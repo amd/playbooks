@@ -49,11 +49,14 @@ Create an issue at [github.com/amd/halo_playbooks](https://github.com/amd/halo_p
    - Example: `[Playbook] Local LLM coding with GitHub Copilot and Qwen3-Next-80B`
 
 2. **Required Labels**: Add relevant labels to categorize the playbook:
-   - `framework::<name>` - Framework used (e.g., `framework::llamacpp`, `framework::docker`, `framework::vllm`)
-   - `model::<name>` - Model used (e.g., `model::qwen3-next-80b`, `model::gpt-oss-120b`)
-   - `app::<name>` - Application used (e.g., `app::vscode`, `app::openwebui`, `app::openhands`)
-   - `os::<name>` - Operating system(s) supported (e.g., `os::linux`, `os::windows`)
-   - `track::<type>` - **REQUIRED**: Either `track::core` or `track::supplemental`
+
+   |   Type     | Format | Description | Examples |
+   |------------|--------|-------------|----------|
+   | Framework | `framework::<name>` | Framework used | `framework::llamacpp`, `framework::docker`, `framework::vllm` |
+   | Model | `model::<name>` | Model used | `model::qwen3-next-80b`, `model::gpt-oss-120b` |
+   | App | `app::<name>` | Application used | `app::vscode`, `app::openwebui`, `app::openhands` |
+   | OS | `os::<name>` | Operating system(s) supported | `os::linux`, `os::windows` |
+   | Track | `track::<type>` | **REQUIRED**: Either core or supplemental | `track::core`, `track::supplemental` |
 
 3. **Milestone**: Assign the issue to the **`playbooks`** milestone
 
