@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+:root {
+  --ember-primary: #D4915D;
+  --ember-dark: #B8784A;
+  --ember-light: #E8B896;
+  --ember-glow: rgba(212, 145, 93, 0.25);
+  --bg-primary: #0d0d0d;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #242424;
+  --bg-card: #1e1e1e;
+  --bg-card-hover: #2a2a2a;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-muted: #6b6b6b;
+  --border-color: #333333;
+  --accent-copper: #C47D52;
+  --accent-teal: #5BA4A4;
+  --accent-warm: #E8A87C;
+}
+
+@theme inline {
+  --color-ember-primary: var(--ember-primary);
+  --color-ember-dark: var(--ember-dark);
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-card: var(--bg-card);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--ember-glow);
+  }
+  50% {
+    box-shadow: 0 0 35px var(--ember-glow), 0 0 50px rgba(212, 145, 93, 0.1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-fade-in-delay-1 {
+  animation: fadeIn 0.5s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-2 {
+  animation: fadeIn 0.5s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-3 {
+  animation: fadeIn 0.5s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  background: var(--bg-card-hover);
+  border-color: var(--ember-primary);
+}
+
+.glow-effect {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Time badge colors */
+.time-badge-ember {
+  background: rgba(212, 145, 93, 0.15);
+  color: var(--ember-primary);
+}
+
+.time-badge-copper {
+  background: rgba(196, 125, 82, 0.15);
+  color: var(--accent-copper);
+}
+
+.time-badge-teal {
+  background: rgba(91, 164, 164, 0.15);
+  color: var(--accent-teal);
+}
+
+.time-badge-warm {
+  background: rgba(232, 168, 124, 0.15);
+  color: var(--accent-warm);
+}
+
+/* Grid pattern background */
+.grid-pattern {
+  background-image: 
+    linear-gradient(rgba(212, 145, 93, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 145, 93, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Gradient backgrounds */
+.gradient-hero {
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+.gradient-section {
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+}
+
+/* Ember gradient for featured sections */
+.gradient-ember {
+  background: linear-gradient(135deg, rgba(212, 145, 93, 0.08) 0%, transparent 50%);
+}
