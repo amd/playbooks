@@ -6,7 +6,7 @@
 
 This repository hosts all playbooks that will be part of the upcoming AMD Developer Platform launch.
 
-## Playbook-Driven Asset Selection
+## Overview
 
 We will maintain a curated set of 15 playbooks, organized into two tiers:
 
