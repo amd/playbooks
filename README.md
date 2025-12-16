@@ -6,6 +6,15 @@
 
 This repository hosts all playbooks that will be part of the upcoming AMD Developer Platform launch.
 
+## Quick Links
+
+- [Overview](#overview)
+- [Onboarding Portal](#onboarding-portal)
+- [Playbook Proposal and Definition](#playbook-proposal-and-definition)
+  - [How to Create a Playbook Proposal](#how-to-create-a-playbook-proposal)
+  - [Example Playbook Proposals](#example-issues)
+
+
 ## Overview
 
 We will maintain a curated set of 15 playbooks, organized into two tiers:
@@ -47,6 +56,11 @@ Create an issue at [github.com/amd/halo_playbooks](https://github.com/amd/halo_p
    - `track::<type>` - **REQUIRED**: Either `track::core` or `track::supplemental`
 
 3. **Milestone**: Assign the issue to the **`playbooks`** milestone
+
+4. **Description**: Provide a detailed description (250+ words) that includes:
+   - Expected length of the playbook (time to complete)
+   - Expected flow and high-level step-by-step progression
+   - Potential technical issues or challenges AMD may encounter to enable this playbook
 
 ### Example Issues
 
