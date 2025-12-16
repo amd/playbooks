@@ -17,6 +17,17 @@ These playbooks serve as the authoritative source for determining all required s
 
 Only assets required to deliver the Core Playbooks will be preinstalled on the device. The preinstalled software set will be the minimal union of all dependencies across the five core playbooks.
 
+
+## Onboarding Portal
+
+Playbooks are the core component of the onboarding portal. The set of available playbooks in the portal will be updated according to the latest contents pushed to this repository.
+
+> Note: The portal's appearance and hosting location may change depending on potential partnerships and agreements established prior to launch.
+
+<p align="center">
+  <img src="doc_assets/launch_page.png" alt="Halo Logo" />
+</p>
+
 ## Playbook Proposal and Definition
 
 To define the 15 playbooks, we need contributors to create issues for each playbook. Each issue should follow a specific format to ensure consistency and proper categorization.
