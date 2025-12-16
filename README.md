@@ -4,6 +4,7 @@
   <img src="src/app/assets/halo.png" alt="Halo Logo" width="240"/>
 </p>
 
+This repository hosts all playbooks that will be part of the upcoming AMD Developer Platform launch.
 
 ## Playbook-Driven Asset Selection
 
@@ -14,21 +15,15 @@ We will maintain a curated set of 15 playbooks, organized into two tiers:
 
 These playbooks serve as the authoritative source for determining all required software assets (frameworks, foundational software, models, and apps).
 
-### Preinstallation Criteria
+Only assets required to deliver the Core Playbooks will be preinstalled on the device. The preinstalled software set will be the minimal union of all dependencies across the five core playbooks.
 
-Only assets required to deliver the Core Playbooks will be preinstalled on the device. This ensures:
-
-- Immediate OOB usability for our most important experiences.
-- Zero setup friction for core user journeys.
-- A focused and intentional asset footprint tied directly to strategic priorities.
-
-The preinstalled software set will be the minimal union of all dependencies across the five core playbooks.
-
-## Phase 1: Creating Playbook Issues
+## Playbook Proposal and Definition
 
 To define the 15 playbooks, we need contributors to create issues for each playbook. Each issue should follow a specific format to ensure consistency and proper categorization.
 
-### How to Create a Playbook Issue
+### How to Create a Playbook Proposal
+
+Create an issue at [github.com/amd/halo_playbooks](https://github.com/amd/halo_playbooks) with the following format.
 
 1. **Title Format**: Use the format `[Playbook] <Descriptive Title>`
    - Example: `[Playbook] Local LLM coding with GitHub Copilot and Qwen3-Next-80B`
