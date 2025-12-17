@@ -72,6 +72,33 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
       }
     });
 
+    // Combine vllm and docker into a single entry
+    const vllmKey = "Framework:vllm";
+    const dockerKey = "Framework:docker";
+    
+    if (softwareMap.has(vllmKey) && softwareMap.has(dockerKey)) {
+      const vllm = softwareMap.get(vllmKey)!;
+      const docker = softwareMap.get(dockerKey)!;
+      
+      // Create combined entry
+      softwareMap.set(vllmKey, {
+        type: vllm.type,
+        name: "vllm (+docker)",
+        linux: vllm.linux || docker.linux,
+        windows: vllm.windows || docker.windows,
+      });
+      
+      // Remove separate docker entry
+      softwareMap.delete(dockerKey);
+    } else if (softwareMap.has(vllmKey)) {
+      // If vllm exists without docker, still rename it
+      const vllm = softwareMap.get(vllmKey)!;
+      softwareMap.set(vllmKey, {
+        ...vllm,
+        name: "vllm (+docker)",
+      });
+    }
+
     return Array.from(softwareMap.values()).sort((a, b) => {
       // Sort by type first, then by name
       if (a.type !== b.type) return a.type.localeCompare(b.type);
