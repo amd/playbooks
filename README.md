@@ -1,7 +1,7 @@
 # Halo Playbooks
 
 <p align="center">
-  <img src="src/app/assets/halo.png" alt="Halo Logo" width="240"/>
+  <img src="src/app/assets/halo.png" alt="Halo Logo" width="400"/>
 </p>
 
 This repository hosts all playbooks that will be part of the upcoming AMD Developer Platform launch.
