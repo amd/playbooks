@@ -161,48 +161,66 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold w-32">
                     Resource Type
                   </th>
                   <th className="text-left py-3 px-4 text-gray-300 font-semibold">
                     Resource Name
                   </th>
-                  <th className="text-center py-3 px-4 text-gray-300 font-semibold">
+                  <th className="text-center py-3 px-4 text-gray-300 font-semibold w-24">
                     Linux
                   </th>
-                  <th className="text-center py-3 px-4 text-gray-300 font-semibold">
+                  <th className="text-center py-3 px-4 text-gray-300 font-semibold w-24">
                     Windows
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {preinstalledSoftware.map((software, index) => (
-                  <tr
-                    key={`${software.type}-${software.name}-${index}`}
-                    className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors"
-                  >
-                    <td className="py-3 px-4 text-gray-400">
-                      {software.type}
-                    </td>
-                    <td className="py-3 px-4 text-white font-mono">
-                      {software.name}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      {software.linux ? (
-                        <span className="text-green-400 text-xl">✓</span>
-                      ) : (
-                        <span className="text-gray-600 text-xl">✗</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      {software.windows ? (
-                        <span className="text-green-400 text-xl">✓</span>
-                      ) : (
-                        <span className="text-gray-600 text-xl">✗</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {(() => {
+                  // Group software by type for rowspan rendering
+                  const groupedByType: { [key: string]: PreinstalledSoftware[] } = {};
+                  preinstalledSoftware.forEach((software) => {
+                    if (!groupedByType[software.type]) {
+                      groupedByType[software.type] = [];
+                    }
+                    groupedByType[software.type].push(software);
+                  });
+
+                  return Object.entries(groupedByType).map(([type, items]) => 
+                    items.map((software, index) => (
+                      <tr
+                        key={`${software.type}-${software.name}-${index}`}
+                        className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors"
+                      >
+                        {index === 0 && (
+                          <td
+                            className="py-3 px-4 text-gray-400 font-semibold border-r border-gray-700 align-top"
+                            rowSpan={items.length}
+                          >
+                            {type}
+                          </td>
+                        )}
+                        <td className="py-3 px-4 text-white font-mono">
+                          {software.name}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {software.linux ? (
+                            <span className="text-green-400 text-xl">✓</span>
+                          ) : (
+                            <span className="text-gray-600 text-xl">✗</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {software.windows ? (
+                            <span className="text-green-400 text-xl">✓</span>
+                          ) : (
+                            <span className="text-gray-600 text-xl">✗</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  );
+                })()}
               </tbody>
             </table>
           </div>
