@@ -1,4 +1,4 @@
-# Halo Playbooks
+# AMD Developer Platform - STX Halo™ Playbooks
 
 <p align="center">
   <img src="src/app/assets/halo.png" alt="Halo Logo" width="400"/>
