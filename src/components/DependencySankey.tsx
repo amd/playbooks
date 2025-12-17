@@ -209,6 +209,21 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
     chartInstanceRef.current = chartInstance;
 
     const option: echarts.EChartsOption = {
+      // Vibrant color palette
+      color: [
+        '#5470c6', // Bright blue
+        '#91cc75', // Vibrant green
+        '#fac858', // Warm yellow
+        '#ee6666', // Coral red
+        '#73c0de', // Sky blue
+        '#3ba272', // Emerald green
+        '#fc8452', // Orange
+        '#9a60b4', // Purple
+        '#ea7ccc', // Pink
+        '#5470c6', // Bright blue (repeat for more nodes)
+        '#91cc75', // Vibrant green
+        '#fac858', // Warm yellow
+      ],
       tooltip: {
         trigger: "item",
         triggerOn: "mousemove",
