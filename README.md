@@ -6,6 +6,12 @@
 
 This repository hosts all playbooks that will be part of the upcoming AMD Developer Platform launch.
 
+> ### 📋 **View All Upcoming Playbooks**
+> 
+> **[View the Playbooks Milestone →](https://github.com/amd/halo_playbooks/milestone/1)**
+>
+> Track all playbook proposals, filter by framework/model/app, and see current development status.
+
 ## Quick Links
 
 - [Overview](#overview)
