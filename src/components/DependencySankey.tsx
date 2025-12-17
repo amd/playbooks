@@ -24,6 +24,97 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstanceRef = useRef<echarts.ECharts | null>(null);
 
+  // Transform data to consolidate platform-specific nodes (only leaf nodes)
+  const consolidatedData = useMemo(() => {
+    // Map to track leaf resources and their platforms
+    const resourceMap = new Map<string, { baseName: string; platforms: Set<string> }>();
+    const nodeMapping = new Map<string, string>(); // old node name -> new node name
+    
+    // First pass: identify which nodes are grouping nodes (have children)
+    const groupingNodes = new Set<string>();
+    data.links.forEach((link) => {
+      groupingNodes.add(link.source);
+    });
+    
+    // Second pass: identify leaf resources with platforms and group them
+    data.nodes.forEach((node) => {
+      const nodeName = node.name;
+      const match = nodeName.match(/^(.+?)\s+\((LINUX|WINDOWS|ANY)\)$/);
+      
+      if (match) {
+        const [, baseName, platform] = match;
+        
+        // Check if this is a grouping node (Apps, Frameworks, Models)
+        const isGroupNode = baseName === "Apps" || baseName === "Frameworks" || baseName === "Models";
+        
+        // Only consolidate leaf nodes (non-grouping nodes)
+        if (!isGroupNode && !groupingNodes.has(nodeName)) {
+          const key = baseName;
+          
+          if (!resourceMap.has(key)) {
+            resourceMap.set(key, {
+              baseName,
+              platforms: new Set(),
+            });
+          }
+          
+          resourceMap.get(key)!.platforms.add(platform);
+        } else {
+          // Keep grouping nodes and intermediate nodes as-is
+          nodeMapping.set(nodeName, nodeName);
+        }
+      } else {
+        // Non-platform nodes remain unchanged
+        nodeMapping.set(nodeName, nodeName);
+      }
+    });
+    
+    // Create new consolidated node names for leaf resources only
+    resourceMap.forEach(({ baseName, platforms }) => {
+      const platformArray = Array.from(platforms).sort();
+      let newNodeName: string;
+      
+      if (platformArray.length === 1) {
+        newNodeName = `${baseName} (${platformArray[0]})`;
+      } else {
+        // Consolidate multiple platforms - format as uppercase with +
+        const platformStr = platformArray.join('+');
+        newNodeName = `${baseName} (${platformStr})`;
+      }
+      
+      // Map all original node names to the new consolidated name
+      platformArray.forEach(platform => {
+        const oldNodeName = `${baseName} (${platform})`;
+        nodeMapping.set(oldNodeName, newNodeName);
+      });
+    });
+    
+    // Create consolidated nodes (deduplicated)
+    const consolidatedNodesSet = new Set(nodeMapping.values());
+    const consolidatedNodes = Array.from(consolidatedNodesSet).map(name => ({ name }));
+    
+    // Transform links using the node mapping and aggregate values
+    const linkMap = new Map<string, number>();
+    
+    data.links.forEach((link) => {
+      const newSource = nodeMapping.get(link.source) || link.source;
+      const newTarget = nodeMapping.get(link.target) || link.target;
+      const linkKey = `${newSource}→${newTarget}`;
+      
+      linkMap.set(linkKey, (linkMap.get(linkKey) || 0) + link.value);
+    });
+    
+    const consolidatedLinks = Array.from(linkMap.entries()).map(([key, value]) => {
+      const [source, target] = key.split('→');
+      return { source, target, value };
+    });
+    
+    return {
+      nodes: consolidatedNodes,
+      links: consolidatedLinks,
+    };
+  }, [data]);
+
   // Extract preinstalled software from the Sankey data
   const preinstalledSoftware = useMemo(() => {
     const softwareMap = new Map<string, PreinstalledSoftware>();
@@ -100,6 +191,10 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
     }
 
     return Array.from(softwareMap.values()).sort((a, b) => {
+      // Always put lemonade last
+      if (a.name.toLowerCase().includes('lemonade')) return 1;
+      if (b.name.toLowerCase().includes('lemonade')) return -1;
+      
       // Sort by type first, then by name
       if (a.type !== b.type) return a.type.localeCompare(b.type);
       return a.name.localeCompare(b.name);
@@ -126,8 +221,8 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
       series: [
         {
           type: "sankey",
-          data: data.nodes,
-          links: data.links,
+          data: consolidatedData.nodes,
+          links: consolidatedData.links,
           emphasis: {
             focus: "adjacency",
           },
@@ -163,7 +258,7 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
       window.removeEventListener("resize", handleResize);
       chartInstance.dispose();
     };
-  }, [data]);
+  }, [consolidatedData]);
 
   return (
     <div className="bg-[#1a1a1a] rounded-lg p-6 border border-gray-800">
@@ -172,7 +267,7 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
         className="w-full"
         style={{ height: "600px" }}
       />
-      {data.nodes.length === 1 && (
+      {consolidatedData.nodes.length === 1 && (
         <p className="text-center text-gray-400 mt-4">
           No playbooks found in this track yet.
         </p>
