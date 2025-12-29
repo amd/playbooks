@@ -40,7 +40,7 @@ Playbooks are the core component of the onboarding portal. The set of available 
 > Note: The portal's appearance and hosting location may change depending on potential partnerships and agreements established prior to launch.
 
 <p align="center">
-  <img src="doc_assets/launch_page.png" alt="Halo Logo" />
+  <img src="assets/launch_page.png" alt="Halo Logo" />
 </p>
 
 ## Playbook Proposal and Definition

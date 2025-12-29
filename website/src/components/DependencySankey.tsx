@@ -292,8 +292,13 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
       {preinstalledSoftware.length > 0 && (
         <div className="mt-8">
           <h3 className="text-xl font-semibold text-white mb-4">
-            Preinstalled SW
+            SW Dependency Tree
           </h3>
+          {title === "Supplemental Track" && (
+            <p className="text-yellow-400 text-sm mb-4 italic">
+              Note: Supplemental playbooks are actively being worked on and the dependency list may change.
+            </p>
+          )}
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
