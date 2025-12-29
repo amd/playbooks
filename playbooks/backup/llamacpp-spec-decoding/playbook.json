@@ -1,0 +1,9 @@
+{
+  "id": "llamacpp-spec-decoding",
+  "title": "Accelerating workloads using spec-decoding and Llama.cpp",
+  "description": "Speed up LLM inference using speculative decoding techniques with Llama.cpp on STX Halo™",
+  "time": 45,
+  "isNew": true,
+  "published": true
+}
+

@@ -1,0 +1,9 @@
+{
+  "id": "clustering-two-halos",
+  "title": "Clustering with two Halos",
+  "description": "Set up a multi-node cluster using two STX Halo™ devices for distributed workloads",
+  "time": 90,
+  "isNew": true,
+  "published": true
+}
+

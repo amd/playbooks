@@ -1,0 +1,9 @@
+{
+  "id": "github-copilot-qwen3-coder",
+  "title": "Local LLM coding with GitHub Copilot and Qwen3-Coder-30B",
+  "description": "Use GitHub Copilot with locally-running Qwen3-Coder-30B for private code assistance on STX Halo™",
+  "time": 45,
+  "isNew": true,
+  "published": true
+}
+

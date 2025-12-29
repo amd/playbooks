@@ -1,0 +1,9 @@
+{
+  "id": "speech2speech-translation",
+  "title": "Live Speech2Speech Translation on AMD GPU",
+  "description": "Build a real-time speech-to-speech translation system using PyTorch on STX Halo™",
+  "time": 60,
+  "isNew": true,
+  "published": true
+}
+

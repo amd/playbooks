@@ -1,0 +1,9 @@
+{
+  "id": "flux2-dev-finetuning",
+  "title": "FLUX.2-dev Fine-tuning",
+  "description": "Fine-tune FLUX.2-dev for custom image generation with your own datasets on STX Halo™",
+  "time": 120,
+  "isNew": true,
+  "published": true
+}
+

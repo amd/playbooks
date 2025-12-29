@@ -1,0 +1,9 @@
+{
+  "id": "gguf-quantization-export",
+  "title": "Quantize and exporting models to GGUF",
+  "description": "Learn to quantize and export models to GGUF format for efficient local inference on STX Halo™",
+  "time": 45,
+  "isNew": true,
+  "published": true
+}
+

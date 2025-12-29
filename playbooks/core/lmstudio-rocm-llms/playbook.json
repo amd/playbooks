@@ -1,0 +1,9 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Hands-On LLMs with ROCm and LM Studio: Chat, Test, and Serve Models",
+  "description": "Use LM Studio with ROCm to chat, test, and serve LLMs locally on STX Halo™",
+  "time": 30,
+  "isNew": true,
+  "published": true
+}
+

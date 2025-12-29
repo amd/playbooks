@@ -1,0 +1,9 @@
+{
+  "id": "vllm-finetuning",
+  "title": "Fine-tuning on vLLM",
+  "description": "Learn how to fine-tune models using vLLM on your STX Halo™ for optimized inference",
+  "time": 90,
+  "isNew": true,
+  "published": true
+}
+

@@ -1,0 +1,9 @@
+{
+  "id": "openhands-coding-assistant",
+  "title": "How to use local LLMs as a coding assistant in OpenHands",
+  "description": "Configure OpenHands to use Qwen3-Coder-30B as your local AI coding assistant",
+  "time": 30,
+  "isNew": true,
+  "published": true
+}
+

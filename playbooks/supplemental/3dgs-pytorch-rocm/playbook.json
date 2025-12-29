@@ -1,0 +1,9 @@
+{
+  "id": "3dgs-pytorch-rocm",
+  "title": "3D Gaussian Splatting (3DGS) Scene Reconstruction with Pytorch+ROCm",
+  "description": "Perform 3D scene reconstruction using Gaussian Splatting with PyTorch and ROCm on STX Halo™",
+  "time": 90,
+  "isNew": true,
+  "published": true
+}
+

@@ -1,7 +1,7 @@
 # AMD Developer Platform - STX Halo™ Playbooks
 
 <p align="center">
-  <img src="src/app/assets/halo.png" alt="Halo Logo" width="400"/>
+  <img src="website/src/app/assets/halo.png" alt="Halo Logo" width="400"/>
 </p>
 
 This repository hosts all playbooks that will be part of the upcoming AMD Developer Platform launch.
@@ -90,6 +90,35 @@ Labels:
 Milestone: playbooks
 ```
 
-### Next Steps
+## Playbook Creation
 
-Once all 15 playbooks have been defined through issues, contributors will be invited to create playbooks based on an initial template.
+The following structure has been created to host playbooks:
+
+```
+playbooks/
+├── core/
+│   ├── comfyui-flux2-images/
+│   ├── github-copilot-qwen3-coder/
+│   ├── lmstudio-rocm-llms/
+│   ├── n8n-automation-gpt-oss/
+│   ├── pytorch-rocm-llms/
+│   └── vllm-finetuning/
+│
+├── supplemental/
+│   ├── 3dgs-pytorch-rocm/
+│   ├── clustering-two-halos/
+│   ├── dify-ai-agents/
+│   ├── gguf-quantization-export/
+│   ├── multi-agent-chatbots/
+│   ├── open-webui-chat/
+│   ├── openhands-coding-assistant/
+│   ├── pytorch-rocm-gpu-kernels/
+│   ├── speech2speech-translation/
+│   └── unsloth-qlora-finetuning/
+│
+└── backup/
+    ├── flux2-dev-finetuning/
+    ├── jax-getting-started/
+    └── llamacpp-spec-decoding/
+```
+An initial template for creating playbooks will be provided soon.

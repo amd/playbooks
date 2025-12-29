@@ -1,0 +1,9 @@
+{
+  "id": "pytorch-rocm-llms",
+  "title": "Running LLMs on PyTorch with ROCm",
+  "description": "Set up and run large language models using PyTorch with ROCm acceleration on STX Halo™",
+  "time": 60,
+  "isNew": true,
+  "published": true
+}
+

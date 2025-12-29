@@ -1,0 +1,9 @@
+{
+  "id": "jax-getting-started",
+  "title": "Getting started with Jax",
+  "description": "Install and configure JAX for GPU-accelerated machine learning on STX Halo™",
+  "time": 60,
+  "isNew": true,
+  "published": true
+}
+
