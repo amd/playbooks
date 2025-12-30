@@ -121,4 +121,4 @@ playbooks/
     ├── jax-getting-started/
     └── llamacpp-spec-decoding/
 ```
-An initial template for creating playbooks will be provided soon.
+📖 **[See the Playbook Creation Guide →](playbooks/README.md)** for detailed instructions on editing playbooks, the metadata schema, and OS-specific content tagging.
