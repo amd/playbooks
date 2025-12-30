@@ -18,8 +18,8 @@ Each playbook lives in its own folder with two required files:
 playbook-name/
 ├── playbook.json            # Metadata (required)
 ├── README.md                # Content (required)
+├── platform.md              # Platform configurations (optional)
 └── assets/                  # Images and files (optional)
-    └── screenshot.png
 ```
 
 ---
@@ -41,6 +41,40 @@ Reference assets in your README using relative paths:
 - **Maximum file size**: 500 KB per asset
 - **Supported formats**: PNG, JPEG, GIF, WebP, SVG
 - Use descriptive filenames (e.g., `step1-output.png` instead of `image1.png`)
+
+---
+
+## The `platform.md` File
+
+Playbooks may include an optional `platform.md` file that documents the expected platform configurations for that playbook. This file specifies:
+
+- Pre-installed software versions and locations
+- Required models and their file paths
+- Any platform-specific prerequisites
+
+### Purpose
+
+The `platform.md` file serves as a reference for:
+
+1. **System administrators** who need to pre-configure machines with the correct setup
+2. **Users** who want to verify their environment matches the expected configuration
+3. **Documentation** of exact versions and file locations used in testing
+
+### Structure
+
+A typical `platform.md` file includes sections for each supported platform (Windows, Linux) with:
+
+- Installation paths and versions
+- Required model files and their locations
+- Any platform-specific notes
+
+### Example
+
+See `playbooks/core/comfyui-image-gen/platform.md` for a complete example showing:
+
+- Windows portable installation location
+- Required model files organized by type (text encoders, LoRAs, diffusion models, VAE)
+- Linux user responsibilities
 
 ---
 
@@ -228,6 +262,7 @@ Before setting `"published": true`:
 - [ ] Code blocks have language hints (e.g., `python`, `bash`, `powershell`)
 - [ ] Links are valid and use HTTPS
 - [ ] No placeholder or TODO content remains
+- [ ] If applicable, `platform.md` documents required configurations and model files
 
 ---
 

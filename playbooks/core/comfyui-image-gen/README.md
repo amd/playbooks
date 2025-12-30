@@ -1,6 +1,6 @@
 ## Overview
 
-ComfyUI is a powerful, node-based interface for Stable Diffusion and other diffusion models. Unlike traditional text-to-image interfaces with simple prompt boxes, ComfyUI exposes the entire image generation pipeline as a visual graph—giving you fine-grained control over every step from text encoding to latent space manipulation to final decoding.
+ComfyUI is a powerful, node-based interface for Stable Diffusion and other diffusion models. Unlike traditional text-to-image interfaces with simple prompt boxes, ComfyUI exposes the entire image generation pipeline as a visual graph, giving you fine-grained control over every step from text encoding to latent space manipulation to final decoding.
 
 This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on your AMD Radeon™ GPU to generate high-quality AI images.
 
@@ -10,15 +10,6 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 - How to launch ComfyUI and load a Flux workflow
 - How to modify prompts and generation parameters
 - Key concepts for understanding diffusion model pipelines
-
-## Why ComfyUI?
-
-ComfyUI offers several advantages:
-
-- **Transparency**: See exactly what operations happen during generation—tokenization, CLIP encoding, sampling, VAE decoding
-- **Experimentation**: Swap components easily (different samplers, schedulers, models) without code changes
-- **Reproducibility**: Save and share complete workflows as JSON files
-- **Extensibility**: Custom nodes let you add new functionality directly into the pipeline
 
 ## Launching ComfyUI
 
