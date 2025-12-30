@@ -2,7 +2,7 @@
 
 ComfyUI is a powerful, node-based interface for Stable Diffusion and other diffusion models. Unlike traditional text-to-image interfaces with simple prompt boxes, ComfyUI exposes the entire image generation pipeline as a visual graph, giving you fine-grained control over every step from text encoding to latent space manipulation to final decoding.
 
-This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on your AMD Radeon™ GPU to generate high-quality AI images.
+This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on your STX Halo™ GPU to generate high-quality AI images.
 
 ## What You'll Learn
 
@@ -48,12 +48,32 @@ ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` 
 
 > **Tip**: Add the `--highvram` flag for faster generation on the STX Halo's 128GB unified memory.
 
-## Understanding the Interface
+## Finding the Z Image Turbo Template
 
-When ComfyUI loads, you'll see a canvas with connected nodes. Each node represents an operation in the diffusion pipeline:
+Before generating images, you need to load the Z Image Turbo template. Here's how to find it:
+
+1. **Look at the far left edge of the screen**—there's a vertical toolbar running from top to bottom on the leftmost side of the app.
+
+2. **Find the folder icon**—in that left toolbar, look for an icon that looks like a folder. When you hover over it, it's labeled "Templates."
 
 <p align="center">
-  <img src="assets/comfyui.png" alt="ComfyUI Interface" width="600"/>
+  <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
+</p>
+
+3. **Click the folder icon**—this opens the Templates panel.
+
+4. **Search for "Z Image Turbo"**—use the search bar or scroll through the available templates to find the Z Image Turbo workflow, then click to load it.
+
+<p align="center">
+  <img src="assets/select-template.png" alt="Selecting the Z Image Turbo template" width="600"/>
+</p>
+
+## Understanding the Interface
+
+When the Z Image Turbo template loads, you'll see a canvas with connected nodes. Each node represents an operation in the diffusion pipeline:
+
+<p align="center">
+  <img src="assets/understanding-workflow.png" alt="ComfyUI Workflow Interface" width="600"/>
 </p>
 
 ### Core Node Types
