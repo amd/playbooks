@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 interface QuickStartCardProps {
   title: string;
@@ -8,7 +9,7 @@ interface QuickStartCardProps {
   icon: string;
 }
 
-const iconMap: Record<string, JSX.Element> = {
+const iconMap: Record<string, ReactNode> = {
   vscode: (
     <svg viewBox="0 0 24 24" className="w-8 h-8" fill="#0078d4">
       <path d="M17.583 3.271l-4.5 4.5L17.583 3.271zm0 0l4.125 4.125v9.208l-4.125 4.125-10.5-7.875L3.958 16.5.833 14.292V9.708L3.958 7.5l3.125 3.646L17.583 3.271zM17.583 20.729l-10.5-7.875-3.125 3.646L.833 14.292V9.708L3.958 7.5l3.125 3.646 10.5-7.875 4.125 4.125v9.208l-4.125 4.125z" />

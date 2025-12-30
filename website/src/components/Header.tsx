@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import AMDLogo from "@/app/assets/AMD_Logo.png";
 
 const navLinks = [
   { name: "Apps", href: "#apps" },
@@ -20,7 +21,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src={require("@/app/assets/AMD_Logo.png").default}
+            src={AMDLogo}
             alt="AMD"
             width={80}
             height={32}
