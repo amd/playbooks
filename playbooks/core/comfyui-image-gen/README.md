@@ -2,7 +2,7 @@
 
 ComfyUI is a powerful, node-based interface for Stable Diffusion and other diffusion models. Unlike traditional text-to-image interfaces with simple prompt boxes, ComfyUI exposes the entire image generation pipeline as a visual graph—giving you fine-grained control over every step from text encoding to latent space manipulation to final decoding.
 
-This tutorial teaches you how to use ComfyUI with the Flux.2-dev model on your AMD Radeon™ GPU to generate high-quality AI images.
+This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on your AMD Radeon™ GPU to generate high-quality AI images.
 
 ## What You'll Learn
 
@@ -58,7 +58,7 @@ When ComfyUI loads, you'll see a canvas with connected nodes. Each node represen
 
 | Node | Purpose |
 |------|---------|
-| **Load Checkpoint** | Loads the diffusion model (Flux.2-dev is pre-loaded) |
+| **Load Checkpoint** | Loads the diffusion model (Z Image Turbo is pre-loaded) |
 | **CLIP Text Encode** | Converts your text prompt into embeddings |
 | **KSampler** | Runs the denoising loop (the actual "diffusion" process) |
 | **VAE Decode** | Converts latent space output to a visible image |
@@ -76,7 +76,7 @@ This matches the mathematical pipeline of diffusion models—ComfyUI simply make
 
 ## Generating Your First Image
 
-The Flux.2-dev model is already loaded. To generate an image:
+The Z Image Turbo model is already loaded. To generate an image:
 
 1. **Find the CLIP Text Encode node** labeled "positive" (your main prompt)
 2. **Enter your prompt**—be specific and descriptive:
