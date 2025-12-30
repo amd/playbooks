@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import type { Playbook, Platform } from "@/types/playbook";
-import { formatTime, platformNames } from "@/types/playbook";
+import { formatTime } from "@/types/playbook";
 
 /**
  * Parses markdown content and filters OS-specific sections
@@ -18,7 +18,7 @@ import { formatTime, platformNames } from "@/types/playbook";
  * <!-- @os:linux --> ... <!-- @os:end -->
  * <!-- @os:all --> ... <!-- @os:end -->
  */
-function filterContentByOS(content: string, platform: Platform | "all"): string {
+function filterContentByOS(content: string, platform: Platform): string {
   if (!content) return "";
   
   // Pattern to match OS-specific blocks
@@ -37,20 +37,11 @@ function filterContentByOS(content: string, platform: Platform | "all"): string 
     
     let replacement = "";
     
-    if (platform === "all") {
-      // Show all content with OS labels
-      if (blockOS === "all") {
-        replacement = blockContent;
-      } else {
-        replacement = `\n\n> **${platformNames[blockOS as Platform]} only:**\n${blockContent}`;
-      }
-    } else {
-      // Show only content for the selected platform
-      if (blockOS === "all" || blockOS === platform) {
-        replacement = blockContent;
-      }
-      // Otherwise, replacement is empty (content hidden)
+    // Show only content for the selected platform
+    if (blockOS === "all" || blockOS === platform) {
+      replacement = blockContent;
     }
+    // Otherwise, replacement is empty (content hidden)
     
     result = result.slice(0, startIndex) + replacement + result.slice(startIndex + fullMatch.length);
   }
@@ -64,27 +55,14 @@ function PlatformToggle({
   onChange 
 }: { 
   platforms: Platform[]; 
-  selected: Platform | "all"; 
-  onChange: (p: Platform | "all") => void;
+  selected: Platform; 
+  onChange: (p: Platform) => void;
 }) {
   const hasWindows = platforms.includes("windows");
   const hasLinux = platforms.includes("linux");
-  const hasBoth = hasWindows && hasLinux;
 
   return (
     <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] rounded-lg border border-[#333]">
-      {hasBoth && (
-        <button
-          onClick={() => onChange("all")}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-            selected === "all"
-              ? "bg-[#D4915D] text-black"
-              : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
-          }`}
-        >
-          All Platforms
-        </button>
-      )}
       {hasWindows && (
         <button
           onClick={() => onChange("windows")}
@@ -124,7 +102,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
   const [playbook, setPlaybook] = useState<Playbook | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform | "all">("all");
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
 
   useEffect(() => {
     async function fetchPlaybook() {
@@ -141,8 +119,10 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
         const data = await res.json();
         setPlaybook(data);
         
-        // Auto-select platform if only one is supported
-        if (data.platforms.length === 1) {
+        // Auto-select platform: prefer windows, otherwise use the first available
+        if (data.platforms.includes("windows")) {
+          setSelectedPlatform("windows");
+        } else if (data.platforms.length > 0) {
           setSelectedPlatform(data.platforms[0]);
         }
       } catch (err) {

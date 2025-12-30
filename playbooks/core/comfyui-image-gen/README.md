@@ -62,7 +62,7 @@ Before generating images, you need to load the Z Image Turbo template. Here's ho
 
 3. **Click the folder icon**—this opens the Templates panel.
 
-4. **Search for "Z Image Turbo"**—use the search bar or scroll through the available templates to find the Z Image Turbo workflow, then click to load it.
+4. **Search for "Z Image Turbo"**—use the search bar or scroll through the available templates to find the Z Image Turbo Text To  Image workflow, then click to load it.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z Image Turbo template" width="600"/>
