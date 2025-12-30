@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import type { Playbook, Platform } from "@/types/playbook";
@@ -153,8 +154,11 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     fetchPlaybook();
   }, [id]);
 
+  // Transform relative image paths to API routes and filter by OS
   const filteredContent = playbook?.content 
     ? filterContentByOS(playbook.content, selectedPlatform)
+        // Transform relative image paths in HTML img tags to use the API route
+        .replace(/src=["'](?!https?:\/\/|\/)(.*?)["']/g, `src="/api/playbooks/${id}/$1"`)
     : "";
 
   return (
@@ -264,6 +268,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                 {filteredContent ? (
                   <article className="playbook-content prose prose-invert max-w-none">
                     <ReactMarkdown
+                      rehypePlugins={[rehypeRaw]}
                       components={{
                         h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
                         h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
@@ -279,6 +284,21 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                             {children}
                           </a>
                         ),
+                        img: ({ src, alt }) => {
+                          // Transform relative paths to use the API route
+                          let imageSrc = src || "";
+                          if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+                            imageSrc = `/api/playbooks/${id}/${imageSrc}`;
+                          }
+                          return (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img 
+                              src={imageSrc} 
+                              alt={alt || ""} 
+                              className="rounded-lg max-w-full h-auto mx-auto my-6"
+                            />
+                          );
+                        },
                         code: ({ className, children }) => {
                           const isInline = !className;
                           if (isInline) {

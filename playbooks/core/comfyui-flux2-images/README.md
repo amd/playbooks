@@ -1,6 +1,8 @@
-# Generating images with ComfyUI and Flux.2-dev
-
 This playbook will guide you through setting up ComfyUI with the Flux.2-dev model on your STX Halo™ to generate stunning AI images.
+
+<p align="center">
+  <img src="assets/comfyui.png" alt="ComfyUI Flux2 Image Demo" width="500"/>
+</p>
 
 ## Prerequisites
 
