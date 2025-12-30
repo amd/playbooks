@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import type { Playbook, Platform } from "@/types/playbook";
@@ -280,6 +281,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                 {filteredContent ? (
                   <article className="playbook-content prose prose-invert max-w-none">
                     <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
                       components={{
                         h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
@@ -326,6 +328,12 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                           <pre className="code-block">{children}</pre>
                         ),
                         hr: () => <hr className="md-hr" />,
+                        table: ({ children }) => <table className="md-table">{children}</table>,
+                        thead: ({ children }) => <thead className="md-thead">{children}</thead>,
+                        tbody: ({ children }) => <tbody className="md-tbody">{children}</tbody>,
+                        tr: ({ children }) => <tr className="md-tr">{children}</tr>,
+                        th: ({ children }) => <th className="md-th">{children}</th>,
+                        td: ({ children }) => <td className="md-td">{children}</td>,
                       }}
                     >
                       {filteredContent}

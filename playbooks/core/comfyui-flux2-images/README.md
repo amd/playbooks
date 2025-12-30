@@ -1,3 +1,5 @@
+## Overview
+
 ComfyUI is a powerful, node-based interface for Stable Diffusion and other diffusion models. Unlike traditional text-to-image interfaces with simple prompt boxes, ComfyUI exposes the entire image generation pipeline as a visual graph—giving you fine-grained control over every step from text encoding to latent space manipulation to final decoding.
 
 This tutorial teaches you how to use ComfyUI with the Flux.2-dev model on your AMD Radeon™ GPU to generate high-quality AI images.
