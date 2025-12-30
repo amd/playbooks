@@ -48,14 +48,8 @@ function PlatformBadge({ platform }: { platform: Platform }) {
 function DifficultyBadge({ difficulty }: { difficulty?: string }) {
   if (!difficulty) return null;
   
-  const colors = {
-    beginner: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    intermediate: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    advanced: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-  };
-  
   return (
-    <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded border ${colors[difficulty as keyof typeof colors] || colors.intermediate}`}>
+    <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-[#2a2a2a] text-[#888] border border-[#3a3a3a]">
       {difficulty}
     </span>
   );

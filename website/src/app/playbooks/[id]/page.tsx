@@ -211,17 +211,11 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                       New
                     </span>
                   )}
-                  {playbook.difficulty && (
-                    <span className={`px-2 py-0.5 text-[10px] font-medium rounded border ${
-                      playbook.difficulty === "beginner" 
-                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                        : playbook.difficulty === "intermediate"
-                        ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
-                        : "bg-rose-500/20 text-rose-400 border-rose-500/30"
-                    }`}>
-                      {playbook.difficulty}
-                    </span>
-                  )}
+{playbook.difficulty && (
+                     <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-[#2a2a2a] text-[#888] border border-[#3a3a3a]">
+                       {playbook.difficulty}
+                     </span>
+                   )}
                   <span className="text-[#6b6b6b] text-xs flex items-center gap-1">
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

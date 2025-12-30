@@ -5,7 +5,7 @@
   "time": 45,
   "platforms": ["windows", "linux"],
   "difficulty": "intermediate",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
   "published": true,
   "tags": ["agents", "dify", "llm", "automation"]

@@ -5,7 +5,7 @@
   "time": 90,
   "platforms": ["linux"],
   "difficulty": "advanced",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
   "published": true,
   "tags": ["clustering", "distributed", "multi-gpu", "rccl"]

@@ -5,7 +5,7 @@
   "time": 45,
   "platforms": ["windows", "linux"],
   "difficulty": "beginner",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
   "published": true,
   "tags": ["image-generation", "comfyui", "flux"]

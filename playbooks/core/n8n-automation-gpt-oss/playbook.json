@@ -5,7 +5,7 @@
   "time": 60,
   "platforms": ["windows", "linux"],
   "difficulty": "intermediate",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
   "published": true,
   "tags": ["automation", "n8n", "workflows", "llm"]

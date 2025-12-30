@@ -5,7 +5,7 @@
   "time": 60,
   "platforms": ["linux"],
   "difficulty": "intermediate",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
   "published": true,
   "tags": ["pytorch", "rocm", "llm", "inference"]
