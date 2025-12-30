@@ -1,9 +1,12 @@
 {
   "id": "gguf-quantization-export",
-  "title": "Quantize and exporting models to GGUF",
-  "description": "Learn to quantize and export models to GGUF format for efficient local inference on STX Halo™",
-  "time": 45,
+  "title": "Quantize and Export Models to GGUF",
+  "description": "Learn to quantize and export models to GGUF format for efficient local inference",
+  "time": 60,
+  "platforms": ["windows", "linux"],
+  "difficulty": "intermediate",
   "isNew": true,
-  "published": true
+  "isFeatured": false,
+  "published": true,
+  "tags": ["quantization", "gguf", "llama-cpp", "optimization"]
 }
-

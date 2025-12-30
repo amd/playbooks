@@ -1,9 +1,12 @@
 {
   "id": "clustering-two-halos",
-  "title": "Clustering with two Halos",
+  "title": "Clustering with Two Halo™ Devices",
   "description": "Set up a multi-node cluster using two STX Halo™ devices for distributed workloads",
   "time": 90,
+  "platforms": ["linux"],
+  "difficulty": "advanced",
   "isNew": true,
-  "published": true
+  "isFeatured": false,
+  "published": true,
+  "tags": ["clustering", "distributed", "multi-gpu", "rccl"]
 }
-

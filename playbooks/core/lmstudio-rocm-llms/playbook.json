@@ -1,9 +1,12 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "Hands-On LLMs with ROCm and LM Studio: Chat, Test, and Serve Models",
-  "description": "Use LM Studio with ROCm to chat, test, and serve LLMs locally on STX Halo™",
+  "title": "Running LLMs with LM Studio and ROCm",
+  "description": "Set up LM Studio with ROCm acceleration to run large language models on STX Halo™",
   "time": 30,
+  "platforms": ["windows", "linux"],
+  "difficulty": "beginner",
   "isNew": true,
-  "published": true
+  "isFeatured": false,
+  "published": true,
+  "tags": ["lm-studio", "rocm", "llm", "inference"]
 }
-

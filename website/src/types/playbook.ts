@@ -1,0 +1,111 @@
+/**
+ * Playbook Contract
+ * 
+ * This file defines the schema for playbooks that is shared between
+ * the playbook.json files and the website.
+ * 
+ * ## OS-Specific Content Tags
+ * 
+ * In README.md files, use the following tags for OS-specific instructions:
+ * 
+ * ```markdown
+ * <!-- @os:windows -->
+ * Windows-specific instructions here
+ * <!-- @os:end -->
+ * 
+ * <!-- @os:linux -->
+ * Linux-specific instructions here
+ * <!-- @os:end -->
+ * 
+ * <!-- @os:all -->
+ * Instructions for all platforms
+ * <!-- @os:end -->
+ * ```
+ * 
+ * Content outside of these tags is shown on all platforms.
+ */
+
+export type Platform = "windows" | "linux";
+export type Category = "core" | "supplemental" | "backup";
+export type Difficulty = "beginner" | "intermediate" | "advanced";
+
+export interface PlaybookMeta {
+  /** Unique identifier matching the folder name */
+  id: string;
+  
+  /** Display title */
+  title: string;
+  
+  /** Short description (shown in cards) */
+  description: string;
+  
+  /** Estimated time in minutes */
+  time: number;
+  
+  /** Supported platforms */
+  platforms: Platform[];
+  
+  /** Whether this is a new playbook */
+  isNew?: boolean;
+  
+  /** Whether this playbook should be featured */
+  isFeatured?: boolean;
+  
+  /** Whether this playbook is ready to be published */
+  published: boolean;
+  
+  /** Difficulty level */
+  difficulty?: Difficulty;
+  
+  /** Tags for filtering/searching */
+  tags?: string[];
+  
+  /** Icon name or emoji for the playbook */
+  icon?: string;
+  
+  /** Prerequisites (IDs of other playbooks) */
+  prerequisites?: string[];
+}
+
+export interface Playbook extends PlaybookMeta {
+  /** Category derived from folder structure */
+  category: Category;
+  
+  /** Path to the playbook folder */
+  path: string;
+  
+  /** Raw markdown content from README.md */
+  content?: string;
+}
+
+/**
+ * Formats time in minutes to a human-readable string
+ */
+export function formatTime(minutes: number): string {
+  if (minutes < 60) {
+    return `${minutes} MIN`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (mins === 0) {
+    return hours === 1 ? "1 HR" : `${hours} HRS`;
+  }
+  return `${hours}h ${mins}m`;
+}
+
+/**
+ * Platform display names
+ */
+export const platformNames: Record<Platform, string> = {
+  windows: "Windows",
+  linux: "Linux",
+};
+
+/**
+ * Platform icons (as simple characters for now)
+ */
+export const platformIcons: Record<Platform, string> = {
+  windows: "⊞",
+  linux: "🐧",
+};
+

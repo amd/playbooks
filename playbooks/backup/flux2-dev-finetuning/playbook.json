@@ -1,9 +1,12 @@
 {
   "id": "flux2-dev-finetuning",
   "title": "FLUX.2-dev Fine-tuning",
-  "description": "Fine-tune FLUX.2-dev for custom image generation with your own datasets on STX Halo™",
+  "description": "Fine-tune FLUX.2-dev for custom image generation with your own datasets",
   "time": 120,
-  "isNew": true,
-  "published": true
+  "platforms": ["linux"],
+  "difficulty": "advanced",
+  "isNew": false,
+  "isFeatured": false,
+  "published": false,
+  "tags": ["flux", "fine-tuning", "image-generation", "dreambooth"]
 }
-

@@ -3,7 +3,10 @@
   "title": "Running LLMs on PyTorch with ROCm",
   "description": "Set up and run large language models using PyTorch with ROCm acceleration on STX Halo™",
   "time": 60,
+  "platforms": ["linux"],
+  "difficulty": "intermediate",
   "isNew": true,
-  "published": true
+  "isFeatured": false,
+  "published": true,
+  "tags": ["pytorch", "rocm", "llm", "inference"]
 }
-

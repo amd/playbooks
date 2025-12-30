@@ -1,9 +1,12 @@
 {
   "id": "open-webui-chat",
-  "title": "How to chat with LLMs in Open WebUI",
+  "title": "Chat with LLMs in Open WebUI",
   "description": "Set up and use Open WebUI to interact with local LLMs on your STX Halo™",
   "time": 30,
+  "platforms": ["windows", "linux"],
+  "difficulty": "beginner",
   "isNew": true,
-  "published": true
+  "isFeatured": false,
+  "published": true,
+  "tags": ["open-webui", "chat", "llm", "ui"]
 }
-

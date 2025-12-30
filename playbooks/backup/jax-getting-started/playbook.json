@@ -1,9 +1,12 @@
 {
   "id": "jax-getting-started",
-  "title": "Getting started with Jax",
-  "description": "Install and configure JAX for GPU-accelerated machine learning on STX Halo™",
+  "title": "Getting Started with JAX on ROCm",
+  "description": "Optimize JAX to run efficiently on STX Halo™ with ROCm acceleration",
   "time": 60,
-  "isNew": true,
-  "published": true
+  "platforms": ["linux"],
+  "difficulty": "intermediate",
+  "isNew": false,
+  "isFeatured": false,
+  "published": false,
+  "tags": ["jax", "rocm", "optimization"]
 }
-

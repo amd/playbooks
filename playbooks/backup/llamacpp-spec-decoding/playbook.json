@@ -1,9 +1,12 @@
 {
   "id": "llamacpp-spec-decoding",
-  "title": "Accelerating workloads using spec-decoding and Llama.cpp",
-  "description": "Speed up LLM inference using speculative decoding techniques with Llama.cpp on STX Halo™",
+  "title": "Speculative Decoding with llama.cpp",
+  "description": "Learn how to set up speculative decoding for fast inference on STX Halo™",
   "time": 45,
-  "isNew": true,
-  "published": true
+  "platforms": ["windows", "linux"],
+  "difficulty": "intermediate",
+  "isNew": false,
+  "isFeatured": false,
+  "published": false,
+  "tags": ["llama-cpp", "speculative-decoding", "inference", "optimization"]
 }
-

@@ -1,9 +1,12 @@
 {
   "id": "dify-ai-agents",
-  "title": "Build node based AI agents and RAG workflows with Dify",
-  "description": "Create powerful AI agents and RAG workflows using Dify's visual node-based interface on STX Halo™",
-  "time": 30,
+  "title": "Building AI Agents with Dify",
+  "description": "Create and deploy AI agents using Dify platform on your STX Halo™",
+  "time": 45,
+  "platforms": ["windows", "linux"],
+  "difficulty": "intermediate",
   "isNew": true,
-  "published": true
+  "isFeatured": false,
+  "published": true,
+  "tags": ["agents", "dify", "llm", "automation"]
 }
-

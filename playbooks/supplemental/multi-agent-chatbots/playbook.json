@@ -1,9 +1,12 @@
 {
   "id": "multi-agent-chatbots",
   "title": "Creating Multi-agent Chatbots",
-  "description": "Build sophisticated multi-agent chatbot systems with coordinated AI responses on STX Halo™",
+  "description": "Build sophisticated multi-agent chatbot systems with coordinated AI responses",
   "time": 60,
+  "platforms": ["windows", "linux"],
+  "difficulty": "intermediate",
   "isNew": true,
-  "published": true
+  "isFeatured": false,
+  "published": true,
+  "tags": ["agents", "chatbots", "multi-agent", "llm"]
 }
-

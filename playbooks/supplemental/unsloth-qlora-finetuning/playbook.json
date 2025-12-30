@@ -1,9 +1,12 @@
 {
   "id": "unsloth-qlora-finetuning",
-  "title": "Unsloth QLoRA Fine-tuning LLMs on AMD GPUs",
-  "description": "Efficiently fine-tune LLMs using Unsloth's QLoRA implementation on STX Halo™",
-  "time": 60,
+  "title": "Optimized Fine-tuning with Unsloth QLoRA",
+  "description": "Use Unsloth for memory-efficient QLoRA fine-tuning on STX Halo™",
+  "time": 90,
+  "platforms": ["linux"],
+  "difficulty": "advanced",
   "isNew": true,
-  "published": true
+  "isFeatured": false,
+  "published": true,
+  "tags": ["unsloth", "qlora", "fine-tuning", "optimization"]
 }
-

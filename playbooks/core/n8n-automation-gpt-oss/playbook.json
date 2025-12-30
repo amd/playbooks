@@ -1,9 +1,12 @@
 {
   "id": "n8n-automation-gpt-oss",
-  "title": "Automating Workflows with n8n and gpt-oss-120b",
-  "description": "Build powerful automation workflows combining n8n with local gpt-oss-120b inference on STX Halo™",
+  "title": "Automating Workflows with n8n and Local LLMs",
+  "description": "Build powerful automation workflows combining n8n with local LLM inference on STX Halo™",
   "time": 60,
+  "platforms": ["windows", "linux"],
+  "difficulty": "intermediate",
   "isNew": true,
-  "published": true
+  "isFeatured": false,
+  "published": true,
+  "tags": ["automation", "n8n", "workflows", "llm"]
 }
-

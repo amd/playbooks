@@ -1,9 +1,12 @@
 {
   "id": "3dgs-pytorch-rocm",
-  "title": "3D Gaussian Splatting (3DGS) Scene Reconstruction with Pytorch+ROCm",
-  "description": "Perform 3D scene reconstruction using Gaussian Splatting with PyTorch and ROCm on STX Halo™",
+  "title": "3D Gaussian Splatting with PyTorch ROCm",
+  "description": "Render stunning 3D scenes using Gaussian Splatting with PyTorch and ROCm on STX Halo™",
   "time": 90,
+  "platforms": ["linux"],
+  "difficulty": "advanced",
   "isNew": true,
-  "published": true
+  "isFeatured": false,
+  "published": true,
+  "tags": ["3d", "gaussian-splatting", "pytorch", "rocm", "rendering"]
 }
-
