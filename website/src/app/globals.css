@@ -205,15 +205,63 @@ body {
   margin: 0.75rem 0;
 }
 
-.playbook-content .md-ul,
+.playbook-content .md-ul {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
 .playbook-content .md-ol {
   margin: 0.75rem 0;
   padding-left: 1.5rem;
+  list-style-type: decimal;
 }
 
-.playbook-content .md-li,
-.playbook-content .md-li-ordered {
+.playbook-content .md-li {
   margin: 0.25rem 0;
+  display: list-item;
+}
+
+/* Nested list styles */
+.playbook-content .md-ul .md-ul {
+  list-style-type: circle;
+  margin: 0.25rem 0;
+}
+
+.playbook-content .md-ul .md-ul .md-ul {
+  list-style-type: square;
+}
+
+/* Table styles */
+.playbook-content .md-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  overflow-x: auto;
+  display: block;
+}
+
+.playbook-content .md-thead {
+  background: var(--bg-tertiary);
+}
+
+.playbook-content .md-th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--ember-primary);
+}
+
+.playbook-content .md-td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.playbook-content .md-tr:hover {
+  background: rgba(212, 145, 93, 0.05);
 }
 
 .playbook-content .md-blockquote {
@@ -267,4 +315,12 @@ body {
   border: none;
   border-top: 1px solid var(--border-color);
   margin: 2rem 0;
+}
+
+/* Remove top margin from headings when they are the first element */
+.playbook-content > .md-h1:first-child,
+.playbook-content > .md-h2:first-child,
+.playbook-content > .md-h3:first-child,
+.playbook-content > .md-h4:first-child {
+  margin-top: 0;
 }
