@@ -7,6 +7,7 @@ This script validates that all playbooks:
 2. Follow the contract defined in website/src/types/playbook.ts
 3. Have valid JSON in playbook.json
 4. Have consistent IDs (folder name should match id in playbook.json)
+5. Have asset files within size limits (max 500 KB per file)
 """
 
 import json
@@ -38,6 +39,10 @@ REQUIRED_FIELDS = ["id", "title", "description", "time", "platforms", "published
 # Valid values for enum fields
 VALID_PLATFORMS = ["windows", "linux"]
 VALID_DIFFICULTIES = ["beginner", "intermediate", "advanced"]
+
+# Asset constraints
+MAX_ASSET_SIZE_KB = 500
+MAX_ASSET_SIZE_BYTES = MAX_ASSET_SIZE_KB * 1024
 
 # ============================================================================
 # Styling
@@ -150,6 +155,31 @@ def validate_file_structure(
         assets_items = list(assets_path.iterdir())
         if len(assets_items) == 0:
             result.add_warning(playbook_name, "Assets folder exists but is empty")
+
+
+def validate_asset_sizes(
+    playbook_path: Path, playbook_name: str, result: ValidationResult
+) -> None:
+    """Validates that all assets are within the size limit."""
+    assets_path = playbook_path / "assets"
+
+    if not assets_path.exists():
+        return
+
+    for asset in assets_path.iterdir():
+        if not asset.is_file():
+            continue
+
+        file_size = asset.stat().st_size
+        if file_size > MAX_ASSET_SIZE_BYTES:
+            size_kb = file_size / 1024
+            result.add_error(
+                playbook_name,
+                f'Asset file too large: "{asset.name}"\n'
+                f"       Size: {size_kb:.1f} KB\n"
+                f"       Maximum allowed: {MAX_ASSET_SIZE_KB} KB\n"
+                "       Please compress or resize the image.",
+            )
 
 
 def validate_playbook_json(
@@ -312,6 +342,7 @@ def validate_playbook(
     playbook_name = f"{category}/{folder_name}"
 
     validate_file_structure(playbook_path, playbook_name, result)
+    validate_asset_sizes(playbook_path, playbook_name, result)
     validate_playbook_json(playbook_path, playbook_name, folder_name, result)
 
     result.playbooks_checked += 1
