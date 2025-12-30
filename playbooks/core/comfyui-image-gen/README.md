@@ -22,22 +22,33 @@ ComfyUI offers several advantages:
 
 ## Launching ComfyUI
 
-Your STX Halo™ comes with ComfyUI pre-installed and configured for ROCm. To start it:
-
 <!-- @os:windows -->
-Open PowerShell and run:
+Your STX Halo™ comes with ComfyUI pre-installed and configured for ROCm. To launch it:
 
-```powershell
-cd C:\AMD\comfyui
-python main.py
-```
+1. Navigate to `C:\ProgramData\ComfyUI`
+2. Run `run_amd_gpu.bat`
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Open a terminal and run:
+### Clone the ComfyUI repository
 
 ```bash
-cd ~/AMD/comfyui
+git clone https://github.com/comfyanonymous/ComfyUI.git
+```
+
+> **Note**: See [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI) for more information.
+
+### Install ComfyUI requirements
+
+```bash
+pip install -r requirements.txt
+```
+
+### Launch ComfyUI
+
+> **Note**: You must return to the home directory of the repository in order to run `main.py`.
+
+```bash
 python main.py
 ```
 <!-- @os:end -->
