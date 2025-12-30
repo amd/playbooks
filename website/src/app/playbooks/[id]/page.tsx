@@ -298,7 +298,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                         ),
                         img: ({ src, alt }) => {
                           // Transform relative paths to use the API route
-                          let imageSrc = src || "";
+                          let imageSrc = typeof src === "string" ? src : "";
                           if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
                             imageSrc = `/api/playbooks/${id}/${imageSrc}`;
                           }

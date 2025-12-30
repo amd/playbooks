@@ -1,0 +1,30 @@
+name: Validate Playbooks
+
+on:
+  workflow_dispatch: # Manual triggering
+  pull_request:
+
+jobs:
+  validate-playbooks:
+    name: Playbook Structure & Contract Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate playbooks
+        run: python .github/scripts/validate_playbooks.py
+
+      - name: Display summary
+        if: success()
+        run: |
+          echo "### ✅ Playbook Validation Passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All playbooks follow the expected structure and contract." >> $GITHUB_STEP_SUMMARY
+
