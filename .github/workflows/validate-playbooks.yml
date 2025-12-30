@@ -3,9 +3,6 @@ name: Validate Playbooks
 on:
   workflow_dispatch: # Manual triggering
   pull_request:
-    paths:
-      - 'playbooks/**'
-      - 'website/src/types/playbook.ts'
 
 jobs:
   validate-playbooks:
