@@ -316,3 +316,11 @@ body {
   border-top: 1px solid var(--border-color);
   margin: 2rem 0;
 }
+
+/* Remove top margin from headings when they are the first element */
+.playbook-content > .md-h1:first-child,
+.playbook-content > .md-h2:first-child,
+.playbook-content > .md-h3:first-child,
+.playbook-content > .md-h4:first-child {
+  margin-top: 0;
+}

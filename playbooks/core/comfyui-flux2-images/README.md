@@ -13,7 +13,7 @@ This tutorial teaches you how to use ComfyUI with the Flux.2-dev model on your A
 
 ## Why ComfyUI?
 
-For ML engineers, ComfyUI offers several advantages:
+ComfyUI offers several advantages:
 
 - **Transparency**: See exactly what operations happen during generation—tokenization, CLIP encoding, sampling, VAE decoding
 - **Experimentation**: Swap components easily (different samplers, schedulers, models) without code changes
@@ -132,7 +132,7 @@ Drag a workflow JSON file onto the canvas, or use **Load** from the menu. The Fl
 
 Workflows are self-contained—share the JSON file with colleagues, and they can reproduce your exact setup. This makes ComfyUI excellent for collaborative experimentation.
 
-## Key Concepts for ML Engineers
+## Key Concepts
 
 ### Latent Space Operations
 
