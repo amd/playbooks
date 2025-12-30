@@ -3,8 +3,6 @@ name: Check Website
 on:
   workflow_dispatch: # Manual triggering
   pull_request:
-    paths:
-      - 'website/**'
 
 jobs:
   check-website:
