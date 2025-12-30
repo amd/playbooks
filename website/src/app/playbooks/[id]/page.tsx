@@ -236,6 +236,18 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                   {playbook.description}
                 </p>
 
+                {/* Cover Image */}
+                {playbook.coverImage && (
+                  <div className="mb-6">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`/api/playbooks/${id}/${playbook.coverImage}`}
+                      alt={playbook.title}
+                      className="w-full rounded-xl border border-[#333] shadow-lg"
+                    />
+                  </div>
+                )}
+
                 {/* Platform Toggle */}
                 {playbook.platforms.length > 0 && (
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3">

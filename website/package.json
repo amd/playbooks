@@ -11,7 +11,7 @@
   "dependencies": {
     "echarts": "^6.0.0",
     "echarts-for-react": "^3.0.5",
-    "next": "16.0.7",
+    "next": "^16.1.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-markdown": "^10.1.0",

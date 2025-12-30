@@ -1,9 +1,5 @@
 This playbook will guide you through setting up ComfyUI with the Flux.2-dev model on your STX Halo™ to generate stunning AI images.
 
-<p align="center">
-  <img src="assets/comfyui.png" alt="ComfyUI Flux2 Image Demo" width="500"/>
-</p>
-
 ## Prerequisites
 
 - STX Halo™ with ROCm drivers installed
@@ -119,6 +115,10 @@ ssh -L 8188:localhost:8188 user@your-halo-ip
 <!-- @os:end -->
 
 ## Creating Your First Image
+
+<p align="center">
+  <img src="assets/comfyui.png" alt="ComfyUI Flux2 Image Demo" width="500"/>
+</p>
 
 1. In the ComfyUI interface, load the Flux.2-dev workflow
 2. Enter your prompt in the text field

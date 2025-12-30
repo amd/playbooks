@@ -8,5 +8,6 @@
   "isNew": false,
   "isFeatured": false,
   "published": true,
-  "tags": ["image-generation", "comfyui", "flux"]
+  "tags": ["image-generation", "comfyui", "flux"],
+  "coverImage": "assets/cover.jpeg"
 }

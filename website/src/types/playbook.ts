@@ -65,6 +65,9 @@ export interface PlaybookMeta {
   
   /** Prerequisites (IDs of other playbooks) */
   prerequisites?: string[];
+  
+  /** Cover image path relative to the playbook folder (e.g., "assets/cover.png") */
+  coverImage?: string;
 }
 
 export interface Playbook extends PlaybookMeta {
