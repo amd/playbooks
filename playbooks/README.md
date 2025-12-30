@@ -17,8 +17,30 @@ Each playbook lives in its own folder with two required files:
 ```text
 playbook-name/
 ├── playbook.json            # Metadata (required)
-└── README.md                # Content (required)
+├── README.md                # Content (required)
+└── assets/                  # Images and files (optional)
+    └── screenshot.png
 ```
+
+---
+
+## The `assets/` Folder
+
+Playbooks can include an optional `assets/` folder for images and other files referenced in the README.
+
+### Usage
+
+Reference assets in your README using relative paths:
+
+```markdown
+![Screenshot](assets/screenshot.png)
+```
+
+### Requirements
+
+- **Maximum file size**: 500 KB per asset
+- **Supported formats**: PNG, JPEG, GIF, WebP, SVG
+- Use descriptive filenames (e.g., `step1-output.png` instead of `image1.png`)
 
 ---
 
@@ -175,10 +197,10 @@ Content **outside** of `@os` tags is always shown regardless of platform selecti
 
 ### Best Practices
 
-1. **Keep blocks focused** — Put only the differing content inside `@os` tags
-2. **Maintain parallel structure** — If you have a Windows block, include a Linux equivalent
-3. **Use for commands** — Most differences are in terminal commands, paths, and package managers
-4. **Don't overuse** — If 90% of your content is the same, only tag the differences
+1. **Keep blocks focused**: Put only the differing content inside `@os` tags
+2. **Maintain parallel structure**: If you have a Windows block, include a Linux equivalent
+3. **Use for commands**: Most differences are in terminal commands, paths, and package managers
+4. **Don't overuse**: If 90% of your content is the same, only tag the differences
 
 ---
 
@@ -209,12 +231,50 @@ Before setting `"published": true`:
 
 ---
 
+## Previewing Your Playbook
+
+Before publishing, preview your playbook on the local development website to verify formatting and layout.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) v18 or higher installed
+
+### Running the Preview Server
+
+1. Open a terminal and navigate to the `website` folder:
+
+   ```bash
+   cd website
+   ```
+
+2. Install dependencies (first time only):
+
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Open your browser to [http://localhost:3000](http://localhost:3000)
+
+### Viewing Your Playbook
+
+- **All playbooks**: Visit `http://localhost:3000` and scroll to the playbooks section
+- **Specific playbook**: Visit `http://localhost:3000/playbooks/<playbook-id>`
+  - Example: `http://localhost:3000/playbooks/lmstudio-rocm-llms`
+
+---
+
 ## Tips for Great Playbooks
 
-1. **Start with the end goal** — Tell users what they'll accomplish
-2. **List prerequisites upfront** — Don't surprise users mid-playbook
-3. **Use numbered steps** — Makes it easy to follow along
-4. **Include expected output** — Show what success looks like
-5. **Add troubleshooting sections** — Anticipate common issues
-6. **Keep code blocks copy-friendly** — Avoid prompts like `$` or `>` in commands
-7. **Test on a fresh system** — Ensure all dependencies are documented
+1. **Start with the end goal**: Tell users what they'll accomplish
+2. **List prerequisites upfront**: Don't surprise users mid-playbook
+3. **Use numbered steps**: Makes it easy to follow along
+4. **Include expected output**: Show what success looks like
+5. **Add troubleshooting sections**: Anticipate common issues
+6. **Keep code blocks copy-friendly**: Avoid prompts like `$` or `>` in commands
+7. **Test on a fresh system**: Ensure all dependencies are documented
