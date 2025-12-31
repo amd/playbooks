@@ -46,7 +46,7 @@ python main.py
 
 ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` to access the interface.
 
-> **Tip**: Add the `--highvram` flag for faster generation on the STX Halo's 128GB unified memory.
+> **Tip**: Keep the terminal window open while using ComfyUI. Closing it will stop the server.
 
 ## Finding the Z Image Turbo Template
 
@@ -105,7 +105,7 @@ The Z Image Turbo model is already loaded. To generate an image:
 3. **Click the "Run Workflow"** in upper right corner (or press `Ctrl+Enter`)
 4. Watch the nodes highlight as each step executes
 
-Your generated image appears in the **Save Image** node and is saved to the `output/` folder.
+The entire workflow execution should complete in less than 30 seconds. Your generated image appears in the **Save Image** node and is saved to the `output/` folder.
 
 ## Adjusting Generation Parameters
 
@@ -120,6 +120,25 @@ The KSampler node controls the core diffusion process:
 | **sampler_name** | Denoising algorithm | `euler` and `res_multistep` work well for turbo models |
 | **scheduler** | Noise schedule curve | `normal` or `simple` |
 | **seed** | Random seed for reproducibility | Set fixed values to iterate on a composition |
+
+### Image Size
+
+To adjust output dimensions, find the **Empty Latent Image** node and modify **width** and **height**. Keep dimensions at or below 1024 pixels on the longest side for optimal quality.
+
+### ModelSamplingAuraFlow
+
+The **ModelSamplingAuraFlow** node is a specialized sampling modifier that adjusts how the diffusion process handles noise scheduling. You'll see this node connected to the model output in the Z Image Turbo workflow.
+
+| Parameter | What It Controls | Recommended Values |
+|-----------|------------------|-------------------|
+| **shift** | Adjusts the noise schedule timing—higher values push more detail refinement to later steps | 1.0–4.0 (default is 3.0) |
+
+When to adjust **shift**:
+
+- **Lower values (1.0–2.0)**: Faster convergence, good for simple compositions
+- **Higher values (3.0–4.0)**: More gradual refinement, can improve fine details in complex scenes
+
+The AuraFlow sampling method is specifically designed for flow-matching models like Z Image Turbo, ensuring proper noise distribution throughout the generation process.
 
 ## Working with Workflows
 
