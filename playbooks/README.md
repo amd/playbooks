@@ -28,13 +28,13 @@ playbooks/
 └── README.md                # This file
 ```
 
-Each playbook lives in its own folder with two required files:
+Each playbook lives in its own folder:
 
 ```text
 playbook-name/
 ├── playbook.json            # Metadata (required)
 ├── README.md                # Content (required)
-├── platform.md              # Platform configurations (optional)
+├── platform.md              # Platform configurations (required for core, optional for supplemental)
 └── assets/                  # Images and files (optional)
 ```
 
@@ -94,7 +94,9 @@ Content outside `@os` tags is always shown. Keep blocks focused—only tag the p
 
 ## The `platform.md` File
 
-Optional file documenting pre-installed software, model paths, and platform-specific prerequisites. See `playbooks/core/comfyui-image-gen/platform.md` for an example.
+Documents pre-installed software, model paths, and platform-specific prerequisites. **Required for `core` playbooks**, since they assume dependencies are preinstalled on the system. Optional for `supplemental` playbooks.
+
+See `playbooks/core/comfyui-image-gen/platform.md` for an example.
 
 ---
 
