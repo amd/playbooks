@@ -1,6 +1,99 @@
 # Playbook Creation Guide
 
-This folder contains all STX Halo™ playbooks—step-by-step guides for AI development tasks.
+This folder contains all STX Halo™ playbooks. But before we get into folder structures and metadata, let's talk about what makes a playbook *great*.
+
+---
+
+## The Soul of a Great Playbook
+
+**A playbook is not a setup guide.** Users should feel accomplished when they finish—they've learned something meaningful, built something real, and can't wait to explore further.
+
+### The Golden Rules
+
+1. **Create a moment of success.** Every playbook should have a "wow" moment where the user *sees something happen*. An image appears. A model responds. A server comes alive. This is the emotional anchor of the experience.
+
+2. **Teach, don't just instruct.** Explain *why* things work, not just *how* to click buttons. Users should leave understanding the system, not just having copy-pasted commands.
+
+3. **Spark curiosity.** End with "Next Steps" that open doors. Where can they go from here? What else is possible? A great playbook is a launchpad, not a destination.
+
+4. **Respect the reader.** Write like you're pair-programming with a smart colleague, not lecturing a child. Be concise, be clear, and trust them to follow along.
+
+### Study the Best Example
+
+Before writing your playbook, **read `playbooks/core/comfyui-image-gen/README.md`** end to end. Notice how it:
+
+- Opens with an **Overview** that explains *what the tool is and why it matters*
+- Lists **What You'll Learn** upfront so users know the journey ahead
+- **Teaches concepts** (pipeline components, what each node does) not just clicks
+- Gets to the **first image generation** quickly—the payoff moment
+- Provides a **rich "Next Steps" section** with specific, actionable paths forward
+- Uses images to show the UI, reducing confusion
+- Maintains an enthusiastic but professional tone throughout
+
+This is the bar. Match it.
+
+---
+
+## Anatomy of a Playbook
+
+### The "What You'll Learn" Section
+
+Immediately after your overview, tell users what they'll accomplish:
+
+```markdown
+## What You'll Learn
+
+- How to load and run the Z Image Turbo template
+- Understanding diffusion pipeline components
+- Generating images and tuning generation parameters
+- Saving and sharing workflows
+```
+
+This isn't just a table of contents—it's a promise. Users should look at this list and think, "Yes, I want to know all of that."
+
+### The Teaching Moments
+
+Don't just say "click this button." Explain the system:
+
+> **Good:** "The KSampler node controls the core diffusion process. The `steps` parameter determines how many denoising iterations the model performs—turbo models are distilled to work with fewer steps (4–10), unlike traditional diffusion models that need 20–50."
+
+> **Bad:** "Set steps to 6 and click Run."
+
+Tables work well for parameter explanations:
+
+| Parameter | What It Controls | Recommended Values |
+|-----------|------------------|-------------------|
+| **steps** | Number of denoising iterations | 4–10 |
+| **cfg** | How closely to follow the prompt | 1.0–2.0 |
+
+### The Payoff Moment
+
+Every playbook needs a clear moment where the user achieves something tangible:
+
+> "Your generated image appears in the **Save Image** node and is saved to the `output/` folder."
+
+> "You should see `Server running on http://localhost:3000`. Open your browser and you'll see your chatbot interface ready for input."
+
+This is the emotional core. Build toward it.
+
+### The "Next Steps" Section
+
+Never end abruptly. Always provide at least 3-4 concrete next steps:
+
+```markdown
+## Next Steps
+
+- **Explore LoRA nodes**: Apply style adapters without retraining
+- **Add negative prompts**: Guide the model away from unwanted features
+- **Build custom workflows**: Chain generations, add upscaling, create variations
+- **Browse community workflows**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples)
+```
+
+End with an inspiring closing line that captures the spirit of continued exploration:
+
+> "ComfyUI's strength is experimentation: connect nodes differently, adjust parameters, and observe how each change affects the output. This hands-on exploration builds intuition for how diffusion models work."
+
+---
 
 ## Folder Structure
 
@@ -41,6 +134,8 @@ Reference assets in your README using relative paths:
 - **Maximum file size**: 500 KB per asset
 - **Supported formats**: PNG, JPEG, GIF, WebP, SVG
 - Use descriptive filenames (e.g., `step1-output.png` instead of `image1.png`)
+
+**Include screenshots liberally.** A picture of the UI with annotations is worth a hundred words of description. Show users what they should see at key moments.
 
 ---
 
@@ -135,29 +230,42 @@ This file contains all metadata for your playbook:
 
 Write your playbook content in Markdown. The first `# Heading` becomes the page title.
 
-**Example structure:**
+**Recommended structure (based on comfyui-image-gen):**
 
-    # My Playbook Title
+    ## Overview
 
-    Introduction paragraph explaining what users will learn.
+    What is this tool/technology? Why does it matter? What makes it 
+    exciting or powerful? Set the stage with 2-3 sentences that hook 
+    the reader.
 
-    ## Prerequisites
+    ## What You'll Learn
 
-    - List required software
-    - Previous knowledge needed
-    - Hardware requirements
+    - Concrete skill or knowledge #1
+    - Concrete skill or knowledge #2
+    - Concrete skill or knowledge #3
+    - The tangible outcome they'll achieve
 
-    ## Step 1: First Step
+    ## Getting Started (or similar)
 
-    Detailed instructions...
+    The first hands-on step. Get users into the tool as quickly 
+    as possible.
 
-    ## Step 2: Second Step
+    ## Core Concepts / Understanding [X]
 
-    More instructions...
+    Teach the mental model. Tables and diagrams work well here.
 
-    ## Conclusion
+    ## Doing The Thing
 
-    Summary and next steps.
+    The main activity—where users achieve the payoff moment.
+
+    ## Customization / Parameters / Going Deeper
+
+    How to modify and experiment. Give users agency.
+
+    ## Next Steps
+
+    3-5 concrete paths forward. Links to resources. An inspiring 
+    closing line about continued exploration.
 
 ---
 
@@ -250,7 +358,19 @@ Content **outside** of `@os` tags is always shown regardless of platform selecti
 
 ## Publishing Checklist
 
-Before setting `"published": true`:
+Before setting `"published": true`, verify both **style** and **technical** requirements:
+
+### Style Requirements
+
+- [ ] **Overview hooks the reader**—explains what the tool is and why it's exciting
+- [ ] **"What You'll Learn" section exists** with 3-5 concrete outcomes
+- [ ] **Concepts are explained**, not just steps listed
+- [ ] **Clear payoff moment**—user sees something tangible happen
+- [ ] **"Next Steps" section exists** with 3-5 paths forward
+- [ ] **Images included** at key UI moments
+- [ ] **Tone is engaging**—reads like a knowledgeable friend, not a manual
+
+### Technical Requirements
 
 - [ ] `id` matches folder name
 - [ ] Title is clear and descriptive
@@ -304,12 +424,35 @@ Before publishing, preview your playbook on the local development website to ver
 
 ---
 
-## Tips for Great Playbooks
+## Writing Style Checklist
 
-1. **Start with the end goal**: Tell users what they'll accomplish
-2. **List prerequisites upfront**: Don't surprise users mid-playbook
-3. **Use numbered steps**: Makes it easy to follow along
-4. **Include expected output**: Show what success looks like
-5. **Add troubleshooting sections**: Anticipate common issues
-6. **Keep code blocks copy-friendly**: Avoid prompts like `$` or `>` in commands
-7. **Test on a fresh system**: Ensure all dependencies are documented
+Before you start writing, internalize these principles:
+
+### Do This
+
+- [ ] **Lead with excitement.** Why is this technology interesting? What can users create?
+- [ ] **Promise outcomes.** "What You'll Learn" should make users eager to continue
+- [ ] **Explain the why.** Don't just give instructions—teach concepts
+- [ ] **Create a payoff moment.** Users should *see something happen*
+- [ ] **End with "Next Steps."** Open doors, don't close them
+- [ ] **Use images generously.** Show the UI, show the output, reduce guesswork
+- [ ] **Write like a knowledgeable friend.** Enthusiastic but not condescending
+
+### Avoid This
+
+- [ ] **"Click this, type that" syndrome.** Instructions without understanding
+- [ ] **Ending abruptly.** "Run the command. Done." leaves users stranded
+- [ ] **Wall-of-text explanations.** Use tables, code blocks, and formatting
+- [ ] **Assuming setup is the goal.** Setup is a means to an end—the end is learning
+- [ ] **Dry, manual-style writing.** Playbooks should feel exciting, not like documentation
+
+---
+
+## Technical Tips
+
+1. **List prerequisites upfront**: Don't surprise users mid-playbook
+2. **Use numbered steps**: Makes it easy to follow along
+3. **Include expected output**: Show what success looks like
+4. **Add troubleshooting sections**: Anticipate common issues
+5. **Keep code blocks copy-friendly**: Avoid prompts like `$` or `>` in commands
+6. **Test on a fresh system**: Ensure all dependencies are documented
