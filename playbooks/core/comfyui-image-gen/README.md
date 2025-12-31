@@ -6,10 +6,10 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 
 ## What You'll Learn
 
-- How ComfyUI's node-based workflow system works
-- How to launch ComfyUI and load a Z Image Turbo workflow
-- How to modify prompts and generation parameters
-- Key concepts for understanding diffusion model pipelines
+- How to launch ComfyUI and load the Z Image Turbo template
+- Understanding diffusion pipeline components
+- Generating images and tuning generation parameters
+- Saving and sharing workflows
 
 ## Launching ComfyUI
 
