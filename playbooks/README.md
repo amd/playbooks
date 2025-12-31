@@ -1,11 +1,11 @@
 # Playbook Creation Guide
 
 
-## The Soul of a Great Playbook
+## Design Principles
 
 **A playbook is not a setup guide.** Users should feel accomplished when they finish. They should feel they learned something meaningful, built something real, and can't wait to explore further.
 
-### The Golden Rules
+### Core Guidelines
 
 1. **Create a moment of success.** Users should *see something happen*: an image appears, a model responds, a server comes alive.
 2. **Teach, don't just instruct.** Explain *why* things work, not just which buttons to click.
