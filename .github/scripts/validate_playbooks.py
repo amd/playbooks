@@ -3,7 +3,7 @@
 Playbook Validation Script
 
 This script validates that all playbooks:
-1. Have the expected file structure (README.md, playbook.json, optional assets/)
+1. Have the expected file structure (README.md, playbook.json, optional platform.md, optional assets/)
 2. Follow the contract defined in website/src/types/playbook.ts
 3. Have valid JSON in playbook.json
 4. Have consistent IDs (folder name should match id in playbook.json)
@@ -31,7 +31,7 @@ PLAYBOOKS_ROOT = SCRIPT_DIR.parent.parent / "playbooks"
 CATEGORIES = ["core", "supplemental", "backup"]
 
 # Allowed files/folders in a playbook directory
-ALLOWED_ITEMS = {"README.md", "playbook.json", "assets"}
+ALLOWED_ITEMS = {"README.md", "playbook.json", "platform.md", "assets"}
 
 # Required fields in playbook.json (based on PlaybookMeta interface)
 REQUIRED_FIELDS = ["id", "title", "description", "time", "platforms", "published"]
