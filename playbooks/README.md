@@ -144,6 +144,7 @@ All playbook folders have already been created. To edit a playbook:
 
 ## Previewing
 
+First, install [Node.js 20.19.6](http://nodejs.org/pt/blog/release/v20.19.6) version 
 ```bash
 cd website
 npm install    # first time only
