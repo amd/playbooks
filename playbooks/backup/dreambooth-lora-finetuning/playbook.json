@@ -1,0 +1,13 @@
+{
+  "id": "dreambooth-lora-finetuning",
+  "title": "DreamBooth Fine-tuning with LoRA",
+  "description": "Fine-tune image generation models using DreamBooth and LoRA on STX Halo™",
+  "time": 120,
+  "platforms": ["windows", "linux"],
+  "difficulty": "intermediate",
+  "isNew": false,
+  "isFeatured": false,
+  "published": false,
+  "tags": ["dreambooth", "lora", "fine-tuning", "image-generation", "stable-diffusion"]
+}
+
