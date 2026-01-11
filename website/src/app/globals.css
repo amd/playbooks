@@ -324,3 +324,36 @@ body {
 .playbook-content > .md-h4:first-child {
   margin-top: 0;
 }
+
+/* Table of Contents Sidebar */
+.toc-sidebar {
+  padding: 1rem;
+  background: rgba(26, 26, 26, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(8px);
+  max-height: calc(100vh - 8rem);
+  overflow-y: auto;
+}
+
+.toc-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.toc-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toc-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.toc-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Smooth scroll for anchor links */
+.scroll-mt-28 {
+  scroll-margin-top: 7rem;
+}
