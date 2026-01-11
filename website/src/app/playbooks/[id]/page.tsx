@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useRef } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -9,6 +9,87 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import type { Playbook, Platform } from "@/types/playbook";
 import { formatTime } from "@/types/playbook";
+
+interface TocItem {
+  id: string;
+  text: string;
+}
+
+/**
+ * Extracts table of contents from markdown content (main sections only - h2)
+ */
+function extractToc(content: string): TocItem[] {
+  if (!content) return [];
+  
+  const headingRegex = /^##\s+(.+)$/gm;
+  const toc: TocItem[] = [];
+  let match;
+  
+  while ((match = headingRegex.exec(content)) !== null) {
+    const text = match[1].trim();
+    const id = slugify(text);
+    toc.push({ id, text });
+  }
+  
+  return toc;
+}
+
+/**
+ * Generates a URL-safe slug from heading text
+ */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+/**
+ * Table of Contents Sidebar Component
+ */
+function TableOfContents({ 
+  items, 
+  activeId,
+  onLinkClick
+}: { 
+  items: TocItem[]; 
+  activeId: string;
+  onLinkClick: (id: string) => void;
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <nav className="toc-sidebar">
+      <div className="text-xs font-semibold text-[#6b6b6b] uppercase tracking-wider mb-3">
+        On this page
+      </div>
+      <ul className="space-y-1">
+        {items.map((item) => (
+          <li key={item.id}>
+            <a
+              href={`#${item.id}`}
+              onClick={(e) => {
+                e.preventDefault();
+                onLinkClick(item.id);
+              }}
+              className={`
+                block text-sm py-1 pl-3 transition-colors duration-150 border-l-2
+                ${activeId === item.id 
+                  ? "text-[#D4915D] border-[#D4915D] font-medium" 
+                  : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
+                }
+              `}
+            >
+              {item.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 /**
  * Parses markdown content and filters OS-specific sections
@@ -103,6 +184,9 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
+  const [activeHeading, setActiveHeading] = useState<string>("");
+  const contentRef = useRef<HTMLDivElement>(null);
+  const isClickScrolling = useRef(false);
 
   useEffect(() => {
     async function fetchPlaybook() {
@@ -142,12 +226,83 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
         .replace(/src=["'](?!https?:\/\/|\/)(.*?)["']/g, `src="/api/playbooks/${id}/$1"`)
     : "";
 
+  // Extract table of contents from filtered content
+  const tocItems = extractToc(filteredContent);
+
+  // Handle clicking a TOC link - scroll and immediately set active
+  const handleTocClick = (targetId: string) => {
+    const element = document.getElementById(targetId);
+    if (element) {
+      // Set active immediately on click
+      setActiveHeading(targetId);
+      isClickScrolling.current = true;
+      
+      const offset = 100;
+      const top = element.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: "smooth" });
+      history.pushState(null, "", `#${targetId}`);
+      
+      // Re-enable scroll tracking after scroll animation completes
+      setTimeout(() => {
+        isClickScrolling.current = false;
+      }, 1000);
+    }
+  };
+
+  // Track active heading on scroll
+  useEffect(() => {
+    if (!contentRef.current || tocItems.length === 0) return;
+
+    const handleScroll = () => {
+      // Skip scroll tracking while programmatic scroll is in progress
+      if (isClickScrolling.current) return;
+      
+      const headings = contentRef.current?.querySelectorAll("h2[id]");
+      if (!headings || headings.length === 0) return;
+      
+      // Find the heading that's currently at or near the top of the viewport
+      // We look for the last heading that has scrolled past the threshold
+      const threshold = 150; // How far from top of viewport to consider "active"
+      let currentActive = "";
+      
+      for (const heading of headings) {
+        const rect = heading.getBoundingClientRect();
+        // If this heading is at or above the threshold, it's the current section
+        if (rect.top <= threshold) {
+          currentActive = heading.id;
+        } else {
+          // Once we find a heading below the threshold, stop
+          break;
+        }
+      }
+      
+      // If no heading is above threshold, use the first one if we're near the top
+      if (!currentActive && headings.length > 0) {
+        const firstHeading = headings[0] as HTMLElement;
+        const rect = firstHeading.getBoundingClientRect();
+        if (rect.top < window.innerHeight / 2) {
+          currentActive = firstHeading.id;
+        }
+      }
+      
+      if (currentActive && currentActive !== activeHeading) {
+        setActiveHeading(currentActive);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Initial check
+    handleScroll();
+    
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [tocItems, activeHeading]);
+
   return (
     <main className="min-h-screen bg-[#0d0d0d]">
       <Header />
       
       <div className="pt-24 pb-16 px-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Back Link */}
           <Link 
             href="/#playbooks" 
@@ -256,82 +411,116 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                 )}
               </div>
 
-              {/* Content */}
-              <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6 md:p-8">
-                {filteredContent ? (
-                  <article className="playbook-content prose prose-invert max-w-none">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]}
-                      components={{
-                        h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
-                        h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
-                        h3: ({ children }) => <h3 className="md-h3">{children}</h3>,
-                        h4: ({ children }) => <h4 className="md-h4">{children}</h4>,
-                        p: ({ children }) => <p className="md-p">{children}</p>,
-                        ul: ({ children }) => <ul className="md-ul">{children}</ul>,
-                        ol: ({ children }) => <ol className="md-ol">{children}</ol>,
-                        li: ({ children }) => <li className="md-li">{children}</li>,
-                        blockquote: ({ children }) => <blockquote className="md-blockquote">{children}</blockquote>,
-                        a: ({ href, children }) => (
-                          <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
-                            {children}
-                          </a>
-                        ),
-                        img: ({ src, alt }) => {
-                          // Transform relative paths to use the API route
-                          let imageSrc = typeof src === "string" ? src : "";
-                          if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
-                            imageSrc = `/api/playbooks/${id}/${imageSrc}`;
-                          }
-                          return (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img 
-                              src={imageSrc} 
-                              alt={alt || ""} 
-                              className="rounded-lg max-w-full h-auto mx-auto my-6"
-                            />
-                          );
-                        },
-                        code: ({ className, children }) => {
-                          const isInline = !className;
-                          if (isInline) {
-                            return <code className="inline-code">{children}</code>;
-                          }
-                          return (
-                            <code className={className}>
-                              {children}
-                            </code>
-                          );
-                        },
-                        pre: ({ children }) => (
-                          <pre className="code-block">{children}</pre>
-                        ),
-                        hr: () => <hr className="md-hr" />,
-                        table: ({ children }) => <table className="md-table">{children}</table>,
-                        thead: ({ children }) => <thead className="md-thead">{children}</thead>,
-                        tbody: ({ children }) => <tbody className="md-tbody">{children}</tbody>,
-                        tr: ({ children }) => <tr className="md-tr">{children}</tr>,
-                        th: ({ children }) => <th className="md-th">{children}</th>,
-                        td: ({ children }) => <td className="md-td">{children}</td>,
-                      }}
-                    >
-                      {filteredContent}
-                    </ReactMarkdown>
-                  </article>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="text-[#6b6b6b] mb-4">
-                      <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+              {/* Main content area with TOC sidebar */}
+              <div className="relative flex gap-8">
+                {/* Table of Contents - Desktop only */}
+                {tocItems.length > 0 && (
+                  <aside className="hidden xl:block w-56 flex-shrink-0">
+                    <div className="sticky top-24">
+                      <TableOfContents 
+                        items={tocItems} 
+                        activeId={activeHeading}
+                        onLinkClick={handleTocClick}
+                      />
                     </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Content Coming Soon</h3>
-                    <p className="text-[#a0a0a0] text-sm">
-                      This playbook is being prepared. Check back soon for detailed instructions.
-                    </p>
-                  </div>
+                  </aside>
                 )}
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6 md:p-8">
+                    {filteredContent ? (
+                      <article ref={contentRef} className="playbook-content prose prose-invert max-w-none">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            h1: ({ children }) => {
+                              const text = String(children);
+                              const headingId = slugify(text);
+                              return <h1 id={headingId} className="md-h1 scroll-mt-28">{children}</h1>;
+                            },
+                            h2: ({ children }) => {
+                              const text = String(children);
+                              const headingId = slugify(text);
+                              return <h2 id={headingId} className="md-h2 scroll-mt-28">{children}</h2>;
+                            },
+                            h3: ({ children }) => {
+                              const text = String(children);
+                              const headingId = slugify(text);
+                              return <h3 id={headingId} className="md-h3 scroll-mt-28">{children}</h3>;
+                            },
+                            h4: ({ children }) => {
+                              const text = String(children);
+                              const headingId = slugify(text);
+                              return <h4 id={headingId} className="md-h4 scroll-mt-28">{children}</h4>;
+                            },
+                            p: ({ children }) => <p className="md-p">{children}</p>,
+                            ul: ({ children }) => <ul className="md-ul">{children}</ul>,
+                            ol: ({ children }) => <ol className="md-ol">{children}</ol>,
+                            li: ({ children }) => <li className="md-li">{children}</li>,
+                            blockquote: ({ children }) => <blockquote className="md-blockquote">{children}</blockquote>,
+                            a: ({ href, children }) => (
+                              <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
+                                {children}
+                              </a>
+                            ),
+                            img: ({ src, alt }) => {
+                              // Transform relative paths to use the API route
+                              let imageSrc = typeof src === "string" ? src : "";
+                              if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+                                imageSrc = `/api/playbooks/${id}/${imageSrc}`;
+                              }
+                              return (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img 
+                                  src={imageSrc} 
+                                  alt={alt || ""} 
+                                  className="rounded-lg max-w-full h-auto mx-auto my-6"
+                                />
+                              );
+                            },
+                            code: ({ className, children }) => {
+                              const isInline = !className;
+                              if (isInline) {
+                                return <code className="inline-code">{children}</code>;
+                              }
+                              return (
+                                <code className={className}>
+                                  {children}
+                                </code>
+                              );
+                            },
+                            pre: ({ children }) => (
+                              <pre className="code-block">{children}</pre>
+                            ),
+                            hr: () => <hr className="md-hr" />,
+                            table: ({ children }) => <table className="md-table">{children}</table>,
+                            thead: ({ children }) => <thead className="md-thead">{children}</thead>,
+                            tbody: ({ children }) => <tbody className="md-tbody">{children}</tbody>,
+                            tr: ({ children }) => <tr className="md-tr">{children}</tr>,
+                            th: ({ children }) => <th className="md-th">{children}</th>,
+                            td: ({ children }) => <td className="md-td">{children}</td>,
+                          }}
+                        >
+                          {filteredContent}
+                        </ReactMarkdown>
+                      </article>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="text-[#6b6b6b] mb-4">
+                          <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-white mb-2">Content Coming Soon</h3>
+                        <p className="text-[#a0a0a0] text-sm">
+                          This playbook is being prepared. Check back soon for detailed instructions.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </>
           )}
