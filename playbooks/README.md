@@ -66,7 +66,7 @@ Write your playbook content in Markdown format. Images, tables, code, and other 
 | **Getting Started** | First hands-on step—get users into the tool quickly |
 | **Core Concepts** | Teach the mental model (tables and diagrams help) |
 | **Main Activity** | Where users achieve the payoff moment |
-| **Next Steps** | 3-5 paths forward with links to resources |
+| **Next Steps** | 3-5 paths forward with links to resources and official documentation |
 
 ### OS-Specific Content
 

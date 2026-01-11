@@ -166,3 +166,5 @@ Workflows are self-contained—share the JSON file with colleagues, and they can
 - **Browse community workflows**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) has many ready-to-use workflows
 
 ComfyUI's strength is experimentation: connect nodes differently, adjust parameters, and observe how each change affects the output. This hands-on exploration builds intuition for how diffusion models work.
+
+For more information, check out the [ComfyUI Documentation](https://docs.comfy.org/).
