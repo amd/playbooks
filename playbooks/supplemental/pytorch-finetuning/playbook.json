@@ -3,7 +3,7 @@
   "title": "Fine-tune with PyTorch",
   "description": "Fine-tune large language models using PyTorch on STX Halo™",
   "time": 90,
-  "platforms": ["linux"],
+  "platforms": ["windows", "linux"],
   "difficulty": "intermediate",
   "isNew": true,
   "isFeatured": false,
