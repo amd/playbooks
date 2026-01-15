@@ -1,168 +1,287 @@
 ## Overview
 
-Finetuning Using Pytorch and TRL
+Fine-tuning large language models (LLMs) adapts pre-trained models to your specific tasks and data. Unlike training from scratch, fine-tuning leverages existing knowledge while teaching the model new behaviors—whether that's writing in a particular style, following specific instructions, or mastering domain-specific knowledge.
+
+This tutorial teaches you how to fine-tune LLMs like Gemma models using PyTorch and popular libraries like Hugging Face Transformers, PEFT, and TRL on your STX Halo™ GPU. You'll learn multiple fine-tuning techniques, from full parameter updates to memory-efficient methods that run on consumer hardware.
 
 ## What You'll Learn
 
-- How to launch ComfyUI and load the Z Image Turbo template
-- Understanding diffusion pipeline components
-- Generating images and tuning generation parameters
-- Saving and sharing workflows
+- Understanding different fine-tuning methods and when to use each
+- Setting up your environment for LLM fine-tuning
+- Preparing datasets for instruction tuning and chat models
+- Running fine-tuning jobs on your STX Halo™
+- Memory optimization techniques for large models
 
-## Launching ComfyUI
+> **🚀 Quick Start**: If you want to jump straight to training, see [Running Your First Fine-Tuning Job](#running-your-first-fine-tuning-job) or browse the [Example Scripts Reference](#example-scripts-reference) to find the right script for your needs.
 
-<!-- @os:windows -->
-Your STX Halo™ comes with ComfyUI pre-installed and configured for ROCm. To launch it:
+## Fine-Tuning Methods
 
-1. Navigate to `C:\ProgramData\ComfyUI`
-2. Run `run_amd_gpu.bat`
-<!-- @os:end -->
+Choose a fine-tuning method based on your GPU memory and quality requirements:
 
-<!-- @os:linux -->
-### Clone the ComfyUI repository
+| Method | Memory Usage | Quality | Best For |
+|--------|--------------|---------|----------|
+| **QLoRA** | Lowest (~0.5× model size) | Good | Limited hardware (16GB VRAM), large models (70B+) |
+| **8-bit + LoRA** | Low (1×–1.5× model size) | Very Good | 13B–30B models on 24GB GPUs |
+| **LoRA** | Moderate (1.5×–2× model size) | Very Good | Task-specific adaptation, multiple adapters |
+| **Full Fine-tuning** | Highest (4×+ model size) | Best | Smaller models (< 7B), maximum quality |
+
+### QLoRA (4-bit Quantization + LoRA)
+
+Most memory-efficient method using 4-bit quantization. Ideal for rapid experimentation and training large models on consumer hardware.
+
+**Memory Requirements**: 7B: 5–7GB | 13B: 10–12GB | 30B: 20–24GB | 70B: 40–48GB
+
+**Example Scripts**:
+- Gemma: `assets/gemma/train_qlora.py`
+- GPTOSS: `assets/gptoss/train_qlora.py`
+
+[QLoRA Documentation](https://ai.google.dev/gemma/docs/core/huggingface_text_finetune_qlora)
+
+---
+
+### 8-bit + LoRA
+
+Loads base model in 8-bit precision with LoRA adapters in full precision. Good balance of quality and efficiency.
+
+**Memory Requirements**: 7B: 8–12GB | 13B: 16–20GB | 30B: 32–40GB
+
+**Example Scripts**:
+- Gemma: `assets/gemma/train_8bit_lora.py`
+- GPTOSS: `assets/gptoss/train_8bit_lora.py`
+
+---
+
+### LoRA (Low-Rank Adaptation)
+
+Trains small adapter matrices while freezing the base model. Excellent for creating multiple task-specific adapters.
+
+**Memory Requirements**: 7B: 14–18GB | 13B: 28–32GB | 30B: 60–70GB
+
+**Example Scripts**:
+- Gemma: `assets/gemma/train_lora.py`
+- GPTOSS: `assets/gptoss/train_lora.py`
+
+[PEFT Documentation](https://huggingface.co/docs/peft)
+
+---
+
+### Full Fine-Tuning
+
+Updates all model parameters. Provides maximum quality but requires significant GPU memory.
+
+**Memory Requirements**: 7B: 28GB+ | 13B: 52GB+ | 30B+: 100GB+
+
+**Example Scripts**:
+- Gemma: `assets/gemma/train_full_finetuning.py`
+- GPTOSS: `assets/gptoss/train_full_finetuning.py`
+
+[Full Fine-tuning Guide](https://ai.google.dev/gemma/docs/core/huggingface_text_full_finetune)
+
+## Prerequisites
+
+### System Requirements
+
+Your STX Halo™ GPU comes optimized for PyTorch with ROCm support. For fine-tuning, you'll need:
+
+- **GPU Memory**: Minimum 16GB VRAM (24GB+ recommended for larger models)
+- **System RAM**: 32GB+ recommended
+- **Storage**: 50GB+ free space for models and datasets
+- **Python**: 3.10 or newer
+
+### Required Libraries
+
+Create a virtual environment and install dependencies:
 
 ```bash
-git clone https://github.com/comfyanonymous/ComfyUI.git
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0
+pip install transformers accelerate peft trl datasets bitsandbytes
 ```
 
-> **Note**: See [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI) for more information.
+> **Note**: Your STX Halo™ uses AMD ROCm. The `bitsandbytes` library provides ROCm support for quantization on AMD GPUs.
 
-### Install ComfyUI requirements
+## Preparing Your Dataset
+
+Fine-tuning requires properly formatted training data. Most modern LLM fine-tuning uses **instruction-following** or **conversational** formats.
+
+### Dataset Format
+
+Your dataset should be in JSON or JSONL format with this structure:
+
+**Instruction format:**
+
+```json
+[
+  {
+    "instruction": "Explain what photosynthesis is.",
+    "input": "",
+    "output": "Photosynthesis is the process by which plants convert light energy into chemical energy..."
+  },
+  {
+    "instruction": "Translate the following to French.",
+    "input": "Hello, how are you?",
+    "output": "Bonjour, comment allez-vous?"
+  }
+]
+```
+
+**Chat format:**
+
+```json
+[
+  {
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "What is machine learning?"},
+      {"role": "assistant", "content": "Machine learning is a subset of artificial intelligence..."}
+    ]
+  }
+]
+```
+
+### Popular Datasets
+
+Here are some commonly used datasets for LLM fine-tuning:
+
+- **openassistant-guanaco**: High-quality conversational dataset
+- **alpaca**: Instruction-following dataset with 52K examples
+- **dolly-15k**: Diverse instruction dataset from Databricks
+- **ShareGPT**: Real ChatGPT conversations
+
+You can load these from Hugging Face or prepare your own custom dataset following the formats above.
+
+## Running Your First Fine-Tuning Job
+
+We provide ready-to-use training scripts for popular LLMs. Select your model family and fine-tuning method:
+
+### Gemma Models
+
+Google's Gemma models (2B, 7B, and larger) are optimized for instruction following and chat:
 
 ```bash
-pip install -r requirements.txt
+# QLoRA (most accessible, 16GB+ VRAM)
+python assets/gemma/train_qlora.py
+
+# LoRA (better quality, 24GB+ VRAM)
+python assets/gemma/train_lora.py
+
+# 8-bit + LoRA (good balance, 16-24GB VRAM)
+python assets/gemma/train_8bit_lora.py
+
+# Full fine-tuning (maximum quality, 32GB+ VRAM)
+python assets/gemma/train_full_finetuning.py
 ```
 
-### Launch ComfyUI
+### GPTOSS Models
 
-> **Note**: You must return to the home directory of the repository in order to run `main.py`.
+GPTOSS open-source models with strong general capabilities:
 
 ```bash
-python main.py
+# QLoRA (most accessible, 16GB+ VRAM)
+python assets/gptoss/train_qlora.py
+
+# LoRA (better quality, 24GB+ VRAM)
+python assets/gptoss/train_lora.py
+
+# 8-bit + LoRA (good balance, 16-24GB VRAM)
+python assets/gptoss/train_8bit_lora.py
+
+# Full fine-tuning (maximum quality, 32GB+ VRAM)
+python assets/gptoss/train_full_finetuning.py
 ```
-<!-- @os:end -->
 
-ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` to access the interface.
+### Steps to Fine-Tune
 
-> **Tip**: Keep the terminal window open while using ComfyUI. Closing it will stop the server.
+1. **Prepare your dataset** in instruction or chat format (see [Preparing Your Dataset](#preparing-your-dataset))
+2. **Choose a script** based on your model and available GPU memory
+3. **Edit the script** to point to your dataset path and adjust hyperparameters if needed
+4. **Run the training** using one of the commands above
 
-## Finding the Z Image Turbo Template
+Training a 7B model on a typical instruction dataset should complete in 2–4 hours on your STX Halo™.
 
-Before generating images, you need to load the Z Image Turbo template. Here's how to find it:
+> **Tip**: Start with QLoRA—it's the most memory-efficient and works well for most use cases. You can always switch to LoRA or full fine-tuning later if you need higher quality.
 
-1. **Look at the far left edge of the screen**—there's a vertical toolbar running from top to bottom on the leftmost side of the app.
+<!-- ## Using Your Fine-Tuned Model -->
 
-2. **Find the folder icon**—in that left toolbar, look for an icon that looks like a folder. When you hover over it, it's labeled "Templates."
+<!-- After training completes, you'll have either a fully fine-tuned model or LoRA adapter weights. Use the inference scripts to load and test your model:
 
-<p align="center">
-  <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
-</p>
+**Gemma Models**:
+- `assets/gemma/inference_full_model.py` - Load and use a fully fine-tuned Gemma model
+- `assets/gemma/inference_lora_adapter.py` - Load base Gemma model + LoRA adapter
 
-3. **Click the folder icon**—this opens the Templates panel.
+**GPTOSS Models**:
+- `assets/gptoss/inference_full_model.py` - Load and use a fully fine-tuned GPTOSS model
+- `assets/gptoss/inference_lora_adapter.py` - Load base GPTOSS model + LoRA adapter -->
 
-4. **Search for "Z Image Turbo"**—use the search bar or scroll through the available templates to find the Z Image Turbo Text To  Image workflow, then click to load it.
+## Best Practices
 
-<p align="center">
-  <img src="assets/select-template.png" alt="Selecting the Z Image Turbo template" width="600"/>
-</p>
+### 1. Start Small, Scale Up
 
-## Understanding the Interface
+Begin with QLoRA on a small model (Gemma 2B or 7B) and a subset of your data:
 
-When the Z Image Turbo template loads, you'll see a canvas with connected nodes. Each node represents an operation in the diffusion pipeline:
+Once the pipeline works and you've validated results, scale to larger models or full datasets. If quality isn't sufficient, move to more powerful methods:
 
-<p align="center">
-  <img src="assets/understanding-workflow.png" alt="ComfyUI Workflow Interface" width="600"/>
-</p>
 
-### Pipeline Components
+### 2. Use Proper Prompt Formatting
 
-The Z Image Turbo workflow uses four key model components that work together:
+Match your training prompts to the model's expected format:
 
-| Component | Role |
-|-----------|------|
-| **Text Encoder** (Qwen 3 4B) | Converts your text prompt into embeddings the diffusion model understands |
-| **Diffusion Model** (Z Image Turbo) | The core neural network that iteratively denoises latent representations into images |
-| **VAE** (Variational Autoencoder) | Encodes images to/from latent space (decodes the final latents into pixels) |
-| **LoRA** (optional) | Lightweight adapters that modify style or subject without retraining the base model |
+```
+# For Llama-2 Chat
+<s>[INST] {instruction} [/INST] {response}</s>
 
-Each node in the workflow corresponds to one of these components. Data flows left-to-right: text → embeddings → guided denoising → latents → final image.
+# For Alpaca format
+### Instruction:
+{instruction}
 
-## Generating Your First Image
+### Response:
+{response}
+```
 
-The Z Image Turbo model is already loaded. To generate an image:
+Check the model card on Hugging Face for the correct format.
 
-1. **Find the CLIP Text Encode node** labeled "Step 3" (your main prompt)
-2. **Enter your prompt**: be specific and descriptive:
+### 3. Save Checkpoints Regularly
 
-   ```
-   A photorealistic red fox sitting in a snowy forest clearing, 
-   morning light filtering through pine trees, 
-   detailed fur texture, bokeh background
-   ```
+The example scripts save intermediate checkpoints, allowing you to resume training if interrupted and select the best checkpoint based on validation performance.
 
-3. **Click the "Run Workflow"** in upper right corner (or press `Ctrl+Enter`)
-4. Watch the nodes highlight as each step executes
+### 4. Version Your Experiments
 
-The entire workflow execution should complete in less than 30 seconds. Your generated image appears in the **Save Image** node and is saved to the `output/` folder.
+Keep track of model name, fine-tuning method, dataset, and key hyperparameters. This makes it easy to reproduce successful experiments.
 
-## Adjusting Generation Parameters
+## Resources
 
-### KSampler Settings
+### Official Documentation
 
-The KSampler node controls the core diffusion process:
+- [Full Fine-tuning Guide](https://ai.google.dev/gemma/docs/core/huggingface_text_full_finetune)
+- [QLoRA Guide](https://ai.google.dev/gemma/docs/core/huggingface_text_finetune_qlora)
+- [PEFT Library](https://huggingface.co/docs/peft)
+- [BitsAndBytes Integration](https://huggingface.co/blog/hf-bitsandbytes-integration)
+- [TRL (Transformer Reinforcement Learning)](https://huggingface.co/docs/trl)
 
-| Parameter | What It Controls | Recommended for Z Image Turbo |
-|-----------|------------------|-------------------------------|
-| **steps** | Number of denoising iterations | 4–10 (turbo models are distilled for fewer steps) |
-| **cfg** | Classifier-free guidance scale—how closely to follow the prompt | 1.0–2.0 (turbo models use very low guidance) |
-| **sampler_name** | Denoising algorithm | `euler` and `res_multistep` work well for turbo models |
-| **scheduler** | Noise schedule curve | `normal` or `simple` |
-| **seed** | Random seed for reproducibility | Set fixed values to iterate on a composition |
+### Community Resources
 
-### Image Size
+- [Hugging Face Model Hub](https://huggingface.co/models): Pre-trained models to fine-tune
+- [Hugging Face Datasets](https://huggingface.co/datasets): Training datasets
+- [LoRA Research Paper](https://arxiv.org/abs/2106.09685): Original LoRA publication
+- [QLoRA Research Paper](https://arxiv.org/abs/2305.14314): QLoRA methodology
 
-To adjust output dimensions, find the **Empty Latent Image** node and modify **width** and **height**. Keep dimensions at or below 1024 pixels on the longest side for optimal quality.
+---
 
-### ModelSamplingAuraFlow
+## Quick Reference: Choosing Your Script
 
-The **ModelSamplingAuraFlow** node is a specialized sampling modifier that adjusts how the diffusion process handles noise scheduling. You'll see this node connected to the model output in the Z Image Turbo workflow.
+| Your Situation | Recommended Script | Command |
+|----------------|-------------------|---------|
+| 🆕 Just getting started | Gemma QLoRA | `python assets/gemma/train_qlora.py` |
+| 💰 Limited VRAM (16GB) | Any QLoRA script | `python assets/{model}/train_qlora.py` |
+| ⚡ Good VRAM (24GB) | 8-bit + LoRA or LoRA | `python assets/{model}/train_lora.py` |
+| 🎯 Maximum quality | Full fine-tuning | `python assets/{model}/train_full_finetuning.py` |
+| 🔬 Production adapter | LoRA or 8-bit LoRA | `python assets/{model}/train_lora.py` |
+| 🧪 Quick experiments | QLoRA | `python assets/{model}/train_qlora.py` |
 
-| Parameter | What It Controls | Recommended Values |
-|-----------|------------------|-------------------|
-| **shift** | Adjusts the noise schedule timing—higher values push more detail refinement to later steps | 1.0–4.0 (default is 3.0) |
+Replace `{model}` with `gemma` or `gptoss` based on which model family you're using.
 
-When to adjust **shift**:
+---
 
-- **Lower values (1.0–2.0)**: Faster convergence, good for simple compositions
-- **Higher values (3.0–4.0)**: More gradual refinement, can improve fine details in complex scenes
-
-The AuraFlow sampling method is specifically designed for flow-matching models like Z Image Turbo, ensuring proper noise distribution throughout the generation process.
-
-## Working with Workflows
-
-### Saving Workflows
-
-Click the **Save** button in the menu to export your workflow as a JSON file. This captures:
-
-- All nodes and their parameters
-- All connections between nodes
-- Current prompt text
-
-### Loading Workflows
-
-Drag a workflow JSON file onto the canvas, or use **Load** from the menu. The Z Image Turbo workflow you see by default is loaded from a saved workflow file.
-
-### Sharing Workflows
-
-Workflows are self-contained—share the JSON file with colleagues, and they can reproduce your exact setup. This makes ComfyUI excellent for collaborative experimentation.
-
-## Next Steps
-
-- **Explore LoRA nodes**: Apply style or subject adapters without retraining
-- **Add negative prompts**: Connect a second CLIP Text Encode node to the **negative** conditioning input of KSampler to guide the model away from unwanted features like blur, artifacts, or watermarks
-- **Build custom workflows**: Chain multiple generations, add upscaling, or create image variations
-- **Browse community workflows**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) has many ready-to-use workflows
-
-ComfyUI's strength is experimentation: connect nodes differently, adjust parameters, and observe how each change affects the output. This hands-on exploration builds intuition for how diffusion models work.
-
-For more information, check out the [ComfyUI Documentation](https://docs.comfy.org/).
+Fine-tuning LLMs is both art and science. Experiment with different methods, track your results, and iterate based on what works for your specific use case. Your STX Halo™ provides the compute power—now go build something amazing!

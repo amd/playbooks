@@ -1,7 +1,7 @@
 {
   "id": "pytorch-finetuning",
   "title": "Finetuning LLMs on STX HALO ",
-  "description": "Full Fine-tuning Gemma-3 models on AMD Strix Halo (GFX1151)",
+  "description": "Finetuning LLMS using Pytorch using Full Fine-tuning, LoRA, 8-bit + LoRA, and QLoRA",
   "time": 50,
   "platforms": ["windows", "linux"],
   "difficulty": "intermediate",
