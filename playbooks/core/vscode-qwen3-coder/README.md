@@ -15,7 +15,13 @@ This tutorial demonstrates how to use the Cline VSCode extension with LMStudio t
 
 In this tutorial, we are going to use LMStudio to serve the LLM. Your STX Halo™ comes with LMStudio installed. In the search bar, search for `LM Studio` and click the icon as shown below:
 
+<!-- @os:windows -->
 ![Launching LM Studio](assets/launching-lm-studio.png)
+<!-- @os:end -->
+
+<!-- @os:linux -->
+TODO: ADD LINUX SCREENSHOT
+<!-- @os:end -->
 
 Now, we must load the LLM behind the coding agent. In this tutorial, we are going to use the Qwen3-Coder-30B-A3B model, a fantastic combination of quality and speed. to load the model, click on the search bar on top. You should see Qwen3-Coder-30B-A3B as shown below.
 
@@ -31,7 +37,13 @@ Check to see if the Server is running. This can be done by going to the Develope
 
 Your STX Halo™ comes with VSCode installed with the Cline extension. In the search bar, search for `VS Code` and click the icon as shown below:
 
+<!-- @os:windows -->
 ![Launching VS Code](assets/launching-vs-code.png)
+<!-- @os:end -->
+
+<!-- @os:linux -->
+TODO: ADD LINUX SCREENSHOT
+<!-- @os:end -->
 
 Go to the Cline VSCode extension as shown below and create an account / sign into Cline:
 
