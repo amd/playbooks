@@ -6,6 +6,10 @@ This document describes the expected platform configurations for running this pl
 
 ### Git
 
+Python should be pre-installed on the system and on the path.
+
+### Git
+
 Git should be pre-installed using the AMD Portable Package
 
 | Component | Version | Location |
