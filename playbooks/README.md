@@ -98,9 +98,8 @@ If you need to reinstall manually:
 2. Run the installer
 3. Configure settings
 
-```bash
 ./install.sh
-```
+
 <!-- @preinstalled:end -->
 ```
 
