@@ -13,7 +13,7 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 
 ## Installing Dependencies
 
-<!-- @require:comfyui,pytorch -->
+<!-- @require:comfyui -->
 
 ## Launching ComfyUI
 
