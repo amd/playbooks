@@ -31,13 +31,19 @@ If you need to install ComfyUI manually:
 git clone https://github.com/comfyanonymous/ComfyUI.git
 ```
 
-> **Note**: See [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI) for more information.
+### Checkout the recommended version
+```bash
+git checkout v0.9.2
+```
 
 ### Install ComfyUI requirements
 
+Activate your preferred Python environment and run:
 ```bash
 pip install -r requirements.txt
 ```
+
+> **Note**: See [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI) for more information.
 <!-- @preinstalled:end -->
 <!-- @os:end -->
 
@@ -52,9 +58,8 @@ To launch ComfyUI:
 
 <!-- @os:linux -->
 
-```bash
-python main.py
-```
+1. Navigate to `/usr/local/bin/ComfyUI/` (or to the appropriate folder if installed manually)
+2. Run `python main.py`
 <!-- @os:end -->
 
 ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` to access the interface.
