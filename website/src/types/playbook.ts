@@ -23,6 +23,19 @@
  * ```
  * 
  * Content outside of these tags is shown on all platforms.
+ * 
+ * ## Pre-installed Software Dropdowns
+ * 
+ * For software pre-installed on AMD Halo Developer Platform, use:
+ * 
+ * ```markdown
+ * <!-- @preinstalled -->
+ * Manual installation instructions here...
+ * <!-- @preinstalled:end -->
+ * ```
+ * 
+ * This renders as a collapsible dropdown with a green checkmark indicating
+ * the software is already available on the Halo platform.
  */
 
 export type Platform = "windows" | "linux";

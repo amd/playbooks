@@ -10,6 +10,68 @@ import Footer from "@/components/Footer";
 import type { Playbook, Platform } from "@/types/playbook";
 import { formatTime } from "@/types/playbook";
 
+/**
+ * Collapsible dropdown component for pre-installed software on AMD Halo
+ */
+function HaloPreinstalledDropdown({ content }: { content: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="halo-preinstalled-container">
+      <button 
+        className="halo-preinstalled-trigger"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+      >
+        <span className="halo-preinstalled-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </span>
+        <span className="halo-preinstalled-text">Already pre-installed on your AMD Halo Developer Platform!</span>
+        <span className={`halo-preinstalled-chevron ${isOpen ? 'open' : ''}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 9l-7 7-7-7" />
+          </svg>
+        </span>
+      </button>
+      {isOpen && (
+        <div className="halo-preinstalled-content">
+          <div className="halo-preinstalled-notice">
+            This software comes pre-installed and configured on your AMD Halo Developer Platform. 
+            If you need to reinstall or configure it manually, follow the instructions below:
+          </div>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
+            components={{
+              p: ({ children }) => <p className="md-p">{children}</p>,
+              ul: ({ children }) => <ul className="md-ul">{children}</ul>,
+              ol: ({ children }) => <ol className="md-ol">{children}</ol>,
+              li: ({ children }) => <li className="md-li">{children}</li>,
+              a: ({ href, children }) => (
+                <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
+                  {children}
+                </a>
+              ),
+              code: ({ className, children }) => {
+                const isInline = !className;
+                if (isInline) {
+                  return <code className="inline-code">{children}</code>;
+                }
+                return <code className={className}>{children}</code>;
+              },
+              pre: ({ children }) => <pre className="code-block">{children}</pre>,
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface TocItem {
   id: string;
   text: string;
@@ -130,6 +192,27 @@ function filterContentByOS(content: string, platform: Platform): string {
   return result;
 }
 
+/**
+ * Transforms @preinstalled tags into collapsible dropdown HTML
+ * 
+ * Tags supported:
+ * <!-- @preinstalled --> ... <!-- @preinstalled:end -->
+ * 
+ * The content inside becomes a collapsible section with a special header
+ * indicating the software is pre-installed on AMD Halo Developer Platform
+ */
+function transformPreinstalledBlocks(content: string): string {
+  if (!content) return "";
+  
+  const preinstalledPattern = /<!-- @preinstalled -->([\s\S]*?)<!-- @preinstalled:end -->/g;
+  
+  return content.replace(preinstalledPattern, (_match, innerContent) => {
+    // Escape any HTML in the content for the data attribute
+    const escapedContent = innerContent.trim();
+    return `<div class="halo-preinstalled-dropdown" data-content="${encodeURIComponent(escapedContent)}"></div>`;
+  });
+}
+
 function PlatformToggle({ 
   platforms, 
   selected, 
@@ -219,9 +302,11 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     fetchPlaybook();
   }, [id]);
 
-  // Transform relative image paths to API routes and filter by OS
+  // Transform relative image paths to API routes, filter by OS, and transform preinstalled blocks
   const filteredContent = playbook?.content 
-    ? filterContentByOS(playbook.content, selectedPlatform)
+    ? transformPreinstalledBlocks(
+        filterContentByOS(playbook.content, selectedPlatform)
+      )
         // Transform relative image paths in HTML img tags to use the API route
         .replace(/src=["'](?!https?:\/\/|\/)(.*?)["']/g, `src="/api/playbooks/${id}/$1"`)
     : "";
@@ -501,6 +586,17 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                             tr: ({ children }) => <tr className="md-tr">{children}</tr>,
                             th: ({ children }) => <th className="md-th">{children}</th>,
                             td: ({ children }) => <td className="md-td">{children}</td>,
+                            div: ({ className, ...props }) => {
+                              // Handle the halo-preinstalled-dropdown custom element
+                              if (className === 'halo-preinstalled-dropdown') {
+                                const dataContent = (props as { 'data-content'?: string })['data-content'];
+                                if (dataContent) {
+                                  const decodedContent = decodeURIComponent(dataContent);
+                                  return <HaloPreinstalledDropdown content={decodedContent} />;
+                                }
+                              }
+                              return <div className={className} {...props} />;
+                            },
                           }}
                         >
                           {filteredContent}

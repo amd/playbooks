@@ -84,6 +84,28 @@ Linux-only content
 
 Content outside `@os` tags is always shown. Keep blocks focused—only tag the parts that differ.
 
+### Pre-installed Software Dropdowns
+
+For software that comes pre-installed on the AMD Halo Developer Platform, use the `@preinstalled` tag to create a collapsible dropdown. This shows users that the software is already available while providing manual installation instructions if needed:
+
+```markdown
+<!-- @preinstalled -->
+### Manual Installation
+
+If you need to reinstall manually:
+
+1. Download from [example.com](https://example.com)
+2. Run the installer
+3. Configure settings
+
+```bash
+./install.sh
+```
+<!-- @preinstalled:end -->
+```
+
+The dropdown displays with a green checkmark and the text "Already pre-installed on your AMD Halo Developer Platform!" When expanded, it shows a notice explaining the software is pre-configured, followed by your manual instructions.
+
 ### Writing Tips
 
 - List prerequisites upfront. Don't surprise users mid-playbook

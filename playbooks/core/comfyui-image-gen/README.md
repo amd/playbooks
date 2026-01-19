@@ -11,18 +11,20 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 - Generating images and tuning generation parameters
 - Saving and sharing workflows
 
-## Launching ComfyUI
-
+## Installing ComfyUI
 <!-- @os:windows -->
-Your STX Halo™ comes with ComfyUI pre-installed and configured for ROCm. To launch it:
+<!-- @preinstalled -->
 
-1. Navigate to `C:\ProgramData\ComfyUI`
-2. Run `run_amd_gpu.bat`
+If you need to reinstall ComfyUI manually:
+
+1. Download the AMD portable package from [ComfyUI Releases](https://github.com/comfyanonymous/ComfyUI/releases)
+2. Extract `ComfyUI_windows_portable_amd.7z` to `C:\ProgramData\ComfyUI`
+3. Download the required models (see platform.md for the full list)
+4. Run `run_amd_gpu.bat` to start ComfyUI
+<!-- @preinstalled:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
-### Clone the ComfyUI repository
-
 ```bash
 git clone https://github.com/comfyanonymous/ComfyUI.git
 ```
@@ -34,10 +36,18 @@ git clone https://github.com/comfyanonymous/ComfyUI.git
 ```bash
 pip install -r requirements.txt
 ```
+<!-- @os:end -->
 
-### Launch ComfyUI
+## Launching ComfyUI
 
-> **Note**: You must return to the home directory of the repository in order to run `main.py`.
+To launch ComfyUI:
+<!-- @os:windows -->
+
+1. Navigate to `C:\ProgramData\ComfyUI`
+2. Run `run_amd_gpu.bat`
+<!-- @os:end -->
+
+<!-- @os:linux -->
 
 ```bash
 python main.py
