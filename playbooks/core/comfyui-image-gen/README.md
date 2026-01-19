@@ -15,12 +15,11 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 <!-- @os:windows -->
 <!-- @preinstalled -->
 
-If you need to reinstall ComfyUI manually:
+If you need to install ComfyUI manually:
 
 1. Download the AMD portable package from [ComfyUI Releases](https://github.com/comfyanonymous/ComfyUI/releases)
 2. Extract `ComfyUI_windows_portable_amd.7z` to `C:\ProgramData\ComfyUI`
-3. Download the required models (see platform.md for the full list)
-4. Run `run_amd_gpu.bat` to start ComfyUI
+
 <!-- @preinstalled:end -->
 <!-- @os:end -->
 
