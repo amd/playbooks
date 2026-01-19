@@ -60,25 +60,45 @@ function loadDependencyContent(dependencyId: string): string | null {
 /**
  * Transforms @require tags into @preinstalled blocks with dependency content
  * 
- * Syntax: <!-- @require:dependency-id -->
+ * Syntax: 
+ *   <!-- @require:dependency-id -->           (single dependency)
+ *   <!-- @require:dep1,dep2,dep3 -->          (multiple dependencies, single dropdown)
  * 
  * This allows playbooks to reference shared dependency installation instructions
- * from the central dependencies folder.
+ * from the central dependencies folder. Multiple dependencies are combined into
+ * a single "Already pre-installed" dropdown.
  */
 function processRequireTags(content: string): string {
-  const requirePattern = /<!-- @require:([a-z0-9-]+) -->/g;
+  // Match @require with one or more comma-separated dependency IDs
+  const requirePattern = /<!-- @require:([a-z0-9-,]+) -->/g;
   
-  return content.replace(requirePattern, (_match, dependencyId) => {
-    const depContent = loadDependencyContent(dependencyId);
+  return content.replace(requirePattern, (_match, dependencyIds: string) => {
+    // Split by comma and trim whitespace
+    const ids = dependencyIds.split(',').map((id: string) => id.trim()).filter(Boolean);
     
-    if (!depContent) {
-      console.warn(`Dependency not found: ${dependencyId}`);
-      return `<!-- Dependency "${dependencyId}" not found -->`;
+    const contents: string[] = [];
+    const notFound: string[] = [];
+    
+    for (const depId of ids) {
+      const depContent = loadDependencyContent(depId);
+      if (depContent) {
+        contents.push(depContent);
+      } else {
+        notFound.push(depId);
+      }
     }
     
-    // Wrap the dependency content in @preinstalled tags
-    // The content already has @os tags, so they'll be processed correctly
-    return `<!-- @preinstalled -->\n${depContent}\n<!-- @preinstalled:end -->`;
+    if (notFound.length > 0) {
+      console.warn(`Dependencies not found: ${notFound.join(', ')}`);
+    }
+    
+    if (contents.length === 0) {
+      return `<!-- Dependencies "${dependencyIds}" not found -->`;
+    }
+    
+    // Combine all dependency contents with a separator and wrap in @preinstalled tags
+    const combinedContent = contents.join('\n\n---\n\n');
+    return `<!-- @preinstalled -->\n${combinedContent}\n<!-- @preinstalled:end -->`;
   });
 }
 
