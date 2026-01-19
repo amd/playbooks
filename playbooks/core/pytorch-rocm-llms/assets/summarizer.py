@@ -1,64 +1,36 @@
 """
 Document Summarizer using LLMs
-==============================
-
-This script provides a DocumentSummarizer class that uses large language models
-to summarize text documents.
 
 Usage:
-    # Use default model (Mistral 7B)
-    python summarizer.py
-    
-    # Use specific model
-    python summarizer.py --model mistral
-    python summarizer.py --model gptoss
-    
-Or import in your own code:
-    from summarizer import DocumentSummarizer
-    summarizer = DocumentSummarizer(model="mistral")
-    summary = summarizer.summarize(your_text)
+    python summarizer.py --file mydocument.txt
+    python summarizer.py --file report.txt --model mistral --max-length 100
 """
 
-import argparse
+import os
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
+import argparse
+import logging
+import warnings
+
+logging.getLogger("transformers").setLevel(logging.ERROR)
+warnings.filterwarnings("ignore", category=UserWarning)
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
-# Available models
 MODELS = {
     "mistral": "mistralai/Mistral-7B-Instruct-v0.3",
-    "gptoss": "Writer/GPTOSS-20B"
+    "gptoss": "openai/gpt-oss-20b"
 }
 
 
 class DocumentSummarizer:
-    """
-    A class for summarizing documents using large language models.
-    
-    Attributes:
-        model_name (str): The Hugging Face model identifier
-        tokenizer: The model's tokenizer
-        model: The loaded language model
-    """
-    
     def __init__(self, model="mistral"):
-        """
-        Initialize the summarizer with a specific model.
-        
-        Args:
-            model (str): Model name - "mistral" (7B, ~14GB, fast) or 
-                        "gptoss" (20B, ~40GB, higher quality)
-        """
         if model not in MODELS:
             raise ValueError(f"Model must be one of: {list(MODELS.keys())}")
         
         self.model_name = MODELS[model]
-        
-        print("="*70)
-        print(f"Loading {model.upper()} ({self.model_name})")
-        print("(First run will download the model)")
-        print("="*70)
-        print()
+        print(f"Loading {model.upper()} ({self.model_name})...")
         
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.model = AutoModelForCausalLM.from_pretrained(
@@ -66,34 +38,32 @@ class DocumentSummarizer:
             torch_dtype=torch.float16,
             device_map="auto"
         )
-        
-        print("✓ Model ready!")
-        print()
+        print("✓ Model ready!\n")
     
-    def summarize(self, text, max_length=200, temperature=0.3):
-        """
-        Summarize the given text.
-        
-        Args:
-            text (str): The document text to summarize
-            max_length (int): Maximum length of summary in tokens
-            temperature (float): Sampling temperature (0.1-1.0)
-                Lower = more focused, higher = more creative
-        
-        Returns:
-            str: The generated summary
-        """
-        # Construct the prompt with instruction markers
-        prompt = f"""[INST] Summarize the following text concisely, capturing the main points:
+    def cleanup(self):
+        """Release GPU memory and cleanup resources"""
+        if hasattr(self, 'model'):
+            del self.model
+        if hasattr(self, 'tokenizer'):
+            del self.tokenizer
+        torch.cuda.empty_cache()
+        print("✓ Cleaned up GPU memory")
+    
+    def summarize(self, text, max_length=150, temperature=0.3):
+        prompt = f"""[INST] You are an expert at creating concise summaries. Summarize the following text in 2-3 sentences maximum, focusing ONLY on the most critical information. Avoid repeating details - extract only the key essence.
 
+TEXT TO SUMMARIZE:
 {text}
 
-Provide a clear, concise summary. [/INST]"""
+INSTRUCTIONS:
+- Maximum 2-3 sentences
+- Extract only the most important concepts
+- Do NOT rephrase everything
+- Be extremely brief and to the point
+
+SUMMARY: [/INST]"""
         
-        # Tokenize the prompt
         inputs = self.tokenizer(prompt, return_tensors="pt").to("cuda")
-        
-        # Generate the summary
         outputs = self.model.generate(
             **inputs,
             max_new_tokens=max_length,
@@ -102,99 +72,60 @@ Provide a clear, concise summary. [/INST]"""
             top_p=0.9
         )
         
-        # Decode the output
         full_response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
-        # Extract just the summary (after [/INST])
-        summary = full_response.split("[/INST]")[-1].strip()
-        
-        return summary
+        return full_response.split("[/INST]")[-1].strip()
     
-    def summarize_batch(self, documents, max_length=200, temperature=0.3):
-        """
-        Summarize multiple documents.
-        
-        Args:
-            documents (list): List of document texts
-            max_length (int): Maximum length per summary
-            temperature (float): Sampling temperature
-        
-        Returns:
-            list: List of summaries corresponding to input documents
-        """
+    def summarize_batch(self, documents, max_length=150, temperature=0.3):
         summaries = []
-        total = len(documents)
-        
         for i, doc in enumerate(documents, 1):
-            print(f"Processing document {i}/{total}...")
-            summary = self.summarize(doc, max_length, temperature)
-            summaries.append(summary)
-        
+            print(f"Processing {i}/{len(documents)}...")
+            summaries.append(self.summarize(doc, max_length, temperature))
         return summaries
 
 
 def main():
-    """Example usage with command-line arguments."""
-    
     parser = argparse.ArgumentParser(description="Summarize documents using LLMs")
-    parser.add_argument(
-        "--model",
-        type=str,
-        default="mistral",
-        choices=["mistral", "gptoss"],
-        help="Model to use: mistral (7B, faster) or gptoss (20B, higher quality)"
-    )
-    
+    parser.add_argument("--model", default="mistral", choices=["mistral", "gptoss"],
+                        help="Model: mistral (7B) or gptoss (20B)")
+    parser.add_argument("--file", default=None, help="Path to .txt file")
+    parser.add_argument("--max-length", type=int, default=150, help="Max tokens (default: 150)")
+    parser.add_argument("--temperature", type=float, default=0.3, help="Temperature 0.1-1.0 (default: 0.3)")
     args = parser.parse_args()
     
-    # Initialize the summarizer
     summarizer = DocumentSummarizer(model=args.model)
     
-    # Sample document about LLMs
-    document = """
-    Large language models (LLMs) are neural networks with billions of parameters 
-    trained on massive text datasets. They learn to predict the next word in a 
-    sequence, developing an understanding of language patterns, facts, and reasoning. 
-    Modern LLMs like GPT-4, Claude, and Llama can perform diverse tasks including 
-    translation, question answering, code generation, and creative writing. The key 
-    breakthrough was the transformer architecture, which uses attention mechanisms 
-    to process sequences in parallel. Training these models requires enormous 
-    computational resources, but once trained, they can run on consumer hardware 
-    for inference tasks. Recent advances include instruction tuning, where models 
-    are fine-tuned to follow user instructions more accurately, and reinforcement 
-    learning from human feedback (RLHF), which aligns model outputs with human 
-    preferences. The field continues to evolve rapidly with new architectures, 
-    training techniques, and applications emerging regularly.
-    """
+    # Load document
+    if args.file:
+        try:
+            with open(args.file, 'r', encoding='utf-8') as f:
+                document = f.read()
+            print(f"✓ Loaded: {args.file}\n")
+        except Exception as e:
+            print(f"✗ Error: {e}")
+            return
+    else:
+        document = """Large language models (LLMs) are neural networks with billions of parameters 
+trained on massive text datasets. They learn to predict the next word in a sequence, 
+developing an understanding of language patterns, facts, and reasoning. Modern LLMs like 
+GPT-4, Claude, and Llama can perform diverse tasks including translation, question answering, 
+code generation, and creative writing. The key breakthrough was the transformer architecture, 
+which uses attention mechanisms to process sequences in parallel. Training these models requires 
+enormous computational resources, but once trained, they can run on consumer hardware for 
+inference tasks. Recent advances include instruction tuning, where models are fine-tuned to 
+follow user instructions more accurately, and reinforcement learning from human feedback (RLHF), 
+which aligns model outputs with human preferences. The field continues to evolve rapidly with 
+new architectures, training techniques, and applications emerging regularly."""
     
-    print("="*70)
-    print("Original Document")
-    print("="*70)
-    print(document.strip())
-    print()
+    print("Using example document...")
     
     # Generate summary
-    print("="*70)
-    print("Generating Summary")
-    print("="*70)
-    print()
-    
-    summary = summarizer.summarize(document)
-    
-    print()
-    print("="*70)
-    print("Summary")
-    print("="*70)
+    print("Generating summary...")
+    summary = summarizer.summarize(document, args.max_length, args.temperature)
     print(summary)
-    print("="*70)
-    print()
-    print("✓ Summarization complete!")
-    print()
-    print("Tips:")
-    print("- Try different models: --model mistral or --model gptoss")
-    print("- Adjust temperature (0.1 = focused, 0.9 = creative)")
-    print("- Modify max_length for longer or shorter summaries")
-
+    print(f"\n✓ Done! (max_length={args.max_length}, temperature={args.temperature})\n")
+    
+    # Cleanup GPU memory and exit cleanly
+    summarizer.cleanup()
 
 if __name__ == "__main__":
     main()

@@ -14,7 +14,7 @@ The following software should be pre-configured on your STX Halo™:
 - PyTorch 2.8+ with ROCm support
 
 ### Python Environment
-- Python 3.10 or newer
+- Python 3.11 or newer
 - pip package manager
 
 ## Environment Setup
@@ -37,7 +37,7 @@ It is **strongly recommended** to create a Python virtual environment before ins
 
 3. Install dependencies:
    ```bash
-   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm7.2
+   pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/rocm7.1
    pip install transformers accelerate sentencepiece protobuf
    ```
 

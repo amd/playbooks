@@ -11,8 +11,16 @@ Usage:
     python run_llm.py
 """
 
+import os
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
+
+import logging
+import warnings
+
+logging.getLogger("transformers").setLevel(logging.ERROR)
+warnings.filterwarnings("ignore", category=UserWarning)
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def main():
     # Verify ROCm is available
@@ -43,11 +51,7 @@ def main():
     # Create a simple prompt
     prompt = "Explain what a large language model is in simple terms:"
     
-    print("="*70)
-    print("Generating Response")
-    print("="*70)
-    print(f"Prompt: {prompt}")
-    print()
+    print(f"Prompt: {prompt}\n")
 
     # Tokenize input
     inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
@@ -66,15 +70,17 @@ def main():
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
     
     print()
-    print("="*70)
-    print("Model Output")
-    print("="*70)
+    print("Model Output:\n")
     # Show the *new* lines only, not the prompt again
     response_text = response[len(prompt):].strip() if response.startswith(prompt) else response.strip()
     print(response_text)
-    print("="*70)
     print()
     print("Done. Try changing the prompt or generation settings for different explanations.")
+    
+    # Cleanup GPU memory and exit cleanly
+    del model
+    del tokenizer
+    torch.cuda.empty_cache()
 
 if __name__ == "__main__":
     main()
