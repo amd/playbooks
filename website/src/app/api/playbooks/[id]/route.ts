@@ -4,6 +4,103 @@ import path from "path";
 import type { Playbook, PlaybookMeta, Category } from "@/types/playbook";
 
 const PLAYBOOKS_ROOT = path.join(process.cwd(), "..", "playbooks");
+const DEPENDENCIES_ROOT = path.join(PLAYBOOKS_ROOT, "dependencies");
+
+interface DependencyRegistry {
+  dependencies: Record<string, {
+    name: string;
+    description: string;
+    category: string;
+    platforms: string[];
+    file: string;
+  }>;
+}
+
+/**
+ * Loads the dependency registry
+ */
+function loadDependencyRegistry(): DependencyRegistry | null {
+  const registryPath = path.join(DEPENDENCIES_ROOT, "registry.json");
+  if (!fs.existsSync(registryPath)) {
+    return null;
+  }
+  try {
+    const content = fs.readFileSync(registryPath, "utf-8");
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error loading dependency registry:", error);
+    return null;
+  }
+}
+
+/**
+ * Loads a dependency's markdown content
+ */
+function loadDependencyContent(dependencyId: string): string | null {
+  const registry = loadDependencyRegistry();
+  if (!registry || !registry.dependencies[dependencyId]) {
+    return null;
+  }
+  
+  const dep = registry.dependencies[dependencyId];
+  const filePath = path.join(DEPENDENCIES_ROOT, dep.file);
+  
+  if (!fs.existsSync(filePath)) {
+    return null;
+  }
+  
+  try {
+    return fs.readFileSync(filePath, "utf-8");
+  } catch (error) {
+    console.error(`Error loading dependency ${dependencyId}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Transforms @require tags into @preinstalled blocks with dependency content
+ * 
+ * Syntax: 
+ *   <!-- @require:dependency-id -->           (single dependency)
+ *   <!-- @require:dep1,dep2,dep3 -->          (multiple dependencies, single dropdown)
+ * 
+ * This allows playbooks to reference shared dependency installation instructions
+ * from the central dependencies folder. Multiple dependencies are combined into
+ * a single "Already pre-installed" dropdown.
+ */
+function processRequireTags(content: string): string {
+  // Match @require with one or more comma-separated dependency IDs
+  const requirePattern = /<!-- @require:([a-z0-9-,]+) -->/g;
+  
+  return content.replace(requirePattern, (_match, dependencyIds: string) => {
+    // Split by comma and trim whitespace
+    const ids = dependencyIds.split(',').map((id: string) => id.trim()).filter(Boolean);
+    
+    const contents: string[] = [];
+    const notFound: string[] = [];
+    
+    for (const depId of ids) {
+      const depContent = loadDependencyContent(depId);
+      if (depContent) {
+        contents.push(depContent);
+      } else {
+        notFound.push(depId);
+      }
+    }
+    
+    if (notFound.length > 0) {
+      console.warn(`Dependencies not found: ${notFound.join(', ')}`);
+    }
+    
+    if (contents.length === 0) {
+      return `<!-- Dependencies "${dependencyIds}" not found -->`;
+    }
+    
+    // Combine all dependency contents with a separator and wrap in @preinstalled tags
+    const combinedContent = contents.join('\n\n---\n\n');
+    return `<!-- @preinstalled -->\n${combinedContent}\n<!-- @preinstalled:end -->`;
+  });
+}
 
 function getCategory(categoryFolder: string): Category {
   if (categoryFolder === "core") return "core";
@@ -42,6 +139,8 @@ function findPlaybook(id: string): Playbook | null {
           let content = "";
           if (fs.existsSync(readmePath)) {
             content = fs.readFileSync(readmePath, "utf-8");
+            // Process @require tags to inject shared dependency content
+            content = processRequireTags(content);
           }
 
           const playbook: Playbook = {

@@ -86,26 +86,21 @@ Content outside `@os` tags is always shown. Keep blocks focused—only tag the p
 
 ### Pre-installed Software Dropdowns
 
-For software that comes pre-installed on the AMD Halo Developer Platform, use the `@preinstalled` tag to create a collapsible dropdown. This shows users that the software is already available while providing manual installation instructions if needed:
+For software that comes pre-installed on the AMD Halo Developer Platform, use the `@require` tag to reference installation instructions from the central `dependencies/` folder:
 
 ```markdown
-<!-- @preinstalled -->
-### Manual Installation
-
-If you need to reinstall manually:
-
-1. Download from [example.com](https://example.com)
-2. Run the installer
-3. Configure settings
-
-./install.sh
-
-<!-- @preinstalled:end -->
+<!-- @require:comfyui -->
 ```
 
-The dropdown displays with a green checkmark and the text "Already pre-installed on your AMD Halo Developer Platform!" When expanded, it shows a notice explaining the software is pre-configured, followed by your manual instructions.
+For multiple dependencies, use comma-separated IDs to combine them into a **single dropdown**:
 
-> NOTE: This should only be used on **core** playbooks.
+```markdown
+<!-- @require:comfyui,pytorch -->
+```
+
+Available dependencies are defined in `playbooks/dependencies/registry.json`. Each dependency has its own markdown file with OS-specific installation instructions.
+
+The dropdown displays with a green checkmark and the text "Already pre-installed on your AMD Halo Developer Platform!" When expanded, it shows a notice explaining the software is pre-configured, followed by manual installation instructions.
 
 ### Writing Tips
 
