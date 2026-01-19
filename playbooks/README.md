@@ -106,6 +106,8 @@ If you need to reinstall manually:
 
 The dropdown displays with a green checkmark and the text "Already pre-installed on your AMD Halo Developer Platform!" When expanded, it shows a notice explaining the software is pre-configured, followed by your manual instructions.
 
+> NOTE: This should only be used on **core** playbooks.
+
 ### Writing Tips
 
 - List prerequisites upfront. Don't surprise users mid-playbook
