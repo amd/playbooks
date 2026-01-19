@@ -28,9 +28,7 @@ git checkout v0.9.2
 pip install -r requirements.txt
 ```
 
-See [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI) for more information.
-
-Models should be placed in `ComfyUI/models/`.
+App should be placed in `/usr/local/bin/ComfyUI/`. Models should be placed in `ComfyUI/models/`.
 
 ## Required Models
 
