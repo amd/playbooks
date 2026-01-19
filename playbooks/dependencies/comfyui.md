@@ -3,8 +3,7 @@
 <!-- @os:windows -->
 <!-- @preinstalled -->
 
-1. Download the AMD portable package from [ComfyUI Releases](https://github.com/
-comfyanonymous/ComfyUI/releases)
+1. Download the AMD portable package from [ComfyUI Releases](https://github.com/comfyanonymous/ComfyUI/releases)
 2. Extract `ComfyUI_windows_portable_amd.7z` to `C:\ProgramData\ComfyUI`
 
 <!-- @preinstalled:end -->
@@ -30,7 +29,6 @@ Activate your preferred Python environment and run:
 pip install -r requirements.txt
 ```
 
-> **Note**: See [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI) for 
-more information.
+> **Note**: See [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI) for more information.
 <!-- @preinstalled:end -->
 <!-- @os:end -->
