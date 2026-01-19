@@ -29,6 +29,7 @@ If you need to install ComfyUI manually:
 ### Clone ComfyUI
 ```bash
 git clone https://github.com/comfyanonymous/ComfyUI.git
+git checkout v0.9.2
 ```
 
 > **Note**: See [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI) for more information.
