@@ -86,7 +86,28 @@ Content outside `@os` tags is always shown. Keep blocks focused—only tag the p
 
 ### Pre-installed Software Dropdowns
 
-For software that comes pre-installed on the AMD Halo Developer Platform, use the `@preinstalled` tag to create a collapsible dropdown. This shows users that the software is already available while providing manual installation instructions if needed:
+For software that comes pre-installed on the AMD Halo Developer Platform, you have two options:
+
+#### Option 1: Reference Shared Dependencies (Recommended)
+
+Use the `@require` tag to reference installation instructions from the central `dependencies/` folder. This ensures consistency across playbooks and makes maintenance easier:
+
+```markdown
+## Installing ComfyUI
+
+<!-- @require:comfyui -->
+```
+
+Available dependencies are defined in `playbooks/dependencies/registry.json`. Each dependency has its own markdown file with OS-specific installation instructions.
+
+**Benefits:**
+- Single source of truth for installation instructions
+- Automatic OS-specific content filtering
+- Easy to update across all playbooks at once
+
+#### Option 2: Inline Pre-installed Blocks
+
+For playbook-specific installation instructions that aren't shared, use the `@preinstalled` tag directly:
 
 ```markdown
 <!-- @preinstalled -->
@@ -103,9 +124,48 @@ If you need to reinstall manually:
 <!-- @preinstalled:end -->
 ```
 
-The dropdown displays with a green checkmark and the text "Already pre-installed on your AMD Halo Developer Platform!" When expanded, it shows a notice explaining the software is pre-configured, followed by your manual instructions.
+Both options display with a green checkmark and the text "Already pre-installed on your AMD Halo Developer Platform!" When expanded, they show a notice explaining the software is pre-configured, followed by the manual instructions.
 
-> NOTE: This should only be used on **core** playbooks.
+> NOTE: Pre-installed software tags should only be used on **core** playbooks.
+
+---
+
+## The `dependencies/` Folder
+
+The `playbooks/dependencies/` folder contains shared installation instructions:
+
+```text
+dependencies/
+├── registry.json          # Dependency registry (metadata)
+├── comfyui.md             # ComfyUI installation
+├── rocm.md                # ROCm installation
+├── pytorch-rocm.md        # PyTorch with ROCm
+├── lmstudio.md            # LM Studio installation
+├── vllm.md                # vLLM installation
+└── ...
+```
+
+### Adding a New Dependency
+
+1. Create a new markdown file in `dependencies/` (e.g., `my-tool.md`)
+2. Add OS-specific sections using `@os` tags
+3. Register it in `registry.json`:
+
+```json
+{
+  "dependencies": {
+    "my-tool": {
+      "name": "My Tool",
+      "description": "Brief description",
+      "category": "app",
+      "platforms": ["windows", "linux"],
+      "file": "my-tool.md"
+    }
+  }
+}
+```
+
+4. Reference it in playbooks with `<!-- @require:my-tool -->`
 
 ### Writing Tips
 
