@@ -24,6 +24,9 @@ If you need to install ComfyUI manually:
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- @preinstalled -->
+
+### Clone ComfyUI
 ```bash
 git clone https://github.com/comfyanonymous/ComfyUI.git
 ```
@@ -35,6 +38,7 @@ git clone https://github.com/comfyanonymous/ComfyUI.git
 ```bash
 pip install -r requirements.txt
 ```
+<!-- @preinstalled:end -->
 <!-- @os:end -->
 
 ## Launching ComfyUI
