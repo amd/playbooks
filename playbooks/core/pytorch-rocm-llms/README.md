@@ -1,14 +1,11 @@
 ## Overview
 
-Want to run powerful AI language models on your own computer? This guide shows you how.
-
-Large language models (LLMs) are AI systems that can understand and generate human-like text. Think ChatGPT, but running locally on your machine. Instead of paying for API access or worrying about data privacy, you can run these models yourself using your STX Halo™ GPU.
-
-This tutorial uses PyTorch (a popular AI framework) powered by ROCm (AMD's GPU acceleration technology) to run models that can summarize documents, answer questions, generate text, and more. Your GPU makes this fast enough to be practical.
+Want to run powerful AI language models on your own STX Halo™ GPU? This guide shows you how.
+This tutorial uses PyTorch powered by AMD's ROCm to run models that can summarize documents, answer questions, generate text, and more, all running locally.
 
 ## What You'll Learn
 
-- Run LLMs locally using PyTorch and ROCm
+- Run LLMs like Mistral-7B-Instruct and gpt-oss-20b locally using PyTorch and ROCm
 - Create a document summarization tool using LLMs
 
 ## Prerequisites
@@ -19,7 +16,6 @@ This tutorial uses PyTorch (a popular AI framework) powered by ROCm (AMD's GPU a
 
 ## Setting Up Your Environment
 
-<!-- @os:linux -->
 ### Create a Virtual Environment
 
 ```bash
@@ -40,7 +36,6 @@ pip install transformers accelerate sentencepiece protobuf
 ```
 
 > **Note**: Your STX Halo™ GPU uses AMD ROCm 7.2. The PyTorch 2.8 ROCm build provides native GPU acceleration.
-<!-- @os:end -->
 
 ## Quick Start with Example Scripts
 
@@ -56,38 +51,11 @@ Both scripts support:
 - Automatic GPU cleanup (no hanging processes)
 - Warning suppression for cleaner output
 
-### Quick Examples
+## Loading and Running Your First LLM
 
-```bash
-# Basic text generation
-python assets/run_llm.py
+The included `run_llm.py` script shows how to load and generate text with LLMs using PyTorch and AMD ROCm. On the first run, model weights are automatically downloaded. The script supports choosing between Mistral 7B (fast) and GPTOSS 20B (higher quality), lets you specify which model to use with `--model`, and handles GPU memory cleanup and suppresses excess warnings for a smooth experience. 
 
-# Summarize a text file
-python assets/summarizer.py --file article.txt
-
-# Use larger model for better quality
-python assets/summarizer.py --file report.txt --model gptoss --max-length 100
-```
-
-## Understanding the Basics
-
-### Model Size and Memory
-
-| Model Size | Parameters | Memory (FP16) | Best For |
-|------------|-----------|---------------|----------|
-| **7B** | 7 billion | ~14GB | Fast inference, most tasks |
-| **13B** | 13 billion | ~26GB | Better quality, complex tasks |
-| **20B** | 20 billion | ~40GB | High quality, specialized tasks |
-
-### Key Components
-
-- **Tokenizer**: Converts text to/from numeric tokens
-- **Model**: Processes tokens and predicts outputs
-- **Generation Parameters**: Control output quality and creativity
-
-## Loading Your First LLM
-
-The `run_llm.py` script demonstrates basic LLM usage:
+Take a look at how prompts are tokenized and sent to the model, understanding this process lets you adapt LLMs for any text generation or summarization task. Here’s a minimal example from the script:
 
 ```python
 import torch
@@ -102,25 +70,20 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 ```
 
-Run it:
+To try it out:
 
 ```bash
-python assets/run_llm.py
+python assets/run_llm.py --model mistral
 ```
 
-First run downloads the model (~14GB). You'll see the model generate a response about LLMs.
+The script will run a sample prompt and print a model-generated response to the console.
+
 
 ## Building a Document Summarizer
 
-To try out document summarization directly, run `assets/summarizer.py`. This standalone script provides everything you need—just pass a `.txt` file and it will generate a concise summary for you. Explore the script to learn more and customize as needed.
+Build on your LLM setup by turning it into a practical document summarizer. In this section, you will use the `assets/summarizer.py` script to feed in a .txt file and automatically generate a concise summary, all running locally on your GPU.
 
-### Key Features
-
-- **File input support**: Process `.txt` files directly
-- **Optimized prompts**: Generates truly concise 2-3 sentence summaries
-- **Model selection**: Choose between Mistral 7B (fast) or GPTOSS 20B (higher quality)
-- **Adjustable parameters**: Control summary length and creativity
-- **Clean output**: Suppresses warnings, proper GPU cleanup
+The script is designed to work out of the box: point it at a text file, pick a model, and it returns a clear 2–3 sentence overview. As you explore the code, you can customize prompts, tweak parameters like length and temperature, and see how different models behave.
 
 ### Core Implementation
 
@@ -183,32 +146,6 @@ summaries = summarizer.summarize_batch(documents)
 - 0.1–0.3: Focused, deterministic (good for summaries)
 - 0.5–0.7: Balanced (general use)
 - 0.8–1.0: Creative, varied (brainstorming)
-
-## Comparing Models
-
-| Model | Size | Speed | Quality | Best For |
-|-------|------|-------|---------|----------|
-| **Mistral 7B Instruct** | 7B | Fast | Very Good | General summaries, high throughput |
-| **GPTOSS 20B** | 20B | Moderate | Excellent | Complex documents, nuanced understanding |
-
-Start with Mistral for learning, scale to GPTOSS for production quality.
-
-## Performance Tips
-
-### Enable Flash Attention (Optional)
-
-```bash
-pip install flash-attn --no-build-isolation
-```
-
-```python
-model = AutoModelForCausalLM.from_pretrained(
-    model_name,
-    torch_dtype=torch.float16,
-    device_map="auto",
-    attn_implementation="flash_attention_2"  # 2-3x faster
-)
-```
 
 ## Real-World Applications
 

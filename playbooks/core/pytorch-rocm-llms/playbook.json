@@ -1,9 +1,9 @@
 {
   "id": "pytorch-rocm-llms",
   "title": "Running LLMs with PyTorch and ROCm",
-  "description": "Learn to load and run large language models locally using PyTorch with ROCm acceleration through a document summarization example",
+  "description": "Learn to run powerful language models on your PC with PyTorch and ROCm to summarize documents quickly and easily",
   "time": 45,
-  "platforms": ["linux"],
+  "platforms": ["linux", "windows"],
   "difficulty": "beginner",
   "isNew": true,
   "isFeatured": false,
