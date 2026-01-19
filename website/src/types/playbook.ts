@@ -26,30 +26,21 @@
  * 
  * ## Pre-installed Software Dropdowns
  * 
- * For software pre-installed on AMD Halo Developer Platform, you have two options:
- * 
- * ### Option 1: Shared Dependencies (Recommended)
- * 
- * Reference installation instructions from the central `dependencies/` folder:
+ * For software pre-installed on AMD Halo Developer Platform, use the `@require` tag
+ * to reference installation instructions from the central `dependencies/` folder:
  * 
  * ```markdown
  * <!-- @require:comfyui -->
  * ```
  * 
- * Available dependencies are defined in `playbooks/dependencies/registry.json`.
- * This approach ensures consistency across playbooks and simplifies maintenance.
- * 
- * ### Option 2: Inline Pre-installed Blocks
- * 
- * For playbook-specific instructions:
+ * For multiple dependencies, use comma-separated IDs for a single dropdown:
  * 
  * ```markdown
- * <!-- @preinstalled -->
- * Manual installation instructions here...
- * <!-- @preinstalled:end -->
+ * <!-- @require:comfyui,pytorch -->
  * ```
  * 
- * Both options render as a collapsible dropdown with a green checkmark indicating
+ * Available dependencies are defined in `playbooks/dependencies/registry.json`.
+ * This renders as a collapsible dropdown with a green checkmark indicating
  * the software is already available on the Halo platform.
  */
 
