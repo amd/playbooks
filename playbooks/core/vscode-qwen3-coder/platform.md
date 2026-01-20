@@ -4,18 +4,6 @@ This document describes the expected platform configurations for running this pl
 
 ## Windows
 
-### Git
-
-Python should be pre-installed on the system and on the path.
-
-### Git
-
-Git should be pre-installed using the AMD Portable Package
-
-| Component | Version | Location |
-|-----------|---------|----------|
-| **git.7z** | 2.52.0 | `C:\ProgramData\git` |
-
 ### LMStudio Installation
 
 LMStudio should be pre-installed using the AMD Portable Package
@@ -31,16 +19,6 @@ VSCode should be pre-installed using the AMD Portable Package
 | Component | Version | Location |
 |-----------|---------|----------|
 | **vscode_windows_portable_amd.7z** | 1.108.1 | `C:\Program Files\Microsoft VS Code\` |
-
-### Cline VSCode Extension Installation
-
-The Cline VSCode extension should be preinstalled with the VSCode installation
-
-ComfyUI should be pre-installed using the AMD portable package:
-
-| Component | Version | Location |
-|-----------|---------|----------|
-| **saoudrizwan.caude-dev-3.50.0.7z** | v3.50.0 | `C:\.vscode\extensions\` |
 
 ### Required Models
 
