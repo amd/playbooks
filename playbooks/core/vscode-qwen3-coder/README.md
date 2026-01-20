@@ -2,23 +2,27 @@
 
 ## Overview
 
-Coding agents are powerful tools that empower developers through collaboration with Large Language Models (LLMs). When embedded into Integrated Development Environments (IDEs), such as VSCode, coding agents can seamlessly integrate into a software engineer's workflow, enabling collaboration on complex tasks with unprecedented speed and efficiency. By automating routine tasks and providing intelligent assistance, coding agents free developers to focus on higher-level problem-solving, transforming how software is built.
+Coding agents are powerful tools that empower developers through collaboration with AI agents backed by Large Language Models (LLMs). Coding agents are typically embedded into the development environment, such as the terminal or VS Code, allowing seamless integration into a developer's workflow. This integration enables collaboration on complex tasks with unprecedented speed and efficiency. By automating routine tasks and providing intelligent assistance, coding agents free developers to focus on higher-level problem-solving, transforming how software is built.
 
-This tutorial demonstrates how to use Cline, VSCode. and LMStudio to run a coding agent entirely on your local STX Halo™ machine, combining the productivity benefits of coding agents with the cost savings and privacy advantages of local compute. 
+This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a coding agent entirely on your local STX Halo™ machine, combining the productivity benefits of coding agents with the cost savings and privacy advantages of local AI compute. 
 
 ## What You'll Learn
 
-* How to run VSCode with the Cline coding agent to aid in software engineering tasks.
+* How to run VS Code with the Cline coding agent to aid in software engineering tasks.
 * How to configure Cline to communicate with LM Studio for local inference of coding agents.
 * How to use local coding agents to solve real-world software engineering tasks. 
 
-## Launch and Configure LMStudio
+## Core Dependencies
 
-In this tutorial, we are going to use LMStudio to serve the LLM behind the coding agent. Your STX Halo™ comes with LMStudio installed. In the search bar, search for `LM Studio` and launch the application. You will be greeted by the following page.
+<!-- @require:lmstudio,vscode -->
+
+## Launch and Configure LM Studio
+
+We are going to use LM Studio to serve the LLM powering the coding agent. Your STX Halo™ comes with LM Studio installed. In the search bar, search for `LM Studio` and launch the application. You will be greeted by the following page.
 
 ![LM Studio Initial Screen](assets/initial-lm-studio.png)
 
-Next, we must load the LLM on the system. In this tutorial, we are going to use the `Qwen3-Coder-30B-A3B` model, a fantastic combination of quality and speed. To load the model, click on the search bar on the top of the LMStudio window, which will show the available models. You should see `Qwen3-Coder-30B-A3B`. To provide the quality necessary of coding agents, the context length will need to be increased from the default of `4096`. Click on the switch "Manually choose model load parameters" and then click on the Qwen3-Coder-30B-A3B model. 
+Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-30B-A3B` model, a fantastic combination of quality and speed. To load the model, click on the search bar on the top of the LM Studio window, which will show the available models. You should see `Qwen3-Coder-30B-A3B`. To provide the quality necessary for coding agents, the context length will need to be increased. Click on the switch `Manually choose model load parameters` and then click on the Qwen3-Coder-30B-A3B model. 
 
 ![Selecting Model](assets/model-list.png)
 
@@ -26,27 +30,31 @@ This will bring up the model configuration, change the context length from `4096
 
 ![Configuring Model](assets/selecting-model.png)
 
-Check to see if the Server is running. This can be done by going to the Developer tab in LM Studio on the left and to see the Status of "Running". If it is not running, flip the switch icon to see that it is running. 
+Check to see if the Server is running. This can be done by going to the Developer tab in LM Studio on the left and to see the Status of `Running`. If it is not running, flip the switch icon to start the server. This is necessary for Cline to be able to communicate with LM Studio. 
 
 ![Server Status](assets/lm-studio-server-status.png)
 
-## Launch and Configure VSCode
+## Launch and Configure VS Code
 
-Your STX Halo™ comes with VSCode installed with the Cline extension. In the search bar, search for `VS Code` and launch the application.
+Your STX Halo™ comes with VS Code installed. In the search bar, search for `VS Code` and launch the application.
 
-The left panel will contain the Cline icon. Click on that icon to go into the Cline VSCode extension. The first step to run with Cline is to create an account.
+The first thing that needs to be done is install the Cline VS Code extension. To do this, click on the `Extensions` icon on the left column of VS Code and search for `Cline`. Then, click the `Install` button. 
 
-![Account Creation](assets/cline-create-my-account.png)
+![Installing Cline Extension](assets/installing-cline-vscode-extension.png)
 
-Next, we need to configure Cline to communciate with the LM Studio server that we setup. Click on the Cline settings and set the API Provider to `LM Studio` and the model to `Qwen3-Coder-30B-A3B-GGUF`. 
+After installation, the left panel will contain the Cline icon. Click on that icon to go into the Cline VS Code extension. On the left, there will be a window asking `How will you use Cline?` As we are going to be using a local LLM running via LM Studio, select `Bring my own API Key` and hit `Continue`. 
+
+![Account Creation](assets/cline-how-will-you-use-cline.png)
+
+Next, we need to configure Cline to communicate with the LM Studio server that we setup. Set the API Provider to `LM Studio` and the model to `Qwen3-Coder-30B-A3B-GGUF`. 
 
 ![Model Configuration](assets/cline-model-configuration.png)
 
 ## Creating your first project
 
-Now that we are done with setup, lets use our local agent to create a website! To do this, have VS Code open an empty directory that will contain the source code generated by the agent, To do this, go to `File->Open Folder` on the top-left of VS Code.
+Let's use our local agent to create a website! To do this, have VS Code open an empty directory that will contain the source code generated by the agent, To do this, go to `File->Open Folder` on the top-left of VS Code.
 
-![VSCode Empty Folder](assets/open-cline-test.png)
+![VS Code Empty Folder](assets/open-cline-test.png)
 
 Now we are ready to prompt the local coding agent. Click on the Cline extension on the left column and enter a prompt to kickoff the agent. As an example, we are using the prompt: `Create a website showcasing the ability to run local large-language models on the AMD Strix Halo device.` and hit `Enter`. 
 
@@ -54,10 +62,12 @@ The agent will then start to create files according to the prompt. As a user, yo
 
 ![Cline Code Generation](assets/cline-code-generation.png)
 
-After generating the software, the agent is complete and you can run the application. In this case, because we prompted the agent to generate a website, the agent wrote to three files: `index.html`, `script.js`, and `styles.css`. By simply double clicking on the HTML file we could load and interact with the generated website.
+After generating the software, the agent is complete and you can run the application. In this case, because we prompted the agent to generate a website, the agent wrote to three files: `index.html`, `script.js`, and `styles.css`. By simply double clicking on the HTML file we can load and interact with the generated website.
 
 ## Next Steps
 
+We encourage the reader to try to generate other applications using this setup. Below are some fun examples we have tried:
+
 * **Retro Arcade Games:** Try some other prompts. It can also be fun for the agent to create retro-style games in Python using the `PyGame` package. This is an image of a simple pong game created with the following prompt: `Create a simple pong game using the PyGame python package.`
 
-* **Data Analysis:** One area where coding agents are particularly useful is that of scripting and data analysis. This is a prompt to showcase the local models ability to generate data analysis software for stock price visualization: `Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqllite database and when the script is first run check to see if the sql lite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.`
+* **Data Analysis:** One area where coding agents are particularly useful is that of scripting and data analysis. This is a prompt to showcase the local models ability to generate data analysis software for stock price visualization: `Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.`
