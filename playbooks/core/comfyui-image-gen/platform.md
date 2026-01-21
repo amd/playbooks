@@ -2,21 +2,39 @@
 
 This document describes the expected platform configurations for running this playbook.
 
-## Windows
-
-### ComfyUI Installation
+## Required Apps/Frameworks
+### Windows
 
 ComfyUI should be pre-installed using the AMD portable package:
 
 | Component | Version | Location |
 |-----------|---------|----------|
-| **ComfyUI_windows_portable_amd.7z** | v0.6.0 | `C:\ProgramData\ComfyUI` |
+| **ComfyUI_windows_portable_amd.7z** | v0.9.2 | `C:\ProgramData\ComfyUI` |
 
 Extract the portable package to `C:\ProgramData\ComfyUI` before running this playbook.
 
-### Required Models
+Models should be placed in `C:\ProgramData\ComfyUI\models\`.
 
-The following models must be present in the ComfyUI models directory (`C:\ProgramData\Comfy\ComfyUI\models\`):
+---
+
+### Linux
+
+Clone ComfyUI from the official repository and install dependencies:
+
+```bash
+git clone https://github.com/comfyanonymous/ComfyUI.git
+cd ComfyUI
+git checkout v0.9.2
+pip install -r requirements.txt
+```
+
+App should be placed in `/usr/local/bin/ComfyUI/`. Models should be placed in `ComfyUI/models/`.
+
+## Required Models
+
+### Windows/Linux
+
+The following models must be present in the ComfyUI models directory:
 
 | Model Type | Filename | Size | Location | Download |
 |------------|----------|------|----------|----------|
@@ -26,14 +44,3 @@ The following models must be present in the ComfyUI models directory (`C:\Progra
 | VAE | `ae.safetensors` | 319.77 MB | `models/vae/` | [Link](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors) |
 
 ---
-
-## Linux
-
-### ComfyUI Installation
-
-Users are responsible for cloning and setting up ComfyUI from the official repository. See the playbook instructions for details.
-
-### Required Models
-
-Users are responsible for downloading and placing the required models in the appropriate directories within their ComfyUI installation.
-
