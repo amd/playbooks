@@ -43,6 +43,13 @@
       "category": "app",
       "platforms": ["windows", "linux"],
       "file": "vscode.md"
+    },
+    "lemonade": {
+      "name": "Lemonade",
+      "description": "Local LLM server with OpenAI-compatible API",
+      "category": "framework",
+      "platforms": ["windows", "linux"],
+      "file": "lemonade.md"
     }
   }
 }

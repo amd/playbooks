@@ -1,12 +1,12 @@
 {
   "id": "n8n-automation-gpt-oss",
   "title": "Automating Workflows with n8n and Local LLMs",
-  "description": "Build powerful automation workflows combining n8n with local LLM inference on STX Halo™",
-  "time": 60,
+  "description": "Build an AI-powered news summarizer using n8n and Lemonade on STX Halo™",
+  "time": 30,
   "platforms": ["windows", "linux"],
-  "difficulty": "intermediate",
+  "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
   "published": true,
-  "tags": ["automation", "n8n", "workflows", "llm"]
+  "tags": ["automation", "n8n", "workflows", "llm", "lemonade"]
 }

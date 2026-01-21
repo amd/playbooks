@@ -1,0 +1,289 @@
+{
+  "name": "Financial news with Lemonade",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        320,
+        328
+      ],
+      "id": "0c40282b-5f50-4fd6-94ec-d3dcbdb9f10d",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "url": "https://www.ft.com/",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "87c304c3-b21f-4b92-9e7c-c422bd587e1c",
+      "name": "Fetch Financial News Webpage",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        544,
+        328
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.2,
+      "notes": "Url : https://www.ft.com/"
+    },
+    {
+      "parameters": {},
+      "id": "baa5bf14-3521-48f5-b3e2-4a72c2165332",
+      "name": "Delay to Ensure Page Load",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        768,
+        328
+      ],
+      "webhookId": "adff7750-f9b0-4796-915d-9c28dcc878b0",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "Headline #1",
+              "cssSelector": "#site-content > div:nth-child(1) > section > div > div > div.layout-desktop__grid.layout-desktop__grid--span4.layout-desktop__grid--column-start-1.layout-desktop__grid--row-start-1.layout-desktop__grid--with-border.layout--default > div > div > div > div.story-group-stacked__primary-story > div > div > div > div > div.primary-story__teaser"
+            },
+            {
+              "key": "Headline #2",
+              "cssSelector": "#site-content > div:nth-child(1) > section > div > div > div.layout-desktop__grid.layout-desktop__grid--span6.layout-desktop__grid--column-start-5.layout-desktop__grid--row-start-1.layout-desktop__grid--with-border.layout--default > div > div > div > div > div > div.story-group__article.story-group__article--featured > div > div.featured-story-content > div.headline.js-teaser-headline.headline--scale-5.headline--color-black > a > span"
+            },
+            {
+              "key": "Editor's Picks",
+              "cssSelector": "#site-content > div:nth-child(1) > section > div > div > div.layout-desktop__grid.layout-desktop__grid--span2.layout-desktop__grid--column-start-11.layout-desktop__grid--row-start-1.layout--default > div"
+            },
+            {
+              "key": "Top Stories",
+              "cssSelector": "#site-content > div:nth-child(3) > section > div",
+              "skipSelectors": "h2"
+            },
+            {
+              "key": "Spotlight",
+              "cssSelector": "#site-content > div:nth-child(6) > section",
+              "skipSelectors": "h2"
+            },
+            {
+              "key": "Various News",
+              "cssSelector": "#site-content > div:nth-child(8) > section",
+              "skipSelectors": "h2"
+            },
+            {
+              "key": "Europe News",
+              "cssSelector": "#site-content > div:nth-child(13) > section",
+              "skipSelectors": "h2"
+            }
+          ]
+        },
+        "options": {
+          "cleanUpText": true
+        }
+      },
+      "id": "d6f85a25-fc4a-46bb-a73f-4868828ddd90",
+      "name": "Extract News Headlines & Text",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        992,
+        328
+      ],
+      "notesInFlow": true,
+      "typeVersion": 1.2,
+      "notes": "Extract selected headlines, editor's picks, spotlight etc."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5412a5ee-dbbe-4fcc-98a5-6fafc37b94d1",
+              "name": "All data",
+              "type": "string",
+              "value": "=News :\n{{ $json['Headline #1'] }}\n\n\n\nFinancial news :\n\n{{ $('Extract News Headlines & Text').item.json['Headline #1'] }};\n\n{{ $('Extract News Headlines & Text').item.json['Headline #2'] }};\n\n{{ $('Extract News Headlines & Text').item.json['Editor\\'s Picks'] }};\n\n{{ $('Extract News Headlines & Text').item.json['Top Stories'] }};\n\n{{ $('Extract News Headlines & Text').item.json.Spotlight }};\n\n{{ $('Extract News Headlines & Text').item.json['Various News'] }};\n\n{{ $('Extract News Headlines & Text').item.json['Europe News'] }};\n\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1fc334d6-8186-43f4-b880-b78749645221",
+      "name": "Clean Extracted News Data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1216,
+        328
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Summarise this news :\n\n{{ $json['All data'] }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an AI financial analyst. Your role is to read, understand, and summarize key financial news from today. The goal is to provide investors with a clear and concise market overview to support better investment decisions.\n\n\nInvestor Outlook\nToday's news points to [bullish/bearish/neutral] sentiment. Watch for [economic event/earnings report] tomorrow, which could influence market direction.\n"
+        }
+      },
+      "id": "218d120d-53ce-4572-8f65-e3fe34344e6d",
+      "name": "AI Financial News Summarizer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1440,
+        328
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss-20b-mxfp4-GGUF",
+        "options": {
+          "maxTokens": 1024
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatLemonade",
+      "typeVersion": 1,
+      "position": [
+        1448,
+        552
+      ],
+      "id": "f70c3f05-cf68-4906-9635-f1787074746a",
+      "name": "Lemonade Chat Model"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"summary\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t}\n}"
+      },
+      "id": "c67531cc-cdb7-477c-a7e5-7d3356114fdb",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        1576,
+        552
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "=",
+        "binaryPropertyName": "=data {{ $json.output }}",
+        "options": {
+          "fileName": "test"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1792,
+        328
+      ],
+      "id": "01244f07-05ed-4f20-a94c-27f6594e7281",
+      "name": "Convert to File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Fetch Financial News Webpage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Financial News Webpage": {
+      "main": [
+        [
+          {
+            "node": "Delay to Ensure Page Load",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delay to Ensure Page Load": {
+      "main": [
+        [
+          {
+            "node": "Extract News Headlines & Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract News Headlines & Text": {
+      "main": [
+        [
+          {
+            "node": "Clean Extracted News Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Extracted News Data": {
+      "main": [
+        [
+          {
+            "node": "AI Financial News Summarizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Financial News Summarizer": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lemonade Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Financial News Summarizer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Financial News Summarizer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
