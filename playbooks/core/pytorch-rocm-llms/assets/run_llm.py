@@ -32,8 +32,9 @@ def main():
     print()
 
     # Load model and tokenizer
-    model_name = "mistralai/Mistral-7B-Instruct-v0.3"
-    # model_name = "openai/gpt-oss-20b"
+    model_name = "openai/gpt-oss-20b"
+    # model_name = "mistralai/Mistral-7B-Instruct-v0.3"
+
     print(f"Loading {model_name}...")
     print("(First run will download ~14GB, this may take a few minutes)")
     print()

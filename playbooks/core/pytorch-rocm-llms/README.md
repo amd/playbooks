@@ -1,11 +1,11 @@
 ## Overview
 
-Want to run powerful AI language models on your own STX Halo™ GPU? This guide shows you how.
+Want to run powerful AI language models on your own STX Halo™ ? This guide shows you how.
 This tutorial uses PyTorch powered by AMD's ROCm to run models that can summarize documents, answer questions, generate text, and more, all running locally.
 
 ## What You'll Learn
 
-- Run LLMs like Mistral-7B-Instruct and gpt-oss-20b locally using PyTorch and ROCm
+- Run LLMs like gpt-oss-20b and Mistral-7B-Instruct locally using PyTorch and ROCm
 - Create a document summarization tool using LLMs
 
 ## Prerequisites
@@ -18,24 +18,30 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 
 ### Create a Virtual Environment
 
+<!-- @os:windows -->
 ```bash
 python3 -m venv llm-env
 source llm-env/bin/activate
 ```
+<!-- @os:end -->
 
-### Install PyTorch with ROCm Support
-
+<!-- @os:linux -->
 ```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm7.2
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv llm-env
+source llm-env/bin/activate
 ```
+<!-- @os:end -->
 
-### Install Additional Dependencies
+### Installing Basic Dependencies
+<!-- @require:pytorch -->
+
+### Additional Dependencies
 
 ```bash
 pip install transformers accelerate sentencepiece protobuf
 ```
-
-> **Note**: Your STX Halo™ GPU uses AMD ROCm 7.2. The PyTorch 2.8 ROCm build provides native GPU acceleration.
 
 ## Quick Start with Example Scripts
 

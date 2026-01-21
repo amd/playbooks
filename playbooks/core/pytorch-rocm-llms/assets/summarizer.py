@@ -19,8 +19,8 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 MODELS = {
-    "mistral": "mistralai/Mistral-7B-Instruct-v0.3",
-    "gptoss": "openai/gpt-oss-20b"
+    "gptoss": "openai/gpt-oss-20b",
+    "mistral": "mistralai/Mistral-7B-Instruct-v0.3"
 }
 
 
@@ -85,8 +85,8 @@ SUMMARY: [/INST]"""
 
 def main():
     parser = argparse.ArgumentParser(description="Summarize documents using LLMs")
-    parser.add_argument("--model", default="mistral", choices=["mistral", "gptoss"],
-                        help="Model: mistral (7B) or gptoss (20B)")
+    parser.add_argument("--model", default="gptoss", choices=["mistral", "gptoss"],
+                        help="Models")
     parser.add_argument("--file", default=None, help="Path to .txt file")
     parser.add_argument("--max-length", type=int, default=150, help="Max tokens (default: 150)")
     parser.add_argument("--temperature", type=float, default=0.3, help="Temperature 0.1-1.0 (default: 0.3)")
