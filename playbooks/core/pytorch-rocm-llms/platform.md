@@ -30,9 +30,10 @@ Models will be downloaded to the Hugging Face cache directory (typically `~/.cac
 
 ## Verified Models
 
-The following models are tested and optimized for STX Halo™:
+The following models are tested and optimized for STX Halo™.
+If you are using AMD Halo Developer Platform, this model comes pre-installed.
+
 - `openai/gpt-oss-20b` (20B parameters, ~40GB)
-- `mistralai/Mistral-7B-Instruct-v0.3` (7B parameters, ~14GB)
 
 ## Network Requirements
 
