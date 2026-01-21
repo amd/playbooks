@@ -33,10 +33,12 @@ def main():
 
     # Load model and tokenizer
     model_name = "openai/gpt-oss-20b"
+    print(f"Loading {model_name}...")
+    print("First run will download ~14GB, this may take a few minutes")
+    print("For AMD Halo Developer Platforms, the model will be pre-installed.")
+    
     # model_name = "mistralai/Mistral-7B-Instruct-v0.3"
 
-    print(f"Loading {model_name}...")
-    print("(First run will download ~14GB, this may take a few minutes)")
     print()
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)

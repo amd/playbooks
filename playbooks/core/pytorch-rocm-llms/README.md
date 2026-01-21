@@ -59,7 +59,7 @@ Both scripts support:
 
 ## Loading and Running Your First LLM
 
-The included `run_llm.py` script shows how to load and generate text with LLMs using PyTorch and AMD ROCm. On the first run, model weights are automatically downloaded. The script supports choosing between Mistral 7B (fast) and GPTOSS 20B (higher quality), lets you specify which model to use with `--model`, and handles GPU memory cleanup and suppresses excess warnings for a smooth experience. 
+The included `assets/run_llm.py` script shows how to load and generate text with LLMs using PyTorch and AMD ROCm. On the first run, model weights are automatically downloaded.
 
 Take a look at how prompts are tokenized and sent to the model, understanding this process lets you adapt LLMs for any text generation or summarization task. Here’s a minimal example from the script:
 
@@ -67,7 +67,7 @@ Take a look at how prompts are tokenized and sent to the model, understanding th
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_name = "mistralai/Mistral-7B-Instruct-v0.3"
+model_name = "openai/gpt-oss-20b"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
@@ -79,11 +79,8 @@ model = AutoModelForCausalLM.from_pretrained(
 To try it out:
 
 ```bash
-python assets/run_llm.py --model mistral
+python assets/run_llm.py
 ```
-
-The script will run a sample prompt and print a model-generated response to the console.
-
 
 ## Building a Document Summarizer
 
@@ -136,7 +133,7 @@ python assets/summarizer.py --file research.txt --model gptoss
 ```python
 from summarizer import DocumentSummarizer
 
-summarizer = DocumentSummarizer(model="mistral")
+summarizer = DocumentSummarizer(model="gptoss")
 summaries = summarizer.summarize_batch(documents)
 ```
 
