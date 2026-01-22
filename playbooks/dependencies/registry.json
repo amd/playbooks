@@ -43,6 +43,13 @@
       "category": "app",
       "platforms": ["windows", "linux"],
       "file": "vscode.md"
+    },
+    "comfyui-models": {
+      "name": "ComfyUI Models",
+      "description": "ComfyUI models for image generation",
+      "category": "model",
+      "platforms": ["windows", "linux"],
+      "file": "comfyui_models.md"
     }
   }
 }
