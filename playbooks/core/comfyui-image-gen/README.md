@@ -27,7 +27,7 @@ To launch ComfyUI on Windows, simply click the ComfyUI shortcut on your Desktop.
 To launch ComfyUI:
 
 1. Navigate to `/usr/local/bin/ComfyUI/` (or to the appropriate folder if installed manually)
-2. Run `python main.py`
+2. Run `python3 main.py`
 
 ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` to access the interface.
 
