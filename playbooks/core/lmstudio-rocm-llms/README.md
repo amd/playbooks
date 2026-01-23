@@ -4,19 +4,9 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 > This guide assumes you are in Developer mode inside LM Studio. To shift to Developer mode, click the "Developer" button at the bottom of the screen.
 
-## Installation
+## Installing Dependencies
 
-### Windows
-
-Your STX Halo™ comes pre-installed with LM Studio.
-
-### Linux
-
-1. Download the appimage from here: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
-2. run `sudo apt install libfuse2`  
-3. run `cd ~/Downloads`  
-4. run `chmod +x LM-Studio-*.AppImage`  
-5. run `/LM-Studio-*.AppImage`  
+<!-- @require:lmstudio -->
 
 ## First Time Boot and House Keeping
 
@@ -44,7 +34,7 @@ When you launch LM Studio for the first time, it may initiate updates for the bi
 
 ### Downloading models
 
-Your LM Studio instance in the STX Halo™ comes with pre-downloaded models such as: OpenAI GPT-OSS 120B (MXFP4), OpenAI GPT-OSS 20B (MXFP4) and Qwen3 Coder 30B A3B (Q4 K M).  
+Your LM Studio instance in the STX Halo™ comes with pre-downloaded models such as: OpenAI GPT-OSS 120B (MXFP4), and Qwen3 Coder 30B A3B (Q4 K M).  
 Should you wish to download additional models - you can do so by pressing "Ctrl" + "Shift" + "M" on your keyboard or clicking on the "Discover" tab (Magnifying Glass) and searching for the model such as: "GLM 4.7 Flash".
 
 > You will want to stick to quantizations that are at least Q4 K M for optimal performance and accuracy.
@@ -60,50 +50,6 @@ LM Studio will automatically download and put the model in the correct directory
 4. Change context size to "128,000". Make sure "Flash Attention" is On and "GPU offload layers" is set to maximum.  
 5. Check "Remember settings" and click load.  
 6. Start chatting with a ChatGPT-grade LLM completely locally.  
-
-## Installing MCP (Model Context Protocol) Servers
-
-> Disclaimer: Giving a Large Language Model tool access to your system may result in the AI acting in unpredictable ways with unpredictable outcomes. Only install implementations from trusted sources, and failure to exercise appropriate caution may result in damages (foreseen or unforeseen). Use such implementations at your own risk, AMD makes no representations/warranties in this context.
-
-### Installing an MCP server
-
-MCP servers typically have additional dependencies. Common dependencies are Node.js and Python. For the example below, you will want to install Node.js from: [https://nodejs.org/en/download](https://nodejs.org/en/download) and install Google Chrome from: [https://www.google.com/chrome/](https://www.google.com/chrome/).
-
-1. Press "Ctrl" + "Shift" + "B" or click the Wrench icon "Show Settings" on the top left hand side.  
-2. Click on "Program". This will open the "Integrations" drawer.  
-3. Click on "Install" and click on "Edit mcp.json"  
-
-Find the installation script for the MCP. For example, for the Microsoft Playwright MCP, the install script can be found at [https://github.com/microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp) and is given below:
-
-```json
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ]
-    }
-  }
-}
-```
-
-4. Copy and paste this installation script inside the mcp.json file and click save.  
-5. If all dependencies are installed, LM Studio will quickly setup the MCP server and you should see various tools pop up like "browser_navigate".  
-6. You will want to enable the Microsoft Playwright MCP server at this point by hitting the toggle in front of "mcp/playwright" under the "Integrations" drawer.  
-7. Make sure to close out of the mcp.json file by clicking the "x" button on the top.  
-
-### Using an MCP server
-
-MCP servers require very large context sizes (AMD recommends at least 128,000 context length) and models that are highly capable in tool calling (denoted by the hammer icon inside LM Studio). For this example, we will be using the pre-loaded Qwen3 Coder 30B A3B model that ships with your STX Halo™.
-
-1. Make sure you are not in the mcp.json file and have exit-ed back to the "Chats" tab.  
-2. Press "Ctrl" + "L" or select the central drop down menu at the top, select "manually chose model load parameters ", and click on Qwen3 Coder 30b.  
-3. Make sure "show advanced settings" is checked.  
-4. Change context size to "128,000". Make sure "Flash Attention" is On and "GPU offload layers" is set to maximum.  
-5. Check "Remember settings" and click load.  
-6. At this point, if the Microsoft Playwright MCP server was properly installed, you should see a bubble displaying "playwright" in the chatbox. This shows you that the model has access to this MCP server.  
-7. You can now give it a command like navigating to a specific website (or any of the other tool calls it has access to).  
 
 ## LM Studio Server: Serve LLMs through an OpenAI compatible endpoint
 

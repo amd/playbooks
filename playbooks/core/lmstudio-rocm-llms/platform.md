@@ -16,13 +16,12 @@ LM Studio should be pre-installed:
 
 ### Model Download
 
-The following models should already be present in the LM Studio models directory (`C:\Users\...\.lmstudio\models\lmstudio-community`):
+The following models should already be present in the LM Studio models directory (`C:\Users\...\.lmstudio\models`):
 
 | Model Type | Quantization | Size | Location |
 |------------|--------------|------|----------|
-| OpenAI GPT-OSS 120B | `MXFP4` | 59 GB | `models\lmstudio-community` |
-| OpenAI GPT-OSS 20B | `MXFP4` | 11.2 GB | `models\lmstudio-community` |
-| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
+| OpenAI GPT-OSS 120B | `MXFP4` | 59 GB | `models\ggml-org` |
+| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\ggml-org` |
 
 ---
 
@@ -30,8 +29,7 @@ The following models should already be present in the LM Studio models directory
 
 ### LM Studio Installation
 
-Users are responsible for cloning and setting up LM Studio. See the playbook instructions for details.
-
+See lmstudio.md (inside dependencies folder) for more details.
 ### Model Download
 
-Users are responsible for downloading the required models within their LM Studio installation.
+Same as on Windows.
