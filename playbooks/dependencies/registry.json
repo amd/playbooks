@@ -1,0 +1,48 @@
+{
+  "$schema": "./registry.schema.json",
+  "description": "Central registry of pre-installed software dependencies for AMD Halo Developer Platform",
+  "dependencies": {
+    "comfyui": {
+      "name": "ComfyUI",
+      "description": "Node-based Stable Diffusion interface",
+      "category": "app",
+      "platforms": ["windows", "linux"],
+      "file": "comfyui.md"
+    },
+    "pytorch": {
+      "name": "PyTorch",
+      "description": "Deep learning framework",
+      "category": "framework",
+      "platforms": ["windows", "linux"],
+      "file": "pytorch.md"
+    },
+    "lmstudio": {
+      "name": "LM Studio",
+      "description": "Desktop app for running local LLMs",
+      "category": "app",
+      "platforms": ["windows", "linux"],
+      "file": "lmstudio.md"
+    },
+    "vllm": {
+      "name": "vLLM",
+      "description": "High-throughput LLM serving engine",
+      "category": "framework",
+      "platforms": ["linux"],
+      "file": "vllm.md"
+    },
+    "n8n": {
+      "name": "n8n",
+      "description": "Workflow automation platform",
+      "category": "app",
+      "platforms": ["windows", "linux"],
+      "file": "n8n.md"
+    },
+    "vscode": {
+      "name": "Visual Studio Code",
+      "description": "Code editor with AI extensions",
+      "category": "app",
+      "platforms": ["windows", "linux"],
+      "file": "vscode.md"
+    }
+  }
+}

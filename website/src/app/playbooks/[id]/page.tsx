@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use, useRef } from "react";
+import { useState, useEffect, use, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -9,6 +9,99 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import type { Playbook, Platform } from "@/types/playbook";
 import { formatTime } from "@/types/playbook";
+
+// Global store for dropdown states - persists across re-renders without causing them
+const dropdownStateStore: Record<string, boolean> = {};
+
+/**
+ * Collapsible dropdown component for pre-installed software on AMD Halo
+ * Uses a global store to persist state without triggering parent re-renders
+ */
+function HaloPreinstalledDropdown({ 
+  content, 
+  dropdownId
+}: { 
+  content: string;
+  dropdownId: string;
+}) {
+  // Initialize from global store, use local state for rendering
+  const [isOpen, setIsOpen] = useState(() => dropdownStateStore[dropdownId] ?? false);
+  
+  const handleToggle = useCallback(() => {
+    setIsOpen(prev => {
+      const newValue = !prev;
+      dropdownStateStore[dropdownId] = newValue;
+      return newValue;
+    });
+  }, [dropdownId]);
+  
+  return (
+    <div className="halo-preinstalled-container">
+      <button 
+        className="halo-preinstalled-trigger"
+        onClick={handleToggle}
+        aria-expanded={isOpen}
+      >
+        <span className="halo-preinstalled-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </span>
+        <span className="halo-preinstalled-text">Already pre-installed on your AMD Halo Developer Platform!</span>
+        <span className={`halo-preinstalled-chevron ${isOpen ? 'open' : ''}`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 9l-7 7-7-7" />
+          </svg>
+        </span>
+      </button>
+      {isOpen && (
+        <div className="halo-preinstalled-content">
+          <div className="halo-preinstalled-notice">
+            This software comes pre-installed and configured on your AMD Halo Developer Platform. 
+            If you need to reinstall or configure it manually, follow the instructions below:
+          </div>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
+            components={{
+              h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
+              h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
+              h3: ({ children }) => <h3 className="md-h3">{children}</h3>,
+              h4: ({ children }) => <h4 className="md-h4">{children}</h4>,
+              p: ({ children }) => <p className="md-p">{children}</p>,
+              ul: ({ children }) => <ul className="md-ul">{children}</ul>,
+              ol: ({ children }) => <ol className="md-ol">{children}</ol>,
+              li: ({ children }) => <li className="md-li">{children}</li>,
+              blockquote: ({ children }) => <blockquote className="md-blockquote">{children}</blockquote>,
+              a: ({ href, children }) => (
+                <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
+                  {children}
+                </a>
+              ),
+              code: ({ className, children }) => {
+                const isInline = !className;
+                if (isInline) {
+                  return <code className="inline-code">{children}</code>;
+                }
+                return <code className={className}>{children}</code>;
+              },
+              pre: ({ children }) => <pre className="code-block">{children}</pre>,
+              hr: () => <hr className="md-hr" />,
+              table: ({ children }) => <table className="md-table">{children}</table>,
+              thead: ({ children }) => <thead className="md-thead">{children}</thead>,
+              tbody: ({ children }) => <tbody className="md-tbody">{children}</tbody>,
+              tr: ({ children }) => <tr className="md-tr">{children}</tr>,
+              th: ({ children }) => <th className="md-th">{children}</th>,
+              td: ({ children }) => <td className="md-td">{children}</td>,
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface TocItem {
   id: string;
@@ -130,6 +223,27 @@ function filterContentByOS(content: string, platform: Platform): string {
   return result;
 }
 
+/**
+ * Transforms @preinstalled tags into collapsible dropdown HTML
+ * 
+ * Tags supported:
+ * <!-- @preinstalled --> ... <!-- @preinstalled:end -->
+ * 
+ * The content inside becomes a collapsible section with a special header
+ * indicating the software is pre-installed on AMD Halo Developer Platform
+ */
+function transformPreinstalledBlocks(content: string): string {
+  if (!content) return "";
+  
+  const preinstalledPattern = /<!-- @preinstalled -->([\s\S]*?)<!-- @preinstalled:end -->/g;
+  
+  return content.replace(preinstalledPattern, (_match, innerContent) => {
+    // Escape any HTML in the content for the data attribute
+    const escapedContent = innerContent.trim();
+    return `<div class="halo-preinstalled-dropdown" data-content="${encodeURIComponent(escapedContent)}"></div>`;
+  });
+}
+
 function PlatformToggle({ 
   platforms, 
   selected, 
@@ -185,6 +299,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
   const [error, setError] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
   const [activeHeading, setActiveHeading] = useState<string>("");
+  const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
 
@@ -219,15 +334,107 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     fetchPlaybook();
   }, [id]);
 
-  // Transform relative image paths to API routes and filter by OS
+  // Transform relative image paths to API routes, filter by OS, and transform preinstalled blocks
   const filteredContent = playbook?.content 
-    ? filterContentByOS(playbook.content, selectedPlatform)
+    ? transformPreinstalledBlocks(
+        filterContentByOS(playbook.content, selectedPlatform)
+      )
         // Transform relative image paths in HTML img tags to use the API route
         .replace(/src=["'](?!https?:\/\/|\/)(.*?)["']/g, `src="/api/playbooks/${id}/$1"`)
     : "";
 
   // Extract table of contents from filtered content
   const tocItems = extractToc(filteredContent);
+
+  // Memoize the markdown components to prevent re-renders on scroll
+  const markdownComponents = useMemo(() => ({
+    h1: ({ children }: { children?: React.ReactNode }) => {
+      const text = String(children);
+      const headingId = slugify(text);
+      return <h1 id={headingId} className="md-h1 scroll-mt-28">{children}</h1>;
+    },
+    h2: ({ children }: { children?: React.ReactNode }) => {
+      const text = String(children);
+      const headingId = slugify(text);
+      return <h2 id={headingId} className="md-h2 scroll-mt-28">{children}</h2>;
+    },
+    h3: ({ children }: { children?: React.ReactNode }) => {
+      const text = String(children);
+      const headingId = slugify(text);
+      return <h3 id={headingId} className="md-h3 scroll-mt-28">{children}</h3>;
+    },
+    h4: ({ children }: { children?: React.ReactNode }) => {
+      const text = String(children);
+      const headingId = slugify(text);
+      return <h4 id={headingId} className="md-h4 scroll-mt-28">{children}</h4>;
+    },
+    p: ({ children }: { children?: React.ReactNode }) => <p className="md-p">{children}</p>,
+    ul: ({ children }: { children?: React.ReactNode }) => <ul className="md-ul">{children}</ul>,
+    ol: ({ children }: { children?: React.ReactNode }) => <ol className="md-ol">{children}</ol>,
+    li: ({ children }: { children?: React.ReactNode }) => <li className="md-li">{children}</li>,
+    blockquote: ({ children }: { children?: React.ReactNode }) => <blockquote className="md-blockquote">{children}</blockquote>,
+    a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+      <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    ),
+    img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+      const { src, alt } = props;
+      // Transform relative paths to use the API route
+      let imageSrc = typeof src === "string" ? src : "";
+      if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+        imageSrc = `/api/playbooks/${id}/${imageSrc}`;
+      }
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img 
+          src={imageSrc} 
+          alt={alt || ""} 
+          className="rounded-lg max-w-full h-auto mx-auto my-6"
+        />
+      );
+    },
+    code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
+      const isInline = !className;
+      if (isInline) {
+        return <code className="inline-code">{children}</code>;
+      }
+      return (
+        <code className={className}>
+          {children}
+        </code>
+      );
+    },
+    pre: ({ children }: { children?: React.ReactNode }) => (
+      <pre className="code-block">{children}</pre>
+    ),
+    hr: () => <hr className="md-hr" />,
+    table: ({ children }: { children?: React.ReactNode }) => <table className="md-table">{children}</table>,
+    thead: ({ children }: { children?: React.ReactNode }) => <thead className="md-thead">{children}</thead>,
+    tbody: ({ children }: { children?: React.ReactNode }) => <tbody className="md-tbody">{children}</tbody>,
+    tr: ({ children }: { children?: React.ReactNode }) => <tr className="md-tr">{children}</tr>,
+    th: ({ children }: { children?: React.ReactNode }) => <th className="md-th">{children}</th>,
+    td: ({ children }: { children?: React.ReactNode }) => <td className="md-td">{children}</td>,
+    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string }) => {
+      const { className, ...rest } = props;
+      // Handle the halo-preinstalled-dropdown custom element
+      if (className === 'halo-preinstalled-dropdown') {
+        const dataContent = props['data-content'];
+        if (dataContent) {
+          const decodedContent = decodeURIComponent(dataContent);
+          // Use content hash as stable ID for this dropdown
+          const dropdownId = `dropdown-${dataContent.substring(0, 50)}`;
+          return (
+            <HaloPreinstalledDropdown 
+              content={decodedContent} 
+              dropdownId={dropdownId}
+            />
+          );
+        }
+      }
+      return <div className={className} {...rest} />;
+    },
+  }), [id]);
 
   // Handle clicking a TOC link - scroll and immediately set active
   const handleTocClick = (targetId: string) => {
@@ -249,53 +456,67 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     }
   };
 
-  // Track active heading on scroll
+  // Track active heading on scroll - use ref to avoid re-renders, only update state for TOC
   useEffect(() => {
     if (!contentRef.current || tocItems.length === 0) return;
 
+    let rafId: number | null = null;
+    
     const handleScroll = () => {
       // Skip scroll tracking while programmatic scroll is in progress
       if (isClickScrolling.current) return;
       
-      const headings = contentRef.current?.querySelectorAll("h2[id]");
-      if (!headings || headings.length === 0) return;
+      // Use requestAnimationFrame to batch updates
+      if (rafId) return;
       
-      // Find the heading that's currently at or near the top of the viewport
-      // We look for the last heading that has scrolled past the threshold
-      const threshold = 150; // How far from top of viewport to consider "active"
-      let currentActive = "";
-      
-      for (const heading of headings) {
-        const rect = heading.getBoundingClientRect();
-        // If this heading is at or above the threshold, it's the current section
-        if (rect.top <= threshold) {
-          currentActive = heading.id;
-        } else {
-          // Once we find a heading below the threshold, stop
-          break;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        
+        const headings = contentRef.current?.querySelectorAll("h2[id]");
+        if (!headings || headings.length === 0) return;
+        
+        // Find the heading that's currently at or near the top of the viewport
+        // We look for the last heading that has scrolled past the threshold
+        const threshold = 150; // How far from top of viewport to consider "active"
+        let currentActive = "";
+        
+        for (const heading of headings) {
+          const rect = heading.getBoundingClientRect();
+          // If this heading is at or above the threshold, it's the current section
+          if (rect.top <= threshold) {
+            currentActive = heading.id;
+          } else {
+            // Once we find a heading below the threshold, stop
+            break;
+          }
         }
-      }
-      
-      // If no heading is above threshold, use the first one if we're near the top
-      if (!currentActive && headings.length > 0) {
-        const firstHeading = headings[0] as HTMLElement;
-        const rect = firstHeading.getBoundingClientRect();
-        if (rect.top < window.innerHeight / 2) {
-          currentActive = firstHeading.id;
+        
+        // If no heading is above threshold, use the first one if we're near the top
+        if (!currentActive && headings.length > 0) {
+          const firstHeading = headings[0] as HTMLElement;
+          const rect = firstHeading.getBoundingClientRect();
+          if (rect.top < window.innerHeight / 2) {
+            currentActive = firstHeading.id;
+          }
         }
-      }
-      
-      if (currentActive && currentActive !== activeHeading) {
-        setActiveHeading(currentActive);
-      }
+        
+        // Only update state if the active heading actually changed
+        if (currentActive && currentActive !== activeHeadingRef.current) {
+          activeHeadingRef.current = currentActive;
+          setActiveHeading(currentActive);
+        }
+      });
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     // Initial check
     handleScroll();
     
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [tocItems, activeHeading]);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [tocItems]);
 
   return (
     <main className="min-h-screen bg-[#0d0d0d]">
@@ -434,74 +655,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           rehypePlugins={[rehypeRaw]}
-                          components={{
-                            h1: ({ children }) => {
-                              const text = String(children);
-                              const headingId = slugify(text);
-                              return <h1 id={headingId} className="md-h1 scroll-mt-28">{children}</h1>;
-                            },
-                            h2: ({ children }) => {
-                              const text = String(children);
-                              const headingId = slugify(text);
-                              return <h2 id={headingId} className="md-h2 scroll-mt-28">{children}</h2>;
-                            },
-                            h3: ({ children }) => {
-                              const text = String(children);
-                              const headingId = slugify(text);
-                              return <h3 id={headingId} className="md-h3 scroll-mt-28">{children}</h3>;
-                            },
-                            h4: ({ children }) => {
-                              const text = String(children);
-                              const headingId = slugify(text);
-                              return <h4 id={headingId} className="md-h4 scroll-mt-28">{children}</h4>;
-                            },
-                            p: ({ children }) => <p className="md-p">{children}</p>,
-                            ul: ({ children }) => <ul className="md-ul">{children}</ul>,
-                            ol: ({ children }) => <ol className="md-ol">{children}</ol>,
-                            li: ({ children }) => <li className="md-li">{children}</li>,
-                            blockquote: ({ children }) => <blockquote className="md-blockquote">{children}</blockquote>,
-                            a: ({ href, children }) => (
-                              <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
-                                {children}
-                              </a>
-                            ),
-                            img: ({ src, alt }) => {
-                              // Transform relative paths to use the API route
-                              let imageSrc = typeof src === "string" ? src : "";
-                              if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
-                                imageSrc = `/api/playbooks/${id}/${imageSrc}`;
-                              }
-                              return (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img 
-                                  src={imageSrc} 
-                                  alt={alt || ""} 
-                                  className="rounded-lg max-w-full h-auto mx-auto my-6"
-                                />
-                              );
-                            },
-                            code: ({ className, children }) => {
-                              const isInline = !className;
-                              if (isInline) {
-                                return <code className="inline-code">{children}</code>;
-                              }
-                              return (
-                                <code className={className}>
-                                  {children}
-                                </code>
-                              );
-                            },
-                            pre: ({ children }) => (
-                              <pre className="code-block">{children}</pre>
-                            ),
-                            hr: () => <hr className="md-hr" />,
-                            table: ({ children }) => <table className="md-table">{children}</table>,
-                            thead: ({ children }) => <thead className="md-thead">{children}</thead>,
-                            tbody: ({ children }) => <tbody className="md-tbody">{children}</tbody>,
-                            tr: ({ children }) => <tr className="md-tr">{children}</tr>,
-                            th: ({ children }) => <th className="md-th">{children}</th>,
-                            td: ({ children }) => <td className="md-td">{children}</td>,
-                          }}
+                          components={markdownComponents}
                         >
                           {filteredContent}
                         </ReactMarkdown>
