@@ -4,7 +4,7 @@
   "description": "Learn how to run inference and serving using vLLM on your STX Halo™",
   "time": 90,
   "platforms": ["linux"],
-  "difficulty": "beginner to intermediate",
+  "difficulty": "beginner, intermediate",
   "isNew": true,
   "isFeatured": true,
   "published": true,
