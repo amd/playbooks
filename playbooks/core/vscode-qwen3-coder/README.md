@@ -24,11 +24,11 @@ We are going to use LM Studio to serve the LLM powering the coding agent. Your S
 
 Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-30B-A3B` model. Click on the search bar on the top of the LM Studio window. For coding agents, the context length will need to be increased before loading. Click the switch `Manually choose model load parameters` and then click on the Qwen3-Coder-30B-A3B model. 
 
-![Selecting Model](assets/model-list.png)
+![Selecting Model](assets/model-list-zoomed.png)
 
 This will bring up the model configuration, change the context length from `4096` to `32768` and click `Load Model` to load the model with the proper configuration. On typical laptops, running a 32k context window on a 30B model would run out of memory. The Strix Halo's unified memory allows us to maximize this context for analyzing large codebases locally.
 
-![Configuring Model](assets/selecting-model.png)
+![Configuring Model](assets/selecting-model-zoomed.png)
 
 Check to see if the Server is running. This can be done by going to the Developer tab in LM Studio on the left and to see the Status of `Running`. If it is not running, flip the switch icon to start the server. This is necessary for Cline to be able to communicate with LM Studio. 
 
@@ -44,11 +44,11 @@ The first thing that needs to be done is install the Cline VS Code extension. To
 
 After installation, the left panel will contain the Cline icon. Click on that icon to go into the Cline VS Code extension. On the left, there will be a window asking `How will you use Cline?` As we are going to be using a local LLM running via LM Studio, select `Bring my own API Key` and hit `Continue`. 
 
-![Account Creation](assets/cline-how-will-you-use-cline.png)
+![Account Creation](assets/cline-how-will-you-use-cline-zoomed.png)
 
 Next, we need to configure Cline to communicate with the LM Studio server that we setup. Set the API Provider to `LM Studio` and the model to `Qwen3-Coder-30B-A3B-GGUF`. 
 
-![Model Configuration](assets/cline-model-configuration.png)
+![Model Configuration](assets/cline-model-configuration-zoomed.png)
 
 ## Creating your first project
 
