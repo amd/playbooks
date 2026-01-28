@@ -22,7 +22,7 @@ We are going to use LM Studio to serve the LLM powering the coding agent. Your S
 
 ![LM Studio Initial Screen](assets/initial-lm-studio.png)
 
-Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-30B-A3B` model, a fantastic combination of quality and speed. To load the model, click on the search bar on the top of the LM Studio window, which will show the available models. You should see `Qwen3-Coder-30B-A3B`. To provide the quality necessary for coding agents, the context length will need to be increased. Click on the switch `Manually choose model load parameters` and then click on the Qwen3-Coder-30B-A3B model. 
+Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-30B-A3B` model. Click on the search bar on the top of the LM Studio window. For coding agents, the context length will need to be increased before loading. Click the switch `Manually choose model load parameters` and then click on the Qwen3-Coder-30B-A3B model. 
 
 ![Selecting Model](assets/model-list.png)
 
