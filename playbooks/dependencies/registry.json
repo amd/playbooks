@@ -50,6 +50,13 @@
       "category": "model",
       "platforms": ["windows", "linux"],
       "file": "comfyui_models.md"
+    },
+    "driver": {
+      "name": "AMD GPU Driver",
+      "description": "Latest AMD GPU driver for optimal performance",
+      "category": "driver",
+      "platforms": ["windows", "linux"],
+      "file": "driver.md"
     }
   }
 }
