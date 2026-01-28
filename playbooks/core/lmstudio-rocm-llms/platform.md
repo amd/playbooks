@@ -10,9 +10,9 @@ LM Studio should be pre-installed:
 
 | Component | Version | Location |
 |-----------|---------|----------|
-| **LM Studio (Models + Msc)** | v0.3.39 | `C:\Users\...\.lmstudio` |
-| **LM Studio (Program)** | v0.3.39 | `C:\Users\...\AppData\Local\Programs\LM Studio` |
-| **LM Studio (Cache)** | v0.3.39 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Users\...\AppData\Local\Programs\LM Studio` |
+| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### Model Download
 
@@ -21,7 +21,6 @@ The following models should already be present in the LM Studio models directory
 | Model Type | Quantization | Size | Location |
 |------------|--------------|------|----------|
 | OpenAI GPT-OSS 120B | `MXFP4` | 59 GB | `models\ggml-org` |
-| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\ggml-org` |
 
 ---
 
