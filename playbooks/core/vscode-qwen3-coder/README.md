@@ -18,7 +18,7 @@ This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a cod
 
 ## Launch and Configure LM Studio
 
-We are going to use LM Studio to serve the LLM powering the coding agent. Your STX Halo™ comes with LM Studio installed. In the search bar, search for `LM Studio` and launch the application. You will be greeted by the following page.
+We are going to use LM Studio to serve the LLM powering the coding agent. Your STX Halo™ comes with LM Studio installed. In the search bar, search for `LM Studio` and launch the application. LM Studio leverages Vulkan to accelerate Large Language Models (LLMs) using the STX Halo™ GPU. You will be greeted by the following page.
 
 ![LM Studio Initial Screen](assets/initial-lm-studio.png)
 
