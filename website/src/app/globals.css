@@ -457,3 +457,42 @@ body {
   background: #0a0a0a;
   border-color: var(--border-color);
 }
+
+/* Image Lightbox Animations */
+@keyframes lightbox-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lightbox-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-lightbox-fade-in {
+  animation: lightbox-fade-in 0.2s ease-out forwards;
+}
+
+.animate-lightbox-zoom-in {
+  animation: lightbox-zoom-in 0.25s ease-out forwards;
+}
+
+/* Clickable image styles in playbook content */
+.playbook-content img {
+  cursor: zoom-in;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.playbook-content img:hover {
+  opacity: 0.9;
+}

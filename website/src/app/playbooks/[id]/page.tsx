@@ -7,6 +7,7 @@ import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ImageLightbox from "@/components/ImageLightbox";
 import type { Playbook, Platform } from "@/types/playbook";
 import { formatTime } from "@/types/playbook";
 
@@ -299,6 +300,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
   const [error, setError] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
   const [activeHeading, setActiveHeading] = useState<string>("");
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
@@ -391,6 +393,15 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
           src={imageSrc} 
           alt={alt || ""} 
           className="rounded-lg max-w-full h-auto mx-auto my-6"
+          onClick={() => setLightboxImage({ src: imageSrc, alt: alt || "" })}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setLightboxImage({ src: imageSrc, alt: alt || "" });
+            }
+          }}
         />
       );
     },
@@ -682,6 +693,14 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
       </div>
 
       <Footer />
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        src={lightboxImage?.src || ""}
+        alt={lightboxImage?.alt || ""}
+        isOpen={lightboxImage !== null}
+        onClose={() => setLightboxImage(null)}
+      />
     </main>
   );
 }
