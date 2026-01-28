@@ -1,4 +1,4 @@
-# Local LLM coding with Cline and Qwen3-Coder-30B
+# Local LLM coding with VSCode and Qwen3-Coder-30B
 
 ## Overview
 
