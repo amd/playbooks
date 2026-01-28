@@ -26,7 +26,7 @@ Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-3
 
 ![Selecting Model](assets/model-list.png)
 
-This will bring up the model configuration, change the context length from `4096` to `32768` and hit `Enter` to load the model with the proper configuration.
+This will bring up the model configuration, change the context length from `4096` to `32768` and click `Load Model` to load the model with the proper configuration. On typical laptops, running a 32k context window on a 30B model would run out of memory. The Strix Halo's unified memory allows us to maximize this context for analyzing large codebases locally.
 
 ![Configuring Model](assets/selecting-model.png)
 
