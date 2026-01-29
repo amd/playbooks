@@ -13,26 +13,26 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 
 ## Installing Dependencies
 
-<!-- @require:comfyui -->
+<!-- @require:comfyui,driver -->
 
 ## Launching ComfyUI
 
-To launch ComfyUI:
 <!-- @os:windows -->
 
-1. Navigate to `C:\ProgramData\ComfyUI`
-2. Run `run_amd_gpu.bat`
+To launch ComfyUI on Windows, simply click the ComfyUI shortcut on your Desktop.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
+To launch ComfyUI:
+
 1. Navigate to `/usr/local/bin/ComfyUI/` (or to the appropriate folder if installed manually)
-2. Run `python main.py`
-<!-- @os:end -->
+2. Run `python3 main.py --use-pytorch-cross-attention`
 
 ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` to access the interface.
 
 > **Tip**: Keep the terminal window open while using ComfyUI. Closing it will stop the server.
+<!-- @os:end -->
 
 ## Finding the Z Image Turbo Template
 
@@ -53,6 +53,10 @@ Before generating images, you need to load the Z Image Turbo template. Here's ho
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z Image Turbo template" width="600"/>
 </p>
+
+## Downloading Models
+
+<!-- @require:comfyui-models -->
 
 ## Understanding the Interface
 
