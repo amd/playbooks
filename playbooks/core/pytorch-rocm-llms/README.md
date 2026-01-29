@@ -19,6 +19,7 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 ### Create a Virtual Environment
 
 <!-- @os:windows -->
+On Windows, open Command Prompt and run:
 ```cmd
 python -m venv llm-env
 llm-env\Scripts\activate.bat
