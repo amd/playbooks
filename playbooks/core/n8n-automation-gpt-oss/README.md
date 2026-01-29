@@ -2,7 +2,7 @@
 
 n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor. Instead of writing code, you build workflows by dragging, connecting, and configuring nodes.
 
-This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the Financial Times website, extracts key headlines, and uses a local LLM running on your STX Halo™ to generate an investor-focused summary.
+This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the Financial Times website, extracts key headlines, and uses a local LLM running on your Ryzen™ AI Halo to generate an investor-focused summary.
 
 ## What You'll Learn
 
@@ -17,7 +17,7 @@ This playbook teaches you how to set up an AI-powered financial news summarizer 
 
 ## Installing n8n
 
-Your STX Halo™ has Node.js pre-installed. Install n8n globally using npm:
+Your STX Halo has Node.js pre-installed. Install n8n globally using npm:
 
 ```bash
 npm install -g n8n

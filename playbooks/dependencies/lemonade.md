@@ -3,8 +3,8 @@
 <!-- @os:windows -->
 
 1. Open PowerShell or Command Prompt
-2. Start Lemonade with gpt-oss-20b:
-```bash
+2. Start Lemonade with gpt-oss-120b:
+```cmd
 lemonade-server run gpt-oss-120b-mxfp4-GGUF
 ```
 
@@ -14,7 +14,7 @@ The server starts on `http://localhost:8000` with an OpenAI-compatible API at `/
 
 <!-- @os:linux -->
 
-Start Lemonade with gpt-oss-20b and ROCm backend:
+Start Lemonade with gpt-oss-120b and ROCm backend:
 ```bash
 lemonade-server run gpt-oss-120b-mxfp4-GGUF --llamacpp rocm
 ```
