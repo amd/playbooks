@@ -4,7 +4,7 @@
 
 1. Open PowerShell or Command Prompt
 2. Install n8n globally using npm:
-```bash
+```cmd
 npm install -g n8n
 ```
 
