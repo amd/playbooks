@@ -45,12 +45,12 @@ pip install transformers accelerate sentencepiece protobuf
 
 ## Quick Start with Example Scripts
 
-This playbook includes ready-to-use scripts in the `assets/` folder:
+This playbook includes ready-to-use scripts in the `assets/` folder (click to preview):
 
 | Script | Description | Usage |
 |--------|-------------|-------|
-| **run_llm.py** | Basic LLM text generation | `python assets/run_llm.py` |
-| **summarizer.py** | Document summarizer with file input | `python assets/summarizer.py --file document.txt` |
+| [run_llm.py](assets/run_llm.py) | Basic LLM text generation | `python assets/run_llm.py` |
+| [summarizer.py](assets/summarizer.py) | Document summarizer with file input | `python assets/summarizer.py --file document.txt` |
 
 Both scripts support:
 - Model selection: `--model mistral` or `--model gptoss`
@@ -59,7 +59,7 @@ Both scripts support:
 
 ## Loading and Running Your First LLM
 
-The included `assets/run_llm.py` script shows how to load and generate text with LLMs using PyTorch and AMD ROCm. On the first run, model weights are automatically downloaded.
+The included [run_llm.py](assets/run_llm.py) script shows how to load and generate text with LLMs using PyTorch and AMD ROCm. On the first run, model weights are automatically downloaded.
 
 Take a look at how prompts are tokenized and sent to the model, understanding this process lets you adapt LLMs for any text generation or summarization task. Here’s a minimal example from the script:
 
@@ -84,7 +84,7 @@ python assets/run_llm.py
 
 ## Building a Document Summarizer
 
-Build on your LLM setup by turning it into a practical document summarizer. In this section, you will use the `assets/summarizer.py` script to feed in a .txt file and automatically generate a concise summary, all running locally on your GPU.
+Build on your LLM setup by turning it into a practical document summarizer. In this section, you will use the [summarizer.py](assets/summarizer.py) script to feed in a .txt file and automatically generate a concise summary, all running locally on your GPU.
 
 The script is designed to work out of the box: point it at a text file, pick a model, and it returns a clear 2–3 sentence overview. As you explore the code, you can customize prompts, tweak parameters like length and temperature, and see how different models behave.
 

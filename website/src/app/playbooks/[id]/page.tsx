@@ -8,6 +8,7 @@ import remarkGfm from "remark-gfm";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
+import CodeLightbox from "@/components/CodeLightbox";
 import type { Playbook, Platform } from "@/types/playbook";
 import { formatTime } from "@/types/playbook";
 
@@ -345,6 +346,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
+  const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
   const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
@@ -419,11 +421,48 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     ol: ({ children }: { children?: React.ReactNode }) => <ol className="md-ol">{children}</ol>,
     li: ({ children }: { children?: React.ReactNode }) => <li className="md-li">{children}</li>,
     blockquote: ({ children }: { children?: React.ReactNode }) => <blockquote className="md-blockquote">{children}</blockquote>,
-    a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
-      <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
-        {children}
-      </a>
-    ),
+    a: ({ href, children }: { href?: string; children?: React.ReactNode }) => {
+      // Check if this is a link to a code file in the assets folder
+      const isAssetCodeFile = href && 
+        href.startsWith("assets/") && 
+        /\.(py|js|ts|tsx|jsx|json|yaml|yml|sh|bash|css|html|xml|sql|rs|go|java|cpp|c|h|hpp|txt)$/i.test(href);
+      
+      if (isAssetCodeFile) {
+        const filename = href.split("/").pop() || href;
+        return (
+          <button
+            onClick={async (e) => {
+              e.preventDefault();
+              try {
+                // Fetch the code file from the API
+                const response = await fetch(`/api/playbooks/${id}/${href}`);
+                if (response.ok) {
+                  const code = await response.text();
+                  setCodeLightbox({ filename, code });
+                } else {
+                  console.error("Failed to fetch code file:", response.status);
+                }
+              } catch (err) {
+                console.error("Failed to fetch code file:", err);
+              }
+            }}
+            className="md-link inline-flex items-center gap-1 cursor-pointer hover:underline"
+            title={`Preview ${filename}`}
+          >
+            <svg className="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            {children}
+          </button>
+        );
+      }
+      
+      return (
+        <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
+          {children}
+        </a>
+      );
+    },
     img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
       const { src, alt } = props;
       // Transform relative paths to use the API route
@@ -744,6 +783,14 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
         alt={lightboxImage?.alt || ""}
         isOpen={lightboxImage !== null}
         onClose={() => setLightboxImage(null)}
+      />
+
+      {/* Code Lightbox */}
+      <CodeLightbox
+        filename={codeLightbox?.filename || ""}
+        code={codeLightbox?.code || ""}
+        isOpen={codeLightbox !== null}
+        onClose={() => setCodeLightbox(null)}
       />
     </main>
   );
