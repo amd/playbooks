@@ -17,7 +17,7 @@ This playbook teaches you how to set up an AI-powered financial news summarizer 
 
 ## Installing n8n
 
-Your STX Halo™ has Node.js pre-installed. Install n8n globally using npm:
+Your STX Halo has Node.js pre-installed. Install n8n globally using npm:
 
 ```bash
 npm install -g n8n
