@@ -90,7 +90,7 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 
 4. Click **Save**
 
-> **Note**: Ensure Lemonade is running before testing. The workflow uses `gpt-oss-20b-mxfp4-GGUF` by default—you can change this in the Lemonade Chat Model node settings.
+> **Note**: Ensure Lemonade is running before testing. The workflow uses `gpt-oss-120b-mxfp4-GGUF` by default—you can change this in the Lemonade Chat Model node settings.
 
 ### Step 5: Test the Workflow
 

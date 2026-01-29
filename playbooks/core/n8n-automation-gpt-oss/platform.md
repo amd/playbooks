@@ -17,7 +17,7 @@ The Lemonade server should be running with gpt-oss-20b loaded:
 
 | Service | Endpoint | Model |
 |---------|----------|-------|
-| **Lemonade API** | `http://localhost:8000/api/v1` | gpt-oss-20b-mxfp4-GGUF |
+| **Lemonade API** | `http://localhost:8000/api/v1` | gpt-oss-120b-mxfp4-GGUF |
 
 ---
 
