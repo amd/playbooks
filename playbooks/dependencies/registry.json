@@ -64,6 +64,14 @@
       "category": "driver",
       "platforms": ["windows", "linux"],
       "file": "driver.md"
+    },
+    "nodejs": {
+      "name": "Node.js",
+      "version": "20.19.2",
+      "description": "JavaScript runtime for server-side applications",
+      "category": "runtime",
+      "platforms": ["windows", "linux"],
+      "file": "nodejs.md"
     }
   }
 }

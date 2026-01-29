@@ -21,7 +21,7 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 
 ## Prerequisites
 
-<!-- @require:lemonade -->
+<!-- @require:lemonade,nodejs -->
 
 ## Installing n8n
 
