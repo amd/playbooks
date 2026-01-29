@@ -11,7 +11,7 @@ LM Studio should be pre-installed:
 | Component | Version | Location |
 |-----------|---------|----------|
 | **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (Program)** | v0.4.0 | `C:\Users\...\AppData\Local\Programs\LM Studio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### Model Download
