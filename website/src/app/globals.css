@@ -491,6 +491,26 @@ body {
   border-color: var(--border-color);
 }
 
+/* Halo Setup Content Styles */
+.halo-setup-container {
+  margin: 1.25rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  background: var(--bg-secondary);
+}
+
+.halo-setup-container .md-p,
+.halo-setup-container .md-ul,
+.halo-setup-container .md-ol {
+  color: var(--text-secondary);
+}
+
+.halo-setup-container .code-block {
+  background: #0a0a0a;
+  border-color: var(--border-color);
+}
+
 /* Image Lightbox Animations */
 @keyframes lightbox-fade-in {
   from {

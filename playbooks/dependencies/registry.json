@@ -1,6 +1,6 @@
 {
   "$schema": "./registry.schema.json",
-  "description": "Central registry of pre-installed software dependencies for AMD Halo Developer Platform",
+  "description": "Central registry of pre-installed software dependencies and setup steps for AMD Halo Developer Platform",
   "dependencies": {
     "comfyui": {
       "name": "ComfyUI",
@@ -57,11 +57,12 @@
       "category": "driver",
       "platforms": ["windows", "linux"],
       "file": "driver.md"
-    },
-    "memory_config": {
-      "name": "AMD Memory Configuration",
-      "description": "Suggested memory configurations for Strix Halo Systems",
-      "category": "framework",
+    }
+  },
+  "setup": {
+    "memory-config": {
+      "name": "Memory Configuration",
+      "description": "Configure GPU memory allocation for optimal performance with large models",
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md"
     }

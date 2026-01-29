@@ -225,6 +225,84 @@ function HaloPreinstalledDropdown({
   );
 }
 
+/**
+ * Setup content component for system configuration steps
+ * Displays setup instructions directly (not collapsible) since these are required steps
+ */
+function HaloSetupContent({ 
+  content
+}: { 
+  content: string;
+}) {
+  return (
+    <div className="halo-setup-container">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
+        components={{
+          h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
+          h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
+          h3: ({ children }) => <h3 className="md-h3">{children}</h3>,
+          h4: ({ children }) => <h4 className="md-h4">{children}</h4>,
+          p: ({ children }) => <p className="md-p">{children}</p>,
+          ul: ({ children }) => <ul className="md-ul">{children}</ul>,
+          ol: ({ children }) => <ol className="md-ol">{children}</ol>,
+          li: ({ children }) => <li className="md-li">{children}</li>,
+          blockquote: ({ children }) => <blockquote className="md-blockquote">{children}</blockquote>,
+          a: ({ href, children }) => (
+            <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
+              {children}
+            </a>
+          ),
+          code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
+            // Inline code (no className)
+            if (!className) {
+              return <code className="inline-code">{children}</code>;
+            }
+            // Block code - just return the code element, let pre handle the wrapper
+            return <code className={className}>{children}</code>;
+          },
+          pre: ({ children }: { children?: React.ReactNode }) => {
+            // Extract language from the code child's className
+            let language: string | undefined;
+            let codeContent: React.ReactNode = children;
+            
+            if (children && typeof children === "object" && "props" in children) {
+              const codeElement = children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
+              const className = codeElement.props?.className;
+              if (className) {
+                const match = /language-(\w+)/.exec(className);
+                language = match ? match[1] : undefined;
+              }
+              codeContent = codeElement.props?.children;
+            }
+            
+            // Use CodeBlock with language for syntax highlighting
+            if (language && HIGHLIGHTED_LANGUAGES.has(language.toLowerCase())) {
+              return (
+                <CodeBlock language={language}>
+                  {String(codeContent).replace(/\n$/, "")}
+                </CodeBlock>
+              );
+            }
+            
+            return <CodeBlock>{children}</CodeBlock>;
+          },
+          hr: () => <hr className="md-hr" />,
+          table: ({ children }) => <table className="md-table">{children}</table>,
+          thead: ({ children }) => <thead className="md-thead">{children}</thead>,
+          tbody: ({ children }) => <tbody className="md-tbody">{children}</tbody>,
+          tr: ({ children }) => <tr className="md-tr">{children}</tr>,
+          th: ({ children }) => <th className="md-th">{children}</th>,
+          td: ({ children }) => <td className="md-td">{children}</td>,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
 interface TocItem {
   id: string;
   text: string;
@@ -366,6 +444,26 @@ function transformPreinstalledBlocks(content: string): string {
   });
 }
 
+/**
+ * Transforms @setup-content tags into setup instruction blocks
+ * 
+ * Tags supported:
+ * <!-- @setup-content --> ... <!-- @setup-content:end -->
+ * 
+ * Unlike @preinstalled (which is collapsible since it's optional info),
+ * setup content is displayed directly as required configuration steps.
+ */
+function transformSetupBlocks(content: string): string {
+  if (!content) return "";
+  
+  const setupPattern = /<!-- @setup-content -->([\s\S]*?)<!-- @setup-content:end -->/g;
+  
+  return content.replace(setupPattern, (_match, innerContent) => {
+    const escapedContent = innerContent.trim();
+    return `<div class="halo-setup-content" data-content="${encodeURIComponent(escapedContent)}"></div>`;
+  });
+}
+
 function PlatformToggle({ 
   platforms, 
   selected, 
@@ -457,10 +555,12 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     fetchPlaybook();
   }, [id]);
 
-  // Transform relative image paths to API routes, filter by OS, and transform preinstalled blocks
+  // Transform relative image paths to API routes, filter by OS, and transform preinstalled/setup blocks
   const filteredContent = playbook?.content 
-    ? transformPreinstalledBlocks(
-        filterContentByOS(playbook.content, selectedPlatform)
+    ? transformSetupBlocks(
+        transformPreinstalledBlocks(
+          filterContentByOS(playbook.content, selectedPlatform)
+        )
       )
         // Transform relative image paths in HTML img tags to use the API route
         .replace(/src=["'](?!https?:\/\/|\/)(.*?)["']/g, `src="/api/playbooks/${id}/$1"`)
@@ -582,6 +682,14 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
               dropdownId={dropdownId}
             />
           );
+        }
+      }
+      // Handle the halo-setup-content custom element
+      if (className === 'halo-setup-content') {
+        const dataContent = props['data-content'];
+        if (dataContent) {
+          const decodedContent = decodeURIComponent(dataContent);
+          return <HaloSetupContent content={decodedContent} />;
         }
       }
       return <div className={className} {...rest} />;
