@@ -26,7 +26,7 @@ Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-3
 
 ![Selecting Model](assets/model-list-zoomed.png)
 
-This will bring up the model configuration, change the context length from `4096` to `32768` and click `Load Model` to load the model with the proper configuration. On typical laptops, running a 32k context window on a 30B model would run out of memory. The Strix Halo's unified memory allows us to maximize this context for analyzing large codebases locally.
+This will bring up the model configuration, change the context length from `4096` to `32768` and click `Load Model` to load the model with the proper configuration. On typical laptops, running a 32k context window on a 30B model would run out of memory. The STX Halo's unified memory allows us to maximize this context for analyzing large codebases locally.
 
 ![Configuring Model](assets/selecting-model-zoomed.png)
 
@@ -56,7 +56,7 @@ Let's use our local agent to create a website! To do this, have VS Code open an 
 
 ![VS Code Empty Folder](assets/open-cline-test.png)
 
-Now we are ready to prompt the local coding agent. Click on the Cline extension on the left column and enter a prompt to kickoff the agent. As an example, we are using the prompt: `Create a website showcasing the ability to run local large-language models on the AMD Strix Halo device.` and hit `Enter`. 
+Now we are ready to prompt the local coding agent. Click on the Cline extension on the left column and enter a prompt to kickoff the agent. As an example, we are using the prompt: `Create a website showcasing the ability to run local large-language models on the AMD STX Halo device.` and hit `Enter`. 
 
 The agent will then start to create files according to the prompt. As a user, you can watch the code be generated in VS Code as shown below:  
 
