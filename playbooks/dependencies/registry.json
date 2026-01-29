@@ -57,6 +57,13 @@
       "category": "driver",
       "platforms": ["windows", "linux"],
       "file": "driver.md"
+    },
+    "memory_config": {
+      "name": "AMD Memory Configuration",
+      "description": "Suggested memory configurations for Strix Halo Systems",
+      "category": "framework",
+      "platforms": ["windows", "linux"],
+      "file": "memoryconfig.md"
     }
   }
 }
