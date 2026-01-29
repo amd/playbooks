@@ -4,7 +4,7 @@
 
 1. Open PowerShell or Command Prompt
 2. Start Lemonade with gpt-oss-20b:
-```bash
+```cmd
 lemonade-server run gpt-oss-20b-mxfp4-GGUF
 ```
 
