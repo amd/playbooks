@@ -33,14 +33,13 @@ def main():
 
     # Load model and tokenizer
     model_name = "openai/gpt-oss-20b"
+    # To use Mistral-7B instead of GPT-OSS-20B, uncomment the following line
+    # model_name = "mistralai/Mistral-7B-Instruct-v0.3"
+
     print(f"Loading {model_name}...")
     print("First run will download ~14GB, this may take a few minutes")
     print("For AMD Halo Developer Platforms, the model will be pre-installed.")
     
-    # model_name = "mistralai/Mistral-7B-Instruct-v0.3"
-
-    print()
-
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
@@ -48,8 +47,7 @@ def main():
         device_map="auto"
     )
 
-    print("✓ Model loaded successfully!")
-    print()
+    print("✓ Model loaded successfully!\n")
 
     # Create a simple prompt
     prompt = "Explain what a large language model is in simple terms:"
@@ -76,8 +74,7 @@ def main():
     print("Model Output:\n")
     response_text = response[len(prompt):].strip() if response.startswith(prompt) else response.strip()
     print(response_text)
-    print()
-    print("Done. Try changing the prompt or generation settings for different explanations.")
+    print("\nDone. Try changing the prompt or generation settings for different explanations.")
     
     # Cleanup GPU memory and exit cleanly
     del model
