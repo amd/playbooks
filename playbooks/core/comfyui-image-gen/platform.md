@@ -3,38 +3,15 @@
 This document describes the expected platform configurations for running this playbook.
 
 ## Required Apps/Frameworks
-### Windows
+### Windows/Linux
 
-ComfyUI should be pre-installed using the AMD portable package:
-
-| Component | Version | Location |
-|-----------|---------|----------|
-| **ComfyUI_windows_portable_amd.7z** | v0.9.2 | `C:\ProgramData\ComfyUI` |
-
-Extract the portable package to `C:\ProgramData\ComfyUI` before running this playbook.
-
-Models should be placed in `C:\ProgramData\ComfyUI\models\`.
-
----
-
-### Linux
-
-Clone ComfyUI from the official repository and install dependencies:
-
-```bash
-git clone https://github.com/comfyanonymous/ComfyUI.git
-cd ComfyUI
-git checkout v0.9.2
-pip install -r requirements.txt
-```
-
-App should be placed in `/usr/local/bin/ComfyUI/`. Models should be placed in `ComfyUI/models/`.
+ComfyUI should be pre-installed using the instructions provided in [ComfyUI Installation Guide](../../dependencies/comfyui.md).
 
 ## Required Models
 
 ### Windows/Linux
 
-The following models must be present in the ComfyUI models directory:
+The following models must be present in the directory where ComfyUI is installed inside of the `models` folder.
 
 | Model Type | Filename | Size | Location | Download |
 |------------|----------|------|----------|----------|
@@ -43,4 +20,5 @@ The following models must be present in the ComfyUI models directory:
 | Diffusion Model | `z_image_turbo_bf16.safetensors` | 11.46 GB | `models/diffusion_models/` | [Link](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors) |
 | VAE | `ae.safetensors` | 319.77 MB | `models/vae/` | [Link](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors) |
 
----
+
+To test whether the models are correctly placed, [preview the ComfyUI playbook using the onboarding website](../../README.md#previewing-the-playbooks) and follow instructions. Models are correctly placed if no "Models not found" page shows up when launching the Z-Image Turbo template.
