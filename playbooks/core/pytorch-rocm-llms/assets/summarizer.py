@@ -35,7 +35,7 @@ class DocumentSummarizer:
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
-            torch_dtype=torch.float16,
+            torch_dtype=torch.bfloat16,
             device_map="auto"
         )
         print("✓ Model ready!\n")

@@ -8,5 +8,6 @@
   "isNew": true,
   "isFeatured": false,
   "published": true,
-  "tags": ["pytorch", "rocm", "llm", "inference", "summarization"]
+  "tags": ["pytorch", "rocm", "llm", "inference", "summarization"],
+  "coverImage": "assets/cover_img.jpeg"
 }
