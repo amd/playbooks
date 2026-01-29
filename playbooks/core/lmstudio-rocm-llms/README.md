@@ -18,11 +18,10 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 ## Downloading models
 
-Your LM Studio instance in the STX Halo™ comes with pre-downloaded models such as: OpenAI GPT-OSS 120B (MXFP4), and Qwen3 Coder 30B A3B (Q4_K_M). 
+Your LM Studio instance in the STX Halo™ comes with OpenAI GPT-OSS 120B pre-downloaded.
 
 
 Should you wish to download additional models - you can do so by pressing "Ctrl" + "Shift" + "M" on your keyboard or clicking on the "Discover" tab (Magnifying Glass) and searching for additional models.
-> Q4_K_M quantization is recommended as it reduces memory footprint and latenncy without severe loss of quality.
 
 LM Studio will automatically download and put the model in the correct directory.
 
