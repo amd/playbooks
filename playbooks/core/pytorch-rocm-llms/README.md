@@ -8,12 +8,6 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 - Run LLMs like gpt-oss-20b and Mistral-7B-Instruct locally using PyTorch and ROCm
 - Create a document summarization tool using LLMs
 
-## Prerequisites
-
-- **Python 3.10 or newer**
-- **16GB+ GPU memory** (24GB+ recommended for 20B models)
-- **50GB+ free disk space** for model storage
-
 ## Setting Up Your Environment
 
 ### Create a Virtual Environment
@@ -50,19 +44,18 @@ This playbook includes ready-to-use scripts in the `assets/` folder (click to pr
 
 | Script | Description | Usage |
 |--------|-------------|-------|
-| [run_llm.py](assets/run_llm.py) | Basic LLM text generation | `python assets/run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Document summarizer with file input | `python assets/summarizer.py --file document.txt` |
+| [run_llm.py](assets/run_llm.py) | Basic LLM text generation | `python run_llm.py` |
+| [summarizer.py](assets/summarizer.py) | Document summarizer with Harmony support | `python summarizer.py --file document.txt` |
 
 Both scripts support:
-- Model selection: `--model mistral` or `--model gptoss`
-- Automatic GPU cleanup (no hanging processes)
-- Warning suppression for cleaner output
+- Model selection: `--model gptoss` (default) or `--model mistral`
+- Chat template formatting for proper model prompting especially useful for document summarization
 
 ## Loading and Running Your First LLM
 
 The included [run_llm.py](assets/run_llm.py) script shows how to load and generate text with LLMs using PyTorch and AMD ROCm. On the first run, model weights are automatically downloaded.
 
-Take a look at how prompts are tokenized and sent to the model, understanding this process lets you adapt LLMs for any text generation or summarization task. Here’s a minimal example from the script:
+Take a look at how prompts are tokenized and sent to the model. Understanding this process lets you adapt LLMs for any text generation or summarization task. Here’s a minimal example from the script:
 
 ```python
 import torch
@@ -72,7 +65,7 @@ model_name = "openai/gpt-oss-20b"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
-    torch_dtype=torch.float16,
+    torch_dtype=torch.bfloat16,
     device_map="auto"
 )
 ```
@@ -80,7 +73,7 @@ model = AutoModelForCausalLM.from_pretrained(
 To try it out:
 
 ```bash
-python assets/run_llm.py
+python run_llm.py
 ```
 
 ## Building a Document Summarizer
@@ -89,53 +82,24 @@ Build on your LLM setup by turning it into a practical document summarizer. In t
 
 The script is designed to work out of the box: point it at a text file, pick a model, and it returns a clear 2–3 sentence overview. As you explore the code, you can customize prompts, tweak parameters like length and temperature, and see how different models behave.
 
-### Core Implementation
-
-```python
-class DocumentSummarizer:
-    def __init__(self, model="mistral"):
-        # Load model and tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_name, torch_dtype=torch.float16, device_map="auto"
-        )
-    
-    def summarize(self, text, max_length=150, temperature=0.3):
-        # Optimized prompt for concise summaries
-        prompt = f"""[INST] You are an expert at creating concise summaries. 
-Summarize the following text in 2-3 sentences maximum, focusing ONLY on 
-the most critical information. Avoid repeating details.
-
-TEXT: {text}
-
-SUMMARY: [/INST]"""
-        
-        inputs = self.tokenizer(prompt, return_tensors="pt").to("cuda")
-        outputs = self.model.generate(**inputs, max_new_tokens=max_length, 
-                                      temperature=temperature)
-        return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-```
-
 ### Usage Examples
 
 ```bash
+
+# Summarize document
+python summarizer.py
+
 # Summarize a text file
-python assets/summarizer.py --file <file.txt>
+python summarizer.py --file example_document.txt
 
-# Shorter summary with lower temperature
-python assets/summarizer.py --file <file.txt>  --temperature 0.2
+# Adjust creativity with temperature
+python summarizer.py --file document.txt --temperature 0.5
 
-# Use larger model for complex documents
-python assets/summarizer.py --file <file.txt> --model gptoss
-```
+# Try different model instead
+python summarizer.py --file document.txt --model mistral
 
-### Batch Summarization
-To summarize multiple documents at once, you can use the `summarize_batch` method as shown below:
-```python
-from summarizer import DocumentSummarizer
-
-summarizer = DocumentSummarizer(model="gptoss")
-summaries = summarizer.summarize_batch(documents)
+# Longer summaries with more tokens
+python summarizer.py --file document.txt --max-length 200
 ```
 
 ## Generation Parameters
@@ -166,4 +130,4 @@ summaries = summarizer.summarize_batch(documents)
 - **Model Exploration**: Experiment with new models like Llama 3, Phi-3, or Qwen for better results
 - **Production Deployment**: Use tools like vLLM or TGI for scalable LLM serving in organizations
 
-Your STX Halo™ gives you the power to run sophisticated language models locally. Experiment with different models, prompts, and parameters to discover what works best for your applications.
+Your STX Halo gives you the power to run sophisticated language models locally. Experiment with different models, prompts, and parameters to discover what works best for your applications.

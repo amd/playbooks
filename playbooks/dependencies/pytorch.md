@@ -3,7 +3,6 @@
 
 1. **Create a Python 3.12 or 3.13 environment and activate it:**  
    (Use your preferred tool: `venv`, `conda`, etc.)
-     ```
 
 2. **Install PyTorch with ROCm support:**
 
