@@ -74,7 +74,6 @@ def main():
     
     print()
     print("Model Output:\n")
-    # Show the *new* lines only, not the prompt again
     response_text = response[len(prompt):].strip() if response.startswith(prompt) else response.strip()
     print(response_text)
     print()

@@ -19,9 +19,9 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 ### Create a Virtual Environment
 
 <!-- @os:windows -->
-```bash
-python3 -m venv llm-env
-source llm-env/bin/activate
+```cmd
+python -m venv llm-env
+llm-env\Scripts\activate.bat
 ```
 <!-- @os:end -->
 
@@ -119,17 +119,17 @@ SUMMARY: [/INST]"""
 
 ```bash
 # Summarize a text file
-python assets/summarizer.py --file mydocument.txt
+python assets/summarizer.py --file <file.txt>
 
 # Shorter summary with lower temperature
-python assets/summarizer.py --file report.txt --max-length 100 --temperature 0.2
+python assets/summarizer.py --file <file.txt>  --temperature 0.2
 
 # Use larger model for complex documents
-python assets/summarizer.py --file research.txt --model gptoss
+python assets/summarizer.py --file <file.txt> --model gptoss
 ```
 
-### Batch Processing
-
+### Batch Summarization
+To summarize multiple documents at once, you can use the `summarize_batch` method as shown below:
 ```python
 from summarizer import DocumentSummarizer
 
@@ -152,23 +152,17 @@ summaries = summarizer.summarize_batch(documents)
 
 ## Real-World Applications
 
-- **Research Paper Analysis**: Extract key findings
-- **News Aggregation**: Summarize articles
-- **Meeting Notes**: Condense transcripts into action items
-- **Legal Document Review**: Extract relevant clauses
-- **Code Documentation**: Generate repository summaries
+- **Research Paper Analysis**: Extract key findings from complex publications for quick review
+- **News Aggregation**: Summarize news articles into brief daily digests or highlights
+- **Meeting Notes**: Condense transcripts into actionable items and concise summaries
+- **Legal Document Review**: Extract relevant clauses or obligations from long legal texts quickly
+- **Code Documentation**: Generate concise repository overviews and function explanations
 
 ## Next Steps
 
-- **Fine-tuning**: Adapt models to your domain (see PyTorch Fine-tuning Playbook)
-- **RAG Systems**: Combine LLMs with document retrieval
-- **Model Exploration**: Try Llama 3, Phi-3, Qwen
-- **Production Deployment**: Use vLLM or TGI for serving at scale
+- **Fine-tuning**: Adapt models to your specific field or jargon for better accuracy (see PyTorch Fine-tuning Playbook)
+- **RAG Systems**: Combine LLMs with document retrieval for context-aware answers and search
+- **Model Exploration**: Experiment with new models like Llama 3, Phi-3, or Qwen for better results
+- **Production Deployment**: Use tools like vLLM or TGI for scalable LLM serving in organizations
 
-### Resources
-
-- [Hugging Face Transformers Documentation](https://huggingface.co/docs/transformers)
-- [PyTorch ROCm Documentation](https://pytorch.org/get-started/locally/)
-- [Mistral AI Documentation](https://docs.mistral.ai/)
-
-Your STX Halo™ GPU gives you the power to run sophisticated language models locally. Experiment with different models, prompts, and parameters to discover what works best for your applications.
+Your STX Halo™ gives you the power to run sophisticated language models locally. Experiment with different models, prompts, and parameters to discover what works best for your applications.

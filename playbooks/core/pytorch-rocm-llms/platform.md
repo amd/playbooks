@@ -1,46 +1,40 @@
 # Platform Configuration
 
-## Operating System Support
+This document describes the expected platform configurations for running this playbook.
 
-- **Linux**: Full support with ROCm
-- **Windows** : Full support with ROCm
+## Prerequisites
 
-## Pre-installed Software
+PyTorch with ROCm support will be pre-installed on your AMD Developer Platform. Please refer to the relevant section for your operating system:
 
-The following software should be pre-configured on your STX Halo™:
+### Windows
 
-### ROCm Stack
-- ROCm 7.2
-- PyTorch 2.9+ with ROCm support
+| Component     | Version         | Notes                             |
+|---------------|-----------------|-----------------------------------|
+| **PyTorch**   | 2.9 or newer    | Preinstalled, available in PATH   |
 
-### Python Environment
-- Python 3.11 or newer
-- pip package manager
+### Linux
 
-## Environment Setup
+| Component     | Version         | Notes                             |
+|---------------|-----------------|-----------------------------------|
+| **PyTorch**   | 2.9 or newer    | Preinstalled, available in PATH   |
 
-## Model Storage
+## Required Models
 
-Models will be downloaded to the Hugging Face cache directory (typically `~/.cache/huggingface/hub/`). Ensure at least **50GB free space** for model storage.
+The following models are tested and optimized for your platform:
 
-## GPU Requirements
+| Model | Parameters | Size | Download Location |
+|-------|------------|------|-------------------|
+| **openai/gpt-oss-20b** | 20B | ~40GB | Pre-installed on AMD Halo Developer Platform |
 
-- **Minimum**: 16GB VRAM (for 7B models)
-- **Recommended**: 24GB VRAM (for 13B-20B models)
+Models will be automatically downloaded to the Hugging Face cache directory:
+- **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
+- **Linux**: `~/.cache/huggingface/hub/`
 
-## Verified Models
-
-The following models are tested and optimized for STX Halo™.
-If you are using AMD Halo Developer Platform, this model comes pre-installed.
-
-- `openai/gpt-oss-20b` (20B parameters, ~40GB)
+Ensure at least **50GB free space** for model storage.
 
 ## Network Requirements
 
 Initial setup requires internet access to download models from Hugging Face. After download, the playbook can run offline.
 
-## Notes
-
-- First-time model downloads may take 10-30 minutes depending on model size and connection speed
+- First-time model downloads may take **5-10 minutes** depending on model size and connection speed
 - Models are cached locally and don't need to be re-downloaded
-- ROCm drivers must be properly installed and configured for iGPU acceleration
