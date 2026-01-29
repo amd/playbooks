@@ -1,5 +1,11 @@
 ### Lemonade
 
+#### Installing Lemonade
+
+Download and install Lemonade Server from [lemonade-server.ai](https://lemonade-server.ai).
+
+#### Starting Lemonade
+
 <!-- @os:windows -->
 
 1. Open PowerShell or Command Prompt

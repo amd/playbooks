@@ -11,6 +11,14 @@ This playbook teaches you how to set up an AI-powered financial news summarizer 
 - Connecting to Lemonade using the native n8n integration
 - Understanding workflow nodes and data flow
 
+## Why Lemonade?
+
+[Lemonade](https://lemonade-server.ai) is a local LLM serving platform built for AMD hardware. It provides an OpenAI-compatible API that runs entirely on your machine—your data never leaves your device.
+
+In this playbook, we use Lemonade to serve a local LLM that n8n connects to for AI-powered tasks. Unlike cloud-based LLM providers, Lemonade runs on your Ryzen™ AI Halo GPU, giving you full control over your models with zero API costs.
+
+n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a first-class integration—no need to configure OpenAI-compatible endpoints manually. This makes connecting your local LLM to automation workflows straightforward.
+
 ## Prerequisites
 
 <!-- @require:lemonade -->
@@ -71,7 +79,7 @@ The imported workflow contains 7 connected nodes:
 | **Extract News Headlines & Text** | HTML node that extracts headlines, editor's picks, top stories, and regional news using CSS selectors |
 | **Clean Extracted News Data** | Set node that combines all extracted data into a single text field |
 | **AI Financial News Summarizer** | AI Agent that processes the news with a financial analyst system prompt |
-| **Lemonade Chat Model** | Connects to your local Lemonade server running gpt-oss-20b |
+| **Lemonade Chat Model** | Connects to your local Lemonade server running the LLM |
 | **Structured Output Parser** | Formats the AI output as structured JSON |
 | **Convert to File** | Converts the summary to a downloadable file |
 
@@ -125,6 +133,7 @@ Click the workflow name at the top and rename it if desired. Workflows auto-save
 - **Send notifications**: Add a **Discord**, **Slack**, or **Email** node to receive summaries
 - **Try different models**: Change the model in the Lemonade Chat Model node to experiment with different LLMs
 - **Customize extraction**: Modify the HTML Extract node's CSS selectors to target different news sections
+- **Try different backends**: n8n also supports [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio, and other local LLM backends
 
 ### Explore n8n Templates
 
