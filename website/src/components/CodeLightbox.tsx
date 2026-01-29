@@ -38,15 +38,11 @@ export default function CodeLightbox({ filename, code, isOpen, onClose }: CodeLi
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
+      // Reset copied state when lightbox closes (cleanup is safe for setState)
+      setCopied(false);
     };
   }, [isOpen, handleKeyDown]);
 
-  // Reset copied state when lightbox closes
-  useEffect(() => {
-    if (!isOpen) {
-      setCopied(false);
-    }
-  }, [isOpen]);
 
   const handleCopy = useCallback(async () => {
     try {
