@@ -294,12 +294,45 @@ body {
   font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
 }
 
+.playbook-content .code-block-wrapper {
+  position: relative;
+  margin: 1rem 0;
+}
+
+.playbook-content .code-copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  padding: 0.375rem;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.playbook-content .code-copy-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-color: var(--ember-primary);
+}
+
+.playbook-content .code-copy-button:active {
+  transform: scale(0.95);
+}
+
 .playbook-content .code-block {
   background: #0a0a0a;
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   padding: 1rem;
-  margin: 1rem 0;
+  padding-right: 3rem;
+  margin: 0;
   overflow-x: auto;
 }
 
