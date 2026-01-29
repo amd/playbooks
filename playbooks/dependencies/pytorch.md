@@ -1,8 +1,12 @@
 ### PyTorch
-> **Note**: The PyTorch-ROCm build provides native iGPU acceleration for both Windows and Linux
+> **Note**: The PyTorch-ROCm build provides native iGPU acceleration for both Windows and Linux.
 
-Activate your preferred Python environment and run:
+1. **Create a Python 3.12 or 3.13 environment and activate it:**  
+   (Use your preferred tool: `venv`, `conda`, etc.)
+     ```
 
-```bash
-pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision torchaudio
-```
+2. **Install PyTorch with ROCm support:**
+
+   ```bash
+   pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision torchaudio
+   ```
