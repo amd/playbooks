@@ -106,7 +106,7 @@ except Exception as e:
 
 
 ## Next Steps
-- **Custom App Integration**: Integrate your own Python scripts or applications using the local OpenAI-compatible API
-- **Advanced Frontends**: Connect powerful interfaces like Open WebUI to your server for chat history and persona management
+- **Custom App Integration**: Integrate your own Python scripts or applications using the local OpenAI-compatible API.
+- **Advanced Frontends**: Connect powerful interfaces like Open WebUI to your server for chat history and persona management.
 
 For more documentation, please visit: https://lmstudio.ai/docs/developer

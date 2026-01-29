@@ -5,6 +5,8 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
@@ -14,25 +16,53 @@ import { formatTime } from "@/types/playbook";
 // Global store for dropdown states - persists across re-renders without causing them
 const dropdownStateStore: Record<string, boolean> = {};
 
+// Languages that support syntax highlighting
+const HIGHLIGHTED_LANGUAGES = new Set(["python", "py", "bash", "sh", "shell", "c", "cpp", "c++"]);
+
+// Map language aliases to their canonical names for the highlighter
+function normalizeLanguage(lang: string): string {
+  const langMap: Record<string, string> = {
+    "py": "python",
+    "sh": "bash",
+    "shell": "bash",
+    "c++": "cpp",
+  };
+  return langMap[lang] || lang;
+}
+
 /**
- * Code block component with copy-to-clipboard functionality
+ * Code block component with copy-to-clipboard functionality and syntax highlighting
  */
-function CodeBlock({ children }: { children?: React.ReactNode }) {
+function CodeBlock({ children, language }: { children?: React.ReactNode; language?: string }) {
   const [copied, setCopied] = useState(false);
   const preRef = useRef<HTMLPreElement>(null);
 
-  const handleCopy = useCallback(async () => {
-    if (preRef.current) {
-      const code = preRef.current.textContent || "";
-      try {
-        await navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error("Failed to copy code:", err);
-      }
+  // Extract the code string from children
+  const codeString = useMemo(() => {
+    if (typeof children === "string") return children;
+    // If children is a React element (code tag), extract its children
+    if (children && typeof children === "object" && "props" in children) {
+      const childElement = children as React.ReactElement<{ children?: React.ReactNode }>;
+      const codeChildren = childElement.props?.children;
+      if (typeof codeChildren === "string") return codeChildren;
     }
-  }, []);
+    return "";
+  }, [children]);
+
+  const handleCopy = useCallback(async () => {
+    const code = codeString || preRef.current?.textContent || "";
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy code:", err);
+    }
+  }, [codeString]);
+
+  // Check if we should use syntax highlighting
+  const normalizedLang = language ? normalizeLanguage(language.toLowerCase()) : "";
+  const shouldHighlight = normalizedLang && HIGHLIGHTED_LANGUAGES.has(language?.toLowerCase() || "");
 
   return (
     <div className="code-block-wrapper">
@@ -53,7 +83,28 @@ function CodeBlock({ children }: { children?: React.ReactNode }) {
           </svg>
         )}
       </button>
-      <pre ref={preRef} className="code-block">{children}</pre>
+      {shouldHighlight && codeString ? (
+        <SyntaxHighlighter
+          language={normalizedLang}
+          style={oneDark}
+          customStyle={{
+            margin: 0,
+            padding: "1rem",
+            borderRadius: "0.5rem",
+            fontSize: "0.875rem",
+            background: "#0a0a0a",
+          }}
+          codeTagProps={{
+            style: {
+              fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+            }
+          }}
+        >
+          {codeString.replace(/\n$/, "")}
+        </SyntaxHighlighter>
+      ) : (
+        <pre ref={preRef} className="code-block">{children}</pre>
+      )}
     </div>
   );
 }
@@ -123,14 +174,40 @@ function HaloPreinstalledDropdown({
                   {children}
                 </a>
               ),
-              code: ({ className, children }) => {
-                const isInline = !className;
-                if (isInline) {
+              code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
+                // Inline code (no className)
+                if (!className) {
                   return <code className="inline-code">{children}</code>;
                 }
+                // Block code - just return the code element, let pre handle the wrapper
                 return <code className={className}>{children}</code>;
               },
-              pre: ({ children }) => <pre className="code-block">{children}</pre>,
+              pre: ({ children }: { children?: React.ReactNode }) => {
+                // Extract language from the code child's className
+                let language: string | undefined;
+                let codeContent: React.ReactNode = children;
+                
+                if (children && typeof children === "object" && "props" in children) {
+                  const codeElement = children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
+                  const className = codeElement.props?.className;
+                  if (className) {
+                    const match = /language-(\w+)/.exec(className);
+                    language = match ? match[1] : undefined;
+                  }
+                  codeContent = codeElement.props?.children;
+                }
+                
+                // Use CodeBlock with language for syntax highlighting
+                if (language && HIGHLIGHTED_LANGUAGES.has(language.toLowerCase())) {
+                  return (
+                    <CodeBlock language={language}>
+                      {String(codeContent).replace(/\n$/, "")}
+                    </CodeBlock>
+                  );
+                }
+                
+                return <CodeBlock>{children}</CodeBlock>;
+              },
               hr: () => <hr className="md-hr" />,
               table: ({ children }) => <table className="md-table">{children}</table>,
               thead: ({ children }) => <thead className="md-thead">{children}</thead>,
@@ -450,19 +527,39 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
       );
     },
     code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
-      const isInline = !className;
-      if (isInline) {
+      // Inline code (no className)
+      if (!className) {
         return <code className="inline-code">{children}</code>;
       }
-      return (
-        <code className={className}>
-          {children}
-        </code>
-      );
+      // Block code - just return the code element, let pre handle the wrapper
+      return <code className={className}>{children}</code>;
     },
-    pre: ({ children }: { children?: React.ReactNode }) => (
-      <CodeBlock>{children}</CodeBlock>
-    ),
+    pre: ({ children }: { children?: React.ReactNode }) => {
+      // Extract language from the code child's className
+      let language: string | undefined;
+      let codeContent: React.ReactNode = children;
+      
+      if (children && typeof children === "object" && "props" in children) {
+        const codeElement = children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
+        const className = codeElement.props?.className;
+        if (className) {
+          const match = /language-(\w+)/.exec(className);
+          language = match ? match[1] : undefined;
+        }
+        codeContent = codeElement.props?.children;
+      }
+      
+      // Use CodeBlock with language for syntax highlighting
+      if (language && HIGHLIGHTED_LANGUAGES.has(language.toLowerCase())) {
+        return (
+          <CodeBlock language={language}>
+            {String(codeContent).replace(/\n$/, "")}
+          </CodeBlock>
+        );
+      }
+      
+      return <CodeBlock>{children}</CodeBlock>;
+    },
     hr: () => <hr className="md-hr" />,
     table: ({ children }: { children?: React.ReactNode }) => <table className="md-table">{children}</table>,
     thead: ({ children }: { children?: React.ReactNode }) => <thead className="md-thead">{children}</thead>,
