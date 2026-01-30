@@ -29,10 +29,14 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 2. Press "Ctrl" + "M" to open the `Model Loader`, select "manually chose model load parameters", and click on "OpenAI GPT-OSS 120B"
 3. Make sure "show advanced settings" is checked.  
 4. Change context size to "128,000". Make sure "Flash Attention" is On and "GPU offload layers" is set to maximum.
-5. Check "Remember settings" and click Load.
+5. Check "Remember settings" and click on `Load Model`.
 6. Send a message and start interacting with the model!
 
-> Context size refers to the model's short-term memory limit, and with Strix Halo, we can use 128,000 tokens to allow for handling extensive workflows that typically require cloud servers.
+<p align="center">
+  <img src="assets/chat.png" alt="Chatting with gpt-oss-120b on LM Studio" width="600"/>
+</p>
+
+> Context size refers to the model's short-term memory limit, and with STX Halo, we can use 128,000 tokens to allow for handling extensive workflows that typically require cloud servers.
 
 ## Serve LLMs through an OpenAI compatible endpoint
 
@@ -69,7 +73,7 @@ client = OpenAI(
     base_url="http://localhost:1234/v1", 
     api_key="lm-studio"
 )
-print("Attempting to connect to local Strix Halo server...")
+print("Attempting to connect to local STX Halo server...")
 
 try:
     # Create a simple chat completion request
