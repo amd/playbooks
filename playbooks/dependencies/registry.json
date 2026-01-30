@@ -51,6 +51,13 @@
       "platforms": ["windows", "linux"],
       "file": "comfyui_models.md"
     },
+    "lmstudio-models-gpt-oss-120b": {
+      "name": "GPT-OSS 120B Model",
+      "description": "OpenAI GPT-OSS 120B model for LM Studio",
+      "category": "model",
+      "platforms": ["windows", "linux"],
+      "file": "lmstudio_models_gpt_oss_120b.md"
+    },
     "driver": {
       "name": "AMD GPU Driver",
       "description": "Latest AMD GPU driver for optimal performance",

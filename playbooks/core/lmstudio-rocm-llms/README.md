@@ -18,20 +18,12 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 <!-- @setup:memory-config -->
 
 
-## Downloading models
+## Downloading Models
 
-Your LM Studio instance in the STX Halo™ comes with OpenAI GPT-OSS 120B pre-downloaded.
-
-
-Should you wish to download additional models - you can do so by pressing "Ctrl" + "Shift" + "M" on your keyboard or clicking on the "Discover" tab (Magnifying Glass) and searching for additional models.
-
-LM Studio will automatically download and put the model in the correct directory.
+<!-- @require:lmstudio-models-gpt-oss-120b -->
 
 ## Chatting with an LLM
 Learn how to start chatting with a ChatGPT-grade LLM completely locally.  
-
-
-> This example uses OpenAI GPT-OSS 120B in its original MXFP4 precision. Please make sure to have completed the [System Setup](#system-setup) section above for optimal performance.
 
 1. Press "Ctrl" + "L" or select the central drop down menu at the top. Select "manually chose model load parameters" and click on "OpenAI GPT-OSS 120B"
 2. Make sure "show advanced settings" is checked.  
