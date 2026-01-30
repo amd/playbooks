@@ -886,7 +886,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
       <Header />
       
       <div className="pt-24 pb-16 px-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Back Link */}
           <Link 
             href="/#playbooks" 
