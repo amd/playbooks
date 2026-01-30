@@ -21,7 +21,7 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 
 ## Prerequisites
 
-<!-- @require:lemonade -->
+<!-- @require:lemonade,nodejs -->
 
 ## Installing n8n
 
@@ -87,8 +87,8 @@ The imported workflow contains 7 connected nodes:
 
 Before running the workflow, you need to connect it to your local Lemonade server:
 
-1. Click the **Lemonade Chat Model** node
-2. Click **Credential to connect with** → **Create New Credential**
+1. Double click the **Lemonade Chat Model** node
+2. In the dropdown menu **Credential to connect with** select **Create New Credential**
 3. Enter the following settings:
 
 | Field | Value |
