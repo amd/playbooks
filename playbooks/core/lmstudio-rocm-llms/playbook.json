@@ -1,12 +1,12 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "Running LLMs with LM Studio and ROCm",
-  "description": "Set up LM Studio with ROCm acceleration to run large language models on STX Halo™",
+  "title": "Running and serving LLMs with LM Studio",
+  "description": "Set up LM Studio and LM Studio Server to run and serve large language models on STX Halo™",
   "time": 30,
   "platforms": ["windows", "linux"],
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
   "published": true,
-  "tags": ["lm-studio", "rocm", "llm", "inference"]
+  "tags": ["lm-studio", "rocm", "vulkan", "llm", "inference"]
 }

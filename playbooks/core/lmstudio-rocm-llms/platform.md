@@ -20,7 +20,7 @@ The following models should already be present in the LM Studio models directory
 
 | Model Type | Quantization | Size | Location |
 |------------|--------------|------|----------|
-| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\ggml-org` |
+| OpenAI GPT-OSS 120B | `MXFP4` | 59 GB | `models\ggml-org` |
 
 ---
 

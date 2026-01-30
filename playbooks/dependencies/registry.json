@@ -1,6 +1,6 @@
 {
   "$schema": "./registry.schema.json",
-  "description": "Central registry of pre-installed software dependencies for AMD Halo Developer Platform",
+  "description": "Central registry of pre-installed software dependencies and setup steps for AMD Halo Developer Platform",
   "dependencies": {
     "comfyui": {
       "name": "ComfyUI",
@@ -51,17 +51,25 @@
       "platforms": ["windows", "linux"],
       "file": "comfyui_models.md"
     },
+    "lmstudio-models-gpt-oss-120b": {
+      "name": "GPT-OSS 120B Model",
+      "description": "OpenAI GPT-OSS 120B model for LM Studio",
+      "category": "model",
+      "platforms": ["windows", "linux"],
+      "file": "lmstudio_models_gpt_oss_120b.md"
+    },
     "driver": {
       "name": "AMD GPU Driver",
       "description": "Latest AMD GPU driver for optimal performance",
       "category": "driver",
       "platforms": ["windows", "linux"],
       "file": "driver.md"
-    },
-    "memory_config": {
-      "name": "AMD Memory Configuration",
-      "description": "Suggested memory configurations for Strix Halo Systems",
-      "category": "framework",
+    }
+  },
+  "setup": {
+    "memory-config": {
+      "name": "Memory Configuration",
+      "description": "Configure GPU memory allocation for running large models",
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md"
     }
