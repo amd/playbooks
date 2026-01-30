@@ -40,7 +40,7 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 
 ## Serve LLMs through an OpenAI compatible endpoint
 
-LM Studio also offers an OpenAI compliant endpoint in the form of LM Studio Server. This has already been demonstrated in an agentic coding workflow with Cline here: "PLACEHOLDER FOR LINK TO PLAYBOOK". Another common use case is connecting LM Studio Server to any web application (React, Node.js, Python) by sending standard HTTP requests to the inference endpoint.
+LM Studio also offers an OpenAI compliant endpoint in the form of LM Studio Server. This has already been demonstrated in an agentic coding workflow with Cline [here](../playbooks/vscode-qwen3-coder). Another common use case is connecting LM Studio Server to any web application (React, Node.js, Python) by sending standard HTTP requests to the inference endpoint.
 
 To set up LM Studio Server, use the following instructions:
 
