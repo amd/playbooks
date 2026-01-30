@@ -58,8 +58,8 @@ When you first open n8n, you'll be prompted to create an account or log in:
 We've provided a pre-built workflow that you can import directly:
 
 1. Download the workflow file: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. In n8n, click **Add workflow** in the top right
-3. Click the **...** menu (three dots) and select **Import from file**
+2. If this is your first workflow, click **Start from Scratch** to open the workflow editor. Otherwise, click **Add workflow** in the top right.
+3. Click the **...** menu (three dots) in the top bar and select **Import from file**
 4. Select the downloaded `financial-news-workflow.json` file
 5. The workflow will appear on the canvas
 
@@ -103,7 +103,7 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 ### Step 5: Test the Workflow
 
 1. Ensure Lemonade is running with a model loaded
-2. Click **Test workflow** in the top right corner
+2. Click **Execute workflow** at the bottom center of the canvas
 3. Watch each node execute from left to right—they turn green when complete
 4. Click the **AI Financial News Summarizer** node to see the generated summary
 
