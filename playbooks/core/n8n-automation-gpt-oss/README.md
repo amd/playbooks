@@ -59,7 +59,7 @@ We've provided a pre-built workflow that you can import directly:
 
 1. Download the workflow file: [financial-news-workflow.json](assets/financial-news-workflow.json)
 2. In n8n, click **Add workflow** in the top right
-3. Click the **...** menu (three dots) and select **Import from file**
+3. Click the **...** menu (three dots) in the top-right corner and select **Import from file**
 4. Select the downloaded `financial-news-workflow.json` file
 5. The workflow will appear on the canvas
 
