@@ -491,6 +491,7 @@ body {
   border-color: var(--border-color);
 }
 
+
 /* Image Lightbox Animations */
 @keyframes lightbox-fade-in {
   from {
