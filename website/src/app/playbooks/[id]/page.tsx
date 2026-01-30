@@ -115,10 +115,14 @@ function CodeBlock({ children, language }: { children?: React.ReactNode; languag
  */
 function HaloPreinstalledDropdown({ 
   content, 
-  dropdownId
+  dropdownId,
+  playbookId,
+  onImageClick
 }: { 
   content: string;
   dropdownId: string;
+  playbookId: string;
+  onImageClick: (image: { src: string; alt: string }) => void;
 }) {
   // Initialize from global store, use local state for rendering
   const [isOpen, setIsOpen] = useState(() => dropdownStateStore[dropdownId] ?? false);
@@ -174,6 +178,31 @@ function HaloPreinstalledDropdown({
                   {children}
                 </a>
               ),
+              img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+                const { src, alt } = props;
+                // Transform relative paths to use the API route
+                let imageSrc = typeof src === "string" ? src : "";
+                if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+                  imageSrc = `/api/playbooks/${playbookId}/${imageSrc}`;
+                }
+                return (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img 
+                    src={imageSrc} 
+                    alt={alt || ""} 
+                    className="rounded-lg max-w-full h-auto mx-auto my-6"
+                    onClick={() => onImageClick({ src: imageSrc, alt: alt || "" })}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onImageClick({ src: imageSrc, alt: alt || "" });
+                      }
+                    }}
+                  />
+                );
+              },
               code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
                 // Inline code (no className)
                 if (!className) {
@@ -230,13 +259,16 @@ function HaloPreinstalledDropdown({
  * Displays setup instructions directly (not collapsible) since these are required steps
  */
 function HaloSetupContent({ 
-  content
+  content,
+  playbookId,
+  onImageClick
 }: { 
   content: string;
+  playbookId: string;
+  onImageClick: (image: { src: string; alt: string }) => void;
 }) {
   return (
-    <div className="halo-setup-container">
-      <ReactMarkdown
+    <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
         components={{
@@ -254,6 +286,31 @@ function HaloSetupContent({
               {children}
             </a>
           ),
+          img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+            const { src, alt } = props;
+            // Transform relative paths to use the API route
+            let imageSrc = typeof src === "string" ? src : "";
+            if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+              imageSrc = `/api/playbooks/${playbookId}/${imageSrc}`;
+            }
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img 
+                src={imageSrc} 
+                alt={alt || ""} 
+                className="rounded-lg max-w-full h-auto mx-auto my-6"
+                onClick={() => onImageClick({ src: imageSrc, alt: alt || "" })}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onImageClick({ src: imageSrc, alt: alt || "" });
+                  }
+                }}
+              />
+            );
+          },
           code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
             // Inline code (no className)
             if (!className) {
@@ -299,7 +356,6 @@ function HaloSetupContent({
       >
         {content}
       </ReactMarkdown>
-    </div>
   );
 }
 
@@ -680,6 +736,8 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
             <HaloPreinstalledDropdown 
               content={decodedContent} 
               dropdownId={dropdownId}
+              playbookId={id}
+              onImageClick={setLightboxImage}
             />
           );
         }
@@ -689,12 +747,18 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
         const dataContent = props['data-content'];
         if (dataContent) {
           const decodedContent = decodeURIComponent(dataContent);
-          return <HaloSetupContent content={decodedContent} />;
+          return (
+            <HaloSetupContent 
+              content={decodedContent}
+              playbookId={id}
+              onImageClick={setLightboxImage}
+            />
+          );
         }
       }
       return <div className={className} {...rest} />;
     },
-  }), [id]);
+  }), [id, setLightboxImage]);
 
   // Handle clicking a TOC link - scroll and immediately set active
   const handleTocClick = (targetId: string) => {
