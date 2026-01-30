@@ -44,6 +44,13 @@
       "platforms": ["windows", "linux"],
       "file": "vscode.md"
     },
+    "lemonade": {
+      "name": "Lemonade",
+      "description": "Local LLM server with OpenAI-compatible API",
+      "category": "framework",
+      "platforms": ["windows", "linux"],
+      "file": "lemonade.md"
+    },
     "comfyui-models": {
       "name": "ComfyUI Models",
       "description": "ComfyUI models for image generation",
@@ -64,6 +71,21 @@
       "category": "driver",
       "platforms": ["windows", "linux"],
       "file": "driver.md"
+    },
+    "nodejs": {
+      "name": "Node.js",
+      "version": "20.19.2",
+      "description": "JavaScript runtime for server-side applications",
+      "category": "runtime",
+      "platforms": ["windows", "linux"],
+      "file": "nodejs.md"
+    },
+    "memory_config": {
+      "name": "AMD Memory Configuration",
+      "description": "Suggested memory configurations for Strix Halo Systems",
+      "category": "framework",
+      "platforms": ["windows", "linux"],
+      "file": "memoryconfig.md"
     }
   },
   "setup": {
