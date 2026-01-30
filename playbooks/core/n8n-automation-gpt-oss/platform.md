@@ -13,7 +13,7 @@ This document describes the expected platform configurations for running this pl
 
 ### Lemonade LLM
 
-The Lemonade server should be running with gpt-oss-20b loaded:
+The Lemonade server should be running with gpt-oss-120b loaded:
 
 | Service | Endpoint | Model |
 |---------|----------|-------|
