@@ -25,16 +25,16 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 ## Chatting with an LLM
 Learn how to start chatting with a ChatGPT-grade LLM completely locally.  
 
-1. Press "Ctrl" + "L" or select the central drop down menu at the top. Select "manually chose model load parameters" and click on "OpenAI GPT-OSS 120B"
-2. Make sure "show advanced settings" is checked.  
-3. Change context size to "128,000". Make sure "Flash Attention" is On and "GPU offload layers" is set to maximum.
-4. Check "Remember settings" and click Load.  
+1. Press "Ctrl" + "1" or click on the 👾 button on the top left of the screen to open the Chat window. 
+2. Press "Ctrl" + "M" to open the `Model Loader`, select "manually chose model load parameters", and click on "OpenAI GPT-OSS 120B"
+3. Make sure "show advanced settings" is checked.  
+4. Change context size to "128,000". Make sure "Flash Attention" is On and "GPU offload layers" is set to maximum.
+5. Check "Remember settings" and click Load.
+6. Send a message and start interacting with the model!
 
 > Context size refers to the model's short-term memory limit, and with Strix Halo, we can use 128,000 tokens to allow for handling extensive workflows that typically require cloud servers.
 
-#### IMAGE PLACEHOLDER
-
-## LM Studio Server: Serve LLMs through an OpenAI compatible endpoint
+## Serve LLMs through an OpenAI compatible endpoint
 
 LM Studio also offers an OpenAI compliant endpoint in the form of LM Studio Server. This has already been demonstrated in an agentic coding workflow with Cline here: "PLACEHOLDER FOR LINK TO PLAYBOOK". Another common use case is connecting LM Studio Server to any web application (React, Node.js, Python) by sending standard HTTP requests to the inference endpoint.
 

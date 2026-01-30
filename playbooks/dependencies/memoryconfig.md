@@ -4,7 +4,7 @@
 
 On Windows, to run larger models that require higher memory, we need to use the AMD Variable Graphics Memory (iGPU VRAM) allocation. Although 64 GB is adequate for most workloads, running the largest models with high context may require 96 GB.
 
-This can be done by opening AMD Software: Adrenalin™ Edition control panel and navigating to: Performance > Tuning > AMD Variable Graphics Memory.  Please reboot the system for the changes to take effect.
+This can be done by opening AMD Software: Adrenalin™ Edition control panel and navigating to: `Performance > Tuning > AMD Variable Graphics Memory`.  Please reboot the system for the changes to take effect.
 
 <!-- @os:end -->
 
