@@ -88,7 +88,7 @@ The imported workflow contains 7 connected nodes:
 Before running the workflow, you need to connect it to your local Lemonade server:
 
 1. Click the **Lemonade Chat Model** node
-2. Click **Credential to connect with** → **Create New Credential**
+2. In the dropdown menu **Credential to connect with** select **Create New Credential**
 3. Enter the following settings:
 
 | Field | Value |
