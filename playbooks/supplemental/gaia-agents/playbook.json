@@ -1,0 +1,12 @@
+{
+  "id": "gaia-agents",
+  "title": "Getting Started Creating Agents with GAIA",
+  "description": "Build and deploy AI agents using the GAIA framework with llama.cpp on your STX Halo™",
+  "time": 60,
+  "platforms": ["linux", "windows"],
+  "difficulty": "intermediate",
+  "isNew": false,
+  "isFeatured": false,
+  "published": true,
+  "tags": ["gaia", "agents", "llamacpp", "llm"]
+}
