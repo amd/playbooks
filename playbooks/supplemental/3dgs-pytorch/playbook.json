@@ -1,5 +1,5 @@
 {
-  "id": "3dgs-pytorch-rocm",
+  "id": "3dgs-pytorch",
   "title": "3D Gaussian Splatting with PyTorch ROCm",
   "description": "Render stunning 3D scenes using Gaussian Splatting with PyTorch and ROCm on STX Halo™",
   "time": 90,

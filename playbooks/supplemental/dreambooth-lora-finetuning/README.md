@@ -1,3 +1,3 @@
-# Clustering with two Halos
+# DreamBooth Fine-tuning with LoRA
 
 <!-- Playbook content goes here -->

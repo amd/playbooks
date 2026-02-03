@@ -1,5 +1,5 @@
 {
-  "id": "pytorch-rocm-gpu-kernels",
+  "id": "pytorch-kernels",
   "title": "Custom GPU Kernels with PyTorch ROCm",
   "description": "Write and optimize custom GPU kernels using PyTorch and ROCm on STX Halo™",
   "time": 120,

@@ -1,3 +1,3 @@
-# Fine-tuning on vLLM
+# Clustering with Two Halos (RCCL)
 
 <!-- Playbook content goes here -->
