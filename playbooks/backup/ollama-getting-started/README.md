@@ -1,4 +1,3 @@
-# DreamBooth Fine-tuning with LoRA
+# Getting Started with Ollama
 
 <!-- Playbook content goes here -->
-

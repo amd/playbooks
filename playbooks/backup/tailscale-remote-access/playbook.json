@@ -1,0 +1,12 @@
+{
+  "id": "tailscale-remote-access",
+  "title": "Setting up Tailscale To Remotely Access Halo",
+  "description": "Configure Tailscale for secure remote access to your STX Halo™ from anywhere",
+  "time": 30,
+  "platforms": ["linux", "windows"],
+  "difficulty": "beginner",
+  "isNew": false,
+  "isFeatured": false,
+  "published": true,
+  "tags": ["tailscale", "remote-access", "networking", "vpn"]
+}
