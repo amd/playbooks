@@ -14,19 +14,23 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 
 <!-- @os:windows -->
 On Windows, open Command Prompt and run:
+<!-- @test:id=create-venv platform=windows timeout=60 -->
 ```cmd
 python -m venv llm-env
 llm-env\Scripts\activate.bat
 ```
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- @test:id=create-venv platform=linux timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
 python3 -m venv llm-env
 source llm-env/bin/activate
 ```
+<!-- @test:end -->
 <!-- @os:end -->
 
 ### Installing Basic Dependencies
@@ -34,9 +38,11 @@ source llm-env/bin/activate
 
 ### Additional Dependencies
 
+<!-- @test:id=install-deps platform=all timeout=300 depends_on=create-venv -->
 ```bash
 pip install transformers accelerate sentencepiece protobuf
 ```
+<!-- @test:end -->
 
 ## Quick Start with Example Scripts
 
@@ -47,6 +53,35 @@ This playbook includes ready-to-use scripts in the `assets/` folder (click to pr
 | [run_llm.py](assets/run_llm.py) | Basic LLM text generation | `python run_llm.py` |
 | [summarizer.py](assets/summarizer.py) | Document summarizer with Harmony support | `python summarizer.py --file document.txt` |
 
+<!-- @test:id=verify-scripts-exist platform=all timeout=30 -->
+```python
+import os
+import sys
+
+# Check that required script files exist
+scripts = ['run_llm.py', 'summarizer.py', 'example_document.txt']
+missing = [s for s in scripts if not os.path.exists(s)]
+
+if missing:
+    print(f"FAIL: Missing files: {missing}")
+    sys.exit(1)
+print("PASS: All required script files exist")
+```
+<!-- @test:end -->
+
+<!-- @test:id=verify-scripts-syntax platform=all timeout=60 depends_on=verify-scripts-exist -->
+```python
+import ast
+import sys
+
+# Verify Python scripts have valid syntax
+for script in ['run_llm.py', 'summarizer.py']:
+    with open(script, 'r') as f:
+        ast.parse(f.read())
+    print(f"PASS: {script} has valid syntax")
+```
+<!-- @test:end -->
+
 Both scripts support:
 - Model selection: `--model gptoss` (default) or `--model mistral`
 - Chat template formatting for proper model prompting especially useful for document summarization
@@ -55,7 +90,7 @@ Both scripts support:
 
 The included [run_llm.py](assets/run_llm.py) script shows how to load and generate text with LLMs using PyTorch and AMD ROCm. On the first run, model weights are automatically downloaded.
 
-Take a look at how prompts are tokenized and sent to the model. Understanding this process lets you adapt LLMs for any text generation or summarization task. Here’s a minimal example from the script:
+Take a look at how prompts are tokenized and sent to the model. Understanding this process lets you adapt LLMs for any text generation or summarization task. Here's a minimal example from the script:
 
 ```python
 import torch
@@ -70,11 +105,24 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 ```
 
+<!-- @test:id=verify-imports platform=all timeout=60 depends_on=install-deps -->
+```python
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+print(f"PyTorch version: {torch.__version__}")
+print(f"CUDA/ROCm available: {torch.cuda.is_available()}")
+print("PASS: All imports successful")
+```
+<!-- @test:end -->
+
 To try it out:
 
+<!-- @test:id=run-llm-help platform=all timeout=30 depends_on=verify-scripts-syntax -->
 ```bash
-python run_llm.py
+python run_llm.py --help
 ```
+<!-- @test:end -->
 
 ## Building a Document Summarizer
 
@@ -84,8 +132,13 @@ The script is designed to work out of the box: point it at a text file, pick a m
 
 ### Usage Examples
 
+<!-- @test:id=summarizer-help platform=all timeout=30 depends_on=verify-scripts-syntax -->
 ```bash
+python summarizer.py --help
+```
+<!-- @test:end -->
 
+```bash
 # Summarize document
 python summarizer.py
 

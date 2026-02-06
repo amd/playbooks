@@ -116,6 +116,142 @@ Content displays directly since these are required steps, not optional reference
 - Include expected output so users know what success looks like
 - Keep code blocks copy-friendly (avoid `$` or `>` prompts)
 
+### Testing Tags
+
+Use `@test` tags to make existing code blocks testable. These tags **wrap your existing code** and are **invisible to website visitors** but are picked up by CI to run automated tests.
+
+**Basic syntax — wrap existing code blocks:**
+
+```markdown
+<!-- @test:id=install-deps platform=all timeout=300 -->
+```bash
+pip install transformers accelerate
+```
+<!-- @test:end -->
+```
+
+The test tags wrap the code block that users see. No duplication needed — the same code that appears in the playbook is what gets tested.
+
+**Test attributes:**
+
+| Attribute | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `id` | Yes | — | Unique identifier for the test (use kebab-case) |
+| `platform` | No | `all` | Target platform: `windows`, `linux`, or `all` |
+| `timeout` | No | `300` | Maximum execution time in seconds |
+| `continue_on_error` | No | `false` | If `true`, test failure won't fail the CI job |
+| `depends_on` | No | — | Comma-separated list of test IDs that must pass first |
+
+**Supported languages:**
+
+| Language tag | Execution |
+|--------------|-----------|
+| `bash`, `sh`, `shell` | PowerShell on Windows, Bash on Linux |
+| `cmd`, `batch` | Windows CMD |
+| `powershell`, `pwsh`, `ps1` | PowerShell |
+| `python` | Python interpreter |
+
+**Example: Chaining tests with dependencies**
+
+Use `depends_on` to create test chains where later tests only run if their dependencies pass:
+
+```markdown
+### Create Virtual Environment
+
+<!-- @test:id=create-venv platform=windows timeout=60 -->
+```cmd
+python -m venv myenv
+myenv\Scripts\activate.bat
+```
+<!-- @test:end -->
+
+### Install Dependencies
+
+<!-- @test:id=install-deps platform=all timeout=300 depends_on=create-venv -->
+```bash
+pip install transformers torch
+```
+<!-- @test:end -->
+
+### Run the Script
+
+<!-- @test:id=run-script platform=all timeout=60 depends_on=install-deps -->
+```bash
+python run_model.py --help
+```
+<!-- @test:end -->
+```
+
+In this example:
+- `install-deps` only runs if `create-venv` passes
+- `run-script` only runs if `install-deps` passes
+- If `create-venv` fails, both `install-deps` and `run-script` are skipped
+
+**Example: Platform-specific tests**
+
+Combine with `@os` tags for platform-specific instructions:
+
+```markdown
+<!-- @os:windows -->
+<!-- @test:id=setup platform=windows timeout=120 -->
+```cmd
+pip install torch
+python -c "import torch; print('OK')"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=setup platform=linux timeout=120 -->
+```bash
+pip3 install torch
+python3 -c "import torch; print('OK')"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+```
+
+**Example: Verification tests (not shown to users)**
+
+For tests that verify things but shouldn't appear in the playbook, place them after visible content:
+
+```markdown
+| [run_llm.py](assets/run_llm.py) | Basic LLM script |
+
+<!-- @test:id=verify-scripts platform=all timeout=30 -->
+```python
+import os, sys
+missing = [f for f in ['run_llm.py'] if not os.path.exists(f)]
+if missing:
+    sys.exit(1)
+```
+<!-- @test:end -->
+
+Both scripts support...
+```
+
+**Best practices:**
+
+1. **Wrap, don't duplicate**: Put test tags around existing code blocks instead of writing separate test code
+2. **Use dependency chains**: Use `depends_on` to skip downstream tests when prerequisites fail
+3. **Keep tests fast**: Use appropriate timeouts; most tests should complete in under 60 seconds
+4. **Handle missing hardware**: CI machines may not have GPUs; tests should handle this gracefully
+5. **Test the happy path**: Focus on verifying instructions work, not edge cases
+
+**Running tests locally:**
+
+```bash
+python .github/scripts/run_playbook_tests.py --playbook your-playbook-id --platform windows
+```
+
+**CI behavior:**
+
+- Tests run automatically on PRs that modify playbook files
+- Tests run on self-hosted runners tagged with `Windows` and `halo`
+- Tests are sorted by dependencies and run in order
+- If a test fails, dependent tests are automatically skipped
+- Test results are uploaded as artifacts for debugging
+
 ---
 
 ## The `platform.md` File
