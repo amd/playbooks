@@ -116,6 +116,110 @@ Content displays directly since these are required steps, not optional reference
 - Include expected output so users know what success looks like
 - Keep code blocks copy-friendly (avoid `$` or `>` prompts)
 
+### Testing Tags
+
+Use `@test` tags to add automated tests that verify your playbook's instructions work correctly. These tags are **invisible to website visitors** but are picked up by CI to run automated tests.
+
+**Basic syntax:**
+
+```markdown
+<!-- @test:id=my-test-name platform=windows -->
+```bash
+pip install transformers
+python -c "import transformers; print('OK')"
+```
+<!-- @test:end -->
+```
+
+**Test attributes:**
+
+| Attribute | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `id` | Yes | — | Unique identifier for the test (use kebab-case) |
+| `platform` | No | `all` | Target platform: `windows`, `linux`, or `all` |
+| `timeout` | No | `300` | Maximum execution time in seconds |
+| `continue_on_error` | No | `false` | If `true`, test failure won't fail the CI job |
+
+**Supported languages:**
+
+| Language tag | Execution |
+|--------------|-----------|
+| `bash`, `sh`, `shell` | PowerShell on Windows, Bash on Linux |
+| `cmd`, `batch` | Windows CMD |
+| `powershell`, `pwsh`, `ps1` | PowerShell |
+| `python` | Python interpreter |
+
+**Example: Platform-specific tests**
+
+```markdown
+<!-- @os:windows -->
+Install on Windows:
+```cmd
+pip install torch
+```
+<!-- @test:id=install-torch-windows platform=windows timeout=120 -->
+```cmd
+pip install torch
+python -c "import torch; print('PASS')"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+Install on Linux:
+```bash
+pip3 install torch
+```
+<!-- @test:id=install-torch-linux platform=linux timeout=120 -->
+```bash
+pip3 install torch
+python3 -c "import torch; print('PASS')"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+```
+
+**Example: Verify script files exist**
+
+```markdown
+<!-- @test:id=verify-scripts platform=all timeout=30 -->
+```python
+import os
+import sys
+
+required_files = ['run_model.py', 'config.json']
+missing = [f for f in required_files if not os.path.exists(f)]
+
+if missing:
+    print(f"FAIL: Missing files: {missing}")
+    sys.exit(1)
+print("PASS: All required files exist")
+```
+<!-- @test:end -->
+```
+
+**Best practices:**
+
+1. **Test what matters**: Focus on verifying that instructions work, not comprehensive unit testing
+2. **Keep tests fast**: Use appropriate timeouts; most tests should complete in under 60 seconds
+3. **Use clear output**: Print "PASS" or "FAIL" messages to make logs easy to read
+4. **Clean up**: Remove any files or directories created during tests
+5. **Handle missing hardware**: CI machines may not have GPUs; tests should handle this gracefully
+6. **Place tests near instructions**: Put test blocks right after the code they verify
+
+**Running tests locally:**
+
+```bash
+python .github/scripts/run_playbook_tests.py --playbook your-playbook-id --platform windows
+```
+
+**CI behavior:**
+
+- Tests run automatically on PRs that modify playbook files
+- Tests run on self-hosted runners tagged with `Windows` and `halo`
+- Test results are uploaded as artifacts for debugging
+- Failed tests will fail the PR check (unless `continue_on_error=true`)
+
 ---
 
 ## The `platform.md` File

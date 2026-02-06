@@ -18,6 +18,13 @@ On Windows, open Command Prompt and run:
 python -m venv llm-env
 llm-env\Scripts\activate.bat
 ```
+<!-- @test:id=create-venv-windows platform=windows timeout=60 -->
+```cmd
+python -m venv test-llm-env
+if exist test-llm-env\Scripts\activate.bat (echo PASS: Virtual environment created) else (echo FAIL: Virtual environment not created && exit /b 1)
+rmdir /s /q test-llm-env
+```
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -27,6 +34,13 @@ sudo apt install -y python3-venv
 python3 -m venv llm-env
 source llm-env/bin/activate
 ```
+<!-- @test:id=create-venv-linux platform=linux timeout=60 -->
+```bash
+python3 -m venv test-llm-env
+if [ -f test-llm-env/bin/activate ]; then echo "PASS: Virtual environment created"; else echo "FAIL: Virtual environment not created" && exit 1; fi
+rm -rf test-llm-env
+```
+<!-- @test:end -->
 <!-- @os:end -->
 
 ### Installing Basic Dependencies
@@ -38,6 +52,13 @@ source llm-env/bin/activate
 pip install transformers accelerate sentencepiece protobuf
 ```
 
+<!-- @test:id=install-dependencies platform=all timeout=300 -->
+```bash
+pip install transformers accelerate sentencepiece protobuf
+python -c "import transformers; import accelerate; print('PASS: Dependencies installed successfully')"
+```
+<!-- @test:end -->
+
 ## Quick Start with Example Scripts
 
 This playbook includes ready-to-use scripts in the `assets/` folder (click to preview):
@@ -46,6 +67,49 @@ This playbook includes ready-to-use scripts in the `assets/` folder (click to pr
 |--------|-------------|-------|
 | [run_llm.py](assets/run_llm.py) | Basic LLM text generation | `python run_llm.py` |
 | [summarizer.py](assets/summarizer.py) | Document summarizer with Harmony support | `python summarizer.py --file document.txt` |
+
+<!-- @test:id=verify-scripts-exist platform=all timeout=30 -->
+```python
+import os
+import sys
+
+# Check that required script files exist
+scripts = ['run_llm.py', 'summarizer.py', 'example_document.txt']
+missing = []
+
+for script in scripts:
+    if not os.path.exists(script):
+        missing.append(script)
+
+if missing:
+    print(f"FAIL: Missing files: {missing}")
+    sys.exit(1)
+else:
+    print("PASS: All required script files exist")
+```
+<!-- @test:end -->
+
+<!-- @test:id=verify-scripts-syntax platform=all timeout=60 -->
+```python
+import ast
+import sys
+
+# Verify Python scripts have valid syntax
+scripts = ['run_llm.py', 'summarizer.py']
+
+for script in scripts:
+    try:
+        with open(script, 'r') as f:
+            source = f.read()
+        ast.parse(source)
+        print(f"PASS: {script} has valid syntax")
+    except SyntaxError as e:
+        print(f"FAIL: {script} has syntax error: {e}")
+        sys.exit(1)
+
+print("PASS: All scripts have valid Python syntax")
+```
+<!-- @test:end -->
 
 Both scripts support:
 - Model selection: `--model gptoss` (default) or `--model mistral`
@@ -69,6 +133,25 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map="auto"
 )
 ```
+
+<!-- @test:id=verify-torch-rocm platform=all timeout=60 -->
+```python
+import torch
+import sys
+
+# Verify PyTorch is installed and can detect GPU
+print(f"PyTorch version: {torch.__version__}")
+print(f"CUDA/ROCm available: {torch.cuda.is_available()}")
+
+if torch.cuda.is_available():
+    print(f"GPU: {torch.cuda.get_device_name(0)}")
+    print("PASS: PyTorch with GPU support is available")
+else:
+    print("WARNING: No GPU detected, but PyTorch is installed")
+    # Don't fail - CI machine might not have GPU
+    print("PASS: PyTorch is installed (no GPU)")
+```
+<!-- @test:end -->
 
 To try it out:
 
