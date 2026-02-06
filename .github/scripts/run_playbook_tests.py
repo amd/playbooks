@@ -5,12 +5,27 @@ Playbook Test Runner
 
 Extracts and executes test blocks from playbook README.md files.
 
-Test blocks are defined using HTML comments that are invisible to the website
-but can be parsed and executed by CI:
+Test blocks wrap existing code blocks using HTML comments that are invisible
+to the website but can be parsed and executed by CI:
 
     <!-- @test:id=unique-test-name platform=windows -->
     ```bash
     pip install transformers
+    ```
+    <!-- @test:end -->
+
+Tests can be chained using the `depends_on` attribute to create test sequences
+where later tests only run if their dependencies pass:
+
+    <!-- @test:id=install-deps platform=all -->
+    ```bash
+    pip install transformers
+    ```
+    <!-- @test:end -->
+
+    <!-- @test:id=run-script platform=all depends_on=install-deps -->
+    ```bash
+    python run_llm.py --help
     ```
     <!-- @test:end -->
 
@@ -20,6 +35,7 @@ Supported test attributes:
     - timeout: Maximum execution time in seconds (default: 300)
     - workdir: Working directory relative to playbook assets folder
     - continue_on_error: true/false - whether to continue if this test fails (default: false)
+    - depends_on: Comma-separated list of test IDs that must pass before this test runs
 
 Usage:
     python run_playbook_tests.py --playbook pytorch-rocm-llms --platform windows
@@ -46,6 +62,7 @@ class TestBlock:
     timeout: int = 300
     workdir: Optional[str] = None
     continue_on_error: bool = False
+    depends_on: list[str] = field(default_factory=list)
     language: str = "bash"
     code: str = ""
     line_number: int = 0
@@ -62,6 +79,7 @@ class TestResult:
     stderr: str
     duration: float
     error_message: str = ""
+    skipped: bool = False
 
 
 @dataclass
@@ -101,6 +119,9 @@ def parse_test_attributes(attr_string: str) -> dict:
             value = int(value)
         elif key == "continue_on_error":
             value = value.lower() == "true"
+        elif key == "depends_on":
+            # Parse comma-separated list of dependencies
+            value = [dep.strip() for dep in value.split(",") if dep.strip()]
 
         attrs[key] = value
 
@@ -142,6 +163,7 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
             timeout=attrs.get("timeout", 300),
             workdir=attrs.get("workdir"),
             continue_on_error=attrs.get("continue_on_error", False),
+            depends_on=attrs.get("depends_on", []),
             language=language,
             code=code,
             line_number=line_number,
@@ -158,13 +180,98 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
     return tests
 
 
-def run_test(test: TestBlock, playbook_path: Path, results_dir: Path) -> TestResult:
+def topological_sort_tests(tests: list[TestBlock]) -> list[TestBlock]:
+    """
+    Sort tests based on their dependencies using topological sort.
+    Tests with no dependencies come first, then tests that depend on them, etc.
+    Preserves original order for tests at the same dependency level.
+    """
+    # Build a map of test ID to test
+    test_map = {t.id: t for t in tests}
+
+    # Track visited and result
+    visited = set()
+    temp_visited = set()
+    result = []
+
+    def visit(test_id: str):
+        if test_id in temp_visited:
+            raise ValueError(f"Circular dependency detected involving test '{test_id}'")
+        if test_id in visited:
+            return
+        if test_id not in test_map:
+            # Dependency not found (might be filtered out by platform)
+            print(f"Warning: Dependency '{test_id}' not found, ignoring")
+            return
+
+        temp_visited.add(test_id)
+        test = test_map[test_id]
+
+        # Visit dependencies first
+        for dep_id in test.depends_on:
+            visit(dep_id)
+
+        temp_visited.remove(test_id)
+        visited.add(test_id)
+        result.append(test)
+
+    # Visit all tests in their original order
+    for test in tests:
+        visit(test.id)
+
+    return result
+
+
+def run_test(
+    test: TestBlock,
+    playbook_path: Path,
+    results_dir: Path,
+    results_map: dict[str, TestResult],
+) -> TestResult:
     """Execute a single test block."""
     print(f"\n{'='*60}")
     print(f"Running test: {test.id}")
     print(f"Language: {test.language}")
     print(f"Timeout: {test.timeout}s")
+    if test.depends_on:
+        print(f"Dependencies: {', '.join(test.depends_on)}")
     print(f"{'='*60}")
+
+    # Check dependencies
+    for dep_id in test.depends_on:
+        if dep_id in results_map:
+            dep_result = results_map[dep_id]
+            if not dep_result.success:
+                skip_msg = f"Skipped: dependency '{dep_id}' failed"
+                print(f"SKIPPED: {skip_msg}")
+                return TestResult(
+                    test_id=test.id,
+                    success=False,
+                    exit_code=-1,
+                    stdout="",
+                    stderr="",
+                    duration=0,
+                    error_message=skip_msg,
+                    skipped=True,
+                )
+            if dep_result.skipped:
+                skip_msg = f"Skipped: dependency '{dep_id}' was skipped"
+                print(f"SKIPPED: {skip_msg}")
+                return TestResult(
+                    test_id=test.id,
+                    success=False,
+                    exit_code=-1,
+                    stdout="",
+                    stderr="",
+                    duration=0,
+                    error_message=skip_msg,
+                    skipped=True,
+                )
+        else:
+            # Dependency not found - might have been filtered by platform
+            print(
+                f"Warning: Dependency '{dep_id}' not found in results, proceeding anyway"
+            )
 
     # Determine working directory
     if test.workdir:
@@ -314,19 +421,31 @@ def run_playbook_tests(playbook_id: str, platform: str) -> bool:
         )
         return True
 
-    print(f"\nFound {len(tests)} test(s) to run:")
+    # Sort tests by dependencies
+    try:
+        tests = topological_sort_tests(tests)
+    except ValueError as e:
+        print(f"Error: {e}")
+        return False
+
+    print(f"\nFound {len(tests)} test(s) to run (in dependency order):")
     for test in tests:
-        print(f"  - {test.id} (platform={test.platform}, timeout={test.timeout}s)")
+        deps = f" (depends on: {', '.join(test.depends_on)})" if test.depends_on else ""
+        print(
+            f"  - {test.id} (platform={test.platform}, timeout={test.timeout}s){deps}"
+        )
 
     # Run tests
     suite = PlaybookTestSuite(playbook_id=playbook_id, tests=tests)
+    results_map: dict[str, TestResult] = {}
     all_passed = True
 
     for test in tests:
-        result = run_test(test, playbook_path, results_dir)
+        result = run_test(test, playbook_path, results_dir, results_map)
         suite.results.append(result)
+        results_map[test.id] = result
 
-        if not result.success:
+        if not result.success and not result.skipped:
             if test.continue_on_error:
                 print(
                     f"\nTest '{test.id}' failed but continue_on_error=true, continuing..."
@@ -340,11 +459,13 @@ def run_playbook_tests(playbook_id: str, platform: str) -> bool:
         "platform": platform,
         "total_tests": len(tests),
         "passed": sum(1 for r in suite.results if r.success),
-        "failed": sum(1 for r in suite.results if not r.success),
+        "failed": sum(1 for r in suite.results if not r.success and not r.skipped),
+        "skipped": sum(1 for r in suite.results if r.skipped),
         "results": [
             {
                 "test_id": r.test_id,
                 "success": r.success,
+                "skipped": r.skipped,
                 "exit_code": r.exit_code,
                 "duration": r.duration,
                 "error_message": r.error_message,
@@ -365,13 +486,19 @@ def run_playbook_tests(playbook_id: str, platform: str) -> bool:
     print(f"Total: {summary['total_tests']}")
     print(f"Passed: {summary['passed']}")
     print(f"Failed: {summary['failed']}")
+    print(f"Skipped: {summary['skipped']}")
     print(f"{'='*60}\n")
 
     for result in suite.results:
-        status = "✓ PASS" if result.success else "✗ FAIL"
+        if result.skipped:
+            status = "⊘ SKIP"
+        elif result.success:
+            status = "✓ PASS"
+        else:
+            status = "✗ FAIL"
         print(f"  {status}: {result.test_id} ({result.duration:.2f}s)")
         if result.error_message:
-            print(f"         Error: {result.error_message}")
+            print(f"         {result.error_message}")
 
     return all_passed
 

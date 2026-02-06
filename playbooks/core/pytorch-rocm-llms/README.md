@@ -14,31 +14,21 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 
 <!-- @os:windows -->
 On Windows, open Command Prompt and run:
+<!-- @test:id=create-venv platform=windows timeout=60 -->
 ```cmd
 python -m venv llm-env
 llm-env\Scripts\activate.bat
-```
-<!-- @test:id=create-venv-windows platform=windows timeout=60 -->
-```cmd
-python -m venv test-llm-env
-if exist test-llm-env\Scripts\activate.bat (echo PASS: Virtual environment created) else (echo FAIL: Virtual environment not created && exit /b 1)
-rmdir /s /q test-llm-env
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- @test:id=create-venv platform=linux timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
 python3 -m venv llm-env
 source llm-env/bin/activate
-```
-<!-- @test:id=create-venv-linux platform=linux timeout=60 -->
-```bash
-python3 -m venv test-llm-env
-if [ -f test-llm-env/bin/activate ]; then echo "PASS: Virtual environment created"; else echo "FAIL: Virtual environment not created" && exit 1; fi
-rm -rf test-llm-env
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -48,14 +38,9 @@ rm -rf test-llm-env
 
 ### Additional Dependencies
 
+<!-- @test:id=install-deps platform=all timeout=300 depends_on=create-venv -->
 ```bash
 pip install transformers accelerate sentencepiece protobuf
-```
-
-<!-- @test:id=install-dependencies platform=all timeout=300 -->
-```bash
-pip install transformers accelerate sentencepiece protobuf
-python -c "import transformers; import accelerate; print('PASS: Dependencies installed successfully')"
 ```
 <!-- @test:end -->
 
@@ -75,39 +60,25 @@ import sys
 
 # Check that required script files exist
 scripts = ['run_llm.py', 'summarizer.py', 'example_document.txt']
-missing = []
-
-for script in scripts:
-    if not os.path.exists(script):
-        missing.append(script)
+missing = [s for s in scripts if not os.path.exists(s)]
 
 if missing:
     print(f"FAIL: Missing files: {missing}")
     sys.exit(1)
-else:
-    print("PASS: All required script files exist")
+print("PASS: All required script files exist")
 ```
 <!-- @test:end -->
 
-<!-- @test:id=verify-scripts-syntax platform=all timeout=60 -->
+<!-- @test:id=verify-scripts-syntax platform=all timeout=60 depends_on=verify-scripts-exist -->
 ```python
 import ast
 import sys
 
 # Verify Python scripts have valid syntax
-scripts = ['run_llm.py', 'summarizer.py']
-
-for script in scripts:
-    try:
-        with open(script, 'r') as f:
-            source = f.read()
-        ast.parse(source)
-        print(f"PASS: {script} has valid syntax")
-    except SyntaxError as e:
-        print(f"FAIL: {script} has syntax error: {e}")
-        sys.exit(1)
-
-print("PASS: All scripts have valid Python syntax")
+for script in ['run_llm.py', 'summarizer.py']:
+    with open(script, 'r') as f:
+        ast.parse(f.read())
+    print(f"PASS: {script} has valid syntax")
 ```
 <!-- @test:end -->
 
@@ -119,7 +90,7 @@ Both scripts support:
 
 The included [run_llm.py](assets/run_llm.py) script shows how to load and generate text with LLMs using PyTorch and AMD ROCm. On the first run, model weights are automatically downloaded.
 
-Take a look at how prompts are tokenized and sent to the model. Understanding this process lets you adapt LLMs for any text generation or summarization task. Here’s a minimal example from the script:
+Take a look at how prompts are tokenized and sent to the model. Understanding this process lets you adapt LLMs for any text generation or summarization task. Here's a minimal example from the script:
 
 ```python
 import torch
@@ -134,30 +105,24 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 ```
 
-<!-- @test:id=verify-torch-rocm platform=all timeout=60 -->
+<!-- @test:id=verify-imports platform=all timeout=60 depends_on=install-deps -->
 ```python
 import torch
-import sys
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
-# Verify PyTorch is installed and can detect GPU
 print(f"PyTorch version: {torch.__version__}")
 print(f"CUDA/ROCm available: {torch.cuda.is_available()}")
-
-if torch.cuda.is_available():
-    print(f"GPU: {torch.cuda.get_device_name(0)}")
-    print("PASS: PyTorch with GPU support is available")
-else:
-    print("WARNING: No GPU detected, but PyTorch is installed")
-    # Don't fail - CI machine might not have GPU
-    print("PASS: PyTorch is installed (no GPU)")
+print("PASS: All imports successful")
 ```
 <!-- @test:end -->
 
 To try it out:
 
+<!-- @test:id=run-llm-help platform=all timeout=30 depends_on=verify-scripts-syntax -->
 ```bash
-python run_llm.py
+python run_llm.py --help
 ```
+<!-- @test:end -->
 
 ## Building a Document Summarizer
 
@@ -167,8 +132,13 @@ The script is designed to work out of the box: point it at a text file, pick a m
 
 ### Usage Examples
 
+<!-- @test:id=summarizer-help platform=all timeout=30 depends_on=verify-scripts-syntax -->
 ```bash
+python summarizer.py --help
+```
+<!-- @test:end -->
 
+```bash
 # Summarize document
 python summarizer.py
 
