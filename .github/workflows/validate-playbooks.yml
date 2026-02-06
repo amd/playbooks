@@ -24,12 +24,12 @@ jobs:
           python-version: '3.11'
 
       - name: Validate n8n playbook
-        shell: pwsh
+        shell: PowerShell
         run: | 
           python playbooks/core/n8n-automation-gpt-oss/playbook.py
 
       - name: Display summary
         if: success()
-        shell: pwsh
+        shell: PowerShell
         run: |
           Add-Content -Path $env:GITHUB_STEP_SUMMARY "### ✅ n8n Playbook Test Passed"
