@@ -405,8 +405,8 @@ def run_playbook_tests(playbook_id: str, platform: str) -> bool:
     print(f"Playbook path: {playbook_path}")
     print(f"README path: {readme_path}")
 
-    # Create results directory
-    results_dir = Path("test-results") / playbook_id
+    # Create results directory (use absolute path so it works from any workdir)
+    results_dir = Path.cwd() / "test-results" / playbook_id
     results_dir.mkdir(parents=True, exist_ok=True)
 
     # Extract tests
