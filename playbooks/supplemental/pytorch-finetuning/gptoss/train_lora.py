@@ -10,9 +10,10 @@ Memory Requirements: ~24-32GB VRAM
 Training Speed: 3-5x faster than full fine-tuning
 """
 
+import gc
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from peft import LoraConfig, get_peft_model
 from trl import SFTConfig, SFTTrainer
 from datasets import load_dataset
 
@@ -28,11 +29,24 @@ def report_peak_mem(tag: str = ""):
         print(f"Peak training memory{(' ' + tag) if tag else ''}: "
               f"{torch.cuda.max_memory_allocated()/1e9:.2f} GB")
 
+def cleanup_gpu_memory():
+    """Release GPU memory and cleanup resources"""
+    try:
+        print("\nCleaning up GPU memory...")
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
+            torch.cuda.empty_cache()
+        print("✓ GPU memory cleaned up")
+    except Exception as e:
+        print(f"⚠ Warning during cleanup: {e}")
+
 
 # -----------------------
 # Model Configuration
 # -----------------------
-MODEL = "gpt-oss/gpt-oss-20b"
+MODEL = "openai/gpt-oss-20b"
 model_name = MODEL.split("/")[-1]
 
 # -----------------------
@@ -56,8 +70,8 @@ LORA_TARGET_MODULES = [        # Which layers to add LoRA adapters to
 # -----------------------
 LR = 3e-4                      # Higher learning rate for LoRA
 EPOCHS = 3
-BATCH_SIZE = 4                 # Can use larger batch with LoRA
-GRAD_ACCUM_STEPS = 4
+BATCH_SIZE = 2                 # Reduced to avoid VRAM exhaustion
+GRAD_ACCUM_STEPS = 8           # Increased to maintain effective batch size of 16
 
 # -----------------------
 # Load Dataset
@@ -84,13 +98,14 @@ print(f"\nLoading {MODEL}...")
 
 model = AutoModelForCausalLM.from_pretrained(
     MODEL,
-    torch_dtype=torch.bfloat16,
+    dtype=torch.bfloat16,  # Use dtype instead of torch_dtype
     device_map="auto",
     trust_remote_code=True,
     low_cpu_mem_usage=True
 )
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
+tokenizer.model_max_length = 512  # Set max sequence length
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
@@ -112,6 +127,10 @@ lora_config = LoraConfig(
 # Apply LoRA to model
 model = get_peft_model(model, lora_config)
 
+# Enable gradient checkpointing for memory efficiency
+model.gradient_checkpointing_enable()
+print("Gradient checkpointing enabled")
+
 # Print trainable parameters
 trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 total_params = sum(p.numel() for p in model.parameters())
@@ -132,7 +151,6 @@ args = SFTConfig(
     output_dir=f"output-{model_name}-lora",
     
     # Dataset settings
-    max_seq_length=512,
     packing=False,
     
     # Training hyperparameters
@@ -186,6 +204,7 @@ print(f"Effective batch size: {BATCH_SIZE * GRAD_ACCUM_STEPS}")
 print(f"Learning rate: {LR}\n")
 
 reset_peak_mem()
+
 trainer.train()
 report_peak_mem("(LoRA)")
 
@@ -208,3 +227,8 @@ print(f"  tokenizer = AutoTokenizer.from_pretrained('output-{model_name}-lora')"
 print("\nTo merge adapter with base model:")
 print("  merged_model = model.merge_and_unload()")
 print("  merged_model.save_pretrained('output-merged')")
+
+# -----------------------
+# Cleanup GPU Memory
+# -----------------------
+cleanup_gpu_memory()

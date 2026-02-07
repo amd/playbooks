@@ -8,6 +8,7 @@ Best for: Maximum quality when you have sufficient GPU memory (40GB+ VRAM)
 Memory Requirements: ~80GB+ VRAM (requires gradient checkpointing and optimizations)
 """
 
+import gc
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from trl import SFTConfig, SFTTrainer
@@ -25,12 +26,25 @@ def report_peak_mem(tag: str = ""):
         print(f"Peak training memory{(' ' + tag) if tag else ''}: "
               f"{torch.cuda.max_memory_allocated()/1e9:.2f} GB")
 
+def cleanup_gpu_memory():
+    """Release GPU memory and cleanup resources"""
+    try:
+        print("\nCleaning up GPU memory...")
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
+            torch.cuda.empty_cache()
+        print("✓ GPU memory cleaned up")
+    except Exception as e:
+        print(f"⚠ Warning during cleanup: {e}")
+
 
 # -----------------------
 # Model Configuration
 # -----------------------
 # GPT-OSS 20B - Open source GPT model
-MODEL = "gpt-oss/gpt-oss-20b"  # 20 billion parameters
+MODEL = "openai/gpt-oss-20b"  # 20 billion parameters
 model_name = MODEL.split("/")[-1]
 
 # -----------------------
@@ -68,15 +82,14 @@ print("This may take several minutes for a 20B model...")
 
 model = AutoModelForCausalLM.from_pretrained(
     MODEL,
-    torch_dtype=torch.bfloat16,      # Use BF16 for better stability and ROCm support
+    dtype=torch.bfloat16,             # Use BF16 for better stability and ROCm support (dtype not torch_dtype)
     device_map="auto",                # Automatically distribute across available GPUs
     trust_remote_code=True,
     low_cpu_mem_usage=True            # Reduce CPU memory during loading
 )
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
-if tokenizer.pad_token is None:
-    tokenizer.pad_token = tokenizer.eos_token
+tokenizer.model_max_length = 512  # Set max sequence length
 
 print(f"Model loaded. Weights footprint: {model.get_memory_footprint()/1e9:.2f} GB")
 
@@ -91,7 +104,6 @@ args = SFTConfig(
     output_dir=f"output-{model_name}-full",
     
     # Dataset settings
-    max_seq_length=512,
     packing=False,
     
     # Training hyperparameters
@@ -130,6 +142,11 @@ args = SFTConfig(
 # -----------------------
 # Initialize Trainer
 # -----------------------
+# Set tokenizer padding
+tokenizer.padding_side = "right"
+if tokenizer.pad_token is None:
+    tokenizer.pad_token = tokenizer.eos_token
+
 trainer = SFTTrainer(
     model=model,
     args=args,
@@ -169,3 +186,8 @@ print(f"Model saved to: output-{model_name}-full")
 print("\nTo use your fine-tuned model:")
 print(f"  model = AutoModelForCausalLM.from_pretrained('output-{model_name}-full')")
 print(f"  tokenizer = AutoTokenizer.from_pretrained('output-{model_name}-full')")
+
+# -----------------------
+# Cleanup GPU Memory
+# -----------------------
+cleanup_gpu_memory()
