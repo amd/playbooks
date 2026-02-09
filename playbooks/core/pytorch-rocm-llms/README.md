@@ -69,7 +69,7 @@ print("PASS: All required script files exist")
 ```
 <!-- @test:end -->
 
-<!-- @test:id=verify-scripts-syntax platform=all timeout=60 depends_on=verify-scripts-exist -->
+<!-- @test:id=verify-scripts-syntax platform=all timeout=60 depends_on=verify-scripts-exist hidden=true -->
 ```python
 import ast
 import sys
@@ -105,7 +105,7 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 ```
 
-<!-- @test:id=verify-imports platform=all timeout=60 depends_on=install-deps -->
+<!-- @test:id=verify-imports platform=all timeout=60 depends_on=install-deps hidden=True -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
