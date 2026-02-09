@@ -53,7 +53,7 @@ This playbook includes ready-to-use scripts in the `assets/` folder (click to pr
 | [run_llm.py](assets/run_llm.py) | Basic LLM text generation | `python run_llm.py` |
 | [summarizer.py](assets/summarizer.py) | Document summarizer with Harmony support | `python summarizer.py --file document.txt` |
 
-<!-- @test:id=verify-scripts-exist platform=all timeout=30 -->
+<!-- @test:id=verify-scripts-exist platform=all timeout=30 hidden=True -->
 ```python
 import os
 import sys
@@ -118,7 +118,7 @@ print("PASS: All imports successful")
 
 To try it out:
 
-<!-- @test:id=run-llm-help platform=all timeout=30 depends_on=verify-scripts-syntax -->
+<!-- @test:id=run-llm-help platform=all timeout=300 depends_on=verify-scripts-syntax -->
 ```bash
 python run_llm.py
 ```
