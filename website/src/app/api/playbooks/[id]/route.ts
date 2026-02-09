@@ -133,6 +133,45 @@ function processRequireTags(content: string): string {
 }
 
 /**
+ * Processes @test tags used for CI testing
+ * 
+ * By default, the @test tags are stripped but the code block remains visible.
+ * If hidden=true is specified, both the tags AND the code block are removed.
+ * 
+ * Syntax:
+ *   <!-- @test:id=test-name platform=all -->
+ *   ```bash
+ *   some command
+ *   ```
+ *   <!-- @test:end -->
+ * 
+ * With hidden=true:
+ *   <!-- @test:id=test-name hidden=true -->
+ *   ```bash
+ *   some hidden test command
+ *   ```
+ *   <!-- @test:end -->
+ */
+function processTestTags(content: string): string {
+  // Pattern to match test blocks with their wrapped code
+  const testBlockPattern = /<!-- @test:([^>]+) -->\s*(```\w*\s*\n[\s\S]*?```)\s*<!-- @test:end -->/g;
+  
+  return content.replace(testBlockPattern, (_match, attrs: string, codeBlock: string) => {
+    // Check if hidden=true is set
+    const hiddenMatch = /hidden\s*=\s*(?:"true"|true)/i.exec(attrs);
+    const isHidden = hiddenMatch !== null;
+    
+    if (isHidden) {
+      // Remove the entire block (tags + code)
+      return '';
+    }
+    
+    // Keep the code block, just strip the test tags
+    return codeBlock;
+  });
+}
+
+/**
  * Transforms @setup tags into @setup-content blocks with setup step content
  * 
  * Syntax: 
@@ -214,6 +253,8 @@ function findPlaybook(id: string): Playbook | null {
           let content = "";
           if (fs.existsSync(readmePath)) {
             content = fs.readFileSync(readmePath, "utf-8");
+            // Process @test tags (strip tags, optionally hide code blocks with hidden=true)
+            content = processTestTags(content);
             // Process @require tags to inject shared dependency content
             content = processRequireTags(content);
             // Process @setup tags to inject shared setup/configuration content

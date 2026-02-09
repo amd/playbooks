@@ -36,6 +36,7 @@ Supported test attributes:
     - workdir: Working directory relative to playbook assets folder
     - continue_on_error: true/false - whether to continue if this test fails (default: false)
     - depends_on: Comma-separated list of test IDs that must pass before this test runs
+    - hidden: true/false - if true, hides the code block from the website (default: false)
 
 Usage:
     python run_playbook_tests.py --playbook pytorch-rocm-llms --platform windows
@@ -63,6 +64,7 @@ class TestBlock:
     workdir: Optional[str] = None
     continue_on_error: bool = False
     depends_on: list[str] = field(default_factory=list)
+    hidden: bool = False
     language: str = "bash"
     code: str = ""
     line_number: int = 0
@@ -119,6 +121,8 @@ def parse_test_attributes(attr_string: str) -> dict:
             value = int(value)
         elif key == "continue_on_error":
             value = value.lower() == "true"
+        elif key == "hidden":
+            value = value.lower() == "true"
         elif key == "depends_on":
             # Parse comma-separated list of dependencies
             value = [dep.strip() for dep in value.split(",") if dep.strip()]
@@ -164,6 +168,7 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
             workdir=attrs.get("workdir"),
             continue_on_error=attrs.get("continue_on_error", False),
             depends_on=attrs.get("depends_on", []),
+            hidden=attrs.get("hidden", False),
             language=language,
             code=code,
             line_number=line_number,

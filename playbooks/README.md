@@ -118,7 +118,7 @@ Content displays directly since these are required steps, not optional reference
 
 ### Testing Tags
 
-Use `@test` tags to make existing code blocks testable. These tags **wrap your existing code** and are **invisible to website visitors** but are picked up by CI to run automated tests.
+Use `@test` tags to make existing code blocks testable. These tags **wrap your existing code** and are picked up by CI to run automated tests. The HTML comment tags themselves are invisible to website visitors, but the wrapped code remains visible by default. Add `hidden=true` to hide the code block from the website if needed (e.g., for test-only setup commands).
 
 **Basic syntax — wrap existing code blocks:**
 
@@ -141,6 +141,7 @@ The test tags wrap the code block that users see. No duplication needed — the 
 | `timeout` | No | `300` | Maximum execution time in seconds |
 | `continue_on_error` | No | `false` | If `true`, test failure won't fail the CI job |
 | `depends_on` | No | — | Comma-separated list of test IDs that must pass first |
+| `hidden` | No | `false` | If `true`, hides the code block from the website (useful for test-only setup) |
 
 **Supported languages:**
 
