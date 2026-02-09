@@ -491,11 +491,11 @@ def run_playbook_tests(playbook_id: str, platform: str) -> bool:
 
     for result in suite.results:
         if result.skipped:
-            status = "⊘ SKIP"
+            status = "[SKIP]"
         elif result.success:
-            status = "✓ PASS"
+            status = "[PASS]"
         else:
-            status = "✗ FAIL"
+            status = "[FAIL]"
         print(f"  {status}: {result.test_id} ({result.duration:.2f}s)")
         if result.error_message:
             print(f"         {result.error_message}")
