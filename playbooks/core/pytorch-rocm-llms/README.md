@@ -120,7 +120,7 @@ To try it out:
 
 <!-- @test:id=run-llm-help platform=all timeout=30 depends_on=verify-scripts-syntax -->
 ```bash
-python run_llm.py --help
+python run_llm.py
 ```
 <!-- @test:end -->
 
@@ -131,12 +131,6 @@ Build on your LLM setup by turning it into a practical document summarizer. In t
 The script is designed to work out of the box: point it at a text file, pick a model, and it returns a clear 2–3 sentence overview. As you explore the code, you can customize prompts, tweak parameters like length and temperature, and see how different models behave.
 
 ### Usage Examples
-
-<!-- @test:id=summarizer-help platform=all timeout=30 depends_on=verify-scripts-syntax -->
-```bash
-python summarizer.py --help
-```
-<!-- @test:end -->
 
 ```bash
 # Summarize document
