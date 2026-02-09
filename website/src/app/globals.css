@@ -530,3 +530,224 @@ body {
 .playbook-content img:hover {
   opacity: 0.9;
 }
+
+/* ──────────────────────────────────────────────────────────
+   Test Coverage Badge Styles (dev:coverage mode only)
+   ────────────────────────────────────────────────────────── */
+
+/* Stats container above the content card */
+.tc-stats-container {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tc-stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  background: #161616;
+  border: 1px solid var(--border-color);
+  border-radius: 0.625rem;
+}
+
+.tc-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #1e1e1e;
+  color: #aaa;
+}
+
+.tc-stat strong { font-weight: 700; color: #fff; }
+.tc-stat-green strong { color: #4ade80; }
+.tc-stat-purple strong { color: #a78bfa; }
+
+.tc-stat-divider {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--border-color);
+}
+
+.tc-stat-coverage {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #1a2e1a;
+  border: 1px solid #2d5a2d;
+  color: #4ade80;
+}
+
+.tc-stat-coverage.tc-cov-mid {
+  background: #2e2a1a;
+  border-color: #5a4d2d;
+  color: #fbbf24;
+}
+
+.tc-stat-coverage.tc-cov-low {
+  background: #2e1a1a;
+  border-color: #5a2d2d;
+  color: #f87171;
+}
+
+/* Results bar */
+.tc-results-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: #161616;
+  border: 1px solid var(--border-color);
+  border-radius: 0.625rem;
+  font-size: 0.75rem;
+}
+
+.tc-results-label {
+  color: #888;
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+.tc-results-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.1875rem 0.625rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+
+.tc-results-pass { background: #1a2e1a; color: #4ade80; }
+.tc-results-fail { background: #2e1a1a; color: #f87171; }
+.tc-results-skip { background: #2e2a1a; color: #fbbf24; }
+
+/* Legend */
+.tc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: #131313;
+  border: 1px solid #242424;
+  border-radius: 0.5rem;
+  font-size: 0.6875rem;
+  color: #666;
+}
+
+.tc-legend-title { font-weight: 600; color: #888; }
+.tc-legend-sep { color: #444; }
+
+.tc-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.tc-legend-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tc-swatch-tested  { background: #0a2e1a; border-color: #2d5a2d; }
+.tc-swatch-hidden  { background: #1a1533; border-color: #4a2d6a; }
+.tc-swatch-untested { background: #0a0a0a; border-color: #282828; }
+.tc-swatch-pass    { background: #166534; border-color: #22c55e; }
+.tc-swatch-fail    { background: #7f1d1d; border-color: #ef4444; }
+.tc-swatch-skip    { background: #78350f; border-color: #f59e0b; }
+
+/* Test coverage block wrapper — badge header + code block */
+.playbook-content .tc-block {
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #2d5a2d;
+}
+
+.playbook-content .tc-block.tc-hidden      { border-color: #4a2d6a; }
+.playbook-content .tc-block.tc-result-fail { border-color: #5a2d2d; }
+.playbook-content .tc-block.tc-result-skip { border-color: #5a4d2d; }
+
+/* Remove inner margins/borders so code block merges with the badge header */
+.playbook-content .tc-block .code-block-wrapper { margin: 0; }
+.playbook-content .tc-block .code-block {
+  border: none;
+  border-radius: 0;
+}
+
+/* Badge header bar */
+.tc-badge-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 7px 12px;
+  background: linear-gradient(135deg, #0a2e1a 0%, #0d3520 100%);
+  font-size: 0.6875rem;
+}
+
+.tc-badge-header.tc-badge-hidden {
+  background: linear-gradient(135deg, #1a1533 0%, #201840 100%);
+}
+
+.tc-badge-header.tc-badge-fail {
+  background: linear-gradient(135deg, #2e1515 0%, #351818 100%);
+}
+
+.tc-badge-header.tc-badge-skip {
+  background: linear-gradient(135deg, #2e2815 0%, #352e18 100%);
+}
+
+/* Pills within the badge header */
+.tc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.tc-pill-label {
+  background: #166534;
+  color: #4ade80;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tc-pill-label-hidden {
+  background: #3b1a6a;
+  color: #a78bfa;
+}
+
+.tc-pill-id       { background: rgba(255, 255, 255, 0.08); color: #ccc; }
+.tc-pill-platform { background: rgba(255, 255, 255, 0.06); color: #999; }
+.tc-pill-timeout  { background: rgba(255, 255, 255, 0.04); color: #777; }
+.tc-pill-depends  { background: rgba(212, 145, 93, 0.15); color: var(--ember-primary); }
+
+.tc-pill-result {
+  margin-left: auto;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tc-pill-result-pass { background: #166534; color: #4ade80; }
+.tc-pill-result-fail { background: #7f1d1d; color: #f87171; }
+.tc-pill-result-skip { background: #78350f; color: #fbbf24; }

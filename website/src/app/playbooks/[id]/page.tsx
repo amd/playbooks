@@ -11,7 +11,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
-import type { Playbook, Platform } from "@/types/playbook";
+import type { Playbook, Platform, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
 import { formatTime } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
@@ -521,6 +521,108 @@ function transformSetupBlocks(content: string): string {
   });
 }
 
+/**
+ * Test coverage badge block — renders a badge header on top of a code block.
+ * Only shown when running in dev:coverage mode.
+ */
+function TestCoverageBlock({
+  testId, platform, timeout, isHidden, depends, code, testResult,
+}: {
+  testId: string;
+  platform: string;
+  timeout: string;
+  isHidden: boolean;
+  depends: string;
+  code: string;
+  testResult?: TestResultInfo;
+}) {
+  // Parse the fenced code block: ```lang\ncontent\n```
+  const langMatch = code.match(/```(\w+)?\s*\n/);
+  const language = langMatch?.[1] || "";
+  const codeContent = code.replace(/```\w*\s*\n/, "").replace(/\n?```\s*$/, "");
+  const dependsList = depends ? depends.split(",").filter(Boolean) : [];
+
+  let resultStatus = "";
+  let resultLabel = "";
+  if (testResult) {
+    if (testResult.skipped) { resultStatus = "skip"; resultLabel = "Skipped"; }
+    else if (testResult.success) { resultStatus = "pass"; resultLabel = "Passed"; }
+    else { resultStatus = "fail"; resultLabel = "Failed"; }
+  }
+
+  const platformIcon = platform === "windows" ? "⊞" : platform === "linux" ? "🐧" : "◉";
+
+  return (
+    <div className={`tc-block ${isHidden ? "tc-hidden" : ""} ${resultStatus ? `tc-result-${resultStatus}` : ""}`}>
+      <div className={`tc-badge-header ${isHidden ? "tc-badge-hidden" : ""} ${resultStatus === "fail" ? "tc-badge-fail" : ""} ${resultStatus === "skip" ? "tc-badge-skip" : ""}`}>
+        <span className={`tc-pill tc-pill-label ${isHidden ? "tc-pill-label-hidden" : ""}`}>
+          {isHidden ? "👁 Hidden Test" : "✓ Tested"}
+        </span>
+        <span className="tc-pill tc-pill-id">{testId}</span>
+        <span className="tc-pill tc-pill-platform">{platformIcon} {platform}</span>
+        <span className="tc-pill tc-pill-timeout">⏱ {timeout}s</span>
+        {dependsList.length > 0 && (
+          <span className="tc-pill tc-pill-depends">→ {dependsList.join(", ")}</span>
+        )}
+        {testResult && (
+          <span className={`tc-pill tc-pill-result tc-pill-result-${resultStatus}`}>
+            {resultLabel}{testResult.duration ? ` (${testResult.duration.toFixed(1)}s)` : ""}
+          </span>
+        )}
+      </div>
+      <CodeBlock language={language}>{codeContent}</CodeBlock>
+    </div>
+  );
+}
+
+/**
+ * Stats bar showing test coverage summary for the playbook.
+ * Only shown when running in dev:coverage mode.
+ */
+function TestCoverageStatsBar({ coverage }: { coverage: TestCoverageInfo }) {
+  const covPct = coverage.totalCodeBlocks > 0
+    ? Math.round((coverage.visibleTestCount / coverage.totalCodeBlocks) * 100)
+    : 0;
+  const covClass = covPct >= 60 ? "" : covPct >= 30 ? "tc-cov-mid" : "tc-cov-low";
+
+  return (
+    <div className="tc-stats-container">
+      {/* Stats row */}
+      <div className="tc-stats-bar">
+        <span className="tc-stat tc-stat-green"><strong>{coverage.visibleTestCount}</strong> visible tests</span>
+        <span className="tc-stat tc-stat-purple"><strong>{coverage.hiddenTestCount}</strong> hidden tests</span>
+        <span className="tc-stat"><strong>{coverage.totalCodeBlocks}</strong> code blocks</span>
+        <span className="tc-stat-divider" />
+        <span className={`tc-stat-coverage ${covClass}`}>{covPct}% coverage</span>
+      </div>
+      {/* Results row */}
+      {coverage.resultsSummary && (
+        <div className="tc-results-bar">
+          <span className="tc-results-label">Last Run:</span>
+          <span className="tc-results-pill tc-results-pass">{coverage.resultsSummary.passed} passed</span>
+          <span className="tc-results-pill tc-results-fail">{coverage.resultsSummary.failed} failed</span>
+          <span className="tc-results-pill tc-results-skip">{coverage.resultsSummary.skipped} skipped</span>
+        </div>
+      )}
+      {/* Legend */}
+      <div className="tc-legend">
+        <span className="tc-legend-title">Legend:</span>
+        <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-tested" /> Tested (visible)</span>
+        <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-hidden" /> Hidden test</span>
+        <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-untested" /> Not tested</span>
+        {coverage.resultsSummary && (
+          <>
+            <span className="tc-legend-sep">|</span>
+            <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-pass" /> Passed</span>
+            <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-fail" /> Failed</span>
+            <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-skip" /> Skipped</span>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PlatformToggle({ 
   platforms, 
   selected, 
@@ -762,7 +864,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     tr: ({ children }: { children?: React.ReactNode }) => <tr className="md-tr">{children}</tr>,
     th: ({ children }: { children?: React.ReactNode }) => <th className="md-th">{children}</th>,
     td: ({ children }: { children?: React.ReactNode }) => <td className="md-td">{children}</td>,
-    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string }) => {
+    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-depends'?: string; 'data-code'?: string }) => {
       const { className, ...rest } = props;
       // Handle the halo-preinstalled-dropdown custom element
       if (className === 'halo-preinstalled-dropdown') {
@@ -795,9 +897,25 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
           );
         }
       }
+      // Handle test-coverage-block (dev:coverage mode only)
+      if (className === 'test-coverage-block') {
+        const testId = props['data-test-id'] || '';
+        const testInfo = playbook?.testCoverage?.tests.find(t => t.id === testId);
+        return (
+          <TestCoverageBlock
+            testId={testId}
+            platform={props['data-platform'] || 'all'}
+            timeout={props['data-timeout'] || '300'}
+            isHidden={props['data-hidden'] === 'true'}
+            depends={props['data-depends'] || ''}
+            code={decodeURIComponent(props['data-code'] || '')}
+            testResult={testInfo?.result}
+          />
+        );
+      }
       return <div className={className} {...rest} />;
     },
-  }), [id, setLightboxImage]);
+  }), [id, setLightboxImage, playbook?.testCoverage]);
 
   // Handle clicking a TOC link - scroll and immediately set active
   const handleTocClick = (targetId: string) => {
@@ -1012,6 +1130,11 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
+                  {/* Test Coverage Stats (only in dev:coverage mode) */}
+                  {playbook.testCoverage && (
+                    <TestCoverageStatsBar coverage={playbook.testCoverage} />
+                  )}
+
                   <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6 md:p-8">
                     {filteredContent ? (
                       <article ref={contentRef} className="playbook-content prose prose-invert max-w-none">

@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import type { Playbook, PlaybookMeta, Category } from "@/types/playbook";
+import type { Playbook, PlaybookMeta, Category, TestInfo, TestCoverageInfo } from "@/types/playbook";
 
 const PLAYBOOKS_ROOT = path.join(process.cwd(), "..", "playbooks");
 const DEPENDENCIES_ROOT = path.join(PLAYBOOKS_ROOT, "dependencies");
+const TEST_RESULTS_ROOT = path.join(process.cwd(), "..", "test-results");
+const SHOW_COVERAGE = process.env.SHOW_TEST_COVERAGE === "true";
 
 interface DependencyRegistry {
   dependencies: Record<string, {
@@ -133,42 +135,109 @@ function processRequireTags(content: string): string {
 }
 
 /**
- * Processes @test tags used for CI testing
- * 
- * By default, the @test tags are stripped but the code block remains visible.
- * If hidden=true is specified, both the tags AND the code block are removed.
- * 
- * Syntax:
- *   <!-- @test:id=test-name platform=all -->
- *   ```bash
- *   some command
- *   ```
- *   <!-- @test:end -->
- * 
- * With hidden=true:
- *   <!-- @test:id=test-name hidden=true -->
- *   ```bash
- *   some hidden test command
- *   ```
- *   <!-- @test:end -->
+ * Parses key=value attributes from a @test tag string.
  */
-function processTestTags(content: string): string {
-  // Pattern to match test blocks with their wrapped code
-  const testBlockPattern = /<!-- @test:([^>]+) -->\s*(```\w*\s*\n[\s\S]*?```)\s*<!-- @test:end -->/g;
-  
-  return content.replace(testBlockPattern, (_match, attrs: string, codeBlock: string) => {
-    // Check if hidden=true is set
-    const hiddenMatch = /hidden\s*=\s*(?:"true"|true)/i.exec(attrs);
-    const isHidden = hiddenMatch !== null;
-    
-    if (isHidden) {
-      // Remove the entire block (tags + code)
-      return '';
+function parseTestAttributes(attrString: string): Record<string, unknown> {
+  const attrs: Record<string, unknown> = {};
+  const pattern = /(\w+)=(?:"([^"]+)"|(\S+))/g;
+  let match;
+  while ((match = pattern.exec(attrString)) !== null) {
+    const key = match[1];
+    const value = match[2] || match[3];
+    if (key === "timeout") attrs[key] = parseInt(value, 10);
+    else if (key === "hidden" || key === "continue_on_error") attrs[key] = value.toLowerCase() === "true";
+    else if (key === "depends_on") attrs[key] = value.split(",").map((s: string) => s.trim()).filter(Boolean);
+    else attrs[key] = value;
+  }
+  return attrs;
+}
+
+/**
+ * Loads test results for a playbook from test-results/{id}/summary.json
+ */
+function loadTestResults(playbookId: string): { resultsMap: Record<string, { success: boolean; skipped: boolean; duration: number; error: string }>; summary?: { passed: number; failed: number; skipped: number } } {
+  const resultsPath = path.join(TEST_RESULTS_ROOT, playbookId, "summary.json");
+  if (!fs.existsSync(resultsPath)) return { resultsMap: {} };
+  try {
+    const raw = JSON.parse(fs.readFileSync(resultsPath, "utf-8"));
+    const resultsMap: Record<string, { success: boolean; skipped: boolean; duration: number; error: string }> = {};
+    for (const r of raw.results || []) {
+      resultsMap[r.test_id] = {
+        success: r.success,
+        skipped: r.skipped ?? false,
+        duration: r.duration ?? 0,
+        error: r.error_message ?? "",
+      };
     }
-    
-    // Keep the code block, just strip the test tags
-    return codeBlock;
+    return {
+      resultsMap,
+      summary: { passed: raw.passed ?? 0, failed: raw.failed ?? 0, skipped: raw.skipped ?? 0 },
+    };
+  } catch {
+    return { resultsMap: {} };
+  }
+}
+
+/**
+ * Processes @test tags used for CI testing.
+ * 
+ * Normal mode (default):
+ *   The @test tags are stripped but the code block remains visible.
+ *   If hidden=true, both the tags AND the code block are removed.
+ * 
+ * Coverage mode (SHOW_TEST_COVERAGE=true):
+ *   @test tags are replaced with visible marker divs that the frontend
+ *   renders as test-coverage badges on top of code blocks.
+ *   Hidden blocks are kept visible with a "hidden test" indicator.
+ *   Returns test metadata for the stats bar.
+ */
+function processTestTags(content: string, playbookId: string): { content: string; testCoverage?: TestCoverageInfo } {
+  const testBlockPattern = /<!-- @test:([^>]+) -->\s*(```\w*\s*\n[\s\S]*?```)\s*<!-- @test:end -->/g;
+
+  if (!SHOW_COVERAGE) {
+    // Original behavior: strip tags, hide hidden blocks
+    const processed = content.replace(testBlockPattern, (_match, attrs: string, codeBlock: string) => {
+      const hiddenMatch = /hidden\s*=\s*(?:"true"|true)/i.exec(attrs);
+      return hiddenMatch ? '' : codeBlock;
+    });
+    return { content: processed };
+  }
+
+  // ── Coverage mode ──────────────────────────────────────────────
+  const tests: TestInfo[] = [];
+  const { resultsMap, summary: resultsSummary } = loadTestResults(playbookId);
+
+  const processed = content.replace(testBlockPattern, (_match, attrStr: string, codeBlock: string) => {
+    const attrs = parseTestAttributes(attrStr);
+    const testId = (attrs.id as string) || "unknown";
+    const platform = (attrs.platform as string) || "all";
+    const timeout = (attrs.timeout as number) || 300;
+    const hidden = (attrs.hidden as boolean) || false;
+    const dependsOn = (attrs.depends_on as string[]) || [];
+
+    const testInfo: TestInfo = { id: testId, platform, timeout, hidden, dependsOn };
+    const result = resultsMap[testId];
+    if (result) testInfo.result = result;
+    tests.push(testInfo);
+
+    const deps = dependsOn.join(",");
+    const encodedCode = encodeURIComponent(codeBlock);
+    const marker = `<div class="test-coverage-block" data-test-id="${testId}" data-platform="${platform}" data-timeout="${timeout}" data-hidden="${hidden}" data-depends="${deps}" data-code="${encodedCode}"></div>`;
+    return marker;
   });
+
+  const totalCodeBlocks = (content.match(/```\w*\s*\n/g) || []).length;
+
+  return {
+    content: processed,
+    testCoverage: {
+      tests,
+      totalCodeBlocks,
+      visibleTestCount: tests.filter(t => !t.hidden).length,
+      hiddenTestCount: tests.filter(t => t.hidden).length,
+      resultsSummary,
+    },
+  };
 }
 
 /**
@@ -251,10 +320,13 @@ function findPlaybook(id: string): Playbook | null {
         
         if (meta.id === id) {
           let content = "";
+          let testCoverage: TestCoverageInfo | undefined;
           if (fs.existsSync(readmePath)) {
             content = fs.readFileSync(readmePath, "utf-8");
-            // Process @test tags (strip tags, optionally hide code blocks with hidden=true)
-            content = processTestTags(content);
+            // Process @test tags (strip tags, or emit coverage markers)
+            const testResult = processTestTags(content, meta.id);
+            content = testResult.content;
+            testCoverage = testResult.testCoverage;
             // Process @require tags to inject shared dependency content
             content = processRequireTags(content);
             // Process @setup tags to inject shared setup/configuration content
@@ -266,6 +338,7 @@ function findPlaybook(id: string): Playbook | null {
             category: getCategory(category),
             path: `${category}/${folder.name}`,
             content,
+            ...(testCoverage ? { testCoverage } : {}),
           };
           
           return playbook;

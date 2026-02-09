@@ -89,6 +89,34 @@ export interface PlaybookMeta {
   coverImage?: string;
 }
 
+export interface TestResultInfo {
+  success: boolean;
+  skipped: boolean;
+  duration: number;
+  error: string;
+}
+
+export interface TestInfo {
+  id: string;
+  platform: string;
+  timeout: number;
+  hidden: boolean;
+  dependsOn: string[];
+  result?: TestResultInfo;
+}
+
+export interface TestCoverageInfo {
+  tests: TestInfo[];
+  totalCodeBlocks: number;
+  visibleTestCount: number;
+  hiddenTestCount: number;
+  resultsSummary?: {
+    passed: number;
+    failed: number;
+    skipped: number;
+  };
+}
+
 export interface Playbook extends PlaybookMeta {
   /** Category derived from folder structure */
   category: Category;
@@ -98,6 +126,9 @@ export interface Playbook extends PlaybookMeta {
   
   /** Raw markdown content from README.md */
   content?: string;
+
+  /** Test coverage data — only present when running in coverage mode */
+  testCoverage?: TestCoverageInfo;
 }
 
 /**
