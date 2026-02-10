@@ -759,6 +759,9 @@ body {
 .tc-user-view .tc-block {
   border-color: var(--border-color);
 }
+.tc-user-view .tc-block.tc-hidden {
+  display: none;
+}
 .tc-user-view .tc-badge-header {
   display: none;
 }
