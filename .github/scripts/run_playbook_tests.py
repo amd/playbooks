@@ -64,8 +64,19 @@ Reusable setup definitions (@setup):
     you can define named, platform-specific setup steps using @setup comments.
     These HTML comments are invisible when the README is rendered as a webpage.
 
+    The platform for each @setup is inferred from surrounding @os: tags.
+    If a @setup definition is outside any @os: block, it applies to all platforms.
+
     Definition syntax (place anywhere in the README before first use):
-        <!-- @setup:id=activate-venv linux="source llm-env/bin/activate" windows="llm-env\\Scripts\\activate.bat" -->
+        <!-- @os:windows -->
+        <!-- @setup:id=activate-venv command="llm-env\\Scripts\\activate.bat" -->
+        <!-- @os:end -->
+        <!-- @os:linux -->
+        <!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
+        <!-- @os:end -->
+
+    Or for a command that works on all platforms (outside @os: blocks):
+        <!-- @setup:id=some-setup command="some-command" -->
 
     Then reference by name in test blocks:
         <!-- @test:id=install-deps platform=all setup=activate-venv -->
@@ -192,39 +203,96 @@ def parse_test_attributes(attr_string: str) -> dict:
 def extract_setup_definitions(content: str) -> dict[str, dict[str, str]]:
     """Extract reusable @setup definitions from README content.
 
-    Parses HTML comments of the form:
-        <!-- @setup:id=activate-venv linux="source llm-env/bin/activate" windows="llm-env\\Scripts\\activate.bat" -->
+    Supports @setup definitions wrapped in @os: blocks, where the platform is
+    inferred from the surrounding tag:
+
+        <!-- @os:windows -->
+        <!-- @setup:id=activate-venv command="llm-env\\Scripts\\activate.bat" -->
+        <!-- @os:end -->
+        <!-- @os:linux -->
+        <!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
+        <!-- @os:end -->
+
+    Definitions outside any @os: block apply to all platforms:
+        <!-- @setup:id=some-setup command="some-command" -->
 
     Returns a dict mapping setup_id -> {platform: command}, e.g.:
         {"activate-venv": {"linux": "source llm-env/bin/activate", "windows": "llm-env\\Scripts\\activate.bat"}}
     """
     setup_defs: dict[str, dict[str, str]] = {}
-    pattern = r"<!-- @setup:([^>]+) -->"
 
-    for match in re.finditer(pattern, content):
-        attr_string = match.group(1)
+    # First, extract @setup definitions inside @os: blocks
+    os_block_pattern = r"<!-- @os:(windows|linux) -->([\s\S]*?)<!-- @os:end -->"
+    setup_pattern = r"<!-- @setup:([^>]+) -->"
+
+    # Track which character ranges are inside @os: blocks
+    os_ranges: list[tuple[int, int]] = []
+
+    for os_match in re.finditer(os_block_pattern, content):
+        platform = os_match.group(1)
+        block_content = os_match.group(2)
+        block_start = os_match.start()
+        os_ranges.append((os_match.start(), os_match.end()))
+
+        for setup_match in re.finditer(setup_pattern, block_content):
+            attr_string = setup_match.group(1)
+            attrs = parse_test_attributes(attr_string)
+
+            setup_id = attrs.get("id")
+            if not setup_id:
+                abs_pos = block_start + setup_match.start()
+                line_number = content[:abs_pos].count("\n") + 1
+                print(
+                    f"Warning: @setup definition at line {line_number} missing 'id', skipping"
+                )
+                continue
+
+            command = attrs.get("command")
+            if not command:
+                abs_pos = block_start + setup_match.start()
+                line_number = content[:abs_pos].count("\n") + 1
+                print(
+                    f"Warning: @setup '{setup_id}' at line {line_number} has no command"
+                )
+                continue
+
+            if setup_id not in setup_defs:
+                setup_defs[setup_id] = {}
+            setup_defs[setup_id][platform] = command
+
+    # Then, find @setup definitions outside any @os: block (applies to all platforms)
+    for setup_match in re.finditer(setup_pattern, content):
+        # Skip if this match falls within an @os: block
+        match_pos = setup_match.start()
+        inside_os_block = any(
+            start <= match_pos < end for start, end in os_ranges
+        )
+        if inside_os_block:
+            continue
+
+        attr_string = setup_match.group(1)
         attrs = parse_test_attributes(attr_string)
 
         setup_id = attrs.get("id")
         if not setup_id:
-            line_number = content[: match.start()].count("\n") + 1
+            line_number = content[: match_pos].count("\n") + 1
             print(
                 f"Warning: @setup definition at line {line_number} missing 'id', skipping"
             )
             continue
 
-        platform_cmds: dict[str, str] = {}
-        for platform in ["linux", "windows"]:
-            if platform in attrs:
-                platform_cmds[platform] = attrs[platform]
-
-        if platform_cmds:
-            setup_defs[setup_id] = platform_cmds
-        else:
-            line_number = content[: match.start()].count("\n") + 1
+        command = attrs.get("command")
+        if not command:
+            line_number = content[: match_pos].count("\n") + 1
             print(
-                f"Warning: @setup '{setup_id}' at line {line_number} has no platform commands"
+                f"Warning: @setup '{setup_id}' at line {line_number} has no command"
             )
+            continue
+
+        if setup_id not in setup_defs:
+            setup_defs[setup_id] = {}
+        setup_defs[setup_id]["linux"] = command
+        setup_defs[setup_id]["windows"] = command
 
     return setup_defs
 

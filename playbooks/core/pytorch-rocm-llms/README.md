@@ -20,6 +20,7 @@ python -m venv llm-env
 llm-env\Scripts\activate.bat
 ```
 <!-- @test:end -->
+<!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -31,16 +32,15 @@ python3 -m venv llm-env
 source llm-env/bin/activate
 ```
 <!-- @test:end -->
+<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
 <!-- @os:end -->
-
-<!-- @setup:id=activate-venv linux="source llm-env/bin/activate" windows="llm-env\Scripts\activate.bat" -->
 
 ### Installing Basic Dependencies
 <!-- @require:pytorch -->
 
 ### Additional Dependencies
 
-<!-- @test:id=install-deps platform=windows timeout=300 depends_on=create-venv setup=activate-venv -->
+<!-- @test:id=install-deps platform=all timeout=300 depends_on=create-venv setup=activate-venv -->
 ```bash
 pip install transformers accelerate sentencepiece protobuf
 ```

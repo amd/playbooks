@@ -698,37 +698,37 @@ function TestCoverageBlock({
 /**
  * Setup definition block — renders a visible badge for @setup:id=... definitions.
  * Only shown in coverage view; hidden in user view (like hidden test blocks).
- * Shows the setup step name and the platform-specific commands it expands to.
+ * Shows the setup step name, platform, and the command it expands to.
+ *
+ * Platform is inferred from the surrounding @os: block context:
+ * - "windows" or "linux" if inside an @os: block
+ * - "all" if outside any @os: block
  */
 function SetupDefinitionBlock({
   setupId,
-  linux,
-  windows,
+  command,
+  platform,
 }: {
   setupId: string;
-  linux: string;
-  windows: string;
+  command: string;
+  platform: string;
 }) {
+  const platformIcon = platform === "windows" ? "⊞" : platform === "linux" ? "🐧" : "◉";
+
   return (
     <div className="tc-block tc-setup-def">
       <div className="tc-badge-header tc-badge-setup">
         <span className="tc-pill tc-pill-label tc-pill-label-setup">⚙ Hidden Setup Definition</span>
         <span className="tc-pill tc-pill-id">{setupId}</span>
+        <span className="tc-pill tc-pill-platform">{platformIcon} {platform}</span>
       </div>
-      <div className="tc-setup-commands">
-        {linux && (
+      {command && (
+        <div className="tc-setup-commands">
           <div className="tc-setup-cmd">
-            <span className="tc-setup-platform">🐧 linux</span>
-            <code className="tc-setup-code">{linux}</code>
+            <code className="tc-setup-code">{command}</code>
           </div>
-        )}
-        {windows && (
-          <div className="tc-setup-cmd">
-            <span className="tc-setup-platform">⊞ windows</span>
-            <code className="tc-setup-code">{windows}</code>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1035,15 +1035,15 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     tr: ({ children }: { children?: React.ReactNode }) => <tr className="md-tr">{children}</tr>,
     th: ({ children }: { children?: React.ReactNode }) => <th className="md-th">{children}</th>,
     td: ({ children }: { children?: React.ReactNode }) => <td className="md-td">{children}</td>,
-    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-depends'?: string; 'data-setup'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-linux'?: string; 'data-windows'?: string }) => {
+    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-depends'?: string; 'data-setup'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-command'?: string }) => {
       const { className, ...rest } = props;
       // Handle setup-def-block (coverage mode — inline @setup:id=... definitions)
       if (className === 'setup-def-block') {
         return (
           <SetupDefinitionBlock
             setupId={props['data-setup-id'] || ''}
-            linux={decodeURIComponent(props['data-linux'] || '')}
-            windows={decodeURIComponent(props['data-windows'] || '')}
+            command={decodeURIComponent(props['data-command'] || '')}
+            platform={props['data-platform'] || 'all'}
           />
         );
       }

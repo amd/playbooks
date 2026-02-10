@@ -264,11 +264,18 @@ function processTestTags(content: string, playbookId: string): { content: string
  * Coverage mode: replaces them with visible marker divs so the frontend can
  *   render them as "Setup Definition" badges, similar to hidden test blocks.
  *
+ * Supports the @os:-wrapped format where platform is inferred from context:
+ *   <!-- @os:windows -->
+ *   <!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
+ *   <!-- @os:end -->
+ *
+ * Definitions outside @os: blocks apply to all platforms.
+ *
  * These are distinct from the @setup:setup-id tags handled by processSetupTags,
  * which reference external setup files from the dependencies registry.
  */
 function processSetupDefinitions(content: string): string {
-  // Match @setup definitions that contain key=value pairs (e.g. id=..., linux=..., windows=...)
+  // Match @setup definitions that contain key=value pairs (e.g. id=..., command=...)
   // Distinguished from the old @setup:id format by the presence of '='
   const setupDefPattern = /<!-- @setup:([^>]*\bid=[^>]+?) -->/g;
 
@@ -277,16 +284,27 @@ function processSetupDefinitions(content: string): string {
     return content.replace(setupDefPattern, '');
   }
 
-  // Coverage mode: replace with visible marker divs
-  return content.replace(setupDefPattern, (_match, attrStr: string) => {
+  // Coverage mode: determine OS context for each @setup and replace with visible marker divs
+  // Pre-compute @os: block ranges to determine platform context
+  const osBlockPattern = /<!-- @os:(windows|linux) -->([\s\S]*?)<!-- @os:end -->/g;
+  const osRanges: { start: number; end: number; platform: string }[] = [];
+  let osMatch;
+  while ((osMatch = osBlockPattern.exec(content)) !== null) {
+    osRanges.push({ start: osMatch.index, end: osMatch.index + osMatch[0].length, platform: osMatch[1] });
+  }
+
+  return content.replace(setupDefPattern, (_match, attrStr: string, offset: number) => {
     const attrs = parseTestAttributes(attrStr);
     const setupId = (attrs.id as string) || '';
     if (!setupId) return '';
 
-    const linux = encodeURIComponent((attrs.linux as string) || '');
-    const windows = encodeURIComponent((attrs.windows as string) || '');
+    const command = (attrs.command as string) || '';
 
-    return `<div class="setup-def-block" data-setup-id="${setupId}" data-linux="${linux}" data-windows="${windows}"></div>`;
+    // Determine the platform from surrounding @os: block context
+    const enclosingOs = osRanges.find(r => offset >= r.start && offset < r.end);
+    const platform = enclosingOs ? enclosingOs.platform : 'all';
+
+    return `<div class="setup-def-block" data-setup-id="${setupId}" data-command="${encodeURIComponent(command)}" data-platform="${platform}"></div>`;
   });
 }
 
