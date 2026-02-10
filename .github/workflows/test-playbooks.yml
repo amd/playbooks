@@ -77,7 +77,7 @@ jobs:
 
       - name: Extract and run tests
         id: run_tests
-        shell: pwsh
+        shell: powershell
         run: |
           python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform windows
 
@@ -91,7 +91,7 @@ jobs:
 
       - name: Test Summary
         if: always()
-        shell: pwsh
+        shell: powershell
         run: |
           $summary = @"
           ### Test Results for ``${{ matrix.playbook }}`` (Windows)
