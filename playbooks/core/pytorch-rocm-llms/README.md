@@ -92,6 +92,18 @@ The included [run_llm.py](assets/run_llm.py) script shows how to load and genera
 
 Take a look at how prompts are tokenized and sent to the model. Understanding this process lets you adapt LLMs for any text generation or summarization task. Here's a minimal example from the script:
 
+<!-- @test:id=verify-imports platform=all timeout=60 depends_on=install-deps hidden=True -->
+```python
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+print(f"PyTorch version: {torch.__version__}")
+print(f"CUDA/ROCm available: {torch.cuda.is_available()}")
+print("PASS: All imports successful")
+```
+<!-- @test:end -->
+
+<!-- @test:id=run-model platform=all timeout=60 depends_on=install-deps -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -103,16 +115,6 @@ model = AutoModelForCausalLM.from_pretrained(
     torch_dtype=torch.bfloat16,
     device_map="auto"
 )
-```
-
-<!-- @test:id=verify-imports platform=all timeout=60 depends_on=install-deps hidden=True -->
-```python
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
-
-print(f"PyTorch version: {torch.__version__}")
-print(f"CUDA/ROCm available: {torch.cuda.is_available()}")
-print("PASS: All imports successful")
 ```
 <!-- @test:end -->
 
