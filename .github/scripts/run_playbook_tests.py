@@ -264,7 +264,9 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
     # Parse reusable setup definitions first
     setup_defs = extract_setup_definitions(content)
     if setup_defs:
-        print(f"Found {len(setup_defs)} setup definition(s): {', '.join(setup_defs.keys())}")
+        print(
+            f"Found {len(setup_defs)} setup definition(s): {', '.join(setup_defs.keys())}"
+        )
 
     # Pattern to match test blocks:
     # <!-- @test:id=name platform=windows ... -->

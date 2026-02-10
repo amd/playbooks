@@ -255,6 +255,40 @@ function processTestTags(content: string, playbookId: string): { content: string
 }
 
 /**
+ * Processes inline @setup:id=... definitions (reusable setup steps defined
+ * directly in the README).
+ *
+ * Normal mode: strips the HTML comments (they are invisible anyway, but be explicit).
+ * Coverage mode: replaces them with visible marker divs so the frontend can
+ *   render them as "Setup Definition" badges, similar to hidden test blocks.
+ *
+ * These are distinct from the @setup:setup-id tags handled by processSetupTags,
+ * which reference external setup files from the dependencies registry.
+ */
+function processSetupDefinitions(content: string): string {
+  // Match @setup definitions that contain key=value pairs (e.g. id=..., linux=..., windows=...)
+  // Distinguished from the old @setup:id format by the presence of '='
+  const setupDefPattern = /<!-- @setup:([^>]*\bid=[^>]+?) -->/g;
+
+  if (!SHOW_COVERAGE) {
+    // Normal/user view: strip definition comments
+    return content.replace(setupDefPattern, '');
+  }
+
+  // Coverage mode: replace with visible marker divs
+  return content.replace(setupDefPattern, (_match, attrStr: string) => {
+    const attrs = parseTestAttributes(attrStr);
+    const setupId = (attrs.id as string) || '';
+    if (!setupId) return '';
+
+    const linux = encodeURIComponent((attrs.linux as string) || '');
+    const windows = encodeURIComponent((attrs.windows as string) || '');
+
+    return `<div class="setup-def-block" data-setup-id="${setupId}" data-linux="${linux}" data-windows="${windows}"></div>`;
+  });
+}
+
+/**
  * Transforms @setup tags into @setup-content blocks with setup step content
  * 
  * Syntax: 
@@ -341,6 +375,8 @@ function findPlaybook(id: string): Playbook | null {
             const testResult = processTestTags(content, meta.id);
             content = testResult.content;
             testCoverage = testResult.testCoverage;
+            // Process inline @setup:id=... definitions (strip or emit coverage markers)
+            content = processSetupDefinitions(content);
             // Process @require tags to inject shared dependency content
             content = processRequireTags(content);
             // Process @setup tags to inject shared setup/configuration content

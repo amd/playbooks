@@ -692,6 +692,44 @@ function TestCoverageBlock({
 }
 
 /**
+ * Setup definition block — renders a visible badge for @setup:id=... definitions.
+ * Only shown in coverage view; hidden in user view (like hidden test blocks).
+ * Shows the setup step name and the platform-specific commands it expands to.
+ */
+function SetupDefinitionBlock({
+  setupId,
+  linux,
+  windows,
+}: {
+  setupId: string;
+  linux: string;
+  windows: string;
+}) {
+  return (
+    <div className="tc-block tc-setup-def">
+      <div className="tc-badge-header tc-badge-setup">
+        <span className="tc-pill tc-pill-label tc-pill-label-setup">⚙ Hidden Setup Definition</span>
+        <span className="tc-pill tc-pill-id">{setupId}</span>
+      </div>
+      <div className="tc-setup-commands">
+        {linux && (
+          <div className="tc-setup-cmd">
+            <span className="tc-setup-platform">🐧 linux</span>
+            <code className="tc-setup-code">{linux}</code>
+          </div>
+        )}
+        {windows && (
+          <div className="tc-setup-cmd">
+            <span className="tc-setup-platform">⊞ windows</span>
+            <code className="tc-setup-code">{windows}</code>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
  * Stats bar showing test coverage summary for the playbook.
  * Only shown when running in dev:coverage mode.
  */
@@ -993,8 +1031,18 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     tr: ({ children }: { children?: React.ReactNode }) => <tr className="md-tr">{children}</tr>,
     th: ({ children }: { children?: React.ReactNode }) => <th className="md-th">{children}</th>,
     td: ({ children }: { children?: React.ReactNode }) => <td className="md-td">{children}</td>,
-    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-depends'?: string; 'data-code'?: string }) => {
+    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-depends'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-linux'?: string; 'data-windows'?: string }) => {
       const { className, ...rest } = props;
+      // Handle setup-def-block (coverage mode — inline @setup:id=... definitions)
+      if (className === 'setup-def-block') {
+        return (
+          <SetupDefinitionBlock
+            setupId={props['data-setup-id'] || ''}
+            linux={decodeURIComponent(props['data-linux'] || '')}
+            windows={decodeURIComponent(props['data-windows'] || '')}
+          />
+        );
+      }
       // Handle the halo-preinstalled-dropdown custom element
       if (className === 'halo-preinstalled-dropdown') {
         const dataContent = props['data-content'];
