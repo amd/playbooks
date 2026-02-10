@@ -229,6 +229,8 @@ function processTestTags(content: string, playbookId: string): { content: string
     const hidden = (attrs.hidden as boolean) || false;
     const dependsOn = (attrs.depends_on as string[]) || [];
 
+    const setup = (attrs.setup as string) || "";
+
     const testInfo: TestInfo = { id: testId, platform, timeout, hidden, dependsOn };
     const result = resultsMap[testId];
     if (result) testInfo.result = result;
@@ -236,7 +238,7 @@ function processTestTags(content: string, playbookId: string): { content: string
 
     const deps = dependsOn.join(",");
     const encodedCode = encodeURIComponent(codeBlock);
-    const marker = `<div class="test-coverage-block" data-test-id="${testId}" data-platform="${platform}" data-timeout="${timeout}" data-hidden="${hidden}" data-depends="${deps}" data-code="${encodedCode}"></div>`;
+    const marker = `<div class="test-coverage-block" data-test-id="${testId}" data-platform="${platform}" data-timeout="${timeout}" data-hidden="${hidden}" data-depends="${deps}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
     return marker;
   });
 

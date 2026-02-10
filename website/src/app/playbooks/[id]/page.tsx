@@ -622,13 +622,14 @@ function transformSetupBlocks(content: string): string {
  * Only shown when running in dev:coverage mode.
  */
 function TestCoverageBlock({
-  testId, platform, timeout, isHidden, depends, code, testResult,
+  testId, platform, timeout, isHidden, depends, setup, code, testResult,
 }: {
   testId: string;
   platform: string;
   timeout: string;
   isHidden: boolean;
   depends: string;
+  setup: string;
   code: string;
   testResult?: TestResultInfo;
 }) {
@@ -662,6 +663,9 @@ function TestCoverageBlock({
         <span className="tc-pill tc-pill-timeout">⏱ {timeout}s</span>
         {dependsList.length > 0 && (
           <span className="tc-pill tc-pill-depends">→ {dependsList.join(", ")}</span>
+        )}
+        {setup && (
+          <span className="tc-pill tc-pill-setup">⚙ {setup}</span>
         )}
         {testResult && (
           <span className={`tc-pill tc-pill-result tc-pill-result-${resultStatus}`}>
@@ -1031,7 +1035,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     tr: ({ children }: { children?: React.ReactNode }) => <tr className="md-tr">{children}</tr>,
     th: ({ children }: { children?: React.ReactNode }) => <th className="md-th">{children}</th>,
     td: ({ children }: { children?: React.ReactNode }) => <td className="md-td">{children}</td>,
-    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-depends'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-linux'?: string; 'data-windows'?: string }) => {
+    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-depends'?: string; 'data-setup'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-linux'?: string; 'data-windows'?: string }) => {
       const { className, ...rest } = props;
       // Handle setup-def-block (coverage mode — inline @setup:id=... definitions)
       if (className === 'setup-def-block') {
@@ -1085,6 +1089,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
             timeout={props['data-timeout'] || '300'}
             isHidden={props['data-hidden'] === 'true'}
             depends={props['data-depends'] || ''}
+            setup={props['data-setup'] || ''}
             code={decodeURIComponent(props['data-code'] || '')}
             testResult={testInfo?.result}
           />
