@@ -55,7 +55,7 @@ This playbook includes ready-to-use scripts in the `assets/` folder (click to pr
 | [run_llm.py](assets/run_llm.py) | Basic LLM text generation | `python run_llm.py` |
 | [summarizer.py](assets/summarizer.py) | Document summarizer with Harmony support | `python summarizer.py --file document.txt` |
 
-<!-- @test:id=verify-scripts-exist platform=all timeout=30 hidden=True -->
+<!-- @test:id=verify-scripts platform=all timeout=30 hidden=True -->
 ```python
 import os
 import sys
@@ -68,13 +68,6 @@ if missing:
     print(f"FAIL: Missing files: {missing}")
     sys.exit(1)
 print("PASS: All required script files exist")
-```
-<!-- @test:end -->
-
-<!-- @test:id=verify-scripts-syntax platform=all timeout=60 depends_on=verify-scripts-exist hidden=true -->
-```python
-import ast
-import sys
 
 # Verify Python scripts have valid syntax
 for script in ['run_llm.py', 'summarizer.py']:
