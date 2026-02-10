@@ -123,7 +123,7 @@ Use `@test` tags to make existing code blocks testable. These tags **wrap your e
 **Basic syntax — wrap existing code blocks:**
 
 ```markdown
-<!-- @test:id=install-deps platform=all timeout=300 -->
+<!-- @test:id=install-deps timeout=300 -->
 ```bash
 pip install transformers accelerate
 ```
@@ -137,10 +137,11 @@ The test tags wrap the code block that users see. No duplication needed — the 
 | Attribute | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | `id` | Yes | — | Unique identifier for the test (use kebab-case) |
-| `platform` | No | `all` | Target platform: `windows`, `linux`, or `all` |
 | `timeout` | No | `300` | Maximum execution time in seconds |
 | `continue_on_error` | No | `false` | If `true`, test failure won't fail the CI job |
 | `hidden` | No | `false` | If `true`, hides the code block from the website (useful for test-only setup) |
+
+> **Note:** Platform is automatically inferred from the surrounding `@os:` tags. Tests inside `<!-- @os:windows -->` run only on Windows, tests inside `<!-- @os:linux -->` run only on Linux, and tests outside any `@os:` block run on all platforms.
 
 **Supported languages:**
 
@@ -158,16 +159,18 @@ Tests run in the order they appear in the README. Place prerequisite steps befor
 ```markdown
 ### Create Virtual Environment
 
-<!-- @test:id=create-venv platform=windows timeout=60 -->
+<!-- @os:windows -->
+<!-- @test:id=create-venv timeout=60 -->
 ```cmd
 python -m venv myenv
 myenv\Scripts\activate.bat
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 ### Install Dependencies
 
-<!-- @test:id=install-deps platform=all timeout=300 -->
+<!-- @test:id=install-deps timeout=300 -->
 ```bash
 pip install transformers torch
 ```
@@ -175,7 +178,7 @@ pip install transformers torch
 
 ### Run the Script
 
-<!-- @test:id=run-script platform=all timeout=60 -->
+<!-- @test:id=run-script timeout=60 -->
 ```bash
 python run_model.py --help
 ```
@@ -190,7 +193,7 @@ Combine with `@os` tags for platform-specific instructions:
 
 ```markdown
 <!-- @os:windows -->
-<!-- @test:id=setup platform=windows timeout=120 -->
+<!-- @test:id=setup timeout=120 -->
 ```cmd
 pip install torch
 python -c "import torch; print('OK')"
@@ -199,7 +202,7 @@ python -c "import torch; print('OK')"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=setup platform=linux timeout=120 -->
+<!-- @test:id=setup timeout=120 -->
 ```bash
 pip3 install torch
 python3 -c "import torch; print('OK')"
@@ -215,7 +218,7 @@ For tests that verify things but shouldn't appear in the playbook, place them af
 ```markdown
 | [run_llm.py](assets/run_llm.py) | Basic LLM script |
 
-<!-- @test:id=verify-scripts platform=all timeout=30 -->
+<!-- @test:id=verify-scripts timeout=30 -->
 ```python
 import os, sys
 missing = [f for f in ['run_llm.py'] if not os.path.exists(f)]

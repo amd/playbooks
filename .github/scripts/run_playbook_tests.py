@@ -8,7 +8,7 @@ Extracts and executes test blocks from playbook README.md files.
 Test blocks wrap existing code blocks using HTML comments that are invisible
 to the website but can be parsed and executed by CI:
 
-    <!-- @test:id=unique-test-name platform=windows -->
+    <!-- @test:id=unique-test-name -->
     ```bash
     pip install transformers
     ```
@@ -17,9 +17,14 @@ to the website but can be parsed and executed by CI:
 Tests are executed in the order they appear in the README. Place prerequisite
 steps (e.g. installing dependencies) before the tests that need them.
 
+Platform inference:
+    The target platform for each test is inferred automatically from the
+    surrounding @os: tags. Tests inside ``<!-- @os:windows -->`` blocks run
+    only on Windows, tests inside ``<!-- @os:linux -->`` blocks run only on
+    Linux, and tests outside any @os: block run on all platforms.
+
 Supported test attributes:
     - id: Unique identifier for the test (required)
-    - platform: windows, linux, or all (default: all)
     - timeout: Maximum execution time in seconds (default: 300)
     - workdir: Working directory relative to playbook assets folder
     - continue_on_error: true/false - whether to continue if this test fails (default: false)
@@ -34,7 +39,7 @@ Setup attribute:
     that run before the test script. This is especially useful for Python code
     blocks which are otherwise executed directly with `python <script>`:
 
-        <!-- @test:id=verify-imports platform=all setup="source llm-env/bin/activate" -->
+        <!-- @test:id=verify-imports setup="source llm-env/bin/activate" -->
         ```python
         import torch
         print(f"PyTorch version: {torch.__version__}")
@@ -66,7 +71,7 @@ Reusable setup definitions (@setup):
         <!-- @setup:id=some-setup command="some-command" -->
 
     Then reference by name in test blocks:
-        <!-- @test:id=install-deps platform=all setup=activate-venv -->
+        <!-- @test:id=install-deps setup=activate-venv -->
         ```bash
         pip install transformers
         ```
@@ -82,7 +87,7 @@ Inline #hide marker:
     prerequisite commands (e.g. venv activation) that the reader doesn't need to see
     repeated, without hiding the entire block:
 
-        <!-- @test:id=install-deps platform=all -->
+        <!-- @test:id=install-deps -->
         ```bash
         source llm-env/bin/activate #hide
         pip install transformers
@@ -113,7 +118,7 @@ class TestBlock:
     """Represents a single test block extracted from a playbook."""
 
     id: str
-    platform: str = "all"
+    platform: str = "all"  # inferred from surrounding @os: tags
     timeout: int = 300
     workdir: Optional[str] = None
     continue_on_error: bool = False
@@ -349,6 +354,20 @@ def resolve_require_tags(content: str) -> str:
     return re.sub(require_pattern, _replace_require, content)
 
 
+def _infer_platform(content: str, position: int) -> str:
+    """Infer the platform for a test based on surrounding @os: tags.
+
+    If the test is inside an ``<!-- @os:windows -->`` block, returns "windows".
+    If inside an ``<!-- @os:linux -->`` block, returns "linux".
+    Otherwise returns "all".
+    """
+    os_block_pattern = r"<!-- @os:(windows|linux) -->([\s\S]*?)<!-- @os:end -->"
+    for os_match in re.finditer(os_block_pattern, content):
+        if os_match.start() <= position < os_match.end():
+            return os_match.group(1)
+    return "all"
+
+
 def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
     """Extract test blocks from a README.md file."""
     content = readme_path.read_text(encoding="utf-8")
@@ -366,7 +385,7 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
         )
 
     # Pattern to match test blocks:
-    # <!-- @test:id=name platform=windows ... -->
+    # <!-- @test:id=name ... -->
     # ```language
     # code
     # ```
@@ -389,9 +408,12 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
             )
             continue
 
+        # Infer platform from surrounding @os: tags
+        inferred_platform = _infer_platform(content, match.start())
+
         test = TestBlock(
             id=attrs["id"],
-            platform=attrs.get("platform", "all"),
+            platform=inferred_platform,
             timeout=attrs.get("timeout", 300),
             workdir=attrs.get("workdir"),
             continue_on_error=attrs.get("continue_on_error", False),

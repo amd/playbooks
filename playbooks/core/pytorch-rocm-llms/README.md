@@ -14,7 +14,7 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 
 <!-- @os:windows -->
 On Windows, open Command Prompt and run:
-<!-- @test:id=create-venv platform=windows timeout=60 -->
+<!-- @test:id=create-venv timeout=60 -->
 ```cmd
 python -m venv llm-env
 llm-env\Scripts\activate.bat
@@ -24,7 +24,7 @@ llm-env\Scripts\activate.bat
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=create-venv platform=linux timeout=120 -->
+<!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -40,7 +40,7 @@ source llm-env/bin/activate
 
 ### Additional Dependencies
 
-<!-- @test:id=install-deps platform=all timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install --upgrade transformers accelerate sentencepiece protobuf
 ```
@@ -55,7 +55,7 @@ This playbook includes ready-to-use scripts in the `assets/` folder (click to pr
 | [run_llm.py](assets/run_llm.py) | Basic LLM text generation | `python run_llm.py` |
 | [summarizer.py](assets/summarizer.py) | Document summarizer with Harmony support | `python summarizer.py --file document.txt` |
 
-<!-- @test:id=verify-scripts platform=all timeout=30 hidden=True -->
+<!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
 import os
 import sys
@@ -87,7 +87,7 @@ The included [run_llm.py](assets/run_llm.py) script shows how to load and genera
 
 Take a look at how prompts are tokenized and sent to the model. Understanding this process lets you adapt LLMs for any text generation or summarization task. Here's a minimal example from the script:
 
-<!-- @test:id=verify-imports platform=all timeout=60 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=60 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -98,7 +98,7 @@ print("PASS: All imports successful")
 ```
 <!-- @test:end -->
 
-<!-- @test:id=run-model platform=all timeout=600 setup=activate-venv -->
+<!-- @test:id=run-model timeout=600 setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -115,7 +115,7 @@ model = AutoModelForCausalLM.from_pretrained(
 
 To try it out:
 
-<!-- @test:id=run-llm-help platform=all timeout=300 setup=activate-venv -->
+<!-- @test:id=run-llm-help timeout=300 setup=activate-venv -->
 ```bash
 python run_llm.py
 ```

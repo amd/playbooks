@@ -248,7 +248,7 @@ function HaloPreinstalledDropdown({
               th: ({ children }) => <th className="md-th">{children}</th>,
               td: ({ children }) => <td className="md-td">{children}</td>,
               // Handle test-coverage-block markers inside dependency content
-              div: (divProps: React.HTMLAttributes<HTMLDivElement> & { 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string }) => {
+              div: (divProps: React.HTMLAttributes<HTMLDivElement> & { 'data-test-id'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string }) => {
                 const { className: divClassName, ...divRest } = divProps;
                 if (divClassName === 'test-coverage-block') {
                   const testId = divProps['data-test-id'] || '';
@@ -256,7 +256,6 @@ function HaloPreinstalledDropdown({
                   return (
                     <TestCoverageBlock
                       testId={testId}
-                      platform={divProps['data-platform'] || 'all'}
                       timeout={divProps['data-timeout'] || '300'}
                       isHidden={divProps['data-hidden'] === 'true'}
                       setup={divProps['data-setup'] || ''}
@@ -644,10 +643,9 @@ function transformSetupBlocks(content: string): string {
  * Only shown when running in dev:coverage mode.
  */
 function TestCoverageBlock({
-  testId, platform, timeout, isHidden, setup, code, testResult,
+  testId, timeout, isHidden, setup, code, testResult,
 }: {
   testId: string;
-  platform: string;
   timeout: string;
   isHidden: boolean;
   setup: string;
@@ -670,8 +668,6 @@ function TestCoverageBlock({
     else { resultStatus = "fail"; resultLabel = "Failed"; }
   }
 
-  const platformIcon = platform === "windows" ? "⊞" : platform === "linux" ? "🐧" : "◉";
-
   return (
     <div className={`tc-block ${isHidden ? "tc-hidden" : ""} ${resultStatus ? `tc-result-${resultStatus}` : ""}`}>
       <div className={`tc-badge-header ${isHidden ? "tc-badge-hidden" : ""} ${resultStatus === "fail" ? "tc-badge-fail" : ""} ${resultStatus === "skip" ? "tc-badge-skip" : ""}`}>
@@ -679,7 +675,6 @@ function TestCoverageBlock({
           {isHidden ? "👁 Hidden Test" : "✓ Tested"}
         </span>
         <span className="tc-pill tc-pill-id">{testId}</span>
-        <span className="tc-pill tc-pill-platform">{platformIcon} {platform}</span>
         <span className="tc-pill tc-pill-timeout">⏱ {timeout}s</span>
         {setup && (
           <span className="tc-pill tc-pill-setup">⚙ {setup}</span>
@@ -715,29 +710,20 @@ function TestCoverageBlock({
 /**
  * Setup definition block — renders a visible badge for @setup:id=... definitions.
  * Only shown in coverage view; hidden in user view (like hidden test blocks).
- * Shows the setup step name, platform, and the command it expands to.
- *
- * Platform is inferred from the surrounding @os: block context:
- * - "windows" or "linux" if inside an @os: block
- * - "all" if outside any @os: block
+ * Shows the setup step name and the command it expands to.
  */
 function SetupDefinitionBlock({
   setupId,
   command,
-  platform,
 }: {
   setupId: string;
   command: string;
-  platform: string;
 }) {
-  const platformIcon = platform === "windows" ? "⊞" : platform === "linux" ? "🐧" : "◉";
-
   return (
     <div className="tc-block tc-setup-def">
       <div className="tc-badge-header tc-badge-setup">
         <span className="tc-pill tc-pill-label tc-pill-label-setup">⚙ Hidden Setup Definition</span>
         <span className="tc-pill tc-pill-id">{setupId}</span>
-        <span className="tc-pill tc-pill-platform">{platformIcon} {platform}</span>
       </div>
       {command && (
         <div className="tc-setup-commands">
@@ -1052,7 +1038,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     tr: ({ children }: { children?: React.ReactNode }) => <tr className="md-tr">{children}</tr>,
     th: ({ children }: { children?: React.ReactNode }) => <th className="md-th">{children}</th>,
     td: ({ children }: { children?: React.ReactNode }) => <td className="md-td">{children}</td>,
-    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-command'?: string }) => {
+    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-command'?: string }) => {
       const { className, ...rest } = props;
       // Handle setup-def-block (coverage mode — inline @setup:id=... definitions)
       if (className === 'setup-def-block') {
@@ -1060,7 +1046,6 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
           <SetupDefinitionBlock
             setupId={props['data-setup-id'] || ''}
             command={decodeURIComponent(props['data-command'] || '')}
-            platform={props['data-platform'] || 'all'}
           />
         );
       }
@@ -1103,7 +1088,6 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
         return (
           <TestCoverageBlock
             testId={testId}
-            platform={props['data-platform'] || 'all'}
             timeout={props['data-timeout'] || '300'}
             isHidden={props['data-hidden'] === 'true'}
             setup={props['data-setup'] || ''}

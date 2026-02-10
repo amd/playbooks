@@ -117,12 +117,11 @@ function processDependencyTestTags(
   const processedContent = depContent.replace(testBlockPattern, (_match, attrStr: string, codeBlock: string) => {
     const attrs = parseTestAttributes(attrStr);
     const testId = (attrs.id as string) || "unknown";
-    const platform = (attrs.platform as string) || "all";
     const timeout = (attrs.timeout as number) || 300;
     const hidden = (attrs.hidden as boolean) || false;
     const setup = (attrs.setup as string) || "";
 
-    const testInfo: TestInfo = { id: testId, platform, timeout, hidden };
+    const testInfo: TestInfo = { id: testId, timeout, hidden };
     const result = resultsMap[testId];
     if (result) testInfo.result = result;
     tests.push(testInfo);
@@ -132,7 +131,7 @@ function processDependencyTestTags(
       // inline in the dependency content. The dropdown component renders these
       // as TestCoverageBlock badges, just like the main content does.
       const encodedCode = encodeURIComponent(codeBlock);
-      return `<div class="test-coverage-block" data-test-id="${testId}" data-platform="${platform}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
+      return `<div class="test-coverage-block" data-test-id="${testId}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
     }
 
     // Normal mode: strip test tags but keep the code block visible
@@ -300,19 +299,18 @@ function processTestTags(content: string, playbookId: string): { content: string
   const processed = content.replace(testBlockPattern, (_match, attrStr: string, codeBlock: string) => {
     const attrs = parseTestAttributes(attrStr);
     const testId = (attrs.id as string) || "unknown";
-    const platform = (attrs.platform as string) || "all";
     const timeout = (attrs.timeout as number) || 300;
     const hidden = (attrs.hidden as boolean) || false;
 
     const setup = (attrs.setup as string) || "";
 
-    const testInfo: TestInfo = { id: testId, platform, timeout, hidden };
+    const testInfo: TestInfo = { id: testId, timeout, hidden };
     const result = resultsMap[testId];
     if (result) testInfo.result = result;
     tests.push(testInfo);
 
     const encodedCode = encodeURIComponent(codeBlock);
-    const marker = `<div class="test-coverage-block" data-test-id="${testId}" data-platform="${platform}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
+    const marker = `<div class="test-coverage-block" data-test-id="${testId}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
     return marker;
   });
 
@@ -338,13 +336,6 @@ function processTestTags(content: string, playbookId: string): { content: string
  * Coverage mode: replaces them with visible marker divs so the frontend can
  *   render them as "Setup Definition" badges, similar to hidden test blocks.
  *
- * Supports the @os:-wrapped format where platform is inferred from context:
- *   <!-- @os:windows -->
- *   <!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
- *   <!-- @os:end -->
- *
- * Definitions outside @os: blocks apply to all platforms.
- *
  * These are distinct from the @setup:setup-id tags handled by processSetupTags,
  * which reference external setup files from the dependencies registry.
  */
@@ -358,27 +349,15 @@ function processSetupDefinitions(content: string): string {
     return content.replace(setupDefPattern, '');
   }
 
-  // Coverage mode: determine OS context for each @setup and replace with visible marker divs
-  // Pre-compute @os: block ranges to determine platform context
-  const osBlockPattern = /<!-- @os:(windows|linux) -->([\s\S]*?)<!-- @os:end -->/g;
-  const osRanges: { start: number; end: number; platform: string }[] = [];
-  let osMatch;
-  while ((osMatch = osBlockPattern.exec(content)) !== null) {
-    osRanges.push({ start: osMatch.index, end: osMatch.index + osMatch[0].length, platform: osMatch[1] });
-  }
-
-  return content.replace(setupDefPattern, (_match, attrStr: string, offset: number) => {
+  // Coverage mode: replace with visible marker divs
+  return content.replace(setupDefPattern, (_match, attrStr: string) => {
     const attrs = parseTestAttributes(attrStr);
     const setupId = (attrs.id as string) || '';
     if (!setupId) return '';
 
     const command = (attrs.command as string) || '';
 
-    // Determine the platform from surrounding @os: block context
-    const enclosingOs = osRanges.find(r => offset >= r.start && offset < r.end);
-    const platform = enclosingOs ? enclosingOs.platform : 'all';
-
-    return `<div class="setup-def-block" data-setup-id="${setupId}" data-command="${encodeURIComponent(command)}" data-platform="${platform}"></div>`;
+    return `<div class="setup-def-block" data-setup-id="${setupId}" data-command="${encodeURIComponent(command)}"></div>`;
   });
 }
 

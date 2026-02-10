@@ -98,7 +98,6 @@ export interface TestResultInfo {
 
 export interface TestInfo {
   id: string;
-  platform: string;
   timeout: number;
   hidden: boolean;
   result?: TestResultInfo;
