@@ -757,7 +757,7 @@ body {
    the user toggles away from coverage view
    ────────────────────────────────────────────────────────── */
 .tc-user-view .tc-block {
-  border-color: var(--border-color);
+  border: none;
 }
 .tc-user-view .tc-block.tc-hidden {
   display: none;
