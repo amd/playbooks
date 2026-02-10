@@ -101,7 +101,6 @@ export interface TestInfo {
   platform: string;
   timeout: number;
   hidden: boolean;
-  dependsOn: string[];
   result?: TestResultInfo;
 }
 

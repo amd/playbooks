@@ -140,7 +140,6 @@ The test tags wrap the code block that users see. No duplication needed — the 
 | `platform` | No | `all` | Target platform: `windows`, `linux`, or `all` |
 | `timeout` | No | `300` | Maximum execution time in seconds |
 | `continue_on_error` | No | `false` | If `true`, test failure won't fail the CI job |
-| `depends_on` | No | — | Comma-separated list of test IDs that must pass first |
 | `hidden` | No | `false` | If `true`, hides the code block from the website (useful for test-only setup) |
 
 **Supported languages:**
@@ -152,9 +151,9 @@ The test tags wrap the code block that users see. No duplication needed — the 
 | `powershell`, `pwsh`, `ps1` | PowerShell |
 | `python` | Python interpreter |
 
-**Example: Chaining tests with dependencies**
+**Example: Ordering tests by README position**
 
-Use `depends_on` to create test chains where later tests only run if their dependencies pass:
+Tests run in the order they appear in the README. Place prerequisite steps before the tests that need them:
 
 ```markdown
 ### Create Virtual Environment
@@ -168,7 +167,7 @@ myenv\Scripts\activate.bat
 
 ### Install Dependencies
 
-<!-- @test:id=install-deps platform=all timeout=300 depends_on=create-venv -->
+<!-- @test:id=install-deps platform=all timeout=300 -->
 ```bash
 pip install transformers torch
 ```
@@ -176,17 +175,14 @@ pip install transformers torch
 
 ### Run the Script
 
-<!-- @test:id=run-script platform=all timeout=60 depends_on=install-deps -->
+<!-- @test:id=run-script platform=all timeout=60 -->
 ```bash
 python run_model.py --help
 ```
 <!-- @test:end -->
 ```
 
-In this example:
-- `install-deps` only runs if `create-venv` passes
-- `run-script` only runs if `install-deps` passes
-- If `create-venv` fails, both `install-deps` and `run-script` are skipped
+In this example, `create-venv` runs first, then `install-deps`, then `run-script` — matching the natural reading order of the playbook.
 
 **Example: Platform-specific tests**
 
@@ -234,7 +230,7 @@ Both scripts support...
 **Best practices:**
 
 1. **Wrap, don't duplicate**: Put test tags around existing code blocks instead of writing separate test code
-2. **Use dependency chains**: Use `depends_on` to skip downstream tests when prerequisites fail
+2. **Order matters**: Tests run in README order, so place prerequisites before the steps that need them
 3. **Keep tests fast**: Use appropriate timeouts; most tests should complete in under 60 seconds
 4. **Handle missing hardware**: CI machines may not have GPUs; tests should handle this gracefully
 5. **Test the happy path**: Focus on verifying instructions work, not edge cases
@@ -249,8 +245,7 @@ python .github/scripts/run_playbook_tests.py --playbook your-playbook-id --platf
 
 - Tests run automatically on PRs that modify playbook files
 - Tests run on self-hosted runners tagged with `Windows` and `halo`
-- Tests are sorted by dependencies and run in order
-- If a test fails, dependent tests are automatically skipped
+- Tests run in the order they appear in the README
 - Test results are uploaded as artifacts for debugging
 
 ---

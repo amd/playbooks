@@ -40,7 +40,7 @@ source llm-env/bin/activate
 
 ### Additional Dependencies
 
-<!-- @test:id=install-deps platform=all timeout=300 depends_on=install-pytorch setup=activate-venv -->
+<!-- @test:id=install-deps platform=all timeout=300 setup=activate-venv -->
 ```bash
 pip install --upgrade transformers accelerate sentencepiece protobuf
 ```
@@ -87,7 +87,7 @@ The included [run_llm.py](assets/run_llm.py) script shows how to load and genera
 
 Take a look at how prompts are tokenized and sent to the model. Understanding this process lets you adapt LLMs for any text generation or summarization task. Here's a minimal example from the script:
 
-<!-- @test:id=verify-imports platform=all timeout=60 depends_on=install-deps hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports platform=all timeout=60 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -98,7 +98,7 @@ print("PASS: All imports successful")
 ```
 <!-- @test:end -->
 
-<!-- @test:id=run-model platform=all timeout=600 depends_on=install-deps setup=activate-venv -->
+<!-- @test:id=run-model platform=all timeout=600 setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -115,7 +115,7 @@ model = AutoModelForCausalLM.from_pretrained(
 
 To try it out:
 
-<!-- @test:id=run-llm-help platform=all timeout=300 depends_on=verify-scripts-syntax setup=activate-venv -->
+<!-- @test:id=run-llm-help platform=all timeout=300 setup=activate-venv -->
 ```bash
 python run_llm.py
 ```

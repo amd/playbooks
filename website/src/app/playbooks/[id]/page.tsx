@@ -248,7 +248,7 @@ function HaloPreinstalledDropdown({
               th: ({ children }) => <th className="md-th">{children}</th>,
               td: ({ children }) => <td className="md-td">{children}</td>,
               // Handle test-coverage-block markers inside dependency content
-              div: (divProps: React.HTMLAttributes<HTMLDivElement> & { 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-depends'?: string; 'data-setup'?: string; 'data-code'?: string }) => {
+              div: (divProps: React.HTMLAttributes<HTMLDivElement> & { 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string }) => {
                 const { className: divClassName, ...divRest } = divProps;
                 if (divClassName === 'test-coverage-block') {
                   const testId = divProps['data-test-id'] || '';
@@ -259,7 +259,6 @@ function HaloPreinstalledDropdown({
                       platform={divProps['data-platform'] || 'all'}
                       timeout={divProps['data-timeout'] || '300'}
                       isHidden={divProps['data-hidden'] === 'true'}
-                      depends={divProps['data-depends'] || ''}
                       setup={divProps['data-setup'] || ''}
                       code={decodeURIComponent(divProps['data-code'] || '')}
                       testResult={testInfo?.result}
@@ -645,13 +644,12 @@ function transformSetupBlocks(content: string): string {
  * Only shown when running in dev:coverage mode.
  */
 function TestCoverageBlock({
-  testId, platform, timeout, isHidden, depends, setup, code, testResult,
+  testId, platform, timeout, isHidden, setup, code, testResult,
 }: {
   testId: string;
   platform: string;
   timeout: string;
   isHidden: boolean;
-  depends: string;
   setup: string;
   code: string;
   testResult?: TestResultInfo;
@@ -660,7 +658,6 @@ function TestCoverageBlock({
   const langMatch = code.match(/```(\w+)?\s*\n/);
   const language = langMatch?.[1] || "";
   const codeContent = code.replace(/```\w*\s*\n/, "").replace(/\n?```\s*$/, "");
-  const dependsList = depends ? depends.split(",").filter(Boolean) : [];
 
   // Detect lines marked with #hide (hidden from user view, visible in coverage)
   const hasHideLines = codeContent.split('\n').some(line => line.trimEnd().endsWith('#hide'));
@@ -684,9 +681,6 @@ function TestCoverageBlock({
         <span className="tc-pill tc-pill-id">{testId}</span>
         <span className="tc-pill tc-pill-platform">{platformIcon} {platform}</span>
         <span className="tc-pill tc-pill-timeout">⏱ {timeout}s</span>
-        {dependsList.length > 0 && (
-          <span className="tc-pill tc-pill-depends">→ {dependsList.join(", ")}</span>
-        )}
         {setup && (
           <span className="tc-pill tc-pill-setup">⚙ {setup}</span>
         )}
@@ -1058,7 +1052,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     tr: ({ children }: { children?: React.ReactNode }) => <tr className="md-tr">{children}</tr>,
     th: ({ children }: { children?: React.ReactNode }) => <th className="md-th">{children}</th>,
     td: ({ children }: { children?: React.ReactNode }) => <td className="md-td">{children}</td>,
-    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-depends'?: string; 'data-setup'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-command'?: string }) => {
+    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-command'?: string }) => {
       const { className, ...rest } = props;
       // Handle setup-def-block (coverage mode — inline @setup:id=... definitions)
       if (className === 'setup-def-block') {
@@ -1112,7 +1106,6 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
             platform={props['data-platform'] || 'all'}
             timeout={props['data-timeout'] || '300'}
             isHidden={props['data-hidden'] === 'true'}
-            depends={props['data-depends'] || ''}
             setup={props['data-setup'] || ''}
             code={decodeURIComponent(props['data-code'] || '')}
             testResult={testInfo?.result}

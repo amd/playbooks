@@ -120,10 +120,9 @@ function processDependencyTestTags(
     const platform = (attrs.platform as string) || "all";
     const timeout = (attrs.timeout as number) || 300;
     const hidden = (attrs.hidden as boolean) || false;
-    const dependsOn = (attrs.depends_on as string[]) || [];
     const setup = (attrs.setup as string) || "";
 
-    const testInfo: TestInfo = { id: testId, platform, timeout, hidden, dependsOn };
+    const testInfo: TestInfo = { id: testId, platform, timeout, hidden };
     const result = resultsMap[testId];
     if (result) testInfo.result = result;
     tests.push(testInfo);
@@ -132,9 +131,8 @@ function processDependencyTestTags(
       // In coverage mode: replace the test block with a coverage marker div
       // inline in the dependency content. The dropdown component renders these
       // as TestCoverageBlock badges, just like the main content does.
-      const deps = dependsOn.join(",");
       const encodedCode = encodeURIComponent(codeBlock);
-      return `<div class="test-coverage-block" data-test-id="${testId}" data-platform="${platform}" data-timeout="${timeout}" data-hidden="${hidden}" data-depends="${deps}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
+      return `<div class="test-coverage-block" data-test-id="${testId}" data-platform="${platform}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
     }
 
     // Normal mode: strip test tags but keep the code block visible
@@ -225,7 +223,6 @@ function parseTestAttributes(attrString: string): Record<string, unknown> {
     const value = match[2] || match[3];
     if (key === "timeout") attrs[key] = parseInt(value, 10);
     else if (key === "hidden" || key === "continue_on_error") attrs[key] = value.toLowerCase() === "true";
-    else if (key === "depends_on") attrs[key] = value.split(",").map((s: string) => s.trim()).filter(Boolean);
     else attrs[key] = value;
   }
   return attrs;
@@ -306,18 +303,16 @@ function processTestTags(content: string, playbookId: string): { content: string
     const platform = (attrs.platform as string) || "all";
     const timeout = (attrs.timeout as number) || 300;
     const hidden = (attrs.hidden as boolean) || false;
-    const dependsOn = (attrs.depends_on as string[]) || [];
 
     const setup = (attrs.setup as string) || "";
 
-    const testInfo: TestInfo = { id: testId, platform, timeout, hidden, dependsOn };
+    const testInfo: TestInfo = { id: testId, platform, timeout, hidden };
     const result = resultsMap[testId];
     if (result) testInfo.result = result;
     tests.push(testInfo);
 
-    const deps = dependsOn.join(",");
     const encodedCode = encodeURIComponent(codeBlock);
-    const marker = `<div class="test-coverage-block" data-test-id="${testId}" data-platform="${platform}" data-timeout="${timeout}" data-hidden="${hidden}" data-depends="${deps}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
+    const marker = `<div class="test-coverage-block" data-test-id="${testId}" data-platform="${platform}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
     return marker;
   });
 

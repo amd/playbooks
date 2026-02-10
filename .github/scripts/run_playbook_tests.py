@@ -14,20 +14,8 @@ to the website but can be parsed and executed by CI:
     ```
     <!-- @test:end -->
 
-Tests can be chained using the `depends_on` attribute to create test sequences
-where later tests only run if their dependencies pass:
-
-    <!-- @test:id=install-deps platform=all -->
-    ```bash
-    pip install transformers
-    ```
-    <!-- @test:end -->
-
-    <!-- @test:id=run-script platform=all depends_on=install-deps -->
-    ```bash
-    python run_llm.py --help
-    ```
-    <!-- @test:end -->
+Tests are executed in the order they appear in the README. Place prerequisite
+steps (e.g. installing dependencies) before the tests that need them.
 
 Supported test attributes:
     - id: Unique identifier for the test (required)
@@ -35,7 +23,6 @@ Supported test attributes:
     - timeout: Maximum execution time in seconds (default: 300)
     - workdir: Working directory relative to playbook assets folder
     - continue_on_error: true/false - whether to continue if this test fails (default: false)
-    - depends_on: Comma-separated list of test IDs that must pass before this test runs
     - hidden: true/false - if true, hides the code block from the website (default: false)
     - setup: Shell commands to run before the test script (e.g. venv activation).
              For Python tests, wraps execution in a shell that runs the setup first:
@@ -95,7 +82,7 @@ Inline #hide marker:
     prerequisite commands (e.g. venv activation) that the reader doesn't need to see
     repeated, without hiding the entire block:
 
-        <!-- @test:id=install-deps platform=all depends_on=create-venv -->
+        <!-- @test:id=install-deps platform=all -->
         ```bash
         source llm-env/bin/activate #hide
         pip install transformers
@@ -130,7 +117,6 @@ class TestBlock:
     timeout: int = 300
     workdir: Optional[str] = None
     continue_on_error: bool = False
-    depends_on: list[str] = field(default_factory=list)
     hidden: bool = False
     setup: Optional[str] = None
     language: str = "bash"
@@ -191,9 +177,6 @@ def parse_test_attributes(attr_string: str) -> dict:
             value = value.lower() == "true"
         elif key == "hidden":
             value = value.lower() == "true"
-        elif key == "depends_on":
-            # Parse comma-separated list of dependencies
-            value = [dep.strip() for dep in value.split(",") if dep.strip()]
 
         attrs[key] = value
 
@@ -412,7 +395,6 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
             timeout=attrs.get("timeout", 300),
             workdir=attrs.get("workdir"),
             continue_on_error=attrs.get("continue_on_error", False),
-            depends_on=attrs.get("depends_on", []),
             hidden=attrs.get("hidden", False),
             setup=resolve_setup(attrs.get("setup"), setup_defs, target_platform),
             language=language,
@@ -431,100 +413,19 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
     return tests
 
 
-def topological_sort_tests(tests: list[TestBlock]) -> list[TestBlock]:
-    """
-    Sort tests based on their dependencies using topological sort.
-    Tests with no dependencies come first, then tests that depend on them, etc.
-    Preserves original order for tests at the same dependency level.
-    """
-    # Build a map of test ID to test
-    test_map = {t.id: t for t in tests}
-
-    # Track visited and result
-    visited = set()
-    temp_visited = set()
-    result = []
-
-    def visit(test_id: str):
-        if test_id in temp_visited:
-            raise ValueError(f"Circular dependency detected involving test '{test_id}'")
-        if test_id in visited:
-            return
-        if test_id not in test_map:
-            # Dependency not found (might be filtered out by platform)
-            print(f"Warning: Dependency '{test_id}' not found, ignoring")
-            return
-
-        temp_visited.add(test_id)
-        test = test_map[test_id]
-
-        # Visit dependencies first
-        for dep_id in test.depends_on:
-            visit(dep_id)
-
-        temp_visited.remove(test_id)
-        visited.add(test_id)
-        result.append(test)
-
-    # Visit all tests in their original order
-    for test in tests:
-        visit(test.id)
-
-    return result
-
-
 def run_test(
     test: TestBlock,
     playbook_path: Path,
     results_dir: Path,
-    results_map: dict[str, TestResult],
 ) -> TestResult:
     """Execute a single test block."""
     print(f"\n{'='*60}")
     print(f"Running test: {test.id}")
     print(f"Language: {test.language}")
     print(f"Timeout: {test.timeout}s")
-    if test.depends_on:
-        print(f"Dependencies: {', '.join(test.depends_on)}")
     if test.setup:
         print(f"Setup: {test.setup}")
     print(f"{'='*60}")
-
-    # Check dependencies
-    for dep_id in test.depends_on:
-        if dep_id in results_map:
-            dep_result = results_map[dep_id]
-            if not dep_result.success:
-                skip_msg = f"Skipped: dependency '{dep_id}' failed"
-                print(f"SKIPPED: {skip_msg}")
-                return TestResult(
-                    test_id=test.id,
-                    success=False,
-                    exit_code=-1,
-                    stdout="",
-                    stderr="",
-                    duration=0,
-                    error_message=skip_msg,
-                    skipped=True,
-                )
-            if dep_result.skipped:
-                skip_msg = f"Skipped: dependency '{dep_id}' was skipped"
-                print(f"SKIPPED: {skip_msg}")
-                return TestResult(
-                    test_id=test.id,
-                    success=False,
-                    exit_code=-1,
-                    stdout="",
-                    stderr="",
-                    duration=0,
-                    error_message=skip_msg,
-                    skipped=True,
-                )
-        else:
-            # Dependency not found - might have been filtered by platform
-            print(
-                f"Warning: Dependency '{dep_id}' not found in results, proceeding anyway"
-            )
 
     # Determine working directory
     if test.workdir:
@@ -715,29 +616,19 @@ def run_playbook_tests(playbook_id: str, platform: str) -> bool:
         )
         return True
 
-    # Sort tests by dependencies
-    try:
-        tests = topological_sort_tests(tests)
-    except ValueError as e:
-        print(f"Error: {e}")
-        return False
-
-    print(f"\nFound {len(tests)} test(s) to run (in dependency order):")
+    print(f"\nFound {len(tests)} test(s) to run (in README order):")
     for test in tests:
-        deps = f" (depends on: {', '.join(test.depends_on)})" if test.depends_on else ""
         print(
-            f"  - {test.id} (platform={test.platform}, timeout={test.timeout}s){deps}"
+            f"  - {test.id} (platform={test.platform}, timeout={test.timeout}s)"
         )
 
     # Run tests
     suite = PlaybookTestSuite(playbook_id=playbook_id, tests=tests)
-    results_map: dict[str, TestResult] = {}
     all_passed = True
 
     for test in tests:
-        result = run_test(test, playbook_path, results_dir, results_map)
+        result = run_test(test, playbook_path, results_dir)
         suite.results.append(result)
-        results_map[test.id] = result
 
         if not result.success and not result.skipped:
             if test.continue_on_error:
