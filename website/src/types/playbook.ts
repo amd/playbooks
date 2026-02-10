@@ -117,6 +117,24 @@ export interface TestCoverageInfo {
   };
 }
 
+/** Per-playbook coverage summary used by the sidebar overview */
+export interface PlaybookCoverageSummary {
+  id: string;
+  title: string;
+  category: Category;
+  platforms: Platform[];
+  testCount: number;
+  hiddenCount: number;
+  visibleTestCount: number;
+  totalCodeBlocks: number;
+  hasResults: boolean;
+  resultsSummary?: {
+    passed: number;
+    failed: number;
+    skipped: number;
+  };
+}
+
 export interface Playbook extends PlaybookMeta {
   /** Category derived from folder structure */
   category: Category;
