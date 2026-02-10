@@ -37,6 +37,27 @@ Supported test attributes:
     - continue_on_error: true/false - whether to continue if this test fails (default: false)
     - depends_on: Comma-separated list of test IDs that must pass before this test runs
     - hidden: true/false - if true, hides the code block from the website (default: false)
+    - setup: Shell commands to run before the test script (e.g. venv activation).
+             For Python tests, wraps execution in a shell that runs the setup first:
+                 setup="source llm-env/bin/activate"  →  bash -c "source llm-env/bin/activate && python <script>"
+             For shell tests, the setup commands are prepended to the script body.
+
+Setup attribute:
+    The `setup` attribute lets you specify shell commands (e.g. venv activation)
+    that run before the test script. This is especially useful for Python code
+    blocks which are otherwise executed directly with `python <script>`:
+
+        <!-- @test:id=verify-imports platform=all setup="source llm-env/bin/activate" -->
+        ```python
+        import torch
+        print(f"PyTorch version: {torch.__version__}")
+        ```
+        <!-- @test:end -->
+
+    The runner expands this to: `bash -c "source llm-env/bin/activate && python test_verify-imports.py"`
+    On Windows, it uses PowerShell instead of bash.
+
+    For shell-based tests, the setup commands are prepended to the script body.
 
 Inline #hide marker:
     Lines ending with `#hide` inside a code block are executed by the test runner
@@ -81,6 +102,7 @@ class TestBlock:
     continue_on_error: bool = False
     depends_on: list[str] = field(default_factory=list)
     hidden: bool = False
+    setup: Optional[str] = None
     language: str = "bash"
     code: str = ""
     line_number: int = 0
@@ -185,6 +207,7 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
             continue_on_error=attrs.get("continue_on_error", False),
             depends_on=attrs.get("depends_on", []),
             hidden=attrs.get("hidden", False),
+            setup=attrs.get("setup"),
             language=language,
             code=code,
             line_number=line_number,
@@ -256,6 +279,8 @@ def run_test(
     print(f"Timeout: {test.timeout}s")
     if test.depends_on:
         print(f"Dependencies: {', '.join(test.depends_on)}")
+    if test.setup:
+        print(f"Setup: {test.setup}")
     print(f"{'='*60}")
 
     # Check dependencies
@@ -317,26 +342,44 @@ def run_test(
     # Determine shell and script extension based on language and platform
     is_windows = sys.platform == "win32"
 
+    # If setup is provided, prepend it to shell-based tests or wrap Python tests
+    setup_prefix = test.setup if test.setup else None
+
     if test.language in ["bash", "sh", "shell"]:
         if is_windows:
-            # Use PowerShell on Windows for bash-like commands
             shell_cmd = ["powershell", "-Command"]
             script_content = effective_code
         else:
             shell_cmd = ["bash", "-c"]
             script_content = effective_code
+        # Prepend setup commands to the shell script body
+        if setup_prefix:
+            script_content = f"{setup_prefix}\n{script_content}"
     elif test.language in ["cmd", "batch"]:
         shell_cmd = ["cmd", "/c"]
         script_content = effective_code
+        if setup_prefix:
+            script_content = f"{setup_prefix}\n{script_content}"
     elif test.language in ["powershell", "pwsh", "ps1"]:
         shell_cmd = ["powershell", "-Command"]
         script_content = effective_code
+        if setup_prefix:
+            script_content = f"{setup_prefix}\n{script_content}"
     elif test.language == "python":
         # For Python code blocks, write to temp file and execute
         script_file = results_dir / f"test_{test.id}.py"
         script_file.write_text(effective_code, encoding="utf-8")
-        shell_cmd = ["python", str(script_file)]
-        script_content = None
+        if setup_prefix:
+            # Wrap in a shell so setup commands (e.g. venv activation) run first
+            if is_windows:
+                shell_cmd = ["powershell", "-Command"]
+                script_content = f'{setup_prefix}; python "{script_file}"'
+            else:
+                shell_cmd = ["bash", "-c"]
+                script_content = f'{setup_prefix} && python "{script_file}"'
+        else:
+            shell_cmd = ["python", str(script_file)]
+            script_content = None
     else:
         # Default to shell execution
         if is_windows:
@@ -344,6 +387,8 @@ def run_test(
         else:
             shell_cmd = ["bash", "-c"]
         script_content = effective_code
+        if setup_prefix:
+            script_content = f"{setup_prefix}\n{script_content}"
 
     # Build the command
     if script_content is not None:
