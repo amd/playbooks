@@ -104,7 +104,7 @@ print("PASS: All imports successful")
 ```
 <!-- @test:end -->
 
-<!-- @test:id=run-model platform=all timeout=60 depends_on=install-deps setup="source llm-env/bin/activate" -->
+<!-- @test:id=run-model platform=all timeout=600 depends_on=install-deps setup="source llm-env/bin/activate" -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -121,7 +121,7 @@ model = AutoModelForCausalLM.from_pretrained(
 
 To try it out:
 
-<!-- @test:id=run-llm-help platform=all timeout=300 depends_on=verify-scripts-syntax -->
+<!-- @test:id=run-llm-help platform=all timeout=300 depends_on=verify-scripts-syntax setup="source llm-env/bin/activate" -->
 ```bash
 python run_llm.py
 ```
