@@ -861,6 +861,163 @@ body {
   display: none;
 }
 
+/* ── "View Logs" button & log viewer panel ──────────────── */
+.tc-logs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  margin-left: 6px;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 10px;
+  background: rgba(127, 29, 29, 0.4);
+  color: #f87171;
+  font-size: 0.625rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tc-logs-btn:hover {
+  background: rgba(127, 29, 29, 0.7);
+  border-color: rgba(248, 113, 113, 0.6);
+  color: #fca5a5;
+}
+
+.tc-logs-btn.tc-logs-btn-active {
+  background: rgba(127, 29, 29, 0.7);
+  border-color: #f87171;
+}
+
+.tc-logs-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.tc-logs-spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(248, 113, 113, 0.3);
+  border-top-color: #f87171;
+  border-radius: 50%;
+  animation: tc-spin 0.6s linear infinite;
+}
+
+@keyframes tc-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Log viewer panel */
+.tc-logs-panel {
+  border-top: 1px solid rgba(248, 113, 113, 0.2);
+  background: #110a0a;
+  max-height: 400px;
+  overflow-y: auto;
+  animation: tc-logs-slide 0.2s ease-out;
+}
+
+@keyframes tc-logs-slide {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 400px;
+    opacity: 1;
+  }
+}
+
+.tc-logs-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tc-logs-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tc-logs-panel::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.tc-logs-panel::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.tc-logs-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 1rem;
+  color: #f87171;
+  font-size: 0.8125rem;
+}
+
+.tc-logs-error-message {
+  padding: 0.5rem 0;
+}
+
+.tc-logs-section {
+  padding: 0.5rem 0;
+}
+
+.tc-logs-section + .tc-logs-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tc-logs-section-label {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 0 1rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tc-logs-stderr .tc-logs-section-label,
+.tc-logs-error-message .tc-logs-section-label {
+  background: rgba(127, 29, 29, 0.4);
+  color: #f87171;
+}
+
+.tc-logs-stdout .tc-logs-section-label {
+  background: rgba(255, 255, 255, 0.06);
+  color: #888;
+}
+
+.tc-logs-pre {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: #ccc;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-x: auto;
+}
+
+.tc-logs-empty {
+  padding: 1rem;
+  color: #666;
+  font-size: 0.8125rem;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Hide log viewer in user view */
+.tc-user-view .tc-logs-btn {
+  display: none;
+}
+.tc-user-view .tc-logs-panel {
+  display: none;
+}
+
 /* ──────────────────────────────────────────────────────────
    Coverage Sidebar — playbook list (mirrors Python preview)
    ────────────────────────────────────────────────────────── */

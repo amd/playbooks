@@ -261,6 +261,7 @@ function HaloPreinstalledDropdown({
                       setup={divProps['data-setup'] || ''}
                       code={decodeURIComponent(divProps['data-code'] || '')}
                       testResult={testInfo?.result}
+                      playbookId={playbookId}
                     />
                   );
                 }
@@ -641,9 +642,10 @@ function transformSetupBlocks(content: string): string {
 /**
  * Test coverage badge block — renders a badge header on top of a code block.
  * Only shown when running in dev:coverage mode.
+ * When a test fails, shows a "View Logs" button to inspect stdout/stderr.
  */
 function TestCoverageBlock({
-  testId, timeout, isHidden, setup, code, testResult,
+  testId, timeout, isHidden, setup, code, testResult, playbookId,
 }: {
   testId: string;
   timeout: string;
@@ -651,7 +653,13 @@ function TestCoverageBlock({
   setup: string;
   code: string;
   testResult?: TestResultInfo;
+  playbookId?: string;
 }) {
+  const [logsOpen, setLogsOpen] = useState(false);
+  const [logs, setLogs] = useState<{ stdout: string; stderr: string } | null>(null);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsError, setLogsError] = useState<string | null>(null);
+
   // Parse the fenced code block: ```lang\ncontent\n```
   const langMatch = code.match(/```(\w+)?\s*\n/);
   const language = langMatch?.[1] || "";
@@ -668,6 +676,45 @@ function TestCoverageBlock({
     else { resultStatus = "fail"; resultLabel = "Failed"; }
   }
 
+  // Show logs button for failed or skipped tests
+  const showLogsButton = testResult && !testResult.success;
+
+  const handleViewLogs = useCallback(async () => {
+    if (logsOpen) {
+      setLogsOpen(false);
+      return;
+    }
+
+    // If logs already fetched, just toggle open
+    if (logs) {
+      setLogsOpen(true);
+      return;
+    }
+
+    // Fetch logs from API
+    if (!playbookId) return;
+    setLogsLoading(true);
+    setLogsError(null);
+
+    try {
+      const res = await fetch(`/api/playbooks/${playbookId}/logs/${testId}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setLogsError(data.error || "Failed to load logs");
+        setLogsOpen(true);
+        return;
+      }
+      const data = await res.json();
+      setLogs(data);
+      setLogsOpen(true);
+    } catch {
+      setLogsError("Failed to fetch logs");
+      setLogsOpen(true);
+    } finally {
+      setLogsLoading(false);
+    }
+  }, [logsOpen, logs, playbookId, testId]);
+
   return (
     <div className={`tc-block ${isHidden ? "tc-hidden" : ""} ${resultStatus ? `tc-result-${resultStatus}` : ""}`}>
       <div className={`tc-badge-header ${isHidden ? "tc-badge-hidden" : ""} ${resultStatus === "fail" ? "tc-badge-fail" : ""} ${resultStatus === "skip" ? "tc-badge-skip" : ""}`}>
@@ -679,12 +726,71 @@ function TestCoverageBlock({
         {setup && (
           <span className="tc-pill tc-pill-setup">⚙ {setup}</span>
         )}
+        {showLogsButton && (
+          <button
+            className={`tc-logs-btn ${logsOpen ? "tc-logs-btn-active" : ""}`}
+            onClick={handleViewLogs}
+            disabled={logsLoading}
+            title={logsOpen ? "Hide logs" : "View test logs"}
+          >
+            {logsLoading ? (
+              <span className="tc-logs-spinner" />
+            ) : (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+            )}
+            {logsOpen ? "Hide Logs" : "View Logs"}
+          </button>
+        )}
         {testResult && (
           <span className={`tc-pill tc-pill-result tc-pill-result-${resultStatus}`}>
             {resultLabel}{testResult.duration ? ` (${testResult.duration.toFixed(1)}s)` : ""}
           </span>
         )}
       </div>
+      {/* Collapsible log viewer */}
+      {logsOpen && (
+        <div className="tc-logs-panel">
+          {logsError && !logs ? (
+            <div className="tc-logs-error">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              {logsError}
+            </div>
+          ) : (
+            <>
+              {testResult?.error && (
+                <div className="tc-logs-error-message">
+                  <span className="tc-logs-section-label">Error</span>
+                  <pre className="tc-logs-pre">{testResult.error}</pre>
+                </div>
+              )}
+              {logs?.stderr && (
+                <div className="tc-logs-section tc-logs-stderr">
+                  <span className="tc-logs-section-label">stderr</span>
+                  <pre className="tc-logs-pre">{logs.stderr}</pre>
+                </div>
+              )}
+              {logs?.stdout && (
+                <div className="tc-logs-section tc-logs-stdout">
+                  <span className="tc-logs-section-label">stdout</span>
+                  <pre className="tc-logs-pre">{logs.stdout}</pre>
+                </div>
+              )}
+              {logs && !logs.stdout && !logs.stderr && !testResult?.error && (
+                <div className="tc-logs-empty">No log output available for this test.</div>
+              )}
+            </>
+          )}
+        </div>
+      )}
       {hasHideLines ? (
         <div className="code-block-wrapper">
           <pre className="code-block tc-code-with-hide">
@@ -1093,6 +1199,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
             setup={props['data-setup'] || ''}
             code={decodeURIComponent(props['data-code'] || '')}
             testResult={testInfo?.result}
+            playbookId={id}
           />
         );
       }
