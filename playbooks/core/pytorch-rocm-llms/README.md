@@ -42,7 +42,7 @@ source llm-env/bin/activate
 
 <!-- @test:id=install-deps platform=all timeout=300 depends_on=install-pytorch setup=activate-venv -->
 ```bash
-pip install transformers accelerate sentencepiece protobuf
+pip install --upgrade transformers accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 
