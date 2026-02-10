@@ -59,6 +59,25 @@ Setup attribute:
 
     For shell-based tests, the setup commands are prepended to the script body.
 
+Reusable setup definitions (@setup):
+    Instead of repeating raw shell commands in every test's `setup` attribute,
+    you can define named, platform-specific setup steps using @setup comments.
+    These HTML comments are invisible when the README is rendered as a webpage.
+
+    Definition syntax (place anywhere in the README before first use):
+        <!-- @setup:id=activate-venv linux="source llm-env/bin/activate" windows="llm-env\\Scripts\\activate.bat" -->
+
+    Then reference by name in test blocks:
+        <!-- @test:id=install-deps platform=all setup=activate-venv -->
+        ```bash
+        pip install transformers
+        ```
+        <!-- @test:end -->
+
+    The runner resolves `setup=activate-venv` to the platform-specific command
+    at parse time. If the value doesn't match any @setup id, it is treated as
+    a raw shell command for backward compatibility.
+
 Inline #hide marker:
     Lines ending with `#hide` inside a code block are executed by the test runner
     but should be stripped from the rendered website view. This lets you add
@@ -170,10 +189,82 @@ def parse_test_attributes(attr_string: str) -> dict:
     return attrs
 
 
+def extract_setup_definitions(content: str) -> dict[str, dict[str, str]]:
+    """Extract reusable @setup definitions from README content.
+
+    Parses HTML comments of the form:
+        <!-- @setup:id=activate-venv linux="source llm-env/bin/activate" windows="llm-env\\Scripts\\activate.bat" -->
+
+    Returns a dict mapping setup_id -> {platform: command}, e.g.:
+        {"activate-venv": {"linux": "source llm-env/bin/activate", "windows": "llm-env\\Scripts\\activate.bat"}}
+    """
+    setup_defs: dict[str, dict[str, str]] = {}
+    pattern = r"<!-- @setup:([^>]+) -->"
+
+    for match in re.finditer(pattern, content):
+        attr_string = match.group(1)
+        attrs = parse_test_attributes(attr_string)
+
+        setup_id = attrs.get("id")
+        if not setup_id:
+            line_number = content[: match.start()].count("\n") + 1
+            print(
+                f"Warning: @setup definition at line {line_number} missing 'id', skipping"
+            )
+            continue
+
+        platform_cmds: dict[str, str] = {}
+        for platform in ["linux", "windows"]:
+            if platform in attrs:
+                platform_cmds[platform] = attrs[platform]
+
+        if platform_cmds:
+            setup_defs[setup_id] = platform_cmds
+        else:
+            line_number = content[: match.start()].count("\n") + 1
+            print(
+                f"Warning: @setup '{setup_id}' at line {line_number} has no platform commands"
+            )
+
+    return setup_defs
+
+
+def resolve_setup(
+    setup_value: Optional[str],
+    setup_defs: dict[str, dict[str, str]],
+    target_platform: str,
+) -> Optional[str]:
+    """Resolve a setup attribute value.
+
+    If the value matches a defined @setup id, returns the platform-specific
+    command. Otherwise returns the raw value (backward compatible).
+    """
+    if not setup_value:
+        return None
+
+    if setup_value in setup_defs:
+        platform_cmds = setup_defs[setup_value]
+        resolved = platform_cmds.get(target_platform)
+        if resolved:
+            return resolved
+        print(
+            f"  Warning: Setup '{setup_value}' has no command for platform '{target_platform}'"
+        )
+        return None
+
+    # Not a reference — treat as a raw shell command (backward compatible)
+    return setup_value
+
+
 def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
     """Extract test blocks from a README.md file."""
     content = readme_path.read_text(encoding="utf-8")
     tests = []
+
+    # Parse reusable setup definitions first
+    setup_defs = extract_setup_definitions(content)
+    if setup_defs:
+        print(f"Found {len(setup_defs)} setup definition(s): {', '.join(setup_defs.keys())}")
 
     # Pattern to match test blocks:
     # <!-- @test:id=name platform=windows ... -->
@@ -207,7 +298,7 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
             continue_on_error=attrs.get("continue_on_error", False),
             depends_on=attrs.get("depends_on", []),
             hidden=attrs.get("hidden", False),
-            setup=attrs.get("setup"),
+            setup=resolve_setup(attrs.get("setup"), setup_defs, target_platform),
             language=language,
             code=code,
             line_number=line_number,
