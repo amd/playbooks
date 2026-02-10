@@ -324,9 +324,55 @@ def resolve_setup(
     return setup_value
 
 
+def resolve_require_tags(content: str) -> str:
+    """Resolve @require tags by inlining dependency content.
+
+    Finds ``<!-- @require:dep-id -->`` tags in the README content and replaces
+    them with the actual dependency file contents from the central
+    ``playbooks/dependencies/`` folder.  This allows the test extractor to
+    discover @test blocks that live inside shared dependency files.
+    """
+    repo_root = Path(__file__).parent.parent.parent
+    dependencies_root = repo_root / "playbooks" / "dependencies"
+    registry_path = dependencies_root / "registry.json"
+
+    if not registry_path.exists():
+        return content
+
+    try:
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    except Exception:
+        return content
+
+    deps_map = registry.get("dependencies", {})
+
+    require_pattern = r"<!-- @require:([a-z0-9-,]+) -->"
+
+    def _replace_require(match: re.Match) -> str:
+        dep_ids = [d.strip() for d in match.group(1).split(",") if d.strip()]
+        parts: list[str] = []
+        for dep_id in dep_ids:
+            dep_info = deps_map.get(dep_id)
+            if not dep_info:
+                print(f"Warning: @require dependency '{dep_id}' not found in registry")
+                continue
+            dep_file = dependencies_root / dep_info["file"]
+            if not dep_file.exists():
+                print(f"Warning: Dependency file '{dep_file}' does not exist")
+                continue
+            parts.append(dep_file.read_text(encoding="utf-8"))
+        return "\n".join(parts) if parts else match.group(0)
+
+    return re.sub(require_pattern, _replace_require, content)
+
+
 def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
     """Extract test blocks from a README.md file."""
     content = readme_path.read_text(encoding="utf-8")
+
+    # Resolve @require tags so tests inside dependencies are discovered
+    content = resolve_require_tags(content)
+
     tests = []
 
     # Parse reusable setup definitions first

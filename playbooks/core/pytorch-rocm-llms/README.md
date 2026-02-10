@@ -40,7 +40,7 @@ source llm-env/bin/activate
 
 ### Additional Dependencies
 
-<!-- @test:id=install-deps platform=all timeout=300 depends_on=create-venv setup=activate-venv -->
+<!-- @test:id=install-deps platform=all timeout=300 depends_on=install-pytorch setup=activate-venv -->
 ```bash
 pip install transformers accelerate sentencepiece protobuf
 ```

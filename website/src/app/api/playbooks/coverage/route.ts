@@ -4,7 +4,71 @@ import path from "path";
 import type { PlaybookMeta, Category, PlaybookCoverageSummary } from "@/types/playbook";
 
 const PLAYBOOKS_ROOT = path.join(process.cwd(), "..", "playbooks");
+const DEPENDENCIES_ROOT = path.join(PLAYBOOKS_ROOT, "dependencies");
 const TEST_RESULTS_ROOT = path.join(process.cwd(), "..", "test-results");
+
+interface DependencyRegistryEntry {
+  name: string;
+  file: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Loads the dependency registry for resolving @require tags.
+ */
+function loadDependencyRegistry(): Record<string, DependencyRegistryEntry> | null {
+  const registryPath = path.join(DEPENDENCIES_ROOT, "registry.json");
+  if (!fs.existsSync(registryPath)) return null;
+  try {
+    const raw = JSON.parse(fs.readFileSync(registryPath, "utf-8"));
+    return raw.dependencies || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Counts @test tags (and hidden tests / code blocks) found inside dependency
+ * content referenced by @require tags in the given README content.
+ */
+function countDependencyTests(readmeContent: string): { testCount: number; hiddenCount: number; codeBlockCount: number } {
+  const registry = loadDependencyRegistry();
+  if (!registry) return { testCount: 0, hiddenCount: 0, codeBlockCount: 0 };
+
+  let testCount = 0;
+  let hiddenCount = 0;
+  let codeBlockCount = 0;
+
+  const requirePattern = /<!-- @require:([a-z0-9-,]+) -->/g;
+  let reqMatch;
+  while ((reqMatch = requirePattern.exec(readmeContent)) !== null) {
+    const depIds = reqMatch[1].split(',').map((id: string) => id.trim()).filter(Boolean);
+    for (const depId of depIds) {
+      const dep = registry[depId];
+      if (!dep) continue;
+      const depFilePath = path.join(DEPENDENCIES_ROOT, dep.file);
+      if (!fs.existsSync(depFilePath)) continue;
+      try {
+        const depContent = fs.readFileSync(depFilePath, "utf-8");
+        // Count @test tags in the dependency content
+        const testTagPattern = /<!-- @test:([^>]+) -->/g;
+        let testMatch;
+        while ((testMatch = testTagPattern.exec(depContent)) !== null) {
+          testCount++;
+          if (/hidden\s*=\s*(?:"true"|true)/i.test(testMatch[1])) {
+            hiddenCount++;
+          }
+        }
+        // Count code blocks
+        codeBlockCount += (depContent.match(/```\w*\s*\n/g) || []).length;
+      } catch {
+        // ignore read errors
+      }
+    }
+  }
+
+  return { testCount, hiddenCount, codeBlockCount };
+}
 
 function getCategory(categoryFolder: string): Category {
   if (categoryFolder === "core") return "core";
@@ -47,7 +111,7 @@ function scanCoverage(): PlaybookCoverageSummary[] {
       if (fs.existsSync(readmePath)) {
         const content = fs.readFileSync(readmePath, "utf-8");
 
-        // Count @test tags
+        // Count @test tags in the README itself
         const testTagPattern = /<!-- @test:([^>]+) -->/g;
         let match;
         while ((match = testTagPattern.exec(content)) !== null) {
@@ -57,8 +121,14 @@ function scanCoverage(): PlaybookCoverageSummary[] {
           }
         }
 
-        // Count code blocks
+        // Count code blocks in the README
         totalCodeBlocks = (content.match(/```\w*\s*\n/g) || []).length;
+
+        // Also count tests and code blocks from @require dependencies
+        const depCounts = countDependencyTests(content);
+        testCount += depCounts.testCount;
+        hiddenCount += depCounts.hiddenCount;
+        totalCodeBlocks += depCounts.codeBlockCount;
       }
 
       // Check for test results

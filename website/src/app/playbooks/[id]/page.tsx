@@ -118,12 +118,14 @@ function HaloPreinstalledDropdown({
   content, 
   dropdownId,
   playbookId,
-  onImageClick
+  onImageClick,
+  testCoverage,
 }: { 
   content: string;
   dropdownId: string;
   playbookId: string;
   onImageClick: (image: { src: string; alt: string }) => void;
+  testCoverage?: TestCoverageInfo;
 }) {
   // Initialize from global store, use local state for rendering
   const [isOpen, setIsOpen] = useState(() => dropdownStateStore[dropdownId] ?? false);
@@ -245,6 +247,27 @@ function HaloPreinstalledDropdown({
               tr: ({ children }) => <tr className="md-tr">{children}</tr>,
               th: ({ children }) => <th className="md-th">{children}</th>,
               td: ({ children }) => <td className="md-td">{children}</td>,
+              // Handle test-coverage-block markers inside dependency content
+              div: (divProps: React.HTMLAttributes<HTMLDivElement> & { 'data-test-id'?: string; 'data-platform'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-depends'?: string; 'data-setup'?: string; 'data-code'?: string }) => {
+                const { className: divClassName, ...divRest } = divProps;
+                if (divClassName === 'test-coverage-block') {
+                  const testId = divProps['data-test-id'] || '';
+                  const testInfo = testCoverage?.tests.find(t => t.id === testId);
+                  return (
+                    <TestCoverageBlock
+                      testId={testId}
+                      platform={divProps['data-platform'] || 'all'}
+                      timeout={divProps['data-timeout'] || '300'}
+                      isHidden={divProps['data-hidden'] === 'true'}
+                      depends={divProps['data-depends'] || ''}
+                      setup={divProps['data-setup'] || ''}
+                      code={decodeURIComponent(divProps['data-code'] || '')}
+                      testResult={testInfo?.result}
+                    />
+                  );
+                }
+                return <div className={divClassName} {...divRest} />;
+              },
             }}
           >
             {content}
@@ -1060,6 +1083,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
               dropdownId={dropdownId}
               playbookId={id}
               onImageClick={setLightboxImage}
+              testCoverage={playbook?.testCoverage}
             />
           );
         }

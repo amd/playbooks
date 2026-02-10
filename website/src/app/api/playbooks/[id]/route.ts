@@ -90,7 +90,64 @@ function loadSetupContent(setupId: string): string | null {
 }
 
 /**
- * Transforms @require tags into @preinstalled blocks with dependency content
+ * Processes @test tags found inside dependency content loaded via @require.
+ * 
+ * Unlike processTestTags (which may hide code blocks for hidden tests),
+ * this always keeps code blocks visible since they are the dependency's
+ * installation instructions shown in the pre-installed dropdown.
+ * 
+ * Normal mode: strips @test tag comments, keeps code blocks, strips #hide lines.
+ * Coverage mode: replaces test blocks with coverage marker divs inline so
+ *   they render as badges inside the pre-installed dropdown itself.
+ * 
+ * Returns the processed dependency content and extracted TestInfo for
+ * merging into the playbook's overall test coverage stats.
+ */
+function processDependencyTestTags(
+  depContent: string,
+  playbookId: string,
+): { processedContent: string; tests: TestInfo[]; codeBlockCount: number } {
+  const testBlockPattern = /<!-- @test:([^>]+) -->\s*(```\w*\s*\n[\s\S]*?```)\s*<!-- @test:end -->/g;
+  const tests: TestInfo[] = [];
+  const { resultsMap } = SHOW_COVERAGE ? loadTestResults(playbookId) : { resultsMap: {} };
+
+  // Count code blocks before processing (on the original content)
+  const codeBlockCount = (depContent.match(/```\w*\s*\n/g) || []).length;
+
+  const processedContent = depContent.replace(testBlockPattern, (_match, attrStr: string, codeBlock: string) => {
+    const attrs = parseTestAttributes(attrStr);
+    const testId = (attrs.id as string) || "unknown";
+    const platform = (attrs.platform as string) || "all";
+    const timeout = (attrs.timeout as number) || 300;
+    const hidden = (attrs.hidden as boolean) || false;
+    const dependsOn = (attrs.depends_on as string[]) || [];
+    const setup = (attrs.setup as string) || "";
+
+    const testInfo: TestInfo = { id: testId, platform, timeout, hidden, dependsOn };
+    const result = resultsMap[testId];
+    if (result) testInfo.result = result;
+    tests.push(testInfo);
+
+    if (SHOW_COVERAGE) {
+      // In coverage mode: replace the test block with a coverage marker div
+      // inline in the dependency content. The dropdown component renders these
+      // as TestCoverageBlock badges, just like the main content does.
+      const deps = dependsOn.join(",");
+      const encodedCode = encodeURIComponent(codeBlock);
+      return `<div class="test-coverage-block" data-test-id="${testId}" data-platform="${platform}" data-timeout="${timeout}" data-hidden="${hidden}" data-depends="${deps}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
+    }
+
+    // Normal mode: strip test tags but keep the code block visible
+    // (it's the installation instruction). Strip #hide lines for clean display.
+    return stripHideLines(codeBlock);
+  });
+
+  return { processedContent, tests, codeBlockCount };
+}
+
+/**
+ * Transforms @require tags into @preinstalled blocks with dependency content.
+ * Also extracts and processes any @test tags found inside dependencies.
  * 
  * Syntax: 
  *   <!-- @require:dependency-id -->           (single dependency)
@@ -99,12 +156,21 @@ function loadSetupContent(setupId: string): string | null {
  * This allows playbooks to reference shared dependency installation instructions
  * from the central dependencies folder. Multiple dependencies are combined into
  * a single "Already pre-installed" dropdown.
+ * 
+ * Returns the modified content plus any test info extracted from dependencies,
+ * so they can be merged into the playbook's overall test coverage.
  */
-function processRequireTags(content: string): string {
+function processRequireTags(content: string, playbookId: string): {
+  content: string;
+  dependencyTests: TestInfo[];
+  dependencyCodeBlocks: number;
+} {
   // Match @require with one or more comma-separated dependency IDs
   const requirePattern = /<!-- @require:([a-z0-9-,]+) -->/g;
+  const allDependencyTests: TestInfo[] = [];
+  let totalDependencyCodeBlocks = 0;
   
-  return content.replace(requirePattern, (_match, dependencyIds: string) => {
+  const processed = content.replace(requirePattern, (_match, dependencyIds: string) => {
     // Split by comma and trim whitespace
     const ids = dependencyIds.split(',').map((id: string) => id.trim()).filter(Boolean);
     
@@ -114,7 +180,12 @@ function processRequireTags(content: string): string {
     for (const depId of ids) {
       const depContent = loadDependencyContent(depId);
       if (depContent) {
-        contents.push(depContent);
+        // Process test tags inside the dependency content
+        const { processedContent: processed, tests, codeBlockCount } =
+          processDependencyTestTags(depContent, playbookId);
+        contents.push(processed);
+        allDependencyTests.push(...tests);
+        totalDependencyCodeBlocks += codeBlockCount;
       } else {
         notFound.push(depId);
       }
@@ -128,10 +199,18 @@ function processRequireTags(content: string): string {
       return `<!-- Dependencies "${dependencyIds}" not found -->`;
     }
     
-    // Combine all dependency contents with a separator and wrap in @preinstalled tags
+    // Combine all dependency contents with a separator and wrap in @preinstalled tags.
+    // In coverage mode the dependency content already contains inline coverage
+    // marker divs that the frontend dropdown will render as test badges.
     const combinedContent = contents.join('\n\n---\n\n');
     return `<!-- @preinstalled -->\n${combinedContent}\n<!-- @preinstalled:end -->`;
   });
+
+  return {
+    content: processed,
+    dependencyTests: allDependencyTests,
+    dependencyCodeBlocks: totalDependencyCodeBlocks,
+  };
 }
 
 /**
@@ -398,7 +477,16 @@ function findPlaybook(id: string): Playbook | null {
             // Process inline @setup:id=... definitions (strip or emit coverage markers)
             content = processSetupDefinitions(content);
             // Process @require tags to inject shared dependency content
-            content = processRequireTags(content);
+            // Also extracts tests from dependencies for coverage tracking
+            const requireResult = processRequireTags(content, meta.id);
+            content = requireResult.content;
+            // Merge dependency tests into the coverage data
+            if (testCoverage && requireResult.dependencyTests.length > 0) {
+              testCoverage.tests.push(...requireResult.dependencyTests);
+              testCoverage.visibleTestCount += requireResult.dependencyTests.filter(t => !t.hidden).length;
+              testCoverage.hiddenTestCount += requireResult.dependencyTests.filter(t => t.hidden).length;
+              testCoverage.totalCodeBlocks += requireResult.dependencyCodeBlocks;
+            }
             // Process @setup tags to inject shared setup/configuration content
             content = processSetupTags(content);
           }
