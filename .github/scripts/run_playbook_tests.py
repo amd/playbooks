@@ -38,6 +38,22 @@ Supported test attributes:
     - depends_on: Comma-separated list of test IDs that must pass before this test runs
     - hidden: true/false - if true, hides the code block from the website (default: false)
 
+Inline #hide marker:
+    Lines ending with `#hide` inside a code block are executed by the test runner
+    but should be stripped from the rendered website view. This lets you add
+    prerequisite commands (e.g. venv activation) that the reader doesn't need to see
+    repeated, without hiding the entire block:
+
+        <!-- @test:id=install-deps platform=all depends_on=create-venv -->
+        ```bash
+        source llm-env/bin/activate #hide
+        pip install transformers
+        ```
+        <!-- @test:end -->
+
+    In the coverage/CI log output, #hide lines are prefixed with [hidden] so
+    reviewers can see what runs invisibly on the website.
+
 Usage:
     python run_playbook_tests.py --playbook pytorch-rocm-llms --platform windows
 """
@@ -287,6 +303,17 @@ def run_test(
     # Ensure working directory exists
     workdir.mkdir(parents=True, exist_ok=True)
 
+    # Process #hide lines: strip the marker for execution, annotate in coverage log
+    code_lines = test.code.splitlines()
+    effective_lines = []
+    for line in code_lines:
+        if line.rstrip().endswith("#hide"):
+            # Strip the #hide marker so it doesn't interfere with execution
+            effective_lines.append(re.sub(r"\s*#hide\s*$", "", line))
+        else:
+            effective_lines.append(line)
+    effective_code = "\n".join(effective_lines)
+
     # Determine shell and script extension based on language and platform
     is_windows = sys.platform == "win32"
 
@@ -294,20 +321,20 @@ def run_test(
         if is_windows:
             # Use PowerShell on Windows for bash-like commands
             shell_cmd = ["powershell", "-Command"]
-            script_content = test.code
+            script_content = effective_code
         else:
             shell_cmd = ["bash", "-c"]
-            script_content = test.code
+            script_content = effective_code
     elif test.language in ["cmd", "batch"]:
         shell_cmd = ["cmd", "/c"]
-        script_content = test.code
+        script_content = effective_code
     elif test.language in ["powershell", "pwsh", "ps1"]:
         shell_cmd = ["powershell", "-Command"]
-        script_content = test.code
+        script_content = effective_code
     elif test.language == "python":
         # For Python code blocks, write to temp file and execute
         script_file = results_dir / f"test_{test.id}.py"
-        script_file.write_text(test.code, encoding="utf-8")
+        script_file.write_text(effective_code, encoding="utf-8")
         shell_cmd = ["python", str(script_file)]
         script_content = None
     else:
@@ -316,7 +343,7 @@ def run_test(
             shell_cmd = ["powershell", "-Command"]
         else:
             shell_cmd = ["bash", "-c"]
-        script_content = test.code
+        script_content = effective_code
 
     # Build the command
     if script_content is not None:
@@ -326,7 +353,17 @@ def run_test(
 
     print(f"Working directory: {workdir}")
     print(f"Command: {' '.join(cmd[:2])}...")
-    print(f"\nCode:\n{test.code[:500]}{'...' if len(test.code) > 500 else ''}\n")
+
+    # Display code with #hide lines annotated for coverage view
+    display_lines = []
+    for line in code_lines:
+        if line.rstrip().endswith("#hide"):
+            clean = re.sub(r"\s*#hide\s*$", "", line)
+            display_lines.append(f"  [hidden] {clean}")
+        else:
+            display_lines.append(f"           {line}")
+    display_code = "\n".join(display_lines)
+    print(f"\nCode:\n{display_code[:500]}{'...' if len(display_code) > 500 else ''}\n")
 
     # Execute the test
     start_time = time.time()

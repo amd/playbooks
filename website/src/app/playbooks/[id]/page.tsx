@@ -638,6 +638,9 @@ function TestCoverageBlock({
   const codeContent = code.replace(/```\w*\s*\n/, "").replace(/\n?```\s*$/, "");
   const dependsList = depends ? depends.split(",").filter(Boolean) : [];
 
+  // Detect lines marked with #hide (hidden from user view, visible in coverage)
+  const hasHideLines = codeContent.split('\n').some(line => line.trimEnd().endsWith('#hide'));
+
   let resultStatus = "";
   let resultLabel = "";
   if (testResult) {
@@ -666,7 +669,24 @@ function TestCoverageBlock({
           </span>
         )}
       </div>
-      <CodeBlock language={language}>{codeContent}</CodeBlock>
+      {hasHideLines ? (
+        <div className="code-block-wrapper">
+          <pre className="code-block tc-code-with-hide">
+            <code>{codeContent.split('\n').map((line, i) => {
+              const isHideLine = line.trimEnd().endsWith('#hide');
+              const cleanLine = isHideLine ? line.replace(/\s*#hide\s*$/, '') : line;
+              return (
+                <div key={i} className={`tc-line ${isHideLine ? 'tc-line-hidden' : ''}`}>
+                  {isHideLine && <span className="tc-hide-label">hidden</span>}
+                  {cleanLine}
+                </div>
+              );
+            })}</code>
+          </pre>
+        </div>
+      ) : (
+        <CodeBlock language={language}>{codeContent}</CodeBlock>
+      )}
     </div>
   );
 }

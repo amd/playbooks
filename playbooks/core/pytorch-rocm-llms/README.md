@@ -40,6 +40,7 @@ source llm-env/bin/activate
 
 <!-- @test:id=install-deps platform=all timeout=300 depends_on=create-venv -->
 ```bash
+source llm-env/bin/activate #hide
 pip install transformers accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->

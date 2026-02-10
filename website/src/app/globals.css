@@ -765,12 +765,48 @@ body {
 .tc-user-view .tc-badge-header {
   display: none;
 }
+/* In user view, hide lines marked with #hide (they are only for test/coverage) */
+.tc-user-view .tc-line-hidden {
+  display: none;
+}
 .tc-user-view .tc-block .code-block {
   border-radius: 0.5rem;
   border: 1px solid var(--border-color);
 }
 .tc-user-view .tc-stats-container {
   display: none;
+}
+
+/* ── #hide line styling (coverage view) ────────────────── */
+.tc-code-with-hide {
+  margin: 0;
+  padding: 1rem;
+  background: #0a0a0a;
+  font-size: 0.875rem;
+  overflow-x: auto;
+}
+.tc-line {
+  display: block;
+  min-height: 1.4em;
+}
+.tc-line-hidden {
+  background: rgba(167, 139, 250, 0.08);
+  border-left: 2px solid #7c3aed;
+  margin-left: -1rem;
+  padding-left: calc(1rem - 2px);
+}
+.tc-hide-label {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #a78bfa;
+  background: rgba(124, 58, 237, 0.2);
+  padding: 0px 5px;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: middle;
 }
 
 /* ──────────────────────────────────────────────────────────

@@ -179,26 +179,40 @@ function loadTestResults(playbookId: string): { resultsMap: Record<string, { suc
 }
 
 /**
+ * Strips lines ending with `#hide` from a fenced code block.
+ * These lines are executed by the test runner but invisible to website readers.
+ * Preserves the code fence delimiters (``` lines).
+ */
+function stripHideLines(codeBlock: string): string {
+  return codeBlock
+    .split('\n')
+    .filter(line => !line.trimEnd().endsWith('#hide'))
+    .join('\n');
+}
+
+/**
  * Processes @test tags used for CI testing.
  * 
  * Normal mode (default):
  *   The @test tags are stripped but the code block remains visible.
  *   If hidden=true, both the tags AND the code block are removed.
+ *   Lines ending with #hide are stripped from the code block.
  * 
  * Coverage mode (SHOW_TEST_COVERAGE=true):
  *   @test tags are replaced with visible marker divs that the frontend
  *   renders as test-coverage badges on top of code blocks.
  *   Hidden blocks are kept visible with a "hidden test" indicator.
+ *   Lines with #hide are kept and visually annotated by the frontend.
  *   Returns test metadata for the stats bar.
  */
 function processTestTags(content: string, playbookId: string): { content: string; testCoverage?: TestCoverageInfo } {
   const testBlockPattern = /<!-- @test:([^>]+) -->\s*(```\w*\s*\n[\s\S]*?```)\s*<!-- @test:end -->/g;
 
   if (!SHOW_COVERAGE) {
-    // Original behavior: strip tags, hide hidden blocks
+    // Normal/user view: strip tags, hide hidden blocks, strip #hide lines
     const processed = content.replace(testBlockPattern, (_match, attrs: string, codeBlock: string) => {
       const hiddenMatch = /hidden\s*=\s*(?:"true"|true)/i.exec(attrs);
-      return hiddenMatch ? '' : codeBlock;
+      return hiddenMatch ? '' : stripHideLines(codeBlock);
     });
     return { content: processed };
   }
