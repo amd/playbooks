@@ -55,7 +55,7 @@ jobs:
     name: Test Playbooks (Windows)
     needs: detect-changes
     if: needs.detect-changes.outputs.has_playbooks == 'true'
-    runs-on: windows-latest
+    runs-on: [self-hosted, Windows, halo]
     strategy:
       fail-fast: false
       matrix:
