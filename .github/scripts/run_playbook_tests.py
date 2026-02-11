@@ -477,19 +477,28 @@ def run_test(
 
     if test.language in ["bash", "sh", "shell"]:
         if is_windows:
-            shell_cmd = ["powershell", "-Command"]
-            script_content = effective_code
+            if setup_prefix:
+                # Use cmd.exe instead of PowerShell so .bat setup commands
+                # (e.g. venv activation) run in the same session and their
+                # environment changes persist for subsequent commands.
+                shell_cmd = ["cmd", "/c"]
+                lines = [l for l in effective_code.strip().splitlines() if l.strip()]
+                script_content = " && ".join([setup_prefix] + lines)
+            else:
+                shell_cmd = ["powershell", "-Command"]
+                script_content = effective_code
         else:
             shell_cmd = ["bash", "-c"]
             script_content = effective_code
-        # Prepend setup commands to the shell script body
-        if setup_prefix:
-            script_content = f"{setup_prefix}\n{script_content}"
+            if setup_prefix:
+                script_content = f"{setup_prefix}\n{script_content}"
     elif test.language in ["cmd", "batch"]:
         shell_cmd = ["cmd", "/c"]
         script_content = effective_code
         if setup_prefix:
-            script_content = f"{setup_prefix}\n{script_content}"
+            # Use && so setup and code share the same cmd.exe session
+            lines = [l for l in effective_code.strip().splitlines() if l.strip()]
+            script_content = " && ".join([setup_prefix] + lines)
     elif test.language in ["powershell", "pwsh", "ps1"]:
         shell_cmd = ["powershell", "-Command"]
         script_content = effective_code
@@ -513,12 +522,18 @@ def run_test(
     else:
         # Default to shell execution
         if is_windows:
-            shell_cmd = ["powershell", "-Command"]
+            if setup_prefix:
+                shell_cmd = ["cmd", "/c"]
+                lines = [l for l in effective_code.strip().splitlines() if l.strip()]
+                script_content = " && ".join([setup_prefix] + lines)
+            else:
+                shell_cmd = ["powershell", "-Command"]
+                script_content = effective_code
         else:
             shell_cmd = ["bash", "-c"]
-        script_content = effective_code
-        if setup_prefix:
-            script_content = f"{setup_prefix}\n{script_content}"
+            script_content = effective_code
+            if setup_prefix:
+                script_content = f"{setup_prefix}\n{script_content}"
 
     # Build the command
     if script_content is not None:
