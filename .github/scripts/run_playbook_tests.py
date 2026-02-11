@@ -671,7 +671,27 @@ def run_playbook_tests(playbook_id: str, platform: str) -> bool:
     suite = PlaybookTestSuite(playbook_id=playbook_id, tests=tests)
     all_passed = True
 
+    skip_remaining = False
+
     for test in tests:
+        if skip_remaining:
+            print(f"\n{'='*60}")
+            print(f"Skipping test: {test.id} (previous test failed)")
+            print(f"{'='*60}")
+            suite.results.append(
+                TestResult(
+                    test_id=test.id,
+                    success=False,
+                    exit_code=-1,
+                    stdout="",
+                    stderr="",
+                    duration=0.0,
+                    error_message="Skipped due to previous test failure",
+                    skipped=True,
+                )
+            )
+            continue
+
         result = run_test(test, playbook_path, results_dir)
         suite.results.append(result)
 
@@ -682,6 +702,10 @@ def run_playbook_tests(playbook_id: str, platform: str) -> bool:
                 )
             else:
                 all_passed = False
+                skip_remaining = True
+                print(
+                    f"\nTest '{test.id}' failed — skipping remaining tests in this playbook."
+                )
 
     # Write summary
     summary = {
