@@ -502,8 +502,8 @@ def run_test(
         if setup_prefix:
             # Wrap in a shell so setup commands (e.g. venv activation) run first
             if is_windows:
-                shell_cmd = ["powershell", "-Command"]
-                script_content = f'{setup_prefix}; python "{script_file}"'
+                shell_cmd = ["cmd", "/c"]
+                script_content = f'{setup_prefix} && python "{script_file}"'
             else:
                 shell_cmd = ["bash", "-c"]
                 script_content = f'{setup_prefix} && python "{script_file}"'
