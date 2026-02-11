@@ -1,3 +1,6 @@
+
+> **🚧 Work in Progress:** This playbook is still under active development. A follow-up PR will migrate from Docker to vLLM wheels.
+
 # High-Performance LLM Inference with vLLM
 
 ## Overview
