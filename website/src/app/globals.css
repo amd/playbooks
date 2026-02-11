@@ -868,10 +868,10 @@ body {
   gap: 4px;
   padding: 2px 10px;
   margin-left: 6px;
-  border: 1px solid rgba(248, 113, 113, 0.3);
+  border: 1px solid rgba(150, 150, 150, 0.3);
   border-radius: 10px;
-  background: rgba(127, 29, 29, 0.4);
-  color: #f87171;
+  background: rgba(80, 80, 80, 0.25);
+  color: #888;
   font-size: 0.625rem;
   font-weight: 600;
   font-family: inherit;
@@ -881,14 +881,15 @@ body {
 }
 
 .tc-logs-btn:hover {
-  background: rgba(127, 29, 29, 0.7);
-  border-color: rgba(248, 113, 113, 0.6);
-  color: #fca5a5;
+  background: rgba(80, 80, 80, 0.45);
+  border-color: rgba(150, 150, 150, 0.5);
+  color: #aaa;
 }
 
 .tc-logs-btn.tc-logs-btn-active {
-  background: rgba(127, 29, 29, 0.7);
-  border-color: #f87171;
+  background: rgba(80, 80, 80, 0.45);
+  border-color: #888;
+  color: #aaa;
 }
 
 .tc-logs-btn:disabled {
@@ -900,8 +901,8 @@ body {
   display: inline-block;
   width: 10px;
   height: 10px;
-  border: 2px solid rgba(248, 113, 113, 0.3);
-  border-top-color: #f87171;
+  border: 2px solid rgba(150, 150, 150, 0.3);
+  border-top-color: #888;
   border-radius: 50%;
   animation: tc-spin 0.6s linear infinite;
 }

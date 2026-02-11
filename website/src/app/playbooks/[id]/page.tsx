@@ -676,8 +676,8 @@ function TestCoverageBlock({
     else { resultStatus = "fail"; resultLabel = "Failed"; }
   }
 
-  // Show logs button for failed or skipped tests
-  const showLogsButton = testResult && !testResult.success;
+  // Show logs button for all tests that have results
+  const showLogsButton = !!testResult;
 
   const handleViewLogs = useCallback(async () => {
     if (logsOpen) {
