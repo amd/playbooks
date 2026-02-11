@@ -1,0 +1,12 @@
+{
+  "id": "local-foundry",
+  "title": "Local Foundry",
+  "description": "Set up and use Local Foundry on your STX Halo™",
+  "time": 60,
+  "platforms": ["linux", "windows"],
+  "difficulty": "intermediate",
+  "isNew": true,
+  "isFeatured": false,
+  "published": true,
+  "tags": ["foundry", "local", "llm"]
+}

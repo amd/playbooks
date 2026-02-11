@@ -1,0 +1,19 @@
+name: Test Playbooks
+
+on:
+  workflow_dispatch:
+    inputs:
+      playbook_id:
+        description: 'Specific playbook ID to test (leave empty to test all changed playbooks)'
+        required: false
+        type: string
+  pull_request:
+    paths:
+      - 'playbooks/**'
+
+jobs:
+  test-placeholder-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: echo "Placeholder test job"

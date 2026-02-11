@@ -1,0 +1,12 @@
+{
+  "id": "lemonade-getting-started",
+  "title": "Using Lemonade Across CPU, GPU, and NPU",
+  "description": "Learn how to use Lemonade framework across CPU, GPU, and NPU on your STX Halo™",
+  "time": 60,
+  "platforms": ["linux", "windows"],
+  "difficulty": "intermediate",
+  "isNew": true,
+  "isFeatured": false,
+  "published": true,
+  "tags": ["lemonade", "cpu", "gpu", "npu", "inference"]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "cvml",
+  "title": "Local Perception Capability with CVML SDK",
+  "description": "Build local perception capabilities using CVML SDK on top of RyzenAI and ROCm",
+  "time": 60,
+  "platforms": ["linux", "windows"],
+  "difficulty": "intermediate",
+  "isNew": true,
+  "isFeatured": false,
+  "published": true,
+  "tags": ["cvml", "perception", "ryzenai", "rocm"]
+}

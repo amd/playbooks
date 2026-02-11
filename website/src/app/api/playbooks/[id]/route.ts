@@ -14,6 +14,12 @@ interface DependencyRegistry {
     platforms: string[];
     file: string;
   }>;
+  setup?: Record<string, {
+    name: string;
+    description: string;
+    platforms: string[];
+    file: string;
+  }>;
 }
 
 /**
@@ -53,6 +59,30 @@ function loadDependencyContent(dependencyId: string): string | null {
     return fs.readFileSync(filePath, "utf-8");
   } catch (error) {
     console.error(`Error loading dependency ${dependencyId}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Loads a setup step's markdown content
+ */
+function loadSetupContent(setupId: string): string | null {
+  const registry = loadDependencyRegistry();
+  if (!registry || !registry.setup || !registry.setup[setupId]) {
+    return null;
+  }
+  
+  const setup = registry.setup[setupId];
+  const filePath = path.join(DEPENDENCIES_ROOT, setup.file);
+  
+  if (!fs.existsSync(filePath)) {
+    return null;
+  }
+  
+  try {
+    return fs.readFileSync(filePath, "utf-8");
+  } catch (error) {
+    console.error(`Error loading setup ${setupId}:`, error);
     return null;
   }
 }
@@ -102,6 +132,51 @@ function processRequireTags(content: string): string {
   });
 }
 
+/**
+ * Transforms @setup tags into @setup-content blocks with setup step content
+ * 
+ * Syntax: 
+ *   <!-- @setup:setup-id -->           (single setup step)
+ *   <!-- @setup:setup1,setup2 -->      (multiple setup steps)
+ * 
+ * This allows playbooks to reference shared system setup/configuration instructions
+ * from the central dependencies folder. Unlike @require (for pre-installed software),
+ * @setup is for configuration steps users need to perform.
+ */
+function processSetupTags(content: string): string {
+  // Match @setup with one or more comma-separated setup IDs (supports underscores and hyphens)
+  const setupPattern = /<!-- @setup:([a-z0-9_-]+(?:,[a-z0-9_-]+)*) -->/g;
+  
+  return content.replace(setupPattern, (_match, setupIds: string) => {
+    // Split by comma and trim whitespace
+    const ids = setupIds.split(',').map((id: string) => id.trim()).filter(Boolean);
+    
+    const contents: string[] = [];
+    const notFound: string[] = [];
+    
+    for (const setupId of ids) {
+      const setupContent = loadSetupContent(setupId);
+      if (setupContent) {
+        contents.push(setupContent);
+      } else {
+        notFound.push(setupId);
+      }
+    }
+    
+    if (notFound.length > 0) {
+      console.warn(`Setup steps not found: ${notFound.join(', ')}`);
+    }
+    
+    if (contents.length === 0) {
+      return `<!-- Setup steps "${setupIds}" not found -->`;
+    }
+    
+    // Combine all setup contents with a separator and wrap in @setup-content tags
+    const combinedContent = contents.join('\n\n---\n\n');
+    return `<!-- @setup-content -->\n${combinedContent}\n<!-- @setup-content:end -->`;
+  });
+}
+
 function getCategory(categoryFolder: string): Category {
   if (categoryFolder === "core") return "core";
   if (categoryFolder === "supplemental") return "supplemental";
@@ -141,6 +216,8 @@ function findPlaybook(id: string): Playbook | null {
             content = fs.readFileSync(readmePath, "utf-8");
             // Process @require tags to inject shared dependency content
             content = processRequireTags(content);
+            // Process @setup tags to inject shared setup/configuration content
+            content = processSetupTags(content);
           }
 
           const playbook: Playbook = {

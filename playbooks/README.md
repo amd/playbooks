@@ -84,23 +84,31 @@ Linux-only content
 
 Content outside `@os` tags is always shown. Keep blocks focused—only tag the parts that differ.
 
-### Pre-installed Software Dropdowns
+### Shared Content Tags
 
-For software that comes pre-installed on the AMD Halo Developer Platform, use the `@require` tag to reference installation instructions from the central `dependencies/` folder:
+Use these tags to pull in shared content from `playbooks/dependencies/`. Both reference items defined in `registry.json`.
+
+| Tag | Purpose | Display |
+|-----|---------|---------|
+| `@require` | Pre-installed software | Collapsible dropdown (optional info) |
+| `@setup` | System configuration steps | Displayed directly (required steps) |
+
+**Pre-installed software** — Use `@require` for software that comes pre-installed on the AMD Halo Developer Platform:
 
 ```markdown
 <!-- @require:comfyui -->
+<!-- @require:comfyui,pytorch -->   <!-- multiple dependencies in one dropdown -->
 ```
 
-For multiple dependencies, use comma-separated IDs to combine them into a **single dropdown**:
+Displays a green checkmark with "Already pre-installed on your AMD Halo Developer Platform!" that expands to show manual installation instructions.
+
+**System setup** — Use `@setup` for configuration steps users need to perform:
 
 ```markdown
-<!-- @require:comfyui,pytorch -->
+<!-- @setup:memory_config -->
 ```
 
-Available dependencies are defined in `playbooks/dependencies/registry.json`. Each dependency has its own markdown file with OS-specific installation instructions.
-
-The dropdown displays with a green checkmark and the text "Already pre-installed on your AMD Halo Developer Platform!" When expanded, it shows a notice explaining the software is pre-configured, followed by manual installation instructions.
+Content displays directly since these are required steps, not optional reference info.
 
 ### Writing Tips
 

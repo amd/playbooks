@@ -5,13 +5,110 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ImageLightbox from "@/components/ImageLightbox";
+import CodeLightbox from "@/components/CodeLightbox";
 import type { Playbook, Platform } from "@/types/playbook";
 import { formatTime } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
 const dropdownStateStore: Record<string, boolean> = {};
+
+// Languages that support syntax highlighting
+const HIGHLIGHTED_LANGUAGES = new Set(["python", "py", "bash", "sh", "shell", "c", "cpp", "c++"]);
+
+// Map language aliases to their canonical names for the highlighter
+function normalizeLanguage(lang: string): string {
+  const langMap: Record<string, string> = {
+    "py": "python",
+    "sh": "bash",
+    "shell": "bash",
+    "c++": "cpp",
+  };
+  return langMap[lang] || lang;
+}
+
+/**
+ * Code block component with copy-to-clipboard functionality and syntax highlighting
+ */
+function CodeBlock({ children, language }: { children?: React.ReactNode; language?: string }) {
+  const [copied, setCopied] = useState(false);
+  const preRef = useRef<HTMLPreElement>(null);
+
+  // Extract the code string from children
+  const codeString = useMemo(() => {
+    if (typeof children === "string") return children;
+    // If children is a React element (code tag), extract its children
+    if (children && typeof children === "object" && "props" in children) {
+      const childElement = children as React.ReactElement<{ children?: React.ReactNode }>;
+      const codeChildren = childElement.props?.children;
+      if (typeof codeChildren === "string") return codeChildren;
+    }
+    return "";
+  }, [children]);
+
+  const handleCopy = useCallback(async () => {
+    const code = codeString || preRef.current?.textContent || "";
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy code:", err);
+    }
+  }, [codeString]);
+
+  // Check if we should use syntax highlighting
+  const normalizedLang = language ? normalizeLanguage(language.toLowerCase()) : "";
+  const shouldHighlight = normalizedLang && HIGHLIGHTED_LANGUAGES.has(language?.toLowerCase() || "");
+
+  return (
+    <div className="code-block-wrapper">
+      <button
+        className="code-copy-button"
+        onClick={handleCopy}
+        aria-label={copied ? "Copied!" : "Copy code"}
+        title={copied ? "Copied!" : "Copy code"}
+      >
+        {copied ? (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        ) : (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        )}
+      </button>
+      {shouldHighlight && codeString ? (
+        <SyntaxHighlighter
+          language={normalizedLang}
+          style={oneDark}
+          customStyle={{
+            margin: 0,
+            padding: "1rem",
+            borderRadius: "0.5rem",
+            fontSize: "0.875rem",
+            background: "#0a0a0a",
+          }}
+          codeTagProps={{
+            style: {
+              fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+            }
+          }}
+        >
+          {codeString.replace(/\n$/, "")}
+        </SyntaxHighlighter>
+      ) : (
+        <pre ref={preRef} className="code-block">{children}</pre>
+      )}
+    </div>
+  );
+}
 
 /**
  * Collapsible dropdown component for pre-installed software on AMD Halo
@@ -19,10 +116,14 @@ const dropdownStateStore: Record<string, boolean> = {};
  */
 function HaloPreinstalledDropdown({ 
   content, 
-  dropdownId
+  dropdownId,
+  playbookId,
+  onImageClick
 }: { 
   content: string;
   dropdownId: string;
+  playbookId: string;
+  onImageClick: (image: { src: string; alt: string }) => void;
 }) {
   // Initialize from global store, use local state for rendering
   const [isOpen, setIsOpen] = useState(() => dropdownStateStore[dropdownId] ?? false);
@@ -78,14 +179,65 @@ function HaloPreinstalledDropdown({
                   {children}
                 </a>
               ),
-              code: ({ className, children }) => {
-                const isInline = !className;
-                if (isInline) {
+              img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+                const { src, alt } = props;
+                // Transform relative paths to use the API route
+                let imageSrc = typeof src === "string" ? src : "";
+                if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+                  imageSrc = `/api/playbooks/${playbookId}/${imageSrc}`;
+                }
+                return (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img 
+                    src={imageSrc} 
+                    alt={alt || ""} 
+                    className="rounded-lg max-w-full h-auto mx-auto my-6"
+                    onClick={() => onImageClick({ src: imageSrc, alt: alt || "" })}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onImageClick({ src: imageSrc, alt: alt || "" });
+                      }
+                    }}
+                  />
+                );
+              },
+              code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
+                // Inline code (no className)
+                if (!className) {
                   return <code className="inline-code">{children}</code>;
                 }
+                // Block code - just return the code element, let pre handle the wrapper
                 return <code className={className}>{children}</code>;
               },
-              pre: ({ children }) => <pre className="code-block">{children}</pre>,
+              pre: ({ children }: { children?: React.ReactNode }) => {
+                // Extract language from the code child's className
+                let language: string | undefined;
+                let codeContent: React.ReactNode = children;
+                
+                if (children && typeof children === "object" && "props" in children) {
+                  const codeElement = children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
+                  const className = codeElement.props?.className;
+                  if (className) {
+                    const match = /language-(\w+)/.exec(className);
+                    language = match ? match[1] : undefined;
+                  }
+                  codeContent = codeElement.props?.children;
+                }
+                
+                // Use CodeBlock with language for syntax highlighting
+                if (language && HIGHLIGHTED_LANGUAGES.has(language.toLowerCase())) {
+                  return (
+                    <CodeBlock language={language}>
+                      {String(codeContent).replace(/\n$/, "")}
+                    </CodeBlock>
+                  );
+                }
+                
+                return <CodeBlock>{children}</CodeBlock>;
+              },
               hr: () => <hr className="md-hr" />,
               table: ({ children }) => <table className="md-table">{children}</table>,
               thead: ({ children }) => <thead className="md-thead">{children}</thead>,
@@ -100,6 +252,111 @@ function HaloPreinstalledDropdown({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Setup content component for system configuration steps
+ * Displays setup instructions directly (not collapsible) since these are required steps
+ */
+function HaloSetupContent({ 
+  content,
+  playbookId,
+  onImageClick
+}: { 
+  content: string;
+  playbookId: string;
+  onImageClick: (image: { src: string; alt: string }) => void;
+}) {
+  return (
+    <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
+        components={{
+          h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
+          h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
+          h3: ({ children }) => <h3 className="md-h3">{children}</h3>,
+          h4: ({ children }) => <h4 className="md-h4">{children}</h4>,
+          p: ({ children }) => <p className="md-p">{children}</p>,
+          ul: ({ children }) => <ul className="md-ul">{children}</ul>,
+          ol: ({ children }) => <ol className="md-ol">{children}</ol>,
+          li: ({ children }) => <li className="md-li">{children}</li>,
+          blockquote: ({ children }) => <blockquote className="md-blockquote">{children}</blockquote>,
+          a: ({ href, children }) => (
+            <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
+              {children}
+            </a>
+          ),
+          img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+            const { src, alt } = props;
+            // Transform relative paths to use the API route
+            let imageSrc = typeof src === "string" ? src : "";
+            if (imageSrc && !imageSrc.startsWith("http") && !imageSrc.startsWith("/")) {
+              imageSrc = `/api/playbooks/${playbookId}/${imageSrc}`;
+            }
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img 
+                src={imageSrc} 
+                alt={alt || ""} 
+                className="rounded-lg max-w-full h-auto mx-auto my-6"
+                onClick={() => onImageClick({ src: imageSrc, alt: alt || "" })}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onImageClick({ src: imageSrc, alt: alt || "" });
+                  }
+                }}
+              />
+            );
+          },
+          code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
+            // Inline code (no className)
+            if (!className) {
+              return <code className="inline-code">{children}</code>;
+            }
+            // Block code - just return the code element, let pre handle the wrapper
+            return <code className={className}>{children}</code>;
+          },
+          pre: ({ children }: { children?: React.ReactNode }) => {
+            // Extract language from the code child's className
+            let language: string | undefined;
+            let codeContent: React.ReactNode = children;
+            
+            if (children && typeof children === "object" && "props" in children) {
+              const codeElement = children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
+              const className = codeElement.props?.className;
+              if (className) {
+                const match = /language-(\w+)/.exec(className);
+                language = match ? match[1] : undefined;
+              }
+              codeContent = codeElement.props?.children;
+            }
+            
+            // Use CodeBlock with language for syntax highlighting
+            if (language && HIGHLIGHTED_LANGUAGES.has(language.toLowerCase())) {
+              return (
+                <CodeBlock language={language}>
+                  {String(codeContent).replace(/\n$/, "")}
+                </CodeBlock>
+              );
+            }
+            
+            return <CodeBlock>{children}</CodeBlock>;
+          },
+          hr: () => <hr className="md-hr" />,
+          table: ({ children }) => <table className="md-table">{children}</table>,
+          thead: ({ children }) => <thead className="md-thead">{children}</thead>,
+          tbody: ({ children }) => <tbody className="md-tbody">{children}</tbody>,
+          tr: ({ children }) => <tr className="md-tr">{children}</tr>,
+          th: ({ children }) => <th className="md-th">{children}</th>,
+          td: ({ children }) => <td className="md-td">{children}</td>,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
   );
 }
 
@@ -244,6 +501,26 @@ function transformPreinstalledBlocks(content: string): string {
   });
 }
 
+/**
+ * Transforms @setup-content tags into setup instruction blocks
+ * 
+ * Tags supported:
+ * <!-- @setup-content --> ... <!-- @setup-content:end -->
+ * 
+ * Unlike @preinstalled (which is collapsible since it's optional info),
+ * setup content is displayed directly as required configuration steps.
+ */
+function transformSetupBlocks(content: string): string {
+  if (!content) return "";
+  
+  const setupPattern = /<!-- @setup-content -->([\s\S]*?)<!-- @setup-content:end -->/g;
+  
+  return content.replace(setupPattern, (_match, innerContent) => {
+    const escapedContent = innerContent.trim();
+    return `<div class="halo-setup-content" data-content="${encodeURIComponent(escapedContent)}"></div>`;
+  });
+}
+
 function PlatformToggle({ 
   platforms, 
   selected, 
@@ -299,6 +576,8 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
   const [error, setError] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
   const [activeHeading, setActiveHeading] = useState<string>("");
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
+  const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
   const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
@@ -334,10 +613,12 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     fetchPlaybook();
   }, [id]);
 
-  // Transform relative image paths to API routes, filter by OS, and transform preinstalled blocks
+  // Transform relative image paths to API routes, filter by OS, and transform preinstalled/setup blocks
   const filteredContent = playbook?.content 
-    ? transformPreinstalledBlocks(
-        filterContentByOS(playbook.content, selectedPlatform)
+    ? transformSetupBlocks(
+        transformPreinstalledBlocks(
+          filterContentByOS(playbook.content, selectedPlatform)
+        )
       )
         // Transform relative image paths in HTML img tags to use the API route
         .replace(/src=["'](?!https?:\/\/|\/)(.*?)["']/g, `src="/api/playbooks/${id}/$1"`)
@@ -373,11 +654,48 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     ol: ({ children }: { children?: React.ReactNode }) => <ol className="md-ol">{children}</ol>,
     li: ({ children }: { children?: React.ReactNode }) => <li className="md-li">{children}</li>,
     blockquote: ({ children }: { children?: React.ReactNode }) => <blockquote className="md-blockquote">{children}</blockquote>,
-    a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
-      <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
-        {children}
-      </a>
-    ),
+    a: ({ href, children }: { href?: string; children?: React.ReactNode }) => {
+      // Check if this is a link to a code file in the assets folder
+      const isAssetCodeFile = href && 
+        href.startsWith("assets/") && 
+        /\.(py|js|ts|tsx|jsx|json|yaml|yml|sh|bash|css|html|xml|sql|rs|go|java|cpp|c|h|hpp|txt)$/i.test(href);
+      
+      if (isAssetCodeFile) {
+        const filename = href.split("/").pop() || href;
+        return (
+          <button
+            onClick={async (e) => {
+              e.preventDefault();
+              try {
+                // Fetch the code file from the API
+                const response = await fetch(`/api/playbooks/${id}/${href}`);
+                if (response.ok) {
+                  const code = await response.text();
+                  setCodeLightbox({ filename, code });
+                } else {
+                  console.error("Failed to fetch code file:", response.status);
+                }
+              } catch (err) {
+                console.error("Failed to fetch code file:", err);
+              }
+            }}
+            className="md-link inline-flex items-center gap-1 cursor-pointer hover:underline"
+            title={`Preview ${filename}`}
+          >
+            <svg className="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            {children}
+          </button>
+        );
+      }
+      
+      return (
+        <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
+          {children}
+        </a>
+      );
+    },
     img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
       const { src, alt } = props;
       // Transform relative paths to use the API route
@@ -391,23 +709,52 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
           src={imageSrc} 
           alt={alt || ""} 
           className="rounded-lg max-w-full h-auto mx-auto my-6"
+          onClick={() => setLightboxImage({ src: imageSrc, alt: alt || "" })}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setLightboxImage({ src: imageSrc, alt: alt || "" });
+            }
+          }}
         />
       );
     },
     code: ({ className, children }: { className?: string; children?: React.ReactNode }) => {
-      const isInline = !className;
-      if (isInline) {
+      // Inline code (no className)
+      if (!className) {
         return <code className="inline-code">{children}</code>;
       }
-      return (
-        <code className={className}>
-          {children}
-        </code>
-      );
+      // Block code - just return the code element, let pre handle the wrapper
+      return <code className={className}>{children}</code>;
     },
-    pre: ({ children }: { children?: React.ReactNode }) => (
-      <pre className="code-block">{children}</pre>
-    ),
+    pre: ({ children }: { children?: React.ReactNode }) => {
+      // Extract language from the code child's className
+      let language: string | undefined;
+      let codeContent: React.ReactNode = children;
+      
+      if (children && typeof children === "object" && "props" in children) {
+        const codeElement = children as React.ReactElement<{ className?: string; children?: React.ReactNode }>;
+        const className = codeElement.props?.className;
+        if (className) {
+          const match = /language-(\w+)/.exec(className);
+          language = match ? match[1] : undefined;
+        }
+        codeContent = codeElement.props?.children;
+      }
+      
+      // Use CodeBlock with language for syntax highlighting
+      if (language && HIGHLIGHTED_LANGUAGES.has(language.toLowerCase())) {
+        return (
+          <CodeBlock language={language}>
+            {String(codeContent).replace(/\n$/, "")}
+          </CodeBlock>
+        );
+      }
+      
+      return <CodeBlock>{children}</CodeBlock>;
+    },
     hr: () => <hr className="md-hr" />,
     table: ({ children }: { children?: React.ReactNode }) => <table className="md-table">{children}</table>,
     thead: ({ children }: { children?: React.ReactNode }) => <thead className="md-thead">{children}</thead>,
@@ -428,13 +775,29 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
             <HaloPreinstalledDropdown 
               content={decodedContent} 
               dropdownId={dropdownId}
+              playbookId={id}
+              onImageClick={setLightboxImage}
+            />
+          );
+        }
+      }
+      // Handle the halo-setup-content custom element
+      if (className === 'halo-setup-content') {
+        const dataContent = props['data-content'];
+        if (dataContent) {
+          const decodedContent = decodeURIComponent(dataContent);
+          return (
+            <HaloSetupContent 
+              content={decodedContent}
+              playbookId={id}
+              onImageClick={setLightboxImage}
             />
           );
         }
       }
       return <div className={className} {...rest} />;
     },
-  }), [id]);
+  }), [id, setLightboxImage]);
 
   // Handle clicking a TOC link - scroll and immediately set active
   const handleTocClick = (targetId: string) => {
@@ -523,7 +886,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
       <Header />
       
       <div className="pt-24 pb-16 px-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Back Link */}
           <Link 
             href="/#playbooks" 
@@ -682,6 +1045,22 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
       </div>
 
       <Footer />
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        src={lightboxImage?.src || ""}
+        alt={lightboxImage?.alt || ""}
+        isOpen={lightboxImage !== null}
+        onClose={() => setLightboxImage(null)}
+      />
+
+      {/* Code Lightbox */}
+      <CodeLightbox
+        filename={codeLightbox?.filename || ""}
+        code={codeLightbox?.code || ""}
+        isOpen={codeLightbox !== null}
+        onClose={() => setCodeLightbox(null)}
+      />
     </main>
   );
 }
