@@ -522,12 +522,20 @@ def run_test(
 
     # Build the command
     if script_content is not None:
-        cmd = shell_cmd + [script_content]
+        if shell_cmd == ["cmd", "/c"]:
+            # Pass as a single string so subprocess sends it directly to
+            # CreateProcess.  Using a list here would go through list2cmdline
+            # which escapes inner quotes with \" — but cmd.exe doesn't
+            # recognise \" as an escape, causing garbled file paths.
+            cmd = f"cmd /c {script_content}"
+        else:
+            cmd = shell_cmd + [script_content]
     else:
         cmd = shell_cmd
 
     print(f"Working directory: {workdir}")
-    print(f"Command: {' '.join(cmd[:2])}...")
+    cmd_preview = cmd if isinstance(cmd, str) else ' '.join(cmd[:2])
+    print(f"Command: {cmd_preview[:60]}...")
 
     # Display code with #hide lines annotated for coverage view
     display_lines = []

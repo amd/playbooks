@@ -59,6 +59,7 @@ This playbook includes ready-to-use scripts in the `assets/` folder (click to pr
 ```python
 import os
 import sys
+import ast
 
 # Check that required script files exist
 scripts = ['run_llm.py', 'summarizer.py', 'example_document.txt']
