@@ -11,8 +11,8 @@ const inter = localFont({
 
 
 export const metadata: Metadata = {
-  title: "STX Halo™ | AMD",
-  description: "Find instructions and examples to run AI workloads on AMD hardware",
+  title: "AMD Playbooks",
+  description: "Find instructions and examples to run AI workloads on AMD hardware — STX Halo, Kraken, and more",
   icons: {
     icon: "/amd-icon.svg",
   },

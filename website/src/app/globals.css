@@ -1260,3 +1260,40 @@ body {
   color: #fff;
   border-color: var(--ember-primary);
 }
+
+/* Device Carousel Animations */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.device-card-enter {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+
+.device-card-enter.from-right {
+  animation-name: slideInFromRight;
+}
+
+.device-card-enter.from-left {
+  animation-name: slideInFromLeft;
+}

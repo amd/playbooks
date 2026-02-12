@@ -64,13 +64,13 @@ export default function BuiltInModelsSection() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
                 </svg>
               </div>
-              <span className="text-emerald-400 text-sm font-medium uppercase tracking-wider">Pre-installed Models</span>
+              <span className="text-emerald-400 text-sm font-medium uppercase tracking-wider">Built-in Models</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
               Explore Built-in Models
             </h2>
             <p className="text-[#a0a0a0] text-lg max-w-2xl">
-              Ready-to-use AI models pre-installed on your STX Halo™ for immediate productivity
+              Ready-to-use AI models optimized for your AMD device
             </p>
           </div>
         </div>
