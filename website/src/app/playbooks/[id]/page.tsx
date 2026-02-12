@@ -11,7 +11,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
-import type { Playbook, Platform } from "@/types/playbook";
+import type { Playbook, Platform, TestCoverageInfo, TestResultInfo, PlaybookCoverageSummary } from "@/types/playbook";
 import { formatTime } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
@@ -118,12 +118,14 @@ function HaloPreinstalledDropdown({
   content, 
   dropdownId,
   playbookId,
-  onImageClick
+  onImageClick,
+  testCoverage,
 }: { 
   content: string;
   dropdownId: string;
   playbookId: string;
   onImageClick: (image: { src: string; alt: string }) => void;
+  testCoverage?: TestCoverageInfo;
 }) {
   // Initialize from global store, use local state for rendering
   const [isOpen, setIsOpen] = useState(() => dropdownStateStore[dropdownId] ?? false);
@@ -245,6 +247,26 @@ function HaloPreinstalledDropdown({
               tr: ({ children }) => <tr className="md-tr">{children}</tr>,
               th: ({ children }) => <th className="md-th">{children}</th>,
               td: ({ children }) => <td className="md-td">{children}</td>,
+              // Handle test-coverage-block markers inside dependency content
+              div: (divProps: React.HTMLAttributes<HTMLDivElement> & { 'data-test-id'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string }) => {
+                const { className: divClassName, ...divRest } = divProps;
+                if (divClassName === 'test-coverage-block') {
+                  const testId = divProps['data-test-id'] || '';
+                  const testInfo = testCoverage?.tests.find(t => t.id === testId);
+                  return (
+                    <TestCoverageBlock
+                      testId={testId}
+                      timeout={divProps['data-timeout'] || '300'}
+                      isHidden={divProps['data-hidden'] === 'true'}
+                      setup={divProps['data-setup'] || ''}
+                      code={decodeURIComponent(divProps['data-code'] || '')}
+                      testResult={testInfo?.result}
+                      playbookId={playbookId}
+                    />
+                  );
+                }
+                return <div className={divClassName} {...divRest} />;
+              },
             }}
           >
             {content}
@@ -442,6 +464,102 @@ function TableOfContents({
 }
 
 /**
+ * Coverage Sidebar — lists ALL playbooks with their test counts,
+ * grouped by category, matching the Python _test_preview.py layout.
+ * Replaces the "On this page" TOC when running in coverage mode.
+ */
+function CoverageSidebar({
+  currentPlaybookId,
+  allPlaybooks,
+  onToggleView,
+}: {
+  currentPlaybookId: string;
+  allPlaybooks: PlaybookCoverageSummary[];
+  onToggleView: () => void;
+}) {
+  // Group by category
+  const grouped = useMemo(() => {
+    const map: Record<string, PlaybookCoverageSummary[]> = {};
+    for (const p of allPlaybooks) {
+      if (!map[p.category]) map[p.category] = [];
+      map[p.category].push(p);
+    }
+    return map;
+  }, [allPlaybooks]);
+
+  // Global stats
+  const totalTests = allPlaybooks.reduce((s, p) => s + p.testCount, 0);
+  const withTests = allPlaybooks.filter(p => p.testCount > 0).length;
+  const total = allPlaybooks.length;
+
+  return (
+    <nav className="cov-sidebar">
+      {/* Header */}
+      <div className="cov-sidebar-header">
+        <svg className="cov-sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+        <span>Test Coverage</span>
+      </div>
+
+      {/* Global stats badges */}
+      <div className="cov-global-stats">
+        <span className="cov-global-badge cov-global-badge-green">{totalTests} total tests</span>
+        <span className={`cov-global-badge ${withTests < total ? "cov-global-badge-warn" : "cov-global-badge-green"}`}>
+          {withTests}/{total} playbooks tested
+        </span>
+      </div>
+
+      {/* Playbook list grouped by category */}
+      <div className="cov-pb-list">
+        {Object.entries(grouped).map(([category, playbooks]) => (
+          <div key={category}>
+            <div className="cov-pb-section">{category}</div>
+            {playbooks.map(p => (
+              <Link
+                key={p.id}
+                href={`/playbooks/${p.id}`}
+                className={`cov-pb-item ${p.id === currentPlaybookId ? "cov-pb-active" : ""}`}
+              >
+                <span className={`cov-pb-dot ${p.testCount > 0 ? "cov-pb-dot-tested" : "cov-pb-dot-untested"}`} />
+                <span className="cov-pb-title" title={p.title}>{p.title}</span>
+                <span className={`cov-pb-count ${p.testCount > 0 ? "cov-pb-count-has" : "cov-pb-count-none"}`}>
+                  {p.testCount}
+                </span>
+              </Link>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Toggle to user view */}
+      <button className="cov-toggle-btn" onClick={onToggleView}>
+        <svg className="cov-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        Switch to User View
+      </button>
+    </nav>
+  );
+}
+
+/**
+ * Small floating toggle shown in the TOC sidebar position when in user-view mode
+ * to allow switching back to coverage mode.
+ */
+function CoverageReturnToggle({ onToggle }: { onToggle: () => void }) {
+  return (
+    <button className="cov-return-toggle" onClick={onToggle}>
+      <svg className="cov-return-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      Show Coverage
+    </button>
+  );
+}
+
+/**
  * Parses markdown content and filters OS-specific sections
  * 
  * Tags supported:
@@ -521,6 +639,257 @@ function transformSetupBlocks(content: string): string {
   });
 }
 
+/**
+ * Test coverage badge block — renders a badge header on top of a code block.
+ * Only shown when running in dev:coverage mode.
+ * When a test fails, shows a "View Logs" button to inspect stdout/stderr.
+ */
+function TestCoverageBlock({
+  testId, timeout, isHidden, setup, code, testResult, playbookId,
+}: {
+  testId: string;
+  timeout: string;
+  isHidden: boolean;
+  setup: string;
+  code: string;
+  testResult?: TestResultInfo;
+  playbookId?: string;
+}) {
+  const [logsOpen, setLogsOpen] = useState(false);
+  const [logs, setLogs] = useState<{ stdout: string; stderr: string } | null>(null);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsError, setLogsError] = useState<string | null>(null);
+
+  // Parse the fenced code block: ```lang\ncontent\n```
+  const langMatch = code.match(/```(\w+)?\s*\n/);
+  const language = langMatch?.[1] || "";
+  const codeContent = code.replace(/```\w*\s*\n/, "").replace(/\n?```\s*$/, "");
+
+  // Detect lines marked with #hide (hidden from user view, visible in coverage)
+  const hasHideLines = codeContent.split('\n').some(line => line.trimEnd().endsWith('#hide'));
+
+  let resultStatus = "";
+  let resultLabel = "";
+  if (testResult) {
+    if (testResult.skipped) { resultStatus = "skip"; resultLabel = "Skipped"; }
+    else if (testResult.success) { resultStatus = "pass"; resultLabel = "Passed"; }
+    else { resultStatus = "fail"; resultLabel = "Failed"; }
+  }
+
+  // Show logs button for all tests that have results
+  const showLogsButton = !!testResult;
+
+  const handleViewLogs = useCallback(async () => {
+    if (logsOpen) {
+      setLogsOpen(false);
+      return;
+    }
+
+    // If logs already fetched, just toggle open
+    if (logs) {
+      setLogsOpen(true);
+      return;
+    }
+
+    // Fetch logs from API
+    if (!playbookId) return;
+    setLogsLoading(true);
+    setLogsError(null);
+
+    try {
+      const res = await fetch(`/api/playbooks/${playbookId}/logs/${testId}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setLogsError(data.error || "Failed to load logs");
+        setLogsOpen(true);
+        return;
+      }
+      const data = await res.json();
+      setLogs(data);
+      setLogsOpen(true);
+    } catch {
+      setLogsError("Failed to fetch logs");
+      setLogsOpen(true);
+    } finally {
+      setLogsLoading(false);
+    }
+  }, [logsOpen, logs, playbookId, testId]);
+
+  return (
+    <div className={`tc-block ${isHidden ? "tc-hidden" : ""} ${resultStatus ? `tc-result-${resultStatus}` : ""}`}>
+      <div className={`tc-badge-header ${isHidden ? "tc-badge-hidden" : ""} ${resultStatus === "fail" ? "tc-badge-fail" : ""} ${resultStatus === "skip" ? "tc-badge-skip" : ""}`}>
+        <span className={`tc-pill tc-pill-label ${isHidden ? "tc-pill-label-hidden" : ""}`}>
+          {isHidden ? "👁 Hidden Test" : "✓ Tested"}
+        </span>
+        <span className="tc-pill tc-pill-id">{testId}</span>
+        <span className="tc-pill tc-pill-timeout">⏱ {timeout}s</span>
+        {setup && (
+          <span className="tc-pill tc-pill-setup">⚙ {setup}</span>
+        )}
+        {showLogsButton && (
+          <button
+            className={`tc-logs-btn ${logsOpen ? "tc-logs-btn-active" : ""}`}
+            onClick={handleViewLogs}
+            disabled={logsLoading}
+            title={logsOpen ? "Hide logs" : "View test logs"}
+          >
+            {logsLoading ? (
+              <span className="tc-logs-spinner" />
+            ) : (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+            )}
+            {logsOpen ? "Hide Logs" : "View Logs"}
+          </button>
+        )}
+        {testResult && (
+          <span className={`tc-pill tc-pill-result tc-pill-result-${resultStatus}`}>
+            {resultLabel}{testResult.duration ? ` (${testResult.duration.toFixed(1)}s)` : ""}
+          </span>
+        )}
+      </div>
+      {/* Collapsible log viewer */}
+      {logsOpen && (
+        <div className="tc-logs-panel">
+          {logsError && !logs ? (
+            <div className="tc-logs-error">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              {logsError}
+            </div>
+          ) : (
+            <>
+              {testResult?.error && (
+                <div className="tc-logs-error-message">
+                  <span className="tc-logs-section-label">Error</span>
+                  <pre className="tc-logs-pre">{testResult.error}</pre>
+                </div>
+              )}
+              {logs?.stderr && (
+                <div className="tc-logs-section tc-logs-stderr">
+                  <span className="tc-logs-section-label">stderr</span>
+                  <pre className="tc-logs-pre">{logs.stderr}</pre>
+                </div>
+              )}
+              {logs?.stdout && (
+                <div className="tc-logs-section tc-logs-stdout">
+                  <span className="tc-logs-section-label">stdout</span>
+                  <pre className="tc-logs-pre">{logs.stdout}</pre>
+                </div>
+              )}
+              {logs && !logs.stdout && !logs.stderr && !testResult?.error && (
+                <div className="tc-logs-empty">No log output available for this test.</div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+      {hasHideLines ? (
+        <div className="code-block-wrapper">
+          <pre className="code-block tc-code-with-hide">
+            <code>{codeContent.split('\n').map((line, i) => {
+              const isHideLine = line.trimEnd().endsWith('#hide');
+              const cleanLine = isHideLine ? line.replace(/\s*#hide\s*$/, '') : line;
+              return (
+                <div key={i} className={`tc-line ${isHideLine ? 'tc-line-hidden' : ''}`}>
+                  {isHideLine && <span className="tc-hide-label">hidden</span>}
+                  {cleanLine}
+                </div>
+              );
+            })}</code>
+          </pre>
+        </div>
+      ) : (
+        <CodeBlock language={language}>{codeContent}</CodeBlock>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Setup definition block — renders a visible badge for @setup:id=... definitions.
+ * Only shown in coverage view; hidden in user view (like hidden test blocks).
+ * Shows the setup step name and the command it expands to.
+ */
+function SetupDefinitionBlock({
+  setupId,
+  command,
+}: {
+  setupId: string;
+  command: string;
+}) {
+  return (
+    <div className="tc-block tc-setup-def">
+      <div className="tc-badge-header tc-badge-setup">
+        <span className="tc-pill tc-pill-label tc-pill-label-setup">⚙ Hidden Setup Definition</span>
+        <span className="tc-pill tc-pill-id">{setupId}</span>
+      </div>
+      {command && (
+        <div className="tc-setup-commands">
+          <div className="tc-setup-cmd">
+            <code className="tc-setup-code">{command}</code>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Stats bar showing test coverage summary for the playbook.
+ * Only shown when running in dev:coverage mode.
+ */
+function TestCoverageStatsBar({ coverage }: { coverage: TestCoverageInfo }) {
+  const covPct = coverage.totalCodeBlocks > 0
+    ? Math.round((coverage.visibleTestCount / coverage.totalCodeBlocks) * 100)
+    : 0;
+  const covClass = covPct >= 60 ? "" : covPct >= 30 ? "tc-cov-mid" : "tc-cov-low";
+
+  return (
+    <div className="tc-stats-container">
+      {/* Stats row */}
+      <div className="tc-stats-bar">
+        <span className="tc-stat tc-stat-green"><strong>{coverage.visibleTestCount}</strong> visible tests</span>
+        <span className="tc-stat tc-stat-purple"><strong>{coverage.hiddenTestCount}</strong> hidden tests</span>
+        <span className="tc-stat"><strong>{coverage.totalCodeBlocks}</strong> code blocks</span>
+        <span className="tc-stat-divider" />
+        <span className={`tc-stat-coverage ${covClass}`}>{covPct}% coverage</span>
+      </div>
+      {/* Results row */}
+      {coverage.resultsSummary && (
+        <div className="tc-results-bar">
+          <span className="tc-results-label">Last Run:</span>
+          <span className="tc-results-pill tc-results-pass">{coverage.resultsSummary.passed} passed</span>
+          <span className="tc-results-pill tc-results-fail">{coverage.resultsSummary.failed} failed</span>
+          <span className="tc-results-pill tc-results-skip">{coverage.resultsSummary.skipped} skipped</span>
+        </div>
+      )}
+      {/* Legend */}
+      <div className="tc-legend">
+        <span className="tc-legend-title">Legend:</span>
+        <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-tested" /> Tested (visible)</span>
+        <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-hidden" /> Hidden test</span>
+        <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-untested" /> Not tested</span>
+        {coverage.resultsSummary && (
+          <>
+            <span className="tc-legend-sep">|</span>
+            <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-pass" /> Passed</span>
+            <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-fail" /> Failed</span>
+            <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-skip" /> Skipped</span>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PlatformToggle({ 
   platforms, 
   selected, 
@@ -578,6 +947,10 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
+  // Coverage view toggle — true = show coverage badges & sidebar; false = normal user view
+  const [coverageViewActive, setCoverageViewActive] = useState<boolean>(true);
+  // All-playbooks coverage data for the sidebar (fetched once when in coverage mode)
+  const [coveragePlaybooks, setCoveragePlaybooks] = useState<PlaybookCoverageSummary[]>([]);
   const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
@@ -612,6 +985,15 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     }
     fetchPlaybook();
   }, [id]);
+
+  // Fetch all-playbooks coverage summary when we detect coverage mode
+  useEffect(() => {
+    if (!playbook?.testCoverage) return;
+    fetch("/api/playbooks/coverage")
+      .then(r => r.json())
+      .then((data: PlaybookCoverageSummary[]) => setCoveragePlaybooks(data))
+      .catch(() => {/* ignore */});
+  }, [playbook?.testCoverage]);
 
   // Transform relative image paths to API routes, filter by OS, and transform preinstalled/setup blocks
   const filteredContent = playbook?.content 
@@ -762,8 +1144,17 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     tr: ({ children }: { children?: React.ReactNode }) => <tr className="md-tr">{children}</tr>,
     th: ({ children }: { children?: React.ReactNode }) => <th className="md-th">{children}</th>,
     td: ({ children }: { children?: React.ReactNode }) => <td className="md-td">{children}</td>,
-    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string }) => {
+    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-command'?: string }) => {
       const { className, ...rest } = props;
+      // Handle setup-def-block (coverage mode — inline @setup:id=... definitions)
+      if (className === 'setup-def-block') {
+        return (
+          <SetupDefinitionBlock
+            setupId={props['data-setup-id'] || ''}
+            command={decodeURIComponent(props['data-command'] || '')}
+          />
+        );
+      }
       // Handle the halo-preinstalled-dropdown custom element
       if (className === 'halo-preinstalled-dropdown') {
         const dataContent = props['data-content'];
@@ -777,6 +1168,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
               dropdownId={dropdownId}
               playbookId={id}
               onImageClick={setLightboxImage}
+              testCoverage={playbook?.testCoverage}
             />
           );
         }
@@ -795,9 +1187,25 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
           );
         }
       }
+      // Handle test-coverage-block (dev:coverage mode only)
+      if (className === 'test-coverage-block') {
+        const testId = props['data-test-id'] || '';
+        const testInfo = playbook?.testCoverage?.tests.find(t => t.id === testId);
+        return (
+          <TestCoverageBlock
+            testId={testId}
+            timeout={props['data-timeout'] || '300'}
+            isHidden={props['data-hidden'] === 'true'}
+            setup={props['data-setup'] || ''}
+            code={decodeURIComponent(props['data-code'] || '')}
+            testResult={testInfo?.result}
+            playbookId={id}
+          />
+        );
+      }
       return <div className={className} {...rest} />;
     },
-  }), [id, setLightboxImage]);
+  }), [id, setLightboxImage, playbook?.testCoverage]);
 
   // Handle clicking a TOC link - scroll and immediately set active
   const handleTocClick = (targetId: string) => {
@@ -995,23 +1403,42 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                 )}
               </div>
 
-              {/* Main content area with TOC sidebar */}
-              <div className="relative flex gap-8">
-                {/* Table of Contents - Desktop only */}
-                {tocItems.length > 0 && (
-                  <aside className="hidden xl:block w-56 flex-shrink-0">
-                    <div className="sticky top-24">
-                      <TableOfContents 
-                        items={tocItems} 
-                        activeId={activeHeading}
-                        onLinkClick={handleTocClick}
+              {/* Main content area with TOC / Coverage sidebar */}
+              <div className={`relative flex gap-8 ${playbook.testCoverage && !coverageViewActive ? "tc-user-view" : ""}`}>
+                {/* Sidebar - Desktop only */}
+                <aside className={`hidden xl:block flex-shrink-0 ${playbook.testCoverage && coverageViewActive ? "w-64" : "w-56"}`}>
+                  <div className="sticky top-24">
+                    {playbook.testCoverage && coverageViewActive ? (
+                      <CoverageSidebar
+                        currentPlaybookId={id}
+                        allPlaybooks={coveragePlaybooks}
+                        onToggleView={() => setCoverageViewActive(false)}
                       />
-                    </div>
-                  </aside>
-                )}
+                    ) : (
+                      <>
+                        {tocItems.length > 0 && (
+                          <TableOfContents 
+                            items={tocItems} 
+                            activeId={activeHeading}
+                            onLinkClick={handleTocClick}
+                          />
+                        )}
+                        {/* Show return toggle when coverage data exists but user switched to user view */}
+                        {playbook.testCoverage && !coverageViewActive && (
+                          <CoverageReturnToggle onToggle={() => setCoverageViewActive(true)} />
+                        )}
+                      </>
+                    )}
+                  </div>
+                </aside>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
+                  {/* Test Coverage Stats (only in coverage view) */}
+                  {playbook.testCoverage && coverageViewActive && (
+                    <TestCoverageStatsBar coverage={playbook.testCoverage} />
+                  )}
+
                   <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6 md:p-8">
                     {filteredContent ? (
                       <article ref={contentRef} className="playbook-content prose prose-invert max-w-none">
@@ -1038,6 +1465,31 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                     )}
                   </div>
                 </div>
+
+                {/* Mobile-only coverage toggle */}
+                {playbook.testCoverage && (
+                  <button
+                    className="cov-mobile-toggle xl:hidden"
+                    onClick={() => setCoverageViewActive(prev => !prev)}
+                  >
+                    {coverageViewActive ? (
+                      <>
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        User View
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Coverage
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </>
           )}
