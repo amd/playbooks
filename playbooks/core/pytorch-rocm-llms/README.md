@@ -115,10 +115,11 @@ model = AutoModelForCausalLM.from_pretrained(
 <!-- @test:end -->
 
 To try it out:
-
+<!-- @test:id=run-llm-simple timeout=600 setup=activate-venv -->
 ```bash
 python run_llm.py
 ```
+<!-- @test:end -->
 
 ## Building a Document Summarizer
 
