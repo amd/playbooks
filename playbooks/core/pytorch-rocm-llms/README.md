@@ -42,7 +42,7 @@ source llm-env/bin/activate
 
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install --upgrade transformers accelerate sentencepiece protobuf
+pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 
@@ -125,6 +125,13 @@ python run_llm.py
 Build on your LLM setup by turning it into a practical document summarizer. In this section, you will use the [summarizer.py](assets/summarizer.py) script to feed in a .txt file and automatically generate a concise summary, all running locally on your GPU.
 
 The script is designed to work out of the box: point it at a text file, pick a model, and it returns a clear 2–3 sentence overview. As you explore the code, you can customize prompts, tweak parameters like length and temperature, and see how different models behave.
+
+To try it out:
+<!-- @test:id=run-model timeout=600 setup=activate-venv -->
+```bash
+python summarizer.py
+```
+<!-- @test:end -->
 
 ### Usage Examples
 
