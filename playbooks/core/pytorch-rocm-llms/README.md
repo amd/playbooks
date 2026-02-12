@@ -127,7 +127,7 @@ Build on your LLM setup by turning it into a practical document summarizer. In t
 The script is designed to work out of the box: point it at a text file, pick a model, and it returns a clear 2–3 sentence overview. As you explore the code, you can customize prompts, tweak parameters like length and temperature, and see how different models behave.
 
 To try it out:
-<!-- @test:id=run-model timeout=600 setup=activate-venv -->
+<!-- @test:id=run-summarizer timeout=1000 setup=activate-venv -->
 ```bash
 python summarizer.py
 ```
