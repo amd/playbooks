@@ -34,7 +34,7 @@ Your STX Halo has docker pre-installed.
 
 Pull latest PyTorch docker: 
 
-```
+```bash
 sudo docker run -it -d \
   --device /dev/dri \
   --device /dev/kfd \
@@ -77,9 +77,40 @@ pip install -e . -v --no-build-isolation
 LLM-Research/Meta-Llama-3.1-8B-Instruct
 ```
 
-Start QLoRA Finetuning 
+Start QLoRA Fine-tuning 
 ```bash
 ./scripts/run_qlora_training.sh llama
+```
+
+The successful sign in log:
+```text
+Training completed. Do not forget to share your model on huggingface.co/models =)
+-------------------------------------------------- Peft Weights after training --------------------------------------------------
+base_model.model.model.layers.0.self_attn.q_proj.lora_A.default.weight:
+shape: (64, 2048)
+mean: 0.000003
+std: 0.012781
+min: -0.023816
+max: 0.023442
+percentile_25: -0.011042
+percentile_50: -0.000020
+percentile_75: 0.011043
+base_model.model.model.layers.0.self_attn.q_proj.lora_B.default.weight:
+shape: (4096, 64)
+mean: 0.000003
+std: 0.000679
+min: -0.003111
+max: 0.002177
+percentile_25: -0.000536
+percentile_50: -0.000000
+percentile_75: 0.000540
+---------------------------------------------------------------------------------------------------------------------------------
+
+
+-------------------------------------------------- Trainer Output --------------------------------------------------
+TrainOutput(global_step=100, training_loss=1.15819159808103, metrics={'train_runtime': 436.7624, 'train_samples_per_second': 0.458, 'train_steps_per_second': 0.229, 'total_flos': 1053550340505600.0, 'train_loss': 1.15819159808103, 'epoch': 0.2})
+--------------------------------------------------------------------------------------------------------------------
+
 ```
 
 ## Part II: GRPO Finetuning 
@@ -94,19 +125,99 @@ TODO: Iswarya
 ```bash
 ./scripts/run_kernel_benchmark.sh attention
 ```
+Output example:
+
+```text
+Config: batch=1 seq=128 heads=32 dim=128 dtype=torch.float16
+  - torch_ref  | timed                    | fwd_diff=0.000e+00 bwd_diff=0.000e+00 | fwd=0.17ms bwd=0.22ms | stable=True
+  - flash_attn | timed                    | fwd_diff=1.953e-03 bwd_diff=3.906e-03 | fwd=0.26ms bwd=0.79ms | stable=True
+  - sdpa       | timed                    | fwd_diff=1.953e-03 bwd_diff=3.906e-03 | fwd=0.07ms bwd=0.13ms | stable=True
+
+Config: batch=1 seq=2048 heads=32 dim=128 dtype=torch.float16
+  - torch_ref  | timed                    | fwd_diff=0.000e+00 bwd_diff=0.000e+00 | fwd=6.11ms bwd=9.36ms | stable=True
+  - flash_attn | timed                    | fwd_diff=1.953e-03 bwd_diff=3.906e-03 | fwd=1.34ms bwd=16.28ms | stable=True
+  - sdpa       | timed                    | fwd_diff=1.953e-03 bwd_diff=3.906e-03 | fwd=2.13ms bwd=4.46ms | stable=True
+
+Config: batch=4 seq=128 heads=32 dim=128 dtype=torch.float16
+  - torch_ref  | timed                    | fwd_diff=0.000e+00 bwd_diff=0.000e+00 | fwd=0.15ms bwd=0.22ms | stable=True
+  - flash_attn | timed                    | fwd_diff=2.441e-03 bwd_diff=3.906e-03 | fwd=0.22ms bwd=0.95ms | stable=True
+  - sdpa       | timed                    | fwd_diff=2.441e-03 bwd_diff=3.906e-03 | fwd=0.10ms bwd=0.18ms | stable=True
+
+Config: batch=4 seq=2048 heads=32 dim=128 dtype=torch.float16
+  - torch_ref  | timed                    | fwd_diff=0.000e+00 bwd_diff=0.000e+00 | fwd=23.19ms bwd=36.10ms | stable=True
+  - flash_attn | timed                    | fwd_diff=1.953e-03 bwd_diff=7.812e-03 | fwd=7.04ms bwd=62.54ms | stable=True
+  - sdpa       | timed                    | fwd_diff=1.953e-03 bwd_diff=7.812e-03 | fwd=6.49ms bwd=14.03ms | stable=True
+
+Config: batch=1 seq=128 heads=32 dim=128 dtype=torch.bfloat16
+  - torch_ref  | timed                    | fwd_diff=0.000e+00 bwd_diff=0.000e+00 | fwd=0.16ms bwd=0.21ms | stable=True
+  - flash_attn | timed                    | fwd_diff=3.125e-02 bwd_diff=3.125e-02 | fwd=0.23ms bwd=0.82ms | stable=True
+  - sdpa       | timed                    | fwd_diff=3.125e-02 bwd_diff=3.125e-02 | fwd=0.07ms bwd=0.14ms | stable=True
+
+Config: batch=1 seq=2048 heads=32 dim=128 dtype=torch.bfloat16
+  - torch_ref  | timed                    | fwd_diff=0.000e+00 bwd_diff=0.000e+00 | fwd=6.21ms bwd=9.46ms | stable=True
+  - flash_attn | timed                    | fwd_diff=2.344e-02 bwd_diff=6.250e-02 | fwd=1.32ms bwd=18.18ms | stable=True
+  - sdpa       | timed                    | fwd_diff=2.344e-02 bwd_diff=6.250e-02 | fwd=2.12ms bwd=3.89ms | stable=True
+
+Config: batch=4 seq=128 heads=32 dim=128 dtype=torch.bfloat16
+  - torch_ref  | timed                    | fwd_diff=0.000e+00 bwd_diff=0.000e+00 | fwd=0.15ms bwd=0.21ms | stable=True
+  - flash_attn | timed                    | fwd_diff=1.953e-02 bwd_diff=3.125e-02 | fwd=0.22ms bwd=1.01ms | stable=True
+  - sdpa       | timed                    | fwd_diff=1.953e-02 bwd_diff=3.125e-02 | fwd=0.10ms bwd=0.19ms | stable=True
+
+Config: batch=4 seq=2048 heads=32 dim=128 dtype=torch.bfloat16
+  - torch_ref  | timed                    | fwd_diff=0.000e+00 bwd_diff=0.000e+00 | fwd=23.13ms bwd=36.02ms | stable=True
+  - flash_attn | timed                    | fwd_diff=2.344e-02 bwd_diff=6.250e-02 | fwd=7.05ms bwd=70.68ms | stable=True
+  - sdpa       | timed                    | fwd_diff=2.344e-02 bwd_diff=6.250e-02 | fwd=6.52ms bwd=12.10ms | stable=True
+```
+
 ### MoE accuracy/performance
 #### FP16
 ```bash
 ./scripts/run_kernel_benchmark.sh moe --dtypes fp16
 ```
+Output example:
+```text
+=== dtype=fp16 (torch.float16) ===
 
+Config: batch=1, seq=128, hidden=2048, experts=64
+Parity   fwd_diff=0.000e+00 | bwd_diff=0.000e+00 | router_diff=0.000e+00 | stable=True
+Perf     target: fwd=30.97ms bwd=43.62ms | ref: fwd=30.48ms bwd=41.88ms | stable=True
+
+Config: batch=1, seq=512, hidden=2048, experts=64
+Parity   fwd_diff=0.000e+00 | bwd_diff=0.000e+00 | router_diff=0.000e+00 | stable=True
+Perf     target: fwd=32.55ms bwd=46.75ms | ref: fwd=32.55ms bwd=46.82ms | stable=True
+
+Config: batch=4, seq=128, hidden=2048, experts=64
+Parity   fwd_diff=0.000e+00 | bwd_diff=0.000e+00 | router_diff=0.000e+00 | stable=True
+Perf     target: fwd=32.95ms bwd=46.71ms | ref: fwd=32.81ms bwd=46.70ms | stable=True
+
+Config: batch=4, seq=512, hidden=2048, experts=64
+Parity   fwd_diff=0.000e+00 | bwd_diff=0.000e+00 | router_diff=0.000e+00 | stable=True
+Perf     target: fwd=42.04ms bwd=76.50ms | ref: fwd=41.85ms bwd=75.95ms | stable=True
+```
 #### BF16
 ```bash
 ./scripts/run_kernel_benchmark.sh moe --dtypes bf16
 ```
+Output example:
+```text
+Config: batch=1, seq=128, hidden=2048, experts=64
+Parity   fwd_diff=0.000e+00 | bwd_diff=0.000e+00 | router_diff=0.000e+00 | stable=True
+Perf     target: fwd=30.23ms bwd=45.18ms | ref: fwd=29.95ms bwd=44.19ms | stable=True
 
+Config: batch=1, seq=512, hidden=2048, experts=64
+Parity   fwd_diff=0.000e+00 | bwd_diff=0.000e+00 | router_diff=0.000e+00 | stable=True
+Perf     target: fwd=32.47ms bwd=48.94ms | ref: fwd=32.34ms bwd=49.06ms | stable=True
+
+Config: batch=4, seq=128, hidden=2048, experts=64
+Parity   fwd_diff=0.000e+00 | bwd_diff=0.000e+00 | router_diff=0.000e+00 | stable=True
+Perf     target: fwd=32.29ms bwd=48.99ms | ref: fwd=32.57ms bwd=49.05ms | stable=True
+
+Config: batch=4, seq=512, hidden=2048, experts=64
+Parity   fwd_diff=0.000e+00 | bwd_diff=0.000e+00 | router_diff=0.000e+00 | stable=True
+Perf     target: fwd=42.92ms bwd=77.06ms | ref: fwd=42.76ms bwd=76.96ms | stable=True
+```
 ## Next Steps
-
+TODO
 
 ## Resources
 
