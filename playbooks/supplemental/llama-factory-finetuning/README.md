@@ -14,6 +14,10 @@ This playbook teaches you how to finetune LLMs using llama factory on your STX H
 - How to run inference with fine-tuned model
 - How to export the fine-tuned model 
 
+## Time & Risk
+- Duration: It will take about 30 miniutes to run this playbook at AMD Lab, but the duration of real finetuning case will depend on model size and dataset size
+- Risk: Finetuning is not an easy task, and you may meet some questions,like out-of-memory and accuracy. Please check [Llama factory FAQs](https://github.com/hiyouga/LlamaFactory/issues/4614) first. 
+
 ## Instructions
 
 ### Install llama factory on ROCm GPU
@@ -24,6 +28,22 @@ llama factory depends on PyTorch, and rocm developers can install PyTorch throug
 - Building PyTorch from source as the steps of [rocm document](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/3rd-party/pytorch-install.html#build-pytorch-from-source)
 
 For this playbook, we'll use the **prebuilt Docker image** which includes Pytorch with ROCm support, making it the easiest way to get started on AMD GPUs. The below command is just for your reference, please use the latest version ROCm docker image.
+
+#### Setup docker environment on your device
+This playbook needs ROCm PyTorch docker container,please ensure Docker is installed and configured correctly. Follow the [Docker installation guide](https://docs.docker.com/engine/install/) for your operating system.
+
+Note: Ensure the Docker permissions are correctly configured. To configure permissions to allow non-root access, run the following commands:
+
+```bash
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+Verify Docker is working correctly with:
+
+```bash
+docker run hello-world
+```
 
 #### Pull the Docker Image
 First, pull the ROCm PyTorch Docker image:
@@ -133,7 +153,12 @@ If you would like to try QLoRA with bitsandbytes, the below command is a typical
 ```bash
 llamafactory-cli train examples/train_qlora/qwen3_lora_sft_bnb_npu.yaml
 ```
-After running LLM finetuning, output files can be found in the path of "output_dir", like the model checkpoint files, model configuration files,training metrics data files. 
+
+After running LLM finetuning, output files can be found in the path of "output_dir", like the model checkpoint files, model configuration files,training metrics data files.
+
+<p align="center">
+  <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
+</p>
 
 ### Test and export the fine-tuned model 
 
@@ -148,6 +173,11 @@ In this playbook, we used the below command to test Qwen3 finetuned model.
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
+An example chat of finetuned model is shown as below.
+
+<p align="center">
+  <img src="assets/qwen3_chat.png" alt="Test Qwen3 Finetuned model" width="600"/>
+</p>
 
 #### Export the fine-tuned model
 
@@ -158,6 +188,12 @@ In this playbook, we used the below command to export Qwen3 finetuned model.
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
+The result of exporting finetuned model is shown as below.
+
+<p align="center">
+  <img src="assets/qwen3_export.png" alt="Export Qwen3 Finetuned model " width="600"/>
+</p>
+
 ## Next Steps
 - **Try more models on AMD GPUs**: We use qwen3 as an example, developer can try other supported models,like gpt-oss, on AMD GPUs.
 - **Try more finetuning schemes on AMD GPUs**: We use LoRA as an example, developer can try others,like full-Parameter, on AMD GPUs.
