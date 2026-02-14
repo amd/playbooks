@@ -25,8 +25,8 @@ Check model availability:
 
 | Capability | Model ID | Notes |
 |---|----|-----|
-| LLM (Text input → Text output) | `DeepSeek-R1-Distill-Llama-8B-NPU` (or similar) | Any Lemonade LLM model for chat, text completion, coding, or reasoning |
-| VLM (Image → Text) | `Gemma-3-4b-it-mm-NPU` (or any model in the **Vision** category) | Any multimodal/vision-capable model that can take images as part of their input |
+| LLM (Text input → Text output) | `Llama-3.2-1B-Instruct-Hybrid` (or similar) | Any Lemonade LLM model for chat, text completion, coding, or reasoning |
+| VLM (Image → Text) | `Gemma-3-4b-it-GGUF` (or any model in the **Vision** category) | Any multimodal/vision-capable model that can take images as part of their input |
 | Image Generation (Text → Image) | `SDXL-Turbo` (or any model in the **Image** category) | Any Stable Diffusion model that generates images for a text prompt |
 | Audio (Speech → Text) | `Whisper-Large-v3` (or any model in the **Audio** category) | Any ASR model that converts audio into text |
 
