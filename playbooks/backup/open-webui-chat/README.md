@@ -73,7 +73,7 @@ This section gets you to a stable baseline: Lemonade running, Open WebUI running
   - Open `http://localhost:8000/api/v1/models`
   - You should see a JSON list of models downloaded in Lemonade
 
-> If you don’t see your models in `/models`, Open WebUI won’t be able to select them later.
+> If you don’t see your models in `http://localhost:8000/api/v1/models`, Open WebUI won’t be able to select them later.
 
 
 ### 2) Install Open WebUI (first-time setup)
@@ -127,27 +127,30 @@ In Open WebUI:
 <p align="center">
   <img src="assets/open_settings.png" alt="Open WebUI Settings page" width="600"/>
 </p>
+<p align="center">
+  <img src="assets/connection_settings.png" alt="Navigating to the connection settings" width="600"/>
+</p>
 
 2. Under **OpenAI API**, add a new connection:
    - **Base URL:** `http://localhost:8000/api/v1`
    - **API Key:** `-` (a single dash works for local)
 <p align="center">
-  <img src="assets/connection_settings.png" alt="Navigating to the connection settings" width="45%"/>
-  <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="45%"/>
+  <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="600"/>
 </p>
 
 3. Save
-4. Apply the suggested settings. These help Open WebUI to be more responsive with local LLMs.
+4. Apply the following suggested settings. These help Open WebUI to be more responsive with local LLMs.
    - Click the user profile button again, and choose "Admin Settings".
    - Click the "Settings" tab at the top, then "Interface" (which will be on the top or the left, depending on your window size), then disable the following:
       - Title Generation
       - Follow Up Generation
       - Tags Generation
-    - Click the "Save" button in the bottom right of the page, then return to `http://localhost:8080`.
-    - Click the model dropdown and expect to see all the models that you have downloaded from Lemonade!
 <p align="center">
   <img src="assets/admin_settings.png" alt="Admin Settings" width="600"/>
 </p>
+
+5. Click the **"Save"** button in the bottom right of the page, then return to `http://localhost:8080`.
+6. Click the model dropdown and expect to see all the models that you have downloaded from Lemonade!
 
 ---
 
@@ -171,7 +174,7 @@ Now you’re all set up. Let's look at three interesting things to do.
 </p>
 
 3. The model will respond in the chat.
-4. At this time, open `Task Manager` on your system. You will see **high GPU/NPU utilization** based on the model you selected. That clearly shows you’re running locally.
+4. At this time, open `Task Manager` on your system. You will see **high GPU/NPU utilization** based on whether the model you selected is **Hybrid** or **NPU** respectively. That clearly shows you’re running locally.
 <p align="center">
   <img src="assets/npu_utilization.png" alt="Task Manager NPU utilization" width="600"/>
 </p>
@@ -261,7 +264,7 @@ You just proved that Open WebUI can coordinate a “two-part” workflow:
 
 ### “This model does not support chat completion” error message
 - You selected an image model (SD-Turbo / SDXL) in the chat model dropdown.
-- Fix: select an LLM for chat, and use the Image toggle + Images settings for generation.
+- **Fix**: select an LLM for chat, and use the Image toggle + Images settings for generation.
 <p align="center">
   <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
 </p>
