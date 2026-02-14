@@ -123,14 +123,31 @@ open-webui serve
 In Open WebUI:
 
 1. Go to **Admin Settings → Connections**
+
+<p align="center">
+  <img src="assets/open_settings.png" alt="Open WebUI Settings page" width="600"/>
+</p>
+
 2. Under **OpenAI API**, add a new connection:
    - **Base URL:** `http://localhost:8000/api/v1`
    - **API Key:** `-` (a single dash works for local)
+<p align="center">
+  <img src="assets/connection_settings.png" alt="Navigating to the connection settings" width="45%"/>
+  <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="45%"/>
+</p>
+
 3. Save
-
-Return to the chat page and open the model dropdown.
-
-Expected result: you can see downloaded Lemonade models in the list.
+4. Apply the suggested settings. These help Open WebUI to be more responsive with local LLMs.
+   - Click the user profile button again, and choose "Admin Settings".
+   - Click the "Settings" tab at the top, then "Interface" (which will be on the top or the left, depending on your window size), then disable the following:
+      - Title Generation
+      - Follow Up Generation
+      - Tags Generation
+    - Click the "Save" button in the bottom right of the page, then return to `http://localhost:8080`.
+    - Click the model dropdown and expect to see all the models that you have downloaded from Lemonade!
+<p align="center">
+  <img src="assets/admin_settings.png" alt="Admin Settings" width="600"/>
+</p>
 
 ---
 
@@ -142,11 +159,24 @@ Now you’re all set up. Let's look at three interesting things to do.
 
 ### Activity 1: Chat with a Local LLM
 
-1. In the chat screen, choose an LLM model (example: `DeepSeek-R1-Distill-Llama-8B-NPU`).
-2. Ask something like: `Give me a short plan for a 30-minute deep work session. Make it practical and specific.`
-3. The model will respond in the chat
+1. Click the dropdown menu in the top-left of the interface. This will display all of the Lemonade models you have installed. Select one to proceed. (example: `Llama-3.2-1B-Instruct-Hybrid`).
+<p align="center">
+  <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
+</p>
+
+2. Enter a message to the LLM and click send (or hit Enter). The LLM will take a few seconds to load into memory and then you will see the response stream in.
+<p align="center">
+  <img src="assets/sending_a_message.png" alt="Sending a message" width="45%"/>
+  <img src="assets/llm_response.png" alt="LLM Response" width="45%"/>
+</p>
+
+3. The model will respond in the chat.
 4. At this time, open `Task Manager` on your system. You will see **high GPU/NPU utilization** based on the model you selected. That clearly shows you’re running locally.
-5. You can keep chatting without changing anything else
+<p align="center">
+  <img src="assets/npu_utilization.png" alt="Task Manager NPU utilization" width="600"/>
+</p>
+
+5. You can keep chatting without changing anything else.
 
 You just proved that Open WebUI can send requests to Lemonade using the OpenAI-compatible chat endpoint.
 
@@ -156,21 +186,29 @@ You just proved that Open WebUI can send requests to Lemonade using the OpenAI-c
 
 This requires a model that supports image input (a vision / multimodal model).
 
-1. Select a vision-capable model (example: `Gemma-3-4b-it-mm-NPU`, or any model labeled for vision in Lemonade)
+1. Select a vision-capable model (example: `Gemma-3-4b-it-GGUF`, or any model labeled for vision in Lemonade)
+<p align="center">
+  <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
+</p>
+
 2. Click the **`+`** button in the message box and upload an image
-3. Ask something that forces true image understanding: `Describe what’s happening in this image and list the key objects you see.`
+3. Ask something that forces true image understanding: `Do you think this is a well-designed UI?`
+<p align="center">
+  <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="45%"/>
+  <img src="assets/vlm_response.png" alt="VLM Response" width="45%"/>
+</p>
+
 4. The model answers based on the image content, not generic text.
 
-You just proved that Open WebUI can send multimodal requests (text + image) through the backend (Lemonade, in this case) to a vision model.
+You just proved that Open WebUI can send multimodal requests (text + image) through the backend (Lemonade) to a vision model.
 
 ---
 
 ### Activity 3: Generate an Image from a Text Prompt (Stable Diffusion)
 
-This is the most important concept shift in this playbook:
-
-Stable Diffusion models **do not “chat.”**
-They generate images through an **Images API**, not the chat endpoint.
+This is the most important concept shift in this playbook.
+- Stable Diffusion models **do not “chat.”**
+- They generate images through an **Images API**, not the chat endpoint.
 
 #### Step 1: Configure Image Generation in Open WebUI
 
@@ -181,17 +219,33 @@ They generate images through an **Images API**, not the chat endpoint.
    - **OpenAI API Base URL:** `http://localhost:8000/api/v1`
    - **OpenAI API Key:** `-`
    - **Model:** `SD-Turbo` (fast) or `SDXL-Base-1.0` (higher quality)
-3. Save
+3. If you want to add more parameters, add them to the text field as JSON. For example: `{ "steps": 4, "cfg_scale": 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+<p align="center">
+  <img src="assets/images_settings.png" alt="Lemonade VLM's" width="600"/>
+</p>
+4. Save
 
 > Use the base URL exactly as above (no trailing slash, no double slashes).
 
-#### Step 2: Generate an image from the chat screen
+#### Step 2: Allow Image Generation for the model
+This step ensures that you enable Image Generation as a capability for your model.
+1. Go to **Admin Settings → Models** and choose your model
+2. Turn on `Image Generation`
+<p align="center">
+  <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
+  <img src="assets/edit_model.png" alt="Edit Model" width="45%"/>
+</p>
 
-1. Go back to chat
-2. Select a **normal LLM** in the model dropdown (example: DeepSeek).  **Do not select a Stable Diffusion model** as this is a chat model selector.
-3. In the message area, toggle **Image** ON
-4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, 35mm lens, dramatic lighting, ultra detailed`
-5. An image is generated and appears in the chat
+#### Step 3: Generate an image from the chat screen
+
+1. Go back to chat at `http://localhost:8080`.
+2. Select a **normal LLM** in the model dropdown (example: DeepSeek, CodeLlama).  **Do not select a Stable Diffusion model** as this is a chat model selector.
+3. In the message area, toggle **Image** ON.
+4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
+5. An image is generated and appears in the chat.
+<p align="center">
+  <img src="assets/image_generation.png" alt="Image Generation" width="600"/>
+</p>
 
 You just proved that Open WebUI can coordinate a “two-part” workflow:
   - the LLM helps refine the prompt
@@ -208,7 +262,9 @@ You just proved that Open WebUI can coordinate a “two-part” workflow:
 ### “This model does not support chat completion” error message
 - You selected an image model (SD-Turbo / SDXL) in the chat model dropdown.
 - Fix: select an LLM for chat, and use the Image toggle + Images settings for generation.
-
+<p align="center">
+  <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
+</p>
 ### Image generation errors/timeouts
 - Start with `SD-Turbo` first (fast, fewer steps)
 - Once working, switch the image model to `SDXL-Base-1.0` for quality
@@ -217,7 +273,7 @@ You just proved that Open WebUI can coordinate a “two-part” workflow:
 
 ## Next Steps (Where this gets really interesting)
 
-You now have a working local AI “stack”—a single UI controlling multiple model types through a standard API.
+You now have a working **“local AI stack”**—a single UI controlling multiple model types through a standard API.
 
 Here are three expansions that unlock entirely new workflows:
 
