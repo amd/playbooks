@@ -265,6 +265,7 @@ You just proved that Open WebUI can coordinate a “two-part” workflow:
 <p align="center">
   <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
 </p>
+
 ### Image generation errors/timeouts
 - Start with `SD-Turbo` first (fast, fewer steps)
 - Once working, switch the image model to `SDXL-Base-1.0` for quality
