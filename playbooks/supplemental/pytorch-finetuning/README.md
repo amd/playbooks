@@ -16,20 +16,27 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 ### 1. Install Dependencies
 
-<!-- @os:linux -->
-```bash
-# Create virtual environment
+<!-- @os:windows -->
+<!-- @test:id=create-venv timeout=60 -->
+```cmd
 python -m venv venv
+venv\Scripts\activate.bat
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="venv\Scripts\activate.bat" -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv venv
 source venv/bin/activate
 ```
-<!-- os:end -->
-
-<!-- @os:windows -->
-```bat
-python -m venv venv
-venv\Scripts\activate
-```
-<!-- os:end -->
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source venv/bin/activate" -->
+<!-- @os:end -->
 
 ### Installing Basic Dependencies
 <!-- @require:pytorch -->
@@ -37,24 +44,63 @@ venv\Scripts\activate
 ### Additional Dependencies
 
 <!-- @os:linux -->
-
+<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
-<!-- os:end -->
+<!-- @test:end -->
+<!-- @os:end -->
 
 <!-- @os:windows -->
 **Windows:** Only core packages are tested and supported here.
+<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
-<!-- os:end -->
+<!-- @test:end -->
+<!-- @os:end -->
 
 ### Enable HF Authentication if not using local models
 Authenticate with the Hugging Face Hub to access some model files:
 ```bash
 hf auth login
 ```
+
+<!-- @test:id=verify-scripts timeout=30 hidden=True -->
+```python
+import os
+import sys
+import ast
+
+# Check that required script files exist
+scripts = ['train_qlora.py', 'train_lora.py', 'train_full_finetuning.py']
+missing = [s for s in scripts if not os.path.exists(s)]
+
+if missing:
+    print(f"FAIL: Missing files: {missing}")
+    sys.exit(1)
+print("PASS: All required script files exist")
+
+# Verify Python scripts have valid syntax
+for script in scripts:
+    with open(script, 'r') as f:
+        ast.parse(f.read())
+    print(f"PASS: {script} has valid syntax")
+```
+<!-- @test:end -->
+
+<!-- @test:id=verify-imports timeout=60 hidden=True setup=activate-venv -->
+```python
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from peft import AutoPeftModelForCausalLM
+from trl import SFTTrainer
+
+print(f"PyTorch version: {torch.__version__}")
+print(f"CUDA/ROCm available: {torch.cuda.is_available()}")
+print("PASS: All imports successful")
+```
+<!-- @test:end -->
 
 ### 2. Choose Your Method
 
@@ -94,6 +140,13 @@ W_updated = W + B × A
 # A: 32×4096 matrix
 # Total: 262K params (98% reduction!)
 ```
+<!-- @test:id=train-lora timeout=900 hidden=True setup=activate-venv -->
+```bash
+python assets/train_lora.py --dry-run
+```
+<!-- @test:end -->
+
+
 
 ### What is QLoRA?
 
@@ -108,7 +161,11 @@ Base Model (4-bit):  10GB  ← Frozen, quantized
 LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
-
+<!-- @test:id=train-qlora timeout=900 hidden=True setup=activate-venv -->
+```bash
+python assets/train_qlora.py --dry-run
+```
+<!-- @test:end -->
 ---
 
 ## Using Your Fine-tuned Model (for Gemma 3 4B)
