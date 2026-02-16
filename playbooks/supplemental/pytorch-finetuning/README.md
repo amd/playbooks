@@ -142,6 +142,10 @@ W_updated = W + B × A
 ```
 <!-- @test:id=train-lora timeout=900 hidden=True setup=activate-venv -->
 ```python
+import sys
+import os
+sys.path.insert(0, os.getcwd())  # Ensure current directory is in path
+
 import train_lora
 
 # Override training config to use max_steps=1 for fast CI testing
@@ -173,6 +177,10 @@ Total: 12GB (vs 40GB full precision)
 ```
 <!-- @test:id=train-qlora timeout=900 hidden=True setup=activate-venv -->
 ```python
+import sys
+import os
+sys.path.insert(0, os.getcwd())  # Ensure current directory is in path
+
 import train_qlora
 
 # Override training config to use max_steps=1 for fast CI testing
