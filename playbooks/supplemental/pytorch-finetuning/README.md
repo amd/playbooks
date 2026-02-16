@@ -142,7 +142,7 @@ W_updated = W + B × A
 ```
 <!-- @test:id=train-lora timeout=900 hidden=True setup=activate-venv -->
 ```bash
-python assets/train_lora.py --dry-run
+python train_lora.py
 ```
 <!-- @test:end -->
 
@@ -163,7 +163,7 @@ Total: 12GB (vs 40GB full precision)
 ```
 <!-- @test:id=train-qlora timeout=900 hidden=True setup=activate-venv -->
 ```bash
-python assets/train_qlora.py --dry-run
+python train_qlora.py
 ```
 <!-- @test:end -->
 ---
