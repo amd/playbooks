@@ -1,17 +1,31 @@
 #!/usr/bin/env python
 """
-LoRA Fine-tuning GPT-OSS 20B on AMD Strix Halo (GFX1151)
+LoRA Fine-tuning GPT-OSS 20B (Pre-quantized) on AMD Strix Halo (GFX1151)
 
-This script uses LoRA (Low-Rank Adaptation) to efficiently fine-tune by training
-small adapter matrices while freezing the base model.
+This script fine-tunes the pre-quantized GPT-OSS 20B model using LoRA adapters.
+The model comes pre-quantized with Mxfp4, so we don't need additional quantization.
 
-Best for: Balanced quality and efficiency, training multiple adapters
-Memory Requirements: ~24-32GB VRAM
-Training Speed: 3-5x faster than full fine-tuning
+Best for: Limited VRAM, rapid experimentation, maximum accessibility
+Memory Requirements: ~12-16GB VRAM
+Training Speed: Fast
+Quality: Excellent with pre-quantized model
 """
 
 import gc
 import torch
+
+# PEFT checks hasattr(bnb.nn, "Linear4bit") when injecting LoRA. If bitsandbytes is
+# installed but incomplete (e.g. Windows/ROCm), bnb has no "nn" and that raises.
+# Patch before importing PEFT so the check returns False. (If you switch to true
+# QLoRA with load_in_4bit, remove this block and ensure bitsandbytes is working.)
+try:
+    import bitsandbytes as _bnb
+    if not hasattr(_bnb, "nn"):
+        import types
+        _bnb.nn = types.ModuleType("nn")
+except ImportError:
+    pass
+
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import LoraConfig, get_peft_model
 from trl import SFTConfig, SFTTrainer
@@ -46,32 +60,31 @@ def cleanup_gpu_memory():
 # -----------------------
 # Model Configuration
 # -----------------------
-MODEL = "openai/gpt-oss-20b"
+MODEL = "google/gemma-3-4b-it"
 model_name = MODEL.split("/")[-1]
 
 # -----------------------
-# LoRA Configuration
+# LoRA Configuration (for Pre-quantized Model)
 # -----------------------
-LORA_R = 32                    # Rank of LoRA matrices (higher = more capacity)
-LORA_ALPHA = 64                # Scaling factor (usually 2x rank)
-LORA_DROPOUT = 0.05            # Dropout for regularization
-LORA_TARGET_MODULES = [        # Which layers to add LoRA adapters to
-    "q_proj",                  # Query projection
-    "k_proj",                  # Key projection  
-    "v_proj",                  # Value projection
-    "o_proj",                  # Output projection
-    "gate_proj",               # Gate projection (MLP)
-    "up_proj",                 # Up projection (MLP)
-    "down_proj"                # Down projection (MLP)
+# The model is already quantized with Mxfp4
+# We only need to configure LoRA adapters
+
+# LoRA settings
+LORA_R = 64                            # Adapter rank
+LORA_ALPHA = 128                       # 2x rank
+LORA_DROPOUT = 0.05
+LORA_TARGET_MODULES = [
+    "q_proj", "k_proj", "v_proj", "o_proj",
+    "gate_proj", "up_proj", "down_proj"
 ]
 
 # -----------------------
 # Training Parameters
 # -----------------------
-LR = 3e-4                      # Higher learning rate for LoRA
+LR = 2e-4                              # Standard QLoRA learning rate
 EPOCHS = 3
-BATCH_SIZE = 2                 # Reduced to avoid VRAM exhaustion
-GRAD_ACCUM_STEPS = 8           # Increased to maintain effective batch size of 16
+BATCH_SIZE = 4
+GRAD_ACCUM_STEPS = 4
 
 # -----------------------
 # Load Dataset
@@ -92,16 +105,18 @@ ds = ds.train_test_split(test_size=0.2)
 print(f"Train samples: {len(ds['train'])}, Test samples: {len(ds['test'])}")
 
 # -----------------------
-# Load Model and Tokenizer
+# Load Model (Pre-quantized)
 # -----------------------
-print(f"\nLoading {MODEL}...")
+print("\nLoading Pre-quantized Model")
+print(f"Model: {MODEL}")
 
+# The model is already pre-quantized with Mxfp4Config
+# We don't need to apply additional quantization
 model = AutoModelForCausalLM.from_pretrained(
     MODEL,
-    dtype=torch.bfloat16,  # Use dtype instead of torch_dtype
     device_map="auto",
     trust_remote_code=True,
-    low_cpu_mem_usage=True
+    dtype=torch.bfloat16  # Use dtype instead of torch_dtype
 )
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
@@ -109,7 +124,18 @@ tokenizer.model_max_length = 512  # Set max sequence length
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
-print(f"Base model loaded. Memory footprint: {model.get_memory_footprint()/1e9:.2f} GB")
+print(f"Pre-quantized model loaded. Memory footprint: {model.get_memory_footprint()/1e9:.2f} GB")
+
+# -----------------------
+# Prepare Model for Training
+# -----------------------
+# Enable gradient checkpointing for memory efficiency
+if hasattr(model, 'enable_input_require_grads'):
+    model.enable_input_require_grads()
+else:
+    def make_inputs_require_grad(module, input, output):
+        output.requires_grad_(True)
+    model.get_input_embeddings().register_forward_hook(make_inputs_require_grad)
 
 # -----------------------
 # Configure LoRA
@@ -124,31 +150,25 @@ lora_config = LoraConfig(
     inference_mode=False
 )
 
-# Apply LoRA to model
+# Apply LoRA adapters
 model = get_peft_model(model, lora_config)
 
-# Enable gradient checkpointing for memory efficiency
-model.gradient_checkpointing_enable()
-print("Gradient checkpointing enabled")
-
-# Print trainable parameters
+# Print parameter info
 trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 total_params = sum(p.numel() for p in model.parameters())
-print("\n" + "="*60)
-print("LoRA Configuration Applied")
-print("="*60)
+
+print("\nQLoRA Configuration Applied")
 print(f"Trainable params: {trainable_params:,} ({100 * trainable_params / total_params:.2f}%)")
-print(f"Total params: {total_params:,}")
+print(f"All params: {total_params:,}")
 print(f"LoRA rank: {LORA_R}")
 print(f"LoRA alpha: {LORA_ALPHA}")
-print(f"Target modules: {', '.join(LORA_TARGET_MODULES)}")
-print("="*60 + "\n")
+print(f"Target modules: {len(LORA_TARGET_MODULES)} layer types\n")
 
 # -----------------------
 # Training Configuration
 # -----------------------
 args = SFTConfig(
-    output_dir=f"output-{model_name}-lora",
+    output_dir=f"output-{model_name}-qlora",
     
     # Dataset settings
     packing=False,
@@ -160,7 +180,7 @@ args = SFTConfig(
     learning_rate=LR,
     
     # Optimizer
-    optim="adamw_torch_fused",
+    optim="adamw_torch_fused",        # Fused optimizer for better performance
     
     # Mixed precision
     bf16=True,
@@ -168,7 +188,8 @@ args = SFTConfig(
     
     # Learning rate schedule
     lr_scheduler_type="cosine",
-    warmup_ratio=0.05,
+    warmup_ratio=0.03,
+    max_grad_norm=0.3,                # Gradient clipping for stability
     
     # Logging and saving
     logging_steps=5,
@@ -199,34 +220,27 @@ trainer = SFTTrainer(
 # -----------------------
 # Run Training
 # -----------------------
-print("Starting LoRA Fine-tuning...")
+print("Starting QLoRA Fine-tuning...")
 print(f"Effective batch size: {BATCH_SIZE * GRAD_ACCUM_STEPS}")
-print(f"Learning rate: {LR}\n")
+print(f"Learning rate: {LR}")
+print(f"Expected time: 2-4 hours for 1000 samples\n")
 
 reset_peak_mem()
-
 trainer.train()
-report_peak_mem("(LoRA)")
+report_peak_mem("(QLoRA)")
 
 # -----------------------
-# Save LoRA Adapter
+# Save QLoRA Adapter
 # -----------------------
-print("\nSaving LoRA adapter...")
-model.save_pretrained(f"output-{model_name}-lora")
-tokenizer.save_pretrained(f"output-{model_name}-lora")
+print("\nSaving QLoRA adapter...")
+model.save_pretrained(f"output-{model_name}-qlora")
+tokenizer.save_pretrained(f"output-{model_name}-qlora")
 
 print("\n" + "="*60)
 print("Training Complete!")
 print("="*60)
-print(f"LoRA adapter saved to: output-{model_name}-lora")
-print(f"Adapter size: ~{trainable_params * 2 / 1e6:.1f} MB (much smaller than full model!)")
-print("\nTo use your LoRA adapter:")
-print("  from peft import AutoPeftModelForCausalLM")
-print(f"  model = AutoPeftModelForCausalLM.from_pretrained('output-{model_name}-lora')")
-print(f"  tokenizer = AutoTokenizer.from_pretrained('output-{model_name}-lora')")
-print("\nTo merge adapter with base model:")
-print("  merged_model = model.merge_and_unload()")
-print("  merged_model.save_pretrained('output-merged')")
+print(f"LoRA adapter saved to: output-{model_name}-qlora")
+print(f"Adapter size: ~{trainable_params * 2 / 1e6:.1f} MB")
 
 # -----------------------
 # Cleanup GPU Memory

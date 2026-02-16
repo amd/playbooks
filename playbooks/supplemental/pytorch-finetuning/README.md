@@ -1,12 +1,14 @@
-# Fine-tune with PyTorch - GPT-OSS 20B
+# Fine-tune with PyTorch - Gemma-3-4B
 
 ## Overview
 
-This tutorial provides complete, ready-to-run examples for fine-tuning the **GPT-OSS 20B** model using PyTorch on AMD Strix Halo (GFX1151). Learn multiple fine-tuning techniques from full parameter updates to memory-efficient methods that run on consumer hardware.
+This tutorial provides step-by-step examples for fine-tuning a large language model with PyTorch and ROCm on AMD Strix Halo. It covers several techniques, from standard fine-tuning to memory-efficient PEFT strategies, so you can easily adapt models for your needs.
 
-**Model**: GPT-OSS 20B (20 billion parameters)  
+**Model Used**: google/gemma-3-4b-it
 **Hardware**: AMD Strix Halo with ROCm support  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, TRL)
+
+> **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
 
 ---
 
@@ -14,153 +16,65 @@ This tutorial provides complete, ready-to-run examples for fine-tuning the **GPT
 
 ### 1. Install Dependencies
 
+<!-- @os:linux -->
 ```bash
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate
+```
+<!-- os:end -->
 
-# Install PyTorch for ROCm
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0
+<!-- @os:windows -->
+```bat
+python -m venv venv
+venv\Scripts\activate
+```
+<!-- os:end -->
 
-# Install fine-tuning libraries
-pip install transformers accelerate peft trl datasets bitsandbytes
+### Installing Basic Dependencies
+<!-- @require:pytorch -->
+
+### Additional Dependencies
+
+<!-- @os:linux -->
+
+```bash
+pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
+```
+<!-- os:end -->
+
+<!-- @os:windows -->
+**Windows:** Only core packages are tested and supported here.
+```bash
+pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
+```
+<!-- os:end -->
+
+### Enable HF Authentication if not using local models
+Authenticate with the Hugging Face Hub to access some model files:
+```bash
+hf auth login
 ```
 
 ### 2. Choose Your Method
 
 | Method | Memory | Speed | Quality | Best For |
 |--------|--------|-------|---------|----------|
-| **QLoRA** 🌟 | 12-16GB | Fastest | 90-95% | Most users (recommended) |
+| **QLoRA** 🌟 | 12-16GB | Fastest | 90-95% | Most users|
 | **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
 | **Full** | 80GB+ | Slowest | 100% | Maximum quality |
 
 ### 3. Run Training
 
-```bash
-cd gptoss
+Below is a summary of available training methods. Each method links to its script and provides a brief description for choosing the right approach.
 
-# Recommended: QLoRA (works on 16GB+ GPUs)
-python train_qlora.py
+| Script                           | Method            | Description                                                                                                         | Typical VRAM | Recommended For                                 |
+|-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
+| [`train_qlora.py`](assets/train_qlora.py)               | **QLoRA** 🌟        | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off.                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA** 🎯         | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
 
-# Alternative: LoRA (requires 24GB+ VRAM)
-python train_lora.py
-
-# Advanced: Full fine-tuning (requires 40GB+ VRAM)
-python train_full_finetuning.py
-```
-
-Expected time: **2-4 hours** for 1000 samples on AMD Strix Halo
-
----
-
-## Available Training Methods
-
-### 1. Full Fine-tuning (`gptoss/train_full_finetuning.py`)
-
-Updates **all model parameters** for maximum quality.
-
-**Characteristics:**
-- ✅ Best possible quality
-- ✅ Maximum flexibility to change behavior
-- ❌ Requires 80GB+ VRAM
-- ❌ Slowest training (8-12 hours)
-
-```bash
-python gptoss/train_full_finetuning.py
-```
-
-**Use when:**
-- You have abundant GPU memory (40GB+ VRAM)
-- Quality is paramount
-- Need significant behavior changes
-
----
-
-### 2. LoRA Fine-tuning (`gptoss/train_lora.py`) 🎯
-
-Trains small **adapter matrices** while freezing base model.
-
-**Characteristics:**
-- ✅ Excellent quality (95%+ of full fine-tuning)
-- ✅ 3-5x faster than full fine-tuning
-- ✅ Small adapter size (~100-300MB)
-- ✅ Train multiple adapters for different tasks
-- ⚠️ Requires 24-32GB VRAM
-
-```bash
-python gptoss/train_lora.py
-```
-
-**Use when:**
-- Balanced quality and efficiency needed
-- Training multiple task-specific models
-- Have 24GB+ VRAM available
-- Want fast iteration cycles
-
-**How LoRA Works:**
-```
-Original Weight: W (4096×4096 = 16M params)
-LoRA Update: W' = W + B×A
-  where B (4096×32) and A (32×4096) = 262K params
-Result: 98.4% parameter reduction!
-```
-
----
-
-### 3. QLoRA Fine-tuning (`gptoss/train_qlora.py`) ⭐ RECOMMENDED
-
-Uses **4-bit quantization** with LoRA for maximum efficiency.
-
-**Characteristics:**
-- ✅ Lowest memory usage (12-16GB VRAM)
-- ✅ Fastest training
-- ✅ 75% memory reduction vs full precision
-- ✅ Train 20B+ models on consumer GPUs
-- ⚠️ Slight quality loss (~3-5% vs LoRA)
-
-```bash
-python gptoss/train_qlora.py
-```
-
-**Use when:**
-- Limited GPU memory (16GB-24GB VRAM)
-- Want fastest training
-- Rapid experimentation needed
-- Quality trade-off acceptable
-
-**QLoRA Benefits:**
-```
-Full Precision Model:  ~40GB
-QLoRA (4-bit + adapters): ~12GB
-Savings: 70% memory reduction!
-```
-
----
-
-## Method Comparison
-
-### Memory Requirements
-
-| Method | 20B Model | Training Time | Quality | Output Size |
-|--------|-----------|---------------|---------|-------------|
-| Full Fine-tuning | 80GB+ | 8-12 hours | 100% | ~40GB |
-| LoRA | 24-32GB | 3-5 hours | 95-98% | ~200MB |
-| QLoRA | 12-16GB | 2-4 hours | 90-95% | ~200MB |
-
-*Based on 1000 training samples on AMD Strix Halo*
-
-### Quality vs Efficiency
-
-```
-Quality ↑
-   100% ━━━━━━━━━━━ Full Fine-tuning
-    97% ━━━━━━━━━━ LoRA (r=64)
-    95% ━━━━━━━━━ LoRA (r=32)
-    92% ━━━━━━━━ QLoRA (r=64)
-    90% ━━━━━━━ QLoRA (r=32)
-         ↑      ↑      ↑      ↑
-        12GB   24GB   40GB   80GB  ← Memory
-```
+> **Typical time:** ~15–20 minutes for 800 samples on AMD Strix Halo
 
 ---
 
@@ -181,12 +95,6 @@ W_updated = W + B × A
 # Total: 262K params (98% reduction!)
 ```
 
-**Benefits:**
-- Small adapter files (100-300MB vs 40GB full model)
-- Train multiple adapters for different tasks
-- Switch adapters at runtime
-- Can merge back into base model
-
 ### What is QLoRA?
 
 **QLoRA** = **4-bit Quantization** + **LoRA**
@@ -203,7 +111,7 @@ Total: 12GB (vs 40GB full precision)
 
 ---
 
-## Using Your Fine-tuned Model
+## Using Your Fine-tuned Model (for Gemma 3 4B)
 
 ### After Full Fine-tuning
 
@@ -211,15 +119,15 @@ Total: 12GB (vs 40GB full precision)
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 model = AutoModelForCausalLM.from_pretrained(
-    "output-gpt-oss-20b-full",
+    "output-gemma-3-4b-full",     # Directory containing your fully fine-tuned checkpoint
     device_map="auto",
-    torch_dtype=torch.bfloat16
+    torch_dtype="auto"            # Use BF16 if your GPU supports it, else "auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gpt-oss-20b-full")
+tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-full")
 
 # Generate text
 prompt = "Explain quantum computing:"
-inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
@@ -230,17 +138,17 @@ print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
 
-# Load model with LoRA adapter
+# Load model with LoRA or QLoRA adapters
 model = AutoPeftModelForCausalLM.from_pretrained(
-    "output-gpt-oss-20b-qlora",
+    "output-gemma-3-4b-qlora",   # or "output-gemma-3-4b-lora" depending on your training
     device_map="auto",
-    torch_dtype=torch.bfloat16
+    torch_dtype="auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gpt-oss-20b-qlora")
+tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-qlora")
 
-# Generate
+# Generate text
 prompt = "Explain quantum computing:"
-inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
@@ -248,11 +156,18 @@ print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ### Merge LoRA Adapter into Base Model
 
 ```python
-# Merge adapter weights into base model (no more separate adapter)
+# Merge LoRA/QLoRA adapter weights into the base model for standalone inference
 merged_model = model.merge_and_unload()
-merged_model.save_pretrained("gpt-oss-20b-merged")
-tokenizer.save_pretrained("gpt-oss-20b-merged")
+merged_model.save_pretrained("gemma-3-4b-merged")
+tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
+
+**Note:**  
+- Make sure the model directory name (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) matches your actual output folder from training.  
+- If you used LoRA instead of QLoRA, just substitute the path accordingly.  
+- Some Gemma models require specifying `trust_remote_code=True` in `from_pretrained`; add if you see a related warning.
+
+For more custom settings (padding tokens, device, etc), refer to the script that you used for training.
 
 ---
 
@@ -399,129 +314,18 @@ LR = 5e-4  # Try higher
 ```python
 BATCH_SIZE = 8
 ```
-
----
-
-## Advanced Fine-tuning Techniques
-
-Beyond the three main methods (Full, LoRA, QLoRA), there are many other techniques you can explore:
-
-### Recommended Next Steps
-
-1. **DoRA** - Improved LoRA with better quality
-2. **IA³** - Ultra-low parameter count
-3. **AdaLoRA** - Dynamic rank allocation
-4. **LoftQ** - Better QLoRA initialization
-5. **Prefix Tuning** - Learn soft prompts
-
-📚 **See [OTHER_TECHNIQUES.md](OTHER_TECHNIQUES.md)** for detailed guides on 10+ additional methods!
-
----
-
-## Project Structure
-
-```
-pytorch-finetuning/
-├── README.md                    ← You are here
-├── OTHER_TECHNIQUES.md          ← Advanced methods guide
-├── gptoss/
-│   ├── README.md                ← Detailed GPT-OSS guide
-│   ├── train_full_finetuning.py ← Full fine-tuning
-│   ├── train_lora.py            ← LoRA fine-tuning
-│   └── train_qlora.py           ← QLoRA fine-tuning (⭐ recommended)
-```
-
----
-
-## Learning Resources
-
-### Official Documentation
-
-- **[PEFT Library](https://huggingface.co/docs/peft)** - Parameter-Efficient Fine-Tuning
-- **[TRL Library](https://huggingface.co/docs/trl)** - Transformer Reinforcement Learning
-- **[Transformers](https://huggingface.co/docs/transformers)** - Hugging Face Transformers
-- **[BitsAndBytes](https://github.com/TimDettmers/bitsandbytes)** - Quantization library
-
-### Research Papers
-
-- **[LoRA Paper](https://arxiv.org/abs/2106.09685)** - Original LoRA (2021)
-- **[QLoRA Paper](https://arxiv.org/abs/2305.14314)** - Efficient fine-tuning (2023)
-- **[DoRA Paper](https://arxiv.org/abs/2402.09353)** - Improved LoRA (2024)
-
-### Community
-
-- **[Hugging Face Hub](https://huggingface.co/models)** - Pre-trained models
-- **[HF Datasets](https://huggingface.co/datasets)** - Training datasets
-- **[HF Forums](https://discuss.huggingface.co/)** - Community support
-- **[r/LocalLLaMA](https://reddit.com/r/LocalLLaMA)** - Reddit community
-
----
-
 ## Next Steps
 
 After successful fine-tuning:
 
-1. ✅ **Evaluate** on held-out test data
-2. 🎯 **Experiment** with different hyperparameters
-3. 📊 **Track** experiments with Weights & Biases
-4. 🎨 **Try** your own datasets
-5. 🚀 **Deploy** with vLLM or TGI
-6. 🔬 **Explore** advanced techniques (see OTHER_TECHNIQUES.md)
-7. 🔄 **Train** multiple LoRA adapters for different tasks
+1. **Evaluate** on held-out test data
+2. **Experiment** with different hyperparameters
+3. **Track** experiments with Weights & Biases
+4. **Try** your own datasets
+5. **Deploy** with vLLM
+6. **Explore** advanced techniques (see OTHER_TECHNIQUES.md)
+7. **Train** multiple LoRA adapters for different tasks
 
 ---
-
-## Support
-
-### Getting Help
-
-1. Check the detailed guides in `gptoss/README.md`
-2. Review troubleshooting sections in each script
-3. Consult [Hugging Face Forums](https://discuss.huggingface.co/)
-4. Open issues on [PEFT GitHub](https://github.com/huggingface/peft/issues)
-
-### Hardware Requirements
-
-**Minimum:**
-- 16GB VRAM (for QLoRA)
-- 32GB System RAM
-- 50GB free disk space
-
-**Recommended:**
-- 24GB+ VRAM (for LoRA)
-- 64GB System RAM
-- 100GB+ free disk space
-
----
-
-## License
-
-This tutorial and code examples are provided as-is for educational purposes.
-
-**Model Licenses:**
-- GPT-OSS 20B: Check model card on Hugging Face
-- Libraries: Apache 2.0 (Transformers, PEFT, TRL)
-
----
-
-## Quick Reference
-
-| What You Want | Use This Method | Run This Command |
-|---------------|----------------|------------------|
-| **Best quality** | Full Fine-tuning | `python gptoss/train_full_finetuning.py` |
-| **Balanced** | LoRA | `python gptoss/train_lora.py` |
-| **Most efficient** ⭐ | QLoRA | `python gptoss/train_qlora.py` |
-| **Multiple adapters** | LoRA or QLoRA | Train multiple times with different datasets |
-| **Limited VRAM (16GB)** | QLoRA | `python gptoss/train_qlora.py` |
-| **Fast iteration** | QLoRA or LoRA | Adjust EPOCHS and BATCH_SIZE |
-
----
-
-**Ready to start fine-tuning? Choose QLoRA for your first experiment! 🚀**
-
-```bash
-cd gptoss
-python train_qlora.py
-```
 
 Good luck with your fine-tuning journey! 🎉

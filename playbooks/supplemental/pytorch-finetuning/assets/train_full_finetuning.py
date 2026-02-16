@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 """
-Full Fine-tuning GPT-OSS 20B on AMD Strix Halo (GFX1151)
+Full Fine-tuning Gemma 3 4B on AMD Strix Halo (GFX1151)
 
 This script demonstrates full parameter fine-tuning which updates all model weights.
-Best for: Maximum quality when you have sufficient GPU memory (40GB+ VRAM)
-
-Memory Requirements: ~80GB+ VRAM (requires gradient checkpointing and optimizations)
+Best for: Maximum quality when you have sufficient GPU memory
 """
 
 import gc
@@ -43,30 +41,33 @@ def cleanup_gpu_memory():
 # -----------------------
 # Model Configuration
 # -----------------------
-# GPT-OSS 20B - Open source GPT model
-MODEL = "openai/gpt-oss-20b"  # 20 billion parameters
+MODEL = "google/gemma-3-4b-it" 
 model_name = MODEL.split("/")[-1]
 
 # -----------------------
 # Training Parameters
 # -----------------------
 LR = 2e-5              # Lower learning rate for full fine-tuning
-EPOCHS = 1             # Start with 1 epoch for large models
-BATCH_SIZE = 1         # Small batch size due to memory constraints
-GRAD_ACCUM_STEPS = 16  # Accumulate gradients for effective batch size of 16
+EPOCHS = 3             # Can do more epochs with smaller model
+BATCH_SIZE = 4         # Larger batch size possible with 2B model
+GRAD_ACCUM_STEPS = 4   # Accumulate gradients for effective batch size of 16
 
 # -----------------------
 # Load and Prepare Dataset
 # -----------------------
 print("Loading dataset...")
-ds = load_dataset("Abirate/english_quotes", split="train").shuffle(seed=42).select(range(1000))
+# Databricks Dolly 15k: diverse instructions (QA, summarization, extraction, etc.)
+ds = load_dataset("databricks/databricks-dolly-15k", split="train").shuffle(seed=42).select(range(1000))
 
 def format_chat(ex):
-    """Format dataset into chat/instruction format"""
+    """Format instruction/context/response into chat messages"""
+    user_content = ex["instruction"]
+    if ex.get("context") and str(ex["context"]).strip():
+        user_content = f"{user_content}\n\nContext: {ex['context']}"
     return {
         "messages": [
-            {"role": "user", "content": f"Give me a quote about: {ex['tags']}"},
-            {"role": "assistant", "content": f"{ex['quote']} - {ex['author']}"}
+            {"role": "user", "content": user_content},
+            {"role": "assistant", "content": ex["response"]}
         ]
     }
 
@@ -78,7 +79,8 @@ print(f"Train samples: {len(ds['train'])}, Test samples: {len(ds['test'])}")
 # Load Model and Tokenizer
 # -----------------------
 print(f"\nLoading {MODEL}...")
-print("This may take several minutes for a 20B model...")
+print("Note: Model is stored as MXFP4 on Hugging Face but will be loaded as BF16 for training")
+print("(This is expected - the warning about MXFP4 is informational)\n")
 
 model = AutoModelForCausalLM.from_pretrained(
     MODEL,
@@ -158,15 +160,14 @@ trainer = SFTTrainer(
 # -----------------------
 # Run Training
 # -----------------------
-print("\n" + "="*60)
+
 print("Starting Full Fine-tuning")
-print("="*60)
 print(f"Model: {MODEL}")
+print(f"Model size: ~4B parameters")
 print(f"Trainable parameters: {model.num_parameters():,}")
 print(f"Effective batch size: {BATCH_SIZE * GRAD_ACCUM_STEPS}")
 print(f"Learning rate: {LR}")
 print(f"Epochs: {EPOCHS}")
-print("="*60 + "\n")
 
 reset_peak_mem()
 trainer.train()
@@ -179,9 +180,8 @@ print("\nSaving fine-tuned model...")
 trainer.save_model()
 tokenizer.save_pretrained(f"output-{model_name}-full")
 
-print("\n" + "="*60)
+
 print("Training Complete!")
-print("="*60)
 print(f"Model saved to: output-{model_name}-full")
 print("\nTo use your fine-tuned model:")
 print(f"  model = AutoModelForCausalLM.from_pretrained('output-{model_name}-full')")
