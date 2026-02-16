@@ -14,10 +14,9 @@ Quality: Excellent with pre-quantized model
 import gc
 import torch
 
-# PEFT checks hasattr(bnb.nn, "Linear4bit") when injecting LoRA. If bitsandbytes is
-# installed but incomplete (e.g. Windows/ROCm), bnb has no "nn" and that raises.
-# Patch before importing PEFT so the check returns False. (If you switch to true
-# QLoRA with load_in_4bit, remove this block and ensure bitsandbytes is working.)
+# Use bitsandbytes (bnb) for quantization on Linux, but skip it on Windows (or if bnb is incomplete).
+# This patch avoids errors during LoRA adapter injection on platforms where bnb is unavailable or unsupported.
+# If you enable true QLoRA (with load_in_4bit), remove this block and ensure bitsandbytes is installed and working.
 try:
     import bitsandbytes as _bnb
     if not hasattr(_bnb, "nn"):
