@@ -1,4 +1,4 @@
-# Fine-tune with PyTorch - Gemma-3-4B
+# Fine-tune LLMs with Pytorch and ROCm
 
 ## Overview
 
