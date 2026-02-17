@@ -1103,6 +1103,24 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
         );
       }
       
+      if (href && href.startsWith("#")) {
+        return (
+          <a
+            href={href}
+            className="md-link"
+            onClick={(e) => {
+              e.preventDefault();
+              const target = document.getElementById(href.slice(1));
+              if (target) {
+                target.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
+            {children}
+          </a>
+        );
+      }
+
       return (
         <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
           {children}
