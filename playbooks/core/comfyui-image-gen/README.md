@@ -24,14 +24,9 @@ To launch ComfyUI on Windows, simply click the ComfyUI shortcut on your Desktop.
 
 <!-- @os:linux -->
 
-To launch ComfyUI:
+To launch ComfyUI, simply click the ComfyUI icon on your Desktop.
 
-1. Navigate to `/usr/local/bin/ComfyUI/` (or to the appropriate folder if installed manually)
-2. Run `python3 main.py --use-pytorch-cross-attention`
-
-ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` to access the interface.
-
-> **Tip**: Keep the terminal window open while using ComfyUI. Closing it will stop the server.
+> **Tip**: If you installed ComfyUI manually, navigate to the installation folder, run `python3 main.py --use-pytorch-cross-attention` and open `http://127.0.0.1:8188` in your browser to access the interface.
 <!-- @os:end -->
 
 ## Finding the Z Image Turbo Template
