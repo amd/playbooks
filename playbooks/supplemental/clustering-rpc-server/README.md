@@ -8,7 +8,7 @@ This playbook teaches you how to cluster two STX Halo™ systems using llama.cpp
 
 ## What You'll Learn
 
-- How to extend VRAM allocation beyond the BIOS limit using kernel parameters
+- How to extend VRAM allocation on STX Halo™ systems
 - Installing llama.cpp with ROCm and RPC support
 - Configuring an RPC worker and launching distributed inference across two nodes
 - Running a 358B parameter model across two networked STX Halo™ systems
