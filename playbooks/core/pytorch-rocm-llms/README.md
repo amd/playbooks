@@ -13,7 +13,7 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 ### Create a Virtual Environment
 
 <!-- @os:windows -->
-On Windows, open Command Prompt and run:
+On Windows, open Command Prompt and run the following prompt to create a venv with ROCm+Pytorch already installed:
 <!-- @test:id=create-venv timeout=60 -->
 ```cmd
 python -m venv llm-env --system-site-packages
@@ -24,6 +24,7 @@ llm-env\Scripts\activate.bat
 <!-- @os:end -->
 
 <!-- @os:linux -->
+On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
