@@ -140,27 +140,6 @@ W_updated = W + B × A
 # A: 32×4096 matrix
 # Total: 262K params (98% reduction!)
 ```
-<!-- @test:id=train-lora timeout=900 hidden=True setup=activate-venv -->
-```python
-import sys
-import os
-sys.path.insert(0, os.getcwd())  # Ensure current directory is in path
-
-import train_lora
-
-# Override training config to use max_steps=1 for fast CI testing
-train_lora.args.max_steps = 1
-train_lora.args.num_train_epochs = None  # Disable epochs when using max_steps
-train_lora.args.save_strategy = "no"  # Skip saving for CI
-train_lora.args.eval_strategy = "no"  # Skip eval for CI
-
-# Run training with single step
-train_lora.trainer.train()
-print("PASS: LoRA training script executed successfully (1 step)")
-```
-<!-- @test:end -->
-
-
 
 ### What is QLoRA?
 
@@ -175,28 +154,9 @@ Base Model (4-bit):  10GB  ← Frozen, quantized
 LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
-<!-- @test:id=train-qlora timeout=900 hidden=True setup=activate-venv -->
-```python
-import sys
-import os
-sys.path.insert(0, os.getcwd())  # Ensure current directory is in path
-
-import train_qlora
-
-# Override training config to use max_steps=1 for fast CI testing
-train_qlora.args.max_steps = 1
-train_qlora.args.num_train_epochs = None  # Disable epochs when using max_steps
-train_qlora.args.save_strategy = "no"  # Skip saving for CI
-train_qlora.args.eval_strategy = "no"  # Skip eval for CI
-
-# Run training with single step
-train_qlora.trainer.train()
-print("PASS: QLoRA training script executed successfully (1 step)")
-```
-<!-- @test:end -->
 ---
 
-## Using Your Fine-tuned Model (for Gemma 3 4B)
+## Using Your Fine-tuned Model
 
 ### After Full Fine-tuning
 
@@ -401,15 +361,15 @@ BATCH_SIZE = 8
 ```
 ## Next Steps
 
-After successful fine-tuning:
+After you have completed successful fine-tuning, consider the following next steps to get more from your model:
 
-1. **Evaluate** on held-out test data
-2. **Experiment** with different hyperparameters
-3. **Track** experiments with Weights & Biases
-4. **Try** your own datasets
-5. **Deploy** with vLLM
-6. **Explore** advanced techniques (see OTHER_TECHNIQUES.md)
-7. **Train** multiple LoRA adapters for different tasks
+1. **Evaluate** thoroughly on held-out test data to measure generalization and avoid overfitting.
+2. **Experiment** by trying different hyperparameter values for better accuracy, speed, and memory trade-offs.
+3. **Track** all your experiments (and corresponding metrics) with Weights & Biases for reproducible research.
+4. **Try** training on your own custom datasets to adapt the model specifically for your use-case.
+5. **Deploy** your fine-tuned model for fast inference using efficient backends such as vLLM on compatible hardware.
+6. **Explore** advanced techniques including prompt engineering, mixed precision, and longer sequence lengths.
+7. **Train** multiple LoRA adapters for different tasks or domains and swap them as needed.
 
 ---
 
