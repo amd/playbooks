@@ -17,15 +17,9 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 
 ## Launching ComfyUI
 
-<!-- @os:windows -->
-
 To launch ComfyUI on Windows, simply click the ComfyUI shortcut on your Desktop.
-<!-- @os:end -->
 
 <!-- @os:linux -->
-
-To launch ComfyUI, simply click the ComfyUI icon on your Desktop.
-
 > **Tip**: If you installed ComfyUI manually, navigate to the installation folder, run `python3 main.py --use-pytorch-cross-attention` and open `http://127.0.0.1:8188` in your browser to access the interface.
 <!-- @os:end -->
 
