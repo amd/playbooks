@@ -56,6 +56,9 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.has_playbooks == 'true'
     runs-on: [self-hosted, Windows, halo]
+    env:
+      PYTHONUTF8: 1
+      PYTHONIOENCODING: utf-8
     strategy:
       fail-fast: false
       matrix:
