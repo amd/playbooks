@@ -1,4 +1,4 @@
-# Clustering with Two Halos (RPC Server)
+# Clustering Two STX Halos with llama.cpp RPC
 
 ## Overview
 
@@ -275,6 +275,7 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
 
 `llama-cli` provides a terminal-based interface for interacting directly with the model. It is ideal for benchmarking, debugging, and low-level experimentation.
 
+<!-- @os:linux -->
 ```bash
 ./llama-cli \
   -m /path/to/GLM-4.7-GGUF/UD-Q4_K_XL/GLM-4.7-UD-Q4_K_XL-00001-of-00005.gguf \
@@ -285,10 +286,30 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
+> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `hostname -I | awk '{print $1}'` to find its local IP address. Use the address on your local network (typically starting with `192.168.` or `10.`).
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note**: Run this command in Terminal.
+
+```powershell
+.\llama-cli.exe `
+  -m C:\path\to\GLM-4.7-GGUF\UD-Q4_K_XL\GLM-4.7-UD-Q4_K_XL-00001-of-00005.gguf `
+  -c 32768 `
+  -fa on `
+  -ngl 999 `
+  --no-mmap `
+  --rpc <RPC_WORKER_IP>:50053
+```
+
+> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `ipconfig | findstr /C:"IPv4"` in a terminal to find its local IP address. Use the address on your local network (typically starting with `192.168.` or `10.`).
+<!-- @os:end -->
+
 #### llama-server
 
 `llama-server` exposes the same inference engine through a persistent server process with an integrated web UI and an OpenAI-compatible HTTP API. This is the preferred interface for longer-running deployments, multi-user access, and integration with external tooling.
 
+<!-- @os:linux -->
 ```bash
 ./llama-server \
   -m /path/to/GLM-4.7-GGUF/UD-Q4_K_XL/GLM-4.7-UD-Q4_K_XL-00001-of-00005.gguf \
@@ -300,6 +321,27 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
   --port 8081 \
   --rpc <RPC_WORKER_IP>:50053
 ```
+
+> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `hostname -I | awk '{print $1}'` to find its local IP address. Use the address on your local network (typically starting with `192.168.` or `10.`).
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note**: Run this command in Terminal.
+
+```powershell
+.\llama-server.exe `
+  -m C:\path\to\GLM-4.7-GGUF\UD-Q4_K_XL\GLM-4.7-UD-Q4_K_XL-00001-of-00005.gguf `
+  -c 32768 `
+  -fa on `
+  -ngl 999 `
+  --no-mmap `
+  --host 0.0.0.0 `
+  --port 8081 `
+  --rpc <RPC_WORKER_IP>:50053
+```
+
+> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `ipconfig | findstr /C:"IPv4"` in a terminal to find its local IP address. Use the address on your local network (typically starting with `192.168.` or `10.`).
+<!-- @os:end -->
 
 Once started, access the web UI at `http://<HOST_IP>:8081`.
 
