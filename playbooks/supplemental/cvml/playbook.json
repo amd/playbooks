@@ -13,5 +13,5 @@
   "isFeatured": false,
   "developed": false,
   "published": true,
-  "tags": ["cvml", "perception", "ryzenai", "rocm"]
+  "tags": ["cvml", "perception", "ryzenai", "gpu", "npu", "inference"]
 }
