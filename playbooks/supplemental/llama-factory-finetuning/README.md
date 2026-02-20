@@ -15,7 +15,7 @@ This playbook teaches you how to finetune LLMs using llama factory on your STX H
 - How to export the fine-tuned model 
 
 ## Time & Risk
-- Duration: It will take about 30 miniutes to run this playbook at AMD Lab, but the duration of real finetuning case will depend on model size and dataset size
+- Duration: It will take about 30 minutes to run this playbook at AMD Lab, but the duration of real finetuning case will depend on model/dataset size and network speed.
 - Risk: Finetuning is not an easy task, and you may meet some questions,like out-of-memory and accuracy. Please check [Llama factory FAQs](https://github.com/hiyouga/LlamaFactory/issues/4614) first. 
 
 ## Instructions
