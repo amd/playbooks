@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import raiImg from "@/app/assets/rai.png";
 
 const devices = [
   { id: "stx-halo", name: "STX Halo™" },
@@ -63,7 +64,7 @@ export default function DeviceCarousel() {
       {/* Image */}
       <div className="flex justify-center">
         <img
-          src="/rai.png"
+          src={raiImg.src}
           alt="AMD Ryzen AI"
           className="max-h-64 md:max-h-80 w-auto object-contain"
         />
