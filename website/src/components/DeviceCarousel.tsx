@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import raiImg from "@/app/assets/rai.png";
+import haloImg from "@/app/assets/halo.png";
 
 const devices = [
   { id: "stx-halo", name: "STX Halo™" },
-  { id: "stx-point", name: "STX Point" },
   { id: "kraken", name: "Kraken" },
   { id: "amd-radeon", name: "Radeon™ GPUs" },
 ];
@@ -64,8 +64,8 @@ export default function DeviceCarousel() {
       {/* Image */}
       <div className="flex justify-center">
         <img
-          src={raiImg.src}
-          alt="AMD Ryzen AI"
+          src={devices[activeIndex].id === "stx-halo" ? haloImg.src : raiImg.src}
+          alt={devices[activeIndex].name}
           className="max-h-64 md:max-h-80 w-auto object-contain"
         />
       </div>
