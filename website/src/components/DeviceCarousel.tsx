@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import raiImg from "@/app/assets/rai.png";
 import haloImg from "@/app/assets/halo.png";
 import radeonImg from "@/app/assets/radeon.png";
@@ -26,26 +26,9 @@ interface DeviceCarouselProps {
 }
 
 export default function DeviceCarousel({ activeId, onActiveIdChange }: DeviceCarouselProps) {
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-
   const selectDevice = useCallback((id: string) => {
     onActiveIdChange(id);
-    setIsAutoPlaying(false);
   }, [onActiveIdChange]);
-
-  const goNext = useCallback(() => {
-    onActiveIdChange((() => {
-      const allIds = [ALL_ID, ...devices.map((d) => d.id)];
-      const idx = allIds.indexOf(activeId);
-      return allIds[(idx + 1) % allIds.length];
-    })());
-  }, [activeId, onActiveIdChange]);
-
-  useEffect(() => {
-    if (!isAutoPlaying) return;
-    const interval = setInterval(goNext, 5000);
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, goNext]);
 
   const isAll = activeId === ALL_ID;
 

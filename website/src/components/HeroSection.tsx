@@ -29,7 +29,7 @@ export default function HeroSection() {
           </h1>
           
           <p className="text-lg md:text-xl text-[#a0a0a0] max-w-2xl mx-auto">
-            Step-by-step playbooks and powerful AI models ready to run. Choose your device to get started.
+            Step-by-step playbooks and powerful AI models ready to run.{activeId === "all" && " Choose your device to get started."}
           </p>
         </div>
 
