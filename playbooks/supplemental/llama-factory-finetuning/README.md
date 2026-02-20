@@ -8,7 +8,7 @@ This playbook teaches you how to finetune LLMs using llama factory on your STX H
 
 ## What you'll accomplish
 
-In This Playbook, You Will Learn
+In this playbook, you Will Learn
 - How to set up llama factory with ROCm support
 - How to configure LLM finetuning parameters (using Qwen/Qwen3-4B-Instruct-2507 as an example)
 - How to run llama factory finetuning
@@ -113,7 +113,7 @@ Llama factory supports mutilple finetuning schemes, and has provides the paramet
 
 | Finetuning schemes | Llama Factory Examples |
 |-----------|------|
-| full-Parameter    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
+| Full-Parameter    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
 | LoRA fine-tuning  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
 | QLoRA fine-tuning | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
