@@ -6,8 +6,9 @@ Efficient fine-tuning is vital for adapting large language models (LLMs) to down
 
 This playbook teaches you how to finetune LLMs using llama factory on your STX Halo™ GPU and other AMD RDNA3/RDNA4 GPUs.
 
-## In This Playbook, You Will Learn
+## What you'll accomplish
 
+In This Playbook, You Will Learn
 - How to set up llama factory with ROCm support
 - How to configure LLM finetuning parameters (using Qwen/Qwen3-4B-Instruct-2507 as an example)
 - How to run llama factory finetuning
@@ -108,7 +109,14 @@ In this playbook, we will use the identity and alpaca_en_demo datasets as an exa
 
 #### Finetuning parameter configuration
 
-Llama factory supports mutilple finetuning schemes, and has provides the parameter configuration examples for fine-tuning. You can find full-Parameter fine-tuning example from [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full), LoRA fine-tuning example in [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora),and QLoRA fine-tuning example in [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora).
+Llama factory supports mutilple finetuning schemes, and has provides the parameter configuration examples for fine-tuning. 
+
+| Finetuning schemes | Llama Factory Examples |
+|-----------|------|
+| full-Parameter    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
+| LoRA fine-tuning  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
+| QLoRA fine-tuning | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
+
 
 These example configuration files have specified model parameters, fine-tuning method parameters, dataset parameters, evaluation parameters, etc. You need to configure them according to your own needs. In this playbook, we take [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml) as an example. 
 
@@ -145,7 +153,7 @@ sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_qlora/qwen3_lora_sft_b
 
 #### Run Llama factory finetuning 
 
-**llamafactory-cli** is the official command-line interface (CLI) tool for LLaMA Factory,developed to simplify end-to-end LLM workflows (data preparation → fine-tuning → evaluation → deployment) without writing complex code.For training/fine-tuning, **llamafactory-cli train** is the flagship subcommand of the LLaMA Factory CLI, designed for end-to-end fine-tuning of large language models (LLMs) with minimal code. It abstracts complex fine-tuning workflows (data preprocessing, hyperparameter tuning, hardware optimization) into a single CLI command, supporting multiple fine-tuning paradigms (LoRA/QLoRA/Full Fine-Tuning) and optimized for low-resource GPUs (e.g., QLoRA on 16GB VRAM). It enforces best practices (e.g., gradient checkpointing, mixed precision) and natively integrates with Hugging Face ecosystems, making it the primary tool for customizing LLMs in LLaMA Factory.
+**llamafactory-cli** is the official command-line interface (CLI) tool for LLaMA Factory,developed to simplify end-to-end LLM workflows (data preparation → fine-tuning → evaluation → deployment) without writing complex code.For training/fine-tuning, **llamafactory-cli train** is the core subcommand of the LLaMA Factory CLI, designed for end-to-end fine-tuning of large language models (LLMs) with minimal code. It abstracts complex fine-tuning workflows (data preprocessing, hyperparameter tuning, hardware optimization) into a single CLI command, supporting multiple fine-tuning paradigms (LoRA/QLoRA/Full Fine-Tuning) and optimized for low-resource GPUs (e.g., QLoRA on 16GB VRAM). It enforces best practices (e.g., gradient checkpointing, mixed precision) and natively integrates with Hugging Face ecosystems, making it the primary tool for customizing LLMs in LLaMA Factory.
 
 You can run llama factory finetuning using the below command,which is based on the modified configuration file of Qwen3 LoRA finetuning. 
 ```bash
@@ -168,7 +176,7 @@ Once you have done the fine-tuning, you may need to test the fine-tuned model to
 
 #### Test the fine-tuned model 
 
-**llamafactory-cli chat** is a core subcommand of the LLaMA Factory CLI, designed for interactive chat/inference with LLMs (both base models and LoRA-fine-tuned models). It simplifies the process of running conversational inference with minimal configuration, supports mainstream LLMs, and offers flexible control over generation hyperparameters (temperature, max tokens, etc.). This tool has multiple inference backend , like Huggingafce transformers, vLLM and ktransformers. Default backend is huggingface transformers. Llama factory also provided the sample configuration to run inference of fine-tuned models in [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). You can also modify this sample configuration to change the inference settings,e.g.,inference backend.
+**llamafactory-cli chat** is designed for interactive chat/inference with LLMs (both base models and LoRA-fine-tuned models). It simplifies the process of running conversational inference with minimal configuration, supports mainstream LLMs, and offers flexible control over generation hyperparameters (temperature, max tokens, etc.). This tool has multiple inference backend , like Huggingafce transformers, vLLM and ktransformers. Default backend is huggingface transformers. Llama factory has provided the sample configuration to run inference of fine-tuned models in [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). You can also modify this sample configuration to change the inference settings,e.g.,inference backend.
 
 In this playbook, we used the below command to test Qwen3 finetuned model.
 
@@ -183,14 +191,14 @@ An example chat of finetuned model is shown as below.
 
 #### Export the fine-tuned model
 
-We don't want to load the pre-trained model and the LoRA adapter separately every time we perform inference. Therefore, we need to merge and export the pre-trained model and the LoRA adapter into a single model for production deployment. **llamafactory-cli export** is a critical subcommand of the LLaMA Factory CLI, designed to convert fine-tuned LLMs (base models + LoRA adapters) into deployment-friendly formats for production use. You can use the merged finetuned model file as a normal HuugingFace model file. Llama factory also provided the sample configurations in [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
+We don't want to load the pre-trained model and the LoRA adapter separately every time we perform inference. Therefore, we need to merge and export the pre-trained model and the LoRA adapter into a single model for production deployment. **llamafactory-cli export** is designed to convert fine-tuned LLMs (base models + LoRA adapters) into deployment-friendly formats for production use. You can use the merged finetuned model file as a normal HuugingFace model file. Llama factory also provided the sample configurations in [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
 In this playbook, we used the below command to export Qwen3 finetuned model. 
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
-The result of exporting finetuned model is shown as below.
+The result of exporting finetuned model is shown as below. You can run the exported model files through vLLM,hugging face transformers library and other inference tools. 
 
 <p align="center">
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Finetuned model " width="600"/>
