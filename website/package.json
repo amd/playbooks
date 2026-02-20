@@ -27,8 +27,8 @@
     "@types/react-dom": "^19",
     "@types/react-syntax-highlighter": "^15.5.13",
     "cross-env": "^10.1.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.0.7",
+    "eslint": "^10.0.1",
+    "eslint-config-next": "^0.2.4",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
