@@ -7,7 +7,7 @@ import radeonImg from "@/app/assets/radeon.png";
 
 const devices = [
   { id: "stx-halo", name: "STX Halo™", img: haloImg },
-  { id: "kraken", name: "Kraken", img: raiImg },
+  { id: "Krackan", name: "Krackan Point™", img: raiImg },
   { id: "amd-radeon", name: "Radeon™ GPUs", img: radeonImg },
 ];
 

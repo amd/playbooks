@@ -6,7 +6,7 @@
   "platforms": ["windows", "linux"],
   "difficulty": "beginner",
   "isNew": false,
-  "isFeatured": false,
+  "isFeatured": true,
   "published": true,
   "tags": ["image-generation", "comfyui", "z-image-turbo"],
   "coverImage": "assets/cover.jpeg"
