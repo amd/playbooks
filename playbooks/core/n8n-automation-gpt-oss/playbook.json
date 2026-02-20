@@ -4,6 +4,10 @@
   "description": "Build an AI-powered news summarizer using n8n and Lemonade on STX Halo™",
   "time": 30,
   "platforms": ["windows", "linux"],
+  "architectures": {
+    "windows": ["halo"],
+    "linux": ["halo"]
+  },
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,

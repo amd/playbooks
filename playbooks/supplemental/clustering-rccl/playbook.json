@@ -4,6 +4,10 @@
   "description": "Set up a multi-node cluster using two STX Halo™ devices with RCCL for distributed workloads",
   "time": 90,
   "platforms": ["linux", "windows"],
+  "architectures": {
+    "linux": ["halo"],
+    "windows": ["halo"]
+  },
   "difficulty": "advanced",
   "isNew": true,
   "isFeatured": false,

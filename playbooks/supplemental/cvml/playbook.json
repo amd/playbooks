@@ -4,6 +4,10 @@
   "description": "Build local perception capabilities using CVML SDK on top of RyzenAI and ROCm",
   "time": 60,
   "platforms": ["linux", "windows"],
+  "architectures": {
+    "linux": ["halo"],
+    "windows": ["halo"]
+  },
   "difficulty": "intermediate",
   "isNew": true,
   "isFeatured": false,

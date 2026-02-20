@@ -4,6 +4,9 @@
   "description": "Write and optimize custom GPU kernels using PyTorch and ROCm on STX Halo™",
   "time": 120,
   "platforms": ["linux"],
+  "architectures": {
+    "linux": ["halo"]
+  },
   "difficulty": "advanced",
   "isNew": false,
   "isFeatured": false,

@@ -4,6 +4,10 @@
   "description": "Use VSCode with locally-running Qwen3-Coder for private code assistance on STX Halo™",
   "time": 60,
   "platforms": ["windows", "linux"],
+  "architectures": {
+    "windows": ["halo"],
+    "linux": ["halo"]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
