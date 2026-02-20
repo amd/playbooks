@@ -27,9 +27,11 @@ llama factory depends on PyTorch, and rocm developers can install PyTorch throug
 - Using a wheels package from [offical PyTorch webiste](https://pytorch.org/get-started/locally/)
 - Building PyTorch from source as the steps of [rocm document](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/3rd-party/pytorch-install.html#build-pytorch-from-source)
 
-For this playbook, we'll use the **prebuilt Docker image** which includes Pytorch with ROCm support, making it the easiest way to get started on AMD GPUs. The below command is just for your reference, please use the latest version ROCm docker image.
+For this playbook, we'll use the **prebuilt ROCm Pytotch Docker image** as an example, making it the easiest way to get started on AMD GPUs. The below command is just for your reference, please use the latest version ROCm docker image.
 
-#### Setup docker environment on your device
+If ROCm Pytorch has been pre-installed on your device, you may skip the below optional steps and install llama factory directly.
+
+#### [optional]Setup docker environment on your device
 This playbook needs ROCm PyTorch docker container,please ensure Docker is installed and configured correctly. Follow the [Docker installation guide](https://docs.docker.com/engine/install/) for your operating system.
 
 Note: Ensure the Docker permissions are correctly configured. To configure permissions to allow non-root access, run the following commands:
@@ -45,14 +47,14 @@ Verify Docker is working correctly with:
 docker run hello-world
 ```
 
-#### Pull the Docker Image
+#### [optional]Pull the Docker Image
 First, pull the ROCm PyTorch Docker image:
 
 ```bash
 docker pull rocm/pytorch:rocm7.2_ubuntu24.04_py3.12_pytorch_release_2.9.1 
 ```
 
-#### Launch the PyTorch docker container
+#### [optional]Launch the PyTorch docker container
 Start the ROCm PyTorch container with AMD GPU access and mount your local data directory if need.
 
 ```bash
