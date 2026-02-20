@@ -4,6 +4,7 @@ import HeroSection from "@/components/HeroSection";
 import DeveloperProgramSection from "@/components/BuiltInAppsSection";
 import PlaybooksSection from "@/components/PlaybooksSection";
 import BuiltInModelsSection from "@/components/BuiltInModelsSection";
+import RocmSoftwareSection from "@/components/RocmSoftwareSection";
 import SupportBanner from "@/components/SupportBanner";
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
       <PlaybooksSection />
       <DeveloperProgramSection />
       <BuiltInModelsSection />
+      <RocmSoftwareSection />
       <SupportBanner />
       <Footer />
     </main>
