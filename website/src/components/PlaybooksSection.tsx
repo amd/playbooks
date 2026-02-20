@@ -4,6 +4,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import type { Playbook, Platform } from "@/types/playbook";
 import { formatTime, platformNames } from "@/types/playbook";
+import { deviceToHash } from "./HeroSection";
 
 function PlatformBadge({ platform }: { platform: Platform }) {
   const icons: Record<Platform, ReactNode> = {
@@ -39,7 +40,11 @@ function DifficultyBadge({ difficulty }: { difficulty?: string }) {
   );
 }
 
-export default function PlaybooksSection() {
+interface PlaybooksSectionProps {
+  activeDevice?: string;
+}
+
+export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps) {
   const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
@@ -66,6 +71,9 @@ export default function PlaybooksSection() {
   const featuredPlaybook = playbooks.find((p) => p.isFeatured);
   const regularPlaybooks = playbooks.filter((p) => !p.isFeatured);
   const displayedPlaybooks = showAll ? regularPlaybooks : regularPlaybooks.slice(0, 6);
+
+  const deviceParam = activeDevice && activeDevice !== "all" ? `?device=${deviceToHash[activeDevice] || activeDevice}` : "";
+  const playbookHref = (id: string) => `/playbooks/${id}${deviceParam}`;
 
   return (
     <section className="py-12 px-6 relative overflow-hidden" id="playbooks">
@@ -143,7 +151,7 @@ export default function PlaybooksSection() {
           <>
             {/* Featured Playbook - Hero Style */}
             {featuredPlaybook && (
-              <Link href={`/playbooks/${featuredPlaybook.id}`} className="block mb-6">
+              <Link href={playbookHref(featuredPlaybook.id)} className="block mb-6">
                 <div className="group relative bg-gradient-to-r from-[#1e1e1e] to-[#242424] border border-[#D4915D]/30 rounded-xl overflow-hidden hover:border-[#D4915D]/60 transition-all duration-300">
                   <div className="absolute inset-0 bg-gradient-to-r from-[#D4915D]/5 to-transparent" />
                   <div className="absolute top-0 right-0 w-48 h-48 bg-[#D4915D]/5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
@@ -200,7 +208,7 @@ export default function PlaybooksSection() {
             {/* Playbook Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
               {displayedPlaybooks.map((playbook) => (
-                <Link key={playbook.id} href={`/playbooks/${playbook.id}`} className="block group">
+                <Link key={playbook.id} href={playbookHref(playbook.id)} className="block group">
                   <div className="h-full bg-[#1e1e1e] border border-[#333333] rounded-lg p-4 hover:border-[#D4915D]/50 hover:bg-[#242424] transition-all duration-300">
                     <div className="flex items-start justify-between mb-3">
                       <div className="p-1.5 rounded-md bg-[#D4915D]/10 border border-[#D4915D]/20">

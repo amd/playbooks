@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import DeviceCarousel from "./DeviceCarousel";
 
 const titles: Record<string, { prefix: string; highlight: string }> = {
@@ -16,7 +16,7 @@ const hashToDevice: Record<string, string> = {
   radeon: "amd-radeon",
 };
 
-const deviceToHash: Record<string, string> = {
+export const deviceToHash: Record<string, string> = {
   "stx-halo": "halo",
   Krackan: "krackan",
   "amd-radeon": "radeon",
@@ -28,23 +28,27 @@ function deviceFromHash(): string {
   return hashToDevice[raw] ?? (raw ? "all" : "stx-halo");
 }
 
-export default function HeroSection() {
-  const [activeId, setActiveId] = useState("stx-halo");
+interface HeroSectionProps {
+  activeDevice: string;
+  onDeviceChange: (id: string) => void;
+}
 
+export default function HeroSection({ activeDevice, onDeviceChange }: HeroSectionProps) {
   useEffect(() => {
-    setActiveId(deviceFromHash());
+    onDeviceChange(deviceFromHash());
 
-    const onHashChange = () => setActiveId(deviceFromHash());
+    const onHashChange = () => onDeviceChange(deviceFromHash());
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
+  }, [onDeviceChange]);
 
   const handleActiveIdChange = useCallback((id: string) => {
-    setActiveId(id);
+    onDeviceChange(id);
     const hash = deviceToHash[id];
     window.history.replaceState(null, "", hash ? `#${hash}` : window.location.pathname);
-  }, []);
-  const { prefix, highlight } = titles[activeId] ?? titles.all;
+  }, [onDeviceChange]);
+
+  const { prefix, highlight } = titles[activeDevice] ?? titles.all;
 
   return (
     <section className="pt-28 pb-4 px-6 gradient-hero relative overflow-hidden">
@@ -61,12 +65,12 @@ export default function HeroSection() {
           </h1>
           
           <p className="text-lg md:text-xl text-[#a0a0a0] max-w-2xl mx-auto">
-            Step-by-step playbooks and powerful AI models ready to run.{activeId === "all" && " Choose your device to get started."}
+            Step-by-step playbooks and powerful AI models ready to run.{activeDevice === "all" && " Choose your device to get started."}
           </p>
         </div>
 
         {/* Device Carousel */}
-        <DeviceCarousel activeId={activeId} onActiveIdChange={handleActiveIdChange} />
+        <DeviceCarousel activeId={activeDevice} onActiveIdChange={handleActiveIdChange} />
       </div>
     </section>
   );
