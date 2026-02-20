@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DeviceCarousel from "./DeviceCarousel";
 
 const titles: Record<string, { prefix: string; highlight: string }> = {
@@ -10,8 +10,40 @@ const titles: Record<string, { prefix: string; highlight: string }> = {
   "amd-radeon": { prefix: "Start your journey on", highlight: "Radeon GPUs™" },
 };
 
+const hashToDevice: Record<string, string> = {
+  halo: "stx-halo",
+  krackan: "Krackan",
+  radeon: "amd-radeon",
+};
+
+const deviceToHash: Record<string, string> = {
+  "stx-halo": "halo",
+  Krackan: "krackan",
+  "amd-radeon": "radeon",
+};
+
+function deviceFromHash(): string {
+  if (typeof window === "undefined") return "all";
+  const raw = window.location.hash.replace("#", "").toLowerCase();
+  return hashToDevice[raw] ?? "all";
+}
+
 export default function HeroSection() {
   const [activeId, setActiveId] = useState("all");
+
+  useEffect(() => {
+    setActiveId(deviceFromHash());
+
+    const onHashChange = () => setActiveId(deviceFromHash());
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  const handleActiveIdChange = useCallback((id: string) => {
+    setActiveId(id);
+    const hash = deviceToHash[id];
+    window.history.replaceState(null, "", hash ? `#${hash}` : window.location.pathname);
+  }, []);
   const { prefix, highlight } = titles[activeId] ?? titles.all;
 
   return (
@@ -34,7 +66,7 @@ export default function HeroSection() {
         </div>
 
         {/* Device Carousel */}
-        <DeviceCarousel activeId={activeId} onActiveIdChange={setActiveId} />
+        <DeviceCarousel activeId={activeId} onActiveIdChange={handleActiveIdChange} />
       </div>
     </section>
   );
