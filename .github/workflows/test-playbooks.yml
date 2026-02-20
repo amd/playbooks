@@ -1,10 +1,12 @@
 name: Test Playbooks
 
 on:
+  schedule:
+    - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
       playbook_id:
-        description: 'Specific playbook ID to test (leave empty to test all changed playbooks)'
+        description: 'Specific playbook ID to test (leave empty to test all playbooks)'
         required: false
         type: string
   pull_request:
@@ -31,11 +33,10 @@ jobs:
             # Manual trigger with specific playbook
             echo "playbooks=[\"${{ github.event.inputs.playbook_id }}\"]" >> $GITHUB_OUTPUT
             echo "has_playbooks=true" >> $GITHUB_OUTPUT
-          else
-            # Detect changed playbooks from PR
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            # PR: detect changed playbooks
             CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} -- 'playbooks/core/*' 'playbooks/supplemental/*' 2>/dev/null || echo "")
             
-            # Extract unique playbook IDs
             PLAYBOOK_IDS=$(echo "$CHANGED_FILES" | grep -E '^playbooks/(core|supplemental)/[^/]+/' | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
             
             if [ "$PLAYBOOK_IDS" = "[]" ] || [ -z "$PLAYBOOK_IDS" ]; then
@@ -43,6 +44,17 @@ jobs:
               echo "has_playbooks=false" >> $GITHUB_OUTPUT
             else
               echo "playbooks=$PLAYBOOK_IDS" >> $GITHUB_OUTPUT
+              echo "has_playbooks=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Nightly schedule or manual dispatch without specific playbook: target all playbooks
+            ALL_PLAYBOOKS=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            
+            if [ "$ALL_PLAYBOOKS" = "[]" ] || [ -z "$ALL_PLAYBOOKS" ]; then
+              echo "playbooks=[]" >> $GITHUB_OUTPUT
+              echo "has_playbooks=false" >> $GITHUB_OUTPUT
+            else
+              echo "playbooks=$ALL_PLAYBOOKS" >> $GITHUB_OUTPUT
               echo "has_playbooks=true" >> $GITHUB_OUTPUT
             fi
           fi
