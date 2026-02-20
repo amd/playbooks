@@ -199,5 +199,6 @@ The result of exporting finetuned model is shown as below.
 ## Next Steps
 - **Try more models on AMD GPUs**: We use qwen3 as an example, developer can try other supported models,like gpt-oss, on AMD GPUs.
 - **Try more finetuning schemes on AMD GPUs**: We use LoRA as an example, developer can try others,like full-Parameter, on AMD GPUs.
+- **Try Fine-Tuning with LLaMA Factory GUI Tool**: LLaMA-Factory supports zero-code fine-tuning of large language models through WebUI, developer can also try [this tool](https://llamafactory.readthedocs.io/en/latest/getting_started/webui.html) on AMD GPUs. 
 
 For more documentation, please visit: https://llamafactory.readthedocs.io/en/latest/ 
