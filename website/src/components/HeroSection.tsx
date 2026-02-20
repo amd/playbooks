@@ -25,11 +25,11 @@ const deviceToHash: Record<string, string> = {
 function deviceFromHash(): string {
   if (typeof window === "undefined") return "all";
   const raw = window.location.hash.replace("#", "").toLowerCase();
-  return hashToDevice[raw] ?? "all";
+  return hashToDevice[raw] ?? (raw ? "all" : "stx-halo");
 }
 
 export default function HeroSection() {
-  const [activeId, setActiveId] = useState("all");
+  const [activeId, setActiveId] = useState("stx-halo");
 
   useEffect(() => {
     setActiveId(deviceFromHash());
