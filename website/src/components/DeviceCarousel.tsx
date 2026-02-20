@@ -6,9 +6,9 @@ import haloImg from "@/app/assets/halo.png";
 import radeonImg from "@/app/assets/radeon.png";
 
 const devices = [
-  { id: "stx-halo", name: "STX Halo™" },
-  { id: "kraken", name: "Kraken" },
-  { id: "amd-radeon", name: "Radeon™ GPUs" },
+  { id: "stx-halo", name: "STX Halo™", img: haloImg },
+  { id: "kraken", name: "Kraken", img: raiImg },
+  { id: "amd-radeon", name: "Radeon™ GPUs", img: radeonImg },
 ];
 
 const ACCENT = "#D4915D";
@@ -62,19 +62,21 @@ export default function DeviceCarousel() {
         </div>
       </div>
 
-      {/* Image */}
-      <div className="flex justify-center">
-        <img
-          src={
-            devices[activeIndex].id === "stx-halo"
-              ? haloImg.src
-              : devices[activeIndex].id === "amd-radeon"
-                ? radeonImg.src
-                : raiImg.src
-          }
-          alt={devices[activeIndex].name}
-          className="max-h-48 md:max-h-50 w-auto object-contain"
-        />
+      {/* Image with crossfade */}
+      <div className="relative flex justify-center" style={{ minHeight: "200px" }}>
+        {devices.map((device, index) => (
+          <img
+            key={device.id}
+            src={device.img.src}
+            alt={device.name}
+            className="max-h-48 md:max-h-50 w-auto object-contain absolute transition-all duration-500 ease-in-out"
+            style={{
+              opacity: index === activeIndex ? 1 : 0,
+              transform: index === activeIndex ? "scale(1)" : "scale(0.95)",
+              pointerEvents: index === activeIndex ? "auto" : "none",
+            }}
+          />
+        ))}
       </div>
 
     </div>
