@@ -6,8 +6,8 @@ import { useState } from "react";
 import AMDLogo from "@/app/assets/AMD_Logo.png";
 
 const navLinks = [
-  { name: "Playbooks", href: "#playbooks" },
-  { name: "Models", href: "#models" },
+  { name: "Playbooks", href: "/#playbooks" },
+  { name: "Models", href: "/#models" },
   { name: "Docs", href: "/docs", external: true },
 ];
 
