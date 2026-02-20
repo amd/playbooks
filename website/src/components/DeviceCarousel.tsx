@@ -20,22 +20,26 @@ const overlapStyles: { translateX: string; translateY: string; rotate: string; z
   { translateX: "100%", translateY: "2%", rotate: "4deg", zIndex: 2 },
 ];
 
-export default function DeviceCarousel() {
-  const [activeId, setActiveId] = useState<string>(ALL_ID);
+interface DeviceCarouselProps {
+  activeId: string;
+  onActiveIdChange: (id: string) => void;
+}
+
+export default function DeviceCarousel({ activeId, onActiveIdChange }: DeviceCarouselProps) {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   const selectDevice = useCallback((id: string) => {
-    setActiveId(id);
+    onActiveIdChange(id);
     setIsAutoPlaying(false);
-  }, []);
+  }, [onActiveIdChange]);
 
   const goNext = useCallback(() => {
-    setActiveId((prev) => {
+    onActiveIdChange((() => {
       const allIds = [ALL_ID, ...devices.map((d) => d.id)];
-      const idx = allIds.indexOf(prev);
+      const idx = allIds.indexOf(activeId);
       return allIds[(idx + 1) % allIds.length];
-    });
-  }, []);
+    })());
+  }, [activeId, onActiveIdChange]);
 
   useEffect(() => {
     if (!isAutoPlaying) return;
