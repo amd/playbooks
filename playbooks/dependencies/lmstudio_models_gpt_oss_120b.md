@@ -12,3 +12,19 @@ To download the GPT-OSS 120B model:
 LM Studio will automatically download and place the model in the correct directory.
 
 Should you wish to download additional models, you can search for them in the Discover tab and LM Studio will handle the rest.
+
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-model-present-windows timeout=60 hidden=True -->
+```powershell
+lms ls --llm | Select-String -Pattern "gpt-oss-120b"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-model-present-linux timeout=60 hidden=True -->
+```bash
+lms ls --llm | grep -i "gpt-oss-120b"
+```
+<!-- @test:end -->
+<!-- @os:end -->
