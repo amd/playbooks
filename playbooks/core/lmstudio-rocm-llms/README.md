@@ -32,6 +32,24 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 5. Check "Remember settings" and click on `Load Model`.
 6. Send a message and start interacting with the model!
 
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-chat-cli-windows timeout=900 hidden=True -->
+```powershell
+lms load openai/gpt-oss-120b --context-length 128000 --gpu max --identifier gptoss120b-128k
+lms chat gptoss120b-128k -p "Reply with exactly: OK"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-chat-cli-linux timeout=900 hidden=True -->
+```bash
+lms load openai/gpt-oss-120b --context-length 128000 --gpu max --identifier gptoss120b-128k
+lms chat gptoss120b-128k -p "Reply with exactly: OK"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 <p align="center">
   <img src="assets/chat.png" alt="Chatting with gpt-oss-120b on LM Studio" width="600"/>
 </p>
@@ -49,6 +67,24 @@ To set up LM Studio Server, use the following instructions:
 3. Click on the toggle in front of Status: Stopped or press "Ctrl" + "R".  
 4. An OpenAI compliant endpoint will now be running. The address is typically http://127.0.0.1:1234  
 5. Staying on the same "Developer" tab, with the Status: Running, you can deploy an LLM by going through the steps mentioned in "Chatting with an LLM".  
+
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
+```powershell
+lms server start --port 1234
+curl.exe -s http://127.0.0.1:1234/v1/models
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-server-up-linux timeout=120 hidden=True -->
+```bash
+lms server start --port 1234
+curl -s http://127.0.0.1:1234/v1/models
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 
 This model will now be accessible through the LM Studio Server endpoint and will support OpenAI endpoints including:
@@ -93,6 +129,24 @@ except Exception as e:
     print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
 ```
 
+<!-- @test:id=lmstudio-ping-endpoint timeout=300 hidden=True -->
+```python
+import json, urllib.request
+req = urllib.request.Request(
+ "http://127.0.0.1:1234/v1/chat/completions",
+ data=json.dumps({
+   "model": "gptoss120b-128k",
+   "messages": [{"role":"user","content":"Write exactly: OK"}],
+   "temperature": 0,
+   "max_tokens": 5
+ }).encode("utf-8"),
+ headers={"Content-Type":"application/json"},
+ method="POST",
+)
+with urllib.request.urlopen(req, timeout=60) as r:
+ print(r.read().decode("utf-8", "replace"))
+```
+<!-- @test:end --> 
 
 #### Swapping between ROCm and Vulkan backends (Optional)
 
