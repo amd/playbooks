@@ -35,7 +35,7 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-chat-cli-windows timeout=900 hidden=True -->
 ```powershell
-lms load openai/gpt-oss-120b --context-length 128000 --gpu max --identifier gptoss120b-128k
+lms load gpt-oss-120b --context-length 128000 --gpu max --identifier gptoss120b-128k
 lms chat gptoss120b-128k -p "Reply with exactly: OK"
 ```
 <!-- @test:end --> 
@@ -44,7 +44,7 @@ lms chat gptoss120b-128k -p "Reply with exactly: OK"
 <!-- @os:linux -->
 <!-- @test:id=lmstudio-chat-cli-linux timeout=900 hidden=True -->
 ```bash
-lms load openai/gpt-oss-120b --context-length 128000 --gpu max --identifier gptoss120b-128k
+lms load gpt-oss-120b --context-length 128000 --gpu max --identifier gptoss120b-128k
 lms chat gptoss120b-128k -p "Reply with exactly: OK"
 ```
 <!-- @test:end --> 
