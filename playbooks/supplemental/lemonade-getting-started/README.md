@@ -2,9 +2,9 @@
 
 ## Overview
 
-🍋 **Lemonade** is an open-source local AI server that lets you run large language models (LLMs), image generators, and speech models directly on your own hardware. It exposes the models through the industry-standard **OpenAI API**, so any app that works with OpenAI can instantly work with Lemonade.
+🍋 **Lemonade** is an open-source local AI server that lets you run large language models (LLMs), image generators, and audio models directly on your own hardware. It exposes the models through the industry-standard **OpenAI API**, so any app that works with OpenAI can instantly work with Lemonade.
 
-In this playbook, you use Lemonade to run models locally on your machine in minutes. Along the way you will learn how local AI servers work, explore image generation and speech models, build a Python app powered by a local LLM, and optionally run models on an AMD Neural Processing Unit (NPU).
+In this playbook, you'll use Lemonade to run models locally on your machine. The playbook also explains how local AI servers work, explores running image generation and audio models, builds a Python app powered by a local LLM, and optionally runs models on an AMD Neural Processing Unit (NPU).
 
 ## What You'll Learn
 
@@ -23,7 +23,7 @@ Before you begin, make sure you have:
 
 - A PC running **Windows 11** or a supported **Linux** distribution (Ubuntu 24.04/25.04, Arch)
 - At least **16 GB of RAM** (64 GB recommended for larger models)
-- **~4 GB of free disk space** for a small model download
+- **~4–32 GB of free disk space**, depending on the models you download. The largest model in this guide requires ~20 GB.
 - **Python 3.10–3.13** (only needed for the Python integration section)
 - For the NPU section in Part 6, you'll need a Ryzen AI 300 series PC with the latest driver installed from [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers).
 
@@ -72,7 +72,7 @@ lemonade-server --version
 You should see output like:
 
 ```
-lemonade-server 1.x.x
+lemonade-server x.y.z
 ```
 
 If you see a version number, Lemonade is installed and ready to go.
@@ -81,7 +81,7 @@ If you see a version number, Lemonade is installed and ready to go.
 
 ## Core Concepts — How Local AI Servers Work
 
-Before we run a model, it is worth understanding *why* things are set up this way. Lemonade is a **local LLM server**, a process that loads AI models into memory and exposes them to applications over HTTP, just like a cloud AI service would.
+Before we run a model, it is worth understanding *why* things are set up this way. Lemonade is a **local model server**, a process that loads AI models into memory and exposes them to applications over HTTP, just like a cloud AI service would.
 
 ### Why a Server?
 
@@ -106,7 +106,7 @@ This means any library or app that supports OpenAI can talk to Lemonade by point
 
 ## Main Activity — Your First Local AI Chat
 
-This is where it gets fun. You are about to download a real LLM and have a conversation with it, entirely on your own machine.
+Let's download an LLM and have a conversation with it, running the AI entirely on your own machine.
 
 ### Step 3: Download and Run a Model
 
@@ -130,7 +130,6 @@ Download complete.
 Server started on http://localhost:8000
 Launching Lemonade App...
 
-> 
 ```
 
 <!-- @os:windows -->
@@ -144,10 +143,10 @@ On Linux, open your browser and navigate to `http://localhost:8000` to access th
 Try typing a question:
 
 ```
-> What are three fun facts about lemons?
+What are three fun facts about lemons?
 ```
 
-The model will respond directly in the chat window. **Congratulations! You are running generative AI locally.**
+The model will respond directly in the chat window. **Congratulations! You are running a large language model locally.**
 
 In the Server Logs pane in the Lemonade App, you can find telemetry data about the model's performance after each response:
 
@@ -159,41 +158,29 @@ TTFT (s):      0.035
 TPS:           67.06
 ```
 
-### Step 4: Explore the Web UI and Different Modalities
+### Step 4: Explore the Web Interface and Different Modalities
 
 Lemonade includes a built-in web interface where you can:
 
-- **Chat** with the loaded model in a familiar chat window
+- **Interact** with the loaded model in a familiar chat window
 - **Browse models** in the Model Manager tab
 - **Download new models** with one click
 
-This is the same API endpoint that applications use, so anything you see in the web UI is also available programmatically.
-
 Try switching between different modalities using the **Model Manager** tab in the web UI where you can browse models by Recipe or by Category:
 
-1. **Audio for Speech-to-text:** In the Model Manager, download `Whisper-Large-v3-Turbo`. Once loaded, use the audio tab to transcribe a recording of your voice.
-2. **Vision:** The `Gemma-3-4b-it-GGUF` model you already have loaded supports vision. Paste an image into the chat box and ask the model to describe it.
-3. **Image generation:** Download `SDXL-Turbo` from the Model Manager, then switch to the image generation tab and type a prompt to generate an image locally.
+1. **Vision:** The `Gemma-3-4b-it-GGUF` model you already have loaded supports vision. Paste an image into the chat box and ask the model to describe it.
+2. **Image generation:** In the Image category, download an image model such as `SDXL-Turbo` from the Model Manager, then use the Lemonade Image Generator to type a prompt and generate an image locally.
+3. **Audio:** In the Audio category, download an audio model such as `Whisper-Tiny`, which can do speech-to-text. Provide a recording of audio to transcribe it locally. For text-to-speech, try one of the models in the Speech category, such as `kokoro-v1`.
 
 ### Step 5: Try a Model with a Different Backend
 
-First, stop the running server: close the Lemonade App window, then switch to your terminal and press `Ctrl+C` to shut down the server process. Now try restarting with a different backend. By default, Lemonade uses Vulkan for GPU acceleration. If you have a supported AMD discrete GPU, you can switch to ROCm using the following command:
+By default, Lemonade uses Vulkan for GPU acceleration. If you have a supported AMD discrete GPU, you can switch to ROCm using the following command:
 
 ```
 lemonade-server run Gemma-3-4b-it-GGUF --llamacpp rocm
 ```
 
-You can see all available models at any time:
-
-```
-lemonade-server list
-```
-
-Or pre-download a model for offline use later:
-
-```
-lemonade-server pull Llama-3.2-3B-Instruct-GGUF
-```
+You can also set your backend using the environment variable, `LEMONADE_LLAMACPP` to the options: `vulkan`, `rocm`, or `cpu`.
 
 ---
 
@@ -211,6 +198,8 @@ lemonade-server serve
 
 ### Step 7: Install the OpenAI Python Client
 
+In a terminal, install the OpenAI Python Client using the following command:
+
 ```
 pip install openai
 ```
@@ -219,12 +208,14 @@ pip install openai
 
 Load the `Qwen3-Coder-30B-A3B-Instruct` model and use the following prompt to generate a simple Flashcard app. Create a file with the generated code called `flashcards.py`.
 
+Note: Since the `Qwen3-Coder-30B-A3B-Instruct` model requires at least 20 GB of available RAM to run, we've provided the example flashcard application for your convenience.
+
 ```
-Generate me a simple python script that uses the following to call an llm to generate flashcards on a subject that is entered by the user.
+Generate a simple python script that uses the following to call an llm (Gemma-3-4b-it-GGUF) to generate flashcards on a subject that is entered by the user.
 curl -X POST http://localhost:8000/api/v1/chat/completions
 -H “Content-Type: application/json”
 -d ‘{
-“model”: “Qwen3-0.6B-GGUF”,
+“model”: “Gemma-3-4b-it-GGUF”,
 “messages”: [
 {“role”: “user”, “content”: “What is the population of Paris?”}
 ],
@@ -375,6 +366,10 @@ This small app exercises several real-world integration patterns:
 
 These same patterns scale to any application such as chatbots, code assistants, content generators, automation tools.
 
+#### Bonus Challenge
+
+* For an added challenge, try updating the app to have the flashcards read to the user by referencing the example provided [here](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py).
+
 ---
 
 ## Running Models on the NPU
@@ -465,12 +460,10 @@ You have a local AI server running on your own hardware, here is where to go nex
 
 1. **🔌 Connect your favorite apps**: Lemonade works out of the box with [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/), and [many more](https://lemonade-server.ai/marketplace).
 
-2. **📚 Browse more models**: Explore the full [model library](https://lemonade-server.ai/docs/server/server_models/) to find models optimized for coding, reasoning, vision, and more. Use `lemonade-server list` to see what is available.
+2. **📚 Browse more models**: Explore the full [model library](https://lemonade-server.ai/docs/server/server_models/) to find models optimized for coding, reasoning, vision, and more. Use the Lemonade App or `lemonade-server list` to see what is available.
 
-3. **⚡ Unlock ROCm GPU acceleration**: If you have a supported AMD GPU, switch to the ROCm backend for maximum performance: `lemonade-server serve --llamacpp rocm`. See [supported AMD GPUs](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
+3. **⚡ Unlock ROCm GPU acceleration**: If you have a supported AMD GPU, switch to the ROCm backend: `lemonade-server serve --llamacpp rocm`. See [supported AMD GPUs](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
 
-4. **🧠 Explore more NPU models**: Browse the full set of [Hybrid](https://huggingface.co/collections/amd/ryzenai-15-llm-hybrid-models-6859a64b421b5c27e1e53899) and [NPU](https://huggingface.co/collections/amd/ryzenai-15-llm-npu-models-6859846d7c13f81298990db0) models on Hugging Face, or convert your own using the [model preparation guide](https://ryzenai.docs.amd.com/en/latest/oga_model_prepare.html).
+4. **🛠️ Read the full API spec**: Lemonade supports chat completions, embeddings, audio transcription, image generation, text-to-speech, and more. See the [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) for every endpoint.
 
-5. **🛠️ Read the full API spec**: Lemonade supports chat completions, embeddings, audio transcription, image generation, text-to-speech, and more. See the [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) for every endpoint.
-
-6. **🤝 Contribute**: Lemonade is open source. Check out the [contribution guide](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) and look for [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+5. **🤝 Contribute**: Lemonade is open source. Check out the [contribution guide](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) and look for [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
