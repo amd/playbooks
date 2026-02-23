@@ -4,21 +4,20 @@
 
 The Ryzen AI CVML Library is AMD's C++ computer vision and machine learning toolkit that provides powerful, on-device perception capabilities — including depth estimation, face detection, and face mesh tracking. Built on top of the Ryzen AI drivers, the library automatically selects the best available hardware (GPU or NPU) for inference, letting you add AI features to C++ applications without worrying about model training or framework integration. All processing happens locally on your STX Halo™ system, making it ideal for privacy-sensitive, low-latency applications.
 
-This playbook teaches you how to set up the Ryzen AI CVML Library, build the included sample applications, and run real-time face detection using your local camera feed.
+This playbook teaches you how to set up the Ryzen AI CVML Library, build the included sample applications, and run face detection on a sample video.
 
 ## What You'll Learn
 
 - How to install prerequisites and set up the Ryzen AI CVML Library on your STX Halo™ system
 - How the CVML C++ API works: contexts, feature objects, and image buffers
 - How to build and run the included sample applications using CMake and OpenCV
-- How to run real-time face detection from a webcam feed with bounding boxes and landmarks
+- How to run face detection on an image with bounding boxes and landmarks
 - How to integrate CVML features into your own C++ applications
 
 ## Prerequisites
 
 Before starting, ensure you have the following:
 
-- A USB webcam or built-in camera (for the real-time demos)
 - [OpenCV 4.11](https://opencv.org/) downloaded and available on your system
 - CMake installed and available in your system PATH
 
@@ -26,7 +25,7 @@ Before starting, ensure you have the following:
 
 <!-- @os:windows -->
 - [AMD Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html)
-- Visual Studio "Desktop development with C++" build tools
+- [Visual Studio 2022](https://visualstudio.microsoft.com/) with the "Desktop development with C++" workload (includes MSVC compiler, Windows SDK, and C++ build tools)
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -184,35 +183,41 @@ The CVML Library includes ready-to-build sample applications for each feature. L
 
 ## Running Face Detection
 
-The face detection sample detects faces in real time from a camera, image, or video. It draws bounding boxes, confidence scores, and five facial landmarks (two eyes, nose, and two mouth edges) on each detected face.
+The face detection sample detects faces in an image, video, or live camera feed. It draws bounding boxes, confidence scores, and five facial landmarks (two eyes, nose, and two mouth edges) on each detected face.
 
-**Run with your webcam** (default — just launch without arguments):
+First, download a sample image to use as input (photo by [SHVETS production](https://www.pexels.com/photo/young-woman-filming-video-in-light-apartment-7516247/), free to use via Pexels):
+
+```bash
+curl -L -o sample_face.jpg "https://images.pexels.com/photos/7516247/pexels-photo-7516247.jpeg?cs=srgb&dl=pexels-shvets-production-7516247.jpg&fm=jpg"
+```
+
+**Run face detection on the sample image:**
 
 <!-- @os:windows -->
 ```cmd
-cvml-sample-face-detection.exe
+cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
 <!-- @os:linux -->
 ```bash
-./cvml-sample-face-detection
+./cvml-sample-face-detection -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-A window will appear showing your camera feed with green bounding boxes around detected faces, yellow confidence scores, and red landmark dots. Point the camera at yourself or at photos of people to see it in action.
+A window will appear showing the image with a green bounding box around the detected face, a yellow confidence score, and red landmark dots (eyes, nose, mouth edges).
 
-**Run on an image:**
+**Save the annotated output to a file:**
 
 <!-- @os:windows -->
 ```cmd
-cvml-sample-face-detection.exe -i my_photo.jpg
+cvml-sample-face-detection.exe -i sample_face.jpg -o output_face.jpg
 ```
 <!-- @os:end -->
 
 <!-- @os:linux -->
 ```bash
-./cvml-sample-face-detection -i my_photo.jpg
+./cvml-sample-face-detection -i sample_face.jpg -o output_face.jpg
 ```
 <!-- @os:end -->
 
@@ -220,13 +225,13 @@ cvml-sample-face-detection.exe -i my_photo.jpg
 
 <!-- @os:windows -->
 ```cmd
-cvml-sample-face-detection.exe -m precise
+cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 ```
 <!-- @os:end -->
 
 <!-- @os:linux -->
 ```bash
-./cvml-sample-face-detection -m precise
+./cvml-sample-face-detection -i sample_face.jpg -m precise
 ```
 <!-- @os:end -->
 
@@ -259,9 +264,9 @@ Where `AMD_CVML_SDK_ROOT` points to the root of the Ryzen AI CVML Library folder
 
 ## Next Steps
 
-- **Try Depth Estimation**: Run `cvml-sample-depth-estimation` to generate colorized depth maps from your webcam or image files — closer objects appear in warm colors, distant ones in cool colors
-- **Explore Face Mesh**: Run `cvml-sample-face-mesh` to see dense facial geometry tracking with detailed mesh points
-- **Process video files**: Use the `-i` and `-o` flags on any sample to batch-process videos and save annotated output (e.g., `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
+- **Try Depth Estimation**: Run `cvml-sample-depth-estimation -i sample_face.jpg` to generate a colorized depth map — closer objects appear in warm colors, distant ones in cool colors
+- **Explore Face Mesh**: Run `cvml-sample-face-mesh -i sample_face.jpg` to see dense facial geometry tracking with detailed mesh points
+- **Process video files**: Use the `-i` and `-o` flags on any sample to process videos (e.g., `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
 - **Compare model variants**: Try `-m precise` vs the default `-m fast` on face detection to see the accuracy/speed tradeoff firsthand
 - **Build your own app**: Use the CMake integration and C++ API to add CVML features to your own C++ applications
 - **Combine features**: Chain face detection with depth estimation in the same application for richer scene understanding
