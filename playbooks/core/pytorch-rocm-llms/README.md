@@ -13,10 +13,10 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 ### Create a Virtual Environment
 
 <!-- @os:windows -->
-On Windows, open Command Prompt and run:
+On Windows, open Command Prompt and run the following prompt to create a venv with ROCm+Pytorch already installed:
 <!-- @test:id=create-venv timeout=60 -->
 ```cmd
-python -m venv llm-env
+python -m venv llm-env --system-site-packages
 llm-env\Scripts\activate.bat
 ```
 <!-- @test:end -->
@@ -24,11 +24,12 @@ llm-env\Scripts\activate.bat
 <!-- @os:end -->
 
 <!-- @os:linux -->
+On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv llm-env
+python3 -m venv llm-env --system-site-packages
 source llm-env/bin/activate
 ```
 <!-- @test:end -->
@@ -42,7 +43,7 @@ source llm-env/bin/activate
 
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install --upgrade transformers accelerate sentencepiece protobuf
+pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 
@@ -115,16 +116,24 @@ model = AutoModelForCausalLM.from_pretrained(
 <!-- @test:end -->
 
 To try it out:
-
+<!-- @test:id=run-llm-simple timeout=600 setup=activate-venv -->
 ```bash
 python run_llm.py
 ```
+<!-- @test:end -->
 
 ## Building a Document Summarizer
 
 Build on your LLM setup by turning it into a practical document summarizer. In this section, you will use the [summarizer.py](assets/summarizer.py) script to feed in a .txt file and automatically generate a concise summary, all running locally on your GPU.
 
 The script is designed to work out of the box: point it at a text file, pick a model, and it returns a clear 2–3 sentence overview. As you explore the code, you can customize prompts, tweak parameters like length and temperature, and see how different models behave.
+
+To try it out:
+<!-- @test:id=run-summarizer timeout=1000 setup=activate-venv -->
+```bash
+python summarizer.py
+```
+<!-- @test:end -->
 
 ### Usage Examples
 
