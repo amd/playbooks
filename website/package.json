@@ -28,7 +28,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "cross-env": "^10.1.0",
     "eslint": "^9",
-    "eslint-config-next": "16.0.7",
+    "eslint-config-next": "^16.1.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

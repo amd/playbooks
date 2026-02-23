@@ -31,9 +31,9 @@ export default function ConnectSection() {
                       <p className="text-[#a0a0a0] mb-1">Configuring SSH access...</p>
                       <p className="text-[#D4915D]">✓ Connection established</p>
                       <p className="text-[#a0a0a0] mt-2 mb-1">
-                        <span className="text-[#a0a0a0]">$</span> ssh halo@stx-local
+                        <span className="text-[#a0a0a0]">$</span> ssh user@amd-device
                       </p>
-                      <p className="text-[#D4915D]">Welcome to STX Halo™</p>
+                      <p className="text-[#D4915D]">Welcome to AMD Developer Platform</p>
                     </div>
                   </div>
                 </div>
