@@ -78,6 +78,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
+      - name: Debug PATH + lms
+        shell: powershell
+        run: |
+          whoami
+          $env:PATH
+          where.exe lms
+          Get-Command lms -ErrorAction SilentlyContinue
+ 
       - name: Extract and run tests
         id: run_tests
         shell: powershell
