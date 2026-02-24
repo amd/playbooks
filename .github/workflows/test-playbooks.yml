@@ -78,6 +78,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
+      - name: Add LM Studio CLI to PATH for this job
+        shell: powershell
+        run: |
+          echo "C:\Users\user\.lmstudio\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          where.exe lms
+          lms --help
+
       - name: Debug PATH + lms
         shell: powershell
         run: |
