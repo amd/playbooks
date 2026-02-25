@@ -4,9 +4,9 @@
   "description": "Build a real-time speech-to-speech translation system on your STX Halo™",
   "time": 60,
   "platforms": ["windows", "linux"],
-  "architectures": {
+  "tested_platforms": {
     "windows": ["halo"],
-    "linux": ["halo"]
+    "linux": []
   },
   "difficulty": "intermediate",
   "isNew": false,

@@ -74,7 +74,7 @@ jobs:
                   pb_file = Path(f"playbooks/{cat}/{pb_id}/playbook.json")
                   if pb_file.exists():
                       meta = json.loads(pb_file.read_text())
-                      archs = meta.get("architectures", {})
+                      archs = meta.get("tested_platforms", {})
                       if not archs:
                           for p in meta.get("platforms", []):
                               archs[p] = ["halo"]

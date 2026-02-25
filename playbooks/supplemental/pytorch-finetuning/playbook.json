@@ -4,9 +4,9 @@
   "description": "Fine-tune large language models using PyTorch on STX Halo™",
   "time": 90,
   "platforms": ["windows", "linux"],
-  "architectures": {
+  "tested_platforms": {
     "windows": ["halo"],
-    "linux": ["halo"]
+    "linux": []
   },
   "difficulty": "intermediate",
   "isNew": true,

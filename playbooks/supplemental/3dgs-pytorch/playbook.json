@@ -4,8 +4,8 @@
   "description": "Render stunning 3D scenes using Gaussian Splatting with PyTorch and ROCm on STX Halo™",
   "time": 90,
   "platforms": ["linux"],
-  "architectures": {
-    "linux": ["halo"]
+  "tested_platforms": {
+    "linux": []
   },
   "difficulty": "advanced",
   "isNew": false,

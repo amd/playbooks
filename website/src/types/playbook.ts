@@ -65,8 +65,8 @@ export interface PlaybookMeta {
   /** Supported platforms */
   platforms: Platform[];
 
-  /** Supported architectures per platform (used by CI to select runners) */
-  architectures?: Partial<Record<Platform, Architecture[]>>;
+  /** Tested platforms per OS (used by CI to select runners) */
+  tested_platforms?: Partial<Record<Platform, Architecture[]>>;
   
   /** Whether this is a new playbook */
   isNew?: boolean;

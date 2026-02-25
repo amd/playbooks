@@ -4,9 +4,9 @@
   "description": "Set up LM Studio and LM Studio Server to run and serve large language models on STX Halo™",
   "time": 30,
   "platforms": ["windows", "linux"],
-  "architectures": {
+  "tested_platforms": {
     "windows": ["halo"],
-    "linux": ["halo"]
+    "linux": []
   },
   "difficulty": "beginner",
   "isNew": false,

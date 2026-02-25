@@ -4,8 +4,8 @@
   "description": "Build and deploy AI agents using the GAIA framework with llama.cpp on your STX Halo™",
   "time": 60,
   "platforms": ["linux", "windows"],
-  "architectures": {
-    "linux": ["halo"],
+  "tested_platforms": {
+    "linux": [],
     "windows": ["halo"]
   },
   "difficulty": "intermediate",
