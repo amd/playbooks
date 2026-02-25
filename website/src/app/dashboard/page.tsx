@@ -468,8 +468,8 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Setup guide */}
-          <SetupGuide />
+          {/* Setup guide — only shown when the API returned an error */}
+          {error && <SetupGuide />}
         </div>
       </section>
 
