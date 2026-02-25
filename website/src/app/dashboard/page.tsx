@@ -101,17 +101,29 @@ function RunnerStatus({ runner }: { runner: RunnerInfo }) {
   );
 }
 
+const REQUIRED_RUNNERS = 2;
+
 function CellContent({ cell }: { cell: CellData }) {
-  if (cell.runners.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full text-[#6b6b6b] text-sm italic py-3">
-        No runners
-      </div>
-    );
-  }
+  const count = cell.runners.length;
+  const sufficient = count >= REQUIRED_RUNNERS;
 
   return (
     <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <span
+          className={`text-lg font-bold tabular-nums ${
+            sufficient ? "text-green-400" : "text-[#a0a0a0]"
+          }`}
+        >
+          {count}/{REQUIRED_RUNNERS}
+        </span>
+        {!sufficient && (
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-yellow-500/80">
+            needs {REQUIRED_RUNNERS - count} more
+          </span>
+        )}
+      </div>
+
       {cell.runners.map((runner) => (
         <div
           key={runner.runner_id}
@@ -253,6 +265,14 @@ export default function DashboardPage() {
   const busyCount = runners.filter((r) => r.busy).length;
   const offlineCount = totalRunners - onlineCount;
 
+  const totalCombinations = hardwareRows.length * OS_LABELS.length;
+  const sufficientCells = Object.values(matrix).reduce(
+    (acc, osMap) =>
+      acc + Object.values(osMap).filter((cell) => cell.runners.length >= REQUIRED_RUNNERS).length,
+    0
+  );
+  const insufficientCells = totalCombinations - sufficientCells;
+
   return (
     <main className="min-h-screen bg-[#0d0d0d] grid-pattern">
       <Header />
@@ -298,6 +318,15 @@ export default function DashboardPage() {
                   <span className="text-sm text-[#6b6b6b] font-medium">{offlineCount} offline</span>
                 </div>
               )}
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+                insufficientCells === 0
+                  ? "bg-green-900/15 border border-green-800/30"
+                  : "bg-red-900/15 border border-red-800/30"
+              }`}>
+                <span className={`text-sm font-medium ${insufficientCells === 0 ? "text-green-400" : "text-red-400"}`}>
+                  {sufficientCells}/{totalCombinations} combos covered
+                </span>
+              </div>
               {lastFetched && (
                 <div className="ml-auto flex items-center gap-2">
                   <span className="text-xs text-[#6b6b6b]">
@@ -336,52 +365,66 @@ export default function DashboardPage() {
           )}
 
           {!loading && runners.length > 0 && (
-            <div className="overflow-x-auto rounded-xl border border-[#333] animate-fade-in">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-[#1a1a1a]">
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] w-55">
-                      Hardware
-                    </th>
-                    {OS_LABELS.map((os) => (
-                      <th
-                        key={os}
-                        className="text-left px-6 py-4 text-sm font-semibold text-[#D4915D] border-b border-[#333]"
-                      >
-                        <div className="flex items-center gap-2">
-                          {os === "Windows" ? (
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
-                            </svg>
-                          ) : (
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12.504 0c-.155 0-.311.003-.466.009a11.978 11.978 0 00-4.653 1.11c-.635.296-1.24.656-1.804 1.07a12.062 12.062 0 00-3.667 4.6A11.953 11.953 0 00.834 12c0 1.742.372 3.397 1.044 4.888a12.015 12.015 0 002.108 3.2 12.05 12.05 0 003.159 2.437A11.937 11.937 0 0012 24a11.94 11.94 0 004.855-1.025 12.043 12.043 0 003.159-2.437 12.01 12.01 0 002.108-3.2A11.928 11.928 0 0023.166 12a11.95 11.95 0 00-1.08-5.211 12.056 12.056 0 00-3.667-4.6 11.93 11.93 0 00-1.804-1.07A11.978 11.978 0 0012.504 0z" />
-                            </svg>
-                          )}
-                          {os}
-                        </div>
+            <div className="space-y-3 animate-fade-in">
+              <div className="overflow-x-auto rounded-xl border border-[#333]">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-[#1a1a1a]">
+                      <th className="text-left px-6 py-4 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] w-55">
+                        Hardware
                       </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {hardwareRows.map((hw, idx) => (
-                    <tr key={hw} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
-                      <td className="px-6 py-5 text-sm font-semibold text-white border-r border-[#333] align-top">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-block w-2 h-2 rounded-full bg-[#D4915D]" />
-                          {hw}
-                        </div>
-                      </td>
                       {OS_LABELS.map((os) => (
-                        <td key={os} className="px-6 py-5 border-[#333] align-top min-w-[300px]">
-                          <CellContent cell={matrix[hw]?.[os] ?? { runners: [] }} />
-                        </td>
+                        <th
+                          key={os}
+                          className="text-left px-6 py-4 text-sm font-semibold text-[#D4915D] border-b border-[#333]"
+                        >
+                          <div className="flex items-center gap-2">
+                            {os === "Windows" ? (
+                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
+                              </svg>
+                            ) : (
+                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.504 0c-.155 0-.311.003-.466.009a11.978 11.978 0 00-4.653 1.11c-.635.296-1.24.656-1.804 1.07a12.062 12.062 0 00-3.667 4.6A11.953 11.953 0 00.834 12c0 1.742.372 3.397 1.044 4.888a12.015 12.015 0 002.108 3.2 12.05 12.05 0 003.159 2.437A11.937 11.937 0 0012 24a11.94 11.94 0 004.855-1.025 12.043 12.043 0 003.159-2.437 12.01 12.01 0 002.108-3.2A11.928 11.928 0 0023.166 12a11.95 11.95 0 00-1.08-5.211 12.056 12.056 0 00-3.667-4.6 11.93 11.93 0 00-1.804-1.07A11.978 11.978 0 0012.504 0z" />
+                              </svg>
+                            )}
+                            {os}
+                          </div>
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {hardwareRows.map((hw, idx) => (
+                      <tr key={hw} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
+                        <td className="px-6 py-5 text-sm font-semibold text-white border-r border-[#333] align-top">
+                          <div className="flex items-center gap-2">
+                            <span className="inline-block w-2 h-2 rounded-full bg-[#D4915D]" />
+                            {hw}
+                          </div>
+                        </td>
+                        {OS_LABELS.map((os) => (
+                          <td key={os} className="px-6 py-5 border-[#333] align-top min-w-[300px]">
+                            <CellContent cell={matrix[hw]?.[os] ?? { runners: [] }} />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {insufficientCells > 0 && (
+                <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg bg-[#1a1a1a] border border-[#333] text-xs text-[#a0a0a0]">
+                  <svg className="w-4 h-4 text-yellow-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>
+                    <strong className="text-white font-medium">{insufficientCells} combination{insufficientCells > 1 ? "s" : ""}</strong>{" "}
+                    {insufficientCells > 1 ? "have" : "has"} fewer than {REQUIRED_RUNNERS} runners.
+                    Each device + OS pair requires {REQUIRED_RUNNERS} machines for redundancy against maintenance, failures, and provisioning delays.
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
