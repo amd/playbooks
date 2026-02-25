@@ -4,22 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-interface JobInfo {
-  id: number;
-  run_id: number;
-  name: string;
-  status: string;
-  conclusion: string | null;
-  started_at: string | null;
-  completed_at: string | null;
-  html_url: string;
-}
-
 interface RunnerInfo {
   runner_id: number;
   runner_name: string;
+  os: string;
+  status: string;
+  busy: boolean;
   labels: string[];
-  jobs: JobInfo[];
 }
 
 interface CellData {
@@ -30,25 +21,26 @@ type MatrixData = Record<string, Record<string, CellData>>;
 
 const HARDWARE_LABELS: Record<string, string> = {
   halo: "STX Halo",
-  krackan: "Krackan Point",
+  krk: "Krackan Point",
 };
 
 const OS_LABELS = ["Windows", "Linux"];
 
 function classifyRunner(runner: RunnerInfo): { hardware: string; os: string } {
-  const labelNames = runner.labels.map((l) => l.toLowerCase());
+  const nameLower = runner.runner_name.toLowerCase();
 
   let hardware = "Other";
   for (const [key, display] of Object.entries(HARDWARE_LABELS)) {
-    if (labelNames.includes(key.toLowerCase())) {
+    if (nameLower.includes(key.toLowerCase())) {
       hardware = display;
       break;
     }
   }
 
   let os = "Other";
+  const runnerOs = runner.os.toLowerCase();
   for (const osName of OS_LABELS) {
-    if (labelNames.includes(osName.toLowerCase())) {
+    if (runnerOs.includes(osName.toLowerCase())) {
       os = osName;
       break;
     }
@@ -76,57 +68,32 @@ function buildMatrix(runners: RunnerInfo[]): MatrixData {
   return matrix;
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
-}
-
 function RunnerStatus({ runner }: { runner: RunnerInfo }) {
-  const latestJob = runner.jobs[0];
-  if (!latestJob) return null;
+  if (runner.status !== "online") {
+    return (
+      <div className="flex items-center gap-1.5">
+        <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#6b6b6b]" />
+        <span className="text-[#6b6b6b] text-xs font-medium">Offline</span>
+      </div>
+    );
+  }
 
-  const isRunning = latestJob.status === "in_progress" || latestJob.status === "queued";
-
-  if (isRunning) {
+  if (runner.busy) {
     return (
       <div className="flex items-center gap-1.5">
         <span className="relative flex h-2.5 w-2.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-400" />
         </span>
-        <span className="text-yellow-400 text-xs font-medium">Running</span>
-      </div>
-    );
-  }
-
-  const conclusion = latestJob.conclusion;
-  if (conclusion === "success") {
-    return (
-      <div className="flex items-center gap-1.5">
-        <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.4)]" />
-        <span className="text-green-400 text-xs font-medium">Idle</span>
-      </div>
-    );
-  }
-  if (conclusion === "failure") {
-    return (
-      <div className="flex items-center gap-1.5">
-        <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.4)]" />
-        <span className="text-red-400 text-xs font-medium">Last run failed</span>
+        <span className="text-yellow-400 text-xs font-medium">Busy</span>
       </div>
     );
   }
 
   return (
     <div className="flex items-center gap-1.5">
-      <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#6b6b6b]" />
-      <span className="text-[#6b6b6b] text-xs font-medium">{conclusion ?? "Unknown"}</span>
+      <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.4)]" />
+      <span className="text-green-400 text-xs font-medium">Idle</span>
     </div>
   );
 }
@@ -142,62 +109,29 @@ function CellContent({ cell }: { cell: CellData }) {
 
   return (
     <div className="space-y-3">
-      {cell.runners.map((runner) => {
-        const latestJob = runner.jobs[0];
-        const recentJobs = runner.jobs.slice(0, 5);
-        return (
-          <div
-            key={runner.runner_id}
-            className="px-3.5 py-3 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#444] transition-colors"
-          >
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-sm font-medium text-white truncate">{runner.runner_name}</span>
-              <RunnerStatus runner={runner} />
-            </div>
-
-            {latestJob && (
-              <div className="text-xs text-[#6b6b6b] mb-2.5">
-                Last active {latestJob.completed_at ? timeAgo(latestJob.completed_at) : latestJob.started_at ? timeAgo(latestJob.started_at) : "—"}
-              </div>
-            )}
-
-            {/* Recent job results */}
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] text-[#6b6b6b] mr-1.5 uppercase tracking-wide">Recent</span>
-              {recentJobs.map((job) => (
-                <a
-                  key={job.id}
-                  href={job.html_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={`${job.name}\n${job.conclusion ?? job.status}`}
-                  className={`w-4 h-4 rounded-sm flex items-center justify-center text-[9px] font-bold transition-transform hover:scale-125 ${
-                    job.status === "in_progress"
-                      ? "bg-yellow-400/20 text-yellow-400 border border-yellow-400/30"
-                      : job.conclusion === "success"
-                        ? "bg-green-400/15 text-green-400 border border-green-400/20"
-                        : job.conclusion === "failure"
-                          ? "bg-red-400/15 text-red-400 border border-red-400/20"
-                          : job.conclusion === "skipped"
-                            ? "bg-[#333] text-[#6b6b6b] border border-[#444]"
-                            : "bg-[#242424] text-[#6b6b6b] border border-[#333]"
-                  }`}
-                >
-                  {job.status === "in_progress"
-                    ? "~"
-                    : job.conclusion === "success"
-                      ? "\u2713"
-                      : job.conclusion === "failure"
-                        ? "\u2717"
-                        : job.conclusion === "skipped"
-                          ? "-"
-                          : "?"}
-                </a>
-              ))}
-            </div>
+      {cell.runners.map((runner) => (
+        <div
+          key={runner.runner_id}
+          className="px-3.5 py-3 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#444] transition-colors"
+        >
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-sm font-medium text-white truncate">{runner.runner_name}</span>
+            <RunnerStatus runner={runner} />
           </div>
-        );
-      })}
+          <div className="flex flex-wrap gap-1.5">
+            {runner.labels
+              .filter((l) => l !== "self-hosted")
+              .map((label) => (
+                <span
+                  key={label}
+                  className="px-2 py-0.5 text-[10px] rounded-full bg-[#242424] border border-[#333] text-[#a0a0a0]"
+                >
+                  {label}
+                </span>
+              ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -229,7 +163,7 @@ function SetupGuide() {
       {open && (
         <div className="px-6 pb-5 border-t border-[#333] pt-4 text-sm text-[#a0a0a0] space-y-3 animate-fade-in">
           <p>
-            This dashboard reads runner activity via the GitHub Workflow Runs API using a{" "}
+            This dashboard reads the registered self-hosted runners via the GitHub API using a{" "}
             <code className="bg-[#242424] px-1.5 py-0.5 rounded text-[#D4915D] text-xs">DASHBOARD_GITHUB_TOKEN</code>{" "}
             environment variable set on the server.
           </p>
@@ -263,7 +197,7 @@ function SetupGuide() {
             </li>
             <li>
               Under <strong className="text-white">Repository permissions</strong>, set{" "}
-              <code className="bg-[#242424] px-1.5 py-0.5 rounded text-[#D4915D] text-xs">Actions</code>{" "}
+              <code className="bg-[#242424] px-1.5 py-0.5 rounded text-[#D4915D] text-xs">Administration</code>{" "}
               to <strong className="text-white">Read-only</strong>
             </li>
             <li>Click <strong className="text-white">Generate token</strong> and paste it into your <code className="bg-[#242424] px-1.5 py-0.5 rounded text-[#D4915D] text-xs">.env.local</code></li>
@@ -281,7 +215,6 @@ function SetupGuide() {
 
 export default function DashboardPage() {
   const [runners, setRunners] = useState<RunnerInfo[]>([]);
-  const [runsChecked, setRunsChecked] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
@@ -296,7 +229,6 @@ export default function DashboardPage() {
         throw new Error(data.error || `API error: ${res.status}`);
       }
       setRunners(data.runners || []);
-      setRunsChecked(data.runs_checked || 0);
       setLastFetched(new Date());
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to fetch runners");
@@ -314,8 +246,9 @@ export default function DashboardPage() {
   const hardwareRows = Object.values(HARDWARE_LABELS);
 
   const totalRunners = runners.length;
-  const runningCount = runners.filter((r) => r.jobs[0]?.status === "in_progress").length;
-  const idleCount = totalRunners - runningCount;
+  const onlineCount = runners.filter((r) => r.status === "online").length;
+  const busyCount = runners.filter((r) => r.busy).length;
+  const offlineCount = totalRunners - onlineCount;
 
   return (
     <main className="min-h-screen bg-[#0d0d0d] grid-pattern">
@@ -332,7 +265,7 @@ export default function DashboardPage() {
               </span>
             </h1>
             <p className="text-lg text-[#a0a0a0] max-w-2xl mx-auto">
-              Self-hosted runner activity from recent workflow runs
+              Self-hosted runner status
             </p>
           </div>
         </div>
@@ -340,29 +273,28 @@ export default function DashboardPage() {
 
       <section className="px-6 pb-6">
         <div className="max-w-[1400px] mx-auto space-y-6">
-          {/* Summary bar */}
           {!loading && runners.length > 0 && (
             <div className="flex flex-wrap items-center gap-4 animate-fade-in">
               <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg">
-                <span className="text-sm text-[#6b6b6b]">Runners seen:</span>
+                <span className="text-sm text-[#6b6b6b]">Total runners:</span>
                 <span className="text-sm font-semibold text-white">{totalRunners}</span>
               </div>
-              {runningCount > 0 && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-green-900/15 border border-green-800/30 rounded-lg">
+                <span className="inline-block w-2 h-2 rounded-full bg-green-400" />
+                <span className="text-sm text-green-400 font-medium">{onlineCount} online</span>
+              </div>
+              {busyCount > 0 && (
                 <div className="flex items-center gap-2 px-4 py-2 bg-yellow-900/15 border border-yellow-800/30 rounded-lg">
                   <span className="inline-block w-2 h-2 rounded-full bg-yellow-400" />
-                  <span className="text-sm text-yellow-400 font-medium">{runningCount} running</span>
+                  <span className="text-sm text-yellow-400 font-medium">{busyCount} busy</span>
                 </div>
               )}
-              {idleCount > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-green-900/15 border border-green-800/30 rounded-lg">
-                  <span className="inline-block w-2 h-2 rounded-full bg-green-400" />
-                  <span className="text-sm text-green-400 font-medium">{idleCount} idle</span>
+              {offlineCount > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg">
+                  <span className="inline-block w-2 h-2 rounded-full bg-[#6b6b6b]" />
+                  <span className="text-sm text-[#6b6b6b] font-medium">{offlineCount} offline</span>
                 </div>
               )}
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg">
-                <span className="text-sm text-[#6b6b6b]">Based on last</span>
-                <span className="text-sm font-semibold text-white">{runsChecked} runs</span>
-              </div>
               {lastFetched && (
                 <div className="ml-auto flex items-center gap-2">
                   <span className="text-xs text-[#6b6b6b]">
@@ -380,7 +312,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Loading state */}
           {loading && (
             <div className="flex items-center justify-center py-16">
               <div className="flex items-center gap-3 text-[#a0a0a0]">
@@ -388,12 +319,11 @@ export default function DashboardPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                <span className="text-sm">Fetching runner activity...</span>
+                <span className="text-sm">Fetching runners...</span>
               </div>
             </div>
           )}
 
-          {/* Error state */}
           {!loading && error && (
             <div className="max-w-2xl mx-auto animate-fade-in">
               <div className="px-4 py-3 rounded-xl bg-red-900/15 border border-red-800/30 text-red-400 text-sm">
@@ -402,7 +332,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Matrix table */}
           {!loading && runners.length > 0 && (
             <div className="overflow-x-auto rounded-xl border border-[#333] animate-fade-in">
               <table className="w-full border-collapse">
@@ -453,7 +382,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Empty state */}
           {!loading && !error && runners.length === 0 && (
             <div className="text-center py-16 animate-fade-in">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#1a1a1a] border border-[#333] mb-4">
@@ -461,14 +389,13 @@ export default function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-white mb-1">No runner activity found</h3>
+              <h3 className="text-lg font-medium text-white mb-1">No runners found</h3>
               <p className="text-sm text-[#6b6b6b]">
-                No self-hosted runner jobs were found in recent workflow runs.
+                No self-hosted runners are registered for this repository.
               </p>
             </div>
           )}
 
-          {/* Setup guide — only shown when the API returned an error */}
           {error && <SetupGuide />}
         </div>
       </section>

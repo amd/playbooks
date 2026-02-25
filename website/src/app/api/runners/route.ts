@@ -4,27 +4,13 @@ const REPO_OWNER = "amd";
 const REPO_NAME = "halo_playbooks";
 const GITHUB_API = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`;
 
-interface GHJob {
-  id: number;
-  run_id: number;
-  name: string;
-  status: string;
-  conclusion: string | null;
-  started_at: string | null;
-  completed_at: string | null;
-  labels: string[];
-  runner_id: number;
-  runner_name: string;
-  html_url: string;
-}
-
-interface GHRun {
+interface GHRunner {
   id: number;
   name: string;
+  os: string;
   status: string;
-  conclusion: string | null;
-  created_at: string;
-  html_url: string;
+  busy: boolean;
+  labels: { name: string }[];
 }
 
 async function ghFetch(path: string, token: string) {
@@ -53,79 +39,19 @@ export async function GET() {
   }
 
   try {
-    const runsData = await ghFetch(
-      "/actions/workflows/test-playbooks.yml/runs?per_page=10",
-      token
-    );
-    const runs: GHRun[] = runsData.workflow_runs ?? [];
+    const data = await ghFetch("/actions/runners?per_page=100", token);
+    const ghRunners: GHRunner[] = data.runners ?? [];
 
-    const jobResults = await Promise.all(
-      runs.map((run) =>
-        ghFetch(`/actions/runs/${run.id}/jobs?per_page=100`, token)
-          .then((d) => d.jobs as GHJob[])
-          .catch(() => [] as GHJob[])
-      )
-    );
+    const runners = ghRunners.map((r) => ({
+      runner_id: r.id,
+      runner_name: r.name,
+      os: r.os,
+      status: r.status,
+      busy: r.busy,
+      labels: r.labels.map((l) => l.name),
+    }));
 
-    const allJobs = jobResults.flat();
-
-    const selfHostedJobs = allJobs.filter(
-      (j) => j.labels.includes("self-hosted") && j.runner_name
-    );
-
-    const runnerMap = new Map<
-      string,
-      {
-        runner_id: number;
-        runner_name: string;
-        labels: string[];
-        jobs: {
-          id: number;
-          run_id: number;
-          name: string;
-          status: string;
-          conclusion: string | null;
-          started_at: string | null;
-          completed_at: string | null;
-          html_url: string;
-        }[];
-      }
-    >();
-
-    for (const job of selfHostedJobs) {
-      const key = job.runner_name;
-      if (!runnerMap.has(key)) {
-        runnerMap.set(key, {
-          runner_id: job.runner_id,
-          runner_name: job.runner_name,
-          labels: job.labels,
-          jobs: [],
-        });
-      }
-      runnerMap.get(key)!.jobs.push({
-        id: job.id,
-        run_id: job.run_id,
-        name: job.name,
-        status: job.status,
-        conclusion: job.conclusion,
-        started_at: job.started_at,
-        completed_at: job.completed_at,
-        html_url: job.html_url,
-      });
-    }
-
-    for (const runner of runnerMap.values()) {
-      runner.jobs.sort(
-        (a, b) =>
-          new Date(b.started_at ?? 0).getTime() -
-          new Date(a.started_at ?? 0).getTime()
-      );
-    }
-
-    return NextResponse.json({
-      runners: Array.from(runnerMap.values()),
-      runs_checked: runs.length,
-    });
+    return NextResponse.json({ runners });
   } catch (e) {
     console.error("Failed to fetch runner data:", e);
     return NextResponse.json(
