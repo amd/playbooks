@@ -30,11 +30,14 @@ const HARDWARE_LABELS: Record<string, string> = {
 const OS_LABELS = ["Windows", "Linux"];
 
 function classifyRunner(runner: RunnerInfo): { hardware: string; os: string } {
-  const nameLower = runner.runner_name.toLowerCase();
+  const searchable = [
+    runner.runner_name.toLowerCase(),
+    ...runner.labels.map((l) => l.toLowerCase()),
+  ].join(" ");
 
   let hardware = "Other";
   for (const [key, display] of Object.entries(HARDWARE_LABELS)) {
-    if (nameLower.includes(key.toLowerCase())) {
+    if (searchable.includes(key.toLowerCase())) {
       hardware = display;
       break;
     }
@@ -103,9 +106,13 @@ function RunnerStatus({ runner }: { runner: RunnerInfo }) {
 
 const REQUIRED_RUNNERS = 2;
 
+function cellOnlineCount(cell: CellData): number {
+  return cell.runners.filter((r) => r.status === "online").length;
+}
+
 function CellContent({ cell }: { cell: CellData }) {
-  const count = cell.runners.length;
-  const sufficient = count >= REQUIRED_RUNNERS;
+  const online = cellOnlineCount(cell);
+  const sufficient = online >= REQUIRED_RUNNERS;
 
   return (
     <div className="space-y-3">
@@ -115,11 +122,11 @@ function CellContent({ cell }: { cell: CellData }) {
             sufficient ? "text-green-400" : "text-[#a0a0a0]"
           }`}
         >
-          {count}/{REQUIRED_RUNNERS}
+          {online}/{REQUIRED_RUNNERS}
         </span>
         {!sufficient && (
           <span className="text-[10px] font-semibold uppercase tracking-wide text-yellow-500/80">
-            needs {REQUIRED_RUNNERS - count} more
+            needs {REQUIRED_RUNNERS - online} more
           </span>
         )}
       </div>
@@ -268,7 +275,7 @@ export default function DashboardPage() {
   const totalCombinations = hardwareRows.length * OS_LABELS.length;
   const sufficientCells = Object.values(matrix).reduce(
     (acc, osMap) =>
-      acc + Object.values(osMap).filter((cell) => cell.runners.length >= REQUIRED_RUNNERS).length,
+      acc + Object.values(osMap).filter((cell) => cellOnlineCount(cell) >= REQUIRED_RUNNERS).length,
     0
   );
   const insufficientCells = totalCombinations - sufficientCells;
