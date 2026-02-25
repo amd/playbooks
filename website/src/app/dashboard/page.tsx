@@ -21,7 +21,10 @@ type MatrixData = Record<string, Record<string, CellData>>;
 
 const HARDWARE_LABELS: Record<string, string> = {
   halo: "STX Halo",
+  stx: "STX Point",
   krk: "Krackan Point",
+  rx7900xt: "Radeon RX 7900 XT",
+  rx9070xt: "Radeon RX 9070 XT",
 };
 
 const OS_LABELS = ["Windows", "Linux"];
@@ -337,7 +340,7 @@ export default function DashboardPage() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-[#1a1a1a]">
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] w-48">
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] w-55">
                       Hardware
                     </th>
                     {OS_LABELS.map((os) => (
