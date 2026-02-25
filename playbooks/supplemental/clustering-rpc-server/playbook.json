@@ -4,6 +4,9 @@
   "description": "Set up distributed inference using RPC server across two STX Halo™ devices with vLLM",
   "time": 90,
   "platforms": ["linux"],
+  "tested_platforms": {
+    "linux": []
+  },
   "difficulty": "advanced",
   "isNew": false,
   "isFeatured": false,

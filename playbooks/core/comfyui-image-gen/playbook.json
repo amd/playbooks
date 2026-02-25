@@ -4,6 +4,10 @@
   "description": "Create stunning AI-generated images using ComfyUI with Z Image Turbo on STX Halo™",
   "time": 15,
   "platforms": ["windows", "linux"],
+  "tested_platforms": {
+    "windows": ["halo"],
+    "linux": []
+  },
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": true,

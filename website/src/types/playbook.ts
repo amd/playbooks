@@ -45,6 +45,7 @@
  */
 
 export type Platform = "windows" | "linux";
+export type Architecture = "halo" | "krk";
 export type Category = "core" | "supplemental" | "backup";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 
@@ -63,6 +64,9 @@ export interface PlaybookMeta {
   
   /** Supported platforms */
   platforms: Platform[];
+
+  /** Tested platforms per OS (used by CI to select runners) */
+  tested_platforms?: Partial<Record<Platform, Architecture[]>>;
   
   /** Whether this is a new playbook */
   isNew?: boolean;
