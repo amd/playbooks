@@ -938,8 +938,11 @@ function PlatformToggle({
   );
 }
 
-export default function PlaybookPage({ params }: { params: Promise<{ id: string }> }) {
+export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string }> }) {
   const { id } = use(params);
+  const { device: deviceHash } = use(searchParams);
+  const backHref = deviceHash ? `/#${deviceHash}` : "/#playbooks";
+
   const [playbook, setPlaybook] = useState<Playbook | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1297,7 +1300,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
         <div className="max-w-5xl mx-auto">
           {/* Back Link */}
           <Link 
-            href="/#playbooks" 
+            href={backHref} 
             className="inline-flex items-center gap-2 text-[#a0a0a0] hover:text-[#D4915D] text-sm mb-6 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1320,7 +1323,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
               <h1 className="text-2xl font-bold text-white mb-2">{error}</h1>
               <p className="text-[#a0a0a0] mb-6">The playbook you&apos;re looking for doesn&apos;t exist or has been moved.</p>
               <Link 
-                href="/#playbooks"
+                href={backHref}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-[#D4915D] text-black font-medium rounded-lg hover:bg-[#e5a26e] transition-colors"
               >
                 View All Playbooks
