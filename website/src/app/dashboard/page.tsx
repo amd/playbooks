@@ -242,6 +242,40 @@ const TABS: { id: DashboardTab; label: string }[] = [
   { id: "playbooks", label: "Playbook Status" },
 ];
 
+type PlaybookCellStatus = "pass" | "fail" | "partial" | "no-tests";
+
+interface PlaybookMatrixColumn {
+  id: string;
+  hardware: string;
+  os: string;
+}
+
+interface PlaybookMatrixCell {
+  passed: number;
+  failed: number;
+  skipped: number;
+  totalTests: number;
+  status: PlaybookCellStatus;
+}
+
+interface PlaybookMatrixRow {
+  playbookId: string;
+  title: string;
+  category: string;
+  cells: Record<string, PlaybookMatrixCell>;
+}
+
+interface PlaybookTestMatrixResponse {
+  run: {
+    id: number;
+    htmlUrl: string;
+    createdAt: string;
+    event: string;
+  } | null;
+  columns: PlaybookMatrixColumn[];
+  rows: PlaybookMatrixRow[];
+}
+
 function CIStatusDashboard() {
   const [runners, setRunners] = useState<RunnerInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -441,17 +475,179 @@ function CIStatusDashboard() {
 }
 
 function PlaybookStatusDashboard() {
-  return (
-    <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#1a1a1a] border border-[#333] mb-5">
-        <svg className="w-8 h-8 text-[#D4915D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-        </svg>
+  const [matrix, setMatrix] = useState<PlaybookTestMatrixResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchMatrix = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/dashboard/playbook-test-matrix");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || `API error: ${res.status}`);
+      }
+      setMatrix(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to fetch playbook test matrix");
+      setMatrix(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchMatrix();
+  }, [fetchMatrix]);
+
+  const getStatusClasses = (status: PlaybookCellStatus): string => {
+    if (status === "pass") return "border-green-800/30 bg-green-900/15 text-green-300";
+    if (status === "fail") return "border-red-800/30 bg-red-900/15 text-red-300";
+    if (status === "partial") return "border-yellow-800/30 bg-yellow-900/15 text-yellow-300";
+    return "border-[#333] bg-[#1a1a1a] text-[#a0a0a0]";
+  };
+
+  const runDate = matrix?.run?.createdAt ? new Date(matrix.run.createdAt) : null;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="flex items-center gap-3 text-[#a0a0a0]">
+          <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <span className="text-sm">Loading nightly playbook results...</span>
+        </div>
       </div>
-      <h3 className="text-lg font-medium text-white mb-2">Playbook Status</h3>
-      <p className="text-sm text-[#6b6b6b] max-w-md text-center">
-        Playbook execution status and results will appear here.
-      </p>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto animate-fade-in">
+        <div className="px-4 py-3 rounded-xl bg-red-900/15 border border-red-800/30 text-red-400 text-sm">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!matrix || matrix.columns.length === 0 || matrix.rows.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#1a1a1a] border border-[#333] mb-5">
+          <svg className="w-8 h-8 text-[#D4915D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-white mb-2">No nightly test data found</h3>
+        <p className="text-sm text-[#6b6b6b] max-w-md text-center">
+          The latest workflow run does not have playbook test artifacts yet.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 animate-fade-in">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm text-[#a0a0a0]">
+          Nightly matrix: <span className="text-white font-medium">{matrix.rows.length}</span> playbooks x{" "}
+          <span className="text-white font-medium">{matrix.columns.length}</span> hardware/OS columns
+        </div>
+        {runDate && (
+          <div className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm text-[#a0a0a0]">
+            Run time: <span className="text-white font-medium">{runDate.toLocaleString()}</span>
+          </div>
+        )}
+        {matrix.run?.htmlUrl && (
+          <a
+            href={matrix.run.htmlUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 rounded-lg border border-[#D4915D]/40 text-[#D4915D] text-sm font-medium hover:bg-[#D4915D]/10 transition-colors"
+          >
+            View workflow run
+          </a>
+        )}
+        <button
+          onClick={fetchMatrix}
+          disabled={loading}
+          className="px-4 py-2 rounded-lg border border-[#333] text-[#a0a0a0] text-sm hover:text-white hover:border-[#555] transition-colors disabled:opacity-50"
+        >
+          Refresh
+        </button>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-[#333]">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-[#1a1a1a]">
+              <th className="text-left px-4 py-3 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] min-w-[260px]">
+                Playbook
+              </th>
+              {matrix.columns.map((column) => (
+                <th
+                  key={column.id}
+                  className="px-4 py-3 text-sm font-semibold text-[#D4915D] border-b border-[#333] min-w-[150px]"
+                >
+                  <div className="flex flex-col items-start leading-tight">
+                    <span>{column.hardware}</span>
+                    <span className="text-xs font-normal text-[#a0a0a0] mt-1">{column.os}</span>
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {matrix.rows.map((row, idx) => (
+              <tr key={row.playbookId} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
+                <td className="px-4 py-4 border-r border-[#333] align-top">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-white">{row.title}</span>
+                    <span className="text-xs text-[#6b6b6b] mt-1">{row.category}</span>
+                  </div>
+                </td>
+                {matrix.columns.map((column) => {
+                  const cell = row.cells[column.id];
+                  if (!cell) {
+                    return (
+                      <td key={column.id} className="px-4 py-4 align-top">
+                        <div className="h-full rounded-lg border border-[#333] bg-[#1a1a1a] px-3 py-2 text-xs text-[#6b6b6b]">
+                          no run
+                        </div>
+                      </td>
+                    );
+                  }
+
+                  return (
+                    <td key={column.id} className="px-4 py-4 align-top">
+                      <div className={`rounded-lg border px-3 py-2 text-xs ${getStatusClasses(cell.status)}`}>
+                        <div className="text-base font-semibold tabular-nums text-white">
+                          {cell.passed}/{cell.totalTests}
+                        </div>
+                        <div className="mt-1 flex items-center gap-2">
+                          {cell.failed > 0 && (
+                            <span className="text-[11px] font-medium text-red-300">{cell.failed} failed</span>
+                          )}
+                          {cell.skipped > 0 && (
+                            <span className="text-[11px] font-medium text-[#d8c28f]">{cell.skipped} skipped</span>
+                          )}
+                          {cell.status === "no-tests" && (
+                            <span className="text-[11px] font-medium text-[#a0a0a0]">no tests</span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
