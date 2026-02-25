@@ -235,7 +235,14 @@ function SetupGuide() {
   );
 }
 
-export default function DashboardPage() {
+type DashboardTab = "ci" | "playbooks";
+
+const TABS: { id: DashboardTab; label: string }[] = [
+  { id: "ci", label: "CI Status" },
+  { id: "playbooks", label: "Playbook Status" },
+];
+
+function CIStatusDashboard() {
   const [runners, setRunners] = useState<RunnerInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -281,6 +288,178 @@ export default function DashboardPage() {
   const insufficientCells = totalCombinations - sufficientCells;
 
   return (
+    <div className="space-y-6">
+      {!loading && runners.length > 0 && (
+        <div className="flex flex-wrap items-center gap-4 animate-fade-in">
+          <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg">
+            <span className="text-sm text-[#6b6b6b]">Total runners:</span>
+            <span className="text-sm font-semibold text-white">{totalRunners}</span>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-green-900/15 border border-green-800/30 rounded-lg">
+            <span className="inline-block w-2 h-2 rounded-full bg-green-400" />
+            <span className="text-sm text-green-400 font-medium">{onlineCount} online</span>
+          </div>
+          {busyCount > 0 && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-yellow-900/15 border border-yellow-800/30 rounded-lg">
+              <span className="inline-block w-2 h-2 rounded-full bg-yellow-400" />
+              <span className="text-sm text-yellow-400 font-medium">{busyCount} busy</span>
+            </div>
+          )}
+          {offlineCount > 0 && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg">
+              <span className="inline-block w-2 h-2 rounded-full bg-[#6b6b6b]" />
+              <span className="text-sm text-[#6b6b6b] font-medium">{offlineCount} offline</span>
+            </div>
+          )}
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+            insufficientCells === 0
+              ? "bg-green-900/15 border border-green-800/30"
+              : "bg-red-900/15 border border-red-800/30"
+          }`}>
+            <span className={`text-sm font-medium ${insufficientCells === 0 ? "text-green-400" : "text-red-400"}`}>
+              {sufficientCells}/{totalCombinations} combos covered
+            </span>
+          </div>
+          {lastFetched && (
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-xs text-[#6b6b6b]">
+                Updated {lastFetched.toLocaleTimeString()}
+              </span>
+              <button
+                onClick={fetchRunners}
+                disabled={loading}
+                className="px-3 py-1.5 text-xs font-medium text-[#D4915D] border border-[#D4915D]/30 rounded-lg hover:bg-[#D4915D]/10 transition-colors disabled:opacity-50"
+              >
+                {loading ? "Refreshing..." : "Refresh"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {loading && (
+        <div className="flex items-center justify-center py-16">
+          <div className="flex items-center gap-3 text-[#a0a0a0]">
+            <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            <span className="text-sm">Fetching runners...</span>
+          </div>
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="max-w-2xl mx-auto animate-fade-in">
+          <div className="px-4 py-3 rounded-xl bg-red-900/15 border border-red-800/30 text-red-400 text-sm">
+            {error}
+          </div>
+        </div>
+      )}
+
+      {!loading && runners.length > 0 && (
+        <div className="space-y-3 animate-fade-in">
+          <div className="overflow-x-auto rounded-xl border border-[#333]">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-[#1a1a1a]">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] w-55">
+                    Hardware
+                  </th>
+                  {OS_LABELS.map((os) => (
+                    <th
+                      key={os}
+                      className="text-left px-6 py-4 text-sm font-semibold text-[#D4915D] border-b border-[#333]"
+                    >
+                      <div className="flex items-center gap-2">
+                        {os === "Windows" ? (
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.504 0c-.155 0-.311.003-.466.009a11.978 11.978 0 00-4.653 1.11c-.635.296-1.24.656-1.804 1.07a12.062 12.062 0 00-3.667 4.6A11.953 11.953 0 00.834 12c0 1.742.372 3.397 1.044 4.888a12.015 12.015 0 002.108 3.2 12.05 12.05 0 003.159 2.437A11.937 11.937 0 0012 24a11.94 11.94 0 004.855-1.025 12.043 12.043 0 003.159-2.437 12.01 12.01 0 002.108-3.2A11.928 11.928 0 0023.166 12a11.95 11.95 0 00-1.08-5.211 12.056 12.056 0 00-3.667-4.6 11.93 11.93 0 00-1.804-1.07A11.978 11.978 0 0012.504 0z" />
+                          </svg>
+                        )}
+                        {os}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {hardwareRows.map((hw, idx) => (
+                  <tr key={hw} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
+                    <td className="px-6 py-5 text-sm font-semibold text-white border-r border-[#333] align-top">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-block w-2 h-2 rounded-full bg-[#D4915D]" />
+                        {hw}
+                      </div>
+                    </td>
+                    {OS_LABELS.map((os) => (
+                      <td key={os} className="px-6 py-5 border-[#333] align-top min-w-[300px]">
+                        <CellContent cell={matrix[hw]?.[os] ?? { runners: [] }} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {insufficientCells > 0 && (
+            <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg bg-[#1a1a1a] border border-[#333] text-xs text-[#a0a0a0]">
+              <svg className="w-4 h-4 text-yellow-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>
+                <strong className="text-white font-medium">{insufficientCells} combination{insufficientCells > 1 ? "s" : ""}</strong>{" "}
+                {insufficientCells > 1 ? "have" : "has"} fewer than {REQUIRED_RUNNERS} runners.
+                Each device + OS pair requires {REQUIRED_RUNNERS} machines for redundancy against maintenance, failures, and provisioning delays.
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!loading && !error && runners.length === 0 && (
+        <div className="text-center py-16 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#1a1a1a] border border-[#333] mb-4">
+            <svg className="w-8 h-8 text-[#6b6b6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-white mb-1">No runners found</h3>
+          <p className="text-sm text-[#6b6b6b]">
+            No self-hosted runners are registered for this repository.
+          </p>
+        </div>
+      )}
+
+      {error && <SetupGuide />}
+    </div>
+  );
+}
+
+function PlaybookStatusDashboard() {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#1a1a1a] border border-[#333] mb-5">
+        <svg className="w-8 h-8 text-[#D4915D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-medium text-white mb-2">Playbook Status</h3>
+      <p className="text-sm text-[#6b6b6b] max-w-md text-center">
+        Playbook execution status and results will appear here.
+      </p>
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  const [activeTab, setActiveTab] = useState<DashboardTab>("ci");
+
+  return (
     <main className="min-h-screen bg-[#0d0d0d] grid-pattern">
       <Header />
 
@@ -289,167 +468,45 @@ export default function DashboardPage() {
         <div className="max-w-[1400px] mx-auto relative z-10">
           <div className="text-center max-w-4xl mx-auto animate-fade-in mb-8">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">
-              CI Runner{" "}
+              Operations{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4915D] to-[#E8B896]">
                 Dashboard
               </span>
             </h1>
             <p className="text-lg text-[#a0a0a0] max-w-2xl mx-auto">
-              Self-hosted runner status
+              CI runner status and playbook execution overview
             </p>
           </div>
         </div>
       </section>
 
-      <section className="px-6 pb-6">
-        <div className="max-w-[1400px] mx-auto space-y-6">
-          {!loading && runners.length > 0 && (
-            <div className="flex flex-wrap items-center gap-4 animate-fade-in">
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg">
-                <span className="text-sm text-[#6b6b6b]">Total runners:</span>
-                <span className="text-sm font-semibold text-white">{totalRunners}</span>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-green-900/15 border border-green-800/30 rounded-lg">
-                <span className="inline-block w-2 h-2 rounded-full bg-green-400" />
-                <span className="text-sm text-green-400 font-medium">{onlineCount} online</span>
-              </div>
-              {busyCount > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-yellow-900/15 border border-yellow-800/30 rounded-lg">
-                  <span className="inline-block w-2 h-2 rounded-full bg-yellow-400" />
-                  <span className="text-sm text-yellow-400 font-medium">{busyCount} busy</span>
-                </div>
-              )}
-              {offlineCount > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg">
-                  <span className="inline-block w-2 h-2 rounded-full bg-[#6b6b6b]" />
-                  <span className="text-sm text-[#6b6b6b] font-medium">{offlineCount} offline</span>
-                </div>
-              )}
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                insufficientCells === 0
-                  ? "bg-green-900/15 border border-green-800/30"
-                  : "bg-red-900/15 border border-red-800/30"
-              }`}>
-                <span className={`text-sm font-medium ${insufficientCells === 0 ? "text-green-400" : "text-red-400"}`}>
-                  {sufficientCells}/{totalCombinations} combos covered
-                </span>
-              </div>
-              {lastFetched && (
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="text-xs text-[#6b6b6b]">
-                    Updated {lastFetched.toLocaleTimeString()}
-                  </span>
-                  <button
-                    onClick={fetchRunners}
-                    disabled={loading}
-                    className="px-3 py-1.5 text-xs font-medium text-[#D4915D] border border-[#D4915D]/30 rounded-lg hover:bg-[#D4915D]/10 transition-colors disabled:opacity-50"
-                  >
-                    {loading ? "Refreshing..." : "Refresh"}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+      <section className="px-6">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="flex gap-1 border-b border-[#333]">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-5 py-3 text-sm font-medium transition-colors relative ${
+                  activeTab === tab.id
+                    ? "text-[#D4915D]"
+                    : "text-[#6b6b6b] hover:text-[#a0a0a0]"
+                }`}
+              >
+                {tab.label}
+                {activeTab === tab.id && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#D4915D] rounded-t" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          {loading && (
-            <div className="flex items-center justify-center py-16">
-              <div className="flex items-center gap-3 text-[#a0a0a0]">
-                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                <span className="text-sm">Fetching runners...</span>
-              </div>
-            </div>
-          )}
-
-          {!loading && error && (
-            <div className="max-w-2xl mx-auto animate-fade-in">
-              <div className="px-4 py-3 rounded-xl bg-red-900/15 border border-red-800/30 text-red-400 text-sm">
-                {error}
-              </div>
-            </div>
-          )}
-
-          {!loading && runners.length > 0 && (
-            <div className="space-y-3 animate-fade-in">
-              <div className="overflow-x-auto rounded-xl border border-[#333]">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-[#1a1a1a]">
-                      <th className="text-left px-6 py-4 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] w-55">
-                        Hardware
-                      </th>
-                      {OS_LABELS.map((os) => (
-                        <th
-                          key={os}
-                          className="text-left px-6 py-4 text-sm font-semibold text-[#D4915D] border-b border-[#333]"
-                        >
-                          <div className="flex items-center gap-2">
-                            {os === "Windows" ? (
-                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
-                              </svg>
-                            ) : (
-                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12.504 0c-.155 0-.311.003-.466.009a11.978 11.978 0 00-4.653 1.11c-.635.296-1.24.656-1.804 1.07a12.062 12.062 0 00-3.667 4.6A11.953 11.953 0 00.834 12c0 1.742.372 3.397 1.044 4.888a12.015 12.015 0 002.108 3.2 12.05 12.05 0 003.159 2.437A11.937 11.937 0 0012 24a11.94 11.94 0 004.855-1.025 12.043 12.043 0 003.159-2.437 12.01 12.01 0 002.108-3.2A11.928 11.928 0 0023.166 12a11.95 11.95 0 00-1.08-5.211 12.056 12.056 0 00-3.667-4.6 11.93 11.93 0 00-1.804-1.07A11.978 11.978 0 0012.504 0z" />
-                              </svg>
-                            )}
-                            {os}
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {hardwareRows.map((hw, idx) => (
-                      <tr key={hw} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
-                        <td className="px-6 py-5 text-sm font-semibold text-white border-r border-[#333] align-top">
-                          <div className="flex items-center gap-2">
-                            <span className="inline-block w-2 h-2 rounded-full bg-[#D4915D]" />
-                            {hw}
-                          </div>
-                        </td>
-                        {OS_LABELS.map((os) => (
-                          <td key={os} className="px-6 py-5 border-[#333] align-top min-w-[300px]">
-                            <CellContent cell={matrix[hw]?.[os] ?? { runners: [] }} />
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {insufficientCells > 0 && (
-                <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg bg-[#1a1a1a] border border-[#333] text-xs text-[#a0a0a0]">
-                  <svg className="w-4 h-4 text-yellow-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>
-                    <strong className="text-white font-medium">{insufficientCells} combination{insufficientCells > 1 ? "s" : ""}</strong>{" "}
-                    {insufficientCells > 1 ? "have" : "has"} fewer than {REQUIRED_RUNNERS} runners.
-                    Each device + OS pair requires {REQUIRED_RUNNERS} machines for redundancy against maintenance, failures, and provisioning delays.
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {!loading && !error && runners.length === 0 && (
-            <div className="text-center py-16 animate-fade-in">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#1a1a1a] border border-[#333] mb-4">
-                <svg className="w-8 h-8 text-[#6b6b6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-white mb-1">No runners found</h3>
-              <p className="text-sm text-[#6b6b6b]">
-                No self-hosted runners are registered for this repository.
-              </p>
-            </div>
-          )}
-
-          {error && <SetupGuide />}
+      <section className="px-6 pb-6 pt-6">
+        <div className="max-w-[1400px] mx-auto">
+          {activeTab === "ci" && <CIStatusDashboard />}
+          {activeTab === "playbooks" && <PlaybookStatusDashboard />}
         </div>
       </section>
 
