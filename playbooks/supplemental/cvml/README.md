@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Ryzen AI CVML Library is AMD's C++ computer vision and machine learning toolkit that provides powerful, on-device perception capabilities — including depth estimation, face detection, and face mesh tracking. Built on top of the Ryzen AI drivers, the library automatically selects the best available hardware (GPU or NPU) for inference, letting you add AI features to C++ applications without worrying about model training or framework integration. All processing happens locally on your STX Halo™ system, making it ideal for privacy-sensitive, low-latency applications.
+The [Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) is AMD's C++ computer vision and machine learning toolkit that provides powerful, on-device perception capabilities — including depth estimation, face detection, and face mesh tracking. Built on top of the Ryzen AI drivers, the library automatically selects the best available hardware (GPU or NPU) for inference, letting you add AI features to C++ applications without worrying about model training or framework integration. All processing happens locally on your STX Halo™ system, making it ideal for privacy-sensitive, low-latency applications.
 
 This playbook teaches you how to set up the Ryzen AI CVML Library, build the included sample applications, and run face detection on a sample video.
 
