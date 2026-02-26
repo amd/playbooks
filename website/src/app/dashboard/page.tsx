@@ -501,11 +501,28 @@ function PlaybookStatusDashboard() {
     fetchMatrix();
   }, [fetchMatrix]);
 
-  const getStatusClasses = (status: PlaybookCellStatus): string => {
-    if (status === "pass") return "border-green-800/30 bg-green-900/15 text-green-300";
-    if (status === "fail") return "border-red-800/30 bg-red-900/15 text-red-300";
-    if (status === "partial") return "border-yellow-800/30 bg-yellow-900/15 text-yellow-300";
-    return "border-[#333] bg-[#1a1a1a] text-[#a0a0a0]";
+  type CellStyle = {
+    label: string;
+    dot: string | null;
+    text: string;
+    bg: string;
+    border: string;
+  };
+
+  const getCellStyle = (cell: PlaybookMatrixCell | undefined): CellStyle => {
+    if (!cell) {
+      return { label: "—", dot: null, text: "text-[#3a3a3a]", bg: "bg-transparent", border: "border-[#222]" };
+    }
+    switch (cell.status) {
+      case "pass":
+        return { label: "All passing", dot: "bg-green-400", text: "text-green-300", bg: "bg-green-900/10", border: "border-green-800/25" };
+      case "fail":
+        return { label: "Failing", dot: "bg-red-400", text: "text-red-300", bg: "bg-red-900/10", border: "border-red-800/25" };
+      case "partial":
+        return { label: "Some passing", dot: "bg-yellow-400", text: "text-yellow-300", bg: "bg-yellow-900/10", border: "border-yellow-800/25" };
+      default:
+        return { label: "No tests", dot: "bg-[#444]", text: "text-[#555]", bg: "bg-transparent", border: "border-[#2a2a2a]" };
+    }
   };
 
   const runDate = matrix?.run?.createdAt ? new Date(matrix.run.createdAt) : null;
@@ -534,7 +551,7 @@ function PlaybookStatusDashboard() {
     );
   }
 
-  if (!matrix || matrix.columns.length === 0 || matrix.rows.length === 0) {
+  if (!matrix || matrix.rows.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#1a1a1a] border border-[#333] mb-5">
@@ -542,9 +559,9 @@ function PlaybookStatusDashboard() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-white mb-2">No nightly test data found</h3>
+        <h3 className="text-lg font-medium text-white mb-2">No playbooks found</h3>
         <p className="text-sm text-[#6b6b6b] max-w-md text-center">
-          The latest workflow run does not have playbook test artifacts yet.
+          No playbooks could be loaded.
         </p>
       </div>
     );
@@ -552,14 +569,22 @@ function PlaybookStatusDashboard() {
 
   return (
     <div className="space-y-4 animate-fade-in">
+      {!matrix.run && (
+        <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg bg-[#1a1a1a] border border-[#333] text-xs text-[#a0a0a0]">
+          <svg className="w-4 h-4 text-[#6b6b6b] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>No nightly test artifacts found — all combinations are shown but no results are available yet.</span>
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <div className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm text-[#a0a0a0]">
-          Nightly matrix: <span className="text-white font-medium">{matrix.rows.length}</span> playbooks x{" "}
-          <span className="text-white font-medium">{matrix.columns.length}</span> hardware/OS columns
+          <span className="text-white font-medium">{matrix.rows.length}</span> playbooks ×{" "}
+          <span className="text-white font-medium">{matrix.columns.length}</span> combinations
         </div>
         {runDate && (
           <div className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm text-[#a0a0a0]">
-            Run time: <span className="text-white font-medium">{runDate.toLocaleString()}</span>
+            Last run: <span className="text-white font-medium">{runDate.toLocaleString()}</span>
           </div>
         )}
         {matrix.run?.htmlUrl && (
@@ -585,17 +610,17 @@ function PlaybookStatusDashboard() {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-[#1a1a1a]">
-              <th className="text-left px-4 py-3 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] min-w-[260px]">
+              <th className="text-left px-4 py-3 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] min-w-[220px]">
                 Playbook
               </th>
               {matrix.columns.map((column) => (
                 <th
                   key={column.id}
-                  className="px-4 py-3 text-sm font-semibold text-[#D4915D] border-b border-[#333] min-w-[150px]"
+                  className="px-3 py-3 text-xs font-semibold text-[#D4915D] border-b border-[#333] min-w-[110px] text-center"
                 >
-                  <div className="flex flex-col items-start leading-tight">
-                    <span>{column.hardware}</span>
-                    <span className="text-xs font-normal text-[#a0a0a0] mt-1">{column.os}</span>
+                  <div className="flex flex-col items-center leading-tight gap-0.5">
+                    <span className="text-[11px] font-semibold text-[#a0a0a0]">{column.hardware}</span>
+                    <span className="text-[10px] font-normal text-[#555]">{column.os}</span>
                   </div>
                 </th>
               ))}
@@ -604,41 +629,22 @@ function PlaybookStatusDashboard() {
           <tbody>
             {matrix.rows.map((row, idx) => (
               <tr key={row.playbookId} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
-                <td className="px-4 py-4 border-r border-[#333] align-top">
+                <td className="px-4 py-3 border-r border-[#333] align-middle">
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-white">{row.title}</span>
-                    <span className="text-xs text-[#6b6b6b] mt-1">{row.category}</span>
+                    <span className="text-xs text-[#6b6b6b] mt-0.5">{row.category}</span>
                   </div>
                 </td>
                 {matrix.columns.map((column) => {
                   const cell = row.cells[column.id];
-                  if (!cell) {
-                    return (
-                      <td key={column.id} className="px-4 py-4 align-top">
-                        <div className="h-full rounded-lg border border-[#333] bg-[#1a1a1a] px-3 py-2 text-xs text-[#6b6b6b]">
-                          no run
-                        </div>
-                      </td>
-                    );
-                  }
-
+                  const style = getCellStyle(cell);
                   return (
-                    <td key={column.id} className="px-4 py-4 align-top">
-                      <div className={`rounded-lg border px-3 py-2 text-xs ${getStatusClasses(cell.status)}`}>
-                        <div className="text-base font-semibold tabular-nums text-white">
-                          {cell.passed}/{cell.totalTests}
-                        </div>
-                        <div className="mt-1 flex items-center gap-2">
-                          {cell.failed > 0 && (
-                            <span className="text-[11px] font-medium text-red-300">{cell.failed} failed</span>
-                          )}
-                          {cell.skipped > 0 && (
-                            <span className="text-[11px] font-medium text-[#d8c28f]">{cell.skipped} skipped</span>
-                          )}
-                          {cell.status === "no-tests" && (
-                            <span className="text-[11px] font-medium text-[#a0a0a0]">no tests</span>
-                          )}
-                        </div>
+                    <td key={column.id} className="px-2 py-2 align-middle text-center">
+                      <div className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full`}>
+                        {style.dot && (
+                          <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
+                        )}
+                        <span className={`text-[11px] font-medium whitespace-nowrap ${style.text}`}>{style.label}</span>
                       </div>
                     </td>
                   );

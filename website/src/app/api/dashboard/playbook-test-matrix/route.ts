@@ -294,9 +294,26 @@ export async function GET() {
     const playbooks = loadPlaybooks();
     const nightly = await getLatestNightlyRunWithArtifacts(token);
     if (!nightly) {
+      const allColumns = Object.keys(HARDWARE_LABELS)
+        .flatMap((archKey) =>
+          ["windows", "linux"].map((platform) => ({
+            id: combinationId(archKey, platform),
+            arch: archKey,
+            platform,
+            hardware: combinationLabel(archKey),
+            os: platform === "windows" ? "Windows" : "Linux",
+          }))
+        )
+        .sort((a, b) => {
+          const hwA = Object.values(HARDWARE_LABELS).indexOf(a.hardware);
+          const hwB = Object.values(HARDWARE_LABELS).indexOf(b.hardware);
+          if (hwA !== hwB) return hwA - hwB;
+          return a.os.localeCompare(b.os);
+        });
+
       return NextResponse.json({
         run: null,
-        columns: [],
+        columns: allColumns,
         rows: playbooks.map((pb) => ({
           playbookId: pb.id,
           title: pb.title,
@@ -357,6 +374,13 @@ export async function GET() {
 
     const byPlaybookAndCombo = new Map<string, CellSummary>();
     const comboIds = new Set<string>();
+
+    // Always include the full CI matrix (all hardware × OS combos)
+    for (const archKey of Object.keys(HARDWARE_LABELS)) {
+      for (const platform of ["windows", "linux"]) {
+        comboIds.add(combinationId(archKey, platform));
+      }
+    }
 
     for (const pb of playbooks) {
       for (const combo of pb.combinations) comboIds.add(combo);
