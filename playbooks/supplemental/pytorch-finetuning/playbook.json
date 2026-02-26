@@ -11,6 +11,7 @@
   "difficulty": "intermediate",
   "isNew": true,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["pytorch", "fine-tuning", "llm", "rocm"]
 }

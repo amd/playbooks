@@ -11,6 +11,7 @@
   "difficulty": "advanced",
   "isNew": true,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["clustering", "distributed", "multi-gpu", "rccl", "vllm"]
 }

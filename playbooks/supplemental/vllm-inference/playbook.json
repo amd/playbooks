@@ -10,6 +10,7 @@
   "difficulty": "beginner",
   "isNew": true,
   "isFeatured": true,
+  "developed": false,
   "published": true,
   "tags": ["vllm", "inference", "llm", "quickstart"]
 }

@@ -11,6 +11,7 @@
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": true,
+  "developed": true,
   "published": true,
   "tags": ["image-generation", "comfyui", "z-image-turbo"],
   "coverImage": "assets/cover.jpeg"

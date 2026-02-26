@@ -44,6 +44,7 @@ interface PlaybookMeta {
   title?: string;
   platforms?: string[];
   tested_platforms?: Record<string, string[] | undefined>;
+  developed?: boolean;
   published?: boolean;
 }
 
@@ -52,6 +53,7 @@ interface PlaybookEntry {
   title: string;
   category: string;
   combinations: string[];
+  developed: boolean;
 }
 
 interface SummaryRaw {
@@ -159,11 +161,14 @@ function loadPlaybooks(): PlaybookEntry[] {
 
         combos = Array.from(new Set(combos));
 
+        const developed = meta.developed === true;
+
         rows.push({
           id: meta.id,
           title: meta.title || meta.id,
           category,
           combinations: combos,
+          developed,
         });
       } catch {
         // Ignore unreadable playbooks
@@ -318,6 +323,7 @@ export async function GET() {
           playbookId: pb.id,
           title: pb.title,
           category: pb.category,
+          developed: pb.developed,
           cells: {},
         })),
       });
@@ -424,6 +430,7 @@ export async function GET() {
         playbookId: pb.id,
         title: pb.title,
         category: pb.category,
+        developed: pb.developed,
         cells,
       };
     });

@@ -262,6 +262,7 @@ interface PlaybookMatrixRow {
   playbookId: string;
   title: string;
   category: string;
+  developed: boolean;
   cells: Record<string, PlaybookMatrixCell>;
 }
 
@@ -509,7 +510,10 @@ function PlaybookStatusDashboard() {
     border: string;
   };
 
-  const getCellStyle = (cell: PlaybookMatrixCell | undefined): CellStyle => {
+  const getCellStyle = (cell: PlaybookMatrixCell | undefined, developed: boolean): CellStyle => {
+    if (!developed) {
+      return { label: "—", dot: null, text: "text-[#2e2e2e]", bg: "bg-transparent", border: "border-[#1e1e1e]" };
+    }
     if (!cell) {
       return { label: "—", dot: null, text: "text-[#3a3a3a]", bg: "bg-transparent", border: "border-[#222]" };
     }
@@ -582,6 +586,16 @@ function PlaybookStatusDashboard() {
           <span className="text-white font-medium">{matrix.rows.length}</span> playbooks ×{" "}
           <span className="text-white font-medium">{matrix.columns.length}</span> combinations
         </div>
+        <div className="px-4 py-2 rounded-lg bg-green-900/15 border border-green-800/30 text-sm text-[#a0a0a0]">
+          <span className="text-green-400 font-medium">{matrix.rows.filter((r) => r.developed).length}</span>
+          <span> developed</span>
+        </div>
+        {matrix.rows.some((r) => !r.developed) && (
+          <div className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm text-[#a0a0a0]">
+            <span className="text-[#6b6b6b] font-medium">{matrix.rows.filter((r) => !r.developed).length}</span>
+            <span> not yet developed</span>
+          </div>
+        )}
         {runDate && (
           <div className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm text-[#a0a0a0]">
             Last run: <span className="text-white font-medium">{runDate.toLocaleString()}</span>
@@ -650,13 +664,20 @@ function PlaybookStatusDashboard() {
                 }
                 const idx = categoryRowIdx++;
                 elements.push(
-                  <tr key={row.playbookId} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
+                  <tr key={row.playbookId} className={`${idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"} ${!row.developed ? "opacity-50" : ""}`}>
                     <td className="px-4 py-3 border-r border-[#333] align-middle">
-                      <span className="text-sm font-medium text-white">{row.title}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-medium ${row.developed ? "text-white" : "text-[#555]"}`}>{row.title}</span>
+                        {!row.developed && (
+                          <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded border border-[#333] text-[#555] bg-[#1a1a1a]">
+                            Not developed
+                          </span>
+                        )}
+                      </div>
                     </td>
                     {matrix.columns.map((column) => {
                       const cell = row.cells[column.id];
-                      const style = getCellStyle(cell);
+                      const style = getCellStyle(cell, row.developed);
                       return (
                         <td key={column.id} className="px-2 py-2 align-middle text-center">
                           <div className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full`}>

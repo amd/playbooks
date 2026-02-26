@@ -11,6 +11,7 @@
   "difficulty": "beginner",
   "isNew": true,
   "isFeatured": false,
+  "developed": true,
   "published": true,
   "tags": ["pytorch", "rocm", "llm", "inference", "summarization"],
   "coverImage": "assets/cover_img.jpeg"
