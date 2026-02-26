@@ -610,7 +610,7 @@ function PlaybookStatusDashboard() {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-[#1a1a1a]">
-              <th className="text-left px-4 py-3 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] min-w-[220px]">
+              <th className="text-left px-4 py-3 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] min-w-[420px]">
                 Playbook
               </th>
               {matrix.columns.map((column) => (
@@ -627,30 +627,52 @@ function PlaybookStatusDashboard() {
             </tr>
           </thead>
           <tbody>
-            {matrix.rows.map((row, idx) => (
-              <tr key={row.playbookId} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
-                <td className="px-4 py-3 border-r border-[#333] align-middle">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-white">{row.title}</span>
-                    <span className="text-xs text-[#6b6b6b] mt-0.5">{row.category}</span>
-                  </div>
-                </td>
-                {matrix.columns.map((column) => {
-                  const cell = row.cells[column.id];
-                  const style = getCellStyle(cell);
-                  return (
-                    <td key={column.id} className="px-2 py-2 align-middle text-center">
-                      <div className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full`}>
-                        {style.dot && (
-                          <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
-                        )}
-                        <span className={`text-[11px] font-medium whitespace-nowrap ${style.text}`}>{style.label}</span>
-                      </div>
-                    </td>
+            {(() => {
+              const elements: React.ReactNode[] = [];
+              let lastCategory = "";
+              let categoryRowIdx = 0;
+              matrix.rows.forEach((row) => {
+                if (row.category !== lastCategory) {
+                  lastCategory = row.category;
+                  categoryRowIdx = 0;
+                  elements.push(
+                    <tr key={`cat-${row.category}`} className="bg-[#111]">
+                      <td
+                        colSpan={matrix.columns.length + 1}
+                        className="px-4 py-1.5 border-t border-b border-[#2a2a2a]"
+                      >
+                        <span className="text-[11px] font-semibold uppercase tracking-widest text-[#555]">
+                          {row.category}
+                        </span>
+                      </td>
+                    </tr>
                   );
-                })}
-              </tr>
-            ))}
+                }
+                const idx = categoryRowIdx++;
+                elements.push(
+                  <tr key={row.playbookId} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
+                    <td className="px-4 py-3 border-r border-[#333] align-middle">
+                      <span className="text-sm font-medium text-white">{row.title}</span>
+                    </td>
+                    {matrix.columns.map((column) => {
+                      const cell = row.cells[column.id];
+                      const style = getCellStyle(cell);
+                      return (
+                        <td key={column.id} className="px-2 py-2 align-middle text-center">
+                          <div className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full`}>
+                            {style.dot && (
+                              <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
+                            )}
+                            <span className={`text-[11px] font-medium whitespace-nowrap ${style.text}`}>{style.label}</span>
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              });
+              return elements;
+            })()}
           </tbody>
         </table>
       </div>
@@ -682,8 +704,8 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="px-6">
-        <div className="max-w-[1400px] mx-auto">
+      <section className="px-4">
+        <div className="max-w-[1800px] mx-auto">
           <div className="flex gap-1 border-b border-[#333]">
             {TABS.map((tab) => (
               <button
@@ -705,8 +727,8 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="px-6 pb-6 pt-6">
-        <div className="max-w-[1400px] mx-auto">
+      <section className="px-4 pb-6 pt-6">
+        <div className="max-w-[1800px] mx-auto">
           {activeTab === "ci" && <CIStatusDashboard />}
           {activeTab === "playbooks" && <PlaybookStatusDashboard />}
         </div>
