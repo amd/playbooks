@@ -853,9 +853,9 @@ export default function DashboardPage() {
         <div className="max-w-[1400px] mx-auto relative z-10">
           <div className="text-center max-w-4xl mx-auto animate-fade-in mb-8">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">
-              Operations{" "}
+              Playbooks {" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4915D] to-[#E8B896]">
-                Dashboard
+                CI Dashboard
               </span>
             </h1>
             <p className="text-lg text-[#a0a0a0] max-w-2xl mx-auto">
