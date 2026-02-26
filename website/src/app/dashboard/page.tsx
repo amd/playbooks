@@ -510,12 +510,12 @@ function PlaybookStatusDashboard() {
     border: string;
   };
 
-  const getCellStyle = (cell: PlaybookMatrixCell | undefined, developed: boolean): CellStyle => {
-    if (!developed) {
+  const getCellStyle = (cell: PlaybookMatrixCell | undefined, developed: boolean, testsAdded: boolean): CellStyle => {
+    if (!developed || !testsAdded) {
       return { label: "—", dot: null, text: "text-[#2e2e2e]", bg: "bg-transparent", border: "border-[#1e1e1e]" };
     }
-    if (!cell) {
-      return { label: "—", dot: null, text: "text-[#3a3a3a]", bg: "bg-transparent", border: "border-[#222]" };
+    if (!cell || cell.status === "no-tests") {
+      return { label: "Not tested", dot: null, text: "text-[#555]", bg: "bg-transparent", border: "border-[#2a2a2a]" };
     }
     switch (cell.status) {
       case "pass":
@@ -525,7 +525,7 @@ function PlaybookStatusDashboard() {
       case "partial":
         return { label: "Some passing", dot: "bg-yellow-400", text: "text-yellow-300", bg: "bg-yellow-900/10", border: "border-yellow-800/25" };
       default:
-        return { label: "No tests", dot: "bg-[#444]", text: "text-[#555]", bg: "bg-transparent", border: "border-[#2a2a2a]" };
+        return { label: "Not tested", dot: null, text: "text-[#555]", bg: "bg-transparent", border: "border-[#2a2a2a]" };
     }
   };
 
@@ -627,6 +627,12 @@ function PlaybookStatusDashboard() {
               <th className="text-left px-4 py-3 text-sm font-semibold text-[#D4915D] border-b border-r border-[#333] min-w-[420px]">
                 Playbook
               </th>
+              <th className="px-3 py-3 text-xs font-semibold text-[#D4915D] border-b border-r border-[#333] w-[80px] text-center">
+                Developed
+              </th>
+              <th className="px-3 py-3 text-xs font-semibold text-[#D4915D] border-b border-r border-[#333] w-[100px] text-center">
+                Tests Added
+              </th>
               {matrix.columns.map((column) => (
                 <th
                   key={column.id}
@@ -652,7 +658,7 @@ function PlaybookStatusDashboard() {
                   elements.push(
                     <tr key={`cat-${row.category}`} className="bg-[#111]">
                       <td
-                        colSpan={matrix.columns.length + 1}
+                        colSpan={matrix.columns.length + 3}
                         className="px-4 py-1.5 border-t border-b border-[#2a2a2a]"
                       >
                         <span className="text-[11px] font-semibold uppercase tracking-widest text-[#555]">
@@ -666,18 +672,34 @@ function PlaybookStatusDashboard() {
                 elements.push(
                   <tr key={row.playbookId} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
                     <td className="px-4 py-3 border-r border-[#333] align-middle">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-white">{row.title}</span>
-                        {!row.developed && (
-                          <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded border border-[#333] text-[#555] bg-[#1a1a1a]">
-                            Not developed
-                          </span>
-                        )}
-                      </div>
+                      <span className="text-sm font-medium text-white">{row.title}</span>
+                    </td>
+                    <td className="px-3 py-3 border-r border-[#333] align-middle text-center">
+                      {row.developed ? (
+                        <svg className="w-4 h-4 text-green-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 text-[#444] mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
+                    </td>
+                    <td className="px-3 py-3 border-r border-[#333] align-middle text-center">
+                      {Object.values(row.cells).some((c) => c.totalTests > 0) ? (
+                        <svg className="w-4 h-4 text-green-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 text-[#444] mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
                     </td>
                     {matrix.columns.map((column) => {
                       const cell = row.cells[column.id];
-                      const style = getCellStyle(cell, row.developed);
+                      const testsAdded = Object.values(row.cells).some((c) => c.totalTests > 0);
+                      const style = getCellStyle(cell, row.developed, testsAdded);
                       return (
                         <td key={column.id} className="px-2 py-2 align-middle text-center">
                           <div className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full`}>
