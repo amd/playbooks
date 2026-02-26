@@ -5,12 +5,13 @@
   "time": 60,
   "platforms": ["windows", "linux"],
   "tested_platforms": {
-    "windows": ["halo"],
+    "windows": [],
     "linux": []
   },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["speech", "translation", "audio", "real-time"]
 }

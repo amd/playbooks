@@ -6,11 +6,12 @@
   "platforms": ["linux", "windows"],
   "tested_platforms": {
     "linux": [],
-    "windows": ["halo"]
+    "windows": []
   },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["gaia", "agents", "llamacpp", "llm"]
 }
