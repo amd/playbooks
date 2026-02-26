@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -672,7 +673,12 @@ function PlaybookStatusDashboard() {
                 elements.push(
                   <tr key={row.playbookId} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
                     <td className="px-4 py-3 border-r border-[#333] align-middle">
-                      <span className="text-sm font-medium text-white">{row.title}</span>
+                      <Link
+                        href={`/playbooks/${row.playbookId}`}
+                        className="text-sm font-medium text-white hover:text-[#D4915D] transition-colors"
+                      >
+                        {row.title}
+                      </Link>
                     </td>
                     <td className="px-3 py-3 border-r border-[#333] align-middle text-center">
                       {row.developed ? (
