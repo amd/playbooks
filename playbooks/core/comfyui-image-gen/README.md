@@ -15,6 +15,83 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 
 <!-- @require:comfyui,driver -->
 
+<!-- @os:windows -->
+<!-- @test:id=create-venv timeout=120 -->
+```powershell
+python -m venv comfyui_venv
+.\comfyui_venv\Scripts\Activate.ps1
+```
+<!-- @test:end --> 
+<!-- @setup:id=activate-comfyui_venv-windows command="cd ComfyUI; .\comfyui_venv\Scripts\Activate.ps1" --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv comfyui_venv --system-site-packages
+source comfyui_venv/bin/activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-comfyui_venv-linux command="cd ComfyUI && source comfyui_venv/bin/activate" -->
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-clone-windows timeout=300 -->
+```powershell
+git clone https://github.com/Comfy-Org/ComfyUI.git
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-clone-linux timeout=300 -->
+```bash
+git clone https://github.com/Comfy-Org/ComfyUI.git
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-install-windows timeout=300 setup=activate-comfyui_venv-windows -->
+```powershell
+pip install -r requirements.txt
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-install-linux timeout=300 setup=activate-comfyui_venv-linux -->
+```bash
+pip install -r requirements.txt
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-server-up-windows timeout=300 hidden=True setup=activate-comfyui_venv-windows -->
+```powershell
+Start-Process -FilePath "python" -ArgumentList "main.py --listen 127.0.0.1 --port 8188" -NoNewWindow
+Start-Sleep -Seconds 5
+curl.exe -s http://127.0.0.1:8188
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-server-up-linux timeout=300 hidden=True setup=activate-comfyui_venv-linux -->
+```bash
+python3 main.py --listen 127.0.0.1 --port 8188 &
+sleep 5
+curl -s http://127.0.0.1:8188
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 ## Launching ComfyUI
 
 <!-- @os:windows -->
@@ -52,6 +129,44 @@ Before generating images, you need to load the Z Image Turbo template. Here's ho
 ## Downloading Models
 
 <!-- @require:comfyui-models -->
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-populate-models-from-cache-windows timeout=600 hidden=True -->
+```powershell
+cd ComfyUI
+$cacheDiff = "C:\ModelCache\ComfyUI\models\diffusion_models\z_image_turbo_bf16.safetensors"
+$cacheTE   = "C:\ModelCache\ComfyUI\models\text_encoders\qwen_3_4b.safetensors"
+$cacheVAE  = "C:\ModelCache\ComfyUI\models\vae\ae.safetensors"
+if (-not (Test-Path $cacheDiff)) { Write-Error "models missing on runner: $cacheDiff"; exit 1 }
+if (-not (Test-Path $cacheTE))   { Write-Error "models missing on runner: $cacheTE"; exit 1 }
+if (-not (Test-Path $cacheVAE))  { Write-Error "models missing on runner: $cacheVAE"; exit 1 }
+New-Item -ItemType Directory -Force -Path ".\models\diffusion_models" | Out-Null
+New-Item -ItemType Directory -Force -Path ".\models\text_encoders"   | Out-Null
+New-Item -ItemType Directory -Force -Path ".\models\vae"             | Out-Null
+Copy-Item -Force $cacheDiff ".\models\diffusion_models\z_image_turbo_bf16.safetensors"
+Copy-Item -Force $cacheTE   ".\models\text_encoders\qwen_3_4b.safetensors"
+Copy-Item -Force $cacheVAE  ".\models\vae\ae.safetensors"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-populate-models-from-cache-linux timeout=600 hidden=True -->
+```bash
+cd ComfyUI
+cache_diff="/opt/model_cache/ComfyUI/models/diffusion_models/z_image_turbo_bf16.safetensors"
+cache_te="/opt/model_cache/ComfyUI/models/text_encoders/qwen_3_4b.safetensors"
+cache_vae="/opt/model_cache/ComfyUI/models/vae/ae.safetensors"
+test -f "$cache_diff" || (echo "models missing on runner: $cache_diff" && exit 1)
+test -f "$cache_te" || (echo "models missing on runner: $cache_te" && exit 1)
+test -f "$cache_vae" || (echo "models missing on runner: $cache_vae" && exit 1)
+mkdir -p models/diffusion_models models/text_encoders models/vae
+cp -f "$cache_diff" models/diffusion_models/z_image_turbo_bf16.safetensors
+cp -f "$cache_te" models/text_encoders/qwen_3_4b.safetensors
+cp -f "$cache_vae" models/vae/ae.safetensors
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 ## Understanding the Interface
 
@@ -91,6 +206,87 @@ The Z Image Turbo model is already loaded. To generate an image:
 4. Watch the nodes highlight as each step executes
 
 The entire workflow execution should complete in less than 30 seconds. Your generated image appears in the **Save Image** node and is saved to the `output/` folder.
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-generate-zimage timeout=600 hidden=True setup=activate-comfyui_venv-windows -->
+```python
+import json, time, urllib.request
+
+with open("assets/image_z_image_turbo.json", "r", encoding="utf-8") as f:
+  workflow = json.load(f)
+
+req = urllib.request.Request(
+  "http://127.0.0.1:8188/prompt",
+  data=json.dumps({"prompt": workflow}).encode("utf-8"),
+  headers={"Content-Type":"application/json"},
+  method="POST",
+)
+with urllib.request.urlopen(req, timeout=30) as r:
+  prompt_id = json.load(r)["prompt_id"]
+
+for _ in range(120):
+  with urllib.request.urlopen(f"http://127.0.0.1:8188/history/{prompt_id}", timeout=30) as r:
+    hist = json.load(r)
+  entry = hist.get(prompt_id, {})
+  if entry.get("outputs"):
+    break
+  time.sleep(1)
+else:
+  raise SystemExit("No outputs after waiting.")
+
+print("OK")
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-generate-zimage timeout=600 hidden=True setup=activate-comfyui_venv-linux -->
+```python
+import json, time, urllib.request
+
+with open("assets/image_z_image_turbo.json", "r", encoding="utf-8") as f:
+  workflow = json.load(f)
+
+req = urllib.request.Request(
+  "http://127.0.0.1:8188/prompt",
+  data=json.dumps({"prompt": workflow}).encode("utf-8"),
+  headers={"Content-Type":"application/json"},
+  method="POST",
+)
+with urllib.request.urlopen(req, timeout=30) as r:
+  prompt_id = json.load(r)["prompt_id"]
+
+for _ in range(120):
+  with urllib.request.urlopen(f"http://127.0.0.1:8188/history/{prompt_id}", timeout=30) as r:
+    hist = json.load(r)
+  entry = hist.get(prompt_id, {})
+  if entry.get("outputs"):
+    break
+  time.sleep(1)
+else:
+  raise SystemExit("No outputs after waiting.")
+
+print("OK")
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-output-exists-windows timeout=60 hidden=True -->
+```powershell
+dir ComfyUI\output\*.png
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-output-exists-linux timeout=60 hidden=True -->
+```bash
+ls ComfyUI/output/*.png
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 ## Adjusting Generation Parameters
 
