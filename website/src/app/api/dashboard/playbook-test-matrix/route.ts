@@ -216,6 +216,17 @@ async function listRunArtifacts(runId: number, token: string): Promise<Artifact[
   return collected;
 }
 
+async function getRunByIdLocal(
+  token: string,
+  runId: number
+): Promise<{ run: WorkflowRun; artifacts: Artifact[] } | null> {
+  const runRes = await ghFetch(`/actions/runs/${runId}`, token);
+  if (!runRes.ok) return null;
+  const run = (await runRes.json()) as WorkflowRun;
+  const artifacts = await listRunArtifacts(runId, token);
+  return { run, artifacts };
+}
+
 async function getLatestNightlyRunWithArtifacts(
   token: string
 ): Promise<{ run: WorkflowRun; artifacts: Artifact[] } | null> {
@@ -283,7 +294,7 @@ async function extractSummary(artifact: Artifact, token: string): Promise<Summar
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const token = process.env.DASHBOARD_GITHUB_TOKEN?.trim();
   if (!token) {
     return NextResponse.json(
@@ -295,9 +306,15 @@ export async function GET() {
     );
   }
 
+  const { searchParams } = new URL(request.url);
+  const runIdParam = searchParams.get("run_id");
+  const runId = runIdParam ? parseInt(runIdParam, 10) : undefined;
+
   try {
     const playbooks = loadPlaybooks();
-    const nightly = await getLatestNightlyRunWithArtifacts(token);
+    const nightly = runId
+      ? await getRunByIdLocal(token, runId)
+      : await getLatestNightlyRunWithArtifacts(token);
     if (!nightly) {
       const allColumns = Object.keys(HARDWARE_LABELS)
         .flatMap((archKey) =>
