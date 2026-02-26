@@ -50,11 +50,9 @@ fi
 ```powershell
 if (Test-Path "comfyui_venv") { Remove-Item -Recurse -Force comfyui_venv}
 py -3.12 -m venv comfyui_venv
-.\comfyui_venv\Scripts\Activate.ps1
-python -V
+.\comfyui_venv\Scripts\python.exe -V
 ```
 <!-- @test:end --> 
-<!-- @setup:id=activate-comfyui_venv-windows command="cd ComfyUI; .\comfyui_venv\Scripts\Activate.ps1" --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -75,7 +73,7 @@ python --version
 <!-- @test:id=comfyui-install-windows timeout=300 setup=activate-comfyui_venv-windows -->
 ```powershell
 .\comfyui_venv\Scripts\python.exe -m pip install --upgrade pip
-.\comfyui_venv\Scripts\python.exe -m pip install -r requirements.txt
+.\comfyui_venv\Scripts\python.exe -m pip install -r .\ComfyUI\requirements.txt
 ```
 <!-- @test:end -->
 <!-- @os:end -->
