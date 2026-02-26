@@ -18,30 +18,42 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 <!-- @os:windows -->
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
-python -m venv comfyui_venv
+if (Test-Path "comfyui_venv") { Remove-Item -Recurse -Force comfyui_venv}
+py -3.12 -m venv comfyui_venv
 .\comfyui_venv\Scripts\Activate.ps1
+python -V
 ```
 <!-- @test:end --> 
-<!-- @setup:id=activate-comfyui_venv-windows command="cd ComfyUI; .\comfyui_venv\Scripts\Activate.ps1" --> 
+<!-- @setup:id=activate-comfyui_venv-windows command="cd ComfyUI; ..\comfyui_venv\Scripts\Activate.ps1" --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
+rm -rf comfyui_venv
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv comfyui_venv --system-site-packages
+python3.12 -m venv comfyui_venv
 source comfyui_venv/bin/activate
+python --version
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-comfyui_venv-linux command="cd ComfyUI && source comfyui_venv/bin/activate" -->
+<!-- @setup:id=activate-comfyui_venv-linux command="cd ComfyUI && source ../comfyui_venv/bin/activate" -->
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-clone-windows timeout=300 -->
 ```powershell
-git clone https://github.com/Comfy-Org/ComfyUI.git
+if (Test-Path "ComfyUI\.git")
+{
+  cd ComfyUI
+  git pull
+}
+else
+{
+  git clone https://github.com/Comfy-Org/ComfyUI.git
+}
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -49,7 +61,12 @@ git clone https://github.com/Comfy-Org/ComfyUI.git
 <!-- @os:linux -->
 <!-- @test:id=comfyui-clone-linux timeout=300 -->
 ```bash
-git clone https://github.com/Comfy-Org/ComfyUI.git
+if [ -d "ComfyUI/.git" ]; then
+  cd ComfyUI
+  git pull
+else
+  git clone https://github.com/Comfy-Org/ComfyUI.git
+fi
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -58,7 +75,8 @@ git clone https://github.com/Comfy-Org/ComfyUI.git
 <!-- @os:windows -->
 <!-- @test:id=comfyui-install-windows timeout=300 setup=activate-comfyui_venv-windows -->
 ```powershell
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -66,9 +84,62 @@ pip install -r requirements.txt
 <!-- @os:linux -->
 <!-- @test:id=comfyui-install-linux timeout=300 setup=activate-comfyui_venv-linux -->
 ```bash
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 <!-- @test:end -->
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-install-rocm-torch-windows timeout=300 setup=activate-comfyui_venv-windows -->
+```powershell
+pip install --no-cache-dir `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_core-7.2.0.dev0-py3-none-win_amd64.whl `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_devel-7.2.0.dev0-py3-none-win_amd64.whl `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_libraries_custom-7.2.0.dev0-py3-none-win_amd64.whl `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm-7.2.0.dev0.tar.gz
+
+pip install --no-cache-dir `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torch-2.9.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torchaudio-2.9.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torchvision-0.24.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-install-rocm-torch-linux timeout=600 hidden=True setup=activate-comfyui_venv-linux -->
+```bash
+sudo apt install python3-pip -y
+pip3 install --upgrade pip wheel
+wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torch-2.9.1%2Brocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl
+wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchvision-0.24.0%2Brocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl
+wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
+wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchaudio-2.9.0%2Brocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl
+pip3 uninstall torch torchvision triton torchaudio
+pip3 install torch-2.9.1+rocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl torchvision-0.24.0+rocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl torchaudio-2.9.0+rocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl triton-3.5.1+rocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-verify-torch-windows timeout=300 hidden=True setup=activate-comfyui_venv-windows -->
+```powershell
+python -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-verify-torch-linux timeout=300 hidden=True setup=activate-comfyui_venv-linux -->
+```bash
+python3 -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)"
+```
+<!-- @test:end --> 
 <!-- @os:end -->
 
 
