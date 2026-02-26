@@ -446,13 +446,15 @@ export async function GET(
   const runId = runIdParam ? parseInt(runIdParam, 10) : undefined;
 
   // Attempt to load test results from GitHub Actions artifacts.
-  // Coverage mode is enabled whenever a GitHub token is set and results are found.
+  // Coverage mode is only enabled when both SHOW_TEST_COVERAGE=true (i.e. running
+  // via `npm run dev:coverage`) AND a GitHub token is set and results are found.
   let showCoverage = false;
   let resultsMap: ResultsMap = {};
   let resultsSummary: { passed: number; failed: number; skipped: number } | undefined;
 
+  const coverageModeEnabled = process.env.SHOW_TEST_COVERAGE === "true";
   const token = process.env.DASHBOARD_GITHUB_TOKEN?.trim();
-  if (token) {
+  if (coverageModeEnabled && token) {
     try {
       const loaded = await loadGitHubTestResults(id, token, runId);
       if (loaded) {

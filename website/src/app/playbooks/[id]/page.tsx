@@ -1065,7 +1065,6 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
-  const coverageEnabled = process.env.NEXT_PUBLIC_SHOW_TEST_COVERAGE === "true";
   // Coverage view toggle — true = show coverage badges & sidebar; false = normal user view
   const [coverageViewActive, setCoverageViewActive] = useState<boolean>(false);
   // All-playbooks coverage data for the sidebar (fetched once when in coverage mode)
@@ -1540,11 +1539,11 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
               </div>
 
               {/* Main content area with TOC / Coverage sidebar */}
-              <div className={`relative flex gap-8 ${playbook.testCoverage && coverageEnabled && !coverageViewActive ? "tc-user-view" : ""}`}>
+              <div className={`relative flex gap-8 ${playbook.testCoverage && !coverageViewActive ? "tc-user-view" : ""}`}>
                 {/* Sidebar - Desktop only */}
-                <aside className={`hidden xl:block flex-shrink-0 ${playbook.testCoverage && coverageEnabled && coverageViewActive ? "w-64" : "w-56"}`}>
+                <aside className={`hidden xl:block flex-shrink-0 ${playbook.testCoverage && coverageViewActive ? "w-64" : "w-56"}`}>
                   <div className="sticky top-24">
-                    {playbook.testCoverage && coverageEnabled && coverageViewActive ? (
+                    {playbook.testCoverage && coverageViewActive ? (
                       <CoverageSidebar
                         currentPlaybookId={id}
                         allPlaybooks={coveragePlaybooks}
@@ -1560,7 +1559,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                           />
                         )}
                         {/* Show return toggle when coverage data exists but user switched to user view */}
-                        {playbook.testCoverage && coverageEnabled && !coverageViewActive && (
+                        {playbook.testCoverage && !coverageViewActive && (
                           <CoverageReturnToggle onToggle={() => setCoverageViewActive(true)} />
                         )}
                       </>
@@ -1571,7 +1570,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   {/* Test Coverage Stats (only in coverage view) */}
-                  {playbook.testCoverage && coverageEnabled && coverageViewActive && (
+                  {playbook.testCoverage && coverageViewActive && (
                     <TestCoverageStatsBar
                       coverage={playbook.testCoverage}
                       availableRuns={availableRuns}
@@ -1608,7 +1607,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                 </div>
 
                 {/* Mobile-only coverage toggle */}
-                {playbook.testCoverage && coverageEnabled && (
+                {playbook.testCoverage && (
                   <button
                     className="cov-mobile-toggle xl:hidden"
                     onClick={() => setCoverageViewActive(prev => !prev)}
