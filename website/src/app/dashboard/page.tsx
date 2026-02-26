@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -475,16 +476,113 @@ function CIStatusDashboard() {
   );
 }
 
+interface RunOption {
+  id: number;
+  htmlUrl: string;
+  createdAt: string;
+  event: string;
+  headBranch: string;
+  conclusion: string | null;
+}
+
+function eventBadge(event: string) {
+  if (event === "schedule") return { label: "Nightly", cls: "bg-blue-900/30 text-blue-400 border-blue-800/30" };
+  if (event === "workflow_dispatch") return { label: "Manual", cls: "bg-purple-900/30 text-purple-400 border-purple-800/30" };
+  return { label: event, cls: "bg-[#242424] text-[#6b6b6b] border-[#333]" };
+}
+
+function RunSelector({
+  runs,
+  selectedId,
+  onChange,
+}: {
+  runs: RunOption[];
+  selectedId: number | null;
+  onChange: (id: number | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    const handler = (e: MouseEvent) => {
+      if (!node.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const selected = selectedId != null ? runs.find((r) => r.id === selectedId) : null;
+  const label = selected
+    ? new Date(selected.createdAt).toLocaleString()
+    : "Latest nightly";
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-2 px-3 py-1.5 bg-[#1a1a1a] border border-[#333] rounded-lg text-sm text-[#a0a0a0] hover:border-[#555] hover:text-white transition-colors"
+      >
+        <svg className="w-3.5 h-3.5 text-[#D4915D] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>Run: <span className="text-white font-medium">{label}</span></span>
+        <svg className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 w-80 bg-[#1a1a1a] border border-[#333] rounded-xl shadow-2xl overflow-hidden">
+          <div className="max-h-72 overflow-y-auto">
+            <button
+              onClick={() => { onChange(null); setOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[#242424] transition-colors ${selectedId == null ? "bg-[#242424]" : ""}`}
+            >
+              <span className="flex-1 text-left text-white font-medium">Latest nightly</span>
+              {selectedId == null && <svg className="w-3.5 h-3.5 text-[#D4915D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>}
+            </button>
+            <div className="border-t border-[#2a2a2a]" />
+            {runs.map((run) => {
+              const badge = eventBadge(run.event);
+              const isSelected = selectedId === run.id;
+              return (
+                <button
+                  key={run.id}
+                  onClick={() => { onChange(run.id); setOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[#242424] transition-colors ${isSelected ? "bg-[#242424]" : ""}`}
+                >
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="text-[#a0a0a0]">{new Date(run.createdAt).toLocaleString()}</div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className={`px-1.5 py-0.5 text-[10px] font-semibold rounded border ${badge.cls}`}>{badge.label}</span>
+                      <span className="text-[11px] text-[#555] truncate">{run.headBranch}</span>
+                    </div>
+                  </div>
+                  {isSelected && <svg className="w-3.5 h-3.5 text-[#D4915D] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PlaybookStatusDashboard() {
   const [matrix, setMatrix] = useState<PlaybookTestMatrixResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [availableRuns, setAvailableRuns] = useState<RunOption[]>([]);
+  const [selectedRunId, setSelectedRunId] = useState<number | null>(null);
 
-  const fetchMatrix = useCallback(async () => {
+  const fetchMatrix = useCallback(async (runId: number | null = null) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/dashboard/playbook-test-matrix");
+      const url = runId
+        ? `/api/dashboard/playbook-test-matrix?run_id=${runId}`
+        : "/api/dashboard/playbook-test-matrix";
+      const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || `API error: ${res.status}`);
@@ -498,9 +596,17 @@ function PlaybookStatusDashboard() {
     }
   }, []);
 
+  // Fetch the list of available runs once on mount
   useEffect(() => {
-    fetchMatrix();
-  }, [fetchMatrix]);
+    fetch("/api/dashboard/playbook-runs?per_page=20")
+      .then((r) => r.json())
+      .then((d) => { if (d.runs) setAvailableRuns(d.runs); })
+      .catch(() => {/* non-critical — run selector just stays empty */});
+  }, []);
+
+  useEffect(() => {
+    fetchMatrix(selectedRunId);
+  }, [fetchMatrix, selectedRunId]);
 
   type CellStyle = {
     label: string;
@@ -582,6 +688,13 @@ function PlaybookStatusDashboard() {
         </div>
       )}
       <div className="flex flex-wrap items-center gap-3">
+        {availableRuns.length > 0 && (
+          <RunSelector
+            runs={availableRuns}
+            selectedId={selectedRunId}
+            onChange={(id) => setSelectedRunId(id)}
+          />
+        )}
         <div className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm text-[#a0a0a0]">
           <span className="text-white font-medium">{matrix.rows.length}</span> playbooks ×{" "}
           <span className="text-white font-medium">{matrix.columns.length}</span> combinations
@@ -598,7 +711,7 @@ function PlaybookStatusDashboard() {
         )}
         {runDate && (
           <div className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm text-[#a0a0a0]">
-            Last run: <span className="text-white font-medium">{runDate.toLocaleString()}</span>
+            Run date: <span className="text-white font-medium">{runDate.toLocaleString()}</span>
           </div>
         )}
         {matrix.run?.htmlUrl && (
@@ -612,7 +725,7 @@ function PlaybookStatusDashboard() {
           </a>
         )}
         <button
-          onClick={fetchMatrix}
+          onClick={() => fetchMatrix(selectedRunId)}
           disabled={loading}
           className="px-4 py-2 rounded-lg border border-[#333] text-[#a0a0a0] text-sm hover:text-white hover:border-[#555] transition-colors disabled:opacity-50"
         >
@@ -672,7 +785,12 @@ function PlaybookStatusDashboard() {
                 elements.push(
                   <tr key={row.playbookId} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
                     <td className="px-4 py-3 border-r border-[#333] align-middle">
-                      <span className="text-sm font-medium text-white">{row.title}</span>
+                      <Link
+                        href={`/playbooks/${row.playbookId}`}
+                        className="text-sm font-medium text-white hover:text-[#D4915D] transition-colors"
+                      >
+                        {row.title}
+                      </Link>
                     </td>
                     <td className="px-3 py-3 border-r border-[#333] align-middle text-center">
                       {row.developed ? (
@@ -735,9 +853,9 @@ export default function DashboardPage() {
         <div className="max-w-[1400px] mx-auto relative z-10">
           <div className="text-center max-w-4xl mx-auto animate-fade-in mb-8">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">
-              Operations{" "}
+              Playbooks {" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4915D] to-[#E8B896]">
-                Dashboard
+                CI Dashboard
               </span>
             </h1>
             <p className="text-lg text-[#a0a0a0] max-w-2xl mx-auto">
