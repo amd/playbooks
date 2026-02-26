@@ -16,33 +16,6 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 <!-- @require:comfyui,driver -->
 
 <!-- @os:windows -->
-<!-- @test:id=create-venv timeout=120 -->
-```powershell
-if (Test-Path "comfyui_venv") { Remove-Item -Recurse -Force comfyui_venv}
-py -3.12 -m venv comfyui_venv
-.\comfyui_venv\Scripts\Activate.ps1
-python -V
-```
-<!-- @test:end --> 
-<!-- @setup:id=activate-comfyui_venv-windows command="cd ComfyUI; ..\comfyui_venv\Scripts\Activate.ps1" --> 
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @test:id=create-venv timeout=120 -->
-```bash
-rm -rf comfyui_venv
-sudo apt update
-sudo apt install -y python3-venv
-python3.12 -m venv comfyui_venv
-source comfyui_venv/bin/activate
-python --version
-```
-<!-- @test:end -->
-<!-- @setup:id=activate-comfyui_venv-linux command="cd ComfyUI && source ../comfyui_venv/bin/activate" -->
-<!-- @os:end -->
-
-
-<!-- @os:windows -->
 <!-- @test:id=comfyui-clone-windows timeout=300 -->
 ```powershell
 if (Test-Path "ComfyUI\.git")
@@ -73,10 +46,36 @@ fi
 
 
 <!-- @os:windows -->
+<!-- @test:id=create-venv timeout=120 -->
+```powershell
+if (Test-Path "comfyui_venv") { Remove-Item -Recurse -Force comfyui_venv}
+py -3.12 -m venv comfyui_venv
+.\comfyui_venv\Scripts\Activate.ps1
+python -V
+```
+<!-- @test:end --> 
+<!-- @setup:id=activate-comfyui_venv-windows command="cd ComfyUI; .\comfyui_venv\Scripts\Activate.ps1" --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+rm -rf comfyui_venv
+sudo apt update
+sudo apt install -y python3-venv
+python3.12 -m venv comfyui_venv
+source comfyui_venv/bin/activate
+python --version
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-comfyui_venv-linux command="cd ComfyUI && source comfyui_venv/bin/activate" -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
 <!-- @test:id=comfyui-install-windows timeout=300 setup=activate-comfyui_venv-windows -->
 ```powershell
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+.\comfyui_venv\Scripts\python.exe -m pip install --upgrade pip
+.\comfyui_venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -92,15 +91,15 @@ python -m pip install -r requirements.txt
 
 
 <!-- @os:windows -->
-<!-- @test:id=comfyui-install-rocm-torch-windows timeout=300 setup=activate-comfyui_venv-windows -->
+<!-- @test:id=comfyui-install-rocm-torch-windows timeout=900 -->
 ```powershell
-pip install --no-cache-dir `
+.\comfyui_venv\Scripts\python.exe -m pip install --no-cache-dir `
 https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_core-7.2.0.dev0-py3-none-win_amd64.whl `
 https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_devel-7.2.0.dev0-py3-none-win_amd64.whl `
 https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_libraries_custom-7.2.0.dev0-py3-none-win_amd64.whl `
 https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm-7.2.0.dev0.tar.gz
 
-pip install --no-cache-dir `
+.\comfyui_venv\Scripts\python.exe -m pip install --no-cache-dir `
 https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torch-2.9.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl `
 https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torchaudio-2.9.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl `
 https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torchvision-0.24.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl
@@ -110,7 +109,7 @@ https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torchvision-0.24.1%2Brocmsdk20
 
 
 <!-- @os:linux -->
-<!-- @test:id=comfyui-install-rocm-torch-linux timeout=600 hidden=True setup=activate-comfyui_venv-linux -->
+<!-- @test:id=comfyui-install-rocm-torch-linux timeout=900 hidden=True setup=activate-comfyui_venv-linux -->
 ```bash
 sudo apt install python3-pip -y
 pip3 install --upgrade pip wheel
@@ -126,9 +125,9 @@ pip3 install torch-2.9.1+rocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl t
 
 
 <!-- @os:windows -->
-<!-- @test:id=comfyui-verify-torch-windows timeout=300 hidden=True setup=activate-comfyui_venv-windows -->
+<!-- @test:id=comfyui-verify-torch-windows timeout=300 hidden=True -->
 ```powershell
-python -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)"
+.\comfyui_venv\Scripts\python.exe -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -144,11 +143,27 @@ python3 -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)"
 
 
 <!-- @os:windows -->
-<!-- @test:id=comfyui-server-up-windows timeout=300 hidden=True setup=activate-comfyui_venv-windows -->
+<!-- @test:id=comfyui-server-up-windows timeout=300 hidden=True -->
 ```powershell
-Start-Process -FilePath "python" -ArgumentList "main.py --listen 127.0.0.1 --port 8188" -NoNewWindow
-Start-Sleep -Seconds 5
-curl.exe -s http://127.0.0.1:8188
+$comfy = Start-Process -FilePath ".\comfyui_venv\Scripts\python.exe" `
+  -ArgumentList "main.py --listen 127.0.0.1 --port 8188" `
+  -WorkingDirectory ".\ComfyUI" `
+  -NoNewWindow -PassThru
+try {
+  # Poll for up to ~60s
+  $ok = $false
+  for ($i=0; $i -lt 60; $i++) {
+    try {
+      $resp = curl.exe -s http://127.0.0.1:8188/
+      if ($resp) { $ok = $true; break }
+    } catch {}
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ok) { exit 1 }
+}
+finally {
+  Stop-Process -Id $comfy.Id -Force -ErrorAction SilentlyContinue
+}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -280,7 +295,8 @@ The entire workflow execution should complete in less than 30 seconds. Your gene
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage timeout=600 hidden=True setup=activate-comfyui_venv-windows -->
-```python
+```powershell
+@'
 import json, time, urllib.request
 
 with open("assets/image_z_image_turbo.json", "r", encoding="utf-8") as f:
@@ -306,6 +322,7 @@ else:
   raise SystemExit("No outputs after waiting.")
 
 print("OK")
+'@ | .\comfyui_venv\Scripts\python.exe -
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
