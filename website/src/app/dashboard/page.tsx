@@ -664,10 +664,10 @@ function PlaybookStatusDashboard() {
                 }
                 const idx = categoryRowIdx++;
                 elements.push(
-                  <tr key={row.playbookId} className={`${idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"} ${!row.developed ? "opacity-50" : ""}`}>
+                  <tr key={row.playbookId} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
                     <td className="px-4 py-3 border-r border-[#333] align-middle">
                       <div className="flex items-center gap-2">
-                        <span className={`text-sm font-medium ${row.developed ? "text-white" : "text-[#555]"}`}>{row.title}</span>
+                        <span className="text-sm font-medium text-white">{row.title}</span>
                         {!row.developed && (
                           <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded border border-[#333] text-[#555] bg-[#1a1a1a]">
                             Not developed
