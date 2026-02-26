@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:coverage": "cross-env SHOW_TEST_COVERAGE=true next dev",
+    "dev:coverage": "cross-env NEXT_PUBLIC_SHOW_TEST_COVERAGE=true next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
