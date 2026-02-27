@@ -1122,7 +1122,7 @@ function PlaybookRunSelector({
 
 const hashToDeviceId: Record<string, Device> = {
   halo: "halo",
-  krackan: "krackan",
+  krk: "krk",
 };
 
 function deviceFromHash(hash?: string): Device | null {

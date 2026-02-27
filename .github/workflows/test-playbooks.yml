@@ -137,14 +137,14 @@ jobs:
         id: run_tests_windows
         shell: powershell
         run: |
-          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform windows
+          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform windows --device "${{ matrix.arch }}"
 
       - name: Extract and run tests (Linux)
         if: matrix.platform == 'linux'
         id: run_tests_linux
         shell: bash
         run: |
-          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform linux
+          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}"
 
       - name: Upload test artifacts
         if: always()

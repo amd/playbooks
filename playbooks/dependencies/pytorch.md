@@ -9,7 +9,7 @@ pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision
 ```
 <!-- @test:end -->
 <!-- @device:end -->
-<!-- @device:krackan -->
+<!-- @device:krk -->
 <!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
 ```bash
 pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ torch torchvision torchaudio

@@ -47,7 +47,7 @@
  * <!-- @device:end -->
  * ```
  * 
- * Valid device IDs: halo, stx, krackan, rx7900xt, rx9070xt.
+ * Valid device IDs: halo, stx, krk, rx7900xt, rx9070xt.
  * Content outside of `@device` tags is shown on all devices.
  * 
  * ## Pre-installed Software Dropdowns
@@ -72,16 +72,16 @@
 
 export type Platform = "windows" | "linux";
 export type Architecture = "halo" | "krk";
-export type Device = "halo" | "stx" | "krackan" | "rx7900xt" | "rx9070xt";
+export type Device = "halo" | "stx" | "krk" | "rx7900xt" | "rx9070xt";
 export type Category = "core" | "supplemental" | "backup";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 
-export const DEVICE_IDS: Device[] = ["halo", "stx", "krackan", "rx7900xt", "rx9070xt"];
+export const DEVICE_IDS: Device[] = ["halo", "stx", "krk", "rx7900xt", "rx9070xt"];
 
 export const deviceNames: Record<Device, string> = {
   halo: "STX Halo",
   stx: "STX Point",
-  krackan: "Krackan Point",
+  krk: "Krackan Point",
   rx7900xt: "RX 7900 XT",
   rx9070xt: "RX 9070 XT",
 };
