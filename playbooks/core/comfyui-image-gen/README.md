@@ -297,9 +297,24 @@ The Z Image Turbo model is already loaded. To generate an image:
 The entire workflow execution should complete in less than 30 seconds. Your generated image appears in the **Save Image** node and is saved to the `output/` folder.
 
 <!-- @os:windows -->
-<!-- @test:id=comfyui-generate-zimage timeout=600 hidden=True setup=activate-comfyui_venv-windows -->
+<!-- @test:id=comfyui-generate-zimage timeout=600 hidden=True -->
 ```powershell
-@'
+$comfy = Start-Process -FilePath ".\comfyui_venv\Scripts\python.exe" `
+  -ArgumentList "main.py --listen 127.0.0.1 --port 8188" `
+  -WorkingDirectory ".\ComfyUI" `
+  -NoNewWindow -PassThru
+try {
+  # Poll (wait for server to be ready) for up to ~60s
+  $ok = $false
+  for ($i=0; $i -lt 60; $i++) {
+    try {
+      $resp = curl.exe -s http://127.0.0.1:8188/
+      if ($resp) { $ok = $true; break }
+    } catch {}
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ok) { exit 1 }
+  @'
 import json, time, urllib.request
 
 with open("image_z_image_turbo.json", "r", encoding="utf-8") as f:
@@ -326,6 +341,10 @@ else:
 
 print("OK")
 '@ | .\comfyui_venv\Scripts\python.exe -
+}
+finally {
+  Stop-Process -Id $comfy.Id -Force -ErrorAction SilentlyContinue
+}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
