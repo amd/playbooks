@@ -302,7 +302,7 @@ The entire workflow execution should complete in less than 30 seconds. Your gene
 @'
 import json, time, urllib.request
 
-with open("assets/image_z_image_turbo.json", "r", encoding="utf-8") as f:
+with open("image_z_image_turbo.json", "r", encoding="utf-8") as f:
   workflow = json.load(f)
 
 req = urllib.request.Request(
