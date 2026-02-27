@@ -84,6 +84,34 @@ Linux-only content
 
 Content outside `@os` tags is always shown. Keep blocks focused—only tag the parts that differ.
 
+### Device-Specific Content
+
+Use `@device` tags for instructions that apply to specific hardware. Supports comma-separated values to target multiple devices:
+
+```markdown
+<!-- @device:halo -->
+STX Halo-only instructions
+<!-- @device:end -->
+
+<!-- @device:halo,stx -->
+Instructions for both Halo and STX Point
+<!-- @device:end -->
+
+<!-- @device:rx7900xt,rx9070xt -->
+Instructions for discrete Radeon GPUs
+<!-- @device:end -->
+```
+
+| Device ID | Hardware |
+|-----------|----------|
+| `halo` | STX Halo |
+| `stx` | STX Point |
+| `krackan` | Krackan Point |
+| `rx7900xt` | Radeon RX 7900 XT |
+| `rx9070xt` | Radeon RX 9070 XT |
+
+Content outside `@device` tags is always shown. Use `<!-- @device:all -->` to explicitly mark content for all devices. A device selector appears on the playbook page when `@device` tags are detected.
+
 ### Shared Content Tags
 
 Use these tags to pull in shared content from `playbooks/dependencies/`. Both reference items defined in `registry.json`.

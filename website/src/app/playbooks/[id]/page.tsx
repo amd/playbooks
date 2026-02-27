@@ -11,8 +11,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
-import type { Playbook, Platform, TestCoverageInfo, TestResultInfo, PlaybookCoverageSummary } from "@/types/playbook";
-import { formatTime } from "@/types/playbook";
+import type { Playbook, Platform, Device, TestCoverageInfo, TestResultInfo, PlaybookCoverageSummary } from "@/types/playbook";
+import { formatTime, DEVICE_IDS, deviceNames } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
 const dropdownStateStore: Record<string, boolean> = {};
@@ -599,6 +599,43 @@ function filterContentByOS(content: string, platform: Platform): string {
 }
 
 /**
+ * Parses markdown content and filters device-specific sections.
+ * Supports comma-separated device IDs.
+ *
+ * Tags supported:
+ * <!-- @device:halo --> ... <!-- @device:end -->
+ * <!-- @device:halo,stx --> ... <!-- @device:end -->
+ * <!-- @device:all --> ... <!-- @device:end -->
+ */
+function filterContentByDevice(content: string, device: Device | null): string {
+  if (!content) return "";
+  if (!device) return content;
+
+  const deviceBlockPattern = /<!-- @device:([\w,]+) -->([\s\S]*?)<!-- @device:end -->/g;
+
+  let result = content;
+  const matches = [...content.matchAll(deviceBlockPattern)];
+
+  for (let i = matches.length - 1; i >= 0; i--) {
+    const match = matches[i];
+    const blockDevices = match[1];
+    const blockContent = match[2];
+    const fullMatch = match[0];
+    const startIndex = match.index!;
+
+    let replacement = "";
+
+    if (blockDevices === "all" || blockDevices.split(",").includes(device)) {
+      replacement = blockContent;
+    }
+
+    result = result.slice(0, startIndex) + replacement + result.slice(startIndex + fullMatch.length);
+  }
+
+  return result;
+}
+
+/**
  * Transforms @preinstalled tags into collapsible dropdown HTML
  * 
  * Tags supported:
@@ -961,6 +998,36 @@ function PlatformToggle({
   );
 }
 
+function DeviceToggle({
+  selected,
+  onChange,
+  hasDeviceContent,
+}: {
+  selected: Device | null;
+  onChange: (d: Device | null) => void;
+  hasDeviceContent: boolean;
+}) {
+  if (!hasDeviceContent) return null;
+
+  return (
+    <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] rounded-lg border border-[#333] flex-wrap">
+      {DEVICE_IDS.map((d) => (
+        <button
+          key={d}
+          onClick={() => onChange(selected === d ? null : d)}
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+            selected === d
+              ? "bg-[#D4915D] text-black"
+              : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
+          }`}
+        >
+          {deviceNames[d]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 interface PlaybookRunOption {
   id: number;
   htmlUrl: string;
@@ -1053,6 +1120,16 @@ function PlaybookRunSelector({
   );
 }
 
+const hashToDeviceId: Record<string, Device> = {
+  halo: "halo",
+  krackan: "krackan",
+};
+
+function deviceFromHash(hash?: string): Device | null {
+  if (!hash) return null;
+  return hashToDeviceId[hash] ?? (DEVICE_IDS.includes(hash as Device) ? hash as Device : null);
+}
+
 export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string }> }) {
   const { id } = use(params);
   const { device: deviceHash } = use(searchParams);
@@ -1062,6 +1139,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => deviceFromHash(deviceHash));
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
@@ -1129,11 +1207,16 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       .catch(() => {/* non-critical */});
   }, [playbook?.testCoverage, availableRuns.length]);
 
-  // Transform relative image paths to API routes, filter by OS, and transform preinstalled/setup blocks
-  const filteredContent = playbook?.content 
+  const hasDeviceContent = !!playbook?.content && /<!-- @device:[\w,]+ -->/.test(playbook.content);
+
+  // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
+  const filteredContent = playbook?.content
     ? transformSetupBlocks(
         transformPreinstalledBlocks(
-          filterContentByOS(playbook.content, selectedPlatform)
+          filterContentByDevice(
+            filterContentByOS(playbook.content, selectedPlatform),
+            selectedDevice
+          )
         )
       )
         // Transform relative image paths in HTML img tags to use the API route
@@ -1511,15 +1594,29 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                   </div>
                 )}
 
-                {/* Platform Toggle */}
-                {playbook.platforms.length > 0 && (
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <span className="text-sm text-[#6b6b6b]">View instructions for:</span>
-                    <PlatformToggle 
-                      platforms={playbook.platforms}
-                      selected={selectedPlatform}
-                      onChange={setSelectedPlatform}
-                    />
+                {/* Platform & Device Toggles */}
+                {(playbook.platforms.length > 0 || hasDeviceContent) && (
+                  <div className="flex flex-col gap-3">
+                    {playbook.platforms.length > 0 && (
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <span className="text-sm text-[#6b6b6b]">Platform:</span>
+                        <PlatformToggle
+                          platforms={playbook.platforms}
+                          selected={selectedPlatform}
+                          onChange={setSelectedPlatform}
+                        />
+                      </div>
+                    )}
+                    {hasDeviceContent && (
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <span className="text-sm text-[#6b6b6b]">Device:</span>
+                        <DeviceToggle
+                          selected={selectedDevice}
+                          onChange={setSelectedDevice}
+                          hasDeviceContent={hasDeviceContent}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 
