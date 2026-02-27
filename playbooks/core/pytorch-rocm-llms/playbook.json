@@ -5,7 +5,7 @@
   "time": 30,
   "platforms": ["linux", "windows"],
   "tested_platforms": {
-    "linux": ["krk"],
+    "linux": [],
     "windows": ["halo"]
   },
   "difficulty": "beginner",
