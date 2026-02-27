@@ -70,7 +70,7 @@ python --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=comfyui-install-windows timeout=300 setup=activate-comfyui_venv-windows -->
+<!-- @test:id=comfyui-install-windows timeout=300 -->
 ```powershell
 .\comfyui_venv\Scripts\python.exe -m pip install --upgrade pip
 .\comfyui_venv\Scripts\python.exe -m pip install -r .\ComfyUI\requirements.txt
@@ -138,6 +138,46 @@ python3 -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-populate-models-from-cache-windows timeout=600 hidden=True -->
+```powershell
+cd ComfyUI
+$cacheDiff = "C:\ModelCache\ComfyUI\models\diffusion_models\z_image_turbo_bf16.safetensors"
+$cacheTE   = "C:\ModelCache\ComfyUI\models\text_encoders\qwen_3_4b.safetensors"
+$cacheVAE  = "C:\ModelCache\ComfyUI\models\vae\ae.safetensors"
+if (-not (Test-Path $cacheDiff)) { Write-Error "models missing on runner: $cacheDiff"; exit 1 }
+if (-not (Test-Path $cacheTE))   { Write-Error "models missing on runner: $cacheTE"; exit 1 }
+if (-not (Test-Path $cacheVAE))  { Write-Error "models missing on runner: $cacheVAE"; exit 1 }
+New-Item -ItemType Directory -Force -Path ".\models\diffusion_models" | Out-Null
+New-Item -ItemType Directory -Force -Path ".\models\text_encoders"   | Out-Null
+New-Item -ItemType Directory -Force -Path ".\models\vae"             | Out-Null
+Copy-Item -Force $cacheDiff ".\models\diffusion_models\z_image_turbo_bf16.safetensors"
+Copy-Item -Force $cacheTE   ".\models\text_encoders\qwen_3_4b.safetensors"
+Copy-Item -Force $cacheVAE  ".\models\vae\ae.safetensors"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-populate-models-from-cache-linux timeout=600 hidden=True -->
+```bash
+cd ComfyUI
+cache_diff="/opt/model_cache/ComfyUI/models/diffusion_models/z_image_turbo_bf16.safetensors"
+cache_te="/opt/model_cache/ComfyUI/models/text_encoders/qwen_3_4b.safetensors"
+cache_vae="/opt/model_cache/ComfyUI/models/vae/ae.safetensors"
+test -f "$cache_diff" || (echo "models missing on runner: $cache_diff" && exit 1)
+test -f "$cache_te" || (echo "models missing on runner: $cache_te" && exit 1)
+test -f "$cache_vae" || (echo "models missing on runner: $cache_vae" && exit 1)
+mkdir -p models/diffusion_models models/text_encoders models/vae
+cp -f "$cache_diff" models/diffusion_models/z_image_turbo_bf16.safetensors
+cp -f "$cache_te" models/text_encoders/qwen_3_4b.safetensors
+cp -f "$cache_vae" models/vae/ae.safetensors
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 
 
 <!-- @os:windows -->
@@ -214,43 +254,6 @@ Before generating images, you need to load the Z Image Turbo template. Here's ho
 
 <!-- @require:comfyui-models -->
 
-<!-- @os:windows -->
-<!-- @test:id=comfyui-populate-models-from-cache-windows timeout=600 hidden=True -->
-```powershell
-cd ComfyUI
-$cacheDiff = "C:\ModelCache\ComfyUI\models\diffusion_models\z_image_turbo_bf16.safetensors"
-$cacheTE   = "C:\ModelCache\ComfyUI\models\text_encoders\qwen_3_4b.safetensors"
-$cacheVAE  = "C:\ModelCache\ComfyUI\models\vae\ae.safetensors"
-if (-not (Test-Path $cacheDiff)) { Write-Error "models missing on runner: $cacheDiff"; exit 1 }
-if (-not (Test-Path $cacheTE))   { Write-Error "models missing on runner: $cacheTE"; exit 1 }
-if (-not (Test-Path $cacheVAE))  { Write-Error "models missing on runner: $cacheVAE"; exit 1 }
-New-Item -ItemType Directory -Force -Path ".\models\diffusion_models" | Out-Null
-New-Item -ItemType Directory -Force -Path ".\models\text_encoders"   | Out-Null
-New-Item -ItemType Directory -Force -Path ".\models\vae"             | Out-Null
-Copy-Item -Force $cacheDiff ".\models\diffusion_models\z_image_turbo_bf16.safetensors"
-Copy-Item -Force $cacheTE   ".\models\text_encoders\qwen_3_4b.safetensors"
-Copy-Item -Force $cacheVAE  ".\models\vae\ae.safetensors"
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @test:id=comfyui-populate-models-from-cache-linux timeout=600 hidden=True -->
-```bash
-cd ComfyUI
-cache_diff="/opt/model_cache/ComfyUI/models/diffusion_models/z_image_turbo_bf16.safetensors"
-cache_te="/opt/model_cache/ComfyUI/models/text_encoders/qwen_3_4b.safetensors"
-cache_vae="/opt/model_cache/ComfyUI/models/vae/ae.safetensors"
-test -f "$cache_diff" || (echo "models missing on runner: $cache_diff" && exit 1)
-test -f "$cache_te" || (echo "models missing on runner: $cache_te" && exit 1)
-test -f "$cache_vae" || (echo "models missing on runner: $cache_vae" && exit 1)
-mkdir -p models/diffusion_models models/text_encoders models/vae
-cp -f "$cache_diff" models/diffusion_models/z_image_turbo_bf16.safetensors
-cp -f "$cache_te" models/text_encoders/qwen_3_4b.safetensors
-cp -f "$cache_vae" models/vae/ae.safetensors
-```
-<!-- @test:end --> 
-<!-- @os:end -->
 
 ## Understanding the Interface
 
