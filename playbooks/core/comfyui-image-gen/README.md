@@ -310,31 +310,38 @@ try {
   }
   if (-not $ok) { exit 1 }
   @'
-import json, time, urllib.request
-
+import json, time, urllib.request, urllib.error, sys
 with open("image_z_image_turbo.json", "r", encoding="utf-8") as f:
   workflow = json.load(f)
-
+data = json.dumps({"prompt": workflow}).encode("utf-8")
 req = urllib.request.Request(
   "http://127.0.0.1:8188/prompt",
-  data=json.dumps({"prompt": workflow}).encode("utf-8"),
+  data=data,
   headers={"Content-Type":"application/json"},
   method="POST",
 )
-with urllib.request.urlopen(req, timeout=30) as r:
-  prompt_id = json.load(r)["prompt_id"]
-
-for _ in range(120):
-  with urllib.request.urlopen(f"http://127.0.0.1:8188/history/{prompt_id}", timeout=30) as r:
+try:
+  with urllib.request.urlopen(req, timeout=60) as r:
+    resp = r.read().decode("utf-8", "replace")
+    prompt_id = json.loads(resp)["prompt_id"]
+except urllib.error.HTTPError as e:
+  body = e.read().decode("utf-8", "replace")
+  print("HTTPError", e.code, e.reason)
+  print(body)
+  sys.exit(1)
+except Exception as e:
+  print("Request failed:", repr(e))
+  sys.exit(1)
+for _ in range(180):
+  with urllib.request.urlopen(f"http://127.0.0.1:8188/history/{prompt_id}", timeout=60) as r:
     hist = json.load(r)
   entry = hist.get(prompt_id, {})
   if entry.get("outputs"):
-    break
+    print("OK")
+    sys.exit(0)
   time.sleep(1)
-else:
-  raise SystemExit("No outputs after waiting.")
-
-print("OK")
+print("No outputs after waiting.")
+sys.exit(1)
 '@ | .\comfyui_venv\Scripts\python.exe -
 }
 finally {
@@ -380,7 +387,12 @@ print("OK")
 <!-- @os:windows -->
 <!-- @test:id=comfyui-output-exists-windows timeout=60 hidden=True -->
 ```powershell
-dir ComfyUI\output\*.png
+$files = Get-ChildItem -Path ".\ComfyUI\output" -Filter *.png -File -ErrorAction SilentlyContinue
+if (-not $files) {
+  Write-Error "No PNG files found in ComfyUI\output"
+  exit 1
+}
+$files | Select-Object -First 5 | ForEach-Object { $_.FullName }
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
