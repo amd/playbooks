@@ -101,9 +101,9 @@ n8n start
 <!-- @os:windows -->
 <!-- @test:id=n8n-start timeout=300 hidden=True -->
 ```bash
-$p = Start-Process -FilePath "n8n" -ArgumentList "start" -NoNewWindow -PassThru
+$p = Start-Process -FilePath "C:\Users\user\AppData\Roaming\npm\n8n.cmd" -ArgumentList "start" -NoNewWindow -PassThru
 Start-Sleep -Seconds 30
-curl.exe -s http://127.0.0.1:5678/healthz
+curl.exe -s http://127.0.0.1:5678
 Stop-Process -Id $p.Id -Force
 ```
 <!-- @test:end -->
