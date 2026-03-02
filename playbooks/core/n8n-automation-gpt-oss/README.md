@@ -32,7 +32,7 @@ lemonade-server --version
 
 <!-- @test:id=lemonade-server-start timeout=120 hidden=True -->
 ```bash
-lemonade-server serve
+lemonade-server serve --no-tray
 ```
 <!-- @test:end -->
 
