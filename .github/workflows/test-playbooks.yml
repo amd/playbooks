@@ -108,8 +108,8 @@ jobs:
   test-playbooks:
     name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})"
     needs: detect-changes
-    if: needs.detect-changes.outputs.has_entries == 'true'
-    runs-on: ${{ fromJson(matrix.runner) }}
+    if: needs.detect-changes.outputs.has_playbooks == 'true'
+    runs-on: [self-hosted, Windows, halo]
     env:
       PYTHONUTF8: 1
       PYTHONIOENCODING: utf-8
