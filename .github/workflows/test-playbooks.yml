@@ -55,7 +55,7 @@ jobs:
     name: Test Playbooks (Windows)
     needs: detect-changes
     if: needs.detect-changes.outputs.has_playbooks == 'true'
-    runs-on: [self-hosted, Windows, halo, 10.23.80.222]
+    runs-on: [self-hosted, Windows, halo, 10.23.80.221]
     env:
       PYTHONUTF8: 1
       PYTHONIOENCODING: utf-8
