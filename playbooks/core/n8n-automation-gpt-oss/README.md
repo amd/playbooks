@@ -33,7 +33,7 @@ lemonade-server --version
 <!-- @os:windows -->
 <!-- @test:id=lemonade-server-start timeout=900 hidden=True -->
 ```powershell
-$p = Start-Process -FilePath "lemonade-server" -Argumentlist "serve --no-tray" -NoNewWindow -PassThru
+$p = Start-Process -FilePath "lemonade-server" -Argumentlist "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
 try {
   $ok = $false
   for ($i=0; $i -lt 120; $i++) {
@@ -43,7 +43,9 @@ try {
   }
   if (-not $ok) { throw "Lemonade server not ready on httip://127.0.0.1:8000" }
 } finally {
-  Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+  & lemonade-server stop
+  Start-Sleep -Seconds 2
+  if ($p -and !$p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
 }
 
 ```
