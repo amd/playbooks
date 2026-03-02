@@ -100,11 +100,28 @@ n8n start
 
 <!-- @os:windows -->
 <!-- @test:id=n8n-start timeout=300 hidden=True -->
-```bash
+```powershell
 $p = Start-Process -FilePath "C:\Users\user\AppData\Roaming\npm\n8n.cmd" -ArgumentList "start" -NoNewWindow -PassThru
-Start-Sleep -Seconds 30
-curl.exe -s http://127.0.0.1:5678
-Stop-Process -Id $p.Id -Force
+
+try {
+  $ok = $false
+  for ($i=0; $i -lt 120; $i++) {
+    # n8n has a health endpoint
+    $resp = curl.exe -s --max-time 2 http://127.0.0.1:5678/healthz
+    if ($LASTEXITCODE -eq 0 -and $resp) { $ok = $true; break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ok) { throw "n8n not ready on http://127.0.0.1:5678/healthz" }
+} finally {
+  # Kill the real process holding port 5678
+  $conn = Get-NetTCPConnection -LocalPort 5678 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($conn) {
+    Stop-Process -Id $conn.OwningProcess -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 1
+  }
+  # Also kill launcher pid just in case
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+}
 ```
 <!-- @test:end -->
 <!-- @os:end -->
