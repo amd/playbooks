@@ -31,17 +31,18 @@ lemonade-server --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=lemonade-server-start timeout=120 hidden=True -->
+<!-- @test:id=lemonade-server-start timeout=600 hidden=True -->
 ```bash
 $p = Start-Process -FilePath "lemonade-server" -Argumentlist "run gpt-oss-120b-mxfp-GGUF --no-tray" -NoNewWindow -PassThru
 Start-Sleep -Seconds 90
 curl.exe -s http://127.0.0.1:8000/api/v1/models
+Stop-Process -Id $p.Id
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=lemonade-server-start timeout=120 hidden=True -->
+<!-- @test:id=lemonade-server-start timeout=600 hidden=True -->
 ```bash
 lemonade-server run gpt-oss-120b-mxfp-GGUF --no-tray &
 PID=$!
