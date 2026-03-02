@@ -31,24 +31,35 @@ lemonade-server --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=lemonade-server-start timeout=600 hidden=True -->
-```bash
+<!-- @test:id=lemonade-server-start timeout=900 hidden=True -->
+```powershell
 $p = Start-Process -FilePath "lemonade-server" -Argumentlist "run gpt-oss-120b-mxfp-GGUF --no-tray" -NoNewWindow -PassThru
-Start-Sleep -Seconds 90
-curl.exe -s http://127.0.0.1:8000/api/v1/models
-Stop-Process -Id $p.Id
+try {
+  for ($i=0; $i -lt 450; $i++) {
+    $ok = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
+    if ($LASTEXITCODE -eq 0 -and $ok) { break }
+    Start-Sleep -Seconds 1
+}
+  curl.exe -s --max-time 5 http://127.0.0.1:8000/api/v1/models
+} finally {
+  Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+}
+
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=lemonade-server-start timeout=600 hidden=True -->
+<!-- @test:id=lemonade-server-start timeout=900 hidden=True -->
 ```bash
 lemonade-server run gpt-oss-120b-mxfp-GGUF --no-tray &
 PID=$!
-sleep 90
-curl -s http://127.0.0.1:8000/api/v1/models
-kill -9 $PID
+trap "kill -9 $PID 2>/dev/null || true" EXIT
+for i in {1..450}; do
+  curl -sf --max-time 2 http://127.0.0.1:8000/api/v1/models && exit 0
+  sleep 1
+done
+exit 1
 ```
 <!-- @test:end -->
 <!-- @os:end -->
