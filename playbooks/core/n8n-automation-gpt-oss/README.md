@@ -30,32 +30,24 @@ lemonade-server --version
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:windows -->
 <!-- @test:id=lemonade-server-start timeout=120 hidden=True -->
 ```bash
-lemonade-server serve --no-tray
-```
-<!-- @test:end -->
-
-<!-- @test:id=model-download-lemonade timeout=450 hidden=True -->
-```bash
-lemonade-server pull gpt-oss-120b-mxfp4-GGUF
-```
-<!-- @test:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=model-download-lemonade timeout=120 hidden=True -->
-```powershell
-Start-Sleep -Seconds 10
+$p = Start-Process -FilePath "lemonade-server" -Argumentlist "run gpt-oss-120b-mxfp4-GGUF --no-tray" -NoNewWindow -PassThru
+Start-Sleep -Seconds 30
 curl.exe -s http://127.0.0.1:8000/api/v1/models
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=model-download-lemonade timeout=120 hidden=True -->
+<!-- @test:id=lemonade-server-start timeout=120 hidden=True -->
 ```bash
-sleep 10
+lemonade-server run gpt-oss-120b-mxfp4-GGUF --no-tray &
+PID=$!
+sleep 30
 curl -s http://127.0.0.1:8000/api/v1/models
+kill -9 $PID
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -87,30 +79,33 @@ n8n --version
 
 Start n8n from the terminal:
 
-<!-- @test:id=n8n-start timeout=300 hidden=True -->
 ```bash
 n8n start
 ```
+
+<!-- @os:windows -->
+<!-- @test:id=n8n-start timeout=300 hidden=True -->
+```bash
+$p = Start-Process -FilePath "n8n" -ArgumentList "start" -NoNewWindow -PassThru
+Start-Sleep -Seconds 30
+curl.exe -s http://127.0.0.1:5678/healthz
+Stop-Process -Id $p.Id -Force
+```
 <!-- @test:end -->
+<!-- @os:end -->
 
 n8n starts a local web server. Open your browser to `http://localhost:5678` to access the editor.
 
 > **Tip**: Keep the terminal window open while using n8n. Closing it will stop the server.
 
-<!-- @os:windows -->
-<!-- @test:id=n8n-server-up timeout=300 hidden=True -->
-```powershell
-Start-Sleep -Seconds 10
-curl.exe -s http://127.0.0.1:5678/healthz
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
 <!-- @os:linux -->
-<!-- @test:id=n8n-server-up timeout=300 hidden=True -->
+<!-- @test:id=n8n-server-start timeout=300 hidden=True -->
 ```bash
-sleep 10
+n8n start &
+PID=$!
+sleep 30
 curl -s http://127.0.0.1:5678/healthz
+kill -9 $PID
 ```
 <!-- @test:end -->
 <!-- @os:end -->
