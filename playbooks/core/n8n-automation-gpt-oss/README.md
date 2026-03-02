@@ -23,25 +23,97 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 
 <!-- @require:lemonade,nodejs -->
 
+<!-- @test:id=lemonade-version timeout=60 hidden=True -->
+```bash
+lemonade-server --version
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @test:id=lemonade-server-start timeout=120 hidden=True -->
+```bash
+lemonade-server serve
+```
+<!-- @test:end -->
+
+<!-- @test:id=model-download-lemonade timeout=450 hidden=True -->
+```bash
+lemonade-server pull gpt-oss-120b-mxfp4-GGUF
+```
+<!-- @test:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=model-download-lemonade timeout=120 hidden=True -->
+```powershell
+Start-Sleep -Seconds 10
+curl.exe -s http://127.0.0.1:8000/api/v1/models
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=model-download-lemonade timeout=120 hidden=True -->
+```bash
+sleep 10
+curl -s http://127.0.0.1:8000/api/v1/models
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @test:id=node-npm-version timeout=60 hidden=True -->
+```bash
+node -v
+npm -v
+```
+<!-- @test:end -->
+
 ## Installing n8n
 
 Your STX Halo has Node.js pre-installed. Install n8n globally using npm:
 
+<!-- @test:id=n8n-install timeout=600 hidden=True -->
 ```bash
 npm install -g n8n
 ```
+<!-- @test:end -->
+
+<!-- @test:id=n8n-version timeout=60 hidden=True -->
+```bash
+n8n --version
+```
+<!-- @test:end -->
 
 ## Launching n8n
 
 Start n8n from the terminal:
 
+<!-- @test:id=n8n-start timeout=300 hidden=True -->
 ```bash
 n8n start
 ```
+<!-- @test:end -->
 
 n8n starts a local web server. Open your browser to `http://localhost:5678` to access the editor.
 
 > **Tip**: Keep the terminal window open while using n8n. Closing it will stop the server.
+
+<!-- @os:windows -->
+<!-- @test:id=n8n-server-up timeout=300 hidden=True -->
+```powershell
+Start-Sleep -Seconds 10
+curl.exe -s http://127.0.0.1:5678/healthz
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=n8n-server-up timeout=300 hidden=True -->
+```bash
+sleep 10
+curl -s http://127.0.0.1:5678/healthz
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 ## Setting Up the Workflow
 
