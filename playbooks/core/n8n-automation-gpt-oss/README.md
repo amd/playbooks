@@ -33,14 +33,15 @@ lemonade-server --version
 <!-- @os:windows -->
 <!-- @test:id=lemonade-server-start timeout=900 hidden=True -->
 ```powershell
-$p = Start-Process -FilePath "lemonade-server" -Argumentlist "run gpt-oss-120b-mxfp-GGUF --no-tray" -NoNewWindow -PassThru
+$p = Start-Process -FilePath "lemonade-server" -Argumentlist "serve --no-tray" -NoNewWindow -PassThru
 try {
-  for ($i=0; $i -lt 450; $i++) {
-    $ok = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
-    if ($LASTEXITCODE -eq 0 -and $ok) { break }
+  $ok = $false
+  for ($i=0; $i -lt 120; $i++) {
+    $resp = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
+    if ($LASTEXITCODE -eq 0 -and $resp) { $ok = $true; break }
     Start-Sleep -Seconds 1
-}
-  curl.exe -s --max-time 5 http://127.0.0.1:8000/api/v1/models
+  }
+  if (-not $ok) { throw "Lemonade server not ready on httip://127.0.0.1:8000" }
 } finally {
   Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
 }
