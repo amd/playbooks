@@ -106,7 +106,7 @@ Instructions for discrete Radeon GPUs
 |-----------|----------|
 | `halo` | STX Halo |
 | `stx` | STX Point |
-| `krackan` | Krackan Point |
+| `krk` | Krackan Point |
 | `rx7900xt` | Radeon RX 7900 XT |
 | `rx9070xt` | Radeon RX 9070 XT |
 

@@ -12,13 +12,13 @@ const titles: Record<string, { prefix: string; highlight: string }> = {
 
 const hashToDevice: Record<string, string> = {
   halo: "stx-halo",
-  krackan: "Krackan",
+  krk: "Krackan",
   radeon: "amd-radeon",
 };
 
 export const deviceToHash: Record<string, string> = {
   "stx-halo": "halo",
-  Krackan: "krackan",
+  Krackan: "krk",
   "amd-radeon": "radeon",
 };
 

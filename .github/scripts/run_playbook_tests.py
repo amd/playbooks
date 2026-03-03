@@ -31,7 +31,7 @@ Device inference:
     Tests outside any @device: block run on all devices. When --device is
     passed on the CLI, tests whose inferred device list doesn't include that
     device are skipped.
-    Valid devices: halo, stx, krackan, rx7900xt, rx9070xt.
+    Valid devices: halo, stx, krk, rx7900xt, rx9070xt.
 
 Supported test attributes:
     - id: Unique identifier for the test (required)
@@ -124,7 +124,7 @@ from pathlib import Path
 from typing import Optional
 
 
-VALID_DEVICES = {"halo", "stx", "krackan", "rx7900xt", "rx9070xt"}
+VALID_DEVICES = {"halo", "stx", "krk", "rx7900xt", "rx9070xt"}
 
 
 @dataclass
