@@ -63,12 +63,6 @@ npm -v
 
 Your STX Halo has Node.js pre-installed. Install n8n globally using npm:
 
-<!-- @test:id=n8n-install timeout=600 hidden=True -->
-```bash
-npm install -g n8n
-```
-<!-- @test:end -->
-
 <!-- @test:id=n8n-version timeout=60 hidden=True -->
 ```bash
 n8n --version
