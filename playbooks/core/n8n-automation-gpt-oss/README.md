@@ -23,13 +23,56 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 
 <!-- @require:lemonade,nodejs -->
 
+<!-- @test:id=lemonade-version timeout=60 hidden=True -->
+```bash
+lemonade-server --version
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-server-start timeout=900 hidden=True -->
+```powershell
+$p = Start-Process -FilePath "lemonade-server" -Argumentlist "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
+try {
+  $ok = $false
+  for ($i=0; $i -lt 120; $i++) {
+    $resp = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
+    if ($LASTEXITCODE -eq 0 -and $resp) { $ok = $true; break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ok) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
+} finally {
+  & lemonade-server stop
+  Start-Sleep -Seconds 2
+  if ($p -and !$p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @test:id=node-npm-version timeout=60 hidden=True -->
+```bash
+node -v
+npm -v
+```
+<!-- @test:end -->
+
 ## Installing n8n
 
 Your STX Halo has Node.js pre-installed. Install n8n globally using npm:
 
+<!-- @test:id=n8n-install timeout=600 hidden=True -->
 ```bash
 npm install -g n8n
 ```
+<!-- @test:end -->
+
+<!-- @test:id=n8n-version timeout=60 hidden=True -->
+```bash
+n8n --version
+```
+<!-- @test:end -->
 
 ## Launching n8n
 
@@ -38,6 +81,31 @@ Start n8n from the terminal:
 ```bash
 n8n start
 ```
+
+<!-- @os:windows -->
+<!-- @test:id=n8n-start timeout=300 hidden=True -->
+```powershell
+$N8N_CMD = "$env:APPDATA\npm\n8n.cmd"
+$p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$N8N_CMD`" start" -NoNewWindow -PassThru
+try {
+  $ok = $false
+  for ($i=0; $i -lt 120; $i++) {
+    # Check HTTP status code only (body may be empty)
+    $code = curl.exe -s -o NUL -w "%{http_code}" --max-time 2 http://127.0.0.1:5678/healthz
+    if ($LASTEXITCODE -eq 0 -and $code -eq "200") { $ok = $true; break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ok) { throw "n8n not ready on http://127.0.0.1:5678/healthz" }
+} finally {
+  # Kill the process actually listening on 5678
+  $conn = Get-NetTCPConnection -LocalPort 5678 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($conn) { Stop-Process -Id $conn.OwningProcess -Force -ErrorAction SilentlyContinue }
+  # Also kill wrapper pid just in case
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 n8n starts a local web server. Open your browser to `http://localhost:5678` to access the editor.
 
