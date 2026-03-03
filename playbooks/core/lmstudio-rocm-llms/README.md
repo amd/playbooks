@@ -36,6 +36,7 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 <!-- @test:id=lmstudio-chat-gpt-oss-windows timeout=1200 hidden=True -->
 ```powershell
 lms unload --identifier gptoss120b-128k 2>$null
+$LASTEXITCODE = 0
 lms load gpt-oss-120b --context-length 128000 --gpu max --identifier gptoss120b-128k
 lms chat gptoss120b-128k -p "Reply with exactly: OK"
 ```
