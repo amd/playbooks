@@ -42,6 +42,7 @@ try {
     Start-Sleep -Seconds 1
   }
   if (-not $ok) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
+  Write-Host "OK: Lemonade server is responding"
 } finally {
   & lemonade-server stop
   Start-Sleep -Seconds 2
@@ -96,6 +97,7 @@ try {
     Start-Sleep -Seconds 1
   }
   if (-not $ok) { throw "n8n not ready on http://127.0.0.1:5678/healthz" }
+  Write-Host "OK: n8n server is responding"
 } finally {
   # Kill the process actually listening on 5678
   $conn = Get-NetTCPConnection -LocalPort 5678 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
