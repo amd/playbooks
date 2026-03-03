@@ -28,26 +28,12 @@ Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-3
 
 This will bring up the model configuration, change the context length from `4096` to `32768` and click `Load Model` to load the model with the proper configuration. On typical laptops, running a 32k context window on a 30B model would run out of memory. The STX Halo's unified memory allows us to maximize this context for analyzing large codebases locally.
 
-<!-- @os:windows -->
-<!-- @test:id=lmstudio-load-qwen3-coder-windows timeout=1200 hidden=True -->
-```powershell
-lms unload --identifier qwen3coder-32k 2>$null
-lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier qwen3coder-32k
-lms chat qwen3coder-32k -p "Reply with exactly: OK"
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @test:id=lmstudio-load-qwen3-coder-linux timeout=1200 hidden=True -->
+<!-- @test:id=lmstudio-load-qwen3-coder timeout=1200 hidden=True -->
 ```bash
-lms unload --identifier qwen3coder-32k >/dev/null 2>&1 || true
 lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier qwen3coder-32k
 lms chat qwen3coder-32k -p "Reply with exactly: OK"
 ```
 <!-- @test:end -->
-<!-- @os:end -->
-
 
 ![Configuring Model](assets/selecting-model-zoomed.png)
 
