@@ -20,18 +20,182 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 
 <!-- @require:comfyui,driver -->
 
+<!-- @os:windows -->
+<!-- @test:id=comfyui-clone-windows timeout=300 -->
+```powershell
+if (Test-Path "ComfyUI\.git")
+{
+  cd ComfyUI
+  git pull
+}
+else
+{
+  git clone https://github.com/Comfy-Org/ComfyUI.git
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-clone-linux timeout=300 -->
+```bash
+if [ -d "ComfyUI/.git" ]; then
+  cd ComfyUI
+  git pull
+else
+  git clone https://github.com/Comfy-Org/ComfyUI.git
+fi
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=create-venv timeout=120 -->
+```powershell
+if (Test-Path "comfyui_venv") { Remove-Item -Recurse -Force comfyui_venv}
+py -3.12 -m venv comfyui_venv
+.\comfyui_venv\Scripts\python.exe -V
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-install-windows timeout=300 -->
+```powershell
+.\comfyui_venv\Scripts\python.exe -m pip install --upgrade pip
+.\comfyui_venv\Scripts\python.exe -m pip install -r .\ComfyUI\requirements.txt
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-install-rocm-torch-windows timeout=900 -->
+```powershell
+.\comfyui_venv\Scripts\python.exe -m pip install --no-cache-dir `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_core-7.2.0.dev0-py3-none-win_amd64.whl `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_devel-7.2.0.dev0-py3-none-win_amd64.whl `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_libraries_custom-7.2.0.dev0-py3-none-win_amd64.whl `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm-7.2.0.dev0.tar.gz
+
+.\comfyui_venv\Scripts\python.exe -m pip install --no-cache-dir `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torch-2.9.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torchaudio-2.9.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl `
+https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torchvision-0.24.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-install-rocm-torch-linux timeout=900 hidden=True -->
+```bash
+sudo apt install python3-pip -y
+pip3 install --upgrade pip wheel
+wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torch-2.9.1%2Brocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl
+wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchvision-0.24.0%2Brocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl
+wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
+wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchaudio-2.9.0%2Brocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl
+pip3 uninstall torch torchvision triton torchaudio
+pip3 install torch-2.9.1+rocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl torchvision-0.24.0+rocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl torchaudio-2.9.0+rocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl triton-3.5.1+rocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-verify-torch-windows timeout=300 hidden=True -->
+```powershell
+.\comfyui_venv\Scripts\python.exe -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-populate-models-from-cache-windows timeout=600 hidden=True -->
+```powershell
+cd ComfyUI
+$cacheDiff = "C:\ModelCache\ComfyUI\models\diffusion_models\z_image_turbo_bf16.safetensors"
+$cacheTE   = "C:\ModelCache\ComfyUI\models\text_encoders\qwen_3_4b.safetensors"
+$cacheVAE  = "C:\ModelCache\ComfyUI\models\vae\ae.safetensors"
+if (-not (Test-Path $cacheDiff)) { Write-Error "models missing on runner: $cacheDiff"; exit 1 }
+if (-not (Test-Path $cacheTE))   { Write-Error "models missing on runner: $cacheTE"; exit 1 }
+if (-not (Test-Path $cacheVAE))  { Write-Error "models missing on runner: $cacheVAE"; exit 1 }
+New-Item -ItemType Directory -Force -Path ".\models\diffusion_models" | Out-Null
+New-Item -ItemType Directory -Force -Path ".\models\text_encoders"   | Out-Null
+New-Item -ItemType Directory -Force -Path ".\models\vae"             | Out-Null
+Copy-Item -Force $cacheDiff ".\models\diffusion_models\z_image_turbo_bf16.safetensors"
+Copy-Item -Force $cacheTE   ".\models\text_encoders\qwen_3_4b.safetensors"
+Copy-Item -Force $cacheVAE  ".\models\vae\ae.safetensors"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=comfyui-populate-models-from-cache-linux timeout=600 hidden=True -->
+```bash
+cd ComfyUI
+cache_diff="/opt/model_cache/ComfyUI/models/diffusion_models/z_image_turbo_bf16.safetensors"
+cache_te="/opt/model_cache/ComfyUI/models/text_encoders/qwen_3_4b.safetensors"
+cache_vae="/opt/model_cache/ComfyUI/models/vae/ae.safetensors"
+test -f "$cache_diff" || (echo "models missing on runner: $cache_diff" && exit 1)
+test -f "$cache_te" || (echo "models missing on runner: $cache_te" && exit 1)
+test -f "$cache_vae" || (echo "models missing on runner: $cache_vae" && exit 1)
+mkdir -p models/diffusion_models models/text_encoders models/vae
+cp -f "$cache_diff" models/diffusion_models/z_image_turbo_bf16.safetensors
+cp -f "$cache_te" models/text_encoders/qwen_3_4b.safetensors
+cp -f "$cache_vae" models/vae/ae.safetensors
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-server-up-windows timeout=300 hidden=True -->
+```powershell
+$comfy = Start-Process -FilePath ".\comfyui_venv\Scripts\python.exe" `
+  -ArgumentList "main.py --listen 127.0.0.1 --port 8188" `
+  -WorkingDirectory ".\ComfyUI" `
+  -NoNewWindow -PassThru
+try {
+  # Poll for up to ~60s
+  $ok = $false
+  for ($i=0; $i -lt 60; $i++) {
+    try {
+      $resp = curl.exe -s http://127.0.0.1:8188/
+      if ($resp) { $ok = $true; break }
+    } catch {}
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ok) { exit 1 }
+}
+finally {
+  Stop-Process -Id $comfy.Id -Force -ErrorAction SilentlyContinue
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+
 ## Launching ComfyUI
 
 <!-- @os:windows -->
-
-To launch ComfyUI, simply click the ComfyUI shortcut on your Desktop.
+To launch ComfyUI on Windows, simply click the ComfyUI shortcut on your Desktop.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-To launch ComfyUI, simply click the ComfyUI icon on your top bar.
-<!-- @os:linux -->
-> **Tip**: If you installed ComfyUI manually, navigate to the installation folder, run `python3 main.py --use-pytorch-cross-attention` and open `http://127.0.0.1:8188` in your browser to access the interface.
+To launch ComfyUI:
+
+1. Navigate to `/usr/local/bin/ComfyUI/` (or to the appropriate folder if installed manually)
+2. Run `python3 main.py --use-pytorch-cross-attention`
+
+ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` to access the interface.
+
+> **Tip**: Keep the terminal window open while using ComfyUI. Closing it will stop the server.
 <!-- @os:end -->
 
 ## Finding the Z Image Turbo Template
@@ -96,6 +260,80 @@ The Z Image Turbo model is already loaded. To generate an image:
 4. Watch the nodes highlight as each step executes
 
 The entire workflow execution should complete in less than 30 seconds. Your generated image appears in the **Save Image** node and is saved to the `output/` folder.
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-generate-zimage timeout=600 hidden=True -->
+```powershell
+$comfy = Start-Process -FilePath ".\comfyui_venv\Scripts\python.exe" `
+  -ArgumentList "main.py --listen 127.0.0.1 --port 8188" `
+  -WorkingDirectory ".\ComfyUI" `
+  -NoNewWindow -PassThru
+try {
+  # Poll (wait for server to be ready) for up to ~60s
+  $ok = $false
+  for ($i=0; $i -lt 60; $i++) {
+    try {
+      $resp = curl.exe -s http://127.0.0.1:8188/
+      if ($resp) { $ok = $true; break }
+    } catch {}
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ok) { exit 1 }
+  @'
+import json, time, urllib.request, urllib.error, sys
+with open("image_z_image_turbo.json", "r", encoding="utf-8") as f:
+  workflow = json.load(f)
+data = json.dumps({"prompt": workflow}).encode("utf-8")
+req = urllib.request.Request(
+  "http://127.0.0.1:8188/prompt",
+  data=data,
+  headers={"Content-Type":"application/json"},
+  method="POST",
+)
+try:
+  with urllib.request.urlopen(req, timeout=60) as r:
+    resp = r.read().decode("utf-8", "replace")
+    prompt_id = json.loads(resp)["prompt_id"]
+except urllib.error.HTTPError as e:
+  body = e.read().decode("utf-8", "replace")
+  print("HTTPError", e.code, e.reason)
+  print(body)
+  sys.exit(1)
+except Exception as e:
+  print("Request failed:", repr(e))
+  sys.exit(1)
+for _ in range(180):
+  with urllib.request.urlopen(f"http://127.0.0.1:8188/history/{prompt_id}", timeout=60) as r:
+    hist = json.load(r)
+  entry = hist.get(prompt_id, {})
+  if entry.get("outputs"):
+    print("OK")
+    sys.exit(0)
+  time.sleep(1)
+print("No outputs after waiting.")
+sys.exit(1)
+'@ | .\comfyui_venv\Scripts\python.exe -
+}
+finally {
+  Stop-Process -Id $comfy.Id -Force -ErrorAction SilentlyContinue
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @test:id=comfyui-output-exists-windows timeout=60 hidden=True -->
+```powershell
+$files = Get-ChildItem -Path ".\ComfyUI\output" -Filter *.png -File -ErrorAction SilentlyContinue
+if (-not $files) {
+  Write-Error "No PNG files found in ComfyUI\output"
+  exit 1
+}
+$files | Select-Object -First 5 | ForEach-Object { $_.FullName }
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 ## Adjusting Generation Parameters
 
