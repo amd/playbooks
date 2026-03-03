@@ -16,7 +16,7 @@ In this playbook, you Will Learn
 - How to export the fine-tuned model 
 
 ## Time & Risk
-- Duration: It will take about 30 minutes to run this playbook at AMD Lab, but the duration of real finetuning case will depend on model/dataset size and network speed.
+- Duration: It will take 30-60 minutes to run this playbook (depending on your model/dataset size and network speed).
 - Risk: Finetuning is not an easy task, and you may meet some questions,like out-of-memory and accuracy. Please check [Llama factory FAQs](https://github.com/hiyouga/LlamaFactory/issues/4614) first. 
 
 ## Instructions
