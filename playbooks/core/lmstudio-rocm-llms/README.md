@@ -32,23 +32,12 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 5. Check "Remember settings" and click on `Load Model`.
 6. Send a message and start interacting with the model!
 
-<!-- @os:windows -->
-<!-- @test:id=lmstudio-chat-cli-windows timeout=900 hidden=True -->
-```powershell
-lms load gpt-oss-120b --context-length 128000 --gpu max --identifier gptoss120b-128k
-lms chat gptoss120b-128k -p "Reply with exactly: OK"
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @test:id=lmstudio-chat-cli-linux timeout=900 hidden=True -->
+<!-- @test:id=lmstudio-chat-cli timeout=900 hidden=True -->
 ```bash
 lms load gpt-oss-120b --context-length 128000 --gpu max --identifier gptoss120b-128k
 lms chat gptoss120b-128k -p "Reply with exactly: OK"
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
 <p align="center">
   <img src="assets/chat.png" alt="Chatting with gpt-oss-120b on LM Studio" width="600"/>
@@ -138,7 +127,7 @@ req = urllib.request.Request(
    "model": "gptoss120b-128k",
    "messages": [{"role":"user","content":"Write exactly: OK"}],
    "temperature": 0,
-   "max_tokens": 5
+   "max_tokens": 100
  }).encode("utf-8"),
  headers={"Content-Type":"application/json"},
  method="POST",
