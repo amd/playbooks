@@ -23,6 +23,7 @@ jobs:
     name: Detect Changed Playbooks
     runs-on: ubuntu-latest
     outputs:
+      playbooks: ${{ steps.detect.outputs.playbooks }}
       matrix: ${{ steps.build-matrix.outputs.matrix }}
       has_entries: ${{ steps.build-matrix.outputs.has_entries }}
     steps:
@@ -113,7 +114,8 @@ jobs:
   test-playbooks:
     name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})"
     needs: detect-changes
-    if: needs.detect-changes.outputs.has_entries == 'true'
+    # if: needs.detect-changes.outputs.has_entries == 'true'
+    if: needs.detect-changes.outputs.has_entries == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.runner_label == '')
     # runs-on: ${{ fromJson(matrix.runner) }}
     runs-on: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.runner_label != '' && fromJson(format('["self-hosted","{0}"]', github.event.inputs.runner_label))) || fromJson(matrix.runner) }}
     env:
@@ -180,3 +182,117 @@ jobs:
 
           See the test artifacts for detailed logs.
           EOF
+
+
+  test-playbooks-single:
+    name: "Test Playbooks (Single Runner Override)"
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_entries == 'true' && github.event_name == 'workflow_dispatch' && github.event.inputs.runner_label != ''
+    runs-on: ${{ fromJson(format('["self-hosted","{0}"]', github.event.inputs.runner_label)) }}
+    env:
+      PYTHONUTF8: 1
+      PYTHONIOENCODING: utf-8
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      # -------- Windows runner path --------
+      - name: Run tests (Windows runner)
+        if: runner.os == 'Windows'
+        shell: powershell
+        env:
+          PLAYBOOKS_JSON: ${{ needs.detect-changes.outputs.playbooks }}
+        run: |
+          $platform = "windows"
+          $playbooks = $env:PLAYBOOKS_JSON | ConvertFrom-Json
+
+          foreach ($pb in $playbooks) {
+            $pbPathCore = "playbooks/core/$pb/playbook.json"
+            $pbPathSupp = "playbooks/supplemental/$pb/playbook.json"
+
+            if (Test-Path $pbPathCore) { $pbPath = $pbPathCore }
+            elseif (Test-Path $pbPathSupp) { $pbPath = $pbPathSupp }
+            else { throw "playbook.json not found for playbook '$pb' in core/ or supplemental/." }
+
+            $meta = Get-Content $pbPath -Raw | ConvertFrom-Json
+
+            # Pick device for this runner's OS from tested_platforms.
+            # If multiple, prefer "halo" if present, else pick first.
+            $devices = @()
+            if ($meta.tested_platforms -and $meta.tested_platforms.$platform) {
+              $devices = $meta.tested_platforms.$platform
+            }
+
+            if (-not $devices -or $devices.Count -eq 0) {
+              $device = "halo"
+            } elseif ($devices -contains "halo") {
+              $device = "halo"
+            } else {
+              $device = $devices[0]
+            }
+
+            Write-Host "Running tests for playbook=$pb platform=$platform device=$device on runner=${{ github.event.inputs.runner_label }}"
+            python .github/scripts/run_playbook_tests.py --playbook "$pb" --platform windows --device "$device"
+          }
+
+      # -------- Linux runner path --------
+      - name: Run tests (Linux runner)
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          PLAYBOOKS_JSON: ${{ needs.detect-changes.outputs.playbooks }}
+        run: |
+          platform="linux"
+          python - << 'PY'
+          import json, os, subprocess
+          from pathlib import Path
+
+          platform = os.environ.get("platform", "linux")
+          playbooks = json.loads(os.environ["PLAYBOOKS_JSON"])
+
+          def find_pb_json(pb):
+              p1 = Path(f"playbooks/core/{pb}/playbook.json")
+              p2 = Path(f"playbooks/supplemental/{pb}/playbook.json")
+              if p1.exists(): return p1
+              if p2.exists(): return p2
+              raise FileNotFoundError(f"playbook.json not found for playbook '{pb}' in core/ or supplemental/.")
+
+          for pb in playbooks:
+              meta = json.loads(find_pb_json(pb).read_text())
+              devices = (meta.get("tested_platforms") or {}).get(platform, []) or []
+
+              # Prefer halo if multiple; else first; else fallback halo.
+              if not devices:
+                  device = "halo"
+              elif "halo" in devices:
+                  device = "halo"
+              else:
+                  device = devices[0]
+
+              print(f"Running tests for playbook={pb} platform={platform} device={device}")
+              subprocess.check_call([
+                  "python", ".github/scripts/run_playbook_tests.py",
+                  "--playbook", pb,
+                  "--platform", platform,
+                  "--device", device
+              ])
+          PY
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-single-runner-${{ github.event.inputs.runner_label }}
+          path: test-results/
+          if-no-files-found: ignore
