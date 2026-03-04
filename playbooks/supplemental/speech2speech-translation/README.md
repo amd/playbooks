@@ -67,6 +67,57 @@ The demo will read the offline audio clip and do the translation:
 python infer_gpu.py
 ```
 
+#### Import necessary dependencies: m4t, torchautio et al 
+```python 
+from transformers import AutoProcessor, SeamlessM4Tv2Model
+import torchaudio
+import scipy
+import time
+import os
+os.environ["HIP_VISIBLE_DEVICES"] = "0"
+```
+#### Load models
+```python
+start = time.time()
+processor = AutoProcessor.from_pretrained("./seamless-m4t-v2-large")
+model = SeamlessM4Tv2Model.from_pretrained("./seamless-m4t-v2-large").to("cuda")
+end = time.time()
+print(f"model loading duration: {end - start} seconds")
+```
+
+#### input audio clip .wav file
+```python
+audio, orig_freq =  torchaudio.load("./audio_clips/input1.wav")
+```
+
+#### Preprocess input .wav file
+```python
+audio =  torchaudio.functional.resample(audio, orig_freq=orig_freq, new_freq=16_000) # must be a 16 kHz waveform array
+audio_inputs = processor(audios=audio, return_tensors="pt").to("cuda")
+```
+
+#### Generate translated audio file 
+```python
+audio_array_from_audio = model.generate(**audio_inputs, tgt_lang="eng")[0].cpu().numpy().squeeze()
+print(f"cuda infer duration: {end - start} seconds")
+```
+#### Save the translated file
+```python
+sample_rate = model.config.sampling_rate
+scipy.io.wavfile.write("out1.wav", rate=sample_rate, data=audio_array_from_audio)
+```
+
+#### Run the complete file to check the audio generation duration
+
+```bash
+python ./assets/infer_gpu.py
+```
+
+#### Compare with cpu backend to observe the difference of latency
+```bash
+python ./assets/infer_cpu.py
+```
+
 ### Runing the Gradio UI demo:
 
 1. Download this file: https://cdn-media.huggingface.co/frpc-gradio-0.3/frpc_linux_amd64
@@ -75,7 +126,7 @@ python infer_gpu.py
 
 ```bash
 export HIP_VISIBLE_DEVICES=0
-python gradio_gpu.py --share
+python ./assets/gradio_gpu.py --share
 ```
 Click down the record button to record input voice, when you click up, the translation will automatically execute. 
 after it done, then you can play the output translated voice.
@@ -88,7 +139,8 @@ after it done, then you can play the output translated voice.
 Also support 40 languages to switch between each other.
 
 ## Next Steps
-TODO
+With this demo, switch between multiple languages for quick translation. 
+It supports dozens of languages and includes voice input and text-to-speech for learners and travelers.
 
 ## Resources
 
