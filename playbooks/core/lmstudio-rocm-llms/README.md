@@ -137,6 +137,12 @@ with urllib.request.urlopen(req, timeout=60) as r:
 ```
 <!-- @test:end --> 
 
+<!-- @test:id=lmstudio-server-stop timeout=300 hidden=True -->
+```bash
+lms server stop
+```
+<!-- @test:end --> 
+
 #### Swapping between ROCm and Vulkan backends (Optional)
 
 1. Press "Ctrl" + "Shift" + "R" on your keyboard. Alternatively click on the Discover tab (Magnifying Glass) on the left-hand side and then click on "Runtime" in the pop up.  
