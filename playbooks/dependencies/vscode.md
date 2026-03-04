@@ -13,7 +13,6 @@ code --version
 winget list --id Microsoft.VisualStudioCode -e
 ```
 <!-- @test:end -->
-<!-- @os:end -->
 
 <!-- @test:id=vscode-update-windows timeout=600 hidden=True -->
 ```powershell
@@ -36,7 +35,6 @@ test -f /etc/apt/keyrings/microsoft.gpg
 code --version
 ```
 <!-- @test:end -->
-<!-- @os:end -->
 
 <!-- @test:id=vscode-update-linux timeout=600 hidden=True -->
 ```bash
