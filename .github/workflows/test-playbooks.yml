@@ -9,6 +9,11 @@ on:
         description: 'Specific playbook ID to test (leave empty to test all playbooks)'
         required: false
         type: string
+      runner_label:
+        description: 'Optional: run on a specific self-hosted runner label (example: 10.23.80.221). Leave empty to use matrix runner.'
+        required: false
+        default: ''
+        type: string
   pull_request:
     paths:
       - 'playbooks/**'
@@ -109,7 +114,8 @@ jobs:
     name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})"
     needs: detect-changes
     if: needs.detect-changes.outputs.has_entries == 'true'
-    runs-on: ${{ fromJson(matrix.runner) }}
+    # runs-on: ${{ fromJson(matrix.runner) }}
+    runs-on: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.runner_label != '' && fromJson(format('["self-hosted","{0}"]', github.event.inputs.runner_label))) || fromJson(matrix.runner) }}
     env:
       PYTHONUTF8: 1
       PYTHONIOENCODING: utf-8
