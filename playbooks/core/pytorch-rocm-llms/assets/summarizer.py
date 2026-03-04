@@ -139,7 +139,7 @@ def main():
     parser = argparse.ArgumentParser(description="Summarize documents using LLMs")
     parser.add_argument("--model", default="gptoss", choices=["mistral", "gptoss"], help="Model to use (default: gptoss)")
     parser.add_argument("--file", default=None, help="Path to .txt file to summarize")
-    parser.add_argument("--max-length", type=int, default=150, help="Maximum tokens to generate (default: 150)")
+    parser.add_argument("--max-length", type=int, default=250, help="Maximum tokens to generate (default: 150)")
     parser.add_argument("--temperature", type=float, default=0.3, help="Sampling temperature 0.1-1.0 (default: 0.3)")
     args = parser.parse_args()
     
