@@ -56,6 +56,21 @@ export interface LoadedTestResults {
   summary: { passed: number; failed: number; skipped: number };
 }
 
+/** Per-device test results from a single artifact */
+export interface DeviceTestResult {
+  device: string;
+  platform: string;
+  resultsMap: Record<string, { success: boolean; skipped: boolean; duration: number; error: string }>;
+  summary: { passed: number; failed: number; skipped: number };
+}
+
+/** Combined test results across all devices/archs for a playbook */
+export interface LoadedAllTestResults {
+  resultsMap: Record<string, { success: boolean; skipped: boolean; duration: number; error: string }>;
+  summary: { passed: number; failed: number; skipped: number };
+  deviceResults: DeviceTestResult[];
+}
+
 function ghFetch(pathname: string, token: string): Promise<Response> {
   return fetch(`${GITHUB_API}${pathname}`, {
     headers: {
@@ -239,6 +254,30 @@ export function findPlaybookArtifacts(
   return result;
 }
 
+/**
+ * Finds ALL non-expired test-results artifacts for a given playbook,
+ * returning each with its parsed platform and arch.
+ */
+export function findAllPlaybookArtifacts(
+  artifacts: Artifact[],
+  playbookId: string
+): Array<{ artifact: Artifact; platform: string; arch: string }> {
+  const result: Array<{ artifact: Artifact; platform: string; arch: string }> = [];
+
+  for (const artifact of artifacts) {
+    if (artifact.expired) continue;
+    const parsed = parseArtifactName(artifact.name);
+    if (!parsed || parsed.playbookId !== playbookId) continue;
+    result.push({
+      artifact,
+      platform: parsed.platform,
+      arch: parsed.arch || "halo",
+    });
+  }
+
+  return result;
+}
+
 /** Summary of a single workflow run, used to populate run selectors. */
 export interface RunSummary {
   id: number;
@@ -335,5 +374,67 @@ export async function loadGitHubTestResults(
       failed: summary.failed ?? 0,
       skipped: summary.skipped ?? 0,
     },
+  };
+}
+
+/**
+ * Loads test results from ALL artifacts for a playbook (all devices/archs).
+ * Returns merged results plus per-device breakdowns.
+ */
+export async function loadAllGitHubTestResults(
+  playbookId: string,
+  token: string,
+  runId?: number,
+): Promise<LoadedAllTestResults | null> {
+  const nightly = runId
+    ? await getRunById(token, runId)
+    : await getLatestNightlyRun(token);
+  if (!nightly) return null;
+
+  const allArtifacts = findAllPlaybookArtifacts(nightly.artifacts, playbookId);
+  if (allArtifacts.length === 0) return null;
+
+  const deviceResults: DeviceTestResult[] = [];
+  const mergedResultsMap: LoadedAllTestResults["resultsMap"] = {};
+  let totalPassed = 0, totalFailed = 0, totalSkipped = 0;
+
+  await Promise.all(allArtifacts.map(async ({ artifact, platform, arch }) => {
+    const summary = await extractFullSummary(artifact, token);
+    if (!summary) return;
+
+    const deviceMap: DeviceTestResult["resultsMap"] = {};
+    for (const r of summary.results ?? []) {
+      const entry = {
+        success: r.success,
+        skipped: r.skipped ?? false,
+        duration: r.duration ?? 0,
+        error: r.error_message ?? "",
+      };
+      deviceMap[r.test_id] = entry;
+      mergedResultsMap[r.test_id] = entry;
+    }
+
+    deviceResults.push({
+      device: arch,
+      platform,
+      resultsMap: deviceMap,
+      summary: {
+        passed: summary.passed ?? 0,
+        failed: summary.failed ?? 0,
+        skipped: summary.skipped ?? 0,
+      },
+    });
+
+    totalPassed += summary.passed ?? 0;
+    totalFailed += summary.failed ?? 0;
+    totalSkipped += summary.skipped ?? 0;
+  }));
+
+  if (deviceResults.length === 0) return null;
+
+  return {
+    resultsMap: mergedResultsMap,
+    summary: { passed: totalPassed, failed: totalFailed, skipped: totalSkipped },
+    deviceResults,
   };
 }

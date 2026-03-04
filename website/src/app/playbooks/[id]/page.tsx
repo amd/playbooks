@@ -120,12 +120,14 @@ function HaloPreinstalledDropdown({
   playbookId,
   onImageClick,
   testCoverage,
+  selectedTestDevice,
 }: { 
   content: string;
   dropdownId: string;
   playbookId: string;
   onImageClick: (image: { src: string; alt: string }) => void;
   testCoverage?: TestCoverageInfo;
+  selectedTestDevice?: string;
 }) {
   // Initialize from global store, use local state for rendering
   const [isOpen, setIsOpen] = useState(() => dropdownStateStore[dropdownId] ?? false);
@@ -247,12 +249,12 @@ function HaloPreinstalledDropdown({
               tr: ({ children }) => <tr className="md-tr">{children}</tr>,
               th: ({ children }) => <th className="md-th">{children}</th>,
               td: ({ children }) => <td className="md-td">{children}</td>,
-              // Handle test-coverage-block markers inside dependency content
               div: (divProps: React.HTMLAttributes<HTMLDivElement> & { 'data-test-id'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string }) => {
                 const { className: divClassName, ...divRest } = divProps;
                 if (divClassName === 'test-coverage-block') {
                   const testId = divProps['data-test-id'] || '';
                   const testInfo = testCoverage?.tests.find(t => t.id === testId);
+                  const activeResult = (selectedTestDevice && testInfo?.deviceResults?.[selectedTestDevice]) || testInfo?.result;
                   return (
                     <TestCoverageBlock
                       testId={testId}
@@ -260,7 +262,7 @@ function HaloPreinstalledDropdown({
                       isHidden={divProps['data-hidden'] === 'true'}
                       setup={divProps['data-setup'] || ''}
                       code={decodeURIComponent(divProps['data-code'] || '')}
-                      testResult={testInfo?.result}
+                      testResult={activeResult}
                       playbookId={playbookId}
                     />
                   );
@@ -698,12 +700,10 @@ function TestCoverageBlock({
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState<string | null>(null);
 
-  // Parse the fenced code block: ```lang\ncontent\n```
   const langMatch = code.match(/```(\w+)?\s*\n/);
   const language = langMatch?.[1] || "";
   const codeContent = code.replace(/```\w*\s*\n/, "").replace(/\n?```\s*$/, "");
 
-  // Detect lines marked with #hide (hidden from user view, visible in coverage)
   const hasHideLines = codeContent.split('\n').some(line => line.trimEnd().endsWith('#hide'));
 
   let resultStatus = "";
@@ -714,7 +714,6 @@ function TestCoverageBlock({
     else { resultStatus = "fail"; resultLabel = "Failed"; }
   }
 
-  // Show logs button for all tests that have results
   const showLogsButton = !!testResult;
 
   const handleViewLogs = useCallback(async () => {
@@ -887,21 +886,61 @@ function SetupDefinitionBlock({
  * Stats bar showing test coverage summary for the playbook.
  * Only shown when GitHub test results are available.
  */
+function TestedDeviceSelector({
+  devices,
+  selected,
+  onChange,
+}: {
+  devices: string[];
+  selected: string;
+  onChange: (device: string) => void;
+}) {
+  if (devices.length <= 1) return null;
+
+  return (
+    <div className="flex items-center gap-1 p-0.5 bg-[#111] rounded-lg border border-[#2a2a2a]">
+      {devices.map((d) => {
+        const name = deviceNames[d as Device] || d;
+        return (
+          <button
+            key={d}
+            onClick={() => onChange(d)}
+            className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all ${
+              selected === d
+                ? "bg-[#D4915D] text-black"
+                : "text-[#6b6b6b] hover:text-[#a0a0a0] hover:bg-[#1a1a1a]"
+            }`}
+          >
+            {name}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function TestCoverageStatsBar({
   coverage,
   availableRuns,
   selectedRunId,
   onRunChange,
+  selectedTestDevice,
+  onTestDeviceChange,
 }: {
   coverage: TestCoverageInfo;
   availableRuns: PlaybookRunOption[];
   selectedRunId: number | null;
   onRunChange: (id: number | null) => void;
+  selectedTestDevice: string;
+  onTestDeviceChange: (device: string) => void;
 }) {
   const covPct = coverage.totalCodeBlocks > 0
     ? Math.round((coverage.visibleTestCount / coverage.totalCodeBlocks) * 100)
     : 0;
   const covClass = covPct >= 60 ? "" : covPct >= 30 ? "tc-cov-mid" : "tc-cov-low";
+
+  const activeSummary = coverage.deviceSummaries?.[selectedTestDevice] ?? coverage.resultsSummary;
+  const testedDevices = coverage.testedDevices ?? [];
 
   return (
     <div className="tc-stats-container">
@@ -912,23 +951,34 @@ function TestCoverageStatsBar({
         <span className="tc-stat"><strong>{coverage.totalCodeBlocks}</strong> code blocks</span>
         <span className="tc-stat-divider" />
         <span className={`tc-stat-coverage ${covClass}`}>{covPct}% coverage</span>
-        {availableRuns.length > 0 && (
-          <span className="ml-auto">
+        <span className="ml-auto flex items-center gap-2">
+          {testedDevices.length > 1 && (
+            <TestedDeviceSelector
+              devices={testedDevices}
+              selected={selectedTestDevice}
+              onChange={onTestDeviceChange}
+            />
+          )}
+          {availableRuns.length > 0 && (
             <PlaybookRunSelector
               runs={availableRuns}
               selectedId={selectedRunId}
               onChange={onRunChange}
             />
-          </span>
-        )}
+          )}
+        </span>
       </div>
-      {/* Results row */}
-      {coverage.resultsSummary && (
+      {/* Results row for selected device */}
+      {activeSummary && (
         <div className="tc-results-bar">
-          <span className="tc-results-label">Results:</span>
-          <span className="tc-results-pill tc-results-pass">{coverage.resultsSummary.passed} passed</span>
-          <span className="tc-results-pill tc-results-fail">{coverage.resultsSummary.failed} failed</span>
-          <span className="tc-results-pill tc-results-skip">{coverage.resultsSummary.skipped} skipped</span>
+          <span className="tc-results-label">
+            {testedDevices.length > 1
+              ? `${deviceNames[selectedTestDevice as Device] || selectedTestDevice}:`
+              : "Results:"}
+          </span>
+          <span className="tc-results-pill tc-results-pass">{activeSummary.passed} passed</span>
+          <span className="tc-results-pill tc-results-fail">{activeSummary.failed} failed</span>
+          <span className="tc-results-pill tc-results-skip">{activeSummary.skipped} skipped</span>
         </div>
       )}
       {/* Legend */}
@@ -937,7 +987,7 @@ function TestCoverageStatsBar({
         <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-tested" /> Tested (visible)</span>
         <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-hidden" /> Hidden test</span>
         <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-untested" /> Not tested</span>
-        {coverage.resultsSummary && (
+        {activeSummary && (
           <>
             <span className="tc-legend-sep">|</span>
             <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-pass" /> Passed</span>
@@ -1150,6 +1200,8 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   // Run selector state — null means "use latest"
   const [availableRuns, setAvailableRuns] = useState<PlaybookRunOption[]>([]);
   const [selectedRunId, setSelectedRunId] = useState<number | null>(null);
+  // Device selector for coverage results
+  const [selectedTestDevice, setSelectedTestDevice] = useState<string>("");
   const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
@@ -1167,11 +1219,16 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       const data = await res.json();
       setPlaybook(data);
 
-      // Auto-select platform: prefer windows, otherwise use the first available
       if (data.platforms.includes("windows")) {
         setSelectedPlatform("windows");
       } else if (data.platforms.length > 0) {
         setSelectedPlatform(data.platforms[0]);
+      }
+
+      // Auto-select first tested device for coverage results
+      const devices = data.testCoverage?.testedDevices;
+      if (devices?.length > 0) {
+        setSelectedTestDevice(prev => prev && devices.includes(prev) ? prev : devices[0]);
       }
     } catch (err) {
       setError("Failed to load playbook");
@@ -1386,6 +1443,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
               playbookId={id}
               onImageClick={setLightboxImage}
               testCoverage={playbook?.testCoverage}
+              selectedTestDevice={selectedTestDevice}
             />
           );
         }
@@ -1404,10 +1462,10 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
           );
         }
       }
-      // Handle test-coverage-block (dev:coverage mode only)
       if (className === 'test-coverage-block') {
         const testId = props['data-test-id'] || '';
         const testInfo = playbook?.testCoverage?.tests.find(t => t.id === testId);
+        const activeResult = (selectedTestDevice && testInfo?.deviceResults?.[selectedTestDevice]) || testInfo?.result;
         return (
           <TestCoverageBlock
             testId={testId}
@@ -1415,7 +1473,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
             isHidden={props['data-hidden'] === 'true'}
             setup={props['data-setup'] || ''}
             code={decodeURIComponent(props['data-code'] || '')}
-            testResult={testInfo?.result}
+            testResult={activeResult}
             playbookId={id}
             runId={selectedRunId}
           />
@@ -1423,7 +1481,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       }
       return <div className={className} {...rest} />;
     },
-  }), [id, setLightboxImage, playbook?.testCoverage, selectedRunId]);
+  }), [id, setLightboxImage, playbook?.testCoverage, selectedRunId, selectedTestDevice]);
 
   // Handle clicking a TOC link - scroll and immediately set active
   const handleTocClick = (targetId: string) => {
@@ -1673,6 +1731,8 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                       availableRuns={availableRuns}
                       selectedRunId={selectedRunId}
                       onRunChange={setSelectedRunId}
+                      selectedTestDevice={selectedTestDevice}
+                      onTestDeviceChange={setSelectedTestDevice}
                     />
                   )}
 
