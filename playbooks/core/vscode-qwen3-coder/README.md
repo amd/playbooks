@@ -126,6 +126,12 @@ with urllib.request.urlopen(req, timeout=60) as r:
 ```
 <!-- @test:end -->
 
+<!-- @test:id=lmstudio-server-stop timeout=300 hidden=True -->
+```bash
+lms server stop
+```
+<!-- @test:end -->
+
 ## Next Steps
 
 After generating the website, you can continue to work with Cline to improve the website. Two possible improvements are:
