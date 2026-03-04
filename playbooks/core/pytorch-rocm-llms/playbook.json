@@ -8,6 +8,9 @@
     "linux": [],
     "windows": ["halo", "krk"]
   },
+  "required_platforms": {
+    "windows": ["halo"]
+  },
   "difficulty": "beginner",
   "isNew": true,
   "isFeatured": false,
