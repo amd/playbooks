@@ -6,9 +6,8 @@ import { useState } from "react";
 import AMDLogo from "@/app/assets/AMD_Logo.png";
 
 const navLinks = [
-  { name: "Apps", href: "#apps" },
-  { name: "Playbooks", href: "#playbooks" },
-  { name: "Models", href: "#models" },
+  { name: "Playbooks", href: "/#playbooks" },
+  { name: "Models", href: "/#models" },
   { name: "Docs", href: "/docs", external: true },
 ];
 
@@ -27,7 +26,7 @@ export default function Header() {
             height={32}
             className="h-8 w-auto brightness-0 invert"
           />
-          <span className="text-[#D4915D] font-semibold text-lg">STX Halo™</span>
+          <span className="text-[#D4915D] font-semibold text-lg">Playbooks</span>
         </Link>
 
         {/* Navigation */}

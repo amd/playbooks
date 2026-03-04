@@ -11,8 +11,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
-import type { Playbook, Platform, TestCoverageInfo, TestResultInfo, PlaybookCoverageSummary } from "@/types/playbook";
-import { formatTime } from "@/types/playbook";
+import type { Playbook, Platform, Device, TestCoverageInfo, TestResultInfo, PlaybookCoverageSummary } from "@/types/playbook";
+import { formatTime, DEVICE_IDS, deviceNames } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
 const dropdownStateStore: Record<string, boolean> = {};
@@ -599,6 +599,43 @@ function filterContentByOS(content: string, platform: Platform): string {
 }
 
 /**
+ * Parses markdown content and filters device-specific sections.
+ * Supports comma-separated device IDs.
+ *
+ * Tags supported:
+ * <!-- @device:halo --> ... <!-- @device:end -->
+ * <!-- @device:halo,stx --> ... <!-- @device:end -->
+ * <!-- @device:all --> ... <!-- @device:end -->
+ */
+function filterContentByDevice(content: string, device: Device | null): string {
+  if (!content) return "";
+  if (!device) return content;
+
+  const deviceBlockPattern = /<!-- @device:([\w,]+) -->([\s\S]*?)<!-- @device:end -->/g;
+
+  let result = content;
+  const matches = [...content.matchAll(deviceBlockPattern)];
+
+  for (let i = matches.length - 1; i >= 0; i--) {
+    const match = matches[i];
+    const blockDevices = match[1];
+    const blockContent = match[2];
+    const fullMatch = match[0];
+    const startIndex = match.index!;
+
+    let replacement = "";
+
+    if (blockDevices === "all" || blockDevices.split(",").includes(device)) {
+      replacement = blockContent;
+    }
+
+    result = result.slice(0, startIndex) + replacement + result.slice(startIndex + fullMatch.length);
+  }
+
+  return result;
+}
+
+/**
  * Transforms @preinstalled tags into collapsible dropdown HTML
  * 
  * Tags supported:
@@ -645,7 +682,7 @@ function transformSetupBlocks(content: string): string {
  * When a test fails, shows a "View Logs" button to inspect stdout/stderr.
  */
 function TestCoverageBlock({
-  testId, timeout, isHidden, setup, code, testResult, playbookId,
+  testId, timeout, isHidden, setup, code, testResult, playbookId, runId,
 }: {
   testId: string;
   timeout: string;
@@ -654,6 +691,7 @@ function TestCoverageBlock({
   code: string;
   testResult?: TestResultInfo;
   playbookId?: string;
+  runId?: number | null;
 }) {
   const [logsOpen, setLogsOpen] = useState(false);
   const [logs, setLogs] = useState<{ stdout: string; stderr: string } | null>(null);
@@ -697,7 +735,10 @@ function TestCoverageBlock({
     setLogsError(null);
 
     try {
-      const res = await fetch(`/api/playbooks/${playbookId}/logs/${testId}`);
+      const logsUrl = runId
+        ? `/api/playbooks/${playbookId}/logs/${testId}?run_id=${runId}`
+        : `/api/playbooks/${playbookId}/logs/${testId}`;
+      const res = await fetch(logsUrl);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setLogsError(data.error || "Failed to load logs");
@@ -713,7 +754,7 @@ function TestCoverageBlock({
     } finally {
       setLogsLoading(false);
     }
-  }, [logsOpen, logs, playbookId, testId]);
+  }, [logsOpen, logs, playbookId, testId, runId]);
 
   return (
     <div className={`tc-block ${isHidden ? "tc-hidden" : ""} ${resultStatus ? `tc-result-${resultStatus}` : ""}`}>
@@ -844,9 +885,19 @@ function SetupDefinitionBlock({
 
 /**
  * Stats bar showing test coverage summary for the playbook.
- * Only shown when running in dev:coverage mode.
+ * Only shown when GitHub test results are available.
  */
-function TestCoverageStatsBar({ coverage }: { coverage: TestCoverageInfo }) {
+function TestCoverageStatsBar({
+  coverage,
+  availableRuns,
+  selectedRunId,
+  onRunChange,
+}: {
+  coverage: TestCoverageInfo;
+  availableRuns: PlaybookRunOption[];
+  selectedRunId: number | null;
+  onRunChange: (id: number | null) => void;
+}) {
   const covPct = coverage.totalCodeBlocks > 0
     ? Math.round((coverage.visibleTestCount / coverage.totalCodeBlocks) * 100)
     : 0;
@@ -861,11 +912,20 @@ function TestCoverageStatsBar({ coverage }: { coverage: TestCoverageInfo }) {
         <span className="tc-stat"><strong>{coverage.totalCodeBlocks}</strong> code blocks</span>
         <span className="tc-stat-divider" />
         <span className={`tc-stat-coverage ${covClass}`}>{covPct}% coverage</span>
+        {availableRuns.length > 0 && (
+          <span className="ml-auto">
+            <PlaybookRunSelector
+              runs={availableRuns}
+              selectedId={selectedRunId}
+              onChange={onRunChange}
+            />
+          </span>
+        )}
       </div>
       {/* Results row */}
       {coverage.resultsSummary && (
         <div className="tc-results-bar">
-          <span className="tc-results-label">Last Run:</span>
+          <span className="tc-results-label">Results:</span>
           <span className="tc-results-pill tc-results-pass">{coverage.resultsSummary.passed} passed</span>
           <span className="tc-results-pill tc-results-fail">{coverage.resultsSummary.failed} failed</span>
           <span className="tc-results-pill tc-results-skip">{coverage.resultsSummary.skipped} skipped</span>
@@ -938,68 +998,225 @@ function PlatformToggle({
   );
 }
 
-export default function PlaybookPage({ params }: { params: Promise<{ id: string }> }) {
+function DeviceToggle({
+  selected,
+  onChange,
+  hasDeviceContent,
+}: {
+  selected: Device | null;
+  onChange: (d: Device | null) => void;
+  hasDeviceContent: boolean;
+}) {
+  if (!hasDeviceContent) return null;
+
+  return (
+    <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] rounded-lg border border-[#333] flex-wrap">
+      {DEVICE_IDS.map((d) => (
+        <button
+          key={d}
+          onClick={() => onChange(selected === d ? null : d)}
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+            selected === d
+              ? "bg-[#D4915D] text-black"
+              : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
+          }`}
+        >
+          {deviceNames[d]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+interface PlaybookRunOption {
+  id: number;
+  htmlUrl: string;
+  createdAt: string;
+  event: string;
+  headBranch: string;
+  conclusion: string | null;
+}
+
+function PlaybookRunSelector({
+  runs,
+  selectedId,
+  onChange,
+}: {
+  runs: PlaybookRunOption[];
+  selectedId: number | null;
+  onChange: (id: number | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    const handler = (e: MouseEvent) => {
+      if (!node.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const selected = selectedId != null ? runs.find((r) => r.id === selectedId) : null;
+  const label = selected ? new Date(selected.createdAt).toLocaleString() : "Latest nightly";
+
+  const eventColors: Record<string, string> = {
+    schedule: "bg-blue-900/30 text-blue-400 border-blue-800/30",
+    workflow_dispatch: "bg-purple-900/30 text-purple-400 border-purple-800/30",
+  };
+  const eventLabels: Record<string, string> = { schedule: "Nightly", workflow_dispatch: "Manual" };
+
+  return (
+    <div ref={ref} className="relative inline-block">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        title="Select a workflow run to view its test results"
+        className="flex items-center gap-1.5 px-2.5 py-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg text-xs text-[#6b6b6b] hover:border-[#555] hover:text-[#a0a0a0] transition-colors"
+      >
+        <svg className="w-3 h-3 text-[#D4915D] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>Run: <span className="text-[#a0a0a0]">{label}</span></span>
+        <svg className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 w-72 bg-[#1a1a1a] border border-[#333] rounded-xl shadow-2xl overflow-hidden">
+          <div className="max-h-64 overflow-y-auto">
+            <button
+              onClick={() => { onChange(null); setOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-[#242424] transition-colors ${selectedId == null ? "bg-[#242424]" : ""}`}
+            >
+              <span className="flex-1 text-left text-white font-medium">Latest nightly</span>
+              {selectedId == null && <svg className="w-3 h-3 text-[#D4915D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>}
+            </button>
+            <div className="border-t border-[#2a2a2a]" />
+            {runs.map((run) => {
+              const badgeCls = eventColors[run.event] ?? "bg-[#242424] text-[#6b6b6b] border-[#333]";
+              const badgeLabel = eventLabels[run.event] ?? run.event;
+              const isSelected = selectedId === run.id;
+              return (
+                <button
+                  key={run.id}
+                  onClick={() => { onChange(run.id); setOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-[#242424] transition-colors ${isSelected ? "bg-[#242424]" : ""}`}
+                >
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="text-[#a0a0a0]">{new Date(run.createdAt).toLocaleString()}</div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className={`px-1.5 py-0.5 text-[10px] font-semibold rounded border ${badgeCls}`}>{badgeLabel}</span>
+                      <span className="text-[10px] text-[#555] truncate">{run.headBranch}</span>
+                    </div>
+                  </div>
+                  {isSelected && <svg className="w-3 h-3 text-[#D4915D] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const hashToDeviceId: Record<string, Device> = {
+  halo: "halo",
+  krk: "krk",
+};
+
+function deviceFromHash(hash?: string): Device | null {
+  if (!hash) return null;
+  return hashToDeviceId[hash] ?? (DEVICE_IDS.includes(hash as Device) ? hash as Device : null);
+}
+
+export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string }> }) {
   const { id } = use(params);
+  const { device: deviceHash } = use(searchParams);
+  const backHref = deviceHash ? `/#${deviceHash}` : "/#playbooks";
+
   const [playbook, setPlaybook] = useState<Playbook | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => deviceFromHash(deviceHash));
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
   // Coverage view toggle — true = show coverage badges & sidebar; false = normal user view
-  const [coverageViewActive, setCoverageViewActive] = useState<boolean>(true);
+  const [coverageViewActive, setCoverageViewActive] = useState<boolean>(false);
   // All-playbooks coverage data for the sidebar (fetched once when in coverage mode)
   const [coveragePlaybooks, setCoveragePlaybooks] = useState<PlaybookCoverageSummary[]>([]);
+  // Run selector state — null means "use latest"
+  const [availableRuns, setAvailableRuns] = useState<PlaybookRunOption[]>([]);
+  const [selectedRunId, setSelectedRunId] = useState<number | null>(null);
   const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
 
-  useEffect(() => {
-    async function fetchPlaybook() {
-      try {
-        const res = await fetch(`/api/playbooks/${id}`);
-        if (!res.ok) {
-          if (res.status === 404) {
-            setError("Playbook not found");
-          } else {
-            setError("Failed to load playbook");
-          }
-          return;
-        }
-        const data = await res.json();
-        setPlaybook(data);
-        
-        // Auto-select platform: prefer windows, otherwise use the first available
-        if (data.platforms.includes("windows")) {
-          setSelectedPlatform("windows");
-        } else if (data.platforms.length > 0) {
-          setSelectedPlatform(data.platforms[0]);
-        }
-      } catch (err) {
-        setError("Failed to load playbook");
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const fetchPlaybook = useCallback(async (runId: number | null) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const url = runId ? `/api/playbooks/${id}?run_id=${runId}` : `/api/playbooks/${id}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        setError(res.status === 404 ? "Playbook not found" : "Failed to load playbook");
+        return;
       }
+      const data = await res.json();
+      setPlaybook(data);
+
+      // Auto-select platform: prefer windows, otherwise use the first available
+      if (data.platforms.includes("windows")) {
+        setSelectedPlatform("windows");
+      } else if (data.platforms.length > 0) {
+        setSelectedPlatform(data.platforms[0]);
+      }
+    } catch (err) {
+      setError("Failed to load playbook");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    fetchPlaybook();
   }, [id]);
+
+  useEffect(() => {
+    fetchPlaybook(selectedRunId);
+  }, [fetchPlaybook, selectedRunId]);
 
   // Fetch all-playbooks coverage summary when we detect coverage mode
   useEffect(() => {
     if (!playbook?.testCoverage) return;
-    fetch("/api/playbooks/coverage")
+    const url = selectedRunId
+      ? `/api/playbooks/coverage?run_id=${selectedRunId}`
+      : "/api/playbooks/coverage";
+    fetch(url)
       .then(r => r.json())
       .then((data: PlaybookCoverageSummary[]) => setCoveragePlaybooks(data))
       .catch(() => {/* ignore */});
-  }, [playbook?.testCoverage]);
+  }, [playbook?.testCoverage, selectedRunId]);
 
-  // Transform relative image paths to API routes, filter by OS, and transform preinstalled/setup blocks
-  const filteredContent = playbook?.content 
+  // Fetch available runs once coverage data is detected (token is configured)
+  useEffect(() => {
+    if (!playbook?.testCoverage) return;
+    if (availableRuns.length > 0) return;
+    fetch("/api/dashboard/playbook-runs?per_page=20")
+      .then(r => r.json())
+      .then(d => { if (d.runs) setAvailableRuns(d.runs); })
+      .catch(() => {/* non-critical */});
+  }, [playbook?.testCoverage, availableRuns.length]);
+
+  const hasDeviceContent = !!playbook?.content && /<!-- @device:[\w,]+ -->/.test(playbook.content);
+
+  // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
+  const filteredContent = playbook?.content
     ? transformSetupBlocks(
         transformPreinstalledBlocks(
-          filterContentByOS(playbook.content, selectedPlatform)
+          filterContentByDevice(
+            filterContentByOS(playbook.content, selectedPlatform),
+            selectedDevice
+          )
         )
       )
         // Transform relative image paths in HTML img tags to use the API route
@@ -1200,12 +1417,13 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
             code={decodeURIComponent(props['data-code'] || '')}
             testResult={testInfo?.result}
             playbookId={id}
+            runId={selectedRunId}
           />
         );
       }
       return <div className={className} {...rest} />;
     },
-  }), [id, setLightboxImage, playbook?.testCoverage]);
+  }), [id, setLightboxImage, playbook?.testCoverage, selectedRunId]);
 
   // Handle clicking a TOC link - scroll and immediately set active
   const handleTocClick = (targetId: string) => {
@@ -1297,7 +1515,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
         <div className="max-w-5xl mx-auto">
           {/* Back Link */}
           <Link 
-            href="/#playbooks" 
+            href={backHref} 
             className="inline-flex items-center gap-2 text-[#a0a0a0] hover:text-[#D4915D] text-sm mb-6 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1320,7 +1538,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
               <h1 className="text-2xl font-bold text-white mb-2">{error}</h1>
               <p className="text-[#a0a0a0] mb-6">The playbook you&apos;re looking for doesn&apos;t exist or has been moved.</p>
               <Link 
-                href="/#playbooks"
+                href={backHref}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-[#D4915D] text-black font-medium rounded-lg hover:bg-[#e5a26e] transition-colors"
               >
                 View All Playbooks
@@ -1376,15 +1594,29 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                   </div>
                 )}
 
-                {/* Platform Toggle */}
-                {playbook.platforms.length > 0 && (
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <span className="text-sm text-[#6b6b6b]">View instructions for:</span>
-                    <PlatformToggle 
-                      platforms={playbook.platforms}
-                      selected={selectedPlatform}
-                      onChange={setSelectedPlatform}
-                    />
+                {/* Platform & Device Toggles */}
+                {(playbook.platforms.length > 0 || hasDeviceContent) && (
+                  <div className="flex flex-col gap-3">
+                    {playbook.platforms.length > 0 && (
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <span className="text-sm text-[#6b6b6b]">Platform:</span>
+                        <PlatformToggle
+                          platforms={playbook.platforms}
+                          selected={selectedPlatform}
+                          onChange={setSelectedPlatform}
+                        />
+                      </div>
+                    )}
+                    {hasDeviceContent && (
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <span className="text-sm text-[#6b6b6b]">Device:</span>
+                        <DeviceToggle
+                          selected={selectedDevice}
+                          onChange={setSelectedDevice}
+                          hasDeviceContent={hasDeviceContent}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1436,7 +1668,12 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                 <div className="flex-1 min-w-0">
                   {/* Test Coverage Stats (only in coverage view) */}
                   {playbook.testCoverage && coverageViewActive && (
-                    <TestCoverageStatsBar coverage={playbook.testCoverage} />
+                    <TestCoverageStatsBar
+                      coverage={playbook.testCoverage}
+                      availableRuns={availableRuns}
+                      selectedRunId={selectedRunId}
+                      onRunChange={setSelectedRunId}
+                    />
                   )}
 
                   <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6 md:p-8">

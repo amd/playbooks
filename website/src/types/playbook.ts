@@ -24,6 +24,32 @@
  * 
  * Content outside of these tags is shown on all platforms.
  * 
+ * ## Device-Specific Content Tags
+ * 
+ * Use `@device` tags for device-specific instructions. Supports comma-separated
+ * values to target multiple devices:
+ * 
+ * ```markdown
+ * <!-- @device:halo -->
+ * STX Halo-only instructions
+ * <!-- @device:end -->
+ * 
+ * <!-- @device:halo,stx -->
+ * Instructions for both Halo and STX Point
+ * <!-- @device:end -->
+ * 
+ * <!-- @device:rx7900xt,rx9070xt -->
+ * Instructions for discrete Radeon GPUs
+ * <!-- @device:end -->
+ * 
+ * <!-- @device:all -->
+ * Instructions for all devices
+ * <!-- @device:end -->
+ * ```
+ * 
+ * Valid device IDs: halo, stx, krk, rx7900xt, rx9070xt.
+ * Content outside of `@device` tags is shown on all devices.
+ * 
  * ## Pre-installed Software Dropdowns
  * 
  * For software pre-installed on AMD Halo Developer Platform, use the `@require` tag
@@ -45,8 +71,20 @@
  */
 
 export type Platform = "windows" | "linux";
+export type Architecture = "halo" | "krk";
+export type Device = "halo" | "stx" | "krk" | "rx7900xt" | "rx9070xt";
 export type Category = "core" | "supplemental" | "backup";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
+
+export const DEVICE_IDS: Device[] = ["halo", "stx", "krk", "rx7900xt", "rx9070xt"];
+
+export const deviceNames: Record<Device, string> = {
+  halo: "STX Halo",
+  stx: "STX Point",
+  krk: "Krackan Point",
+  rx7900xt: "RX 7900 XT",
+  rx9070xt: "RX 9070 XT",
+};
 
 export interface PlaybookMeta {
   /** Unique identifier matching the folder name */
@@ -63,6 +101,9 @@ export interface PlaybookMeta {
   
   /** Supported platforms */
   platforms: Platform[];
+
+  /** Tested platforms per OS (used by CI to select runners) */
+  tested_platforms?: Partial<Record<Platform, Architecture[]>>;
   
   /** Whether this is a new playbook */
   isNew?: boolean;

@@ -4,9 +4,14 @@
   "description": "Set up LM Studio and LM Studio Server to run and serve large language models on STX Halo™",
   "time": 30,
   "platforms": ["windows", "linux"],
+  "tested_platforms": {
+    "windows": ["halo"],
+    "linux": []
+  },
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
+  "developed": true,
   "published": true,
   "tags": ["lm-studio", "rocm", "vulkan", "llm", "inference"]
 }

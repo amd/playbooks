@@ -7,6 +7,7 @@
   "difficulty": "intermediate",
   "isNew": true,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["openhands", "agents", "sdk", "llm"]
 }

@@ -7,6 +7,7 @@
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["openhands", "coding-assistant", "llamacpp", "qwen"]
 }

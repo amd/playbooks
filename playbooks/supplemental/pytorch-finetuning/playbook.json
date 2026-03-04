@@ -4,9 +4,14 @@
   "description": "Fine-tune large language models using PyTorch on STX Halo™",
   "time": 90,
   "platforms": ["windows", "linux"],
+  "tested_platforms": {
+    "windows": [],
+    "linux": []
+  },
   "difficulty": "intermediate",
   "isNew": true,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["pytorch", "fine-tuning", "llm", "rocm"]
 }
