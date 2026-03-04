@@ -10,7 +10,7 @@
   },
   "required_platforms": {
     "windows": ["halo"],
-    "linux": ["krk"]
+    "linux": []
   },
   "difficulty": "intermediate",
   "isNew": false,
