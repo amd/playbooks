@@ -249,6 +249,8 @@ interface PlaybookMatrixColumn {
   id: string;
   hardware: string;
   os: string;
+  arch: string;
+  platform: string;
 }
 
 interface PlaybookMatrixCell {
@@ -818,14 +820,29 @@ function PlaybookStatusDashboard() {
                       const cell = row.cells[column.id];
                       const testsAdded = Object.values(row.cells).some((c) => c.totalTests > 0);
                       const style = getCellStyle(cell, row.developed, testsAdded);
+                      const isClickable = !!(cell && cell.totalTests > 0);
+                      const runId = selectedRunId ?? matrix?.run?.id ?? null;
+
+                      const cellBadge = (
+                        <div className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full ${isClickable ? "hover:border-[#D4915D]/50 hover:bg-[#D4915D]/5 transition-colors" : ""}`}>
+                          {style.dot && (
+                            <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
+                          )}
+                          <span className={`text-[11px] font-medium whitespace-nowrap ${style.text}`}>{style.label}</span>
+                        </div>
+                      );
+
                       return (
-                        <td key={column.id} className="px-2 py-2 align-middle text-center">
-                          <div className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full`}>
-                            {style.dot && (
-                              <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
-                            )}
-                            <span className={`text-[11px] font-medium whitespace-nowrap ${style.text}`}>{style.label}</span>
-                          </div>
+                        <td key={column.id} className={`px-2 py-2 align-middle text-center${isClickable ? " cursor-pointer" : ""}`}>
+                          {isClickable ? (
+                            <Link
+                              href={`/playbooks/${row.playbookId}?coverage=true&test_device=${column.arch}&platform=${column.platform}${runId ? `&run_id=${runId}` : ""}`}
+                            >
+                              {cellBadge}
+                            </Link>
+                          ) : (
+                            cellBadge
+                          )}
                         </td>
                       );
                     })}

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import {
   getLatestNightlyRun,
   getRunById,
-  findPlaybookArtifacts,
+  findAllPlaybookArtifacts,
   extractTestLogs,
 } from "@/lib/github-test-results";
 
@@ -37,6 +37,7 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const runIdParam = searchParams.get("run_id");
   const runId = runIdParam ? parseInt(runIdParam, 10) : undefined;
+  const device = searchParams.get("device") || undefined;
 
   let nightly;
   try {
@@ -58,14 +59,14 @@ export async function GET(
     );
   }
 
-  const { windows: winArtifact, linux: linuxArtifact } = findPlaybookArtifacts(
-    nightly.artifacts,
-    playbookId
-  );
+  let allArtifacts = findAllPlaybookArtifacts(nightly.artifacts, playbookId);
 
-  // Try Windows first, then Linux
-  for (const artifact of [winArtifact, linuxArtifact]) {
-    if (!artifact) continue;
+  if (device) {
+    const filtered = allArtifacts.filter((a) => a.arch === device);
+    if (filtered.length > 0) allArtifacts = filtered;
+  }
+
+  for (const { artifact } of allArtifacts) {
     try {
       const logs = await extractTestLogs(artifact, token, testId);
       if (!logs) continue;
