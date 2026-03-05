@@ -264,6 +264,7 @@ function HaloPreinstalledDropdown({
                       code={decodeURIComponent(divProps['data-code'] || '')}
                       testResult={activeResult}
                       playbookId={playbookId}
+                      selectedTestDevice={selectedTestDevice}
                     />
                   );
                 }
@@ -684,7 +685,7 @@ function transformSetupBlocks(content: string): string {
  * When a test fails, shows a "View Logs" button to inspect stdout/stderr.
  */
 function TestCoverageBlock({
-  testId, timeout, isHidden, setup, code, testResult, playbookId, runId,
+  testId, timeout, isHidden, setup, code, testResult, playbookId, runId, selectedTestDevice,
 }: {
   testId: string;
   timeout: string;
@@ -694,11 +695,18 @@ function TestCoverageBlock({
   testResult?: TestResultInfo;
   playbookId?: string;
   runId?: number | null;
+  selectedTestDevice?: string;
 }) {
   const [logsOpen, setLogsOpen] = useState(false);
   const [logs, setLogs] = useState<{ stdout: string; stderr: string } | null>(null);
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLogs(null);
+    setLogsError(null);
+    setLogsOpen(false);
+  }, [selectedTestDevice]);
 
   const langMatch = code.match(/```(\w+)?\s*\n/);
   const language = langMatch?.[1] || "";
@@ -734,9 +742,11 @@ function TestCoverageBlock({
     setLogsError(null);
 
     try {
-      const logsUrl = runId
-        ? `/api/playbooks/${playbookId}/logs/${testId}?run_id=${runId}`
-        : `/api/playbooks/${playbookId}/logs/${testId}`;
+      const logsParams = new URLSearchParams();
+      if (runId) logsParams.set("run_id", String(runId));
+      if (selectedTestDevice) logsParams.set("device", selectedTestDevice);
+      const qs = logsParams.toString();
+      const logsUrl = `/api/playbooks/${playbookId}/logs/${testId}${qs ? `?${qs}` : ""}`;
       const res = await fetch(logsUrl);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -753,7 +763,7 @@ function TestCoverageBlock({
     } finally {
       setLogsLoading(false);
     }
-  }, [logsOpen, logs, playbookId, testId, runId]);
+  }, [logsOpen, logs, playbookId, testId, runId, selectedTestDevice]);
 
   return (
     <div className={`tc-block ${isHidden ? "tc-hidden" : ""} ${resultStatus ? `tc-result-${resultStatus}` : ""}`}>
@@ -1476,6 +1486,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
             testResult={activeResult}
             playbookId={id}
             runId={selectedRunId}
+            selectedTestDevice={selectedTestDevice}
           />
         );
       }
