@@ -2,28 +2,31 @@
 
 ## Overview
 
-Efficient fine-tuning is vital for adapting large language models (LLMs) to downstream tasks. Llama factory is an open-source, efficient, and user-friendly platform designed to streamline the training and fine-tuning of large language models (LLMs) and multimodal models. Its core strength lies in enabling users to customize hundreds of pre-trained models locally with minimal coding, spanning from data preparation and model training to human alignment and deployment.
+Efficient fine-tuning is vital for adapting large language models (LLMs) to downstream tasks. LLaMA Factory is an open-source, efficient, and user-friendly platform designed to streamline the training and fine-tuning of large language models (LLMs) and multimodal models. Its core strength lies in enabling users to customize hundreds of pre-trained models locally with minimal coding, spanning from data preparation and model training to human alignment and deployment.
 
-This playbook teaches you how to finetune LLMs using llama factory on your STX Halo™ GPU and other AMD RDNA3/RDNA4 GPUs.
+This playbook teaches you how to finetune LLMs using LLaMA Factory on your local AMD hardware.
 
 ## What you'll accomplish
 
-In this playbook, you Will Learn
-- How to set up llama factory with ROCm support
+In this playbook, you will learnL
+- How to set up LLaMA Factory with ROCm support
 - How to configure LLM finetuning parameters (using Qwen/Qwen3-4B-Instruct-2507 as an example)
-- How to run llama factory finetuning
-- How to run inference with fine-tuned model
+- How to run LLaMA Factory finetuning
+- How to run inference with the fine-tuned model
 - How to export the fine-tuned model 
 
-## Time & Risk
+## Estimated Time
 - Duration: It will take 30-60 minutes to run this playbook (depending on your model/dataset size and network speed).
-- Risk: Finetuning is not an easy task, and you may meet some questions,like out-of-memory and accuracy. Please check [Llama factory FAQs](https://github.com/hiyouga/LlamaFactory/issues/4614) first. 
+- View the [LlaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for more information.
+
+## Dependencies
+fill this in with dependency info
 
 ## Instructions
 
 ### Install llama factory on ROCm GPU
 
-llama factory depends on PyTorch, and rocm developers can install PyTorch through the below options: 
+LLaMA Factory depends on PyTorch, and rocm developers can install PyTorch through the below options: 
 - Using a prebuilt Docker image with PyTorch pre-installed from [AMD rocm pytorch docker hub](https://hub.docker.com/r/rocm/pytorch/tags )
 - Using a wheels package from [offical PyTorch webiste](https://pytorch.org/get-started/locally/)
 - Building PyTorch from source as the steps of [rocm document](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/3rd-party/pytorch-install.html#build-pytorch-from-source)
