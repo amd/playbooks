@@ -38,6 +38,7 @@ export async function GET(
   const runIdParam = searchParams.get("run_id");
   const runId = runIdParam ? parseInt(runIdParam, 10) : undefined;
   const device = searchParams.get("device") || undefined;
+  const platform = searchParams.get("platform") || undefined;
 
   let nightly;
   try {
@@ -61,8 +62,10 @@ export async function GET(
 
   let allArtifacts = findAllPlaybookArtifacts(nightly.artifacts, playbookId);
 
-  if (device) {
-    const filtered = allArtifacts.filter((a) => a.arch === device);
+  if (device || platform) {
+    const filtered = allArtifacts.filter((a) =>
+      (!device || a.arch === device) && (!platform || a.platform === platform)
+    );
     if (filtered.length > 0) allArtifacts = filtered;
   }
 
