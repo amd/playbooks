@@ -472,10 +472,10 @@ export async function GET(
   const coverageModeEnabled = process.env.SHOW_TEST_COVERAGE === "true";
   const token = process.env.DASHBOARD_GITHUB_TOKEN?.trim();
   if (coverageModeEnabled && token) {
+    showCoverage = true;
     try {
       const loaded = await loadAllGitHubTestResults(id, token, runId);
       if (loaded) {
-        showCoverage = true;
         resultsMap = loaded.resultsMap;
         resultsSummary = loaded.summary;
         deviceResultsList = loaded.deviceResults;
