@@ -7,6 +7,16 @@ Download and install Lemonade Server from [lemonade-server.ai](https://lemonade-
 #### Starting Lemonade
 
 <!-- @os:windows -->
+<!-- @test:id=lemonade-chat-gpt-oss-120b timeout=1200 hidden=True -->
+```powershell
+lemonade-server --version
+winget upgrade -e --id AMD.LemonadeServer
+lemonade-server --version
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
 
 1. Open PowerShell or Command Prompt
 2. Start Lemonade with gpt-oss-120b:
