@@ -12,7 +12,7 @@
     "windows": ["halo"]
   },
   "difficulty": "beginner",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
   "developed": true,
   "published": true,
