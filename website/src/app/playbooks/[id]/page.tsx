@@ -17,6 +17,16 @@ import { formatTime, DEVICE_IDS, deviceNames } from "@/types/playbook";
 // Global store for dropdown states - persists across re-renders without causing them
 const dropdownStateStore: Record<string, boolean> = {};
 
+/**
+ * Parses a composite device key like "halo-windows" into arch and platform.
+ * Handles arch names that may contain hyphens by matching known platform suffixes.
+ */
+function parseDeviceKey(key: string): { arch: string; platform: string | null } {
+  if (key.endsWith('-windows')) return { arch: key.slice(0, -8), platform: 'windows' };
+  if (key.endsWith('-linux')) return { arch: key.slice(0, -6), platform: 'linux' };
+  return { arch: key, platform: null };
+}
+
 // Languages that support syntax highlighting
 const HIGHLIGHTED_LANGUAGES = new Set(["python", "py", "bash", "sh", "shell", "c", "cpp", "c++"]);
 
@@ -121,6 +131,7 @@ function HaloPreinstalledDropdown({
   onImageClick,
   testCoverage,
   selectedTestDevice,
+  runId,
 }: { 
   content: string;
   dropdownId: string;
@@ -128,6 +139,7 @@ function HaloPreinstalledDropdown({
   onImageClick: (image: { src: string; alt: string }) => void;
   testCoverage?: TestCoverageInfo;
   selectedTestDevice?: string;
+  runId?: number | null;
 }) {
   // Initialize from global store, use local state for rendering
   const [isOpen, setIsOpen] = useState(() => dropdownStateStore[dropdownId] ?? false);
@@ -264,6 +276,7 @@ function HaloPreinstalledDropdown({
                       code={decodeURIComponent(divProps['data-code'] || '')}
                       testResult={activeResult}
                       playbookId={playbookId}
+                      runId={runId}
                       selectedTestDevice={selectedTestDevice}
                     />
                   );
@@ -648,7 +661,11 @@ function TestCoverageBlock({
     try {
       const logsParams = new URLSearchParams();
       if (runId) logsParams.set("run_id", String(runId));
-      if (selectedTestDevice) logsParams.set("device", selectedTestDevice);
+      if (selectedTestDevice) {
+        const { arch, platform } = parseDeviceKey(selectedTestDevice);
+        logsParams.set("device", arch);
+        if (platform) logsParams.set("platform", platform);
+      }
       const qs = logsParams.toString();
       const logsUrl = `/api/playbooks/${playbookId}/logs/${testId}${qs ? `?${qs}` : ""}`;
       const res = await fetch(logsUrl);
@@ -814,7 +831,7 @@ function TestedDeviceSelector({
   return (
     <div className="flex items-center gap-1 p-0.5 bg-[#111] rounded-lg border border-[#2a2a2a]">
       {devices.map((d) => {
-        const name = deviceNames[d as Device] || d;
+        const name = deviceNames[parseDeviceKey(d).arch as Device] || parseDeviceKey(d).arch;
         return (
           <button
             key={d}
@@ -840,6 +857,7 @@ function TestCoverageStatsBar({
   onRunChange,
   selectedTestDevice,
   onTestDeviceChange,
+  selectedPlatform,
 }: {
   coverage: TestCoverageInfo;
   availableRuns: PlaybookRunOption[];
@@ -847,6 +865,7 @@ function TestCoverageStatsBar({
   onRunChange: (id: number | null) => void;
   selectedTestDevice: string;
   onTestDeviceChange: (device: string) => void;
+  selectedPlatform: Platform;
 }) {
   const covPct = coverage.totalCodeBlocks > 0
     ? Math.round((coverage.visibleTestCount / coverage.totalCodeBlocks) * 100)
@@ -854,7 +873,8 @@ function TestCoverageStatsBar({
   const covClass = covPct >= 60 ? "" : covPct >= 30 ? "tc-cov-mid" : "tc-cov-low";
 
   const activeSummary = coverage.deviceSummaries?.[selectedTestDevice] ?? coverage.resultsSummary;
-  const testedDevices = coverage.testedDevices ?? [];
+  const allDevices = coverage.testedDevices ?? [];
+  const testedDevices = allDevices.filter(d => d.endsWith(`-${selectedPlatform}`));
 
   return (
     <div className="tc-stats-container">
@@ -887,7 +907,7 @@ function TestCoverageStatsBar({
         <div className="tc-results-bar">
           <span className="tc-results-label">
             {testedDevices.length > 1
-              ? `${deviceNames[selectedTestDevice as Device] || selectedTestDevice}:`
+              ? `${deviceNames[parseDeviceKey(selectedTestDevice).arch as Device] || parseDeviceKey(selectedTestDevice).arch}:`
               : "Results:"}
           </span>
           <span className="tc-results-pill tc-results-pass">{activeSummary.passed} passed</span>
@@ -1115,7 +1135,11 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
     const parsed = runIdParam ? parseInt(runIdParam, 10) : NaN;
     return Number.isFinite(parsed) ? parsed : null;
   });
-  const [selectedTestDevice, setSelectedTestDevice] = useState<string>(() => testDeviceParam || "");
+  const [selectedTestDevice, setSelectedTestDevice] = useState<string>(() => {
+    if (testDeviceParam && platformParam) return `${testDeviceParam}-${platformParam}`;
+    if (testDeviceParam) return testDeviceParam;
+    return "";
+  });
   const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
@@ -1140,9 +1164,17 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       }
 
       // Auto-select first tested device for coverage results
-      const devices = data.testCoverage?.testedDevices;
-      if (devices?.length > 0) {
-        setSelectedTestDevice(prev => prev && devices.includes(prev) ? prev : devices[0]);
+      const devices: string[] = data.testCoverage?.testedDevices ?? [];
+      if (devices.length > 0) {
+        setSelectedTestDevice(prev => {
+          if (prev && devices.includes(prev)) return prev;
+          // Try matching by arch prefix (URL may pass bare arch like "halo")
+          if (prev) {
+            const match = devices.find(d => d.startsWith(`${prev}-`));
+            if (match) return match;
+          }
+          return devices[0];
+        });
       }
     } catch (err) {
       setError("Failed to load playbook");
@@ -1175,10 +1207,25 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbook]);
 
+  // When platform changes, switch selectedTestDevice to the matching composite key
+  useEffect(() => {
+    const devices = playbook?.testCoverage?.testedDevices;
+    if (!devices || devices.length === 0) return;
+
+    setSelectedTestDevice(prev => {
+      const currentArch = parseDeviceKey(prev).arch;
+      const newKey = `${currentArch}-${selectedPlatform}`;
+      if (devices.includes(newKey)) return newKey;
+      const match = devices.find(d => d.endsWith(`-${selectedPlatform}`));
+      return match || prev;
+    });
+  }, [selectedPlatform, playbook?.testCoverage?.testedDevices]);
+
   // In coverage mode, sync instruction device filter to the selected test device
   useEffect(() => {
     if (coverageViewActive && selectedTestDevice) {
-      const asDevice = DEVICE_IDS.includes(selectedTestDevice as Device) ? (selectedTestDevice as Device) : null;
+      const { arch } = parseDeviceKey(selectedTestDevice);
+      const asDevice = DEVICE_IDS.includes(arch as Device) ? (arch as Device) : null;
       setSelectedDevice(asDevice);
     }
   }, [coverageViewActive, selectedTestDevice]);
@@ -1363,6 +1410,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
               onImageClick={setLightboxImage}
               testCoverage={playbook?.testCoverage}
               selectedTestDevice={selectedTestDevice}
+              runId={selectedRunId}
             />
           );
         }
@@ -1662,6 +1710,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                       onRunChange={setSelectedRunId}
                       selectedTestDevice={selectedTestDevice}
                       onTestDeviceChange={setSelectedTestDevice}
+                      selectedPlatform={selectedPlatform}
                     />
                   )}
 

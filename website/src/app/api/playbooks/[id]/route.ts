@@ -125,7 +125,7 @@ function processDependencyTestTags(
     if (deviceResultsList) {
       const dr: Record<string, typeof result> = {};
       for (const d of deviceResultsList) {
-        if (d.resultsMap[testId]) dr[d.device] = d.resultsMap[testId];
+        if (d.resultsMap[testId]) dr[`${d.device}-${d.platform}`] = d.resultsMap[testId];
       }
       if (Object.keys(dr).length > 0) testInfo.deviceResults = dr;
     }
@@ -283,7 +283,7 @@ function processTestTags(
     if (deviceResultsList) {
       const dr: Record<string, typeof result> = {};
       for (const d of deviceResultsList) {
-        if (d.resultsMap[testId]) dr[d.device] = d.resultsMap[testId];
+        if (d.resultsMap[testId]) dr[`${d.device}-${d.platform}`] = d.resultsMap[testId];
       }
       if (Object.keys(dr).length > 0) testInfo.deviceResults = dr;
     }
@@ -294,7 +294,7 @@ function processTestTags(
   });
 
   const totalCodeBlocks = (content.match(/```\w*\s*\n/g) || []).length;
-  const testedDevices = deviceResultsList?.map(d => d.device) ?? [];
+  const testedDevices = deviceResultsList?.map(d => `${d.device}-${d.platform}`) ?? [];
 
   return {
     content: processed,
@@ -481,7 +481,7 @@ export async function GET(
         deviceResultsList = loaded.deviceResults;
         deviceSummaries = {};
         for (const dr of loaded.deviceResults) {
-          deviceSummaries[dr.device] = dr.summary;
+          deviceSummaries[`${dr.device}-${dr.platform}`] = dr.summary;
         }
       }
     } catch (err) {
