@@ -45,10 +45,11 @@ try {
   if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
   Write-Host "OK: Lemonade server is responding"
 
-  # Now that the server is responding, check model downloaded
-  if ($modelsJson -notmatch '"id"\s*:\s*"gpt-oss-120b-mxfp-GGUF".*?"downloaded"\s*:\s*true') {
-    throw "Model gpt-oss-120b-mxfp-GGUF is not downloaded in Lemonade. Please download it."
-  }
+  # Now that the server is responding, check model downloaded (robust JSON parse)
+  $parsed = $modelsJson | ConvertFrom-Json
+  $entry  = $parsed.data | Where-Object { $_.id -eq "gpt-oss-120b-mxfp-GGUF" } | Select-Object -First 1
+  if (-not $entry) { throw "Model gpt-oss-120b-mxfp-GGUF is not present in Lemonade /api/v1/models." }
+  if (-not $entry.downloaded) { throw "Model gpt-oss-120b-mxfp-GGUF is present but not downloaded in Lemonade. Please download it." }
   Write-Host "OK: gpt-oss-120b-mxfp-GGUF model is downloaded in Lemonade"
 
   # Chat test
