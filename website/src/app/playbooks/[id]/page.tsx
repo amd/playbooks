@@ -266,7 +266,9 @@ function HaloPreinstalledDropdown({
                 if (divClassName === 'test-coverage-block') {
                   const testId = divProps['data-test-id'] || '';
                   const testInfo = testCoverage?.tests.find(t => t.id === testId);
-                  const activeResult = (selectedTestDevice && testInfo?.deviceResults?.[selectedTestDevice]) || testInfo?.result;
+                  const activeResult = selectedTestDevice
+                    ? testInfo?.deviceResults?.[selectedTestDevice]
+                    : testInfo?.result;
                   return (
                     <TestCoverageBlock
                       testId={testId}
@@ -826,7 +828,7 @@ function TestedDeviceSelector({
   selected: string;
   onChange: (device: string) => void;
 }) {
-  if (devices.length <= 1) return null;
+  if (devices.length === 0) return null;
 
   return (
     <div className="flex items-center gap-1 p-0.5 bg-[#111] rounded-lg border border-[#2a2a2a]">
@@ -872,9 +874,10 @@ function TestCoverageStatsBar({
     : 0;
   const covClass = covPct >= 60 ? "" : covPct >= 30 ? "tc-cov-mid" : "tc-cov-low";
 
-  const activeSummary = coverage.deviceSummaries?.[selectedTestDevice] ?? coverage.resultsSummary;
   const allDevices = coverage.testedDevices ?? [];
   const testedDevices = allDevices.filter(d => d.endsWith(`-${selectedPlatform}`));
+  const activeSummary = coverage.deviceSummaries?.[selectedTestDevice]
+    ?? (testedDevices.length === 0 ? undefined : coverage.resultsSummary);
 
   return (
     <div className="tc-stats-container">
@@ -906,7 +909,7 @@ function TestCoverageStatsBar({
       {activeSummary && (
         <div className="tc-results-bar">
           <span className="tc-results-label">
-            {testedDevices.length > 1
+            {testedDevices.length > 0
               ? `${deviceNames[parseDeviceKey(selectedTestDevice).arch as Device] || parseDeviceKey(selectedTestDevice).arch}:`
               : "Results:"}
           </span>
@@ -1207,7 +1210,9 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbook]);
 
-  // When platform changes, switch selectedTestDevice to the matching composite key
+  // When platform changes, switch selectedTestDevice to the matching composite key.
+  // If no device is tested on the new platform, use a synthetic key so stale results
+  // from the previous platform are cleared rather than carried over.
   useEffect(() => {
     const devices = playbook?.testCoverage?.testedDevices;
     if (!devices || devices.length === 0) return;
@@ -1217,7 +1222,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       const newKey = `${currentArch}-${selectedPlatform}`;
       if (devices.includes(newKey)) return newKey;
       const match = devices.find(d => d.endsWith(`-${selectedPlatform}`));
-      return match || prev;
+      return match || newKey;
     });
   }, [selectedPlatform, playbook?.testCoverage?.testedDevices]);
 
@@ -1432,7 +1437,9 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       if (className === 'test-coverage-block') {
         const testId = props['data-test-id'] || '';
         const testInfo = playbook?.testCoverage?.tests.find(t => t.id === testId);
-        const activeResult = (selectedTestDevice && testInfo?.deviceResults?.[selectedTestDevice]) || testInfo?.result;
+        const activeResult = selectedTestDevice
+          ? testInfo?.deviceResults?.[selectedTestDevice]
+          : testInfo?.result;
         return (
           <TestCoverageBlock
             testId={testId}
