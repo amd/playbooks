@@ -1094,27 +1094,28 @@ function deviceFromHash(hash?: string): Device | null {
   return hashToDeviceId[hash] ?? (DEVICE_IDS.includes(hash as Device) ? hash as Device : null);
 }
 
-export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string }> }) {
+export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string; coverage?: string; run_id?: string; test_device?: string; platform?: string }> }) {
   const { id } = use(params);
-  const { device: deviceHash } = use(searchParams);
+  const { device: deviceHash, coverage: coverageParam, run_id: runIdParam, test_device: testDeviceParam, platform: platformParam } = use(searchParams);
   const backHref = deviceHash ? `/#${deviceHash}` : "/#playbooks";
 
   const [playbook, setPlaybook] = useState<Playbook | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform>(() =>
+    platformParam === "linux" ? "linux" : "windows"
+  );
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => deviceFromHash(deviceHash));
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
-  // Coverage view toggle — true = show coverage badges & sidebar; false = normal user view
-  const [coverageViewActive, setCoverageViewActive] = useState<boolean>(false);
-  // All-playbooks coverage data for the sidebar (fetched once when in coverage mode)
-  // Run selector state — null means "use latest"
+  const [coverageViewActive, setCoverageViewActive] = useState<boolean>(() => coverageParam === "true");
   const [availableRuns, setAvailableRuns] = useState<PlaybookRunOption[]>([]);
-  const [selectedRunId, setSelectedRunId] = useState<number | null>(null);
-  // Device selector for coverage results
-  const [selectedTestDevice, setSelectedTestDevice] = useState<string>("");
+  const [selectedRunId, setSelectedRunId] = useState<number | null>(() => {
+    const parsed = runIdParam ? parseInt(runIdParam, 10) : NaN;
+    return Number.isFinite(parsed) ? parsed : null;
+  });
+  const [selectedTestDevice, setSelectedTestDevice] = useState<string>(() => testDeviceParam || "");
   const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
@@ -1164,6 +1165,15 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       .then(d => { if (d.runs) setAvailableRuns(d.runs); })
       .catch(() => {/* non-critical */});
   }, [playbook?.testCoverage, availableRuns.length]);
+
+  // When arriving via URL platform param, re-apply after fetchPlaybook's auto-select
+  useEffect(() => {
+    if (!playbook || !platformParam) return;
+    if (playbook.platforms.includes(platformParam as Platform)) {
+      setSelectedPlatform(platformParam as Platform);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playbook]);
 
   // In coverage mode, sync instruction device filter to the selected test device
   useEffect(() => {
