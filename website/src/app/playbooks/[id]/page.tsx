@@ -1274,6 +1274,14 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       .catch(() => {/* non-critical */});
   }, [playbook?.testCoverage, availableRuns.length]);
 
+  // In coverage mode, sync instruction device filter to the selected test device
+  useEffect(() => {
+    if (coverageViewActive && selectedTestDevice) {
+      const asDevice = DEVICE_IDS.includes(selectedTestDevice as Device) ? (selectedTestDevice as Device) : null;
+      setSelectedDevice(asDevice);
+    }
+  }, [coverageViewActive, selectedTestDevice]);
+
   const hasDeviceContent = !!playbook?.content && /<!-- @device:[\w,]+ -->/.test(playbook.content);
 
   // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
@@ -1676,7 +1684,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                         />
                       </div>
                     )}
-                    {hasDeviceContent && (
+                    {hasDeviceContent && !coverageViewActive && (
                       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                         <span className="text-sm text-[#6b6b6b]">Device:</span>
                         <DeviceToggle
