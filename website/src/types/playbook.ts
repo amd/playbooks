@@ -142,6 +142,8 @@ export interface TestInfo {
   timeout: number;
   hidden: boolean;
   result?: TestResultInfo;
+  /** Per-device test results keyed by device/arch ID (e.g. "halo", "stx") */
+  deviceResults?: Record<string, TestResultInfo>;
 }
 
 export interface TestCoverageInfo {
@@ -154,6 +156,10 @@ export interface TestCoverageInfo {
     failed: number;
     skipped: number;
   };
+  /** Per-device summaries keyed by device/arch ID */
+  deviceSummaries?: Record<string, { passed: number; failed: number; skipped: number }>;
+  /** Ordered list of tested device/arch IDs */
+  testedDevices?: string[];
 }
 
 /** Per-playbook coverage summary used by the sidebar overview */

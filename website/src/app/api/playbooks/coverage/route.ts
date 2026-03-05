@@ -5,7 +5,7 @@ import type { PlaybookMeta, Platform, Category, PlaybookCoverageSummary } from "
 import {
   getLatestNightlyRun,
   extractFullSummary,
-  findPlaybookArtifacts,
+  findAllPlaybookArtifacts,
 } from "@/lib/github-test-results";
 
 const PLAYBOOKS_ROOT = path.join(process.cwd(), "..", "playbooks");
@@ -170,21 +170,25 @@ export async function GET() {
       if (nightly) {
         await Promise.all(
           scanned.map(async (pb) => {
-            const { windows: winArtifact, linux: linuxArtifact } = findPlaybookArtifacts(
-              nightly.artifacts,
-              pb.id
-            );
-            const artifact = winArtifact ?? linuxArtifact;
-            if (!artifact) return;
+            const allArtifacts = findAllPlaybookArtifacts(nightly.artifacts, pb.id);
+            if (allArtifacts.length === 0) return;
 
-            const summary = await extractFullSummary(artifact, token);
-            if (!summary) return;
+            let totalPassed = 0, totalFailed = 0, totalSkipped = 0;
+            await Promise.all(allArtifacts.map(async ({ artifact }) => {
+              const summary = await extractFullSummary(artifact, token);
+              if (!summary) return;
+              totalPassed += summary.passed ?? 0;
+              totalFailed += summary.failed ?? 0;
+              totalSkipped += summary.skipped ?? 0;
+            }));
 
-            resultsByPlaybook.set(pb.id, {
-              passed: summary.passed ?? 0,
-              failed: summary.failed ?? 0,
-              skipped: summary.skipped ?? 0,
-            });
+            if (totalPassed + totalFailed + totalSkipped > 0) {
+              resultsByPlaybook.set(pb.id, {
+                passed: totalPassed,
+                failed: totalFailed,
+                skipped: totalSkipped,
+              });
+            }
           })
         );
       }
