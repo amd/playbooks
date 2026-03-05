@@ -11,7 +11,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
-import type { Playbook, Platform, Device, TestCoverageInfo, TestResultInfo, PlaybookCoverageSummary } from "@/types/playbook";
+import type { Playbook, Platform, Device, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
 import { formatTime, DEVICE_IDS, deviceNames } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
@@ -463,102 +463,6 @@ function TableOfContents({
         ))}
       </ul>
     </nav>
-  );
-}
-
-/**
- * Coverage Sidebar — lists ALL playbooks with their test counts,
- * grouped by category, matching the Python _test_preview.py layout.
- * Replaces the "On this page" TOC when running in coverage mode.
- */
-function CoverageSidebar({
-  currentPlaybookId,
-  allPlaybooks,
-  onToggleView,
-}: {
-  currentPlaybookId: string;
-  allPlaybooks: PlaybookCoverageSummary[];
-  onToggleView: () => void;
-}) {
-  // Group by category
-  const grouped = useMemo(() => {
-    const map: Record<string, PlaybookCoverageSummary[]> = {};
-    for (const p of allPlaybooks) {
-      if (!map[p.category]) map[p.category] = [];
-      map[p.category].push(p);
-    }
-    return map;
-  }, [allPlaybooks]);
-
-  // Global stats
-  const totalTests = allPlaybooks.reduce((s, p) => s + p.testCount, 0);
-  const withTests = allPlaybooks.filter(p => p.testCount > 0).length;
-  const total = allPlaybooks.length;
-
-  return (
-    <nav className="cov-sidebar">
-      {/* Header */}
-      <div className="cov-sidebar-header">
-        <svg className="cov-sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-        </svg>
-        <span>Test Coverage</span>
-      </div>
-
-      {/* Global stats badges */}
-      <div className="cov-global-stats">
-        <span className="cov-global-badge cov-global-badge-green">{totalTests} total tests</span>
-        <span className={`cov-global-badge ${withTests < total ? "cov-global-badge-warn" : "cov-global-badge-green"}`}>
-          {withTests}/{total} playbooks tested
-        </span>
-      </div>
-
-      {/* Playbook list grouped by category */}
-      <div className="cov-pb-list">
-        {Object.entries(grouped).map(([category, playbooks]) => (
-          <div key={category}>
-            <div className="cov-pb-section">{category}</div>
-            {playbooks.map(p => (
-              <Link
-                key={p.id}
-                href={`/playbooks/${p.id}`}
-                className={`cov-pb-item ${p.id === currentPlaybookId ? "cov-pb-active" : ""}`}
-              >
-                <span className={`cov-pb-dot ${p.testCount > 0 ? "cov-pb-dot-tested" : "cov-pb-dot-untested"}`} />
-                <span className="cov-pb-title" title={p.title}>{p.title}</span>
-                <span className={`cov-pb-count ${p.testCount > 0 ? "cov-pb-count-has" : "cov-pb-count-none"}`}>
-                  {p.testCount}
-                </span>
-              </Link>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      {/* Toggle to user view */}
-      <button className="cov-toggle-btn" onClick={onToggleView}>
-        <svg className="cov-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-        Switch to User View
-      </button>
-    </nav>
-  );
-}
-
-/**
- * Small floating toggle shown in the TOC sidebar position when in user-view mode
- * to allow switching back to coverage mode.
- */
-function CoverageReturnToggle({ onToggle }: { onToggle: () => void }) {
-  return (
-    <button className="cov-return-toggle" onClick={onToggle}>
-      <svg className="cov-return-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      Show Coverage
-    </button>
   );
 }
 
@@ -1206,7 +1110,6 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   // Coverage view toggle — true = show coverage badges & sidebar; false = normal user view
   const [coverageViewActive, setCoverageViewActive] = useState<boolean>(false);
   // All-playbooks coverage data for the sidebar (fetched once when in coverage mode)
-  const [coveragePlaybooks, setCoveragePlaybooks] = useState<PlaybookCoverageSummary[]>([]);
   // Run selector state — null means "use latest"
   const [availableRuns, setAvailableRuns] = useState<PlaybookRunOption[]>([]);
   const [selectedRunId, setSelectedRunId] = useState<number | null>(null);
@@ -1251,18 +1154,6 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   useEffect(() => {
     fetchPlaybook(selectedRunId);
   }, [fetchPlaybook, selectedRunId]);
-
-  // Fetch all-playbooks coverage summary when we detect coverage mode
-  useEffect(() => {
-    if (!playbook?.testCoverage) return;
-    const url = selectedRunId
-      ? `/api/playbooks/coverage?run_id=${selectedRunId}`
-      : "/api/playbooks/coverage";
-    fetch(url)
-      .then(r => r.json())
-      .then((data: PlaybookCoverageSummary[]) => setCoveragePlaybooks(data))
-      .catch(() => {/* ignore */});
-  }, [playbook?.testCoverage, selectedRunId]);
 
   // Fetch available runs once coverage data is detected (token is configured)
   useEffect(() => {
@@ -1715,28 +1606,37 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
               {/* Main content area with TOC / Coverage sidebar */}
               <div className={`relative flex gap-8 ${playbook.testCoverage && !coverageViewActive ? "tc-user-view" : ""}`}>
                 {/* Sidebar - Desktop only */}
-                <aside className={`hidden xl:block flex-shrink-0 ${playbook.testCoverage && coverageViewActive ? "w-64" : "w-56"}`}>
+                <aside className="hidden xl:block flex-shrink-0 w-56">
                   <div className="sticky top-24">
-                    {playbook.testCoverage && coverageViewActive ? (
-                      <CoverageSidebar
-                        currentPlaybookId={id}
-                        allPlaybooks={coveragePlaybooks}
-                        onToggleView={() => setCoverageViewActive(false)}
+                    {tocItems.length > 0 && (
+                      <TableOfContents 
+                        items={tocItems} 
+                        activeId={activeHeading}
+                        onLinkClick={handleTocClick}
                       />
-                    ) : (
-                      <>
-                        {tocItems.length > 0 && (
-                          <TableOfContents 
-                            items={tocItems} 
-                            activeId={activeHeading}
-                            onLinkClick={handleTocClick}
-                          />
+                    )}
+                    {playbook.testCoverage && (
+                      <button
+                        className="cov-return-toggle"
+                        onClick={() => setCoverageViewActive(prev => !prev)}
+                      >
+                        {coverageViewActive ? (
+                          <>
+                            <svg className="cov-return-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            User View
+                          </>
+                        ) : (
+                          <>
+                            <svg className="cov-return-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Show Coverage
+                          </>
                         )}
-                        {/* Show return toggle when coverage data exists but user switched to user view */}
-                        {playbook.testCoverage && !coverageViewActive && (
-                          <CoverageReturnToggle onToggle={() => setCoverageViewActive(true)} />
-                        )}
-                      </>
+                      </button>
                     )}
                   </div>
                 </aside>
