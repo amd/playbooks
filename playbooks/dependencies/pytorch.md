@@ -21,7 +21,8 @@ python -m pip install --force-reinstall --no-cache-dir --index-url https://repo.
 <!-- @device:stx -->
 <!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
 ```bash
-pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ torch torchvision torchaudio
+python -m pip install --upgrade pip
+python -m pip install --force-reinstall --no-cache-dir --index-url https://repo.amd.com/rocm/whl/gfx1150/ torch torchvision torchaudio
 ```
 <!-- @test:end -->
 <!-- @device:end -->
