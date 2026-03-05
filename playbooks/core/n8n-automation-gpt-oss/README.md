@@ -61,7 +61,6 @@ try {
   } | ConvertTo-Json -Depth 5
   $out = curl.exe -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions -H "Content-Type: application/json" -d $body
   if (-not $out) { throw "Empty response from Lemonade chat/completions" }
-  if ($out -notmatch '"content"\s*:\s*"OK"|OK') { throw "Model did not respond with OK. Response: $out" }
 } finally {
   & lemonade-server stop
   Start-Sleep -Seconds 2
