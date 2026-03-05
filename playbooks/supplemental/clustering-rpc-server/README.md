@@ -33,7 +33,49 @@ sudo apt install git cmake python3 python3-pip
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-<!-- @setup:memory-config -->
+<!-- @os:windows -->
+### Memory configuration for running large models
+
+On Windows, to run larger models that require higher memory, we need to use the AMD Variable Graphics Memory (iGPU VRAM) allocation.
+
+This can be done by opening AMD Software: Adrenalin Edition control panel and navigating to: `Performance > Tuning > AMD Variable Graphics Memory`. Set the value to **96 GB**. Please reboot the system for the changes to take effect.
+
+<!-- @os:end -->
+
+<!-- @os:linux -->
+### Memory configuration for running large models
+
+On Linux, ROCm utilizes a shared system memory pool, and this pool is configured by default to half the system memory.
+
+This amount can be increased by changing the kernel's Translation Table Manager (TTM) page setting, with the following instructions. AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5GB)
+
+* Install the pipx utility and add the path for pipx installed wheels into the system search path.
+
+  ```bash
+  sudo apt install pipx
+  pipx ensurepath
+  ```
+
+* Install the amd-debug-tools wheel from PyPi.
+  ```bash
+  pipx install amd-debug-tools
+  ```
+
+* Run the amd-ttm tool to query the current settings for shared memory.
+  ```bash
+  amd-ttm
+  ```
+
+* Reconfigure shared memory settings to **120 GB**:
+  ```bash
+  amd-ttm --set 120
+  ```
+
+* Reboot the system for changes to take effect.
+
+For `amd-ttm` usage examples, see the [ROCm documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/docs-7.0.2/docs/install/installryz/native_linux/install-ryzen.html#amd-ttm-usage-examples).
+
+<!-- @os:end -->
 
 ## Installing llama.cpp
 
@@ -254,10 +296,17 @@ At load time, llama.cpp shards the model across both nodes. Once loaded, inferen
 ### Step 1: Start the RPC Server (Machine 2)
 
 On Machine 2, start the RPC server to expose its GPU resources to the controller:
-
+<!-- @os:linux -->
 ```bash
 ./rpc-server -p 50053 -c --host 0.0.0.0
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+.\rpc-server.exe -p 50053 -c --host 0.0.0.0
+```
+<!-- @os:end -->
 
 | Flag | Purpose |
 |------|---------|
@@ -290,7 +339,7 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Note**: Run this command in Terminal.
+> **Note**: Run this command in Terminal (Powershell).
 
 ```powershell
 .\llama-cli.exe `
@@ -326,7 +375,7 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Note**: Run this command in Terminal.
+> **Note**: Run this command in Terminal (Powershell).
 
 ```powershell
 .\llama-server.exe `
