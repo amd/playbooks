@@ -335,7 +335,7 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `hostname -I | awk '{print $1}'` to find its local IP address. Use the address on your local network (typically starting with `192.168.` or `10.`).
+> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `hostname -I | awk '{print $1}'` to find its local IP address.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -351,8 +351,13 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `ipconfig | findstr /C:"IPv4"` in a terminal to find its local IP address. Use the address on your local network (typically starting with `192.168.` or `10.`).
+> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `ipconfig | findstr /C:"IPv4"` in Terminal (Powershell) to find its local IP address.
+
 <!-- @os:end -->
+
+Once running, `llama-cli` displays model loading progress and enters an interactive prompt where you can chat directly with the model:
+
+![llama-cli running GLM 4.7 across two nodes](assets/llama-cli-example.png)
 
 #### llama-server
 
@@ -371,7 +376,7 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `hostname -I | awk '{print $1}'` to find its local IP address. Use the address on your local network (typically starting with `192.168.` or `10.`).
+> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `hostname -I | awk '{print $1}'` to find its local IP address.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -389,10 +394,20 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `ipconfig | findstr /C:"IPv4"` in a terminal to find its local IP address. Use the address on your local network (typically starting with `192.168.` or `10.`).
+> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `ipconfig | findstr /C:"IPv4"` in Terminal (Powershell) to find its local IP address.
 <!-- @os:end -->
 
-Once started, access the web UI at `http://<HOST_IP>:8081`.
+Once started, open `http://<HOST_IP>:8081` in your browser to access the built-in web UI. This provides a browser-based chat interface for interacting with the model:
+
+![llama-server web UI running GLM 4.7 across two nodes](assets/llama-server-example.png)
+
+<!-- @os:linux -->
+> **Finding `<HOST_IP>`**: On Machine 1, run `hostname -I | awk '{print $1}'` to find its local IP address.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Finding `<HOST_IP>`**: On Machine 1, run `ipconfig | findstr /C:"IPv4"` in Terminal (Powershell) to find its local IP address.
+<!-- @os:end -->
 
 #### Parameter Reference
 
