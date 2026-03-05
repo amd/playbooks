@@ -28,25 +28,42 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 lemonade-server --version
 ```
 <!-- @test:end -->
-<!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=lemonade-server-start timeout=900 hidden=True -->
+<!-- @test:id=lemonade-chat-gpt-oss-120b timeout=1200 hidden=True -->
 ```powershell
-$p = Start-Process -FilePath "lemonade-server" -Argumentlist "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
+$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
 try {
-  $ok = $false
+  # Wait for server to come up
+  $modelsJson = $null
   for ($i=0; $i -lt 120; $i++) {
-    $resp = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
-    if ($LASTEXITCODE -eq 0 -and $resp) { $ok = $true; break }
+    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
+    if ($modelsJson) { break }
     Start-Sleep -Seconds 1
   }
-  if (-not $ok) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
+  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
   Write-Host "OK: Lemonade server is responding"
+
+  # Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
+  $parsed = $modelsJson | ConvertFrom-Json
+  $entry  = $parsed.data | Where-Object { $_.id -eq "gpt-oss-120b-mxfp-GGUF" } | Select-Object -First 1
+  if (-not $entry) { throw "Model gpt-oss-120b-mxfp-GGUF is not present in Lemonade /api/v1/models." }
+  if (-not $entry.downloaded) { throw "Model gpt-oss-120b-mxfp-GGUF is present but not downloaded in Lemonade. Please download it." }
+  Write-Host "OK: gpt-oss-120b-mxfp-GGUF model is downloaded in Lemonade"
+
+  # Model chat test
+  $body = @{
+    model = "gpt-oss-120b-mxfp-GGUF"
+    messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+    temperature = 0
+    max_tokens = 32
+  } | ConvertTo-Json -Depth 5
+  $out = curl.exe -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+  if (-not $out) { throw "Empty response from Lemonade chat/completions" }
 } finally {
   & lemonade-server stop
   Start-Sleep -Seconds 2
-  if ($p -and !$p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
 }
 ```
 <!-- @test:end -->
