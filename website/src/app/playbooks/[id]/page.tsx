@@ -41,17 +41,40 @@ function normalizeLanguage(lang: string): string {
   return langMap[lang] || lang;
 }
 
+const TERMINAL_LANGUAGES = new Set([
+  "bash", "sh", "shell", "zsh", "powershell", "ps1", "cmd", "bat",
+  "console", "terminal", "prompt",
+]);
+
+const LANGUAGE_EXTENSIONS: Record<string, string> = {
+  python: "py", py: "py",
+  c: "c", cpp: "cpp", "c++": "cpp", javascript: "js", js: "js",
+  typescript: "ts", ts: "ts", json: "json", yaml: "yml", yml: "yml",
+  html: "html", css: "css", sql: "sql", rust: "rs", go: "go", java: "java",
+};
+
+function downloadCode(code: string, language?: string) {
+  const ext = (language && LANGUAGE_EXTENSIONS[language.toLowerCase()]) || "txt";
+  const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `snippet.${ext}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 /**
- * Code block component with copy-to-clipboard functionality and syntax highlighting
+ * Code block component with copy-to-clipboard and download functionality, plus syntax highlighting
  */
 function CodeBlock({ children, language }: { children?: React.ReactNode; language?: string }) {
   const [copied, setCopied] = useState(false);
   const preRef = useRef<HTMLPreElement>(null);
 
-  // Extract the code string from children
   const codeString = useMemo(() => {
     if (typeof children === "string") return children;
-    // If children is a React element (code tag), extract its children
     if (children && typeof children === "object" && "props" in children) {
       const childElement = children as React.ReactElement<{ children?: React.ReactNode }>;
       const codeChildren = childElement.props?.children;
@@ -71,29 +94,50 @@ function CodeBlock({ children, language }: { children?: React.ReactNode; languag
     }
   }, [codeString]);
 
-  // Check if we should use syntax highlighting
+  const handleDownload = useCallback(() => {
+    const code = codeString || preRef.current?.textContent || "";
+    downloadCode(code, language);
+  }, [codeString, language]);
+
   const normalizedLang = language ? normalizeLanguage(language.toLowerCase()) : "";
   const shouldHighlight = normalizedLang && HIGHLIGHTED_LANGUAGES.has(language?.toLowerCase() || "");
+  const isTerminal = !language || TERMINAL_LANGUAGES.has(language.toLowerCase());
 
   return (
     <div className="code-block-wrapper">
-      <button
-        className="code-copy-button"
-        onClick={handleCopy}
-        aria-label={copied ? "Copied!" : "Copy code"}
-        title={copied ? "Copied!" : "Copy code"}
-      >
-        {copied ? (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-        ) : (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
+      <div className="code-buttons-group">
+        <button
+          className="code-action-button"
+          onClick={handleCopy}
+          aria-label={copied ? "Copied!" : "Copy code"}
+          title={copied ? "Copied!" : "Copy code"}
+        >
+          {copied ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          )}
+        </button>
+        {!isTerminal && (
+          <button
+            className="code-action-button"
+            onClick={handleDownload}
+            aria-label="Download code"
+            title="Download code"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
         )}
-      </button>
+      </div>
       {shouldHighlight && codeString ? (
         <SyntaxHighlighter
           language={normalizedLang}
