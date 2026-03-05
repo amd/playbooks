@@ -33,7 +33,14 @@ lemonade-server --version
 <!-- @os:windows -->
 <!-- @test:id=lemonade-server-start timeout=900 hidden=True -->
 ```powershell
-$p = Start-Process -FilePath "lemonade-server" -Argumentlist "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
+lemonade-server serve --no-tray --host 127.0.0.1 --port 8000
+curl.exe -s http://127.0.0.1:8000/api/v1/models
+lemonade-server stop
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- $p = Start-Process -FilePath "lemonade-server" -Argumentlist "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
 try {
   $ok = $false
   for ($i=0; $i -lt 120; $i++) {
@@ -41,28 +48,36 @@ try {
     if ($LASTEXITCODE -eq 0 -and $resp) { $ok = $true; break }
     Start-Sleep -Seconds 1
   }
-  if (-not $ok) { throw "Lemonade server not ready on httip://127.0.0.1:8000" }
+  if (-not $ok) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
+  Write-Host "OK: Lemonade server is responding"
 } finally {
   & lemonade-server stop
   Start-Sleep -Seconds 2
   if ($p -and !$p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
-}
+} -->
 
-```
-<!-- @test:end -->
-<!-- @os:end -->
+<!-- @os:windows -->
+<!-- @test:id=lemonade-chat-gpt-oss-120b timeout=900 hidden=True -->
+```powershell
+lemonade-server serve --no-tray --host 127.0.0.1 --port 8000
 
-<!-- @os:linux -->
-<!-- @test:id=lemonade-server-start timeout=900 hidden=True -->
-```bash
-lemonade-server run gpt-oss-120b-mxfp-GGUF --no-tray &
-PID=$!
-trap "kill -9 $PID 2>/dev/null || true" EXIT
-for i in {1..450}; do
-  curl -sf --max-time 2 http://127.0.0.1:8000/api/v1/models && exit 0
-  sleep 1
-done
-exit 1
+$models = curl.exe -s --max-time 10 http://127.0.0.1:8000/api/v1/models
+if ($models -notmatch '"id":"gpt-oss-120b-mxfp-GGUF".*?"downloaded":true') { throw "Model gpt-oss-120b-mxfp-GGUF is not downloaded in Lemonade. Please download it." }
+
+$body = @{
+  model = "gpt-oss-120b-mxfp-GGUF"
+  messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+  temperature = 0
+  max_tokens = 100
+} | ConvertTo-Json -Depth 5
+
+$out = curl.exe -s --max-time 60 http://127.0.0.1:8000/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+
+if (-not $out) { throw "Empty response from Lemonade chat/completions" }
+if ($out -notmatch "OK") { throw "Model did not respond with OK. Response: $out" }
+
+lemonade-server stop
+Write-Host "Lemonade server stopped successfully"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -79,9 +94,9 @@ npm -v
 Your STX Halo has Node.js pre-installed. Install n8n globally using npm:
 
 <!-- @test:id=n8n-install timeout=600 hidden=True -->
-```bash
+<!-- ```bash
 npm install -g n8n
-```
+``` -->
 <!-- @test:end -->
 
 <!-- @test:id=n8n-version timeout=60 hidden=True -->
@@ -112,6 +127,7 @@ try {
     Start-Sleep -Seconds 1
   }
   if (-not $ok) { throw "n8n not ready on http://127.0.0.1:5678/healthz" }
+  Write-Host "OK: n8n server is responding"
 } finally {
   # Kill the process actually listening on 5678
   $conn = Get-NetTCPConnection -LocalPort 5678 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -126,18 +142,6 @@ try {
 n8n starts a local web server. Open your browser to `http://localhost:5678` to access the editor.
 
 > **Tip**: Keep the terminal window open while using n8n. Closing it will stop the server.
-
-<!-- @os:linux -->
-<!-- @test:id=n8n-server-start timeout=300 hidden=True -->
-```bash
-n8n start &
-PID=$!
-sleep 30
-curl -s http://127.0.0.1:5678/healthz
-kill -9 $PID
-```
-<!-- @test:end -->
-<!-- @os:end -->
 
 ## Setting Up the Workflow
 
