@@ -158,7 +158,7 @@ The real power of a local AI server is that any application can connect to it us
 
 ### Step 4: Start the Server
 
-If the server is not already running from the previous section, start it using the following:
+If the server is not already running from the previous section, launch it by double-clicking on the Lemonade app or start it from the command line using the following:
 
 ```
 lemonade-server serve
@@ -340,7 +340,7 @@ These same patterns scale to any application such as chatbots, code assistants, 
 
 ## Running Models on the NPU
 
-If you have an **AMD Ryzen AI 300 series** (or newer) processor, your PC has a built-in **Neural Processing Unit (NPU)**, a dedicated chip designed specifically for AI workloads. Running models on the NPU is more power-efficient than using the GPU, which makes it ideal for background AI tasks, longer sessions, and battery-powered use.
+If you have a Ryzen AI 300/400/Max 300 series or Z2 Extreme, your device has a built-in **Neural Processing Unit (NPU)**, a dedicated chip designed specifically for AI workloads. Running models on the NPU is more power-efficient than using the GPU, which makes it ideal for background AI tasks, longer sessions, and battery-powered use.
 
 Lemonade supports three NPU execution modes, all transparent behind the same OpenAI API:
 
@@ -358,7 +358,7 @@ Lemonade supports three NPU execution modes, all transparent behind the same Ope
 
 ### Step 8: Run a Hybrid Model
 
-Hybrid models split work between the NPU and iGPU for a good balance of speed and efficiency. Try one:
+Hybrid models split work between the NPU and iGPU for a good balance of speed and efficiency. In the Lemonade App, select `Qwen3-4B-Hybrid` from the `Ryzen AI LLM` list or run it using the following comment:
 
 ```
 lemonade-server run Qwen3-4B-Hybrid
@@ -370,7 +370,7 @@ Lemonade detects your NPU automatically and uses the right backend.
 
 ### Step 9: Run an FLM Model
 
-FastFlowLM (FLM) models are specifically optimized for AMD's XDNA2 NPU architecture and can be very fast for their size:
+FastFlowLM (FLM) models are specifically optimized for AMD's XDNA2 NPU architecture and can be very fast for their size. For example, select `Gemma3-4b-it-FLM` from the `FastFlowLM NPU` list or use the following command:
 
 ```
 lemonade-server run Gemma3-4b-it-FLM
@@ -378,11 +378,13 @@ lemonade-server run Gemma3-4b-it-FLM
 
 FLM models include some of the most popular architectures (Gemma 3, Qwen 3, Llama 3, and DeepSeek R1) and range from under 1 GB to over 13 GB.
 
+<!-- @os:windows -->
 > **Tip:** For best NPU performance, enable turbo mode:
 > ```
 > cd C:\Windows\System32\AMD
 > .\xrt-smi configure --pmode turbo
 > ```
+<!-- @os:end -->
 
 ### Switching Models
 
