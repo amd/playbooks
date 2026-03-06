@@ -4,9 +4,17 @@
   "description": "Learn to run powerful language models on your PC with PyTorch and ROCm to summarize documents quickly and easily",
   "time": 30,
   "platforms": ["linux", "windows"],
+  "tested_platforms": {
+    "linux": [],
+    "windows": ["halo"]
+  },
+  "required_platforms": {
+    "windows": ["halo"]
+  },
   "difficulty": "beginner",
   "isNew": true,
   "isFeatured": false,
+  "developed": true,
   "published": true,
   "tags": ["pytorch", "rocm", "llm", "inference", "summarization"],
   "coverImage": "assets/cover_img.jpeg"

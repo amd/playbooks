@@ -24,6 +24,32 @@
  * 
  * Content outside of these tags is shown on all platforms.
  * 
+ * ## Device-Specific Content Tags
+ * 
+ * Use `@device` tags for device-specific instructions. Supports comma-separated
+ * values to target multiple devices:
+ * 
+ * ```markdown
+ * <!-- @device:halo -->
+ * STX Halo-only instructions
+ * <!-- @device:end -->
+ * 
+ * <!-- @device:halo,stx -->
+ * Instructions for both Halo and STX Point
+ * <!-- @device:end -->
+ * 
+ * <!-- @device:rx7900xt,rx9070xt -->
+ * Instructions for discrete Radeon GPUs
+ * <!-- @device:end -->
+ * 
+ * <!-- @device:all -->
+ * Instructions for all devices
+ * <!-- @device:end -->
+ * ```
+ * 
+ * Valid device IDs: halo, stx, krk, rx7900xt, rx9070xt.
+ * Content outside of `@device` tags is shown on all devices.
+ * 
  * ## Pre-installed Software Dropdowns
  * 
  * For software pre-installed on AMD Halo Developer Platform, use the `@require` tag
@@ -45,8 +71,20 @@
  */
 
 export type Platform = "windows" | "linux";
+export type Architecture = "halo" | "krk";
+export type Device = "halo" | "stx" | "krk" | "rx7900xt" | "rx9070xt";
 export type Category = "core" | "supplemental" | "backup";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
+
+export const DEVICE_IDS: Device[] = ["halo", "stx", "krk", "rx7900xt", "rx9070xt"];
+
+export const deviceNames: Record<Device, string> = {
+  halo: "STX Halo",
+  stx: "STX Point",
+  krk: "Krackan Point",
+  rx7900xt: "RX 7900 XT",
+  rx9070xt: "RX 9070 XT",
+};
 
 export interface PlaybookMeta {
   /** Unique identifier matching the folder name */
@@ -63,6 +101,9 @@ export interface PlaybookMeta {
   
   /** Supported platforms */
   platforms: Platform[];
+
+  /** Tested platforms per OS (used by CI to select runners) */
+  tested_platforms?: Partial<Record<Platform, Architecture[]>>;
   
   /** Whether this is a new playbook */
   isNew?: boolean;
@@ -89,6 +130,56 @@ export interface PlaybookMeta {
   coverImage?: string;
 }
 
+export interface TestResultInfo {
+  success: boolean;
+  skipped: boolean;
+  duration: number;
+  error: string;
+}
+
+export interface TestInfo {
+  id: string;
+  timeout: number;
+  hidden: boolean;
+  result?: TestResultInfo;
+  /** Per-device test results keyed by device/arch ID (e.g. "halo", "stx") */
+  deviceResults?: Record<string, TestResultInfo>;
+}
+
+export interface TestCoverageInfo {
+  tests: TestInfo[];
+  totalCodeBlocks: number;
+  visibleTestCount: number;
+  hiddenTestCount: number;
+  resultsSummary?: {
+    passed: number;
+    failed: number;
+    skipped: number;
+  };
+  /** Per-device summaries keyed by device/arch ID */
+  deviceSummaries?: Record<string, { passed: number; failed: number; skipped: number }>;
+  /** Ordered list of tested device/arch IDs */
+  testedDevices?: string[];
+}
+
+/** Per-playbook coverage summary used by the sidebar overview */
+export interface PlaybookCoverageSummary {
+  id: string;
+  title: string;
+  category: Category;
+  platforms: Platform[];
+  testCount: number;
+  hiddenCount: number;
+  visibleTestCount: number;
+  totalCodeBlocks: number;
+  hasResults: boolean;
+  resultsSummary?: {
+    passed: number;
+    failed: number;
+    skipped: number;
+  };
+}
+
 export interface Playbook extends PlaybookMeta {
   /** Category derived from folder structure */
   category: Category;
@@ -98,6 +189,9 @@ export interface Playbook extends PlaybookMeta {
   
   /** Raw markdown content from README.md */
   content?: string;
+
+  /** Test coverage data — only present when running in coverage mode */
+  testCoverage?: TestCoverageInfo;
 }
 
 /**
