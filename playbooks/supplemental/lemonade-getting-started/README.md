@@ -48,7 +48,7 @@ Before we run a model, it is worth understanding *why* things are set up this wa
 | **Simplified integration** | Apps talk to one HTTP API instead of dealing with hardware-specific C++ or Python libraries. |
 | **Shared models** | A single loaded model can serve multiple apps at once, no duplicate copies eating your RAM. |
 | **Cloud-to-local portability** | Code written for OpenAI's cloud API works with Lemonade by changing one URL. |
-| **Separation of concerns** | Model management, streaming, and fault tolerance are handled by the server so app developers can focus on their app. |
+| **Separation of concerns** | Model management, streaming, and fault tolerance are handled by the server so developers can focus on their app. |
 
 ### The OpenAI API Standard
 
@@ -366,7 +366,7 @@ lemonade-server run Qwen3-4B-Hybrid
 
 Lemonade detects your NPU automatically and uses the right backend.
 
-> **What is happening under the hood?** When you send a message, the NPU processes your entire prompt in parallel (this is called "prefill"). Then the iGPU takes over to generate the response one token at a time. This hybrid approach plays to each chip's strengths.
+> **What is happening under the hood?** When you send a message, the NPU processes your entire prompt in parallel (this is called "prefill"). Then the iGPU takes over to generate the response one token at a time (this is called "decode"). This hybrid approach plays to each chip's strengths.
 
 ### Step 9: Run an FLM Model
 
@@ -417,12 +417,12 @@ response = client.chat.completions.create(
 
 You have a local AI server running on your own hardware, here is where to go next:
 
-1. **🔌 Connect your favorite apps**: Lemonade works out of the box with [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/), and [many more](https://lemonade-server.ai/marketplace).
+1. **Connect your favorite apps**: Lemonade works out of the box with [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/), and [many more](https://lemonade-server.ai/marketplace).
 
-2. **📚 Browse more models**: Explore the full [model library](https://lemonade-server.ai/docs/server/server_models/) to find models optimized for coding, reasoning, vision, and more. Use the Lemonade App or `lemonade-server list` to see what is available.
+2. **Browse more models**: Explore the full [model library](https://lemonade-server.ai/docs/server/server_models/) to find models optimized for coding, reasoning, vision, and more. Use the Lemonade App or `lemonade-server list` to see what is available.
 
-3. **⚡ Unlock ROCm GPU acceleration**: If you have a supported AMD GPU, switch to the ROCm backend: `lemonade-server serve --llamacpp rocm`. See [supported AMD GPUs](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
+3. **Unlock ROCm GPU acceleration**: If you have a supported AMD GPU, switch to the ROCm backend: `lemonade-server serve --llamacpp rocm`. See [supported AMD GPUs](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
 
-4. **🛠️ Read the full API spec**: Lemonade supports chat completions, embeddings, audio transcription, image generation, text-to-speech, and more. See the [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) for every endpoint.
+4. **Read the full API spec**: Lemonade supports chat completions, embeddings, audio transcription, image generation, text-to-speech, and more. See the [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) for every endpoint.
 
-5. **🤝 Contribute**: Lemonade is open source. Check out the [contribution guide](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) and look for [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+5. **Contribute**: Lemonade is open source. Check out the [contribution guide](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) and look for [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
