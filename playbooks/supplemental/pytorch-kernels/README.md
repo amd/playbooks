@@ -525,6 +525,12 @@ tensor(0., device='cuda:0')
 
 ## Next Steps
 
-- Each partial product A[row][k]*B[k][col] is independent; partial sums can be computed by separate threads then atomically reduced
+Once you understand the naive matmul kernel, you can explore more advanced GPU strategies:
+- Each product A[row][k] * B[k][col] is independent. Instead of one thread computing the full dot product, multiple threads can compute partial sums and then reduce them together.
 
-- One thread computes 1 output; it could compute a 4×4 tile of outputs, reusing the same loaded A/B values across 16 independent accumulations in registers
+- Instead of computing one output element, a thread can compute a tile of outputs (e.g., 4×4). This allows reuse of loaded A and B values across multiple accumulations, improving arithmetic intensity.
+
+You may take one step further and implement these real-world GPU workloads:
+- **2D Convolution (Image Filtering)**: A small filter (kernel) slides across an image, computing each output pixel from a weighted sum of neighboring pixels. This introduces **stencil computations and shared memory tiling**, where threads reuse overlapping image regions to reduce global memory access.
+
+- **Softmax Function**: Softmax converts a vector of numbers into probabilities that sum to 1, commonly used in neural network outputs. Implementing it efficiently on GPU introduces **parallel reductions and numerical stability techniques** while processing large vectors.
