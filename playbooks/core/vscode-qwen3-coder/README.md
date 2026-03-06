@@ -136,18 +136,18 @@ lms server stop
 
 After generating the website, you can continue to work with Cline to improve the website. Two possible improvements are:
 
-* **Documentation:** Prompting the agent with `Add a README` is all that is needed for the agent to generate a `README.md` file that documents the website.
-* **Animation:** Prompt the model with `Add an animation that visually represents a large language model running on a laptop.` to generate an animation to the website.   
+- **Documentation**: Prompting the agent with `Add a README` is all that is needed for the agent to generate a `README.md` file that documents the website.
+- **Animation**: Prompt the model with `Add an animation that visually represents a large language model running on a laptop.` to generate an animation to the website.
 
 We encourage the reader to try to generate other applications using this setup. Below are some fun examples we have tried:
 
-* **Retro Arcade Games:** Try some other prompts. It can also be fun for the agent to create retro-style games in Python using the `PyGame` package with the following prompt:
+- **Retro Arcade Games**: Try some other prompts. It can also be fun for the agent to create retro-style games in Python using the `PyGame` package with the following prompt:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-* **Data Analysis:** One area where coding agents are particularly useful is that of scripting and data analysis. This is a prompt to showcase the local models ability to generate data analysis software for stock price visualization:
+- **Data Analysis**: One area where coding agents are particularly useful is that of scripting and data analysis. This is a prompt to showcase the local models ability to generate data analysis software for stock price visualization:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
