@@ -43,6 +43,14 @@ n8n starts a local web server. Open your browser to `http://localhost:5678` to a
 
 > **Tip**: Keep the terminal window open while using n8n. Closing it will stop the server.
 
+## Launching Lemonade
+
+If Lemonade is not already running, launch it from the terminal:
+
+```bash
+lemonade-server run gpt-oss-120b-mxfp4-GGUF --llamacpp rocm
+```
+
 ## Setting Up the Workflow
 
 ### Step 1: Sign Up or Log In to n8n
