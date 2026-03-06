@@ -40,6 +40,20 @@ function DifficultyBadge({ difficulty }: { difficulty?: string }) {
   );
 }
 
+function PreinstalledBadge() {
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-semibold rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+      title="Software for this playbook comes pre-installed on STX Halo, so you can jump straight in"
+    >
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      Pre-installed
+    </span>
+  );
+}
+
 interface PlaybooksSectionProps {
   activeDevice?: string;
 }
@@ -72,6 +86,7 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
   const regularPlaybooks = playbooks.filter((p) => !p.isFeatured);
   const displayedPlaybooks = showAll ? regularPlaybooks : regularPlaybooks.slice(0, 6);
 
+  const isHaloSelected = activeDevice === "stx-halo";
   const deviceParam = activeDevice && activeDevice !== "all" ? `?device=${deviceToHash[activeDevice] || activeDevice}` : "";
   const playbookHref = (id: string) => `/playbooks/${id}${deviceParam}`;
 
@@ -167,6 +182,9 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
                             New
                           </span>
                         )}
+                        {isHaloSelected && featuredPlaybook.category === "core" && (
+                          <PreinstalledBadge />
+                        )}
                         <DifficultyBadge difficulty={featuredPlaybook.difficulty} />
                         <div className="flex gap-1">
                           {featuredPlaybook.platforms.map((p) => (
@@ -217,6 +235,9 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
                         </svg>
                       </div>
                       <div className="flex items-center gap-1.5">
+                        {isHaloSelected && playbook.category === "core" && (
+                          <PreinstalledBadge />
+                        )}
                         {playbook.isNew && (
                           <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold rounded border border-emerald-500/30">
                             New
