@@ -1,5 +1,7 @@
 ## Overview
 
+![alt text](assets/unsloth.png)
+
 Unsloth is a high-efficiency LLM fine-tuning framework designed to make advanced model customization accessible on modern hardware.
 
 It streamlines supervised fine-tuning (SFT), parameter-efficient fine-tuning (PEFT), QLoRA, and reinforcement learning approaches such as GRPO—allowing developers to adapt powerful foundation models to domain-specific tasks without large-scale infrastructure.
@@ -28,7 +30,6 @@ By combining efficiency, simplicity, and reproducibility, Unsloth bridges the ga
 
 
 ## Installing unsloth
-
 ```bash
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth" unsloth-zoo
 pip install bitsandbytes
@@ -70,6 +71,8 @@ model, tokenizer = FastModel.from_pretrained(
     # token = "YOUR_HF_TOKEN", # HF Token for gated models
 )
 ```
+Unsloth welcome message and Loading the model weights:
+![alt text](assets/welcome.png)
 ### Load model with unsloth in 4bit
 4bit dynamic quants is for superior accuracy and low memory use. \
 If you want to use quantized model, like 4bit model, you can set 'load_in_4bit' as True to enable the quantized model, and use 'unsloth/gemma-3n-E4B-it-unsloth-bnb-4bit', then it will save graphic memory.
