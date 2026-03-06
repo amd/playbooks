@@ -6,7 +6,7 @@
   "platforms": ["linux", "windows"],
   "tested_platforms": {
     "linux": [],
-    "windows": ["halo", "krk"]
+    "windows": ["halo"]
   },
   "required_platforms": {
     "windows": ["halo"]
