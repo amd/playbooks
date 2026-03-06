@@ -10,72 +10,30 @@ In this playbook, you'll use Lemonade to run models locally on your machine. The
 
 By the end of this playbook you will be able to:
 
-1. **Install Lemonade Server** and verify it is running.
-2. **Download and chat with an LLM** using a single command.
-3. **Explore the web UI** and try different modalities such as vision, speech-to-text, and image generation.
-4. **Switch GPU backends** between Vulkan and ROCm.
-5. **Build a Python app** powered by a local LLM using the OpenAI-compatible API.
-6. **Run models on the NPU** using Hybrid and FLM execution modes on AMD Ryzen AI hardware.
+* **Install Lemonade Server** and verify it is running.
+* **Download and chat with an LLM** using a single command.
+* **Explore the web UI** and try different modalities such as vision, speech-to-text, and image generation.
+* **Switch GPU backends** between Vulkan and ROCm.
+* **Build a Python app** powered by a local LLM using the OpenAI-compatible API.
+* **Run models on the NPU** using Hybrid and FLM execution modes on AMD Ryzen™ AI hardware.
 
 ## Prerequisites
 
 Before you begin, make sure you have:
 
-- A PC running **Windows 11** or a supported **Linux** distribution (Ubuntu 24.04/25.04, Arch)
+- A PC running **Windows 11** or a supported **Linux** distribution (Ubuntu 24.04+, Fedora, Debian)
 - At least **16 GB of RAM** (64 GB recommended for larger models)
 - **~4–32 GB of free disk space**, depending on the models you download. The largest model in this guide requires ~20 GB.
 - **Python 3.10–3.13** (only needed for the Python integration section)
-- For the NPU section in Part 6, you'll need a Ryzen AI 300 series PC with the latest driver installed from [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers).
+- For the NPU section in Part 6, you'll need a PC with an AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 series or Z2 Extreme) with the latest driver installed from [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers).
 
 <!-- @require:lemonade-server -->
 
 ---
 
-## Getting Started — Install and Launch
+## Getting Started
 
-### Step 1: Install Lemonade Server
-
-<!-- @os:windows -->
-Download the latest installer from [lemonade-server.ai](https://lemonade-server.ai/install_options.html) and run the `.msi` file. The installer adds `lemonade-server` to your system PATH automatically.
-
-You can also install silently from the command line:
-
-```
-msiexec /i lemonade-server-minimal.msi /qn
-```
-<!-- @os:end -->
-
-<!-- @os:linux -->
-**Ubuntu (snap):**
-
-```
-sudo snap install lemonade-server
-```
-
-**Arch Linux (AUR):**
-
-```
-yay -S lemonade-server
-```
-
-**Or install from source** — see the [full installation options](https://lemonade-server.ai/install_options.html).
-<!-- @os:end -->
-
-### Step 2: Verify the Installation
-
-Open a terminal and run:
-
-```
-lemonade-server --version
-```
-
-You should see output like:
-
-```
-lemonade-server x.y.z
-```
-
-If you see a version number, Lemonade is installed and ready to go.
+This playbook assumes you have installed Lemonade Server and verified it is running. Once you have completed the setup, you are ready to download and run your first model.
 
 ---
 
@@ -108,7 +66,7 @@ This means any library or app that supports OpenAI can talk to Lemonade by point
 
 Let's download an LLM and have a conversation with it, running the AI entirely on your own machine.
 
-### Step 3: Download and Run a Model
+### Step 1: Download and Run a Model
 
 Lemonade ships with a curated model library. Let's start with **Gemma 3 4B**, a capable and compact model from Google that includes vision support:
 
@@ -133,7 +91,7 @@ Launching Lemonade App...
 ```
 
 <!-- @os:windows -->
-On Windows, the Lemonade App opens automatically and you can start chatting right away.
+On Windows, the Lemonade App launches automatically and you can begin chatting immediately. If you installed the `minimal.msi` package, the app is not included. To start chatting, open your web browser and go to `http://localhost:8000`.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -148,6 +106,8 @@ What are three fun facts about lemons?
 
 The model will respond directly in the chat window. **Congratulations! You are running a large language model locally.**
 
+![Lemonade App with Logs displayed](../../dependencies/assets/ChatwithLogs.png)
+
 In the Server Logs pane in the Lemonade App, you can find telemetry data about the model's performance after each response:
 
 ```
@@ -158,7 +118,7 @@ TTFT (s):      0.035
 TPS:           67.06
 ```
 
-### Step 4: Explore the Web Interface and Different Modalities
+### Step 2: Explore the Web Interface and Different Modalities
 
 Lemonade includes a built-in web interface where you can:
 
@@ -172,15 +132,23 @@ Try switching between different modalities using the **Model Manager** tab in th
 2. **Image generation:** In the Image category, download an image model such as `SDXL-Turbo` from the Model Manager, then use the Lemonade Image Generator to type a prompt and generate an image locally.
 3. **Audio:** In the Audio category, download an audio model such as `Whisper-Tiny`, which can do speech-to-text. Provide a recording of audio to transcribe it locally. For text-to-speech, try one of the models in the Speech category, such as `kokoro-v1`.
 
-### Step 5: Try a Model with a Different Backend
+![Multi-Modality with Lemonade](../../dependencies/assets/multi_modality.png)
 
-By default, Lemonade uses Vulkan for GPU acceleration. If you have a supported AMD discrete GPU, you can switch to ROCm using the following command:
+### Step 3: Try a Model with a Different Backend
+
+If you hover over a model in the Lemonade App, you'll see a gear icon. Clicking this allows you to select options for the model, including choosing your desired backend.
+
+By default, Lemonade uses Vulkan for GPU acceleration. If you have a supported AMD discrete GPU, you can switch to ROCm.
+
+![Lemonade Select Backend](../../dependencies/assets/lemonademodeloptions.png)
+
+Alternatively, you can specify the backend using the following command:
 
 ```
 lemonade-server run Gemma-3-4b-it-GGUF --llamacpp rocm
 ```
 
-You can also set your backend using the environment variable, `LEMONADE_LLAMACPP` to the options: `vulkan`, `rocm`, or `cpu`.
+You can also set your default backend using the environment variable `LEMONADE_LLAMACPP` with the values: `vulkan`, `rocm`, or `cpu`.
 
 ---
 
@@ -188,7 +156,7 @@ You can also set your backend using the environment variable, `LEMONADE_LLAMACPP
 
 The real power of a local AI server is that any application can connect to it using just a few lines of code. To prove it, let's build a small but functional **study flashcard generator** where you give it a topic, it generates flashcards, and you can quiz yourself interactively.
 
-### Step 6: Start the Server
+### Step 4: Start the Server
 
 If the server is not already running from the previous section, start it using the following:
 
@@ -196,7 +164,7 @@ If the server is not already running from the previous section, start it using t
 lemonade-server serve
 ```
 
-### Step 7: Install the OpenAI Python Client
+### Step 5: Install the OpenAI Python Client
 
 In a terminal, install the OpenAI Python Client using the following command:
 
@@ -204,11 +172,9 @@ In a terminal, install the OpenAI Python Client using the following command:
 pip install openai
 ```
 
-### Step 8: Build the Flashcard App
+### Step 6: Build the Flashcard App
 
 Load the `Qwen3-Coder-30B-A3B-Instruct` model and use the following prompt to generate a simple Flashcard app. Create a file with the generated code called `flashcards.py`.
-
-Note: Since the `Qwen3-Coder-30B-A3B-Instruct` model requires at least 20 GB of available RAM to run, we've provided the example flashcard application for your convenience.
 
 ```
 Generate a simple python script that uses the following to call an llm (Gemma-3-4b-it-GGUF) to generate flashcards on a subject that is entered by the user.
@@ -223,7 +189,7 @@ curl -X POST http://localhost:8000/api/v1/chat/completions
 }’
 ```
 
-For reference, here is what was generated:
+Note: Since the `Qwen3-Coder-30B-A3B-Instruct` model requires at least 20 GB of available RAM to run, we've provided the example flashcard application for your convenience. Here is what was generated:
 
 ```python
 from openai import OpenAI
@@ -309,7 +275,7 @@ while True:
         print("The model returned an unexpected format. Try again!\n")
 ```
 
-### Step 9: Run It
+### Step 7: Run It
 
 ```
 python flashcards.py
@@ -381,24 +347,16 @@ Lemonade supports three NPU execution modes, all transparent behind the same Ope
 | Mode | How It Works | Recipe | Example Models |
 |------|-------------|--------|----------------|
 | **Hybrid (NPU + iGPU)** | NPU processes the prompt, iGPU generates tokens | OGA (`oga-hybrid`) | Qwen3-8B-Hybrid, Phi-4-Mini-Instruct-Hybrid |
-| **NPU-only** | Entire inference runs on the NPU | OGA | Qwen-2.5-7B-Instruct-NPU |
+| **NPU-only** | Entire inference runs on the NPU | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
 | **FLM** | Uses FastFlowLM engine on the NPU, optimized for AMD XDNA2 | FLM (`flm`) | Gemma3-4b-it-FLM, Qwen3-8b-FLM |
 
 ### Requirements
 
-<!-- @os:windows -->
-NPU inference is currently **Windows only**. You need:
-
 - **AMD Ryzen AI 300/400 series or Z2 series** processor
-- **NPU driver** version `32.0.203.280` or newer, which can be downloaded from [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers).
-- For **FLM** models: the FLM runtime installed from [fastflowlm.com](https://fastflowlm.com/docs/install/)
-<!-- @os:end -->
+- For **FLM** models: Lemonade will automatically install the FLM runtime. To learn more about FastFlowLM see [here](https://fastflowlm.com/docs/)
 
-<!-- @os:linux -->
-NPU inference is not yet supported on Linux. You can still run all GGUF models on CPU or GPU. To request Linux NPU support, file an issue at [amd/ryzenai-sw](https://github.com/amd/ryzenai-sw) or [FastFlowLM](https://github.com/FastFlowLM/FastFlowLM).
-<!-- @os:end -->
 
-### Step 10: Run a Hybrid Model
+### Step 8: Run a Hybrid Model
 
 Hybrid models split work between the NPU and iGPU for a good balance of speed and efficiency. Try one:
 
@@ -410,7 +368,7 @@ Lemonade detects your NPU automatically and uses the right backend.
 
 > **What is happening under the hood?** When you send a message, the NPU processes your entire prompt in parallel (this is called "prefill"). Then the iGPU takes over to generate the response one token at a time. This hybrid approach plays to each chip's strengths.
 
-### Step 11: Run an FLM Model
+### Step 9: Run an FLM Model
 
 FastFlowLM (FLM) models are specifically optimized for AMD's XDNA2 NPU architecture and can be very fast for their size:
 
@@ -428,7 +386,7 @@ FLM models include some of the most popular architectures (Gemma 3, Qwen 3, Llam
 
 ### Switching Models
 
-The flashcard app from Step 8 works on NPU models too, just change the model name:
+The flashcard app from Step 6 works on NPU models too, just change the model name:
 
 ```python
 # In flashcards.py, swap the model to run on NPU instead of GPU
@@ -451,6 +409,7 @@ response = client.chat.completions.create(
 | `lemonade-server stop` | Stop a running server |
 | `lemonade-server delete MODEL` | Remove a model from disk |
 | `lemonade-server --version` | Print the installed version |
+| `lemonade-server recipes` | Recipes command for managing backends |
 
 ---
 
