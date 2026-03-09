@@ -1,6 +1,6 @@
 ## Overview
 
-![alt text](assets/unsloth.png)
+<!-- ![alt text](assets/unsloth.png) -->
 
 Unsloth is a high-efficiency LLM fine-tuning framework designed to make advanced model customization accessible on modern hardware.
 
