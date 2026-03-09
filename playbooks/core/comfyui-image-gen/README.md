@@ -21,17 +21,21 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 <!-- @require:comfyui,driver -->
 
 <!-- @os:windows -->
-<!-- @test:id=comfyui-clone-windows timeout=300 -->
+<!-- @test:id=comfyui-desktop-workspace-present-windows timeout=60 -->
 ```powershell
-if (Test-Path "ComfyUI\.git")
-{
-  cd ComfyUI
-  git pull
-}
-else
-{
-  git clone https://github.com/Comfy-Org/ComfyUI.git
-}
+$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
+$py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
+$mainPy = Join-Path $installRoot "resources\ComfyUI\main.py"
+
+if (-not (Test-Path $comfyRoot)) { throw "ComfyUI workspace not found at: $comfyRoot" }
+if (-not (Test-Path $py))     { throw "ComfyUI workspace venv python not found: $py" }
+if (-not (Test-Path $installRoot)) { throw "ComfyUI Desktop not found at: $installRoot" }
+if (-not (Test-Path $mainPy)) { throw "ComfyUI main.py not found in workspace: $mainPy" }
+
+Write-Host "OK: ComfyUI workspace: $comfyRoot"
+Write-Host "OK: Python: $py"
+Write-Host "OK: main.py: $mainPy"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -39,97 +43,106 @@ else
 <!-- @os:linux -->
 <!-- @test:id=comfyui-clone-linux timeout=300 -->
 ```bash
+set -euo pipefail
 if [ -d "ComfyUI/.git" ]; then
-  cd ComfyUI
-  git pull
+ (cd ComfyUI && git fetch --all && git reset --hard origin/master)
 else
-  git clone https://github.com/Comfy-Org/ComfyUI.git
+ git clone https://github.com/Comfy-Org/ComfyUI.git
 fi
+cd ComfyUI
+git fetch --tags
+git checkout -f v0.10.0
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:linux --> 
+<!-- @test:id=comfyui-venv-linux timeout=180 -->
+```bash
+set -euo pipefail
+python3 --version
+rm -rf comfyui_venv
+python3 -m venv comfyui_venv
+./comfyui_venv/bin/python -V
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
-<!-- @os:windows -->
-<!-- @test:id=create-venv timeout=120 -->
-```powershell
-if (Test-Path "comfyui_venv") { Remove-Item -Recurse -Force comfyui_venv}
-py -3.12 -m venv comfyui_venv
-.\comfyui_venv\Scripts\python.exe -V
+<!-- @os:linux --> 
+<!-- @test:id=comfyui-requirements-linux timeout=600 -->
+```bash
+set -euo pipefail
+./comfyui_venv/bin/python -m pip install --upgrade pip
+./comfyui_venv/bin/python -m pip install -r ./ComfyUI/requirements.txt
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
 
-<!-- @os:windows -->
-<!-- @test:id=comfyui-install-windows timeout=300 -->
+<!-- @os:windows --> 
+<!-- @test:id=comfyui-backend-usable-windows timeout=120 hidden=True -->
 ```powershell
-.\comfyui_venv\Scripts\python.exe -m pip install --upgrade pip
-.\comfyui_venv\Scripts\python.exe -m pip install -r .\ComfyUI\requirements.txt
+$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
+$py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+if (-not (Test-Path $py)) { throw "Missing ComfyUI workspace python: $py" }
+
+& $py -c "import torch; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('hip', getattr(torch.version,'hip',None));"
+if ($LASTEXITCODE -ne 0) { throw "Torch import/check failed in ComfyUI workspace venv." }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
-
-
-<!-- @os:windows -->
-<!-- @test:id=comfyui-install-rocm-torch-windows timeout=900 -->
-```powershell
-.\comfyui_venv\Scripts\python.exe -m pip install --no-cache-dir `
-https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_core-7.2.0.dev0-py3-none-win_amd64.whl `
-https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_devel-7.2.0.dev0-py3-none-win_amd64.whl `
-https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_libraries_custom-7.2.0.dev0-py3-none-win_amd64.whl `
-https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm-7.2.0.dev0.tar.gz
-
-.\comfyui_venv\Scripts\python.exe -m pip install --no-cache-dir `
-https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torch-2.9.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl `
-https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torchaudio-2.9.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl `
-https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torchvision-0.24.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
 
 <!-- @os:linux -->
 <!-- @test:id=comfyui-install-rocm-torch-linux timeout=900 hidden=True -->
 ```bash
+set -euo pipefail
 sudo apt install python3-pip -y
-pip3 install --upgrade pip wheel
+./comfyui_venv/bin/python -m pip install --upgrade pip wheel
+
 wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torch-2.9.1%2Brocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl
 wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchvision-0.24.0%2Brocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl
 wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
 wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchaudio-2.9.0%2Brocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl
-pip3 uninstall torch torchvision triton torchaudio
-pip3 install torch-2.9.1+rocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl torchvision-0.24.0+rocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl torchaudio-2.9.0+rocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl triton-3.5.1+rocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
+
+./comfyui_venv/bin/python -m pip uninstall -y torch torchvision triton torchaudio
+./comfyui_venv/bin/python -m pip install torch-2.9.1+rocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl torchvision-0.24.0+rocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl torchaudio-2.9.0+rocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl triton-3.5.1+rocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux --> 
+<!-- @test:id=comfyui-verify-torch-linux timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+./comfyui_venv/bin/python -c "import torch; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('hip', getattr(torch.version,'hip',None));"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
 
-<!-- @os:windows -->
-<!-- @test:id=comfyui-verify-torch-windows timeout=300 hidden=True -->
-```powershell
-.\comfyui_venv\Scripts\python.exe -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)"
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-
-<!-- @os:windows -->
+<!-- @os:windows --> 
 <!-- @test:id=comfyui-populate-models-from-cache-windows timeout=600 hidden=True -->
 ```powershell
-cd ComfyUI
+$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
+if (-not (Test-Path $comfyRoot)) { throw "ComfyUI workspace not found: $comfyRoot" }
+
 $cacheDiff = "C:\ModelCache\ComfyUI\models\diffusion_models\z_image_turbo_bf16.safetensors"
 $cacheTE   = "C:\ModelCache\ComfyUI\models\text_encoders\qwen_3_4b.safetensors"
 $cacheVAE  = "C:\ModelCache\ComfyUI\models\vae\ae.safetensors"
-if (-not (Test-Path $cacheDiff)) { Write-Error "models missing on runner: $cacheDiff"; exit 1 }
-if (-not (Test-Path $cacheTE))   { Write-Error "models missing on runner: $cacheTE"; exit 1 }
-if (-not (Test-Path $cacheVAE))  { Write-Error "models missing on runner: $cacheVAE"; exit 1 }
-New-Item -ItemType Directory -Force -Path ".\models\diffusion_models" | Out-Null
-New-Item -ItemType Directory -Force -Path ".\models\text_encoders"   | Out-Null
-New-Item -ItemType Directory -Force -Path ".\models\vae"             | Out-Null
-Copy-Item -Force $cacheDiff ".\models\diffusion_models\z_image_turbo_bf16.safetensors"
-Copy-Item -Force $cacheTE   ".\models\text_encoders\qwen_3_4b.safetensors"
-Copy-Item -Force $cacheVAE  ".\models\vae\ae.safetensors"
+
+if (-not (Test-Path $cacheDiff)) { throw "models missing on runner: $cacheDiff" }
+if (-not (Test-Path $cacheTE))   { throw "models missing on runner: $cacheTE" }
+if (-not (Test-Path $cacheVAE))  { throw "models missing on runner: $cacheVAE" }
+
+New-Item -ItemType Directory -Force -Path (Join-Path $comfyRoot "models\diffusion_models") 
+New-Item -ItemType Directory -Force -Path (Join-Path $comfyRoot "models\text_encoders")  
+New-Item -ItemType Directory -Force -Path (Join-Path $comfyRoot "models\vae")       
+
+Copy-Item -Force $cacheDiff (Join-Path $comfyRoot "models\diffusion_models\z_image_turbo_bf16.safetensors")
+Copy-Item -Force $cacheTE   (Join-Path $comfyRoot "models\text_encoders\qwen_3_4b.safetensors")
+Copy-Item -Force $cacheVAE  (Join-Path $comfyRoot "models\vae\ae.safetensors")
+
+Write-Host "OK: models copied into $comfyRoot\models"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -156,28 +169,62 @@ cp -f "$cache_vae" models/vae/ae.safetensors
 <!-- @os:windows -->
 <!-- @test:id=comfyui-server-up-windows timeout=300 hidden=True -->
 ```powershell
-$comfy = Start-Process -FilePath ".\comfyui_venv\Scripts\python.exe" `
-  -ArgumentList "main.py --listen 127.0.0.1 --port 8188" `
-  -WorkingDirectory ".\ComfyUI" `
-  -NoNewWindow -PassThru
+$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
+$py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
+$mainPy = Join-Path $installRoot "resources\ComfyUI\main.py"
+
+$proc = Start-Process -FilePath $py `
+ -ArgumentList "`"$mainPy`" --listen 127.0.0.1 --port 8188" `
+ -WorkingDirectory $comfyRoot `
+ -NoNewWindow -PassThru
+
 try {
-  # Poll for up to ~60s
-  $ok = $false
-  for ($i=0; $i -lt 60; $i++) {
-    try {
-      $resp = curl.exe -s http://127.0.0.1:8188/
-      if ($resp) { $ok = $true; break }
-    } catch {}
-    Start-Sleep -Seconds 1
-  }
-  if (-not $ok) { exit 1 }
-}
-finally {
-  Stop-Process -Id $comfy.Id -Force -ErrorAction SilentlyContinue
+ $ok = $false
+ for ($i=0; $i -lt 60; $i++) {
+   $resp = curl.exe -s --max-time 2 http://127.0.0.1:8188/
+   if ($LASTEXITCODE -eq 0 -and $resp) { $ok = $true; break }
+   Start-Sleep -Seconds 1
+ }
+ if (-not $ok) { throw "ComfyUI server not reachable at http://127.0.0.1:8188/" }
+ Write-Host "OK: ComfyUI server is reachable!"
+} finally {
+ Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 }
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
+
+<!-- @os:linux --> 
+<!-- @test:id=comfyui-server-up-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+./comfyui_venv/bin/python ./ComfyUI/main.py --listen 127.0.0.1 --port 8188 >/tmp/comfyui.log 2>&1 &
+PID=$!
+
+cleanup() {
+ kill -9 "$PID" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+ok=0
+for i in $(seq 1 60); do
+ resp="$(curl -s --max-time 2 http://127.0.0.1:8188/ || true)"
+ if [ -n "$resp" ]; then ok=1; break; fi
+ sleep 1
+done
+
+if [ "$ok" -ne 1 ]; then
+ echo "ComfyUI server not reachable at http://127.0.0.1:8188/"
+ tail -n 200 /tmp/comfyui.log || true
+ exit 1
+fi
+
+echo "OK: ComfyUI server is reachable!"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 
 
 ## Launching ComfyUI
@@ -262,78 +309,174 @@ The Z Image Turbo model is already loaded. To generate an image:
 The entire workflow execution should complete in less than 30 seconds. Your generated image appears in the **Save Image** node and is saved to the `output/` folder.
 
 <!-- @os:windows -->
-<!-- @test:id=comfyui-generate-zimage timeout=600 hidden=True -->
+<!-- @test:id=comfyui-generate-zimage-windows timeout=600 hidden=True -->
 ```powershell
-$comfy = Start-Process -FilePath ".\comfyui_venv\Scripts\python.exe" `
-  -ArgumentList "main.py --listen 127.0.0.1 --port 8188" `
-  -WorkingDirectory ".\ComfyUI" `
-  -NoNewWindow -PassThru
+$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
+$py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
+$mainPy = Join-Path $installRoot "resources\ComfyUI\main.py"
+
+$proc = Start-Process -FilePath $py `
+ -ArgumentList "`"$mainPy`" --listen 127.0.0.1 --port 8188" `
+ -WorkingDirectory $comfyRoot `
+ -NoNewWindow -PassThru
+
 try {
-  # Poll (wait for server to be ready) for up to ~60s
-  $ok = $false
-  for ($i=0; $i -lt 60; $i++) {
-    try {
-      $resp = curl.exe -s http://127.0.0.1:8188/
-      if ($resp) { $ok = $true; break }
-    } catch {}
-    Start-Sleep -Seconds 1
-  }
-  if (-not $ok) { exit 1 }
-  @'
-import json, time, urllib.request, urllib.error, sys
-with open("image_z_image_turbo.json", "r", encoding="utf-8") as f:
-  workflow = json.load(f)
+ $ok = $false
+ for ($i=0; $i -lt 60; $i++) {
+   $resp = curl.exe -s --max-time 2 http://127.0.0.1:8188/
+   if ($LASTEXITCODE -eq 0 -and $resp) { $ok = $true; break }
+   Start-Sleep -Seconds 1
+ }
+ if (-not $ok) { throw "ComfyUI server not ready on http://127.0.0.1:8188/" }
+
+ # run submit script from assets working dir (where image_z_image_turbo.json should exist)
+ @'
+import json, time, urllib.request, urllib.error, sys, os
+wf_path = "image_z_image_turbo.json"
+if not os.path.exists(wf_path):
+ raise SystemExit(f"Missing workflow json in working dir: {os.getcwd()} -> {wf_path}")
+with open(wf_path, "r", encoding="utf-8") as f:
+ workflow = json.load(f)
 data = json.dumps({"prompt": workflow}).encode("utf-8")
 req = urllib.request.Request(
-  "http://127.0.0.1:8188/prompt",
-  data=data,
-  headers={"Content-Type":"application/json"},
-  method="POST",
+ "http://127.0.0.1:8188/prompt",
+ data=data,
+ headers={"Content-Type":"application/json"},
+ method="POST",
 )
 try:
-  with urllib.request.urlopen(req, timeout=60) as r:
-    resp = r.read().decode("utf-8", "replace")
-    prompt_id = json.loads(resp)["prompt_id"]
+ with urllib.request.urlopen(req, timeout=60) as r:
+   prompt_id = json.load(r)["prompt_id"]
 except urllib.error.HTTPError as e:
-  body = e.read().decode("utf-8", "replace")
-  print("HTTPError", e.code, e.reason)
-  print(body)
-  sys.exit(1)
+ body = e.read().decode("utf-8", "replace")
+ print("HTTPError", e.code, e.reason)
+ print(body)
+ sys.exit(1)
 except Exception as e:
   print("Request failed:", repr(e))
   sys.exit(1)
+
 for _ in range(180):
-  with urllib.request.urlopen(f"http://127.0.0.1:8188/history/{prompt_id}", timeout=60) as r:
-    hist = json.load(r)
-  entry = hist.get(prompt_id, {})
-  if entry.get("outputs"):
-    print("OK")
-    sys.exit(0)
-  time.sleep(1)
+ with urllib.request.urlopen(f"http://127.0.0.1:8188/history/{prompt_id}", timeout=60) as r:
+   hist = json.load(r)
+ entry = hist.get(prompt_id, {})
+ if entry.get("outputs"):
+   print("OK")
+   sys.exit(0)
+ time.sleep(1)
+
 print("No outputs after waiting.")
 sys.exit(1)
-'@ | .\comfyui_venv\Scripts\python.exe -
-}
-finally {
-  Stop-Process -Id $comfy.Id -Force -ErrorAction SilentlyContinue
+'@ | & $py -
+ if ($LASTEXITCODE -ne 0) { throw "Workflow submit/generation failed" }
+
+} finally {
+ Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 }
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
+
+
+<!-- @os:linux --> 
+<!-- @test:id=comfyui-generate-zimage-linux timeout=600 hidden=True -->
+```bash
+set -euo pipefail
+
+# start server
+./comfyui_venv/bin/python ./ComfyUI/main.py --listen 127.0.0.1 --port 8188 >/tmp/comfyui.log 2>&1 &
+PID=$!
+
+cleanup() {
+ kill -9 "$PID" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+# wait ready
+ok=0
+for i in $(seq 1 60); do
+ resp="$(curl -s --max-time 2 http://127.0.0.1:8188/ || true)"
+ if [ -n "$resp" ]; then ok=1; break; fi
+ sleep 1
+done
+
+if [ "$ok" -ne 1 ]; then
+ echo "ComfyUI server not ready"
+ tail -n 200 /tmp/comfyui.log || true
+ exit 1
+fi
+
+# submit workflow json from assets folder (one level up from ComfyUI)
+./comfyui_venv/bin/python - <<'PY'
+import json, time, urllib.request, urllib.error, sys, os
+
+wf_path = "image_z_image_turbo.json"
+if not os.path.exists(wf_path):
+ raise SystemExit(f"Missing workflow json in working dir: {os.getcwd()} -> {wf_path}")
+
+with open(wf_path, "r", encoding="utf-8") as f:
+ workflow = json.load(f)
+
+data = json.dumps({"prompt": workflow}).encode("utf-8")
+req = urllib.request.Request(
+ "http://127.0.0.1:8188/prompt",
+ data=data,
+ headers={"Content-Type":"application/json"},
+ method="POST",
+)
+
+try:
+ with urllib.request.urlopen(req, timeout=60) as r:
+   prompt_id = json.load(r)["prompt_id"]
+except urllib.error.HTTPError as e:
+ body = e.read().decode("utf-8", "replace")
+ print("HTTPError", e.code, e.reason)
+ print(body)
+ sys.exit(1)
+
+for _ in range(180):
+ with urllib.request.urlopen(f"http://127.0.0.1:8188/history/{prompt_id}", timeout=60) as r:
+   hist = json.load(r)
+ entry = hist.get(prompt_id, {})
+ if entry.get("outputs"):
+   print("OK")
+   sys.exit(0)
+ time.sleep(1)
+
+print("No outputs after waiting.")
+sys.exit(1)
+PY
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
 
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-output-exists-windows timeout=60 hidden=True -->
 ```powershell
-$files = Get-ChildItem -Path ".\ComfyUI\output" -Filter *.png -File -ErrorAction SilentlyContinue
+$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
+$outDir = Join-Path $comfyRoot "output"
+
+$files = Get-ChildItem -Path $outDir -Filter *.png -File -ErrorAction SilentlyContinue
 if (-not $files) {
-  Write-Error "No PNG files found in ComfyUI\output"
-  exit 1
+ throw "No PNG files found in: $outDir"
 }
-$files | Select-Object -First 5 | ForEach-Object { $_.FullName }
+$files | Sort-Object LastWriteTime -Descending | Select-Object -First 5 | ForEach-Object { $_.FullName }
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
+
+<!-- @os:linux --> 
+<!-- @test:id=comfyui-output-exists-linux timeout=60 hidden=True -->
+```bash
+set -euo pipefail
+ls -1 ComfyUI/output/*.png >/dev/null 2>&1 || (echo "No PNG files found in ComfyUI/output" && exit 1)
+ls -1t ComfyUI/output/*.png | head -n 5
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 
 ## Adjusting Generation Parameters
 
