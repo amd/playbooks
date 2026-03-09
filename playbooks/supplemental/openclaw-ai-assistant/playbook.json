@@ -1,0 +1,16 @@
+{
+  "id": "openclaw-ai-assistant",
+  "title": "Quick Start on openclaw",
+  "description": "Learn how to run openclaw with local serving LLMs on your STX Halo™",
+  "time": 90,
+  "platforms": ["linux"],
+  "tested_platforms": {
+    "linux": []
+  },
+  "difficulty": "beginner",
+  "isNew": false,
+  "isFeatured": true,
+  "developed": false,
+  "published": true,
+  "tags": ["openclaw", "agents", "llm", "quickstart"]
+}
