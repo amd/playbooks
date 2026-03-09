@@ -26,7 +26,7 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 Learn how to start chatting with a ChatGPT-grade LLM completely locally.  
 
 1. Press "Ctrl" + "1" or click on the 👾 button on the top left of the screen to open the Chat window. 
-2. Press "Ctrl" + "M" to open the `Model Loader`, select "manually chose model load parameters", and click on "OpenAI GPT-OSS 120B"
+2. Press "Ctrl" + "shift" + "M" to open the `Model Loader`, select "manually chose model load parameters", and click on "OpenAI GPT-OSS 120B"
 3. Make sure "show advanced settings" is checked.  
 4. Change context size to "128,000". Make sure "Flash Attention" is On and "GPU offload layers" is set to maximum.
 5. Check "Remember settings" and click on `Load Model`.
@@ -46,7 +46,7 @@ To set up LM Studio Server, use the following instructions:
 
 1. On the left hand side, click on the "Developer" tab (command line icon) and then click on Server Settings.  
 2. If you want to serve the model over your LAN, check "Serve on Local Network", if you want to use with a website or extensive calling within VS Code, enable "CORS"; otherwise leave these as defaults.  
-3. Click on the toggle in front of Status: Stopped or press "Ctrl" + "R".  
+3. On the upper left corner, run the server by click on the toggle button in front of "Status: Stopped".
 4. An OpenAI compliant endpoint will now be running. The address is typically http://127.0.0.1:1234  
 5. Staying on the same "Developer" tab, with the Status: Running, you can deploy an LLM by going through the steps mentioned in "Chatting with an LLM".  
 
@@ -99,7 +99,6 @@ except Exception as e:
 1. Press "Ctrl" + "Shift" + "R" on your keyboard. Alternatively click on the Discover tab (Magnifying Glass) on the left-hand side and then click on "Runtime" in the pop up.  
 2. In the bottom right quadrant of the pop-up, you should see the "Selections" drawer with the "Engines" sub-header.  
 3. The GGUF drop-down menu will show your currently selected backend. You can change this to ROCm or Vulkan llama.cpp depending on what you are trying to do. 
-> Warning: selecting CPU llama.cpp here will disable GPU usage.  
 
 
 ## Next Steps
