@@ -31,50 +31,7 @@ LLaMA Factory depends on PyTorch, and rocm developers can install PyTorch throug
 - Using a wheels package from [offical PyTorch webiste](https://pytorch.org/get-started/locally/)
 - Building PyTorch from source as the steps of [rocm document](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/3rd-party/pytorch-install.html#build-pytorch-from-source)
 
-For this playbook, we'll use the **prebuilt ROCm Pytotch Docker image** as an example, making it the easiest way to get started on AMD GPUs. The below command is just for your reference, please use the latest version ROCm docker image.
-
-If ROCm Pytorch has been pre-installed on your device, you may skip the below optional steps and install llama factory directly.
-
-#### [optional]Setup docker environment on your device
-This playbook needs ROCm PyTorch docker container,please ensure Docker is installed and configured correctly. Follow the [Docker installation guide](https://docs.docker.com/engine/install/) for your operating system.
-
-Note: Ensure the Docker permissions are correctly configured. To configure permissions to allow non-root access, run the following commands:
-
-```bash
-sudo usermod -aG docker $USER
-newgrp docker
-```
-
-Verify Docker is working correctly with:
-
-```bash
-docker run hello-world
-```
-
-#### [optional]Pull the Docker Image
-First, pull the ROCm PyTorch Docker image:
-
-```bash
-docker pull rocm/pytorch:rocm7.2_ubuntu24.04_py3.12_pytorch_release_2.9.1 
-```
-
-#### [optional]Launch the PyTorch docker container
-Start the ROCm PyTorch container with AMD GPU access and mount your local data directory if need.
-
-```bash
-docker run -it \
-    --cap-add=SYS_PTRACE \
-    --security-opt seccomp=unconfined \
-    --device=/dev/kfd \
-    --device=/dev/dri \
-    --group-add video \
-    --ipc=host \
-    --shm-size 8G \
-    -v {host data path}:/data \
-    rocm/pytorch:rocm7.2_ubuntu24.04_py3.12_pytorch_release_2.9.1
-```
-
-#### Install llama factory
+For this playbook, we'll use the **prebuilt ROCm Pytotch** as an example, making it the easiest way to get started on AMD GPUs. 
 
 Download the source code from [llama factory official GitHub repository](https://github.com/hiyouga/LlamaFactory),and install LLaMA Factory with dependencies.
 
@@ -83,20 +40,6 @@ git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
 cd LlamaFactory
 pip install -e .
 pip install -r requirements/metrics.txt
-```
-
-If you would like to try Llama Factory QLora finetuning through BitsandBytes library, you also need to install bitsandbytes. In this playbook, we introduce how to compile and install bitsandbytes library on AMD ROCm GPU, which can help developer enjoy the latest bitsandbytes quantization solution.
-
-```bash
-# Install bitsandbytes from source
-# Clone bitsandbytes repo
-git clone https://github.com/bitsandbytes-foundation/bitsandbytes.git && cd bitsandbytes/
-
-# Compile & install
-apt-get install -y build-essential cmake  # install build tools dependencies, unless present
-cmake -DCOMPUTE_BACKEND=hip -DBNB_ROCM_ARCH="gfx1150" -S . # Use -DBNB_ROCM_ARCH to target specific gpu arch,gfx1201 for 9070xt GPU, gfx1150 for strix halo
-make
-pip install -e .
 ```
 
 Now you have installed llama factory successfully on AMD ROCm GPU. and next step is to run LLM finetuning on it.
@@ -148,12 +91,6 @@ In this playbook,we modified the default value of lora_rank to run fine-tuning o
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 
-if you would like to run bitsandbytes QLoRA finetuning, you can also try to modify lora_rank in the corresponding configuration file.
-
-```bash
-sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_qlora/qwen3_lora_sft_bnb_npu.yaml
-```
-
 #### Run Llama factory finetuning 
 
 **llamafactory-cli** is the official command-line interface (CLI) tool for LLaMA Factory,developed to simplify end-to-end LLM workflows (data preparation → fine-tuning → evaluation → deployment) without writing complex code.For training/fine-tuning, **llamafactory-cli train** is the core subcommand of the LLaMA Factory CLI, designed for end-to-end fine-tuning of large language models (LLMs) with minimal code. It abstracts complex fine-tuning workflows (data preprocessing, hyperparameter tuning, hardware optimization) into a single CLI command, supporting multiple fine-tuning paradigms (LoRA/QLoRA/Full Fine-Tuning) and optimized for low-resource GPUs (e.g., QLoRA on 16GB VRAM). It enforces best practices (e.g., gradient checkpointing, mixed precision) and natively integrates with Hugging Face ecosystems, making it the primary tool for customizing LLMs in LLaMA Factory.
@@ -161,10 +98,6 @@ sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_qlora/qwen3_lora_sft_b
 You can run llama factory finetuning using the below command,which is based on the modified configuration file of Qwen3 LoRA finetuning. 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
-```
-If you would like to try QLoRA with bitsandbytes, the below command is a typical example.
-```bash
-llamafactory-cli train examples/train_qlora/qwen3_lora_sft_bnb_npu.yaml
 ```
 
 After running LLM finetuning, output files can be found in the path of "output_dir", like the model checkpoint files, model configuration files,training metrics data files.
@@ -209,7 +142,7 @@ The result of exporting finetuned model is shown as below. You can run the expor
 
 ## Next Steps
 - **Try more models on AMD GPUs**: We use qwen3 as an example, developer can try other supported models,like gpt-oss, on AMD GPUs.
-- **Try more finetuning schemes on AMD GPUs**: We use LoRA as an example, developer can try others,like full-Parameter, on AMD GPUs.
+- **Try the finetuned model through vLLM on AMD GPUs**: We use the default Huggingface transformers library as inference backend, developer can try vLLM on AMD GPUs.
 - **Try Fine-Tuning with LLaMA Factory GUI Tool**: LLaMA-Factory supports zero-code fine-tuning of large language models through WebUI, developer can also try [this tool](https://llamafactory.readthedocs.io/en/latest/getting_started/webui.html) on AMD GPUs. 
 
 For more documentation, please visit: https://llamafactory.readthedocs.io/en/latest/ 
