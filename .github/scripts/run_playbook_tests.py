@@ -23,6 +23,16 @@ Platform inference:
     only on Windows, tests inside ``<!-- @os:linux -->`` blocks run only on
     Linux, and tests outside any @os: block run on all platforms.
 
+Device inference:
+    The target device(s) for each test is inferred from surrounding @device:
+    tags. Tags support comma-separated values:
+        ``<!-- @device:halo -->``       → runs only on halo
+        ``<!-- @device:halo,stx -->``   → runs on halo or stx
+    Tests outside any @device: block run on all devices. When --device is
+    passed on the CLI, tests whose inferred device list doesn't include that
+    device are skipped.
+    Valid devices: halo, stx, krk, rx7900xt, rx9070xt.
+
 Supported test attributes:
     - id: Unique identifier for the test (required)
     - timeout: Maximum execution time in seconds (default: 300)
@@ -99,6 +109,7 @@ Inline #hide marker:
 
 Usage:
     python run_playbook_tests.py --playbook pytorch-rocm-llms --platform windows
+    python run_playbook_tests.py --playbook pytorch-rocm-llms --platform windows --device halo
 """
 
 import argparse
@@ -113,12 +124,16 @@ from pathlib import Path
 from typing import Optional
 
 
+VALID_DEVICES = {"halo", "stx", "krk", "rx7900xt", "rx9070xt"}
+
+
 @dataclass
 class TestBlock:
     """Represents a single test block extracted from a playbook."""
 
     id: str
     platform: str = "all"  # inferred from surrounding @os: tags
+    device: str = "all"  # inferred from surrounding @device: tags (comma-separated)
     timeout: int = 300
     workdir: Optional[str] = None
     continue_on_error: bool = False
@@ -368,7 +383,21 @@ def _infer_platform(content: str, position: int) -> str:
     return "all"
 
 
-def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
+def _infer_device(content: str, position: int) -> str:
+    """Infer the target device(s) for a test based on surrounding @device: tags.
+
+    If the test is inside a ``<!-- @device:halo,stx -->`` block, returns "halo,stx".
+    If inside ``<!-- @device:halo -->`` returns "halo".
+    Otherwise returns "all".
+    """
+    device_block_pattern = r"<!-- @device:([\w,]+) -->([\s\S]*?)<!-- @device:end -->"
+    for m in re.finditer(device_block_pattern, content):
+        if m.start() <= position < m.end():
+            return m.group(1)
+    return "all"
+
+
+def extract_tests(readme_path: Path, target_platform: str, target_device: Optional[str] = None) -> list[TestBlock]:
     """Extract test blocks from a README.md file."""
     content = readme_path.read_text(encoding="utf-8")
 
@@ -408,12 +437,14 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
             )
             continue
 
-        # Infer platform from surrounding @os: tags
+        # Infer platform and device from surrounding tags
         inferred_platform = _infer_platform(content, match.start())
+        inferred_device = _infer_device(content, match.start())
 
         test = TestBlock(
             id=attrs["id"],
             platform=inferred_platform,
+            device=inferred_device,
             timeout=attrs.get("timeout", 300),
             workdir=attrs.get("workdir"),
             continue_on_error=attrs.get("continue_on_error", False),
@@ -425,12 +456,22 @@ def extract_tests(readme_path: Path, target_platform: str) -> list[TestBlock]:
         )
 
         # Filter by platform
-        if test.platform == "all" or test.platform == target_platform:
-            tests.append(test)
-        else:
+        if test.platform != "all" and test.platform != target_platform:
             print(
                 f"Skipping test '{test.id}' (platform={test.platform}, running on {target_platform})"
             )
+            continue
+
+        # Filter by device
+        if target_device and test.device != "all":
+            allowed_devices = {d.strip() for d in test.device.split(",")}
+            if target_device not in allowed_devices:
+                print(
+                    f"Skipping test '{test.id}' (device={test.device}, running on {target_device})"
+                )
+                continue
+
+        tests.append(test)
 
     return tests
 
@@ -628,11 +669,13 @@ def run_test(
         )
 
 
-def run_playbook_tests(playbook_id: str, platform: str) -> bool:
+def run_playbook_tests(playbook_id: str, platform: str, device: Optional[str] = None) -> bool:
     """Run all tests for a playbook."""
     print(f"\n{'#'*60}")
     print(f"# Testing Playbook: {playbook_id}")
     print(f"# Platform: {platform}")
+    if device:
+        print(f"# Device: {device}")
     print(f"{'#'*60}\n")
 
     # Find playbook
@@ -650,7 +693,7 @@ def run_playbook_tests(playbook_id: str, platform: str) -> bool:
     results_dir.mkdir(parents=True, exist_ok=True)
 
     # Extract tests
-    tests = extract_tests(readme_path, platform)
+    tests = extract_tests(readme_path, platform, device)
 
     if not tests:
         print(f"\nNo tests found for platform '{platform}' in {playbook_id}")
@@ -663,8 +706,9 @@ def run_playbook_tests(playbook_id: str, platform: str) -> bool:
 
     print(f"\nFound {len(tests)} test(s) to run (in README order):")
     for test in tests:
+        device_info = f", device={test.device}" if test.device != "all" else ""
         print(
-            f"  - {test.id} (platform={test.platform}, timeout={test.timeout}s)"
+            f"  - {test.id} (platform={test.platform}{device_info}, timeout={test.timeout}s)"
         )
 
     # Run tests
@@ -766,9 +810,15 @@ def main():
         choices=["windows", "linux"],
         help="Target platform",
     )
+    parser.add_argument(
+        "--device",
+        choices=sorted(VALID_DEVICES),
+        default=None,
+        help="Target device (filters @device: blocks)",
+    )
     args = parser.parse_args()
 
-    success = run_playbook_tests(args.playbook, args.platform)
+    success = run_playbook_tests(args.playbook, args.platform, args.device)
     sys.exit(0 if success else 1)
 
 

@@ -4,9 +4,14 @@
   "description": "Learn how to use Lemonade framework across CPU, GPU, and NPU on your STX Halo™",
   "time": 60,
   "platforms": ["linux", "windows"],
+  "tested_platforms": {
+    "linux": [],
+    "windows": []
+  },
   "difficulty": "intermediate",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["lemonade", "cpu", "gpu", "npu", "inference"]
 }

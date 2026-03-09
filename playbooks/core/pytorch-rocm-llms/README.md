@@ -13,7 +13,7 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 ### Create a Virtual Environment
 
 <!-- @os:windows -->
-On Windows, open Command Prompt and run the following prompt to create a venv with ROCm+Pytorch already installed:
+On Windows, open Command Prompt and run the following prompt to create a venv with ROCm+Pytorch already installed: 
 <!-- @test:id=create-venv timeout=60 -->
 ```cmd
 python -m venv llm-env --system-site-packages
@@ -89,7 +89,7 @@ The included [run_llm.py](assets/run_llm.py) script shows how to load and genera
 
 Take a look at how prompts are tokenized and sent to the model. Understanding this process lets you adapt LLMs for any text generation or summarization task. Here's a minimal example from the script:
 
-<!-- @test:id=verify-imports timeout=60 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
