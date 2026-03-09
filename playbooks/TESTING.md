@@ -30,6 +30,8 @@ The test tags wrap the code block that users see. No duplication needed — the 
 | `hidden` | No | `false` | If `true`, hides the code block from the website (useful for test-only setup) |
 
 > **Note:** Platform is automatically inferred from the surrounding `@os:` tags. Tests inside `<!-- @os:windows -->` run only on Windows, tests inside `<!-- @os:linux -->` run only on Linux, and tests outside any `@os:` block run on all platforms.
+>
+> **Note:** Device is automatically inferred from surrounding `@device:` tags. Tests inside `<!-- @device:halo -->` run only on halo, `<!-- @device:halo,stx -->` run on halo or stx. Tests outside any `@device:` block run on all devices. Pass `--device <id>` to filter.
 
 **Supported languages:**
 
@@ -130,6 +132,7 @@ Both scripts support...
 
 ```bash
 python .github/scripts/run_playbook_tests.py --playbook your-playbook-id --platform windows
+python .github/scripts/run_playbook_tests.py --playbook your-playbook-id --platform windows --device halo
 ```
 
 **CI behavior:**
