@@ -43,15 +43,12 @@ Clone the Ryzen AI Software repository to get the CVML Library:
 <!-- @os:linux -->
 ```bash
 sudo apt install git-lfs
-git lfs install
 ```
 <!-- @os:end -->
 
-<!-- @os:windows -->
-```cmd
+```bash
 git lfs install
 ```
-<!-- @os:end -->
 
 ```bash
 git clone https://github.com/amd/RyzenAI-SW.git
@@ -169,6 +166,7 @@ The CVML Library includes ready-to-build sample applications for each feature. L
 
    <!-- @os:windows -->
    ```cmd
+   rem Build the samples (Windows)
    cd samples
    mkdir build
    cmake -S %CD% -B %CD%\build -DOPENCV_INSTALL_ROOT=%OPENCV_INSTALL_ROOT%
@@ -178,6 +176,7 @@ The CVML Library includes ready-to-build sample applications for each feature. L
 
    <!-- @os:linux -->
    ```bash
+   # Build the samples (Linux)
    cd samples
    mkdir build
    cmake -S $PWD -B $PWD/build -DOPENCV_INSTALL_ROOT=$OPENCV_INSTALL_ROOT
@@ -244,7 +243,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-A window will appear showing the image with a green bounding box around the detected face, a yellow confidence score, and red landmark dots (eyes, nose, mouth edges).
+A window will appear showing the image with bounding boxes around detected faces, confidence scores, and facial landmark points (eyes, nose, mouth edges).
 
 <p align="center">
   <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
