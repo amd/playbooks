@@ -51,9 +51,9 @@ def cleanup_gpu_memory():
             torch.cuda.empty_cache()
             torch.cuda.synchronize()
             torch.cuda.empty_cache()
-        print("✓ GPU memory cleaned up")
+        print("GPU memory cleanup complete.")
     except Exception as e:
-        print(f"⚠ Warning during cleanup: {e}")
+        print(f"[Warning] during cleanup: {e}")
 
 
 # -----------------------
