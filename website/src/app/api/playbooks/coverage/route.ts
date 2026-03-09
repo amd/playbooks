@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import type { PlaybookMeta, Category, PlaybookCoverageSummary } from "@/types/playbook";
+import type { PlaybookMeta, Platform, Category, PlaybookCoverageSummary } from "@/types/playbook";
+import {
+  getLatestNightlyRun,
+  extractFullSummary,
+  findAllPlaybookArtifacts,
+} from "@/lib/github-test-results";
 
 const PLAYBOOKS_ROOT = path.join(process.cwd(), "..", "playbooks");
 const DEPENDENCIES_ROOT = path.join(PLAYBOOKS_ROOT, "dependencies");
-const TEST_RESULTS_ROOT = path.join(process.cwd(), "..", "test-results");
 
 interface DependencyRegistryEntry {
   name: string;
@@ -50,7 +54,6 @@ function countDependencyTests(readmeContent: string): { testCount: number; hidde
       if (!fs.existsSync(depFilePath)) continue;
       try {
         const depContent = fs.readFileSync(depFilePath, "utf-8");
-        // Count @test tags in the dependency content
         const testTagPattern = /<!-- @test:([^>]+) -->/g;
         let testMatch;
         while ((testMatch = testTagPattern.exec(depContent)) !== null) {
@@ -59,7 +62,6 @@ function countDependencyTests(readmeContent: string): { testCount: number; hidde
             hiddenCount++;
           }
         }
-        // Count code blocks
         codeBlockCount += (depContent.match(/```\w*\s*\n/g) || []).length;
       } catch {
         // ignore read errors
@@ -76,12 +78,23 @@ function getCategory(categoryFolder: string): Category {
   return "backup";
 }
 
+interface PlaybookScanResult {
+  id: string;
+  title: string;
+  category: Category;
+  platforms: Platform[];
+  testCount: number;
+  hiddenCount: number;
+  visibleTestCount: number;
+  totalCodeBlocks: number;
+}
+
 /**
- * Scans all playbooks and returns per-playbook test coverage summaries.
- * Mirrors the scan_playbooks() function from _test_preview.py.
+ * Scans all playbook READMEs and counts @test tags per playbook.
+ * Does not read any local test-results files — results come from GitHub.
  */
-function scanCoverage(): PlaybookCoverageSummary[] {
-  const summaries: PlaybookCoverageSummary[] = [];
+function scanPlaybooks(): PlaybookScanResult[] {
+  const results: PlaybookScanResult[] = [];
   const categories = ["core", "supplemental"];
 
   for (const category of categories) {
@@ -111,7 +124,6 @@ function scanCoverage(): PlaybookCoverageSummary[] {
       if (fs.existsSync(readmePath)) {
         const content = fs.readFileSync(readmePath, "utf-8");
 
-        // Count @test tags in the README itself
         const testTagPattern = /<!-- @test:([^>]+) -->/g;
         let match;
         while ((match = testTagPattern.exec(content)) !== null) {
@@ -121,52 +133,79 @@ function scanCoverage(): PlaybookCoverageSummary[] {
           }
         }
 
-        // Count code blocks in the README
         totalCodeBlocks = (content.match(/```\w*\s*\n/g) || []).length;
 
-        // Also count tests and code blocks from @require dependencies
         const depCounts = countDependencyTests(content);
         testCount += depCounts.testCount;
         hiddenCount += depCounts.hiddenCount;
         totalCodeBlocks += depCounts.codeBlockCount;
       }
 
-      // Check for test results
-      let hasResults = false;
-      let resultsSummary: { passed: number; failed: number; skipped: number } | undefined;
-      const resultsPath = path.join(TEST_RESULTS_ROOT, meta.id, "summary.json");
-      if (fs.existsSync(resultsPath)) {
-        try {
-          const raw = JSON.parse(fs.readFileSync(resultsPath, "utf-8"));
-          hasResults = true;
-          resultsSummary = {
-            passed: raw.passed ?? 0,
-            failed: raw.failed ?? 0,
-            skipped: raw.skipped ?? 0,
-          };
-        } catch {
-          // ignore
-        }
-      }
-
-      summaries.push({
+      results.push({
         id: meta.id,
         title: meta.title || meta.id,
         category: getCategory(category),
-        platforms: meta.platforms || [],
+        platforms: (meta.platforms || []) as Platform[],
         testCount,
         hiddenCount,
         visibleTestCount: testCount - hiddenCount,
         totalCodeBlocks,
-        hasResults,
-        resultsSummary,
       });
     }
   }
 
-  return summaries;
+  return results;
 }
 
 export async function GET() {
-  return NextResponse.json(scanCoverage());
+  const scanned = scanPlaybooks();
+
+  // Try to enrich results with GitHub Actions artifacts
+  const token = process.env.DASHBOARD_GITHUB_TOKEN?.trim();
+  const resultsByPlaybook = new Map<string, { passed: number; failed: number; skipped: number }>();
+
+  if (token) {
+    try {
+      const nightly = await getLatestNightlyRun(token);
+      if (nightly) {
+        await Promise.all(
+          scanned.map(async (pb) => {
+            const allArtifacts = findAllPlaybookArtifacts(nightly.artifacts, pb.id);
+            if (allArtifacts.length === 0) return;
+
+            let totalPassed = 0, totalFailed = 0, totalSkipped = 0;
+            await Promise.all(allArtifacts.map(async ({ artifact }) => {
+              const summary = await extractFullSummary(artifact, token);
+              if (!summary) return;
+              totalPassed += summary.passed ?? 0;
+              totalFailed += summary.failed ?? 0;
+              totalSkipped += summary.skipped ?? 0;
+            }));
+
+            if (totalPassed + totalFailed + totalSkipped > 0) {
+              resultsByPlaybook.set(pb.id, {
+                passed: totalPassed,
+                failed: totalFailed,
+                skipped: totalSkipped,
+              });
+            }
+          })
+        );
+      }
+    } catch (err) {
+      // GitHub fetch failed — return coverage without results
+      console.error("Failed to fetch GitHub test results for coverage:", err);
+    }
+  }
+
+  const summaries: PlaybookCoverageSummary[] = scanned.map((pb) => {
+    const ghResults = resultsByPlaybook.get(pb.id);
+    return {
+      ...pb,
+      hasResults: !!ghResults,
+      resultsSummary: ghResults,
+    };
+  });
+
+  return NextResponse.json(summaries);
 }

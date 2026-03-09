@@ -4,9 +4,14 @@
   "description": "Build a 100% local AI agent — no cloud APIs needed. Use the GAIA SDK to create a hardware advisor on your STX Halo",
   "time": 20,
   "platforms": ["windows", "linux"],
+  "tested_platforms": {
+    "linux": [],
+    "windows": []
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["gaia", "agent-sdk", "agent", "hardware", "lemonade"]
 }
