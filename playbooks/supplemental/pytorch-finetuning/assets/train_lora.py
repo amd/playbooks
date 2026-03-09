@@ -11,6 +11,7 @@ Training Speed: 3-5x faster than full fine-tuning
 """
 
 import gc
+import os
 import torch
 
 # Checks bitsandbytes and ensures it's only used if available and complete.
@@ -87,8 +88,11 @@ GRAD_ACCUM_STEPS = 8           # Increased to maintain effective batch size of 1
 # Load Dataset
 # -----------------------
 print("Loading dataset...")
-
-ds = load_dataset("databricks/databricks-dolly-15k", split="train").shuffle(seed=42).select(range(1000))
+QUICK_TRAIN = os.environ.get("QUICK_TRAIN") == "1"
+n_samples = 8 if QUICK_TRAIN else 1000
+if QUICK_TRAIN:
+    print("QUICK_TRAIN=1: using 1 step and a tiny dataset (smoke test).")
+ds = load_dataset("databricks/databricks-dolly-15k", split="train").shuffle(seed=42).select(range(n_samples))
 
 def format_chat(ex):
     if "messages" in ex:
@@ -169,6 +173,7 @@ args = SFTConfig(
     per_device_train_batch_size=BATCH_SIZE,
     gradient_accumulation_steps=GRAD_ACCUM_STEPS,
     learning_rate=LR,
+    **(dict(max_steps=1) if QUICK_TRAIN else {}),
     
     # Optimizer
     optim="adamw_torch_fused",

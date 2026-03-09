@@ -4,13 +4,12 @@
 
 This tutorial provides step-by-step examples for fine-tuning a large language model with PyTorch and ROCm on AMD Strix Halo. It covers several techniques, from standard fine-tuning to memory-efficient PEFT strategies, so you can easily adapt models for your needs.
 
-**Model Used**: google/gemma-3-4b-it
+**Model Used**: google/gemma-3-4b-it  
+*(this model is gated; see [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models))*  
 **Hardware**: AMD Strix Halo with ROCm support  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, TRL)
 
 > **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
-
----
 
 ## Quick Start
 
@@ -52,7 +51,7 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandb
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** Only core packages are tested and supported here.
+**Windows:** Only core packages are tested and supported here. **bitsandbytes is not well supported on Windows**, so the Windows install omits it; use LoRA or full fine-tuning on Windows (QLoRA requires bitsandbytes and is intended for Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
@@ -60,11 +59,19 @@ pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate p
 <!-- @test:end -->
 <!-- @os:end -->
 
-### Enable HF Authentication if not using local models
-Authenticate with the Hugging Face Hub to access some model files:
+### Enable HF authentication (gated or custom / non–preinstalled models)
+
+In this example we use **google/gemma-3-4b-it**, which is a **gated** model. You must accept the model’s terms on Hugging Face and then authenticate so the training scripts can download it.
+
+1. **Accept the license:** Open [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), sign in (or create an account), and accept the license/terms on the model page (e.g. “Agree and access repository”).
+2. **Install and log in:** Install the Hugging Face CLI, then run the standard login:
+
 ```bash
+pip install huggingface_hub
 hf auth login
 ```
+
+
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -97,8 +104,19 @@ from peft import AutoPeftModelForCausalLM
 from trl import SFTTrainer
 
 print(f"PyTorch version: {torch.__version__}")
-print(f"CUDA/ROCm available: {torch.cuda.is_available()}")
+print(f"ROCm available: {torch.cuda.is_available()}")
 print("PASS: All imports successful")
+```
+<!-- @test:end -->
+
+<!-- @test:id=quick-train-one-step timeout=600 hidden=True setup=activate-venv -->
+```python
+import os
+import subprocess
+import sys
+os.environ["QUICK_TRAIN"] = "1"
+r = subprocess.run([sys.executable, "train_lora.py"], timeout=600)
+sys.exit(r.returncode)
 ```
 <!-- @test:end -->
 
@@ -111,6 +129,14 @@ print("PASS: All imports successful")
 | **Full** | 80GB+ | Slowest | 100% | Maximum quality |
 
 ### 3. Run Training
+
+**Dataset and what the model learns**  
+The scripts turn the dataset into chat examples. For example, the QLoRA script uses **Abirate/english_quotes**: each example becomes a user–assistant pair like:
+
+- **User:** “Give me a quote about: &lt;tag&gt;”
+- **Assistant:** “&lt;quote&gt; – &lt;author&gt;”
+
+So fine-tuning teaches the model to respond to prompts asking for quotes about a topic and to return them in the format `<quote text> - <author>`. The LoRA and full fine-tuning scripts use **databricks/databricks-dolly-15k** (general instruction/response pairs), so the exact task varies by script; the idea is the same - adapt the model to your chosen dataset and format.
 
 Below is a summary of available training methods. Each method links to its script and provides a brief description for choosing the right approach.
 
@@ -128,7 +154,7 @@ Below is a summary of available training methods. Each method links to its scrip
 
 ### What is LoRA?
 
-**LoRA (Low-Rank Adaptation)** freezes the original model and trains small "adapter" matrices:
+**LoRA (Low-Rank Adaptation)** keeps the base model frozen and only trains small "adapter" matrices that get added to certain layers. The key idea: instead of updating a huge weight matrix with millions of parameters, we learn a low-rank update (two small matrices whose product has much fewer parameters). That gives a large reduction in trainable parameters and VRAM while keeping most of the full fine-tuning quality.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -143,11 +169,7 @@ W_updated = W + B × A
 
 ### What is QLoRA?
 
-**QLoRA** = **4-bit Quantization** + **LoRA**
-
-1. Load base model in 4-bit (75% memory savings)
-2. Add LoRA adapters trained in BF16
-3. Best of both worlds!
+**QLoRA** combines **4-bit quantization** with **LoRA**: the base model is loaded in 4-bit (large memory savings), and only the LoRA adapters are trained in higher precision. So you get the parameter efficiency of LoRA plus much lower VRAM, with a small quality trade-off compared to full-precision LoRA.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -260,21 +282,7 @@ dataset = dataset.map(format_instruction)
 
 ### Adjust Training Parameters
 
-#### For Faster Training (Lower Quality)
-```python
-LR = 5e-4              # Higher learning rate
-EPOCHS = 1             # Fewer epochs
-BATCH_SIZE = 8         # Larger batch (if memory allows)
-LORA_R = 16            # Smaller rank
-```
-
-#### For Better Quality (Slower Training)
-```python
-LR = 1e-4              # Lower learning rate
-EPOCHS = 5             # More epochs
-GRAD_ACCUM_STEPS = 16  # More gradient accumulation
-LORA_R = 64            # Larger rank
-```
+Edit the training script and change the variables to match your goals: **learning rate** (`LR`), **epochs** (`EPOCHS`), **batch size** (`BATCH_SIZE`), **gradient accumulation** (`GRAD_ACCUM_STEPS`), and for LoRA/QLoRA **rank** (`LORA_R`). For faster runs use fewer epochs and a higher LR; for better quality use more epochs and a lower LR. Reduce batch size or sequence length if you hit out-of-memory errors.
 
 ### Memory Optimization Tips
 
@@ -315,23 +323,16 @@ watch -n 1 rocm-smi
 rocm-smi --showmeminfo vram
 ```
 
-### Track Experiments with Weights & Biases
+### (Optional) Track Experiments with Weights & Biases
+
+To log runs and metrics to [Weights & Biases](https://wandb.ai):
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-In training script:
-```python
-args = SFTConfig(
-    # ... other settings ...
-    report_to="wandb",
-    run_name="gpt-oss-20b-qlora-experiment"
-)
-```
-
-View metrics at [wandb.ai](https://wandb.ai)
+In the training script, set `report_to="wandb"` and optionally `run_name="your-experiment-name"` in the trainer config. If you prefer not to use Wandb, leave `report_to` at its default or set it to `"none"`.
 
 ### Common Issues
 
