@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-Write a GPU kernel from scratch, compile it, and launch it on an AMD GPU — then watch utilization spike. This playbook shows how GPU computation actually works: you write the kernel code, and it executes in parallel across thousands of threads.
+Write a GPU kernel from scratch, compile it, and launch it on an AMD GPU, then watch utilization spike. This playbook shows how GPU computation actually works: you write the kernel code, and it executes in parallel across thousands of threads.
 
 ## What You'll Learn
 
@@ -29,22 +29,16 @@ This playbook covers two flows for kernel development:
 
 | | Flow | Entry point |
 |---|---|---|
-| **1** | High-level JIT compilation | `torch.cuda._compile_kernel`, write a kernel as a Python string, no build step |
-| **2** | Low-level C++ extension | `CUDAExtension` + pybind11, compile a `.cu` file into a native `.so` and import it |
+| **1** | High-Level JIT compilation | `torch.cuda._compile_kernel`, write a kernel as a Python string, no build step |
+| **2** | Low-Level C++ extension | `CUDAExtension` + pybind11, compile a `.cu` file into a native `.so` and import it |
 
-Both flows run on AMD GPUs. This is possible because PyTorch's ROCm build **maps the entire CUDA API surface to HIP**, `torch.cuda`, `CUDAExtension`, and CUDA kernel syntax all work on AMD hardware transparently. You write CUDA-style code; ROCm handles the translation.
+Both flows run on AMD GPUs. This is possible because PyTorch's ROCm build maps the entire CUDA API surface to HIP, `torch.cuda`, `CUDAExtension`, and CUDA kernel syntax all work on AMD hardware transparently. You write CUDA-style code; ROCm handles the translation.
 
 ---
 
-## What is a GPU Kernel?
+### What is a GPU Kernel?
 
-A GPU kernel is a function that runs **in parallel across thousands of GPU threads simultaneously**. Unlike a CPU function that executes once per call, a kernel is launched with a **grid** of **blocks**, each containing many **threads**, all executing the same code on different data.
-
-```
-Grid
-└── Block [0]  Block [1]  Block [2]  ...
-     └── Thread[0..255]  (each processes one data element)
-```
+A GPU kernel is a function that runs in parallel across thousands of GPU threads simultaneously. Unlike a CPU function that executes once per call, a kernel is launched with a **grid** of **blocks**, each containing many **threads**, all executing the same code on different data.
 
 ### Core Concepts:
 
@@ -59,6 +53,19 @@ In HIP/CUDA, `__global__` marks a function as a GPU kernel:
 ```c
 __global__ void add_one(float* data, int n) { ... }
 ```
+
+### GPU Execution Model: Wavefronts
+
+GPU threads are scheduled in groups rather than completely independently; threads in a group execute the same instructions simultaneously. On AMD GPUs, these groups are called **wavefronts**.
+
+| Architecture | Execution Group |
+|---------------|----------------|
+| NVIDIA CUDA | Warp (32 threads) |
+| AMD ROCm / HIP | Wavefront (64 threads) |
+
+A wavefront is the smallest group of threads that the GPU scheduler executes simultaneously. All 64 threads in a wavefront execute the same instruction at the same time.
+
+This will become relevant later when discussing block size choices.
 
 ### Thread Indexing Model
 
@@ -119,57 +126,7 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 ---
 
 ## Installing Dependencies
-
-### 1. Uninstall Old Stack
-
-```bash
-pip uninstall torch torchvision torchaudio
-
-# Remove old ROCm
-sudo apt purge 'rocm*' 'hip*' 'hsa*' -y
-sudo rm -rf /opt/rocm*
-sudo rm -rf /etc/apt/sources.list.d/rocm*
-sudo apt autoremove -y
-sudo apt update
-```
-
-Verify it's gone: `rocminfo` shouldn't return anything.
-
-### 2. Install ROCm 7.1.1
-
-Check your Ubuntu version first:
-- **24.04** → `noble`
-- **22.04** → `jammy`
-
-```bash
-# Download the installer (noble shown; swap for jammy if needed)
-wget https://repo.radeon.com/amdgpu-install/7.1.1/ubuntu/noble/amdgpu-install_7.1.1.70101-1_all.deb
-
-# Install the package
-sudo DEBIAN_FRONTEND=noninteractive apt install -y ./amdgpu-install_7.1.1.70101-1_all.deb
-
-# Install ROCm + HIP
-sudo amdgpu-install --usecase=rocm,hip -y
-```
-
-Verify:
-```bash
-hipcc --version
-rocminfo
-```
-
-### 3. Install PyTorch for ROCm 7.1
-
-```bash
-pip install torch torchvision torchaudio \
-  --index-url https://download.pytorch.org/whl/rocm7.1
-```
-
-Verify:
-```bash
-python3 -c "import torch; print(torch.version.hip)"
-python3 -c "import torch; print(torch.cuda.is_available())"
-```
+Please refer to the [platform.md](platform.md) file.
 
 ---
 
@@ -177,11 +134,19 @@ python3 -c "import torch; print(torch.cuda.is_available())"
 
 ### Example 1: Simple Vector Addition
 
-#### Flow 1: High-Level: `add_one_kernel.py`
+#### Flow 1: High-Level: [`add_one_kernel.py`](assets/Vector%20Addition/add_one_kernel.py)
 
 Kernel is written as a raw C++ string inside Python and compiled at runtime via PyTorch's built-in JIT.
 
-**Files:** [add_one_kernel.py](assets/Vector%20Addition/add_one_kernel.py)
+#### Why Block Size = 256?
+The kernel uses **256 threads per block**. This value is commonly used because it aligns well with the **wavefront execution model of AMD GPUs**.
+
+Recall that AMD GPUs execute threads in groups of 64 threads, called a wavefront.
+```
+256 threads per block = 4 wavefronts per block
+                      = 4 × 64 threads
+```
+This allows the GPU scheduler to keep multiple wavefronts active within a single block, which improves scheduling efficiency and helps keep compute units busy.
 
 **How it works:**
 
@@ -235,6 +200,7 @@ Elapsed time: 2.347s
 Peak GPU Utilization: 94%
 Average GPU Utilization: 67.06%
 ```
+**Nice work! You just ran your first GPU kernel.**
 
 ---
 
@@ -274,6 +240,14 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     m.def("add_one", &add_one_launcher, "Add one kernel (HIP)");
 }
 ```
+
+#### Why `hipDeviceSynchronize()`?
+
+GPU kernel launches are asynchronous. When the CPU launches a kernel like this:
+```
+add_one<<<grid_size, block_size>>>(data, n);
+```
+the CPU immediately continues executing the next instruction without waiting for the GPU to finish. `hipDeviceSynchronize()` forces the CPU to block until the GPU kernel completes.
 
 **Step 2: Build** ([setup.py](assets/Vector%20Addition/setup.py)):
 ```bash
@@ -369,13 +343,9 @@ grid_x = ceil(P / 16)   # enough blocks to span all P columns
 grid_y = ceil(M / 16)   # enough blocks to span all M rows
 ```
 
----
-
-#### Flow 1: High-Level: `matmul_kernel.py`
+#### Flow 1: High-Level: [`matmul_kernel.py`](assets/Matrix%20Multiplication/matmul_kernel.py)
 
 Kernel is written as a raw C++ string inside Python and compiled at runtime via PyTorch's built-in JIT. Identical workflow to Example 1, only the kernel body and launch dimensions change.
-
-**Files:** [matmul_kernel.py](assets/Matrix%20Multiplication/matmul_kernel.py)
 
 **How it works:**
 
@@ -413,7 +383,7 @@ The row-major memory layout of the tensors maps directly to how the kernel index
 - `A[row * N + k]` — row `row`, column `k`
 - `B[k * P + col]`  — row `k`, column `col`
 
-The script spawns the same background monitoring thread from Example 1 (`rocm-smi` polled every 100ms) and verifies the result against `torch.mm`.
+The script spawns the same background monitoring thread from Example 1 (`rocm-smi` polled every 100ms) and verifies the result against `torch.mm`. Floating-point arithmetic on GPUs may produce small numerical differences compared to CPU implementations due to parallel reduction order. This is why we verify the result using a tolerance (`max error`) instead of exact equality.
 
 **Run:**
 ```bash
@@ -482,9 +452,9 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 ```
 
 Compared to `add_one_launcher` in Example 1, the launcher here:
-- Takes **two** input tensors instead of one
+- Takes two input tensors instead of one
 - Derives all three dimensions (M, N, P) from tensor shapes, no manual size passing from Python
-- Allocates and **returns** the output tensor C, rather than mutating in-place
+- Allocates and returns the output tensor C, rather than mutating in-place
 - Uses `dim3` for both grid and block to express the 2D launch shape
 
 **Step 2: Build** ([setup.py](assets/Matrix%20Multiplication/setup.py)):
@@ -520,17 +490,24 @@ tensor([[19., 22.],
 >>> (C - torch.mm(A, B)).abs().max()
 tensor(0., device='cuda:0')
 ```
+**Awesome! You just implemented matrix multiplication on the GPU.** This is a major milestone because matrix multiplication is the backbone of modern machine learning. Operations like:
+- Neural network layers
+- Attention mechanisms
+- Embeddings
+- Transformers
 
 ---
 
 ## Next Steps
 
-Once you understand the naive matmul kernel, you can explore more advanced GPU strategies:
-- Each product A[row][k] * B[k][col] is independent. Instead of one thread computing the full dot product, multiple threads can compute partial sums and then reduce them together.
+Once you understand the naive matmul kernel, you can explore more advanced GPU strategies. You may take one step further and implement these improvements:
+- Instead of reading every value of A and B from global memory repeatedly, blocks of threads load tiles into shared memory and reuse them across many multiply-add operations.
+  
+- Each product `A[row][k] * B[k][col]` is independent. Instead of one thread computing the full dot product, multiple threads can compute partial sums and then reduce them together.
 
-- Instead of computing one output element, a thread can compute a tile of outputs (e.g., 4×4). This allows reuse of loaded A and B values across multiple accumulations, improving arithmetic intensity.
+- Rather than computing a single element per thread, a thread can compute a small tile (e.g., 4×4) of the output. This increases data reuse from shared memory and improves arithmetic intensity.
 
-You may take one step further and implement these real-world GPU workloads:
-- **2D Convolution (Image Filtering)**: A small filter (kernel) slides across an image, computing each output pixel from a weighted sum of neighboring pixels. This introduces **stencil computations and shared memory tiling**, where threads reuse overlapping image regions to reduce global memory access.
+You may also implement real-world GPU workloads:
+- **2D Convolution (Image Filtering)**: A small filter (kernel) slides across an image, computing each output pixel from a weighted sum of neighboring pixels. This introduces stencil computations and shared memory tiling, where threads reuse overlapping image regions to reduce global memory access.
 
-- **Softmax Function**: Softmax converts a vector of numbers into probabilities that sum to 1, commonly used in neural network outputs. Implementing it efficiently on GPU introduces **parallel reductions and numerical stability techniques** while processing large vectors.
+- **Softmax Function**: Softmax converts a vector of numbers into probabilities that sum to 1, commonly used in neural network outputs. Implementing it efficiently on GPU introduces parallel reductions and numerical stability techniques while processing large vectors.
