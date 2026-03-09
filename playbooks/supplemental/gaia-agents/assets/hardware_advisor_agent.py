@@ -72,7 +72,15 @@ Always use tools to get real data - never guess specifications."""
                         for l in result.stdout.strip().split("\n")
                         if l.strip()
                     ]
+                    # Skip virtual/remote adapters that aren't real GPUs
+                    skip_keywords = [
+                        "microsoft remote display",
+                        "microsoft basic display",
+                        "remote desktop",
+                    ]
                     # CSV format: "Name","AdapterRAM"
+                    # Collect all valid GPUs and pick the one with the most VRAM
+                    candidates = []
                     for line in lines[1:]:  # Skip header
                         # Remove quotes and split
                         line = line.replace('"', "")
@@ -84,16 +92,21 @@ Always use tools to get real data - never guess specifications."""
                                     int(parts[1]) if parts[1].strip().isdigit() else 0
                                 )
                                 if name and len(name) > 0:
-                                    return {
+                                    if any(k in name.lower() for k in skip_keywords):
+                                        continue
+                                    candidates.append({
                                         "name": name,
                                         "memory_mb": (
                                             adapter_ram // (1024 * 1024)
                                             if adapter_ram > 0
                                             else 0
                                         ),
-                                    }
+                                    })
                             except (ValueError, IndexError):
                                 continue
+                    if candidates:
+                        # Return the GPU with the most VRAM
+                        return max(candidates, key=lambda g: g["memory_mb"])
 
             elif system == "Linux":
                 # Use lspci to find VGA devices
@@ -101,15 +114,20 @@ Always use tools to get real data - never guess specifications."""
                     ["lspci"], capture_output=True, text=True, timeout=5
                 )
                 if result.returncode == 0:
+                    candidates = []
                     for line in result.stdout.split("\n"):
                         if "VGA compatible controller" in line:
                             # Extract GPU name after the colon
                             parts = line.split(":", 2)
                             if len(parts) >= 3:
-                                return {
+                                candidates.append({
                                     "name": parts[2].strip(),
                                     "memory_mb": 0,  # Memory not available via lspci
-                                }
+                                })
+                    if candidates:
+                        # Prefer AMD GPUs if present, otherwise return first
+                        amd_gpus = [g for g in candidates if "amd" in g["name"].lower() or "radeon" in g["name"].lower()]
+                        return amd_gpus[0] if amd_gpus else candidates[0]
 
         except Exception as e:
             # Debug output
@@ -296,8 +314,7 @@ def main():
         print("Agent ready!\n")
     except Exception as e:
         print(f"Error initializing agent: {e}")
-        print("\nMake sure Lemonade server is running.")
-        print("GAIA will start it automatically on first use.")
+        print("\nMake sure Lemonade Server is running before using GAIA.")
         return
 
     # Interactive loop

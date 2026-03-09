@@ -48,6 +48,6 @@ gaia chat
 
 Type a message and press Enter. Type `quit` to exit.
 
-> **Tip**: GAIA automatically starts Lemonade Server on first use if it's not already running.
+> **Important**: Make sure Lemonade Server is running before using GAIA. GAIA requires Lemonade Server to be started manually.
 
 For more information, see the [GAIA documentation](https://amd-gaia.ai).
