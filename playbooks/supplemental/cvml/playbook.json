@@ -1,6 +1,6 @@
 {
   "id": "cvml",
-  "title": "Local Perception Capability with CVML SDK",
+  "title": "Local Computer Vision with Ryzen AI NPU",
   "description": "Build local perception capabilities using CVML SDK on top of RyzenAI and ROCm",
   "time": 60,
   "platforms": ["linux", "windows"],

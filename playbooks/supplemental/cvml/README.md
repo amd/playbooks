@@ -1,4 +1,4 @@
-# Local Perception Capability with CVML SDK
+# Local Computer Vision with Ryzen AI NPU
 
 ## Overview
 
@@ -24,19 +24,34 @@ Before starting, ensure you have the following:
 <!-- @require:driver -->
 
 <!-- @os:windows -->
-- [AMD Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html)
+- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) (Windows installer)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/) with the "Desktop development with C++" workload (includes MSVC compiler, Windows SDK, and C++ build tools)
 <!-- @os:end -->
 
 <!-- @os:linux -->
 - Ubuntu 22.04 or 24.04 (kernel >= 6.11.0-21-generic)
-- [AMD Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html)
-- Vulkan SDK
+- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/1.6.1/linux.html#install-npu-drivers) (Linux installer — required for NPU inference)
+- Vulkan SDK (installed in the [Linux-Specific Setup](#linux-specific-setup) section below)
 <!-- @os:end -->
 
 ## Setting Up the CVML Library
 
 Clone the Ryzen AI Software repository to get the CVML Library:
+
+> **Note:** This repository uses [Git LFS](https://git-lfs.com/) for large binary files (`.so`, `.dll`, etc.). Make sure Git LFS is installed before cloning, otherwise the shared libraries will be placeholder text files and the build will fail.
+
+<!-- @os:linux -->
+```bash
+sudo apt install git-lfs
+git lfs install
+```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```cmd
+git lfs install
+```
+<!-- @os:end -->
 
 ```bash
 git clone https://github.com/amd/RyzenAI-SW.git
@@ -138,12 +153,14 @@ The CVML Library includes ready-to-build sample applications for each feature. L
 
    <!-- @os:windows -->
    ```cmd
+   rem Set the OpenCV path (Windows)
    set OPENCV_INSTALL_ROOT=C:\path\to\opencv
    ```
    <!-- @os:end -->
 
    <!-- @os:linux -->
    ```bash
+   # Set the OpenCV path (Linux)
    export OPENCV_INSTALL_ROOT=/path/to/opencv
    ```
    <!-- @os:end -->
@@ -168,15 +185,37 @@ The CVML Library includes ready-to-build sample applications for each feature. L
    ```
    <!-- @os:end -->
 
+   After a successful build, the executables are located in:
+
+   <!-- @os:windows -->
+   ```
+   samples\build\cvml-sample-face-detection\Release\cvml-sample-face-detection.exe
+   samples\build\cvml-sample-depth-estimation\Release\cvml-sample-depth-estimation.exe
+   samples\build\cvml-sample-face-mesh\Release\cvml-sample-face-mesh.exe
+   ```
+   <!-- @os:end -->
+
+   <!-- @os:linux -->
+   ```
+   samples/build/cvml-sample-face-detection/cvml-sample-face-detection
+   samples/build/cvml-sample-depth-estimation/cvml-sample-depth-estimation
+   samples/build/cvml-sample-face-mesh/cvml-sample-face-mesh
+   ```
+   <!-- @os:end -->
+
 3. Before running any sample, ensure the CVML runtime files are accessible:
 
    <!-- @os:windows -->
-   Either copy the `.DLL` and `.GRAPHLIB` files from the `windows/` folder into the same directory as the built executables, or add the `windows/` folder to your `PATH` environment variable.
+   ```cmd
+   rem Add the CVML runtime folder to PATH (Windows)
+   set PATH=%CD%\..\windows;%PATH%
+   ```
    <!-- @os:end -->
 
    <!-- @os:linux -->
    ```bash
-   export LD_LIBRARY_PATH=/path/to/Ryzen-AI-CVML-Library/linux:$LD_LIBRARY_PATH
+   # Add the CVML runtime folder to LD_LIBRARY_PATH (Linux)
+   export LD_LIBRARY_PATH=$PWD/../linux:$LD_LIBRARY_PATH
    export LD_LIBRARY_PATH=/opt/xilinx/xrt/lib:$LD_LIBRARY_PATH
    ```
    <!-- @os:end -->
@@ -185,10 +224,10 @@ The CVML Library includes ready-to-build sample applications for each feature. L
 
 The face detection sample detects faces in an image, video, or live camera feed. It draws bounding boxes, confidence scores, and five facial landmarks (two eyes, nose, and two mouth edges) on each detected face.
 
-First, download a sample image to use as input (photo by [SHVETS production](https://www.pexels.com/photo/young-woman-filming-video-in-light-apartment-7516247/), free to use via Pexels):
+First, download a sample image to use as input (photo by [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), free to use via Pexels):
 
 ```bash
-curl -L -o sample_face.jpg "https://images.pexels.com/photos/7516247/pexels-photo-7516247.jpeg?cs=srgb&dl=pexels-shvets-production-7516247.jpg&fm=jpg"
+curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
 ```
 
 **Run face detection on the sample image:**
@@ -206,6 +245,10 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 <!-- @os:end -->
 
 A window will appear showing the image with a green bounding box around the detected face, a yellow confidence score, and red landmark dots (eyes, nose, mouth edges).
+
+<p align="center">
+  <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
+</p>
 
 **Save the annotated output to a file:**
 
