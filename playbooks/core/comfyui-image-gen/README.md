@@ -89,8 +89,11 @@ $req = Join-Path $installRoot "resources\ComfyUI\requirements.txt"
 if (-not (Test-Path $py))  { throw "ComfyUI workspace python not found: $py" }
 if (-not (Test-Path $req)) { throw "ComfyUI requirements.txt not found: $req" }
 
-& $py -m pip install -r $req
-if ($LASTEXITCODE -ne 0) { throw "Failed to sync ComfyUI requirements into workspace venv." }
+& $py -m pip install --upgrade --force-reinstall --no-cache-dir comfyui-frontend-package
+if ($LASTEXITCODE -ne 0) { throw "Failed to install comfyui-frontend-package into workspace venv." }
+
+& $py -c "import importlib.metadata as m; print(m.version('comfyui-frontend-package'))"
+if ($LASTEXITCODE -ne 0) { throw "comfyui-frontend-package metadata still missing after install." }
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
