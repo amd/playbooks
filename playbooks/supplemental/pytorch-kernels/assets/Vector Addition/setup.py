@@ -7,7 +7,7 @@ setup(
         CUDAExtension(
             name="add_one_ext",
             sources=[
-                "add_one_kernel.cu",
+                "assets/Vector Addition/add_one_kernel.cu",
             ],
         )
     ],
