@@ -113,7 +113,9 @@ print("PASS: All imports successful")
 import os
 import subprocess
 import sys
+
 os.environ["QUICK_TRAIN"] = "1"
+os.environ["QUICK_TRAIN_MODEL"] = "unsloth/gemma-3-4b-it"
 r = subprocess.run([sys.executable, "train_lora.py"], timeout=600)
 sys.exit(r.returncode)
 ```

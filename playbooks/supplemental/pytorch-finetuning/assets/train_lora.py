@@ -49,9 +49,9 @@ def cleanup_gpu_memory():
             torch.cuda.empty_cache()
             torch.cuda.synchronize()
             torch.cuda.empty_cache()
-        print("✓ GPU memory cleaned up")
+        print("GPU memory cleanup complete.")
     except Exception as e:
-        print(f"⚠ Warning during cleanup: {e}")
+        print(f"[Warning] during cleanup: {e}")
 
 
 # -----------------------
@@ -89,6 +89,10 @@ GRAD_ACCUM_STEPS = 8           # Increased to maintain effective batch size of 1
 # -----------------------
 print("Loading dataset...")
 QUICK_TRAIN = os.environ.get("QUICK_TRAIN") == "1"
+if QUICK_TRAIN and os.environ.get("QUICK_TRAIN_MODEL"):
+    MODEL = os.environ["QUICK_TRAIN_MODEL"]
+    model_name = MODEL.split("/")[-1]
+    print(f"QUICK_TRAIN=1: using non-gated model for smoke test: {MODEL}")
 n_samples = 8 if QUICK_TRAIN else 1000
 if QUICK_TRAIN:
     print("QUICK_TRAIN=1: using 1 step and a tiny dataset (smoke test).")
@@ -113,8 +117,9 @@ print(f"Train samples: {len(ds['train'])}, Test samples: {len(ds['test'])}")
 # Load Model and Tokenizer
 # -----------------------
 print(f"\nLoading {MODEL}...")
-print("Note: Model is stored as MXFP4 on Hugging Face but will be loaded as BF16 for training")
-print("(This is expected - the warning about MXFP4 is informational)\n")
+if "gemma" in MODEL.lower():
+    print("Note: Model is stored as MXFP4 on Hugging Face but will be loaded as BF16 for training")
+    print("(This is expected - the warning about MXFP4 is informational)\n")
 
 model = AutoModelForCausalLM.from_pretrained(
     MODEL,
