@@ -4,8 +4,7 @@
 
 This tutorial provides step-by-step examples for fine-tuning a large language model with PyTorch and ROCm on AMD Strix Halo. It covers several techniques, from standard fine-tuning to memory-efficient PEFT strategies, so you can easily adapt models for your needs.
 
-**Model Used**: google/gemma-3-4b-it  
-*(this model is gated; see [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models))*  
+**Model Used**: google/gemma-3-4b-it  *(see [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) if gated)*  
 **Hardware**: AMD Strix Halo with ROCm support  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, TRL)
 
