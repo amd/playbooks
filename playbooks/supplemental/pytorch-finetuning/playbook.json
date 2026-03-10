@@ -14,5 +14,5 @@
   "developed": false,
   "published": true,
   "tags": ["pytorch", "fine-tuning", "llm", "rocm"],
-  "coverImage": "assets/cover_image.png"
+  "coverImage": "assets/cover_image.jpg"
 }
