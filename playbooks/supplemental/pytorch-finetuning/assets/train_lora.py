@@ -164,6 +164,22 @@ print(f"Trainable params: {trainable_params:,} ({100 * trainable_params / total_
 print(f"Total params: {total_params:,}")
 print(f"LoRA rank: {LORA_R}")
 print(f"LoRA alpha: {LORA_ALPHA}")
+
+# -----------------------
+# Mixed precision: use bf16 if supported, else fp16, else fp32
+# -----------------------
+_use_bf16 = False
+_use_fp16 = False
+if torch.cuda.is_available():
+    if getattr(torch.cuda, "is_bf16_supported", None) and torch.cuda.is_bf16_supported():
+        _use_bf16 = True
+        print("Using bf16 mixed precision.")
+    else:
+        _use_fp16 = True
+        print("bf16 not supported; using fp16 mixed precision.")
+else:
+    print("No GPU / bf16 not available; using fp32.")
+
 # -----------------------
 # Training Configuration
 # -----------------------
@@ -183,9 +199,9 @@ args = SFTConfig(
     # Optimizer
     optim="adamw_torch_fused",
     
-    # Mixed precision
-    bf16=True,
-    fp16=False,
+    # Mixed precision (set from runtime bf16/fp16 support check above)
+    bf16=_use_bf16,
+    fp16=_use_fp16,
     
     # Learning rate schedule
     lr_scheduler_type="cosine",
