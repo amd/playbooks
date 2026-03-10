@@ -5,8 +5,8 @@
   "time": 45,
   "platforms": ["windows", "linux"],
   "tested_platforms": {
-    "windows": [],
-    "linux": []
+    "windows": ["halo", "krk"],
+    "linux": ["halo"]
   },
   "difficulty": "intermediate",
   "isNew": false,
