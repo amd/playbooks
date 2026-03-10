@@ -126,7 +126,7 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 ---
 
 ## Installing Dependencies
-Please refer to the [platform.md](platform.md) file.
+<!-- @require:pytorch -->
 
 ---
 
