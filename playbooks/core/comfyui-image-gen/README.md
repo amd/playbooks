@@ -78,6 +78,22 @@ set -euo pipefail
 <!-- @test:end --> 
 <!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=comfyui-sync-requirements-windows timeout=600 -->
+```powershell
+$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
+$py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
+$req = Join-Path $installRoot "resources\ComfyUI\requirements.txt"
+
+if (-not (Test-Path $py))  { throw "ComfyUI workspace python not found: $py" }
+if (-not (Test-Path $req)) { throw "ComfyUI requirements.txt not found: $req" }
+
+& $py -m pip install -r $req
+if ($LASTEXITCODE -ne 0) { throw "Failed to sync ComfyUI requirements into workspace venv." }
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 <!-- @os:windows --> 
 <!-- @test:id=comfyui-backend-usable-windows timeout=120 hidden=True -->
