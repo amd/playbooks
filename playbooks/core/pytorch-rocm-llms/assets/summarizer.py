@@ -47,7 +47,7 @@ class DocumentSummarizer:
             torch_dtype=torch.bfloat16,
             device_map="auto"
         )
-        print("✓ Model ready!\n")
+        print("[OK] Model ready!\n")
     
     def cleanup(self):
         """Release GPU memory and cleanup resources"""
@@ -56,7 +56,7 @@ class DocumentSummarizer:
         if hasattr(self, 'tokenizer'):
             del self.tokenizer
         torch.cuda.empty_cache()
-        print("✓ Cleaned up GPU memory")
+        print("[OK] Cleaned up GPU memory")
     
     def _build_messages(self, text):
         """
@@ -139,7 +139,7 @@ def main():
     parser = argparse.ArgumentParser(description="Summarize documents using LLMs")
     parser.add_argument("--model", default="gptoss", choices=["mistral", "gptoss"], help="Model to use (default: gptoss)")
     parser.add_argument("--file", default=None, help="Path to .txt file to summarize")
-    parser.add_argument("--max-length", type=int, default=150, help="Maximum tokens to generate (default: 150)")
+    parser.add_argument("--max-length", type=int, default=250, help="Maximum tokens to generate (default: 150)")
     parser.add_argument("--temperature", type=float, default=0.3, help="Sampling temperature 0.1-1.0 (default: 0.3)")
     args = parser.parse_args()
     
@@ -150,7 +150,7 @@ def main():
         try:
             with open(args.file, 'r', encoding='utf-8') as f:
                 document = f.read()
-            print(f"✓ Loaded: {args.file}\n")
+            print(f"[OK] Loaded: {args.file}\n")
         except Exception as e:
             print(f"✗ Error: {e}")
             return
@@ -173,7 +173,7 @@ new architectures, training techniques, and applications emerging regularly."""
     print("Generating summary...")
     summary = summarizer.summarize(document, args.max_length, args.temperature)
     print(summary)
-    print(f"\n✓ Done! (max_length={args.max_length}, temperature={args.temperature})\n")
+    print(f"\n[OK] Done! (max_length={args.max_length}, temperature={args.temperature})\n")
     
     # Cleanup
     summarizer.cleanup()

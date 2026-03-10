@@ -34,7 +34,7 @@ CATEGORIES = ["core", "supplemental", "backup"]
 ALLOWED_ITEMS = {"README.md", "playbook.json", "platform.md", "assets"}
 
 # Required fields in playbook.json (based on PlaybookMeta interface)
-REQUIRED_FIELDS = ["id", "title", "description", "time", "platforms", "published"]
+REQUIRED_FIELDS = ["id", "title", "description", "time", "platforms", "developed", "published"]
 
 # Valid values for enum fields
 VALID_PLATFORMS = ["windows", "linux"]
@@ -244,6 +244,12 @@ def validate_playbook_json(
         result.add_error(
             playbook_name,
             f'Field "time" must be a number (minutes), got: {type(meta["time"]).__name__}',
+        )
+
+    if "developed" in meta and not isinstance(meta["developed"], bool):
+        result.add_error(
+            playbook_name,
+            f'Field "developed" must be a boolean, got: {type(meta["developed"]).__name__}',
         )
 
     if "published" in meta and not isinstance(meta["published"], bool):

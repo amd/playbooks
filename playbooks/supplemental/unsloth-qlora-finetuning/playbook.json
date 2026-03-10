@@ -4,9 +4,13 @@
   "description": "Use Unsloth for memory-efficient QLoRA fine-tuning on STX Halo™",
   "time": 90,
   "platforms": ["linux"],
+  "tested_platforms": {
+    "linux": []
+  },
   "difficulty": "advanced",
   "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["unsloth", "qlora", "fine-tuning", "optimization"]
 }

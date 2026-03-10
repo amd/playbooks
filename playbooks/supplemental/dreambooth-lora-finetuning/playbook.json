@@ -4,9 +4,14 @@
   "description": "Fine-tune image generation models using DreamBooth and LoRA techniques on your STX Halo™",
   "time": 90,
   "platforms": ["linux", "windows"],
+  "tested_platforms": {
+    "linux": [],
+    "windows": []
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
   "tags": ["dreambooth", "lora", "fine-tuning", "image-generation"]
 }

@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import type { Playbook, PlaybookMeta, Category, TestInfo, TestCoverageInfo } from "@/types/playbook";
+import { loadAllGitHubTestResults } from "@/lib/github-test-results";
+import type { DeviceTestResult } from "@/lib/github-test-results";
 
 const PLAYBOOKS_ROOT = path.join(process.cwd(), "..", "playbooks");
 const DEPENDENCIES_ROOT = path.join(PLAYBOOKS_ROOT, "dependencies");
-const TEST_RESULTS_ROOT = path.join(process.cwd(), "..", "test-results");
-const SHOW_COVERAGE = process.env.SHOW_TEST_COVERAGE === "true";
+
+type ResultsMap = Record<string, { success: boolean; skipped: boolean; duration: number; error: string }>;
 
 interface DependencyRegistry {
   dependencies: Record<string, {
@@ -91,27 +93,23 @@ function loadSetupContent(setupId: string): string | null {
 
 /**
  * Processes @test tags found inside dependency content loaded via @require.
- * 
- * Unlike processTestTags (which may hide code blocks for hidden tests),
- * this always keeps code blocks visible since they are the dependency's
- * installation instructions shown in the pre-installed dropdown.
- * 
+ *
  * Normal mode: strips @test tag comments, keeps code blocks, strips #hide lines.
  * Coverage mode: replaces test blocks with coverage marker divs inline so
  *   they render as badges inside the pre-installed dropdown itself.
- * 
+ *
  * Returns the processed dependency content and extracted TestInfo for
  * merging into the playbook's overall test coverage stats.
  */
 function processDependencyTestTags(
   depContent: string,
-  playbookId: string,
+  showCoverage: boolean,
+  resultsMap: ResultsMap,
+  deviceResultsList?: DeviceTestResult[],
 ): { processedContent: string; tests: TestInfo[]; codeBlockCount: number } {
   const testBlockPattern = /<!-- @test:([^>]+) -->\s*(```\w*\s*\n[\s\S]*?```)\s*<!-- @test:end -->/g;
   const tests: TestInfo[] = [];
-  const { resultsMap } = SHOW_COVERAGE ? loadTestResults(playbookId) : { resultsMap: {} };
 
-  // Count code blocks before processing (on the original content)
   const codeBlockCount = (depContent.match(/```\w*\s*\n/g) || []).length;
 
   const processedContent = depContent.replace(testBlockPattern, (_match, attrStr: string, codeBlock: string) => {
@@ -124,18 +122,20 @@ function processDependencyTestTags(
     const testInfo: TestInfo = { id: testId, timeout, hidden };
     const result = resultsMap[testId];
     if (result) testInfo.result = result;
+    if (deviceResultsList) {
+      const dr: Record<string, typeof result> = {};
+      for (const d of deviceResultsList) {
+        if (d.resultsMap[testId]) dr[`${d.device}-${d.platform}`] = d.resultsMap[testId];
+      }
+      if (Object.keys(dr).length > 0) testInfo.deviceResults = dr;
+    }
     tests.push(testInfo);
 
-    if (SHOW_COVERAGE) {
-      // In coverage mode: replace the test block with a coverage marker div
-      // inline in the dependency content. The dropdown component renders these
-      // as TestCoverageBlock badges, just like the main content does.
+    if (showCoverage) {
       const encodedCode = encodeURIComponent(codeBlock);
       return `<div class="test-coverage-block" data-test-id="${testId}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
     }
 
-    // Normal mode: strip test tags but keep the code block visible
-    // (it's the installation instruction). Strip #hide lines for clean display.
     return stripHideLines(codeBlock);
   });
 
@@ -145,30 +145,29 @@ function processDependencyTestTags(
 /**
  * Transforms @require tags into @preinstalled blocks with dependency content.
  * Also extracts and processes any @test tags found inside dependencies.
- * 
- * Syntax: 
+ *
+ * Syntax:
  *   <!-- @require:dependency-id -->           (single dependency)
  *   <!-- @require:dep1,dep2,dep3 -->          (multiple dependencies, single dropdown)
- * 
- * This allows playbooks to reference shared dependency installation instructions
- * from the central dependencies folder. Multiple dependencies are combined into
- * a single "Already pre-installed" dropdown.
- * 
+ *
  * Returns the modified content plus any test info extracted from dependencies,
  * so they can be merged into the playbook's overall test coverage.
  */
-function processRequireTags(content: string, playbookId: string): {
+function processRequireTags(
+  content: string,
+  showCoverage: boolean,
+  resultsMap: ResultsMap,
+  deviceResultsList?: DeviceTestResult[],
+): {
   content: string;
   dependencyTests: TestInfo[];
   dependencyCodeBlocks: number;
 } {
-  // Match @require with one or more comma-separated dependency IDs
   const requirePattern = /<!-- @require:([a-z0-9-,]+) -->/g;
   const allDependencyTests: TestInfo[] = [];
   let totalDependencyCodeBlocks = 0;
   
   const processed = content.replace(requirePattern, (_match, dependencyIds: string) => {
-    // Split by comma and trim whitespace
     const ids = dependencyIds.split(',').map((id: string) => id.trim()).filter(Boolean);
     
     const contents: string[] = [];
@@ -177,10 +176,9 @@ function processRequireTags(content: string, playbookId: string): {
     for (const depId of ids) {
       const depContent = loadDependencyContent(depId);
       if (depContent) {
-        // Process test tags inside the dependency content
-        const { processedContent: processed, tests, codeBlockCount } =
-          processDependencyTestTags(depContent, playbookId);
-        contents.push(processed);
+        const { processedContent: proc, tests, codeBlockCount } =
+          processDependencyTestTags(depContent, showCoverage, resultsMap, deviceResultsList);
+        contents.push(proc);
         allDependencyTests.push(...tests);
         totalDependencyCodeBlocks += codeBlockCount;
       } else {
@@ -196,9 +194,6 @@ function processRequireTags(content: string, playbookId: string): {
       return `<!-- Dependencies "${dependencyIds}" not found -->`;
     }
     
-    // Combine all dependency contents with a separator and wrap in @preinstalled tags.
-    // In coverage mode the dependency content already contains inline coverage
-    // marker divs that the frontend dropdown will render as test badges.
     const combinedContent = contents.join('\n\n---\n\n');
     return `<!-- @preinstalled -->\n${combinedContent}\n<!-- @preinstalled:end -->`;
   });
@@ -228,32 +223,6 @@ function parseTestAttributes(attrString: string): Record<string, unknown> {
 }
 
 /**
- * Loads test results for a playbook from test-results/{id}/summary.json
- */
-function loadTestResults(playbookId: string): { resultsMap: Record<string, { success: boolean; skipped: boolean; duration: number; error: string }>; summary?: { passed: number; failed: number; skipped: number } } {
-  const resultsPath = path.join(TEST_RESULTS_ROOT, playbookId, "summary.json");
-  if (!fs.existsSync(resultsPath)) return { resultsMap: {} };
-  try {
-    const raw = JSON.parse(fs.readFileSync(resultsPath, "utf-8"));
-    const resultsMap: Record<string, { success: boolean; skipped: boolean; duration: number; error: string }> = {};
-    for (const r of raw.results || []) {
-      resultsMap[r.test_id] = {
-        success: r.success,
-        skipped: r.skipped ?? false,
-        duration: r.duration ?? 0,
-        error: r.error_message ?? "",
-      };
-    }
-    return {
-      resultsMap,
-      summary: { passed: raw.passed ?? 0, failed: raw.failed ?? 0, skipped: raw.skipped ?? 0 },
-    };
-  } catch {
-    return { resultsMap: {} };
-  }
-}
-
-/**
  * Strips lines ending with `#hide` from a fenced code block.
  * These lines are executed by the test runner but invisible to website readers.
  * Preserves the code fence delimiters (``` lines).
@@ -267,24 +236,30 @@ function stripHideLines(codeBlock: string): string {
 
 /**
  * Processes @test tags used for CI testing.
- * 
- * Normal mode (default):
+ *
+ * Normal mode (no GitHub results available):
  *   The @test tags are stripped but the code block remains visible.
  *   If hidden=true, both the tags AND the code block are removed.
  *   Lines ending with #hide are stripped from the code block.
- * 
- * Coverage mode (SHOW_TEST_COVERAGE=true):
+ *
+ * Coverage mode (GitHub results available):
  *   @test tags are replaced with visible marker divs that the frontend
  *   renders as test-coverage badges on top of code blocks.
  *   Hidden blocks are kept visible with a "hidden test" indicator.
  *   Lines with #hide are kept and visually annotated by the frontend.
  *   Returns test metadata for the stats bar.
  */
-function processTestTags(content: string, playbookId: string): { content: string; testCoverage?: TestCoverageInfo } {
+function processTestTags(
+  content: string,
+  showCoverage: boolean,
+  resultsMap: ResultsMap,
+  resultsSummary?: { passed: number; failed: number; skipped: number },
+  deviceResultsList?: DeviceTestResult[],
+  deviceSummaries?: Record<string, { passed: number; failed: number; skipped: number }>,
+): { content: string; testCoverage?: TestCoverageInfo } {
   const testBlockPattern = /<!-- @test:([^>]+) -->\s*(```\w*\s*\n[\s\S]*?```)\s*<!-- @test:end -->/g;
 
-  if (!SHOW_COVERAGE) {
-    // Normal/user view: strip tags, hide hidden blocks, strip #hide lines
+  if (!showCoverage) {
     const processed = content.replace(testBlockPattern, (_match, attrs: string, codeBlock: string) => {
       const hiddenMatch = /hidden\s*=\s*(?:"true"|true)/i.exec(attrs);
       return hiddenMatch ? '' : stripHideLines(codeBlock);
@@ -294,27 +269,32 @@ function processTestTags(content: string, playbookId: string): { content: string
 
   // ── Coverage mode ──────────────────────────────────────────────
   const tests: TestInfo[] = [];
-  const { resultsMap, summary: resultsSummary } = loadTestResults(playbookId);
 
   const processed = content.replace(testBlockPattern, (_match, attrStr: string, codeBlock: string) => {
     const attrs = parseTestAttributes(attrStr);
     const testId = (attrs.id as string) || "unknown";
     const timeout = (attrs.timeout as number) || 300;
     const hidden = (attrs.hidden as boolean) || false;
-
     const setup = (attrs.setup as string) || "";
 
     const testInfo: TestInfo = { id: testId, timeout, hidden };
     const result = resultsMap[testId];
     if (result) testInfo.result = result;
+    if (deviceResultsList) {
+      const dr: Record<string, typeof result> = {};
+      for (const d of deviceResultsList) {
+        if (d.resultsMap[testId]) dr[`${d.device}-${d.platform}`] = d.resultsMap[testId];
+      }
+      if (Object.keys(dr).length > 0) testInfo.deviceResults = dr;
+    }
     tests.push(testInfo);
 
     const encodedCode = encodeURIComponent(codeBlock);
-    const marker = `<div class="test-coverage-block" data-test-id="${testId}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
-    return marker;
+    return `<div class="test-coverage-block" data-test-id="${testId}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
   });
 
   const totalCodeBlocks = (content.match(/```\w*\s*\n/g) || []).length;
+  const testedDevices = deviceResultsList?.map(d => `${d.device}-${d.platform}`) ?? [];
 
   return {
     content: processed,
@@ -324,6 +304,8 @@ function processTestTags(content: string, playbookId: string): { content: string
       visibleTestCount: tests.filter(t => !t.hidden).length,
       hiddenTestCount: tests.filter(t => t.hidden).length,
       resultsSummary,
+      deviceSummaries,
+      testedDevices: testedDevices.length > 0 ? testedDevices : undefined,
     },
   };
 }
@@ -332,52 +314,33 @@ function processTestTags(content: string, playbookId: string): { content: string
  * Processes inline @setup:id=... definitions (reusable setup steps defined
  * directly in the README).
  *
- * Normal mode: strips the HTML comments (they are invisible anyway, but be explicit).
+ * Normal mode: strips the HTML comments.
  * Coverage mode: replaces them with visible marker divs so the frontend can
- *   render them as "Setup Definition" badges, similar to hidden test blocks.
- *
- * These are distinct from the @setup:setup-id tags handled by processSetupTags,
- * which reference external setup files from the dependencies registry.
+ *   render them as "Setup Definition" badges.
  */
-function processSetupDefinitions(content: string): string {
-  // Match @setup definitions that contain key=value pairs (e.g. id=..., command=...)
-  // Distinguished from the old @setup:id format by the presence of '='
+function processSetupDefinitions(content: string, showCoverage: boolean): string {
   const setupDefPattern = /<!-- @setup:([^>]*\bid=[^>]+?) -->/g;
 
-  if (!SHOW_COVERAGE) {
-    // Normal/user view: strip definition comments
+  if (!showCoverage) {
     return content.replace(setupDefPattern, '');
   }
 
-  // Coverage mode: replace with visible marker divs
   return content.replace(setupDefPattern, (_match, attrStr: string) => {
     const attrs = parseTestAttributes(attrStr);
     const setupId = (attrs.id as string) || '';
     if (!setupId) return '';
-
     const command = (attrs.command as string) || '';
-
     return `<div class="setup-def-block" data-setup-id="${setupId}" data-command="${encodeURIComponent(command)}"></div>`;
   });
 }
 
 /**
- * Transforms @setup tags into @setup-content blocks with setup step content
- * 
- * Syntax: 
- *   <!-- @setup:setup-id -->           (single setup step)
- *   <!-- @setup:setup1,setup2 -->      (multiple setup steps)
- * 
- * This allows playbooks to reference shared system setup/configuration instructions
- * from the central dependencies folder. Unlike @require (for pre-installed software),
- * @setup is for configuration steps users need to perform.
+ * Transforms @setup tags into @setup-content blocks with setup step content.
  */
 function processSetupTags(content: string): string {
-  // Match @setup with one or more comma-separated setup IDs (supports underscores and hyphens)
   const setupPattern = /<!-- @setup:([a-z0-9_-]+(?:,[a-z0-9_-]+)*) -->/g;
   
   return content.replace(setupPattern, (_match, setupIds: string) => {
-    // Split by comma and trim whitespace
     const ids = setupIds.split(',').map((id: string) => id.trim()).filter(Boolean);
     
     const contents: string[] = [];
@@ -400,7 +363,6 @@ function processSetupTags(content: string): string {
       return `<!-- Setup steps "${setupIds}" not found -->`;
     }
     
-    // Combine all setup contents with a separator and wrap in @setup-content tags
     const combinedContent = contents.join('\n\n---\n\n');
     return `<!-- @setup-content -->\n${combinedContent}\n<!-- @setup-content:end -->`;
   });
@@ -412,7 +374,14 @@ function getCategory(categoryFolder: string): Category {
   return "backup";
 }
 
-function findPlaybook(id: string): Playbook | null {
+function findPlaybook(
+  id: string,
+  showCoverage: boolean,
+  resultsMap: ResultsMap,
+  resultsSummary?: { passed: number; failed: number; skipped: number },
+  deviceResultsList?: DeviceTestResult[],
+  deviceSummaries?: Record<string, { passed: number; failed: number; skipped: number }>,
+): Playbook | null {
   const categories = ["core", "supplemental", "backup"];
 
   for (const category of categories) {
@@ -444,15 +413,11 @@ function findPlaybook(id: string): Playbook | null {
           let testCoverage: TestCoverageInfo | undefined;
           if (fs.existsSync(readmePath)) {
             content = fs.readFileSync(readmePath, "utf-8");
-            // Process @test tags (strip tags, or emit coverage markers)
-            const testResult = processTestTags(content, meta.id);
+            const testResult = processTestTags(content, showCoverage, resultsMap, resultsSummary, deviceResultsList, deviceSummaries);
             content = testResult.content;
             testCoverage = testResult.testCoverage;
-            // Process inline @setup:id=... definitions (strip or emit coverage markers)
-            content = processSetupDefinitions(content);
-            // Process @require tags to inject shared dependency content
-            // Also extracts tests from dependencies for coverage tracking
-            const requireResult = processRequireTags(content, meta.id);
+            content = processSetupDefinitions(content, showCoverage);
+            const requireResult = processRequireTags(content, showCoverage, resultsMap, deviceResultsList);
             content = requireResult.content;
             // Merge dependency tests into the coverage data
             if (testCoverage && requireResult.dependencyTests.length > 0) {
@@ -489,7 +454,42 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const playbook = findPlaybook(id);
+
+  // Optional specific run ID — if omitted the latest nightly run is used.
+  const { searchParams } = new URL(request.url);
+  const runIdParam = searchParams.get("run_id");
+  const runId = runIdParam ? parseInt(runIdParam, 10) : undefined;
+
+  // Attempt to load test results from GitHub Actions artifacts.
+  // Coverage mode is only enabled when both SHOW_TEST_COVERAGE=true (i.e. running
+  // via `npm run dev:coverage`) AND a GitHub token is set and results are found.
+  let showCoverage = false;
+  let resultsMap: ResultsMap = {};
+  let resultsSummary: { passed: number; failed: number; skipped: number } | undefined;
+  let deviceResultsList: DeviceTestResult[] | undefined;
+  let deviceSummaries: Record<string, { passed: number; failed: number; skipped: number }> | undefined;
+
+  const coverageModeEnabled = process.env.SHOW_TEST_COVERAGE === "true";
+  const token = process.env.DASHBOARD_GITHUB_TOKEN?.trim();
+  if (coverageModeEnabled && token) {
+    showCoverage = true;
+    try {
+      const loaded = await loadAllGitHubTestResults(id, token, runId);
+      if (loaded) {
+        resultsMap = loaded.resultsMap;
+        resultsSummary = loaded.summary;
+        deviceResultsList = loaded.deviceResults;
+        deviceSummaries = {};
+        for (const dr of loaded.deviceResults) {
+          deviceSummaries[`${dr.device}-${dr.platform}`] = dr.summary;
+        }
+      }
+    } catch (err) {
+      console.error(`Failed to fetch GitHub test results for ${id}:`, err);
+    }
+  }
+
+  const playbook = findPlaybook(id, showCoverage, resultsMap, resultsSummary, deviceResultsList, deviceSummaries);
 
   if (!playbook) {
     return NextResponse.json(
@@ -500,4 +500,3 @@ export async function GET(
 
   return NextResponse.json(playbook);
 }
-

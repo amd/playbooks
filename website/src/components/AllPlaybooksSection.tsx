@@ -133,8 +133,8 @@ export default function AllPlaybooksSection() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-2">All Playbooks</h2>
           <p className="text-[#a0a0a0]">
-            Detailed instructions to set up and run popular AI workflows on STX
-            Halo™
+            Detailed instructions to set up and run popular AI workflows on AMD
+            hardware
           </p>
         </div>
 

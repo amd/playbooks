@@ -1,6 +1,6 @@
 ### Node.js
 
-Node.js 20.19.2 LTS (Iron) is the recommended version for this platform.
+Node.js 22.22.1 LTS is the recommended version for this platform.
 
 <!-- @os:windows -->
 
