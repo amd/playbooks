@@ -68,6 +68,8 @@ torch.cuda.synchronize()
 
 end = time.perf_counter()
 
+print("First 5 elements:", x[:5].cpu())
+
 monitoring = False
 monitor_thread.join()
 
