@@ -14,14 +14,15 @@ This playbook teaches you how to set up the Ryzen AI CVML Library, build the inc
 - How to run face detection on an image with bounding boxes and landmarks
 - How to integrate CVML features into your own C++ applications
 
-## Prerequisites
+## Installing Basic Dependencies
+<!-- @require:driver -->
+
+## Additional Dependencies
 
 Before starting, ensure you have the following:
 
 - [OpenCV 4.11](https://opencv.org/) downloaded and available on your system
 - CMake installed and available in your system PATH
-
-<!-- @require:driver -->
 
 <!-- @os:windows -->
 - [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) (Windows installer)
