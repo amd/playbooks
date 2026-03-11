@@ -7,6 +7,7 @@
   "difficulty": "beginner",
   "isNew": true,
   "isFeatured": false,
+  "developed": true,
   "published": true,
   "tags": ["ollama", "llm", "inference", "local", "api"]
 }
