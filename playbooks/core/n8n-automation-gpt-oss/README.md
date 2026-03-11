@@ -11,13 +11,13 @@ This playbook teaches you how to set up an AI-powered financial news summarizer 
 - Connecting to Lemonade using the native n8n integration
 - Understanding workflow nodes and data flow
 
-## Why Lemonade?
+## What is Lemonade?
 
 [Lemonade](https://lemonade-server.ai) is a local LLM serving platform built for AMD hardware. It provides an OpenAI-compatible API that runs entirely on your machine—your data never leaves your device.
 
-In this playbook, we use Lemonade to serve a local LLM that n8n connects to for AI-powered tasks. Unlike cloud-based LLM providers, Lemonade runs on your Ryzen™ AI Halo GPU, giving you full control over your models with zero API costs.
+In this playbook, we use Lemonade to serve a local LLM that n8n connects to for AI-powered tasks. 
 
-n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a first-class integration—no need to configure OpenAI-compatible endpoints manually. This makes connecting your local LLM to automation workflows straightforward.
+n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a first-class integration—no need for manual configuration. This makes connecting your local LLM to automation workflows straightforward.
 
 ## Prerequisites
 
@@ -78,7 +78,8 @@ npm -v
 
 ## Installing n8n
 
-Your STX Halo has Node.js pre-installed. Install n8n globally using npm:
+Your STX Halo has Node.js (and npm) pre-installed. Install n8n globally using npm.
+> **Note**: You may see many npm warnings. This is expected.
 
 ```bash
 npm install -g n8n
@@ -90,6 +91,10 @@ n8n --version
 ```
 <!-- @test:end -->
 
+<!-- @os:windows -->
+> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+> setting it to RemoteSigned or Bypass) before running some Powershell commands
+<!-- @os:end -->
 ## Launching n8n
 
 Start n8n from the terminal:
@@ -130,11 +135,13 @@ n8n starts a local web server. Open your browser to `http://localhost:5678` to a
 
 ## Launching Lemonade
 
-If Lemonade is not already running, launch it from the terminal:
+Lemonade is the local server that will run a model and connect to n8n. If Lemonade is not already running, launch it from another terminal:
 
 ```bash
 lemonade-server run gpt-oss-120b-mxfp4-GGUF --llamacpp rocm
 ```
+Alternatively, you can use the Lemonade GUI to load a model. 
+
 
 ## Setting Up the Workflow
 
@@ -143,18 +150,21 @@ lemonade-server run gpt-oss-120b-mxfp4-GGUF --llamacpp rocm
 When you first open n8n, you'll be prompted to create an account or log in:
 
 1. Open `http://localhost:5678` in your browser
-2. Create a new account with your email, or log in if you already have one
+2. Create a new local account with your email, or log in if you already have one
 3. Once logged in, you'll see the n8n dashboard
+
+> **Tip**: If locked out of your account, try `n8n user-management:reset`
 
 ### Step 2: Import the Workflow
 
 We've provided a pre-built workflow that you can import directly:
 
 1. Download the workflow file: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. If this is your first workflow, click **Start from Scratch** to open the workflow editor. Otherwise, click **Add workflow** in the top right.
-3. Click the **...** menu (three dots) in the top bar and select **Import from file**
+2. Click **Start from Scratch** to open the workflow editor. Alternatively, click the + Button in the top left, and then **Add workflow**.
+3. Click the **...** menu (three dots) in the top right bar and select **Import from file**
 4. Select the downloaded `financial-news-workflow.json` file
 5. The workflow will appear on the canvas
+
 
 ### Step 3: Understanding the Workflow
 
@@ -180,7 +190,7 @@ The imported workflow contains 7 connected nodes:
 
 Before running the workflow, you need to connect it to your local Lemonade server:
 
-1. Double click the **Lemonade Chat Model** node
+1. Double click the **Lemonade Chat Model** node in n8n
 2. In the dropdown menu **Credential to connect with** select **Create New Credential**
 3. Enter the following settings:
 
@@ -189,7 +199,7 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 | **Base URL** | `http://localhost:8000/api/v1` |
 | **API Key** | `lemonade` |
 
-4. Click **Save**
+4. Choose your model and save/exit the node.
 
 > **Note**: Ensure Lemonade is running before testing. The workflow uses `gpt-oss-120b-mxfp4-GGUF` by default—you can change this in the Lemonade Chat Model node settings.
 
@@ -198,7 +208,8 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 1. Ensure Lemonade is running with a model loaded
 2. Click **Execute workflow** at the bottom center of the canvas
 3. Watch each node execute from left to right—they turn green when complete
-4. Click the **AI Financial News Summarizer** node to see the generated summary
+4. Click the **AI Financial News Summarizer** node to see the generated summary in the bottom pane.
+5. Click the **Convert to File** node to download the corresponding text file in the bottom pane.
 
 ## Understanding the AI Agent
 
