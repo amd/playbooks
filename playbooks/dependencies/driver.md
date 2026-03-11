@@ -24,7 +24,11 @@ Download and install the latest AMD GPU driver for Linux:
 
 <!-- @test:id=amd-gpu-visible-linux timeout=60 hidden=True -->
 ```bash
+set -euo pipefail
+sudo -n apt-get update -y
+sudo -n apt-get install -y rocm-smi
 rocm-smi
+rocm-smi --showproductname
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
