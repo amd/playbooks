@@ -37,8 +37,6 @@ Open WebUI setups are easiest when you keep this simple map in your head:
 | Backend (Model Server) | Hosts models and exposes HTTP endpoints | Lemonade, Ollama, vLLM, llama.cpp server, OpenAI-compatible servers |
 | Models | The actual LLM / vision / diffusion / audio models | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
 
-Open WebUI sends requests to a backend server, which runs the model and returns the result.
-
 #### Why “OpenAI-compatible API” matters
 
 Open WebUI is built around standard OpenAI-style endpoints, like: 
