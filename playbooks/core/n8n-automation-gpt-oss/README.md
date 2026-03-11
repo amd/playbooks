@@ -23,6 +23,59 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 
 <!-- @require:lemonade,nodejs -->
 
+<!-- @test:id=lemonade-version timeout=60 hidden=True -->
+```bash
+lemonade-server --version
+```
+<!-- @test:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-chat-gpt-oss-120b timeout=1200 hidden=True -->
+```powershell
+$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
+try {
+  # Wait for server to come up
+  $modelsJson = $null
+  for ($i=0; $i -lt 120; $i++) {
+    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
+    if ($modelsJson) { break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
+  Write-Host "OK: Lemonade server is responding"
+
+  # Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
+  $parsed = $modelsJson | ConvertFrom-Json
+  $entry  = $parsed.data | Where-Object { $_.id -eq "gpt-oss-120b-mxfp-GGUF" } | Select-Object -First 1
+  if (-not $entry) { throw "Model gpt-oss-120b-mxfp-GGUF is not present in Lemonade /api/v1/models." }
+  if (-not $entry.downloaded) { throw "Model gpt-oss-120b-mxfp-GGUF is present but not downloaded in Lemonade. Please download it." }
+  Write-Host "OK: gpt-oss-120b-mxfp-GGUF model is downloaded in Lemonade"
+
+  # Model chat test
+  $body = @{
+    model = "gpt-oss-120b-mxfp-GGUF"
+    messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+    temperature = 0
+    max_tokens = 32
+  } | ConvertTo-Json -Depth 5
+  $out = curl.exe -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+  if (-not $out) { throw "Empty response from Lemonade chat/completions" }
+} finally {
+  & lemonade-server stop
+  Start-Sleep -Seconds 2
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @test:id=node-npm-version timeout=60 hidden=True -->
+```bash
+node -v
+npm -v
+```
+<!-- @test:end -->
+
 ## Installing n8n
 
 Your STX Halo has Node.js pre-installed. Install n8n globally using npm:
@@ -31,6 +84,12 @@ Your STX Halo has Node.js pre-installed. Install n8n globally using npm:
 npm install -g n8n
 ```
 
+<!-- @test:id=n8n-version timeout=60 hidden=True -->
+```bash
+n8n --version
+```
+<!-- @test:end -->
+
 ## Launching n8n
 
 Start n8n from the terminal:
@@ -38,6 +97,32 @@ Start n8n from the terminal:
 ```bash
 n8n start
 ```
+
+<!-- @os:windows -->
+<!-- @test:id=n8n-start timeout=300 hidden=True -->
+```powershell
+$N8N_CMD = "$env:APPDATA\npm\n8n.cmd"
+$p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$N8N_CMD`" start" -NoNewWindow -PassThru
+try {
+  $ok = $false
+  for ($i=0; $i -lt 120; $i++) {
+    # Check HTTP status code only (body may be empty)
+    $code = curl.exe -s -o NUL -w "%{http_code}" --max-time 2 http://127.0.0.1:5678/healthz
+    if ($LASTEXITCODE -eq 0 -and $code -eq "200") { $ok = $true; break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ok) { throw "n8n not ready on http://127.0.0.1:5678/healthz" }
+  Write-Host "OK: n8n server is responding"
+} finally {
+  # Kill the process actually listening on 5678
+  $conn = Get-NetTCPConnection -LocalPort 5678 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($conn) { Stop-Process -Id $conn.OwningProcess -Force -ErrorAction SilentlyContinue }
+  # Also kill wrapper pid just in case
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 n8n starts a local web server. Open your browser to `http://localhost:5678` to access the editor.
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import type { Playbook, Platform } from "@/types/playbook";
 import { formatTime, platformNames } from "@/types/playbook";
@@ -63,6 +63,8 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const [platformFilter, setPlatformFilter] = useState<Platform | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function fetchPlaybooks() {
@@ -82,9 +84,22 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
     fetchPlaybooks();
   }, [platformFilter]);
 
-  const featuredPlaybook = playbooks.find((p) => p.isFeatured);
-  const regularPlaybooks = playbooks.filter((p) => !p.isFeatured);
-  const displayedPlaybooks = showAll ? regularPlaybooks : regularPlaybooks.slice(0, 6);
+  const filteredPlaybooks = useMemo(() => {
+    if (!searchQuery.trim()) return playbooks;
+    const q = searchQuery.toLowerCase();
+    return playbooks.filter((p) => {
+      const inTitle = p.title.toLowerCase().includes(q);
+      const inDesc = p.description.toLowerCase().includes(q);
+      const inTags = p.tags?.some((t) => t.toLowerCase().includes(q));
+      const inDifficulty = p.difficulty?.toLowerCase().includes(q);
+      return inTitle || inDesc || inTags || inDifficulty;
+    });
+  }, [playbooks, searchQuery]);
+
+  const isSearching = searchQuery.trim().length > 0;
+  const featuredPlaybook = isSearching ? undefined : filteredPlaybooks.find((p) => p.isFeatured);
+  const regularPlaybooks = filteredPlaybooks.filter((p) => !p.isFeatured || isSearching);
+  const displayedPlaybooks = (showAll || isSearching) ? regularPlaybooks : regularPlaybooks.slice(0, 6);
 
   const isHaloSelected = activeDevice === "stx-halo";
   const deviceParam = activeDevice && activeDevice !== "all" ? `?device=${deviceToHash[activeDevice] || activeDevice}` : "";
@@ -116,9 +131,9 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
             Step-by-step guides to help you master AI development on AMD hardware. From fine-tuning to deployment, we&apos;ve got you covered.
           </p>
           
-          {/* Platform Filter */}
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-xs text-[#6b6b6b]">Filter by platform:</span>
+          {/* Filters Row */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="text-xs text-[#6b6b6b]">Platform:</span>
             <button
               onClick={() => setPlatformFilter(null)}
               className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
@@ -155,6 +170,36 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
               </svg>
               Linux
             </button>
+            <span className="text-[#333] text-xs select-none">|</span>
+            <div className="relative">
+              <svg
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[#555] pointer-events-none"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search..."
+                className="pl-7 pr-7 py-1 w-40 focus:w-56 text-xs bg-[#242424] border border-[#333333] rounded-md text-white placeholder-[#555] focus:outline-none focus:border-[#444] transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => { setSearchQuery(""); searchInputRef.current?.focus(); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#555] hover:text-[#a0a0a0] transition-colors"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -223,6 +268,17 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
               </Link>
             )}
 
+            {/* Search Results Info */}
+            {isSearching && (
+              <div className="mb-4 text-center">
+                <span className="text-xs text-[#6b6b6b]">
+                  {filteredPlaybooks.length === 0
+                    ? "No playbooks found"
+                    : `${filteredPlaybooks.length} playbook${filteredPlaybooks.length === 1 ? "" : "s"} matching "${searchQuery.trim()}"`}
+                </span>
+              </div>
+            )}
+
             {/* Playbook Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
               {displayedPlaybooks.map((playbook) => (
@@ -279,7 +335,7 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
             </div>
 
             {/* Show More Button */}
-            {regularPlaybooks.length > 6 && (
+            {!isSearching && regularPlaybooks.length > 6 && (
               <div className="text-center mb-4">
                 <button
                   onClick={() => setShowAll(!showAll)}
