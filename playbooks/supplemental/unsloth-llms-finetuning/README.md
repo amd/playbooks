@@ -301,6 +301,8 @@ Now, use the gemma-3N-finetune.gguf file or gemma-3N-finetune-Q4_K_M.gguf file i
 
 ### Run the script with above content.
 
+[test_unsloth.py](assets/test_unsloth.py)
+
 ```bash
 python assets/test_unsloth.py
 ```
