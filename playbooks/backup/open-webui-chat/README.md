@@ -3,13 +3,17 @@
 <!-- Playbook content goes here -->
 ## Overview
 
-Open WebUI is a self-hosted, browser-based interface that feels like a familiar chatbot, but it’s really a **control room** for whatever AI engines you connect behind it. Instead of being tied to one provider, Open WebUI can connect to **any backend that exposes an OpenAI-compatible API**, so you can swap models and capabilities without switching UIs.
+Open WebUI is a self-hosted, browser-based interface that provides a familiar chatbot experience while acting as a frontend for one or more AI model servers. Instead of being tied to one provider, Open WebUI can connect to **any backend that exposes an OpenAI-compatible API**, so you can swap models and capabilities without switching UIs.
 
-In this playbook, we use **Lemonade** as the backend because it gives you a clean **OpenAI-compatible endpoint** for multiple modalities (LLMs, vision, Stable Diffusion image generation, audio) in one place, which will be perfect for learning the full workflow end-to-end.
-
+In this playbook, we use **Lemonade** as the backend because it exposes a **unified OpenAI-compatible endpoint** supporting multiple modalities:
+- **LLMs** for text generation
+- **Vision models** for image understanding
+- **Stable Diffusion** for image generation
+- **Audio transcription models** for speech-to-text
+This setup enables you to explore the **complete multimodal workflow end-to-end**.
 ---
 
-## What You’ll Learn
+## Learning Objectives
 
 By the end, you’ll be able to:
 
@@ -23,7 +27,7 @@ By the end, you’ll be able to:
 
 ## Core Concepts (Mental Model)
 
-### The three moving parts
+### The three components
 
 Open WebUI setups are easiest when you keep this simple map in your head:
 
@@ -33,9 +37,9 @@ Open WebUI setups are easiest when you keep this simple map in your head:
 | Backend (Model Server) | Hosts models and exposes HTTP endpoints | Lemonade, Ollama, vLLM, llama.cpp server, OpenAI-compatible servers |
 | Models | The actual LLM / vision / diffusion / audio models | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
 
-Open WebUI does not “run the model.” It sends requests to a backend server. The backend runs the model and returns the result.
+Open WebUI sends requests to a backend server, which runs the model and returns the result.
 
-### Why “OpenAI-compatible API” matters
+#### Why “OpenAI-compatible API” matters
 
 Open WebUI is built around standard OpenAI-style endpoints, like: 
   - Chat: `/chat/completions`
@@ -49,9 +53,9 @@ If a backend supports those endpoints, Open WebUI can talk to it with minimal se
 
 ---
 
-## One-Time Setup (Do This Once)
+## One-Time Setup
 
-This section gets you to a stable baseline: Lemonade running, Open WebUI running, and a working connection between them.
+This section establishes a stable local environment: Lemonade running, Open WebUI running, and a working connection between them.
 
 ### 1) Install Lemonade, Start Lemonade Server, and Download Models
 
@@ -59,24 +63,23 @@ This section gets you to a stable baseline: Lemonade running, Open WebUI running
 - Start the Lemonade server:
   -  Open Powershell
   -  Run the command: `lemonade-server serve`
-- Confirm server status to make sure that it is listening locally:
+- Verify server status:
   - In the same Powershell terminal, run: `lemonade-server status`
-  - It should show Lemonade server running (commonly on port `8000`)
   - Expect to see `Server is running on port 8000`
--  Open the Lemonade Server app and download required models from the `Model Manager` tab
+  - Open the Lemonade Server app and download required models from the `Model Manager` tab
 
 <p align="center">
   <img src="assets/lemonade_model_manager.png" alt="Lemonade Server App" width="600"/>
 </p>
 
 - Confirm the API is reachable:
-  - Open `http://localhost:8000/api/v1/models`
+  - Open `http://localhost:8000/api/v1/models` in your web browser.
   - You should see a JSON list of models downloaded in Lemonade
 
 > If you don’t see your models in `http://localhost:8000/api/v1/models`, Open WebUI won’t be able to select them later.
 
 
-### 2) Install Open WebUI (first-time setup)
+### 2) Install Open WebUI
 
 <!-- @os:windows -->
 Open PowerShell and create a fresh virtual environment:
@@ -109,7 +112,7 @@ pip install open-webui
 open-webui serve
 ```
 - In a browser, navigate to `http://localhost:8080`.
-- Open WebUI will ask you to create a local administrator account. You can fill any username, password, and email you like. Once you are signed in, you will see the chat interface.
+- Open WebUI will ask you to create a local administrator account. Once you are signed in, you will see the chat interface.
 
 <p align="center">
   <img src="assets/open-webui_chat_interface.png" alt="Open WebUI Chat Interface" width="600"/>
@@ -179,9 +182,7 @@ Now you’re all set up. Let's look at three interesting things to do.
   <img src="assets/npu_utilization.png" alt="Task Manager NPU utilization" width="600"/>
 </p>
 
-5. You can keep chatting without changing anything else.
-
-You just proved that Open WebUI can send requests to Lemonade using the OpenAI-compatible chat endpoint.
+This validates that Open WebUI can send requests to Lemonade using the OpenAI-compatible chat endpoint.
 
 ---
 
@@ -203,13 +204,12 @@ This requires a model that supports image input (a vision / multimodal model).
 
 4. The model answers based on the image content, not generic text.
 
-You just proved that Open WebUI can send multimodal requests (text + image) through the backend (Lemonade) to a vision model.
+This demonstrates that Open WebUI can send multimodal requests (text + image) through the backend (Lemonade) to a vision model.
 
 ---
 
 ### Activity 3: Generate an Image from a Text Prompt (Stable Diffusion)
 
-This is the most important concept shift in this playbook.
 - Stable Diffusion models **do not “chat.”**
 - They generate images through an **Images API**, not the chat endpoint.
 
@@ -228,7 +228,6 @@ This is the most important concept shift in this playbook.
 </p>
 4. Save
 
-> Use the base URL exactly as above (no trailing slash, no double slashes).
 
 #### Step 2: Allow Image Generation for the model
 This step ensures that you enable Image Generation as a capability for your model.
@@ -250,13 +249,13 @@ This step ensures that you enable Image Generation as a capability for your mode
   <img src="assets/image_generation.png" alt="Image Generation" width="600"/>
 </p>
 
-You just proved that Open WebUI can coordinate a “two-part” workflow:
-  - the LLM helps refine the prompt
-  - the image is generated via Lemonade’s Images endpoint using Stable Diffusion
+This establishes that Open WebUI can coordinate a “two-part” workflow:
+  - The LLM helps refine the prompt
+  - The image is generated via Lemonade’s Images endpoint using Stable Diffusion
 
 ---
 
-## Troubleshooting (Fast Fixes)
+## Troubleshooting
 
 ### “No models show up”
 - Confirm `http://localhost:8000/api/v1/models` loads in a browser
@@ -275,7 +274,7 @@ You just proved that Open WebUI can coordinate a “two-part” workflow:
 
 ---
 
-## Next Steps (Where this gets really interesting)
+## Next Steps
 
 You now have a working **“local AI stack”**—a single UI controlling multiple model types through a standard API.
 
