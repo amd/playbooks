@@ -7,7 +7,7 @@
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
-  "developed": false,
+  "developed": true,
   "published": true,
   "tags": ["openwebui", "chat", "llamacpp", "llm"]
 }
