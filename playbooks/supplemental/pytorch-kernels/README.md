@@ -36,11 +36,11 @@ Both flows run on AMD GPUs. This is possible because PyTorch's ROCm build maps t
 
 ---
 
+## Background
+
 ### What is a GPU Kernel?
 
 A GPU kernel is a function that runs in parallel across thousands of GPU threads simultaneously. Unlike a CPU function that executes once per call, a kernel is launched with a **grid** of **blocks**, each containing many **threads**, all executing the same code on different data.
-
-### Core Concepts:
 
 ### `__global__` — the kernel qualifier
 
@@ -96,7 +96,7 @@ Total threads = `gridDim.x * blockDim.x`. Each thread processes one element inde
 
 ---
 
-## AMD GPU Programming: HIP
+### AMD GPU Programming: HIP
 
 AMD GPUs use **HIP** (Heterogeneous-Compute Interface for Portability), part of the **ROCm** (Radeon Open Compute) platform.
 
@@ -113,7 +113,7 @@ HIP is designed to be syntactically close to CUDA. Most CUDA code can be transla
 
 ---
 
-## PyTorch + AMD/HIP
+### PyTorch + AMD/HIP
 
 PyTorch ships a ROCm build where the CUDA API surface (`torch.cuda.*`) is transparently backed by HIP. This means:
 <!-- @test:id=verify-torch timeout=30 hidden=True -->
@@ -131,11 +131,14 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 
 ---
 
-## Installing Dependencies
+## Setup
+
+### Installing Dependencies
 <!-- @require:pytorch -->
+
 ---
 
-## Create a Virtual Environment
+### Create a Virtual Environment
 <!-- @os:windows -->
 <!-- @test:id=create-venv timeout=60 -->
 <!-- ```cmd
