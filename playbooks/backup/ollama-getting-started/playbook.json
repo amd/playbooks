@@ -1,13 +1,12 @@
 {
   "id": "ollama-getting-started",
   "title": "Getting Started with Ollama",
-  "description": "Install and run LLMs locally using Ollama on your STX Halo™",
-  "time": 30,
-  "platforms": ["linux", "windows"],
+  "description": "Install Ollama and run LLMs locally — chat from the terminal, desktop app, or REST API on your STX Halo™",
+  "time": 15,
+  "platforms": ["windows", "linux"],
   "difficulty": "beginner",
-  "isNew": false,
+  "isNew": true,
   "isFeatured": false,
-  "developed": false,
   "published": true,
-  "tags": ["ollama", "llm", "inference", "local"]
+  "tags": ["ollama", "llm", "inference", "local", "api"]
 }
