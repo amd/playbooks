@@ -57,7 +57,12 @@ This section establishes a stable local environment: Lemonade running, Open WebU
 
 ### 1) Install Lemonade, Start Lemonade Server, and Download Models
 
-- Install Lemonade for your platform (App + Server) using the `.msi` installer from the [official documentation page](https://lemonade-server.ai/install_options.html).
+<!-- @os:windows -->
+- Install Lemonade (App + Server) using the `.msi` installer from the [official documentation page](https://lemonade-server.ai/install_options.html).
+<!-- @os:end -->
+<!-- @os:linux -->
+- Install Lemonade (App + Server) by following the Linux distribution-specific package manager instructions on the [official documentation page](https://lemonade-server.ai/install_options.html).
+<!-- @os:end -->
 - Start the Lemonade server:
   -  Open Powershell
   -  Run the command: `lemonade-server serve`
@@ -175,11 +180,12 @@ Now you’re all set up. Let's look at three interesting things to do.
 </p>
 
 3. The model will respond in the chat.
+<!-- @os:windows -->
 4. At this time, open `Task Manager` on your system. You will see **high GPU/NPU utilization** based on whether the model you selected is **Hybrid** or **NPU** respectively. That clearly shows you’re running locally.
 <p align="center">
   <img src="assets/npu_utilization.png" alt="Task Manager NPU utilization" width="600"/>
 </p>
-
+<!-- @os:end -->
 This validates that Open WebUI can send requests to Lemonade using the OpenAI-compatible chat endpoint.
 
 ---
