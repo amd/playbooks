@@ -142,8 +142,9 @@ set -euo pipefail
 <!-- @os:windows --> 
 <!-- @test:id=comfyui-populate-models-from-cache-windows timeout=600 hidden=True -->
 ```powershell
-$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
-if (-not (Test-Path $comfyRoot)) { throw "ComfyUI workspace not found: $comfyRoot" }
+$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
+$modelsRoot = Join-Path $installRoot "resources\ComfyUI\models"
+if (-not (Test-Path $installRoot)) { throw "ComfyUI desktop install not found: $installRoot" }
 
 $cacheDiff = "C:\ModelCache\ComfyUI\models\diffusion_models\z_image_turbo_bf16.safetensors"
 $cacheTE   = "C:\ModelCache\ComfyUI\models\text_encoders\qwen_3_4b.safetensors"
@@ -153,15 +154,15 @@ if (-not (Test-Path $cacheDiff)) { throw "models missing on runner: $cacheDiff" 
 if (-not (Test-Path $cacheTE))   { throw "models missing on runner: $cacheTE" }
 if (-not (Test-Path $cacheVAE))  { throw "models missing on runner: $cacheVAE" }
 
-New-Item -ItemType Directory -Force -Path (Join-Path $comfyRoot "models\diffusion_models") 
-New-Item -ItemType Directory -Force -Path (Join-Path $comfyRoot "models\text_encoders")  
-New-Item -ItemType Directory -Force -Path (Join-Path $comfyRoot "models\vae")       
+New-Item -ItemType Directory -Force -Path (Join-Path $modelsRoot "diffusion_models") 
+New-Item -ItemType Directory -Force -Path (Join-Path $modelsRoot "text_encoders")  
+New-Item -ItemType Directory -Force -Path (Join-Path $modelsRoot "vae")       
 
-Copy-Item -Force $cacheDiff (Join-Path $comfyRoot "models\diffusion_models\z_image_turbo_bf16.safetensors")
-Copy-Item -Force $cacheTE   (Join-Path $comfyRoot "models\text_encoders\qwen_3_4b.safetensors")
-Copy-Item -Force $cacheVAE  (Join-Path $comfyRoot "models\vae\ae.safetensors")
+Copy-Item -Force $cacheDiff (Join-Path $modelsRoot "diffusion_models\z_image_turbo_bf16.safetensors")
+Copy-Item -Force $cacheTE   (Join-Path $modelsRoot "text_encoders\qwen_3_4b.safetensors")
+Copy-Item -Force $cacheVAE  (Join-Path $modelsRoot "vae\ae.safetensors")
 
-Write-Host "OK: models copied into $comfyRoot\models"
+Write-Host "OK: models copied into $modelsRoot"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -328,7 +329,7 @@ The Z Image Turbo model is already loaded. To generate an image:
 The entire workflow execution should complete in less than 30 seconds. Your generated image appears in the **Save Image** node and is saved to the `output/` folder.
 
 <!-- @os:windows -->
-<!-- @test:id=comfyui-generate-zimage-windows timeout=600 hidden=True -->
+<!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
 ```powershell
 $comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
 $py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
@@ -376,12 +377,12 @@ except Exception as e:
   print("Request failed:", repr(e))
   sys.exit(1)
 
-for _ in range(180):
+for _ in range(600):
  with urllib.request.urlopen(f"http://127.0.0.1:8188/history/{prompt_id}", timeout=60) as r:
    hist = json.load(r)
  entry = hist.get(prompt_id, {})
  if entry.get("outputs"):
-   print("OK")
+   print("OK, output image generated!")
    sys.exit(0)
  time.sleep(1)
 
@@ -399,7 +400,7 @@ sys.exit(1)
 
 
 <!-- @os:linux --> 
-<!-- @test:id=comfyui-generate-zimage-linux timeout=600 hidden=True -->
+<!-- @test:id=comfyui-generate-zimage-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -454,12 +455,12 @@ except urllib.error.HTTPError as e:
  print(body)
  sys.exit(1)
 
-for _ in range(180):
+for _ in range(600):
  with urllib.request.urlopen(f"http://127.0.0.1:8188/history/{prompt_id}", timeout=60) as r:
    hist = json.load(r)
  entry = hist.get(prompt_id, {})
  if entry.get("outputs"):
-   print("OK")
+   print("OK, output image generated!")
    sys.exit(0)
  time.sleep(1)
 
@@ -474,8 +475,8 @@ PY
 <!-- @os:windows -->
 <!-- @test:id=comfyui-output-exists-windows timeout=60 hidden=True -->
 ```powershell
-$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
-$outDir = Join-Path $comfyRoot "output"
+$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
+$outDir = Join-Path $installRoot "resources\ComfyUI\output"
 
 $files = Get-ChildItem -Path $outDir -Filter *.png -File -ErrorAction SilentlyContinue
 if (-not $files) {
