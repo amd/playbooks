@@ -1,10 +1,18 @@
 {
   "id": "speech2speech-translation",
-  "title": "Speech-to-Speech Translation",
+  "title": "Live Speech-to-Speech Translation",
   "description": "Build a real-time speech-to-speech translation system on your STX Halo™",
-  "time": 60,
-  "platforms": ["windows", "linux"],
-  "difficulty": "intermediate",
+  "time": 30,
+  "platforms": ["linux", "windows"],
+  "tested_platforms": {
+    "linux": ["halo"],
+    "windows": []
+  },
+  "required_platforms": {
+    "linux": ["halo"],
+    "windows": []
+  },
+  "difficulty": "advanced",
   "isNew": false,
   "isFeatured": false,
   "published": true,

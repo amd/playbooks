@@ -1,7 +1,9 @@
 # Live Speech2Speech Translation on AMD GPU
 
 ## Overview
-The Ryzen™ AI Halo platform redefines real-time communication by enabling seamless, end-to-end speech-to-speech translation entirely on-device. Designed to eliminate language barriers in meetings, live streaming, travel, and cross-lingual collaboration, this solution leverages the SeamlessM4T family of foundation models. By unifying Automatic Speech Recognition (ASR), Machine Translation (MT), and Text-to-Speech (TTS) into a single architecture, the platform delivers low-latency streaming inference that preserves the nuances and expressiveness of natural speech. Fully executed on the edge, this capability ensures strict data privacy and reliable offline functionality, making high-quality, low-latency translation ubiquitous regardless of network connectivity.
+The Ryzen™ AI Halo platform, integrated with the Radeon ROCm software stack and PyTorch, creates a powerful and unified ecosystem for on-device AI. The ROCm (Radeon Open Compute) platform, now fully enabled for Windows and Linux with versions like ROCm 6.4.4 and 7.0.2, provides the foundational, open-source software layer that allows developers to harness the parallel computing power of AMD GPUs and APUs for AI workloads . This platform ensures seamless hardware acceleration, with official support confirmed for a wide range of devices including the Radeon PRO W7900 and the Ryzen AI Max series, which are central to the Halo platform's capabilities .
+
+Crucially, PyTorch, one of the world's leading machine learning frameworks, runs natively on this ROCm foundation . This integration means developers can use the full PyTorch ecosystem—for tasks like training and inference—directly on the hardware, without needing complex workarounds. The deep optimization within the ROCm stack enables advanced features like Flash Attention 2 for faster training and efficient deployment of large language models . Furthermore, this tight integration ensures that foundational models like Meta's SeamlessM4T (available in sizes up to 2.3B parameters) can leverage the combined performance of the Ryzen AI Halo hardware and the Radeon ROCm software to deliver low-latency, expressive, and private speech-to-speech translation entirely on the edge.
 
 ## What You'll Learn
 
@@ -22,7 +24,7 @@ For cross-border meetings and global collaboration, this means faster decisions,
 
 Your STX Halo has docker pre-installed. 
 
-Pull latest PyTorch docker: 
+Pull latest PyTorch docker (skip this step is PyTorch is pre-installed): 
 
 ```bash
 sudo docker run -it -d \
@@ -87,7 +89,7 @@ print(f"model loading duration: {end - start} seconds")
 
 #### input audio clip .wav file
 ```python
-audio, orig_freq =  torchaudio.load("./audio_clips/input1.wav")
+audio, orig_freq =  torchaudio.load("./assets/input1.wav")
 ```
 
 #### Preprocess input .wav file
@@ -128,7 +130,7 @@ python ./assets/infer_cpu.py
 export HIP_VISIBLE_DEVICES=0
 python ./assets/gradio_gpu.py --share
 ```
-Click down the record button to record input voice, when you click up, the translation will automatically execute. 
+Press and hold the record button to capture your voice; releasing it will automatically execute the translation.
 after it done, then you can play the output translated voice.
 ### Gradio UI example:
 
