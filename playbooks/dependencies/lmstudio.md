@@ -12,5 +12,5 @@
 2. run `sudo apt install libfuse2`  
 3. run `cd ~/Downloads`  
 4. run `chmod +x LM-Studio-*.AppImage`  
-5. run `/LM-Studio-*.AppImage`  
+5. run `./LM-Studio-*.AppImage`  
 <!-- @os:end -->

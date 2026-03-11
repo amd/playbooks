@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface CodeLightboxProps {
   filename: string;
@@ -186,11 +188,32 @@ export default function CodeLightbox({ filename, code, isOpen, onClose }: CodeLi
         
         {/* Code content */}
         <div className="flex-1 overflow-auto bg-[#0d0d0d] rounded-b-lg">
-          <pre className="p-4 text-sm leading-relaxed">
-            <code className={`language-${language} text-[#e0e0e0]`}>
-              {code}
-            </code>
-          </pre>
+          <SyntaxHighlighter
+            language={language}
+            style={oneDark}
+            showLineNumbers
+            customStyle={{
+              margin: 0,
+              padding: "1rem",
+              borderRadius: 0,
+              fontSize: "0.875rem",
+              lineHeight: "1.625",
+              background: "#0d0d0d",
+            }}
+            codeTagProps={{
+              style: {
+                fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+              }
+            }}
+            lineNumberStyle={{
+              minWidth: "3em",
+              paddingRight: "1em",
+              color: "#4a4a4a",
+              userSelect: "none",
+            }}
+          >
+            {code}
+          </SyntaxHighlighter>
         </div>
       </div>
     </div>
