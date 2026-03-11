@@ -10,7 +10,9 @@ In this playbook, we use **Lemonade** as the backend because it exposes a **unif
 - **Vision models** for image understanding
 - **Stable Diffusion** for image generation
 - **Audio transcription models** for speech-to-text
+
 This setup enables you to explore the **complete multimodal workflow end-to-end**.
+
 ---
 
 ## Learning Objectives
@@ -27,9 +29,7 @@ By the end, you’ll be able to:
 
 ## Core Concepts (Mental Model)
 
-### The three components
-
-Open WebUI setups are easiest when you keep this simple map in your head:
+### The Three Components
 
 | Piece | What it does | Examples |
 |---|---|---|
@@ -88,6 +88,7 @@ This section establishes a stable local environment: Lemonade running, Open WebU
 Open PowerShell and create a fresh virtual environment:
 
 ```bash
+# Install open-webui into a venv [Windows]
 python -m venv openwebui-venv
 .\openwebui-venv\Scripts\activate
 python -m pip install --upgrade pip
@@ -99,6 +100,7 @@ pip install open-webui
 Open a terminal and create a fresh virtual environment:
 
 ```bash
+# Install open-webui into a venv [Linux]
 python3 -m venv openwebui-venv
 source openwebui-venv/bin/activate
 python -m pip install --upgrade pip
@@ -131,17 +133,17 @@ In Open WebUI:
 1. Go to **Admin Settings → Connections**
 
 <p align="center">
-  <img src="assets/open_settings.png" alt="Open WebUI Settings page" width="600"/>
+  <img src="assets/open_settings.png" alt="Open WebUI Settings page" width="200"/>
 </p>
 <p align="center">
-  <img src="assets/connection_settings.png" alt="Navigating to the connection settings" width="600"/>
+  <img src="assets/connection_settings.png" alt="Navigating to the connection settings" width="500"/>
 </p>
 
 2. Under **OpenAI API**, add a new connection:
    - **Base URL:** `http://localhost:8000/api/v1`
    - **API Key:** `-` (a single dash works for local)
 <p align="center">
-  <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="600"/>
+  <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="500"/>
 </p>
 
 3. Save
@@ -175,8 +177,8 @@ Now you’re all set up. Let's look at three interesting things to do.
 
 2. Enter a message to the LLM and click send (or hit Enter). The LLM will take a few seconds to load into memory and then you will see the response stream in.
 <p align="center">
-  <img src="assets/sending_a_message.png" alt="Sending a message" width="45%"/>
-  <img src="assets/llm_response.png" alt="LLM Response" width="45%"/>
+  <img src="assets/sending_a_message.png" alt="Sending a message" width="53%"/>
+  <img src="assets/llm_response.png" alt="LLM Response" width="40%"/>
 </p>
 
 3. The model will respond in the chat.
@@ -202,8 +204,8 @@ This requires a model that supports image input (a vision / multimodal model).
 2. Click the **`+`** button in the message box and upload an image
 3. Ask something that forces true image understanding: `Do you think this is a well-designed UI?`
 <p align="center">
-  <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="45%"/>
-  <img src="assets/vlm_response.png" alt="VLM Response" width="45%"/>
+  <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="46%"/>
+  <img src="assets/vlm_response.png" alt="VLM Response" width="47%"/>
 </p>
 
 4. The model answers based on the image content, not generic text.
@@ -214,8 +216,7 @@ This demonstrates that Open WebUI can send multimodal requests (text + image) th
 
 ### Activity 3: Generate an Image from a Text Prompt (Stable Diffusion)
 
-- Stable Diffusion models **do not “chat.”**
-- They generate images through an **Images API**, not the chat endpoint.
+Stable Diffusion models don't support text generation, they only generate images through the Images API. 
 
 #### Step 1: Configure Image Generation in Open WebUI
 
@@ -238,14 +239,14 @@ This step ensures that you enable Image Generation as a capability for your mode
 1. Go to **Admin Settings → Models** and choose your model
 2. Turn on `Image Generation`
 <p align="center">
-  <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
+  <img src="assets/model_settings.png" alt="Model Settings" width="47%"/>
   <img src="assets/edit_model.png" alt="Edit Model" width="45%"/>
 </p>
 
 #### Step 3: Generate an image from the chat screen
 
 1. Go back to chat at `http://localhost:8080`.
-2. Select a **normal LLM** in the model dropdown (example: DeepSeek, CodeLlama).  **Do not select a Stable Diffusion model** as this is a chat model selector.
+2. Select a **Text Generation LLM** in the model dropdown (example: DeepSeek, CodeLlama).  **Do not select a Stable Diffusion model** as this is a chat model selector.
 3. In the message area, toggle **Image** ON.
 4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. An image is generated and appears in the chat.
@@ -280,7 +281,7 @@ This establishes that Open WebUI can coordinate a “two-part” workflow:
 
 ## Next Steps
 
-You now have a working **“local AI stack”**—a single UI controlling multiple model types through a standard API.
+You now have a working **“local AI stack”**, a single UI controlling multiple model types through a standard API.
 
 Here are three expansions that unlock entirely new workflows:
 
