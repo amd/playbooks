@@ -13,9 +13,9 @@ Lemonade should be pre-installed from [here](https://lemonade-server.ai/install_
 > This playbook uses **Open WebUI** (Python package) and **Lemonade** (Lemonade server/app) both **running natively**.  
 > Docker is **not required** for the main flow in this playbook.
 
-## Required Models (in Lemonade)
+## Models (in Lemonade)
 
-Models should be downloaded inside the **Lemonade app** (using the built-in Model Manager) or via Lemonade’s model management commands (`lemonade-server pull <model_name>`). This playbook assumes that required models are downloaded and show up in the models list endpoint.
+Models should be downloaded inside the **Lemonade app** (using the built-in Model Manager) or via Lemonade’s model management commands (`lemonade-server pull <model_name>`). This playbook assumes that the below recommended models are downloaded and show up in the models list endpoint.
 
 Check model availability:
 - Open: `http://localhost:8000/api/v1/models`
