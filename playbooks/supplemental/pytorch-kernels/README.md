@@ -58,12 +58,7 @@ __global__ void add_one(float* data, int n) { ... }
 
 GPU threads are scheduled in groups rather than completely independently; threads in a group execute the same instructions simultaneously. On AMD GPUs, these groups are called **wavefronts**.
 
-| Architecture | Execution Group |
-|---------------|----------------|
-| NVIDIA CUDA | Warp (32 threads) |
-| AMD ROCm / HIP | Wavefront (64 threads) |
-
-A wavefront is the smallest group of threads that the GPU scheduler executes simultaneously. All 64 threads in a wavefront execute the same instruction at the same time.
+A wavefront is the smallest group of threads that the GPU scheduler executes simultaneously. All threads in a wavefront execute the same instruction at the same time.
 
 This will become relevant later when discussing block size choices.
 
