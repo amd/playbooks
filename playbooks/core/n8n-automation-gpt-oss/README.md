@@ -227,7 +227,7 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 
 The agent receives the cleaned news data and outputs a structured summary with market sentiment.
 
-## Saving Your Workflow
+### Saving Your Workflow
 
 Click the workflow name at the top and rename it if desired. Workflows auto-save as you work.
 
