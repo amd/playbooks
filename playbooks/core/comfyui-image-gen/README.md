@@ -133,6 +133,7 @@ wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchaudio-2.9.0%2Brocm
 <!-- @test:id=comfyui-verify-torch-linux timeout=120 hidden=True -->
 ```bash
 set -euo pipefail
+export LD_LIBRARY_PATH=/opt/rocm/lib:${LD_LIBRARY_PATH:-}
 ./comfyui_venv/bin/python -c "import torch; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('hip', getattr(torch.version,'hip',None));"
 ```
 <!-- @test:end --> 
@@ -219,6 +220,7 @@ try {
 <!-- @test:id=comfyui-server-up-linux timeout=300 hidden=True -->
 ```bash
 set -euo pipefail
+export LD_LIBRARY_PATH=/opt/rocm/lib:${LD_LIBRARY_PATH:-}
 ./comfyui_venv/bin/python ./ComfyUI/main.py --listen 127.0.0.1 --port 8188 >/tmp/comfyui.log 2>&1 &
 PID=$!
 
@@ -403,7 +405,7 @@ sys.exit(1)
 <!-- @test:id=comfyui-generate-zimage-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
-
+export LD_LIBRARY_PATH=/opt/rocm/lib:${LD_LIBRARY_PATH:-}
 # start server
 ./comfyui_venv/bin/python ./ComfyUI/main.py --listen 127.0.0.1 --port 8188 >/tmp/comfyui.log 2>&1 &
 PID=$!

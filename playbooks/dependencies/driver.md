@@ -29,6 +29,8 @@ sudo -n apt-get update -y
 sudo -n apt-get install -y rocm-smi
 rocm-smi
 rocm-smi --showproductname
+test -d /opt/rocm
+test -e /opt/rocm/lib/libroctx64.so.4 -o -e /opt/rocm/lib/libroctx64.so
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
