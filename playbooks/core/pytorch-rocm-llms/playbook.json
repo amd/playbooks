@@ -5,10 +5,11 @@
   "time": 30,
   "platforms": ["linux", "windows"],
   "tested_platforms": {
-    "linux": [],
+    "linux": ["halo"],
     "windows": ["halo"]
   },
   "required_platforms": {
+    "linux": ["halo"],
     "windows": ["halo"]
   },
   "difficulty": "beginner",

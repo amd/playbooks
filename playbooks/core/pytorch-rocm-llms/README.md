@@ -9,6 +9,7 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 - Create a document summarization tool using LLMs
 
 ## Setting Up Your Environment
+<!-- @require:rocm -->
 
 ### Create a Virtual Environment
 
