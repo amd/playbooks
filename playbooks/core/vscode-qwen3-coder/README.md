@@ -28,13 +28,6 @@ Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-3
 
 This will bring up the model configuration, change the context length from `4096` to `32768` and click `Load Model` to load the model with the proper configuration. On typical laptops, running a 32k context window on a 30B model would run out of memory. The STX Halo's unified memory allows us to maximize this context for analyzing large codebases locally.
 
-<!-- @test:id=lmstudio-load-qwen3-coder timeout=1200 hidden=True -->
-```bash
-lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier qwen3coder-32k
-lms chat qwen3coder-32k -p "Reply with exactly: OK"
-```
-<!-- @test:end -->
-
 ![Configuring Model](assets/selecting-model-zoomed.png)
 
 Check to see if the Server is running. This can be done by going to the Developer tab in LM Studio on the left and to see the Status of `Running`. If it is not running, flip the switch icon to start the server. This is necessary for Cline to be able to communicate with LM Studio. 
@@ -58,6 +51,13 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @os:end -->
 
 ![Server Status](assets/lm-studio-server-status.png)
+
+<!-- @test:id=lmstudio-load-qwen3-coder timeout=1200 hidden=True -->
+```bash
+lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier qwen3coder-32k
+lms chat qwen3coder-32k -p "Reply with exactly: OK"
+```
+<!-- @test:end -->
 
 ## Launch and Configure VS Code
 
