@@ -95,5 +95,13 @@
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md"
     }
+  },
+  "rocm": {
+    "memory-config": {
+      "name": "ROCm",
+      "description": "AMD software platform for GPU computing and AI workloads",
+      "platforms": ["windows", "linux"],
+      "file": "rocm.md"
+    }
   }
 }
