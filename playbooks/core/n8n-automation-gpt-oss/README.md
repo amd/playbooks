@@ -79,7 +79,7 @@ npm -v
 ## Installing n8n
 
 Your STX Halo has Node.js (and npm) pre-installed. Install n8n globally using npm.
-> **Note**: You may see many npm warnings. This is expected.
+> **Note**: You may see some npm warnings. This is expected.
 
 ```bash
 npm install -g n8n
@@ -93,7 +93,7 @@ n8n --version
 
 <!-- @os:windows -->
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Bypass) before running some Powershell commands
+> setting it to RemoteSigned or Unrestricted) before running some Powershell commands
 <!-- @os:end -->
 ## Launching n8n
 
@@ -140,7 +140,7 @@ Lemonade is the local server that will run a model and connect to n8n. If Lemona
 ```bash
 lemonade-server run gpt-oss-120b-mxfp4-GGUF --llamacpp rocm
 ```
-Alternatively, you can use the Lemonade GUI to load a model. 
+Alternatively, you can use the Lemonade GUI to choose and load a model. 
 
 
 ## Setting Up the Workflow
