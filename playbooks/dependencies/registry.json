@@ -86,6 +86,13 @@
       "category": "framework",
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md"
+    },
+    "rocm": {
+      "name": "ROCm",
+      "description": "AMD software platform for GPU computing and AI workloads",
+      "category": "framework",
+      "platforms": ["windows", "linux"],
+      "file": "rocm.md"
     }
   },
   "setup": {
@@ -94,14 +101,6 @@
       "description": "Configure GPU memory allocation for running large models",
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md"
-    }
-  },
-  "rocm": {
-    "memory-config": {
-      "name": "ROCm",
-      "description": "AMD software platform for GPU computing and AI workloads",
-      "platforms": ["windows", "linux"],
-      "file": "rocm.md"
     }
   }
 }
