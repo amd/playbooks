@@ -8,9 +8,6 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 - Run LLMs like gpt-oss-20b and Mistral-7B-Instruct locally using PyTorch and ROCm
 - Create a document summarization tool using LLMs
 
-## Setting Up Your Environment
-<!-- @require:rocm -->
-
 ### Create a Virtual Environment
 
 <!-- @os:windows -->
@@ -38,7 +35,12 @@ source llm-env/bin/activate
 <!-- @os:end -->
 
 ### Installing Basic Dependencies
-<!-- @require:pytorch -->
+<!-- @os:linux -->
+<!-- @require:rocm,pytorch,driver -->
+<!-- @os:end -->
+<!-- @os:windows -->
+<!-- @require:pytorch,driver -->
+<!-- @os:end -->
 
 ### Additional Dependencies
 

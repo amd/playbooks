@@ -20,7 +20,7 @@ sudo reboot
 This is important for the runtime stack and permissions to settle.
 
 ### 4. Verify that ROCm is installed correctly and usable
-<!-- @os:linux -->
+
 <!-- @test:id=verify-linux-rocm-installation timeout=180 -->
 ```bash
 # Check ROCm path (paths should exist)
@@ -39,5 +39,5 @@ groups
 rocminfo | sed -n '1,120p'
 ```
 <!-- @test:end -->
-<!-- @os:end -->
+
 ---
