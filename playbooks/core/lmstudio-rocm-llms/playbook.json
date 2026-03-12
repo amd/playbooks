@@ -6,7 +6,7 @@
   "platforms": ["windows", "linux"],
   "tested_platforms": {
     "windows": ["halo"],
-    "linux": []
+    "linux": ["halo"]
   },
   "difficulty": "beginner",
   "isNew": false,
