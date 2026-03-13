@@ -51,7 +51,7 @@ pip install -r requirements/metrics.txt
 
 Now you have installed llama factory successfully on AMD ROCm GPU. and next step is to run LLM finetuning on it.
 
-### Run llama factory finetuing 
+### Run llama factory finetuning 
 
 In this section, we will introduce how to prepare finetuning dataset,configure LoRA/QLoRA parameters,run LoRA finetuning.
 #### Dataset Preparation
