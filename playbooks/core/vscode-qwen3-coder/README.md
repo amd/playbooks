@@ -173,13 +173,28 @@ with urllib.request.urlopen(req, timeout=60) as r:
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @test:id=lmstudio-server-stop timeout=300 hidden=True -->
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-server-stop-windows timeout=300 hidden=True -->
+```powershell
+$ID = Get-Content "$env:TEMP\lmstudio_model_id.txt" -Raw
+$ID = $ID.Trim()
+lms unload "$ID"
+lms ps
+lms server stop
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-server-stop-linux timeout=300 hidden=True -->
 ```bash
+ID="$(cat /tmp/lmstudio_model_id.txt)"
 lms unload "$ID" || true
 lms ps
 lms server stop
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 ## Next Steps
 
