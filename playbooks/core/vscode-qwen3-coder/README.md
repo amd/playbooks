@@ -52,7 +52,20 @@ curl -s http://127.0.0.1:1234/v1/models
 
 ![Server Status](assets/lm-studio-server-status.png)
 
-<!-- @test:id=lmstudio-load-qwen3-coder timeout=1200 hidden=True -->
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-load-qwen3-coder-windows timeout=1200 hidden=True -->
+```powershell
+$ID = "qwen3coder-32k-$env:GITHUB_RUN_ID"
+Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
+lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier "$ID"
+lms ps
+lms chat "$ID" -p "Reply with exactly: OK"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-load-qwen3-coder-linux timeout=1200 hidden=True -->
 ```bash
 ID="qwen3coder-32k-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
@@ -61,6 +74,7 @@ lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 ## Launch and Configure VS Code
 
@@ -110,7 +124,34 @@ The agent will then start to create files according to the prompt. As a user, yo
 
 After generating the software, the agent is complete and you can run the application. In this case, because we prompted the agent to generate a website, the agent wrote to three files: `index.html`, `script.js`, and `styles.css`. By simply double clicking on the HTML file we can load and interact with the generated website.
 
-<!-- @test:id=lmstudio-coding-prompt-endpoint timeout=300 hidden=True -->
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
+```python
+import json, urllib.request, os
+
+model_id_path = os.path.join(os.environ["TEMP"], "lmstudio_model_id.txt")
+with open(model_id_path, "r", encoding="utf-8") as f:
+    model_id = f.read().strip()
+
+req = urllib.request.Request(
+    "http://127.0.0.1:1234/v1/chat/completions",
+    data=json.dumps({
+        "model": model_id,
+        "messages": [{"role":"user","content":"Write a Python function add(a,b) that returns a+b. Only output code."}],
+        "temperature": 0,
+        "max_tokens": 500
+    }).encode("utf-8"),
+    headers={"Content-Type":"application/json"},
+    method="POST",
+)
+with urllib.request.urlopen(req, timeout=60) as r:
+    print(r.read().decode("utf-8", "replace"))
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-coding-prompt-endpoint-linux timeout=300 hidden=True -->
 ```python
 import json, urllib.request
 with open("/tmp/lmstudio_model_id.txt", "r", encoding="utf-8") as f:
@@ -130,6 +171,7 @@ with urllib.request.urlopen(req, timeout=60) as r:
     print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 <!-- @test:id=lmstudio-server-stop timeout=300 hidden=True -->
 ```bash
