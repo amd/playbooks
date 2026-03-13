@@ -54,8 +54,10 @@ curl -s http://127.0.0.1:1234/v1/models
 
 <!-- @test:id=lmstudio-load-qwen3-coder timeout=1200 hidden=True -->
 ```bash
-lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier qwen3coder-32k
-lms chat qwen3coder-32k -p "Reply with exactly: OK"
+ID="qwen3coder-32k-${GITHUB_RUN_ID}"
+lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier "$ID"
+lms ps # Verify model is really loaded
+lms chat "$ID" -p "Reply with exactly: OK"
 ```
 <!-- @test:end -->
 
@@ -113,7 +115,7 @@ import json, urllib.request
 req = urllib.request.Request(
     "http://127.0.0.1:1234/v1/chat/completions",
     data=json.dumps({
-        "model": "qwen3coder-32k",
+        "model": os.environ["ID"],
         "messages": [{"role":"user","content":"Write a Python function add(a,b) that returns a+b. Only output code."}],
         "temperature": 0,
         "max_tokens": 500
@@ -128,6 +130,8 @@ with urllib.request.urlopen(req, timeout=60) as r:
 
 <!-- @test:id=lmstudio-server-stop timeout=300 hidden=True -->
 ```bash
+lms unload "$ID" || true
+lms ps
 lms server stop
 ```
 <!-- @test:end -->
