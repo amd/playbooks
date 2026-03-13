@@ -55,6 +55,8 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-load-qwen3-coder-windows timeout=1200 hidden=True -->
 ```powershell
+lms unload --all
+lms ps
 $ID = "qwen3coder-32k-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
 lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier "$ID"
@@ -67,6 +69,8 @@ lms chat "$ID" -p "Reply with exactly: OK"
 <!-- @os:linux -->
 <!-- @test:id=lmstudio-load-qwen3-coder-linux timeout=1200 hidden=True -->
 ```bash
+lms unload --all || true
+lms ps
 ID="qwen3coder-32k-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
 lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier "$ID"
@@ -124,7 +128,7 @@ The agent will then start to create files according to the prompt. As a user, yo
 
 After generating the software, the agent is complete and you can run the application. In this case, because we prompted the agent to generate a website, the agent wrote to three files: `index.html`, `script.js`, and `styles.css`. By simply double clicking on the HTML file we can load and interact with the generated website.
 
-<!-- @os:linux -->
+<!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
 ```python
 import json, urllib.request, os
