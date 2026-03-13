@@ -1,6 +1,6 @@
 ## Overview
 
-LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggml-org/llama.cpp) and also provides an [OpenAI compliant endpoint](https://lmstudio.ai/docs/developer/openai-compat) for local serving of models. LM Studio provides a simple but powerful interface to quickly and easily download and deploy models using LM Studio. LM Studio offers both Vulkan and ROCm based backends (called runtimes) for AMD users.
+LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggml-org/llama.cpp) and also provides an [OpenAI compliant endpoint](https://lmstudio.ai/docs/developer/openai-compat) for local model serving. LM Studio provides a simple but powerful interface to easily download and deploy models. LM Studio offers both Vulkan and ROCm based backends (called runtimes) for AMD users.
 
 
 ## What You'll Learn
@@ -25,18 +25,19 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 ## Chatting with an LLM
 Learn how to start chatting with a ChatGPT-grade LLM completely locally.  
 
-1. Press "Ctrl" + "1" or click on the 👾 button on the top left of the screen to open the Chat window. 
-2. Press "Ctrl" + "M" to open the `Model Loader`, select "manually chose model load parameters", and click on "OpenAI GPT-OSS 120B"
+1. Press `Ctrl + 1` or click on the 👾 button on the top left of the screen to open the Chat window. 
+2. Press `Ctrl + L` to open the Model Loader, select `Manually chose model load parameters`, and click on `GPT-OSS 120B`
 3. Make sure "show advanced settings" is checked.  
-4. Change context size to "128,000". Make sure "Flash Attention" is On and "GPU offload layers" is set to maximum.
-5. Check "Remember settings" and click on `Load Model`.
-6. Send a message and start interacting with the model!
+4. Change `Context Length` as desired. Higher context length means more model memory, but more system memory used.
+5. Make sure `Flash Attention` is On and `GPU Offload` is set to maximum.
+6. Check `Remember settings` and click on `Load Model`.
+7. Send a message and start interacting with the model!
 
 <p align="center">
   <img src="assets/chat.png" alt="Chatting with gpt-oss-120b on LM Studio" width="600"/>
 </p>
 
-> Context size refers to the model's short-term memory limit, and with STX Halo, we can use 128,000 tokens to allow for handling extensive workflows that typically require cloud servers.
+> **Tip**: Context length refers to the model's memory. Flash attention improves processing speed while reducing memory usage. GPU Offload shifts compute to the graphics card for faster responses.
 
 ## Serve LLMs through an OpenAI compatible endpoint
 
@@ -44,11 +45,11 @@ LM Studio also offers an OpenAI compliant endpoint in the form of LM Studio Serv
 
 To set up LM Studio Server, use the following instructions:
 
-1. On the left hand side, click on the "Developer" tab (command line icon) and then click on Server Settings.  
-2. If you want to serve the model over your LAN, check "Serve on Local Network", if you want to use with a website or extensive calling within VS Code, enable "CORS"; otherwise leave these as defaults.  
-3. Click on the toggle in front of Status: Stopped or press "Ctrl" + "R".  
+1. On the left hand side, click on the `Developer` tab (command line icon) or `CTRL + 2` and then click on `Server Settings`.  
+2. (Optional): If you want to serve the model over your LAN, check `Serve on Local Network`. If you want to use with a website or extensive calling within VS Code, check `Enable CORS`. 
+3. On the upper left corner, run the server by clicking on the toggle button in front of `Status: Stopped`.
 4. An OpenAI compliant endpoint will now be running. The address is typically http://127.0.0.1:1234  
-5. Staying on the same "Developer" tab, with the Status: Running, you can deploy an LLM by going through the steps mentioned in "Chatting with an LLM".  
+5. If a model is not already loaded, you can load it by clicking `Load Model` and following the previously mentioned steps. 
 
 
 This model will now be accessible through the LM Studio Server endpoint and will support OpenAI endpoints including:
@@ -61,11 +62,18 @@ This model will now be accessible through the LM Studio Server endpoint and will
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
 
+
 #### Example: Pinging your Endpoint
 Having just created the OpenAI Compatible endpoint, let's look at how to integrate this into a Python developer environment and use your system as a local API Provider. 
 
+1. Install the OpenAI package
+```bash
+pip install openai
+```
+
+2. Run the following script to ping the endpoint we have just created.
 ```python
-from openai import OpenAI # if not installed, run pip install openai in your selected environment
+from openai import OpenAI
 
 # Initialize the client specifically for your local server
 # The API key is required by the library but ignored by LM Studio
@@ -81,7 +89,7 @@ try:
         model="local-model", # The model identifier is optional in local mode
         messages=[
             {"role": "system", "content": "You are a helpful coding assistant."},
-            {"role": "user", "content": "Write a one-line Python joke."}
+            {"role": "user", "content": "Explain Python decorators in 1 sentence"}
         ],
         temperature=0.7,
     )
@@ -94,15 +102,14 @@ except Exception as e:
 ```
 
 
-#### Swapping between ROCm and Vulkan backends (Optional)
+#### (Optional): Swapping between ROCm and Vulkan backends
 
-1. Press "Ctrl" + "Shift" + "R" on your keyboard. Alternatively click on the Discover tab (Magnifying Glass) on the left-hand side and then click on "Runtime" in the pop up.  
-2. In the bottom right quadrant of the pop-up, you should see the "Selections" drawer with the "Engines" sub-header.  
-3. The GGUF drop-down menu will show your currently selected backend. You can change this to ROCm or Vulkan llama.cpp depending on what you are trying to do. 
-> Warning: selecting CPU llama.cpp here will disable GPU usage.  
+1. Press `Ctrl + Shift + R` on your keyboard. Alternatively click on the `Discover` tab (Magnifying Glass) on the left-hand side and then click on `Runtime` in the pop up.   
+2. You should then see `Runtime Selections`, where the dropdown menu can be changed to ROCm or Vulkan llama.cpp.
 
 
 ## Next Steps
+
 - **Custom App Integration**: Integrate your own Python scripts or applications using the local OpenAI-compatible API.
 - **Advanced Frontends**: Connect powerful interfaces like Open WebUI to your server for chat history and persona management.
 

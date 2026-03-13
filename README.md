@@ -105,7 +105,6 @@ playbooks/
 │   └── vllm-finetuning/
 │
 ├── supplemental/
-│   ├── 3dgs-pytorch-rocm/
 │   ├── clustering-two-halos/
 │   ├── dify-ai-agents/
 │   ├── gguf-quantization-export/
