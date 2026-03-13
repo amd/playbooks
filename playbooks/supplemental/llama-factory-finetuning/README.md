@@ -8,7 +8,7 @@ This playbook teaches you how to finetune LLMs using LLaMA Factory on your local
 
 ## What you'll accomplish
 
-In this playbook, you will learnL
+In this playbook, you will learn
 - How to set up LLaMA Factory with ROCm support
 - How to configure LLM finetuning parameters (using Qwen/Qwen3-4B-Instruct-2507 as an example)
 - How to run LLaMA Factory finetuning
@@ -16,11 +16,18 @@ In this playbook, you will learnL
 - How to export the fine-tuned model 
 
 ## Estimated Time
-- Duration: It will take 30-60 minutes to run this playbook (depending on your model/dataset size and network speed).
+- Duration: It will take about 60 minutes to run this playbook (depending on your model/dataset size and network speed).
 - View the [LlaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for more information.
 
 ## Dependencies
-fill this in with dependency info
+Before installing LLaMA-Factory, please make sure you have installed the following dependencies:
+- Python: minimum verison is 3.11
+- ROCm version PyTorch: a core library for Llama Factory to run on AMD . You could use the below command to check whether it has been installed.
+```bash
+python -c "import torch; print(f'PyTorch: {torch.__version__}, ROCm: {torch.cuda.is_available()}')"
+```
+- huggingface_hub:this library is used to download and upload the model/dataset files for developers.
+
 
 ## Instructions
 
@@ -49,9 +56,9 @@ Now you have installed llama factory successfully on AMD ROCm GPU. and next step
 In this section, we will introduce how to prepare finetuning dataset,configure LoRA/QLoRA parameters,run LoRA finetuning.
 #### Dataset Preparation
 
-Llama factory supports the finetuning datasets in Alpaca format and ShareGPT format. All the avaiable datasets have been defined in Llama Factory [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). If you are using a custom dataset, please make sure to add a dataset description in dataset_info.json and specify dataset: dataset_name before training to use it. Detailes can be found in their [offical document](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
+Llama factory supports the finetuning datasets in Alpaca format and ShareGPT format. All the available datasets have been defined in Llama Factory [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). If you are using a custom dataset, please make sure to add a dataset description in dataset_info.json and specify dataset: dataset_name before training to use it. Details can be found in their [official document](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
-In this playbook, we will use the identity and alpaca_en_demo datasets as an example,and configure the dataset information in next step.
+In this playbook, we will use the identity and alpaca_en_demo datasets as an example, and configure the dataset information in next step.
 
 #### Finetuning parameter configuration
 
@@ -108,7 +115,7 @@ After running LLM finetuning, output files can be found in the path of "output_d
 
 ### Test and export the fine-tuned model 
 
-Once you have done the fine-tuning, you may need to test the fine-tuned model to check whether it can work. You may also need to export the fine-tuned model files for production deployment. Llama facory has also developed the tools to help you on them.
+Once you have done the fine-tuning, you may need to test the fine-tuned model to check whether it can work. You may also need to export the fine-tuned model files for production deployment. Llama factory has also developed the tools to help you on them.
 
 #### Test the fine-tuned model 
 
