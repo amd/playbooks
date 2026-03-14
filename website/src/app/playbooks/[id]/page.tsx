@@ -11,11 +11,21 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
-import type { Playbook, Platform, Device, TestCoverageInfo, TestResultInfo, PlaybookCoverageSummary } from "@/types/playbook";
+import type { Playbook, Platform, Device, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
 import { formatTime, DEVICE_IDS, deviceNames } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
 const dropdownStateStore: Record<string, boolean> = {};
+
+/**
+ * Parses a composite device key like "halo-windows" into arch and platform.
+ * Handles arch names that may contain hyphens by matching known platform suffixes.
+ */
+function parseDeviceKey(key: string): { arch: string; platform: string | null } {
+  if (key.endsWith('-windows')) return { arch: key.slice(0, -8), platform: 'windows' };
+  if (key.endsWith('-linux')) return { arch: key.slice(0, -6), platform: 'linux' };
+  return { arch: key, platform: null };
+}
 
 // Languages that support syntax highlighting
 const HIGHLIGHTED_LANGUAGES = new Set(["python", "py", "bash", "sh", "shell", "c", "cpp", "c++"]);
@@ -31,17 +41,40 @@ function normalizeLanguage(lang: string): string {
   return langMap[lang] || lang;
 }
 
+const TERMINAL_LANGUAGES = new Set([
+  "bash", "sh", "shell", "zsh", "powershell", "ps1", "cmd", "bat",
+  "console", "terminal", "prompt",
+]);
+
+const LANGUAGE_EXTENSIONS: Record<string, string> = {
+  python: "py", py: "py",
+  c: "c", cpp: "cpp", "c++": "cpp", javascript: "js", js: "js",
+  typescript: "ts", ts: "ts", json: "json", yaml: "yml", yml: "yml",
+  html: "html", css: "css", sql: "sql", rust: "rs", go: "go", java: "java",
+};
+
+function downloadCode(code: string, language?: string) {
+  const ext = (language && LANGUAGE_EXTENSIONS[language.toLowerCase()]) || "txt";
+  const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `snippet.${ext}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 /**
- * Code block component with copy-to-clipboard functionality and syntax highlighting
+ * Code block component with copy-to-clipboard and download functionality, plus syntax highlighting
  */
 function CodeBlock({ children, language }: { children?: React.ReactNode; language?: string }) {
   const [copied, setCopied] = useState(false);
   const preRef = useRef<HTMLPreElement>(null);
 
-  // Extract the code string from children
   const codeString = useMemo(() => {
     if (typeof children === "string") return children;
-    // If children is a React element (code tag), extract its children
     if (children && typeof children === "object" && "props" in children) {
       const childElement = children as React.ReactElement<{ children?: React.ReactNode }>;
       const codeChildren = childElement.props?.children;
@@ -61,29 +94,50 @@ function CodeBlock({ children, language }: { children?: React.ReactNode; languag
     }
   }, [codeString]);
 
-  // Check if we should use syntax highlighting
+  const handleDownload = useCallback(() => {
+    const code = codeString || preRef.current?.textContent || "";
+    downloadCode(code, language);
+  }, [codeString, language]);
+
   const normalizedLang = language ? normalizeLanguage(language.toLowerCase()) : "";
   const shouldHighlight = normalizedLang && HIGHLIGHTED_LANGUAGES.has(language?.toLowerCase() || "");
+  const isTerminal = !language || TERMINAL_LANGUAGES.has(language.toLowerCase());
 
   return (
     <div className="code-block-wrapper">
-      <button
-        className="code-copy-button"
-        onClick={handleCopy}
-        aria-label={copied ? "Copied!" : "Copy code"}
-        title={copied ? "Copied!" : "Copy code"}
-      >
-        {copied ? (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-        ) : (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
+      <div className="code-buttons-group">
+        <button
+          className="code-action-button"
+          onClick={handleCopy}
+          aria-label={copied ? "Copied!" : "Copy code"}
+          title={copied ? "Copied!" : "Copy code"}
+        >
+          {copied ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          )}
+        </button>
+        {!isTerminal && (
+          <button
+            className="code-action-button"
+            onClick={handleDownload}
+            aria-label="Download code"
+            title="Download code"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
         )}
-      </button>
+      </div>
       {shouldHighlight && codeString ? (
         <SyntaxHighlighter
           language={normalizedLang}
@@ -120,12 +174,16 @@ function HaloPreinstalledDropdown({
   playbookId,
   onImageClick,
   testCoverage,
+  selectedTestDevice,
+  runId,
 }: { 
   content: string;
   dropdownId: string;
   playbookId: string;
   onImageClick: (image: { src: string; alt: string }) => void;
   testCoverage?: TestCoverageInfo;
+  selectedTestDevice?: string;
+  runId?: number | null;
 }) {
   // Initialize from global store, use local state for rendering
   const [isOpen, setIsOpen] = useState(() => dropdownStateStore[dropdownId] ?? false);
@@ -247,12 +305,14 @@ function HaloPreinstalledDropdown({
               tr: ({ children }) => <tr className="md-tr">{children}</tr>,
               th: ({ children }) => <th className="md-th">{children}</th>,
               td: ({ children }) => <td className="md-td">{children}</td>,
-              // Handle test-coverage-block markers inside dependency content
               div: (divProps: React.HTMLAttributes<HTMLDivElement> & { 'data-test-id'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string }) => {
                 const { className: divClassName, ...divRest } = divProps;
                 if (divClassName === 'test-coverage-block') {
                   const testId = divProps['data-test-id'] || '';
                   const testInfo = testCoverage?.tests.find(t => t.id === testId);
+                  const activeResult = selectedTestDevice
+                    ? testInfo?.deviceResults?.[selectedTestDevice]
+                    : testInfo?.result;
                   return (
                     <TestCoverageBlock
                       testId={testId}
@@ -260,8 +320,10 @@ function HaloPreinstalledDropdown({
                       isHidden={divProps['data-hidden'] === 'true'}
                       setup={divProps['data-setup'] || ''}
                       code={decodeURIComponent(divProps['data-code'] || '')}
-                      testResult={testInfo?.result}
+                      testResult={activeResult}
                       playbookId={playbookId}
+                      runId={runId}
+                      selectedTestDevice={selectedTestDevice}
                     />
                   );
                 }
@@ -385,24 +447,31 @@ function HaloSetupContent({
 interface TocItem {
   id: string;
   text: string;
+  children?: TocItem[];
 }
 
 /**
- * Extracts table of contents from markdown content (main sections only - h2)
+ * Extracts table of contents from markdown content (h2 sections with h3 sub-items)
  */
 function extractToc(content: string): TocItem[] {
   if (!content) return [];
-  
-  const headingRegex = /^##\s+(.+)$/gm;
+
+  const headingRegex = /^(#{2,3})\s+(.+)$/gm;
   const toc: TocItem[] = [];
   let match;
-  
+
   while ((match = headingRegex.exec(content)) !== null) {
-    const text = match[1].trim();
+    const level = match[1].length;
+    const text = match[2].trim();
     const id = slugify(text);
-    toc.push({ id, text });
+
+    if (level === 2) {
+      toc.push({ id, text, children: [] });
+    } else if (level === 3 && toc.length > 0) {
+      toc[toc.length - 1].children!.push({ id, text });
+    }
   }
-  
+
   return toc;
 }
 
@@ -448,114 +517,42 @@ function TableOfContents({
               }}
               className={`
                 block text-sm py-1 pl-3 transition-colors duration-150 border-l-2
-                ${activeId === item.id 
-                  ? "text-[#D4915D] border-[#D4915D] font-medium" 
+                ${activeId === item.id
+                  ? "text-[#D4915D] border-[#D4915D] font-medium"
                   : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
                 }
               `}
             >
               {item.text}
             </a>
+            {item.children && item.children.length > 0 && (
+              <ul className="space-y-1 mt-1">
+                {item.children.map((child) => (
+                  <li key={child.id}>
+                    <a
+                      href={`#${child.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onLinkClick(child.id);
+                      }}
+                      className={`
+                        block text-sm py-1 pl-6 transition-colors duration-150 border-l-2
+                        ${activeId === child.id
+                          ? "text-[#D4915D] border-[#D4915D] font-medium"
+                          : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
+                        }
+                      `}
+                    >
+                      {child.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
     </nav>
-  );
-}
-
-/**
- * Coverage Sidebar — lists ALL playbooks with their test counts,
- * grouped by category, matching the Python _test_preview.py layout.
- * Replaces the "On this page" TOC when running in coverage mode.
- */
-function CoverageSidebar({
-  currentPlaybookId,
-  allPlaybooks,
-  onToggleView,
-}: {
-  currentPlaybookId: string;
-  allPlaybooks: PlaybookCoverageSummary[];
-  onToggleView: () => void;
-}) {
-  // Group by category
-  const grouped = useMemo(() => {
-    const map: Record<string, PlaybookCoverageSummary[]> = {};
-    for (const p of allPlaybooks) {
-      if (!map[p.category]) map[p.category] = [];
-      map[p.category].push(p);
-    }
-    return map;
-  }, [allPlaybooks]);
-
-  // Global stats
-  const totalTests = allPlaybooks.reduce((s, p) => s + p.testCount, 0);
-  const withTests = allPlaybooks.filter(p => p.testCount > 0).length;
-  const total = allPlaybooks.length;
-
-  return (
-    <nav className="cov-sidebar">
-      {/* Header */}
-      <div className="cov-sidebar-header">
-        <svg className="cov-sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-        </svg>
-        <span>Test Coverage</span>
-      </div>
-
-      {/* Global stats badges */}
-      <div className="cov-global-stats">
-        <span className="cov-global-badge cov-global-badge-green">{totalTests} total tests</span>
-        <span className={`cov-global-badge ${withTests < total ? "cov-global-badge-warn" : "cov-global-badge-green"}`}>
-          {withTests}/{total} playbooks tested
-        </span>
-      </div>
-
-      {/* Playbook list grouped by category */}
-      <div className="cov-pb-list">
-        {Object.entries(grouped).map(([category, playbooks]) => (
-          <div key={category}>
-            <div className="cov-pb-section">{category}</div>
-            {playbooks.map(p => (
-              <Link
-                key={p.id}
-                href={`/playbooks/${p.id}`}
-                className={`cov-pb-item ${p.id === currentPlaybookId ? "cov-pb-active" : ""}`}
-              >
-                <span className={`cov-pb-dot ${p.testCount > 0 ? "cov-pb-dot-tested" : "cov-pb-dot-untested"}`} />
-                <span className="cov-pb-title" title={p.title}>{p.title}</span>
-                <span className={`cov-pb-count ${p.testCount > 0 ? "cov-pb-count-has" : "cov-pb-count-none"}`}>
-                  {p.testCount}
-                </span>
-              </Link>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      {/* Toggle to user view */}
-      <button className="cov-toggle-btn" onClick={onToggleView}>
-        <svg className="cov-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-        Switch to User View
-      </button>
-    </nav>
-  );
-}
-
-/**
- * Small floating toggle shown in the TOC sidebar position when in user-view mode
- * to allow switching back to coverage mode.
- */
-function CoverageReturnToggle({ onToggle }: { onToggle: () => void }) {
-  return (
-    <button className="cov-return-toggle" onClick={onToggle}>
-      <svg className="cov-return-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      Show Coverage
-    </button>
   );
 }
 
@@ -682,7 +679,7 @@ function transformSetupBlocks(content: string): string {
  * When a test fails, shows a "View Logs" button to inspect stdout/stderr.
  */
 function TestCoverageBlock({
-  testId, timeout, isHidden, setup, code, testResult, playbookId, runId,
+  testId, timeout, isHidden, setup, code, testResult, playbookId, runId, selectedTestDevice,
 }: {
   testId: string;
   timeout: string;
@@ -692,18 +689,23 @@ function TestCoverageBlock({
   testResult?: TestResultInfo;
   playbookId?: string;
   runId?: number | null;
+  selectedTestDevice?: string;
 }) {
   const [logsOpen, setLogsOpen] = useState(false);
   const [logs, setLogs] = useState<{ stdout: string; stderr: string } | null>(null);
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState<string | null>(null);
 
-  // Parse the fenced code block: ```lang\ncontent\n```
+  useEffect(() => {
+    setLogs(null);
+    setLogsError(null);
+    setLogsOpen(false);
+  }, [selectedTestDevice]);
+
   const langMatch = code.match(/```(\w+)?\s*\n/);
   const language = langMatch?.[1] || "";
   const codeContent = code.replace(/```\w*\s*\n/, "").replace(/\n?```\s*$/, "");
 
-  // Detect lines marked with #hide (hidden from user view, visible in coverage)
   const hasHideLines = codeContent.split('\n').some(line => line.trimEnd().endsWith('#hide'));
 
   let resultStatus = "";
@@ -714,7 +716,6 @@ function TestCoverageBlock({
     else { resultStatus = "fail"; resultLabel = "Failed"; }
   }
 
-  // Show logs button for all tests that have results
   const showLogsButton = !!testResult;
 
   const handleViewLogs = useCallback(async () => {
@@ -735,9 +736,15 @@ function TestCoverageBlock({
     setLogsError(null);
 
     try {
-      const logsUrl = runId
-        ? `/api/playbooks/${playbookId}/logs/${testId}?run_id=${runId}`
-        : `/api/playbooks/${playbookId}/logs/${testId}`;
+      const logsParams = new URLSearchParams();
+      if (runId) logsParams.set("run_id", String(runId));
+      if (selectedTestDevice) {
+        const { arch, platform } = parseDeviceKey(selectedTestDevice);
+        logsParams.set("device", arch);
+        if (platform) logsParams.set("platform", platform);
+      }
+      const qs = logsParams.toString();
+      const logsUrl = `/api/playbooks/${playbookId}/logs/${testId}${qs ? `?${qs}` : ""}`;
       const res = await fetch(logsUrl);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -754,7 +761,7 @@ function TestCoverageBlock({
     } finally {
       setLogsLoading(false);
     }
-  }, [logsOpen, logs, playbookId, testId, runId]);
+  }, [logsOpen, logs, playbookId, testId, runId, selectedTestDevice]);
 
   return (
     <div className={`tc-block ${isHidden ? "tc-hidden" : ""} ${resultStatus ? `tc-result-${resultStatus}` : ""}`}>
@@ -887,21 +894,65 @@ function SetupDefinitionBlock({
  * Stats bar showing test coverage summary for the playbook.
  * Only shown when GitHub test results are available.
  */
+function TestedDeviceSelector({
+  devices,
+  selected,
+  onChange,
+}: {
+  devices: string[];
+  selected: string;
+  onChange: (device: string) => void;
+}) {
+  if (devices.length === 0) return null;
+
+  return (
+    <div className="flex items-center gap-1 p-0.5 bg-[#111] rounded-lg border border-[#2a2a2a]">
+      {devices.map((d) => {
+        const name = deviceNames[parseDeviceKey(d).arch as Device] || parseDeviceKey(d).arch;
+        return (
+          <button
+            key={d}
+            onClick={() => onChange(d)}
+            className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all ${
+              selected === d
+                ? "bg-[#D4915D] text-black"
+                : "text-[#6b6b6b] hover:text-[#a0a0a0] hover:bg-[#1a1a1a]"
+            }`}
+          >
+            {name}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function TestCoverageStatsBar({
   coverage,
   availableRuns,
   selectedRunId,
   onRunChange,
+  selectedTestDevice,
+  onTestDeviceChange,
+  selectedPlatform,
 }: {
   coverage: TestCoverageInfo;
   availableRuns: PlaybookRunOption[];
   selectedRunId: number | null;
   onRunChange: (id: number | null) => void;
+  selectedTestDevice: string;
+  onTestDeviceChange: (device: string) => void;
+  selectedPlatform: Platform;
 }) {
   const covPct = coverage.totalCodeBlocks > 0
     ? Math.round((coverage.visibleTestCount / coverage.totalCodeBlocks) * 100)
     : 0;
   const covClass = covPct >= 60 ? "" : covPct >= 30 ? "tc-cov-mid" : "tc-cov-low";
+
+  const allDevices = coverage.testedDevices ?? [];
+  const testedDevices = allDevices.filter(d => d.endsWith(`-${selectedPlatform}`));
+  const activeSummary = coverage.deviceSummaries?.[selectedTestDevice]
+    ?? (testedDevices.length === 0 ? undefined : coverage.resultsSummary);
 
   return (
     <div className="tc-stats-container">
@@ -912,23 +963,34 @@ function TestCoverageStatsBar({
         <span className="tc-stat"><strong>{coverage.totalCodeBlocks}</strong> code blocks</span>
         <span className="tc-stat-divider" />
         <span className={`tc-stat-coverage ${covClass}`}>{covPct}% coverage</span>
-        {availableRuns.length > 0 && (
-          <span className="ml-auto">
+        <span className="ml-auto flex items-center gap-2">
+          {testedDevices.length > 1 && (
+            <TestedDeviceSelector
+              devices={testedDevices}
+              selected={selectedTestDevice}
+              onChange={onTestDeviceChange}
+            />
+          )}
+          {availableRuns.length > 0 && (
             <PlaybookRunSelector
               runs={availableRuns}
               selectedId={selectedRunId}
               onChange={onRunChange}
             />
-          </span>
-        )}
+          )}
+        </span>
       </div>
-      {/* Results row */}
-      {coverage.resultsSummary && (
+      {/* Results row for selected device */}
+      {activeSummary && (
         <div className="tc-results-bar">
-          <span className="tc-results-label">Results:</span>
-          <span className="tc-results-pill tc-results-pass">{coverage.resultsSummary.passed} passed</span>
-          <span className="tc-results-pill tc-results-fail">{coverage.resultsSummary.failed} failed</span>
-          <span className="tc-results-pill tc-results-skip">{coverage.resultsSummary.skipped} skipped</span>
+          <span className="tc-results-label">
+            {testedDevices.length > 0
+              ? `${deviceNames[parseDeviceKey(selectedTestDevice).arch as Device] || parseDeviceKey(selectedTestDevice).arch}:`
+              : "Results:"}
+          </span>
+          <span className="tc-results-pill tc-results-pass">{activeSummary.passed} passed</span>
+          <span className="tc-results-pill tc-results-fail">{activeSummary.failed} failed</span>
+          <span className="tc-results-pill tc-results-skip">{activeSummary.skipped} skipped</span>
         </div>
       )}
       {/* Legend */}
@@ -937,7 +999,7 @@ function TestCoverageStatsBar({
         <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-tested" /> Tested (visible)</span>
         <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-hidden" /> Hidden test</span>
         <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-untested" /> Not tested</span>
-        {coverage.resultsSummary && (
+        {activeSummary && (
           <>
             <span className="tc-legend-sep">|</span>
             <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-pass" /> Passed</span>
@@ -1130,26 +1192,32 @@ function deviceFromHash(hash?: string): Device | null {
   return hashToDeviceId[hash] ?? (DEVICE_IDS.includes(hash as Device) ? hash as Device : null);
 }
 
-export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string }> }) {
+export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string; coverage?: string; run_id?: string; test_device?: string; platform?: string }> }) {
   const { id } = use(params);
-  const { device: deviceHash } = use(searchParams);
+  const { device: deviceHash, coverage: coverageParam, run_id: runIdParam, test_device: testDeviceParam, platform: platformParam } = use(searchParams);
   const backHref = deviceHash ? `/#${deviceHash}` : "/#playbooks";
 
   const [playbook, setPlaybook] = useState<Playbook | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform>(() =>
+    platformParam === "linux" ? "linux" : "windows"
+  );
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => deviceFromHash(deviceHash));
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
-  // Coverage view toggle — true = show coverage badges & sidebar; false = normal user view
-  const [coverageViewActive, setCoverageViewActive] = useState<boolean>(false);
-  // All-playbooks coverage data for the sidebar (fetched once when in coverage mode)
-  const [coveragePlaybooks, setCoveragePlaybooks] = useState<PlaybookCoverageSummary[]>([]);
-  // Run selector state — null means "use latest"
+  const [coverageViewActive, setCoverageViewActive] = useState<boolean>(() => coverageParam === "true");
   const [availableRuns, setAvailableRuns] = useState<PlaybookRunOption[]>([]);
-  const [selectedRunId, setSelectedRunId] = useState<number | null>(null);
+  const [selectedRunId, setSelectedRunId] = useState<number | null>(() => {
+    const parsed = runIdParam ? parseInt(runIdParam, 10) : NaN;
+    return Number.isFinite(parsed) ? parsed : null;
+  });
+  const [selectedTestDevice, setSelectedTestDevice] = useState<string>(() => {
+    if (testDeviceParam && platformParam) return `${testDeviceParam}-${platformParam}`;
+    if (testDeviceParam) return testDeviceParam;
+    return "";
+  });
   const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
@@ -1167,11 +1235,24 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       const data = await res.json();
       setPlaybook(data);
 
-      // Auto-select platform: prefer windows, otherwise use the first available
       if (data.platforms.includes("windows")) {
         setSelectedPlatform("windows");
       } else if (data.platforms.length > 0) {
         setSelectedPlatform(data.platforms[0]);
+      }
+
+      // Auto-select first tested device for coverage results
+      const devices: string[] = data.testCoverage?.testedDevices ?? [];
+      if (devices.length > 0) {
+        setSelectedTestDevice(prev => {
+          if (prev && devices.includes(prev)) return prev;
+          // Try matching by arch prefix (URL may pass bare arch like "halo")
+          if (prev) {
+            const match = devices.find(d => d.startsWith(`${prev}-`));
+            if (match) return match;
+          }
+          return devices[0];
+        });
       }
     } catch (err) {
       setError("Failed to load playbook");
@@ -1185,18 +1266,6 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
     fetchPlaybook(selectedRunId);
   }, [fetchPlaybook, selectedRunId]);
 
-  // Fetch all-playbooks coverage summary when we detect coverage mode
-  useEffect(() => {
-    if (!playbook?.testCoverage) return;
-    const url = selectedRunId
-      ? `/api/playbooks/coverage?run_id=${selectedRunId}`
-      : "/api/playbooks/coverage";
-    fetch(url)
-      .then(r => r.json())
-      .then((data: PlaybookCoverageSummary[]) => setCoveragePlaybooks(data))
-      .catch(() => {/* ignore */});
-  }, [playbook?.testCoverage, selectedRunId]);
-
   // Fetch available runs once coverage data is detected (token is configured)
   useEffect(() => {
     if (!playbook?.testCoverage) return;
@@ -1206,6 +1275,40 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       .then(d => { if (d.runs) setAvailableRuns(d.runs); })
       .catch(() => {/* non-critical */});
   }, [playbook?.testCoverage, availableRuns.length]);
+
+  // When arriving via URL platform param, re-apply after fetchPlaybook's auto-select
+  useEffect(() => {
+    if (!playbook || !platformParam) return;
+    if (playbook.platforms.includes(platformParam as Platform)) {
+      setSelectedPlatform(platformParam as Platform);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playbook]);
+
+  // When platform changes, switch selectedTestDevice to the matching composite key.
+  // If no device is tested on the new platform, use a synthetic key so stale results
+  // from the previous platform are cleared rather than carried over.
+  useEffect(() => {
+    const devices = playbook?.testCoverage?.testedDevices;
+    if (!devices || devices.length === 0) return;
+
+    setSelectedTestDevice(prev => {
+      const currentArch = parseDeviceKey(prev).arch;
+      const newKey = `${currentArch}-${selectedPlatform}`;
+      if (devices.includes(newKey)) return newKey;
+      const match = devices.find(d => d.endsWith(`-${selectedPlatform}`));
+      return match || newKey;
+    });
+  }, [selectedPlatform, playbook?.testCoverage?.testedDevices]);
+
+  // In coverage mode, sync instruction device filter to the selected test device
+  useEffect(() => {
+    if (coverageViewActive && selectedTestDevice) {
+      const { arch } = parseDeviceKey(selectedTestDevice);
+      const asDevice = DEVICE_IDS.includes(arch as Device) ? (arch as Device) : null;
+      setSelectedDevice(asDevice);
+    }
+  }, [coverageViewActive, selectedTestDevice]);
 
   const hasDeviceContent = !!playbook?.content && /<!-- @device:[\w,]+ -->/.test(playbook.content);
 
@@ -1289,6 +1392,24 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
         );
       }
       
+      if (href && href.startsWith("#")) {
+        return (
+          <a
+            href={href}
+            className="md-link"
+            onClick={(e) => {
+              e.preventDefault();
+              const target = document.getElementById(href.slice(1));
+              if (target) {
+                target.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
+            {children}
+          </a>
+        );
+      }
+
       return (
         <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
           {children}
@@ -1386,6 +1507,8 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
               playbookId={id}
               onImageClick={setLightboxImage}
               testCoverage={playbook?.testCoverage}
+              selectedTestDevice={selectedTestDevice}
+              runId={selectedRunId}
             />
           );
         }
@@ -1404,10 +1527,12 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
           );
         }
       }
-      // Handle test-coverage-block (dev:coverage mode only)
       if (className === 'test-coverage-block') {
         const testId = props['data-test-id'] || '';
         const testInfo = playbook?.testCoverage?.tests.find(t => t.id === testId);
+        const activeResult = selectedTestDevice
+          ? testInfo?.deviceResults?.[selectedTestDevice]
+          : testInfo?.result;
         return (
           <TestCoverageBlock
             testId={testId}
@@ -1415,15 +1540,16 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
             isHidden={props['data-hidden'] === 'true'}
             setup={props['data-setup'] || ''}
             code={decodeURIComponent(props['data-code'] || '')}
-            testResult={testInfo?.result}
+            testResult={activeResult}
             playbookId={id}
             runId={selectedRunId}
+            selectedTestDevice={selectedTestDevice}
           />
         );
       }
       return <div className={className} {...rest} />;
     },
-  }), [id, setLightboxImage, playbook?.testCoverage, selectedRunId]);
+  }), [id, setLightboxImage, playbook?.testCoverage, selectedRunId, selectedTestDevice]);
 
   // Handle clicking a TOC link - scroll and immediately set active
   const handleTocClick = (targetId: string) => {
@@ -1461,15 +1587,27 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       rafId = requestAnimationFrame(() => {
         rafId = null;
         
-        const headings = contentRef.current?.querySelectorAll("h2[id]");
+        const headings = contentRef.current?.querySelectorAll("h2[id], h3[id]");
         if (!headings || headings.length === 0) return;
-        
+
+        // Build a set of all IDs present in the TOC (h2 + h3 children)
+        const tocIds = new Set<string>();
+        for (const item of tocItems) {
+          tocIds.add(item.id);
+          if (item.children) {
+            for (const child of item.children) {
+              tocIds.add(child.id);
+            }
+          }
+        }
+
         // Find the heading that's currently at or near the top of the viewport
         // We look for the last heading that has scrolled past the threshold
         const threshold = 150; // How far from top of viewport to consider "active"
         let currentActive = "";
-        
+
         for (const heading of headings) {
+          if (!tocIds.has(heading.id)) continue;
           const rect = heading.getBoundingClientRect();
           // If this heading is at or above the threshold, it's the current section
           if (rect.top <= threshold) {
@@ -1607,7 +1745,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                         />
                       </div>
                     )}
-                    {hasDeviceContent && (
+                    {hasDeviceContent && !coverageViewActive && (
                       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                         <span className="text-sm text-[#6b6b6b]">Device:</span>
                         <DeviceToggle
@@ -1638,28 +1776,37 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
               {/* Main content area with TOC / Coverage sidebar */}
               <div className={`relative flex gap-8 ${playbook.testCoverage && !coverageViewActive ? "tc-user-view" : ""}`}>
                 {/* Sidebar - Desktop only */}
-                <aside className={`hidden xl:block flex-shrink-0 ${playbook.testCoverage && coverageViewActive ? "w-64" : "w-56"}`}>
+                <aside className="hidden xl:block flex-shrink-0 w-56">
                   <div className="sticky top-24">
-                    {playbook.testCoverage && coverageViewActive ? (
-                      <CoverageSidebar
-                        currentPlaybookId={id}
-                        allPlaybooks={coveragePlaybooks}
-                        onToggleView={() => setCoverageViewActive(false)}
+                    {tocItems.length > 0 && (
+                      <TableOfContents 
+                        items={tocItems} 
+                        activeId={activeHeading}
+                        onLinkClick={handleTocClick}
                       />
-                    ) : (
-                      <>
-                        {tocItems.length > 0 && (
-                          <TableOfContents 
-                            items={tocItems} 
-                            activeId={activeHeading}
-                            onLinkClick={handleTocClick}
-                          />
+                    )}
+                    {playbook.testCoverage && (
+                      <button
+                        className="cov-return-toggle"
+                        onClick={() => setCoverageViewActive(prev => !prev)}
+                      >
+                        {coverageViewActive ? (
+                          <>
+                            <svg className="cov-return-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            User View
+                          </>
+                        ) : (
+                          <>
+                            <svg className="cov-return-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Show Coverage
+                          </>
                         )}
-                        {/* Show return toggle when coverage data exists but user switched to user view */}
-                        {playbook.testCoverage && !coverageViewActive && (
-                          <CoverageReturnToggle onToggle={() => setCoverageViewActive(true)} />
-                        )}
-                      </>
+                      </button>
                     )}
                   </div>
                 </aside>
@@ -1673,6 +1820,9 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                       availableRuns={availableRuns}
                       selectedRunId={selectedRunId}
                       onRunChange={setSelectedRunId}
+                      selectedTestDevice={selectedTestDevice}
+                      onTestDeviceChange={setSelectedTestDevice}
+                      selectedPlatform={selectedPlatform}
                     />
                   )}
 

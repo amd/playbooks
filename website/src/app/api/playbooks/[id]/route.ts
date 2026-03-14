@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import type { Playbook, PlaybookMeta, Category, TestInfo, TestCoverageInfo } from "@/types/playbook";
-import { loadGitHubTestResults } from "@/lib/github-test-results";
+import { loadAllGitHubTestResults } from "@/lib/github-test-results";
+import type { DeviceTestResult } from "@/lib/github-test-results";
 
 const PLAYBOOKS_ROOT = path.join(process.cwd(), "..", "playbooks");
 const DEPENDENCIES_ROOT = path.join(PLAYBOOKS_ROOT, "dependencies");
@@ -104,11 +105,11 @@ function processDependencyTestTags(
   depContent: string,
   showCoverage: boolean,
   resultsMap: ResultsMap,
+  deviceResultsList?: DeviceTestResult[],
 ): { processedContent: string; tests: TestInfo[]; codeBlockCount: number } {
   const testBlockPattern = /<!-- @test:([^>]+) -->\s*(```\w*\s*\n[\s\S]*?```)\s*<!-- @test:end -->/g;
   const tests: TestInfo[] = [];
 
-  // Count code blocks before processing (on the original content)
   const codeBlockCount = (depContent.match(/```\w*\s*\n/g) || []).length;
 
   const processedContent = depContent.replace(testBlockPattern, (_match, attrStr: string, codeBlock: string) => {
@@ -121,18 +122,20 @@ function processDependencyTestTags(
     const testInfo: TestInfo = { id: testId, timeout, hidden };
     const result = resultsMap[testId];
     if (result) testInfo.result = result;
+    if (deviceResultsList) {
+      const dr: Record<string, typeof result> = {};
+      for (const d of deviceResultsList) {
+        if (d.resultsMap[testId]) dr[`${d.device}-${d.platform}`] = d.resultsMap[testId];
+      }
+      if (Object.keys(dr).length > 0) testInfo.deviceResults = dr;
+    }
     tests.push(testInfo);
 
     if (showCoverage) {
-      // In coverage mode: replace the test block with a coverage marker div
-      // inline in the dependency content. The dropdown component renders these
-      // as TestCoverageBlock badges, just like the main content does.
       const encodedCode = encodeURIComponent(codeBlock);
       return `<div class="test-coverage-block" data-test-id="${testId}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
     }
 
-    // Normal mode: strip test tags but keep the code block visible
-    // (it's the installation instruction). Strip #hide lines for clean display.
     return stripHideLines(codeBlock);
   });
 
@@ -154,6 +157,7 @@ function processRequireTags(
   content: string,
   showCoverage: boolean,
   resultsMap: ResultsMap,
+  deviceResultsList?: DeviceTestResult[],
 ): {
   content: string;
   dependencyTests: TestInfo[];
@@ -173,7 +177,7 @@ function processRequireTags(
       const depContent = loadDependencyContent(depId);
       if (depContent) {
         const { processedContent: proc, tests, codeBlockCount } =
-          processDependencyTestTags(depContent, showCoverage, resultsMap);
+          processDependencyTestTags(depContent, showCoverage, resultsMap, deviceResultsList);
         contents.push(proc);
         allDependencyTests.push(...tests);
         totalDependencyCodeBlocks += codeBlockCount;
@@ -250,6 +254,8 @@ function processTestTags(
   showCoverage: boolean,
   resultsMap: ResultsMap,
   resultsSummary?: { passed: number; failed: number; skipped: number },
+  deviceResultsList?: DeviceTestResult[],
+  deviceSummaries?: Record<string, { passed: number; failed: number; skipped: number }>,
 ): { content: string; testCoverage?: TestCoverageInfo } {
   const testBlockPattern = /<!-- @test:([^>]+) -->\s*(```\w*\s*\n[\s\S]*?```)\s*<!-- @test:end -->/g;
 
@@ -274,6 +280,13 @@ function processTestTags(
     const testInfo: TestInfo = { id: testId, timeout, hidden };
     const result = resultsMap[testId];
     if (result) testInfo.result = result;
+    if (deviceResultsList) {
+      const dr: Record<string, typeof result> = {};
+      for (const d of deviceResultsList) {
+        if (d.resultsMap[testId]) dr[`${d.device}-${d.platform}`] = d.resultsMap[testId];
+      }
+      if (Object.keys(dr).length > 0) testInfo.deviceResults = dr;
+    }
     tests.push(testInfo);
 
     const encodedCode = encodeURIComponent(codeBlock);
@@ -281,6 +294,7 @@ function processTestTags(
   });
 
   const totalCodeBlocks = (content.match(/```\w*\s*\n/g) || []).length;
+  const testedDevices = deviceResultsList?.map(d => `${d.device}-${d.platform}`) ?? [];
 
   return {
     content: processed,
@@ -290,6 +304,8 @@ function processTestTags(
       visibleTestCount: tests.filter(t => !t.hidden).length,
       hiddenTestCount: tests.filter(t => t.hidden).length,
       resultsSummary,
+      deviceSummaries,
+      testedDevices: testedDevices.length > 0 ? testedDevices : undefined,
     },
   };
 }
@@ -363,6 +379,8 @@ function findPlaybook(
   showCoverage: boolean,
   resultsMap: ResultsMap,
   resultsSummary?: { passed: number; failed: number; skipped: number },
+  deviceResultsList?: DeviceTestResult[],
+  deviceSummaries?: Record<string, { passed: number; failed: number; skipped: number }>,
 ): Playbook | null {
   const categories = ["core", "supplemental", "backup"];
 
@@ -395,14 +413,11 @@ function findPlaybook(
           let testCoverage: TestCoverageInfo | undefined;
           if (fs.existsSync(readmePath)) {
             content = fs.readFileSync(readmePath, "utf-8");
-            // Process @test tags (strip tags, or emit coverage markers with GitHub results)
-            const testResult = processTestTags(content, showCoverage, resultsMap, resultsSummary);
+            const testResult = processTestTags(content, showCoverage, resultsMap, resultsSummary, deviceResultsList, deviceSummaries);
             content = testResult.content;
             testCoverage = testResult.testCoverage;
-            // Process inline @setup:id=... definitions
             content = processSetupDefinitions(content, showCoverage);
-            // Process @require tags to inject shared dependency content
-            const requireResult = processRequireTags(content, showCoverage, resultsMap);
+            const requireResult = processRequireTags(content, showCoverage, resultsMap, deviceResultsList);
             content = requireResult.content;
             // Merge dependency tests into the coverage data
             if (testCoverage && requireResult.dependencyTests.length > 0) {
@@ -451,24 +466,30 @@ export async function GET(
   let showCoverage = false;
   let resultsMap: ResultsMap = {};
   let resultsSummary: { passed: number; failed: number; skipped: number } | undefined;
+  let deviceResultsList: DeviceTestResult[] | undefined;
+  let deviceSummaries: Record<string, { passed: number; failed: number; skipped: number }> | undefined;
 
   const coverageModeEnabled = process.env.SHOW_TEST_COVERAGE === "true";
   const token = process.env.DASHBOARD_GITHUB_TOKEN?.trim();
   if (coverageModeEnabled && token) {
+    showCoverage = true;
     try {
-      const loaded = await loadGitHubTestResults(id, token, runId);
+      const loaded = await loadAllGitHubTestResults(id, token, runId);
       if (loaded) {
-        showCoverage = true;
         resultsMap = loaded.resultsMap;
         resultsSummary = loaded.summary;
+        deviceResultsList = loaded.deviceResults;
+        deviceSummaries = {};
+        for (const dr of loaded.deviceResults) {
+          deviceSummaries[`${dr.device}-${dr.platform}`] = dr.summary;
+        }
       }
     } catch (err) {
-      // GitHub fetch failed — degrade gracefully to user view
       console.error(`Failed to fetch GitHub test results for ${id}:`, err);
     }
   }
 
-  const playbook = findPlaybook(id, showCoverage, resultsMap, resultsSummary);
+  const playbook = findPlaybook(id, showCoverage, resultsMap, resultsSummary, deviceResultsList, deviceSummaries);
 
   if (!playbook) {
     return NextResponse.json(

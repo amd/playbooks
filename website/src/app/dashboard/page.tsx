@@ -249,6 +249,8 @@ interface PlaybookMatrixColumn {
   id: string;
   hardware: string;
   os: string;
+  arch: string;
+  platform: string;
 }
 
 interface PlaybookMatrixCell {
@@ -413,8 +415,8 @@ function CIStatusDashboard() {
                             <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801" />
                           </svg>
                         ) : (
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12.504 0c-.155 0-.311.003-.466.009a11.978 11.978 0 00-4.653 1.11c-.635.296-1.24.656-1.804 1.07a12.062 12.062 0 00-3.667 4.6A11.953 11.953 0 00.834 12c0 1.742.372 3.397 1.044 4.888a12.015 12.015 0 002.108 3.2 12.05 12.05 0 003.159 2.437A11.937 11.937 0 0012 24a11.94 11.94 0 004.855-1.025 12.043 12.043 0 003.159-2.437 12.01 12.01 0 002.108-3.2A11.928 11.928 0 0023.166 12a11.95 11.95 0 00-1.08-5.211 12.056 12.056 0 00-3.667-4.6 11.93 11.93 0 00-1.804-1.07A11.978 11.978 0 0012.504 0z" />
+                          <svg className="w-4 h-4" viewBox="0 0 266 312" fill="currentColor">
+                            <path d="M132.87 4.28c-17.36 0-30.73 24.37-36.88 44.48-4.05 13.25-5.44 27.86-4.32 41.33-22.92 10.98-42.2 29.54-42.2 62.95 0 9.93.91 19.2 2.6 27.85-20.04 6.2-36.76 15.78-46.45 29.83C-.4 219.67-.97 231.77 2.8 243.5c6.02 18.72 22.53 29.5 42.03 35.3 18.55 5.51 40.4 7.55 61.55 7.55h53.24c21.14 0 42.99-2.04 61.55-7.55 19.5-5.8 36.01-16.58 42.03-35.3 3.77-11.73 3.2-23.83-2.82-32.78-9.69-14.05-26.41-23.63-46.45-29.83 1.69-8.65 2.6-17.92 2.6-27.85 0-33.41-19.28-51.97-42.2-62.95 1.12-13.47-.27-28.08-4.32-41.33C164.6 28.65 150.23 4.28 132.87 4.28zM99.47 184.87c11.56 0 21.69 5.47 27.2 13.84-8.86 4.1-16.28 12.82-16.28 25.93 0 .89.14 1.67.2 2.53-4.96 3.07-11.2 3.61-18.94.12-9.56-4.31-17.08-15.64-16.21-26.37.86-10.72 9.08-16.05 24.03-16.05zm66.8 0c14.95 0 23.17 5.33 24.03 16.05.87 10.73-6.65 22.06-16.21 26.37-7.74 3.49-13.98 2.95-18.94-.12.06-.86.2-1.64.2-2.53 0-13.11-7.42-21.83-16.28-25.93 5.51-8.37 15.64-13.84 27.2-13.84zm-33.4 45.53c7.22 0 13.08 5.86 13.08 13.08 0 7.21-5.86 13.07-13.08 13.07s-13.08-5.86-13.08-13.07c0-7.22 5.86-13.08 13.08-13.08zm-11.32 31.74c3.4 1.71 7.2 2.72 11.32 2.72s7.92-1.01 11.32-2.72c3.77 6.37 5.38 13.85-.58 20.86-4.07 4.79-13.88 4.79-17.96 0-5.76-6.79-4.52-14.07-.58-20.86h-3.52z" />
                           </svg>
                         )}
                         {os}
@@ -818,14 +820,29 @@ function PlaybookStatusDashboard() {
                       const cell = row.cells[column.id];
                       const testsAdded = Object.values(row.cells).some((c) => c.totalTests > 0);
                       const style = getCellStyle(cell, row.developed, testsAdded);
+                      const isClickable = !!(cell && cell.totalTests > 0);
+                      const runId = selectedRunId ?? matrix?.run?.id ?? null;
+
+                      const cellBadge = (
+                        <div className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full ${isClickable ? "hover:border-[#D4915D]/50 hover:bg-[#D4915D]/5 transition-colors" : ""}`}>
+                          {style.dot && (
+                            <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
+                          )}
+                          <span className={`text-[11px] font-medium whitespace-nowrap ${style.text}`}>{style.label}</span>
+                        </div>
+                      );
+
                       return (
-                        <td key={column.id} className="px-2 py-2 align-middle text-center">
-                          <div className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full`}>
-                            {style.dot && (
-                              <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
-                            )}
-                            <span className={`text-[11px] font-medium whitespace-nowrap ${style.text}`}>{style.label}</span>
-                          </div>
+                        <td key={column.id} className={`px-2 py-2 align-middle text-center${isClickable ? " cursor-pointer" : ""}`}>
+                          {isClickable ? (
+                            <Link
+                              href={`/playbooks/${row.playbookId}?coverage=true&test_device=${column.arch}&platform=${column.platform}${runId ? `&run_id=${runId}` : ""}`}
+                            >
+                              {cellBadge}
+                            </Link>
+                          ) : (
+                            cellBadge
+                          )}
                         </td>
                       );
                     })}

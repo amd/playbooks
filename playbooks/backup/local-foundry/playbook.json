@@ -5,7 +5,7 @@
   "time": 60,
   "platforms": ["linux", "windows"],
   "difficulty": "intermediate",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
   "developed": false,
   "published": true,

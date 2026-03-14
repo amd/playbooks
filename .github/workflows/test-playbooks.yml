@@ -78,7 +78,9 @@ jobs:
                       if not archs:
                           for p in meta.get("platforms", []):
                               archs[p] = ["halo"]
+                      required = meta.get("required_platforms", {})
                       for platform, arch_list in archs.items():
+                          required_archs = set(required.get(platform, []))
                           for arch in arch_list:
                               os_label = "Windows" if platform == "windows" else "Linux"
                               matrix.append({
@@ -86,6 +88,7 @@ jobs:
                                   "platform": platform,
                                   "arch": arch,
                                   "runner": json.dumps(["self-hosted", os_label, arch]),
+                                  "required": arch in required_archs,
                               })
                       break
 
@@ -106,10 +109,11 @@ jobs:
           echo "Test matrix: ${{ steps.build-matrix.outputs.matrix }}"
 
   test-playbooks:
-    name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})"
+    name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
     needs: detect-changes
     if: needs.detect-changes.outputs.has_entries == 'true'
     runs-on: ${{ fromJson(matrix.runner) }}
+    continue-on-error: ${{ !matrix.required }}
     env:
       PYTHONUTF8: 1
       PYTHONIOENCODING: utf-8
@@ -174,3 +178,18 @@ jobs:
 
           See the test artifacts for detailed logs.
           EOF
+
+  test-gate:
+    name: Test Gate (Required Tests)
+    needs: [detect-changes, test-playbooks]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required tests
+        run: |
+          echo "test-playbooks result: ${{ needs.test-playbooks.result }}"
+          if [ "${{ needs.test-playbooks.result }}" = "failure" ]; then
+            echo "::error::One or more required tests failed"
+            exit 1
+          fi
+          echo "All required tests passed (or no tests were needed)"

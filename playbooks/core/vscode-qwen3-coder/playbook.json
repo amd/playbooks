@@ -6,6 +6,10 @@
   "platforms": ["windows", "linux"],
   "tested_platforms": {
     "windows": ["halo"],
+    "linux": ["krk"]
+  },
+  "required_platforms": {
+    "windows": ["halo"],
     "linux": []
   },
   "difficulty": "intermediate",

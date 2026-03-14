@@ -9,9 +9,9 @@
     "windows": []
   },
   "difficulty": "intermediate",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
-  "developed": false,
+  "developed": true,
   "published": true,
   "tags": ["lemonade", "cpu", "gpu", "npu", "inference"]
 }
