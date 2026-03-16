@@ -165,7 +165,7 @@ source llm-env/bin/activate
 
 ### Walkthrough 1: Vector Addition
 
-#### Approach A:  JIT Compilation: [`add_one_kernel.py`](assets/Vector%20Addition/add_one_kernel.py)
+#### Approach A:  JIT Compilation: [`add_one_kernel.py`](assets/Vector_Addition/add_one_kernel.py)
 
 Kernel is written as a raw C++ string inside Python and compiled at runtime via PyTorch's built-in JIT.
 
@@ -233,7 +233,7 @@ The inner `for (int i = 0; i < 1000; i++)` loop is artificial, its only purpose 
 **Run:**
 <!-- @test:id=run-vector-addition-add-one-kernel-py timeout=600 setup=activate-venv-->
 ```bash
-python "assets/Vector Addition/add_one_kernel.py"
+python "assets/Vector_Addition/add_one_kernel.py"
 ```
 <!-- @test:end -->
 
@@ -256,12 +256,12 @@ The full manual path: write the kernel and Python binding in a single `.cu` file
 
 | File | Role |
 |---|---|
-| [add_one_kernel.cu](assets/Vector%20Addition/add_one_kernel.cu) | Kernel + launcher + pybind11 binding, everything in one file |
-| [setup.py](assets/Vector%20Addition/setup.py) | Build script, uses `CUDAExtension` to compile the `.cu` into a `.so` |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + launcher + pybind11 binding, everything in one file |
+| [setup.py](assets/Vector_Addition/setup.py) | Build script, uses `CUDAExtension` to compile the `.cu` into a `.so` |
 
 **How it works:**
 
-**Step 1: The kernel, launcher, and binding** ([add_one_kernel.cu](assets/Vector%20Addition/add_one_kernel.cu)):
+**Step 1: The kernel, launcher, and binding** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
 ```cpp
 // GPU kernel, one thread per element
 __global__ void add_one(float* data, int n) {
@@ -293,8 +293,8 @@ add_one<<<grid_size, block_size>>>(data, n);
 ```
 the CPU immediately continues executing the next instruction without waiting for the GPU to finish. `hipDeviceSynchronize()` forces the CPU to block until the GPU kernel completes.
 
-**Step 2: Build** ([setup.py](assets/Vector%20Addition/setup.py)):
-<!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup="source ../llm-env/bin/activate" workdir="Vector Addition" -->
+**Step 2: Build** ([setup.py](assets/Vector_Addition/setup.py)):
+<!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup="source ../llm-env/bin/activate" workdir="Vector_Addition" -->
 ```bash
 python setup.py build_ext --inplace
 ```
@@ -309,7 +309,7 @@ python setup.py build_ext --inplace
 ```python
 import os, sys
 import torch
-os.chdir("Vector Addition")
+os.chdir("Vector_Addition")
 sys.path.insert(0, os.getcwd())
 import add_one_ext
 
@@ -396,7 +396,7 @@ grid_x = ceil(K / 16)   # enough blocks to span all K columns
 grid_y = ceil(M / 16)   # enough blocks to span all M rows
 ```
 
-#### Approach A:  JIT Compilation: [`matmul_kernel.py`](assets/Matrix%20Multiplication/matmul_kernel.py)
+#### Approach A:  JIT Compilation: [`matmul_kernel.py`](assets/Matrix_Multiplication/matmul_kernel.py)
 
 Kernel is written as a raw C++ string inside Python and compiled at runtime via PyTorch's built-in JIT. Identical workflow to Walkthrough 1, only the kernel body and launch dimensions change.
 
@@ -458,7 +458,7 @@ The script spawns the same background monitoring thread from Walkthrough 1 (`roc
 **Run:**
 <!-- @test:id=run-matmul-kernel-py timeout=800 setup=activate-venv -->
 ```bash
-python "Matrix Multiplication/matmul_kernel.py"
+python "Matrix_Multiplication/matmul_kernel.py"
 ```
 <!-- @test:end -->
 
@@ -480,12 +480,12 @@ The full manual path: write the kernel and Python binding in a `.cu` file, compi
 
 | File | Role |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix%20Multiplication/matmul_kernel.cu) | Kernel + launcher + pybind11 binding |
-| [setup.py](assets/Matrix%20Multiplication/setup.py) | Build script, uses `CUDAExtension` to compile the `.cu` into a `.so` |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + launcher + pybind11 binding |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Build script, uses `CUDAExtension` to compile the `.cu` into a `.so` |
 
 **How it works:**
 
-**Step 1: The kernel, launcher, and binding** ([matmul_kernel.cu](assets/Matrix%20Multiplication/matmul_kernel.cu)):
+**Step 1: The kernel, launcher, and binding** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
 ```cpp
 #define BLOCK 16
 
@@ -529,9 +529,9 @@ Compared to `add_one_launcher` in Walkthrough 1, the launcher here:
 - Allocates and returns the output tensor C, rather than mutating in-place
 - Uses `dim3` for both grid and block to express the 2D launch shape
 
-**Step 2: Build** ([setup.py](assets/Matrix%20Multiplication/setup.py)):
+**Step 2: Build** ([setup.py](assets/Matrix_Multiplication/setup.py)):
 
-<!-- @test:id=run-matmul-kernel-cu timeout=800 setup="source ../llm-env/bin/activate" workdir="Matrix Multiplication" -->
+<!-- @test:id=run-matmul-kernel-cu timeout=800 setup="source ../llm-env/bin/activate" workdir="Matrix_Multiplication" -->
 ```bash
 python setup.py build_ext --inplace
 ```
@@ -548,7 +548,7 @@ The same `CUDAExtension` → `hipcc` remapping as walkthrough 1 applies here unc
 ```python
 import os, sys
 import torch
-os.chdir("Matrix Multiplication")
+os.chdir("Matrix_Multiplication")
 sys.path.insert(0, os.getcwd())
 import matmul_ext
 
