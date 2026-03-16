@@ -11,98 +11,29 @@ permissions:
   contents: read  # Required to read repository contents
 
 jobs:
-  get-runners:
-    runs-on: ubuntu-latest
-    outputs:
-      runners: ${{ steps.get-runners.outputs.runners }}
-    steps:
-      - name: Get self-hosted runners
-        id: get-runners
-        run: |
-          # Get all self-hosted runners for this repository with pagination
-          all_runners=()
-          page=1
-          per_page=100
-          
-          while true; do
-            # Safety check to prevent infinite loops
-            if [ $page -gt 10 ]; then
-              echo "Warning: Hit pagination limit (10 pages), stopping"
-              break
-            fi
-            
-            echo "Fetching page $page..."
-            response=$(curl -s --max-time 30 \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/runners?per_page=$per_page&page=$page")
-            
-            # Check if the API call was successful
-            if [ $? -ne 0 ]; then
-              echo "Error: Failed to fetch runners from GitHub API"
-              echo "runners=[]" >> $GITHUB_OUTPUT
-              exit 1
-            fi
-            
-            # Check if API returned an error
-            if echo "$response" | jq -e '.message' > /dev/null 2>&1; then
-              echo "Error: API returned error: $(echo "$response" | jq -r '.message')"
-              echo "runners=[]" >> $GITHUB_OUTPUT
-              exit 1
-            fi
-            
-            # Extract runners from this page (all self-hosted, regardless of status)
-            page_runners=$(echo "$response" | jq -r '.runners[]? | select(.labels[]?.name == "self-hosted") | .name')
-            
-            # Break if no runners found on this page
-            if [ -z "$page_runners" ]; then
-              break
-            fi
-            
-            # Add to our list (safely handle names with special characters)
-            while IFS= read -r runner; do
-              if [ -n "$runner" ]; then
-                # Validate runner name (alphanumeric, hyphens, underscores only)
-                if [[ "$runner" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-                  all_runners+=("$runner")
-                else
-                  echo "Warning: Skipping runner with invalid name: $runner"
-                fi
-              fi
-            done <<< "$page_runners"
-            
-            # Check if we have more pages
-            total_count=$(echo "$response" | jq -r '.total_count // 0')
-            if [ $((page * per_page)) -ge $total_count ]; then
-              break
-            fi
-            
-            ((page++))
-          done
-          
-          echo "Total runners found: ${#all_runners[@]}"
-          
-          # Convert to JSON array
-          if [ ${#all_runners[@]} -eq 0 ]; then
-            runners_json="[]"
-          elif [ ${#all_runners[@]} -gt 256 ]; then
-            echo "Warning: Found ${#all_runners[@]} runners, but GitHub Actions matrix jobs are limited to 256"
-            echo "Taking first 256 runners for this run"
-            runners_json=$(printf '%s\n' "${all_runners[@]:0:256}" | jq -R . | jq -s .)
-          else
-            runners_json=$(printf '%s\n' "${all_runners[@]}" | jq -R . | jq -s .)
-          fi
-          
-          echo "Found runners: $runners_json"
-          echo "runners=$runners_json" >> $GITHUB_OUTPUT
-
   heartbeat:
-    needs: get-runners
-    if: needs.get-runners.outputs.runners != '[]' && needs.get-runners.outputs.runners != ''
     strategy:
       matrix:
-        runner: ${{ fromJson(needs.get-runners.outputs.runners) }}
+        runner:
+          - xsj-aimlab-halo-0
+          - xsj-aimlab-halo-1
+          - xsj-aimlab-halo-2
+          - xsj-aimlab-halo-3
+          - xsj-aimlab-halo-4
+          - xsj-aimlab-stxp-01
+          - xsj-aimlab-stxp-02
+          - xsj-aimlab-stxp-03
+          - xsj-aimlab-stxp-04
+          - xsj-aimlab-krk-01
+          - xsj-aimlab-krk-02
+          - xsj-aimlab-krk-03
+          - xsj-aimlab-krk-04
+          - APEXX-T4P-03
+          - tp401-linux-r9700-vm
+          - tp401-linux-w7900-vm
+          - xsj-aimlab-radeon-7900-vm01
       fail-fast: false  # Continue even if one runner fails
+
     runs-on: [self-hosted, "${{ matrix.runner }}"]
     steps:
       - name: Create heartbeat file (Windows)
