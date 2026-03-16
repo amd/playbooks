@@ -333,15 +333,15 @@ tensor([2., 2., 2., 2., 2., 2., 2., 2., 2., 2.], device='cuda:0')
 
 ### Walkthrough 2: Matrix Multiplication
 
-Given matrices **A** (M×N) and **B** (N×P), compute **C = A * B** (M×P). Each element `C[i][j]` is the dot product of row `i` of A with column `j` of B, completely independent of every other output element, making this a natural fit for GPU parallelism.
+Given matrices **A** (M×N) and **B** (N×K), compute **C = A * B** (M×K). Each element `C[i][j]` is the dot product of row `i` of A with column `j` of B, completely independent of every other output element, making this a natural fit for GPU parallelism.
 
 #### The Math
 
 Each output element is defined as:
 
-$$C[row, col] = \sum_{k=0}^{N-1} A[row, k] \cdot B[k, col]$$
+$$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-Each output element is assigned to exactly one thread, and threads don't depend on each other's results, thread `(0,0)` and thread `(1,5)` run simultaneously with no coordination. However, within a single thread the dot product is **sequential**: the `k` loop iterates N times, accumulating one multiply-add per step.
+Each output element is assigned to exactly one thread, and threads don't depend on each other's results, thread `(0,0)` and thread `(1,5)` run simultaneously with no coordination. However, within a single thread the dot product is **sequential**: the `n` loop iterates N times, accumulating one multiply-add per step.
 
 #### Row-Major Memory Layout
 
@@ -362,13 +362,13 @@ To reach `A[row][col]`, skip `row` full rows (each `N` elements wide), then adva
 
 $$A[row, col] = A[row \times N + col]$$
 
-The same principle applies to B (column width P):
+The same principle applies to B (column width K):
 
-$$B[k, col] = B[k \times P + col]$$
+$$B[n, col] = B[n \times K + col]$$
 
 Substituting into the matmul formula gives the exact inner loop in the kernel:
 
-$$C[row, col] = \sum_{k=0}^{N-1} A[row \times N + k] \cdot B[k \times P + col]$$
+$$C[row, col] = \sum_{n=0}^{N-1} A[row \times N + n] \cdot B[n \times K + col]$$
 
 #### 2D thread indexing
 
@@ -376,7 +376,7 @@ Vector addition maps one thread to one element of a 1D array. Matrix multiplicat
 
 | | Vector Addition | Matrix Multiplication |
 |---|---|---|
-| Output shape | 1D vector, length N | 2D matrix, M×P |
+| Output shape | 1D vector, length N | 2D matrix, M×K |
 | Thread grid | 1D: `(grid_x, 1, 1)` | 2D: `(grid_x, grid_y, 1)` |
 | Thread block | 1D: `(256, 1, 1)` = 256 threads | 2D: `(16, 16, 1)` = 256 threads |
 | Thread index | `idx = blockIdx.x * blockDim.x + threadIdx.x` | `row = blockIdx.y * blockDim.y + threadIdx.y` & `col = blockIdx.x * blockDim.x + threadIdx.x` |
@@ -392,7 +392,7 @@ Grid (2D)
 
 The grid covers the full output:
 ```
-grid_x = ceil(P / 16)   # enough blocks to span all P columns
+grid_x = ceil(K / 16)   # enough blocks to span all K columns
 grid_y = ceil(M / 16)   # enough blocks to span all M rows
 ```
 
@@ -405,42 +405,42 @@ Kernel is written as a raw C++ string inside Python and compiled at runtime via 
 ```python
 import torch
 
-# 1. Kernel source, 2D indexing to map threads onto the M×P output matrix
+# 1. Kernel source, 2D indexing to map threads onto the M×K output matrix
 KERNEL_SOURCE = """
 extern "C"
-__global__ void matmul(float* A, float* B, float* C, int M, int N, int P) {
+__global__ void matmul(float* A, float* B, float* C, int M, int N, int K) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (row < M && col < P) {
+    if (row < M && col < K) {
         float sum = 0.0f;
-        for (int k = 0; k < N; k++) {
-            sum += A[row * N + k] * B[k * P + col];
+        for (int n = 0; n < N; n++) {
+            sum += A[row * N + n] * B[n * K + col];
         }
-        C[row * P + col] = sum;
+        C[row * K + col] = sum;
     }
 }
 """
-# Inputs: A is M x N, B is N x P, C is M x P
-M, N, P = 1024, 512, 768
+# Inputs: A is M x N, B is N x K, C is M x K
+M, N, K = 1024, 512, 768
 
 A = torch.randn(M, N, dtype=torch.float32, device="cuda")
-B = torch.randn(N, P, dtype=torch.float32, device="cuda")
-C = torch.zeros(M, P, dtype=torch.float32, device="cuda")
+B = torch.randn(N, K, dtype=torch.float32, device="cuda")
+C = torch.zeros(M, K, dtype=torch.float32, device="cuda")
 
 BLOCK = 16
-grid_x = (P + BLOCK - 1) // BLOCK
+grid_x = (K + BLOCK - 1) // BLOCK
 grid_y = (M + BLOCK - 1) // BLOCK
 
 # 2. Compile the kernel string
 matmul_kernel = torch.cuda._compile_kernel(KERNEL_SOURCE, "matmul")
 
-# 3. Launch with a 2D grid, grid_x covers columns (P), grid_y covers rows (M)
+# 3. Launch with a 2D grid, grid_x covers columns (K), grid_y covers rows (M)
 BLOCK = 16
 matmul_kernel(
     grid=(grid_x, grid_y, 1),
     block=(BLOCK, BLOCK, 1),
-    args=[A, B, C, M, N, P],
+    args=[A, B, C, M, N, K],
 )
 
 C_ref = torch.mm(A, B)
@@ -450,8 +450,8 @@ print(f"Max error vs torch.mm: {max_err:.6f}")
 <!-- @test:end -->
 
 The row-major memory layout of the tensors maps directly to how the kernel indexes the flat pointers:
-- `A[row * N + k]`:  row `row`, column `k`
-- `B[k * P + col]` :  row `k`, column `col`
+- `A[row * N + n]`:  row `row`, column `n`
+- `B[n * K + col]` :  row `n`, column `col`
 
 The script spawns the same background monitoring thread from Walkthrough 1 (`rocm-smi` polled every 100ms) and verifies the result against `torch.mm`. Floating-point arithmetic on GPUs may produce small numerical differences compared to CPU implementations due to parallel reduction order. This is why we verify the result using a tolerance (`max error`) instead of exact equality.
 
@@ -490,42 +490,42 @@ The full manual path: write the kernel and Python binding in a `.cu` file, compi
 #define BLOCK 16
 
 // GPU kernel, one thread per output element of C
-__global__ void matmul(float* A, float* B, float* C, int M, int N, int P) {
+__global__ void matmul(float* A, float* B, float* C, int M, int N, int K) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (row < M && col < P) {
+    if (row < M && col < K) {
         float sum = 0.0f;
-        for (int k = 0; k < N; k++) {
-            sum += A[row * N + k] * B[k * P + col];
+        for (int n = 0; n < N; n++) {
+            sum += A[row * N + n] * B[n * K + col];
         }
-        C[row * P + col] = sum;
+        C[row * K + col] = sum;
     }
 }
 
 // Launcher, extracts dims from torch::Tensor, allocates C, sets 2D grid/block
 torch::Tensor matmul_launcher(torch::Tensor A, torch::Tensor B) {
-    int M = A.size(0), N = A.size(1), P = B.size(1);
-    auto C = torch::zeros({M, P}, A.options());
+    int M = A.size(0), N = A.size(1), K = B.size(1);
+    auto C = torch::zeros({M, K}, A.options());
 
     dim3 block(BLOCK, BLOCK);
-    dim3 grid((P + BLOCK - 1) / BLOCK, (M + BLOCK - 1) / BLOCK);
+    dim3 grid((K + BLOCK - 1) / BLOCK, (M + BLOCK - 1) / BLOCK);
 
     matmul<<<grid, block>>>(A.data_ptr<float>(), B.data_ptr<float>(),
-                            C.data_ptr<float>(), M, N, P);
+                            C.data_ptr<float>(), M, N, K);
     hipDeviceSynchronize();
     return C;
 }
 
 // Python binding, exposes matmul_launcher as matmul_ext.matmul
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-    m.def("matmul", &matmul_launcher, "Naive matmul kernel (HIP): A(M,N) @ B(N,P) -> C(M,P)");
+    m.def("matmul", &matmul_launcher, "Naive matmul kernel (HIP): A(M,N) @ B(N,K) -> C(M,K)");
 }
 ```
 
 Compared to `add_one_launcher` in Walkthrough 1, the launcher here:
 - Takes two input tensors instead of one
-- Derives all three dimensions (M, N, P) from tensor shapes, no manual size passing from Python
+- Derives all three dimensions (M, N, K) from tensor shapes, no manual size passing from Python
 - Allocates and returns the output tensor C, rather than mutating in-place
 - Uses `dim3` for both grid and block to express the 2D launch shape
 
@@ -541,7 +541,7 @@ Produces two files in the same directory:
 - `matmul_ext.cpython-*.so`:  the importable Python extension
 - `matmul_kernel.hip`:  the HIP source generated by hipifying the `.cu` file; this is what `hipcc` actually compiled
 
-The same `CUDAExtension` → `hipcc` remapping as Walkthrough 1 applies here unchanged.
+The same `CUDAExtension` → `hipcc` remapping as walkthrough 1 applies here unchanged.
 
 **Step 3: Use from Python:**
 <!-- @test:id=verify-matmul-kernel-so timeout=300 setup=activate-venv -->

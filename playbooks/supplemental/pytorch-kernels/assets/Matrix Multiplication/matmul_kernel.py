@@ -4,39 +4,39 @@ import threading
 import time
 import re
 
-# A is M x N, B is N x P, C is M x P
-M, N, P = 1024, 512, 768
+# A is M x N, B is N x K, C is M x K
+M, N, K = 1024, 512, 768
 
 KERNEL_SOURCE = """
 extern "C"
-__global__ void matmul(float* A, float* B, float* C, int M, int N, int P) {
+__global__ void matmul(float* A, float* B, float* C, int M, int N, int K) {
     // Each thread computes one element of C
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (row < M && col < P) {
+    if (row < M && col < K) {
         float sum = 0.0f;
-        for (int k = 0; k < N; k++) {
-            sum += A[row * N + k] * B[k * P + col];
+        for (int n = 0; n < N; n++) {
+            sum += A[row * N + n] * B[n * K + col];
         }
-        C[row * P + col] = sum;
+        C[row * K + col] = sum;
     }
 }
 """
 
 print("HIP version:", torch.version.hip)
 print("Device:", torch.cuda.get_device_name(0))
-print(f"Matrix dims: A({M}x{N}) @ B({N}x{P}) -> C({M}x{P})")
+print(f"Matrix dims: A({M}x{N}) @ B({N}x{K}) -> C({M}x{K})")
 
 matmul_kernel = torch.cuda._compile_kernel(KERNEL_SOURCE, "matmul")
 
 # Row-major contiguous tensors on GPU
 A = torch.randn(M, N, dtype=torch.float32, device="cuda")
-B = torch.randn(N, P, dtype=torch.float32, device="cuda")
-C = torch.zeros(M, P, dtype=torch.float32, device="cuda")
+B = torch.randn(N, K, dtype=torch.float32, device="cuda")
+C = torch.zeros(M, K, dtype=torch.float32, device="cuda")
 
 BLOCK = 16
-grid_x = (P + BLOCK - 1) // BLOCK   # blocks to cover columns
+grid_x = (K + BLOCK - 1) // BLOCK   # blocks to cover columns
 grid_y = (M + BLOCK - 1) // BLOCK   # blocks to cover rows
 
 gpu_usage_log = []
@@ -71,7 +71,7 @@ for _ in range(50):
     matmul_kernel(
         grid=(grid_x, grid_y, 1),
         block=(BLOCK, BLOCK, 1),
-        args=[A, B, C, M, N, P],
+        args=[A, B, C, M, N, K],
     )
 
 torch.cuda.synchronize()
