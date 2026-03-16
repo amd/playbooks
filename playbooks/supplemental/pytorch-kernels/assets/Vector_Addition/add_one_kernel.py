@@ -55,7 +55,11 @@ monitor_thread.start()
 
 print("Running kernel...")
 
-start = time.perf_counter()
+start_event = torch.cuda.Event(enable_timing=True)
+end_event = torch.cuda.Event(enable_timing=True)
+
+torch.cuda.synchronize()
+start_event.record()
 
 for _ in range(200):
     add_one_kernel(
@@ -64,16 +68,16 @@ for _ in range(200):
         args=[x, n],
     )
 
+end_event.record()
 torch.cuda.synchronize()
-
-end = time.perf_counter()
 
 print("First 5 elements:", x[:5].cpu())
 
 monitoring = False
 monitor_thread.join()
 
-print(f"Elapsed time: {end - start:.3f}s")
+elapsed_ms = start_event.elapsed_time(end_event)
+print(f"Elapsed time: {elapsed_ms / 1000:.3f}s")
 
 if gpu_usage_log:
     print(f"Peak GPU Utilization: {max(gpu_usage_log)}%")

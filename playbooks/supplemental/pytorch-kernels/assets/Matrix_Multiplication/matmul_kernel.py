@@ -65,7 +65,11 @@ monitor_thread.start()
 
 print("Running matmul kernel...")
 
-start = time.perf_counter()
+start_event = torch.cuda.Event(enable_timing=True)
+end_event = torch.cuda.Event(enable_timing=True)
+
+torch.cuda.synchronize()
+start_event.record()
 
 for _ in range(50):
     matmul_kernel(
@@ -74,14 +78,14 @@ for _ in range(50):
         args=[A, B, C, M, N, K],
     )
 
+end_event.record()
 torch.cuda.synchronize()
-
-end = time.perf_counter()
 
 monitoring = False
 monitor_thread.join()
 
-print(f"Elapsed time: {end - start:.3f}s")
+elapsed_ms = start_event.elapsed_time(end_event)
+print(f"Elapsed time: {elapsed_ms / 1000:.3f}s")
 
 # Verify the output against torch.mm
 C_ref = torch.mm(A, B)
