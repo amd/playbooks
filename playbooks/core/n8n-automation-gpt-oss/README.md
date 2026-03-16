@@ -30,7 +30,7 @@ lemonade-server --version
 <!-- @test:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=lemonade-chat-gpt-oss-120b timeout=1200 hidden=True -->
+<!-- @test:id=lemonade-chat-gpt-oss-120b-windows timeout=1200 hidden=True -->
 ```powershell
 $p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
 try {
@@ -69,6 +69,85 @@ try {
 <!-- @test:end -->
 <!-- @os:end -->
 
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-chat-gpt-oss-120b-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+p=""
+cleanup() {
+  lemonade-server stop >/dev/null 2>&1 || true
+  sleep 2
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+lemonade-server serve --host 127.0.0.1 --port 8000 >/tmp/lemonade-test.log 2>&1 &
+p=$!
+
+models_json=""
+for i in $(seq 1 120); do
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/models || true)"
+  if [ -n "$models_json" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$models_json" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:8000"
+  exit 1
+fi
+echo "OK: Lemonade server is responding"
+
+export MODELS_JSON="$models_json"
+python3 - <<'PY'
+import json
+import os
+import sys
+
+data = json.loads(os.environ["MODELS_JSON"])
+entry = None
+for item in data.get("data", []):
+    if item.get("id") == "gpt-oss-120b-mxfp-GGUF":
+        entry = item
+        break
+
+if entry is None:
+    print("Model gpt-oss-120b-mxfp-GGUF is not present in Lemonade /api/v1/models.")
+    sys.exit(1)
+
+if not entry.get("downloaded", False):
+    print("Model gpt-oss-120b-mxfp-GGUF is present but not downloaded in Lemonade. Please download it.")
+    sys.exit(1)
+
+print("OK: gpt-oss-120b-mxfp-GGUF model is downloaded in Lemonade")
+PY
+
+body='{
+  "model": "gpt-oss-120b-mxfp-GGUF",
+  "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
+  "temperature": 0,
+  "max_tokens": 32
+}'
+
+out="$(curl -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d "$body" || true)"
+
+if [ -z "$out" ]; then
+  echo "Empty response from Lemonade chat/completions"
+  exit 1
+fi
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 <!-- @test:id=node-npm-version timeout=60 hidden=True -->
 ```bash
 node -v
@@ -90,6 +169,15 @@ n8n --version
 ```
 <!-- @test:end -->
 
+<!-- @os:linux -->
+If `n8n --version` says the command not found, ensure your npm global bin directory is on `PATH`, or create a symlink to the installed `n8n` binary. For example, on systems where Node.js is installed under `/usr/local/node`, you may need:
+```bash
+sudo ln -sf /usr/local/node/bin/n8n /usr/local/bin/n8n
+hash -r # Tells bash to clear its remembered cache of command locations 
+n8n --version
+```
+<!-- @os:end -->
+
 ## Launching n8n
 
 Start n8n from the terminal:
@@ -99,7 +187,7 @@ n8n start
 ```
 
 <!-- @os:windows -->
-<!-- @test:id=n8n-start timeout=300 hidden=True -->
+<!-- @test:id=n8n-start-windows timeout=300 hidden=True -->
 ```powershell
 $N8N_CMD = "$env:APPDATA\npm\n8n.cmd"
 $p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$N8N_CMD`" start" -NoNewWindow -PassThru
@@ -124,6 +212,44 @@ try {
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:linux -->
+<!-- @test:id=n8n-start-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+
+p=""
+cleanup() {
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+n8n start >/tmp/n8n-test.log 2>&1 &
+p=$!
+
+ok=false
+for i in $(seq 1 120); do
+  code="$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:5678/healthz || true)"
+  if [ "$code" = "200" ]; then
+    ok=true
+    break
+  fi
+  sleep 1
+done
+
+if [ "$ok" != "true" ]; then
+  echo "n8n not ready on http://127.0.0.1:5678/healthz"
+  exit 1
+fi
+
+echo "OK: n8n server is responding"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 n8n starts a local web server. Open your browser to `http://localhost:5678` to access the editor.
 
 > **Tip**: Keep the terminal window open while using n8n. Closing it will stop the server.
@@ -133,7 +259,7 @@ n8n starts a local web server. Open your browser to `http://localhost:5678` to a
 If Lemonade is not already running, launch it from the terminal:
 
 ```bash
-lemonade-server run gpt-oss-120b-mxfp4-GGUF --llamacpp rocm
+lemonade-server run gpt-oss-120b-mxfp-GGUF --llamacpp rocm
 ```
 
 ## Setting Up the Workflow
@@ -191,7 +317,7 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 
 4. Click **Save**
 
-> **Note**: Ensure Lemonade is running before testing. The workflow uses `gpt-oss-120b-mxfp4-GGUF` by default—you can change this in the Lemonade Chat Model node settings.
+> **Note**: Ensure Lemonade is running before testing. The workflow uses `gpt-oss-120b-mxfp-GGUF` by default—you can change this in the Lemonade Chat Model node settings.
 
 ### Step 5: Test the Workflow
 
