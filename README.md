@@ -7,6 +7,7 @@
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
 [![AI Dev Program](https://img.shields.io/badge/AMD_AI-Developer_Program-7B2D8E?logo=amd&logoColor=white)](https://www.amd.com/en/developer/ai-dev-program.html)
 <img src="assets/banner.png" alt="AMD Playbooks"/>
+
 Guided developer journeys for AI/ML workloads on AMD devices.
 
 [**Browse Playbooks at amd.com/playbooks →**](https://amd.com/playbooks)
