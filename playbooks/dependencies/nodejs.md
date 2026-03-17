@@ -17,10 +17,12 @@ npm --version
 <!-- @os:linux -->
 
 ```bash
-curl -fsSL https://nodejs.org/dist/v20.19.2/node-v20.19.2-linux-x64.tar.xz | tar -xJ
+curl -fsSLO https://nodejs.org/dist/v20.19.2/node-v20.19.2-linux-x64.tar.xz
+tar -xJf node-v20.19.2-linux-x64.tar.xz
+sudo rm -rf /usr/local/node
 sudo mv node-v20.19.2-linux-x64 /usr/local/node
-sudo ln -s /usr/local/node/bin/node /usr/local/bin/node
-sudo ln -s /usr/local/node/bin/npm /usr/local/bin/npm
+sudo ln -sf /usr/local/node/bin/node /usr/local/bin/node
+sudo ln -sf /usr/local/node/bin/npm /usr/local/bin/npm
 ```
 
 <!-- @os:end -->
