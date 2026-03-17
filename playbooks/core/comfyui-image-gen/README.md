@@ -74,6 +74,7 @@ python3 -m venv comfyui_venv
 set -euo pipefail
 ./comfyui_venv/bin/python -m pip install --upgrade pip
 ./comfyui_venv/bin/python -m pip install -r ./ComfyUI/requirements.txt
+./comfyui_venv/bin/python -m pip install requests
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
