@@ -40,7 +40,13 @@ This installs Lemonade Server, downloads the default models, and verifies the se
 
 #### Verifying Installation
 
-Run a quick test to confirm GAIA is working:
+Verify that GAIA v0.16.2 or later is installed:
+
+```
+gaia --version
+```
+
+Then run a quick test to confirm GAIA is working:
 
 ```
 gaia chat
