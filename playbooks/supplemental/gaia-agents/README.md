@@ -91,8 +91,8 @@ info = client.get_system_info()
     "Physical Memory": "32.0 GB",
     "devices": {
         "cpu": {"name": "...", "available": True},
-        "gpu": {"name": "...", "memory": 8192, "available": True},
-        "npu": {"name": "Ryzen AI NPU", "available": True}
+        "amd_igpu": {"name": "...", "memory": 8192, "available": True},
+        "amd_npu": {"name": "Ryzen AI NPU", "available": True}
     }
 }
 ```
@@ -109,8 +109,8 @@ info = client.get_system_info()
     "Physical Memory": "32.0 GB",
     "devices": {
         "cpu": {"name": "...", "available": True},
-        "gpu": {"name": "...", "memory": 8192, "available": True},
-        "npu": {"name": "Not detected", "available": False}
+        "amd_igpu": {"name": "...", "memory": 8192, "available": True},
+        "amd_npu": {"name": "Not detected", "available": False}
     }
 }
 ```
@@ -372,7 +372,7 @@ def _register_tools(self):
 
             # Get NPU information from Lemonade
             devices = info.get("devices", {})
-            npu_info = devices.get("npu", {})
+            npu_info = devices.get("amd_npu", {})
             npu_available = npu_info.get("available", False)
             npu_name = (
                 npu_info.get("name", "Not detected")
@@ -385,13 +385,13 @@ def _register_tools(self):
                 "os": info.get("OS Version", "Unknown"),
                 "processor": info.get("Processor", "Unknown"),
                 "ram_gb": ram_gb,
-                "gpu": {
+                "amd_igpu": {
                     "name": gpu_name,
                     "memory_mb": gpu_memory_mb,
                     "memory_gb": gpu_memory_gb,
                     "available": gpu_available,
                 },
-                "npu": {"name": npu_name, "available": npu_available},
+                "amd_npu": {"name": npu_name, "available": npu_available},
             }
         except Exception as e:
             return {
