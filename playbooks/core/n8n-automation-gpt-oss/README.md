@@ -1,6 +1,6 @@
 ## Overview
 
-n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor. Instead of writing code, you build workflows by dragging, connecting, and configuring nodes.
+n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor.
 
 This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the Financial Times website, extracts key headlines, and uses a local LLM running on your Ryzen™ AI Halo to generate an investor-focused summary.
 
@@ -17,7 +17,7 @@ This playbook teaches you how to set up an AI-powered financial news summarizer 
 
 In this playbook, we use Lemonade to serve a local LLM that n8n connects to for AI-powered tasks. 
 
-n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a first-class integration—no need for manual configuration. This makes connecting your local LLM to automation workflows straightforward.
+n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a first-class integration - no need for manual configuration. This makes connecting your local LLM to automation workflows straightforward.
 
 ## Prerequisites
 
@@ -172,16 +172,22 @@ n8n --version
 
 <!-- @os:windows -->
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands
+> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-If `n8n --version` says the command not found, ensure your npm global bin directory is on `PATH`, or create a symlink to the installed `n8n` binary. For example, on systems where Node.js is installed under `/usr/local/node`, you may need:
-```bash
-sudo ln -sf /usr/local/node/bin/n8n /usr/local/bin/n8n
-hash -r # Tells bash to clear its remembered cache of command locations 
-n8n --version
-```
+> **Tip**: If `n8n --version` says `command not found`, ensure your npm global bin directory is on `PATH`, or create a symlink to the installed `n8n` binary. For example, on systems where Node.js is installed under `/usr/local/node`, you may need:
+>```bash
+>sudo ln -sf /usr/local/node/bin/n8n /usr/local/bin/n8n
+>hash -r # Tells bash to clear its remembered cache of command locations 
+>n8n --version
+>```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Tip**: If `n8n --version` says command not found, ensure your npm global bin directory is on the user `PATH`. For example, the n8n you just installed might exist at `C:\Users\<username>\AppData\Roaming\npm`. Add this to the user path through:
+>- Edit system environment variables > Environment Variables > Edit User Path
+
 <!-- @os:end -->
 
 ## Launching n8n
@@ -256,7 +262,7 @@ echo "OK: n8n server is responding"
 <!-- @test:end -->
 <!-- @os:end -->
 
-n8n starts a local web server. Open your browser to `http://localhost:5678` to access the editor.
+n8n starts a local web server. Press `'o'` or Open your browser to `http://localhost:5678` to access the editor.
 
 > **Tip**: Keep the terminal window open while using n8n. Closing it will stop the server.
 
@@ -265,7 +271,7 @@ n8n starts a local web server. Open your browser to `http://localhost:5678` to a
 Lemonade is the local server that will run a model and connect to n8n. If Lemonade is not already running, launch it from another terminal:
 
 ```bash
-lemonade-server run extra.gpt-oss-120b-GGUF --llamacpp rocm
+lemonade-server run extra.gpt-oss-120b-GGUF --llamacpp vulkan
 ```
 Alternatively, you can use the Lemonade GUI to choose and load a model. 
 > **Tip**: On HaloBox, the pre-installed model is at the location marked with `.extra`.
@@ -287,7 +293,7 @@ When you first open n8n, you'll be prompted to create an account or log in:
 
 We've provided a pre-built workflow that you can import directly:
 
-1. Download the workflow file: [financial-news-workflow.json](assets/financial-news-workflow.json)
+1. Download the following workflow file: [financial-news-workflow.json](assets/financial-news-workflow.json)
 2. Click **Start from Scratch** to open the workflow editor. Alternatively, click the + Button in the top left, and then **Add workflow**.
 3. Click the **...** menu (three dots) in the top right bar and select **Import from file**
 4. Select the downloaded `financial-news-workflow.json` file
@@ -320,16 +326,15 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 
 1. Double click the **Lemonade Chat Model** node in n8n
 2. In the dropdown menu **Credential to connect with** select **Create New Credential**
-3. Enter the following settings:
+3. Enter the values in the table below and click save.
+4. Choose the relevant model that you have loaded in Lemonade Server.
 
-| Field | Value |
-|-------|-------|
-| **Base URL** | `http://localhost:8000/api/v1` |
-| **API Key** | `lemonade` |
+  | Field | Value |
+  |-------|-------|
+  | **Base URL** | `http://localhost:8000/api/v1` |
+  | **API Key** | `lemonade` |
 
-4. Choose your model and save/exit the node.
-
-> **Note**: Ensure Lemonade is running before testing. This workflow uses GPT-OSS-120B and it is pre-installed on Halo Box as `extra.gpt-oss-120b-mxfp-GGUF`. You can change this to other loaded models in the Lemonade Chat Model node settings.
+> **Note**: Ensure Lemonade server is running before testing. This workflow uses GPT-OSS-120B and it is pre-installed on Halo Box as `extra.gpt-oss-120b-GGUF`. You can change this to other loaded models in the Lemonade Chat Model node settings.
 
 ### Step 5: Test the Workflow
 
