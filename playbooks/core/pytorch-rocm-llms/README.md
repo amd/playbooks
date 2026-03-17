@@ -1,3 +1,8 @@
+<!-- @github-only -->
+> [!IMPORTANT]
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+<!-- @github-only:end -->
+
 ## Overview
 
 Want to run powerful AI language models on your own STX Halo™ ? This guide shows you how.
@@ -7,8 +12,6 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 
 - Run LLMs like gpt-oss-20b and Mistral-7B-Instruct locally using PyTorch and ROCm
 - Create a document summarization tool using LLMs
-
-## Setting Up Your Environment
 
 ### Create a Virtual Environment
 
@@ -37,7 +40,12 @@ source llm-env/bin/activate
 <!-- @os:end -->
 
 ### Installing Basic Dependencies
-<!-- @require:pytorch -->
+<!-- @os:linux -->
+<!-- @require:rocm,pytorch,driver -->
+<!-- @os:end -->
+<!-- @os:windows -->
+<!-- @require:pytorch,driver -->
+<!-- @os:end -->
 
 ### Additional Dependencies
 

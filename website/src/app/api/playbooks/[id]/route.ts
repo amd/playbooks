@@ -223,6 +223,18 @@ function parseTestAttributes(attrString: string): Record<string, unknown> {
 }
 
 /**
+ * Strips <!-- @github-only --> ... <!-- @github-only:end --> blocks.
+ * These blocks contain notices intended only for GitHub readers and
+ * should never appear on the website.
+ */
+function stripGitHubOnlyBlocks(content: string): string {
+  return content.replace(
+    /<!-- @github-only -->[\s\S]*?<!-- @github-only:end -->\n?/g,
+    ''
+  );
+}
+
+/**
  * Strips lines ending with `#hide` from a fenced code block.
  * These lines are executed by the test runner but invisible to website readers.
  * Preserves the code fence delimiters (``` lines).
@@ -413,6 +425,7 @@ function findPlaybook(
           let testCoverage: TestCoverageInfo | undefined;
           if (fs.existsSync(readmePath)) {
             content = fs.readFileSync(readmePath, "utf-8");
+            content = stripGitHubOnlyBlocks(content);
             const testResult = processTestTags(content, showCoverage, resultsMap, resultsSummary, deviceResultsList, deviceSummaries);
             content = testResult.content;
             testCoverage = testResult.testCoverage;
