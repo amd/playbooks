@@ -5,6 +5,7 @@
 ![AMD](https://img.shields.io/badge/AMD-Playbooks-ED1C24?logo=amd&logoColor=white)
 ![ROCm](https://img.shields.io/badge/ROCm-Enabled-green)
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
+[![AI Dev Program](https://img.shields.io/badge/AMD_AI-Developer_Program-7B2D8E?logo=amd&logoColor=white)](https://www.amd.com/en/developer/ai-dev-program.html)
 <img src="assets/banner.png" alt="AMD Playbooks"/>
 Guided developer journeys for AI/ML workloads on AMD devices.
 
@@ -15,7 +16,7 @@ Guided developer journeys for AI/ML workloads on AMD devices.
 
 ## About
 
-This is AMD's official repository of playbooks for AMD developer platforms. Each playbook is a self-contained, step-by-step guided experience — covering prerequisites, instructions for Windows and Linux, troubleshooting guidance, and example code — designed to take you from setup to a working result.
+This is AMD's official repository of playbooks for AMD developer platforms. Each playbook is a self-contained, hands-on learning experience that covers prerequisites, step-by-step instructions for Windows and Linux, troubleshooting guidance, and working example code, built to help you grow your AI development skills one project at a time.
 
 ## Available Playbooks
 
@@ -38,16 +39,23 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 | **Clustering with RCCL** | Multi-node cluster using two AMD devices with RCCL `Coming Soon` |
 | **Speech-to-Speech Translation** | Build a real-time speech-to-speech translation system `Coming Soon` |
 
-## Resources
+## AMD AI Developer Program
+
+> **[Join the AMD AI Developer Program →](https://www.amd.com/en/developer/ai-dev-program.html)**
+>
+> Get access to tools, resources, and community support to accelerate your AI development on AMD hardware.
+
+## Additional Resources
 
 - **Playbooks Portal**: [amd.com/playbooks](https://amd.com/playbooks)
 - **AMD Developer Hub**: [developer.amd.com](https://developer.amd.com)
 - **ROCm Documentation**: [rocm.docs.amd.com](https://rocm.docs.amd.com)
+- **AMD AI Developer Program**: [amd.com/ai-dev-program](https://www.amd.com/en/developer/ai-dev-program.html)
 - **Community Forum**: [community.amd.com](https://community.amd.com)
-
-> [!IMPORTANT]
-> We are **not currently accepting new playbook proposals** from the community at this stage. However, we welcome collaborations, idea exchanges, and contributions that help advance this space. If you encounter issues or have feedback that can help us identify and diagnose problems, please [open an issue](https://github.com/amd/halo_playbooks/issues).
 
 ## License
 
 This project is licensed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.
+
+> [!IMPORTANT]
+> We are **not currently accepting new playbook proposals** from the community at this stage. However, we welcome collaborations, idea exchanges, and contributions that help advance this space. If you encounter issues or have feedback that can help us identify and diagnose problems, please [open an issue](https://github.com/amd/halo_playbooks/issues).
