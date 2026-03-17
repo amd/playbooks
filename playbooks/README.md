@@ -1,5 +1,6 @@
 # Playbook Creation Guide
-
+> [!IMPORTANT]
+> We are **not currently accepting new playbook proposals** from the community at this stage. However, we welcome collaborations, idea exchanges, and contributions that help advance this space. If you encounter issues or have feedback that can help us identify and diagnose problems, please [open an issue](https://github.com/amd/halo_playbooks/issues).
 
 ## Design Principles
 
