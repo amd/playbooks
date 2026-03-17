@@ -1,18 +1,18 @@
 {
   "id": "pytorch-finetuning",
-  "title": "Fine-tune with PyTorch",
-  "description": "Fine-tune large language models using PyTorch on STX Halo™",
-  "time": 90,
+  "title": "Fine-tune LLMs with PyTorch and ROCm",
+  "description": "Fine-tune large language models using PyTorch and ROCm on STX Halo™",
+  "time": 45,
   "platforms": ["windows", "linux"],
   "tested_platforms": {
-    "windows": [],
-    "linux": []
+    "windows": ["halo"],
+    "linux": ["halo"]
   },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
-  "developed": false,
+  "developed": true,
   "published": true,
-  "tags": ["pytorch", "fine-tuning", "llm", "rocm"]
+  "tags": ["pytorch", "fine-tuning", "llm", "rocm"],
+  "coverImage": "assets/cover_image.jpg"
 }
-
