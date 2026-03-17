@@ -1,18 +1,17 @@
 <div align="center">
 
-# AMD/Playbooks
+
 
 ![AMD](https://img.shields.io/badge/AMD-Playbooks-ED1C24?logo=amd&logoColor=white)
 ![ROCm](https://img.shields.io/badge/ROCm-Enabled-green)
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
-
+<img src="assets/banner.png" alt="AMD Playbooks"/>
 Guided developer journeys for AI/ML workloads on AMD devices.
 
 [**Browse Playbooks at amd.com/playbooks →**](https://amd.com/playbooks)
 
 </div>
 
----
 
 ## About
 
