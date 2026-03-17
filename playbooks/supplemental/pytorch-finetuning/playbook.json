@@ -11,7 +11,7 @@
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
-  "developed": false,
+  "developed": true,
   "published": true,
   "tags": ["pytorch", "fine-tuning", "llm", "rocm"],
   "coverImage": "assets/cover_image.jpg"

@@ -1,4 +1,11 @@
+<!-- @github-only -->
+> [!IMPORTANT]
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+<!-- @github-only:end -->
+
 ## Overview
+
+# Getting Started with Ollama
 
 Ollama is a lightweight tool for running large language models locally. It handles model downloading, quantization, and serving behind a simple command-line interface and desktop app, so you can go from zero to chatting with an LLM in minutes. Because everything runs on your own hardware, your prompts and data never leave the machine.
 

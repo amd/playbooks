@@ -447,24 +447,31 @@ function HaloSetupContent({
 interface TocItem {
   id: string;
   text: string;
+  children?: TocItem[];
 }
 
 /**
- * Extracts table of contents from markdown content (main sections only - h2)
+ * Extracts table of contents from markdown content (h2 sections with h3 sub-items)
  */
 function extractToc(content: string): TocItem[] {
   if (!content) return [];
-  
-  const headingRegex = /^##\s+(.+)$/gm;
+
+  const headingRegex = /^(#{2,3})\s+(.+)$/gm;
   const toc: TocItem[] = [];
   let match;
-  
+
   while ((match = headingRegex.exec(content)) !== null) {
-    const text = match[1].trim();
+    const level = match[1].length;
+    const text = match[2].trim();
     const id = slugify(text);
-    toc.push({ id, text });
+
+    if (level === 2) {
+      toc.push({ id, text, children: [] });
+    } else if (level === 3 && toc.length > 0) {
+      toc[toc.length - 1].children!.push({ id, text });
+    }
   }
-  
+
   return toc;
 }
 
@@ -510,14 +517,38 @@ function TableOfContents({
               }}
               className={`
                 block text-sm py-1 pl-3 transition-colors duration-150 border-l-2
-                ${activeId === item.id 
-                  ? "text-[#D4915D] border-[#D4915D] font-medium" 
+                ${activeId === item.id
+                  ? "text-[#D4915D] border-[#D4915D] font-medium"
                   : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
                 }
               `}
             >
               {item.text}
             </a>
+            {item.children && item.children.length > 0 && (
+              <ul className="space-y-1 mt-1">
+                {item.children.map((child) => (
+                  <li key={child.id}>
+                    <a
+                      href={`#${child.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onLinkClick(child.id);
+                      }}
+                      className={`
+                        block text-sm py-1 pl-6 transition-colors duration-150 border-l-2
+                        ${activeId === child.id
+                          ? "text-[#D4915D] border-[#D4915D] font-medium"
+                          : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
+                        }
+                      `}
+                    >
+                      {child.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
@@ -1361,6 +1392,24 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
         );
       }
       
+      if (href && href.startsWith("#")) {
+        return (
+          <a
+            href={href}
+            className="md-link"
+            onClick={(e) => {
+              e.preventDefault();
+              const target = document.getElementById(href.slice(1));
+              if (target) {
+                target.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
+            {children}
+          </a>
+        );
+      }
+
       return (
         <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
           {children}
@@ -1538,15 +1587,27 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       rafId = requestAnimationFrame(() => {
         rafId = null;
         
-        const headings = contentRef.current?.querySelectorAll("h2[id]");
+        const headings = contentRef.current?.querySelectorAll("h2[id], h3[id]");
         if (!headings || headings.length === 0) return;
-        
+
+        // Build a set of all IDs present in the TOC (h2 + h3 children)
+        const tocIds = new Set<string>();
+        for (const item of tocItems) {
+          tocIds.add(item.id);
+          if (item.children) {
+            for (const child of item.children) {
+              tocIds.add(child.id);
+            }
+          }
+        }
+
         // Find the heading that's currently at or near the top of the viewport
         // We look for the last heading that has scrolled past the threshold
         const threshold = 150; // How far from top of viewport to consider "active"
         let currentActive = "";
-        
+
         for (const heading of headings) {
+          if (!tocIds.has(heading.id)) continue;
           const rect = heading.getBoundingClientRect();
           // If this heading is at or above the threshold, it's the current section
           if (rect.top <= threshold) {
