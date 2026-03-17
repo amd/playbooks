@@ -28,7 +28,7 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 
 1. Download the installer from [ollama.com/download](https://ollama.com/download).
 2. Run the `.exe` installer and follow the prompts.
-3. Once installed, Ollama runs as a background service and is accessible from both the terminal and the desktop app.
+3. Once installed, Ollama runs as a background service and is accessible from the terminal, desktop app, and system tray.
 
 Verify the installation by opening a terminal:
 
