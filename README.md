@@ -4,7 +4,7 @@
 
 ![AMD](https://img.shields.io/badge/AMD-Playbooks-ED1C24?logo=amd&logoColor=white)
 ![ROCm](https://img.shields.io/badge/ROCm-Enabled-green)
-![License](https://img.shields.io/badge/License-Apache_2.0-blue)
+![License](https://img.shields.io/badge/License-MIT-blue)
 [![AI Dev Program](https://img.shields.io/badge/AMD_AI-Developer_Program-7B2D8E?logo=amd&logoColor=white)](https://www.amd.com/en/developer/ai-dev-program.html)
 <img src="assets/banner.png" alt="AMD Playbooks"/>
 
@@ -55,4 +55,4 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 
 ## License
 
-This project is licensed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
