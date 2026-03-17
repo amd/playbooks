@@ -274,7 +274,7 @@ Lemonade is the local server that will run a model and connect to n8n. If Lemona
 lemonade-server run extra.gpt-oss-120b-GGUF --llamacpp vulkan
 ```
 Alternatively, you can use the Lemonade GUI to choose and load a model. 
-> **Tip**: On HaloBox, the pre-installed model is at the location marked with `.extra`.
+> **Tip**: On HaloBox, the pre-installed model is at the location marked with `.extra`. You can also experiment by changing to different backends, like `rocm`.
 
 
 ## Setting Up the Workflow
