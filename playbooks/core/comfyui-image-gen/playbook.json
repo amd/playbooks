@@ -8,6 +8,10 @@
     "windows": ["halo"],
     "linux": ["halo"]
   },
+  "required_platforms": {
+    "windows": ["halo"],
+    "linux": ["halo"]
+  },
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": true,
