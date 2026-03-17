@@ -1,3 +1,8 @@
+<!-- @github-only -->
+> [!IMPORTANT]
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+<!-- @github-only:end -->
+
 ## Overview
 
 n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor.
