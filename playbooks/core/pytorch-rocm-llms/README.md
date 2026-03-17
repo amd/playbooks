@@ -1,3 +1,8 @@
+<!-- @github-only -->
+> [!IMPORTANT]
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+<!-- @github-only:end -->
+
 ## Overview
 
 Want to run powerful AI language models on your own STX Halo™ ? This guide shows you how.
