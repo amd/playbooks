@@ -32,6 +32,7 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 | **Using Lemonade Across CPU, GPU, and NPU** | Learn how to use the Lemonade framework across CPU, GPU, and NPU |
 | **Local Computer Vision with Ryzen AI NPU** | Build local perception capabilities using CVML SDK on RyzenAI and ROCm |
 | **Clustering Two Devices with llama.cpp RPC** | Distributed inference using RPC server across two AMD devices with llama.cpp |
+| **Getting Started with Ollama** | Install Ollama and run LLMs locally from the terminal, desktop app, or REST API |
 | **Getting Started Creating Agents with GAIA** | Build and deploy AI agents using the GAIA framework `Coming Soon` |
 | **Custom GPU Kernels with PyTorch ROCm** | Write and optimize custom GPU kernels using PyTorch and ROCm `Coming Soon` |
 | **Optimized Fine-tuning with Unsloth QLoRA** | Memory-efficient QLoRA fine-tuning with Unsloth `Coming Soon` |
