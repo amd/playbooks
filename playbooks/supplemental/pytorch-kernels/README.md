@@ -141,6 +141,7 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 <!-- @os:windows -->
 <!-- @test:id=create-venv timeout=60 -->
 ```cmd
+# Windows
 python -m venv llm-env --system-site-packages
 llm-env\Scripts\Activate.ps1
 ```
@@ -151,6 +152,7 @@ llm-env\Scripts\Activate.ps1
 <!-- @os:linux -->
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
+# Linux
 sudo apt update
 sudo apt install -y python3-venv
 python3 -m venv llm-env --system-site-packages
