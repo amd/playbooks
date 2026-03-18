@@ -11,20 +11,29 @@
 <!-- @os:end -->
 
 <!-- @os:linux -->
+#### Create a Virtual Environment
+On Linux, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv llm-env --system-site-packages
+source llm-env/bin/activate
+```
 
 #### Clone ComfyUI
 ```bash
 git clone https://github.com/comfyanonymous/ComfyUI.git
 ```
 
-#### Checkout the recommended version
+#### Optionally checkout a specific version
 ```bash
-git checkout v0.10.0
+git checkout v0.17.0
 ```
 
 #### Install ComfyUI requirements
 
-Activate your preferred Python environment and run:
+Within the Python virtual environment, run:
 ```bash
 pip install -r requirements.txt
 ```
