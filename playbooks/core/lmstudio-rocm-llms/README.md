@@ -38,6 +38,34 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 6. Check `Remember settings` and click on `Load Model`.
 7. Send a message and start interacting with the model!
 
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-load-gpt-oss-windows timeout=1200 hidden=True -->
+```powershell
+lms unload --all
+lms ps
+$ID = "gpt-oss-120b-$env:GITHUB_RUN_ID"
+Set-Content -Path "$env:TEMP\gpt-oss_model_id.txt" -Value $ID -Encoding utf8
+lms load gpt-oss-120b --context-length 32768 --gpu max --identifier "$ID"
+lms ps
+lms chat "$ID" -p "Reply with exactly: OK"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-load-gpt-oss-linux timeout=1200 hidden=True -->
+```bash
+lms unload --all || true
+lms ps
+ID="gpt-oss-120b-${GITHUB_RUN_ID}"
+echo "$ID" > /tmp/gpt-oss_model_id.txt
+lms load gpt-oss-120b --context-length 32768 --gpu max --identifier "$ID"
+lms ps # Verify model is really loaded
+lms chat "$ID" -p "Reply with exactly: OK"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 <p align="center">
   <img src="assets/chat.png" alt="Chatting with gpt-oss-120b on LM Studio" width="600"/>
 </p>
@@ -55,6 +83,24 @@ To set up LM Studio Server, use the following instructions:
 3. On the upper left corner, run the server by clicking on the toggle button in front of `Status: Stopped`.
 4. An OpenAI compliant endpoint will now be running. The address is typically http://127.0.0.1:1234  
 5. If a model is not already loaded, you can load it by clicking `Load Model` and following the previously mentioned steps. 
+
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
+```powershell
+lms server start --port 1234
+curl.exe -s http://127.0.0.1:1234/v1/models
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-server-up-linux timeout=120 hidden=True -->
+```bash
+lms server start --port 1234
+curl -s http://127.0.0.1:1234/v1/models
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 
 This model will now be accessible through the LM Studio Server endpoint and will support OpenAI endpoints including:
@@ -106,6 +152,79 @@ except Exception as e:
     print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
 ```
 
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-ping-endpoint-windows timeout=300 hidden=True -->
+```python
+import json, urllib.request, os
+
+model_id_path = os.path.join(os.environ["TEMP"], "gpt-oss_model_id.txt")
+with open(model_id_path, "r", encoding="utf-8") as f:
+    model_id = f.read().strip()
+
+req = urllib.request.Request(
+ "http://127.0.0.1:1234/v1/chat/completions",
+ data=json.dumps({
+   "model": model_id,
+   "messages": [{"role":"user","content":"What is 2 + 2? Reply with only the number."}],
+   "temperature": 0,
+   "max_tokens": 500
+ }).encode("utf-8"),
+ headers={"Content-Type":"application/json"},
+ method="POST",
+)
+with urllib.request.urlopen(req, timeout=60) as r:
+ print(r.read().decode("utf-8", "replace"))
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-ping-endpoint-linux timeout=300 hidden=True -->
+```python
+import json, urllib.request
+
+with open("/tmp/gpt-oss_model_id.txt", "r", encoding="utf-8") as f:
+    model_id = f.read().strip()
+
+req = urllib.request.Request(
+ "http://127.0.0.1:1234/v1/chat/completions",
+ data=json.dumps({
+   "model": model_id,
+   "messages": [{"role":"user","content":"What is 47 + 42? Reply with only the number in words."}],
+   "temperature": 0,
+   "max_tokens": 500
+ }).encode("utf-8"),
+ headers={"Content-Type":"application/json"},
+ method="POST",
+)
+with urllib.request.urlopen(req, timeout=60) as r:
+ print(r.read().decode("utf-8", "replace"))
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-server-stop-windows timeout=300 hidden=True -->
+```powershell
+$ID = Get-Content "$env:TEMP\gpt-oss_model_id.txt" -Raw
+$ID = $ID.Trim()
+lms unload "$ID"
+lms ps
+lms server stop
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-server-stop-linux timeout=300 hidden=True -->
+```bash
+ID="$(cat /tmp/gpt-oss_model_id.txt)"
+lms unload "$ID" || true
+lms ps
+lms server stop
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 #### (Optional): Swapping between ROCm and Vulkan backends
 
