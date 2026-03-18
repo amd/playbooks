@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """
 Copyright Notice Checker
 
@@ -84,9 +85,13 @@ def should_skip_file(file_path: str) -> bool:
     
     return False
 
-def check_copyright(file_path: str) -> Optional[str]:
+def check_copyright(file_path: str, require_amd: bool = False) -> Optional[str]:
     """
     Check if file has proper copyright notice.
+    
+    Args:
+        file_path: Path to the file to check
+        require_amd: If True, requires AMD copyright. If False, accepts any valid copyright.
     
     Returns:
         None if copyright is present, error message if missing
@@ -119,27 +124,66 @@ def check_copyright(file_path: str) -> Optional[str]:
     except (UnicodeDecodeError, FileNotFoundError):
         return f"Could not read file: {file_path}"
     
-    # Check for copyright notice patterns
-    copyright_patterns = [
+    # Check for AMD copyright specifically
+    amd_copyright_patterns = [
         'Copyright Advanced Micro Devices, Inc.',
         'Copyright (C) Advanced Micro Devices, Inc.',
         'Copyright(C) Advanced Micro Devices, Inc.',
         'Copyright © Advanced Micro Devices, Inc.',
-        'SPDX-License-Identifier: MIT'
     ]
     
-    has_copyright = any(pattern in content for pattern in copyright_patterns[:4])
-    has_spdx = 'SPDX-License-Identifier: MIT' in content
+    # Check for any valid copyright (must be at start of line or after comment char)
+    general_copyright_patterns = []
     
-    if not has_copyright or not has_spdx:
-        config = COPYRIGHT_REQUIRED_EXTENSIONS[extension]
-        return f"Missing copyright notice. Please add at the top of the file:\n\n{config['header']}"
+    # Check for copyright statements that appear to be actual copyright notices
+    lines = content.splitlines()
+    for line in lines[:20]:  # Check first 20 lines only
+        line_stripped = line.strip()
+        # For hash comments
+        if (line_stripped.startswith('# Copyright ') or 
+            line_stripped.startswith('#Copyright ') or
+            line_stripped == '# Copyright' or
+            line_stripped == '#Copyright'):
+            general_copyright_patterns.append('valid_copyright_found')
+            break
+        # For slash comments  
+        if (line_stripped.startswith('// Copyright ') or 
+            line_stripped.startswith('//Copyright ') or
+            line_stripped == '// Copyright' or
+            line_stripped == '//Copyright'):
+            general_copyright_patterns.append('valid_copyright_found')
+            break
+        # For HTML comments in markdown
+        if ('<!--' in line_stripped and 'Copyright' in line_stripped):
+            general_copyright_patterns.append('valid_copyright_found')
+            break
+    
+    has_amd_copyright = any(pattern in content for pattern in amd_copyright_patterns)
+    has_any_copyright = len(general_copyright_patterns) > 0  # Check if we found any valid copyright
+    has_mit_license = 'SPDX-License-Identifier: MIT' in content
+    
+    config = COPYRIGHT_REQUIRED_EXTENSIONS[extension]
+    
+    if require_amd:
+        # AMD employee - require AMD copyright and MIT license
+        if not has_amd_copyright or not has_mit_license:
+            return f"Missing AMD copyright notice. Please add at the top of the file:\n\n{config['header']}"
+    else:
+        # External contributor - require any copyright and MIT license
+        if not has_any_copyright or not has_mit_license:
+            if config['format'] == 'hash':
+                example = "# Copyright Your Name\n#\n# SPDX-License-Identifier: MIT\n"
+            else:
+                example = "// Copyright Your Name\n//\n// SPDX-License-Identifier: MIT\n"
+            
+            return f"Missing copyright notice. Please add at the top of the file:\n\n{example}\n\nOr for AMD contributions:\n\n{config['header']}"
     
     return None
 
 def main():
     parser = argparse.ArgumentParser(description='Check copyright notices in files')
     parser.add_argument('--changed-files', help='Newline-separated list of changed files')
+    parser.add_argument('--require-amd', action='store_true', help='Require AMD copyright format')
     parser.add_argument('files', nargs='*', help='Specific files to check')
     
     args = parser.parse_args()
@@ -172,7 +216,7 @@ def main():
         if not file_path:
             continue
             
-        error = check_copyright(file_path)
+        error = check_copyright(file_path, require_amd=args.require_amd)
         if error:
             errors[file_path] = error
     
@@ -187,7 +231,7 @@ def main():
         print(f"\n{len(errors)} file(s) missing proper copyright notices.")
         print("\nFor Markdown files, use this format:")
         print("<!--")
-        print("Copyright Advanced Micro Devices, Inc.")
+        print("Copyright Your Name")
         print("")
         print("SPDX-License-Identifier: MIT")
         print("-->")

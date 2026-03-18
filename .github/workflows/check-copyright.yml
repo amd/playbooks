@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Get changed files
+      - name: Get changed files and check contributor
         id: changed-files
         run: |
           # Get list of changed files in this PR
@@ -28,14 +28,36 @@ jobs:
           echo "changed_files<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+          
+          # Check if PR author is AMD employee
+          AUTHOR_EMAIL="${{ github.event.pull_request.user.login }}"
+          # Check if author works for AMD by looking at commit email domains
+          AMD_COMMITS=$(git log --format="%ae" ${{ github.event.pull_request.base.sha }}..${{ github.sha }} | grep -c "@amd.com" || echo "0")
+          ALL_COMMITS=$(git log --format="%ae" ${{ github.event.pull_request.base.sha }}..${{ github.sha }} | wc -l)
+          
+          if [ "$AMD_COMMITS" -gt 0 ] && [ "$AMD_COMMITS" -eq "$ALL_COMMITS" ]; then
+            echo "require_amd_copyright=true" >> $GITHUB_OUTPUT
+            echo "✓ AMD employee detected - requiring AMD copyright"
+          else
+            echo "require_amd_copyright=false" >> $GITHUB_OUTPUT
+            echo "✓ External contributor detected - allowing any copyright"
+          fi
 
       - name: Check copyright notices
         run: |
-          python .github/scripts/check_copyright.py --changed-files "${{ steps.changed-files.outputs.changed_files }}"
+          if [ "${{ steps.changed-files.outputs.require_amd_copyright }}" == "true" ]; then
+            python .github/scripts/check_copyright.py --changed-files "${{ steps.changed-files.outputs.changed_files }}" --require-amd
+          else
+            python .github/scripts/check_copyright.py --changed-files "${{ steps.changed-files.outputs.changed_files }}"
+          fi
 
       - name: Display summary
         if: success()
         run: |
           echo "### ✅ Copyright Notice Check Passed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "All eligible files contain the required AMD copyright notice." >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.changed-files.outputs.require_amd_copyright }}" == "true" ]; then
+            echo "All eligible files contain the required AMD copyright notice." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "All eligible files contain valid copyright notices with MIT license." >> $GITHUB_STEP_SUMMARY
+          fi
