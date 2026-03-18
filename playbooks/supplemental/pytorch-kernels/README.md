@@ -43,7 +43,7 @@ Both approaches run on AMD GPUs. This is possible because PyTorch's ROCm build m
 A GPU kernel is a function that runs in parallel across thousands of GPU threads simultaneously. Unlike a CPU function that executes once per call, a kernel is launched with a **grid** of **blocks**, each containing many **threads**, all executing the same code on different data.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/8b9efbb4-6335-4b6f-8430-6eaf1917bc75" width="900"/>
+  <img src="https://github.com/user-attachments/assets/4773c54b-686e-4b1b-8fea-d451dee9c27c" width="900"/>
 </p>
 
 ### `__global__`:  the kernel qualifier
@@ -140,16 +140,16 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 ### Create a Virtual Environment
 <!-- @os:windows -->
 <!-- @test:id=create-venv timeout=60 -->
-<!-- ```cmd
+```cmd
 python -m venv llm-env --system-site-packages
-llm-env\Scripts\activate.bat
-``` -->
+llm-env\Scripts\Activate.ps1
+```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
+<!-- @setup:id=activate-venv command="llm-env\Scripts\Activate.ps1" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
