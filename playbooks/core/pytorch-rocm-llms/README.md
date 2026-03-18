@@ -22,9 +22,11 @@ On Windows, open a terminal in the directory of your choice and follow the comma
 python -m venv llm-env --system-site-packages
 llm-env\Scripts\activate
 ```
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands
 <!-- @test:end -->
+
+> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
+
 <!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
 <!-- @os:end -->
 
