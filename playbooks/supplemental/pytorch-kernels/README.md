@@ -174,7 +174,7 @@ Kernel is written as a raw C++ string inside Python and compiled at runtime via 
 #### Why Block Size = 256?
 The kernel uses **256 threads per block**. This value is commonly used because it aligns well with the **wavefront execution model of AMD GPUs**.
 
-Recall that AMD GPUs execute threads in groups of 64 threads, called a wavefront.
+AMD GPUs execute threads in groups of 64 threads, called a wavefront.
 ```
 256 threads per block = 4 wavefronts per block
                       = 4 × 64 threads
