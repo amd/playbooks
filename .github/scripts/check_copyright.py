@@ -24,6 +24,14 @@ COPYRIGHT_REQUIRED_EXTENSIONS = {
         'format': 'hash',
         'header': '# Copyright Advanced Micro Devices, Inc.\n#\n# SPDX-License-Identifier: MIT\n'
     },
+    '.yml': {
+        'format': 'hash',
+        'header': '# Copyright Advanced Micro Devices, Inc.\n#\n# SPDX-License-Identifier: MIT\n'
+    },
+    '.yaml': {
+        'format': 'hash',
+        'header': '# Copyright Advanced Micro Devices, Inc.\n#\n# SPDX-License-Identifier: MIT\n'
+    },
     '.ts': {
         'format': 'slash',
         'header': '// Copyright Advanced Micro Devices, Inc.\n//\n// SPDX-License-Identifier: MIT\n'
@@ -44,7 +52,7 @@ COPYRIGHT_REQUIRED_EXTENSIONS = {
 
 # File extensions to skip (don't need copyright)
 SKIP_EXTENSIONS = {
-    '.json', '.yml', '.yaml', '.md', '.txt', '.csv',
+    '.json', '.md', '.txt', '.csv',
     '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico',
     '.woff', '.woff2', '.ttf', '.eot',
     '.lock', '.log', '.gitignore', '.gitkeep'
@@ -55,7 +63,6 @@ SKIP_DIRECTORIES = {
     'website',
     'node_modules',
     '.git',
-    '.github/workflows',  # Skip workflow files
     'assets'  # Skip asset directories
 }
 
