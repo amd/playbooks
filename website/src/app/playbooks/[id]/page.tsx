@@ -1076,7 +1076,7 @@ function DeviceToggle({
       {DEVICE_IDS.map((d) => (
         <button
           key={d}
-          onClick={() => onChange(selected === d ? null : d)}
+          onClick={() => onChange(d)}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
             selected === d
               ? "bg-[#D4915D] text-black"
@@ -1203,7 +1203,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>(() =>
     platformParam === "linux" ? "linux" : "windows"
   );
-  const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => deviceFromHash(deviceHash));
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => deviceFromHash(deviceHash) ?? "halo");
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
