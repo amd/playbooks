@@ -21,7 +21,7 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 <!-- @require:comfyui,driver -->
 
 <!-- @os:windows -->
-<!-- @test:id=comfyui-desktop-workspace-present-windows timeout=60 -->
+<!-- @test:id=comfyui-desktop-workspace-present-windows timeout=60 hidden=True -->
 ```powershell
 $comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
 $py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
@@ -41,7 +41,7 @@ Write-Host "OK: main.py: $mainPy"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=comfyui-clone-linux timeout=300 -->
+<!-- @test:id=comfyui-clone-linux timeout=300 hidden=True -->
 ```bash
 set -euo pipefail
 if [ -d "ComfyUI/.git" ]; then
@@ -57,7 +57,7 @@ git checkout -f v0.10.0
 <!-- @os:end -->
 
 <!-- @os:linux --> 
-<!-- @test:id=comfyui-venv-linux timeout=180 -->
+<!-- @test:id=comfyui-venv-linux timeout=180 hidden=True -->
 ```bash
 set -euo pipefail
 python3 --version
@@ -69,7 +69,7 @@ python3 -m venv comfyui_venv
 <!-- @os:end -->
 
 <!-- @os:linux --> 
-<!-- @test:id=comfyui-requirements-linux timeout=600 -->
+<!-- @test:id=comfyui-requirements-linux timeout=600 hidden=True -->
 ```bash
 set -euo pipefail
 ./comfyui_venv/bin/python -m pip install --upgrade pip
@@ -80,7 +80,7 @@ set -euo pipefail
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=comfyui-sync-requirements-windows timeout=600 -->
+<!-- @test:id=comfyui-sync-requirements-windows timeout=600 hidden=True -->
 ```powershell
 $comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
 $py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
