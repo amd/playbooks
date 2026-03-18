@@ -1,3 +1,7 @@
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 """
 Basic LLM Loading and Text Generation
 ======================================

@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 """
 LoRA Fine-tuning Gemma 3 4B on AMD Strix Halo (GFX1151)
 

@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 ### PyTorch
 <!-- @test:end -->
 <!-- @os:end -->
