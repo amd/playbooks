@@ -1,0 +1,41 @@
+name: Check Copyright Notice
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-copyright:
+    name: Copyright Notice Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          # Get list of changed files in this PR
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Check copyright notices
+        run: |
+          python .github/scripts/check_copyright.py --changed-files "${{ steps.changed-files.outputs.changed_files }}"
+
+      - name: Display summary
+        if: success()
+        run: |
+          echo "### ✅ Copyright Notice Check Passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All eligible files contain the required AMD copyright notice." >> $GITHUB_STEP_SUMMARY
