@@ -1,3 +1,8 @@
+<!-- @github-only -->
+> [!IMPORTANT]
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+<!-- @github-only:end -->
+
 ## Overview
 
 LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggml-org/llama.cpp) and also provides an [OpenAI compliant endpoint](https://lmstudio.ai/docs/developer/openai-compat) for local model serving. LM Studio provides a simple but powerful interface to easily download and deploy models. LM Studio offers both Vulkan and ROCm based backends (called runtimes) for AMD users.

@@ -1,123 +1,59 @@
-# AMD Developer Platform - STX Halo™ Playbooks
+# AMD Playbooks
 
-<p align="center">
-  <img src="website/src/app/assets/halo.png" alt="Halo Logo" width="400"/>
-</p>
+<div align="center">
 
-This repository hosts all playbooks that will be part of the upcoming AMD Developer Platform launch.
+![AMD](https://img.shields.io/badge/AMD-Playbooks-ED1C24?logo=amd&logoColor=white)
+![ROCm](https://img.shields.io/badge/ROCm-Enabled-green)
+![License](https://img.shields.io/badge/License-MIT-blue)
+[![AI Dev Program](https://img.shields.io/badge/AMD_AI-Developer_Program-7B2D8E?logo=amd&logoColor=white)](https://www.amd.com/en/developer/ai-dev-program.html)
+<img src="assets/banner.png" alt="AMD Playbooks"/>
 
-> ### 📋 **View All Upcoming Playbooks**
-> 
-> **[View the Playbooks Milestone →](https://github.com/amd/halo_playbooks/milestone/1)**
+Guided developer journeys for AI/ML workloads on AMD devices.
+
+[**Browse Playbooks at amd.com/playbooks →**](https://amd.com/playbooks)
+
+</div>
+
+## About
+
+This is AMD's official repository of playbooks for AMD developer platforms. Each playbook is a self-contained, hands-on learning experience that covers prerequisites, step-by-step instructions for Windows and Linux, troubleshooting guidance, and working example code, built to help you grow your AI development skills one project at a time.
+
+## Available Playbooks
+
+| Playbook | Description |
+|----------|-------------|
+| **Running LLMs with PyTorch and ROCm** | Run powerful language models locally with PyTorch and ROCm |
+| **Running and Serving LLMs with LM Studio** | Set up LM Studio to run and serve large language models |
+| **Automating Workflows with n8n and Local LLMs** | Build an AI-powered news summarizer using n8n and Lemonade |
+| **Local LLM Coding with VSCode and Qwen3-Coder** | Use VSCode with locally-running Qwen3-Coder for private code assistance |
+| **Generating Images with ComfyUI and Z Image Turbo** | Create AI-generated images using ComfyUI with Z Image Turbo |
+| **Chat with LLMs in Open WebUI** | Set up Open WebUI to chat with local LLMs |
+| **Fine-tune LLMs with PyTorch and ROCm** | Fine-tune large language models using PyTorch and ROCm |
+| **Using Lemonade Across CPU, GPU, and NPU** | Learn how to use the Lemonade framework across CPU, GPU, and NPU |
+| **Local Computer Vision with Ryzen AI NPU** | Build local perception capabilities using CVML SDK on RyzenAI and ROCm |
+| **Clustering Two Devices with llama.cpp RPC** | Distributed inference using RPC server across two AMD devices with llama.cpp |
+| **Getting Started with Ollama** | Install Ollama and run LLMs locally from the terminal, desktop app, or REST API |
+| **Getting Started Creating Agents with GAIA** | Build and deploy AI agents using the GAIA framework |
+| **Custom GPU Kernels with PyTorch ROCm** | Write and optimize custom GPU kernels using PyTorch and ROCm `Coming Soon` |
+| **Optimized Fine-tuning with Unsloth QLoRA** | Memory-efficient QLoRA fine-tuning with Unsloth `Coming Soon` |
+| **Quick Start on vLLM** | Run inference and serving using vLLM `Coming Soon` |
+| **Clustering with RCCL** | Multi-node cluster using two AMD devices with RCCL `Coming Soon` |
+| **Speech-to-Speech Translation** | Build a real-time speech-to-speech translation system `Coming Soon` |
+
+## AMD AI Developer Program
+
+> **[Join the AMD AI Developer Program →](https://www.amd.com/en/developer/ai-dev-program.html)**
 >
-> Track all playbook proposals, filter by framework/model/app, and see current development status.
+> Get access to tools, resources, and community support to accelerate your AI development on AMD hardware.
 
-## Quick Links
+## Additional Resources
 
-- [Overview](#overview)
-- [Onboarding Portal](#onboarding-portal)
-- [Playbook Proposal and Definition](#playbook-proposal-and-definition)
-  - [How to Create a Playbook Proposal](#how-to-create-a-playbook-proposal)
-  - [Example Playbook Proposals](#example-issues)
+- **Playbooks Portal**: [amd.com/playbooks](https://amd.com/playbooks)
+- **AMD Developer Hub**: [developer.amd.com](https://developer.amd.com)
+- **ROCm Documentation**: [rocm.docs.amd.com](https://rocm.docs.amd.com)
+- **AMD AI Developer Program**: [amd.com/ai-dev-program](https://www.amd.com/en/developer/ai-dev-program.html)
+- **Community Forum**: [community.amd.com](https://community.amd.com)
 
+## License
 
-## Overview
-
-We will maintain a curated set of 15 playbooks, organized into two tiers:
-
-- **Core Playbooks (5)**: Mission-critical experiences that represent the highest-value workflows.
-- **Supplemental Playbooks (10)**: Additional experiences that broaden capability but are not required for out-of-box (OOB) readiness.
-
-These playbooks serve as the authoritative source for determining all required software assets (frameworks, foundational software, models, and apps).
-
-Only assets required to deliver the Core Playbooks will be preinstalled on the device. The preinstalled software set will be the minimal union of all dependencies across the five core playbooks.
-
-
-## Onboarding Portal
-
-Playbooks are the core component of the onboarding portal. The set of available playbooks in the portal will be updated according to the latest contents pushed to this repository.
-
-> Note: The portal's appearance and hosting location may change depending on potential partnerships and agreements established prior to launch.
-
-<p align="center">
-  <img src="assets/launch_page.png" alt="Halo Logo" />
-</p>
-
-## Playbook Proposal and Definition
-
-To define the 15 playbooks, we need contributors to create issues for each playbook. Each issue should follow a specific format to ensure consistency and proper categorization.
-
-### How to Create a Playbook Proposal
-
-Create an issue at [github.com/amd/halo_playbooks](https://github.com/amd/halo_playbooks) with the following format.
-
-1. **Title Format**: Use the format `[Playbook] <Descriptive Title>`
-   - Example: `[Playbook] Local LLM coding with GitHub Copilot and Qwen3-Next-80B`
-
-2. **Required Labels**: Add relevant labels to categorize the playbook:
-
-   |   Type     | Format | Description | Examples |
-   |------------|--------|-------------|----------|
-   | Framework | `framework::<name>` | Framework used | `framework::llamacpp`, `framework::docker`, `framework::vllm` |
-   | Model | `model::<name>` | Model used | `model::qwen3-next-80b`, `model::gpt-oss-120b` |
-   | App | `app::<name>` | Application used | `app::vscode`, `app::openwebui`, `app::openhands` |
-   | OS | `os::<name>` | Operating system(s) supported | `os::linux`, `os::windows` |
-   | Track | `track::<type>` | **REQUIRED**: Either core or supplemental | `track::core`, `track::supplemental` |
-
-3. **Milestone**: Assign the issue to the **`playbooks`** milestone
-
-4. **Description**: Provide a detailed description (250+ words) that includes:
-   - Expected length of the playbook (time to complete)
-   - Expected flow and high-level step-by-step progression
-   - Potential technical issues or challenges AMD may encounter to enable this playbook
-
-### Example Issues
-
-Here are examples of properly formatted playbook issues:
-
-#### Playbook Example
-```
-[Playbook] Local LLM coding with GitHub Copilot and Qwen3-Next-80B
-
-Labels:
-- app::vscode
-- framework::llamacpp
-- model::qwen3-next-80b
-- os::linux
-- os::windows
-- track::core
-
-Milestone: playbooks
-```
-
-## Playbook Creation
-
-The following structure has been created to host playbooks:
-
-```
-playbooks/
-├── core/
-│   ├── comfyui-flux2-images/
-│   ├── github-copilot-qwen3-coder/
-│   ├── lmstudio-rocm-llms/
-│   ├── n8n-automation-gpt-oss/
-│   ├── pytorch-rocm-llms/
-│   └── vllm-finetuning/
-│
-├── supplemental/
-│   ├── clustering-two-halos/
-│   ├── dify-ai-agents/
-│   ├── gguf-quantization-export/
-│   ├── multi-agent-chatbots/
-│   ├── open-webui-chat/
-│   ├── openhands-coding-assistant/
-│   ├── pytorch-rocm-gpu-kernels/
-│   ├── speech2speech-translation/
-│   └── unsloth-qlora-finetuning/
-│
-└── backup/
-    ├── flux2-dev-finetuning/
-    ├── jax-getting-started/
-    └── llamacpp-spec-decoding/
-```
-📖 **[See the Playbook Creation Guide →](playbooks/README.md)** for detailed instructions on editing playbooks, the metadata schema, and OS-specific content tagging.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
