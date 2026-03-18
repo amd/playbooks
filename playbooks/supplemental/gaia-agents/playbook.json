@@ -11,7 +11,7 @@
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
-  "developed": false,
+  "developed": true,
   "published": true,
   "tags": ["gaia", "agent-sdk", "agent", "hardware", "lemonade"]
 }
