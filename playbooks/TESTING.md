@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Playbook Testing Guide
 
 > **Note:** The testing infrastructure is still being developed. Playbook creators are not expected to add tests to their playbooks yet.

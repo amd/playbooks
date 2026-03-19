@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Platform Configuration — Lemonade Local AI
 
 This document describes the pre-installed software, model paths, and platform-specific prerequisites assumed by this playbook.

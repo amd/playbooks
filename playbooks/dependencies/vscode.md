@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 ### Visual Studio Code
 
 These are the instructions for how to install VS Code version 1.08.2. 

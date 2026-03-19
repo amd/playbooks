@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 ### GAIA
 
 GAIA is AMD's open-source framework for building AI agents that run locally on AMD hardware with Ryzen AI acceleration.

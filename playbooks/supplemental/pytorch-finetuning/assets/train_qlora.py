@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 """
 LoRA Fine-tuning GPT-OSS 20B (Pre-quantized) on AMD Strix Halo (GFX1151)
 

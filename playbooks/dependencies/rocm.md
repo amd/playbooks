@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # ROCm on Linux: Install, Permissions, and Verification
 ### 1. Install ROCm on Linux
 ```bash
