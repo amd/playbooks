@@ -1,5 +1,4 @@
 # ROCm on Linux: Install, Permissions, and Verification
-
 ### 1. Install ROCm on Linux
 ```bash
 sudo apt update
@@ -40,4 +39,3 @@ rocminfo | sed -n '1,120p'
 ```
 <!-- @test:end -->
 
----

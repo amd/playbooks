@@ -81,7 +81,7 @@
     },
     "nodejs": {
       "name": "Node.js",
-      "version": "20.19.2",
+      "version": "22.22.1",
       "description": "JavaScript runtime for server-side applications",
       "category": "runtime",
       "platforms": ["windows", "linux"],
@@ -98,7 +98,7 @@
       "name": "ROCm",
       "description": "AMD software platform for GPU computing and AI workloads",
       "category": "framework",
-      "platforms": ["windows", "linux"],
+      "platforms": ["linux"],
       "file": "rocm.md"
     }
   },
