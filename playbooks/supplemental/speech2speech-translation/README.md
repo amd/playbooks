@@ -50,7 +50,7 @@ source s2st-env/bin/activate
 Install m4t dependencies using pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio==4.44.1 scipy==1.15.3 
 ```
 <!-- @test:end -->
 
@@ -110,12 +110,7 @@ scipy.io.wavfile.write("out1.wav", rate=sample_rate, data=audio_array_from_audio
 #### Run the complete file to check the audio generation duration
 
 ```bash
-python ./assets/infer_gpu.py
-```
-
-#### Compare with cpu backend to observe the difference of latency
-```bash
-python ./assets/infer_cpu.py
+python ./assets/infer.py
 ```
 
 ### Runing the Gradio UI demo:
@@ -126,7 +121,7 @@ python ./assets/infer_cpu.py
 
 ```bash
 export HIP_VISIBLE_DEVICES=0
-python ./assets/gradio_gpu.py --share
+python ./assets/gradio_demo.py --share
 ```
 Press and hold the record button to capture your voice; releasing it will automatically execute the translation.
 after it done, then you can play the output translated voice.
