@@ -80,7 +80,7 @@ jobs:
                       meta = json.loads(pb_file.read_text())
                       tested = meta.get("tested_platforms", {})
                       if not tested:
-                          shown = meta.get("shown_platforms", {})
+                          shown = meta.get("supported_platforms", {})
                           tested = dict(shown) if shown else {"halo": ["windows", "linux"]}
                       required = meta.get("required_platforms", {})
                       for device, platform_list in tested.items():

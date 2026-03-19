@@ -3,7 +3,7 @@
   "title": "Running and serving LLMs with LM Studio",
   "description": "Set up LM Studio and LM Studio Server to run and serve large language models on STX Halo\u2122",
   "time": 30,
-  "shown_platforms": {
+  "supported_platforms": {
     "halo": [
       "windows",
       "linux"

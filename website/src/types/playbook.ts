@@ -100,7 +100,7 @@ export interface PlaybookMeta {
   time: number;
   
   /** Shown platforms per device — controls which OS/device combos appear in the UI */
-  shown_platforms: Partial<Record<Device, Platform[]>>;
+  supported_platforms: Partial<Record<Device, Platform[]>>;
 
   /** Tested platforms per device (used by CI to select runners) */
   tested_platforms?: Partial<Record<Device, Platform[]>>;
@@ -170,7 +170,7 @@ export interface PlaybookCoverageSummary {
   id: string;
   title: string;
   category: Category;
-  shown_platforms: Partial<Record<Device, Platform[]>>;
+  supported_platforms: Partial<Record<Device, Platform[]>>;
   testCount: number;
   hiddenCount: number;
   visibleTestCount: number;
@@ -213,7 +213,7 @@ export function formatTime(minutes: number): string {
 }
 
 /**
- * Extracts a deduplicated list of platforms (OS) from a shown_platforms map.
+ * Extracts a deduplicated list of platforms (OS) from a supported_platforms map.
  */
 export function extractPlatforms(shownPlatforms: Partial<Record<Device, Platform[]>>): Platform[] {
   const set = new Set<Platform>();
@@ -224,7 +224,7 @@ export function extractPlatforms(shownPlatforms: Partial<Record<Device, Platform
 }
 
 /**
- * Extracts devices from a shown_platforms map that support the given platform.
+ * Extracts devices from a supported_platforms map that support the given platform.
  * If no platform is provided, returns all devices.
  */
 export function extractDevices(

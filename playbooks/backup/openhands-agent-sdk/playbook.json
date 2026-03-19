@@ -3,7 +3,7 @@
   "title": "OpenHands Software Agent SDK",
   "description": "Build software agents using the OpenHands Agent SDK on your STX Halo\u2122",
   "time": 60,
-  "shown_platforms": {
+  "supported_platforms": {
     "halo": [
       "linux",
       "windows"

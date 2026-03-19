@@ -3,7 +3,7 @@
   "title": "Running LLMs with PyTorch and ROCm",
   "description": "Learn to run powerful language models on your PC with PyTorch and ROCm to summarize documents quickly and easily",
   "time": 30,
-  "shown_platforms": {
+  "supported_platforms": {
     "halo": [
       "linux",
       "windows"

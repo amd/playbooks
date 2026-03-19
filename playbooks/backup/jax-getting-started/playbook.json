@@ -3,7 +3,7 @@
   "title": "Getting Started with JAX on ROCm",
   "description": "Optimize JAX to run efficiently on STX Halo\u2122 with ROCm acceleration",
   "time": 60,
-  "shown_platforms": {
+  "supported_platforms": {
     "halo": [
       "linux"
     ]

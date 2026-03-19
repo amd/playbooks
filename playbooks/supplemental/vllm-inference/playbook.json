@@ -3,7 +3,7 @@
   "title": "Quick Start on vLLM",
   "description": "Learn how to run inference and serving using vLLM on your STX Halo\u2122",
   "time": 90,
-  "shown_platforms": {
+  "supported_platforms": {
     "halo": [
       "linux"
     ]

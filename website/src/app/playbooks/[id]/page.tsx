@@ -1235,7 +1235,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       const data = await res.json();
       setPlaybook(data);
 
-      const availablePlatforms = extractPlatforms(data.shown_platforms ?? {});
+      const availablePlatforms = extractPlatforms(data.supported_platforms ?? {});
       if (availablePlatforms.includes("windows")) {
         setSelectedPlatform("windows");
       } else if (availablePlatforms.length > 0) {
@@ -1280,7 +1280,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   // When arriving via URL platform param, re-apply after fetchPlaybook's auto-select
   useEffect(() => {
     if (!playbook || !platformParam) return;
-    const available = extractPlatforms(playbook.shown_platforms ?? {});
+    const available = extractPlatforms(playbook.supported_platforms ?? {});
     if (available.includes(platformParam as Platform)) {
       setSelectedPlatform(platformParam as Platform);
     }
@@ -1290,14 +1290,14 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   // When platform changes, ensure selectedDevice is valid for the new platform.
   useEffect(() => {
     if (!playbook) return;
-    const available = extractDevices(playbook.shown_platforms ?? {}, selectedPlatform);
+    const available = extractDevices(playbook.supported_platforms ?? {}, selectedPlatform);
     if (available.length > 0 && selectedDevice && !available.includes(selectedDevice)) {
       setSelectedDevice(available[0]);
     } else if (available.length > 0 && !selectedDevice) {
       setSelectedDevice(available[0]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPlatform, playbook?.shown_platforms]);
+  }, [selectedPlatform, playbook?.supported_platforms]);
 
   // When platform changes, switch selectedTestDevice to the matching composite key.
   // If no device is tested on the new platform, use a synthetic key so stale results
@@ -1748,11 +1748,11 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
 
                 {/* Platform & Device Toggles */}
                 <div className="flex flex-col gap-3">
-                  {extractPlatforms(playbook.shown_platforms ?? {}).length > 0 && (
+                  {extractPlatforms(playbook.supported_platforms ?? {}).length > 0 && (
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                       <span className="text-sm text-[#6b6b6b]">Platform:</span>
                       <PlatformToggle
-                        platforms={extractPlatforms(playbook.shown_platforms ?? {})}
+                        platforms={extractPlatforms(playbook.supported_platforms ?? {})}
                         selected={selectedPlatform}
                         onChange={setSelectedPlatform}
                       />
@@ -1762,7 +1762,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                       <span className="text-sm text-[#6b6b6b]">Device:</span>
                       <DeviceToggle
-                        devices={extractDevices(playbook.shown_platforms ?? {}, selectedPlatform)}
+                        devices={extractDevices(playbook.supported_platforms ?? {}, selectedPlatform)}
                         selected={selectedDevice}
                         onChange={setSelectedDevice}
                       />

@@ -3,7 +3,7 @@
   "title": "Automating Workflows with n8n and Local LLMs",
   "description": "Build an AI-powered news summarizer using n8n and Lemonade on STX Halo\u2122",
   "time": 30,
-  "shown_platforms": {
+  "supported_platforms": {
     "halo": [
       "windows",
       "linux"

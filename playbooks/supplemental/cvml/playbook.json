@@ -3,7 +3,7 @@
   "title": "Local Computer Vision with Ryzen AI NPU",
   "description": "Build local perception capabilities using CVML SDK on top of RyzenAI and ROCm",
   "time": 60,
-  "shown_platforms": {
+  "supported_platforms": {
     "halo": [
       "linux",
       "windows"

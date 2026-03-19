@@ -3,7 +3,7 @@
   "title": "Getting Started with Ollama",
   "description": "Install Ollama and run LLMs locally \u2014 chat from the terminal, desktop app, or REST API on your STX Halo\u2122",
   "time": 15,
-  "shown_platforms": {
+  "supported_platforms": {
     "halo": [
       "windows",
       "linux"

@@ -42,7 +42,7 @@ interface ArtifactsResponse {
 interface PlaybookMeta {
   id: string;
   title?: string;
-  shown_platforms?: Record<string, string[] | undefined>;
+  supported_platforms?: Record<string, string[] | undefined>;
   tested_platforms?: Record<string, string[] | undefined>;
   developed?: boolean;
   published?: boolean;
@@ -149,7 +149,7 @@ function loadPlaybooks(): PlaybookEntry[] {
         const testedKeys = Object.keys(tested);
 
         if (testedKeys.length === 0) {
-          const shown = meta.shown_platforms ?? {};
+          const shown = meta.supported_platforms ?? {};
           for (const [device, platformList] of Object.entries(shown)) {
             for (const platform of platformList ?? []) {
               combos.push(combinationId(device, platform));

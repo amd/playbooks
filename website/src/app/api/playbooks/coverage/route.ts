@@ -82,7 +82,7 @@ interface PlaybookScanResult {
   id: string;
   title: string;
   category: Category;
-  shown_platforms: Partial<Record<Device, Platform[]>>;
+  supported_platforms: Partial<Record<Device, Platform[]>>;
   testCount: number;
   hiddenCount: number;
   visibleTestCount: number;
@@ -145,7 +145,7 @@ function scanPlaybooks(): PlaybookScanResult[] {
         id: meta.id,
         title: meta.title || meta.id,
         category: getCategory(category),
-        shown_platforms: (meta.shown_platforms || {}) as Partial<Record<Device, Platform[]>>,
+        supported_platforms: (meta.supported_platforms || {}) as Partial<Record<Device, Platform[]>>,
         testCount,
         hiddenCount,
         visibleTestCount: testCount - hiddenCount,

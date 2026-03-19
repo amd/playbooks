@@ -3,7 +3,7 @@
   "title": "Clustering with Two Halos (RCCL)",
   "description": "Set up a multi-node cluster using two STX Halo\u2122 devices with RCCL for distributed workloads",
   "time": 90,
-  "shown_platforms": {
+  "supported_platforms": {
     "halo": [
       "linux",
       "windows"

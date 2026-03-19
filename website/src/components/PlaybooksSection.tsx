@@ -232,7 +232,7 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
                         )}
                         <DifficultyBadge difficulty={featuredPlaybook.difficulty} />
                         <div className="flex gap-1">
-                          {extractPlatforms(featuredPlaybook.shown_platforms ?? {}).map((p) => (
+                          {extractPlatforms(featuredPlaybook.supported_platforms ?? {}).map((p) => (
                             <PlatformBadge key={p} platform={p} />
                           ))}
                         </div>
@@ -300,7 +300,7 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
                           </span>
                         )}
                         <div className="flex gap-1">
-                          {extractPlatforms(playbook.shown_platforms ?? {}).map((p) => (
+                          {extractPlatforms(playbook.supported_platforms ?? {}).map((p) => (
                             <PlatformBadge key={p} platform={p} />
                           ))}
                         </div>
