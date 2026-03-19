@@ -17,7 +17,6 @@ audio, orig_freq =  torchaudio.load("./input1.wav")
 audio =  torchaudio.functional.resample(audio, orig_freq=orig_freq, new_freq=16_000) # must be a 16 kHz waveform array
 audio_inputs = processor(audios=audio, return_tensors="pt").to("cuda")
 audio_array_from_audio = model.generate(**audio_inputs, tgt_lang="eng")[0].cpu().numpy().squeeze()
-
 end = time.time()
 print(f"cuda infer duration: {end - start} seconds")
 

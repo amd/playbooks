@@ -6,17 +6,14 @@ The Ryzen™ AI Halo platform, integrated with the Radeon ROCm software stack an
 Crucially, PyTorch, one of the world's leading machine learning frameworks, runs natively on this ROCm foundation . This integration means developers can use the full PyTorch ecosystem—for tasks like training and inference—directly on the hardware, without needing complex workarounds. The deep optimization within the ROCm stack enables advanced features like Flash Attention 2 for faster training and efficient deployment of large language models . Furthermore, this tight integration ensures that foundational models like Meta's SeamlessM4T (available in sizes up to 2.3B parameters) can leverage the combined performance of the Ryzen AI Halo hardware and the Radeon ROCm software to deliver low-latency, expressive, and private speech-to-speech translation entirely on the edge.
 
 ## What You'll Learn
-
-- How to set up s2st environment
+- How to set up speech-to-speech environment
 - How to set up Gradio UI demo
-- Show example with Mandarin to English s2st
+- Show example with Mandarin to English speech-to-speech
 
-## Why live s2st translation?
-In global business, language barriers slow teams down and create distance. Live speech-to-speech translation (S2ST) removes that friction entirely.
+## Why live speech-to-speech translation?
+In global business, language barriers slow teams down and create distance. Live speech-to-speech translation (speech-to-speech) removes that friction entirely.
 It enables real-time, natural conversation across languages—preserving tone, emotion, and intent without awkward pauses. Participants hear your message instantly in their own language, exactly as you meant it.
 For cross-border meetings and global collaboration, this means faster decisions, stronger trust, and the ability to truly think together—without language getting in the way.
-
-## Prerequisites
 
 ## Setting Up Your Environment
 
@@ -57,18 +54,18 @@ pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate s
 ```
 <!-- @test:end -->
 
-## Set up the s2st demo
+## Set up the speech-to-speech demo
 The script will use your HF_TOKEN to download the models, but if you want to download only exactly the file needed you can also download from [https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) all files.
 
 
 
 The seamlessm4t model arch:
 <p align="center">
-  <img src="assets/seamlessm4t_arch.svg" alt="Templates button in the left toolbar" width="600"/>
+  <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 
-#### Import necessary dependencies: m4t, torchautio et al 
+#### Import necessary dependencies: m4t, torchaudio et al 
 ```python 
 from transformers import AutoProcessor, SeamlessM4Tv2Model
 import torchaudio
@@ -86,7 +83,7 @@ end = time.time()
 print(f"model loading duration: {end - start} seconds")
 ```
 
-#### input audio clip .wav file
+#### Input audio clip .wav file
 ```python
 audio, orig_freq =  torchaudio.load("./assets/input1.wav")
 ```
@@ -99,8 +96,10 @@ audio_inputs = processor(audios=audio, return_tensors="pt").to("cuda")
 
 #### Generate translated audio file 
 ```python
+start = time.time()
 audio_array_from_audio = model.generate(**audio_inputs, tgt_lang="eng")[0].cpu().numpy().squeeze()
-print(f"cuda infer duration: {end - start} seconds")
+end = time.time()
+print(f"gpu infer duration: {end - start} seconds")
 ```
 #### Save the translated file
 ```python
@@ -134,7 +133,7 @@ after it done, then you can play the output translated voice.
 ### Gradio UI example:
 
 <p align="center">
-  <img src="assets/gradio.png" alt="Templates button in the left toolbar" width="600"/>
+  <img src="assets/gradio.png" alt="gradio UI" width="600"/>
 </p>
 
 Also support 40 languages to switch between each other.
@@ -145,6 +144,6 @@ It supports dozens of languages and includes voice input and text-to-speech for 
 
 ## Resources
 
-Below are some additional resources to learn more about s2st on 
+Below are some additional resources to learn more about speech-to-speech on 
 * The repo is here https://huggingface.co/facebook/seamless-m4t-v2-large 
 * The paper is in Seamless: Multilingual Expressive and Streaming Speech Translation
