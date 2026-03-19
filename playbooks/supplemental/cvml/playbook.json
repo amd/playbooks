@@ -3,15 +3,23 @@
   "title": "Local Computer Vision with Ryzen AI NPU",
   "description": "Build local perception capabilities using CVML SDK on top of RyzenAI and ROCm",
   "time": 60,
-  "platforms": ["linux", "windows"],
-  "tested_platforms": {
-    "linux": [],
-    "windows": []
+  "shown_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
   },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": ["cvml", "perception", "ryzenai", "gpu", "npu", "inference"]
+  "tags": [
+    "cvml",
+    "perception",
+    "ryzenai",
+    "gpu",
+    "npu",
+    "inference"
+  ]
 }

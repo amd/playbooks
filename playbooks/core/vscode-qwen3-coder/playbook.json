@@ -1,21 +1,41 @@
 {
   "id": "vscode-qwen3-coder",
   "title": "Local LLM Coding with VSCode and Qwen3-Coder",
-  "description": "Use VSCode with locally-running Qwen3-Coder for private code assistance on STX Halo™",
+  "description": "Use VSCode with locally-running Qwen3-Coder for private code assistance on STX Halo\u2122",
   "time": 60,
-  "platforms": ["windows", "linux"],
+  "shown_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ],
+    "krk": [
+      "linux"
+    ]
+  },
   "tested_platforms": {
-    "windows": ["halo"],
-    "linux": ["halo", "krk"]
+    "halo": [
+      "windows",
+      "linux"
+    ],
+    "krk": [
+      "linux"
+    ]
   },
   "required_platforms": {
-    "windows": ["halo"],
-    "linux": ["halo"]
+    "halo": [
+      "windows",
+      "linux"
+    ]
   },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": ["coding", "vscode", "qwen", "llm"]
+  "tags": [
+    "coding",
+    "vscode",
+    "qwen",
+    "llm"
+  ]
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import type { Playbook, Platform } from "@/types/playbook";
-import { formatTime, platformNames } from "@/types/playbook";
+import { formatTime, platformNames, extractPlatforms } from "@/types/playbook";
 import { deviceToHash } from "./HeroSection";
 
 function PlatformBadge({ platform }: { platform: Platform }) {
@@ -232,7 +232,7 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
                         )}
                         <DifficultyBadge difficulty={featuredPlaybook.difficulty} />
                         <div className="flex gap-1">
-                          {featuredPlaybook.platforms.map((p) => (
+                          {extractPlatforms(featuredPlaybook.shown_platforms ?? {}).map((p) => (
                             <PlatformBadge key={p} platform={p} />
                           ))}
                         </div>
@@ -300,7 +300,7 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
                           </span>
                         )}
                         <div className="flex gap-1">
-                          {playbook.platforms.map((p) => (
+                          {extractPlatforms(playbook.shown_platforms ?? {}).map((p) => (
                             <PlatformBadge key={p} platform={p} />
                           ))}
                         </div>

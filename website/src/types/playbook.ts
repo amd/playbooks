@@ -99,11 +99,14 @@ export interface PlaybookMeta {
   /** Estimated time in minutes */
   time: number;
   
-  /** Supported platforms */
-  platforms: Platform[];
+  /** Shown platforms per device — controls which OS/device combos appear in the UI */
+  shown_platforms: Partial<Record<Device, Platform[]>>;
 
-  /** Tested platforms per OS (used by CI to select runners) */
-  tested_platforms?: Partial<Record<Platform, Architecture[]>>;
+  /** Tested platforms per device (used by CI to select runners) */
+  tested_platforms?: Partial<Record<Device, Platform[]>>;
+
+  /** Required platforms per device (CI marks these as must-pass) */
+  required_platforms?: Partial<Record<Device, Platform[]>>;
   
   /** Whether this is a new playbook */
   isNew?: boolean;
@@ -167,7 +170,7 @@ export interface PlaybookCoverageSummary {
   id: string;
   title: string;
   category: Category;
-  platforms: Platform[];
+  shown_platforms: Partial<Record<Device, Platform[]>>;
   testCount: number;
   hiddenCount: number;
   visibleTestCount: number;
@@ -207,6 +210,30 @@ export function formatTime(minutes: number): string {
     return hours === 1 ? "1 HR" : `${hours} HRS`;
   }
   return `${hours}h ${mins}m`;
+}
+
+/**
+ * Extracts a deduplicated list of platforms (OS) from a shown_platforms map.
+ */
+export function extractPlatforms(shownPlatforms: Partial<Record<Device, Platform[]>>): Platform[] {
+  const set = new Set<Platform>();
+  for (const platforms of Object.values(shownPlatforms)) {
+    if (platforms) for (const p of platforms) set.add(p);
+  }
+  return Array.from(set);
+}
+
+/**
+ * Extracts devices from a shown_platforms map that support the given platform.
+ * If no platform is provided, returns all devices.
+ */
+export function extractDevices(
+  shownPlatforms: Partial<Record<Device, Platform[]>>,
+  platform?: Platform,
+): Device[] {
+  return (Object.entries(shownPlatforms) as [Device, Platform[]][])
+    .filter(([, platforms]) => !platform || platforms.includes(platform))
+    .map(([device]) => device);
 }
 
 /**

@@ -1,13 +1,23 @@
 {
   "id": "openhands-agent-sdk",
   "title": "OpenHands Software Agent SDK",
-  "description": "Build software agents using the OpenHands Agent SDK on your STX Halo™",
+  "description": "Build software agents using the OpenHands Agent SDK on your STX Halo\u2122",
   "time": 60,
-  "platforms": ["linux", "windows"],
+  "shown_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
   "developed": false,
   "published": true,
-  "tags": ["openhands", "agents", "sdk", "llm"]
+  "tags": [
+    "openhands",
+    "agents",
+    "sdk",
+    "llm"
+  ]
 }

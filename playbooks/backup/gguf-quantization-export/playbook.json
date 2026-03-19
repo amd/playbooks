@@ -1,13 +1,23 @@
 {
   "id": "gguf-quantization-export",
   "title": "Quantize and Export Models to GGUF",
-  "description": "Learn how to quantize and export models to GGUF format using llama.cpp on your STX Halo™",
+  "description": "Learn how to quantize and export models to GGUF format using llama.cpp on your STX Halo\u2122",
   "time": 60,
-  "platforms": ["linux", "windows"],
+  "shown_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
   "developed": false,
   "published": true,
-  "tags": ["gguf", "quantization", "llamacpp", "model-export"]
+  "tags": [
+    "gguf",
+    "quantization",
+    "llamacpp",
+    "model-export"
+  ]
 }

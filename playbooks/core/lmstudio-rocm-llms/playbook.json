@@ -1,21 +1,36 @@
 {
   "id": "lmstudio-rocm-llms",
   "title": "Running and serving LLMs with LM Studio",
-  "description": "Set up LM Studio and LM Studio Server to run and serve large language models on STX Halo™",
+  "description": "Set up LM Studio and LM Studio Server to run and serve large language models on STX Halo\u2122",
   "time": 30,
-  "platforms": ["windows", "linux"],
+  "shown_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ]
+  },
   "tested_platforms": {
-    "windows": ["halo"],
-    "linux": ["halo"]
+    "halo": [
+      "windows",
+      "linux"
+    ]
   },
   "required_platforms": {
-    "windows": ["halo"],
-    "linux": ["halo"]
+    "halo": [
+      "windows",
+      "linux"
+    ]
   },
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": ["lm-studio", "rocm", "vulkan", "llm", "inference"]
+  "tags": [
+    "lm-studio",
+    "rocm",
+    "vulkan",
+    "llm",
+    "inference"
+  ]
 }

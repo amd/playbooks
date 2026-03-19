@@ -1,16 +1,25 @@
 {
   "id": "clustering-rpc-server",
   "title": "Clustering Two STX Halos with llama.cpp RPC",
-  "description": "Set up distributed inference using RPC server across two STX Halo™ devices with llama.cpp to run 350B+ models",
+  "description": "Set up distributed inference using RPC server across two STX Halo\u2122 devices with llama.cpp to run 350B+ models",
   "time": 90,
-  "platforms": ["linux", "windows"],
-  "tested_platforms": {
-    "linux": []
+  "shown_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
   },
   "difficulty": "advanced",
   "isNew": true,
   "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": ["clustering", "rpc", "distributed", "llm", "inference", "rocm"]
+  "tags": [
+    "clustering",
+    "rpc",
+    "distributed",
+    "llm",
+    "inference",
+    "rocm"
+  ]
 }

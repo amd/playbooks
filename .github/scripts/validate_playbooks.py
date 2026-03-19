@@ -38,7 +38,7 @@ CATEGORIES = ["core", "supplemental", "backup"]
 ALLOWED_ITEMS = {"README.md", "playbook.json", "platform.md", "assets"}
 
 # Required fields in playbook.json (based on PlaybookMeta interface)
-REQUIRED_FIELDS = ["id", "title", "description", "time", "platforms", "developed", "published"]
+REQUIRED_FIELDS = ["id", "title", "description", "time", "shown_platforms", "developed", "published"]
 
 # Valid values for enum fields
 VALID_PLATFORMS = ["windows", "linux"]
@@ -262,26 +262,33 @@ def validate_playbook_json(
             f'Field "published" must be a boolean, got: {type(meta["published"]).__name__}',
         )
 
-    # Validate platforms array
-    if "platforms" in meta:
-        if not isinstance(meta["platforms"], list):
+    # Validate shown_platforms (device -> os[] map)
+    if "shown_platforms" in meta:
+        if not isinstance(meta["shown_platforms"], dict):
             result.add_error(
                 playbook_name,
-                f'Field "platforms" must be an array, got: {type(meta["platforms"]).__name__}',
+                f'Field "shown_platforms" must be an object (device → OS[]), got: {type(meta["shown_platforms"]).__name__}',
             )
         else:
-            if len(meta["platforms"]) == 0:
+            if len(meta["shown_platforms"]) == 0:
                 result.add_error(
                     playbook_name,
-                    'Field "platforms" cannot be empty - at least one platform is required',
+                    'Field "shown_platforms" cannot be empty - at least one device/platform combo is required',
                 )
-            for platform in meta["platforms"]:
-                if platform not in VALID_PLATFORMS:
+            for device, os_list in meta["shown_platforms"].items():
+                if not isinstance(os_list, list):
                     result.add_error(
                         playbook_name,
-                        f'Invalid platform: "{platform}"\n'
-                        f"       Valid platforms: {', '.join(VALID_PLATFORMS)}",
+                        f'shown_platforms["{device}"] must be an array, got: {type(os_list).__name__}',
                     )
+                else:
+                    for platform in os_list:
+                        if platform not in VALID_PLATFORMS:
+                            result.add_error(
+                                playbook_name,
+                                f'Invalid platform in shown_platforms["{device}"]: "{platform}"\n'
+                                f"       Valid platforms: {', '.join(VALID_PLATFORMS)}",
+                            )
 
     # Validate difficulty
     if "difficulty" in meta and meta["difficulty"] not in VALID_DIFFICULTIES:

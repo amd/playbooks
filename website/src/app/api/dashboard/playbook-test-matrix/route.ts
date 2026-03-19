@@ -42,7 +42,7 @@ interface ArtifactsResponse {
 interface PlaybookMeta {
   id: string;
   title?: string;
-  platforms?: string[];
+  shown_platforms?: Record<string, string[] | undefined>;
   tested_platforms?: Record<string, string[] | undefined>;
   developed?: boolean;
   published?: boolean;
@@ -149,12 +149,17 @@ function loadPlaybooks(): PlaybookEntry[] {
         const testedKeys = Object.keys(tested);
 
         if (testedKeys.length === 0) {
-          const platforms = meta.platforms ?? [];
-          combos = platforms.map((platform) => combinationId("halo", platform));
+          const shown = meta.shown_platforms ?? {};
+          for (const [device, platformList] of Object.entries(shown)) {
+            for (const platform of platformList ?? []) {
+              combos.push(combinationId(device, platform));
+            }
+          }
+          if (combos.length === 0) combos = [combinationId("halo", "windows"), combinationId("halo", "linux")];
         } else {
-          for (const [platform, archList] of Object.entries(tested)) {
-            for (const arch of archList ?? []) {
-              combos.push(combinationId(arch, platform));
+          for (const [device, platformList] of Object.entries(tested)) {
+            for (const platform of platformList ?? []) {
+              combos.push(combinationId(device, platform));
             }
           }
         }
