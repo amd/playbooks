@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import type { PlaybookMeta, Platform, Category, PlaybookCoverageSummary } from "@/types/playbook";
+import type { PlaybookMeta, Platform, Device, Category, PlaybookCoverageSummary } from "@/types/playbook";
 import {
   getLatestNightlyRun,
   extractFullSummary,
@@ -82,7 +82,7 @@ interface PlaybookScanResult {
   id: string;
   title: string;
   category: Category;
-  platforms: Platform[];
+  supported_platforms: Partial<Record<Device, Platform[]>>;
   testCount: number;
   hiddenCount: number;
   visibleTestCount: number;
@@ -145,7 +145,7 @@ function scanPlaybooks(): PlaybookScanResult[] {
         id: meta.id,
         title: meta.title || meta.id,
         category: getCategory(category),
-        platforms: (meta.platforms || []) as Platform[],
+        supported_platforms: (meta.supported_platforms || {}) as Partial<Record<Device, Platform[]>>,
         testCount,
         hiddenCount,
         visibleTestCount: testCount - hiddenCount,

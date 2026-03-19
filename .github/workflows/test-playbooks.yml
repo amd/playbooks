@@ -78,21 +78,20 @@ jobs:
                   pb_file = Path(f"playbooks/{cat}/{pb_id}/playbook.json")
                   if pb_file.exists():
                       meta = json.loads(pb_file.read_text())
-                      archs = meta.get("tested_platforms", {})
-                      if not archs:
-                          for p in meta.get("platforms", []):
-                              archs[p] = ["halo"]
+                      tested = meta.get("tested_platforms", {})
+                      if not tested:
+                          continue
                       required = meta.get("required_platforms", {})
-                      for platform, arch_list in archs.items():
-                          required_archs = set(required.get(platform, []))
-                          for arch in arch_list:
+                      for device, platform_list in tested.items():
+                          required_platforms = set(required.get(device, []))
+                          for platform in platform_list:
                               os_label = "Windows" if platform == "windows" else "Linux"
                               matrix.append({
                                   "playbook": pb_id,
                                   "platform": platform,
-                                  "arch": arch,
-                                  "runner": json.dumps(["self-hosted", os_label, arch]),
-                                  "required": arch in required_archs,
+                                  "arch": device,
+                                  "runner": json.dumps(["self-hosted", os_label, device]),
+                                  "required": platform in required_platforms,
                               })
                       break
 
