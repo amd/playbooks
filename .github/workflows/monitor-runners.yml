@@ -17,7 +17,7 @@ jobs:
         id: runners
         run: |
           # Use the same runner list as the heartbeat workflow
-          runners="xsj-aimlab-halo-0,xsj-aimlab-halo-1,xsj-aimlab-halo-02,xsj-aimlab-halo-03,xsj-aimlab-stxp-01,xsj-aimlab-stxp-02,xsj-aimlab-stxp-03,xsj-aimlab-stxp-04,xsj-aimlab-krk-01,xsj-aimlab-krk-02,xsj-aimlab-krk-03,xsj-aimlab-krk-04,APEXX-T4P-03,tp401-linux-r9700-vm,tp401-linux-w7900-vm,xsj-aimlab-radeon-7900-vm01"
+          runners="xsj-aimlab-halo-0,xsj-aimlab-halo-1,xsj-aimlab-halo-02,xsj-aimlab-halo-03,xsj-aimlab-stxp-01,xsj-aimlab-stxp-02,xsj-aimlab-stxp-03,xsj-aimlab-stxp-05,xsj-aimlab-krk-01,xsj-aimlab-krk-02,xsj-aimlab-krk-03,xsj-aimlab-krk-04,APEXX-T4P-03,tp401-linux-r9700-vm,tp401-linux-w7900-vm,xsj-aimlab-radeon-7900-vm01"
           
           echo "names=$runners" >> $GITHUB_OUTPUT
           echo "Using static runner list: $runners"
