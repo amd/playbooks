@@ -1,7 +1,7 @@
 # Live Speech2Speech Translation on AMD GPU
 
 ## Overview
-The Ryzen™ AI Halo platform, integrated with the Radeon ROCm software stack and PyTorch, creates a powerful and unified ecosystem for on-device AI. The ROCm (Radeon Open Compute) platform, now fully enabled for Windows and Linux with versions like ROCm 6.4.4 and 7.0.2, provides the foundational, open-source software layer that allows developers to harness the parallel computing power of AMD GPUs and APUs for AI workloads . This platform ensures seamless hardware acceleration, with official support confirmed for a wide range of devices including the Radeon PRO W7900 and the Ryzen AI Max series, which are central to the Halo platform's capabilities .
+The Ryzen™ AI Halo platform, integrated with the Radeon ROCm software stack and PyTorch, creates a powerful and unified ecosystem for on-device AI. The ROCm (Radeon Open Compute) platform, now fully enabled for Windows and Linux, provides the foundational, open-source software layer that allows developers to harness the parallel computing power of AMD GPUs and APUs for AI workloads . This platform ensures seamless hardware acceleration, with official support confirmed for a wide range of devices including the Radeon PRO W7900 and the Ryzen AI Max series, which are central to the Halo platform's capabilities .
 
 Crucially, PyTorch, one of the world's leading machine learning frameworks, runs natively on this ROCm foundation . This integration means developers can use the full PyTorch ecosystem—for tasks like training and inference—directly on the hardware, without needing complex workarounds. The deep optimization within the ROCm stack enables advanced features like Flash Attention 2 for faster training and efficient deployment of large language models . Furthermore, this tight integration ensures that foundational models like Meta's SeamlessM4T (available in sizes up to 2.3B parameters) can leverage the combined performance of the Ryzen AI Halo hardware and the Radeon ROCm software to deliver low-latency, expressive, and private speech-to-speech translation entirely on the edge.
 
@@ -11,7 +11,7 @@ Crucially, PyTorch, one of the world's leading machine learning frameworks, runs
 - Show example with Mandarin to English speech-to-speech
 
 ## Why live speech-to-speech translation?
-In global business, language barriers slow teams down and create distance. Live speech-to-speech translation (speech-to-speech) removes that friction entirely.
+In global business, language barriers slow teams down and create distance. Live speech-to-speech translation removes that friction entirely.
 It enables real-time, natural conversation across languages—preserving tone, emotion, and intent without awkward pauses. Participants hear your message instantly in their own language, exactly as you meant it.
 For cross-border meetings and global collaboration, this means faster decisions, stronger trust, and the ability to truly think together—without language getting in the way.
 
