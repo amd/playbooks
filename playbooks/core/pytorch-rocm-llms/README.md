@@ -56,7 +56,8 @@ source llm-env/bin/activate
 <!-- @require:rocm -->
 <!-- @os:end -->
 
-<!-- @require:pytorch, driver -->
+<!-- @require:pytorch -->
+<!-- @require:driver -->
 
 ### Installing Additional Dependencies
 
