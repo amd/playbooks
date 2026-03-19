@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 ### Node.js
 
 Node.js 22.22.1 LTS is the recommended version for this platform.

@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 ### PyTorch
 1. **Install PyTorch with ROCm support:**
 <!-- @device:halo -->
