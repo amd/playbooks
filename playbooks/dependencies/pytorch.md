@@ -5,8 +5,6 @@ SPDX-License-Identifier: MIT
 -->
 
 ### PyTorch
-<!-- @test:end -->
-<!-- @os:end -->
 1. **Install PyTorch with ROCm support:**
 <!-- @device:halo -->
 <!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
