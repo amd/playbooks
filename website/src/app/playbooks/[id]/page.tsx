@@ -621,23 +621,36 @@ function filterContentByDevice(content: string, device: Device | null): string {
 }
 
 /**
- * Transforms @preinstalled tags into collapsible dropdown HTML
+ * Transforms @preinstalled tags into either collapsible dropdown HTML (when
+ * preinstalled on the active device) or plain setup-content blocks (when not).
  * 
  * Tags supported:
- * <!-- @preinstalled --> ... <!-- @preinstalled:end -->
+ * <!-- @preinstalled:JSON --> ... <!-- @preinstalled:end -->
  * 
- * The content inside becomes a collapsible section with a special header
- * indicating the software is pre-installed on AMD Halo Developer Platform
+ * The JSON contains per-platform arrays of device IDs where the software is
+ * preinstalled, e.g. {"linux":["halo"],"windows":["halo"]}.
  */
-function transformPreinstalledBlocks(content: string): string {
+function transformPreinstalledBlocks(content: string, platform: Platform, device: Device | null): string {
   if (!content) return "";
   
-  const preinstalledPattern = /<!-- @preinstalled -->([\s\S]*?)<!-- @preinstalled:end -->/g;
+  const preinstalledPattern = /<!-- @preinstalled:(.*?) -->([\s\S]*?)<!-- @preinstalled:end -->/g;
   
-  return content.replace(preinstalledPattern, (_match, innerContent) => {
-    // Escape any HTML in the content for the data attribute
+  return content.replace(preinstalledPattern, (_match, preinstalledJson: string, innerContent: string) => {
     const escapedContent = innerContent.trim();
-    return `<div class="halo-preinstalled-dropdown" data-content="${encodeURIComponent(escapedContent)}"></div>`;
+    let isPreinstalled = false;
+    
+    try {
+      const preinstalledData = JSON.parse(preinstalledJson);
+      const deviceList: string[] = preinstalledData[platform] || [];
+      isPreinstalled = device ? deviceList.includes(device) : false;
+    } catch {
+      // Malformed JSON — fall back to showing plain instructions
+    }
+    
+    if (isPreinstalled) {
+      return `<div class="halo-preinstalled-dropdown" data-content="${encodeURIComponent(escapedContent)}"></div>`;
+    }
+    return `<div class="halo-setup-content" data-content="${encodeURIComponent(escapedContent)}"></div>`;
   });
 }
 
@@ -1307,7 +1320,9 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
           filterContentByDevice(
             filterContentByOS(playbook.content, selectedPlatform),
             selectedDevice
-          )
+          ),
+          selectedPlatform,
+          selectedDevice
         )
       )
         // Transform relative image paths in HTML img tags to use the API route
