@@ -491,7 +491,16 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
 
         tests.append(test)
 
-    return tests
+    # Deduplicate tests by ID, keeping the first occurrence (README order).
+    # Duplicates arise when @require tags inline the same dependency content
+    # into multiple @os: blocks, or when device variants share an ID.
+    seen_ids: set[str] = set()
+    unique_tests: list[TestBlock] = []
+    for t in tests:
+        if t.id not in seen_ids:
+            seen_ids.add(t.id)
+            unique_tests.append(t)
+    return unique_tests
 
 
 def run_test(
