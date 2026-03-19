@@ -1064,14 +1064,10 @@ function PlatformToggle({
 function DeviceToggle({
   selected,
   onChange,
-  hasDeviceContent,
 }: {
   selected: Device | null;
   onChange: (d: Device | null) => void;
-  hasDeviceContent: boolean;
 }) {
-  if (!hasDeviceContent) return null;
-
   return (
     <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] rounded-lg border border-[#333] flex-wrap">
       {DEVICE_IDS.map((d) => (
@@ -1310,8 +1306,6 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       setSelectedDevice(asDevice);
     }
   }, [coverageViewActive, selectedTestDevice]);
-
-  const hasDeviceContent = !!playbook?.content && /<!-- @device:[\w,]+ -->/.test(playbook.content);
 
   // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
   const filteredContent = playbook?.content
@@ -1736,30 +1730,27 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                 )}
 
                 {/* Platform & Device Toggles */}
-                {(playbook.platforms.length > 0 || hasDeviceContent) && (
-                  <div className="flex flex-col gap-3">
-                    {playbook.platforms.length > 0 && (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                        <span className="text-sm text-[#6b6b6b]">Platform:</span>
-                        <PlatformToggle
-                          platforms={playbook.platforms}
-                          selected={selectedPlatform}
-                          onChange={setSelectedPlatform}
-                        />
-                      </div>
-                    )}
-                    {hasDeviceContent && !coverageViewActive && (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                        <span className="text-sm text-[#6b6b6b]">Device:</span>
-                        <DeviceToggle
-                          selected={selectedDevice}
-                          onChange={setSelectedDevice}
-                          hasDeviceContent={hasDeviceContent}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div className="flex flex-col gap-3">
+                  {playbook.platforms.length > 0 && (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <span className="text-sm text-[#6b6b6b]">Platform:</span>
+                      <PlatformToggle
+                        platforms={playbook.platforms}
+                        selected={selectedPlatform}
+                        onChange={setSelectedPlatform}
+                      />
+                    </div>
+                  )}
+                  {!coverageViewActive && (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <span className="text-sm text-[#6b6b6b]">Device:</span>
+                      <DeviceToggle
+                        selected={selectedDevice}
+                        onChange={setSelectedDevice}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 {/* Tags */}
                 {playbook.tags && playbook.tags.length > 0 && (
