@@ -557,7 +557,8 @@ function TableOfContents({
 }
 
 /**
- * Parses markdown content and filters OS-specific sections
+ * Parses markdown content and filters OS-specific sections.
+ * Handles nested @os: blocks correctly by processing innermost blocks first.
  * 
  * Tags supported:
  * <!-- @os:windows --> ... <!-- @os:end -->
@@ -567,36 +568,29 @@ function TableOfContents({
 function filterContentByOS(content: string, platform: Platform): string {
   if (!content) return "";
   
-  // Pattern to match OS-specific blocks
-  const osBlockPattern = /<!-- @os:(windows|linux|all) -->([\s\S]*?)<!-- @os:end -->/g;
+  // Matches only innermost @os: blocks (content contains no nested @os: open/close tags).
+  // Negative lookaheads prevent matching across nesting boundaries.
+  const innerOsPattern = /<!-- @os:(windows|linux|all) -->((?:(?!<!-- @os:(?:windows|linux|all) -->|<!-- @os:end -->)[\s\S])*?)<!-- @os:end -->/g;
   
   let result = content;
-  const matches = [...content.matchAll(osBlockPattern)];
+  let prev: string;
   
-  // Process matches in reverse order to preserve indices
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const match = matches[i];
-    const blockOS = match[1];
-    const blockContent = match[2];
-    const fullMatch = match[0];
-    const startIndex = match.index!;
-    
-    let replacement = "";
-    
-    // Show only content for the selected platform
-    if (blockOS === "all" || blockOS === platform) {
-      replacement = blockContent;
-    }
-    // Otherwise, replacement is empty (content hidden)
-    
-    result = result.slice(0, startIndex) + replacement + result.slice(startIndex + fullMatch.length);
-  }
+  do {
+    prev = result;
+    result = result.replace(innerOsPattern, (_fullMatch, blockOS: string, blockContent: string) => {
+      if (blockOS === "all" || blockOS === platform) {
+        return blockContent;
+      }
+      return "";
+    });
+  } while (result !== prev);
   
   return result;
 }
 
 /**
  * Parses markdown content and filters device-specific sections.
+ * Handles nested @device: blocks correctly by processing innermost blocks first.
  * Supports comma-separated device IDs.
  *
  * Tags supported:
@@ -608,26 +602,20 @@ function filterContentByDevice(content: string, device: Device | null): string {
   if (!content) return "";
   if (!device) return content;
 
-  const deviceBlockPattern = /<!-- @device:([\w,]+) -->([\s\S]*?)<!-- @device:end -->/g;
+  const innerDevicePattern = /<!-- @device:([\w,]+) -->((?:(?!<!-- @device:[\w,]+ -->|<!-- @device:end -->)[\s\S])*?)<!-- @device:end -->/g;
 
   let result = content;
-  const matches = [...content.matchAll(deviceBlockPattern)];
+  let prev: string;
 
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const match = matches[i];
-    const blockDevices = match[1];
-    const blockContent = match[2];
-    const fullMatch = match[0];
-    const startIndex = match.index!;
-
-    let replacement = "";
-
-    if (blockDevices === "all" || blockDevices.split(",").includes(device)) {
-      replacement = blockContent;
-    }
-
-    result = result.slice(0, startIndex) + replacement + result.slice(startIndex + fullMatch.length);
-  }
+  do {
+    prev = result;
+    result = result.replace(innerDevicePattern, (_fullMatch, blockDevices: string, blockContent: string) => {
+      if (blockDevices === "all" || blockDevices.split(",").includes(device)) {
+        return blockContent;
+      }
+      return "";
+    });
+  } while (result !== prev);
 
   return result;
 }
