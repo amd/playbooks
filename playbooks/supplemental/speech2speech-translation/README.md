@@ -18,56 +18,55 @@ For cross-border meetings and global collaboration, this means faster decisions,
 
 ## Prerequisites
 
+## Setting Up Your Environment
 
+### Create a Virtual Environment
 
-## Set up the environment
-
-Your STX Halo has docker pre-installed. 
-
-Pull latest PyTorch docker (skip this step is PyTorch is pre-installed): 
-
-```bash
-sudo docker run -it -d \
-  --device /dev/dri \
-  --device /dev/kfd \
-  --network host \
-  --ipc host \
-  --group-add video \
-  --cap-add SYS_PTRACE \
-  --security-opt seccomp=unconfined \
-  --privileged \
-  --shm-size 32G \
-  -v /path/to/your/models:/models \
-  -v /path/to/your/share:/share \
-  -v /path/to/your/workspace/pr:/workspace \
-  --name s2st_playbook \
-  rocm/pytorch:latest /bin/bash
+<!-- @os:windows -->
+On Windows, open Command Prompt and run the following prompt to create a venv with ROCm+Pytorch already installed: 
+<!-- @test:id=create-venv timeout=60 -->
+```cmd
+python -m venv s2st-env --system-site-packages
+s2st-env\Scripts\activate.bat
 ```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="s2st-env\Scripts\activate.bat" -->
+<!-- @os:end -->
 
+<!-- @os:linux -->
+On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv s2st-env --system-site-packages
+source s2st-env/bin/activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source s2st-env/bin/activate" -->
+<!-- @os:end -->
+
+### Installing Basic Dependencies
+<!-- @require:pytorch -->
+
+### Additional Dependencies
 Install m4t dependencies using pip:
-
+<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-- pip install -r requirements.txt
-- pip install git+https://github.com/huggingface/transformers.git sentencepiece
-- pip install protobuf
-- pip install soundfile
+pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
 ```
+<!-- @test:end -->
 
+## Set up the s2st demo
 The script will use your HF_TOKEN to download the models, but if you want to download only exactly the file needed you can also download from [https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) all files.
 
 
-## Set up the s2st demo
+
 The seamlessm4t model arch:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="Templates button in the left toolbar" width="600"/>
 </p>
 
-### Runing the inference code:
-
-The demo will read the offline audio clip and do the translation: 
-```bash
-python infer_gpu.py
-```
 
 #### Import necessary dependencies: m4t, torchautio et al 
 ```python 

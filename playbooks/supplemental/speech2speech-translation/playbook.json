@@ -6,11 +6,11 @@
   "platforms": ["linux", "windows"],
   "tested_platforms": {
     "linux": ["halo"],
-    "windows": []
+    "windows": ["halo"]
   },
   "required_platforms": {
     "linux": ["halo"],
-    "windows": []
+    "windows": ["halo"]
   },
   "difficulty": "advanced",
   "isNew": false,
