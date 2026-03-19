@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 ### n8n
 
 <!-- @os:windows -->

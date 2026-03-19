@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Playbook Creation Guide
 > [!IMPORTANT]
 > We are **not currently accepting new playbook proposals** from the community at this stage. However, we welcome collaborations, idea exchanges, and contributions that help advance this space. If you encounter issues or have feedback that can help us identify and diagnose problems, please [open an issue](https://github.com/amd/halo_playbooks/issues).
@@ -175,7 +181,7 @@ All playbook folders have already been created. To edit a playbook:
   "title": "My Playbook Title",
   "description": "Brief description for the card (100-150 chars)",
   "time": 45,
-  "platforms": ["windows", "linux"],
+  "supported_platforms": { "halo": ["windows", "linux"] },
   "difficulty": "intermediate",
   "published": true,
   "tags": ["tag1", "tag2"]
@@ -188,7 +194,9 @@ All playbook folders have already been created. To edit a playbook:
 | `title` | Yes | Display title |
 | `description` | Yes | Card description (100–150 characters) |
 | `time` | Yes | Completion time in minutes |
-| `platforms` | Yes | `["windows"]`, `["linux"]`, or `["windows", "linux"]` |
+| `supported_platforms` | Yes | Device → OS map controlling which platforms/devices appear in the UI, e.g. `{ "halo": ["windows", "linux"] }` |
+| `tested_platforms` | No | Device → OS map of CI-tested combinations, e.g. `{ "halo": ["windows", "linux"], "krk": ["linux"] }` |
+| `required_platforms` | No | Subset of `tested_platforms` where CI failure blocks merges |
 | `published` | Yes | Set `true` to show on website |
 | `difficulty` | No | `"beginner"`, `"intermediate"`, or `"advanced"` |
 | `isNew` | No | Shows "New" badge |

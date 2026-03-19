@@ -1,13 +1,21 @@
 {
   "id": "jax-getting-started",
   "title": "Getting Started with JAX on ROCm",
-  "description": "Optimize JAX to run efficiently on STX Halo™ with ROCm acceleration",
+  "description": "Optimize JAX to run efficiently on STX Halo\u2122 with ROCm acceleration",
   "time": 60,
-  "platforms": ["linux"],
+  "supported_platforms": {
+    "halo": [
+      "linux"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
   "developed": false,
   "published": false,
-  "tags": ["jax", "rocm", "optimization"]
+  "tags": [
+    "jax",
+    "rocm",
+    "optimization"
+  ]
 }

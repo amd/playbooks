@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 """
 Playbook Test Runner
 ====================
@@ -207,7 +211,9 @@ def extract_setup_definitions(content: str) -> dict[str, dict[str, str]]:
     """Extract reusable @setup definitions from README content.
 
     Supports @setup definitions wrapped in @os: blocks, where the platform is
-    inferred from the surrounding tag:
+    inferred from the surrounding tag.  Handles arbitrarily nested ``@os:``
+    blocks (e.g. when ``@require`` injects dependency content that itself
+    contains ``@os:`` sections) by using a stack-based parser.
 
         <!-- @os:windows -->
         <!-- @setup:id=activate-venv command="llm-env\\Scripts\\activate.bat" -->
@@ -223,62 +229,22 @@ def extract_setup_definitions(content: str) -> dict[str, dict[str, str]]:
         {"activate-venv": {"linux": "source llm-env/bin/activate", "windows": "llm-env\\Scripts\\activate.bat"}}
     """
     setup_defs: dict[str, dict[str, str]] = {}
-
-    # First, extract @setup definitions inside @os: blocks
-    os_block_pattern = r"<!-- @os:(windows|linux) -->([\s\S]*?)<!-- @os:end -->"
     setup_pattern = r"<!-- @setup:([^>]+) -->"
 
-    # Track which character ranges are inside @os: blocks
-    os_ranges: list[tuple[int, int]] = []
+    os_blocks = _find_nested_blocks(
+        content,
+        r"<!-- @os:(windows|linux) -->",
+        "<!-- @os:end -->",
+    )
 
-    for os_match in re.finditer(os_block_pattern, content):
-        platform = os_match.group(1)
-        block_content = os_match.group(2)
-        block_start = os_match.start()
-        os_ranges.append((os_match.start(), os_match.end()))
-
-        for setup_match in re.finditer(setup_pattern, block_content):
-            attr_string = setup_match.group(1)
-            attrs = parse_test_attributes(attr_string)
-
-            setup_id = attrs.get("id")
-            if not setup_id:
-                abs_pos = block_start + setup_match.start()
-                line_number = content[:abs_pos].count("\n") + 1
-                print(
-                    f"Warning: @setup definition at line {line_number} missing 'id', skipping"
-                )
-                continue
-
-            command = attrs.get("command")
-            if not command:
-                abs_pos = block_start + setup_match.start()
-                line_number = content[:abs_pos].count("\n") + 1
-                print(
-                    f"Warning: @setup '{setup_id}' at line {line_number} has no command"
-                )
-                continue
-
-            if setup_id not in setup_defs:
-                setup_defs[setup_id] = {}
-            setup_defs[setup_id][platform] = command
-
-    # Then, find @setup definitions outside any @os: block (applies to all platforms)
     for setup_match in re.finditer(setup_pattern, content):
-        # Skip if this match falls within an @os: block
         match_pos = setup_match.start()
-        inside_os_block = any(
-            start <= match_pos < end for start, end in os_ranges
-        )
-        if inside_os_block:
-            continue
-
         attr_string = setup_match.group(1)
         attrs = parse_test_attributes(attr_string)
 
         setup_id = attrs.get("id")
         if not setup_id:
-            line_number = content[: match_pos].count("\n") + 1
+            line_number = content[:match_pos].count("\n") + 1
             print(
                 f"Warning: @setup definition at line {line_number} missing 'id', skipping"
             )
@@ -286,16 +252,27 @@ def extract_setup_definitions(content: str) -> dict[str, dict[str, str]]:
 
         command = attrs.get("command")
         if not command:
-            line_number = content[: match_pos].count("\n") + 1
+            line_number = content[:match_pos].count("\n") + 1
             print(
                 f"Warning: @setup '{setup_id}' at line {line_number} has no command"
             )
             continue
 
+        # Determine platform from the innermost enclosing @os: block
+        platform = None
+        for value, start, end in os_blocks:
+            if start <= match_pos < end:
+                platform = value
+                break  # blocks are sorted innermost-first
+
         if setup_id not in setup_defs:
             setup_defs[setup_id] = {}
-        setup_defs[setup_id]["linux"] = command
-        setup_defs[setup_id]["windows"] = command
+
+        if platform:
+            setup_defs[setup_id][platform] = command
+        else:
+            setup_defs[setup_id]["linux"] = command
+            setup_defs[setup_id]["windows"] = command
 
     return setup_defs
 
@@ -369,31 +346,72 @@ def resolve_require_tags(content: str) -> str:
     return re.sub(require_pattern, _replace_require, content)
 
 
+def _find_nested_blocks(
+    content: str,
+    open_pattern: str,
+    close_literal: str,
+) -> list[tuple[str, int, int]]:
+    """Find properly nested tag blocks using a stack-based parser.
+
+    Returns a list of ``(value, block_start, block_end)`` tuples sorted by
+    span size ascending (innermost first).  ``value`` is the capture group
+    from the opening tag (e.g. ``"linux"`` for ``<!-- @os:linux -->``).
+    """
+    open_re = re.compile(open_pattern)
+    close_re = re.compile(re.escape(close_literal))
+
+    events: list[tuple[int, str, str]] = []  # (pos, 'open'|'close', value)
+    for m in open_re.finditer(content):
+        events.append((m.start(), "open", m.group(1)))
+    for m in close_re.finditer(content):
+        events.append((m.start(), "close", ""))
+    events.sort(key=lambda e: e[0])
+
+    stack: list[tuple[str, int]] = []  # (value, start_pos)
+    blocks: list[tuple[str, int, int]] = []
+    for pos, kind, value in events:
+        if kind == "open":
+            stack.append((value, pos))
+        elif kind == "close" and stack:
+            open_value, open_pos = stack.pop()
+            close_end = pos + len(close_literal)
+            blocks.append((open_value, open_pos, close_end))
+
+    blocks.sort(key=lambda b: b[2] - b[1])
+    return blocks
+
+
 def _infer_platform(content: str, position: int) -> str:
     """Infer the platform for a test based on surrounding @os: tags.
 
-    If the test is inside an ``<!-- @os:windows -->`` block, returns "windows".
-    If inside an ``<!-- @os:linux -->`` block, returns "linux".
-    Otherwise returns "all".
+    Handles arbitrarily nested ``@os:`` blocks by finding the innermost
+    enclosing block that contains *position*.
     """
-    os_block_pattern = r"<!-- @os:(windows|linux) -->([\s\S]*?)<!-- @os:end -->"
-    for os_match in re.finditer(os_block_pattern, content):
-        if os_match.start() <= position < os_match.end():
-            return os_match.group(1)
+    blocks = _find_nested_blocks(
+        content,
+        r"<!-- @os:(windows|linux) -->",
+        "<!-- @os:end -->",
+    )
+    for value, start, end in blocks:
+        if start <= position < end:
+            return value
     return "all"
 
 
 def _infer_device(content: str, position: int) -> str:
     """Infer the target device(s) for a test based on surrounding @device: tags.
 
-    If the test is inside a ``<!-- @device:halo,stx -->`` block, returns "halo,stx".
-    If inside ``<!-- @device:halo -->`` returns "halo".
-    Otherwise returns "all".
+    Handles arbitrarily nested ``@device:`` blocks by finding the innermost
+    enclosing block that contains *position*.
     """
-    device_block_pattern = r"<!-- @device:([\w,]+) -->([\s\S]*?)<!-- @device:end -->"
-    for m in re.finditer(device_block_pattern, content):
-        if m.start() <= position < m.end():
-            return m.group(1)
+    blocks = _find_nested_blocks(
+        content,
+        r"<!-- @device:([\w,]+) -->",
+        "<!-- @device:end -->",
+    )
+    for value, start, end in blocks:
+        if start <= position < end:
+            return value
     return "all"
 
 
@@ -473,7 +491,16 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
 
         tests.append(test)
 
-    return tests
+    # Deduplicate tests by ID, keeping the first occurrence (README order).
+    # Duplicates arise when @require tags inline the same dependency content
+    # into multiple @os: blocks, or when device variants share an ID.
+    seen_ids: set[str] = set()
+    unique_tests: list[TestBlock] = []
+    for t in tests:
+        if t.id not in seen_ids:
+            seen_ids.add(t.id)
+            unique_tests.append(t)
+    return unique_tests
 
 
 def run_test(

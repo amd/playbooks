@@ -1,4 +1,7 @@
 #!/bin/bash
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
 
 # Script to run the Gradio client for vLLM
 
