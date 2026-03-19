@@ -5,11 +5,16 @@
   "time": 60,
   "supported_platforms": {
     "halo": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
     ],
     "krk": [
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "tested_platforms": {
