@@ -74,8 +74,10 @@ export async function GET(request: Request) {
 
   // Filter by platform
   if (platform) {
-    playbooks = playbooks.filter((p) => 
-      p.platforms.includes(platform as "windows" | "linux")
+    playbooks = playbooks.filter((p) =>
+      Object.values(p.supported_platforms ?? {}).some(
+        (platforms) => platforms?.includes(platform as "windows" | "linux")
+      )
     );
   }
 

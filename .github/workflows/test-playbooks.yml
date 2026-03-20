@@ -1,10 +1,16 @@
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 name: Test Playbooks
 
 on:
+  schedule:
+    - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
       playbook_id:
-        description: 'Specific playbook ID to test (leave empty to test all changed playbooks)'
+        description: 'Specific playbook ID to test (leave empty to test all playbooks)'
         required: false
         type: string
   pull_request:
@@ -12,8 +18,181 @@ on:
       - 'playbooks/**'
 
 jobs:
-  test-placeholder-job:
+  detect-changes:
+    name: Detect Changed Playbooks
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+      has_entries: ${{ steps.build-matrix.outputs.has_entries }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed playbooks
+        id: detect
+        run: |
+          if [ -n "${{ github.event.inputs.playbook_id }}" ]; then
+            echo "playbooks=[\"${{ github.event.inputs.playbook_id }}\"]" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} -- 'playbooks/core/*' 'playbooks/supplemental/*' 2>/dev/null || echo "")
+            
+            PLAYBOOK_IDS=$(echo "$CHANGED_FILES" | grep -E '^playbooks/(core|supplemental)/[^/]+/' | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            
+            if [ "$PLAYBOOK_IDS" = "[]" ] || [ -z "$PLAYBOOK_IDS" ]; then
+              echo "playbooks=[]" >> $GITHUB_OUTPUT
+            else
+              echo "playbooks=$PLAYBOOK_IDS" >> $GITHUB_OUTPUT
+            fi
+          else
+            ALL_PLAYBOOKS=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            
+            if [ "$ALL_PLAYBOOKS" = "[]" ] || [ -z "$ALL_PLAYBOOKS" ]; then
+              echo "playbooks=[]" >> $GITHUB_OUTPUT
+            else
+              echo "playbooks=$ALL_PLAYBOOKS" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Build test matrix from playbook metadata
+        id: build-matrix
+        env:
+          PLAYBOOKS: ${{ steps.detect.outputs.playbooks }}
+        run: |
+          if [ "$PLAYBOOKS" = "[]" ] || [ -z "$PLAYBOOKS" ]; then
+            echo "matrix=[]" >> $GITHUB_OUTPUT
+            echo "has_entries=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          MATRIX=$(python3 << 'PYEOF'
+          import json, os
+          from pathlib import Path
+
+          playbooks = json.loads(os.environ["PLAYBOOKS"])
+          matrix = []
+
+          for pb_id in playbooks:
+              for cat in ["core", "supplemental"]:
+                  pb_file = Path(f"playbooks/{cat}/{pb_id}/playbook.json")
+                  if pb_file.exists():
+                      meta = json.loads(pb_file.read_text())
+                      tested = meta.get("tested_platforms", {})
+                      if not tested:
+                          continue
+                      required = meta.get("required_platforms", {})
+                      for device, platform_list in tested.items():
+                          required_platforms = set(required.get(device, []))
+                          for platform in platform_list:
+                              os_label = "Windows" if platform == "windows" else "Linux"
+                              matrix.append({
+                                  "playbook": pb_id,
+                                  "platform": platform,
+                                  "arch": device,
+                                  "runner": json.dumps(["self-hosted", os_label, device]),
+                                  "required": platform in required_platforms,
+                              })
+                      break
+
+          print(json.dumps(matrix))
+          PYEOF
+          )
+
+          if [ "$MATRIX" = "[]" ] || [ -z "$MATRIX" ]; then
+            echo "matrix=[]" >> $GITHUB_OUTPUT
+            echo "has_entries=false" >> $GITHUB_OUTPUT
+          else
+            echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+            echo "has_entries=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Display test matrix
+        run: |
+          echo "Test matrix: ${{ steps.build-matrix.outputs.matrix }}"
+
+  test-playbooks:
+    name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_entries == 'true'
+    runs-on: ${{ fromJson(matrix.runner) }}
+    continue-on-error: ${{ !matrix.required }}
+    env:
+      PYTHONUTF8: 1
+      PYTHONIOENCODING: utf-8
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Extract and run tests (Windows)
+        if: matrix.platform == 'windows'
+        id: run_tests_windows
+        shell: powershell
+        run: |
+          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform windows --device "${{ matrix.arch }}"
+
+      - name: Extract and run tests (Linux)
+        if: matrix.platform == 'linux'
+        id: run_tests_linux
+        shell: bash
+        run: |
+          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}"
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          path: test-results/
+          if-no-files-found: ignore
+
+      - name: Test Summary (Windows)
+        if: always() && matrix.platform == 'windows'
+        shell: powershell
+        run: |
+          $summary = @"
+          ### Test Results for ``${{ matrix.playbook }}`` (${{ matrix.platform }}/${{ matrix.arch }})
+          
+          See the test artifacts for detailed logs.
+          "@
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+
+      - name: Test Summary (Linux)
+        if: always() && matrix.platform == 'linux'
+        shell: bash
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ### Test Results for `${{ matrix.playbook }}` (${{ matrix.platform }}/${{ matrix.arch }})
+
+          See the test artifacts for detailed logs.
+          EOF
+
+  test-gate:
+    name: Test Gate (Required Tests)
+    needs: [detect-changes, test-playbooks]
+    if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Placeholder
-        run: echo "Placeholder test job"
+      - name: Check required tests
+        run: |
+          echo "test-playbooks result: ${{ needs.test-playbooks.result }}"
+          if [ "${{ needs.test-playbooks.result }}" = "failure" ]; then
+            echo "::error::One or more required tests failed"
+            exit 1
+          fi
+          echo "All required tests passed (or no tests were needed)"

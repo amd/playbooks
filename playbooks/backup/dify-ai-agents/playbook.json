@@ -1,12 +1,24 @@
 {
   "id": "dify-ai-agents",
   "title": "Build Node Based AI Agents and RAG Workflows with Dify",
-  "description": "Create AI agents and RAG workflows using Dify's visual node editor with llama.cpp on your STX Halo™",
+  "description": "Create AI agents and RAG workflows using Dify's visual node editor with llama.cpp on your STX Halo\u2122",
   "time": 60,
-  "platforms": ["linux", "windows"],
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
-  "tags": ["dify", "agents", "rag", "llamacpp", "workflows"]
+  "tags": [
+    "dify",
+    "agents",
+    "rag",
+    "llamacpp",
+    "workflows"
+  ]
 }

@@ -7,11 +7,11 @@ export default function SupportBanner() {
         <div className="bg-gradient-to-r from-[#2a1f1a] via-[#1e1e1e] to-[#1e1e1e] border border-[#333333] rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold text-white mb-2">
-              STX Halo™ Support
+              AMD Developer Support
             </h2>
             <p className="text-[#a0a0a0]">
-              Access documentation, software, and expert assistance for your STX
-              Halo™.
+              Access documentation, software, and expert assistance for your AMD
+              device.
             </p>
           </div>
           <Link

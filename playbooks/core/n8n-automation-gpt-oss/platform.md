@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Platform Configuration
 
 This document describes the expected platform configurations for running this playbook.
@@ -8,7 +14,7 @@ This document describes the expected platform configurations for running this pl
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| **Node.js** | 20.x+ | Pre-installed, available in PATH |
+| **Node.js** | 22.16+ | Pre-installed, available in PATH |
 | **Lemonade Server** | latest | Running on `http://localhost:8000/api/v1` |
 
 ### Lemonade LLM
@@ -27,7 +33,7 @@ The Lemonade server should be running with gpt-oss-120b loaded:
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| **Node.js** | 20.x+ | Pre-installed, available in PATH |
+| **Node.js** | 22.16+ | Pre-installed, available in PATH |
 | **Lemonade Server** | latest | Running on `http://localhost:8000/api/v1` |
 
 ### Lemonade LLM

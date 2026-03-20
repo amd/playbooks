@@ -2,13 +2,6 @@ import PlaybookCard from "./PlaybookCard";
 
 const allPlaybooks = [
   {
-    title: "FLUX.1 Dreambooth LoRA Fine-tuning",
-    description:
-      "Fine-tune FLUX.1-dev 12B model using Dreambooth LoRA for custom image generation",
-    time: "1 HR",
-    href: "/halo/flux-finetuning",
-  },
-  {
     title: "Optimized JAX",
     description: "Optimize JAX to run on Halo™",
     time: "2 HRS",
@@ -133,8 +126,8 @@ export default function AllPlaybooksSection() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-2">All Playbooks</h2>
           <p className="text-[#a0a0a0]">
-            Detailed instructions to set up and run popular AI workflows on STX
-            Halo™
+            Detailed instructions to set up and run popular AI workflows on AMD
+            hardware
           </p>
         </div>
 

@@ -1,12 +1,32 @@
 {
   "id": "gaia-agents",
-  "title": "Getting Started Creating Agents with GAIA",
-  "description": "Build and deploy AI agents using the GAIA framework with llama.cpp on your STX Halo™",
-  "time": 60,
-  "platforms": ["linux", "windows"],
+  "title": "Building Your First Agent with GAIA",
+  "description": "Build a 100% local AI agent \u2014 no cloud APIs needed. Use the GAIA SDK to create a hardware advisor on your STX Halo",
+  "time": 20,
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
+  "developed": true,
   "published": true,
-  "tags": ["gaia", "agents", "llamacpp", "llm"]
+  "tags": [
+    "gaia",
+    "agent-sdk",
+    "agent",
+    "hardware",
+    "lemonade"
+  ]
 }

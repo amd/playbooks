@@ -1,20 +1,31 @@
 {
   "id": "speech2speech-translation",
-  "title": "Live Speech-to-Speech Translation",
-  "description": "Build a real-time speech-to-speech translation system on your STX Halo™",
-  "time": 30,
-  "platforms": ["linux", "windows"],
-  "tested_platforms": {
-    "linux": ["halo"],
-    "windows": ["halo"]
+  "title": "Speech-to-Speech Translation",
+  "description": "Build a real-time speech-to-speech translation system on your STX Halo\u2122",
+  "time": 60,
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
   },
-  "required_platforms": {
-    "linux": ["halo"],
-    "windows": ["halo"]
-  },
-  "difficulty": "advanced",
+  "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
-  "tags": ["speech", "translation", "audio", "real-time"]
+  "tags": [
+    "speech",
+    "translation",
+    "audio",
+    "real-time"
+  ]
 }

@@ -1,6 +1,12 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 ### Node.js
 
-Node.js 20.19.2 LTS (Iron) is the recommended version for this platform.
+Node.js 22.22.1 LTS is the recommended version for this platform.
 
 <!-- @os:windows -->
 
@@ -17,10 +23,17 @@ npm --version
 <!-- @os:linux -->
 
 ```bash
-curl -fsSL https://nodejs.org/dist/v20.19.2/node-v20.19.2-linux-x64.tar.xz | tar -xJ
-sudo mv node-v20.19.2-linux-x64 /usr/local/node
-sudo ln -s /usr/local/node/bin/node /usr/local/bin/node
-sudo ln -s /usr/local/node/bin/npm /usr/local/bin/npm
+# Download and install Homebrew
+curl -o- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+
+# Download and install Node.js:
+brew install node@22
+
+# Verify the Node.js version:
+node -v # Should print "v22.22.1".
+
+# Verify npm version:
+npm -v # Should print "10.9.4".
 ```
 
 <!-- @os:end -->
