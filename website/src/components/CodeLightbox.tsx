@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface CodeLightboxProps {
   filename: string;
@@ -54,7 +56,18 @@ export default function CodeLightbox({ filename, code, isOpen, onClose }: CodeLi
     }
   }, [code]);
 
-  // Get language from file extension for syntax highlighting class
+  const handleDownload = useCallback(() => {
+    const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [code, filename]);
+
   const getLanguageFromFilename = (name: string): string => {
     const ext = name.split(".").pop()?.toLowerCase() || "";
     const languageMap: Record<string, string> = {
@@ -132,41 +145,75 @@ export default function CodeLightbox({ filename, code, isOpen, onClose }: CodeLi
             </span>
           </div>
           
-          {/* Copy button */}
-          <button
-            onClick={handleCopy}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${
-              copied 
-                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
-                : "bg-[#2a2a2a] text-[#a0a0a0] hover:text-white hover:bg-[#333] border border-[#444]"
-            }`}
-            aria-label={copied ? "Copied!" : "Copy code"}
-          >
-            {copied ? (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-sm font-medium">Copied!</span>
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                <span className="text-sm font-medium">Copy</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Copy button */}
+            <button
+              onClick={handleCopy}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${
+                copied 
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+                  : "bg-[#2a2a2a] text-[#a0a0a0] hover:text-white hover:bg-[#333] border border-[#444]"
+              }`}
+              aria-label={copied ? "Copied!" : "Copy code"}
+            >
+              {copied ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-sm font-medium">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-sm font-medium">Copy</span>
+                </>
+              )}
+            </button>
+            {/* Download button */}
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all bg-[#2a2a2a] text-[#a0a0a0] hover:text-white hover:bg-[#333] border border-[#444]"
+              aria-label="Download file"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+              </svg>
+              <span className="text-sm font-medium">Download</span>
+            </button>
+          </div>
         </div>
         
         {/* Code content */}
         <div className="flex-1 overflow-auto bg-[#0d0d0d] rounded-b-lg">
-          <pre className="p-4 text-sm leading-relaxed">
-            <code className={`language-${language} text-[#e0e0e0]`}>
-              {code}
-            </code>
-          </pre>
+          <SyntaxHighlighter
+            language={language}
+            style={oneDark}
+            showLineNumbers
+            customStyle={{
+              margin: 0,
+              padding: "1rem",
+              borderRadius: 0,
+              fontSize: "0.875rem",
+              lineHeight: "1.625",
+              background: "#0d0d0d",
+            }}
+            codeTagProps={{
+              style: {
+                fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+              }
+            }}
+            lineNumberStyle={{
+              minWidth: "3em",
+              paddingRight: "1em",
+              color: "#4a4a4a",
+              userSelect: "none",
+            }}
+          >
+            {code}
+          </SyntaxHighlighter>
         </div>
       </div>
     </div>

@@ -1,12 +1,24 @@
 {
   "id": "clustering-rccl",
   "title": "Clustering with Two Halos (RCCL)",
-  "description": "Set up a multi-node cluster using two STX Halo™ devices with RCCL for distributed workloads",
+  "description": "Set up a multi-node cluster using two STX Halo\u2122 devices with RCCL for distributed workloads",
   "time": 90,
-  "platforms": ["linux", "windows"],
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "advanced",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
-  "tags": ["clustering", "distributed", "multi-gpu", "rccl", "vllm"]
+  "tags": [
+    "clustering",
+    "distributed",
+    "multi-gpu",
+    "rccl",
+    "vllm"
+  ]
 }

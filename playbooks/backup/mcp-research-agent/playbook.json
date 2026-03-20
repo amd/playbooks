@@ -1,12 +1,23 @@
 {
   "id": "mcp-research-agent",
   "title": "Building a Research Agent Using MCP",
-  "description": "Build a research agent using the Model Context Protocol (MCP) on your STX Halo™",
+  "description": "Build a research agent using the Model Context Protocol (MCP) on your STX Halo\u2122",
   "time": 60,
-  "platforms": ["linux", "windows"],
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "intermediate",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
+  "developed": false,
   "published": true,
-  "tags": ["mcp", "agents", "research", "llm"]
+  "tags": [
+    "mcp",
+    "agents",
+    "research",
+    "llm"
+  ]
 }

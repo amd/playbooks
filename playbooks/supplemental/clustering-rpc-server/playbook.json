@@ -1,12 +1,25 @@
 {
   "id": "clustering-rpc-server",
-  "title": "Clustering with Two Halos (RPC Server)",
-  "description": "Set up distributed inference using RPC server across two STX Halo™ devices with vLLM",
+  "title": "Clustering Two STX Halos with llama.cpp RPC",
+  "description": "Set up distributed inference using RPC server across two STX Halo\u2122 devices with llama.cpp to run 350B+ models",
   "time": 90,
-  "platforms": ["linux"],
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "advanced",
-  "isNew": false,
+  "isNew": true,
   "isFeatured": false,
+  "developed": true,
   "published": true,
-  "tags": ["clustering", "rpc", "vllm", "distributed", "docker"]
+  "tags": [
+    "clustering",
+    "rpc",
+    "distributed",
+    "llm",
+    "inference",
+    "rocm"
+  ]
 }

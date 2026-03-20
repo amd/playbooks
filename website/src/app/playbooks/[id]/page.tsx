@@ -11,11 +11,21 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
-import type { Playbook, Platform } from "@/types/playbook";
-import { formatTime } from "@/types/playbook";
+import type { Playbook, Platform, Device, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
+import { formatTime, DEVICE_IDS, deviceNames, extractPlatforms, extractDevices } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
 const dropdownStateStore: Record<string, boolean> = {};
+
+/**
+ * Parses a composite device key like "halo-windows" into arch and platform.
+ * Handles arch names that may contain hyphens by matching known platform suffixes.
+ */
+function parseDeviceKey(key: string): { arch: string; platform: string | null } {
+  if (key.endsWith('-windows')) return { arch: key.slice(0, -8), platform: 'windows' };
+  if (key.endsWith('-linux')) return { arch: key.slice(0, -6), platform: 'linux' };
+  return { arch: key, platform: null };
+}
 
 // Languages that support syntax highlighting
 const HIGHLIGHTED_LANGUAGES = new Set(["python", "py", "bash", "sh", "shell", "c", "cpp", "c++"]);
@@ -31,17 +41,40 @@ function normalizeLanguage(lang: string): string {
   return langMap[lang] || lang;
 }
 
+const TERMINAL_LANGUAGES = new Set([
+  "bash", "sh", "shell", "zsh", "powershell", "ps1", "cmd", "bat",
+  "console", "terminal", "prompt",
+]);
+
+const LANGUAGE_EXTENSIONS: Record<string, string> = {
+  python: "py", py: "py",
+  c: "c", cpp: "cpp", "c++": "cpp", javascript: "js", js: "js",
+  typescript: "ts", ts: "ts", json: "json", yaml: "yml", yml: "yml",
+  html: "html", css: "css", sql: "sql", rust: "rs", go: "go", java: "java",
+};
+
+function downloadCode(code: string, language?: string) {
+  const ext = (language && LANGUAGE_EXTENSIONS[language.toLowerCase()]) || "txt";
+  const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `snippet.${ext}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 /**
- * Code block component with copy-to-clipboard functionality and syntax highlighting
+ * Code block component with copy-to-clipboard and download functionality, plus syntax highlighting
  */
 function CodeBlock({ children, language }: { children?: React.ReactNode; language?: string }) {
   const [copied, setCopied] = useState(false);
   const preRef = useRef<HTMLPreElement>(null);
 
-  // Extract the code string from children
   const codeString = useMemo(() => {
     if (typeof children === "string") return children;
-    // If children is a React element (code tag), extract its children
     if (children && typeof children === "object" && "props" in children) {
       const childElement = children as React.ReactElement<{ children?: React.ReactNode }>;
       const codeChildren = childElement.props?.children;
@@ -61,29 +94,50 @@ function CodeBlock({ children, language }: { children?: React.ReactNode; languag
     }
   }, [codeString]);
 
-  // Check if we should use syntax highlighting
+  const handleDownload = useCallback(() => {
+    const code = codeString || preRef.current?.textContent || "";
+    downloadCode(code, language);
+  }, [codeString, language]);
+
   const normalizedLang = language ? normalizeLanguage(language.toLowerCase()) : "";
   const shouldHighlight = normalizedLang && HIGHLIGHTED_LANGUAGES.has(language?.toLowerCase() || "");
+  const isTerminal = !language || TERMINAL_LANGUAGES.has(language.toLowerCase());
 
   return (
     <div className="code-block-wrapper">
-      <button
-        className="code-copy-button"
-        onClick={handleCopy}
-        aria-label={copied ? "Copied!" : "Copy code"}
-        title={copied ? "Copied!" : "Copy code"}
-      >
-        {copied ? (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-        ) : (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
+      <div className="code-buttons-group">
+        <button
+          className="code-action-button"
+          onClick={handleCopy}
+          aria-label={copied ? "Copied!" : "Copy code"}
+          title={copied ? "Copied!" : "Copy code"}
+        >
+          {copied ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          )}
+        </button>
+        {!isTerminal && (
+          <button
+            className="code-action-button"
+            onClick={handleDownload}
+            aria-label="Download code"
+            title="Download code"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
         )}
-      </button>
+      </div>
       {shouldHighlight && codeString ? (
         <SyntaxHighlighter
           language={normalizedLang}
@@ -118,12 +172,18 @@ function HaloPreinstalledDropdown({
   content, 
   dropdownId,
   playbookId,
-  onImageClick
+  onImageClick,
+  testCoverage,
+  selectedTestDevice,
+  runId,
 }: { 
   content: string;
   dropdownId: string;
   playbookId: string;
   onImageClick: (image: { src: string; alt: string }) => void;
+  testCoverage?: TestCoverageInfo;
+  selectedTestDevice?: string;
+  runId?: number | null;
 }) {
   // Initialize from global store, use local state for rendering
   const [isOpen, setIsOpen] = useState(() => dropdownStateStore[dropdownId] ?? false);
@@ -245,6 +305,30 @@ function HaloPreinstalledDropdown({
               tr: ({ children }) => <tr className="md-tr">{children}</tr>,
               th: ({ children }) => <th className="md-th">{children}</th>,
               td: ({ children }) => <td className="md-td">{children}</td>,
+              div: (divProps: React.HTMLAttributes<HTMLDivElement> & { 'data-test-id'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string }) => {
+                const { className: divClassName, ...divRest } = divProps;
+                if (divClassName === 'test-coverage-block') {
+                  const testId = divProps['data-test-id'] || '';
+                  const testInfo = testCoverage?.tests.find(t => t.id === testId);
+                  const activeResult = selectedTestDevice
+                    ? testInfo?.deviceResults?.[selectedTestDevice]
+                    : testInfo?.result;
+                  return (
+                    <TestCoverageBlock
+                      testId={testId}
+                      timeout={divProps['data-timeout'] || '300'}
+                      isHidden={divProps['data-hidden'] === 'true'}
+                      setup={divProps['data-setup'] || ''}
+                      code={decodeURIComponent(divProps['data-code'] || '')}
+                      testResult={activeResult}
+                      playbookId={playbookId}
+                      runId={runId}
+                      selectedTestDevice={selectedTestDevice}
+                    />
+                  );
+                }
+                return <div className={divClassName} {...divRest} />;
+              },
             }}
           >
             {content}
@@ -363,24 +447,31 @@ function HaloSetupContent({
 interface TocItem {
   id: string;
   text: string;
+  children?: TocItem[];
 }
 
 /**
- * Extracts table of contents from markdown content (main sections only - h2)
+ * Extracts table of contents from markdown content (h2 sections with h3 sub-items)
  */
 function extractToc(content: string): TocItem[] {
   if (!content) return [];
-  
-  const headingRegex = /^##\s+(.+)$/gm;
+
+  const headingRegex = /^(#{2,3})\s+(.+)$/gm;
   const toc: TocItem[] = [];
   let match;
-  
+
   while ((match = headingRegex.exec(content)) !== null) {
-    const text = match[1].trim();
+    const level = match[1].length;
+    const text = match[2].trim();
     const id = slugify(text);
-    toc.push({ id, text });
+
+    if (level === 2) {
+      toc.push({ id, text, children: [] });
+    } else if (level === 3 && toc.length > 0) {
+      toc[toc.length - 1].children!.push({ id, text });
+    }
   }
-  
+
   return toc;
 }
 
@@ -426,14 +517,38 @@ function TableOfContents({
               }}
               className={`
                 block text-sm py-1 pl-3 transition-colors duration-150 border-l-2
-                ${activeId === item.id 
-                  ? "text-[#D4915D] border-[#D4915D] font-medium" 
+                ${activeId === item.id
+                  ? "text-[#D4915D] border-[#D4915D] font-medium"
                   : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
                 }
               `}
             >
               {item.text}
             </a>
+            {item.children && item.children.length > 0 && (
+              <ul className="space-y-1 mt-1">
+                {item.children.map((child) => (
+                  <li key={child.id}>
+                    <a
+                      href={`#${child.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onLinkClick(child.id);
+                      }}
+                      className={`
+                        block text-sm py-1 pl-6 transition-colors duration-150 border-l-2
+                        ${activeId === child.id
+                          ? "text-[#D4915D] border-[#D4915D] font-medium"
+                          : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
+                        }
+                      `}
+                    >
+                      {child.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
@@ -442,7 +557,8 @@ function TableOfContents({
 }
 
 /**
- * Parses markdown content and filters OS-specific sections
+ * Parses markdown content and filters OS-specific sections.
+ * Handles nested @os: blocks correctly by processing innermost blocks first.
  * 
  * Tags supported:
  * <!-- @os:windows --> ... <!-- @os:end -->
@@ -452,52 +568,89 @@ function TableOfContents({
 function filterContentByOS(content: string, platform: Platform): string {
   if (!content) return "";
   
-  // Pattern to match OS-specific blocks
-  const osBlockPattern = /<!-- @os:(windows|linux|all) -->([\s\S]*?)<!-- @os:end -->/g;
+  // Matches only innermost @os: blocks (content contains no nested @os: open/close tags).
+  // Negative lookaheads prevent matching across nesting boundaries.
+  const innerOsPattern = /<!-- @os:(windows|linux|all) -->((?:(?!<!-- @os:(?:windows|linux|all) -->|<!-- @os:end -->)[\s\S])*?)<!-- @os:end -->/g;
   
   let result = content;
-  const matches = [...content.matchAll(osBlockPattern)];
+  let prev: string;
   
-  // Process matches in reverse order to preserve indices
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const match = matches[i];
-    const blockOS = match[1];
-    const blockContent = match[2];
-    const fullMatch = match[0];
-    const startIndex = match.index!;
-    
-    let replacement = "";
-    
-    // Show only content for the selected platform
-    if (blockOS === "all" || blockOS === platform) {
-      replacement = blockContent;
-    }
-    // Otherwise, replacement is empty (content hidden)
-    
-    result = result.slice(0, startIndex) + replacement + result.slice(startIndex + fullMatch.length);
-  }
+  do {
+    prev = result;
+    result = result.replace(innerOsPattern, (_fullMatch, blockOS: string, blockContent: string) => {
+      if (blockOS === "all" || blockOS === platform) {
+        return blockContent;
+      }
+      return "";
+    });
+  } while (result !== prev);
   
   return result;
 }
 
 /**
- * Transforms @preinstalled tags into collapsible dropdown HTML
+ * Parses markdown content and filters device-specific sections.
+ * Handles nested @device: blocks correctly by processing innermost blocks first.
+ * Supports comma-separated device IDs.
+ *
+ * Tags supported:
+ * <!-- @device:halo --> ... <!-- @device:end -->
+ * <!-- @device:halo,stx --> ... <!-- @device:end -->
+ * <!-- @device:all --> ... <!-- @device:end -->
+ */
+function filterContentByDevice(content: string, device: Device | null): string {
+  if (!content) return "";
+  if (!device) return content;
+
+  const innerDevicePattern = /<!-- @device:([\w,]+) -->((?:(?!<!-- @device:[\w,]+ -->|<!-- @device:end -->)[\s\S])*?)<!-- @device:end -->/g;
+
+  let result = content;
+  let prev: string;
+
+  do {
+    prev = result;
+    result = result.replace(innerDevicePattern, (_fullMatch, blockDevices: string, blockContent: string) => {
+      if (blockDevices === "all" || blockDevices.split(",").includes(device)) {
+        return blockContent;
+      }
+      return "";
+    });
+  } while (result !== prev);
+
+  return result;
+}
+
+/**
+ * Transforms @preinstalled tags into either collapsible dropdown HTML (when
+ * preinstalled on the active device) or plain setup-content blocks (when not).
  * 
  * Tags supported:
- * <!-- @preinstalled --> ... <!-- @preinstalled:end -->
+ * <!-- @preinstalled:JSON --> ... <!-- @preinstalled:end -->
  * 
- * The content inside becomes a collapsible section with a special header
- * indicating the software is pre-installed on AMD Halo Developer Platform
+ * The JSON contains per-platform arrays of device IDs where the software is
+ * preinstalled, e.g. {"linux":["halo"],"windows":["halo"]}.
  */
-function transformPreinstalledBlocks(content: string): string {
+function transformPreinstalledBlocks(content: string, platform: Platform, device: Device | null): string {
   if (!content) return "";
   
-  const preinstalledPattern = /<!-- @preinstalled -->([\s\S]*?)<!-- @preinstalled:end -->/g;
+  const preinstalledPattern = /<!-- @preinstalled:(.*?) -->([\s\S]*?)<!-- @preinstalled:end -->/g;
   
-  return content.replace(preinstalledPattern, (_match, innerContent) => {
-    // Escape any HTML in the content for the data attribute
+  return content.replace(preinstalledPattern, (_match, preinstalledJson: string, innerContent: string) => {
     const escapedContent = innerContent.trim();
-    return `<div class="halo-preinstalled-dropdown" data-content="${encodeURIComponent(escapedContent)}"></div>`;
+    let isPreinstalled = false;
+    
+    try {
+      const preinstalledData = JSON.parse(preinstalledJson);
+      const deviceList: string[] = preinstalledData[platform] || [];
+      isPreinstalled = device ? deviceList.includes(device) : false;
+    } catch {
+      // Malformed JSON — fall back to showing plain instructions
+    }
+    
+    if (isPreinstalled) {
+      return `<div class="halo-preinstalled-dropdown" data-content="${encodeURIComponent(escapedContent)}"></div>`;
+    }
+    return `<div class="halo-setup-content" data-content="${encodeURIComponent(escapedContent)}"></div>`;
   });
 }
 
@@ -519,6 +672,345 @@ function transformSetupBlocks(content: string): string {
     const escapedContent = innerContent.trim();
     return `<div class="halo-setup-content" data-content="${encodeURIComponent(escapedContent)}"></div>`;
   });
+}
+
+/**
+ * Test coverage badge block — renders a badge header on top of a code block.
+ * Only shown when running in dev:coverage mode.
+ * When a test fails, shows a "View Logs" button to inspect stdout/stderr.
+ */
+function TestCoverageBlock({
+  testId, timeout, isHidden, setup, code, testResult, playbookId, runId, selectedTestDevice,
+}: {
+  testId: string;
+  timeout: string;
+  isHidden: boolean;
+  setup: string;
+  code: string;
+  testResult?: TestResultInfo;
+  playbookId?: string;
+  runId?: number | null;
+  selectedTestDevice?: string;
+}) {
+  const [logsOpen, setLogsOpen] = useState(false);
+  const [logs, setLogs] = useState<{ stdout: string; stderr: string } | null>(null);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsError, setLogsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLogs(null);
+    setLogsError(null);
+    setLogsOpen(false);
+  }, [selectedTestDevice]);
+
+  const langMatch = code.match(/```(\w+)?\s*\n/);
+  const language = langMatch?.[1] || "";
+  const codeContent = code.replace(/```\w*\s*\n/, "").replace(/\n?```\s*$/, "");
+
+  const hasHideLines = codeContent.split('\n').some(line => line.trimEnd().endsWith('#hide'));
+
+  let resultStatus = "";
+  let resultLabel = "";
+  if (testResult) {
+    if (testResult.skipped) { resultStatus = "skip"; resultLabel = "Skipped"; }
+    else if (testResult.success) { resultStatus = "pass"; resultLabel = "Passed"; }
+    else { resultStatus = "fail"; resultLabel = "Failed"; }
+  }
+
+  const showLogsButton = !!testResult;
+
+  const handleViewLogs = useCallback(async () => {
+    if (logsOpen) {
+      setLogsOpen(false);
+      return;
+    }
+
+    // If logs already fetched, just toggle open
+    if (logs) {
+      setLogsOpen(true);
+      return;
+    }
+
+    // Fetch logs from API
+    if (!playbookId) return;
+    setLogsLoading(true);
+    setLogsError(null);
+
+    try {
+      const logsParams = new URLSearchParams();
+      if (runId) logsParams.set("run_id", String(runId));
+      if (selectedTestDevice) {
+        const { arch, platform } = parseDeviceKey(selectedTestDevice);
+        logsParams.set("device", arch);
+        if (platform) logsParams.set("platform", platform);
+      }
+      const qs = logsParams.toString();
+      const logsUrl = `/api/playbooks/${playbookId}/logs/${testId}${qs ? `?${qs}` : ""}`;
+      const res = await fetch(logsUrl);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setLogsError(data.error || "Failed to load logs");
+        setLogsOpen(true);
+        return;
+      }
+      const data = await res.json();
+      setLogs(data);
+      setLogsOpen(true);
+    } catch {
+      setLogsError("Failed to fetch logs");
+      setLogsOpen(true);
+    } finally {
+      setLogsLoading(false);
+    }
+  }, [logsOpen, logs, playbookId, testId, runId, selectedTestDevice]);
+
+  return (
+    <div className={`tc-block ${isHidden ? "tc-hidden" : ""} ${resultStatus ? `tc-result-${resultStatus}` : ""}`}>
+      <div className={`tc-badge-header ${isHidden ? "tc-badge-hidden" : ""} ${resultStatus === "fail" ? "tc-badge-fail" : ""} ${resultStatus === "skip" ? "tc-badge-skip" : ""}`}>
+        <span className={`tc-pill tc-pill-label ${isHidden ? "tc-pill-label-hidden" : ""}`}>
+          {isHidden ? "👁 Hidden Test" : "✓ Tested"}
+        </span>
+        <span className="tc-pill tc-pill-id">{testId}</span>
+        <span className="tc-pill tc-pill-timeout">⏱ {timeout}s</span>
+        {setup && (
+          <span className="tc-pill tc-pill-setup">⚙ {setup}</span>
+        )}
+        {showLogsButton && (
+          <button
+            className={`tc-logs-btn ${logsOpen ? "tc-logs-btn-active" : ""}`}
+            onClick={handleViewLogs}
+            disabled={logsLoading}
+            title={logsOpen ? "Hide logs" : "View test logs"}
+          >
+            {logsLoading ? (
+              <span className="tc-logs-spinner" />
+            ) : (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+            )}
+            {logsOpen ? "Hide Logs" : "View Logs"}
+          </button>
+        )}
+        {testResult && (
+          <span className={`tc-pill tc-pill-result tc-pill-result-${resultStatus}`}>
+            {resultLabel}{testResult.duration ? ` (${testResult.duration.toFixed(1)}s)` : ""}
+          </span>
+        )}
+      </div>
+      {/* Collapsible log viewer */}
+      {logsOpen && (
+        <div className="tc-logs-panel">
+          {logsError && !logs ? (
+            <div className="tc-logs-error">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              {logsError}
+            </div>
+          ) : (
+            <>
+              {testResult?.error && (
+                <div className="tc-logs-error-message">
+                  <span className="tc-logs-section-label">Error</span>
+                  <pre className="tc-logs-pre">{testResult.error}</pre>
+                </div>
+              )}
+              {logs?.stderr && (
+                <div className="tc-logs-section tc-logs-stderr">
+                  <span className="tc-logs-section-label">stderr</span>
+                  <pre className="tc-logs-pre">{logs.stderr}</pre>
+                </div>
+              )}
+              {logs?.stdout && (
+                <div className="tc-logs-section tc-logs-stdout">
+                  <span className="tc-logs-section-label">stdout</span>
+                  <pre className="tc-logs-pre">{logs.stdout}</pre>
+                </div>
+              )}
+              {logs && !logs.stdout && !logs.stderr && !testResult?.error && (
+                <div className="tc-logs-empty">No log output available for this test.</div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+      {hasHideLines ? (
+        <div className="code-block-wrapper">
+          <pre className="code-block tc-code-with-hide">
+            <code>{codeContent.split('\n').map((line, i) => {
+              const isHideLine = line.trimEnd().endsWith('#hide');
+              const cleanLine = isHideLine ? line.replace(/\s*#hide\s*$/, '') : line;
+              return (
+                <div key={i} className={`tc-line ${isHideLine ? 'tc-line-hidden' : ''}`}>
+                  {isHideLine && <span className="tc-hide-label">hidden</span>}
+                  {cleanLine}
+                </div>
+              );
+            })}</code>
+          </pre>
+        </div>
+      ) : (
+        <CodeBlock language={language}>{codeContent}</CodeBlock>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Setup definition block — renders a visible badge for @setup:id=... definitions.
+ * Only shown in coverage view; hidden in user view (like hidden test blocks).
+ * Shows the setup step name and the command it expands to.
+ */
+function SetupDefinitionBlock({
+  setupId,
+  command,
+}: {
+  setupId: string;
+  command: string;
+}) {
+  return (
+    <div className="tc-block tc-setup-def">
+      <div className="tc-badge-header tc-badge-setup">
+        <span className="tc-pill tc-pill-label tc-pill-label-setup">⚙ Hidden Setup Definition</span>
+        <span className="tc-pill tc-pill-id">{setupId}</span>
+      </div>
+      {command && (
+        <div className="tc-setup-commands">
+          <div className="tc-setup-cmd">
+            <code className="tc-setup-code">{command}</code>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Stats bar showing test coverage summary for the playbook.
+ * Only shown when GitHub test results are available.
+ */
+function TestedDeviceSelector({
+  devices,
+  selected,
+  onChange,
+}: {
+  devices: string[];
+  selected: string;
+  onChange: (device: string) => void;
+}) {
+  if (devices.length === 0) return null;
+
+  return (
+    <div className="flex items-center gap-1 p-0.5 bg-[#111] rounded-lg border border-[#2a2a2a]">
+      {devices.map((d) => {
+        const name = deviceNames[parseDeviceKey(d).arch as Device] || parseDeviceKey(d).arch;
+        return (
+          <button
+            key={d}
+            onClick={() => onChange(d)}
+            className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all ${
+              selected === d
+                ? "bg-[#D4915D] text-black"
+                : "text-[#6b6b6b] hover:text-[#a0a0a0] hover:bg-[#1a1a1a]"
+            }`}
+          >
+            {name}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TestCoverageStatsBar({
+  coverage,
+  availableRuns,
+  selectedRunId,
+  onRunChange,
+  selectedTestDevice,
+  onTestDeviceChange,
+  selectedPlatform,
+}: {
+  coverage: TestCoverageInfo;
+  availableRuns: PlaybookRunOption[];
+  selectedRunId: number | null;
+  onRunChange: (id: number | null) => void;
+  selectedTestDevice: string;
+  onTestDeviceChange: (device: string) => void;
+  selectedPlatform: Platform;
+}) {
+  const covPct = coverage.totalCodeBlocks > 0
+    ? Math.round((coverage.visibleTestCount / coverage.totalCodeBlocks) * 100)
+    : 0;
+  const covClass = covPct >= 60 ? "" : covPct >= 30 ? "tc-cov-mid" : "tc-cov-low";
+
+  const allDevices = coverage.testedDevices ?? [];
+  const testedDevices = allDevices.filter(d => d.endsWith(`-${selectedPlatform}`));
+  const activeSummary = coverage.deviceSummaries?.[selectedTestDevice]
+    ?? (testedDevices.length === 0 ? undefined : coverage.resultsSummary);
+
+  return (
+    <div className="tc-stats-container">
+      {/* Stats row */}
+      <div className="tc-stats-bar">
+        <span className="tc-stat tc-stat-green"><strong>{coverage.visibleTestCount}</strong> visible tests</span>
+        <span className="tc-stat tc-stat-purple"><strong>{coverage.hiddenTestCount}</strong> hidden tests</span>
+        <span className="tc-stat"><strong>{coverage.totalCodeBlocks}</strong> code blocks</span>
+        <span className="tc-stat-divider" />
+        <span className={`tc-stat-coverage ${covClass}`}>{covPct}% coverage</span>
+        <span className="ml-auto flex items-center gap-2">
+          {testedDevices.length > 1 && (
+            <TestedDeviceSelector
+              devices={testedDevices}
+              selected={selectedTestDevice}
+              onChange={onTestDeviceChange}
+            />
+          )}
+          {availableRuns.length > 0 && (
+            <PlaybookRunSelector
+              runs={availableRuns}
+              selectedId={selectedRunId}
+              onChange={onRunChange}
+            />
+          )}
+        </span>
+      </div>
+      {/* Results row for selected device */}
+      {activeSummary && (
+        <div className="tc-results-bar">
+          <span className="tc-results-label">
+            {testedDevices.length > 0
+              ? `${deviceNames[parseDeviceKey(selectedTestDevice).arch as Device] || parseDeviceKey(selectedTestDevice).arch}:`
+              : "Results:"}
+          </span>
+          <span className="tc-results-pill tc-results-pass">{activeSummary.passed} passed</span>
+          <span className="tc-results-pill tc-results-fail">{activeSummary.failed} failed</span>
+          <span className="tc-results-pill tc-results-skip">{activeSummary.skipped} skipped</span>
+        </div>
+      )}
+      {/* Legend */}
+      <div className="tc-legend">
+        <span className="tc-legend-title">Legend:</span>
+        <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-tested" /> Tested (visible)</span>
+        <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-hidden" /> Hidden test</span>
+        <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-untested" /> Not tested</span>
+        {activeSummary && (
+          <>
+            <span className="tc-legend-sep">|</span>
+            <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-pass" /> Passed</span>
+            <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-fail" /> Failed</span>
+            <span className="tc-legend-item"><span className="tc-legend-swatch tc-swatch-skip" /> Skipped</span>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function PlatformToggle({ 
@@ -569,55 +1061,279 @@ function PlatformToggle({
   );
 }
 
-export default function PlaybookPage({ params }: { params: Promise<{ id: string }> }) {
+function DeviceToggle({
+  devices,
+  selected,
+  onChange,
+}: {
+  devices: Device[];
+  selected: Device | null;
+  onChange: (d: Device | null) => void;
+}) {
+  if (devices.length === 0) return null;
+  return (
+    <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] rounded-lg border border-[#333] flex-wrap">
+      {devices.map((d) => (
+        <button
+          key={d}
+          onClick={() => onChange(d)}
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+            selected === d
+              ? "bg-[#D4915D] text-black"
+              : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
+          }`}
+        >
+          {deviceNames[d]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+interface PlaybookRunOption {
+  id: number;
+  htmlUrl: string;
+  createdAt: string;
+  event: string;
+  headBranch: string;
+  conclusion: string | null;
+}
+
+function PlaybookRunSelector({
+  runs,
+  selectedId,
+  onChange,
+}: {
+  runs: PlaybookRunOption[];
+  selectedId: number | null;
+  onChange: (id: number | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    const handler = (e: MouseEvent) => {
+      if (!node.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const selected = selectedId != null ? runs.find((r) => r.id === selectedId) : null;
+  const label = selected ? new Date(selected.createdAt).toLocaleString() : "Latest nightly";
+
+  const eventColors: Record<string, string> = {
+    schedule: "bg-blue-900/30 text-blue-400 border-blue-800/30",
+    workflow_dispatch: "bg-purple-900/30 text-purple-400 border-purple-800/30",
+  };
+  const eventLabels: Record<string, string> = { schedule: "Nightly", workflow_dispatch: "Manual" };
+
+  return (
+    <div ref={ref} className="relative inline-block">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        title="Select a workflow run to view its test results"
+        className="flex items-center gap-1.5 px-2.5 py-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg text-xs text-[#6b6b6b] hover:border-[#555] hover:text-[#a0a0a0] transition-colors"
+      >
+        <svg className="w-3 h-3 text-[#D4915D] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>Run: <span className="text-[#a0a0a0]">{label}</span></span>
+        <svg className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 w-72 bg-[#1a1a1a] border border-[#333] rounded-xl shadow-2xl overflow-hidden">
+          <div className="max-h-64 overflow-y-auto">
+            <button
+              onClick={() => { onChange(null); setOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-[#242424] transition-colors ${selectedId == null ? "bg-[#242424]" : ""}`}
+            >
+              <span className="flex-1 text-left text-white font-medium">Latest nightly</span>
+              {selectedId == null && <svg className="w-3 h-3 text-[#D4915D]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>}
+            </button>
+            <div className="border-t border-[#2a2a2a]" />
+            {runs.map((run) => {
+              const badgeCls = eventColors[run.event] ?? "bg-[#242424] text-[#6b6b6b] border-[#333]";
+              const badgeLabel = eventLabels[run.event] ?? run.event;
+              const isSelected = selectedId === run.id;
+              return (
+                <button
+                  key={run.id}
+                  onClick={() => { onChange(run.id); setOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-xs hover:bg-[#242424] transition-colors ${isSelected ? "bg-[#242424]" : ""}`}
+                >
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="text-[#a0a0a0]">{new Date(run.createdAt).toLocaleString()}</div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className={`px-1.5 py-0.5 text-[10px] font-semibold rounded border ${badgeCls}`}>{badgeLabel}</span>
+                      <span className="text-[10px] text-[#555] truncate">{run.headBranch}</span>
+                    </div>
+                  </div>
+                  {isSelected && <svg className="w-3 h-3 text-[#D4915D] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const hashToDeviceId: Record<string, Device> = {
+  halo: "halo",
+  krk: "krk",
+};
+
+function deviceFromHash(hash?: string): Device | null {
+  if (!hash) return null;
+  return hashToDeviceId[hash] ?? (DEVICE_IDS.includes(hash as Device) ? hash as Device : null);
+}
+
+export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string; coverage?: string; run_id?: string; test_device?: string; platform?: string }> }) {
   const { id } = use(params);
+  const { device: deviceHash, coverage: coverageParam, run_id: runIdParam, test_device: testDeviceParam, platform: platformParam } = use(searchParams);
+  const backHref = deviceHash ? `/#${deviceHash}` : "/#playbooks";
+
   const [playbook, setPlaybook] = useState<Playbook | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform>("windows");
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform>(() =>
+    platformParam === "linux" ? "linux" : "windows"
+  );
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => deviceFromHash(deviceHash) ?? "halo");
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
+  const [coverageViewActive, setCoverageViewActive] = useState<boolean>(() => coverageParam === "true");
+  const [availableRuns, setAvailableRuns] = useState<PlaybookRunOption[]>([]);
+  const [selectedRunId, setSelectedRunId] = useState<number | null>(() => {
+    const parsed = runIdParam ? parseInt(runIdParam, 10) : NaN;
+    return Number.isFinite(parsed) ? parsed : null;
+  });
+  const [selectedTestDevice, setSelectedTestDevice] = useState<string>(() => {
+    if (testDeviceParam && platformParam) return `${testDeviceParam}-${platformParam}`;
+    if (testDeviceParam) return testDeviceParam;
+    return "";
+  });
   const activeHeadingRef = useRef<string>("");
   const contentRef = useRef<HTMLDivElement>(null);
   const isClickScrolling = useRef(false);
 
-  useEffect(() => {
-    async function fetchPlaybook() {
-      try {
-        const res = await fetch(`/api/playbooks/${id}`);
-        if (!res.ok) {
-          if (res.status === 404) {
-            setError("Playbook not found");
-          } else {
-            setError("Failed to load playbook");
-          }
-          return;
-        }
-        const data = await res.json();
-        setPlaybook(data);
-        
-        // Auto-select platform: prefer windows, otherwise use the first available
-        if (data.platforms.includes("windows")) {
-          setSelectedPlatform("windows");
-        } else if (data.platforms.length > 0) {
-          setSelectedPlatform(data.platforms[0]);
-        }
-      } catch (err) {
-        setError("Failed to load playbook");
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const fetchPlaybook = useCallback(async (runId: number | null) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const url = runId ? `/api/playbooks/${id}?run_id=${runId}` : `/api/playbooks/${id}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        setError(res.status === 404 ? "Playbook not found" : "Failed to load playbook");
+        return;
       }
+      const data = await res.json();
+      setPlaybook(data);
+
+      const availablePlatforms = extractPlatforms(data.supported_platforms ?? {});
+      if (availablePlatforms.includes("windows")) {
+        setSelectedPlatform("windows");
+      } else if (availablePlatforms.length > 0) {
+        setSelectedPlatform(availablePlatforms[0]);
+      }
+
+      // Auto-select first tested device for coverage results
+      const devices: string[] = data.testCoverage?.testedDevices ?? [];
+      if (devices.length > 0) {
+        setSelectedTestDevice(prev => {
+          if (prev && devices.includes(prev)) return prev;
+          // Try matching by arch prefix (URL may pass bare arch like "halo")
+          if (prev) {
+            const match = devices.find(d => d.startsWith(`${prev}-`));
+            if (match) return match;
+          }
+          return devices[0];
+        });
+      }
+    } catch (err) {
+      setError("Failed to load playbook");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    fetchPlaybook();
   }, [id]);
 
-  // Transform relative image paths to API routes, filter by OS, and transform preinstalled/setup blocks
-  const filteredContent = playbook?.content 
+  useEffect(() => {
+    fetchPlaybook(selectedRunId);
+  }, [fetchPlaybook, selectedRunId]);
+
+  // Fetch available runs once coverage data is detected (token is configured)
+  useEffect(() => {
+    if (!playbook?.testCoverage) return;
+    if (availableRuns.length > 0) return;
+    fetch("/api/dashboard/playbook-runs?per_page=20")
+      .then(r => r.json())
+      .then(d => { if (d.runs) setAvailableRuns(d.runs); })
+      .catch(() => {/* non-critical */});
+  }, [playbook?.testCoverage, availableRuns.length]);
+
+  // When arriving via URL platform param, re-apply after fetchPlaybook's auto-select
+  useEffect(() => {
+    if (!playbook || !platformParam) return;
+    const available = extractPlatforms(playbook.supported_platforms ?? {});
+    if (available.includes(platformParam as Platform)) {
+      setSelectedPlatform(platformParam as Platform);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playbook]);
+
+  // When platform changes, ensure selectedDevice is valid for the new platform.
+  useEffect(() => {
+    if (!playbook) return;
+    const available = extractDevices(playbook.supported_platforms ?? {}, selectedPlatform);
+    if (available.length > 0 && selectedDevice && !available.includes(selectedDevice)) {
+      setSelectedDevice(available[0]);
+    } else if (available.length > 0 && !selectedDevice) {
+      setSelectedDevice(available[0]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPlatform, playbook?.supported_platforms]);
+
+  // When platform changes, switch selectedTestDevice to the matching composite key.
+  // If no device is tested on the new platform, use a synthetic key so stale results
+  // from the previous platform are cleared rather than carried over.
+  useEffect(() => {
+    const devices = playbook?.testCoverage?.testedDevices;
+    if (!devices || devices.length === 0) return;
+
+    setSelectedTestDevice(prev => {
+      const currentArch = parseDeviceKey(prev).arch;
+      const newKey = `${currentArch}-${selectedPlatform}`;
+      if (devices.includes(newKey)) return newKey;
+      const match = devices.find(d => d.endsWith(`-${selectedPlatform}`));
+      return match || newKey;
+    });
+  }, [selectedPlatform, playbook?.testCoverage?.testedDevices]);
+
+  // In coverage mode, sync instruction device filter to the selected test device
+  useEffect(() => {
+    if (coverageViewActive && selectedTestDevice) {
+      const { arch } = parseDeviceKey(selectedTestDevice);
+      const asDevice = DEVICE_IDS.includes(arch as Device) ? (arch as Device) : null;
+      setSelectedDevice(asDevice);
+    }
+  }, [coverageViewActive, selectedTestDevice]);
+
+  // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
+  const filteredContent = playbook?.content
     ? transformSetupBlocks(
         transformPreinstalledBlocks(
-          filterContentByOS(playbook.content, selectedPlatform)
+          filterContentByDevice(
+            filterContentByOS(playbook.content, selectedPlatform),
+            selectedDevice
+          ),
+          selectedPlatform,
+          selectedDevice
         )
       )
         // Transform relative image paths in HTML img tags to use the API route
@@ -690,6 +1406,24 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
         );
       }
       
+      if (href && href.startsWith("#")) {
+        return (
+          <a
+            href={href}
+            className="md-link"
+            onClick={(e) => {
+              e.preventDefault();
+              const target = document.getElementById(href.slice(1));
+              if (target) {
+                target.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
+            {children}
+          </a>
+        );
+      }
+
       return (
         <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
           {children}
@@ -762,8 +1496,17 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
     tr: ({ children }: { children?: React.ReactNode }) => <tr className="md-tr">{children}</tr>,
     th: ({ children }: { children?: React.ReactNode }) => <th className="md-th">{children}</th>,
     td: ({ children }: { children?: React.ReactNode }) => <td className="md-td">{children}</td>,
-    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string }) => {
+    div: (props: React.HTMLAttributes<HTMLDivElement> & { 'data-content'?: string; 'data-test-id'?: string; 'data-timeout'?: string; 'data-hidden'?: string; 'data-setup'?: string; 'data-code'?: string; 'data-setup-id'?: string; 'data-command'?: string }) => {
       const { className, ...rest } = props;
+      // Handle setup-def-block (coverage mode — inline @setup:id=... definitions)
+      if (className === 'setup-def-block') {
+        return (
+          <SetupDefinitionBlock
+            setupId={props['data-setup-id'] || ''}
+            command={decodeURIComponent(props['data-command'] || '')}
+          />
+        );
+      }
       // Handle the halo-preinstalled-dropdown custom element
       if (className === 'halo-preinstalled-dropdown') {
         const dataContent = props['data-content'];
@@ -777,6 +1520,9 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
               dropdownId={dropdownId}
               playbookId={id}
               onImageClick={setLightboxImage}
+              testCoverage={playbook?.testCoverage}
+              selectedTestDevice={selectedTestDevice}
+              runId={selectedRunId}
             />
           );
         }
@@ -795,9 +1541,29 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
           );
         }
       }
+      if (className === 'test-coverage-block') {
+        const testId = props['data-test-id'] || '';
+        const testInfo = playbook?.testCoverage?.tests.find(t => t.id === testId);
+        const activeResult = selectedTestDevice
+          ? testInfo?.deviceResults?.[selectedTestDevice]
+          : testInfo?.result;
+        return (
+          <TestCoverageBlock
+            testId={testId}
+            timeout={props['data-timeout'] || '300'}
+            isHidden={props['data-hidden'] === 'true'}
+            setup={props['data-setup'] || ''}
+            code={decodeURIComponent(props['data-code'] || '')}
+            testResult={activeResult}
+            playbookId={id}
+            runId={selectedRunId}
+            selectedTestDevice={selectedTestDevice}
+          />
+        );
+      }
       return <div className={className} {...rest} />;
     },
-  }), [id, setLightboxImage]);
+  }), [id, setLightboxImage, playbook?.testCoverage, selectedRunId, selectedTestDevice]);
 
   // Handle clicking a TOC link - scroll and immediately set active
   const handleTocClick = (targetId: string) => {
@@ -835,15 +1601,27 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
       rafId = requestAnimationFrame(() => {
         rafId = null;
         
-        const headings = contentRef.current?.querySelectorAll("h2[id]");
+        const headings = contentRef.current?.querySelectorAll("h2[id], h3[id]");
         if (!headings || headings.length === 0) return;
-        
+
+        // Build a set of all IDs present in the TOC (h2 + h3 children)
+        const tocIds = new Set<string>();
+        for (const item of tocItems) {
+          tocIds.add(item.id);
+          if (item.children) {
+            for (const child of item.children) {
+              tocIds.add(child.id);
+            }
+          }
+        }
+
         // Find the heading that's currently at or near the top of the viewport
         // We look for the last heading that has scrolled past the threshold
         const threshold = 150; // How far from top of viewport to consider "active"
         let currentActive = "";
-        
+
         for (const heading of headings) {
+          if (!tocIds.has(heading.id)) continue;
           const rect = heading.getBoundingClientRect();
           // If this heading is at or above the threshold, it's the current section
           if (rect.top <= threshold) {
@@ -889,7 +1667,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
         <div className="max-w-5xl mx-auto">
           {/* Back Link */}
           <Link 
-            href="/#playbooks" 
+            href={backHref} 
             className="inline-flex items-center gap-2 text-[#a0a0a0] hover:text-[#D4915D] text-sm mb-6 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -912,7 +1690,7 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
               <h1 className="text-2xl font-bold text-white mb-2">{error}</h1>
               <p className="text-[#a0a0a0] mb-6">The playbook you&apos;re looking for doesn&apos;t exist or has been moved.</p>
               <Link 
-                href="/#playbooks"
+                href={backHref}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-[#D4915D] text-black font-medium rounded-lg hover:bg-[#e5a26e] transition-colors"
               >
                 View All Playbooks
@@ -968,17 +1746,29 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                   </div>
                 )}
 
-                {/* Platform Toggle */}
-                {playbook.platforms.length > 0 && (
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <span className="text-sm text-[#6b6b6b]">View instructions for:</span>
-                    <PlatformToggle 
-                      platforms={playbook.platforms}
-                      selected={selectedPlatform}
-                      onChange={setSelectedPlatform}
-                    />
-                  </div>
-                )}
+                {/* Platform & Device Toggles */}
+                <div className="flex flex-col gap-3">
+                  {extractPlatforms(playbook.supported_platforms ?? {}).length > 0 && (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <span className="text-sm text-[#6b6b6b]">Platform:</span>
+                      <PlatformToggle
+                        platforms={extractPlatforms(playbook.supported_platforms ?? {})}
+                        selected={selectedPlatform}
+                        onChange={setSelectedPlatform}
+                      />
+                    </div>
+                  )}
+                  {!coverageViewActive && (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <span className="text-sm text-[#6b6b6b]">Device:</span>
+                      <DeviceToggle
+                        devices={extractDevices(playbook.supported_platforms ?? {}, selectedPlatform)}
+                        selected={selectedDevice}
+                        onChange={setSelectedDevice}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 {/* Tags */}
                 {playbook.tags && playbook.tags.length > 0 && (
@@ -995,23 +1785,59 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                 )}
               </div>
 
-              {/* Main content area with TOC sidebar */}
-              <div className="relative flex gap-8">
-                {/* Table of Contents - Desktop only */}
-                {tocItems.length > 0 && (
-                  <aside className="hidden xl:block w-56 flex-shrink-0">
-                    <div className="sticky top-24">
+              {/* Main content area with TOC / Coverage sidebar */}
+              <div className={`relative flex gap-8 ${playbook.testCoverage && !coverageViewActive ? "tc-user-view" : ""}`}>
+                {/* Sidebar - Desktop only */}
+                <aside className="hidden xl:block flex-shrink-0 w-56">
+                  <div className="sticky top-24">
+                    {tocItems.length > 0 && (
                       <TableOfContents 
                         items={tocItems} 
                         activeId={activeHeading}
                         onLinkClick={handleTocClick}
                       />
-                    </div>
-                  </aside>
-                )}
+                    )}
+                    {playbook.testCoverage && (
+                      <button
+                        className="cov-return-toggle"
+                        onClick={() => setCoverageViewActive(prev => !prev)}
+                      >
+                        {coverageViewActive ? (
+                          <>
+                            <svg className="cov-return-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            User View
+                          </>
+                        ) : (
+                          <>
+                            <svg className="cov-return-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Show Coverage
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </aside>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
+                  {/* Test Coverage Stats (only in coverage view) */}
+                  {playbook.testCoverage && coverageViewActive && (
+                    <TestCoverageStatsBar
+                      coverage={playbook.testCoverage}
+                      availableRuns={availableRuns}
+                      selectedRunId={selectedRunId}
+                      onRunChange={setSelectedRunId}
+                      selectedTestDevice={selectedTestDevice}
+                      onTestDeviceChange={setSelectedTestDevice}
+                      selectedPlatform={selectedPlatform}
+                    />
+                  )}
+
                   <div className="bg-[#1a1a1a] border border-[#333] rounded-xl p-6 md:p-8">
                     {filteredContent ? (
                       <article ref={contentRef} className="playbook-content prose prose-invert max-w-none">
@@ -1038,6 +1864,31 @@ export default function PlaybookPage({ params }: { params: Promise<{ id: string 
                     )}
                   </div>
                 </div>
+
+                {/* Mobile-only coverage toggle */}
+                {playbook.testCoverage && (
+                  <button
+                    className="cov-mobile-toggle xl:hidden"
+                    onClick={() => setCoverageViewActive(prev => !prev)}
+                  >
+                    {coverageViewActive ? (
+                      <>
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        User View
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Coverage
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </>
           )}

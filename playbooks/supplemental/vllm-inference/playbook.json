@@ -1,12 +1,31 @@
 {
   "id": "vllm-inference",
-  "title": "Getting Started with vLLM",
-  "description": "Install and configure vLLM for optimized LLM inference on your STX Halo™",
-  "time": 60,
-  "platforms": ["linux"],
-  "difficulty": "intermediate",
+  "title": "Quick Start on vLLM",
+  "description": "Learn how to run inference and serving using vLLM on your STX Halo\u2122",
+  "time": 90,
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
+  },
+  "difficulty": "beginner",
   "isNew": false,
-  "isFeatured": false,
+  "isFeatured": true,
+  "developed": false,
   "published": true,
-  "tags": ["vllm", "inference", "llm", "docker"]
+  "tags": [
+    "vllm",
+    "inference",
+    "llm",
+    "quickstart"
+  ]
 }
