@@ -19,12 +19,24 @@
     "krk": [
       "linux",
       "windows"
+    ],
+    "rx7900xt": [
+      "linux"
+    ],
+    "rx9070xt": [
+      "linux"
     ]
   },
   "tested_platforms": {
     "halo": [
       "linux",
       "windows"
+    ],
+    "rx7900xt": [
+      "linux"
+    ],
+    "rx9070xt": [
+      "linux"
     ]
   },
   "required_platforms": {
