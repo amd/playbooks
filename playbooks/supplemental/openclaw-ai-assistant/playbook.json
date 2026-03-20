@@ -12,5 +12,6 @@
   "isFeatured": true,
   "developed": false,
   "published": true,
-  "tags": ["openclaw", "agents", "llm", "quickstart"]
+  "tags": ["openclaw", "agents", "llm", "quickstart"],
+  "coverImage": "assets/logo.png"
 }

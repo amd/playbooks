@@ -38,11 +38,14 @@ OpenClaw is built for developers who want powerful AI agents without relying on 
 1. Download LM Studio 
 2. Start LM Studio and click on "Skip for now" for the model download prompt. 
 3. Check "Developer Mode" and "Start LLM service on login"
+
 ![alt text](assets/image-1.png)
+
 1. Click on the "Model Search" Icon represented by a Robot and a Magnifying glass
 2. Select "Qwen3.5 35B A3B" on the left hand side and click download on the right hand side. Wait for it to finish 6. downloading. 
 
 ![alt text](assets/image.png)
+
 1. Click Ctrl + L to bring up model selection. Check "Manually choose load model parameters" and click on the LLM to 2. bring up the load options. 
 2. Check "remember settings" and check "show advanced settings".
 3. Set context to 190000 and make sure GPU Offload is set to MAX.
@@ -54,6 +57,7 @@ Click load.
 8. Start a chat and send a message "test" to ensure the LLM is working.
 
 ![alt text](assets/image-2.png)
+
 1. Press Ctrl + 2 to take you to the developer tab. 
 2. Press the toggle infront of "Status: Stopped" to start the server. 
 3. Click on Server Settings
