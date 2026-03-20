@@ -10,8 +10,6 @@ SPDX-License-Identifier: MIT
 <!-- @github-only:end -->
 
 
-> **🚧 Work in Progress:** This playbook is still under active development. A follow-up PR will migrate from Docker to vLLM wheels.
-
 # High-Performance LLM Inference with vLLM
 
 ## Overview
@@ -49,44 +47,34 @@ The following files are under `assets` directory:
 
 vLLM can be installed in several ways depending on your environment and preferences:
 
-- **Docker (Recommended)** - Use prebuilt container images with ROCm support for AMD GPUs
 - **PyPI Wheel** - Install from Python Package Index using pip
+- **Docker** - Use prebuilt container images with ROCm support for AMD GPUs
 - **Build from Source** - Compile vLLM locally with custom configurations
 
-For this playbook, we'll use the **prebuilt Docker image** which includes vLLM with ROCm support, making it the easiest way to get started on AMD GPUs.
+For this playbook, we'll use the **prebuilt wheel** which includes vLLM with ROCm support, making it the easiest way to get started on AMD GPUs.
 
 ## Preparation
 
-### Pull the Docker Image
+### Install vLLM
 
-First, pull the ROCm vLLM Docker image:
-
-```bash
-docker pull vllm/vllm-openai-rocm:v0.14.0
-```
-
-This Docker image contains vLLM with ROCm support for AMD GPUs. 
-
-**Start a container:**
+Create a Python virtual environment and activate it:
 
 ```bash
-docker run -it --network=host --device=/dev/kfd --device=/dev/dri --group-add video --ipc=host \
-  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --shm-size 8G \
-  -v /data:/data \
-  --entrypoint /bin/bash \
-  vllm/vllm-openai-rocm:v0.14.0
+python -m venv vllm_env
+source vllm_env/bin/activate
 ```
 
-**Key options explained:**
-- `--entrypoint /bin/bash` - Overrides the default container entrypoint to give you a bash shell for interactive work
-- `-v /data:/data` - Mounts your host's `/data` directory to the container's `/data` directory. This allows you to:
-  - Store model weights on the host filesystem
-  - Access models without re-downloading them each time you start a new container
-  - Share models across multiple containers
-  - You can change this to any directory, e.g., `-v $HOME/models:/data` to use your home directory
-- `--device=/dev/kfd --device=/dev/dri` - Grants container access to AMD GPU devices
-- `--network=host` - Uses host networking for easy access to the vLLM server
-- `--shm-size 8G` - Allocates shared memory for efficient tensor operations 
+Install PyTorch 2.9.1 with ROCm support:
+
+```bash
+pip install torch==2.9.1
+```
+
+Install vLLM from the prebuilt ROCm wheel:
+
+```bash
+pip install vllm --extra-index-url https://wheels.vllm.ai/rocm/0.16.1/rocm712
+```
 
 ### Download the Model
 
@@ -124,7 +112,7 @@ You should see model files including `config.json`, `model.safetensors`, `tokeni
 
 ### 1. Start the vLLM Server
 
-Inside the Docker container, start the vLLM server:
+Start the vLLM server:
 
 ```bash
 vllm serve /data/Qwen3_1_7B
@@ -143,27 +131,9 @@ vllm serve /data/Qwen3_1_7B \
   --max-model-len 4096
 ```
 
-**Alternative: Run server directly with docker run (without entering container):**
-
-```bash
-docker run --rm \
-  --network=host \
-  --group-add=video \
-  --cap-add=SYS_PTRACE \
-  --security-opt seccomp=unconfined \
-  --device /dev/kfd \
-  --device /dev/dri \
-  --ipc=host \
-  --shm-size 8G \
-  -v /data:/data \
-  vllm/vllm-openai-rocm:v0.14.0 \
-  --model /data/Qwen3_1_7B
-```
-
-
 ### 2. Test the server with curl
 
-You can test the server using the curl script inside the container:
+You can test the server using the curl script:
 
 ```bash
 ./curl_script.sh
@@ -387,7 +357,6 @@ Common vLLM server parameters:
 vllm serve /data/Qwen3_1_7B \
   --host 0.0.0.0              # Allow external connections
   --port 8000                 # Server port (default: 8000)
-  --tensor-parallel-size 2    # Use multiple GPUs
   --gpu-memory-utilization 0.9  # GPU memory usage (0.0-1.0)
   --max-model-len 4096        # Maximum sequence length
   --trust-remote-code         # Allow custom model code
@@ -473,7 +442,7 @@ pip install -r requirements_gradio.txt
 
 In this playbook, you learned how to:
 
-- Set up and run vLLM with ROCm support using Docker for high-performance LLM inference on AMD GPUs
+- Set up and run vLLM with ROCm support for high-performance LLM inference on AMD GPUs
 - Download and configure language models from Hugging Face for use with vLLM
 - Start and configure a vLLM server with OpenAI-compatible API endpoints on port 8000
 - Test the server using curl commands and API requests
