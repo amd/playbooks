@@ -630,7 +630,7 @@ function filterContentByDevice(content: string, device: Device | null): string {
  * The JSON contains per-platform arrays of device IDs where the software is
  * preinstalled, e.g. {"linux":["halo"],"windows":["halo"]}.
  */
-function transformPreinstalledBlocks(content: string, platform: Platform, device: Device | null): string {
+function transformPreinstalledBlocks(content: string, platform: Platform, device: string | null): string {
   if (!content) return "";
   
   const preinstalledPattern = /<!-- @preinstalled:(.*?) -->([\s\S]*?)<!-- @preinstalled:end -->/g;
@@ -1390,6 +1390,11 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
     }
   }, [coverageViewActive, selectedTestDevice]);
 
+  const preinstalledDevice: string | null =
+    selectedCategory === "reference" && selectedDevice === "halo"
+      ? "halo_box"
+      : selectedDevice;
+
   // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
   const filteredContent = playbook?.content
     ? transformSetupBlocks(
@@ -1399,7 +1404,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
             selectedDevice
           ),
           selectedPlatform,
-          selectedDevice
+          preinstalledDevice
         )
       )
         // Transform relative image paths in HTML img tags to use the API route
