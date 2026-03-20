@@ -312,7 +312,6 @@ where.exe python
 where.exe pip
 python -c "import sys; print(sys.executable)"
 python -m pip --version
-python -m pip install openai
 ```
 <!-- @test:end -->
 <!-- @os:end -->
