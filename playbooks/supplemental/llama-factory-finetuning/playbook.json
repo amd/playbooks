@@ -17,7 +17,7 @@
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
-  "developed": false,
+  "developed": true,
   "published": true,
   "tags": ["Llama Factory", "lora", "fine-tuning"]
 }
