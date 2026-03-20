@@ -18,7 +18,7 @@ This playbook teaches you how to finetune LLMs using LLaMA Factory on your local
 - Duration: It will take about 60 minutes to run this playbook (depending on your model/dataset size and network speed).
 - View the [LlaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for more information.
 
-## Dependencies
+## Setting up the Environment
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
@@ -50,17 +50,18 @@ pip install -r requirements/metrics.txt
 
 Having successfully installed LLaMA Factory, let's run fine-tuning on it.
 
-### Run LLaMA Factory finetuning 
+## Using LLaMA Factory CLI for Fine Tuning 
 
 This section will cover how to prepare finetuning datasets, configure LoRA/QLoRA parameters, and run LoRA finetuning.
 
-#### Dataset Preparation
+### Dataset Preparation
 
 LLaMA Factory supports finetuning datasets in the Alpaca format and ShareGPT format. All the available datasets have been defined in the [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). If you are using a custom dataset, please make sure to add a dataset description in dataset_info.json and specify the dataset name before training. Details can be found in their docs [here](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
 In this playbook, we will use the identity and alpaca_en_demo datasets as an example, and configure the dataset information in the next step.
 
-#### Finetuning parameter configuration
+
+### Finetuning parameter configuration
 
 LLaMA Factory supports multiple finetuning schemes.
 
@@ -98,7 +99,7 @@ We will modify the default value of lora_rank to run fine-tuning on AMD GPUs.
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 
-#### Run LLaMA factory finetuning 
+### Run LLaMA factory finetuning 
 
 **llamafactory-cli** is the official command-line interface (CLI) tool for LLaMA Factory,developed to simplify end-to-end LLM workflows (data preparation → fine-tuning → evaluation → deployment) without writing complex code. 
 
@@ -116,6 +117,7 @@ After running LLM finetuning, output files can be found in the path of "output_d
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
 </p>
 
+
 ### Test the fine-tuned model 
 
 **llamafactory-cli chat** is designed for interactive chat/inference with LLMs (both base models and LoRA-fine-tuned models). LLaMA Factory provides the sample configuration to run inference of fine-tuned models in [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). You can also modify this sample configuration to change the settings such as the inference backend.
@@ -131,7 +133,8 @@ An example chat using the finetuned model is shown below:
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Finetuned model" width="600"/>
 </p>
 
-#### Export the fine-tuned model
+
+### Export the fine-tuned model
 
 For production use-cases, the pre-trained model and the LoRA adapter need to be merged and exported into a single model. This merged model can be used as a normal HuggingFace model file. LLaMA Factory provides the sample configurations in [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
@@ -146,7 +149,8 @@ The result of exporting the finetuned model is shown below.
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Finetuned model " width="600"/>
 </p>
 
-## LLaMA Factory GUI
+
+## Using LLaMA Factory GUI
 LLaMA-Factory also supports zero-code fine-tuning of large language models through a web UI in the browser.
 
 Use the following command to open it:
@@ -154,6 +158,7 @@ Use the following command to open it:
 ```bash
 llamafactory-cli webui
 ```
+
 
 ## Next Steps
 - Try different models such as gpt-oss and other state of the art models.
