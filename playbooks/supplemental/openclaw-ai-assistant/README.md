@@ -119,14 +119,16 @@ curl -fsSL https://openclaw.ai/install.sh | bash
 ```
 
 ## Configuring OpenClaw with a local LLM
-* Read the security warning and press the left arrow key to navigate to Yes and hit Enter to continue. Hit enter again to select Quick Start.
-* Press the down arrow key to scroll down till you "Custom Provider" and click enter. 
-* Open LM Studio again - notice the section on the right which says API Usage. Copy the address  below "Local server is reachable at" and paste this (Tip: right click while the Powershell window is focused to automatically paste your clipboard) into the powershell window:
+Read the security warning and press the left arrow key to navigate to Yes and hit Enter to continue. Hit enter again to select Quick Start. \\ 
+Press the down arrow key to scroll down till you "Custom Provider" and click enter. \\
+Open LM Studio again - notice the section on the right which says API Usage. Copy the address  below "Local server is reachable at" and paste this (Tip: right click while the Powershell window is focused to automatically paste your clipboard) into the powershell window:
+
 ![alt text](assets/image-3.png)
 
 * Press enter on "Paste API Key Now" and enter "lmstudio" - don't leave this blank even though it is not required. 
 
 * Select "Anthropic-compatible API" and press enter. Navigate back over to the LM Studio "API Usage" section and copy the model name exactly. Paste this in the window for the Model ID and press enter: 'qwen/qwen3.5-35b-a3b'
+
 ![alt text](assets/image-4.png)
 * At this point OpenClaw will verify the connection and say "Verification Succesful" and prompt you for a Endpoint ID and then a Model alias. Add both of those: like 'qwen35b'
 * This is the point where you configure your communication channel with your bot. Before you proceed ensure you have the tokens and authentications already sorted. 
@@ -138,6 +140,7 @@ We will now select some starting skills: himalaya, blogwatcher, nanopdf and claw
 ![alt text](assets/image-5.png)
 * If you prefer cloud access, add it now otherwise select NO to all the API key requests. 
 * Select boot-md, command-logger and session-memory in hooks and click enter:
+
 ![alt text](assets/image-6.png)
 
 Hatch your Clawie!
