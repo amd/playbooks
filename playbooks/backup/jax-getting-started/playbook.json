@@ -6,6 +6,9 @@
   "supported_platforms": {
     "halo": [
       "linux"
+    ],
+    "halo_box": [
+      "linux"
     ]
   },
   "difficulty": "intermediate",

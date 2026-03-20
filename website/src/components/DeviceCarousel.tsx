@@ -6,9 +6,9 @@ import haloImg from "@/app/assets/halo.png";
 import radeonImg from "@/app/assets/radeon.png";
 
 const devices = [
-  { id: "stx-halo", name: "STX Halo™", img: haloImg },
-  { id: "Krackan", name: "Krackan Point™", img: raiImg },
-  { id: "amd-radeon", name: "Radeon™ GPUs", img: radeonImg },
+  { id: "reference", name: "AMD Ryzen\u2122 AI Halo", img: haloImg },
+  { id: "apu", name: "Ryzen\u2122 AI APUs", img: raiImg },
+  { id: "gpu", name: "Radeon\u2122 GPUs", img: radeonImg },
 ];
 
 const ALL_ID = "all";
@@ -41,7 +41,7 @@ export default function DeviceCarousel({ activeId, onActiveIdChange }: DeviceCar
             <button
               key={device.id}
               onClick={() => selectDevice(device.id)}
-              className={`relative px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
+              className={`relative px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-1.5 ${
                 activeId === device.id
                   ? "text-black shadow-lg"
                   : "text-[#a0a0a0] hover:text-white hover:bg-[#242424]"
