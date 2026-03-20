@@ -1,33 +1,37 @@
 # Live Speech2Speech Translation on AMD GPU
 
 ## Overview
-The Ryzen™ AI Halo platform, integrated with the Radeon ROCm software stack and PyTorch, creates a powerful and unified ecosystem for on-device AI. The ROCm (Radeon Open Compute) platform, now fully enabled for Windows and Linux, provides the foundational, open-source software layer that allows developers to harness the parallel computing power of AMD GPUs and APUs for AI workloads . This platform ensures seamless hardware acceleration, with official support confirmed for a wide range of devices including the Radeon PRO W7900 and the Ryzen AI Max series, which are central to the Halo platform's capabilities .
+The ROCm (Radeon Open Compute) and Pytorch stack create a unified ecosystem for on-device AI. It works for both Windows and Linux with official support for a wide range of devices including APUs and GPUs.
 
-Crucially, PyTorch, one of the world's leading machine learning frameworks, runs natively on this ROCm foundation . This integration means developers can use the full PyTorch ecosystem—for tasks like training and inference—directly on the hardware, without needing complex workarounds. The deep optimization within the ROCm stack enables advanced features like Flash Attention 2 for faster training and efficient deployment of large language models . Furthermore, this tight integration ensures that foundational models like Meta's SeamlessM4T (available in sizes up to 2.3B parameters) can leverage the combined performance of the Ryzen AI Halo hardware and the Radeon ROCm software to deliver low-latency, expressive, and private speech-to-speech translation entirely on the edge.
+This playbook will teach you how to run low-latency, expressive, and private speech-to-speech translation entirely on the edge.
 
 ## What You'll Learn
 - How to set up speech-to-speech environment
-- How to set up Gradio UI demo
-- Show example with Mandarin to English speech-to-speech
+- How to write Python code to load and use speech-speech models
+- How to run and experiment with the Gradio UI
 
-## Why live speech-to-speech translation?
-In global business, language barriers slow teams down and create distance. Live speech-to-speech translation removes that friction entirely.
-It enables real-time, natural conversation across languages—preserving tone, emotion, and intent without awkward pauses. Participants hear your message instantly in their own language, exactly as you meant it.
-For cross-border meetings and global collaboration, this means faster decisions, stronger trust, and the ability to truly think together—without language getting in the way.
+## Why use real-time speech-to-speech translation?
+- Removes friction between translation and language barriers
+- Conveys tone, emotion, and intent without awkward pauses
+- Enables global collaboation and faster decision-making
 
 ## Setting Up Your Environment
 
 ### Create a Virtual Environment
 
 <!-- @os:windows -->
-On Windows, open Command Prompt and run the following prompt to create a venv with ROCm+Pytorch already installed: 
+On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
 <!-- @test:id=create-venv timeout=60 -->
-```cmd
+```bash
 python -m venv s2st-env --system-site-packages
-s2st-env\Scripts\activate.bat
+s2st-env\Scripts\activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="s2st-env\Scripts\activate.bat" -->
+<!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
+
+> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
+
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -55,17 +59,19 @@ pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate s
 <!-- @test:end -->
 
 ## Set up the speech-to-speech demo
-The script will use your HF_TOKEN to download the models, but if you want to download only exactly the file needed you can also download from [https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) all files.
+
+#### Learn about seamless-m4t-v2
+Check out the model card on Hugging Face for more information: [https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)
 
 
 
-The seamlessm4t model arch:
+This is the technical architecture of the speech-speech models:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 
-#### Import necessary dependencies: m4t, torchaudio et al 
+#### Import necessary dependencies
 ```python 
 from transformers import AutoProcessor, SeamlessM4Tv2Model
 import torchaudio
@@ -84,8 +90,10 @@ print(f"model loading duration: {end - start} seconds")
 ```
 
 #### Input audio clip .wav file
+Please download the following file: [input1.wav](assets/input1.wav). Then, load it with torchaudio.
+
 ```python
-audio, orig_freq =  torchaudio.load("./assets/input1.wav")
+audio, orig_freq =  torchaudio.load("input1.wav")
 ```
 
 #### Preprocess input .wav file
@@ -108,37 +116,43 @@ scipy.io.wavfile.write("out1.wav", rate=sample_rate, data=audio_array_from_audio
 ```
 
 #### Run the complete file to check the audio generation duration
+Please download the following file: [infer.py](assets/infer.py). Then, run it.
+
 
 ```bash
-python ./assets/infer.py
+python ./infer.py
 ```
 
 ### Runing the Gradio UI demo:
 
+This is a helpful UI that builds upon the code we have written and makes live speech-speech translation easy.
+
 1. Download this file: https://cdn-media.huggingface.co/frpc-gradio-0.3/frpc_linux_amd64
 2. Rename the downloaded file to: frpc_linux_amd64_v0.3
 3. Move the file to this location: /root/.cache/huggingface/gradio/frpc
+4. Download the following file: [gradio_demo.py](assets/gradio_demo.py).
+5. Run the following code:
 
 ```bash
 export HIP_VISIBLE_DEVICES=0
-python ./assets/gradio_demo.py --share
+python ./gradio_demo.py --share
 ```
+
 Press and hold the record button to capture your voice; releasing it will automatically execute the translation.
-after it done, then you can play the output translated voice.
+
 ### Gradio UI example:
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
 </p>
 
-Also support 40 languages to switch between each other.
 
 ## Next Steps
-With this demo, switch between multiple languages for quick translation. 
-It supports dozens of languages and includes voice input and text-to-speech for learners and travelers.
+- Mix and match between dozens of languages for quick translation. 
+- Experiment with voice input and text-to-speech
 
 ## Resources
 
-Below are some additional resources to learn more about speech-to-speech on 
+Below are some additional resources to learn more about speech-to-speech translation:  
 * The repo is here https://huggingface.co/facebook/seamless-m4t-v2-large 
-* The paper is in Seamless: Multilingual Expressive and Streaming Speech Translation
+* Research academia related to "Seamless: Multilingual Expressive and Streaming Speech Translation"
