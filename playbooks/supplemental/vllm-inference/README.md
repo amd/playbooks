@@ -14,7 +14,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-vLLM is a high-performance inference engine designed for large language models (LLMs). It provides optimized serving with PagedAttention for efficient memory management, continuous batching for higher throughput, and an OpenAI-compatible API for seamless integration. This makes vLLM ideal for production deployments where speed and resource efficiency are critical.
+vLLM is a high-performance inference engine designed for large language models (LLMs). It provides optimized serving with continuous batching for high throughput and an OpenAI-compatible API for seamless application integration. This makes vLLM great for production deployments where speed and resource efficiency are critical.
 
 This playbook teaches you how to serve LLMs using vLLM on your GPU and interact with models through a modern web interface.
 
@@ -25,23 +25,6 @@ This playbook teaches you how to serve LLMs using vLLM on your GPU and interact 
 - How to interact with models via OpenAI-compatible API endpoints
 - How to use the Gradio web interface for interactive chat with streaming responses
 - How to configure server parameters for different use cases
-
-## Key Features
-
-✨ **Real-time Streaming** - Token-by-token response generation with low latency  
-🎨 **Modern Web UI** - Beautiful Gradio interface for interactive chat  
- **OpenAI-Compatible API** - Drop-in replacement for OpenAI endpoints  
-🚀 **High Performance** - Optimized vLLM engine with GPU acceleration  
-⚙️ **Flexible Configuration** - Customizable parameters for different use cases
-
-## Files
-
-The following files are under `assets` directory:
-
-- `curl_script.sh` - Test the server with curl
-- `run_gradio_client.sh` - Launch the Gradio client
-- `model_chat_ui.py` - Interactive web UI with streaming support
-- `requirements_gradio.txt` - Python dependencies for Gradio
 
 ## Installing vLLM
 
@@ -67,7 +50,7 @@ source vllm_env/bin/activate
 Install PyTorch 2.9.1 with ROCm support:
 
 ```bash
-pip install torch==2.9.1
+pip install torch==2.9.1 --extra-index-url https://download.pytorch.org/whl/rocm7.12
 ```
 
 Install vLLM from the prebuilt ROCm wheel:
@@ -75,38 +58,6 @@ Install vLLM from the prebuilt ROCm wheel:
 ```bash
 pip install vllm --extra-index-url https://wheels.vllm.ai/rocm/0.16.1/rocm712
 ```
-
-### Download the Model
-
-Before starting the vLLM server, you need to download your model from Hugging Face to local directory for easier future access without re-downloading it. 
-
-Let's use the Qwen3-1.7B model for example:
-
-```bash
-# Install huggingface-cli if not already installed
-pip install -U huggingface_hub
-
-# Download the model to /data/Qwen3_1_7B
-huggingface-cli download Qwen/Qwen3-1.7B --local-dir /data/Qwen3_1_7B
-```
-
-**Note**: The download may take some time depending on your internet connection. The model is approximately 3.4GB.
-
-**Alternative with custom cache directory:**
-
-```bash
-# Download with specific cache location
-huggingface-cli download Qwen/Qwen3-1.7B --local-dir /data/Qwen3_1_7B --local-dir-use-symlinks False
-```
-
-**Verify the download:**
-
-```bash
-ls -lh /data/Qwen3_1_7B
-```
-
-You should see model files including `config.json`, `model.safetensors`, `tokenizer.json`, etc.
-
 
 ## Quick Start
 
@@ -125,9 +76,6 @@ The server will start on `http://localhost:8000` with the Qwen3-1.7B model.
 ```bash
 # Allow external connections and customize settings
 vllm serve /data/Qwen3_1_7B \
-  --host 0.0.0.0 \
-  --port 8000 \
-  --gpu-memory-utilization 0.9 \
   --max-model-len 4096
 ```
 
@@ -167,13 +115,6 @@ For an interactive chat experience, launch the Gradio client:
 
 Then open your browser to `http://localhost:7860`
 
-**Features:**
-- 🔄 **Real-time streaming** - Responses appear token-by-token as they're generated
-- 💬 **Chat history** - Persistent conversation context
-- ⚙️ **Adjustable parameters** - Temperature, max tokens, system prompt
-- 🎨 **Modern UI** - Clean, responsive interface built with Gradio
-- 🚀 **Low latency** - See responses start immediately
-
 **Custom Configuration:**
 
 ```bash
@@ -190,199 +131,7 @@ Then open your browser to `http://localhost:7860`
 ./run_gradio_client.sh --port 8080 --model /data/Qwen3_1_7B --server http://localhost:8000
 ```
 
-## Gradio Web Interface
-
-The Gradio client (`model_chat_ui.py`) provides a modern web interface for interacting with your vLLM server.
-
-### Features
-
-- **Streaming Responses**: Messages appear token-by-token in real-time as the model generates them
-- **Chat History**: Full conversation context is maintained throughout the session
-- **Configurable Parameters**:
-  - System Prompt: Set custom instructions for the model
-  - Temperature (0.0-2.0): Control randomness in responses
-  - Max Tokens (128-4096): Limit response length
-- **Modern UI**: Clean, responsive interface with intuitive controls
-- **Error Handling**: Clear error messages for connection issues or timeouts
-
-### Usage
-
-Launch the Gradio interface:
-
-```bash
-./run_gradio_client.sh
-```
-
-Or run the Python script directly:
-
-```bash
-python3 model_chat_ui.py --port 7860 --model /data/Qwen3_1_7B --server http://localhost:8000
-```
-
-### Command-Line Options
-
-```bash
-Options:
-  -p, --port PORT       Port for Gradio UI (default: 7860)
-  -m, --model MODEL     Model name (default: /data/Qwen3_1_7B)
-  -s, --server URL      vLLM server URL (default: http://localhost:8000)
-  -h, --help            Show help message
-```
-
-### Examples
-
-```bash
-# Run on different port
-./run_gradio_client.sh --port 8080
-
-# Connect to remote vLLM server
-./run_gradio_client.sh --server http://192.168.1.100:8000
-
-# Use different model
-./run_gradio_client.sh --model /data/Qwen3-14B
-```
-
-### Streaming Implementation
-
-The Gradio client uses Server-Sent Events (SSE) to stream responses from the vLLM server:
-
-1. Sends request to `/v1/chat/completions` with `"stream": true`
-2. Receives incremental token deltas via SSE
-3. Updates the UI in real-time as tokens arrive
-4. Provides smooth, ChatGPT-like user experience
-
-## API Usage
-
-### Curl Example
-
-```bash
-# Default vLLM server URL
-URL="http://localhost:8000/v1/chat/completions"
-
-# Send a chat completion request
-curl -X POST "$URL" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "/data/Qwen3_1_7B",
-    "messages": [
-      {
-        "role": "user",
-        "content": "What is the sum of 123 and 456? Show your reasoning."
-      }
-    ],
-    "temperature": 0.7,
-    "max_tokens": 2048
-  }'
-```
-
-### Python Examples
-
-**Non-streaming request:**
-
-```python
-import requests
-
-url = "http://localhost:8000/v1/chat/completions"
-payload = {
-    "model": "/data/Qwen3_1_7B",
-    "messages": [
-        {"role": "user", "content": "Hello, how are you?"}
-    ],
-    "temperature": 0.7,
-    "max_tokens": 2048
-}
-
-response = requests.post(url, json=payload)
-result = response.json()
-print(result["choices"][0]["message"]["content"])
-```
-
-**Streaming request:**
-
-```python
-import requests
-import json
-
-url = "http://localhost:8000/v1/chat/completions"
-payload = {
-    "model": "/data/Qwen3_1_7B",
-    "messages": [
-        {"role": "user", "content": "Tell me a story"}
-    ],
-    "temperature": 0.7,
-    "max_tokens": 2048,
-    "stream": True
-}
-
-response = requests.post(url, json=payload, stream=True)
-
-# Process streaming response
-for line in response.iter_lines():
-    if line:
-        line = line.decode('utf-8')
-        if line.startswith('data: '):
-            data_str = line[6:]  # Remove 'data: ' prefix
-            
-            if data_str.strip() == '[DONE]':
-                break
-            
-            try:
-                data = json.loads(data_str)
-                if 'choices' in data and len(data['choices']) > 0:
-                    delta = data['choices'][0].get('delta', {})
-                    content = delta.get('content', '')
-                    if content:
-                        print(content, end='', flush=True)
-            except json.JSONDecodeError:
-                continue
-
-print()  # New line at end
-```
-
-## Configuration
-
-### Model Path
-
-To use a different model, simply replace the model path in the `vllm serve` command:
-
-```bash
-vllm serve /path/to/your/model
-```
-
-### Server Parameters
-
-Common vLLM server parameters:
-
-```bash
-vllm serve /data/Qwen3_1_7B \
-  --host 0.0.0.0              # Allow external connections
-  --port 8000                 # Server port (default: 8000)
-  --gpu-memory-utilization 0.9  # GPU memory usage (0.0-1.0)
-  --max-model-len 4096        # Maximum sequence length
-  --trust-remote-code         # Allow custom model code
-```
-
-### Request Parameters
-
-- `temperature` (0.0-2.0) - Controls randomness. Higher = more random
-- `max_tokens` - Maximum tokens to generate
-- `top_p` (0.0-1.0) - Nucleus sampling parameter
-- `frequency_penalty` - Reduce repetition
-- `presence_penalty` - Encourage topic diversity
-
 ## Troubleshooting
-
-### Server not starting
-
-Check if the model path exists:
-```bash
-ls -l /data/Qwen3_1_7B
-```
-
-If the model directory doesn't exist or is empty, download it first:
-```bash
-huggingface-cli download Qwen/Qwen3-1.7B --local-dir /data/Qwen3_1_7B
-```
 
 ### Connection refused
 
@@ -422,32 +171,18 @@ pip install -r requirements_gradio.txt
 
 ## Requirements
 
-### For Model Download
-```bash
-pip install -U huggingface_hub
-```
-
 ### For vLLM Server
 - Python 3.8+
 - vLLM installed
 - GPU with sufficient memory
-- Model downloaded to `/data/Qwen3_1_7B` (see Preparation section)
-
-### For Gradio Client
-```bash
-pip install -r requirements_gradio.txt
-```
 
 ## Summary
 
 In this playbook, you learned how to:
 
 - Set up and run vLLM with ROCm support for high-performance LLM inference on AMD GPUs
-- Download and configure language models from Hugging Face for use with vLLM
 - Start and configure a vLLM server with OpenAI-compatible API endpoints on port 8000
 - Test the server using curl commands and API requests
-- Launch and use the Gradio web interface (port 7860) for interactive chat with real-time streaming responses
-- Configure server parameters like GPU memory utilization, model length limits, and multi-GPU support
 - Make API calls to the vLLM server using both streaming and non-streaming requests
 - Troubleshoot common issues with server startup, memory, and client connections
 
