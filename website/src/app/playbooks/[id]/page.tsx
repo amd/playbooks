@@ -11,8 +11,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
-import type { Playbook, Platform, Device, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
-import { formatTime, DEVICE_IDS, deviceNames, extractPlatforms, extractDevices } from "@/types/playbook";
+import type { Playbook, Platform, Device, DeviceCategory, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
+import { formatTime, DEVICE_IDS, deviceNames, extractPlatforms, extractDevices, extractCategories, extractCategoryDevices, DEVICE_CATEGORY_MAP, categoryForDevice } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
 const dropdownStateStore: Record<string, boolean> = {};
@@ -630,7 +630,7 @@ function filterContentByDevice(content: string, device: Device | null): string {
  * The JSON contains per-platform arrays of device IDs where the software is
  * preinstalled, e.g. {"linux":["halo"],"windows":["halo"]}.
  */
-function transformPreinstalledBlocks(content: string, platform: Platform, device: Device | null): string {
+function transformPreinstalledBlocks(content: string, platform: Platform, device: string | null): string {
   if (!content) return "";
   
   const preinstalledPattern = /<!-- @preinstalled:(.*?) -->([\s\S]*?)<!-- @preinstalled:end -->/g;
@@ -1065,10 +1065,12 @@ function DeviceToggle({
   devices,
   selected,
   onChange,
+  nameOverrides,
 }: {
   devices: Device[];
   selected: Device | null;
   onChange: (d: Device | null) => void;
+  nameOverrides?: Partial<Record<Device, string>>;
 }) {
   if (devices.length === 0) return null;
   return (
@@ -1083,7 +1085,36 @@ function DeviceToggle({
               : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
           }`}
         >
-          {deviceNames[d]}
+          {nameOverrides?.[d] ?? deviceNames[d]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function CategoryToggle({
+  categories,
+  selected,
+  onChange,
+}: {
+  categories: { id: DeviceCategory; name: string }[];
+  selected: DeviceCategory | null;
+  onChange: (c: DeviceCategory) => void;
+}) {
+  if (categories.length === 0) return null;
+  return (
+    <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] rounded-lg border border-[#333] flex-wrap">
+      {categories.map((c) => (
+        <button
+          key={c.id}
+          onClick={() => onChange(c.id)}
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+            selected === c.id
+              ? "bg-[#D4915D] text-black"
+              : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
+          }`}
+        >
+          {c.name}
         </button>
       ))}
     </div>
@@ -1192,10 +1223,22 @@ function deviceFromHash(hash?: string): Device | null {
   return hashToDeviceId[hash] ?? (DEVICE_IDS.includes(hash as Device) ? hash as Device : null);
 }
 
-export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string; coverage?: string; run_id?: string; test_device?: string; platform?: string }> }) {
+const CATEGORY_IDS: DeviceCategory[] = ["reference", "apu", "gpu"];
+
+const categoryToHash: Record<DeviceCategory, string> = {
+  reference: "halo",
+  apu: "apu",
+  gpu: "gpu",
+};
+
+export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string; category?: string; coverage?: string; run_id?: string; test_device?: string; platform?: string }> }) {
   const { id } = use(params);
-  const { device: deviceHash, coverage: coverageParam, run_id: runIdParam, test_device: testDeviceParam, platform: platformParam } = use(searchParams);
-  const backHref = deviceHash ? `/#${deviceHash}` : "/#playbooks";
+  const { device: deviceHash, category: categoryParam, coverage: coverageParam, run_id: runIdParam, test_device: testDeviceParam, platform: platformParam } = use(searchParams);
+  const backHref = categoryParam
+    ? `/#${categoryToHash[categoryParam as DeviceCategory] || "playbooks"}`
+    : deviceHash
+      ? `/#${deviceHash}`
+      : "/#playbooks";
 
   const [playbook, setPlaybook] = useState<Playbook | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1203,7 +1246,17 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>(() =>
     platformParam === "linux" ? "linux" : "windows"
   );
-  const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => deviceFromHash(deviceHash) ?? "halo");
+  const [selectedCategory, setSelectedCategory] = useState<DeviceCategory | null>(() => {
+    if (categoryParam && CATEGORY_IDS.includes(categoryParam as DeviceCategory)) {
+      return categoryParam as DeviceCategory;
+    }
+    const dev = deviceFromHash(deviceHash);
+    return dev ? categoryForDevice(dev) : "reference";
+  });
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => {
+    if (categoryParam === "reference") return "halo";
+    return deviceFromHash(deviceHash) ?? "halo";
+  });
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
@@ -1287,17 +1340,30 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbook]);
 
-  // When platform changes, ensure selectedDevice is valid for the new platform.
+  // When category changes, ensure selectedDevice is valid for the new category.
   useEffect(() => {
-    if (!playbook) return;
-    const available = extractDevices(playbook.supported_platforms ?? {}, selectedPlatform);
-    if (available.length > 0 && selectedDevice && !available.includes(selectedDevice)) {
-      setSelectedDevice(available[0]);
-    } else if (available.length > 0 && !selectedDevice) {
-      setSelectedDevice(available[0]);
+    if (!playbook || !selectedCategory) return;
+    const sp = playbook.supported_platforms ?? {};
+    const catInfo = DEVICE_CATEGORY_MAP[selectedCategory];
+    const catDevices = extractCategoryDevices(catInfo, sp);
+    if (catDevices.length > 0 && selectedDevice && !catDevices.includes(selectedDevice)) {
+      setSelectedDevice(catDevices[0]);
+    } else if (catDevices.length > 0 && !selectedDevice) {
+      setSelectedDevice(catDevices[0]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPlatform, playbook?.supported_platforms]);
+  }, [selectedCategory, playbook?.supported_platforms]);
+
+  // When device changes, ensure selectedPlatform is valid for the new device.
+  useEffect(() => {
+    if (!playbook || !selectedDevice) return;
+    const sp = playbook.supported_platforms ?? {};
+    const devicePlatforms = sp[selectedDevice] ?? [];
+    if (devicePlatforms.length > 0 && !devicePlatforms.includes(selectedPlatform)) {
+      setSelectedPlatform(devicePlatforms.includes("windows") ? "windows" : devicePlatforms[0]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDevice, playbook?.supported_platforms]);
 
   // When platform changes, switch selectedTestDevice to the matching composite key.
   // If no device is tested on the new platform, use a synthetic key so stale results
@@ -1324,6 +1390,11 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
     }
   }, [coverageViewActive, selectedTestDevice]);
 
+  const preinstalledDevice: string | null =
+    selectedCategory === "reference" && selectedDevice === "halo"
+      ? "halo_box"
+      : selectedDevice;
+
   // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
   const filteredContent = playbook?.content
     ? transformSetupBlocks(
@@ -1333,7 +1404,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
             selectedDevice
           ),
           selectedPlatform,
-          selectedDevice
+          preinstalledDevice
         )
       )
         // Transform relative image paths in HTML img tags to use the API route
@@ -1746,25 +1817,68 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                   </div>
                 )}
 
-                {/* Platform & Device Toggles */}
-                <div className="flex flex-col gap-3">
-                  {extractPlatforms(playbook.supported_platforms ?? {}).length > 0 && (
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                      <span className="text-sm text-[#6b6b6b]">Platform:</span>
+                {/* Platform Selector */}
+                <div className="inline-flex items-stretch rounded-lg border border-[#2a2a2a] bg-[#161616] divide-x divide-[#2a2a2a]">
+                  {!coverageViewActive && (() => {
+                    const sp = playbook.supported_platforms ?? {};
+                    const cats = extractCategories(sp);
+                    const activeCat = selectedCategory ? DEVICE_CATEGORY_MAP[selectedCategory] : null;
+                    const catDevices = activeCat
+                      ? extractCategoryDevices(activeCat, sp)
+                      : [];
+                    const devicePlatforms = selectedDevice
+                      ? (sp[selectedDevice] ?? [])
+                      : extractPlatforms(sp);
+                    return (
+                      <>
+                        {cats.length > 0 && (
+                          <div className="px-3 py-2">
+                            <div className="text-[10px] text-[#555] mb-1">Device Family</div>
+                            <CategoryToggle
+                              categories={cats}
+                              selected={selectedCategory}
+                              onChange={(c) => {
+                                setSelectedCategory(c);
+                                const info = DEVICE_CATEGORY_MAP[c];
+                                const devs = extractCategoryDevices(info, sp);
+                                if (devs.length > 0 && (!selectedDevice || !devs.includes(selectedDevice))) {
+                                  setSelectedDevice(devs[0]);
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
+                        {activeCat && catDevices.length > 0 && (
+                          <div className="px-3 py-2">
+                            <div className="text-[10px] text-[#555] mb-1">Device</div>
+                            <DeviceToggle
+                              devices={catDevices}
+                              selected={selectedDevice}
+                              onChange={setSelectedDevice}
+                              nameOverrides={activeCat.deviceDisplayNames}
+                            />
+                          </div>
+                        )}
+                        {devicePlatforms.length > 0 && (
+                          <div className="px-3 py-2">
+                            <div className="text-[10px] text-[#555] mb-1">OS</div>
+                            <PlatformToggle
+                              platforms={devicePlatforms}
+                              selected={selectedPlatform}
+                              onChange={setSelectedPlatform}
+                            />
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                  {coverageViewActive && extractPlatforms(playbook.supported_platforms ?? {}).length > 0 && (
+                    <div className="px-3 py-2">
+                      <div className="text-[10px] text-[#555] mb-1">OS</div>
                       <PlatformToggle
                         platforms={extractPlatforms(playbook.supported_platforms ?? {})}
                         selected={selectedPlatform}
                         onChange={setSelectedPlatform}
-                      />
-                    </div>
-                  )}
-                  {!coverageViewActive && (
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                      <span className="text-sm text-[#6b6b6b]">Device:</span>
-                      <DeviceToggle
-                        devices={extractDevices(playbook.supported_platforms ?? {}, selectedPlatform)}
-                        selected={selectedDevice}
-                        onChange={setSelectedDevice}
                       />
                     </div>
                   )}

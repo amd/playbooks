@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import type { Playbook, Platform } from "@/types/playbook";
 import { formatTime, platformNames, extractPlatforms } from "@/types/playbook";
-import { deviceToHash } from "./HeroSection";
 
 function PlatformBadge({ platform }: { platform: Platform }) {
   const icons: Record<Platform, ReactNode> = {
@@ -101,9 +100,9 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
   const regularPlaybooks = filteredPlaybooks.filter((p) => !p.isFeatured || isSearching);
   const displayedPlaybooks = (showAll || isSearching) ? regularPlaybooks : regularPlaybooks.slice(0, 6);
 
-  const isHaloSelected = activeDevice === "stx-halo";
-  const deviceParam = activeDevice && activeDevice !== "all" ? `?device=${deviceToHash[activeDevice] || activeDevice}` : "";
-  const playbookHref = (id: string) => `/playbooks/${id}${deviceParam}`;
+  const isHaloSelected = activeDevice === "reference";
+  const categoryParam = activeDevice && activeDevice !== "all" ? `?category=${activeDevice}` : "";
+  const playbookHref = (id: string) => `/playbooks/${id}${categoryParam}`;
 
   return (
     <section className="py-12 px-6 relative overflow-hidden" id="playbooks">
