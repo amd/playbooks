@@ -7,6 +7,10 @@
     "halo": [
       "windows",
       "linux"
+    ],
+    "halo_box": [
+      "windows",
+      "linux"
     ]
   },
   "tested_platforms": {
@@ -17,6 +21,10 @@
   },
   "required_platforms": {
     "halo": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
       "windows",
       "linux"
     ]
