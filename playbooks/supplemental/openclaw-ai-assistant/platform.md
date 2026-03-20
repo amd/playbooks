@@ -6,35 +6,40 @@ This document describes the expected platform configurations for running this pl
 
 PyTorch with ROCm support will be pre-installed on your AMD Developer Platform. Please refer to the relevant section for your operating system:
 
-### Windows
+## Windows
+
+### ROCm
 
 | Component     | Version         | Notes                             |
 |---------------|-----------------|-----------------------------------|
 | **ROCm**   | 7.1.1 or newer    | Preinstalled, available in PATH   |
 
-### Linux
 
-| Component     | Version         | Notes                             |
-|---------------|-----------------|-----------------------------------|
-| **ROCm**   | 7.1.1 or newer    | Preinstalled, available in PATH   |
+### LM Studio Installation
 
-## Required Models
+LM Studio should be pre-installed:
 
-The following models are tested and optimized for your platform:
+| Component | Version | Location |
+|-----------|---------|----------|
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-| Model | Parameters | Size | Download Location |
-|-------|------------|------|-------------------|
-| **unsloth/gemma-3n-E4B-it** | 8B | ~16GB | Pre-installed on AMD Halo Developer Platform |
+### Required Models
 
-Models will be automatically downloaded to the Hugging Face cache directory:
-- **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
-- **Linux**: `~/.cache/huggingface/hub/`
+The following models should already be present in the LM Studio models directory (`C:\Users\...\.lmstudio\models`):
 
-Ensure at least **20GB free space** for model storage.
+| Model Type | Quantization | Size | Location |
+|------------|--------------|------|----------|
+| Qwen3.5 unsloth/Qwen3.5-35B-A3B-GGUF 35B | `Q4_K_M` | 22 GB | `models\ggml-org` |
+
+---
+
+Ensure at least **30GB free space** for model storage.
 
 ## Network Requirements
 
 Initial setup requires internet access to download models from Hugging Face. After download, the playbook can run offline.
 
-- First-time model downloads may take **5-10 minutes** depending on model size and connection speed
+- First-time model downloads may take **10-15 minutes** depending on model size and connection speed
 - Models are cached locally and don't need to be re-downloaded
