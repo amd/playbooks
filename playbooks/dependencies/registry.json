@@ -9,8 +9,8 @@
       "platforms": ["windows", "linux"],
       "file": "comfyui.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "pytorch": {
@@ -20,8 +20,8 @@
       "platforms": ["windows", "linux"],
       "file": "pytorch.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "lmstudio": {
@@ -31,8 +31,8 @@
       "platforms": ["windows", "linux"],
       "file": "lmstudio.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "vllm": {
@@ -42,8 +42,8 @@
       "platforms": ["linux"],
       "file": "vllm.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "n8n": {
@@ -53,8 +53,8 @@
       "platforms": ["windows", "linux"],
       "file": "n8n.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "vscode": {
@@ -64,8 +64,8 @@
       "platforms": ["windows", "linux"],
       "file": "vscode.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "lemonade": {
@@ -75,8 +75,8 @@
       "platforms": ["windows", "linux"],
       "file": "lemonade.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "gaia": {
@@ -97,8 +97,8 @@
       "platforms": ["windows", "linux"],
       "file": "comfyui_models.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "lmstudio-models-gpt-oss-120b": {
@@ -108,8 +108,8 @@
       "platforms": ["windows", "linux"],
       "file": "lmstudio_models_gpt_oss_120b.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "driver": {
@@ -119,8 +119,8 @@
       "platforms": ["windows", "linux"],
       "file": "driver.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "nodejs": {
@@ -131,8 +131,8 @@
       "platforms": ["windows", "linux"],
       "file": "nodejs.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "memory_config": {
@@ -142,8 +142,8 @@
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     },
     "rocm": {
@@ -153,8 +153,8 @@
       "platforms": ["linux"],
       "file": "rocm.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     }
   },
@@ -165,8 +165,8 @@
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md",
       "preinstalled": {
-        "linux": ["halo"],
-        "windows": ["halo"]
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
       }
     }
   }

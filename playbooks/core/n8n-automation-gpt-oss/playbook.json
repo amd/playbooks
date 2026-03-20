@@ -8,6 +8,10 @@
       "linux",
       "windows"
     ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
     "stx": [
       "linux",
       "windows"
@@ -25,6 +29,10 @@
   },
   "required_platforms": {
     "halo": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
       "windows",
       "linux"
     ]

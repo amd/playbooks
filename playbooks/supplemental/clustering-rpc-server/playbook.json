@@ -7,6 +7,10 @@
     "halo": [
       "linux",
       "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
     ]
   },
   "difficulty": "advanced",
