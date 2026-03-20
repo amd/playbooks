@@ -11,7 +11,7 @@ This script validates that all playbooks:
 2. Follow the contract defined in website/src/types/playbook.ts
 3. Have valid JSON in playbook.json
 4. Have consistent IDs (folder name should match id in playbook.json)
-5. Have asset files within size limits (max 500 KB per file)
+5. Have asset files within size limits (max 500 KB per file, 5 MB for audio)
 """
 
 import json
@@ -55,6 +55,9 @@ VALID_DIFFICULTIES = ["beginner", "intermediate", "advanced"]
 # Asset constraints
 MAX_ASSET_SIZE_KB = 500
 MAX_ASSET_SIZE_BYTES = MAX_ASSET_SIZE_KB * 1024
+AUDIO_EXTENSIONS = {".mp3", ".wav"}
+MAX_AUDIO_SIZE_KB = 5 * 1024
+MAX_AUDIO_SIZE_BYTES = MAX_AUDIO_SIZE_KB * 1024
 
 # ============================================================================
 # Styling
@@ -182,15 +185,19 @@ def validate_asset_sizes(
         if not asset.is_file():
             continue
 
+        is_audio = asset.suffix.lower() in AUDIO_EXTENSIONS
+        max_bytes = MAX_AUDIO_SIZE_BYTES if is_audio else MAX_ASSET_SIZE_BYTES
+        max_kb = MAX_AUDIO_SIZE_KB if is_audio else MAX_ASSET_SIZE_KB
+
         file_size = asset.stat().st_size
-        if file_size > MAX_ASSET_SIZE_BYTES:
+        if file_size > max_bytes:
             size_kb = file_size / 1024
             result.add_error(
                 playbook_name,
                 f'Asset file too large: "{asset.name}"\n'
                 f"       Size: {size_kb:.1f} KB\n"
-                f"       Maximum allowed: {MAX_ASSET_SIZE_KB} KB\n"
-                "       Please compress or resize the image.",
+                f"       Maximum allowed: {max_kb} KB\n"
+                "       Please compress or resize the file.",
             )
 
 
