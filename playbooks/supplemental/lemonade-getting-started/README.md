@@ -40,6 +40,131 @@ Before you begin, make sure you have:
 
 <!-- @require:lemonade-server -->
 
+<!-- @test:id=lemonade-version timeout=60 hidden=True -->
+```bash
+lemonade-server --version
+```
+<!-- @test:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-chat-gemma-windows timeout=1200 hidden=True -->
+```powershell
+$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
+try {
+  # Wait for server to come up
+  $modelsJson = $null
+  for ($i=0; $i -lt 120; $i++) {
+    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
+    if ($modelsJson) { break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
+  Write-Host "OK: Lemonade server is responding"
+
+  # Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
+  $parsed = $modelsJson | ConvertFrom-Json
+  $entry  = $parsed.data | Where-Object { $_.id -eq "Gemma-3-4b-it-GGUF" } | Select-Object -First 1
+  if (-not $entry) { throw "Model Gemma-3-4b-it-GGUF is not present in Lemonade /api/v1/models." }
+  if (-not $entry.downloaded) { throw "Model Gemma-3-4b-it-GGUF is present but not downloaded in Lemonade. Please download it." }
+  Write-Host "OK: Gemma-3-4b-it-GGUF model is downloaded in Lemonade"
+
+  # Model chat test
+  $body = @{
+    model = "Gemma-3-4b-it-GGUF"
+    messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+    temperature = 0
+    max_tokens = 32
+  } | ConvertTo-Json -Depth 5
+  $out = curl.exe -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+  if (-not $out) { throw "Empty response from Lemonade chat/completions" }
+} finally {
+  & lemonade-server stop
+  Start-Sleep -Seconds 2
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-chat-gemma-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+p=""
+cleanup() {
+  lemonade-server stop >/dev/null 2>&1 || true
+  sleep 2
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+lemonade-server serve --host 127.0.0.1 --port 8000 >/tmp/lemonade-test.log 2>&1 &
+p=$!
+
+models_json=""
+for i in $(seq 1 120); do
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/models || true)"
+  if [ -n "$models_json" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$models_json" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:8000"
+  exit 1
+fi
+echo "OK: Lemonade server is responding"
+
+export MODELS_JSON="$models_json"
+python3 - <<'PY'
+import json
+import os
+import sys
+
+data = json.loads(os.environ["MODELS_JSON"])
+entry = None
+for item in data.get("data", []):
+    if item.get("id") == "Gemma-3-4b-it-GGUF":
+        entry = item
+        break
+
+if entry is None:
+    print("Model Gemma-3-4b-it-GGUF is not present in Lemonade /api/v1/models.")
+    sys.exit(1)
+
+if not entry.get("downloaded", False):
+    print("Model Gemma-3-4b-it-GGUF is present but not downloaded in Lemonade. Please download it.")
+    sys.exit(1)
+
+print("OK: Gemma-3-4b-it-GGUF model is downloaded in Lemonade")
+PY
+
+body='{
+  "model": "Gemma-3-4b-it-GGUF",
+  "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
+  "temperature": 0,
+  "max_tokens": 32
+}'
+
+out="$(curl -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d "$body" || true)"
+
+if [ -z "$out" ]; then
+  echo "Empty response from Lemonade chat/completions"
+  exit 1
+fi
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 ---
 
 ## Getting Started
@@ -179,9 +304,29 @@ lemonade-server serve
 
 In a terminal, install the OpenAI Python Client using the following command:
 
-```
+<!-- @test:id=pip-install-openai timeout=300 -->
+```bash
 pip install openai
 ```
+<!-- @test:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=python-openai-import-windows timeout=120 hidden=True -->
+```powershell
+python --version
+python -c "from openai import OpenAI; print('OK')"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=python-openai-import-linux timeout=120 hidden=True -->
+```bash
+python3 --version
+python3 -c "from openai import OpenAI; print('OK')"
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 ### Step 6: Build the Flashcard App
 
@@ -285,6 +430,143 @@ while True:
     except (json.JSONDecodeError, KeyError):
         print("The model returned an unexpected format. Try again!\n")
 ```
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-python-smoke-windows timeout=600 hidden=True -->
+```powershell
+$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
+try {
+  # Wait for server to come up
+  $modelsJson = $null
+  for ($i=0; $i -lt 120; $i++) {
+    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
+    if ($modelsJson) { break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
+  Write-Host "OK: Lemonade server is responding"
+
+  $script = @'
+from openai import OpenAI
+import json
+
+client = OpenAI(base_url="http://127.0.0.1:8000/api/v1", api_key="lemonade")
+
+resp = client.chat.completions.create(
+    model="Gemma-3-4b-it-GGUF",
+    messages=[
+        {
+            "role": "system",
+            "content": "Return ONLY valid JSON: [{\"question\":\"...\",\"answer\":\"...\"}]"
+        },
+        {
+            "role": "user",
+            "content": "Create 2 flashcards about the solar system"
+        }
+    ],
+    temperature=0,
+    max_tokens=500,
+)
+
+text = resp.choices[0].message.content.strip()
+if text.startswith("```"):
+    text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+
+cards = json.loads(text)
+assert isinstance(cards, list) and len(cards) >= 1
+assert "question" in cards[0] and "answer" in cards[0]
+print("OK")
+'@
+
+  Set-Content -Path lemonade_python_smoke.py -Value $script
+  python lemonade_python_smoke.py
+} finally {
+  Remove-Item lemonade_python_smoke.py -ErrorAction SilentlyContinue
+  & lemonade-server stop
+  Start-Sleep -Seconds 2
+  if ($p -and -not $p.HasExited) {
+    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+  }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-python-smoke-linux timeout=600 hidden=True -->
+```bash
+set -euo pipefail
+
+p=""
+cleanup() {
+  rm -f /tmp/lemonade_python_smoke.py
+  lemonade-server stop >/dev/null 2>&1 || true
+  sleep 2
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+lemonade-server serve --host 127.0.0.1 --port 8000 >/tmp/lemonade-python-test.log 2>&1 &
+p=$!
+
+models_json=""
+for i in $(seq 1 120); do
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/models || true)"
+  if [ -n "$models_json" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$models_json" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:8000"
+  exit 1
+fi
+echo "OK: Lemonade server is responding"
+
+cat >/tmp/lemonade_python_smoke.py <<'PY'
+from openai import OpenAI
+import json
+
+client = OpenAI(base_url="http://127.0.0.1:8000/api/v1", api_key="lemonade")
+
+resp = client.chat.completions.create(
+    model="Gemma-3-4b-it-GGUF",
+    messages=[
+        {
+            "role": "system",
+            "content": "Return ONLY valid JSON: [{\"question\":\"...\",\"answer\":\"...\"}]"
+        },
+        {
+            "role": "user",
+            "content": "Create 2 flashcards about the solar system"
+        }
+    ],
+    temperature=0,
+    max_tokens=200,
+)
+
+text = resp.choices[0].message.content.strip()
+if text.startswith("```"):
+    text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+
+cards = json.loads(text)
+assert isinstance(cards, list) and len(cards) >= 1
+assert "question" in cards[0] and "answer" in cards[0]
+print("OK")
+PY
+
+python3 /tmp/lemonade_python_smoke.py
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 
 ### Step 7: Run It
 
