@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggml-org/llama.cpp) and also provides an [OpenAI compliant endpoint](https://lmstudio.ai/docs/developer/openai-compat) for local model serving. LM Studio provides a simple but powerful interface to easily download and deploy models. LM Studio offers both Vulkan and ROCm based backends (called runtimes) for AMD users.
+LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggml-org/llama.cpp) and also provides an [OpenAI compliant endpoint](https://lmstudio.ai/docs/developer/openai-compat) for local model serving. LM Studio provides a simple but powerful interface to easily download and deploy models. Currently, AMD recommends using the Vulkan backend with LMStudio workflows.
 
 
 ## What You'll Learn
@@ -231,11 +231,6 @@ lms server stop
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
-
-#### (Optional): Swapping between ROCm and Vulkan backends
-
-1. Press `Ctrl + Shift + R` on your keyboard. Alternatively click on the `Discover` tab (Magnifying Glass) on the left-hand side and then click on `Runtime` in the pop up.   
-2. You should then see `Runtime Selections`, where the dropdown menu can be changed to ROCm or Vulkan llama.cpp.
 
 
 ## Next Steps
