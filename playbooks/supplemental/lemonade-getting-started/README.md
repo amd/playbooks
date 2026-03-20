@@ -304,16 +304,51 @@ lemonade-server serve
 
 In a terminal, install the OpenAI Python Client using the following command:
 
-<!-- @test:id=pip-install-openai timeout=300 -->
-```bash
-pip install openai
+<!-- @os:windows -->
+<!-- @test:id=env-check-windows timeout=300 -->
+```powershell
+python --version
+where.exe python
+where.exe pip
+python -c "import sys; print(sys.executable)"
+python -m pip --version
+python -m pip install openai
 ```
 <!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=env-check-linux timeout=300 -->
+```bash
+python3 --version
+which python3
+which pip3
+python3 -c "import sys; print(sys.executable)"
+python3 -m pip --version
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=pip-install-openai-windows timeout=300 -->
+```powershell
+python -m pip install openai
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=pip-install-openai-linux timeout=300 -->
+```bash
+python3 -m pip install openai
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @test:id=python-openai-import-windows timeout=120 hidden=True -->
 ```powershell
-python --version
+python -m pip show openai
 python -c "from openai import OpenAI; print('OK')"
 ```
 <!-- @test:end -->
@@ -322,7 +357,7 @@ python -c "from openai import OpenAI; print('OK')"
 <!-- @os:linux -->
 <!-- @test:id=python-openai-import-linux timeout=120 hidden=True -->
 ```bash
-python3 --version
+python3 -m pip show openai
 python3 -c "from openai import OpenAI; print('OK')"
 ```
 <!-- @test:end -->
