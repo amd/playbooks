@@ -1340,36 +1340,30 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbook]);
 
-  // When platform or category changes, ensure selectedDevice is valid.
+  // When category changes, ensure selectedDevice is valid for the new category.
   useEffect(() => {
-    if (!playbook) return;
+    if (!playbook || !selectedCategory) return;
     const sp = playbook.supported_platforms ?? {};
-
-    // Re-validate category for the new platform
-    const cats = extractCategories(sp, selectedPlatform);
-    if (cats.length > 0 && selectedCategory && !cats.some(c => c.id === selectedCategory)) {
-      setSelectedCategory(cats[0].id);
-      return; // will re-fire when selectedCategory updates
-    }
-
-    const catInfo = selectedCategory ? DEVICE_CATEGORY_MAP[selectedCategory] : null;
-    if (catInfo) {
-      const catDevices = extractCategoryDevices(catInfo, sp, selectedPlatform);
-      if (catDevices.length > 0 && selectedDevice && !catDevices.includes(selectedDevice)) {
-        setSelectedDevice(catDevices[0]);
-      } else if (catDevices.length > 0 && !selectedDevice) {
-        setSelectedDevice(catDevices[0]);
-      }
-    } else {
-      const available = extractDevices(sp, selectedPlatform);
-      if (available.length > 0 && selectedDevice && !available.includes(selectedDevice)) {
-        setSelectedDevice(available[0]);
-      } else if (available.length > 0 && !selectedDevice) {
-        setSelectedDevice(available[0]);
-      }
+    const catInfo = DEVICE_CATEGORY_MAP[selectedCategory];
+    const catDevices = extractCategoryDevices(catInfo, sp);
+    if (catDevices.length > 0 && selectedDevice && !catDevices.includes(selectedDevice)) {
+      setSelectedDevice(catDevices[0]);
+    } else if (catDevices.length > 0 && !selectedDevice) {
+      setSelectedDevice(catDevices[0]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPlatform, selectedCategory, playbook?.supported_platforms]);
+  }, [selectedCategory, playbook?.supported_platforms]);
+
+  // When device changes, ensure selectedPlatform is valid for the new device.
+  useEffect(() => {
+    if (!playbook || !selectedDevice) return;
+    const sp = playbook.supported_platforms ?? {};
+    const devicePlatforms = sp[selectedDevice] ?? [];
+    if (devicePlatforms.length > 0 && !devicePlatforms.includes(selectedPlatform)) {
+      setSelectedPlatform(devicePlatforms.includes("windows") ? "windows" : devicePlatforms[0]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDevice, playbook?.supported_platforms]);
 
   // When platform changes, switch selectedTestDevice to the matching composite key.
   // If no device is tested on the new platform, use a synthetic key so stale results
@@ -1818,37 +1812,30 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                   </div>
                 )}
 
-                {/* Platform, Category & Device Toggles */}
-                <div className="flex flex-col gap-3">
-                  {extractPlatforms(playbook.supported_platforms ?? {}).length > 0 && (
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                      <span className="text-sm text-[#6b6b6b]">Platform:</span>
-                      <PlatformToggle
-                        platforms={extractPlatforms(playbook.supported_platforms ?? {})}
-                        selected={selectedPlatform}
-                        onChange={setSelectedPlatform}
-                      />
-                    </div>
-                  )}
+                {/* Platform Selector */}
+                <div className="inline-flex items-stretch rounded-lg border border-[#2a2a2a] bg-[#161616] divide-x divide-[#2a2a2a]">
                   {!coverageViewActive && (() => {
                     const sp = playbook.supported_platforms ?? {};
-                    const cats = extractCategories(sp, selectedPlatform);
+                    const cats = extractCategories(sp);
                     const activeCat = selectedCategory ? DEVICE_CATEGORY_MAP[selectedCategory] : null;
                     const catDevices = activeCat
-                      ? extractCategoryDevices(activeCat, sp, selectedPlatform)
+                      ? extractCategoryDevices(activeCat, sp)
                       : [];
+                    const devicePlatforms = selectedDevice
+                      ? (sp[selectedDevice] ?? [])
+                      : extractPlatforms(sp);
                     return (
                       <>
                         {cats.length > 0 && (
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                            <span className="text-sm text-[#6b6b6b]">Hardware:</span>
+                          <div className="px-3 py-2">
+                            <div className="text-[10px] text-[#555] mb-1">Device Family</div>
                             <CategoryToggle
                               categories={cats}
                               selected={selectedCategory}
                               onChange={(c) => {
                                 setSelectedCategory(c);
                                 const info = DEVICE_CATEGORY_MAP[c];
-                                const devs = extractCategoryDevices(info, sp, selectedPlatform);
+                                const devs = extractCategoryDevices(info, sp);
                                 if (devs.length > 0 && (!selectedDevice || !devs.includes(selectedDevice))) {
                                   setSelectedDevice(devs[0]);
                                 }
@@ -1857,8 +1844,8 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                           </div>
                         )}
                         {activeCat && catDevices.length > 0 && (
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                            <span className="text-sm text-[#6b6b6b]">Device:</span>
+                          <div className="px-3 py-2">
+                            <div className="text-[10px] text-[#555] mb-1">Device</div>
                             <DeviceToggle
                               devices={catDevices}
                               selected={selectedDevice}
@@ -1867,9 +1854,29 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                             />
                           </div>
                         )}
+                        {devicePlatforms.length > 0 && (
+                          <div className="px-3 py-2">
+                            <div className="text-[10px] text-[#555] mb-1">OS</div>
+                            <PlatformToggle
+                              platforms={devicePlatforms}
+                              selected={selectedPlatform}
+                              onChange={setSelectedPlatform}
+                            />
+                          </div>
+                        )}
                       </>
                     );
                   })()}
+                  {coverageViewActive && extractPlatforms(playbook.supported_platforms ?? {}).length > 0 && (
+                    <div className="px-3 py-2">
+                      <div className="text-[10px] text-[#555] mb-1">OS</div>
+                      <PlatformToggle
+                        platforms={extractPlatforms(playbook.supported_platforms ?? {})}
+                        selected={selectedPlatform}
+                        onChange={setSelectedPlatform}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Tags */}
