@@ -32,7 +32,6 @@ OpenClaw is built for developers who want powerful AI agents without relying on 
 <!-- @require:qwen3.5-32b-a3b -->
 
 
-
 ## LM Studio configuration and Server setup
 
 ### Initial setup
@@ -70,8 +69,10 @@ Open a powershell window as administrator.
 ```bash
 wsl --install -d Ubuntu-24.04
 ```
+
 Install Ubuntu (if you are running this command for the first time, WSL will get installed first):
 Create a username and password. Run updates. You may be prompted to enter the password and press Y to continue:
+
 ```bash
 sudo apt update && sudo apt upgrade
 ```
@@ -85,9 +86,13 @@ EOF
 ```
 
 Open a second powershell terminal (as administrator) and run:  'wsl --shutdown'. 
+
 Go back to the original powershell terminal (stay here from now on) and run: 'wsl.exe'
+
 Verify systemd is running by executing: 'ps -p 1 -o comm='
+
 If you recieved "systemd" as the response, you can proceed and add to path:
+
 ```bash
 mkdir -p ~/.config/systemd/user ~/.npm-global
 
@@ -119,27 +124,32 @@ curl -fsSL https://openclaw.ai/install.sh | bash
 ```
 
 ## Configuring OpenClaw with a local LLM
-Read the security warning and press the left arrow key to navigate to Yes and hit Enter to continue. Hit enter again to select Quick Start. \\ 
-Press the down arrow key to scroll down till you "Custom Provider" and click enter. \\
+Read the security warning and press the left arrow key to navigate to Yes and hit Enter to continue. Hit enter again to select Quick Start. 
+
+Press the down arrow key to scroll down till you "Custom Provider" and click enter. 
+
 Open LM Studio again - notice the section on the right which says API Usage. Copy the address  below "Local server is reachable at" and paste this (Tip: right click while the Powershell window is focused to automatically paste your clipboard) into the powershell window:
 
 ![alt text](assets/image-3.png)
 
-* Press enter on "Paste API Key Now" and enter "lmstudio" - don't leave this blank even though it is not required. 
+Press enter on "Paste API Key Now" and enter "lmstudio" - don't leave this blank even though it is not required. 
 
-* Select "Anthropic-compatible API" and press enter. Navigate back over to the LM Studio "API Usage" section and copy the model name exactly. Paste this in the window for the Model ID and press enter: 'qwen/qwen3.5-35b-a3b'
+Select "Anthropic-compatible API" and press enter. Navigate back over to the LM Studio "API Usage" section and copy the model name exactly. Paste this in the window for the Model ID and press enter: 'qwen/qwen3.5-35b-a3b'
 
 ![alt text](assets/image-4.png)
-* At this point OpenClaw will verify the connection and say "Verification Succesful" and prompt you for a Endpoint ID and then a Model alias. Add both of those: like 'qwen35b'
-* This is the point where you configure your communication channel with your bot. Before you proceed ensure you have the tokens and authentications already sorted. 
 
-* We now need to configure the web search API. You can either skip this step or sign up for an API like Brave - which offers a lot of calls for just $5. 
+At this point OpenClaw will verify the connection and say "Verification Succesful" and prompt you for a Endpoint ID and then a Model alias. Add both of those: like 'qwen35b'
+
+This is the point where you configure your communication channel with your bot. Before you proceed ensure you have the tokens and authentications already sorted. 
+
+We now need to configure the web search API. You can either skip this step or sign up for an API like Brave - which offers a lot of calls for just $5. 
 
 We will now select some starting skills: himalaya, blogwatcher, nanopdf and clawhub (don't worry if you cannot find clawhub in the list - do not worry - you can set it up later). If it prompts you - select npm - and continue installing. 
 
 ![alt text](assets/image-5.png)
-* If you prefer cloud access, add it now otherwise select NO to all the API key requests. 
-* Select boot-md, command-logger and session-memory in hooks and click enter:
+*If you prefer cloud access, add it now otherwise select NO to all the API key requests. 
+
+*Select boot-md, command-logger and session-memory in hooks and click enter:
 
 ![alt text](assets/image-6.png)
 
@@ -155,24 +165,29 @@ Lets do some house-keeping: You are running locally using LM Studio and a Qwen m
 ```
 ![alt text](assets/image-8.png)
 
-* Wait for the gateway to reconnect and show as idle. The model will stop talking at this point. type /new in the TUI and the correct context limit will now show up in the terminal. 
+Wait for the gateway to reconnect and show as idle. The model will stop talking at this point. type /new in the TUI and the correct context limit will now show up in the terminal. 
+
 ```bash
 /new
 ```
-* We now need to enable the local embedding model for functional memory.md. To do this, send the following prompt:
+We now need to enable the local embedding model for functional memory.md. To do this, send the following prompt:
+
 ```text
 Perfect! that is all done. Lets setup and validate memory.md now. Please read the docs. Specifically, we need to configure the embedding model – which by default is cloud based. We need to configure this to the local embedding model – which includes the memorysearch parameter in openclaw.json and should trigger a download of the local embeddding model. Once done – please validate its working along with the entire memory.md system.
 ```
-* When the gateway restarts - the model cannot tell it has restarted - just prompt the model again with "the gateway has restarted". OpenClaw will download the local embedding model and set it up properly. 
+
+When the gateway restarts - the model cannot tell it has restarted - just prompt the model again with "the gateway has restarted". OpenClaw will download the local embedding model and set it up properly. 
 
 
-* You should get confirmation of the memory system being fully functional.
+You should get confirmation of the memory system being fully functional.
+
 Optional: If you were not able to install the clawhub skill at the beginning, do this now, otherwise skip this step:
 
-
 ## Enabling OpenClaw to use Chrome (visible)
-* We will now setup browser use (that the user can see) inside of WSL2. Open up a seperate powershell window: 'wsl.exe'
-* Run the following command to install the browser extension in your workspace; Run apt update; Download and install Chrome:
+We will now setup browser use (that the user can see) inside of WSL2. Open up a seperate powershell window: 'wsl.exe'
+
+Run the following command to install the browser extension in your workspace; Run apt update; Download and install Chrome:
+
 ```bash
 openclaw browser extension install
 
@@ -189,11 +204,17 @@ openclaw dashboard
 This will open up the browser for the first time. Accept and chose whether you want to sign in. Keep this browser open now. 
 
 Go back to the powershell window and copy the dashboard token (the part after "#token=") 
+
 ![alt text](assets/image-9.png)
+
 Navigate to Extensions > Turn on Developer Mode > Click on Load Unpacked Extensions
+
 ![alt text](assets/image-10.png)
-* Press Ctrl+H to make dot domains show up and click on .openclaw > browser > chrome extension and while in this folder click on open. 
-* The following page will show up asking for the token. Provide the token and click save. It should say relay reachable and authenticated: 
+
+Press Ctrl+H to make dot domains show up and click on .openclaw > browser > chrome extension and while in this folder click on open.
+
+The following page will show up asking for the token. Provide the token and click save. It should say relay reachable and authenticated: 
+
 ![alt text](assets/image-11.png)
 
 Click on the extension icon in the toolbar (jigsaw puzzle) and click on the OpenClaw Browser Relay to turn it on. You should get a notification of "OpenClaw Browser Relay started debugging this browser.
@@ -202,11 +223,12 @@ Send the following prompt in the TUI now:
 ```text
 I just configured you with the chrome browser relay extension. can you verify its working by navigating to amd.com
 ```
+
 Your OpenClaw agent now has a browser that it can use (and you can observe)!
 ![alt text](assets/image-12.png)
 
-
 You can also explore more tools in below table and give access to them for more complicated tasks.
+
 ![alt text](assets/tools.png)
 
 ## Next Steps
