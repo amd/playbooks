@@ -24,7 +24,7 @@ The following models are tested and optimized for your platform:
 
 | Model | Parameters | Size | Download Location |
 |-------|------------|------|-------------------|
-| **google/gemma-3n-E4B-it** | 8B | ~16GB | Pre-installed on AMD Halo Developer Platform |
+| **unsloth/gemma-3n-E4B-it** | 8B | ~16GB | Download from HF
 
 Models will be automatically downloaded to the Hugging Face cache directory:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
