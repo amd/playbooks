@@ -182,7 +182,7 @@ AMD Radeon GPUs execute threads in groups of 32 threads, called a wavefront.
 This allows the GPU scheduler to keep multiple wavefronts active within a single block, which improves scheduling efficiency and helps keep compute units busy.
 
 **How it works:**
-<!-- @test:id=test-vector-addition timeout=300 setup=activate-venv-->
+<!-- @test:id=test-vector-addition timeout=300 setup=activate-venv -->
 ```python
 import torch
 
@@ -233,7 +233,7 @@ Final value:    200,001.0  (per element)
 The inner `for (int i = 0; i < 1000; i++)` loop is artificial, its only purpose is to make each kernel launch run long enough for `rocm-smi` to capture meaningful utilization. Without it, 200 launches over 100M elements would complete near-instantly and the sampling thread would likely read very low GPU utilization.
 
 **Run:**
-<!-- @test:id=run-vector-addition-add-one-kernel-py timeout=600 setup=activate-venv-->
+<!-- @test:id=run-vector-addition-add-one-kernel-py timeout=600 setup=activate-venv -->
 ```bash
 python "assets/Vector_Addition/add_one_kernel.py"
 ```
