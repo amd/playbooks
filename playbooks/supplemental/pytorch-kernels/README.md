@@ -115,14 +115,6 @@ HIP is designed to be syntactically close to CUDA. Most CUDA code can be transla
 ### PyTorch + AMD/HIP
 
 PyTorch ships a ROCm build where the CUDA API surface (`torch.cuda.*`) is transparently backed by HIP. This means:
-<!-- @test:id=verify-torch timeout=30 hidden=True -->
-```python
-import torch
-torch.cuda.is_available()
-tensor.to("cuda")
-torch.version.hip
-```
-<!-- @test:end -->
 
 - `torch.cuda.is_available()` works on AMD GPUs with ROCm
 - `tensor.to("cuda")` allocates on the AMD GPU
