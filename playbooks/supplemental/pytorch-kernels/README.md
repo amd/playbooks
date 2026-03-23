@@ -126,11 +126,6 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 
 ## Setup
 
-### Installing Dependencies
-<!-- @require:pytorch -->
-
----
-
 ### Create a Virtual Environment
 <!-- @os:windows -->
 <!-- @test:id=create-venv timeout=60 -->
@@ -155,6 +150,14 @@ source llm-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
 <!-- @os:end -->
+---
+
+### Installing Dependencies
+<!-- @test:id=install-torch-linux timeout=900 hidden=True setup=activate-venv -->
+```bash
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0+rocm7.13.0a20260317 torchaudio==2.10.0+rocm7.13.0a20260317 torchvision==0.25.0+rocm7.13.0a20260317 --force-reinstall
+```
+<!-- @test:end --> 
 ---
 
 ## Walkthroughs
@@ -290,7 +293,7 @@ add_one<<<grid_size, block_size>>>(data, n);
 the CPU immediately continues executing the next instruction without waiting for the GPU to finish. `hipDeviceSynchronize()` forces the CPU to block until the GPU kernel completes.
 
 **Step 2: Build** ([setup.py](assets/Vector_Addition/setup.py)):
-<!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup="source ../llm-env/bin/activate" workdir="Vector_Addition" -->
+<!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup=activate-venv workdir="Vector_Addition" -->
 ```bash
 python setup.py build_ext --inplace
 ```
@@ -527,7 +530,7 @@ Compared to `add_one_launcher` in Walkthrough 1, the launcher here:
 
 **Step 2: Build** ([setup.py](assets/Matrix_Multiplication/setup.py)):
 
-<!-- @test:id=run-matmul-kernel-cu timeout=800 setup="source ../llm-env/bin/activate" workdir="Matrix_Multiplication" -->
+<!-- @test:id=run-matmul-kernel-cu timeout=800 setup=activate-venv workdir="Matrix_Multiplication" -->
 ```bash
 python setup.py build_ext --inplace
 ```
