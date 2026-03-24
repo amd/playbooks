@@ -13,13 +13,15 @@ This playbook teaches you how to use Unsloth for practical fine-tuning workflows
 - How to save the fine-tuned result in local storage
 
 ## Why Unsloth?
-Fine-tuning large language models has traditionally required significant compute resources and costly infrastructure. Unsloth makes this process practical and accessible.
+Fine-tuning large language models no longer requires massive compute or complex infrastructure—Unsloth focuses on making it fast and memory-efficient.
 
-A key advantage of Unsloth is its strong support for parameter-efficient methods. With PEFT and QLoRA, only a small subset of parameters needs to be trained, significantly reducing memory requirements and training time while maintaining model performance. 
+A key strength of Unsloth lies in its VRAM optimization and accelerated training pipeline. By leveraging techniques such as optimized kernels and parameter-efficient fine-tuning (PEFT), it significantly reduces memory usage while enabling much faster training compared to standard approaches.
 
-Unsloth also supports GRPO-based reinforcement learning. Beyond imitation learning, developers can directly optimize model behavior toward domain-specific objectives, such as generating investor-focused financial summaries or emphasizing risk signals.
+In this project, we primarily adopt Supervised Fine-Tuning (SFT) with QLoRA, where only a small subset of parameters is updated. This allows us to fine-tune large models on consumer-grade hardware without sacrificing performance.
 
-Unsloth bridges the gap between cutting-edge research and practical deployment, enabling developers to turn general-purpose foundation models into domain-specialized systems.
+Beyond SFT, Unsloth also supports GRPO-based reinforcement learning, enabling further alignment toward domain-specific objectives when needed.
+
+Overall, Unsloth bridges the gap between research and real-world deployment—making it practical to adapt foundation models into specialized systems efficiently.
 
 ## Set up your environment
 
