@@ -1,0 +1,39 @@
+{
+  "id": "unsloth-llms-finetuning",
+  "title": "Optimized LLMs Fine-tuning with Unsloth",
+  "description": "Use Unsloth for memory-efficient fine-tune LLMs on STX Halo™",
+  "time": 60,
+  "supported_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
+      "windows",
+      "linux"
+    ]
+  },
+  "tested_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
+      "windows",
+      "linux"
+    ]
+  },
+  "difficulty": "advanced",
+  "isNew": false,
+  "isFeatured": false,
+  "developed": false,
+  "published": true,
+  "tags": ["unsloth", "sft", "fine-tuning", "optimization"],
+  "coverImage": "assets/unsloth.png"
+}
