@@ -34,6 +34,131 @@ uv pip install amd-gaia
 
 <!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=install-uv-windows timeout=300 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+if (Get-Command uv -ErrorAction SilentlyContinue) {
+Write-Host "uv already available on PATH"
+uv --version
+exit 0
+}
+
+Write-Host "uv not found. Installing..."
+powershell -ExecutionPolicy Bypass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+$uvBin = Join-Path $env:USERPROFILE ".local\bin"
+if (Test-Path $uvBin) {
+$env:PATH = "$uvBin;$env:PATH"
+}
+
+if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
+throw "uv install completed but uv is still not on PATH"
+}
+
+uv --version
+where.exe uv
+Write-Host "OK: uv installed and available on PATH"
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+<!-- @os:linux -->
+<!-- @test:id=install-uv-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+
+if command -v uv >/dev/null 2>&1; then
+echo "uv already available on PATH"
+uv --version
+exit 0
+fi
+
+echo "uv not found. Installing..."
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+export PATH="$HOME/.local/bin:$PATH"
+
+command -v uv >/dev/null 2>&1
+uv --version
+which uv
+echo "OK: uv installed and available on PATH"
+
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+
+<!-- @os:windows -->
+<!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
+```powershell
+python --version
+where.exe python
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+<!-- @os:linux -->
+<!-- @test:id=python-env-check-linux timeout=30 hidden=True -->
+```bash
+set -euo pipefail
+python3 --version
+which python3
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+
+<!-- @os:linux -->
+<!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+
+if ! command -v lspci >/dev/null 2>&1; then
+echo "lspci not found. Installing pciutils..."
+sudo apt update
+sudo apt install -y pciutils
+fi
+
+command -v lspci >/dev/null 2>&1
+lspci | head -n 5
+echo "OK: lspci is available"
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+
+<!-- @os:windows --> 
+<!-- @test:id=gaia-create-venv-install-windows timeout=600 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+$uvBin = Join-Path $env:USERPROFILE ".local\bin"
+if (Test-Path $uvBin) { $env:PATH = "$uvBin;$env:PATH" }
+uv venv .venv
+.\.venv\Scripts\Activate.ps1
+uv pip install amd-gaia
+gaia --version
+python -c "import gaia; print('OK')"
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+<!-- @os:linux --> 
+<!-- @test:id=gaia-create-venv-install-linux timeout=600 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+uv venv .venv
+source .venv/bin/activate
+uv pip install amd-gaia
+gaia --version
+python3 -c "import gaia; print('OK')"
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+
 #### Initializing GAIA
 
 After installation, run `gaia init` to set up Lemonade Server and download models:
@@ -43,6 +168,76 @@ gaia init
 ```
 
 This installs Lemonade Server, downloads the default models, and verifies the setup.
+
+<!-- @test:id=gaia-lemonade-version timeout=60 hidden=True -->
+```bash
+lemonade-server --version
+```
+<!-- @test:end --> 
+
+<!-- @os:windows -->
+<!-- @test:id=gaia-lemonade-health-windows timeout=300 hidden=True -->
+```powershell
+$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
+try {
+  $health = $null
+  for ($i=0; $i -lt 120; $i++) {
+    $health = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/health
+    if ($health) { break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:8000/api/v1/health" }
+  Write-Host "OK: Lemonade server health endpoint responded"
+} finally {
+  & lemonade-server stop
+  Start-Sleep -Seconds 2
+  if ($p -and -not $p.HasExited) {
+    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+  }
+}
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+<!-- @os:linux -->
+<!-- @test:id=gaia-lemonade-health-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+
+p=""
+cleanup() {
+  lemonade-server stop >/dev/null 2>&1 || true
+  sleep 2
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+lemonade-server serve --host 127.0.0.1 --port 8000 >/tmp/gaia-lemonade.log 2>&1 &
+p=$!
+
+health=""
+for i in $(seq 1 120); do
+  health="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/health || true)"
+  if [ -n "$health" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$health" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:8000/api/v1/health"
+  exit 1
+fi
+
+echo "OK: Lemonade server health endpoint responded"
+
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
 
 #### Verifying Installation
 
