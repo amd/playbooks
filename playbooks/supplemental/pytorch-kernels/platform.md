@@ -38,13 +38,29 @@ amd-smi           # should fail or report no ROCm
 ls -l /opt/rocm   # should not exist
 ```
 
-### Install ROCm 7.2
+### Install ROCm Python packages via pip
 
 ```bash
-sudo apt update
-wget https://repo.radeon.com/amdgpu-install/7.2/ubuntu/noble/amdgpu-install_7.2.70200-1_all.deb
-sudo apt install ./amdgpu-install_7.2.70200-1_all.deb
-sudo amdgpu-install -y --usecase=rocm --no-dkms
+# Create a venv - Recommended approach
+python3 -m venv ~/rocm-env
+
+# Activate it
+source ~/rocm-env/bin/activate
+
+# Upgrade pip
+pip install --upgrade pip setuptools wheel
+
+# For gfx1151:
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+
+# Initialize the devel libraries. Some tools (HIPRTC, libroctx64, etc.) are lazily expanded, so run:
+rocm-sdk init
+
+# Set environment variables
+export ROCM_HOME="$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
+export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
+export PATH="$ROCM_HOME/bin:$PATH"
+
 ```
 
 #### Set user permissions
@@ -59,21 +75,29 @@ sudo reboot
 
 #### Verify:
 ```bash
+ls $ROCM_HOME/lib/libhiprtc.so*
+ls $ROCM_HOME/lib/libroctx64.so*
+```
+You should see files like libhiprtc.so and libroctx64.so. If this returns nothing, the ROCm SDK was not initialized correctly.
+```bash
 hipcc --version
 rocminfo
+amd-smi
 ```
 
 ### Install PyTorch
 
 ```bash
-pip install torch torchvision torchaudio \
-  --index-url https://download.pytorch.org/whl/rocm7.2
+pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 ```
 
 #### Verify:
-```bash
-python3 -c "import torch; print(torch.version.hip)"
-python3 -c "import torch; print(torch.cuda.is_available())"
+```python
+import torch
+
+print("HIP available:", torch.cuda.is_available())
+print("Device name:", torch.cuda.get_device_name(0))
+print("Device count:", torch.cuda.device_count())
 ```
 
 ---
