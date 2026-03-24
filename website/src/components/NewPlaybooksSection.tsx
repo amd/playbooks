@@ -3,7 +3,7 @@ import PlaybookCard from "./PlaybookCard";
 const newPlaybooks = [
   {
     title: "SGLang Inference Server",
-    description: "Install and use SGLang on STX Halo™",
+    description: "Install and use SGLang on Ryzen™ AI Max",
     time: "30 MIN",
     href: "/halo/sglang",
   },
@@ -17,7 +17,7 @@ const newPlaybooks = [
   {
     title: "Vibe Coding in VS Code",
     description:
-      "Use STX Halo™ as a local or remote Vibe Coding assistant with Ollama and Continue",
+      "Use Ryzen™ AI Max as a local or remote Vibe Coding assistant with Ollama and Continue",
     time: "30 MIN",
     href: "/halo/vibe-coding",
   },
