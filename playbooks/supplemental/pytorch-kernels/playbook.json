@@ -23,7 +23,10 @@
     ]
   },
   "tested_platforms":{
-    "halo": [
+    "stx": [
+      "linux"
+    ],
+    "krk": [
       "linux"
     ]
   },
