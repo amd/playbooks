@@ -80,9 +80,9 @@ export type DeviceCategory = "reference" | "apu" | "gpu";
 export const DEVICE_IDS: Device[] = ["halo", "stx", "krk", "rx7900xt", "rx9070xt"];
 
 export const deviceNames: Record<Device, string> = {
-  halo: "STX Halo",
-  stx: "STX Point",
-  krk: "Krackan Point",
+  halo: "Ryzen™ AI Max",
+  stx: "Ryzen™ AI 300 HX",
+  krk: "Ryzen™ AI 300",
   rx7900xt: "RX 7900 XT",
   rx9070xt: "RX 9070 XT",
 };
@@ -96,7 +96,7 @@ export interface DeviceCategoryInfo {
 }
 
 export const DEVICE_CATEGORIES: DeviceCategoryInfo[] = [
-  { id: "reference", name: "Reference Platforms", devices: ["halo"], deviceDisplayNames: { halo: "AMD Ryzen\u2122 AI Halo for Developers" } },
+  { id: "reference", name: "Reference Platforms", devices: ["halo"], deviceDisplayNames: { halo: "AMD Ryzen\u2122 AI Halo" } },
   { id: "apu", name: "Ryzen\u2122 AI APUs", devices: ["halo", "stx", "krk"] },
   { id: "gpu", name: "Radeon\u2122 GPUs", devices: ["rx7900xt", "rx9070xt"] },
 ];

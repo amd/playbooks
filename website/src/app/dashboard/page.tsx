@@ -21,9 +21,9 @@ interface CellData {
 type MatrixData = Record<string, Record<string, CellData>>;
 
 const HARDWARE_LABELS: Record<string, string> = {
-  halo: "STX Halo",
-  stx: "STX Point",
-  krk: "Krackan Point",
+  halo: "Ryzen™ AI Max",
+  stx: "Ryzen™ AI 300 HX",
+  krk: "Ryzen™ AI 300",
   rx7900xt: "Radeon RX 7900 XT",
   rx9070xt: "Radeon RX 9070 XT",
 };

@@ -43,7 +43,7 @@ function PreinstalledBadge() {
   return (
     <span
       className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-semibold rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-      title="Software for this playbook comes pre-installed on STX Halo, so you can jump straight in"
+      title="Software for this playbook comes pre-installed on Ryzen™ AI Max, so you can jump straight in"
     >
       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
