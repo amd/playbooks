@@ -75,6 +75,7 @@ export type Architecture = "halo" | "krk";
 export type Device = "halo" | "stx" | "krk" | "rx7900xt" | "rx9070xt";
 export type Category = "core" | "supplemental" | "backup";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
+export type DeviceCategory = "reference" | "apu" | "gpu";
 
 export const DEVICE_IDS: Device[] = ["halo", "stx", "krk", "rx7900xt", "rx9070xt"];
 
@@ -85,6 +86,62 @@ export const deviceNames: Record<Device, string> = {
   rx7900xt: "RX 7900 XT",
   rx9070xt: "RX 9070 XT",
 };
+
+export interface DeviceCategoryInfo {
+  id: DeviceCategory;
+  name: string;
+  devices: Device[];
+  /** Per-category overrides for device display names */
+  deviceDisplayNames?: Partial<Record<Device, string>>;
+}
+
+export const DEVICE_CATEGORIES: DeviceCategoryInfo[] = [
+  { id: "reference", name: "Reference Platforms", devices: ["halo"], deviceDisplayNames: { halo: "AMD Ryzen\u2122 AI Halo for Developers" } },
+  { id: "apu", name: "Ryzen\u2122 AI APUs", devices: ["halo", "stx", "krk"] },
+  { id: "gpu", name: "Radeon\u2122 GPUs", devices: ["rx7900xt", "rx9070xt"] },
+];
+
+export const DEVICE_CATEGORY_MAP: Record<DeviceCategory, DeviceCategoryInfo> =
+  Object.fromEntries(DEVICE_CATEGORIES.map(c => [c.id, c])) as Record<DeviceCategory, DeviceCategoryInfo>;
+
+/**
+ * Returns the categories available for a playbook given its supported platforms.
+ * A category is available if any of its devices appear in the supported platforms
+ * (optionally filtered by OS platform).
+ */
+export function extractCategories(
+  supportedPlatforms: Partial<Record<Device, Platform[]>>,
+  platform?: Platform,
+): DeviceCategoryInfo[] {
+  const available = new Set(
+    platform ? extractDevices(supportedPlatforms, platform) : (Object.keys(supportedPlatforms) as Device[]),
+  );
+  return DEVICE_CATEGORIES.filter(cat => cat.devices.some(d => available.has(d)));
+}
+
+/**
+ * Returns the devices within a category that are supported by a playbook.
+ */
+export function extractCategoryDevices(
+  category: DeviceCategoryInfo,
+  supportedPlatforms: Partial<Record<Device, Platform[]>>,
+  platform?: Platform,
+): Device[] {
+  return category.devices.filter(d => {
+    const platforms = supportedPlatforms[d];
+    return platforms && (!platform || platforms.includes(platform));
+  });
+}
+
+/**
+ * Derives the best-matching category for a given device.
+ * Prefers "reference" for halo, otherwise matches to apu/gpu.
+ */
+export function categoryForDevice(device: Device): DeviceCategory {
+  if (device === "halo") return "reference";
+  if (device === "stx" || device === "krk") return "apu";
+  return "gpu";
+}
 
 export interface PlaybookMeta {
   /** Unique identifier matching the folder name */
@@ -99,11 +156,14 @@ export interface PlaybookMeta {
   /** Estimated time in minutes */
   time: number;
   
-  /** Supported platforms */
-  platforms: Platform[];
+  /** Shown platforms per device — controls which OS/device combos appear in the UI */
+  supported_platforms: Partial<Record<Device, Platform[]>>;
 
-  /** Tested platforms per OS (used by CI to select runners) */
-  tested_platforms?: Partial<Record<Platform, Architecture[]>>;
+  /** Tested platforms per device (used by CI to select runners) */
+  tested_platforms?: Partial<Record<Device, Platform[]>>;
+
+  /** Required platforms per device (CI marks these as must-pass) */
+  required_platforms?: Partial<Record<Device, Platform[]>>;
   
   /** Whether this is a new playbook */
   isNew?: boolean;
@@ -167,7 +227,7 @@ export interface PlaybookCoverageSummary {
   id: string;
   title: string;
   category: Category;
-  platforms: Platform[];
+  supported_platforms: Partial<Record<Device, Platform[]>>;
   testCount: number;
   hiddenCount: number;
   visibleTestCount: number;
@@ -207,6 +267,30 @@ export function formatTime(minutes: number): string {
     return hours === 1 ? "1 HR" : `${hours} HRS`;
   }
   return `${hours}h ${mins}m`;
+}
+
+/**
+ * Extracts a deduplicated list of platforms (OS) from a supported_platforms map.
+ */
+export function extractPlatforms(shownPlatforms: Partial<Record<Device, Platform[]>>): Platform[] {
+  const set = new Set<Platform>();
+  for (const platforms of Object.values(shownPlatforms)) {
+    if (platforms) for (const p of platforms) set.add(p);
+  }
+  return Array.from(set);
+}
+
+/**
+ * Extracts devices from a supported_platforms map that support the given platform.
+ * If no platform is provided, returns all devices.
+ */
+export function extractDevices(
+  shownPlatforms: Partial<Record<Device, Platform[]>>,
+  platform?: Platform,
+): Device[] {
+  return (Object.entries(shownPlatforms) as [Device, Platform[]][])
+    .filter(([, platforms]) => !platform || platforms.includes(platform))
+    .map(([device]) => device);
 }
 
 /**

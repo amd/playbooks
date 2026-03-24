@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
 """
 Playbook Validation Script
 
@@ -7,7 +11,7 @@ This script validates that all playbooks:
 2. Follow the contract defined in website/src/types/playbook.ts
 3. Have valid JSON in playbook.json
 4. Have consistent IDs (folder name should match id in playbook.json)
-5. Have asset files within size limits (max 500 KB per file)
+5. Have asset files within size limits (max 500 KB per file, 5 MB for audio)
 """
 
 import json
@@ -34,7 +38,15 @@ CATEGORIES = ["core", "supplemental", "backup"]
 ALLOWED_ITEMS = {"README.md", "playbook.json", "platform.md", "assets"}
 
 # Required fields in playbook.json (based on PlaybookMeta interface)
-REQUIRED_FIELDS = ["id", "title", "description", "time", "platforms", "developed", "published"]
+REQUIRED_FIELDS = [
+    "id",
+    "title",
+    "description",
+    "time",
+    "supported_platforms",
+    "developed",
+    "published",
+]
 
 # Valid values for enum fields
 VALID_PLATFORMS = ["windows", "linux"]
@@ -43,6 +55,9 @@ VALID_DIFFICULTIES = ["beginner", "intermediate", "advanced"]
 # Asset constraints
 MAX_ASSET_SIZE_KB = 500
 MAX_ASSET_SIZE_BYTES = MAX_ASSET_SIZE_KB * 1024
+AUDIO_EXTENSIONS = {".mp3", ".wav"}
+MAX_AUDIO_SIZE_KB = 5 * 1024
+MAX_AUDIO_SIZE_BYTES = MAX_AUDIO_SIZE_KB * 1024
 
 # ============================================================================
 # Styling
@@ -170,15 +185,19 @@ def validate_asset_sizes(
         if not asset.is_file():
             continue
 
+        is_audio = asset.suffix.lower() in AUDIO_EXTENSIONS
+        max_bytes = MAX_AUDIO_SIZE_BYTES if is_audio else MAX_ASSET_SIZE_BYTES
+        max_kb = MAX_AUDIO_SIZE_KB if is_audio else MAX_ASSET_SIZE_KB
+
         file_size = asset.stat().st_size
-        if file_size > MAX_ASSET_SIZE_BYTES:
+        if file_size > max_bytes:
             size_kb = file_size / 1024
             result.add_error(
                 playbook_name,
                 f'Asset file too large: "{asset.name}"\n'
                 f"       Size: {size_kb:.1f} KB\n"
-                f"       Maximum allowed: {MAX_ASSET_SIZE_KB} KB\n"
-                "       Please compress or resize the image.",
+                f"       Maximum allowed: {max_kb} KB\n"
+                "       Please compress or resize the file.",
             )
 
 
@@ -258,26 +277,33 @@ def validate_playbook_json(
             f'Field "published" must be a boolean, got: {type(meta["published"]).__name__}',
         )
 
-    # Validate platforms array
-    if "platforms" in meta:
-        if not isinstance(meta["platforms"], list):
+    # Validate supported_platforms (device -> os[] map)
+    if "supported_platforms" in meta:
+        if not isinstance(meta["supported_platforms"], dict):
             result.add_error(
                 playbook_name,
-                f'Field "platforms" must be an array, got: {type(meta["platforms"]).__name__}',
+                f'Field "supported_platforms" must be an object (device → OS[]), got: {type(meta["supported_platforms"]).__name__}',
             )
         else:
-            if len(meta["platforms"]) == 0:
+            if len(meta["supported_platforms"]) == 0:
                 result.add_error(
                     playbook_name,
-                    'Field "platforms" cannot be empty - at least one platform is required',
+                    'Field "supported_platforms" cannot be empty - at least one device/platform combo is required',
                 )
-            for platform in meta["platforms"]:
-                if platform not in VALID_PLATFORMS:
+            for device, os_list in meta["supported_platforms"].items():
+                if not isinstance(os_list, list):
                     result.add_error(
                         playbook_name,
-                        f'Invalid platform: "{platform}"\n'
-                        f"       Valid platforms: {', '.join(VALID_PLATFORMS)}",
+                        f'supported_platforms["{device}"] must be an array, got: {type(os_list).__name__}',
                     )
+                else:
+                    for platform in os_list:
+                        if platform not in VALID_PLATFORMS:
+                            result.add_error(
+                                playbook_name,
+                                f'Invalid platform in supported_platforms["{device}"]: "{platform}"\n'
+                                f"       Valid platforms: {', '.join(VALID_PLATFORMS)}",
+                            )
 
     # Validate difficulty
     if "difficulty" in meta and meta["difficulty"] not in VALID_DIFFICULTIES:

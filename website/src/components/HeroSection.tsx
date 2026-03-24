@@ -4,28 +4,31 @@ import { useEffect, useCallback } from "react";
 import DeviceCarousel from "./DeviceCarousel";
 
 const titles: Record<string, { prefix: string; highlight: string }> = {
-  all: { prefix: "Start your AI journey with", highlight: "AMD Developer Playbooks™" },
-  "stx-halo": { prefix: "Start your journey on", highlight: "STX Halo™" },
-  Krackan: { prefix: "Start your journey on", highlight: "Krackan Point™" },
-  "amd-radeon": { prefix: "Start your journey on", highlight: "Radeon GPUs™" },
+  all: { prefix: "Start your AI journey with", highlight: "AMD Developer Playbooks\u2122" },
+  reference: { prefix: "Start your journey on", highlight: "AMD Ryzen\u2122 AI Halo" },
+  apu: { prefix: "Start your journey on", highlight: "Ryzen\u2122 AI APUs" },
+  gpu: { prefix: "Start your journey on", highlight: "Radeon\u2122 GPUs" },
 };
 
 const hashToDevice: Record<string, string> = {
-  halo: "stx-halo",
-  krk: "Krackan",
-  radeon: "amd-radeon",
+  halo: "reference",
+  apu: "apu",
+  gpu: "gpu",
+  // legacy hashes
+  krk: "apu",
+  radeon: "gpu",
 };
 
 export const deviceToHash: Record<string, string> = {
-  "stx-halo": "halo",
-  Krackan: "krk",
-  "amd-radeon": "radeon",
+  reference: "halo",
+  apu: "apu",
+  gpu: "gpu",
 };
 
 function deviceFromHash(): string {
   if (typeof window === "undefined") return "all";
   const raw = window.location.hash.replace("#", "").toLowerCase();
-  return hashToDevice[raw] ?? (raw ? "all" : "stx-halo");
+  return hashToDevice[raw] ?? (raw ? "all" : "reference");
 }
 
 interface HeroSectionProps {

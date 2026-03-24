@@ -7,85 +7,155 @@
       "description": "Node-based Stable Diffusion interface",
       "category": "app",
       "platforms": ["windows", "linux"],
-      "file": "comfyui.md"
+      "file": "comfyui.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     },
     "pytorch": {
       "name": "PyTorch",
       "description": "Deep learning framework",
       "category": "framework",
       "platforms": ["windows", "linux"],
-      "file": "pytorch.md"
+      "file": "pytorch.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     },
     "lmstudio": {
       "name": "LM Studio",
       "description": "Desktop app for running local LLMs",
       "category": "app",
       "platforms": ["windows", "linux"],
-      "file": "lmstudio.md"
+      "file": "lmstudio.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     },
     "vllm": {
       "name": "vLLM",
       "description": "High-throughput LLM serving engine",
       "category": "framework",
       "platforms": ["linux"],
-      "file": "vllm.md"
+      "file": "vllm.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     },
     "n8n": {
       "name": "n8n",
       "description": "Workflow automation platform",
       "category": "app",
       "platforms": ["windows", "linux"],
-      "file": "n8n.md"
+      "file": "n8n.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     },
     "vscode": {
       "name": "Visual Studio Code",
       "description": "Code editor with AI extensions",
       "category": "app",
       "platforms": ["windows", "linux"],
-      "file": "vscode.md"
+      "file": "vscode.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     },
     "lemonade": {
       "name": "Lemonade",
       "description": "Local LLM server with OpenAI-compatible API",
       "category": "framework",
       "platforms": ["windows", "linux"],
-      "file": "lemonade.md"
+      "file": "lemonade.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
+    },
+    "gaia": {
+      "name": "GAIA",
+      "description": "AMD framework for building AI agents on local hardware",
+      "category": "framework",
+      "platforms": ["windows", "linux"],
+      "file": "gaia.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      }
     },
     "comfyui-models": {
       "name": "ComfyUI Models",
       "description": "ComfyUI models for image generation",
       "category": "model",
       "platforms": ["windows", "linux"],
-      "file": "comfyui_models.md"
+      "file": "comfyui_models.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     },
     "lmstudio-models-gpt-oss-120b": {
       "name": "GPT-OSS 120B Model",
       "description": "OpenAI GPT-OSS 120B model for LM Studio",
       "category": "model",
       "platforms": ["windows", "linux"],
-      "file": "lmstudio_models_gpt_oss_120b.md"
+      "file": "lmstudio_models_gpt_oss_120b.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     },
     "driver": {
       "name": "AMD GPU Driver",
       "description": "Latest AMD GPU driver for optimal performance",
       "category": "driver",
       "platforms": ["windows", "linux"],
-      "file": "driver.md"
+      "file": "driver.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     },
     "nodejs": {
       "name": "Node.js",
-      "version": "20.19.2",
+      "version": "22.22.1",
       "description": "JavaScript runtime for server-side applications",
       "category": "runtime",
       "platforms": ["windows", "linux"],
-      "file": "nodejs.md"
+      "file": "nodejs.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     },
     "memory_config": {
       "name": "AMD Memory Configuration",
       "description": "Suggested memory configurations for Strix Halo Systems",
       "category": "framework",
       "platforms": ["windows", "linux"],
-      "file": "memoryconfig.md"
+      "file": "memoryconfig.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
+    },
+    "rocm": {
+      "name": "ROCm",
+      "description": "AMD software platform for GPU computing and AI workloads",
+      "category": "framework",
+      "platforms": ["linux"],
+      "file": "rocm.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     }
   },
   "setup": {
@@ -93,7 +163,11 @@
       "name": "Memory Configuration",
       "description": "Configure GPU memory allocation for running large models",
       "platforms": ["windows", "linux"],
-      "file": "memoryconfig.md"
+      "file": "memoryconfig.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": ["halo_box"]
+      }
     }
   }
 }

@@ -1,3 +1,7 @@
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 """
 Document Summarizer using LLMs
 
@@ -9,19 +13,16 @@ Usage:
 import os
 import argparse
 import logging
-import warnings
-
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 logging.getLogger("transformers").setLevel(logging.ERROR)
-warnings.filterwarnings("ignore", category=UserWarning)
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 MODELS = {
     "gptoss": "openai/gpt-oss-20b",
-    "mistral": "mistralai/Mistral-7B-Instruct-v0.3"
+    # download more models here as needed
 }
 
 
@@ -113,11 +114,7 @@ class DocumentSummarizer:
         
         # Clean up Harmony-style outputs
         # This is needed for summarization because Harmony-style models (like gpt-oss)
-        # often include tool/analysis outputs and multiple assistant channels.
-        # For summarization, we want only the final channel containing the actual human-readable summary,
-        # not internal reasoning steps or tool traces.
-        # So we specifically extract only the assistant's final message,
-        # ensuring that what we return is concise and appropriate for users expecting a summary.
+        # often include tool/analysis outputs and multiple assistant channels. We only want the final output for summarization.
         
         if "<|start|>assistant<|channel|>final<|message|>" in full:
             final_part = full.split("<|start|>assistant<|channel|>final<|message|>", 1)[1]

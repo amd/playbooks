@@ -1,14 +1,27 @@
 {
   "id": "llamafactory-lora-finetuning",
   "title": "LoRA Fine-tuning with LLaMA-Factory",
-  "description": "Fine-tune LLMs using LoRA with LLaMA-Factory on STX Halo™",
+  "description": "Fine-tune LLMs using LoRA with LLaMA-Factory on STX Halo\u2122",
   "time": 90,
-  "platforms": ["windows", "linux"],
+  "supported_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
+      "windows",
+      "linux"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
   "developed": false,
   "published": false,
-  "tags": ["llama-factory", "lora", "fine-tuning", "llm"]
+  "tags": [
+    "llama-factory",
+    "lora",
+    "fine-tuning",
+    "llm"
+  ]
 }
-

@@ -1,16 +1,36 @@
 {
   "id": "pytorch-kernels",
   "title": "Custom GPU Kernels with PyTorch ROCm",
-  "description": "Write and optimize custom GPU kernels using PyTorch and ROCm on STX Halo™",
+  "description": "Write and optimize custom GPU kernels using PyTorch and ROCm on STX Halo\u2122",
   "time": 120,
-  "platforms": ["linux"],
-  "tested_platforms": {
-    "linux": []
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
   },
   "difficulty": "advanced",
   "isNew": false,
   "isFeatured": false,
   "developed": false,
   "published": true,
-  "tags": ["pytorch", "rocm", "gpu", "kernels", "optimization"]
+  "tags": [
+    "pytorch",
+    "rocm",
+    "gpu",
+    "kernels",
+    "optimization"
+  ]
 }

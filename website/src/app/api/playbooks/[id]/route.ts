@@ -17,6 +17,7 @@ interface DependencyRegistry {
     category: string;
     platforms: string[];
     file: string;
+    preinstalled?: Record<string, string[]>;
   }>;
   setup?: Record<string, {
     name: string;
@@ -153,6 +154,29 @@ function processDependencyTestTags(
  * Returns the modified content plus any test info extracted from dependencies,
  * so they can be merged into the playbook's overall test coverage.
  */
+/**
+ * Computes the intersection of preinstalled device lists across multiple dependencies.
+ * A device is only considered preinstalled if ALL deps in the group list it.
+ */
+function mergePreinstalledData(maps: Array<Record<string, string[]>>): Record<string, string[]> {
+  if (maps.length === 0) return {};
+  if (maps.length === 1) return maps[0];
+
+  const allPlatforms = new Set<string>();
+  for (const m of maps) {
+    for (const p of Object.keys(m)) allPlatforms.add(p);
+  }
+
+  const result: Record<string, string[]> = {};
+  for (const platform of allPlatforms) {
+    const lists = maps.map(m => m[platform] || []);
+    result[platform] = lists[0].filter(device =>
+      lists.every(list => list.includes(device))
+    );
+  }
+  return result;
+}
+
 function processRequireTags(
   content: string,
   showCoverage: boolean,
@@ -166,12 +190,14 @@ function processRequireTags(
   const requirePattern = /<!-- @require:([a-z0-9-,]+) -->/g;
   const allDependencyTests: TestInfo[] = [];
   let totalDependencyCodeBlocks = 0;
+  const registry = loadDependencyRegistry();
   
   const processed = content.replace(requirePattern, (_match, dependencyIds: string) => {
     const ids = dependencyIds.split(',').map((id: string) => id.trim()).filter(Boolean);
     
     const contents: string[] = [];
     const notFound: string[] = [];
+    const preinstalledMaps: Array<Record<string, string[]>> = [];
     
     for (const depId of ids) {
       const depContent = loadDependencyContent(depId);
@@ -181,6 +207,9 @@ function processRequireTags(
         contents.push(proc);
         allDependencyTests.push(...tests);
         totalDependencyCodeBlocks += codeBlockCount;
+        
+        const depMeta = registry?.dependencies[depId];
+        preinstalledMaps.push(depMeta?.preinstalled || {});
       } else {
         notFound.push(depId);
       }
@@ -194,8 +223,9 @@ function processRequireTags(
       return `<!-- Dependencies "${dependencyIds}" not found -->`;
     }
     
+    const mergedPreinstalled = mergePreinstalledData(preinstalledMaps);
     const combinedContent = contents.join('\n\n---\n\n');
-    return `<!-- @preinstalled -->\n${combinedContent}\n<!-- @preinstalled:end -->`;
+    return `<!-- @preinstalled:${JSON.stringify(mergedPreinstalled)} -->\n${combinedContent}\n<!-- @preinstalled:end -->`;
   });
 
   return {
@@ -220,6 +250,18 @@ function parseTestAttributes(attrString: string): Record<string, unknown> {
     else attrs[key] = value;
   }
   return attrs;
+}
+
+/**
+ * Strips <!-- @github-only --> ... <!-- @github-only:end --> blocks.
+ * These blocks contain notices intended only for GitHub readers and
+ * should never appear on the website.
+ */
+function stripGitHubOnlyBlocks(content: string): string {
+  return content.replace(
+    /<!-- @github-only -->[\s\S]*?<!-- @github-only:end -->\n?/g,
+    ''
+  );
 }
 
 /**
@@ -413,6 +455,7 @@ function findPlaybook(
           let testCoverage: TestCoverageInfo | undefined;
           if (fs.existsSync(readmePath)) {
             content = fs.readFileSync(readmePath, "utf-8");
+            content = stripGitHubOnlyBlocks(content);
             const testResult = processTestTags(content, showCoverage, resultsMap, resultsSummary, deviceResultsList, deviceSummaries);
             content = testResult.content;
             testCoverage = testResult.testCoverage;

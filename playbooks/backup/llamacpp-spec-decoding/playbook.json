@@ -1,13 +1,27 @@
 {
   "id": "llamacpp-spec-decoding",
   "title": "Speculative Decoding with llama.cpp",
-  "description": "Learn how to set up speculative decoding for fast inference on STX Halo™",
+  "description": "Learn how to set up speculative decoding for fast inference on STX Halo\u2122",
   "time": 45,
-  "platforms": ["windows", "linux"],
+  "supported_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
+      "windows",
+      "linux"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
   "developed": false,
   "published": false,
-  "tags": ["llama-cpp", "speculative-decoding", "inference", "optimization"]
+  "tags": [
+    "llama-cpp",
+    "speculative-decoding",
+    "inference",
+    "optimization"
+  ]
 }

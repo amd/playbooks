@@ -11,8 +11,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
-import type { Playbook, Platform, Device, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
-import { formatTime, DEVICE_IDS, deviceNames } from "@/types/playbook";
+import type { Playbook, Platform, Device, DeviceCategory, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
+import { formatTime, DEVICE_IDS, deviceNames, extractPlatforms, extractDevices, extractCategories, extractCategoryDevices, DEVICE_CATEGORY_MAP, categoryForDevice } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
 const dropdownStateStore: Record<string, boolean> = {};
@@ -41,17 +41,40 @@ function normalizeLanguage(lang: string): string {
   return langMap[lang] || lang;
 }
 
+const TERMINAL_LANGUAGES = new Set([
+  "bash", "sh", "shell", "zsh", "powershell", "ps1", "cmd", "bat",
+  "console", "terminal", "prompt",
+]);
+
+const LANGUAGE_EXTENSIONS: Record<string, string> = {
+  python: "py", py: "py",
+  c: "c", cpp: "cpp", "c++": "cpp", javascript: "js", js: "js",
+  typescript: "ts", ts: "ts", json: "json", yaml: "yml", yml: "yml",
+  html: "html", css: "css", sql: "sql", rust: "rs", go: "go", java: "java",
+};
+
+function downloadCode(code: string, language?: string) {
+  const ext = (language && LANGUAGE_EXTENSIONS[language.toLowerCase()]) || "txt";
+  const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `snippet.${ext}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 /**
- * Code block component with copy-to-clipboard functionality and syntax highlighting
+ * Code block component with copy-to-clipboard and download functionality, plus syntax highlighting
  */
 function CodeBlock({ children, language }: { children?: React.ReactNode; language?: string }) {
   const [copied, setCopied] = useState(false);
   const preRef = useRef<HTMLPreElement>(null);
 
-  // Extract the code string from children
   const codeString = useMemo(() => {
     if (typeof children === "string") return children;
-    // If children is a React element (code tag), extract its children
     if (children && typeof children === "object" && "props" in children) {
       const childElement = children as React.ReactElement<{ children?: React.ReactNode }>;
       const codeChildren = childElement.props?.children;
@@ -71,29 +94,50 @@ function CodeBlock({ children, language }: { children?: React.ReactNode; languag
     }
   }, [codeString]);
 
-  // Check if we should use syntax highlighting
+  const handleDownload = useCallback(() => {
+    const code = codeString || preRef.current?.textContent || "";
+    downloadCode(code, language);
+  }, [codeString, language]);
+
   const normalizedLang = language ? normalizeLanguage(language.toLowerCase()) : "";
   const shouldHighlight = normalizedLang && HIGHLIGHTED_LANGUAGES.has(language?.toLowerCase() || "");
+  const isTerminal = !language || TERMINAL_LANGUAGES.has(language.toLowerCase());
 
   return (
     <div className="code-block-wrapper">
-      <button
-        className="code-copy-button"
-        onClick={handleCopy}
-        aria-label={copied ? "Copied!" : "Copy code"}
-        title={copied ? "Copied!" : "Copy code"}
-      >
-        {copied ? (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-        ) : (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
+      <div className="code-buttons-group">
+        <button
+          className="code-action-button"
+          onClick={handleCopy}
+          aria-label={copied ? "Copied!" : "Copy code"}
+          title={copied ? "Copied!" : "Copy code"}
+        >
+          {copied ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          )}
+        </button>
+        {!isTerminal && (
+          <button
+            className="code-action-button"
+            onClick={handleDownload}
+            aria-label="Download code"
+            title="Download code"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
         )}
-      </button>
+      </div>
       {shouldHighlight && codeString ? (
         <SyntaxHighlighter
           language={normalizedLang}
@@ -403,24 +447,31 @@ function HaloSetupContent({
 interface TocItem {
   id: string;
   text: string;
+  children?: TocItem[];
 }
 
 /**
- * Extracts table of contents from markdown content (main sections only - h2)
+ * Extracts table of contents from markdown content (h2 sections with h3 sub-items)
  */
 function extractToc(content: string): TocItem[] {
   if (!content) return [];
-  
-  const headingRegex = /^##\s+(.+)$/gm;
+
+  const headingRegex = /^(#{2,3})\s+(.+)$/gm;
   const toc: TocItem[] = [];
   let match;
-  
+
   while ((match = headingRegex.exec(content)) !== null) {
-    const text = match[1].trim();
+    const level = match[1].length;
+    const text = match[2].trim();
     const id = slugify(text);
-    toc.push({ id, text });
+
+    if (level === 2) {
+      toc.push({ id, text, children: [] });
+    } else if (level === 3 && toc.length > 0) {
+      toc[toc.length - 1].children!.push({ id, text });
+    }
   }
-  
+
   return toc;
 }
 
@@ -466,14 +517,38 @@ function TableOfContents({
               }}
               className={`
                 block text-sm py-1 pl-3 transition-colors duration-150 border-l-2
-                ${activeId === item.id 
-                  ? "text-[#D4915D] border-[#D4915D] font-medium" 
+                ${activeId === item.id
+                  ? "text-[#D4915D] border-[#D4915D] font-medium"
                   : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
                 }
               `}
             >
               {item.text}
             </a>
+            {item.children && item.children.length > 0 && (
+              <ul className="space-y-1 mt-1">
+                {item.children.map((child) => (
+                  <li key={child.id}>
+                    <a
+                      href={`#${child.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onLinkClick(child.id);
+                      }}
+                      className={`
+                        block text-sm py-1 pl-6 transition-colors duration-150 border-l-2
+                        ${activeId === child.id
+                          ? "text-[#D4915D] border-[#D4915D] font-medium"
+                          : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
+                        }
+                      `}
+                    >
+                      {child.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
@@ -482,7 +557,8 @@ function TableOfContents({
 }
 
 /**
- * Parses markdown content and filters OS-specific sections
+ * Parses markdown content and filters OS-specific sections.
+ * Handles nested @os: blocks correctly by processing innermost blocks first.
  * 
  * Tags supported:
  * <!-- @os:windows --> ... <!-- @os:end -->
@@ -492,36 +568,29 @@ function TableOfContents({
 function filterContentByOS(content: string, platform: Platform): string {
   if (!content) return "";
   
-  // Pattern to match OS-specific blocks
-  const osBlockPattern = /<!-- @os:(windows|linux|all) -->([\s\S]*?)<!-- @os:end -->/g;
+  // Matches only innermost @os: blocks (content contains no nested @os: open/close tags).
+  // Negative lookaheads prevent matching across nesting boundaries.
+  const innerOsPattern = /<!-- @os:(windows|linux|all) -->((?:(?!<!-- @os:(?:windows|linux|all) -->|<!-- @os:end -->)[\s\S])*?)<!-- @os:end -->/g;
   
   let result = content;
-  const matches = [...content.matchAll(osBlockPattern)];
+  let prev: string;
   
-  // Process matches in reverse order to preserve indices
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const match = matches[i];
-    const blockOS = match[1];
-    const blockContent = match[2];
-    const fullMatch = match[0];
-    const startIndex = match.index!;
-    
-    let replacement = "";
-    
-    // Show only content for the selected platform
-    if (blockOS === "all" || blockOS === platform) {
-      replacement = blockContent;
-    }
-    // Otherwise, replacement is empty (content hidden)
-    
-    result = result.slice(0, startIndex) + replacement + result.slice(startIndex + fullMatch.length);
-  }
+  do {
+    prev = result;
+    result = result.replace(innerOsPattern, (_fullMatch, blockOS: string, blockContent: string) => {
+      if (blockOS === "all" || blockOS === platform) {
+        return blockContent;
+      }
+      return "";
+    });
+  } while (result !== prev);
   
   return result;
 }
 
 /**
  * Parses markdown content and filters device-specific sections.
+ * Handles nested @device: blocks correctly by processing innermost blocks first.
  * Supports comma-separated device IDs.
  *
  * Tags supported:
@@ -533,48 +602,55 @@ function filterContentByDevice(content: string, device: Device | null): string {
   if (!content) return "";
   if (!device) return content;
 
-  const deviceBlockPattern = /<!-- @device:([\w,]+) -->([\s\S]*?)<!-- @device:end -->/g;
+  const innerDevicePattern = /<!-- @device:([\w,]+) -->((?:(?!<!-- @device:[\w,]+ -->|<!-- @device:end -->)[\s\S])*?)<!-- @device:end -->/g;
 
   let result = content;
-  const matches = [...content.matchAll(deviceBlockPattern)];
+  let prev: string;
 
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const match = matches[i];
-    const blockDevices = match[1];
-    const blockContent = match[2];
-    const fullMatch = match[0];
-    const startIndex = match.index!;
-
-    let replacement = "";
-
-    if (blockDevices === "all" || blockDevices.split(",").includes(device)) {
-      replacement = blockContent;
-    }
-
-    result = result.slice(0, startIndex) + replacement + result.slice(startIndex + fullMatch.length);
-  }
+  do {
+    prev = result;
+    result = result.replace(innerDevicePattern, (_fullMatch, blockDevices: string, blockContent: string) => {
+      if (blockDevices === "all" || blockDevices.split(",").includes(device)) {
+        return blockContent;
+      }
+      return "";
+    });
+  } while (result !== prev);
 
   return result;
 }
 
 /**
- * Transforms @preinstalled tags into collapsible dropdown HTML
+ * Transforms @preinstalled tags into either collapsible dropdown HTML (when
+ * preinstalled on the active device) or plain setup-content blocks (when not).
  * 
  * Tags supported:
- * <!-- @preinstalled --> ... <!-- @preinstalled:end -->
+ * <!-- @preinstalled:JSON --> ... <!-- @preinstalled:end -->
  * 
- * The content inside becomes a collapsible section with a special header
- * indicating the software is pre-installed on AMD Halo Developer Platform
+ * The JSON contains per-platform arrays of device IDs where the software is
+ * preinstalled, e.g. {"linux":["halo"],"windows":["halo"]}.
  */
-function transformPreinstalledBlocks(content: string): string {
+function transformPreinstalledBlocks(content: string, platform: Platform, device: string | null): string {
   if (!content) return "";
   
-  const preinstalledPattern = /<!-- @preinstalled -->([\s\S]*?)<!-- @preinstalled:end -->/g;
+  const preinstalledPattern = /<!-- @preinstalled:(.*?) -->([\s\S]*?)<!-- @preinstalled:end -->/g;
   
-  return content.replace(preinstalledPattern, (_match, innerContent) => {
-    // Escape any HTML in the content for the data attribute
+  return content.replace(preinstalledPattern, (_match, preinstalledJson: string, innerContent: string) => {
     const escapedContent = innerContent.trim();
-    return `<div class="halo-preinstalled-dropdown" data-content="${encodeURIComponent(escapedContent)}"></div>`;
+    let isPreinstalled = false;
+    
+    try {
+      const preinstalledData = JSON.parse(preinstalledJson);
+      const deviceList: string[] = preinstalledData[platform] || [];
+      isPreinstalled = device ? deviceList.includes(device) : false;
+    } catch {
+      // Malformed JSON — fall back to showing plain instructions
+    }
+    
+    if (isPreinstalled) {
+      return `<div class="halo-preinstalled-dropdown" data-content="${encodeURIComponent(escapedContent)}"></div>`;
+    }
+    return `<div class="halo-setup-content" data-content="${encodeURIComponent(escapedContent)}"></div>`;
   });
 }
 
@@ -986,29 +1062,59 @@ function PlatformToggle({
 }
 
 function DeviceToggle({
+  devices,
   selected,
   onChange,
-  hasDeviceContent,
+  nameOverrides,
 }: {
+  devices: Device[];
   selected: Device | null;
   onChange: (d: Device | null) => void;
-  hasDeviceContent: boolean;
+  nameOverrides?: Partial<Record<Device, string>>;
 }) {
-  if (!hasDeviceContent) return null;
-
+  if (devices.length === 0) return null;
   return (
     <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] rounded-lg border border-[#333] flex-wrap">
-      {DEVICE_IDS.map((d) => (
+      {devices.map((d) => (
         <button
           key={d}
-          onClick={() => onChange(selected === d ? null : d)}
+          onClick={() => onChange(d)}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
             selected === d
               ? "bg-[#D4915D] text-black"
               : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
           }`}
         >
-          {deviceNames[d]}
+          {nameOverrides?.[d] ?? deviceNames[d]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function CategoryToggle({
+  categories,
+  selected,
+  onChange,
+}: {
+  categories: { id: DeviceCategory; name: string }[];
+  selected: DeviceCategory | null;
+  onChange: (c: DeviceCategory) => void;
+}) {
+  if (categories.length === 0) return null;
+  return (
+    <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] rounded-lg border border-[#333] flex-wrap">
+      {categories.map((c) => (
+        <button
+          key={c.id}
+          onClick={() => onChange(c.id)}
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+            selected === c.id
+              ? "bg-[#D4915D] text-black"
+              : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
+          }`}
+        >
+          {c.name}
         </button>
       ))}
     </div>
@@ -1117,10 +1223,22 @@ function deviceFromHash(hash?: string): Device | null {
   return hashToDeviceId[hash] ?? (DEVICE_IDS.includes(hash as Device) ? hash as Device : null);
 }
 
-export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string; coverage?: string; run_id?: string; test_device?: string; platform?: string }> }) {
+const CATEGORY_IDS: DeviceCategory[] = ["reference", "apu", "gpu"];
+
+const categoryToHash: Record<DeviceCategory, string> = {
+  reference: "halo",
+  apu: "apu",
+  gpu: "gpu",
+};
+
+export default function PlaybookPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ device?: string; category?: string; coverage?: string; run_id?: string; test_device?: string; platform?: string }> }) {
   const { id } = use(params);
-  const { device: deviceHash, coverage: coverageParam, run_id: runIdParam, test_device: testDeviceParam, platform: platformParam } = use(searchParams);
-  const backHref = deviceHash ? `/#${deviceHash}` : "/#playbooks";
+  const { device: deviceHash, category: categoryParam, coverage: coverageParam, run_id: runIdParam, test_device: testDeviceParam, platform: platformParam } = use(searchParams);
+  const backHref = categoryParam
+    ? `/#${categoryToHash[categoryParam as DeviceCategory] || "playbooks"}`
+    : deviceHash
+      ? `/#${deviceHash}`
+      : "/#playbooks";
 
   const [playbook, setPlaybook] = useState<Playbook | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1128,7 +1246,17 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>(() =>
     platformParam === "linux" ? "linux" : "windows"
   );
-  const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => deviceFromHash(deviceHash));
+  const [selectedCategory, setSelectedCategory] = useState<DeviceCategory | null>(() => {
+    if (categoryParam && CATEGORY_IDS.includes(categoryParam as DeviceCategory)) {
+      return categoryParam as DeviceCategory;
+    }
+    const dev = deviceFromHash(deviceHash);
+    return dev ? categoryForDevice(dev) : "reference";
+  });
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => {
+    if (categoryParam === "reference") return "halo";
+    return deviceFromHash(deviceHash) ?? "halo";
+  });
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
@@ -1160,10 +1288,11 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       const data = await res.json();
       setPlaybook(data);
 
-      if (data.platforms.includes("windows")) {
+      const availablePlatforms = extractPlatforms(data.supported_platforms ?? {});
+      if (availablePlatforms.includes("windows")) {
         setSelectedPlatform("windows");
-      } else if (data.platforms.length > 0) {
-        setSelectedPlatform(data.platforms[0]);
+      } else if (availablePlatforms.length > 0) {
+        setSelectedPlatform(availablePlatforms[0]);
       }
 
       // Auto-select first tested device for coverage results
@@ -1204,11 +1333,37 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
   // When arriving via URL platform param, re-apply after fetchPlaybook's auto-select
   useEffect(() => {
     if (!playbook || !platformParam) return;
-    if (playbook.platforms.includes(platformParam as Platform)) {
+    const available = extractPlatforms(playbook.supported_platforms ?? {});
+    if (available.includes(platformParam as Platform)) {
       setSelectedPlatform(platformParam as Platform);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbook]);
+
+  // When category changes, ensure selectedDevice is valid for the new category.
+  useEffect(() => {
+    if (!playbook || !selectedCategory) return;
+    const sp = playbook.supported_platforms ?? {};
+    const catInfo = DEVICE_CATEGORY_MAP[selectedCategory];
+    const catDevices = extractCategoryDevices(catInfo, sp);
+    if (catDevices.length > 0 && selectedDevice && !catDevices.includes(selectedDevice)) {
+      setSelectedDevice(catDevices[0]);
+    } else if (catDevices.length > 0 && !selectedDevice) {
+      setSelectedDevice(catDevices[0]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory, playbook?.supported_platforms]);
+
+  // When device changes, ensure selectedPlatform is valid for the new device.
+  useEffect(() => {
+    if (!playbook || !selectedDevice) return;
+    const sp = playbook.supported_platforms ?? {};
+    const devicePlatforms = sp[selectedDevice] ?? [];
+    if (devicePlatforms.length > 0 && !devicePlatforms.includes(selectedPlatform)) {
+      setSelectedPlatform(devicePlatforms.includes("windows") ? "windows" : devicePlatforms[0]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDevice, playbook?.supported_platforms]);
 
   // When platform changes, switch selectedTestDevice to the matching composite key.
   // If no device is tested on the new platform, use a synthetic key so stale results
@@ -1235,7 +1390,10 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
     }
   }, [coverageViewActive, selectedTestDevice]);
 
-  const hasDeviceContent = !!playbook?.content && /<!-- @device:[\w,]+ -->/.test(playbook.content);
+  const preinstalledDevice: string | null =
+    selectedCategory === "reference" && selectedDevice === "halo"
+      ? "halo_box"
+      : selectedDevice;
 
   // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
   const filteredContent = playbook?.content
@@ -1244,7 +1402,9 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
           filterContentByDevice(
             filterContentByOS(playbook.content, selectedPlatform),
             selectedDevice
-          )
+          ),
+          selectedPlatform,
+          preinstalledDevice
         )
       )
         // Transform relative image paths in HTML img tags to use the API route
@@ -1317,6 +1477,24 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
         );
       }
       
+      if (href && href.startsWith("#")) {
+        return (
+          <a
+            href={href}
+            className="md-link"
+            onClick={(e) => {
+              e.preventDefault();
+              const target = document.getElementById(href.slice(1));
+              if (target) {
+                target.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
+            {children}
+          </a>
+        );
+      }
+
       return (
         <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
           {children}
@@ -1494,15 +1672,27 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       rafId = requestAnimationFrame(() => {
         rafId = null;
         
-        const headings = contentRef.current?.querySelectorAll("h2[id]");
+        const headings = contentRef.current?.querySelectorAll("h2[id], h3[id]");
         if (!headings || headings.length === 0) return;
-        
+
+        // Build a set of all IDs present in the TOC (h2 + h3 children)
+        const tocIds = new Set<string>();
+        for (const item of tocItems) {
+          tocIds.add(item.id);
+          if (item.children) {
+            for (const child of item.children) {
+              tocIds.add(child.id);
+            }
+          }
+        }
+
         // Find the heading that's currently at or near the top of the viewport
         // We look for the last heading that has scrolled past the threshold
         const threshold = 150; // How far from top of viewport to consider "active"
         let currentActive = "";
-        
+
         for (const heading of headings) {
+          if (!tocIds.has(heading.id)) continue;
           const rect = heading.getBoundingClientRect();
           // If this heading is at or above the threshold, it's the current section
           if (rect.top <= threshold) {
@@ -1627,31 +1817,72 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                   </div>
                 )}
 
-                {/* Platform & Device Toggles */}
-                {(playbook.platforms.length > 0 || hasDeviceContent) && (
-                  <div className="flex flex-col gap-3">
-                    {playbook.platforms.length > 0 && (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                        <span className="text-sm text-[#6b6b6b]">Platform:</span>
-                        <PlatformToggle
-                          platforms={playbook.platforms}
-                          selected={selectedPlatform}
-                          onChange={setSelectedPlatform}
-                        />
-                      </div>
-                    )}
-                    {hasDeviceContent && !coverageViewActive && (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                        <span className="text-sm text-[#6b6b6b]">Device:</span>
-                        <DeviceToggle
-                          selected={selectedDevice}
-                          onChange={setSelectedDevice}
-                          hasDeviceContent={hasDeviceContent}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
+                {/* Platform Selector */}
+                <div className="inline-flex items-stretch rounded-lg border border-[#2a2a2a] bg-[#161616] divide-x divide-[#2a2a2a]">
+                  {!coverageViewActive && (() => {
+                    const sp = playbook.supported_platforms ?? {};
+                    const cats = extractCategories(sp);
+                    const activeCat = selectedCategory ? DEVICE_CATEGORY_MAP[selectedCategory] : null;
+                    const catDevices = activeCat
+                      ? extractCategoryDevices(activeCat, sp)
+                      : [];
+                    const devicePlatforms = selectedDevice
+                      ? (sp[selectedDevice] ?? [])
+                      : extractPlatforms(sp);
+                    return (
+                      <>
+                        {cats.length > 0 && (
+                          <div className="px-3 py-2">
+                            <div className="text-[10px] text-[#555] mb-1">Device Family</div>
+                            <CategoryToggle
+                              categories={cats}
+                              selected={selectedCategory}
+                              onChange={(c) => {
+                                setSelectedCategory(c);
+                                const info = DEVICE_CATEGORY_MAP[c];
+                                const devs = extractCategoryDevices(info, sp);
+                                if (devs.length > 0 && (!selectedDevice || !devs.includes(selectedDevice))) {
+                                  setSelectedDevice(devs[0]);
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
+                        {activeCat && catDevices.length > 0 && (
+                          <div className="px-3 py-2">
+                            <div className="text-[10px] text-[#555] mb-1">Device</div>
+                            <DeviceToggle
+                              devices={catDevices}
+                              selected={selectedDevice}
+                              onChange={setSelectedDevice}
+                              nameOverrides={activeCat.deviceDisplayNames}
+                            />
+                          </div>
+                        )}
+                        {devicePlatforms.length > 0 && (
+                          <div className="px-3 py-2">
+                            <div className="text-[10px] text-[#555] mb-1">OS</div>
+                            <PlatformToggle
+                              platforms={devicePlatforms}
+                              selected={selectedPlatform}
+                              onChange={setSelectedPlatform}
+                            />
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                  {coverageViewActive && extractPlatforms(playbook.supported_platforms ?? {}).length > 0 && (
+                    <div className="px-3 py-2">
+                      <div className="text-[10px] text-[#555] mb-1">OS</div>
+                      <PlatformToggle
+                        platforms={extractPlatforms(playbook.supported_platforms ?? {})}
+                        selected={selectedPlatform}
+                        onChange={setSelectedPlatform}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 {/* Tags */}
                 {playbook.tags && playbook.tags.length > 0 && (

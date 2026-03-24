@@ -1,16 +1,35 @@
 {
   "id": "vllm-inference",
   "title": "Quick Start on vLLM",
-  "description": "Learn how to run inference and serving using vLLM on your STX Halo™",
+  "description": "Learn how to run inference and serving using vLLM on your STX Halo\u2122",
   "time": 90,
-  "platforms": ["linux"],
-  "tested_platforms": {
-    "linux": []
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
   },
   "difficulty": "beginner",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": true,
   "developed": false,
   "published": true,
-  "tags": ["vllm", "inference", "llm", "quickstart"]
+  "tags": [
+    "vllm",
+    "inference",
+    "llm",
+    "quickstart"
+  ]
 }
