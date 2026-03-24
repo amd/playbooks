@@ -155,7 +155,7 @@ source llm-env/bin/activate
 ### Installing Dependencies
 <!-- @test:id=install-torch-linux timeout=900 hidden=True setup=activate-venv -->
 ```bash
-pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0+rocm7.13.0a20260317 torchaudio==2.10.0+rocm7.13.0a20260317 torchvision==0.25.0+rocm7.13.0a20260317 --force-reinstall
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0+rocm7.12.0a20260310 torchaudio==2.10.0+rocm7.12.0a20260310 torchvision==0.25.0+rocm7.12.0a20260310 --force-reinstall
 ```
 <!-- @test:end --> 
 ---
@@ -293,9 +293,9 @@ add_one<<<grid_size, block_size>>>(data, n);
 the CPU immediately continues executing the next instruction without waiting for the GPU to finish. `hipDeviceSynchronize()` forces the CPU to block until the GPU kernel completes.
 
 **Step 2: Build** ([setup.py](assets/Vector_Addition/setup.py)):
-<!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup=activate-venv workdir="Vector_Addition" -->
+<!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup=activate-venv -->
 ```bash
-python setup.py build_ext --inplace
+python "Vector_Addition/setup.py" build_ext --inplace
 ```
 <!-- @test:end -->
 
