@@ -155,7 +155,7 @@ source llm-env/bin/activate
 ### Installing Dependencies
 <!-- @test:id=install-torch-linux timeout=900 hidden=True setup=activate-venv -->
 ```bash
-pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0+rocm7.12.0a20260310 torchaudio==2.10.0+rocm7.12.0a20260310 torchvision==0.25.0+rocm7.12.0a20260310 --force-reinstall
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0+rocm7.13.0a20260317 torchaudio==2.10.0+rocm7.13.0a20260317 torchvision==0.25.0+rocm7.13.0a20260317 --force-reinstall
 ```
 <!-- @test:end --> 
 ---
