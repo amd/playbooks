@@ -16,52 +16,61 @@ python3 -c "import torch; print(torch.cuda.is_available())"
 
 However, if you want to remove the existing stack and reinstall the dependencies, or if you're running this playbook on a different hardware setup, you may follow these steps:
 
-### 1. Uninstall Old Stack
+### Uninstall Old Stack
 
 ```bash
 pip uninstall torch torchvision torchaudio
 
-# Remove old ROCm
-sudo apt purge 'rocm*' 'hip*' 'hsa*' -y
-sudo rm -rf /opt/rocm*
-sudo rm -rf /etc/apt/sources.list.d/rocm*
+# Remove ROCm
+sudo rm -rf /opt/rocm
+sudo apt purge -y 'amdgpu*' 'rocm*' 'hip*'
 sudo apt autoremove -y
-sudo apt update
+
+sudo rm -rf /etc/ld.so.conf.d/rocm.conf
+sudo rm -rf /etc/profile.d/rocm.sh
 ```
 
-Verify it's gone: running `rocminfo` should either return “command not found” or produce an empty output.
+#### Verify cleanup:
+```bash
+which hipcc       # should return nothing
+rocminfo          # should fail if ROCm is fully removed
+amd-smi           # should fail or report no ROCm
+ls -l /opt/rocm   # should not exist
+```
 
-### 2. Install ROCm 7.1.1
-
-Check your Ubuntu version first:
-- **24.04** → `noble`
-- **22.04** → `jammy`
+### Install ROCm 7.2
 
 ```bash
-# Download the installer (noble shown; swap for jammy if needed)
-wget https://repo.radeon.com/amdgpu-install/7.1.1/ubuntu/noble/amdgpu-install_7.1.1.70101-1_all.deb
-
-# Install the package
-sudo DEBIAN_FRONTEND=noninteractive apt install -y ./amdgpu-install_7.1.1.70101-1_all.deb
-
-# Install ROCm + HIP
-sudo amdgpu-install --usecase=rocm,hip -y
+sudo apt update
+wget https://repo.radeon.com/amdgpu-install/7.2/ubuntu/noble/amdgpu-install_7.2.70200-1_all.deb
+sudo apt install ./amdgpu-install_7.2.70200-1_all.deb
+sudo amdgpu-install -y --usecase=rocm --no-dkms
 ```
 
-Verify:
+#### Set user permissions
+```bash
+sudo usermod -aG render,video $USER
+```
+
+#### Reboot
+```bash
+sudo reboot
+```
+
+#### Verify:
 ```bash
 hipcc --version
 rocminfo
 ```
 
-### 3. Install PyTorch for ROCm 7.1
+### Install PyTorch
 
 ```bash
 pip install torch torchvision torchaudio \
-  --index-url https://download.pytorch.org/whl/rocm7.1
+  --index-url https://download.pytorch.org/whl/rocm7.2
 ```
 
-Verify:
+#### Verify:
 ```bash
 python3 -c "import torch; print(torch.version.hip)"
 python3 -c "import torch; print(torch.cuda.is_available())"
