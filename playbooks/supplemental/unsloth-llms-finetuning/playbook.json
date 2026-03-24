@@ -32,7 +32,7 @@
   "difficulty": "advanced",
   "isNew": false,
   "isFeatured": false,
-  "developed": false,
+  "developed": true,
   "published": true,
   "tags": ["unsloth", "sft", "fine-tuning", "optimization"],
   "coverImage": "assets/unsloth.png"
