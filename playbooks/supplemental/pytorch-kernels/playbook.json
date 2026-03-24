@@ -6,22 +6,23 @@
   "supported_platforms": {
     "halo": [
       "linux",
-      "windows"
     ],
     "halo_box": [
       "linux",
-      "windows"
     ],
     "stx": [
       "linux",
-      "windows"
     ],
     "krk": [
       "linux",
-      "windows"
     ]
   },
   "required_platforms": {
+    "halo": [
+      "linux"
+    ]
+  },
+  "tested_platforms":{
     "halo": [
       "linux"
     ]
