@@ -155,7 +155,12 @@ source llm-env/bin/activate
 ### Installing Dependencies
 <!-- @test:id=install-torch-linux timeout=900 hidden=True setup=activate-venv -->
 ```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm7.2
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+rocm-sdk init
+export ROCM_HOME="$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
+export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
+export PATH="$ROCM_HOME/bin:$PATH"
+pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 ```
 <!-- @test:end --> 
 ---
