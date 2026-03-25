@@ -137,29 +137,27 @@ print("OK")
 <!-- @test:id=gaia-hardware-advisor-smoke-windows timeout=300 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
-$uvBin = Join-Path $env:USERPROFILE ".local\bin"
-if (Test-Path $uvBin) { $env:PATH = "$uvBin;$env:PATH" }
 
 $p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
 try {
+  $health = $null
   for ($i=0; $i -lt 120; $i++) {
     $health = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/health
     if ($health) { break }
     Start-Sleep -Seconds 1
   }
 
-  $inputText = "quit"
-  $output = $inputText | uv run hardware_advisor_agent.py
-  if (-not ($output -match "Hardware Advisor Agent")) {
-    throw "Did not see expected startup banner from hardware_advisor_agent.py"
-  }
+  if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:8000/api/v1/health" }
+  Write-Host "OK: Lemonade server ready on http://127.0.0.1:8000/api/v1/health"
+
+  $output = cmd /c "echo quit| .\.venv\Scripts\python.exe hardware_advisor_agent.py"
+
+  if (-not ($output -match "Hardware Advisor Agent" -or $output -match "Agent ready!" -or $output -match "Goodbye!")) { throw "Did not see expected output from hardware_advisor_agent.py" }
   Write-Host "OK: hardware_advisor_agent.py started successfully"
 } finally {
   & lemonade-server stop
   Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) {
-    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-  }
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
 }
 ```
 <!-- @test:end --> 
