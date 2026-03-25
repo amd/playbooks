@@ -3,13 +3,14 @@
 This document describes the expected platform configurations for running this playbook.
 
 ## Required Frameworks
-### Linux
+## Linux
 
-If you're running this on a Halo Box, you don't have to worry about the dependencies, as ROCm and Torch come pre‑installed. You can validate them by running:
+If you're running on a Halo Box, ROCm and PyTorch are preinstalled. You can validate them by running:
 
 ```bash
 hipcc --version
 rocminfo
+amd-smi
 python3 -c "import torch; print(torch.version.hip)"
 python3 -c "import torch; print(torch.cuda.is_available())"
 ```
@@ -35,7 +36,6 @@ sudo rm -rf /etc/profile.d/rocm.sh
 which hipcc       # should return nothing
 rocminfo          # should fail if ROCm is fully removed
 amd-smi           # should fail or report no ROCm
-ls -l /opt/rocm   # should not exist
 ```
 
 ### Install ROCm Python packages via pip
@@ -43,14 +43,12 @@ ls -l /opt/rocm   # should not exist
 ```bash
 # Create a venv - Recommended approach
 python3 -m venv ~/rocm-env
-
-# Activate it
 source ~/rocm-env/bin/activate
 
 # Upgrade pip
 pip install --upgrade pip setuptools wheel
 
-# For gfx1151:
+# ROCm for gfx1151:
 pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
 
 # Initialize the devel libraries. Some tools (HIPRTC, libroctx64, etc.) are lazily expanded, so run:
@@ -60,20 +58,15 @@ rocm-sdk init
 export ROCM_HOME="$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
 export PATH="$ROCM_HOME/bin:$PATH"
-
 ```
 
-#### Set user permissions
+#### Set user permissions and reboot
 ```bash
 sudo usermod -aG render,video $USER
-```
-
-#### Reboot
-```bash
 sudo reboot
 ```
 
-#### Verify:
+#### Verify ROCm:
 ```bash
 ls $ROCM_HOME/lib/libhiprtc.so*
 ls $ROCM_HOME/lib/libroctx64.so*
@@ -101,3 +94,51 @@ print("Device count:", torch.cuda.device_count())
 ```
 
 ---
+
+## Windows
+
+### Prerequisites
+- Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- Reboot
+
+### Install ROCm Python packages via pip
+```bash
+# Create a venv - Recommended approach
+python -m venv rocm-env
+rocm-env\Scripts\activate
+
+# Upgrade pip
+pip install --upgrade pip setuptools wheel
+
+# ROCm for gfx1151:
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+
+# Initialize the devel libraries. Some tools (HIPRTC, libroctx64, etc.) are lazily expanded, so run:
+rocm-sdk init
+
+# Set environment variables
+$env:ROCM_HOME="$env:VIRTUAL_ENV\Lib\site-packages\_rocm_sdk_devel"
+$env:PATH="$env:ROCM_HOME\bin;$env:ROCM_HOME\lib;$env:PATH"
+```
+
+#### Verify:
+```bash
+dir $env:ROCM_HOME\lib\hiprtc*
+hipcc --version
+hipInfo.exe
+```
+
+### Install PyTorch
+
+```bash
+pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch torchaudio torchvision
+```
+
+#### Verify:
+```python
+import torch
+
+print("HIP available:", torch.cuda.is_available())
+print("Device name:", torch.cuda.get_device_name(0))
+print("Device count:", torch.cuda.device_count())
+```
