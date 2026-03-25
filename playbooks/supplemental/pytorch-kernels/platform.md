@@ -23,6 +23,11 @@ However, if you want to remove the existing stack and reinstall the dependencies
 pip uninstall torch torchvision torchaudio
 
 # Remove ROCm
+pip uninstall -y rocm rocm-sdk-core rocm-sdk-devel rocm-sdk-libraries-gfx1151 triton triton-rocm
+
+rm -f ~/.local/bin/hipcc
+rm -f ~/.local/bin/amd-smi
+
 sudo rm -rf /opt/rocm
 sudo apt purge -y 'amdgpu*' 'rocm*' 'hip*'
 sudo apt autoremove -y
