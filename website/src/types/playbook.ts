@@ -75,16 +75,73 @@ export type Architecture = "halo" | "krk";
 export type Device = "halo" | "stx" | "krk" | "rx7900xt" | "rx9070xt";
 export type Category = "core" | "supplemental" | "backup";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
+export type DeviceCategory = "reference" | "apu" | "gpu";
 
 export const DEVICE_IDS: Device[] = ["halo", "stx", "krk", "rx7900xt", "rx9070xt"];
 
 export const deviceNames: Record<Device, string> = {
-  halo: "STX Halo",
-  stx: "STX Point",
-  krk: "Krackan Point",
+  halo: "Ryzen™ AI Max",
+  stx: "Ryzen™ AI 300 HX",
+  krk: "Ryzen™ AI 300",
   rx7900xt: "RX 7900 XT",
   rx9070xt: "RX 9070 XT",
 };
+
+export interface DeviceCategoryInfo {
+  id: DeviceCategory;
+  name: string;
+  devices: Device[];
+  /** Per-category overrides for device display names */
+  deviceDisplayNames?: Partial<Record<Device, string>>;
+}
+
+export const DEVICE_CATEGORIES: DeviceCategoryInfo[] = [
+  { id: "reference", name: "Reference Platforms", devices: ["halo"], deviceDisplayNames: { halo: "AMD Ryzen\u2122 AI Halo" } },
+  { id: "apu", name: "Ryzen\u2122 AI APUs", devices: ["halo", "stx", "krk"] },
+  { id: "gpu", name: "Radeon\u2122 GPUs", devices: ["rx7900xt", "rx9070xt"] },
+];
+
+export const DEVICE_CATEGORY_MAP: Record<DeviceCategory, DeviceCategoryInfo> =
+  Object.fromEntries(DEVICE_CATEGORIES.map(c => [c.id, c])) as Record<DeviceCategory, DeviceCategoryInfo>;
+
+/**
+ * Returns the categories available for a playbook given its supported platforms.
+ * A category is available if any of its devices appear in the supported platforms
+ * (optionally filtered by OS platform).
+ */
+export function extractCategories(
+  supportedPlatforms: Partial<Record<Device, Platform[]>>,
+  platform?: Platform,
+): DeviceCategoryInfo[] {
+  const available = new Set(
+    platform ? extractDevices(supportedPlatforms, platform) : (Object.keys(supportedPlatforms) as Device[]),
+  );
+  return DEVICE_CATEGORIES.filter(cat => cat.devices.some(d => available.has(d)));
+}
+
+/**
+ * Returns the devices within a category that are supported by a playbook.
+ */
+export function extractCategoryDevices(
+  category: DeviceCategoryInfo,
+  supportedPlatforms: Partial<Record<Device, Platform[]>>,
+  platform?: Platform,
+): Device[] {
+  return category.devices.filter(d => {
+    const platforms = supportedPlatforms[d];
+    return platforms && (!platform || platforms.includes(platform));
+  });
+}
+
+/**
+ * Derives the best-matching category for a given device.
+ * Prefers "reference" for halo, otherwise matches to apu/gpu.
+ */
+export function categoryForDevice(device: Device): DeviceCategory {
+  if (device === "halo") return "reference";
+  if (device === "stx" || device === "krk") return "apu";
+  return "gpu";
+}
 
 export interface PlaybookMeta {
   /** Unique identifier matching the folder name */

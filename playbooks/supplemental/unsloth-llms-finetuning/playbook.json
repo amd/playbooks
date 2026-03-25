@@ -1,8 +1,8 @@
 {
-  "id": "comfyui-image-gen",
-  "title": "Generating images with ComfyUI and Z Image Turbo",
-  "description": "Create stunning AI-generated images using ComfyUI with Z Image Turbo on STX Halo\u2122",
-  "time": 15,
+  "id": "unsloth-llms-finetuning",
+  "title": "Optimized LLMs Fine-tuning with Unsloth",
+  "description": "Use Unsloth for memory-efficient fine-tune LLMs on STX Halo™",
+  "time": 60,
   "supported_platforms": {
     "halo": [
       "windows",
@@ -29,15 +29,11 @@
       "linux"
     ]
   },
-  "difficulty": "beginner",
+  "difficulty": "advanced",
   "isNew": false,
-  "isFeatured": true,
+  "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": [
-    "image-generation",
-    "comfyui",
-    "z-image-turbo"
-  ],
-  "coverImage": "assets/cover.jpeg"
+  "tags": ["unsloth", "sft", "fine-tuning", "optimization"],
+  "coverImage": "assets/unsloth.png"
 }
