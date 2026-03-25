@@ -305,7 +305,7 @@ lemonade-server serve
 In a terminal, install the OpenAI Python Client using the following command:
 
 <!-- @os:windows -->
-<!-- @test:id=env-check-windows timeout=300 -->
+<!-- @test:id=env-check-windows timeout=300 hidden=True -->
 ```powershell
 python --version
 where.exe python
@@ -317,7 +317,7 @@ python -m pip --version
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=env-check-linux timeout=300 -->
+<!-- @test:id=env-check-linux timeout=300 hidden=True -->
 ```bash
 python3 --version
 which python3
@@ -329,7 +329,7 @@ python3 -m pip --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=pip-install-openai-windows timeout=300 -->
+<!-- @test:id=pip-install-openai-windows timeout=300 hidden=True -->
 ```powershell
 python -m pip install openai
 ```
@@ -337,7 +337,7 @@ python -m pip install openai
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=pip-install-openai-linux timeout=300 -->
+<!-- @test:id=pip-install-openai-linux timeout=300 hidden=True -->
 ```bash
 python3 -m pip install openai
 ```
@@ -480,52 +480,15 @@ try {
   if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
   Write-Host "OK: Lemonade server is responding"
 
-  $script = @'
-from openai import OpenAI
-import json
-
-client = OpenAI(base_url="http://127.0.0.1:8000/api/v1", api_key="lemonade")
-
-resp = client.chat.completions.create(
-    model="Gemma-3-4b-it-GGUF",
-    messages=[
-        {
-            "role": "system",
-            "content": "Return ONLY valid JSON: [{\"question\":\"...\",\"answer\":\"...\"}]"
-        },
-        {
-            "role": "user",
-            "content": "Create 2 flashcards about the solar system"
-        }
-    ],
-    temperature=0,
-    max_tokens=500,
-)
-
-text = resp.choices[0].message.content.strip()
-if text.startswith("```"):
-    text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
-
-cards = json.loads(text)
-assert isinstance(cards, list) and len(cards) >= 1
-assert "question" in cards[0] and "answer" in cards[0]
-print("OK")
-'@
-
-  Set-Content -Path lemonade_python_smoke.py -Value $script
   python lemonade_python_smoke.py
 } finally {
-  Remove-Item lemonade_python_smoke.py -ErrorAction SilentlyContinue
   & lemonade-server stop
   Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) {
-    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-  }
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
 }
 ```
 <!-- @test:end -->
 <!-- @os:end -->
-
 
 
 <!-- @os:linux -->
@@ -564,39 +527,7 @@ if [ -z "$models_json" ]; then
 fi
 echo "OK: Lemonade server is responding"
 
-cat >/tmp/lemonade_python_smoke.py <<'PY'
-from openai import OpenAI
-import json
-
-client = OpenAI(base_url="http://127.0.0.1:8000/api/v1", api_key="lemonade")
-
-resp = client.chat.completions.create(
-    model="Gemma-3-4b-it-GGUF",
-    messages=[
-        {
-            "role": "system",
-            "content": "Return ONLY valid JSON: [{\"question\":\"...\",\"answer\":\"...\"}]"
-        },
-        {
-            "role": "user",
-            "content": "Create 2 flashcards about the solar system"
-        }
-    ],
-    temperature=0,
-    max_tokens=200,
-)
-
-text = resp.choices[0].message.content.strip()
-if text.startswith("```"):
-    text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
-
-cards = json.loads(text)
-assert isinstance(cards, list) and len(cards) >= 1
-assert "question" in cards[0] and "answer" in cards[0]
-print("OK")
-PY
-
-python3 /tmp/lemonade_python_smoke.py
+python3 lemonade_python_smoke.py
 ```
 <!-- @test:end -->
 <!-- @os:end -->
