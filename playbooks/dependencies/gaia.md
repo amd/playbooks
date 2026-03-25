@@ -239,6 +239,125 @@ echo "OK: Lemonade server health endpoint responded"
 <!-- @test:end --> 
 <!-- @os:end --> 
 
+<!-- @os:windows -->
+<!-- @test:id=lemonade-chat-qwen-windows timeout=1200 hidden=True -->
+```powershell
+$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
+try {
+  # Wait for server to come up
+  $modelsJson = $null
+  for ($i=0; $i -lt 120; $i++) {
+    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
+    if ($modelsJson) { break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
+  Write-Host "OK: Lemonade server is responding"
+
+  # Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
+  $parsed = $modelsJson | ConvertFrom-Json
+  $entry  = $parsed.data | Where-Object { $_.id -eq "Qwen3-Coder-30B-A3B-Instruct-GGUF" } | Select-Object -First 1
+  if (-not $entry) { throw "Model Qwen3-Coder-30B-A3B-Instruct-GGUF is not present in Lemonade /api/v1/models." }
+  if (-not $entry.downloaded) { throw "Model Qwen3-Coder-30B-A3B-Instruct-GGUF is present but not downloaded in Lemonade. Please download it." }
+  Write-Host "OK: Qwen3-Coder-30B-A3B-Instruct-GGUF model is downloaded in Lemonade"
+
+  # Model chat test
+  $body = @{
+    model = "Qwen3-Coder-30B-A3B-Instruct-GGUF"
+    messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+    temperature = 0
+    max_tokens = 32
+  } | ConvertTo-Json -Depth 5
+  $out = curl.exe -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+  if (-not $out) { throw "Empty response from Lemonade chat/completions" }
+} finally {
+  & lemonade-server stop
+  Start-Sleep -Seconds 2
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-chat-qwen-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+p=""
+cleanup() {
+  lemonade-server stop >/dev/null 2>&1 || true
+  sleep 2
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+lemonade-server serve --host 127.0.0.1 --port 8000 >/tmp/lemonade-test.log 2>&1 &
+p=$!
+
+models_json=""
+for i in $(seq 1 120); do
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/models || true)"
+  if [ -n "$models_json" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$models_json" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:8000"
+  exit 1
+fi
+echo "OK: Lemonade server is responding"
+
+export MODELS_JSON="$models_json"
+python3 - <<'PY'
+import json
+import os
+import sys
+
+data = json.loads(os.environ["MODELS_JSON"])
+entry = None
+for item in data.get("data", []):
+    if item.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF":
+        entry = item
+        break
+
+if entry is None:
+    print("Model Qwen3-Coder-30B-A3B-Instruct-GGUF is not present in Lemonade /api/v1/models.")
+    sys.exit(1)
+
+if not entry.get("downloaded", False):
+    print("Model Qwen3-Coder-30B-A3B-Instruct-GGUF is present but not downloaded in Lemonade. Please download it.")
+    sys.exit(1)
+
+print("OK: Qwen3-Coder-30B-A3B-Instruct-GGUF model is downloaded in Lemonade")
+PY
+
+body='{
+  "model": "Qwen3-Coder-30B-A3B-Instruct-GGUF",
+  "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
+  "temperature": 0,
+  "max_tokens": 32
+}'
+
+out="$(curl -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d "$body" || true)"
+
+if [ -z "$out" ]; then
+  echo "Empty response from Lemonade chat/completions"
+  exit 1
+fi
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 #### Verifying Installation
 
 Verify that GAIA v0.16.2 or later is installed:

@@ -89,8 +89,18 @@ Now let's build this from scratch.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True -->
 ```powershell
-.\.venv\Scripts\Activate.ps1
-$script = @'
+$ErrorActionPreference = "Stop"
+$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
+try {
+  $health = $null
+  for ($i=0; $i -lt 120; $i++) {
+    $health = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/health
+    if ($health) { break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:8000/api/v1/health" }
+
+  $script = @'
 from gaia.llm.lemonade_client import LemonadeClient
 
 client = LemonadeClient(keep_alive=True)
@@ -109,9 +119,16 @@ assert model_info.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF"
 
 print("OK")
 '@
-Set-Content -Path gaia_lemonadeclient_smoke.py -Value $script
-python gaia_lemonadeclient_smoke.py
-Remove-Item gaia_lemonadeclient_smoke.py -ErrorAction SilentlyContinue
+  Set-Content -Path gaia_lemonadeclient_smoke.py -Value $script
+  .\.venv\Scripts\python.exe gaia_lemonadeclient_smoke.py
+} finally {
+  Remove-Item gaia_lemonadeclient_smoke.py -ErrorAction SilentlyContinue
+  & lemonade-server stop
+  Start-Sleep -Seconds 2
+  if ($p -and -not $p.HasExited) {
+    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+  }
+}
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 
@@ -131,7 +148,7 @@ try {
     Start-Sleep -Seconds 1
   }
 
-  $inputText = "quit`n"
+  $inputText = "quit"
   $output = $inputText | uv run hardware_advisor_agent.py
   if (-not ($output -match "Hardware Advisor Agent")) {
     throw "Did not see expected startup banner from hardware_advisor_agent.py"
@@ -184,7 +201,7 @@ rm -f /tmp/gaia_lemonadeclient_smoke.py
 <!-- @test:id=gaia-hardware-advisor-smoke-linux timeout=300 hidden=True -->
 ```bash
 set -euo pipefail
-export PATH ="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 p=""
 cleanup() {
@@ -209,7 +226,7 @@ for i in $(seq 1 120); do
   sleep 1
 done
 
-printf 'quit\n' | uv run hardware_advisor_agent.py >/tmp/gaia_agent_output.txt
+printf 'quit' | uv run hardware_advisor_agent.py >/tmp/gaia_agent_output.txt
 
 grep -q "Hardware Advisor Agent" /tmp/gaia_agent_output.txt
 echo "OK: hardware_advisor_agent.py started successfully"
