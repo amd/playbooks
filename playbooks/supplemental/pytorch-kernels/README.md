@@ -131,7 +131,7 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 <!-- @test:id=create-venv timeout=60 -->
 ```cmd
 # Windows
-python -m venv llm-env --system-site-packages
+python -m venv llm-env
 llm-env\Scripts\Activate.ps1
 ```
 <!-- @test:end -->
@@ -144,7 +144,7 @@ llm-env\Scripts\Activate.ps1
 # Linux
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv llm-env --system-site-packages
+python3 -m venv llm-env
 source llm-env/bin/activate
 ```
 <!-- @test:end -->
@@ -153,16 +153,36 @@ source llm-env/bin/activate
 ---
 
 ### Installing Dependencies
-<!-- @test:id=install-torch-linux timeout=900 hidden=True setup=activate-venv -->
+<!-- @test:id=install-torch-rocm timeout=900 setup=activate-venv -->
 ```bash
 pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
-rocm-sdk init
-export ROCM_HOME="$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
-export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
-export PATH="$ROCM_HOME/bin:$PATH"
+rocm-sdk init # Initialize the devel libraries
+
 pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 ```
 <!-- @test:end --> 
+
+<!-- @os:linux -->
+<!-- @test:id=set-envs timeout=60 -->
+```bash
+# Linux
+export ROCM_HOME="$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
+export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
+export PATH="$ROCM_HOME/bin:$PATH"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=set-envs timeout=60 -->
+```bash
+# Windows
+$env:ROCM_HOME="$VIRTUAL_ENV\Lib\site-packages\_rocm_sdk_devel"
+$env:PATH="$env:ROCM_HOME\bin;$env:ROCM_HOME\lib;$env:PATH"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 ---
 
 ## Walkthroughs
@@ -209,14 +229,15 @@ block_size = 256
 grid_size = (n + block_size - 1) // block_size
 
 # 3. Launch: specify grid/block dimensions and pass tensor args directly
-add_one_kernel(
-    grid=(grid_size, 1, 1),
-    block=(block_size, 1, 1),
-    args=[x, n],
-)
+for _ in range(200):
+    add_one_kernel(
+        grid=(grid_size, 1, 1),
+        block=(block_size, 1, 1),
+        args=[x, n],
+    )
 
 # 4. Test the output
-print("First 5 elements:", x[:5].cpu()) #tensor([1001., 1001., 1001., 1001., 1001.])
+print("First 5 elements:", x[:5].cpu()) #tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @test:end -->
 The script also spawns a background thread that polls `rocm-smi` every 100ms to log peak and average GPU utilization during the kernel run.
