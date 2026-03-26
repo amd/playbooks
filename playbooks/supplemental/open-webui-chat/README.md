@@ -244,7 +244,7 @@ import base64, json, os, sys, urllib.request
 
 data = json.loads(os.environ["MODELS_JSON"])
 required = [
-  "Llama-3.2-1B-Instruct-Hybrid",
+  "Llama-3.2-1B-Instruct-GGUF",
   "Gemma-3-4b-it-GGUF",
   "SDXL-Turbo",
 ]
@@ -275,7 +275,7 @@ def post_json(url, payload, timeout=300):
 
 # LLM chat smoke test
 chat = post_json("http://127.0.0.1:8000/api/v1/chat/completions", {
-  "model": "Llama-3.2-1B-Instruct-Hybrid",
+  "model": "Llama-3.2-1B-Instruct-GGUF",
   "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
   "temperature": 0,
   "max_tokens": 50,
