@@ -46,23 +46,11 @@ A GPU kernel is a function that runs in parallel across thousands of GPU threads
   <img src="https://github.com/user-attachments/assets/4773c54b-686e-4b1b-8fea-d451dee9c27c" width="900"/>
 </p>
 
-### `__global__`:  the kernel qualifier
-
-In HIP/CUDA, `__global__` marks a function as a GPU kernel:
-
-- It **runs on the GPU** (device)
-- It is **launched from the CPU** (host)
-- It **executes in parallel** across many GPU threads simultaneously
-
-```c
-__global__ void add_one(float* data, int n) { ... }
-```
-
 ### GPU Execution Model: Wavefronts
 
 GPU threads are scheduled in groups rather than completely independently; threads in a group execute the same instructions simultaneously. On AMD GPUs, these groups are called **wavefronts**.
 
-A wavefront is the smallest group of threads that the GPU scheduler executes simultaneously. All threads in a wavefront execute the same instruction at the same time.
+A wavefront is the smallest group of threads that the GPU scheduler executes simultaneously. All threads in a wavefront execute the same instruction at the same time. A wavefront on Radeon GPUs consists of 32 threads.
 
 This will become relevant later when discussing block size choices.
 
@@ -125,6 +113,11 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 ---
 
 ## Setup
+<!-- @os:windows -->
+### Prerequisites - Windows
+- Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- Reboot
+<!-- @os:end -->
 
 ### Create a Virtual Environment
 <!-- @os:windows -->
@@ -156,6 +149,7 @@ source llm-env/bin/activate
 <!-- @test:id=install-torch-rocm timeout=900 setup=activate-venv -->
 ```bash
 pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+#Reboot
 rocm-sdk init # Initialize the devel libraries
 
 pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
