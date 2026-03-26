@@ -140,13 +140,15 @@ try {
     messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
     temperature = 0
     max_tokens = 50
+    stream = $false
   } | ConvertTo-Json -Depth 6
-  $chatOut = curl.exe -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions `
+  $chatOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions `
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
     -d $chatBody
   if (-not $chatOut) { throw "Empty response from chat/completions" }
   $chatParsed = $chatOut | ConvertFrom-Json
+  if (-not $chatParsed.choices -or $chatParsed.choices.Count -lt 1) { throw "Unexpected chat response (no choices). Raw response: $chatOut" }
   $chatText = $chatParsed.choices[0].message.content
   if ($chatText -notmatch "\bOK\b") { throw "LLM chat test failed. Got: $chatText" }
   Write-Host "OK: LLM chat works"
