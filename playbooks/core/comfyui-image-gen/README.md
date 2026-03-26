@@ -258,6 +258,7 @@ echo "OK: ComfyUI server is reachable!"
 
 ## Launching ComfyUI
 
+<!-- @device:halo_box -->
 <!-- @os:windows -->
 To launch ComfyUI on Windows, click the ComfyUI Desktop Launcher which is found on your Desktop. You will see the following page:
 
@@ -285,6 +286,26 @@ To launch ComfyUI on Linux, click the ComfyUI shortcut in the taskbar. It should
 > 3. The interface is accessible at `http://127.0.0.1:8188`. Keep the terminal window open while using ComfyUI.
 
 <!-- @os:end -->
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @os:windows -->
+To launch ComfyUI on Windows, simply click the ComfyUI shortcut on your Desktop.
+<!-- @os:end -->
+
+<!-- @os:linux -->
+
+To launch ComfyUI:
+
+1. Navigate to `/usr/local/bin/ComfyUI/` (or to the appropriate folder if installed manually)
+2. Run `python3 main.py --use-pytorch-cross-attention`
+
+ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` to access the interface.
+
+> **Tip**: Keep the terminal window open while using ComfyUI. Closing it will stop the server.
+<!-- @os:end -->
+<!-- @device:end -->
+
 
 ## Finding the Z-Image Turbo Template
 
