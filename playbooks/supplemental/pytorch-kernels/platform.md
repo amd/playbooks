@@ -55,7 +55,16 @@ pip install --upgrade pip setuptools wheel
 
 # ROCm for gfx1151:
 pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+```
 
+#### Set user permissions and reboot
+```bash
+sudo usermod -aG render,video $USER
+sudo reboot
+```
+
+#### Export environment variables
+```bash
 # Initialize the devel libraries. Some tools (HIPRTC, libroctx64, etc.) are lazily expanded, so run:
 rocm-sdk init
 
@@ -63,12 +72,6 @@ rocm-sdk init
 export ROCM_HOME="$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
 export PATH="$ROCM_HOME/bin:$PATH"
-```
-
-#### Set user permissions and reboot
-```bash
-sudo usermod -aG render,video $USER
-sudo reboot
 ```
 
 #### Verify ROCm:
