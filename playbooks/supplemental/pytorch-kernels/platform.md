@@ -90,6 +90,7 @@ amd-smi
 ### Install PyTorch
 
 ```bash
+source ~/rocm-env/bin/activate
 pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 ```
 
@@ -152,6 +153,7 @@ hipInfo.exe
 ### Install PyTorch
 
 ```bash
+rocm-env\Scripts\activate
 pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch torchaudio torchvision
 ```
 
