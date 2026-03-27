@@ -65,6 +65,7 @@ sudo reboot
 
 #### Export environment variables
 ```bash
+source ~/rocm-env/bin/activate
 # Initialize the devel libraries. Some tools (HIPRTC, libroctx64, etc.) are lazily expanded, so run:
 rocm-sdk init
 
