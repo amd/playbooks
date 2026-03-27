@@ -437,7 +437,7 @@ if (-not (Test-Path $ow)) { throw "open-webui not found. Run openwebui-install-v
 # Fresh data dir so auth mode/config isn't polluted by previous runs
 $dataDir = "$PWD\openwebui-data-ci"
 if (Test-Path $dataDir) { Remove-Item -Recurse -Force $dataDir }
-New-Item -ItemType Directory -Force -Path $dataDir
+New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
 
 $env:DATA_DIR = $dataDir
 $env:WEBUI_AUTH = "False" # Disable auth for CI
