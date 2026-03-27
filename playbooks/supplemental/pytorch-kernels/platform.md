@@ -107,7 +107,6 @@ print("Device count:", torch.cuda.device_count())
 
 ### Prerequisites
 - Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
-- Reboot
 
 ### Install ROCm Python packages via pip
 ```bash
@@ -121,17 +120,30 @@ pip install --upgrade pip setuptools wheel
 # ROCm for gfx1151:
 pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
 
+#Reboot
+
+# Open a Powershell terminal and activate Visual Studio environment
+cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 && set' | ForEach-Object { if ($_ -match '^([^=]+)=(.*)$') { [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
+
+rocm-env\Scripts\activate
+
 # Initialize the devel libraries. Some tools (HIPRTC, libroctx64, etc.) are lazily expanded, so run:
 rocm-sdk init
 
 # Set environment variables
-$env:ROCM_HOME="$env:VIRTUAL_ENV\Lib\site-packages\_rocm_sdk_devel"
-$env:PATH="$env:ROCM_HOME\bin;$env:ROCM_HOME\lib;$env:PATH"
+$ROCM_ROOT = (rocm-sdk path --root).Trim()
+$ROCM_BIN = (rocm-sdk path --bin).Trim()
+
+$env:PATH = "$ROCM_ROOT\lib\llvm\bin;$ROCM_BIN;$env:PATH"
+
+# Set compiler and build settings
+$env:CC = "clang-cl"
+$env:CXX = "clang-cl"
+$env:DISTUTILS_USE_SDK = "1"
 ```
 
 #### Verify:
 ```bash
-dir $env:ROCM_HOME\lib\hiprtc*
 hipcc --version
 hipInfo.exe
 ```
