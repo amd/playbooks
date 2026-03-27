@@ -108,7 +108,11 @@ $ErrorActionPreference = "Stop"
 Start-Sleep -Seconds 2
 
 # Start server
-$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
+$logOut = "$PWD\lemonade-openwebui-ci-out.log"
+$logErr = "$PWD\lemonade-openwebui-ci-err.log"
+$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru `
+  -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+
 try {
   # Wait for /models
   $modelsJson = $null
@@ -142,13 +146,14 @@ try {
     max_tokens = 50
     stream = $false
   } | ConvertTo-Json -Depth 6
+  $tmpChat = Join-Path $env:TEMP "chat-body.json"
+  [System.IO.File]::WriteAllText($tmpChat, $chatBody, [System.Text.UTF8Encoding]::new($false))
   $chatOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions `
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
-    -d $chatBody
+    --data-binary "@$tmpChat"
   if (-not $chatOut) { throw "Empty response from chat/completions" }
   $chatParsed = $chatOut | ConvertFrom-Json
-  if (-not $chatParsed.choices -or $chatParsed.choices.Count -lt 1) { throw "Unexpected chat response (no choices). Raw response: $chatOut" }
   $chatText = $chatParsed.choices[0].message.content
   if ($chatText -notmatch "\bOK\b") { throw "LLM chat test failed. Got: $chatText" }
   Write-Host "OK: LLM chat works"
@@ -168,10 +173,12 @@ try {
     temperature = 0
     max_tokens = 32
   } | ConvertTo-Json -Depth 10
-  $visionOut = curl.exe -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions `
+  $tmpVision = Join-Path $env:TEMP "vision-body.json"
+  [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
+  $visionOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions `
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
-    -d $visionBody
+    --data-binary "@$tmpVision"
   if (-not $visionOut) { throw "Empty response from vision chat/completions" }
   $visionParsed = $visionOut | ConvertFrom-Json
   $visionText = $visionParsed.choices[0].message.content
@@ -184,16 +191,19 @@ try {
     prompt = "A simple red cube on a white table, studio lighting"
     size   = "256x256"
   } | ConvertTo-Json -Depth 6
-  $imgOut = curl.exe -s --max-time 900 http://127.0.0.1:8000/api/v1/images/generations `
+  $tmpImg = Join-Path $env:TEMP "img-body.json"
+  [System.IO.File]::WriteAllText($tmpImg, $imgBody, [System.Text.UTF8Encoding]::new($false))
+  $imgOut = curl.exe -sS --fail-with-body --max-time 900 http://127.0.0.1:8000/api/v1/images/generations `
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
-    -d $imgBody
+    --data-binary "@$tmpImg"
   if (-not $imgOut) { throw "Empty response from images/generations" }
   $imgParsed = $imgOut | ConvertFrom-Json
   if (-not $imgParsed.data -or -not $imgParsed.data[0].b64_json) { throw "Image generation did not return data[0].b64_json" }
   Write-Host "OK: Image generation works"
 }
 finally {
+  Remove-Item $tmpChat, $tmpVision, $tmpImg -Force -ErrorAction SilentlyContinue
   & lemonade-server stop
   Start-Sleep -Seconds 2
   if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
@@ -350,7 +360,9 @@ $py = Join-Path $venv "Scripts\python.exe"
 
 & $py -m pip install --upgrade pip
 & $py -m pip install open-webui
+& $py -m pip install beautifulsoup4
 & $py -c "import open_webui; print('OK: import open_webui')"
+& $py -c "import bs4; print('OK: bs4 import')"
 
 $ow = Join-Path $venv "Scripts\open-webui.exe"
 & $ow --help
@@ -384,7 +396,9 @@ ow="$venv/bin/open-webui"
 
 "$py" -m pip install --upgrade pip
 "$py" -m pip install open-webui
+"$py" -m pip install beautifulsoup4
 "$py" -c "import open_webui; print('OK: import open_webui')"
+"$py" -c "import bs4; print('OK: bs4 import')"
 "$ow" --help
 
 echo "OK: open-webui installed in venv"
