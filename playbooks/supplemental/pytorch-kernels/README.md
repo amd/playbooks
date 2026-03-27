@@ -85,7 +85,8 @@ Total threads = `gridDim.x * blockDim.x`. Each thread processes one element inde
 
 ### AMD GPU Programming: HIP
 
-AMD GPUs use **HIP** (Heterogeneous-Compute Interface for Portability), part of the **ROCm** (Radeon Open Compute) platform.
+AMD GPUs use **HIP** (Heterogeneous-Compute Interface for Portability), part of the **ROCm** (Radeon Open Compute) platform. **ROCm** is the full AMD open-source GPU compute stack: drivers, compilers, libraries, and runtime. HIP sits on top of ROCm.
+
 
 HIP is designed to be syntactically close to CUDA. Most CUDA code can be translated to HIP mechanically using the `hipify` tool (which is what generated the `.hip` files in this repo).
 
@@ -95,8 +96,6 @@ HIP is designed to be syntactically close to CUDA. Most CUDA code can be transla
 | `cudaDeviceSynchronize` | `hipDeviceSynchronize` |
 | `kernel<<<grid, block>>>` | `hipLaunchKernelGGL(kernel, ...)` |
 | `nvcc` | `hipcc` |
-
-**ROCm** is the full AMD open-source GPU compute stack: drivers, compilers, libraries, and runtime. HIP sits on top of ROCm.
 
 ---
 
@@ -116,53 +115,77 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 <!-- @os:windows -->
 ### Prerequisites - Windows
 - Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
-- Reboot
 <!-- @os:end -->
 
 ### Create a Virtual Environment
-<!-- @os:windows -->
-<!-- @test:id=create-venv timeout=60 -->
-```cmd
-# Windows
-python -m venv llm-env
-llm-env\Scripts\Activate.ps1
-```
-<!-- @test:end -->
-<!-- @setup:id=activate-venv command="llm-env\Scripts\Activate.ps1" -->
-<!-- @os:end -->
-
 <!-- @os:linux -->
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
-# Linux
-sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv llm-env
-source llm-env/bin/activate
+python3 -m venv ~/rocm-env
+source ~/rocm-env/bin/activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
+<!-- @setup:id=activate-venv command="source rocm-env/bin/activate" -->
 <!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=create-venv timeout=60 -->
+```bash
+python -m venv rocm-env
+rocm-env\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="rocm-env\Scripts\activate" -->
+<!-- @os:end -->
+
 ---
 
 ### Installing Dependencies
+<!-- @os:linux -->
 <!-- @test:id=install-torch-rocm timeout=900 setup=activate-venv -->
 ```bash
+source ~/rocm-env/bin/activate
+
+pip install --upgrade pip setuptools wheel
 pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
-#Reboot
-rocm-sdk init # Initialize the devel libraries
+# sudo reboot
+
+source ~/rocm-env/bin/activate
 
 pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 ```
 <!-- @test:end --> 
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=install-torch-rocm timeout=900 setup=activate-venv -->
+```bash
+rocm-env\Scripts\activate
+
+pip install --upgrade pip setuptools wheel
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+# Reboot
+
+# Open a Powershell terminal and activate Visual Studio environment
+cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 && set' | ForEach-Object { if ($_ -match '^([^=]+)=(.*)$') { [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
+
+rocm-env\Scripts\activate
+
+pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+#### Set Environment Variables
 <!-- @os:linux -->
 <!-- @test:id=set-envs timeout=60 -->
 ```bash
-# Linux
-export ROCM_HOME="$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
-export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
-export PATH="$ROCM_HOME/bin:$PATH"
+rocm-sdk init # Initialize the devel libraries
+
+export ROCM_HOME = "$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
+export LD_LIBRARY_PATH = "$ROCM_HOME/lib:$LD_LIBRARY_PATH"
+export PATH = "$ROCM_HOME/bin:$PATH"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -170,9 +193,17 @@ export PATH="$ROCM_HOME/bin:$PATH"
 <!-- @os:windows -->
 <!-- @test:id=set-envs timeout=60 -->
 ```bash
-# Windows
-$env:ROCM_HOME="$VIRTUAL_ENV\Lib\site-packages\_rocm_sdk_devel"
-$env:PATH="$env:ROCM_HOME\bin;$env:ROCM_HOME\lib;$env:PATH"
+rocm-sdk init # Initialize the devel libraries
+
+$ROCM_ROOT = (rocm-sdk path --root).Trim()
+$ROCM_BIN = (rocm-sdk path --bin).Trim()
+
+$env:PATH = "$ROCM_ROOT\lib\llvm\bin;$ROCM_BIN;$env:PATH"
+
+# Set compiler and build settings
+$env:CC = "clang-cl"
+$env:CXX = "clang-cl"
+$env:DISTUTILS_USE_SDK = "1"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -263,6 +294,8 @@ Elapsed time: 2.753s
 Peak GPU Utilization: 93%
 Average GPU Utilization: 65.94%
 ```
+On Windows, `rocm-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike to 100% utilization when you run the program.
+
 **Nice work! You just ran your first GPU kernel.**
 
 ---
@@ -313,17 +346,27 @@ add_one<<<grid_size, block_size>>>(data, n);
 the CPU immediately continues executing the next instruction without waiting for the GPU to finish. `hipDeviceSynchronize()` forces the CPU to block until the GPU kernel completes.
 
 **Step 2: Build** ([setup.py](assets/Vector_Addition/setup.py)):
+<!-- @os:linux -->
 <!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup=activate-venv -->
 ```bash
 python "Vector_Addition/setup.py" build_ext --inplace
 ```
 <!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup=activate-venv -->
+```bash
+pip install --no-build-isolation -v .
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 `CUDAExtension` is a CUDA build helper from `torch.utils.cpp_extension`. On AMD with ROCm, PyTorch **remaps `CUDAExtension` to use `hipcc`** instead of `nvcc`, so the same `setup.py` that would build a CUDA extension on NVIDIA compiles to AMD GPU code without any changes. This is the key mechanism that makes CUDA extension code portable to AMD: PyTorch's ROCm build intercepts the build path and routes it through the HIP compiler. Produces two files in the same directory:
 - `add_one_ext.cpython-*.so`:  the importable Python extension
 - `add_one_kernel.hip`:  the HIP source generated by hipifying the `.cu` file; this is what `hipcc` actually compiled
 
-**Step 3: Use from Python:**
+**Step 3: Use from Python**
 <!-- @test:id=verify-vector-addition-add-one-kernel-so timeout=400 setup=activate-venv -->
 ```python
 import os, sys
@@ -550,11 +593,21 @@ Compared to `add_one_launcher` in Walkthrough 1, the launcher here:
 
 **Step 2: Build** ([setup.py](assets/Matrix_Multiplication/setup.py)):
 
-<!-- @test:id=run-matmul-kernel-cu timeout=800 setup=activate-venv workdir="Matrix_Multiplication" -->
+<!-- @os:linux -->
+<!-- @test:id=run-matmul-kernel-cu timeout=600 setup=activate-venv -->
 ```bash
-python setup.py build_ext --inplace
+python "Matrix_Multiplication/setup.py" build_ext --inplace
 ```
 <!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=run-matmul-kernel-cu timeout=600 setup=activate-venv -->
+```bash
+pip install --no-build-isolation -v .
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 Produces two files in the same directory:
 - `matmul_ext.cpython-*.so`:  the importable Python extension
@@ -562,7 +615,7 @@ Produces two files in the same directory:
 
 The same `CUDAExtension` → `hipcc` remapping as walkthrough 1 applies here unchanged.
 
-**Step 3: Use from Python:**
+**Step 3: Use from Python**
 <!-- @test:id=verify-matmul-kernel-so timeout=300 setup=activate-venv -->
 ```python
 import os, sys
