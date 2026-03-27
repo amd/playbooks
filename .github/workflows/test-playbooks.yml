@@ -120,7 +120,7 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.has_entries == 'true'
     # runs-on: ${{ fromJson(matrix.runner) }}
-    runs-on: ${{ github.event.inputs.runnerl_label }}
+    runs-on: ${{ github.event.inputs.runner_label }}
     continue-on-error: ${{ !matrix.required }}
     env:
       PYTHONUTF8: 1
