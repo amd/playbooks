@@ -104,7 +104,7 @@ lemonade-server --version
 $ErrorActionPreference = "Stop"
 
 # Stop any stale server (safe if none running)
-& lemonade-server stop
+& lemonade-server stop 2>$null | Out-Null
 Start-Sleep -Seconds 2
 
 # Start server
@@ -204,9 +204,10 @@ try {
 }
 finally {
   Remove-Item $tmpChat, $tmpVision, $tmpImg -Force -ErrorAction SilentlyContinue
-  & lemonade-server stop
+  & lemonade-server stop 2>$null | Out-Null
   Start-Sleep -Seconds 2
   if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+  Write-Host "OK: Lemonade Server stopped successfully"
 }
 ```
 <!-- @test:end --> 
@@ -442,7 +443,9 @@ $env:DATA_DIR = $dataDir
 $env:WEBUI_AUTH = "False" # Disable auth for CI
 $env:ENABLE_PERSISTENT_CONFIG = "False" # Ensure environment-variable config applies for the run and isn't overridden by persistent settings
 
-$p = Start-Process -FilePath $ow -ArgumentList "serve --port 8080" -NoNewWindow -PassThru
+$logOut = "$PWD\openwebui-ci-out.log"
+$logErr = "$PWD\openwebui-ci-err.log" 
+$p = Start-Process -FilePath $ow -ArgumentList "serve --port 8080" -NoNewWindow -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
 try {
   $ok = $false
   for ($i=0; $i -lt 90; $i++) {
