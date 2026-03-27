@@ -13,6 +13,10 @@ on:
         description: 'Specific playbook ID to test (leave empty to test all playbooks)'
         required: false
         type: string
+      runnerl_label:
+        description: 'Label of runner'
+        required: true
+        type: string
   pull_request:
     paths:
       - 'playbooks/**'
@@ -115,7 +119,8 @@ jobs:
     name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
     needs: detect-changes
     if: needs.detect-changes.outputs.has_entries == 'true'
-    runs-on: ${{ fromJson(matrix.runner) }}
+    # runs-on: ${{ fromJson(matrix.runner) }}
+    runs-on: ${{ github.event.inputs.runnerl_label }}
     continue-on-error: ${{ !matrix.required }}
     env:
       PYTHONUTF8: 1
