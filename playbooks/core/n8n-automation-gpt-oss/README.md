@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor.
 
-This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the Financial Times website, extracts key headlines, and uses a local LLM running on your Ryzen™ AI Halo to generate an investor-focused summary.
+This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the South China Morning Post (SCMP) business section, extracts key headlines, and uses a local LLM running on your Ryzen™ AI Halo to generate an investor-focused summary.
 
 ## What You'll Learn
 
@@ -322,7 +322,7 @@ The imported workflow contains 7 connected nodes:
 | Node | Purpose |
 |------|---------|
 | **When clicking 'Execute workflow'** | Manual trigger to start the workflow |
-| **Fetch Financial News Webpage** | HTTP GET request to `https://www.ft.com/` |
+| **Fetch Financial News Webpage** | HTTP GET request to `https://www.scmp.com/business` |
 | **Delay to Ensure Page Load** | Wait node to ensure page content is fully loaded |
 | **Extract News Headlines & Text** | HTML node that extracts headlines, editor's picks, top stories, and regional news using CSS selectors |
 | **Clean Extracted News Data** | Set node that combines all extracted data into a single text field |
