@@ -10,7 +10,7 @@ const quickStarts = [
   },
   {
     title: "Halo™ Dashboard",
-    description: "Monitor your STX Halo™ system and launch JupyterLab",
+    description: "Monitor your Ryzen™ AI Max system and launch JupyterLab",
     time: "30 MIN",
     href: "/halo/dashboard",
     icon: "dashboard",
