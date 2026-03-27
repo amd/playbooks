@@ -66,7 +66,7 @@ sudo reboot
 #### Export environment variables
 ```bash
 source ~/rocm-env/bin/activate
-# Initialize the devel libraries. Some tools (HIPRTC, libroctx64, etc.) are lazily expanded, so run:
+# Initialize the devel libraries. Some tools (HIPRTC, libroctx64, etc.) are lazily expanded
 rocm-sdk init
 
 # Set environment variables
@@ -128,7 +128,7 @@ cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Bu
 
 rocm-env\Scripts\activate
 
-# Initialize the devel libraries. Some tools (HIPRTC, libroctx64, etc.) are lazily expanded, so run:
+# Initialize the devel libraries. Some tools (HIPRTC, libroctx64, etc.) are lazily expanded
 rocm-sdk init
 
 # Set environment variables
