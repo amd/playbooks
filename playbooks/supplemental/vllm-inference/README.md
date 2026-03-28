@@ -118,19 +118,45 @@ Since vLLM exposes an OpenAI-compatible API, you can use the `openai` Python pac
 pip install openai
 ```
 
-The included `chat_with_model.py` script demonstrates this. It creates an `OpenAI` client pointed at the local vLLM server, sends a chat completion request, and streams the response token-by-token:
+The included `chat_with_model.py` script demonstrates this. First, create an `OpenAI` client pointed at the local vLLM server instead of OpenAI's servers. The `api_key` is required by the client but vLLM doesn't validate it, so any string works:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="EMPTY",
+)
+```
+
+Then send a chat completion request. This uses the same message format as the OpenAI API — a list of messages with roles like `"user"` and `"assistant"`. Setting `stream=True` means the response will arrive incrementally rather than all at once:
+
+```python
+response = client.chat.completions.create(
+    model="Qwen/Qwen3-1.7B",
+    messages=[
+        {"role": "user", "content": "What is the sum of 123 and 456? Show your reasoning."},
+    ],
+    temperature=0.7,
+    max_tokens=2048,
+    stream=True,
+)
+```
+
+Finally, iterate over the streamed chunks and print each piece of text as it arrives:
+
+```python
+for chunk in response:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+Run the script:
 
 ```bash
 python assets/chat_with_model.py
 ```
-
-The key parts of the script:
-
-1. **Client setup** - Point the OpenAI client at the vLLM server instead of OpenAI's servers. The `api_key` can be any string since vLLM doesn't require authentication.
-2. **Chat completion** - Call `client.chat.completions.create()` with your messages, just like you would with the OpenAI API.
-3. **Streaming** - With `stream=True`, the response arrives as chunks that are printed as they're generated.
-
-You can modify the `messages` list in the script to change the prompt, or adjust `temperature` and `max_tokens` to control the output.
 
 ## Troubleshooting
 
