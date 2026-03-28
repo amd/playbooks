@@ -20,7 +20,7 @@ client = OpenAI(
 response = client.chat.completions.create(
     model="Qwen/Qwen3-1.7B",
     messages=[
-        {"role": "user", "content": "What is the sum of 123 and 456? Show your reasoning."},
+        {"role": "user", "content": "Tell me a short story"},
     ],
     temperature=0.7,
     max_tokens=2048,
