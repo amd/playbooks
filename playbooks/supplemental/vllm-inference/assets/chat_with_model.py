@@ -22,8 +22,7 @@ response = client.chat.completions.create(
     messages=[
         {"role": "user", "content": "Tell me a short story"},
     ],
-    temperature=0.7,
-    max_tokens=2048,
+    max_tokens=2048,  # Maximum number of tokens the model will generate in its response
     stream=True,
 )
 
