@@ -69,7 +69,7 @@ Start the vLLM server:
 vllm serve Qwen/Qwen3-1.7B
 ```
 
-The server will start on `http://localhost:8000` with the Qwen3-1.7B model.
+The server will start on `http://localhost:8000` with the Qwen3-1.7B model. The server runs in the foreground, so open a separate terminal for the remaining steps.
 
 **Common server options:**
 
