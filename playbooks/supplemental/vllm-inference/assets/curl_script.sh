@@ -9,7 +9,7 @@ set -ex
 
 # Default values
 URL="http://localhost:8000/v1/chat/completions"
-MODEL="/data/Qwen3_1_7B"
+MODEL="Qwen/Qwen3-1.7B"
 PROMPT="What is the sum of 123 and 456? Show your reasoning."
 TEMPERATURE=0.7
 MAX_TOKENS=2048
@@ -42,14 +42,14 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Options:"
             echo "  -u, --url URL            Server URL (default: http://localhost:8000/v1/chat/completions)"
-            echo "  -m, --model MODEL        Model name (default: /data/Qwen3_1_7B)"
+            echo "  -m, --model MODEL        Model name (default: Qwen/Qwen3-1.7B)"
             echo "  -p, --prompt PROMPT      User prompt (default: sample math question)"
             echo "  -t, --temperature TEMP   Temperature (default: 0.7)"
             echo "  --max-tokens NUM         Max tokens (default: 2048)"
             echo "  -h, --help               Show this help message"
             echo ""
             echo "Examples:"
-            echo "  $0 --model /data/Qwen3_1_7B"
+            echo "  $0 --model Qwen/Qwen3-1.7B"
             echo "  $0 --prompt 'Explain quantum computing'"
             exit 0
             ;;

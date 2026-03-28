@@ -48,7 +48,7 @@ source vllm_env/bin/activate
 Install PyTorch 2.9.1 with ROCm support:
 
 ```bash
-pip install torch==2.9.1 --extra-index-url https://download.pytorch.org/whl/rocm7.12
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision torchaudio
 ```
 
 Install vLLM from the prebuilt ROCm wheel:
@@ -66,7 +66,7 @@ python -m pip install \
 Start the vLLM server:
 
 ```bash
-vllm serve /data/Qwen3_1_7B
+vllm serve Qwen/Qwen3-1.7B
 ```
 
 The server will start on `http://localhost:8000` with the Qwen3-1.7B model.
@@ -74,7 +74,7 @@ The server will start on `http://localhost:8000` with the Qwen3-1.7B model.
 **Common server options:**
 
 ```bash
-vllm serve /data/Qwen3_1_7B \
+vllm serve Qwen/Qwen3-1.7B \
   --max-model-len 4096 \
   --gpu-memory-utilization 0.9 \
   --max-num-seqs 16
@@ -98,7 +98,7 @@ Or use the curl command directly:
 curl -X POST "http://localhost:8000/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "/data/Qwen3_1_7B",
+    "model": "Qwen/Qwen3-1.7B",
     "messages": [
       {
         "role": "user",
@@ -145,12 +145,12 @@ curl http://localhost:8000/health
 
 Reduce GPU memory usage when starting the server:
 ```bash
-vllm serve /data/Qwen3_1_7B --gpu-memory-utilization 0.7
+vllm serve Qwen/Qwen3-1.7B --gpu-memory-utilization 0.7
 ```
 
 Or limit the maximum model length:
 ```bash
-vllm serve /data/Qwen3_1_7B --max-model-len 2048
+vllm serve Qwen/Qwen3-1.7B --max-model-len 2048
 ```
 
 ## Requirements
