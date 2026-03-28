@@ -16,14 +16,12 @@ SPDX-License-Identifier: MIT
 
 vLLM is a high-performance inference engine designed for large language models (LLMs). It provides optimized serving with continuous batching for high throughput and an OpenAI-compatible API for seamless application integration. This makes vLLM great for production deployments where speed and resource efficiency are critical.
 
-This playbook teaches you how to serve LLMs using vLLM on your GPU and interact with models through a modern web interface.
+This playbook teaches you how to serve LLMs using vLLM on your STX Halo™ GPU and interact with models through the OpenAI Python API.
 
 ## In This Playbook, You Will Learn
 
 - How to set up and start a vLLM server with ROCm support
-- How to download and configure LLM models (using Qwen3-1.7B as an example)
 - How to interact with models via OpenAI-compatible API endpoints
-- How to use the Gradio web interface for interactive chat with streaming responses
 - How to configure server parameters for different use cases
 
 ## Installing vLLM
@@ -56,7 +54,9 @@ pip install torch==2.9.1 --extra-index-url https://download.pytorch.org/whl/rocm
 Install vLLM from the prebuilt ROCm wheel:
 
 ```bash
-pip install vllm --extra-index-url https://wheels.vllm.ai/rocm/0.16.1/rocm712
+python -m pip install \
+  --extra-index-url https://rocm.frameworks.amd.com/whl/gfx1151/ \
+  "vllm==0.16.1.dev10+g11515110f.d20260323.rocm712"
 ```
 
 ## Quick Start
@@ -74,10 +74,15 @@ The server will start on `http://localhost:8000` with the Qwen3-1.7B model.
 **Common server options:**
 
 ```bash
-# Allow external connections and customize settings
 vllm serve /data/Qwen3_1_7B \
-  --max-model-len 4096
+  --max-model-len 4096 \
+  --gpu-memory-utilization 0.9 \
+  --max-num-seqs 16
 ```
+
+- `--max-model-len` - Sets the maximum context length. Longer contexts use more memory, so lowering this frees up GPU memory for other uses.
+- `--gpu-memory-utilization` - Controls what fraction of GPU memory vLLM reserves (0.0-1.0). vLLM pre-allocates memory for its KV cache, which stores the attention state for active requests. A higher value means more cache space and more concurrent requests, but setting it too high can cause out-of-memory errors.
+- `--max-num-seqs` - The maximum number of requests vLLM will process at once. vLLM uses continuous batching, meaning it can dynamically add and remove requests from a running batch rather than waiting for an entire batch to finish. This keeps the GPU busy and improves throughput.
 
 ### 2. Test the server with curl
 
@@ -105,31 +110,27 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
   }'
 ```
 
-### 3. Use the Gradio Web Interface
+### 3. Chat with the model using the OpenAI Python API
 
-For an interactive chat experience, launch the Gradio client:
-
-```bash
-./run_gradio_client.sh
-```
-
-Then open your browser to `http://localhost:7860`
-
-**Custom Configuration:**
+Since vLLM exposes an OpenAI-compatible API, you can use the `openai` Python package to interact with it. Install it first:
 
 ```bash
-# Change port
-./run_gradio_client.sh --port 8080
-
-# Different model
-./run_gradio_client.sh --model /path/to/model
-
-# Different vLLM server
-./run_gradio_client.sh --server http://192.168.1.100:8000
-
-# All options
-./run_gradio_client.sh --port 8080 --model /data/Qwen3_1_7B --server http://localhost:8000
+pip install openai
 ```
+
+The included `chat_with_model.py` script demonstrates this. It creates an `OpenAI` client pointed at the local vLLM server, sends a chat completion request, and streams the response token-by-token:
+
+```bash
+python assets/chat_with_model.py
+```
+
+The key parts of the script:
+
+1. **Client setup** - Point the OpenAI client at the vLLM server instead of OpenAI's servers. The `api_key` can be any string since vLLM doesn't require authentication.
+2. **Chat completion** - Call `client.chat.completions.create()` with your messages, just like you would with the OpenAI API.
+3. **Streaming** - With `stream=True`, the response arrives as chunks that are printed as they're generated.
+
+You can modify the `messages` list in the script to change the prompt, or adjust `temperature` and `max_tokens` to control the output.
 
 ## Troubleshooting
 
@@ -151,23 +152,6 @@ Or limit the maximum model length:
 ```bash
 vllm serve /data/Qwen3_1_7B --max-model-len 2048
 ```
-
-### Gradio client issues
-
-**"Gradio not found" error:**
-```bash
-pip install -r requirements_gradio.txt
-```
-
-**"Cannot connect to vLLM server" in UI:**
-- Verify the vLLM server is running: `curl http://localhost:8000/health`
-- Check the server URL in the Gradio settings panel
-- Ensure firewall allows connections on port 8000
-
-**Streaming not working:**
-- Update to the latest version of Gradio: `pip install --upgrade gradio`
-- Verify vLLM server supports streaming API
-- Check browser console for JavaScript errors
 
 ## Requirements
 
