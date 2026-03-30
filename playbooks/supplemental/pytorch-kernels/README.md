@@ -17,20 +17,36 @@ Write a GPU kernel from scratch, compile it, and launch it on an AMD GPU, then w
 
 ## What You'll Learn
 
+<!-- @os:windows -->
+- How GPU kernels work: grids, blocks, threads, and the indexing model that maps them to data
+- How AMD's ROCm/HIP stack lets you write CUDA-style code that runs on AMD GPUs without modification
+- How to compile a kernel at runtime using `torch.cuda._compile_kernel`
+- How to build a native C++ kernel extension with `CUDAExtension` + pybind11, importable from Python
+<!-- @os:end -->
+<!-- @os:linux -->
 - How GPU kernels work: grids, blocks, threads, and the indexing model that maps them to data
 - How AMD's ROCm/HIP stack lets you write CUDA-style code that runs on AMD GPUs without modification
 - How to compile a kernel at runtime using `torch.cuda._compile_kernel`
 - How to build a native C++ kernel extension with `CUDAExtension` + pybind11, importable from Python
 - How to measure kernel execution time and monitor live GPU utilization with `rocm-smi`
+<!-- @os:end -->
 
 ---
 
 This playbook covers two approaches for kernel development:
 
+<!-- @os:windows -->
+| Approach | Entry point |
+|---|---|
+| **JIT Compilation** | `torch.cuda._compile_kernel`, write a kernel as a Python string, no build step |
+| **C++ Extension** | `CUDAExtension` + pybind11, compile a `.cu` file into a native `.pyd` and import it |
+<!-- @os:end -->
+<!-- @os:linux -->
 | Approach | Entry point |
 |---|---|
 | **JIT Compilation** | `torch.cuda._compile_kernel`, write a kernel as a Python string, no build step |
 | **C++ Extension** | `CUDAExtension` + pybind11, compile a `.cu` file into a native `.so` and import it |
+<!-- @os:end -->
 
 Both approaches run on AMD GPUs. This is possible because PyTorch's ROCm build maps the entire CUDA API surface to HIP, `torch.cuda`, `CUDAExtension`, and CUDA kernel syntax all work on AMD hardware transparently. You write CUDA-style code; ROCm handles the translation.
 
@@ -87,15 +103,7 @@ Total threads = `gridDim.x * blockDim.x`. Each thread processes one element inde
 
 AMD GPUs use **HIP** (Heterogeneous-Compute Interface for Portability), part of the **ROCm** (Radeon Open Compute) platform. **ROCm** is the full AMD open-source GPU compute stack: drivers, compilers, libraries, and runtime. HIP sits on top of ROCm.
 
-
 HIP is designed to be syntactically close to CUDA. Most CUDA code can be translated to HIP mechanically using the `hipify` tool (which is what generated the `.hip` files in this repo).
-
-| CUDA | HIP equivalent |
-|---|---|
-| `cudaMalloc` | `hipMalloc` |
-| `cudaDeviceSynchronize` | `hipDeviceSynchronize` |
-| `kernel<<<grid, block>>>` | `hipLaunchKernelGGL(kernel, ...)` |
-| `nvcc` | `hipcc` |
 
 ---
 
@@ -265,8 +273,9 @@ for _ in range(200):
 print("First 5 elements:", x[:5].cpu()) #tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @test:end -->
+<!-- @os:linux -->
 The script also spawns a background thread that polls `rocm-smi` every 100ms to log peak and average GPU utilization during the kernel run.
-
+<!-- @os:end -->
 **What the workload actually does:**
 
 ```
@@ -294,8 +303,9 @@ Elapsed time: 2.753s
 Peak GPU Utilization: 93%
 Average GPU Utilization: 65.94%
 ```
+<!-- @os:windows -->
 On Windows, `rocm-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike to 100% utilization when you run the program.
-
+<!-- @os:end -->
 **Nice work! You just ran your first GPU kernel.**
 
 ---
@@ -306,10 +316,18 @@ The full manual path: write the kernel and Python binding in a single `.cu` file
 
 **Files:**
 
+<!-- @os:windows -->
+| File | Role |
+|---|---|
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + launcher + pybind11 binding, everything in one file |
+| [setup.py](assets/Vector_Addition/setup.py) | Build script, uses `CUDAExtension` to compile the `.cu` into a `.pyd` |
+<!-- @os:end -->
+<!-- @os:linux -->
 | File | Role |
 |---|---|
 | [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + launcher + pybind11 binding, everything in one file |
 | [setup.py](assets/Vector_Addition/setup.py) | Build script, uses `CUDAExtension` to compile the `.cu` into a `.so` |
+<!-- @os:end -->
 
 **How it works:**
 
@@ -345,26 +363,23 @@ add_one<<<grid_size, block_size>>>(data, n);
 ```
 the CPU immediately continues executing the next instruction without waiting for the GPU to finish. `hipDeviceSynchronize()` forces the CPU to block until the GPU kernel completes.
 
-**Step 2: Build** ([setup.py](assets/Vector_Addition/setup.py)):
-<!-- @os:linux -->
-<!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup=activate-venv -->
-```bash
-python "Vector_Addition/setup.py" build_ext --inplace
-```
-<!-- @test:end -->
-<!-- @os:end -->
+**Step 2: Build**
 
-<!-- @os:windows -->
 <!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup=activate-venv -->
 ```bash
 pip install --no-build-isolation -v .
 ```
 <!-- @test:end -->
-<!-- @os:end -->
 
-`CUDAExtension` is a CUDA build helper from `torch.utils.cpp_extension`. On AMD with ROCm, PyTorch **remaps `CUDAExtension` to use `hipcc`** instead of `nvcc`, so the same `setup.py` that would build a CUDA extension on NVIDIA compiles to AMD GPU code without any changes. This is the key mechanism that makes CUDA extension code portable to AMD: PyTorch's ROCm build intercepts the build path and routes it through the HIP compiler. Produces two files in the same directory:
-- `add_one_ext.cpython-*.so`:  the importable Python extension
+`CUDAExtension` is a CUDA build helper from `torch.utils.cpp_extension`. On AMD with ROCm, PyTorch **remaps `CUDAExtension` to use `hipcc`** instead of `nvcc`, so the same `setup.py` that would build a CUDA extension on NVIDIA compiles to AMD GPU code without any changes. This is the key mechanism that makes CUDA extension code portable to AMD: PyTorch's ROCm build intercepts the build path and routes it through the HIP compiler. Produces these in the same directory:
+<!-- @os:windows -->
+- `build/`:  directory with the `.pyd` files
 - `add_one_kernel.hip`:  the HIP source generated by hipifying the `.cu` file; this is what `hipcc` actually compiled
+<!-- @os:end -->
+<!-- @os:linux -->
+- `build/`:  directory with the `.so` files
+- `add_one_kernel.hip`:  the HIP source generated by hipifying the `.cu` file; this is what `hipcc` actually compiled
+<!-- @os:end -->
 
 **Step 3: Use from Python**
 <!-- @test:id=verify-vector-addition-add-one-kernel-so timeout=400 setup=activate-venv -->
@@ -513,7 +528,7 @@ print(f"Max error vs torch.mm: {max_err:.6f}")
 
 The row-major memory layout of the tensors maps directly to how the kernel indexes the flat pointers:
 - `A[row * N + n]`:  row `row`, column `n`
-- `B[n * K + col]` :  row `n`, column `col`
+- `B[n * K + col]`:  row `n`, column `col`
 
 The script spawns the same background monitoring thread from Walkthrough 1 (`rocm-smi` polled every 100ms) and verifies the result against `torch.mm`. Floating-point arithmetic on GPUs may produce small numerical differences compared to CPU implementations due to parallel reduction order. This is why we verify the result using a tolerance (`max error`) instead of exact equality.
 
@@ -539,11 +554,18 @@ Average GPU Utilization: 55.00%
 The full manual path: write the kernel and Python binding in a `.cu` file, compile it as a native extension, then import and call it from Python. Mirrors the structure of `add_one_kernel.cu` exactly, only the kernel signature and launcher logic differ.
 
 **Files:**
-
+<!-- @os:windows -->
+| File | Role |
+|---|---|
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + launcher + pybind11 binding |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Build script, uses `CUDAExtension` to compile the `.cu` into a `.pyd` |
+<!-- @os:end -->
+<!-- @os:linux -->
 | File | Role |
 |---|---|
 | [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + launcher + pybind11 binding |
 | [setup.py](assets/Matrix_Multiplication/setup.py) | Build script, uses `CUDAExtension` to compile the `.cu` into a `.so` |
+<!-- @os:end -->
 
 **How it works:**
 
@@ -591,27 +613,23 @@ Compared to `add_one_launcher` in Walkthrough 1, the launcher here:
 - Allocates and returns the output tensor C, rather than mutating in-place
 - Uses `dim3` for both grid and block to express the 2D launch shape
 
-**Step 2: Build** ([setup.py](assets/Matrix_Multiplication/setup.py)):
+**Step 2: Build**
 
-<!-- @os:linux -->
-<!-- @test:id=run-matmul-kernel-cu timeout=600 setup=activate-venv -->
-```bash
-python "Matrix_Multiplication/setup.py" build_ext --inplace
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
-<!-- @os:windows -->
 <!-- @test:id=run-matmul-kernel-cu timeout=600 setup=activate-venv -->
 ```bash
 pip install --no-build-isolation -v .
 ```
 <!-- @test:end -->
-<!-- @os:end -->
 
-Produces two files in the same directory:
-- `matmul_ext.cpython-*.so`:  the importable Python extension
+Produces these in the same directory:
+<!-- @os:windows -->
+- `build/`:  directory with the `.pyd` files
 - `matmul_kernel.hip`:  the HIP source generated by hipifying the `.cu` file; this is what `hipcc` actually compiled
+<!-- @os:end -->
+<!-- @os:linux -->
+- `build/`:  directory with the `.so` files
+- `matmul_kernel.hip`:  the HIP source generated by hipifying the `.cu` file; this is what `hipcc` actually compiled
+<!-- @os:end -->
 
 The same `CUDAExtension` → `hipcc` remapping as walkthrough 1 applies here unchanged.
 
