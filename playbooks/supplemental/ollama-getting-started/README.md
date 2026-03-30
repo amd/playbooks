@@ -85,7 +85,7 @@ where.exe ollama
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=ollama-debug-context-windows timeout=120 hidden=True -->
+<!-- @test:id=ollama-version-debug-context-windows timeout=120 hidden=True -->
 ```powershell
 Write-Host "ollama version:"
 ollama --version
@@ -94,7 +94,7 @@ ollama --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=ollama-debug-context-windows timeout=120 hidden=True -->
+<!-- @test:id=ollama-list-debug-context-windows timeout=120 hidden=True -->
 ```powershell
 Write-Host "ollama list:"
 ollama list
@@ -103,7 +103,7 @@ ollama list
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=ollama-debug-context-windows timeout=120 hidden=True -->
+<!-- @test:id=ollama-model-dir-debug-context-windows timeout=120 hidden=True -->
 ```powershell
 Write-Host "Default model dir exists?"
 $defaultModels = Join-Path $env:USERPROFILE ".ollama\models"
@@ -114,7 +114,7 @@ Test-Path $defaultModels
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=ollama-debug-context-windows timeout=120 hidden=True -->
+<!-- @test:id=ollama-contents-debug-context-windows timeout=120 hidden=True -->
 ```powershell
 $defaultModels = Join-Path $env:USERPROFILE ".ollama\models"
 if (Test-Path $defaultModels) {
