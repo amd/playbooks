@@ -38,93 +38,6 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 
 Verify the installation by opening a terminal:
 
-<!-- @os:windows -->
-<!-- @test:id=whoami-debug-context-windows timeout=120 hidden=True -->
-```powershell
-$ErrorActionPreference = "Stop"
-Write-Host "WHOAMI:"
-whoami
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=user-debug-context-windows timeout=120 hidden=True -->
-```powershell
-Write-Host "USERPROFILE:"
-Write-Host $env:USERPROFILE
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=home-debug-context-windows timeout=120 hidden=True -->
-```powershell
-Write-Host "HOME:"
-Write-Host $env:HOME
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=ollama-models-debug-context-windows timeout=120 hidden=True -->
-```powershell
-Write-Host "OLLAMA_MODELS:"
-Write-Host $env:OLLAMA_MODELS
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=where-ollama-debug-context-windows timeout=120 hidden=True -->
-```powershell
-Write-Host "where ollama:"
-where.exe ollama
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=ollama-version-debug-context-windows timeout=120 hidden=True -->
-```powershell
-Write-Host "ollama version:"
-ollama --version
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=ollama-list-debug-context-windows timeout=120 hidden=True -->
-```powershell
-Write-Host "ollama list:"
-ollama list
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=ollama-model-dir-debug-context-windows timeout=120 hidden=True -->
-```powershell
-Write-Host "Default model dir exists?"
-$defaultModels = Join-Path $env:USERPROFILE ".ollama\models"
-Write-Host $defaultModels
-Test-Path $defaultModels
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=ollama-contents-debug-context-windows timeout=120 hidden=True -->
-```powershell
-$defaultModels = Join-Path $env:USERPROFILE ".ollama\models"
-if (Test-Path $defaultModels) {
-  Write-Host "Contents under default manifests path:"
-  Get-ChildItem -Path $defaultModels -Recurse -ErrorAction SilentlyContinue | Select-Object -First 50 FullName
-}
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
 <!-- @test:id=ollama-version-windows timeout=60 hidden=True -->
 ```powershell
 ollama --version
@@ -175,7 +88,7 @@ You should see `gpt-oss:20b` in the output along with its size and last-modified
 <!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
-$list = ollama list
+$list = (ollama list | Out-String)
 if (-not $list) { throw "ollama list returned no output" }
 if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
 Write-Host "OK: gpt-oss:20b is present in ollama list"
@@ -187,6 +100,45 @@ Write-Host "OK: gpt-oss:20b is present in ollama list"
 <!-- @test:id=ollama-list-gpt-oss-20b-linux timeout=120 hidden=True -->
 ```bash
 set -euo pipefail
+p=""
+started_here="0"
+
+cleanup() {
+  if [ "$started_here" = "1" ] && [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+wait_for_ollama_api() {
+  local attempts="${1:-120}"
+  local out=""
+  for i in $(seq 1 "$attempts"); do
+    out="$(curl -s --max-time 2 http://127.0.0.1:11434/api/tags || true)"
+    if [ -n "$out" ]; then
+      echo "$out"
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+tags_json="$(wait_for_ollama_api 5 || true)"
+if [ -z "$tags_json" ]; then
+  ollama serve >/tmp/ollama-list-test.log 2>&1 &
+  p=$!
+  started_here="1"
+  tags_json="$(wait_for_ollama_api 120 || true)"
+fi
+if [ -z "$tags_json" ]; then
+  echo "Ollama API not ready on http://127.0.0.1:11434"
+  exit 1
+fi
+echo "OK: Ollama API is responding on http://127.0.0.1:11434"
+
 list="$(ollama list)"
 if [ -z "$list" ]; then
   echo "ollama list returned no output"
