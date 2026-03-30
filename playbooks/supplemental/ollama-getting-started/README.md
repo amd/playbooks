@@ -39,36 +39,84 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 Verify the installation by opening a terminal:
 
 <!-- @os:windows -->
-<!-- @test:id=ollama-debug-context-windows timeout=120 hidden=True -->
+<!-- @test:id=whoami-debug-context-windows timeout=120 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
-
 Write-Host "WHOAMI:"
 whoami
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=user-debug-context-windows timeout=120 hidden=True -->
+```powershell
 Write-Host "USERPROFILE:"
 Write-Host $env:USERPROFILE
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=home-debug-context-windows timeout=120 hidden=True -->
+```powershell
 Write-Host "HOME:"
 Write-Host $env:HOME
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=ollama-models-debug-context-windows timeout=120 hidden=True -->
+```powershell
 Write-Host "OLLAMA_MODELS:"
 Write-Host $env:OLLAMA_MODELS
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=where-ollama-debug-context-windows timeout=120 hidden=True -->
+```powershell
 Write-Host "where ollama:"
 where.exe ollama
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=ollama-debug-context-windows timeout=120 hidden=True -->
+```powershell
 Write-Host "ollama version:"
 ollama --version
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=ollama-debug-context-windows timeout=120 hidden=True -->
+```powershell
 Write-Host "ollama list:"
 ollama list
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=ollama-debug-context-windows timeout=120 hidden=True -->
+```powershell
 Write-Host "Default model dir exists?"
 $defaultModels = Join-Path $env:USERPROFILE ".ollama\models"
 Write-Host $defaultModels
 Test-Path $defaultModels
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=ollama-debug-context-windows timeout=120 hidden=True -->
+```powershell
+$defaultModels = Join-Path $env:USERPROFILE ".ollama\models"
 if (Test-Path $defaultModels) {
   Write-Host "Contents under default manifests path:"
   Get-ChildItem -Path $defaultModels -Recurse -ErrorAction SilentlyContinue | Select-Object -First 50 FullName
