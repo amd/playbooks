@@ -38,6 +38,45 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 
 Verify the installation by opening a terminal:
 
+<!-- @os:windows -->
+<!-- @test:id=ollama-debug-context-windows timeout=120 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+Write-Host "WHOAMI:"
+whoami
+
+Write-Host "USERPROFILE:"
+Write-Host $env:USERPROFILE
+
+Write-Host "HOME:"
+Write-Host $env:HOME
+
+Write-Host "OLLAMA_MODELS:"
+Write-Host $env:OLLAMA_MODELS
+
+Write-Host "where ollama:"
+where.exe ollama
+
+Write-Host "ollama version:"
+ollama --version
+
+Write-Host "ollama list:"
+ollama list
+
+Write-Host "Default model dir exists?"
+$defaultModels = Join-Path $env:USERPROFILE ".ollama\models"
+Write-Host $defaultModels
+Test-Path $defaultModels
+
+if (Test-Path $defaultModels) {
+  Write-Host "Contents under default manifests path:"
+  Get-ChildItem -Path $defaultModels -Recurse -ErrorAction SilentlyContinue | Select-Object -First 50 FullName
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 <!-- @test:id=ollama-version-windows timeout=60 hidden=True -->
 ```powershell
 ollama --version
