@@ -43,6 +43,7 @@ git checkout v0.17.2
 With the Python virtual environment activated, run:
 ```bash
 pip install -r requirements.txt
+pip install requests
 ```
 
 > **Note**: See [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI) for more information.
