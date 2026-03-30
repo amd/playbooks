@@ -3,8 +3,7 @@
 import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import type { Playbook, Platform } from "@/types/playbook";
-import { formatTime, platformNames } from "@/types/playbook";
-import { deviceToHash } from "./HeroSection";
+import { formatTime, platformNames, extractPlatforms } from "@/types/playbook";
 
 function PlatformBadge({ platform }: { platform: Platform }) {
   const icons: Record<Platform, ReactNode> = {
@@ -44,7 +43,7 @@ function PreinstalledBadge() {
   return (
     <span
       className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-semibold rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-      title="Software for this playbook comes pre-installed on STX Halo, so you can jump straight in"
+      title="Software for this playbook comes pre-installed on Ryzen™ AI Max, so you can jump straight in"
     >
       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -101,9 +100,9 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
   const regularPlaybooks = filteredPlaybooks.filter((p) => !p.isFeatured || isSearching);
   const displayedPlaybooks = (showAll || isSearching) ? regularPlaybooks : regularPlaybooks.slice(0, 6);
 
-  const isHaloSelected = activeDevice === "stx-halo";
-  const deviceParam = activeDevice && activeDevice !== "all" ? `?device=${deviceToHash[activeDevice] || activeDevice}` : "";
-  const playbookHref = (id: string) => `/playbooks/${id}${deviceParam}`;
+  const isHaloSelected = activeDevice === "reference";
+  const categoryParam = activeDevice && activeDevice !== "all" ? `?category=${activeDevice}` : "";
+  const playbookHref = (id: string) => `/playbooks/${id}${categoryParam}`;
 
   return (
     <section className="py-12 px-6 relative overflow-hidden" id="playbooks">
@@ -232,7 +231,7 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
                         )}
                         <DifficultyBadge difficulty={featuredPlaybook.difficulty} />
                         <div className="flex gap-1">
-                          {featuredPlaybook.platforms.map((p) => (
+                          {extractPlatforms(featuredPlaybook.supported_platforms ?? {}).map((p) => (
                             <PlatformBadge key={p} platform={p} />
                           ))}
                         </div>
@@ -300,7 +299,7 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
                           </span>
                         )}
                         <div className="flex gap-1">
-                          {playbook.platforms.map((p) => (
+                          {extractPlatforms(playbook.supported_platforms ?? {}).map((p) => (
                             <PlatformBadge key={p} platform={p} />
                           ))}
                         </div>

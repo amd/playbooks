@@ -11,7 +11,7 @@ import RocmSoftwareSection from "@/components/RocmSoftwareSection";
 import SupportBanner from "@/components/SupportBanner";
 
 export default function Home() {
-  const [activeDevice, setActiveDevice] = useState("stx-halo");
+  const [activeDevice, setActiveDevice] = useState("reference");
 
   return (
     <main className="min-h-screen bg-[#0d0d0d] grid-pattern">

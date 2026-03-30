@@ -1,17 +1,48 @@
 {
   "id": "gaia-agents",
   "title": "Building Your First Agent with GAIA",
-  "description": "Build a 100% local AI agent — no cloud APIs needed. Use the GAIA SDK to create a hardware advisor on your STX Halo",
+  "description": "Build a 100% local AI agent \u2014 no cloud APIs needed. Use the GAIA SDK to create a hardware advisor on your STX Halo",
   "time": 20,
-  "platforms": ["windows", "linux"],
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
+  },
   "tested_platforms": {
-    "linux": [],
-    "windows": []
+    "halo": [
+      "windows",
+      "linux"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ]
   },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": ["gaia", "agent-sdk", "agent", "hardware", "lemonade"]
+  "tags": [
+    "gaia",
+    "agent-sdk",
+    "agent",
+    "hardware",
+    "lemonade"
+  ]
 }

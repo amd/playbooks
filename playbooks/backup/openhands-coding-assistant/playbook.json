@@ -1,13 +1,27 @@
 {
   "id": "openhands-coding-assistant",
   "title": "How to Use Local LLMs as a Coding Assistant in OpenHands",
-  "description": "Configure OpenHands to use local LLMs as a coding assistant with llama.cpp on your STX Halo™",
+  "description": "Configure OpenHands to use local LLMs as a coding assistant with llama.cpp on your STX Halo\u2122",
   "time": 60,
-  "platforms": ["linux", "windows"],
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
   "developed": false,
   "published": true,
-  "tags": ["openhands", "coding-assistant", "llamacpp", "qwen"]
+  "tags": [
+    "openhands",
+    "coding-assistant",
+    "llamacpp",
+    "qwen"
+  ]
 }

@@ -3,20 +3,51 @@
   "title": "Running LLMs with PyTorch and ROCm",
   "description": "Learn to run powerful language models on your PC with PyTorch and ROCm to summarize documents quickly and easily",
   "time": 30,
-  "platforms": ["linux", "windows"],
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
+  },
   "tested_platforms": {
-    "linux": ["halo"],
-    "windows": ["halo"]
+    "halo": [
+      "linux",
+      "windows"
+    ]
   },
   "required_platforms": {
-    "linux": ["halo"],
-    "windows": ["halo"]
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ]
   },
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": ["pytorch", "rocm", "llm", "inference", "summarization"],
+  "tags": [
+    "pytorch",
+    "rocm",
+    "llm",
+    "inference",
+    "summarization"
+  ],
   "coverImage": "assets/cover_img.jpeg"
 }
