@@ -24,7 +24,13 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 
 ## Installing Dependencies
 
+<!-- @os:windows -->
+<!-- @require:comfyui,driver -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
 <!-- @require:comfyui,rocm,driver -->
+<!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-desktop-workspace-present-windows timeout=60 hidden=True -->
@@ -124,7 +130,7 @@ if ($LASTEXITCODE -ne 0) { throw "Torch import/check failed in ComfyUI workspace
 set -euo pipefail
 sudo apt install python3-pip -y
 ./comfyui_venv/bin/python -m pip install --upgrade pip wheel
-./comfyu_venv/bin/python -m pip install --force-reinstall --no-cache-dir --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision torchaudio
+./comfyui_venv/bin/python -m pip install --force-reinstall --no-cache-dir --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision torchaudio
 
 ./comfyui_venv/bin/python - <<'PY'
 import torch
