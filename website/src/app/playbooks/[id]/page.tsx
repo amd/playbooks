@@ -1824,7 +1824,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                 )}
 
                 {/* Platform Selector */}
-                <div className="inline-flex items-stretch rounded-lg border border-[#2a2a2a] bg-[#161616] divide-x divide-[#2a2a2a]">
+                <div id="platform-selector" className="inline-flex items-stretch rounded-lg border border-[#2a2a2a] bg-[#161616] divide-x divide-[#2a2a2a] scroll-mt-28">
                   {!coverageViewActive && (() => {
                     const sp = playbook.supported_platforms ?? {};
                     const cats = extractCategories(sp);
@@ -1917,6 +1917,59 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                         onLinkClick={handleTocClick}
                       />
                     )}
+
+                    {/* Showing instructions context box */}
+                    {!coverageViewActive && (
+                      <button
+                        className="mt-4 rounded-lg border border-[#2a2a2a] bg-[#161616] px-3.5 py-3 w-full text-left cursor-pointer hover:border-[#444] hover:bg-[#1c1c1c] transition-colors"
+                        onClick={() => {
+                          const el = document.getElementById("platform-selector");
+                          if (el) {
+                            el.scrollIntoView({ behavior: "smooth", block: "center" });
+                          }
+                        }}
+                        title="Click to change"
+                      >
+                        <div className="text-[10px] font-semibold text-[#6b6b6b] uppercase tracking-wider mb-2">
+                          Showing instructions for
+                        </div>
+                        <div className="space-y-1.5">
+                          {selectedDevice && (
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-[#6b6b6b]">Platform:</span>
+                              <span className="text-[#d0d0d0] font-medium">
+                                {(() => {
+                                  const activeCat = selectedCategory ? DEVICE_CATEGORY_MAP[selectedCategory] : null;
+                                  const displayName = activeCat?.deviceDisplayNames?.[selectedDevice] ?? deviceNames[selectedDevice];
+                                  return displayName || selectedDevice;
+                                })()}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className="text-[#6b6b6b]">OS:</span>
+                            <span className="text-[#d0d0d0] font-medium flex items-center gap-1.5">
+                              {selectedPlatform === "windows" ? (
+                                <>
+                                  <svg className="w-3 h-3 text-[#6b6b6b]" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+                                  </svg>
+                                  Windows
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="w-3 h-3 text-[#6b6b6b]" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139z"/>
+                                  </svg>
+                                  Linux
+                                </>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    )}
+
                     {playbook.testCoverage && (
                       <button
                         className="cov-return-toggle"

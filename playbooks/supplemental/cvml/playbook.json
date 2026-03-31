@@ -5,11 +5,9 @@
   "time": 60,
   "supported_platforms": {
     "halo": [
-      "linux",
       "windows"
     ],
     "halo_box": [
-      "linux",
       "windows"
     ]
   },
