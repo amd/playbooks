@@ -156,6 +156,17 @@
         "linux": ["halo_box"],
         "windows": ["halo_box"]
       }
+    },
+    "podman": {
+      "name": "Podman",
+      "description": "Container management tool for running OCI containers",
+      "category": "framework",
+      "platforms": ["linux"],
+      "file": "podman.md",
+      "preinstalled": {
+        "linux": ["halo_box"],
+        "windows": []
+      }
     }
   },
   "setup": {
