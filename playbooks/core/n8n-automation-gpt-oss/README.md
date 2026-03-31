@@ -201,7 +201,7 @@ n8n --version
 <!-- @os:end -->
 
 <!-- @os:linux -->
-We are going to use a service called Podman to manage our n8n installation. It is already pre-installed on your system, and similar in concept to Docker.
+We are going to use a service called Podman to containerize our n8n installation.
 
 Please download the following into a directory of your choice:  [compose.yml](assets/compose.yml)
 
