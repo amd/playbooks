@@ -15,7 +15,7 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 
 ## What You'll Learn
-- How to configure and use LM Studio to leverage STX Halo hardware
+- How to configure and use LM Studio to leverage your local hardware
 - Test and manage LLMs in a completely offline environment
 - Serve models via OpenAI Compatible API to power custom workflows and apps
 
@@ -138,7 +138,7 @@ client = OpenAI(
     base_url="http://localhost:1234/v1", 
     api_key="lm-studio"
 )
-print("Attempting to connect to local STX Halo server...")
+print("Attempting to connect to local LM Studio server...")
 
 try:
     # Create a simple chat completion request

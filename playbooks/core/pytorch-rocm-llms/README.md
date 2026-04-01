@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-Want to run powerful AI language models on your own STX Halo™ ? This guide shows you how.
+Want to run powerful AI language models on your own hardware? This guide shows you how.
 This tutorial uses PyTorch powered by AMD's ROCm to run models that can summarize documents, answer questions, generate text, and more, all running locally.
 
 ## What You'll Learn
@@ -225,4 +225,4 @@ python summarizer.py --file document.txt --max-length 400
 - **Model Exploration**: Experiment with new models like Llama 3, Phi-3, or Qwen for better results
 - **Production Deployment**: Use tools like vLLM for scalable LLM serving in organizations
 
-Your STX Halo gives you the power to run sophisticated language models locally. Experiment with different models, prompts, and parameters to discover what works best for your applications.
+Your system gives you the power to run sophisticated language models locally. Experiment with different models, prompts, and parameters to discover what works best for your applications.

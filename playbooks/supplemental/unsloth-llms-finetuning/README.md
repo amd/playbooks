@@ -4,7 +4,7 @@
 
 Unsloth is a high-efficiency LLM fine-tuning framework designed to make advanced model customization accessible on modern hardware.
 
-This playbook teaches you how to use Unsloth for practical fine-tuning workflows that run efficiently on local AI systems like Ryzen™ AI Halo.
+This playbook teaches you how to use Unsloth for practical fine-tuning workflows that run efficiently on local AI hardware.
 
 ## What You'll Learn
 
