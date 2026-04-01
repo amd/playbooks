@@ -91,6 +91,248 @@ This section establishes a stable local environment: Lemonade running, Open WebU
 
 > If you don’t see your models in `http://localhost:8000/api/v1/models`, Open WebUI won’t be able to select them later.
 
+<!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
+```bash
+lemonade-server --version
+```
+<!-- @test:end --> 
+
+
+<!-- @os:windows -->
+<!-- @test:id=openwebui-lemonade-multimodal-smoke-windows timeout=1800 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+# Stop any stale server (safe if none running)
+& lemonade-server stop 2>$null | Out-Null
+Start-Sleep -Seconds 2
+
+# Start server
+$logOut = "$PWD\lemonade-openwebui-ci-out.log"
+$logErr = "$PWD\lemonade-openwebui-ci-err.log"
+$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru `
+  -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+
+try {
+  # Wait for /models
+  $modelsJson = $null
+  for ($i=0; $i -lt 120; $i++) {
+    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
+    if ($modelsJson) { break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
+  Write-Host "OK: Lemonade server is responding"
+  
+  # Verify required models are present + downloaded
+  $parsed = $modelsJson | ConvertFrom-Json
+  $required = @(
+    "Llama-3.2-1B-Instruct-Hybrid",
+    "Gemma-3-4b-it-GGUF",
+    "SDXL-Turbo"
+  )
+  foreach ($mid in $required) {
+    $entry = $parsed.data | Where-Object { $_.id -eq $mid } | Select-Object -First 1
+    if (-not $entry) { throw "Model $mid is not present in /api/v1/models. Please download it." }
+    if (-not $entry.downloaded) { throw "Model $mid is present but not downloaded. Please download it." }
+    Write-Host "OK: $mid is downloaded"
+  }
+
+  # Chat completion smoke test (LLM)
+  $chatBody = @{
+    model = "Llama-3.2-1B-Instruct-Hybrid"
+    messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+    temperature = 0
+    max_tokens = 50
+    stream = $false
+  } | ConvertTo-Json -Depth 6
+  $tmpChat = Join-Path $env:TEMP "chat-body.json"
+  [System.IO.File]::WriteAllText($tmpChat, $chatBody, [System.Text.UTF8Encoding]::new($false))
+  $chatOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions `
+    -H "Content-Type: application/json" `
+    -H "Authorization: Bearer -" `
+    --data-binary "@$tmpChat"
+  if (-not $chatOut) { throw "Empty response from chat/completions" }
+  $chatParsed = $chatOut | ConvertFrom-Json
+  $chatText = $chatParsed.choices[0].message.content
+  if ($chatText -notmatch "\bOK\b") { throw "LLM chat test failed. Got: $chatText" }
+  Write-Host "OK: LLM chat works"
+
+  # Vision smoke test (OpenAI-style image_url)
+  $png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
+  $dataUrl = "data:image/png;base64,$png1x1"
+  $visionBody = @{
+    model = "Gemma-3-4b-it-GGUF"
+    messages = @(@{
+      role = "user"
+      content = @(
+        @{ type = "text"; text = "If you can see an image input, reply with exactly: OK" },
+        @{ type = "image_url"; image_url = @{ url = $dataUrl } }
+      )
+    })
+    temperature = 0
+    max_tokens = 32
+  } | ConvertTo-Json -Depth 10
+  $tmpVision = Join-Path $env:TEMP "vision-body.json"
+  [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
+  $visionOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions `
+    -H "Content-Type: application/json" `
+    -H "Authorization: Bearer -" `
+    --data-binary "@$tmpVision"
+  if (-not $visionOut) { throw "Empty response from vision chat/completions" }
+  $visionParsed = $visionOut | ConvertFrom-Json
+  $visionText = $visionParsed.choices[0].message.content
+  if ($visionText -notmatch "\bOK\b") { throw "Vision test failed. Got: $visionText" }
+  Write-Host "OK: Vision chat works"
+
+  # Image generation smoke test
+  $imgBody = @{
+    model  = "SDXL-Turbo"
+    prompt = "A simple red cube on a white table, studio lighting"
+    size   = "256x256"
+  } | ConvertTo-Json -Depth 6
+  $tmpImg = Join-Path $env:TEMP "img-body.json"
+  [System.IO.File]::WriteAllText($tmpImg, $imgBody, [System.Text.UTF8Encoding]::new($false))
+  $imgOut = curl.exe -sS --fail-with-body --max-time 900 http://127.0.0.1:8000/api/v1/images/generations `
+    -H "Content-Type: application/json" `
+    -H "Authorization: Bearer -" `
+    --data-binary "@$tmpImg"
+  if (-not $imgOut) { throw "Empty response from images/generations" }
+  $imgParsed = $imgOut | ConvertFrom-Json
+  if (-not $imgParsed.data -or -not $imgParsed.data[0].b64_json) { throw "Image generation did not return data[0].b64_json" }
+  Write-Host "OK: Image generation works"
+}
+finally {
+  Remove-Item $tmpChat, $tmpVision, $tmpImg -Force -ErrorAction SilentlyContinue
+  & lemonade-server stop 2>$null | Out-Null
+  Start-Sleep -Seconds 2
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+  Write-Host "OK: Lemonade Server stopped successfully"
+}
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+<!-- @os:linux --> 
+<!-- @test:id=openwebui-lemonade-multimodal-smoke-linux timeout=1800 hidden=True -->
+```bash
+set -euo pipefail
+
+lemonade-server stop >/dev/null 2>&1 || true
+sleep 2
+
+p=""
+cleanup() {
+  lemonade-server stop >/dev/null 2>&1 || true
+  sleep 2
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+lemonade-server serve --host 127.0.0.1 --port 8000 >./lemonade-openwebui-ci.log 2>&1 &
+p=$!
+
+models_json=""
+for i in $(seq 1 120); do
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/models || true)"
+  if [ -n "$models_json" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$models_json" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:8000"
+  exit 1
+fi
+echo "OK: Lemonade server is responding"
+
+export MODELS_JSON="$models_json"
+python3 - <<'PY'
+import base64, json, os, sys, urllib.request
+
+data = json.loads(os.environ["MODELS_JSON"])
+required = [
+  "Llama-3.2-1B-Instruct-GGUF",
+  "Gemma-3-4b-it-GGUF",
+  "SDXL-Turbo",
+]
+
+by_id = {m.get("id"): m for m in data.get("data", [])}
+for mid in required:
+  m = by_id.get(mid)
+  if not m:
+    print(f"Model {mid} is not present in /api/v1/models. Please download it.")
+    sys.exit(1)
+  if not m.get("downloaded", False):
+    print(f"Model {mid} is present but not downloaded. Please download it.")
+    sys.exit(1)
+  print(f"OK: {mid} is downloaded")
+
+def post_json(url, payload, timeout=300):
+  req = urllib.request.Request(
+    url,
+    data=json.dumps(payload).encode("utf-8"),
+    headers={
+      "Content-Type": "application/json",
+      "Authorization": "Bearer -",
+    },
+    method="POST",
+  )
+  with urllib.request.urlopen(req, timeout=timeout) as r:
+    return json.loads(r.read().decode("utf-8"))
+
+# LLM chat smoke test
+chat = post_json("http://127.0.0.1:8000/api/v1/chat/completions", {
+  "model": "Llama-3.2-1B-Instruct-GGUF",
+  "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
+  "temperature": 0,
+  "max_tokens": 50,
+}, timeout=300)
+text = chat["choices"][0]["message"]["content"]
+if "OK" not in text:
+  raise SystemExit(f"LLM chat test failed. Got: {text}")
+print("OK: LLM chat works")
+
+# Vision smoke test (OpenAI image_url format)
+png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
+data_url = "data:image/png;base64," + png1x1
+vision = post_json("http://127.0.0.1:8000/api/v1/chat/completions", {
+  "model": "Gemma-3-4b-it-GGUF",
+  "messages": [{
+    "role": "user",
+    "content": [
+      {"type": "text", "text": "If you can see an image input, reply with exactly: OK"},
+      {"type": "image_url", "image_url": {"url": data_url}},
+    ],
+  }],
+  "temperature": 0,
+  "max_tokens": 32,
+}, timeout=300)
+vtext = vision["choices"][0]["message"]["content"]
+if "OK" not in vtext:
+  raise SystemExit(f"Vision test failed. Got: {vtext}")
+print("OK: Vision chat works")
+
+# Image generation smoke test
+img = post_json("http://127.0.0.1:8000/api/v1/images/generations", {
+  "model": "SDXL-Turbo",
+  "prompt": "A simple red cube on a white table, studio lighting",
+  "size": "256x256",
+}, timeout=900)
+b64 = img.get("data", [{}])[0].get("b64_json")
+if not b64:
+  raise SystemExit("Image generation did not return data[0].b64_json")
+print("OK: Image generation works")
+PY
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
 
 ### 2) Install Open WebUI
 
@@ -106,6 +348,30 @@ pip install open-webui
 ```
 <!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=openwebui-install-venv-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$venv = "$PWD\openwebui-venv-ci"
+if (Test-Path $venv) { Remove-Item -Recurse -Force $venv }
+
+python -m venv $venv
+$py = Join-Path $venv "Scripts\python.exe"
+
+& $py -m pip install --upgrade pip
+& $py -m pip install open-webui
+& $py -m pip install beautifulsoup4
+& $py -c "import open_webui; print('OK: import open_webui')"
+& $py -c "import bs4; print('OK: bs4 import')"
+
+$ow = Join-Path $venv "Scripts\open-webui.exe"
+& $ow --help
+Write-Host "OK: open-webui installed in venv"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 <!-- @os:linux -->
 Open a terminal and create a fresh virtual environment:
 
@@ -116,6 +382,29 @@ source openwebui-venv/bin/activate
 python -m pip install --upgrade pip
 pip install open-webui
 ```
+<!-- @os:end -->
+
+<!-- @os:linux --> 
+<!-- @test:id=openwebui-install-venv-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+venv="./openwebui-venv-ci"
+rm -rf "$venv"
+python3 -m venv "$venv"
+py="$venv/bin/python"
+ow="$venv/bin/open-webui"
+
+"$py" -m pip install --upgrade pip
+"$py" -m pip install open-webui
+"$py" -m pip install beautifulsoup4
+"$py" -c "import open_webui; print('OK: import open_webui')"
+"$py" -c "import bs4; print('OK: bs4 import')"
+"$ow" --help
+
+echo "OK: open-webui installed in venv"
+```
+<!-- @test:end --> 
 <!-- @os:end -->
 
 > Note: Open WebUI also provides a variety of other installation options, such as Docker, on their GitHub.
@@ -134,6 +423,95 @@ open-webui serve
 </p>
   
 > Keep the terminal window open. Closing it stops Open WebUI.
+
+
+<!-- @os:windows -->
+<!-- @test:id=openwebui-server-smoke-windows timeout=900 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$venv = "$PWD\openwebui-venv-ci"
+$ow = Join-Path $venv "Scripts\open-webui.exe"
+if (-not (Test-Path $ow)) { throw "open-webui not found. Run openwebui-install-venv-windows first." }
+
+# Fresh data dir so auth mode/config isn't polluted by previous runs
+$dataDir = "$PWD\openwebui-data-ci"
+if (Test-Path $dataDir) { Remove-Item -Recurse -Force $dataDir }
+New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
+
+$env:DATA_DIR = $dataDir
+$env:WEBUI_AUTH = "False" # Disable auth for CI
+$env:ENABLE_PERSISTENT_CONFIG = "False" # Ensure environment-variable config applies for the run and isn't overridden by persistent settings
+
+$logOut = "$PWD\openwebui-ci-out.log"
+$logErr = "$PWD\openwebui-ci-err.log" 
+$p = Start-Process -FilePath $ow -ArgumentList "serve --port 8080" -NoNewWindow -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+try {
+  $ok = $false
+  for ($i=0; $i -lt 90; $i++) {
+    $health = curl.exe -s --max-time 2 http://127.0.0.1:8080/health
+    if ($health) { $ok = $true; break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ok) { throw "Open WebUI not ready on http://127.0.0.1:8080" }
+  Write-Host "OK: Open WebUI is responding on /health"
+}
+finally {
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+}
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+<!-- @os:linux --> 
+<!-- @test:id=openwebui-server-smoke-linux timeout=900 hidden=True -->
+```bash
+set -euo pipefail
+
+venv="./openwebui-venv-ci"
+ow="$venv/bin/open-webui"
+if [ ! -x "$ow" ]; then
+  echo "open-webui not found. Run openwebui-install-venv-linux first."
+  exit 1
+fi
+
+data_dir="./openwebui-data-ci"
+rm -rf "$data_dir"
+mkdir -p "$data_dir"
+
+export DATA_DIR="$data_dir"
+export WEBUI_AUTH=False
+export ENABLE_PERSISTENT_CONFIG=False
+
+p=""
+cleanup() {
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+"$ow" serve --port 8080 >./openwebui-ci.log 2>&1 &
+p=$!
+
+ok=""
+for i in $(seq 1 90); do
+  ok="$(curl -s --max-time 2 http://127.0.0.1:8080/health || true)"
+  if [ -n "$ok" ]; then break; fi
+  sleep 1
+done
+
+if [ -z "$ok" ]; then
+  echo "Open WebUI not ready on http://127.0.0.1:8080"
+  exit 1
+fi
+
+echo "OK: Open WebUI is responding on /health"
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
 
 
 ### 4) Connect Open WebUI to Lemonade
