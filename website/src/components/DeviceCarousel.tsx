@@ -5,7 +5,7 @@ import raiImg from "@/app/assets/rai.png";
 import haloImg from "@/app/assets/halo.png";
 import radeonImg from "@/app/assets/radeon.png";
 
-const devices = [
+const families = [
   { id: "reference", name: "AMD Ryzen\u2122 AI Halo", img: haloImg },
   { id: "apu", name: "Ryzen\u2122 AI APUs", img: raiImg },
   { id: "gpu", name: "Radeon\u2122 GPUs", img: radeonImg },
@@ -25,8 +25,11 @@ interface DeviceCarouselProps {
   onActiveIdChange: (id: string) => void;
 }
 
-export default function DeviceCarousel({ activeId, onActiveIdChange }: DeviceCarouselProps) {
-  const selectDevice = useCallback((id: string) => {
+export default function DeviceCarousel({
+  activeId,
+  onActiveIdChange,
+}: DeviceCarouselProps) {
+  const selectFamily = useCallback((id: string) => {
     onActiveIdChange(id);
   }, [onActiveIdChange]);
 
@@ -34,29 +37,29 @@ export default function DeviceCarousel({ activeId, onActiveIdChange }: DeviceCar
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      {/* Device Selector Tabs */}
+      {/* Device Family Tabs */}
       <div className="flex justify-center mb-8">
         <div className="inline-flex items-center bg-[#1a1a1a] border border-[#333333] rounded-xl p-1.5 gap-1">
-          {devices.map((device) => (
+          {families.map((family) => (
             <button
-              key={device.id}
-              onClick={() => selectDevice(device.id)}
+              key={family.id}
+              onClick={() => selectFamily(family.id)}
               className={`relative px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-1.5 ${
-                activeId === device.id
+                activeId === family.id
                   ? "text-black shadow-lg"
                   : "text-[#a0a0a0] hover:text-white hover:bg-[#242424]"
               }`}
               style={
-                activeId === device.id
+                activeId === family.id
                   ? { backgroundColor: ACCENT }
                   : undefined
               }
             >
-              {device.name}
+              {family.name}
             </button>
           ))}
           <button
-            onClick={() => selectDevice(ALL_ID)}
+            onClick={() => selectFamily(ALL_ID)}
             className={`relative px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
               isAll
                 ? "text-black shadow-lg"
@@ -80,11 +83,11 @@ export default function DeviceCarousel({ activeId, onActiveIdChange }: DeviceCar
             pointerEvents: isAll ? "auto" : "none",
           }}
         >
-          {devices.map((device, i) => (
+          {families.map((family, i) => (
             <img
-              key={device.id}
-              src={device.img.src}
-              alt={device.name}
+              key={family.id}
+              src={family.img.src}
+              alt={family.name}
               className="max-h-40 md:max-h-44 w-auto object-contain absolute drop-shadow-xl"
               style={{
                 transform: `translateX(${overlapStyles[i].translateX}) translateY(${overlapStyles[i].translateY}) rotate(${overlapStyles[i].rotate})`,
@@ -95,17 +98,17 @@ export default function DeviceCarousel({ activeId, onActiveIdChange }: DeviceCar
           ))}
         </div>
 
-        {/* Individual device views */}
-        {devices.map((device) => (
+        {/* Individual family views */}
+        {families.map((family) => (
           <img
-            key={device.id}
-            src={device.img.src}
-            alt={device.name}
+            key={family.id}
+            src={family.img.src}
+            alt={family.name}
             className="max-h-48 md:max-h-50 w-auto object-contain absolute transition-all duration-500 ease-in-out"
             style={{
-              opacity: activeId === device.id ? 1 : 0,
-              transform: activeId === device.id ? "scale(1)" : "scale(0.95)",
-              pointerEvents: activeId === device.id ? "auto" : "none",
+              opacity: activeId === family.id ? 1 : 0,
+              transform: activeId === family.id ? "scale(1)" : "scale(0.95)",
+              pointerEvents: activeId === family.id ? "auto" : "none",
             }}
           />
         ))}

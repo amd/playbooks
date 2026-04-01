@@ -2,7 +2,6 @@
 
 import { useEffect, useCallback } from "react";
 import DeviceCarousel from "./DeviceCarousel";
-
 const titles: Record<string, { prefix: string; highlight: string }> = {
   all: { prefix: "Start your AI journey with", highlight: "AMD Developer Playbooks\u2122" },
   reference: { prefix: "Start your journey on", highlight: "AMD Ryzen\u2122 AI Halo" },
@@ -36,7 +35,10 @@ interface HeroSectionProps {
   onDeviceChange: (id: string) => void;
 }
 
-export default function HeroSection({ activeDevice, onDeviceChange }: HeroSectionProps) {
+export default function HeroSection({
+  activeDevice,
+  onDeviceChange,
+}: HeroSectionProps) {
   useEffect(() => {
     onDeviceChange(deviceFromHash());
 

@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";
 import Link from "next/link";
-import type { Playbook, Platform } from "@/types/playbook";
-import { formatTime, platformNames, extractPlatforms } from "@/types/playbook";
+import type { Playbook, Platform, Device, DeviceCategory } from "@/types/playbook";
+import { formatTime, platformNames, extractPlatforms, DEVICE_CATEGORY_MAP, deviceNames } from "@/types/playbook";
 
 function PlatformBadge({ platform }: { platform: Platform }) {
   const icons: Record<Platform, ReactNode> = {
@@ -55,9 +55,11 @@ function PreinstalledBadge() {
 
 interface PlaybooksSectionProps {
   activeDevice?: string;
+  selectedDevice?: Device | null;
+  onSelectedDeviceChange?: (d: Device) => void;
 }
 
-export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps) {
+export default function PlaybooksSection({ activeDevice, selectedDevice, onSelectedDeviceChange }: PlaybooksSectionProps) {
   const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
@@ -101,8 +103,13 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
   const displayedPlaybooks = (showAll || isSearching) ? regularPlaybooks : regularPlaybooks.slice(0, 6);
 
   const isHaloSelected = activeDevice === "reference";
-  const categoryParam = activeDevice && activeDevice !== "all" ? `?category=${activeDevice}` : "";
-  const playbookHref = (id: string) => `/playbooks/${id}${categoryParam}`;
+  const playbookHref = (id: string) => {
+    const params = new URLSearchParams();
+    if (activeDevice && activeDevice !== "all") params.set("category", activeDevice);
+    if (selectedDevice) params.set("device", selectedDevice);
+    const qs = params.toString();
+    return `/playbooks/${id}${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <section className="py-12 px-6 relative overflow-hidden" id="playbooks">
@@ -132,6 +139,31 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
           
           {/* Filters Row */}
           <div className="flex flex-wrap items-center justify-center gap-2">
+            {(() => {
+              const isAll = !activeDevice || activeDevice === "all";
+              const catInfo = !isAll ? DEVICE_CATEGORY_MAP[activeDevice as DeviceCategory] : null;
+              const catDevices = catInfo?.devices ?? [];
+              if (catDevices.length <= 1) return null;
+              return (
+                <>
+                  <span className="text-xs text-[#6b6b6b]">Device:</span>
+                  {catDevices.map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => onSelectedDeviceChange?.(d)}
+                      className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                        selectedDevice === d
+                          ? "bg-[#D4915D] text-black font-medium"
+                          : "bg-[#242424] text-[#a0a0a0] hover:bg-[#333]"
+                      }`}
+                    >
+                      {catInfo?.deviceDisplayNames?.[d] ?? deviceNames[d]}
+                    </button>
+                  ))}
+                  <span className="text-[#333] text-xs select-none">|</span>
+                </>
+              );
+            })()}
             <span className="text-xs text-[#6b6b6b]">Platform:</span>
             <button
               onClick={() => setPlatformFilter(null)}
