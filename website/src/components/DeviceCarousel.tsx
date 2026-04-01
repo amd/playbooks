@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import raiImg from "@/app/assets/rai.png";
 import haloImg from "@/app/assets/halo.png";
 import radeonImg from "@/app/assets/radeon.png";
+import { COMING_SOON_CATEGORIES } from "@/types/playbook";
 
 const families = [
   { id: "reference", name: "AMD Ryzen\u2122 AI Halo", img: haloImg },
@@ -40,24 +41,34 @@ export default function DeviceCarousel({
       {/* Device Family Tabs */}
       <div className="flex justify-center mb-8">
         <div className="inline-flex items-center bg-[#1a1a1a] border border-[#333333] rounded-xl p-1.5 gap-1">
-          {families.map((family) => (
-            <button
-              key={family.id}
-              onClick={() => selectFamily(family.id)}
-              className={`relative px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-1.5 ${
-                activeId === family.id
-                  ? "text-black shadow-lg"
-                  : "text-[#a0a0a0] hover:text-white hover:bg-[#242424]"
-              }`}
-              style={
-                activeId === family.id
-                  ? { backgroundColor: ACCENT }
-                  : undefined
-              }
-            >
-              {family.name}
-            </button>
-          ))}
+          {families.map((family) => {
+            const comingSoon = COMING_SOON_CATEGORIES.has(family.id);
+            return (
+              <button
+                key={family.id}
+                onClick={() => selectFamily(family.id)}
+                className={`relative px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex flex-col items-center gap-0.5 ${
+                  activeId === family.id
+                    ? "text-black shadow-lg"
+                    : "text-[#a0a0a0] hover:text-white hover:bg-[#242424]"
+                }`}
+                style={
+                  activeId === family.id
+                    ? { backgroundColor: ACCENT }
+                    : undefined
+                }
+              >
+                {family.name}
+                {comingSoon && (
+                  <span className={`text-[9px] font-medium leading-none tracking-wide ${
+                    activeId === family.id ? "text-black/60" : "text-[#D4915D]/70"
+                  }`}>
+                    Coming Soon
+                  </span>
+                )}
+              </button>
+            );
+          })}
           <button
             onClick={() => selectFamily(ALL_ID)}
             className={`relative px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
