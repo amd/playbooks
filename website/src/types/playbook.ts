@@ -105,6 +105,7 @@ export const DEVICE_CATEGORY_MAP: Record<DeviceCategory, DeviceCategoryInfo> =
   Object.fromEntries(DEVICE_CATEGORIES.map(c => [c.id, c])) as Record<DeviceCategory, DeviceCategoryInfo>;
 
 export const COMING_SOON_CATEGORIES: ReadonlySet<string> = new Set<string>(["reference", "gpu"]);
+export const COMING_SOON_DEVICES: ReadonlySet<string> = new Set<string>(["stx", "krk"]);
 
 /**
  * Returns the categories available for a playbook given its supported platforms.

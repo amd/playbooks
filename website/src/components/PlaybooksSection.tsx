@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import type { Playbook, Platform, Device, DeviceCategory } from "@/types/playbook";
-import { formatTime, platformNames, extractPlatforms, DEVICE_CATEGORY_MAP, deviceNames, COMING_SOON_CATEGORIES } from "@/types/playbook";
+import { formatTime, platformNames, extractPlatforms, DEVICE_CATEGORY_MAP, deviceNames, COMING_SOON_CATEGORIES, COMING_SOON_DEVICES } from "@/types/playbook";
 
 function PlatformBadge({ platform }: { platform: Platform }) {
   const icons: Record<Platform, ReactNode> = {
@@ -103,7 +103,7 @@ export default function PlaybooksSection({ activeDevice, selectedDevice, onSelec
   const displayedPlaybooks = (showAll || isSearching) ? regularPlaybooks : regularPlaybooks.slice(0, 6);
 
   const isHaloSelected = activeDevice === "reference";
-  const isComingSoon = !!activeDevice && COMING_SOON_CATEGORIES.has(activeDevice);
+  const isComingSoon = (!!activeDevice && COMING_SOON_CATEGORIES.has(activeDevice)) || (!!selectedDevice && COMING_SOON_DEVICES.has(selectedDevice));
   const playbookHref = (id: string) => {
     const params = new URLSearchParams();
     if (activeDevice && activeDevice !== "all") params.set("category", activeDevice);
@@ -152,13 +152,20 @@ export default function PlaybooksSection({ activeDevice, selectedDevice, onSelec
                     <button
                       key={d}
                       onClick={() => onSelectedDeviceChange?.(d)}
-                      className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                      className={`px-2.5 py-1 text-xs rounded-md transition-colors flex items-center gap-1.5 ${
                         selectedDevice === d
                           ? "bg-[#D4915D] text-black font-medium"
                           : "bg-[#242424] text-[#a0a0a0] hover:bg-[#333]"
                       }`}
                     >
                       {catInfo?.deviceDisplayNames?.[d] ?? deviceNames[d]}
+                      {COMING_SOON_DEVICES.has(d) && (
+                        <span className={`text-[9px] font-medium tracking-wide ${
+                          selectedDevice === d ? "text-black/50" : "text-[#D4915D]/70"
+                        }`}>
+                          Soon
+                        </span>
+                      )}
                     </button>
                   ))}
                   <span className="text-[#333] text-xs select-none">|</span>
