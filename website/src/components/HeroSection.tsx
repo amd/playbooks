@@ -27,7 +27,7 @@ export const deviceToHash: Record<string, string> = {
 function deviceFromHash(): string {
   if (typeof window === "undefined") return "all";
   const raw = window.location.hash.replace("#", "").toLowerCase();
-  return hashToDevice[raw] ?? (raw ? "all" : "reference");
+  return hashToDevice[raw] ?? "all";
 }
 
 interface HeroSectionProps {

@@ -13,8 +13,8 @@ import type { Device } from "@/types/playbook";
 import { DEVICE_CATEGORY_MAP } from "@/types/playbook";
 
 export default function Home() {
-  const [activeDevice, setActiveDevice] = useState("reference");
-  const [selectedDevice, setSelectedDevice] = useState<Device | null>("halo");
+  const [activeDevice, setActiveDevice] = useState("all");
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
 
   const handleCategoryChange = useCallback((category: string) => {
     setActiveDevice(category);
