@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";
 import Link from "next/link";
-import type { Playbook, Platform } from "@/types/playbook";
-import { formatTime, platformNames, extractPlatforms } from "@/types/playbook";
+import type { Playbook, Platform, Device, DeviceCategory } from "@/types/playbook";
+import { formatTime, platformNames, extractPlatforms, DEVICE_CATEGORY_MAP, deviceNames, COMING_SOON_CATEGORIES, COMING_SOON_DEVICES } from "@/types/playbook";
 
 function PlatformBadge({ platform }: { platform: Platform }) {
   const icons: Record<Platform, ReactNode> = {
@@ -55,9 +55,11 @@ function PreinstalledBadge() {
 
 interface PlaybooksSectionProps {
   activeDevice?: string;
+  selectedDevice?: Device | null;
+  onSelectedDeviceChange?: (d: Device) => void;
 }
 
-export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps) {
+export default function PlaybooksSection({ activeDevice, selectedDevice, onSelectedDeviceChange }: PlaybooksSectionProps) {
   const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
@@ -101,8 +103,14 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
   const displayedPlaybooks = (showAll || isSearching) ? regularPlaybooks : regularPlaybooks.slice(0, 6);
 
   const isHaloSelected = activeDevice === "reference";
-  const categoryParam = activeDevice && activeDevice !== "all" ? `?category=${activeDevice}` : "";
-  const playbookHref = (id: string) => `/playbooks/${id}${categoryParam}`;
+  const isComingSoon = (!!activeDevice && COMING_SOON_CATEGORIES.has(activeDevice)) || (!!selectedDevice && COMING_SOON_DEVICES.has(selectedDevice));
+  const playbookHref = (id: string) => {
+    const params = new URLSearchParams();
+    if (activeDevice && activeDevice !== "all") params.set("category", activeDevice);
+    if (selectedDevice) params.set("device", selectedDevice);
+    const qs = params.toString();
+    return `/playbooks/${id}${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <section className="py-12 px-6 relative overflow-hidden" id="playbooks">
@@ -132,6 +140,38 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
           
           {/* Filters Row */}
           <div className="flex flex-wrap items-center justify-center gap-2">
+            {(() => {
+              const isAll = !activeDevice || activeDevice === "all";
+              const catInfo = !isAll ? DEVICE_CATEGORY_MAP[activeDevice as DeviceCategory] : null;
+              const catDevices = catInfo?.devices ?? [];
+              if (catDevices.length <= 1) return null;
+              return (
+                <>
+                  <span className="text-xs text-[#6b6b6b]">Device:</span>
+                  {catDevices.map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => onSelectedDeviceChange?.(d)}
+                      className={`px-2.5 py-1 text-xs rounded-md transition-colors flex items-center gap-1.5 ${
+                        selectedDevice === d
+                          ? "bg-[#D4915D] text-black font-medium"
+                          : "bg-[#242424] text-[#a0a0a0] hover:bg-[#333]"
+                      }`}
+                    >
+                      {catInfo?.deviceDisplayNames?.[d] ?? deviceNames[d]}
+                      {COMING_SOON_DEVICES.has(d) && (
+                        <span className={`text-[9px] font-medium tracking-wide ${
+                          selectedDevice === d ? "text-black/50" : "text-[#D4915D]/70"
+                        }`}>
+                          Soon
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                  <span className="text-[#333] text-xs select-none">|</span>
+                </>
+              );
+            })()}
             <span className="text-xs text-[#6b6b6b]">Platform:</span>
             <button
               onClick={() => setPlatformFilter(null)}
@@ -210,10 +250,17 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
           <>
             {/* Featured Playbook - Hero Style */}
             {featuredPlaybook && (
-              <Link href={playbookHref(featuredPlaybook.id)} className="block mb-6">
+              <Link href={isComingSoon ? "#" : playbookHref(featuredPlaybook.id)} className="block mb-6" onClick={isComingSoon ? (e) => e.preventDefault() : undefined}>
                 <div className="group relative bg-gradient-to-r from-[#1e1e1e] to-[#242424] border border-[#D4915D]/30 rounded-xl overflow-hidden hover:border-[#D4915D]/60 transition-all duration-300">
                   <div className="absolute inset-0 bg-gradient-to-r from-[#D4915D]/5 to-transparent" />
                   <div className="absolute top-0 right-0 w-48 h-48 bg-[#D4915D]/5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
+                  {isComingSoon && (
+                    <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[2px] flex items-center justify-center rounded-xl">
+                      <span className="px-4 py-1.5 text-sm font-semibold text-[#D4915D] border border-[#D4915D]/40 rounded-full bg-[#D4915D]/10 tracking-wide">
+                        Coming Soon
+                      </span>
+                    </div>
+                  )}
                   
                   <div className="relative p-5 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4">
                     <div className="flex-1">
@@ -281,8 +328,15 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
             {/* Playbook Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
               {displayedPlaybooks.map((playbook) => (
-                <Link key={playbook.id} href={playbookHref(playbook.id)} className="block group">
-                  <div className="h-full bg-[#1e1e1e] border border-[#333333] rounded-lg p-4 hover:border-[#D4915D]/50 hover:bg-[#242424] transition-all duration-300">
+                <Link key={playbook.id} href={isComingSoon ? "#" : playbookHref(playbook.id)} className="block group" onClick={isComingSoon ? (e) => e.preventDefault() : undefined}>
+                  <div className="relative h-full bg-[#1e1e1e] border border-[#333333] rounded-lg p-4 hover:border-[#D4915D]/50 hover:bg-[#242424] transition-all duration-300 overflow-hidden">
+                    {isComingSoon && (
+                      <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[2px] flex items-center justify-center rounded-lg">
+                        <span className="px-3 py-1 text-xs font-semibold text-[#D4915D] border border-[#D4915D]/40 rounded-full bg-[#D4915D]/10 tracking-wide">
+                          Coming Soon
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-start justify-between mb-3">
                       <div className="p-1.5 rounded-md bg-[#D4915D]/10 border border-[#D4915D]/20">
                         <svg className="w-4 h-4 text-[#D4915D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -321,12 +375,14 @@ export default function PlaybooksSection({ activeDevice }: PlaybooksSectionProps
                         </span>
                         <DifficultyBadge difficulty={playbook.difficulty} />
                       </div>
-                      <div className="flex items-center text-xs text-[#D4915D] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span>View</span>
-                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
+                      {!isComingSoon && (
+                        <div className="flex items-center text-xs text-[#D4915D] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span>View</span>
+                          <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Link>
