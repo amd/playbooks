@@ -2,12 +2,11 @@
 
 import { useEffect, useCallback } from "react";
 import DeviceCarousel from "./DeviceCarousel";
-
 const titles: Record<string, { prefix: string; highlight: string }> = {
   all: { prefix: "Start your AI journey with", highlight: "AMD Developer Playbooks\u2122" },
-  reference: { prefix: "Start your journey on", highlight: "AMD Ryzen\u2122 AI Halo" },
-  apu: { prefix: "Start your journey on", highlight: "Ryzen\u2122 AI APUs" },
-  gpu: { prefix: "Start your journey on", highlight: "Radeon\u2122 GPUs" },
+  reference: { prefix: "Start your AI journey with", highlight: "AMD Developer Playbooks\u2122" },
+  apu: { prefix: "Start your AI journey with", highlight: "AMD Developer Playbooks\u2122" },
+  gpu: { prefix: "Start your AI journey with", highlight: "AMD Developer Playbooks\u2122" },
 };
 
 const hashToDevice: Record<string, string> = {
@@ -28,7 +27,7 @@ export const deviceToHash: Record<string, string> = {
 function deviceFromHash(): string {
   if (typeof window === "undefined") return "all";
   const raw = window.location.hash.replace("#", "").toLowerCase();
-  return hashToDevice[raw] ?? (raw ? "all" : "reference");
+  return hashToDevice[raw] ?? "all";
 }
 
 interface HeroSectionProps {
@@ -36,7 +35,10 @@ interface HeroSectionProps {
   onDeviceChange: (id: string) => void;
 }
 
-export default function HeroSection({ activeDevice, onDeviceChange }: HeroSectionProps) {
+export default function HeroSection({
+  activeDevice,
+  onDeviceChange,
+}: HeroSectionProps) {
   useEffect(() => {
     onDeviceChange(deviceFromHash());
 
