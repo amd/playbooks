@@ -59,7 +59,7 @@ set -euo pipefail
 if [ -d "ComfyUI/.git" ]; then
  (cd ComfyUI && git fetch --all && git reset --hard origin/master)
 else
- git clone https://github.com/comfyanonymous/ComfyUI.git
+ git clone https://github.com/Comfy-Org/ComfyUI.git
 fi
 cd ComfyUI
 ```
