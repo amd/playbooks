@@ -158,8 +158,6 @@ Below is a summary of available training methods. Each method links to its scrip
 | [`train_lora.py`](assets/train_lora.py)                 | **LoRA** 🎯         | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
 
-> **Typical time:** ~15–20 minutes for 800 samples
-
 ---
 
 ## Understanding the Techniques
