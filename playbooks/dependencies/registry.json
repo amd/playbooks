@@ -135,10 +135,9 @@
         "windows": ["halo_box"]
       }
     },
-    "memory_config": {
-      "name": "AMD Memory Configuration",
-      "description": "Suggested memory configurations for Strix Halo Systems",
-      "category": "framework",
+    "memory-config": {
+      "name": "Memory Configuration",
+      "description": "Configure GPU memory allocation for running large models",
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md",
       "preinstalled": {
