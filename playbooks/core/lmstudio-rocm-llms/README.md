@@ -181,7 +181,6 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     except Exception as e:
         print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
     ```
-
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-ping-endpoint-windows timeout=300 hidden=True -->
 ```python
@@ -192,19 +191,19 @@ with open(model_id_path, "r", encoding="utf-8") as f:
     model_id = f.read().strip()
 
 req = urllib.request.Request(
-"http://127.0.0.1:1234/v1/chat/completions",
-data=json.dumps({
-"model": model_id,
-"messages": [{"role":"user","content":"What is 2 + 2? Reply with only the number."}],
-"temperature": 0,
-"max_tokens": 500
-}).encode("utf-8"),
-headers={"Content-Type":"application/json"},
-method="POST",
+ "http://127.0.0.1:1234/v1/chat/completions",
+ data=json.dumps({
+   "model": model_id,
+   "messages": [{"role":"user","content":"What is 2 + 2? Reply with only the number."}],
+   "temperature": 0,
+   "max_tokens": 500
+ }).encode("utf-8"),
+ headers={"Content-Type":"application/json"},
+ method="POST",
 )
 with urllib.request.urlopen(req, timeout=60) as r:
-print(r.read().decode("utf-8", "replace"))
- ```
+ print(r.read().decode("utf-8", "replace"))
+```
 <!-- @test:end --> 
 <!-- @os:end -->
 
@@ -259,7 +258,7 @@ lms server stop
 #### (Optional): Swapping between Runtimes
 
 1. Press `Ctrl + Shift + R` on your keyboard. Alternatively click on the `Discover` tab (Magnifying Glass) on the left-hand side and then click on `Runtime` in the pop up.   
-2. You should then see `Runtime Selections`, where the dropdown menu can be changed.
+2. You should then see `Runtime Selections`, where the dropdown menu can be used to change the runtime.
 
 
 ## Next Steps
