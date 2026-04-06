@@ -14,7 +14,7 @@
     },
     {
       "parameters": {
-        "url": "https://www.ft.com/",
+        "url": "https://apnews.com/business",
         "options": {
           "timeout": 10000
         }
@@ -28,7 +28,7 @@
       ],
       "notesInFlow": true,
       "typeVersion": 4.2,
-      "notes": "Url : https://www.ft.com/"
+      "notes": "Url : https://apnews.com/business"
     },
     {
       "parameters": {},
@@ -48,36 +48,32 @@
         "extractionValues": {
           "values": [
             {
-              "key": "Headline #1",
-              "cssSelector": "#site-content > div:nth-child(1) > section > div > div > div.layout-desktop__grid.layout-desktop__grid--span4.layout-desktop__grid--column-start-1.layout-desktop__grid--row-start-1.layout-desktop__grid--with-border.layout--default > div > div > div > div.story-group-stacked__primary-story > div > div > div > div > div.primary-story__teaser"
+              "key": "Top Headline",
+              "cssSelector": ".PageListStandardH .PageList-items-item:first-child .PagePromo-title"
             },
             {
-              "key": "Headline #2",
-              "cssSelector": "#site-content > div:nth-child(1) > section > div > div > div.layout-desktop__grid.layout-desktop__grid--span6.layout-desktop__grid--column-start-5.layout-desktop__grid--row-start-1.layout-desktop__grid--with-border.layout--default > div > div > div > div > div > div.story-group__article.story-group__article--featured > div > div.featured-story-content > div.headline.js-teaser-headline.headline--scale-5.headline--color-black > a > span"
-            },
-            {
-              "key": "Editor's Picks",
-              "cssSelector": "#site-content > div:nth-child(1) > section > div > div > div.layout-desktop__grid.layout-desktop__grid--span2.layout-desktop__grid--column-start-11.layout-desktop__grid--row-start-1.layout--default > div"
+              "key": "Second Headline",
+              "cssSelector": ".PageListStandardH .PageList-items-item:nth-child(2) .PagePromo-title"
             },
             {
               "key": "Top Stories",
-              "cssSelector": "#site-content > div:nth-child(3) > section > div",
-              "skipSelectors": "h2"
+              "cssSelector": ".PageListStandardH .PageList-items .PagePromo-title"
             },
             {
-              "key": "Spotlight",
-              "cssSelector": "#site-content > div:nth-child(6) > section",
-              "skipSelectors": "h2"
+              "key": "Most Read",
+              "cssSelector": "#most-read ~ .PageListRightRailA-content .PagePromo-title"
             },
             {
-              "key": "Various News",
-              "cssSelector": "#site-content > div:nth-child(8) > section",
-              "skipSelectors": "h2"
+              "key": "Financial Markets",
+              "cssSelector": "#financial-markets ~ .PageListRightRailA-content .PagePromo-title"
             },
             {
-              "key": "Europe News",
-              "cssSelector": "#site-content > div:nth-child(13) > section",
-              "skipSelectors": "h2"
+              "key": "Economy",
+              "cssSelector": "#economy ~ .PageListRightRailA-content .PagePromo-title"
+            },
+            {
+              "key": "Tech",
+              "cssSelector": "#tech ~ .PageListRightRailA-content .PagePromo-title"
             }
           ]
         },
@@ -104,7 +100,7 @@
               "id": "5412a5ee-dbbe-4fcc-98a5-6fafc37b94d1",
               "name": "All data",
               "type": "string",
-              "value": "=News :\n{{ $json['Headline #1'] }}\n\n\n\nFinancial news :\n\n{{ $('Extract News Headlines & Text\t1').item.json['Headline #1'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Headline #2'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Editor\\'s Picks'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Top Stories'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json.Spotlight }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Various News'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Europe News'] }};\n\n"
+              "value": "=News :\n{{ $json['Top Headline'] }}\n\n\n\nFinancial news :\n\n{{ $('Extract News Headlines & Text\t1').item.json['Top Headline'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Second Headline'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Top Stories'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Most Read'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Financial Markets'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json.Economy }};\n\n{{ $('Extract News Headlines & Text\t1').item.json.Tech }};\n\n"
             }
           ]
         },

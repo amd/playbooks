@@ -40,6 +40,12 @@
       "linux"
     ]
   },
+  "published_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
