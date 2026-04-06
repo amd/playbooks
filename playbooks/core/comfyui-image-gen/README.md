@@ -24,7 +24,13 @@ This tutorial teaches you how to use ComfyUI with the Z-Image Turbo model on you
 
 ## Installing Dependencies
 
+<!-- @os:windows -->
 <!-- @require:comfyui,driver -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @require:comfyui,rocm,driver -->
+<!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-desktop-workspace-present-windows timeout=60 hidden=True -->
@@ -56,8 +62,6 @@ else
  git clone https://github.com/Comfy-Org/ComfyUI.git
 fi
 cd ComfyUI
-git fetch --tags
-git checkout -f v0.10.0
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -80,7 +84,6 @@ python3 -m venv comfyui_venv
 set -euo pipefail
 ./comfyui_venv/bin/python -m pip install --upgrade pip
 ./comfyui_venv/bin/python -m pip install -r ./ComfyUI/requirements.txt
-./comfyui_venv/bin/python -m pip install requests
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -124,14 +127,15 @@ if ($LASTEXITCODE -ne 0) { throw "Torch import/check failed in ComfyUI workspace
 set -euo pipefail
 sudo apt install python3-pip -y
 ./comfyui_venv/bin/python -m pip install --upgrade pip wheel
+./comfyui_venv/bin/python -m pip install --force-reinstall --no-cache-dir --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision torchaudio
 
-wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torch-2.9.1%2Brocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl
-wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchvision-0.24.0%2Brocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl
-wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
-wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchaudio-2.9.0%2Brocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl
-
-./comfyui_venv/bin/python -m pip uninstall -y torch torchvision triton torchaudio
-./comfyui_venv/bin/python -m pip install torch-2.9.1+rocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl torchvision-0.24.0+rocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl torchaudio-2.9.0+rocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl triton-3.5.1+rocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
+./comfyui_venv/bin/python - <<'PY'
+import torch
+print(f"PyTorch version: {torch.__version__}")
+print(f"ROCm/HIP version: {getattr(torch.version, 'hip', None)}")
+print(f"CUDA/ROCm available: {torch.cuda.is_available()}")
+print("PASS: All imports successful")
+PY
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
