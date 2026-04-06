@@ -42,6 +42,9 @@ groups
 
 # Check ROCm with rocminfo ('Permission denied' error should NOT be seen)
 rocminfo | sed -n '1,120p'
+
+# Check installed ROCm version
+cat /opt/rocm/.info/version
 ```
 <!-- @test:end -->
 
