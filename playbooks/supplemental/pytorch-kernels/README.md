@@ -127,23 +127,19 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 
 ### Create a Virtual Environment
 <!-- @os:linux -->
-<!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt install -y python3-venv
 python3 -m venv ~/rocm-env
 source ~/rocm-env/bin/activate
 ```
-<!-- @test:end -->
 <!-- @setup:id=activate-venv command="source rocm-env/bin/activate" -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv rocm-env
 rocm-env\Scripts\activate
 ```
-<!-- @test:end -->
 <!-- @setup:id=activate-venv command="rocm-env\Scripts\activate" -->
 <!-- @os:end -->
 
@@ -151,7 +147,6 @@ rocm-env\Scripts\activate
 
 ### Installing Dependencies
 <!-- @os:linux -->
-<!-- @test:id=install-torch-rocm timeout=900 setup=activate-venv -->
 ```bash
 source ~/rocm-env/bin/activate
 
@@ -163,11 +158,9 @@ source ~/rocm-env/bin/activate
 
 pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 ```
-<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=install-torch-rocm timeout=900 setup=activate-venv -->
 ```bash
 rocm-env\Scripts\activate
 
@@ -182,12 +175,10 @@ rocm-env\Scripts\activate
 
 pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 ```
-<!-- @test:end --> 
 <!-- @os:end -->
 
 #### Set Environment Variables
 <!-- @os:linux -->
-<!-- @test:id=set-envs timeout=60 -->
 ```bash
 rocm-sdk init # Initialize the devel libraries
 
@@ -195,11 +186,9 @@ export ROCM_HOME = "$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH = "$ROCM_HOME/lib:$LD_LIBRARY_PATH"
 export PATH = "$ROCM_HOME/bin:$PATH"
 ```
-<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=set-envs timeout=60 -->
 ```bash
 rocm-sdk init # Initialize the devel libraries
 
@@ -213,7 +202,6 @@ $env:CC = "clang-cl"
 $env:CXX = "clang-cl"
 $env:DISTUTILS_USE_SDK = "1"
 ```
-<!-- @test:end -->
 <!-- @os:end -->
 
 ---
@@ -237,7 +225,6 @@ AMD Radeon GPUs execute threads in groups of 32 threads, called a wavefront.
 This allows the GPU scheduler to keep multiple wavefronts active within a single block, which improves scheduling efficiency and helps keep compute units busy.
 
 **How it works:**
-<!-- @test:id=test-vector-addition timeout=300 setup=activate-venv -->
 ```python
 import torch
 
@@ -272,7 +259,6 @@ for _ in range(200):
 # 4. Test the output
 print("First 5 elements:", x[:5].cpu()) #tensor([200001., 200001., 200001., 200001., 200001.])
 ```
-<!-- @test:end -->
 <!-- @os:linux -->
 The script also spawns a background thread that polls `rocm-smi` every 100ms to log peak and average GPU utilization during the kernel run.
 <!-- @os:end -->
@@ -290,11 +276,9 @@ Final value:    200,001.0  (per element)
 The inner `for (int i = 0; i < 1000; i++)` loop is artificial, its only purpose is to make each kernel launch run long enough for `rocm-smi` to capture meaningful utilization. Without it, 200 launches over 100M elements would complete near-instantly and the sampling thread would likely read very low GPU utilization.
 
 **Run:**
-<!-- @test:id=run-vector-addition-add-one-kernel-py timeout=600 setup=activate-venv -->
 ```bash
 python "Vector_Addition/add_one_kernel.py"
 ```
-<!-- @test:end -->
 
 **Expected output:**[The performance numbers might vary]
 ```
@@ -365,11 +349,9 @@ the CPU immediately continues executing the next instruction without waiting for
 
 **Step 2: Build**
 
-<!-- @test:id=run-vector-addition-add-one-kernel-cu timeout=600 setup=activate-venv -->
 ```bash
 pip install --no-build-isolation -v .
 ```
-<!-- @test:end -->
 
 `CUDAExtension` is a CUDA build helper from `torch.utils.cpp_extension`. On AMD with ROCm, PyTorch **remaps `CUDAExtension` to use `hipcc`** instead of `nvcc`, so the same `setup.py` that would build a CUDA extension on NVIDIA compiles to AMD GPU code without any changes. This is the key mechanism that makes CUDA extension code portable to AMD: PyTorch's ROCm build intercepts the build path and routes it through the HIP compiler. Produces these in the same directory:
 <!-- @os:windows -->
@@ -382,7 +364,6 @@ pip install --no-build-isolation -v .
 <!-- @os:end -->
 
 **Step 3: Use from Python**
-<!-- @test:id=verify-vector-addition-add-one-kernel-so timeout=400 setup=activate-venv -->
 ```python
 import os, sys
 import torch
@@ -394,7 +375,6 @@ x = torch.ones(10, device="cuda")
 add_one_ext.add_one(x)
 print(x[:5].cpu())
 ```
-<!-- @test:end -->
 
 **Expected output:**
 ```python
@@ -478,7 +458,6 @@ grid_y = ceil(M / 16)   # enough blocks to span all M rows
 Kernel is written as a raw C++ string inside Python and compiled at runtime via PyTorch's built-in JIT. Identical workflow to Walkthrough 1, only the kernel body and launch dimensions change.
 
 **How it works:**
-<!-- @test:id=test-matmul-kernel timeout=800 setup=activate-venv -->
 ```python
 import torch
 
@@ -524,7 +503,6 @@ C_ref = torch.mm(A, B)
 max_err = (C - C_ref).abs().max().item()
 print(f"Max error vs torch.mm: {max_err:.6f}")
 ```
-<!-- @test:end -->
 
 The row-major memory layout of the tensors maps directly to how the kernel indexes the flat pointers:
 - `A[row * N + n]`:  row `row`, column `n`
@@ -533,11 +511,9 @@ The row-major memory layout of the tensors maps directly to how the kernel index
 The script spawns the same background monitoring thread from Walkthrough 1 (`rocm-smi` polled every 100ms) and verifies the result against `torch.mm`. Floating-point arithmetic on GPUs may produce small numerical differences compared to CPU implementations due to parallel reduction order. This is why we verify the result using a tolerance (`max error`) instead of exact equality.
 
 **Run:**
-<!-- @test:id=run-matmul-kernel-py timeout=800 setup=activate-venv -->
 ```bash
 python "Matrix_Multiplication/matmul_kernel.py"
 ```
-<!-- @test:end -->
 
 **Expected output:**[The performance numbers might vary]
 ```
@@ -615,11 +591,9 @@ Compared to `add_one_launcher` in Walkthrough 1, the launcher here:
 
 **Step 2: Build**
 
-<!-- @test:id=run-matmul-kernel-cu timeout=600 setup=activate-venv -->
 ```bash
 pip install --no-build-isolation -v .
 ```
-<!-- @test:end -->
 
 Produces these in the same directory:
 <!-- @os:windows -->
@@ -634,7 +608,6 @@ Produces these in the same directory:
 The same `CUDAExtension` → `hipcc` remapping as walkthrough 1 applies here unchanged.
 
 **Step 3: Use from Python**
-<!-- @test:id=verify-matmul-kernel-so timeout=300 setup=activate-venv -->
 ```python
 import os, sys
 import torch
@@ -650,7 +623,6 @@ B = torch.tensor([[5., 6.],
 
 C = matmul_ext.matmul(A, B)
 ```
-<!-- @test:end -->
 
 **Expected output:**
 ```python
