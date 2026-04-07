@@ -16,6 +16,7 @@ Quality: Excellent with pre-quantized model
 """
 
 import gc
+import os
 import torch
 
 # Use bitsandbytes (bnb) for quantization on Linux, but skip it on Windows (or if bnb is incomplete).
@@ -63,7 +64,7 @@ def cleanup_gpu_memory():
 # -----------------------
 # Model Configuration
 # -----------------------
-MODEL = "google/gemma-3-4b-it"
+MODEL = "openai/gpt-oss-20b" # pre-quantized 4-bit (Mxfp4) model
 model_name = MODEL.split("/")[-1]
 
 # -----------------------
@@ -73,12 +74,17 @@ model_name = MODEL.split("/")[-1]
 # We only need to configure LoRA adapters
 
 # LoRA settings
-LORA_R = 64                            # Adapter rank
-LORA_ALPHA = 128                       # 2x rank
-LORA_DROPOUT = 0.05
-LORA_TARGET_MODULES = [
-    "q_proj", "k_proj", "v_proj", "o_proj",
-    "gate_proj", "up_proj", "down_proj"
+LORA_R = 64                    # Rank of LoRA matrices (higher = more capacity)
+LORA_ALPHA = 128                # Scaling factor (usually 2x rank)
+LORA_DROPOUT = 0.05            # Dropout for regularization
+LORA_TARGET_MODULES = [        # Which layers to add LoRA adapters to
+    "q_proj",                  # Query projection
+    "k_proj",                  # Key projection  
+    "v_proj",                  # Value projection
+    "o_proj",                  # Output projection
+    "gate_proj",               # Gate projection (MLP)
+    "up_proj",                 # Up projection (MLP)
+    "down_proj"                # Down projection (MLP)
 ]
 
 # -----------------------
@@ -93,7 +99,15 @@ GRAD_ACCUM_STEPS = 4
 # Load Dataset
 # -----------------------
 print("Loading dataset...")
-ds = load_dataset("Abirate/english_quotes", split="train").shuffle(seed=42).select(range(1000))
+QUICK_TRAIN = os.environ.get("QUICK_TRAIN") == "1"
+if QUICK_TRAIN and os.environ.get("QUICK_TRAIN_MODEL"):
+    MODEL = os.environ["QUICK_TRAIN_MODEL"]
+    model_name = MODEL.split("/")[-1]
+    print(f"QUICK_TRAIN=1: using non-gated model for smoke test: {MODEL}")
+n_samples = 8 if QUICK_TRAIN else 1000
+if QUICK_TRAIN:
+    print("QUICK_TRAIN=1: using 1 step and a tiny dataset (smoke test).")
+ds = load_dataset("Abirate/english_quotes", split="train").shuffle(seed=42).select(range(n_samples))
 
 def format_chat(ex):
     return {
@@ -106,6 +120,7 @@ def format_chat(ex):
 ds = ds.map(format_chat, remove_columns=ds.column_names)
 ds = ds.train_test_split(test_size=0.2)
 print(f"Train samples: {len(ds['train'])}, Test samples: {len(ds['test'])}")
+print(f"Total selected samples: {n_samples}")
 
 # -----------------------
 # Load Model (Pre-quantized)
@@ -168,6 +183,24 @@ print(f"LoRA alpha: {LORA_ALPHA}")
 print(f"Target modules: {len(LORA_TARGET_MODULES)} layer types\n")
 
 # -----------------------
+# Mixed precision: use bf16 if supported, else fp16, else fp32
+# -----------------------
+_use_bf16 = False
+_use_fp16 = False
+if torch.cuda.is_available():
+    if (
+        getattr(torch.cuda, "is_bf16_supported", None)
+        and torch.cuda.is_bf16_supported()
+    ):
+        _use_bf16 = True
+        print("Using bf16 mixed precision.")
+    else:
+        _use_fp16 = True
+        print("bf16 not supported; using fp16 mixed precision.")
+else:
+    print("No GPU / bf16 not available; using fp32.")
+
+# -----------------------
 # Training Configuration
 # -----------------------
 args = SFTConfig(
@@ -181,13 +214,14 @@ args = SFTConfig(
     per_device_train_batch_size=BATCH_SIZE,
     gradient_accumulation_steps=GRAD_ACCUM_STEPS,
     learning_rate=LR,
+    **(dict(max_steps=1) if QUICK_TRAIN else {}),
     
     # Optimizer
     optim="adamw_torch_fused",        # Fused optimizer for better performance
     
-    # Mixed precision
-    bf16=True,
-    fp16=False,
+    # Mixed precision (set from runtime bf16/fp16 support check above)
+    bf16=_use_bf16,
+    fp16=_use_fp16,
     
     # Learning rate schedule
     lr_scheduler_type="cosine",
@@ -224,9 +258,16 @@ trainer = SFTTrainer(
 # Run Training
 # -----------------------
 print("Starting QLoRA Fine-tuning...")
+print(f"Model: {MODEL}")
+print(f"Trainable parameters: {trainable_params:,}")
 print(f"Effective batch size: {BATCH_SIZE * GRAD_ACCUM_STEPS}")
 print(f"Learning rate: {LR}")
-print(f"Expected time: 2-4 hours for 1000 samples\n")
+if QUICK_TRAIN:
+    print("Quick smoke mode enabled: tiny dataset + max_steps=1")
+else:
+    print(f"Epochs: {EPOCHS}")
+    print(f"Expected time: 2-4 hours for 1000 samples\n")
+print()
 
 reset_peak_mem()
 trainer.train()
@@ -244,6 +285,14 @@ print("Training Complete!")
 print("="*60)
 print(f"LoRA adapter saved to: output-{model_name}-qlora")
 print(f"Adapter size: ~{trainable_params * 2 / 1e6:.1f} MB")
+
+print("\nTo use your QLoRA adapter:")
+print("  from peft import AutoPeftModelForCausalLM")
+print(f"  model = AutoPeftModelForCausalLM.from_pretrained('output-{model_name}-qlora')")
+print(f"  tokenizer = AutoTokenizer.from_pretrained('output-{model_name}-qlora')")
+print("\nTo merge adapter with base model:")
+print("  merged_model = model.merge_and_unload()")
+print("  merged_model.save_pretrained('output-merged')")
 
 # -----------------------
 # Cleanup GPU Memory
