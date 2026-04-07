@@ -107,6 +107,15 @@ print("Device count:", torch.cuda.device_count())
 
 ## Windows
 
+If you're running on a Halo Box, ROCm and PyTorch are preinstalled. You can validate them by running:
+
+```bash
+hipcc --version
+hipinfo
+
+print("HIP available:", torch.cuda.is_available())
+```
+
 ### Prerequisites
 - Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 
@@ -147,7 +156,7 @@ $env:DISTUTILS_USE_SDK = "1"
 #### Verify:
 ```bash
 hipcc --version
-hipInfo.exe
+hipInfo
 ```
 
 ### Install PyTorch
