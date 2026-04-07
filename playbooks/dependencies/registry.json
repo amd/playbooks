@@ -138,6 +138,7 @@
     "memory-config": {
       "name": "Memory Configuration",
       "description": "Configure GPU memory allocation for running large models",
+      "category": "framework",
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md",
       "preinstalled": {

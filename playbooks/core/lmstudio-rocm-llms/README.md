@@ -37,7 +37,8 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 4. Change `Context Length` as desired. Higher context length means more model memory, but more system memory used. Recommended for this playbook is 4096.
 5. Make sure `GPU Offload` is set to maximum and `Flash Attention` is On
 6. Check `Remember settings` and click on `Load Model`.
-7. Send a message and start interacting with the model!
+7. If not in the chat window, press `Ctrl + 1` or click on the 👾 button on the top left of the screen.
+8. Send a message and start interacting with the model!
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-load-gpt-oss-windows timeout=1200 hidden=True -->
@@ -121,30 +122,14 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
 1. Create a Python virtual environment:
     <!-- @os:windows -->
     On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-    <!-- @test:id=create-venv timeout=60 -->
-    ```bash
-    python -m venv llm-env --system-site-packages
-    llm-env\Scripts\activate
-    ```
-    <!-- @test:end -->
 
     > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
     > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-    <!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
     <!-- @os:end -->
 
     <!-- @os:linux -->
     On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
-    <!-- @test:id=create-venv timeout=120 -->
-    ```bash
-    sudo apt update
-    sudo apt install -y python3-venv
-    python3 -m venv llm-env --system-site-packages
-    source llm-env/bin/activate
-    ```
-    <!-- @test:end -->
-    <!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
     <!-- @os:end -->
 
 2. Install the OpenAI package
