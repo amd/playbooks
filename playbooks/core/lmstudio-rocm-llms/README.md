@@ -122,6 +122,10 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
 1. Create a Python virtual environment:
     <!-- @os:windows -->
     On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
+    ```bash
+    python -m venv llm-env --system-site-packages
+    llm-env\Scripts\activate
+    ```
 
     > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
     > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
@@ -130,6 +134,12 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
 
     <!-- @os:linux -->
     On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+    ```bash
+    sudo apt update
+    sudo apt install -y python3-venv
+    python3 -m venv llm-env --system-site-packages
+    source llm-env/bin/activate
+    ```
     <!-- @os:end -->
 
 2. Install the OpenAI package
