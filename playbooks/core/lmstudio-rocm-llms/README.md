@@ -22,12 +22,7 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 ## Installing Dependencies
 
-<!-- @require:lmstudio -->
-
-## System Setup
-
-<!-- @setup:memory-config -->
-
+<!-- @require:lmstudio,memory-config -->
 
 ## Downloading Models
 
@@ -36,13 +31,14 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 ## Chatting with an LLM
 Learn how to start chatting with a ChatGPT-grade LLM completely locally.  
 
-1. Press `Ctrl + 1` or click on the 👾 button on the top left of the screen to open the Chat window. 
+1. Open LMStudio. 
 2. Press `Ctrl + L` to open the Model Loader, select `Manually chose model load parameters`, and click on `GPT-OSS 120B`
 3. Make sure "show advanced settings" is checked.  
-4. Change `Context Length` as desired. Higher context length means more model memory, but more system memory used.
-5. Make sure `Flash Attention` is On and `GPU Offload` is set to maximum.
+4. Change `Context Length` as desired. Higher context length means more model memory, but more system memory used. Recommended for this playbook is 4096.
+5. Make sure `GPU Offload` is set to maximum and `Flash Attention` is On
 6. Check `Remember settings` and click on `Load Model`.
-7. Send a message and start interacting with the model!
+7. If not in the chat window, press `Ctrl + 1` or click on the 👾 button on the top left of the screen.
+8. Send a message and start interacting with the model!
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-load-gpt-oss-windows timeout=1200 hidden=True -->
@@ -86,8 +82,8 @@ To set up LM Studio Server, use the following instructions:
 
 1. On the left hand side, click on the `Developer` tab (command line icon) or `CTRL + 2` and then click on `Server Settings`.  
 2. (Optional): If you want to serve the model over your LAN, check `Serve on Local Network`. If you want to use with a website or extensive calling within VS Code, check `Enable CORS`. 
-3. On the upper left corner, run the server by clicking on the toggle button in front of `Status: Stopped`.
-4. An OpenAI compliant endpoint will now be running. The address is typically http://127.0.0.1:1234  
+3. On the upper left corner, make sure the server is running by clicking on the toggle button in front of `Status`.
+4. An OpenAI compliant endpoint will now be running. The address is typically at http://127.0.0.1:1234  
 5. If a model is not already loaded, you can load it by clicking `Load Model` and following the previously mentioned steps. 
 
 <!-- @os:windows -->
@@ -121,43 +117,65 @@ This model will now be accessible through the LM Studio Server endpoint and will
 
 
 #### Example: Pinging your Endpoint
-Having just created the OpenAI Compatible endpoint, let's look at how to integrate this into a Python developer environment and use your system as a local API Provider. 
+Having just created the OpenAI Compatible endpoint, let's look at how to integrate this into a Python developer environment (such as VSCode) and use your system as a local API Provider. 
 
-1. Install the OpenAI package
-```bash
-pip install openai
-```
+1. Create a Python virtual environment:
+    <!-- @os:windows -->
+    On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
+    ```bash
+    python -m venv llm-env --system-site-packages
+    llm-env\Scripts\activate
+    ```
 
-2. Run the following script to ping the endpoint we have just created.
-```python
-from openai import OpenAI
+    > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+    > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-# Initialize the client specifically for your local server
-# The API key is required by the library but ignored by LM Studio
-client = OpenAI(
-    base_url="http://localhost:1234/v1", 
-    api_key="lm-studio"
-)
-print("Attempting to connect to local STX Halo server...")
+    <!-- @os:end -->
 
-try:
-    # Create a simple chat completion request
-    completion = client.chat.completions.create(
-        model="local-model", # The model identifier is optional in local mode
-        messages=[
-            {"role": "system", "content": "You are a helpful coding assistant."},
-            {"role": "user", "content": "Explain Python decorators in 1 sentence"}
-        ],
-        temperature=0.7,
+    <!-- @os:linux -->
+    On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+    ```bash
+    sudo apt update
+    sudo apt install -y python3-venv
+    python3 -m venv llm-env --system-site-packages
+    source llm-env/bin/activate
+    ```
+    <!-- @os:end -->
+
+2. Install the OpenAI package
+    ```bash
+    pip install openai
+    ```
+
+3. Run the following script to ping the endpoint we have just created.
+    ```python
+    from openai import OpenAI
+
+    # Initialize the client specifically for your local server
+    # The API key is required by the library but ignored by LM Studio
+    client = OpenAI(
+        base_url="http://localhost:1234/v1", 
+        api_key="lm-studio"
     )
-    # Print the response
-    print("\nConnection Successful! Server Response:\n")
-    print(completion.choices[0].message.content)
+    print("Attempting to connect to local STX Halo server...")
 
-except Exception as e:
-    print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
-```
+    try:
+        # Create a simple chat completion request
+        completion = client.chat.completions.create(
+            model="local-model", # The model identifier is optional in local mode
+            messages=[
+                {"role": "system", "content": "You are a helpful coding assistant."},
+                {"role": "user", "content": "Explain Python decorators in 1 sentence"}
+            ],
+            temperature=0.7,
+        )
+        # Print the response
+        print("\nConnection Successful! Server Response:\n")
+        print(completion.choices[0].message.content)
 
+    except Exception as e:
+        print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
+    ```
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-ping-endpoint-windows timeout=300 hidden=True -->
 ```python
@@ -232,10 +250,10 @@ lms server stop
 <!-- @test:end --> 
 <!-- @os:end -->
 
-#### (Optional): Swapping between ROCm and Vulkan backends
+#### (Optional): Swapping between Runtimes
 
 1. Press `Ctrl + Shift + R` on your keyboard. Alternatively click on the `Discover` tab (Magnifying Glass) on the left-hand side and then click on `Runtime` in the pop up.   
-2. You should then see `Runtime Selections`, where the dropdown menu can be changed to ROCm or Vulkan llama.cpp.
+2. You should then see `Runtime Selections`, where the dropdown menu can be used to change the runtime.
 
 
 ## Next Steps
