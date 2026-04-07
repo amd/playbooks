@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor.
 
-This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the Financial Times website, extracts key headlines, and uses a local LLM running on your Ryzen™ AI Halo to generate an investor-focused summary.
+This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the AP News business section, extracts key headlines, and uses a local LLM running on your Ryzen™ AI Halo to generate an investor-focused summary.
 
 ## What You'll Learn
 
@@ -31,8 +31,14 @@ In this playbook, we use Lemonade to serve a local LLM that n8n connects to for 
 n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a first-class integration - no need for manual configuration. This makes connecting your local LLM to automation workflows straightforward.
 
 ## Prerequisites
-
+<!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @require:lemonade,podman -->
+<!-- @os:end -->
+
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -167,13 +173,14 @@ npm -v
 <!-- @test:end -->
 
 ## Installing n8n
-
+<!-- @os:windows -->
 Your STX Halo has Node.js (and npm) pre-installed. Install n8n globally using npm.
 > **Note**: You may see some npm warnings. This is expected.
 
 ```bash
 npm install -g n8n
 ```
+<!-- @os:end -->
 
 <!-- @test:id=n8n-version timeout=60 hidden=True -->
 ```bash
@@ -186,19 +193,24 @@ n8n --version
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 <!-- @os:end -->
 
-<!-- @os:linux -->
-> **Tip**: If `n8n --version` says `command not found`, ensure your npm global bin directory is on `PATH`, or create a symlink to the installed `n8n` binary. For example, on systems where Node.js is installed under `/usr/local/node`, you may need:
->```bash
->sudo ln -sf /usr/local/node/bin/n8n /usr/local/bin/n8n
->hash -r # Tells bash to clear its remembered cache of command locations 
->n8n --version
->```
-<!-- @os:end -->
 
 <!-- @os:windows -->
 > **Tip**: If `n8n --version` says command not found, ensure your npm global bin directory is on the user `PATH`. For example, the n8n you just installed might exist at `C:\Users\<username>\AppData\Roaming\npm`. Add this to the user path through:
 >- Edit system environment variables > Environment Variables > Edit User Path
 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+We are going to use a service called Podman to containerize our n8n installation.
+
+Please download the following into a directory of your choice:  [compose.yml](assets/compose.yml)
+
+In that directory, run the following command:
+```bash
+sudo podman compose up -d
+```
+
+This should install n8n, write to a persistent storage, and have it accessible at `localhost:5678`. 
 <!-- @os:end -->
 
 ## Launching n8n
@@ -322,7 +334,7 @@ The imported workflow contains 7 connected nodes:
 | Node | Purpose |
 |------|---------|
 | **When clicking 'Execute workflow'** | Manual trigger to start the workflow |
-| **Fetch Financial News Webpage** | HTTP GET request to `https://www.ft.com/` |
+| **Fetch Financial News Webpage** | HTTP GET request to `https://apnews.com/business` |
 | **Delay to Ensure Page Load** | Wait node to ensure page content is fully loaded |
 | **Extract News Headlines & Text** | HTML node that extracts headlines, editor's picks, top stories, and regional news using CSS selectors |
 | **Clean Extracted News Data** | Set node that combines all extracted data into a single text field |

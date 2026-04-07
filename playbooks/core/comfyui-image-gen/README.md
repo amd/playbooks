@@ -13,18 +13,24 @@ SPDX-License-Identifier: MIT
 
 ComfyUI is a powerful, node-based interface for Stable Diffusion and other diffusion models. Unlike traditional text-to-image interfaces with simple prompt boxes, ComfyUI exposes the entire image generation pipeline as a visual graph, giving you fine-grained control over every step from text encoding to latent space manipulation to final decoding.
 
-This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on your STX Halo™ GPU to generate high-quality AI images.
+This tutorial teaches you how to use ComfyUI with the Z-Image Turbo model on your STX Halo™ GPU to generate high-quality AI images.
 
 ## What You'll Learn
 
-- How to launch ComfyUI and load the Z Image Turbo template
+- How to launch ComfyUI and load the Z-Image Turbo template
 - Understanding diffusion pipeline components
 - Generating images and tuning generation parameters
 - Saving and sharing workflows
 
 ## Installing Dependencies
 
+<!-- @os:windows -->
 <!-- @require:comfyui,driver -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @require:comfyui,rocm,driver -->
+<!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-desktop-workspace-present-windows timeout=60 hidden=True -->
@@ -56,8 +62,6 @@ else
  git clone https://github.com/Comfy-Org/ComfyUI.git
 fi
 cd ComfyUI
-git fetch --tags
-git checkout -f v0.10.0
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -80,7 +84,6 @@ python3 -m venv comfyui_venv
 set -euo pipefail
 ./comfyui_venv/bin/python -m pip install --upgrade pip
 ./comfyui_venv/bin/python -m pip install -r ./ComfyUI/requirements.txt
-./comfyui_venv/bin/python -m pip install requests
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -124,14 +127,15 @@ if ($LASTEXITCODE -ne 0) { throw "Torch import/check failed in ComfyUI workspace
 set -euo pipefail
 sudo apt install python3-pip -y
 ./comfyui_venv/bin/python -m pip install --upgrade pip wheel
+./comfyui_venv/bin/python -m pip install --force-reinstall --no-cache-dir --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision torchaudio
 
-wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torch-2.9.1%2Brocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl
-wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchvision-0.24.0%2Brocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl
-wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
-wget https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchaudio-2.9.0%2Brocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl
-
-./comfyui_venv/bin/python -m pip uninstall -y torch torchvision triton torchaudio
-./comfyui_venv/bin/python -m pip install torch-2.9.1+rocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl torchvision-0.24.0+rocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl torchaudio-2.9.0+rocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl triton-3.5.1+rocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl
+./comfyui_venv/bin/python - <<'PY'
+import torch
+print(f"PyTorch version: {torch.__version__}")
+print(f"ROCm/HIP version: {getattr(torch.version, 'hip', None)}")
+print(f"CUDA/ROCm available: {torch.cuda.is_available()}")
+print("PASS: All imports successful")
+PY
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -258,6 +262,37 @@ echo "OK: ComfyUI server is reachable!"
 
 ## Launching ComfyUI
 
+<!-- @device:halo_box -->
+<!-- @os:windows -->
+To launch ComfyUI on Windows, click the ComfyUI Desktop Launcher which is found on your Desktop. You will see the following page:
+
+<p align="center">
+  <img src="assets/installer.png" alt="Templates button in the left toolbar" width="600"/>
+</p>
+
+Click `Install ComfyUI` and follow the steps. Choose `AMD` as the version and use default install locations. When finished, you should see the following:
+
+<p align="center">
+  <img src="assets/installed.png" alt="Templates button in the left toolbar" width="600"/>
+</p>
+
+Click the blue `Launch` button to open ComfyUI in its own window.
+
+
+<!-- @os:end -->
+
+<!-- @os:linux -->
+To launch ComfyUI on Linux, click the ComfyUI shortcut in the taskbar. It should open by itself in a browser window.
+
+> Alternatively,
+> 1. Use the terminal to navigate to `/usr/local/bin/ComfyUI/` (or to the appropriate folder if installed manually)
+> 2. Run `python3 main.py --use-pytorch-cross-attention`
+> 3. The interface is accessible at `http://127.0.0.1:8188`. Keep the terminal window open while using ComfyUI.
+
+<!-- @os:end -->
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @os:windows -->
 To launch ComfyUI on Windows, simply click the ComfyUI shortcut on your Desktop.
 <!-- @os:end -->
@@ -273,10 +308,12 @@ ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` 
 
 > **Tip**: Keep the terminal window open while using ComfyUI. Closing it will stop the server.
 <!-- @os:end -->
+<!-- @device:end -->
 
-## Finding the Z Image Turbo Template
 
-Before generating images, you need to load the Z Image Turbo template. Here's how to find it:
+## Finding the Z-Image Turbo Template
+
+Before generating images, you need to load the Z-Image Turbo template. Here's how to find it:
 
 1. **Look at the far left edge of the screen**—there's a vertical toolbar running from top to bottom on the leftmost side of the app.
 
@@ -288,10 +325,10 @@ Before generating images, you need to load the Z Image Turbo template. Here's ho
 
 3. **Click the folder icon**—this opens the Templates panel.
 
-4. **Search for "Z Image Turbo"**—use the search bar or scroll through the available templates to find the Z Image Turbo Text To  Image workflow, then click to load it.
+4. **Search for "Z-Image Turbo"**—use the search bar or scroll through the available templates to find the Z-Image Turbo Text To  Image workflow, then click to load it.
 
 <p align="center">
-  <img src="assets/select-template.png" alt="Selecting the Z Image Turbo template" width="600"/>
+  <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
 </p>
 
 ## Downloading Models
@@ -300,20 +337,27 @@ Before generating images, you need to load the Z Image Turbo template. Here's ho
 
 ## Understanding the Interface
 
-When the Z Image Turbo template loads, you'll see a canvas with connected nodes. Each node represents an operation in the diffusion pipeline:
+When the Z-Image Turbo template loads, you'll see a canvas with 2 main nodes. The first node is called 'Text to Image (Z-Image-Turbo), and the second node is for viewing the image. 
 
 <p align="center">
-  <img src="assets/understanding-workflow.png" alt="ComfyUI Workflow Interface" width="600"/>
+  <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
+</p>
+
+
+On the Z-Image node, click the top right button to expand the Node and see the subgraph.
+
+<p align="center">
+  <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
 </p>
 
 ### Pipeline Components
 
-The Z Image Turbo workflow uses four key model components that work together:
+The Z-Image Turbo workflow uses four key model components that work together:
 
 | Component | Role |
 |-----------|------|
 | **Text Encoder** (Qwen 3 4B) | Converts your text prompt into embeddings the diffusion model understands |
-| **Diffusion Model** (Z Image Turbo) | The core neural network that iteratively denoises latent representations into images |
+| **Diffusion Model** (Z-Image Turbo) | The core neural network that iteratively denoises latent representations into images |
 | **VAE** (Variational Autoencoder) | Encodes images to/from latent space (decodes the final latents into pixels) |
 | **LoRA** (optional) | Lightweight adapters that modify style or subject without retraining the base model |
 
@@ -321,18 +365,16 @@ Each node in the workflow corresponds to one of these components. Data flows lef
 
 ## Generating Your First Image
 
-The Z Image Turbo model is already loaded. To generate an image:
+The Z-Image Turbo model is already loaded. To generate an image:
 
-1. **Find the CLIP Text Encode node** labeled "Step 3" (your main prompt)
-2. **Enter your prompt**: be specific and descriptive:
-
+1. **Enter your prompt** in the main Z-Image Node. Be descriptive. Here is an example:
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-
-3. **Click the "Run Workflow"** in upper right corner (or press `Ctrl+Enter`)
+2. **(Optional)**: Confirm or tweak any other specific settings within the subgraph.
+3. **Click the blue "Run Workflow"** in the right corner (or press `Ctrl+Enter`)
 4. Watch the nodes highlight as each step executes
 
 The entire workflow execution should complete in less than 30 seconds. Your generated image appears in the **Save Image** node and is saved to the `output/` folder.
@@ -513,7 +555,7 @@ ls -1t ComfyUI/output/*.png | head -n 5
 
 The KSampler node controls the core diffusion process:
 
-| Parameter | What It Controls | Recommended for Z Image Turbo |
+| Parameter | What It Controls | Recommended for Z-Image Turbo |
 |-----------|------------------|-------------------------------|
 | **steps** | Number of denoising iterations | 4–10 (turbo models are distilled for fewer steps) |
 | **cfg** | Classifier-free guidance scale—how closely to follow the prompt | 1.0–2.0 (turbo models use very low guidance) |
@@ -527,7 +569,7 @@ To adjust output dimensions, find the **Empty Latent Image** node and modify **w
 
 ### ModelSamplingAuraFlow
 
-The **ModelSamplingAuraFlow** node is a specialized sampling modifier that adjusts how the diffusion process handles noise scheduling. You'll see this node connected to the model output in the Z Image Turbo workflow.
+The **ModelSamplingAuraFlow** node is a specialized sampling modifier that adjusts how the diffusion process handles noise scheduling. You'll see this node connected to the model output in the Z-Image Turbo workflow.
 
 | Parameter | What It Controls | Recommended Values |
 |-----------|------------------|-------------------|
@@ -538,7 +580,7 @@ When to adjust **shift**:
 - **Lower values (1.0–2.0)**: Faster convergence, good for simple compositions
 - **Higher values (3.0–4.0)**: More gradual refinement, can improve fine details in complex scenes
 
-The AuraFlow sampling method is specifically designed for flow-matching models like Z Image Turbo, ensuring proper noise distribution throughout the generation process.
+The AuraFlow sampling method is specifically designed for flow-matching models like Z-Image Turbo, ensuring proper noise distribution throughout the generation process.
 
 ## Working with Workflows
 
@@ -552,7 +594,7 @@ Click the **Save** button in the menu to export your workflow as a JSON file. Th
 
 ### Loading Workflows
 
-Drag a workflow JSON file onto the canvas, or use **Load** from the menu. The Z Image Turbo workflow you see by default is loaded from a saved workflow file.
+Drag a workflow JSON file onto the canvas, or use **Load** from the menu. The Z-Image Turbo workflow you see by default is loaded from a saved workflow file.
 
 ### Sharing Workflows
 
