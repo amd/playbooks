@@ -83,7 +83,7 @@ To set up LM Studio Server, use the following instructions:
 1. On the left hand side, click on the `Developer` tab (command line icon) or `CTRL + 2` and then click on `Server Settings`.  
 2. (Optional): If you want to serve the model over your LAN, check `Serve on Local Network`. If you want to use with a website or extensive calling within VS Code, check `Enable CORS`. 
 3. On the upper left corner, make sure the server is running by clicking on the toggle button in front of `Status`.
-4. An OpenAI compliant endpoint will now be running. The address is typically http://127.0.0.1:1234  
+4. An OpenAI compliant endpoint will now be running. The address is typically at http://127.0.0.1:1234  
 5. If a model is not already loaded, you can load it by clicking `Load Model` and following the previously mentioned steps. 
 
 <!-- @os:windows -->
