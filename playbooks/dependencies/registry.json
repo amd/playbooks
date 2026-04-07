@@ -90,6 +90,13 @@
         "windows": []
       }
     },
+    "gaia": {
+      "name": "GAIA",
+      "description": "AMD framework for building AI agents on local hardware",
+      "category": "framework",
+      "platforms": ["windows", "linux"],
+      "file": "gaia.md"
+    },
     "comfyui-models": {
       "name": "ComfyUI Models",
       "description": "ComfyUI models for image generation",
