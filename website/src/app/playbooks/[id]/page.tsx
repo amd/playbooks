@@ -4,7 +4,10 @@ import { useState, useEffect, use, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import "katex/dist/katex.min.css";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import Header from "@/components/Header";
@@ -222,8 +225,8 @@ function HaloPreinstalledDropdown({
             If you need to reinstall or configure it manually, follow the instructions below:
           </div>
           <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw]}
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeRaw, rehypeKatex]}
             components={{
               h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
               h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
@@ -354,8 +357,8 @@ function HaloSetupContent({
 }) {
   return (
     <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeRaw, rehypeKatex]}
         components={{
           h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
           h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
@@ -596,11 +599,16 @@ function filterContentByOS(content: string, platform: Platform): string {
  * Tags supported:
  * <!-- @device:halo --> ... <!-- @device:end -->
  * <!-- @device:halo,stx --> ... <!-- @device:end -->
+ * <!-- @device:halo_box --> ... <!-- @device:end -->
  * <!-- @device:all --> ... <!-- @device:end -->
+ *
+ * @param devices - Active device identifiers for the current selection.
+ *   When the "reference" category is active with "halo", this includes
+ *   both "halo" and "halo_box" so that halo_box-specific blocks render.
  */
-function filterContentByDevice(content: string, device: Device | null): string {
+function filterContentByDevice(content: string, devices: string[]): string {
   if (!content) return "";
-  if (!device) return content;
+  if (devices.length === 0) return content;
 
   const innerDevicePattern = /<!-- @device:([\w,]+) -->((?:(?!<!-- @device:[\w,]+ -->|<!-- @device:end -->)[\s\S])*?)<!-- @device:end -->/g;
 
@@ -610,7 +618,7 @@ function filterContentByDevice(content: string, device: Device | null): string {
   do {
     prev = result;
     result = result.replace(innerDevicePattern, (_fullMatch, blockDevices: string, blockContent: string) => {
-      if (blockDevices === "all" || blockDevices.split(",").includes(device)) {
+      if (blockDevices === "all" || blockDevices.split(",").some(d => devices.includes(d))) {
         return blockContent;
       }
       return "";
@@ -1390,10 +1398,11 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
     }
   }, [coverageViewActive, selectedTestDevice]);
 
-  const preinstalledDevice: string | null =
-    selectedCategory === "reference" && selectedDevice === "halo"
-      ? "halo_box"
-      : selectedDevice;
+  const isReferenceHalo = selectedCategory === "reference" && selectedDevice === "halo";
+  const preinstalledDevice: string | null = isReferenceHalo ? "halo_box" : selectedDevice;
+
+  const activeDevices: string[] = selectedDevice ? [selectedDevice] : [];
+  if (isReferenceHalo) activeDevices.push("halo_box");
 
   // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
   const filteredContent = playbook?.content
@@ -1401,7 +1410,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
         transformPreinstalledBlocks(
           filterContentByDevice(
             filterContentByOS(playbook.content, selectedPlatform),
-            selectedDevice
+            activeDevices
           ),
           selectedPlatform,
           preinstalledDevice
@@ -2009,8 +2018,8 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                     {filteredContent ? (
                       <article ref={contentRef} className="playbook-content prose prose-invert max-w-none">
                         <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[rehypeRaw]}
+                          remarkPlugins={[remarkGfm, remarkMath]}
+                          rehypePlugins={[rehypeRaw, rehypeKatex]}
                           components={markdownComponents}
                         >
                           {filteredContent}
