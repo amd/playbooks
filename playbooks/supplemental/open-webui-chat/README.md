@@ -411,6 +411,7 @@ python3 -m venv openwebui-venv
 source openwebui-venv/bin/activate
 python -m pip install --upgrade pip
 pip install open-webui
+pip install beautifulsoup4
 ```
 <!-- @os:end -->
 
