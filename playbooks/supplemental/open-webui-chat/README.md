@@ -349,6 +349,16 @@ pip install open-webui
 <!-- @os:end -->
 
 <!-- @os:windows -->
+<!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
+```powershell
+python --version
+where.exe python
+python -c "import sys; print(sys.executable)"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
 <!-- @test:id=openwebui-install-venv-windows timeout=1200 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
@@ -362,11 +372,30 @@ $py = Join-Path $venv "Scripts\python.exe"
 & $py -m pip install --upgrade pip
 & $py -m pip install open-webui
 & $py -m pip install beautifulsoup4
+
+if ($LASTEXITCODE -ne 0) { throw "pip install open-webui failed" }
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=openwebui-install-check-windows timeout=1200 hidden=True -->
+```powershell
+$venv = "$PWD\openwebui-venv-ci"
+$py = Join-Path $venv "Scripts\python.exe"
 & $py -c "import open_webui; print('OK: import open_webui')"
 & $py -c "import bs4; print('OK: bs4 import')"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=openwebui-cli-windows timeout=1200 hidden=True -->
+```powershell
+$venv = "$PWD\openwebui-venv-ci"
 $ow = Join-Path $venv "Scripts\open-webui.exe"
-& $ow --help
+
+& $ow --help | Out-Null
 Write-Host "OK: open-webui installed in venv"
 ```
 <!-- @test:end --> 
@@ -382,6 +411,18 @@ source openwebui-venv/bin/activate
 python -m pip install --upgrade pip
 pip install open-webui
 ```
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=python-env-check-linux timeout=300 hidden=True -->
+```bash
+python3 --version
+python3 -m pip --version
+which python3
+which pip3
+python3 -c "import sys; print(sys.executable)"
+```
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux --> 
