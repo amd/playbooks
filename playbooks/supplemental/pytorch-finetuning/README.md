@@ -13,10 +13,10 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-This tutorial provides step-by-step examples for fine-tuning a large language model with PyTorch and ROCm on AMD Strix Halo. It covers several techniques, from standard fine-tuning to memory-efficient PEFT strategies, so you can easily adapt models for your needs.
+This tutorial provides step-by-step examples for fine-tuning a large language model with PyTorch and ROCm. It covers several techniques, from standard fine-tuning to memory-efficient PEFT strategies, so you can easily adapt models for your needs.
 
 **Model Used**: google/gemma-3-4b-it  *(see [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) if gated)*  
-**Hardware**: AMD Strix Halo with ROCm support  
+**Hardware**: AMD GPU with ROCm support  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, TRL)
 
 > **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
@@ -185,8 +185,6 @@ Below is a summary of available training methods. Each method links to its scrip
 | [`train_qlora.py`](assets/train_qlora.py)               | **QLoRA** 🌟        | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off.                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
 | [`train_lora.py`](assets/train_lora.py)                 | **LoRA** 🎯         | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
-
-> **Typical time:** ~15–20 minutes for 800 samples on AMD Strix Halo
 
 ---
 

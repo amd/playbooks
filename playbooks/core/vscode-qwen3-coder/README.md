@@ -15,7 +15,7 @@ SPDX-License-Identifier: MIT
 
 Coding agents are powerful tools that empower developers through collaboration with AI agents backed by Large Language Models (LLMs). They can be embedded into the development environment, such as the terminal or VS Code, allowing seamless integration into a developer's workflow.
 
-This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a coding agent entirely on your local STX Halo™ machine.
+This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a coding agent entirely on your local machine.
 
 ## What You'll Learn
 
@@ -29,7 +29,7 @@ This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a cod
 
 ## Launch and Configure LM Studio
 
-LM Studio is pre-installed on STX Halo systems, and we will use this to serve the LLM powering the coding agent.
+LM Studio is pre-installed on your system, and we will use this to serve the LLM powering the coding agent.
 - In the search bar, search for `LM Studio` and launch the application. You will be greeted by the following page.
 
 ![LM Studio Initial Screen](assets/initial-lm-studio.png)
@@ -98,7 +98,7 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ## Launch and Configure VS Code
 
-Your STX Halo™ comes with VS Code installed. We will install the Cline Extension and connect it to the LM Studio server we just made.
+Your system comes with VS Code installed. We will install the Cline Extension and connect it to the LM Studio server we just made.
 - In the search bar, search for `VS Code` and launch the application.
 - Click on the `Extensions` icon on the left column of VS Code and search for `Cline`. Then, click the `Install` button. 
 
@@ -141,7 +141,7 @@ Let's use our local agent to create a website! Open VSCode to a directory of you
 Now we are ready to prompt the local coding agent. 
 - Click on the Cline extension on the left column and enter a prompt to kickoff the agent. As an example, let's use the following prompt:
 ```code
-Create a website showcasing the ability to run local large-language models on the AMD STX Halo device.
+Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
 The agent will then start to create files according to the prompt. As a user, you can watch the code be generated in VS Code as shown below. You may have to click `Save` each time Cline wants to create a file. 

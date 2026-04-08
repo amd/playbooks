@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor.
 
-This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the AP News business section, extracts key headlines, and uses a local LLM running on your Ryzen™ AI Halo to generate an investor-focused summary.
+This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the AP News business section, extracts key headlines, and uses a local LLM running on your system to generate an investor-focused summary.
 
 ## What You'll Learn
 
@@ -174,7 +174,7 @@ npm -v
 
 ## Installing n8n
 <!-- @os:windows -->
-Your STX Halo has Node.js (and npm) pre-installed. Install n8n globally using npm.
+Your system has Node.js (and npm) pre-installed. Install n8n globally using npm.
 > **Note**: You may see some npm warnings. This is expected.
 
 ```bash
@@ -301,7 +301,7 @@ Lemonade is the local server that will run a model and connect to n8n. If Lemona
 lemonade-server run extra.gpt-oss-120b-GGUF --llamacpp vulkan
 ```
 Alternatively, you can use the Lemonade GUI to choose and load a model. 
-> **Tip**: On HaloBox, the pre-installed model is at the location marked with `.extra`. You can also experiment by changing to different backends, like `rocm`.
+> **Tip**: The pre-installed model is at the location marked with `.extra`. You can also experiment by changing to different backends, like `rocm`.
 
 
 ## Setting Up the Workflow
@@ -361,7 +361,7 @@ Before running the workflow, you need to connect it to your local Lemonade serve
   | **Base URL** | `http://localhost:8000/api/v1` |
   | **API Key** | `lemonade` |
 
-> **Note**: Ensure Lemonade server is running before testing. This workflow uses GPT-OSS-120B and it is pre-installed on Halo Box as `extra.gpt-oss-120b-GGUF`. You can change this to other loaded models in the Lemonade Chat Model node settings.
+> **Note**: Ensure Lemonade server is running before testing. This workflow uses GPT-OSS-120B and it is pre-installed as `extra.gpt-oss-120b-GGUF`. You can change this to other loaded models in the Lemonade Chat Model node settings.
 
 ### Step 5: Test the Workflow
 

@@ -15,7 +15,7 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 
 ## What You'll Learn
-- How to configure and use LM Studio to leverage STX Halo hardware
+- How to configure and use LM Studio to leverage your local hardware
 - Test and manage LLMs in a completely offline environment
 - Serve models via OpenAI Compatible API to power custom workflows and apps
 
@@ -151,13 +151,13 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     ```python
     from openai import OpenAI
 
-    # Initialize the client specifically for your local server
-    # The API key is required by the library but ignored by LM Studio
-    client = OpenAI(
-        base_url="http://localhost:1234/v1", 
-        api_key="lm-studio"
-    )
-    print("Attempting to connect to local STX Halo server...")
+# Initialize the client specifically for your local server
+# The API key is required by the library but ignored by LM Studio
+client = OpenAI(
+    base_url="http://localhost:1234/v1", 
+    api_key="lm-studio"
+)
+print("Attempting to connect to local LM Studio server...")
 
     try:
         # Create a simple chat completion request

@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 
 vLLM is a high-performance inference engine designed for large language models (LLMs). It provides optimized serving with PagedAttention for efficient memory management, continuous batching for higher throughput, and an OpenAI-compatible API for seamless integration. This makes vLLM ideal for production deployments where speed and resource efficiency are critical.
 
-This playbook teaches you how to serve LLMs using vLLM on your STX Halo™ GPU and interact with models through a modern web interface.
+This playbook teaches you how to serve LLMs using vLLM on your GPU and interact with models through a modern web interface.
 
 ## In This Playbook, You Will Learn
 
@@ -482,7 +482,7 @@ In this playbook, you learned how to:
 - Make API calls to the vLLM server using both streaming and non-streaming requests
 - Troubleshoot common issues with server startup, memory, and client connections
 
-You now have a fully functional vLLM deployment for serving large language models with optimized performance on your STX Halo™ GPU.
+You now have a fully functional vLLM deployment for serving large language models with optimized performance on your GPU.
 
 ## Additional Resources
 
