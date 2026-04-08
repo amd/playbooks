@@ -345,6 +345,7 @@ python -m venv openwebui-venv
 .\openwebui-venv\Scripts\activate
 python -m pip install --upgrade pip
 pip install open-webui
+pip install beautifulsoup4
 ```
 <!-- @os:end -->
 
@@ -448,6 +449,7 @@ echo "OK: open-webui installed in venv"
 <!-- @test:end --> 
 <!-- @os:end -->
 
+> **Tip (Python version):** Install Open WebUI using **Python 3.12**. The `open-webui` PyPI package may not install on Python 3.13+ (you’ll see “No matching distribution found”). 
 > Note: Open WebUI also provides a variety of other installation options, such as Docker, on their GitHub.
 
 ### 3) Start Open WebUI Server
