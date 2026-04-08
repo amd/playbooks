@@ -119,7 +119,7 @@ print("PASS: All imports successful")
 ```
 <!-- @test:end -->
 
-<!-- @test:id=quick-train-one-step timeout=600 hidden=True setup=activate-venv -->
+<!-- @test:id=quick-train-lora timeout=600 hidden=True setup=activate-venv -->
 ```python
 import os
 import subprocess
@@ -128,6 +128,34 @@ import sys
 os.environ["QUICK_TRAIN"] = "1"
 os.environ["QUICK_TRAIN_MODEL"] = "unsloth/gemma-3-4b-it"
 r = subprocess.run([sys.executable, "train_lora.py"], timeout=600)
+sys.exit(r.returncode)
+```
+<!-- @test:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=quick-train-qlora timeout=600 hidden=True setup=activate-venv -->
+```python
+import os
+import subprocess
+import sys
+
+os.environ["QUICK_TRAIN"] = "1"
+os.environ["QUICK_TRAIN_MODEL"] = "unsloth/gemma-3-4b-it"
+r = subprocess.run([sys.executable, "train_qlora.py"], timeout=600)
+sys.exit(r.returncode)
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @test:id=quick-train-full-finetuning timeout=1200 hidden=True setup=activate-venv -->
+```python
+import os
+import subprocess
+import sys
+
+os.environ["QUICK_TRAIN"] = "1"
+os.environ["QUICK_TRAIN_MODEL"] = "unsloth/gemma-3-4b-it"
+r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```
 <!-- @test:end -->
@@ -246,6 +274,94 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 
 For more custom settings (padding tokens, device, etc), refer to the script that you used for training.
 
+<!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
+```python
+import os
+import sys
+
+out_dir = "output-gemma-3-4b-it-lora"
+if not os.path.isdir(out_dir):
+    print(f"FAIL: Missing output directory: {out_dir}")
+    sys.exit(1)
+
+required = [
+    "adapter_config.json",
+    "tokenizer_config.json",
+    "tokenizer.json",
+]
+missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
+if missing:
+    print(f"FAIL: Missing required files: {missing}")
+    sys.exit(1)
+
+if not (os.path.exists(os.path.join(out_dir, "adapter_model.safetensors")) or os.path.exists(os.path.join(out_dir, "adapter_model.bin"))):
+    print("FAIL: Missing adapter weights")
+    sys.exit(1)
+
+print("PASS: LoRA output looks correct")
+```
+<!-- @test:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=verify-qlora-output timeout=120 hidden=True setup=activate-venv -->
+```python
+import os
+import sys
+
+out_dir = "output-gemma-3-4b-it-qlora"
+if not os.path.isdir(out_dir):
+    print(f"FAIL: Missing output directory: {out_dir}")
+    sys.exit(1)
+
+required = [
+    "adapter_config.json",
+    "tokenizer_config.json",
+    "tokenizer.json",
+]
+missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
+if missing:
+    print(f"FAIL: Missing required files: {missing}")
+    sys.exit(1)
+
+if not (os.path.exists(os.path.join(out_dir, "adapter_model.safetensors")) or os.path.exists(os.path.join(out_dir, "adapter_model.bin"))):
+    print("FAIL: Missing adapter weights")
+    sys.exit(1)
+
+print("PASS: QLoRA output looks correct")
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @test:id=verify-full-finetuning-output timeout=300 hidden=True setup=activate-venv -->
+```python
+import glob
+import os
+import sys
+
+out_dir = "output-gemma-3-4b-it-full"
+if not os.path.isdir(out_dir):
+    print(f"FAIL: Missing output directory: {out_dir}")
+    sys.exit(1)
+
+required = [
+    "config.json",
+    "tokenizer_config.json",
+    "tokenizer.json",
+    "model.safetensors.index.json",
+]
+missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
+if missing:
+    print(f"FAIL: Missing required files: {missing}")
+    sys.exit(1)
+
+shards = glob.glob(os.path.join(out_dir, "model-*.safetensors"))
+if not shards:
+    print("FAIL: No sharded model safetensors files found")
+    sys.exit(1)
+
+print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
+```
+<!-- @test:end -->
 ---
 
 ## Customization Guide

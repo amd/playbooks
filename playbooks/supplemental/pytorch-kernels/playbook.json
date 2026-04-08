@@ -21,10 +21,22 @@
       "windows"
     ]
   },
+  "required_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
+  },
+  "tested_platforms":{
+    "halo": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "advanced",
   "isNew": false,
   "isFeatured": false,
-  "developed": false,
+  "developed": true,
   "published": true,
   "tags": [
     "pytorch",

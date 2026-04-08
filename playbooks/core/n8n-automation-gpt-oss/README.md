@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor.
 
-This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the Financial Times website, extracts key headlines, and uses a local LLM running on your system to generate an investor-focused summary.
+This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the AP News business section, extracts key headlines, and uses a local LLM running on your system to generate an investor-focused summary.
 
 ## What You'll Learn
 
@@ -195,7 +195,7 @@ n8n --version
 
 
 <!-- @os:windows -->
-> **Tip**: If `n8n --version` says command not found, ensure your npm global bin directory is on the user `PATH`. For example, the n8n you just installed might exist at `C:\Users\<username>\AppData\Roaming\npm`. Add this to the user path through:
+> **Tip**: If `n8n --version` says command not found, ensure your npm global bin directory is on the user `PATH`. For example, the n8n you just installed might exist at `C:\Users\<username>\AppData\Roaming\npm`. Add this to the user path and refresh your terminal:
 >- Edit system environment variables > Environment Variables > Edit User Path
 
 <!-- @os:end -->
@@ -207,12 +207,15 @@ Please download the following into a directory of your choice:  [compose.yml](as
 
 In that directory, run the following command:
 ```bash
-sudo podman compose up -d
+podman compose up -d
 ```
 
-This should install n8n, write to a persistent storage, and have it accessible at `localhost:5678`. 
+This should install n8n and write to a persistent storage.
+
+Launch n8n by typing `localhost:5678` into your browser address bar.
 <!-- @os:end -->
 
+<!-- @os:windows -->
 ## Launching n8n
 
 Start n8n from the terminal:
@@ -220,8 +223,6 @@ Start n8n from the terminal:
 ```bash
 n8n start
 ```
-
-<!-- @os:windows -->
 <!-- @test:id=n8n-start-windows timeout=300 hidden=True -->
 ```powershell
 $N8N_CMD = "$env:APPDATA\npm\n8n.cmd"
@@ -285,9 +286,12 @@ echo "OK: n8n server is responding"
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:windows -->
 n8n starts a local web server. Press `'o'` or Open your browser to `http://localhost:5678` to access the editor.
+<!-- @os:end -->
 
-> **Tip**: Keep the terminal window open while using n8n. Closing it will stop the server.
+
+> **Tip**: Keep the terminal window open while using n8n. Closing it might stop the server.
 
 ## Launching Lemonade
 
@@ -334,7 +338,7 @@ The imported workflow contains 7 connected nodes:
 | Node | Purpose |
 |------|---------|
 | **When clicking 'Execute workflow'** | Manual trigger to start the workflow |
-| **Fetch Financial News Webpage** | HTTP GET request to `https://www.ft.com/` |
+| **Fetch Financial News Webpage** | HTTP GET request to `https://apnews.com/business` |
 | **Delay to Ensure Page Load** | Wait node to ensure page content is fully loaded |
 | **Extract News Headlines & Text** | HTML node that extracts headlines, editor's picks, top stories, and regional news using CSS selectors |
 | **Clean Extracted News Data** | Set node that combines all extracted data into a single text field |

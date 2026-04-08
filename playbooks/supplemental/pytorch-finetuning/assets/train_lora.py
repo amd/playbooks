@@ -116,6 +116,7 @@ def format_chat(ex):
 ds = ds.map(format_chat, remove_columns=ds.column_names)
 ds = ds.train_test_split(test_size=0.2)
 print(f"Train samples: {len(ds['train'])}, Test samples: {len(ds['test'])}")
+print(f"Total selected samples: {n_samples}")
 
 # -----------------------
 # Load Model and Tokenizer
@@ -241,8 +242,15 @@ trainer = SFTTrainer(
 # Run Training
 # -----------------------
 print("Starting LoRA Fine-tuning...")
+print(f"Model: {MODEL}")
+print(f"Trainable parameters: {trainable_params:,}")
 print(f"Effective batch size: {BATCH_SIZE * GRAD_ACCUM_STEPS}")
 print(f"Learning rate: {LR}\n")
+if QUICK_TRAIN:
+    print("Quick smoke mode enabled: tiny dataset + max_steps=1")
+else:
+    print(f"Epochs: {EPOCHS}")
+print()
 
 reset_peak_mem()
 
@@ -256,7 +264,9 @@ print("\nSaving LoRA adapter...")
 model.save_pretrained(f"output-{model_name}-lora")
 tokenizer.save_pretrained(f"output-{model_name}-lora")
 
-print("Training Complete!\n")
+print("\n" + "="*60)
+print("Training Complete!")
+print("="*60)
 print(f"LoRA adapter saved to: output-{model_name}-lora")
 print(f"Adapter size: ~{trainable_params * 2 / 1e6:.1f} MB (much smaller than full model!)")
 

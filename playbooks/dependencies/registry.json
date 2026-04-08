@@ -90,6 +90,13 @@
         "windows": []
       }
     },
+    "gaia": {
+      "name": "GAIA",
+      "description": "AMD framework for building AI agents on local hardware",
+      "category": "framework",
+      "platforms": ["windows", "linux"],
+      "file": "gaia.md"
+    },
     "comfyui-models": {
       "name": "ComfyUI Models",
       "description": "ComfyUI models for image generation",
@@ -135,9 +142,9 @@
         "windows": ["halo_box"]
       }
     },
-    "memory_config": {
-      "name": "AMD Memory Configuration",
-      "description": "Suggested memory configurations for Strix Halo Systems",
+    "memory-config": {
+      "name": "Memory Configuration",
+      "description": "Configure GPU memory allocation for running large models",
       "category": "framework",
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md",

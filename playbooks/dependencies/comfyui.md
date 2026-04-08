@@ -30,7 +30,7 @@ source llm-env/bin/activate
 
 #### Clone ComfyUI
 ```bash
-git clone https://github.com/comfyanonymous/ComfyUI.git
+git clone https://github.com/Comfy-Org/ComfyUI.git
 ```
 
 #### Optionally checkout a specific version
