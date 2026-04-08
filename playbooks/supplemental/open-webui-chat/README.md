@@ -349,6 +349,16 @@ pip install open-webui
 <!-- @os:end -->
 
 <!-- @os:windows -->
+<!-- @test:id=python-version-windows timeout=1200 hidden=True -->
+```powershell
+python --version
+where.exe python
+python -c "import sys; print(sys.executable)"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
 <!-- @test:id=openwebui-install-venv-windows timeout=1200 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
@@ -362,11 +372,39 @@ $py = Join-Path $venv "Scripts\python.exe"
 & $py -m pip install --upgrade pip
 & $py -m pip install open-webui
 & $py -m pip install beautifulsoup4
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=openwebui-check-windows timeout=1200 hidden=True -->
+```powershell
+$venv = "$PWD\openwebui-venv-ci"
+$py = Join-Path $venv "Scripts\python.exe"
 & $py -c "import open_webui; print('OK: import open_webui')"
 & $py -c "import bs4; print('OK: bs4 import')"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
-$ow = Join-Path $venv "Scripts\open-webui.exe"
-& $ow --help
+<!-- @os:windows -->
+<!-- @test:id=openwebui-help-windows timeout=1200 hidden=True -->
+```powershell
+$venv = "$PWD\openwebui-venv-ci"
+$scriptsDir = Join-Path $venv "Scripts"
+$ow = Join-Path $scriptsDir "open-webui.exe"
+
+if (-not (Test-Path $ow)) {
+  $candidate = Get-ChildItem $scriptsDir -Filter "open-webui*" | Select-Object -First 1
+  if (-not $candidate) {
+    Get-ChildItem $scriptsDir | Select-Object Name
+    throw "open-webui entrypoint not found in venv Scripts dir"
+  }
+  $ow = $candidate.FullName
+}
+
+Get-ChildItem (Join-Path $venv "Scripts") | Select-Object Name
+& $ow --help | Out-Null
 Write-Host "OK: open-webui installed in venv"
 ```
 <!-- @test:end --> 
@@ -391,7 +429,7 @@ set -euo pipefail
 
 venv="./openwebui-venv-ci"
 rm -rf "$venv"
-python3 -m venv "$venv"
+python3.12 -m venv "$venv"
 py="$venv/bin/python"
 ow="$venv/bin/open-webui"
 
