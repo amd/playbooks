@@ -349,7 +349,7 @@ pip install open-webui
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=python-version-windows timeout=1200 hidden=True -->
+<!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
 ```powershell
 python --version
 where.exe python
@@ -372,12 +372,14 @@ $py = Join-Path $venv "Scripts\python.exe"
 & $py -m pip install --upgrade pip
 & $py -m pip install open-webui
 & $py -m pip install beautifulsoup4
+
+if ($LASTEXITCODE -ne 0) { throw "pip install open-webui failed" }
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=openwebui-check-windows timeout=1200 hidden=True -->
+<!-- @test:id=openwebui-install-check-windows timeout=1200 hidden=True -->
 ```powershell
 $venv = "$PWD\openwebui-venv-ci"
 $py = Join-Path $venv "Scripts\python.exe"
@@ -388,22 +390,11 @@ $py = Join-Path $venv "Scripts\python.exe"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=openwebui-help-windows timeout=1200 hidden=True -->
+<!-- @test:id=openwebui-cli-windows timeout=1200 hidden=True -->
 ```powershell
 $venv = "$PWD\openwebui-venv-ci"
-$scriptsDir = Join-Path $venv "Scripts"
-$ow = Join-Path $scriptsDir "open-webui.exe"
+$ow = Join-Path $venv "Scripts\open-webui.exe"
 
-if (-not (Test-Path $ow)) {
-  $candidate = Get-ChildItem $scriptsDir -Filter "open-webui*" | Select-Object -First 1
-  if (-not $candidate) {
-    Get-ChildItem $scriptsDir | Select-Object Name
-    throw "open-webui entrypoint not found in venv Scripts dir"
-  }
-  $ow = $candidate.FullName
-}
-
-Get-ChildItem (Join-Path $venv "Scripts") | Select-Object Name
 & $ow --help | Out-Null
 Write-Host "OK: open-webui installed in venv"
 ```
@@ -422,6 +413,18 @@ pip install open-webui
 ```
 <!-- @os:end -->
 
+<!-- @os:linux -->
+<!-- @test:id=python-env-check-linux timeout=300 hidden=True -->
+```bash
+python3 --version
+python3 -m pip --version
+which python3
+which pip3
+python3 -c "import sys; print(sys.executable)"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 <!-- @os:linux --> 
 <!-- @test:id=openwebui-install-venv-linux timeout=1200 hidden=True -->
 ```bash
@@ -429,7 +432,7 @@ set -euo pipefail
 
 venv="./openwebui-venv-ci"
 rm -rf "$venv"
-python3.12 -m venv "$venv"
+python3 -m venv "$venv"
 py="$venv/bin/python"
 ow="$venv/bin/open-webui"
 
