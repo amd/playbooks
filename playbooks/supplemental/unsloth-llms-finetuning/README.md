@@ -54,7 +54,29 @@ source unsloth-env/bin/activate
 <!-- @os:end -->
 
 ### Installing Basic Dependencies
-<!-- @require:pytorch -->
+<!-- @os:linux -->
+<!-- @require:rocm,pytorch,driver -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @require:pytorch,driver -->
+<!-- @os:end -->
+
+<!-- @test:id=verify-torch-env timeout=60 hidden=True setup=activate-venv -->
+```python
+import sys
+import torch
+
+print(f"Python executable: {sys.executable}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
+
+if not torch.cuda.is_available():
+    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
+
+print("PASS: ROCm-enabled PyTorch is visible")
+```
+<!-- @test:end -->
 
 ### Additional Dependencies
 
@@ -67,6 +89,25 @@ pip install datasets transformers trl
 ```
 <!-- @test:end -->
 
+<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+```python
+import torch
+from datasets import load_dataset
+from transformers import TextStreamer
+from unsloth import FastModel
+from unsloth.chat_templates import (
+    get_chat_template,
+    standardize_data_formats,
+    train_on_responses_only,
+)
+from trl import SFTTrainer, SFTConfig
+
+print(f"PyTorch version: {torch.__version__}")
+print(f"ROCm available: {torch.cuda.is_available()}")
+print("PASS: All required imports succeeded")
+```
+<!-- @test:end -->
+
 ## Download the Unsloth Fine Tuning Script
 
 Instead of manually executing each step, this playbook provides a clean, end-to-end script here: [test_unsloth.py](assets/test_unsloth.py).
@@ -76,6 +117,33 @@ Run the following code to execute the script:
 ```bash
 python test_unsloth.py
 ```
+
+<!-- @test:id=verify-script timeout=60 hidden=True -->
+```python
+import os
+import sys
+import ast
+
+scripts = ["test_unsloth.py", "test_unsloth_ci.py"]
+missing = [s for s in scripts if not os.path.exists(s)]
+
+if missing:
+    print(f"FAIL: Missing script: {missing}")
+    sys.exit(1)
+print("PASS: All required script files exist")
+
+for script in scripts:
+    with open(script, "r", encoding="utf-8") as f:
+        ast.parse(f.read(), filename=script)
+    print(f"PASS: {script} has valid syntax")
+```
+<!-- @test:end -->
+
+<!-- @test:id=quick-train-unsloth timeout=2400 hidden=True setup=activate-venv -->
+```bash
+python test_unsloth_ci.py
+```
+<!-- @test:end -->
 
 The rest of the playbook will conceptually go through each major step of the script. 
 
@@ -141,12 +209,77 @@ model.save_pretrained("gemma_3n_lora")
 tokenizer.save_pretrained("gemma_3n_lora")
 ```
 
+<!-- @test:id=verify-unsloth-lora-output timeout=120 hidden=True setup=activate-venv -->
+```python
+import os
+import sys
+import glob
+
+out_dir = "gemma_3n_lora_ci"
+if not os.path.isdir(out_dir):
+    print(f"FAIL: Missing output directory: {out_dir}")
+    sys.exit(1)
+
+required = [
+    "adapter_config.json",
+    "tokenizer_config.json",
+]
+missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
+if missing:
+    print(f"FAIL: Missing required files: {missing}")
+    sys.exit(1)
+
+adapter_weights = (
+    glob.glob(os.path.join(out_dir, "adapter_model*.safetensors")) +
+    glob.glob(os.path.join(out_dir, "adapter_model*.bin"))
+)
+if not adapter_weights:
+    print("FAIL: Missing adapter weights")
+    sys.exit(1)
+
+print("PASS: Unsloth LoRA output looks correct")
+print(f"Found adapter weights: {adapter_weights}")
+```
+<!-- @test:end -->
+
 ### Save merged model (for vLLM) 
 
 For deployment with vLLM, merge the adapters into a full model:
 ```python
 model.save_pretrained_merged("gemma-3N-finetune", tokenizer)
 ```
+
+<!-- @test:id=verify-unsloth-merged-output timeout=120 hidden=True setup=activate-venv -->
+```python
+import os
+import sys
+import glob
+
+out_dir = "gemma_3n_merged_ci"
+if not os.path.isdir(out_dir):
+    print(f"FAIL: Missing merged model directory: {out_dir}")
+    sys.exit(1)
+
+required = [
+    "config.json",
+    "tokenizer_config.json",
+]
+missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
+if missing:
+    print(f"FAIL: Missing required merged files: {missing}")
+    sys.exit(1)
+
+model_files = (
+    glob.glob(os.path.join(out_dir, "*.safetensors")) +
+    glob.glob(os.path.join(out_dir, "pytorch_model*.bin"))
+)
+if not model_files:
+    print("FAIL: Missing merged model weights")
+    sys.exit(1)
+
+print("PASS: Merged model output looks correct")
+```
+<!-- @test:end -->
 
 ### Export GGUF (for llama.cpp)
 
@@ -155,6 +288,26 @@ Convert directly to GGUF for local inference:
 model.save_pretrained_gguf("gemma_3n_finetune", tokenizer, quantization_method="Q8_0")
 ```
 
+<!-- @test:id=verify-unsloth-gguf-output timeout=120 hidden=True setup=activate-venv -->
+```python
+import os
+import sys
+import glob
+
+out_dir = "gemma_3n_gguf_ci"
+if not os.path.isdir(out_dir):
+    print(f"FAIL: Missing GGUF output directory: {out_dir}")
+    sys.exit(1)
+
+gguf_files = glob.glob(os.path.join(out_dir, "*.gguf"))
+if not gguf_files:
+    print("FAIL: Missing GGUF files")
+    sys.exit(1)
+
+print("PASS: GGUF export output looks correct")
+print(f"Found GGUF files: {gguf_files}")
+```
+<!-- @test:end -->
 
 ## Next Steps
 - Train on your own specific datasets
