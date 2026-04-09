@@ -6,10 +6,21 @@
   "supported_platforms": {
     "halo": [
       "linux"
+    ],
+    "halo_box": [
+      "linux"
     ]
   },
   "tested_platforms": {
     "halo": [
+      "linux"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "linux"
+    ],
+    "halo_box": [
       "linux"
     ]
   },
