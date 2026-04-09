@@ -9,6 +9,7 @@ Minimal Unsloth training script (Gemma-3N)
 """
 
 import time
+import unsloth
 import torch
 from datasets import load_dataset
 from transformers import TextStreamer
@@ -116,6 +117,7 @@ def train(model, tokenizer, dataset):
             learning_rate=2e-4,
             logging_steps=5,
             report_to="none",
+            optim="adamw_torch",
         ),
     )
 
@@ -147,7 +149,9 @@ def run_inference(model, tokenizer):
 
     inputs = tokenizer.apply_chat_template(
         messages,
+        tokenize=True,
         add_generation_prompt=True,
+        return_dict=True,
         return_tensors="pt",
     ).to("cuda")
 

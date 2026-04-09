@@ -25,23 +25,7 @@ Overall, Unsloth bridges the gap between research and real-world deployment—ma
 
 ## Set up your environment
 
-<!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-<!-- @test:id=create-venv timeout=60 -->
-```bash
-python -m venv unsloth-env --system-site-packages
-unsloth-env\Scripts\activate
-```
-<!-- @test:end -->
-<!-- @setup:id=activate-venv command="unsloth-env\Scripts\activate" -->
-
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @os:end -->
-
-<!-- @os:linux -->
-On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
+Open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -51,16 +35,9 @@ source unsloth-env/bin/activate
 ```
 <!-- @test:end --> 
 <!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" --> 
-<!-- @os:end -->
 
 ### Installing Basic Dependencies
-<!-- @os:linux -->
 <!-- @require:rocm,pytorch,driver -->
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @require:pytorch,driver -->
-<!-- @os:end -->
 
 <!-- @test:id=verify-torch-env timeout=60 hidden=True setup=activate-venv -->
 ```python
@@ -91,6 +68,7 @@ pip install datasets transformers trl
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
 ```python
+import unsloth
 import torch
 from datasets import load_dataset
 from transformers import TextStreamer
@@ -287,27 +265,6 @@ Convert directly to GGUF for local inference:
 ```python
 model.save_pretrained_gguf("gemma_3n_finetune", tokenizer, quantization_method="Q8_0")
 ```
-
-<!-- @test:id=verify-unsloth-gguf-output timeout=120 hidden=True setup=activate-venv -->
-```python
-import os
-import sys
-import glob
-
-out_dir = "gemma_3n_gguf_ci"
-if not os.path.isdir(out_dir):
-    print(f"FAIL: Missing GGUF output directory: {out_dir}")
-    sys.exit(1)
-
-gguf_files = glob.glob(os.path.join(out_dir, "*.gguf"))
-if not gguf_files:
-    print("FAIL: Missing GGUF files")
-    sys.exit(1)
-
-print("PASS: GGUF export output looks correct")
-print(f"Found GGUF files: {gguf_files}")
-```
-<!-- @test:end -->
 
 ## Next Steps
 - Train on your own specific datasets

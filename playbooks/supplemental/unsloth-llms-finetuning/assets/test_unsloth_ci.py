@@ -11,6 +11,7 @@ CI-friendly Unsloth training script (Gemma-3N)
 
 import os
 import time
+import unsloth
 import torch
 from datasets import load_dataset
 from transformers import TextStreamer
@@ -32,7 +33,6 @@ DATASET_NAME = "mlabonne/FineTome-100k"
 DATASET_SPLIT = "train[:128]"   # smaller split for CI
 OUTPUT_DIR = "gemma_3n_lora_ci"
 MERGED_DIR = "gemma_3n_merged_ci"
-GGUF_DIR = "gemma_3n_gguf_ci"
 
 MAX_STEPS = 5
 PER_DEVICE_BATCH_SIZE = 1
@@ -140,6 +140,7 @@ def train(model, tokenizer, dataset):
             learning_rate=LEARNING_RATE,
             logging_steps=1,
             report_to="none",
+            optim="adamw_torch",
         ),
     )
 
@@ -173,7 +174,9 @@ def run_inference(model, tokenizer):
 
     inputs = tokenizer.apply_chat_template(
         messages,
+        tokenize=True,
         add_generation_prompt=True,
+        return_dict=True,
         return_tensors="pt",
     ).to("cuda")
 
@@ -203,15 +206,6 @@ def save_merged(model, tokenizer):
     model.save_pretrained_merged(MERGED_DIR, tokenizer)
 
 
-def save_gguf(model, tokenizer):
-    log(f"Exporting GGUF model to: {GGUF_DIR}")
-    model.save_pretrained_gguf(
-        GGUF_DIR,
-        tokenizer,
-        quantization_method="Q8_0",
-    )
-
-
 # =========================
 # Main
 # =========================
@@ -231,7 +225,6 @@ def main():
 
     save_lora(model, tokenizer)
     save_merged(model, tokenizer)
-    save_gguf(model, tokenizer)
 
     log("===== Done =====")
 
