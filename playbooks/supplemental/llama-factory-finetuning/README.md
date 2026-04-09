@@ -203,7 +203,7 @@ import os
 import sys
 import glob
 
-out_dir = " "
+out_dir = "LlamaFactory/saves/qwen3_lora_sft_ci"
 if not os.path.isdir(out_dir):
     print(f"FAIL: Missing output directory: {out_dir}")
     sys.exit(1)
