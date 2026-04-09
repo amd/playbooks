@@ -20,20 +20,6 @@ This playbook teaches you how to finetune LLMs using LLaMA Factory on your local
 
 ## Setting up the Environment
 
-### Installing Basic Dependencies
-<!-- @os:linux -->
-<!-- @require:rocm,pytorch,driver -->
-<!-- @os:end -->
-<!-- @os:windows -->
-<!-- @require:pytorch,driver -->
-<!-- @os:end -->
-
-### Installing Additional Dependencies
-- **Python**: ensure minimum verison is 3.11
-```bash
-pip install huggingface_hub
-```
-
 <!-- @os:linux -->
 <!-- @test:id=create-venv timeout=120 hidden=True -->
 ```bash
@@ -47,6 +33,20 @@ pip --version
 <!-- @test:end --> 
 <!-- @setup:id=activate-venv command="source venv/bin/activate" --> 
 <!-- @os:end -->
+
+### Installing Basic Dependencies
+<!-- @os:linux -->
+<!-- @require:rocm,pytorch,driver -->
+<!-- @os:end -->
+<!-- @os:windows -->
+<!-- @require:pytorch,driver -->
+<!-- @os:end -->
+
+### Installing Additional Dependencies
+- **Python**: ensure minimum verison is 3.11
+```bash
+pip install huggingface_hub
+```
 
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 hidden=True setup=activate-venv -->
