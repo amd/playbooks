@@ -10,7 +10,7 @@ set -ex
 # Default values
 URL="http://localhost:8000/v1/chat/completions"
 MODEL="Qwen/Qwen3-1.7B"
-PROMPT="What is the sum of 123 and 456? Show your reasoning."
+PROMPT="Tell me a short story"
 TEMPERATURE=0.7
 MAX_TOKENS=2048
 

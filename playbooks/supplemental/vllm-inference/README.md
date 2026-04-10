@@ -41,7 +41,7 @@ For this playbook, we'll use the **prebuilt wheel** which includes vLLM with ROC
 Create a Python 3.12 virtual environment and activate it:
 
 ```bash
-python3.12 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
 ```
 
