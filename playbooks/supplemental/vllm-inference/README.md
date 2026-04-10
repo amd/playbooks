@@ -134,6 +134,8 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
 Since vLLM exposes an OpenAI-compatible API, you can use the `openai` Python package to interact with it. Install it first:
 
 ```bash
+python -m venv .openai-venv
+source .openai-venv/bin/activate
 python -m pip install openai
 ```
 
