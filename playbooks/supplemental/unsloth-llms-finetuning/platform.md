@@ -16,7 +16,7 @@ The following models are tested and optimized for your platform:
 
 | Model | Parameters | Size | Download Location |
 |-------|------------|------|-------------------|
-| **unsloth/gemma-3n-E4B-it** | 8B | ~16GB | Download from HF
+| **unsloth/gemma-4-E4B-it** | 8B | ~16GB | Download from HF
 
 Models will be automatically downloaded to the Hugging Face cache directory: `~/.cache/huggingface/hub/`
 

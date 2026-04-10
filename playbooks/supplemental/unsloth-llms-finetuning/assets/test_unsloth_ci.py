@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-CI-friendly Unsloth training script (Gemma-3N)
+CI-friendly Unsloth training script (Gemma-4)
 - Short smoke-test style run
 - Verifies model load, dataset prep, LoRA training, inference, local save,
   merged save, and GGUF export
@@ -26,12 +26,12 @@ from trl import SFTTrainer, SFTConfig
 # =========================
 # Config
 # =========================
-MODEL_NAME = "unsloth/gemma-3n-E4B-it"
+MODEL_NAME = "unsloth/gemma-4-E4B-it"
 MAX_SEQ_LEN = 512
 DATASET_NAME = "mlabonne/FineTome-100k"
 DATASET_SPLIT = "train[:128]"   # smaller split for CI
-OUTPUT_DIR = "gemma_3n_lora_ci"
-MERGED_DIR = "gemma_3n_merged_ci"
+OUTPUT_DIR = "gemma_4_lora_ci"
+MERGED_DIR = "gemma_4_merged_ci"
 
 MAX_STEPS = 5
 PER_DEVICE_BATCH_SIZE = 1
@@ -68,7 +68,7 @@ def load_model():
         max_seq_length=MAX_SEQ_LEN,
         load_in_4bit=False,
     )
-    tokenizer = get_chat_template(tokenizer, chat_template="gemma-3")
+    tokenizer = get_chat_template(tokenizer, chat_template="gemma-4")
     return model, tokenizer
 
 
@@ -145,8 +145,8 @@ def train(model, tokenizer, dataset):
 
     trainer = train_on_responses_only(
         trainer,
-        instruction_part="<start_of_turn>user\n",
-        response_part="<start_of_turn>model\n",
+        instruction_part="<|turn>user\n",
+        response_part="<|turn>model\n",
     )
 
     log("Starting training...")

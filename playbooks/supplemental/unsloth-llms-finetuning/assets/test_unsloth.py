@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Minimal Unsloth training script (Gemma-3N)
+Minimal Unsloth training script (Gemma-4)
 - Clean (<200 lines)
 - With progress logs
 - Suitable for quickstart
@@ -25,12 +25,12 @@ from trl import SFTTrainer, SFTConfig
 # =========================
 # Config
 # =========================
-MODEL_NAME = "unsloth/gemma-3n-E4B-it"
+MODEL_NAME = "unsloth/gemma-4-E4B-it"
 MAX_SEQ_LEN = 1024
 DATASET_NAME = "mlabonne/FineTome-100k"
 DATASET_SPLIT = "train[:2000]"   # keep small for demo
-OUTPUT_DIR = "gemma_3n_lora"
-MERGED_DIR = "gemma_3n_merged"
+OUTPUT_DIR = "gemma_4_lora"
+MERGED_DIR = "gemma_4_merged"
 
 
 # =========================
@@ -51,7 +51,7 @@ def load_model():
         load_in_4bit=False,
     )
 
-    tokenizer = get_chat_template(tokenizer, chat_template="gemma-3")
+    tokenizer = get_chat_template(tokenizer, chat_template="gemma-4")
     return model, tokenizer
 
 
@@ -124,8 +124,8 @@ def train(model, tokenizer, dataset):
 
     trainer = train_on_responses_only(
         trainer,
-        instruction_part="<start_of_turn>user\n",
-        response_part="<start_of_turn>model\n",
+        instruction_part="<|turn>user\n",
+        response_part="<|turn>model\n",
     )
 
     log("Start training...")

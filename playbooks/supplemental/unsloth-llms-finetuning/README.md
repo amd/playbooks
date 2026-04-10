@@ -127,8 +127,8 @@ The rest of the playbook will conceptually go through each major step of the scr
 
 ## How It Works
 The test_unsloth.py script performs the following steps:
-* **Load Model**: Loads unsloth/gemma-3n-E4B-it using FastModel.
-* **Prepare Data**: Standardizes the dataset (e.g., FineTome-100k) and applies the Gemma-3 chat template.
+* **Load Model**: Loads unsloth/gemma-4-E4B-it using FastModel.
+* **Prepare Data**: Standardizes the dataset (e.g., FineTome-100k) and applies the Gemma-4 chat template.
 * **Apply LoRA**: Adds adapters to language, attention, and MLP modules for efficient training.
 * **Train**: Uses SFTTrainer with response-only loss masking.
 * **Inference**: Runs a quick generation test to verify performance.
@@ -138,10 +138,10 @@ The test_unsloth.py script performs the following steps:
 You can modify the following constants to customize your run:
 
 ```python
-MODEL_NAME = "unsloth/gemma-3n-E4B-it"
+MODEL_NAME = "unsloth/gemma-4-E4B-it"
 MAX_SEQ_LEN = 1024
 DATASET_NAME = "mlabonne/FineTome-100k"
-OUTPUT_DIR = "gemma_3n_lora"
+OUTPUT_DIR = "gemma_4_lora"
 ```
 
 Example of the Unsloth welcome message and output when loading the model weights:
@@ -155,7 +155,7 @@ mlabonne/FineTome-100k
 ```
 The dataset is: 
 * Converted into chat format
-* Processed using the Gemma-3 chat template
+* Processed using the Gemma-4 chat template
 * Cleaned to remove duplicate BOS tokens
 
 ## Train the Model
@@ -174,7 +174,7 @@ During training, you will see logs such as:
 You can enable 4-bit quantization by using a 4-bit quantized model:
 ```python
 load_in_4bit = True
-model_name = "unsloth/gemma-3n-E4B-it-unsloth-bnb-4bit"
+model_name = "unsloth/gemma-4-E4B-it-unsloth-bnb-4bit"
 ```
 This reduces memory usage significantly with minimal quality loss.
 
@@ -183,8 +183,8 @@ This reduces memory usage significantly with minimal quality loss.
 
 The script automatically saves LoRA adapters to the OUTPUT_DIR.
 ```python
-model.save_pretrained("gemma_3n_lora")  
-tokenizer.save_pretrained("gemma_3n_lora")
+model.save_pretrained("gemma_4_lora")  
+tokenizer.save_pretrained("gemma_4_lora")
 ```
 
 <!-- @test:id=verify-unsloth-lora-output timeout=120 hidden=True setup=activate-venv -->
@@ -193,7 +193,7 @@ import os
 import sys
 import glob
 
-out_dir = "gemma_3n_lora_ci"
+out_dir = "gemma_4_lora_ci"
 if not os.path.isdir(out_dir):
     print(f"FAIL: Missing output directory: {out_dir}")
     sys.exit(1)
@@ -224,7 +224,7 @@ print(f"Found adapter weights: {adapter_weights}")
 
 For deployment with vLLM, merge the adapters into a full model:
 ```python
-model.save_pretrained_merged("gemma-3N-finetune", tokenizer)
+model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
 
 <!-- @test:id=verify-unsloth-merged-output timeout=120 hidden=True setup=activate-venv -->
@@ -233,7 +233,7 @@ import os
 import sys
 import glob
 
-out_dir = "gemma_3n_merged_ci"
+out_dir = "gemma_4_merged_ci"
 if not os.path.isdir(out_dir):
     print(f"FAIL: Missing merged model directory: {out_dir}")
     sys.exit(1)
@@ -263,7 +263,7 @@ print("PASS: Merged model output looks correct")
 
 Convert directly to GGUF for local inference:
 ```python
-model.save_pretrained_gguf("gemma_3n_finetune", tokenizer, quantization_method="Q8_0")
+model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
 
 ## Next Steps
