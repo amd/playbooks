@@ -28,11 +28,11 @@ This playbook teaches you how to serve LLMs using vLLM on your STX Halo™ GPU a
 
 vLLM can be installed in several ways depending on your environment and preferences:
 
-- **PyPI Wheel** - Install from Python Package Index using pip
+- **AMD ROCm Wheel Index** - Install AMD-provided ROCm-enabled vLLM wheels using pip
 - **Docker** - Use prebuilt container images with ROCm support for AMD GPUs
 - **Build from Source** - Compile vLLM locally with custom configurations
 
-For this playbook, we'll use the **prebuilt wheel** which includes vLLM with ROCm support, making it the easiest way to get started on AMD GPUs.
+For this playbook, we'll use the prebuilt AMD ROCm wheel from AMD's package index, which is the easiest way to get started with ROCm-enabled vLLM on AMD GPUs.
 
 ## Preparation
 
