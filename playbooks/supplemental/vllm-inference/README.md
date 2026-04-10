@@ -38,17 +38,21 @@ For this playbook, we'll use the **prebuilt wheel** which includes vLLM with ROC
 
 ### Install vLLM
 
-Create a Python virtual environment and activate it:
+Create a Python 3.12 virtual environment and activate it:
 
 ```bash
-python -m venv vllm_env
-source vllm_env/bin/activate
+python3.12 -m venv .venv
+source .venv/bin/activate
 ```
 
-Install PyTorch 2.9.1 with ROCm support:
+Install ROCm 7.12.0 and PyTorch 2.9.1 in the virtual environment:
 
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision torchaudio
+python -m pip install \
+  --index-url https://repo.amd.com/rocm/whl/gfx1151/ \
+  "torch==2.9.1+rocm7.12.0" \
+  "torchaudio==2.9.0+rocm7.12.0" \
+  "torchvision==0.24.0+rocm7.12.0"
 ```
 
 Install vLLM from the prebuilt ROCm wheel:
@@ -57,6 +61,21 @@ Install vLLM from the prebuilt ROCm wheel:
 python -m pip install \
   --extra-index-url https://rocm.frameworks.amd.com/whl/gfx1151/ \
   "vllm==0.16.1.dev10+g11515110f.d20260323.rocm712"
+```
+
+Set the environment variables required by the ROCm pip packages before starting vLLM:
+
+```bash
+export PYTHONPATH=.venv/lib/python3.12/site-packages/_rocm_sdk_core/share/amd_smi
+export FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE
+```
+
+Check the installation:
+
+```bash
+echo "=== vLLM ===" && python -c "import vllm; print('vLLM version:', vllm.__version__)"
+echo "=== PyTorch ===" && python -c "import torch; print('PyTorch:', torch.__version__); print('HIP available:', torch.cuda.is_available()); print('HIP built:', torch.backends.hip.is_built() if hasattr(torch.backends, 'hip') else 'N/A')"
+echo "=== flash-attn ===" && python -c "import flash_attn; print('flash-attn:', flash_attn.__version__)"
 ```
 
 ## Quick Start
@@ -89,7 +108,7 @@ vllm serve Qwen/Qwen3-1.7B \
 You can test the server using the curl script:
 
 ```bash
-./curl_script.sh
+./assets/curl_script.sh
 ```
 
 Or use the curl command directly:
@@ -115,7 +134,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
 Since vLLM exposes an OpenAI-compatible API, you can use the `openai` Python package to interact with it. Install it first:
 
 ```bash
-pip install openai
+python -m pip install openai
 ```
 
 The included `chat_with_model.py` script demonstrates this. First, create an `OpenAI` client pointed at the local vLLM server instead of OpenAI's servers. The `api_key` is required by the client but vLLM doesn't validate it, so any string works:
