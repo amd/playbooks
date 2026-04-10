@@ -2,14 +2,13 @@
 # coding: utf-8
 
 """
-Minimal Unsloth training script (Gemma-4)
+Minimal Unsloth training script (Gemma-3N)
 - Clean (<200 lines)
 - With progress logs
-- Suitable for quickstart
+- Suitable for CI / quickstart
 """
 
 import time
-import unsloth
 import torch
 from datasets import load_dataset
 from transformers import TextStreamer
@@ -25,12 +24,11 @@ from trl import SFTTrainer, SFTConfig
 # =========================
 # Config
 # =========================
-MODEL_NAME = "unsloth/gemma-4-E4B-it"
+MODEL_NAME = "unsloth/gemma-3n-E4B-it"
 MAX_SEQ_LEN = 1024
 DATASET_NAME = "mlabonne/FineTome-100k"
 DATASET_SPLIT = "train[:2000]"   # keep small for demo
-OUTPUT_DIR = "gemma_4_lora"
-MERGED_DIR = "gemma_4_merged"
+OUTPUT_DIR = "gemma_3n_lora"
 
 
 # =========================
@@ -51,7 +49,7 @@ def load_model():
         load_in_4bit=False,
     )
 
-    tokenizer = get_chat_template(tokenizer, chat_template="gemma-4")
+    tokenizer = get_chat_template(tokenizer, chat_template="gemma-3")
     return model, tokenizer
 
 
@@ -118,14 +116,13 @@ def train(model, tokenizer, dataset):
             learning_rate=2e-4,
             logging_steps=5,
             report_to="none",
-            optim="adamw_torch",
         ),
     )
 
     trainer = train_on_responses_only(
         trainer,
-        instruction_part="<|turn>user\n",
-        response_part="<|turn>model\n",
+        instruction_part="<start_of_turn>user\n",
+        response_part="<start_of_turn>model\n",
     )
 
     log("Start training...")
@@ -150,9 +147,7 @@ def run_inference(model, tokenizer):
 
     inputs = tokenizer.apply_chat_template(
         messages,
-        tokenize=True,
         add_generation_prompt=True,
-        return_dict=True,
         return_tensors="pt",
     ).to("cuda")
 
@@ -174,9 +169,6 @@ def save_model(model, tokenizer):
     model.save_pretrained(OUTPUT_DIR)
     tokenizer.save_pretrained(OUTPUT_DIR)
 
-def save_merged_model(model, tokenizer):
-    log("Saving merged model...")
-    model.save_pretrained_merged(MERGED_DIR, tokenizer)
 
 # =========================
 # Main
@@ -191,7 +183,6 @@ def main():
     train(model, tokenizer, dataset)
     run_inference(model, tokenizer)
     save_model(model, tokenizer)
-    save_merged_model(model, tokenizer)
 
     log("===== Done =====")
 
