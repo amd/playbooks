@@ -3,7 +3,6 @@
 
 """
 CI-friendly Unsloth training script (Gemma-3N)
-- Designed for both Windows and Linux
 - Short smoke-test style run
 - Verifies model load, dataset prep, LoRA training, inference, local save,
   merged save, and GGUF export

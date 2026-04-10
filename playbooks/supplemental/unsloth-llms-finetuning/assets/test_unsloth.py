@@ -5,7 +5,7 @@
 Minimal Unsloth training script (Gemma-3N)
 - Clean (<200 lines)
 - With progress logs
-- Suitable for CI / quickstart
+- Suitable for quickstart
 """
 
 import time
@@ -30,6 +30,7 @@ MAX_SEQ_LEN = 1024
 DATASET_NAME = "mlabonne/FineTome-100k"
 DATASET_SPLIT = "train[:2000]"   # keep small for demo
 OUTPUT_DIR = "gemma_3n_lora"
+MERGED_DIR = "gemma_3n_merged"
 
 
 # =========================
@@ -173,6 +174,9 @@ def save_model(model, tokenizer):
     model.save_pretrained(OUTPUT_DIR)
     tokenizer.save_pretrained(OUTPUT_DIR)
 
+def save_merged_model(model, tokenizer):
+    log("Saving merged model...")
+    model.save_pretrained_merged(MERGED_DIR, tokenizer)
 
 # =========================
 # Main
@@ -187,6 +191,7 @@ def main():
     train(model, tokenizer, dataset)
     run_inference(model, tokenizer)
     save_model(model, tokenizer)
+    save_merged_model(model, tokenizer)
 
     log("===== Done =====")
 
