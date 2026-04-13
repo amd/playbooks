@@ -45,7 +45,7 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-Install ROCm 7.12.0 and PyTorch 2.9.1 in the virtual environment:
+Install PyTorch 2.9.1 built for ROCm 7.12.0, along with the required ROCm Python packages, in the virtual environment:
 
 ```bash
 python -m pip install \
@@ -131,11 +131,10 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \
 
 ### 3. Chat with the model using the OpenAI Python API
 
-Since vLLM exposes an OpenAI-compatible API, you can use the `openai` Python package to interact with it. Install it first:
+Since vLLM exposes an OpenAI-compatible API, you can use the `openai` Python package to interact with it. Activate the `.venv` virtual environment created earlier (if not already active) and install `openai` into it:
 
 ```bash
-python -m venv .openai-venv
-source .openai-venv/bin/activate
+source .venv/bin/activate
 python -m pip install openai
 ```
 
