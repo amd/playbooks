@@ -32,9 +32,15 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-<!-- @test:id=create-venv timeout=60 -->
+
 ```bash
 python -m venv s2st-env --system-site-packages
+s2st-env\Scripts\activate
+```
+
+<!-- @test:id=create-venv timeout=60 -->
+```bash
+python -m venv s2st-env
 s2st-env\Scripts\activate
 ```
 <!-- @test:end -->
@@ -47,11 +53,18 @@ s2st-env\Scripts\activate
 
 <!-- @os:linux -->
 On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
-<!-- @test:id=create-venv timeout=120 -->
+
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
 python3 -m venv s2st-env --system-site-packages
+source s2st-env/bin/activate
+```
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv s2st-env
 source s2st-env/bin/activate
 ```
 <!-- @test:end -->
@@ -65,7 +78,98 @@ source s2st-env/bin/activate
 Install m4t dependencies using pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio==4.44.1 scipy==1.15.3 
+pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+```
+<!-- @test:end -->
+
+<!-- @test:id=verify-imports timeout=120 setup=activate-venv hidden=True -->
+```python
+import importlib
+
+modules = [
+    "torch",
+    "torchaudio",
+    "scipy",
+    "soundfile",
+    "gradio",
+    "transformers",
+    "safetensors",
+    "sentencepiece",
+    "accelerate",
+    "tiktoken",
+    "lang_list",
+]
+
+for module in modules:
+    importlib.import_module(module)
+    print(f"PASS: imported {module}")
+
+from transformers import AutoProcessor, SeamlessM4Tv2Model
+from lang_list import LANGUAGE_NAME_TO_CODE, ASR_TARGET_LANGUAGE_NAMES, S2ST_TARGET_LANGUAGE_NAMES
+
+assert "English" in LANGUAGE_NAME_TO_CODE, "FAIL: English missing in LANGUAGE_NAME_TO_CODE"
+assert len(ASR_TARGET_LANGUAGE_NAMES) > 0, "FAIL: ASR_TARGET_LANGUAGE_NAMES is empty"
+assert len(S2ST_TARGET_LANGUAGE_NAMES) > 0, "FAIL: S2ST_TARGET_LANGUAGE_NAMES is empty"
+
+print("PASS: key speech2speech imports work")
+```
+<!-- @test:end -->
+
+<!-- @test:id=verify-scripts timeout=60 hidden=True -->
+```python
+import ast
+import os
+import sys
+
+required_files = [
+    "infer.py",
+    "gradio_demo.py",
+    "lang_list.py",
+    "input1.wav",
+]
+
+missing = [f for f in required_files if not os.path.exists(f)]
+if missing:
+    print(f"FAIL: Missing required files: {missing}")
+    sys.exit(1)
+
+print("PASS: All required files exist")
+
+for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
+    with open(script, "r", encoding="utf-8") as f:
+        ast.parse(f.read(), filename=script)
+    print(f"PASS: {script} has valid syntax")
+```
+<!-- @test:end -->
+
+<!-- @os:windows -->
+<!-- @setup:id=set-s2s-model-path command="$env:S2S_MODEL_PATH = C:\ModelCache\speech2speech\models\seamless-m4t-v2-large" -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @setup:id=set-s2s-model-path command="export S2S_MODEL_PATH=/opt/model_cache/speech2speech/models/seamless-m4t-v2-large" -->
+<!-- @os:end -->
+
+<!-- @test:id=verify-local-model-assets timeout=120 setup=activate-venv,set-s2s-model-path hidden=True -->
+```python
+import os
+import sys
+from transformers import AutoProcessor
+
+model_dir = os.environ.get("S2S_MODEL_PATH", "./seamless-m4t-v2-large")
+
+if not os.path.isdir(model_dir):
+    print(f"FAIL: Local model directory not found: {model_dir}")
+    sys.exit(1)
+
+print(f"PASS: Found local model directory: {model_dir}")
+
+try:
+    _ = AutoProcessor.from_pretrained(model_dir)
+    print("PASS: AutoProcessor can be loaded from local model directory")
+except Exception as e:
+    print(f"FAIL: Could not load processor from {model_dir}: {e}")
+    sys.exit(1)
 ```
 <!-- @test:end -->
 
@@ -74,7 +178,14 @@ pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate s
 #### Learn about seamless-m4t-v2
 Check out the model card on Hugging Face for more information: [https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)
 
+#### Download the model locally
 
+Before running `infer.py` or `gradio_demo.py`, download the model files into a local folder named `seamless-m4t-v2-large` in the same directory as the scripts.
+
+```bash
+pip install -U "huggingface_hub<1.0"
+hf download facebook/seamless-m4t-v2-large --local-dir ./seamless-m4t-v2-large
+```
 
 This is the technical architecture of the speech-speech models:
 <p align="center">
@@ -85,32 +196,48 @@ This is the technical architecture of the speech-speech models:
 #### Import necessary dependencies
 ```python 
 from transformers import AutoProcessor, SeamlessM4Tv2Model
-import torchaudio
-import scipy
-import time
 import os
+import time
+import numpy as np
+import scipy.io.wavfile
+import soundfile as sf
+import torch
+import torchaudio
+from transformers import AutoProcessor, SeamlessM4Tv2Model
+
 os.environ["HIP_VISIBLE_DEVICES"] = "0"
+device = "cuda"
+model_path = os.environ.get("S2S_MODEL_PATH", "./seamless-m4t-v2-large")
 ```
 #### Load models
 ```python
 start = time.time()
 processor = AutoProcessor.from_pretrained("./seamless-m4t-v2-large")
-model = SeamlessM4Tv2Model.from_pretrained("./seamless-m4t-v2-large").to("cuda")
+dtype = torch.float16 if device.type == "cuda" else torch.float32
+model = SeamlessM4Tv2Model.from_pretrained(model_path, dtype=dtype).to(device)
 end = time.time()
 print(f"model loading duration: {end - start} seconds")
 ```
 
 #### Input audio clip .wav file
-Please download the following file: [input1.wav](assets/input1.wav). Then, load it with torchaudio.
+Please download the following file: [input1.wav](assets/input1.wav). Then, load it with soundfile.
 
 ```python
-audio, orig_freq =  torchaudio.load("input1.wav")
+audio_np, orig_freq = sf.read("input1.wav", dtype="float32", always_2d=True)
+audio = torchaudio.functional.resample(
+    torch.from_numpy(audio_np.T),
+    orig_freq=orig_freq,
+    new_freq=16_000,
+)
 ```
 
 #### Preprocess input .wav file
 ```python
-audio =  torchaudio.functional.resample(audio, orig_freq=orig_freq, new_freq=16_000) # must be a 16 kHz waveform array
-audio_inputs = processor(audios=audio, return_tensors="pt").to("cuda")
+audio_inputs = processor(
+    audio=audio.squeeze(0).cpu().numpy(),
+    sampling_rate=16_000,
+    return_tensors="pt",
+).to(device)
 ```
 
 #### Generate translated audio file 
@@ -129,25 +256,85 @@ scipy.io.wavfile.write("out1.wav", rate=sample_rate, data=audio_array_from_audio
 #### Run the complete file to check the audio generation duration
 Please download the following file: [infer.py](assets/infer.py). Then, run it.
 
-
 ```bash
 python ./infer.py
 ```
 
+<!-- @os:windows -->
+<!-- @test:id=infer-smoke-windows timeout=1800 setup=activate-venv hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+Remove-Item .\out1.wav -Force -ErrorAction SilentlyContinue
+
+python .\infer.py
+if ($LASTEXITCODE -ne 0) { throw "infer.py failed" }
+if (-not (Test-Path .\out1.wav)) { throw "FAIL: out1.wav was not created" }
+
+$file = Get-Item .\out1.wav
+if ($file.Length -le 0) { throw "FAIL: out1.wav is empty" }
+
+Write-Host "PASS: infer.py created out1.wav successfully"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=infer-smoke-linux timeout=1800 setup=activate-venv hidden=True -->
+```bash
+set -euo pipefail
+rm -f ./out1.wav
+
+python ./infer.py
+if [ ! -f ./out1.wav ]; then
+  echo "FAIL: out1.wav was not created"
+  exit 1
+fi
+
+if [ ! -s ./out1.wav ]; then
+  echo "FAIL: out1.wav is empty"
+  exit 1
+fi
+
+echo "PASS: infer.py created out1.wav successfully"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 ### Runing the Gradio UI demo:
 
-This is a helpful UI that builds upon the code we have written and makes live speech-speech translation easy.
+This is a helpful UI that builds upon the code we have written and makes live speech-speech translation easy. This demo supports two launch modes:
 
-1. Download this file: https://cdn-media.huggingface.co/frpc-gradio-0.3/frpc_linux_amd64
-2. Rename the downloaded file to: frpc_linux_amd64_v0.3
-3. Move the file to this location: /root/.cache/huggingface/gradio/frpc
-4. Download the following file: [gradio_demo.py](assets/gradio_demo.py).
-5. Run the following code:
+- `--no-share`: local-only mode. The app is available only on your machine.
+- `--share`: also creates a public Gradio share link. This requires outbound network access to Gradio's share service.
 
+#### Run locally only
 ```bash
-export HIP_VISIBLE_DEVICES=0
+python ./gradio_demo.py --no-share
+```
+Then open your web browser at `http://127.0.0.1:7860`
+
+#### Run with a public share link
+When `--share` is used, Gradio uses **FRP (Fast Reverse Proxy)** to create a public link. On some systems, the FRP client download may be blocked by antivirus or network policy.
+
+1. First try running the following code after downloading it: [gradio_demo.py](assets/gradio_demo.py).
+```bash
 python ./gradio_demo.py --share
 ```
+<!-- @os:windows -->
+2. If Gradio says the FRP client is missing or blocked, do this:
+    - Download this file: https://cdn-media.huggingface.co/frpc-gradio-0.3/frpc_windows_amd64.exe
+    - Rename the downloaded file to: `frpc_windows_amd64_v0.3`
+    - Move the file to this location: `%USERPROFILE%\.cache\huggingface\gradio\frpc`
+<!-- @os:end -->
+
+<!-- @os:linux -->
+2. If Gradio says the FRP client is missing or blocked, do this: 
+    - Download this file: https://cdn-media.huggingface.co/frpc-gradio-0.3/frpc_linux_amd64
+    - Rename the downloaded file to: `frpc_linux_amd64_v0.3`
+    - Move the file to this location: `/root/.cache/huggingface/gradio/frpc`
+<!-- @os:end -->
+
+3. Try running `gradio_demo.py` again with `--share`.
 
 Press and hold the record button to capture your voice; releasing it will automatically execute the translation.
 
