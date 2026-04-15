@@ -33,14 +33,9 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
 
-```bash
-python -m venv s2st-env --system-site-packages
-s2st-env\Scripts\activate
-```
-
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
-python -m venv s2st-env
+python -m venv s2st-env --system-site-packages
 s2st-env\Scripts\activate
 ```
 <!-- @test:end -->
@@ -54,17 +49,11 @@ s2st-env\Scripts\activate
 <!-- @os:linux -->
 On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
 
-```bash
-sudo apt update
-sudo apt install -y python3-venv
-python3 -m venv s2st-env --system-site-packages
-source s2st-env/bin/activate
-```
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv s2st-env
+python3 -m venv s2st-env --system-site-packages
 source s2st-env/bin/activate
 ```
 <!-- @test:end -->
@@ -181,19 +170,34 @@ except Exception as e:
 #### Learn about seamless-m4t-v2
 Check out the model card on Hugging Face for more information: [https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)
 
-#### Download the model locally
-
-Before running `infer.py` or `gradio_demo.py`, download the model files into a local folder named `seamless-m4t-v2-large` in the same directory as the scripts.
-
-```bash
-pip install -U "huggingface_hub<1.0"
-hf download facebook/seamless-m4t-v2-large --local-dir ./seamless-m4t-v2-large
-```
-
 This is the technical architecture of the speech-speech models:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
+
+#### Download the model locally
+
+Before running `infer.py` or `gradio_demo.py`, download the model files into a local folder named `seamless-m4t-v2-large` in the same directory as the scripts.
+
+Open a terminal in the scripts directory. Activate the `s2st-env` virtual environment only if it is not already active, then run:
+
+<!-- @os:windows -->
+```bash
+s2st-env\Scripts\activate # Activate the venv only if it's not already active
+pip install -U "huggingface_hub<1.0"
+hf download facebook/seamless-m4t-v2-large --local-dir ./seamless-m4t-v2-large
+```
+<!-- @os:end -->
+
+<!-- @os:linux -->
+```bash
+source s2st-env/bin/activate # Activate the venv only if it's not already active
+pip install -U "huggingface_hub<1.0"
+hf download facebook/seamless-m4t-v2-large --local-dir ./seamless-m4t-v2-large
+```
+<!-- @os:end -->
+
+After the download completes, the model folder should be available at `./seamless-m4t-v2-large`.
 
 
 #### Import necessary dependencies
