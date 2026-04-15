@@ -85,6 +85,11 @@ pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate s
 <!-- @test:id=verify-imports timeout=120 setup=activate-venv hidden=True -->
 ```python
 import importlib
+import os
+import sys
+
+# Ensure local assets directory is importable
+sys.path.insert(0, os.getcwd())
 
 modules = [
     "torch",
@@ -104,12 +109,13 @@ for module in modules:
     print(f"PASS: imported {module}")
 
 from transformers import AutoProcessor, SeamlessM4Tv2Model
-# from lang_list import LANGUAGE_NAME_TO_CODE, ASR_TARGET_LANGUAGE_NAMES, S2ST_TARGET_LANGUAGE_NAMES
+import lang_list
+from lang_list import LANGUAGE_NAME_TO_CODE, ASR_TARGET_LANGUAGE_NAMES, S2ST_TARGET_LANGUAGE_NAMES
 
-# assert "English" in LANGUAGE_NAME_TO_CODE, "FAIL: English missing in LANGUAGE_NAME_TO_CODE"
-# assert len(ASR_TARGET_LANGUAGE_NAMES) > 0, "FAIL: ASR_TARGET_LANGUAGE_NAMES is empty"
-# assert len(S2ST_TARGET_LANGUAGE_NAMES) > 0, "FAIL: S2ST_TARGET_LANGUAGE_NAMES is empty"
+assert "English" in LANGUAGE_NAME_TO_CODE, "FAIL: English missing in LANGUAGE_NAME_TO_CODE"
+assert len(S2ST_TARGET_LANGUAGE_NAMES) > 0, "FAIL: S2ST_TARGET_LANGUAGE_NAMES is empty"
 
+print("PASS: imported local module lang_list")
 print("PASS: key speech2speech imports work")
 ```
 <!-- @test:end -->
@@ -141,21 +147,19 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 ```
 <!-- @test:end -->
 
-<!-- @os:windows -->
-<!-- @setup:id=set-s2s-model-path command="$env:S2S_MODEL_PATH = C:\ModelCache\speech2speech\models\seamless-m4t-v2-large" -->
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @setup:id=set-s2s-model-path command="export S2S_MODEL_PATH=/opt/model_cache/speech2speech/models/seamless-m4t-v2-large" -->
-<!-- @os:end -->
-
-<!-- @test:id=verify-local-model-assets timeout=120 setup=activate-venv,set-s2s-model-path hidden=True -->
+<!-- @test:id=verify-local-model-assets timeout=120 setup=activate-venv hidden=True -->
 ```python
 import os
 import sys
+import platform
 from transformers import AutoProcessor
 
-model_dir = os.environ.get("S2S_MODEL_PATH", "./seamless-m4t-v2-large")
+model_dir = os.environ.get("S2S_MODEL_PATH")
+if not model_dir:
+    if platform.system() == "Windows":
+        model_dir = r"C:\ModelCache\speech2speech\models\seamless-m4t-v2-large"
+    else:
+        model_dir = "/opt/model_cache/speech2speech/models/seamless-m4t-v2-large"
 
 if not os.path.isdir(model_dir):
     print(f"FAIL: Local model directory not found: {model_dir}")
@@ -342,6 +346,116 @@ Press and hold the record button to capture your voice; releasing it will automa
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
 </p>
+
+<!-- @os:windows -->
+<!-- @test:id=gradio-ui-smoke-windows timeout=1800 setup=activate-venv hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$script = @'
+import os
+import sys
+import gradio as gr
+
+# Ensure current directory is importable so lang_list.py can be imported
+sys.path.insert(0, os.getcwd())
+
+import gradio_demo
+
+called = {}
+
+def fake_launch(self, *args, **kwargs):
+    called["args"] = args
+    called["kwargs"] = kwargs
+    print(f"PASS: launch called with kwargs={kwargs}")
+    return self
+
+orig_launch = gr.Blocks.launch
+
+def fake_runner(input_audio, target_language):
+    return None, "OK"
+
+try:
+    demo = gradio_demo.build_ui(fake_runner)
+    print(f"PASS: build_ui(fake_runner) returned {type(demo).__name__}")
+
+    gr.Blocks.launch = fake_launch
+    sys.argv = ["gradio_demo.py", "--no-share"]
+    gradio_demo.main()
+
+    kwargs = called.get("kwargs", {})
+    assert kwargs.get("server_name") == "127.0.0.1", "FAIL: unexpected server_name"
+    assert kwargs.get("server_port") == 7860, "FAIL: unexpected server_port"
+    assert kwargs.get("share") is False, "FAIL: expected share=False by default/--no-share"
+
+    print("PASS: gradio_demo main() reached launch() with expected settings")
+finally:
+    gr.Blocks.launch = orig_launch
+'@
+
+$tempPy = Join-Path $env:TEMP "gradio_ui_smoke_ci.py"
+Set-Content -Path $tempPy -Value $script -Encoding UTF8
+
+python $tempPy
+
+if ($LASTEXITCODE -ne 0) {
+  Remove-Item $tempPy -Force -ErrorAction SilentlyContinue
+  throw "gradio UI smoke test failed"
+}
+
+Remove-Item $tempPy -Force -ErrorAction SilentlyContinue
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=gradio-ui-smoke-linux timeout=1800 setup=activate-venv hidden=True -->
+```bash
+set -euo pipefail
+
+python - <<'PY'
+import os
+import sys
+import gradio as gr
+
+# Ensure current directory is importable so lang_list.py can be imported
+sys.path.insert(0, os.getcwd())
+
+import gradio_demo
+
+called = {}
+
+def fake_launch(self, *args, **kwargs):
+    called["args"] = args
+    called["kwargs"] = kwargs
+    print(f"PASS: launch called with kwargs={kwargs}")
+    return self
+
+orig_launch = gr.Blocks.launch
+
+def fake_runner(input_audio, target_language):
+    return None, "OK"
+
+try:
+    demo = gradio_demo.build_ui(fake_runner)
+    print(f"PASS: build_ui(fake_runner) returned {type(demo).__name__}")
+
+    gr.Blocks.launch = fake_launch
+    sys.argv = ["gradio_demo.py", "--no-share"]
+    gradio_demo.main()
+
+    kwargs = called.get("kwargs", {})
+    assert kwargs.get("server_name") == "127.0.0.1", "FAIL: unexpected server_name"
+    assert kwargs.get("server_port") == 7860, "FAIL: unexpected server_port"
+    assert kwargs.get("share") is False, "FAIL: expected share=False by default/--no-share"
+
+    print("PASS: gradio_demo main() reached launch() with expected settings")
+finally:
+    gr.Blocks.launch = orig_launch
+PY
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 
 ## Next Steps
