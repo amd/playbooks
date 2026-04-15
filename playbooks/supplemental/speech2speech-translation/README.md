@@ -269,6 +269,11 @@ python ./infer.py
 $ErrorActionPreference = "Stop"
 Remove-Item .\out1.wav -Force -ErrorAction SilentlyContinue
 
+$env:S2S_MODEL_PATH = "C:\ModelCache\speech2speech\models\seamless-m4t-v2-large"
+
+if (-not (Test-Path $env:S2S_MODEL_PATH)) { throw "FAIL: Model directory not found: $env:S2S_MODEL_PATH" }
+if (-not (Test-Path .\input1.wav)) { throw "FAIL: input1.wav not found in current directory" }
+
 python .\infer.py
 if ($LASTEXITCODE -ne 0) { throw "infer.py failed" }
 if (-not (Test-Path .\out1.wav)) { throw "FAIL: out1.wav was not created" }
@@ -286,6 +291,18 @@ Write-Host "PASS: infer.py created out1.wav successfully"
 ```bash
 set -euo pipefail
 rm -f ./out1.wav
+
+export S2S_MODEL_PATH=/opt/model_cache/speech2speech/models/seamless-m4t-v2-large
+
+if [ ! -d "$S2S_MODEL_PATH" ]; then
+  echo "FAIL: Model directory not found: $S2S_MODEL_PATH"
+  exit 1
+fi
+
+if [ ! -f ./input1.wav ]; then
+  echo "FAIL: input1.wav not found in current directory"
+  exit 1
+fi
 
 python ./infer.py
 if [ ! -f ./out1.wav ]; then
