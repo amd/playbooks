@@ -369,6 +369,7 @@ Press and hold the record button to capture your voice; releasing it will automa
 ```powershell
 $ErrorActionPreference = "Stop"
 
+$env:S2S_MODEL_PATH = "C:\ModelCache\speech2speech\models\seamless-m4t-v2-large"
 $script = @'
 import os
 import sys
@@ -430,6 +431,7 @@ Remove-Item $tempPy -Force -ErrorAction SilentlyContinue
 ```bash
 set -euo pipefail
 
+export S2S_MODEL_PATH=/opt/model_cache/speech2speech/models/seamless-m4t-v2-large
 python - <<'PY'
 import os
 import sys
