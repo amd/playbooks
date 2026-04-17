@@ -9,10 +9,13 @@ SPDX-License-Identifier: MIT
 #### Installing Lemonade
 
 <!-- @os:windows -->
-Download the latest installer from [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) and run the `.msi` file. The installer adds `lemonade-server` to your system PATH automatically.
+Download the latest installer from [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) and run the `.msi` file. 
+
+After installation:
+- The `lemonade` CLI is added to your system PATH automatically
+- Lemonade server is expected to run in the background automatically
 
 You can also install silently from the command line:
-
 ```cmd
 msiexec /i lemonade-server-minimal.msi /qn
 ```
@@ -32,44 +35,69 @@ yay -S lemonade-server
 For other distributions or to install from source, see the [full installation options](https://lemonade-server.ai/install_options.html).
 <!-- @os:end -->
 
+
 #### Verifying Lemonade Installation
 
 Open a terminal and run:
-
-```
-lemonade-server --version
+```bash
+lemonade --version
 ```
 
 You should see output like:
-
 ```
-lemonade-server x.y.z
+lemonade version x.y.z
 ```
 
-If you see a version number, Lemonade is installed and ready to go.
+If you see a version number, Lemonade is installed correctly and ready to go.
+
+> **Tip**: Use `lemonade --help` to display help information.
 
 
-#### Starting Lemonade
+#### Checking Lemonade Server Status
 
-To start the server, open a terminal and run:
+Open a terminal and run:
 ```bash
-lemonade-server serve
+lemonade status
 ```
 
-The server starts on `http://localhost:8000` with an OpenAI-compatible API at `/api/v1`.
+You should see the output showing that the server is running, typically on port `13305`. 
 
-To run a specific model immediately, use the `run` command:
+The default OpenAI-compatible API base URL is: `http://localhost:13305/api/v1`.
 
+
+#### Loading and Chatting with a Model
+
+To load a model and open the Lemonade web app in your browser to chat with the model:
 ```bash
-lemonade-server run Gemma-3-4b-it-GGUF
+lemonade run Gemma-3-4b-it-GGUF
 ```
 
-> **Tip**: Use `lemonade-server list` to see available models, or `lemonade-server pull <MODEL_NAME>` to download new ones.
+> **Tip**: Use `lemonade list` to see available models, or `lemonade pull <MODEL_NAME>` to download new ones.
 
-To start Lemonade server with ROCm backend:
 
+#### Loading a Model with a Specific Backend
+
+To load a llama.cpp model with AMD ROCm™ software backend:
 ```bash
-lemonade-server serve --llamacpp rocm
+lemonade run <MODEL_NAME> --llamacpp rocm
 ```
 
-For the latest installation options or troubleshooting, please refer to the official Lemonade documentation.
+To load a llama.cpp model with Vulkan:
+```bash
+lemonade run <MODEL_NAME> --llamacpp vulkan
+```
+
+
+#### Setting a Default llama.cpp Backend
+
+If you want Lemonade to use a default backend (for example, ROCm) for llama.cpp models, run:
+```bash
+lemonade config set llamacpp.backend=rocm
+```
+
+You can inspect the current config anytime with:
+```bash
+lemonade config
+```
+
+For the latest Lemonade server options or troubleshooting, please refer to the [official Lemonade documentation](https://lemonade-server.ai/docs/lemonade-cli/).
