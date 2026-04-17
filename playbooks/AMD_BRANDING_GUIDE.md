@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # AMD Branding Guide
 
 This guide outlines the correct usage of AMD product names and trademarks in all documentation, playbooks, and content within this repository.
