@@ -311,7 +311,7 @@ lemonade run extra.gpt-oss-120b-GGUF --llamacpp vulkan
 ```
 <!-- @device:end -->
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt -->
 ```bash
 lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 ```
@@ -380,7 +380,7 @@ Before running the workflow, you need to connect it to your local Lemonade serve
   | **Base URL** | `http://localhost:13305/api/v1` |
   | **API Key** | `lemonade` |
 
-> **Note**: Before testing, ensure Lemonade server is running using `lemonade status`. 
+> **Note**: Before testing, run `lemonade status` in a terminal to confirm that the Lemonade server is running.
 <!-- @device:halo_box -->
 > This workflow uses GPT-OSS-120B and it is pre-installed as `extra.gpt-oss-120b-GGUF`. You can change this to other loaded models in the Lemonade Chat Model node settings.
 <!-- @device:end -->

@@ -67,7 +67,7 @@ The default OpenAI-compatible API base URL is: `http://localhost:13305/api/v1`.
 
 #### Loading and Chatting with a Model
 
-To load a model and open the Lemonade app / web app in your browser to chat with the model:
+To load a model and open the Lemonade web app in your browser to chat with the model:
 ```bash
 lemonade run Gemma-3-4b-it-GGUF
 ```
@@ -79,12 +79,12 @@ lemonade run Gemma-3-4b-it-GGUF
 
 To load a llama.cpp model with ROCm backend:
 ```bash
-lemonade run Gemma-3-4b-it-GGUF --llamacpp rocm
+lemonade run <MODEL_NAME> --llamacpp rocm
 ```
 
 To load a llama.cpp model with Vulkan:
 ```bash
-lemonade run extra.gpt-oss-120b-GGUF --llamacpp rocm
+lemonade run <MODEL_NAME> --llamacpp vulkan
 ```
 
 
