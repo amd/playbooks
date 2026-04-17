@@ -1,7 +1,7 @@
 {
   "id": "comfyui-image-gen",
   "title": "Generating images with ComfyUI and Z Image Turbo",
-  "description": "Create stunning AI-generated images using ComfyUI with Z Image Turbo on STX Halo\u2122",
+  "description": "Create stunning AI-generated images using ComfyUI with Z Image Turbo.\u2122",
   "time": 15,
   "supported_platforms": {
     "halo": [

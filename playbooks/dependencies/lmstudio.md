@@ -25,6 +25,7 @@ lms --help
 3. run `cd ~/Downloads`  
 4. run `chmod +x LM-Studio-*.AppImage`  
 5. run `./LM-Studio-*.AppImage`  
+> Tip: After installing, launch LM Studio once to initialize the CLI (`lms`).
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash
