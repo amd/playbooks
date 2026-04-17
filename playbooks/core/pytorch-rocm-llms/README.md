@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 ## Overview
 
 Want to run powerful AI language models on your own hardware? This guide shows you how.
-This tutorial uses PyTorch powered by AMD's ROCm to run models that can summarize documents, answer questions, generate text, and more, all running locally.
+This tutorial uses PyTorch powered by AMD ROCm™ software to run models that can summarize documents, answer questions, generate text, and more, all running locally.
 
 ## What You'll Learn
 

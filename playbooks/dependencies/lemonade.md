@@ -77,7 +77,7 @@ lemonade run Gemma-3-4b-it-GGUF
 
 #### Loading a Model with a Specific Backend
 
-To load a llama.cpp model with ROCm backend:
+To load a llama.cpp model with AMD ROCm™ software backend:
 ```bash
 lemonade run <MODEL_NAME> --llamacpp rocm
 ```

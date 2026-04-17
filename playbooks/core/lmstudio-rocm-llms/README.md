@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggml-org/llama.cpp) and also provides an [OpenAI compliant endpoint](https://lmstudio.ai/docs/developer/openai-compat) for local model serving. LM Studio provides a simple but powerful interface to easily download and deploy models. LM Studio offers both Vulkan and ROCm based backends (called runtimes) for AMD users.
+LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggml-org/llama.cpp) and also provides an [OpenAI compliant endpoint](https://lmstudio.ai/docs/developer/openai-compat) for local model serving. LM Studio provides a simple but powerful interface to easily download and deploy models. LM Studio offers both Vulkan and AMD ROCm™ software backends (called runtimes) for AMD users.
 
 
 ## What You'll Learn
@@ -174,7 +174,30 @@ print("Attempting to connect to local LM Studio server...")
         print(completion.choices[0].message.content)
 
     except Exception as e:
-        print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
+    # Initialize the client specifically for your local server
+    # The API key is required by the library but ignored by LM Studio
+    client = OpenAI(
+        base_url="http://localhost:1234/v1", 
+        api_key="lm-studio"
+    )
+    print("Attempting to connect to local LM Studio server...")
+
+        try:
+            # Create a simple chat completion request
+            completion = client.chat.completions.create(
+                model="local-model", # The model identifier is optional in local mode
+                messages=[
+                    {"role": "system", "content": "You are a helpful coding assistant."},
+                    {"role": "user", "content": "Explain Python decorators in 1 sentence"}
+                ],
+                temperature=0.7,
+            )
+            # Print the response
+            print("\nConnection Successful! Server Response:\n")
+            print(completion.choices[0].message.content)
+
+        except Exception as e:
+            print(f"\nConnecti
     ```
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-ping-endpoint-windows timeout=300 hidden=True -->

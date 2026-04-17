@@ -249,5 +249,5 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 Below are some additional resources to learn more about Coding Agents, Cline, and running workloads on 
 
 * More information about the AMD LM Studio partnership and integration: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* AMD Blog walking through running Cline on an AMD STX Halo™: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* AMD Blog walking through running Cline on AMD Ryzen™ AI and Radeon™ Graphics Cards: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
 * Cline Blog on running coding agents locally on AI PCs: https://cline.bot/blog/local-models-amd
