@@ -120,8 +120,8 @@ This model will now be accessible through the LM Studio Server endpoint and will
 Having just created the OpenAI Compatible endpoint, let's look at how to integrate this into a Python developer environment (such as VSCode) and use your system as a local API Provider. 
 
 1. Create a Python virtual environment:
-    <!-- @os:windows -->
-    On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
+<!-- @os:windows -->
+    On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
     ```bash
     python -m venv llm-env --system-site-packages
     llm-env\Scripts\activate
@@ -130,9 +130,9 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
     > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-    <!-- @os:end -->
+<!-- @os:end -->
 
-    <!-- @os:linux -->
+<!-- @os:linux -->
     On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
     ```bash
     sudo apt update
@@ -140,7 +140,7 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     python3 -m venv llm-env --system-site-packages
     source llm-env/bin/activate
     ```
-    <!-- @os:end -->
+<!-- @os:end -->
 
 2. Install the OpenAI package
     ```bash

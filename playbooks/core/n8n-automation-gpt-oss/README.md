@@ -174,7 +174,8 @@ npm -v
 
 ## Installing n8n
 <!-- @os:windows -->
-Your system has Node.js (and npm) pre-installed. Install n8n globally using npm.
+Install n8n globally using npm.
+
 > **Note**: You may see some npm warnings. This is expected.
 
 ```bash
@@ -195,15 +196,15 @@ n8n --version
 
 
 <!-- @os:windows -->
-> **Tip**: If `n8n --version` says command not found, ensure your npm global bin directory is on the user `PATH`. For example, the n8n you just installed might exist at `C:\Users\<username>\AppData\Roaming\npm`. Add this to the user path and refresh your terminal:
->- Edit system environment variables > Environment Variables > Edit User Path
+> **Tip**: If `n8n --version` says command not found, ensure your npm global bin directory is on the user `PATH`. For example, the n8n you just installed might exist at `C:\Users\<username>\AppData\Roaming\npm`. 
+> Add this to the user path (Edit the system environment variables > Environment Variables > Edit User Path) and open a new terminal window. 
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-We are going to use a service called Podman to containerize our n8n installation.
+We are now going to use Podman service to containerize our n8n installation.
 
-Please download the following into a directory of your choice:  [compose.yml](assets/compose.yml)
+Please download the following into a directory of your choice: [compose.yml](assets/compose.yml)
 
 In that directory, run the following command:
 ```bash
@@ -223,6 +224,7 @@ Start n8n from the terminal:
 ```bash
 n8n start
 ```
+
 <!-- @test:id=n8n-start-windows timeout=300 hidden=True -->
 ```powershell
 $N8N_CMD = "$env:APPDATA\npm\n8n.cmd"
@@ -295,14 +297,31 @@ n8n starts a local web server. Press `'o'` or Open your browser to `http://local
 
 ## Launching Lemonade
 
-Lemonade is the local server that will run a model and connect to n8n. If Lemonade is not already running, launch it from another terminal:
+Lemonade is the local server that will run a model and connect to n8n. Open a terminal and run:
 
+<!-- @device:halo -->
 ```bash
-lemonade-server run extra.gpt-oss-120b-GGUF --llamacpp vulkan
+lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 ```
-Alternatively, you can use the Lemonade GUI to choose and load a model. 
-> **Tip**: The pre-installed model is at the location marked with `.extra`. You can also experiment by changing to different backends, like `rocm`.
+<!-- @device:end -->
 
+<!-- @device:halo_box -->
+```bash
+lemonade run extra.gpt-oss-120b-GGUF --llamacpp vulkan
+```
+<!-- @device:end -->
+
+<!-- @device:stx,krk -->
+```bash
+lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
+```
+<!-- @device:end -->
+
+Alternatively, you can use the Lemonade GUI to choose and load a model. You can also experiment by changing to different backends, like `rocm`.
+
+<!-- @device:halo_box -->
+> **Tip**: The pre-installed model is at the location marked with `.extra`. 
+<!-- @device:end -->
 
 ## Setting Up the Workflow
 
@@ -358,10 +377,13 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 
   | Field | Value |
   |-------|-------|
-  | **Base URL** | `http://localhost:8000/api/v1` |
+  | **Base URL** | `http://localhost:13305/api/v1` |
   | **API Key** | `lemonade` |
 
-> **Note**: Ensure Lemonade server is running before testing. This workflow uses GPT-OSS-120B and it is pre-installed as `extra.gpt-oss-120b-GGUF`. You can change this to other loaded models in the Lemonade Chat Model node settings.
+> **Note**: Before testing, ensure Lemonade server is running using `lemonade status`. 
+<!-- @device:halo_box -->
+> This workflow uses GPT-OSS-120B and it is pre-installed as `extra.gpt-oss-120b-GGUF`. You can change this to other loaded models in the Lemonade Chat Model node settings.
+<!-- @device:end -->
 
 ### Step 5: Test the Workflow
 

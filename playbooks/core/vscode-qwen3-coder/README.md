@@ -29,7 +29,8 @@ This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a cod
 
 ## Launch and Configure LM Studio
 
-LM Studio is pre-installed on your system, and we will use this to serve the LLM powering the coding agent.
+We will use LM Studio to serve the LLM powering the coding agent.
+
 - In the search bar, search for `LM Studio` and launch the application. You will be greeted by the following page.
 
 ![LM Studio Initial Screen](assets/initial-lm-studio.png)
@@ -98,7 +99,7 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ## Launch and Configure VS Code
 
-Your system comes with VS Code installed. We will install the Cline Extension and connect it to the LM Studio server we just made.
+We will install the Cline Extension in VS Code and connect it to the LM Studio server we just made.
 - In the search bar, search for `VS Code` and launch the application.
 - Click on the `Extensions` icon on the left column of VS Code and search for `Cline`. Then, click the `Install` button. 
 
@@ -134,7 +135,7 @@ Next, we need to configure Cline to communicate with the LM Studio server that w
 ## Creating your first project
 
 Let's use our local agent to create a website! Open VSCode to a directory of your choice where Cline will create the files.
-- To do this, go to `File->Open Folder` on the top-left of VS Code and choose a folder like `Documents`.
+- To do this, go to `File -> Open Folder` on the top-left of VS Code and choose a folder like `Documents`.
 
 ![VS Code Empty Folder](assets/open-cline-test.png)
 
