@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 ## Overview
 
 Want to run powerful AI language models on your own hardware? This guide shows you how.
-This tutorial uses PyTorch powered by AMD's ROCm to run models that can summarize documents, answer questions, generate text, and more, all running locally.
+This tutorial uses PyTorch powered by AMD ROCm™ software to run models that can summarize documents, answer questions, generate text, and more, all running locally.
 
 ## What You'll Learn
 
@@ -23,6 +23,7 @@ This tutorial uses PyTorch powered by AMD's ROCm to run models that can summariz
 
 ### Create a Virtual Environment
 
+<!-- @device:halo_box_ -->
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
 <!-- @test:id=create-venv timeout=60 -->
@@ -50,6 +51,38 @@ source llm-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
 <!-- @os:end -->
+<!-- @device:end -->
+
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @os:windows -->
+On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv timeout=60 -->
+```bash
+python -m venv llm-env
+llm-env\Scripts\activate
+```
+<!-- @test:end -->
+
+> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
+
+<!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv llm-env
+source llm-env/bin/activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
+<!-- @os:end -->
+<!-- @device:end -->
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
