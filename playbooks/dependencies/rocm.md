@@ -5,11 +5,17 @@ SPDX-License-Identifier: MIT
 -->
 
 ### ROCm
-#### 1. Install ROCm on Linux
+
+<!-- @device:halo_box,halo,stx -->
+#### 1. Install AMD ROCm™ software on Linux (Ubuntu 24.04)
+
+These steps install the **system ROCm 7.2.1 runtime** on Ubuntu 24.04.
+> Note: ROCm is a **system-wide install** on Linux.
+
 ```bash
 sudo apt update
-wget https://repo.radeon.com/amdgpu-install/7.2/ubuntu/noble/amdgpu-install_7.2.70200-1_all.deb
-sudo apt install ./amdgpu-install_7.2.70200-1_all.deb
+wget https://repo.radeon.com/amdgpu-install/7.2.1/ubuntu/noble/amdgpu-install_7.2.1.70201-1_all.deb
+sudo apt install ./amdgpu-install_7.2.1.70201-1_all.deb
 sudo amdgpu-install -y --usecase=rocm --no-dkms
 ```
 
@@ -48,3 +54,6 @@ cat /opt/rocm/.info/version
 ```
 <!-- @test:end -->
 
+Refer this [official documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/native_linux/install-ryzen.html) for more info.
+
+<!-- @device:end -->

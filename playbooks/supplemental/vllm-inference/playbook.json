@@ -5,20 +5,17 @@
   "time": 90,
   "supported_platforms": {
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "halo_box": [
       "linux",
       "windows"
     ],
     "stx": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "krk": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "difficulty": "beginner",
