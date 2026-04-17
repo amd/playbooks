@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # Playbook Creation Guide
 > [!IMPORTANT]
-> We are **not currently accepting new playbook proposals** from the community at this stage. However, we welcome collaborations, idea exchanges, and contributions that help advance this space. If you encounter issues or have feedback that can help us identify and diagnose problems, please [open an issue](https://github.com/amd/halo_playbooks/issues).
+> We are **not currently accepting new playbook proposals** from the community at this stage. However, we welcome collaborations, idea exchanges, and contributions that help advance this space. If you encounter issues or have feedback that can help us identify and diagnose problems, please [open an issue](https://github.com/amd/playbooks/issues).
 
 ## Design Principles
 
@@ -109,13 +109,13 @@ Instructions for discrete Radeon GPUs
 <!-- @device:end -->
 ```
 
-| Device ID | Hardware |
-|-----------|----------|
-| `halo` | STX Halo |
-| `stx` | STX Point |
-| `krk` | Krackan Point |
-| `rx7900xt` | Radeon RX 7900 XT |
-| `rx9070xt` | Radeon RX 9070 XT |
+| Device ID | Hardware | Product Name |
+|-----------|----------|--------------|
+| `halo` | STX Halo | AMD Ryzen™ AI Max+ |
+| `stx` | STX Point | AMD Ryzen™ AI 300 HX |
+| `krk` | Krackan Point | AMD Ryzen™ AI 300 |
+| `rx7900xt` | Radeon RX 7900 XT | AMD Radeon™ 7000 Series Graphics |
+| `rx9070xt` | Radeon RX 9070 XT | AMD Radeon™ 9000 Series Graphics |
 
 Content outside `@device` tags is always shown. Use `<!-- @device:all -->` to explicitly mark content for all devices. A device selector appears on the playbook page when `@device` tags are detected.
 
@@ -135,7 +135,7 @@ Use these tags to pull in shared content from `playbooks/dependencies/`. Both re
 <!-- @require:comfyui,pytorch -->   <!-- multiple dependencies in one dropdown -->
 ```
 
-Displays a green checkmark with "Already pre-installed on your AMD Halo Developer Platform!" that expands to show manual installation instructions.
+Displays a green checkmark with "Already pre-installed on your AMD Ryzen™ AI Halo Developer Platform!" that expands to show manual installation instructions.
 
 **System setup** — Use `@setup` for configuration steps users need to perform:
 
@@ -150,6 +150,15 @@ Content displays directly since these are required steps, not optional reference
 - List prerequisites upfront. Don't surprise users mid-playbook
 - Include expected output so users know what success looks like
 - Keep code blocks copy-friendly (avoid `$` or `>` prompts)
+- Follow the [AMD Branding Guide](../AMD_BRANDING_GUIDE.md) for correct product naming and trademark usage
+
+### AMD Product Branding
+
+When referencing AMD products in your playbooks, follow the [AMD Branding Guide](../AMD_BRANDING_GUIDE.md) to ensure consistent and correct usage:
+
+- **First mention**: Use the full product name with trademark symbol (™)
+- **Subsequent mentions**: Use the approved shortened form
+- **JSON files**: Use `\u2122` for trademark symbols instead of typing ™ directly
 
 ---
 
