@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 ### ROCm
 
 <!-- @device:halo_box,halo,stx -->
-#### 1. Install ROCm on Linux (Ubuntu 24.04)
+#### 1. Install AMD ROCm™ software on Linux (Ubuntu 24.04)
 
 These steps install the **system ROCm 7.2.1 runtime** on Ubuntu 24.04.
 > Note: ROCm is a **system-wide install** on Linux.
