@@ -62,17 +62,29 @@ Confirm the install worked:
 lemonade --version
 ```
 
-### Step 2: Start the Lemonade Daemon
+### Step 2: Verify the Lemonade Daemon is Running
 
-`lemond` is the server process. Start it in the background so it keeps running while you continue the guide:
+`lemond` is managed by systemd and starts automatically when `lemonade-server` is installed — you do not need to start it manually. Check its status:
 
 ```bash
-lemond
+systemctl status lemond
+```
+
+You should see `Active: active (running)`. If the service shows as stopped or failed, start it with:
+
+```bash
+sudo systemctl start lemond
+```
+
+To confirm it is enabled to start automatically on every boot:
+
+```bash
+sudo systemctl enable lemond
 ```
 
 ### Step 3: Verify the Server is Ready
 
-The daemon takes a few seconds to initialize. Query the `/api/v1/models` endpoint to confirm it is up:
+Query the `/api/v1/models` endpoint to confirm the server is accepting requests:
 
 ```bash
 curl -s http://127.0.0.1:13305/api/v1/models
@@ -84,7 +96,7 @@ You should see:
 {"data":[],"object":"list"}
 ```
 
-This is the correct response. The empty `data` array simply means no model weights have been downloaded yet, the server itself is running and ready. If the command returns nothing at all, wait a few seconds and try again.
+This is the correct response. The empty `data` array simply means no model weights have been downloaded yet, the server itself is running and ready. If the command returns nothing, check the service status with `systemctl status lemond`.
 
 **Congrats — Lemonade Server is live!** You now have a fully local inference server running on your machine. From here on, every model call stays on your hardware, no cloud, no API keys, no data leaving your system.
 
