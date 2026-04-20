@@ -24,11 +24,17 @@ By the end of this playbook you will be able to:
 
 ## Prerequisites
 
+<!-- @device:halo -->
+<!-- @require:lemonade -->
+<!-- @device:end -->
+
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
 - At least **12 GB of RAM** (32 GB+ recommended for larger models)
 - **~10–20 GB of free disk space** for model weights
 
 ---
+
+<!-- @device:stx,krk,rx7900xt,rx9070xt -->
 
 ## Part 1: Install and Start Lemonade Server
 
@@ -38,7 +44,7 @@ When OpenClaw works through a task, it calls the model repeatedly, drafting a pl
 
 Lemonade runs as a background process and exposes an HTTP API at `http://127.0.0.1:13305/api/v1`. OpenClaw sends HTTP requests to that address.
 
-### Step 1: Install Lemonade via the PPA
+### Install Lemonade via the PPA
 
 Lemonade publishes a Debian PPA. Add the repository and install the package:
 
@@ -62,7 +68,7 @@ Confirm the install worked:
 lemonade --version
 ```
 
-### Step 2: Verify the Lemonade Daemon is Running
+### Verify the Lemonade Daemon is Running
 
 `lemond` is managed by systemd and starts automatically when `lemonade-server` is installed — you do not need to start it manually. Check its status:
 
@@ -82,7 +88,7 @@ To confirm it is enabled to start automatically on every boot:
 sudo systemctl enable lemond
 ```
 
-### Step 3: Verify the Server is Ready
+### Verify the Server is Ready
 
 Query the `/api/v1/models` endpoint to confirm the server is accepting requests:
 
@@ -100,33 +106,21 @@ This is the correct response. The empty `data` array simply means no model weigh
 
 **Congrats — Lemonade Server is live!** You now have a fully local inference server running on your machine. From here on, every model call stays on your hardware, no cloud, no API keys, no data leaving your system.
 
+<!-- @device:end -->
+
 ---
 
 ## Part 2: Managing Models
 
-### Step 4: Explore the Built-In Model Library
+### Explore the Built-In Model Library
 
-Lemonade ships with a curated catalog of pre-configured models. Run:
+Lemonade ships with a curated catalog of pre-configured models.
 
 ```bash
 lemonade list
 ```
 
-The output looks similar to this:
-
-```
-Model Name                      Downloaded  Details
---------------------------------------------------------------
-Gemma-3-4b-it-GGUF              No          llamacpp
-Phi-4-mini-instruct-GGUF        No          llamacpp
-Llama-3.2-3B-Instruct-GGUF      No          llamacpp
-Qwen3-8B-GGUF                   No          llamacpp
-Whisper-Large-v3                No          whispercpp
-SDXL-Turbo                      No          sd-cpp
-...
-```
-
-### Step 5: Pull a Model from the Catalog
+### Pull a Model from the Catalog
 
 Choose a model from the list and download its weights:
 
@@ -138,7 +132,7 @@ Lemonade fetches the weights from HuggingFace and stores them locally. Run `lemo
 
 > **Choosing a model for agent work:** Agent tasks like those OpenClaw handles are instruction-following and multi-step reasoning problems. Larger models generally reason more reliably, but they require more RAM. A good starting point is any model in the 7–14B parameter range, which typically requires 4–8 GB of disk space in 4-bit quantization.
 
-### Step 6: Import a Custom Model from HuggingFace
+### Import a Custom Model from HuggingFace
 
 The built-in catalog covers many popular models, but you can bring in other models hosted on HuggingFace using [`lemonade import`](https://lemonade-server.ai/docs/lemonade-cli/#options-for-import).
 
@@ -215,7 +209,7 @@ This takes effect for newly loaded models. A context of 32 768 tokens is a reaso
 
 ## Part 3: Install and Configure OpenClaw
 
-### Step 7: Install OpenClaw
+### Install OpenClaw
 
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
@@ -236,7 +230,7 @@ To persist this across terminal sessions:
 echo 'export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"' >> ~/.bashrc
 ```
 
-### Step 8: Configure OpenClaw to Use Lemonade
+### Configure OpenClaw to Use Lemonade
 
 Run OpenClaw's non-interactive onboarding, replacing `YOUR_MODEL_ID` with the model you pulled in Part 2. Use the plain name (e.g., `Gemma-3-4b-it-GGUF`) for catalog models, or the `user.` prefixed name (e.g., `user.MyModel-GGUF`) for imported ones:
 
@@ -270,7 +264,7 @@ openclaw onboard \
 
 This command writes OpenClaw's configuration to `~/.openclaw/openclaw.json`.
 
-### Step 9: Start the OpenClaw Gateway
+### Start the OpenClaw Gateway
 
 The gateway is the OpenClaw process that manages the agent loop and serves the dashboard:
 
@@ -290,7 +284,7 @@ Open your browser and navigate to `http://127.0.0.1:18789`. You should see the O
 
 ## Part 4: Connect a Discord Bot. [Reference](https://docs.openclaw.ai/channels/discord#ask-your-agent-2)
 
-### Step 10: Chat with Your Agent via Discord
+### Chat with Your Agent via Discord
 
 Once the gateway is running, you can reach your local agent through Discord by wiring up a bot. This lets you send commands from your mobile device to your laptop and trigger workloads from anywhere.
 
