@@ -17,7 +17,7 @@ body:
           errors that are not tied to the steps of a playbook), please file
           it in the [ROCm repository](https://github.com/ROCm/ROCm/issues/new/choose)
           instead.
-        - Please search [existing issues](https://github.com/AMD-AIG-AIMA/playbooks/issues?q=is%3Aissue)
+        - Please search [existing issues](https://github.com/amd/playbooks/issues)
           to make sure this hasn't already been reported.
 
   - type: input
@@ -32,16 +32,12 @@ body:
     validations:
       required: true
 
-  - type: dropdown
+  - type: input
     id: os
     attributes:
       label: Operating system
-      options:
-        - Windows
-        - Linux (Ubuntu)
-        - Linux (other distribution)
-        - WSL2
-        - Other
+      description: Which OS are you running on (including WSL2 if applicable)?
+      placeholder: e.g. Windows / Ubuntu / WSL2 (Ubuntu)
     validations:
       required: true
 
