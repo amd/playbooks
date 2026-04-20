@@ -36,7 +36,7 @@ By the end of this playbook you will be able to:
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt -->
 
-## Part 1: Install and Start Lemonade Server
+## Install and Start Lemonade Server
 
 ### Why a Local Model Server?
 
@@ -110,7 +110,7 @@ This is the correct response. The empty `data` array simply means no model weigh
 
 ---
 
-## Part 2: Managing Models
+## Managing Models
 
 ### Explore the Built-In Model Library
 
@@ -207,7 +207,7 @@ This takes effect for newly loaded models. A context of 32 768 tokens is a reaso
 
 ---
 
-## Part 3: Install and Configure OpenClaw
+## Install and Configure OpenClaw
 
 ### Install OpenClaw
 
@@ -282,7 +282,7 @@ Open your browser and navigate to `http://127.0.0.1:18789`. You should see the O
 
 ---
 
-## Part 4: Connect a Discord Bot. [Reference](https://docs.openclaw.ai/channels/discord#ask-your-agent-2)
+## Connect a Discord Bot. [Reference](https://docs.openclaw.ai/channels/discord#ask-your-agent-2)
 
 ### Chat with Your Agent via Discord
 
