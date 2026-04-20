@@ -1,0 +1,32 @@
+{
+  "id": "openclaw-lemonade-server",
+  "title": "Run OpenClaw with Lemonade Server",
+  "description": "Install and configure OpenClaw autonomous AI agent with Lemonade Server as its local inference backend on Linux.",
+  "time": 45,
+  "supported_platforms": {
+    "halo": [
+      "linux"
+    ],
+    "halo_box": [
+      "linux"
+    ],
+    "stx": [
+      "linux"
+    ],
+    "krk": [
+      "linux"
+    ]
+  },
+  "difficulty": "intermediate",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "openclaw",
+    "lemonade",
+    "agent",
+    "local-ai",
+    "linux"
+  ]
+}
