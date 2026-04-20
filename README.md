@@ -47,7 +47,7 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 | **Getting Started Creating Agents with GAIA** | Build and deploy AI agents using the GAIA framework |
 | **Fine-tuning LLMs with LLaMA-Factory** | LoRA fine-tuning of large language models using LLaMA-Factory |
 | **Custom GPU Kernels with PyTorch ROCm** | Write and optimize custom GPU kernels using PyTorch and ROCm |
-| **Optimized Fine-tuning with Unsloth QLoRA** | Memory-efficient QLoRA fine-tuning with Unsloth |
+| **Optimized Fine-tuning with Unsloth** | Memory-efficient QLoRA fine-tuning with Unsloth |
 | **Quick Start on vLLM** | Run inference and serving using vLLM |
 | **Clustering with RCCL** | Multi-node cluster using two AMD devices with RCCL |
 | **Speech-to-Speech Translation** | Build a real-time speech-to-speech translation system |
