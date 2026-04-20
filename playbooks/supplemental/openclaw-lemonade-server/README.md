@@ -268,6 +268,10 @@ openclaw gateway run --bind loopback --port 18789
 
 Open your browser and navigate to `http://127.0.0.1:18789`. You should see the OpenClaw dashboard with your Lemonade-backed model listed as the active backend. **Your agent is ready.**
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/fcadf4de-8421-4f14-a63a-2fa5cbb7c4ec" width="500" height="300" />
+</p>
+
 **Congratulations — you've built a fully local AI agent stack from scratch.** 
 
 ---
@@ -327,13 +331,21 @@ You should see `logged in to discord as <bot-id>` in the gateway output.
 
 DM the bot in Discord. It will reply with a short pairing code. Approve it on the machine running OpenClaw:
 
+<p align="center">
+  <img width="500" height="300" alt="Screenshot from 2026-04-19 22-51-27" src="https://github.com/user-attachments/assets/bbe5f4aa-d6c0-4958-9578-f2fd38cc97ef" />
+</p>
+
 ```bash
 openclaw pairing approve <CODE>
 ```
 
 > Pairing codes expire after one hour. If the bot does not reply to your first DM, check that the gateway is running and that **Direct Messages** is enabled in your server's privacy settings.
 
-You can now chat with your agent directly from Discord.
+You can now chat with your agent directly from Discord and offload tasks to your local hardware.
+
+<p align="center">
+  <img width="350" height="300" alt="image" src="https://github.com/user-attachments/assets/7d0f9632-5a1d-4f3c-81a2-d1903939f5fd" />
+</p>
 
 > **Tip — increase the model context window:** Local models often ship with a small default context limit. If the agent stops responding after a few messages, raise the limit in `~/.openclaw/openclaw.json` under `models.providers.lemonade.models[0].contextWindow` (e.g. `32768`) and restart the gateway.
 
