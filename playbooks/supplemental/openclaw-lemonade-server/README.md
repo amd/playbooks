@@ -352,3 +352,11 @@ You can now chat with your agent directly from Discord and offload tasks to your
 ---
 
 ## Next Steps
+
+Now that your agent can receive commands from your phone and act on your local machine, here are three directions worth exploring:
+
+1. **Stock market summarizer**: Schedule OpenClaw to fetch data from financial APIs on a fixed interval, summarize the day's movements with your local model, and push a digest to your Discord DM each morning.
+
+2. **Fine-tuning monitor**: Kick off a training job remotely via Discord, then have the agent tail the training log and report periodic loss values, GPU utilization, and disk usage back to your phone. If the run stalls or VRAM spikes, you find out immediately without needing to be at the machine.
+
+3. **IOT with a local VLM**: Point a camera at your front door, run a vision model on Lemonade, and have OpenClaw analyze frames on demand or on a trigger. Ask "did any packages arrive today?" from your phone and get a straight answer from your own hardware.
