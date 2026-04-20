@@ -1,0 +1,129 @@
+# Copyright Advanced Micro Devices, Inc.
+# SPDX-License-Identifier: MIT
+
+name: Bug report
+description: Report a problem with a specific playbook in this repository.
+title: "[Bug]: <short description>"
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report!
+
+        **Before you continue:**
+        - If your issue is with **ROCm itself** (drivers, HIP, the compiler,
+          MIOpen / rocBLAS / hipBLAS, kernel modules, or general GPU compute
+          errors that are not tied to the steps of a playbook), please file
+          it in the [ROCm repository](https://github.com/ROCm/ROCm/issues/new/choose)
+          instead.
+        - Please search [existing issues](https://github.com/AMD-AIG-AIMA/playbooks/issues?q=is%3Aissue)
+          to make sure this hasn't already been reported.
+
+  - type: input
+    id: playbook
+    attributes:
+      label: Which playbook is this about?
+      description: |
+        Name the playbook (or repository area) this issue applies to.
+        If possible, use the directory name under `playbooks/` (e.g.
+        `pytorch-rocm-llms`) or the playbook title from the README.
+      placeholder: e.g. pytorch-rocm-llms / "Running LLMs with PyTorch and ROCm"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - Linux (Ubuntu)
+        - Linux (other distribution)
+        - WSL2
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: os-version
+    attributes:
+      label: Operating system version
+      description: |
+        - Windows: e.g. `Windows 11 24H2 (Build 26100.2314)`
+        - Linux: output of `lsb_release -a` or contents of `/etc/os-release`
+      placeholder: e.g. Ubuntu 24.04.1 LTS / Windows 11 24H2 (26100.2314)
+    validations:
+      required: true
+
+  - type: input
+    id: hardware
+    attributes:
+      label: AMD hardware / platform
+      description: |
+        Which AMD device are you running on? Include the product name and,
+        if relevant, the specific CPU/APU/GPU model.
+      placeholder: e.g. Ryzen AI Max+ 395 (STX Halo), Radeon RX 7900 XTX, Instinct MI300X
+    validations:
+      required: true
+
+  - type: input
+    id: gpu-driver
+    attributes:
+      label: GPU driver / ROCm version
+      description: |
+        - Windows: AMD Adrenalin / Radeon Software version
+        - Linux: output of `rocminfo | head` or `dpkg -l | grep -i rocm`
+      placeholder: e.g. Adrenalin 25.x / ROCm 6.4.0
+    validations:
+      required: false
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug.
+      placeholder: Describe the actual behavior you observed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      placeholder: Describe what you expected the playbook step to do.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: |
+        List the exact steps from the playbook that lead to the bug. Include
+        the section / step number from the playbook where the failure occurs.
+      placeholder: |
+        1. Go to step '...' of the playbook
+        2. Run command '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs, error messages, or screenshots
+      description: |
+        Paste any relevant terminal output, stack traces, or screenshots.
+        Logs will be automatically formatted as code, no need for backticks.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Anything else that might help us reproduce or diagnose the issue.
+    validations:
+      required: false
