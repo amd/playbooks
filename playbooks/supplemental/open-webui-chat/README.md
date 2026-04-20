@@ -55,7 +55,7 @@ Open WebUI is built around standard OpenAI-style endpoints, like:
   - Image generation: `/images/generations`
   - Audio transcription: `/audio/transcriptions`
 
-Lemonade exposes these under `http://localhost:8000/api/v1/...`
+Lemonade exposes these under `http://localhost:13305/api/v1/...`
 
 If a backend supports those endpoints, Open WebUI can talk to it with minimal setup. That’s why we can switch backends without changing our workflow.
 
@@ -73,12 +73,12 @@ This section establishes a stable local environment: Lemonade running, Open WebU
 <!-- @os:linux -->
 - Install Lemonade (App + Server) by following the Linux distribution-specific package manager instructions on the [official documentation page](https://lemonade-server.ai/install_options.html).
 <!-- @os:end -->
-- Start the Lemonade server:
-  -  Open Powershell
-  -  Run the command: `lemonade-server serve`
-- Verify server status:
-  - In the same Powershell terminal, run: `lemonade-server status`
-  - Expect to see `Server is running on port 8000`
+After installation:
+    - The lemonade CLI is added to your system PATH automatically
+    - Lemonade server is expected to run in the background automatically
+- Verify Lemonade installation and server status:
+  - Open a terminal and run: `lemonade --version`. You should see something like `lemonade version x.y.z`.
+  - In the same terminal, run `lemonade status`. You should see the output showing that the server is running, typically on port `13305`.
   - Open the Lemonade Server app and download required models from the `Model Manager` tab
 
 <p align="center">
@@ -86,10 +86,10 @@ This section establishes a stable local environment: Lemonade running, Open WebU
 </p>
 
 - Confirm the API is reachable:
-  - Open `http://localhost:8000/api/v1/models` in your web browser.
+  - Open `http://localhost:13305/api/v1/models` in your web browser.
   - You should see a JSON list of models downloaded in Lemonade
 
-> If you don’t see your models in `http://localhost:8000/api/v1/models`, Open WebUI won’t be able to select them later.
+> If you don’t see your models in `http://localhost:13305/api/v1/models`, Open WebUI won’t be able to select them later.
 
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash
@@ -562,35 +562,39 @@ echo "OK: Open WebUI is responding on /health"
 
 In Open WebUI:
 
-1. Go to **Admin Settings → Connections**
+1. Go to **Admin Settings → Connections** (http://localhost:8080/admin/settings/connections):
 
 <p align="center">
-  <img src="assets/open_settings.png" alt="Open WebUI Settings page" width="200"/>
-</p>
-<p align="center">
-  <img src="assets/connection_settings.png" alt="Navigating to the connection settings" width="500"/>
+  <img src="assets/open_settings.png" alt="Open WebUI Settings page" width="16%"/>
+  <img src="assets/connection_settings.png" alt="Navigating to the connection settings" width="69%"/>
 </p>
 
 2. Under **OpenAI API**, add a new connection:
-   - **Base URL:** `http://localhost:8000/api/v1`
+   - **Base URL:** `http://localhost:13305/api/v1`
    - **API Key:** `-` (a single dash works for local)
 <p align="center">
-  <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="500"/>
+  <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
 </p>
 
-3. Save
-4. Apply the following suggested settings. These help Open WebUI to be more responsive with local LLMs.
+3. In http://localhost:8080/admin/settings/connections, esnure that under __"Manage OpenAI API Connections"__, only `http://localhost:13305/api/v1` is enabled.
+<p align="center">
+  <img src="assets/connection.png" alt="Admin settings connections page showing 'Manage OpenAI API Connections' with only http://localhost:13305/api/v1 enabled." width="600"/>
+</p>
+
+4. Save
+
+5. Apply the following suggested settings. These help Open WebUI to be more responsive with local LLMs.
    - Click the user profile button again, and choose "Admin Settings".
    - Click the "Settings" tab at the top, then "Interface" (which will be on the top or the left, depending on your window size), then disable the following:
       - Title Generation
       - Follow Up Generation
       - Tags Generation
 <p align="center">
-  <img src="assets/admin_settings.png" alt="Admin Settings" width="600"/>
+  <img src="assets/admin_settings.png" alt="Admin Settings" width="800"/>
 </p>
 
-5. Click the **"Save"** button in the bottom right of the page, then return to `http://localhost:8080`.
-6. Click the model dropdown and expect to see all the models that you have downloaded from Lemonade!
+6. Click the **"Save"** button in the bottom right of the page, then return to `http://localhost:8080`.
+7. Click the model dropdown and expect to see all the models that you have downloaded from Lemonade!
 
 ---
 
@@ -602,22 +606,22 @@ Now you’re all set up. Let's look at three interesting things to do.
 
 ### Activity 1: Chat with a Local LLM
 
-1. Click the dropdown menu in the top-left of the interface. This will display all of the Lemonade models you have installed. Select one to proceed. (example: `Llama-3.2-1B-Instruct-Hybrid`).
+1. Click the dropdown menu in the top-left of the interface. This will display all of the Lemonade models you have installed. Select one to proceed. (example: `Qwen3-4B-Hybrid`).
 <p align="center">
   <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
 </p>
 
 2. Enter a message to the LLM and click send (or hit Enter). The LLM will take a few seconds to load into memory and then you will see the response stream in.
 <p align="center">
-  <img src="assets/sending_a_message.png" alt="Sending a message" width="53%"/>
-  <img src="assets/llm_response.png" alt="LLM Response" width="40%"/>
+  <img src="assets/sending_a_message.png" alt="Sending a message" width="37.5%"/>
+  <img src="assets/llm_response.png" alt="LLM Response" width="50%"/>
 </p>
 
 3. The model will respond in the chat.
 <!-- @os:windows -->
 4. At this time, open `Task Manager` on your system. You will see **high GPU/NPU utilization** based on whether the model you selected is **Hybrid** or **NPU** respectively. That clearly shows you’re running locally.
 <p align="center">
-  <img src="assets/npu_utilization.png" alt="Task Manager NPU utilization" width="600"/>
+  <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
 </p>
 <!-- @os:end -->
 This validates that Open WebUI can send requests to Lemonade using the OpenAI-compatible chat endpoint.
@@ -628,16 +632,16 @@ This validates that Open WebUI can send requests to Lemonade using the OpenAI-co
 
 This requires a model that supports image input (a vision / multimodal model).
 
-1. Select a vision-capable model (example: `Gemma-3-4b-it-GGUF`, or any model labeled for vision in Lemonade)
+1. Select a vision-capable model (example: `Qwen3.5-4B-GGUF`, or any model labeled for vision in Lemonade)
 <p align="center">
   <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
 </p>
 
 2. Click the **`+`** button in the message box and upload an image
-3. Ask something that forces true image understanding: `Do you think this is a well-designed UI?`
+3. Ask something that forces true image understanding: `Do you think this is a well-designed GUI?`
 <p align="center">
-  <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="46%"/>
-  <img src="assets/vlm_response.png" alt="VLM Response" width="47%"/>
+  <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="43%"/>
+  <img src="assets/vlm_response.png" alt="VLM Response" width="40%"/>
 </p>
 
 4. The model answers based on the image content, not generic text.
@@ -652,38 +656,40 @@ Stable Diffusion models don't support text generation, they only generate images
 
 #### Step 1: Configure Image Generation in Open WebUI
 
-1. Go to **Admin Settings → Images**
+1. Go to **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
 2. Set:
    - **Image Generation:** ON
    - **Image Generation Engine:** Default (OpenAI)
-   - **OpenAI API Base URL:** `http://localhost:8000/api/v1`
+   - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
-   - **Model:** `SD-Turbo` (fast) or `SDXL-Base-1.0` (higher quality)
+   - **Model:** `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality)
 3. If you want to add more parameters, add them to the text field as JSON. For example: `{ "steps": 4, "cfg_scale": 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 <p align="center">
   <img src="assets/images_settings.png" alt="Lemonade VLM's" width="600"/>
 </p>
+
 4. Save
 
 
 #### Step 2: Allow Image Generation for the model
 This step ensures that you enable Image Generation as a capability for your model.
-1. Go to **Admin Settings → Models** and choose your model
+1. Go to **Admin Settings → Models** (http://localhost:8080/admin/settings/models) and choose your model
 2. Turn on `Image Generation`
 <p align="center">
-  <img src="assets/model_settings.png" alt="Model Settings" width="47%"/>
-  <img src="assets/edit_model.png" alt="Edit Model" width="45%"/>
+  <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
+  <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
 </p>
 
 #### Step 3: Generate an image from the chat screen
 
 1. Go back to chat at `http://localhost:8080`.
-2. Select a **Text Generation LLM** in the model dropdown (example: DeepSeek, CodeLlama).  **Do not select a Stable Diffusion model** as this is a chat model selector.
+2. Select a **Text Generation LLM** in the model dropdown (example: Qwen, Llama). **Do not select a Stable Diffusion model** as this is a chat model selector.
 3. In the message area, toggle **Image** ON.
 4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. An image is generated and appears in the chat.
 <p align="center">
-  <img src="assets/image_generation.png" alt="Image Generation" width="600"/>
+  <img src="assets/sdxl_prompt.png" alt="Image Generation" width="43%"/>
+  <img src="assets/sdxl_response.png" alt="Edit Model" width="35%"/>
 </p>
 
 This establishes that Open WebUI can coordinate a “two-part” workflow:
@@ -695,18 +701,18 @@ This establishes that Open WebUI can coordinate a “two-part” workflow:
 ## Troubleshooting
 
 ### “No models show up”
-- Confirm `http://localhost:8000/api/v1/models` loads in a browser
-- Re-check Open WebUI connection Base URL: `http://localhost:8000/api/v1`
+- Confirm `http://localhost:13305/api/v1/models` loads in a browser
+- Re-check Open WebUI connection Base URL: `http://localhost:13305/api/v1`
 
 ### “This model does not support chat completion” error message
-- You selected an image model (SD-Turbo / SDXL) in the chat model dropdown.
+- You selected an image model (SDXL-Turbo / SDXL-Base-1.0) in the chat model dropdown.
 - **Fix**: select an LLM for chat, and use the Image toggle + Images settings for generation.
 <p align="center">
   <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
 </p>
 
 ### Image generation errors/timeouts
-- Start with `SD-Turbo` first (fast, fewer steps)
+- Start with `SDXL-Turbo` first (fast, fewer steps)
 - Once working, switch the image model to `SDXL-Base-1.0` for quality
 
 ---
@@ -733,6 +739,7 @@ Render HTML outputs directly in the interface. This is surprisingly powerful for
 - [Open WebUI (GitHub)](https://github.com/open-webui/open-webui)
 - [Lemonade (GitHub)](https://github.com/lemonade-sdk/lemonade)
 - [Lemonade Server docs](https://lemonade-server.ai/docs)
+- [Lemonade Server CLI](https://lemonade-server.ai/docs/lemonade-cli/)
 - [Lemonade ↔ Open WebUI integration guide](https://lemonade-server.ai/docs/server/apps/open-webui)
 - [Lemonade Server API spec (endpoints)](https://lemonade-server.ai/docs/server/server_spec)
 - [Video walkthrough (Lemonade)](https://www.youtube.com/watch?v=mcf7dDybUco)
