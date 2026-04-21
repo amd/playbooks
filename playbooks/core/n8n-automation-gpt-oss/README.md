@@ -75,7 +75,7 @@ $body = @{
   temperature = 0
   max_tokens = 32
 } | ConvertTo-Json -Depth 5
-$out = curl.exe -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+$out = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions -H "Content-Type: application/json" -d $body
 if (-not $out) { throw "Empty response from Lemonade chat/completions" }
 
 ```
@@ -134,7 +134,7 @@ body='{
   "max_tokens": 32
 }'
 
-out="$(curl -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
+out="$(curl -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d "$body" || true)"
 
