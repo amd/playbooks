@@ -344,8 +344,7 @@ Open PowerShell and create a fresh virtual environment:
 python -m venv openwebui-venv
 .\openwebui-venv\Scripts\activate
 python -m pip install --upgrade pip
-pip install open-webui
-pip install beautifulsoup4
+pip install open-webui beautifulsoup4
 ```
 <!-- @os:end -->
 
@@ -371,8 +370,7 @@ python -m venv $venv
 $py = Join-Path $venv "Scripts\python.exe"
 
 & $py -m pip install --upgrade pip
-& $py -m pip install open-webui
-& $py -m pip install beautifulsoup4
+& $py -m pip install open-webui beautifulsoup4
 
 if ($LASTEXITCODE -ne 0) { throw "pip install open-webui failed" }
 ```
@@ -410,8 +408,7 @@ Open a terminal and create a fresh virtual environment:
 python3 -m venv openwebui-venv
 source openwebui-venv/bin/activate
 python -m pip install --upgrade pip
-pip install open-webui
-pip install beautifulsoup4
+pip install open-webui beautifulsoup4
 ```
 <!-- @os:end -->
 
@@ -439,8 +436,7 @@ py="$venv/bin/python"
 ow="$venv/bin/open-webui"
 
 "$py" -m pip install --upgrade pip
-"$py" -m pip install open-webui
-"$py" -m pip install beautifulsoup4
+"$py" -m pip install open-webui beautifulsoup4
 "$py" -c "import open_webui; print('OK: import open_webui')"
 "$py" -c "import bs4; print('OK: bs4 import')"
 "$ow" --help
