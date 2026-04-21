@@ -171,30 +171,21 @@ This installs Lemonade Server, downloads the default models, and verifies the se
 
 <!-- @test:id=gaia-lemonade-version timeout=60 hidden=True -->
 ```bash
-lemonade-server --version
+lemonade --version
 ```
 <!-- @test:end --> 
 
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonade-health-windows timeout=300 hidden=True -->
 ```powershell
-$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
-try {
-  $health = $null
-  for ($i=0; $i -lt 120; $i++) {
-    $health = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/health
-    if ($health) { break }
-    Start-Sleep -Seconds 1
-  }
-  if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:8000/api/v1/health" }
-  Write-Host "OK: Lemonade server health endpoint responded"
-} finally {
-  & lemonade-server stop
-  Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) {
-    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-  }
+$health = $null
+for ($i=0; $i -lt 120; $i++) {
+  $health = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/health
+  if ($health) { break }
+  Start-Sleep -Seconds 1
 }
+if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health" }
+Write-Host "OK: Lemonade server health endpoint responded"
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 
@@ -204,24 +195,9 @@ try {
 ```bash
 set -euo pipefail
 
-p=""
-cleanup() {
-  lemonade-server stop >/dev/null 2>&1 || true
-  sleep 2
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
-
-lemonade-server serve --host 127.0.0.1 --port 8000 >/tmp/gaia-lemonade.log 2>&1 &
-p=$!
-
 health=""
 for i in $(seq 1 120); do
-  health="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/health || true)"
+  health="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/health || true)"
   if [ -n "$health" ]; then
     break
   fi
@@ -229,7 +205,7 @@ for i in $(seq 1 120); do
 done
 
 if [ -z "$health" ]; then
-  echo "Lemonade server not ready on http://127.0.0.1:8000/api/v1/health"
+  echo "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health"
   exit 1
 fi
 
@@ -242,39 +218,32 @@ echo "OK: Lemonade server health endpoint responded"
 <!-- @os:windows -->
 <!-- @test:id=lemonade-chat-qwen-windows timeout=1200 hidden=True -->
 ```powershell
-$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
-try {
-  # Wait for server to come up
-  $modelsJson = $null
-  for ($i=0; $i -lt 120; $i++) {
-    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
-    if ($modelsJson) { break }
-    Start-Sleep -Seconds 1
-  }
-  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
-  Write-Host "OK: Lemonade server is responding"
-
-  # Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
-  $parsed = $modelsJson | ConvertFrom-Json
-  $entry  = $parsed.data | Where-Object { $_.id -eq "Qwen3-Coder-30B-A3B-Instruct-GGUF" } | Select-Object -First 1
-  if (-not $entry) { throw "Model Qwen3-Coder-30B-A3B-Instruct-GGUF is not present in Lemonade /api/v1/models." }
-  if (-not $entry.downloaded) { throw "Model Qwen3-Coder-30B-A3B-Instruct-GGUF is present but not downloaded in Lemonade. Please download it." }
-  Write-Host "OK: Qwen3-Coder-30B-A3B-Instruct-GGUF model is downloaded in Lemonade"
-
-  # Model chat test
-  $body = @{
-    model = "Qwen3-Coder-30B-A3B-Instruct-GGUF"
-    messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
-    temperature = 0
-    max_tokens = 32
-  } | ConvertTo-Json -Depth 5
-  $out = curl.exe -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions -H "Content-Type: application/json" -d $body
-  if (-not $out) { throw "Empty response from Lemonade chat/completions" }
-} finally {
-  & lemonade-server stop
-  Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+# Wait for server to come up
+$modelsJson = $null
+for ($i=0; $i -lt 120; $i++) {
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:1305/api/v1/models
+  if ($modelsJson) { break }
+  Start-Sleep -Seconds 1
 }
+if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
+Write-Host "OK: Lemonade server is responding"
+
+# Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
+$parsed = $modelsJson | ConvertFrom-Json
+$entry  = $parsed.data | Where-Object { $_.id -eq "Qwen3-Coder-30B-A3B-Instruct-GGUF" } | Select-Object -First 1
+if (-not $entry) { throw "Model Qwen3-Coder-30B-A3B-Instruct-GGUF is not present in Lemonade /api/v1/models." }
+if (-not $entry.downloaded) { throw "Model Qwen3-Coder-30B-A3B-Instruct-GGUF is present but not downloaded in Lemonade. Please download it." }
+Write-Host "OK: Qwen3-Coder-30B-A3B-Instruct-GGUF model is downloaded in Lemonade"
+
+# Model chat test
+$body = @{
+  model = "Qwen3-Coder-30B-A3B-Instruct-GGUF"
+  messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+  temperature = 0
+  max_tokens = 32
+} | ConvertTo-Json -Depth 5
+$out = curl.exe -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+if (-not $out) { throw "Empty response from Lemonade chat/completions" }
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -285,24 +254,9 @@ try {
 ```bash
 set -euo pipefail
 
-p=""
-cleanup() {
-  lemonade-server stop >/dev/null 2>&1 || true
-  sleep 2
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
-
-lemonade-server serve --host 127.0.0.1 --port 8000 >/tmp/lemonade-test.log 2>&1 &
-p=$!
-
 models_json=""
 for i in $(seq 1 120); do
-  models_json="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/models || true)"
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/models || true)"
   if [ -n "$models_json" ]; then
     break
   fi
@@ -310,7 +264,7 @@ for i in $(seq 1 120); do
 done
 
 if [ -z "$models_json" ]; then
-  echo "Lemonade server not ready on http://127.0.0.1:8000"
+  echo "Lemonade server not ready on http://127.0.0.1:13305"
   exit 1
 fi
 echo "OK: Lemonade server is responding"
@@ -346,7 +300,7 @@ body='{
   "max_tokens": 32
 }'
 
-out="$(curl -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions \
+out="$(curl -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d "$body" || true)"
 
