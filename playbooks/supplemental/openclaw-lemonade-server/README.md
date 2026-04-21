@@ -272,7 +272,13 @@ The gateway is the OpenClaw process that manages the agent loop and serves the d
 openclaw gateway run --bind loopback --port 18789
 ```
 
-Open your browser and navigate to `http://127.0.0.1:18789`. You should see the OpenClaw dashboard with your Lemonade-backed model listed as the active backend. **Your agent is ready.**
+To open the dashboard, run this in a second terminal while the gateway is still running:
+
+```bash
+openclaw dashboard
+```
+
+This prints the authenticated URL and opens it in your browser. After that first visit, you can navigate directly to `http://127.0.0.1:18789/` — localhost connections are auto-approved. You should see the OpenClaw dashboard with your Lemonade-backed model listed as the active backend. **Your agent is ready.**
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/fcadf4de-8421-4f14-a63a-2fa5cbb7c4ec" width="500" height="300" />
