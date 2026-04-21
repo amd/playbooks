@@ -17,6 +17,13 @@ on:
     paths:
       - 'playbooks/**'
 
+permissions:
+  contents: read
+  # Required so the failure-reporting step can open issues on behalf of the
+  # workflow. Note we still gate the issue creation step itself on
+  # github.ref == 'refs/heads/main' so PR runs never create issues.
+  issues: write
+
 jobs:
   detect-changes:
     name: Detect Changed Playbooks
@@ -160,6 +167,46 @@ jobs:
           name: test-results-${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
+
+      # Open / update a tracking issue for every failed test, but ONLY on the
+      # main branch. PRs (whose base is main) intentionally don't trigger this:
+      # those failures are usually the PR author's responsibility and would
+      # otherwise spam the tracker. `failure()` only fires when a previous step
+      # in this job failed, so passing matrix entries are skipped automatically.
+      #
+      # We invoke python directly (no shell-specific line continuations) so the
+      # same step works on both Windows and Linux self-hosted runners.
+      - name: Create failure issues (Linux)
+        if: failure() && matrix.platform == 'linux' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUNNER_NAME: ${{ runner.name }}
+        run: |
+          python .github/scripts/create_failure_issues.py \
+            --repo "${{ github.repository }}" \
+            --playbook "${{ matrix.playbook }}" \
+            --workflow-file "test-playbooks.yml" \
+            --runner-labels "self-hosted,Linux,${{ matrix.arch }}" \
+            --runner-name "${{ runner.name }}" \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --sha "${{ github.sha }}"
+
+      - name: Create failure issues (Windows)
+        if: failure() && matrix.platform == 'windows' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: powershell
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUNNER_NAME: ${{ runner.name }}
+        run: |
+          python .github/scripts/create_failure_issues.py `
+            --repo "${{ github.repository }}" `
+            --playbook "${{ matrix.playbook }}" `
+            --workflow-file "test-playbooks.yml" `
+            --runner-labels "self-hosted,Windows,${{ matrix.arch }}" `
+            --runner-name "${{ runner.name }}" `
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" `
+            --sha "${{ github.sha }}"
 
       - name: Test Summary (Windows)
         if: always() && matrix.platform == 'windows'

@@ -4,15 +4,7 @@ This document describes the expected platform configurations for running this pl
 
 ## Prerequisites
 
-PyTorch with ROCm support will be pre-installed on your AMD Developer Platform. Please refer to the relevant section for your operating system:
-
-### Windows
-
-| Component     | Version         | Notes                             |
-|---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 or newer    | Preinstalled, available in PATH   |
-
-### Linux
+PyTorch with ROCm support will be pre-installed on your AMD Developer Platform.
 
 | Component     | Version         | Notes                             |
 |---------------|-----------------|-----------------------------------|
@@ -24,11 +16,9 @@ The following models are tested and optimized for your platform:
 
 | Model | Parameters | Size | Download Location |
 |-------|------------|------|-------------------|
-| **unsloth/gemma-3n-E4B-it** | 8B | ~16GB | Download from HF
+| **unsloth/gemma-4-E4B-it** | 8B | ~16GB | Download from HF
 
-Models will be automatically downloaded to the Hugging Face cache directory:
-- **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
-- **Linux**: `~/.cache/huggingface/hub/`
+Models will be automatically downloaded to the Hugging Face cache directory: `~/.cache/huggingface/hub/`
 
 Ensure at least **20GB free space** for model storage.
 

@@ -1,10 +1,13 @@
 ## Overview
 
-<!-- ![alt text](assets/unsloth.png) -->
+This playbook shows how to fine-tune a language model locally with Unsloth on AMD hardware.
 
-Unsloth is a high-efficiency LLM fine-tuning framework designed to make advanced model customization accessible on modern hardware.
+It uses a short Supervised Fine-Tuning (SFT) example with LoRA adapters on `unsloth/gemma-4-E4B-it`, using a subset of the `mlabonne/FineTome-100k` dataset. The goal is to give you a simple end-to-end workflow that covers setup, training, inference, and saving the fine-tuned result.
 
-This playbook teaches you how to use Unsloth for practical fine-tuning workflows that run efficiently on local AI hardware.
+The example is designed to be practical and easy to modify, so you can use it as a starting point for your own datasets and models.
+
+![alt text](assets/unsloth.png)
+
 
 ## What You'll Learn
 
@@ -13,35 +16,17 @@ This playbook teaches you how to use Unsloth for practical fine-tuning workflows
 - How to save the fine-tuned result in local storage
 
 ## Why Unsloth?
-Fine-tuning large language models no longer requires massive compute or complex infrastructure—Unsloth focuses on making it fast and memory-efficient.
 
-A key strength of Unsloth lies in its VRAM optimization and accelerated training pipeline. By leveraging techniques such as optimized kernels and parameter-efficient fine-tuning (PEFT), it significantly reduces memory usage while enabling much faster training compared to standard approaches.
+Unsloth makes LLM fine-tuning easier to run on local hardware by reducing memory usage and speeding up training compared to a standard setup.
 
-In this project, we primarily adopt Supervised Fine-Tuning (SFT) with QLoRA, where only a small subset of parameters is updated. This allows us to fine-tune large models on consumer-grade hardware without sacrificing performance.
+In this playbook, we use Unsloth together with **LoRA-based SFT**. That means the base model stays mostly frozen, while a much smaller set of adapter weights is trained. This is a good fit for local development because it is lighter than full fine-tuning and faster to iterate on.
 
-Beyond SFT, Unsloth also supports GRPO-based reinforcement learning, enabling further alignment toward domain-specific objectives when needed.
-
-Overall, Unsloth bridges the gap between research and real-world deployment—making it practical to adapt foundation models into specialized systems efficiently.
+Unsloth also supports other training approaches, including QLoRA and reinforcement learning workflows. This playbook focuses on the simplest path first: a small LoRA fine-tuning example that users can run, understand, and extend.
 
 ## Set up your environment
 
-<!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-<!-- @test:id=create-venv timeout=60 -->
-```bash
-python -m venv unsloth-env --system-site-packages
-unsloth-env\Scripts\activate
-```
-<!-- @test:end -->
-<!-- @setup:id=activate-venv command="unsloth-env\Scripts\activate" -->
-
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @os:end -->
-
-<!-- @os:linux -->
-On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
+<!-- @device:halo_box_ -->
+Open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -51,10 +36,39 @@ source unsloth-env/bin/activate
 ```
 <!-- @test:end --> 
 <!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" --> 
-<!-- @os:end -->
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+Open a terminal and run the following prompt to create a venv:
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv unsloth-env
+source unsloth-env/bin/activate
+```
+<!-- @test:end --> 
+<!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" --> 
+<!-- @device:end -->
 
 ### Installing Basic Dependencies
-<!-- @require:pytorch -->
+<!-- @require:rocm,pytorch,driver -->
+
+<!-- @test:id=verify-torch-env timeout=60 hidden=True setup=activate-venv -->
+```python
+import sys
+import torch
+
+print(f"Python executable: {sys.executable}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
+
+if not torch.cuda.is_available():
+    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
+
+print("PASS: ROCm-enabled PyTorch is visible")
+```
+<!-- @test:end -->
 
 ### Additional Dependencies
 
@@ -64,6 +78,26 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 pip install --no-deps git+https://github.com/unslothai/unsloth-zoo.git
 pip install --no-deps --upgrade timm
 pip install datasets transformers trl
+```
+<!-- @test:end -->
+
+<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+```python
+import unsloth
+import torch
+from datasets import load_dataset
+from transformers import TextStreamer
+from unsloth import FastModel
+from unsloth.chat_templates import (
+    get_chat_template,
+    standardize_data_formats,
+    train_on_responses_only,
+)
+from trl import SFTTrainer, SFTConfig
+
+print(f"PyTorch version: {torch.__version__}")
+print(f"ROCm available: {torch.cuda.is_available()}")
+print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
@@ -77,12 +111,39 @@ Run the following code to execute the script:
 python test_unsloth.py
 ```
 
+<!-- @test:id=verify-script timeout=60 hidden=True -->
+```python
+import os
+import sys
+import ast
+
+scripts = ["test_unsloth.py", "test_unsloth_ci.py"]
+missing = [s for s in scripts if not os.path.exists(s)]
+
+if missing:
+    print(f"FAIL: Missing script: {missing}")
+    sys.exit(1)
+print("PASS: All required script files exist")
+
+for script in scripts:
+    with open(script, "r", encoding="utf-8") as f:
+        ast.parse(f.read(), filename=script)
+    print(f"PASS: {script} has valid syntax")
+```
+<!-- @test:end -->
+
+<!-- @test:id=quick-train-unsloth timeout=2400 hidden=True setup=activate-venv -->
+```bash
+python test_unsloth_ci.py
+```
+<!-- @test:end -->
+
 The rest of the playbook will conceptually go through each major step of the script. 
 
 ## How It Works
 The test_unsloth.py script performs the following steps:
-* **Load Model**: Loads unsloth/gemma-3n-E4B-it using FastModel.
-* **Prepare Data**: Standardizes the dataset (e.g., FineTome-100k) and applies the Gemma-3 chat template.
+* **Load Model**: Loads unsloth/gemma-4-E4B-it using FastModel.
+* **Prepare Data**: Standardizes the dataset (e.g., FineTome-100k) and applies the Gemma-4 chat template.
 * **Apply LoRA**: Adds adapters to language, attention, and MLP modules for efficient training.
 * **Train**: Uses SFTTrainer with response-only loss masking.
 * **Inference**: Runs a quick generation test to verify performance.
@@ -92,13 +153,14 @@ The test_unsloth.py script performs the following steps:
 You can modify the following constants to customize your run:
 
 ```python
-MODEL_NAME = "unsloth/gemma-3n-E4B-it"
+MODEL_NAME = "unsloth/gemma-4-E4B-it"
 MAX_SEQ_LEN = 1024
 DATASET_NAME = "mlabonne/FineTome-100k"
-OUTPUT_DIR = "gemma_3n_lora"
+OUTPUT_DIR = "gemma_4_lora"
 ```
 
 Example of the Unsloth welcome message and output when loading the model weights:
+
 ![alt text](assets/welcome.png)
 
 ## Prepare Dataset
@@ -109,7 +171,7 @@ mlabonne/FineTome-100k
 ```
 The dataset is: 
 * Converted into chat format
-* Processed using the Gemma-3 chat template
+* Processed using the Gemma-4 chat template
 * Cleaned to remove duplicate BOS tokens
 
 ## Train the Model
@@ -120,47 +182,119 @@ The script runs a short training demo, with the following parameters:
 - Gradient accumulation
 
 During training, you will see logs such as:
-```
+
 ![alt text](assets/training.png)
 
 
-## Optional: Lower Memory (4-bit)
-You can enable 4-bit quantization by using a 4-bit quantized model:
-```python
-load_in_4bit = True
-model_name = "unsloth/gemma-3n-E4B-it-unsloth-bnb-4bit"
-```
-This reduces memory usage significantly with minimal quality loss.
-
 ## Saving and Deployment
+
 ### Local Saving (LoRA)
 
 The script automatically saves LoRA adapters to the OUTPUT_DIR.
 ```python
-model.save_pretrained("gemma_3n_lora")  
-tokenizer.save_pretrained("gemma_3n_lora")
+model.save_pretrained("gemma_4_lora")  
+tokenizer.save_pretrained("gemma_4_lora")
 ```
+
+<!-- @test:id=verify-unsloth-lora-output timeout=120 hidden=True setup=activate-venv -->
+```python
+import os
+import sys
+import glob
+
+out_dir = "gemma_4_lora_ci"
+if not os.path.isdir(out_dir):
+    print(f"FAIL: Missing output directory: {out_dir}")
+    sys.exit(1)
+
+required = [
+    "adapter_config.json",
+    "tokenizer_config.json",
+]
+missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
+if missing:
+    print(f"FAIL: Missing required files: {missing}")
+    sys.exit(1)
+
+adapter_weights = (
+    glob.glob(os.path.join(out_dir, "adapter_model*.safetensors")) +
+    glob.glob(os.path.join(out_dir, "adapter_model*.bin"))
+)
+if not adapter_weights:
+    print("FAIL: Missing adapter weights")
+    sys.exit(1)
+
+print("PASS: Unsloth LoRA output looks correct")
+print(f"Found adapter weights: {adapter_weights}")
+```
+<!-- @test:end -->
 
 ### Save merged model (for vLLM) 
 
 For deployment with vLLM, merge the adapters into a full model:
 ```python
-model.save_pretrained_merged("gemma-3N-finetune", tokenizer)
+model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
+
+<!-- @test:id=verify-unsloth-merged-output timeout=120 hidden=True setup=activate-venv -->
+```python
+import os
+import sys
+import glob
+
+out_dir = "gemma_4_merged_ci"
+if not os.path.isdir(out_dir):
+    print(f"FAIL: Missing merged model directory: {out_dir}")
+    sys.exit(1)
+
+required = [
+    "config.json",
+    "tokenizer_config.json",
+]
+missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
+if missing:
+    print(f"FAIL: Missing required merged files: {missing}")
+    sys.exit(1)
+
+model_files = (
+    glob.glob(os.path.join(out_dir, "*.safetensors")) +
+    glob.glob(os.path.join(out_dir, "pytorch_model*.bin"))
+)
+if not model_files:
+    print("FAIL: Missing merged model weights")
+    sys.exit(1)
+
+print("PASS: Merged model output looks correct")
+```
+<!-- @test:end -->
 
 ### Export GGUF (for llama.cpp)
 
 Convert directly to GGUF for local inference:
 ```python
-model.save_pretrained_gguf("gemma_3n_finetune", tokenizer, quantization_method="Q8_0")
+model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
 
+## Explore Lower-Memory (4-bit) Fine-Tuning
+
+This playbook uses standard LoRA fine-tuning. If you need lower memory usage with minimal quality loss, a natural next step is to explore QLoRA with a supported 4-bit model and runtime stack.
+
+QLoRA keeps the same adapter-based training idea as LoRA, but uses a quantized 4-bit base model underneath. This can reduce memory usage further, but compatibility depends on the model, backend, and low-bit kernel support in the software stack.
+
+Before switching to QLoRA, verify that your chosen model and your AMD hardware/software environment support the required quantized runtime path.
+
+An example on how you can enable 4-bit quantization by using a 4-bit quantized model:
+```python
+load_in_4bit = True
+model_name = "unsloth/gemma-4-E4B-it-unsloth-bnb-4bit"
+```
 
 ## Next Steps
 - Train on your own specific datasets
 - Try finetuning with different hyperparameters
 - Experiment with different quantization levels to understand the tradeoff between memory usage and quality
 - Deploy with vLLM or llama.cpp
+- Try QLoRA for a lower-memory setup
 
 ## Resources
 
