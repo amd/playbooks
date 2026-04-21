@@ -1,8 +1,0 @@
-{
-  "model_name": "Qwen3.5-9B-GGUF-Q4-K-M",
-  "checkpoint": "unsloth/Qwen3.5-9B-GGUF:Q4_K_M",
-  "mmproj": "mmproj-F32.gguf",
-  "recipe": "llamacpp",
-  "labels": ["vision", "tool-calling"],
-  "size": 5.68
-}
