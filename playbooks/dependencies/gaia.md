@@ -221,7 +221,7 @@ echo "OK: Lemonade server health endpoint responded"
 # Wait for server to come up
 $modelsJson = $null
 for ($i=0; $i -lt 120; $i++) {
-  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:1305/api/v1/models
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
   if ($modelsJson) { break }
   Start-Sleep -Seconds 1
 }
