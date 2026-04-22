@@ -14,6 +14,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
+import PlaybookHelpBox from "@/components/PlaybookHelpBox";
 import type { Playbook, Platform, Device, DeviceCategory, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
 import { formatTime, DEVICE_IDS, deviceNames, extractPlatforms, extractDevices, extractCategories, extractCategoryDevices, DEVICE_CATEGORY_MAP, categoryForDevice } from "@/types/playbook";
 
@@ -2039,6 +2040,11 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                       </div>
                     )}
                   </div>
+
+                  {/* Need help? — links to GitHub issues */}
+                  {filteredContent && (
+                    <PlaybookHelpBox playbookTitle={playbook.title} />
+                  )}
                 </div>
 
                 {/* Mobile-only coverage toggle */}
