@@ -21,22 +21,6 @@
       "windows"
     ]
   },
-  "tested_platforms": {
-    "halo": [
-      "windows",
-      "linux"
-    ]
-  },
-  "required_platforms": {
-    "halo": [
-      "windows",
-      "linux"
-    ],
-    "halo_box": [
-      "windows",
-      "linux"
-    ]
-  },
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
