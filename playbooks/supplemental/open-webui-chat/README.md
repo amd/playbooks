@@ -197,7 +197,9 @@ try {
   Write-Host "OK: Image generation works"
 }
 finally {
-  Remove-Item $tmpChat, $tmpVision, $tmpImg -Force -ErrorAction SilentlyContinue
+  @($tmpChat, $tmpVision, $tmpImg) |
+  Where-Object { $_ } |
+  ForEach-Object { Remove-Item $_ -Force -ErrorAction SilentlyContinue }
 }
 ```
 <!-- @test:end --> 
