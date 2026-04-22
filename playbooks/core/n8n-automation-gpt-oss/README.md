@@ -75,9 +75,19 @@ $body = @{
   temperature = 0
   max_tokens = 32
 } | ConvertTo-Json -Depth 5
-$out = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions -H "Content-Type: application/json" -d $body
-if (-not $out) { throw "Empty response from Lemonade chat/completions" }
 
+$tmpBody = Join-Path $env:TEMP "lemonade-chat-body.json"
+[System.IO.File]::WriteAllText($tmpBody, $body, [System.Text.UTF8Encoding]::new($false))
+
+try {
+  $out = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
+  -H "Content-Type: application/json" `
+  --data-binary "@$tmpBody"
+  if (-not $out) { throw "Empty response from Lemonade chat/completions" }
+}
+finally {
+  Remove-Item  $tmpBody -Force -ErrorAction SilentlyContinue
+}
 ```
 <!-- @test:end -->
 <!-- @os:end -->
