@@ -102,7 +102,7 @@ try {
   $script = @'
 from gaia.llm.lemonade_client import LemonadeClient
 
-client = LemonadeClient(keep_alive=True)
+client = LemonadeClient(host="localhost", port=13305, keep_alive=True)
 
 info = client.get_system_info()
 assert isinstance(info, dict)
@@ -116,7 +116,7 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 assert isinstance(model_info, dict)
 assert model_info.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF"
 
-print("OK")
+print("OK: LemonadeClient works")
 '@
   Set-Content -Path gaia_lemonadeclient_smoke.py -Value $script
   .\.venv\Scripts\python.exe gaia_lemonadeclient_smoke.py
@@ -176,7 +176,7 @@ source .venv/bin/activate
 cat >/tmp/gaia_lemonadeclient_smoke.py <<'PY'
 from gaia.llm.lemonade_client import LemonadeClient
 
-client = LemonadeClient(keep_alive=True)
+client = LemonadeClient(host="localhost", port=13305, keep_alive=True)
 
 info = client.get_system_info()
 assert isinstance(info, dict)
@@ -190,7 +190,7 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 assert isinstance(model_info, dict)
 assert model_info.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF"
 
-print("OK")
+print("OK: LemonadeClient works")
 PY
 
 python3 /tmp/gaia_lemonadeclient_smoke.py

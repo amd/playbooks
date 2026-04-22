@@ -103,6 +103,10 @@ lemonade --version
 ```powershell
 $ErrorActionPreference = "Stop"
 
+$tmpChat = $null
+$tmpVision = $null
+$tmpImg = $null
+
 try {
   # Wait for /models
   $modelsJson = $null
@@ -258,7 +262,7 @@ chat = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
   "model": "Qwen3.5-4B-GGUF",
   "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
   "temperature": 0,
-  "max_tokens": 50,
+  "max_tokens": 500,
 }, timeout=300)
 text = chat["choices"][0]["message"]["content"]
 if "OK" not in text:
