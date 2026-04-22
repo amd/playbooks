@@ -276,7 +276,7 @@ openclaw dashboard
 This prints the authenticated URL, open it in your browser. You should see the OpenClaw dashboard with your Lemonade model listed as the active backend. **Your agent is ready.**
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/fcadf4de-8421-4f14-a63a-2fa5cbb7c4ec" width="500" height="300" />
+  <img src="assets/openclaw_dashboard.png" width="500" height="300" />
 </p>
 
 **Congratulations — you've built a fully local AI agent stack from scratch.** 
@@ -346,7 +346,7 @@ I already set my Discord bot token in config. Please finish Discord setup with U
 DM the bot in Discord. It will reply with a short pairing code.
 
 <p align="center">
-  <img width="500" height="300" alt="Screenshot from 2026-04-19 22-51-27" src="https://github.com/user-attachments/assets/bbe5f4aa-d6c0-4958-9578-f2fd38cc97ef" />
+  <img width="400" height="400" alt="Screenshot from 2026-04-19 22-51-27" src="assets/discord_pair_code.png" />
 </p>
 
 Approve it on the machine running OpenClaw Dashboard
@@ -359,7 +359,7 @@ openclaw pairing approve <CODE>
 You can now chat with your agent directly from Discord and offload tasks to your local hardware.
 
 <p align="center">
-  <img width="350" height="300" alt="image" src="https://github.com/user-attachments/assets/7d0f9632-5a1d-4f3c-81a2-d1903939f5fd" />
+  <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
 </p>
 
 ---
