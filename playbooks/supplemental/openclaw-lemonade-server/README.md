@@ -10,6 +10,8 @@ Together, they form a fully local AI agent stack: Lemonade handles model inferen
 
 > **Before you continue:** OpenClaw is a highly autonomous AI agent. Giving any AI agent access to your system may result in unpredictable or unintended outcomes. Proceed only if you understand the risks and are comfortable with autonomous software acting on your behalf.
 
+---
+
 ## What You'll Learn
 
 By the end of this playbook you will be able to:
@@ -19,18 +21,15 @@ By the end of this playbook you will be able to:
 - **Start the OpenClaw gateway** and confirm your agent is ready to work.
 - **Connect a Discord bot** to your agent so you can chat with it from any device.
 
-## Prerequisites
+---
 
-<!-- @device:halo -->
-<!-- @require:lemonade -->
-<!-- @device:end -->
+## Prerequisites
 
 <!-- @os:linux -->
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
 - At least **12 GB of RAM** (32 GB+ recommended for larger models)
 - **~10–20 GB of free disk space** for model weights
 <!-- @os:end -->
-
 <!-- @os:windows -->
 - A PC running **Windows 10/11**
 - Visual Studio Community Edition [2022](https://aka.ms/vs/17/release/vs_community.exe)
@@ -38,65 +37,11 @@ By the end of this playbook you will be able to:
 - **~10–20 GB of free disk space** for model weights
 <!-- @os:end -->
 
----
-
-<!-- @device:stx,krk,rx7900xt,rx9070xt -->
-
-## Install and Start Lemonade Server
-<!-- @os:linux -->
-### Install Lemonade via the PPA
-
-```bash
-sudo apt-get install -y software-properties-common
-sudo add-apt-repository -y ppa:lemonade-team/bleeding-edge
-sudo apt-get update
-sudo apt-get install -y lemonade-server
-```
-
-This installs two key binaries:
-
-| Binary | Role |
-|--------|------|
-| `lemonade` | CLI for model management: list, pull, import, configure |
-| `lemond` | Daemon that hosts the HTTP inference server |
-<!-- @os:end -->
-
-<!-- @os:windows -->
-### Install Lemonade via the MSI
-
-Download the latest installer from [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) and run the .msi file.
-
-After installation:
-
-- The lemonade CLI is added to your system PATH automatically
-- Lemonade server is expected to run in the background automatically
-
-<!-- @os:end -->
-Confirm the install worked:
-
-```bash
-lemonade --version
-```
-
-### Verify the Server is Ready
-
-```bash
-curl -s http://127.0.0.1:13305/api/v1/models
-```
-
-You should see:
-
-```json
-{"data":[],"object":"list"}
-```
-
-The empty `data` array simply means no model weights have been downloaded yet, the server itself is running and ready.
-
-**Congrats — Lemonade Server is live!** You now have a fully local inference server running on your machine. 
+<!-- @require:lemonade -->
 
 ---
-<!-- @device:end -->
-### Configuring Context Size
+
+## Configuring Context Size
 
 For agent workloads, a larger context window lets the model keep more of the task history, tool outputs, and reasoning steps in view at once. Set this once after the server is running:
 
