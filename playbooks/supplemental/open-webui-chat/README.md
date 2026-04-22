@@ -655,8 +655,8 @@ This step ensures that you enable Image Generation as a capability for your mode
 4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. An image is generated and appears in the chat.
 <p align="center">
-  <img src="assets/image_gen_prompt.png" alt="Image Generation" width="50%"/>
-  <img src="assets/image_gen_response.png" alt="Edit Model" width="37.5%"/>
+  <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
+  <img src="assets/image_gen_response.png" alt="Edit Model" width="32.5%"/>
 </p>
 
 This establishes that Open WebUI can coordinate a “two-part” workflow:
