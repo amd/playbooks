@@ -1,7 +1,7 @@
 {
   "id": "lemonade-getting-started",
   "title": "Using Lemonade Across CPU, GPU, and NPU",
-  "description": "Learn how to use Lemonade framework across CPU, GPU, and NPU on your STX Halo\u2122",
+  "description": "Learn to run Gen AI models locally with Lemonade, an open-source local AI server.",
   "time": 60,
   "supported_platforms": {
     "halo": [
