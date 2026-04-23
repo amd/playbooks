@@ -22,10 +22,10 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @os:end -->
 
 <!-- @os:linux -->
-
+<!-- @device:rx7900xt,rx9070xt -->
 Download and install the latest AMD GPU driver for Linux:
 
-1. Visit the [AMD Linux Drivers](https://amd.com/en/support/download/linux-drivers.html) page.
+1. Visit the [AMD Linux Drivers](https://www.amd.com/en/support/download/linux-drivers.html) page.
 2. Follow the installation instructions provided on the download page.
 
 <!-- @test:id=amd-gpu-visible-linux timeout=60 hidden=True -->
@@ -38,5 +38,6 @@ rocm-smi --showproductname
 test -d /opt/rocm
 test -e /opt/rocm/lib/libroctx64.so.4 -o -e /opt/rocm/lib/libroctx64.so
 ```
+<!-- @device:end -->
 <!-- @test:end --> 
 <!-- @os:end -->

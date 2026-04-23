@@ -29,7 +29,7 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @require:comfyui,rocm,driver,pytorch -->
+<!-- @require:comfyui,driver,pytorch -->
 <!-- @os:end -->
 
 <!-- @os:windows -->

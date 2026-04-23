@@ -86,7 +86,7 @@ source llm-env/bin/activate
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
-<!-- @require:rocm,pytorch,driver -->
+<!-- @require:pytorch,driver -->
 <!-- @os:end -->
 <!-- @os:windows -->
 <!-- @require:pytorch,driver -->
