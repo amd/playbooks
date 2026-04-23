@@ -89,7 +89,7 @@ source llm-env/bin/activate
 <!-- @require:driver,rocm,pytorch -->
 <!-- @os:end -->
 <!-- @os:windows -->
-<!-- @require:driver,rocm,pytorch -->
+<!-- @require:driver,pytorch -->
 <!-- @os:end -->
 
 ### Installing Additional Dependencies
