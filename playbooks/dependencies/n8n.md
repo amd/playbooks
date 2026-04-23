@@ -1,5 +1,3 @@
-<!-- This dependency is not used anywhere. It is outdated as we use podman for Linux -->
-
 <!--
 Copyright Advanced Micro Devices, Inc.
 
