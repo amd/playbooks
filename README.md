@@ -28,7 +28,7 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 
 | Playbook | Description |
 |----------|-------------|
-| **Running LLMs with PyTorch and ROCm** | Run powerful language models locally with PyTorch and ROCm |
+| **Running LLMs with PyTorch and AMD ROCm™ software** | Run powerful language models locally with PyTorch and ROCm |
 | **Running and Serving LLMs with LM Studio** | Set up LM Studio to run and serve large language models |
 | **Automating Workflows with n8n and Local LLMs** | Build an AI-powered news summarizer using n8n and Lemonade |
 | **Local LLM Coding with VSCode and Qwen3-Coder** | Use VSCode with locally-running Qwen3-Coder for private code assistance |
@@ -41,7 +41,7 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 | **Chat with LLMs in Open WebUI** | Set up Open WebUI to chat with local LLMs |
 | **Fine-tune LLMs with PyTorch and ROCm** | Fine-tune large language models using PyTorch and ROCm |
 | **Using Lemonade Across CPU, GPU, and NPU** | Learn how to use the Lemonade framework across CPU, GPU, and NPU |
-| **Local Computer Vision with Ryzen AI NPU** | Build local perception capabilities using CVML SDK on RyzenAI and ROCm |
+| **Local Computer Vision with Ryzen™ AI NPU** | Build local perception capabilities using CVML SDK on Ryzen AI and ROCm |
 | **Clustering Two Devices with llama.cpp RPC** | Distributed inference using RPC server across two AMD devices with llama.cpp |
 | **Getting Started with Ollama** | Install Ollama and run LLMs locally from the terminal, desktop app, or REST API |
 | **Getting Started Creating Agents with GAIA** | Build and deploy AI agents using the GAIA framework |

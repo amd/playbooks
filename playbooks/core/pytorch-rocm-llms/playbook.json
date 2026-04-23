@@ -1,6 +1,6 @@
 {
   "id": "pytorch-rocm-llms",
-  "title": "Running LLMs with PyTorch and ROCm",
+  "title": "Running LLMs with PyTorch and AMD ROCm™ software",
   "description": "Learn to run powerful language models on your PC with PyTorch and AMD ROCm™ software to summarize documents quickly and easily.",
   "time": 30,
   "supported_platforms": {
