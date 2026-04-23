@@ -59,7 +59,7 @@ Both approaches run on AMD GPUs. This is possible because PyTorch's ROCm build m
 A GPU kernel is a function that runs in parallel across thousands of GPU threads simultaneously. Unlike a CPU function that executes once per call, a kernel is launched with a **grid** of **blocks**, each containing many **threads**, all executing the same code on different data.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/4773c54b-686e-4b1b-8fea-d451dee9c27c" width="900"/>
+  <img src="assets/grid_threads.png" width="900"/>
 </p>
 
 ### GPU Execution Model: Wavefronts
