@@ -13,13 +13,14 @@ resp = client.chat.completions.create(
         {"role": "user", "content": "Create 2 flashcards about the solar system"},
     ],
     temperature=0,
-    max_tokens=1000,
+    max_tokens=5000,
 )
 
 text = resp.choices[0].message.content.strip()
 if text.startswith("```"):
     text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
 
+print("Raw response:", repr(text))
 cards = json.loads(text)
 assert isinstance(cards, list) and len(cards) >= 1
 assert "question" in cards[0] and "answer" in cards[0]
