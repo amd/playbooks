@@ -1,3 +1,7 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+SPDX-License-Identifier: MIT
+-->
 # Run OpenClaw with Lemonade Server as the backend
 
 ## Overview
@@ -28,14 +32,14 @@ By the end of this playbook you will be able to:
 <!-- @os:linux -->
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
 - At least **12 GB of RAM** (32 GB+ recommended for larger models)
-- **~10–20 GB of free disk space** for model weights
+- **~10–30 GB of free disk space** for model weights
 <!-- @os:end -->
 <!-- @os:windows -->
 - A PC running **Windows 10/11**
 - Visual Studio Community Edition [2022](https://aka.ms/vs/17/release/vs_community.exe)
 - At least **12 GB of RAM** (32 GB+ recommended for larger models)
-- You could increase the dedicated GPU memory using [Adrenaline software](https://www.amd.com/en/support/download/drivers.html) to try out larger models
-- **~10–20 GB of free disk space** for model weights
+- You could increase the dedicated GPU memory using [AMD Software: Adrenalin Edition™](https://www.amd.com/en/support/download/drivers.html) to try out larger models
+- **~10–30 GB of free disk space** for model weights
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -292,7 +296,7 @@ I already set my Discord bot token in config. Please finish Discord setup with U
 DM the bot in Discord. It will reply with a short pairing code.
 
 <p align="center">
-  <img width="400" height="400" alt="Screenshot from 2026-04-19 22-51-27" src="assets/discord_pair_code.png" />
+  <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
 Approve it on the machine running OpenClaw Dashboard
