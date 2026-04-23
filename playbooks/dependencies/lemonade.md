@@ -25,7 +25,7 @@ msiexec /i lemonade-server-minimal.msi /qn
 **Ubuntu (snap):**
 ```bash
 sudo snap install lemonade-server
-```
+**Ubuntu:**
 
 **Arch Linux (AUR):**
 ```bash
