@@ -15,7 +15,7 @@ This document describes the expected platform configurations for running this pl
 | Component | Version | Notes |
 |-----------|---------|-------|
 | **Node.js** | 22.16+ | Pre-installed, available in PATH |
-| **Lemonade Server** | latest | Running on `http://localhost:8000/api/v1` |
+| **Lemonade Server** | latest | Running on `http://localhost:13305/api/v1` |
 
 ### Lemonade LLM
 
@@ -23,7 +23,7 @@ The Lemonade server should be running with gpt-oss-120b loaded:
 
 | Service | Endpoint | Model |
 |---------|----------|-------|
-| **Lemonade API** | `http://localhost:8000/api/v1` | gpt-oss-120b-mxfp4-GGUF |
+| **Lemonade API** | `http://localhost:13305/api/v1` | gpt-oss-120b-mxfp4-GGUF |
 
 ---
 
@@ -34,7 +34,7 @@ The Lemonade server should be running with gpt-oss-120b loaded:
 | Component | Version | Notes |
 |-----------|---------|-------|
 | **Node.js** | 22.16+ | Pre-installed, available in PATH |
-| **Lemonade Server** | latest | Running on `http://localhost:8000/api/v1` |
+| **Lemonade Server** | latest | Running on `http://localhost:13305/api/v1` |
 
 ### Lemonade LLM
 
