@@ -46,9 +46,9 @@ source llm-env/bin/activate
 git clone https://github.com/Comfy-Org/ComfyUI.git
 ```
 
-#### Optionally checkout a specific version
+#### (Optional) Checkout a specific version
 ```bash
-git checkout v0.17.2
+git checkout v0.19.2
 ```
 
 #### Install ComfyUI requirements
