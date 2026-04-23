@@ -38,6 +38,6 @@ rocm-smi --showproductname
 test -d /opt/rocm
 test -e /opt/rocm/lib/libroctx64.so.4 -o -e /opt/rocm/lib/libroctx64.so
 ```
-<!-- @device:end -->
 <!-- @test:end --> 
+<!-- @device:end -->
 <!-- @os:end -->
