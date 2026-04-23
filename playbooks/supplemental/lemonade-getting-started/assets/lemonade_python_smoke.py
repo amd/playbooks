@@ -1,10 +1,10 @@
 from openai import OpenAI
 import json
 
-client = OpenAI(base_url="http://127.0.0.1:8000/api/v1", api_key="lemonade")
+client = OpenAI(base_url="http://127.0.0.1:13305/api/v1", api_key="lemonade")
 
 resp = client.chat.completions.create(
-    model="Gemma-3-4b-it-GGUF",
+    model="Qwen3.5-4B-GGUF",
     messages=[
         {
             "role": "system",
@@ -13,7 +13,7 @@ resp = client.chat.completions.create(
         {"role": "user", "content": "Create 2 flashcards about the solar system"},
     ],
     temperature=0,
-    max_tokens=500,
+    max_tokens=1000,
 )
 
 text = resp.choices[0].message.content.strip()

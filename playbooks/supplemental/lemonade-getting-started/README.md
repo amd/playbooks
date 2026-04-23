@@ -45,65 +45,45 @@ lemonade --version
 <!-- @test:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=lemonade-chat-gemma-windows timeout=1200 hidden=True -->
+<!-- @test:id=lemonade-chat-qwen-windows timeout=1200 hidden=True -->
 ```powershell
-$p = Start-Process -FilePath "lemonade" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 13305" -NoNewWindow -PassThru
-try {
-  # Wait for server to come up
-  $modelsJson = $null
-  for ($i=0; $i -lt 120; $i++) {
-    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
-    if ($modelsJson) { break }
-    Start-Sleep -Seconds 1
-  }
-  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
-  Write-Host "OK: Lemonade server is responding"
 
-  # Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
-  $parsed = $modelsJson | ConvertFrom-Json
-  $entry  = $parsed.data | Where-Object { $_.id -eq "Qwen3.5-4B-GGUF" } | Select-Object -First 1
-  if (-not $entry) { throw "Model Qwen3.5-4B-GGUF is not present in Lemonade /api/v1/models." }
-  if (-not $entry.downloaded) { throw "Model Qwen3.5-4B-GGUF is present but not downloaded in Lemonade. Please download it." }
-  Write-Host "OK: Qwen3.5-4B-GGUF model is downloaded in Lemonade"
-
-  # Model chat test
-  $body = @{
-    model = "Qwen3.5-4B-GGUF"
-    messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
-    temperature = 0
-    max_tokens = 32
-  } | ConvertTo-Json -Depth 5
-  $out = curl.exe -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions -H "Content-Type: application/json" -d $body
-  if (-not $out) { throw "Empty response from Lemonade chat/completions" }
-} finally {
-  & lemonade stop
-  Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+# Wait for server to come up
+$modelsJson = $null
+for ($i=0; $i -lt 120; $i++) {
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
+  if ($modelsJson) { break }
+  Start-Sleep -Seconds 1
 }
+if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
+Write-Host "OK: Lemonade server is responding"
+
+# Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
+$parsed = $modelsJson | ConvertFrom-Json
+$entry  = $parsed.data | Where-Object { $_.id -eq "Qwen3.5-4B-GGUF" } | Select-Object -First 1
+if (-not $entry) { throw "Model Qwen3.5-4B-GGUF is not present in Lemonade /api/v1/models." }
+if (-not $entry.downloaded) { throw "Model Qwen3.5-4B-GGUF is present but not downloaded in Lemonade. Please download it." }
+Write-Host "OK: Qwen3.5-4B-GGUF model is downloaded in Lemonade"
+
+# Model chat test
+$body = @{
+  model = "Qwen3.5-4B-GGUF"
+  messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+  temperature = 0
+  max_tokens = 500
+} | ConvertTo-Json -Depth 5
+$out = curl.exe -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+if (-not $out) { throw "Empty response from Lemonade chat/completions" }
+Write-Host "OK: Model Qwen3.5-4B-GGUF responded"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 
 <!-- @os:linux -->
-<!-- @test:id=lemonade-chat-gemma-linux timeout=1200 hidden=True -->
+<!-- @test:id=lemonade-chat-qwen-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
-
-p=""
-cleanup() {
-  lemonade stop >/dev/null 2>&1 || true
-  sleep 2
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
-
-lemonade serve --host 127.0.0.1 --port 13305 >/tmp/lemonade-test.log 2>&1 &
-p=$!
 
 models_json=""
 for i in $(seq 1 120); do
@@ -148,7 +128,7 @@ body='{
   "model": "Qwen3.5-4B-GGUF",
   "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
   "temperature": 0,
-  "max_tokens": 32
+  "max_tokens": 500
 }'
 
 out="$(curl -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
@@ -159,6 +139,8 @@ if [ -z "$out" ]; then
   echo "Empty response from Lemonade chat/completions"
   exit 1
 fi
+
+echo "OK: Model Qwen3.5-4B-GGUF responded"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -280,11 +262,15 @@ The real power of a local AI server is that any application can connect to it us
 
 ### Step 4: Start the Server
 
-If the server is not already running from the previous section, launch it by double-clicking on the Lemonade app or start it from the command line using the following:
+Make sure the Lemonade server is running. It typically starts automatically in the background after installation. To verify, run:
 
 ```
-lemonade serve
+lemonade status
 ```
+
+You should see a message like: `Server is running on port 13305`.
+
+If the server isn’t running, start it by opening the Lemonade app. Use the default port **13305** (you can confirm or select this from the tray icon).
 
 ### Step 5: Install the OpenAI Python Client
 
@@ -454,24 +440,17 @@ while True:
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=600 hidden=True -->
 ```powershell
-$p = Start-Process -FilePath "lemonade" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 13305" -NoNewWindow -PassThru
-try {
-  # Wait for server to come up
-  $modelsJson = $null
-  for ($i=0; $i -lt 120; $i++) {
-    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
-    if ($modelsJson) { break }
-    Start-Sleep -Seconds 1
-  }
-  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
-  Write-Host "OK: Lemonade server is responding"
-
-  python lemonade_python_smoke.py
-} finally {
-  & lemonade stop
-  Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+# Wait for server to come up
+$modelsJson = $null
+for ($i=0; $i -lt 120; $i++) {
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
+  if ($modelsJson) { break }
+  Start-Sleep -Seconds 1
 }
+if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
+Write-Host "OK: Lemonade server is responding"
+
+python lemonade_python_smoke.py
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -481,22 +460,6 @@ try {
 <!-- @test:id=lemonade-python-smoke-linux timeout=600 hidden=True -->
 ```bash
 set -euo pipefail
-
-p=""
-cleanup() {
-  rm -f /tmp/lemonade_python_smoke.py
-  lemonade stop >/dev/null 2>&1 || true
-  sleep 2
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
-
-lemonade serve --host 127.0.0.1 --port 13305 >/tmp/lemonade-python-test.log 2>&1 &
-p=$!
 
 models_json=""
 for i in $(seq 1 120); do
@@ -650,7 +613,7 @@ You have a local AI server running on your own hardware, here is where to go nex
 
 2. **Browse more models**: Explore the full [model library](https://lemonade-server.ai/docs/server/server_models/) to find models optimized for coding, reasoning, vision, and more. Use the Lemonade App or `lemonade list` to see what is available.
 
-3. **Unlock ROCm GPU acceleration**: If you have a supported AMD GPU, switch to the ROCm backend: `lemonade serve --llamacpp rocm`. See [supported AMD GPUs](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
+3. **Unlock ROCm GPU acceleration**: If you have a supported AMD GPU, switch to the ROCm backend: `lemonade config set llamacpp.backend=rocm`. See [supported AMD GPUs](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
 
 4. **Read the full API spec**: Lemonade supports chat completions, embeddings, audio transcription, image generation, text-to-speech, and more. See the [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) for every endpoint.
 
