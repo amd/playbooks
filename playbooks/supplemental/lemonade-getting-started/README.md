@@ -450,6 +450,7 @@ for ($i=0; $i -lt 120; $i++) {
 if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
 Write-Host "OK: Lemonade server is responding"
 
+Start-Sleep -Seconds 5
 python lemonade_python_smoke.py
 ```
 <!-- @test:end -->
@@ -476,6 +477,7 @@ if [ -z "$models_json" ]; then
 fi
 echo "OK: Lemonade server is responding"
 
+sleep 5
 python3 lemonade_python_smoke.py
 ```
 <!-- @test:end -->
