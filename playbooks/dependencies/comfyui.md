@@ -17,30 +17,6 @@ SPDX-License-Identifier: MIT
 <!-- @os:end -->
 
 <!-- @os:linux -->
-
-#### Create a Virtual Environment
-<!-- @device:halo_box_ -->
-On Linux, open a terminal in the directory of your choice and run the following prompt to create a venv with ROCm+Pytorch already installed:
-
-```bash
-sudo apt update
-sudo apt install -y python3-venv
-python3 -m venv llm-env --system-site-packages
-source llm-env/bin/activate
-```
-<!-- @device:end -->
-
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-On Linux, open a terminal in the directory of your choice and run the following prompt to create a venv:
-
-```bash
-sudo apt update
-sudo apt install -y python3-venv
-python3 -m venv llm-env
-source llm-env/bin/activate
-```
-<!-- @device:end -->
-
 #### Clone ComfyUI
 ```bash
 git clone https://github.com/Comfy-Org/ComfyUI.git

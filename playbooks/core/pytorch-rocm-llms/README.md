@@ -23,7 +23,7 @@ This tutorial uses PyTorch powered by AMD ROCm™ software to run models that ca
 
 ### Create a Virtual Environment
 
-<!-- @device:halo_box_ -->
+<!-- @device:halo_box -->
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
 <!-- @test:id=create-venv timeout=60 -->
@@ -86,10 +86,10 @@ source llm-env/bin/activate
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
-<!-- @require:pytorch,driver -->
+<!-- @require:driver,rocm,pytorch -->
 <!-- @os:end -->
 <!-- @os:windows -->
-<!-- @require:pytorch,driver -->
+<!-- @require:driver,rocm,pytorch -->
 <!-- @os:end -->
 
 ### Installing Additional Dependencies

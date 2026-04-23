@@ -25,11 +25,24 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 ## Installing Dependencies
 
 <!-- @os:windows -->
-<!-- @require:comfyui,driver -->
+<!-- @require:driver,comfyui -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @require:comfyui,driver,pytorch -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+#### Create a Virtual Environment
+On Linux, open a terminal in the directory of your choice and run the following prompt to create a venv:
+
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv llm-env
+source llm-env/bin/activate
+```
+<!-- @device:end -->
+
+<!-- @require:driver,rocm,pytorch,comfyui -->
 <!-- @os:end -->
 
 <!-- @os:windows -->

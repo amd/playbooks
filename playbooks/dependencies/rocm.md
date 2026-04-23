@@ -6,54 +6,44 @@ SPDX-License-Identifier: MIT
 
 ### ROCm
 
-<!-- @device:halo_box,halo,stx -->
-#### 1. Install AMD ROCm™ software on Linux (Ubuntu 24.04)
-
-These steps install the **system ROCm 7.2.1 runtime** on Ubuntu 24.04.
-> Note: ROCm is a **system-wide install** on Linux.
-
+**Add the current user to the render and video groups.** Restart your system following these commands.
 ```bash
-sudo apt update
-wget https://repo.radeon.com/amdgpu-install/7.2.1/ubuntu/noble/amdgpu-install_7.2.1.70201-1_all.deb
-sudo apt install ./amdgpu-install_7.2.1.70201-1_all.deb
-sudo amdgpu-install -y --usecase=rocm --no-dkms
+sudo usermod -a -G render,video $LOGNAME
 ```
-
-#### 2. Set the correct user permissions
+#### Install ROCm into a virtual environment
+<!-- @device:halo,halo_box -->
+<!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-sudo usermod -aG render,video $USER
-```
+python -m pip install --upgrade pip
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[libraries,devel]"
 
-#### 3. Reboot the system
-```bash
-sudo reboot
-```
-This is important for the runtime stack and permissions to settle.
-
-#### 4. Verify that ROCm is installed correctly and usable
-
-<!-- @test:id=verify-linux-rocm-installation timeout=180 -->
-```bash
-# Check ROCm path (paths should exist)
-ls -l /opt/rocm
-ls -l /opt/rocm/lib/libroctx64.so*
-
-# Check ROCm device files (Device files owned by the render group should be visible)
-ls -l /dev/kfd
-ls -l /dev/dri/renderD* 
-
-# Check user groups ($USER should be listed in both render and video)
-id
-groups
-
-# Check ROCm with rocminfo ('Permission denied' error should NOT be seen)
-rocminfo | sed -n '1,120p'
-
-# Check installed ROCm version
-cat /opt/rocm/.info/version
 ```
 <!-- @test:end -->
+<!-- @device:end -->
 
-Refer this [official documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/native_linux/install-ryzen.html) for more info.
+<!-- @device:krk -->
+<!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
+```bash
+python -m pip install --upgrade pip
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "rocm[libraries,devel]"
 
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:stx -->
+<!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
+```bash
+python -m pip install --upgrade pip
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ "rocm[libraries,devel]"
+
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:rx7900xt,rx9070xt -->
+```bash
+python -m pip install --upgrade pip
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120x-all/ "rocm[libraries,devel]"
+```
 <!-- @device:end -->
