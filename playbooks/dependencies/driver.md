@@ -4,9 +4,8 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### AMD GPU Driver
-
 <!-- @os:windows -->
+### AMD GPU Driver
 
 Update to the latest AMD GPU driver using `AMD Software: Adrenalin Edition™`.
 
@@ -23,6 +22,8 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 
 <!-- @os:linux -->
 <!-- @device:rx7900xt,rx9070xt -->
+### AMD GPU Driver
+
 Download and install the latest AMD GPU driver for Linux:
 
 1. Visit the [AMD Linux Drivers](https://www.amd.com/en/support/download/linux-drivers.html) page.
