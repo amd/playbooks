@@ -33,6 +33,11 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 | **Automating Workflows with n8n and Local LLMs** | Build an AI-powered news summarizer using n8n and Lemonade |
 | **Local LLM Coding with VSCode and Qwen3-Coder** | Use VSCode with locally-running Qwen3-Coder for private code assistance |
 | **Generating Images with ComfyUI and Z Image Turbo** | Create AI-generated images using ComfyUI with Z Image Turbo |
+
+## Coming Soon
+
+| Playbook | Description |
+|----------|-------------|
 | **Chat with LLMs in Open WebUI** | Set up Open WebUI to chat with local LLMs |
 | **Fine-tune LLMs with PyTorch and ROCm** | Fine-tune large language models using PyTorch and ROCm |
 | **Using Lemonade Across CPU, GPU, and NPU** | Learn how to use the Lemonade framework across CPU, GPU, and NPU |
@@ -40,11 +45,12 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 | **Clustering Two Devices with llama.cpp RPC** | Distributed inference using RPC server across two AMD devices with llama.cpp |
 | **Getting Started with Ollama** | Install Ollama and run LLMs locally from the terminal, desktop app, or REST API |
 | **Getting Started Creating Agents with GAIA** | Build and deploy AI agents using the GAIA framework |
-| **Custom GPU Kernels with PyTorch ROCm** | Write and optimize custom GPU kernels using PyTorch and ROCm `Coming Soon` |
-| **Optimized Fine-tuning with Unsloth QLoRA** | Memory-efficient QLoRA fine-tuning with Unsloth `Coming Soon` |
-| **Quick Start on vLLM** | Run inference and serving using vLLM `Coming Soon` |
-| **Clustering with RCCL** | Multi-node cluster using two AMD devices with RCCL `Coming Soon` |
-| **Speech-to-Speech Translation** | Build a real-time speech-to-speech translation system `Coming Soon` |
+| **Fine-tuning LLMs with LLaMA-Factory** | LoRA fine-tuning of large language models using LLaMA-Factory |
+| **Custom GPU Kernels with PyTorch ROCm** | Write and optimize custom GPU kernels using PyTorch and ROCm |
+| **Optimized Fine-tuning with Unsloth** | Memory-efficient LoRA fine-tuning with Unsloth |
+| **Quick Start on vLLM** | Run inference and serving using vLLM |
+| **Clustering with RCCL** | Multi-node cluster using two AMD devices with RCCL |
+| **Speech-to-Speech Translation** | Build a real-time speech-to-speech translation system |
 
 ## AMD AI Developer Program
 
