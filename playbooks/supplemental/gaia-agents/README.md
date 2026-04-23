@@ -90,20 +90,19 @@ Now let's build this from scratch.
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
-$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
 try {
   $health = $null
   for ($i=0; $i -lt 120; $i++) {
-    $health = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/health
+    $health = curl.exe -sS --fail-with-body --max-time 2 http://127.0.0.1:13305/api/v1/health
     if ($health) { break }
     Start-Sleep -Seconds 1
   }
-  if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:8000/api/v1/health" }
+  if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health" }
 
   $script = @'
 from gaia.llm.lemonade_client import LemonadeClient
 
-client = LemonadeClient(keep_alive=True)
+client = LemonadeClient(host="localhost", port=13305, keep_alive=True)
 
 info = client.get_system_info()
 assert isinstance(info, dict)
@@ -117,17 +116,12 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 assert isinstance(model_info, dict)
 assert model_info.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF"
 
-print("OK")
+print("OK: LemonadeClient works")
 '@
   Set-Content -Path gaia_lemonadeclient_smoke.py -Value $script
   .\.venv\Scripts\python.exe gaia_lemonadeclient_smoke.py
 } finally {
   Remove-Item gaia_lemonadeclient_smoke.py -ErrorAction SilentlyContinue
-  & lemonade-server stop
-  Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) {
-    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-  }
 }
 ```
 <!-- @test:end --> 
@@ -138,27 +132,21 @@ print("OK")
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
-try {
-  $health = $null
-  for ($i=0; $i -lt 120; $i++) {
-    $health = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/health
+$health = $null
+for ($i=0; $i -lt 120; $i++) {
+    $health = curl.exe -sS --fail-with-body --max-time 2 http://127.0.0.1:13305/api/v1/health
     if ($health) { break }
     Start-Sleep -Seconds 1
-  }
-
-  if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:8000/api/v1/health" }
-  Write-Host "OK: Lemonade server ready on http://127.0.0.1:8000/api/v1/health"
-
-  $output = cmd /c "echo quit| .\.venv\Scripts\python.exe hardware_advisor_agent.py"
-
-  if (-not ($output -match "Hardware Advisor Agent" -or $output -match "Agent ready!" -or $output -match "Goodbye!")) { throw "Did not see expected output from hardware_advisor_agent.py" }
-  Write-Host "OK: hardware_advisor_agent.py started successfully"
-} finally {
-  & lemonade-server stop
-  Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
 }
+
+if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health" }
+Write-Host "OK: Lemonade server ready on http://127.0.0.1:13305/api/v1/health"
+
+$output = cmd /c "echo quit| .\.venv\Scripts\python.exe hardware_advisor_agent.py"
+
+if (-not ($output -match "Hardware Advisor Agent" -or $output -match "Agent ready!" -or $output -match "Goodbye!")) { throw "Did not see expected output from hardware_advisor_agent.py" }
+Write-Host "OK: hardware_advisor_agent.py started successfully"
+
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 
@@ -167,12 +155,28 @@ try {
 <!-- @test:id=gaia-lemonadeclient-smoke-linux timeout=300 hidden=True -->
 ```bash
 set -euo pipefail
+
+health=""
+for i in $(seq 1 120); do
+  health="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/health || true)"
+  if [ -n "$health" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$health" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health"
+  exit 1
+fi
+echo "OK: Lemonade server is responding on http://127.0.0.1:13305/api/v1/health"
+
 source .venv/bin/activate
 
 cat >/tmp/gaia_lemonadeclient_smoke.py <<'PY'
 from gaia.llm.lemonade_client import LemonadeClient
 
-client = LemonadeClient(keep_alive=True)
+client = LemonadeClient(host="localhost", port=13305, keep_alive=True)
 
 info = client.get_system_info()
 assert isinstance(info, dict)
@@ -186,7 +190,7 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 assert isinstance(model_info, dict)
 assert model_info.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF"
 
-print("OK")
+print("OK: LemonadeClient works")
 PY
 
 python3 /tmp/gaia_lemonadeclient_smoke.py
@@ -201,28 +205,19 @@ rm -f /tmp/gaia_lemonadeclient_smoke.py
 set -euo pipefail
 export PATH="$HOME/.local/bin:$PATH"
 
-p=""
-cleanup() {
-  lemonade-server stop >/dev/null 2>&1 || true
-  sleep 2
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
-
-lemonade-server serve --host 127.0.0.1 --port 8000 >/tmp/gaia-agent.log 2>&1 &
-p=$!
-
 for i in $(seq 1 120); do
-  health="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/health || true)"
+  health="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/health || true)"
   if [ -n "$health" ]; then
     break
   fi
   sleep 1
 done
+
+if [ -z "$health" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health"
+  exit 1
+fi
+echo "OK: Lemonade server is responding on http://127.0.0.1:13305/api/v1/health"
 
 printf 'quit' | uv run hardware_advisor_agent.py >/tmp/gaia_agent_output.txt
 
