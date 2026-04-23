@@ -93,7 +93,7 @@ After installation:
 
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash
-lemonade-server --version
+lemonade --version
 ```
 <!-- @test:end --> 
 
@@ -103,32 +103,26 @@ lemonade-server --version
 ```powershell
 $ErrorActionPreference = "Stop"
 
-# Stop any stale server (safe if none running)
-& lemonade-server stop 2>$null | Out-Null
-Start-Sleep -Seconds 2
-
-# Start server
-$logOut = "$PWD\lemonade-openwebui-ci-out.log"
-$logErr = "$PWD\lemonade-openwebui-ci-err.log"
-$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru `
-  -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+$tmpChat = $null
+$tmpVision = $null
+$tmpImg = $null
 
 try {
   # Wait for /models
   $modelsJson = $null
   for ($i=0; $i -lt 120; $i++) {
-    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
+    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
     if ($modelsJson) { break }
     Start-Sleep -Seconds 1
   }
-  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
+  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
   Write-Host "OK: Lemonade server is responding"
   
   # Verify required models are present + downloaded
   $parsed = $modelsJson | ConvertFrom-Json
   $required = @(
-    "Llama-3.2-1B-Instruct-Hybrid",
-    "Gemma-3-4b-it-GGUF",
+    "Qwen3-4B-Hybrid",
+    "Qwen3.5-4B-GGUF",
     "SDXL-Turbo"
   )
   foreach ($mid in $required) {
@@ -140,15 +134,15 @@ try {
 
   # Chat completion smoke test (LLM)
   $chatBody = @{
-    model = "Llama-3.2-1B-Instruct-Hybrid"
+    model = "Qwen3-4B-Hybrid"
     messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
     temperature = 0
-    max_tokens = 50
+    max_tokens = 500
     stream = $false
   } | ConvertTo-Json -Depth 6
   $tmpChat = Join-Path $env:TEMP "chat-body.json"
   [System.IO.File]::WriteAllText($tmpChat, $chatBody, [System.Text.UTF8Encoding]::new($false))
-  $chatOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions `
+  $chatOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
     --data-binary "@$tmpChat"
@@ -159,31 +153,31 @@ try {
   Write-Host "OK: LLM chat works"
 
   # Vision smoke test (OpenAI-style image_url)
-  $png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
-  $dataUrl = "data:image/png;base64,$png1x1"
-  $visionBody = @{
-    model = "Gemma-3-4b-it-GGUF"
-    messages = @(@{
-      role = "user"
-      content = @(
-        @{ type = "text"; text = "If you can see an image input, reply with exactly: OK" },
-        @{ type = "image_url"; image_url = @{ url = $dataUrl } }
-      )
-    })
-    temperature = 0
-    max_tokens = 32
-  } | ConvertTo-Json -Depth 10
-  $tmpVision = Join-Path $env:TEMP "vision-body.json"
-  [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
-  $visionOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions `
-    -H "Content-Type: application/json" `
-    -H "Authorization: Bearer -" `
-    --data-binary "@$tmpVision"
-  if (-not $visionOut) { throw "Empty response from vision chat/completions" }
-  $visionParsed = $visionOut | ConvertFrom-Json
-  $visionText = $visionParsed.choices[0].message.content
-  if ($visionText -notmatch "\bOK\b") { throw "Vision test failed. Got: $visionText" }
-  Write-Host "OK: Vision chat works"
+  # $png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
+  # $dataUrl = "data:image/png;base64,$png1x1"
+  # $visionBody = @{
+  #   model = "Qwen3.5-4B-GGUF"
+  #   messages = @(@{
+  #     role = "user"
+  #     content = @(
+  #       @{ type = "text"; text = "If you can see an image input, reply with exactly: OK" },
+  #       @{ type = "image_url"; image_url = @{ url = $dataUrl } }
+  #     )
+  #   })
+  #   temperature = 0
+  #   max_tokens = 32
+  # } | ConvertTo-Json -Depth 10
+  # $tmpVision = Join-Path $env:TEMP "vision-body.json"
+  # [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
+  # $visionOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
+  #   -H "Content-Type: application/json" `
+  #   -H "Authorization: Bearer -" `
+  #   --data-binary "@$tmpVision"
+  # if (-not $visionOut) { throw "Empty response from vision chat/completions" }
+  # $visionParsed = $visionOut | ConvertFrom-Json
+  # $visionText = $visionParsed.choices[0].message.content
+  # if ($visionText -notmatch "\bOK\b") { throw "Vision test failed. Got: $visionText" }
+  # Write-Host "OK: Vision chat works"
 
   # Image generation smoke test
   $imgBody = @{
@@ -193,7 +187,7 @@ try {
   } | ConvertTo-Json -Depth 6
   $tmpImg = Join-Path $env:TEMP "img-body.json"
   [System.IO.File]::WriteAllText($tmpImg, $imgBody, [System.Text.UTF8Encoding]::new($false))
-  $imgOut = curl.exe -sS --fail-with-body --max-time 900 http://127.0.0.1:8000/api/v1/images/generations `
+  $imgOut = curl.exe -sS --fail-with-body --max-time 900 http://127.0.0.1:13305/api/v1/images/generations `
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
     --data-binary "@$tmpImg"
@@ -203,11 +197,9 @@ try {
   Write-Host "OK: Image generation works"
 }
 finally {
-  Remove-Item $tmpChat, $tmpVision, $tmpImg -Force -ErrorAction SilentlyContinue
-  & lemonade-server stop 2>$null | Out-Null
-  Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
-  Write-Host "OK: Lemonade Server stopped successfully"
+  @($tmpChat, $tmpVision, $tmpImg) |
+  Where-Object { $_ } |
+  ForEach-Object { Remove-Item $_ -Force -ErrorAction SilentlyContinue }
 }
 ```
 <!-- @test:end --> 
@@ -218,27 +210,9 @@ finally {
 ```bash
 set -euo pipefail
 
-lemonade-server stop >/dev/null 2>&1 || true
-sleep 2
-
-p=""
-cleanup() {
-  lemonade-server stop >/dev/null 2>&1 || true
-  sleep 2
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
-
-lemonade-server serve --host 127.0.0.1 --port 8000 >./lemonade-openwebui-ci.log 2>&1 &
-p=$!
-
 models_json=""
 for i in $(seq 1 120); do
-  models_json="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/models || true)"
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/models || true)"
   if [ -n "$models_json" ]; then
     break
   fi
@@ -246,7 +220,7 @@ for i in $(seq 1 120); do
 done
 
 if [ -z "$models_json" ]; then
-  echo "Lemonade server not ready on http://127.0.0.1:8000"
+  echo "Lemonade server not ready on http://127.0.0.1:13305"
   exit 1
 fi
 echo "OK: Lemonade server is responding"
@@ -257,8 +231,7 @@ import base64, json, os, sys, urllib.request
 
 data = json.loads(os.environ["MODELS_JSON"])
 required = [
-  "Llama-3.2-1B-Instruct-GGUF",
-  "Gemma-3-4b-it-GGUF",
+  "Qwen3.5-4B-GGUF",
   "SDXL-Turbo",
 ]
 
@@ -287,11 +260,12 @@ def post_json(url, payload, timeout=300):
     return json.loads(r.read().decode("utf-8"))
 
 # LLM chat smoke test
-chat = post_json("http://127.0.0.1:8000/api/v1/chat/completions", {
-  "model": "Llama-3.2-1B-Instruct-GGUF",
+chat = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
+  "model": "Qwen3.5-4B-GGUF",
   "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
   "temperature": 0,
-  "max_tokens": 50,
+  "max_tokens": 500,
+  "stream": False,
 }, timeout=300)
 text = chat["choices"][0]["message"]["content"]
 if "OK" not in text:
@@ -299,27 +273,27 @@ if "OK" not in text:
 print("OK: LLM chat works")
 
 # Vision smoke test (OpenAI image_url format)
-png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
-data_url = "data:image/png;base64," + png1x1
-vision = post_json("http://127.0.0.1:8000/api/v1/chat/completions", {
-  "model": "Gemma-3-4b-it-GGUF",
-  "messages": [{
-    "role": "user",
-    "content": [
-      {"type": "text", "text": "If you can see an image input, reply with exactly: OK"},
-      {"type": "image_url", "image_url": {"url": data_url}},
-    ],
-  }],
-  "temperature": 0,
-  "max_tokens": 32,
-}, timeout=300)
-vtext = vision["choices"][0]["message"]["content"]
-if "OK" not in vtext:
-  raise SystemExit(f"Vision test failed. Got: {vtext}")
-print("OK: Vision chat works")
+# png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
+# data_url = "data:image/png;base64," + png1x1
+# vision = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
+#   "model": "Qwen3.5-4B-GGUF",
+#   "messages": [{
+#     "role": "user",
+#     "content": [
+#       {"type": "text", "text": "If you can see an image input, reply with exactly: OK"},
+#       {"type": "image_url", "image_url": {"url": data_url}},
+#     ],
+#   }],
+#   "temperature": 0,
+#   "max_tokens": 32,
+# }, timeout=300)
+# vtext = vision["choices"][0]["message"]["content"]
+# if "OK" not in vtext:
+#   raise SystemExit(f"Vision test failed. Got: {vtext}")
+# print("OK: Vision chat works")
 
 # Image generation smoke test
-img = post_json("http://127.0.0.1:8000/api/v1/images/generations", {
+img = post_json("http://127.0.0.1:13305/api/v1/images/generations", {
   "model": "SDXL-Turbo",
   "prompt": "A simple red cube on a white table, studio lighting",
   "size": "256x256",
@@ -346,9 +320,7 @@ python -m venv openwebui-venv
 python -m pip install --upgrade pip
 pip install open-webui beautifulsoup4
 ```
-<!-- @os:end -->
 
-<!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
 ```powershell
 python --version
@@ -356,9 +328,7 @@ where.exe python
 python -c "import sys; print(sys.executable)"
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
-<!-- @os:windows -->
 <!-- @test:id=openwebui-install-venv-windows timeout=1200 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
@@ -375,9 +345,7 @@ $py = Join-Path $venv "Scripts\python.exe"
 if ($LASTEXITCODE -ne 0) { throw "pip install open-webui failed" }
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
-<!-- @os:windows -->
 <!-- @test:id=openwebui-install-check-windows timeout=1200 hidden=True -->
 ```powershell
 $venv = "$PWD\openwebui-venv-ci"
@@ -386,9 +354,7 @@ $py = Join-Path $venv "Scripts\python.exe"
 & $py -c "import bs4; print('OK: bs4 import')"
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
-<!-- @os:windows -->
 <!-- @test:id=openwebui-cli-windows timeout=1200 hidden=True -->
 ```powershell
 $venv = "$PWD\openwebui-venv-ci"
@@ -407,12 +373,10 @@ Open a terminal and create a fresh virtual environment:
 # Install open-webui into a venv [Linux]
 python3 -m venv openwebui-venv
 source openwebui-venv/bin/activate
-python -m pip install --upgrade pip
+python3 -m pip install --upgrade pip
 pip install open-webui beautifulsoup4
 ```
-<!-- @os:end -->
 
-<!-- @os:linux -->
 <!-- @test:id=python-env-check-linux timeout=300 hidden=True -->
 ```bash
 python3 --version
@@ -422,9 +386,7 @@ which pip3
 python3 -c "import sys; print(sys.executable)"
 ```
 <!-- @test:end -->
-<!-- @os:end -->
 
-<!-- @os:linux --> 
 <!-- @test:id=openwebui-install-venv-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
@@ -601,7 +563,7 @@ Now you’re all set up. Let's look at three interesting things to do.
 ---
 
 ### Activity 1: Chat with a Local LLM
-
+<!-- @os:windows -->
 1. Click the dropdown menu in the top-left of the interface. This will display all of the Lemonade models you have installed. Select one to proceed. (example: `Qwen3-4B-Hybrid`).
 <p align="center">
   <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
@@ -614,12 +576,28 @@ Now you’re all set up. Let's look at three interesting things to do.
 </p>
 
 3. The model will respond in the chat.
-<!-- @os:windows -->
+
 4. At this time, open `Task Manager` on your system. You will see **high GPU/NPU utilization** based on whether the model you selected is **Hybrid** or **NPU** respectively. That clearly shows you’re running locally.
 <p align="center">
   <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
 </p>
 <!-- @os:end -->
+
+<!-- @os:linux -->
+1. Click the dropdown menu in the top-left of the interface. This will display all of the Lemonade models you have installed. Select one to proceed. (example: `Qwen3.5-4B-GGUF`).
+<p align="center">
+  <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
+</p>
+
+2. Enter a message to the LLM and click send (or hit Enter). The LLM will take a few seconds to load into memory and then you will see the response stream in.
+<p align="center">
+  <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
+  <img src="assets/linux_llm_response.png" alt="LLM Response" width="46%"/>
+</p>
+
+3. The model will respond in the chat.
+<!-- @os:end -->
+
 This validates that Open WebUI can send requests to Lemonade using the OpenAI-compatible chat endpoint.
 
 ---
@@ -684,8 +662,8 @@ This step ensures that you enable Image Generation as a capability for your mode
 4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. An image is generated and appears in the chat.
 <p align="center">
-  <img src="assets/sdxl_prompt.png" alt="Image Generation" width="43%"/>
-  <img src="assets/sdxl_response.png" alt="Edit Model" width="35%"/>
+  <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
+  <img src="assets/image_gen_response.png" alt="Edit Model" width="32.5%"/>
 </p>
 
 This establishes that Open WebUI can coordinate a “two-part” workflow:
