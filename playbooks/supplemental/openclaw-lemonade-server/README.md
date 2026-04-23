@@ -34,6 +34,7 @@ By the end of this playbook you will be able to:
 - A PC running **Windows 10/11**
 - Visual Studio Community Edition [2022](https://aka.ms/vs/17/release/vs_community.exe)
 - At least **12 GB of RAM** (32 GB+ recommended for larger models)
+- You could increase the dedicated GPU memory using [Adrenaline software](https://www.amd.com/en/support/download/drivers.html) to try out larger models
 - **~10–20 GB of free disk space** for model weights
 <!-- @os:end -->
 
@@ -46,10 +47,10 @@ By the end of this playbook you will be able to:
 For agent workloads, a larger context window lets the model keep more of the task history, tool outputs, and reasoning steps in view at once. Set this once after the server is running:
 
 ```bash
-lemonade config set ctx_size=32768
+lemonade config set ctx_size=190000
 ```
 
-This takes effect for newly loaded models. A context of 32768 tokens is a reasonable floor for agent use; increase it if your model and available RAM support it.
+This takes effect for newly loaded models. A context of 190000 tokens is a reasonable floor for agent use; increase it if your model and available RAM support it.
 
 ---
 
@@ -162,7 +163,7 @@ echo 'export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
 ### Configure OpenClaw to Use Lemonade
 
-Run OpenClaw's non-interactive onboarding, replacing `YOUR_MODEL_ID` with your Lemonade Model ID. Use the plain name (e.g., `Qwen3.5-9B-GGUF`) for catalog models, or the `user.` prefixed name (e.g., `user.Qwen3.5-9B-GGUF-Q4-K-M`) for custom imported ones:
+Run OpenClaw's non-interactive onboarding, replacing `YOUR_MODEL_ID` with your Lemonade Model ID. Use the plain name (e.g., `Qwen3.5-35B-A3B-GGUF`) for catalog models, or the `user.` prefixed name (e.g., `user.Qwen3.6-35B-A3B-UD-Q4_K_M`) for custom imported ones:
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
