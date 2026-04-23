@@ -6,11 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### ROCm
 
-**Add the current user to the render and video groups.** Restart your system following these commands.
+**Add the current user to the render and video groups.** A restart will occur to apply the settings.
 ```bash
 sudo usermod -a -G render,video $LOGNAME
+sudo reboot
 ```
-#### Install ROCm into a virtual environment
+#### Install ROCm in the created virtual environment
+Ensure the virtual environment is active before proceeding.
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
