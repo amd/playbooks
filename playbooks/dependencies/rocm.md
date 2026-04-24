@@ -52,3 +52,5 @@ python -m pip install --upgrade pip
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120x-all/ "rocm[libraries,devel]"
 ```
 <!-- @device:end -->
+
+For further installation help, please see this [link](https://rocm.docs.amd.com/en/7.12.0-preview/install/rocm.html?fam=ryzen&gpu=max-pro-395&os=ubuntu&os-version=24.04&i=pip).
