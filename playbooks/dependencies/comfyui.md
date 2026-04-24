@@ -19,7 +19,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:linux -->
 
 #### Create a Virtual Environment
-<!-- @device:halo_box_ -->
+<!-- @device:halo_box -->
 On Linux, open a terminal in the directory of your choice and run the following prompt to create a venv with ROCm+Pytorch already installed:
 
 ```bash

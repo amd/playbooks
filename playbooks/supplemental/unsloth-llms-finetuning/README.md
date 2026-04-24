@@ -25,7 +25,7 @@ Unsloth also supports other training approaches, including QLoRA and reinforceme
 
 ## Set up your environment
 
-<!-- @device:halo_box_ -->
+<!-- @device:halo_box -->
 Open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
