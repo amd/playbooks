@@ -21,6 +21,22 @@
       "windows"
     ]
   },
+  "tested_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
+      "windows",
+      "linux"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,

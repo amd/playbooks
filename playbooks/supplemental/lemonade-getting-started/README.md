@@ -13,9 +13,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-🍋 **Lemonade** is an open-source local AI server that lets you run large language models (LLMs), image generators, and audio models directly on your own hardware. It exposes the models through the industry-standard **OpenAI API**, so any app that works with OpenAI can instantly work with Lemonade.
-
-In this playbook, you'll use Lemonade to run models locally on your machine. The playbook also explains how local AI servers work, explores running image generation and audio models, builds a Python app powered by a local LLM, and optionally runs models on an AMD Neural Processing Unit (NPU).
+🍋 **Lemonade** is an open-source local AI server that lets you run large language models (LLMs), image generators, and audio models directly on your own hardware. It exposes the models through the industry-standard **OpenAI API**, so any app that works with OpenAI can instantly work with Lemonade. By the end of the playbook, you'll be using Lemonade to run models locally on your machine.
 
 ## What You'll Learn
 
@@ -24,9 +22,9 @@ By the end of this playbook you will be able to:
 * **Install Lemonade Server** and verify it is running.
 * **Download and chat with an LLM** using a single command.
 * **Explore the web UI** and try different modalities such as vision, speech-to-text, and image generation.
-* **Switch GPU backends** between Vulkan and ROCm.
+* **Switch GPU backends** between Vulkan and AMD ROCm™ software.
 * **Build a Python app** powered by a local LLM using the OpenAI-compatible API.
-* **Run models on the NPU** using Hybrid and FLM execution modes on AMD Ryzen™ AI hardware.
+* **Run models on the AMD Neural Processing Unit (NPU)** using Hybrid and FLM execution modes on AMD Ryzen™ AI hardware.
 
 ## Prerequisites
 
@@ -35,81 +33,61 @@ Before you begin, make sure you have:
 - A PC running **Windows 11** or a supported **Linux** distribution (Ubuntu 24.04+, Fedora, Debian)
 - At least **16 GB of RAM** (64 GB recommended for larger models)
 - **~4–32 GB of free disk space**, depending on the models you download. The largest model in this guide requires ~20 GB.
-- **Python 3.10–3.13** (only needed for the Python integration section)
-- For the NPU section in Part 6, you'll need a PC with an AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 series or Z2 Extreme) with the latest driver installed from [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers).
+- **Python 3.10–3.13** (used in the Python app section)
+- [Optional] An AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 series or Z2 Extreme) with the latest driver installed from [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) if you want to run a model on the NPU.
 
-<!-- @require:lemonade-server -->
+<!-- @require:lemonade -->
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
-lemonade-server --version
+lemonade --version
 ```
 <!-- @test:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=lemonade-chat-gemma-windows timeout=1200 hidden=True -->
+<!-- @test:id=lemonade-chat-qwen-windows timeout=1200 hidden=True -->
 ```powershell
-$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
-try {
-  # Wait for server to come up
-  $modelsJson = $null
-  for ($i=0; $i -lt 120; $i++) {
-    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
-    if ($modelsJson) { break }
-    Start-Sleep -Seconds 1
-  }
-  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
-  Write-Host "OK: Lemonade server is responding"
 
-  # Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
-  $parsed = $modelsJson | ConvertFrom-Json
-  $entry  = $parsed.data | Where-Object { $_.id -eq "Gemma-3-4b-it-GGUF" } | Select-Object -First 1
-  if (-not $entry) { throw "Model Gemma-3-4b-it-GGUF is not present in Lemonade /api/v1/models." }
-  if (-not $entry.downloaded) { throw "Model Gemma-3-4b-it-GGUF is present but not downloaded in Lemonade. Please download it." }
-  Write-Host "OK: Gemma-3-4b-it-GGUF model is downloaded in Lemonade"
-
-  # Model chat test
-  $body = @{
-    model = "Gemma-3-4b-it-GGUF"
-    messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
-    temperature = 0
-    max_tokens = 32
-  } | ConvertTo-Json -Depth 5
-  $out = curl.exe -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions -H "Content-Type: application/json" -d $body
-  if (-not $out) { throw "Empty response from Lemonade chat/completions" }
-} finally {
-  & lemonade-server stop
-  Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+# Wait for server to come up
+$modelsJson = $null
+for ($i=0; $i -lt 120; $i++) {
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
+  if ($modelsJson) { break }
+  Start-Sleep -Seconds 1
 }
+if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
+Write-Host "OK: Lemonade server is responding"
+
+# Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
+$parsed = $modelsJson | ConvertFrom-Json
+$entry  = $parsed.data | Where-Object { $_.id -eq "Qwen3.5-4B-GGUF" } | Select-Object -First 1
+if (-not $entry) { throw "Model Qwen3.5-4B-GGUF is not present in Lemonade /api/v1/models." }
+if (-not $entry.downloaded) { throw "Model Qwen3.5-4B-GGUF is present but not downloaded in Lemonade. Please download it." }
+Write-Host "OK: Qwen3.5-4B-GGUF model is downloaded in Lemonade"
+
+# Model chat test
+$body = @{
+  model = "Qwen3.5-4B-GGUF"
+  messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+  temperature = 0
+  max_tokens = 500
+} | ConvertTo-Json -Depth 5
+$out = curl.exe -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+if (-not $out) { throw "Empty response from Lemonade chat/completions" }
+Write-Host "OK: Model Qwen3.5-4B-GGUF responded"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 
 <!-- @os:linux -->
-<!-- @test:id=lemonade-chat-gemma-linux timeout=1200 hidden=True -->
+<!-- @test:id=lemonade-chat-qwen-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
 
-p=""
-cleanup() {
-  lemonade-server stop >/dev/null 2>&1 || true
-  sleep 2
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
-
-lemonade-server serve --host 127.0.0.1 --port 8000 >/tmp/lemonade-test.log 2>&1 &
-p=$!
-
 models_json=""
 for i in $(seq 1 120); do
-  models_json="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/models || true)"
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/models || true)"
   if [ -n "$models_json" ]; then
     break
   fi
@@ -117,7 +95,7 @@ for i in $(seq 1 120); do
 done
 
 if [ -z "$models_json" ]; then
-  echo "Lemonade server not ready on http://127.0.0.1:8000"
+  echo "Lemonade server not ready on http://127.0.0.1:13305"
   exit 1
 fi
 echo "OK: Lemonade server is responding"
@@ -131,29 +109,29 @@ import sys
 data = json.loads(os.environ["MODELS_JSON"])
 entry = None
 for item in data.get("data", []):
-    if item.get("id") == "Gemma-3-4b-it-GGUF":
+    if item.get("id") == "Qwen3.5-4B-GGUF":
         entry = item
         break
 
 if entry is None:
-    print("Model Gemma-3-4b-it-GGUF is not present in Lemonade /api/v1/models.")
+    print("Model Qwen3.5-4B-GGUF is not present in Lemonade /api/v1/models.")
     sys.exit(1)
 
 if not entry.get("downloaded", False):
-    print("Model Gemma-3-4b-it-GGUF is present but not downloaded in Lemonade. Please download it.")
+    print("Model Qwen3.5-4B-GGUF is present but not downloaded in Lemonade. Please download it.")
     sys.exit(1)
 
-print("OK: Gemma-3-4b-it-GGUF model is downloaded in Lemonade")
+print("OK: Qwen3.5-4B-GGUF model is downloaded in Lemonade")
 PY
 
 body='{
-  "model": "Gemma-3-4b-it-GGUF",
+  "model": "Qwen3.5-4B-GGUF",
   "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
   "temperature": 0,
-  "max_tokens": 32
+  "max_tokens": 500
 }'
 
-out="$(curl -s --max-time 300 http://127.0.0.1:8000/api/v1/chat/completions \
+out="$(curl -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d "$body" || true)"
 
@@ -161,15 +139,11 @@ if [ -z "$out" ]; then
   echo "Empty response from Lemonade chat/completions"
   exit 1
 fi
+
+echo "OK: Model Qwen3.5-4B-GGUF responded"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
-
----
-
-## Getting Started
-
-This playbook assumes you have installed Lemonade Server and verified it is running. Once you have completed the setup, you are ready to download and run your first model.
 
 ---
 
@@ -196,7 +170,7 @@ Lemonade implements the **OpenAI API**, the same interface used by ChatGPT, Azur
 | **user** | Messages from the human (or application) to the model |
 | **assistant** | Responses generated by the model |
 
-This means any library or app that supports OpenAI can talk to Lemonade by pointing it at `http://localhost:8000/api/v1` while Lemonade Server is running.
+This means any library or app that supports OpenAI can talk to Lemonade by pointing it at `http://localhost:13305/api/v1` while Lemonade Server is running.
 
 ## Main Activity — Your First Local AI Chat
 
@@ -204,34 +178,25 @@ Let's download an LLM and have a conversation with it, running the AI entirely o
 
 ### Step 1: Download and Run a Model
 
-Lemonade ships with a curated model library. Let's start with **Gemma 3 4B**, a capable and compact model from Google that includes vision support:
+Lemonade ships with a curated model library. Let's start with **Gemma 4 E2B**, a capable and compact model that includes vision support:
 
 ```
-lemonade-server run Gemma-3-4b-it-GGUF
+lemonade run Gemma-4-E2B-it-GGUF
 ```
 
 This single command does three things:
 
-1. **Downloads** the model (~3.6 GB) from Hugging Face if it is not already installed.
-2. **Starts** the Lemonade Server process on port 8000.
+1. **Downloads** the model (~3 GB) from Hugging Face, if it is not already downloaded.
+2. **Starts** the Lemonade Server process on port 13305.
 3. **Opens Lemonade App** so you can start chatting with the model.
 
-You should see output like:
-
-```
-Pulling Gemma-3-4b-it-GGUF...
-Download complete.
-Server started on http://localhost:8000
-Launching Lemonade App...
-
-```
 
 <!-- @os:windows -->
-On Windows, the Lemonade App launches automatically and you can begin chatting immediately. If you installed the `minimal.msi` package, the app is not included. To start chatting, open your web browser and go to `http://localhost:8000`.
+On Windows, the Lemonade App launches automatically and you can begin chatting immediately. If you installed the `minimal.msi` package, the app is not included. To start chatting, open your web browser and go to `http://localhost:13305`.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-On Linux, open your browser and navigate to `http://localhost:8000` to access the web app.
+On Linux, open your browser and navigate to `http://localhost:13305` to access the web app.
 <!-- @os:end -->
 
 Try typing a question:
@@ -244,14 +209,15 @@ The model will respond directly in the chat window. **Congratulations! You are r
 
 ![Lemonade App with Logs displayed](../../dependencies/assets/ChatwithLogs.png)
 
-In the Server Logs pane in the Lemonade App, you can find telemetry data about the model's performance after each response:
+In the Server Logs pane in the Lemonade App, you can find telemetry data about the model's performance after each response. For example:
 
 ```
-=== Telemetry ===
-Input tokens:  13
-Output tokens: 188
-TTFT (s):      0.035
-TPS:           67.06
+ === Telemetry ===
+Input tokens:  24
+Output tokens: 527
+TTFT (s):      0.052
+TPS:           95.99
+=================
 ```
 
 ### Step 2: Explore the Web Interface and Different Modalities
@@ -264,7 +230,7 @@ Lemonade includes a built-in web interface where you can:
 
 Try switching between different modalities using the **Model Manager** tab in the web UI where you can browse models by Recipe or by Category:
 
-1. **Vision:** The `Gemma-3-4b-it-GGUF` model you already have loaded supports vision. Paste an image into the chat box and ask the model to describe it.
+1. **Vision:** The `Gemma-4-E2B-it-GGUF` model you already have loaded supports vision. Paste an image into the chat box and ask the model to describe it.
 2. **Image generation:** In the Image category, download an image model such as `SDXL-Turbo` from the Model Manager, then use the Lemonade Image Generator to type a prompt and generate an image locally.
 3. **Audio:** In the Audio category, download an audio model such as `Whisper-Tiny`, which can do speech-to-text. Provide a recording of audio to transcribe it locally. For text-to-speech, try one of the models in the Speech category, such as `kokoro-v1`.
 
@@ -278,10 +244,12 @@ By default, Lemonade uses Vulkan for GPU acceleration. If you have a supported A
 
 ![Lemonade Select Backend](../../dependencies/assets/lemonademodeloptions.png)
 
+To manage your installed backends, click the backend button in the leftmost column.
+
 Alternatively, you can specify the backend using the following command:
 
 ```
-lemonade-server run Gemma-3-4b-it-GGUF --llamacpp rocm
+lemonade run Gemma-4-E2B-it-GGUF --llamacpp rocm
 ```
 
 You can also set your default backend using the environment variable `LEMONADE_LLAMACPP` with the values: `vulkan`, `rocm`, or `cpu`.
@@ -294,11 +262,15 @@ The real power of a local AI server is that any application can connect to it us
 
 ### Step 4: Start the Server
 
-If the server is not already running from the previous section, launch it by double-clicking on the Lemonade app or start it from the command line using the following:
+Make sure the Lemonade server is running. It typically starts automatically in the background after installation. To verify, run:
 
 ```
-lemonade-server serve
+lemonade status
 ```
+
+You should see a message like: `Server is running on port 13305`.
+
+If the server isn’t running, start it by opening the Lemonade app. Use the default port **13305** (you can confirm or select this from the tray icon).
 
 ### Step 5: Install the OpenAI Python Client
 
@@ -367,11 +339,11 @@ python3 -c "from openai import OpenAI; print('OK')"
 Load the `Qwen3-Coder-30B-A3B-Instruct` model and use the following prompt to generate a simple Flashcard app. Create a file with the generated code called `flashcards.py`.
 
 ```
-Generate a simple python script that uses the following to call an llm (Gemma-3-4b-it-GGUF) to generate flashcards on a subject that is entered by the user.
-curl -X POST http://localhost:8000/api/v1/chat/completions
+Generate a simple python script that uses the following to call an llm (Qwen3.5-4B-GGUF) to generate flashcards on a subject that is entered by the user.
+curl -X POST http://localhost:13305/api/v1/chat/completions
 -H “Content-Type: application/json”
 -d ‘{
-“model”: “Gemma-3-4b-it-GGUF”,
+“model”: “Qwen3.5-4B-GGUF”,
 “messages”: [
 {“role”: “user”, “content”: “What is the population of Paris?”}
 ],
@@ -387,7 +359,7 @@ import json, random
 
 # Connect to Lemonade
 client = OpenAI(
-    base_url="http://localhost:8000/api/v1",
+    base_url="http://localhost:13305/api/v1",
     api_key="lemonade",
 )
 
@@ -396,7 +368,7 @@ def generate_flashcards(topic, count=5):
     print(f"\n✨ Generating {count} flashcards on: {topic}\n")
 
     response = client.chat.completions.create(
-        model="Gemma-3-4b-it-GGUF",
+        model="Qwen3.5-4B-GGUF",
         messages=[
             {
                 "role": "system",
@@ -468,24 +440,18 @@ while True:
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=600 hidden=True -->
 ```powershell
-$p = Start-Process -FilePath "lemonade-server" -ArgumentList "serve --no-tray --host 127.0.0.1 --port 8000" -NoNewWindow -PassThru
-try {
-  # Wait for server to come up
-  $modelsJson = $null
-  for ($i=0; $i -lt 120; $i++) {
-    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:8000/api/v1/models
-    if ($modelsJson) { break }
-    Start-Sleep -Seconds 1
-  }
-  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:8000" }
-  Write-Host "OK: Lemonade server is responding"
-
-  python lemonade_python_smoke.py
-} finally {
-  & lemonade-server stop
-  Start-Sleep -Seconds 2
-  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+# Wait for server to come up
+$modelsJson = $null
+for ($i=0; $i -lt 120; $i++) {
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
+  if ($modelsJson) { break }
+  Start-Sleep -Seconds 1
 }
+if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
+Write-Host "OK: Lemonade server is responding"
+
+Start-Sleep -Seconds 5
+python lemonade_python_smoke.py
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -496,25 +462,9 @@ try {
 ```bash
 set -euo pipefail
 
-p=""
-cleanup() {
-  rm -f /tmp/lemonade_python_smoke.py
-  lemonade-server stop >/dev/null 2>&1 || true
-  sleep 2
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
-
-lemonade-server serve --host 127.0.0.1 --port 8000 >/tmp/lemonade-python-test.log 2>&1 &
-p=$!
-
 models_json=""
 for i in $(seq 1 120); do
-  models_json="$(curl -s --max-time 2 http://127.0.0.1:8000/api/v1/models || true)"
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/models || true)"
   if [ -n "$models_json" ]; then
     break
   fi
@@ -522,11 +472,12 @@ for i in $(seq 1 120); do
 done
 
 if [ -z "$models_json" ]; then
-  echo "Lemonade server not ready on http://127.0.0.1:8000"
+  echo "Lemonade server not ready on http://127.0.0.1:13305"
   exit 1
 fi
 echo "OK: Lemonade server is responding"
 
+sleep 5
 python3 lemonade_python_smoke.py
 ```
 <!-- @test:end -->
@@ -611,15 +562,15 @@ Lemonade supports three NPU execution modes, all transparent behind the same Ope
 ### Requirements
 
 - **AMD Ryzen AI 300/400 series or Z2 series** processor
-- For **FLM** models: Lemonade will automatically install the FLM runtime. To learn more about FastFlowLM see [here](https://fastflowlm.com/docs/)
+- For **FLM** models: The FLM runtime can be installed from within the Lemonade app or Lemonade will automatically install the FLM runtime when running an FLM model. To learn more about FastFlowLM see [here](https://fastflowlm.com/docs/)
 
 
 ### Step 8: Run a Hybrid Model
 
-Hybrid models split work between the NPU and iGPU for a good balance of speed and efficiency. In the Lemonade App, select `Qwen3-4B-Hybrid` from the `Ryzen AI LLM` list or run it using the following comment:
+Hybrid models split work between the NPU and iGPU for a good balance of speed and efficiency. In the Lemonade App, select a model from the `Ryzen AI LLM` list, for example, `Qwen3-4B-Hybrid`, or run it using the following command:
 
 ```
-lemonade-server run Qwen3-4B-Hybrid
+lemonade run Qwen3-4B-Hybrid
 ```
 
 Lemonade detects your NPU automatically and uses the right backend.
@@ -628,10 +579,10 @@ Lemonade detects your NPU automatically and uses the right backend.
 
 ### Step 9: Run an FLM Model
 
-FastFlowLM (FLM) models are specifically optimized for AMD's XDNA2 NPU architecture and can be very fast for their size. For example, select `Gemma3-4b-it-FLM` from the `FastFlowLM NPU` list or use the following command:
+FastFlowLM (FLM) models are specifically optimized for AMD's XDNA2 NPU architecture and can be very fast for their size. For example, select `Gemma3-4b` from the `FastFlowLM NPU` list or use the following command:
 
 ```
-lemonade-server run Gemma3-4b-it-FLM
+lemonade run gemma3-4b-FLM
 ```
 
 FLM models include some of the most popular architectures (Gemma 3, Qwen 3, Llama 3, and DeepSeek R1) and range from under 1 GB to over 13 GB.
@@ -655,23 +606,6 @@ response = client.chat.completions.create(
     messages=messages,
 )
 ```
----
-
-## Useful Commands Reference
-
-| Command | What It Does |
-|---------|-------------|
-| `lemonade-server serve` | Start the server (default port 8000) |
-| `lemonade-server run MODEL` | Start the server and chat with a model |
-| `lemonade-server pull MODEL` | Download a model without starting the server |
-| `lemonade-server list` | Show all available models |
-| `lemonade-server status` | Check if the server is running |
-| `lemonade-server stop` | Stop a running server |
-| `lemonade-server delete MODEL` | Remove a model from disk |
-| `lemonade-server --version` | Print the installed version |
-| `lemonade-server recipes` | Recipes command for managing backends |
-
----
 
 ## Next Steps
 
@@ -679,9 +613,9 @@ You have a local AI server running on your own hardware, here is where to go nex
 
 1. **Connect your favorite apps**: Lemonade works out of the box with [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/), and [many more](https://lemonade-server.ai/marketplace).
 
-2. **Browse more models**: Explore the full [model library](https://lemonade-server.ai/docs/server/server_models/) to find models optimized for coding, reasoning, vision, and more. Use the Lemonade App or `lemonade-server list` to see what is available.
+2. **Browse more models**: Explore the full [model library](https://lemonade-server.ai/docs/server/server_models/) to find models optimized for coding, reasoning, vision, and more. Use the Lemonade App or `lemonade list` to see what is available.
 
-3. **Unlock ROCm GPU acceleration**: If you have a supported AMD GPU, switch to the ROCm backend: `lemonade-server serve --llamacpp rocm`. See [supported AMD GPUs](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
+3. **Unlock ROCm GPU acceleration**: If you have a supported AMD GPU, switch to the ROCm backend: `lemonade config set llamacpp.backend=rocm`. See [supported AMD GPUs](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
 
 4. **Read the full API spec**: Lemonade supports chat completions, embeddings, audio transcription, image generation, text-to-speech, and more. See the [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) for every endpoint.
 

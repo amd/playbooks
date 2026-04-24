@@ -120,7 +120,7 @@ This model will now be accessible through the LM Studio Server endpoint and will
 Having just created the OpenAI Compatible endpoint, let's look at how to integrate this into a Python developer environment (such as VSCode) and use your system as a local API Provider. 
 
 1. Create a Python virtual environment:
-<!-- @device:halo_box_ -->
+<!-- @device:halo_box -->
 <!-- @os:windows -->
     On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
     ```bash

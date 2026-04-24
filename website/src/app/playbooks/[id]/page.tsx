@@ -604,8 +604,9 @@ function filterContentByOS(content: string, platform: Platform): string {
  * <!-- @device:all --> ... <!-- @device:end -->
  *
  * @param devices - Active device identifiers for the current selection.
- *   When the "reference" category is active with "halo", this includes
- *   both "halo" and "halo_box" so that halo_box-specific blocks render.
+ *   The "reference" category's "halo" entry maps to "halo_box" (the AMD
+ *   Halo Developer Platform), not the bare "halo" chip; this keeps
+ *   halo-only and halo_box-only blocks from both rendering at once.
  */
 function filterContentByDevice(content: string, devices: string[]): string {
   if (!content) return "";
@@ -1399,11 +1400,18 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
     }
   }, [coverageViewActive, selectedTestDevice]);
 
+  // The "reference" category's "halo" entry represents the AMD Halo Developer
+  // Platform (halo_box), not the Strix Halo (Ryzen AI Max) chip — the chip is
+  // selected via the "apu" category. Treat them as distinct devices so that
+  // <!-- @device:halo --> blocks only render for the chip and
+  // <!-- @device:halo_box --> blocks only render for the developer platform.
+  // Content meant for both should be tagged <!-- @device:halo,halo_box -->.
   const isReferenceHalo = selectedCategory === "reference" && selectedDevice === "halo";
   const preinstalledDevice: string | null = isReferenceHalo ? "halo_box" : selectedDevice;
 
-  const activeDevices: string[] = selectedDevice ? [selectedDevice] : [];
-  if (isReferenceHalo) activeDevices.push("halo_box");
+  const activeDevices: string[] = isReferenceHalo
+    ? ["halo_box"]
+    : selectedDevice ? [selectedDevice] : [];
 
   // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
   const filteredContent = playbook?.content
