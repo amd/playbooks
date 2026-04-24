@@ -31,7 +31,7 @@ By the end of this playbook you will be able to:
 
 <!-- @os:linux -->
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
-- At least **12 GB of RAM** (32 GB+ recommended for larger models)
+- At least **24 GB of RAM** (64 GB+ recommended for larger models)
 - AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5GB)
 - Install the amd-debug-tools wheel from PyPi, and run the amd-ttm tool to reconfigure shared memory settings to **120 GB**:
 ```bash
@@ -42,7 +42,7 @@ amd-ttm --set 120
 <!-- @os:windows -->
 - A PC running **Windows 10/11**
 - Visual Studio Community Edition [2022](https://aka.ms/vs/17/release/vs_community.exe)
-- At least **12 GB of RAM** (32 GB+ recommended for larger models)
+- At least **24 GB of RAM** (64 GB+ recommended for larger models)
 - You could increase the dedicated GPU memory using [AMD Software: Adrenalin Edition™](https://www.amd.com/en/support/download/drivers.html) to try out larger models
 - **~10–30 GB of free disk space** for model weights
 <!-- @os:end -->
