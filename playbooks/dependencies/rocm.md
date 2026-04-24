@@ -24,7 +24,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[l
 <!-- @device:end -->
 
 <!-- @device:krk -->
-<!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
+
 ```bash
 python -m pip install --upgrade pip
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "rocm[libraries,devel]"
@@ -34,7 +34,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "rocm[l
 <!-- @device:end -->
 
 <!-- @device:stx -->
-<!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
+
 ```bash
 python -m pip install --upgrade pip
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ "rocm[libraries,devel]"
