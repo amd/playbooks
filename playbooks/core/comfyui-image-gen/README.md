@@ -314,7 +314,7 @@ To launch ComfyUI on Windows, simply click the ComfyUI shortcut on your Desktop.
 
 To launch ComfyUI:
 
-1. Navigate to `/usr/local/bin/ComfyUI/` (or to the appropriate folder if installed manually)
+1. Ensure you are within the ComfyUI directory. 
 2. Run `python3 main.py --use-pytorch-cross-attention`
 
 ComfyUI starts a local web server. Open your browser to `http://127.0.0.1:8188` to access the interface.
