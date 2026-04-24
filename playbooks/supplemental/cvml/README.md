@@ -42,30 +42,31 @@ Before starting, ensure you have the following:
 
 <!-- @os:linux -->
 - Ubuntu 22.04 or 24.04 (kernel >= 6.11.0-21-generic)
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/1.6.1/linux.html#install-npu-drivers) (Linux installer — required for NPU inference)
+- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (Linux installer — required for NPU inference)
 - Vulkan SDK (installed in the [Linux-Specific Setup](#linux-specific-setup) section below)
 <!-- @os:end -->
 
 ## Setting Up the CVML Library
 
-Clone the Ryzen AI Software repository to get the CVML Library:
+Download the Ryzen AI CVML Library package from the AMD Account Portal:
 
-> **Note:** This repository uses [Git LFS](https://git-lfs.com/) for large binary files (`.so`, `.dll`, etc.). Make sure Git LFS is installed before cloning, otherwise the shared libraries will be placeholder text files and the build will fail.
+```
+https://account.amd.com/en/forms/downloads/xef.html?filename=Ryzen-AI-Library-Public-Release.zip
+```
 
-<!-- @os:linux -->
-```bash
-sudo apt install git-lfs
+After downloading, extract the package to a local directory (e.g., `C:\RyzenAI-Library` on Windows or `~/RyzenAI-Library` on Linux) and set the `AMD_CVML_SDK_ROOT` environment variable to the extracted location:
+
+<!-- @os:windows -->
+```cmd
+set AMD_CVML_SDK_ROOT=C:\RyzenAI-Library
 ```
 <!-- @os:end -->
 
+<!-- @os:linux -->
 ```bash
-git lfs install
+export AMD_CVML_SDK_ROOT=~/RyzenAI-Library
 ```
-
-```bash
-git clone https://github.com/amd/RyzenAI-SW.git
-cd RyzenAI-SW/Ryzen-AI-CVML-Library
-```
+<!-- @os:end -->
 
 The library package contains the following structure:
 
@@ -94,8 +95,36 @@ sudo apt install vulkan-sdk
 If you are running Ubuntu 22.04, also update the MESA Vulkan drivers:
 
 ```bash
-sudo add-apt-repository ppa:kisak/kisak-mesa -y
 sudo apt update && sudo apt upgrade
+sudo add-apt-repository ppa:kisak/kisak-mesa -y
+sudo apt update
+sudo apt upgrade
+```
+
+### Additional Ubuntu 24.04 Dependencies
+
+If you are running Ubuntu 24.04, install additional required packages:
+
+```bash
+sudo apt install libavcodec-dev libavformat-dev libswscale-dev libnsl2 gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly -y
+
+DEP_PKG_LIST="https://launchpad.net/ubuntu/+archive/primary/+files/libmpdec3_2.5.1-2build2_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libpython3.10-minimal_3.10.4-3_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libpython3.10-stdlib_3.10.4-3_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libpython3.10_3.10.4-3_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libprotobuf23_3.12.4-1ubuntu7_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libgoogle-glog0v5_0.5.0+really0.4.0-2_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libtiff5_4.3.0-6_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libilmbase25_2.5.7-2_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libopenexr25_2.5.7-1_amd64.deb"
+
+for pkg in $DEP_PKG_LIST
+do
+    echo $pkg
+    wget $pkg
+    sudo dpkg -i *.deb
+    rm *.deb
+done
 ```
 
 <!-- @os:end -->
@@ -153,6 +182,8 @@ context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 ```
 
 > **Note:** Features that use the ONNX backend for NPU operations may experience longer startup latency on the first run. Subsequent runs will be faster.
+
+> **Note:** If the NPU driver is not installed on the target system, the Ryzen AI CVML library will automatically fall back to the GPU backend for inference operations.
 
 ## Building the Sample Applications
 
@@ -220,6 +251,8 @@ The CVML Library includes ready-to-build sample applications for each feature. L
    ```cmd
    rem Add the CVML runtime folder to PATH (Windows)
    set PATH=%CD%\..\windows;%PATH%
+   rem Add OpenCV runtime libraries to PATH
+   set PATH=%PATH%;%OPENCV_INSTALL_ROOT%\x64\vc16\bin
    ```
    <!-- @os:end -->
 
@@ -228,6 +261,8 @@ The CVML Library includes ready-to-build sample applications for each feature. L
    # Add the CVML runtime folder to LD_LIBRARY_PATH (Linux)
    export LD_LIBRARY_PATH=$PWD/../linux:$LD_LIBRARY_PATH
    export LD_LIBRARY_PATH=/opt/xilinx/xrt/lib:$LD_LIBRARY_PATH
+   # Add OpenCV runtime libraries to LD_LIBRARY_PATH
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$OPENCV_INSTALL_ROOT/lib
    ```
    <!-- @os:end -->
 
