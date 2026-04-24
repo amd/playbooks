@@ -32,6 +32,11 @@ By the end of this playbook you will be able to:
 <!-- @os:linux -->
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
 - At least **12 GB of RAM** (32 GB+ recommended for larger models)
+- AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5GB)
+- Install the amd-debug-tools wheel from PyPi, and run the amd-ttm tool to reconfigure shared memory settings to **120 GB**:
+```bash
+amd-ttm --set 120
+```
 - **~10–30 GB of free disk space** for model weights
 <!-- @os:end -->
 <!-- @os:windows -->
