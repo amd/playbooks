@@ -32,10 +32,13 @@ By the end of this playbook you will be able to:
 <!-- @os:linux -->
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
 - At least **24 GB of RAM** (64 GB+ recommended for larger models)
-- AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5GB)
-- Install the amd-debug-tools wheel from PyPi, and run the amd-ttm tool to reconfigure shared memory settings to **120 GB**:
+- Depending on the size of the model you're running, set the minimum possible dedicated VRAM in the BIOS.
+- Next, install the amd-debug-tools wheel from PyPI, and run the amd-ttm tool to reconfigure shared memory settings to the maximum:
 ```bash
-amd-ttm --set 120
+  sudo apt install pipx
+  pipx ensurepath
+  pipx install amd-debug-tools
+  amd-ttm --set 120 # Strix Halo's can be set to 120GB
 ```
 - **~10–30 GB of free disk space** for model weights
 <!-- @os:end -->
