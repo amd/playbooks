@@ -38,7 +38,7 @@ By the end of this playbook you will be able to:
   sudo apt install pipx
   pipx ensurepath
   pipx install amd-debug-tools
-  amd-ttm --set 96 # Strix Halo's can be set to 96GB. 
+  amd-ttm --set 96 # Strix Halo's can be set to 96GB. Set the shared memory value for other devices accordingly.
 ```
 - **~10–30 GB of free disk space** for model weights
 <!-- @os:end -->
