@@ -13,10 +13,10 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-Open WebUI is a self-hosted, browser-based interface that provides a familiar chatbot experience while acting as a frontend for one or more AI model servers. Instead of being tied to one provider, Open WebUI can connect to **any backend that exposes an OpenAI-compatible API**, so you can swap models and capabilities without switching UIs.
+[Open WebUI](https://docs.openwebui.com) is a self-hosted, browser-based interface that provides a familiar chatbot experience while acting as a frontend for one or more AI model servers. Instead of being tied to one provider, Open WebUI can connect to **any backend that exposes an OpenAI-compatible API**, so you can swap models and capabilities without switching UIs.
 
-In this playbook, we use **Lemonade** as the backend because it exposes a **unified OpenAI-compatible endpoint** supporting multiple modalities:
-- **LLMs** for text generation
+In this playbook, we use [**Lemonade**](https://lemonade-server.ai) as the backend because it exposes a **unified OpenAI-compatible endpoint** supporting multiple modalities:
+- **Large Language Models (LLMs)** for text generation
 - **Vision models** for image understanding
 - **Stable Diffusion** for image generation
 - **Audio transcription models** for speech-to-text
@@ -33,7 +33,7 @@ By the end, you’ll be able to:
 - Chat with a local LLM from your browser
 - Upload an image and ask a vision model questions about it
 - Generate images from text prompts using Stable Diffusion models (SD-Turbo / SDXL)
-- Understand the mental model so you can swap in other backends later (Ollama, vLLM, llama.cpp server, etc.)
+- Understand the mental model so you can use other backends (Ollama, vLLM, llama.cpp server, etc.)
 
 ---
 
@@ -45,7 +45,7 @@ By the end, you’ll be able to:
 |---|---|---|
 | Frontend (UI) | The web app you interact with | Open WebUI |
 | Backend (Model Server) | Hosts models and exposes HTTP endpoints | Lemonade, Ollama, vLLM, llama.cpp server, OpenAI-compatible servers |
-| Models | The actual LLM / vision / diffusion / audio models | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
+| Models | The actual LLM / Vision / Diffusion / Audio models | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
 
 #### Why “OpenAI-compatible API” matters
 
@@ -65,29 +65,13 @@ If a backend supports those endpoints, Open WebUI can talk to it with minimal se
 
 This section establishes a stable local environment: Lemonade running, Open WebUI running, and a working connection between them.
 
-### 1) Install Lemonade, Start Lemonade Server, and Download Models
+### 1. Install Lemonade, Start Lemonade Server, and Download Models
 
-<!-- @os:windows -->
-- Install Lemonade (App + Server) using the `.msi` installer from the [official documentation page](https://lemonade-server.ai/install_options.html).
-<!-- @os:end -->
-<!-- @os:linux -->
-- Install Lemonade (App + Server) by following the Linux distribution-specific package manager instructions on the [official documentation page](https://lemonade-server.ai/install_options.html).
-<!-- @os:end -->
-After installation:
-    - The lemonade CLI is added to your system PATH automatically
-    - Lemonade server is expected to run in the background automatically
-- Verify Lemonade installation and server status:
-  - Open a terminal and run: `lemonade --version`. You should see something like `lemonade version x.y.z`.
-  - In the same terminal, run `lemonade status`. You should see the output showing that the server is running, typically on port `13305`.
-  - Open the Lemonade Server app and download required models from the `Model Manager` tab
-
-<p align="center">
-  <img src="assets/lemonade_model_manager.png" alt="Lemonade Server App" width="600"/>
-</p>
+<!-- @require:lemonade -->
 
 - Confirm the API is reachable:
   - Open `http://localhost:13305/api/v1/models` in your web browser.
-  - You should see a JSON list of models downloaded in Lemonade
+  - Download the desired models in Lemonade
 
 > If you don’t see your models in `http://localhost:13305/api/v1/models`, Open WebUI won’t be able to select them later.
 
@@ -308,7 +292,7 @@ PY
 <!-- @os:end --> 
 
 
-### 2) Install Open WebUI
+### 2. Install Open WebUI
 
 <!-- @os:windows -->
 Open PowerShell and create a fresh virtual environment:
@@ -411,9 +395,9 @@ echo "OK: open-webui installed in venv"
 > **Tip (Python version):** Install Open WebUI using **Python 3.12**. The `open-webui` PyPI package may not install on Python 3.13+ (you’ll see “No matching distribution found”). 
 > Note: Open WebUI also provides a variety of other installation options, such as Docker, on their GitHub.
 
-### 3) Start Open WebUI Server
+### 3. Start Open WebUI Server
 
-- Run this command to launch the Open WebUI HTTP server:
+- Run the following command to launch the Open WebUI HTTP server:
 ```bash
 open-webui serve
 ```
@@ -516,7 +500,7 @@ echo "OK: Open WebUI is responding on /health"
 <!-- @os:end --> 
 
 
-### 4) Connect Open WebUI to Lemonade
+### 4. Connect Open WebUI to Lemonade
 
 In Open WebUI:
 
@@ -534,14 +518,14 @@ In Open WebUI:
   <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
 </p>
 
-3. In http://localhost:8080/admin/settings/connections, esnure that under __"Manage OpenAI API Connections"__, only `http://localhost:13305/api/v1` is enabled.
+3. In http://localhost:8080/admin/settings/connections, ensure that under __"Manage OpenAI API Connections"__, only `http://localhost:13305/api/v1` is enabled.
 <p align="center">
   <img src="assets/connection.png" alt="Admin settings connections page showing 'Manage OpenAI API Connections' with only http://localhost:13305/api/v1 enabled." width="600"/>
 </p>
 
 4. Save
 
-5. Apply the following suggested settings. These help Open WebUI to be more responsive with local LLMs.
+5. Apply the following suggested settings. These help Open WebUI be more responsive with local LLMs.
    - Click the user profile button again, and choose "Admin Settings".
    - Click the "Settings" tab at the top, then "Interface" (which will be on the top or the left, depending on your window size), then disable the following:
       - Title Generation
@@ -552,19 +536,19 @@ In Open WebUI:
 </p>
 
 6. Click the **"Save"** button in the bottom right of the page, then return to `http://localhost:8080`.
-7. Click the model dropdown and expect to see all the models that you have downloaded from Lemonade!
+7. Click the model dropdown and you should see the models that you have downloaded from Lemonade.
 
 ---
 
 ## Main Activities
 
-Now you’re all set up. Let's look at three interesting things to do.
+Now, you’re all set up. Let's look at three interesting things to do.
 
 ---
 
 ### Activity 1: Chat with a Local LLM
 <!-- @os:windows -->
-1. Click the dropdown menu in the top-left of the interface. This will display all of the Lemonade models you have installed. Select one to proceed. (example: `Qwen3-4B-Hybrid`).
+1. Click the dropdown menu in the top-left of the interface. This will display the Lemonade models you have installed. Select one to proceed. (example: `Qwen3-4B-Hybrid`).
 <p align="center">
   <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
 </p>
@@ -577,14 +561,14 @@ Now you’re all set up. Let's look at three interesting things to do.
 
 3. The model will respond in the chat.
 
-4. At this time, open `Task Manager` on your system. You will see **high GPU/NPU utilization** based on whether the model you selected is **Hybrid** or **NPU** respectively. That clearly shows you’re running locally.
+4. At this time, open `Task Manager` on your system. You will see **high GPU or NPU utilization** based on whether the model you selected is **Hybrid** or **NPU** respectively. Using the task manager, you can confirm that you’re running the model locally.
 <p align="center">
   <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
 </p>
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Click the dropdown menu in the top-left of the interface. This will display all of the Lemonade models you have installed. Select one to proceed. (example: `Qwen3.5-4B-GGUF`).
+1. Click the dropdown menu in the top-left of the interface. This will display the Lemonade models you have installed. Select one to proceed. (example: `Qwen3.5-4B-GGUF`).
 <p align="center">
   <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
 </p>
@@ -604,9 +588,9 @@ This validates that Open WebUI can send requests to Lemonade using the OpenAI-co
 
 ### Activity 2: Upload an Image and Ask Questions (Vision)
 
-This requires a model that supports image input (a vision / multimodal model).
+This requires a model that supports image input (a Vision or Multimodal model).
 
-1. Select a vision-capable model (example: `Qwen3.5-4B-GGUF`, or any model labeled for vision in Lemonade)
+1. Select a vision-capable model (example: `Qwen3.5-4B-GGUF`, or any model labeled for Vision in Lemonade)
 <p align="center">
   <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
 </p>
@@ -697,13 +681,16 @@ You now have a working **“local AI stack”**, a single UI controlling multipl
 
 Here are three expansions that unlock entirely new workflows:
 
-### 1) Speech-to-Text with Whisper
+### 1. Speech-to-Text with Whisper
+
 Try turning audio into text using a Whisper model, then feed it into an LLM for summarization, action items, or rewriting. This is the foundation for meeting notes and voice-driven assistants.
 
-### 2) Python Coding inside Open WebUI
+### 2. Python Coding inside Open WebUI
+
 Use Open WebUI’s built-in code execution experience to run Python snippets, inspect outputs, and iterate faster—without leaving the UI. [Reference](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
 
-### 3) HTML Rendering inside Open WebUI
+### 3. HTML Rendering inside Open WebUI
+
 Render HTML outputs directly in the interface. This is surprisingly powerful for building quick prototypes, formatted reports, and interactive snippets. [Reference](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
 
 ---
