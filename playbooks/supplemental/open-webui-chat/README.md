@@ -630,19 +630,20 @@ Stable Diffusion models don't support text generation, they only generate images
 
 #### Step 1: Configure Image Generation in Open WebUI
 
-1. Go to **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
-2. Set:
+1. Fo to Lemonade, search for `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality), and download it.
+2. Go to **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
+3. Set:
    - **Image Generation:** ON
    - **Image Generation Engine:** Default (OpenAI)
    - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
-   - **Model:** `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality)
-3. If you want to add more parameters, add them to the text field as JSON. For example: `{ "steps": 4, "cfg_scale": 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+   - **Model:** `SDXL-Turbo` or `SDXL-Base-1.0`
+4. If you want to add more parameters, add them to the text field as JSON. For example: `{ "steps": 4, "cfg_scale": 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 <p align="center">
   <img src="assets/images_settings.png" alt="Lemonade VLM's" width="600"/>
 </p>
 
-4. Save
+5. Save
 
 
 #### Step 2: Allow Image Generation for the model
