@@ -20,6 +20,20 @@ This playbook teaches you how to finetune LLMs using LLaMA Factory on your local
 
 ## Setting up the Environment
 
+<!-- @os:linux -->
+<!-- @test:id=create-venv timeout=120 hidden=True -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv venv
+source venv/bin/activate
+python3 --version
+pip --version
+```
+<!-- @test:end --> 
+<!-- @setup:id=activate-venv command="source venv/bin/activate" --> 
+<!-- @os:end -->
+
 ### Installing Basic Dependencies
 <!-- @os:linux -->
 <!-- @require:rocm,pytorch,driver -->
@@ -34,6 +48,14 @@ This playbook teaches you how to finetune LLMs using LLaMA Factory on your local
 pip install huggingface_hub
 ```
 
+<!-- @os:linux -->
+<!-- @test:id=install-deps timeout=300 hidden=True setup=activate-venv -->
+```bash
+python3 -m pip install --upgrade pip
+python3 -m pip install huggingface_hub
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 ### Install LLaMA Factory
 
@@ -41,12 +63,26 @@ LLaMA Factory depends on PyTorch. You should already have it installed per the a
 
 Download the source code from [LLaMA Factory official GitHub repository](https://github.com/hiyouga/LlamaFactory), and install its dependencies.
 
+<!-- @os:linux -->
+<!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
 ```bash
 git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
 cd LlamaFactory
 pip install -e .
 pip install -r requirements/metrics.txt
 ```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=verify-llamafactory-cli timeout=60 hidden=True setup=activate-venv -->
+```bash
+cd LlamaFactory
+llamafactory-cli version || python -m llamafactory.cli version || true
+command -v llamafactory-cli
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 Having successfully installed LLaMA Factory, let's run fine-tuning on it.
 
@@ -71,6 +107,28 @@ LLaMA Factory supports multiple finetuning schemes.
 | LoRA fine-tuning  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
 | QLoRA fine-tuning | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
+<!-- @os:linux -->
+<!-- @test:id=verify-llamafactory-files timeout=60 hidden=True setup=activate-venv -->
+```python
+import os
+import sys
+
+base = "LlamaFactory"
+required = [
+    "examples/train_lora/qwen3_lora_sft.yaml",
+    "examples/inference/qwen3_lora_sft.yaml",
+    "examples/merge_lora/qwen3_lora_sft.yaml",
+]
+
+missing = [p for p in required if not os.path.exists(os.path.join(base, p))]
+if missing:
+    print(f"FAIL: Missing required files: {missing}")
+    sys.exit(1)
+
+print("PASS: Required LLaMA Factory example files exist")
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 These example configuration files have specified model parameters, fine-tuning method parameters, dataset parameters, evaluation parameters, and more. You can configure them according to your own needs. In this playbook, we will use [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
@@ -111,12 +169,65 @@ You can run LLaMA Factory finetuning using the below command, which is based on 
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
 ```
 
-After running LLM finetuning, output files can be found in the path of "output_dir", like the model checkpoint files, model configuration files,training metrics data files.
+<!-- @os:linux -->
+<!-- @test:id=quick-train-llamafactory-lora timeout=1800 hidden=True setup=activate-venv -->
+```bash
+cd LlamaFactory
+
+cp examples/train_lora/qwen3_lora_sft.yaml examples/train_lora/qwen3_lora_sft_ci.yaml
+
+sed -i 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
+sed -i 's|output_dir: .*|output_dir: saves/qwen3_lora_sft_ci|g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
+sed -i 's/overwrite_output_dir: false/overwrite_output_dir: true/g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
+sed -i 's/per_device_train_batch_size: .*/per_device_train_batch_size: 1/g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
+sed -i 's/gradient_accumulation_steps: .*/gradient_accumulation_steps: 1/g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
+sed -i 's/num_train_epochs: .*/num_train_epochs: 1/g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
+sed -i 's/logging_steps: .*/logging_steps: 1/g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
+sed -i 's/save_steps: .*/save_steps: 5/g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
+
+llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+After running LLM finetuning, all generated outputs are stored in the "output_dir", including model checkpoint files, configuration files, and training metrics.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
 </p>
 
+<!-- @os:linux -->
+<!-- @test:id=verify-llamafactory-train-output timeout=120 hidden=True setup=activate-venv -->
+```python
+import os
+import sys
+import glob
+
+out_dir = "LlamaFactory/saves/qwen3_lora_sft_ci"
+if not os.path.isdir(out_dir):
+    print(f"FAIL: Missing output directory: {out_dir}")
+    sys.exit(1)
+
+required = [
+    "adapter_config.json",
+    "trainer_state.json",
+    "training_args.bin",
+]
+missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
+if missing:
+    print(f"FAIL: Missing required files: {missing}")
+    sys.exit(1)
+
+adapter_weights = glob.glob(os.path.join(out_dir, "adapter_model*.safetensors")) + glob.glob(os.path.join(out_dir, "adapter_model*.bin"))
+if not adapter_weights:
+    print("FAIL: Missing adapter weights")
+    sys.exit(1)
+
+print("PASS: LLaMA Factory training output looks correct")
+print(f"Found adapter weights: {adapter_weights}")
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 ### Test the fine-tuned model 
 
@@ -149,6 +260,63 @@ The result of exporting the finetuned model is shown below.
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Finetuned model " width="600"/>
 </p>
 
+<!-- @os:linux -->
+<!-- @test:id=export-llamafactory-model timeout=1800 hidden=True setup=activate-venv -->
+```bash
+cd LlamaFactory
+pip install pyyaml
+
+python - <<'PY'
+import yaml
+from pathlib import Path
+
+src = Path("examples/merge_lora/qwen3_lora_sft.yaml")
+dst = Path("examples/merge_lora/qwen3_lora_sft_ci.yaml")
+
+cfg = yaml.safe_load(src.read_text())
+
+cfg["adapter_name_or_path"] = "saves/qwen3_lora_sft_ci"
+cfg["export_dir"] = "saves/qwen3_lora_sft_ci_merged"
+
+dst.write_text(yaml.safe_dump(cfg, sort_keys=False))
+print(f"Wrote {dst}")
+PY
+
+llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=verify-llamafactory-export-output timeout=120 hidden=True setup=activate-venv -->
+```python
+import os
+import sys
+import glob
+
+out_dir = "LlamaFactory/saves/qwen3_lora_sft_ci_merged"
+if not os.path.isdir(out_dir):
+    print(f"FAIL: Missing export directory: {out_dir}")
+    sys.exit(1)
+
+required = ["config.json",]
+missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
+if missing:
+    print(f"FAIL: Missing required export files: {missing}")
+    sys.exit(1)
+
+model_files = (
+    glob.glob(os.path.join(out_dir, "*.safetensors")) +
+    glob.glob(os.path.join(out_dir, "pytorch_model*.bin"))
+)
+if not model_files:
+    print("FAIL: Missing merged model weights")
+    sys.exit(1)
+
+print("PASS: Exported merged model output looks correct")
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 ## Using LLaMA Factory GUI
 LLaMA-Factory also supports zero-code fine-tuning of large language models through a web UI in the browser.
