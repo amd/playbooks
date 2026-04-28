@@ -659,7 +659,7 @@ This step ensures that you enable Image Generation as a capability for your mode
 
 1. Go back to chat at `http://localhost:8080`.
 2. Select a **Text Generation LLM** in the model dropdown (example: Qwen, Llama). **Do not select a Stable Diffusion model** as this is a chat model selector.
-3. In the message area, toggle **Image** ON.
+3. In the message area, click on **Integrations** and then toggle **Image** ON.
 4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. An image is generated and appears in the chat.
 <p align="center">
