@@ -26,7 +26,7 @@ Unsloth also supports other training approaches, including QLoRA and reinforceme
 ## Set up your environment
 
 <!-- @device:halo_box -->
-Open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
+Open a terminal and run the following prompt to create a venv with AMD ROCm™ software and Pytorch already installed:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -101,7 +101,7 @@ print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
-## Download the Unsloth Fine Tuning Script
+## Download the Unsloth Fine-Tuning Script
 
 Instead of manually executing each step, this playbook provides a clean, end-to-end script here: [test_unsloth.py](assets/test_unsloth.py).
 
@@ -141,6 +141,7 @@ python test_unsloth_ci.py
 The rest of the playbook will conceptually go through each major step of the script. 
 
 ## How It Works
+
 The test_unsloth.py script performs the following steps:
 * **Load Model**: Loads unsloth/gemma-4-E4B-it using FastModel.
 * **Prepare Data**: Standardizes the dataset (e.g., FineTome-100k) and applies the Gemma-4 chat template.
@@ -150,6 +151,7 @@ The test_unsloth.py script performs the following steps:
 * **Save**: Exports LoRA adapters locally.
 
 ## Key Configuration
+
 You can modify the following constants to customize your run:
 
 ```python

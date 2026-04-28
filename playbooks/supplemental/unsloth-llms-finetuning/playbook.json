@@ -1,7 +1,7 @@
 {
   "id": "unsloth-llms-finetuning",
   "title": "Optimized LLMs Fine-tuning with Unsloth",
-  "description": "Use Unsloth for memory-efficient fine-tune LLMs on STX Halo™",
+  "description": "Use Unsloth for memory-efficient fine-tuned LLMs™",
   "time": 60,
   "supported_platforms": {
     "halo": [

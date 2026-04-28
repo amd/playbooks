@@ -1,7 +1,7 @@
 {
   "id": "speech2speech-translation",
   "title": "Speech-to-Speech Translation",
-  "description": "Build a real-time speech-to-speech translation system on your STX Halo\u2122",
+  "description": "Build a real-time speech-to-speech translation on your local hardware.",
   "time": 60,
   "supported_platforms": {
     "halo": [
