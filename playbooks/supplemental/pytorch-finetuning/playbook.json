@@ -1,7 +1,7 @@
 {
   "id": "pytorch-finetuning",
-  "title": "Fine-tune LLMs with PyTorch and ROCm",
-  "description": "Fine-tune large language models using PyTorch and ROCm on STX Halo\u2122",
+  "title": "Fine-tune LLMs with PyTorch and AMD ROCm™ Software",
+  "description": "Fine-tune large language models (LLMs) using PyTorch and ROCm.",
   "time": 45,
   "supported_platforms": {
     "halo": [
