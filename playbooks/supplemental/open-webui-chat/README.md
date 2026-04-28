@@ -630,7 +630,7 @@ Stable Diffusion models don't support text generation, they only generate images
 
 #### Step 1: Configure Image Generation in Open WebUI
 
-1. Fo to Lemonade, search for `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality), and download it.
+1. Go to Lemonade, search for `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality), and download it.
 2. Go to **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
 3. Set:
    - **Image Generation:** ON
