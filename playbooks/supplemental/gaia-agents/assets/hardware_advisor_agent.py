@@ -27,7 +27,7 @@ class HardwareAdvisorAgent(Agent):
     """Agent that advises on LLM capabilities based on your hardware."""
 
     def __init__(self, **kwargs):
-        self.client = LemonadeClient(keep_alive=True)
+        self.client = LemonadeClient(host="localhost", port=13305, keep_alive=True)
         super().__init__(**kwargs)
         self.max_steps = 50
 

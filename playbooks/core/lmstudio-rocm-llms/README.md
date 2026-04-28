@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggml-org/llama.cpp) and also provides an [OpenAI compliant endpoint](https://lmstudio.ai/docs/developer/openai-compat) for local model serving. LM Studio provides a simple but powerful interface to easily download and deploy models. LM Studio offers both Vulkan and ROCm based backends (called runtimes) for AMD users.
+LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggml-org/llama.cpp) and also provides an [OpenAI compliant endpoint](https://lmstudio.ai/docs/developer/openai-compat) for local model serving. LM Studio provides a simple but powerful interface to easily download and deploy models. LM Studio offers both Vulkan and AMD ROCm™ software backends (called runtimes) for AMD users.
 
 
 ## What You'll Learn
@@ -32,7 +32,7 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 Learn how to start chatting with a ChatGPT-grade LLM completely locally.  
 
 1. Open LMStudio. 
-2. Press `Ctrl + L` to open the Model Loader, select `Manually chose model load parameters`, and click on `GPT-OSS 120B`
+2. Press `Ctrl + L` to open the Model Loader, select `Manually choose model load parameters`, and click on `GPT-OSS 120B`
 3. Make sure "show advanced settings" is checked.  
 4. Change `Context Length` as desired. Higher context length means more model memory, but more system memory used. Recommended for this playbook is 4096.
 5. Make sure `GPU Offload` is set to maximum and `Flash Attention` is On
@@ -80,7 +80,7 @@ LM Studio also offers an OpenAI compliant endpoint in the form of LM Studio Serv
 
 To set up LM Studio Server, use the following instructions:
 
-1. On the left hand side, click on the `Developer` tab (command line icon) or `CTRL + 2` and then click on `Server Settings`.  
+1. On the left hand side, click on the `Developer` tab (command line icon) or `Ctrl + 2` and then click on `Server Settings`.  
 2. (Optional): If you want to serve the model over your LAN, check `Serve on Local Network`. If you want to use with a website or extensive calling within VS Code, check `Enable CORS`. 
 3. On the upper left corner, make sure the server is running by clicking on the toggle button in front of `Status`.
 4. An OpenAI compliant endpoint will now be running. The address is typically at http://127.0.0.1:1234  
@@ -120,8 +120,9 @@ This model will now be accessible through the LM Studio Server endpoint and will
 Having just created the OpenAI Compatible endpoint, let's look at how to integrate this into a Python developer environment (such as VSCode) and use your system as a local API Provider. 
 
 1. Create a Python virtual environment:
-    <!-- @os:windows -->
-    On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
+<!-- @device:halo_box -->
+<!-- @os:windows -->
+    On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
     ```bash
     python -m venv llm-env --system-site-packages
     llm-env\Scripts\activate
@@ -130,9 +131,9 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
     > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-    <!-- @os:end -->
+<!-- @os:end -->
 
-    <!-- @os:linux -->
+<!-- @os:linux -->
     On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
     ```bash
     sudo apt update
@@ -140,7 +141,33 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     python3 -m venv llm-env --system-site-packages
     source llm-env/bin/activate
     ```
-    <!-- @os:end -->
+<!-- @os:end -->
+<!-- @device:end -->
+
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @os:windows -->
+    On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+    ```bash
+    python -m venv llm-env
+    llm-env\Scripts\activate
+    ```
+
+    > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+    > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
+
+<!-- @os:end -->
+
+<!-- @os:linux -->
+    On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+    ```bash
+    sudo apt update
+    sudo apt install -y python3-venv
+    python3 -m venv llm-env
+    source llm-env/bin/activate
+    ```
+<!-- @os:end -->
+<!-- @device:end -->
 
 2. Install the OpenAI package
     ```bash
@@ -151,30 +178,30 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     ```python
     from openai import OpenAI
 
-# Initialize the client specifically for your local server
-# The API key is required by the library but ignored by LM Studio
-client = OpenAI(
-    base_url="http://localhost:1234/v1", 
-    api_key="lm-studio"
-)
-print("Attempting to connect to local LM Studio server...")
+    # Initialize the client specifically for your local server
+    # The API key is required by the library but ignored by LM Studio
+    client = OpenAI(
+        base_url="http://localhost:1234/v1", 
+        api_key="lm-studio"
+    )
+    print("Attempting to connect to local LM Studio server...")
 
-    try:
-        # Create a simple chat completion request
-        completion = client.chat.completions.create(
-            model="local-model", # The model identifier is optional in local mode
-            messages=[
-                {"role": "system", "content": "You are a helpful coding assistant."},
-                {"role": "user", "content": "Explain Python decorators in 1 sentence"}
-            ],
-            temperature=0.7,
-        )
-        # Print the response
-        print("\nConnection Successful! Server Response:\n")
-        print(completion.choices[0].message.content)
+        try:
+            # Create a simple chat completion request
+            completion = client.chat.completions.create(
+                model="local-model", # The model identifier is optional in local mode
+                messages=[
+                    {"role": "system", "content": "You are a helpful coding assistant."},
+                    {"role": "user", "content": "Explain Python decorators in 1 sentence"}
+                ],
+                temperature=0.7,
+            )
+            # Print the response
+            print("\nConnection Successful! Server Response:\n")
+            print(completion.choices[0].message.content)
 
-    except Exception as e:
-        print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
+        except Exception as e:
+            print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
     ```
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-ping-endpoint-windows timeout=300 hidden=True -->

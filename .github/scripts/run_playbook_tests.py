@@ -696,6 +696,58 @@ def run_test(
         )
 
 
+def write_failure_metadata(
+    results_dir: Path,
+    playbook_id: str,
+    platform: str,
+    device: Optional[str],
+    test: TestBlock,
+    result: TestResult,
+) -> None:
+    """Persist a structured record of a failed test for downstream consumers.
+
+    The CI ``Create failure issues`` step reads these files to build GitHub
+    issues that contain everything needed to reproduce the failure (the full
+    test code, the recorded logs, and the matrix entry that produced it).
+    """
+    failures_dir = results_dir / "failures"
+    failures_dir.mkdir(parents=True, exist_ok=True)
+
+    # Bound the captured log size so issue bodies stay within GitHub's limits.
+    max_log_chars = 8000
+    stdout_excerpt = result.stdout[-max_log_chars:] if result.stdout else ""
+    stderr_excerpt = result.stderr[-max_log_chars:] if result.stderr else ""
+
+    payload = {
+        "playbook_id": playbook_id,
+        "platform": platform,
+        "device": device,
+        "test": {
+            "id": test.id,
+            "language": test.language,
+            "code": test.code,
+            "setup": test.setup,
+            "workdir": test.workdir,
+            "timeout": test.timeout,
+            "platform": test.platform,
+            "device": test.device,
+            "line_number": test.line_number,
+        },
+        "result": {
+            "exit_code": result.exit_code,
+            "duration": result.duration,
+            "error_message": result.error_message,
+            "stdout_excerpt": stdout_excerpt,
+            "stderr_excerpt": stderr_excerpt,
+            "stdout_truncated": bool(result.stdout) and len(result.stdout) > max_log_chars,
+            "stderr_truncated": bool(result.stderr) and len(result.stderr) > max_log_chars,
+        },
+    }
+
+    failure_file = failures_dir / f"{test.id}.json"
+    failure_file.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
 def run_playbook_tests(playbook_id: str, platform: str, device: Optional[str] = None) -> bool:
     """Run all tests for a playbook."""
     print(f"\n{'#'*60}")
@@ -767,6 +819,9 @@ def run_playbook_tests(playbook_id: str, platform: str, device: Optional[str] = 
         suite.results.append(result)
 
         if not result.success and not result.skipped:
+            write_failure_metadata(
+                results_dir, playbook_id, platform, device, test, result
+            )
             if test.continue_on_error:
                 print(
                     f"\nTest '{test.id}' failed but continue_on_error=true, continuing..."

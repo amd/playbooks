@@ -1,0 +1,22 @@
+# Copyright Advanced Micro Devices, Inc.
+# SPDX-License-Identifier: MIT
+
+blank_issues_enabled: false
+contact_links:
+  - name: ROCm bug or driver issue
+    url: https://github.com/ROCm/ROCm/issues/new/choose
+    about: >-
+      Issues related to ROCm itself (drivers, runtime, kernel modules, HIP,
+      compiler, libraries such as MIOpen / rocBLAS / hipBLAS, hardware
+      enablement, or general GPU compute errors that are not specific to a
+      playbook) should be filed in the ROCm repository, not here.
+  - name: AMD Community Forum
+    url: https://community.amd.com/
+    about: >-
+      For general questions, discussion, or help that is not a bug or a
+      playbook request, please use the AMD Community Forum.
+  - name: AMD AI Developer Program
+    url: https://www.amd.com/en/developer/ai-dev-program.html
+    about: >-
+      Join the AMD AI Developer Program for tools, resources, and community
+      support to accelerate your AI development on AMD hardware.

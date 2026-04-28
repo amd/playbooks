@@ -5,27 +5,22 @@
   "time": 60,
   "supported_platforms": {
     "halo": [
-      "windows",
       "linux"
     ],
     "halo_box": [
-      "windows",
       "linux"
     ]
   },
   "tested_platforms": {
     "halo": [
-      "windows",
       "linux"
     ]
   },
   "required_platforms": {
     "halo": [
-      "windows",
       "linux"
     ],
     "halo_box": [
-      "windows",
       "linux"
     ]
   },

@@ -2,12 +2,13 @@
 # coding: utf-8
 
 """
-Minimal Unsloth training script (Gemma-4)
-- Clean (<200 lines)
-- With progress logs
-- Suitable for quickstart
+CI-friendly Unsloth training script (Gemma-4)
+- Short smoke-test style run
+- Verifies model load, dataset prep, LoRA training, inference, local save,
+  merged save, and GGUF export
 """
 
+import os
 import time
 import unsloth
 import torch
@@ -26,11 +27,18 @@ from trl import SFTTrainer, SFTConfig
 # Config
 # =========================
 MODEL_NAME = "unsloth/gemma-4-E4B-it"
-MAX_SEQ_LEN = 1024
+MAX_SEQ_LEN = 512
 DATASET_NAME = "mlabonne/FineTome-100k"
-DATASET_SPLIT = "train[:2000]"   # keep small for demo
-OUTPUT_DIR = "gemma_4_lora"
-MERGED_DIR = "gemma_4_merged"
+DATASET_SPLIT = "train[:128]"   # smaller split for CI
+OUTPUT_DIR = "gemma_4_lora_ci"
+MERGED_DIR = "gemma_4_merged_ci"
+
+MAX_STEPS = 5
+PER_DEVICE_BATCH_SIZE = 1
+GRAD_ACCUM_STEPS = 2
+LEARNING_RATE = 2e-4
+
+PROMPT = "Explain why the sky is blue."
 
 
 # =========================
@@ -38,6 +46,16 @@ MERGED_DIR = "gemma_4_merged"
 # =========================
 def log(msg: str):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
+
+
+def require_cuda():
+    log("Checking GPU availability...")
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "ROCm-enabled PyTorch GPU is not available. "
+            "This CI script expects a working GPU environment."
+        )
+    log(f"GPU available: {torch.cuda.get_device_name(0)}")
 
 
 # =========================
@@ -50,7 +68,6 @@ def load_model():
         max_seq_length=MAX_SEQ_LEN,
         load_in_4bit=False,
     )
-
     tokenizer = get_chat_template(tokenizer, chat_template="gemma-4")
     return model, tokenizer
 
@@ -62,7 +79,7 @@ def prepare_dataset(tokenizer):
     log("Loading dataset...")
     dataset = load_dataset(DATASET_NAME, split=DATASET_SPLIT)
 
-    log("Standardizing format...")
+    log("Standardizing dataset format...")
     dataset = standardize_data_formats(dataset)
 
     def format_fn(examples):
@@ -79,6 +96,10 @@ def prepare_dataset(tokenizer):
     log("Applying chat template...")
     dataset = dataset.map(format_fn, batched=True)
 
+    if len(dataset) == 0:
+        raise RuntimeError("Prepared dataset is empty")
+
+    log(f"Prepared dataset size: {len(dataset)}")
     return dataset
 
 
@@ -112,11 +133,11 @@ def train(model, tokenizer, dataset):
         train_dataset=dataset,
         args=SFTConfig(
             dataset_text_field="text",
-            per_device_train_batch_size=1,
-            gradient_accumulation_steps=4,
-            max_steps=50,  # quick demo
-            learning_rate=2e-4,
-            logging_steps=5,
+            per_device_train_batch_size=PER_DEVICE_BATCH_SIZE,
+            gradient_accumulation_steps=GRAD_ACCUM_STEPS,
+            max_steps=MAX_STEPS,
+            learning_rate=LEARNING_RATE,
+            logging_steps=1,
             report_to="none",
             optim="adamw_torch",
         ),
@@ -128,12 +149,14 @@ def train(model, tokenizer, dataset):
         response_part="<|turn>model\n",
     )
 
-    log("Start training...")
+    log("Starting training...")
     start = time.time()
-
     stats = trainer.train()
+    elapsed = round(time.time() - start, 2)
 
-    log(f"Training finished in {round(time.time() - start, 2)} sec")
+    log(f"Training finished in {elapsed} sec")
+    log(f"Training stats: {stats}")
+
     return stats
 
 
@@ -141,11 +164,11 @@ def train(model, tokenizer, dataset):
 # Inference test
 # =========================
 def run_inference(model, tokenizer):
-    log("Running inference test...")
+    log("Running inference smoke test...")
 
     messages = [{
         "role": "user",
-        "content": [{"type": "text", "text": "Explain why the sky is blue."}]
+        "content": [{"type": "text", "text": PROMPT}]
     }]
 
     inputs = tokenizer.apply_chat_template(
@@ -165,24 +188,32 @@ def run_inference(model, tokenizer):
         streamer=TextStreamer(tokenizer, skip_prompt=True),
     )
 
+    log("Inference smoke test completed")
+
 
 # =========================
-# Save
+# Save outputs
 # =========================
-def save_model(model, tokenizer):
-    log("Saving LoRA adapters...")
+def save_lora(model, tokenizer):
+    log(f"Saving LoRA adapters to: {OUTPUT_DIR}")
     model.save_pretrained(OUTPUT_DIR)
     tokenizer.save_pretrained(OUTPUT_DIR)
 
-def save_merged_model(model, tokenizer):
-    log("Saving merged model...")
+
+def save_merged(model, tokenizer):
+    log(f"Saving merged model to: {MERGED_DIR}")
     model.save_pretrained_merged(MERGED_DIR, tokenizer)
+
 
 # =========================
 # Main
 # =========================
 def main():
-    log("===== Unsloth Training Pipeline =====")
+    log("===== Unsloth CI Training Pipeline =====")
+    log(f"Python: {os.sys.version}")
+    log(f"PyTorch: {torch.__version__}")
+
+    require_cuda()
 
     model, tokenizer = load_model()
     dataset = prepare_dataset(tokenizer)
@@ -190,8 +221,9 @@ def main():
 
     train(model, tokenizer, dataset)
     run_inference(model, tokenizer)
-    save_model(model, tokenizer)
-    save_merged_model(model, tokenizer)
+
+    save_lora(model, tokenizer)
+    save_merged(model, tokenizer)
 
     log("===== Done =====")
 

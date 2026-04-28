@@ -1,7 +1,7 @@
 {
   "id": "lmstudio-rocm-llms",
   "title": "Running and serving LLMs with LM Studio",
-  "description": "Set up LM Studio and LM Studio Server to run and serve large language models on STX Halo\u2122",
+  "description": "Set up LM Studio and LM Studio Server to run and serve large language models locally.",
   "time": 30,
   "supported_platforms": {
     "halo": [
