@@ -13,6 +13,11 @@
       "linux"
     ]
   },
+  "published_platforms": {
+    "halo": [
+      "linux"
+    ]
+  },
   "platforms": ["linux"],
   "difficulty": "intermediate",
   "isNew": false,

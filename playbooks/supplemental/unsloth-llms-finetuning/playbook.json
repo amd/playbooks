@@ -24,6 +24,11 @@
       "linux"
     ]
   },
+  "published_platforms": {
+    "halo": [
+      "linux"
+    ]
+  },
   "difficulty": "advanced",
   "isNew": false,
   "isFeatured": false,
