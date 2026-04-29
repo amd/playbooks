@@ -590,7 +590,7 @@ This validates that Open WebUI can send requests to Lemonade using the OpenAI-co
 
 This requires a model that supports image input (a Vision or Multimodal model).
 
-1. Select a vision-capable model (example: `Qwen3.5-4B-GGUF`, or any model labeled for Vision in Lemonade)
+1. Click the filter icon, select “By Category,” then choose a model from the **Vision** section (e.g., `Qwen3.5-4B-GGUF`)
 <p align="center">
   <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
 </p>
