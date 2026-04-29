@@ -186,22 +186,22 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     )
     print("Attempting to connect to local LM Studio server...")
 
-        try:
-            # Create a simple chat completion request
-            completion = client.chat.completions.create(
-                model="local-model", # The model identifier is optional in local mode
-                messages=[
-                    {"role": "system", "content": "You are a helpful coding assistant."},
-                    {"role": "user", "content": "Explain Python decorators in 1 sentence"}
-                ],
-                temperature=0.7,
-            )
-            # Print the response
-            print("\nConnection Successful! Server Response:\n")
-            print(completion.choices[0].message.content)
+    try:
+        # Create a simple chat completion request
+        completion = client.chat.completions.create(
+            model="local-model", # The model identifier is optional in local mode
+            messages=[
+                {"role": "system", "content": "You are a helpful coding assistant."},
+                {"role": "user", "content": "Explain Python decorators in 1 sentence"}
+            ],
+            temperature=0.7,
+        )
+        # Print the response
+        print("\nConnection Successful! Server Response:\n")
+        print(completion.choices[0].message.content)
 
-        except Exception as e:
-            print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
+    except Exception as e:
+        print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
     ```
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-ping-endpoint-windows timeout=300 hidden=True -->
