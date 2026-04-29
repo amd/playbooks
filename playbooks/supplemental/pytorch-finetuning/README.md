@@ -164,7 +164,7 @@ sys.exit(r.returncode)
 
 | Method | Memory | Speed | Quality | Best For |
 |--------|--------|-------|---------|----------|
-| **QLoRA** | 12-16GB | Fastest | 90-95% | Most users|
+| **QLoRA** | 12-16GB | Fastest | 90-95% | Low Memory Usage |
 | **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
 | **Full** | 80GB+ | Slowest | 100% | Maximum quality |
 
@@ -182,7 +182,7 @@ Below is a summary of the available training methods. Each method links to its s
 
 | Script                           | Method            | Description                                                                                                         | Typical VRAM | Recommended For                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA** 🌟       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
+| [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
 | [`train_lora.py`](assets/train_lora.py)                 | **LoRA** 🎯         | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
 
