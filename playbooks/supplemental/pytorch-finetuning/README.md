@@ -164,7 +164,7 @@ sys.exit(r.returncode)
 
 | Method | Memory | Speed | Quality | Best For |
 |--------|--------|-------|---------|----------|
-| **QLoRA** 🌟 | 12-16GB | Fastest | 90-95% | Most users|
+| **QLoRA** | 12-16GB | Fastest | 90-95% | Low Memory Usage |
 | **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
 | **Full** | 80GB+ | Slowest | 100% | Maximum quality |
 
@@ -182,8 +182,8 @@ Below is a summary of the available training methods. Each method links to its s
 
 | Script                           | Method            | Description                                                                                                         | Typical VRAM | Recommended For                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_qlora.py`](assets/train_qlora.py)               | **QLoRA** 🌟        | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off.                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA** 🎯         | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
 
 ---
@@ -209,13 +209,17 @@ W_updated = W + B × A
 
 ### What is QLoRA?
 
-**QLoRA** combines **4-bit quantization** with **LoRA**. The base model is loaded in 4-bit (large memory savings), and only the LoRA adapters are trained in higher precision. So you get the parameter efficiency of LoRA plus much lower VRAM, with a small quality trade-off compared to full-precision LoRA.
+**QLoRA** combines **4-bit quantization** with **LoRA**. The base model is loaded in 4-bit (large memory savings), and only the LoRA adapters are trained in higher precision. So you get the parameter efficiency of LoRA plus much lower VRAM, with a small quality trade-off compared to full-precision LoRA. Note that 4-bit quantization can cause numerical instabilities (loss spikes or NaNs), so users may often prefer **LoRA** if enough VRAM is available.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
 LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
+
+> [!NOTE]
+> For MXFP4 base models like `openai/gpt-oss-20b`, we recommend using **LoRA** (`train_lora.py`) instead of QLoRA. The QLoRA script's `bitsandbytes` 4-bit path typically dequantizes MXFP4 weights to BF16, so the run behaves like standard LoRA. Native MXFP4 needs `bitsandbytes` built from source plus a matching Transformers/Triton/kernels stack. See the [Transformers MXFP4 docs](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+
 ---
 
 ## Using your Fine-Tuned Model

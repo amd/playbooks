@@ -590,7 +590,7 @@ This validates that Open WebUI can send requests to Lemonade using the OpenAI-co
 
 This requires a model that supports image input (a Vision or Multimodal model).
 
-1. Select a vision-capable model (example: `Qwen3.5-4B-GGUF`, or any model labeled for Vision in Lemonade)
+1. Click the filter icon, select “By Category,” then choose a model from the **Vision** section (e.g., `Qwen3.5-4B-GGUF`)
 <p align="center">
   <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
 </p>
@@ -614,19 +614,20 @@ Stable Diffusion models don't support text generation, they only generate images
 
 #### Step 1: Configure Image Generation in Open WebUI
 
-1. Go to **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
-2. Set:
+1. Go to Lemonade, search for `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality), and download it.
+2. Go to **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
+3. Set:
    - **Image Generation:** ON
    - **Image Generation Engine:** Default (OpenAI)
    - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
-   - **Model:** `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality)
-3. If you want to add more parameters, add them to the text field as JSON. For example: `{ "steps": 4, "cfg_scale": 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+   - **Model:** `SDXL-Turbo` or `SDXL-Base-1.0`
+4. If you want to add more parameters, add them to the text field as JSON. For example: `{ "steps": 4, "cfg_scale": 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 <p align="center">
   <img src="assets/images_settings.png" alt="Lemonade VLM's" width="600"/>
 </p>
 
-4. Save
+5. Save
 
 
 #### Step 2: Allow Image Generation for the model
@@ -642,7 +643,7 @@ This step ensures that you enable Image Generation as a capability for your mode
 
 1. Go back to chat at `http://localhost:8080`.
 2. Select a **Text Generation LLM** in the model dropdown (example: Qwen, Llama). **Do not select a Stable Diffusion model** as this is a chat model selector.
-3. In the message area, toggle **Image** ON.
+3. In the message area, click on **Integrations**, and toggle **Image** ON.
 4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. An image is generated and appears in the chat.
 <p align="center">
