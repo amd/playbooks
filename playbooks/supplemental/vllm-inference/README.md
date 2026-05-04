@@ -79,7 +79,7 @@ Create a Python 3.12 virtual environment and activate it:
 
 <!-- @test:id=create-venv timeout=30 hidden=True -->
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 <!-- @test:end -->
