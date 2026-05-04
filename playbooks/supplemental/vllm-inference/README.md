@@ -156,7 +156,7 @@ vllm serve Qwen/Qwen3-1.7B \
 You can test the server using the curl script:
 
 ```bash
-./assets/curl_script.sh
+./curl_script.sh
 ```
 
 Or use the curl command directly:
@@ -222,7 +222,7 @@ for chunk in response:
 Run the script:
 
 ```bash
-python assets/chat_with_model.py
+python chat_with_model.py
 ```
 
 <!-- @test:id=vllm-server-smoke-linux timeout=1800 hidden=True -->
