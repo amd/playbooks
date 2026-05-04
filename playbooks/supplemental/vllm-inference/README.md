@@ -109,17 +109,31 @@ python -m pip install \
 
 Set the environment variables required by the ROCm pip packages before starting vLLM:
 
-<!-- @test:id=set-env-var timeout=600 hidden=True setup=activate-venv -->
 ```bash
 export PYTHONPATH=.venv/lib/python3.12/site-packages/_rocm_sdk_core/share/amd_smi
 export FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE
 ```
-<!-- @test:end -->
 
 Check the installation:
 
-<!-- @test:id=check-install timeout=600 hidden=True setup=activate-venv -->
 ```bash
+echo "=== vLLM ===" && python -c "import vllm; print('vLLM version:', vllm.__version__)"
+echo "=== PyTorch ===" && python -c "import torch; print('PyTorch:', torch.__version__); print('HIP available:', torch.cuda.is_available()); print('HIP built:', torch.backends.hip.is_built() if hasattr(torch.backends, 'hip') else 'N/A')"
+echo "=== flash-attn ===" && python -c "import flash_attn; print('flash-attn:', flash_attn.__version__)"
+```
+
+<!-- @test:id=python-env-check-linux timeout=30 hidden=True setup=activate-venv -->
+```bash
+set -euo pipefail
+python3 --version
+which python3
+```
+<!-- @test:end --> 
+
+<!-- @test:id=set-env-var-and-check-install timeout=600 hidden=True setup=activate-venv -->
+```bash
+export PYTHONPATH=.venv/lib/python3.12/site-packages/_rocm_sdk_core/share/amd_smi
+export FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE
 echo "=== vLLM ===" && python -c "import vllm; print('vLLM version:', vllm.__version__)"
 echo "=== PyTorch ===" && python -c "import torch; print('PyTorch:', torch.__version__); print('HIP available:', torch.cuda.is_available()); print('HIP built:', torch.backends.hip.is_built() if hasattr(torch.backends, 'hip') else 'N/A')"
 echo "=== flash-attn ===" && python -c "import flash_attn; print('flash-attn:', flash_attn.__version__)"
