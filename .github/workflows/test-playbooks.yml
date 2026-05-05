@@ -139,7 +139,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.playbook == 'open-webui-chat' && '3.12' || '3.13' }}
+          python-version: ${{ (matrix.playbook == 'open-webui-chat' || matrix.playbook == 'vllm-inference') && '3.12' || '3.13' }}
 
       - name: Install test dependencies
         run: |
