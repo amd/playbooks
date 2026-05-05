@@ -26,8 +26,6 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 
 ## Available Playbooks
 
-### Core
-
 | Playbook | Description |
 |----------|-------------|
 | **Running LLMs with PyTorch and AMD ROCm™ software** | Run powerful language models locally with PyTorch and ROCm |
