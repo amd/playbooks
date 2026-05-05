@@ -65,38 +65,6 @@ source s2st-env/bin/activate
 <!-- @os:end -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv:
-
-<!-- @test:id=create-venv timeout=60 -->
-```bash
-python -m venv s2st-env
-s2st-env\Scripts\activate
-```
-<!-- @test:end -->
-<!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
-
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @os:end -->
-
-<!-- @os:linux -->
-On Linux, open a terminal and run the following prompt to create a venv:
-
-<!-- @test:id=create-venv timeout=120 -->
-```bash
-sudo apt update
-sudo apt install -y python3-venv
-python3 -m venv s2st-env
-source s2st-env/bin/activate
-```
-<!-- @test:end -->
-<!-- @setup:id=activate-venv command="source s2st-env/bin/activate" -->
-<!-- @os:end -->
-<!-- @device:end -->
-
 ### Installing Basic Dependencies
 
 <!-- @require:pytorch -->
@@ -111,6 +79,24 @@ pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate s
 <!-- @test:end -->
 
 <!-- @test:id=verify-imports timeout=120 setup=activate-venv hidden=True -->
+
+To execute Python code from now on, it is necessary to enter the Python3 shell as the current IDE within your above created virtual environment.
+```bash
+python3
+```
+Output:
+```bash
+Python 3.13.5 (main, Jun 25 2025, 18:55:22) [GCC 14.2.0] on linux 
+Type "help", "copyright", "credits" or "license" for more information.  
+>> 
+```
+### Verify imports
+
+To begin, navigate to the assets directory using the command:
+```bash
+cd ~/speech2speech-translation/assets
+```
+
 ```python
 import importlib
 import os
@@ -175,19 +161,71 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 ```
 <!-- @test:end -->
 
+## Set up the speech-to-speech demo
+
+#### Learn about seamless-m4t-v2
+
+Check out the model card on Hugging Face for more information: [https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)
+
+This is the technical architecture of the speech-speech models:
+<p align="center">
+  <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
+</p>
+
+#### Prepare the Environment for Model Setup
+#####  Linux
+<!-- @os:linux -->
+```bash
+# Navigate to the speech2speech-translation directory 
+cd ~/speech2speech-translation 
+
+# Create the seamless-m4t-v2-large folder 
+mkdir seamless-m4t-v2-large 
+
+# Set the environment variable globally 
+export S2S_MODEL_PATH=/absolute/path/to/speech2speech-translation/seamless-m4t-v2-large
+```
+<!-- @os:end -->
+
+##### Windows
+<!-- @os:windows -->
+```bash
+# Navigate to the speech2speech-translation directory:
+Set-Location -Path "C:\absolute\path\to\speech2speech-translation"
+
+# Create the seamless-m4t-v2-large Folder:
+New-Item -Path "C:\absolute\path\to\speech2speech-translation\seamless-m4t-v2-large" -ItemTy
+
+#Set the environment variable globally
+setx S2S_MODEL_PATH "C:\absolute\path\to\speech2speech-translation\seamless-m4t-v2-large" 
+```
+> **Note**: You may need to restart your Poweshell session for the changes to take effect.
+<!-- @os:end -->
+
+### Download the model locally
+
+Before running `infer.py` or `gradio_demo.py`, download the model files into a local folder named `seamless-m4t-v2-large` in the same directory as the scripts.
+
+Open a terminal in the scripts directory. Activate the `s2st-env` virtual environment only if it is not already active, then run:
+<!-- @os:linux$windows -->
+```bash
+pip install -U "huggingface_hub<1.0"
+hf download facebook/seamless-m4t-v2-large --local-dir ./seamless-m4t-v2-large
+```
+<!-- @os:end -->
+
+After the download completes, the model folder should be available at `./seamless-m4t-v2-large`.
+
+#### Verify local Model assets
+
 <!-- @test:id=verify-local-model-assets timeout=120 setup=activate-venv hidden=True -->
 ```python
 import os
 import sys
-import platform
 from transformers import AutoProcessor
 
+# Retrieve the model directory from the environment variable
 model_dir = os.environ.get("S2S_MODEL_PATH")
-if not model_dir:
-    if platform.system() == "Windows":
-        model_dir = r"C:\ModelCache\speech2speech\models\seamless-m4t-v2-large"
-    else:
-        model_dir = "/opt/model_cache/speech2speech/models/seamless-m4t-v2-large"
 
 if not os.path.isdir(model_dir):
     print(f"FAIL: Local model directory not found: {model_dir}")
@@ -204,41 +242,6 @@ except Exception as e:
 ```
 <!-- @test:end -->
 
-## Set up the speech-to-speech demo
-
-#### Learn about seamless-m4t-v2
-
-Check out the model card on Hugging Face for more information: [https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)
-
-This is the technical architecture of the speech-speech models:
-<p align="center">
-  <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
-</p>
-
-#### Download the model locally
-
-Before running `infer.py` or `gradio_demo.py`, download the model files into a local folder named `seamless-m4t-v2-large` in the same directory as the scripts.
-
-Open a terminal in the scripts directory. Activate the `s2st-env` virtual environment only if it is not already active, then run:
-
-<!-- @os:windows -->
-```bash
-s2st-env\Scripts\activate # Activate the venv only if it's not already active
-pip install -U "huggingface_hub<1.0"
-hf download facebook/seamless-m4t-v2-large --local-dir ./seamless-m4t-v2-large
-```
-<!-- @os:end -->
-
-<!-- @os:linux -->
-```bash
-source s2st-env/bin/activate # Activate the venv only if it's not already active
-pip install -U "huggingface_hub<1.0"
-hf download facebook/seamless-m4t-v2-large --local-dir ./seamless-m4t-v2-large
-```
-<!-- @os:end -->
-
-After the download completes, the model folder should be available at `./seamless-m4t-v2-large`.
-
 
 #### Import necessary dependencies
 
@@ -254,14 +257,14 @@ import torchaudio
 from transformers import AutoProcessor, SeamlessM4Tv2Model
 
 os.environ["HIP_VISIBLE_DEVICES"] = "0"
-device = "cuda"
-model_path = os.environ.get("S2S_MODEL_PATH", "./seamless-m4t-v2-large")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model_path = os.environ.get("S2S_MODEL_PATH")
 ```
 #### Load models
 
 ```python
 start = time.time()
-processor = AutoProcessor.from_pretrained("./seamless-m4t-v2-large")
+processor = AutoProcessor.from_pretrained(model_path)
 dtype = torch.float16 if device.type == "cuda" else torch.float32
 model = SeamlessM4Tv2Model.from_pretrained(model_path, dtype=dtype).to(device)
 end = time.time()
@@ -270,15 +273,15 @@ print(f"model loading duration: {end - start} seconds")
 
 #### Input audio clip .wav file
 
-Please download the following file: [input1.wav](assets/input1.wav). Then, load it with soundfile.
+Please download the following file: [input1.wav](assets/input1.wav). Once downloaded, ensure you remain in the `speech2speech-translation` directory, and then load the file using SoundFile.
 
 ```python
-audio_np, orig_freq = sf.read("input1.wav", dtype="float32", always_2d=True)
-audio = torchaudio.functional.resample(
-    torch.from_numpy(audio_np.T),
-    orig_freq=orig_freq,
-    new_freq=16_000,
-)
+audio_np, orig_freq = sf.read("./assets/input1.wav", dtype="float32", always_2d=True)
+... audio = torchaudio.functional.resample(
+...     torch.from_numpy(audio_np.T),
+...     orig_freq=orig_freq,
+...     new_freq=16_000,
+... )
 ```
 
 #### Preprocess input .wav file
@@ -303,7 +306,8 @@ print(f"gpu infer duration: {end - start} seconds")
 
 ```python
 sample_rate = model.config.sampling_rate
-scipy.io.wavfile.write("out1.wav", rate=sample_rate, data=audio_array_from_audio)
+audio_array_from_audio= audio_array_from_audio.astype("float32")
+scipy.io.wavfile.write("./assets/output1.wav", rate=sample_rate, data=audio_array_from_audio)
 ```
 
 #### Run the complete file to check the audio generation duration
@@ -313,14 +317,29 @@ Please download the following file: [infer.py](assets/infer.py). Then, run it.
 ```bash
 python ./infer.py
 ```
+## Automate Inference Launch 
 
+### Windows
+
+Create a PowerShell script named `setup_infer.ps1`.
+```powershell
+New-Item -Path . -Name "setup_infer.ps1" -ItemType "file" -Force 
+ 
+# Add the necessary commands to the script 
+Set-Content -Path "setup_infer.ps1" -Value @"  
+# Add Your PowerShell Script for Windows Setup
+# Insert the following commands below to complete the setup.
+"@ 
+```
+
+#### PowerShell script for  Windows
 <!-- @os:windows -->
 <!-- @test:id=infer-smoke-windows timeout=1800 setup=activate-venv hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
-Remove-Item .\out1.wav -Force -ErrorAction SilentlyContinue
+Remove-Item .\output1.wav -Force -ErrorAction SilentlyContinue
 
-$env:S2S_MODEL_PATH = "C:\ModelCache\speech2speech\models\seamless-m4t-v2-large"
+echo $env:S2S_MODEL_PATH
 
 if (-not (Test-Path $env:S2S_MODEL_PATH)) { throw "FAIL: Model directory not found: $env:S2S_MODEL_PATH" }
 if (-not (Test-Path .\input1.wav)) { throw "FAIL: input1.wav not found in current directory" }
@@ -337,13 +356,31 @@ Write-Host "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
+```powershell
+# Set full read/write permissions for the script 
+icacls "setup_infer.ps1" /grant Everyone:(F) 
+ 
+# Run the script 
+./setup_infer.ps1 
+```
+### Linux
+
+Create a shell script named `setup_infer.sh`.
+```bash
+sudo nano setup_infer.sh 
+# Add the necessary commands to the script 
+# Insert the following commands below to complete the setup.
+```
+
+#### Bash script for Linux
+
 <!-- @os:linux -->
 <!-- @test:id=infer-smoke-linux timeout=1800 setup=activate-venv hidden=True -->
 ```bash
 set -euo pipefail
-rm -f ./out1.wav
+rm -f ./output1.wav
 
-export S2S_MODEL_PATH=/opt/model_cache/speech2speech/models/seamless-m4t-v2-large
+echo $S2S_MODEL_PATH
 
 if [ ! -d "$S2S_MODEL_PATH" ]; then
   echo "FAIL: Model directory not found: $S2S_MODEL_PATH"
@@ -370,6 +407,14 @@ echo "PASS: infer.py created out1.wav successfully"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
+
+```bash
+# Give execute permissions to the script 
+chmod +x setup_infer.sh 
+ 
+# Run the script 
+./setup_infer.sh 
+```
 
 ### Runing the Gradio UI demo:
 
@@ -417,12 +462,27 @@ Press and hold the record button to capture your voice; releasing it will automa
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
 </p>
 
+## Automate Gradio UI Launch
+
+### Windows
+
+Create a PowerShell script named `setup_gradio.ps1` in `assets` folder.
+```powershell
+New-Item -Path . -Name "setup_gradio.ps1" -ItemType "file" -Force 
+ 
+# Add the necessary commands to the script 
+Set-Content -Path "setup_gradio.ps1" -Value @"  
+# Add Your PowerShell Script for Windows Setup
+# Insert the following commands below to complete the setup.
+"@ 
+```
+#### Powershell script for Windows
 <!-- @os:windows -->
 <!-- @test:id=gradio-ui-smoke-windows timeout=1800 setup=activate-venv hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$env:S2S_MODEL_PATH = "C:\ModelCache\speech2speech\models\seamless-m4t-v2-large"
+echo $env:S2S_MODEL_PATH
 $script = @'
 import os
 import sys
@@ -479,12 +539,29 @@ Remove-Item $tempPy -Force -ErrorAction SilentlyContinue
 <!-- @test:end --> 
 <!-- @os:end -->
 
+```powershell
+# Set full read/write permissions for the script 
+icacls "setup_gradio.ps1" /grant Everyone:(F) 
+ 
+# Run the script 
+./setup_gradio.ps1 
+```
+### Linux
+
+Create a shell script named `setup_gradio.sh` in `assets` folder.
+```bash
+sudo nano setup_gradio.sh 
+# Add the necessary commands to the script 
+# Insert the following commands below to complete the setup.
+```
+#### Bash script for Linux
+
 <!-- @os:linux -->
 <!-- @test:id=gradio-ui-smoke-linux timeout=1800 setup=activate-venv hidden=True -->
 ```bash
 set -euo pipefail
 
-export S2S_MODEL_PATH=/opt/model_cache/speech2speech/models/seamless-m4t-v2-large
+echo $S2S_MODEL_PATH
 python - <<'PY'
 import os
 import sys
@@ -528,6 +605,14 @@ PY
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
+
+```bash
+# Give execute permissions to the script 
+chmod +x setup_gradio.sh 
+ 
+# Run the script 
+./setup_gradio.sh 
+```
 
 
 ## Next Steps

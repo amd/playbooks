@@ -19,8 +19,8 @@ from transformers import AutoProcessor, SeamlessM4Tv2Model
 # ============ Configuration ============
 DEFAULT_TARGET_LANGUAGE = "eng"
 INPUT_AUDIO_PATH = "./input1.wav"
-OUTPUT_AUDIO_PATH = "./out1.wav"
-MODEL_PATH = os.environ.get("S2S_MODEL_PATH", "./seamless-m4t-v2-large")
+OUTPUT_AUDIO_PATH = "./output1.wav"
+MODEL_PATH = os.environ.get("S2S_MODEL_PATH")
 TARGET_SAMPLE_RATE = 16_000
 # =======================================
 
