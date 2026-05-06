@@ -377,8 +377,9 @@ $ErrorActionPreference = "Stop"
 $playbookRoot = (Get-Location).Path
 
 if (-not $env:OPENCV_INSTALL_ROOT) {throw "OPENCV_INSTALL_ROOT is not set."}
+if (-not $env:OpenCV_DIR) {throw "OpenCV_DIR is not set."}
 
-$work = Join-Path $env:TEMP ("cvml-test-" + [System.Guid]::NewGuid().ToString())
+$work = $work = Join-Path (Get-Location) "cvml-test"
 New-Item -ItemType Directory -Force -Path $work | Out-Null
 
 try {
@@ -403,7 +404,7 @@ try {
   $samplesDir = Join-Path $cvmlRoot "samples"
   $buildDir = Join-Path $samplesDir "build"
 
-  cmake -S $samplesDir -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT"
+  cmake -S $samplesDir -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT" -DOpenCV_DIR="$env:OpenCV_DIR"
   cmake --build $buildDir --config Release --parallel
 
   $faceExe = Join-Path $buildDir "cvml-sample-face-detection\Release\cvml-sample-face-detection.exe"
