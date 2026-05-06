@@ -12,7 +12,7 @@ import urllib.error
 
 def fetch_github_issues():
     """Fetch GitHub issues from the repository"""
-    repo = "amd/halo_playbooks"
+    repo = "amd/playbooks"
     token = os.environ.get("GITHUB_TOKEN", "")
 
     headers = {

@@ -216,7 +216,7 @@ function SetupGuide() {
             <li>
               Set <strong className="text-white">Repository access</strong> to{" "}
               <code className="bg-[#242424] px-1.5 py-0.5 rounded text-[#D4915D] text-xs">Only select repositories</code>{" "}
-              and pick <code className="bg-[#242424] px-1.5 py-0.5 rounded text-[#D4915D] text-xs">amd/halo_playbooks</code>
+              and pick <code className="bg-[#242424] px-1.5 py-0.5 rounded text-[#D4915D] text-xs">amd/playbooks</code>
             </li>
             <li>
               Under <strong className="text-white">Repository permissions</strong>, set{" "}

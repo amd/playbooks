@@ -9,15 +9,15 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Fine-tune LLMs with Pytorch and ROCm
+# Fine-tune LLMs with Pytorch and AMD ROCm™ Software
 
 ## Overview
 
-This tutorial provides step-by-step examples for fine-tuning a large language model with PyTorch and ROCm. It covers several techniques, from standard fine-tuning to memory-efficient PEFT strategies, so you can easily adapt models for your needs.
+This tutorial provides step-by-step examples for fine-tuning a large language model (LLM) with PyTorch and ROCm. It covers several techniques, from standard fine-tuning to memory-efficient Parameter-Efficient Fine-Tuning (PEFT) strategies, so you can easily adapt models for your needs.
 
 **Model Used**: google/gemma-3-4b-it  *(see [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) if gated)*  
-**Hardware**: AMD GPU with ROCm support  
-**Framework**: PyTorch + Hugging Face (Transformers, PEFT, TRL)
+**Hardware**: AMD Radeon™ GPU with ROCm support  
+**Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 > **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
 
@@ -164,7 +164,7 @@ sys.exit(r.returncode)
 
 | Method | Memory | Speed | Quality | Best For |
 |--------|--------|-------|---------|----------|
-| **QLoRA** 🌟 | 12-16GB | Fastest | 90-95% | Most users|
+| **QLoRA** | 12-16GB | Fastest | 90-95% | Low Memory Usage |
 | **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
 | **Full** | 80GB+ | Slowest | 100% | Maximum quality |
 
@@ -176,14 +176,14 @@ The scripts turn the dataset into chat examples. For example, the QLoRA script u
 - **User:** “Give me a quote about: &lt;tag&gt;”
 - **Assistant:** “&lt;quote&gt; – &lt;author&gt;”
 
-So fine-tuning teaches the model to respond to prompts asking for quotes about a topic and to return them in the format `<quote text> - <author>`. The LoRA and full fine-tuning scripts use **databricks/databricks-dolly-15k** (general instruction/response pairs), so the exact task varies by script; the idea is the same - adapt the model to your chosen dataset and format.
+Fine-tuning teaches the model to respond to prompts asking for quotes about a topic and to return them in the format `<quote text> - <author>`. The LoRA and full fine-tuning scripts use **databricks/databricks-dolly-15k** (general instruction/response pairs), so the exact task varies by script; the idea is the same - adapt the model to your chosen dataset and format.
 
-Below is a summary of available training methods. Each method links to its script and provides a brief description for choosing the right approach.
+Below is a summary of the available training methods. Each method links to its script and provides a brief description for choosing the right approach.
 
 | Script                           | Method            | Description                                                                                                         | Typical VRAM | Recommended For                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_qlora.py`](assets/train_qlora.py)               | **QLoRA** 🌟        | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off.                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA** 🎯         | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
 
 ---
@@ -192,7 +192,9 @@ Below is a summary of available training methods. Each method links to its scrip
 
 ### What is LoRA?
 
-**LoRA (Low-Rank Adaptation)** keeps the base model frozen and only trains small "adapter" matrices that get added to certain layers. The key idea: instead of updating a huge weight matrix with millions of parameters, we learn a low-rank update (two small matrices whose product has much fewer parameters). That gives a large reduction in trainable parameters and VRAM while keeping most of the full fine-tuning quality.
+**LoRA (Low-Rank Adaptation)** keeps the base model frozen and only trains small "adapter" matrices that get added to certain layers. 
+
+- **The key idea**: instead of updating a huge weight matrix with millions of parameters, we learn a low-rank update (two small matrices whose product has much fewer parameters). That gives a large reduction in trainable parameters and VRAM while keeping most of the full fine-tuning quality.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -207,18 +209,22 @@ W_updated = W + B × A
 
 ### What is QLoRA?
 
-**QLoRA** combines **4-bit quantization** with **LoRA**: the base model is loaded in 4-bit (large memory savings), and only the LoRA adapters are trained in higher precision. So you get the parameter efficiency of LoRA plus much lower VRAM, with a small quality trade-off compared to full-precision LoRA.
+**QLoRA** combines **4-bit quantization** with **LoRA**. The base model is loaded in 4-bit (large memory savings), and only the LoRA adapters are trained in higher precision. So you get the parameter efficiency of LoRA plus much lower VRAM, with a small quality trade-off compared to full-precision LoRA. Note that 4-bit quantization can cause numerical instabilities (loss spikes or NaNs), so users may often prefer **LoRA** if enough VRAM is available.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
 LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
+
+> [!NOTE]
+> For MXFP4 base models like `openai/gpt-oss-20b`, we recommend using **LoRA** (`train_lora.py`) instead of QLoRA. The QLoRA script's `bitsandbytes` 4-bit path typically dequantizes MXFP4 weights to BF16, so the run behaves like standard LoRA. Native MXFP4 needs `bitsandbytes` built from source plus a matching Transformers/Triton/kernels stack. See the [Transformers MXFP4 docs](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+
 ---
 
-## Using Your Fine-tuned Model
+## Using your Fine-Tuned Model
 
-### After Full Fine-tuning
+### After Full Fine-Tuning
 
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -366,7 +372,7 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ## Customization Guide
 
-### Use Your Own Dataset
+### Use your Own Dataset
 
 All scripts use the same dataset format. Replace the loading section:
 
@@ -408,7 +414,7 @@ dataset = dataset.map(format_instruction)
 
 ### Adjust Training Parameters
 
-Edit the training script and change the variables to match your goals: **learning rate** (`LR`), **epochs** (`EPOCHS`), **batch size** (`BATCH_SIZE`), **gradient accumulation** (`GRAD_ACCUM_STEPS`), and for LoRA/QLoRA **rank** (`LORA_R`). For faster runs use fewer epochs and a higher LR; for better quality use more epochs and a lower LR. Reduce batch size or sequence length if you hit out-of-memory errors.
+Edit the training script and change the variables to match your goals: **learning rate** (`LR`), **epochs** (`EPOCHS`), **batch size** (`BATCH_SIZE`), **gradient accumulation** (`GRAD_ACCUM_STEPS`), and for LoRA/QLoRA **rank** (`LORA_R`). For faster runs use fewer epochs and a higher learning rate (LR); for better quality use more epochs and a lower LR. Reduce batch size or sequence length if you hit out-of-memory errors.
 
 ### Memory Optimization Tips
 

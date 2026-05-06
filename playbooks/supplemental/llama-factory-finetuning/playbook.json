@@ -1,7 +1,7 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "LLM Fine-tuning with llama factory",
-  "description": "Fine-tune large language models using Llama Factory and LoRA techniques on your STX Halo™",
+  "title": "LLM Fine-Tuning with LLaMA Factory",
+  "description": "Fine-tune large language models (LLMs) using LLaMA Factory and LoRA techniques.",
   "time": 60,
   "supported_platforms": {
     "halo": [
