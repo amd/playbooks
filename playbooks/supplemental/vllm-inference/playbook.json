@@ -8,13 +8,25 @@
       "linux"
     ],
     "halo_box": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "stx": [
       "linux"
     ],
     "krk": [
+      "linux"
+    ]
+  },
+  "tested_platforms": {
+    "halo": [
+      "linux"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "linux"
+    ],
+    "halo_box": [
       "linux"
     ]
   },

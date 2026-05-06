@@ -9,19 +9,22 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Live Speech2Speech Translation on AMD GPU
+# Live Speech2Speech Translation on AMD Radeon™ GPU
 
 ## Overview
-The ROCm (Radeon Open Compute) and Pytorch stack create a unified ecosystem for on-device AI. It works for both Windows and Linux with official support for a wide range of devices including APUs and GPUs.
+
+The AMD ROCm™ software and PyTorch stack create a unified ecosystem for on-device AI. It works for both Windows and Linux with official support for a wide range of devices including Ryzen™ AI APUs and Radeon™ GPUs.
 
 This playbook will teach you how to run low-latency, expressive, and private speech-to-speech translation entirely on the edge.
 
 ## What You'll Learn
+
 - How to set up speech-to-speech environment
 - How to write Python code to load and use speech-speech models
 - How to run and experiment with the Gradio UI
 
 ## Why use real-time speech-to-speech translation?
+
 - Removes friction between translation and language barriers
 - Conveys tone, emotion, and intent without awkward pauses
 - Enables global collaboation and faster decision-making
@@ -29,6 +32,7 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 ## Setting Up Your Environment
 
 ### Create a Virtual Environment
+
 <!-- @device:halo_box -->
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed:
@@ -94,9 +98,11 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 ### Installing Basic Dependencies
+
 <!-- @require:pytorch -->
 
 ### Additional Dependencies
+
 Install m4t dependencies using pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
@@ -201,6 +207,7 @@ except Exception as e:
 ## Set up the speech-to-speech demo
 
 #### Learn about seamless-m4t-v2
+
 Check out the model card on Hugging Face for more information: [https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)
 
 This is the technical architecture of the speech-speech models:
@@ -234,6 +241,7 @@ After the download completes, the model folder should be available at `./seamles
 
 
 #### Import necessary dependencies
+
 ```python 
 from transformers import AutoProcessor, SeamlessM4Tv2Model
 import os
@@ -250,6 +258,7 @@ device = "cuda"
 model_path = os.environ.get("S2S_MODEL_PATH", "./seamless-m4t-v2-large")
 ```
 #### Load models
+
 ```python
 start = time.time()
 processor = AutoProcessor.from_pretrained("./seamless-m4t-v2-large")
@@ -260,6 +269,7 @@ print(f"model loading duration: {end - start} seconds")
 ```
 
 #### Input audio clip .wav file
+
 Please download the following file: [input1.wav](assets/input1.wav). Then, load it with soundfile.
 
 ```python
@@ -272,6 +282,7 @@ audio = torchaudio.functional.resample(
 ```
 
 #### Preprocess input .wav file
+
 ```python
 audio_inputs = processor(
     audio=audio.squeeze(0).cpu().numpy(),
@@ -280,7 +291,8 @@ audio_inputs = processor(
 ).to(device)
 ```
 
-#### Generate translated audio file 
+#### Generate translated audio file
+
 ```python
 start = time.time()
 audio_array_from_audio = model.generate(**audio_inputs, tgt_lang="eng")[0].cpu().numpy().squeeze()
@@ -288,12 +300,14 @@ end = time.time()
 print(f"gpu infer duration: {end - start} seconds")
 ```
 #### Save the translated file
+
 ```python
 sample_rate = model.config.sampling_rate
 scipy.io.wavfile.write("out1.wav", rate=sample_rate, data=audio_array_from_audio)
 ```
 
 #### Run the complete file to check the audio generation duration
+
 Please download the following file: [infer.py](assets/infer.py). Then, run it.
 
 ```bash
@@ -365,13 +379,15 @@ This is a helpful UI that builds upon the code we have written and makes live sp
 - `--share`: also creates a public Gradio share link. This requires outbound network access to Gradio's share service.
 
 #### Run locally only
+
 ```bash
 python ./gradio_demo.py --no-share
 ```
 Then open your web browser at `http://127.0.0.1:7860`
 
 #### Run with a public share link
-When `--share` is used, Gradio uses **FRP (Fast Reverse Proxy)** to create a public link. On some systems, the FRP client download may be blocked by antivirus or network policy.
+
+When `--share` is used, Gradio uses **Fast Reverse Proxy (FRP)** to create a public link. On some systems, the FRP client download may be blocked by antivirus or network policy.
 
 1. First try running the following code after downloading it: [gradio_demo.py](assets/gradio_demo.py).
 ```bash
@@ -515,6 +531,7 @@ PY
 
 
 ## Next Steps
+
 - Mix and match between dozens of languages for quick translation. 
 - Experiment with voice input and text-to-speech
 

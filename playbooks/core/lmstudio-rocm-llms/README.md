@@ -32,7 +32,7 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 Learn how to start chatting with a ChatGPT-grade LLM completely locally.  
 
 1. Open LMStudio. 
-2. Press `Ctrl + L` to open the Model Loader, select `Manually chose model load parameters`, and click on `GPT-OSS 120B`
+2. Press `Ctrl + L` to open the Model Loader, select `Manually choose model load parameters`, and click on `GPT-OSS 120B`
 3. Make sure "show advanced settings" is checked.  
 4. Change `Context Length` as desired. Higher context length means more model memory, but more system memory used. Recommended for this playbook is 4096.
 5. Make sure `GPU Offload` is set to maximum and `Flash Attention` is On
@@ -80,7 +80,7 @@ LM Studio also offers an OpenAI compliant endpoint in the form of LM Studio Serv
 
 To set up LM Studio Server, use the following instructions:
 
-1. On the left hand side, click on the `Developer` tab (command line icon) or `CTRL + 2` and then click on `Server Settings`.  
+1. On the left hand side, click on the `Developer` tab (command line icon) or `Ctrl + 2` and then click on `Server Settings`.  
 2. (Optional): If you want to serve the model over your LAN, check `Serve on Local Network`. If you want to use with a website or extensive calling within VS Code, check `Enable CORS`. 
 3. On the upper left corner, make sure the server is running by clicking on the toggle button in front of `Status`.
 4. An OpenAI compliant endpoint will now be running. The address is typically at http://127.0.0.1:1234  
@@ -186,22 +186,22 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     )
     print("Attempting to connect to local LM Studio server...")
 
-        try:
-            # Create a simple chat completion request
-            completion = client.chat.completions.create(
-                model="local-model", # The model identifier is optional in local mode
-                messages=[
-                    {"role": "system", "content": "You are a helpful coding assistant."},
-                    {"role": "user", "content": "Explain Python decorators in 1 sentence"}
-                ],
-                temperature=0.7,
-            )
-            # Print the response
-            print("\nConnection Successful! Server Response:\n")
-            print(completion.choices[0].message.content)
+    try:
+        # Create a simple chat completion request
+        completion = client.chat.completions.create(
+            model="local-model", # The model identifier is optional in local mode
+            messages=[
+                {"role": "system", "content": "You are a helpful coding assistant."},
+                {"role": "user", "content": "Explain Python decorators in 1 sentence"}
+            ],
+            temperature=0.7,
+        )
+        # Print the response
+        print("\nConnection Successful! Server Response:\n")
+        print(completion.choices[0].message.content)
 
-        except Exception as e:
-            print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
+    except Exception as e:
+        print(f"\nConnection Failed: {e}. Ensure LM Studio server is running on port 1234.")
     ```
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-ping-endpoint-windows timeout=300 hidden=True -->
