@@ -13,6 +13,14 @@ Best for: Limited VRAM, rapid experimentation, maximum accessibility
 Memory Requirements: ~12-16GB VRAM
 Training Speed: Fast
 Quality: Excellent with pre-quantized model
+
+Note on MXFP4 base models (e.g. openai/gpt-oss-20b):
+    For MXFP4 bases, prefer LoRA (train_lora.py) over QLoRA. The bitsandbytes
+    4-bit path here typically dequantizes MXFP4 weights to BF16, so the run
+    behaves like standard LoRA anyway. A successful run does not mean true
+    4-bit QLoRA. Native MXFP4 execution requires bitsandbytes built from source
+    plus a matching Transformers/Triton/kernels stack. See:
+    https://huggingface.co/docs/transformers/main/en/quantization/mxfp4
 """
 
 import gc

@@ -4,7 +4,7 @@ import path from "path";
 import JSZip from "jszip";
 
 const REPO_OWNER = "amd";
-const REPO_NAME = "halo_playbooks";
+const REPO_NAME = "playbooks";
 const GITHUB_API = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`;
 const WORKFLOW_FILE = "test-playbooks.yml";
 const PLAYBOOKS_ROOT = path.join(process.cwd(), "..", "playbooks");
