@@ -389,7 +389,7 @@ $playbookRoot = (Get-Location).Path
 if (-not $env:OPENCV_INSTALL_ROOT) {throw "OPENCV_INSTALL_ROOT is not set."}
 if (-not $env:OpenCV_DIR) {throw "OpenCV_DIR is not set."}
 
-$work = $work = Join-Path (Get-Location) "cvml-test"
+$work = Join-Path (Get-Location) "cvml-test"
 New-Item -ItemType Directory -Force -Path $work | Out-Null
 
 try {
@@ -480,7 +480,8 @@ if [ -z "${OPENCV_INSTALL_ROOT:-}" ]; then
   exit 1
 fi
 
-work="$(mktemp -d)"
+work="$PWD/cvml-test"
+mkdir -p "$work"
 cleanup() {
   rm -rf "$work"
 }
