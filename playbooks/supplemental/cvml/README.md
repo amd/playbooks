@@ -65,8 +65,10 @@ git lfs version
 cmake --version
 
 if (-not $env:OPENCV_INSTALL_ROOT) {throw "OPENCV_INSTALL_ROOT is not set. Set it to your OpenCV 4.11 installation root before running this test."}
-
 if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
+
+if (-not $env:OpenCV_DIR) {throw "OpenCV_DIR is not set. Set it to point to the folder containing OpenCVConfig.cmake before running this test."}
+if (-not (Test-Path $env:OpenCV_DIR)) {throw "OpenCV_DIR does not exist: $env:OpenCV_DIR"}
 
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path $vswhere)) {throw "vswhere.exe not found. Install Visual Studio 2022 with Desktop development with C++ workload."}
@@ -99,9 +101,17 @@ if [ -z "${OPENCV_INSTALL_ROOT:-}" ]; then
   echo "OPENCV_INSTALL_ROOT is not set. Set it to your OpenCV 4.11 installation root before running this test."
   exit 1
 fi
-
 if [ ! -d "$OPENCV_INSTALL_ROOT" ]; then
   echo "OPENCV_INSTALL_ROOT does not exist: $OPENCV_INSTALL_ROOT"
+  exit 1
+fi
+
+if [ -z "${OpenCV_DIR:-}" ]; then
+  echo "OpenCV_DIR is not set. Set it to point to the folder containing OpenCVConfig.cmake before running this test."
+  exit 1
+fi
+if [ ! -d "$OpenCV_DIR" ]; then
+  echo "OpenCV_DIR does not exist: $OpenCV_DIR"
   exit 1
 fi
 
@@ -526,7 +536,7 @@ for dir in "$OPENCV_INSTALL_ROOT/lib" "$OPENCV_INSTALL_ROOT/lib64" "$OPENCV_INST
   fi
 done
 
-input_image="$playbook_root/assets/sample_face.jpg"
+input_image="$playbook_root/sample_face.jpg"
 if [ ! -f "$input_image" ]; then
   input_image="$work/sample_face.jpg"
   curl -L -o "$input_image" "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
