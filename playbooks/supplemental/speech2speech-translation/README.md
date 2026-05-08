@@ -35,7 +35,7 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed:
+On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed (AI Halo):
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -51,13 +51,45 @@ s2st-env\Scripts\activate
 <!-- @os:end -->
 
 <!-- @os:linux -->
-On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
+On Linux, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed (AI Halo):
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
 python3 -m venv s2st-env --system-site-packages
+source s2st-env/bin/activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source s2st-env/bin/activate" -->
+<!-- @os:end -->
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @os:windows -->
+On Windows, open a terminal in the directory of your choice and follow the commands to create a venv:
+
+<!-- @test:id=create-venv timeout=60 -->
+```bash
+python -m venv s2st-env
+s2st-env\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
+
+> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
+
+<!-- @os:end -->
+
+<!-- @os:linux -->
+On Linux, open a terminal and run the following prompt to create a venv:
+
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv s2st-env
 source s2st-env/bin/activate
 ```
 <!-- @test:end -->
@@ -319,6 +351,7 @@ python ./infer.py
 ```
 ## Automate Inference Launch 
 
+<!-- @os:windows -->
 ### Windows
 
 Create a PowerShell script named `setup_infer.ps1`.
@@ -331,10 +364,8 @@ Set-Content -Path "setup_infer.ps1" -Value @"
 # Insert the following commands below to complete the setup.
 "@ 
 ```
-
-#### PowerShell script for  Windows
-<!-- @os:windows -->
 <!-- @test:id=infer-smoke-windows timeout=1800 setup=activate-venv hidden=True -->
+#### PowerShell script for Windows
 ```powershell
 $ErrorActionPreference = "Stop"
 Remove-Item .\output1.wav -Force -ErrorAction SilentlyContinue
@@ -353,8 +384,8 @@ if ($file.Length -le 0) { throw "FAIL: out1.wav is empty" }
 
 Write-Host "PASS: infer.py created out1.wav successfully"
 ```
-<!-- @test:end --> 
-<!-- @os:end -->
+<!-- @test:end -->
+
 
 ```powershell
 # Set full read/write permissions for the script 
@@ -363,6 +394,9 @@ icacls "setup_infer.ps1" /grant Everyone:(F)
 # Run the script 
 ./setup_infer.ps1 
 ```
+<!-- @os:end -->
+
+<!-- @os:linux -->
 ### Linux
 
 Create a shell script named `setup_infer.sh`.
@@ -372,10 +406,9 @@ sudo nano setup_infer.sh
 # Insert the following commands below to complete the setup.
 ```
 
+<!-- @test:id=infer-smoke-linux timeout=1800 setup=activate-venv hidden=True -->
 #### Bash script for Linux
 
-<!-- @os:linux -->
-<!-- @test:id=infer-smoke-linux timeout=1800 setup=activate-venv hidden=True -->
 ```bash
 set -euo pipefail
 rm -f ./output1.wav
@@ -406,7 +439,6 @@ fi
 echo "PASS: infer.py created out1.wav successfully"
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
 ```bash
 # Give execute permissions to the script 
@@ -415,8 +447,9 @@ chmod +x setup_infer.sh
 # Run the script 
 ./setup_infer.sh 
 ```
+<!-- @os:end -->
 
-### Runing the Gradio UI demo:
+## Runing the Gradio UI demo:
 
 This is a helpful UI that builds upon the code we have written and makes live speech-speech translation easy. This demo supports two launch modes:
 
@@ -464,6 +497,7 @@ Press and hold the record button to capture your voice; releasing it will automa
 
 ## Automate Gradio UI Launch
 
+<!-- @os:windows -->
 ### Windows
 
 Create a PowerShell script named `setup_gradio.ps1` in `assets` folder.
@@ -476,10 +510,10 @@ Set-Content -Path "setup_gradio.ps1" -Value @"
 # Insert the following commands below to complete the setup.
 "@ 
 ```
-#### Powershell script for Windows
-<!-- @os:windows -->
 <!-- @test:id=gradio-ui-smoke-windows timeout=1800 setup=activate-venv hidden=True -->
+#### Powershell script for Windows
 ```powershell
+
 $ErrorActionPreference = "Stop"
 
 echo $env:S2S_MODEL_PATH
@@ -535,9 +569,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Remove-Item $tempPy -Force -ErrorAction SilentlyContinue
+
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
 ```powershell
 # Set full read/write permissions for the script 
@@ -546,6 +580,9 @@ icacls "setup_gradio.ps1" /grant Everyone:(F)
 # Run the script 
 ./setup_gradio.ps1 
 ```
+<!-- @os:end -->
+
+<!-- @os:linux -->
 ### Linux
 
 Create a shell script named `setup_gradio.sh` in `assets` folder.
@@ -554,10 +591,8 @@ sudo nano setup_gradio.sh
 # Add the necessary commands to the script 
 # Insert the following commands below to complete the setup.
 ```
-#### Bash script for Linux
-
-<!-- @os:linux -->
 <!-- @test:id=gradio-ui-smoke-linux timeout=1800 setup=activate-venv hidden=True -->
+#### Bash script for Linux
 ```bash
 set -euo pipefail
 
@@ -604,7 +639,6 @@ finally:
 PY
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
 ```bash
 # Give execute permissions to the script 
@@ -613,6 +647,8 @@ chmod +x setup_gradio.sh
 # Run the script 
 ./setup_gradio.sh 
 ```
+<!-- @os:end -->
+
 
 
 ## Next Steps
