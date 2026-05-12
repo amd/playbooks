@@ -62,8 +62,14 @@ You should see folders like:
 - share
 or similar.
 
+**6. Set OpenCV_DIR permanently for interactive shells**
+`OpenCV_DIR` should point to the folder containing `OpenCVConfig.cmake`.
+```bash
+echo 'export OpenCV_DIR=/opt/opencv-4.11.0/lib/cmake/opencv4' >> ~/.bashrc
+source ~/.bashrc
+```
 
-**6. System library path setup**
+**7. System library path setup**
 If the sample executable cannot find OpenCV shared libraries at runtime, add:
 ```bash
 export LD_LIBRARY_PATH=/opt/opencv-4.11.0/lib:$LD_LIBRARY_PATH
