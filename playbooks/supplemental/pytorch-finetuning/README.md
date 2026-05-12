@@ -23,19 +23,50 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. Setup
+
+#### Create a Virtual Environment
+<!-- @os:linux -->
+<!-- @device:halo_box -->
+<!-- @test:id=create-venv timeout=60 -->
+```bash
+sudo apt update 
+sudo apt install -y python3-venv 
+python3 -m venv venv --system-site-packages 
+source venv/bin/activate 
+```
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @setup:id=activate-venv command="source venv/bin/activate" -->
+<!-- @os:end -->
 
 <!-- @os:windows -->
+<!-- @device:halo_box -->
 <!-- @test:id=create-venv timeout=60 -->
-```cmd
+```powershell
+python -m venv venv --system-site-packages
+venv\Scripts\activate.bat
+```
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @setup:id=activate-venv command="source venv/bin/activate" -->
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @test:id=create-venv timeout=60 -->
+```powershell
 python -m venv venv
 venv\Scripts\activate.bat
 ```
 <!-- @test:end -->
+<!-- @device:end -->
 <!-- @setup:id=activate-venv command="venv\Scripts\activate.bat" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -44,32 +75,55 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 <!-- @test:end -->
+<!-- @device:end -->
 <!-- @setup:id=activate-venv command="source venv/bin/activate" -->
 <!-- @os:end -->
 
-### Installing Basic Dependencies
+#### Installing Basic Dependencies
 <!-- @require:pytorch -->
 
-### Additional Dependencies
+<!-- @os:linux -->
+<!-- @device:halo_box -->
+<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+##### **HaloBox: Skip driver and PyTorch Dependecies**
+No need to set up driver and PyTorch dependencies, as these configurations are pre-installed.
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @device:halo_box -->
+<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+##### **HaloBox: Skip driver and PyTorch Dependecies**
+No need to set up driver and PyTorch dependencies, as these configurations are pre-installed.
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @os:end -->
+
+#### Additional Dependencies
 
 <!-- @os:linux -->
+<!-- @device:halo_box,halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
+<!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
+<!-- @device:halo_box,halo,stx,krk,rx7900xt,rx9070xt -->
 **Windows:** Only core packages are tested and supported here. **bitsandbytes is not well supported on Windows**, so the Windows install omits it; use LoRA or full fine-tuning on Windows (QLoRA requires bitsandbytes and is intended for Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
+<!-- @device:end -->
 <!-- @os:end -->
 
-### Enable HF authentication (gated or custom / non–preinstalled models)
+#### Enable HF authentication (gated or custom / non–preinstalled models)
 
 In this example we use **google/gemma-3-4b-it**, which is a **gated** model. You must accept the model’s terms on Hugging Face and then authenticate so the training scripts can download it.
 
@@ -80,8 +134,6 @@ In this example we use **google/gemma-3-4b-it**, which is a **gated** model. You
 pip install huggingface_hub
 hf auth login
 ```
-
-
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -230,11 +282,11 @@ Total: 12GB (vs 40GB full precision)
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 model = AutoModelForCausalLM.from_pretrained(
-    "output-gemma-3-4b-full",     # Directory containing your fully fine-tuned checkpoint
+    "output-gemma-3-4b-it-full",     # Directory containing your fully fine-tuned checkpoint
     device_map="auto",
     torch_dtype="auto"            # Use BF16 if your GPU supports it, else "auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-full")
+tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-it-full")
 
 # Generate text
 prompt = "Explain quantum computing:"
@@ -251,11 +303,11 @@ from transformers import AutoTokenizer
 
 # Load model with LoRA or QLoRA adapters
 model = AutoPeftModelForCausalLM.from_pretrained(
-    "output-gemma-3-4b-qlora",   # or "output-gemma-3-4b-lora" depending on your training
+    "output-gemma-3-4b-it-qlora",   # or "output-gemma-3-4b-lora" depending on your training
     device_map="auto",
     torch_dtype="auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-qlora")
+tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-it-qlora")
 
 # Generate text
 prompt = "Explain quantum computing:"
@@ -400,16 +452,50 @@ def format_instruction(example):
 dataset = dataset.map(format_instruction)
 ```
 
-**Dataset Format:**
+**Dataset Format for Local JSON/JSONL file:**
+
+When using this method, please ensure that your JSON files are correctly structured to avoid parsing errors. 
+
+The following guidelines must be adhered to:
+* **File Formatting:** JSON files should be formatted within an Integrated Development Environment (IDE) to ensure proper structure and syntax.
+* **Required Keys:** The custom JSON file must contain the keys `instruction` and `response`. These keys are essential for the method to function correctly.
 ```json
 [
   {
-    "messages": [
-      {"role": "user", "content": "Your instruction here"},
-      {"role": "assistant", "content": "Expected response here"}
-    ]
+    "instruction": "Your first instruction here",
+    "response": "Expected response here"
+  },
+  {
+    "instruction": "Your second instruction here",
+    "response": "Expected response here"
   }
 ]
+```
+**Dataset Format for Hugging Face Hub dataset**
+
+When utilizing datasets from Hugging Face, please ensure that your datasets are structured correctly to facilitate seamless integration. 
+
+The following guidelines should be followed:
+* **Instruction-Response Pair:** Focus on datasets that include an `instruction-response` pair. This structure is essential for the intended functionality.
+* **Custom Key Modification:** If your dataset does not conform to the `instruction-response` structure, you have the option to modify the `format_instruction()` function. This allows you to accommodate specific keys as needed.
+
+Example Adjustment: In cases where the dataset's output needs to be adjusted, you can modify the response section within the format_instruction() function to fit your requirements.
+```python
+def format_instruction(example):
+    return {
+        "messages": [
+            {"role": "user", "content": example['input']},
+            {"role": "assistant", "content": example['output']}
+        ]
+    }
+```
+**Dataset Format for CSV file**
+
+To accommodate the script using a CSV file format, you need to ensure that the CSV file contains columns named `instruction` and `response`. 
+```csv
+instruction,response
+"Your first instruction here","Expected response here"
+"Your second instruction here","Expected response here"
 ```
 
 ### Adjust Training Parameters
