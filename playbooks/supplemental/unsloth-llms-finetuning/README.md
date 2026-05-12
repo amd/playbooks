@@ -6,9 +6,6 @@ It uses a short Supervised Fine-Tuning (SFT) example with LoRA adapters on `unsl
 
 The example is designed to be practical and easy to modify, so you can use it as a starting point for your own datasets and models.
 
-![alt text](assets/unsloth.png)
-
-
 ## What You'll Learn
 
 - How to set up the Unsloth environment
