@@ -5,6 +5,8 @@ import os
 import time
 from typing import Tuple
 
+os.environ["HIP_VISIBLE_DEVICES"] = "0"
+
 import gradio as gr
 import numpy as np
 import soundfile as sf
@@ -21,7 +23,7 @@ AUDIO_SAMPLE_RATE = 16000
 DEFAULT_TARGET_LANGUAGE = "English"
 DEFAULT_SERVER_NAME = "127.0.0.1"
 DEFAULT_SERVER_PORT = 7860
-DEFAULT_MODEL_PATH = os.environ.get("S2S_MODEL_PATH", "./seamless-m4t-v2-large")
+DEFAULT_MODEL_PATH = "facebook/seamless-m4t-v2-large"
 DEFAULT_DEVICE_ID = os.environ.get("S2S_DEVICE_ID", "0")
 
 DESCRIPTION = """\
@@ -53,11 +55,10 @@ def build_runtime(model_path: str, device_id: str):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dtype = torch.float16 if device.type == "cuda" else torch.float32
 
-    print("Loading model...")
     processor = AutoProcessor.from_pretrained(model_path)
-    model = SeamlessM4Tv2Model.from_pretrained(model_path, dtype=dtype).to(device)
+    model = SeamlessM4Tv2Model.from_pretrained(model_path, torch_dtype=dtype).to(device)
     model.eval()
-    print(f"Model loaded on {device}")
+    print("Loading model (downloads automatically on first run)...")
     return processor, model, device
 
 def load_audio(audio_path: str, target_sr: int = AUDIO_SAMPLE_RATE) -> torch.Tensor:
