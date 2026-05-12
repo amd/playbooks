@@ -33,7 +33,7 @@
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": true,
-  "developed": false,
+  "developed": true,
   "published": true,
   "tags": [
     "vllm",
