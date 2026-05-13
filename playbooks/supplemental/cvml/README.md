@@ -32,10 +32,10 @@ This playbook teaches you how to set up the Ryzen AI CVML Library, build the inc
 
 Before starting, ensure you have the following:
 
-- [OpenCV 4.11](https://opencv.org/) downloaded and available on your system
 - CMake installed and available in your system PATH
 
 <!-- @os:windows -->
+- [OpenCV 4.11](https://opencv.org/) downloaded and available on your system
 - [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) (Windows installer)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/) with the "Desktop development with C++" workload (includes MSVC compiler, Windows SDK, and C++ build tools)
 <!-- @os:end -->
@@ -44,6 +44,7 @@ Before starting, ensure you have the following:
 - Ubuntu 22.04 or 24.04 (kernel >= 6.11.0-21-generic)
 - [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/1.6.1/linux.html#install-npu-drivers) (Linux installer — required for NPU inference)
 - Vulkan SDK (installed in the [Linux-Specific Setup](#linux-specific-setup) section below)
+<!-- @require:opencv -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
