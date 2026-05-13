@@ -283,16 +283,45 @@ if (-not (Test-Path $RocmSdk)) {throw "Missing rocm-sdk.exe at $RocmSdk. Run the
 
 $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
 
-$env:PATH = "$ROCM_ROOT\lib\llvm\bin;$ROCM_BIN;$env:PATH"
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:HIP_PLATFORM = "amd"
 $env:CC = "clang-cl"
 $env:CXX = "clang-cl"
 $env:DISTUTILS_USE_SDK = "1"
+
+Write-Host "ROCM_ROOT=$ROCM_ROOT"
+Write-Host "ROCM_BIN=$ROCM_BIN"
+
+Get-ChildItem -Path $ROCM_ROOT -Recurse -Filter "hiprtc*.dll" | Select-Object -First 10 FullName | Out-Host
 
 hipcc --version | Out-Host
 hipinfo | Out-Host
 
 $code = @'
+import os
+import sys
+
+if sys.platform == "win32":
+    for key in ("ROCM_HOME", "HIP_PATH"):
+        root = os.environ.get(key)
+        if root:
+            for subdir in ("bin", "lib", r"lib\llvm\bin"):
+                path = os.path.join(root, subdir)
+                if os.path.isdir(path):
+                    os.add_dll_directory(path)
+
+    rocm_bin = os.environ.get("ROCM_BIN")
+    if rocm_bin and os.path.isdir(rocm_bin):
+        os.add_dll_directory(rocm_bin)
 import torch
 
 print("torch:", torch.__version__)
@@ -308,6 +337,8 @@ if not torch.cuda.is_available():
 print("Device:", torch.cuda.get_device_name(0))
 print("OK: ROCm PyTorch environment is ready")
 '@
+
+$code | & $Python -
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -467,9 +498,36 @@ $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
 & $RocmSdk init
 $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
-$env:PATH = "$ROCM_ROOT\lib\llvm\bin;$ROCM_BIN;$env:PATH"
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
+$env:HIP_PLATFORM = "amd"
 
 $code = @'
+import os
+import sys
+
+if sys.platform == "win32":
+    for key in ("ROCM_HOME", "HIP_PATH"):
+        root = os.environ.get(key)
+        if root:
+            for subdir in ("bin", "lib", r"lib\llvm\bin"):
+                path = os.path.join(root, subdir)
+                if os.path.isdir(path):
+                    os.add_dll_directory(path)
+
+    rocm_bin = os.environ.get("ROCM_BIN")
+    if rocm_bin and os.path.isdir(rocm_bin):
+        os.add_dll_directory(rocm_bin)
 import torch
 
 if not torch.cuda.is_available():
@@ -676,7 +734,20 @@ cmd /c "`"$Vcvars`" >nul 2>&1 && set" | ForEach-Object {
 $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
 
-$env:PATH = "$ROCM_ROOT\lib\llvm\bin;$ROCM_BIN;$env:PATH"
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
+$env:HIP_PLATFORM = "amd"
+
 $env:CC = "clang-cl"
 $env:CXX = "clang-cl"
 $env:DISTUTILS_USE_SDK = "1"
@@ -686,6 +757,21 @@ try {
   & $Python -m pip install --no-build-isolation -v .
 
   $code = @'
+  import os
+import sys
+
+if sys.platform == "win32":
+    for key in ("ROCM_HOME", "HIP_PATH"):
+        root = os.environ.get(key)
+        if root:
+            for subdir in ("bin", "lib", r"lib\llvm\bin"):
+                path = os.path.join(root, subdir)
+                if os.path.isdir(path):
+                    os.add_dll_directory(path)
+
+    rocm_bin = os.environ.get("ROCM_BIN")
+    if rocm_bin and os.path.isdir(rocm_bin):
+        os.add_dll_directory(rocm_bin)
 import torch
 import add_one_ext
 
@@ -929,9 +1015,36 @@ $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
 & $RocmSdk init
 $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
-$env:PATH = "$ROCM_ROOT\lib\llvm\bin;$ROCM_BIN;$env:PATH"
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
+$env:HIP_PLATFORM = "amd"
 
 $code = @'
+import os
+import sys
+
+if sys.platform == "win32":
+    for key in ("ROCM_HOME", "HIP_PATH"):
+        root = os.environ.get(key)
+        if root:
+            for subdir in ("bin", "lib", r"lib\llvm\bin"):
+                path = os.path.join(root, subdir)
+                if os.path.isdir(path):
+                    os.add_dll_directory(path)
+
+    rocm_bin = os.environ.get("ROCM_BIN")
+    if rocm_bin and os.path.isdir(rocm_bin):
+        os.add_dll_directory(rocm_bin)
 import torch
 
 if not torch.cuda.is_available():
@@ -1176,7 +1289,20 @@ cmd /c "`"$Vcvars`" >nul 2>&1 && set" | ForEach-Object {
 $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
 
-$env:PATH = "$ROCM_ROOT\lib\llvm\bin;$ROCM_BIN;$env:PATH"
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
+$env:HIP_PLATFORM = "amd"
+
 $env:CC = "clang-cl"
 $env:CXX = "clang-cl"
 $env:DISTUTILS_USE_SDK = "1"
@@ -1186,6 +1312,21 @@ try {
   & $Python -m pip install --no-build-isolation -v .
 
   $code = @'
+  import os
+import sys
+
+if sys.platform == "win32":
+    for key in ("ROCM_HOME", "HIP_PATH"):
+        root = os.environ.get(key)
+        if root:
+            for subdir in ("bin", "lib", r"lib\llvm\bin"):
+                path = os.path.join(root, subdir)
+                if os.path.isdir(path):
+                    os.add_dll_directory(path)
+
+    rocm_bin = os.environ.get("ROCM_BIN")
+    if rocm_bin and os.path.isdir(rocm_bin):
+        os.add_dll_directory(rocm_bin)
 import torch
 import matmul_ext
 
