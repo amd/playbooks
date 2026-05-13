@@ -88,6 +88,9 @@ if (-not $clPath) {throw "MSVC cl.exe was not found under Visual Studio installa
 ```bash
 set -euo pipefail
 
+export OPENCV_INSTALL_ROOT="${OPENCV_INSTALL_ROOT:-/opt/opencv-4.11.0}"
+export OpenCV_DIR="${OpenCV_DIR:-/opt/opencv-4.11.0/lib/cmake/opencv4}"
+
 git --version
 git lfs version
 cmake --version
@@ -473,6 +476,9 @@ finally {
 <!-- @test:id=cvml-build-and-face-detection-linux timeout=1800 hidden=True -->
 ```bash
 set -euo pipefail
+
+export OPENCV_INSTALL_ROOT="${OPENCV_INSTALL_ROOT:-/opt/opencv-4.11.0}"
+export OpenCV_DIR="${OpenCV_DIR:-/opt/opencv-4.11.0/lib/cmake/opencv4}"
 
 playbook_root="$PWD"
 
