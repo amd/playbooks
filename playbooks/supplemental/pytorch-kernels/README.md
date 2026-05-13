@@ -206,7 +206,7 @@ $env:DISTUTILS_USE_SDK = "1"
 
 
 <!-- @os:linux -->
-<!-- @test:id=pytorch-kernels-rocm-pytorch-linux timeout=300 hidden=True -->
+<!-- @test:id=pytorch-kernels-rocm-pytorch-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -260,7 +260,7 @@ PY
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=pytorch-kernels-rocm-pytorch-windows timeout=300 hidden=True -->
+<!-- @test:id=pytorch-kernels-rocm-pytorch-windows timeout=1200 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -269,7 +269,6 @@ python -m venv rocm-env
 # $Venv = Join-Path $env:USERPROFILE "rocm-env-pytorch-kernels"
 $Venv = Join-Path (Get-Location) "rocm-env"
 $Python = Join-Path $Venv "Scripts\python.exe"
-$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
 
 if (-not (Test-Path $Python)) {throw "Missing venv at $Venv. Run the setup steps first."}
 
@@ -277,6 +276,7 @@ pip install --upgrade pip setuptools wheel
 pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
 pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 
+$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
 & $RocmSdk init
 
 $ROCM_ROOT = (& $RocmSdk path --root).Trim()
