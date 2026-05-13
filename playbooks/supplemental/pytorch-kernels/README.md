@@ -317,7 +317,7 @@ The kernel artificially adds extra work to demonstrate GPU utilization:
 - Without the `for (int i = 0; i < 1000; i++)` loop, 200 launches would finish instantly and the monitoring tools wouldn't capture meaningful GPU utilization. The artificial work makes each kernel run long enough for monitoring tools to measure performance.
 
 <!-- @os:linux -->
-**Expected output:**[The performance numbers might vary]
+**Expected output:**[The performance numbers will vary]
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
@@ -327,7 +327,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
->**Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike to 100% utilization when you run the program.
+>**Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike of utilization when you run the program.
 **Expected output:**
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
@@ -516,7 +516,7 @@ print(f"Max error vs torch.mm: {max_err:.6f}")
 The script verifies the result against `torch.mm` with a small tolerance. Floating-point arithmetic on GPUs may produce small numerical differences compared to CPU implementations due to parallel reduction order.
 
 <!-- @os:linux -->
-**Expected output:**[The performance numbers might vary]
+**Expected output:**[The performance numbers will vary]
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -526,7 +526,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
->**Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike to 100% utilization when you run the program.
+>**Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike of utilization when you run the program.
 **Expected output:**
 ```
 Elapsed time: 2.753s
@@ -634,7 +634,7 @@ python run_compiled_multiply.py
 **Expected output:**
 ```
 Result: tensor([[19., 22.],
-        [43., 50.]], device='cuda:0')
+        [43., 50.]])
 ```
 
 **Awesome! You just implemented matrix multiplication on the GPU.** This is a major milestone because matrix multiplication is the backbone of modern machine learning operations like:

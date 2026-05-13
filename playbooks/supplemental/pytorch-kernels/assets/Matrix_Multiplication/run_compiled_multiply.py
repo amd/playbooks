@@ -1,6 +1,5 @@
 import os, sys
 import torch
-os.chdir("Matrix_Multiplication")
 sys.path.insert(0, os.getcwd())
 import matmul_ext
 
