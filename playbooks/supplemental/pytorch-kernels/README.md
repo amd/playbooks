@@ -265,6 +265,7 @@ PY
 $ErrorActionPreference = "Stop"
 
 python -m venv rocm-env
+rocm-env\Scripts\activate
 
 # $Venv = Join-Path $env:USERPROFILE "rocm-env-pytorch-kernels"
 $Venv = Join-Path (Get-Location) "rocm-env"
@@ -277,6 +278,7 @@ pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[librari
 pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 
 $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
+if (-not (Test-Path $RocmSdk)) {throw "Missing rocm-sdk.exe at $RocmSdk. Run the setup steps first."}
 & $RocmSdk init
 
 $ROCM_ROOT = (& $RocmSdk path --root).Trim()
@@ -457,6 +459,7 @@ PY
 ```powershell
 $ErrorActionPreference = "Stop"
 
+rocm-env\Scripts\activate
 $Venv = Join-Path (Get-Location) "rocm-env"
 $Python = Join-Path $Venv "Scripts\python.exe"
 $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
@@ -646,6 +649,7 @@ PY
 ```powershell
 $ErrorActionPreference = "Stop"
 
+rocm-env\Scripts\activate
 $Venv = Join-Path (Get-Location) "rocm-env"
 $Python = Join-Path $Venv "Scripts\python.exe"
 $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
@@ -917,6 +921,7 @@ PY
 ```powershell
 $ErrorActionPreference = "Stop"
 
+rocm-env\Scripts\activate
 $Venv = Join-Path (Get-Location) "rocm-env"
 $Python = Join-Path $Venv "Scripts\python.exe"
 $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
@@ -1144,6 +1149,7 @@ PY
 ```powershell
 $ErrorActionPreference = "Stop"
 
+rocm-env\Scripts\activate
 $Venv = Join-Path (Get-Location) "rocm-env"
 $Python = Join-Path $Venv "Scripts\python.exe"
 $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
