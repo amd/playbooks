@@ -206,7 +206,7 @@ $env:DISTUTILS_USE_SDK = "1"
 
 
 <!-- @os:linux -->
-<!-- @test:id=pytorch-kernels-rocm-pytorch-linux timeout=1200 hidden=True -->
+<!-- @test:id=env-setup-rocm-pytorch-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -260,7 +260,7 @@ PY
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=pytorch-kernels-rocm-pytorch-windows timeout=1200 hidden=True -->
+<!-- @test:id=env-setup-rocm-pytorch-windows timeout=1200 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -283,6 +283,14 @@ if (-not (Test-Path $RocmSdk)) {throw "Missing rocm-sdk.exe at $RocmSdk. Run the
 
 $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+
+$ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
+$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
+if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
+  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
+  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
+}
+
 $RocmPathEntries = @(
   $ROCM_BIN,
   "$ROCM_ROOT\bin",
@@ -432,7 +440,7 @@ On Windows, `rocm-smi` is not supported. To track GPU utilization, you can use T
 **Nice work! You just ran your first GPU kernel.**
 
 <!-- @os:linux -->
-<!-- @test:id=pytorch-kernels-vector-jit-linux timeout=300 hidden=True -->
+<!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -486,7 +494,7 @@ PY
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=pytorch-kernels-vector-jit-windows timeout=300 hidden=True -->
+<!-- @test:id=vector-addition-jit-windows timeout=300 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -498,6 +506,14 @@ $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
 & $RocmSdk init
 $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+
+$ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
+$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
+if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
+  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
+  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
+}
+
 $RocmPathEntries = @(
   $ROCM_BIN,
   "$ROCM_ROOT\bin",
@@ -664,7 +680,7 @@ tensor([2., 2., 2., 2., 2., 2., 2., 2., 2., 2.], device='cuda:0')
 ```
 
 <!-- @os:linux -->
-<!-- @test:id=pytorch-kernels-vector-extension-linux timeout=600 hidden=True -->
+<!-- @test:id=vector-extension-linux timeout=600 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -703,7 +719,7 @@ PY
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=pytorch-kernels-vector-extension-windows timeout=600 hidden=True -->
+<!-- @test:id=vector-extension-windows timeout=600 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -936,7 +952,7 @@ Average GPU Utilization: 55.00%
 ```
 
 <!-- @os:linux -->
-<!-- @test:id=pytorch-kernels-matmul-jit-linux timeout=300 hidden=True -->
+<!-- @test:id=matmul-jit-linux timeout=300 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -1003,7 +1019,7 @@ PY
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=pytorch-kernels-matmul-jit-windows timeout=300 hidden=True -->
+<!-- @test:id=matmul-jit-windows timeout=300 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -1015,6 +1031,14 @@ $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
 & $RocmSdk init
 $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+
+$ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
+$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
+if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
+  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
+  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
+}
+
 $RocmPathEntries = @(
   $ROCM_BIN,
   "$ROCM_ROOT\bin",
@@ -1215,7 +1239,7 @@ tensor(0., device='cuda:0')
 - Transformers
 
 <!-- @os:linux -->
-<!-- @test:id=pytorch-kernels-matmul-extension-linux timeout=600 hidden=True -->
+<!-- @test:id=matmul-extension-linux timeout=600 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -1258,7 +1282,7 @@ PY
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=pytorch-kernels-matmul-extension-windows timeout=600 hidden=True -->
+<!-- @test:id=matmul-extension-windows timeout=600 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
