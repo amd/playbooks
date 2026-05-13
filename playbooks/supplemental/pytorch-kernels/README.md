@@ -204,7 +204,6 @@ $env:DISTUTILS_USE_SDK = "1"
 ```
 <!-- @os:end -->
 
-
 <!-- @os:linux -->
 <!-- @test:id=env-setup-rocm-pytorch-linux timeout=1200 hidden=True -->
 ```bash
@@ -257,6 +256,15 @@ print("OK: ROCm PyTorch environment is ready")
 PY
 ```
 <!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=amd-smi-linux timeout=1200 hidden=True -->
+```bash
+source "./rocm-env/bin/activate"
+amd-smi
+```
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
