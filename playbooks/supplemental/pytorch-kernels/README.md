@@ -210,8 +210,10 @@ $env:DISTUTILS_USE_SDK = "1"
 ```bash
 set -euo pipefail
 
+python3 -m venv rocm-env
+
 # VENV="${HOME}/rocm-env"
-VENV="${pwd}/rocm-env"
+VENV="$PWD/rocm-env"
 if [ ! -f "$VENV/bin/activate" ]; then
   echo "Missing venv at $VENV. Run the setup steps first."
   exit 1
@@ -261,6 +263,8 @@ PY
 <!-- @test:id=pytorch-kernels-rocm-pytorch-windows timeout=300 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
+
+python -m venv rocm-env
 
 # $Venv = Join-Path $env:USERPROFILE "rocm-env-pytorch-kernels"
 $Venv = Join-Path (Get-Location) "rocm-env"
