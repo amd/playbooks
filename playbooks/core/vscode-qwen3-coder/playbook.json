@@ -27,6 +27,11 @@
       "linux"
     ],
     "krk": [
+      "windows",
+      "linux"
+    ],
+    "stx": [
+      "windows",
       "linux"
     ]
   },
