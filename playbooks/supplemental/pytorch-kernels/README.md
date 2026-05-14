@@ -118,7 +118,7 @@ kernel-env\Scripts\activate
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-<!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
+<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate.bat" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -131,7 +131,7 @@ python3 -m venv kernel-env --system-site-packages
 source kernel-env/bin/activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
+<!-- @setup:id=activate-venv command="source kernel-env/bin/activate" -->
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -148,7 +148,7 @@ kernel-env\Scripts\activate
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-<!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
+<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate.bat" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -161,7 +161,7 @@ python3 -m venv kernel-env
 source kernel-env/bin/activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
+<!-- @setup:id=activate-venv command="source kernel-env/bin/activate" -->
 <!-- @os:end -->
 <!-- @device:end -->
 
