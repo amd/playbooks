@@ -4,7 +4,7 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### ROCm
+#### ROCm
 
 **Add the current user to the render and video groups.** 
 ```bash
