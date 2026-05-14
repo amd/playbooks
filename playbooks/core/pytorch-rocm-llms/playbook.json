@@ -25,14 +25,6 @@
     "halo": [
       "linux",
       "windows"
-    ],
-    "krk": [
-      "windows",
-      "linux"
-    ],
-    "stx": [
-      "windows",
-      "linux"
     ]
   },
   "required_platforms": {
