@@ -4,7 +4,7 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### PyTorch
+#### PyTorch
 **Install PyTorch with AMD ROCm™ software support** in the created virtual environment:
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
