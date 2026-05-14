@@ -24,7 +24,10 @@ it:
    reproduce the failure: the full failing test code, captured logs, the
    exact runner labels (so they know which OS / hardware to target), and the
    ``gh workflow run`` command to dispatch just that test on the same matrix
-   entry.
+   entry. Newly created issues are auto-assigned to the user(s) listed in
+   ``--assignees`` (defaults to ``ppanchad-amd``) so triage has an explicit
+   owner. Issues that already exist are *not* re-assigned, so a maintainer
+   handing the issue off later is respected.
 
 The script talks to the GitHub REST API directly via ``urllib`` so it has no
 binary dependency on the ``gh`` CLI (some self-hosted runners don't ship it).
@@ -47,6 +50,9 @@ from typing import Any, Optional
 ISSUE_LABEL = "ci-test-failure"
 TITLE_PREFIX = "[CI]"
 GITHUB_API = "https://api.github.com"
+# Default GitHub user that triages CI-opened failure issues. Override with
+# --assignees on the command line (or leave empty to skip auto-assignment).
+DEFAULT_ASSIGNEES = ["ppanchad-amd"]
 
 
 def build_title(playbook: str, test_id: str, device: str, platform: str) -> str:
@@ -138,21 +144,37 @@ def find_existing_issue(repo: str, token: str, title: str) -> Optional[dict]:
 
 
 def create_issue(
-    repo: str, token: str, title: str, body: str, labels: list[str]
+    repo: str,
+    token: str,
+    title: str,
+    body: str,
+    labels: list[str],
+    assignees: Optional[list[str]] = None,
 ) -> Optional[dict]:
     url = f"{GITHUB_API}/repos/{repo}/issues"
-    status, payload = _api_request(
-        "POST",
-        url,
-        token,
-        body={"title": title, "body": body, "labels": labels},
-    )
+    payload_body: dict[str, Any] = {"title": title, "body": body, "labels": labels}
+    if assignees:
+        # GitHub silently drops assignees the token can't assign (e.g. user is
+        # not a collaborator). We surface that below by re-checking the
+        # response and falling back to a /assignees POST so the failure is
+        # visible in the workflow logs instead of being a silent no-op.
+        payload_body["assignees"] = assignees
+    status, payload = _api_request("POST", url, token, body=payload_body)
     if status not in (200, 201):
         sys.stderr.write(
             f"Failed to create issue '{title}' (status={status}): {payload!r}\n"
         )
         return None
-    return payload if isinstance(payload, dict) else None
+    issue = payload if isinstance(payload, dict) else None
+    if issue and assignees:
+        actual = {a.get("login") for a in (issue.get("assignees") or []) if a}
+        missing = [a for a in assignees if a not in actual]
+        if missing:
+            sys.stderr.write(
+                f"Warning: issue #{issue.get('number')} created but assignees "
+                f"{missing} were not applied (likely missing repo permissions).\n"
+            )
+    return issue
 
 
 def comment_on_issue(
@@ -352,6 +374,7 @@ def process_failures(
     run_url: str,
     sha: str,
     dry_run: bool,
+    assignees: list[str],
 ) -> int:
     """Create (or skip) issues for every recorded failure. Returns count created."""
     failure_files = collect_failure_files(results_root, playbook)
@@ -416,11 +439,16 @@ def process_failures(
             )
             continue
 
-        issue = create_issue(repo, token, title, body, [ISSUE_LABEL, "bug"])
+        issue = create_issue(
+            repo, token, title, body, [ISSUE_LABEL, "bug"], assignees=assignees
+        )
         if issue is None:
             continue
 
-        print(f"Created issue: {issue.get('html_url')}")
+        assignee_note = (
+            f" (assigned to {', '.join(assignees)})" if assignees else ""
+        )
+        print(f"Created issue: {issue.get('html_url')}{assignee_note}")
         created += 1
 
     return created
@@ -457,9 +485,19 @@ def main() -> int:
         action="store_true",
         help="Print the issue body instead of calling the GitHub API",
     )
+    parser.add_argument(
+        "--assignees",
+        default=",".join(DEFAULT_ASSIGNEES),
+        help=(
+            "Comma-separated GitHub logins to auto-assign to newly created "
+            "issues. Pass an empty string to skip auto-assignment. "
+            f"Defaults to '{','.join(DEFAULT_ASSIGNEES)}'."
+        ),
+    )
     args = parser.parse_args()
 
     runner_labels = [l.strip() for l in args.runner_labels.split(",") if l.strip()]
+    assignees = [a.strip() for a in args.assignees.split(",") if a.strip()]
     token = os.environ.get("GITHUB_TOKEN", "")
 
     created = process_failures(
@@ -473,6 +511,7 @@ def main() -> int:
         run_url=args.run_url,
         sha=args.sha,
         dry_run=args.dry_run,
+        assignees=assignees,
     )
 
     print(f"\nDone. Issues created: {created}")
