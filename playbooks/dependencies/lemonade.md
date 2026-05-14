@@ -6,7 +6,24 @@ SPDX-License-Identifier: MIT
 
 ### Lemonade
 
+The GAIA playbook requires a Lemonade server to be installed and running locally at `:13305` port. The `LemonadeClient`, included in the GAIA package, utilizes this server to obtain AMD accelerated hardware system information and model catalog queries.
+
 #### Installing Lemonade
+
+<!-- @device:halo_box -->
+<!-- @os:linux -->
+For HaloBox systems, which are based on the Debian Unix Distribution, the installation of Lemonade should be performed via Snap. [Install Lemonade Desktop on Debian using the Snap Store | Snapcraft](https://snapcraft.io/install/lemonade-desktop/debian) Below are the steps to install the Lemonade server: 
+
+**Debian**
+```bash 
+sudo apt update 
+sudo apt install snapd 
+sudo snap install lemonade-server 
+# (Optional) Install Lemonade Desktop 
+sudo snap install lemonade-desktop 
+``` 
+<!-- @device:end --> 
+<!-- @os:end -->
 
 <!-- @os:windows -->
 Download the latest installer from [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) and run the `.msi` file. 

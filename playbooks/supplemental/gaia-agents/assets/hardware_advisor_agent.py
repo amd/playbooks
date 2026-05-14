@@ -320,7 +320,7 @@ def main():
     # Interactive loop
     while True:
         try:
-            user_input = input("You: ").strip()
+            user_input = input("To leave, type 'quit', 'exit', or 'q' \n You: ").strip() 
 
             if not user_input:
                 continue

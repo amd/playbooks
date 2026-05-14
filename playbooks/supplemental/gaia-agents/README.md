@@ -25,208 +25,139 @@ In this playbook, you'll build a Hardware Advisor Agent that detects your system
 - Memory-based model sizing using the 70% rule
 - Building an interactive CLI for natural language hardware queries
 
+## Create a Virtual Environment
+<!-- @os:linux -->
+<!-- @device:halo_box -->
+<!-- @test:id=create-venv timeout=60 -->
+```bash
+sudo apt update 
+sudo apt install -y python3-venv 
+python3 -m venv gaia-env --system-site-packages 
+source gaia-env/bin/activate 
+```
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @device:halo_box -->
+<!-- @test:id=create-venv timeout=60 -->
+```powershell
+python -m venv gaia-env --system-site-packages
+gaia-env\Scripts\activate.bat
+```
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @test:id=create-venv timeout=60 -->
+```powershell
+python -m venv gaia-env
+gaia-env\Scripts\activate.bat
+```
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @setup:id=activate-venv command="gaia-env\Scripts\activate.bat" -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv gaia-env
+source gaia-env/bin/activate
+```
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
+<!-- @os:end -->
+
 ## Installing Dependencies
+
+### AMD's ROCm Driver Setup
+
+<!-- @os:halobox -->
+<!-- @device:halo_box -->
+For users on the AI Halo system, you may skip this step.
+<!-- @device:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @device:halo,rx7900xt,rx9070xt -->
+Linux
+```bash
+source ~/gaia-env/bin/activate
+
+pip install --upgrade pip setuptools wheel
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+# sudo reboot
+```
+<!-- @device:end -->
+
+<!-- @device:stx,rx7900xt,rx9070xt -->
+```bash
+source ~/gaia-env/bin/activate
+
+pip install --upgrade pip setuptools wheel
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1150/ "rocm[libraries,devel]"
+# sudo reboot
+```
+<!-- @device:end -->
+
+<!-- @device:krk,rx7900xt,rx9070xt -->
+```bash
+source ~/gaia-env/bin/activate
+
+pip install --upgrade pip setuptools wheel
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1152/ "rocm[libraries,devel]"
+# sudo reboot
+```
+<!-- @device:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @device:halo,rx7900xt,rx9070xt -->
+Windows
+```powershell
+gaia-env\Scripts\activate
+
+pip install --upgrade pip setuptools wheel
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+# Reboot
+```
+<!-- @device:end -->
+
+<!-- @device:stx,rx7900xt,rx9070xt -->
+```powershell
+gaia-env\Scripts\activate
+
+pip install --upgrade pip setuptools wheel
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1150/ "rocm[libraries,devel]"
+# Reboot
+```
+<!-- @device:end -->
+
+<!-- @device:krk,rx7900xt,rx9070xt -->
+```powershell
+gaia-env\Scripts\activate
+
+pip install --upgrade pip setuptools wheel
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1152/ "rocm[libraries,devel]"
+# Reboot
+```
+<!-- @device:end -->
+<!-- @os:end -->
 
 <!-- @require:gaia,lemonade -->
 
-## Getting Started
-
 Get the finished agent running first so you can see what you're building, then we'll walk through the code step by step.
-
-### 1. Run the Pre-Built Example
-
-This playbook includes the complete [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Run it to see the finished agent in action:
-
-```
-uv run hardware_advisor_agent.py
-```
-
-<!-- @test:id=gaia-verify-assets timeout=60 hidden=True -->
-```python
-import os
-import sys
-import ast
-
-scripts = ["hardware_advisor_agent.py"]
-missing = [s for s in scripts if not os.path.exists(s)]
-
-if missing:
-    print(f"FAIL: Missing files: {missing}")
-    sys.exit(1)
-
-print("PASS: hardware_advisor_agent.py exists")
-
-with open("hardware_advisor_agent.py", "r", encoding="utf-8") as f:
-    ast.parse(f.read())
-
-print("PASS: hardware_advisor_agent.py has valid syntax")
-```
-<!-- @test:end --> 
-
-**Try asking:** "What size LLM can I run?"
-
-**Expected output:**
-
-```
-============================================================
-Hardware Advisor Agent
-============================================================
-
-Hi! I can help you figure out what size LLM your system can run.
-
-Agent ready!
-
-You: What size LLM can I run?
-
-Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
-- 30B parameter models (like Qwen3-Coder-30B)
-- Most 7B-14B models comfortably
-- NPU acceleration available for smaller models
-```
-
-Now let's build this from scratch.
-
-<!-- @os:windows -->
-<!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True -->
-```powershell
-$ErrorActionPreference = "Stop"
-try {
-  $health = $null
-  for ($i=0; $i -lt 120; $i++) {
-    $health = curl.exe -sS --fail-with-body --max-time 2 http://127.0.0.1:13305/api/v1/health
-    if ($health) { break }
-    Start-Sleep -Seconds 1
-  }
-  if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health" }
-
-  $script = @'
-from gaia.llm.lemonade_client import LemonadeClient
-
-client = LemonadeClient(host="localhost", port=13305, keep_alive=True)
-
-info = client.get_system_info()
-assert isinstance(info, dict)
-assert "Physical Memory" in info or "devices" in info
-
-models = client.list_models(show_all=True)
-assert isinstance(models, dict)
-assert "data" in models
-
-model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
-assert isinstance(model_info, dict)
-assert model_info.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF"
-
-print("OK: LemonadeClient works")
-'@
-  Set-Content -Path gaia_lemonadeclient_smoke.py -Value $script
-  .\.venv\Scripts\python.exe gaia_lemonadeclient_smoke.py
-} finally {
-  Remove-Item gaia_lemonadeclient_smoke.py -ErrorAction SilentlyContinue
-}
-```
-<!-- @test:end --> 
-<!-- @os:end --> 
-
-<!-- @os:windows -->
-<!-- @test:id=gaia-hardware-advisor-smoke-windows timeout=300 hidden=True -->
-```powershell
-$ErrorActionPreference = "Stop"
-
-$health = $null
-for ($i=0; $i -lt 120; $i++) {
-    $health = curl.exe -sS --fail-with-body --max-time 2 http://127.0.0.1:13305/api/v1/health
-    if ($health) { break }
-    Start-Sleep -Seconds 1
-}
-
-if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health" }
-Write-Host "OK: Lemonade server ready on http://127.0.0.1:13305/api/v1/health"
-
-$output = cmd /c "echo quit| .\.venv\Scripts\python.exe hardware_advisor_agent.py"
-
-if (-not ($output -match "Hardware Advisor Agent" -or $output -match "Agent ready!" -or $output -match "Goodbye!")) { throw "Did not see expected output from hardware_advisor_agent.py" }
-Write-Host "OK: hardware_advisor_agent.py started successfully"
-
-```
-<!-- @test:end --> 
-<!-- @os:end --> 
-
-<!-- @os:linux -->
-<!-- @test:id=gaia-lemonadeclient-smoke-linux timeout=300 hidden=True -->
-```bash
-set -euo pipefail
-
-health=""
-for i in $(seq 1 120); do
-  health="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/health || true)"
-  if [ -n "$health" ]; then
-    break
-  fi
-  sleep 1
-done
-
-if [ -z "$health" ]; then
-  echo "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health"
-  exit 1
-fi
-echo "OK: Lemonade server is responding on http://127.0.0.1:13305/api/v1/health"
-
-source .venv/bin/activate
-
-cat >/tmp/gaia_lemonadeclient_smoke.py <<'PY'
-from gaia.llm.lemonade_client import LemonadeClient
-
-client = LemonadeClient(host="localhost", port=13305, keep_alive=True)
-
-info = client.get_system_info()
-assert isinstance(info, dict)
-assert "Physical Memory" in info or "devices" in info
-
-models = client.list_models(show_all=True)
-assert isinstance(models, dict)
-assert "data" in models
-
-model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
-assert isinstance(model_info, dict)
-assert model_info.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF"
-
-print("OK: LemonadeClient works")
-PY
-
-python3 /tmp/gaia_lemonadeclient_smoke.py
-rm -f /tmp/gaia_lemonadeclient_smoke.py
-```
-<!-- @test:end --> 
-<!-- @os:end --> 
-
-<!-- @os:linux -->
-<!-- @test:id=gaia-hardware-advisor-smoke-linux timeout=300 hidden=True -->
-```bash
-set -euo pipefail
-export PATH="$HOME/.local/bin:$PATH"
-
-for i in $(seq 1 120); do
-  health="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/health || true)"
-  if [ -n "$health" ]; then
-    break
-  fi
-  sleep 1
-done
-
-if [ -z "$health" ]; then
-  echo "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health"
-  exit 1
-fi
-echo "OK: Lemonade server is responding on http://127.0.0.1:13305/api/v1/health"
-
-printf 'quit' | uv run hardware_advisor_agent.py >/tmp/gaia_agent_output.txt
-
-grep -q "Hardware Advisor Agent" /tmp/gaia_agent_output.txt
-echo "OK: hardware_advisor_agent.py started successfully"
-```
-<!-- @test:end --> 
-<!-- @os:end --> 
-
 
 ## Core Concepts
 
@@ -242,20 +173,24 @@ The data flows through these in sequence: user query → agent selects a tool �
 
 ### LemonadeClient SDK
 
-The LemonadeClient provides a unified API for system detection, NPU/GPU availability, and model catalog queries.
+The `LemonadeClient` provides a unified API for system detection, NPU/GPU availability, and model catalog queries.
 
 **Import and initialize:**
-
-```python
-from gaia.llm.lemonade_client import LemonadeClient
-
-client = LemonadeClient(keep_alive=True)
-```
 
 **`get_system_info()`** — Returns OS, CPU, RAM, and device availability:
 
 ```python
-info = client.get_system_info()
+def system_info() -> str: 
+    import json 
+    from gaia.llm.lemonade_client import LemonadeClient 
+
+    client = LemonadeClient(keep_alive=True) 
+    info = client.get_system_info() 
+    json_formatted_obj = json.dumps(info, indent=4) 
+
+    return json_formatted_obj 
+
+print(system_info()) 
 ```
 
 <!-- @os:windows -->
@@ -297,8 +232,19 @@ info = client.get_system_info()
 **`list_models(show_all=True)`** — Returns the full model catalog:
 
 ```python
-response = client.list_models(show_all=True)
+def list_models() -> str: 
+    import json 
+    from gaia.llm.lemonade_client import LemonadeClient 
 
+    client = LemonadeClient(keep_alive=True) 
+    response = client.list_models(show_all=True) 
+    json_formatted_obj = json.dumps(response, indent=4) 
+    
+    return json_formatted_obj 
+
+print(list_models())
+```
+```python
 # Returns:
 {
     "data": [
@@ -315,8 +261,19 @@ response = client.list_models(show_all=True)
 **`get_model_info(model_id)`** — Returns size estimates for a specific model:
 
 ```python
-model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
+def get_model_by_name() -> str:  
+    import json  
+    from gaia.llm.lemonade_client import LemonadeClient  
 
+    client = LemonadeClient(keep_alive=True)  
+    model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")  
+    json_formatted_obj = json.dumps(model_info, indent=4)  
+    
+    return json_formatted_obj  
+
+print(get_model_by_name())
+```
+```python
 # Returns:
 {
     "id": "Qwen3-Coder-30B-A3B-Instruct-GGUF",
@@ -410,7 +367,7 @@ if __name__ == "__main__":
 Run it to verify:
 
 ```
-uv run hardware_advisor.py
+python3 hardware_advisor.py
 ```
 
 Expected output:
@@ -521,7 +478,7 @@ def _get_gpu_info(self) -> Dict[str, Any]:
     return {"name": "Not detected", "memory_mb": 0}
 ```
 
-**Replace the `_register_tools()` method** with the `get_hardware_info` tool:
+**Add the `get_hardware_info` tool** to the existing `_register_tools()` method in the **Step 1**:
 
 ```python
 def _register_tools(self):
@@ -588,7 +545,7 @@ if __name__ == "__main__":
 
     while True:
         try:
-            query = input("You: ").strip()
+            query = input("To leave, type 'quit', 'exit', or 'q' \n You: ").strip()
             if query:
                 agent.process_query(query)
                 print()
@@ -600,7 +557,7 @@ if __name__ == "__main__":
 Run and try asking "Show me my system specs":
 
 ```
-uv run hardware_advisor.py
+python3 hardware_advisor.py
 ```
 
 **Example output:**
@@ -618,7 +575,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ### Step 3: Model Catalog
 
-Add the `list_available_models()` tool inside `_register_tools()`, after the `get_hardware_info` function. Now the agent can tell you what models are available.
+**Add the `list_available_models()` tool** inside `_register_tools()`, after the `get_hardware_info` function. Now the agent can tell you what models are available.
 
 ```python
     @tool(atomic=True)
@@ -663,7 +620,7 @@ Add the `list_available_models()` tool inside `_register_tools()`, after the `ge
 Run and try asking "What models are available?":
 
 ```
-uv run hardware_advisor.py
+python3 hardware_advisor.py
 ```
 
 **Example output:**
@@ -681,7 +638,7 @@ Agent: I found 15 models in the catalog:
 
 ### Step 4: Smart Recommendations
 
-Add the `recommend_models()` tool inside `_register_tools()`, after `list_available_models`. The agent can now calculate which models fit in your system's memory using the 70% rule.
+**Add the `recommend_models()` tool** inside `_register_tools()`, after `list_available_models`. The agent can now calculate which models fit in your system's memory using the 70% rule.
 
 ```python
     @tool(atomic=True)
@@ -743,7 +700,7 @@ Add the `recommend_models()` tool inside `_register_tools()`, after `list_availa
 Run and try asking "What size LLM can I run?":
 
 ```
-uv run hardware_advisor.py
+python3 hardware_advisor.py
 ```
 
 **Example output:**
@@ -790,7 +747,7 @@ def main():
 
     while True:
         try:
-            user_input = input("You: ").strip()
+            user_input = input("To leave, type 'quit', 'exit', or 'q' \n You: ").strip()
 
             if not user_input:
                 continue
@@ -812,7 +769,190 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+## Run the Pre-Built Automation Example
 
+This playbook [hardware_advisor_agent.py](assets/hardware_advisor_agent.py) includes the complete Agent. Run it to see the finished agent in action.
+
+<!-- @test:id=gaia-verify-assets timeout=60 hidden=True -->
+### Verify Agent presence
+
+Windows
+```python
+import os
+import sys
+import ast
+
+scripts = ["hardware_advisor_agent.py"]
+missing = [s for s in scripts if not os.path.exists(s)]
+
+if missing:
+    print(f"FAIL: Missing files: {missing}")
+    sys.exit(1)
+
+print("PASS: hardware_advisor_agent.py exists")
+
+with open("hardware_advisor_agent.py", "r", encoding="utf-8") as f:
+    ast.parse(f.read())
+
+print("PASS: hardware_advisor_agent.py has valid syntax")
+```
+<!-- @test:end -->
+
+### Validate LemonadeClient 
+
+<!-- @os:windows -->
+<!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True -->
+Windows 
+```powershell
+$ErrorActionPreference = "Stop"
+$venv_path = ".\gaia-env" 
+
+try {
+  $health = $null
+  for ($i=0; $i -lt 120; $i++) {
+    $health = curl.exe -sS --fail-with-body --max-time 2 http://127.0.0.1:13305/api/v1/health
+    if ($health) { break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health" }
+
+  $script = @'
+from gaia.llm.lemonade_client import LemonadeClient
+
+client = LemonadeClient(host="localhost", port=13305, keep_alive=True)
+
+info = client.get_system_info()
+assert isinstance(info, dict)
+assert "Physical Memory" in info or "devices" in info
+
+models = client.list_models(show_all=True)
+assert isinstance(models, dict)
+assert "data" in models
+
+model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
+assert isinstance(model_info, dict)
+assert model_info.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF"
+
+print("OK: LemonadeClient works")
+'@
+  Set-Content -Path gaia_lemonadeclient_smoke.py -Value $script
+  & "$venv_path\Scripts\python.exe" gaia_lemonadeclient_smoke.py  
+} finally {
+  Remove-Item gaia_lemonadeclient_smoke.py -ErrorAction SilentlyContinue
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=gaia-lemonadeclient-smoke-linux timeout=300 hidden=True -->
+Linux
+```bash
+set -euo pipefail
+
+health=""
+for i in $(seq 1 120); do
+  health="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/health || true)"
+  if [ -n "$health" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$health" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health"
+  exit 1
+fi
+echo "OK: Lemonade server is responding on http://127.0.0.1:13305/api/v1/health"
+
+venv_path="gaia-env"
+if [ -d "$venv_path" ]; then
+    source "$venv_path/bin/activate"
+else
+    echo "'$venv_path' not found. Please navigate to the venv parent folder and try again."
+    exit 1
+fi
+
+cat >/tmp/gaia_lemonadeclient_smoke.py <<'PY'
+from gaia.llm.lemonade_client import LemonadeClient
+
+client = LemonadeClient(host="localhost", port=13305, keep_alive=True)
+
+info = client.get_system_info()
+assert isinstance(info, dict)
+assert "Physical Memory" in info or "devices" in info
+
+models = client.list_models(show_all=True)
+assert isinstance(models, dict)
+assert "data" in models
+
+model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
+assert isinstance(model_info, dict)
+assert model_info.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF"
+
+print("OK: LemonadeClient works")
+PY
+
+python3 /tmp/gaia_lemonadeclient_smoke.py
+rm -f /tmp/gaia_lemonadeclient_smoke.py
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+### Server Health Validation
+<!-- @os:windows -->
+<!-- @test:id=gaia-hardware-advisor-smoke-windows timeout=300 hidden=True -->
+Windows
+```powershell
+$ErrorActionPreference = "Stop"
+
+$health = $null
+for ($i=0; $i -lt 120; $i++) {
+    $health = curl.exe -sS --fail-with-body --max-time 2 http://127.0.0.1:13305/api/v1/health
+    if ($health) { break }
+    Start-Sleep -Seconds 1
+}
+
+if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health" }
+Write-Host "OK: Lemonade server ready on http://127.0.0.1:13305/api/v1/health"
+
+$output = cmd /c "echo quit| .\gaia-env\Scripts\python.exe hardware_advisor_agent.py"
+
+if (-not ($output -match "Hardware Advisor Agent" -or $output -match "Agent ready!" -or $output -match "Goodbye!")) { throw "Did not see expected output from hardware_advisor_agent.py" }
+Write-Host "OK: hardware_advisor_agent.py started successfully"
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+
+<!-- @os:linux -->
+<!-- @test:id=gaia-hardware-advisor-smoke-linux timeout=300 hidden=True -->
+Linux
+```bash
+set -euo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+
+for i in $(seq 1 120); do
+  health="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/health || true)"
+  if [ -n "$health" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$health" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health"
+  exit 1
+fi
+echo "OK: Lemonade server is responding on http://127.0.0.1:13305/api/v1/health"
+
+printf 'quit' | python3 hardware_advisor_agent.py >/tmp/gaia_agent_output.txt
+
+grep -q "Hardware Advisor Agent" /tmp/gaia_agent_output.txt
+echo "OK: hardware_advisor_agent.py started successfully"
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
 ---
 
 ### Final Verification
@@ -826,6 +966,32 @@ Your `hardware_advisor.py` should now have all of these components:
 - [x] `list_available_models()` tool with labels and size enrichment
 - [x] `recommend_models()` tool with 70% rule, fits_in_ram, fits_in_gpu
 - [x] `main()` function with interactive CLI
+
+### Run 
+```
+python3 hardware_advisor_agent.py
+```
+
+**Try asking:** "What size LLM can I run?"
+
+**Expected output:**
+
+```
+============================================================
+Hardware Advisor Agent
+============================================================
+
+Hi! I can help you figure out what size LLM your system can run.
+
+Agent ready!
+
+You: What size LLM can I run?
+
+Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
+- 30B parameter models (like Qwen3-Coder-30B)
+- Most 7B-14B models comfortably
+- NPU acceleration available for smaller models
+```
 
 **Test these queries to confirm everything works:**
 
