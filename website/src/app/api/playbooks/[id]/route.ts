@@ -137,7 +137,7 @@ function processDependencyTestTags(
       return `<div class="test-coverage-block" data-test-id="${testId}" data-timeout="${timeout}" data-hidden="${hidden}" data-setup="${setup}" data-code="${encodedCode}"></div>`;
     }
 
-    return stripHideLines(codeBlock);
+    return hidden ? '' : stripHideLines(codeBlock);
   });
 
   return { processedContent, tests, codeBlockCount };
