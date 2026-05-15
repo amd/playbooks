@@ -10,6 +10,49 @@ GAIA is AMD's open-source framework for building AI agents that run locally on A
 
 #### Installing GAIA
 
+
+<!-- @device:halo_box -->
+<!-- @os:windows -->
+On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv timeout=60 -->
+```bash
+python -m venv gaia-env --system-site-packages
+gaia-env\Scripts\activate
+```
+<!-- @test:end -->
+Then, use pip to install Gaia
+```bash
+pip install amd-gaia
+```
+
+<!-- @setup:id=activate-venv command="gaia-env\Scripts\activate.bat" -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv gaia-env --system-site-packages
+source gaia-env/bin/activate
+```
+2. Then, use pip to install Gaia
+```bash
+pip install amd-gaia
+```
+
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
+<!-- @os:end -->
+<!-- @device:end -->
+
+
+
+
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
 <!-- @test:id=create-venv timeout=60 -->
@@ -39,11 +82,28 @@ source gaia-env/bin/activate
 ```bash
 pip install amd-gaia
 ```
+3. Initializing GAIA
+
+After installation, run `gaia init` to set up Lemonade Server and download models:
+
+```
+gaia init
+```
+
+This installs Lemonade Server, downloads the default models, and verifies the setup.
+
+<!-- @test:id=gaia-lemonade-version timeout=60 hidden=True -->
+```bash
+lemonade --version
+```
+<!-- @test:end --> 
+
 
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 <!-- @os:end -->
 <!-- @device:end -->
+
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
@@ -110,22 +170,6 @@ python3 -c "import gaia; print('OK')"
 <!-- @test:end --> 
 <!-- @os:end --> 
 
-
-#### Initializing GAIA
-
-After installation, run `gaia init` to set up Lemonade Server and download models:
-
-```
-gaia init
-```
-
-This installs Lemonade Server, downloads the default models, and verifies the setup.
-
-<!-- @test:id=gaia-lemonade-version timeout=60 hidden=True -->
-```bash
-lemonade --version
-```
-<!-- @test:end --> 
 
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonade-health-windows timeout=300 hidden=True -->
@@ -272,14 +316,6 @@ Verify that GAIA v0.16.2 or later is installed:
 ```
 gaia --version
 ```
-
-Then run a quick test to confirm GAIA is working:
-
-```
-gaia chat
-```
-
-Type a message and press Enter. Type `quit` to exit.
 
 > **Important**: Make sure Lemonade Server is running before using GAIA. GAIA requires Lemonade Server to be started manually.
 
