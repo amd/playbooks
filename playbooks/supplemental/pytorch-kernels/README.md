@@ -189,8 +189,8 @@ cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Bu
 <!-- @os:end -->
 
 #### Set Environment Variables
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @os:linux -->
-#### Linux
 ```bash
 rocm-sdk init # Initialize the devel libraries
 
@@ -199,9 +199,8 @@ export LD_LIBRARY_PATH = "$ROCM_HOME/lib:$LD_LIBRARY_PATH"
 export PATH = "$ROCM_HOME/bin:$PATH"
 ```
 <!-- @os:end -->
+<!-- @device:end -->
 
-<!-- @os:linux&halobox -->
-#### Linux & HaloBox
 ```bash
 # Set compiler and build settings
 export CC=clang
