@@ -130,6 +130,9 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 Next, we need to configure Cline to communicate with the LM Studio server that we set up. 
 - Set the API Provider to `LM Studio` and the model to `Qwen3-Coder-30B-A3B-GGUF`. 
 
+>**Tip**: Newer models may be available. Consider downloading and switching to Qwen3.6 models if desired.
+
+
 ![Model Configuration](assets/cline-model-configuration-zoomed.png)
 
 ## Creating your first project

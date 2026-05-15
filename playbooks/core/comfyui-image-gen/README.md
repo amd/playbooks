@@ -296,11 +296,8 @@ Click the blue `Launch` button to open ComfyUI in its own window.
 
 <!-- @os:linux -->
 To launch ComfyUI on Linux, click the ComfyUI shortcut in the taskbar. It should open by itself in a browser window.
+>**Tip**: ComfyUI and its models are stored at `~/.local/share/ComfyUI/models`. This is where you can manually add workflows or new models.
 
-> Alternatively,
-> 1. Use the terminal to navigate to `/usr/local/bin/ComfyUI/` (or to the appropriate folder if installed manually)
-> 2. Run `python3 main.py --use-pytorch-cross-attention`
-> 3. The interface is accessible at `http://127.0.0.1:8188`. Keep the terminal window open while using ComfyUI.
 
 <!-- @os:end -->
 <!-- @device:end -->
