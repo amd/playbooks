@@ -238,7 +238,7 @@ python summarizer.py --file document.txt --max-length 400
 
 | Parameter | What It Controls | Typical Values |
 |-----------|------------------|----------------|
-| `max_new_tokens` | The maximum lenght of the LLM's output | Use 50–500 tokens for summaries. (1 token is about 0.75 English words) |
+| `max_new_tokens` | The maximum length of the LLM's output | Use 50–500 tokens for summaries. (1 token is about 0.75 English words) |
 | `temperature` | Creativity. Low values make it focused, while high values come with more unpredictability | - **0.1–0.3**: Focused, deterministic (good for summaries) <br> **0.5–0.7**: Balanced(general use) <br> **0.8–1.0**: Creative, varied (brainstorming) |
 | `top_p` | Nucleus Sampling - Low values limit the model to more narrow outputs | **0.1-0.5**: Strict, predictable <br> **0.9-0.95**: (standard, natural, conversational) |
 
