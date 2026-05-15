@@ -195,12 +195,30 @@ rocm-sdk init # Initialize the devel libraries
 $ROCM_ROOT = (rocm-sdk path --root).Trim()
 $ROCM_BIN = (rocm-sdk path --bin).Trim()
 
-$env:PATH = "$ROCM_ROOT\lib\llvm\bin;$ROCM_BIN;$env:PATH"
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:HIP_PLATFORM = "amd"
 
 # Set compiler and build settings
 $env:CC = "clang-cl"
 $env:CXX = "clang-cl"
 $env:DISTUTILS_USE_SDK = "1"
+```
+<!-- @os:end -->
+
+<!-- @os:linux -->
+Verify that the AMD GPU is visible with:
+```bash
+amd-smi
 ```
 <!-- @os:end -->
 
@@ -211,7 +229,6 @@ set -euo pipefail
 
 python3 -m venv rocm-env
 
-# VENV="${HOME}/rocm-env"
 VENV="$PWD/rocm-env"
 if [ ! -f "$VENV/bin/activate" ]; then
   echo "Missing venv at $VENV. Run the setup steps first."
@@ -275,7 +292,6 @@ $ErrorActionPreference = "Stop"
 python -m venv rocm-env
 rocm-env\Scripts\activate
 
-# $Venv = Join-Path $env:USERPROFILE "rocm-env-pytorch-kernels"
 $Venv = Join-Path (Get-Location) "rocm-env"
 $Python = Join-Path $Venv "Scripts\python.exe"
 
@@ -452,7 +468,6 @@ On Windows, `rocm-smi` is not supported. To track GPU utilization, you can use T
 ```bash
 set -euo pipefail
 
-# source "$HOME/rocm-env/bin/activate"
 source "./rocm-env/bin/activate"
 rocm-sdk init
 
@@ -692,7 +707,6 @@ tensor([2., 2., 2., 2., 2., 2., 2., 2., 2., 2.], device='cuda:0')
 ```bash
 set -euo pipefail
 
-# source "$HOME/rocm-env/bin/activate"
 source "./rocm-env/bin/activate"
 rocm-sdk init
 
@@ -964,7 +978,6 @@ Average GPU Utilization: 55.00%
 ```bash
 set -euo pipefail
 
-# source "$HOME/rocm-env/bin/activate"
 source "./rocm-env/bin/activate"
 rocm-sdk init
 
@@ -1251,7 +1264,6 @@ tensor(0., device='cuda:0')
 ```bash
 set -euo pipefail
 
-# source "$HOME/rocm-env/bin/activate"
 source "./rocm-env/bin/activate"
 rocm-sdk init
 
