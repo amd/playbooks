@@ -46,12 +46,11 @@ pip --version
 
 ### Installing Additional Dependencies
 
-- **Python**: ensure minimum verison is 3.11
+- **Python**: ensure minimum version is 3.11
 ```bash
 pip install huggingface_hub
 ```
 
-<<<<<<< sreeram/llama-factory-ft_tests
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 hidden=True setup=activate-venv -->
 ```bash
@@ -61,8 +60,6 @@ python3 -m pip install huggingface_hub
 <!-- @test:end --> 
 <!-- @os:end -->
 
-=======
->>>>>>> main
 ### Install LLaMA Factory
 
 LLaMA Factory depends on PyTorch. You should already have it installed per the above requirements.
@@ -113,7 +110,6 @@ LLaMA Factory supports multiple fine-tuning schemes.
 | LoRA fine-tuning  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
 | QLoRA fine-tuning | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
-<<<<<<< sreeram/llama-factory-ft_tests
 <!-- @os:linux -->
 <!-- @test:id=verify-llamafactory-files timeout=60 hidden=True setup=activate-venv -->
 ```python
@@ -137,8 +133,6 @@ print("PASS: Required LLaMA Factory example files exist")
 <!-- @test:end --> 
 <!-- @os:end -->
 
-=======
->>>>>>> main
 These example configuration files have specified model parameters, fine-tuning method parameters, dataset parameters, evaluation parameters, and more. You can configure them according to your own needs. In this playbook, we will use [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
 **Key parameters explained:**
@@ -149,7 +143,7 @@ These example configuration files have specified model parameters, fine-tuning m
 - `lora_rank` - The dimensionality of the low-rank matrix used in LoRA, typical values: 4, 6, 8, 16 (smaller values = fewer parameters = faster fine-tuning; larger values = better task adaptation but higher resource usage).
 - `lora_target` - Target modules for LoRA method. Default: all.
 - `dataset` - Dataset(s) to use. Use “,” to separate multiple datasets
-- `output_dir` - File-tuning Output path
+- `output_dir` - Fine-tuning Output path
 - `logging_steps` - Logging interval in steps
 - `save_steps` - Model checkpoint saving interval.
 - `overwrite_output_dir` - Whether to allow overwriting the output directory.
@@ -178,7 +172,6 @@ You can run LLaMA Factory fine-tuning using the following command, which is base
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
 ```
 
-<<<<<<< sreeram/llama-factory-ft_tests
 <!-- @os:linux -->
 <!-- @test:id=quick-train-llamafactory-lora timeout=1800 hidden=True setup=activate-venv -->
 ```bash
@@ -201,9 +194,6 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 <!-- @os:end -->
 
 After running LLM finetuning, all generated outputs are stored in the "output_dir", including model checkpoint files, configuration files, and training metrics.
-=======
-After running LLM fine-tuning, output files can be found in the path of `output_dir`, like the model checkpoint files, model configuration files, training metrics data files.
->>>>>>> main
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>

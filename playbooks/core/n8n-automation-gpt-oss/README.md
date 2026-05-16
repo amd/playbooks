@@ -339,7 +339,7 @@ We've provided a pre-built workflow that you can import directly:
 
 ### Step 3: Understanding the Workflow
 
-The imported workflow contains 7 connected nodes:
+The imported workflow contains 9 connected nodes:
 
 <p align="center">
   <img src="assets/workflow-overview.png" alt="n8n Financial News Workflow" width="800"/>
