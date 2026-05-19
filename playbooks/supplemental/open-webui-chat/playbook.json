@@ -49,6 +49,14 @@
     "halo": [
       "windows",
       "linux"
+    ],
+    "krk": [
+      "windows",
+      "linux"
+    ],
+    "stx": [
+      "windows",
+      "linux"
     ]
   },
   "difficulty": "beginner",
