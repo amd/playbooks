@@ -311,7 +311,7 @@ def main():
     # Create agent (uses local Lemonade server by default)
     try:
         agent = HardwareAdvisorAgent()
-        print("Agent ready!\n")
+        print("Agent ready! (Ctrl+C to exit)\n")
     except Exception as e:
         print(f"Error initializing agent: {e}")
         print("\nMake sure Lemonade Server is running before using GAIA.")
@@ -320,7 +320,7 @@ def main():
     # Interactive loop
     while True:
         try:
-            user_input = input("You: ").strip()
+            user_input = input("You: ").strip() 
 
             if not user_input:
                 continue

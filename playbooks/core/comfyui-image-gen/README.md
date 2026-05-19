@@ -296,11 +296,8 @@ Click the blue `Launch` button to open ComfyUI in its own window.
 
 <!-- @os:linux -->
 To launch ComfyUI on Linux, click the ComfyUI shortcut in the taskbar. It should open by itself in a browser window.
+>**Tip**: ComfyUI and its models are stored at `~/.local/share/ComfyUI/models`. This is where you can manually add workflows or new models.
 
-> Alternatively,
-> 1. Use the terminal to navigate to `/usr/local/bin/ComfyUI/` (or to the appropriate folder if installed manually)
-> 2. Run `python3 main.py --use-pytorch-cross-attention`
-> 3. The interface is accessible at `http://127.0.0.1:8188`. Keep the terminal window open while using ComfyUI.
 
 <!-- @os:end -->
 <!-- @device:end -->
@@ -338,7 +335,7 @@ Before generating images, you need to load the Z-Image Turbo template. Here's ho
 
 3. **Click the folder icon**—this opens the Templates panel.
 
-4. **Search for "Z-Image Turbo"**—use the search bar or scroll through the available templates to find the Z-Image Turbo Text To  Image workflow, then click to load it.
+4. **Search for "Z-Image Turbo"**—use the search bar or scroll through the available templates to find the Z-Image Turbo Text To Image workflow, then click to load it.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -350,7 +347,7 @@ Before generating images, you need to load the Z-Image Turbo template. Here's ho
 
 ## Understanding the Interface
 
-When the Z-Image Turbo template loads, you'll see a canvas with 2 main nodes. The first node is called 'Text to Image (Z-Image-Turbo), and the second node is for viewing the image. 
+When the Z-Image Turbo template loads, you'll see a canvas with 2 main nodes. The first node is called 'Text to Image (Z-Image-Turbo)', and the second node is for viewing the image. 
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
