@@ -15,7 +15,7 @@ const ALL_ID = "all";
 const ACCENT = "#D4915D";
 
 const overlapStyles: { translateX: string; translateY: string; rotate: string; zIndex: number }[] = [
-  { translateX: "-75%", translateY: "2%", rotate: "-4deg", zIndex: 1 },
+  { translateX: "-75%", translateY: "2%", rotate: "0deg", zIndex: 1 },
   { translateX: "0%", translateY: "-3%", rotate: "0deg", zIndex: 3 },
   { translateX: "100%", translateY: "2%", rotate: "4deg", zIndex: 2 },
 ];
