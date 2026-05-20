@@ -107,7 +107,7 @@ Reusable @var definitions (device-aware values):
         <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
         <!-- @device:end -->
         <!-- @device:stx,krk,rx7900xt,rx9070xt -->
-        <!-- @var:id=lemonade_model value="gpt-oss-20b-GGUF" -->
+        <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
         <!-- @device:end -->
 
     Or for a value that applies to all devices (outside @device: blocks):
@@ -347,7 +347,7 @@ def extract_var_definitions(content: str) -> dict[str, dict[str, str]]:
         <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
         <!-- @device:end -->
         <!-- @device:stx,krk,rx7900xt,rx9070xt -->
-        <!-- @var:id=lemonade_model value="gpt-oss-20b-GGUF" -->
+        <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
         <!-- @device:end -->
 
     Definitions outside any @device: block apply to all devices and are stored
@@ -358,7 +358,7 @@ def extract_var_definitions(content: str) -> dict[str, dict[str, str]]:
         {"lemonade_model": {
             "halo": "gpt-oss-120b-mxfp-GGUF",
             "halo_box": "gpt-oss-120b-mxfp-GGUF",
-            "stx": "gpt-oss-20b-GGUF",
+            "stx": "gpt-oss-20b-mxfp4-GGUF",
             ...
         }}
     """

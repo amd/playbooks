@@ -24,7 +24,7 @@ The Lemonade server should be running with the device-appropriate model loaded:
 | Device | Endpoint | Model |
 |--------|----------|-------|
 | halo / halo_box | `http://localhost:13305/api/v1` | `gpt-oss-120b-mxfp-GGUF` |
-| stx / krk / rx7900xt / rx9070xt | `http://localhost:13305/api/v1` | `gpt-oss-20b-GGUF` |
+| stx / krk / rx7900xt / rx9070xt | `http://localhost:13305/api/v1` | `gpt-oss-20b-mxfp4-GGUF` |
 
 ---
 

@@ -49,7 +49,7 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt -->
-<!-- @var:id=lemonade_model value="gpt-oss-20b-GGUF" -->
+<!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 
 
