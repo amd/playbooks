@@ -9,13 +9,13 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-## Overview
+# Overview
 
-# Getting Started with Ollama
+## Getting Started with Ollama
 
-Ollama is a lightweight tool for running large language models locally. It handles model downloading, quantization, and serving behind a simple command-line interface and desktop app, so you can go from zero to chatting with an LLM in minutes. Because everything runs on your own hardware, your prompts and data never leave the machine.
+Ollama is a popular lightweight tool for running large language models locally. It handles model downloading, quantization, and serving behind a simple command-line interface and desktop app, so you can go from zero to chatting with an LLM in minutes.
 
-This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model, and having a conversation with it, both from the terminal and the desktop app.
+This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model, and having a conversation with it, through both the terminal and the desktop app.
 
 ## What You'll Learn
 
@@ -36,7 +36,11 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 2. Run the `.exe` installer and follow the prompts.
 3. Once installed, Ollama runs as a background service and is accessible from the terminal, desktop app, and system tray.
 
-Verify the installation by opening a terminal:
+Verify the installation by opening a terminal a running:
+
+```bash
+ollama --version
+```
 
 <!-- @test:id=ollama-version-windows timeout=60 hidden=True -->
 ```powershell
