@@ -11,6 +11,11 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
+<!-- @device:stx,krk -->
+> [!NOTE]
+> This playbook requires a minimum of **32GB** of system memory.
+<!-- @device:end -->
+
 n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor.
 
 This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the AP News business section, extracts key headlines, and uses a local LLM running on your system to generate an investor-focused summary.
