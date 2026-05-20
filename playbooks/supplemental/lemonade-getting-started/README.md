@@ -13,11 +13,6 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-<!-- @github-only -->
-> [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
-<!-- @github-only:end -->
-
 🍋 **Lemonade** is an open-source local AI server that lets you run large language models (LLMs), image generators, and audio models directly on your own hardware. It exposes the models through the industry-standard **OpenAI API**, so any app that works with OpenAI can instantly work with Lemonade. By the end of the playbook, you'll be using Lemonade to run models locally on your machine.
 
 ## What You'll Learn
