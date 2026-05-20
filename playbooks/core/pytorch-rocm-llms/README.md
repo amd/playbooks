@@ -11,6 +11,11 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
+<!-- @github-only -->
+> [!IMPORTANT]
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+<!-- @github-only:end -->
+
 Want to run powerful AI language models on your own hardware? This guide shows you how.
 This tutorial uses PyTorch powered by AMD ROCm™ software to run models that can summarize documents, answer questions, generate text, and more, all running locally.
 
