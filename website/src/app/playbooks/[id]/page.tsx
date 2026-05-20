@@ -7,6 +7,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
+import { remarkAlert } from "remark-github-blockquote-alert";
 import "katex/dist/katex.min.css";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -226,18 +227,22 @@ function HaloPreinstalledDropdown({
             If you need to reinstall or configure it manually, follow the instructions below:
           </div>
           <ReactMarkdown
-            remarkPlugins={[remarkGfm, remarkMath]}
+            remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
             rehypePlugins={[rehypeRaw, rehypeKatex]}
             components={{
               h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
               h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
               h3: ({ children }) => <h3 className="md-h3">{children}</h3>,
               h4: ({ children }) => <h4 className="md-h4">{children}</h4>,
-              p: ({ children }) => <p className="md-p">{children}</p>,
+              p: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
+                <p className={className ? `md-p ${className}` : "md-p"}>{children}</p>
+              ),
               ul: ({ children }) => <ul className="md-ul">{children}</ul>,
               ol: ({ children }) => <ol className="md-ol">{children}</ol>,
               li: ({ children }) => <li className="md-li">{children}</li>,
-              blockquote: ({ children }) => <blockquote className="md-blockquote">{children}</blockquote>,
+              blockquote: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
+                <blockquote className={className ? `md-blockquote ${className}` : "md-blockquote"}>{children}</blockquote>
+              ),
               a: ({ href, children }) => (
                 <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
                   {children}
@@ -358,18 +363,22 @@ function HaloSetupContent({
 }) {
   return (
     <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath]}
+        remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
         rehypePlugins={[rehypeRaw, rehypeKatex]}
         components={{
           h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
           h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
           h3: ({ children }) => <h3 className="md-h3">{children}</h3>,
           h4: ({ children }) => <h4 className="md-h4">{children}</h4>,
-          p: ({ children }) => <p className="md-p">{children}</p>,
+          p: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
+            <p className={className ? `md-p ${className}` : "md-p"}>{children}</p>
+          ),
           ul: ({ children }) => <ul className="md-ul">{children}</ul>,
           ol: ({ children }) => <ol className="md-ol">{children}</ol>,
           li: ({ children }) => <li className="md-li">{children}</li>,
-          blockquote: ({ children }) => <blockquote className="md-blockquote">{children}</blockquote>,
+          blockquote: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
+            <blockquote className={className ? `md-blockquote ${className}` : "md-blockquote"}>{children}</blockquote>
+          ),
           a: ({ href, children }) => (
             <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
               {children}
@@ -1454,11 +1463,15 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
       const headingId = slugify(text);
       return <h4 id={headingId} className="md-h4 scroll-mt-28">{children}</h4>;
     },
-    p: ({ children }: { children?: React.ReactNode }) => <p className="md-p">{children}</p>,
+    p: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
+      <p className={className ? `md-p ${className}` : "md-p"}>{children}</p>
+    ),
     ul: ({ children }: { children?: React.ReactNode }) => <ul className="md-ul">{children}</ul>,
     ol: ({ children }: { children?: React.ReactNode }) => <ol className="md-ol">{children}</ol>,
     li: ({ children }: { children?: React.ReactNode }) => <li className="md-li">{children}</li>,
-    blockquote: ({ children }: { children?: React.ReactNode }) => <blockquote className="md-blockquote">{children}</blockquote>,
+    blockquote: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
+      <blockquote className={className ? `md-blockquote ${className}` : "md-blockquote"}>{children}</blockquote>
+    ),
     a: ({ href, children }: { href?: string; children?: React.ReactNode }) => {
       // Check if this is a link to a code file in the assets folder
       const isAssetCodeFile = href && 
@@ -2027,7 +2040,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                     {filteredContent ? (
                       <article ref={contentRef} className="playbook-content prose prose-invert max-w-none">
                         <ReactMarkdown
-                          remarkPlugins={[remarkGfm, remarkMath]}
+                          remarkPlugins={[remarkGfm, remarkMath, remarkAlert]}
                           rehypePlugins={[rehypeRaw, rehypeKatex]}
                           components={markdownComponents}
                         >
