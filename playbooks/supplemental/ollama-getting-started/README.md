@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Overview
+# Getting Started with Ollama
 
-## Getting Started with Ollama
+## Overview
 
 Ollama is a popular lightweight tool for running large language models locally. It handles model downloading, quantization, and serving behind a simple command-line interface and desktop app, so you can go from zero to chatting with an LLM in minutes.
 
@@ -21,7 +21,7 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 
 - How to install and launch Ollama on your system
 - Pull and run the GPT-OSS 20B model locally
-- Chat with models using the CLI and the Ollama desktop app
+- Chat with models using the CLI
 - Query models programmatically through the REST API
 
 ## Installing Dependencies
@@ -36,9 +36,9 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 2. Run the `.exe` installer and follow the prompts.
 3. Once installed, Ollama runs as a background service and is accessible from the terminal, desktop app, and system tray.
 
-Verify the installation by opening a terminal a running:
+Verify the installation by opening a terminal and running:
 
-```bash
+```powershell
 ollama --version
 ```
 
@@ -60,6 +60,10 @@ curl -fsSL https://ollama.com/install.sh | sh
 ```
 
 Verify the installation:
+
+```bash
+ollama --version
+```
 
 <!-- @test:id=ollama-version-linux timeout=60 hidden=True -->
 ```bash
@@ -186,17 +190,12 @@ The model streams its response token-by-token directly in the terminal. Type `/b
 
 > **Tip**: The first run takes a few seconds to load the model into memory. Subsequent prompts within the same session respond much faster since the model stays loaded.
 
+<!-- @os:windows -->
 ## Chatting from the Desktop App
 
 Ollama also ships with a desktop application that provides a clean chat interface for interacting with your models.
 
-<!-- @os:windows -->
 Open **Ollama** from the Start menu or click the Ollama icon in the system tray and select **Open Ollama**.
-<!-- @os:end -->
-
-<!-- @os:linux -->
-Launch **Ollama** from your application menu or by running `ollama app` from the terminal.
-<!-- @os:end -->
 
 Once the app is open:
 
@@ -209,10 +208,11 @@ Once the app is open:
 </p>
 
 The desktop app keeps a history of your conversations in the sidebar, making it easy to revisit previous chats.
+<!-- @os:end -->
 
 ## Using the REST API
 
-While Ollama is running, it exposes a REST API on `http://localhost:11434` that you can use to integrate models into your own applications and scripts.
+After installation, Ollama runs as a background service and exposes a REST API on `http://localhost:11434` that you can use to integrate models into your own applications and scripts.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -468,23 +468,48 @@ PY
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Generate a Response
+### Generate a Response in Terminal
 
+<!-- @os:linux -->
 ```bash
-curl http://localhost:11434/api/generate -d "{\"model\": \"gpt-oss:20b\", \"prompt\": \"Explain GPU acceleration in two sentences.\", \"stream\": false}"
+curl http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "prompt": "Explain GPU acceleration in two sentences.", "stream": false}'
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+curl.exe http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "prompt": "Explain GPU acceleration in two sentences.", "stream": false}'
+```
+<!-- @os:end -->
 
 The response is a JSON object containing the model's output in the `response` field.
 
-### Chat with Context
-
-For multi-turn conversations, use the chat endpoint which maintains message history:
-
-```bash
-curl http://localhost:11434/api/chat -d "{\"model\": \"gpt-oss:20b\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello! What can you help me with?\"}], \"stream\": false}"
-```
 
 ### Python Example
+Now that we can hit the Ollama API programmatically, let's call it from Python.
+
+#### Create a Virtual Environment in Terminal
+
+<!-- @os:linux -->
+```bash
+sudo apt install -y python3-venv
+python3 -m venv ollama-env
+source ollama-env/bin/activate
+pip install requests
+```
+<!-- @setup:id=activate-venv command="source ollama-env/bin/activate" -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+python -m venv ollama-env
+ollama-env\Scripts\activate
+pip install requests
+```
+<!-- @setup:id=activate-venv command="ollama-env\Scripts\activate" -->
+<!-- @os:end -->
+#### Create a Python file
+In the same directory, use VS Code or another editor to create a .py file and copy the following code into it. Then, run the file in your activated environment with `python your_file_name.py`
 
 ```python
 import requests
