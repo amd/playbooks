@@ -27,6 +27,11 @@
       "linux"
     ],
     "krk": [
+      "windows",
+      "linux"
+    ],
+    "stx": [
+      "windows",
       "linux"
     ]
   },
@@ -42,6 +47,14 @@
   },
   "published_platforms": {
     "halo": [
+      "windows",
+      "linux"
+    ],
+    "krk": [
+      "windows",
+      "linux"
+    ],
+    "stx": [
       "windows",
       "linux"
     ]

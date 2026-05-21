@@ -19,11 +19,12 @@ This document describes the expected platform configurations for running this pl
 
 ### Lemonade LLM
 
-The Lemonade server should be running with gpt-oss-120b loaded:
+The Lemonade server should be running with the device-appropriate model loaded:
 
-| Service | Endpoint | Model |
-|---------|----------|-------|
-| **Lemonade API** | `http://localhost:13305/api/v1` | gpt-oss-120b-mxfp4-GGUF |
+| Device | Endpoint | Model |
+|--------|----------|-------|
+| halo / halo_box | `http://localhost:13305/api/v1` | `gpt-oss-120b-mxfp-GGUF` |
+| stx / krk / rx7900xt / rx9070xt | `http://localhost:13305/api/v1` | `gpt-oss-20b-mxfp4-GGUF` |
 
 ---
 
@@ -38,4 +39,4 @@ The Lemonade server should be running with gpt-oss-120b loaded:
 
 ### Lemonade LLM
 
-Users are responsible for starting Lemonade with gpt-oss-20b before running this playbook.
+Users are responsible for starting Lemonade with the device-appropriate model before running this playbook (see the README for the `lemonade run` command for your device).
