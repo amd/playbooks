@@ -11,6 +11,11 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
+<!-- @device:stx,krk -->
+> [!NOTE]
+> This playbook requires a minimum of **32GB** of system memory.
+<!-- @device:end -->
+
 n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor.
 
 This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the AP News business section, extracts key headlines, and uses a local LLM running on your system to generate an investor-focused summary.
@@ -39,6 +44,14 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 <!-- @require:lemonade,podman -->
 <!-- @os:end -->
 
+<!-- @device:halo,halo_box -->
+<!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
+<!-- @device:end -->
+
+<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+<!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
+<!-- @device:end -->
+
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -47,7 +60,7 @@ lemonade --version
 <!-- @test:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=lemonade-chat-gpt-oss-120b-windows timeout=1200 hidden=True -->
+<!-- @test:id=lemonade-chat-windows timeout=1200 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -63,14 +76,14 @@ Write-Host "OK: Lemonade server is responding"
 
 # Now that the server is responding, check if model is downloaded in Lemonade (robust JSON parse)
 $parsed = $modelsJson | ConvertFrom-Json
-$entry  = $parsed.data | Where-Object { $_.id -eq "gpt-oss-120b-mxfp-GGUF" } | Select-Object -First 1
-if (-not $entry) { throw "Model gpt-oss-120b-mxfp-GGUF is not present in Lemonade /api/v1/models." }
-if (-not $entry.downloaded) { throw "Model gpt-oss-120b-mxfp-GGUF is present but not downloaded in Lemonade. Please download it." }
-Write-Host "OK: gpt-oss-120b-mxfp-GGUF model is downloaded in Lemonade"
+$entry  = $parsed.data | Where-Object { $_.id -eq "${lemonade_model}" } | Select-Object -First 1
+if (-not $entry) { throw "Model ${lemonade_model} is not present in Lemonade /api/v1/models." }
+if (-not $entry.downloaded) { throw "Model ${lemonade_model} is present but not downloaded in Lemonade. Please download it." }
+Write-Host "OK: ${lemonade_model} model is downloaded in Lemonade"
 
 # Model chat test
 $body = @{
-  model = "gpt-oss-120b-mxfp-GGUF"
+  model = "${lemonade_model}"
   messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
   temperature = 0
   max_tokens = 32
@@ -94,7 +107,7 @@ finally {
 
 
 <!-- @os:linux -->
-<!-- @test:id=lemonade-chat-gpt-oss-120b-linux timeout=1200 hidden=True -->
+<!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -122,23 +135,23 @@ import sys
 data = json.loads(os.environ["MODELS_JSON"])
 entry = None
 for item in data.get("data", []):
-    if item.get("id") == "gpt-oss-120b-mxfp-GGUF":
+    if item.get("id") == "${lemonade_model}":
         entry = item
         break
 
 if entry is None:
-    print("Model gpt-oss-120b-mxfp-GGUF is not present in Lemonade /api/v1/models.")
+    print("Model ${lemonade_model} is not present in Lemonade /api/v1/models.")
     sys.exit(1)
 
 if not entry.get("downloaded", False):
-    print("Model gpt-oss-120b-mxfp-GGUF is present but not downloaded in Lemonade. Please download it.")
+    print("Model ${lemonade_model} is present but not downloaded in Lemonade. Please download it.")
     sys.exit(1)
 
-print("OK: gpt-oss-120b-mxfp-GGUF model is downloaded in Lemonade")
+print("OK: ${lemonade_model} model is downloaded in Lemonade")
 PY
 
 body='{
-  "model": "gpt-oss-120b-mxfp-GGUF",
+  "model": "${lemonade_model}",
   "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
   "temperature": 0,
   "max_tokens": 32

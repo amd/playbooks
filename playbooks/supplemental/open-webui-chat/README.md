@@ -11,6 +11,11 @@ SPDX-License-Identifier: MIT
 
 # How to Chat with LLMs in Open WebUI
 
+<!-- @device:stx,krk -->
+> [!NOTE]
+> This playbook requires a minimum of **32GB** of system memory.
+<!-- @device:end -->
+
 ## Overview
 
 [Open WebUI](https://docs.openwebui.com) is a self-hosted, browser-based interface that provides a familiar chatbot experience while acting as a frontend for one or more AI model servers. Instead of being tied to one provider, Open WebUI can connect to **any backend that exposes an OpenAI-compatible API**, so you can swap models and capabilities without switching UIs.

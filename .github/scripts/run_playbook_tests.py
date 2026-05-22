@@ -95,6 +95,37 @@ Reusable setup definitions (@setup):
     at parse time. If the value doesn't match any @setup id, it is treated as
     a raw shell command for backward compatibility.
 
+Reusable @var definitions (device-aware values):
+    Use @var to declare a named value whose resolution depends on the active
+    @device: scope. This is the device-aware analog of @setup, intended for
+    cases where a single test should exercise a different value (e.g. a model
+    id, container tag, or endpoint) depending on which device the runner was
+    invoked with via ``--device``.
+
+    Definition syntax (place anywhere in the README before first use):
+        <!-- @device:halo,halo_box -->
+        <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
+        <!-- @device:end -->
+        <!-- @device:stx,krk,rx7900xt,rx9070xt -->
+        <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
+        <!-- @device:end -->
+
+    Or for a value that applies to all devices (outside @device: blocks):
+        <!-- @var:id=api_port value="13305" -->
+
+    Reference inside test code with ``${name}`` syntax:
+        <!-- @test:id=chat-test -->
+        ```bash
+        curl http://127.0.0.1:13305/api/v1/models | grep ${lemonade_model}
+        ```
+        <!-- @test:end -->
+
+    Substitution is restricted to ``${name}`` placeholders whose name matches a
+    declared @var id, so ordinary shell ``$variable`` / ``${env}`` usage is
+    never touched. If a declared placeholder cannot be resolved for the active
+    device, the runner raises a clear error rather than silently substituting
+    an empty string.
+
 Inline #hide marker:
     Lines ending with `#hide` inside a code block are executed by the test runner
     but should be stripped from the rendered website view. This lets you add
@@ -304,6 +335,128 @@ def resolve_setup(
     return setup_value
 
 
+def extract_var_definitions(content: str) -> dict[str, dict[str, str]]:
+    """Extract reusable @var definitions from README content.
+
+    Supports @var definitions wrapped in @device: blocks, where the target
+    device(s) are inferred from the surrounding tag. Comma-separated device
+    lists in the surrounding ``@device:halo,halo_box`` tag fan out into one
+    key per device in the returned mapping.
+
+        <!-- @device:halo,halo_box -->
+        <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
+        <!-- @device:end -->
+        <!-- @device:stx,krk,rx7900xt,rx9070xt -->
+        <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
+        <!-- @device:end -->
+
+    Definitions outside any @device: block apply to all devices and are stored
+    under the ``"all"`` key:
+        <!-- @var:id=api_port value="13305" -->
+
+    Returns a dict mapping var_id -> {device: value}, e.g.:
+        {"lemonade_model": {
+            "halo": "gpt-oss-120b-mxfp-GGUF",
+            "halo_box": "gpt-oss-120b-mxfp-GGUF",
+            "stx": "gpt-oss-20b-mxfp4-GGUF",
+            ...
+        }}
+    """
+    var_defs: dict[str, dict[str, str]] = {}
+    var_pattern = r"<!-- @var:([^>]+) -->"
+
+    device_blocks = _find_nested_blocks(
+        content,
+        r"<!-- @device:([\w,]+) -->",
+        "<!-- @device:end -->",
+    )
+
+    for var_match in re.finditer(var_pattern, content):
+        match_pos = var_match.start()
+        attr_string = var_match.group(1)
+        attrs = parse_test_attributes(attr_string)
+
+        var_id = attrs.get("id")
+        if not var_id:
+            line_number = content[:match_pos].count("\n") + 1
+            print(
+                f"Warning: @var definition at line {line_number} missing 'id', skipping"
+            )
+            continue
+
+        value = attrs.get("value")
+        if value is None:
+            line_number = content[:match_pos].count("\n") + 1
+            print(
+                f"Warning: @var '{var_id}' at line {line_number} has no value"
+            )
+            continue
+
+        # Determine target devices from the innermost enclosing @device: block
+        device_value: Optional[str] = None
+        for dev_val, start, end in device_blocks:
+            if start <= match_pos < end:
+                device_value = dev_val
+                break  # blocks are sorted innermost-first
+
+        if var_id not in var_defs:
+            var_defs[var_id] = {}
+
+        if device_value:
+            for dev in (d.strip() for d in device_value.split(",")):
+                if dev:
+                    var_defs[var_id][dev] = value
+        else:
+            var_defs[var_id]["all"] = value
+
+    return var_defs
+
+
+def substitute_vars(
+    code: str,
+    var_defs: dict[str, dict[str, str]],
+    target_device: Optional[str],
+    test_id: str,
+) -> str:
+    """Substitute ``${name}`` placeholders in *code* using *var_defs*.
+
+    Only placeholders whose name matches a declared @var id are substituted;
+    every other ``${...}`` (e.g. ordinary shell variable references) is left
+    untouched. Resolution for a declared name prefers the value mapped to
+    *target_device*, falling back to the ``"all"`` value if present.
+
+    Raises ``ValueError`` if a declared placeholder cannot be resolved for the
+    active device — silent substitution of an empty string would cause subtle
+    test failures downstream.
+    """
+    if not var_defs:
+        return code
+
+    placeholder_pattern = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+
+    def _replace(match: re.Match) -> str:
+        name = match.group(1)
+        if name not in var_defs:
+            return match.group(0)
+        mapping = var_defs[name]
+        resolved: Optional[str] = None
+        if target_device and target_device in mapping:
+            resolved = mapping[target_device]
+        elif "all" in mapping:
+            resolved = mapping["all"]
+        if resolved is None:
+            device_repr = target_device or "<unspecified>"
+            available = ", ".join(sorted(mapping.keys())) or "<none>"
+            raise ValueError(
+                f"Test '{test_id}' references @var '${{{name}}}' but no value "
+                f"is defined for device '{device_repr}'. "
+                f"Available device(s) for this var: {available}."
+            )
+        return resolved
+
+    return placeholder_pattern.sub(_replace, code)
+
+
 def resolve_require_tags(content: str) -> str:
     """Resolve @require tags by inlining dependency content.
 
@@ -360,11 +513,19 @@ def _find_nested_blocks(
     open_re = re.compile(open_pattern)
     close_re = re.compile(re.escape(close_literal))
 
+    # Collect close positions first so we can skip any open match that
+    # coincides exactly with a close. This guards against permissive open
+    # patterns (e.g. ``@device:([\w,]+)``) that would otherwise also match
+    # the close tag ``@device:end`` and corrupt the nesting stack.
+    close_positions = {m.start() for m in close_re.finditer(content)}
+
     events: list[tuple[int, str, str]] = []  # (pos, 'open'|'close', value)
     for m in open_re.finditer(content):
+        if m.start() in close_positions:
+            continue
         events.append((m.start(), "open", m.group(1)))
-    for m in close_re.finditer(content):
-        events.append((m.start(), "close", ""))
+    for pos in close_positions:
+        events.append((pos, "close", ""))
     events.sort(key=lambda e: e[0])
 
     stack: list[tuple[str, int]] = []  # (value, start_pos)
@@ -431,6 +592,13 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
             f"Found {len(setup_defs)} setup definition(s): {', '.join(setup_defs.keys())}"
         )
 
+    # Parse reusable device-aware @var definitions
+    var_defs = extract_var_definitions(content)
+    if var_defs:
+        print(
+            f"Found {len(var_defs)} var definition(s): {', '.join(var_defs.keys())}"
+        )
+
     # Pattern to match test blocks:
     # <!-- @test:id=name ... -->
     # ```language
@@ -488,6 +656,12 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
                     f"Skipping test '{test.id}' (device={test.device}, running on {target_device})"
                 )
                 continue
+
+        # Substitute ${var} placeholders using device-aware @var definitions.
+        # Only declared var names are touched; ordinary shell ${env} references
+        # are preserved. Unresolved declared references raise loudly.
+        if var_defs:
+            test.code = substitute_vars(test.code, var_defs, target_device, test.id)
 
         tests.append(test)
 
