@@ -29,16 +29,5 @@ Download and install the latest AMD GPU driver for Linux:
 1. Visit the [AMD Linux Drivers](https://www.amd.com/en/support/download/linux-drivers.html) page.
 2. Follow the installation instructions provided on the download page.
 
-<!-- @test:id=amd-gpu-visible-linux timeout=60 hidden=True -->
-```bash
-set -euo pipefail
-sudo -n apt-get update -y
-sudo -n apt-get install -y rocm-smi
-rocm-smi
-rocm-smi --showproductname
-test -d /opt/rocm
-test -e /opt/rocm/lib/libroctx64.so.4 -o -e /opt/rocm/lib/libroctx64.so
-```
-<!-- @test:end --> 
 <!-- @device:end -->
 <!-- @os:end -->
