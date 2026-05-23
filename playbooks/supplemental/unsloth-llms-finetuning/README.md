@@ -131,6 +131,8 @@ for script in scripts:
 
 <!-- @test:id=quick-train-unsloth timeout=2400 hidden=True setup=activate-venv -->
 ```bash
+rm -rf unsloth_compiled_cache
+rm -rf ~/.cache/torch/inductor ~/.cache/torch_extensions
 python test_unsloth_ci.py
 ```
 <!-- @test:end -->
