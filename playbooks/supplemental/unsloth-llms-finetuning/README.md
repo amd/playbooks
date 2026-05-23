@@ -78,6 +78,8 @@ pip install datasets transformers trl
 ```
 <!-- @test:end -->
 
+> **Note:** During import, Unsloth may probe optional `bitsandbytes` acceleration paths. On some ROCm versions, you may see a message such as `bitsandbytes library load error: Configured ROCm binary not found`. This playbook uses standard LoRA fine-tuning with `optim="adamw_torch"`, so we do not rely on the bitsandbytes optimizer or 4-bit QLoRA. Therefore, this message can be treated as non-blocking.
+
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
 ```python
 import unsloth
