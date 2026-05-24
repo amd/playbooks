@@ -224,6 +224,8 @@ $startedHere = $false
 $tmpShow = $null
 $tmpGenerate = $null
 $tmpChat = $null
+$venv = "$PWD\ollama-env-ci"
+$pythonSmoke = "$PWD\ollama_python_smoke.py" 
 
 function Wait-OllamaApi {
   param( [int]$MaxAttempts = 120 )
@@ -311,10 +313,36 @@ try {
   if (-not $chatText) { throw "/api/chat did not return message.content" }
   if ($chatText.Trim() -ne "OK") { throw "/api/chat expected exactly OK but got: $chatText" }
   Write-Host "OK: /api/chat works"
+
+  # Python requests smoke
+  if (Test-Path $venv) { Remove-Item -Recurse -Force $venv }
+  python -m venv $venv
+  $py = Join-Path $venv "Scripts\python.exe"
+  & $py -m pip install --upgrade pip
+  & $py -m pip install requests
+@'
+import requests
+response = requests.post(
+    "http://127.0.0.1:11434/api/generate",
+    json={
+        "model": "gpt-oss:20b",
+        "prompt": "Reply with exactly: OK",
+        "stream": False,
+    },
+    timeout=300,
+)
+response.raise_for_status()
+text = response.json()["response"].strip()
+if text != "OK":
+    raise SystemExit(f"Expected exactly OK, got: {text}")
+print("OK: Python requests example works")
+'@ | Set-Content -Path $pythonSmoke -Encoding UTF8
+  & $py $pythonSmoke
 }
 
 finally {
-  Remove-Item $tmpShow, $tmpGenerate, $tmpChat -Force -ErrorAction SilentlyContinue
+  Remove-Item $tmpShow, $tmpGenerate, $tmpChat, $pythonSmoke -Force -ErrorAction SilentlyContinue
+  Remove-Item $venv -Recurse -Force -ErrorAction SilentlyContinue
   if ($startedHere) {
     if ($p -and -not $p.HasExited) {
       Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
@@ -331,8 +359,12 @@ finally {
 set -euo pipefail
 p=""
 started_here="0"
+venv="./ollama-env-ci"
+python_smoke="./ollama_python_smoke.py" 
 
 cleanup() {
+  rm -f "$python_smoke"
+  rm -rf "$venv"
   if [ "$started_here" = "1" ] && [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
     kill "$p" 2>/dev/null || true
     sleep 2
@@ -464,6 +496,30 @@ if text.strip() != "OK":
     sys.exit(1)
 print("OK: /api/chat works")
 PY
+
+rm -rf "$venv"
+python3 -m venv "$venv"
+py="$venv/bin/python"
+"$py" -m pip install --upgrade pip
+"$py" -m pip install requests
+cat > "$python_smoke" <<'PY'
+import requests
+response = requests.post(
+    "http://127.0.0.1:11434/api/generate",
+    json={
+        "model": "gpt-oss:20b",
+        "prompt": "Reply with exactly: OK",
+        "stream": False,
+    },
+    timeout=300,
+)
+response.raise_for_status()
+text = response.json()["response"].strip()
+if text != "OK":
+    raise SystemExit(f"Expected exactly OK, got: {text}")
+print("OK: Python requests example works")
+PY
+"$py" "$python_smoke"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
