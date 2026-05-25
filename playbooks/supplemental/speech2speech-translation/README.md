@@ -27,7 +27,7 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 
 - Removes friction between translation and language barriers
 - Conveys tone, emotion, and intent without awkward pauses
-- Enables global collaboation and faster decision-making
+- Enables global collaboration and faster decision-making
 
 ## Setting Up Your Environment
 
@@ -99,7 +99,7 @@ source s2st-env/bin/activate
 
 ### Installing Basic Dependencies
 
-<!-- @require:pytorch -->
+<!-- @require:rocm,pytorch -->
 
 ### Additional Dependencies
 
@@ -208,111 +208,153 @@ except Exception as e:
 
 #### Learn about seamless-m4t-v2
 
-Check out the model card on Hugging Face for more information: [https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)
-
+Check out the [model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) on Hugging Face for more information.
 This is the technical architecture of the speech-speech models:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
-#### Download the model locally
+#### Download Scripts
 
-Before running `infer.py` or `gradio_demo.py`, download the model files into a local folder named `seamless-m4t-v2-large` in the same directory as the scripts.
+This playbook includes ready-to-use scripts. Please download all of them to the same directory as the environment you created.
 
-Open a terminal in the scripts directory. Activate the `s2st-env` virtual environment only if it is not already active, then run:
+| Script | Description | Usage |
+|--------|-------------|-------|
+| [infer.py](assets/infer.py) | Basic LLM text generation | `python infer.py` |
+| [input1.wav](assets/input1.wav) | Example Audio file | N/A |
+| [lang_list.py](assets/lang_list.py) | Language Support File | N/A |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuitive UI for Speech Translation | `python gradio_demo.py --no-share` |
 
-<!-- @os:windows -->
+
+### Starting with infer.py
+
+To execute the script, run 
 ```bash
-s2st-env\Scripts\activate # Activate the venv only if it's not already active
-pip install -U "huggingface_hub<1.0"
-hf download facebook/seamless-m4t-v2-large --local-dir ./seamless-m4t-v2-large
+python infer.py
 ```
-<!-- @os:end -->
-
-<!-- @os:linux -->
-```bash
-source s2st-env/bin/activate # Activate the venv only if it's not already active
-pip install -U "huggingface_hub<1.0"
-hf download facebook/seamless-m4t-v2-large --local-dir ./seamless-m4t-v2-large
-```
-<!-- @os:end -->
-
-After the download completes, the model folder should be available at `./seamless-m4t-v2-large`.
-
-
-#### Import necessary dependencies
+> **Note**: You may see some warnings. This is expected.
+ 
+  
+#### Explaining the Code
+**Snippet 1: Importing the necessary dependencies**
 
 ```python 
-from transformers import AutoProcessor, SeamlessM4Tv2Model
 import os
+os.environ["HIP_VISIBLE_DEVICES"] = "0"
+
 import time
 import numpy as np
 import scipy.io.wavfile
 import soundfile as sf
 import torch
 import torchaudio
+
 from transformers import AutoProcessor, SeamlessM4Tv2Model
 
-os.environ["HIP_VISIBLE_DEVICES"] = "0"
-device = "cuda"
-model_path = os.environ.get("S2S_MODEL_PATH", "./seamless-m4t-v2-large")
-```
-#### Load models
+# ============ Configuration ============
+DEFAULT_TARGET_LANGUAGE = "eng"
 
+INPUT_AUDIO_PATH = "./input1.wav"
+OUTPUT_AUDIO_PATH = "./out1.wav"
+
+# Automatically downloads + caches via Hugging Face
+MODEL_ID = "facebook/seamless-m4t-v2-large"
+
+TARGET_SAMPLE_RATE = 16_000
+```
+
+**Snippet 2: Loading the models from HuggingFace**
+
+This function takes in a model ID and downloads the model if not already downloaded. It then returns the processor and model for the next function to use.
 ```python
-start = time.time()
-processor = AutoProcessor.from_pretrained("./seamless-m4t-v2-large")
-dtype = torch.float16 if device.type == "cuda" else torch.float32
-model = SeamlessM4Tv2Model.from_pretrained(model_path, dtype=dtype).to(device)
-end = time.time()
-print(f"model loading duration: {end - start} seconds")
+def load_model(model_id: str, device: torch.device):
+    start = time.time()
+
+    print("Loading model (downloads automatically on first run)...")
+
+    processor = AutoProcessor.from_pretrained(model_id)
+
+    dtype = torch.float16 if device.type == "cuda" else torch.float32
+
+    model = SeamlessM4Tv2Model.from_pretrained(model_id, torch_dtype=dtype).to(device)
+
+    elapsed = time.time() - start
+    print(f"Model loading duration: {elapsed:.2f} seconds")
+
+    return processor, model
 ```
 
-#### Input audio clip .wav file
+**Snippet 3: Input audio clip .wav file and preprocess it**
 
-Please download the following file: [input1.wav](assets/input1.wav). Then, load it with soundfile.
-
+This function loads the audio clip and resamples it to the target rate.
 ```python
-audio_np, orig_freq = sf.read("input1.wav", dtype="float32", always_2d=True)
-audio = torchaudio.functional.resample(
-    torch.from_numpy(audio_np.T),
-    orig_freq=orig_freq,
-    new_freq=16_000,
-)
+def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
+
+    audio_np, orig_freq = sf.read(audio_path, dtype="float32", always_2d=True)
+
+    # Convert to tensor [channels, samples]
+    audio = torch.from_numpy(audio_np.T)
+
+    # Resample if needed
+    if orig_freq != target_sr:
+        audio = torchaudio.functional.resample(audio, orig_freq=orig_freq, new_freq=target_sr)
+
+    # Convert stereo -> mono
+    if audio.shape[0] > 1:
+        audio = torch.mean(audio, dim=0, keepdim=True)
+
+    return audio
 ```
 
-#### Preprocess input .wav file
+**Snippet 4: Run inference**
 
+This function runs inference with the model and returns the generated output.
 ```python
-audio_inputs = processor(
-    audio=audio.squeeze(0).cpu().numpy(),
-    sampling_rate=16_000,
-    return_tensors="pt",
-).to(device)
+def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
+
+    start = time.time()
+
+    audio_inputs = processor(
+        audio=audio.squeeze(0).cpu().numpy(),
+        sampling_rate=TARGET_SAMPLE_RATE,
+        return_tensors="pt",
+    )
+
+    audio_inputs = {
+        k: v.to(device) if isinstance(v, torch.Tensor) else v
+        for k, v in audio_inputs.items()
+    }
+
+    with torch.inference_mode():
+        output = model.generate(**audio_inputs, tgt_lang=target_lang)[0]
+
+    audio_array = output.float().cpu().numpy().squeeze()
+
+    elapsed = time.time() - start
+    print(f"Inference duration: {elapsed:.2f} seconds")
+
+    return audio_array, elapsed
 ```
 
-#### Generate translated audio file
+**Snippet 5: Save the translated file**
 
+This function saves the audio array to a .WAV file. 
 ```python
-start = time.time()
-audio_array_from_audio = model.generate(**audio_inputs, tgt_lang="eng")[0].cpu().numpy().squeeze()
-end = time.time()
-print(f"gpu infer duration: {end - start} seconds")
+def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
+    if np.issubdtype(audio_array.dtype, np.floating):
+        max_abs = np.max(np.abs(audio_array)) if audio_array.size else 0.0
+
+        if max_abs > 1.0:
+            audio_array = audio_array / max_abs
+
+        audio_array = (audio_array * 32767.0).clip(-32768, 32767).astype(np.int16)
+
+    scipy.io.wavfile.write(output_path, rate=sample_rate, data=audio_array)
+
+    print(f"Output saved to: {output_path}")
 ```
-#### Save the translated file
 
-```python
-sample_rate = model.config.sampling_rate
-scipy.io.wavfile.write("out1.wav", rate=sample_rate, data=audio_array_from_audio)
-```
 
-#### Run the complete file to check the audio generation duration
-
-Please download the following file: [infer.py](assets/infer.py). Then, run it.
-
-```bash
-python ./infer.py
-```
 
 <!-- @os:windows -->
 <!-- @test:id=infer-smoke-windows timeout=1800 setup=activate-venv hidden=True -->
@@ -371,45 +413,20 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Runing the Gradio UI demo:
 
-This is a helpful UI that builds upon the code we have written and makes live speech-speech translation easy. This demo supports two launch modes:
 
-- `--no-share`: local-only mode. The app is available only on your machine.
-- `--share`: also creates a public Gradio share link. This requires outbound network access to Gradio's share service.
 
-#### Run locally only
+### Running the Gradio UI demo:
+
+Now that you have run a basic script example, the following instructions provide a helpful UI that builds upon the code we have written and makes live speech-speech translation easy.
+
+#### Run Gradio Locally
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Then open your web browser at `http://127.0.0.1:7860`
+Then, open your web browser at `http://127.0.0.1:7860` to access the UI.
 
-#### Run with a public share link
-
-When `--share` is used, Gradio uses **Fast Reverse Proxy (FRP)** to create a public link. On some systems, the FRP client download may be blocked by antivirus or network policy.
-
-1. First try running the following code after downloading it: [gradio_demo.py](assets/gradio_demo.py).
-```bash
-python ./gradio_demo.py --share
-```
-<!-- @os:windows -->
-2. If Gradio says the FRP client is missing or blocked, do this:
-    - Download this file: https://cdn-media.huggingface.co/frpc-gradio-0.3/frpc_windows_amd64.exe
-    - Rename the downloaded file to: `frpc_windows_amd64_v0.3`
-    - Move the file to this location: `%USERPROFILE%\.cache\huggingface\gradio\frpc`
-<!-- @os:end -->
-
-<!-- @os:linux -->
-2. If Gradio says the FRP client is missing or blocked, do this: 
-    - Download this file: https://cdn-media.huggingface.co/frpc-gradio-0.3/frpc_linux_amd64
-    - Rename the downloaded file to: `frpc_linux_amd64_v0.3`
-    - Move the file to this location: `/root/.cache/huggingface/gradio/frpc`
-<!-- @os:end -->
-
-3. Try running `gradio_demo.py` again with `--share`.
-
-Press and hold the record button to capture your voice; releasing it will automatically execute the translation.
 
 ### Gradio UI example:
 
@@ -533,10 +550,11 @@ PY
 ## Next Steps
 
 - Mix and match between dozens of languages for quick translation. 
-- Experiment with voice input and text-to-speech
+- Share your demo with others: Add --share to create a public link that anyone can access remotely, or deploy permanently using Hugging Face Spaces
 
 ## Resources
 
 Below are some additional resources to learn more about speech-to-speech translation:  
 * The repo is here https://huggingface.co/facebook/seamless-m4t-v2-large 
 * Research academia related to "Seamless: Multilingual Expressive and Streaming Speech Translation"
+* Gradio sharing and deployment: [Sharing Your App Guide](https://www.gradio.app/guides/sharing-your-app) and [Deploy to Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
