@@ -11,6 +11,11 @@
       "windows"
     ]
   },
+  "published_platforms": {
+    "halo": [
+      "windows"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
