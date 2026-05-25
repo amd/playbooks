@@ -117,7 +117,7 @@ print("HIP available:", torch.cuda.is_available())
 ```
 
 ### Prerequisites
-- Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- Install latest: [AMD Software: Adrenalin Edition™](https://www.amd.com/en/products/software/adrenalin.html)
 
 ### Install ROCm Python packages via pip
 ```bash

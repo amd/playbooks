@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Compile your own GPU kernels for Pytorch+ROCm
+# Compile your own GPU kernels for PyTorch + AMD ROCm™
 
 ## Overview
 
@@ -122,7 +122,7 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 ## Setup
 <!-- @os:windows -->
 ### Prerequisites - Windows
-- Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- Install latest: [AMD Software: Adrenalin Edition™](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @os:end -->
 
 ### Create a Virtual Environment
