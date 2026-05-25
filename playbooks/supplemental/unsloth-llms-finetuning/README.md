@@ -297,7 +297,7 @@ model_name = "unsloth/gemma-4-E4B-it-unsloth-bnb-4bit"
 
 ## Resources
 
-Below are some additional resources to learn more about unsloth and finetuning on 
+Below are some additional resources to learn more about Unsloth and finetuning:
 
 * [Unsloth Docs](https://docs.unsloth.ai)
 

@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-## Overview
+# Overview
 
-# Getting Started Creating Agents with GAIA
+## Getting Started Creating Agents with GAIA
 
 GAIA agents are AI assistants that use a local LLM to reason and call tools you define — like chatbots that can take action. They run **100% locally** with no cloud APIs, no data leaving your machine, and no API keys required.
 
@@ -27,18 +27,19 @@ In this playbook, you'll build a Hardware Advisor Agent that detects your system
 
 ## Installing Dependencies
 
-<!-- @require:gaia,lemonade -->
+<!-- @require:lemonade -->
+<!-- @require:gaia -->
 
 ## Getting Started
 
-Get the finished agent running first so you can see what you're building, then we'll walk through the code step by step.
+Get the finished agent running first so you can see what you're building. Then, we'll walk through the code step by step.
 
-### 1. Run the Pre-Built Example
+### Run the Pre-Built Example
 
-This playbook includes the complete [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Run it to see the finished agent in action:
+This playbook includes the complete [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Download it to a directory of your choice and run it to see the finished agent in action:
 
-```
-uv run hardware_advisor_agent.py
+```bash
+python hardware_advisor_agent.py
 ```
 
 <!-- @test:id=gaia-verify-assets timeout=60 hidden=True -->
@@ -84,8 +85,9 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 - NPU acceleration available for smaller models
 ```
 
-Now let's build this from scratch.
+**Congratulations** - you've built an agent! 
 
+The rest of the playbook will be explaining how each part of the script works, so you can understand it from the ground up.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True -->
 ```powershell
@@ -203,7 +205,6 @@ rm -f /tmp/gaia_lemonadeclient_smoke.py
 <!-- @test:id=gaia-hardware-advisor-smoke-linux timeout=300 hidden=True -->
 ```bash
 set -euo pipefail
-export PATH="$HOME/.local/bin:$PATH"
 
 for i in $(seq 1 120); do
   health="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/health || true)"
@@ -219,7 +220,8 @@ if [ -z "$health" ]; then
 fi
 echo "OK: Lemonade server is responding on http://127.0.0.1:13305/api/v1/health"
 
-printf 'quit' | uv run hardware_advisor_agent.py >/tmp/gaia_agent_output.txt
+source .venv/bin/activate
+printf 'quit' | python3 hardware_advisor_agent.py >/tmp/gaia_agent_output.txt
 
 grep -q "Hardware Advisor Agent" /tmp/gaia_agent_output.txt
 echo "OK: hardware_advisor_agent.py started successfully"
@@ -228,9 +230,8 @@ echo "OK: hardware_advisor_agent.py started successfully"
 <!-- @os:end --> 
 
 
-## Core Concepts
 
-### Architecture
+## Understand the Architecture
 
 The Hardware Advisor Agent combines three components:
 
@@ -374,9 +375,9 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 70B model (~42 GB):   Too large
 ```
 
-## Building the Agent Step by Step
+## Coding the Agent Step by Step (Optional)
 
-You'll create **one file** called `hardware_advisor.py` and progressively add features. Each step builds on the previous one.
+You'll create **one file** called `hardware_advisor_agent.py` and progressively add features. Each step builds on the previous one.
 
 ### Step 1: Agent Skeleton
 
@@ -409,8 +410,8 @@ if __name__ == "__main__":
 
 Run it to verify:
 
-```
-uv run hardware_advisor.py
+```bash
+python hardware_advisor_agent.py
 ```
 
 Expected output:
@@ -588,7 +589,7 @@ if __name__ == "__main__":
 
     while True:
         try:
-            query = input("You: ").strip()
+            query = input("You: ").strip()            
             if query:
                 agent.process_query(query)
                 print()
@@ -599,8 +600,8 @@ if __name__ == "__main__":
 
 Run and try asking "Show me my system specs":
 
-```
-uv run hardware_advisor.py
+```bash
+python hardware_advisor_agent.py
 ```
 
 **Example output:**
@@ -662,8 +663,8 @@ Add the `list_available_models()` tool inside `_register_tools()`, after the `ge
 
 Run and try asking "What models are available?":
 
-```
-uv run hardware_advisor.py
+```bash
+python hardware_advisor_agent.py
 ```
 
 **Example output:**
@@ -742,8 +743,8 @@ Add the `recommend_models()` tool inside `_register_tools()`, after `list_availa
 
 Run and try asking "What size LLM can I run?":
 
-```
-uv run hardware_advisor.py
+```bash
+python hardware_advisor_agent.py
 ```
 
 **Example output:**
@@ -782,7 +783,7 @@ def main():
 
     try:
         agent = HardwareAdvisorAgent()
-        print("Agent ready!\n")
+        print("Hardware Advisor Agent (Ctrl+C to exit)")
     except Exception as e:
         print(f"Error initializing agent: {e}")
         print("\nMake sure Lemonade Server is running before using GAIA.")
@@ -817,7 +818,7 @@ if __name__ == "__main__":
 
 ### Final Verification
 
-Your `hardware_advisor.py` should now have all of these components:
+Your `hardware_advisor_agent.py` should now have all of these components:
 
 - [x] Imports: `from typing import Any, Dict` and `from gaia import Agent, tool`
 - [x] `HardwareAdvisorAgent` class with `__init__` and system prompt
