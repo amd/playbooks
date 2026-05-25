@@ -39,7 +39,6 @@
   },
   "published_platforms": {
     "halo": [
-      "windows",
       "linux"
     ]
   },
