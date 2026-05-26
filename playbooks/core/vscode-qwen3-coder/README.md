@@ -11,6 +11,11 @@ SPDX-License-Identifier: MIT
 
 # Local LLM coding with VSCode and Qwen3-Coder-30B
 
+<!-- @device:stx,krk -->
+> [!NOTE]
+> This playbook requires a minimum of **32GB** of system memory.
+<!-- @device:end -->
+
 ## Overview
 
 Coding agents are powerful tools that empower developers through collaboration with AI agents backed by Large Language Models (LLMs). They can be embedded into the development environment, such as the terminal or VS Code, allowing seamless integration into a developer's workflow.
