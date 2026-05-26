@@ -828,10 +828,11 @@ def run_test(
 
         print(f"Exit code: {result.returncode}")
         print(f"Duration: {duration:.2f}s")
+        console_log_chars = 10000
         if result.stdout:
-            print(f"STDOUT (last 500 chars):\n{result.stdout[-500:]}")
+            print(f"STDOUT (last {console_log_chars} chars):\n{result.stdout[-console_log_chars:]}")
         if result.stderr:
-            print(f"STDERR (last 500 chars):\n{result.stderr[-500:]}")
+            print(f"STDERR (last {console_log_chars} chars):\n{result.stderr[-console_log_chars:]}")
 
         return TestResult(
             test_id=test.id,
@@ -888,7 +889,7 @@ def write_failure_metadata(
     failures_dir.mkdir(parents=True, exist_ok=True)
 
     # Bound the captured log size so issue bodies stay within GitHub's limits.
-    max_log_chars = 8000
+    max_log_chars = 10000
     stdout_excerpt = result.stdout[-max_log_chars:] if result.stdout else ""
     stderr_excerpt = result.stderr[-max_log_chars:] if result.stderr else ""
 

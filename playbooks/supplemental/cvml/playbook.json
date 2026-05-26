@@ -11,6 +11,16 @@
       "windows"
     ]
   },
+  "tested_platforms": {
+    "halo": [
+      "windows"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "windows"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
