@@ -336,7 +336,7 @@ The CVML Library includes ready-to-build sample applications for each feature. L
    rem Build the samples (Windows)
    cd samples
    mkdir build
-   cmake -S %CD% -B %CD%\build -DOPENCV_INSTALL_ROOT=%OPENCV_INSTALL_ROOT%
+   cmake -S %CD% -B %CD%\build -DOPENCV_INSTALL_ROOT=%OPENCV_INSTALL_ROOT% -DCMAKE_PREFIX_PATH=%OPENCV_INSTALL_ROOT%
    cmake --build %CD%\build --config Release
    ```
    <!-- @os:end -->
@@ -346,7 +346,7 @@ The CVML Library includes ready-to-build sample applications for each feature. L
    # Build the samples (Linux)
    cd samples
    mkdir build
-   cmake -S $PWD -B $PWD/build -DOPENCV_INSTALL_ROOT=$OPENCV_INSTALL_ROOT
+   cmake -S $PWD -B $PWD/build -DOPENCV_INSTALL_ROOT="$OPENCV_INSTALL_ROOT" -DCMAKE_PREFIX_PATH="$OPENCV_INSTALL_ROOT"
    cmake --build $PWD/build --config Release
    ```
    <!-- @os:end -->
