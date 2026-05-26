@@ -50,6 +50,15 @@ Before starting, ensure you have the following:
 - Vulkan SDK (installed in the [Vulkan SDK](#vulkan-sdk) section below)
 <!-- @os:end -->
 
+<!-- @os:linux -->
+<!-- @test:id=linux-runner-check timeout=120 hidden=True -->
+```bash
+cat /etc/os-release
+uname -r
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 <!-- @os:windows -->
 <!-- @test:id=cvml-prereqs-windows timeout=120 hidden=True -->
 ```powershell
