@@ -71,7 +71,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "unsloth @ git+https://github.com/unslothai/unsloth.git"
+pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 pip install --no-deps git+https://github.com/unslothai/unsloth-zoo.git
 pip install --no-deps --upgrade timm
 pip install datasets transformers trl
