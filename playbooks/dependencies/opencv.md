@@ -42,36 +42,3 @@ cmake -S .. -B . \
 cmake --build . --parallel "$(nproc)"
 sudo cmake --install .
 ```
-
-**5. Set OPENCV_INSTALL_ROOT permanently for interactive shells**
-```bash
-echo 'export OPENCV_INSTALL_ROOT=/opt/opencv-4.11.0' >> ~/.bashrc
-source ~/.bashrc
-```
-
-Verify:
-```bash
-echo $OPENCV_INSTALL_ROOT
-ls $OPENCV_INSTALL_ROOT
-```
-
-You should see folders like:
-- bin
-- include
-- Lib
-- share
-or similar.
-
-**6. Set OpenCV_DIR permanently for interactive shells**
-`OpenCV_DIR` should point to the folder containing `OpenCVConfig.cmake`.
-```bash
-echo 'export OpenCV_DIR=/opt/opencv-4.11.0/lib/cmake/opencv4' >> ~/.bashrc
-source ~/.bashrc
-```
-
-**7. System library path setup**
-If the sample executable cannot find OpenCV shared libraries at runtime, add:
-```bash
-export LD_LIBRARY_PATH=/opt/opencv-4.11.0/lib:$LD_LIBRARY_PATH
-```
-

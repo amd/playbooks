@@ -450,30 +450,6 @@ finally {Pop-Location -ErrorAction SilentlyContinue}
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=linux-resource-check timeout=1800 hidden=True -->
-```bash
-echo "=== whoami/id/groups ==="
-whoami
-id
-groups
-
-echo "=== limits ==="
-ulimit -a
-cat /proc/$$/limits
-
-echo "=== OpenCV variables ==="
-echo "OPENCV_INSTALL_ROOT=$OPENCV_INSTALL_ROOT"
-echo "OpenCV_DIR=${OpenCV_DIR:-unset}"
-
-echo "=== XRT/NPU ==="
-source /opt/xilinx/xrt/setup.sh || true
-which xrt-smi || true
-xrt-smi examine || true
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:linux -->
 <!-- @test:id=cvml-build-and-face-detection-linux timeout=1800 hidden=True -->
 ```bash
 set -euo pipefail
@@ -503,7 +479,7 @@ build_dir="$samples_dir/build"
 cd "$samples_dir"
 mkdir build
 
-cmake -S "$PWD" -B "$PWD/build" -DOPENCV_INSTALL_ROOT="$OPENCV_INSTALL_ROOT"
+cmake -S "$PWD" -B "$PWD/build" -DOPENCV_INSTALL_ROOT="$OPENCV_INSTALL_ROOT" -DCMAKE_PREFIX_PATH="$OPENCV_INSTALL_ROOT"
 cmake --build "$PWD/build" --config Release --parallel "$(nproc)"
 
 face_exe="$build_dir/cvml-sample-face-detection/cvml-sample-face-detection"
