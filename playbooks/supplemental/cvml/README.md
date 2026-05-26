@@ -77,6 +77,9 @@ if (-not $clPath) {throw "MSVC cl.exe was not found under Visual Studio installa
 Write-Host "Checking Ryzen AI NPU driver presence..."
 $pnputilOutput = pnputil /enum-devices /class "NeuralProcessor" 2>$null
 if ($LASTEXITCODE -eq 0 -and $pnputilOutput -match "AMD|NPU|Ryzen") {Write-Host "Ryzen AI NPU driver appears to be present."} else {Write-Host "Ryzen AI NPU driver was not detected. CVML is expected to use GPU fallback if supported by the runtime."}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @test:id=cvml-prereqs-linux timeout=120 hidden=True -->
