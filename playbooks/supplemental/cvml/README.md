@@ -450,6 +450,30 @@ finally {Pop-Location -ErrorAction SilentlyContinue}
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- @test:id=linux-resource-check timeout=1800 hidden=True -->
+```bash
+echo "=== whoami/id/groups ==="
+whoami
+id
+groups
+
+echo "=== limits ==="
+ulimit -a
+cat /proc/$$/limits
+
+echo "=== OpenCV variables ==="
+echo "OPENCV_INSTALL_ROOT=$OPENCV_INSTALL_ROOT"
+echo "OpenCV_DIR=${OpenCV_DIR:-unset}"
+
+echo "=== XRT/NPU ==="
+source /opt/xilinx/xrt/setup.sh || true
+which xrt-smi || true
+xrt-smi examine || true
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
 <!-- @test:id=cvml-build-and-face-detection-linux timeout=1800 hidden=True -->
 ```bash
 set -euo pipefail
