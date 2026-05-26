@@ -138,7 +138,7 @@ fi
 
 ## Setting Up the CVML Library
 
-Download the Ryzen AI CVML Library package from the AMD Account Portal:
+Create an AMD account at [account.amd.com](https://account.amd.com) if you don't have one, then sign in to download the Ryzen AI CVML Library from the portal link below:
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
