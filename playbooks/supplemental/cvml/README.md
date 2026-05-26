@@ -417,10 +417,8 @@ try {
   if (Test-Path $opencvRuntime) {$env:PATH = "$env:PATH;$opencvRuntime"} else {
     Write-Host "OpenCV runtime path from README was not found: $opencvRuntime"
     Write-Host "Trying common OpenCV extracted package path instead."
-
     $opencvRuntimeFallback = Join-Path $env:OPENCV_INSTALL_ROOT "build\x64\vc16\bin"
     if (-not (Test-Path $opencvRuntimeFallback)) {throw "OpenCV runtime DLL folder was not found at either $opencvRuntime or $opencvRuntimeFallback"}
-
     $env:PATH = "$env:PATH;$opencvRuntimeFallback"
   }
 
@@ -470,10 +468,6 @@ work="$PWD/cvml-test"
 rm -rf "$work"
 mkdir -p "$work"
 cp -a "$AMD_CVML_SDK_ROOT"/. "$work"/
-cleanup() {
-  rm -rf "$work"
-}
-trap cleanup EXIT
 samples_dir="$work/samples"
 build_dir="$samples_dir/build"
 cd "$samples_dir"
