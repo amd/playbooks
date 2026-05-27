@@ -31,9 +31,10 @@ By the end of this playbook you will be able to:
 Before you begin, make sure you have:
 
 - A PC running **Windows 11** or a supported **Linux** distribution (Ubuntu 24.04+, Fedora, Debian)
-- At least **16 GB of RAM** (64 GB recommended for larger models)
-- **~4–32 GB of free disk space**, depending on the models you download. The largest model in this guide requires ~20 GB.
+- **16 GB of RAM** is recommended for the runtime model used in Steps 1–7 (`Gemma-4-E2B-it-GGUF`, ~3 GB). **32 GB+** is recommended if you want to use the larger code-generation model in Step 6 (`Qwen3.5-35B-A3B-GGUF`, ~20 GB).
+- **~4–30 GB of free disk space**, depending on the models you download. The largest model in this guide is about 20 GB.
 - **Python 3.10–3.13** (used in the Python app section)
+- An internet connection (wired or wireless)
 - [Optional] An AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 series or Z2 Extreme) with the latest driver installed from [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) if you want to run a model on the NPU.
 
 <!-- @require:lemonade -->
@@ -45,7 +46,7 @@ lemonade --version
 <!-- @test:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=lemonade-chat-qwen-windows timeout=1200 hidden=True -->
+<!-- @test:id=lemonade-chat-gemma-windows timeout=1200 hidden=True -->
 ```powershell
 
 # Wait for server to come up
@@ -60,28 +61,28 @@ Write-Host "OK: Lemonade server is responding"
 
 # Now that the server is responding, check if model is downloaded in Lemonade(robust JSON parse)
 $parsed = $modelsJson | ConvertFrom-Json
-$entry  = $parsed.data | Where-Object { $_.id -eq "Qwen3.5-4B-GGUF" } | Select-Object -First 1
-if (-not $entry) { throw "Model Qwen3.5-4B-GGUF is not present in Lemonade /api/v1/models." }
-if (-not $entry.downloaded) { throw "Model Qwen3.5-4B-GGUF is present but not downloaded in Lemonade. Please download it." }
-Write-Host "OK: Qwen3.5-4B-GGUF model is downloaded in Lemonade"
+$entry  = $parsed.data | Where-Object { $_.id -eq "Gemma-4-E2B-it-GGUF" } | Select-Object -First 1
+if (-not $entry) { throw "Model Gemma-4-E2B-it-GGUF is not present in Lemonade /api/v1/models." }
+if (-not $entry.downloaded) { throw "Model Gemma-4-E2B-it-GGUF is present but not downloaded in Lemonade. Please download it." }
+Write-Host "OK: Gemma-4-E2B-it-GGUF model is downloaded in Lemonade"
 
 # Model chat test
 $body = @{
-  model = "Qwen3.5-4B-GGUF"
+  model = "Gemma-4-E2B-it-GGUF"
   messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
   temperature = 0
   max_tokens = 500
 } | ConvertTo-Json -Depth 5
 $out = curl.exe -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions -H "Content-Type: application/json" -d $body
 if (-not $out) { throw "Empty response from Lemonade chat/completions" }
-Write-Host "OK: Model Qwen3.5-4B-GGUF responded"
+Write-Host "OK: Model Gemma-4-E2B-it-GGUF responded"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 
 <!-- @os:linux -->
-<!-- @test:id=lemonade-chat-qwen-linux timeout=1200 hidden=True -->
+<!-- @test:id=lemonade-chat-gemma-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -109,23 +110,23 @@ import sys
 data = json.loads(os.environ["MODELS_JSON"])
 entry = None
 for item in data.get("data", []):
-    if item.get("id") == "Qwen3.5-4B-GGUF":
+    if item.get("id") == "Gemma-4-E2B-it-GGUF":
         entry = item
         break
 
 if entry is None:
-    print("Model Qwen3.5-4B-GGUF is not present in Lemonade /api/v1/models.")
+    print("Model Gemma-4-E2B-it-GGUF is not present in Lemonade /api/v1/models.")
     sys.exit(1)
 
 if not entry.get("downloaded", False):
-    print("Model Qwen3.5-4B-GGUF is present but not downloaded in Lemonade. Please download it.")
+    print("Model Gemma-4-E2B-it-GGUF is present but not downloaded in Lemonade. Please download it.")
     sys.exit(1)
 
-print("OK: Qwen3.5-4B-GGUF model is downloaded in Lemonade")
+print("OK: Gemma-4-E2B-it-GGUF model is downloaded in Lemonade")
 PY
 
 body='{
-  "model": "Qwen3.5-4B-GGUF",
+  "model": "Gemma-4-E2B-it-GGUF",
   "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
   "temperature": 0,
   "max_tokens": 500
@@ -140,7 +141,7 @@ if [ -z "$out" ]; then
   exit 1
 fi
 
-echo "OK: Model Qwen3.5-4B-GGUF responded"
+echo "OK: Model Gemma-4-E2B-it-GGUF responded"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -178,7 +179,7 @@ Let's download an LLM and have a conversation with it, running the AI entirely o
 
 ### Step 1: Download and Run a Model
 
-Lemonade ships with a curated model library. Let's start with **Gemma 4 E2B**, a capable and compact model that includes vision support:
+Lemonade ships with a curated model library. Let's start with **Gemma-4-E2B-it**, a capable and compact model that includes vision support. Open a terminal and run:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF
@@ -186,7 +187,7 @@ lemonade run Gemma-4-E2B-it-GGUF
 
 This single command does three things:
 
-1. **Downloads** the model (~3 GB) from Hugging Face, if it is not already downloaded.
+1. **Downloads** the model (~3 GB) from Hugging Face, if it is not already downloaded. (May take some time)
 2. **Starts** the Lemonade Server process on port 13305.
 3. **Opens Lemonade App** so you can start chatting with the model.
 
@@ -262,7 +263,7 @@ The real power of a local AI server is that any application can connect to it us
 
 ### Step 4: Start the Server
 
-Make sure the Lemonade server is running. It typically starts automatically in the background after installation. To verify, run:
+Verify that the Lemonade server is running. It typically starts automatically in the background after installation. To verify, run:
 
 ```
 lemonade status
@@ -270,11 +271,29 @@ lemonade status
 
 You should see a message like: `Server is running on port 13305`.
 
-If the server isn’t running, start it by opening the Lemonade app. Use the default port **13305** (you can confirm or select this from the tray icon).
+If the server isn't running, start it by opening the Lemonade app. Use the default port **13305** (you can confirm or select this from the tray icon).
 
 ### Step 5: Install the OpenAI Python Client
 
-In a terminal, install the OpenAI Python Client using the following command:
+In a terminal, create a venv and install the OpenAI Python Client using the following commands:
+<!-- @os:linux -->
+```bash
+# Your specific version of Linux may have different commands
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv lemonade-env
+source lemonade-env/bin/activate
+pip install openai
+```
+<!-- @os:end -->
+<!-- @os:windows -->
+```powershell
+python -m venv lemonade-env
+lemonade-env\Scripts\activate
+pip install openai
+```
+<!-- @os:end -->
+
 
 <!-- @os:windows -->
 <!-- @test:id=env-check-windows timeout=300 hidden=True -->
@@ -336,106 +355,51 @@ python3 -c "from openai import OpenAI; print('OK')"
 
 ### Step 6: Build the Flashcard App
 
-Load the `Qwen3-Coder-30B-A3B-Instruct` model and use the following prompt to generate a simple Flashcard app. Create a file with the generated code called `flashcards.py`.
+Let's download a different model to generate code: `Qwen3.5-35B-A3B-GGUF`. This is a large (~20 GB) and performant model best suited to systems with 32 GB+ of RAM. If you have less RAM available, try `Qwen3.5-9B-GGUF` (~6 GB) instead.
 
+You can download it from the UI or run the following:
 ```
-Generate a simple python script that uses the following to call an llm (Qwen3.5-4B-GGUF) to generate flashcards on a subject that is entered by the user.
-curl -X POST http://localhost:13305/api/v1/chat/completions
--H “Content-Type: application/json”
--d ‘{
-“model”: “Qwen3.5-4B-GGUF”,
-“messages”: [
-{“role”: “user”, “content”: “What is the population of Paris?”}
-],
-“stream”: false
-}’
+lemonade run Qwen3.5-35B-A3B-GGUF
 ```
 
-Note: Since the `Qwen3-Coder-30B-A3B-Instruct` model requires at least 20 GB of available RAM to run, we've provided the example flashcard application for your convenience. Here is what was generated:
+Feed the following prompt into Lemonade Chat UI to generate code for a simple Flashcard app. 
 
-```python
-from openai import OpenAI
-import json, random
+We'll use Qwen3.5-35B-A3B-GGUF (a larger model better at writing code) to generate our Python app, and the app itself will call Gemma-4-E2B-it-GGUF (the smaller model you already downloaded) at runtime. The code can then be copied to a file of your choice to be run in Python.
 
-# Connect to Lemonade
-client = OpenAI(
-    base_url="http://localhost:13305/api/v1",
-    api_key="lemonade",
-)
-
-def generate_flashcards(topic, count=5):
-    """Ask the LLM to generate flashcards on any topic."""
-    print(f"\n✨ Generating {count} flashcards on: {topic}\n")
-
-    response = client.chat.completions.create(
-        model="Qwen3.5-4B-GGUF",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are a study assistant. Generate flashcards as a JSON array. "
-                    "Each object must have a 'question' and 'answer' field. "
-                    "Keep answers to 1-2 sentences. Return ONLY valid JSON, no markdown."
-                ),
-            },
-            {
-                "role": "user",
-                "content": f"Create {count} flashcards about: {topic}",
-            },
-        ],
-    )
-
-    # Parse the structured output from the LLM
-    text = response.choices[0].message.content.strip()
-    # Handle cases where the model wraps JSON in markdown code fences
-    if text.startswith("```"):
-        text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
-    return json.loads(text)
-
-
-def quiz(cards):
-    """Run an interactive quiz session with the generated flashcards."""
-    random.shuffle(cards)
-    score = 0
-
-    for i, card in enumerate(cards, 1):
-        print(f"--- Card {i}/{len(cards)} ---")
-        print(f"Q: {card['question']}\n")
-        input("Press Enter to reveal the answer...")
-        print(f"A: {card['answer']}\n")
-        got_it = input("Did you get it right? (y/n): ").strip().lower()
-        if got_it == "y":
-            score += 1
-        print()
-
-    print(f"🏆 Score: {score}/{len(cards)}")
-
-
-# --- Main loop ---
-print("🍋 Lemonade Flashcard Generator")
-print("================================")
-print("Powered by a local LLM running on your own hardware.\n")
-
-while True:
-    topic = input('Enter a topic (or "quit" to exit): ').strip()
-    if topic.lower() in ("quit", "q", "exit"):
-        print("Happy studying! 👋")
-        break
-
-    try:
-        cards = generate_flashcards(topic)
-        print(f"Generated {len(cards)} cards!\n")
-
-        for i, card in enumerate(cards, 1):
-            print(f"  {i}. {card['question']}")
-        print()
-
-        if input("Start quiz? (y/n): ").strip().lower() == "y":
-            quiz(cards)
-            print()
-    except (json.JSONDecodeError, KeyError):
-        print("The model returned an unexpected format. Try again!\n")
 ```
+Generate a Python script that uses the OpenAI Python library to call a local LLM and create an interactive flashcard study tool.
+
+Connection details:
+- Base URL: http://localhost:13305/api/v1
+- API key: "lemonade"
+- Model to use: "Gemma-4-E2B-it-GGUF"
+
+Structure:
+
+1. A `generate_flashcards(topic, count=5)` function that:
+   - Sends a system message instructing the LLM to return ONLY a JSON array of objects with "question" and "answer" fields.
+   - Handles malformed JSON gracefully.
+   - Returns the parsed list of cards, or an empty list if parsing fails.
+
+2. A `quiz(cards)` function that shuffles the cards and, for each card:
+   - Prints `--- Card i/N ---`.
+   - Prints `Q: <question>`.
+   - Waits for the user to press Enter ("Press Enter to reveal the answer...").
+   - Prints `A: <answer>`.
+   - Asks "Did you get it right? (y/n): " and tracks the score.
+   - At the end, prints `🏆 Score: <score>/<total>`.
+
+3. A main loop that:
+   - Prints a `🍋 Lemonade Flashcard Generator` banner on startup.
+   - Asks the user for a topic (typing "quit" exits).
+   - Prints `✨ Generating N flashcards on: <topic>`.
+   - Calls `generate_flashcards` and lists the generated questions as an indented numbered list (`  1. ...`).
+   - Offers to start the quiz.
+```
+
+> **Tip**: We have followed standard engineering practice through thorough prompt creation and using 2-model system to optimize resources and speed.
+
+For your convenience, we have provided sample output in [`flashcards.py`](assets/flashcards.py). Feel free to download it to your directory. Either way, you should now have a Python file that can be run.
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=600 hidden=True -->
@@ -484,10 +448,11 @@ python3 lemonade_python_smoke.py
 <!-- @os:end -->
 
 
-### Step 7: Run It
+### Step 7: Run The Generated Code
 
-```
-python flashcards.py
+```bash
+# Ensure the virtual environment is running
+python flashcards.py # replace with your file name
 ```
 
 **Here's what you should see:**
@@ -524,7 +489,7 @@ Did you get it right? (y/n): y
 🏆 Score: 4/5
 ```
 
-In about 50 lines of code you have built a fully functional study tool powered by a local LLM. There is no API key to manage, no usage costs, and no data ever leaves your machine.
+In about 150 lines of code you have built a fully functional study tool powered by a local LLM. There is no API key to manage, no usage costs, and no data ever leaves your machine.
 
 > **Key insight:** Notice the `client = OpenAI(base_url=...) ` line is the *only* thing tying this app to Lemonade instead of OpenAI's cloud. The rest of the code is identical to what you would write against any OpenAI-compatible service. If you have ever used the OpenAI Python library, you already know how to build apps with Lemonade.
 
@@ -547,7 +512,7 @@ These same patterns scale to any application such as chatbots, code assistants, 
 
 ---
 
-## Running Models on the NPU
+## Running Models on the NPU (Optional)
 
 If you have a Ryzen AI 300/400/Max 300 series or Z2 Extreme, your device has a built-in **Neural Processing Unit (NPU)**, a dedicated chip designed specifically for AI workloads. Running models on the NPU is more power-efficient than using the GPU, which makes it ideal for background AI tasks, longer sessions, and battery-powered use.
 
@@ -555,14 +520,14 @@ Lemonade supports three NPU execution modes, all transparent behind the same Ope
 
 | Mode | How It Works | Recipe | Example Models |
 |------|-------------|--------|----------------|
-| **Hybrid (NPU + iGPU)** | NPU processes the prompt, iGPU generates tokens | OGA (`oga-hybrid`) | Qwen3-8B-Hybrid, Phi-4-Mini-Instruct-Hybrid |
+| **Hybrid (NPU + iGPU)** | NPU processes the prompt, iGPU generates tokens | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
 | **NPU-only** | Entire inference runs on the NPU | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
-| **FLM** | Uses FastFlowLM engine on the NPU, optimized for AMD XDNA2 | FLM (`flm`) | Gemma3-4b-it-FLM, Qwen3-8b-FLM |
+| **FLM** | Uses FastFlowLM engine on the NPU, optimized for AMD XDNA2 | FLM (`flm`) | qwen3.5-4b-FLM |
 
 ### Requirements
 
 - **AMD Ryzen AI 300/400 series or Z2 series** processor
-- For **FLM** models: The FLM runtime can be installed from within the Lemonade app or Lemonade will automatically install the FLM runtime when running an FLM model. To learn more about FastFlowLM see [here](https://fastflowlm.com/docs/)
+- For **FLM** models: The FLM runtime can be installed from within the Lemonade app or Lemonade will automatically install the FLM runtime when running an FLM model. To learn more about FastFlowLM, see [here](https://fastflowlm.com/docs/).
 
 
 ### Step 8: Run a Hybrid Model
@@ -573,19 +538,20 @@ Hybrid models split work between the NPU and iGPU for a good balance of speed an
 lemonade run Qwen3-4B-Hybrid
 ```
 
-Lemonade detects your NPU automatically and uses the right backend.
+Lemonade detects your NPU automatically and installs the **Ryzen AI LLM** backend.
 
-> **What is happening under the hood?** When you send a message, the NPU processes your entire prompt in parallel (this is called "prefill"). Then the iGPU takes over to generate the response one token at a time (this is called "decode"). This hybrid approach plays to each chip's strengths.
+> **What is happening under the hood?** When you send a message, the NPU processes your entire prompt in parallel (this is called "prefill"). Then, the iGPU takes over to generate the response one token at a time (this is called "decode"). This hybrid approach plays to each chip's strengths.
 
 ### Step 9: Run an FLM Model
 
-FastFlowLM (FLM) models are specifically optimized for AMD's XDNA2 NPU architecture and can be very fast for their size. For example, select `Gemma3-4b` from the `FastFlowLM NPU` list or use the following command:
+FastFlowLM (FLM) models are specifically optimized for AMD's XDNA2 NPU architecture and can be very fast for their size. For example, select `qwen3.5-4b-FLM` from the `FastFlowLM NPU` list or use the following command:
 
 ```
-lemonade run gemma3-4b-FLM
+lemonade run qwen3.5-4b-FLM
 ```
 
 FLM models include some of the most popular architectures (Gemma 3, Qwen 3, Llama 3, and DeepSeek R1) and range from under 1 GB to over 13 GB.
+Lemonade detects your NPU automatically and installs the **FastFlowLM NPU** backend.
 
 <!-- @os:windows -->
 > **Tip:** For best NPU performance, enable turbo mode:

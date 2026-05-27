@@ -9,19 +9,19 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-## Overview
-
 # Getting Started with Ollama
 
-Ollama is a lightweight tool for running large language models locally. It handles model downloading, quantization, and serving behind a simple command-line interface and desktop app, so you can go from zero to chatting with an LLM in minutes. Because everything runs on your own hardware, your prompts and data never leave the machine.
+## Overview
 
-This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model, and having a conversation with it, both from the terminal and the desktop app.
+Ollama is a popular lightweight tool for running large language models locally. It handles model downloading, quantization, and serving behind a simple command-line interface and desktop app, so you can go from zero to chatting with an LLM in minutes.
+
+This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model, and having a conversation with it, through both the terminal and the desktop app.
 
 ## What You'll Learn
 
 - How to install and launch Ollama on your system
 - Pull and run the GPT-OSS 20B model locally
-- Chat with models using the CLI and the Ollama desktop app
+- Chat with models using the CLI
 - Query models programmatically through the REST API
 
 ## Installing Dependencies
@@ -36,7 +36,11 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 2. Run the `.exe` installer and follow the prompts.
 3. Once installed, Ollama runs as a background service and is accessible from the terminal, desktop app, and system tray.
 
-Verify the installation by opening a terminal:
+Verify the installation by opening a terminal and running:
+
+```powershell
+ollama --version
+```
 
 <!-- @test:id=ollama-version-windows timeout=60 hidden=True -->
 ```powershell
@@ -56,6 +60,10 @@ curl -fsSL https://ollama.com/install.sh | sh
 ```
 
 Verify the installation:
+
+```bash
+ollama --version
+```
 
 <!-- @test:id=ollama-version-linux timeout=60 hidden=True -->
 ```bash
@@ -182,17 +190,12 @@ The model streams its response token-by-token directly in the terminal. Type `/b
 
 > **Tip**: The first run takes a few seconds to load the model into memory. Subsequent prompts within the same session respond much faster since the model stays loaded.
 
+<!-- @os:windows -->
 ## Chatting from the Desktop App
 
 Ollama also ships with a desktop application that provides a clean chat interface for interacting with your models.
 
-<!-- @os:windows -->
 Open **Ollama** from the Start menu or click the Ollama icon in the system tray and select **Open Ollama**.
-<!-- @os:end -->
-
-<!-- @os:linux -->
-Launch **Ollama** from your application menu or by running `ollama app` from the terminal.
-<!-- @os:end -->
 
 Once the app is open:
 
@@ -205,10 +208,11 @@ Once the app is open:
 </p>
 
 The desktop app keeps a history of your conversations in the sidebar, making it easy to revisit previous chats.
+<!-- @os:end -->
 
 ## Using the REST API
 
-While Ollama is running, it exposes a REST API on `http://localhost:11434` that you can use to integrate models into your own applications and scripts.
+After installation, Ollama runs as a background service and exposes a REST API on `http://localhost:11434` that you can use to integrate models into your own applications and scripts.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -220,6 +224,8 @@ $startedHere = $false
 $tmpShow = $null
 $tmpGenerate = $null
 $tmpChat = $null
+$venv = "$PWD\ollama-env-ci"
+$pythonSmoke = "$PWD\ollama_python_smoke.py" 
 
 function Wait-OllamaApi {
   param( [int]$MaxAttempts = 120 )
@@ -307,10 +313,36 @@ try {
   if (-not $chatText) { throw "/api/chat did not return message.content" }
   if ($chatText.Trim() -ne "OK") { throw "/api/chat expected exactly OK but got: $chatText" }
   Write-Host "OK: /api/chat works"
+
+  # Python requests smoke
+  if (Test-Path $venv) { Remove-Item -Recurse -Force $venv }
+  python -m venv $venv
+  $py = Join-Path $venv "Scripts\python.exe"
+  & $py -m pip install --upgrade pip
+  & $py -m pip install requests
+@'
+import requests
+response = requests.post(
+    "http://127.0.0.1:11434/api/generate",
+    json={
+        "model": "gpt-oss:20b",
+        "prompt": "Reply with exactly: OK",
+        "stream": False,
+    },
+    timeout=300,
+)
+response.raise_for_status()
+text = response.json()["response"].strip()
+if text != "OK":
+    raise SystemExit(f"Expected exactly OK, got: {text}")
+print("OK: Python requests example works")
+'@ | Set-Content -Path $pythonSmoke -Encoding UTF8
+  & $py $pythonSmoke
 }
 
 finally {
-  Remove-Item $tmpShow, $tmpGenerate, $tmpChat -Force -ErrorAction SilentlyContinue
+  Remove-Item $tmpShow, $tmpGenerate, $tmpChat, $pythonSmoke -Force -ErrorAction SilentlyContinue
+  Remove-Item $venv -Recurse -Force -ErrorAction SilentlyContinue
   if ($startedHere) {
     if ($p -and -not $p.HasExited) {
       Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
@@ -327,8 +359,12 @@ finally {
 set -euo pipefail
 p=""
 started_here="0"
+venv="./ollama-env-ci"
+python_smoke="./ollama_python_smoke.py" 
 
 cleanup() {
+  rm -f "$python_smoke"
+  rm -rf "$venv"
   if [ "$started_here" = "1" ] && [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
     kill "$p" 2>/dev/null || true
     sleep 2
@@ -460,27 +496,76 @@ if text.strip() != "OK":
     sys.exit(1)
 print("OK: /api/chat works")
 PY
+
+rm -rf "$venv"
+python3 -m venv "$venv"
+py="$venv/bin/python"
+"$py" -m pip install --upgrade pip
+"$py" -m pip install requests
+cat > "$python_smoke" <<'PY'
+import requests
+response = requests.post(
+    "http://127.0.0.1:11434/api/generate",
+    json={
+        "model": "gpt-oss:20b",
+        "prompt": "Reply with exactly: OK",
+        "stream": False,
+    },
+    timeout=300,
+)
+response.raise_for_status()
+text = response.json()["response"].strip()
+if text != "OK":
+    raise SystemExit(f"Expected exactly OK, got: {text}")
+print("OK: Python requests example works")
+PY
+"$py" "$python_smoke"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Generate a Response
+### Generate a Response in Terminal
 
+<!-- @os:linux -->
 ```bash
-curl http://localhost:11434/api/generate -d "{\"model\": \"gpt-oss:20b\", \"prompt\": \"Explain GPU acceleration in two sentences.\", \"stream\": false}"
+curl http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "prompt": "Explain GPU acceleration in two sentences.", "stream": false}'
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+curl.exe http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "prompt": "Explain GPU acceleration in two sentences.", "stream": false}'
+```
+<!-- @os:end -->
 
 The response is a JSON object containing the model's output in the `response` field.
 
-### Chat with Context
-
-For multi-turn conversations, use the chat endpoint which maintains message history:
-
-```bash
-curl http://localhost:11434/api/chat -d "{\"model\": \"gpt-oss:20b\", \"messages\": [{\"role\": \"user\", \"content\": \"Hello! What can you help me with?\"}], \"stream\": false}"
-```
 
 ### Python Example
+Now that we can hit the Ollama API programmatically, let's call it from Python.
+
+#### Create a Virtual Environment in Terminal
+
+<!-- @os:linux -->
+```bash
+sudo apt install -y python3-venv
+python3 -m venv ollama-env
+source ollama-env/bin/activate
+pip install requests
+```
+<!-- @setup:id=activate-venv command="source ollama-env/bin/activate" -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+python -m venv ollama-env
+ollama-env\Scripts\activate
+pip install requests
+```
+<!-- @setup:id=activate-venv command="ollama-env\Scripts\activate" -->
+<!-- @os:end -->
+#### Create a Python file
+In the same directory, use VS Code or another editor to create a .py file and copy the following code into it. Then, run the file in your activated environment with `python your_file_name.py`
 
 ```python
 import requests

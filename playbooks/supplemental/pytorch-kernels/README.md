@@ -129,8 +129,8 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 <!-- @os:linux -->
 ```bash
 sudo apt install -y python3-venv
-python3 -m venv ~/rocm-env
-source ~/rocm-env/bin/activate
+python3 -m venv rocm-env
+source rocm-env/bin/activate
 ```
 <!-- @setup:id=activate-venv command="source rocm-env/bin/activate" -->
 <!-- @os:end -->
