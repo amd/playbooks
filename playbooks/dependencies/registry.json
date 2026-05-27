@@ -24,17 +24,6 @@
         "windows": ["halo_box"]
       }
     },
-    "opencv": {
-      "name": "OpenCV",
-      "description": "Computer Vision library and framework",
-      "category": "framework",
-      "platforms": ["windows", "linux"],
-      "file": "opencv.md",
-      "preinstalled": {
-        "linux": ["halo_box"],
-        "windows": ["halo_box"]
-      }
-    },
     "lmstudio": {
       "name": "LM Studio",
       "description": "Desktop app for running local LLMs",

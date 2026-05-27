@@ -44,7 +44,6 @@ Before starting, ensure you have the following:
 - Ubuntu 22.04 or 24.04 (kernel >= 6.11.0-21-generic)
 - [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/1.6.1/linux.html#install-npu-drivers) (Linux installer — required for NPU inference)
 - Vulkan SDK (installed in the [Linux-Specific Setup](#linux-specific-setup) section below)
-<!-- @require:opencv -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
