@@ -9,23 +9,23 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Compile your own GPU kernels for PyTorch + AMD ROCm™
+# Compile your own GPU kernels for PyTorch + AMD ROCm™ Software
 
 ## Overview
 
-Write a GPU kernel from scratch, compile it, and launch it on an AMD GPU, then watch utilization spike. This playbook shows how GPU computation actually works: you write the kernel code, and it executes in parallel across thousands of threads.
+Write a GPU kernel from scratch, compile it, and launch it on an AMD Radeon™ GPU, then watch utilization spike. This playbook shows how GPU computation actually works: you write the kernel code, and it executes in parallel across thousands of threads.
 
 ## What You'll Learn
 
 <!-- @os:windows -->
 - How GPU kernels work: grids, blocks, threads, and the indexing model that maps them to data
-- How AMD's ROCm/HIP stack lets you write CUDA-style code that runs on AMD GPUs without modification
+- How the AMD ROCm/HIP stack lets you write CUDA-style code that runs on AMD GPUs without modification
 - How to compile a kernel at runtime using `torch.cuda._compile_kernel`
 - How to build a native C++ kernel extension with `CUDAExtension` + pybind11, importable from Python
 <!-- @os:end -->
 <!-- @os:linux -->
 - How GPU kernels work: grids, blocks, threads, and the indexing model that maps them to data
-- How AMD's ROCm/HIP stack lets you write CUDA-style code that runs on AMD GPUs without modification
+- How the AMD ROCm/HIP stack lets you write CUDA-style code that runs on AMD GPUs without modification
 - How to compile a kernel at runtime using `torch.cuda._compile_kernel`
 - How to build a native C++ kernel extension with `CUDAExtension` + pybind11, importable from Python
 - How to measure kernel execution time and monitor live GPU utilization with `rocm-smi`

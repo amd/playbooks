@@ -5,7 +5,7 @@ This document describes the expected platform configurations for running this pl
 ## Required Frameworks
 ## Linux
 
-If you're running on a Halo Box, ROCm and PyTorch are preinstalled. You can validate them by running:
+If you're running on AMD Ryzen™ AI Halo Developer Platform, AMD ROCm™ software and PyTorch are preinstalled. You can validate them by running:
 
 ```bash
 hipcc --version
