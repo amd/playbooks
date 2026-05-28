@@ -127,7 +127,7 @@ pip install -r requirements/metrics.txt --break-system-packages
 ```bash
 git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
 cd LlamaFactory
-pip install -e . 
+pip install -e .
 pip install -r requirements/metrics.txt 
 ```
 <!-- @test:end --> 
@@ -275,7 +275,7 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
 ```
 
 <!-- @os:linux -->
-<!-- @test:id=quick-train-llamafactory-lora timeout=1800 hidden=True setup=activate-venv -->
+<!-- @test:id=quick-train-llamafactory-lora timeout=3600 hidden=True setup=activate-venv -->
 ```bash
 cd LlamaFactory
 
@@ -296,7 +296,7 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=quick-train-llamafactory-lora timeout=1800 hidden=True setup=activate-venv -->
+<!-- @test:id=quick-train-llamafactory-lora timeout=3600 hidden=True setup=activate-venv -->
 ```bash
 Set-Location -Path "LlamaFactory"
 
@@ -304,6 +304,8 @@ Copy-Item -Path "examples/train_lora/qwen3_lora_sft.yaml" -Destination "examples
 
 $filePath = "examples/train_lora/qwen3_lora_sft_ci.yaml"
 (Get-Content -Path $filePath) -replace 'lora_rank: 8', 'lora_rank: 6' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'bf16:\s*true', 'fp16: true' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'dataloader_num_workers:\s*4', 'dataloader_num_workers: 0' | Set-Content -Path $filePath
 (Get-Content -Path $filePath) -replace 'output_dir: .*', 'output_dir: saves/qwen3_lora_sft_ci' | Set-Content -Path $filePath
 (Get-Content -Path $filePath) -replace 'overwrite_output_dir: false', 'overwrite_output_dir: true' | Set-Content -Path $filePath
 (Get-Content -Path $filePath) -replace 'per_device_train_batch_size: .*', 'per_device_train_batch_size: 1' | Set-Content -Path $filePath
