@@ -3,7 +3,7 @@
   "title": "LLM Fine-Tuning with LLaMA Factory",
   "description": "Fine-tune large language models (LLMs) using LLaMA Factory and LoRA techniques.",
   "time": 60,
-    "supported_platforms": {
+  "supported_platforms": {
     "halo": [
       "linux",
       "windows"

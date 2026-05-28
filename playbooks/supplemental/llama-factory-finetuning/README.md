@@ -20,39 +20,46 @@ This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your loca
 - View the [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for more information.
 
 ## Setting up the Environment
+#### Create a Virtual Environment
 
 <!-- @os:linux -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @test:id=create-venv timeout=120 hidden=False -->
-Create a Virtual Environment
+<!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
+```bash
+python3 --version
+pip --version
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
+```bash
+python --version
+pip --version
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
 python3 -m venv venv
 source venv/bin/activate
-python3 --version
-pip --version
 ```
 <!-- @test:end --> 
-<!-- @setup:id=activate-venv command="source venv/bin/activate" --> 
-<!-- @device:end -->
+<!-- @setup:id=activate-venv command="source venv/bin/activate" -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @test:id=create-venv timeout=120 hidden=False -->
-Create a Virtual Environment
-
-```bash
-python3 -m venv venv
+<!-- @test:id=create-venv timeout=120 -->
+```powershell
+python -m venv venv
 venv\Scripts\activate
-python3 --version
-pip --version
 ```
 <!-- @test:end --> 
 <!-- @setup:id=activate-venv command="venv\Scripts\activate" --> 
-<!-- @device:end -->
 <!-- @os:end -->
 
 ### Installing Basic Dependencies
@@ -79,11 +86,20 @@ pip install huggingface_hub
 ```
 <!-- @device:end -->
 
-<!-- @os:linux, windows -->
+<!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 hidden=True setup=activate-venv -->
 ```bash
 python3 -m pip install --upgrade pip
 python3 -m pip install huggingface_hub
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=install-deps timeout=300 hidden=True setup=activate-venv -->
+```bash
+python -m pip install --upgrade pip
+python -m pip install huggingface_hub
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -94,7 +110,6 @@ LLaMA Factory depends on PyTorch. You should already have it installed per the a
 
 Download the source code from [LLaMA Factory official GitHub repository](https://github.com/hiyouga/LlamaFactory), and install its dependencies.
 
-<!-- @os:linux, windows -->
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
 ```bash
@@ -106,9 +121,7 @@ pip install -r requirements/metrics.txt --break-system-packages
 ```
 <!-- @test:end --> 
 <!-- @device:end -->
-<!-- @os:end -->
 
-<!-- @os:linux, windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
 ```bash
@@ -119,7 +132,6 @@ pip install -r requirements/metrics.txt
 ```
 <!-- @test:end --> 
 <!-- @device:end -->
-<!-- @os:end -->
 
 Verify if `llamafactory-cli` is executable.
 
@@ -177,7 +189,6 @@ LLaMA Factory supports multiple fine-tuning schemes.
 | LoRA fine-tuning  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
 | QLoRA fine-tuning | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
-<!-- @os:linux, windows -->
 <!-- @test:id=verify-llamafactory-files timeout=60 hidden=True setup=activate-venv -->
 ```python
 import os
@@ -197,8 +208,7 @@ if missing:
 
 print("PASS: Required LLaMA Factory example files exist")
 ```
-<!-- @test:end --> 
-<!-- @os:end -->
+<!-- @test:end -->
 
 These example configuration files have specified model parameters, fine-tuning method parameters, dataset parameters, evaluation parameters, and more. You can configure them according to your own needs. In this playbook, we will use [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
@@ -221,30 +231,34 @@ These example configuration files have specified model parameters, fine-tuning m
 - `lr_scheduler_type` - Learning rate schedule. Options: linear, cosine, polynomial, constant, etc.
 - `warmup_ratio` - Learning rate warmup ratio
 
-We will modify the default value of `lora_rank` to run fine-tuning on AMD Ryzen™ & AMD Radeon™ GPUs.
-
 <!-- @os:linux -->
+We will modify the default value of `lora_rank` to run fine-tuning on AMD Ryzen™ & AMD Radeon™ GPUs.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-```bash
-$filePath = "examples/train_lora/qwen3_lora_sft.yaml"; $content = Get-Content -Path $filePath; $newContent = $content -replace 'lora_rank: 8', 'lora_rank: 6'; Copy-Item -Path $filePath -Destination "$filePath.bak"; Set-Content -Path $filePath -Value $newContent
-```
+We will update the default LoRA fine-tuning configuration for better compatibility with AMD Ryzen™ and AMD Radeon™ GPUs:
+- Set `lora_rank` from `8` to `6` to reduce memory usage during fine-tuning.
+- Use `fp16` instead of `bf16` for broader AMD GPU compatibility and lower memory usage.
+- Set `dataloader_num_workers` to `0` on Windows to avoid `"Can't pickle local object<>"` errors caused by multiprocessing data loading.
 
-We will also use `fp16` instead of `bf16` for precision format in machine learning workflows to ensure compatibility and optimize performance on AMD Ryzen™ & AMD Radeon™ GPUs, as `fp16` is widely supported and helps speed up computations while reducing memory usage.
+```powershell
+$filePath = "examples/train_lora/qwen3_lora_sft.yaml"
 
-```bash
-$filePath = "examples/train_lora/qwen3_lora_sft.yaml"; $content = Get-Content -Path $filePath; $newContent = $content -replace 'bf16: true', 'fp16: true'; Copy-Item -Path $filePath -Destination "$filePath.bak"; Set-Content -Path $filePath -Value $newContent
-```
-On Windows, to avoid `"Can't pickle local object<>"` errors in LlamaFactory setup, training should be conducted in a single main process instead of using multiple processes for parallel data loading, which can cause pickling issues.
+# Create a backup before modifying the YAML file
+Copy-Item -Path $filePath -Destination "$filePath.bak" -Force
 
-Set `dataloader_num_workers` to `0` for smooth training on AMD Ryzen™ & AMD Radeon™ GPUs.
+# Read the file and update the training settings
+$content = Get-Content -Path $filePath -Raw
 
-```bash
-$filePath = "examples/train_lora/qwen3_lora_sft.yaml"; $content = Get-Content -Path $filePath; $newContent = $content -replace 'dataloader_num_workers: 4', 'dataloader_num_workers: 0'; Copy-Item -Path $filePath -Destination "$filePath.bak"; Set-Content -Path $filePath -Value $newContent
+$newContent = $content `
+  -replace 'lora_rank: 8', 'lora_rank: 6' `
+  -replace 'bf16: true', 'fp16: true' `
+  -replace 'dataloader_num_workers: 4', 'dataloader_num_workers: 0'
+
+Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
@@ -309,7 +323,6 @@ After running LLM finetuning, all generated outputs are stored in the "output_di
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
 </p>
 
-<!-- @os:linux, windows -->
 <!-- @test:id=verify-llamafactory-train-output timeout=120 hidden=True setup=activate-venv -->
 ```python
 import os
@@ -340,7 +353,6 @@ print("PASS: LLaMA Factory training output looks correct")
 print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
 ### Test the fine-tuned model 
 
@@ -428,7 +440,6 @@ llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 <!-- @test:end --> 
 <!-- @os:end -->
 
-<!-- @os:linux, windows -->
 <!-- @test:id=verify-llamafactory-export-output timeout=120 hidden=True setup=activate-venv -->
 ```python
 import os
@@ -457,7 +468,6 @@ if not model_files:
 print("PASS: Exported merged model output looks correct")
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
 ## Using LLaMA Factory GUI
 
