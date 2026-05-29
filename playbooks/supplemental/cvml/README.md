@@ -56,7 +56,7 @@ Before starting, ensure you have the following:
 $ErrorActionPreference = "Stop"
 
 $env:AMD_CVML_SDK_ROOT = "C:\RyzenAI-Library"
-$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv"
+$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv\build"
 
 cmake --version
 
@@ -471,7 +471,7 @@ The face detection feature offers two model variants:
 $ErrorActionPreference = "Stop"
 
 $env:AMD_CVML_SDK_ROOT = "C:\RyzenAI-Library"
-$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv"
+$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv\build"
 
 if (-not (Test-Path $env:AMD_CVML_SDK_ROOT)) {throw "AMD_CVML_SDK_ROOT does not exist: $env:AMD_CVML_SDK_ROOT"}
 if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
@@ -487,7 +487,7 @@ Push-Location $samplesDir
 try {
   New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
 
-  cmake -S (Get-Location).Path -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT"
+  cmake -S (Get-Location).Path -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT" -DCMAKE_PREFIX_PATH="$env:OPENCV_INSTALL_ROOT"
   cmake --build $buildDir --config Release --parallel
 
   $faceExe = Join-Path $buildDir "cvml-sample-face-detection\Release\cvml-sample-face-detection.exe"
@@ -500,13 +500,8 @@ try {
 
   $env:PATH = "$(Join-Path $samplesDir "..\windows");$env:PATH"
   $opencvRuntime = Join-Path $env:OPENCV_INSTALL_ROOT "x64\vc16\bin"
-  if (Test-Path $opencvRuntime) {$env:PATH = "$env:PATH;$opencvRuntime"} else {
-    Write-Host "OpenCV runtime path from README was not found: $opencvRuntime"
-    Write-Host "Trying common OpenCV extracted package path instead."
-    $opencvRuntimeFallback = Join-Path $env:OPENCV_INSTALL_ROOT "build\x64\vc16\bin"
-    if (-not (Test-Path $opencvRuntimeFallback)) {throw "OpenCV runtime DLL folder was not found at either $opencvRuntime or $opencvRuntimeFallback"}
-    $env:PATH = "$env:PATH;$opencvRuntimeFallback"
-  }
+  if (-not (Test-Path $opencvRuntime)) {throw "OpenCV runtime DLL folder was not found: $opencvRuntime"}
+  $env:PATH = "$env:PATH;$opencvRuntime"
 
   $inputImage = Join-Path $samplesDir "sample_face.jpg"
   curl.exe -L -o $inputImage "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
