@@ -32,18 +32,22 @@ This playbook teaches you how to set up the Ryzen AI CVML Library, build the inc
 
 Before starting, ensure you have the following:
 
-- CMake installed and available in your system PATH
-
 <!-- @os:windows -->
-- [OpenCV 4.11](https://opencv.org/) downloaded and available on your system
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) (Windows installer)
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) with the "Desktop development with C++" workload (includes MSVC compiler, Windows SDK, and C++ build tools)
+- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — download `opencv-4.11.0-windows.exe`, run it, and extract to a local folder (e.g. `C:\opencv`)
+- [CMake](https://cmake.org/download/) — download the Windows x86-64 MSI installer and during installation select **"Add CMake to the system PATH for all users"**
+- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — version 32.0.203.280 or newer required; both listed versions (32.0.203.280 and 32.0.203.314) are compatible
+- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) with the "Desktop development with C++" workload (includes MSVC compiler, Windows SDK, and C++ build tools)
 <!-- @os:end -->
 
 <!-- @os:linux -->
+- OpenCV 4.11 — must be built from source (apt packages on Ubuntu 22.04 and 24.04 do not provide version 4.11). See [Building OpenCV from Source](#building-opencv-from-source) below.
+- CMake — install via apt:
+  ```bash
+  sudo apt install cmake
+  ```
 - Ubuntu 22.04 or 24.04 (kernel >= 6.11.0-21-generic)
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/1.6.1/linux.html#install-npu-drivers) (Linux installer — required for NPU inference)
-- Vulkan SDK (installed in the [Linux-Specific Setup](#linux-specific-setup) section below)
+- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (Linux installer — required for NPU inference)
+- Vulkan SDK (installed in the [Vulkan SDK](#vulkan-sdk) section below)
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -52,7 +56,7 @@ Before starting, ensure you have the following:
 $ErrorActionPreference = "Stop"
 
 $env:AMD_CVML_SDK_ROOT = "C:\RyzenAI-Library"
-$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv"
+$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv\build"
 
 cmake --version
 
@@ -129,24 +133,25 @@ fi
 
 ## Setting Up the CVML Library
 
-Clone the Ryzen AI Software repository to get the CVML Library:
+Create an AMD account at [account.amd.com](https://account.amd.com) if you don't have one, then sign in to download the Ryzen AI CVML Library from the portal link below:
 
-> **Note:** This repository uses [Git LFS](https://git-lfs.com/) for large binary files (`.so`, `.dll`, etc.). Make sure Git LFS is installed before cloning, otherwise the shared libraries will be placeholder text files and the build will fail.
+```
+https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
+```
 
-<!-- @os:linux -->
-```bash
-sudo apt install git-lfs
+After downloading, extract the package to a local directory (e.g., `C:\RyzenAI-Library` on Windows or `~/RyzenAI-Library` on Linux) and set the `AMD_CVML_SDK_ROOT` environment variable to the extracted location:
+
+<!-- @os:windows -->
+```cmd
+set AMD_CVML_SDK_ROOT=C:\RyzenAI-Library
 ```
 <!-- @os:end -->
 
+<!-- @os:linux -->
 ```bash
-git lfs install
+export AMD_CVML_SDK_ROOT=~/RyzenAI-Library
 ```
-
-```bash
-git clone https://github.com/amd/RyzenAI-SW.git
-cd RyzenAI-SW/Ryzen-AI-CVML-Library
-```
+<!-- @os:end -->
 
 The library package contains the following structure:
 
@@ -162,6 +167,37 @@ The library package contains the following structure:
 
 ### Linux-Specific Setup
 
+#### Building OpenCV from Source
+
+Install OpenCV build dependencies:
+
+```bash
+sudo apt install unzip wget ubuntu-restricted-extras libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev libgtk-3-dev pkg-config ffmpeg
+```
+
+Download, configure, and build OpenCV 4.11.0 with the contrib modules (reference: [OpenCV Linux install tutorial](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
+
+```bash
+wget -O opencv-4.11.0.zip https://github.com/opencv/opencv/archive/4.11.0.zip
+wget -O opencv_contrib-4.11.0.zip https://github.com/opencv/opencv_contrib/archive/4.11.0.zip
+unzip opencv-4.11.0.zip
+unzip opencv_contrib-4.11.0.zip
+mkdir -p build && cd build
+
+cmake -DBUILD_opencv_world=ON \
+  -DBUILD_SHARED_LIBS=ON \
+  -DCMAKE_INSTALL_PREFIX=install \
+  -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-4.11.0/modules ../opencv-4.11.0 \
+  -DWITH_GSTREAMER=ON \
+  -DHIGHGUI_ENABLE_PLUGINS=ON
+
+cmake --build . --target install
+```
+
+Shared libraries are installed under `<build>/install/lib/`. Use the `install` directory as `OPENCV_INSTALL_ROOT` in later steps.
+
+#### Vulkan SDK
+
 Install the Vulkan SDK:
 
 ```bash
@@ -175,8 +211,36 @@ sudo apt install vulkan-sdk
 If you are running Ubuntu 22.04, also update the MESA Vulkan drivers:
 
 ```bash
-sudo add-apt-repository ppa:kisak/kisak-mesa -y
 sudo apt update && sudo apt upgrade
+sudo add-apt-repository ppa:kisak/kisak-mesa -y
+sudo apt update
+sudo apt upgrade
+```
+
+#### Additional Ubuntu 24.04 Dependencies
+
+If you are running Ubuntu 24.04, install additional required packages:
+
+```bash
+sudo apt install libavcodec-dev libavformat-dev libswscale-dev libnsl2 gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly -y
+
+DEP_PKG_LIST="https://launchpad.net/ubuntu/+archive/primary/+files/libmpdec3_2.5.1-2build2_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libpython3.10-minimal_3.10.4-3_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libpython3.10-stdlib_3.10.4-3_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libpython3.10_3.10.4-3_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libprotobuf23_3.12.4-1ubuntu7_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libgoogle-glog0v5_0.5.0+really0.4.0-2_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libtiff5_4.3.0-6_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libilmbase25_2.5.7-2_amd64.deb \
+    https://launchpad.net/ubuntu/+archive/primary/+files/libopenexr25_2.5.7-1_amd64.deb"
+
+for pkg in $DEP_PKG_LIST
+do
+    echo $pkg
+    wget $pkg
+    sudo dpkg -i *.deb
+    rm *.deb
+done
 ```
 
 <!-- @os:end -->
@@ -235,6 +299,8 @@ context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 
 > **Note:** Features that use the ONNX backend for NPU operations may experience longer startup latency on the first run. Subsequent runs will be faster.
 
+> **Note:** If the NPU driver is not installed on the target system, the Ryzen AI CVML library will automatically fall back to the GPU backend for inference operations.
+
 ## Building the Sample Applications
 
 The CVML Library includes ready-to-build sample applications for each feature. Let's build them all at once.
@@ -244,7 +310,10 @@ The CVML Library includes ready-to-build sample applications for each feature. L
    <!-- @os:windows -->
    ```cmd
    rem Set the OpenCV path (Windows)
-   set OPENCV_INSTALL_ROOT=C:\path\to\opencv
+   rem Point to the build subfolder inside your OpenCV installation
+   rem (e.g. if you extracted OpenCV to C:\opencv, use C:\opencv\build)
+   rem CMake's find_package needs this folder to locate OpenCVConfig.cmake
+   set OPENCV_INSTALL_ROOT=C:\opencv\build
    ```
    <!-- @os:end -->
 
@@ -262,7 +331,7 @@ The CVML Library includes ready-to-build sample applications for each feature. L
    rem Build the samples (Windows)
    cd samples
    mkdir build
-   cmake -S %CD% -B %CD%\build -DOPENCV_INSTALL_ROOT=%OPENCV_INSTALL_ROOT%
+   cmake -S %CD% -B %CD%\build -DOPENCV_INSTALL_ROOT=%OPENCV_INSTALL_ROOT% -DCMAKE_PREFIX_PATH=%OPENCV_INSTALL_ROOT%
    cmake --build %CD%\build --config Release
    ```
    <!-- @os:end -->
@@ -272,7 +341,7 @@ The CVML Library includes ready-to-build sample applications for each feature. L
    # Build the samples (Linux)
    cd samples
    mkdir build
-   cmake -S $PWD -B $PWD/build -DOPENCV_INSTALL_ROOT=$OPENCV_INSTALL_ROOT
+   cmake -S $PWD -B $PWD/build -DOPENCV_INSTALL_ROOT="$OPENCV_INSTALL_ROOT" -DCMAKE_PREFIX_PATH="$OPENCV_INSTALL_ROOT"
    cmake --build $PWD/build --config Release
    ```
    <!-- @os:end -->
@@ -301,6 +370,8 @@ The CVML Library includes ready-to-build sample applications for each feature. L
    ```cmd
    rem Add the CVML runtime folder to PATH (Windows)
    set PATH=%CD%\..\windows;%PATH%
+   rem Add OpenCV runtime libraries to PATH
+   set PATH=%OPENCV_INSTALL_ROOT%\x64\vc16\bin;%PATH%
    ```
    <!-- @os:end -->
 
@@ -309,6 +380,8 @@ The CVML Library includes ready-to-build sample applications for each feature. L
    # Add the CVML runtime folder to LD_LIBRARY_PATH (Linux)
    export LD_LIBRARY_PATH=$PWD/../linux:$LD_LIBRARY_PATH
    export LD_LIBRARY_PATH=/opt/xilinx/xrt/lib:$LD_LIBRARY_PATH
+   # Add OpenCV runtime libraries to LD_LIBRARY_PATH
+   export LD_LIBRARY_PATH=$OPENCV_INSTALL_ROOT/lib:$LD_LIBRARY_PATH
    ```
    <!-- @os:end -->
 
@@ -316,7 +389,21 @@ The CVML Library includes ready-to-build sample applications for each feature. L
 
 The face detection sample detects faces in an image, video, or live camera feed. It draws bounding boxes, confidence scores, and five facial landmarks (two eyes, nose, and two mouth edges) on each detected face.
 
-First, download a sample image to use as input (photo by [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), free to use via Pexels):
+First, navigate to the face detection executable folder:
+
+<!-- @os:windows -->
+```cmd
+cd build\cvml-sample-face-detection\Release
+```
+<!-- @os:end -->
+
+<!-- @os:linux -->
+```bash
+cd build/cvml-sample-face-detection
+```
+<!-- @os:end -->
+
+Then download a sample image to use as input (photo by [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), free to use via Pexels):
 
 ```bash
 curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
@@ -384,7 +471,7 @@ The face detection feature offers two model variants:
 $ErrorActionPreference = "Stop"
 
 $env:AMD_CVML_SDK_ROOT = "C:\RyzenAI-Library"
-$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv"
+$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv\build"
 
 if (-not (Test-Path $env:AMD_CVML_SDK_ROOT)) {throw "AMD_CVML_SDK_ROOT does not exist: $env:AMD_CVML_SDK_ROOT"}
 if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
@@ -400,7 +487,7 @@ Push-Location $samplesDir
 try {
   New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
 
-  cmake -S (Get-Location).Path -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT"
+  cmake -S (Get-Location).Path -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT" -DCMAKE_PREFIX_PATH="$env:OPENCV_INSTALL_ROOT"
   cmake --build $buildDir --config Release --parallel
 
   $faceExe = Join-Path $buildDir "cvml-sample-face-detection\Release\cvml-sample-face-detection.exe"
@@ -413,13 +500,8 @@ try {
 
   $env:PATH = "$(Join-Path $samplesDir "..\windows");$env:PATH"
   $opencvRuntime = Join-Path $env:OPENCV_INSTALL_ROOT "x64\vc16\bin"
-  if (Test-Path $opencvRuntime) {$env:PATH = "$env:PATH;$opencvRuntime"} else {
-    Write-Host "OpenCV runtime path from README was not found: $opencvRuntime"
-    Write-Host "Trying common OpenCV extracted package path instead."
-    $opencvRuntimeFallback = Join-Path $env:OPENCV_INSTALL_ROOT "build\x64\vc16\bin"
-    if (-not (Test-Path $opencvRuntimeFallback)) {throw "OpenCV runtime DLL folder was not found at either $opencvRuntime or $opencvRuntimeFallback"}
-    $env:PATH = "$env:PATH;$opencvRuntimeFallback"
-  }
+  if (-not (Test-Path $opencvRuntime)) {throw "OpenCV runtime DLL folder was not found: $opencvRuntime"}
+  $env:PATH = "$env:PATH;$opencvRuntime"
 
   $inputImage = Join-Path $samplesDir "sample_face.jpg"
   curl.exe -L -o $inputImage "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
@@ -533,6 +615,8 @@ Where `AMD_CVML_SDK_ROOT` points to the root of the Ryzen AI CVML Library folder
 ```
 
 ## Next Steps
+
+For each sample below, navigate to its executable folder first, following the same pattern as the [Running Face Detection](#running-face-detection) section above (e.g. `cd build\cvml-sample-depth-estimation\Release` on Windows or `cd build/cvml-sample-depth-estimation` on Linux). On Windows, append `.exe` to each command (e.g. `cvml-sample-depth-estimation.exe`).
 
 - **Try Depth Estimation**: Run `cvml-sample-depth-estimation -i sample_face.jpg` to generate a colorized depth map — closer objects appear in warm colors, distant ones in cool colors
 - **Explore Face Mesh**: Run `cvml-sample-face-mesh -i sample_face.jpg` to see dense facial geometry tracking with detailed mesh points
