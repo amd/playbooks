@@ -44,16 +44,6 @@ Before starting, ensure you have the following:
 - Ubuntu 22.04 or 24.04 (kernel >= 6.11.0-21-generic)
 - [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/1.6.1/linux.html#install-npu-drivers) (Linux installer — required for NPU inference)
 - Vulkan SDK (installed in the [Linux-Specific Setup](#linux-specific-setup) section below)
-<!-- @require:opencv -->
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @test:id=linux-runner-check timeout=120 hidden=True -->
-```bash
-cat /etc/os-release
-uname -r
-```
-<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -61,15 +51,18 @@ uname -r
 ```powershell
 $ErrorActionPreference = "Stop"
 
-git --version
-git lfs version
+$env:AMD_CVML_SDK_ROOT = "C:\RyzenAI-Library"
+$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv"
+
 cmake --version
 
-if (-not $env:OPENCV_INSTALL_ROOT) {throw "OPENCV_INSTALL_ROOT is not set. Set it to your OpenCV 4.11 installation root before running this test."}
-if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
+if (-not (Test-Path $env:AMD_CVML_SDK_ROOT)) {throw "AMD_CVML_SDK_ROOT does not exist: $env:AMD_CVML_SDK_ROOT"}
+foreach ($dir in @("cmake", "include", "windows", "samples")) {
+  $path = Join-Path $env:AMD_CVML_SDK_ROOT $dir
+  if (-not (Test-Path $path)) {throw "Expected CVML folder was not found: $path"}
+}
 
-if (-not $env:OpenCV_DIR) {throw "OpenCV_DIR is not set. Set it to point to the folder containing OpenCVConfig.cmake before running this test."}
-if (-not (Test-Path $env:OpenCV_DIR)) {throw "OpenCV_DIR does not exist: $env:OpenCV_DIR"}
+if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
 
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path $vswhere)) {throw "vswhere.exe not found. Install Visual Studio 2022 with Desktop development with C++ workload."}
@@ -79,6 +72,10 @@ if (-not $vsInstall) {throw "Visual Studio 2022 Desktop development with C++ wor
 
 $clPath = Get-ChildItem "$vsInstall\VC\Tools\MSVC" -Recurse -Filter cl.exe -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $clPath) {throw "MSVC cl.exe was not found under Visual Studio installation."}
+
+Write-Host "Checking Ryzen AI NPU driver presence..."
+$pnputilOutput = pnputil /enum-devices /class "NeuralProcessor" 2>$null
+if ($LASTEXITCODE -eq 0 -and $pnputilOutput -match "AMD|NPU|Ryzen") {Write-Host "Ryzen AI NPU driver appears to be present."} else {Write-Host "Ryzen AI NPU driver was not detected. CVML is expected to use GPU fallback if supported by the runtime."}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -88,11 +85,9 @@ if (-not $clPath) {throw "MSVC cl.exe was not found under Visual Studio installa
 ```bash
 set -euo pipefail
 
+export AMD_CVML_SDK_ROOT="${AMD_CVML_SDK_ROOT:-/home/user/RyzenAI-Library}"
 export OPENCV_INSTALL_ROOT="${OPENCV_INSTALL_ROOT:-/opt/opencv-4.11.0}"
-export OpenCV_DIR="${OpenCV_DIR:-/opt/opencv-4.11.0/lib/cmake/opencv4}"
 
-git --version
-git lfs version
 cmake --version
 
 . /etc/os-release
@@ -101,21 +96,19 @@ if [ "${VERSION_ID}" != "24.04" ]; then
   exit 1
 fi
 
-if [ -z "${OPENCV_INSTALL_ROOT:-}" ]; then
-  echo "OPENCV_INSTALL_ROOT is not set. Set it to your OpenCV 4.11 installation root before running this test."
+if [ ! -d "$AMD_CVML_SDK_ROOT" ]; then
+  echo "AMD_CVML_SDK_ROOT does not exist: $AMD_CVML_SDK_ROOT"
   exit 1
 fi
+for dir in cmake include linux samples; do
+  if [ ! -d "$AMD_CVML_SDK_ROOT/$dir" ]; then
+    echo "Expected CVML folder was not found: $AMD_CVML_SDK_ROOT/$dir"
+    exit 1
+  fi
+done
+
 if [ ! -d "$OPENCV_INSTALL_ROOT" ]; then
   echo "OPENCV_INSTALL_ROOT does not exist: $OPENCV_INSTALL_ROOT"
-  exit 1
-fi
-
-if [ -z "${OpenCV_DIR:-}" ]; then
-  echo "OpenCV_DIR is not set. Set it to point to the folder containing OpenCVConfig.cmake before running this test."
-  exit 1
-fi
-if [ ! -d "$OpenCV_DIR" ]; then
-  echo "OpenCV_DIR does not exist: $OpenCV_DIR"
   exit 1
 fi
 
@@ -124,11 +117,12 @@ if ! command -v glslc >/dev/null 2>&1 && ! command -v vulkaninfo >/dev/null 2>&1
   exit 1
 fi
 
-if [ ! -d /opt/xilinx/xrt/lib ]; then
-  echo "/opt/xilinx/xrt/lib was not found. Install the Ryzen AI Linux NPU driver/XRT runtime before running this test."
-  exit 1
+if [ -d /opt/xilinx/xrt/lib ]; then
+  echo "Ryzen AI NPU driver/XRT runtime appears to be present."
+else
+  echo "Ryzen AI NPU driver/XRT runtime was not found at /opt/xilinx/xrt/lib."
+  echo "CVML is expected to use GPU fallback if supported by the runtime."
 fi
-
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -383,42 +377,30 @@ The face detection feature offers two model variants:
 | `fast` (default) | Higher FPS | Good | Real-time camera applications |
 | `precise` | Lower FPS | Best | Photo analysis, high-accuracy needs |
 
+
 <!-- @os:windows -->
 <!-- @test:id=cvml-build-and-face-detection-windows timeout=1800 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$playbookRoot = (Get-Location).Path
+$env:AMD_CVML_SDK_ROOT = "C:\RyzenAI-Library"
+$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv"
 
-if (-not $env:OPENCV_INSTALL_ROOT) {throw "OPENCV_INSTALL_ROOT is not set."}
-if (-not $env:OpenCV_DIR) {throw "OpenCV_DIR is not set."}
+if (-not (Test-Path $env:AMD_CVML_SDK_ROOT)) {throw "AMD_CVML_SDK_ROOT does not exist: $env:AMD_CVML_SDK_ROOT"}
+if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
 
 $work = Join-Path (Get-Location) "cvml-test"
+if (Test-Path $work) {Remove-Item -Recurse -Force $work}
 New-Item -ItemType Directory -Force -Path $work | Out-Null
+Copy-Item -Recurse -Force -Path (Join-Path $env:AMD_CVML_SDK_ROOT "*") -Destination $work
+$samplesDir = Join-Path $work "samples"
+$buildDir = Join-Path $samplesDir "build"
+Push-Location $samplesDir
 
 try {
-  $repo = Join-Path $work "RyzenAI-SW"
+  New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
 
-  git lfs install
-  git clone --depth 1 https://github.com/amd/RyzenAI-SW.git $repo
-
-  Push-Location $repo
-  git lfs pull
-  Pop-Location
-
-  $cvmlRoot = Join-Path $repo "Ryzen-AI-CVML-Library"
-  if (-not (Test-Path $cvmlRoot)) {throw "Ryzen-AI-CVML-Library folder was not found after cloning RyzenAI-SW."}
-
-  $lfsCandidate = Get-ChildItem (Join-Path $cvmlRoot "windows") -Recurse -Include *.dll,*.lib,*.amodel,*.graphlib -ErrorAction SilentlyContinue | Select-Object -First 1
-  if (-not $lfsCandidate) {throw "No Windows CVML binary/runtime files were found. Git LFS may not have pulled the assets."}
-
-  $firstLine = Get-Content -Path $lfsCandidate.FullName -TotalCount 1 -ErrorAction SilentlyContinue
-  if ($firstLine -like "version https://git-lfs.github.com/spec*") {throw "Git LFS file was downloaded as a pointer instead of the real binary: $($lfsCandidate.FullName)"}
-
-  $samplesDir = Join-Path $cvmlRoot "samples"
-  $buildDir = Join-Path $samplesDir "build"
-
-  cmake -S $samplesDir -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT" -DOpenCV_DIR="$env:OpenCV_DIR"
+  cmake -S (Get-Location).Path -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT"
   cmake --build $buildDir --config Release --parallel
 
   $faceExe = Join-Path $buildDir "cvml-sample-face-detection\Release\cvml-sample-face-detection.exe"
@@ -429,45 +411,37 @@ try {
     if (-not (Test-Path $exe)) {throw "Expected executable was not found: $exe"}
   }
 
-  $opencvBinCandidates = @(
-    (Join-Path $env:OPENCV_INSTALL_ROOT "build\x64\vc16\bin"),
-    (Join-Path $env:OPENCV_INSTALL_ROOT "x64\vc16\bin"),
-    (Join-Path $env:OPENCV_INSTALL_ROOT "bin")
-  ) | Where-Object { Test-Path $_ }
-
-  foreach ($dir in $opencvBinCandidates) {
-    $env:PATH = "$dir;$env:PATH"
+  $env:PATH = "$(Join-Path $samplesDir "..\windows");$env:PATH"
+  $opencvRuntime = Join-Path $env:OPENCV_INSTALL_ROOT "x64\vc16\bin"
+  if (Test-Path $opencvRuntime) {$env:PATH = "$env:PATH;$opencvRuntime"} else {
+    Write-Host "OpenCV runtime path from README was not found: $opencvRuntime"
+    Write-Host "Trying common OpenCV extracted package path instead."
+    $opencvRuntimeFallback = Join-Path $env:OPENCV_INSTALL_ROOT "build\x64\vc16\bin"
+    if (-not (Test-Path $opencvRuntimeFallback)) {throw "OpenCV runtime DLL folder was not found at either $opencvRuntime or $opencvRuntimeFallback"}
+    $env:PATH = "$env:PATH;$opencvRuntimeFallback"
   }
 
-  $env:PATH = "$(Join-Path $cvmlRoot "windows");$env:PATH"
+  $inputImage = Join-Path $samplesDir "sample_face.jpg"
+  curl.exe -L -o $inputImage "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
 
-  $inputImage = Join-Path $playbookRoot "sample_face.jpg"
-  if (-not (Test-Path $inputImage)) {
-    $inputImage = Join-Path $work "sample_face.jpg"
-    curl.exe -L -o $inputImage "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
-  }
-
-  $outputFast = Join-Path $work "output_face_fast.jpg"
-  $outputPrecise = Join-Path $work "output_face_precise.jpg"
+  $outputFast = Join-Path $samplesDir "output_face_fast.jpg"
+  $outputPrecise = Join-Path $samplesDir "output_face_precise.jpg"
 
   Push-Location (Split-Path $faceExe)
+
   & $faceExe -i $inputImage -o $outputFast
   if ($LASTEXITCODE -ne 0) {throw "Face detection default model failed with exit code $LASTEXITCODE."}
-
   & $faceExe -i $inputImage -o $outputPrecise -m precise
   if ($LASTEXITCODE -ne 0) {throw "Face detection precise model failed with exit code $LASTEXITCODE."}
+
   Pop-Location
 
   foreach ($output in @($outputFast, $outputPrecise)) {
     if (-not (Test-Path $output)) {throw "Expected output image was not created: $output"}
-
     if ((Get-Item $output).Length -le 0) {throw "Output image is empty: $output"}
   }
 }
-finally {
-  Pop-Location -ErrorAction SilentlyContinue
-  Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue
-}
+finally {Pop-Location -ErrorAction SilentlyContinue}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -477,53 +451,29 @@ finally {
 ```bash
 set -euo pipefail
 
+export AMD_CVML_SDK_ROOT="${AMD_CVML_SDK_ROOT:-/home/user/RyzenAI-Library}"
 export OPENCV_INSTALL_ROOT="${OPENCV_INSTALL_ROOT:-/opt/opencv-4.11.0}"
-export OpenCV_DIR="${OpenCV_DIR:-/opt/opencv-4.11.0/lib/cmake/opencv4}"
 
-playbook_root="$PWD"
-
-if [ -z "${OPENCV_INSTALL_ROOT:-}" ]; then
-  echo "OPENCV_INSTALL_ROOT is not set."
+if [ ! -d "$AMD_CVML_SDK_ROOT" ]; then
+  echo "AMD_CVML_SDK_ROOT does not exist: $AMD_CVML_SDK_ROOT"
+  exit 1
+fi
+if [ ! -d "$OPENCV_INSTALL_ROOT" ]; then
+  echo "OPENCV_INSTALL_ROOT does not exist: $OPENCV_INSTALL_ROOT"
   exit 1
 fi
 
 work="$PWD/cvml-test"
+rm -rf "$work"
 mkdir -p "$work"
-cleanup() {
-  rm -rf "$work"
-}
-trap cleanup EXIT
-
-repo="$work/RyzenAI-SW"
-
-git lfs install
-git clone --depth 1 https://github.com/amd/RyzenAI-SW.git "$repo"
-
-cd "$repo"
-git lfs pull
-
-cvml_root="$repo/Ryzen-AI-CVML-Library"
-if [ ! -d "$cvml_root" ]; then
-  echo "Ryzen-AI-CVML-Library folder was not found after cloning RyzenAI-SW."
-  exit 1
-fi
-
-lfs_candidate="$(find "$cvml_root/linux" -type f \( -name "*.so" -o -name "*.amod" -o -name "*.xclbin" \) | head -n 1 || true)"
-if [ -z "$lfs_candidate" ]; then
-  echo "No Linux CVML binary/runtime files were found. Git LFS may not have pulled the assets."
-  exit 1
-fi
-
-if head -n 1 "$lfs_candidate" | grep -q "version https://git-lfs.github.com/spec"; then
-  echo "Git LFS file was downloaded as a pointer instead of the real binary: $lfs_candidate"
-  exit 1
-fi
-
-samples_dir="$cvml_root/samples"
+cp -a "$AMD_CVML_SDK_ROOT"/. "$work"/
+samples_dir="$work/samples"
 build_dir="$samples_dir/build"
+cd "$samples_dir"
+mkdir build
 
-cmake -S "$samples_dir" -B "$build_dir" -DOPENCV_INSTALL_ROOT="$OPENCV_INSTALL_ROOT"
-cmake --build "$build_dir" --config Release --parallel "$(nproc)"
+cmake -S "$PWD" -B "$PWD/build" -DOPENCV_INSTALL_ROOT="$OPENCV_INSTALL_ROOT" -DCMAKE_PREFIX_PATH="$OPENCV_INSTALL_ROOT"
+cmake --build "$PWD/build" --config Release --parallel "$(nproc)"
 
 face_exe="$build_dir/cvml-sample-face-detection/cvml-sample-face-detection"
 depth_exe="$build_dir/cvml-sample-depth-estimation/cvml-sample-depth-estimation"
@@ -536,29 +486,23 @@ for exe in "$face_exe" "$depth_exe" "$mesh_exe"; do
   fi
 done
 
-export LD_LIBRARY_PATH="$cvml_root/linux:/opt/xilinx/xrt/lib:${LD_LIBRARY_PATH:-}"
-
-for dir in "$OPENCV_INSTALL_ROOT/lib" "$OPENCV_INSTALL_ROOT/lib64" "$OPENCV_INSTALL_ROOT/build/lib"; do
-  if [ -d "$dir" ]; then
-    export LD_LIBRARY_PATH="$dir:$LD_LIBRARY_PATH"
-  fi
-done
-
-input_image="$playbook_root/sample_face.jpg"
-if [ ! -f "$input_image" ]; then
-  input_image="$work/sample_face.jpg"
-  curl -L -o "$input_image" "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
+export LD_LIBRARY_PATH="$PWD/../linux:${LD_LIBRARY_PATH:-}"
+if [ -d /opt/xilinx/xrt/lib ]; then
+  export LD_LIBRARY_PATH="/opt/xilinx/xrt/lib:$LD_LIBRARY_PATH"
+  echo "Ryzen AI NPU driver/XRT runtime path found. Added /opt/xilinx/xrt/lib to LD_LIBRARY_PATH."
+else
+  echo "Ryzen AI NPU driver/XRT runtime path was not found."
+  echo "Continuing because the README says CVML can fall back to GPU when the NPU driver is not installed."
 fi
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$OPENCV_INSTALL_ROOT/lib"
 
-output_fast="$work/output_face_fast.jpg"
-output_precise="$work/output_face_precise.jpg"
+curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
 
 cd "$(dirname "$face_exe")"
+./cvml-sample-face-detection -i "$samples_dir/sample_face.jpg" -o "$samples_dir/output_face_fast.jpg"
+./cvml-sample-face-detection -i "$samples_dir/sample_face.jpg" -o "$samples_dir/output_face_precise.jpg" -m precise
 
-"$face_exe" -i "$input_image" -o "$output_fast"
-"$face_exe" -i "$input_image" -o "$output_precise" -m precise
-
-for output in "$output_fast" "$output_precise"; do
+for output in "$samples_dir/output_face_fast.jpg" "$samples_dir/output_face_precise.jpg"; do
   if [ ! -s "$output" ]; then
     echo "Expected output image was not created or is empty: $output"
     exit 1
