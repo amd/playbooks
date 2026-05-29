@@ -33,7 +33,7 @@ pip --version
 
 <!-- @os:windows -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
-```bash
+```powershell
 python --version
 pip --version
 ```
@@ -97,7 +97,7 @@ python3 -m pip install huggingface_hub
 
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 hidden=True setup=activate-venv -->
-```bash
+```powershell
 python -m pip install --upgrade pip
 python -m pip install huggingface_hub
 ```
@@ -148,7 +148,7 @@ command -v llamafactory-cli
 
 <!-- @os:windows -->
 <!-- @test:id=verify-llamafactory-cli timeout=60 hidden=False setup=activate-venv -->
-```bash
+```powershell
 cd LlamaFactory
 if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
     llamafactory-cli version
@@ -297,7 +297,7 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 
 <!-- @os:windows -->
 <!-- @test:id=quick-train-llamafactory-lora timeout=3600 hidden=True setup=activate-venv -->
-```bash
+```powershell
 Set-Location -Path "LlamaFactory"
 
 Copy-Item -Path "examples/train_lora/qwen3_lora_sft.yaml" -Destination "examples/train_lora/qwen3_lora_sft_ci.yaml"
@@ -417,7 +417,7 @@ llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 
 <!-- @os:windows -->
 <!-- @test:id=export-llamafactory-model timeout=1800 hidden=True setup=activate-venv -->
-```bash
+```powershell
 Set-Location -Path "LlamaFactory"
 pip install pyyaml
 
