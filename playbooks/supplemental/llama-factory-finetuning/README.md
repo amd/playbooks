@@ -421,23 +421,36 @@ llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 Set-Location -Path "LlamaFactory"
 pip install pyyaml
 
-python -Command "
+$script = @'
 import yaml
 from pathlib import Path
 
-src = Path('examples/merge_lora/qwen3_lora_sft.yaml')
-dst = Path('examples/merge_lora/qwen3_lora_sft_ci.yaml')
+src = Path("examples/merge_lora/qwen3_lora_sft.yaml")
+dst = Path("examples/merge_lora/qwen3_lora_sft_ci.yaml")
 
 cfg = yaml.safe_load(src.read_text())
 
-cfg['adapter_name_or_path'] = 'saves/qwen3_lora_sft_ci'
-cfg['export_dir'] = 'saves/qwen3_lora_sft_ci_merged'
+cfg["adapter_name_or_path"] = "saves/qwen3_lora_sft_ci"
+cfg["export_dir"] = "saves/qwen3_lora_sft_ci_merged"
 
 dst.write_text(yaml.safe_dump(cfg, sort_keys=False))
-print(f'Wrote {dst}')
-"
+print(f"Wrote {dst}")
+'@
+
+$tempPy = Join-Path $env:TEMP "write_llamafactory_export_config.py"
+Set-Content -Path $tempPy -Value $script -Encoding UTF8
+
+python $tempPy
+if ($LASTEXITCODE -ne 0) {
+    Remove-Item $tempPy -Force -ErrorAction SilentlyContinue
+    throw "FAIL: Could not create qwen3_lora_sft_ci.yaml"
+}
+Remove-Item $tempPy -Force -ErrorAction SilentlyContinue
+
+if (-not (Test-Path "examples/merge_lora/qwen3_lora_sft_ci.yaml")) {throw "FAIL: examples/merge_lora/qwen3_lora_sft_ci.yaml was not created"}
 
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
+if ($LASTEXITCODE -ne 0) {throw "FAIL: llamafactory-cli export failed"}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
