@@ -13,9 +13,11 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-**AMD Sync** turns your laptop into a remote cockpit for the AMD Ryzen™ AI Halo. Skip the manual SSH, key, and IDE setup — install AMD Sync, fill out one form, and get one-click access to a remote terminal, VS Code, JupyterLab, and a live GPU/CPU/memory dashboard on the Ryzen AI Halo.
+**AMD Sync** turns your laptop into a remote cockpit for the AMD Ryzen™ AI Halo. Skip the manual SSH, key, and IDE setup — install AMD Sync and get one-click access to a remote terminal, VS Code, JupyterLab, and a live GPU/CPU/memory dashboard on the Ryzen AI Halo.
 
 Your local machine stays familiar; every command, notebook, and model runs on the Ryzen AI Halo.
+
+> **Tip**: This page will contain any new updates to AMDSync. 
 
 ## What You'll Learn
 
@@ -35,9 +37,8 @@ AMD Sync has two sides: a **client** (your laptop, running the AMD Sync app) and
 
 ## Step 1 — Enable SSH on the Ryzen AI Halo
 
-The Ryzen AI Halo ships with its SSH server **off by default**. Turn it on before connecting.
 
-> **Note:** On Linux, the Ryzen AI Halo ships with the SSH server **on by default**.
+> **Note:** On Windows, the Ryzen AI Halo ships with the SSH server *off by default*. On Linux, it comes with SSH server *on by default*.
 
 1. On the Ryzen AI Halo, open the **AMD Ryzen™ AI Developer Center**.
 2. Go to the **Remote** tab.
@@ -48,7 +49,9 @@ The Ryzen AI Halo ships with its SSH server **off by default**. Turn it on befor
   <img src="assets/halobox_remote_tab.png" alt="AMD Ryzen AI Developer Center Remote tab showing SSH Server toggle and Server Information"/>
 </div>
 
-> **Tip:** AMD Sync asks for the **OS login password** of that user, not a token from the Developer Center.
+> **Note:** This is the AMD Developer Center for Windows. The Linux one may have different UI, but similar remote functionality.
+
+> **Tip:** AMD Sync asks for the **OS login password** of that user, not a password from the Developer Center.
 
 ---
 
@@ -119,7 +122,7 @@ The home view gives you five one-click components — all available regardless o
 
 ### Try VS Code
 
-For your first launch, try **VS Code** — it's the fastest payoff.
+For your first launch, try **VS Code**.
 
 1. Leave **Directory** on the default `~/Documents/AMD_Sync`.
 2. Click **VS Code**.
@@ -160,7 +163,7 @@ If a custom path doesn't work, AMD Sync tells you why: invalid syntax, folder do
 ## Live Metrics and JupyterLab
 
 - **Live Metrics** — A live dashboard of GPU, memory, and CPU usage. The fastest way to confirm a remote training run is actually hitting the hardware.
-- **JupyterLab** — A full notebook project SSH-connected to the Ryzen AI Halo, with its own integrated terminal so you can mix notebook cells and shell commands without leaving the UI.
+- **JupyterLab** — A full notebook project SSH-connected to the Ryzen AI Halo, with its own integrated terminal for mixing notebook cells and shell commands without leaving the UI.
 
 ---
 
@@ -178,7 +181,6 @@ The **Settings** menu has three tabs:
   <img src="assets/customize_tab.png" alt="AMD Sync Settings menu Customize tab"/>
 </div>
 
-A few details worth calling out on the **Customize** tab:
 
 - **Terminal type (Windows)** — Choose between **PowerShell** (default) and **Windows Command Prompt**.
 - **Terminal type (Linux)** — Only the default system terminal is available.
@@ -197,9 +199,3 @@ A few details worth calling out on the **Customize** tab:
 - **`.deb` won't open from the file manager** — Use `sudo apt install ./AMDSyncInstaller.deb` from a terminal.
 
 ---
-
-## Next Steps
-
-- **Run an LLM remotely** — Open the [LM Studio playbook](../../core/lmstudio-rocm-llms) inside a VS Code session launched from AMD Sync to serve models from the Ryzen AI Halo.
-- **Pair with a coding assistant** — Combine AMD Sync's remote VS Code session with the [VS Code + Qwen3 Coder playbook](../../core/vscode-qwen3-coder) for an agentic remote development setup.
-- **Add more devices** — Connect additional Ryzen AI Halos under **Settings → Devices** and switch between them in one click.
