@@ -13,12 +13,14 @@
   },
   "tested_platforms": {
     "halo": [
-      "windows"
+      "windows",
+      "linux"
     ]
   },
   "required_platforms": {
     "halo": [
-      "windows"
+      "windows",
+      "linux"
     ]
   },
   "difficulty": "intermediate",
