@@ -20,7 +20,6 @@ This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your loca
 - View the [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for more information.
 
 ## Setting up the Environment
-#### Create a Virtual Environment
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -40,6 +39,9 @@ pip --version
 <!-- @test:end -->
 <!-- @os:end -->
 
+#### Create a Virtual Environment
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @os:linux -->
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -61,6 +63,7 @@ venv\Scripts\activate
 <!-- @test:end --> 
 <!-- @setup:id=activate-venv command="venv\Scripts\activate" --> 
 <!-- @os:end -->
+<!-- @device:end -->
 
 ### Installing Basic Dependencies
 
