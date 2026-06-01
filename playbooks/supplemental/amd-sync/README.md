@@ -13,33 +13,33 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-**AMD Sync** turns your laptop into a remote desktop for the AMD Ryzen systems. Skip the manual SSH, key, and IDE setup — install AMD Sync, fill out one form, and get one-click access to a remote terminal, VS Code, JupyterLab, and a live GPU/CPU/memory dashboard on the box.
+**AMD Sync** turns your laptop into a remote cockpit for the AMD Ryzen™ AI Halo. Skip the manual SSH, key, and IDE setup — install AMD Sync, fill out one form, and get one-click access to a remote terminal, VS Code, JupyterLab, and a live GPU/CPU/memory dashboard on the Ryzen AI Halo.
 
-Your local machine stays familiar; every command, notebook, and model runs seamlessly. 
+Your local machine stays familiar; every command, notebook, and model runs on the Ryzen AI Halo.
 
 ## What You'll Learn
 
-- Enable SSH on the Ryzen System and connect to it from AMD Sync
-- Launch VS Code, Terminal, JupyterLab, and Live Metrics against the Ryzen System with one click
+- Enable SSH on the Ryzen AI Halo and connect to it from AMD Sync
+- Launch VS Code, Terminal, JupyterLab, and Live Metrics against the Ryzen AI Halo with one click
 - Organize remote work using AMD Sync's managed project folders
 
 ---
 
 ## Core Concepts
 
-AMD Sync has two sides: a **client** (your laptop, running the AMD Sync app) and a **server** (the Ryzen System, running an SSH server that AMD Sync tunnels into). Everything you launch from AMD Sync — VS Code, a terminal, a notebook — opens locally but executes on the Ryzen System.
+AMD Sync has two sides: a **client** (your laptop, running the AMD Sync app) and a **server** (the Ryzen AI Halo, running an SSH server that AMD Sync tunnels into). Everything you launch from AMD Sync — VS Code, a terminal, a notebook — opens locally but executes on the Ryzen AI Halo.
 
 > **Supported clients:** Windows 11 and Debian/Ubuntu Linux. macOS is not supported.
 
 ---
 
-## Step 1 — Enable SSH on the Ryzen System
+## Step 1 — Enable SSH on the Ryzen AI Halo
 
 The Ryzen AI Halo ships with its SSH server **off by default**. Turn it on before connecting.
 
-> **Note** On Linux, Ryzen AI Halo ships with SSH server **on by default**.
+> **Note:** On Linux, the Ryzen AI Halo ships with the SSH server **on by default**.
 
-1. On the Ryzen System, open the **AMD Ryzen™ AI Developer Center**.
+1. On the Ryzen AI Halo, open the **AMD Ryzen™ AI Developer Center**.
 2. Go to the **Remote** tab.
 3. Toggle **SSH Server** on.
 4. Note the **IP Address**, **Port**, and **Username** shown under **Server Information** — you'll paste them into AMD Sync.
@@ -63,7 +63,7 @@ AMD Sync runs on Windows 11 and Debian/Ubuntu Linux. Download the installer for 
 1. Double-click `AMDSyncInstaller.exe`.
 2. Click **Accept & Install**.
 
-> If Windows Firewall prompts you, allow AMD Sync network access so it can reach the Ryzen System over SSH.
+> If Windows Firewall prompts you, allow AMD Sync network access so it can reach the Ryzen AI Halo over SSH.
 
 ### Linux
 
@@ -79,9 +79,9 @@ Pick the format that matches your distribution:
 
 ---
 
-## Step 3 — Connect to Your Ryzen System
+## Step 3 — Connect to Your Ryzen AI Halo
 
-On first launch, AMD Sync shows the **Add a Remote Device** form. Fill it in using the values from the Developer Center's Remote Access page.
+On first launch, AMD Sync shows the **Add a Remote Device** form. Fill it in using the values from the Developer Center's **Remote** tab.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/connect_device.png" alt="AMD Sync Add a Remote Device form"/>
@@ -89,21 +89,21 @@ On first launch, AMD Sync shows the **Add a Remote Device** form. Fill it in usi
 
 | Field | Notes |
 |-------|-------|
-| **Device Name** *(optional)* | A friendly label like `Ryzen System`. Defaults to `Device 1`, `Device 2`, … |
-| **Hostname or IP** | From the Remote Access page |
-| **SSH Port** | From the Remote Access page (numbers only) |
-| **Username** | Your OS account name on the Ryzen System |
+| **Device Name** *(optional)* | A friendly label like `Ryzen AI Halo`. Defaults to `Device 1`, `Device 2`, … |
+| **Hostname or IP** | From the Remote tab |
+| **SSH Port** | From the Remote tab (numbers only) |
+| **Username** | Your OS account name on the Ryzen AI Halo |
 | **Password** | Your OS login password — masked as you type |
 
 Click **Add Device**. After a brief loading screen, you'll see **"Connection Successful"** and land on the home view, which lives in your system tray. Click off the window to dismiss it; AMD Sync stays running and is one click away.
 
-> **If the connection fails,** AMD Sync returns to the form with your values preserved. The usual causes are SSH being disabled on the Ryzen System, the wrong password, or the two devices being on different networks.
+> **If the connection fails,** AMD Sync returns to the form with your values preserved. The usual causes are SSH being disabled on the Ryzen AI Halo, the wrong password, or the two devices being on different networks.
 
 ---
 
 ## Step 4 — Launch Your First Remote Tool
 
-The home view gives you five one-click components — all available regardless of which OS the client and Ryzen System are running.
+The home view gives you five one-click components — all available regardless of which OS the client and Ryzen AI Halo are running.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/homepage_after_connect.png" alt="AMD Sync home view with Directory dropdown and launchers"/>
@@ -111,11 +111,11 @@ The home view gives you five one-click components — all available regardless o
 
 | Component | What it does |
 |-----------|--------------|
-| **Directory** | Picks the folder on the Ryzen System that VS Code, Terminal, and JupyterLab will open in. Defaults to a managed `Documents/AMD_Sync` workspace. |
+| **Directory** | Picks the folder on the Ryzen AI Halo that VS Code, Terminal, and JupyterLab will open in. Defaults to a managed `Documents/AMD_Sync` workspace. |
 | **VS Code** | Opens VS Code locally with an SSH tunnel into the selected folder. |
-| **Terminal** | Opens a local terminal SSH-connected to the Ryzen System, in the selected folder. |
-| **JupyterLab** | Launches a notebook project SSH-connected to the Ryzen System, scoped to the selected folder. |
-| **Live Metrics** | Real-time view of GPU, memory, and CPU utilization on the Ryzen System. |
+| **Terminal** | Opens a local terminal SSH-connected to the Ryzen AI Halo, in the selected folder. |
+| **JupyterLab** | Launches a notebook project SSH-connected to the Ryzen AI Halo, scoped to the selected folder. |
+| **Live Metrics** | Real-time view of GPU, memory, and CPU utilization on the Ryzen AI Halo. |
 
 ### Try VS Code
 
@@ -123,22 +123,22 @@ For your first launch, try **VS Code** — it's the fastest payoff.
 
 1. Leave **Directory** on the default `~/Documents/AMD_Sync`.
 2. Click **VS Code**.
-3. AMD Sync creates `Documents/AMD_Sync/Project_1` on the Ryzen System and opens VS Code locally, tunneled into it.
+3. AMD Sync creates `Documents/AMD_Sync/Project_1` on the Ryzen AI Halo and opens VS Code locally, tunneled into it.
 
-You're now editing files that live on the Ryzen System with your local VS Code setup. Create `helloworld.py`, add `print("hello world")`, open the integrated terminal (`` Ctrl + ` ``), and run it:
+You're now editing files that live on the Ryzen AI Halo with your local VS Code setup. Create `helloworld.py`, add `print("hello world")`, open the integrated terminal (`` Ctrl + ` ``), and run it:
 
 <div align="center" style="max-width: 620px; margin: 1.5rem auto;">
-  <img src="assets/vscode.png" alt="VS Code SSH-tunneled into Project_1 on the Ryzen System, running helloworld.py"/>
+  <img src="assets/vscode.png" alt="VS Code SSH-tunneled into Project_1 on the Ryzen AI Halo, running helloworld.py"/>
 </div>
 
-The status bar reads **SSH: Linux** — proof your code is running on the Ryzen System, not your laptop.
+The status bar reads **SSH: Linux** — proof your code is running on the Ryzen AI Halo, not your laptop.
 
 ### Try the Terminal
 
 Click **Terminal** to drop into the same folder over SSH without leaving the keyboard.
 
 <div align="center" style="max-width: 620px; margin: 1.5rem auto;">
-  <img src="assets/terminal.png" alt="Local terminal SSH-connected to the Ryzen System in ~/Documents/AMD_Sync"/>
+  <img src="assets/terminal.png" alt="Local terminal SSH-connected to the Ryzen AI Halo in ~/Documents/AMD_Sync"/>
 </div>
 
 On Windows, the default terminal is **PowerShell** — switch to **Windows Command Prompt** from the Settings menu if you prefer. On Linux, AMD Sync uses your default system terminal.
@@ -147,11 +147,11 @@ On Windows, the default terminal is **PowerShell** — switch to **Windows Comma
 
 ## How the Directory Works
 
-The **Directory** dropdown is the single most important control in AMD Sync — it decides where every tool you launch lands on the Ryzen System.
+The **Directory** dropdown is the single most important control in AMD Sync — it decides where every tool you launch lands on the Ryzen AI Halo.
 
 - **`~/Documents/AMD_Sync` (default)** — Launching VS Code or JupyterLab from here creates a fresh project folder automatically (`Project_1`, `Project_2`, … for VS Code; `Notebook_Project_1`, `Notebook_Project_2`, … for JupyterLab).
-- **Existing project folders** — Any immediate child of `AMD_Sync` (including folders you create manually on the Ryzen System) appears in the dropdown. The last folder you used becomes the default next time.
-- **Custom paths** — Type any absolute path to open a folder elsewhere on the Ryzen System. AMD Sync only *opens* it, never creates outside `AMD_Sync`, and won't remember it between sessions.
+- **Existing project folders** — Any immediate child of `AMD_Sync` (including folders you create manually on the Ryzen AI Halo) appears in the dropdown. The last folder you used becomes the default next time.
+- **Custom paths** — Type any absolute path to open a folder elsewhere on the Ryzen AI Halo. AMD Sync only *opens* it — it won't create folders outside `AMD_Sync`, and custom paths aren't saved between sessions.
 
 If a custom path doesn't work, AMD Sync tells you why: invalid syntax, folder doesn't exist, or the path points to a file.
 
@@ -160,7 +160,7 @@ If a custom path doesn't work, AMD Sync tells you why: invalid syntax, folder do
 ## Live Metrics and JupyterLab
 
 - **Live Metrics** — A live dashboard of GPU, memory, and CPU usage. The fastest way to confirm a remote training run is actually hitting the hardware.
-- **JupyterLab** — A full notebook project SSH-connected to the Ryzen System, with its own integrated terminal so you can mix notebook cells and shell commands without leaving the UI.
+- **JupyterLab** — A full notebook project SSH-connected to the Ryzen AI Halo, with its own integrated terminal so you can mix notebook cells and shell commands without leaving the UI.
 
 ---
 
@@ -170,7 +170,7 @@ The **Settings** menu has three tabs:
 
 | Tab | What it covers |
 |-----|----------------|
-| **Devices** | Lists every Ryzen System you've connected to successfully. Reconnect, edit credentials, or add a new device. |
+| **Devices** | Lists every Ryzen AI Halo you've connected to successfully. Reconnect, edit credentials, or add a new device. |
 | **Information** | Links to documentation and forum support. |
 | **Customize** | Reposition the app on your desktop, switch terminal type (Windows only), and check for AMD Sync updates. |
 
@@ -190,8 +190,8 @@ A few details worth calling out on the **Customize** tab:
 
 ## Troubleshooting
 
-- **Connection fails immediately** — Confirm SSH is enabled on the Ryzen System's Remote Access page.
-- **Wrong password error** — Use your **OS login password**, not anything from the Developer Center UI.
+- **Connection fails immediately** — Confirm the SSH server is enabled on the Ryzen AI Halo's **Remote** tab in the Developer Center.
+- **Wrong password error** — Use your **OS login password** on the Ryzen AI Halo, not passwords taken from the Developer Center.
 - **VS Code button does nothing** — Install VS Code on your client machine from [code.visualstudio.com](https://code.visualstudio.com).
 - **AMD Sync tray icon missing (Linux/GNOME)** — Install and enable the AppIndicator extension.
 - **`.deb` won't open from the file manager** — Use `sudo apt install ./AMDSyncInstaller.deb` from a terminal.
@@ -200,6 +200,6 @@ A few details worth calling out on the **Customize** tab:
 
 ## Next Steps
 
-- **Run an LLM remotely** — Open the [LM Studio playbook](../../core/lmstudio-rocm-llms) inside a VS Code session launched from AMD Sync.
-- **Pair with a coding assistant** — Combine AMD Sync's remote VS Code with the [VS Code + Qwen3 Coder playbook](../../core/vscode-qwen3-coder) for an agentic remote development setup.
-- **Add more devices** — Manage extra Ryzen Systemes under **Settings → Devices** and swap between them in one click.
+- **Run an LLM remotely** — Open the [LM Studio playbook](../../core/lmstudio-rocm-llms) inside a VS Code session launched from AMD Sync to serve models from the Ryzen AI Halo.
+- **Pair with a coding assistant** — Combine AMD Sync's remote VS Code session with the [VS Code + Qwen3 Coder playbook](../../core/vscode-qwen3-coder) for an agentic remote development setup.
+- **Add more devices** — Connect additional Ryzen AI Halos under **Settings → Devices** and switch between them in one click.

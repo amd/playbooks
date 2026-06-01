@@ -1,7 +1,7 @@
 {
   "id": "amd-sync",
   "title": "Remote Development with AMD Sync",
-  "description": "Install AMD Sync on your laptop and get one-click remote VS Code, Terminal, JupyterLab, and Live Metrics on your Halo Box.",
+  "description": "Install AMD Sync on your laptop and get one-click remote VS Code, Terminal, JupyterLab, and Live Metrics on your AMD Ryzen AI Halo.",
   "time": 10,
   "supported_platforms": {
     "halo_box": [
@@ -32,6 +32,6 @@
     "remote-access",
     "vscode",
     "jupyterlab",
-    "halo-box"
+    "halo_box"
   ]
 }
