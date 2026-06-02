@@ -23,7 +23,7 @@ On the Ryzen AI Halo, the default is 64GB dedicated. To modify this, open **AMD 
 Open **AMD Software: Adrenalin Edition™** and navigate to **Performance → Tuning → AMD Variable Graphics Memory**. Reboot for the changes to take effect.
 
 <p align="center">
-  <img src="/api/dependencies/assets/memory-config/adrenalin_vram.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
+  <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
 </p>
 
 <!-- @device:end -->
