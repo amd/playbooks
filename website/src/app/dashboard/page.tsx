@@ -267,7 +267,7 @@ interface PlaybookMatrixRow {
   title: string;
   category: string;
   developed: boolean;
-  unsupportedCombos: string[];
+  unsupportedReasons: Record<string, string>;
   cells: Record<string, PlaybookMatrixCell>;
 }
 
@@ -821,7 +821,8 @@ function PlaybookStatusDashboard() {
                     {matrix.columns.map((column) => {
                       const cell = row.cells[column.id];
                       const testsAdded = Object.values(row.cells).some((c) => c.totalTests > 0);
-                      const isUnsupported = (row.unsupportedCombos ?? []).includes(column.id);
+                      const isUnsupported = Object.prototype.hasOwnProperty.call(row.unsupportedReasons ?? {}, column.id);
+                      const unsupportedReason = row.unsupportedReasons?.[column.id] ?? "";
                       const style = getCellStyle(cell, row.developed, testsAdded);
                       const isClickable = !isUnsupported && !!(cell && cell.totalTests > 0);
                       const runId = selectedRunId ?? matrix?.run?.id ?? null;
@@ -829,7 +830,10 @@ function PlaybookStatusDashboard() {
                       if (isUnsupported) {
                         return (
                           <td key={column.id} className="px-2 py-2 align-middle text-center">
-                            <div className="inline-flex items-center justify-center gap-1.5 rounded border border-blue-800/25 bg-blue-900/10 px-2 py-1 w-full">
+                            <div
+                              title={unsupportedReason || "Unsupported"}
+                              className={`inline-flex items-center justify-center gap-1.5 rounded border border-blue-800/25 bg-blue-900/10 px-2 py-1 w-full${unsupportedReason ? " cursor-help" : ""}`}
+                            >
                               <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0 bg-blue-400" />
                               <span className="text-[11px] font-medium whitespace-nowrap text-blue-300">Unsupported</span>
                             </div>
@@ -885,7 +889,7 @@ interface ReleasedMatrixRow {
   title: string;
   category: string;
   releasedCombos: string[];
-  unsupportedCombos: string[];
+  unsupportedReasons: Record<string, string>;
 }
 
 interface ReleasedMatrixResponse {
@@ -1029,7 +1033,7 @@ function ReleasedDashboard() {
                 }
                 const idx = categoryRowIdx++;
                 const releasedSet = new Set(row.releasedCombos);
-                const unsupportedSet = new Set(row.unsupportedCombos);
+                const unsupportedReasons = row.unsupportedReasons ?? {};
                 elements.push(
                   <tr key={row.playbookId} className={idx % 2 === 0 ? "bg-[#0d0d0d]" : "bg-[#141414]"}>
                     <td className="px-4 py-3 border-r border-[#333] align-middle">
@@ -1042,7 +1046,8 @@ function ReleasedDashboard() {
                     </td>
                     {releasedColumns.map((column) => {
                       const isReleased = releasedSet.has(column.id);
-                      const isUnsupported = unsupportedSet.has(column.id);
+                      const isUnsupported = Object.prototype.hasOwnProperty.call(unsupportedReasons, column.id);
+                      const unsupportedReason = unsupportedReasons[column.id] ?? "";
                       return (
                         <td key={column.id} className="px-2 py-2 align-middle text-center">
                           {isReleased ? (
@@ -1051,7 +1056,10 @@ function ReleasedDashboard() {
                               <span className="text-[11px] font-medium whitespace-nowrap text-green-300">Released</span>
                             </div>
                           ) : isUnsupported ? (
-                            <div className="inline-flex items-center justify-center gap-1.5 rounded border border-blue-800/25 bg-blue-900/10 px-2 py-1 w-full">
+                            <div
+                              title={unsupportedReason || "Unsupported"}
+                              className={`inline-flex items-center justify-center gap-1.5 rounded border border-blue-800/25 bg-blue-900/10 px-2 py-1 w-full${unsupportedReason ? " cursor-help" : ""}`}
+                            >
                               <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0 bg-blue-400" />
                               <span className="text-[11px] font-medium whitespace-nowrap text-blue-300">Unsupported</span>
                             </div>

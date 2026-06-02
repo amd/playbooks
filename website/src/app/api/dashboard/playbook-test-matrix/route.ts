@@ -39,12 +39,14 @@ interface ArtifactsResponse {
   artifacts: Artifact[];
 }
 
+type UnsupportedEntry = string | { platform: string; reason?: string };
+
 interface PlaybookMeta {
   id: string;
   title?: string;
   supported_platforms?: Record<string, string[] | undefined>;
   tested_platforms?: Record<string, string[] | undefined>;
-  unsupported_platforms?: Record<string, string[] | undefined>;
+  unsupported_platforms?: Record<string, UnsupportedEntry[] | undefined>;
   developed?: boolean;
   published?: boolean;
 }
@@ -54,7 +56,7 @@ interface PlaybookEntry {
   title: string;
   category: string;
   combinations: string[];
-  unsupportedCombos: string[];
+  unsupportedReasons: Record<string, string>;
   developed: boolean;
 }
 
@@ -89,6 +91,22 @@ function combinationId(arch: string, platform: string): string {
 function combinationLabel(arch: string): string {
   const normalizedArch = arch.toLowerCase();
   return HARDWARE_LABELS[normalizedArch] ?? arch;
+}
+
+function parseUnsupportedReasons(
+  unsupported: Record<string, UnsupportedEntry[] | undefined> | undefined
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [device, entries] of Object.entries(unsupported ?? {})) {
+    for (const entry of entries ?? []) {
+      if (typeof entry === "string") {
+        result[combinationId(device, entry)] = "";
+      } else if (entry && typeof entry.platform === "string") {
+        result[combinationId(device, entry.platform)] = entry.reason ?? "";
+      }
+    }
+  }
+  return result;
 }
 
 function parseArtifactName(name: string): { playbookId: string; platform: string; arch: string | null } | null {
@@ -168,13 +186,7 @@ function loadPlaybooks(): PlaybookEntry[] {
 
         combos = Array.from(new Set(combos));
 
-        const unsupportedCombos: string[] = [];
-        const unsupported = meta.unsupported_platforms ?? {};
-        for (const [device, platformList] of Object.entries(unsupported)) {
-          for (const platform of platformList ?? []) {
-            unsupportedCombos.push(combinationId(device, platform));
-          }
-        }
+        const unsupportedReasons = parseUnsupportedReasons(meta.unsupported_platforms);
 
         const developed = meta.developed === true;
 
@@ -183,7 +195,7 @@ function loadPlaybooks(): PlaybookEntry[] {
           title: meta.title || meta.id,
           category,
           combinations: combos,
-          unsupportedCombos: Array.from(new Set(unsupportedCombos)),
+          unsupportedReasons,
           developed,
         });
       } catch {
@@ -357,7 +369,7 @@ export async function GET(request: Request) {
           title: pb.title,
           category: pb.category,
           developed: pb.developed,
-          unsupportedCombos: pb.unsupportedCombos,
+          unsupportedReasons: pb.unsupportedReasons,
           cells: {},
         })),
       });
@@ -465,7 +477,7 @@ export async function GET(request: Request) {
         title: pb.title,
         category: pb.category,
         developed: pb.developed,
-        unsupportedCombos: pb.unsupportedCombos,
+        unsupportedReasons: pb.unsupportedReasons,
         cells,
       };
     });

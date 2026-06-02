@@ -5,12 +5,12 @@
   "time": 15,
   "unsupported_platforms": {
     "stx": [
-      "windows",
-      "linux"
+      { "platform": "windows", "reason": "Z Image Turbo is too large for this device" },
+      { "platform": "linux", "reason": "Z Image Turbo is too large for this device" }
     ],
     "krk": [
-      "windows",
-      "linux"
+      { "platform": "windows", "reason": "Z Image Turbo is too large for this device" },
+      { "platform": "linux", "reason": "Z Image Turbo is too large for this device" }
     ]
   },
   "supported_platforms": {

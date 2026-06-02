@@ -12,11 +12,13 @@ const HARDWARE_LABELS: Record<string, string> = {
   rx9070xt: "Radeon RX 9070 XT",
 };
 
+type UnsupportedEntry = string | { platform: string; reason?: string };
+
 interface PlaybookMeta {
   id: string;
   title?: string;
   published_platforms?: Record<string, string[] | undefined>;
-  unsupported_platforms?: Record<string, string[] | undefined>;
+  unsupported_platforms?: Record<string, UnsupportedEntry[] | undefined>;
   developed?: boolean;
   published?: boolean;
 }
@@ -26,7 +28,7 @@ interface PlaybookRow {
   title: string;
   category: string;
   releasedCombos: string[];
-  unsupportedCombos: string[];
+  unsupportedReasons: Record<string, string>;
 }
 
 function normalizePlatform(platform: string): string {
@@ -40,6 +42,22 @@ function combinationId(arch: string, platform: string): string {
 function combinationLabel(arch: string): string {
   const normalizedArch = arch.toLowerCase();
   return HARDWARE_LABELS[normalizedArch] ?? arch;
+}
+
+function parseUnsupportedReasons(
+  unsupported: Record<string, UnsupportedEntry[] | undefined> | undefined
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [device, entries] of Object.entries(unsupported ?? {})) {
+    for (const entry of entries ?? []) {
+      if (typeof entry === "string") {
+        result[combinationId(device, entry)] = "";
+      } else if (entry && typeof entry.platform === "string") {
+        result[combinationId(device, entry.platform)] = entry.reason ?? "";
+      }
+    }
+  }
+  return result;
 }
 
 function loadPlaybooks(): PlaybookRow[] {
@@ -68,20 +86,14 @@ function loadPlaybooks(): PlaybookRow[] {
           }
         }
 
-        const unsupportedCombos: string[] = [];
-        const unsupported = meta.unsupported_platforms ?? {};
-        for (const [device, platformList] of Object.entries(unsupported)) {
-          for (const platform of platformList ?? []) {
-            unsupportedCombos.push(combinationId(device, platform));
-          }
-        }
+        const unsupportedReasons = parseUnsupportedReasons(meta.unsupported_platforms);
 
         rows.push({
           playbookId: meta.id,
           title: meta.title || meta.id,
           category,
           releasedCombos: Array.from(new Set(combos)),
-          unsupportedCombos: Array.from(new Set(unsupportedCombos)),
+          unsupportedReasons,
         });
       } catch {
         // Ignore unreadable playbooks
@@ -107,7 +119,7 @@ export async function GET() {
     const comboIds = new Set<string>();
     for (const pb of playbooks) {
       for (const combo of pb.releasedCombos) comboIds.add(combo);
-      for (const combo of pb.unsupportedCombos) comboIds.add(combo);
+      for (const combo of Object.keys(pb.unsupportedReasons)) comboIds.add(combo);
     }
 
     const columns = Array.from(comboIds)
@@ -136,7 +148,7 @@ export async function GET() {
       title: pb.title,
       category: pb.category,
       releasedCombos: pb.releasedCombos,
-      unsupportedCombos: pb.unsupportedCombos,
+      unsupportedReasons: pb.unsupportedReasons,
     }));
 
     return NextResponse.json({ columns, rows });
