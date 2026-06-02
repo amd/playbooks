@@ -44,6 +44,7 @@ interface PlaybookMeta {
   title?: string;
   supported_platforms?: Record<string, string[] | undefined>;
   tested_platforms?: Record<string, string[] | undefined>;
+  unsupported_platforms?: Record<string, string[] | undefined>;
   developed?: boolean;
   published?: boolean;
 }
@@ -53,6 +54,7 @@ interface PlaybookEntry {
   title: string;
   category: string;
   combinations: string[];
+  unsupportedCombos: string[];
   developed: boolean;
 }
 
@@ -166,6 +168,14 @@ function loadPlaybooks(): PlaybookEntry[] {
 
         combos = Array.from(new Set(combos));
 
+        const unsupportedCombos: string[] = [];
+        const unsupported = meta.unsupported_platforms ?? {};
+        for (const [device, platformList] of Object.entries(unsupported)) {
+          for (const platform of platformList ?? []) {
+            unsupportedCombos.push(combinationId(device, platform));
+          }
+        }
+
         const developed = meta.developed === true;
 
         rows.push({
@@ -173,6 +183,7 @@ function loadPlaybooks(): PlaybookEntry[] {
           title: meta.title || meta.id,
           category,
           combinations: combos,
+          unsupportedCombos: Array.from(new Set(unsupportedCombos)),
           developed,
         });
       } catch {
@@ -346,6 +357,7 @@ export async function GET(request: Request) {
           title: pb.title,
           category: pb.category,
           developed: pb.developed,
+          unsupportedCombos: pb.unsupportedCombos,
           cells: {},
         })),
       });
@@ -453,6 +465,7 @@ export async function GET(request: Request) {
         title: pb.title,
         category: pb.category,
         developed: pb.developed,
+        unsupportedCombos: pb.unsupportedCombos,
         cells,
       };
     });

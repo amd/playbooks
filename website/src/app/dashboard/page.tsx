@@ -267,6 +267,7 @@ interface PlaybookMatrixRow {
   title: string;
   category: string;
   developed: boolean;
+  unsupportedCombos: string[];
   cells: Record<string, PlaybookMatrixCell>;
 }
 
@@ -820,9 +821,21 @@ function PlaybookStatusDashboard() {
                     {matrix.columns.map((column) => {
                       const cell = row.cells[column.id];
                       const testsAdded = Object.values(row.cells).some((c) => c.totalTests > 0);
+                      const isUnsupported = (row.unsupportedCombos ?? []).includes(column.id);
                       const style = getCellStyle(cell, row.developed, testsAdded);
-                      const isClickable = !!(cell && cell.totalTests > 0);
+                      const isClickable = !isUnsupported && !!(cell && cell.totalTests > 0);
                       const runId = selectedRunId ?? matrix?.run?.id ?? null;
+
+                      if (isUnsupported) {
+                        return (
+                          <td key={column.id} className="px-2 py-2 align-middle text-center">
+                            <div className="inline-flex items-center justify-center gap-1.5 rounded border border-blue-800/25 bg-blue-900/10 px-2 py-1 w-full">
+                              <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0 bg-blue-400" />
+                              <span className="text-[11px] font-medium whitespace-nowrap text-blue-300">Unsupported</span>
+                            </div>
+                          </td>
+                        );
+                      }
 
                       const cellBadge = (
                         <div className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full ${isClickable ? "hover:border-[#D4915D]/50 hover:bg-[#D4915D]/5 transition-colors" : ""}`}>
