@@ -136,7 +136,7 @@ source rocm-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-```bash
+```powershell
 python -m venv rocm-env
 rocm-env\Scripts\activate
 ```
@@ -150,46 +150,64 @@ rocm-env\Scripts\activate
 ```bash
 source ~/rocm-env/bin/activate
 
-pip install --upgrade pip setuptools wheel
-pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
-# sudo reboot
+python -m pip install --upgrade pip setuptools wheel
 
-source ~/rocm-env/bin/activate
+# Install PyTorch first. This pins the compatible ROCm runtime/library version.
+python -m pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 
-pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
+# Install ROCm devel packages matching the ROCm version pulled in by PyTorch.
+ROCM_VERSION="$(python -c 'import importlib.metadata as m; print(m.version("rocm"))')"
+python -m pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]==${ROCM_VERSION}"
+
+# Verify installed package versions
+python -m pip list | grep -E '^(rocm|rocm-sdk|torch|torchvision|torchaudio)' || true
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-```bash
+```powershell
 rocm-env\Scripts\activate
 
-pip install --upgrade pip setuptools wheel
-pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
-# Reboot
+python -m pip install --upgrade pip setuptools wheel
 
-# Open a Powershell terminal and activate Visual Studio environment
+# Install PyTorch first. This pins the compatible ROCm runtime/library version.
+python -m pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
+
+# Install ROCm devel packages matching the ROCm version pulled in by PyTorch.
+$RocmVersion = (.\rocm-env\Scripts\python.exe -c "import importlib.metadata as m; print(m.version('rocm'))").Trim()
+Write-Host "Installing ROCm devel package matching rocm==$RocmVersion"
+python -m pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]==$RocmVersion"
+
+# Verify installed package versions
+python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
+```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+Open a new Powershell terminal and activate Visual Studio environment:
+```powershell
 cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 && set' | ForEach-Object { if ($_ -match '^([^=]+)=(.*)$') { [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
-
-rocm-env\Scripts\activate
-
-pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 ```
 <!-- @os:end -->
 
 #### Set Environment Variables
 <!-- @os:linux -->
 ```bash
+source rocm-env/bin/activate
+
 rocm-sdk init # Initialize the devel libraries
 
-export ROCM_HOME="$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
+PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
 export PATH="$ROCM_HOME/bin:$PATH"
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-```bash
+```powershell
+rocm-env\Scripts\activate
+
 rocm-sdk init # Initialize the devel libraries
 
 $ROCM_ROOT = (rocm-sdk path --root).Trim()
@@ -238,9 +256,15 @@ fi
 
 source "$VENV/bin/activate"
 
-pip install --upgrade pip setuptools wheel
-pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
-pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
+python -m pip install --upgrade pip setuptools wheel
+# Install PyTorch first. This pins the compatible ROCm runtime/library version.
+python -m pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
+# Install the matching ROCm devel package for the ROCm version pulled in by torch.
+ROCM_VERSION="$(python -c 'import importlib.metadata as m; print(m.version("rocm"))')"
+echo "Installing ROCm devel package matching rocm==$ROCM_VERSION"
+python -m pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]==${ROCM_VERSION}"
+echo "Installed ROCm/PyTorch packages:"
+python -m pip list | grep -E '^(rocm|rocm-sdk|torch|torchvision|torchaudio)' || true
 
 rocm-sdk init
 
@@ -256,7 +280,6 @@ hipcc --version >/dev/null
 rocminfo >/dev/null
 
 python - <<'PY'
-import sys
 import torch
 
 print("torch:", torch.__version__)
@@ -299,8 +322,14 @@ $Python = Join-Path $Venv "Scripts\python.exe"
 if (-not (Test-Path $Python)) {throw "Missing venv at $Venv. Run the setup steps first."}
 
 & $Python -m pip install --upgrade pip setuptools wheel
-& $Python -m pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+# Install PyTorch first. This pins the compatible ROCm runtime/library version.
 & $Python -m pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
+# Install the matching ROCm devel package for the ROCm version pulled in by torch.
+$RocmVersion = (& $Python -c "import importlib.metadata as m; print(m.version('rocm'))").Trim()
+Write-Host "Installing ROCm devel package matching rocm==$RocmVersion"
+& $Python -m pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]==$RocmVersion"
+Write-Host "Installed ROCm/PyTorch packages:"
+& $Python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 
 $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
 if (-not (Test-Path $RocmSdk)) {throw "Missing rocm-sdk.exe at $RocmSdk. Run the setup steps first."}
