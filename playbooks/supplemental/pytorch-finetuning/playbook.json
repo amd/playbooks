@@ -41,6 +41,10 @@
     "halo": [
       "windows",
       "linux"
+    ],
+    "halo_box": [
+      "windows",
+      "linux"
     ]
   },
   "difficulty": "intermediate",
