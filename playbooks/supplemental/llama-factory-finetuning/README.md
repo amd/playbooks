@@ -39,9 +39,9 @@ pip --version
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 #### Create a Virtual Environment
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @os:linux -->
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
