@@ -348,24 +348,11 @@ openclaw --version
 ```
 
 <!-- @os:linux -->
-<!-- @test:id=node-version-linux timeout=120 hidden=True -->
-```bash
-set -e
-echo "whoami: $(whoami)"
-echo "HOME=$HOME"
-echo "PATH=$PATH"
-which node || true
-node -v || true
-which npm || true
-npm -v || true
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:linux -->
 <!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
 ```bash
 set -euo pipefail
+echo "HOME=$HOME"
+echo "PATH=$PATH"
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
 node -v
 npm -v
@@ -381,6 +368,8 @@ $ErrorActionPreference = "Stop"
 
 $script = @'
 set -euo pipefail
+echo "HOME=$HOME"
+echo "PATH=$PATH"
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
 node -v
 npm -v
