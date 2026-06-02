@@ -16,7 +16,7 @@ This tutorial uses PyTorch powered by AMD ROCm™ software to run models that ca
 
 ## What You'll Learn
 
-- Run LLMs like gpt-oss-20b and Mistral-7B-Instruct locally using PyTorch and ROCm
+- Run LLMs like gpt-oss-20b and qwen3.5-4B locally using PyTorch and ROCm
 - Create a document summarization tool using LLMs
 
 ## Initial Setup 
@@ -94,6 +94,15 @@ source llm-env/bin/activate
 
 ### Installing Additional Dependencies
 
+<!-- @device:halo,halo_box -->
+<!-- @var:id=hf_model value="openai/gpt-oss-20b" -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+<!-- @var:id=hf_model value="Qwen/Qwen3.5-4B" -->
+<!-- @device:end -->
+
+<!-- @device:halo,halo_box -->
+
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
@@ -109,6 +118,26 @@ pip install transformers safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+<!-- @device:end -->
+
+<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+
+<!-- @os:windows -->
+<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+```bash
+pip install transformers==5.9.0 safetensors accelerate sentencepiece protobuf
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+```bash
+pip install "transformers>=5.2.0" safetensors accelerate sentencepiece protobuf
+```
+<!-- @test:end -->
+<!-- @os:end -->
+<!-- @device:end -->
 
 ## Quick Start with Example Scripts
 
@@ -143,7 +172,7 @@ for script in ['run_llm.py', 'summarizer.py']:
 <!-- @test:end -->
 
 Both scripts support:
-- Model selection: `openai/gpt-oss-20b` (default) or other models such as Mistral
+- Model selection via `--model` flag
 - Chat template formatting for proper model prompting, especially useful for document summarization
 
 ## Loading and Running Your First LLM
@@ -168,7 +197,7 @@ print("PASS: All imports successful")
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_name = "openai/gpt-oss-20b"
+model_name = "${hf_model}"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
@@ -178,10 +207,20 @@ model = AutoModelForCausalLM.from_pretrained(
 ```
 <!-- @test:end -->
 
+<!-- @device:halo,halo_box -->
 ```python
 # Choose your model
 model_name = "openai/gpt-oss-20b"
+```
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+```python
+# Choose your model
+model_name = "Qwen/Qwen3.5-4B"
+```
+<!-- @device:end -->
 
+```python
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
@@ -200,11 +239,13 @@ messages = [
 ```
 
 Try out the downloaded script:
+
 <!-- @test:id=run-llm-simple timeout=600 setup=activate-venv -->
 ```bash
-python run_llm.py
+python run_llm.py --model ${hf_model}
 ```
 <!-- @test:end -->
+
 
 ## Building a Document Summarizer
 
@@ -214,15 +255,18 @@ The script is designed to work out of the box. Open the script in an editor to e
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
-python summarizer.py
+python summarizer.py --model ${hf_model}
 ```
 <!-- @test:end -->
 
 ### Usage Examples
 
 ```bash
-# Summarize a large piece of text (at Line 152 in summarizer.py)
+# Summarize the built-in example text (defaults to openai/gpt-oss-20b)
 python summarizer.py
+
+# On Strix Point / Krackan, use the compact Qwen3.5-4B model instead
+python summarizer.py --model ${hf_model}
 
 # Summarize a text file
 python summarizer.py --file example_document.txt

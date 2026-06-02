@@ -26,17 +26,20 @@ PyTorch with ROCm support will be pre-installed on your AMD Developer Platform. 
 
 ## Required Models
 
-The following models are tested and optimized for your platform:
+The following models are tested and optimized for your platform. The playbook automatically selects one based on your device:
 
-| Model | Parameters | Size | Download Location |
-|-------|------------|------|-------------------|
-| **openai/gpt-oss-20b** | 20B | ~40GB | Pre-installed on AMD Halo Developer Platform |
+| Model | Parameters | Size | Platform | Download Location |
+|-------|------------|------|----------|-------------------|
+| **openai/gpt-oss-20b** | 20B | ~40GB | Strix Halo (halo, halo_box) | Pre-installed on AMD Halo Developer Platform |
+| **Qwen/Qwen3.5-4B** | 4B | ~9GB | Strix Point (stx), Krackan (krk) | Hugging Face Hub |
+
+> **Note:** gpt-oss-20b is too large for the smaller memory footprint of Strix Point and Krackan, so those platforms use the compact Qwen3.5-4B instead. Qwen3.5 requires `transformers>=5.2.0`.
 
 Models will be automatically downloaded to the Hugging Face cache directory:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
-Ensure at least **50GB free space** for model storage.
+Ensure at least **50GB free space** for gpt-oss-20b, or **~15GB** for Qwen3.5-4B.
 
 ## Network Requirements
 

@@ -5,50 +5,75 @@
 """
 Document Summarizer using LLMs
 
+Works with two families of models:
+- openai/gpt-oss-20b (default) -- emits the Harmony token format
+- Qwen/Qwen3.5-4B -- a compact model that fits comfortably on Strix/Krackan
+
 Usage:
     python summarizer.py
-    python summarizer.py --file example_document.txt --model gptoss
+    python summarizer.py --file example_document.txt --model Qwen/Qwen3.5-4B
 """
 
 import os
+import re
 import argparse
 import logging
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import (
+    AutoModelForCausalLM,
+    AutoModelForImageTextToText,
+    AutoTokenizer,
+)
 
 logging.getLogger("transformers").setLevel(logging.ERROR)
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
-MODELS = {
+DEFAULT_MODEL = "openai/gpt-oss-20b"
+
+# Convenience aliases so you can pass a short name instead of the full repo id.
+MODEL_ALIASES = {
     "gptoss": "openai/gpt-oss-20b",
-    # download more models here as needed
+    "qwen": "Qwen/Qwen3.5-4B",
 }
+
+
+def is_harmony_model(model_name):
+    """gpt-oss models speak the Harmony channel format; others don't."""
+    return "gpt-oss" in model_name.lower()
 
 
 class DocumentSummarizer:
     """Summarize documents using Large Language Models"""
 
-    def __init__(self, model="gptoss"):
+    def __init__(self, model=DEFAULT_MODEL):
         """
-        Initialize the summarizer with specified model.
-        
-        Args:
-            model: Model name, must be one of 'gptoss' or 'mistral'
-        """
-        if model not in MODELS:
-            raise ValueError(f"Model must be one of: {list(MODELS.keys())}")
+        Initialize the summarizer with the specified model.
 
-        self.model_key = model
-        self.model_name = MODELS[model]
-        print(f"Loading {model.upper()} ({self.model_name})...")
+        Args:
+            model: A Hugging Face model id (e.g. "openai/gpt-oss-20b" or
+                   "Qwen/Qwen3.5-4B"), or a short alias from MODEL_ALIASES.
+        """
+        self.model_name = MODEL_ALIASES.get(model, model)
+        self.harmony = is_harmony_model(self.model_name)
+        print(f"Loading {self.model_name}...")
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_name,
-            torch_dtype=torch.bfloat16,
-            device_map="auto"
-        )
+        try:
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.model_name,
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+            )
+        except (ValueError, KeyError):
+            # Vision-language checkpoints (e.g. Qwen3.5) are not registered
+            # under AutoModelForCausalLM; load them via the image-text-to-text
+            # head. They still generate text-only from a text-only prompt.
+            self.model = AutoModelForImageTextToText.from_pretrained(
+                self.model_name,
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+            )
         print("[OK] Model ready!\n")
     
     def cleanup(self):
@@ -99,21 +124,24 @@ class DocumentSummarizer:
         """
         messages = self._build_messages(text)
 
-        # gpt-oss supports a `reasoning_effort` argument in its chat template.
-        # For non-Harmony models this kwarg will be silently ignored by most
-        # templates, but we guard it just in case.
+        # gpt-oss supports a `reasoning_effort` argument in its chat template,
+        # while Qwen3.5 accepts `enable_thinking` to request a direct answer.
+        # Both kwargs are guarded so unsupported templates fall back gracefully.
         template_kwargs = dict(
             tokenize=False,
             add_generation_prompt=True,
         )
-        if self.model_key == "gptoss":
+        if self.harmony:
             template_kwargs["reasoning_effort"] = reasoning_effort
+        else:
+            template_kwargs["enable_thinking"] = False
 
         try:
             prompt = self.tokenizer.apply_chat_template(messages, **template_kwargs)
         except TypeError:
-            # Template doesn't accept reasoning_effort -- retry without it
+            # Template doesn't accept the model-specific kwarg -- retry without it
             template_kwargs.pop("reasoning_effort", None)
+            template_kwargs.pop("enable_thinking", None)
             prompt = self.tokenizer.apply_chat_template(messages, **template_kwargs)
 
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
@@ -127,11 +155,17 @@ class DocumentSummarizer:
         
         full = self.tokenizer.decode(outputs[0], skip_special_tokens=False)
 
-        # Clean up Harmony-style outputs
-        # Harmony-format models (like gpt-oss) emit multiple channels --
-        # `analysis` (chain-of-thought) and `final` (user-facing answer).
-        # We only want the `final` channel for summarization.
+        if self.harmony:
+            return self._extract_harmony(full)
+        return self._extract_thinking(outputs, inputs)
 
+    def _extract_harmony(self, full):
+        """Clean up Harmony-style outputs.
+
+        Harmony-format models (like gpt-oss) emit multiple channels --
+        `analysis` (chain-of-thought) and `final` (user-facing answer).
+        We only want the `final` channel for summarization.
+        """
         final_marker = "<|channel|>final<|message|>"
 
         if final_marker in full:
@@ -158,20 +192,26 @@ class DocumentSummarizer:
                 "the token limit. Try increasing --max-length (e.g. 2048) or "
                 "setting --reasoning-effort low.]"
             )
+        return full.strip()
 
-        # Fallback for non-Harmony models (e.g. Mistral): decode without
-        # special tokens and strip the echoed prompt.
+    def _extract_thinking(self, outputs, inputs):
+        """Strip the echoed prompt and any <think>...</think> reasoning block.
+
+        Used for non-Harmony models such as Qwen3.5 and Mistral.
+        """
         decoded = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         input_decoded = self.tokenizer.decode(inputs["input_ids"][0], skip_special_tokens=True)
         if decoded.startswith(input_decoded):
             decoded = decoded[len(input_decoded):]
+        decoded = re.sub(r"<think>.*?</think>", "", decoded, flags=re.S)
         return decoded.strip()
 
 
 def main():
     parser = argparse.ArgumentParser(description="Summarize documents using LLMs")
-    parser.add_argument("--model", default="gptoss", choices=list(MODELS.keys()),
-                        help="Model to use (default: gptoss)")
+    parser.add_argument("--model", default=DEFAULT_MODEL,
+                        help="Hugging Face model id or alias (gptoss, qwen). "
+                             f"Default: {DEFAULT_MODEL}")
     parser.add_argument("--file", default=None, help="Path to .txt file to summarize")
     parser.add_argument("--max-length", type=int, default=1024,
                         help="Maximum tokens to generate (default: 1024). "
