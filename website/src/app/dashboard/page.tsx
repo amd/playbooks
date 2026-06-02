@@ -239,8 +239,8 @@ function SetupGuide() {
 type DashboardTab = "ci" | "playbooks" | "released";
 
 const TABS: { id: DashboardTab; label: string }[] = [
-  { id: "ci", label: "CI Status" },
-  { id: "playbooks", label: "Playbook Status" },
+  { id: "ci", label: "CI Runners" },
+  { id: "playbooks", label: "Playbook CI Status" },
   { id: "released", label: "Released Playbooks" },
 ];
 

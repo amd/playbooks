@@ -6,6 +6,7 @@ const PLAYBOOKS_ROOT = path.join(process.cwd(), "..", "playbooks");
 const CATEGORY_ORDER: Record<string, number> = { core: 0, supplemental: 1, backup: 2 };
 const HARDWARE_LABELS: Record<string, string> = {
   halo: "STX Halo",
+  halo_box: "Halo Box",
   stx: "STX Point",
   krk: "Krackan Point",
   rx7900xt: "Radeon RX 7900 XT",
