@@ -27,6 +27,16 @@
       "linux"
     ]
   },
+  "required_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "intermediate",
   "isNew": true,
   "isFeatured": false,

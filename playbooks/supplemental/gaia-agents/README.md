@@ -27,6 +27,25 @@ In this playbook, you'll build a Hardware Advisor Agent that detects your system
 
 ## Installing Dependencies
 
+<!-- @os:windows -->
+<!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
+```powershell
+python --version
+where.exe python
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+<!-- @os:linux -->
+<!-- @test:id=python-env-check-linux timeout=30 hidden=True -->
+```bash
+set -euo pipefail
+python3 --version
+which python3
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
 <!-- @require:lemonade -->
 <!-- @require:gaia -->
 
@@ -89,7 +108,7 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 
 The rest of the playbook will be explaining how each part of the script works, so you can understand it from the ground up.
 <!-- @os:windows -->
-<!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True -->
+<!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
 $ErrorActionPreference = "Stop"
 try {
@@ -121,7 +140,7 @@ assert model_info.get("id") == "Qwen3-Coder-30B-A3B-Instruct-GGUF"
 print("OK: LemonadeClient works")
 '@
   Set-Content -Path gaia_lemonadeclient_smoke.py -Value $script
-  .\.venv\Scripts\python.exe gaia_lemonadeclient_smoke.py
+  python gaia_lemonadeclient_smoke.py
 } finally {
   Remove-Item gaia_lemonadeclient_smoke.py -ErrorAction SilentlyContinue
 }
@@ -130,7 +149,7 @@ print("OK: LemonadeClient works")
 <!-- @os:end --> 
 
 <!-- @os:windows -->
-<!-- @test:id=gaia-hardware-advisor-smoke-windows timeout=300 hidden=True -->
+<!-- @test:id=gaia-hardware-advisor-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -144,7 +163,7 @@ for ($i=0; $i -lt 120; $i++) {
 if (-not $health) { throw "Lemonade server not ready on http://127.0.0.1:13305/api/v1/health" }
 Write-Host "OK: Lemonade server ready on http://127.0.0.1:13305/api/v1/health"
 
-$output = cmd /c "echo quit| .\.venv\Scripts\python.exe hardware_advisor_agent.py"
+$output = cmd /c "echo quit| python hardware_advisor_agent.py"
 
 if (-not ($output -match "Hardware Advisor Agent" -or $output -match "Agent ready!" -or $output -match "Goodbye!")) { throw "Did not see expected output from hardware_advisor_agent.py" }
 Write-Host "OK: hardware_advisor_agent.py started successfully"
@@ -154,7 +173,7 @@ Write-Host "OK: hardware_advisor_agent.py started successfully"
 <!-- @os:end --> 
 
 <!-- @os:linux -->
-<!-- @test:id=gaia-lemonadeclient-smoke-linux timeout=300 hidden=True -->
+<!-- @test:id=gaia-lemonadeclient-smoke-linux timeout=300 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
 
@@ -172,8 +191,6 @@ if [ -z "$health" ]; then
   exit 1
 fi
 echo "OK: Lemonade server is responding on http://127.0.0.1:13305/api/v1/health"
-
-source .venv/bin/activate
 
 cat >/tmp/gaia_lemonadeclient_smoke.py <<'PY'
 from gaia.llm.lemonade_client import LemonadeClient
@@ -202,7 +219,7 @@ rm -f /tmp/gaia_lemonadeclient_smoke.py
 <!-- @os:end --> 
 
 <!-- @os:linux -->
-<!-- @test:id=gaia-hardware-advisor-smoke-linux timeout=300 hidden=True -->
+<!-- @test:id=gaia-hardware-advisor-smoke-linux timeout=300 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
 
@@ -220,7 +237,6 @@ if [ -z "$health" ]; then
 fi
 echo "OK: Lemonade server is responding on http://127.0.0.1:13305/api/v1/health"
 
-source .venv/bin/activate
 printf 'quit' | python3 hardware_advisor_agent.py >/tmp/gaia_agent_output.txt
 
 grep -q "Hardware Advisor Agent" /tmp/gaia_agent_output.txt
@@ -228,7 +244,6 @@ echo "OK: hardware_advisor_agent.py started successfully"
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 
-
 
 
 ## Understand the Architecture
@@ -589,7 +604,7 @@ if __name__ == "__main__":
 
     while True:
         try:
-            query = input("You: ").strip()            
+            query = input("You: ").strip()       
             if query:
                 agent.process_query(query)
                 print()
