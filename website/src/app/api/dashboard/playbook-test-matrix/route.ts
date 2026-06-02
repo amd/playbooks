@@ -11,6 +11,7 @@ const PLAYBOOKS_ROOT = path.join(process.cwd(), "..", "playbooks");
 const CATEGORY_ORDER: Record<string, number> = { core: 0, supplemental: 1, backup: 2 };
 const HARDWARE_LABELS: Record<string, string> = {
   halo: "STX Halo",
+  halo_box: "Halo Box",
   stx: "STX Point",
   krk: "Krackan Point",
   rx7900xt: "Radeon RX 7900 XT",
@@ -39,11 +40,14 @@ interface ArtifactsResponse {
   artifacts: Artifact[];
 }
 
+type UnsupportedEntry = string | { platform: string; reason?: string };
+
 interface PlaybookMeta {
   id: string;
   title?: string;
   supported_platforms?: Record<string, string[] | undefined>;
   tested_platforms?: Record<string, string[] | undefined>;
+  unsupported_platforms?: Record<string, UnsupportedEntry[] | undefined>;
   developed?: boolean;
   published?: boolean;
 }
@@ -53,6 +57,7 @@ interface PlaybookEntry {
   title: string;
   category: string;
   combinations: string[];
+  unsupportedReasons: Record<string, string>;
   developed: boolean;
 }
 
@@ -80,13 +85,36 @@ function normalizePlatform(platform: string): string {
   return platform.toLowerCase() === "windows" ? "windows" : "linux";
 }
 
+// Archs that should never be shown as columns in the playbook status matrix.
+const EXCLUDED_ARCHS = new Set(["halo_box"]);
+
 function combinationId(arch: string, platform: string): string {
   return `${arch.toLowerCase()}|${normalizePlatform(platform)}`;
+}
+
+function isExcludedCombo(comboId: string): boolean {
+  return EXCLUDED_ARCHS.has(comboId.split("|")[0]);
 }
 
 function combinationLabel(arch: string): string {
   const normalizedArch = arch.toLowerCase();
   return HARDWARE_LABELS[normalizedArch] ?? arch;
+}
+
+function parseUnsupportedReasons(
+  unsupported: Record<string, UnsupportedEntry[] | undefined> | undefined
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [device, entries] of Object.entries(unsupported ?? {})) {
+    for (const entry of entries ?? []) {
+      if (typeof entry === "string") {
+        result[combinationId(device, entry)] = "";
+      } else if (entry && typeof entry.platform === "string") {
+        result[combinationId(device, entry.platform)] = entry.reason ?? "";
+      }
+    }
+  }
+  return result;
 }
 
 function parseArtifactName(name: string): { playbookId: string; platform: string; arch: string | null } | null {
@@ -127,7 +155,7 @@ function classifyCell(summary: SummaryRaw): CellSummary["status"] {
 }
 
 function loadPlaybooks(): PlaybookEntry[] {
-  const categories = ["core", "supplemental", "backup"];
+  const categories = ["core", "supplemental"];
   const rows: PlaybookEntry[] = [];
 
   for (const category of categories) {
@@ -166,6 +194,8 @@ function loadPlaybooks(): PlaybookEntry[] {
 
         combos = Array.from(new Set(combos));
 
+        const unsupportedReasons = parseUnsupportedReasons(meta.unsupported_platforms);
+
         const developed = meta.developed === true;
 
         rows.push({
@@ -173,6 +203,7 @@ function loadPlaybooks(): PlaybookEntry[] {
           title: meta.title || meta.id,
           category,
           combinations: combos,
+          unsupportedReasons,
           developed,
         });
       } catch {
@@ -321,20 +352,33 @@ export async function GET(request: Request) {
       ? await getRunByIdLocal(token, runId)
       : await getLatestNightlyRunWithArtifacts(token);
     if (!nightly) {
-      const allColumns = Object.keys(HARDWARE_LABELS)
-        .flatMap((archKey) =>
-          ["windows", "linux"].map((platform) => ({
-            id: combinationId(archKey, platform),
-            arch: archKey,
+      // Columns are only the device/OS combos that at least one playbook
+      // actually declares (tested/supported) or marks unsupported.
+      const comboIds = new Set<string>();
+      for (const pb of playbooks) {
+        for (const combo of pb.combinations) comboIds.add(combo);
+        for (const combo of Object.keys(pb.unsupportedReasons)) comboIds.add(combo);
+      }
+
+      const allColumns = Array.from(comboIds)
+        .filter((comboId) => !isExcludedCombo(comboId))
+        .map((comboId) => {
+          const [arch, platform] = comboId.split("|");
+          return {
+            id: comboId,
+            arch,
             platform,
-            hardware: combinationLabel(archKey),
+            hardware: combinationLabel(arch),
             os: platform === "windows" ? "Windows" : "Linux",
-          }))
-        )
+          };
+        })
         .sort((a, b) => {
-          const hwA = Object.values(HARDWARE_LABELS).indexOf(a.hardware);
-          const hwB = Object.values(HARDWARE_LABELS).indexOf(b.hardware);
-          if (hwA !== hwB) return hwA - hwB;
+          const hwA = Object.keys(HARDWARE_LABELS).indexOf(a.arch);
+          const hwB = Object.keys(HARDWARE_LABELS).indexOf(b.arch);
+          const hwOrderA = hwA === -1 ? 999 : hwA;
+          const hwOrderB = hwB === -1 ? 999 : hwB;
+          if (hwOrderA !== hwOrderB) return hwOrderA - hwOrderB;
+          if (a.hardware !== b.hardware) return a.hardware.localeCompare(b.hardware);
           return a.os.localeCompare(b.os);
         });
 
@@ -346,6 +390,7 @@ export async function GET(request: Request) {
           title: pb.title,
           category: pb.category,
           developed: pb.developed,
+          unsupportedReasons: pb.unsupportedReasons,
           cells: {},
         })),
       });
@@ -403,15 +448,11 @@ export async function GET(request: Request) {
     const byPlaybookAndCombo = new Map<string, CellSummary>();
     const comboIds = new Set<string>();
 
-    // Always include the full CI matrix (all hardware × OS combos)
-    for (const archKey of Object.keys(HARDWARE_LABELS)) {
-      for (const platform of ["windows", "linux"]) {
-        comboIds.add(combinationId(archKey, platform));
-      }
-    }
-
+    // Columns are only the device/OS combos that at least one playbook
+    // actually declares (tested/supported), marks unsupported, or has results for.
     for (const pb of playbooks) {
       for (const combo of pb.combinations) comboIds.add(combo);
+      for (const combo of Object.keys(pb.unsupportedReasons)) comboIds.add(combo);
     }
 
     for (const entry of summaryEntries) {
@@ -421,6 +462,7 @@ export async function GET(request: Request) {
     }
 
     const columns = Array.from(comboIds)
+      .filter((comboId) => !isExcludedCombo(comboId))
       .map((comboId) => {
         const [arch, platform] = comboId.split("|");
         return {
@@ -453,6 +495,7 @@ export async function GET(request: Request) {
         title: pb.title,
         category: pb.category,
         developed: pb.developed,
+        unsupportedReasons: pb.unsupportedReasons,
         cells,
       };
     });
