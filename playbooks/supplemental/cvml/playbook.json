@@ -1,7 +1,7 @@
 {
   "id": "cvml",
-  "title": "Local Computer Vision with Ryzen AI NPU",
-  "description": "Build local perception capabilities using CVML SDK on top of RyzenAI and ROCm",
+  "title": "Local Computer Vision with AMD Ryzen\u2122 AI NPU",
+  "description": "Build local perception capabilities using the CVML SDK on top of Ryzen AI and AMD ROCm\u2122 software",
   "time": 60,
   "supported_platforms": {
     "halo": [
