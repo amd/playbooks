@@ -1,7 +1,7 @@
 {
   "id": "gaia-agents",
   "title": "Building Your First Agent with GAIA",
-  "description": "Build a 100% local AI agent \u2014 no cloud APIs needed. Use the GAIA SDK to create a hardware advisor on your STX Halo",
+  "description": "Build a 100% local AI agent \u2014 no cloud APIs needed. Use the GAIA SDK to create a hardware advisor on your AMD Ryzen\u2122 AI",
   "time": 20,
   "supported_platforms": {
     "halo": [
