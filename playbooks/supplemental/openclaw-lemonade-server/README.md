@@ -487,7 +487,6 @@ openclaw onboard \
   --accept-risk
 
 config="$HOME/.openclaw/openclaw.json"
-
 test -f "$config"
 
 grep -q "lemonade" "$config"
@@ -535,7 +534,6 @@ openclaw onboard \
   --accept-risk
 
 config="$HOME/.openclaw/openclaw.json"
-
 test -f "$config"
 
 grep -q "lemonade" "$config"
@@ -584,7 +582,11 @@ set -euo pipefail
 
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
 
-test -f "$HOME/.openclaw/openclaw.json"
+config="$HOME/.openclaw/openclaw.json"
+if [ ! -f "$config" ]; then
+  echo "Missing $config. Run the OpenClaw onboarding test first."
+  exit 1
+fi
 log="/tmp/openclaw-gateway-ci.log"
 
 cleanup() {
@@ -633,7 +635,11 @@ set -euo pipefail
 
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
 
-test -f "$HOME/.openclaw/openclaw.json"
+config="$HOME/.openclaw/openclaw.json"
+if [ ! -f "$config" ]; then
+  echo "Missing $config. Run the OpenClaw onboarding test first."
+  exit 1
+fi
 log="/tmp/openclaw-gateway-ci.log"
 
 cleanup() {
