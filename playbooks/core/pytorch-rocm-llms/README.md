@@ -192,6 +192,7 @@ print("PASS: All imports successful")
 ```
 <!-- @test:end -->
 
+<!-- @device:halo,halo_box -->
 <!-- @test:id=run-model timeout=600 hidden=True setup=activate-venv -->
 ```python
 import torch
@@ -206,6 +207,24 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 ```
 <!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+<!-- @test:id=run-model timeout=600 hidden=True setup=activate-venv -->
+```python
+import torch
+from transformers import AutoTokenizer, AutoModelForImageTextToText
+
+model_name = "${hf_model}"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForImageTextToText.from_pretrained(
+    model_name,
+    torch_dtype=torch.bfloat16,
+    device_map="auto"
+)
+```
+<!-- @test:end -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 ```python
