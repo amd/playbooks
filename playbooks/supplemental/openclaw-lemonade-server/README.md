@@ -302,10 +302,19 @@ echo "$models_json" | python3 -m json.tool >/dev/null
 echo "OK: WSL can reach native Windows Lemonade through the bridge"
 '@
 
-$script | wsl -d Ubuntu-24.04 -- bash -s
+$tmp = Join-Path $env:TEMP "wsl-lemonade-bridge-windows.sh"
+[System.IO.File]::WriteAllText($tmp, $script, [System.Text.UTF8Encoding]::new($false))
 
-if ($LASTEXITCODE -ne 0) {
-  throw "WSL Lemonade bridge test failed"
+try {
+  $wslTmp = (wsl -d Ubuntu-24.04 -- wslpath -a "$tmp").Trim()
+  wsl -d Ubuntu-24.04 -- bash "$wslTmp"
+
+  if ($LASTEXITCODE -ne 0) {
+    throw "WSL Lemonade bridge test failed"
+  }
+}
+finally {
+  Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
 <!-- @test:end --> 
@@ -333,10 +342,27 @@ openclaw --version
 ```
 
 <!-- @os:linux -->
+<!-- @test:id=node-version-linux timeout=120 hidden=True -->
+```bash
+set -e
+echo "whoami: $(whoami)"
+echo "HOME=$HOME"
+echo "PATH=$PATH"
+which node || true
+node -v || true
+which npm || true
+npm -v || true
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
 <!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
 ```bash
 set -euo pipefail
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+node -v
+npm -v
 openclaw --version
 ```
 <!-- @test:end --> 
