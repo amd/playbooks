@@ -127,7 +127,7 @@ function classifyCell(summary: SummaryRaw): CellSummary["status"] {
 }
 
 function loadPlaybooks(): PlaybookEntry[] {
-  const categories = ["core", "supplemental", "backup"];
+  const categories = ["core", "supplemental"];
   const rows: PlaybookEntry[] = [];
 
   for (const category of categories) {

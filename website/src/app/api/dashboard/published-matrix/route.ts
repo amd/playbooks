@@ -16,6 +16,7 @@ interface PlaybookMeta {
   id: string;
   title?: string;
   published_platforms?: Record<string, string[] | undefined>;
+  unsupported_platforms?: Record<string, string[] | undefined>;
   developed?: boolean;
   published?: boolean;
 }
@@ -25,6 +26,7 @@ interface PlaybookRow {
   title: string;
   category: string;
   releasedCombos: string[];
+  unsupportedCombos: string[];
 }
 
 function normalizePlatform(platform: string): string {
@@ -66,11 +68,20 @@ function loadPlaybooks(): PlaybookRow[] {
           }
         }
 
+        const unsupportedCombos: string[] = [];
+        const unsupported = meta.unsupported_platforms ?? {};
+        for (const [device, platformList] of Object.entries(unsupported)) {
+          for (const platform of platformList ?? []) {
+            unsupportedCombos.push(combinationId(device, platform));
+          }
+        }
+
         rows.push({
           playbookId: meta.id,
           title: meta.title || meta.id,
           category,
           releasedCombos: Array.from(new Set(combos)),
+          unsupportedCombos: Array.from(new Set(unsupportedCombos)),
         });
       } catch {
         // Ignore unreadable playbooks
@@ -92,10 +103,11 @@ export async function GET() {
     const playbooks = loadPlaybooks();
 
     // Columns are the union of every device/OS combo that at least one
-    // playbook has been released on.
+    // playbook has been released on or explicitly marked unsupported.
     const comboIds = new Set<string>();
     for (const pb of playbooks) {
       for (const combo of pb.releasedCombos) comboIds.add(combo);
+      for (const combo of pb.unsupportedCombos) comboIds.add(combo);
     }
 
     const columns = Array.from(comboIds)
@@ -124,6 +136,7 @@ export async function GET() {
       title: pb.title,
       category: pb.category,
       releasedCombos: pb.releasedCombos,
+      unsupportedCombos: pb.unsupportedCombos,
     }));
 
     return NextResponse.json({ columns, rows });
