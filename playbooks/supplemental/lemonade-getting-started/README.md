@@ -26,7 +26,17 @@ By the end of this playbook you will be able to:
 * **Build a Python app** powered by a local LLM using the OpenAI-compatible API.
 * **Run models on the AMD Neural Processing Unit (NPU)** using Hybrid and FLM execution modes on AMD Ryzen™ AI hardware.
 
-## Prerequisites
+## Setting the Memory Configuration
+
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 Before you begin, make sure you have:
 

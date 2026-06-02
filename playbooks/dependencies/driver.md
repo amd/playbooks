@@ -4,6 +4,8 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+
 <!-- @os:windows -->
 ### AMD GPU Driver
 
@@ -42,3 +44,5 @@ test -e /opt/rocm/lib/libroctx64.so.4 -o -e /opt/rocm/lib/libroctx64.so
 <!-- @test:end --> 
 <!-- @device:end -->
 <!-- @os:end -->
+
+<!-- @device:end -->

@@ -21,9 +21,17 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 > **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
 
-## Quick Start
+## Setting the Memory Configuration
 
-### 1. Install Dependencies
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @os:windows -->
 <!-- @test:id=create-venv timeout=60 -->
@@ -159,8 +167,8 @@ r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```
 <!-- @test:end -->
-
-### 2. Choose Your Method
+## Quick Start
+### 1. Choose Your Method
 
 | Method | Memory | Speed | Quality | Best For |
 |--------|--------|-------|---------|----------|
@@ -168,7 +176,7 @@ sys.exit(r.returncode)
 | **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
 | **Full** | 80GB+ | Slowest | 100% | Maximum quality |
 
-### 3. Run Training
+### 2. Run Training
 
 **Dataset and what the model learns**  
 The scripts turn the dataset into chat examples. For example, the QLoRA script uses **Abirate/english_quotes**: each example becomes a user–assistant pair like:

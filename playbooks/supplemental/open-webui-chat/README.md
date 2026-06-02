@@ -66,6 +66,16 @@ If a backend supports those endpoints, Open WebUI can talk to it with minimal se
 
 ---
 
+## Setting the Memory Configuration
+
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
 ## One-Time Setup
 
 This section establishes a stable local environment: Lemonade running, Open WebUI running, and a working connection between them.

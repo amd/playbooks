@@ -22,7 +22,17 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 - Generating images and tuning generation parameters
 - Saving and sharing workflows
 
-## Installing Dependencies
+## Setting the Memory Configuration
+
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -42,7 +52,7 @@ source llm-env/bin/activate
 ```
 <!-- @device:end -->
 
-<!-- @require:driver,rocm,pytorch,comfyui -->
+<!-- @require:driver,pytorch,comfyui -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -270,8 +280,6 @@ echo "OK: ComfyUI server is reachable!"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
-
-
 
 ## Launching ComfyUI
 

@@ -119,6 +119,12 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 
 ---
 
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
 ## Setup
 <!-- @os:windows -->
 ### Prerequisites - Windows

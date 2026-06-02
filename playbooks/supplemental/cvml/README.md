@@ -25,6 +25,12 @@ This playbook teaches you how to set up the Ryzen AI CVML Library, build the inc
 - How to run face detection on an image with bounding boxes and landmarks
 - How to integrate CVML features into your own C++ applications
 
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
 ## Installing Basic Dependencies
 <!-- @require:driver -->
 

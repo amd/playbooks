@@ -19,7 +19,17 @@ This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your loca
 - Duration: It will take about 60 minutes to run this playbook (depending on your model/dataset size and network speed).
 - View the [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for more information.
 
-## Setting up the Environment
+## Setting the Memory Configuration
+
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @os:linux -->
 <!-- @test:id=create-venv timeout=120 hidden=True -->
@@ -38,7 +48,7 @@ pip --version
 ### Installing Basic Dependencies
 
 <!-- @os:linux -->
-<!-- @require:rocm,pytorch,driver -->
+<!-- @require:pytorch,driver -->
 <!-- @os:end -->
 <!-- @os:windows -->
 <!-- @require:pytorch,driver -->

@@ -24,7 +24,17 @@ This playbook teaches you how to serve LLMs using vLLM on your STX Halo™ GPU a
 - How to interact with models via OpenAI-compatible API endpoints
 - How to configure server parameters for different use cases
 
-## Installing vLLM
+## Setting the Memory Configuration
+
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 vLLM can be installed in several ways depending on your environment and preferences:
 

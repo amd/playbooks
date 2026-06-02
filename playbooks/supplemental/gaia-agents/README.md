@@ -25,7 +25,17 @@ In this playbook, you'll build a Hardware Advisor Agent that detects your system
 - Memory-based model sizing using the 70% rule
 - Building an interactive CLI for natural language hardware queries
 
-## Installing Dependencies
+## Setting the Memory Configuration
+
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @require:lemonade -->
 <!-- @require:gaia -->

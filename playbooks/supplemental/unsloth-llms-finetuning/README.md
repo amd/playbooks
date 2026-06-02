@@ -20,7 +20,17 @@ In this playbook, we use Unsloth together with **LoRA-based SFT**. That means th
 
 Unsloth also supports other training approaches, including QLoRA and reinforcement learning workflows. This playbook focuses on the simplest path first: a small LoRA fine-tuning example that users can run, understand, and extend.
 
-## Set up your environment
+## Setting the Memory Configuration
+
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @device:halo_box -->
 Open a terminal and run the following prompt to create a venv with AMD ROCm™ software and Pytorch already installed:
@@ -49,7 +59,7 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 ### Installing Basic Dependencies
-<!-- @require:rocm,pytorch,driver -->
+<!-- @require:pytorch,driver -->
 
 <!-- @test:id=verify-torch-env timeout=60 hidden=True setup=activate-venv -->
 ```python

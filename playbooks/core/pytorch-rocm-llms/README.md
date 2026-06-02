@@ -19,7 +19,17 @@ This tutorial uses PyTorch powered by AMD ROCm™ software to run models that ca
 - Run LLMs like gpt-oss-20b and Mistral-7B-Instruct locally using PyTorch and ROCm
 - Create a document summarization tool using LLMs
 
-## Initial Setup 
+## Setting the Memory Configuration
+
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 ### Create a Virtual Environment
 
@@ -86,7 +96,7 @@ source llm-env/bin/activate
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
-<!-- @require:driver,rocm,pytorch -->
+<!-- @require:driver,pytorch -->
 <!-- @os:end -->
 <!-- @os:windows -->
 <!-- @require:driver,pytorch -->

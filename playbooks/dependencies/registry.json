@@ -179,6 +179,12 @@
         "linux": ["halo_box"],
         "windows": ["halo_box"]
       }
+    },
+    "software-update": {
+      "name": "Software Updates",
+      "description": "Check for and install software updates on the AMD Ryzen AI Halo",
+      "platforms": ["windows", "linux"],
+      "file": "softwareupdate.md"
     }
   }
 }

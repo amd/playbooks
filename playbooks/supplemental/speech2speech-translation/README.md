@@ -29,7 +29,17 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 - Conveys tone, emotion, and intent without awkward pauses
 - Enables global collaboration and faster decision-making
 
-## Setting Up Your Environment
+## Setting the Memory Configuration
+
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 ### Create a Virtual Environment
 
@@ -99,7 +109,7 @@ source s2st-env/bin/activate
 
 ### Installing Basic Dependencies
 
-<!-- @require:rocm,pytorch -->
+<!-- @require:pytorch -->
 
 ### Additional Dependencies
 

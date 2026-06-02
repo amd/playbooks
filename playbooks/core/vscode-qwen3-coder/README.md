@@ -28,7 +28,17 @@ This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a cod
 * How to configure Cline to communicate with LM Studio for local inference of coding agents.
 * How to use local coding agents to solve real-world software engineering tasks. 
 
-## Core Dependencies
+## Setting the Memory Configuration
+
+<!-- @setup:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @require:lmstudio,vscode -->
 
