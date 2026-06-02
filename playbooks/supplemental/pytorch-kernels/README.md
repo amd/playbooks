@@ -206,6 +206,7 @@ $env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
 
 $env:ROCM_HOME = $ROCM_ROOT
 $env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
 $env:HIP_PLATFORM = "amd"
 
 # Set compiler and build settings
@@ -297,9 +298,9 @@ $Python = Join-Path $Venv "Scripts\python.exe"
 
 if (-not (Test-Path $Python)) {throw "Missing venv at $Venv. Run the setup steps first."}
 
-pip install --upgrade pip setuptools wheel
-pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
-pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
+& $Python -m pip install --upgrade pip setuptools wheel
+& $Python -m pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+& $Python -m pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 
 $RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
 if (-not (Test-Path $RocmSdk)) {throw "Missing rocm-sdk.exe at $RocmSdk. Run the setup steps first."}
@@ -309,10 +310,18 @@ $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
 
 $ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
-$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
-if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
-  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
-  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
+$ActualHiprtc = Get-ChildItem -Path $ROCM_BIN -Filter "hiprtc*.dll" -ErrorAction SilentlyContinue |
+  Where-Object { $_.Name -notlike "hiprtc-builtins*" -and $_.Name -ne "hiprtc0701.dll" } |
+  Sort-Object Name -Descending |
+  Select-Object -First 1
+if ((-not (Test-Path $ExpectedHiprtc)) -and $ActualHiprtc) {
+  Copy-Item $ActualHiprtc.FullName $ExpectedHiprtc -Force
+  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc from $($ActualHiprtc.Name)"
+}
+if (-not (Test-Path $ExpectedHiprtc)) {
+  Write-Host "Available HIPRTC DLLs:"
+  Get-ChildItem -Path $ROCM_BIN -Filter "hiprtc*.dll" -ErrorAction SilentlyContinue | Select-Object FullName | Out-Host
+  throw "Missing $ExpectedHiprtc and no compatible hiprtc*.dll was found to copy."
 }
 
 $RocmPathEntries = @(
@@ -325,6 +334,7 @@ $env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
 
 $env:ROCM_HOME = $ROCM_ROOT
 $env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
 $env:HIP_PLATFORM = "amd"
 $env:CC = "clang-cl"
 $env:CXX = "clang-cl"
@@ -367,6 +377,21 @@ if not torch.cuda.is_available():
     raise SystemExit("torch.cuda.is_available() is False. AMD GPU is not available through HIP.")
 
 print("Device:", torch.cuda.get_device_name(0))
+
+kernel_source = r"""
+extern "C"
+__global__ void noop(float* data) {
+    data[0] = data[0] + 1.0f;
+}
+"""
+kernel = torch.cuda._compile_kernel(kernel_source, "noop")
+x = torch.zeros(1, dtype=torch.float32, device="cuda")
+kernel(grid=(1, 1, 1), block=(1, 1, 1), args=[x])
+torch.cuda.synchronize()
+if abs(x.item() - 1.0) > 1e-6:
+    raise SystemExit("HIPRTC/JIT sanity check failed.")
+print("OK: HIPRTC JIT compilation is ready")
+
 print("OK: ROCm PyTorch environment is ready")
 '@
 
@@ -531,10 +556,18 @@ $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
 
 $ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
-$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
-if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
-  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
-  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
+$ActualHiprtc = Get-ChildItem -Path $ROCM_BIN -Filter "hiprtc*.dll" -ErrorAction SilentlyContinue |
+  Where-Object { $_.Name -notlike "hiprtc-builtins*" -and $_.Name -ne "hiprtc0701.dll" } |
+  Sort-Object Name -Descending |
+  Select-Object -First 1
+if ((-not (Test-Path $ExpectedHiprtc)) -and $ActualHiprtc) {
+  Copy-Item $ActualHiprtc.FullName $ExpectedHiprtc -Force
+  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc from $($ActualHiprtc.Name)"
+}
+if (-not (Test-Path $ExpectedHiprtc)) {
+  Write-Host "Available HIPRTC DLLs:"
+  Get-ChildItem -Path $ROCM_BIN -Filter "hiprtc*.dll" -ErrorAction SilentlyContinue | Select-Object FullName | Out-Host
+  throw "Missing $ExpectedHiprtc and no compatible hiprtc*.dll was found to copy."
 }
 
 $RocmPathEntries = @(
@@ -1054,10 +1087,18 @@ $ROCM_ROOT = (& $RocmSdk path --root).Trim()
 $ROCM_BIN  = (& $RocmSdk path --bin).Trim()
 
 $ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
-$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
-if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
-  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
-  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
+$ActualHiprtc = Get-ChildItem -Path $ROCM_BIN -Filter "hiprtc*.dll" -ErrorAction SilentlyContinue |
+  Where-Object { $_.Name -notlike "hiprtc-builtins*" -and $_.Name -ne "hiprtc0701.dll" } |
+  Sort-Object Name -Descending |
+  Select-Object -First 1
+if ((-not (Test-Path $ExpectedHiprtc)) -and $ActualHiprtc) {
+  Copy-Item $ActualHiprtc.FullName $ExpectedHiprtc -Force
+  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc from $($ActualHiprtc.Name)"
+}
+if (-not (Test-Path $ExpectedHiprtc)) {
+  Write-Host "Available HIPRTC DLLs:"
+  Get-ChildItem -Path $ROCM_BIN -Filter "hiprtc*.dll" -ErrorAction SilentlyContinue | Select-Object FullName | Out-Host
+  throw "Missing $ExpectedHiprtc and no compatible hiprtc*.dll was found to copy."
 }
 
 $RocmPathEntries = @(
