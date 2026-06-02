@@ -52,19 +52,148 @@ By the end of this playbook you will be able to:
 
 <!-- @require:lemonade -->
 
+<!-- @var:id=openclaw_model value="Qwen3-4B-GGUF" -->
+
+<!-- @test:id=lemonade-version timeout=60 hidden=True -->
+```bash
+lemonade --version
+```
+<!-- @test:end -->
+
 ---
 
 ## Configuring Context Size
 
 For agent workloads, a larger context window lets the model keep more of the task history, tool outputs, and reasoning steps in view at once. Set this once after the server is running:
 
+<!-- @test:id=lemonade-config-ctx-size timeout=120 -->
 ```bash
 lemonade config set ctx_size=190000
 ```
+<!-- @test:end -->
 
 This takes effect for newly loaded models. A context of 190000 tokens is a reasonable floor for agent use; increase it if your model and available RAM support it.
 
 ---
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-chat-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$modelsJson = $null
+for ($i = 0; $i -lt 120; $i++) {
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
+  if ($modelsJson) { break }
+  Start-Sleep -Seconds 1
+}
+
+if (-not $modelsJson) {throw "Lemonade server not ready on http://127.0.0.1:13305"}
+Write-Host "OK: Lemonade server is responding"
+
+$parsed = $modelsJson | ConvertFrom-Json
+$entry = $parsed.data | Where-Object { $_.id -eq "${openclaw_model}" } | Select-Object -First 1
+
+if (-not $entry) {throw "Model ${openclaw_model} is not present in Lemonade /api/v1/models."}
+if (-not $entry.downloaded) {throw "Model ${openclaw_model} is present but not downloaded in Lemonade. Please download it before running CI."}
+Write-Host "OK: ${openclaw_model} model is downloaded in Lemonade"
+
+$body = @{
+  model = "${openclaw_model}"
+  messages = @(
+    @{
+      role = "user"
+      content = "Reply with exactly: OK"
+    }
+  )
+  temperature = 0
+  max_tokens = 32
+} | ConvertTo-Json -Depth 5
+
+$tmpBody = Join-Path $env:TEMP "openclaw-lemonade-chat-body.json"
+[System.IO.File]::WriteAllText($tmpBody, $body, [System.Text.UTF8Encoding]::new($false))
+
+try {
+  $out = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
+    -H "Content-Type: application/json" `
+    --data-binary "@$tmpBody"
+  if (-not $out) {throw "Empty response from Lemonade chat/completions"}
+  Write-Host "OK: Lemonade chat/completions returned a response"
+}
+finally {
+  Remove-Item $tmpBody -Force -ErrorAction SilentlyContinue
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+models_json=""
+for i in $(seq 1 120); do
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/models || true)"
+  if [ -n "$models_json" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$models_json" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:13305"
+  exit 1
+fi
+echo "OK: Lemonade server is responding"
+
+export MODELS_JSON="$models_json"
+
+python3 - <<'PY'
+import json
+import os
+import sys
+
+data = json.loads(os.environ["MODELS_JSON"])
+model_id = "${openclaw_model}"
+
+entry = None
+for item in data.get("data", []):
+    if item.get("id") == model_id:
+        entry = item
+        break
+
+if entry is None:
+    print(f"Model {model_id} is not present in Lemonade /api/v1/models.")
+    sys.exit(1)
+
+if not entry.get("downloaded", False):
+    print(f"Model {model_id} is present but not downloaded in Lemonade. Please download it before running CI.")
+    sys.exit(1)
+
+print(f"OK: {model_id} model is downloaded in Lemonade")
+PY
+
+body='{
+  "model": "${openclaw_model}",
+  "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
+  "temperature": 0,
+  "max_tokens": 32
+}'
+
+out="$(curl -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d "$body")"
+
+if [ -z "$out" ]; then
+  echo "Empty response from Lemonade chat/completions"
+  exit 1
+fi
+
+echo "OK: Lemonade chat/completions returned a response"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 <!-- @os:windows -->
 
@@ -145,6 +274,42 @@ The empty `data` array simply means no model weights have been downloaded yet, t
 
 > The `netsh portproxy` rule survives reboots but the WSL gateway IP can change after `wsl --shutdown`. If Lemonade becomes unreachable from WSL after a restart, get the updated gateway IP and update the proxy with this new IP.
 
+<!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$script = @'
+set -euo pipefail
+
+WINDOWS_HOST="$(ip route show default | awk '{print $3}' | head -1)"
+
+if [ -z "$WINDOWS_HOST" ]; then
+  echo "Could not determine WSL gateway IP"
+  exit 1
+fi
+
+echo "WSL gateway IP: $WINDOWS_HOST"
+
+models_json="$(curl -s --max-time 5 "http://$WINDOWS_HOST:13305/api/v1/models" || true)"
+
+if [ -z "$models_json" ]; then
+  echo "Could not reach Lemonade from WSL at http://$WINDOWS_HOST:13305/api/v1/models"
+  echo "Check the Windows netsh portproxy and firewall rule from the README."
+  exit 1
+fi
+
+echo "$models_json" | python3 -m json.tool >/dev/null
+echo "OK: WSL can reach native Windows Lemonade through the bridge"
+'@
+
+$script | wsl -d Ubuntu-24.04 -- bash -s
+
+if ($LASTEXITCODE -ne 0) {
+  throw "WSL Lemonade bridge test failed"
+}
+```
+<!-- @test:end --> 
+
 ---
 <!-- @os:end -->
 
@@ -166,6 +331,36 @@ After installation, confirm `openclaw` is on your `PATH`:
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
 openclaw --version
 ```
+
+<!-- @os:linux -->
+<!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+openclaw --version
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=openclaw-version-windows timeout=120 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$script = @'
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+openclaw --version
+'@
+
+$script | wsl -d Ubuntu-24.04 -- bash -s
+
+if ($LASTEXITCODE -ne 0) {
+  throw "OpenClaw version check failed inside WSL"
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 To persist this across terminal sessions:
 
@@ -217,6 +412,99 @@ openclaw onboard \
 
 This command writes OpenClaw's configuration to `~/.openclaw/openclaw.json`.
 
+<!-- @os:linux -->
+<!-- @test:id=openclaw-onboard-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+export OPENCLAW_CONFIG_PATH="$HOME/.openclaw-ci/openclaw.json"
+export OPENCLAW_STATE_DIR="$HOME/.openclaw-ci/state"
+
+rm -rf "$HOME/.openclaw-ci"
+mkdir -p "$(dirname "$OPENCLAW_CONFIG_PATH")" "$OPENCLAW_STATE_DIR"
+
+openclaw onboard \
+  --non-interactive \
+  --mode local \
+  --auth-choice custom-api-key \
+  --custom-base-url "http://127.0.0.1:13305/api/v1" \
+  --custom-model-id "${openclaw_model}" \
+  --custom-provider-id "lemonade" \
+  --custom-compatibility "openai" \
+  --custom-api-key "lemonade" \
+  --secret-input-mode plaintext \
+  --gateway-port 18789 \
+  --gateway-bind loopback \
+  --skip-health \
+  --accept-risk
+
+test -f "$OPENCLAW_CONFIG_PATH"
+
+grep -q "lemonade" "$OPENCLAW_CONFIG_PATH"
+grep -q "${openclaw_model}" "$OPENCLAW_CONFIG_PATH"
+grep -q "127.0.0.1:13305" "$OPENCLAW_CONFIG_PATH"
+
+echo "OK: OpenClaw onboarding wrote Lemonade configuration"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=openclaw-onboard-windows timeout=300 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$script = @'
+set -euo pipefail
+
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+export OPENCLAW_CONFIG_PATH="$HOME/.openclaw-ci/openclaw.json"
+export OPENCLAW_STATE_DIR="$HOME/.openclaw-ci/state"
+
+rm -rf "$HOME/.openclaw-ci"
+mkdir -p "$(dirname "$OPENCLAW_CONFIG_PATH")" "$OPENCLAW_STATE_DIR"
+
+WINDOWS_HOST="$(ip route show default | awk '{print $3}' | head -1)"
+
+if [ -z "$WINDOWS_HOST" ]; then
+  echo "Could not determine WSL gateway IP"
+  exit 1
+fi
+
+openclaw onboard \
+  --non-interactive \
+  --mode local \
+  --auth-choice custom-api-key \
+  --custom-base-url "http://$WINDOWS_HOST:13305/api/v1" \
+  --custom-model-id "${openclaw_model}" \
+  --custom-provider-id "lemonade" \
+  --custom-compatibility "openai" \
+  --custom-api-key "lemonade" \
+  --secret-input-mode plaintext \
+  --gateway-port 18789 \
+  --gateway-bind loopback \
+  --skip-health \
+  --accept-risk
+
+test -f "$OPENCLAW_CONFIG_PATH"
+
+grep -q "lemonade" "$OPENCLAW_CONFIG_PATH"
+grep -q "${openclaw_model}" "$OPENCLAW_CONFIG_PATH"
+grep -q "$WINDOWS_HOST:13305" "$OPENCLAW_CONFIG_PATH"
+
+echo "OK: OpenClaw onboarding wrote Lemonade configuration inside WSL"
+'@
+
+$script | wsl -d Ubuntu-24.04 -- bash -s
+
+if ($LASTEXITCODE -ne 0) {
+  throw "OpenClaw onboarding failed inside WSL"
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 ### Start the OpenClaw Gateway
 
 The gateway is the OpenClaw process that manages the agent loop and serves the dashboard:
@@ -224,6 +512,132 @@ The gateway is the OpenClaw process that manages the agent loop and serves the d
 ```bash
 openclaw gateway run --bind loopback --port 18789
 ```
+
+<!-- @os:linux -->
+<!-- @test:id=openclaw-gateway-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+export OPENCLAW_CONFIG_PATH="$HOME/.openclaw-ci/openclaw.json"
+export OPENCLAW_STATE_DIR="$HOME/.openclaw-ci/state"
+
+if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
+  echo "Missing $OPENCLAW_CONFIG_PATH. Run the openclaw-onboard-linux test first."
+  exit 1
+fi
+
+log="/tmp/openclaw-gateway-ci.log"
+rm -f "$log"
+
+cleanup() {
+  if [ -n "${gateway_pid:-}" ] && kill -0 "$gateway_pid" 2>/dev/null; then
+    kill "$gateway_pid" 2>/dev/null || true
+    sleep 2
+    kill -9 "$gateway_pid" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+openclaw gateway run --bind loopback --port 18789 >"$log" 2>&1 &
+gateway_pid=$!
+
+ok=false
+for i in $(seq 1 120); do
+  code="$(curl -s -o /tmp/openclaw-dashboard.html -w "%{http_code}" --max-time 2 http://127.0.0.1:18789/ || true)"
+  if [ "$code" = "200" ]; then
+    ok=true
+    break
+  fi
+  sleep 1
+done
+
+if [ "$ok" != "true" ]; then
+  echo "OpenClaw gateway did not serve dashboard on http://127.0.0.1:18789/"
+  echo "---- Gateway log tail ----"
+  tail -200 "$log" || true
+  exit 1
+fi
+
+grep -i "openclaw" /tmp/openclaw-dashboard.html >/dev/null || {
+  echo "Dashboard responded, but response did not look like OpenClaw HTML"
+  tail -200 "$log" || true
+  exit 1
+}
+
+openclaw gateway status || true
+echo "OK: OpenClaw gateway started and dashboard is reachable"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=openclaw-gateway-windows timeout=300 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$script = @'
+set -euo pipefail
+
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+export OPENCLAW_CONFIG_PATH="$HOME/.openclaw-ci/openclaw.json"
+export OPENCLAW_STATE_DIR="$HOME/.openclaw-ci/state"
+
+if [ ! -f "$OPENCLAW_CONFIG_PATH" ]; then
+  echo "Missing $OPENCLAW_CONFIG_PATH. Run the openclaw-onboard-windows test first."
+  exit 1
+fi
+
+log="/tmp/openclaw-gateway-ci.log"
+rm -f "$log"
+
+cleanup() {
+  if [ -n "${gateway_pid:-}" ] && kill -0 "$gateway_pid" 2>/dev/null; then
+    kill "$gateway_pid" 2>/dev/null || true
+    sleep 2
+    kill -9 "$gateway_pid" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+openclaw gateway run --bind loopback --port 18789 >"$log" 2>&1 &
+gateway_pid=$!
+
+ok=false
+for i in $(seq 1 120); do
+  code="$(curl -s -o /tmp/openclaw-dashboard.html -w "%{http_code}" --max-time 2 http://127.0.0.1:18789/ || true)"
+  if [ "$code" = "200" ]; then
+    ok=true
+    break
+  fi
+  sleep 1
+done
+
+if [ "$ok" != "true" ]; then
+  echo "OpenClaw gateway did not serve dashboard on http://127.0.0.1:18789/ inside WSL"
+  echo "---- Gateway log tail ----"
+  tail -200 "$log" || true
+  exit 1
+fi
+
+grep -i "openclaw" /tmp/openclaw-dashboard.html >/dev/null || {
+  echo "Dashboard responded, but response did not look like OpenClaw HTML"
+  tail -200 "$log" || true
+  exit 1
+}
+
+openclaw gateway status || true
+echo "OK: OpenClaw gateway started and dashboard is reachable inside WSL"
+'@
+
+$script | wsl -d Ubuntu-24.04 -- bash -s
+
+if ($LASTEXITCODE -ne 0) {
+  throw "OpenClaw gateway smoke test failed inside WSL"
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 To open the dashboard, run this in a second terminal while the gateway is still running:
 
