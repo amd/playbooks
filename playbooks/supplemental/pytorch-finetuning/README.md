@@ -86,7 +86,6 @@ source venv/bin/activate
 <!-- @device:halo_box -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ##### **HaloBox: Skip driver and PyTorch Dependecies**
-No need to set up driver and PyTorch dependencies, as these configurations are pre-installed.
 <!-- @test:end -->
 <!-- @device:end -->
 <!-- @os:end -->
@@ -211,33 +210,6 @@ r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```
 <!-- @test:end -->
-
-### 2. Choose Your Method
-
-| Method | Memory | Speed | Quality | Best For |
-|--------|--------|-------|---------|----------|
-| **QLoRA** | 12-16GB | Fastest | 90-95% | Low Memory Usage |
-| **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
-| **Full** | 80GB+ | Slowest | 100% | Maximum quality |
-
-### 3. Run Training
-
-**Dataset and what the model learns**  
-The scripts turn the dataset into chat examples. For example, the QLoRA script uses **Abirate/english_quotes**: each example becomes a user–assistant pair like:
-
-- **User:** “Give me a quote about: &lt;tag&gt;”
-- **Assistant:** “&lt;quote&gt; – &lt;author&gt;”
-
-Fine-tuning teaches the model to respond to prompts asking for quotes about a topic and to return them in the format `<quote text> - <author>`. The LoRA and full fine-tuning scripts use **databricks/databricks-dolly-15k** (general instruction/response pairs), so the exact task varies by script; the idea is the same - adapt the model to your chosen dataset and format.
-
-Below is a summary of the available training methods. Each method links to its script and provides a brief description for choosing the right approach.
-
-| Script                           | Method            | Description                                                                                                         | Typical VRAM | Recommended For                                 |
-|-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
-
 ---
 
 ## Understanding the Techniques
@@ -273,6 +245,38 @@ Total: 12GB (vs 40GB full precision)
 > For MXFP4 base models like `openai/gpt-oss-20b`, we recommend using **LoRA** (`train_lora.py`) instead of QLoRA. The QLoRA script's `bitsandbytes` 4-bit path typically dequantizes MXFP4 weights to BF16, so the run behaves like standard LoRA. Native MXFP4 needs `bitsandbytes` built from source plus a matching Transformers/Triton/kernels stack. See the [Transformers MXFP4 docs](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
+
+### 2. Choose Your Method
+
+| Method | Memory | Speed | Quality | Best For |
+|--------|--------|-------|---------|----------|
+| **QLoRA** | 12-16GB | Fastest | 90-95% | Low Memory Usage |
+| **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
+| **Full** | 80GB+ | Slowest | 100% | Maximum quality |
+
+### 3. Run Training
+
+**Dataset and what the model learns**  
+The scripts turn the dataset into chat examples. For example, the QLoRA script uses **Abirate/english_quotes**: each example becomes a user–assistant pair like:
+
+- **User:** “Give me a quote about: &lt;tag&gt;”
+- **Assistant:** “&lt;quote&gt; – &lt;author&gt;”
+
+Fine-tuning teaches the model to respond to prompts asking for quotes about a topic and to return them in the format `<quote text> - <author>`. The LoRA and full fine-tuning scripts use **databricks/databricks-dolly-15k** (general instruction/response pairs), so the exact task varies by script; the idea is the same - adapt the model to your chosen dataset and format.
+
+Below is a summary of the available training methods. Each method links to its script and provides a brief description for choosing the right approach.
+
+| Script                           | Method            | Description                                                                                                         | Typical VRAM | Recommended For                                 |
+|-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
+
+Simply select your preferred `Training method`, download the corresponding script and execute it using the command keeping your `~/.venv` activated: 
+
+```python
+python3 train_<method_name>.py.
+```
 
 ## Using your Fine-Tuned Model
 
