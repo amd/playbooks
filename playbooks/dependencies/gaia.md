@@ -10,105 +10,96 @@ GAIA is AMD's open-source framework for building AI agents that run locally on A
 
 #### Installing GAIA
 
+<!-- @device:halo_box -->
 <!-- @os:windows -->
-
-1. Open PowerShell
-2. Create a virtual environment and install GAIA:
-```cmd
-uv venv .venv
-.\.venv\Scripts\Activate.ps1
-uv pip install amd-gaia
+1. On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv-halo-box-windows timeout=60 -->
+```bash
+python -m venv gaia-env --system-site-packages
+gaia-env\Scripts\activate
 ```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
+2. Then, use `pip` to install **Gaia**
+<!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
+```bash
+pip install amd-gaia
+```
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
-
-1. Open a terminal
-2. Create a virtual environment and install GAIA:
+1. On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
-uv venv .venv
-source .venv/bin/activate
-uv pip install amd-gaia
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv gaia-env --system-site-packages
+source gaia-env/bin/activate
 ```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
+2. Then, use `pip` to install **Gaia**
+<!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
+```bash
+pip install amd-gaia
+```
+<!-- @test:end -->
+<!-- @os:end -->
+<!-- @device:end -->
+
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @os:windows -->
+1. On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv-windows timeout=60 -->
+```bash
+python -m venv gaia-env
+gaia-env\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
+
+2. Then, use `pip` to install **Gaia**
+<!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
+```bash
+pip install amd-gaia
+```
+<!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @os:windows -->
-<!-- @test:id=install-uv-windows timeout=300 hidden=True -->
-```powershell
-$ErrorActionPreference = "Stop"
-
-if (Get-Command uv -ErrorAction SilentlyContinue) {
-Write-Host "uv already available on PATH"
-uv --version
-exit 0
-}
-
-Write-Host "uv not found. Installing..."
-powershell -ExecutionPolicy Bypass -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-$uvBin = Join-Path $env:USERPROFILE ".local\bin"
-if (Test-Path $uvBin) {
-$env:PATH = "$uvBin;$env:PATH"
-}
-
-if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
-throw "uv install completed but uv is still not on PATH"
-}
-
-uv --version
-where.exe uv
-Write-Host "OK: uv installed and available on PATH"
-```
-<!-- @test:end --> 
-<!-- @os:end --> 
-
 <!-- @os:linux -->
-<!-- @test:id=install-uv-linux timeout=300 hidden=True -->
+1. On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
-set -euo pipefail
-
-if command -v uv >/dev/null 2>&1; then
-echo "uv already available on PATH"
-uv --version
-exit 0
-fi
-
-echo "uv not found. Installing..."
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-export PATH="$HOME/.local/bin:$PATH"
-
-command -v uv >/dev/null 2>&1
-uv --version
-which uv
-echo "OK: uv installed and available on PATH"
-
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv gaia-env
+source gaia-env/bin/activate
 ```
-<!-- @test:end --> 
-<!-- @os:end --> 
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-
-<!-- @os:windows -->
-<!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
-```powershell
-python --version
-where.exe python
-```
-<!-- @test:end --> 
-<!-- @os:end --> 
-
-<!-- @os:linux -->
-<!-- @test:id=python-env-check-linux timeout=30 hidden=True -->
+2. Then, use `pip` to install **Gaia**
+<!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
-set -euo pipefail
-python3 --version
-which python3
+pip install amd-gaia
 ```
-<!-- @test:end --> 
-<!-- @os:end --> 
+<!-- @test:end -->
+<!-- @os:end -->
+<!-- @device:end -->
 
+3. Initializing GAIA
+
+After installation, run `gaia init` to set up Lemonade Server and download models:
+
+```bash
+gaia init
+```
+
+This installs Lemonade Server, downloads the default models, and verifies the setup.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -130,14 +121,9 @@ echo "OK: lspci is available"
 
 
 <!-- @os:windows --> 
-<!-- @test:id=gaia-create-venv-install-windows timeout=600 hidden=True -->
-```powershell
-$ErrorActionPreference = "Stop"
-$uvBin = Join-Path $env:USERPROFILE ".local\bin"
-if (Test-Path $uvBin) { $env:PATH = "$uvBin;$env:PATH" }
-uv venv .venv
-.\.venv\Scripts\Activate.ps1
-uv pip install amd-gaia
+<!-- @test:id=gaia-version-windows timeout=60 hidden=True setup=activate-venv -->
+```bash
+lemonade --version
 gaia --version
 python -c "import gaia; print('OK')"
 ```
@@ -145,35 +131,15 @@ python -c "import gaia; print('OK')"
 <!-- @os:end --> 
 
 <!-- @os:linux --> 
-<!-- @test:id=gaia-create-venv-install-linux timeout=600 hidden=True -->
+<!-- @test:id=gaia-version-linux timeout=60 hidden=True setup=activate-venv -->
 ```bash
-set -euo pipefail
-export PATH="$HOME/.local/bin:$PATH"
-uv venv .venv
-source .venv/bin/activate
-uv pip install amd-gaia
+lemonade --version
 gaia --version
 python3 -c "import gaia; print('OK')"
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 
 
-
-#### Initializing GAIA
-
-After installation, run `gaia init` to set up Lemonade Server and download models:
-
-```
-gaia init
-```
-
-This installs Lemonade Server, downloads the default models, and verifies the setup.
-
-<!-- @test:id=gaia-lemonade-version timeout=60 hidden=True -->
-```bash
-lemonade --version
-```
-<!-- @test:end --> 
 
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonade-health-windows timeout=300 hidden=True -->
@@ -317,17 +283,9 @@ fi
 
 Verify that GAIA v0.16.2 or later is installed:
 
-```
+```bash
 gaia --version
 ```
-
-Then run a quick test to confirm GAIA is working:
-
-```
-gaia chat
-```
-
-Type a message and press Enter. Type `quit` to exit.
 
 > **Important**: Make sure Lemonade Server is running before using GAIA. GAIA requires Lemonade Server to be started manually.
 

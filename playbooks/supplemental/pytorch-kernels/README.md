@@ -9,23 +9,23 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Compile your own GPU kernels for Pytorch+ROCm
+# Compile your own GPU kernels for PyTorch + AMD ROCm™ Software
 
 ## Overview
 
-Write a GPU kernel from scratch, compile it, and launch it on an AMD GPU, then watch utilization spike. This playbook shows how GPU computation actually works: you write the kernel code, and it executes in parallel across thousands of threads.
+Write a GPU kernel from scratch, compile it, and launch it on an AMD Radeon™ GPU, then watch utilization spike. This playbook shows how GPU computation actually works: you write the kernel code, and it executes in parallel across thousands of threads.
 
 ## What You'll Learn
 
 <!-- @os:windows -->
 - How GPU kernels work: grids, blocks, threads, and the indexing model that maps them to data
-- How AMD's ROCm/HIP stack lets you write CUDA-style code that runs on AMD GPUs without modification
+- How the AMD ROCm/HIP stack lets you write CUDA-style code that runs on AMD GPUs without modification
 - How to compile a kernel at runtime using `torch.cuda._compile_kernel`
 - How to build a native C++ kernel extension with `CUDAExtension` + pybind11, importable from Python
 <!-- @os:end -->
 <!-- @os:linux -->
 - How GPU kernels work: grids, blocks, threads, and the indexing model that maps them to data
-- How AMD's ROCm/HIP stack lets you write CUDA-style code that runs on AMD GPUs without modification
+- How the AMD ROCm/HIP stack lets you write CUDA-style code that runs on AMD GPUs without modification
 - How to compile a kernel at runtime using `torch.cuda._compile_kernel`
 - How to build a native C++ kernel extension with `CUDAExtension` + pybind11, importable from Python
 - How to measure kernel execution time and monitor live GPU utilization with `rocm-smi`
@@ -48,7 +48,7 @@ This playbook covers two approaches for kernel development:
 | **C++ Extension** | `CUDAExtension` + pybind11, compile a `.cu` file into a native `.so` and import it |
 <!-- @os:end -->
 
-Both approaches run on AMD GPUs. This is possible because PyTorch's ROCm build maps the entire CUDA API surface to HIP, `torch.cuda`, `CUDAExtension`, and CUDA kernel syntax all work on AMD hardware transparently. You write CUDA-style code; ROCm handles the translation.
+Both approaches run on AMD GPUs. This is possible because PyTorch's ROCm build maps the entire CUDA API surface to HIP. `torch.cuda`, `CUDAExtension`, and CUDA kernel syntax all work on AMD hardware transparently. You write CUDA-style code; ROCm handles the translation.
 
 ---
 
@@ -95,7 +95,7 @@ These variables are combined to compute a globally unique thread index:
 int idx = blockIdx.x * blockDim.x + threadIdx.x;
 ```
 
-Total threads = `gridDim.x * blockDim.x`. Each thread processes one element independently, this is **data parallelism**. The same operation runs on many elements at once with no inter-thread dependency.
+Total threads = `gridDim.x * blockDim.x`. Each thread processes one element independently; this is **data parallelism**. The same operation runs on many elements at once with no inter-thread dependency.
 
 ---
 
@@ -122,15 +122,15 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 ## Setup
 <!-- @os:windows -->
 ### Prerequisites - Windows
-- Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- Install latest: [AMD Software: Adrenalin Edition™](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @os:end -->
 
 ### Create a Virtual Environment
 <!-- @os:linux -->
 ```bash
 sudo apt install -y python3-venv
-python3 -m venv ~/rocm-env
-source ~/rocm-env/bin/activate
+python3 -m venv rocm-env
+source rocm-env/bin/activate
 ```
 <!-- @setup:id=activate-venv command="source rocm-env/bin/activate" -->
 <!-- @os:end -->
@@ -182,9 +182,9 @@ pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==
 ```bash
 rocm-sdk init # Initialize the devel libraries
 
-export ROCM_HOME = "$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
-export LD_LIBRARY_PATH = "$ROCM_HOME/lib:$LD_LIBRARY_PATH"
-export PATH = "$ROCM_HOME/bin:$PATH"
+export ROCM_HOME="$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
+export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
+export PATH="$ROCM_HOME/bin:$PATH"
 ```
 <!-- @os:end -->
 
@@ -195,13 +195,184 @@ rocm-sdk init # Initialize the devel libraries
 $ROCM_ROOT = (rocm-sdk path --root).Trim()
 $ROCM_BIN = (rocm-sdk path --bin).Trim()
 
-$env:PATH = "$ROCM_ROOT\lib\llvm\bin;$ROCM_BIN;$env:PATH"
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:HIP_PLATFORM = "amd"
 
 # Set compiler and build settings
 $env:CC = "clang-cl"
 $env:CXX = "clang-cl"
 $env:DISTUTILS_USE_SDK = "1"
 ```
+<!-- @os:end -->
+
+<!-- @os:linux -->
+Verify that the AMD GPU is visible with:
+```bash
+amd-smi
+```
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=env-setup-rocm-pytorch-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+python3 -m venv rocm-env
+
+VENV="$PWD/rocm-env"
+if [ ! -f "$VENV/bin/activate" ]; then
+  echo "Missing venv at $VENV. Run the setup steps first."
+  exit 1
+fi
+
+source "$VENV/bin/activate"
+
+pip install --upgrade pip setuptools wheel
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
+
+rocm-sdk init
+
+PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
+export LD_LIBRARY_PATH="$ROCM_HOME/lib:${LD_LIBRARY_PATH:-}"
+export PATH="$ROCM_HOME/bin:$PATH"
+
+test -f "$ROCM_HOME/lib/libhiprtc.so" || ls "$ROCM_HOME/lib"/libhiprtc.so*
+test -f "$ROCM_HOME/lib/libroctx64.so" || ls "$ROCM_HOME/lib"/libroctx64.so*
+
+hipcc --version >/dev/null
+rocminfo >/dev/null
+
+python - <<'PY'
+import sys
+import torch
+
+print("torch:", torch.__version__)
+print("HIP:", torch.version.hip)
+print("CUDA available via HIP:", torch.cuda.is_available())
+
+if torch.version.hip is None:
+    raise SystemExit("PyTorch is not a ROCm/HIP build.")
+
+if not torch.cuda.is_available():
+    raise SystemExit("torch.cuda.is_available() is False. AMD GPU is not available through HIP.")
+
+print("Device:", torch.cuda.get_device_name(0))
+print("OK: ROCm PyTorch environment is ready")
+PY
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=amd-smi-linux timeout=1200 hidden=True -->
+```bash
+source "./rocm-env/bin/activate"
+amd-smi
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=env-setup-rocm-pytorch-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+python -m venv rocm-env
+rocm-env\Scripts\activate
+
+$Venv = Join-Path (Get-Location) "rocm-env"
+$Python = Join-Path $Venv "Scripts\python.exe"
+
+if (-not (Test-Path $Python)) {throw "Missing venv at $Venv. Run the setup steps first."}
+
+pip install --upgrade pip setuptools wheel
+pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
+pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
+
+$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
+if (-not (Test-Path $RocmSdk)) {throw "Missing rocm-sdk.exe at $RocmSdk. Run the setup steps first."}
+& $RocmSdk init
+
+$ROCM_ROOT = (& $RocmSdk path --root).Trim()
+$ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+
+$ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
+$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
+if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
+  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
+  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
+}
+
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:HIP_PLATFORM = "amd"
+$env:CC = "clang-cl"
+$env:CXX = "clang-cl"
+$env:DISTUTILS_USE_SDK = "1"
+
+Write-Host "ROCM_ROOT=$ROCM_ROOT"
+Write-Host "ROCM_BIN=$ROCM_BIN"
+
+Get-ChildItem -Path $ROCM_ROOT -Recurse -Filter "hiprtc*.dll" | Select-Object -First 10 FullName | Out-Host
+
+hipcc --version | Out-Host
+hipinfo | Out-Host
+
+$code = @'
+import os
+import sys
+
+if sys.platform == "win32":
+    for key in ("ROCM_HOME", "HIP_PATH"):
+        root = os.environ.get(key)
+        if root:
+            for subdir in ("bin", "lib", r"lib\llvm\bin"):
+                path = os.path.join(root, subdir)
+                if os.path.isdir(path):
+                    os.add_dll_directory(path)
+
+    rocm_bin = os.environ.get("ROCM_BIN")
+    if rocm_bin and os.path.isdir(rocm_bin):
+        os.add_dll_directory(rocm_bin)
+import torch
+
+print("torch:", torch.__version__)
+print("HIP:", torch.version.hip)
+print("CUDA available via HIP:", torch.cuda.is_available())
+
+if torch.version.hip is None:
+    raise SystemExit("PyTorch is not a ROCm/HIP build.")
+
+if not torch.cuda.is_available():
+    raise SystemExit("torch.cuda.is_available() is False. AMD GPU is not available through HIP.")
+
+print("Device:", torch.cuda.get_device_name(0))
+print("OK: ROCm PyTorch environment is ready")
+'@
+
+$code | & $Python -
+```
+<!-- @test:end --> 
 <!-- @os:end -->
 
 ---
@@ -292,6 +463,151 @@ On Windows, `rocm-smi` is not supported. To track GPU utilization, you can use T
 <!-- @os:end -->
 **Nice work! You just ran your first GPU kernel.**
 
+<!-- @os:linux -->
+<!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+
+source "./rocm-env/bin/activate"
+rocm-sdk init
+
+PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
+export LD_LIBRARY_PATH="$ROCM_HOME/lib:${LD_LIBRARY_PATH:-}"
+export PATH="$ROCM_HOME/bin:$PATH"
+
+python - <<'PY'
+import torch
+
+if not torch.cuda.is_available():
+    raise SystemExit("HIP GPU is not available.")
+
+kernel_source = r'''
+extern "C"
+__global__ void add_one(float* data, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < n) {
+        data[idx] += 1.0f;
+    }
+}
+'''
+
+kernel = torch.cuda._compile_kernel(kernel_source, "add_one")
+
+x = torch.ones(1024, dtype=torch.float32, device="cuda")
+n = x.numel()
+block = 256
+grid = (n + block - 1) // block
+
+kernel(
+    grid=(grid, 1, 1),
+    block=(block, 1, 1),
+    args=[x, n],
+)
+
+torch.cuda.synchronize()
+
+if not torch.allclose(x, torch.full_like(x, 2.0)):
+    raise SystemExit(f"Vector JIT output mismatch. First values: {x[:5].cpu()}")
+
+print("OK: vector addition JIT kernel compiled and ran correctly")
+PY
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=vector-addition-jit-windows timeout=300 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+rocm-env\Scripts\activate
+$Venv = Join-Path (Get-Location) "rocm-env"
+$Python = Join-Path $Venv "Scripts\python.exe"
+$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
+
+& $RocmSdk init
+$ROCM_ROOT = (& $RocmSdk path --root).Trim()
+$ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+
+$ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
+$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
+if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
+  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
+  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
+}
+
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
+$env:HIP_PLATFORM = "amd"
+
+$code = @'
+import os
+import sys
+
+if sys.platform == "win32":
+    for key in ("ROCM_HOME", "HIP_PATH"):
+        root = os.environ.get(key)
+        if root:
+            for subdir in ("bin", "lib", r"lib\llvm\bin"):
+                path = os.path.join(root, subdir)
+                if os.path.isdir(path):
+                    os.add_dll_directory(path)
+
+    rocm_bin = os.environ.get("ROCM_BIN")
+    if rocm_bin and os.path.isdir(rocm_bin):
+        os.add_dll_directory(rocm_bin)
+import torch
+
+if not torch.cuda.is_available():
+    raise SystemExit("HIP GPU is not available.")
+
+kernel_source = r"""
+extern "C"
+__global__ void add_one(float* data, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < n) {
+        data[idx] += 1.0f;
+    }
+}
+"""
+
+kernel = torch.cuda._compile_kernel(kernel_source, "add_one")
+
+x = torch.ones(1024, dtype=torch.float32, device="cuda")
+n = x.numel()
+block = 256
+grid = (n + block - 1) // block
+
+kernel(
+    grid=(grid, 1, 1),
+    block=(block, 1, 1),
+    args=[x, n],
+)
+
+torch.cuda.synchronize()
+
+if not torch.allclose(x, torch.full_like(x, 2.0)):
+    raise SystemExit(f"Vector JIT output mismatch. First values: {x[:5].cpu()}")
+
+print("OK: vector addition JIT kernel compiled and ran correctly")
+'@
+
+$code | & $Python -
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 ---
 
 #### Approach B:  C++ Extension
@@ -353,7 +669,7 @@ the CPU immediately continues executing the next instruction without waiting for
 pip install --no-build-isolation -v .
 ```
 
-`CUDAExtension` is a CUDA build helper from `torch.utils.cpp_extension`. On AMD with ROCm, PyTorch **remaps `CUDAExtension` to use `hipcc`** instead of `nvcc`, so the same `setup.py` that would build a CUDA extension on NVIDIA compiles to AMD GPU code without any changes. This is the key mechanism that makes CUDA extension code portable to AMD: PyTorch's ROCm build intercepts the build path and routes it through the HIP compiler. Produces these in the same directory:
+`CUDAExtension` is a CUDA build helper from `torch.utils.cpp_extension`. On AMD with ROCm, PyTorch **remaps `CUDAExtension` to use `hipcc`** instead of `nvcc`, so the same `setup.py` that would build a CUDA extension on NVIDIA compiles to AMD GPU code without any changes. This is the key mechanism that makes CUDA extension code portable to AMD: PyTorch's ROCm build intercepts the build path and routes it through the HIP compiler. This produces the following in the same directory:
 <!-- @os:windows -->
 - `build/`:  directory with the `.pyd` files
 - `add_one_kernel.hip`:  the HIP source generated by hipifying the `.cu` file; this is what `hipcc` actually compiled
@@ -386,6 +702,140 @@ tensor([1., 1., 1., 1., 1., 1., 1., 1., 1., 1.], device='cuda:0')
 tensor([2., 2., 2., 2., 2., 2., 2., 2., 2., 2.], device='cuda:0')
 ```
 
+<!-- @os:linux -->
+<!-- @test:id=vector-extension-linux timeout=600 hidden=True -->
+```bash
+set -euo pipefail
+
+source "./rocm-env/bin/activate"
+rocm-sdk init
+
+PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
+export LD_LIBRARY_PATH="$ROCM_HOME/lib:${LD_LIBRARY_PATH:-}"
+export PATH="$ROCM_HOME/bin:$PATH"
+
+cd Vector_Addition
+
+python -m pip install --no-build-isolation -v .
+
+python - <<'PY'
+import torch
+import add_one_ext
+
+if not torch.cuda.is_available():
+    raise SystemExit("HIP GPU is not available.")
+
+x = torch.ones(16, dtype=torch.float32, device="cuda")
+add_one_ext.add_one(x)
+torch.cuda.synchronize()
+
+expected = torch.full_like(x, 2.0)
+if not torch.allclose(x, expected):
+    raise SystemExit(f"Vector extension output mismatch. Got: {x.cpu()}")
+
+print("OK: vector addition C++ extension built, imported, and ran correctly")
+PY
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=vector-extension-windows timeout=600 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+rocm-env\Scripts\activate
+$Venv = Join-Path (Get-Location) "rocm-env"
+$Python = Join-Path $Venv "Scripts\python.exe"
+$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
+
+$VcvarsCandidates = @(
+  "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat",
+  "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat",
+  "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat",
+  "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"
+)
+
+$Vcvars = $VcvarsCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $Vcvars) {
+  throw "Could not find vcvars64.bat. Install Visual Studio 2022 C++ Build Tools."
+}
+
+cmd /c "`"$Vcvars`" >nul 2>&1 && set" | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {
+    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
+  }
+}
+
+& $RocmSdk init
+$ROCM_ROOT = (& $RocmSdk path --root).Trim()
+$ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
+$env:HIP_PLATFORM = "amd"
+
+$env:CC = "clang-cl"
+$env:CXX = "clang-cl"
+$env:DISTUTILS_USE_SDK = "1"
+
+Push-Location "Vector_Addition"
+try {
+  & $Python -m pip install --no-build-isolation -v .
+
+  $code = @'
+  import os
+import sys
+
+if sys.platform == "win32":
+    for key in ("ROCM_HOME", "HIP_PATH"):
+        root = os.environ.get(key)
+        if root:
+            for subdir in ("bin", "lib", r"lib\llvm\bin"):
+                path = os.path.join(root, subdir)
+                if os.path.isdir(path):
+                    os.add_dll_directory(path)
+
+    rocm_bin = os.environ.get("ROCM_BIN")
+    if rocm_bin and os.path.isdir(rocm_bin):
+        os.add_dll_directory(rocm_bin)
+import torch
+import add_one_ext
+
+if not torch.cuda.is_available():
+    raise SystemExit("HIP GPU is not available.")
+
+x = torch.ones(16, dtype=torch.float32, device="cuda")
+add_one_ext.add_one(x)
+torch.cuda.synchronize()
+
+expected = torch.full_like(x, 2.0)
+if not torch.allclose(x, expected):
+    raise SystemExit(f"Vector extension output mismatch. Got: {x.cpu()}")
+
+print("OK: vector addition C++ extension built, imported, and ran correctly")
+'@
+
+  $code | & $Python -
+}
+finally {
+  Pop-Location
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 ---
 
 ### Walkthrough 2: Matrix Multiplication
@@ -398,7 +848,7 @@ Each output element is defined as:
 
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-Each output element is assigned to exactly one thread, and threads don't depend on each other's results, thread `(0,0)` and thread `(1,5)` run simultaneously with no coordination. However, within a single thread the dot product is **sequential**: the `n` loop iterates N times, accumulating one multiply-add per step.
+Each output element is assigned to exactly one thread, and threads don't depend on each other's results: thread `(0,0)` and thread `(1,5)` run simultaneously with no coordination. However, within a single thread the dot product is **sequential**: the `n` loop iterates N times, accumulating one multiply-add per step.
 
 #### Row-Major Memory Layout
 
@@ -523,11 +973,182 @@ Peak GPU Utilization:    100%
 Average GPU Utilization: 55.00%
 ```
 
+<!-- @os:linux -->
+<!-- @test:id=matmul-jit-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+
+source "./rocm-env/bin/activate"
+rocm-sdk init
+
+PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
+export LD_LIBRARY_PATH="$ROCM_HOME/lib:${LD_LIBRARY_PATH:-}"
+export PATH="$ROCM_HOME/bin:$PATH"
+
+python - <<'PY'
+import torch
+
+if not torch.cuda.is_available():
+    raise SystemExit("HIP GPU is not available.")
+
+kernel_source = r'''
+extern "C"
+__global__ void matmul(float* A, float* B, float* C, int M, int N, int K) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row < M && col < K) {
+        float sum = 0.0f;
+        for (int n = 0; n < N; n++) {
+            sum += A[row * N + n] * B[n * K + col];
+        }
+        C[row * K + col] = sum;
+    }
+}
+'''
+
+M, N, K = 32, 16, 24
+A = torch.randn(M, N, dtype=torch.float32, device="cuda")
+B = torch.randn(N, K, dtype=torch.float32, device="cuda")
+C = torch.zeros(M, K, dtype=torch.float32, device="cuda")
+
+kernel = torch.cuda._compile_kernel(kernel_source, "matmul")
+
+BLOCK = 16
+grid_x = (K + BLOCK - 1) // BLOCK
+grid_y = (M + BLOCK - 1) // BLOCK
+
+kernel(
+    grid=(grid_x, grid_y, 1),
+    block=(BLOCK, BLOCK, 1),
+    args=[A, B, C, M, N, K],
+)
+
+torch.cuda.synchronize()
+
+C_ref = torch.mm(A, B)
+max_err = (C - C_ref).abs().max().item()
+
+if max_err > 1e-3:
+    raise SystemExit(f"Matmul JIT max error too high: {max_err}")
+
+print(f"OK: matmul JIT kernel compiled and ran correctly; max_err={max_err:.6f}")
+PY
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=matmul-jit-windows timeout=300 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+rocm-env\Scripts\activate
+$Venv = Join-Path (Get-Location) "rocm-env"
+$Python = Join-Path $Venv "Scripts\python.exe"
+$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
+
+& $RocmSdk init
+$ROCM_ROOT = (& $RocmSdk path --root).Trim()
+$ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+
+$ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
+$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
+if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
+  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
+  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
+}
+
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
+$env:HIP_PLATFORM = "amd"
+
+$code = @'
+import os
+import sys
+
+if sys.platform == "win32":
+    for key in ("ROCM_HOME", "HIP_PATH"):
+        root = os.environ.get(key)
+        if root:
+            for subdir in ("bin", "lib", r"lib\llvm\bin"):
+                path = os.path.join(root, subdir)
+                if os.path.isdir(path):
+                    os.add_dll_directory(path)
+
+    rocm_bin = os.environ.get("ROCM_BIN")
+    if rocm_bin and os.path.isdir(rocm_bin):
+        os.add_dll_directory(rocm_bin)
+import torch
+
+if not torch.cuda.is_available():
+    raise SystemExit("HIP GPU is not available.")
+
+kernel_source = r"""
+extern "C"
+__global__ void matmul(float* A, float* B, float* C, int M, int N, int K) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row < M && col < K) {
+        float sum = 0.0f;
+        for (int n = 0; n < N; n++) {
+            sum += A[row * N + n] * B[n * K + col];
+        }
+        C[row * K + col] = sum;
+    }
+}
+"""
+
+M, N, K = 32, 16, 24
+A = torch.randn(M, N, dtype=torch.float32, device="cuda")
+B = torch.randn(N, K, dtype=torch.float32, device="cuda")
+C = torch.zeros(M, K, dtype=torch.float32, device="cuda")
+
+kernel = torch.cuda._compile_kernel(kernel_source, "matmul")
+
+BLOCK = 16
+grid_x = (K + BLOCK - 1) // BLOCK
+grid_y = (M + BLOCK - 1) // BLOCK
+
+kernel(
+    grid=(grid_x, grid_y, 1),
+    block=(BLOCK, BLOCK, 1),
+    args=[A, B, C, M, N, K],
+)
+
+torch.cuda.synchronize()
+
+C_ref = torch.mm(A, B)
+max_err = (C - C_ref).abs().max().item()
+
+if max_err > 1e-3:
+    raise SystemExit(f"Matmul JIT max error too high: {max_err}")
+
+print(f"OK: matmul JIT kernel compiled and ran correctly; max_err={max_err:.6f}")
+'@
+
+$code | & $Python -
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 ---
 
 #### Approach B:  C++ Extension
 
-The full manual path: write the kernel and Python binding in a `.cu` file, compile it as a native extension, then import and call it from Python. Mirrors the structure of `add_one_kernel.cu` exactly, only the kernel signature and launcher logic differ.
+The full manual path: write the kernel and Python binding in a `.cu` file, compile it as a native extension, then import and call it from Python. This mirrors the structure of `add_one_kernel.cu` exactly; only the kernel signature and launcher logic differ.
 
 **Files:**
 <!-- @os:windows -->
@@ -595,7 +1216,7 @@ Compared to `add_one_launcher` in Walkthrough 1, the launcher here:
 pip install --no-build-isolation -v .
 ```
 
-Produces these in the same directory:
+This produces the following in the same directory:
 <!-- @os:windows -->
 - `build/`:  directory with the `.pyd` files
 - `matmul_kernel.hip`:  the HIP source generated by hipifying the `.cu` file; this is what `hipcc` actually compiled
@@ -637,6 +1258,148 @@ tensor(0., device='cuda:0')
 - Attention mechanisms
 - Embeddings
 - Transformers
+
+<!-- @os:linux -->
+<!-- @test:id=matmul-extension-linux timeout=600 hidden=True -->
+```bash
+set -euo pipefail
+
+source "./rocm-env/bin/activate"
+rocm-sdk init
+
+PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
+export LD_LIBRARY_PATH="$ROCM_HOME/lib:${LD_LIBRARY_PATH:-}"
+export PATH="$ROCM_HOME/bin:$PATH"
+
+cd Matrix_Multiplication
+
+python -m pip install --no-build-isolation -v .
+
+python - <<'PY'
+import torch
+import matmul_ext
+
+if not torch.cuda.is_available():
+    raise SystemExit("HIP GPU is not available.")
+
+A = torch.randn(32, 16, dtype=torch.float32, device="cuda")
+B = torch.randn(16, 24, dtype=torch.float32, device="cuda")
+
+C = matmul_ext.matmul(A, B)
+torch.cuda.synchronize()
+
+C_ref = torch.mm(A, B)
+max_err = (C - C_ref).abs().max().item()
+
+if max_err > 1e-3:
+    raise SystemExit(f"Matmul extension max error too high: {max_err}")
+
+print(f"OK: matmul C++ extension built, imported, and ran correctly; max_err={max_err:.6f}")
+PY
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=matmul-extension-windows timeout=600 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+rocm-env\Scripts\activate
+$Venv = Join-Path (Get-Location) "rocm-env"
+$Python = Join-Path $Venv "Scripts\python.exe"
+$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
+
+$VcvarsCandidates = @(
+  "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat",
+  "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat",
+  "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat",
+  "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"
+)
+
+$Vcvars = $VcvarsCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $Vcvars) {
+  throw "Could not find vcvars64.bat. Install Visual Studio 2022 C++ Build Tools."
+}
+
+cmd /c "`"$Vcvars`" >nul 2>&1 && set" | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {
+    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
+  }
+}
+
+& $RocmSdk init
+$ROCM_ROOT = (& $RocmSdk path --root).Trim()
+$ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+
+$RocmPathEntries = @(
+  $ROCM_BIN,
+  "$ROCM_ROOT\bin",
+  "$ROCM_ROOT\lib",
+  "$ROCM_ROOT\lib\llvm\bin"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+$env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
+
+$env:ROCM_HOME = $ROCM_ROOT
+$env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
+$env:HIP_PLATFORM = "amd"
+
+$env:CC = "clang-cl"
+$env:CXX = "clang-cl"
+$env:DISTUTILS_USE_SDK = "1"
+
+Push-Location "Matrix_Multiplication"
+try {
+  & $Python -m pip install --no-build-isolation -v .
+
+  $code = @'
+  import os
+import sys
+
+if sys.platform == "win32":
+    for key in ("ROCM_HOME", "HIP_PATH"):
+        root = os.environ.get(key)
+        if root:
+            for subdir in ("bin", "lib", r"lib\llvm\bin"):
+                path = os.path.join(root, subdir)
+                if os.path.isdir(path):
+                    os.add_dll_directory(path)
+
+    rocm_bin = os.environ.get("ROCM_BIN")
+    if rocm_bin and os.path.isdir(rocm_bin):
+        os.add_dll_directory(rocm_bin)
+import torch
+import matmul_ext
+
+if not torch.cuda.is_available():
+    raise SystemExit("HIP GPU is not available.")
+
+A = torch.randn(32, 16, dtype=torch.float32, device="cuda")
+B = torch.randn(16, 24, dtype=torch.float32, device="cuda")
+
+C = matmul_ext.matmul(A, B)
+torch.cuda.synchronize()
+
+C_ref = torch.mm(A, B)
+max_err = (C - C_ref).abs().max().item()
+
+if max_err > 1e-3:
+    raise SystemExit(f"Matmul extension max error too high: {max_err}")
+
+print(f"OK: matmul C++ extension built, imported, and ran correctly; max_err={max_err:.6f}")
+'@
+
+  $code | & $Python -
+}
+finally {
+  Pop-Location
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
 
 ---
 

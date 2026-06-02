@@ -13,13 +13,13 @@ print("\n")
 print("="*50)
 print("       LEMONADE PYTHON FLASHCARD SMOKE TEST")
 print("="*50)
-print("Attempting to generate 2 flashcards using the Qwen3.5-4B-GGUF model...")
+print("Attempting to generate 2 flashcards using the Gemma-4-E2B-it-GGUF model...")
 
 for attempt in range(5):
     text = None
     try:
         resp = client.chat.completions.create(
-            model="Qwen3.5-4B-GGUF",
+            model="Gemma-4-E2B-it-GGUF",
             messages=[
                 {
                     "role": "system",

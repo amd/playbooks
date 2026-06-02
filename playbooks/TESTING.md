@@ -126,6 +126,28 @@ if missing:
 Both scripts support...
 ```
 
+**Device-aware values with `@var`:**
+
+When a single test needs to use a different value depending on which device the runner was invoked with (e.g. a model id, container tag, or endpoint), declare a `@var` definition inside a `@device:` block and reference it from the test body with `${name}`:
+
+```markdown
+<!-- @device:halo,halo_box -->
+<!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
+<!-- @device:end -->
+
+<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+<!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
+<!-- @device:end -->
+
+<!-- @test:id=chat-test hidden=true -->
+```bash
+curl -s http://127.0.0.1:13305/api/v1/models | grep ${lemonade_model}
+```
+<!-- @test:end -->
+```
+
+Only `${name}` placeholders whose name matches a declared `@var` id are substituted, so ordinary shell `$variable` and `${env}` usage is left untouched. A `@var` defined outside any `@device:` block applies to all devices. If a declared placeholder has no value for the active `--device`, the runner fails loudly with the test id and var name.
+
 **Best practices:**
 
 1. **Wrap, don't duplicate**: Put test tags around existing code blocks instead of writing separate test code
