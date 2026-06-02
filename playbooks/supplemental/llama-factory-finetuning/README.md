@@ -22,18 +22,48 @@ This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your loca
 ## Setting up the Environment
 
 <!-- @os:linux -->
-<!-- @test:id=create-venv timeout=120 hidden=True -->
+<!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
+```bash
+python3 --version
+pip --version
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
+```powershell
+python --version
+pip --version
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+#### Create a Virtual Environment
+
+<!-- @os:linux -->
+<!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
 python3 -m venv venv
 source venv/bin/activate
-python3 --version
-pip --version
 ```
 <!-- @test:end --> 
-<!-- @setup:id=activate-venv command="source venv/bin/activate" --> 
+<!-- @setup:id=activate-venv command="source venv/bin/activate" -->
 <!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=create-venv timeout=120 -->
+```powershell
+python -m venv venv
+venv\Scripts\activate
+```
+<!-- @test:end --> 
+<!-- @setup:id=activate-venv command="venv\Scripts\activate" --> 
+<!-- @os:end -->
+<!-- @device:end -->
 
 ### Installing Basic Dependencies
 
@@ -43,19 +73,36 @@ pip --version
 <!-- @os:windows -->
 <!-- @require:pytorch,driver -->
 <!-- @os:end -->
-
+ 
 ### Installing Additional Dependencies
 
 - **Python**: ensure minimum version is 3.11
+<!-- @device:halo_box -->
 ```bash
-pip install huggingface_hub
+pip install huggingface_hub --break-system-packages
 ```
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+```bash
+pip install huggingface_hub 
+```
+<!-- @device:end -->
 
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 hidden=True setup=activate-venv -->
 ```bash
 python3 -m pip install --upgrade pip
 python3 -m pip install huggingface_hub
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=install-deps timeout=300 hidden=True setup=activate-venv -->
+```powershell
+python -m pip install --upgrade pip
+python -m pip install huggingface_hub
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -66,26 +113,61 @@ LLaMA Factory depends on PyTorch. You should already have it installed per the a
 
 Download the source code from [LLaMA Factory official GitHub repository](https://github.com/hiyouga/LlamaFactory), and install its dependencies.
 
-<!-- @os:linux -->
+<!-- @device:halo_box -->
+<!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
+```bash
+git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
+cd LlamaFactory
+pip install setuptools --break-system-packages
+pip install -e . --break-system-packages
+pip install -r requirements/metrics.txt --break-system-packages
+```
+<!-- @test:end --> 
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
 ```bash
 git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
 cd LlamaFactory
 pip install -e .
-pip install -r requirements/metrics.txt
+pip install -r requirements/metrics.txt 
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
+<!-- @device:end -->
+
+Verify if `llamafactory-cli` is executable.
 
 <!-- @os:linux -->
-<!-- @test:id=verify-llamafactory-cli timeout=60 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-llamafactory-cli timeout=60 hidden=False setup=activate-venv -->
 ```bash
 cd LlamaFactory
 llamafactory-cli version || python -m llamafactory.cli version || true
+echo "llamafactory-cli is available"
 command -v llamafactory-cli
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=verify-llamafactory-cli timeout=60 hidden=False setup=activate-venv -->
+```powershell
+cd LlamaFactory
+if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
+    llamafactory-cli version
+    Write-Host "llamafactory-cli is available"
+} else {
+    Write-Host "llamafactory-cli is not available"
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+Example output:
+
+<p align="center">
+  <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
+</p>
 
 Having successfully installed LLaMA Factory, let's run fine-tuning on it.
 
@@ -110,7 +192,6 @@ LLaMA Factory supports multiple fine-tuning schemes.
 | LoRA fine-tuning  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
 | QLoRA fine-tuning | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
-<!-- @os:linux -->
 <!-- @test:id=verify-llamafactory-files timeout=60 hidden=True setup=activate-venv -->
 ```python
 import os
@@ -130,8 +211,7 @@ if missing:
 
 print("PASS: Required LLaMA Factory example files exist")
 ```
-<!-- @test:end --> 
-<!-- @os:end -->
+<!-- @test:end -->
 
 These example configuration files have specified model parameters, fine-tuning method parameters, dataset parameters, evaluation parameters, and more. You can configure them according to your own needs. In this playbook, we will use [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
@@ -154,11 +234,36 @@ These example configuration files have specified model parameters, fine-tuning m
 - `lr_scheduler_type` - Learning rate schedule. Options: linear, cosine, polynomial, constant, etc.
 - `warmup_ratio` - Learning rate warmup ratio
 
-We will modify the default value of `lora_rank` to run fine-tuning on AMD Radeon™ GPUs.
-
+<!-- @os:linux -->
+We will modify the default value of `lora_rank` to run fine-tuning on AMD Ryzen™ & AMD Radeon™ GPUs.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+We will update the default LoRA fine-tuning configuration for better compatibility with AMD Ryzen™ and AMD Radeon™ GPUs:
+- Set `lora_rank` from `8` to `6` to reduce memory usage during fine-tuning.
+- Use `fp16` instead of `bf16` for broader AMD GPU compatibility and lower memory usage.
+- Set `dataloader_num_workers` to `0` on Windows to avoid `"Can't pickle local object<>"` errors caused by multiprocessing data loading.
+
+```powershell
+$filePath = "examples/train_lora/qwen3_lora_sft.yaml"
+
+# Create a backup before modifying the YAML file
+Copy-Item -Path $filePath -Destination "$filePath.bak" -Force
+
+# Read the file and update the training settings
+$content = Get-Content -Path $filePath -Raw
+
+$newContent = $content `
+  -replace 'lora_rank: 8', 'lora_rank: 6' `
+  -replace 'bf16: true', 'fp16: true' `
+  -replace 'dataloader_num_workers: 4', 'dataloader_num_workers: 0'
+
+Set-Content -Path $filePath -Value $newContent
+```
+<!-- @os:end -->
 
 ### Run LLaMA Factory Fine-Tuning 
 
@@ -173,7 +278,7 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
 ```
 
 <!-- @os:linux -->
-<!-- @test:id=quick-train-llamafactory-lora timeout=1800 hidden=True setup=activate-venv -->
+<!-- @test:id=quick-train-llamafactory-lora timeout=3600 hidden=True setup=activate-venv -->
 ```bash
 cd LlamaFactory
 
@@ -193,13 +298,36 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 <!-- @test:end --> 
 <!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=quick-train-llamafactory-lora timeout=3600 hidden=True setup=activate-venv -->
+```powershell
+Set-Location -Path "LlamaFactory"
+
+Copy-Item -Path "examples/train_lora/qwen3_lora_sft.yaml" -Destination "examples/train_lora/qwen3_lora_sft_ci.yaml"
+
+$filePath = "examples/train_lora/qwen3_lora_sft_ci.yaml"
+(Get-Content -Path $filePath) -replace 'lora_rank: 8', 'lora_rank: 6' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'bf16:\s*true', 'fp16: true' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'dataloader_num_workers:\s*4', 'dataloader_num_workers: 0' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'output_dir: .*', 'output_dir: saves/qwen3_lora_sft_ci' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'overwrite_output_dir: false', 'overwrite_output_dir: true' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'per_device_train_batch_size: .*', 'per_device_train_batch_size: 1' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'gradient_accumulation_steps: .*', 'gradient_accumulation_steps: 1' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'num_train_epochs: .*', 'num_train_epochs: 1' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'logging_steps: .*', 'logging_steps: 1' | Set-Content -Path $filePath
+(Get-Content -Path $filePath) -replace 'save_steps: .*', 'save_steps: 5' | Set-Content -Path $filePath
+
+llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 After running LLM finetuning, all generated outputs are stored in the "output_dir", including model checkpoint files, configuration files, and training metrics.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
 </p>
 
-<!-- @os:linux -->
 <!-- @test:id=verify-llamafactory-train-output timeout=120 hidden=True setup=activate-venv -->
 ```python
 import os
@@ -230,7 +358,6 @@ print("PASS: LLaMA Factory training output looks correct")
 print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
 ### Test the fine-tuned model 
 
@@ -290,7 +417,47 @@ llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 <!-- @test:end --> 
 <!-- @os:end -->
 
-<!-- @os:linux -->
+
+<!-- @os:windows -->
+<!-- @test:id=export-llamafactory-model timeout=1800 hidden=True setup=activate-venv -->
+```powershell
+Set-Location -Path "LlamaFactory"
+pip install pyyaml
+
+$script = @'
+import yaml
+from pathlib import Path
+
+src = Path("examples/merge_lora/qwen3_lora_sft.yaml")
+dst = Path("examples/merge_lora/qwen3_lora_sft_ci.yaml")
+
+cfg = yaml.safe_load(src.read_text())
+
+cfg["adapter_name_or_path"] = "saves/qwen3_lora_sft_ci"
+cfg["export_dir"] = "saves/qwen3_lora_sft_ci_merged"
+
+dst.write_text(yaml.safe_dump(cfg, sort_keys=False))
+print(f"Wrote {dst}")
+'@
+
+$tempPy = Join-Path $env:TEMP "write_llamafactory_export_config.py"
+Set-Content -Path $tempPy -Value $script -Encoding UTF8
+
+python $tempPy
+if ($LASTEXITCODE -ne 0) {
+    Remove-Item $tempPy -Force -ErrorAction SilentlyContinue
+    throw "FAIL: Could not create qwen3_lora_sft_ci.yaml"
+}
+Remove-Item $tempPy -Force -ErrorAction SilentlyContinue
+
+if (-not (Test-Path "examples/merge_lora/qwen3_lora_sft_ci.yaml")) {throw "FAIL: examples/merge_lora/qwen3_lora_sft_ci.yaml was not created"}
+
+llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
+if ($LASTEXITCODE -ne 0) {throw "FAIL: llamafactory-cli export failed"}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 <!-- @test:id=verify-llamafactory-export-output timeout=120 hidden=True setup=activate-venv -->
 ```python
 import os
@@ -319,18 +486,24 @@ if not model_files:
 print("PASS: Exported merged model output looks correct")
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
 
 ## Using LLaMA Factory GUI
 
-LLaMA-Factory also supports zero-code fine-tuning of LLMs through a web UI in the browser.
+`LLaMA-Factory` also supports zero-code fine-tuning of LLMs through a web UI in the browser.
 
 Use the following command to open it:
 
 ```bash
 llamafactory-cli webui
 ```
+The `LlamaFactory Web UI` offers a streamlined interface for managing machine learning workflows, including training, evaluation, prediction, chatting, and exporting models. Here's a brief introduction to each tab:
 
+* **Train**: This tab allows you to select a model and dataset, configure training parameters, and initiate the training process. It's essential to understand the mandatory and optional parameters to optimize the training setup.
+* **Evaluate & Predict**: After training, you can evaluate the model's performance and make predictions using this tab. It provides insights into the model's accuracy and effectiveness on new data.
+* **Chat**: Once training is complete, load the model in the Chat tab to interact with it and see the results of your work. This feature enables real-time communication with the trained model.
+* **Export**: This tab facilitates the export of trained models for deployment or further use. You can save your models in various formats suitable for different applications.
+
+For detailed guidance, we encourage you to refer to the official documentation on the [LlamaFactory GitHub repository](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) and the [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). Additionally, the [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) provides valuable insights into the interface and its functionalities.
 
 ## Next Steps
 - Try different models such as `gpt-oss` and other state of the art models.
