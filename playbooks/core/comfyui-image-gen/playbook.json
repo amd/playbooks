@@ -3,6 +3,16 @@
   "title": "Generating images with ComfyUI and Z Image Turbo",
   "description": "Create stunning AI-generated images using ComfyUI with Z Image Turbo.",
   "time": 15,
+  "unsupported_platforms": {
+    "stx": [
+      { "platform": "windows", "reason": "Z Image Turbo is too large for this device" },
+      { "platform": "linux", "reason": "Z Image Turbo is too large for this device" }
+    ],
+    "krk": [
+      { "platform": "windows", "reason": "Z Image Turbo is too large for this device" },
+      { "platform": "linux", "reason": "Z Image Turbo is too large for this device" }
+    ]
+  },
   "supported_platforms": {
     "halo": [
       "windows",
