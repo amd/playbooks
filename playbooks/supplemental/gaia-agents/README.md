@@ -31,6 +31,7 @@ In this playbook, you'll build a Hardware Advisor Agent that detects your system
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
+> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
 
 <!-- @setup:software-update -->
 <!-- @device:end -->

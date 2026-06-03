@@ -35,6 +35,7 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
+> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
 
 <!-- @setup:software-update -->
 <!-- @device:end -->

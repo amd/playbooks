@@ -27,6 +27,7 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
+> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
 
 <!-- @setup:software-update -->
 <!-- @device:end -->

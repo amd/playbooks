@@ -35,6 +35,7 @@ This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a cod
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
+> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
 <!-- @setup:software-update -->
 <!-- @device:end -->
 

@@ -30,6 +30,7 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
+> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
 
 <!-- @setup:software-update -->
 <!-- @device:end -->
