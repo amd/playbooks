@@ -4,11 +4,10 @@ This document describes the expected platform configurations for running this pl
 
 ## Prerequisites
 
-PyTorch with ROCm support will be pre-installed on your AMD Developer Platform.
-
-| Component     | Version         | Notes                             |
-|---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 or newer    | Preinstalled, available in PATH   |
+| Component     | Version              | Notes                                                   |
+|---------------|----------------------|---------------------------------------------------------|
+| **PyTorch**   | 2.9 or newer (Linux) | Pre-installed on Linux AMD Developer Platforms          |
+| **PyTorch**   | 2.11.x + ROCm 7.13 (Windows) | Must be installed manually via AMD pip index   |
 
 ## Required Models
 

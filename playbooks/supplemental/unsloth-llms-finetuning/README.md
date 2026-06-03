@@ -22,6 +22,7 @@ Unsloth also supports other training approaches, including QLoRA and reinforceme
 
 ## Set up your environment
 
+<!-- @os:linux -->
 <!-- @device:halo_box -->
 Open a terminal and run the following prompt to create a venv with AMD ROCm™ software and Pytorch already installed:
 <!-- @test:id=create-venv timeout=120 -->
@@ -66,9 +67,59 @@ if not torch.cuda.is_available():
 print("PASS: ROCm-enabled PyTorch is visible")
 ```
 <!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+Open a PowerShell terminal and run the following steps.
+
+**Step 1 — Install Python 3.13**
+
+Skip if Python 3.13 is already installed. Restart your terminal after install.
+
+```powershell
+winget install -e --id Python.Python.3.13
+```
+
+**Step 2 — Create and activate a virtual environment**
+
+```powershell
+python -m venv unsloth_env
+.\unsloth_env\Scripts\activate
+```
+<!-- @os:end -->
+
+### Installing Basic Dependencies
+
+<!-- @os:windows -->
+Install PyTorch with ROCm 7.13 support for Ryzen AI Max (gfx1151). You **must** use torch 2.11.x — older wheels have a known `_grouped_mm` null kernel bug that was fixed in ROCm 7.13.
+
+```powershell
+pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ `
+    "torch==2.11.0+rocm7.13.0" `
+    "torchvision==0.26.0+rocm7.13.0" `
+    "torchaudio==2.11.0+rocm7.13.0"
+```
+
+Verify that PyTorch can see your GPU:
+
+```python
+import sys
+import torch
+
+print(f"Python executable: {sys.executable}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
+
+if not torch.cuda.is_available():
+    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
+
+print("PASS: ROCm-enabled PyTorch is visible")
+```
+<!-- @os:end -->
 
 ### Additional Dependencies
 
+<!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
@@ -77,8 +128,21 @@ pip install --no-deps --upgrade timm
 pip install datasets transformers trl
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
+<!-- @os:windows -->
+```powershell
+pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
+```
+<!-- @os:end -->
+
+<!-- @os:linux -->
 > **Note:** During import, Unsloth may probe optional `bitsandbytes` acceleration paths. On some ROCm versions, you may see a message such as `bitsandbytes library load error: Configured ROCm binary not found`. This playbook uses standard LoRA fine-tuning with `optim="adamw_torch"`, so we do not rely on the bitsandbytes optimizer or 4-bit QLoRA. Therefore, this message can be treated as non-blocking.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note:** On Windows ROCm, Unsloth will print several warnings at startup — see [Known Warnings](#known-warnings) below. These are all safe to ignore; training works correctly.
+<!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -234,6 +298,10 @@ print(f"Found adapter weights: {adapter_weights}")
 
 ### Save merged model (for vLLM) 
 
+<!-- @os:windows -->
+> **Note:** vLLM does not support Windows. To deploy your fine-tuned model on Windows, use llama.cpp (see [Export GGUF](#export-gguf-for-llamacpp) below) or transfer the merged model to a Linux machine running vLLM.
+<!-- @os:end -->
+
 For deployment with vLLM, merge the adapters into a full model:
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
@@ -277,6 +345,21 @@ Convert directly to GGUF for local inference:
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
+
+<!-- @os:windows -->
+## Known Warnings
+
+These warnings are printed by Unsloth at startup on Windows ROCm and are all safe to ignore:
+
+| Warning | Reason | Safe to ignore? |
+|---|---|---|
+| `bitsandbytes library load error` | bitsandbytes has no Windows ROCm build | Yes — this playbook uses `adamw_torch`, not bnb |
+| `No ROCm platform found for torch.distributed` | ROCm-on-Windows lacks distributed training | Yes — single-GPU training is unaffected |
+| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth flags non-Linux builds | Yes — Windows ROCm works for single-GPU SFT |
+| `triton is not available` | Triton has no Windows build | Yes — Unsloth falls back to PyTorch kernels |
+
+Training will proceed correctly despite these warnings.
+<!-- @os:end -->
 
 ## Next Steps
 - Train on your own specific datasets
