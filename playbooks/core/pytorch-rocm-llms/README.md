@@ -94,12 +94,8 @@ source llm-env/bin/activate
 
 ### Installing Additional Dependencies
 
-<!-- @device:halo,halo_box -->
-<!-- @var:id=hf_model value="openai/gpt-oss-20b" -->
-<!-- @device:end -->
-<!-- @device:stx,krk,rx7900xt,rx9070xt -->
-<!-- @var:id=hf_model value="Qwen/Qwen3.5-4B" -->
-<!-- @device:end -->
+<!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
+<!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt value="Qwen/Qwen3.5-4B" -->
 
 <!-- @device:halo,halo_box -->
 
@@ -226,20 +222,8 @@ model = AutoModelForImageTextToText.from_pretrained(
 <!-- @test:end -->
 <!-- @device:end -->
 
-<!-- @device:halo,halo_box -->
 ```python
-# Choose your model
-model_name = "openai/gpt-oss-20b"
-```
-<!-- @device:end -->
-<!-- @device:stx,krk,rx7900xt,rx9070xt -->
-```python
-# Choose your model
-model_name = "Qwen/Qwen3.5-4B"
-```
-<!-- @device:end -->
-
-```python
+model_name = "${hf_model}"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
