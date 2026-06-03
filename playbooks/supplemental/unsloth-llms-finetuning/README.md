@@ -133,6 +133,7 @@ pip install datasets transformers trl
 <!-- @os:windows -->
 ```powershell
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
+pip install triton-windows
 ```
 <!-- @os:end -->
 
