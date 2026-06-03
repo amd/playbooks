@@ -121,7 +121,7 @@ pip install transformers safetensors accelerate sentencepiece protobuf
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.9.0 safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -129,7 +129,7 @@ pip install transformers==5.9.0 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.2.0" safetensors accelerate sentencepiece protobuf
+pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -266,9 +266,6 @@ python summarizer.py --model ${hf_model}
 
 ```bash
 # Summarize the built-in example text (defaults to openai/gpt-oss-20b)
-python summarizer.py
-
-# On Strix Point / Krackan, use the compact Qwen3.5-4B model instead
 python summarizer.py --model ${hf_model}
 
 # Summarize a text file
