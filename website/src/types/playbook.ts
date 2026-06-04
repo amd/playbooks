@@ -52,7 +52,7 @@
  * 
  * ## Pre-installed Software Dropdowns
  * 
- * For software pre-installed on AMD Halo Developer Platform, use the `@require` tag
+ * For software pre-installed on AMD Ryzen AI Developer Platform, use the `@require` tag
  * to reference installation instructions from the central `dependencies/` folder:
  * 
  * ```markdown
