@@ -20,10 +20,22 @@
     ],
     "halo_box": [
       "linux"
+    ],
+    "stx": [
+      "linux"
+    ],
+    "krk": [
+      "linux"
     ]
   },
   "tested_platforms": {
     "halo": [
+      "linux"
+    ],
+    "stx": [
+      "linux"
+    ],
+    "krk": [
       "linux"
     ]
   },
@@ -31,12 +43,21 @@
     "halo": [
       "linux"
     ],
-    "halo_box": [
+    "stx": [
+      "linux"
+    ],
+    "krk": [
       "linux"
     ]
   },
   "published_platforms": {
     "halo": [
+      "linux"
+    ],
+    "stx": [
+      "linux"
+    ],
+    "krk": [
       "linux"
     ]
   },
