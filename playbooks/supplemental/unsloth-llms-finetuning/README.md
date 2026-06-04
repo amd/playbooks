@@ -22,12 +22,19 @@ Unsloth also supports other training approaches, including QLoRA and reinforceme
 
 ## Set up your environment
 
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+**Add your user to the render and video groups** to access the GPU:
+```bash
+sudo usermod -aG render,video $LOGNAME
+# Log out and log back in to apply settings, or run: exec su -l $USER
+```
+<!-- @device:end -->
+
 <!-- @device:halo_box -->
 Open a terminal and run the following prompt to create a venv with AMD ROCm™ software and Pytorch already installed:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
-sudo apt install -y python3-venv
 python3 -m venv unsloth-env --system-site-packages
 source unsloth-env/bin/activate
 ```
@@ -49,7 +56,7 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 ### Installing Basic Dependencies
-<!-- @require:rocm,pytorch,driver -->
+<!-- @require:pytorch,driver -->
 
 <!-- @test:id=verify-torch-env timeout=60 hidden=True setup=activate-venv -->
 ```python
@@ -72,13 +79,10 @@ print("PASS: ROCm-enabled PyTorch is visible")
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
-pip install --no-deps git+https://github.com/unslothai/unsloth-zoo.git
-pip install --no-deps --upgrade timm
-pip install datasets transformers trl
 ```
 <!-- @test:end -->
 
-> **Note:** During import, Unsloth may probe optional `bitsandbytes` acceleration paths. On some ROCm versions, you may see a message such as `bitsandbytes library load error: Configured ROCm binary not found`. This playbook uses standard LoRA fine-tuning with `optim="adamw_torch"`, so we do not rely on the bitsandbytes optimizer or 4-bit QLoRA. Therefore, this message can be treated as non-blocking.
+> **Note:** During import, Unsloth may probe optional `bitsandbytes` acceleration paths. On some ROCm versions, you may see a message such as `bitsandbytes library load error: Configured ROCm binary not found`. This playbook uses standard LoRA fine-tuning with `optim="adamw_torch"`, so we do not rely on the `bitsandbytes` optimizer or 4-bit QLoRA. Therefore, this message can be treated as non-blocking.
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
 ```python
