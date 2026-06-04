@@ -22,7 +22,7 @@ This playbook teaches you how to serve LLMs using containerized vLLM on the inte
 
 - How to set up and start a vLLM server with ROCm support
 - How to interact with models via OpenAI-compatible API endpoints
-- How to verify the local server and send chat completion requests
+- How to send prompts to the local server with `vllm-prompt`
 
 ## Starting vLLM
 
@@ -36,36 +36,18 @@ vllm-launch
 
 The launcher starts the container, targets the integrated GPU, and exposes a local OpenAI-compatible vLLM server.
 
-<!-- @test:id=vllm-launch-available-linux timeout=30 hidden=true -->
-```bash
-command -v vllm-launch
-```
-<!-- @test:end -->
-
 ## Quick Start
 
 ### 1. Confirm the vLLM Server Is Running
 
-After `vllm-launch` starts, the server is available at `http://localhost:8000`. Keep the launch terminal open because the server runs in the foreground, then open a separate terminal for the remaining steps. The examples below use `Qwen/Qwen3-1.7B`; if your launcher is configured for a different model, substitute that model ID in the requests.
+After `vllm-launch` starts, the server is available at `http://localhost:8001`. Keep the launch terminal open because the server runs in the foreground, then open a separate terminal for the remaining steps. The examples below use `Qwen/Qwen3-1.7B`; if your launcher is configured for a different model, substitute that model ID in the requests.
 
-### 2. Test the server with curl
+### 2. Send a Prompt
 
-Send a chat completion request directly to the local server:
+Use the provided `vllm-prompt` script to send a request to the local vLLM OpenAI-compatible server:
 
 ```bash
-curl -X POST "http://localhost:8000/v1/chat/completions" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "Qwen/Qwen3-1.7B",
-    "messages": [
-      {
-        "role": "user",
-        "content": "What is the sum of 123 and 456? Show your reasoning."
-      }
-    ],
-    "temperature": 0.7,
-    "max_tokens": 2048
-  }'
+vllm-prompt "Tell me a story"
 ```
 
 ### 3. Chat with the model using the OpenAI Python API
@@ -82,7 +64,7 @@ Create an `OpenAI` client pointed at the local vLLM server instead of OpenAI's s
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:8000/v1",
+    base_url="http://localhost:8001/v1",
     api_key="EMPTY",
 )
 ```
@@ -109,33 +91,10 @@ for chunk in response:
         print(content, end="", flush=True)
 ```
 
-You can run the complete example directly from the terminal:
+The included `chat_with_model.py` script contains the complete example. Run it from this playbook directory:
 
 ```bash
-python3 - <<'PY'
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="http://localhost:8000/v1",
-    api_key="EMPTY",
-)
-
-response = client.chat.completions.create(
-    model="Qwen/Qwen3-1.7B",
-    messages=[
-        {"role": "user", "content": "Tell me a short story"},
-    ],
-    max_tokens=2048,
-    stream=True,
-)
-
-for chunk in response:
-    content = chunk.choices[0].delta.content
-    if content:
-        print(content, end="", flush=True)
-
-print()
-PY
+python3 assets/chat_with_model.py
 ```
 
 ## Troubleshooting
@@ -144,7 +103,7 @@ PY
 
 Make sure the server is running:
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 ```
 
 ### Out of memory
@@ -168,8 +127,8 @@ vllm-launch
 In this playbook, you learned how to:
 
 - Start containerized vLLM with ROCm support on the integrated GPU
-- Start a vLLM server with OpenAI-compatible API endpoints on port 8000
-- Test the server using curl commands and API requests
+- Start a vLLM server with OpenAI-compatible API endpoints on port 8001
+- Send prompts with `vllm-prompt`
 - Make API calls to the vLLM server using both streaming and non-streaming requests
 - Troubleshoot common issues with server startup, memory, and client connections
 
