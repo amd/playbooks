@@ -153,6 +153,7 @@ sys.exit(r.returncode)
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @device:halo,halo_box -->
 <!-- @test:id=quick-train-full-finetuning timeout=1200 hidden=True setup=activate-venv -->
 ```python
 import os
@@ -165,6 +166,7 @@ r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```
 <!-- @test:end -->
+<!-- @device:end -->
 
 ### 2. Choose Your Method
 
@@ -191,6 +193,10 @@ Below is a summary of the available training methods. Each method links to its s
 | [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
 | [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
+
+<!-- @device:stx,krk -->
+> **Note:** Full fine-tuning (`train_full_finetuning.py`) may require more than 64GB of system RAM and may not be feasible on this device. Consider using LoRA or QLoRA instead.
+<!-- @device:end -->
 
 ---
 
@@ -344,6 +350,7 @@ print("PASS: QLoRA output looks correct")
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @device:halo,halo_box -->
 <!-- @test:id=verify-full-finetuning-output timeout=300 hidden=True setup=activate-venv -->
 ```python
 import glob
@@ -374,6 +381,7 @@ if not shards:
 print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 ```
 <!-- @test:end -->
+<!-- @device:end -->
 ---
 
 ## Customization Guide
