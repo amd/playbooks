@@ -15,6 +15,8 @@ SPDX-License-Identifier: MIT
 
 Write a GPU kernel from scratch, compile it, launch it on an AMD GPU, and watch utilization spike. This playbook shows how GPU computation actually works: write the kernel code, and execute it in parallel across thousands of threads.
 
+> **Note**: This is a fairly complex playbook, which may require some extra debugging and modifications.
+
 ## What You'll Learn
 
 <!-- @os:windows -->
@@ -101,19 +103,17 @@ AMD GPUs execute threads in groups of **32** called **wavefronts**. All threads 
 
 ---
 
-## Setup
+## Installing Software Prerequisites
 
 ### Create a Virtual Environment
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-<!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv kernel-env --system-site-packages
 kernel-env\Scripts\activate
 ```
-<!-- @test:end -->
 
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
@@ -123,14 +123,12 @@ kernel-env\Scripts\activate
 
 <!-- @os:linux -->
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-<!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
 python3 -m venv kernel-env --system-site-packages
 source kernel-env/bin/activate
 ```
-<!-- @test:end -->
 <!-- @setup:id=activate-venv command="source kernel-env/bin/activate" -->
 <!-- @os:end -->
 <!-- @device:end -->
@@ -138,12 +136,10 @@ source kernel-env/bin/activate
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
-<!-- @test:id=create-venv timeout=60 -->
-```bash
+```powershell
 python -m venv kernel-env
 kernel-env\Scripts\activate
 ```
-<!-- @test:end -->
 
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
@@ -169,19 +165,22 @@ source kernel-env/bin/activate
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
-<!-- @require:driver,rocm,pytorch -->
+<!-- @require:rocm,pytorch -->
 <!-- @os:end -->
 <!-- @os:windows -->
-<!-- @require:driver,pytorch -->
+<!-- @require:driver,rocm,pytorch -->
 <!-- @os:end -->
 
 ---
 
 ### Installing Additional Dependencies
+
 ```bash
-pip install --upgrade pip setuptools wheel
+pip install --upgrade setuptools wheel
 ```
 <!-- @os:windows -->
+Please ensure [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) is installed.
+
 Open a Powershell terminal and activate Visual Studio environment C++ dependencies.
 ```bash
 cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 && set' | ForEach-Object { if ($_ -match '^([^=]+)=(.*)$') { [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
@@ -194,7 +193,9 @@ cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Bu
 ```bash
 rocm-sdk init # Initialize the devel libraries
 
-export ROCM_HOME="$VIRTUAL_ENV/lib/python3.12/site-packages/_rocm_sdk_devel"
+# Get the active Python version (e.g. "3.13") so the path works with any Python release
+PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
 export PATH="$ROCM_HOME/bin:$PATH"
 ```
