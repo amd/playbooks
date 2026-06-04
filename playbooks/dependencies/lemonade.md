@@ -33,7 +33,7 @@ sudo apt install lemonade-server
 yay -S lemonade-server
 ```
 
-For other distributions or to install from source, see the [full installation options](https://lemonade-server.ai/install_options.html).
+For other distributions or to install from source, see the [full installation options](https://lemonade-server.ai/docs/guide/install/).
 <!-- @os:end -->
 
 

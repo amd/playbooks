@@ -9,6 +9,11 @@ CI-friendly Unsloth training script (Gemma-4)
 """
 
 import os
+# CI stability: avoid Torch Inductor / Unsloth compiled generation issues on ROCm.
+# These must be set before importing unsloth.
+os.environ.setdefault("UNSLOTH_COMPILE_DISABLE", "1")
+os.environ.setdefault("UNSLOTH_DISABLE_FAST_GENERATION", "1")
+
 import time
 import unsloth
 import torch
