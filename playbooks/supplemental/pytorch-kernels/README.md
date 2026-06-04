@@ -182,7 +182,7 @@ pip install --upgrade setuptools wheel
 Please ensure [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) is installed.
 
 Open a Powershell terminal and activate Visual Studio environment C++ dependencies.
-```bash
+```powershell
 cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 && set' | ForEach-Object { if ($_ -match '^([^=]+)=(.*)$') { [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
 ```
 <!-- @os:end -->
@@ -212,7 +212,7 @@ export DISTUTILS_USE_SDK=1
 
 <!-- @os:windows -->
 #### Windows
-```bash
+```powershell
 rocm-sdk init # Initialize the devel libraries
 
 $ROCM_ROOT = (rocm-sdk path --root).Trim()
