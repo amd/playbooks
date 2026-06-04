@@ -3,6 +3,17 @@
   "title": "Quick Start on vLLM",
   "description": "Learn how to run inference and serving using vLLM on your STX Halo\u2122",
   "time": 90,
+  "unsupported_platforms": {
+    "halo": [
+      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+    ],
+    "stx": [
+      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+    ],
+    "krk": [
+      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+    ]
+  },
   "supported_platforms": {
     "halo": [
       "linux"

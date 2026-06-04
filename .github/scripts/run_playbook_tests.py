@@ -102,15 +102,17 @@ Reusable @var definitions (device-aware values):
     id, container tag, or endpoint) depending on which device the runner was
     invoked with via ``--device``.
 
-    Definition syntax (place anywhere in the README before first use):
+    Definition syntax (place anywhere in the README before first use). The
+    preferred form uses an inline ``device=`` attribute:
+        <!-- @var:id=lemonade_model device=halo,halo_box value="gpt-oss-120b-mxfp-GGUF" -->
+        <!-- @var:id=lemonade_model device=stx,krk,rx7900xt,rx9070xt value="gpt-oss-20b-mxfp4-GGUF" -->
+
+    The device(s) may also be inferred from a surrounding @device: block:
         <!-- @device:halo,halo_box -->
         <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
         <!-- @device:end -->
-        <!-- @device:stx,krk,rx7900xt,rx9070xt -->
-        <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
-        <!-- @device:end -->
 
-    Or for a value that applies to all devices (outside @device: blocks):
+    Or for a value that applies to all devices (no device= and no @device: block):
         <!-- @var:id=api_port value="13305" -->
 
     Reference inside test code with ``${name}`` syntax:
@@ -338,10 +340,16 @@ def resolve_setup(
 def extract_var_definitions(content: str) -> dict[str, dict[str, str]]:
     """Extract reusable @var definitions from README content.
 
-    Supports @var definitions wrapped in @device: blocks, where the target
-    device(s) are inferred from the surrounding tag. Comma-separated device
-    lists in the surrounding ``@device:halo,halo_box`` tag fan out into one
-    key per device in the returned mapping.
+    The target device(s) for a definition can be specified two ways:
+
+    1. An inline ``device=`` attribute on the @var tag itself (preferred, as it
+       reads in a single line and renders cleanly on the website):
+
+        <!-- @var:id=lemonade_model device=halo,halo_box value="gpt-oss-120b-mxfp-GGUF" -->
+        <!-- @var:id=lemonade_model device=stx,krk,rx7900xt,rx9070xt value="gpt-oss-20b-mxfp4-GGUF" -->
+
+    2. A surrounding @device: block, where the device(s) are inferred from the
+       enclosing tag:
 
         <!-- @device:halo,halo_box -->
         <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
@@ -350,8 +358,12 @@ def extract_var_definitions(content: str) -> dict[str, dict[str, str]]:
         <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
         <!-- @device:end -->
 
-    Definitions outside any @device: block apply to all devices and are stored
-    under the ``"all"`` key:
+    The inline ``device=`` attribute takes precedence over the enclosing block.
+    Comma-separated device lists fan out into one key per device in the
+    returned mapping.
+
+    Definitions with neither an inline ``device=`` nor an enclosing @device:
+    block apply to all devices and are stored under the ``"all"`` key:
         <!-- @var:id=api_port value="13305" -->
 
     Returns a dict mapping var_id -> {device: value}, e.g.:
@@ -392,12 +404,15 @@ def extract_var_definitions(content: str) -> dict[str, dict[str, str]]:
             )
             continue
 
-        # Determine target devices from the innermost enclosing @device: block
-        device_value: Optional[str] = None
-        for dev_val, start, end in device_blocks:
-            if start <= match_pos < end:
-                device_value = dev_val
-                break  # blocks are sorted innermost-first
+        # Determine target devices: an inline device= attribute takes
+        # precedence; otherwise fall back to the innermost enclosing
+        # @device: block.
+        device_value: Optional[str] = attrs.get("device")
+        if device_value is None:
+            for dev_val, start, end in device_blocks:
+                if start <= match_pos < end:
+                    device_value = dev_val
+                    break  # blocks are sorted innermost-first
 
         if var_id not in var_defs:
             var_defs[var_id] = {}
@@ -828,10 +843,11 @@ def run_test(
 
         print(f"Exit code: {result.returncode}")
         print(f"Duration: {duration:.2f}s")
+        console_log_chars = 10000
         if result.stdout:
-            print(f"STDOUT (last 500 chars):\n{result.stdout[-500:]}")
+            print(f"STDOUT (last {console_log_chars} chars):\n{result.stdout[-console_log_chars:]}")
         if result.stderr:
-            print(f"STDERR (last 500 chars):\n{result.stderr[-500:]}")
+            print(f"STDERR (last {console_log_chars} chars):\n{result.stderr[-console_log_chars:]}")
 
         return TestResult(
             test_id=test.id,
@@ -888,7 +904,7 @@ def write_failure_metadata(
     failures_dir.mkdir(parents=True, exist_ok=True)
 
     # Bound the captured log size so issue bodies stay within GitHub's limits.
-    max_log_chars = 8000
+    max_log_chars = 10000
     stdout_excerpt = result.stdout[-max_log_chars:] if result.stdout else ""
     stderr_excerpt = result.stderr[-max_log_chars:] if result.stderr else ""
 
