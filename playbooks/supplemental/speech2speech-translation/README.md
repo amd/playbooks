@@ -175,34 +175,6 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 ```
 <!-- @test:end -->
 
-<!-- @test:id=verify-local-model-assets timeout=120 setup=activate-venv hidden=True -->
-```python
-import os
-import sys
-import platform
-from transformers import AutoProcessor
-
-model_dir = os.environ.get("S2S_MODEL_PATH")
-if not model_dir:
-    if platform.system() == "Windows":
-        model_dir = r"C:\ModelCache\speech2speech\models\seamless-m4t-v2-large"
-    else:
-        model_dir = "/opt/model_cache/speech2speech/models/seamless-m4t-v2-large"
-
-if not os.path.isdir(model_dir):
-    print(f"FAIL: Local model directory not found: {model_dir}")
-    sys.exit(1)
-
-print(f"PASS: Found local model directory: {model_dir}")
-
-try:
-    _ = AutoProcessor.from_pretrained(model_dir)
-    print("PASS: AutoProcessor can be loaded from local model directory")
-except Exception as e:
-    print(f"FAIL: Could not load processor from {model_dir}: {e}")
-    sys.exit(1)
-```
-<!-- @test:end -->
 
 ## Set up the speech-to-speech demo
 
@@ -354,23 +326,18 @@ def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     print(f"Output saved to: {output_path}")
 ```
 
-
-
 <!-- @os:windows -->
 <!-- @test:id=infer-smoke-windows timeout=1800 setup=activate-venv hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 Remove-Item .\out1.wav -Force -ErrorAction SilentlyContinue
 
-$env:S2S_MODEL_PATH = "C:\ModelCache\speech2speech\models\seamless-m4t-v2-large"
-
-if (-not (Test-Path $env:S2S_MODEL_PATH)) { throw "FAIL: Model directory not found: $env:S2S_MODEL_PATH" }
 if (-not (Test-Path .\input1.wav)) { throw "FAIL: input1.wav not found in current directory" }
 
 python .\infer.py
 if ($LASTEXITCODE -ne 0) { throw "infer.py failed" }
-if (-not (Test-Path .\out1.wav)) { throw "FAIL: out1.wav was not created" }
 
+if (-not (Test-Path .\out1.wav)) { throw "FAIL: out1.wav was not created" }
 $file = Get-Item .\out1.wav
 if ($file.Length -le 0) { throw "FAIL: out1.wav is empty" }
 
@@ -385,24 +352,17 @@ Write-Host "PASS: infer.py created out1.wav successfully"
 set -euo pipefail
 rm -f ./out1.wav
 
-export S2S_MODEL_PATH=/opt/model_cache/speech2speech/models/seamless-m4t-v2-large
-
-if [ ! -d "$S2S_MODEL_PATH" ]; then
-  echo "FAIL: Model directory not found: $S2S_MODEL_PATH"
-  exit 1
-fi
-
 if [ ! -f ./input1.wav ]; then
   echo "FAIL: input1.wav not found in current directory"
   exit 1
 fi
 
 python ./infer.py
+
 if [ ! -f ./out1.wav ]; then
   echo "FAIL: out1.wav was not created"
   exit 1
 fi
-
 if [ ! -s ./out1.wav ]; then
   echo "FAIL: out1.wav is empty"
   exit 1
@@ -412,9 +372,6 @@ echo "PASS: infer.py created out1.wav successfully"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
-
-
-
 
 ### Running the Gradio UI demo:
 
@@ -439,7 +396,6 @@ Then, open your web browser at `http://127.0.0.1:7860` to access the UI.
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$env:S2S_MODEL_PATH = "C:\ModelCache\speech2speech\models\seamless-m4t-v2-large"
 $script = @'
 import os
 import sys
@@ -501,7 +457,6 @@ Remove-Item $tempPy -Force -ErrorAction SilentlyContinue
 ```bash
 set -euo pipefail
 
-export S2S_MODEL_PATH=/opt/model_cache/speech2speech/models/seamless-m4t-v2-large
 python - <<'PY'
 import os
 import sys
