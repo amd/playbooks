@@ -1,3 +1,14 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+<!-- @github-only -->
+> [!IMPORTANT]
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+<!-- @github-only:end -->
+
 ## Overview
 
 This playbook shows how to fine-tune a language model locally with Unsloth on AMD hardware.
@@ -20,30 +31,43 @@ In this playbook, we use Unsloth together with **LoRA-based SFT**. That means th
 
 Unsloth also supports other training approaches, including QLoRA and reinforcement learning workflows. This playbook focuses on the simplest path first: a small LoRA fine-tuning example that users can run, understand, and extend.
 
-## Set up your environment
+## Setting the Memory Configuration
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-**Add your user to the render and video groups** to access the GPU:
-```bash
-sudo usermod -aG render,video $LOGNAME
-# Log out and log back in to apply settings, or run: exec su -l $USER
-```
-<!-- @device:end -->
+<!-- @setup:memory-config -->
 
 <!-- @device:halo_box -->
-Open a terminal and run the following prompt to create a venv with AMD ROCm™ software and Pytorch already installed:
+## Check for Software Updates
+
+> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
+
+<!-- @setup:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
+
+### Create a Virtual Environment
+
+<!-- @os:linux -->
+<!-- @device:halo_box -->
+Open a terminal and create a venv with AMD ROCm™ software and PyTorch already installed:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 python3 -m venv unsloth-env --system-site-packages
 source unsloth-env/bin/activate
 ```
-<!-- @test:end --> 
-<!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" --> 
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-Open a terminal and run the following prompt to create a venv:
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+
+Open a terminal and create a venv:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -51,11 +75,24 @@ sudo apt install -y python3-venv
 python3 -m venv unsloth-env
 source unsloth-env/bin/activate
 ```
-<!-- @test:end --> 
-<!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" --> 
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" -->
 <!-- @device:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note:** Python 3.13 is required for Windows.
+
+Open a PowerShell terminal and create a virtual environment:
+
+```powershell
+python -m venv unsloth_env
+.\unsloth_env\Scripts\activate
+```
+<!-- @os:end -->
 
 ### Installing Basic Dependencies
+
 <!-- @require:pytorch,driver -->
 
 <!-- @test:id=verify-torch-env timeout=60 hidden=True setup=activate-venv -->
@@ -73,55 +110,6 @@ if not torch.cuda.is_available():
 print("PASS: ROCm-enabled PyTorch is visible")
 ```
 <!-- @test:end -->
-<!-- @os:end -->
-
-<!-- @os:windows -->
-Open a PowerShell terminal and run the following steps.
-
-**Step 1 — Install Python 3.13**
-
-Skip if Python 3.13 is already installed. Restart your terminal after install.
-
-```powershell
-winget install -e --id Python.Python.3.13
-```
-
-**Step 2 — Create and activate a virtual environment**
-
-```powershell
-python -m venv unsloth_env
-.\unsloth_env\Scripts\activate
-```
-<!-- @os:end -->
-
-### Installing Basic Dependencies
-
-<!-- @os:windows -->
-Install PyTorch with ROCm 7.13 support for Ryzen AI Max (gfx1151). You **must** use torch 2.11.x — older wheels have a known `_grouped_mm` null kernel bug that was fixed in ROCm 7.13.
-
-```powershell
-pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ `
-    "torch==2.11.0+rocm7.13.0" `
-    "torchvision==0.26.0+rocm7.13.0" `
-    "torchaudio==2.11.0+rocm7.13.0"
-```
-
-Verify that PyTorch can see your GPU:
-
-```python
-import sys
-import torch
-
-print(f"Python executable: {sys.executable}")
-print(f"PyTorch version: {torch.__version__}")
-print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
-
-if not torch.cuda.is_available():
-    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
-
-print("PASS: ROCm-enabled PyTorch is visible")
-```
-<!-- @os:end -->
 
 ### Additional Dependencies
 
@@ -133,7 +121,6 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Note:** During import, Unsloth may probe optional `bitsandbytes` acceleration paths. On some ROCm versions, you may see a message such as `bitsandbytes library load error: Configured ROCm binary not found`. This playbook uses standard LoRA fine-tuning with `optim="adamw_torch"`, so we do not rely on the `bitsandbytes` optimizer or 4-bit QLoRA. Therefore, this message can be treated as non-blocking.
 <!-- @os:windows -->
 ```powershell
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
@@ -141,9 +128,7 @@ pip install triton-windows
 ```
 <!-- @os:end -->
 
-<!-- @os:linux -->
-> **Note:** During import, Unsloth may probe optional `bitsandbytes` acceleration paths. On some ROCm versions, you may see a message such as `bitsandbytes library load error: Configured ROCm binary not found`. This playbook uses standard LoRA fine-tuning with `optim="adamw_torch"`, so we do not rely on the bitsandbytes optimizer or 4-bit QLoRA. Therefore, this message can be treated as non-blocking.
-<!-- @os:end -->
+> **Note:** During import, Unsloth may probe optional `bitsandbytes` acceleration paths. On some ROCm versions, you may see a message such as `bitsandbytes library load error: Configured ROCm binary not found`. This playbook uses standard LoRA fine-tuning with `optim="adamw_torch"`, so we do not rely on the `bitsandbytes` optimizer or 4-bit QLoRA. This message can be safely ignored.
 
 <!-- @os:windows -->
 > **Note:** On Windows ROCm, Unsloth will print several warnings at startup — see [Known Warnings](#known-warnings) below. These are all safe to ignore; training works correctly.
@@ -307,10 +292,12 @@ print(f"Found adapter weights: {adapter_weights}")
 > **Note:** vLLM does not support Windows. To deploy your fine-tuned model on Windows, use llama.cpp (see [Export GGUF](#export-gguf-for-llamacpp) below) or transfer the merged model to a Linux machine running vLLM.
 <!-- @os:end -->
 
+<!-- @os:linux -->
 For deployment with vLLM, merge the adapters into a full model:
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
+<!-- @os:end -->
 
 <!-- @test:id=verify-unsloth-merged-output timeout=120 hidden=True setup=activate-venv -->
 ```python
