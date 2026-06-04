@@ -56,7 +56,7 @@ pip --version
 
 ### Installing Additional Dependencies
 
-- **Python**: ensure minimum version is 3.11
+- **Note**: Ensure Python version is 3.11, 3.12, or 3.13
 ```bash
 pip install huggingface_hub
 ```
