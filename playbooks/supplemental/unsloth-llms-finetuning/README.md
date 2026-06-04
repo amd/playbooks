@@ -78,6 +78,8 @@ pip install datasets transformers trl
 ```
 <!-- @test:end -->
 
+> **Note:** During import, Unsloth may probe optional `bitsandbytes` acceleration paths. On some ROCm versions, you may see a message such as `bitsandbytes library load error: Configured ROCm binary not found`. This playbook uses standard LoRA fine-tuning with `optim="adamw_torch"`, so we do not rely on the bitsandbytes optimizer or 4-bit QLoRA. Therefore, this message can be treated as non-blocking.
+
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
 ```python
 import unsloth
@@ -131,6 +133,8 @@ for script in scripts:
 
 <!-- @test:id=quick-train-unsloth timeout=2400 hidden=True setup=activate-venv -->
 ```bash
+rm -rf unsloth_compiled_cache
+rm -rf ~/.cache/torch/inductor ~/.cache/torch_extensions
 python test_unsloth_ci.py
 ```
 <!-- @test:end -->
@@ -272,20 +276,6 @@ print("PASS: Merged model output looks correct")
 Convert directly to GGUF for local inference:
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
-```
-
-## Explore Lower-Memory (4-bit) Fine-Tuning
-
-This playbook uses standard LoRA fine-tuning. If you need lower memory usage with minimal quality loss, a natural next step is to explore QLoRA with a supported 4-bit model and runtime stack.
-
-QLoRA keeps the same adapter-based training idea as LoRA, but uses a quantized 4-bit base model underneath. This can reduce memory usage further, but compatibility depends on the model, backend, and low-bit kernel support in the software stack.
-
-Before switching to QLoRA, verify that your chosen model and your AMD hardware/software environment support the required quantized runtime path.
-
-An example on how you can enable 4-bit quantization by using a 4-bit quantized model:
-```python
-load_in_4bit = True
-model_name = "unsloth/gemma-4-E4B-it-unsloth-bnb-4bit"
 ```
 
 ## Next Steps
