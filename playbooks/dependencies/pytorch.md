@@ -42,5 +42,9 @@ python -m pip install  --index-url https://repo.amd.com/rocm/whl/gfx1150/ torch 
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt -->
-See [this link](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/native_linux/install-ryzen.html) for details.
+```bash
+python -m pip install  --index-url https://repo.amd.com/rocm/whl/gfx1200-all/ torch torchvision torchaudio
+```
 <!-- @device:end -->
+
+For other devices, please refer to [this link](https://rocm.docs.amd.com/en/7.13.0-preview/frameworks/pytorch/install.html?fam=ryzen&os=windows&pytorch-ver=2.11.0&w=compute&gpu=max-pro-395&gfx=gfx1151) for full instructions.
