@@ -79,9 +79,17 @@ lms chat "$ID" -p "Reply with exactly: OK"
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @device:halo,halo_box -->
 <p align="center">
   <img src="assets/chat.png" alt="Chatting with ${model_name} on LM Studio" width="600"/>
 </p>
+<!-- @device:end -->
+
+<!-- @device:stx,krk -->
+<p align="center">
+  <img src="assets/chat_qwen.png" alt="Chatting with ${model_name} on LM Studio" width="600"/>
+</p>
+<!-- @device:end -->
 
 > **Tip**: Context length refers to the model's memory. Flash attention improves processing speed while reducing memory usage. GPU Offload shifts compute to the graphics card for faster responses.
 
