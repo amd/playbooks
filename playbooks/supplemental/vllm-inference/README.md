@@ -106,14 +106,6 @@ Make sure the server is running:
 curl http://localhost:8001/health
 ```
 
-### Out of memory
-
-If the launcher exits with an out-of-memory error, use a smaller model or reduce the configured context length before restarting:
-
-```bash
-vllm-launch
-```
-
 ## Requirements
 
 ### For vLLM Server
