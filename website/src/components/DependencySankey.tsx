@@ -163,30 +163,30 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
       }
     });
 
-    // Combine vllm and docker into a single entry
+    // Combine vllm and the container runtime into a single entry
     const vllmKey = "Framework:vllm";
-    const dockerKey = "Framework:docker";
+    const containerRuntimeKey = "Framework:docker";
     
-    if (softwareMap.has(vllmKey) && softwareMap.has(dockerKey)) {
+    if (softwareMap.has(vllmKey) && softwareMap.has(containerRuntimeKey)) {
       const vllm = softwareMap.get(vllmKey)!;
-      const docker = softwareMap.get(dockerKey)!;
+      const containerRuntime = softwareMap.get(containerRuntimeKey)!;
       
       // Create combined entry
       softwareMap.set(vllmKey, {
         type: vllm.type,
-        name: "vllm (+docker)",
-        linux: vllm.linux || docker.linux,
-        windows: vllm.windows || docker.windows,
+        name: "vllm (+container)",
+        linux: vllm.linux || containerRuntime.linux,
+        windows: vllm.windows || containerRuntime.windows,
       });
       
-      // Remove separate docker entry
-      softwareMap.delete(dockerKey);
+      // Remove separate container runtime entry
+      softwareMap.delete(containerRuntimeKey);
     } else if (softwareMap.has(vllmKey)) {
-      // If vllm exists without docker, still rename it
+      // If vllm exists without the runtime entry, still rename it
       const vllm = softwareMap.get(vllmKey)!;
       softwareMap.set(vllmKey, {
         ...vllm,
-        name: "vllm (+docker)",
+        name: "vllm (+container)",
       });
     }
 
@@ -371,4 +371,3 @@ export default function DependencySankey({ data, title }: DependencySankeyProps)
     </div>
   );
 }
-
