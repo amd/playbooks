@@ -1405,8 +1405,8 @@ You've learned to write, compile, and launch GPU kernels using both JIT compilat
 - **Memory coalescing** - Optimize memory access patterns for bandwidth
 
 **Real-world algorithms:**
-- **2D Convolution** - Image filtering and neural network layers
-- **Reductions** - Parallel sums, max finding, softmax operations
+- **2D Convolution** - A small filter (kernel) slides across an image, computing each output pixel from a weighted sum of neighboring pixels. This introduces stencil computations and shared memory tiling, where threads reuse overlapping image regions to reduce global memory access.
+- **Softmax Function**: Softmax converts a vector of numbers into probabilities that sum to 1, commonly used in neural network outputs. Implementing it efficiently on GPU introduces parallel reductions and numerical stability techniques while processing large vectors.
 
 **Production considerations:**
 - **Error handling** - Bounds checking and device management
