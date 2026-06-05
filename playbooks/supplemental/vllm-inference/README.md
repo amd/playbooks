@@ -10,8 +10,6 @@ SPDX-License-Identifier: MIT
 <!-- @github-only:end -->
 
 
-# High-Performance LLM Inference with vLLM
-
 ## Overview
 
 vLLM is a high-performance inference engine designed for large language models (LLMs). It provides optimized serving with continuous batching for high throughput and an OpenAI-compatible API for seamless application integration. This makes vLLM great for production deployments where speed and resource efficiency are critical.

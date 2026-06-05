@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Live Speech2Speech Translation on AMD Radeon™ GPU
-
 ## Overview
 
 The AMD ROCm™ software and PyTorch stack create a unified ecosystem for on-device AI. It works for both Windows and Linux with official support for a wide range of devices including Ryzen™ AI APUs and Radeon™ GPUs.

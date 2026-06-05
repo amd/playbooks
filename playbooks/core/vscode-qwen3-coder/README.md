@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Local LLM coding with VSCode and Qwen3-Coder-30B
-
 <!-- @device:stx,krk -->
 > [!NOTE]
 > This playbook requires a minimum of **32GB** of system memory.
