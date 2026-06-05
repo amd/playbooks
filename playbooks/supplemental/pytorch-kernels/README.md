@@ -118,7 +118,6 @@ kernel-env\Scripts\activate
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate.bat" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -143,12 +142,10 @@ kernel-env\Scripts\activate
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate.bat" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
-<!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
