@@ -1,3 +1,14 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+<!-- @github-only -->
+> [!IMPORTANT]
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+<!-- @github-only:end -->
+
 ## Overview
 
 This playbook shows how to fine-tune a language model locally with Unsloth on AMD hardware.
@@ -20,23 +31,31 @@ In this playbook, we use Unsloth together with **LoRA-based SFT**. That means th
 
 Unsloth also supports other training approaches, including QLoRA and reinforcement learning workflows. This playbook focuses on the simplest path first: a small LoRA fine-tuning example that users can run, understand, and extend.
 
-## Set up your environment
+## Installing Software Prerequisites
 
+### Create a Virtual Environment
+
+<!-- @os:linux -->
 <!-- @device:halo_box -->
-Open a terminal and run the following prompt to create a venv with AMD ROCm™ software and Pytorch already installed:
+Open a terminal and create a venv with AMD ROCm™ software and PyTorch already installed:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
-sudo apt install -y python3-venv
 python3 -m venv unsloth-env --system-site-packages
 source unsloth-env/bin/activate
 ```
-<!-- @test:end --> 
-<!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" --> 
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-Open a terminal and run the following prompt to create a venv:
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+
+Open a terminal and create a venv:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -44,12 +63,25 @@ sudo apt install -y python3-venv
 python3 -m venv unsloth-env
 source unsloth-env/bin/activate
 ```
-<!-- @test:end --> 
-<!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" --> 
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" -->
 <!-- @device:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note:** Python 3.13 is required for Windows.
+
+Open a PowerShell terminal and create a virtual environment:
+
+```powershell
+python -m venv unsloth_env
+.\unsloth_env\Scripts\activate
+```
+<!-- @os:end -->
 
 ### Installing Basic Dependencies
-<!-- @require:rocm,pytorch,driver -->
+
+<!-- @require:pytorch,driver -->
 
 <!-- @test:id=verify-torch-env timeout=60 hidden=True setup=activate-venv -->
 ```python
@@ -69,16 +101,28 @@ print("PASS: ROCm-enabled PyTorch is visible")
 
 ### Additional Dependencies
 
+<!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
-pip install --no-deps git+https://github.com/unslothai/unsloth-zoo.git
-pip install --no-deps --upgrade timm
-pip install datasets transformers trl
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
-> **Note:** During import, Unsloth may probe optional `bitsandbytes` acceleration paths. On some ROCm versions, you may see a message such as `bitsandbytes library load error: Configured ROCm binary not found`. This playbook uses standard LoRA fine-tuning with `optim="adamw_torch"`, so we do not rely on the bitsandbytes optimizer or 4-bit QLoRA. Therefore, this message can be treated as non-blocking.
+<!-- @os:windows -->
+<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+```powershell
+pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
+pip install triton-windows
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+> **Note:** During import, Unsloth may probe optional `bitsandbytes` acceleration paths. On some ROCm versions, you may see a message such as `bitsandbytes library load error: Configured ROCm binary not found`. This playbook uses standard LoRA fine-tuning with `optim="adamw_torch"`, so we do not rely on the `bitsandbytes` optimizer or 4-bit QLoRA. This message can be safely ignored.
+
+<!-- @os:windows -->
+> **Note:** On Windows ROCm, Unsloth will print several warnings at startup — see [Known Warnings](#known-warnings) below. These are all safe to ignore; training works correctly.
+<!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -234,10 +278,16 @@ print(f"Found adapter weights: {adapter_weights}")
 
 ### Save merged model (for vLLM) 
 
+<!-- @os:windows -->
+> **Note:** vLLM does not support Windows. To deploy your fine-tuned model on Windows, use llama.cpp (see [Export GGUF](#export-gguf-for-llamacpp) below) or transfer the merged model to a Linux machine running vLLM.
+<!-- @os:end -->
+
+<!-- @os:linux -->
 For deployment with vLLM, merge the adapters into a full model:
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
+<!-- @os:end -->
 
 <!-- @test:id=verify-unsloth-merged-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -278,10 +328,25 @@ Convert directly to GGUF for local inference:
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
 
+<!-- @os:windows -->
+## Known Warnings
+
+These warnings are printed by Unsloth at startup on Windows ROCm and are all safe to ignore:
+
+| Warning | Reason | Safe to ignore? |
+|---|---|---|
+| `bitsandbytes library load error` | bitsandbytes has no Windows ROCm build | Yes — this playbook uses `adamw_torch`, not bnb |
+| `No ROCm platform found for torch.distributed` | ROCm-on-Windows lacks distributed training | Yes — single-GPU training is unaffected |
+| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth flags non-Linux builds | Yes — Windows ROCm works for single-GPU SFT |
+| `triton is not available` | Triton has no Windows build | Yes — Unsloth falls back to PyTorch kernels |
+
+Training will proceed correctly despite these warnings.
+<!-- @os:end -->
+
 ## Next Steps
+- Try [Unsloth Studio](https://unsloth.ai/docs/new/studio), an intuitive GUI for Unsloth
 - Train on your own specific datasets
 - Try finetuning with different hyperparameters
-- Experiment with different quantization levels to understand the tradeoff between memory usage and quality
 - Deploy with vLLM or llama.cpp
 - Try QLoRA for a lower-memory setup
 
