@@ -1,8 +1,8 @@
 {
   "id": "speech2speech-translation",
-  "title": "Speech-to-Speech Translation",
+  "title": "Real-Time Speech-to-Speech Translation",
   "description": "Build a real-time speech-to-speech translation on your local hardware.",
-  "time": 20,
+  "time": 30,
   "supported_platforms": {
     "halo": [
       "linux",
