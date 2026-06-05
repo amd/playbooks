@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision torchaudio
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -17,7 +17,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch t
 <!-- @device:krk -->
 <!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ torch torchvision torchaudio
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -25,7 +25,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ torch t
 <!-- @device:stx -->
 <!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ torch torchvision torchaudio
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
