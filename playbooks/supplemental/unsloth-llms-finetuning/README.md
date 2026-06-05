@@ -342,9 +342,9 @@ Training will proceed correctly despite these warnings.
 <!-- @os:end -->
 
 ## Next Steps
+- Try [Unsloth Studio](https://unsloth.ai/docs/new/studio), an intuitive GUI for Unsloth
 - Train on your own specific datasets
 - Try finetuning with different hyperparameters
-- Experiment with different quantization levels to understand the tradeoff between memory usage and quality
 - Deploy with vLLM or llama.cpp
 - Try QLoRA for a lower-memory setup
 
