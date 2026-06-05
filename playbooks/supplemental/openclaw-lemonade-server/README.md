@@ -79,42 +79,6 @@ The model has a default context length of 262,144 tokens. If you encounter out-o
 >
 > This registers the model as `user.Qwen3.6-35B-A3B-NoThinking`. If you use this variant, replace `Qwen3.6-35B-A3B-GGUF` with `user.Qwen3.6-35B-A3B-NoThinking` in the OpenClaw onboard command below.
 
-> **OpenClaw context window sizing:** OpenClaw's compaction triggers when `contextTokens > contextWindow − reserveTokens`. The default `reserveTokensFloor` is 20,000 tokens, a floor that overrides `reserveTokens` when lower, so any model context below ~37k will trigger an infinite compaction loop. Set a low reserve and disable the floor once in your config and it applies to every model, no per-model tuning needed:
->
-> ```json
-> "compaction": {
->   "reserveTokens": 4096,
->   "reserveTokensFloor": 0
-> }
-> ```
->
-> `reserveTokensFloor` is a *floor* (minimum guard), not the reserve itself, setting only the floor has no effect. `reserveTokensFloor: 0` disables the guard so the lower `reserveTokens` is accepted.
->
-> **When to apply this:** Use this config if your model's effective context window is below ~37k, either because the model is small (e.g. 8k, 16k, 32k) or because you've intentionally capped it to a lower value (e.g. loading a 128k model but setting context to 16k in Lemonade). Without it, OpenClaw enters an infinite compaction loop on startup.
->
-> **Large-context models at full context:** You can skip this entirely. The defaults work fine, compaction will kick in well before the window fills and the model has ample room to generate long responses. If you do apply it, be aware that `reserveTokens: 4096` limits response length to ~4k tokens, which may cut off long file generation or detailed plans.
->
-> **Where to add this:** Place the `compaction` block inside `agents.defaults` in your `openclaw.json` (usually at `~/.openclaw/openclaw.json`):
->
-> ```json
-> {
->   "agents": {
->     "defaults": {
->       "workspace": "/home/<you>/.openclaw/workspace",
->       "model": {
->         "primary": "lemonade/<your-model-id>"
->       },
->       "compaction": {
->         "reserveTokens": 4096,
->         "reserveTokensFloor": 0
->       }
->     }
->   }
-> }
-> ```
->
-> The rest of your config (gateway, channels, models, etc.) stays unchanged, only the `compaction` key needs to be added.
-
 ---
 
 <!-- @os:windows -->
@@ -260,6 +224,42 @@ openclaw onboard \
 <!-- @os:end -->
 
 This command writes OpenClaw's configuration to `~/.openclaw/openclaw.json`.
+
+> **OpenClaw context window sizing:** OpenClaw's compaction triggers when `contextTokens > contextWindow − reserveTokens`. The default `reserveTokensFloor` is 20,000 tokens, a floor that overrides `reserveTokens` when lower, so any model context below ~37k will trigger an infinite compaction loop. Set a low reserve and disable the floor once in your config and it applies to every model, no per-model tuning needed:
+>
+> ```json
+> "compaction": {
+>   "reserveTokens": 4096,
+>   "reserveTokensFloor": 0
+> }
+> ```
+>
+> `reserveTokensFloor` is a *floor* (minimum guard), not the reserve itself, setting only the floor has no effect. `reserveTokensFloor: 0` disables the guard so the lower `reserveTokens` is accepted.
+>
+> **When to apply this:** Use this config if your model's effective context window is below ~37k, either because the model is small (e.g. 8k, 16k, 32k) or because you've intentionally capped it to a lower value (e.g. loading a 128k model but setting context to 16k in Lemonade). Without it, OpenClaw enters an infinite compaction loop on startup.
+>
+> **Large-context models at full context:** You can skip this entirely. The defaults work fine, compaction will kick in well before the window fills and the model has ample room to generate long responses. If you do apply it, be aware that `reserveTokens: 4096` limits response length to ~4k tokens, which may cut off long file generation or detailed plans.
+>
+> **Where to add this:** Place the `compaction` block inside `agents.defaults` in your `openclaw.json` (usually at `~/.openclaw/openclaw.json`):
+>
+> ```json
+> {
+>   "agents": {
+>     "defaults": {
+>       "workspace": "/home/<you>/.openclaw/workspace",
+>       "model": {
+>         "primary": "lemonade/<your-model-id>"
+>       },
+>       "compaction": {
+>         "reserveTokens": 4096,
+>         "reserveTokensFloor": 0
+>       }
+>     }
+>   }
+> }
+> ```
+>
+> The rest of your config (gateway, channels, models, etc.) stays unchanged, only the `compaction` key needs to be added.
 
 <!-- @os:linux -->
 ### (Recommended) Enable Docker Sandboxing
