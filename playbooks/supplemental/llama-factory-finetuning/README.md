@@ -6,7 +6,7 @@ Efficient fine-tuning is vital for adapting large language models (LLMs) to down
 
 This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your local AMD hardware.
 
-## What you'll learn
+## What You'll Learn
 
 - How to set up LLaMA Factory with AMD ROCm™ software
 - How to configure LLM fine-tuning parameters (using Qwen/Qwen3-4B-Instruct-2507 as an example)
@@ -77,12 +77,7 @@ venv\Scripts\activate
 
 ### Installing Basic Dependencies
 
-<!-- @os:linux -->
 <!-- @require:pytorch,driver -->
-<!-- @os:end -->
-<!-- @os:windows -->
-<!-- @require:pytorch,driver -->
-<!-- @os:end -->
  
 ### Installing Additional Dependencies
 

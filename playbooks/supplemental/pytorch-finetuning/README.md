@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Fine-tune LLMs with Pytorch and AMD ROCm™ Software
-
 ## Overview
 
 This tutorial provides step-by-step examples for fine-tuning a large language model (LLM) with PyTorch and ROCm. It covers several techniques, from standard fine-tuning to memory-efficient Parameter-Efficient Fine-Tuning (PEFT) strategies, so you can easily adapt models for your needs.
@@ -20,6 +18,12 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 > **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
+
+## What You'll Learn
+
+- How to fine-tune an LLM using LoRA, QLoRA, and full fine-tuning with PyTorch and ROCm
+- How to save and deploy your fine-tuned model
+- How to monitor training and debug common issues
 
 ## Setting the Memory Configuration
 

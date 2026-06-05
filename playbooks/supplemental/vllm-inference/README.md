@@ -18,7 +18,7 @@ vLLM is a high-performance inference engine designed for large language models (
 
 This playbook teaches you how to serve LLMs using containerized vLLM on the integrated GPU and interact with models through the OpenAI Python API.
 
-## In This Playbook, You Will Learn
+## What You'll Learn
 
 - How to set up and start a vLLM server with ROCm support
 - How to interact with models via OpenAI-compatible API endpoints
@@ -30,6 +30,8 @@ This playbook teaches you how to serve LLMs using containerized vLLM on the inte
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
+
+> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
 
 <!-- @setup:software-update -->
 <!-- @device:end -->

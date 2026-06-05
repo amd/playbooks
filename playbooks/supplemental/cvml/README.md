@@ -31,7 +31,7 @@ This playbook teaches you how to set up the Ryzen AI CVML Library, build the inc
 <!-- @setup:software-update -->
 <!-- @device:end -->
 
-## Installing Basic Dependencies
+## Installing Software Prerequisites
 <!-- @require:driver -->
 
 ## Additional Dependencies

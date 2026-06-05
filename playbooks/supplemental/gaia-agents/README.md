@@ -9,9 +9,7 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Overview
-
-## Getting Started Creating Agents with GAIA
+## Overview
 
 GAIA agents are AI assistants that use a local LLM to reason and call tools you define — like chatbots that can take action. They run **100% locally** with no cloud APIs, no data leaving your machine, and no API keys required.
 
