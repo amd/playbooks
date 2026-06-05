@@ -76,8 +76,6 @@ The model has a default context length of 262,144 tokens. If you encounter out-o
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
 > lemonade import Qwen3.6-35B-A3B-NoThinking.json
 > ```
->
-> This registers the model as `user.Qwen3.6-35B-A3B-NoThinking`. If you use this variant, replace `Qwen3.6-35B-A3B-GGUF` with `user.Qwen3.6-35B-A3B-NoThinking` in the OpenClaw onboard command below.
 
 ---
 
