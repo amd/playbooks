@@ -10,19 +10,19 @@ from openai import OpenAI
 # Point the OpenAI client at the local vLLM server.
 # The api_key is required by the client but vLLM doesn't validate it.
 client = OpenAI(
-    base_url="http://localhost:8000/v1",
+    base_url="http://localhost:8001/v1",
     api_key="EMPTY",
 )
 
 # Send a chat completion request with streaming enabled.
-# This uses the same format as the OpenAI API — a list of messages
-# with roles ("system", "user", "assistant").
+# This uses the same format as the OpenAI API: a list of messages
+# with roles such as "system", "user", and "assistant".
 response = client.chat.completions.create(
     model="Qwen/Qwen3-1.7B",
     messages=[
         {"role": "user", "content": "Tell me a short story"},
     ],
-    max_tokens=2048,  # Maximum number of tokens the model will generate in its response
+    max_tokens=2048,
     stream=True,
 )
 

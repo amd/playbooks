@@ -5,36 +5,29 @@
   "time": 120,
   "supported_platforms": {
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "halo_box": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "stx": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "krk": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "required_platforms": {
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "halo_box": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "tested_platforms":{
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "difficulty": "advanced",
