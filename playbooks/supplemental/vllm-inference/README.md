@@ -91,11 +91,8 @@ for chunk in response:
         print(content, end="", flush=True)
 ```
 
-The included `chat_with_model.py` script contains the complete example. Run it from this playbook directory:
+The included [chat_with_model.py](assets/chat_with_model.py) script contains the entire example and can be downloaded.
 
-```bash
-python3 assets/chat_with_model.py
-```
 
 ## Troubleshooting
 
