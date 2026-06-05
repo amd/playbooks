@@ -31,18 +31,6 @@ In this playbook, we use Unsloth together with **LoRA-based SFT**. That means th
 
 Unsloth also supports other training approaches, including QLoRA and reinforcement learning workflows. This playbook focuses on the simplest path first: a small LoRA fine-tuning example that users can run, understand, and extend.
 
-## Setting the Memory Configuration
-
-<!-- @setup:memory-config -->
-
-<!-- @device:halo_box -->
-## Check for Software Updates
-
-> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
-
-<!-- @setup:software-update -->
-<!-- @device:end -->
-
 ## Installing Software Prerequisites
 
 ### Create a Virtual Environment
