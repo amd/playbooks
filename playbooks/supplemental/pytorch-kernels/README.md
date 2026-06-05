@@ -155,7 +155,6 @@ sudo apt install -y python3-venv
 python3 -m venv kernel-env
 source kernel-env/bin/activate
 ```
-<!-- @test:end -->
 <!-- @os:end -->
 <!-- @device:end -->
 
