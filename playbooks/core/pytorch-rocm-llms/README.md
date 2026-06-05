@@ -39,74 +39,71 @@ This tutorial uses PyTorch powered by AMD ROCm™ software to run models that ca
 
 ### Create a Virtual Environment
 
-<!-- @device:halo_box -->
-<!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-<!-- @test:id=create-venv timeout=60 -->
-```bash
-python -m venv llm-env --system-site-packages
-llm-env\Scripts\activate
-```
-<!-- @test:end -->
-
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
-<!-- @os:end -->
-
 <!-- @os:linux -->
+<!-- @device:halo_box -->
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv llm-env --system-site-packages
-source llm-env/bin/activate
+python3 -m venv pytorch-env --system-site-packages
+source pytorch-env/bin/activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
-<!-- @os:end -->
+<!-- @setup:id=activate-venv command="source pytorch-env/bin/activate" -->
 <!-- @device:end -->
 
-
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @os:linux -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
+
+On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv pytorch-env
+source pytorch-env/bin/activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source pytorch-env/bin/activate" -->
+<!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @device:halo_box -->
+On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
-python -m venv llm-env
-llm-env\Scripts\activate
+python -m venv pytorch-env --system-site-packages
+pytorch-env\Scripts\activate
 ```
 <!-- @test:end -->
 
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-<!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
-<!-- @os:end -->
+<!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate.bat" -->
+<!-- @device:end -->
 
-<!-- @os:linux -->
-On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv timeout=60 -->
 ```bash
-sudo apt update
-sudo apt install -y python3-venv
-python3 -m venv llm-env
-source llm-env/bin/activate
+python -m venv pytorch-env
+pytorch-env\Scripts\activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
-<!-- @os:end -->
+
+> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
+
+<!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate.bat" -->
 <!-- @device:end -->
+<!-- @os:end -->
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->

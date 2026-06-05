@@ -53,8 +53,8 @@ On Linux, open a terminal in the directory of your choice and run the following 
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv llm-env
-source llm-env/bin/activate
+python3 -m venv comfyui-env
+source comfyui-env/bin/activate
 ```
 <!-- @device:end -->
 

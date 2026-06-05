@@ -129,20 +129,8 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 
 ### Create a Virtual Environment
 
-<!-- @device:halo_box -->
-<!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-```bash
-python -m venv kernel-env --system-site-packages
-kernel-env\Scripts\activate
-```
-
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @os:end -->
-
 <!-- @os:linux -->
+<!-- @device:halo_box -->
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
 ```bash
 sudo apt update
@@ -150,16 +138,23 @@ sudo apt install -y python3-venv
 python3 -m venv kernel-env --system-site-packages
 source kernel-env/bin/activate
 ```
-<!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @os:linux -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
+
+On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv kernel-env
+source kernel-env/bin/activate
+```
+<!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -173,17 +168,6 @@ kernel-env\Scripts\activate
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
 <!-- @os:end -->
-
-<!-- @os:linux -->
-On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
-```bash
-sudo apt update
-sudo apt install -y python3-venv
-python3 -m venv kernel-env
-source kernel-env/bin/activate
-```
-<!-- @os:end -->
-<!-- @device:end -->
 
 
 

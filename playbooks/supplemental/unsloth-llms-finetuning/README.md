@@ -82,12 +82,23 @@ source unsloth-env/bin/activate
 <!-- @os:windows -->
 > **Note:** Python 3.13 is required for Windows.
 
+<!-- @device:halo_box -->
 Open a PowerShell terminal and create a virtual environment:
 
 ```powershell
-python -m venv unsloth_env
-.\unsloth_env\Scripts\activate
+python -m venv unsloth-env --system-site-packages
+.\unsloth-env\Scripts\activate
 ```
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+Open a PowerShell terminal and create a virtual environment:
+
+```powershell
+python -m venv unsloth-env
+.\unsloth-env\Scripts\activate
+```
+<!-- @device:end -->
 <!-- @os:end -->
 
 ### Installing Basic Dependencies

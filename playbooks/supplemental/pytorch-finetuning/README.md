@@ -38,17 +38,8 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 ## Installing Software Prerequisites
 
-<!-- @os:linux -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-**Grant your user access to GPU devices** (log out and back in for this to take effect):
-
-```bash
-sudo usermod -aG render,video $LOGNAME
-```
-<!-- @device:end -->
-<!-- @os:end -->
-
 #### Create a Virtual Environment
+
 <!-- @os:linux -->
 <!-- @device:halo_box -->
 <!-- @test:id=create-venv timeout=60 -->
@@ -59,8 +50,26 @@ python3 -m venv finetune-venv --system-site-packages
 source finetune-venv/bin/activate 
 ```
 <!-- @test:end -->
-<!-- @device:end -->
 <!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv finetune-venv
+source finetune-venv/bin/activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
+<!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -71,12 +80,9 @@ python -m venv finetune-venv --system-site-packages
 finetune-venv\Scripts\activate
 ```
 <!-- @test:end -->
+<!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
 <!-- @device:end -->
-<!-- @setup:id=activate-venv command="source finetune-venv\Scripts\activate" -->
-<!-- @os:end -->
 
-
-<!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
@@ -84,22 +90,8 @@ python -m venv finetune-venv
 finetune-venv\Scripts\activate
 ```
 <!-- @test:end -->
-<!-- @device:end -->
 <!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @test:id=create-venv timeout=120 -->
-```bash
-sudo apt update
-sudo apt install -y python3-venv
-python3 -m venv finetune-venv
-source finetune-venv/bin/activate
-```
-<!-- @test:end -->
 <!-- @device:end -->
-<!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
 <!-- @os:end -->
 
 #### Installing Basic Dependencies

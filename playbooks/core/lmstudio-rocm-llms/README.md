@@ -131,62 +131,60 @@ This model will now be accessible through the LM Studio Server endpoint and will
 Having just created the OpenAI Compatible endpoint, let's look at how to integrate this into a Python developer environment (such as VSCode) and use your system as a local API Provider. 
 
 1. Create a Python virtual environment:
-<!-- @device:halo_box -->
-<!-- @os:windows -->
-    On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
-    ```bash
-    python -m venv llm-env --system-site-packages
-    llm-env\Scripts\activate
-    ```
-
-    > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-    > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- @device:halo_box -->
     On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
-    python3 -m venv llm-env --system-site-packages
-    source llm-env/bin/activate
+    python3 -m venv lmstudio-env --system-site-packages
+    source lmstudio-env/bin/activate
     ```
-<!-- @os:end -->
 <!-- @device:end -->
 
-
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @os:linux -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
+
+    On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+    ```bash
+    sudo apt update
+    sudo apt install -y python3-venv
+    python3 -m venv lmstudio-env
+    source lmstudio-env/bin/activate
+    ```
+<!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
+<!-- @device:halo_box -->
     On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
     ```bash
-    python -m venv llm-env
-    llm-env\Scripts\activate
+    python -m venv lmstudio-env --system-site-packages
+    lmstudio-env\Scripts\activate
     ```
 
     > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
     > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-<!-- @os:end -->
-
-<!-- @os:linux -->
-    On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
-    ```bash
-    sudo apt update
-    sudo apt install -y python3-venv
-    python3 -m venv llm-env
-    source llm-env/bin/activate
-    ```
-<!-- @os:end -->
 <!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+    On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+    ```bash
+    python -m venv lmstudio-env
+    lmstudio-env\Scripts\activate
+    ```
+
+    > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+    > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
+
+<!-- @device:end -->
+<!-- @os:end -->
 
 2. Install the OpenAI package
     ```bash
