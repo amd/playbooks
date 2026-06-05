@@ -23,34 +23,67 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. Setup
 
-<!-- @os:windows -->
+#### Create a Virtual Environment
+<!-- @os:linux -->
+<!-- @device:halo_box -->
 <!-- @test:id=create-venv timeout=60 -->
-```cmd
-python -m venv venv
-venv\Scripts\activate.bat
+```bash
+sudo apt update 
+sudo apt install -y python3-venv 
+python3 -m venv finetune-venv --system-site-packages 
+source finetune-venv/bin/activate 
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="venv\Scripts\activate.bat" -->
+<!-- @device:end -->
+<!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @device:halo_box -->
+<!-- @test:id=create-venv timeout=60 -->
+```powershell
+python -m venv finetune-venv --system-site-packages
+finetune-venv\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @setup:id=activate-venv command="source finetune-venv\Scripts\activate" -->
+<!-- @os:end -->
+
+
+<!-- @os:windows -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @test:id=create-venv timeout=60 -->
+```powershell
+python -m venv finetune-venv
+finetune-venv\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv finetune-venv
+source finetune-venv/bin/activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source venv/bin/activate" -->
+<!-- @device:end -->
+<!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
 <!-- @os:end -->
 
-### Installing Basic Dependencies
+#### Installing Basic Dependencies
 <!-- @require:pytorch -->
 
-### Additional Dependencies
+
+#### Additional Dependencies
 
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
@@ -69,7 +102,7 @@ pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate p
 <!-- @test:end -->
 <!-- @os:end -->
 
-### Enable HF authentication (gated or custom / non–preinstalled models)
+#### Enable HF authentication (gated or custom / non–preinstalled models)
 
 In this example we use **google/gemma-3-4b-it**, which is a **gated** model. You must accept the model’s terms on Hugging Face and then authenticate so the training scripts can download it.
 
@@ -80,8 +113,6 @@ In this example we use **google/gemma-3-4b-it**, which is a **gated** model. You
 pip install huggingface_hub
 hf auth login
 ```
-
-
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -159,33 +190,6 @@ r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```
 <!-- @test:end -->
-
-### 2. Choose Your Method
-
-| Method | Memory | Speed | Quality | Best For |
-|--------|--------|-------|---------|----------|
-| **QLoRA** | 12-16GB | Fastest | 90-95% | Low Memory Usage |
-| **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
-| **Full** | 80GB+ | Slowest | 100% | Maximum quality |
-
-### 3. Run Training
-
-**Dataset and what the model learns**  
-The scripts turn the dataset into chat examples. For example, the QLoRA script uses **Abirate/english_quotes**: each example becomes a user–assistant pair like:
-
-- **User:** “Give me a quote about: &lt;tag&gt;”
-- **Assistant:** “&lt;quote&gt; – &lt;author&gt;”
-
-Fine-tuning teaches the model to respond to prompts asking for quotes about a topic and to return them in the format `<quote text> - <author>`. The LoRA and full fine-tuning scripts use **databricks/databricks-dolly-15k** (general instruction/response pairs), so the exact task varies by script; the idea is the same - adapt the model to your chosen dataset and format.
-
-Below is a summary of the available training methods. Each method links to its script and provides a brief description for choosing the right approach.
-
-| Script                           | Method            | Description                                                                                                         | Typical VRAM | Recommended For                                 |
-|-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
-
 ---
 
 ## Understanding the Techniques
@@ -217,10 +221,41 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> [!NOTE]
-> For MXFP4 base models like `openai/gpt-oss-20b`, we recommend using **LoRA** (`train_lora.py`) instead of QLoRA. The QLoRA script's `bitsandbytes` 4-bit path typically dequantizes MXFP4 weights to BF16, so the run behaves like standard LoRA. Native MXFP4 needs `bitsandbytes` built from source plus a matching Transformers/Triton/kernels stack. See the [Transformers MXFP4 docs](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Note**: For MXFP4 base models like `openai/gpt-oss-20b`, we recommend using **LoRA** (`train_lora.py`) instead of QLoRA. The QLoRA script's `bitsandbytes` 4-bit path typically dequantizes MXFP4 weights to BF16, so the run behaves like standard LoRA. Native MXFP4 needs `bitsandbytes` built from source plus a matching Transformers/Triton/kernels stack. See the [Transformers MXFP4 docs](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
+
+### 2. Choose Your Method
+
+| Method | Memory | Speed | Quality | Best For |
+|--------|--------|-------|---------|----------|
+| **QLoRA** (Linux only) | 12-16GB | Fastest | 90-95% | Low Memory Usage |
+| **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
+| **Full** | 80GB+ | Slowest | 100% | Maximum quality |
+
+### 3. Run Training
+
+**Dataset and what the model learns**  
+The scripts turn the dataset into chat examples. For example, the QLoRA script uses **Abirate/english_quotes**: each example becomes a user–assistant pair like:
+
+- **User:** “Give me a quote about: &lt;tag&gt;”
+- **Assistant:** “&lt;quote&gt; – &lt;author&gt;”
+
+Fine-tuning teaches the model to respond to prompts asking for quotes about a topic and to return them in the format `<quote text> - <author>`. The LoRA and full fine-tuning scripts use **databricks/databricks-dolly-15k** (general instruction/response pairs), so the exact task varies by script; the idea is the same - adapt the model to your chosen dataset and format.
+
+Below is a summary of the available training methods. Each method links to its script and provides a brief description for choosing the right approach.
+
+| Script                           | Method            | Description                                                                                                         | Typical VRAM | Recommended For                                 |
+|-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
+
+Simply select your preferred `Training method`, download the corresponding script and execute it using the command keeping your virtual environment activated: 
+
+```python
+python3 train_<method_name>.py.
+```
 
 ## Using your Fine-Tuned Model
 
@@ -230,11 +265,11 @@ Total: 12GB (vs 40GB full precision)
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 model = AutoModelForCausalLM.from_pretrained(
-    "output-gemma-3-4b-full",     # Directory containing your fully fine-tuned checkpoint
+    "output-gemma-3-4b-it-full",     # Directory containing your fully fine-tuned checkpoint
     device_map="auto",
     torch_dtype="auto"            # Use BF16 if your GPU supports it, else "auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-full")
+tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-it-full")
 
 # Generate text
 prompt = "Explain quantum computing:"
@@ -251,11 +286,11 @@ from transformers import AutoTokenizer
 
 # Load model with LoRA or QLoRA adapters
 model = AutoPeftModelForCausalLM.from_pretrained(
-    "output-gemma-3-4b-qlora",   # or "output-gemma-3-4b-lora" depending on your training
+    "output-gemma-3-4b-it-qlora",   # or "output-gemma-3-4b-lora" depending on your training
     device_map="auto",
     torch_dtype="auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-qlora")
+tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-it-qlora")
 
 # Generate text
 prompt = "Explain quantum computing:"
@@ -400,16 +435,50 @@ def format_instruction(example):
 dataset = dataset.map(format_instruction)
 ```
 
-**Dataset Format:**
+**Dataset Format for Local JSON/JSONL file:**
+
+When using this method, please ensure that your JSON files are correctly structured to avoid parsing errors. 
+
+The following guidelines must be adhered to:
+* **File Formatting:** JSON files should be formatted within an Integrated Development Environment (IDE) to ensure proper structure and syntax.
+* **Required Keys:** The custom JSON file must contain the keys `instruction` and `response`. These keys are essential for the method to function correctly.
 ```json
 [
   {
-    "messages": [
-      {"role": "user", "content": "Your instruction here"},
-      {"role": "assistant", "content": "Expected response here"}
-    ]
+    "instruction": "Your first instruction here",
+    "response": "Expected response here"
+  },
+  {
+    "instruction": "Your second instruction here",
+    "response": "Expected response here"
   }
 ]
+```
+**Dataset Format for Hugging Face Hub dataset**
+
+When utilizing datasets from Hugging Face, please ensure that your datasets are structured correctly to facilitate seamless integration. 
+
+The following guidelines should be followed:
+* **Instruction-Response Pair:** Focus on datasets that include an `instruction-response` pair. This structure is essential for the intended functionality.
+* **Custom Key Modification:** If your dataset does not conform to the `instruction-response` structure, you have the option to modify the `format_instruction()` function. This allows you to accommodate specific keys as needed.
+
+Example Adjustment: In cases where the dataset's output needs to be adjusted, you can modify the response section within the format_instruction() function to fit your requirements.
+```python
+def format_instruction(example):
+    return {
+        "messages": [
+            {"role": "user", "content": example['input']},
+            {"role": "assistant", "content": example['output']}
+        ]
+    }
+```
+**Dataset Format for CSV file**
+
+To accommodate the script using a CSV file format, you need to ensure that the CSV file contains columns named `instruction` and `response`. 
+```csv
+instruction,response
+"Your first instruction here","Expected response here"
+"Your second instruction here","Expected response here"
 ```
 
 ### Adjust Training Parameters
@@ -449,7 +518,7 @@ model.gradient_checkpointing_enable()
 
 ```bash
 # Check ROCm GPU status
-watch -n 1 rocm-smi
+watch -n 1 amd-smi
 
 # Show memory info
 rocm-smi --showmeminfo vram
@@ -505,5 +574,3 @@ After you have completed successful fine-tuning, consider the following next ste
 7. **Train** multiple LoRA adapters for different tasks or domains and swap them as needed.
 
 ---
-
-Good luck with your fine-tuning journey! 🎉
