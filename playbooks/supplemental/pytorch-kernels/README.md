@@ -193,7 +193,6 @@ export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
 export PATH="$ROCM_HOME/bin:$PATH"
 ```
-<!-- @os:end -->
 <!-- @device:end -->
 
 ```bash
