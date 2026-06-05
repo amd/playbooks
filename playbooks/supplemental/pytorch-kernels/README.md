@@ -193,7 +193,6 @@ export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
 export PATH="$ROCM_HOME/bin:$PATH"
 ```
-<!-- @device:end -->
 
 ```bash
 # Set compiler and build settings
@@ -230,7 +229,7 @@ $env:CXX = "clang-cl"
 $env:DISTUTILS_USE_SDK = "1"
 ```
 <!-- @os:end -->
-
+<!-- @device:end -->
 <!-- @os:linux -->
 Verify that the AMD GPU is visible with:
 ```bash
