@@ -1,40 +1,33 @@
 {
   "id": "pytorch-kernels",
-  "title": "Custom GPU Kernels with PyTorch ROCm",
-  "description": "Write and optimize custom GPU kernels using PyTorch and ROCm on STX Halo\u2122",
+  "title": "Custom GPU Kernels with PyTorch and AMD ROCm\u2122",
+  "description": "Write and optimize custom GPU kernels using PyTorch and AMD ROCm\u2122 software on AMD Ryzen\u2122 AI",
   "time": 120,
   "supported_platforms": {
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "halo_box": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "stx": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "krk": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "required_platforms": {
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "halo_box": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "tested_platforms":{
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "difficulty": "advanced",
