@@ -65,10 +65,10 @@ lemonade pull Qwen3.6-35B-A3B-GGUF
 Then load it with a large context window and save that setting for future runs:
 
 ```bash
-lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 190000 --save-options
+lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 
-A context of 190,000 tokens is a safe working floor for agent use on this model. Increase it if your available RAM allows.
+The model has a default context length of 262,144 tokens. If you encounter out-of-memory (OOM) errors, consider reducing the context window. However, because Qwen3.6 leverages extended context for complex tasks, we advise maintaining a context length of at least 128K tokens to preserve thinking capabilities.
 
 > **Tip: Disable thinking for faster agent responses:** Qwen3.6-35B-A3B runs in thinking mode by default, which adds latency before each response. For agent loops this overhead accumulates quickly. The [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) repo provides a ready-made config that disables thinking. To use it, download the file and import it:
 >
