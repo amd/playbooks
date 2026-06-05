@@ -50,6 +50,14 @@ pip --version
 <!-- @os:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @os:linux -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+<!-- @os:end -->
+
 #### Create a Virtual Environment
 
 <!-- @os:linux -->

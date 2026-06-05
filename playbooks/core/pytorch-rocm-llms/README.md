@@ -71,6 +71,14 @@ source llm-env/bin/activate
 
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @os:linux -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+<!-- @os:end -->
+
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
 <!-- @test:id=create-venv timeout=60 -->

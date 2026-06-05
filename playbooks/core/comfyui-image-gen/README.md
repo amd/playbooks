@@ -41,6 +41,12 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+
 #### Create a Virtual Environment
 On Linux, open a terminal in the directory of your choice and run the following prompt to create a venv:
 

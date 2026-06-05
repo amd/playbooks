@@ -38,6 +38,16 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 ## Installing Software Prerequisites
 
+<!-- @os:linux -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+<!-- @device:end -->
+<!-- @os:end -->
+
 #### Create a Virtual Environment
 <!-- @os:linux -->
 <!-- @device:halo_box -->

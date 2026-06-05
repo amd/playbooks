@@ -6,16 +6,6 @@ SPDX-License-Identifier: MIT
 
 #### PyTorch
 
-<!-- @os:linux -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-**Before starting, grant your user access to GPU devices** (log out/in for this to take effect):
-
-```bash
-sudo usermod -a -G render,video $LOGNAME
-```
-<!-- @device:end -->
-<!-- @os:end -->
-
 **Install PyTorch with AMD ROCm™ software support** in the created virtual environment:
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-pytorch timeout=300 setup=activate-venv -->
