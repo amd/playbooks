@@ -49,7 +49,7 @@ finetune-venv\Scripts\activate
 ```
 <!-- @test:end -->
 <!-- @device:end -->
-<!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
+<!-- @setup:id=activate-venv command="source finetune-venv\Scripts\activate" -->
 <!-- @os:end -->
 
 
@@ -62,7 +62,7 @@ finetune-venv\Scripts\activate
 ```
 <!-- @test:end -->
 <!-- @device:end -->
-<!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate.bat" -->
+<!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
