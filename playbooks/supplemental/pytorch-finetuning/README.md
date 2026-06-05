@@ -32,24 +32,24 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 ```bash
 sudo apt update 
 sudo apt install -y python3-venv 
-python3 -m venv venv --system-site-packages 
-source venv/bin/activate 
+python3 -m venv finetune-venv --system-site-packages 
+source finetune-venv/bin/activate 
 ```
 <!-- @test:end -->
 <!-- @device:end -->
-<!-- @setup:id=activate-venv command="source venv/bin/activate" -->
+<!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
-python -m venv venv --system-site-packages
-venv\Scripts\activate.bat
+python -m venv finetune-venv --system-site-packages
+finetune-venv\Scripts\activate
 ```
 <!-- @test:end -->
 <!-- @device:end -->
-<!-- @setup:id=activate-venv command="source venv/bin/activate" -->
+<!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
 <!-- @os:end -->
 
 
@@ -57,12 +57,12 @@ venv\Scripts\activate.bat
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
-python -m venv venv
-venv\Scripts\activate.bat
+python -m venv finetune-venv
+finetune-venv\Scripts\activate
 ```
 <!-- @test:end -->
 <!-- @device:end -->
-<!-- @setup:id=activate-venv command="venv\Scripts\activate.bat" -->
+<!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate.bat" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -71,55 +71,35 @@ venv\Scripts\activate.bat
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv finetune-venv
+source finetune-venv/bin/activate
 ```
 <!-- @test:end -->
 <!-- @device:end -->
-<!-- @setup:id=activate-venv command="source venv/bin/activate" -->
+<!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
 <!-- @os:end -->
 
 #### Installing Basic Dependencies
 <!-- @require:pytorch -->
 
-<!-- @os:linux -->
-<!-- @device:halo_box -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
-##### **HaloBox: Skip driver and PyTorch Dependecies**
-<!-- @test:end -->
-<!-- @device:end -->
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @device:halo_box -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
-##### **HaloBox: Skip driver and PyTorch Dependecies**
-No need to set up driver and PyTorch dependencies, as these configurations are pre-installed.
-<!-- @test:end -->
-<!-- @device:end -->
-<!-- @os:end -->
 
 #### Additional Dependencies
 
 <!-- @os:linux -->
-<!-- @device:halo_box,halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
-<!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @device:halo_box,halo,stx,krk,rx7900xt,rx9070xt -->
 **Windows:** Only core packages are tested and supported here. **bitsandbytes is not well supported on Windows**, so the Windows install omits it; use LoRA or full fine-tuning on Windows (QLoRA requires bitsandbytes and is intended for Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
-<!-- @device:end -->
 <!-- @os:end -->
 
 #### Enable HF authentication (gated or custom / non–preinstalled models)
@@ -241,8 +221,7 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> [!NOTE]
-> For MXFP4 base models like `openai/gpt-oss-20b`, we recommend using **LoRA** (`train_lora.py`) instead of QLoRA. The QLoRA script's `bitsandbytes` 4-bit path typically dequantizes MXFP4 weights to BF16, so the run behaves like standard LoRA. Native MXFP4 needs `bitsandbytes` built from source plus a matching Transformers/Triton/kernels stack. See the [Transformers MXFP4 docs](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Note**: For MXFP4 base models like `openai/gpt-oss-20b`, we recommend using **LoRA** (`train_lora.py`) instead of QLoRA. The QLoRA script's `bitsandbytes` 4-bit path typically dequantizes MXFP4 weights to BF16, so the run behaves like standard LoRA. Native MXFP4 needs `bitsandbytes` built from source plus a matching Transformers/Triton/kernels stack. See the [Transformers MXFP4 docs](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
 
@@ -250,7 +229,7 @@ Total: 12GB (vs 40GB full precision)
 
 | Method | Memory | Speed | Quality | Best For |
 |--------|--------|-------|---------|----------|
-| **QLoRA** | 12-16GB | Fastest | 90-95% | Low Memory Usage |
+| **QLoRA** (Linux only) | 12-16GB | Fastest | 90-95% | Low Memory Usage |
 | **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
 | **Full** | 80GB+ | Slowest | 100% | Maximum quality |
 
@@ -272,7 +251,7 @@ Below is a summary of the available training methods. Each method links to its s
 | [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
 
-Simply select your preferred `Training method`, download the corresponding script and execute it using the command keeping your `~/.venv` activated: 
+Simply select your preferred `Training method`, download the corresponding script and execute it using the command keeping your virtual environment activated: 
 
 ```python
 python3 train_<method_name>.py.
@@ -539,7 +518,7 @@ model.gradient_checkpointing_enable()
 
 ```bash
 # Check ROCm GPU status
-watch -n 1 rocm-smi
+watch -n 1 amd-smi
 
 # Show memory info
 rocm-smi --showmeminfo vram
@@ -595,5 +574,3 @@ After you have completed successful fine-tuning, consider the following next ste
 7. **Train** multiple LoRA adapters for different tasks or domains and swap them as needed.
 
 ---
-
-Good luck with your fine-tuning journey! 🎉
