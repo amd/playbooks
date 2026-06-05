@@ -156,7 +156,6 @@ python3 -m venv kernel-env
 source kernel-env/bin/activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source kernel-env/bin/activate" -->
 <!-- @os:end -->
 <!-- @device:end -->
 
