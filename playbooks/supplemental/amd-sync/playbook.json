@@ -1,0 +1,31 @@
+{
+  "id": "amd-sync",
+  "title": "Remote Development with AMD Sync",
+  "description": "Install AMD Sync on your laptop and get one-click remote VS Code, Terminal, JupyterLab, and Live Metrics on your AMD Ryzen AI Halo.",
+  "time": 10,
+  "supported_platforms": {
+    "halo_box": [
+      "windows",
+      "linux"
+    ]
+  },
+  "tested_platforms": {
+    "halo_box": [
+      "windows",
+      "linux"
+    ]
+  },
+  "difficulty": "beginner",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "amd-sync",
+    "ssh",
+    "remote-access",
+    "vscode",
+    "jupyterlab",
+    "halo_box"
+  ]
+}
