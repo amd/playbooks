@@ -195,19 +195,74 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 
 ### Installing Additional Dependencies
 
+<!-- @os:linux -->
+Install the Linux C/C++ build toolchain. This is a system-level dependency and is required for the C++ extension walkthroughs because `CUDAExtension` builds native `.so` modules from `.cu` files.
+
+Run this once on the Linux machine, outside the created Python virtual environment:
+
+```bash
+sudo apt update
+sudo apt install -y build-essential gcc g++
+```
+<!-- @os:end -->
+
+After activating the `kernel-env` virtual environment, install the Python build dependencies:
 <!-- @test:id=install-deps timeout=60 setup=activate-venv -->
 ```bash
-python -m pip install --upgrade setuptools wheel
+python -m pip install "setuptools<82" wheel ninja
 ```
 <!-- @test:end -->
 
+<!-- @os:linux -->
+<!-- @test:id=verify-linux-build-tools timeout=60 hidden=True -->
+```bash
+set -euo pipefail
+
+command -v gcc
+command -v g++
+gcc --version
+g++ --version
+
+echo "OK: Linux C/C++ build toolchain is available."
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 <!-- @os:windows -->
-Please ensure [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) is installed.
+Please ensure [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) or newer is installed with the **Desktop development with C++** workload.
 
 Open a Powershell terminal and activate Visual Studio environment C++ dependencies.
-<!-- @test:id=verify-vscode-2022 timeout=60 -->
 ```powershell
 cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 && set' | ForEach-Object { if ($_ -match '^([^=]+)=(.*)$') { [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
+```
+
+<!-- @test:id=verify-visual-studio-community timeout=60 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+Write-Host "Detected Visual Studio installations:"
+& $VsWhere -all -products * -format table | Out-Host
+
+$VcvarsList = & $VsWhere `
+  -all `
+  -products * `
+  -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+  -find "VC\Auxiliary\Build\vcvars64.bat"
+if (-not $VcvarsList) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+$Vcvars = $VcvarsList | Select-Object -First 1
+Write-Host "Using vcvars64.bat from Visual Studio C++ environment: $Vcvars"
+
+$VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
+$ExitCode = $LASTEXITCODE
+if ($ExitCode -ne 0) {
+  $VsEnv | Out-Host
+  throw "Failed to activate the Visual Studio C++ environment. Exit code: $ExitCode"
+}
+
+$VsEnv | Select-String "Developer Command Prompt|Environment initialized|cl.exe" | Out-Host
+Write-Host "OK: Visual Studio C++ build environment is available."
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -770,23 +825,29 @@ PY
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$VcvarsCandidates = @(
-  "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"
-)
+$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 
-$Vcvars = $VcvarsCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-if (-not $Vcvars) {
-  throw "Could not find vcvars64.bat. Install Visual Studio 2022 C++ Build Tools."
-}
+$Vcvars = & $VsWhere `
+  -latest `
+  -products * `
+  -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+  -find "VC\Auxiliary\Build\vcvars64.bat" |
+  Select-Object -First 1
+if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+Write-Host "Using Visual Studio C++ environment: $Vcvars"
 
-cmd /c "`"$Vcvars`" >nul 2>&1 && set" | ForEach-Object {
-  if ($_ -match '^([^=]+)=(.*)$') {
-    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
-  }
+$VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
+$ExitCode = $LASTEXITCODE
+if ($ExitCode -ne 0) {
+  $VsEnv | Out-Host
+  throw "Failed to activate the Visual Studio C++ environment. Exit code: $ExitCode"
 }
+$VsEnv | Select-String "Developer Command Prompt|Environment initialized|cl.exe" | Out-Host
+$VsEnv | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {[System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')}
+}
+where.exe cl
 
 rocm-sdk init
 
@@ -1286,23 +1347,29 @@ PY
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$VcvarsCandidates = @(
-  "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"
-)
+$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 
-$Vcvars = $VcvarsCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-if (-not $Vcvars) {
-  throw "Could not find vcvars64.bat. Install Visual Studio 2022 C++ Build Tools."
-}
+$Vcvars = & $VsWhere `
+  -latest `
+  -products * `
+  -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+  -find "VC\Auxiliary\Build\vcvars64.bat" |
+  Select-Object -First 1
+if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+Write-Host "Using Visual Studio C++ environment: $Vcvars"
 
-cmd /c "`"$Vcvars`" >nul 2>&1 && set" | ForEach-Object {
-  if ($_ -match '^([^=]+)=(.*)$') {
-    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
-  }
+$VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
+$ExitCode = $LASTEXITCODE
+if ($ExitCode -ne 0) {
+  $VsEnv | Out-Host
+  throw "Failed to activate the Visual Studio C++ environment. Exit code: $ExitCode"
 }
+$VsEnv | Select-String "Developer Command Prompt|Environment initialized|cl.exe" | Out-Host
+$VsEnv | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {[System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')}
+}
+where.exe cl
 
 rocm-sdk init
 
