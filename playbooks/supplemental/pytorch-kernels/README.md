@@ -176,12 +176,21 @@ source kernel-env/bin/activate
 <!-- @require:driver,rocm,pytorch -->
 <!-- @os:end -->
 
+<!-- @os:linux -->
 <!-- @test:id=verify-installed-package-versions timeout=60 hidden=True setup=activate-venv -->
 ```bash
 python -m pip list | grep -E '^(rocm|rocm-sdk|torch|torchvision|torchaudio)' || true
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=verify-installed-package-versions timeout=60 hidden=True setup=activate-venv -->
+```bash
+python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
+```
+<!-- @test:end -->
+<!-- @os:end -->
 ---
 
 ### Installing Additional Dependencies
@@ -731,10 +740,6 @@ export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:${LD_LIBRARY_PATH:-}"
 export PATH="$ROCM_HOME/bin:$PATH"
 
-export CC=clang
-export CXX=clang
-export DISTUTILS_USE_SDK=1
-
 cd Vector_Addition
 
 python -m pip install --no-build-isolation -v .
@@ -1246,10 +1251,6 @@ PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_in
 export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:${LD_LIBRARY_PATH:-}"
 export PATH="$ROCM_HOME/bin:$PATH"
-
-export CC=clang
-export CXX=clang
-export DISTUTILS_USE_SDK=1
 
 cd Matrix_Multiplication
 
