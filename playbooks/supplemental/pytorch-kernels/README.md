@@ -116,11 +116,11 @@ python -m venv kernel-env --system-site-packages
 kernel-env\Scripts\activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
+<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -145,12 +145,12 @@ On Windows, open a terminal in the directory of your choice and follow the comma
 python -m venv kernel-env
 kernel-env\Scripts\activate
 ```
-<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 <!-- @test:end -->
 
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
+<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
