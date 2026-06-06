@@ -186,7 +186,7 @@ python -m pip list | grep -E '^(rocm|rocm-sdk|torch|torchvision|torchaudio)' || 
 
 <!-- @os:windows -->
 <!-- @test:id=verify-installed-package-versions timeout=60 hidden=True setup=activate-venv -->
-```bash
+```powershell
 python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 ```
 <!-- @test:end -->
