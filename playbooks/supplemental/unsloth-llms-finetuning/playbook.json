@@ -4,15 +4,6 @@
   "description": "Use Unsloth for memory-efficient fine-tuned LLMs™",
   "time": 60,
   "unsupported_platforms": {
-    "halo": [
-      { "platform": "windows", "reason": "Not Compatible: ROCm-on-Windows PyTorch build is missing torch.distributed functionality that Unsloth expects" }
-    ],
-    "stx": [
-      { "platform": "windows", "reason": "Not Compatible: ROCm-on-Windows PyTorch build is missing torch.distributed functionality that Unsloth expects" }
-    ],
-    "krk": [
-      { "platform": "windows", "reason": "Not Compatible: ROCm-on-Windows PyTorch build is missing torch.distributed functionality that Unsloth expects" }
-    ]
   },
   "supported_platforms": {
     "halo": [

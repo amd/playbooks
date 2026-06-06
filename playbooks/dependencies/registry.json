@@ -112,6 +112,17 @@
         "windows": ["halo_box"]
       }
     },
+    "lmstudio-models-qwen3-9b": {
+      "name": "Qwen3.5 9B Model",
+      "description": "Qwen3.5 9B model for LM Studio",
+      "category": "model",
+      "platforms": ["windows", "linux"],
+      "file": "lmstudio_models_qwen3_9b.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      }
+    },
     "driver": {
       "name": "AMD GPU Driver",
       "description": "Latest AMD GPU driver for optimal performance",
