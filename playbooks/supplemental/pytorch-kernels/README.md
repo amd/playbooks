@@ -298,7 +298,6 @@ Write-Host "OK: Visual Studio C++ build environment is available."
 <!-- @os:end -->
 
 #### Set Environment Variables
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @os:linux -->
 <!-- @test:id=set-env-variables-linux timeout=300 setup=activate-venv -->
 ```bash
@@ -347,7 +346,6 @@ $env:DISTUTILS_USE_SDK = "1"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
-<!-- @device:end -->
 
 <!-- @os:linux -->
 Verify that the AMD GPU is visible with:
@@ -581,7 +579,8 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
->**Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike of utilization when you run the program.
+> **Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike of utilization when you run the program.
+
 **Expected output:**
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
@@ -1054,7 +1053,8 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
->**Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike of utilization when you run the program.
+> **Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike of utilization when you run the program.
+
 **Expected output:**
 ```
 Elapsed time: 2.753s
