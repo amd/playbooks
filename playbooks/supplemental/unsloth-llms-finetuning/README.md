@@ -23,6 +23,10 @@ The example is designed to be practical and easy to modify, so you can use it as
 - How to fine-tune a LLM using SFT with Unsloth
 - How to save the fine-tuned result in local storage
 
+<!-- @device:stx,krk -->
+> **Note:** Some of the fine-tuning techniques in this playbook may require more than 64GB of system RAM.
+<!-- @device:end -->
+
 ## Why Unsloth?
 
 Unsloth makes LLM fine-tuning easier to run on local hardware by reducing memory usage and speeding up training compared to a standard setup.
