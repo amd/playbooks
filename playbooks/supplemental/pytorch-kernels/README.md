@@ -233,7 +233,37 @@ Please ensure [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe
 
 Open a Powershell terminal and activate Visual Studio environment C++ dependencies.
 ```powershell
-cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 && set' | ForEach-Object { if ($_ -match '^([^=]+)=(.*)$') { [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
+# Find Visual Studio 2022 or newer with the C++ build tools installed.
+$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+$Vcvars = & $VsWhere `
+  -latest `
+  -products * `
+  -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+  -find "VC\Auxiliary\Build\vcvars64.bat" |
+  Select-Object -First 1
+Write-Host "Using vcvars64.bat from Visual Studio C++ environment: $Vcvars"
+
+# Run vcvars64.bat and import the Visual Studio compiler environment into this PowerShell session.
+# This makes cl.exe, INCLUDE, LIB, LIBPATH, and Windows SDK paths available for extension builds.
+$VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
+$ExitCode = $LASTEXITCODE
+if ($ExitCode -ne 0) {
+  $VsEnv | Out-Host
+  throw "Failed to activate the Visual Studio C++ environment. Exit code: $ExitCode"
+}
+
+# Show the important activation lines, without printing every environment variable.
+$VsEnv | Select-String "Developer Command Prompt|Environment initialized|cl.exe" | Out-Host
+
+# Import environment variables from vcvars64.bat into the current PowerShell process.
+$VsEnv | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {
+    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
+  }
+}
+
+# Verify that the Microsoft C++ compiler is now available.
+where.exe cl
 ```
 
 <!-- @test:id=verify-visual-studio-community timeout=60 hidden=True -->
