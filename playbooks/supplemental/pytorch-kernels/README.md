@@ -229,7 +229,7 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Please ensure [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) or newer is installed with the **Desktop development with C++** workload.
+Please ensure [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) or [newer](https://visualstudio.microsoft.com/vs/community/) is installed with the **Desktop development with C++** workload.
 
 Open a Powershell terminal and activate Visual Studio environment C++ dependencies.
 ```powershell
