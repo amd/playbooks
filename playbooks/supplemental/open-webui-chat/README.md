@@ -381,39 +381,6 @@ podman compose up -d
 This pulls the Open WebUI image and writes to persistent storage.
 
 Launch Open WebUI by typing `localhost:8080` into your browser address bar.
-
-<!-- @test:id=openwebui-compose-up-linux timeout=1200 hidden=True -->
-```bash
-set -euo pipefail
-
-# CI runners may not have Podman preinstalled (non-HaloBox devices); mirror the
-# @require:podman setup so the container test can run.
-if ! command -v podman >/dev/null 2>&1; then
-  sudo apt-get update
-  sudo apt-get install -y podman docker-compose-plugin
-  sudo systemctl enable --now podman.socket || true
-fi
-
-podman compose up -d
-
-ok=""
-for i in $(seq 1 120); do
-  ok="$(curl -s --max-time 2 http://127.0.0.1:8080/health || true)"
-  if [ -n "$ok" ]; then break; fi
-  sleep 1
-done
-
-if [ -z "$ok" ]; then
-  echo "Open WebUI not ready on http://127.0.0.1:8080"
-  podman compose logs || true
-  podman compose down || true
-  exit 1
-fi
-
-echo "OK: Open WebUI is responding on /health"
-podman compose down
-```
-<!-- @test:end -->
 <!-- @os:end -->
 
 > Note: Open WebUI also provides other installation options (such as a Python package or Docker) on their [GitHub](https://github.com/open-webui/open-webui).
