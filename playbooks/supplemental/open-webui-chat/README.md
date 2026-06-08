@@ -364,7 +364,7 @@ Write-Host "OK: open-webui installed in venv"
 
 <!-- @os:windows -->
 > **Tip (Python version):** Install Open WebUI using **Python 3.12**. The `open-webui` PyPI package may not install on Python 3.13+ (you’ll see “No matching distribution found”).
-> Note: Open WebUI also provides a variety of other installation options, such as Docker, on their GitHub.
+> Note: Open WebUI also provides a variety of other installation options, such as Docker, on their [GitHub](https://github.com/open-webui/open-webui).
 <!-- @os:end -->
 
 <!-- @os:linux -->
