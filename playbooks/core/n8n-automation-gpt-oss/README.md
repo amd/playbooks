@@ -185,7 +185,6 @@ Install n8n globally using npm.
 ```bash
 npm install -g n8n
 ```
-<!-- @os:end -->
 
 <!-- @test:id=n8n-version timeout=60 hidden=True -->
 ```bash
