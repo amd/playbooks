@@ -231,40 +231,71 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:windows -->
 Please ensure [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) or [newer](https://visualstudio.microsoft.com/vs/community/) is installed with the **Desktop development with C++** workload.
 
-Open a Powershell terminal and activate Visual Studio environment C++ dependencies.
+> **Note**: This Visual Studio C++ environment setup is required only for the **C++ Extension** approach. It is not required for the JIT Compilation approach.
+
+Open a PowerShell terminal and run the following commands before building the C++ extension.
+
+**Step 1: Find the installed Visual Studio C++ environment**
+
+**(A) Locate `vswhere.exe`, which is installed with the Visual Studio Installer**
 ```powershell
-# Find Visual Studio 2022 or newer with the C++ build tools installed.
 $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+```
+
+**(B) Find `vcvars64.bat` from Visual Studio 2022 or newer with C++ build tools**
+
+```powershell
 $Vcvars = & $VsWhere `
   -latest `
   -products * `
   -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
   -find "VC\Auxiliary\Build\vcvars64.bat" |
   Select-Object -First 1
-Write-Host "Using vcvars64.bat from Visual Studio C++ environment: $Vcvars"
 
-# Run vcvars64.bat and import the Visual Studio compiler environment into this PowerShell session.
-# This makes cl.exe, INCLUDE, LIB, LIBPATH, and Windows SDK paths available for extension builds.
+if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+```
+
+**(C) Print the Visual Studio C++ Environment being used**
+
+```powershell
+Write-Host "Using Visual Studio C++ environment: $Vcvars"
+```
+
+**Step 2: Activate the Visual Studio C++ build environment**
+
+**(A) Run `vcvars64.bat` and capture the environment it sets**
+
+This makes `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH`, and Windows SDK paths available.
+
+```powershell
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
 $ExitCode = $LASTEXITCODE
+
 if ($ExitCode -ne 0) {
   $VsEnv | Out-Host
   throw "Failed to activate the Visual Studio C++ environment. Exit code: $ExitCode"
 }
+```
 
-# Show the important activation lines, without printing every environment variable.
-$VsEnv | Select-String "Developer Command Prompt|Environment initialized|cl.exe" | Out-Host
+**(B) Import the Visual Studio environment variables into this PowerShell session**
 
-# Import environment variables from vcvars64.bat into the current PowerShell process.
+```powershell
 $VsEnv | ForEach-Object {
   if ($_ -match '^([^=]+)=(.*)$') {
     [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
   }
 }
+```
 
-# Verify that the Microsoft C++ compiler is now available.
+**Step 3: Verify that the Microsoft C++ compiler is available**
+
+```powershell
 where.exe cl
 ```
+
+<!-- @os:end -->
 
 <!-- @test:id=verify-visual-studio-community timeout=60 hidden=True -->
 ```powershell
@@ -282,6 +313,7 @@ $VcvarsList = & $VsWhere `
   -find "VC\Auxiliary\Build\vcvars64.bat"
 if (-not $VcvarsList) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 $Vcvars = $VcvarsList | Select-Object -First 1
+if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 Write-Host "Using vcvars64.bat from Visual Studio C++ environment: $Vcvars"
 
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
@@ -292,6 +324,14 @@ if ($ExitCode -ne 0) {
 }
 
 $VsEnv | Select-String "Developer Command Prompt|Environment initialized|cl.exe" | Out-Host
+$VsEnv | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {
+    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
+  }
+}
+
+where.exe cl
+
 Write-Host "OK: Visual Studio C++ build environment is available."
 ```
 <!-- @test:end -->
@@ -733,6 +773,10 @@ $code | python -
 #### Approach B:  C++ Extension
 
 The second approach is more manual: write the kernel and Python binding to a single `.cu` file, compile it natively using PyTorch's build system, and import it into Python.
+
+<!-- @os:windows -->
+> **Note**: The C++ Extension approach requires the Visual Studio C++ build environment because PyTorch builds a native `.pyd` extension from the `.cu` file. Run the Visual Studio activation commands from the setup section before building the extension.
+<!-- @os:end -->
 
 Download the following files if you haven't already:
 <!-- @os:windows -->
@@ -1232,6 +1276,10 @@ $code | python -
 #### Approach B:  C++ Extension
 
 The second approach is more manual: write the kernel and Python binding to a single `.cu` file, compile it natively using PyTorch's build system, and import it into Python.
+
+<!-- @os:windows -->
+> **Note**: The C++ Extension approach requires the Visual Studio C++ build environment because PyTorch builds a native `.pyd` extension from the `.cu` file. Run the Visual Studio activation commands from the setup section before building the extension.
+<!-- @os:end -->
 
 Download the following files if you haven't already:
 <!-- @os:windows -->
