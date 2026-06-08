@@ -196,6 +196,8 @@ Both scripts support:
 
 The included [run_llm.py](assets/run_llm.py) script shows how to generate text with LLMs using PyTorch and AMD ROCm.
 
+> **Note:** When you load a model, Hugging Face Transformers first checks its local cache (`~/.cache/huggingface/hub` on Linux, `C:\Users\<user>\.cache\huggingface\hub` on Windows). If the model isn't cached, it downloads automatically from huggingface.co. The first run may take a few minutes depending on model size and network speed.
+
 The snippet below shows how to use the model and customize the questions asked.
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
