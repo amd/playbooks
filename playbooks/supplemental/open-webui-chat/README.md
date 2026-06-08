@@ -386,6 +386,14 @@ Launch Open WebUI by typing `localhost:8080` into your browser address bar.
 ```bash
 set -euo pipefail
 
+# CI runners may not have Podman preinstalled (non-HaloBox devices); mirror the
+# @require:podman setup so the container test can run.
+if ! command -v podman >/dev/null 2>&1; then
+  sudo apt-get update
+  sudo apt-get install -y podman docker-compose-plugin
+  sudo systemctl enable --now podman.socket || true
+fi
+
 podman compose up -d
 
 ok=""
