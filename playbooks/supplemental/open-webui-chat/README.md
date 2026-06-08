@@ -72,6 +72,8 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 
 <!-- @os:windows -->
 <!-- @require:lemonade,pyenv -->
+
+---
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -307,27 +309,42 @@ PY
 ## Installing Open WebUI
 
 <!-- @os:windows -->
-Using pyenv (installed in the Prerequisites), install and select Python 3.12, then create a fresh virtual environment for Open WebUI:
+### 1. Install and globally set Python 3.12 with pyenv
+
+Using pyenv (installed in the Prerequisites), install Python 3.12 and set it as your global version:
 
 ```powershell
-# Install and select Python 3.12 (open-webui does not support Python 3.13+)
 pyenv install 3.12.10
 pyenv global 3.12.10
+```
 
-# Create and activate a virtual environment, then install open-webui
+### 2. Verify Python 3.12 is active
+
+Confirm the active Python is 3.12 before creating the environment:
+
+```powershell
+python --version
+# Python 3.12.x
+```
+
+<!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
+```powershell
+$v = (python --version) 2>&1
+if ($v -notmatch "Python 3\.12\.") { throw "Expected Python 3.12.x but got: $v" }
+where.exe python
+python -c "import sys; print(sys.executable)"
+Write-Host "OK: $v"
+```
+<!-- @test:end --> 
+
+### 3. Create a virtual environment and install Open WebUI
+
+```powershell
 python -m venv openwebui-venv
 .\openwebui-venv\Scripts\activate
 python -m pip install --upgrade pip
 pip install open-webui beautifulsoup4
 ```
-
-<!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
-```powershell
-python --version
-where.exe python
-python -c "import sys; print(sys.executable)"
-```
-<!-- @test:end --> 
 
 <!-- @test:id=openwebui-install-venv-windows timeout=1200 hidden=True -->
 ```powershell
@@ -367,7 +384,7 @@ Write-Host "OK: open-webui installed in venv"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Note:** Open WebUI requires **Python 3.12** — the `open-webui` PyPI package does not install on Python 3.13+ (you’ll see “No matching distribution found”), which is why we pin 3.12 with pyenv above.
+> Open WebUI requires **Python 3.12**. The `open-webui` PyPI package does not install on Python 3.13+ (you’ll see “No matching distribution found”), which is why we pin 3.12 with pyenv above.
 > Open WebUI also provides other installation options (such as Docker) on their [GitHub](https://github.com/open-webui/open-webui).
 <!-- @os:end -->
 
@@ -387,7 +404,7 @@ This pulls the Open WebUI image and writes to persistent storage.
 Launch Open WebUI by typing `localhost:8080` into your browser address bar.
 <!-- @os:end -->
 
-> Note: Open WebUI also provides other installation options (such as a Python package or Docker) on their [GitHub](https://github.com/open-webui/open-webui).
+> Open WebUI also provides other installation options (such as a Python package or Docker) on their [GitHub](https://github.com/open-webui/open-webui).
 
 ## Starting Open WebUI Server
 
