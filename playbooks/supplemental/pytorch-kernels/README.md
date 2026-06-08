@@ -773,7 +773,7 @@ $code | python -
 The second approach is more manual: write the kernel and Python binding to a single `.cu` file, compile it natively using PyTorch's build system, and import it into Python.
 
 <!-- @os:windows -->
-> **Note**: The C++ Extension approach requires the Visual Studio C++ build environment because PyTorch builds a native `.pyd` extension from the `.cu` file. Run the Visual Studio activation commands from the setup section before building the extension.
+> **Note**: The C++ Extension approach requires the Visual Studio C++ build environment because PyTorch compiles the `.cu` source file into a native `.pyd` extension module. Building that native extension depends on the Microsoft C++ toolchain (compiler, linker, and build tools) provided by Visual Studio. Run the Visual Studio activation commands from the setup section before building the extension.
 <!-- @os:end -->
 
 Download the following files if you haven't already:
@@ -1276,7 +1276,7 @@ $code | python -
 The second approach is more manual: write the kernel and Python binding to a single `.cu` file, compile it natively using PyTorch's build system, and import it into Python.
 
 <!-- @os:windows -->
-> **Note**: The C++ Extension approach requires the Visual Studio C++ build environment because PyTorch builds a native `.pyd` extension from the `.cu` file. Run the Visual Studio activation commands from the setup section before building the extension.
+> **Note**: The C++ Extension approach requires the Visual Studio C++ build environment because PyTorch compiles the `.cu` source file into a native `.pyd` extension module. Building that native extension depends on the Microsoft C++ toolchain (compiler, linker, and build tools) provided by Visual Studio. Run the Visual Studio activation commands from the setup section before building the extension.
 <!-- @os:end -->
 
 Download the following files if you haven't already:
