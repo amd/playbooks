@@ -295,8 +295,6 @@ $VsEnv | ForEach-Object {
 where.exe cl
 ```
 
-<!-- @os:end -->
-
 <!-- @test:id=verify-visual-studio-community timeout=60 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
