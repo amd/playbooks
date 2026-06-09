@@ -185,13 +185,22 @@ Install n8n globally using npm.
 ```bash
 npm install -g n8n
 ```
-<!-- @os:end -->
 
 <!-- @test:id=n8n-version timeout=60 hidden=True -->
 ```bash
 n8n --version
 ```
 <!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=n8n-version timeout=60 hidden=True -->
+```bash
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+n8n --version
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 <!-- @os:windows -->
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
@@ -259,6 +268,7 @@ try {
 ```bash
 set -euo pipefail
 
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
 p=""
 cleanup() {
   if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
