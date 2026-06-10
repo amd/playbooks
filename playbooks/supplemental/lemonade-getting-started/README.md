@@ -397,7 +397,7 @@ Structure:
    - Offers to start the quiz.
 ```
 
-> **Tip**: We have followed standard engineering practice through thorough prompt creation and using 2-model system to optimize resources and speed.
+> **Tip**: We have followed standard engineering practice thorough prompt creation and using 2-model system to optimize resources and speed.
 
 For your convenience, we have provided sample output in [`flashcards.py`](assets/flashcards.py). Feel free to download it to your directory. Either way, you should now have a Python file that can be run.
 
@@ -545,6 +545,23 @@ Lemonade detects your NPU automatically and installs the **Ryzen AI LLM** backen
 ### Step 9: Run an FLM Model
 
 FastFlowLM (FLM) models are specifically optimized for AMD's XDNA2 NPU architecture and can be very fast for their size. For example, select `qwen3.5-4b-FLM` from the `FastFlowLM NPU` list or use the following command:
+
+<!-- @os:windows -->
+Visit the [official FLM](https://fastflowlm.com/docs/install_win/#-install-fastflowlm-windows) documentation and follow the installation steps.
+<!-- @os:end -->
+
+<!-- @os:linux -->
+Visit the [official FLM](https://lemonade-server.ai/flm_npu_linux.html) documentation and follow the installation steps for FLM by selecting your Linux distribution.
+
+After that, install the `*.deb` package pulled from the latest [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).
+<!-- @os:end -->
+
+Next, download desired model from [models page](https://fastflowlm.com/docs/models/qwen/) and validate it using the Shell command provided in the documentation.
+
+```
+flm run qwen3.5-4b-FLM
+```
+If everything is working correctly, install the `FastFlowLM NPU` backend. After a successful installation, you should see that `flm:npu` completed in the **Download Manager** inside the **Lemonade Desktop App**.
 
 ```
 lemonade run qwen3.5-4b-FLM
