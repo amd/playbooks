@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# How to Chat with LLMs in Open WebUI
-
 <!-- @device:stx,krk -->
 > [!NOTE]
 > This playbook requires a minimum of **32GB** of system memory.
@@ -30,14 +28,14 @@ This setup enables you to explore the **complete multimodal workflow end-to-end*
 
 ---
 
-## Learning Objectives
+## What You’ll Learn
 
 By the end, you’ll be able to:
 
 - Connect Open WebUI to a local OpenAI-compatible backend (Lemonade)
 - Chat with a local LLM from your browser
 - Upload an image and ask a vision model questions about it
-- Generate images from text prompts using Stable Diffusion models (SD-Turbo / SDXL)
+- Generate images from text prompts using Stable Diffusion models (SDXL-Turbo / SDXL)
 - Understand the mental model so you can use other backends (Ollama, vLLM, llama.cpp server, etc.)
 
 ---
@@ -54,7 +52,7 @@ By the end, you’ll be able to:
 
 #### Why “OpenAI-compatible API” matters
 
-Open WebUI is built around standard OpenAI-style endpoints, like: 
+Open WebUI is built around standard OpenAI-style endpoints, like:
   - Chat: `/chat/completions`
   - Models list: `/models`
   - Image generation: `/images/generations`
@@ -64,9 +62,20 @@ Lemonade exposes these under `http://localhost:13305/api/v1/...`
 
 If a backend supports those endpoints, Open WebUI can talk to it with minimal setup. That’s why we can switch backends without changing our workflow.
 
+#### Two services, two ports
+
+Throughout this playbook you’ll work with two separate services:
+
+| Service | URL | What you do there |
+|---|---|---|
+| **Lemonade** (GUI) | `http://localhost:13305` | Browse, download, and manage models |
+| **Open WebUI** | `http://localhost:8080` | Chat, upload images, generate images — the user-facing UI |
+
+Lemonade runs the models; Open WebUI is the interface you interact with. Use the Lemonade GUI to download your models first, then use them from Open WebUI.
+
 ---
 
-## Prerequisites
+## Installing Software Prerequisites
 
 This playbook needs Lemonade running as the backend and, on Linux, a container engine (Podman) to run Open WebUI. Set these up before installing Open WebUI.
 
@@ -84,11 +93,10 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 <!-- @device:end -->
 <!-- @os:end -->
 
-- Confirm the API is reachable:
-  - Open `http://localhost:13305/api/v1/models` in your web browser.
-  - Download the desired models in Lemonade
+- Open the Lemonade GUI at `http://localhost:13305`, browse the available models, and download the ones you want to use (e.g., an LLM for chat, a vision model, and/or a Stable Diffusion model for image generation).
+- Confirm the API is reachable by visiting `http://localhost:13305/api/v1/models` in your browser — you should see your downloaded models listed.
 
-> If you don’t see your models in `http://localhost:13305/api/v1/models`, Open WebUI won’t be able to select them later.
+> Models must be downloaded in **Lemonade** (`localhost:13305`) before they can appear in **Open WebUI** (`localhost:8080`). If a model isn’t showing up in Open WebUI, check Lemonade first.
 
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash
@@ -309,18 +317,18 @@ PY
 ## Installing Open WebUI
 
 <!-- @os:windows -->
-### 1. Install and globally set Python 3.12 with pyenv
+### 1. Install Python 3.12 with pyenv
 
-Using pyenv (installed in the Prerequisites), install Python 3.12 and set it as your global version:
+Using pyenv (installed in the Prerequisites), install Python 3.12 and set it for the current directory. This keeps your system default Python (e.g., 3.13) untouched for other projects.
 
 ```powershell
 pyenv install 3.12.10
-pyenv global 3.12.10
+pyenv local 3.12.10
 ```
 
 ### 2. Verify Python 3.12 is active
 
-Confirm the active Python is 3.12 before creating the environment:
+Confirm the active Python is 3.12 in this directory before creating the environment:
 
 ```powershell
 python --version
@@ -385,7 +393,6 @@ Write-Host "OK: open-webui installed in venv"
 
 <!-- @os:windows -->
 > Open WebUI requires **Python 3.12**. The `open-webui` PyPI package does not install on Python 3.13+ (you’ll see “No matching distribution found”), which is why we pin 3.12 with pyenv above.
-> Open WebUI also provides other installation options (such as Docker) on their [GitHub](https://github.com/open-webui/open-webui).
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -471,6 +478,8 @@ finally {
 
 ## Connecting Open WebUI to Lemonade
 
+Now that both services are running — Lemonade on `localhost:13305` and Open WebUI on `localhost:8080` — connect them so Open WebUI can use Lemonade's models.
+
 In Open WebUI:
 
 1. Go to **Admin Settings → Connections** (http://localhost:8080/admin/settings/connections):
@@ -488,7 +497,7 @@ In Open WebUI:
      <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
    </p>
 
-3. In http://localhost:8080/admin/settings/connections, ensure that under __"Manage OpenAI API Connections"__, only `http://localhost:13305/api/v1` is enabled.
+3. In **Admin Settings → Connections** (`http://localhost:8080/admin/settings/connections`), ensure that under **"Manage OpenAI API Connections"**, only `http://localhost:13305/api/v1` is enabled.
 
    <p align="center">
      <img src="assets/connection.png" alt="Admin settings connections page showing 'Manage OpenAI API Connections' with only http://localhost:13305/api/v1 enabled." width="600"/>
@@ -590,7 +599,7 @@ Stable Diffusion models don't support text generation, they only generate images
 
 #### Step 1: Configure Image Generation in Open WebUI
 
-1. Go to Lemonade, search for `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality), and download it.
+1. In the Lemonade GUI (`http://localhost:13305`), search for `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality) and download it.
 2. Go to **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
 3. Set:
    - **Image Generation:** ON
@@ -638,9 +647,9 @@ This establishes that Open WebUI can coordinate a “two-part” workflow:
 
 ## Troubleshooting
 
-### “No models show up”
-- Confirm `http://localhost:13305/api/v1/models` loads in a browser
-- Re-check Open WebUI connection Base URL: `http://localhost:13305/api/v1`
+### “No models show up in Open WebUI”
+- First, check Lemonade: open `http://localhost:13305/api/v1/models` in a browser and confirm your models are listed and downloaded
+- Then, check the Open WebUI connection: go to **Admin Settings → Connections** at `http://localhost:8080/admin/settings/connections` and verify the Base URL is `http://localhost:13305/api/v1`
 
 ### “This model does not support chat completion” error message
 - You selected an image model (SDXL-Turbo / SDXL-Base-1.0) in the chat model dropdown.
