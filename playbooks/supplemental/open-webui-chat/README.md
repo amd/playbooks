@@ -81,7 +81,6 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
-<!-- @require:pyenv -->
 
 ---
 <!-- @os:end -->
@@ -323,84 +322,78 @@ PY
 ## Installing Open WebUI
 
 <!-- @os:windows -->
-### 1. Create a project directory and set Python 3.12
+### 1. Install Python 3.12
 
-Create a dedicated folder for Open WebUI. Using `pyenv local` inside this folder pins Python 3.12 only here — your system default (e.g., 3.13) stays untouched everywhere else.
+Open WebUI requires **Python 3.12** — it does not install on Python 3.13+. The Windows Python Launcher (`py`) lets you install 3.12 side by side with any existing Python version without conflicts.
+
+```powershell
+winget install Python.Python.3.12
+```
+
+Close and reopen your terminal after installing, then verify:
+
+```powershell
+py -3.12 --version
+# Python 3.12.x
+```
+
+<!-- @device:halo_box -->
+> **Note:** Your system comes with Python 3.13 pre-installed. Installing 3.12 does not affect it — `python` continues to use 3.13, and `py -3.12` targets 3.12 only when you need it.
+<!-- @device:end -->
+
+<!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
+```powershell
+$v = (py -3.12 --version) 2>&1
+if ($v -notmatch “Python 3\.12\.”) { throw “Expected Python 3.12.x but got: $v” }
+Write-Host “OK: $v”
+```
+<!-- @test:end --> 
+
+### 2. Create a virtual environment and install Open WebUI
 
 ```powershell
 mkdir openwebui
 cd openwebui
-pyenv install 3.12.10
-pyenv local 3.12.10
-```
-
-### 2. Verify Python 3.12 is active
-
-Confirm the active Python is 3.12 in this directory before creating the environment:
-
-```powershell
-python --version
-# Python 3.12.x
-```
-
-<!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
-```powershell
-$v = (python --version) 2>&1
-if ($v -notmatch "Python 3\.12\.") { throw "Expected Python 3.12.x but got: $v" }
-where.exe python
-python -c "import sys; print(sys.executable)"
-Write-Host "OK: $v"
-```
-<!-- @test:end --> 
-
-### 3. Create a virtual environment and install Open WebUI
-
-```powershell
-python -m venv openwebui-venv
-openwebui-venv\Scripts\activate
+py -3.12 -m venv openwebui-venv
+.\openwebui-venv\Scripts\activate
 pip install open-webui beautifulsoup4
 ```
 
 <!-- @test:id=openwebui-install-venv-windows timeout=1200 hidden=True -->
 ```powershell
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = “Stop”
 
-$venv = "$PWD\openwebui-venv-ci"
+$venv = “$PWD\openwebui-venv-ci”
 if (Test-Path $venv) { Remove-Item -Recurse -Force $venv }
 
-python -m venv $venv
-$py = Join-Path $venv "Scripts\python.exe"
+py -3.12 -m venv $venv
+$py = Join-Path $venv “Scripts\python.exe”
 
 & $py -m pip install --upgrade pip
 & $py -m pip install open-webui beautifulsoup4
 
-if ($LASTEXITCODE -ne 0) { throw "pip install open-webui failed" }
+if ($LASTEXITCODE -ne 0) { throw “pip install open-webui failed” }
 ```
 <!-- @test:end --> 
 
 <!-- @test:id=openwebui-install-check-windows timeout=1200 hidden=True -->
 ```powershell
-$venv = "$PWD\openwebui-venv-ci"
-$py = Join-Path $venv "Scripts\python.exe"
-& $py -c "import open_webui; print('OK: import open_webui')"
-& $py -c "import bs4; print('OK: bs4 import')"
+$venv = “$PWD\openwebui-venv-ci”
+$py = Join-Path $venv “Scripts\python.exe”
+& $py -c “import open_webui; print(‘OK: import open_webui’)”
+& $py -c “import bs4; print(‘OK: bs4 import’)”
 ```
 <!-- @test:end --> 
 
 <!-- @test:id=openwebui-cli-windows timeout=1200 hidden=True -->
 ```powershell
-$venv = "$PWD\openwebui-venv-ci"
-$ow = Join-Path $venv "Scripts\open-webui.exe"
+$venv = “$PWD\openwebui-venv-ci”
+$ow = Join-Path $venv “Scripts\open-webui.exe”
 
 & $ow --help | Out-Null
-Write-Host "OK: open-webui installed in venv"
+Write-Host “OK: open-webui installed in venv”
 ```
 <!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:windows -->
-> Open WebUI requires **Python 3.12**. The `open-webui` PyPI package does not install on Python 3.13+ (you’ll see “No matching distribution found”), which is why we pin 3.12 with pyenv above.'
-> **Tip**: Open WebUI also provides other installation options on their [GitHub](https://github.com/open-webui/open-webui).
 <!-- @os:end -->
 
 <!-- @os:linux -->
