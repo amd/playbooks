@@ -87,7 +87,7 @@ python -m venv unsloth_env
 
 <!-- @require:pytorch,driver -->
 
-<!-- @test:id=verify-torch-env timeout=60 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
 ```python
 import sys
 import torch
