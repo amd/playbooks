@@ -34,12 +34,15 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 #### Create a Virtual Environment
 On Linux, open a terminal in the directory of your choice and run the following prompt to create a venv:
 
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
 python3 -m venv llm-env
 source llm-env/bin/activate
 ```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
 <!-- @device:end -->
 
 <!-- @require:driver,rocm,pytorch,comfyui -->
@@ -80,23 +83,11 @@ cd ComfyUI
 <!-- @os:end -->
 
 <!-- @os:linux --> 
-<!-- @test:id=comfyui-venv-linux timeout=180 hidden=True -->
+<!-- @test:id=comfyui-requirements-linux timeout=600 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
-python3 --version
-rm -rf comfyui_venv
-python3 -m venv comfyui_venv
-./comfyui_venv/bin/python -V
-```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:linux --> 
-<!-- @test:id=comfyui-requirements-linux timeout=600 hidden=True -->
-```bash
-set -euo pipefail
-./comfyui_venv/bin/python -m pip install --upgrade pip
-./comfyui_venv/bin/python -m pip install -r ./ComfyUI/requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r ./ComfyUI/requirements.txt
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -135,14 +126,11 @@ if ($LASTEXITCODE -ne 0) { throw "Torch import/check failed in ComfyUI workspace
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=comfyui-install-rocm-torch-linux timeout=900 hidden=True -->
+<!-- @test:id=comfyui-install-rocm-torch-linux timeout=900 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
-sudo apt install python3-pip -y
-./comfyui_venv/bin/python -m pip install --upgrade pip wheel
-./comfyui_venv/bin/python -m pip install --force-reinstall --no-cache-dir --index-url https://repo.amd.com/rocm/whl/gfx1151/ torch torchvision torchaudio
 
-./comfyui_venv/bin/python - <<'PY'
+python - <<'PY'
 import torch
 print(f"PyTorch version: {torch.__version__}")
 print(f"ROCm/HIP version: {getattr(torch.version, 'hip', None)}")
@@ -154,11 +142,11 @@ PY
 <!-- @os:end -->
 
 <!-- @os:linux --> 
-<!-- @test:id=comfyui-verify-torch-linux timeout=120 hidden=True -->
+<!-- @test:id=comfyui-verify-torch-linux timeout=120 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
 export LD_LIBRARY_PATH=/opt/rocm/lib:${LD_LIBRARY_PATH:-}
-./comfyui_venv/bin/python -c "import torch; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('hip', getattr(torch.version,'hip',None));"
+python -c "import torch; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('hip', getattr(torch.version,'hip',None));"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -241,11 +229,11 @@ try {
 <!-- @os:end -->
 
 <!-- @os:linux --> 
-<!-- @test:id=comfyui-server-up-linux timeout=300 hidden=True -->
+<!-- @test:id=comfyui-server-up-linux timeout=300 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
 export LD_LIBRARY_PATH=/opt/rocm/lib:${LD_LIBRARY_PATH:-}
-./comfyui_venv/bin/python ./ComfyUI/main.py --listen 127.0.0.1 --port 8188 >/tmp/comfyui.log 2>&1 &
+python ./ComfyUI/main.py --listen 127.0.0.1 --port 8188 >/tmp/comfyui.log 2>&1 &
 PID=$!
 
 cleanup() {
@@ -270,7 +258,6 @@ echo "OK: ComfyUI server is reachable!"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
-
 
 
 ## Launching ComfyUI
@@ -461,12 +448,12 @@ sys.exit(1)
 
 
 <!-- @os:linux --> 
-<!-- @test:id=comfyui-generate-zimage-linux timeout=1200 hidden=True -->
+<!-- @test:id=comfyui-generate-zimage-linux timeout=1200 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
 export LD_LIBRARY_PATH=/opt/rocm/lib:${LD_LIBRARY_PATH:-}
 # start server
-./comfyui_venv/bin/python ./ComfyUI/main.py --listen 127.0.0.1 --port 8188 >/tmp/comfyui.log 2>&1 &
+python ./ComfyUI/main.py --listen 127.0.0.1 --port 8188 >/tmp/comfyui.log 2>&1 &
 PID=$!
 
 cleanup() {
@@ -489,7 +476,7 @@ if [ "$ok" -ne 1 ]; then
 fi
 
 # submit workflow json from assets folder (one level up from ComfyUI)
-./comfyui_venv/bin/python - <<'PY'
+python - <<'PY'
 import json, time, urllib.request, urllib.error, sys, os
 
 wf_path = "image_z_image_turbo.json"

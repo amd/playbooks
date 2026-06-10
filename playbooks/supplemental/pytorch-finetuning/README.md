@@ -32,8 +32,8 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 ### 1. Setup
 
 #### Create a Virtual Environment
-<!-- @os:linux -->
 <!-- @device:halo_box -->
+<!-- @os:linux -->
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update 
@@ -42,37 +42,32 @@ python3 -m venv finetune-venv --system-site-packages
 source finetune-venv/bin/activate 
 ```
 <!-- @test:end -->
-<!-- @device:end -->
 <!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @device:halo_box -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
 python -m venv finetune-venv --system-site-packages
 finetune-venv\Scripts\activate
 ```
 <!-- @test:end -->
-<!-- @device:end -->
 <!-- @setup:id=activate-venv command="source finetune-venv\Scripts\activate" -->
 <!-- @os:end -->
+<!-- @device:end -->
 
-
-<!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @os:windows -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
 python -m venv finetune-venv
 finetune-venv\Scripts\activate
 ```
 <!-- @test:end -->
-<!-- @device:end -->
 <!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -81,13 +76,12 @@ python3 -m venv finetune-venv
 source finetune-venv/bin/activate
 ```
 <!-- @test:end -->
-<!-- @device:end -->
 <!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
 <!-- @os:end -->
+<!-- @device:end -->
 
 #### Installing Basic Dependencies
 <!-- @require:pytorch -->
-
 
 #### Additional Dependencies
 
@@ -197,6 +191,7 @@ r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```
 <!-- @test:end -->
+<!-- @device:end -->
 ---
 
 ## Understanding the Techniques
@@ -259,7 +254,13 @@ Below is a summary of the available training methods. Each method links to its s
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
 
 <!-- @device:stx,krk -->
+<!-- @os:linux -->
 > **Note:** Full fine-tuning (`train_full_finetuning.py`) may require more than 64GB of system RAM and may not be feasible on this device. Consider using LoRA or QLoRA instead.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note:** Full fine-tuning (`train_full_finetuning.py`) may require more than 64GB of system RAM and may not be feasible on this device. Consider using LoRA instead.
+<!-- @os:end -->
 <!-- @device:end -->
 
 Simply select your preferred `Training method`, download the corresponding script and execute it using the command keeping your virtual environment activated: 

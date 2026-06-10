@@ -33,7 +33,7 @@ function parseDeviceKey(key: string): { arch: string; platform: string | null } 
 }
 
 // Languages that support syntax highlighting
-const HIGHLIGHTED_LANGUAGES = new Set(["python", "py", "bash", "sh", "shell", "c", "cpp", "c++"]);
+const HIGHLIGHTED_LANGUAGES = new Set(["python", "py", "bash", "sh", "shell", "c", "cpp", "c++", "powershell", "ps1", "pwsh"]);
 
 // Map language aliases to their canonical names for the highlighter
 function normalizeLanguage(lang: string): string {
@@ -42,6 +42,8 @@ function normalizeLanguage(lang: string): string {
     "sh": "bash",
     "shell": "bash",
     "c++": "cpp",
+    "ps1": "powershell",
+    "pwsh": "powershell",
   };
   return langMap[lang] || lang;
 }
