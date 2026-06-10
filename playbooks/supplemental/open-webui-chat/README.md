@@ -80,7 +80,8 @@ Lemonade runs the models; Open WebUI is the interface you interact with. Use the
 This playbook needs Lemonade running as the backend and, on Linux, a container engine (Podman) to run Open WebUI. Set these up before installing Open WebUI.
 
 <!-- @os:windows -->
-<!-- @require:lemonade,pyenv -->
+<!-- @require:lemonade -->
+<!-- @require:pyenv -->
 
 ---
 <!-- @os:end -->
@@ -93,16 +94,21 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 <!-- @device:end -->
 <!-- @os:end -->
 
-- Open the Lemonade GUI at `http://localhost:13305`, browse the available models, and download the ones you want to use (e.g., an LLM for chat, a vision model, and/or a Stable Diffusion model for image generation).
-- Confirm the API is reachable by visiting `http://localhost:13305/api/v1/models` in your browser — you should see your downloaded models listed.
-
-> Models must be downloaded in **Lemonade** (`localhost:13305`) before they can appear in **Open WebUI** (`localhost:8080`). If a model isn’t showing up in Open WebUI, check Lemonade first.
-
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash
 lemonade --version
 ```
 <!-- @test:end --> 
+
+## Downloading Models in Lemonade
+
+Before installing Open WebUI, make sure the models you want to use are downloaded and ready in Lemonade.
+
+1. Open the Lemonade GUI at `http://localhost:13305`.
+2. Browse the available models and download the ones you want to use (e.g., an LLM for chat, a vision model, and/or a Stable Diffusion model for image generation).
+3. Confirm the API is reachable by visiting `http://localhost:13305/api/v1/models` in your browser — you should see your downloaded models listed.
+
+> Models must be downloaded in **Lemonade** (`localhost:13305`) before they can appear in **Open WebUI** (`localhost:8080`). If a model isn’t showing up in Open WebUI later, come back here and check Lemonade first.
 
 
 <!-- @os:windows -->
@@ -317,11 +323,13 @@ PY
 ## Installing Open WebUI
 
 <!-- @os:windows -->
-### 1. Install Python 3.12 with pyenv
+### 1. Create a project directory and set Python 3.12
 
-Using pyenv (installed in the Prerequisites), install Python 3.12 and set it for the current directory. This keeps your system default Python (e.g., 3.13) untouched for other projects.
+Create a dedicated folder for Open WebUI. Using `pyenv local` inside this folder pins Python 3.12 only here — your system default (e.g., 3.13) stays untouched everywhere else.
 
 ```powershell
+mkdir openwebui
+cd openwebui
 pyenv install 3.12.10
 pyenv local 3.12.10
 ```
@@ -349,8 +357,7 @@ Write-Host "OK: $v"
 
 ```powershell
 python -m venv openwebui-venv
-.\openwebui-venv\Scripts\activate
-python -m pip install --upgrade pip
+openwebui-venv\Scripts\activate
 pip install open-webui beautifulsoup4
 ```
 
@@ -482,14 +489,25 @@ Now that both services are running — Lemonade on `localhost:13305` and Open We
 
 In Open WebUI:
 
-1. Go to **Admin Settings → Connections** (http://localhost:8080/admin/settings/connections):
+1. Click the **user profile icon** in the top-right corner, then select **Settings**.
 
    <p align="center">
-     <img src="assets/open_settings.png" alt="Open WebUI Settings page" width="16%"/>
-     <img src="assets/connection_settings.png" alt="Navigating to the connection settings" width="69%"/>
+     <img src="assets/open_settings.png" alt="Click the user profile icon" width="300"/>
    </p>
 
-2. Under **OpenAI API**, add a new connection:
+2. In the Settings panel, click **Admin Settings** at the bottom-left.
+
+   <p align="center">
+     <img src="assets/click_admin_settings.png" alt="Select Admin Settings" width="450"/>
+   </p>
+
+3. In the Admin Settings sidebar, click **Connections** (or navigate directly to `http://localhost:8080/admin/settings/connections`).
+
+   <p align="center">
+     <img src="assets/admin_settings_connections.png" alt="Admin Settings Connections page" width="600"/>
+   </p>
+
+4. Under **OpenAI API**, add a new connection:
    - **Base URL:** `http://localhost:13305/api/v1`
    - **API Key:** `-` (a single dash works for local)
 
@@ -497,27 +515,25 @@ In Open WebUI:
      <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
    </p>
 
-3. In **Admin Settings → Connections** (`http://localhost:8080/admin/settings/connections`), ensure that under **"Manage OpenAI API Connections"**, only `http://localhost:13305/api/v1` is enabled.
+5. Ensure that under **"Manage OpenAI API Connections"**, only `http://localhost:13305/api/v1` is enabled. Disable any other connections (e.g., the default OpenAI one).
 
    <p align="center">
-     <img src="assets/connection.png" alt="Admin settings connections page showing 'Manage OpenAI API Connections' with only http://localhost:13305/api/v1 enabled." width="600"/>
+     <img src="assets/admin_settings_connections.png" alt="Manage OpenAI API Connections with only Lemonade enabled" width="600"/>
    </p>
 
-4. Save
+6. Click **Save**.
 
-5. Apply the following suggested settings. These help Open WebUI be more responsive with local LLMs.
-   - Click the user profile button again, and choose "Admin Settings".
-   - Click the "Settings" tab at the top, then "Interface" (which will be on the top or the left, depending on your window size), then disable the following:
-      - Title Generation
-      - Follow Up Generation
-      - Tags Generation
+7. **(Recommended)** Disable automatic generation features to keep Open WebUI responsive with local LLMs. Go to **Admin Settings → Settings → Interface** and turn off:
+   - Title Generation
+   - Follow Up Generation
+   - Tags Generation
 
    <p align="center">
-     <img src="assets/admin_settings.png" alt="Admin Settings" width="800"/>
+     <img src="assets/admin_settings.png" alt="Admin Settings Interface — disable Title, Follow Up, and Tags Generation" width="600"/>
    </p>
 
-6. Click the **"Save"** button in the bottom right of the page, then return to `http://localhost:8080`.
-7. Click the model dropdown and you should see the models that you have downloaded from Lemonade.
+8. Click **Save**, then return to `http://localhost:8080`.
+9. Click the model dropdown — you should see the models you downloaded from Lemonade.
 
 ---
 
@@ -610,7 +626,7 @@ Stable Diffusion models don't support text generation, they only generate images
 4. If you want to add more parameters, add them to the text field as JSON. For example: `{ "steps": 4, "cfg_scale": 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
-     <img src="assets/images_settings.png" alt="Lemonade VLM's" width="600"/>
+     <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
    </p>
 
 5. Save
@@ -636,7 +652,7 @@ This step ensures that you enable Image Generation as a capability for your mode
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
-     <img src="assets/image_gen_response.png" alt="Edit Model" width="32.5%"/>
+     <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
 This establishes that Open WebUI can coordinate a “two-part” workflow:
