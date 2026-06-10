@@ -399,7 +399,8 @@ Write-Host "OK: open-webui installed in venv"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> Open WebUI requires **Python 3.12**. The `open-webui` PyPI package does not install on Python 3.13+ (you’ll see “No matching distribution found”), which is why we pin 3.12 with pyenv above.
+> Open WebUI requires **Python 3.12**. The `open-webui` PyPI package does not install on Python 3.13+ (you’ll see “No matching distribution found”), which is why we pin 3.12 with pyenv above.'
+> **Tip**: Open WebUI also provides other installation options on their [GitHub](https://github.com/open-webui/open-webui).
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -418,7 +419,7 @@ This pulls the Open WebUI image and writes to persistent storage.
 Launch Open WebUI by typing `localhost:8080` into your browser address bar.
 <!-- @os:end -->
 
-> Open WebUI also provides other installation options (such as a Python package or Docker) on their [GitHub](https://github.com/open-webui/open-webui).
+> **Tip**: Open WebUI also provides other installation options on their [GitHub](https://github.com/open-webui/open-webui).
 
 ## Starting Open WebUI Server
 
