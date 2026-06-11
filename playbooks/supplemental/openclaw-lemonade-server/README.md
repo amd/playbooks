@@ -56,7 +56,7 @@ By the end of this playbook you will be able to:
 
 ## Pull and Load the Recommended Model
 
-The recommended model for this playbook is **Qwen3.6-35B-A3B-GGUF**, a strong MoE model with a 263k-token context window that is well-suited to agent workloads. Pull it now:
+The recommended model for this playbook is **Qwen3.6-35B-A3B-GGUF** from Unsloth, a strong MoE model with a 263k-token context window that is well-suited to agent workloads. This model uses UD-Q4_K_XL quantization. Pull it now:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
