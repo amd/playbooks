@@ -266,8 +266,12 @@ def post_json(url, payload, timeout=300):
     },
     method="POST",
   )
-  with urllib.request.urlopen(req, timeout=timeout) as r:
-    return json.loads(r.read().decode("utf-8"))
+  try:
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+      return json.loads(r.read().decode("utf-8"))
+  except urllib.error.HTTPError as e:
+    body = e.read().decode("utf-8", errors="replace")
+    raise SystemExit(f"POST {url} failed with HTTP {e.code}. Response body:\n{body}")
 
 # LLM chat smoke test
 chat = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
