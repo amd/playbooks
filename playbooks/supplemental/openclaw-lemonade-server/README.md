@@ -259,7 +259,6 @@ This command writes OpenClaw's configuration to `~/.openclaw/openclaw.json`.
 >
 > The rest of your config (gateway, channels, models, etc.) stays unchanged, only the `compaction` key needs to be added.
 
-<!-- @os:linux -->
 ### (Recommended) Enable Docker Sandboxing
 
 OpenClaw can route all agent file and code operations through an isolated Docker container rather than running them directly on your host. This limits the blast radius of any unintended action to the sandbox, leaving your host filesystem and network untouched.
@@ -300,7 +299,34 @@ Sandbox containers have **no network access** by default. See the [sandboxing re
 
 > To verify sandboxing is active, ask the agent to `run hostname` from the dashboard. If you see a short container ID instead of your machine's hostname, the sandbox is working.
 
-<!-- @os:end -->
+> #### Troubleshooting: Docker Permission Denied
+> 
+> If you get "permission denied" when running Docker commands:
+> 
+> **Step 1: Add your user to the docker group**
+> 
+> ```bash
+> sudo groupadd docker                    # Create group if needed
+> sudo usermod -aG docker $USER           # Add yourself to the group
+> newgrp docker                           # Activate the change
+> docker run hello-world                  # Test it
+> ```
+> 
+> **Step 2: If the error persists, apply the permanent fix**
+> 
+> ```bash
+> sudo chgrp docker /lib/systemd/system/docker.socket
+> sudo chmod g+w /lib/systemd/system/docker.socket
+> ```
+> 
+> Then **reboot** your system.
+> 
+> **Quick temporary fix** (resets after reboot):
+> ```bash
+> sudo chmod 666 /var/run/docker.sock
+> ```
+
+
 ### Start the OpenClaw Gateway
 
 The gateway is the OpenClaw process that manages the agent loop and serves the dashboard:
