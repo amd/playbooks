@@ -79,7 +79,6 @@ source finetune-venv/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @device:halo_box -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
 python -m venv finetune-venv --system-site-packages
@@ -90,6 +89,7 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @os:windows -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
 python -m venv finetune-venv
@@ -99,10 +99,10 @@ finetune-venv\Scripts\activate
 <!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
 <!-- @device:end -->
 <!-- @os:end -->
+<!-- @device:end -->
 
 #### Installing Basic Dependencies
 <!-- @require:pytorch -->
-
 
 #### Additional Dependencies
 
@@ -212,33 +212,7 @@ r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```
 <!-- @test:end -->
-## Quick Start
-### 1. Choose Your Method
-
-| Method | Memory | Speed | Quality | Best For |
-|--------|--------|-------|---------|----------|
-| **QLoRA** | 12-16GB | Fastest | 90-95% | Low Memory Usage |
-| **LoRA** | 24-32GB | Fast | 95-98% | Balanced approach |
-| **Full** | 80GB+ | Slowest | 100% | Maximum quality |
-
-### 2. Run Training
-
-**Dataset and what the model learns**  
-The scripts turn the dataset into chat examples. For example, the QLoRA script uses **Abirate/english_quotes**: each example becomes a user–assistant pair like:
-
-- **User:** “Give me a quote about: &lt;tag&gt;”
-- **Assistant:** “&lt;quote&gt; – &lt;author&gt;”
-
-Fine-tuning teaches the model to respond to prompts asking for quotes about a topic and to return them in the format `<quote text> - <author>`. The LoRA and full fine-tuning scripts use **databricks/databricks-dolly-15k** (general instruction/response pairs), so the exact task varies by script; the idea is the same - adapt the model to your chosen dataset and format.
-
-Below is a summary of the available training methods. Each method links to its script and provides a brief description for choosing the right approach.
-
-| Script                           | Method            | Description                                                                                                         | Typical VRAM | Recommended For                                 |
-|-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trains small adapter matrices while freezing base model. 3–5x faster; ~95–98% full quality.                         | 24–32GB      | Advanced users; multiple adapters; more VRAM    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
-
+<!-- @device:end -->
 ---
 
 ## Understanding the Techniques
@@ -301,7 +275,13 @@ Below is a summary of the available training methods. Each method links to its s
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
 
 <!-- @device:stx,krk -->
+<!-- @os:linux -->
 > **Note:** Full fine-tuning (`train_full_finetuning.py`) may require more than 64GB of system RAM and may not be feasible on this device. Consider using LoRA or QLoRA instead.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note:** Full fine-tuning (`train_full_finetuning.py`) may require more than 64GB of system RAM and may not be feasible on this device. Consider using LoRA instead.
+<!-- @os:end -->
 <!-- @device:end -->
 
 Simply select your preferred `Training method`, download the corresponding script and execute it using the command keeping your virtual environment activated: 

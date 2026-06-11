@@ -9,12 +9,6 @@
       "linux"
     ]
   },
-  "tested_platforms": {
-    "halo_box": [
-      "windows",
-      "linux"
-    ]
-  },
   "difficulty": "beginner",
   "isNew": true,
   "isFeatured": false,

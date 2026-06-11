@@ -11,12 +11,28 @@
     "halo_box": [
       "windows",
       "linux"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "tested_platforms": {
     "halo": [
       "windows",
       "linux"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "required_platforms": {
@@ -27,12 +43,28 @@
     "halo_box": [
       "windows",
       "linux"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {
     "halo": [
       "windows",
       "linux"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "difficulty": "beginner",

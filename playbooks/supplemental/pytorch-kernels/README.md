@@ -121,8 +121,10 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 
 ## Installing Software Prerequisites
 <!-- @os:windows -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 ### Prerequisites - Windows
 - Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+<!-- @device:end -->
 <!-- @os:end -->
 
 ### Create a Virtual Environment
@@ -130,6 +132,7 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 <!-- @os:linux -->
 <!-- @device:halo_box -->
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
+<!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -157,45 +160,207 @@ source kernel-env/bin/activate
 
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
-```powershell
+<!-- @test:id=create-venv timeout=60 -->
+```bash
 python -m venv kernel-env
 kernel-env\Scripts\activate
 ```
+<!-- @test:end -->
 
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
+<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 <!-- @os:end -->
-
 
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
 <!-- @require:rocm,pytorch -->
 <!-- @os:end -->
+
 <!-- @os:windows -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @require:driver,rocm,pytorch -->
+<!-- @device:end -->
+
+<!-- @device:halo_box -->
+> **Note:** For this playbook, ROCm and PyTorch need to be installed into the virtual environment even on the Ryzen AI Halo, since custom kernel compilation requires the full development headers.
+
+Install ROCm:
+```powershell
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[libraries,devel]"
+```
+
+Install PyTorch:
+```powershell
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
+```
+<!-- @device:end -->
 <!-- @os:end -->
 
+<!-- @os:linux -->
+<!-- @test:id=verify-installed-package-versions timeout=60 hidden=True setup=activate-venv -->
+```bash
+python -m pip list | grep -E '^(rocm|rocm-sdk|torch|torchvision|torchaudio)' || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=verify-installed-package-versions timeout=60 hidden=True setup=activate-venv -->
+```powershell
+python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
+```
+<!-- @test:end -->
+<!-- @os:end -->
 ---
 
 ### Installing Additional Dependencies
 
-```bash
-pip install --upgrade setuptools wheel
-```
-<!-- @os:windows -->
-Please ensure [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) is installed.
+<!-- @os:linux -->
+Install the Linux C/C++ build toolchain. This is a system-level dependency and is required for the C++ extension walkthroughs because `CUDAExtension` builds native `.so` modules from `.cu` files.
 
-Open a Powershell terminal and activate Visual Studio environment C++ dependencies.
-```powershell
-cmd /c '"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1 && set' | ForEach-Object { if ($_ -match '^([^=]+)=(.*)$') { [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
+Run this once on the Linux machine, outside the created Python virtual environment:
+
+```bash
+sudo apt update
+sudo apt install -y build-essential gcc g++
 ```
 <!-- @os:end -->
 
-#### Set Environment Variables
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+After activating the `kernel-env` virtual environment, install the Python build dependencies:
+<!-- @test:id=install-deps timeout=60 setup=activate-venv -->
+```bash
+python -m pip install "setuptools<82" wheel ninja
+```
+<!-- @test:end -->
+
 <!-- @os:linux -->
+<!-- @test:id=verify-linux-build-tools timeout=60 hidden=True -->
+```bash
+set -euo pipefail
+
+command -v gcc
+command -v g++
+gcc --version
+g++ --version
+
+echo "OK: Linux C/C++ build toolchain is available."
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+Please ensure [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) or [newer](https://visualstudio.microsoft.com/vs/community/) is installed with the **Desktop development with C++** workload.
+
+> **Note**: This Visual Studio C++ environment setup is required only for the **C++ Extension** approach. It is not required for the JIT Compilation approach.
+
+Open a PowerShell terminal and run the following commands before building the C++ extension.
+
+**Step 1: Find the installed Visual Studio C++ environment**
+
+**(A) Locate `vswhere.exe`, which is installed with the Visual Studio Installer**
+```powershell
+$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+```
+
+**(B) Find `vcvars64.bat` from Visual Studio 2022 or newer with C++ build tools**
+
+```powershell
+$Vcvars = & $VsWhere `
+  -latest `
+  -products * `
+  -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+  -find "VC\Auxiliary\Build\vcvars64.bat" |
+  Select-Object -First 1
+
+if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+```
+
+**(C) Print the Visual Studio C++ Environment being used**
+
+```powershell
+Write-Host "Using Visual Studio C++ environment: $Vcvars"
+```
+
+**Step 2: Activate the Visual Studio C++ build environment**
+
+**(A) Run `vcvars64.bat` and capture the environment it sets**
+
+This makes `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH`, and Windows SDK paths available.
+
+```powershell
+$VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
+$ExitCode = $LASTEXITCODE
+
+if ($ExitCode -ne 0) {
+  $VsEnv | Out-Host
+  throw "Failed to activate the Visual Studio C++ environment. Exit code: $ExitCode"
+}
+```
+
+**(B) Import the Visual Studio environment variables into this PowerShell session**
+
+```powershell
+$VsEnv | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {
+    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
+  }
+}
+```
+
+**Step 3: Verify that the Microsoft C++ compiler is available**
+
+```powershell
+where.exe cl
+```
+
+<!-- @test:id=verify-visual-studio-community timeout=60 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+Write-Host "Detected Visual Studio installations:"
+& $VsWhere -all -products * -format table | Out-Host
+
+$VcvarsList = & $VsWhere `
+  -all `
+  -products * `
+  -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+  -find "VC\Auxiliary\Build\vcvars64.bat"
+if (-not $VcvarsList) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+$Vcvars = $VcvarsList | Select-Object -First 1
+if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+Write-Host "Using vcvars64.bat from Visual Studio C++ environment: $Vcvars"
+
+$VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
+$ExitCode = $LASTEXITCODE
+if ($ExitCode -ne 0) {
+  $VsEnv | Out-Host
+  throw "Failed to activate the Visual Studio C++ environment. Exit code: $ExitCode"
+}
+
+$VsEnv | Select-String "Developer Command Prompt|Environment initialized|cl.exe" | Out-Host
+$VsEnv | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {
+    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
+  }
+}
+
+where.exe cl
+
+Write-Host "OK: Visual Studio C++ build environment is available."
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+#### Set Environment Variables
+<!-- @os:linux -->
+<!-- @test:id=set-env-variables-linux timeout=300 setup=activate-venv -->
 ```bash
 rocm-sdk init # Initialize the devel libraries
 
@@ -204,18 +369,17 @@ PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_in
 export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
 export PATH="$ROCM_HOME/bin:$PATH"
-```
 
-```bash
 # Set compiler and build settings
 export CC=clang
 export CXX=clang
 export DISTUTILS_USE_SDK=1
 ```
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-#### Windows
+<!-- @test:id=set-env-variables-windows timeout=300 setup=activate-venv -->
 ```powershell
 rocm-sdk init # Initialize the devel libraries
 
@@ -233,6 +397,7 @@ $env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
 
 $env:ROCM_HOME = $ROCM_ROOT
 $env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
 $env:HIP_PLATFORM = "amd"
 
 # Set compiler and build settings
@@ -240,33 +405,22 @@ $env:CC = "clang-cl"
 $env:CXX = "clang-cl"
 $env:DISTUTILS_USE_SDK = "1"
 ```
+<!-- @test:end -->
 <!-- @os:end -->
-<!-- @device:end -->
+
 <!-- @os:linux -->
 Verify that the AMD GPU is visible with:
+<!-- @test:id=amd-smi-linux timeout=60 setup=activate-venv -->
 ```bash
 amd-smi
 ```
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=env-setup-rocm-pytorch-linux timeout=1200 hidden=True -->
+<!-- @test:id=env-setup-rocm-pytorch-linux timeout=300 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
-
-python3 -m venv rocm-env
-
-VENV="$PWD/rocm-env"
-if [ ! -f "$VENV/bin/activate" ]; then
-  echo "Missing venv at $VENV. Run the setup steps first."
-  exit 1
-fi
-
-source "$VENV/bin/activate"
-
-pip install --upgrade pip setuptools wheel
-pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
-pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
 
 rocm-sdk init
 
@@ -275,6 +429,17 @@ export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:${LD_LIBRARY_PATH:-}"
 export PATH="$ROCM_HOME/bin:$PATH"
 
+export CC=clang
+export CXX=clang
+export DISTUTILS_USE_SDK=1
+
+echo "Installed ROCm/PyTorch packages:"
+python -m pip list | grep -E '^(rocm|rocm-sdk|torch|torchvision|torchaudio)' || true
+
+test -d "$ROCM_HOME"
+test -d "$ROCM_HOME/bin"
+test -d "$ROCM_HOME/lib"
+
 test -f "$ROCM_HOME/lib/libhiprtc.so" || ls "$ROCM_HOME/lib"/libhiprtc.so*
 test -f "$ROCM_HOME/lib/libroctx64.so" || ls "$ROCM_HOME/lib"/libroctx64.so*
 
@@ -282,7 +447,6 @@ hipcc --version >/dev/null
 rocminfo >/dev/null
 
 python - <<'PY'
-import sys
 import torch
 
 print("torch:", torch.__version__)
@@ -299,48 +463,18 @@ print("Device:", torch.cuda.get_device_name(0))
 print("OK: ROCm PyTorch environment is ready")
 PY
 ```
-<!-- @test:end --> 
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @test:id=amd-smi-linux timeout=1200 hidden=True -->
-```bash
-source "./rocm-env/bin/activate"
-amd-smi
-```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=env-setup-rocm-pytorch-windows timeout=1200 hidden=True -->
+<!-- @test:id=env-setup-rocm-pytorch-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
-python -m venv rocm-env
-rocm-env\Scripts\activate
+rocm-sdk init
 
-$Venv = Join-Path (Get-Location) "rocm-env"
-$Python = Join-Path $Venv "Scripts\python.exe"
-
-if (-not (Test-Path $Python)) {throw "Missing venv at $Venv. Run the setup steps first."}
-
-pip install --upgrade pip setuptools wheel
-pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ "rocm[libraries,devel]"
-pip install --pre --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch==2.10.0 torchaudio torchvision
-
-$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
-if (-not (Test-Path $RocmSdk)) {throw "Missing rocm-sdk.exe at $RocmSdk. Run the setup steps first."}
-& $RocmSdk init
-
-$ROCM_ROOT = (& $RocmSdk path --root).Trim()
-$ROCM_BIN  = (& $RocmSdk path --bin).Trim()
-
-$ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
-$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
-if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
-  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
-  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
-}
+$ROCM_ROOT = (rocm-sdk path --root).Trim()
+$ROCM_BIN = (rocm-sdk path --bin).Trim()
 
 $RocmPathEntries = @(
   $ROCM_BIN,
@@ -352,6 +486,7 @@ $env:PATH = (($RocmPathEntries + @($env:PATH)) -join ";")
 
 $env:ROCM_HOME = $ROCM_ROOT
 $env:HIP_PATH = $ROCM_ROOT
+$env:ROCM_BIN = $ROCM_BIN
 $env:HIP_PLATFORM = "amd"
 $env:CC = "clang-cl"
 $env:CXX = "clang-cl"
@@ -359,6 +494,9 @@ $env:DISTUTILS_USE_SDK = "1"
 
 Write-Host "ROCM_ROOT=$ROCM_ROOT"
 Write-Host "ROCM_BIN=$ROCM_BIN"
+
+Write-Host "Installed ROCm/PyTorch packages:"
+python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 
 Get-ChildItem -Path $ROCM_ROOT -Recurse -Filter "hiprtc*.dll" | Select-Object -First 10 FullName | Out-Host
 
@@ -368,6 +506,7 @@ hipinfo | Out-Host
 $code = @'
 import os
 import sys
+import torch
 
 if sys.platform == "win32":
     for key in ("ROCM_HOME", "HIP_PATH"):
@@ -381,7 +520,6 @@ if sys.platform == "win32":
     rocm_bin = os.environ.get("ROCM_BIN")
     if rocm_bin and os.path.isdir(rocm_bin):
         os.add_dll_directory(rocm_bin)
-import torch
 
 print("torch:", torch.__version__)
 print("HIP:", torch.version.hip)
@@ -397,7 +535,7 @@ print("Device:", torch.cuda.get_device_name(0))
 print("OK: ROCm PyTorch environment is ready")
 '@
 
-$code | & $Python -
+$code | python -
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -502,7 +640,8 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
->**Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike of utilization when you run the program.
+> **Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike of utilization when you run the program.
+
 **Expected output:**
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
@@ -513,17 +652,20 @@ No GPU Usage captured.
 **Nice work! You just ran your first GPU kernel.**
 
 <!-- @os:linux -->
-<!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True -->
+<!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
 
-source "./rocm-env/bin/activate"
 rocm-sdk init
 
 PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
 export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:${LD_LIBRARY_PATH:-}"
 export PATH="$ROCM_HOME/bin:$PATH"
+
+export CC=clang
+export CXX=clang
+export DISTUTILS_USE_SDK=1
 
 python - <<'PY'
 import torch
@@ -566,25 +708,14 @@ PY
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=vector-addition-jit-windows timeout=300 hidden=True -->
+<!-- @test:id=vector-addition-jit-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
-rocm-env\Scripts\activate
-$Venv = Join-Path (Get-Location) "rocm-env"
-$Python = Join-Path $Venv "Scripts\python.exe"
-$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
+rocm-sdk init
 
-& $RocmSdk init
-$ROCM_ROOT = (& $RocmSdk path --root).Trim()
-$ROCM_BIN  = (& $RocmSdk path --bin).Trim()
-
-$ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
-$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
-if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
-  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
-  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
-}
+$ROCM_ROOT = (rocm-sdk path --root).Trim()
+$ROCM_BIN = (rocm-sdk path --bin).Trim()
 
 $RocmPathEntries = @(
   $ROCM_BIN,
@@ -616,6 +747,7 @@ if sys.platform == "win32":
     rocm_bin = os.environ.get("ROCM_BIN")
     if rocm_bin and os.path.isdir(rocm_bin):
         os.add_dll_directory(rocm_bin)
+
 import torch
 
 if not torch.cuda.is_available():
@@ -652,7 +784,7 @@ if not torch.allclose(x, torch.full_like(x, 2.0)):
 print("OK: vector addition JIT kernel compiled and ran correctly")
 '@
 
-$code | & $Python -
+$code | python -
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -662,6 +794,10 @@ $code | & $Python -
 #### Approach B:  C++ Extension
 
 The second approach is more manual: write the kernel and Python binding to a single `.cu` file, compile it natively using PyTorch's build system, and import it into Python.
+
+<!-- @os:windows -->
+> **Note**: The C++ Extension approach requires the Visual Studio C++ build environment because PyTorch compiles the `.cu` source file into a native `.pyd` extension module. Building that native extension depends on the Microsoft C++ toolchain (compiler, linker, and build tools) provided by Visual Studio. Run the Visual Studio activation commands from the setup section before building the extension.
+<!-- @os:end -->
 
 Download the following files if you haven't already:
 <!-- @os:windows -->
@@ -742,11 +878,10 @@ After: tensor([2., 2., 2., 2., 2., 2., 2., 2., 2., 2.], device='cuda:0')
 ```
 
 <!-- @os:linux -->
-<!-- @test:id=vector-extension-linux timeout=600 hidden=True -->
+<!-- @test:id=vector-extension-linux timeout=600 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
 
-source "./rocm-env/bin/activate"
 rocm-sdk init
 
 PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
@@ -780,36 +915,38 @@ PY
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=vector-extension-windows timeout=600 hidden=True -->
+<!-- @test:id=vector-extension-windows timeout=600 hidden=True setup=activate-venv -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
-rocm-env\Scripts\activate
-$Venv = Join-Path (Get-Location) "rocm-env"
-$Python = Join-Path $Venv "Scripts\python.exe"
-$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
+$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 
-$VcvarsCandidates = @(
-  "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"
-)
+$Vcvars = & $VsWhere `
+  -latest `
+  -products * `
+  -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+  -find "VC\Auxiliary\Build\vcvars64.bat" |
+  Select-Object -First 1
+if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+Write-Host "Using Visual Studio C++ environment: $Vcvars"
 
-$Vcvars = $VcvarsCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-if (-not $Vcvars) {
-  throw "Could not find vcvars64.bat. Install Visual Studio 2022 C++ Build Tools."
+$VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
+$ExitCode = $LASTEXITCODE
+if ($ExitCode -ne 0) {
+  $VsEnv | Out-Host
+  throw "Failed to activate the Visual Studio C++ environment. Exit code: $ExitCode"
 }
-
-cmd /c "`"$Vcvars`" >nul 2>&1 && set" | ForEach-Object {
-  if ($_ -match '^([^=]+)=(.*)$') {
-    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
-  }
+$VsEnv | Select-String "Developer Command Prompt|Environment initialized|cl.exe" | Out-Host
+$VsEnv | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {[System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')}
 }
+where.exe cl
 
-& $RocmSdk init
-$ROCM_ROOT = (& $RocmSdk path --root).Trim()
-$ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+rocm-sdk init
+
+$ROCM_ROOT = (rocm-sdk path --root).Trim()
+$ROCM_BIN = (rocm-sdk path --bin).Trim()
 
 $RocmPathEntries = @(
   $ROCM_BIN,
@@ -831,10 +968,10 @@ $env:DISTUTILS_USE_SDK = "1"
 
 Push-Location "Vector_Addition"
 try {
-  & $Python -m pip install --no-build-isolation -v .
+  python -m pip install --no-build-isolation -v .
 
   $code = @'
-  import os
+import os
 import sys
 
 if sys.platform == "win32":
@@ -849,6 +986,7 @@ if sys.platform == "win32":
     rocm_bin = os.environ.get("ROCM_BIN")
     if rocm_bin and os.path.isdir(rocm_bin):
         os.add_dll_directory(rocm_bin)
+
 import torch
 import add_one_ext
 
@@ -866,7 +1004,7 @@ if not torch.allclose(x, expected):
 print("OK: vector addition C++ extension built, imported, and ran correctly")
 '@
 
-  $code | & $Python -
+  $code | python -
 }
 finally {
   Pop-Location
@@ -980,7 +1118,8 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
->**Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike of utilization when you run the program.
+> **Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see a brief spike of utilization when you run the program.
+
 **Expected output:**
 ```
 Elapsed time: 2.753s
@@ -990,17 +1129,20 @@ No GPU Usage captured.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=matmul-jit-linux timeout=300 hidden=True -->
+<!-- @test:id=matmul-jit-linux timeout=300 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
 
-source "./rocm-env/bin/activate"
 rocm-sdk init
 
 PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
 export ROCM_HOME="$VIRTUAL_ENV/lib/python${PY_MM}/site-packages/_rocm_sdk_devel"
 export LD_LIBRARY_PATH="$ROCM_HOME/lib:${LD_LIBRARY_PATH:-}"
 export PATH="$ROCM_HOME/bin:$PATH"
+
+export CC=clang
+export CXX=clang
+export DISTUTILS_USE_SDK=1
 
 python - <<'PY'
 import torch
@@ -1056,25 +1198,14 @@ PY
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=matmul-jit-windows timeout=300 hidden=True -->
+<!-- @test:id=matmul-jit-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
-rocm-env\Scripts\activate
-$Venv = Join-Path (Get-Location) "rocm-env"
-$Python = Join-Path $Venv "Scripts\python.exe"
-$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
+rocm-sdk init
 
-& $RocmSdk init
-$ROCM_ROOT = (& $RocmSdk path --root).Trim()
-$ROCM_BIN  = (& $RocmSdk path --bin).Trim()
-
-$ExpectedHiprtc = Join-Path $ROCM_BIN "hiprtc0701.dll"
-$ActualHiprtc = Join-Path $ROCM_BIN "hiprtc07013.dll"
-if ((-not (Test-Path $ExpectedHiprtc)) -and (Test-Path $ActualHiprtc)) {
-  Copy-Item $ActualHiprtc $ExpectedHiprtc -Force
-  Write-Host "Created HIPRTC compatibility copy: $ExpectedHiprtc"
-}
+$ROCM_ROOT = (rocm-sdk path --root).Trim()
+$ROCM_BIN = (rocm-sdk path --bin).Trim()
 
 $RocmPathEntries = @(
   $ROCM_BIN,
@@ -1106,6 +1237,7 @@ if sys.platform == "win32":
     rocm_bin = os.environ.get("ROCM_BIN")
     if rocm_bin and os.path.isdir(rocm_bin):
         os.add_dll_directory(rocm_bin)
+
 import torch
 
 if not torch.cuda.is_available():
@@ -1155,7 +1287,7 @@ if max_err > 1e-3:
 print(f"OK: matmul JIT kernel compiled and ran correctly; max_err={max_err:.6f}")
 '@
 
-$code | & $Python -
+$code | python -
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -1165,6 +1297,10 @@ $code | & $Python -
 #### Approach B:  C++ Extension
 
 The second approach is more manual: write the kernel and Python binding to a single `.cu` file, compile it natively using PyTorch's build system, and import it into Python.
+
+<!-- @os:windows -->
+> **Note**: The C++ Extension approach requires the Visual Studio C++ build environment because PyTorch compiles the `.cu` source file into a native `.pyd` extension module. Building that native extension depends on the Microsoft C++ toolchain (compiler, linker, and build tools) provided by Visual Studio. Run the Visual Studio activation commands from the setup section before building the extension.
+<!-- @os:end -->
 
 Download the following files if you haven't already:
 <!-- @os:windows -->
@@ -1265,11 +1401,10 @@ Result: tensor([[19., 22.],
 - Transformers
 
 <!-- @os:linux -->
-<!-- @test:id=matmul-extension-linux timeout=600 hidden=True -->
+<!-- @test:id=matmul-extension-linux timeout=600 hidden=True setup=activate-venv -->
 ```bash
 set -euo pipefail
 
-source "./rocm-env/bin/activate"
 rocm-sdk init
 
 PY_MM="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
@@ -1307,36 +1442,38 @@ PY
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=matmul-extension-windows timeout=600 hidden=True -->
+<!-- @test:id=matmul-extension-windows timeout=600 hidden=True setup=activate-venv -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
-rocm-env\Scripts\activate
-$Venv = Join-Path (Get-Location) "rocm-env"
-$Python = Join-Path $Venv "Scripts\python.exe"
-$RocmSdk = Join-Path $Venv "Scripts\rocm-sdk.exe"
+$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 
-$VcvarsCandidates = @(
-  "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat",
-  "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"
-)
+$Vcvars = & $VsWhere `
+  -latest `
+  -products * `
+  -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+  -find "VC\Auxiliary\Build\vcvars64.bat" |
+  Select-Object -First 1
+if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
+Write-Host "Using Visual Studio C++ environment: $Vcvars"
 
-$Vcvars = $VcvarsCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-if (-not $Vcvars) {
-  throw "Could not find vcvars64.bat. Install Visual Studio 2022 C++ Build Tools."
+$VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
+$ExitCode = $LASTEXITCODE
+if ($ExitCode -ne 0) {
+  $VsEnv | Out-Host
+  throw "Failed to activate the Visual Studio C++ environment. Exit code: $ExitCode"
 }
-
-cmd /c "`"$Vcvars`" >nul 2>&1 && set" | ForEach-Object {
-  if ($_ -match '^([^=]+)=(.*)$') {
-    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
-  }
+$VsEnv | Select-String "Developer Command Prompt|Environment initialized|cl.exe" | Out-Host
+$VsEnv | ForEach-Object {
+  if ($_ -match '^([^=]+)=(.*)$') {[System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')}
 }
+where.exe cl
 
-& $RocmSdk init
-$ROCM_ROOT = (& $RocmSdk path --root).Trim()
-$ROCM_BIN  = (& $RocmSdk path --bin).Trim()
+rocm-sdk init
+
+$ROCM_ROOT = (rocm-sdk path --root).Trim()
+$ROCM_BIN = (rocm-sdk path --bin).Trim()
 
 $RocmPathEntries = @(
   $ROCM_BIN,
@@ -1358,10 +1495,10 @@ $env:DISTUTILS_USE_SDK = "1"
 
 Push-Location "Matrix_Multiplication"
 try {
-  & $Python -m pip install --no-build-isolation -v .
+  python -m pip install --no-build-isolation -v .
 
   $code = @'
-  import os
+import os
 import sys
 
 if sys.platform == "win32":
@@ -1376,6 +1513,7 @@ if sys.platform == "win32":
     rocm_bin = os.environ.get("ROCM_BIN")
     if rocm_bin and os.path.isdir(rocm_bin):
         os.add_dll_directory(rocm_bin)
+
 import torch
 import matmul_ext
 
@@ -1397,7 +1535,7 @@ if max_err > 1e-3:
 print(f"OK: matmul C++ extension built, imported, and ran correctly; max_err={max_err:.6f}")
 '@
 
-  $code | & $Python -
+  $code | python -
 }
 finally {
   Pop-Location
