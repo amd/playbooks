@@ -563,7 +563,7 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end --> 
 
-<!-- @os:windows -->
+<!-- @os:linux -->
 <!-- @test:id=openwebui-podman-server-smoke-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
