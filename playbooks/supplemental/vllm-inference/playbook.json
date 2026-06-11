@@ -31,6 +31,12 @@
   "tested_platforms": {
     "halo": [
       "linux"
+    ],
+    "stx": [
+      "linux"
+    ],
+    "krk": [
+      "linux"
     ]
   },
   "required_platforms": {
@@ -38,6 +44,17 @@
       "linux"
     ],
     "halo_box": [
+      "linux"
+    ]
+  },
+  "published_platforms": {
+    "halo": [
+      "linux"
+    ],
+    "krk": [
+      "linux"
+    ],
+    "stx": [
       "linux"
     ]
   },
