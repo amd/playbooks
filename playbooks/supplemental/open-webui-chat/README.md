@@ -81,13 +81,11 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
-
 ---
 <!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @require:lemonade,podman -->
-
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 ---
 <!-- @device:end -->
@@ -343,9 +341,13 @@ py -3.12 --version
 
 <!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
 ```powershell
-$v = (py -3.12 --version) 2>&1
-if ($v -notmatch “Python 3\.12\.”) { throw “Expected Python 3.12.x but got: $v” }
-Write-Host “OK: $v”
+$ErrorActionPreference = "Stop"
+
+$v = (& py -3.12 --version) 2>&1
+if ($LASTEXITCODE -ne 0) { throw "Python 3.12 was not found. Install it with: winget install Python.Python.3.12" }
+if ($v -notmatch "Python 3\.12\.") { throw "Expected Python 3.12.x but got: $v" }
+
+Write-Host "OK: $v"
 ```
 <!-- @test:end --> 
 
@@ -361,37 +363,56 @@ pip install open-webui beautifulsoup4
 
 <!-- @test:id=openwebui-install-venv-windows timeout=1200 hidden=True -->
 ```powershell
-$ErrorActionPreference = “Stop”
+$ErrorActionPreference = "Stop"
 
-$venv = “$PWD\openwebui-venv-ci”
-if (Test-Path $venv) { Remove-Item -Recurse -Force $venv }
+$work = Join-Path (Get-Location) "openwebui"
+if (Test-Path $work) { Remove-Item -Recurse -Force $work }
+New-Item -ItemType Directory -Force -Path $work | Out-Null
 
-py -3.12 -m venv $venv
-$py = Join-Path $venv “Scripts\python.exe”
+Push-Location $work
+try {
+  py -3.12 -m venv openwebui-venv
+  $py = Join-Path $work "openwebui-venv\Scripts\python.exe"
 
-& $py -m pip install --upgrade pip
-& $py -m pip install open-webui beautifulsoup4
+  & $py -m pip install --upgrade pip
+  if ($LASTEXITCODE -ne 0) { throw "pip upgrade failed" }
 
-if ($LASTEXITCODE -ne 0) { throw “pip install open-webui failed” }
+  & $py -m pip install open-webui beautifulsoup4
+  if ($LASTEXITCODE -ne 0) { throw "pip install open-webui beautifulsoup4 failed" }
+
+  Write-Host "OK: open-webui installed in venv"
+}
+finally {
+  Pop-Location
+}
 ```
 <!-- @test:end --> 
 
 <!-- @test:id=openwebui-install-check-windows timeout=1200 hidden=True -->
 ```powershell
-$venv = “$PWD\openwebui-venv-ci”
-$py = Join-Path $venv “Scripts\python.exe”
-& $py -c “import open_webui; print(‘OK: import open_webui’)”
-& $py -c “import bs4; print(‘OK: bs4 import’)”
+$ErrorActionPreference = "Stop"
+
+$work = Join-Path (Get-Location) "openwebui"
+$venv = Join-Path $work "openwebui-venv"
+$py = Join-Path $venv "Scripts\python.exe"
+
+& $py -c "import open_webui; print('OK: import open_webui')"
+& $py -c "import bs4; print('OK: bs4 import')"
 ```
 <!-- @test:end --> 
 
 <!-- @test:id=openwebui-cli-windows timeout=1200 hidden=True -->
 ```powershell
-$venv = “$PWD\openwebui-venv-ci”
-$ow = Join-Path $venv “Scripts\open-webui.exe”
+$ErrorActionPreference = "Stop"
+
+$work = Join-Path (Get-Location) "openwebui"
+$venv = Join-Path $work "openwebui-venv"
+$ow = Join-Path $venv "Scripts\open-webui.exe"
+
+if (-not (Test-Path $ow)) { throw "open-webui.exe not found at $ow" }
 
 & $ow --help | Out-Null
-Write-Host “OK: open-webui installed in venv”
+Write-Host "OK: open-webui CLI is available"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -410,6 +431,70 @@ podman compose up -d
 This pulls the Open WebUI image and writes to persistent storage.
 
 Launch Open WebUI by typing `localhost:8080` into your browser address bar.
+
+<!-- @test:id=openwebui-podman-prereq-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
+export PODMAN_COMPOSE_WARNING_LOGS=false
+
+podman --version
+podman compose version
+podman info >/dev/null
+
+if [ ! -f compose.yml ]; then
+  echo "compose.yml not found in current working directory (playbooks/supplemental/open-webui-chat/assets)"
+  exit 1
+fi
+
+echo "OK: Podman, Podman Compose, and compose.yml are available"
+```
+<!-- @test:end -->
+
+<!-- @test:id=openwebui-compose-validate-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+
+python3 - <<'PY'
+from pathlib import Path
+import sys
+import yaml
+
+path = Path("compose.yml")
+if not path.exists():
+    raise SystemExit("compose.yml not found")
+
+data = yaml.safe_load(path.read_text())
+svc = data.get("services", {}).get("open-webui")
+if not svc:
+    raise SystemExit("compose.yml does not define services.open-webui")
+
+expected_image = "ghcr.io/open-webui/open-webui:main"
+if svc.get("image") != expected_image:
+    raise SystemExit(f"Expected image {expected_image}, got {svc.get('image')}")
+
+if svc.get("container_name") != "open-webui":
+    raise SystemExit("Expected container_name: open-webui")
+
+if svc.get("network_mode") != "host":
+    raise SystemExit("Expected network_mode: host")
+
+volumes = svc.get("volumes", [])
+if "open_webui_data:/app/backend/data" not in volumes:
+    raise SystemExit("Expected open_webui_data:/app/backend/data volume mount")
+
+if "open_webui_data" not in data.get("volumes", {}):
+    raise SystemExit("Expected top-level open_webui_data volume")
+
+print("OK: compose.yml matches the Open WebUI Podman setup")
+PY
+
+podman compose -f compose.yml config >/dev/null
+
+echo "OK: podman compose can parse compose.yml"
+```
+<!-- @test:end -->
 <!-- @os:end -->
 
 > **Tip**: Open WebUI also provides other installation options on their [GitHub](https://github.com/open-webui/open-webui).
@@ -444,12 +529,13 @@ open-webui serve
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$venv = "$PWD\openwebui-venv-ci"
+$work = Join-Path (Get-Location) "openwebui"
+$venv = Join-Path $work "openwebui-venv"
 $ow = Join-Path $venv "Scripts\open-webui.exe"
 if (-not (Test-Path $ow)) { throw "open-webui not found. Run openwebui-install-venv-windows first." }
 
 # Fresh data dir so auth mode/config isn't polluted by previous runs
-$dataDir = "$PWD\openwebui-data-ci"
+$dataDir = Join-Path $work "openwebui-data-ci"
 if (Test-Path $dataDir) { Remove-Item -Recurse -Force $dataDir }
 New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
 
@@ -457,8 +543,8 @@ $env:DATA_DIR = $dataDir
 $env:WEBUI_AUTH = "False" # Disable auth for CI
 $env:ENABLE_PERSISTENT_CONFIG = "False" # Ensure environment-variable config applies for the run and isn't overridden by persistent settings
 
-$logOut = "$PWD\openwebui-ci-out.log"
-$logErr = "$PWD\openwebui-ci-err.log" 
+$logOut = Join-Path $work "openwebui-ci-out.log"
+$logErr = Join-Path $work "openwebui-ci-err.log"
 $p = Start-Process -FilePath $ow -ArgumentList "serve --port 8080" -NoNewWindow -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
 try {
   $ok = $false
@@ -473,6 +559,50 @@ try {
 finally {
   if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
 }
+```
+<!-- @test:end --> 
+<!-- @os:end --> 
+
+<!-- @os:windows -->
+<!-- @test:id=openwebui-podman-server-smoke-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
+export PODMAN_COMPOSE_WARNING_LOGS=false
+
+cleanup() {
+  podman compose -f compose.yml down >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+# Clean up a stale container from a previous failed run.
+podman rm -f open-webui >/dev/null 2>&1 || true
+
+podman compose -f compose.yml up -d
+
+health=""
+for i in $(seq 1 180); do
+  health="$(curl -fsS --max-time 2 http://127.0.0.1:8080/health || true)"
+  if [ -n "$health" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$health" ]; then
+  echo "Open WebUI did not become ready on http://127.0.0.1:8080/health"
+  echo "Container status:"
+  podman ps -a || true
+  echo "Open WebUI logs:"
+  podman logs --tail 200 open-webui || true
+  exit 1
+fi
+
+echo "OK: Open WebUI container is responding on /health"
+
+# Verify that the Open WebUI container can reach Lemonade through host networking.
+podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json.load(urllib.request.urlopen(\"http://127.0.0.1:13305/api/v1/models\", timeout=10)); assert \"data\" in data; print(\"OK: Open WebUI container can reach Lemonade models endpoint\")"'
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 
