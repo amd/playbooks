@@ -16,7 +16,7 @@ Lemonade should be pre-installed from [here](https://lemonade-server.ai/install_
 - **Open WebUI** (frontend web app)
 - **Lemonade Server** (backend model server)
 
-> This playbook uses **Open WebUI** (Python package) and **Lemonade** (Lemonade server/app) both **running natively**.  
+> This playbook runs **Lemonade** (Lemonade server/app) **natively**. **Open WebUI** runs as a **container** on Linux (via Podman) and as a **Python package** on Windows. The `open-webui` PyPI package supports Python ≤ 3.12 only, so the Linux container avoids having to manage older Python versions.  
 
 ## Models (in Lemonade)
 

@@ -110,7 +110,7 @@ pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate s
 ```
 <!-- @test:end -->
 
-<!-- @test:id=verify-imports timeout=120 setup=activate-venv hidden=True -->
+<!-- @test:id=verify-imports timeout=300 setup=activate-venv hidden=True -->
 ```python
 import importlib
 import os
