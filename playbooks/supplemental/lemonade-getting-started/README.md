@@ -397,7 +397,7 @@ Structure:
    - Offers to start the quiz.
 ```
 
-> **Tip**: We have followed standard engineering practices through thorough prompt creation and by using a two-model system to optimize resources and speed.practice thorough prompt creation and using 2-model system to optimize resources and speed.
+> **Tip**: We have followed standard engineering practices through thorough prompt creation and by using a two-model system to optimize resources and speed.
 
 For your convenience, we have provided sample output in [`flashcards.py`](assets/flashcards.py). Feel free to download it to your directory. Either way, you should now have a Python file that can be run.
 
