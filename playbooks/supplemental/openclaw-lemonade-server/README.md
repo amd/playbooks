@@ -31,8 +31,9 @@ By the end of this playbook you will be able to:
 
 <!-- @os:linux -->
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
-- At least **24 GB of RAM** (64 GB+ recommended for larger models)
+- At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - Depending on the size of the model you're running, set the minimum possible dedicated VRAM in the BIOS.
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Optional, for sandboxing OpenClaw)
 - Next, install the amd-debug-tools wheel from PyPI, and run the amd-ttm tool to reconfigure shared memory settings to the maximum:
 ```bash
   sudo apt install pipx
@@ -44,10 +45,10 @@ By the end of this playbook you will be able to:
 <!-- @os:end -->
 <!-- @os:windows -->
 - A PC running **Windows 10/11**
-- Visual Studio Community Edition [2022](https://aka.ms/vs/17/release/vs_community.exe)
-- At least **24 GB of RAM** (64 GB+ recommended for larger models)
+- At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - You could increase the dedicated GPU memory using [AMD Software: Adrenalin Edition™](https://www.amd.com/en/support/download/drivers.html) to try out larger models
 - **~10–30 GB of free disk space** for model weights
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Optional, for sandboxing OpenClaw)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -130,9 +131,7 @@ ip route show default | awk '{print $3}' | head -1
 **Add the port proxy** (run in PowerShell as Administrator, replacing `<WSL-Gateway-IP>` with your WSL gateway IP):
 
 ```powershell
-netsh interface portproxy add v4tov4 `
-  listenaddress=<WSL-Gateway-IP> listenport=13305 `
-  connectaddress=127.0.0.1 connectport=13305
+netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
 **Add a firewall rule** (same elevated PowerShell):
@@ -148,13 +147,23 @@ WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-You should see:
+If you’ve already loaded the Qwen3.6-35B-A3B-GGUF model in the previous step, you should see JSON output like this:
 
 ```json
-{"data":[],"object":"list"}
+{
+  "data": [
+    {
+      "checkpoint": "unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL",
+      "checkpoints": {
+        "main": "unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL"
+      },
+      "mmproj": "unsloth/Qwen3.6-35B-A3B-GGUF:mmproj-F16.gguf",
+      ....
+    }
+  ],
+  "object": "list"
+}
 ```
-
-The empty `data` array simply means no model weights have been downloaded yet, the server itself is running and ready.
 
 > The `netsh portproxy` rule survives reboots but the WSL gateway IP can change after `wsl --shutdown`. If Lemonade becomes unreachable from WSL after a restart, get the updated gateway IP and update the proxy with this new IP.
 
@@ -279,25 +288,26 @@ CMD ["sleep", "infinity"]
 DOCKERFILE
 ```
 
-Add the following `sandbox` key inside the existing `agents.defaults` block in `~/.openclaw/openclaw.json`:
+Run this to add the `sandbox` key inside the existing `agents.defaults` block in `~/.openclaw/openclaw.json`:
 
-```json
-"agents": {
-  "defaults": {
-    "workspace": "...",
-    "model": { ... },
-    "sandbox": {
-      "mode": "non-main",
-      "scope": "session",
-      "workspaceAccess": "none"
+```bash
+cat > sandbox.patch.json5 <<JSON5
+{
+  agents: {
+    defaults: {
+      sandbox: {
+        mode: "non-main",
+        scope: "session",
+        workspaceAccess: "none"
+      }
     }
   }
 }
+JSON5
+openclaw config patch --file ./sandbox.patch.json5
 ```
 
 Sandbox containers have **no network access** by default. See the [sandboxing reference](https://docs.openclaw.ai/gateway/sandboxing) for bind mounts and network overrides.
-
-> To verify sandboxing is active, ask the agent to `run hostname` from the dashboard. If you see a short container ID instead of your machine's hostname, the sandbox is working.
 
 > #### Troubleshooting: Docker Permission Denied
 > 
@@ -342,6 +352,8 @@ openclaw dashboard
 ```
 
 Because the gateway binds to loopback, the dashboard auto-authenticates when opened from the same machine, no token entry or device approval is needed for local access. You should see the OpenClaw dashboard with your Lemonade model listed as the active backend.
+
+> If you’ve enabled sandboxing, you can verify it by asking the agent to `run hostname` from the dashboard. If you see a short container ID instead of your machine’s hostname, the sandbox is working.
 
 **Congratulations, you've built a fully local AI agent stack from scratch.**
 
