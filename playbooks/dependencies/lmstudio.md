@@ -20,6 +20,7 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
+> Note: You can choose to install either the .deb or the AppImage. 
 1. Download the appimage from here: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
 2. run `sudo apt install libfuse2`  
 3. run `cd ~/Downloads`  
