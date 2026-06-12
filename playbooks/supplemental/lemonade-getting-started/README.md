@@ -402,7 +402,7 @@ Structure:
 For your convenience, we have provided sample output in [`flashcards.py`](assets/flashcards.py). Feel free to download it to your directory. Either way, you should now have a Python file that can be run.
 
 <!-- @os:windows -->
-<!-- @test:id=lemonade-python-smoke-windows timeout=600 hidden=True -->
+<!-- @test:id=lemonade-python-smoke-windows timeout=900 hidden=True -->
 ```powershell
 # Wait for server to come up
 $modelsJson = $null

@@ -1,7 +1,7 @@
 {
   "id": "vllm-inference",
   "title": "Quick Start on vLLM",
-  "description": "Learn how to run inference and serving using vLLM on your STX Halo\u2122",
+  "description": "Learn how to run inference and serving using containerized vLLM on the integrated GPU",
   "time": 90,
   "unsupported_platforms": {
     "halo": [
