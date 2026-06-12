@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# How to Chat with LLMs in Open WebUI
-
 <!-- @device:stx,krk -->
 > [!NOTE]
 > This playbook requires a minimum of **32GB** of system memory.
@@ -30,14 +28,14 @@ This setup enables you to explore the **complete multimodal workflow end-to-end*
 
 ---
 
-## Learning Objectives
+## What You’ll Learn
 
 By the end, you’ll be able to:
 
 - Connect Open WebUI to a local OpenAI-compatible backend (Lemonade)
 - Chat with a local LLM from your browser
 - Upload an image and ask a vision model questions about it
-- Generate images from text prompts using Stable Diffusion models (SD-Turbo / SDXL)
+- Generate images from text prompts using Stable Diffusion models (SDXL-Turbo / SDXL)
 - Understand the mental model so you can use other backends (Ollama, vLLM, llama.cpp server, etc.)
 
 ---
@@ -54,7 +52,7 @@ By the end, you’ll be able to:
 
 #### Why “OpenAI-compatible API” matters
 
-Open WebUI is built around standard OpenAI-style endpoints, like: 
+Open WebUI is built around standard OpenAI-style endpoints, like:
   - Chat: `/chat/completions`
   - Models list: `/models`
   - Image generation: `/images/generations`
@@ -64,27 +62,50 @@ Lemonade exposes these under `http://localhost:13305/api/v1/...`
 
 If a backend supports those endpoints, Open WebUI can talk to it with minimal setup. That’s why we can switch backends without changing our workflow.
 
+#### Two services, two ports
+
+Throughout this playbook you’ll work with two separate services:
+
+| Service | URL | What you do there |
+|---|---|---|
+| **Lemonade** (GUI) | `http://localhost:13305` | Browse, download, and manage models |
+| **Open WebUI** | `http://localhost:8080` | Chat, upload images, generate images — the user-facing UI |
+
+Lemonade runs the models; Open WebUI is the interface you interact with. Use the Lemonade GUI to download your models first, then use them from Open WebUI.
+
 ---
 
-## One-Time Setup
+## Installing Software Prerequisites
 
-This section establishes a stable local environment: Lemonade running, Open WebUI running, and a working connection between them.
+This playbook needs Lemonade running as the backend and, on Linux, a container engine (Podman) to run Open WebUI. Set these up before installing Open WebUI.
 
-### 1. Install Lemonade, Start Lemonade Server, and Download Models
-
+<!-- @os:windows -->
 <!-- @require:lemonade -->
+---
+<!-- @os:end -->
 
-- Confirm the API is reachable:
-  - Open `http://localhost:13305/api/v1/models` in your web browser.
-  - Download the desired models in Lemonade
-
-> If you don’t see your models in `http://localhost:13305/api/v1/models`, Open WebUI won’t be able to select them later.
+<!-- @os:linux -->
+<!-- @require:lemonade,podman -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+---
+<!-- @device:end -->
+<!-- @os:end -->
 
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash
 lemonade --version
 ```
 <!-- @test:end --> 
+
+## Downloading Models in Lemonade
+
+Before installing Open WebUI, make sure the models you want to use are downloaded and ready in Lemonade.
+
+1. Open the Lemonade GUI at `http://localhost:13305`.
+2. Browse the available models and download the ones you want to use (e.g., an LLM for chat, a vision model, and/or a Stable Diffusion model for image generation).
+3. Confirm the API is reachable by visiting `http://localhost:13305/api/v1/models` in your browser — you should see your downloaded models listed.
+
+> Models must be downloaded in **Lemonade** (`localhost:13305`) before they can appear in **Open WebUI** (`localhost:8080`). If a model isn’t showing up in Open WebUI later, come back here and check Lemonade first.
 
 
 <!-- @os:windows -->
@@ -245,8 +266,12 @@ def post_json(url, payload, timeout=300):
     },
     method="POST",
   )
-  with urllib.request.urlopen(req, timeout=timeout) as r:
-    return json.loads(r.read().decode("utf-8"))
+  try:
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+      return json.loads(r.read().decode("utf-8"))
+  except urllib.error.HTTPError as e:
+    body = e.read().decode("utf-8", errors="replace")
+    raise SystemExit(f"POST {url} failed with HTTP {e.code}. Response body:\n{body}")
 
 # LLM chat smoke test
 chat = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
@@ -296,49 +321,85 @@ PY
 <!-- @test:end --> 
 <!-- @os:end --> 
 
-
-### 2. Install Open WebUI
+## Installing Open WebUI
 
 <!-- @os:windows -->
-Open PowerShell and create a fresh virtual environment:
+### 1. Install Python 3.12
 
-```bash
-# Install open-webui into a venv [Windows]
-python -m venv openwebui-venv
-.\openwebui-venv\Scripts\activate
-python -m pip install --upgrade pip
-pip install open-webui beautifulsoup4
+Open WebUI requires **Python 3.12** — it does not install on Python 3.13+. The Windows Python Launcher (`py`) lets you install 3.12 side by side with any existing Python version without conflicts.
+
+```powershell
+winget install Python.Python.3.12
 ```
+
+Close and reopen your terminal after installing, then verify:
+
+```powershell
+py -3.12 --version
+# Python 3.12.x
+```
+
+<!-- @device:halo_box -->
+> **Note:** Your system comes with Python 3.13 pre-installed. Installing 3.12 does not affect it — `python` continues to use 3.13, and `py -3.12` targets 3.12 only when you need it.
+<!-- @device:end -->
 
 <!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
 ```powershell
-python --version
-where.exe python
-python -c "import sys; print(sys.executable)"
+$ErrorActionPreference = "Stop"
+
+$v = (& py -3.12 --version) 2>&1
+if ($LASTEXITCODE -ne 0) { throw "Python 3.12 was not found. Install it with: winget install Python.Python.3.12" }
+if ($v -notmatch "Python 3\.12\.") { throw "Expected Python 3.12.x but got: $v" }
+
+Write-Host "OK: $v"
 ```
 <!-- @test:end --> 
+
+### 2. Create a virtual environment and install Open WebUI
+
+```powershell
+mkdir openwebui
+cd openwebui
+py -3.12 -m venv openwebui-venv
+.\openwebui-venv\Scripts\activate
+pip install open-webui beautifulsoup4
+```
 
 <!-- @test:id=openwebui-install-venv-windows timeout=1200 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$venv = "$PWD\openwebui-venv-ci"
-if (Test-Path $venv) { Remove-Item -Recurse -Force $venv }
+$work = Join-Path (Get-Location) "openwebui"
+if (Test-Path $work) { Remove-Item -Recurse -Force $work }
+New-Item -ItemType Directory -Force -Path $work | Out-Null
 
-python -m venv $venv
-$py = Join-Path $venv "Scripts\python.exe"
+Push-Location $work
+try {
+  py -3.12 -m venv openwebui-venv
+  $py = Join-Path $work "openwebui-venv\Scripts\python.exe"
 
-& $py -m pip install --upgrade pip
-& $py -m pip install open-webui beautifulsoup4
+  & $py -m pip install --upgrade pip
+  if ($LASTEXITCODE -ne 0) { throw "pip upgrade failed" }
 
-if ($LASTEXITCODE -ne 0) { throw "pip install open-webui failed" }
+  & $py -m pip install open-webui beautifulsoup4
+  if ($LASTEXITCODE -ne 0) { throw "pip install open-webui beautifulsoup4 failed" }
+
+  Write-Host "OK: open-webui installed in venv"
+}
+finally {
+  Pop-Location
+}
 ```
 <!-- @test:end --> 
 
 <!-- @test:id=openwebui-install-check-windows timeout=1200 hidden=True -->
 ```powershell
-$venv = "$PWD\openwebui-venv-ci"
+$ErrorActionPreference = "Stop"
+
+$work = Join-Path (Get-Location) "openwebui"
+$venv = Join-Path $work "openwebui-venv"
 $py = Join-Path $venv "Scripts\python.exe"
+
 & $py -c "import open_webui; print('OK: import open_webui')"
 & $py -c "import bs4; print('OK: bs4 import')"
 ```
@@ -346,74 +407,125 @@ $py = Join-Path $venv "Scripts\python.exe"
 
 <!-- @test:id=openwebui-cli-windows timeout=1200 hidden=True -->
 ```powershell
-$venv = "$PWD\openwebui-venv-ci"
+$ErrorActionPreference = "Stop"
+
+$work = Join-Path (Get-Location) "openwebui"
+$venv = Join-Path $work "openwebui-venv"
 $ow = Join-Path $venv "Scripts\open-webui.exe"
 
+if (-not (Test-Path $ow)) { throw "open-webui.exe not found at $ow" }
+
 & $ow --help | Out-Null
-Write-Host "OK: open-webui installed in venv"
+Write-Host "OK: open-webui CLI is available"
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Open a terminal and create a fresh virtual environment:
+We are now going to use Podman service to containerize our Open WebUI installation.
+
+Please download the following into a directory of your choice: [compose.yml](assets/compose.yml)
+
+In that directory, run the following command:
 
 ```bash
-# Install open-webui into a venv [Linux]
-python3 -m venv openwebui-venv
-source openwebui-venv/bin/activate
-python3 -m pip install --upgrade pip
-pip install open-webui beautifulsoup4
+podman compose up -d
 ```
 
-<!-- @test:id=python-env-check-linux timeout=300 hidden=True -->
-```bash
-python3 --version
-python3 -m pip --version
-which python3
-which pip3
-python3 -c "import sys; print(sys.executable)"
-```
-<!-- @test:end -->
+This pulls the Open WebUI image and writes to persistent storage.
 
-<!-- @test:id=openwebui-install-venv-linux timeout=1200 hidden=True -->
+Launch Open WebUI by typing `localhost:8080` into your browser address bar.
+
+<!-- @test:id=openwebui-podman-prereq-linux timeout=300 hidden=True -->
 ```bash
 set -euo pipefail
 
-venv="./openwebui-venv-ci"
-rm -rf "$venv"
-python3 -m venv "$venv"
-py="$venv/bin/python"
-ow="$venv/bin/open-webui"
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
+export PODMAN_COMPOSE_WARNING_LOGS=false
 
-"$py" -m pip install --upgrade pip
-"$py" -m pip install open-webui beautifulsoup4
-"$py" -c "import open_webui; print('OK: import open_webui')"
-"$py" -c "import bs4; print('OK: bs4 import')"
-"$ow" --help
+podman --version
+podman compose version
+podman info >/dev/null
 
-echo "OK: open-webui installed in venv"
+if [ ! -f compose.yml ]; then
+  echo "compose.yml not found in current working directory (playbooks/supplemental/open-webui-chat/assets)"
+  exit 1
+fi
+
+echo "OK: Podman, Podman Compose, and compose.yml are available"
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
+
+<!-- @test:id=openwebui-compose-validate-linux timeout=300 hidden=True -->
+```bash
+set -euo pipefail
+
+python3 - <<'PY'
+from pathlib import Path
+import sys
+import yaml
+
+path = Path("compose.yml")
+if not path.exists():
+    raise SystemExit("compose.yml not found")
+
+data = yaml.safe_load(path.read_text())
+svc = data.get("services", {}).get("open-webui")
+if not svc:
+    raise SystemExit("compose.yml does not define services.open-webui")
+
+expected_image = "ghcr.io/open-webui/open-webui:main"
+if svc.get("image") != expected_image:
+    raise SystemExit(f"Expected image {expected_image}, got {svc.get('image')}")
+
+if svc.get("container_name") != "open-webui":
+    raise SystemExit("Expected container_name: open-webui")
+
+if svc.get("network_mode") != "host":
+    raise SystemExit("Expected network_mode: host")
+
+volumes = svc.get("volumes", [])
+if "open_webui_data:/app/backend/data" not in volumes:
+    raise SystemExit("Expected open_webui_data:/app/backend/data volume mount")
+
+if "open_webui_data" not in data.get("volumes", {}):
+    raise SystemExit("Expected top-level open_webui_data volume")
+
+print("OK: compose.yml matches the Open WebUI Podman setup")
+PY
+
+podman compose -f compose.yml config >/dev/null
+
+echo "OK: podman compose can parse compose.yml"
+```
+<!-- @test:end -->
 <!-- @os:end -->
 
-> **Tip (Python version):** Install Open WebUI using **Python 3.12**. The `open-webui` PyPI package may not install on Python 3.13+ (you’ll see “No matching distribution found”). 
-> Note: Open WebUI also provides a variety of other installation options, such as Docker, on their GitHub.
+> **Tip**: Open WebUI also provides other installation options on their [GitHub](https://github.com/open-webui/open-webui).
 
-### 3. Start Open WebUI Server
+## Starting Open WebUI Server
 
+<!-- @os:windows -->
 - Run the following command to launch the Open WebUI HTTP server:
 ```bash
 open-webui serve
 ```
+<!-- @os:end -->
+
 - In a browser, navigate to `http://localhost:8080`.
 - Open WebUI will ask you to create a local administrator account. Once you are signed in, you will see the chat interface.
 
 <p align="center">
   <img src="assets/open-webui_chat_interface.png" alt="Open WebUI Chat Interface" width="600"/>
 </p>
-  
+
+<!-- @os:windows -->
 > Keep the terminal window open. Closing it stops Open WebUI.
+<!-- @os:end -->
+
+<!-- @os:linux -->
+> The container runs in the background. From the directory containing `compose.yml`, manage it with `podman compose down` (stop) and `podman compose up -d` (start). Your accounts and settings persist in the `open_webui_data` volume.
+<!-- @os:end -->
 
 
 <!-- @os:windows -->
@@ -421,12 +533,13 @@ open-webui serve
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$venv = "$PWD\openwebui-venv-ci"
+$work = Join-Path (Get-Location) "openwebui"
+$venv = Join-Path $work "openwebui-venv"
 $ow = Join-Path $venv "Scripts\open-webui.exe"
 if (-not (Test-Path $ow)) { throw "open-webui not found. Run openwebui-install-venv-windows first." }
 
 # Fresh data dir so auth mode/config isn't polluted by previous runs
-$dataDir = "$PWD\openwebui-data-ci"
+$dataDir = Join-Path $work "openwebui-data-ci"
 if (Test-Path $dataDir) { Remove-Item -Recurse -Force $dataDir }
 New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
 
@@ -434,8 +547,8 @@ $env:DATA_DIR = $dataDir
 $env:WEBUI_AUTH = "False" # Disable auth for CI
 $env:ENABLE_PERSISTENT_CONFIG = "False" # Ensure environment-variable config applies for the run and isn't overridden by persistent settings
 
-$logOut = "$PWD\openwebui-ci-out.log"
-$logErr = "$PWD\openwebui-ci-err.log" 
+$logOut = Join-Path $work "openwebui-ci-out.log"
+$logErr = Join-Path $work "openwebui-ci-err.log"
 $p = Start-Process -FilePath $ow -ArgumentList "serve --port 8080" -NoNewWindow -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
 try {
   $ok = $false
@@ -454,94 +567,101 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end --> 
 
-<!-- @os:linux --> 
-<!-- @test:id=openwebui-server-smoke-linux timeout=900 hidden=True -->
+<!-- @os:linux -->
+<!-- @test:id=openwebui-podman-server-smoke-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
 
-venv="./openwebui-venv-ci"
-ow="$venv/bin/open-webui"
-if [ ! -x "$ow" ]; then
-  echo "open-webui not found. Run openwebui-install-venv-linux first."
-  exit 1
-fi
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
+export PODMAN_COMPOSE_WARNING_LOGS=false
 
-data_dir="./openwebui-data-ci"
-rm -rf "$data_dir"
-mkdir -p "$data_dir"
-
-export DATA_DIR="$data_dir"
-export WEBUI_AUTH=False
-export ENABLE_PERSISTENT_CONFIG=False
-
-p=""
 cleanup() {
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
+  podman compose -f compose.yml down >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-"$ow" serve --port 8080 >./openwebui-ci.log 2>&1 &
-p=$!
+# Clean up a stale container from a previous failed run.
+podman rm -f open-webui >/dev/null 2>&1 || true
 
-ok=""
-for i in $(seq 1 90); do
-  ok="$(curl -s --max-time 2 http://127.0.0.1:8080/health || true)"
-  if [ -n "$ok" ]; then break; fi
+podman compose -f compose.yml up -d
+
+health=""
+for i in $(seq 1 180); do
+  health="$(curl -fsS --max-time 2 http://127.0.0.1:8080/health || true)"
+  if [ -n "$health" ]; then
+    break
+  fi
   sleep 1
 done
 
-if [ -z "$ok" ]; then
-  echo "Open WebUI not ready on http://127.0.0.1:8080"
+if [ -z "$health" ]; then
+  echo "Open WebUI did not become ready on http://127.0.0.1:8080/health"
+  echo "Container status:"
+  podman ps -a || true
+  echo "Open WebUI logs:"
+  podman logs --tail 200 open-webui || true
   exit 1
 fi
 
-echo "OK: Open WebUI is responding on /health"
+echo "OK: Open WebUI container is responding on /health"
+
+# Verify that the Open WebUI container can reach Lemonade through host networking.
+podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json.load(urllib.request.urlopen(\"http://127.0.0.1:13305/api/v1/models\", timeout=10)); assert \"data\" in data; print(\"OK: Open WebUI container can reach Lemonade models endpoint\")"'
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 
 
+## Connecting Open WebUI to Lemonade
 
-### 4. Connect Open WebUI to Lemonade
+Now that both services are running — Lemonade on `localhost:13305` and Open WebUI on `localhost:8080` — connect them so Open WebUI can use Lemonade's models.
 
 In Open WebUI:
 
-1. Go to **Admin Settings → Connections** (http://localhost:8080/admin/settings/connections):
+1. Click the **user profile icon** in the top-right corner, then select **Settings**.
 
-<p align="center">
-  <img src="assets/open_settings.png" alt="Open WebUI Settings page" width="16%"/>
-  <img src="assets/connection_settings.png" alt="Navigating to the connection settings" width="69%"/>
-</p>
+   <p align="center">
+     <img src="assets/open_settings.png" alt="Click the user profile icon" width="300"/>
+   </p>
 
-2. Under **OpenAI API**, add a new connection:
+2. In the Settings panel, click **Admin Settings** at the bottom-left.
+
+   <p align="center">
+     <img src="assets/click_admin_settings.png" alt="Select Admin Settings" width="450"/>
+   </p>
+
+3. In the Admin Settings sidebar, click **Connections** (or navigate directly to `http://localhost:8080/admin/settings/connections`).
+
+   <p align="center">
+     <img src="assets/admin_settings_connections.png" alt="Admin Settings Connections page" width="600"/>
+   </p>
+
+4. Under **OpenAI API**, add a new connection:
    - **Base URL:** `http://localhost:13305/api/v1`
    - **API Key:** `-` (a single dash works for local)
-<p align="center">
-  <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
-</p>
 
-3. In http://localhost:8080/admin/settings/connections, ensure that under __"Manage OpenAI API Connections"__, only `http://localhost:13305/api/v1` is enabled.
-<p align="center">
-  <img src="assets/connection.png" alt="Admin settings connections page showing 'Manage OpenAI API Connections' with only http://localhost:13305/api/v1 enabled." width="600"/>
-</p>
+   <p align="center">
+     <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
+   </p>
 
-4. Save
+5. Ensure that under **"Manage OpenAI API Connections"**, only `http://localhost:13305/api/v1` is enabled. Disable any other connections (e.g., the default OpenAI one).
 
-5. Apply the following suggested settings. These help Open WebUI be more responsive with local LLMs.
-   - Click the user profile button again, and choose "Admin Settings".
-   - Click the "Settings" tab at the top, then "Interface" (which will be on the top or the left, depending on your window size), then disable the following:
-      - Title Generation
-      - Follow Up Generation
-      - Tags Generation
-<p align="center">
-  <img src="assets/admin_settings.png" alt="Admin Settings" width="800"/>
-</p>
+   <p align="center">
+     <img src="assets/admin_settings_connections.png" alt="Manage OpenAI API Connections with only Lemonade enabled" width="600"/>
+   </p>
 
-6. Click the **"Save"** button in the bottom right of the page, then return to `http://localhost:8080`.
-7. Click the model dropdown and you should see the models that you have downloaded from Lemonade.
+6. Click **Save**.
+
+7. **(Recommended)** Disable automatic generation features to keep Open WebUI responsive with local LLMs. Go to **Admin Settings → Settings → Interface** and turn off:
+   - Title Generation
+   - Follow Up Generation
+   - Tags Generation
+
+   <p align="center">
+     <img src="assets/admin_settings.png" alt="Admin Settings Interface — disable Title, Follow Up, and Tags Generation" width="600"/>
+   </p>
+
+8. Click **Save**, then return to `http://localhost:8080`.
+9. Click the model dropdown — you should see the models you downloaded from Lemonade.
 
 ---
 
@@ -574,15 +694,17 @@ Now, you’re all set up. Let's look at three interesting things to do.
 
 <!-- @os:linux -->
 1. Click the dropdown menu in the top-left of the interface. This will display the Lemonade models you have installed. Select one to proceed. (example: `Qwen3.5-4B-GGUF`).
-<p align="center">
-  <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
-</p>
+
+   <p align="center">
+     <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
+   </p>
 
 2. Enter a message to the LLM and click send (or hit Enter). The LLM will take a few seconds to load into memory and then you will see the response stream in.
-<p align="center">
-  <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
-  <img src="assets/linux_llm_response.png" alt="LLM Response" width="46%"/>
-</p>
+
+   <p align="center">
+     <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
+     <img src="assets/linux_llm_response.png" alt="LLM Response" width="46%"/>
+   </p>
 
 3. The model will respond in the chat.
 <!-- @os:end -->
@@ -596,16 +718,18 @@ This validates that Open WebUI can send requests to Lemonade using the OpenAI-co
 This requires a model that supports image input (a Vision or Multimodal model).
 
 1. Click the filter icon, select “By Category,” then choose a model from the **Vision** section (e.g., `Qwen3.5-4B-GGUF`)
-<p align="center">
-  <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
-</p>
+
+   <p align="center">
+     <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
+   </p>
 
 2. Click the **`+`** button in the message box and upload an image
 3. Ask something that forces true image understanding: `Do you think this is a well-designed GUI?`
-<p align="center">
-  <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="43%"/>
-  <img src="assets/vlm_response.png" alt="VLM Response" width="40%"/>
-</p>
+
+   <p align="center">
+     <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="43%"/>
+     <img src="assets/vlm_response.png" alt="VLM Response" width="40%"/>
+   </p>
 
 4. The model answers based on the image content, not generic text.
 
@@ -619,7 +743,7 @@ Stable Diffusion models don't support text generation, they only generate images
 
 #### Step 1: Configure Image Generation in Open WebUI
 
-1. Go to Lemonade, search for `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality), and download it.
+1. In the Lemonade GUI (`http://localhost:13305`), search for `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality) and download it.
 2. Go to **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
 3. Set:
    - **Image Generation:** ON
@@ -628,9 +752,10 @@ Stable Diffusion models don't support text generation, they only generate images
    - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` or `SDXL-Base-1.0`
 4. If you want to add more parameters, add them to the text field as JSON. For example: `{ "steps": 4, "cfg_scale": 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
-<p align="center">
-  <img src="assets/images_settings.png" alt="Lemonade VLM's" width="600"/>
-</p>
+
+   <p align="center">
+     <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
+   </p>
 
 5. Save
 
@@ -639,10 +764,11 @@ Stable Diffusion models don't support text generation, they only generate images
 This step ensures that you enable Image Generation as a capability for your model.
 1. Go to **Admin Settings → Models** (http://localhost:8080/admin/settings/models) and choose your model
 2. Turn on `Image Generation`
-<p align="center">
-  <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
-  <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
-</p>
+
+   <p align="center">
+     <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
+     <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
+   </p>
 
 #### Step 3: Generate an image from the chat screen
 
@@ -651,10 +777,11 @@ This step ensures that you enable Image Generation as a capability for your mode
 3. In the message area, click on **Integrations**, and toggle **Image** ON.
 4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. An image is generated and appears in the chat.
-<p align="center">
-  <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
-  <img src="assets/image_gen_response.png" alt="Edit Model" width="32.5%"/>
-</p>
+
+   <p align="center">
+     <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
+     <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
+   </p>
 
 This establishes that Open WebUI can coordinate a “two-part” workflow:
   - The LLM helps refine the prompt
@@ -664,9 +791,9 @@ This establishes that Open WebUI can coordinate a “two-part” workflow:
 
 ## Troubleshooting
 
-### “No models show up”
-- Confirm `http://localhost:13305/api/v1/models` loads in a browser
-- Re-check Open WebUI connection Base URL: `http://localhost:13305/api/v1`
+### “No models show up in Open WebUI”
+- First, check Lemonade: open `http://localhost:13305/api/v1/models` in a browser and confirm your models are listed and downloaded
+- Then, check the Open WebUI connection: go to **Admin Settings → Connections** at `http://localhost:8080/admin/settings/connections` and verify the Base URL is `http://localhost:13305/api/v1`
 
 ### “This model does not support chat completion” error message
 - You selected an image model (SDXL-Turbo / SDXL-Base-1.0) in the chat model dropdown.

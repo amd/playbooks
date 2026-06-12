@@ -1,6 +1,6 @@
 {
   "id": "open-webui-chat",
-  "title": "How to Chat with LLMs in Open WebUI",
+  "title": "Chat with LLMs in Open WebUI",
   "description": "Use Open WebUI to chat with LLMs locally.",
   "time": 30,
   "supported_platforms": {

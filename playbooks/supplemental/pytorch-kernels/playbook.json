@@ -26,12 +26,34 @@
       "linux",
       "windows"
     ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
     "halo_box": [
       "linux",
       "windows"
     ]
   },
   "tested_platforms":{
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
+  },
+  "published_platforms": {
     "halo": [
       "linux",
       "windows"
