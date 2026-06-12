@@ -25,6 +25,21 @@
     "halo": [
       "linux",
       "windows"
+<<<<<<< dholanda/hb_release
+=======
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+>>>>>>> main
     ]
   },
   "tested_platforms":{
@@ -43,11 +58,24 @@
   },
   "published_platforms": {
     "halo": [
+<<<<<<< dholanda/hb_release
       "linux"
     ],
     "halo_box": [
       "windows",
       "linux"
+=======
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+>>>>>>> main
     ]
   },
   "difficulty": "advanced",
