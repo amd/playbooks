@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 <!--
 Copyright Advanced Micro Devices, Inc.
 
@@ -10,10 +9,7 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Clustering with Two Halos (RCCL)
-=======
 # Clustering Two STX Halos with RCCL
->>>>>>> Stashed changes
 
 ## Overview
 
@@ -72,42 +68,47 @@ This amount can be increased by changing the kernel's Translation Table Manager 
 
 For `amd-ttm` usage examples, see the [ROCm documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/docs-7.0.2/docs/install/installryz/native_linux/install-ryzen.html#amd-ttm-usage-examples).
 
-## Installing vLLM
+## Locate the network environment variables
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-### Step 1: Create a Python Environment
+On each machine, run `hostname -I | awk '{print $1}'` to find its local IP address.
 
-It's recommended to use [uv](https://docs.astral.sh/uv/getting-started/installation/), a fast Python environment manager, to create and manage Python environments. Install uv via the official installer:
+Now run `ifconfig` and find the name of the network interface that corresponds to the IP address from the previous step and note it down (it will be referred to in the rest of the instructions as `IFNAME`).
 
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-After installing `uv`, you can create a new Python environment using the following commands:
+Here is an example (IP address is 10.6.207.93, interface is enp191s0):
 
 ```bash
-uv venv --python 3.12 --seed --managed-python
-source .venv/bin/activate
+enp191s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 10.6.207.93  netmask 255.255.252.0  broadcast 10.6.207.255
+        inet6 fe80::7f35:81ba:90be:3f0c  prefixlen 64  scopeid 0x20<link>
+        ether 38:a7:46:e6:b6:bd  txqueuelen 1000  (Ethernet)
+        RX packets 7503448  bytes 10474278896 (9.7 GiB)
+        RX errors 0  dropped 10313  overruns 0  frame 0
+        TX packets 732453  bytes 9990339667 (9.3 GiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 ```
 
-### Step 2: Install vLLM Prebuilt Wheels
+## VLLM container initialization
 
-Install the latest vLLM prebuilt wheels with AMD ROCm™ 7 acceleration:
+> **Note**: Complete this step on both Machine 1 and Machine 2.
+
+Podman is a free and open source container tool and your machine has access to a container which has vLLM installed. You can start the container with this command:
 
 ```bash
-uv pip install vllm --extra-index-url https://wheels.vllm.ai/rocm/
+sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g oci-registry.ryai.dev/ryai-vllm:latest
 ```
 
-### Step 3: Verify the Installation
+## Setting network environment variables
 
-Confirm that vLLM is installed correctly:
+> **Note**: Complete this step on both Machine 1 and Machine 2.
+
+These environment variables need to be set to the `IFNAME` prior to starting the Ray cluster and the vLLM server, so that RCCL will use the correct interface for network communication.
 
 ```bash
-vllm --version
+export NCCL_SOCKET_IFNAME=<IFNAME>
+export GLOO_SOCKET_IFNAME=<IFNAME> 
 ```
-
-If the installation was successful, this will print the vLLM version followed by the ROCm version (e.g., `0.17.1+rocm700`).
 
 ## Running the Model on the Cluster
 
@@ -153,4 +154,7 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
   --reasoning-parser qwen3
 ```
 
-## Next Steps
+## Managing the container
+
+Within the podman container, you can stop your work and detach from it using (Ctrl+P, Ctrl+Q). For more instructions and references please go here: https://docs.podman.io/en/latest
+
