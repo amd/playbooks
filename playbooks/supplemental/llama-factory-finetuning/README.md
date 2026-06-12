@@ -216,7 +216,7 @@ print("PASS: Required LLaMA Factory example files exist")
 These example configuration files have specified model parameters, fine-tuning method parameters, dataset parameters, evaluation parameters, and more. You can configure them according to your own needs. In this playbook, we will use [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
 **Key parameters explained:**
-- `model_name_or_path` - HuggingFace Model name or local model file path.
+- `model_name_or_path` - Hugging Face model name or local model file path.
 - `stage` - Training stage. Options: rm (reward modeling), pt (pretrain), sft (Supervised Fine-Tuning), PPO, DPO, KTO, ORPO.
 - `do_train` - true for training, false for evaluation
 - `finetuning_type` - Fine-tuning method. Options: freeze, lora, full
@@ -363,7 +363,7 @@ print(f"Found adapter weights: {adapter_weights}")
 
 **llamafactory-cli chat** is designed for interactive chat/inference with LLMs (both base models and LoRA-fine-tuned models). LLaMA Factory provides the sample configuration to run inference of fine-tuned models in [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). You can also modify this sample configuration to change the settings, such as the inference backend.
 
-Use the following command to test Qwen3 fine-tuned model:
+Use the following command to test the Qwen3 fine-tuned model:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
@@ -379,7 +379,7 @@ An example chat using the fine-tuned model is shown below:
 
 For production use-cases, the pre-trained model and the LoRA adapter need to be merged and exported into a single model. This merged model can be used as a normal Hugging Face model file. LLaMA Factory provides the sample configurations in [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
-Use the following command to export Qwen3 fine-tuned model:
+Use the following command to export the Qwen3 fine-tuned model:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
