@@ -8,10 +8,6 @@
       "windows",
       "linux"
     ],
-    "halo_box": [
-      "windows",
-      "linux"
-    ],
     "stx": [
       "windows",
       "linux"
@@ -54,7 +50,11 @@
       "windows",
       "linux"
     ],
-    "halo_box": [
+    "stx": [
+      "windows",
+      "linux"
+    ],
+    "krk": [
       "windows",
       "linux"
     ]
