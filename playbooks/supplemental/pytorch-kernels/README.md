@@ -139,6 +139,7 @@ sudo apt install -y python3-venv
 python3 -m venv kernel-env --system-site-packages
 source kernel-env/bin/activate
 ```
+<!-- @test:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
@@ -149,13 +150,16 @@ sudo usermod -aG render,video $LOGNAME
 ```
 
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
 python3 -m venv kernel-env
 source kernel-env/bin/activate
 ```
+<!-- @test:end -->
 <!-- @device:end -->
+<!-- @setup:id=activate-venv command="source kernel-env/bin/activate" -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
