@@ -26,6 +26,14 @@
       "linux",
       "windows"
     ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
     "halo_box": [
       "linux",
       "windows"
