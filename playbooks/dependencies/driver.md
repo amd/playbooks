@@ -33,5 +33,3 @@ Download and install the latest AMD GPU driver for Linux:
 
 <!-- @device:end -->
 <!-- @os:end -->
-
-<!-- @device:end -->

@@ -19,12 +19,12 @@ This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your loca
 
 ## Setting the Memory Configuration
 
-<!-- @setup:memory-config -->
+<!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
-<!-- @setup:software-update -->
+<!-- @require:software-update -->
 <!-- @device:end -->
 
 ## Installing Software Prerequisites

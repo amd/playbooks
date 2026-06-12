@@ -37,13 +37,13 @@ Unsloth also supports other training approaches, including QLoRA and reinforceme
 
 ## Setting the Memory Configuration
 
-<!-- @setup:memory-config -->
+<!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
 > **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
 
-<!-- @setup:software-update -->
+<!-- @require:software-update -->
 <!-- @device:end -->
 
 ## Installing Software Prerequisites
@@ -103,6 +103,7 @@ python -m venv unsloth-env
 .\unsloth-env\Scripts\activate
 ```
 <!-- @device:end -->
+<!-- @setup:id=activate-venv command="unsloth-env\Scripts\activate" -->
 <!-- @os:end -->
 
 ### Installing Basic Dependencies

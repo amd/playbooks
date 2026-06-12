@@ -77,12 +77,12 @@ Lemonade runs the models; Open WebUI is the interface you interact with. Use the
 
 ## Setting the Memory Configuration
 
-<!-- @setup:memory-config -->
+<!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
-<!-- @setup:software-update -->
+<!-- @require:software-update -->
 <!-- @device:end -->
 
 ## One-Time Setup

@@ -22,13 +22,13 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 ## Setting the Memory Configuration
 
-<!-- @setup:memory-config -->
+<!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
 > **Note**: If VS Code or LM Studio is not installed, you can install them from the AMD Ryzen™ AI Developer Center on Windows. On Linux, follow the LM Studio install instructions below.
 
-<!-- @setup:software-update -->
+<!-- @require:software-update -->
 <!-- @device:end -->
 
 ## Installing Software Prerequisites

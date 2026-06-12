@@ -26,7 +26,7 @@ This playbook teaches you how to set up the Ryzen AI CVML Library, build the inc
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
-<!-- @setup:software-update -->
+<!-- @require:software-update -->
 <!-- @device:end -->
 
 ## Installing Software Prerequisites

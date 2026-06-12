@@ -28,13 +28,13 @@ This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a cod
 
 ## Setting the Memory Configuration
 
-<!-- @setup:memory-config -->
+<!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
 > **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
-<!-- @setup:software-update -->
+<!-- @require:software-update -->
 <!-- @device:end -->
 
 ## Installing Software Prerequisites

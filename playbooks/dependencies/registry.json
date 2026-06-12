@@ -153,8 +153,8 @@
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md",
       "preinstalled": {
-        "linux": ["halo_box"],
-        "windows": ["halo_box"]
+        "linux": [],
+        "windows": []
       }
     },
     "rocm": {
@@ -179,22 +179,16 @@
         "windows": []
       }
     },
-  "setup": {
-    "memory-config": {
-      "name": "Memory Configuration",
-      "description": "Configure GPU memory allocation for running large models",
-      "platforms": ["windows", "linux"],
-      "file": "memoryconfig.md",
-      "preinstalled": {
-        "linux": ["halo_box"],
-        "windows": ["halo_box"]
-      }
-    },
     "software-update": {
       "name": "Software Updates",
       "description": "Check for and install software updates on the AMD Ryzen AI Halo",
+      "category": "framework",
       "platforms": ["windows", "linux"],
-      "file": "softwareupdate.md"
+      "file": "softwareupdate.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      }
     }
   }
 }
