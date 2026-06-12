@@ -175,7 +175,7 @@ try {
       )
     })
     temperature = 0
-    max_tokens = 32
+    max_tokens = 256
   } | ConvertTo-Json -Depth 10
   $tmpVision = Join-Path $env:TEMP "vision-body.json"
   [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
@@ -301,7 +301,7 @@ vision = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
     ],
   }],
   "temperature": 0,
-  "max_tokens": 32,
+  "max_tokens": 256,
 }, timeout=300)
 vtext = vision["choices"][0]["message"]["content"]
 if "OK" not in vtext:
@@ -313,6 +313,8 @@ img = post_json("http://127.0.0.1:13305/api/v1/images/generations", {
   "model": "SDXL-Turbo",
   "prompt": "A simple red cube on a white table, studio lighting",
   "size": "256x256",
+  "steps": 4,
+  "response_format": "b64_json",
 }, timeout=900)
 b64 = img.get("data", [{}])[0].get("b64_json")
 if not b64:
