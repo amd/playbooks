@@ -185,8 +185,10 @@ try {
     --data-binary "@$tmpVision"
   if (-not $visionOut) { throw "Empty response from vision chat/completions" }
   $visionParsed = $visionOut | ConvertFrom-Json
+  if (-not $visionParsed.choices -or $visionParsed.choices.Count -lt 1) { throw "Unexpected vision response (no choices). Raw response: $visionOut" }
   $visionText = $visionParsed.choices[0].message.content
-  if ($visionText -notmatch "\bOK\b") { throw "Vision test failed. Got: $visionText" }
+  if ([string]::IsNullOrWhiteSpace($visionText)) { throw "Vision returned empty content. Raw response: $visionOut" }
+  if ($visionText -notmatch "\bOK\b") { throw "Vision test failed. Got: $visionText. Raw response: $visionOut" }
   Write-Host "OK: Vision chat works"
 
   # Image generation smoke test
@@ -303,9 +305,13 @@ vision = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
   "temperature": 0,
   "max_tokens": 256,
 }, timeout=300)
-vtext = vision["choices"][0]["message"]["content"]
+if not vision.get("choices"):
+  raise SystemExit(f"Unexpected vision response (no choices). Raw response:\n{json.dumps(vision, indent=2)}")
+vtext = vision["choices"][0]["message"].get("content", "")
+if not vtext.strip():
+  raise SystemExit(f"Vision returned empty content. Raw response:\n{json.dumps(vision, indent=2)}")
 if "OK" not in vtext:
-  raise SystemExit(f"Vision test failed. Got: {vtext}")
+  raise SystemExit(f"Vision test failed. Got: {vtext}\nRaw response:\n{json.dumps(vision, indent=2)}")
 print("OK: Vision chat works")
 
 # Image generation smoke test
