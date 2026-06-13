@@ -26,13 +26,24 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 ## Downloading Models
 
+<!-- @var:id=lms_model device=halo,halo_box value="gpt-oss-120b" -->
+<!-- @var:id=lms_model device=stx,krk value="qwen3.5-9b" -->
+<!-- @var:id=model_name device=halo,halo_box value="GPT-OSS 120B" -->
+<!-- @var:id=model_name device=stx,krk value="Qwen3.5 9B" -->
+
+<!-- @device:halo,halo_box -->
 <!-- @require:lmstudio-models-gpt-oss-120b -->
+<!-- @device:end -->
+
+<!-- @device:stx,krk -->
+<!-- @require:lmstudio-models-qwen3-9b -->
+<!-- @device:end -->
 
 ## Chatting with an LLM
 Learn how to start chatting with a ChatGPT-grade LLM completely locally.  
 
 1. Open LMStudio. 
-2. Press `Ctrl + L` to open the Model Loader, select `Manually choose model load parameters`, and click on `GPT-OSS 120B`
+2. Press `Ctrl + L` to open the Model Loader, select `Manually choose model load parameters`, and click on `${model_name}`
 3. Make sure "show advanced settings" is checked.  
 4. Change `Context Length` as desired. Higher context length means more model memory, but more system memory used. Recommended for this playbook is 4096.
 5. Make sure `GPU Offload` is set to maximum and `Flash Attention` is On
@@ -41,13 +52,13 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 8. Send a message and start interacting with the model!
 
 <!-- @os:windows -->
-<!-- @test:id=lmstudio-load-gpt-oss-windows timeout=1200 hidden=True -->
+<!-- @test:id=lmstudio-load-model-windows timeout=1200 hidden=True -->
 ```powershell
 lms unload --all
 lms ps
-$ID = "gpt-oss-120b-$env:GITHUB_RUN_ID"
-Set-Content -Path "$env:TEMP\gpt-oss_model_id.txt" -Value $ID -Encoding utf8
-lms load gpt-oss-120b --context-length 32768 --gpu max --identifier "$ID"
+$ID = "${lms_model}-$env:GITHUB_RUN_ID"
+Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
+lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID"
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -55,22 +66,30 @@ lms chat "$ID" -p "Reply with exactly: OK"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=lmstudio-load-gpt-oss-linux timeout=1200 hidden=True -->
+<!-- @test:id=lmstudio-load-model-linux timeout=1200 hidden=True -->
 ```bash
 lms unload --all || true
 lms ps
-ID="gpt-oss-120b-${GITHUB_RUN_ID}"
-echo "$ID" > /tmp/gpt-oss_model_id.txt
-lms load gpt-oss-120b --context-length 32768 --gpu max --identifier "$ID"
+ID="${lms_model}-${GITHUB_RUN_ID}"
+echo "$ID" > /tmp/lmstudio_model_id.txt
+lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID"
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @device:halo,halo_box -->
 <p align="center">
-  <img src="assets/chat.png" alt="Chatting with gpt-oss-120b on LM Studio" width="600"/>
+  <img src="assets/chat.png" alt="Chatting with ${model_name} on LM Studio" width="600"/>
 </p>
+<!-- @device:end -->
+
+<!-- @device:stx,krk -->
+<p align="center">
+  <img src="assets/chat_qwen.png" alt="Chatting with ${model_name} on LM Studio" width="600"/>
+</p>
+<!-- @device:end -->
 
 > **Tip**: Context length refers to the model's memory. Flash attention improves processing speed while reducing memory usage. GPU Offload shifts compute to the graphics card for faster responses.
 
@@ -208,7 +227,7 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
 ```python
 import json, urllib.request, os
 
-model_id_path = os.path.join(os.environ["TEMP"], "gpt-oss_model_id.txt")
+model_id_path = os.path.join(os.environ["TEMP"], "lmstudio_model_id.txt")
 with open(model_id_path, "r", encoding="utf-8") as f:
     model_id = f.read().strip()
 
@@ -234,7 +253,7 @@ with urllib.request.urlopen(req, timeout=60) as r:
 ```python
 import json, urllib.request
 
-with open("/tmp/gpt-oss_model_id.txt", "r", encoding="utf-8") as f:
+with open("/tmp/lmstudio_model_id.txt", "r", encoding="utf-8") as f:
     model_id = f.read().strip()
 
 req = urllib.request.Request(
@@ -257,7 +276,7 @@ with urllib.request.urlopen(req, timeout=60) as r:
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-stop-windows timeout=300 hidden=True -->
 ```powershell
-$ID = Get-Content "$env:TEMP\gpt-oss_model_id.txt" -Raw
+$ID = Get-Content "$env:TEMP\lmstudio_model_id.txt" -Raw
 $ID = $ID.Trim()
 lms unload "$ID"
 lms ps
@@ -269,7 +288,7 @@ lms server stop
 <!-- @os:linux -->
 <!-- @test:id=lmstudio-server-stop-linux timeout=300 hidden=True -->
 ```bash
-ID="$(cat /tmp/gpt-oss_model_id.txt)"
+ID="$(cat /tmp/lmstudio_model_id.txt)"
 lms unload "$ID" || true
 lms ps
 lms server stop

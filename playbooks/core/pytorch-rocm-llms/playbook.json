@@ -25,6 +25,14 @@
     "halo": [
       "linux",
       "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "required_platforms": {
@@ -32,7 +40,11 @@
       "linux",
       "windows"
     ],
-    "halo_box": [
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
       "linux",
       "windows"
     ]
@@ -41,6 +53,18 @@
     "halo": [
       "windows",
       "linux"
+    ],
+    "halo_box": [
+      "windows",
+      "linux"
+    ],  
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "difficulty": "beginner",

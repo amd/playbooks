@@ -33,7 +33,7 @@ function parseDeviceKey(key: string): { arch: string; platform: string | null } 
 }
 
 // Languages that support syntax highlighting
-const HIGHLIGHTED_LANGUAGES = new Set(["python", "py", "bash", "sh", "shell", "c", "cpp", "c++"]);
+const HIGHLIGHTED_LANGUAGES = new Set(["python", "py", "bash", "sh", "shell", "c", "cpp", "c++", "powershell", "ps1", "pwsh"]);
 
 // Map language aliases to their canonical names for the highlighter
 function normalizeLanguage(lang: string): string {
@@ -42,6 +42,8 @@ function normalizeLanguage(lang: string): string {
     "sh": "bash",
     "shell": "bash",
     "c++": "cpp",
+    "ps1": "powershell",
+    "pwsh": "powershell",
   };
   return langMap[lang] || lang;
 }
@@ -637,6 +639,107 @@ function filterContentByDevice(content: string, devices: string[]): string {
   } while (result !== prev);
 
   return result;
+}
+
+/**
+ * Parses `key=value` / `key="value with spaces"` attribute strings, mirroring
+ * the parser used by the test runner (run_playbook_tests.py).
+ */
+function parseTagAttributes(attrString: string): Record<string, string> {
+  const attrs: Record<string, string> = {};
+  const pattern = /(\w+)=(?:"([^"]+)"|(\S+))/g;
+  let m: RegExpExecArray | null;
+  while ((m = pattern.exec(attrString)) !== null) {
+    attrs[m[1]] = m[2] !== undefined ? m[2] : m[3];
+  }
+  return attrs;
+}
+
+/**
+ * Extracts reusable @var definitions, keyed by var id then device. Mirrors the
+ * test runner's resolution: an inline `device=` attribute takes precedence,
+ * otherwise the device(s) are inferred from the enclosing @device: block, and
+ * definitions with neither are stored under the "all" key.
+ *
+ * Tags supported:
+ * <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
+ * <!-- @var:id=api_port value="13305" -->
+ */
+function extractVarDefs(content: string): Record<string, Record<string, string>> {
+  const defs: Record<string, Record<string, string>> = {};
+  if (!content) return defs;
+
+  // Resolve @device: block ranges with a stack so the innermost enclosing
+  // block can be matched for each @var definition.
+  const blocks: { devices: string; start: number; end: number }[] = [];
+  const stack: { devices: string; start: number }[] = [];
+  const tagPattern = /<!-- @device:([\w,]+) -->|<!-- @device:end -->/g;
+  let tm: RegExpExecArray | null;
+  while ((tm = tagPattern.exec(content)) !== null) {
+    if (tm[1]) {
+      stack.push({ devices: tm[1], start: tm.index });
+    } else {
+      const open = stack.pop();
+      if (open) blocks.push({ devices: open.devices, start: open.start, end: tm.index });
+    }
+  }
+  blocks.sort((a, b) => b.start - a.start); // innermost-first
+
+  const varPattern = /<!-- @var:([^>]+) -->/g;
+  let vm: RegExpExecArray | null;
+  while ((vm = varPattern.exec(content)) !== null) {
+    const attrs = parseTagAttributes(vm[1]);
+    const id = attrs["id"];
+    const value = attrs["value"];
+    if (!id || value === undefined) continue;
+
+    let deviceValue: string | undefined = attrs["device"];
+    if (deviceValue === undefined) {
+      const pos = vm.index;
+      for (const b of blocks) {
+        if (b.start <= pos && pos < b.end) {
+          deviceValue = b.devices;
+          break;
+        }
+      }
+    }
+
+    if (!defs[id]) defs[id] = {};
+    if (deviceValue) {
+      for (const d of deviceValue.split(",").map(s => s.trim()).filter(Boolean)) {
+        defs[id][d] = value;
+      }
+    } else {
+      defs[id]["all"] = value;
+    }
+  }
+
+  return defs;
+}
+
+/**
+ * Substitutes `${name}` placeholders with device-aware @var values and strips
+ * the @var definition comments. Only placeholders whose name matches a declared
+ * @var id are touched; ordinary `${env}` references are left untouched. The
+ * value mapped to the active device is preferred, falling back to "all".
+ */
+function substituteVars(
+  content: string,
+  varDefs: Record<string, Record<string, string>>,
+  devices: string[]
+): string {
+  if (!content) return "";
+  const result = content.replace(/[ \t]*<!-- @var:[^>]+ -->\n?/g, "");
+  if (Object.keys(varDefs).length === 0) return result;
+
+  const device = devices.length > 0 ? devices[0] : null;
+  return result.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (match, name: string) => {
+    const mapping = varDefs[name];
+    if (!mapping) return match;
+    if (device && mapping[device] !== undefined) return mapping[device];
+    if (mapping["all"] !== undefined) return mapping["all"];
+    return match;
+  });
 }
 
 /**
@@ -1273,7 +1376,7 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
     return dev ? categoryForDevice(dev) : "reference";
   });
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(() => {
-    if (categoryParam === "reference") return "halo";
+    if (categoryParam === "reference") return "halo_box";
     return deviceFromHash(deviceHash) ?? "halo";
   });
   const [activeHeading, setActiveHeading] = useState<string>("");
@@ -1409,25 +1512,28 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
     }
   }, [coverageViewActive, selectedTestDevice]);
 
-  // The "reference" category's "halo" entry represents the AMD Halo Developer
-  // Platform (halo_box), not the Strix Halo (Ryzen AI Max) chip — the chip is
-  // selected via the "apu" category. Treat them as distinct devices so that
-  // <!-- @device:halo --> blocks only render for the chip and
-  // <!-- @device:halo_box --> blocks only render for the developer platform.
-  // Content meant for both should be tagged <!-- @device:halo,halo_box -->.
-  const isReferenceHalo = selectedCategory === "reference" && selectedDevice === "halo";
-  const preinstalledDevice: string | null = isReferenceHalo ? "halo_box" : selectedDevice;
+  // "halo_box" is the Reference Platform (AMD Ryzen AI Halo developer box);
+  // "halo" is the chip (Ryzen AI Max) under the APU category.
+  // When in the reference category, use "halo_box" for device filtering and
+  // preinstalled checks.
+  const effectiveDevice: Device | null =
+    selectedCategory === "reference" && selectedDevice === "halo" ? "halo_box" : selectedDevice;
+  const preinstalledDevice: string | null = effectiveDevice;
 
-  const activeDevices: string[] = isReferenceHalo
-    ? ["halo_box"]
-    : selectedDevice ? [selectedDevice] : [];
+  const activeDevices: string[] = effectiveDevice ? [effectiveDevice] : [];
 
-  // Transform relative image paths to API routes, filter by OS/device, and transform preinstalled/setup blocks
+  // Transform relative image paths to API routes, filter by OS/device, substitute
+  // device-aware @var values, and transform preinstalled/setup blocks.
+  const varDefs = playbook?.content ? extractVarDefs(playbook.content) : {};
   const filteredContent = playbook?.content
     ? transformSetupBlocks(
         transformPreinstalledBlocks(
-          filterContentByDevice(
-            filterContentByOS(playbook.content, selectedPlatform),
+          substituteVars(
+            filterContentByDevice(
+              filterContentByOS(playbook.content, selectedPlatform),
+              activeDevices
+            ),
+            varDefs,
             activeDevices
           ),
           selectedPlatform,
