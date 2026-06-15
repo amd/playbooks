@@ -53,7 +53,7 @@ By the end of this playbook you will be able to:
 
 <!-- @require:lemonade -->
 
-<!-- @var:id=openclaw_model value="Qwen3-4B-GGUF" -->
+<!-- @var:id=openclaw_model value="Qwen3.6-35B-A3B-GGUF" -->
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -67,17 +67,17 @@ lemonade --version
 
 The recommended model for this playbook is **Qwen3.6-35B-A3B-GGUF** from Unsloth, a strong MoE model with a 263k-token context window that is well-suited to agent workloads. This model uses UD-Q4_K_XL quantization. Pull it now:
 
-<!-- @test:id=lemonade-config-ctx-size timeout=120 -->
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
-<!-- @test:end -->
 
 Then load it with a large context window and save that setting for future runs:
 
+<!-- @test:id=lemonade-model-load timeout=300 -->
 ```bash
 lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
+<!-- @test:end --> 
 
 The model has a default context length of 262,144 tokens. If you encounter out-of-memory (OOM) errors, consider reducing the context window. However, because Qwen3.6 leverages extended context for complex tasks, we advise maintaining a context length of at least 128K tokens to preserve thinking capabilities.
 
@@ -111,6 +111,11 @@ $entry = $parsed.data | Where-Object { $_.id -eq "${openclaw_model}" } | Select-
 if (-not $entry) {throw "Model ${openclaw_model} is not present in Lemonade /api/v1/models."}
 if (-not $entry.downloaded) {throw "Model ${openclaw_model} is present but not downloaded in Lemonade. Please download it before running CI."}
 Write-Host "OK: ${openclaw_model} model is downloaded in Lemonade"
+
+if ($entry.recipe_options.ctx_size -ne 262144) {
+  throw "Model ${openclaw_model} is not saved with ctx_size=262144. Run: lemonade load ${openclaw_model} --ctx-size 262144 --save-options"
+}
+Write-Host "OK: ${openclaw_model} is saved with ctx_size=262144"
 
 $body = @{
   model = "${openclaw_model}"
@@ -186,6 +191,12 @@ if not entry.get("downloaded", False):
     sys.exit(1)
 
 print(f"OK: {model_id} model is downloaded in Lemonade")
+
+ctx_size = entry.get("recipe_options", {}).get("ctx_size")
+if ctx_size != 262144:
+    print(f"Model {model_id} is not saved with ctx_size=262144. Run: lemonade load {model_id} --ctx-size 262144 --save-options")
+    sys.exit(1)
+print(f"OK: {model_id} is saved with ctx_size=262144")
 PY
 
 body='{

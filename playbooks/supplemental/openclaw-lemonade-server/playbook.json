@@ -40,16 +40,6 @@
       "windows",
       "linux"
     ],
-    "halo_box": [
-      "windows",
-      "linux"
-    ]
-  },
-  "published_platforms": {
-    "halo": [
-      "windows",
-      "linux"
-    ],
     "stx": [
       "linux",
       "windows"
@@ -59,12 +49,20 @@
       "windows"
     ]
   },
-  "required_platforms": {
+  "published_platforms": {
     "halo": [
       "linux",
       "windows"
     ],
     "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
       "linux",
       "windows"
     ]
