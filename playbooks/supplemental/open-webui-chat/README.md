@@ -163,37 +163,41 @@ try {
   Write-Host "OK: LLM chat works"
 
   # Vision smoke test (OpenAI-style image_url)
-  # $png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
-  # $dataUrl = "data:image/png;base64,$png1x1"
-  # $visionBody = @{
-  #   model = "Qwen3.5-4B-GGUF"
-  #   messages = @(@{
-  #     role = "user"
-  #     content = @(
-  #       @{ type = "text"; text = "If you can see an image input, reply with exactly: OK" },
-  #       @{ type = "image_url"; image_url = @{ url = $dataUrl } }
-  #     )
-  #   })
-  #   temperature = 0
-  #   max_tokens = 32
-  # } | ConvertTo-Json -Depth 10
-  # $tmpVision = Join-Path $env:TEMP "vision-body.json"
-  # [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
-  # $visionOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
-  #   -H "Content-Type: application/json" `
-  #   -H "Authorization: Bearer -" `
-  #   --data-binary "@$tmpVision"
-  # if (-not $visionOut) { throw "Empty response from vision chat/completions" }
-  # $visionParsed = $visionOut | ConvertFrom-Json
-  # $visionText = $visionParsed.choices[0].message.content
-  # if ($visionText -notmatch "\bOK\b") { throw "Vision test failed. Got: $visionText" }
-  # Write-Host "OK: Vision chat works"
+  $png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
+  $dataUrl = "data:image/png;base64,$png1x1"
+  $visionBody = @{
+    model = "Qwen3.5-4B-GGUF"
+    messages = @(@{
+      role = "user"
+      content = @(
+        @{ type = "text"; text = "If you can see an image input, reply with exactly: OK" },
+        @{ type = "image_url"; image_url = @{ url = $dataUrl } }
+      )
+    })
+    temperature = 0
+    max_tokens = 256
+  } | ConvertTo-Json -Depth 10
+  $tmpVision = Join-Path $env:TEMP "vision-body.json"
+  [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
+  $visionOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
+    -H "Content-Type: application/json" `
+    -H "Authorization: Bearer -" `
+    --data-binary "@$tmpVision"
+  if (-not $visionOut) { throw "Empty response from vision chat/completions" }
+  $visionParsed = $visionOut | ConvertFrom-Json
+  if (-not $visionParsed.choices -or $visionParsed.choices.Count -lt 1) { throw "Unexpected vision response (no choices). Raw response: $visionOut" }
+  $visionText = $visionParsed.choices[0].message.content
+  if ([string]::IsNullOrWhiteSpace($visionText)) { throw "Vision returned empty content. Raw response: $visionOut" }
+  if ($visionText -notmatch "\bOK\b") { throw "Vision test failed. Got: $visionText. Raw response: $visionOut" }
+  Write-Host "OK: Vision chat works"
 
   # Image generation smoke test
   $imgBody = @{
     model  = "SDXL-Turbo"
     prompt = "A simple red cube on a white table, studio lighting"
     size   = "256x256"
+    steps  = 4
+    response_format = "b64_json"
   } | ConvertTo-Json -Depth 6
   $tmpImg = Join-Path $env:TEMP "img-body.json"
   [System.IO.File]::WriteAllText($tmpImg, $imgBody, [System.Text.UTF8Encoding]::new($false))
@@ -203,7 +207,7 @@ try {
     --data-binary "@$tmpImg"
   if (-not $imgOut) { throw "Empty response from images/generations" }
   $imgParsed = $imgOut | ConvertFrom-Json
-  if (-not $imgParsed.data -or -not $imgParsed.data[0].b64_json) { throw "Image generation did not return data[0].b64_json" }
+  if (-not $imgParsed.data -or -not $imgParsed.data[0].b64_json) { throw "Image generation did not return data[0].b64_json. Raw response: $imgOut" }
   Write-Host "OK: Image generation works"
 }
 finally {
@@ -287,30 +291,36 @@ if "OK" not in text:
 print("OK: LLM chat works")
 
 # Vision smoke test (OpenAI image_url format)
-# png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
-# data_url = "data:image/png;base64," + png1x1
-# vision = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
-#   "model": "Qwen3.5-4B-GGUF",
-#   "messages": [{
-#     "role": "user",
-#     "content": [
-#       {"type": "text", "text": "If you can see an image input, reply with exactly: OK"},
-#       {"type": "image_url", "image_url": {"url": data_url}},
-#     ],
-#   }],
-#   "temperature": 0,
-#   "max_tokens": 32,
-# }, timeout=300)
-# vtext = vision["choices"][0]["message"]["content"]
-# if "OK" not in vtext:
-#   raise SystemExit(f"Vision test failed. Got: {vtext}")
-# print("OK: Vision chat works")
+png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
+data_url = "data:image/png;base64," + png1x1
+vision = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
+  "model": "Qwen3.5-4B-GGUF",
+  "messages": [{
+    "role": "user",
+    "content": [
+      {"type": "text", "text": "If you can see an image input, reply with exactly: OK"},
+      {"type": "image_url", "image_url": {"url": data_url}},
+    ],
+  }],
+  "temperature": 0,
+  "max_tokens": 256,
+}, timeout=300)
+if not vision.get("choices"):
+  raise SystemExit(f"Unexpected vision response (no choices). Raw response:\n{json.dumps(vision, indent=2)}")
+vtext = vision["choices"][0]["message"].get("content", "")
+if not vtext.strip():
+  raise SystemExit(f"Vision returned empty content. Raw response:\n{json.dumps(vision, indent=2)}")
+if "OK" not in vtext:
+  raise SystemExit(f"Vision test failed. Got: {vtext}\nRaw response:\n{json.dumps(vision, indent=2)}")
+print("OK: Vision chat works")
 
 # Image generation smoke test
 img = post_json("http://127.0.0.1:13305/api/v1/images/generations", {
   "model": "SDXL-Turbo",
   "prompt": "A simple red cube on a white table, studio lighting",
   "size": "256x256",
+  "steps": 4,
+  "response_format": "b64_json",
 }, timeout=900)
 b64 = img.get("data", [{}])[0].get("b64_json")
 if not b64:

@@ -23,7 +23,7 @@ By the end of this playbook you will be able to:
 - Learn about **Lemonade Server**
 - **Install OpenClaw** and **point it at Lemonade Server** as its AI backend.
 - **Start the OpenClaw gateway** and confirm your agent is ready to work.
-- **Connect a Discord bot** to your agent so you can chat with it from any device.
+- **Connect a communication channel** (Discord or Telegram) so you can chat with your agent from any device.
 
 ---
 
@@ -31,8 +31,9 @@ By the end of this playbook you will be able to:
 
 <!-- @os:linux -->
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
-- At least **24 GB of RAM** (64 GB+ recommended for larger models)
+- At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - Depending on the size of the model you're running, set the minimum possible dedicated VRAM in the BIOS.
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Optional, for sandboxing OpenClaw)
 - Next, install the amd-debug-tools wheel from PyPI, and run the amd-ttm tool to reconfigure shared memory settings to the maximum:
 ```bash
   sudo apt install pipx
@@ -44,15 +45,15 @@ By the end of this playbook you will be able to:
 <!-- @os:end -->
 <!-- @os:windows -->
 - A PC running **Windows 10/11**
-- Visual Studio Community Edition [2022](https://aka.ms/vs/17/release/vs_community.exe)
-- At least **24 GB of RAM** (64 GB+ recommended for larger models)
+- At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - You could increase the dedicated GPU memory using [AMD Software: Adrenalin Edition™](https://www.amd.com/en/support/download/drivers.html) to try out larger models
 - **~10–30 GB of free disk space** for model weights
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Optional, for sandboxing OpenClaw)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
 
-<!-- @var:id=openclaw_model value="Qwen3-4B-GGUF" -->
+<!-- @var:id=openclaw_model value="Qwen3.6-35B-A3B-GGUF" -->
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -62,17 +63,30 @@ lemonade --version
 
 ---
 
-## Configuring Context Size
+## Pull and Load the Recommended Model
 
-For agent workloads, a larger context window lets the model keep more of the task history, tool outputs, and reasoning steps in view at once. Set this once after the server is running:
+The recommended model for this playbook is **Qwen3.6-35B-A3B-GGUF** from Unsloth, a strong MoE model with a 263k-token context window that is well-suited to agent workloads. This model uses UD-Q4_K_XL quantization. Pull it now:
 
-<!-- @test:id=lemonade-config-ctx-size timeout=120 -->
 ```bash
-lemonade config set ctx_size=190000
+lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
-<!-- @test:end -->
 
-This takes effect for newly loaded models. A context of 190000 tokens is a reasonable floor for agent use; increase it if your model and available RAM support it.
+Then load it with a large context window and save that setting for future runs:
+
+<!-- @test:id=lemonade-model-load timeout=300 -->
+```bash
+lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
+```
+<!-- @test:end --> 
+
+The model has a default context length of 262,144 tokens. If you encounter out-of-memory (OOM) errors, consider reducing the context window. However, because Qwen3.6 leverages extended context for complex tasks, we advise maintaining a context length of at least 128K tokens to preserve thinking capabilities.
+
+> **Tip: Disable thinking for faster agent responses:** Qwen3.6-35B-A3B runs in thinking mode by default, which adds latency before each response. For agent loops this overhead accumulates quickly. The [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) repo provides a ready-made config that disables thinking. To use it, download the file and import it:
+>
+> ```bash
+> curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
+> lemonade import Qwen3.6-35B-A3B-NoThinking.json
+> ```
 
 ---
 
@@ -97,6 +111,11 @@ $entry = $parsed.data | Where-Object { $_.id -eq "${openclaw_model}" } | Select-
 if (-not $entry) {throw "Model ${openclaw_model} is not present in Lemonade /api/v1/models."}
 if (-not $entry.downloaded) {throw "Model ${openclaw_model} is present but not downloaded in Lemonade. Please download it before running CI."}
 Write-Host "OK: ${openclaw_model} model is downloaded in Lemonade"
+
+if ($entry.recipe_options.ctx_size -ne 262144) {
+  throw "Model ${openclaw_model} is not saved with ctx_size=262144. Run: lemonade load ${openclaw_model} --ctx-size 262144 --save-options"
+}
+Write-Host "OK: ${openclaw_model} is saved with ctx_size=262144"
 
 $body = @{
   model = "${openclaw_model}"
@@ -172,6 +191,12 @@ if not entry.get("downloaded", False):
     sys.exit(1)
 
 print(f"OK: {model_id} model is downloaded in Lemonade")
+
+ctx_size = entry.get("recipe_options", {}).get("ctx_size")
+if ctx_size != 262144:
+    print(f"Model {model_id} is not saved with ctx_size=262144. Run: lemonade load {model_id} --ctx-size 262144 --save-options")
+    sys.exit(1)
+print(f"OK: {model_id} is saved with ctx_size=262144")
 PY
 
 body='{
@@ -246,9 +271,7 @@ ip route show default | awk '{print $3}' | head -1
 **Add the port proxy** (run in PowerShell as Administrator, replacing `<WSL-Gateway-IP>` with your WSL gateway IP):
 
 ```powershell
-netsh interface portproxy add v4tov4 `
-  listenaddress=<WSL-Gateway-IP> listenport=13305 `
-  connectaddress=127.0.0.1 connectport=13305
+netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
 **Add a firewall rule** (same elevated PowerShell):
@@ -264,13 +287,23 @@ WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-You should see:
+If you’ve already loaded the Qwen3.6-35B-A3B-GGUF model in the previous step, you should see JSON output like this:
 
 ```json
-{"data":[],"object":"list"}
+{
+  "data": [
+    {
+      "checkpoint": "unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL",
+      "checkpoints": {
+        "main": "unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_XL"
+      },
+      "mmproj": "unsloth/Qwen3.6-35B-A3B-GGUF:mmproj-F16.gguf",
+      ....
+    }
+  ],
+  "object": "list"
+}
 ```
-
-The empty `data` array simply means no model weights have been downloaded yet, the server itself is running and ready.
 
 > The `netsh portproxy` rule survives reboots but the WSL gateway IP can change after `wsl --shutdown`. If Lemonade becomes unreachable from WSL after a restart, get the updated gateway IP and update the proxy with this new IP.
 
@@ -340,10 +373,9 @@ curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 
 The `--no-onboard` flag skips the interactive setup wizard, you will configure the model backend manually in the next step, which gives you precise control over which model and server are used.
 
-After installation, confirm `openclaw` is on your `PATH`:
+Open a new terminal and confirm the installation:
 
 ```bash
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
 openclaw --version
 ```
 
@@ -400,15 +432,10 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-To persist this across terminal sessions:
-
-```bash
-echo 'export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"' >> ~/.bashrc
-```
 
 ### Configure OpenClaw to Use Lemonade
 
-Run OpenClaw's non-interactive onboarding, replacing `YOUR_MODEL_ID` with your Lemonade Model ID. Use the plain name (e.g., `Qwen3.5-35B-A3B-GGUF`) for catalog models, or the `user.` prefixed name (e.g., `user.Qwen3.6-35B-A3B-UD-Q4_K_M`) for custom imported ones:
+Run OpenClaw's non-interactive onboarding.
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -416,7 +443,7 @@ openclaw onboard \
   --mode local \
   --auth-choice custom-api-key \
   --custom-base-url "http://127.0.0.1:13305/api/v1" \
-  --custom-model-id "YOUR_MODEL_ID" \
+  --custom-model-id "Qwen3.6-35B-A3B-GGUF" \
   --custom-provider-id "lemonade" \
   --custom-compatibility "openai" \
   --custom-api-key "lemonade" \
@@ -436,7 +463,7 @@ openclaw onboard \
   --mode local \
   --auth-choice custom-api-key \
   --custom-base-url "http://$WINDOWS_HOST:13305/api/v1" \
-  --custom-model-id "YOUR_MODEL_ID" \
+  --custom-model-id "Qwen3.6-35B-A3B-GGUF" \
   --custom-provider-id "lemonade" \
   --custom-compatibility "openai" \
   --custom-api-key "lemonade" \
@@ -449,6 +476,110 @@ openclaw onboard \
 <!-- @os:end -->
 
 This command writes OpenClaw's configuration to `~/.openclaw/openclaw.json`.
+
+> **OpenClaw context window sizing:** OpenClaw's compaction triggers when `contextTokens > contextWindow − reserveTokens`. The default `reserveTokensFloor` is 20,000 tokens, a floor that overrides `reserveTokens` when lower, so any model context below ~37k will trigger an infinite compaction loop. Set a low reserve and disable the floor once in your config and it applies to every model, no per-model tuning needed:
+>
+> ```json
+> "compaction": {
+>   "reserveTokens": 4096,
+>   "reserveTokensFloor": 0
+> }
+> ```
+>
+> `reserveTokensFloor` is a *floor* (minimum guard), not the reserve itself, setting only the floor has no effect. `reserveTokensFloor: 0` disables the guard so the lower `reserveTokens` is accepted.
+>
+> **When to apply this:** Use this config if your model's effective context window is below ~37k, either because the model is small (e.g. 8k, 16k, 32k) or because you've intentionally capped it to a lower value (e.g. loading a 128k model but setting context to 16k in Lemonade). Without it, OpenClaw enters an infinite compaction loop on startup.
+>
+> **Large-context models at full context:** You can skip this entirely. The defaults work fine, compaction will kick in well before the window fills and the model has ample room to generate long responses. If you do apply it, be aware that `reserveTokens: 4096` limits response length to ~4k tokens, which may cut off long file generation or detailed plans.
+>
+> **Where to add this:** Place the `compaction` block inside `agents.defaults` in your `openclaw.json` (usually at `~/.openclaw/openclaw.json`):
+>
+> ```json
+> {
+>   "agents": {
+>     "defaults": {
+>       "workspace": "/home/<you>/.openclaw/workspace",
+>       "model": {
+>         "primary": "lemonade/<your-model-id>"
+>       },
+>       "compaction": {
+>         "reserveTokens": 4096,
+>         "reserveTokensFloor": 0
+>       }
+>     }
+>   }
+> }
+> ```
+>
+> The rest of your config (gateway, channels, models, etc.) stays unchanged, only the `compaction` key needs to be added.
+
+### (Recommended) Enable Docker Sandboxing
+
+OpenClaw can route all agent file and code operations through an isolated Docker container rather than running them directly on your host. This limits the blast radius of any unintended action to the sandbox, leaving your host filesystem and network untouched.
+
+Build the sandbox image once (Docker must be installed):
+
+```bash
+docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
+FROM debian:bookworm-slim
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  bash ca-certificates curl git jq python3 ripgrep \
+  && rm -rf /var/lib/apt/lists/*
+RUN useradd --create-home --shell /bin/bash sandbox
+USER sandbox
+WORKDIR /home/sandbox
+CMD ["sleep", "infinity"]
+DOCKERFILE
+```
+
+Run this to add the `sandbox` key inside the existing `agents.defaults` block in `~/.openclaw/openclaw.json`:
+
+```bash
+cat > sandbox.patch.json5 <<JSON5
+{
+  agents: {
+    defaults: {
+      sandbox: {
+        mode: "non-main",
+        scope: "session",
+        workspaceAccess: "none"
+      }
+    }
+  }
+}
+JSON5
+openclaw config patch --file ./sandbox.patch.json5
+```
+
+Sandbox containers have **no network access** by default. See the [sandboxing reference](https://docs.openclaw.ai/gateway/sandboxing) for bind mounts and network overrides.
+
+> #### Troubleshooting: Docker Permission Denied
+> 
+> If you get "permission denied" when running Docker commands:
+> 
+> **Step 1: Add your user to the docker group**
+> 
+> ```bash
+> sudo groupadd docker                    # Create group if needed
+> sudo usermod -aG docker $USER           # Add yourself to the group
+> newgrp docker                           # Activate the change
+> docker run hello-world                  # Test it
+> ```
+> 
+> **Step 2: If the error persists, apply the permanent fix**
+> 
+> ```bash
+> sudo chgrp docker /lib/systemd/system/docker.socket
+> sudo chmod g+w /lib/systemd/system/docker.socket
+> ```
+> 
+> Then **reboot** your system.
+> 
+> **Quick temporary fix** (resets after reboot):
+> ```bash
+> sudo chmod 666 /var/run/docker.sock
+> ```
 
 <!-- @os:linux -->
 <!-- @test:id=openclaw-onboard-linux timeout=300 hidden=True -->
@@ -695,21 +826,39 @@ To open the dashboard, run this in a second terminal while the gateway is still 
 openclaw dashboard
 ```
 
-This prints the authenticated URL, open it in your browser. You should see the OpenClaw dashboard with your Lemonade model listed as the active backend. **Your agent is ready.**
+Because the gateway binds to loopback, the dashboard auto-authenticates when opened from the same machine, no token entry or device approval is needed for local access. You should see the OpenClaw dashboard with your Lemonade model listed as the active backend.
+
+> If you’ve enabled sandboxing, you can verify it by asking the agent to `run hostname` from the dashboard. If you see a short container ID instead of your machine’s hostname, the sandbox is working.
+
+**Congratulations, you've built a fully local AI agent stack from scratch.**
+
+> **Need the gateway token?** Run `openclaw dashboard --no-open` to print the dashboard URL with the token embedded (it also attempts to copy it to your clipboard). Alternatively, the token is at `gateway.auth.token` in `~/.openclaw/openclaw.json`.
+>
+> **Approving a remote device:** When you open the dashboard from a second machine or phone, the browser displays a request ID. Back on the machine running the gateway, run:
+> ```bash
+> openclaw devices approve <requestId>
+> ```
+> This is only needed for remote or secondary devices, loopback access from the same machine auto-authenticates.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
 </p>
 
-**Congratulations — you've built a fully local AI agent stack from scratch.** 
+---
+
+## Optional: Connect a Communication Channel
+
+Once the gateway is running you can reach your local agent from any device. Pick the option that fits your setup. OpenClaw supports [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram), and other channels, see the full list at [docs.openclaw.ai](https://docs.openclaw.ai).
 
 ---
 
-## Optional: Connect a Discord Bot to your Openclaw. [Reference](https://docs.openclaw.ai/channels/discord#ask-your-agent-2)
+### Option A: Discord
 
-### Chat with Your Agent via Discord
+Discord requires a server where **you have administrator access** to add a bot. If you share servers but don't own one, use Option B (Telegram) instead.
 
-Once the gateway is running, you can reach your local agent through Discord by wiring up a bot. This lets you send commands from your mobile device to your laptop and trigger workloads from anywhere.
+#### Create a Discord account and server
+
+If you do not have a Discord account, sign up at [discord.com](https://discord.com). You also need a server where you are administrator, create one by clicking the **+** icon in the Discord sidebar and selecting **Create My Own**. A private server is fine.
 
 #### Create a Discord application and bot
 
@@ -717,6 +866,7 @@ Once the gateway is running, you can reach your local agent through Discord by w
 2. In the sidebar, click **Bot**. Set a username for the bot.
 3. Still on the Bot page, scroll to **Privileged Gateway Intents** and enable:
    - **Message Content Intent** (required)
+   - **Server Members Intent** (recommended)
 4. Scroll back up and click **Reset Token** to generate your bot token. Copy it.
 
 #### Add the bot to your server
@@ -736,16 +886,35 @@ Enable Developer Mode in Discord (**User Settings/ Advanced/ Developer Mode**), 
 
 Right-click your server icon/ **Privacy Settings**/ toggle on **Direct Messages**. This allows the bot to DM you, which is required for the pairing step.
 
-#### Set the bot token and enable Discord in OpenClaw
+#### Configure OpenClaw for Discord
 
-Your bot token is a secret, store it as an environment variable and reference it from config:
+Store your bot token as an environment variable, then create a single patch file that enables Discord, references the token, and allowlists your server. Replace `<server_id>` and `<user_id>` with the IDs collected above.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
-openclaw config set channels.discord.token \
-  --ref-provider default --ref-source env --ref-id DISCORD_BOT_TOKEN
-openclaw config set channels.discord.enabled true --strict-json
+
+cat > discord.patch.json5 <<JSON5
+{
+  channels: {
+    discord: {
+      enabled: true,
+      token: { source: "env", provider: "default", id: "DISCORD_BOT_TOKEN" },
+      dmPolicy: "pairing",
+      groupPolicy: "allowlist",
+      guilds: {
+        "<server_id>": {
+          requireMention: false,
+          users: ["<user_id>"],
+        },
+      },
+    },
+  },
+}
+JSON5
+openclaw config patch --file ./discord.patch.json5
 ```
+
+> **Do not rely on asking the agent to configure this.** When sandboxing is enabled, the agent cannot write to `~/.openclaw/openclaw.json` from inside the sandbox, use the CLI commands above on the host instead.
 
 Restart the gateway so it picks up the new channel config:
 
@@ -753,15 +922,7 @@ Restart the gateway so it picks up the new channel config:
 openclaw gateway run --bind loopback --port 18789
 ```
 
-You should see `logged in to discord as <bot-id>` in the gateway output.
-
-#### Configure Openclaw with the Server details
-
-Open your Openclaw Dashboard and send this message in the chat window replacing `<user_id>` and `<server_id>` with the IDs collected earlier
-
-```bash
-I already set my Discord bot token in config. Please finish Discord setup with User ID <user_id> and Server ID <server_id>.
-```
+You should see `logged in to discord as <bot-name>` in the gateway output within a few seconds.
 
 #### Pair your Discord account
 
@@ -771,9 +932,9 @@ DM the bot in Discord. It will reply with a short pairing code.
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-Approve it on the machine running OpenClaw Dashboard
+Approve it on the machine running OpenClaw:
 ```bash
-openclaw pairing approve <CODE>
+openclaw pairing approve discord <CODE>
 ```
 
 > Pairing codes expire after one hour.
@@ -786,12 +947,54 @@ You can now chat with your agent directly from Discord and offload tasks to your
 
 ---
 
+### Option B: Telegram
+
+Telegram is simpler than Discord for most users, it requires no server and no admin access.
+
+#### Create a Telegram bot
+
+1. Open Telegram and message **@BotFather**.
+2. Send `/newbot` and follow the prompts. Save the bot token it gives you.
+
+#### Configure OpenClaw for Telegram
+
+Store the token as an environment variable:
+
+```bash
+export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
+```
+
+Add the channel configuration to `~/.openclaw/openclaw.json` (or patch it via the dashboard):
+
+```json
+{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "YOUR_BOT_TOKEN",
+      "dmPolicy": "pairing"
+    }
+  }
+}
+```
+
+Restart the gateway, then send your bot any message in Telegram. Approve the pairing:
+
+```bash
+openclaw pairing list telegram
+openclaw pairing approve telegram <CODE>
+```
+
+Pairing codes expire after one hour. You can now chat with your agent via Telegram DM.
+
+---
+
 ## Next Steps
 
 Now that your agent can receive commands from your phone and act on your local machine, here are three directions worth exploring:
 
-1. **Stock market summarizer**: Schedule OpenClaw to fetch data from financial APIs on a fixed interval, summarize the day's movements with your local model, and push a digest to your Discord DM each morning.
+1. **Stock market summarizer**: Schedule OpenClaw to fetch data from financial APIs on a fixed interval, summarize the day's movements with your local model, and push a digest to your phone each morning via your chosen channel.
 
-2. **Fine-tuning monitor**: Kick off a training job remotely via Discord, then have the agent tail the training log and report periodic loss values, GPU utilization, and disk usage back to your phone. If the run stalls or VRAM spikes, you find out immediately without needing to be at the machine.
+2. **Fine-tuning monitor**: Kick off a training job remotely via Telegram or Discord, then have the agent tail the training log and report periodic loss values, GPU utilization, and disk usage back to your phone. If the run stalls or VRAM spikes, you find out immediately without needing to be at the machine.
 
 3. **IOT with a local VLM**: Point a camera at your front door, run a vision model on Lemonade, and have OpenClaw analyze frames on demand or on a trigger. Ask "did any packages arrive today?" from your phone and get a straight answer from your own hardware.
