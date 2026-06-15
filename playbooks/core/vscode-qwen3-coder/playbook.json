@@ -39,10 +39,6 @@
     "halo": [
       "windows",
       "linux"
-    ],
-    "halo_box": [
-      "windows",
-      "linux"
     ]
   },
   "published_platforms": {
@@ -55,6 +51,10 @@
       "linux"
     ],
     "stx": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
       "windows",
       "linux"
     ]

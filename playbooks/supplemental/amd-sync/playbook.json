@@ -9,6 +9,18 @@
       "linux"
     ]
   },
+  "required_platforms": {
+    "halo_box": [
+      "windows",
+      "linux"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "windows",
+      "linux"
+    ]
+  },
   "difficulty": "beginner",
   "isNew": true,
   "isFeatured": false,
