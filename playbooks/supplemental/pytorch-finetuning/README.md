@@ -97,7 +97,6 @@ finetune-venv\Scripts\activate
 ```
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
-<!-- @device:end -->
 <!-- @os:end -->
 <!-- @device:end -->
 
