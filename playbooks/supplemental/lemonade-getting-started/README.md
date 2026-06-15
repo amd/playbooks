@@ -547,22 +547,53 @@ Lemonade detects your NPU automatically and installs the **Ryzen AI LLM** backen
 FastFlowLM (FLM) models are specifically optimized for AMD's XDNA2 NPU architecture and can be very fast for their size. For example, select `qwen3.5-4b-FLM` from the `FastFlowLM NPU` list or use the following command:
 
 <!-- @os:windows -->
-Visit the [official FLM](https://fastflowlm.com/docs/install_win/#-install-fastflowlm-windows) documentation and follow the installation steps.
+To enable `FastFlowLM` on Windows:
+
+* Open the `Backends Manager` menu.
+* Locate `FastFlowLM NPU` backend category.
+* Click Install NPU.
+* Once installation is complete, ~36 defaults models will be available under the FFLM dropdown menu.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Visit the [official FLM](https://lemonade-server.ai/flm_npu_linux.html) documentation and follow the installation steps for FLM by selecting your Linux distribution.
+When the `Lemonade` App is launched for the first time, the `FastFlowNPU` backend is not enabled by default. 
+The local app will open the installation page to guide you through setup.
 
-After that, install the `*.deb` package pulled from the latest [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).
+To enable `FastFlowLM` on Linux:
+
+* Open the `Lemonade` App.
+* Visit the [official FLM](https://lemonade-server.ai/flm_npu_linux.html) documentation and follow the installation steps for FLM by selecting your Linux distribution.
+* Enable backports as instructed on the installation page.
+* Download the latest `v0.9.x` release from the [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).
+<!-- @device:halo_box -->
+>[!Note]
+For AMD Halo Developer Platform, make sure to choose Debian 13.
+```
+fastflowlm_0.9.X_debian13_amd64.deb
+```
+<!-- @device:end -->
+
+<!-- @device:halo,sx,krk,rx7900xt,rx9070xt -->
+```
+fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
+```
+<!-- @device:end -->
+* Install the downloaded `.deb` package.
+* Recommended: Quit the `Lemonade App` and open it again so the changes are detected.
+* Recommended: Open `Backends Manager` and click Install `FastFlowNPU` Backend.
 <!-- @os:end -->
 
-Next, download desired model from [models page](https://fastflowlm.com/docs/models/qwen/) and validate it using the Shell command provided in the documentation.
+After a successful installation, you should see that `flm:npu` completed in the **Download Manager** inside the **Lemonade Desktop App**.
+<p align="center">
+  <img width="400" height="400" src="assets/FFLM-installationWizard.png" />
+</p>
+You can then select any of the available FFLM models and start using the NPU backend.
 
+For specific model, download desired model from [models page](https://fastflowlm.com/docs/models/qwen/) and validate it using the Shell command provided in the documentation.
 ```
 flm run qwen3.5-4b-FLM
 ```
-If everything is working correctly, install the `FastFlowLM NPU` backend. After a successful installation, you should see that `flm:npu` completed in the **Download Manager** inside the **Lemonade Desktop App**.
-
+or via 
 ```
 lemonade run qwen3.5-4b-FLM
 ```
