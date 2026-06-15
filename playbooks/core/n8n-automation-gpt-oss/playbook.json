@@ -39,10 +39,6 @@
     "halo": [
       "windows",
       "linux"
-    ],
-    "halo_box": [
-      "windows",
-      "linux"
     ]
   },
   "published_platforms": {
@@ -57,6 +53,10 @@
     "krk": [
       "linux",
       "windows"
+    ],
+    "halo_box": [
+      "windows",
+      "linux"
     ]
   },
   "difficulty": "beginner",

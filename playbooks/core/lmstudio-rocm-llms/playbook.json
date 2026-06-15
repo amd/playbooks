@@ -40,10 +40,6 @@
       "windows",
       "linux"
     ],
-    "halo_box": [
-      "windows",
-      "linux"
-    ],
     "stx": [
       "linux",
       "windows"
@@ -58,6 +54,10 @@
       "windows",
       "linux"
     ],
+    "halo_box": [
+      "windows",
+      "linux"
+    ],  
     "stx": [
       "linux",
       "windows"
