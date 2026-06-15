@@ -79,6 +79,7 @@ source finetune-venv/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
+<!-- @device:halo_box -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
 python -m venv finetune-venv --system-site-packages
