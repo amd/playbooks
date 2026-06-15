@@ -32,7 +32,7 @@ Open **AMD Software: Adrenalin Edition™** and navigate to **Performance → Tu
 
 <!-- @os:linux -->
 
-On Linux, to run larger models, increase the **shared memory** pool available to the GPU.
+On Linux, to run larger models, increase the **shared memory** pool available to the GPU. This might involve setting the BIOS dedicated GPU memory to the minimum, so that the shared memory pool can be maximized.
 
 <!-- @device:halo_box -->
 
