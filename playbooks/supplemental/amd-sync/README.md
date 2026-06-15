@@ -70,13 +70,15 @@ AMD Sync runs on Windows 11 and Linux. Download the installer for your OS, then 
 
 ### Linux
 
-[Download AMDSyncInstaller.deb](https://developer.amd.com/playbooks/linux/amdsyncinstaller)
+Click the link to download your preferred format:
 
-```bash
-sudo apt install ./AMDSyncInstaller.deb
-```
+| Format | Download | Install command |
+|--------|----------|-----------------|
+| `.deb` | [AMDSyncInstaller.deb](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.deb) | `sudo apt install ./amdsyncinstaller.deb` |
+| `.rpm` | [AMDSyncInstaller.rpm](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.rpm) | `sudo rpm -i ./amdsyncinstaller.rpm` |
+| `.AppImage` | [AMDSyncInstaller.AppImage](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.AppImage) | `chmod +x ./amdsyncinstaller.AppImage && ./amdsyncinstaller.AppImage` |
 
-> **Heads-up:** Ubuntu App Center may flag a locally opened `.deb` as *"Potentially unsafe."* That's the standard warning for any third-party local installer. If double-clicking the `.deb` fails, use the terminal command above.
+> **Note:** Ubuntu App Center may flag a locally opened `.deb` as *"Potentially unsafe."* That's the standard warning for any third-party local installer. If double-clicking the `.deb` fails, use the terminal command above.
 
 ---
 
