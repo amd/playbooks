@@ -88,22 +88,25 @@ source unsloth-env/bin/activate
 
 <!-- @device:halo_box -->
 Open a PowerShell terminal and create a virtual environment:
-
+<!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env --system-site-packages
 .\unsloth-env\Scripts\activate
 ```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="unsloth-env\Scripts\activate" -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 Open a PowerShell terminal and create a virtual environment:
-
+<!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env
 .\unsloth-env\Scripts\activate
 ```
-<!-- @device:end -->
+<!-- @test:end -->
 <!-- @setup:id=activate-venv command="unsloth-env\Scripts\activate" -->
+<!-- @device:end -->
 <!-- @os:end -->
 
 ### Installing Basic Dependencies

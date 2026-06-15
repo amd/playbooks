@@ -90,7 +90,6 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @os:windows -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
 python -m venv finetune-venv
@@ -98,8 +97,8 @@ finetune-venv\Scripts\activate
 ```
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
-<!-- @os:end -->
 <!-- @device:end -->
+<!-- @os:end -->
 
 #### Installing Basic Dependencies
 <!-- @require:pytorch -->
