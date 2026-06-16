@@ -39,6 +39,14 @@
     "halo": [
       "windows",
       "linux"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {

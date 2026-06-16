@@ -31,7 +31,7 @@ Your local machine stays familiar; every command, notebook, and model runs on th
 
 AMD Sync has two sides: a **client** (your laptop, running the AMD Sync app) and a **server** (the Ryzen AI Halo, running an SSH server that AMD Sync tunnels into). Everything you launch from AMD Sync — VS Code, a terminal, a notebook — opens locally but executes on the Ryzen AI Halo.
 
-> **Supported clients:** Windows 11 and Debian/Ubuntu Linux. macOS is not supported.
+> **Supported clients:** Windows 11 and Linux. macOS is not supported.
 
 ---
 
@@ -57,11 +57,11 @@ AMD Sync has two sides: a **client** (your laptop, running the AMD Sync app) and
 
 ## Step 2 — Install AMD Sync on Your Client
 
-AMD Sync runs on Windows 11 and Debian/Ubuntu Linux. Download the installer for your OS, then follow the steps below. After installation, click **Accept & Install** on the **Get Started** screen — AMD Sync launches automatically when it finishes.
+AMD Sync runs on Windows 11 and Linux. Download the installer for your OS, then follow the steps below. After installation, click **Accept & Install** on the **Get Started** screen — AMD Sync launches automatically when it finishes.
 
 ### Windows
 
-[Download AMDSyncInstaller.exe](https://example.com/downloads/AMDSyncInstaller.exe)
+[Download AMDSyncInstaller.exe](https://developer.amd.com/playbooks/windows/amdsyncinstaller)
 
 1. Double-click `AMDSyncInstaller.exe`.
 2. Click **Accept & Install**.
@@ -70,15 +70,15 @@ AMD Sync runs on Windows 11 and Debian/Ubuntu Linux. Download the installer for 
 
 ### Linux
 
-Pick the format that matches your distribution:
+Click the link to download your preferred format:
 
-| Format | Best for | Download | Install command |
-|--------|----------|----------|-----------------|
-| `.deb` | Debian, Ubuntu | [AMDSyncInstaller.deb](https://example.com/downloads/AMDSyncInstaller.deb) | `sudo apt install ./AMDSyncInstaller.deb` |
-| `.rpm` | RPM-based distros | [AMDSyncInstaller.rpm](https://example.com/downloads/AMDSyncInstaller.rpm) | `sudo rpm -i ./AMDSyncInstaller.rpm` |
-| `.AppImage` | Portable use | [AMDSyncInstaller.AppImage](https://example.com/downloads/AMDSyncInstaller.AppImage) | `chmod +x ./AMDSyncInstaller.AppImage && ./AMDSyncInstaller.AppImage` |
+| Format | Download | Install command |
+|--------|----------|-----------------|
+| `.deb` | [AMDSyncInstaller.deb](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.deb) | `sudo apt install ./amdsyncinstaller.deb` |
+| `.rpm` | [AMDSyncInstaller.rpm](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.rpm) | `sudo rpm -i ./amdsyncinstaller.rpm` |
+| `.AppImage` | [AMDSyncInstaller.AppImage](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.AppImage) | `chmod +x ./amdsyncinstaller.AppImage && ./amdsyncinstaller.AppImage` |
 
-> **Heads-up:** Ubuntu App Center may flag a locally opened `.deb` as *"Potentially unsafe."* That's the standard warning for any third-party local installer. If double-clicking the `.deb` fails, use the terminal command above.
+> **Note:** Ubuntu App Center may flag a locally opened `.deb` as *"Potentially unsafe."* That's the standard warning for any third-party local installer. If double-clicking the `.deb` fails, use the terminal command above.
 
 ---
 
