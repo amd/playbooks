@@ -78,5 +78,6 @@
     "gpu",
     "kernels",
     "optimization"
-  ]
+  ],
+  "coverImage": "assets/cover.png"
 }

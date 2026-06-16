@@ -70,5 +70,6 @@
     "gpu",
     "npu",
     "inference"
-  ]
+  ],
+  "coverImage": "../../dependencies/assets/multi_modality.png"
 }

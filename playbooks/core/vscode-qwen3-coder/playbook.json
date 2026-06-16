@@ -69,5 +69,6 @@
     "vscode",
     "qwen",
     "llm"
-  ]
+  ],
+  "coverImage": "assets/open-cline-test.png"
 }

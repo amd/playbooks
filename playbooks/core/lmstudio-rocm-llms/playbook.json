@@ -78,5 +78,6 @@
     "vulkan",
     "llm",
     "inference"
-  ]
+  ],
+  "coverImage": "assets/cover_image.avif"
 }

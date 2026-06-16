@@ -70,5 +70,6 @@
     "agent",
     "hardware",
     "lemonade"
-  ]
+  ],
+  "coverImage": "assets/gaia-cover.png"
 }

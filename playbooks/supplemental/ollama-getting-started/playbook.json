@@ -70,5 +70,6 @@
     "inference",
     "local",
     "api"
-  ]
+  ],
+  "coverImage": "assets/ollama_app.png"
 }

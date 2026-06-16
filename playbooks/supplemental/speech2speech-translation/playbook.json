@@ -69,5 +69,6 @@
     "translation",
     "audio",
     "real-time"
-  ]
+  ],
+  "coverImage": "assets/gradio.png"
 }
