@@ -4,8 +4,7 @@
 """
 CI-friendly Unsloth training script (Gemma-4)
 - Short smoke-test style run
-- Verifies model load, dataset prep, LoRA training, inference, local save,
-  merged save, and GGUF export
+- Verifies model load, dataset prep, LoRA training, inference, local save, and merged save
 """
 
 import os
@@ -14,6 +13,8 @@ import os
 os.environ.setdefault("UNSLOTH_COMPILE_DISABLE", "1")
 os.environ.setdefault("UNSLOTH_DISABLE_FAST_GENERATION", "1")
 
+import shutil
+from pathlib import Path
 def clean_ci_caches():
     """Remove Unsloth/Torch compiled caches that can make CI runs flaky."""
     script_dir = Path(__file__).resolve().parent
