@@ -12,9 +12,10 @@ A playbook is more than prose. Each part is affected differently:
 | `@test` blocks | Scripts run by CI | Keep code identical |
 | `playbook.json` | Metadata | Translate `title` and `description` only |
 | `assets/` | Screenshots, often with English UI text | May need re-capture in a localized setup |
+| External services | Model/dataset sources referenced in steps | May need substitution for the China market (e.g. Hugging Face -> ModelScope) |
 | CI/CD | Tests run on self-hosted AMD machines (`halo`, `stx`, `krk`) | Localized playbooks still need real hardware to validate |
 
-Takeaway: localizing means translating prose while preserving tags and test code, possibly re-capturing screenshots, then serving and validating the result on real hardware.
+Takeaway: localizing means translating prose while preserving tags and test code, possibly re-capturing screenshots and substituting external services (e.g. Hugging Face -> ModelScope), then serving and validating the result on real hardware.
 
 ## Option 1: Fork the repository (China-owned)
 
@@ -26,7 +27,6 @@ How it works:
 - Translation is manual, so wording and terminology can be hand-tuned for the market.
 - The team can create their own China-only playbooks.
 - The team runs their own CI/CD and their own machines.
-- The team runs their own website deployment for the China audience.
 
 The hard part (staying in sync):
 
@@ -61,6 +61,7 @@ How it works:
 - A pipeline auto-generates the `zh-CN` (auto-translated) content from the global English source.
 - Because it is fully automated, auto-translated files are overwritten on every run. The team cannot manually fix a translation, since any edit is deleted on the next run.
 - The team influences output through config, not edits.
+- China-specific content and models can be enabled through our special tags.
 - The China team can add China-native playbooks, but they must maintain their own machines to test them. AMD US machines cover only the global and auto-translated playbooks. 
 
 Pros:
@@ -77,11 +78,16 @@ Cons:
 
 | Dimension | Option 1: Fork | Option 2: Same repo |
 |---|---|---|
-| Ownership | China team owns fork | Shared; English is source of truth |
-| Translation | Manual (human) | Automated (no manual fixes) |
-| Upstream sync | Manual, ongoing | Automatic, zero drift |
-| China-native playbooks | Yes, unrestricted | Yes, China team maintains their own test machines |
-| Model selection | Fully flexible | Via model-override tags |
-| CI/CD and runners | China-owned | AMD machines for global + auto-translated; China machines for China-native |
-| Maintenance cost | High | Low |
-| Autonomy | High | Low |
+| Ownership | China team owns the fork | Shared; English stays the source of truth |
+| Translation | Manual, hand-tuned | Automated, overwritten on every run |
+| Translation quality | Highest | Depends on the pipeline |
+| Upstream fixes | Tracked and re-applied manually | Flow to the localized version automatically |
+| China-native playbooks | Yes, unrestricted | Yes, but China team maintains their own test machines |
+| Test machines | China-owned | AMD machines for global + auto-translated; China machines for China-native |
+| Autonomy | High (content, models, branding) | Limited to what the shared config allows |
+
+## Open questions
+
+- Website deployment: who hosts and serves the China-facing site for both options.
+- Issue triage ownership: which team is responsible for triaging issues related to Chinese playbooks.
+
