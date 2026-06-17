@@ -278,7 +278,7 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
 ```
 
 <!-- @os:linux -->
-<!-- @test:id=quick-train-llamafactory-lora timeout=3600 hidden=True setup=activate-venv -->
+<!-- @test:id=quick-train-llamafactory-lora timeout=1200 hidden=True setup=activate-venv -->
 ```bash
 cd LlamaFactory
 
@@ -293,13 +293,25 @@ sed -i 's/num_train_epochs: .*/num_train_epochs: 1/g' examples/train_lora/qwen3_
 sed -i 's/logging_steps: .*/logging_steps: 1/g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
 sed -i 's/save_steps: .*/save_steps: 5/g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
 
+sed -i 's/max_samples: .*/max_samples: 16/g' examples/train_lora/qwen3_lora_sft_ci.yaml || true
+if grep -q '^max_steps:' examples/train_lora/qwen3_lora_sft_ci.yaml; then
+  sed -i 's/^max_steps:.*/max_steps: 5/g' examples/train_lora/qwen3_lora_sft_ci.yaml
+else
+  printf '\nmax_steps: 5\n' >> examples/train_lora/qwen3_lora_sft_ci.yaml
+fi
+if grep -q '^save_total_limit:' examples/train_lora/qwen3_lora_sft_ci.yaml; then
+  sed -i 's/^save_total_limit:.*/save_total_limit: 1/g' examples/train_lora/qwen3_lora_sft_ci.yaml
+else
+  printf 'save_total_limit: 1\n' >> examples/train_lora/qwen3_lora_sft_ci.yaml
+fi
+
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=quick-train-llamafactory-lora timeout=3600 hidden=True setup=activate-venv -->
+<!-- @test:id=quick-train-llamafactory-lora timeout=1200 hidden=True setup=activate-venv -->
 ```powershell
 Set-Location -Path "LlamaFactory"
 
@@ -316,6 +328,19 @@ $filePath = "examples/train_lora/qwen3_lora_sft_ci.yaml"
 (Get-Content -Path $filePath) -replace 'num_train_epochs: .*', 'num_train_epochs: 1' | Set-Content -Path $filePath
 (Get-Content -Path $filePath) -replace 'logging_steps: .*', 'logging_steps: 1' | Set-Content -Path $filePath
 (Get-Content -Path $filePath) -replace 'save_steps: .*', 'save_steps: 5' | Set-Content -Path $filePath
+
+(Get-Content -Path $filePath) -replace 'max_samples: .*', 'max_samples: 16' | Set-Content -Path $filePath
+if (Select-String -Path $filePath -Pattern '^max_steps:' -Quiet) {
+    (Get-Content -Path $filePath) -replace '^max_steps:.*', 'max_steps: 5' | Set-Content -Path $filePath
+} else {
+    Add-Content -Path $filePath -Value ""
+    Add-Content -Path $filePath -Value "max_steps: 5"
+}
+if (Select-String -Path $filePath -Pattern '^save_total_limit:' -Quiet) {
+    (Get-Content -Path $filePath) -replace '^save_total_limit:.*', 'save_total_limit: 1' | Set-Content -Path $filePath
+} else {
+    Add-Content -Path $filePath -Value "save_total_limit: 1"
+}
 
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
