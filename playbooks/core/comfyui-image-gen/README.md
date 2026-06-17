@@ -280,7 +280,7 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-To launch ComfyUI on Windows, click the ComfyUI Desktop Launcher which is found on your Desktop. Follow the steps to install the Local version with AMD.
+To launch ComfyUI on Windows, click the ComfyUI Desktop Launcher which is found on your Desktop. Follow the steps to install the local version with AMD.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>

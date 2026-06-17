@@ -219,7 +219,7 @@ n8n --version
 
 
 <!-- @os:windows -->
-> **PATH Issue**: If `n8n --version` says command not found, ensure your npm global bin directory is on the user `PATH`. For example, n8n might now exist at `C:\Users\<username>\AppData\Roaming\npm`. 
+> **PATH Issue**: If `n8n --version` says command not found, ensure your npm global bin directory is on the user `PATH`. The usual installation path is at `C:\Users\<username>\AppData\Roaming\npm`. 
 > Add this to the user path (Edit the system environment variables > Environment Variables > Edit User Path) and reload the terminal. 
 
 <!-- @os:end -->
