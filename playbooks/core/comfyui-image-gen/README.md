@@ -58,7 +58,7 @@ python3 -m venv comfyui-env
 source comfyui-env/bin/activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
+<!-- @setup:id=activate-venv command="source comfyui-env/bin/activate" -->
 <!-- @device:end -->
 
 <!-- @require:driver,pytorch,comfyui -->
