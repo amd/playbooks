@@ -342,9 +342,19 @@ lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
+
+<!-- @os:linux -->
 ```bash
 lemonade run gpt-oss-120b-Q4_K_M --llamacpp vulkan
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
+```
+<!-- @os:end -->
+
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt -->
