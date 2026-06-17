@@ -578,6 +578,14 @@ set -euo pipefail
 
 export PATH="/mnt/wsl/docker-desktop/cli-tools/usr/bin:$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
+docker_config="$(mktemp -d)"
+cleanup() {
+  rm -rf "$docker_config"
+}
+trap cleanup EXIT
+export DOCKER_CONFIG="$docker_config"
+printf '{ "auths": {} }\n' > "$DOCKER_CONFIG/config.json"
+
 docker version
 
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -824,6 +832,15 @@ $script = @'
 set -euo pipefail
 
 export PATH="/mnt/wsl/docker-desktop/cli-tools/usr/bin:$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+docker_config="$(mktemp -d)"
+cleanup() {
+  rm -rf "$docker_config"
+}
+trap cleanup EXIT
+export DOCKER_CONFIG="$docker_config"
+printf '{ "auths": {} }\n' > "$DOCKER_CONFIG/config.json"
+
 config="$HOME/.openclaw/openclaw.json"
 
 if [ ! -f "$config" ]; then
