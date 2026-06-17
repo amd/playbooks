@@ -215,7 +215,7 @@ function HaloPreinstalledDropdown({
             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </span>
-        <span className="halo-preinstalled-text">Already pre-installed on your AMD Halo Developer Platform!</span>
+        <span className="halo-preinstalled-text">Already pre-installed on your AMD Ryzen AI Developer Platform!</span>
         <span className={`halo-preinstalled-chevron ${isOpen ? 'open' : ''}`}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 9l-7 7-7-7" />
@@ -225,7 +225,7 @@ function HaloPreinstalledDropdown({
       {isOpen && (
         <div className="halo-preinstalled-content">
           <div className="halo-preinstalled-notice">
-            This software comes pre-installed and configured on your AMD Halo Developer Platform. 
+            This software comes pre-installed and configured on your AMD Ryzen AI Developer Platform. 
             If you need to reinstall or configure it manually, follow the instructions below:
           </div>
           <ReactMarkdown

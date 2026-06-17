@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Live Speech2Speech Translation on AMD Radeon™ GPU
-
 ## Overview
 
 The AMD ROCm™ software and PyTorch stack create a unified ecosystem for on-device AI. It works for both Windows and Linux with official support for a wide range of devices including Ryzen™ AI APUs and Radeon™ GPUs.
@@ -29,12 +27,59 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 - Conveys tone, emotion, and intent without awkward pauses
 - Enables global collaboration and faster decision-making
 
-## Setting Up Your Environment
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 ### Create a Virtual Environment
 
+<!-- @os:linux -->
 <!-- @device:halo_box -->
+On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
+
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv s2st-env --system-site-packages
+source s2st-env/bin/activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source s2st-env/bin/activate" -->
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+
+On Linux, open a terminal and run the following prompt to create a venv:
+
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv s2st-env
+source s2st-env/bin/activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="source s2st-env/bin/activate" -->
+<!-- @device:end -->
+<!-- @os:end -->
+
 <!-- @os:windows -->
+<!-- @device:halo_box -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed:
 
 <!-- @test:id=create-venv timeout=60 -->
@@ -48,25 +93,9 @@ s2st-env\Scripts\activate
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-<!-- @os:end -->
-
-<!-- @os:linux -->
-On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
-
-<!-- @test:id=create-venv timeout=120 -->
-```bash
-sudo apt update
-sudo apt install -y python3-venv
-python3 -m venv s2st-env --system-site-packages
-source s2st-env/bin/activate
-```
-<!-- @test:end -->
-<!-- @setup:id=activate-venv command="source s2st-env/bin/activate" -->
-<!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv:
 
 <!-- @test:id=create-venv timeout=60 -->
@@ -80,26 +109,12 @@ s2st-env\Scripts\activate
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-<!-- @os:end -->
-
-<!-- @os:linux -->
-On Linux, open a terminal and run the following prompt to create a venv:
-
-<!-- @test:id=create-venv timeout=120 -->
-```bash
-sudo apt update
-sudo apt install -y python3-venv
-python3 -m venv s2st-env
-source s2st-env/bin/activate
-```
-<!-- @test:end -->
-<!-- @setup:id=activate-venv command="source s2st-env/bin/activate" -->
-<!-- @os:end -->
 <!-- @device:end -->
+<!-- @os:end -->
 
 ### Installing Basic Dependencies
 
-<!-- @require:rocm,pytorch -->
+<!-- @require:pytorch -->
 
 ### Additional Dependencies
 

@@ -2,7 +2,7 @@
   "id": "gaia-agents",
   "title": "Building Your First Agent with GAIA",
   "description": "Build a 100% local AI agent \u2014 no cloud APIs needed. Use the GAIA SDK to create a hardware advisor on your AMD Ryzen\u2122 AI",
-  "time": 20,
+  "time": 15,
   "supported_platforms": {
     "halo": [
       "linux",
@@ -67,7 +67,7 @@
       "linux"
     ]
   },
-  "difficulty": "intermediate",
+  "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
   "developed": true,

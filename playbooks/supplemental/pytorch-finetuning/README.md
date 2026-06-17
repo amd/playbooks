@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Fine-tune LLMs with Pytorch and AMD ROCm™ Software
-
 ## Overview
 
 This tutorial provides step-by-step examples for fine-tuning a large language model (LLM) with PyTorch and ROCm. It covers several techniques, from standard fine-tuning to memory-efficient Parameter-Efficient Fine-Tuning (PEFT) strategies, so you can easily adapt models for your needs.
@@ -21,19 +19,37 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 <!-- @device:halo,halo_box -->
 > **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
+
 <!-- @device:end -->
 
 <!-- @device:stx,krk -->
 > **Note:** Some of the fine-tuning techniques in this playbook may require more than 64GB of system RAM.
+
 <!-- @device:end -->
 
-## Quick Start
+## What You'll Learn
 
-### 1. Setup
+- How to fine-tune an LLM using LoRA, QLoRA, and full fine-tuning with PyTorch and ROCm
+- How to save and deploy your fine-tuned model
+- How to monitor training and debug common issues
+
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 #### Create a Virtual Environment
-<!-- @device:halo_box -->
+
 <!-- @os:linux -->
+<!-- @device:halo_box -->
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update 
@@ -43,31 +59,15 @@ source finetune-venv/bin/activate
 ```
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=create-venv timeout=60 -->
-```powershell
-python -m venv finetune-venv --system-site-packages
-finetune-venv\Scripts\activate
-```
-<!-- @test:end -->
-<!-- @setup:id=activate-venv command="source finetune-venv\Scripts\activate" -->
-<!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @os:windows -->
-<!-- @test:id=create-venv timeout=60 -->
-```powershell
-python -m venv finetune-venv
-finetune-venv\Scripts\activate
-```
-<!-- @test:end -->
-<!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
-<!-- @os:end -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
 
-<!-- @os:linux -->
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -77,8 +77,30 @@ source finetune-venv/bin/activate
 ```
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
-<!-- @os:end -->
 <!-- @device:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @device:halo_box -->
+<!-- @test:id=create-venv timeout=60 -->
+```powershell
+python -m venv finetune-venv --system-site-packages
+finetune-venv\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @test:id=create-venv timeout=60 -->
+```powershell
+python -m venv finetune-venv
+finetune-venv\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
+<!-- @device:end -->
+<!-- @os:end -->
 
 #### Installing Basic Dependencies
 <!-- @require:pytorch -->
