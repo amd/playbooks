@@ -43,18 +43,15 @@
     "halo": [
       "linux"
     ],
-    "halo_box": [
-      "linux"
-    ]
-  },
-  "published_platforms": {
-    "halo": [
+    "stx": [
       "linux"
     ],
     "krk": [
       "linux"
-    ],
-    "stx": [
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
       "linux"
     ]
   },
