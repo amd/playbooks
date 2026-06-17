@@ -19,10 +19,12 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 <!-- @device:halo,halo_box -->
 > **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
+
 <!-- @device:end -->
 
 <!-- @device:stx,krk -->
 > **Note:** Some of the fine-tuning techniques in this playbook may require more than 64GB of system RAM.
+
 <!-- @device:end -->
 
 ## What You'll Learn

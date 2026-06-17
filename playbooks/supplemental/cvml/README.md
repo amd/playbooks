@@ -94,7 +94,7 @@ if ($LASTEXITCODE -eq 0 -and $pnputilOutput -match "AMD|NPU|Ryzen") {Write-Host 
 set -euo pipefail
 
 export AMD_CVML_SDK_ROOT="${AMD_CVML_SDK_ROOT:-/home/user/RyzenAI-Library}"
-export OPENCV_INSTALL_ROOT="${OPENCV_INSTALL_ROOT:-/opt/opencv-4.11.0}"
+export OPENCV_INSTALL_ROOT="${OPENCV_INSTALL_ROOT:-/home/user/build/install}"
 
 cmake --version
 
@@ -538,7 +538,7 @@ finally {Pop-Location -ErrorAction SilentlyContinue}
 set -euo pipefail
 
 export AMD_CVML_SDK_ROOT="${AMD_CVML_SDK_ROOT:-/home/user/RyzenAI-Library}"
-export OPENCV_INSTALL_ROOT="${OPENCV_INSTALL_ROOT:-/opt/opencv-4.11.0}"
+export OPENCV_INSTALL_ROOT="${OPENCV_INSTALL_ROOT:-/home/user/build/install}"
 
 if [ ! -d "$AMD_CVML_SDK_ROOT" ]; then
   echo "AMD_CVML_SDK_ROOT does not exist: $AMD_CVML_SDK_ROOT"
@@ -580,7 +580,7 @@ else
   echo "Ryzen AI NPU driver/XRT runtime path was not found."
   echo "Continuing because the README says CVML can fall back to GPU when the NPU driver is not installed."
 fi
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$OPENCV_INSTALL_ROOT/lib"
+export LD_LIBRARY_PATH="$OPENCV_INSTALL_ROOT/lib:$LD_LIBRARY_PATH"
 
 curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
 

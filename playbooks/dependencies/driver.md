@@ -21,7 +21,7 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
-
+<!-- @device:end -->
 <!-- @os:linux -->
 <!-- @device:rx7900xt,rx9070xt -->
 ### AMD GPU Driver

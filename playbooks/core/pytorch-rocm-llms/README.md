@@ -11,10 +11,6 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-<!-- @github-only -->
-> [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
-<!-- @github-only:end -->
 
 Want to run powerful AI language models on your own hardware? This guide shows you how.
 This tutorial uses PyTorch powered by AMD ROCm™ software to run models that can summarize documents, answer questions, generate text, and more, all running locally.
@@ -82,12 +78,9 @@ python -m venv pytorch-env --system-site-packages
 pytorch-env\Scripts\activate
 ```
 <!-- @test:end -->
-
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate.bat" -->
+<!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
+
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
@@ -97,21 +90,15 @@ python -m venv pytorch-env
 pytorch-env\Scripts\activate
 ```
 <!-- @test:end -->
-
+<!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
+<!-- @device:end -->
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
-<!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate.bat" -->
-<!-- @device:end -->
 <!-- @os:end -->
 
 ### Installing Basic Dependencies
-<!-- @os:linux -->
 <!-- @require:driver,pytorch -->
-<!-- @os:end -->
-<!-- @os:windows -->
-<!-- @require:driver,pytorch -->
-<!-- @os:end -->
 
 ### Installing Additional Dependencies
 
