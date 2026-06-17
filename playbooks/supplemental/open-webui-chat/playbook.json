@@ -1,6 +1,6 @@
 {
   "id": "open-webui-chat",
-  "title": "How to Chat with LLMs in Open WebUI",
+  "title": "Chat with LLMs in Open WebUI",
   "description": "Use Open WebUI to chat with LLMs locally.",
   "time": 30,
   "supported_platforms": {
@@ -40,9 +40,13 @@
       "windows",
       "linux"
     ],
-    "halo_box": [
-      "windows",
-      "linux"
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {
@@ -50,11 +54,15 @@
       "windows",
       "linux"
     ],
-    "krk": [
+    "halo_box": [
       "windows",
       "linux"
     ],
     "stx": [
+      "windows",
+      "linux"
+    ],
+    "krk": [
       "windows",
       "linux"
     ]

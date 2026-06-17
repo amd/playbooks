@@ -178,6 +178,17 @@
         "linux": ["halo_box"],
         "windows": []
       }
+    },
+    "pyenv": {
+      "name": "pyenv",
+      "description": "Python version manager for installing and switching between Python versions",
+      "category": "runtime",
+      "platforms": ["windows"],
+      "file": "pyenv.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      }
     }
   },
   "setup": {
