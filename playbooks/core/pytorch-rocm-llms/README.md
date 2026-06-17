@@ -26,7 +26,7 @@ This tutorial uses PyTorch powered by AMD ROCm™ software to run models that ca
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
-> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->

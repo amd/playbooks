@@ -29,7 +29,7 @@ This playbook teaches you how to serve LLMs using containerized vLLM on the inte
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
-> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->

@@ -42,7 +42,7 @@ Unsloth also supports other training approaches, including QLoRA and reinforceme
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
-> **Note**: If VSCode is not installed, you can install it with Ryzen AI Developer Center.
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
