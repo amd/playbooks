@@ -2,7 +2,29 @@
   "id": "amd-sync",
   "title": "Remote Development with AMD Sync",
   "description": "Install AMD Sync on your laptop and get one-click remote VS Code, Terminal, JupyterLab, and Live Metrics on your AMD Ryzen AI Halo.",
-  "time": 10,
+  "time": 15,
+  "unsupported_platforms": {
+    "halo": [
+      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen AI Halo" },
+      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen AI Halo" }
+    ],
+    "stx": [
+      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen AI Halo" },
+      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen AI Halo" }
+    ],
+    "krk": [
+      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen AI Halo" },
+      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen AI Halo" }
+    ],
+    "rx7900xt": [
+      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen AI Halo" },
+      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen AI Halo" }
+    ],
+    "rx9070xt": [
+      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen AI Halo" },
+      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen AI Halo" }
+    ]
+  },
   "supported_platforms": {
     "halo_box": [
       "windows",

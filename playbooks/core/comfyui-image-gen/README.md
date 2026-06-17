@@ -22,7 +22,17 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 - Generating images and tuning generation parameters
 - Saving and sharing workflows
 
-## Installing Dependencies
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -31,6 +41,12 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+
 #### Create a Virtual Environment
 On Linux, open a terminal in the directory of your choice and run the following prompt to create a venv:
 
@@ -38,14 +54,14 @@ On Linux, open a terminal in the directory of your choice and run the following 
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv llm-env
-source llm-env/bin/activate
+python3 -m venv comfyui-env
+source comfyui-env/bin/activate
 ```
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @require:driver,rocm,pytorch,comfyui -->
+<!-- @require:driver,pytorch,comfyui -->
 <!-- @os:end -->
 
 <!-- @os:windows -->

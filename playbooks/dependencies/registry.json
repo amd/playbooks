@@ -31,8 +31,8 @@
       "platforms": ["windows", "linux"],
       "file": "lmstudio.md",
       "preinstalled": {
-        "linux": ["halo_box"],
-        "windows": ["halo_box"]
+        "linux": [],
+        "windows": []
       }
     },
     "vllm": {
@@ -64,8 +64,8 @@
       "platforms": ["windows", "linux"],
       "file": "vscode.md",
       "preinstalled": {
-        "linux": ["halo_box"],
-        "windows": ["halo_box"]
+        "linux": [],
+        "windows": []
       }
     },
     "lemonade": {
@@ -153,8 +153,8 @@
       "platforms": ["windows", "linux"],
       "file": "memoryconfig.md",
       "preinstalled": {
-        "linux": ["halo_box"],
-        "windows": ["halo_box"]
+        "linux": [],
+        "windows": []
       }
     },
     "rocm": {
@@ -179,27 +179,15 @@
         "windows": []
       }
     },
-    "pyenv": {
-      "name": "pyenv",
-      "description": "Python version manager for installing and switching between Python versions",
-      "category": "runtime",
-      "platforms": ["windows"],
-      "file": "pyenv.md",
+    "software-update": {
+      "name": "Software Updates",
+      "description": "Check for and install software updates on the AMD Ryzen AI Halo",
+      "category": "framework",
+      "platforms": ["windows", "linux"],
+      "file": "softwareupdate.md",
       "preinstalled": {
         "linux": [],
         "windows": []
-      }
-    }
-  },
-  "setup": {
-    "memory-config": {
-      "name": "Memory Configuration",
-      "description": "Configure GPU memory allocation for running large models",
-      "platforms": ["windows", "linux"],
-      "file": "memoryconfig.md",
-      "preinstalled": {
-        "linux": ["halo_box"],
-        "windows": ["halo_box"]
       }
     }
   }

@@ -1,8 +1,8 @@
 {
   "id": "lemonade-getting-started",
-  "title": "Using Lemonade Across CPU, GPU, and NPU",
+  "title": "Getting Started with Lemonade",
   "description": "Learn to run Gen AI models locally with Lemonade, an open-source local AI server.",
-  "time": 60,
+  "time": 30,
   "supported_platforms": {
     "halo": [
       "linux",
@@ -39,6 +39,14 @@
     "halo": [
       "windows",
       "linux"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {
@@ -59,7 +67,7 @@
       "linux"
     ]
   },
-  "difficulty": "intermediate",
+  "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
   "developed": true,
