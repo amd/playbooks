@@ -13,6 +13,16 @@
       "windows"
     ]
   },
+  "published_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ]
+  },
   "difficulty": "advanced",
   "isNew": true,
   "isFeatured": false,
