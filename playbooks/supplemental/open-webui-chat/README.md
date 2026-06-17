@@ -75,7 +75,17 @@ Lemonade runs the models; Open WebUI is the interface you interact with. Use the
 
 ---
 
-## Installing Software Prerequisites
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## One-Time Setup
 
 This playbook needs Lemonade running as the backend and, on Linux, a container engine (Podman) to run Open WebUI. Set these up before installing Open WebUI.
 

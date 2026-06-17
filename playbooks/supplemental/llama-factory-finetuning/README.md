@@ -1,12 +1,10 @@
-# LLM Fine-Tuning with LLaMA Factory
-
 ## Overview
 
 Efficient fine-tuning is vital for adapting large language models (LLMs) to downstream tasks. LLaMA Factory is an open-source and user-friendly platform that streamlines the training and fine-tuning of large language models and multimodal models. It allows users to customize hundreds of pre-trained models locally with minimal coding.
 
 This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your local AMD hardware.
 
-## What you'll learn
+## What You'll Learn
 
 - How to set up LLaMA Factory with AMD ROCm™ software
 - How to configure LLM fine-tuning parameters (using Qwen/Qwen3-4B-Instruct-2507 as an example)
@@ -19,7 +17,17 @@ This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your loca
 - Duration: It will take about 60 minutes to run this playbook (depending on your model/dataset size and network speed).
 - View the [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for more information.
 
-## Setting up the Environment
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -39,55 +47,73 @@ pip --version
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 #### Create a Virtual Environment
 
 <!-- @os:linux -->
+<!-- @device:halo_box -->
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv llamafactory-env --system-site-packages
+source llamafactory-env/bin/activate
 ```
 <!-- @test:end --> 
-<!-- @setup:id=activate-venv command="source venv/bin/activate" -->
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=create-venv timeout=120 -->
-```powershell
-python -m venv venv
-venv\Scripts\activate
-```
-<!-- @test:end --> 
-<!-- @setup:id=activate-venv command="venv\Scripts\activate" --> 
-<!-- @os:end -->
-<!-- @device:end -->
-
-### Installing Basic Dependencies
-
-<!-- @os:linux -->
-<!-- @require:rocm,pytorch,driver -->
-<!-- @os:end -->
-<!-- @os:windows -->
-<!-- @require:pytorch,driver -->
-<!-- @os:end -->
- 
-### Installing Additional Dependencies
-
-- **Python**: ensure minimum version is 3.11
-<!-- @device:halo_box -->
-```bash
-pip install huggingface_hub --break-system-packages
-```
+<!-- @setup:id=activate-venv command="source llamafactory-env/bin/activate" -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
 ```bash
-pip install huggingface_hub 
+sudo usermod -aG render,video $LOGNAME
 ```
+
+<!-- @test:id=create-venv timeout=120 -->
+```bash
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv llamafactory-env
+source llamafactory-env/bin/activate
+```
+<!-- @test:end --> 
+<!-- @setup:id=activate-venv command="source llamafactory-env/bin/activate" -->
 <!-- @device:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @device:halo_box -->
+<!-- @test:id=create-venv timeout=120 -->
+```powershell
+python -m venv llamafactory-env --system-site-packages
+llamafactory-env\Scripts\activate
+```
+<!-- @test:end --> 
+<!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" --> 
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @test:id=create-venv timeout=120 -->
+```powershell
+python -m venv llamafactory-env
+llamafactory-env\Scripts\activate
+```
+<!-- @test:end --> 
+<!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" --> 
+<!-- @device:end -->
+<!-- @os:end -->
+
+### Installing Basic Dependencies
+
+<!-- @require:pytorch,driver -->
+ 
+### Installing Additional Dependencies
+
+> **Note**: Ensure Python version is 3.11, 3.12, or 3.13
+
+```bash
+pip install huggingface_hub
+```
 
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 hidden=True setup=activate-venv -->

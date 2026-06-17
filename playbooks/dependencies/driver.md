@@ -4,6 +4,8 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+
 <!-- @os:windows -->
 ### AMD GPU Driver
 
@@ -19,7 +21,7 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
-
+<!-- @device:end -->
 <!-- @os:linux -->
 <!-- @device:rx7900xt,rx9070xt -->
 ### AMD GPU Driver

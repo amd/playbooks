@@ -27,26 +27,28 @@ By the end of this playbook you will be able to:
 
 ---
 
-## Prerequisites
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @os:linux -->
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
-- Depending on the size of the model you're running, set the minimum possible dedicated VRAM in the BIOS.
 - [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Optional, for sandboxing OpenClaw)
-- Next, install the amd-debug-tools wheel from PyPI, and run the amd-ttm tool to reconfigure shared memory settings to the maximum:
-```bash
-  sudo apt install pipx
-  pipx ensurepath
-  pipx install amd-debug-tools
-  amd-ttm --set 96 # Strix Halos can be set to 96GB. Set the shared memory value for other devices accordingly.
-```
+
 - **~10–30 GB of free disk space** for model weights
 <!-- @os:end -->
 <!-- @os:windows -->
 - A PC running **Windows 10/11**
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
-- You could increase the dedicated GPU memory using [AMD Software: Adrenalin Edition™](https://www.amd.com/en/support/download/drivers.html) to try out larger models
 - **~10–30 GB of free disk space** for model weights
 - [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Optional, for sandboxing OpenClaw)
 <!-- @os:end -->
