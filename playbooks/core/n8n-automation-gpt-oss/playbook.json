@@ -78,5 +78,6 @@
     "workflows",
     "llm",
     "lemonade"
-  ]
+  ],
+  "coverImage": "assets/workflow-overview.png"
 }
