@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Local Computer Vision with AMD Ryzen™ AI NPU
-
 ## Overview
 
 The [Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) is an AMD C++ computer vision and machine learning toolkit that provides powerful, on-device perception capabilities — including depth estimation, face detection, and face mesh tracking. Built on top of the Ryzen AI drivers, the library automatically selects the best available hardware (GPU or NPU) for inference, letting you add AI features to C++ applications without worrying about model training or framework integration. All processing happens locally on your system, making it ideal for privacy-sensitive, low-latency applications.
@@ -25,7 +23,13 @@ This playbook teaches you how to set up the Ryzen AI CVML Library, build the inc
 - How to run face detection on an image with bounding boxes and landmarks
 - How to integrate CVML features into your own C++ applications
 
-## Installing Basic Dependencies
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 <!-- @require:driver -->
 
 ## Additional Dependencies

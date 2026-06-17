@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Run Generative AI Locally with Lemonade
-
 ## Overview
 
 🍋 **Lemonade** is an open-source local AI server that lets you run large language models (LLMs), image generators, and audio models directly on your own hardware. It exposes the models through the industry-standard **OpenAI API**, so any app that works with OpenAI can instantly work with Lemonade. By the end of the playbook, you'll be using Lemonade to run models locally on your machine.
@@ -26,7 +24,17 @@ By the end of this playbook you will be able to:
 * **Build a Python app** powered by a local LLM using the OpenAI-compatible API.
 * **Run models on the AMD Neural Processing Unit (NPU)** using Hybrid and FLM execution modes on AMD Ryzen™ AI hardware.
 
-## Prerequisites
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 Before you begin, make sure you have:
 

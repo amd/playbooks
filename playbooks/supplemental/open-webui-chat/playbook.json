@@ -79,5 +79,6 @@
     "llm",
     "vlm",
     "stable-diffusion"
-  ]
+  ],
+  "coverImage": "assets/open-webui_chat_interface.png"
 }

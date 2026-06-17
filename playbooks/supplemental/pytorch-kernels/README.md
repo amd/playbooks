@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Compile your own GPU kernels for PyTorch + AMD ROCm™ Software
-
 ## Overview
 
 Write a GPU kernel from scratch, compile it, launch it on an AMD GPU, and watch utilization spike. This playbook shows how GPU computation actually works: write the kernel code, and execute it in parallel across thousands of threads.
@@ -103,27 +101,36 @@ AMD GPUs execute threads in groups of **32** called **wavefronts**. All threads 
 
 ---
 
+### PyTorch + AMD/HIP
+
+PyTorch ships a ROCm build where the CUDA API surface (`torch.cuda.*`) is transparently backed by HIP. This means:
+
+- `torch.cuda.is_available()` works on AMD GPUs with ROCm
+- `tensor.to("cuda")` allocates on the AMD GPU
+- `torch.version.hip` exposes the HIP version
+
+PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JIT-compile a raw kernel string and get back a callable, without needing a separate build step.
+
+---
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
 ## Installing Software Prerequisites
+<!-- @os:windows -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+### Prerequisites - Windows
+- Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+<!-- @device:end -->
+<!-- @os:end -->
 
 ### Create a Virtual Environment
 
-<!-- @device:halo_box -->
-<!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-<!-- @test:id=create-venv timeout=60 -->
-```bash
-python -m venv kernel-env --system-site-packages
-kernel-env\Scripts\activate
-```
-<!-- @test:end -->
-
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
-<!-- @os:end -->
-
 <!-- @os:linux -->
+<!-- @device:halo_box -->
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -134,26 +141,15 @@ source kernel-env/bin/activate
 ```
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source kernel-env/bin/activate" -->
-<!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
-<!-- @test:id=create-venv timeout=60 -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
 ```bash
-python -m venv kernel-env
-kernel-env\Scripts\activate
+sudo usermod -aG render,video $LOGNAME
 ```
-<!-- @test:end -->
 
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
-<!-- @os:end -->
-
-<!-- @os:linux -->
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -164,16 +160,48 @@ source kernel-env/bin/activate
 ```
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source kernel-env/bin/activate" -->
-<!-- @os:end -->
 <!-- @device:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv timeout=60 -->
+```bash
+python -m venv kernel-env
+kernel-env\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
+
+> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
+
+<!-- @os:end -->
 
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
 <!-- @require:rocm,pytorch -->
 <!-- @os:end -->
+
 <!-- @os:windows -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @require:driver,rocm,pytorch -->
+<!-- @device:end -->
+
+<!-- @device:halo_box -->
+> **Note:** For this playbook, ROCm and PyTorch need to be installed into the virtual environment even on the Ryzen AI Halo, since custom kernel compilation requires the full development headers.
+
+Install ROCm:
+```powershell
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[libraries,devel]"
+```
+
+Install PyTorch:
+```powershell
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
+```
+<!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->

@@ -11,10 +11,6 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-<!-- @github-only -->
-> [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
-<!-- @github-only:end -->
 
 Want to run powerful AI language models on your own hardware? This guide shows you how.
 This tutorial uses PyTorch powered by AMD ROCm™ software to run models that can summarize documents, answer questions, generate text, and more, all running locally.
@@ -24,78 +20,85 @@ This tutorial uses PyTorch powered by AMD ROCm™ software to run models that ca
 - Run LLMs like gpt-oss-20b and qwen3.5-4B locally using PyTorch and ROCm
 - Create a document summarization tool using LLMs
 
-## Initial Setup 
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 ### Create a Virtual Environment
 
-<!-- @device:halo_box -->
-<!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-<!-- @test:id=create-venv timeout=60 -->
-```bash
-python -m venv llm-env --system-site-packages
-llm-env\Scripts\activate
-```
-<!-- @test:end -->
-
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
-<!-- @os:end -->
-
 <!-- @os:linux -->
+<!-- @device:halo_box -->
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv llm-env --system-site-packages
-source llm-env/bin/activate
+python3 -m venv pytorch-env --system-site-packages
+source pytorch-env/bin/activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
-<!-- @os:end -->
+<!-- @setup:id=activate-venv command="source pytorch-env/bin/activate" -->
 <!-- @device:end -->
 
-
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-<!-- @os:windows -->
-On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
-<!-- @test:id=create-venv timeout=60 -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
 ```bash
-python -m venv llm-env
-llm-env\Scripts\activate
+sudo usermod -aG render,video $LOGNAME
 ```
-<!-- @test:end -->
 
-> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
-> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
-
-<!-- @setup:id=activate-venv command="llm-env\Scripts\activate.bat" -->
-<!-- @os:end -->
-
-<!-- @os:linux -->
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv llm-env
-source llm-env/bin/activate
+python3 -m venv pytorch-env
+source pytorch-env/bin/activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
+<!-- @setup:id=activate-venv command="source pytorch-env/bin/activate" -->
+<!-- @device:end -->
 <!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @device:halo_box -->
+On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
+<!-- @test:id=create-venv timeout=60 -->
+```bash
+python -m venv pytorch-env --system-site-packages
+pytorch-env\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+<!-- @test:id=create-venv timeout=60 -->
+```bash
+python -m venv pytorch-env
+pytorch-env\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
+<!-- @device:end -->
+> **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
+> setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
+
+<!-- @os:end -->
+
 ### Installing Basic Dependencies
-<!-- @os:linux -->
-<!-- @require:driver,rocm,pytorch -->
-<!-- @os:end -->
-<!-- @os:windows -->
 <!-- @require:driver,pytorch -->
-<!-- @os:end -->
 
 ### Installing Additional Dependencies
 
@@ -179,6 +182,8 @@ Both scripts support:
 ## Loading and Running Your First LLM
 
 The included [run_llm.py](assets/run_llm.py) script shows how to generate text with LLMs using PyTorch and AMD ROCm.
+
+> **Note:** When you load a model, Hugging Face Transformers first checks its local cache (`~/.cache/huggingface/hub` on Linux, `C:\Users\<user>\.cache\huggingface\hub` on Windows). If the model isn't cached, it downloads automatically from huggingface.co. The first run may take a few minutes depending on model size and network speed.
 
 The snippet below shows how to use the model and customize the questions asked.
 

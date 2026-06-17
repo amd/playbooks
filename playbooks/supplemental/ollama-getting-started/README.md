@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Getting Started with Ollama
-
 ## Overview
 
 Ollama is a popular lightweight tool for running large language models locally. It handles model downloading, quantization, and serving behind a simple command-line interface and desktop app, so you can go from zero to chatting with an LLM in minutes.
@@ -24,7 +22,18 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 - Chat with models using the CLI
 - Query models programmatically through the REST API
 
-## Installing Dependencies
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @require:driver -->
 

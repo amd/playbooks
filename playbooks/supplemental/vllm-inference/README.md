@@ -10,21 +10,31 @@ SPDX-License-Identifier: MIT
 <!-- @github-only:end -->
 
 
-# High-Performance LLM Inference with vLLM
-
 ## Overview
 
 vLLM is a high-performance inference engine designed for large language models (LLMs). It provides optimized serving with continuous batching for high throughput and an OpenAI-compatible API for seamless application integration. This makes vLLM great for production deployments where speed and resource efficiency are critical.
 
 This playbook teaches you how to serve LLMs using containerized vLLM on the integrated GPU and interact with models through the OpenAI Python API.
 
-## In This Playbook, You Will Learn
+## What You'll Learn
 
 - How to set up and start a vLLM server with ROCm support
 - How to interact with models via OpenAI-compatible API endpoints
 - How to send prompts to the local server with `vllm-prompt`
 
-## Starting vLLM
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 This playbook uses a prebuilt container image that includes vLLM, ROCm support, and the helper scripts needed to launch the server. You do not need to install PyTorch, vLLM, or local playbook scripts manually.
 
