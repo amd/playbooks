@@ -6,11 +6,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-On Windows, to run larger models, increase the **dedicated GPU memory** allocation. 
-
 <!-- @device:halo_box -->
 
-On the Ryzen AI Halo, the default is 64GB dedicated. To modify this, open **AMD Software: Adrenalin Edition™** and navigate to **Performance → Tuning → AMD Variable Graphics Memory**. Reboot for the changes to take effect.
+For the Ryzen AI Halo, the dedicated GPU memory defaults to 64GB, which is sufficient for most workloads. For larger models or longer contexts, increasing this to 96GB may help. To adjust, open **AMD Software: Adrenalin Edition™** and navigate to **Performance → Tuning → AMD Variable Graphics Memory**. Reboot for the changes to take effect.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -20,7 +18,7 @@ On the Ryzen AI Halo, the default is 64GB dedicated. To modify this, open **AMD 
 
 <!-- @device:halo,stx,krk -->
 
-Open **AMD Software: Adrenalin Edition™** and navigate to **Performance → Tuning → AMD Variable Graphics Memory**. Reboot for the changes to take effect.
+To change the dedicated GPU memory value, open **AMD Software: Adrenalin Edition™** and navigate to **Performance → Tuning → AMD Variable Graphics Memory**. Reboot for the changes to take effect.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
