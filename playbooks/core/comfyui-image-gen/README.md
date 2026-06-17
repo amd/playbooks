@@ -280,19 +280,17 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-To launch ComfyUI on Windows, click the ComfyUI Desktop Launcher which is found on your Desktop. You will see the following page:
+To launch ComfyUI on Windows, click the ComfyUI Desktop Launcher which is found on your Desktop. Follow the steps to install the local version with AMD.
 
 <p align="center">
-  <img src="assets/installer.png" alt="Templates button in the left toolbar" width="600"/>
+  <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Click `Install ComfyUI` and follow the steps. Choose `AMD` as the version and use default install locations. When finished, you should see the following:
+Then, click the ComfyUI button at the top-middle of the app. This will open a settings tab. Open the Storage tab and make sure the paths are set as follows to access the pre-installed models.
 
 <p align="center">
-  <img src="assets/installed.png" alt="Templates button in the left toolbar" width="600"/>
+  <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
 </p>
-
-Click the blue `Launch` button to open ComfyUI in its own window.
 
 
 <!-- @os:end -->

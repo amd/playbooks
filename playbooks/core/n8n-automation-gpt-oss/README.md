@@ -219,8 +219,8 @@ n8n --version
 
 
 <!-- @os:windows -->
-> **Tip**: If `n8n --version` says command not found, ensure your npm global bin directory is on the user `PATH`. For example, the n8n you just installed might exist at `C:\Users\<username>\AppData\Roaming\npm`. 
-> Add this to the user path (Edit the system environment variables > Environment Variables > Edit User Path) and open a new terminal window. 
+> **PATH Issue**: If `n8n --version` says command not found, ensure your npm global bin directory is on the user `PATH`. The usual installation path is at `C:\Users\<username>\AppData\Roaming\npm`. 
+> Add this to the user path (Edit the system environment variables > Environment Variables > Edit User Path) and reload the terminal. 
 
 <!-- @os:end -->
 
@@ -321,7 +321,19 @@ n8n starts a local web server. Press `'o'` or Open your browser to `http://local
 
 ## Launching Lemonade
 
-Lemonade is the local server that will run a model and connect to n8n. Open a terminal and run:
+Lemonade is the local server that will run a model and connect to n8n. 
+
+<!-- @os:linux -->
+Open the Lemonade GUI by clicking the Lemonade Icon in the taskbar. You can browse models, backends, and load the pre-installed models from here.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+Open the Lemonade GUI by clicking the Lemonade Icon. Right click the tray icon to open the app. Then, you can add models, backends, and load the pre-installed models.
+<!-- @os:end -->
+
+>**Tip**: Once running, the Lemonade GUI is also accessible at http://localhost:13305
+
+Alternatively, you can open a terminal and run `lemonade list` to see what models are installed. Then, run:
 
 <!-- @device:halo -->
 ```bash
@@ -330,9 +342,19 @@ lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
+
+<!-- @os:linux -->
 ```bash
-lemonade run extra.gpt-oss-120b-GGUF --llamacpp vulkan
+lemonade run gpt-oss-120b-Q4_K_M --llamacpp vulkan
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
+```
+<!-- @os:end -->
+
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt -->
@@ -341,11 +363,6 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 ```
 <!-- @device:end -->
 
-Alternatively, you can use the Lemonade GUI to choose and load a model. You can also experiment by changing to different backends, like `rocm`.
-
-<!-- @device:halo_box -->
-> **Tip**: The pre-installed model is at the location marked with `.extra`. 
-<!-- @device:end -->
 
 ## Setting Up the Workflow
 
@@ -406,7 +423,7 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 
 > **Note**: Before testing, run `lemonade status` in a terminal to confirm that the Lemonade server is running.
 <!-- @device:halo_box -->
-> This workflow uses GPT-OSS-120B and it is pre-installed as `extra.gpt-oss-120b-GGUF`. You can change this to other loaded models in the Lemonade Chat Model node settings.
+> This workflow uses GPT-OSS-120B and it is pre-installed in Lemonade. You can change this to other loaded models in the Lemonade Chat Model node settings.
 <!-- @device:end -->
 
 ### Step 5: Test the Workflow
@@ -414,8 +431,8 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 1. Ensure Lemonade is running with a model loaded
 2. Click **Execute workflow** at the bottom center of the canvas
 3. Watch each node execute from left to right—they turn green when complete
-4. Click the **AI Financial News Summarizer** node to see the generated summary in the bottom pane.
-5. Click the **Convert to File** node to download the corresponding text file in the bottom pane.
+4. Double click the **AI Financial News Summarizer** node to see the generated summary in the bottom pane.
+5. Double click the **Convert to File** node to download the corresponding text file in the bottom pane.
 
 ## Understanding the AI Agent
 
