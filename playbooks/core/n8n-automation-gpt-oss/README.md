@@ -328,7 +328,7 @@ Open the Lemonade GUI by clicking the Lemonade Icon in the taskbar. You can brow
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Open the Lemonade GUI by clicking the Lemonade Icon. Right click the tray icon to open the app. Then, you can models, backends, and load the pre-installed models.
+Open the Lemonade GUI by clicking the Lemonade Icon. Right click the tray icon to open the app. Then, you can add models, backends, and load the pre-installed models.
 <!-- @os:end -->
 
 >**Tip**: Once running, the Lemonade GUI is also accessible at http://localhost:13305

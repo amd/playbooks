@@ -34,7 +34,7 @@ On Linux, to run larger models, increase the **shared memory** pool available to
 
 <!-- @device:halo_box -->
 
-On the AMD Ryzen™ AI Halo, the default is 96GB shared. To modify this, open the **AMD Ryzen™ AI Developer Center** and go to the **Settings** tab. Under **Graphics Performance Settings**, increase the **Shared Video Memory** slider, then click **Apply Changes** and reboot for the changes to take effect.
+For the AMD Ryzen™ AI Halo, the default is 96GB shared. To modify this, open the **AMD Ryzen™ AI Developer Center** and go to the **Settings** tab. Under **Graphics Performance Settings**, increase the **Shared Video Memory** slider, then click **Apply Changes** and reboot for the changes to take effect.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/linux_mem_new.png" alt="AMD Ryzen AI Developer Center — Graphics Performance Settings with Shared Video Memory slider" width="600"/>
