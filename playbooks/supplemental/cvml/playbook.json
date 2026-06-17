@@ -22,6 +22,9 @@
       "windows",
       "linux"
     ],
+    "halo_box": [
+      "windows"
+    ],
     "stx": [
       "windows",
       "linux"
