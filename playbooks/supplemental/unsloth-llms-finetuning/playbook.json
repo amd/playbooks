@@ -1,6 +1,6 @@
 {
   "id": "unsloth-llms-finetuning",
-  "title": "Fine-Tune LLMs with Unsloth",
+  "title": "Fine-Tuning LLMs with Unsloth",
   "description": "Use Unsloth for memory-efficient fine-tuned LLMs™",
   "time": 45,
   "unsupported_platforms": {
