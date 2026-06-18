@@ -1,8 +1,8 @@
 {
   "id": "speech2speech-translation",
-  "title": "Speech-to-Speech Translation",
+  "title": "Real-Time Speech-to-Speech Translation",
   "description": "Build a real-time speech-to-speech translation on your local hardware.",
-  "time": 20,
+  "time": 30,
   "supported_platforms": {
     "halo": [
       "linux",
@@ -40,13 +40,21 @@
       "windows",
       "linux"
     ],
-    "halo_box": [
-      "windows",
-      "linux"
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {
     "halo": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
       "windows",
       "linux"
     ],
@@ -69,5 +77,6 @@
     "translation",
     "audio",
     "real-time"
-  ]
+  ],
+  "coverImage": "assets/gradio.png"
 }

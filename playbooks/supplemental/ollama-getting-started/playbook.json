@@ -40,13 +40,21 @@
       "windows",
       "linux"
     ],
-    "halo_box": [
-      "windows",
-      "linux"
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {
     "halo": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
       "windows",
       "linux"
     ],
@@ -70,5 +78,6 @@
     "inference",
     "local",
     "api"
-  ]
+  ],
+  "coverImage": "assets/ollama_app.png"
 }

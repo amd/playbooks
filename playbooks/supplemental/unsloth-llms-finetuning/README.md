@@ -25,6 +25,7 @@ The example is designed to be practical and easy to modify, so you can use it as
 
 <!-- @device:stx,krk -->
 > **Note:** Some of the fine-tuning techniques in this playbook may require more than 64GB of system RAM.
+
 <!-- @device:end -->
 
 ## Why Unsloth?
@@ -34,6 +35,17 @@ Unsloth makes LLM fine-tuning easier to run on local hardware by reducing memory
 In this playbook, we use Unsloth together with **LoRA-based SFT**. That means the base model stays mostly frozen, while a much smaller set of adapter weights is trained. This is a good fit for local development because it is lighter than full fine-tuning and faster to iterate on.
 
 Unsloth also supports other training approaches, including QLoRA and reinforcement learning workflows. This playbook focuses on the simplest path first: a small LoRA fine-tuning example that users can run, understand, and extend.
+
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
+
+<!-- @require:software-update -->
+<!-- @device:end -->
 
 ## Installing Software Prerequisites
 
@@ -75,16 +87,30 @@ source unsloth-env/bin/activate
 <!-- @os:windows -->
 > **Note:** Python 3.13 is required for Windows.
 
+<!-- @device:halo_box -->
 Open a PowerShell terminal and create a virtual environment:
-
+<!-- @test:id=create-venv timeout=120 -->
 ```powershell
-python -m venv unsloth_env
-.\unsloth_env\Scripts\activate
+python -m venv unsloth-env --system-site-packages
+.\unsloth-env\Scripts\activate
 ```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="unsloth-env\Scripts\activate" -->
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+Open a PowerShell terminal and create a virtual environment:
+<!-- @test:id=create-venv timeout=120 -->
+```powershell
+python -m venv unsloth-env
+.\unsloth-env\Scripts\activate
+```
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="unsloth-env\Scripts\activate" -->
+<!-- @device:end -->
 <!-- @os:end -->
 
 ### Installing Basic Dependencies
-
 <!-- @require:pytorch,driver -->
 
 <!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
@@ -181,8 +207,6 @@ for script in scripts:
 
 <!-- @test:id=quick-train-unsloth timeout=2400 hidden=True setup=activate-venv -->
 ```bash
-rm -rf unsloth_compiled_cache
-rm -rf ~/.cache/torch/inductor ~/.cache/torch_extensions
 python test_unsloth_ci.py
 ```
 <!-- @test:end -->

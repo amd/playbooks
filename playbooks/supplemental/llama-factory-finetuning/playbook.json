@@ -40,13 +40,21 @@
       "windows",
       "linux"
     ],
-    "halo_box": [
-      "windows",
-      "linux"
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {
     "halo": [
+      "windows",
+      "linux"
+    ],
+    "halo_box": [
       "windows",
       "linux"
     ],
@@ -65,5 +73,6 @@
   "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": ["Llama Factory", "lora", "fine-tuning"]
+  "tags": ["Llama Factory", "lora", "fine-tuning"],
+  "coverImage": "assets/cover.png"
 }

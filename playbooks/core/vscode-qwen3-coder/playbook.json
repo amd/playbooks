@@ -2,7 +2,7 @@
   "id": "vscode-qwen3-coder",
   "title": "Local LLM Coding with VS Code and Qwen3-Coder",
   "description": "Use VS Code with locally-running Qwen3-Coder for private code assistance.",
-  "time": 60,
+  "time": 30,
   "supported_platforms": {
     "halo": [
       "linux",
@@ -40,9 +40,13 @@
       "windows",
       "linux"
     ],
-    "halo_box": [
-      "windows",
-      "linux"
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {
@@ -57,9 +61,13 @@
     "stx": [
       "windows",
       "linux"
+    ],
+    "halo_box": [
+      "windows",
+      "linux"
     ]
   },
-  "difficulty": "intermediate",
+  "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
   "developed": true,
@@ -69,5 +77,6 @@
     "vscode",
     "qwen",
     "llm"
-  ]
+  ],
+  "coverImage": "assets/open-cline-test.png"
 }

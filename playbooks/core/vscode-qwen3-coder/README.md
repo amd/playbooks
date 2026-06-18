@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Local LLM coding with VSCode and Qwen3-Coder-30B
-
 <!-- @device:stx,krk -->
 > [!NOTE]
 > This playbook requires a minimum of **32GB** of system memory.
@@ -28,7 +26,18 @@ This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a cod
 * How to configure Cline to communicate with LM Studio for local inference of coding agents.
 * How to use local coding agents to solve real-world software engineering tasks. 
 
-## Core Dependencies
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @require:lmstudio,vscode -->
 

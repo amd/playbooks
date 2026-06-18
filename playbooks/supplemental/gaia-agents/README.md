@@ -9,9 +9,7 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Overview
-
-## Getting Started Creating Agents with GAIA
+## Overview
 
 GAIA agents are AI assistants that use a local LLM to reason and call tools you define — like chatbots that can take action. They run **100% locally** with no cloud APIs, no data leaving your machine, and no API keys required.
 
@@ -25,7 +23,18 @@ In this playbook, you'll build a Hardware Advisor Agent that detects your system
 - Memory-based model sizing using the 70% rule
 - Building an interactive CLI for natural language hardware queries
 
-## Installing Dependencies
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->

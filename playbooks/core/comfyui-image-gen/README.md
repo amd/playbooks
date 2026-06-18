@@ -22,7 +22,17 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 - Generating images and tuning generation parameters
 - Saving and sharing workflows
 
-## Installing Dependencies
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+## Installing Software Prerequisites
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -31,6 +41,12 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+**Grant your user access to GPU devices** (log out and back in for this to take effect):
+
+```bash
+sudo usermod -aG render,video $LOGNAME
+```
+
 #### Create a Virtual Environment
 On Linux, open a terminal in the directory of your choice and run the following prompt to create a venv:
 
@@ -38,14 +54,14 @@ On Linux, open a terminal in the directory of your choice and run the following 
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
-python3 -m venv llm-env
-source llm-env/bin/activate
+python3 -m venv comfyui-env
+source comfyui-env/bin/activate
 ```
 <!-- @test:end -->
-<!-- @setup:id=activate-venv command="source llm-env/bin/activate" -->
+<!-- @setup:id=activate-venv command="source comfyui-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @require:driver,rocm,pytorch,comfyui -->
+<!-- @require:driver,pytorch,comfyui -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -264,19 +280,17 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-To launch ComfyUI on Windows, click the ComfyUI Desktop Launcher which is found on your Desktop. You will see the following page:
+To launch ComfyUI on Windows, click the ComfyUI Desktop Launcher which is found on your Desktop. Follow the steps to install the local version with AMD.
 
 <p align="center">
-  <img src="assets/installer.png" alt="Templates button in the left toolbar" width="600"/>
+  <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Click `Install ComfyUI` and follow the steps. Choose `AMD` as the version and use default install locations. When finished, you should see the following:
+Then, click the ComfyUI button at the top-middle of the app. This will open a settings tab. Open the Storage tab and make sure the paths are set as follows to access the pre-installed models.
 
 <p align="center">
-  <img src="assets/installed.png" alt="Templates button in the left toolbar" width="600"/>
+  <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
 </p>
-
-Click the blue `Launch` button to open ComfyUI in its own window.
 
 
 <!-- @os:end -->

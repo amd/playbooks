@@ -1,6 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "Running and serving LLMs with LM Studio",
+  "title": "Run and Serve LLMs with LM Studio",
   "description": "Set up LM Studio and LM Studio Server to run and serve large language models locally.",
   "time": 30,
   "supported_platforms": {
@@ -40,10 +40,6 @@
       "windows",
       "linux"
     ],
-    "halo_box": [
-      "windows",
-      "linux"
-    ],
     "stx": [
       "linux",
       "windows"
@@ -58,6 +54,10 @@
       "windows",
       "linux"
     ],
+    "halo_box": [
+      "windows",
+      "linux"
+    ],  
     "stx": [
       "linux",
       "windows"
@@ -78,5 +78,6 @@
     "vulkan",
     "llm",
     "inference"
-  ]
+  ],
+  "coverImage": "assets/cover_image.avif"
 }

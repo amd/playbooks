@@ -258,7 +258,7 @@ export default function PlaybooksSection({ activeDevice, selectedDevice, onSelec
                             New
                           </span>
                         )}
-                        {isHaloSelected && featuredPlaybook.category === "core" && (
+                        {isHaloSelected && featuredPlaybook.category === "core" && featuredPlaybook.id !== "lmstudio-rocm-llms" && (
                           <PreinstalledBadge />
                         )}
                         <DifficultyBadge difficulty={featuredPlaybook.difficulty} />
@@ -322,7 +322,7 @@ export default function PlaybooksSection({ activeDevice, selectedDevice, onSelec
                         </svg>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        {isHaloSelected && playbook.category === "core" && (
+                        {isHaloSelected && playbook.category === "core" && playbook.id !== "lmstudio-rocm-llms" && (
                           <PreinstalledBadge />
                         )}
                         {playbook.isNew && (
