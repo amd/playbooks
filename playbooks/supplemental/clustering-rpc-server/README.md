@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-Your Ryzen AI Halo is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
+Your Ryzen™ AI Halo is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
 
 This playbook teaches you how to cluster two Ryzen AI Halo systems using llama.cpp's RPC engine and run GLM 4.7, a 358B parameter model, across both machines with AMD ROCm™ acceleration.
 
