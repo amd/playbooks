@@ -148,17 +148,48 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
   --language-model-only \
   --reasoning-parser qwen3
 ```
+> Within the Podman container, you can stop your work and detach from it using (Ctrl+P, Ctrl+Q). For more instructions and references refer to the [Podman documentation](https://docs.podman.io/en/latest)
 
-## Tips
+#### Parameter Reference
 
-1. Within the Podman container, you can stop your work and detach from it using (Ctrl+P, Ctrl+Q). For more instructions and references please go here: https://docs.podman.io/en/latest
+| Flag | Purpose |
+|------|---------|
+| `--port` | Port to serve the HTTP API on |
+| `--host` | IP address to bind the server to (`0.0.0.0` for all interfaces) |
+| `--max-model-len` | Maximum context length in tokens |
+| `--gpu-memory-utilization` | Fraction of GPU memory to allocate (0.0–1.0) |
+| `--dtype` | Data type for model weights |
+| `--tensor-parallel-size` | Number of GPUs to shard the model across (set to total GPUs in the cluster) |
+| `--distributed-executor-backend` | Backend for multi-node execution (`ray` for cluster deployments) |
+| `--enforce-eager` | Disables CUDA graph compilation for compatibility |
+| `--language-model-only` | Skips loading auxiliary model components (e.g., vision encoder) |
+| `--reasoning-parser` | Enables structured reasoning output parsing for the model |
 
-2. If the Ray actors crash or your model is stalling when loading, the number of Ray workers may be too large, you can reduce it by launching Ray again with the following:
+For full parameter usage, refer to the [vLLM documentation](https://docs.vllm.ai/en/latest/configuration/engine_args/).
 
-```bash
-ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1 --num-cpus=8
-```
-```bash
-ray start --address=<MACHINE_1_IP>:6379 --node-ip-address=<MACHINE_2_IP> --num-gpus=1 --num-cpus=8
-```
+## Accessing the Model
 
+vLLM exposes an OpenAI-compatible API, so you can connect any compatible client or interface to your cluster. One popular option is [Open WebUI](https://github.com/open-webui/open-webui), which provides a browser-based chat interface.
+
+To connect Open WebUI to your vLLM endpoint:
+
+1. Open **Settings** > **Admin Panel** > **Connections**
+2. Click the **+** on **Manage OpenAI API Connections**
+3. Set the **Connection Type** to **External**
+4. Set the **URL** to `http://<MACHINE_1_IP>:7000/v1`
+5. Under **Auth**, select **None** from the dropdown
+6. Leave **Model IDs** empty to automatically discover all models from the endpoint
+
+> **Finding `<MACHINE_1_IP>`**: On Machine 1, run `hostname -I | awk '{print $1}'` to find its local IP address. If accessing Open WebUI from Machine 1 itself, you can use `http://localhost:7000/v1`.
+
+![Open WebUI connection settings for the vLLM endpoint](assets/openwebui-connection.png)
+
+Once connected, select the model from the model dropdown in Open WebUI and start chatting. The model is now running across both of your STX Halo™ nodes:
+
+![Chatting with Qwen3.5-397B in Open WebUI](assets/openwebui-chat.png)
+
+## Next Steps
+
+- **Explore other models**: Discover new models on [Hugging Face](https://huggingface.co/models?&sort=trending) that fit within your cluster's combined GPU memory
+- **Scale to four nodes**: Add two more STX Halo™ systems as additional Ray workers to shard models across even more GPUs. Follow [Step 2: Join the Cluster](#step-2-join-the-cluster-machine-2) on each additional worker and increase `--tensor-parallel-size` accordingly
+- **Try other parallelism strategies**: vLLM supports [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) for mixture-of-experts models and [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) for higher throughput. Experiment with `--enable-expert-parallel` and `--data-parallel-size` to find the best configuration for your workload
