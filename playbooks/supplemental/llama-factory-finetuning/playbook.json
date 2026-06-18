@@ -73,5 +73,6 @@
   "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": ["Llama Factory", "lora", "fine-tuning"]
+  "tags": ["Llama Factory", "lora", "fine-tuning"],
+  "coverImage": "assets/cover.png"
 }
