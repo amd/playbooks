@@ -26,7 +26,14 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
-> **Note**: If VS Code or LM Studio is not installed, you can install them from the AMD Ryzen™ AI Developer Center on Windows. On Linux, follow the LM Studio install instructions below.
+
+<!-- @os:linux -->
+> **Note**: You can install VS Code through AMD Ryzen™ AI Developer Center. For LM Studio, follow the install instructions below.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note**: If VS Code or LM Studio is not installed, you can install them from the AMD Ryzen™ AI Developer Center. 
+<!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
