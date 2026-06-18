@@ -33,9 +33,10 @@ This playbook requires two Ryzen™ AI Halo units and one Ethernet switch, conne
 | Component | Quantity | Description |
 |-----------|----------|-------------|
 | Ryzen™ AI Halo | 2 | Compute nodes that form the cluster |
-| Ethernet switch | 1 | Central switch to allow multi node Ryzen™ AI Halo communication |
+| 10Gbps Ethernet switch | 1 | Central switch to allow multi node Ryzen™ AI Halo communication (at least 2 ports) |
+| Ethernet cable | 2 | Connects each Halo unit to the switch (Cat 7 or higher recommended) |
 
-The Ethernet switch requires three ports: one for each Halo unit and one for the client machine used to access the model. If you access the model from one of the Halo units, two ports are required.
+> **Note**: Two Ethernet switch ports are required to connect the two Ryzen™ AI Halo units. A third port is required if you access the model from a separate client machine instead of from one of the Halo units.
 
 ### Software
 <!-- @require:driver -->
@@ -45,11 +46,49 @@ sudo apt install curl
 ```
 <!-- @os:end -->
 
+## Physical Hardware Setup
+
+> **Note**: Complete this step on both Machine 1 and Machine 2.
+
+Connect each Ryzen™ AI Halo unit to the Ethernet switch using a Cat 7 (or higher) cable. This establishes the 10Gbps link used for high-speed communication between the nodes.
+
+### 1. Determine Network Interfaces
+
+On each machine, find the name of its network interface and note it down (it will be referred to in the rest of the instructions as `IFNAME`). Run:
+
+```bash
+ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
+```
+
+This prints the interface name directly, for example:
+
+```bash
+enp191s0
+```
+
+### 2. Verify Network Link Speeds
+
+Confirm the link is active and running at full speed by checking the speed of your interface:
+
+```bash
+sudo ethtool <IFNAME> | grep Speed
+```
+
+> **Note**: Replace `<IFNAME>` with the output interface name from [1. Determine Network Interfaces](#1-determine-network-interfaces)
+
+You should see a speed of `10000Mb/s`:
+
+```bash
+	Speed: 10000Mb/s
+```
+
+> **Note**: If the speed is lower than `10000Mb/s` or the link does not come up, check the cable connection and confirm the switch port is set to 10Gbps. Some switches require auto-negotiation to be disabled and the link speed set manually; refer to your switch's documentation.
+
 ## Extending VRAM Allocation
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-### Memory configuration for running large models
+### Memory Configuration for Running Large Models
 
 On Linux, ROCm utilizes a shared system memory pool, and this pool is configured by default to half the system memory.
 
@@ -81,33 +120,21 @@ This amount can be increased by changing the kernel's Translation Table Manager 
 
 For `amd-ttm` usage examples, see the [ROCm documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/docs-7.0.2/docs/install/installryz/native_linux/install-ryzen.html#amd-ttm-usage-examples).
 
-## Locate the network environment variables
+## vLLM Container Initialization
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-On each machine, find the name of its network interface and note it down (it will be referred to in the rest of the instructions as `IFNAME`). Run:
+Your Ryzen™ AI Halo ships with vLLM packaged inside a prebuilt container image, which you run using Podman, a free and open source container tool.
 
-```bash
-ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
-```
-
-This prints the interface name directly, for example:
-
-```bash
-enp191s0
-```
-
-## VLLM container initialization
-
-> **Note**: Complete this step on both Machine 1 and Machine 2.
-
-Your halobox ships with vLLM packaged inside a prebuilt container image, which you run using Podman, a free and open source container tool.
+### 1. Create the Model Download Directory
 
 When you serve the Qwen3.5-397B model in this playbook, vLLM will automatically download the model weights to your system. To make sure those weights are accessible from inside the container, first create a models directory that the container can mount:
 
 ```bash
 mkdir -p ~/.local/share/vLLM/models
 ```
+
+### 2. Launch the vLLM Container
 
 The command below launches the container and drops you into an interactive shell. It mounts the models directory you just created and passes your `IFNAME` to `NCCL_SOCKET_IFNAME` and `GLOO_SOCKET_IFNAME`, telling RCCL (the library vLLM uses to coordinate GPUs across the cluster) which interface to use.
 
@@ -116,6 +143,8 @@ Start the container with:
 ```bash
 sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
 ```
+
+> **Note**: Replace `<IFNAME>` with the output interface name from [1. Determine Network Interfaces](#1-determine-network-interfaces)
 
 ## Running the Model on the Cluster
 
@@ -162,7 +191,6 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
   --language-model-only \
   --reasoning-parser qwen3
 ```
-> Within the Podman container, you can stop your work and detach from it using (Ctrl+P, Ctrl+Q). For more instructions and references refer to the [Podman documentation](https://docs.podman.io/en/latest)
 
 #### Parameter Reference
 
