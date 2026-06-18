@@ -89,9 +89,11 @@ This playbook requires two Ryzen™ AI Halo units and one Ethernet switch, conne
 > **Note**: Two Ethernet switch ports are required to connect the two Ryzen™ AI Halo units. A third port is required if you access the model from a separate client machine instead of from one of the Halo units.
 
 ### Software
-<!-- @require:driver -->
-
 <!-- @os:windows -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @require:driver -->
+<!-- @device:end -->
+Please install:
 - [Git](https://git-scm.com/downloads/win)
 - [Python](https://www.python.org/downloads/)
 - [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with the **Desktop Development with C++** workload
