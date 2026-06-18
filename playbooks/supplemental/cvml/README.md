@@ -39,7 +39,7 @@ Before starting, ensure you have the following:
 <!-- @os:windows -->
 - [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — download `opencv-4.11.0-windows.exe`, run it, and extract to a local folder (e.g. `C:\opencv`)
 - [CMake](https://cmake.org/download/) — download the Windows x86-64 MSI installer and during installation select **"Add CMake to the system PATH for all users"**
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — version 32.0.203.280 or newer required; both listed versions (32.0.203.280 and 32.0.203.314) are compatible
+- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — install the latest available version
 - [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) with the "Desktop development with C++" workload (includes MSVC compiler, Windows SDK, and C++ build tools)
 <!-- @os:end -->
 
