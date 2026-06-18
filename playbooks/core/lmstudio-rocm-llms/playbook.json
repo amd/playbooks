@@ -1,6 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "Run and Serve LLMs with LM Studio",
+  "title": "Running and Serving LLMs with LM Studio",
   "description": "Set up LM Studio and LM Studio Server to run and serve large language models locally.",
   "time": 30,
   "supported_platforms": {
