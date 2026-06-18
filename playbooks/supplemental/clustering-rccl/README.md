@@ -93,26 +93,21 @@ enp191s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-Podman is a free and open source container tool and your machine has access to a container which has vLLM installed. You can start the container with this command:
+Create a directory to store the models if it has not been created already:
 
 ```bash
-sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g oci-registry.ryai.dev/ryai-vllm:latest
+mkdir -p ~/.local/share/vLLM/models
 ```
 
-## Setting network environment variables
-
-> **Note**: Complete this step on both Machine 1 and Machine 2.
-
-These environment variables need to be set to the `IFNAME` prior to starting the Ray cluster and the vLLM server, so that RCCL will use the correct interface for network communication.
+Podman is a free and open source container tool and your machine has access to a container which has vLLM installed. The container shell will be passed the `IFNAME` from the previous step as part of its network environment variables. You can start the container with this command:
 
 ```bash
-export NCCL_SOCKET_IFNAME=<IFNAME>
-export GLOO_SOCKET_IFNAME=<IFNAME> 
+sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
 ```
 
 ## Running the Model on the Cluster
 
-vLLM uses Ray to orchestrate the cluster and RCCL to handle GPU-to-GPU communication across nodes. One machine acts as the **head node** (Machine 1), coordinating inference. The other joins as a **worker node** (Machine 2), contributing its GPU memory and compute.
+vLLM uses Ray to orchestrate the cluster and RCCL to handle GPU-to-GPU communication across nodes. One machine acts as the **head node** (Machine 1), coordinating inference. The other joins as a **worker node** (Machine 2), contributing its GPU memory and compute. Note that Ray is an optional dependency and is only available from within the Podman container.
 
 At launch, vLLM shards the model across both nodes using tensor parallelism. Once loaded, inference proceeds as if running on a single accelerator.
 
@@ -154,7 +149,16 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
   --reasoning-parser qwen3
 ```
 
-## Managing the container
+## Tips
 
-Within the podman container, you can stop your work and detach from it using (Ctrl+P, Ctrl+Q). For more instructions and references please go here: https://docs.podman.io/en/latest
+1. Within the Podman container, you can stop your work and detach from it using (Ctrl+P, Ctrl+Q). For more instructions and references please go here: https://docs.podman.io/en/latest
+
+2. If the Ray actors crash or your model is stalling when loading, the number of Ray workers may be too large, you can reduce it by launching Ray again with the following:
+
+```bash
+ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1 --num-cpus=8
+```
+```bash
+ray start --address=<MACHINE_1_IP>:6379 --node-ip-address=<MACHINE_2_IP> --num-gpus=1 --num-cpus=8
+```
 
