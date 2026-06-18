@@ -71,6 +71,8 @@ foreach ($dir in @("cmake", "include", "windows", "samples")) {
 }
 
 if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
+$opencvConfig = Join-Path $env:OPENCV_INSTALL_ROOT "OpenCVConfig.cmake"
+if (-not (Test-Path $opencvConfig)) {throw "OpenCVConfig.cmake was not found: $opencvConfig"}
 
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path $vswhere)) {throw "vswhere.exe not found. Install Visual Studio 2022 with Desktop development with C++ workload."}
@@ -82,8 +84,13 @@ $clPath = Get-ChildItem "$vsInstall\VC\Tools\MSVC" -Recurse -Filter cl.exe -Erro
 if (-not $clPath) {throw "MSVC cl.exe was not found under Visual Studio installation."}
 
 Write-Host "Checking Ryzen AI NPU driver presence..."
-$pnputilOutput = pnputil /enum-devices /class "NeuralProcessor" 2>$null
-if ($LASTEXITCODE -eq 0 -and $pnputilOutput -match "AMD|NPU|Ryzen") {Write-Host "Ryzen AI NPU driver appears to be present."} else {Write-Host "Ryzen AI NPU driver was not detected. CVML is expected to use GPU fallback if supported by the runtime."}
+$npuDevices = Get-PnpDevice -Class ComputeAccelerator -ErrorAction SilentlyContinue | Where-Object {$_.FriendlyName -match "NPU|Neural|Ryzen AI|XDNA"}
+if ($npuDevices) {
+    Write-Host "NPU driver/device found:"
+    $npuDevices | Format-Table Status, Class, Name, InstanceId -AutoSize
+} else {
+    Write-Host "Ryzen AI NPU driver was not detected. The samples explicitly set InferenceBackend::AUTO, so GPU fallback should be used if supported by the runtime."
+}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -119,6 +126,14 @@ if [ ! -d "$OPENCV_INSTALL_ROOT" ]; then
   echo "OPENCV_INSTALL_ROOT does not exist: $OPENCV_INSTALL_ROOT"
   exit 1
 fi
+if [ ! -d "$OPENCV_INSTALL_ROOT/lib" ]; then
+  echo "OpenCV lib directory was not found: $OPENCV_INSTALL_ROOT/lib"
+  exit 1
+fi
+if [ ! -f "$OPENCV_INSTALL_ROOT/lib/cmake/opencv4/OpenCVConfig.cmake" ]; then
+  echo "OpenCVConfig.cmake was not found under: $OPENCV_INSTALL_ROOT/lib/cmake/opencv4"
+  exit 1
+fi
 
 if ! command -v glslc >/dev/null 2>&1 && ! command -v vulkaninfo >/dev/null 2>&1; then
   echo "Vulkan SDK tools were not found. Install the Vulkan SDK before running this test."
@@ -129,7 +144,7 @@ if [ -d /opt/xilinx/xrt/lib ]; then
   echo "Ryzen AI NPU driver/XRT runtime appears to be present."
 else
   echo "Ryzen AI NPU driver/XRT runtime was not found at /opt/xilinx/xrt/lib."
-  echo "CVML is expected to use GPU fallback if supported by the runtime."
+  echo "The samples explicitly set InferenceBackend::AUTO, so GPU fallback should be used if supported by the runtime."
 fi
 ```
 <!-- @test:end --> 
@@ -470,7 +485,7 @@ The face detection feature offers two model variants:
 
 
 <!-- @os:windows -->
-<!-- @test:id=cvml-build-and-face-detection-windows timeout=1800 hidden=True -->
+<!-- @test:id=cvml-build-sample-applications-windows timeout=1800 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -484,12 +499,30 @@ $work = Join-Path (Get-Location) "cvml-test"
 if (Test-Path $work) {Remove-Item -Recurse -Force $work}
 New-Item -ItemType Directory -Force -Path $work | Out-Null
 Copy-Item -Recurse -Force -Path (Join-Path $env:AMD_CVML_SDK_ROOT "*") -Destination $work
+
 $samplesDir = Join-Path $work "samples"
 $buildDir = Join-Path $samplesDir "build"
+
 Push-Location $samplesDir
 
 try {
   New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
+  foreach ($sample in @("cvml-sample-face-detection", "cvml-sample-depth-estimation", "cvml-sample-face-mesh")) {
+    $mainFile = Join-Path $samplesDir "$sample\main.cpp"
+    $source = Get-Content -Path $mainFile -Raw
+
+    $createContextLine = "auto context = amd::cvml::CreateContext();"
+    $setBackendLine = "  context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);"
+
+    if ($source -notmatch "SetInferenceBackend") {
+      if (-not $source.Contains($createContextLine)) {
+        throw "Could not find CreateContext line in: $mainFile"
+      }
+
+      $source = $source.Replace($createContextLine, "$createContextLine`r`n$setBackendLine")
+      Set-Content -Path $mainFile -Value $source -NoNewline
+    }
+  }
 
   cmake -S (Get-Location).Path -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT" -DCMAKE_PREFIX_PATH="$env:OPENCV_INSTALL_ROOT"
   cmake --build $buildDir --config Release --parallel
@@ -503,37 +536,52 @@ try {
   }
 
   $env:PATH = "$(Join-Path $samplesDir "..\windows");$env:PATH"
+
   $opencvRuntime = Join-Path $env:OPENCV_INSTALL_ROOT "x64\vc16\bin"
   if (-not (Test-Path $opencvRuntime)) {throw "OpenCV runtime DLL folder was not found: $opencvRuntime"}
-  $env:PATH = "$env:PATH;$opencvRuntime"
+  $env:PATH = "$opencvRuntime;$env:PATH"
 
   $inputImage = Join-Path $samplesDir "sample_face.jpg"
   curl.exe -L -o $inputImage "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
 
-  $outputFast = Join-Path $samplesDir "output_face_fast.jpg"
-  $outputPrecise = Join-Path $samplesDir "output_face_precise.jpg"
+  $outputFaceFast = Join-Path $samplesDir "output_face_fast.jpg"
+  $outputFacePrecise = Join-Path $samplesDir "output_face_precise.jpg"
+  $outputDepth = Join-Path $samplesDir "output_depth.jpg"
+  $outputMesh = Join-Path $samplesDir "output_mesh.jpg"
 
   Push-Location (Split-Path $faceExe)
-
-  & $faceExe -i $inputImage -o $outputFast
+  & $faceExe -i $inputImage -o $outputFaceFast
   if ($LASTEXITCODE -ne 0) {throw "Face detection default model failed with exit code $LASTEXITCODE."}
-  & $faceExe -i $inputImage -o $outputPrecise -m precise
-  if ($LASTEXITCODE -ne 0) {throw "Face detection precise model failed with exit code $LASTEXITCODE."}
 
+  & $faceExe -i $inputImage -o $outputFacePrecise -m precise
+  if ($LASTEXITCODE -ne 0) {throw "Face detection precise model failed with exit code $LASTEXITCODE."}
   Pop-Location
 
-  foreach ($output in @($outputFast, $outputPrecise)) {
+  Push-Location (Split-Path $depthExe)
+  & $depthExe -i $inputImage -o $outputDepth
+  if ($LASTEXITCODE -ne 0) {throw "Depth estimation failed with exit code $LASTEXITCODE."}
+  Pop-Location
+
+  Push-Location (Split-Path $meshExe)
+  & $meshExe -i $inputImage -o $outputMesh
+  if ($LASTEXITCODE -ne 0) {throw "Face mesh failed with exit code $LASTEXITCODE."}
+  Pop-Location
+
+  foreach ($output in @($outputFaceFast, $outputFacePrecise, $outputDepth, $outputMesh)) {
     if (-not (Test-Path $output)) {throw "Expected output image was not created: $output"}
     if ((Get-Item $output).Length -le 0) {throw "Output image is empty: $output"}
   }
 }
-finally {Pop-Location -ErrorAction SilentlyContinue}
+finally {
+  Pop-Location -ErrorAction SilentlyContinue
+  Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue
+}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=cvml-build-and-face-detection-linux timeout=1800 hidden=True -->
+<!-- @test:id=cvml-build-sample-applications-linux timeout=1800 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -548,17 +596,74 @@ if [ ! -d "$OPENCV_INSTALL_ROOT" ]; then
   echo "OPENCV_INSTALL_ROOT does not exist: $OPENCV_INSTALL_ROOT"
   exit 1
 fi
+if [ ! -d "$OPENCV_INSTALL_ROOT/lib" ]; then
+  echo "OpenCV lib directory was not found: $OPENCV_INSTALL_ROOT/lib"
+  exit 1
+fi
+if [ ! -f "$OPENCV_INSTALL_ROOT/lib/cmake/opencv4/OpenCVConfig.cmake" ]; then
+  echo "OpenCVConfig.cmake was not found under: $OPENCV_INSTALL_ROOT/lib/cmake/opencv4"
+  exit 1
+fi
 
 work="$PWD/cvml-test"
 rm -rf "$work"
 mkdir -p "$work"
+
 cp -a "$AMD_CVML_SDK_ROOT"/. "$work"/
+
+cleanup() {
+  rm -rf "$work"
+}
+trap cleanup EXIT
+
 samples_dir="$work/samples"
 build_dir="$samples_dir/build"
+
 cd "$samples_dir"
 mkdir build
 
-cmake -S "$PWD" -B "$PWD/build" -DOPENCV_INSTALL_ROOT="$OPENCV_INSTALL_ROOT" -DCMAKE_PREFIX_PATH="$OPENCV_INSTALL_ROOT"
+python3 - <<'PY'
+from pathlib import Path
+
+samples = [
+    Path("cvml-sample-face-detection/main.cpp"),
+    Path("cvml-sample-depth-estimation/main.cpp"),
+    Path("cvml-sample-face-mesh/main.cpp"),
+]
+
+create_context_line = "auto context = amd::cvml::CreateContext();"
+set_backend_line = "  context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);"
+
+for path in samples:
+    source = path.read_text()
+
+    if "SetInferenceBackend" in source:
+        continue
+
+    if create_context_line not in source:
+        raise SystemExit(f"Could not find CreateContext line in: {path}")
+
+    source = source.replace(
+        create_context_line,
+        create_context_line + "\n" + set_backend_line,
+        1,
+    )
+
+    path.write_text(source)
+PY
+
+cmake_config_log="$build_dir/cmake-configure.log"
+
+cmake -S "$PWD" -B "$PWD/build" \
+  -DOPENCV_INSTALL_ROOT="$OPENCV_INSTALL_ROOT" \
+  -DCMAKE_PREFIX_PATH="$OPENCV_INSTALL_ROOT" 2>&1 | tee "$cmake_config_log"
+
+if ! grep -q 'found version "4.11.0"' "$cmake_config_log"; then
+  echo "CMake did not report OpenCV version 4.11.0."
+  cat "$cmake_config_log"
+  exit 1
+fi
+
 cmake --build "$PWD/build" --config Release --parallel "$(nproc)"
 
 face_exe="$build_dir/cvml-sample-face-detection/cvml-sample-face-detection"
@@ -573,22 +678,36 @@ for exe in "$face_exe" "$depth_exe" "$mesh_exe"; do
 done
 
 export LD_LIBRARY_PATH="$PWD/../linux:${LD_LIBRARY_PATH:-}"
+
 if [ -d /opt/xilinx/xrt/lib ]; then
   export LD_LIBRARY_PATH="/opt/xilinx/xrt/lib:$LD_LIBRARY_PATH"
   echo "Ryzen AI NPU driver/XRT runtime path found. Added /opt/xilinx/xrt/lib to LD_LIBRARY_PATH."
 else
-  echo "Ryzen AI NPU driver/XRT runtime path was not found."
-  echo "Continuing because the README says CVML can fall back to GPU when the NPU driver is not installed."
+  echo "Ryzen AI NPU driver/XRT runtime was not found."
+  echo "The samples explicitly set InferenceBackend::AUTO, so GPU fallback should be used if supported by the runtime."
 fi
+
 export LD_LIBRARY_PATH="$OPENCV_INSTALL_ROOT/lib:$LD_LIBRARY_PATH"
 
 curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
 
-cd "$(dirname "$face_exe")"
-./cvml-sample-face-detection -i "$samples_dir/sample_face.jpg" -o "$samples_dir/output_face_fast.jpg"
-./cvml-sample-face-detection -i "$samples_dir/sample_face.jpg" -o "$samples_dir/output_face_precise.jpg" -m precise
+input_image="$samples_dir/sample_face.jpg"
+output_face_fast="$samples_dir/output_face_fast.jpg"
+output_face_precise="$samples_dir/output_face_precise.jpg"
+output_depth="$samples_dir/output_depth.jpg"
+output_mesh="$samples_dir/output_mesh.jpg"
 
-for output in "$samples_dir/output_face_fast.jpg" "$samples_dir/output_face_precise.jpg"; do
+cd "$(dirname "$face_exe")"
+./cvml-sample-face-detection -i "$input_image" -o "$output_face_fast"
+./cvml-sample-face-detection -i "$input_image" -o "$output_face_precise" -m precise
+
+cd "$(dirname "$depth_exe")"
+./cvml-sample-depth-estimation -i "$input_image" -o "$output_depth"
+
+cd "$(dirname "$mesh_exe")"
+./cvml-sample-face-mesh -i "$input_image" -o "$output_mesh"
+
+for output in "$output_face_fast" "$output_face_precise" "$output_depth" "$output_mesh"; do
   if [ ! -s "$output" ]; then
     echo "Expected output image was not created or is empty: $output"
     exit 1

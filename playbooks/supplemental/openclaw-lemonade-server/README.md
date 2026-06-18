@@ -75,8 +75,9 @@ lemonade pull Qwen3.6-35B-A3B-GGUF
 
 Then load it with a large context window and save that setting for future runs:
 
-<!-- @test:id=lemonade-model-load timeout=300 -->
+<!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
+lemonade unload
 lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end --> 
@@ -315,7 +316,7 @@ $ErrorActionPreference = "Stop"
 
 $script = @'
 set -euo pipefail
-
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 WINDOWS_HOST="$(ip route show default | awk '{print $3}' | head -1)"
 
 if [ -z "$WINDOWS_HOST" ]; then
@@ -381,13 +382,19 @@ Open a new terminal and confirm the installation:
 openclaw --version
 ```
 
+> **Tip:** If you see `command not found` after installation, add npm's global bin directory to your PATH:
+> ```bash
+> export PATH="$HOME/.npm-global/bin:$PATH"
+> ```
+> To make this permanent, add the line above to your `~/.bashrc` or `~/.zshrc` file.
+
 <!-- @os:linux -->
 <!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
 ```bash
 set -euo pipefail
 echo "HOME=$HOME"
 echo "PATH=$PATH"
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 node -v
 npm -v
 openclaw --version
@@ -404,7 +411,7 @@ $script = @'
 set -euo pipefail
 echo "HOME=$HOME"
 echo "PATH=$PATH"
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 node -v
 npm -v
 openclaw --version
@@ -535,6 +542,90 @@ CMD ["sleep", "infinity"]
 DOCKERFILE
 ```
 
+<!-- @os:linux -->
+<!-- @test:id=openclaw-sandbox-image-linux timeout=1800 hidden=True -->
+```bash
+set -euo pipefail
+
+docker version
+
+docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
+FROM debian:bookworm-slim
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  bash ca-certificates curl git jq python3 ripgrep \
+  && rm -rf /var/lib/apt/lists/*
+RUN useradd --create-home --shell /bin/bash sandbox
+USER sandbox
+WORKDIR /home/sandbox
+CMD ["sleep", "infinity"]
+DOCKERFILE
+
+docker image inspect openclaw-sandbox:bookworm-slim >/dev/null
+
+echo "OK: OpenClaw sandbox Docker image is available"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=openclaw-sandbox-image-windows timeout=1800 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$script = @'
+set -euo pipefail
+
+export PATH="/mnt/wsl/docker-desktop/cli-tools/usr/bin:$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+docker_config="$(mktemp -d)"
+cleanup() {
+  rm -rf "$docker_config"
+}
+trap cleanup EXIT
+export DOCKER_CONFIG="$docker_config"
+printf '{ "auths": {} }\n' > "$DOCKER_CONFIG/config.json"
+
+docker version
+
+docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
+FROM debian:bookworm-slim
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  bash ca-certificates curl git jq python3 ripgrep \
+  && rm -rf /var/lib/apt/lists/*
+RUN useradd --create-home --shell /bin/bash sandbox
+USER sandbox
+WORKDIR /home/sandbox
+CMD ["sleep", "infinity"]
+DOCKERFILE
+
+docker image inspect openclaw-sandbox:bookworm-slim >/dev/null
+
+echo "OK: OpenClaw sandbox Docker image is available inside WSL"
+'@
+
+$script = $script -replace "`r`n", "`n"
+
+$tmp = Join-Path $env:TEMP "openclaw-sandbox-image-windows.sh"
+[System.IO.File]::WriteAllText($tmp, $script, [System.Text.UTF8Encoding]::new($false))
+
+try {
+  $full = [System.IO.Path]::GetFullPath($tmp)
+  $drive = $full.Substring(0,1).ToLower()
+  $rest = $full.Substring(2).Replace('\','/')
+  $wslTmp = "/mnt/$drive$rest"
+
+  wsl -d Ubuntu-24.04 -- bash "$wslTmp"
+  if ($LASTEXITCODE -ne 0) { throw "OpenClaw sandbox image build failed inside WSL" }
+}
+finally {
+  Remove-Item $tmp -Force -ErrorAction SilentlyContinue
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 Run this to add the `sandbox` key inside the existing `agents.defaults` block in `~/.openclaw/openclaw.json`:
 
 ```bash
@@ -588,7 +679,7 @@ Sandbox containers have **no network access** by default. See the [sandboxing re
 ```bash
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
 mkdir -p "$HOME/.openclaw"
 rm -f "$HOME/.openclaw/openclaw.json"
@@ -620,6 +711,48 @@ echo "OK: OpenClaw onboarding wrote Lemonade configuration"
 <!-- @test:end --> 
 <!-- @os:end -->
 
+<!-- @os:linux -->
+<!-- @test:id=openclaw-sandbox-config-linux timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+config="$HOME/.openclaw/openclaw.json"
+
+if [ ! -f "$config" ]; then
+  echo "Missing $config. Run the OpenClaw onboarding test first."
+  exit 1
+fi
+
+docker image inspect openclaw-sandbox:bookworm-slim >/dev/null
+
+cat > sandbox.patch.json5 <<JSON5
+{
+  agents: {
+    defaults: {
+      sandbox: {
+        mode: "non-main",
+        scope: "session",
+        workspaceAccess: "none"
+      }
+    }
+  }
+}
+JSON5
+
+openclaw config patch --file ./sandbox.patch.json5
+
+grep -q '"sandbox"' "$config"
+grep -Eq '"mode"[[:space:]]*:[[:space:]]*"non-main"' "$config"
+grep -Eq '"scope"[[:space:]]*:[[:space:]]*"session"' "$config"
+grep -Eq '"workspaceAccess"[[:space:]]*:[[:space:]]*"none"' "$config"
+
+echo "OK: OpenClaw sandbox configuration was written"
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
+
 <!-- @os:windows -->
 <!-- @test:id=openclaw-onboard-windows timeout=300 hidden=True -->
 ```powershell
@@ -628,7 +761,7 @@ $ErrorActionPreference = "Stop"
 $script = @'
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
 mkdir -p "$HOME/.openclaw"
 rm -f "$HOME/.openclaw/openclaw.json"
@@ -689,6 +822,78 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
+
+<!-- @os:windows -->
+<!-- @test:id=openclaw-sandbox-config-windows timeout=120 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$script = @'
+set -euo pipefail
+
+export PATH="/mnt/wsl/docker-desktop/cli-tools/usr/bin:$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+docker_config="$(mktemp -d)"
+cleanup() {
+  rm -rf "$docker_config"
+}
+trap cleanup EXIT
+export DOCKER_CONFIG="$docker_config"
+printf '{ "auths": {} }\n' > "$DOCKER_CONFIG/config.json"
+
+config="$HOME/.openclaw/openclaw.json"
+
+if [ ! -f "$config" ]; then
+  echo "Missing $config. Run the OpenClaw onboarding test first."
+  exit 1
+fi
+
+docker image inspect openclaw-sandbox:bookworm-slim >/dev/null
+
+cat > sandbox.patch.json5 <<JSON5
+{
+  agents: {
+    defaults: {
+      sandbox: {
+        mode: "non-main",
+        scope: "session",
+        workspaceAccess: "none"
+      }
+    }
+  }
+}
+JSON5
+
+openclaw config patch --file ./sandbox.patch.json5
+
+grep -q '"sandbox"' "$config"
+grep -Eq '"mode"[[:space:]]*:[[:space:]]*"non-main"' "$config"
+grep -Eq '"scope"[[:space:]]*:[[:space:]]*"session"' "$config"
+grep -Eq '"workspaceAccess"[[:space:]]*:[[:space:]]*"none"' "$config"
+
+echo "OK: OpenClaw sandbox configuration was written inside WSL"
+'@
+
+$script = $script -replace "`r`n", "`n"
+$tmp = Join-Path $env:TEMP "openclaw-sandbox-config-windows.sh"
+[System.IO.File]::WriteAllText($tmp, $script, [System.Text.UTF8Encoding]::new($false))
+
+try {
+  $full = [System.IO.Path]::GetFullPath($tmp)
+  $drive = $full.Substring(0,1).ToLower()
+  $rest = $full.Substring(2).Replace('\','/')
+  $wslTmp = "/mnt/$drive$rest"
+
+  wsl -d Ubuntu-24.04 -- bash "$wslTmp"
+  if ($LASTEXITCODE -ne 0) { throw "OpenClaw sandbox config patch failed inside WSL" }
+}
+finally {
+  Remove-Item $tmp -Force -ErrorAction SilentlyContinue
+}
+```
+<!-- @test:end --> 
+<!-- @os:end -->
+
 ### Start the OpenClaw Gateway
 
 The gateway is the OpenClaw process that manages the agent loop and serves the dashboard:
@@ -702,7 +907,7 @@ openclaw gateway run --bind loopback --port 18789
 ```bash
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
 config="$HOME/.openclaw/openclaw.json"
 if [ ! -f "$config" ]; then
@@ -755,7 +960,7 @@ $ErrorActionPreference = "Stop"
 $script = @'
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
 config="$HOME/.openclaw/openclaw.json"
 if [ ! -f "$config" ]; then

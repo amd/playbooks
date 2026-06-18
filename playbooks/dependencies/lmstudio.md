@@ -8,8 +8,15 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
+<!-- @device:halo_box -->
+LM Studio can be installed from the **AMD Ryzen™ AI Developer Center**. Go to the **Updates** tab and install LM Studio if it is not already present.
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 1. Download the installer from here: [https://lmstudio.ai/download](https://lmstudio.ai/download)
 2. Install. 
+<!-- @device:end -->
+
 > Tip: After installing, launch LM Studio once to initialize the CLI (`lms`).
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
