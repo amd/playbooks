@@ -39,7 +39,6 @@ This playbook requires two Ryzen™ AI Halo units and one Ethernet switch, conne
 > **Note**: Two Ethernet switch ports are required to connect the two Ryzen™ AI Halo units. A third port is required if you access the model from a separate client machine instead of from one of the Halo units.
 
 ### Software
-<!-- @require:driver -->
 <!-- @os:linux -->
 ```bash
 sudo apt install curl
