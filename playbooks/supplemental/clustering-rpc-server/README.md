@@ -13,16 +13,16 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-Your Ryzen™ AI Halo is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
+Your Ryzen AI Halo is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
 
-This playbook teaches you how to cluster two Ryzen™ AI Halo systems using llama.cpp's RPC engine and run GLM 4.7, a 358B parameter model, across both machines with ROCm acceleration.
+This playbook teaches you how to cluster two Ryzen AI Halo systems using llama.cpp's RPC engine and run GLM 4.7, a 358B parameter model, across both machines with AMD ROCm™ acceleration.
 
 ## What You'll Learn
 
-- How to extend VRAM allocation on Ryzen™ AI Halo systems
+- How to extend VRAM allocation on Ryzen AI Halo systems
 - Installing llama.cpp with ROCm and RPC support
 - Configuring an RPC worker and launching distributed inference across two nodes
-- Running a 358B parameter model across two networked Ryzen™ AI Halo systems
+- Running a 358B parameter model across two networked Ryzen AI Halo systems
 
 ## Setting the Memory Configuration
 
@@ -79,15 +79,15 @@ This amount can be increased by changing the kernel's Translation Table Manager 
 
 ### Hardware
 
-This playbook requires two Ryzen™ AI Halo units and one Ethernet switch, connected in a star topology with each unit wired directly to the switch.
+This playbook requires two Ryzen AI Halo units and one Ethernet switch, connected in a star topology with each unit wired directly to the switch.
 
 | Component | Quantity | Description |
 |-----------|----------|-------------|
-| Ryzen™ AI Halo | 2 | Compute nodes that form the cluster |
-| 10Gbps Ethernet switch | 1 | Central switch to allow multi node Ryzen™ AI Halo communication (at least 2 ports) |
+| Ryzen AI Halo | 2 | Compute nodes that form the cluster |
+| 10Gbps Ethernet switch | 1 | Central switch to allow multi node Ryzen AI Halo communication (at least 2 ports) |
 | Ethernet cable | 2 | Connects each Halo unit to the switch (Cat 7 or higher recommended) |
 
-> **Note**: Two Ethernet switch ports are required to connect the two Ryzen™ AI Halo units. A third port is required if you access the model from a separate client machine instead of from one of the Halo units.
+> **Note**: Two Ethernet switch ports are required to connect the two Ryzen AI Halo units. A third port is required if you access the model from a separate client machine instead of from one of the Halo units.
 
 ### Software
 <!-- @os:windows -->
@@ -111,7 +111,7 @@ sudo apt install git cmake python3 python3-pip
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-Connect each Ryzen™ AI Halo unit to the Ethernet switch using a Cat 7 (or higher) cable. This establishes the 10Gbps link used for high-speed communication between the nodes.
+Connect each Ryzen AI Halo unit to the Ethernet switch using a Cat 7 (or higher) cable. This establishes the 10Gbps link used for high-speed communication between the nodes.
 <!-- @os:linux -->
 ### 1. Determine Network Interfaces
 
@@ -179,7 +179,7 @@ Two installation options are available:
 
 ### Option 1: Lemonade SDK (Recommended)
 
-The Lemonade SDK provides nightly builds of llama.cpp with AMD ROCm™ 7 acceleration, targeting GPUs such as gfx1151 (Strix Halo / Ryzen AI Max+ 395) and other recent Radeon architectures.
+The Lemonade SDK provides nightly builds of llama.cpp with AMD ROCm 7 acceleration, targeting GPUs such as gfx1151 (Strix Halo / Ryzen AI Max+ 395) and other recent Radeon architectures.
 
 <!-- @os:windows -->
 #### Step 1: Download the Pre-Built Binaries
@@ -198,7 +198,7 @@ Unzip the downloaded archive:
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-This directory now contains ROCm-enabled builds of `llama-cli.exe`, `llama-server.exe`, and `rpc-server.exe`, precompiled for your Ryzen™ AI Halo system.
+This directory now contains ROCm-enabled builds of `llama-cli.exe`, `llama-server.exe`, and `rpc-server.exe`, precompiled for your Ryzen AI Halo system.
 
 #### Step 3: Verify GPU Detection
 
@@ -233,7 +233,7 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-This directory now contains ROCm-enabled builds of `llama-cli`, `llama-server`, and `rpc-server`, precompiled for your Ryzen™ AI Halo system.
+This directory now contains ROCm-enabled builds of `llama-cli`, `llama-server`, and `rpc-server`, precompiled for your Ryzen AI Halo system.
 
 #### Step 3: Verify GPU Detection
 
@@ -277,7 +277,7 @@ cmake --build rocm --config Release
 |-----------|---------|
 | `-DGGML_HIP=ON` | Enables the ROCm/HIP software stack |
 | `-DGGML_RPC=ON` | Enables RPC for distributed inference |
-| `-DGPU_TARGETS=gfx1151` | Targets the Ryzen™ AI Halo GPU (Radeon 8060s) |
+| `-DGPU_TARGETS=gfx1151` | Targets the Ryzen AI Halo GPU (Radeon 8060s) |
 | `-G Ninja` | Uses the Ninja build system |
 
 #### Step 2: Verify GPU Detection
@@ -329,7 +329,7 @@ cmake --build rocm --config Release -j$(nproc)
 | `-DGGML_HIP=ON` | Enables the ROCm software stack |
 | `-DGGML_RPC=ON` | Enables RPC for distributed inference |
 | `-DGGML_HIP_ROCWMMA_FATTN=ON` | Enables rocWMMA for enhanced Flash Attention on AMD GPUs |
-| `-DAMDGPU_TARGETS="gfx1151"` | Targets the Ryzen™ AI Halo GPU (Radeon 8060s) |
+| `-DAMDGPU_TARGETS="gfx1151"` | Targets the Ryzen AI Halo GPU (Radeon 8060s) |
 
 For more build options, refer to the [llama.cpp build documentation](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
 
@@ -355,7 +355,7 @@ With llama.cpp prepared on each node, proceed to [Downloading the Model](#downlo
 
 ## Downloading the Model
 
-This playbook uses [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), a 358B parameter model in the `Q4_K_XL` quantization from [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). At this quantization the model requires approximately 205GB of storage and fits within the combined GPU memory of two Ryzen™ AI Halo nodes.
+This playbook uses [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), a 358B parameter model in the `Q4_K_XL` quantization from [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). At this quantization the model requires approximately 205GB of storage and fits within the combined GPU memory of two Ryzen AI Halo nodes.
 
 Download the GGUF files using the Hugging Face CLI:
 <!-- @os:linux -->
@@ -519,4 +519,4 @@ For full parameter usage, refer to the [llama-cli documentation](https://github.
 
 - **Connect third-party applications**: `llama-server` exposes an OpenAI-compatible API. Point any OpenAI-compatible application (such as Open WebUI) at `http://<HOST_IP>:8081` with any placeholder API key (e.g., `none`) to connect to your cluster
 - **Explore other models**: Browse quantized GGUFs on [Hugging Face](https://huggingface.co/models?search=gguf) to find models that fit within your cluster's combined GPU memory
-- **Scale to four nodes**: Add two more Ryzen™ AI Halo systems as additional RPC workers to access models at the 1 trillion parameter scale. Pass additional endpoints to `--rpc` as a comma-separated list (e.g., `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)
+- **Scale to four nodes**: Add two more Ryzen AI Halo systems as additional RPC workers to access models at the 1 trillion parameter scale. Pass additional endpoints to `--rpc` as a comma-separated list (e.g., `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)

@@ -1,7 +1,7 @@
 {
   "id": "clustering-rccl",
   "title": "Clustering with Two Halos (RCCL)",
-  "description": "Set up a multi-node cluster using two STX Halo\u2122 devices with RCCL for distributed workloads",
+  "description": "Set up a multi-node cluster using two Ryzen\u2122 AI Halo devices with RCCL for distributed workloads",
   "time": 90,
   "unsupported_platforms": {
     "halo": [

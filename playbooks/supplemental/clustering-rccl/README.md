@@ -13,30 +13,30 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-Your Ryzen™ AI Halo is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
+Your Ryzen AI Halo is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
 
-This playbook teaches you how to cluster two Ryzen™ AI Halo systems using RCCL (ROCm Communication Collectives Library) with vLLM and run Qwen3.5-397B, a 397B parameter model, across both machines with ROCm acceleration.
+This playbook teaches you how to cluster two Ryzen AI Halo systems using RCCL (ROCm Communication Collectives Library) with vLLM and run Qwen3.5-397B, a 397B parameter model, across both machines with ROCm acceleration.
 
 ## What You'll Learn
 
-- How to extend VRAM allocation on Ryzen™ AI Halo systems
+- How to extend VRAM allocation on Ryzen AI Halo systems
 - Launching vLLM with ROCm support
-- Configuring RCCL for multi-node tensor-parallel inference across two Ryzen™ AI Halo systems
-- Running a 397B parameter model across two networked Ryzen™ AI Halo systems
+- Configuring RCCL for multi-node tensor-parallel inference across two Ryzen AI Halo systems
+- Running a 397B parameter model across two networked Ryzen AI Halo systems
 
 ## Prerequisites
 
 ### Hardware
 
-This playbook requires two Ryzen™ AI Halo units and one Ethernet switch, connected in a star topology with each unit wired directly to the switch.
+This playbook requires two Ryzen AI Halo units and one Ethernet switch, connected in a star topology with each unit wired directly to the switch.
 
 | Component | Quantity | Description |
 |-----------|----------|-------------|
-| Ryzen™ AI Halo | 2 | Compute nodes that form the cluster |
-| 10Gbps Ethernet switch | 1 | Central switch to allow multi node Ryzen™ AI Halo communication (at least 2 ports) |
+| Ryzen AI Halo | 2 | Compute nodes that form the cluster |
+| 10Gbps Ethernet switch | 1 | Central switch to allow multi node Ryzen AI Halo communication (at least 2 ports) |
 | Ethernet cable | 2 | Connects each Halo unit to the switch (Cat 7 or higher recommended) |
 
-> **Note**: Two Ethernet switch ports are required to connect the two Ryzen™ AI Halo units. A third port is required if you access the model from a separate client machine instead of from one of the Halo units.
+> **Note**: Two Ethernet switch ports are required to connect the two Ryzen AI Halo units. A third port is required if you access the model from a separate client machine instead of from one of the Halo units.
 
 ### Software
 <!-- @os:linux -->
@@ -49,7 +49,7 @@ sudo apt install curl
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-Connect each Ryzen™ AI Halo unit to the Ethernet switch using a Cat 7 (or higher) cable. This establishes the 10Gbps link used for high-speed communication between the nodes.
+Connect each Ryzen AI Halo unit to the Ethernet switch using a Cat 7 (or higher) cable. This establishes the 10Gbps link used for high-speed communication between the nodes.
 
 ### 1. Determine Network Interfaces
 
@@ -121,7 +121,7 @@ This amount can be increased by changing the kernel's Translation Table Manager 
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-Your Ryzen™ AI Halo ships with vLLM packaged inside a prebuilt container image, which you run using Podman, a free and open source container tool.
+Your Ryzen AI Halo ships with vLLM packaged inside a prebuilt container image, which you run using Podman, a free and open source container tool.
 
 ### 1. Create the Model Download Directory
 
@@ -223,12 +223,12 @@ To connect Open WebUI to your vLLM endpoint:
 
 ![Open WebUI connection settings for the vLLM endpoint](assets/openwebui-connection.png)
 
-Once connected, select the model from the model dropdown in Open WebUI and start chatting. The model is now running across both of your Ryzen™ AI Halo nodes:
+Once connected, select the model from the model dropdown in Open WebUI and start chatting. The model is now running across both of your Ryzen AI Halo nodes:
 
 ![Chatting with Qwen3.5-397B in Open WebUI](assets/openwebui-chat.png)
 
 ## Next Steps
 
 - **Explore other models**: Discover new models on [Hugging Face](https://huggingface.co/models?&sort=trending) that fit within your cluster's combined GPU memory
-- **Scale to four nodes**: Add two more Ryzen™ AI Halo systems as additional Ray workers to shard models across even more GPUs. This requires an Ethernet switch with at least four ports, one for each node. Follow [Step 2: Join the Cluster](#step-2-join-the-cluster-machine-2) on each additional worker and increase `--tensor-parallel-size` accordingly
+- **Scale to four nodes**: Add two more Ryzen AI Halo systems as additional Ray workers to shard models across even more GPUs. This requires an Ethernet switch with at least four ports, one for each node. Follow [Step 2: Join the Cluster](#step-2-join-the-cluster-machine-2) on each additional worker and increase `--tensor-parallel-size` accordingly
 - **Try other parallelism strategies**: vLLM supports [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) for mixture-of-experts models and [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) for higher throughput. Experiment with `--enable-expert-parallel` and `--data-parallel-size` to find the best configuration for your workload

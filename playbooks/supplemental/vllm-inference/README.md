@@ -18,7 +18,7 @@ This playbook teaches you how to serve LLMs using containerized vLLM on the inte
 
 ## What You'll Learn
 
-- How to set up and start a vLLM server with ROCm support
+- How to set up and start a vLLM server with AMD ROCm™ support
 - How to interact with models via OpenAI-compatible API endpoints
 - How to send prompts to the local server with `vllm-prompt`
 
@@ -29,7 +29,7 @@ This playbook teaches you how to serve LLMs using containerized vLLM on the inte
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
-> **Note**: If VS Code is not installed, you can install it with Ryzen AI Developer Center.
+> **Note**: If VS Code is not installed, you can install it with AMD Ryzen™ AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
