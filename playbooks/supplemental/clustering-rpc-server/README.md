@@ -28,7 +28,9 @@ This playbook teaches you how to cluster two Ryzen™ AI Halo systems using llam
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 <!-- @os:windows -->
-<!-- @require:memory-config -->
+On Windows, to run larger models that require higher memory, we need to use the AMD Variable Graphics Memory (iGPU VRAM) allocation.
+
+This can be done by opening AMD Software: Adrenalin Edition control panel and navigating to: `Performance > Tuning > AMD Variable Graphics Memory`. Set the value to **96 GB**. Please reboot the system for the changes to take effect.
 <!-- @os:end -->
 
 <!-- @os:linux -->
