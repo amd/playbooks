@@ -9,20 +9,20 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Clustering Two STX Halos with RCCL
+# Clustering Two Ryzen™ AI Halos with RCCL
 
 ## Overview
 
-Your STX Halo™ is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
+Your Ryzen™ AI Halo™ is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
 
-This playbook teaches you how to cluster two STX Halo™ systems using RCCL (ROCm Communication Collectives Library) with vLLM and run Qwen3.5-397B, a 397B parameter model, across both machines with ROCm acceleration.
+This playbook teaches you how to cluster two Ryzen™ AI Halo™ systems using RCCL (ROCm Communication Collectives Library) with vLLM and run Qwen3.5-397B, a 397B parameter model, across both machines with ROCm acceleration.
 
 ## What You'll Learn
 
-- How to extend VRAM allocation on STX Halo™ systems
-- Installing vLLM with ROCm support
-- Configuring RCCL for multi-node tensor-parallel inference across two STX Halo™ systems
-- Running a 397B parameter model across two networked STX Halo™ systems
+- How to extend VRAM allocation on Ryzen™ AI Halo™ systems
+- Launching vLLM with ROCm support
+- Configuring RCCL for multi-node tensor-parallel inference across two Ryzen™ AI Halo™ systems
+- Running a 397B parameter model across two networked Ryzen™ AI Halo systems
 
 ## Prerequisites
 
@@ -226,12 +226,12 @@ To connect Open WebUI to your vLLM endpoint:
 
 ![Open WebUI connection settings for the vLLM endpoint](assets/openwebui-connection.png)
 
-Once connected, select the model from the model dropdown in Open WebUI and start chatting. The model is now running across both of your STX Halo™ nodes:
+Once connected, select the model from the model dropdown in Open WebUI and start chatting. The model is now running across both of your Ryzen™ AI Halo™ nodes:
 
 ![Chatting with Qwen3.5-397B in Open WebUI](assets/openwebui-chat.png)
 
 ## Next Steps
 
 - **Explore other models**: Discover new models on [Hugging Face](https://huggingface.co/models?&sort=trending) that fit within your cluster's combined GPU memory
-- **Scale to four nodes**: Add two more STX Halo™ systems as additional Ray workers to shard models across even more GPUs. This requires an Ethernet switch with at least four ports, one for each node. Follow [Step 2: Join the Cluster](#step-2-join-the-cluster-machine-2) on each additional worker and increase `--tensor-parallel-size` accordingly
+- **Scale to four nodes**: Add two more Ryzen™ AI Halo™ systems as additional Ray workers to shard models across even more GPUs. This requires an Ethernet switch with at least four ports, one for each node. Follow [Step 2: Join the Cluster](#step-2-join-the-cluster-machine-2) on each additional worker and increase `--tensor-parallel-size` accordingly
 - **Try other parallelism strategies**: vLLM supports [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) for mixture-of-experts models and [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) for higher throughput. Experiment with `--enable-expert-parallel` and `--data-parallel-size` to find the best configuration for your workload
