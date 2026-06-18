@@ -25,6 +25,19 @@ This playbook teaches you how to cluster two STX Halo™ systems using RCCL (ROC
 - Running a 397B parameter model across two networked STX Halo™ systems
 
 ## Prerequisites
+
+### Hardware
+
+This playbook requires two Ryzen™ AI Halo units and one Ethernet switch, connected in a star topology with each unit wired directly to the switch.
+
+| Component | Quantity | Description |
+|-----------|----------|-------------|
+| Ryzen™ AI Halo | 2 | Compute nodes that form the cluster |
+| Ethernet switch | 1 | Central switch to allow multi node Ryzen™ AI Halo communication |
+
+The Ethernet switch requires three ports: one for each Halo unit and one for the client machine used to access the model. If you access the model from one of the Halo units, two ports are required.
+
+### Software
 <!-- @require:driver -->
 <!-- @os:linux -->
 ```bash
