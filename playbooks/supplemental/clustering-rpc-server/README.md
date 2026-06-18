@@ -27,6 +27,7 @@ This playbook teaches you how to cluster two Ryzen™ AI Halo systems using llam
 ## Setting the Memory Configuration
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
+
 <!-- @os:windows -->
 On Windows, to run larger models that require higher memory, we need to use the AMD Variable Graphics Memory (iGPU VRAM) allocation.
 
@@ -143,6 +144,7 @@ You should see a speed of `10000Mb/s`:
 ```
 
 > **Note**: If the speed is lower than `10000Mb/s` or the link does not come up, check the cable connection and confirm the switch port is set to 10Gbps. Some switches require auto-negotiation to be disabled and the link speed set manually; refer to your switch's documentation.
+
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -163,6 +165,7 @@ Ethernet  Up      10 Gbps
 ```
 
 > **Note**: If the speed is lower than `10 Gbps` or the link does not come up, check the cable connection and confirm the switch port is set to 10Gbps. Some switches require auto-negotiation to be disabled and the link speed set manually; refer to your switch's documentation.
+
 <!-- @os:end -->
 
 ## Installing llama.cpp
