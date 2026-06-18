@@ -44,13 +44,13 @@ There is no host-side vLLM installation step. Start vLLM with:
 vllm-launch
 ```
 
-The launcher starts the container, targets the integrated GPU, and exposes a local OpenAI-compatible vLLM server.
+The launcher starts the container, targets the integrated GPU, and exposes a local OpenAI-compatible vLLM server. Alternatively, click the vLLM icon in the taskbar.
 
 ## Quick Start
 
 ### 1. Confirm the vLLM Server Is Running
 
-After `vllm-launch` starts, the server is available at `http://localhost:8001`. Keep the launch terminal open because the server runs in the foreground, then open a separate terminal for the remaining steps. The examples below use `Qwen/Qwen3-1.7B`; if your launcher is configured for a different model, substitute that model ID in the requests.
+The `vllm-launch` may take a couple minutes to initialize everything. Once it starts, the server is available at `http://localhost:8001`. Keep the launch terminal open because the server runs in the foreground, then open a separate terminal for the remaining steps. The examples below use `Qwen/Qwen3-1.7B`; if your launcher is configured for a different model, substitute that model ID in the requests.
 
 ### 2. Send a Prompt
 
@@ -113,14 +113,6 @@ Make sure the server is running:
 curl http://localhost:8001/health
 ```
 
-## Requirements
-
-### For vLLM Server
-- Linux
-- `vllm-launch` container launcher
-- AMD system with a supported integrated GPU
-- Sufficient memory for the selected model
-
 ## Summary
 
 In this playbook, you learned how to:
@@ -133,7 +125,13 @@ In this playbook, you learned how to:
 
 You now have a containerized vLLM deployment for serving large language models with optimized performance on the integrated GPU.
 
+## Next Steps
+
+- **Try different models** — Swap the model in the `vllm-launch` configuration to experiment with different LLMs and compare performance.
+- **Build an application** — Use the OpenAI-compatible API to integrate vLLM into a Python app, chatbot, or automation workflow.
+- **Fine-tune and serve** — Fine-tune a model using LoRA or QLoRA, then deploy it with vLLM for optimized inference.
+
 ## Additional Resources
 
-- **[vLLM Official Documentation](https://docs.vllm.ai/)** - Comprehensive guides and API references
-- **[vLLM GitHub Repository](https://github.com/vllm-project/vllm)** - Source code, issues, and community discussions
+- **[vLLM Official Documentation](https://docs.vllm.ai/)** — Comprehensive guides and API references
+- **[vLLM GitHub Repository](https://github.com/vllm-project/vllm)** — Source code, issues, and community discussions
