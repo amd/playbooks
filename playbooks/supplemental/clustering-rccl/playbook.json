@@ -3,6 +3,30 @@
   "title": "Clustering with Two Halos (RCCL)",
   "description": "Set up a multi-node cluster using two STX Halo\u2122 devices with RCCL for distributed workloads",
   "time": 90,
+  "unsupported_platforms": {
+    "halo": [
+      { "platform": "windows", "reason": "RCCL clustering relies on vLLM which is only supported on Linux" }
+    ],
+    "halo_box": [
+      { "platform": "windows", "reason": "RCCL clustering relies on vLLM which is only supported on Linux" }
+    ],
+    "stx": [
+      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
+      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+    ],
+    "krk": [
+      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
+      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+    ],
+    "rx7900xt": [
+      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
+      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+    ],
+    "rx9070xt": [
+      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
+      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+    ]
+  },
   "supported_platforms": {
     "halo": [
       "linux"
@@ -11,10 +35,18 @@
       "linux"
     ]
   },
+  "published_platforms": {
+    "halo": [
+      "linux"    
+    ],
+    "halo_box": [
+      "linux"
+    ]
+  },
   "difficulty": "advanced",
   "isNew": false,
   "isFeatured": false,
-  "developed": false,
+  "developed": true,
   "published": true,
   "tags": [
     "clustering",
