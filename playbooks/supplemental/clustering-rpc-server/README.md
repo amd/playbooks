@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-Your Ryzen™ AI Halo™ is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
+Your Ryzen™ AI Halo is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
 
 This playbook teaches you how to cluster two Ryzen™ AI Halo systems using llama.cpp's RPC engine and run GLM 4.7, a 358B parameter model, across both machines with ROCm acceleration.
 
@@ -31,12 +31,17 @@ This playbook teaches you how to cluster two Ryzen™ AI Halo systems using llam
 On Windows, to run larger models that require higher memory, we need to use the AMD Variable Graphics Memory (iGPU VRAM) allocation.
 
 This can be done by opening AMD Software: Adrenalin Edition control panel and navigating to: `Performance > Tuning > AMD Variable Graphics Memory`. Set the value to **96 GB**. Please reboot the system for the changes to take effect.
+
+<p align="center">
+  <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
+</p>
+
 <!-- @os:end -->
 
 <!-- @os:linux -->
 On Linux, ROCm utilizes a shared system memory pool, and this pool is configured by default to half the system memory.
 
-This amount can be increased by changing the kernel's Translation Table Manager (TTM) page setting, with the following instructions. AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5GB)
+This amount can be increased by changing the kernel's Translation Table Manager (TTM) page setting, with the following instructions. AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5 GB).
 
 * Install the pipx utility and add the path for pipx installed wheels into the system search path.
 
@@ -45,7 +50,7 @@ This amount can be increased by changing the kernel's Translation Table Manager 
   pipx ensurepath
   ```
 
-* Install the amd-debug-tools wheel from PyPi.
+* Install the amd-debug-tools wheel from PyPI.
   ```bash
   pipx install amd-debug-tools
   ```
@@ -62,7 +67,6 @@ This amount can be increased by changing the kernel's Translation Table Manager 
 
 * Reboot the system for changes to take effect.
 
-For `amd-ttm` usage examples, see the [ROCm documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/docs-7.0.2/docs/install/installryz/native_linux/install-ryzen.html#amd-ttm-usage-examples).
 
 <!-- @os:end -->
 <!-- @device:halo_box -->
