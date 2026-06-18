@@ -1,6 +1,6 @@
 {
   "id": "clustering-rpc-server",
-  "title": "Clustering Two Ryzen™ AI Halo with llama.cpp RPC",
+  "title": "Clustering Two Ryzen™ AI Halos with RPC",
   "description": "Set up distributed inference using RPC server across two Ryzen\u2122 AI Halo devices with llama.cpp to run 350B+ models",
   "time": 90,
   "supported_platforms": {

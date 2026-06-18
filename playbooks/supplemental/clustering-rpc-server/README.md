@@ -27,9 +27,42 @@ This playbook teaches you how to cluster two Ryzen™ AI Halo systems using llam
 ## Setting the Memory Configuration
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
-
+<!-- @os:windows -->
 <!-- @require:memory-config -->
+<!-- @os:end -->
 
+<!-- @os:linux -->
+On Linux, ROCm utilizes a shared system memory pool, and this pool is configured by default to half the system memory.
+
+This amount can be increased by changing the kernel's Translation Table Manager (TTM) page setting, with the following instructions. AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5GB)
+
+* Install the pipx utility and add the path for pipx installed wheels into the system search path.
+
+  ```bash
+  sudo apt install pipx
+  pipx ensurepath
+  ```
+
+* Install the amd-debug-tools wheel from PyPi.
+  ```bash
+  pipx install amd-debug-tools
+  ```
+
+* Run the amd-ttm tool to query the current settings for shared memory.
+  ```bash
+  amd-ttm
+  ```
+
+* Reconfigure shared memory settings to **120 GB**:
+  ```bash
+  amd-ttm --set 120
+  ```
+
+* Reboot the system for changes to take effect.
+
+For `amd-ttm` usage examples, see the [ROCm documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/docs-7.0.2/docs/install/installryz/native_linux/install-ryzen.html#amd-ttm-usage-examples).
+
+<!-- @os:end -->
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
