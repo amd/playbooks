@@ -72,34 +72,33 @@ For `amd-ttm` usage examples, see the [ROCm documentation](https://rocm.docs.amd
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-On each machine, run `hostname -I | awk '{print $1}'` to find its local IP address.
-
-Now run `ifconfig` and find the name of the network interface that corresponds to the IP address from the previous step and note it down (it will be referred to in the rest of the instructions as `IFNAME`).
-
-Here is an example (IP address is 10.6.207.93, interface is enp191s0):
+On each machine, find the name of its network interface and note it down (it will be referred to in the rest of the instructions as `IFNAME`). Run:
 
 ```bash
-enp191s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
-        inet 10.6.207.93  netmask 255.255.252.0  broadcast 10.6.207.255
-        inet6 fe80::7f35:81ba:90be:3f0c  prefixlen 64  scopeid 0x20<link>
-        ether 38:a7:46:e6:b6:bd  txqueuelen 1000  (Ethernet)
-        RX packets 7503448  bytes 10474278896 (9.7 GiB)
-        RX errors 0  dropped 10313  overruns 0  frame 0
-        TX packets 732453  bytes 9990339667 (9.3 GiB)
-        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
+```
+
+This prints the interface name directly, for example:
+
+```bash
+enp191s0
 ```
 
 ## VLLM container initialization
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-Create a directory to store the models if it has not been created already:
+Your halobox ships with vLLM packaged inside a prebuilt container image, which you run using Podman, a free and open source container tool.
+
+When you serve the Qwen3.5-397B model in this playbook, vLLM will automatically download the model weights to your system. To make sure those weights are accessible from inside the container, first create a models directory that the container can mount:
 
 ```bash
 mkdir -p ~/.local/share/vLLM/models
 ```
 
-Podman is a free and open source container tool and your machine has access to a container which has vLLM installed. The container shell will be passed the `IFNAME` from the previous step as part of its network environment variables. You can start the container with this command:
+The command below launches the container and drops you into an interactive shell. It mounts the models directory you just created and passes your `IFNAME` to `NCCL_SOCKET_IFNAME` and `GLOO_SOCKET_IFNAME`, telling RCCL (the library vLLM uses to coordinate GPUs across the cluster) which interface to use.
+
+Start the container with:
 
 ```bash
 sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
@@ -107,7 +106,9 @@ sudo podman run -it --name vllm_cluster --replace --pull missing --network=host 
 
 ## Running the Model on the Cluster
 
-vLLM uses Ray to orchestrate the cluster and RCCL to handle GPU-to-GPU communication across nodes. One machine acts as the **head node** (Machine 1), coordinating inference. The other joins as a **worker node** (Machine 2), contributing its GPU memory and compute. Note that Ray is an optional dependency and is only available from within the Podman container.
+vLLM uses Ray to orchestrate the cluster and RCCL to handle GPU-to-GPU communication across nodes. One machine acts as the **head node** (Machine 1), coordinating inference. The other joins as a **worker node** (Machine 2), contributing its GPU memory and compute.
+
+> **Note**: Ray is an optional dependency for vLLM and is only available from within the preconfigured Podman container.
 
 At launch, vLLM shards the model across both nodes using tensor parallelism. Once loaded, inference proceeds as if running on a single accelerator.
 
