@@ -1,6 +1,6 @@
 {
   "id": "vscode-qwen3-coder",
-  "title": "Local LLM Coding with VS Code and Qwen3-Coder",
+  "title": "Local LLM Coding with VSCode and Qwen3-Coder",
   "description": "Use VS Code with locally-running Qwen3-Coder for private code assistance.",
   "time": 30,
   "supported_platforms": {

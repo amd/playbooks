@@ -73,8 +73,6 @@ Increase the shared memory pool by changing the kernel's Translation Table Manag
 
 5. Reboot for the changes to take effect.
 
-For `amd-ttm` usage examples, see the [ROCm documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/docs-7.0.2/docs/install/installryz/native_linux/install-ryzen.html#amd-ttm-usage-examples).
-
 <!-- @device:end -->
 
 <!-- @os:end -->

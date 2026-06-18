@@ -1,9 +1,37 @@
 {
   "id": "clustering-rpc-server",
-  "title": "Clustering Two STX Halos with llama.cpp RPC",
-  "description": "Set up distributed inference using RPC server across two STX Halo\u2122 devices with llama.cpp to run 350B+ models",
+  "title": "Clustering Two Ryzen™ AI Halos with RPC",
+  "description": "Set up distributed inference using RPC server across two Ryzen\u2122 AI Halo devices with llama.cpp to run 350B+ models",
   "time": 90,
+  "unsupported_platforms": {
+    "stx": [
+      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
+      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+    ],
+    "krk": [
+      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
+      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+    ],
+    "rx7900xt": [
+      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
+      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+    ],
+    "rx9070xt": [
+      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
+      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+    ]
+  },
   "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ]
+  },
+  "published_platforms": {
     "halo": [
       "linux",
       "windows"

@@ -9,37 +9,92 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Clustering Two STX Halos with llama.cpp RPC
+# Clustering Two Ryzen™ AI Halos with RPC
 
 ## Overview
 
-Your STX Halo™ is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
+Your Ryzen™ AI Halo is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
 
-This playbook teaches you how to cluster two STX Halo™ systems using llama.cpp's RPC engine and run GLM 4.7, a 358B parameter model, across both machines with ROCm acceleration.
+This playbook teaches you how to cluster two Ryzen™ AI Halo systems using llama.cpp's RPC engine and run GLM 4.7, a 358B parameter model, across both machines with ROCm acceleration.
 
 ## What You'll Learn
 
-- How to extend VRAM allocation on STX Halo™ systems
+- How to extend VRAM allocation on Ryzen™ AI Halo systems
 - Installing llama.cpp with ROCm and RPC support
 - Configuring an RPC worker and launching distributed inference across two nodes
-- Running a 358B parameter model across two networked STX Halo™ systems
+- Running a 358B parameter model across two networked Ryzen™ AI Halo systems
 
 ## Setting the Memory Configuration
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-<!-- @require:memory-config -->
+<!-- @os:windows -->
+On Windows, to run larger models that require higher memory, we need to use the AMD Variable Graphics Memory (iGPU VRAM) allocation.
 
+This can be done by opening AMD Software: Adrenalin Edition control panel and navigating to: `Performance > Tuning > AMD Variable Graphics Memory`. Set the value to **96 GB**. Please reboot the system for the changes to take effect.
+
+<p align="center">
+  <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
+</p>
+
+<!-- @os:end -->
+
+<!-- @os:linux -->
+On Linux, ROCm utilizes a shared system memory pool, and this pool is configured by default to half the system memory.
+
+This amount can be increased by changing the kernel's Translation Table Manager (TTM) page setting, with the following instructions. AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5 GB).
+
+* Install the pipx utility and add the path for pipx installed wheels into the system search path.
+
+  ```bash
+  sudo apt install pipx
+  pipx ensurepath
+  ```
+
+* Install the amd-debug-tools wheel from PyPI.
+  ```bash
+  pipx install amd-debug-tools
+  ```
+
+* Run the amd-ttm tool to query the current settings for shared memory.
+  ```bash
+  amd-ttm
+  ```
+
+* Reconfigure shared memory settings to **120 GB**:
+  ```bash
+  amd-ttm --set 120
+  ```
+
+* Reboot the system for changes to take effect.
+
+
+<!-- @os:end -->
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
 <!-- @require:software-update -->
 <!-- @device:end -->
+## Prerequisites
 
-## Installing Software Prerequisites
-<!-- @require:driver -->
+### Hardware
 
+This playbook requires two Ryzen™ AI Halo units and one Ethernet switch, connected in a star topology with each unit wired directly to the switch.
+
+| Component | Quantity | Description |
+|-----------|----------|-------------|
+| Ryzen™ AI Halo | 2 | Compute nodes that form the cluster |
+| 10Gbps Ethernet switch | 1 | Central switch to allow multi node Ryzen™ AI Halo communication (at least 2 ports) |
+| Ethernet cable | 2 | Connects each Halo unit to the switch (Cat 7 or higher recommended) |
+
+> **Note**: Two Ethernet switch ports are required to connect the two Ryzen™ AI Halo units. A third port is required if you access the model from a separate client machine instead of from one of the Halo units.
+
+### Software
 <!-- @os:windows -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @require:driver -->
+<!-- @device:end -->
+Please install:
 - [Git](https://git-scm.com/downloads/win)
 - [Python](https://www.python.org/downloads/)
 - [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with the **Desktop Development with C++** workload
@@ -50,6 +105,67 @@ This playbook teaches you how to cluster two STX Halo™ systems using llama.cpp
 ```bash
 sudo apt install git cmake python3 python3-pip
 ```
+<!-- @os:end -->
+
+## Physical Hardware Setup
+
+> **Note**: Complete this step on both Machine 1 and Machine 2.
+
+Connect each Ryzen™ AI Halo unit to the Ethernet switch using a Cat 7 (or higher) cable. This establishes the 10Gbps link used for high-speed communication between the nodes.
+<!-- @os:linux -->
+### 1. Determine Network Interfaces
+
+On each machine, find the name of its network interface and note it down (it will be referred to below as `IFNAME`). Run:
+
+```bash
+ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
+```
+
+This prints the interface name directly, for example:
+
+```bash
+enp191s0
+```
+
+### 2. Verify Network Link Speeds
+
+Confirm the link is active and running at full speed by checking the speed of your interface:
+
+```bash
+sudo ethtool <IFNAME> | grep Speed
+```
+
+> **Note**: Replace `<IFNAME>` with the output interface name from [1. Determine Network Interfaces](#1-determine-network-interfaces)
+
+You should see a speed of `10000Mb/s`:
+
+```bash
+	Speed: 10000Mb/s
+```
+
+> **Note**: If the speed is lower than `10000Mb/s` or the link does not come up, check the cable connection and confirm the switch port is set to 10Gbps. Some switches require auto-negotiation to be disabled and the link speed set manually; refer to your switch's documentation.
+
+<!-- @os:end -->
+
+<!-- @os:windows -->
+### Verify Network Link Speed
+
+On each machine, check the link speed of your network interfaces:
+
+```powershell
+Get-NetAdapter | Select-Object Name, Status, LinkSpeed
+```
+
+Your Ethernet interface should be `Up` and running at `10 Gbps`:
+
+```powershell
+Name      Status  LinkSpeed
+----      ------  ---------
+Ethernet  Up      10 Gbps
+```
+
+> **Note**: If the speed is lower than `10 Gbps` or the link does not come up, check the cable connection and confirm the switch port is set to 10Gbps. Some switches require auto-negotiation to be disabled and the link speed set manually; refer to your switch's documentation.
+
 <!-- @os:end -->
 
 ## Installing llama.cpp
@@ -82,7 +198,7 @@ Unzip the downloaded archive:
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-This directory now contains ROCm-enabled builds of `llama-cli.exe`, `llama-server.exe`, and `rpc-server.exe`, precompiled for your STX Halo™ system.
+This directory now contains ROCm-enabled builds of `llama-cli.exe`, `llama-server.exe`, and `rpc-server.exe`, precompiled for your Ryzen™ AI Halo system.
 
 #### Step 3: Verify GPU Detection
 
@@ -117,7 +233,7 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-This directory now contains ROCm-enabled builds of `llama-cli`, `llama-server`, and `rpc-server`, precompiled for your STX Halo™ system.
+This directory now contains ROCm-enabled builds of `llama-cli`, `llama-server`, and `rpc-server`, precompiled for your Ryzen™ AI Halo system.
 
 #### Step 3: Verify GPU Detection
 
@@ -161,7 +277,7 @@ cmake --build rocm --config Release
 |-----------|---------|
 | `-DGGML_HIP=ON` | Enables the ROCm/HIP software stack |
 | `-DGGML_RPC=ON` | Enables RPC for distributed inference |
-| `-DGPU_TARGETS=gfx1151` | Targets the STX Halo™ GPU (Radeon 8060s) |
+| `-DGPU_TARGETS=gfx1151` | Targets the Ryzen™ AI Halo GPU (Radeon 8060s) |
 | `-G Ninja` | Uses the Ninja build system |
 
 #### Step 2: Verify GPU Detection
@@ -213,7 +329,7 @@ cmake --build rocm --config Release -j$(nproc)
 | `-DGGML_HIP=ON` | Enables the ROCm software stack |
 | `-DGGML_RPC=ON` | Enables RPC for distributed inference |
 | `-DGGML_HIP_ROCWMMA_FATTN=ON` | Enables rocWMMA for enhanced Flash Attention on AMD GPUs |
-| `-DAMDGPU_TARGETS="gfx1151"` | Targets the STX Halo™ GPU (Radeon 8060s) |
+| `-DAMDGPU_TARGETS="gfx1151"` | Targets the Ryzen™ AI Halo GPU (Radeon 8060s) |
 
 For more build options, refer to the [llama.cpp build documentation](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
 
@@ -239,7 +355,7 @@ With llama.cpp prepared on each node, proceed to [Downloading the Model](#downlo
 
 ## Downloading the Model
 
-This playbook uses [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), a 358B parameter model in the `Q4_K_XL` quantization from [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). At this quantization the model requires approximately 205GB of storage and fits within the combined GPU memory of two STX Halo™ nodes.
+This playbook uses [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), a 358B parameter model in the `Q4_K_XL` quantization from [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). At this quantization the model requires approximately 205GB of storage and fits within the combined GPU memory of two Ryzen™ AI Halo nodes.
 
 Download the GGUF files using the Hugging Face CLI:
 <!-- @os:linux -->
@@ -403,4 +519,4 @@ For full parameter usage, refer to the [llama-cli documentation](https://github.
 
 - **Connect third-party applications**: `llama-server` exposes an OpenAI-compatible API. Point any OpenAI-compatible application (such as Open WebUI) at `http://<HOST_IP>:8081` with any placeholder API key (e.g., `none`) to connect to your cluster
 - **Explore other models**: Browse quantized GGUFs on [Hugging Face](https://huggingface.co/models?search=gguf) to find models that fit within your cluster's combined GPU memory
-- **Scale to four nodes**: Add two more STX Halo™ systems as additional RPC workers to access models at the 1 trillion parameter scale. Pass additional endpoints to `--rpc` as a comma-separated list (e.g., `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)
+- **Scale to four nodes**: Add two more Ryzen™ AI Halo systems as additional RPC workers to access models at the 1 trillion parameter scale. Pass additional endpoints to `--rpc` as a comma-separated list (e.g., `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)
