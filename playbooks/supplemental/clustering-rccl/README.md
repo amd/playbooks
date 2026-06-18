@@ -118,8 +118,6 @@ This amount can be increased by changing the kernel's Translation Table Manager 
 
 * Reboot the system for changes to take effect.
 
-For `amd-ttm` usage examples, see the [ROCm documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/docs-7.0.2/docs/install/installryz/native_linux/install-ryzen.html#amd-ttm-usage-examples).
-
 ## vLLM Container Initialization
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
