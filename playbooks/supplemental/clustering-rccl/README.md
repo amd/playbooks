@@ -233,5 +233,5 @@ Once connected, select the model from the model dropdown in Open WebUI and start
 ## Next Steps
 
 - **Explore other models**: Discover new models on [Hugging Face](https://huggingface.co/models?&sort=trending) that fit within your cluster's combined GPU memory
-- **Scale to four nodes**: Add two more STX Halo™ systems as additional Ray workers to shard models across even more GPUs. Follow [Step 2: Join the Cluster](#step-2-join-the-cluster-machine-2) on each additional worker and increase `--tensor-parallel-size` accordingly
+- **Scale to four nodes**: Add two more STX Halo™ systems as additional Ray workers to shard models across even more GPUs. This requires an Ethernet switch with at least four ports, one for each node. Follow [Step 2: Join the Cluster](#step-2-join-the-cluster-machine-2) on each additional worker and increase `--tensor-parallel-size` accordingly
 - **Try other parallelism strategies**: vLLM supports [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) for mixture-of-experts models and [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) for higher throughput. Experiment with `--enable-expert-parallel` and `--data-parallel-size` to find the best configuration for your workload
