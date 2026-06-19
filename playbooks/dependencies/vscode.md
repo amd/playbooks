@@ -6,13 +6,33 @@ SPDX-License-Identifier: MIT
 
 ### Visual Studio Code
 
-These are the instructions for how to install VS Code version 1.08.2. 
+<!-- @device:halo_box -->
+<!-- @os:windows -->
+VS Code can be installed from the **AMD Ryzen™ AI Developer Center**. Go to the **Updates** tab and install VS Code if it is not already present.
+<!-- @os:end -->
 
+<!-- @os:linux -->
+VS Code can be installed from the **AMD Ryzen™ AI Developer Center**. Go to the **Manage** tab and install VS Code if it is not already present.
+<!-- @os:end -->
+<!-- @device:end -->
+
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @os:windows -->
 
 1. Download the Windows installation executable from: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
 2. Click on the downloaded file `VSCodeUserSetup-x64-1.108.2.exe` to install VS Code.
 
+<!-- @os:end -->
+
+<!-- @os:linux -->
+
+1. Download the Debian installation package from: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
+2. Click on the downloaded file `code_1.108.2-1769004815_amd64.deb` to install VS Code.
+
+<!-- @os:end -->
+<!-- @device:end -->
+
+<!-- @os:windows -->
 <!-- @test:id=vscode-cli-windows timeout=120 hidden=True -->
 ```powershell
 code --version
@@ -30,10 +50,6 @@ winget list --id Microsoft.VisualStudioCode -e
 <!-- @os:end -->
 
 <!-- @os:linux -->
-
-1. Download the Debian installation package from: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
-2. Click on the downloaded file `code_1.108.2-1769004815_amd64.deb` to install VS Code.
-
 <!-- @test:id=vscode-ms-repo-key-present-linux timeout=120 hidden=True -->
 ```bash
 test -f /etc/apt/sources.list.d/vscode.list
