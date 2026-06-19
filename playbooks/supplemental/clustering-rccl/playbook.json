@@ -1,6 +1,6 @@
 {
   "id": "clustering-rccl",
-  "title": "Clustering with Two Halos (RCCL)",
+  "title": "Clustering Two Ryzen™ AI Halos with RCCL",
   "description": "Set up a multi-node cluster using two Ryzen\u2122 AI Halo devices with RCCL for distributed workloads",
   "time": 90,
   "unsupported_platforms": {
