@@ -61,7 +61,7 @@ AMD Sync runs on Windows 11 and Linux. Download the installer for your OS, then 
 
 ### Windows
 
-[Download AMDSyncInstaller.exe](https://developer.amd.com/playbooks/windows/amdsyncinstaller)
+[Download AMDSyncInstaller.exe](https://drivers.amd.com/drivers/amd-sync/windows/amdsyncinstaller.exe)
 
 1. Double-click `AMDSyncInstaller.exe`.
 2. Click **Accept & Install**.
