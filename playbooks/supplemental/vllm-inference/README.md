@@ -62,10 +62,22 @@ vllm-prompt "Tell me a story"
 
 ### 3. Chat with the model using the OpenAI Python API
 
-Since vLLM exposes an OpenAI-compatible API, you can use the `openai` Python package to interact with it. Install the client package in your local Python environment:
+Since vLLM exposes an OpenAI-compatible API, you can use the `openai` Python package to interact with it.
 
+First, create a Python virtual environment:
+
+<!-- @os:linux -->
+<!-- @device:halo_box -->
 ```bash
-python3 -m pip install openai
+sudo apt install -y python3-venv
+python3 -m venv vllm-env
+source vllm-env/bin/activate
+```
+<!-- @device:end -->
+
+Install the OpenAI package
+```bash
+pip install openai
 ```
 
 Create an `OpenAI` client pointed at the local vLLM server instead of OpenAI's servers. The `api_key` is required by the client but vLLM doesn't validate it, so any string works:
@@ -79,7 +91,7 @@ client = OpenAI(
 )
 ```
 
-Then send a chat completion request. This uses the same message format as the OpenAI API — a list of messages with roles like `"user"` and `"assistant"`. Setting `stream=True` means the response will arrive incrementally rather than all at once:
+Then, send a chat completion request. This uses the same message format as the OpenAI API — a list of messages with roles like `"user"` and `"assistant"`. Setting `stream=True` means the response will arrive incrementally rather than all at once:
 
 ```python
 response = client.chat.completions.create(

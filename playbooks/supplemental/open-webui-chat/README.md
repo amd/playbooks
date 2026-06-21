@@ -28,9 +28,9 @@ This setup enables you to explore the **complete multimodal workflow end-to-end*
 
 ---
 
-## What You’ll Learn
+## What You'll Learn
 
-By the end, you’ll be able to:
+By the end, you'll be able to:
 
 - Connect Open WebUI to a local OpenAI-compatible backend (Lemonade)
 - Chat with a local LLM from your browser
@@ -50,7 +50,7 @@ By the end, you’ll be able to:
 | Backend (Model Server) | Hosts models and exposes HTTP endpoints | Lemonade, Ollama, vLLM, llama.cpp server, OpenAI-compatible servers |
 | Models | The actual LLM / Vision / Diffusion / Audio models | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
 
-#### Why “OpenAI-compatible API” matters
+#### Why "OpenAI-compatible API" matters
 
 Open WebUI is built around standard OpenAI-style endpoints, like:
   - Chat: `/chat/completions`
@@ -60,11 +60,11 @@ Open WebUI is built around standard OpenAI-style endpoints, like:
 
 Lemonade exposes these under `http://localhost:13305/api/v1/...`
 
-If a backend supports those endpoints, Open WebUI can talk to it with minimal setup. That’s why we can switch backends without changing our workflow.
+If a backend supports those endpoints, Open WebUI can talk to it with minimal setup. That's why we can switch backends without changing our workflow.
 
 #### Two services, two ports
 
-Throughout this playbook you’ll work with two separate services:
+Throughout this playbook you'll work with two separate services:
 
 | Service | URL | What you do there |
 |---|---|---|
@@ -115,7 +115,7 @@ Before installing Open WebUI, make sure the models you want to use are downloade
 2. Browse the available models and download the ones you want to use (e.g., an LLM for chat, a vision model, and/or a Stable Diffusion model for image generation).
 3. Confirm the API is reachable by visiting `http://localhost:13305/api/v1/models` in your browser — you should see your downloaded models listed.
 
-> Models must be downloaded in **Lemonade** (`localhost:13305`) before they can appear in **Open WebUI** (`localhost:8080`). If a model isn’t showing up in Open WebUI later, come back here and check Lemonade first.
+> Models must be downloaded in **Lemonade** (`localhost:13305`) before they can appear in **Open WebUI** (`localhost:8080`). If a model isn't showing up in Open WebUI later, come back here and check Lemonade first.
 
 
 <!-- @os:windows -->
@@ -687,7 +687,7 @@ In Open WebUI:
 
 ## Main Activities
 
-Now, you’re all set up. Let's look at three interesting things to do.
+Now, you're all set up. Let's look at three interesting things to do.
 
 ---
 
@@ -706,7 +706,7 @@ Now, you’re all set up. Let's look at three interesting things to do.
 
 3. The model will respond in the chat.
 
-4. At this time, open `Task Manager` on your system. You will see **high GPU or NPU utilization** based on whether the model you selected is **Hybrid** or **NPU** respectively. Using the task manager, you can confirm that you’re running the model locally.
+4. At this time, open `Task Manager` on your system. You will see **high GPU or NPU utilization** based on whether the model you selected is **Hybrid** or **NPU** respectively. Using the task manager, you can confirm that you're running the model locally.
 <p align="center">
   <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
 </p>
@@ -737,7 +737,7 @@ This validates that Open WebUI can send requests to Lemonade using the OpenAI-co
 
 This requires a model that supports image input (a Vision or Multimodal model).
 
-1. Click the filter icon, select “By Category,” then choose a model from the **Vision** section (e.g., `Qwen3.5-4B-GGUF`)
+1. Click the filter icon, select "By Category," then choose a model from the **Vision** section (e.g., `Qwen3.5-4B-GGUF`)
 
    <p align="center">
      <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
@@ -772,60 +772,7 @@ Stable Diffusion models don't support text generation, they only generate images
    - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` or `SDXL-Base-1.0`
-4. If you want to add more parameters, add them to the text field as JSON. For example: `{ “steps”: 4, “cfg_scale”: 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
-
-   <p align=”center”>
-     <img src=”assets/images_settings.png” alt=”Open WebUI Image Generation settings” width=”600”/>
-   </p>
-
-5. Save
-
-
-#### Step 2: Allow Image Generation for the model
-This step ensures that you enable Image Generation as a capability for your model.
-1. Go to **Admin Settings → Models** (http://localhost:8080/admin/settings/models) and choose your model
-2. Turn on `Image Generation`
-
-   <p align="center">
-     <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
-     <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
-   </p>
-
-#### Step 3: Generate an image from the chat screen
-
-1. Go back to chat at `http://localhost:8080`.
-2. Select a **Text Generation LLM** in the model dropdown (example: Qwen, Llama). **Do not select a Stable Diffusion model** as this is a chat model selector.
-3. In the message area, click on **Integrations**, and toggle **Image** ON.
-4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
-5. An image is generated and appears in the chat.
-
-   <p align="center">
-     <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
-     <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
-   </p>
-
-This establishes that Open WebUI can coordinate a “two-part” workflow:
-  - The LLM helps refine the prompt
-  - The image is generated via Lemonade’s Images endpoint using Stable Diffusion
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
-### Activity 3: Generate an Image from a Text Prompt (Stable Diffusion)
-
-Stable Diffusion models don’t support text generation, they only generate images through the Images API. 
-
-#### Step 1: Configure Image Generation in Open WebUI
-
-1. In the Lemonade GUI (`http://localhost:13305`), search for `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality) and download it.
-2. Go to **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
-3. Set:
-   - **Image Generation:** ON
-   - **Image Generation Engine:** Default (OpenAI)
-   - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
-   - **OpenAI API Key:** `-`
-   - **Model:** `SDXL-Turbo` or `SDXL-Base-1.0`
-4. If you want to add more parameters, add them to the text field as JSON. For example: `{ “steps”: 4, “cfg_scale”: 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+4. If you want to add more parameters, add them to the text field as JSON. For example: `{ "steps": 4, "cfg_scale": 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
@@ -857,9 +804,62 @@ This step ensures that you enable Image Generation as a capability for your mode
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-This establishes that Open WebUI can coordinate a “two-part” workflow:
+This establishes that Open WebUI can coordinate a "two-part" workflow:
   - The LLM helps refine the prompt
-  - The image is generated via Lemonade’s Images endpoint using Stable Diffusion
+  - The image is generated via Lemonade's Images endpoint using Stable Diffusion
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+### Activity 3: Generate an Image from a Text Prompt (Stable Diffusion)
+
+Stable Diffusion models don't support text generation, they only generate images through the Images API. 
+
+#### Step 1: Configure Image Generation in Open WebUI
+
+1. In the Lemonade GUI (`http://localhost:13305`), search for `SDXL-Turbo` (fast) or `SDXL-Base-1.0` (higher quality) and download it.
+2. Go to **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
+3. Set:
+   - **Image Generation:** ON
+   - **Image Generation Engine:** Default (OpenAI)
+   - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
+   - **OpenAI API Key:** `-`
+   - **Model:** `SDXL-Turbo` or `SDXL-Base-1.0`
+4. If you want to add more parameters, add them to the text field as JSON. For example: `{ "steps": 4, "cfg_scale": 1 }`. See available parameters at [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+
+   <p align="center">
+     <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
+   </p>
+
+5. Save
+
+
+#### Step 2: Allow Image Generation for the model
+This step ensures that you enable Image Generation as a capability for your model.
+1. Go to **Admin Settings → Models** (http://localhost:8080/admin/settings/models) and choose your model
+2. Turn on `Image Generation`
+
+   <p align="center">
+     <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
+     <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
+   </p>
+
+#### Step 3: Generate an image from the chat screen
+
+1. Go back to chat at `http://localhost:8080`.
+2. Select a **Text Generation LLM** in the model dropdown (example: Qwen, Llama). **Do not select a Stable Diffusion model** as this is a chat model selector.
+3. In the message area, click on **Integrations**, and toggle **Image** ON.
+4. Use a prompt like: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
+5. An image is generated and appears in the chat.
+
+   <p align="center">
+     <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
+     <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
+   </p>
+
+This establishes that Open WebUI can coordinate a "two-part" workflow:
+  - The LLM helps refine the prompt
+  - The image is generated via Lemonade's Images endpoint using Stable Diffusion
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -867,11 +867,11 @@ This establishes that Open WebUI can coordinate a “two-part” workflow:
 
 ## Troubleshooting
 
-### “No models show up in Open WebUI”
+### "No models show up in Open WebUI"
 - First, check Lemonade: open `http://localhost:13305/api/v1/models` in a browser and confirm your models are listed and downloaded
 - Then, check the Open WebUI connection: go to **Admin Settings → Connections** at `http://localhost:8080/admin/settings/connections` and verify the Base URL is `http://localhost:13305/api/v1`
 
-### “This model does not support chat completion” error message
+### "This model does not support chat completion" error message
 - You selected an image model (SDXL-Turbo / SDXL-Base-1.0) in the chat model dropdown.
 - **Fix**: select an LLM for chat, and use the Image toggle + Images settings for generation.
 <p align="center">
@@ -886,7 +886,7 @@ This establishes that Open WebUI can coordinate a “two-part” workflow:
 
 ## Next Steps
 
-You now have a working **“local AI stack”**, a single UI controlling multiple model types through a standard API.
+You now have a working **'local AI stack'**, a single UI controlling multiple model types through a standard API.
 
 Here are three expansions that unlock entirely new workflows:
 
@@ -896,7 +896,7 @@ Try turning audio into text using a Whisper model, then feed it into an LLM for 
 
 ### 2. Python Coding inside Open WebUI
 
-Use Open WebUI’s built-in code execution experience to run Python snippets, inspect outputs, and iterate faster—without leaving the UI. [Reference](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
+Use Open WebUI's built-in code execution experience to run Python snippets, inspect outputs, and iterate faster—without leaving the UI. [Reference](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
 
 ### 3. HTML Rendering inside Open WebUI
 
