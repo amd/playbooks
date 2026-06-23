@@ -64,7 +64,7 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 2. Press `Ctrl + L` to open the Model Loader, select `Manually choose model load parameters`, and click on `${model_name}`
 3. Make sure "show advanced settings" is checked.  
 4. Change `Context Length` as desired. Higher context length means more model memory, but more system memory used. Recommended for this playbook is 4096.
-5. Make sure `GPU Offload` is set to maximum and `Flash Attention` is On
+5. Make sure `GPU Offload` is set to maximum and `Flash Attention` is On (Cache Quantizations can remain off)
 6. Check `Remember settings` and click on `Load Model`.
 7. If not in the chat window, press `Ctrl + 1` or click on the 👾 button on the top left of the screen.
 8. Send a message and start interacting with the model!
