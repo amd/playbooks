@@ -335,14 +335,7 @@ Open the Lemonade GUI by clicking the Lemonade Icon. Right click the tray icon t
 
 Alternatively, you can open a terminal and run `lemonade list` to see what models are installed. Then, run:
 
-<!-- @device:halo -->
-```bash
-lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
-```
-<!-- @device:end -->
-
 <!-- @device:halo_box -->
-
 <!-- @os:linux -->
 ```bash
 lemonade run gpt-oss-120b-Q4_K_M --llamacpp vulkan
@@ -354,7 +347,12 @@ lemonade run gpt-oss-120b-Q4_K_M --llamacpp vulkan
 lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 ```
 <!-- @os:end -->
+<!-- @device:end -->
 
+<!-- @device:halo -->
+```bash
+lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
+```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt -->

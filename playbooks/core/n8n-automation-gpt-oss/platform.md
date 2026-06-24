@@ -14,7 +14,7 @@ This document describes the expected platform configurations for running this pl
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Pre-installed, available in PATH |
+| **Node.js** | 22.16+ | Pre-installed and available in PATH on Halo Box; must be manually installed on all other devices (Halo, STX, KRK, RX 7900 XT, RX 9070 XT) |
 | **Lemonade Server** | latest | Running on `http://localhost:13305/api/v1` |
 
 ### Lemonade LLM
@@ -34,7 +34,7 @@ The Lemonade server should be running with the device-appropriate model loaded:
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Pre-installed, available in PATH |
+| **Node.js** | 22.16+ | Pre-installed and available in PATH on Halo Box; must be manually installed on all other devices (Halo, STX, KRK, RX 7900 XT, RX 9070 XT) |
 | **Lemonade Server** | latest | Running on `http://localhost:13305/api/v1` |
 
 ### Lemonade LLM
