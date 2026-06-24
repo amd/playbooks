@@ -1,0 +1,159 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Allocate RDNA GPU Runners
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "allocate" to confirm you want to request 8 GPU runners (2x RX7900XT Win, 2x RX7900XT Linux, 2x RX9070XT Win, 2x RX9070XT Linux)'
+        required: true
+        type: string
+
+jobs:
+  validate:
+    name: Validate Input
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "allocate" ]; then
+            echo "Error: You must type 'allocate' in the confirmation field."
+            exit 1
+          fi
+          echo "Confirmation received. Proceeding to allocate 8 GPU runners."
+
+  allocate-rx7900xt-linux:
+    name: Allocate 2x RX7900XT Linux (gpu_navi3x)
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.ORCHESTRAI_APP_ID }}
+          private-key: ${{ secrets.ORCHESTRAI_APP_KEY }}
+          owner: AMD-SW-Infrastructure
+          repositories: ucicd-test-orchestra
+
+      - name: Request 2x RX 7900 XT Linux runners
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: AMD-SW-Infrastructure/ucicd-test-orchestra
+          event-type: rdna-service-request
+          client-payload: |
+            {
+              "action": "allocate",
+              "repository": "amd/playbooks",
+              "platform": "linux",
+              "gpu": "gpu_navi3x",
+              "count": 2
+            }
+
+  allocate-rx7900xt-windows:
+    name: Allocate 2x RX7900XT Windows (gpu_navi3x)
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.ORCHESTRAI_APP_ID }}
+          private-key: ${{ secrets.ORCHESTRAI_APP_KEY }}
+          owner: AMD-SW-Infrastructure
+          repositories: ucicd-test-orchestra
+
+      - name: Request 2x RX 7900 XT Windows runners
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: AMD-SW-Infrastructure/ucicd-test-orchestra
+          event-type: rdna-service-request
+          client-payload: |
+            {
+              "action": "allocate",
+              "repository": "amd/playbooks",
+              "platform": "windows",
+              "gpu": "gpu_navi3x",
+              "count": 2
+            }
+
+  allocate-rx9070xt-linux:
+    name: Allocate 2x RX9070XT Linux (gpu_navi4x)
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.ORCHESTRAI_APP_ID }}
+          private-key: ${{ secrets.ORCHESTRAI_APP_KEY }}
+          owner: AMD-SW-Infrastructure
+          repositories: ucicd-test-orchestra
+
+      - name: Request 2x RX 9070 XT Linux runners
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: AMD-SW-Infrastructure/ucicd-test-orchestra
+          event-type: rdna-service-request
+          client-payload: |
+            {
+              "action": "allocate",
+              "repository": "amd/playbooks",
+              "platform": "linux",
+              "gpu": "gpu_navi4x",
+              "count": 2
+            }
+
+  allocate-rx9070xt-windows:
+    name: Allocate 2x RX9070XT Windows (gpu_navi4x)
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.ORCHESTRAI_APP_ID }}
+          private-key: ${{ secrets.ORCHESTRAI_APP_KEY }}
+          owner: AMD-SW-Infrastructure
+          repositories: ucicd-test-orchestra
+
+      - name: Request 2x RX 9070 XT Windows runners
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: AMD-SW-Infrastructure/ucicd-test-orchestra
+          event-type: rdna-service-request
+          client-payload: |
+            {
+              "action": "allocate",
+              "repository": "amd/playbooks",
+              "platform": "windows",
+              "gpu": "gpu_navi4x",
+              "count": 2
+            }
+
+  summary:
+    name: Allocation Summary
+    needs: [allocate-rx7900xt-linux, allocate-rx7900xt-windows, allocate-rx9070xt-linux, allocate-rx9070xt-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print next steps
+        run: |
+          echo "All 8 runner allocation requests have been sent."
+          echo ""
+          echo "Next steps:"
+          echo "  1. Wait 2-5 minutes for runners to come online."
+          echo "  2. Check: https://github.com/amd/playbooks/settings/actions/runners"
+          echo "  3. You should see 8 new runners with names starting with CS-RORDMZ-"
+          echo ""
+          echo "The runners will remain registered for 30 days."
+          echo "You do NOT need to run this workflow again for each CI run."
