@@ -69,6 +69,7 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 <!-- @os:end -->
 
+
 <!-- @os:windows -->
 <!-- @device:halo_box -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
@@ -81,7 +82,6 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
 <!-- @test:id=create-venv timeout=60 -->
@@ -92,6 +92,7 @@ pytorch-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
+
 > **Tip**: Windows users may need to modify their PowerShell Execution Policy (e.g.
 > setting it to RemoteSigned or Unrestricted) before running some Powershell commands.
 
@@ -106,7 +107,6 @@ pytorch-env\Scripts\activate
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt value="Qwen/Qwen3.5-4B" -->
 
 <!-- @device:halo,halo_box -->
-
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
@@ -125,7 +125,6 @@ pip install transformers safetensors accelerate sentencepiece protobuf
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt -->
-
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
