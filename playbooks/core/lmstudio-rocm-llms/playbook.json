@@ -27,6 +27,10 @@
     "rx9070xt": [
       "linux",
       "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
     ]
   },
   "tested_platforms": {
@@ -95,6 +99,10 @@
       "windows"
     ],
     "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
       "linux",
       "windows"
     ]

@@ -45,15 +45,15 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 ## Downloading Models
 
 <!-- @var:id=lms_model device=halo,halo_box value="gpt-oss-120b" -->
-<!-- @var:id=lms_model device=stx,krk,rx7900xt,rx9070xt value="qwen3.5-9b" -->
+<!-- @var:id=lms_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="qwen3.5-9b" -->
 <!-- @var:id=model_name device=halo,halo_box value="GPT-OSS 120B" -->
-<!-- @var:id=model_name device=stx,krk,rx7900xt,rx9070xt value="Qwen3.5 9B" -->
+<!-- @var:id=model_name device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen3.5 9B" -->
 
 <!-- @device:halo,halo_box -->
 <!-- @require:lmstudio-models-gpt-oss-120b -->
 <!-- @device:end -->
 
-<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @require:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
@@ -103,7 +103,7 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <p align="center">
   <img src="assets/chat_qwen.png" alt="Chatting with ${model_name} on LM Studio" width="600"/>
 </p>

@@ -27,7 +27,7 @@ The following models should already be present in the LM Studio models directory
 | Device | Model Type | Quantization | Size | Location |
 | ----- |------------|--------------|------|----------|
 | halo_box / halo | OpenAI GPT-OSS 120B | `MXFP4` | 59 GB | `models\ggml-org` |
-| stx / krk / rx7900xt / rx9070xt | Qwen3.5 9B | `Q4_K_M` | 7 GB | `models\lmstudio-community` |
+| stx / krk / rx7900xt / rx9070xt / r9700 | Qwen3.5 9B | `Q4_K_M` | 7 GB | `models\lmstudio-community` |
 
 ---
 
