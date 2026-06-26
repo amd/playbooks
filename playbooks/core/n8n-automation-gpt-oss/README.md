@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
 > This playbook requires a minimum of **32GB** of system memory.
 <!-- @device:end -->
@@ -58,7 +58,7 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
 
-<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 
@@ -355,7 +355,7 @@ lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 ```
 <!-- @device:end -->
 
-<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 ```bash
 lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 ```

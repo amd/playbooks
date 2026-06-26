@@ -14,7 +14,7 @@ This document describes the expected platform configurations for running this pl
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Pre-installed and available in PATH on the AMD Ryzen™ AI Halo Developer Platform (Halo Box); must be manually installed on all other devices (STX Halo, STX Point, Krackan Point , Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700) |
+| **Node.js** | 22.16+ | Pre-installed and available in PATH on the AMD Ryzen™ AI Halo Developer Platform (Halo Box); must be manually installed on all other devices (STX Halo, STX Point, Krackan Point, Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700) |
 | **Lemonade Server** | latest | Running on `http://localhost:13305/api/v1` |
 
 ### Lemonade LLM
@@ -34,7 +34,7 @@ The Lemonade server should be running with the device-appropriate model loaded:
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Pre-installed and available in PATH on the AMD Ryzen™ AI Halo Developer Platform (Halo Box); must be manually installed on all other devices (STX Halo, STX Point, Krackan Point , Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700) |
+| **Node.js** | 22.16+ | Pre-installed and available in PATH on the AMD Ryzen™ AI Halo Developer Platform (Halo Box); must be manually installed on all other devices (STX Halo, STX Point, Krackan Point, Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700) |
 | **Lemonade Server** | latest | Running on `http://localhost:13305/api/v1` |
 
 ### Lemonade LLM
