@@ -169,7 +169,7 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     ```
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -199,7 +199,7 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
     On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
     ```bash
     python -m venv lmstudio-env
