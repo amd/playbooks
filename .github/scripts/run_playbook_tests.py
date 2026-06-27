@@ -161,7 +161,7 @@ from pathlib import Path
 from typing import Optional
 
 
-VALID_DEVICES = {"halo", "stx", "krk", "rx7900xt", "rx9070xt"}
+VALID_DEVICES = {"halo", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"}
 
 
 @dataclass

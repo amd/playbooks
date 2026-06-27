@@ -16,6 +16,7 @@ const HARDWARE_LABELS: Record<string, string> = {
   krk: "Krackan Point",
   rx7900xt: "Radeon RX 7900 XT",
   rx9070xt: "Radeon RX 9070 XT",
+  r9700: "Radeon AI Pro R9700",
 };
 
 interface WorkflowRun {
