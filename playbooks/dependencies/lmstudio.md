@@ -18,7 +18,7 @@ To allow LM Studio to see the pre-installed models, navigate to Settings > Gener
 </p>
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 1. Download the installer from here: [https://lmstudio.ai/download](https://lmstudio.ai/download)
 2. Install. 
 <!-- @device:end -->
