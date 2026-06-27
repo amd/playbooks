@@ -4,19 +4,19 @@ This document describes the expected platform configurations for running this pl
 
 ## Prerequisites
 
-PyTorch with ROCm support will be pre-installed on your AMD Developer Platform. Please refer to the relevant section for your operating system:
+PyTorch with ROCm support is pre-installed on the AMD Ryzen™ AI Halo Developer Platform (Halo Box). For all other devices (STX Halo, STX Point, Krackan Point, Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700), users must manually install PyTorch with ROCm support. Please refer to the relevant section for your operating system:
 
 ### Windows
 
 | Component     | Version         | Notes                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 or newer    | Preinstalled, available in PATH   |
+| **PyTorch**   | 2.8 or newer    | Pre-installed on Halo Box; must be manually installed on all other devices (STX Halo, STX Point, Krackan Point, Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700)   |
 
 ### Linux
 
 | Component     | Version         | Notes                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 or newer    | Preinstalled, available in PATH   |
+| **PyTorch**   | 2.8 or newer    | Pre-installed on Halo Box; must be manually installed on all other devices (STX Halo, STX Point, Krackan Point, Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700)   |
 
 ## Required Models
 
@@ -24,7 +24,7 @@ The following models are tested and optimized for your platform:
 
 | Model | Parameters | Size | Download Location |
 |-------|------------|------|-------------------|
-| **facebook/seamless-m4t-v2-large** | 2.3B | ~10GB | Pre-installed on AMD Halo Developer Platform |
+| **facebook/seamless-m4t-v2-large** | 2.3B | ~10GB | Pre-installed on Halo Box; must be manually installed on all other devices (STX Halo, STX Point, Krackan Point, Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700) |
 
 Models will be automatically downloaded to the Hugging Face cache directory:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
