@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-<!-- @device:stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
 > This playbook requires a minimum of **32GB** of system memory.
 <!-- @device:end -->
@@ -96,7 +96,7 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 
 <!-- @os:linux -->
 <!-- @require:lemonade,podman -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ---
 <!-- @device:end -->
 <!-- @os:end -->
@@ -810,7 +810,7 @@ This establishes that Open WebUI can coordinate a "two-part" workflow:
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Activity 3: Generate an Image from a Text Prompt (Stable Diffusion)
 
 Stable Diffusion models don't support text generation, they only generate images through the Images API. 

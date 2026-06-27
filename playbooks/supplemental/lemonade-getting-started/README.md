@@ -581,7 +581,7 @@ fastflowlm_0.9.X_debian13_amd64.deb
 ```
 <!-- @device:end -->
 
-<!-- @device:halo,sx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,sx,krk,rx7900xt,rx9070xt,r9700 -->
 ```
 fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 ```

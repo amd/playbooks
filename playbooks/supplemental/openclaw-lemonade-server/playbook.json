@@ -4,11 +4,11 @@
   "description": "Install and configure OpenClaw autonomous AI agent with Lemonade Server.",
   "time": 45,
   "supported_platforms": {
-    "halo_box": [
+    "halo": [
       "linux",
       "windows"
     ],
-    "halo": [
+    "halo_box": [
       "linux",
       "windows"
     ],
@@ -17,68 +17,44 @@
       "windows"
     ],
     "krk": [
-      "linux",
-      "windows"
-    ],
-    "rx7900xt": [
-      "linux",
-      "windows"
-    ],
-    "rx9070xt": [
       "linux",
       "windows"
     ]
   },
   "tested_platforms": {
     "halo": [
-      "linux",
-      "windows"
+      "windows",
+      "linux"
     ],
     "stx": [
       "linux",
       "windows"
     ],
     "krk": [
-      "linux",
-      "windows"
-    ],
-    "rx7900xt": [
-      "linux",
-      "windows"
-    ],
-    "rx9070xt": [
       "linux",
       "windows"
     ]
   },
   "required_platforms": {
     "halo": [
-      "linux",
-      "windows"
+      "windows",
+      "linux"
     ],
     "stx": [
       "linux",
       "windows"
     ],
     "krk": [
-      "linux",
-      "windows"
-    ],
-    "rx7900xt": [
-      "linux",
-      "windows"
-    ],
-    "rx9070xt": [
       "linux",
       "windows"
     ]
   },
   "published_platforms": {
-    "halo_box": [
+    "halo": [
       "linux",
       "windows"
     ],
-    "halo": [
+    "halo_box": [
       "linux",
       "windows"
     ],
@@ -87,14 +63,6 @@
       "windows"
     ],
     "krk": [
-      "linux",
-      "windows"
-    ],
-    "rx7900xt": [
-      "linux",
-      "windows"
-    ],
-    "rx9070xt": [
       "linux",
       "windows"
     ]
