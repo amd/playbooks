@@ -23,7 +23,7 @@ The example is designed to be practical and easy to modify, so you can use it as
 - How to fine-tune a LLM using SFT with Unsloth
 - How to save the fine-tuned result in local storage
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > **Note:** Some of the fine-tuning techniques in this playbook may require more than 64GB of system RAM.
 
 <!-- @device:end -->
@@ -64,7 +64,7 @@ source unsloth-env/bin/activate
 <!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -98,7 +98,7 @@ python -m venv unsloth-env --system-site-packages
 <!-- @setup:id=activate-venv command="unsloth-env\Scripts\activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 Open a PowerShell terminal and create a virtual environment:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
