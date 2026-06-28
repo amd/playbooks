@@ -47,7 +47,7 @@
  * <!-- @device:end -->
  * ```
  * 
- * Valid device IDs: halo, stx, krk, rx7900xt, rx9070xt.
+ * Valid device IDs: halo, stx, krk, rx7900xt, rx9070xt, r9700.
  * Content outside of `@device` tags is shown on all devices.
  * 
  * ## Pre-installed Software Dropdowns
@@ -72,20 +72,21 @@
 
 export type Platform = "windows" | "linux";
 export type Architecture = "halo" | "krk";
-export type Device = "halo" | "halo_box" | "stx" | "krk" | "rx7900xt" | "rx9070xt";
+export type Device = "halo" | "halo_box" | "stx" | "krk" | "rx7900xt" | "rx9070xt" | "r9700";
 export type Category = "core" | "supplemental" | "backup";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 export type DeviceCategory = "reference" | "apu" | "gpu";
 
-export const DEVICE_IDS: Device[] = ["halo", "halo_box", "stx", "krk", "rx7900xt", "rx9070xt"];
+export const DEVICE_IDS: Device[] = ["halo", "halo_box", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"];
 
 export const deviceNames: Record<Device, string> = {
   halo: "Ryzen™ AI Max",
   halo_box: "AMD Ryzen™ AI Halo",
   stx: "Ryzen™ AI 300 HX",
   krk: "Ryzen™ AI 300",
-  rx7900xt: "RX 7900 XT",
-  rx9070xt: "RX 9070 XT",
+  rx7900xt: "Radeon™ RX 7900 XT",
+  rx9070xt: "Radeon™ RX 9070 XT",
+  r9700: "Radeon™ AI Pro R9700",
 };
 
 export interface DeviceCategoryInfo {
@@ -99,7 +100,7 @@ export interface DeviceCategoryInfo {
 export const DEVICE_CATEGORIES: DeviceCategoryInfo[] = [
   { id: "reference", name: "Reference Platforms", devices: ["halo_box"], deviceDisplayNames: { halo_box: "AMD Ryzen\u2122 AI Halo" } },
   { id: "apu", name: "Ryzen\u2122 AI APUs", devices: ["halo", "stx", "krk"] },
-  { id: "gpu", name: "Radeon\u2122 GPUs", devices: ["rx7900xt", "rx9070xt"] },
+  { id: "gpu", name: "Radeon\u2122 GPUs", devices: ["rx7900xt", "rx9070xt", "r9700"] },
 ];
 
 export const DEVICE_CATEGORY_MAP: Record<DeviceCategory, DeviceCategoryInfo> =
