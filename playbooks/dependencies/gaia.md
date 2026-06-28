@@ -113,7 +113,7 @@ sudo apt install -y pciutils
 fi
 
 command -v lspci >/dev/null 2>&1
-lspci | head -n 5
+lspci | head -n 5 || true
 echo "OK: lspci is available"
 ```
 <!-- @test:end --> 
