@@ -19,18 +19,6 @@
     "krk": [
       "linux",
       "windows"
-    ],
-    "rx7900xt": [
-      "linux",
-      "windows"
-    ],
-    "rx9070xt": [
-      "linux",
-      "windows"
-    ],
-    "r9700": [
-      "linux",
-      "windows"
     ]
   },
   "tested_platforms": {
@@ -45,18 +33,6 @@
     "krk": [
       "linux",
       "windows"
-    ],
-    "rx7900xt": [
-      "linux",
-      "windows"
-    ],
-    "rx9070xt": [
-      "linux",
-      "windows"
-    ],
-    "r9700": [
-      "linux",
-      "windows"
     ]
   },
   "required_platforms": {
@@ -69,18 +45,6 @@
       "windows"
     ],
     "krk": [
-      "linux",
-      "windows"
-    ],
-    "rx7900xt": [
-      "linux",
-      "windows"
-    ],
-    "rx9070xt": [
-      "linux",
-      "windows"
-    ],
-    "r9700": [
       "linux",
       "windows"
     ]
@@ -99,18 +63,6 @@
       "windows"
     ],
     "krk": [
-      "linux",
-      "windows"
-    ],
-    "rx7900xt": [
-      "linux",
-      "windows"
-    ],
-    "rx9070xt": [
-      "linux",
-      "windows"
-    ],
-    "r9700": [
       "linux",
       "windows"
     ]
