@@ -19,24 +19,28 @@
     "rx9070xt": [
       { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
       { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+    ],
+    "r9700": [
+      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
+      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
     ]
   },
   "supported_platforms": {
-    "halo": [
+    "halo_box": [
       "linux",
       "windows"
     ],
-    "halo_box": [
+    "halo": [
       "linux",
       "windows"
     ]
   },
   "published_platforms": {
-    "halo": [
+    "halo_box": [
       "linux",
       "windows"
     ],
-    "halo_box": [
+    "halo": [
       "linux",
       "windows"
     ]
