@@ -104,18 +104,20 @@ STX Halo-only instructions
 Instructions for both Halo and STX Point
 <!-- @device:end -->
 
-<!-- @device:rx7900xt,rx9070xt -->
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
 Instructions for discrete Radeon GPUs
 <!-- @device:end -->
 ```
 
 | Device ID | Hardware | Product Name |
 |-----------|----------|--------------|
+| `halo_box` | STX Halo | AMD Ryzen™ AI Halo Developer Platform |
 | `halo` | STX Halo | AMD Ryzen™ AI Max+ |
 | `stx` | STX Point | AMD Ryzen™ AI 300 HX |
 | `krk` | Krackan Point | AMD Ryzen™ AI 300 |
 | `rx7900xt` | Radeon RX 7900 XT | AMD Radeon™ 7000 Series Graphics |
 | `rx9070xt` | Radeon RX 9070 XT | AMD Radeon™ 9000 Series Graphics |
+| `r9700` | Radeon AI Pro R9700 | AMD Radeon™ 9000 Series Graphics |
 
 Content outside `@device` tags is always shown. Use `<!-- @device:all -->` to explicitly mark content for all devices. A device selector appears on the playbook page when `@device` tags are detected.
 
