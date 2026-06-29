@@ -22,6 +22,10 @@ This guide outlines the correct usage of AMD product names and trademarks in all
 
 ### Hardware Platforms
 
+#### STX Halo Box (Device ID: `halo_box`)
+- **First mention:** AMD Ryzen™ AI Halo Developer Platform
+- **Subsequent:** Ryzen AI Halo Developer Platform, Halo platform, or Halo Box
+
 #### STX Halo (Device ID: `halo`)
 - **First mention:** AMD Ryzen™ AI Max+
 - **Subsequent:** Ryzen AI Max+, Halo platform, or Halo
@@ -41,6 +45,10 @@ This guide outlines the correct usage of AMD product names and trademarks in all
 #### Radeon RX 9070 XT (Device ID: `rx9070xt`)
 - **First mention:** AMD Radeon™ 9000 Series Graphics
 - **Subsequent:** Radeon 9000 Series or RX 9070 XT
+
+#### Radeon AI Pro R9700 (Device ID: `r9700`)
+- **First mention:** AMD Radeon™ 9000 Series Graphics
+- **Subsequent:** Radeon 9000 Series or AI Pro R9700
 
 ### Software and Platforms
 
