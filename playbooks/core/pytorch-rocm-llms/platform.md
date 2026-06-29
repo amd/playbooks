@@ -16,13 +16,13 @@ PyTorch with ROCm support is pre-installed on the AMD Ryzen™ AI Halo Developer
 
 | Component     | Version         | Notes                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 or newer    | Pre-installed on the AMD Ryzen™ AI Halo Developer Platform; must be manually installed on all other devices |
+| **PyTorch**   | 2.9 or newer    | Pre-installed on the AMD Ryzen AI Halo Developer Platform; must be manually installed on all other devices |
 
 ### Linux
 
 | Component     | Version         | Notes                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 or newer    | Pre-installed on the AMD Ryzen™ AI Halo Developer Platform; must be manually installed on all other devices |
+| **PyTorch**   | 2.9 or newer    | Pre-installed on the AMD Ryzen AI Halo Developer Platform; must be manually installed on all other devices |
 
 ## Required Models
 
@@ -30,7 +30,7 @@ The following models are tested and optimized for your platform:
 
 | Model | Parameters | Size | Download Location |
 |-------|------------|------|-------------------|
-| **openai/gpt-oss-20b** | 20B | ~40GB | Pre-installed on AMD Halo Developer Platform |
+| **openai/gpt-oss-20b** | 20B | ~40GB | Pre-installed on the AMD Ryzen AI Halo Developer Platform; must be manually installed on all other devices |
 
 Models will be automatically downloaded to the Hugging Face cache directory:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
