@@ -49,7 +49,7 @@ We will use LM Studio to serve the LLM powering the coding agent.
 
 ![LM Studio Initial Screen](assets/initial-lm-studio.png)
 
-Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-30B-A3B` model with a large context length.
+Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-30B-A3B` model with a large context length. (Use the Model tab to install it if you haven't already).
 - Click on the search bar on the top of the LM Studio window or press `CTRL+L`. Click the switch `Manually choose model load parameters` and then click on the Qwen3-Coder-30B-A3B model.
 - Change the context length from `4096` to `32768`, and make sure `GPU Offload` is at the max. Then, click `Load Model`
 

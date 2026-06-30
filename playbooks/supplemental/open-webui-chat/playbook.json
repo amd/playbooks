@@ -4,11 +4,11 @@
   "description": "Use Open WebUI to chat with LLMs locally.",
   "time": 30,
   "supported_platforms": {
-    "halo": [
+    "halo_box": [
       "linux",
       "windows"
     ],
-    "halo_box": [
+    "halo": [
       "linux",
       "windows"
     ],
@@ -23,22 +23,22 @@
   },
   "tested_platforms": {
     "halo": [
-      "windows",
-      "linux"
-    ],
-    "krk": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "required_platforms": {
     "halo": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
       "linux",
@@ -50,21 +50,21 @@
     ]
   },
   "published_platforms": {
-    "halo": [
-      "windows",
-      "linux"
-    ],
     "halo_box": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
     ],
     "stx": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "krk": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "difficulty": "beginner",
