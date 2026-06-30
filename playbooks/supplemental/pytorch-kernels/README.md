@@ -121,7 +121,7 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 
 ## Installing Software Prerequisites
 <!-- @os:windows -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Prerequisites - Windows
 - Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
@@ -143,7 +143,7 @@ source kernel-env/bin/activate
 <!-- @setup:id=activate-venv command="source kernel-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -185,7 +185,7 @@ kernel-env\Scripts\activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver,rocm,pytorch -->
 <!-- @device:end -->
 

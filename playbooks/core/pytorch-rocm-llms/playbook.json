@@ -4,11 +4,11 @@
   "description": "Learn to run powerful language models on your PC with PyTorch and AMD ROCm™ software to summarize documents quickly and easily.",
   "time": 30,
   "supported_platforms": {
-    "halo": [
+    "halo_box": [
       "linux",
       "windows"
     ],
-    "halo_box": [
+    "halo": [
       "linux",
       "windows"
     ],
@@ -17,6 +17,18 @@
       "windows"
     ],
     "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
       "linux",
       "windows"
     ]
@@ -33,6 +45,18 @@
     "krk": [
       "linux",
       "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
     ]
   },
   "required_platforms": {
@@ -47,22 +71,46 @@
     "krk": [
       "linux",
       "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {
-    "halo": [
-      "windows",
-      "linux"
-    ],
     "halo_box": [
-      "windows",
-      "linux"
-    ],  
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
     "stx": [
       "linux",
       "windows"
     ],
     "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
       "linux",
       "windows"
     ]
