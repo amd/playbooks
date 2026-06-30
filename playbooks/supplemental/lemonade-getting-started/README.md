@@ -45,6 +45,10 @@ Before you begin, make sure you have:
 - An internet connection (wired or wireless)
 - [Optional] An AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 series or Z2 Extreme) with the latest driver installed from [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) if you want to run a model on the NPU.
 
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @require:driver -->
+<!-- @device:end -->
+
 <!-- @require:lemonade -->
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
