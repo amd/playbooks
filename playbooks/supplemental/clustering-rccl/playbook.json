@@ -4,10 +4,10 @@
   "description": "Set up a multi-node cluster using two Ryzen\u2122 AI Halo devices with RCCL for distributed workloads",
   "time": 90,
   "unsupported_platforms": {
-    "halo": [
+    "halo_box": [
       { "platform": "windows", "reason": "RCCL clustering relies on vLLM which is only supported on Linux" }
     ],
-    "halo_box": [
+    "halo": [
       { "platform": "windows", "reason": "RCCL clustering relies on vLLM which is only supported on Linux" }
     ],
     "stx": [
@@ -25,21 +25,25 @@
     "rx9070xt": [
       { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
       { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+    ],
+    "r9700": [
+      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
+      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
     ]
   },
   "supported_platforms": {
-    "halo": [
+    "halo_box": [
       "linux"
     ],
-    "halo_box": [
+    "halo": [
       "linux"
     ]
   },
   "published_platforms": {
-    "halo": [
+    "halo_box": [
       "linux"    
     ],
-    "halo_box": [
+    "halo": [
       "linux"
     ]
   },

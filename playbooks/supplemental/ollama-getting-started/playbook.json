@@ -4,11 +4,11 @@
   "description": "Install Ollama and run LLMs locally \u2014 chat from the terminal, desktop app, or REST API on your AMD Ryzen\u2122 AI",
   "time": 15,
   "supported_platforms": {
-    "halo": [
+    "halo_box": [
       "linux",
       "windows"
     ],
-    "halo_box": [
+    "halo": [
       "linux",
       "windows"
     ],
@@ -17,54 +17,102 @@
       "windows"
     ],
     "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
       "linux",
       "windows"
     ]
   },
   "tested_platforms": {
     "halo": [
-      "windows",
-      "linux"
-    ],
-    "stx": [
-      "windows",
-      "linux"
-    ],
-    "krk": [
-      "windows",
-      "linux"
-    ]
-  },
-  "required_platforms": {
-    "halo": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
       "linux",
       "windows"
     ],
     "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
       "linux",
       "windows"
     ]
   },
   "published_platforms": {
-    "halo": [
-      "windows",
-      "linux"
-    ],
     "halo_box": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
     ],
     "stx": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "krk": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
     ]
   },
   "difficulty": "beginner",

@@ -24,9 +24,10 @@ LM Studio should be pre-installed:
 
 The following models should already be present in the LM Studio models directory (`C:\Users\...\.lmstudio\models`):
 
-| Model Type | Quantization | Size | Location |
-|------------|--------------|------|----------|
-| OpenAI GPT-OSS 120B | `MXFP4` | 59 GB | `models\ggml-org` |
+| Device | Model Type | Quantization | Size (GB) | Location |
+| ----- |------------|--------------|------|----------|
+| AMD Ryzen™ AI Halo Developer Platform <br> AMD Ryzen™ AI Max+ | OpenAI GPT-OSS 120B | `MXFP4` | 63.39 | `models\ggml-org` |
+| AMD Ryzen™ AI 300 HX <br> AMD Ryzen™ AI 300 <br> AMD Radeon™ 7000 Series Graphics <br> AMD Radeon™ 9000 Series Graphics | Qwen3.5 9B | `Q4_K_M` | 6.55 | `models\lmstudio-community` |
 
 ---
 
@@ -34,7 +35,8 @@ The following models should already be present in the LM Studio models directory
 
 ### LM Studio Installation
 
-See lmstudio.md (inside dependencies folder) for more details.
+See [lmstudio.md](../../dependencies/lmstudio.md) for more details.
+
 ### Model Download
 
 Same as on Windows.
