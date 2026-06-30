@@ -47,7 +47,7 @@ To allow LM Studio to see the pre-installed models, navigate to Settings > Gener
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
 </p>
-<!-- @device:end -->s
+<!-- @device:end -->
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash
