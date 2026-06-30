@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 ### AMD GPU Driver
 
-Update to the latest AMD GPU driver using `AMD Software: Adrenalin Edition™`.
+Update to the latest AMD GPU driver using [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
 
 1. Open `AMD Software: Adrenalin Edition` from your Start menu or system tray.
 2. Navigate to **Driver and Software**, click **Manage Updates**.
