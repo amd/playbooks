@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
 > This playbook requires a minimum of **32GB** of system memory.
 <!-- @device:end -->
@@ -96,7 +96,7 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 
 <!-- @os:linux -->
 <!-- @require:lemonade,podman -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ---
 <!-- @device:end -->
 <!-- @os:end -->
@@ -119,6 +119,7 @@ Before installing Open WebUI, make sure the models you want to use are downloade
 
 
 <!-- @os:windows -->
+<!-- @device:halo,stx,krk -->
 <!-- @test:id=openwebui-lemonade-multimodal-smoke-windows timeout=1800 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
@@ -226,7 +227,120 @@ finally {
   ForEach-Object { Remove-Item $_ -Force -ErrorAction SilentlyContinue }
 }
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
+<!-- @device:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @test:id=openwebui-lemonade-multimodal-smoke-windows timeout=1800 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$tmpChat = $null
+$tmpVision = $null
+$tmpImg = $null
+
+try {
+  # Wait for /models
+  $modelsJson = $null
+  for ($i=0; $i -lt 120; $i++) {
+    $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
+    if ($modelsJson) { break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
+  Write-Host "OK: Lemonade server is responding"
+  
+  # Verify required models are present + downloaded
+  $parsed = $modelsJson | ConvertFrom-Json
+  $required = @(
+    "Qwen3.5-4B-GGUF",
+    "SDXL-Turbo"
+  )
+  foreach ($mid in $required) {
+    $entry = $parsed.data | Where-Object { $_.id -eq $mid } | Select-Object -First 1
+    if (-not $entry) { throw "Model $mid is not present in /api/v1/models. Please download it." }
+    if (-not $entry.downloaded) { throw "Model $mid is present but not downloaded. Please download it." }
+    Write-Host "OK: $mid is downloaded"
+  }
+
+  # Chat completion smoke test (LLM)
+  $chatBody = @{
+    model = "Qwen3.5-4B-GGUF"
+    messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+    temperature = 0
+    max_tokens = 500
+    stream = $false
+  } | ConvertTo-Json -Depth 6
+  $tmpChat = Join-Path $env:TEMP "chat-body.json"
+  [System.IO.File]::WriteAllText($tmpChat, $chatBody, [System.Text.UTF8Encoding]::new($false))
+  $chatOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
+    -H "Content-Type: application/json" `
+    -H "Authorization: Bearer -" `
+    --data-binary "@$tmpChat"
+  if (-not $chatOut) { throw "Empty response from chat/completions" }
+  $chatParsed = $chatOut | ConvertFrom-Json
+  $chatText = $chatParsed.choices[0].message.content
+  if ($chatText -notmatch "\bOK\b") { throw "LLM chat test failed. Got: $chatText" }
+  Write-Host "OK: LLM chat works"
+
+  # Vision smoke test (OpenAI-style image_url)
+  $png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
+  $dataUrl = "data:image/png;base64,$png1x1"
+  $visionBody = @{
+    model = "Qwen3.5-4B-GGUF"
+    messages = @(@{
+      role = "user"
+      content = @(
+        @{ type = "text"; text = "If you can see an image input, reply with exactly: OK" },
+        @{ type = "image_url"; image_url = @{ url = $dataUrl } }
+      )
+    })
+    temperature = 0
+    max_tokens = 256
+  } | ConvertTo-Json -Depth 10
+  $tmpVision = Join-Path $env:TEMP "vision-body.json"
+  [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
+  $visionOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
+    -H "Content-Type: application/json" `
+    -H "Authorization: Bearer -" `
+    --data-binary "@$tmpVision"
+  if (-not $visionOut) { throw "Empty response from vision chat/completions" }
+  $visionParsed = $visionOut | ConvertFrom-Json
+  if (-not $visionParsed.choices -or $visionParsed.choices.Count -lt 1) { throw "Unexpected vision response (no choices). Raw response: $visionOut" }
+  $visionText = $visionParsed.choices[0].message.content
+  if ([string]::IsNullOrWhiteSpace($visionText)) { throw "Vision returned empty content. Raw response: $visionOut" }
+  if ($visionText -notmatch "\bOK\b") { throw "Vision test failed. Got: $visionText. Raw response: $visionOut" }
+  Write-Host "OK: Vision chat works"
+
+  # Image generation smoke test
+  $imgBody = @{
+    model  = "SDXL-Turbo"
+    prompt = "A simple red cube on a white table, studio lighting"
+    size   = "256x256"
+    steps  = 4
+    response_format = "b64_json"
+  } | ConvertTo-Json -Depth 6
+  $tmpImg = Join-Path $env:TEMP "img-body.json"
+  [System.IO.File]::WriteAllText($tmpImg, $imgBody, [System.Text.UTF8Encoding]::new($false))
+  $imgOut = curl.exe -sS --fail-with-body --max-time 900 http://127.0.0.1:13305/api/v1/images/generations `
+    -H "Content-Type: application/json" `
+    -H "Authorization: Bearer -" `
+    --data-binary "@$tmpImg"
+  if (-not $imgOut) { throw "Empty response from images/generations" }
+  $imgParsed = $imgOut | ConvertFrom-Json
+  if (-not $imgParsed.data -or -not $imgParsed.data[0].b64_json) { throw "Image generation did not return data[0].b64_json. Raw response: $imgOut" }
+  Write-Host "OK: Image generation works"
+}
+finally {
+  @($tmpChat, $tmpVision, $tmpImg) |
+  Where-Object { $_ } |
+  ForEach-Object { Remove-Item $_ -Force -ErrorAction SilentlyContinue }
+}
+```
+<!-- @test:end -->
+<!-- @device:end -->
 <!-- @os:end --> 
 
 <!-- @os:linux --> 
@@ -693,23 +807,43 @@ Now, you're all set up. Let's look at three interesting things to do.
 
 ### Activity 1: Chat with a Local LLM
 <!-- @os:windows -->
+<!-- @device:halo,stx,krk -->
 1. Click the dropdown menu in the top-left of the interface. This will display the Lemonade models you have installed. Select one to proceed. (example: `Qwen3-4B-Hybrid`).
-<p align="center">
-  <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
-</p>
+
+    <p align="center">
+      <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
+    </p>
 
 2. Enter a message to the LLM and click send (or hit Enter). The LLM will take a few seconds to load into memory and then you will see the response stream in.
-<p align="center">
-  <img src="assets/sending_a_message.png" alt="Sending a message" width="37.5%"/>
-  <img src="assets/llm_response.png" alt="LLM Response" width="50%"/>
-</p>
+
+    <p align="center">
+      <img src="assets/sending_a_message.png" alt="Sending a message" width="37.5%"/>
+      <img src="assets/llm_response.png" alt="LLM Response" width="50%"/>
+    </p>
+<!-- @device:end -->
+
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+1. Click the dropdown menu in the top-left of the interface. This will display the Lemonade models you have installed. Select one to proceed. (example: `Qwen3.5-4B-GGUF`).
+
+   <p align="center">
+     <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
+   </p>
+
+2. Enter a message to the LLM and click send (or hit Enter). The LLM will take a few seconds to load into memory and then you will see the response stream in.
+
+   <p align="center">
+     <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
+     <img src="assets/linux_llm_response.png" alt="LLM Response" width="46%"/>
+   </p>
+<!-- @device:end -->    
 
 3. The model will respond in the chat.
 
 4. At this time, open `Task Manager` on your system. You will see **high GPU or NPU utilization** based on whether the model you selected is **Hybrid** or **NPU** respectively. Using the task manager, you can confirm that you're running the model locally.
-<p align="center">
-  <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
-</p>
+
+    <p align="center">
+      <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
+    </p>
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -810,7 +944,7 @@ This establishes that Open WebUI can coordinate a "two-part" workflow:
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Activity 3: Generate an Image from a Text Prompt (Stable Diffusion)
 
 Stable Diffusion models don't support text generation, they only generate images through the Images API. 
