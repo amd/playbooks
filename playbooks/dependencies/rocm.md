@@ -6,17 +6,6 @@ SPDX-License-Identifier: MIT
 
 #### ROCm
 
-<!-- @device:rx7900xt,rx9070xt,r9700 -->
-**Install the AMD GPU driver before installing the ROCm libraries.** Discrete Radeon™ GPUs require the GPU driver to be installed first.
-
-<!-- @os:windows -->
-- Install **AMD Software: Adrenalin Edition**. See [Install AMD Software: Adrenalin Edition](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html) for the download link and instructions.
-<!-- @os:end -->
-<!-- @os:linux -->
-- Install the **AMD GPU Driver (amdgpu)** using the Radeon Software for Linux (RSL) flow. See [Install the kernel driver](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html) for instructions for your distribution.
-<!-- @os:end -->
-<!-- @device:end -->
-
 **Add the current user to the render and video groups.** 
 ```bash
 sudo usermod -a -G render,video $LOGNAME
