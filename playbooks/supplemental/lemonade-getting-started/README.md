@@ -520,6 +520,7 @@ These same patterns scale to any application such as chatbots, code assistants, 
 
 ---
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Running Models on the NPU (Optional)
 
 If you have a Ryzen AI 300/400/Max 300 series or Z2 Extreme, your device has a built-in **Neural Processing Unit (NPU)**, a dedicated chip designed specifically for AI workloads. Running models on the NPU is more power-efficient than using the GPU, which makes it ideal for background AI tasks, longer sessions, and battery-powered use.
@@ -562,8 +563,10 @@ To enable `FastFlowLM` on Windows:
 * Click Install NPU.
 * Once installation is complete, ~36 defaults models will be available under the FFLM dropdown menu.
 <!-- @os:end -->
+<!-- @device:end -->
 
 <!-- @os:linux -->
+<!-- @device:halo_box,halo,stx,krk -->
 When the `Lemonade` App is launched for the first time, the `FastFlowNPU` backend is not enabled by default. 
 The local app will open the installation page to guide you through setup.
 
@@ -572,7 +575,9 @@ To enable `FastFlowLM` on Linux:
 * Open the `Lemonade` App.
 * Visit the [official FLM](https://lemonade-server.ai/flm_npu_linux.html) documentation and follow the installation steps for FLM by selecting your Linux distribution.
 * Enable backports as instructed on the installation page.
-* Download the latest `v0.9.x` release from the [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).
+* Download the latest `v0.9.x` release from the [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).'
+<!-- @device:end -->
+
 <!-- @device:halo_box -->
 >[!Note]
 For AMD Halo Developer Platform, make sure to choose Debian 13.
@@ -581,7 +586,7 @@ fastflowlm_0.9.X_debian13_amd64.deb
 ```
 <!-- @device:end -->
 
-<!-- @device:halo,sx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk -->
 ```
 fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 ```
@@ -589,8 +594,10 @@ fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 * Install the downloaded `.deb` package.
 * Recommended: Quit the `Lemonade App` and open it again so the changes are detected.
 * Recommended: Open `Backends Manager` and click Install `FastFlowNPU` Backend.
+<!-- @device:end -->
 <!-- @os:end -->
 
+<!-- @device:halo_box,halo,stx,krk -->
 After a successful installation, you should see that `flm:npu` completed in the **Download Manager** inside the **Lemonade Desktop App**.
 <p align="center">
   <img width="400" height="400" src="assets/FFLM-installationWizard.png" />
@@ -628,6 +635,7 @@ response = client.chat.completions.create(
     messages=messages,
 )
 ```
+<!-- @device:end -->
 
 ## Next Steps
 
