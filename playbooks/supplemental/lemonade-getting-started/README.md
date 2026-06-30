@@ -22,7 +22,9 @@ By the end of this playbook you will be able to:
 * **Explore the web UI** and try different modalities such as vision, speech-to-text, and image generation.
 * **Switch GPU backends** between Vulkan and AMD ROCm™ software.
 * **Build a Python app** powered by a local LLM using the OpenAI-compatible API.
+<!-- @device:halo_box,halo,stx,krk -->
 * **Run models on the AMD Neural Processing Unit (NPU)** using Hybrid and FLM execution modes on AMD Ryzen™ AI hardware.
+<!-- @device:end -->
 
 ## Setting the Memory Configuration
 
@@ -43,7 +45,9 @@ Before you begin, make sure you have:
 - **~4–30 GB of free disk space**, depending on the models you download. The largest model in this guide is about 20 GB.
 - **Python 3.10–3.13** (used in the Python app section)
 - An internet connection (wired or wireless)
+<!-- @device:halo_box,halo,stx,krk -->
 - [Optional] An AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 series or Z2 Extreme) with the latest driver installed from [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) if you want to run a model on the NPU.
+<!-- @device:end -->
 
 <!-- @require:lemonade -->
 
