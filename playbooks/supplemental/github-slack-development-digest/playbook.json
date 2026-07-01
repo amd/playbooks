@@ -1,0 +1,79 @@
+{
+  "id": "github-slack-development-digest",
+  "title": "Build a GitHub-to-Slack Development Digest with Agent Canvas",
+  "description": "Configure Agent Canvas, GitHub MCP, Slack MCP, and a scheduled OpenHands automation that posts a local-LLM digest.",
+  "time": 45,
+  "supported_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
+  },
+  "tested_platforms": {
+    "halo": [
+      "linux"
+    ],
+    "stx": [
+      "linux"
+    ],
+    "krk": [
+      "linux"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "linux"
+    ],
+    "stx": [
+      "linux"
+    ],
+    "krk": [
+      "linux"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
+  },
+  "difficulty": "intermediate",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "openhands",
+    "agent-canvas",
+    "automation",
+    "github",
+    "slack",
+    "lemonade",
+    "llm"
+  ],
+  "coverImage": "assets/00-architecture-overview.png"
+}
