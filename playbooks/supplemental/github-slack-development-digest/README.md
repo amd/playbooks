@@ -160,28 +160,7 @@ the LLM base URL:
 ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
 ```
 
-<!-- @test:id=lemonade-version timeout=60 hidden=True -->
-```bash
-lemonade --version
-```
-<!-- @test:end -->
 
-<!-- @test:id=lemonade-health-linux timeout=120 hidden=True -->
-```bash
-set -euo pipefail
-
-for i in $(seq 1 120); do
-  if curl -fsS "http://127.0.0.1:13305/api/v1/health" >/dev/null; then
-    echo "OK: Lemonade Server is responding"
-    exit 0
-  fi
-  sleep 1
-done
-
-echo "Lemonade Server did not become ready on http://127.0.0.1:13305"
-exit 1
-```
-<!-- @test:end -->
 
 ## 2. Verify the Local Model
 

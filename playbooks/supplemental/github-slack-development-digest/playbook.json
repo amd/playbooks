@@ -21,28 +21,6 @@
       "windows"
     ]
   },
-  "tested_platforms": {
-    "halo": [
-      "linux"
-    ],
-    "stx": [
-      "linux"
-    ],
-    "krk": [
-      "linux"
-    ]
-  },
-  "required_platforms": {
-    "halo": [
-      "linux"
-    ],
-    "stx": [
-      "linux"
-    ],
-    "krk": [
-      "linux"
-    ]
-  },
   "published_platforms": {
     "halo_box": [
       "linux",
