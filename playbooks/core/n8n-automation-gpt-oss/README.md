@@ -46,6 +46,10 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 <!-- @device:end -->
 
 ## Installing Software Prerequisites
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @require:driver -->
+<!-- @device:end -->
+
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
 <!-- @os:end -->
