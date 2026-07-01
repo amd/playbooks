@@ -11,8 +11,6 @@ SPDX-License-Identifier: MIT
 > OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
-# Build a GitHub-to-Slack Development Digest with Agent Canvas and a Local LLM
-
 ## Overview
 
 Developers spend a lot of time on small recurring loops: reviewing labeled
