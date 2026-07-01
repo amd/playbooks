@@ -11,8 +11,6 @@ SPDX-License-Identifier: MIT
 > OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
-# Get Started with OpenHands and a Local LLM
-
 ## Overview
 
 [OpenHands](https://github.com/All-Hands-AI/OpenHands) is an AI software agent
@@ -80,7 +78,7 @@ You need:
 
 ## Variables Used in This Playbook
 
-<!-- @device:halo,halo_box,stx,krk -->
+<!-- @device:halo,halo_box,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 <!-- @device:end -->
 
