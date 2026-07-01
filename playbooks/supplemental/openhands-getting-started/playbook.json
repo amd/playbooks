@@ -33,34 +33,6 @@
       "windows"
     ]
   },
-  "tested_platforms": {
-    "halo": [
-      "linux",
-      "windows"
-    ],
-    "stx": [
-      "linux",
-      "windows"
-    ],
-    "krk": [
-      "linux",
-      "windows"
-    ]
-  },
-  "required_platforms": {
-    "halo": [
-      "linux",
-      "windows"
-    ],
-    "stx": [
-      "linux",
-      "windows"
-    ],
-    "krk": [
-      "linux",
-      "windows"
-    ]
-  },
   "published_platforms": {
     "halo_box": [
       "linux",

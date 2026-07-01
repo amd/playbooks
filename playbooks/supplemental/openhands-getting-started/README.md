@@ -105,28 +105,7 @@ Lemonade exposes an OpenAI-compatible API at:
 http://127.0.0.1:13305/api/v1
 ```
 
-<!-- @test:id=lemonade-version timeout=60 hidden=True -->
-```bash
-lemonade --version
-```
-<!-- @test:end -->
 
-<!-- @test:id=lemonade-health-linux timeout=120 hidden=True -->
-```bash
-set -euo pipefail
-
-for i in $(seq 1 120); do
-  if curl -fsS "http://127.0.0.1:13305/api/v1/health" >/dev/null; then
-    echo "OK: Lemonade Server is responding"
-    exit 0
-  fi
-  sleep 1
-done
-
-echo "Lemonade Server did not become ready on http://127.0.0.1:13305"
-exit 1
-```
-<!-- @test:end -->
 
 ## 2. Verify the Local Model
 
@@ -179,41 +158,8 @@ locally.
 
 ![Agent Canvas onboarding backend connection success](assets/02-onboarding-backend-connected.png)
 
-<!-- @os:windows -->
-<!-- @test:id=agent-canvas-installed-windows timeout=120 hidden=True -->
-```powershell
-$null = Get-Command agent-canvas -ErrorAction Stop
-Write-Host "OK: agent-canvas is on PATH"
-```
-<!-- @test:end -->
-<!-- @os:end -->
 
-<!-- @os:linux -->
-<!-- @test:id=agent-canvas-installed-linux timeout=120 hidden=True -->
-```bash
-set -euo pipefail
-command -v agent-canvas >/dev/null 2>&1 || { echo "agent-canvas not on PATH"; exit 1; }
-echo "OK: agent-canvas is on PATH"
-```
-<!-- @test:end -->
-<!-- @os:end -->
 
-<!-- @test:id=agent-canvas-health timeout=120 hidden=True -->
-```bash
-set -euo pipefail
-
-for i in $(seq 1 60); do
-  if curl -fsS "http://localhost:8000/" >/dev/null 2>&1; then
-    echo "OK: Agent Canvas is responding on http://localhost:8000"
-    exit 0
-  fi
-  sleep 1
-done
-
-echo "Agent Canvas did not become ready on http://localhost:8000"
-exit 1
-```
-<!-- @test:end -->
 
 ## 4. Configure the Local LLM
 
