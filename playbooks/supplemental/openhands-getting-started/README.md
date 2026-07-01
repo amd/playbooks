@@ -1,0 +1,331 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+<!-- @github-only -->
+> [!IMPORTANT]
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
+<!-- @github-only:end -->
+
+# Get Started with OpenHands and a Local LLM
+
+## Overview
+
+[OpenHands](https://github.com/All-Hands-AI/OpenHands) is an AI software agent
+that can write code, run commands, browse the web, and edit files in a real
+workspace. Instead of copying suggestions out of a chat window, you point the
+agent at a project folder and let it do the work: implement a feature, fix a
+bug, write tests, or explain a codebase.
+
+[Agent Canvas](https://github.com/OpenHands/agent-canvas) is the recommended
+browser UI for running OpenHands. A single `agent-canvas` command starts the
+agent server, the automation backend, and the web frontend together, so you can
+drive a conversation with the agent from your browser.
+
+To keep everything on your AMD system, the agent talks to a local model served
+by Lemonade Server. Lemonade exposes that model through an OpenAI-compatible
+API, so Agent Canvas can configure it like any other OpenAI-style endpoint
+while the model, your code, and the conversation context all stay on your
+machine.
+
+In this playbook, you will start a local model, launch Agent Canvas, point it
+at that model, and run your first coding task against a real project folder.
+
+## What You'll Learn
+
+- How to start Lemonade Server and confirm a local model answers chat requests
+- How to install and launch Agent Canvas from the npm package
+- How to configure Agent Canvas to use a local Lemonade model as the LLM
+- How to start an OpenHands conversation and watch the agent edit files and run
+  commands in a workspace
+- How to review what the agent changed and steer it with follow-up messages
+
+## Core Concepts
+
+| Concept | What it is | Where it fits in this playbook |
+| --- | --- | --- |
+| Lemonade Server | A local LLM serving platform built for AMD hardware that exposes an OpenAI-compatible API. Your data never leaves your machine. | Runs the model that powers the agent. |
+| OpenHands | An AI software agent that reads and edits files, runs shell commands, and browses the web inside a workspace. | The agent you drive from the chat. |
+| Agent Canvas | The browser UI and backend that runs OpenHands conversations and shows tool calls and file changes. | Launches the stack and hosts your conversation. |
+| Workspace | The project folder the agent is allowed to read and modify. | The target of the agent's edits and commands. |
+
+<!-- @device:stx,krk -->
+> [!NOTE]
+> Coding-agent workflows benefit from a larger model and context window. Use at
+> least 32 GB of system memory, and prefer 64 GB or more for larger GGUF models.
+<!-- @device:end -->
+
+## Prerequisites
+
+<!-- @os:linux -->
+<!-- @require:lemonade,nodejs -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @require:lemonade,nodejs -->
+<!-- @os:end -->
+
+You need:
+
+- Lemonade Server installed and able to serve the model below.
+- Node.js 22.12 or later and `npm` (used by the `agent-canvas` CLI).
+- `uv`, the Python package manager that Agent Canvas uses to manage the agent
+  server environment.
+- A project folder to work in. This can be any local git repository or code
+  directory you want the agent to work on.
+
+## Variables Used in This Playbook
+
+<!-- @device:halo,halo_box,stx,krk -->
+<!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
+<!-- @device:end -->
+
+```bash
+export LEMONADE_BASE_URL="http://127.0.0.1:13305/api/v1"
+export LEMONADE_MODEL="Qwen3.6-35B-A3B-GGUF"
+```
+
+## 1. Start Lemonade Server
+
+Start the model from the Lemonade CLI:
+
+```bash
+lemonade config set llamacpp.backend=vulkan
+lemonade config set ctx_size=65536
+lemonade run "${LEMONADE_MODEL}"
+```
+
+Lemonade exposes an OpenAI-compatible API at:
+
+```text
+http://127.0.0.1:13305/api/v1
+```
+
+<!-- @test:id=lemonade-version timeout=60 hidden=True -->
+```bash
+lemonade --version
+```
+<!-- @test:end -->
+
+<!-- @test:id=lemonade-health-linux timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+
+for i in $(seq 1 120); do
+  if curl -fsS "http://127.0.0.1:13305/api/v1/health" >/dev/null; then
+    echo "OK: Lemonade Server is responding"
+    exit 0
+  fi
+  sleep 1
+done
+
+echo "Lemonade Server did not become ready on http://127.0.0.1:13305"
+exit 1
+```
+<!-- @test:end -->
+
+## 2. Verify the Local Model
+
+Confirm Lemonade can serve the selected model:
+
+```bash
+curl -s "${LEMONADE_BASE_URL}/models" | python3 -m json.tool
+```
+
+Then send a small chat request:
+
+```bash
+curl -sS "${LEMONADE_BASE_URL}/chat/completions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "'"${LEMONADE_MODEL}"'",
+    "messages": [
+      {"role": "user", "content": "Reply with exactly: OK"}
+    ],
+    "temperature": 0,
+    "max_tokens": 64
+  }' | python3 -m json.tool
+```
+
+If this returns a `choices` array, Lemonade is ready for Agent Canvas.
+
+## 3. Install and Launch Agent Canvas
+
+Install the published Agent Canvas package globally:
+
+```bash
+npm install -g @openhands/agent-canvas
+```
+
+Then start the full stack from a terminal:
+
+```bash
+agent-canvas
+```
+
+By default, Agent Canvas starts on `http://localhost:8000`. Open that URL in
+your browser. The default local backend should show as healthy on the home
+screen.
+
+The `agent-canvas` command starts the agent server, the automation backend, and
+the web frontend together. You only need this one command to run OpenHands
+locally.
+
+![Agent Canvas onboarding screen with OpenHands selected](assets/01-onboarding-choose-agent.png)
+
+![Agent Canvas onboarding backend connection success](assets/02-onboarding-backend-connected.png)
+
+<!-- @os:windows -->
+<!-- @test:id=agent-canvas-installed-windows timeout=120 hidden=True -->
+```powershell
+$null = Get-Command agent-canvas -ErrorAction Stop
+Write-Host "OK: agent-canvas is on PATH"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=agent-canvas-installed-linux timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+command -v agent-canvas >/dev/null 2>&1 || { echo "agent-canvas not on PATH"; exit 1; }
+echo "OK: agent-canvas is on PATH"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @test:id=agent-canvas-health timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+
+for i in $(seq 1 60); do
+  if curl -fsS "http://localhost:8000/" >/dev/null 2>&1; then
+    echo "OK: Agent Canvas is responding on http://localhost:8000"
+    exit 0
+  fi
+  sleep 1
+done
+
+echo "Agent Canvas did not become ready on http://localhost:8000"
+exit 1
+```
+<!-- @test:end -->
+
+## 4. Configure the Local LLM
+
+In the Agent Canvas UI:
+
+1. Open **Settings > LLM**.
+2. For the provider, choose **OpenAI-compatible** (or **Other / OpenAI-compatible**).
+3. Set the **Base URL** to `http://127.0.0.1:13305/api/v1`.
+4. Set the **Model** to `Qwen3.6-35B-A3B-GGUF`.
+5. For the API key, enter any non-empty string. Lemonade does not require a
+   real key, but the OpenHands client needs a value to send.
+6. Save the profile so you can reuse it. Give it a name like `Lemonade local`.
+
+You can switch profiles later from the chat input with the `/model` command.
+
+![Agent Canvas LLM profile configured for Lemonade](assets/03-llm-profile-configured.png)
+
+## 5. Open a Workspace
+
+The agent can only read and modify files inside a workspace you choose. Before
+starting a task, point Agent Canvas at your project folder:
+
+1. From the home screen, choose **Open Workspace**.
+2. Select the folder that contains your project (for example, a git repository
+   you want the agent to work on).
+3. Start a new conversation in that workspace.
+
+Everything the agent does—reading files, running commands, editing code—is
+scoped to that workspace.
+
+![Agent Canvas home after onboarding](assets/04-agent-canvas-home.png)
+
+## 6. Run Your First Coding Task
+
+With the workspace open and the local LLM selected, type a concrete task into
+the chat. A good first task is small and verifiable, for example:
+
+```text
+Create a new file called hello.py that defines a function greet(name) that
+returns "Hello, {name}!", and add a small test that prints greet("World")
+when run as a script.
+```
+
+Watch the conversation timeline. OpenHands will:
+
+- Read the workspace to understand the layout.
+- Create `hello.py` with the requested function and test block.
+- Optionally run `python3 hello.py` to verify the output.
+- Report what it did and any command output in the chat.
+
+You should see the new file appear in the workspace, and the agent's final
+message should describe the change it made. This is the payoff moment: the
+agent wrote and ran real code in your project folder.
+
+## 7. Review and Steer the Agent
+
+After the agent finishes a step, review its work before accepting the next one:
+
+- **File changes**: use the workspace file browser or the agent's diff view to
+  see exactly what was added, changed, or deleted.
+- **Command output**: expand any command the agent ran to see stdout, stderr,
+  and the exit code.
+- **Follow-ups**: if the result is not what you wanted, reply in the same
+  conversation with a correction. The agent keeps the prior context and
+  iterates on the same files.
+
+For example, if the test did not print the expected greeting, reply:
+
+```text
+The script did not print anything. Run python3 hello.py and fix it so the
+greet("World") test prints to stdout.
+```
+
+The agent will re-read the file, run the command, diagnose the issue, and edit
+the file again—all in the same conversation.
+
+## Troubleshooting
+
+- **`agent-canvas` is not on PATH:** reinstall with
+  `npm install -g @openhands/agent-canvas` and confirm `npm bin -g` is on your
+  PATH.
+- **The UI loads but the backend shows unhealthy:** wait a few seconds for the
+  agent server to finish starting, then refresh. If it stays unhealthy, restart
+  `agent-canvas` and check the terminal output for errors.
+- **Lemonade chat requests fail with a connection error:** confirm
+  `curl -fsS "${LEMONADE_BASE_URL}/health"` succeeds and that Lemonade is still
+  serving the model with `lemonade status`.
+- **The agent errors with a context-length or token-limit message:** restart
+  Lemonade with a larger `ctx_size` (for example `ctx_size=65536`), and start a
+  fresh conversation so the agent does not carry an oversized history.
+- **The agent produces low-quality or incomplete edits:** switch to a larger
+  model in Lemonade, or give the agent a smaller, more concrete task and let it
+  finish before asking for the next change.
+- **`uv` is missing:** install it from
+  [the uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+  Agent Canvas uses `uv` to manage the agent server Python environment.
+
+## Next Steps
+
+- Try a larger task in the same workspace, such as adding a unit test file or
+  fixing a known bug, and review the agent's diff before keeping the change.
+- Connect an MCP server such as GitHub or Slack under **Customize** so the
+  agent can read issues or post updates while it works.
+- Save several LLM profiles (a fast small model and a stronger large model) and
+  switch between them with `/model` mid-conversation.
+- Move on to [OpenHands automations](https://docs.openhands.dev/openhands/usage/automations/overview) to
+  turn recurring development loops into scheduled or event-triggered agent runs.
+
+## Resources
+
+- [OpenHands documentation](https://docs.openhands.dev/)
+- [Agent Canvas overview](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
+- [Agent Canvas setup](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
+- [LLM profiles and model configuration](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
+- [Lemonade Server documentation](https://lemonade-server.ai/docs)
