@@ -10,24 +10,19 @@ SPDX-License-Identifier: MIT
 ```bash
 sudo usermod -a -G render,video $LOGNAME
 ```
+
 **Restart your system to apply the settings.**
 ```bash
 sudo reboot
 ```
+
 **Install ROCm in the created virtual environment.**
 > **Note**: Ensure the virtual environment is active before proceeding.
+
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[libraries,devel]"
-```
-<!-- @test:end -->
-<!-- @device:end -->
-
-<!-- @device:krk -->
-<!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
-```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "rocm[libraries,devel]"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -40,12 +35,28 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ "rocm[l
 <!-- @test:end -->
 <!-- @device:end -->
 
-<!-- @device:rx7900xt,rx9070xt -->
+<!-- @device:krk -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120x-all/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "rocm[libraries,devel]"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
 
-For further installation help, please see this [link](https://rocm.docs.amd.com/en/7.12.0-preview/install/rocm.html?fam=ryzen&gpu=max-pro-395&os=ubuntu&os-version=24.04&i=pip).
+<!-- @device:rx7900xt -->
+<!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx110X-all/ "rocm[libraries,devel]"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:rx9070xt,r9700 -->
+<!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "rocm[libraries,devel]"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+For further installation help, please see this [link](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).

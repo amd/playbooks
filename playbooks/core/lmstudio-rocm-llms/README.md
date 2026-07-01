@@ -40,20 +40,24 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 ## Installing Software Prerequisites
 
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @require:driver -->
+<!-- @device:end -->
+
 <!-- @require:lmstudio -->
 
 ## Downloading Models
 
 <!-- @var:id=lms_model device=halo,halo_box value="gpt-oss-120b" -->
-<!-- @var:id=lms_model device=stx,krk value="qwen3.5-9b" -->
+<!-- @var:id=lms_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="qwen3.5-9b" -->
 <!-- @var:id=model_name device=halo,halo_box value="GPT-OSS 120B" -->
-<!-- @var:id=model_name device=stx,krk value="Qwen3.5 9B" -->
+<!-- @var:id=model_name device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen3.5 9B" -->
 
 <!-- @device:halo,halo_box -->
 <!-- @require:lmstudio-models-gpt-oss-120b -->
 <!-- @device:end -->
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @require:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
@@ -64,7 +68,7 @@ Learn how to start chatting with a ChatGPT-grade LLM completely locally.
 2. Press `Ctrl + L` to open the Model Loader, select `Manually choose model load parameters`, and click on `${model_name}`
 3. Make sure "show advanced settings" is checked.  
 4. Change `Context Length` as desired. Higher context length means more model memory, but more system memory used. Recommended for this playbook is 4096.
-5. Make sure `GPU Offload` is set to maximum and `Flash Attention` is On
+5. Make sure `GPU Offload` is set to maximum and `Flash Attention` is On (Cache Quantizations can remain off)
 6. Check `Remember settings` and click on `Load Model`.
 7. If not in the chat window, press `Ctrl + 1` or click on the 👾 button on the top left of the screen.
 8. Send a message and start interacting with the model!
@@ -103,7 +107,7 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <p align="center">
   <img src="assets/chat_qwen.png" alt="Chatting with ${model_name} on LM Studio" width="600"/>
 </p>
@@ -169,7 +173,7 @@ Having just created the OpenAI Compatible endpoint, let's look at how to integra
     ```
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -199,7 +203,7 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
     On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
     ```bash
     python -m venv lmstudio-env

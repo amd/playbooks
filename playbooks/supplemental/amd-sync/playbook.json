@@ -23,15 +23,13 @@
     "rx9070xt": [
       { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" },
       { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" }
+    ],
+    "r9700": [
+      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" },
+      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" }
     ]
   },
   "supported_platforms": {
-    "halo_box": [
-      "windows",
-      "linux"
-    ]
-  },
-  "required_platforms": {
     "halo_box": [
       "windows",
       "linux"

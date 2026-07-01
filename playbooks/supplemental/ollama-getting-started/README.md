@@ -562,7 +562,6 @@ python3 -m venv ollama-env
 source ollama-env/bin/activate
 pip install requests
 ```
-<!-- @setup:id=activate-venv command="source ollama-env/bin/activate" -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -571,7 +570,6 @@ python -m venv ollama-env
 ollama-env\Scripts\activate
 pip install requests
 ```
-<!-- @setup:id=activate-venv command="ollama-env\Scripts\activate" -->
 <!-- @os:end -->
 #### Create a Python file
 In the same directory, use VS Code or another editor to create a .py file and copy the following code into it. Then, run the file in your activated environment with `python your_file_name.py`
