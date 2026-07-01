@@ -40,6 +40,10 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 ## Installing Software Prerequisites
 
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @require:driver -->
+<!-- @device:end -->
+
 <!-- @require:lmstudio -->
 
 ## Downloading Models

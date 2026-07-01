@@ -1,7 +1,7 @@
 {
   "id": "ollama-getting-started",
   "title": "Getting Started with Ollama",
-  "description": "Install Ollama and run LLMs locally \u2014 chat from the terminal, desktop app, or REST API on your AMD Ryzen\u2122 AI",
+  "description": "Install Ollama and run LLMs locally \u2014 chat from the terminal, desktop app, or REST API.",
   "time": 15,
   "supported_platforms": {
     "halo_box": [

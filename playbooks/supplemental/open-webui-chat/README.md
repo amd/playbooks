@@ -90,12 +90,22 @@ Lemonade runs the models; Open WebUI is the interface you interact with. Use the
 This playbook needs Lemonade running as the backend and, on Linux, a container engine (Podman) to run Open WebUI. Set these up before installing Open WebUI.
 
 <!-- @os:windows -->
+<!-- @device:halo_box,halo,stx,krk -->
 <!-- @require:lemonade -->
+<!-- @device:end -->
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @require:driver,lemonade -->
+<!-- @device:end -->
 ---
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- @device:halo_box,halo,stx,krk -->
 <!-- @require:lemonade,podman -->
+<!-- @device:end -->
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @require:driver,lemonade,podman -->
+<!-- @device:end -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ---
 <!-- @device:end -->
