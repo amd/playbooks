@@ -216,14 +216,21 @@ args = SFTConfig(
     
     # Dataset settings
     packing=False,
-    
+
+    # Loss: use the standard (non-chunked) cross-entropy. Newer TRL (>=1.7)
+    # defaults loss_type to "chunked_nll", whose path reads
+    # outputs.last_hidden_state, which Gemma 3's multimodal output object
+    # (Gemma3CausalLMOutputWithPast) does not expose. Pin "nll" for
+    # version-independent compatibility.
+    loss_type="nll",
+
     # Training hyperparameters
     num_train_epochs=EPOCHS,
     per_device_train_batch_size=BATCH_SIZE,
     gradient_accumulation_steps=GRAD_ACCUM_STEPS,
     learning_rate=LR,
     **(dict(max_steps=1) if QUICK_TRAIN else {}),
-    
+
     # Optimizer
     optim="adamw_torch_fused",        # Fused optimizer for better performance
     

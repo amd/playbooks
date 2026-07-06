@@ -172,6 +172,12 @@ print("PASS: All imports successful")
 ```
 <!-- @test:end -->
 
+<!-- @test:id=verify-trl-transformers-version timeout=60 hidden=True setup=activate-venv -->
+```bash
+python -c "import trl, transformers; print('trl', trl.__version__, '| transformers', transformers.__version__)"
+```
+<!-- @test:end -->
+
 <!-- @test:id=quick-train-lora timeout=600 hidden=True setup=activate-venv -->
 ```python
 import os
