@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
 > This playbook requires a minimum of **32GB** of system memory.
 <!-- @device:end -->
@@ -90,7 +90,7 @@ lms unload --all
 lms ps
 $ID = "qwen3coder-32k-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
-lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier "$ID"
+lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID"
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -104,7 +104,7 @@ lms unload --all || true
 lms ps
 ID="qwen3coder-32k-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
-lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier "$ID"
+lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID"
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
