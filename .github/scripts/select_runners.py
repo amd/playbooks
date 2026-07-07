@@ -94,10 +94,30 @@ def list_runners(repo: str, token: str) -> list[dict]:
         url = f"{GITHUB_API}/repos/{repo}/actions/runners?per_page=100&page={page}"
         status, body = _api_request("GET", url, token)
         if status == 403:
+            # Surface GitHub's exact reason -- the message distinguishes a
+            # scope/permission problem from an org policy that blocks the token
+            # type (classic PATs are often disallowed for org resources).
+            detail = ""
+            if isinstance(body, dict):
+                detail = body.get("message", "")
+            elif isinstance(body, str):
+                detail = body
             sys.stderr.write(
-                "GitHub API returned 403 listing runners. The token needs "
-                "admin/manage_runners scope (a PAT stored as a secret), not "
-                "the default GITHUB_TOKEN.\n"
+                "GitHub API returned 403 listing runners.\n"
+                f"GitHub says: {detail}\n"
+                "Common causes: (1) the org disallows this token type "
+                "(classic PATs are frequently blocked for org resources -- "
+                "an org admin must allow-list it or you must use a GitHub App/"
+                "fine-grained PAT); (2) the token lacks 'repo' scope / "
+                "Administration:Read; (3) the token isn't SSO-authorized for "
+                "the org.\n"
+            )
+            sys.exit(1)
+        if status == 401:
+            sys.stderr.write(
+                "GitHub API returned 401 (bad credentials). The "
+                "RUNNER_ADMIN_TOKEN secret is missing, misspelled, or "
+                "expired.\n"
             )
             sys.exit(1)
         if status != 200 or not isinstance(body, dict):
