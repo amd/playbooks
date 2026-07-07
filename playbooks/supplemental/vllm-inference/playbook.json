@@ -4,6 +4,9 @@
   "description": "Learn how to run inference and serving using containerized vLLM on the integrated GPU",
   "time": 30,
   "unsupported_platforms": {
+    "halo_box": [
+      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+    ],
     "halo": [
       { "platform": "windows", "reason": "vLLM is not supported on Windows" }
     ],
@@ -11,6 +14,15 @@
       { "platform": "windows", "reason": "vLLM is not supported on Windows" }
     ],
     "krk": [
+      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+    ],
+    "rx7900xt": [
+      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+    ],
+    "rx9070xt": [
+      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+    ],
+    "r9700": [
       { "platform": "windows", "reason": "vLLM is not supported on Windows" }
     ]
   },

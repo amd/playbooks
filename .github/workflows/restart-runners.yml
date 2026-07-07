@@ -1,0 +1,170 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Restart Runners
+
+# Two ways to trigger:
+#   1. Automatically every day at 3:00 AM Pacific Time (the cron below). Pacific
+#      is UTC-8 (PST) / UTC-7 (PDT); GitHub cron is always UTC and does NOT
+#      observe DST, so we schedule BOTH 10:00 and 11:00 UTC and let the guard
+#      step run the restart only during the hour that is actually 03:00 Pacific.
+#   2. Manually via "Run workflow" (workflow_dispatch), where you pick exactly
+#      which runners to restart.
+on:
+  schedule:
+    - cron: "0 10 * * *"   # 03:00 PDT (summer, UTC-7)
+    - cron: "0 11 * * *"   # 03:00 PST (winter, UTC-8)
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "What to restart"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all          # every online runner
+          - by_name      # a single runner (fill in 'name')
+          - by_group     # a hardware group, optionally narrowed by os
+      name:
+        description: "Runner name (only used when scope = by_name), e.g. xsj-aimlab-halo-0"
+        required: false
+        type: string
+      group:
+        description: "Hardware group (used when scope = by_group)"
+        required: false
+        default: "any"
+        type: choice
+        options:
+          - any
+          - halo         # Ryzen AI Max
+          - stx          # Ryzen AI 300 HX
+          - krk          # Ryzen AI 300
+          - rx7900xt     # Radeon RX 7900 XT
+          - rx9070xt     # Radeon RX 9070 XT
+      os:
+        description: "OS filter (used when scope = by_group)"
+        required: false
+        default: "any"
+        type: choice
+        options:
+          - any
+          - Windows
+          - Linux
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Step 1: figure out WHICH runners to restart by querying the GitHub API for
+  # the live fleet and filtering it. Nothing is hardcoded here, so newly added
+  # machines are picked up automatically.
+  # ---------------------------------------------------------------------------
+  select:
+    name: Select runners
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.pick.outputs.matrix }}
+      has_entries: ${{ steps.pick.outputs.has_entries }}
+    steps:
+      - name: Guard cron to 03:00 Pacific
+        id: guard
+        run: |
+          # On a scheduled run, only proceed during the UTC hour that maps to
+          # 03:00 Pacific right now. Manual runs always proceed.
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          pacific_hour=$(TZ="America/Los_Angeles" date +%H)
+          echo "Current Pacific hour: $pacific_hour"
+          if [ "$pacific_hour" = "03" ]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Not 03:00 Pacific (the other cron will handle it). Skipping."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout repository
+        if: steps.guard.outputs.proceed == 'true'
+        uses: actions/checkout@v4
+
+      - name: Build restart matrix
+        id: pick
+        if: steps.guard.outputs.proceed == 'true'
+        env:
+          # Admin-scoped PAT (repo + manage_runners) stored as a repo secret.
+          # The default GITHUB_TOKEN cannot list self-hosted runners.
+          RUNNER_ADMIN_TOKEN: ${{ secrets.RUNNER_ADMIN_TOKEN }}
+        run: |
+          # Scheduled runs always target the whole fleet. Manual runs use the
+          # inputs the operator chose.
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            NAME=""
+            OS="any"
+            GROUP="any"
+          else
+            case "${{ github.event.inputs.scope }}" in
+              by_name)
+                NAME="${{ github.event.inputs.name }}"
+                OS="any"
+                GROUP="any"
+                ;;
+              by_group)
+                NAME=""
+                OS="${{ github.event.inputs.os }}"
+                GROUP="${{ github.event.inputs.group }}"
+                ;;
+              *)  # all
+                NAME=""
+                OS="any"
+                GROUP="any"
+                ;;
+            esac
+          fi
+
+          python3 .github/scripts/select_runners.py \
+            --repo "${{ github.repository }}" \
+            --name "$NAME" \
+            --os "$OS" \
+            --group "$GROUP"
+
+  # ---------------------------------------------------------------------------
+  # Step 2: fan out one job per selected runner. Each job runs ON that machine
+  # (routed by its name label), so the reboot happens locally. runner.os tells
+  # us whether to use the Windows or Linux reboot command -- no separate
+  # OS-identification step is needed.
+  # ---------------------------------------------------------------------------
+  restart:
+    name: "Restart ${{ matrix.runner }}"
+    needs: select
+    if: needs.select.outputs.has_entries == 'true'
+    runs-on: [self-hosted, "${{ matrix.runner }}"]
+    strategy:
+      fail-fast: false   # one machine failing must not block the others
+      matrix:
+        include: ${{ fromJson(needs.select.outputs.matrix) }}
+    steps:
+      - name: Reboot (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Write-Host "Restarting $env:COMPUTERNAME (runner ${{ matrix.runner }}) in 5s..."
+          # /r = restart (NOT shutdown), /t 5 = 5s delay so this step can report
+          # success before the connection drops, /f = force apps closed so the
+          # reboot can't hang. The runner service must start on boot for the
+          # machine to rejoin the pool automatically.
+          shutdown /r /t 5 /f /c "Scheduled restart via GitHub Actions"
+
+      - name: Reboot (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          echo "Restarting $(hostname) (runner ${{ matrix.runner }}) now..."
+          # `sudo reboot` restarts the machine (NOT shutdown). It's backgrounded
+          # with a short delay so this step exits cleanly before the runner
+          # process is killed -- otherwise the reboot terminates the job mid-run
+          # and it reports a false failure. Requires passwordless sudo (or root).
+          ( sleep 5 ; sudo --non-interactive reboot ) &
+          echo "Reboot scheduled."

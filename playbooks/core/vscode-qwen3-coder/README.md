@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
 > This playbook requires a minimum of **32GB** of system memory.
 <!-- @device:end -->
@@ -49,7 +49,7 @@ We will use LM Studio to serve the LLM powering the coding agent.
 
 ![LM Studio Initial Screen](assets/initial-lm-studio.png)
 
-Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-30B-A3B` model with a large context length.
+Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-30B-A3B` model with a large context length. (Use the Model tab to install it if you haven't already).
 - Click on the search bar on the top of the LM Studio window or press `CTRL+L`. Click the switch `Manually choose model load parameters` and then click on the Qwen3-Coder-30B-A3B model.
 - Change the context length from `4096` to `32768`, and make sure `GPU Offload` is at the max. Then, click `Load Model`
 
@@ -90,7 +90,7 @@ lms unload --all
 lms ps
 $ID = "qwen3coder-32k-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
-lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier "$ID"
+lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID"
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -104,7 +104,7 @@ lms unload --all || true
 lms ps
 ID="qwen3coder-32k-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
-lms load qwen3-coder-30b-a3b-instruct --context-length 32768 --gpu max --identifier "$ID"
+lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID"
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
