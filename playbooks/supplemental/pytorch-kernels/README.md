@@ -181,7 +181,12 @@ kernel-env\Scripts\activate
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
+<!-- @device:halo_box,halo,stx,krk -->
 <!-- @require:rocm,pytorch -->
+<!-- @device:end -->
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @require:driver,rocm,pytorch -->
+<!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->

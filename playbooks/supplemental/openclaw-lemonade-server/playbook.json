@@ -4,11 +4,11 @@
   "description": "Install and configure OpenClaw autonomous AI agent with Lemonade Server.",
   "time": 45,
   "supported_platforms": {
-    "halo": [
+    "halo_box": [
       "linux",
       "windows"
     ],
-    "halo_box": [
+    "halo": [
       "linux",
       "windows"
     ],
@@ -23,8 +23,8 @@
   },
   "tested_platforms": {
     "halo": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
       "linux",
@@ -37,8 +37,8 @@
   },
   "required_platforms": {
     "halo": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
       "linux",
@@ -50,11 +50,11 @@
     ]
   },
   "published_platforms": {
-    "halo": [
+    "halo_box": [
       "linux",
       "windows"
     ],
-    "halo_box": [
+    "halo": [
       "linux",
       "windows"
     ],

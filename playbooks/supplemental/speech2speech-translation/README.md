@@ -114,6 +114,10 @@ s2st-env\Scripts\activate
 
 ### Installing Basic Dependencies
 
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @require:driver -->
+<!-- @device:end -->
+
 <!-- @require:pytorch -->
 
 ### Additional Dependencies

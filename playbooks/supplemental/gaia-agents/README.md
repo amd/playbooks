@@ -55,6 +55,10 @@ which python3
 <!-- @test:end --> 
 <!-- @os:end --> 
 
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @require:driver -->
+<!-- @device:end -->
+
 <!-- @require:lemonade -->
 <!-- @require:gaia -->
 
