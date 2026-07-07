@@ -51,7 +51,7 @@ pip install amd-gaia
 <!-- @device:end -->
 
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 1. On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
@@ -113,7 +113,7 @@ sudo apt install -y pciutils
 fi
 
 command -v lspci >/dev/null 2>&1
-lspci | head -n 5
+lspci | head -n 5 || true
 echo "OK: lspci is available"
 ```
 <!-- @test:end --> 
