@@ -172,6 +172,23 @@ print("PASS: All imports successful")
 ```
 <!-- @test:end -->
 
+<!-- @test:id=verify-package-version timeout=60 hidden=True setup=activate-venv -->
+```python
+import importlib.metadata as md
+
+pkgs = [
+    "torch", "transformers", "trl", "peft", "accelerate",
+    "datasets", "safetensors", "fsspec", "bitsandbytes",
+    "huggingface_hub", "tokenizers",
+]
+for p in pkgs:
+    try:
+        print(f"{p}: {md.version(p)}")
+    except md.PackageNotFoundError:
+        print(f"{p}: NOT INSTALLED")
+```
+<!-- @test:end -->
+
 <!-- @test:id=quick-train-lora timeout=600 hidden=True setup=activate-venv -->
 ```python
 import os
