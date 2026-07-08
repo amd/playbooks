@@ -762,9 +762,155 @@ Hermes will now spin up a persistent sandbox container and route all `terminal` 
 
 ---
 
-## Start Hermes
+<!-- @os:linux -->
+<!-- @device:halo_box -->
+## (Recommended) Hermes Integration with Firecrawl Services
 
-Start an interactive CLI session directly:
+`Firecrawl` is a self-hosted web crawling and content extraction service that unlocks the full potential of Hermes automation. We recommend getting familiar with the [Firecrawl SDK](https://docs.firecrawl.dev/introduction) before diving in.
+
+In this setup, Firecrawl runs as a set of Docker containers managed with Podman. To simplify lifecycle management and automatic startup, we register Firecrawl as a user-level `systemd` service that orchetrates the underlying Podman Compose stack. This allows Hermes to start, stop, and verify the Firecrawl service using standard `systemctl --user` commands instead of interacting with containers directly.
+
+To keep things simple, we've broken the whole process into four steps:
+
+---
+
+### 1. Register the system service
+Navigate to the systemd user configuration directory:
+```bash
+cd ~/.config/systemd/user
+```
+Create and open a new file called `firecrawl.service`.
+```bash
+sudo nano firecrawl.service
+```
+Copy and paste the following configuration:
+```bash
+[Unit]
+Description=Firecrawl
+After=podman.service
+Requires=podman.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/<your-system-username>/firecrawl
+
+# Optional: Validate config before starting
+ExecStartPre=/usr/bin/podman -f hermes-compose.yaml config --quiet
+
+# Start containers in detached mode
+ExecStart=/usr/bin/podman compose -f hermes-compose.yaml up -d --remove-orphans
+
+# Stop containers when the service stops
+ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
+
+[Install]
+WantedBy=default.target
+
+```
+>  ⚠️ Replace `your-system-username` with your actual system username.
+
+At this point, the service has been defined but not yet registered with systemd. 
+Make sure the filename matches exactly what you created above, then run:
+```bash
+systemctl --user daemon-reload
+systemctl --user enable firecrawl.service
+```
+If successful, you should see the following output:
+
+> ***Created symlink '/home/<your-system-username>/.config/systemd/user/default.target.wants/firecrawl.service' → '/home/<your-system-username>/.config/systemd/user/firecrawl.service'.***
+
+💡 `default.target.wants/` contains symbolic links to services that are configured to start automatically.
+
+### 2. Configure Firecrawl for your Service
+
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) is ideal for those who need full control over their scraping and data processing environments but comes with the trade-off of additional maintenance and configuration efforts.
+
+Start by cloning the repository:
+```bash
+git clone https://github.com/firecrawl/firecrawl.git
+```
+> ℹ️ Firecrawl ships with its own `.env` file. We will not be using it. Instead, create your own `.env` file in the root `/firecrawl` directory using the template below.
+
+Create `.env` in the root `/firecrawl` directory:
+```bash
+# ===== Required ENVS ======
+PORT=3002
+HOST=0.0.0.0
+
+# ===== Firecrawl =====
+# FIRECRAWL_API_KEY=""
+
+# ===== Proxy =====
+# PROXY_SERVER can be a full URL (e.g. http://0.1.2.3:1234) or just an IP and port combo (e.g. 0.1.2.3:1234)
+# Do not uncomment PROXY_USERNAME and PROXY_PASSWORD if your proxy is unauthenticated
+# PROXY_SERVER=
+# PROXY_USERNAME=
+# PROXY_PASSWORD=
+
+# This key lets you access the queue admin panel. Change this if your deployment is publicly accessible.
+BULL_AUTH_KEY=CHANGEME
+
+# ===== System Resource Configuration =====
+# Maximum CPU usage threshold (0.0-1.0). Worker will reject new jobs when CPU usage exceeds this value.
+# Default: 0.8 (80%)
+# MAX_CPU=0.8
+
+# Maximum RAM usage threshold (0.0-1.0). Worker will reject new jobs when memory usage exceeds this value.
+# Default: 0.8 (80%)
+# MAX_RAM=0.8
+```
+As advised:
+> *Protect the admin UI. Set `BULL_AUTH_KEY` to a strong secret, especially on any deployment reachable from untrusted networks.*
+
+### 3. Deploying Hermes via Compose
+
+Before moving on, make sure you have pulled the latest Hermes Docker image:
+```bash
+podman pull docker.io/nousresearch/hermes-agent:latest
+```
+Once that is done, download the Hermes Compose file [hermes-compose.yaml](assets/hermes-compose.yaml) and place it in the root `/firecrawl` directory:
+
+> ⚠️ This convention is required for systemd to locate and start the service correctly as specified in `WorkingDirectory=/home/<your-system-username>/firecrawl`.
+
+> 💡 You can always expand the stack by adding additional Firecrawl services as needed. The full list of available services can be found in the official [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+
+### 4. Launch Hermes service through Firecrawl 
+
+#### Health Check
+Before handing control over to `systemd`, validate that everything works correctly by running the stack manually:
+```bash
+podman compose -f hermes-compose.yaml up -d
+```
+If everything is configured correctly, you should see the Hermes container come up and your command line output should look similar to this:
+<p align="center">
+  <img src="assets/podman_health_verification.png" width="500" height="400" />
+</p>
+
+Once verified, bring the stack back down before proceeding:
+```bash
+podman compose -f hermes-compose.yaml down
+```
+Now that everything is validated, start the service through `systemd`:
+```bash
+systemctl --user start firecrawl.service```
+```
+[The Hermes API](https://docs.firecrawl.dev/api-reference/v2-introduction) is accessible from within the interactive container, and the Web Dashboard is available on same host and port at http://127.0.0.1:9119.
+<p align="center">
+  <img src="assets/System_Service_launch.png" width="500" height="500" />
+</p>
+
+To stop the service, run:
+```bash
+systemctl --user stop firecrawl.service
+```
+<!-- @device:end -->
+<!-- @os:end -->
+---
+
+## Hermes Native
+
+Start an interactive CLI session directly: 
 
 ```bash
 hermes
