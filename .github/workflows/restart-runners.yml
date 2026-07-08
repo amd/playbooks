@@ -23,15 +23,15 @@ on:
         default: "all"
         type: choice
         options:
-          - all          # every online runner
-          - by_name      # a single runner (fill in 'name')
-          - by_group     # a hardware group, optionally narrowed by os
+          - all          # every runner; 'name', 'group', 'os' are all ignored
+          - by_name      # ONE runner named in 'name'; 'group' and 'os' ignored
+          - by_group     # runners matching 'group' + 'os'; 'name' ignored
       name:
-        description: "Runner name (only used when scope = by_name), e.g. xsj-aimlab-halo-0"
+        description: "Runner name -- USED ONLY when scope=by_name (ignored otherwise), e.g. xsj-aimlab-halo-0"
         required: false
         type: string
       group:
-        description: "Hardware group (used when scope = by_group)"
+        description: "Hardware group -- USED ONLY when scope=by_group (ignored otherwise)"
         required: false
         default: "any"
         type: choice
@@ -40,10 +40,11 @@ on:
           - halo         # Ryzen AI Max
           - stx          # Ryzen AI 300 HX
           - krk          # Ryzen AI 300
-          - rx7900xt     # Radeon RX 7900 XT
+          - r9700        # Radeon AI Pro R9700
           - rx9070xt     # Radeon RX 9070 XT
+          - rx7900xt     # Radeon RX 7900 XT
       os:
-        description: "OS filter (used when scope = by_group)"
+        description: "OS filter -- USED ONLY when scope=by_group (ignored otherwise)"
         required: false
         default: "any"
         type: choice
@@ -57,9 +58,9 @@ permissions:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Step 1: figure out WHICH runners to restart by querying the GitHub API for
-  # the live fleet and filtering it. Nothing is hardcoded here, so newly added
-  # machines are picked up automatically.
+  # Step 1: Determine which runners need to be restarted by filtering the
+  # maintained runner inventory in .github/runners.json.
+  # Update .github/runners.json whenever machines are added, removed, or changed.
   # ---------------------------------------------------------------------------
   select:
     name: Select runners
@@ -93,10 +94,6 @@ jobs:
       - name: Build restart matrix
         id: pick
         if: steps.guard.outputs.proceed == 'true'
-        env:
-          # Admin-scoped PAT (repo + manage_runners) stored as a repo secret.
-          # The default GITHUB_TOKEN cannot list self-hosted runners.
-          RUNNER_ADMIN_TOKEN: ${{ secrets.RUNNER_ADMIN_TOKEN }}
         run: |
           # Scheduled runs always target the whole fleet. Manual runs use the
           # inputs the operator chose.
@@ -110,6 +107,12 @@ jobs:
                 NAME="${{ github.event.inputs.name }}"
                 OS="any"
                 GROUP="any"
+                # Guard: an empty name with an empty os/group filter would match
+                # EVERY runner, silently rebooting the whole fleet. Fail instead.
+                if [ -z "$NAME" ]; then
+                  echo "::error::scope=by_name requires the 'name' field to be set."
+                  exit 1
+                fi
                 ;;
               by_group)
                 NAME=""
@@ -125,7 +128,6 @@ jobs:
           fi
 
           python3 .github/scripts/select_runners.py \
-            --repo "${{ github.repository }}" \
             --name "$NAME" \
             --os "$OS" \
             --group "$GROUP"

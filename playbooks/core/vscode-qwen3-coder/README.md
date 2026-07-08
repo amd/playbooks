@@ -90,7 +90,7 @@ lms unload --all
 lms ps
 $ID = "qwen3coder-32k-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
-lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID"
+lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -104,7 +104,7 @@ lms unload --all || true
 lms ps
 ID="qwen3coder-32k-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
-lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID"
+lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
