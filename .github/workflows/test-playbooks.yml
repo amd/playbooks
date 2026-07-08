@@ -14,8 +14,6 @@ on:
         required: false
         type: string
   pull_request:
-    paths:
-      - 'playbooks/**'
 
 permissions:
   contents: read
