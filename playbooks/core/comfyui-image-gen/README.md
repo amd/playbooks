@@ -40,7 +40,7 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 
 <!-- @os:linux -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -303,7 +303,7 @@ To launch ComfyUI on Linux, click the ComfyUI shortcut in the taskbar. It should
 <!-- @os:end -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 To launch ComfyUI on Windows, simply click the ComfyUI shortcut on your Desktop.
 <!-- @os:end -->
