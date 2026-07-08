@@ -225,12 +225,13 @@ cp -f "$cache_vae" models/vae/ae.safetensors
 <!-- @os:windows -->
 <!-- @test:id=comfyui-server-up-windows timeout=300 hidden=True -->
 ```powershell
-$comfyRoot = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI\ComfyUI"
-$py        = Join-Path $comfyRoot ".venv\Scripts\python.exe"
-$mainPy    = Join-Path $comfyRoot "main.py"
+$comfyRoot   = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI\ComfyUI"
+$py          = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+$mainPy      = Join-Path $comfyRoot "main.py"
+$sharedPaths = Join-Path $env:APPDATA "Comfy Desktop\shared_model_paths.yaml"
 
 $proc = Start-Process -FilePath $py `
- -ArgumentList "`"$mainPy`" --listen 127.0.0.1 --port 8188" `
+ -ArgumentList "`"$mainPy`" --listen 127.0.0.1 --port 8188 --extra-model-paths-config `"$sharedPaths`"" `
  -WorkingDirectory $comfyRoot `
  -NoNewWindow -PassThru
 
@@ -399,12 +400,13 @@ The entire workflow execution should complete in less than 30 seconds. Your gene
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
 ```powershell
-$comfyRoot = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI\ComfyUI"
-$py        = Join-Path $comfyRoot ".venv\Scripts\python.exe"
-$mainPy    = Join-Path $comfyRoot "main.py"
+$comfyRoot      = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI\ComfyUI"
+$py             = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+$mainPy         = Join-Path $comfyRoot "main.py"
+$sharedPaths    = Join-Path $env:APPDATA "Comfy Desktop\shared_model_paths.yaml"
 
 $proc = Start-Process -FilePath $py `
- -ArgumentList "`"$mainPy`" --listen 127.0.0.1 --port 8188" `
+ -ArgumentList "`"$mainPy`" --listen 127.0.0.1 --port 8188 --extra-model-paths-config `"$sharedPaths`"" `
  -WorkingDirectory $comfyRoot `
  -NoNewWindow -PassThru
 
@@ -544,9 +546,10 @@ PY
 ```powershell
 $outDir = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI\ComfyUI\output"
 
-$files = Get-ChildItem -Path $outDir -Filter *.png -File -ErrorAction SilentlyContinue
+# ComfyUI saves into date-stamped subdirectories, so recurse to find PNGs
+$files = Get-ChildItem -Path $outDir -Filter *.png -File -Recurse -ErrorAction SilentlyContinue
 if (-not $files) {
- throw "No PNG files found in: $outDir"
+ throw "No PNG files found under: $outDir"
 }
 $files | Sort-Object LastWriteTime -Descending | Select-Object -First 5 | ForEach-Object { $_.FullName }
 ```
