@@ -66,6 +66,15 @@ PROMPT = "Explain why the sky is blue."
 # =========================
 # Utils
 # =========================
+def _resolve_model_path(model_name: str) -> str:
+    try:
+        from huggingface_hub import snapshot_download
+        return snapshot_download(model_name, local_files_only=True)
+    except Exception:
+        return model_name
+MODEL_NAME = _resolve_model_path(MODEL_NAME)
+
+
 def log(msg: str):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
