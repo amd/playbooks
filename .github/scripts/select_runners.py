@@ -4,40 +4,38 @@
 # SPDX-License-Identifier: MIT
 
 """
-Discover self-hosted runners and build a restart matrix.
+Filter the maintained runner list and build a matrix.
 
-This script is invoked from the ``Restart Runners`` workflow. It queries the
-GitHub REST API for every self-hosted runner registered to the repository
-(name, OS, online/offline status, and labels) and filters that live list down
-to the set the caller asked to restart. Nothing about the fleet is hardcoded:
-machines added to or removed from a group are picked up automatically on the
-next run, which is why this is preferred over a static name list.
+This script is the single source of truth for the fleet across workflows. It is invoked from:
 
-Filtering is done by ANDing three optional criteria:
+* ``Restart Runners`` -- with filters (``--name``/``--os``/``--group``) to pick
+  the subset of machines to reboot.
+* ``Runner Heartbeat`` -- with no filters (``--os any --group any``) to emit the
+  full fleet as a matrix.
 
+It reads the static fleet definition in ``.github/runners.json`` and filters it down to the requested set.
+When machines are added or removed, edit ``.github/runners.json`` ONLY -- both workflows pick up the change automatically.
+
+``runners.json`` is a JSON array of objects, one per runner::
+    [
+      { "name": "xsj-aimlab-halo-0", "os": "Windows", "group": "halo" },
+      ...
+    ]
+
+Filtering ANDs three optional criteria:
 * ``--name``   exact runner name (e.g. ``xsj-aimlab-halo-0``). Restarts one box.
-* ``--os``     ``Windows`` or ``Linux`` (or ``any``). Matched against the
-               runner's OS label.
-* ``--group``  a hardware label (e.g. ``halo``, ``stx``, ``krk``,
-               ``rx7900xt``, ``rx9070xt``) or ``any``. Matched against the
-               runner's labels.
+* ``--os``     ``Windows`` or ``Linux`` (or ``any``). Matched against ``os``.
+* ``--group``  a hardware group (``halo``, ``stx``, ``krk``, ``r9700``,
+               ``rx9070xt``, ``rx7900xt``) or ``any``. Matched against ``group``.
 
 So ``--os Windows --group halo`` selects the Windows Ryzen AI Max machines,
 ``--group any --os any`` (the cron default) selects the whole fleet, and
 ``--name xsj-aimlab-krk-02`` targets a single machine.
 
-Offline runners are skipped: a job can never be dispatched to a runner that is
-not connected, so including them would just hang the matrix entry.
-
 The result is written to ``GITHUB_OUTPUT`` as ``matrix`` (a JSON array of
 ``{"runner": "<name>"}`` objects consumed by ``strategy.matrix.include``) and
 ``has_entries`` (``true``/``false``). It also prints a human-readable summary
 to the step log.
-
-Listing self-hosted runners requires an admin-scoped token, so ``GITHUB_TOKEN``
-here must be a PAT with ``repo`` + ``manage_runners`` (classic: ``repo``)
-scope, supplied via a secret. The default ``GITHUB_TOKEN`` cannot read this
-endpoint.
 """
 
 from __future__ import annotations
@@ -46,74 +44,35 @@ import argparse
 import json
 import os
 import sys
-import urllib.error
-import urllib.request
-from typing import Any, Optional
+from pathlib import Path
+from typing import Optional
 
 
-GITHUB_API = "https://api.github.com"
+# Location of the maintained fleet list, relative to the repo root.
+RUNNERS_FILE = Path(".github/runners.json")
 
 
-def _api_request(method: str, url: str, token: str) -> tuple[int, Any]:
-    """Perform an authenticated GitHub REST request.
-
-    Returns ``(status_code, parsed_json_or_text)``. 5xx errors are raised;
-    4xx errors are returned so the caller can surface a clear message (e.g. a
-    403 when the token lacks ``manage_runners`` scope).
-    """
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "playbooks-runner-restarter",
-    }
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-
-    req = urllib.request.Request(url, headers=headers, method=method)
+def load_runners() -> list[dict]:
+    """Load and lightly validate the maintained runner list."""
+    if not RUNNERS_FILE.exists():
+        sys.stderr.write(f"Runner list not found at {RUNNERS_FILE}.\n")
+        sys.exit(1)
     try:
-        with urllib.request.urlopen(req) as resp:
-            payload = resp.read().decode("utf-8")
-            return resp.status, json.loads(payload) if payload else None
-    except urllib.error.HTTPError as e:
-        payload = e.read().decode("utf-8", errors="replace")
-        try:
-            parsed = json.loads(payload)
-        except json.JSONDecodeError:
-            parsed = payload
-        if e.code >= 500:
-            sys.stderr.write(f"GitHub API {method} {url} -> {e.code}: {parsed}\n")
-            raise
-        return e.code, parsed
-
-
-def list_runners(repo: str, token: str) -> list[dict]:
-    """Return every self-hosted runner registered to ``repo`` (paginated)."""
-    runners: list[dict] = []
-    page = 1
-    while True:
-        url = f"{GITHUB_API}/repos/{repo}/actions/runners?per_page=100&page={page}"
-        status, body = _api_request("GET", url, token)
-        if status == 403:
+        data = json.loads(RUNNERS_FILE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        sys.stderr.write(f"{RUNNERS_FILE} is not valid JSON: {e}\n")
+        sys.exit(1)
+    if not isinstance(data, list):
+        sys.stderr.write(f"{RUNNERS_FILE} must contain a JSON array.\n")
+        sys.exit(1)
+    for i, entry in enumerate(data):
+        if not isinstance(entry, dict) or "name" not in entry or "os" not in entry:
             sys.stderr.write(
-                "GitHub API returned 403 listing runners. The token needs "
-                "admin/manage_runners scope (a PAT stored as a secret), not "
-                "the default GITHUB_TOKEN.\n"
+                f"{RUNNERS_FILE} entry #{i} must be an object with at least "
+                f"'name' and 'os' keys. Got: {entry!r}\n"
             )
             sys.exit(1)
-        if status != 200 or not isinstance(body, dict):
-            sys.stderr.write(f"Unexpected response listing runners ({status}): {body}\n")
-            sys.exit(1)
-        batch = body.get("runners", [])
-        runners.extend(batch)
-        if len(batch) < 100:
-            break
-        page += 1
-    return runners
-
-
-def label_names(runner: dict) -> set[str]:
-    """Return the set of label names attached to a runner."""
-    return {lbl.get("name", "") for lbl in runner.get("labels", [])}
+    return data
 
 
 def matches(
@@ -123,21 +82,16 @@ def matches(
     group: Optional[str],
 ) -> bool:
     """Return True if ``runner`` satisfies all active filters."""
-    labels = label_names(runner)
-
     if name:
         if runner.get("name") != name:
             return False
 
     if os_filter and os_filter.lower() != "any":
-        # GitHub attaches an OS label ("Windows"/"Linux") to self-hosted
-        # runners; match case-insensitively to be safe.
-        os_labels = {lbl.lower() for lbl in labels}
-        if os_filter.lower() not in os_labels:
+        if str(runner.get("os", "")).lower() != os_filter.lower():
             return False
 
     if group and group.lower() != "any":
-        if group not in labels:
+        if str(runner.get("group", "")).lower() != group.lower():
             return False
 
     return True
@@ -145,44 +99,36 @@ def matches(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build a runner restart matrix.")
-    parser.add_argument("--repo", required=True, help="owner/repo")
     parser.add_argument("--name", default="", help="Exact runner name, or empty")
     parser.add_argument("--os", dest="os_filter", default="any", help="Windows|Linux|any")
-    parser.add_argument("--group", default="any", help="Hardware label, or any")
+    parser.add_argument("--group", default="any", help="Hardware group, or any")
     args = parser.parse_args()
 
-    token = os.environ.get("RUNNER_ADMIN_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
-    if not token:
-        sys.stderr.write("No token in RUNNER_ADMIN_TOKEN or GITHUB_TOKEN.\n")
-        return 1
+    runners = load_runners()
 
-    runners = list_runners(args.repo, token)
-
-    selected: list[dict] = []
-    skipped_offline: list[str] = []
-    for r in runners:
-        if not matches(r, args.name.strip() or None, args.os_filter, args.group):
-            continue
-        if r.get("status") != "online":
-            skipped_offline.append(r.get("name", "<unknown>"))
-            continue
-        selected.append(r)
+    selected = [
+        r
+        for r in runners
+        if matches(r, args.name.strip() or None, args.os_filter, args.group)
+    ]
 
     # Human-readable summary in the step log.
-    print(f"Discovered {len(runners)} runner(s) total.")
+    print(f"Loaded {len(runners)} runner(s) from {RUNNERS_FILE}.")
     print(
         f"Filters -> name={args.name or 'any'}, os={args.os_filter}, "
         f"group={args.group}"
     )
-    if skipped_offline:
-        print(f"Skipping {len(skipped_offline)} offline match(es): "
-              f"{', '.join(skipped_offline)}")
+    if args.name.strip() and not selected:
+        print(
+            f"WARNING: no runner named '{args.name.strip()}' in "
+            f"{RUNNERS_FILE}. Check spelling / update the list."
+        )
     if selected:
         print("Will restart:")
         for r in selected:
-            print(f"  - {r['name']} (labels: {', '.join(sorted(label_names(r)))})")
+            print(f"  - {r['name']} ({r.get('os')}, group={r.get('group', 'n/a')})")
     else:
-        print("No online runners matched the selection.")
+        print("No runners matched the selection.")
 
     matrix = [{"runner": r["name"]} for r in selected]
 
