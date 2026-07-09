@@ -4,6 +4,10 @@ Efficient fine-tuning is vital for adapting large language models (LLMs) to down
 
 This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your local AMD hardware.
 
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+> **Note:** The fine-tuning techniques in this playbook require at least 16 GB of GPU memory and 32 GB of system RAM.
+<!-- @device:end -->
+
 ## What You'll Learn
 
 - How to set up LLaMA Factory with AMD ROCm™ software
@@ -62,7 +66,7 @@ source llamafactory-env/bin/activate
 <!-- @setup:id=activate-venv command="source llamafactory-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -92,7 +96,7 @@ llamafactory-env\Scripts\activate
 <!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" --> 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv llamafactory-env
@@ -151,7 +155,7 @@ pip install -r requirements/metrics.txt --break-system-packages
 <!-- @test:end --> 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
 ```bash
 git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
