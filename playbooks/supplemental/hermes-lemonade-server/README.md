@@ -43,13 +43,16 @@ By the end of this playbook you will be able to:
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Optional, for sandboxing Hermes Agent)
+<!-- @device:halo_box -->
+- Podman (pre-installed on Halo Box - no setup required)
+<!-- @device:end -->
+- [Podman](https://podman.io/docs/installation) (Optional, for sandboxing Hermes Agent - `sudo apt-get install -y podman`)
 <!-- @os:end -->
 <!-- @os:windows -->
 - A PC running **Windows 10/11**
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Optional, for sandboxing Hermes Agent)
+- [Podman Desktop](https://podman-desktop.io/) (Optional, for sandboxing Hermes Agent)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -624,14 +627,15 @@ finally {
 
 ---
 
-## (Recommended) Enable Docker Sandboxing
+## (Recommended) Enable Podman Sandboxing
 
-Hermes Agent can route all agent shell and file operations through an isolated Docker container rather than running them directly on your host. This limits the blast radius of any unintended action to the sandbox, leaving your host filesystem and network untouched.
+Hermes Agent can route all agent shell and file operations through an isolated container rather than running them directly on your host. This limits the blast radius of any unintended action to the sandbox, leaving your host filesystem and network untouched.
 
 Build a lightweight sandbox image:
 
+<!-- @os:linux -->
 ```bash
-docker build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
+podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
 FROM debian:bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -643,15 +647,33 @@ WORKDIR /home/sandbox
 CMD ["sleep", "infinity"]
 DOCKERFILE
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+# Run inside your WSL terminal
+podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
+FROM debian:bookworm-slim
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  bash ca-certificates curl git jq python3 ripgrep \
+  && rm -rf /var/lib/apt/lists/*
+RUN useradd --create-home --shell /bin/bash sandbox
+USER sandbox
+WORKDIR /home/sandbox
+CMD ["sleep", "infinity"]
+DOCKERFILE
+```
+<!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-image-linux timeout=1800 hidden=True -->
 ```bash
 set -euo pipefail
 
-docker version
+podman version
 
-docker build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
+podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
 FROM debian:bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -663,9 +685,9 @@ WORKDIR /home/sandbox
 CMD ["sleep", "infinity"]
 DOCKERFILE
 
-docker image inspect hermes-sandbox:bookworm-slim >/dev/null
+podman image inspect hermes-sandbox:bookworm-slim >/dev/null
 
-echo "OK: Hermes sandbox Docker image is available"
+echo "OK: Hermes sandbox Podman image is available"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -678,19 +700,9 @@ $ErrorActionPreference = "Stop"
 $script = @'
 set -euo pipefail
 
-export PATH="/mnt/wsl/docker-desktop/cli-tools/usr/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+podman version
 
-docker_config="$(mktemp -d)"
-cleanup() {
-  rm -rf "$docker_config"
-}
-trap cleanup EXIT
-export DOCKER_CONFIG="$docker_config"
-printf '{ "auths": {} }\n' > "$DOCKER_CONFIG/config.json"
-
-docker version
-
-docker build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
+podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
 FROM debian:bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -702,9 +714,9 @@ WORKDIR /home/sandbox
 CMD ["sleep", "infinity"]
 DOCKERFILE
 
-docker image inspect hermes-sandbox:bookworm-slim >/dev/null
+podman image inspect hermes-sandbox:bookworm-slim >/dev/null
 
-echo "OK: Hermes sandbox Docker image is available inside WSL"
+echo "OK: Hermes sandbox Podman image is available inside WSL"
 '@
 
 $script = $script -replace "`r`n", "`n"
@@ -728,9 +740,11 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Then configure Hermes to use it as the terminal backend:
+Then configure Hermes to use Podman as the container runtime and set the terminal backend:
 
 ```bash
+echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
+
 cat >> ~/.hermes/config.yaml <<'EOF'
 terminal:
   backend: docker
@@ -738,38 +752,13 @@ terminal:
 EOF
 ```
 
-Hermes will now spin up a persistent sandbox container and route all `terminal` and file-tool calls through it. The container shares the life of the Hermes process, it is reused across all tool calls and destroyed when Hermes exits.
+> The `terminal.backend` is still `docker` - `HERMES_DOCKER_BINARY` is what tells Hermes to use Podman as the runtime instead.
 
-> **Verify the sandbox is working:** Start Hermes (`hermes`) and ask it to `run hostname`,  you should see a short container ID instead of your machine's hostname. You can also ask it to `rm -rf ${HOME}/Downloads/testing`: Hermes will confirm the deletion, but the folder will still be on your host. The command ran inside the container's isolated `$HOME`, not yours.
+Hermes will now spin up a persistent sandbox container and route all `terminal` and file-tool calls through it. The container shares the life of the Hermes process, is reused across all tool calls, and is destroyed when Hermes exits.
 
-> **Need stronger isolation?** Hermes also provides an official Docker image (`nousresearch/hermes-agent`) that runs the entire agent process inside a container,  gateway, tools, and all. See the [Hermes Docker documentation](https://hermes-agent.nousresearch.com/docs/user-guide/docker) for setup details.
+> **Verify the sandbox is working:** Start Hermes (`hermes`) and ask it to `run hostname` - you should see a short container ID instead of your machine's hostname. You can also ask it to `rm -rf ${HOME}/Downloads/testing`: Hermes will confirm the deletion, but the folder will still be on your host. The command ran inside the container's isolated `$HOME`, not yours.
 
-> #### Troubleshooting: Docker Permission Denied
-> 
-> If you get "permission denied" when running Docker commands:
-> 
-> **Step 1: Add your user to the docker group**
-> 
-> ```bash
-> sudo groupadd docker                    # Create group if needed
-> sudo usermod -aG docker $USER           # Add yourself to the group
-> newgrp docker                           # Activate the change
-> docker run hello-world                  # Test it
-> ```
-> 
-> **Step 2: If the error persists, apply the permanent fix**
-> 
-> ```bash
-> sudo chgrp docker /lib/systemd/system/docker.socket
-> sudo chmod g+w /lib/systemd/system/docker.socket
-> ```
-> 
-> Then **reboot** your system.
-> 
-> **Quick temporary fix** (resets after reboot):
-> ```bash
-> sudo chmod 666 /var/run/docker.sock
-> ```
+> **Need stronger isolation?** Hermes also provides an official Docker image (`nousresearch/hermes-agent`) that runs the entire agent process inside a container - gateway, tools, and all. See the [Hermes Docker documentation](https://hermes-agent.nousresearch.com/docs/user-guide/docker) for setup details.
 
 ---
 
