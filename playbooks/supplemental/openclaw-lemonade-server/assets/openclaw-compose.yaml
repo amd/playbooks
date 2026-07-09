@@ -1,0 +1,29 @@
+name: openclaw
+
+services:
+  openclaw_gateway:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw_gateway
+    command: ["node", "dist/index.js", "gateway", "--allow-unconfigured"]
+    ports:
+      - "18789:18789"   
+      - "18790:18790"  
+    environment:
+      HOME: /home/node
+      OPENCLAW_GATEWAY_MODE: local
+      OPENCLAW_GATEWAY_BIND: lan
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  fdb-data:
+  fdb-cluster-file:
