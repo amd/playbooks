@@ -40,7 +40,7 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 
 <!-- @os:linux -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -67,19 +67,26 @@ source comfyui-env/bin/activate
 <!-- @os:windows -->
 <!-- @test:id=comfyui-desktop-workspace-present-windows timeout=60 hidden=True -->
 ```powershell
-$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
-$py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
-$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
-$mainPy = Join-Path $installRoot "resources\ComfyUI\main.py"
+# The new Comfy Desktop (since June 2026) installs into %LOCALAPPDATA%\Comfy-Desktop\
+# Layout: ComfyUI-Installs\<name>\ComfyUI\ holds main.py + .venv
+#         ComfyUI-Shared\ holds the shared model library
+$instBase  = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI"
+$comfyRoot = Join-Path $instBase "ComfyUI"
+$py        = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+$mainPy    = Join-Path $comfyRoot "main.py"
+$sharedModels = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Shared\models"
 
-if (-not (Test-Path $comfyRoot)) { throw "ComfyUI workspace not found at: $comfyRoot" }
-if (-not (Test-Path $py))     { throw "ComfyUI workspace venv python not found: $py" }
-if (-not (Test-Path $installRoot)) { throw "ComfyUI Desktop not found at: $installRoot" }
-if (-not (Test-Path $mainPy)) { throw "ComfyUI main.py not found in workspace: $mainPy" }
+if (-not (Test-Path $instBase))     { throw "Comfy Desktop instance not found at: $instBase" }
+if (-not (Test-Path $comfyRoot))    { throw "ComfyUI source not found at: $comfyRoot" }
+if (-not (Test-Path $py))           { throw "ComfyUI venv python not found: $py" }
+if (-not (Test-Path $mainPy))       { throw "ComfyUI main.py not found: $mainPy" }
+if (-not (Test-Path $sharedModels)) { throw "Comfy Desktop shared models dir not found: $sharedModels" }
 
-Write-Host "OK: ComfyUI workspace: $comfyRoot"
+Write-Host "OK: instance root: $instBase"
+Write-Host "OK: ComfyUI source: $comfyRoot"
 Write-Host "OK: Python: $py"
 Write-Host "OK: main.py: $mainPy"
+Write-Host "OK: shared models: $sharedModels"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -111,12 +118,11 @@ python -m pip install -r ./ComfyUI/requirements.txt
 <!-- @os:windows -->
 <!-- @test:id=comfyui-sync-requirements-windows timeout=600 hidden=True -->
 ```powershell
-$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
-$py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
-$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
-$req = Join-Path $installRoot "resources\ComfyUI\requirements.txt"
+$comfyRoot = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI\ComfyUI"
+$py  = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+$req = Join-Path $comfyRoot "requirements.txt"
 
-if (-not (Test-Path $py))  { throw "ComfyUI workspace python not found: $py" }
+if (-not (Test-Path $py))  { throw "ComfyUI venv python not found: $py" }
 if (-not (Test-Path $req)) { throw "ComfyUI requirements.txt not found: $req" }
 
 & $py -m pip install --upgrade --force-reinstall --no-cache-dir comfyui-frontend-package
@@ -131,12 +137,11 @@ if ($LASTEXITCODE -ne 0) { throw "comfyui-frontend-package metadata still missin
 <!-- @os:windows --> 
 <!-- @test:id=comfyui-backend-usable-windows timeout=120 hidden=True -->
 ```powershell
-$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
-$py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
-if (-not (Test-Path $py)) { throw "Missing ComfyUI workspace python: $py" }
+$py = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI\ComfyUI\.venv\Scripts\python.exe"
+if (-not (Test-Path $py)) { throw "Missing ComfyUI venv python: $py" }
 
 & $py -c "import torch; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('hip', getattr(torch.version,'hip',None));"
-if ($LASTEXITCODE -ne 0) { throw "Torch import/check failed in ComfyUI workspace venv." }
+if ($LASTEXITCODE -ne 0) { throw "Torch import/check failed in ComfyUI venv." }
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -171,9 +176,11 @@ python -c "import torch; print('torch', torch.__version__); print('cuda_availabl
 <!-- @os:windows --> 
 <!-- @test:id=comfyui-populate-models-from-cache-windows timeout=600 hidden=True -->
 ```powershell
-$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
-$modelsRoot = Join-Path $installRoot "resources\ComfyUI\models"
-if (-not (Test-Path $installRoot)) { throw "ComfyUI desktop install not found: $installRoot" }
+# The new Comfy Desktop (since June 2026) uses a shared model library separate from the ComfyUI source.
+# Models are served from %LOCALAPPDATA%\Comfy-Desktop\ComfyUI-Shared\models\
+# as configured in shared_model_paths.yaml.
+$modelsRoot = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Shared\models"
+if (-not (Test-Path $modelsRoot)) { throw "Comfy Desktop shared models dir not found: $modelsRoot" }
 
 $cacheDiff = "C:\ModelCache\ComfyUI\models\diffusion_models\z_image_turbo_bf16.safetensors"
 $cacheTE   = "C:\ModelCache\ComfyUI\models\text_encoders\qwen_3_4b.safetensors"
@@ -183,9 +190,9 @@ if (-not (Test-Path $cacheDiff)) { throw "models missing on runner: $cacheDiff" 
 if (-not (Test-Path $cacheTE))   { throw "models missing on runner: $cacheTE" }
 if (-not (Test-Path $cacheVAE))  { throw "models missing on runner: $cacheVAE" }
 
-New-Item -ItemType Directory -Force -Path (Join-Path $modelsRoot "diffusion_models") 
-New-Item -ItemType Directory -Force -Path (Join-Path $modelsRoot "text_encoders")  
-New-Item -ItemType Directory -Force -Path (Join-Path $modelsRoot "vae")       
+New-Item -ItemType Directory -Force -Path (Join-Path $modelsRoot "diffusion_models")
+New-Item -ItemType Directory -Force -Path (Join-Path $modelsRoot "text_encoders")
+New-Item -ItemType Directory -Force -Path (Join-Path $modelsRoot "vae")
 
 Copy-Item -Force $cacheDiff (Join-Path $modelsRoot "diffusion_models\z_image_turbo_bf16.safetensors")
 Copy-Item -Force $cacheTE   (Join-Path $modelsRoot "text_encoders\qwen_3_4b.safetensors")
@@ -218,13 +225,13 @@ cp -f "$cache_vae" models/vae/ae.safetensors
 <!-- @os:windows -->
 <!-- @test:id=comfyui-server-up-windows timeout=300 hidden=True -->
 ```powershell
-$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
-$py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
-$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
-$mainPy = Join-Path $installRoot "resources\ComfyUI\main.py"
+$comfyRoot   = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI\ComfyUI"
+$py          = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+$mainPy      = Join-Path $comfyRoot "main.py"
+$sharedPaths = Join-Path $env:APPDATA "Comfy Desktop\shared_model_paths.yaml"
 
 $proc = Start-Process -FilePath $py `
- -ArgumentList "`"$mainPy`" --listen 127.0.0.1 --port 8188" `
+ -ArgumentList "`"$mainPy`" --listen 127.0.0.1 --port 8188 --extra-model-paths-config `"$sharedPaths`"" `
  -WorkingDirectory $comfyRoot `
  -NoNewWindow -PassThru
 
@@ -303,7 +310,7 @@ To launch ComfyUI on Linux, click the ComfyUI shortcut in the taskbar. It should
 <!-- @os:end -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 To launch ComfyUI on Windows, simply click the ComfyUI shortcut on your Desktop.
 <!-- @os:end -->
@@ -393,13 +400,13 @@ The entire workflow execution should complete in less than 30 seconds. Your gene
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
 ```powershell
-$comfyRoot = Join-Path $env:USERPROFILE "Documents\ComfyUI"
-$py = Join-Path $comfyRoot ".venv\Scripts\python.exe"
-$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
-$mainPy = Join-Path $installRoot "resources\ComfyUI\main.py"
+$comfyRoot      = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI\ComfyUI"
+$py             = Join-Path $comfyRoot ".venv\Scripts\python.exe"
+$mainPy         = Join-Path $comfyRoot "main.py"
+$sharedPaths    = Join-Path $env:APPDATA "Comfy Desktop\shared_model_paths.yaml"
 
 $proc = Start-Process -FilePath $py `
- -ArgumentList "`"$mainPy`" --listen 127.0.0.1 --port 8188" `
+ -ArgumentList "`"$mainPy`" --listen 127.0.0.1 --port 8188 --extra-model-paths-config `"$sharedPaths`"" `
  -WorkingDirectory $comfyRoot `
  -NoNewWindow -PassThru
 
@@ -537,12 +544,12 @@ PY
 <!-- @os:windows -->
 <!-- @test:id=comfyui-output-exists-windows timeout=60 hidden=True -->
 ```powershell
-$installRoot = Join-Path $env:LOCALAPPDATA "Programs\ComfyUI"
-$outDir = Join-Path $installRoot "resources\ComfyUI\output"
+$outDir = Join-Path $env:LOCALAPPDATA "Comfy-Desktop\ComfyUI-Installs\ComfyUI\ComfyUI\output"
 
-$files = Get-ChildItem -Path $outDir -Filter *.png -File -ErrorAction SilentlyContinue
+# ComfyUI saves into date-stamped subdirectories, so recurse to find PNGs
+$files = Get-ChildItem -Path $outDir -Filter *.png -File -Recurse -ErrorAction SilentlyContinue
 if (-not $files) {
- throw "No PNG files found in: $outDir"
+ throw "No PNG files found under: $outDir"
 }
 $files | Sort-Object LastWriteTime -Descending | Select-Object -First 5 | ForEach-Object { $_.FullName }
 ```
