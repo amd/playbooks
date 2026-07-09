@@ -4,21 +4,21 @@ This document describes the expected platform configurations for running this pl
 
 ## Prerequisites
 
-PyTorch with ROCm support is pre-installed on the AMD Ryzen™ AI Halo Developer Platform (Halo Box). For all other devices (STX Halo, STX Point, Krackan Point, Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700), users must manually install PyTorch with ROCm support. Please refer to the relevant section for your operating system:
+PyTorch with ROCm support is pre-installed on the AMD Ryzen™ AI Halo Developer Platform. For all other devices, users must manually install PyTorch with ROCm support. Please refer to the relevant section for your operating system:
 
 
 ### Windows
 
 | Component     | Version         | Notes                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.11.x + ROCm 7.13  | Pre-installed on Halo Box; must be manually installed on all other devices (STX Halo, STX Point, Krackan Point, Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700) |
+| **PyTorch**   | 2.11.x + ROCm 7.13  | Pre-installed on the AMD Ryzen AI Halo Developer Platform; must be manually installed on all other devices |
 
 
 ### Linux
 
 | Component     | Version         | Notes                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 or newer    | Pre-installed on Halo Box; must be manually installed on all other devices (STX Halo, STX Point, Krackan Point, Radeon RX 7900 XT, Radeon RX 9070 XT, Radeon AI Pro R9700) |
+| **PyTorch**   | 2.11.x + ROCm 7.13   | Pre-installed on the AMD Ryzen AI Halo Developer Platform; must be manually installed on all other devices |
 
 
 ## Required Models
