@@ -4,7 +4,9 @@ Efficient fine-tuning is vital for adapting large language models (LLMs) to down
 
 This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your local AMD hardware.
 
-> **Note:** The fine-tuning technique in this playbook require at least 16 GB of GPU memory and 32 GB of system RAM.
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+> **Note:** The fine-tuning techniques in this playbook require at least 16 GB of GPU memory and 32 GB of system RAM.
+<!-- @device:end -->
 
 ## What You'll Learn
 
