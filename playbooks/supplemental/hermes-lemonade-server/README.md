@@ -52,7 +52,7 @@ By the end of this playbook you will be able to:
 - A PC running **Windows 10/11**
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
-- [Podman Desktop](https://podman-desktop.io/) (Optional, for sandboxing Hermes Agent)
+- Podman (Optional, for sandboxing Hermes Agent - install inside WSL: `sudo apt-get install -y podman`)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
