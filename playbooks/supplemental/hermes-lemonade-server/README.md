@@ -766,7 +766,9 @@ Hermes will now spin up a persistent sandbox container and route all `terminal` 
 <!-- @device:halo_box -->
 ## (Recommended) Hermes Integration with Firecrawl Services
 
-`Firecrawl` is a self-hosted web crawling and content extraction service that unlocks the full potential of Hermes automation. We recommend getting familiar with the [Firecrawl SDK](https://docs.firecrawl.dev/introduction) before diving in.
+Hermes can browse and extract content from websites using its built-in web tools. However, many modern websites use bot-detection systems, which block simple HTTP requests and return challenge pages instead of the actual content. As a result, Hermes may be unable to reliably extract information from these sites.
+
+To overcome this limitation, [Firecrawl](https://docs.firecrawl.dev/introduction) provides a self-hosted web crawling and content extraction service that can bypass these challenges and unlock the full potential of Hermes automation. 
 
 In this setup, Firecrawl runs as a set of Docker containers managed with Podman. To simplify lifecycle management and automatic startup, we register Firecrawl as a user-level `systemd` service that orchetrates the underlying Podman Compose stack. This allows Hermes to start, stop, and verify the Firecrawl service using standard `systemctl --user` commands instead of interacting with containers directly.
 
@@ -793,7 +795,7 @@ Requires=podman.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/home/<your-system-username>/firecrawl
+WorkingDirectory=${HOME}/firecrawl
 
 # Optional: Validate config before starting
 ExecStartPre=/usr/bin/podman -f hermes-compose.yaml config --quiet
@@ -808,9 +810,7 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
->  ⚠️ Replace `your-system-username` with your actual system username.
-
-At this point, the service has been defined but not yet registered with systemd. 
+At this point, the service has been defined but not yet registered with `systemd`. 
 Make sure the filename matches exactly what you created above, then run:
 ```bash
 systemctl --user daemon-reload
@@ -818,9 +818,9 @@ systemctl --user enable firecrawl.service
 ```
 If successful, you should see the following output:
 
-> ***Created symlink '/home/<your-system-username>/.config/systemd/user/default.target.wants/firecrawl.service' → '/home/<your-system-username>/.config/systemd/user/firecrawl.service'.***
+> **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
-💡 `default.target.wants/` contains symbolic links to services that are configured to start automatically.
+ `default.target.wants/` contains symbolic links to services that are configured to start automatically.
 
 ### 2. Configure Firecrawl for your Service
 
@@ -830,8 +830,6 @@ Start by cloning the repository:
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-> ℹ️ Firecrawl ships with its own `.env` file. We will not be using it. Instead, create your own `.env` file in the root `/firecrawl` directory using the template below.
-
 Create `.env` in the root `/firecrawl` directory:
 ```bash
 # ===== Required ENVS ======
@@ -860,8 +858,7 @@ BULL_AUTH_KEY=CHANGEME
 # Default: 0.8 (80%)
 # MAX_RAM=0.8
 ```
-As advised:
-> *Protect the admin UI. Set `BULL_AUTH_KEY` to a strong secret, especially on any deployment reachable from untrusted networks.*
+> Set `BULL_AUTH_KEY` to a strong secret, especially on any deployment reachable from untrusted networks.
 
 ### 3. Deploying Hermes via Compose
 
@@ -871,13 +868,12 @@ podman pull docker.io/nousresearch/hermes-agent:latest
 ```
 Once that is done, download the Hermes Compose file [hermes-compose.yaml](assets/hermes-compose.yaml) and place it in the root `/firecrawl` directory:
 
-> ⚠️ This convention is required for systemd to locate and start the service correctly as specified in `WorkingDirectory=/home/<your-system-username>/firecrawl`.
+> This convention is required for `systemd` to locate and start the service correctly as specified in `WorkingDirectory=${HOME}/firecrawl`.
 
-> 💡 You can always expand the stack by adding additional Firecrawl services as needed. The full list of available services can be found in the official [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+> You can always expand the stack by adding additional Firecrawl services as needed. The full list of available services can be found in the official [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
 
 ### 4. Launch Hermes service through Firecrawl 
 
-#### Health Check
 Before handing control over to `systemd`, validate that everything works correctly by running the stack manually:
 ```bash
 podman compose -f hermes-compose.yaml up -d
@@ -893,7 +889,7 @@ podman compose -f hermes-compose.yaml down
 ```
 Now that everything is validated, start the service through `systemd`:
 ```bash
-systemctl --user start firecrawl.service```
+systemctl --user start firecrawl.service
 ```
 [The Hermes API](https://docs.firecrawl.dev/api-reference/v2-introduction) is accessible from within the interactive container, and the Web Dashboard is available on same host and port at http://127.0.0.1:9119.
 <p align="center">
