@@ -23,9 +23,19 @@ The example is designed to be practical and easy to modify, so you can use it as
 - How to fine-tune a LLM using SFT with Unsloth
 - How to save the fine-tuned result in local storage
 
-<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
-> **Note:** Some of the fine-tuning techniques in this playbook may require more than 64GB of system RAM.
+<!-- @device:halo,stx,krk -->
+> **Note:** The fine-tuning techniques in this playbook require at least 24 GB of GPU memory and 32 GB of system RAM.
+<!-- @device:end -->
 
+
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @os:windows -->
+> **Note:** The fine-tuning techniques in this playbook require at least 24 GB of GPU memory and 32 GB of system RAM.
+<!-- @os:end -->
+
+<!-- @os:linux -->
+> **Note:** The fine-tuning techniques in this playbook require at least 24 GB of **dedicated** GPU memory and 32 GB of system RAM.
+<!-- @os:end -->
 <!-- @device:end -->
 
 ## Why Unsloth?
