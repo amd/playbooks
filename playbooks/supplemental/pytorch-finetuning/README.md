@@ -19,12 +19,11 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 <!-- @device:halo,halo_box -->
 > **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
-
+> Full fine-tuning requires at least 32 GB of GPU memory and 64 GB of system RAM.
 <!-- @device:end -->
 
-<!-- @device:stx,krk -->
-> **Note:** Some of the fine-tuning techniques in this playbook may require more than 64GB of system RAM.
-
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+> **Note:** LoRA and QLoRA fine-tuning require at least 16 GB of GPU memory and 32 GB system RAM.
 <!-- @device:end -->
 
 ## What You'll Learn
@@ -61,7 +60,7 @@ source finetune-venv/bin/activate
 <!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -91,7 +90,7 @@ finetune-venv\Scripts\activate
 <!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
 python -m venv finetune-venv
@@ -292,7 +291,7 @@ Below is a summary of the available training methods. Each method links to its s
 | [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
 > **Note:** Full fine-tuning (`train_full_finetuning.py`) may require more than 64GB of system RAM and may not be feasible on this device. Consider using LoRA or QLoRA instead.
 <!-- @os:end -->
