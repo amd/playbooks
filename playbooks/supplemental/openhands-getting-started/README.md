@@ -84,7 +84,7 @@ You need:
 
 ```bash
 export LEMONADE_BASE_URL="http://127.0.0.1:13305/api/v1"
-export LEMONADE_MODEL="Qwen3.6-35B-A3B-GGUF"
+export LEMONADE_MODEL="openai/Qwen3.6-35B-A3B-GGUF"
 ```
 
 ## 1. Start Lemonade Server
@@ -152,13 +152,6 @@ The `agent-canvas` command starts the agent server, the automation backend, and
 the web frontend together. You only need this one command to run OpenHands
 locally.
 
-![Agent Canvas onboarding screen with OpenHands selected](assets/01-onboarding-choose-agent.png)
-
-![Agent Canvas onboarding backend connection success](assets/02-onboarding-backend-connected.png)
-
-
-
-
 ## 4. Configure the Local LLM
 
 In the Agent Canvas UI:
@@ -166,14 +159,13 @@ In the Agent Canvas UI:
 1. Open **Settings > LLM**.
 2. For the provider, choose **OpenAI-compatible** (or **Other / OpenAI-compatible**).
 3. Set the **Base URL** to `http://127.0.0.1:13305/api/v1`.
-4. Set the **Model** to `Qwen3.6-35B-A3B-GGUF`.
+4. Set the **Model** to `openai/Qwen3.6-35B-A3B-GGUF`.
 5. For the API key, enter any non-empty string. Lemonade does not require a
    real key, but the OpenHands client needs a value to send.
-6. Save the profile so you can reuse it. Give it a name like `Lemonade local`.
+6. Save the profile so you can reuse it. Use a name without spaces, such as
+   `lemonade-local`.
 
 You can switch profiles later from the chat input with the `/model` command.
-
-![Agent Canvas LLM profile configured for Lemonade](assets/03-llm-profile-configured.png)
 
 ## 5. Open a Workspace
 
@@ -239,6 +231,16 @@ the file again—all in the same conversation.
 - **`agent-canvas` is not on PATH:** reinstall with
   `npm install -g @openhands/agent-canvas` and confirm `npm bin -g` is on your
   PATH.
+- **`npm install -g` fails with a permissions error:** configure a user-owned
+  global npm directory, then reopen the terminal and install Agent Canvas
+  again:
+
+  ```bash
+  mkdir -p ~/.npm-global
+  npm config set prefix ~/.npm-global
+  export PATH="$HOME/.npm-global/bin:$PATH"
+  npm install -g @openhands/agent-canvas
+  ```
 - **The UI loads but the backend shows unhealthy:** wait a few seconds for the
   agent server to finish starting, then refresh. If it stays unhealthy, restart
   `agent-canvas` and check the terminal output for errors.
