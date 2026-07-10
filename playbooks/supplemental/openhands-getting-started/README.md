@@ -84,7 +84,8 @@ You need:
 
 ```bash
 export LEMONADE_BASE_URL="http://127.0.0.1:13305/api/v1"
-export LEMONADE_MODEL="openai/Qwen3.6-35B-A3B-GGUF"
+export LEMONADE_MODEL="Qwen3.6-35B-A3B-GGUF"
+export OPENHANDS_LLM_MODEL="openai/${LEMONADE_MODEL}"
 ```
 
 ## 1. Start Lemonade Server
@@ -154,18 +155,27 @@ locally.
 
 ## 4. Configure the Local LLM
 
-In the Agent Canvas UI:
+On first launch, Agent Canvas opens an onboarding flow. In that flow:
 
-1. Open **Settings > LLM**.
-2. For the provider, choose **OpenAI-compatible** (or **Other / OpenAI-compatible**).
-3. Set the **Base URL** to `http://127.0.0.1:13305/api/v1`.
-4. Set the **Model** to `openai/Qwen3.6-35B-A3B-GGUF`.
-5. For the API key, enter any non-empty string. Lemonade does not require a
-   real key, but the OpenHands client needs a value to send.
-6. Save the profile so you can reuse it. Use a name without spaces, such as
-   `lemonade-local`.
+1. Keep **OpenHands** selected as the agent and click **Next**.
+2. On **Set up your LLM**, select **Advanced**.
+3. Keep **Authentication** set to **API key**.
+4. Set **Custom Model** to the `OPENHANDS_LLM_MODEL` value,
+   `openai/Qwen3.6-35B-A3B-GGUF`.
+5. Set **Base URL** to `http://127.0.0.1:13305/api/v1`.
+6. For **API Key**, enter any non-empty placeholder such as `lemonade-local`.
+   Lemonade does not require a real key, but the OpenHands client needs a value
+   to send.
+7. Click **Next**.
 
-You can switch profiles later from the chat input with the `/model` command.
+The completed Advanced settings should look like this. The API key field is
+masked by the UI.
+
+![Agent Canvas first-use LLM Advanced settings with the Lemonade model and local base URL](assets/03-llm-advanced-settings.png)
+
+If you change models later, open **Settings > LLM** and update the same
+Advanced fields. You can switch saved profiles from the chat input with the
+`/model` command.
 
 ## 5. Open a Workspace
 
