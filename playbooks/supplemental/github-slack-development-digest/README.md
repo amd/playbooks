@@ -339,7 +339,7 @@ all work before relying on the schedule.
 
 ## Troubleshooting
 
-- **Lemonade is down after a reboot or power outage:** restart it with the
+- **Lemonade is down:** restart it with the
   `lemonade run "${LEMONADE_MODEL}"` command in step 1, then re-run the health
   check.
 - **`npm install -g` fails with a permissions error:** configure a user-owned
