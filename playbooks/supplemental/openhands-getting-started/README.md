@@ -171,7 +171,7 @@ On first launch, Agent Canvas opens an onboarding flow. In that flow:
 The completed Advanced settings should look like this. The API key field is
 masked by the UI.
 
-![Agent Canvas first-use LLM Advanced settings with the Lemonade model and local base URL](assets/03-llm-advanced-settings.png)
+![Agent Canvas first-use LLM Advanced settings with the Lemonade model and local base URL](assets/01-llm-advanced-settings.png)
 
 If you change models later, open **Settings > LLM** and update the same
 Advanced fields. You can switch saved profiles from the chat input with the
@@ -190,7 +190,7 @@ starting a task, point Agent Canvas at your project folder:
 Everything the agent does—reading files, running commands, editing code—is
 scoped to that workspace.
 
-![Agent Canvas home after onboarding](assets/04-agent-canvas-home.png)
+![Agent Canvas home after onboarding](assets/02-agent-canvas-home.png)
 
 ## 6. Run Your First Coding Task
 
