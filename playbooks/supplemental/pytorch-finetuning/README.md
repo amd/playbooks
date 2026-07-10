@@ -18,12 +18,33 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
-> **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
-> Full fine-tuning requires at least 32 GB of GPU memory and 64 GB of system RAM.
+> **Note:** 
+> 
+> - You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
+>
+> - Full fine-tuning requires at least 32 GB of GPU memory and 64 GB of system RAM.
 <!-- @device:end -->
 
-<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
-> **Note:** LoRA and QLoRA fine-tuning require at least 16 GB of GPU memory and 32 GB system RAM.
+
+<!-- @device:stx,krk -->
+<!-- @os:linux -->
+> **Note:** LoRA and QLoRA fine-tuning require at least 16 GB of GPU memory and 32 GB of system RAM.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note:** LoRA fine-tuning requires at least 16 GB of GPU memory and 32 GB of system RAM.
+<!-- @os:end -->
+<!-- @device:end -->
+
+
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @os:linux -->
+> **Note:** LoRA and QLoRA fine-tuning require at least 16 GB of **dedicated** GPU memory and 32 GB of system RAM.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note:** LoRA fine-tuning requires at least 16 GB of GPU memory and 32 GB of system RAM.
+<!-- @os:end -->
 <!-- @device:end -->
 
 ## What You'll Learn
