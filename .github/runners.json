@@ -1,0 +1,20 @@
+[
+  { "name": "xsj-aimlab-halo-0",  "os": "Windows", "group": "halo" },
+  { "name": "xsj-aimlab-halo-1",  "os": "Windows", "group": "halo" },
+  { "name": "xsj-aimlab-halo-02", "os": "Linux",   "group": "halo" },
+  { "name": "xsj-aimlab-halo-03", "os": "Linux",   "group": "halo" },
+  { "name": "xsj-aimlab-stxp-03", "os": "Windows", "group": "stx" },
+  { "name": "xsj-aimlab-stxp-05", "os": "Windows", "group": "stx" },
+  { "name": "xsj-aimlab-stxp-01", "os": "Linux",   "group": "stx" },
+  { "name": "xsj-aimlab-stxp-02", "os": "Linux",   "group": "stx" },
+  { "name": "xsj-aimlab-krk-01",  "os": "Windows", "group": "krk" },
+  { "name": "xsj-aimlab-krk-02",  "os": "Windows", "group": "krk" },
+  { "name": "xsj-aimlab-krk-03",  "os": "Linux",   "group": "krk" },
+  { "name": "xsj-aimlab-krk-04",  "os": "Linux",   "group": "krk" },
+  { "name": "CS-RORDMZ-DT136",    "os": "Windows", "group": "rx7900xt" },
+  { "name": "CS-RORDMZ-DT71",     "os": "Linux",   "group": "rx7900xt" },
+  { "name": "CS-RORDMZ-DT134",    "os": "Windows", "group": "rx9070xt" },
+  { "name": "CS-RORDMZ-DT72",     "os": "Linux",   "group": "rx9070xt" },
+  { "name": "MNB-UCICD-DT337",    "os": "Windows", "group": "r9700" },
+  { "name": "MNB-UCICD-DT386",    "os": "Linux",   "group": "r9700" }
+]

@@ -80,7 +80,7 @@ lms unload --all
 lms ps
 $ID = "${lms_model}-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID"
+lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -94,7 +94,7 @@ lms unload --all || true
 lms ps
 ID="${lms_model}-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID"
+lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
