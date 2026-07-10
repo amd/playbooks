@@ -109,6 +109,7 @@ Invite the Slack app to the target channel before testing the automation.
 ```bash
 export LEMONADE_BASE_URL="http://127.0.0.1:13305/api/v1"
 export LEMONADE_MODEL="Qwen3.6-35B-A3B-GGUF"
+export OPENHANDS_LLM_MODEL="openai/${LEMONADE_MODEL}"
 export QWEN_CUSTOM_TOKENIZER="Qwen/Qwen3.6-35B-A3B"
 export CONDENSER_MAX_TOKENS="56000"
 ```
@@ -196,39 +197,50 @@ Canvas UI in your browser.
 
 ## 4. Configure the Local LLM in the UI
 
-In the Agent Canvas UI, open **Settings > LLM** and configure the local
-Lemonade model:
+On first launch, Agent Canvas opens an onboarding flow. In that flow:
 
-1. For the **Agent**, choose **OpenHands**.
-2. For the **Provider**, choose **OpenAI-compatible** (or **Other /
-   OpenAI-compatible**).
-3. Set **Base URL** to `http://127.0.0.1:13305/api/v1`.
-4. Set **Model** to `openai/Qwen3.6-35B-A3B-GGUF`.
-5. For the **API key**, enter any non-empty string such as `lemonade`. Lemonade
-   does not require a real key, but the OpenHands client needs a value to send.
-6. Set **Custom tokenizer** to `Qwen/Qwen3.6-35B-A3B`.
-7. Under **Advanced**, set the LiteLLM extra body to
+1. Keep **OpenHands** selected as the agent and click **Next**.
+2. On **Set up your LLM**, select **Advanced**.
+3. Keep **Authentication** set to **API key**.
+4. Set **Custom Model** to the `OPENHANDS_LLM_MODEL` value,
+   `openai/Qwen3.6-35B-A3B-GGUF`.
+5. Set **Base URL** to `http://127.0.0.1:13305/api/v1`.
+6. For **API Key**, enter any non-empty placeholder such as `lemonade-local`.
+   Lemonade does not require a real key, but the OpenHands client needs a value
+   to send.
+
+The connection fields should look like this. The API key field is masked by
+the UI.
+
+![Agent Canvas first-use LLM Advanced settings with the Lemonade model and local base URL](assets/03-llm-advanced-settings.png)
+
+Then select **All** and set the extra local-model fields:
+
+1. Scroll to **Custom Tokenizer** and set it to `Qwen/Qwen3.6-35B-A3B`.
+2. Scroll to **LiteLLM Extra Body** and set it to
    `{"enable_thinking": true}`.
-8. Enable the **condenser**, set its kind to `llm_summarizing`, and set
-   **max tokens** to `56000`.
-9. Save the profile so you can reuse it. Use a name without spaces, such as
-   `lemonade-local`.
+3. Click **Next**.
 
-The saved LLM profile should show:
+![Agent Canvas first-use LLM All tab with the Qwen custom tokenizer](assets/03-llm-all-tokenizer-settings.png)
+
+![Agent Canvas first-use LLM All tab with LiteLLM extra body configured](assets/03-llm-all-extra-body-settings.png)
+
+The LLM settings should show:
 
 | Field | Value |
 | --- | --- |
-| Model | `openai/Qwen3.6-35B-A3B-GGUF` |
+| Custom Model | `openai/Qwen3.6-35B-A3B-GGUF` |
 | Base URL | `http://127.0.0.1:13305/api/v1` |
 | Custom tokenizer | `Qwen/Qwen3.6-35B-A3B` |
-| LiteLLM extra body | `{"enable_thinking":true}` |
-| Condenser kind | `llm_summarizing` |
-| Condenser max tokens | `56000` |
+| LiteLLM extra body | `{"enable_thinking": true}` |
 
 The `openai/` prefix tells LiteLLM to use OpenAI-compatible request formatting
 against the Lemonade endpoint. The custom tokenizer is the original Hugging
 Face tokenizer for the GGUF model; it lets OpenHands count the same
-chat-template tokens that the local model server sees.
+chat-template tokens that the local model server sees. The current first-use
+LLM form does not show condenser settings. If your Agent Canvas build exposes
+condenser settings later under **Settings > LLM**, use `llm_summarizing` and
+set max tokens below the Lemonade context window, such as `56000`.
 
 ## 5. Install GitHub and Slack MCP Servers
 
@@ -342,15 +354,16 @@ all work before relying on the schedule.
   ```
 - **Agent Canvas rejects the LLM settings after setting `custom_tokenizer`:**
   install `transformers` in the Agent Server Python environment, restart Agent
-  Canvas if needed, and retry saving the LLM profile. OpenHands requires
+  Canvas if needed, and retry saving the LLM settings. OpenHands requires
   Transformers to load the tokenizer chat template when `custom_tokenizer` is
   set.
 - **Agent Canvas cannot reach Lemonade:** verify
   `curl -fsS "${LEMONADE_BASE_URL}/health"` and confirm the base URL entered in
-  **Settings > LLM** matches the running local endpoint or HTTPS tunnel.
-- **The LLM profile did not save:** make sure you clicked **Save** after
-  entering the values, and that the profile name is set. Reopen **Settings >
-  LLM** to confirm the values persisted.
+  the first-use LLM form or **Settings > LLM** matches the running local
+  endpoint or HTTPS tunnel.
+- **The LLM settings did not save:** make sure you clicked **Next** after
+  entering the values. Reopen **Settings > LLM** to confirm the values
+  persisted.
 - **GitHub MCP cannot see private repositories:** confirm the GitHub token has
   read access to the target repository and that the MCP **Test** button in
   **Customize** advertises GitHub tools.
@@ -360,9 +373,9 @@ all work before relying on the schedule.
   set `SLACK_CHANNEL_IDS` on the Slack MCP server in **Customize**.
 - **The automation run fails or exceeds context:** confirm Lemonade was started
   with `ctx_size=65536`, confirm the OpenHands LLM has `custom_tokenizer` set,
-  and confirm the condenser has `max_tokens` set below the Lemonade context
-  window. Also use an explicit repository and cap GitHub result sets to 3 to 5
-  items.
+  and use an explicit repository with GitHub result sets capped to 3 to 5
+  items. If your Agent Canvas build exposes condenser settings, set condenser
+  max tokens below the Lemonade context window.
 
 ## Next Steps
 
