@@ -19,18 +19,18 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 <!-- @device:halo,halo_box -->
 > **Note:** 
-> - Full fine-tuning requires at least **32 GB of total GPU memory** and **64 GB of system RAM**.
+> - Full fine-tuning requires at least **64 GB of system RAM**, with at least **32 GB of it available to the GPU** (the 32 GB is part of the 64 GB, not in addition to it).
 > - You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **Note:** LoRA and QLoRA fine-tuning require at least **16 GB of total GPU memory** and **32 GB of system RAM**.
+> **Note:** LoRA and QLoRA fine-tuning require at least **32 GB of system RAM**, with at least **16 GB of it available to the GPU** (the 16 GB is part of the 32 GB, not in addition to it).
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Note:** LoRA fine-tuning requires at least **16 GB of total GPU memory** and **32 GB of system RAM**.
+> **Note:** LoRA fine-tuning requires at least **32 GB of system RAM**, with at least **16 GB of it available to the GPU** (the 16 GB is part of the 32 GB, not in addition to it).
 <!-- @os:end -->
 <!-- @device:end -->
 
