@@ -22,28 +22,33 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 > 
 > - You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
 >
-> - Full fine-tuning requires at least 32 GB of GPU memory and 64 GB of system RAM.
+> - Full fine-tuning requires at least **32 GB of total GPU memory** and **64 GB of system RAM**.
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **Note:** LoRA and QLoRA fine-tuning require at least 16 GB of GPU memory and 32 GB of system RAM.
+> **Note:** LoRA and QLoRA fine-tuning require at least **16 GB of total GPU memory** and **32 GB of system RAM**.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Note:** LoRA fine-tuning requires at least 16 GB of GPU memory and 32 GB of system RAM.
+> **Note:** LoRA fine-tuning requires at least **16 GB of total GPU memory** and **32 GB of system RAM**.
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Note:** LoRA and QLoRA fine-tuning require at least 16 GB of **dedicated** GPU memory and 32 GB of system RAM.
+> **Note:** LoRA and QLoRA fine-tuning require a graphics card with at least **16 GB of dedicated GPU memory** and **32 GB of system RAM**.
+> - On Linux, training runs entirely in the graphics card's dedicated VRAM.
+> - It does not fall back to shared GPU memory (system RAM) when VRAM runs out.
+> - Cards with less than 16 GB of dedicated VRAM will run out of memory during training on Linux, even if the system has plenty of RAM.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Note:** LoRA fine-tuning requires at least 16 GB of GPU memory and 32 GB of system RAM.
+> **Note:** LoRA fine-tuning requires at least **16 GB of total GPU memory** and **32 GB of system RAM**.
+> - On Windows, total GPU memory combines the graphics card's dedicated VRAM with shared GPU memory (borrowed from system RAM).
+> - Therefore, cards with less than 16 GB of dedicated VRAM can still run this playbook by using shared GPU memory to make up the difference.
 <!-- @os:end -->
 <!-- @device:end -->
 
