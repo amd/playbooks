@@ -141,15 +141,6 @@ Lemonade exposes an OpenAI-compatible API at:
 http://127.0.0.1:13305/api/v1
 ```
 
-If you are developing Lemonade from a local source checkout and need to restart
-the server in the background, run:
-
-```bash
-cd ~/work/lemonade
-setsid -f build/lemond --host 127.0.0.1 --port 13305 \
-  </dev/null > ~/.openhands/agent-canvas/lemonade.log 2>&1
-```
-
 Optional: if Agent Canvas or the automation runner is not on the same machine,
 publish the Lemonade endpoint through a secure tunnel and use the HTTPS URL as
 the LLM base URL:
@@ -203,10 +194,6 @@ the web frontend together. You only need this one command to run OpenHands
 locally. The rest of this playbook configures everything through the Agent
 Canvas UI in your browser.
 
-![Agent Canvas onboarding screen with OpenHands selected](assets/01-onboarding-choose-agent.png)
-
-![Agent Canvas onboarding backend connection success](assets/02-onboarding-backend-connected.png)
-
 ## 4. Configure the Local LLM in the UI
 
 In the Agent Canvas UI, open **Settings > LLM** and configure the local
@@ -224,7 +211,8 @@ Lemonade model:
    `{"enable_thinking": true}`.
 8. Enable the **condenser**, set its kind to `llm_summarizing`, and set
    **max tokens** to `56000`.
-9. Save the profile so you can reuse it. Give it a name like `Lemonade local`.
+9. Save the profile so you can reuse it. Use a name without spaces, such as
+   `lemonade-local`.
 
 The saved LLM profile should show:
 
@@ -241,10 +229,6 @@ The `openai/` prefix tells LiteLLM to use OpenAI-compatible request formatting
 against the Lemonade endpoint. The custom tokenizer is the original Hugging
 Face tokenizer for the GGUF model; it lets OpenHands count the same
 chat-template tokens that the local model server sees.
-
-![Agent Canvas LLM profile configured for Lemonade](assets/03-llm-profile-configured.png)
-
-![Agent Canvas home after onboarding](assets/05-agent-canvas-home.png)
 
 ## 5. Install GitHub and Slack MCP Servers
 
@@ -344,7 +328,18 @@ all work before relying on the schedule.
 ## Troubleshooting
 
 - **Lemonade is down after a reboot or power outage:** restart it with the
-  `setsid -f build/lemond ...` command in step 1, then re-run the health check.
+  `lemonade run "${LEMONADE_MODEL}"` command in step 1, then re-run the health
+  check.
+- **`npm install -g` fails with a permissions error:** configure a user-owned
+  global npm directory, then reopen the terminal and install Agent Canvas
+  again:
+
+  ```bash
+  mkdir -p ~/.npm-global
+  npm config set prefix ~/.npm-global
+  export PATH="$HOME/.npm-global/bin:$PATH"
+  npm install -g @openhands/agent-canvas
+  ```
 - **Agent Canvas rejects the LLM settings after setting `custom_tokenizer`:**
   install `transformers` in the Agent Server Python environment, restart Agent
   Canvas if needed, and retry saving the LLM profile. OpenHands requires
