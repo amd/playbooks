@@ -212,7 +212,7 @@ On first launch, Agent Canvas opens an onboarding flow. In that flow:
 The connection fields should look like this. The API key field is masked by
 the UI.
 
-![Agent Canvas first-use LLM Advanced settings with the Lemonade model and local base URL](assets/03-llm-advanced-settings.png)
+![Agent Canvas first-use LLM Advanced settings with the Lemonade model and local base URL](assets/01-llm-advanced-settings.png)
 
 Then select **All** and set the extra local-model fields:
 
@@ -221,7 +221,7 @@ Then select **All** and set the extra local-model fields:
    `{"enable_thinking": true}`.
 3. Click **Next**.
 
-![Agent Canvas first-use LLM All tab with the Qwen custom tokenizer](assets/03-llm-all-tokenizer-settings.png)
+![Agent Canvas first-use LLM All tab with the Qwen custom tokenizer](assets/02-llm-all-tokenizer-settings.png)
 
 ![Agent Canvas first-use LLM All tab with LiteLLM extra body configured](assets/03-llm-all-extra-body-settings.png)
 
@@ -318,7 +318,7 @@ automation:
 The automation detail page shows the new automation with its cron trigger and
 the generated prompt-preset entrypoint.
 
-![Agent Canvas automation detail after creation](assets/06-automation-created.png)
+![Agent Canvas automation detail after creation](assets/05-automation-created.png)
 
 ## 7. Test the Automation
 
@@ -333,9 +333,9 @@ You do not need to wait for the cron schedule to fire—**Run now** triggers a
 run on demand so you can confirm the prompt, MCP connections, and Slack posting
 all work before relying on the schedule.
 
-![Agent Canvas automation run completed successfully](assets/08-automation-run-completed.png)
+![Agent Canvas automation run completed successfully](assets/06-automation-run-completed.png)
 
-![Slack channel showing the generated OpenHands digest](assets/09-slackbot-message.png)
+![Slack channel showing the generated OpenHands digest](assets/07-slackbot-message.png)
 
 ## Troubleshooting
 
