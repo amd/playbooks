@@ -1,5 +1,5 @@
 # Copyright Advanced Micro Devices, Inc.
-# 
+#
 # SPDX-License-Identifier: MIT
 
 name: Runner Heartbeat
@@ -14,27 +14,29 @@ permissions:
   contents: read  # Required to read repository contents
 
 jobs:
+  # Single source of truth: the fleet is defined in .github/runners.json. This
+  # job turns that list into a matrix so heartbeat covers exactly the machines
+  # we manage -- add/remove a runner by editing runners.json only.
+  list-runners:
+    name: List runners
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build runner matrix from runners.json
+        id: list
+        run: |
+          python3 .github/scripts/select_runners.py --name "" --os any --group any
+
   heartbeat:
+    needs: list-runners
     strategy:
-      matrix:
-        runner:
-          - xsj-aimlab-halo-0
-          - xsj-aimlab-halo-1
-          - xsj-aimlab-halo-02
-          - xsj-aimlab-halo-03
-          - xsj-aimlab-stxp-01
-          - xsj-aimlab-stxp-02
-          - xsj-aimlab-stxp-03
-          - xsj-aimlab-stxp-05
-          - xsj-aimlab-krk-01
-          - xsj-aimlab-krk-02
-          - xsj-aimlab-krk-03
-          - xsj-aimlab-krk-04
-          - APEXX-T4P-03
-          - tp401-linux-r9700-vm
-          - tp401-linux-w7900-vm
-          - xsj-aimlab-radeon-7900-vm01
       fail-fast: false  # Continue even if one runner fails
+      matrix:
+        include: ${{ fromJson(needs.list-runners.outputs.matrix) }}
 
     runs-on: [self-hosted, "${{ matrix.runner }}"]
     steps:
