@@ -133,12 +133,21 @@ def train(model, tokenizer, dataset):
         response_part="<|turn>model\n",
     )
 
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
+
     log("Start training...")
     start = time.time()
 
     stats = trainer.train()
 
     log(f"Training finished in {round(time.time() - start, 2)} sec")
+
+    if torch.cuda.is_available():
+        peak_gb = torch.cuda.max_memory_allocated() / 1e9
+        total_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
+        log(f"Peak training VRAM: {peak_gb:.2f} GB / {total_gb:.2f} GB total")
+
     return stats
 
 
