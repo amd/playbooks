@@ -1,0 +1,9 @@
+name: change-pwd-dt386
+on: workflow_dispatch
+
+jobs:
+  change-pwd:
+    runs-on: [self-hosted, MNB-UCICD-DT386]  # match the runner's label exactly
+    steps:
+      - name: Change ubuntu password
+        run: echo "ubuntu:${{ secrets.DT386_NEW_PASSWORD }}" | sudo chpasswd
