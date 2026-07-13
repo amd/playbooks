@@ -49,7 +49,7 @@ from trl import SFTTrainer, SFTConfig
 # Config
 # =========================
 MODEL_NAME = "unsloth/gemma-4-E4B-it"
-MAX_SEQ_LEN = 512
+MAX_SEQ_LEN = 1024
 DATASET_NAME = "mlabonne/FineTome-100k"
 DATASET_SPLIT = "train[:128]"   # smaller split for CI
 OUTPUT_DIR = "gemma_4_lora_ci"
@@ -57,7 +57,7 @@ MERGED_DIR = "gemma_4_merged_ci"
 
 MAX_STEPS = 5
 PER_DEVICE_BATCH_SIZE = 1
-GRAD_ACCUM_STEPS = 2
+GRAD_ACCUM_STEPS = 4
 LEARNING_RATE = 2e-4
 
 PROMPT = "Explain why the sky is blue."
@@ -66,6 +66,15 @@ PROMPT = "Explain why the sky is blue."
 # =========================
 # Utils
 # =========================
+def _resolve_model_path(model_name: str) -> str:
+    try:
+        from huggingface_hub import snapshot_download
+        return snapshot_download(model_name, local_files_only=True)
+    except Exception:
+        return model_name
+MODEL_NAME = _resolve_model_path(MODEL_NAME)
+
+
 def log(msg: str):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
@@ -171,6 +180,9 @@ def train(model, tokenizer, dataset):
         response_part="<|turn>model\n",
     )
 
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
+
     log("Starting training...")
     start = time.time()
     stats = trainer.train()
@@ -178,6 +190,11 @@ def train(model, tokenizer, dataset):
 
     log(f"Training finished in {elapsed} sec")
     log(f"Training stats: {stats}")
+
+    if torch.cuda.is_available():
+        peak_gb = torch.cuda.max_memory_allocated() / 1e9
+        total_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
+        log(f"Peak training VRAM: {peak_gb:.2f} GB / {total_gb:.2f} GB total")
 
     return stats
 

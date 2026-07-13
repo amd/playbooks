@@ -4,10 +4,22 @@ This document describes the expected platform configurations for running this pl
 
 ## Prerequisites
 
-| Component     | Version              | Notes                                                   |
-|---------------|----------------------|---------------------------------------------------------|
-| **PyTorch**   | 2.9 or newer (Linux) | Pre-installed on Linux AMD Developer Platforms          |
-| **PyTorch**   | 2.11.x + ROCm 7.13 (Windows) | Must be installed manually via AMD pip index   |
+PyTorch with ROCm support is pre-installed on the AMD Ryzen™ AI Halo Developer Platform. For all other devices, users must manually install PyTorch with ROCm support. Please refer to the relevant section for your operating system:
+
+
+### Windows
+
+| Component     | Version         | Notes                             |
+|---------------|-----------------|-----------------------------------|
+| **PyTorch**   | 2.11.x + ROCm 7.13  | Pre-installed on the AMD Ryzen AI Halo Developer Platform; must be manually installed on all other devices |
+
+
+### Linux
+
+| Component     | Version         | Notes                             |
+|---------------|-----------------|-----------------------------------|
+| **PyTorch**   | 2.11.x + ROCm 7.13   | Pre-installed on the AMD Ryzen AI Halo Developer Platform; must be manually installed on all other devices |
+
 
 ## Required Models
 
