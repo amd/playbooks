@@ -918,27 +918,41 @@ sudo nano firecrawl.service
 Copy and paste the following configuration:
 ```bash
 [Unit]
-Description=Firecrawl
+Description=OpenClaw Gateway
 After=podman.service
 Requires=podman.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=${HOME}/firecrawl
+WorkingDirectory=%h/firecrawl
 
 # Optional: Validate config before starting
-ExecStartPre=/usr/bin/podman -f openclaw-compose.yaml config --quiet
+ExecStartPre=/usr/bin/podman compose -f openclaw-compose.yaml config --quiet
 
-# Start containers in detached mode
+# Generate token and write to .env file
+ExecStartPre=/bin/bash -c 'chmod 644 %h/firecrawl/.env && echo "OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)" > %h/firecrawl/.env'
+
+# Step 1: Start containers in detached mode
 ExecStart=/usr/bin/podman compose -f openclaw-compose.yaml up -d --remove-orphans
+
+# Step 2: Wait for container to be healthy/ready
+ExecStartPost=/bin/sleep 5
+
+# Step 3: Run onboarding inside container in detached mode
+ExecStartPost=/usr/bin/podman exec -d openclaw_gateway_token /bin/bash -c "openclaw onboard \
+    --non-interactive \
+    --accept-risk \
+    --mode local \
+    --auth-choice skip \
+    --gateway-auth token \
+    --gateway-token "$OPENCLAW_GATEWAY_TOKEN" "
 
 # Stop containers when the service stops
 ExecStop=/usr/bin/podman compose -f openclaw-compose.yaml down
 
 [Install]
 WantedBy=default.target
-
 ```
 At this point, the service has been defined but not yet registered with `systemd`. 
 Make sure the filename matches exactly what you created above, then run:
@@ -967,29 +981,8 @@ PORT=3002
 HOST=0.0.0.0
 
 # ===== Firecrawl =====
-# FIRECRAWL_API_KEY=""
-
-# ===== Proxy =====
-# PROXY_SERVER can be a full URL (e.g. http://0.1.2.3:1234) or just an IP and port combo (e.g. 0.1.2.3:1234)
-# Do not uncomment PROXY_USERNAME and PROXY_PASSWORD if your proxy is unauthenticated
-# PROXY_SERVER=
-# PROXY_USERNAME=
-# PROXY_PASSWORD=
-
-# This key lets you access the queue admin panel. Change this if your deployment is publicly accessible.
-BULL_AUTH_KEY=CHANGEME
-
-# ===== System Resource Configuration =====
-# Maximum CPU usage threshold (0.0-1.0). Worker will reject new jobs when CPU usage exceeds this value.
-# Default: 0.8 (80%)
-# MAX_CPU=0.8
-
-# Maximum RAM usage threshold (0.0-1.0). Worker will reject new jobs when memory usage exceeds this value.
-# Default: 0.8 (80%)
-# MAX_RAM=0.8
+# FIRECRAWL_API_KEY="" # optional
 ```
-> Set `BULL_AUTH_KEY` to a strong secret, especially on any deployment reachable from untrusted networks.
-
 ### 3. Deploying OpenClaw via Compose
 
 Before moving on, make sure you have pulled the latest OpenClaw Docker image:
@@ -1017,6 +1010,12 @@ Once verified, bring the stack back down before proceeding:
 ```bash
 podman compose -f openclaw-compose.yaml down
 ```
+Before starting the service, you must ensure the correct ownership and permissions are set on the `firecrawl` directory and its `.env` file. 
+This is essential for the service to write your credentials at startup.
+```bash
+sudo chown ${USER}:${USER} ~/firecrawl/.env
+chmod 644 ~/firecrawl/.env
+```
 Now that everything is validated, start the service through `systemd`:
 ```bash
 systemctl --user start firecrawl.service
@@ -1025,24 +1024,22 @@ systemctl --user start firecrawl.service
 <p align="center">
   <img src="assets/OpenClawWebUI-PodmanLaunch.png" width="500" height="500" />
 </p>
-<!-- This is a current blocker! We are not sure that users can get a gateway token this way. We do not have an openclaw account to test this, the Token can be obtained in a couple of ways, but inside the openclaw container
-openclaw config get gateway.auth.token
-openclaw doctor --generate-new-token
-openclaw dashboard --no-open
-All this generates a token whether copied to the keyboard or to the .openclaw.json file after the minimal setup is done. So all this is available, only from the container. We don't want the user to enter the container because that would break the automation flow
--->
 
-## Obtaining Your `OPENCLAW_GATEWAY_TOKEN`
+### Obtaining Your `OPENCLAW_GATEWAY_TOKEN`
 
-To get your gateway token, follow these steps:
+Once the service is up and running, you will notice a new `.openclaw` directory created in your home folder (~/.openclaw). This directory is locked by default, so you'll need to unlock it to retrieve your gateway token.
 
-1. Open the OpenClaw dashboard in your browser.
-2. Navigate to **Settings** (or **Control UI Settings**).
-3. Locate the **Gateway Token** field — copy the value displayed there.
+1. Grant access to the directory:
+```bash
+sudo chmod 777 ~/.openclaw/
+```
+2. Read your gateway token:
+```bash
+sudo cat ~/.openclaw/openclaw.json | grep "token"
+```
+Locate the `OPENCLAW_GATEWAY_TOKEN` value in the output.
 
->  You now have your `OPENCLAW_GATEWAY_TOKEN` and are ready to go!
-
-> **Note:** Steps above are placeholders — please verify with the OpenClaw team and link to the official documentation here.
+3. Open the gateway dashboard in your browser http://127.0.0.1:18789. Paste your token when prompted to authenticate.
 
 To stop the service, run:
 ```bash
@@ -1052,9 +1049,7 @@ systemctl --user stop firecrawl.service
 <!-- @os:end -->
 ---
 
-
-
-### Start the OpenClaw Gateway
+## Start the OpenClaw Gateway
 
 The gateway is the OpenClaw process that manages the agent loop and serves the dashboard:
 

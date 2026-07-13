@@ -1,24 +1,39 @@
 name: openclaw
 
 services:
+
+  openclaw_init:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw_init
+    user: root
+    command: ["/bin/sh", "-c", "mkdir -p /home/node/.openclaw && chown -R node:node /home/node/.openclaw && chmod -R 755 /home/node/.openclaw"]
+    volumes:
+      - ${HOME}/.openclaw:/home/node/.openclaw:z
+
   openclaw_gateway:
     image: ghcr.io/openclaw/openclaw:latest
-    container_name: openclaw_gateway
+    container_name: openclaw_gateway_token
     command: ["node", "dist/index.js", "gateway", "--allow-unconfigured"]
+    depends_on:
+      openclaw_init:
+        condition: service_completed_successfully
     ports:
-      - "18789:18789"   
-      - "18790:18790"  
+      - "18789:18789"
+      - "18790:18790"
+    env_file:
+      - .env
     environment:
       HOME: /home/node
       OPENCLAW_GATEWAY_MODE: local
       OPENCLAW_GATEWAY_BIND: lan
+    volumes:
+      - ${HOME}/.openclaw:/home/node/.openclaw:z
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
         compress: "true"
-
 
 networks:
   backend:
