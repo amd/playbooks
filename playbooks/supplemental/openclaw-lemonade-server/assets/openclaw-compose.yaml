@@ -12,7 +12,7 @@ services:
 
   openclaw_gateway:
     image: ghcr.io/openclaw/openclaw:latest
-    container_name: openclaw_gateway_token
+    container_name: openclaw_gateway
     command: ["node", "dist/index.js", "gateway", "--allow-unconfigured"]
     depends_on:
       openclaw_init:

@@ -940,7 +940,7 @@ ExecStart=/usr/bin/podman compose -f openclaw-compose.yaml up -d --remove-orphan
 ExecStartPost=/bin/sleep 5
 
 # Step 3: Run onboarding inside container in detached mode
-ExecStartPost=/usr/bin/podman exec -d openclaw_gateway_token /bin/bash -c "openclaw onboard \
+ExecStartPost=/usr/bin/podman exec -d openclaw_gateway /bin/bash -c "openclaw onboard \
     --non-interactive \
     --accept-risk \
     --mode local \
