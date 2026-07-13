@@ -6,7 +6,7 @@ name: Fetch GitHub Issues
 
 on:
   schedule:
-    - cron: '30 11 * * *'   # 04:30 PDT (UTC-7); 05:30 PST (UTC-8)
+    - cron: '0 10 * * *'   # 03:00 PDT (UTC-7); 04:00 PST (UTC-8)
   workflow_dispatch: # Allow manual triggering
   push:
     branches:

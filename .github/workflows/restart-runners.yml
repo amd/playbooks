@@ -5,13 +5,13 @@
 name: Restart Runners
 
 # Two ways to trigger:
-#   1. Automatically every day at 1:30 AM Pacific Time (the cron below uses
-#      UTC-7/PDT as the reference; it will drift to 2:30 AM Pacific in winter).
+#   1. Automatically every day at 12:30 AM Pacific Time (the cron below uses
+#      UTC-7/PDT as the reference; it will drift to 1:30 AM Pacific in winter).
 #   2. Manually via "Run workflow" (workflow_dispatch), where you pick exactly
 #      which runners to restart.
 on:
   schedule:
-    - cron: "30 8 * * *"   # 01:30 PDT (UTC-7); 02:30 PST (UTC-8)
+    - cron: "30 7 * * *"   # 00:30 PDT (UTC-7); 01:30 PST (UTC-8)
   workflow_dispatch:
     inputs:
       scope:
