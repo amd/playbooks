@@ -13,6 +13,8 @@
   },
   "difficulty": "advanced",
   "isNew": true,
+  "isFeatured": true,
+  "developed": true,
   "published": true,
   "tags": [
     "deepseek",
