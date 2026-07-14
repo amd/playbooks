@@ -3,6 +3,7 @@ Copyright Advanced Micro Devices, Inc.
 
 SPDX-License-Identifier: MIT
 -->
+
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 ### AMD GPU Driver
