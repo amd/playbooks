@@ -6,7 +6,7 @@ name: Test Playbooks
 
 on:
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 8 * * *'    # 01:00 PDT (UTC-7); 02:00 PST (UTC-8)
   workflow_dispatch:
     inputs:
       playbook_id:
