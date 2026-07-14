@@ -173,9 +173,10 @@ masked by the UI.
 
 ![Agent Canvas first-use LLM Advanced settings with the Lemonade model and local base URL](assets/01-llm-advanced-settings.png)
 
-If you change models later, open **Settings > LLM** and update the same
-Advanced fields. You can switch saved profiles from the chat input with the
-`/model` command.
+Agent Canvas saves these values as an LLM profile. If your version asks you to
+name that profile, use a no-space name such as `lemonade-local`. If you change
+models later, open **Settings > LLM** and update the same Advanced fields. You
+can switch saved profiles from the chat input with the `/model` command.
 
 ## 5. Open a Workspace
 
