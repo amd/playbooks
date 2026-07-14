@@ -1,0 +1,139 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Translate Playbooks
+
+# Automatically translates a playbook's prose into the target locales and
+# direct-pushes the results under translations/<locale>/. English under
+# playbooks/ stays the single canonical, executable source and is never
+# modified here. Translations are never tested by CI.
+#
+# Runs on a self-hosted runner so the translation step can reach the internal
+# AMD model endpoint while the repository itself stays public.
+
+on:
+  # Maintenance mode: retranslate a playbook once its English source lands on main.
+  push:
+    branches: [main]
+    paths:
+      - 'playbooks/**'
+  # Manual / backfill: translate a specific playbook (or all) into chosen locales.
+  workflow_dispatch:
+    inputs:
+      playbook_id:
+        description: 'Playbook id to translate (leave empty to translate all)'
+        required: false
+        type: string
+      locales:
+        description: 'Comma-separated target locales'
+        required: false
+        default: 'zh-CN,es-LA,fr-FR'
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: translate-playbooks-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  translate:
+    name: Translate playbooks
+    runs-on: [self-hosted, translation]
+    env:
+      DEFAULT_LOCALES: 'zh-CN,es-LA,fr-FR'
+      # Internal model endpoint (set as repository secrets on the self-hosted runner).
+      # AMD_LLM_PROVIDER is 'anthropic' for the internal AMD gateway or 'openai'
+      # for an OpenAI-compatible endpoint. AMD_LLM_EXTRA_HEADERS is a JSON object
+      # of extra request headers (e.g. the API-management subscription key).
+      AMD_LLM_PROVIDER: ${{ secrets.AMD_LLM_PROVIDER }}
+      AMD_LLM_BASE_URL: ${{ secrets.AMD_LLM_BASE_URL }}
+      AMD_LLM_MODEL: ${{ secrets.AMD_LLM_MODEL }}
+      AMD_LLM_API_KEY: ${{ secrets.AMD_LLM_API_KEY }}
+      AMD_LLM_EXTRA_HEADERS: ${{ secrets.AMD_LLM_EXTRA_HEADERS }}
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: 'utf-8'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Determine locales
+        id: locales
+        shell: bash
+        run: |
+          LOCALES="${{ github.event.inputs.locales }}"
+          if [ -z "$LOCALES" ]; then LOCALES="$DEFAULT_LOCALES"; fi
+          echo "locales=$LOCALES" >> "$GITHUB_OUTPUT"
+          echo "Target locales: $LOCALES"
+
+      - name: Determine playbooks to translate
+        id: detect
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.playbook_id }}" ]; then
+            PLAYBOOKS="${{ github.event.inputs.playbook_id }}"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # empty input on manual run = all published playbooks
+            PLAYBOOKS=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null \
+              | sed 's|playbooks/[^/]*/||' | sort -u | tr '\n' ' ')
+          else
+            # push to main: only playbooks whose files changed
+            CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" \
+              -- 'playbooks/core/*' 'playbooks/supplemental/*' 2>/dev/null || echo "")
+            PLAYBOOKS=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' \
+              | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | tr '\n' ' ')
+          fi
+          echo "playbooks=$PLAYBOOKS" >> "$GITHUB_OUTPUT"
+          echo "Playbooks to translate: '$PLAYBOOKS'"
+
+      - name: Translate
+        id: translate
+        if: steps.detect.outputs.playbooks != ''
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          for pb in ${{ steps.detect.outputs.playbooks }}; do
+            echo "::group::Translating $pb"
+            python .github/scripts/translate_playbook.py \
+              --playbook "$pb" \
+              --locales "${{ steps.locales.outputs.locales }}" || rc=1
+            echo "::endgroup::"
+          done
+          exit $rc
+
+      - name: Commit and push translations
+        if: always() && steps.detect.outputs.playbooks != ''
+        shell: bash
+        run: |
+          git config user.name "amd-playbooks-l10n-bot"
+          git config user.email "amd-playbooks-l10n-bot@users.noreply.github.com"
+          if [ -z "$(git status --porcelain translations)" ]; then
+            echo "No translation changes to commit."
+            exit 0
+          fi
+          git add translations
+          git commit -m "l10n: update translations [skip ci]"
+          # Push back to the ref that triggered the run.
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Open issue on translation failure
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "Automated translation failed on $(date -u +%Y-%m-%d)" \
+            --body "The Translate Playbooks workflow failed the structural validation gate (code fences or @-tags did not match the English source), or a playbook translation errored. See the run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --label "localization" || echo "Could not create issue (label may be missing)."

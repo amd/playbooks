@@ -3,3 +3,12 @@
 /.github/ @danielholanda
 test_*.py @sreeram-11
 *test*.py @sreeram-11
+
+# Translations are generated automatically by translate-playbooks.yml.
+# Per-locale ownership provides oversight; Daniel/Adam are the backstop.
+# NOTE: test-playbooks.yml only triggers on 'playbooks/**', so changes under
+# 'translations/**' never run playbook CI (translations are not tested).
+/translations/ @danielholanda @adamlam2-amd
+/translations/zh-CN/ @danielholanda @adamlam2-amd
+/translations/es-LA/ @danielholanda @adamlam2-amd
+/translations/fr-FR/ @danielholanda @adamlam2-amd
