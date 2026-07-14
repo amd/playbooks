@@ -1,3 +1,7 @@
+// Copyright Advanced Micro Devices, Inc.
+// 
+// SPDX-License-Identifier: MIT
+
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
 

@@ -1,3 +1,7 @@
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 """
 SeamlessM4T v2 Audio-to-Text Inference Script
 AMD GPU Support via ROCm / HIP

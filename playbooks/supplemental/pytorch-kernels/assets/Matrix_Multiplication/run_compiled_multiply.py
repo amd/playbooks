@@ -1,3 +1,7 @@
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 import os, sys
 import torch
 sys.path.insert(0, os.getcwd())
