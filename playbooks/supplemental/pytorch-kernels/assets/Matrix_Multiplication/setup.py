@@ -1,3 +1,7 @@
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 from setuptools import setup
 
