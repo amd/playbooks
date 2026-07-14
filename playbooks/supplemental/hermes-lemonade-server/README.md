@@ -477,7 +477,7 @@ hermes model
 
 When prompted:
 
-1. Select **Custom OpenAI-compatible endpoint**
+1. Select **Custom endpoint (enter URL manually)**
 <!-- @os:linux -->
 2. **API base URL:** `http://127.0.0.1:13305/api/v1`
 <!-- @os:end -->
