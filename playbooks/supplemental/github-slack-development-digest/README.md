@@ -85,9 +85,11 @@ test the automation, and Lemonade to run the LLM locally.
 
 You need:
 
-- Lemonade Server installed.
-- Agent Canvas checked out locally, using a recent `main` checkout.
-- A recent OpenHands Agent Server / `software-agent-sdk` build with
+- Lemonade Server installed by following the standard
+  [Lemonade installation guide](https://lemonade-server.ai/docs/guide/install/).
+- Node.js 22.12 or later and `npm`, used to install the published Agent Canvas
+  CLI and run MCP servers with `npx`.
+- A recent published `@openhands/agent-canvas` package with
   schema-driven agent settings, `LLMSummarizingCondenserSettings.max_tokens`,
   and LLM `custom_tokenizer` support.
 - The Python `transformers` package available in the Agent Server environment.
@@ -185,6 +187,9 @@ Install the published Agent Canvas package and start the full stack:
 npm install -g @openhands/agent-canvas
 agent-canvas
 ```
+
+If the global npm install fails with a permissions error, see the npm
+permissions troubleshooting entry below.
 
 By default, Agent Canvas starts on `http://localhost:8000`. Open that URL in
 your browser. The default local backend should show as healthy on the home
@@ -342,16 +347,20 @@ all work before relying on the schedule.
 - **Lemonade is down:** restart it with the
   `lemonade run "${LEMONADE_MODEL}"` command in step 1, then re-run the health
   check.
-- **`npm install -g` fails with a permissions error:** configure a user-owned
-  global npm directory, then reopen the terminal and install Agent Canvas
-  again:
+- **`npm install -g` fails with a permissions error:** on Linux or WSL,
+  configure a user-owned global npm directory, add it to your shell startup
+  file, then install Agent Canvas again:
 
   ```bash
   mkdir -p ~/.npm-global
-  npm config set prefix ~/.npm-global
+  npm config set prefix "$HOME/.npm-global"
+  printf '\nexport PATH="$HOME/.npm-global/bin:$PATH"\n' >> ~/.bashrc
   export PATH="$HOME/.npm-global/bin:$PATH"
   npm install -g @openhands/agent-canvas
   ```
+
+  If you use `zsh`, add the same `export PATH=...` line to `~/.zshrc` instead
+  of `~/.bashrc`.
 - **Agent Canvas rejects the LLM settings after setting `custom_tokenizer`:**
   install `transformers` in the Agent Server Python environment, restart Agent
   Canvas if needed, and retry saving the LLM settings. OpenHands requires
