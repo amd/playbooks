@@ -24,17 +24,22 @@ The example is designed to be practical and easy to modify, so you can use it as
 - How to save the fine-tuned result in local storage
 
 <!-- @device:halo,stx,krk -->
-> **Note:** The fine-tuning techniques in this playbook require at least 24 GB of GPU memory and 32 GB of system RAM.
+> **Note:** The fine-tuning techniques in this playbook require at least **64 GB of system RAM**, with at least **24 GB of it available to the GPU** (the 24 GB is part of the 64 GB, not in addition to it).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Note:** The fine-tuning techniques in this playbook require at least 24 GB of GPU memory and 32 GB of system RAM.
+> **Note:** The fine-tuning techniques in this playbook require at least **24 GB of total GPU memory** and **32 GB of system RAM**.
+> - On Windows, total GPU memory combines the graphics card's dedicated VRAM with shared GPU memory (borrowed from system RAM).
+> - Therefore, cards with less than 24 GB of dedicated VRAM can still run this playbook by using shared GPU memory to make up the difference.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Note:** The fine-tuning techniques in this playbook require at least 24 GB of **dedicated** GPU memory and 32 GB of system RAM.
+> **Note:** The fine-tuning techniques in this playbook require a graphics card with at least **24 GB of dedicated GPU memory** and **32 GB of system RAM**.
+> - On Linux, training runs entirely in the graphics card's dedicated VRAM.
+> - It does not fall back to shared GPU memory (system RAM) when VRAM runs out.
+> - Cards with less than 24 GB of dedicated VRAM will run out of memory during training on Linux, even if the system has plenty of RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
