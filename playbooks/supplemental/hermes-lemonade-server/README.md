@@ -756,7 +756,7 @@ EOF
 
 Hermes will now spin up a persistent sandbox container and route all `terminal` and file-tool calls through it. The container shares the life of the Hermes process, is reused across all tool calls, and is destroyed when Hermes exits.
 
-> **Verify the sandbox is working:** Start Hermes (`hermes`) and ask it to `run hostname` - you should see a short container ID instead of your machine's hostname. You can also ask it to `rm -rf ${HOME}/Downloads/testing`: Hermes will confirm the deletion, but the folder will still be on your host. The command ran inside the container's isolated `$HOME`, not yours.
+> **Verify the sandbox is working:** Start Hermes (`hermes`) and ask it to `run hostname` - you should see a short container ID instead of your machine's hostname. You can also ask it to `rm -rf <path-to-a-dummy-file/folder>`: Hermes will confirm the deletion, but the folder will still be on your host. The command ran inside the container's isolated `$HOME`, not yours.
 
 > **Need stronger isolation?** Hermes also provides an official Docker image (`nousresearch/hermes-agent`) that runs the entire agent process inside a container - gateway, tools, and all. See the [Hermes Docker documentation](https://hermes-agent.nousresearch.com/docs/user-guide/docker) for setup details.
 
