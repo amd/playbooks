@@ -254,9 +254,10 @@ systemd=true
 EOF
 ```
 
-Restart WSL:
+Exit WSL and restart it:
 
 ```powershell
+exit
 wsl --shutdown
 wsl
 ```
@@ -276,6 +277,7 @@ ip route show default | awk '{print $3}' | head -1
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
+> Note: If you encounter a `netsh: command not found` error, please try using the explicit executable name instead - `netsh.exe`
 
 **Add a firewall rule** (same elevated PowerShell):
 
@@ -308,7 +310,19 @@ If you’ve already loaded the Qwen3.6-35B-A3B-GGUF model in the previous step, 
 }
 ```
 
-> The `netsh portproxy` rule survives reboots but the WSL gateway IP can change after `wsl --shutdown`. If Lemonade becomes unreachable from WSL after a restart, get the updated gateway IP and update the proxy with this new IP.
+> The `netsh portproxy` rule survives reboots, but the WSL
+ gateway IP can change after `wsl --shutdown`. If Lemonade becomes
+ unreachable from WSL after a restart, retrieve the updated gateway IP
+ and update the proxy rule accordingly.
+
+> **Recommendation:** To avoid gateway issues, we strongly suggest
+> the following shell configuration:
+> - **Windows commands** should be executed in **PowerShell**
+> - **WSL distro commands** should be executed in a **Command Prompt**,
+> run as **Administrator**
+> Using the correct shell environment for each context helps prevent
+unexpected behavior caused by gateway IP address changes.
+
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -1041,11 +1055,38 @@ Because the gateway binds to loopback, the dashboard auto-authenticates when ope
 
 > **Need the gateway token?** Run `openclaw dashboard --no-open` to print the dashboard URL with the token embedded (it also attempts to copy it to your clipboard). Alternatively, the token is at `gateway.auth.token` in `~/.openclaw/openclaw.json`.
 >
-> **Approving a remote device:** When you open the dashboard from a second machine or phone, the browser displays a request ID. Back on the machine running the gateway, run:
-> ```bash
-> openclaw devices approve <requestId>
-> ```
-> This is only needed for remote or secondary devices, loopback access from the same machine auto-authenticates.
+ **Accessing the Dashboard from Another Device (via SSH Tunnel)**
+
+Add the remote host to your `~/.ssh/known_hosts` by connecting for the
+first time and accepting the fingerprint prompt on your **local machine**:
+```bash
+ssh user@<host-ip>
+```
+
+ On your **local machine**, open an SSH tunnel to the remote host:
+ ```bash
+ ssh -N -L 17879:127.0.0.1:17879 user@<host-ip>
+ ```
+  **Note:** After entering your password, no output is expected — the terminal will appear to hang. This is correct behavior. The `-N` flag means "do not execute a remote command", so SSH simply sits there maintaining the tunnel.
+
+Then, on your **local machine**, open your browser and navigate to http://127.0.0.1:17879.
+
+
+On the **remote machine**, retrieve your token:
+```bash
+cat ~/.openclaw/openclaw.json
+```
+Copy the token and paste it into the browser to log in.
+
+> **Approving a remote device**: When you open the dashboard from a second machine or phone, the browser might display a request ID. If a device approval request arrives on the remote machine, check pending requests to allow [Remote Access](https://docs.openclaw.ai/gateway/remote).
+```bash
+openclaw devices list
+```
+Back on the machine running the gateway, run:
+```bash
+openclaw devices approve <requestId>
+```
+>This is only needed for remote or secondary devices, loopback access from the same machine auto-authenticates.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
