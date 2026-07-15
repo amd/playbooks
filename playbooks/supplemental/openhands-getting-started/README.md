@@ -72,8 +72,9 @@ You need:
 - Lemonade Server installed and able to serve the model below.
 - Node.js 22.12 or later and `npm` (used by the `agent-canvas` CLI).
 - `uv`, the Python package manager that Agent Canvas uses to manage the agent
-  server environment. If it is not installed, follow the
-  [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+  server environment. If your system does not already have it, install it from
+  the [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/)
+  before launching Agent Canvas.
 - A project folder to work in. This can be any local git repository or code
   directory you want the agent to work on.
 
@@ -139,14 +140,16 @@ agent-canvas
 ```
 
 By default, Agent Canvas starts on `http://localhost:8000`. Open that URL in
-your browser. If port 8000 is already in use, choose another port:
+your browser. If port 8000 is already in use, pass `--port` (or `-p`) when you
+launch Agent Canvas:
 
 ```bash
 agent-canvas --port 3000
 ```
 
-Then open `http://localhost:3000` instead. The default local backend should
-show as healthy on the home screen.
+The same command works in PowerShell on Windows. Then open
+`http://localhost:3000` instead. The default local backend should show as
+healthy on the home screen.
 
 The `agent-canvas` command starts the agent server, the automation backend, and
 the web frontend together. You only need this one command to run OpenHands
@@ -239,7 +242,10 @@ the file again—all in the same conversation.
 
 - **`agent-canvas` is not on PATH:** reinstall with
   `npm install -g @openhands/agent-canvas` and confirm the npm global binary
-  directory is on your PATH.
+  directory is on your PATH. On Windows, run `npm config get prefix`; the
+  returned directory, often `%APPDATA%\npm` or `%USERPROFILE%\.npm-global`,
+  must be on your user PATH before `agent-canvas` can be launched from a new
+  terminal.
 - **`npm install -g` fails with a permissions error:** configure a user-owned
   global npm directory, then reopen the terminal and install Agent Canvas again.
 
@@ -257,12 +263,13 @@ the file again—all in the same conversation.
   ```powershell
   New-Item -ItemType Directory -Force "$env:USERPROFILE\.npm-global"
   npm config set prefix "$env:USERPROFILE\.npm-global"
+  $env:Path = "$env:USERPROFILE\.npm-global;$env:Path"
   npm install -g @openhands/agent-canvas
   ```
 
-  Then add `%USERPROFILE%\.npm-global` to your user PATH from
-  **Settings > System > About > Advanced system settings > Environment
-  Variables**, and open a new terminal.
+  To make the Windows PATH change permanent, add `%USERPROFILE%\.npm-global` to
+  your user PATH from **Settings > System > About > Advanced system settings >
+  Environment Variables**, and open a new terminal.
   <!-- @os:end -->
 - **The UI loads but the backend shows unhealthy:** wait a few seconds for the
   agent server to finish starting, then refresh. If it stays unhealthy, restart
