@@ -15,7 +15,7 @@
   "isNew": true,
   "isFeatured": true,
   "developed": true,
-  "published": true,
+  "published": false,
   "tags": [
     "deepseek",
     "ds4",
