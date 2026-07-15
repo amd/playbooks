@@ -72,21 +72,14 @@ You need:
 - Lemonade Server installed and able to serve the model below.
 - Node.js 22.12 or later and `npm` (used by the `agent-canvas` CLI).
 - `uv`, the Python package manager that Agent Canvas uses to manage the agent
-  server environment.
+  server environment. If it is not installed, follow the
+  [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
 - A project folder to work in. This can be any local git repository or code
   directory you want the agent to work on.
-
-## Variables Used in This Playbook
 
 <!-- @device:halo,halo_box,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 <!-- @device:end -->
-
-```bash
-export LEMONADE_BASE_URL="http://127.0.0.1:13305/api/v1"
-export LEMONADE_MODEL="Qwen3.6-35B-A3B-GGUF"
-export OPENHANDS_LLM_MODEL="openai/${LEMONADE_MODEL}"
-```
 
 ## 1. Start Lemonade Server
 
@@ -95,7 +88,7 @@ Start the model from the Lemonade CLI:
 ```bash
 lemonade config set llamacpp.backend=vulkan
 lemonade config set ctx_size=65536
-lemonade run "${LEMONADE_MODEL}"
+lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
 Lemonade exposes an OpenAI-compatible API at:
@@ -111,16 +104,16 @@ http://127.0.0.1:13305/api/v1
 Confirm Lemonade can serve the selected model:
 
 ```bash
-curl -s "${LEMONADE_BASE_URL}/models" | python3 -m json.tool
+curl -s "http://127.0.0.1:13305/api/v1/models" | python3 -m json.tool
 ```
 
 Then send a small chat request:
 
 ```bash
-curl -sS "${LEMONADE_BASE_URL}/chat/completions" \
+curl -sS "http://127.0.0.1:13305/api/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "'"${LEMONADE_MODEL}"'",
+    "model": "Qwen3.6-35B-A3B-GGUF",
     "messages": [
       {"role": "user", "content": "Reply with exactly: OK"}
     ],
@@ -146,8 +139,14 @@ agent-canvas
 ```
 
 By default, Agent Canvas starts on `http://localhost:8000`. Open that URL in
-your browser. The default local backend should show as healthy on the home
-screen.
+your browser. If port 8000 is already in use, choose another port:
+
+```bash
+agent-canvas --port 3000
+```
+
+Then open `http://localhost:3000` instead. The default local backend should
+show as healthy on the home screen.
 
 The `agent-canvas` command starts the agent server, the automation backend, and
 the web frontend together. You only need this one command to run OpenHands
@@ -160,8 +159,7 @@ On first launch, Agent Canvas opens an onboarding flow. In that flow:
 1. Keep **OpenHands** selected as the agent and click **Next**.
 2. On **Set up your LLM**, select **Advanced**.
 3. Keep **Authentication** set to **API key**.
-4. Set **Custom Model** to the `OPENHANDS_LLM_MODEL` value,
-   `openai/Qwen3.6-35B-A3B-GGUF`.
+4. Set **Custom Model** to `openai/Qwen3.6-35B-A3B-GGUF`.
 5. Set **Base URL** to `http://127.0.0.1:13305/api/v1`.
 6. For **API Key**, enter any non-empty placeholder such as `lemonade-local`.
    Lemonade does not require a real key, but the OpenHands client needs a value
@@ -240,24 +238,38 @@ the file again—all in the same conversation.
 ## Troubleshooting
 
 - **`agent-canvas` is not on PATH:** reinstall with
-  `npm install -g @openhands/agent-canvas` and confirm `npm bin -g` is on your
-  PATH.
+  `npm install -g @openhands/agent-canvas` and confirm the npm global binary
+  directory is on your PATH.
 - **`npm install -g` fails with a permissions error:** configure a user-owned
-  global npm directory, then reopen the terminal and install Agent Canvas
-  again:
+  global npm directory, then reopen the terminal and install Agent Canvas again.
 
+  <!-- @os:linux -->
   ```bash
   mkdir -p ~/.npm-global
   npm config set prefix ~/.npm-global
-  export PATH="$HOME/.npm-global/bin:$PATH"
+  echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.profile
+  . ~/.profile
   npm install -g @openhands/agent-canvas
   ```
+  <!-- @os:end -->
+
+  <!-- @os:windows -->
+  ```powershell
+  New-Item -ItemType Directory -Force "$env:USERPROFILE\.npm-global"
+  npm config set prefix "$env:USERPROFILE\.npm-global"
+  npm install -g @openhands/agent-canvas
+  ```
+
+  Then add `%USERPROFILE%\.npm-global` to your user PATH from
+  **Settings > System > About > Advanced system settings > Environment
+  Variables**, and open a new terminal.
+  <!-- @os:end -->
 - **The UI loads but the backend shows unhealthy:** wait a few seconds for the
   agent server to finish starting, then refresh. If it stays unhealthy, restart
   `agent-canvas` and check the terminal output for errors.
 - **Lemonade chat requests fail with a connection error:** confirm
-  `curl -fsS "${LEMONADE_BASE_URL}/health"` succeeds and that Lemonade is still
-  serving the model with `lemonade status`.
+  `curl -fsS "http://127.0.0.1:13305/api/v1/health"` succeeds and that
+  Lemonade is still serving the model with `lemonade status`.
 - **The agent errors with a context-length or token-limit message:** restart
   Lemonade with a larger `ctx_size` (for example `ctx_size=65536`), and start a
   fresh conversation so the agent does not carry an oversized history.
