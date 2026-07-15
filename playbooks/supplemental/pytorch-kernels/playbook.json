@@ -1,7 +1,7 @@
 {
   "id": "pytorch-kernels",
   "title": "Building Custom GPU Kernels with PyTorch and AMD ROCm\u2122",
-  "description": "Write and optimize custom GPU kernels using PyTorch and AMD ROCm\u2122 software on AMD Ryzen\u2122 AI",
+  "description": "Write and optimize custom GPU kernels using PyTorch and AMD ROCm\u2122 software",
   "time": 60,
   "supported_platforms": {
     "halo_box": [

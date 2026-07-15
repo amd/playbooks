@@ -1,0 +1,149 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Restart Runners
+
+# Two ways to trigger:
+#   1. Automatically every day at 12:30 AM Pacific Time (the cron below uses
+#      UTC-7/PDT as the reference; it will drift to 1:30 AM Pacific in winter).
+#   2. Manually via "Run workflow" (workflow_dispatch), where you pick exactly
+#      which runners to restart.
+on:
+  schedule:
+    - cron: "30 7 * * *"   # 00:30 PDT (UTC-7); 01:30 PST (UTC-8)
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "What to restart"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all          # every runner; 'name', 'group', 'os' are all ignored
+          - by_name      # ONE runner named in 'name'; 'group' and 'os' ignored
+          - by_group     # runners matching 'group' + 'os'; 'name' ignored
+      name:
+        description: "Runner name -- USED ONLY when scope=by_name (ignored otherwise), e.g. xsj-aimlab-halo-0"
+        required: false
+        type: string
+      group:
+        description: "Hardware group -- USED ONLY when scope=by_group (ignored otherwise)"
+        required: false
+        default: "any"
+        type: choice
+        options:
+          - any
+          - halo         # Ryzen AI Max
+          - stx          # Ryzen AI 300 HX
+          - krk          # Ryzen AI 300
+          - r9700        # Radeon AI Pro R9700
+          - rx9070xt     # Radeon RX 9070 XT
+          - rx7900xt     # Radeon RX 7900 XT
+      os:
+        description: "OS filter -- USED ONLY when scope=by_group (ignored otherwise)"
+        required: false
+        default: "any"
+        type: choice
+        options:
+          - any
+          - Windows
+          - Linux
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Step 1: Determine which runners need to be restarted by filtering the
+  # maintained runner inventory in .github/runners.json.
+  # Update .github/runners.json whenever machines are added, removed, or changed.
+  # ---------------------------------------------------------------------------
+  select:
+    name: Select runners
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.pick.outputs.matrix }}
+      has_entries: ${{ steps.pick.outputs.has_entries }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build restart matrix
+        id: pick
+        run: |
+          # Scheduled runs always target the whole fleet. Manual runs use the
+          # inputs the operator chose.
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            NAME=""
+            OS="any"
+            GROUP="any"
+          else
+            case "${{ github.event.inputs.scope }}" in
+              by_name)
+                NAME="${{ github.event.inputs.name }}"
+                OS="any"
+                GROUP="any"
+                # Guard: an empty name with an empty os/group filter would match
+                # EVERY runner, silently rebooting the whole fleet. Fail instead.
+                if [ -z "$NAME" ]; then
+                  echo "::error::scope=by_name requires the 'name' field to be set."
+                  exit 1
+                fi
+                ;;
+              by_group)
+                NAME=""
+                OS="${{ github.event.inputs.os }}"
+                GROUP="${{ github.event.inputs.group }}"
+                ;;
+              *)  # all
+                NAME=""
+                OS="any"
+                GROUP="any"
+                ;;
+            esac
+          fi
+
+          python3 .github/scripts/select_runners.py \
+            --name "$NAME" \
+            --os "$OS" \
+            --group "$GROUP"
+
+  # ---------------------------------------------------------------------------
+  # Step 2: fan out one job per selected runner. Each job runs ON that machine
+  # (routed by its name label), so the reboot happens locally. runner.os tells
+  # us whether to use the Windows or Linux reboot command -- no separate
+  # OS-identification step is needed.
+  # ---------------------------------------------------------------------------
+  restart:
+    name: "Restart ${{ matrix.runner }}"
+    needs: select
+    if: needs.select.outputs.has_entries == 'true'
+    runs-on: [self-hosted, "${{ matrix.runner }}"]
+    strategy:
+      fail-fast: false   # one machine failing must not block the others
+      matrix:
+        include: ${{ fromJson(needs.select.outputs.matrix) }}
+    steps:
+      - name: Reboot (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Write-Host "Restarting $env:COMPUTERNAME (runner ${{ matrix.runner }}) in 5s..."
+          # /r = restart (NOT shutdown), /t 5 = 5s delay so this step can report
+          # success before the connection drops, /f = force apps closed so the
+          # reboot can't hang. The runner service must start on boot for the
+          # machine to rejoin the pool automatically.
+          shutdown /r /t 5 /f /c "Scheduled restart via GitHub Actions"
+
+      - name: Reboot (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          echo "Restarting $(hostname) (runner ${{ matrix.runner }}) now..."
+          # `sudo reboot` restarts the machine (NOT shutdown). It's backgrounded
+          # with a short delay so this step exits cleanly before the runner
+          # process is killed -- otherwise the reboot terminates the job mid-run
+          # and it reports a false failure. Requires passwordless sudo (or root).
+          ( sleep 5 ; sudo --non-interactive reboot ) &
+          echo "Reboot scheduled."

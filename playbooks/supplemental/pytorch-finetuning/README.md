@@ -18,13 +18,36 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
-> **Note:** You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
-
+> **Note:** 
+> - Full fine-tuning requires at least **64 GB of system RAM**, with at least **32 GB of it available to the GPU** (the 32 GB is part of the 64 GB, not in addition to it).
+> - You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
 <!-- @device:end -->
 
-<!-- @device:stx,krk -->
-> **Note:** Some of the fine-tuning techniques in this playbook may require more than 64GB of system RAM.
 
+<!-- @device:stx,krk -->
+<!-- @os:linux -->
+> **Note:** LoRA and QLoRA fine-tuning require at least **32 GB of system RAM**, with at least **16 GB of it available to the GPU** (the 16 GB is part of the 32 GB, not in addition to it).
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note:** LoRA fine-tuning requires at least **32 GB of system RAM**, with at least **16 GB of it available to the GPU** (the 16 GB is part of the 32 GB, not in addition to it).
+<!-- @os:end -->
+<!-- @device:end -->
+
+
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @os:linux -->
+> **Note:** LoRA and QLoRA fine-tuning require a graphics card with at least **16 GB of dedicated GPU memory** and **32 GB of system RAM**.
+> - On Linux, training runs entirely in the graphics card's dedicated VRAM.
+> - It does not fall back to shared GPU memory (system RAM) when VRAM runs out.
+> - Cards with less than 16 GB of dedicated VRAM will run out of memory during training on Linux, even if the system has plenty of RAM.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note:** LoRA fine-tuning requires at least **16 GB of total GPU memory** and **32 GB of system RAM**.
+> - On Windows, total GPU memory combines the graphics card's dedicated VRAM with shared GPU memory (borrowed from system RAM).
+> - Therefore, cards with less than 16 GB of dedicated VRAM can still run this playbook by using shared GPU memory to make up the difference.
+<!-- @os:end -->
 <!-- @device:end -->
 
 ## What You'll Learn
@@ -61,7 +84,7 @@ source finetune-venv/bin/activate
 <!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -91,7 +114,7 @@ finetune-venv\Scripts\activate
 <!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=create-venv timeout=60 -->
 ```powershell
 python -m venv finetune-venv
@@ -169,6 +192,23 @@ from trl import SFTTrainer
 print(f"PyTorch version: {torch.__version__}")
 print(f"ROCm available: {torch.cuda.is_available()}")
 print("PASS: All imports successful")
+```
+<!-- @test:end -->
+
+<!-- @test:id=verify-package-version timeout=60 hidden=True setup=activate-venv -->
+```python
+import importlib.metadata as md
+
+pkgs = [
+    "torch", "transformers", "trl", "peft", "accelerate",
+    "datasets", "safetensors", "fsspec", "bitsandbytes",
+    "huggingface_hub", "tokenizers",
+]
+for p in pkgs:
+    try:
+        print(f"{p}: {md.version(p)}")
+    except md.PackageNotFoundError:
+        print(f"{p}: NOT INSTALLED")
 ```
 <!-- @test:end -->
 
@@ -275,7 +315,7 @@ Below is a summary of the available training methods. Each method links to its s
 | [`train_qlora.py`](assets/train_qlora.py)  *(Linux only)*             | **QLoRA**       | 4-bit quantization + LoRA adapters. Lowest memory use, fastest, small quality trade-off. Requires `bitsandbytes` (Linux only).                            | 12–16GB      | Most users; fast experiments; limited VRAM      |
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Updates all model parameters. Maximum quality; highest memory and compute usage.                                    | 40GB+        | Maximum quality; research; large VRAM           |
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
 > **Note:** Full fine-tuning (`train_full_finetuning.py`) may require more than 64GB of system RAM and may not be feasible on this device. Consider using LoRA or QLoRA instead.
 <!-- @os:end -->

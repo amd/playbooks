@@ -1,8 +1,34 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 ## Overview
 
 Efficient fine-tuning is vital for adapting large language models (LLMs) to downstream tasks. LLaMA Factory is an open-source and user-friendly platform that streamlines the training and fine-tuning of large language models and multimodal models. It allows users to customize hundreds of pre-trained models locally with minimal coding.
 
 This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your local AMD hardware.
+
+<!-- @device:stx,krk -->
+> **Note:** The fine-tuning techniques in this playbook require at least **32 GB of system RAM**, with at least **16 GB of it available to the GPU** (the 16 GB is part of the 32 GB, not in addition to it).
+<!-- @device:end -->
+
+
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @os:windows -->
+> **Note:** The fine-tuning techniques in this playbook require at least **16 GB of total GPU memory** and **32 GB of system RAM**.
+> - On Windows, total GPU memory combines the graphics card's dedicated VRAM with shared GPU memory (borrowed from system RAM).
+> - Therefore, cards with less than 16 GB of dedicated VRAM can still run this playbook by using shared GPU memory to make up the difference.
+<!-- @os:end -->
+
+<!-- @os:linux -->
+> **Note:** The fine-tuning techniques in this playbook require a graphics card with at least **16 GB of dedicated GPU memory** and **32 GB of system RAM**.
+> - On Linux, training runs entirely in the graphics card's dedicated VRAM.
+> - It does not fall back to shared GPU memory (system RAM) when VRAM runs out.
+> - Cards with less than 16 GB of dedicated VRAM will run out of memory during training on Linux, even if the system has plenty of RAM.
+<!-- @os:end -->
+<!-- @device:end -->
 
 ## What You'll Learn
 
@@ -62,7 +88,7 @@ source llamafactory-env/bin/activate
 <!-- @setup:id=activate-venv command="source llamafactory-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -92,7 +118,7 @@ llamafactory-env\Scripts\activate
 <!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" --> 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv llamafactory-env
@@ -151,7 +177,7 @@ pip install -r requirements/metrics.txt --break-system-packages
 <!-- @test:end --> 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
 ```bash
 git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
