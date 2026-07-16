@@ -84,6 +84,22 @@ curl -s http://127.0.0.1:1234/v1/models
 ![Server Status](assets/lm-studio-server-status.png)
 
 <!-- @os:windows -->
+<!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
+```powershell
+# CI: pin a GPU (Vulkan) runtime so tests don't fall back to the CPU engine.
+lms runtime ls
+$rt = ((lms runtime ls) -match 'vulkan' | Select-Object -First 1)
+if ($rt) {
+  lms runtime select (($rt.Trim() -split '\s+')[0])
+  lms runtime ls | Select-String 'ENGINE|✓'
+} else {
+  Write-Output "WARNING: no Vulkan runtime installed; GPU acceleration unavailable. Install with: lms get <vulkan-runtime>"
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
 <!-- @test:id=lmstudio-load-qwen3-coder-windows timeout=1200 hidden=True -->
 ```powershell
 lms unload --all
