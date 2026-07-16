@@ -1,0 +1,79 @@
+{
+  "id": "openhands-getting-started",
+  "title": "Getting Started with OpenHands and a Local LLM",
+  "description": "Install Agent Canvas, connect a local Lemonade model, and run your first OpenHands coding agent on your AMD Ryzen\u2122 AI.",
+  "time": 20,
+  "supported_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "difficulty": "beginner",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "openhands",
+    "agent-canvas",
+    "coding-agent",
+    "lemonade",
+    "llm"
+  ],
+  "coverImage": "assets/02-agent-canvas-home.png"
+}
