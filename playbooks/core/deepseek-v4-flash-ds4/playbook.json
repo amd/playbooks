@@ -1,0 +1,26 @@
+{
+  "id": "deepseek-v4-flash-ds4",
+  "title": "Running DeepSeek V4 Flash with ds4",
+  "description": "Deploy DeepSeek V4 Flash locally using the ds4 inference engine and manage models interactively with ds4-cockpit.",
+  "time": 20,
+  "supported_platforms": {
+    "halo_box": [
+      "linux"
+    ],
+    "halo": [
+      "linux"
+    ]
+  },
+  "difficulty": "advanced",
+  "isNew": true,
+  "isFeatured": true,
+  "developed": true,
+  "published": false,
+  "tags": [
+    "deepseek",
+    "ds4",
+    "rocm",
+    "llm",
+    "inference"
+  ]
+}
