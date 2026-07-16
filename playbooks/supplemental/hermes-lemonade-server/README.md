@@ -417,7 +417,6 @@ hermes doctor
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=hermes-install-windows timeout=300 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -449,7 +448,6 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
 <!-- @os:end -->
 
 ---
@@ -531,7 +529,6 @@ custom_providers:
 EOF
 ```
 
-<!-- @test:id=hermes-lemonade-config-linux timeout=60 hidden=True -->
 ```bash
 set -euo pipefail
 export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
@@ -550,7 +547,6 @@ grep -q "context_length: 262144" "$config"
 
 echo "OK: Hermes config.yaml contains Lemonade model configuration"
 ```
-<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -578,7 +574,6 @@ custom_providers:
 EOF
 ```
 
-<!-- @test:id=hermes-lemonade-config-windows timeout=60 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -622,7 +617,6 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
 <!-- @os:end -->
 
 ---
