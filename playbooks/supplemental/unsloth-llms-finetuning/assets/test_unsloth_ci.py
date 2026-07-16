@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 """
 CI-friendly Unsloth training script (Gemma-4)
 - Short smoke-test style run

@@ -1,3 +1,7 @@
+// Copyright Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: MIT
+
 interface Software {
   name: string;
   description: string;
