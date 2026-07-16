@@ -687,7 +687,6 @@ echo "OK: Hermes sandbox Podman image is available"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=hermes-sandbox-image-windows timeout=1800 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -731,7 +730,6 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
 <!-- @os:end -->
 
 Then configure Hermes to use Podman as the container runtime and set the terminal backend:
@@ -907,7 +905,6 @@ hermes
 ```
 
 <!-- @os:linux -->
-<!-- @test:id=hermes-gateway-linux timeout=300 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -953,11 +950,9 @@ fi
 
 echo "OK: Hermes gateway started successfully"
 ```
-<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=hermes-gateway-windows timeout=300 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
@@ -1028,7 +1023,6 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
 <!-- @os:end -->
 
 **Congratulations, you've built a fully local AI agent stack.**
