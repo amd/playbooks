@@ -1,3 +1,7 @@
+// Copyright Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: MIT
+
 export default function DeveloperProgramSection() {
   return (
     <section className="py-4 px-6" id="developer-program">
