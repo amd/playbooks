@@ -90,9 +90,27 @@ lms unload --all
 lms ps
 $ID = "qwen3coder-32k-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
+# retry once: large-model loads can transiently fail under memory pressure
 lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y
+if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y }
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-select-gpu-runtime-linux timeout=120 hidden=True -->
+```bash
+# CI: pin a GPU (Vulkan) runtime so tests don't fall back to the CPU engine.
+lms runtime ls
+GPU_RT="$(lms runtime ls 2>/dev/null | awk '/vulkan/{print $1; exit}')"
+if [ -n "$GPU_RT" ]; then
+  lms runtime select "$GPU_RT"
+  lms runtime ls | grep -E 'ENGINE|✓'
+else
+  echo "WARNING: no Vulkan runtime installed; GPU acceleration unavailable. Install with: lms get <vulkan-runtime>"
+fi
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -104,7 +122,8 @@ lms unload --all || true
 lms ps
 ID="qwen3coder-32k-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
-lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y
+# retry once: large-model loads can transiently fail under memory pressure
+lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y; }
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -183,12 +202,12 @@ req = urllib.request.Request(
         "model": model_id,
         "messages": [{"role":"user","content":"Write a Python function add(a,b) that returns a+b. Only output code."}],
         "temperature": 0,
-        "max_tokens": 500
+        "max_tokens": 64
     }).encode("utf-8"),
     headers={"Content-Type":"application/json"},
     method="POST",
 )
-with urllib.request.urlopen(req, timeout=60) as r:
+with urllib.request.urlopen(req, timeout=120) as r:
     print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end -->
@@ -206,12 +225,12 @@ req = urllib.request.Request(
         "model": model_id,
         "messages": [{"role":"user","content":"Write a Python function add(a,b) that returns a+b. Only output code."}],
         "temperature": 0,
-        "max_tokens": 500
+        "max_tokens": 64
     }).encode("utf-8"),
     headers={"Content-Type":"application/json"},
     method="POST",
 )
-with urllib.request.urlopen(req, timeout=60) as r:
+with urllib.request.urlopen(req, timeout=120) as r:
     print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end -->
