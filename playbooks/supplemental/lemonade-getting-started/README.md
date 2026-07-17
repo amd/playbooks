@@ -662,7 +662,7 @@ You have a local AI server running on your own hardware, here is where to go nex
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
 ```bash
-# CI cleanup: unload the model so the GPU pool is free for later playbooks on this runner
+# CI cleanup: unload the model so the GPU pool is free
 lemonade unload || true
 ```
 <!-- @test:end -->
@@ -671,7 +671,7 @@ lemonade unload || true
 <!-- @os:windows -->
 <!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
 ```powershell
-# CI cleanup: unload the model so the GPU pool is free for later playbooks on this runner
+# CI cleanup: unload the model so the GPU pool is free
 lemonade unload
 exit 0
 ```
