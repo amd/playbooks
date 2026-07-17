@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-kernels",
+  "title": "PyTorch ve AMD ROCm™ ile Özel GPU Kernel'ları Oluşturma",
+  "description": "PyTorch ve AMD ROCm™ yazılımını kullanarak özel GPU çekirdekleri yazın ve optimize edin"
+}

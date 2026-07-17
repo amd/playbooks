@@ -1,0 +1,5 @@
+{
+  "id": "llama-factory-finetuning",
+  "title": "Ρύθμιση LLM με LLaMA-Factory",
+  "description": "Βελτιστοποιήστε μεγάλα γλωσσικά μοντέλα (LLMs) χρησιμοποιώντας τεχνικές LLaMA-Factory και LoRA."
+}

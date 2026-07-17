@@ -1,0 +1,5 @@
+{
+  "id": "cvml",
+  "title": "Lokal datamaskinvisjon med AMD Ryzen™ AI NPU",
+  "description": "Bygg lokale persepsjonskapasiteter ved hjelp av CVML SDK på toppen av Ryzen AI og AMD ROCm™-programvare"
+}

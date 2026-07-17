@@ -1,0 +1,5 @@
+{
+  "id": "amd-sync",
+  "title": "Etäkehitys AMD Syncin avulla",
+  "description": "Asenna AMD Sync kannettavallesi ja saat yhdellä napsautuksella etäkäyttöön VS Code, Terminal, JupyterLab ja Live Metrics AMD Ryzen™ AI Halo -laitteellasi."
+}

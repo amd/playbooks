@@ -1,0 +1,5 @@
+{
+  "id": "ollama-getting-started",
+  "title": "Початок роботи з Ollama",
+  "description": "Встановіть Ollama та запускайте LLM локально — спілкуйтеся через термінал, настільний застосунок або REST API."
+}

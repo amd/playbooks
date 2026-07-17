@@ -1,0 +1,5 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "การคลัสเตอร์ Ryzen™ AI Halo สองตัวด้วย RPC",
+  "description": "ตั้งค่าการอนุมานแบบกระจายโดยใช้ RPC server ข้ามอุปกรณ์ Ryzen™ AI Halo สองเครื่องด้วย llama.cpp เพื่อรันโมเดลขนาด 350B ขึ้นไป"
+}

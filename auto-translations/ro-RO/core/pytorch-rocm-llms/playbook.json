@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-rocm-llms",
+  "title": "Rularea LLM-urilor pe PyTorch cu software-ul AMD ROCm™",
+  "description": "Învățați să rulați modele de limbaj puternice pe PC-ul dvs. cu PyTorch și software-ul AMD ROCm™ pentru a rezuma documente rapid și ușor."
+}

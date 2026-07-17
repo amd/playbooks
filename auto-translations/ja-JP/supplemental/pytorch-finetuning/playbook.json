@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "PyTorchとAMD ROCm™ソフトウェアを使用したLLMのファインチューニング",
+  "description": "PyTorchとROCmを使用して大規模言語モデル（LLM）をファインチューニングします。"
+}

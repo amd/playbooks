@@ -1,0 +1,5 @@
+{
+  "id": "cvml",
+  "title": "ראיית מחשב מקומית עם AMD Ryzen™ AI NPU",
+  "description": "בנה יכולות תפיסה מקומיות באמצעות CVML SDK על גבי Ryzen AI ותוכנת AMD ROCm™"
+}

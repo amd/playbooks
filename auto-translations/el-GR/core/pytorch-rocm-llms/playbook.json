@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-rocm-llms",
+  "title": "Εκτέλεση LLMs σε PyTorch με AMD ROCm™ Software",
+  "description": "Μάθετε να εκτελείτε ισχυρά γλωσσικά μοντέλα στον υπολογιστή σας με PyTorch και λογισμικό AMD ROCm™ για να συνοψίζετε έγγραφα γρήγορα και εύκολα."
+}

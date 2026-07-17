@@ -1,0 +1,41 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+# Plattformkonfiguration — Lemonade Local AI
+
+Dieses Dokument beschreibt die vorinstallierte Software, Modellpfade und plattformspezifischen Voraussetzungen, die von diesem Playbook vorausgesetzt werden.
+
+## Vorinstallierte Software
+
+| Software | Version | Zweck |
+|----------|---------|-------|
+| Lemonade Server | Neueste Version | Lokaler LLM-Server mit OpenAI-kompatibler API |
+| Python | 3.10–3.13 | Erforderlich für das OpenAI Python-Client-Beispiel |
+
+## Standardmäßiger Modellspeicher
+
+Über Lemonade heruntergeladene Modelle werden gemäß der Hugging Face Hub-Spezifikation gespeichert:
+
+| Plattform | Standardpfad |
+|-----------|-------------|
+| Windows | `%USERPROFILE%\.cache\huggingface\hub\` |
+| Linux | `~/.cache/huggingface/hub/` |
+
+Um den Speicherort zu ändern, setzen Sie die Umgebungsvariable `HF_HOME`.
+
+## Hardwareanforderungen
+
+| Hardware-Ziel | Anforderungen |
+|--------------|--------------|
+| **CPU** | Jeder moderne x86-64-Prozessor (AMD oder Intel) |
+| **GPU (Vulkan)** | Jede GPU mit Vulkan-Treiberunterstützung |
+| **GPU (ROCm)** | AMD Radeon RX 7000/9000-Serie oder Radeon PRO W7000-Serie; AMD Ryzen AI MAX+ Pro 395 |
+| **NPU** | AMD Ryzen AI 300-Serie-Prozessor, Windows 11 |
+
+## Netzwerkanforderungen
+
+- Für den ersten Modell-Download ist eine Internetverbindung erforderlich (1–25 GB je nach Modell)
+- Nach dem Herunterladen der Modelle ist kein Internet mehr erforderlich

@@ -1,0 +1,5 @@
+{
+  "id": "speech2speech-translation",
+  "title": "Tłumaczenie mowy na mowę w czasie rzeczywistym",
+  "description": "Zbuduj system tłumaczenia mowy na mowę w czasie rzeczywistym na lokalnym sprzęcie."
+}

@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "Ajuste Fino de LLMs com PyTorch e AMD ROCm™ Software",
+  "description": "Ajuste fino de grandes modelos de linguagem (LLMs) usando PyTorch e ROCm."
+}

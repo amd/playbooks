@@ -1,0 +1,5 @@
+{
+  "id": "n8n-automation-gpt-oss",
+  "title": "Automazione dei flussi di lavoro con n8n e LLM locali",
+  "description": "Crea un riepilogatore di notizie basato sull'IA utilizzando n8n e Lemonade."
+}

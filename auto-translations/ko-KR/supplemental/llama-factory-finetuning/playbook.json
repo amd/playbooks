@@ -1,0 +1,5 @@
+{
+  "id": "llama-factory-finetuning",
+  "title": "LLaMA Factory로 LLM 파인튜닝하기",
+  "description": "LLaMA Factory와 LoRA 기법을 사용하여 대규모 언어 모델(LLM)을 파인튜닝합니다."
+}

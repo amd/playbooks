@@ -1,0 +1,5 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Kjøre og betjene LLM-er med LM Studio",
+  "description": "Sett opp LM Studio og LM Studio Server for å kjøre og betjene store språkmodeller lokalt."
+}

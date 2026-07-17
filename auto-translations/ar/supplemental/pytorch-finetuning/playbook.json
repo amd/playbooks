@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "ضبط دقيق لنماذج اللغة الكبيرة باستخدام PyTorch وبرنامج AMD ROCm™",
+  "description": "ضبط دقيق للنماذج اللغوية الكبيرة (LLMs) باستخدام PyTorch و ROCm."
+}

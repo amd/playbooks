@@ -1,0 +1,5 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "Agrupando dos Ryzen™ AI Halos con RPC",
+  "description": "Configura la inferencia distribuida usando el servidor RPC en dos dispositivos Ryzen™ AI Halo con llama.cpp para ejecutar modelos de 350B+"
+}

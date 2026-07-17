@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-rocm-llms",
+  "title": "Pokretanje LLM-ova na PyTorch-u sa AMD ROCm™ softverom",
+  "description": "Naučite kako da pokrenete moćne jezičke modele na svom računaru koristeći PyTorch i AMD ROCm™ softver za brzo i lako sažimanje dokumenata."
+}

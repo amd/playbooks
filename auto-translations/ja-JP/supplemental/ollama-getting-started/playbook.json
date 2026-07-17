@@ -1,0 +1,5 @@
+{
+  "id": "ollama-getting-started",
+  "title": "Ollamaを始める",
+  "description": "Ollama をインストールしてLLMをローカルで実行 — ターミナル、デスクトップアプリ、またはREST APIからチャット。"
+}

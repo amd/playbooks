@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-rocm-llms",
+  "title": "Uruchamianie LLM na PyTorch z oprogramowaniem AMD ROCm™",
+  "description": "Naucz się uruchamiać zaawansowane modele językowe na swoim komputerze z PyTorch i oprogramowaniem AMD ROCm™, aby szybko i łatwo podsumowywać dokumenty."
+}

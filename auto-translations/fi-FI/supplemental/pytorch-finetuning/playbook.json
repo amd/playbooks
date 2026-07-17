@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "Hienosäätö LLM-malleille PyTorch- ja AMD ROCm™-ohjelmistolla",
+  "description": "Hienosäädä suuria kielimalleja (LLM) käyttämällä PyTorch ja ROCm."
+}

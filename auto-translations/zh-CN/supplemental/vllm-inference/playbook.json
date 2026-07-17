@@ -1,0 +1,5 @@
+{
+  "id": "vllm-inference",
+  "title": "vLLM 入门",
+  "description": "了解如何在集成 GPU 上使用容器化 vLLM 运行推理和服务"
+}

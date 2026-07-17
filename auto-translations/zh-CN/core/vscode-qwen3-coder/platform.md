@@ -1,0 +1,41 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+# 平台配置
+
+本文档描述了运行此 playbook 的预期平台配置。
+
+## Windows
+
+### LM Studio 安装
+
+LM Studio 应已预先安装：
+
+| 组件 | 版本 | 位置 |
+|-----------|---------|----------|
+| **LM Studio（模型 + 杂项）** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio（程序）** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio（缓存）** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+
+### 模型下载
+
+以下模型应已存在于 LM Studio 模型目录（`C:\Users\...\.lmstudio\models`）中：
+
+| 模型类型 | 量化方式 | 大小 | 位置 |
+|------------|--------------|------|----------|
+| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
+
+---
+
+## Linux
+
+### LM Studio 安装
+
+详情请参阅 lmstudio.md（位于 dependencies 文件夹内）。
+
+### 模型下载
+
+与 Windows 上相同。

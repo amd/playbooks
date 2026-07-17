@@ -1,0 +1,5 @@
+{
+  "id": "vllm-inference",
+  "title": "Aan de slag met vLLM",
+  "description": "Leer hoe u inferentie en serving uitvoert met behulp van gecontaineriseerde vLLM op de geïntegreerde GPU"
+}

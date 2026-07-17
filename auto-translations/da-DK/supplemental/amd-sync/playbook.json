@@ -1,0 +1,5 @@
+{
+  "id": "amd-sync",
+  "title": "Fjernudvikling med AMD Sync",
+  "description": "Installer AMD Sync på din bærbare computer og få ét-klik fjernadgang til VS Code, Terminal, JupyterLab og Live Metrics på din AMD Ryzen™ AI Halo."
+}

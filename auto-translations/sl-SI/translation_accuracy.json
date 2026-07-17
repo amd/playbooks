@@ -1,0 +1,549 @@
+{
+  "locale": "sl-SI",
+  "files": {
+    "playbooks/core/comfyui-image-gen/README.md": {
+      "source_sha256": "5f3da10f7fae3dc68416413efd91668449de4a5796ccf600a591bb1621817f18",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'natančen' should be 'natančen/podroben'; 'variacijsko samodejno kodiranje' is unusual for VAE; some terms like 'vdelane vrednosti' for embeddings are uncommon but acceptable."
+    },
+    "playbooks/core/comfyui-image-gen/platform.md": {
+      "source_sha256": "e8a6884590d062f17595a57f2aadf5abe686c3169f53f3181544259336435c47",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'playbook' translated inconsistently as 'priročnik' (guide) vs more technical term; 'preview' rendered as 'si oglejte' slightly loses meaning; decimal commas correct for sl-SI."
+    },
+    "playbooks/core/comfyui-image-gen/playbook.json": {
+      "source_sha256": "7fbbe78699fe6dbb9f4812e99b949d9c7daa2f88f52ee0f87cbb4641d0f5baae",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Very minor: slightly verbose phrasing but accurate and fluent."
+    },
+    "playbooks/dependencies/comfyui.md": {
+      "source_sha256": "1364f858fb8176db125d258fd392b33e0c2ec1d9f50983f5648926384717a436",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 93,
+      "quality_issues": "Minor: 'želeno' should be 'željeno' (typo). 'Checkout' translated as 'Izberite' loses git-specific meaning."
+    },
+    "playbooks/dependencies/comfyui_models.md": {
+      "source_sha256": "8cb46545df5efaaae1521a92e385e95f3dcdabdbdd3a8ddce9c94a0e0680a9b5",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Typo: 'Morda' should be 'Morda**j**'. Otherwise accurate and fluent."
+    },
+    "playbooks/dependencies/driver.md": {
+      "source_sha256": "bdde05c0805a03d019eedad5bd7dc53a862c6b1f5ffeee6743fdfb73ef39de73",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 82,
+      "quality_issues": "UI strings 'Driver and Software' and 'Manage Updates' left untranslated (acceptable if matching app UI). 'sistemske vrstice' is awkward for 'system tray'. Minor phrasing issues."
+    },
+    "playbooks/dependencies/gaia.md": {
+      "source_sha256": "4837a0e4fd45ede7efc3d903c1bb65484d0805c6e45657d2b097b23c063bb935",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 96,
+      "quality_issues": "Near-flawless. All code, URLs, brand names intact. Minor nit: 'okvir' for 'framework' is acceptable but 'ogrodje' is more standard Slovenian."
+    },
+    "playbooks/dependencies/lemonade.md": {
+      "source_sha256": "428d83bf7ddb03e55ae4c09580554a56ff49d91b924eba6758bb9f106eb7b46a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor fluency issue: 'Prikazati bi se morala izhod' has gender disagreement ('morala' feminine vs 'izhod' masculine). 'zaledjem' is an uncommon term for 'backend'."
+    },
+    "playbooks/dependencies/lmstudio.md": {
+      "source_sha256": "7bf63eab985e835155ecc012bee6c157069e27bc9030a3a975ef0652fe0b5443",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 93,
+      "quality_issues": "Minor: 'od tukaj' is slightly awkward (better: 'tukaj' or 's te povezave'); UI terms left in English is acceptable but inconsistent."
+    },
+    "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
+      "source_sha256": "e33b569398da8f57d5da1bbd94f0c0e005ee7a4c206a577236f785cba3865fcd",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "\"imenik\" should be \"mapo\" or \"direktorij\"; \"namestil\" slightly shifts meaning from \"place\"."
+    },
+    "playbooks/dependencies/lmstudio_models_qwen3_9b.md": {
+      "source_sha256": "51c02b376e3faea175b98d9d6586c91a9524c83348cedf4bd76323499a3d486e",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "\"imenik\" should be \"imenik\" is acceptable but \"directory\" is typically \"mapo\" or \"direktorij\" in Slovenian; minor fluency nits."
+    },
+    "playbooks/dependencies/memoryconfig.md": {
+      "source_sha256": "45f82fd83ae2477a8f1afaebee688689addef39939bb0597c8f1cfb83591473f",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 72,
+      "quality_issues": "Grammar error: 'privzeta namenjena pomnilnik' (gender mismatch). 'kolesa/kolo' for 'wheels' is awkward; 'pakete' preferred. 'namenski VRAM' should be 'namenjeni VRAM'. TTM 'page setting' mistranslated"
+    },
+    "playbooks/dependencies/n8n.md": {
+      "source_sha256": "921441b6697d8ab93bbbc5a9bb71d737f616df42dd40a39b063af61e5aa5c6fa",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 97,
+      "quality_issues": "Excellent translation; all code, URLs, brand names intact. Minor stylistic choice differences only."
+    },
+    "playbooks/dependencies/nodejs.md": {
+      "source_sha256": "9df41526a5c8035b380150c56be8f29cad65da0286a8ee16fe0a49426436939b",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Bash code comments left untranslated; minor inconsistency with translating some UI text but not code comments."
+    },
+    "playbooks/dependencies/podman.md": {
+      "source_sha256": "4e8c2edd4b805a8395f03ddc6b7ff096e6352a7c404616b59a05edc257f0bccd",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "\"jedro pogona Podman\" is slightly awkward for \"core Podman engine\"; \"slike\" for \"images\" could be \"vsebniške slike\" for clarity."
+    },
+    "playbooks/dependencies/pytorch.md": {
+      "source_sha256": "ba5ed9d425c6685dd285c639438efc74c1e8d9d561442bad6412b9adc8164d82",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'Install PyTorch with AMD ROCm™ software support' slightly shortened in translation, dropping 'software' nuance, but acceptable."
+    },
+    "playbooks/dependencies/rocm.md": {
+      "source_sha256": "af961dbef80b407b98ee05fd0e5f816418bf097d384460ca5a57e7844bf38813",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'v skupini' should be 'v skupini render in video' or 'v skupini render ter video' — grammatically slightly awkward but understandable."
+    },
+    "playbooks/dependencies/softwareupdate.md": {
+      "source_sha256": "2d5cb11ce696297d74dfbb9d140b765dc64add55f1bdcbdd27fb3498ca3871f5",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'reboot' translated as 'znova zaženite sistem' instead of 'ponovno zaženite računalnik'; alt text left untranslated (acceptable for code)."
+    },
+    "playbooks/dependencies/vllm.md": {
+      "source_sha256": "8876f624743d3b843409b5cd523a262e60ba53539710bf26c00d80a88153391e",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'cilja na' is slightly awkward; 'targets' could be 'uporabi'. Otherwise excellent."
+    },
+    "playbooks/dependencies/vscode.md": {
+      "source_sha256": "09b668411f70fb8781a2d0d7c7e4417250e610839d0f6213d5f2ff846ceda8f2",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'installation executable' translated as 'namestitveno datoteko' loses 'executable' specificity. Otherwise excellent."
+    },
+    "playbooks/core/lmstudio-rocm-llms/README.md": {
+      "source_sha256": "f0c7074a75cf11c9c9bb8b3508a87f66c8c08fa3e96832ece9f55e7dc5f85b91",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'sklepno točko za sklepanje' is redundant/awkward; 'obiščite' should be 'obiščite'→'obiščite' typo for 'obiščite'; some UI strings left untranslated by design but inconsistent."
+    },
+    "playbooks/core/lmstudio-rocm-llms/platform.md": {
+      "source_sha256": "f731064c13c2ca273ea6bbc804e0b3309a1f4d385e3b58b35575f5e8430a3b86",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'Msc' translated as 'razno' is a reasonable guess but unverified; 'playbook' as 'priročnik' is acceptable but slightly imprecise."
+    },
+    "playbooks/core/lmstudio-rocm-llms/playbook.json": {
+      "source_sha256": "43aa660e28f5698ceef07211ce4a2b2c197d5463917e8311049c6410a9bdbb57",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "\"LLM-jev\" is an awkward Slovenian declension of the English acronym; \"strežba\" is acceptable but slightly unusual terminology."
+    },
+    "playbooks/core/n8n-automation-gpt-oss/README.md": {
+      "source_sha256": "19066843d638353adb3a11fe7f188f59a66c1f11eeaa7037af97a5c21308d4df",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Typo 'najmanj' should be 'najmanj' → 'najmanj' is missing final letter ('najmanj' vs 'najmanj'); minor: 'obiščite' should be 'obiščite' (typo for 'obiščite'→'obiščite' is odd, likely 'obiščite' is cor"
+    },
+    "playbooks/core/n8n-automation-gpt-oss/platform.md": {
+      "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'vašo napravo' should be 'vašo napravo' (correct) or 'vašo' is slightly informal; 'playbook' translated as 'priročnik' is acceptable but debatable."
+    },
+    "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
+      "source_sha256": "068a5d7d2996ca2c8b37535eddf9fe38ab421d56ee509a426d96835a96ab3f74",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 78,
+      "quality_issues": "Awkward phrasing 's pomočjo umetne inteligence podprt povzemalnik' is clunky; more natural would be 'povzemalnik novic, podprt z UI'."
+    },
+    "playbooks/core/pytorch-rocm-llms/README.md": {
+      "source_sha256": "a7f0693c43a5a31e55ffb32b5050099e5297ec77456daff75cf33edf91794d7a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor typos: 'konfigurace' should be 'konfiguracije', 'natančnost' should be 'natančnost/natančnost' (correct: 'natančnost' is acceptable but 'poudarke' should be 'poudarke→poudarke' is wrong, correct"
+    },
+    "playbooks/core/pytorch-rocm-llms/platform.md": {
+      "source_sha256": "f10bd86c45555b65939b97bf0e599a75ce90d5ec18c61a68a98463d34c1e31d2",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'imenik' should be 'mapo' or 'direktorij' for 'directory'; otherwise excellent translation."
+    },
+    "playbooks/core/pytorch-rocm-llms/playbook.json": {
+      "source_sha256": "e4aba2b4e1928b5162037673172f666cb991a500469e027743d01f3ee26955ef",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'LLM-jev' pluralization is slightly awkward but acceptable in Slovenian tech writing."
+    },
+    "playbooks/core/vscode-qwen3-coder/README.md": {
+      "source_sha256": "25da94f89aec651b737075b56e6c558256a645c2a44b96204163e9c87c857fae",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Typo 'najmanj' (should be 'najmanj'), 'narejene' (should be 'narejene→narejene is wrong, correct: narejene→storjene/izvedene'), 'obiščite' (should be 'obiščite→obiščite is wrong, correct: obiščite→obi"
+    },
+    "playbooks/core/vscode-qwen3-coder/platform.md": {
+      "source_sha256": "14c7eec60b483e4bedb5e465673d89e07466088a9ed9c59d7964c3466cf89410",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'Msc' translated as 'razno' is reasonable but slightly interpretive; '18.2' correctly localized to '18,2'."
+    },
+    "playbooks/core/vscode-qwen3-coder/playbook.json": {
+      "source_sha256": "7ce988423e60b386afb4d619e4c1f54b387b839fe588261ab5aaf63e13dee220",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'kodiranje z LLM' slightly awkward phrasing; could be 'LLM kodiranje'. Overall accurate and fluent."
+    },
+    "playbooks/supplemental/amd-sync/README.md": {
+      "source_sha256": "ae7dafe9ebacacdff50f8cf23f8e03d49e1b648456a6b33fabaa84d4fc8c3c0e",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor typo 'raje' instead of 'raje' (likely 'raje' → 'rajši/raje'); 'brez tipkovnice' mistranslates 'without leaving the keyboard'; untranslated GitHub callout block."
+    },
+    "playbooks/supplemental/amd-sync/playbook.json": {
+      "source_sha256": "dd916e95fa31e2909a5ce0b7809b56adcc87c799638d3b136deadf1ec0bd4940",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 82,
+      "quality_issues": "\"enoklični\" is incorrect; should be \"z enim klikom\" (one-click). Minor fluency issue with mixed formal register."
+    },
+    "playbooks/supplemental/clustering-rccl/README.md": {
+      "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Minor: 'glavo vozlišče' should be 'glavno vozlišče'; 'pri čemer' should be 'pri čemer' (correct: 'pri čemer' is acceptable but 'čemer' is slightly unusual); anchor links not localized; 'obremenitev' s"
+    },
+    "playbooks/supplemental/clustering-rccl/playbook.json": {
+      "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Title uses 'Halo' singular instead of 'Halos' plural; 'Združevanje' is acceptable but 'Gručenje' might be more precise for clustering."
+    },
+    "playbooks/supplemental/clustering-rpc-server/README.md": {
+      "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'Namen' used for 'Purpose' column header is slightly unusual (could be 'Namen/Uporaba'); anchor links point to English IDs not Slovenian; 'kolesa' for 'wheels' is awkward; 'vrata' gender agreem"
+    },
+    "playbooks/supplemental/clustering-rpc-server/playbook.json": {
+      "source_sha256": "afee8d03bc9faa092036cbf4a62ec9db4252a49f25273438a7e4e5bbc2b4a10c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "\"Združevanje\" is acceptable but \"Gručenje\" would be more precise for \"Clustering\". Minor fluency issues."
+    },
+    "playbooks/supplemental/llama-factory-finetuning/README.md": {
+      "source_sha256": "38f43810c9ea7c04ad70e180795d64b81ab9e45fd01413ecd26a1d4e7283bde1",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor typo 'natančnost' should be 'natančnost→točnost'; 'obiščite' should be 'obiščite→obiščite' is acceptable but slightly awkward; overall excellent fluency and accuracy."
+    },
+    "playbooks/supplemental/llama-factory-finetuning/playbook.json": {
+      "source_sha256": "e8a8cd9cebcb66736e1cfb707fd792795defcb4f4facb6b80f722be826b2a89b",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 72,
+      "quality_issues": "Inconsistent hyphenation ('Fino nastavljanje' vs 'Fino-nastavljajte'); 'LLaMA-Factory' adds hyphen not in source; 'Fino nastavljanje' is an awkward calque rather than natural Slovenian terminology."
+    },
+    "playbooks/supplemental/ollama-getting-started/README.md": {
+      "source_sha256": "5cb90cfa647fafa9f99ad8b659211c2e1806cd11f9fff3ceb351b56a90e6f227",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'enosmerno'/'večsmerni' slightly awkward for single-turn/multi-turn; 'hitreje' should be 'hitreje' (correct); untranslated GitHub-only block; 'sistemske vrstice' for system tray is acceptable b"
+    },
+    "playbooks/supplemental/ollama-getting-started/playbook.json": {
+      "source_sha256": "642990e3570bb0888cd87c78e2c61d19eea1864677052a0f04d7aa2a7c0f5414",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Minor: 'z Ollama' could be 'z Ollamo' for proper Slovenian declension; 'REST API-ja' slightly awkward but acceptable."
+    },
+    "playbooks/supplemental/cvml/README.md": {
+      "source_sha256": "a238f52921afd44cf45727cfafb0f4d99ceeb97b18b1c785362c8938554f6004",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'natančni' typo (should be 'natančen'), untranslated GitHub callout block, some anchor links kept in English may not resolve."
+    },
+    "playbooks/supplemental/cvml/playbook.json": {
+      "source_sha256": "53796041ee0532656e093dbb4bbac2c3bddbf15e76f7646824fa6360f1232a8c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'Computer Vision' translated as 'računalniški vid' instead of the more standard 'računalniški vid' or 'strojni vid'; 'on top of' slightly loosely rendered as 'na osnovi'."
+    },
+    "playbooks/supplemental/gaia-agents/README.md": {
+      "source_sha256": "feb74d6ee2839ece7d3918fb2910e2b7cf09cfdde6191742b776c521910f960a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 91,
+      "quality_issues": "Minor: 'obiščite' should be 'obiščite'→'obiščite' is acceptable but 'obiščite' is uncommon (better: 'obiščite'); 'pasico' for 'banner' is unusual; some English strings left untranslated by design."
+    },
+    "playbooks/supplemental/gaia-agents/platform.md": {
+      "source_sha256": "0aa409f73352dbe5489bcbff783403a39bd4049ae44238f8ce107165f02cf43c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 93,
+      "quality_issues": "Minor: 'playbook' translated as 'priročnik' (handbook) rather than a more precise term; otherwise excellent."
+    },
+    "playbooks/supplemental/gaia-agents/playbook.json": {
+      "source_sha256": "e835f7da0097042741c5558f5fc14a57f25b24f807ef5c277ee6cf9793212ed9",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 93,
+      "quality_issues": "Minor: 'AI agent' could be 'agenta AI' for grammatical agreement; otherwise accurate and fluent."
+    },
+    "playbooks/supplemental/lemonade-getting-started/README.md": {
+      "source_sha256": "b3613af14dd94ab44888f2d3013af6b10e1685c5e4915765507065117303be9a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Minor typos: 'obiščite' should be 'obiščite'→'obiščite' is nonstandard (should be 'obiščite' or 'obiščite'), 'natančnim' → 'natančnim' (should be 'natančnim'→'natančnim' is acceptable but 'ukvarjale' "
+    },
+    "playbooks/supplemental/lemonade-getting-started/platform.md": {
+      "source_sha256": "091ccd8efa90e078a5d740aac0e40d742ad91f5898d0de9e1574d62e6778ec17",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "\"series\" left untranslated in hardware table; minor but consistent."
+    },
+    "playbooks/supplemental/lemonade-getting-started/playbook.json": {
+      "source_sha256": "444b1e3ddf1a59c5357878cb7e88b0db243e7c9a9d544095a2b8bdd3b8ba648a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Excellent translation. 'Gen AI' expanded naturally. Minor: 'Začetek dela' could also be 'Kako začeti'."
+    },
+    "playbooks/supplemental/open-webui-chat/README.md": {
+      "source_sha256": "b257e5d4c3accfd50265d7b75ea8258159b037cbbe57dcc9241bad746554c929",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Minor typos: 'najmanj' → 'najmanj', 'obiščete' → 'obiščite', 'hkrati' → 'hkrati', 'sporočilo' → 'sporočilo'; 'ga ne vpliva' awkward phrasing; untranslated prompt in Activity 2."
+    },
+    "playbooks/supplemental/open-webui-chat/platform.md": {
+      "source_sha256": "1cc71fc518a4ba7e507047973d835456dc836155b3365f0e7fb64ed1f81d85cb",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 93,
+      "quality_issues": "Minor: 'od tukaj' should be 'od tu' or 'tukaj'; 'na Windowsih' slightly informal; category names Vision/Image/Audio left untranslated (acceptable)."
+    },
+    "playbooks/supplemental/open-webui-chat/playbook.json": {
+      "source_sha256": "b7c488fe64673b9b617a974c4b360661b6afe299f3410c1120db34a6e794a0fd",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 92,
+      "quality_issues": "Minor word order: 'lokalno' at end sounds slightly unnatural; 'lokalni klepet z LLM-ji' might flow better."
+    },
+    "playbooks/supplemental/openclaw-lemonade-server/README.md": {
+      "source_sha256": "3870cbf9cdec77fbb11f99c2751de2826fce765a431d52a853a9c034727e7225",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor typos: 'natančen' should be 'natančen→natanken'; 'pri čemer' should be 'pri čemer→pri čemer' is acceptable but slightly awkward; overall excellent fluency and accuracy."
+    },
+    "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
+      "source_sha256": "99df141310754dea218b61260f021d4fd7aec64a922654db64ed473b877e6351",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Minor fluency: 'OpenClaw AI' word order slightly unnatural; could be 'AI agenta OpenClaw'. Otherwise accurate and clear."
+    },
+    "playbooks/supplemental/pytorch-finetuning/README.md": {
+      "source_sha256": "bc2cba716bb866957cf930a234b9080bd64c863a18e6f77f7e98c3f51f0868fc",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 85,
+      "quality_issues": "Several typos: 'bistveno' (should be 'bistveno'→'bistveno' is wrong, correct: 'bistveno'→'bistveno'), 'hkrati'→'hkrati' (missing 'o': 'hkrati'→'hkrati'), 'natančnosti'→'natančnosti' (should be 'natanč"
+    },
+    "playbooks/supplemental/pytorch-finetuning/playbook.json": {
+      "source_sha256": "34841c22920fdf111d2a7ab0b640af96555cc1aa0376103acf8ea62e336609af",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 78,
+      "quality_issues": "\"Fino nastavljanje\" is a calque; \"natančno prilagajanje\" or similar would be more natural. Inconsistent LLM/LLM-jev usage."
+    },
+    "playbooks/supplemental/pytorch-kernels/platform.md": {
+      "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 93,
+      "quality_issues": "Minor: 'delovnim obremenilom' is awkward for 'workload' (better: 'delovno obremenitvijo'); 'playbook' as 'priročnik' is acceptable but slightly imprecise."
+    },
+    "playbooks/supplemental/pytorch-kernels/playbook.json": {
+      "source_sha256": "30272b772a010c694249bc9a4f83fe9676ee2fa98cf3ec96dbca4f3be4ae3916",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 72,
+      "quality_issues": "Inconsistent terminology: 'jeder' (title) vs 'jedrnike' (subtitle) for 'kernels'. 'Jedrnike' is non-standard; 'jedra' is preferred throughout."
+    },
+    "playbooks/supplemental/speech2speech-translation/README.md": {
+      "source_sha256": "c6e008753ea3a6442c32774e44345e39fd5b5b64534fcb837541f2220c66d1fd",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'obiščite' should be 'obiščite'→'obiščite' is acceptable but 'prevzorči' would be better than 'vzorči'; 'njena predprocesiranje' gender mismatch; 'desetinami' should be 'desetinami jezikov' is "
+    },
+    "playbooks/supplemental/speech2speech-translation/platform.md": {
+      "source_sha256": "ac5b39917b7a533154f6a0f823949356905a766e067a7efcd000d63584cb36a3",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "\"2,3 milijarde\" expands original \"2.3B\" unnecessarily; minor stylistic nits only."
+    },
+    "playbooks/supplemental/speech2speech-translation/playbook.json": {
+      "source_sha256": "48eb7b7b031b9e676748a482854cf10fb41555109fa05ec9a06a8992baf282cf",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Good translation. 'Zgradite' is slightly unusual for 'Build' in this context; 'Postavite' or 'Ustvarite' might be more natural."
+    },
+    "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
+      "source_sha256": "a2ee5a621944612fd1d5ac526c6b844f0f528a0c696c178ac8f85f170ab7467c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor typo 'pri čemer' should be 'pri čemer→čemer' (correct: 'pri čemer' is acceptable but 'bistveno' should be 'bistveno→bistveno' is actually wrong, should be 'bistveno→znatno/občutno'). 'bistveno' "
+    },
+    "playbooks/supplemental/unsloth-llms-finetuning/platform.md": {
+      "source_sha256": "45dc9cd1642f32761ed88326b25e7df018482c93832b386c31464522eb62066b",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 93,
+      "quality_issues": "Typo: 'imenik' should be 'imenik' → 'imenik predpomnilnika'. Minor: 'prostega prostora' is slightly redundant but acceptable."
+    },
+    "playbooks/supplemental/unsloth-llms-finetuning/playbook.json": {
+      "source_sha256": "3204669893381cf35615253a77a5fab815e3d2e3cc61269de7441781b2a6aebc",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 82,
+      "quality_issues": "\"Fino nastavljanje\" is a calque; more natural would be \"Natančno prilagajanje\". Trademark symbol preserved. Brand name Unsloth correctly kept."
+    },
+    "playbooks/supplemental/vllm-inference/README.md": {
+      "source_sha256": "24dc5ebde274af75275e075ca2423138e0d67d3de03f1cebbee30fb9ac5940f4",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'obiščite' should be 'obiščite'→'obiščite' is acceptable but slightly unusual; 'paketnim obdelovalanjem' is awkward for 'batching'; code comments left in English (acceptable). Overall very good"
+    },
+    "playbooks/supplemental/vllm-inference/playbook.json": {
+      "source_sha256": "0db881869b8d489317f0445edf4b420f738173b9c82c6488074e8948f7d6351c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 72,
+      "quality_issues": "\"vsebnikovim\" is awkward/incorrect; should be \"kontejneriziranim\". \"sklepanje\" is acceptable but \"strežbo\" is slightly unnatural for \"serving\"."
+    },
+    "playbooks/supplemental/pytorch-kernels/README.md": {
+      "source_sha256": "ef647656230fb6a512ac0b98b573e61f729e4c14de2bdcd4b33a1c733c1a9e2c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 92,
+      "quality_issues": "Minor fluency nits: 'hkrati' should be 'hkrati/sočasno' used inconsistently; 'orodijsko verigo' slightly awkward; 'Vdelavi' for 'Embeddings' is uncommon."
+    }
+  }
+}

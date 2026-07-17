@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-rocm-llms",
+  "title": "Spouštění LLM na PyTorch s AMD ROCm™ Software",
+  "description": "Naučte se spouštět výkonné jazykové modely na svém PC pomocí PyTorch a softwaru AMD ROCm™ pro rychlé a snadné shrnutí dokumentů."
+}

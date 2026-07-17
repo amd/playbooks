@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-kernels",
+  "title": "Gradnja prilagojenih GPU jeder s PyTorch in AMD ROCm™",
+  "description": "Pišite in optimizirajte prilagojene GPU jedrnike z uporabo PyTorch in programske opreme AMD ROCm™"
+}

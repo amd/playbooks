@@ -1,0 +1,5 @@
+{
+  "id": "vllm-inference",
+  "title": "תחילת העבודה עם vLLM",
+  "description": "למד כיצד להריץ הסקה והגשה באמצעות vLLM במכולה על ה-iGPU המשולב"
+}

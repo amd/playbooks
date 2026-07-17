@@ -1,0 +1,5 @@
+{
+  "id": "ollama-getting-started",
+  "title": "開始使用 Ollama",
+  "description": "安裝 Ollama 並在本機執行 LLM — 透過終端機、桌面應用程式或 REST API 進行對話。"
+}

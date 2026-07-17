@@ -1,0 +1,30 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+# การกำหนดค่าแพลตฟอร์ม
+
+เอกสารนี้อธิบายการกำหนดค่าแพลตฟอร์มที่คาดหวังสำหรับการรัน playbook นี้
+
+## แอปพลิเคชัน/เฟรมเวิร์กที่จำเป็น
+### Windows/Linux
+
+ควรติดตั้ง ComfyUI ล่วงหน้าโดยใช้คำแนะนำที่ให้ไว้ใน[คู่มือการติดตั้ง ComfyUI](../../dependencies/comfyui.md)
+
+## โมเดลที่จำเป็น
+
+### Windows/Linux
+
+โมเดลต่อไปนี้จะต้องมีอยู่ในไดเรกทอรีที่ติดตั้ง ComfyUI ภายในโฟลเดอร์ `models`
+
+| ประเภทโมเดล | ชื่อไฟล์ | ขนาด | ตำแหน่ง | ดาวน์โหลด |
+|------------|----------|------|----------|----------|
+| Text Encoder | `qwen_3_4b.safetensors` | 7.49 GB | `models/text_encoders/` | [ลิงก์](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors) |
+| LoRA | `pixel_art_style_z_image_turbo.safetensors` | 162.25 MB | `models/loras/` | [ลิงก์](https://huggingface.co/tarn59/pixel_art_style_lora_z_image_turbo/resolve/main/pixel_art_style_z_image_turbo.safetensors) |
+| Diffusion Model | `z_image_turbo_bf16.safetensors` | 11.46 GB | `models/diffusion_models/` | [ลิงก์](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors) |
+| VAE | `ae.safetensors` | 319.77 MB | `models/vae/` | [ลิงก์](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors) |
+
+
+เพื่อทดสอบว่าโมเดลถูกวางไว้อย่างถูกต้องหรือไม่ [ให้ดูตัวอย่าง ComfyUI playbook ผ่านเว็บไซต์ onboarding](../../README.md#previewing-the-playbooks) และทำตามคำแนะนำ โมเดลถูกวางไว้อย่างถูกต้องหากไม่มีหน้า "Models not found" ปรากฏขึ้นเมื่อเปิดใช้งานเทมเพลต Z-Image Turbo

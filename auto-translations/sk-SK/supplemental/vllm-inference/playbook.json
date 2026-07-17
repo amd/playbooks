@@ -1,0 +1,5 @@
+{
+  "id": "vllm-inference",
+  "title": "Začíname s vLLM",
+  "description": "Naučte sa, ako spustiť inferenciu a obsluhu pomocou kontajnerizovaného vLLM na integrovanom GPU"
+}

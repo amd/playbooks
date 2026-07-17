@@ -1,0 +1,5 @@
+{
+  "id": "vscode-qwen3-coder",
+  "title": "VS CodeとQwen3-Coderを使ったローカルLLMコーディング",
+  "description": "ローカルで実行中の Qwen3-Coder と VS Code を使用して、プライベートなコード支援を行います。"
+}

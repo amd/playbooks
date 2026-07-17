@@ -1,0 +1,5 @@
+{
+  "id": "unsloth-llms-finetuning",
+  "title": "Doladění LLM pomocí Unsloth",
+  "description": "Použijte Unsloth pro paměťově efektivní doladění LLM™"
+}

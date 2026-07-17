@@ -1,0 +1,5 @@
+{
+  "id": "llama-factory-finetuning",
+  "title": "Ajuste fino de LLMs con LLaMA-Factory",
+  "description": "Ajusta finamente modelos de lenguaje grandes (LLMs) usando LLaMA-Factory y técnicas de LoRA."
+}

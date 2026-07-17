@@ -1,0 +1,5 @@
+{
+  "id": "vllm-inference",
+  "title": "vLLM を使い始める",
+  "description": "コンテナ化された vLLM を使用して iGPU 上で推論とサービングを実行する方法を学ぶ"
+}

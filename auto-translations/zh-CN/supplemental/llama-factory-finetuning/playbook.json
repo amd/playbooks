@@ -1,0 +1,5 @@
+{
+  "id": "llama-factory-finetuning",
+  "title": "使用 LLaMA-Factory 微调 LLM",
+  "description": "使用 LLaMA-Factory 和 LoRA 技术对大型语言模型（LLM）进行微调。"
+}

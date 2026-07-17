@@ -1,0 +1,5 @@
+{
+  "id": "openclaw-lemonade-server",
+  "title": "Запуск OpenClaw локально за допомогою Lemonade Server",
+  "description": "Встановіть та налаштуйте автономний агент ШІ OpenClaw з Lemonade Server."
+}

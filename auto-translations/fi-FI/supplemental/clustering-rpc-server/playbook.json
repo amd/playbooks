@@ -1,0 +1,5 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "Kahden Ryzen™ AI Halon klusterointi RPC:llä",
+  "description": "Asenna hajautettu päättely käyttämällä RPC-palvelinta kahden Ryzen™ AI Halo -laitteen välillä llama.cpp:n avulla 350B+ mallien ajamiseen"
+}

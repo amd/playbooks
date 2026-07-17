@@ -1,0 +1,5 @@
+{
+  "id": "vscode-qwen3-coder",
+  "title": "การเขียนโค้ดด้วย LLM ในเครื่องโดยใช้ VS Code และ Qwen3-Coder",
+  "description": "ใช้ VS Code ร่วมกับ Qwen3-Coder ที่รันในเครื่องเพื่อช่วยเขียนโค้ดแบบส่วนตัว"
+}

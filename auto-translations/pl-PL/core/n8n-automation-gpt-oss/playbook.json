@@ -1,0 +1,5 @@
+{
+  "id": "n8n-automation-gpt-oss",
+  "title": "Automatyzacja przepływów pracy z n8n i lokalnymi LLM",
+  "description": "Zbuduj oparty na AI agregator wiadomości z podsumowaniami, używając n8n i Lemonade."
+}

@@ -1,0 +1,5 @@
+{
+  "id": "clustering-rccl",
+  "title": "การจัดกลุ่ม Ryzen AI Halo สองตัวด้วย RCCL",
+  "description": "ตั้งค่าคลัสเตอร์หลายโหนดโดยใช้อุปกรณ์ Ryzen™ AI Halo สองเครื่องพร้อม RCCL สำหรับงานแบบกระจาย"
+}

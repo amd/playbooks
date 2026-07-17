@@ -1,0 +1,5 @@
+{
+  "id": "llama-factory-finetuning",
+  "title": "Fino nastavljanje LLM-jev z LLaMA-Factory",
+  "description": "Fino-nastavljajte velike jezikovne modele (LLM) z uporabo LLaMA-Factory in tehnik LoRA."
+}

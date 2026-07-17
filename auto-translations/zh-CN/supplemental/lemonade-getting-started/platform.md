@@ -1,0 +1,41 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+# 平台配置 — Lemonade 本地 AI
+
+本文档描述了本手册所假定的预安装软件、模型路径及平台特定的前提条件。
+
+## 预安装软件
+
+| 软件 | 版本 | 用途 |
+|----------|---------|---------|
+| Lemonade Server | 最新版本 | 具有 OpenAI 兼容 API 的本地 LLM 服务器 |
+| Python | 3.10–3.13 | OpenAI Python 客户端示例所需 |
+
+## 默认模型存储路径
+
+通过 Lemonade 下载的模型按照 Hugging Face Hub 规范进行存储：
+
+| 平台 | 默认路径 |
+|----------|-------------|
+| Windows | `%USERPROFILE%\.cache\huggingface\hub\` |
+| Linux | `~/.cache/huggingface/hub/` |
+
+如需更改存储位置，请设置 `HF_HOME` 环境变量。
+
+## 硬件要求
+
+| 硬件目标 | 要求 |
+|----------------|-------------|
+| **CPU** | 任何现代 x86-64 处理器（AMD 或 Intel） |
+| **GPU (Vulkan)** | 任何支持 Vulkan 驱动的 GPU |
+| **GPU (ROCm)** | AMD Radeon RX 7000/9000 系列或 Radeon PRO W7000 系列；AMD Ryzen AI MAX+ Pro 395 |
+| **NPU** | AMD Ryzen AI 300 系列处理器，Windows 11 |
+
+## 网络要求
+
+- 首次下载模型需要互联网连接（根据模型大小，需 1–25 GB 不等）
+- 模型下载完成后无需互联网连接

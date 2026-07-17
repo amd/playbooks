@@ -1,0 +1,5 @@
+{
+  "id": "llama-factory-finetuning",
+  "title": "LLM-mallien hienosäätö LLaMA-Factoryn avulla",
+  "description": "Hienosäädä suuria kielimalleja (LLM) käyttämällä LLaMA-Factory- ja LoRA-tekniikoita."
+}

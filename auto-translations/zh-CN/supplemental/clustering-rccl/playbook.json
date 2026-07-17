@@ -1,0 +1,5 @@
+{
+  "id": "clustering-rccl",
+  "title": "集群两个 Ryzen™ AI Halo 与 RCCL",
+  "description": "使用两台 Ryzen™ AI Halo 设备通过 RCCL 搭建多节点集群以支持分布式工作负载"
+}

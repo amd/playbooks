@@ -1,0 +1,5 @@
+{
+  "id": "amd-sync",
+  "title": "פיתוח מרחוק עם AMD Sync",
+  "description": "התקן את AMD Sync על המחשב הנייד שלך וקבל גישה בלחיצה אחת ל-VS Code מרוחק, Terminal, JupyterLab ומדדים חיים על ה-AMD Ryzen™ AI Halo שלך."
+}

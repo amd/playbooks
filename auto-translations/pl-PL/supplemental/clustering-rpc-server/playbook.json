@@ -1,0 +1,5 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "Klastrowanie dwóch Ryzen™ AI Halo z RPC",
+  "description": "Skonfiguruj rozproszone wnioskowanie przy użyciu serwera RPC na dwóch urządzeniach Ryzen™ AI Halo z llama.cpp, aby uruchamiać modele 350B+"
+}

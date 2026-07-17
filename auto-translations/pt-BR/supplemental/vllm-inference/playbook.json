@@ -1,0 +1,5 @@
+{
+  "id": "vllm-inference",
+  "title": "Introdução ao vLLM",
+  "description": "Aprenda como executar inferência e serviço usando vLLM em contêiner na GPU integrada"
+}

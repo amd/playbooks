@@ -1,0 +1,5 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "2つのRyzen™ AI HaloをRPCでクラスタリングする",
+  "description": "RPC サーバーを使用して 2 台の Ryzen™ AI Halo デバイス間で分散推論をセットアップし、llama.cpp で 350B 以上のモデルを実行する"
+}

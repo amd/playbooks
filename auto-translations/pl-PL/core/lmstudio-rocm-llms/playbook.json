@@ -1,0 +1,5 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Uruchamianie i obsługiwanie LLM za pomocą LM Studio",
+  "description": "Skonfiguruj LM Studio i LM Studio Server, aby lokalnie uruchamiać i udostępniać duże modele językowe."
+}

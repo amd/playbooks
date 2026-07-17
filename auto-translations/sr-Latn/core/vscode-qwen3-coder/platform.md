@@ -1,0 +1,41 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+# Konfiguracija platforme
+
+Ovaj dokument opisuje očekivane konfiguracije platforme za pokretanje ovog priručnika.
+
+## Windows
+
+### Instalacija LM Studio
+
+LM Studio treba biti unapred instaliran:
+
+| Komponenta | Verzija | Lokacija |
+|-----------|---------|----------|
+| **LM Studio (Modeli + Razno)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Keš)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+
+### Preuzimanje modela
+
+Sledeći modeli već treba da budu prisutni u direktorijumu modela LM Studio (`C:\Users\...\.lmstudio\models`):
+
+| Tip modela | Kvantizacija | Veličina | Lokacija |
+|------------|--------------|------|----------|
+| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
+
+---
+
+## Linux
+
+### Instalacija LM Studio
+
+Pogledajte lmstudio.md (unutar fascikle sa zavisnostima) za više detalja.
+
+### Preuzimanje modela
+
+Isto kao na Windows-u.

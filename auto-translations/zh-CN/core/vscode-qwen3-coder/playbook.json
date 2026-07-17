@@ -1,0 +1,5 @@
+{
+  "id": "vscode-qwen3-coder",
+  "title": "使用 VSCode 和 Qwen3-Coder 进行本地 LLM 编程",
+  "description": "使用 VS Code 配合本地运行的 Qwen3-Coder 实现私密代码辅助。"
+}

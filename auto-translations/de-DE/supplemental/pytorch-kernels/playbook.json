@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-kernels",
+  "title": "Benutzerdefinierte GPU-Kernel mit PyTorch und AMD ROCm™ erstellen",
+  "description": "Benutzerdefinierte GPU-Kernel mit PyTorch und AMD ROCm™-Software schreiben und optimieren"
+}

@@ -1,0 +1,5 @@
+{
+  "id": "unsloth-llms-finetuning",
+  "title": "Finjustering af LLM'er med Unsloth",
+  "description": "Brug Unsloth til hukommelseseffektiv finjustering af LLMs™"
+}

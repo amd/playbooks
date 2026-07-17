@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "Βελτιστοποίηση LLM με PyTorch και AMD ROCm™ Software",
+  "description": "Βελτιστοποιήστε μεγάλα γλωσσικά μοντέλα (LLMs) χρησιμοποιώντας PyTorch και ROCm."
+}

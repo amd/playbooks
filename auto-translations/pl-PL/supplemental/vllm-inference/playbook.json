@@ -1,0 +1,5 @@
+{
+  "id": "vllm-inference",
+  "title": "Pierwsze kroki z vLLM",
+  "description": "Dowiedz się, jak uruchamiać wnioskowanie i obsługę przy użyciu skonteneryzowanego vLLM na zintegrowanym GPU"
+}

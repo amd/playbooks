@@ -1,0 +1,42 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+# Platform Configuration
+
+이 문서는 이 플레이북을 실행하기 위한 예상 플랫폼 구성을 설명합니다.
+
+## Windows
+
+### LM Studio 설치
+
+LM Studio가 사전 설치되어 있어야 합니다:
+
+| 구성 요소 | 버전 | 위치 |
+|-----------|---------|----------|
+| **LM Studio (모델 + 기타)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (프로그램)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (캐시)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+
+### 모델 다운로드
+
+다음 모델들이 LM Studio 모델 디렉터리(`C:\Users\...\.lmstudio\models`)에 이미 존재해야 합니다:
+
+| 디바이스 | 모델 유형 | 양자화 | 크기 (GB) | 위치 |
+| ----- |------------|--------------|------|----------|
+| AMD Ryzen™ AI Halo Developer Platform <br> AMD Ryzen™ AI Max+ | OpenAI GPT-OSS 120B | `MXFP4` | 63.39 | `models\ggml-org` |
+| AMD Ryzen™ AI 300 HX <br> AMD Ryzen™ AI 300 <br> AMD Radeon™ 7000 Series Graphics <br> AMD Radeon™ 9000 Series Graphics | Qwen3.5 9B | `Q4_K_M` | 6.55 | `models\lmstudio-community` |
+
+---
+
+## Linux
+
+### LM Studio 설치
+
+자세한 내용은 [lmstudio.md](../../dependencies/lmstudio.md)를 참조하십시오.
+
+### 모델 다운로드
+
+Windows와 동일합니다.

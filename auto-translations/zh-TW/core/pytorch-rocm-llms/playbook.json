@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-rocm-llms",
+  "title": "在 AMD ROCm™ 軟體上使用 PyTorch 執行 LLM",
+  "description": "學習如何在您的 PC 上使用 PyTorch 和 AMD ROCm™ 軟體執行強大的語言模型，以快速輕鬆地摘要文件。"
+}

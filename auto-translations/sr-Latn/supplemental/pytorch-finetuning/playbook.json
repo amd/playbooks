@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "Fino podešavanje LLM-ova pomoću PyTorch i AMD ROCm™ softvera",
+  "description": "Fino podešavanje velikih jezičkih modela (LLM) korišćenjem PyTorch i ROCm."
+}

@@ -1,0 +1,5 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "LLMs mit LM Studio ausführen und bereitstellen",
+  "description": "Richten Sie LM Studio und LM Studio Server ein, um große Sprachmodelle lokal auszuführen und bereitzustellen."
+}

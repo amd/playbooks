@@ -1,0 +1,5 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Zaganjanje in strežba LLM-jev z LM Studio",
+  "description": "Nastavite LM Studio in LM Studio Server za lokalno zaganjanje in strežbo velikih jezikovnih modelov."
+}

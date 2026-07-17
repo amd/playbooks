@@ -1,0 +1,5 @@
+{
+  "id": "unsloth-llms-finetuning",
+  "title": "Тонке налаштування LLM за допомогою Unsloth",
+  "description": "Використовуйте Unsloth для пам'яттєво-ефективного дообучення LLMs™"
+}

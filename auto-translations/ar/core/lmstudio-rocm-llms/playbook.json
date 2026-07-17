@@ -1,0 +1,5 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "تشغيل وخدمة نماذج اللغة الكبيرة باستخدام LM Studio",
+  "description": "قم بإعداد LM Studio وخادم LM Studio لتشغيل نماذج اللغة الكبيرة وتقديمها محليًا."
+}

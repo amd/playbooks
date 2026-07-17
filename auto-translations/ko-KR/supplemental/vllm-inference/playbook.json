@@ -1,0 +1,5 @@
+{
+  "id": "vllm-inference",
+  "title": "vLLM 시작하기",
+  "description": "통합 GPU에서 컨테이너화된 vLLM을 사용하여 추론 및 서빙을 실행하는 방법 알아보기"
+}

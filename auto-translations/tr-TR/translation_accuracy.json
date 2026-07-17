@@ -1,0 +1,549 @@
+{
+  "locale": "tr-TR",
+  "files": {
+    "playbooks/core/comfyui-image-gen/README.md": {
+      "source_sha256": "5f3da10f7fae3dc68416413efd91668449de4a5796ccf600a591bb1621817f18",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'deneyimlemeden' should be 'deneyden/denemeden'; 'prompt' translated inconsistently as 'istem/komut'."
+    },
+    "playbooks/core/comfyui-image-gen/platform.md": {
+      "source_sha256": "e8a6884590d062f17595a57f2aadf5abe686c3169f53f3181544259336435c47",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "H1 'Platform Configuration' left untranslated; 'onboarding website' rendered as 'katılım web sitesi' (imprecise); decimal separators correctly localized."
+    },
+    "playbooks/core/comfyui-image-gen/playbook.json": {
+      "source_sha256": "7fbbe78699fe6dbb9f4812e99b949d9c7daa2f88f52ee0f87cbb4641d0f5baae",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'AI-generated' translated as 'yapay zeka destekli' (AI-supported) rather than 'yapay zeka ile oluşturulmuş' (AI-generated)."
+    },
+    "playbooks/dependencies/comfyui.md": {
+      "source_sha256": "1364f858fb8176db125d258fd392b33e0c2ec1d9f50983f5648926384717a436",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 97,
+      "quality_issues": "Near-flawless translation; all code, URLs, brand names intact. Minor stylistic nit only."
+    },
+    "playbooks/dependencies/comfyui_models.md": {
+      "source_sha256": "8cb46545df5efaaae1521a92e385e95f3dcdabdbdd3a8ddce9c94a0e0680a9b5",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 96,
+      "quality_issues": "Near flawless. Minor: 'Download' button label left untranslated, which is acceptable for UI elements."
+    },
+    "playbooks/dependencies/driver.md": {
+      "source_sha256": "bdde05c0805a03d019eedad5bd7dc53a862c6b1f5ffeee6743fdfb73ef39de73",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 90,
+      "quality_issues": "UI strings like 'Driver and Software' and 'Manage Updates' left untranslated, which is acceptable for software labels but inconsistent with translating other terms."
+    },
+    "playbooks/dependencies/gaia.md": {
+      "source_sha256": "4837a0e4fd45ede7efc3d903c1bb65484d0805c6e45657d2b097b23c063bb935",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 96,
+      "quality_issues": "Near-flawless. All code, URLs, brand names intact. Minor: 'Initializing' → 'Başlatma' is acceptable but slightly less precise than 'Başlatılması'."
+    },
+    "playbooks/dependencies/lemonade.md": {
+      "source_sha256": "428d83bf7ddb03e55ae4c09580554a56ff49d91b924eba6758bb9f106eb7b46a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 96,
+      "quality_issues": "Near-flawless translation; minor nit: 'bayrakları' for 'flags' is acceptable but 'seçenekleri' could also work."
+    },
+    "playbooks/dependencies/lmstudio.md": {
+      "source_sha256": "7bf63eab985e835155ecc012bee6c157069e27bc9030a3a975ef0652fe0b5443",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: UI terms like 'Updates', 'Settings > General > Models Directory' left untranslated, but this is acceptable for software UI references."
+    },
+    "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
+      "source_sha256": "e33b569398da8f57d5da1bbd94f0c0e005ee7a4c206a577236f785cba3865fcd",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "\"Discover\" tab name left untranslated, which is acceptable but inconsistent with translating \"Download\" as \"İndir\"."
+    },
+    "playbooks/dependencies/lmstudio_models_qwen3_9b.md": {
+      "source_sha256": "51c02b376e3faea175b98d9d6586c91a9524c83348cedf4bd76323499a3d486e",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'Discover' tab name left untranslated (acceptable for UI reference); 'Download' button translated inconsistently as 'İndir'."
+    },
+    "playbooks/dependencies/memoryconfig.md": {
+      "source_sha256": "45f82fd83ae2477a8f1afaebee688689addef39939bb0597c8f1cfb83591473f",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: '64GB' rendered as '64 GB' (spacing inconsistency with source). Overall excellent, accurate, fluent translation."
+    },
+    "playbooks/dependencies/n8n.md": {
+      "source_sha256": "921441b6697d8ab93bbbc5a9bb71d737f616df42dd40a39b063af61e5aa5c6fa",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 96,
+      "quality_issues": "Minor: 'global olarak' could be 'genel olarak' but acceptable; overall excellent translation."
+    },
+    "playbooks/dependencies/nodejs.md": {
+      "source_sha256": "9df41526a5c8035b380150c56be8f29cad65da0286a8ee16fe0a49426436939b",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Code block comments left untranslated in bash section; minor inconsistency with translating some UI text but not inline code comments."
+    },
+    "playbooks/dependencies/podman.md": {
+      "source_sha256": "4e8c2edd4b805a8395f03ddc6b7ff096e6352a7c404616b59a05edc257f0bccd",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'görüntüleri' could be 'imajları' for container terminology consistency."
+    },
+    "playbooks/dependencies/pytorch.md": {
+      "source_sha256": "ba5ed9d425c6685dd285c639438efc74c1e8d9d561442bad6412b9adc8164d82",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor bold formatting split differs from source; otherwise accurate and fluent."
+    },
+    "playbooks/dependencies/rocm.md": {
+      "source_sha256": "af961dbef80b407b98ee05fd0e5f816418bf097d384460ca5a57e7844bf38813",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 97,
+      "quality_issues": "Near-flawless. Minor: 'ROCm'u' apostrophe usage is acceptable but could also be 'ROCm'yi'."
+    },
+    "playbooks/dependencies/softwareupdate.md": {
+      "source_sha256": "2d5cb11ce696297d74dfbb9d140b765dc64add55f1bdcbdd27fb3498ca3871f5",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'reboot' translated as 'yeniden başlatın' (restart) instead of more precise 'yeniden başlatma yapın'; alt text left untranslated (acceptable for code)."
+    },
+    "playbooks/dependencies/vllm.md": {
+      "source_sha256": "8876f624743d3b843409b5cd523a262e60ba53539710bf26c00d80a88153391e",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'konteyner imajı' could be 'konteyner görüntüsü'; overall excellent translation."
+    },
+    "playbooks/dependencies/vscode.md": {
+      "source_sha256": "09b668411f70fb8781a2d0d7c7e4417250e610839d0f6213d5f2ff846ceda8f2",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: UI tab names 'Updates' and 'Manage' left untranslated, though this may be intentional for brand consistency."
+    },
+    "playbooks/core/lmstudio-rocm-llms/README.md": {
+      "source_sha256": "f0c7074a75cf11c9c9bb8b3508a87f66c8c08fa3e96832ece9f55e7dc5f85b91",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'Cache Quantizations' translated as 'Önbellek Nicemleme' (slightly unusual term); 'VSCode' changed to 'VS Code' inconsistently with source."
+    },
+    "playbooks/core/lmstudio-rocm-llms/platform.md": {
+      "source_sha256": "f731064c13c2ca273ea6bbc804e0b3309a1f4d385e3b58b35575f5e8430a3b86",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 93,
+      "quality_issues": "H1 title 'Platform Configuration' left untranslated; 'Msc' translated as 'Çeşitli' is reasonable but slightly loose."
+    },
+    "playbooks/core/lmstudio-rocm-llms/playbook.json": {
+      "source_sha256": "43aa660e28f5698ceef07211ce4a2b2c197d5463917e8311049c6410a9bdbb57",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'kurun' could be 'ayarlayın' to better match 'Set up'"
+    },
+    "playbooks/core/n8n-automation-gpt-oss/README.md": {
+      "source_sha256": "19066843d638353adb3a11fe7f188f59a66c1f11eeaa7037af97a5c21308d4df",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: UI strings like 'Start from Scratch', 'Add workflow', 'Import from file' left untranslated (acceptable for software UI); 'system prompt' consistently rendered as 'sistem istemi' which is fine."
+    },
+    "playbooks/core/n8n-automation-gpt-oss/platform.md": {
+      "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 93,
+      "quality_issues": "Minor: 'Graphics' translated as 'Grafik' instead of 'Grafik Kartları'; 'latest' as 'en son' is acceptable but 'latest' could be kept; 'Developer Platform' consistently translated well."
+    },
+    "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
+      "source_sha256": "068a5d7d2996ca2c8b37535eddf9fe38ab421d56ee509a426d96835a96ab3f74",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 97,
+      "quality_issues": "Excellent translation, accurate and fluent. No errors detected."
+    },
+    "playbooks/core/pytorch-rocm-llms/README.md": {
+      "source_sha256": "a7f0693c43a5a31e55ffb32b5050099e5297ec77456daff75cf33edf91794d7a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: '@github-only' block left untranslated; bash comments in 'Usage Examples' not translated; 'playbook' inconsistently kept/translated."
+    },
+    "playbooks/core/pytorch-rocm-llms/platform.md": {
+      "source_sha256": "f10bd86c45555b65939b97bf0e599a75ce90d5ec18c61a68a98463d34c1e31d2",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'bulundurun' could be 'bulunduğundan emin olun' for closer match to 'Ensure'. Otherwise excellent."
+    },
+    "playbooks/core/pytorch-rocm-llms/playbook.json": {
+      "source_sha256": "e4aba2b4e1928b5162037673172f666cb991a500469e027743d01f3ee26955ef",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor structural shift: 'Learn to... to summarize' slightly reworded but accurate."
+    },
+    "playbooks/core/vscode-qwen3-coder/README.md": {
+      "source_sha256": "25da94f89aec651b737075b56e6c558256a645c2a44b96204163e9c87c857fae",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Source Resources section has incomplete sentence ('running workloads on'); translation completes it gracefully. Minor: some UI terms left untranslated inconsistently."
+    },
+    "playbooks/core/vscode-qwen3-coder/platform.md": {
+      "source_sha256": "14c7eec60b483e4bedb5e465673d89e07466088a9ed9c59d7964c3466cf89410",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 92,
+      "quality_issues": "Title 'Platform Configuration' left untranslated; 'Msc' translated as 'Çeşitli' is reasonable but debatable; decimal separator correctly localized to comma."
+    },
+    "playbooks/core/vscode-qwen3-coder/playbook.json": {
+      "source_sha256": "7ce988423e60b386afb4d619e4c1f54b387b839fe588261ab5aaf63e13dee220",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'VSCode' brand name changed to 'VS Code' in title, matching subtitle style but differing from source."
+    },
+    "playbooks/supplemental/amd-sync/README.md": {
+      "source_sha256": "ae7dafe9ebacacdff50f8cf23f8e03d49e1b648456a6b33fabaa84d4fc8c3c0e",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: some UI terms left untranslated (e.g., 'Remote', 'Device Name') but acceptable for software context; 'notebook' translated as 'not defteri' inconsistently."
+    },
+    "playbooks/supplemental/amd-sync/playbook.json": {
+      "source_sha256": "dd916e95fa31e2909a5ce0b7809b56adcc87c799638d3b136deadf1ec0bd4940",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: added 'erişimi' not in source; otherwise accurate and fluent."
+    },
+    "playbooks/supplemental/clustering-rccl/README.md": {
+      "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Anchor links not localized (e.g., #1-determine-network-interfaces instead of Turkish anchors), minor inconsistency in translating 'Auth' as 'Kimlik Doğrulama'."
+    },
+    "playbooks/supplemental/clustering-rccl/playbook.json": {
+      "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor stylistic choice: 'yapın' adds imperative not in source"
+    },
+    "playbooks/supplemental/clustering-rpc-server/README.md": {
+      "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Anchor links not localized (e.g. #downloading-the-model, #option-1-lemonade-sdk-recommended remain English); minor: 'nicemlendirilen' should be 'nicelleştirilmiş/kuantize edilmiş'"
+    },
+    "playbooks/supplemental/clustering-rpc-server/playbook.json": {
+      "source_sha256": "afee8d03bc9faa092036cbf4a62ec9db4252a49f25273438a7e4e5bbc2b4a10c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 92,
+      "quality_issues": "Minor fluency: 'kurulumu yaparak' is slightly awkward; 'kurun' or 'ayarlayın' would be more natural."
+    },
+    "playbooks/supplemental/ollama-getting-started/README.md": {
+      "source_sha256": "5cb90cfa647fafa9f99ad8b659211c2e1806cd11f9fff3ceb351b56a90e6f227",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'kayıt defteri' for 'registry' is slightly unusual in container context; all code, URLs, brand names intact."
+    },
+    "playbooks/supplemental/ollama-getting-started/playbook.json": {
+      "source_sha256": "642990e3570bb0888cd87c78e2c61d19eea1864677052a0f04d7aa2a7c0f5414",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 97,
+      "quality_issues": "Near-flawless translation; all terms and structure preserved."
+    },
+    "playbooks/supplemental/open-webui-chat/README.md": {
+      "source_sha256": "b257e5d4c3accfd50265d7b75ea8258159b037cbbe57dcc9241bad746554c929",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: some UI terms like 'Image Generation' left untranslated in step instructions; 'volume' translated as 'birim' inconsistently."
+    },
+    "playbooks/supplemental/open-webui-chat/platform.md": {
+      "source_sha256": "1cc71fc518a4ba7e507047973d835456dc836155b3365f0e7fb64ed1f81d85cb",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'playbook' left untranslated (acceptable); category names Vision/Image/Audio kept in English (correct). Very high quality overall."
+    },
+    "playbooks/supplemental/open-webui-chat/playbook.json": {
+      "source_sha256": "b7c488fe64673b9b617a974c4b360661b6afe299f3410c1120db34a6e794a0fd",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 97,
+      "quality_issues": "Near-flawless translation; minor stylistic choice on 'Sohbet Etme' vs 'Sohbet' but acceptable."
+    },
+    "playbooks/supplemental/cvml/README.md": {
+      "source_sha256": "a238f52921afd44cf45727cfafb0f4d99ceeb97b18b1c785362c8938554f6004",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'landmarks' translated as 'yer işaretleri' instead of domain-standard 'referans noktaları'; code comments left in English (acceptable but inconsistent)."
+    },
+    "playbooks/supplemental/cvml/playbook.json": {
+      "source_sha256": "53796041ee0532656e093dbb4bbac2c3bddbf15e76f7646824fa6360f1232a8c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "\"Computer Vision\" translated as \"Bilgisayarlı Görü\" is acceptable but \"Bilgisayar Görüsü\" is more standard. \"on top of\" slightly simplified to \"üzerinde\"."
+    },
+    "playbooks/supplemental/gaia-agents/README.md": {
+      "source_sha256": "feb74d6ee2839ece7d3918fb2910e2b7cf09cfdde6191742b776c521910f960a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: some English UI strings in expected output left untranslated (by design); 'oyun kitabı' for 'playbook' is acceptable but slightly unusual."
+    },
+    "playbooks/supplemental/gaia-agents/platform.md": {
+      "source_sha256": "0aa409f73352dbe5489bcbff783403a39bd4049ae44238f8ce107165f02cf43c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Excellent translation. Minor nit: 'playbook' left untranslated is acceptable but inconsistent with translating other terms."
+    },
+    "playbooks/supplemental/gaia-agents/playbook.json": {
+      "source_sha256": "e835f7da0097042741c5558f5fc14a57f25b24f807ef5c277ee6cf9793212ed9",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: '100% local' translated as 'Tamamen yerel' loses the numeric emphasis."
+    },
+    "playbooks/supplemental/lemonade-getting-started/platform.md": {
+      "source_sha256": "091ccd8efa90e078a5d740aac0e40d742ad91f5898d0de9e1574d62e6778ec17",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Title left untranslated; 'playbook' not translated or adapted."
+    },
+    "playbooks/supplemental/lemonade-getting-started/playbook.json": {
+      "source_sha256": "444b1e3ddf1a59c5357878cb7e88b0db243e7c9a9d544095a2b8bdd3b8ba648a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Slight awkwardness in sentence structure; 'bir yerel AI sunucusu ile' could be better linked to Lemonade as an appositive."
+    },
+    "playbooks/supplemental/llama-factory-finetuning/README.md": {
+      "source_sha256": "38f43810c9ea7c04ad70e180795d64b81ab9e45fd01413ecd26a1d4e7283bde1",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'LLaMA Factory' inconsistently rendered as 'LLaMA-Factory'; 'playbook' consistently translated as 'kılavuz' which is acceptable but loses nuance."
+    },
+    "playbooks/supplemental/llama-factory-finetuning/playbook.json": {
+      "source_sha256": "e8a8cd9cebcb66736e1cfb707fd792795defcb4f4facb6b80f722be826b2a89b",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "LLaMA-Factory should be LLaMA Factory (no hyphen). Minor inconsistency."
+    },
+    "playbooks/supplemental/openclaw-lemonade-server/README.md": {
+      "source_sha256": "3870cbf9cdec77fbb11f99c2751de2826fce765a431d52a853a9c034727e7225",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'etkileşimsiz ekleme işlemi' for 'non-interactive onboarding' is slightly awkward; 'nicemleme' for 'quantization' is correct but niche."
+    },
+    "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
+      "source_sha256": "99df141310754dea218b61260f021d4fd7aec64a922654db64ed473b877e6351",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'AI ajanı' could be 'yapay zeka ajanı' for full localization, but AI is acceptable."
+    },
+    "playbooks/supplemental/pytorch-finetuning/README.md": {
+      "source_sha256": "bc2cba716bb866957cf930a234b9080bd64c863a18e6f77f7e98c3f51f0868fc",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'Experiment' and 'Try' both translated as 'Deneyin' (items 2&4); code comments left in English (acceptable for technical docs)."
+    },
+    "playbooks/supplemental/pytorch-finetuning/playbook.json": {
+      "source_sha256": "34841c22920fdf111d2a7ab0b640af96555cc1aa0376103acf8ea62e336609af",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 97,
+      "quality_issues": "Near-flawless translation with correct terminology and brand preservation."
+    },
+    "playbooks/supplemental/pytorch-kernels/platform.md": {
+      "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 93,
+      "quality_issues": "Title 'Platform Configuration' left untranslated; 'walkthroughs' rendered as 'adım adım anlatımları' is acceptable but slightly loose; minor table alignment differences."
+    },
+    "playbooks/supplemental/pytorch-kernels/playbook.json": {
+      "source_sha256": "30272b772a010c694249bc9a4f83fe9676ee2fa98cf3ec96dbca4f3be4ae3916",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 88,
+      "quality_issues": "Inconsistent terminology: 'Kernel'ları' in title vs 'çekirdekleri' in subtitle for the same term 'kernels'."
+    },
+    "playbooks/supplemental/speech2speech-translation/platform.md": {
+      "source_sha256": "ac5b39917b7a533154f6a0f823949356905a766e067a7efcd000d63584cb36a3",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: '20GB' rendered as '20 GB' (added space); brand terms and code blocks intact; fluent and accurate overall."
+    },
+    "playbooks/supplemental/speech2speech-translation/playbook.json": {
+      "source_sha256": "48eb7b7b031b9e676748a482854cf10fb41555109fa05ec9a06a8992baf282cf",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 97,
+      "quality_issues": "Excellent translation, fully accurate and natural in Turkish."
+    },
+    "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
+      "source_sha256": "a2ee5a621944612fd1d5ac526c6b844f0f528a0c696c178ac8f85f170ab7467c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'Bilinen Uyarılar' anchor (#known-warnings) kept as English, matching source; 'playbook' left untranslated consistently; very minor stylistic nits only."
+    },
+    "playbooks/supplemental/unsloth-llms-finetuning/platform.md": {
+      "source_sha256": "45dc9cd1642f32761ed88326b25e7df018482c93832b386c31464522eb62066b",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: '20GB' rendered as '20 GB' (added space); overall excellent fluency, accuracy, and preservation of code/brand terms."
+    },
+    "playbooks/supplemental/unsloth-llms-finetuning/playbook.json": {
+      "source_sha256": "3204669893381cf35615253a77a5fab815e3d2e3cc61269de7441781b2a6aebc",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Very accurate translation. Minor stylistic note: 'Fine-Tuned LLMs' trademark kept intact."
+    },
+    "playbooks/supplemental/vllm-inference/README.md": {
+      "source_sha256": "24dc5ebde274af75275e075ca2423138e0d67d3de03f1cebbee30fb9ac5940f4",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Code comments left in English; minor stylistic choices but overall excellent, fluent, accurate translation."
+    },
+    "playbooks/supplemental/vllm-inference/playbook.json": {
+      "source_sha256": "0db881869b8d489317f0445edf4b420f738173b9c82c6488074e8948f7d6351c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'serving' translated as 'servis işlemleri' is acceptable but slightly expanded."
+    },
+    "playbooks/supplemental/pytorch-kernels/README.md": {
+      "source_sha256": "ef647656230fb6a512ac0b98b573e61f729e4c14de2bdcd4b33a1c733c1a9e2c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'Walkthrough' inconsistently translated as both 'Adım Adım Anlatım' and 'İzlenecek Yol'; decimal comma vs period inconsistency (200.001,0 vs 200,001.0)."
+    },
+    "playbooks/supplemental/speech2speech-translation/README.md": {
+      "source_sha256": "c6e008753ea3a6442c32774e44345e39fd5b5b64534fcb837541f2220c66d1fd",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'private' translated as 'gizli' (secret) instead of 'özel/mahrem'; 'prompt' translated as 'komut' inconsistently; 'resamples to target rate' as 'hedef hıza' instead of 'hedef örnekleme hızına'."
+    },
+    "playbooks/supplemental/lemonade-getting-started/README.md": {
+      "source_sha256": "b3613af14dd94ab44888f2d3013af6b10e1685c5e4915765507065117303be9a",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-4.6",
+      "judge_model": "Claude-Opus-4.6",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'playbook' as 'oyun kitabı' is unconventional; 'flashcard' inconsistently rendered as 'kart'/'flash kart'/'çalışma kartı'; 'Recipe' translated as 'Tarife' (unusual)."
+    }
+  }
+}

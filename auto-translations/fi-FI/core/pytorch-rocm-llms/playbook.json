@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-rocm-llms",
+  "title": "LLM-mallien ajaminen PyTorch-kehyksellä AMD ROCm™ -ohjelmistolla",
+  "description": "Opi ajamaan tehokkaita kielimalleja tietokoneellasi PyTorch- ja AMD ROCm™ -ohjelmistolla dokumenttien nopeaan ja helppoon tiivistämiseen."
+}

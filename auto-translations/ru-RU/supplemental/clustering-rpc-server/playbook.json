@@ -1,0 +1,5 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "Кластеризация двух Ryzen™ AI Halo с помощью RPC",
+  "description": "Настройка распределённого инференса с использованием RPC-сервера на двух устройствах Ryzen™ AI Halo с llama.cpp для запуска моделей 350B+"
+}

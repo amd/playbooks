@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-kernels",
+  "title": "使用 PyTorch 和 AMD ROCm™ 构建自定义 GPU 内核",
+  "description": "使用 PyTorch 和 AMD ROCm™ 软件编写并优化自定义 GPU 内核"
+}

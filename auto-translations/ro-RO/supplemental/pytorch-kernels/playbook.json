@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-kernels",
+  "title": "Construirea de nuclee GPU personalizate cu PyTorch și AMD ROCm™",
+  "description": "Scrieți și optimizați nuclee GPU personalizate folosind PyTorch și software-ul AMD ROCm™"
+}

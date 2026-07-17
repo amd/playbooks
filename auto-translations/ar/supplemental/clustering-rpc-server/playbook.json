@@ -1,0 +1,5 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "تجميع وحدتي Ryzen™ AI Halo معاً باستخدام RPC",
+  "description": "إعداد الاستدلال الموزع باستخدام خادم RPC عبر جهازين من Ryzen™ AI Halo مع llama.cpp لتشغيل نماذج بحجم 350B وما فوق"
+}

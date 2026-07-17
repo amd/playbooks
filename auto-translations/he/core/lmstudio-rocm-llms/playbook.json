@@ -1,0 +1,5 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "הפעלה והגשת LLMs עם LM Studio",
+  "description": "הגדר את LM Studio ואת LM Studio Server להפעלה ולהגשת מודלים של שפה גדולים באופן מקומי."
+}

@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-rocm-llms",
+  "title": "LLM's uitvoeren op PyTorch met AMD ROCm™-software",
+  "description": "Leer hoe u krachtige taalmodellen op uw pc kunt uitvoeren met PyTorch en AMD ROCm™-software om documenten snel en eenvoudig samen te vatten."
+}

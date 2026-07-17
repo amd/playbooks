@@ -1,0 +1,5 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "두 개의 Ryzen™ AI Halo를 RPC로 클러스터링하기",
+  "description": "두 개의 Ryzen™ AI Halo 장치에서 llama.cpp를 사용하여 RPC 서버를 통한 분산 추론을 설정하고 350B+ 모델을 실행하세요"
+}

@@ -1,0 +1,5 @@
+{
+  "id": "open-webui-chat",
+  "title": "Open WebUI でのLLMとのチャット",
+  "description": "Open WebUI を使用して、ローカルで LLM とチャットします。"
+}

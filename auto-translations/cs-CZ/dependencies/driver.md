@@ -1,0 +1,31 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @os:windows -->
+### AMD GPU Driver
+
+Aktualizujte na nejnovější ovladač AMD GPU pomocí [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
+
+1. Otevřete `AMD Software: Adrenalin Edition` z nabídky Start nebo systémové lišty.
+2. Přejděte na **Driver and Software**, klikněte na **Manage Updates**.
+3. Pokud je k dispozici aktualizace, postupujte podle pokynů ke stažení a instalaci.
+
+<!-- @test:id=amd-gpu-visible-windows timeout=60 hidden=True -->
+```powershell
+Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
+```
+<!-- @test:end -->
+<!-- @os:end -->
+<!-- @device:end -->
+
+<!-- @os:linux -->
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+### AMD GPU Driver
+
+Nainstalujte ovladač AMD GPU (amdgpu) pomocí postupu Radeon Software for Linux (RSL). Pokyny pro vaši distribuci naleznete v části [Instalace ovladače jádra](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+
+<!-- @device:end -->
+<!-- @os:end -->

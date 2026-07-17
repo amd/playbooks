@@ -1,0 +1,5 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "LM Studio を使用した LLM の実行とサービング",
+  "description": "LM Studio と LM Studio Server をセットアップして、大規模言語モデルをローカルで実行・提供します。"
+}

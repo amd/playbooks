@@ -1,0 +1,5 @@
+{
+  "id": "vscode-qwen3-coder",
+  "title": "VS Code와 Qwen3-Coder를 활용한 로컬 LLM 코딩",
+  "description": "로컬에서 실행 중인 Qwen3-Coder와 VS Code를 함께 사용하여 프라이빗 코드 지원을 받으세요."
+}

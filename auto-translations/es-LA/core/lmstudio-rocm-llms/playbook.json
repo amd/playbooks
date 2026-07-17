@@ -1,0 +1,5 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Ejecutar y servir LLMs con LM Studio",
+  "description": "Configura LM Studio y LM Studio Server para ejecutar y servir modelos de lenguaje grandes de forma local."
+}

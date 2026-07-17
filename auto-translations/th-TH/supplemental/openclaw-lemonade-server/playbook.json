@@ -1,0 +1,5 @@
+{
+  "id": "openclaw-lemonade-server",
+  "title": "การรัน OpenClaw ในเครื่องด้วย Lemonade Server",
+  "description": "ติดตั้งและกำหนดค่า OpenClaw autonomous AI agent ด้วย Lemonade Server"
+}

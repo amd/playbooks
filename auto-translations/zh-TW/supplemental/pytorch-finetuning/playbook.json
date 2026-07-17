@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "使用 PyTorch 與 AMD ROCm™ 軟體微調 LLM",
+  "description": "使用 PyTorch 和 ROCm 對大型語言模型（LLM）進行微調。"
+}

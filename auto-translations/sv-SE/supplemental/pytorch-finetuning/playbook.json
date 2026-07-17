@@ -1,0 +1,5 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "Finjustering av LLM:er med PyTorch och AMD ROCm™-programvara",
+  "description": "Finjustera stora språkmodeller (LLM) med hjälp av PyTorch och ROCm."
+}

@@ -1,0 +1,5 @@
+{
+  "id": "vscode-qwen3-coder",
+  "title": "Локальное программирование с LLM в VS Code и Qwen3-Coder",
+  "description": "Используйте VS Code с локально запущенным Qwen3-Coder для приватной помощи в написании кода."
+}

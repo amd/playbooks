@@ -1,0 +1,5 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Spustenie a obsluha LLM pomocou LM Studio",
+  "description": "Nastavte LM Studio a LM Studio Server na spustenie a obsluhu veľkých jazykových modelov lokálne."
+}
