@@ -190,6 +190,35 @@ export interface PlaybookMeta {
   
   /** Cover image path relative to the playbook folder (e.g., "assets/cover.png") */
   coverImage?: string;
+
+  /**
+   * App-specific software versions this playbook was validated with, keyed by
+   * device CATEGORY (reference / apu / gpu) then OS. Only list what's unique to
+   * this playbook (e.g. ComfyUI, PyTorch) — shared platform versions (ROCm,
+   * drivers) come from the central baseline in playbooks/validation.json.
+   * Presence of this field is what turns the Validation section on.
+   * Example:
+   *   "validatedVersions": {
+   *     "reference": { "windows": { "ComfyUI": "0.5.4", "PyTorch": "2.10" } }
+   *   }
+   */
+  validatedVersions?: Partial<Record<DeviceCategory, Partial<Record<Platform, Record<string, string>>>>>;
+
+  /** Month/year this playbook was validated, e.g. "2026-07". Falls back to the baseline defaultDate. */
+  validatedDate?: string;
+
+  /**
+   * Resolved per-device, per-OS validation shown at the bottom of the playbook.
+   * Populated server-side (baseline + validatedVersions merged); not authored by hand.
+   */
+  validation?: Partial<Record<Device, Partial<Record<Platform, ValidationInfo>>>>;
+}
+
+export interface ValidationInfo {
+  /** Month/year the playbook was last validated, e.g. "2026-07" (rendered as "July 2026") */
+  lastValidated?: string;
+  /** Key/value pairs of software validated for this device+OS, e.g. { "ROCm": "7.13.0" } */
+  versions?: Record<string, string>;
 }
 
 export interface TestResultInfo {
@@ -254,6 +283,24 @@ export interface Playbook extends PlaybookMeta {
 
   /** Test coverage data — only present when running in coverage mode */
   testCoverage?: TestCoverageInfo;
+}
+
+/**
+ * Formats a "YYYY-MM" or "YYYY-MM-DD" validation date into a human-readable
+ * string like "July 2026". Falls back to the raw string if it can't be parsed.
+ */
+export function formatValidationDate(value?: string): string {
+  if (!value) return "";
+  const match = /^(\d{4})-(\d{2})/.exec(value.trim());
+  if (!match) return value;
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+  if (monthIndex < 0 || monthIndex > 11) return value;
+  return `${months[monthIndex]} ${year}`;
 }
 
 /**

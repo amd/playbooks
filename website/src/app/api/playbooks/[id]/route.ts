@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import type { Playbook, PlaybookMeta, Category, TestInfo, TestCoverageInfo } from "@/types/playbook";
+import type { Playbook, PlaybookMeta, Category, TestInfo, TestCoverageInfo, Device, Platform, ValidationInfo, DeviceCategory } from "@/types/playbook";
+import { categoryForDevice } from "@/types/playbook";
 import { loadAllGitHubTestResults } from "@/lib/github-test-results";
 import type { DeviceTestResult } from "@/lib/github-test-results";
 
@@ -42,6 +43,73 @@ function loadDependencyRegistry(): DependencyRegistry | null {
     console.error("Error loading dependency registry:", error);
     return null;
   }
+}
+
+type VersionMap = Record<string, string>;
+type PerOS = Partial<Record<Platform, VersionMap>>;
+
+interface ValidationFile {
+  defaultDate?: string;
+  // Baseline versions keyed by device CATEGORY (reference / apu / gpu), then OS.
+  baseline?: Partial<Record<DeviceCategory, PerOS>>;
+}
+
+/**
+ * Loads the master validation file (playbooks/validation.json).
+ */
+function loadValidationFile(): ValidationFile | null {
+  const validationPath = path.join(PLAYBOOKS_ROOT, "validation.json");
+  if (!fs.existsSync(validationPath)) {
+    return null;
+  }
+  try {
+    return JSON.parse(fs.readFileSync(validationPath, "utf-8"));
+  } catch (error) {
+    console.error("Error loading validation.json:", error);
+    return null;
+  }
+}
+
+/**
+ * Builds the resolved per-device, per-OS validation map for a playbook. Device/OS
+ * combinations come from the playbook's supported_platforms; each device is
+ * resolved to its category (halo_box=reference, halo/stx/krk=apu, dGPUs=gpu), and
+ * versions are layered as baseline.<category>[os] -> playbook.validatedVersions.<category>[os]
+ * (the playbook overrides the baseline, so it can pin its own version). The
+ * displayed date is meta.validatedDate or the baseline defaultDate. Returns
+ * undefined unless the playbook declares validatedVersions (opt-in).
+ */
+function buildValidation(meta: PlaybookMeta): PlaybookMeta["validation"] | undefined {
+  const validatedVersions = meta.validatedVersions;
+  if (!validatedVersions) return undefined;
+
+  const file = loadValidationFile();
+  const baseline = file?.baseline ?? {};
+  const date = meta.validatedDate ?? file?.defaultDate;
+
+  const result: Partial<Record<Device, Partial<Record<Platform, ValidationInfo>>>> = {};
+
+  for (const [device, platforms] of Object.entries(meta.supported_platforms) as [Device, Platform[]][]) {
+    if (!platforms) continue;
+    const category = categoryForDevice(device);
+    const baseCat = baseline[category] ?? {};
+    const pbCat = validatedVersions[category] ?? {};
+
+    const perPlatform: Partial<Record<Platform, ValidationInfo>> = {};
+    for (const platform of platforms) {
+      const versions: VersionMap = {
+        ...(baseCat[platform] ?? {}),
+        ...(pbCat[platform] ?? {}),
+      };
+      perPlatform[platform] = { lastValidated: date, versions };
+    }
+
+    if (Object.keys(perPlatform).length > 0) {
+      result[device] = perPlatform;
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 /**
@@ -473,14 +541,19 @@ function findPlaybook(
             content = processSetupTags(content);
           }
 
+          // Validation data lives in the master playbooks/validation.json,
+          // merged (baseline + playbook overrides) at request time.
+          const validation = buildValidation(meta);
+
           const playbook: Playbook = {
             ...meta,
             category: getCategory(category),
             path: `${category}/${folder.name}`,
             content,
+            ...(validation ? { validation } : {}),
             ...(testCoverage ? { testCoverage } : {}),
           };
-          
+
           return playbook;
         }
       } catch (error) {
