@@ -44,15 +44,19 @@ By the end of this playbook you will be able to:
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
 - [Podman](https://podman.io/docs/installation) (Optional, for sandboxing Hermes Agent)
-  - `sudo apt-get install -y podman`
+  ```bash 
+  sudo apt-get install -y podman`
+  ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - A PC running **Windows 10/11**
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
-- Podman (Optional, for sandboxing Hermes Agent)
-  - Install inside WSL: `sudo apt-get install -y podman`
+- Podman (Optional, for sandboxing Hermes Agent). Install inside WSL:
+  ```bash 
+  sudo apt-get install -y podman`
+  ```
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
