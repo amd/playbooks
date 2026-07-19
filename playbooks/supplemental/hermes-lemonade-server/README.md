@@ -1080,23 +1080,35 @@ rm -f "$log"
 hermes gateway run >"$log" 2>&1 &
 gateway_pid=$!
 
+# `hermes gateway run` is a long-running message bridge + cron scheduler with no
+# HTTP health endpoint, so we detect a successful boot by (1) a known startup
+# marker appearing in the log and (2) the process still being alive afterwards
+# (i.e. it parsed config.yaml and did not crash). "No messaging platforms
+# enabled" is expected in CI (no channel token) and is not a failure.
 ok=false
 for i in $(seq 1 60); do
-  if grep -q "Gateway started\|Listening\|ready" "$log" 2>/dev/null; then
+  if grep -qE "Hermes Gateway Starting|gateway\.run|cron scheduler" "$log" 2>/dev/null; then
     ok=true
+    break
+  fi
+  if ! kill -0 "$gateway_pid" 2>/dev/null; then
+    echo "Hermes gateway process exited before it finished starting"
     break
   fi
   sleep 1
 done
 
-if [ "$ok" != "true" ]; then
-  echo "Hermes gateway did not start within 60 seconds"
+# Give it a moment to surface any immediate post-banner crash, then confirm it is still running.
+sleep 3
+
+if [ "$ok" = "true" ] && kill -0 "$gateway_pid" 2>/dev/null; then
+  echo "OK: Hermes gateway started successfully"
+else
+  echo "Hermes gateway did not start"
   echo "---- Gateway log ----"
   cat "$log" || true
   exit 1
 fi
-
-echo "OK: Hermes gateway started successfully"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -1133,23 +1145,35 @@ rm -f "$log"
 hermes gateway run >"$log" 2>&1 &
 gateway_pid=$!
 
+# `hermes gateway run` is a long-running message bridge + cron scheduler with no
+# HTTP health endpoint, so we detect a successful boot by (1) a known startup
+# marker appearing in the log and (2) the process still being alive afterwards
+# (i.e. it parsed config.yaml and did not crash). "No messaging platforms
+# enabled" is expected in CI (no channel token) and is not a failure.
 ok=false
 for i in $(seq 1 60); do
-  if grep -q "Gateway started\|Listening\|ready" "$log" 2>/dev/null; then
+  if grep -qE "Hermes Gateway Starting|gateway\.run|cron scheduler" "$log" 2>/dev/null; then
     ok=true
+    break
+  fi
+  if ! kill -0 "$gateway_pid" 2>/dev/null; then
+    echo "Hermes gateway process exited before it finished starting"
     break
   fi
   sleep 1
 done
 
-if [ "$ok" != "true" ]; then
-  echo "Hermes gateway did not start within 60 seconds"
+# Give it a moment to surface any immediate post-banner crash, then confirm it is still running.
+sleep 3
+
+if [ "$ok" = "true" ] && kill -0 "$gateway_pid" 2>/dev/null; then
+  echo "OK: Hermes gateway started inside WSL"
+else
+  echo "Hermes gateway did not start"
   echo "---- Gateway log ----"
   cat "$log" || true
   exit 1
 fi
-
-echo "OK: Hermes gateway started inside WSL"
 '@
 
 $script = $script -replace "`r`n", "`n"
