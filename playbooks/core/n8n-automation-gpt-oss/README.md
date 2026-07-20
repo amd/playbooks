@@ -473,3 +473,22 @@ n8n has hundreds of pre-built workflow templates. Browse the official template l
 Search for "AI", "LLM", or "automation" to find workflows you can import and customize.
 
 For more information, check out the [n8n Documentation](https://docs.n8n.io/).
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->

@@ -1058,3 +1058,22 @@ Render HTML outputs directly in the interface. This is surprisingly powerful for
 - [Lemonade Server API spec (endpoints)](https://lemonade-server.ai/docs/server/server_spec)
 - [Video walkthrough (Lemonade)](https://www.youtube.com/watch?v=mcf7dDybUco)
 - [Video walkthrough (Open WebUI + Lemonade)](https://www.youtube.com/watch?v=yZs-Yzl736E)
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->
