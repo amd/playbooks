@@ -303,13 +303,21 @@ def _pack_sections(masked):
     return chunks
 
 
-def _translate_chunk(masked_chunk, base_prompt, cfg, quality_retry):
-    """Translate one masked chunk, preserving its placeholder subset exactly."""
-    chunk_expected = sorted(int(x) for x in SENTINEL_FIND.findall(masked_chunk))
-    # Nothing translatable (only placeholders/whitespace/punctuation): return as
-    # is. This avoids handing the model a bare run of placeholders to drop.
-    if not re.search(r"[^\W\d_]", SENTINEL_FIND.sub("", masked_chunk)):
-        return masked_chunk
+# A line made up solely of placeholder tokens (+ whitespace) is a whole-line
+# structural marker - a masked @os/@device/@require/@github-only comment, a fenced
+# code block, etc. These carry no translatable prose, and some models drop such
+# bare-token lines when translating the surrounding text. They are passed through
+# verbatim in the segmented fallback so they can never be dropped.
+_SENTINEL_ONLY_LINE = re.compile(r"^\s*(?:\u2402L10N\d+\u2403\s*)+$")
+
+
+def _translate_text_block(text, base_prompt, cfg, quality_retry):
+    """Translate one masked text, preserving its placeholder subset exactly.
+    Raises ValueError if the placeholders can't be reproduced."""
+    expected = sorted(int(x) for x in SENTINEL_FIND.findall(text))
+    # Nothing translatable (only placeholders/whitespace/punctuation): return as is.
+    if not re.search(r"[^\W\d_]", SENTINEL_FIND.sub("", text)):
+        return text
 
     last_seen = None
     for i in range(2):
@@ -322,14 +330,41 @@ def _translate_chunk(masked_chunk, base_prompt, cfg, quality_retry):
                 "exactly once, in the same order, byte-for-byte. Do not omit any."
             )
             temperature = 0.6 if quality_retry else 0.3
-        candidate = call_model(system_prompt, masked_chunk, cfg, temperature=temperature)
+        candidate = call_model(system_prompt, text, cfg, temperature=temperature)
         seen = sorted(int(x) for x in SENTINEL_FIND.findall(candidate))
-        if seen == chunk_expected:
+        if seen == expected:
             return candidate
         last_seen = seen
     raise ValueError(
-        f"placeholder mismatch in section: expected {chunk_expected}, got {last_seen}"
+        f"placeholder mismatch in section: expected {expected}, got {last_seen}"
     )
+
+
+def _translate_chunk(masked_chunk, base_prompt, cfg, quality_retry):
+    """Translate one masked chunk. Fast path: a single request for the whole
+    chunk. If that drops placeholders - some models omit whole-line structural
+    markers (paired @tag comments around admonitions, etc.) - fall back to
+    translating only the prose segments and passing the marker lines through
+    verbatim, so they cannot be dropped."""
+    try:
+        return _translate_text_block(masked_chunk, base_prompt, cfg, quality_retry)
+    except ValueError:
+        pass  # fall through to the segmented, marker-safe path
+
+    lines = masked_chunk.split("\n")
+    out = []
+    i, n = 0, len(lines)
+    while i < n:
+        if _SENTINEL_ONLY_LINE.match(lines[i]):
+            out.append(lines[i])  # structural marker line: kept verbatim, never sent
+            i += 1
+            continue
+        j = i
+        while j < n and not _SENTINEL_ONLY_LINE.match(lines[j]):
+            j += 1
+        out.append(_translate_text_block("\n".join(lines[i:j]), base_prompt, cfg, quality_retry))
+        i = j
+    return "\n".join(out)
 
 
 def translate_markdown(text, locale, cfg, glossary_terms, quality_retry=False):

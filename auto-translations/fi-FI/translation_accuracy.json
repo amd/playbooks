@@ -188,26 +188,26 @@
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
       "source_sha256": "19066843d638353adb3a11fe7f188f59a66c1f11eeaa7037af97a5c21308d4df",
       "prompt_version": "2",
-      "model": "Claude-Opus-4.8",
+      "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 93,
-      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: 'ohjekirja' for playbook slightly off; missing blank line before Step 3 heading."
+      "quality_score": 90,
+      "quality_issues": "Stray '#' added before @github-only comment; missing blank line before Step 3 heading. Otherwise accurate and fluent."
     },
     "playbooks/core/n8n-automation-gpt-oss/platform.md": {
       "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
       "prompt_version": "2",
-      "model": "Claude-Opus-4.8",
+      "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Accurate, fluent, code/URLs/brands intact. Minor: 'latest' left untranslated in table, acceptable."
+      "quality_score": 96,
+      "quality_issues": "Excellent; minor spacing nit around `lemonade run`-komento but fully accurate and fluent."
     },
     "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
       "source_sha256": "068a5d7d2996ca2c8b37535eddf9fe38ab421d56ee509a426d96835a96ab3f74",
       "prompt_version": "2",
-      "model": "Claude-Opus-4.8",
+      "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Natural, accurate; 'uutistiivistäjä' slightly awkward but acceptable; brand terms and formatting intact"
+      "quality_score": 90,
+      "quality_issues": "Accurate and fluent; 'summarizer' as 'uutiskooste' slightly imprecise (summarizer vs. summary), minor terminology nuance."
     },
     "playbooks/core/pytorch-rocm-llms/README.md": {
       "source_sha256": "a7f0693c43a5a31e55ffb32b5050099e5297ec77456daff75cf33edf91794d7a",
@@ -430,8 +430,8 @@
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 82,
-      "quality_issues": "Inconsistent brand term: 'Lemonade-palvelimella' vs 'Lemonade Server'; 'OpenClaw-autonominen' compound slightly awkward."
+      "quality_score": 88,
+      "quality_issues": "Inconsistent brand handling: 'Lemonade-palvelimella' vs 'Lemonade Server'; minor compound phrasing awkwardness."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
       "source_sha256": "bc2cba716bb866957cf930a234b9080bd64c863a18e6f77f7e98c3f51f0868fc",

@@ -33,7 +33,7 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | zh-CN | 68 | 93.0 | 72 | Claude-Opus-4.8 |
 | zh-TW | 68 | 93.9 | 82 | Claude-Opus-4.8 |
 
-## Files below 85 (40)
+## Files below 85 (39)
 
 | Locale | File | Score | Issues |
 |--------|------|-------|--------|
@@ -56,7 +56,6 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | th-TH | playbooks/core/comfyui-image-gen/playbook.json | 78 | Title mistranslated as progressive 'กำลังสร้าง' (generating in progress) instead of gerund heading; slightly awkward phrasing. |
 | cs-CZ | playbooks/supplemental/clustering-rccl/playbook.json | 82 | "Clustrování" awkward neologism; "vícenodový" non-standard (better: víceuzlový). Terminology intact, otherwise fluent and accurate. |
 | de-DE | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Inconsistent terminology (Feinabstimmung vs Fine-Tuning); trademark symbol misplaced from original 'fine-tuned LLMs™'. |
-| fi-FI | playbooks/supplemental/openclaw-lemonade-server/playbook.json | 82 | Inconsistent brand term: 'Lemonade-palvelimella' vs 'Lemonade Server'; 'OpenClaw-autonominen' compound slightly awkward. |
 | fi-FI | playbooks/supplemental/vllm-inference/playbook.json | 82 | 'palvelua' awkward for serving; 'konteinoitua' non-standard term; otherwise accurate and fluent. |
 | it-IT | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Title redundant: 'Ottimizzazione fine-tuning' pleonastic; otherwise accurate, fluent, terms intact. |
 | it-IT | playbooks/supplemental/speech2speech-translation/playbook.json | 82 | Title omits 'speech-to-speech' nuance; 'voce a voce' slightly awkward but acceptable; overall accurate and fluent. |

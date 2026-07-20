@@ -286,12 +286,6 @@
     },
     {
       "locale": "fi-FI",
-      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
-      "score": 82,
-      "issues": "Inconsistent brand term: 'Lemonade-palvelimella' vs 'Lemonade Server'; 'OpenClaw-autonominen' compound slightly awkward."
-    },
-    {
-      "locale": "fi-FI",
       "file": "playbooks/supplemental/vllm-inference/playbook.json",
       "score": 82,
       "issues": "'palvelua' awkward for serving; 'konteinoitua' non-standard term; otherwise accurate and fluent."
