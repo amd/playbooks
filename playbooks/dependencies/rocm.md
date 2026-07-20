@@ -19,10 +19,10 @@ sudo reboot
 **Install ROCm in the created virtual environment.**
 > **Note**: Ensure the virtual environment is active before proceeding.
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo_box,halo -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,device-gfx1151]==7.14.0"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1151]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -30,7 +30,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "roc
 <!-- @device:stx -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,device-gfx1150]==7.14.0"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1150]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -38,7 +38,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "roc
 <!-- @device:krk -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,device-gfx1152]==7.14.0"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1152]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -46,7 +46,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "roc
 <!-- @device:rx7900xt -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,device-gfx1100]==7.14.0"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1100]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -54,7 +54,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "roc
 <!-- @device:rx9070xt,r9700 -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,device-gfx1201]==7.14.0"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1201]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
