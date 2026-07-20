@@ -8,5 +8,5 @@ test_*.py @sreeram-11
 # localized-playbooks/ holds human-uploaded translations (e.g. the China team).
 # NOTE: test-playbooks.yml only triggers on 'playbooks/**', so changes under
 # the translation trees never run playbook CI (translations are not tested).
-/auto-translations/ @danielholanda @adamlam2-amd
-/localized-playbooks/ @danielholanda @adamlam2-amd
+/auto-translations/ @bconsolvo
+/localized-playbooks/ @bconsolvo
