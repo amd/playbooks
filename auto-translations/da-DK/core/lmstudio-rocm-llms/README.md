@@ -5,34 +5,35 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Denne playbook bruger specielle tags, som GitHub ikke kan gengive. Besøg venligst [amd.com/playbooks](https://amd.com/playbooks) for at forhåndsvise dette indhold korrekt.
 <!-- @github-only:end -->
 
 ## Oversigt
 
-LM Studio er en kraftfuld GUI-baseret wrapper til [llama.cpp](https://github.com/ggml-org/llama.cpp) og tilbyder også et [OpenAI-kompatibelt endpoint](https://lmstudio.ai/docs/developer/openai-compat) til lokal modelservering. LM Studio giver en enkel men kraftfuld grænseflade til nemt at downloade og implementere modeller. LM Studio tilbyder både Vulkan- og AMD ROCm™-softwarebackends (kaldet runtimes) til AMD-brugere.
+LM Studio er en kraftfuld GUI-baseret wrapper til [llama.cpp](https://github.com/ggml-org/llama.cpp) og tilbyder også et [OpenAI-kompatibelt endpoint](https://lmstudio.ai/docs/developer/openai-compat) til lokal model-servering. LM Studio giver en simpel, men kraftfuld grænseflade til nemt at downloade og deploye modeller. LM Studio tilbyder både Vulkan- og AMD ROCm™ software-backends (kaldet runtimes) til AMD-brugere.
 
 
 ## Hvad du vil lære
-- Sådan konfigurerer og bruger du LM Studio til at udnytte din lokale hardware
-- Test og administrer LLM'er i et fuldstændigt offline-miljø
-- Servér modeller via OpenAI-kompatibel API til at drive brugerdefinerede arbejdsgange og apps
+- Hvordan du konfigurerer og bruger LM Studio til at udnytte din lokale hardware
+- Test og administrer LLM'er i et fuldstændigt offline miljø
+- Server modeller via OpenAI-kompatibel API for at drive tilpassede workflows og apps
 
 
-## Indstilling af hukommelseskonfigurationen
+## Indstilling af hukommelseskonfiguration
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Søg efter softwareopdateringer
+## Tjek for softwareopdateringer
 
 <!-- @os:linux -->
 > **Bemærk**: Du kan installere VS Code via AMD Ryzen™ AI Developer Center. For LM Studio skal du følge installationsvejledningen nedenfor.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Bemærk**: Hvis VS Code eller LM Studio ikke er installeret, kan du installere dem fra AMD Ryzen™ AI Developer Center.
+> **Bemærk**: Hvis VS Code eller LM Studio ikke er installeret, kan du installere dem fra AMD Ryzen™ AI Developer Center. 
 <!-- @os:end -->
 
 <!-- @require:software-update -->
@@ -62,16 +63,16 @@ LM Studio er en kraftfuld GUI-baseret wrapper til [llama.cpp](https://github.com
 <!-- @device:end -->
 
 ## Chat med en LLM
-Lær, hvordan du begynder at chatte med en ChatGPT-klasse LLM fuldstændigt lokalt.
+Lær, hvordan du begynder at chatte med en LLM af ChatGPT-kvalitet fuldstændigt lokalt.  
 
-1. Åbn LMStudio.
+1. Åbn LMStudio. 
 2. Tryk på `Ctrl + L` for at åbne Model Loader, vælg `Manually choose model load parameters`, og klik på `${model_name}`
-3. Sørg for, at "show advanced settings" er markeret.
-4. Skift `Context Length` efter ønske. Længere kontekstlængde betyder mere modelhukommelse, men mere systemhukommelse bruges. Anbefalet til dette playbook er 4096.
+3. Sørg for, at "show advanced settings" er markeret.  
+4. Skift `Context Length` efter ønske. Højere context length betyder mere modelhukommelse, men mere systemhukommelse bruges. Anbefalet for denne playbook er 4096.
 5. Sørg for, at `GPU Offload` er sat til maksimum, og at `Flash Attention` er slået til (Cache Quantizations kan forblive slået fra)
 6. Markér `Remember settings`, og klik på `Load Model`.
 7. Hvis du ikke er i chatvinduet, tryk på `Ctrl + 1` eller klik på 👾-knappen øverst til venstre på skærmen.
-8. Send en besked og begynd at interagere med modellen!
+8. Send en besked, og begynd at interagere med modellen!
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-load-model-windows timeout=1200 hidden=True -->
@@ -113,19 +114,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Tip**: Kontekstlængde refererer til modellens hukommelse. Flash attention forbedrer behandlingshastigheden og reducerer samtidig hukommelsesforbruget. GPU Offload flytter beregning til grafikkortet for hurtigere svar.
+> **Tip**: Context length refererer til modellens hukommelse. Flash attention forbedrer behandlingshastigheden og reducerer samtidig hukommelsesforbruget. GPU Offload flytter beregning til grafikkortet for hurtigere svar.
 
-## Servér LLM'er via et OpenAI-kompatibelt endpoint
+## Server LLM'er gennem et OpenAI-kompatibelt endpoint
 
-LM Studio tilbyder også et OpenAI-kompatibelt endpoint i form af LM Studio Server. Dette er allerede blevet demonstreret i en agentisk kodningsarbejdsgang med Cline [her](../playbooks/vscode-qwen3-coder). Et andet almindeligt anvendelsestilfælde er at forbinde LM Studio Server til en hvilken som helst webapplikation (React, Node.js, Python) ved at sende standard HTTP-anmodninger til inference-endpointet.
+LM Studio tilbyder også et OpenAI-kompatibelt endpoint i form af LM Studio Server. Dette er allerede blevet demonstreret i et agentisk kodningsworkflow med Cline [her](../playbooks/vscode-qwen3-coder). Et andet almindeligt anvendelsestilfælde er at forbinde LM Studio Server til enhver webapplikation (React, Node.js, Python) ved at sende standard HTTP-anmodninger til inference-endpointet.
 
-For at opsætte LM Studio Server skal du følge disse instruktioner:
+For at opsætte LM Studio Server skal du bruge følgende instruktioner:
 
-1. Klik på fanen `Developer` (kommandolinjeikonet) i venstre side eller `Ctrl + 2`, og klik derefter på `Server Settings`.
-2. (Valgfrit): Hvis du vil servere modellen over dit LAN, markér `Serve on Local Network`. Hvis du vil bruge den med et websted eller omfattende kald inden for VS Code, markér `Enable CORS`.
-3. I øverste venstre hjørne skal du sørge for, at serveren kører ved at klikke på til/fra-knappen foran `Status`.
-4. Et OpenAI-kompatibelt endpoint vil nu køre. Adressen er typisk http://127.0.0.1:1234
-5. Hvis en model ikke allerede er indlæst, kan du indlæse den ved at klikke på `Load Model` og følge de tidligere nævnte trin.
+1. I venstre side skal du klikke på fanen `Developer` (kommandolinje-ikonet) eller `Ctrl + 2` og derefter klikke på `Server Settings`.  
+2. (Valgfrit): Hvis du vil servere modellen over dit LAN, skal du markere `Serve on Local Network`. Hvis du vil bruge det med en hjemmeside eller omfattende kald i VS Code, skal du markere `Enable CORS`. 
+3. I øverste venstre hjørne skal du sørge for, at serveren kører, ved at klikke på skifteknappen foran `Status`.
+4. Et OpenAI-kompatibelt endpoint vil nu køre. Adressen er typisk http://127.0.0.1:1234  
+5. Hvis en model ikke allerede er indlæst, kan du indlæse den ved at klikke på `Load Model` og følge de tidligere nævnte trin. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -133,7 +134,7 @@ For at opsætte LM Studio Server skal du følge disse instruktioner:
 lms server start --port 1234
 curl.exe -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -142,29 +143,27 @@ curl.exe -s http://127.0.0.1:1234/v1/models
 lms server start --port 1234
 curl -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 
-Denne model vil nu være tilgængelig via LM Studio Server-endpointet og vil understøtte OpenAI-endpoints, herunder:
+Denne model vil nu være tilgængelig gennem LM Studio Server-endpointet og vil understøtte OpenAI-endpoints, herunder:
 
 | Endpoint | Metode | Dokumentation |
 |------------|----------|----------|
 | /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
 | /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
-| /v1/chat/completions | POST | [Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
+| /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
+#### Eksempel: Ping af dit Endpoint
+Efter at have oprettet OpenAI Compatible endpoint, lad os se på, hvordan du integrerer dette i et Python-udviklermiljø (som f.eks. VSCode) og bruger dit system som en lokal API-udbyder.
 
-
-#### Eksempel: Ping dit endpoint
-Nu hvor vi netop har oprettet det OpenAI-kompatible endpoint, lad os se på, hvordan man integrerer dette i et Python-udviklermiljø (såsom VSCode) og bruger dit system som en lokal API-udbyder.
-
-1. Opret et Python virtuelt miljø:
+1. Opret et Python-virtuelt miljø:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    På Linux skal du åbne en terminal i den ønskede mappe og følge kommandoerne for at oprette et venv.
+    På Linux skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -174,13 +173,13 @@ Nu hvor vi netop har oprettet det OpenAI-kompatible endpoint, lad os se på, hvo
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Giv din bruger adgang til GPU-enheder** (log ud og ind igen for at dette træder i kraft):
+**Giv din bruger adgang til GPU-enheder** (log ud og ind igen, for at dette træder i kraft):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    På Linux skal du åbne en terminal i den ønskede mappe og følge kommandoerne for at oprette et venv.
+    På Linux skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -192,26 +191,26 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    På Windows skal du åbne en terminal i den ønskede mappe og følge kommandoerne for at oprette et venv.
+    På Windows skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
     > **Tip**: Windows-brugere skal muligvis ændre deres PowerShell Execution Policy (f.eks.
-    > sætte den til RemoteSigned eller Unrestricted) inden de kører visse Powershell-kommandoer.
+    > ved at sætte den til RemoteSigned eller Unrestricted), før de kan køre visse Powershell-kommandoer.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    På Windows skal du åbne en terminal i den ønskede mappe og følge kommandoerne for at oprette et venv.
+    På Windows skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
     > **Tip**: Windows-brugere skal muligvis ændre deres PowerShell Execution Policy (f.eks.
-    > sætte den til RemoteSigned eller Unrestricted) inden de kører visse Powershell-kommandoer.
+    > ved at sætte den til RemoteSigned eller Unrestricted), før de kan køre visse Powershell-kommandoer.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -221,7 +220,7 @@ sudo usermod -aG render,video $LOGNAME
     pip install openai
     ```
 
-3. Kør følgende script for at pinge det endpoint, vi netop har oprettet.
+3. Kør følgende script for at pinge det endpoint, vi lige har oprettet.
     ```python
     from openai import OpenAI
 
@@ -273,7 +272,7 @@ req = urllib.request.Request(
 with urllib.request.urlopen(req, timeout=60) as r:
  print(r.read().decode("utf-8", "replace"))
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -298,7 +297,7 @@ req = urllib.request.Request(
 with urllib.request.urlopen(req, timeout=60) as r:
  print(r.read().decode("utf-8", "replace"))
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -321,18 +320,18 @@ lms unload "$ID" || true
 lms ps
 lms server stop
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
-#### (Valgfrit): Skift mellem runtimes
+#### (Valgfrit): Skift mellem Runtimes
 
-1. Tryk på `Ctrl + Shift + R` på tastaturet. Alternativt kan du klikke på fanen `Discover` (forstørrelsesglasset) i venstre side og derefter klikke på `Runtime` i pop op-vinduet.
+1. Tryk på `Ctrl + Shift + R` på dit tastatur. Alternativt kan du klikke på fanen `Discover` (forstørrelsesglas) i venstre side og derefter klikke på `Runtime` i pop op-vinduet.
 2. Du bør derefter se `Runtime Selections`, hvor rullemenuen kan bruges til at skifte runtime.
 
 
-## Næste skridt
+## Næste trin
 
-- **Brugerdefineret app-integration**: Integrer dine egne Python-scripts eller applikationer ved hjælp af den lokale OpenAI-kompatible API.
-- **Avancerede frontends**: Forbind kraftfulde grænseflader som Open WebUI til din server til chathistorik og personastyring.
+- **Brugerdefineret app-integration**: Integrer dine egne Python-scripts eller applikationer ved hjælp af det lokale OpenAI-kompatible API.
+- **Avancerede frontends**: Forbind kraftfulde grænseflader som Open WebUI til din server for chathistorik og personahåndtering.
 
-For yderligere dokumentation, besøg venligst: https://lmstudio.ai/docs/developer
+For mere dokumentation, besøg venligst: https://lmstudio.ai/docs/developer

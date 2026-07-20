@@ -23,6 +23,6 @@ Nainstalujte n8n globálně pomocí npm:
 npm install -g n8n
 ```
 
-> **Poznámka**: Další možnosti instalace naleznete v [dokumentaci n8n](https://docs.n8n.io/hosting/installation/npm/).
+> **Poznámka**: Další možnosti instalace naleznete v dokumentaci [n8n Documentation](https://docs.n8n.io/hosting/installation/npm/).
 
 <!-- @os:end -->

@@ -4,38 +4,38 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# プラットフォーム設定 — Lemonade Local AI
+# プラットフォーム構成 — Lemonade Local AI
 
-このドキュメントでは、このプレイブックが前提とする、プリインストール済みソフトウェア、モデルパス、およびプラットフォーム固有の前提条件について説明します。
+このドキュメントでは、このプレイブックが前提とする事前インストール済みソフトウェア、モデルパス、およびプラットフォーム固有の前提条件について説明します。
 
-## プリインストール済みソフトウェア
+## 事前インストール済みソフトウェア
 
-| ソフトウェア | バージョン | 目的 |
+| ソフトウェア | バージョン | 用途 |
 |----------|---------|---------|
 | Lemonade Server | 最新リリース | OpenAI互換APIを備えたローカルLLMサーバー |
-| Python | 3.10–3.13 | OpenAI Pythonクライアントの例に必要 |
+| Python | 3.10–3.13 | OpenAI Pythonクライアントのサンプルに必要 |
 
-## デフォルトのモデルストレージ
+## デフォルトのモデル保存場所
 
-Lemonade を通じてダウンロードされたモデルは、Hugging Face Hub の仕様に従って保存されます：
+Lemonadeを通じてダウンロードされたモデルは、Hugging Face Hubの仕様を使用して保存されます。
 
 | プラットフォーム | デフォルトパス |
 |----------|-------------|
 | Windows | `%USERPROFILE%\.cache\huggingface\hub\` |
 | Linux | `~/.cache/huggingface/hub/` |
 
-ストレージの場所を変更するには、`HF_HOME` 環境変数を設定してください。
+保存場所を変更するには、`HF_HOME` 環境変数を設定してください。
 
 ## ハードウェア要件
 
 | ハードウェアターゲット | 要件 |
 |----------------|-------------|
-| **CPU** | 最新のx86-64プロセッサー（AMD またはIntel） |
-| **GPU (Vulkan)** | Vulkanドライバーをサポートする任意の GPU |
-| **GPU (ROCm)** | AMD Radeon RX 7000/9000シリーズ または Radeon PRO W7000シリーズ；AMD Ryzen AI MAX+ Pro 395 |
-| **NPU** | AMD Ryzen AI 300シリーズプロセッサー、Windows 11 |
+| **CPU** | 最新のx86-64プロセッサ（AMDまたはIntel） |
+| **GPU (Vulkan)** | Vulkanドライバーをサポートする任意のGPU |
+| **GPU (ROCm)** | AMD Radeon RX 7000/9000シリーズまたはRadeon PRO W7000シリーズ；AMD Ryzen AI MAX+ Pro 395 |
+| **NPU** | AMD Ryzen AI 300シリーズプロセッサ、Windows 11 |
 
 ## ネットワーク要件
 
-- 初回モデルダウンロード時にインターネット接続が必要（モデルによって1〜25 GB）
-- モデルのダウンロード完了後はインターネット不要
+- 初回のモデルダウンロードにはインターネット接続が必要です（モデルによって1〜25GB）
+- モデルのダウンロード後はインターネット接続は不要です

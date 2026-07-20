@@ -1,5 +1,5 @@
 {
   "id": "pytorch-finetuning",
   "title": "Feinabstimmung von LLMs mit PyTorch und AMD ROCm™ Software",
-  "description": "Große Sprachmodelle (LLMs) mit PyTorch und ROCm feinabstimmen."
+  "description": "Feintuning großer Sprachmodelle (LLMs) mit PyTorch und ROCm."
 }

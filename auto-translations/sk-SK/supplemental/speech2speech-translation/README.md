@@ -6,25 +6,25 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Táto príručka používa špeciálne značky, ktoré GitHub nedokáže vykresliť. Navštívte [amd.com/playbooks](https://amd.com/playbooks), aby sa vám tento obsah zobrazil správne.
 <!-- @github-only:end -->
 
 ## Prehľad
 
-AMD ROCm™ softvér a zásobník PyTorch vytvárajú jednotný ekosystém pre AI na zariadení. Funguje pre Windows aj Linux s oficiálnou podporou širokého spektra zariadení vrátane Ryzen™ AI APU a Radeon™ GPU.
+Softvér AMD ROCm™ a technológia PyTorch vytvárajú jednotný ekosystém pre AI priamo na zariadení. Funguje v systémoch Windows aj Linux s oficiálnou podporou širokej škály zariadení vrátane APU Ryzen™ AI a GPU Radeon™.
 
-Tento playbook vás naučí, ako spustiť nízkolatenčný, expresívny a súkromný preklad reči na reč úplne na okraji siete.
+Táto príručka vás naučí, ako spustiť nízkolatentný, expresívny a súkromný preklad reči na reč úplne na edge zariadení.
 
 ## Čo sa naučíte
 
 - Ako nastaviť prostredie pre preklad reči na reč
-- Ako písať kód v Pythone na načítanie a používanie modelov reč-reč
-- Ako spustiť a experimentovať s rozhraním Gradio UI
+- Ako napísať kód v Pythone na načítanie a použitie modelov reč-reč
+- Ako spustiť a experimentovať s Gradio UI
 
 ## Prečo používať preklad reči na reč v reálnom čase?
 
 - Odstraňuje trenie medzi prekladom a jazykovými bariérami
-- Prenáša tón, emócie a zámer bez nepríjemných prestávok
+- Prenáša tón, emócie a zámer bez trápnych pauz
 - Umožňuje globálnu spoluprácu a rýchlejšie rozhodovanie
 
 ## Nastavenie konfigurácie pamäte
@@ -32,8 +32,8 @@ Tento playbook vás naučí, ako spustiť nízkolatenčný, expresívny a súkro
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Kontrola aktualizácií softvéru
-> **Poznámka**: Ak VS Code nie je nainštalovaný, môžete ho nainštalovať pomocou Ryzen AI Developer Center.
+## Skontrolujte aktualizácie softvéru
+> **Poznámka**: Ak nemáte nainštalovaný VS Code, môžete ho nainštalovať pomocou Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -44,7 +44,7 @@ Tento playbook vás naučí, ako spustiť nízkolatenčný, expresívny a súkro
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Na Linuxe otvorte terminál a spustite nasledujúci príkaz na vytvorenie venv s už nainštalovaným ROCm+Pytorch:
+V systéme Linux otvorte terminál a spustite nasledujúci príkaz na vytvorenie venv s už nainštalovaným ROCm+PyTorch:
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -58,13 +58,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Udeľte svojmu používateľovi prístup k zariadeniam GPU** (pre uplatnenie zmien sa odhláste a znova prihláste):
+**Udeľte svojmu používateľovi prístup k zariadeniam GPU** (aby sa to prejavilo, odhláste sa a znova prihláste):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Na Linuxe otvorte terminál a spustite nasledujúci príkaz na vytvorenie venv:
+V systéme Linux otvorte terminál a spustite nasledujúci príkaz na vytvorenie venv:
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -80,7 +80,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Na Windows otvorte terminál v adresári podľa vášho výberu a postupujte podľa príkazov na vytvorenie venv s už nainštalovaným ROCm+Pytorch:
+V systéme Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv s už nainštalovaným ROCm+PyTorch:
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -90,13 +90,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tip**: Používatelia Windows môžu potrebovať upraviť svoju politiku spúšťania PowerShell (napr.
+> **Tip**: Používatelia systému Windows možno budú musieť upraviť svoju politiku spúšťania PowerShell (napr.
 > nastaviť ju na RemoteSigned alebo Unrestricted) pred spustením niektorých príkazov PowerShell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Na Windows otvorte terminál v adresári podľa vášho výberu a postupujte podľa príkazov na vytvorenie venv:
+V systéme Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv:
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -106,7 +106,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tip**: Používatelia Windows môžu potrebovať upraviť svoju politiku spúšťania PowerShell (napr.
+> **Tip**: Používatelia systému Windows možno budú musieť upraviť svoju politiku spúšťania PowerShell (napr.
 > nastaviť ju na RemoteSigned alebo Unrestricted) pred spustením niektorých príkazov PowerShell.
 
 <!-- @device:end -->
@@ -195,11 +195,11 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Nastavenie ukážky preklad reči na reč
+## Nastavenie demonštrácie prekladu reči na reč
 
-#### Zoznámte sa s seamless-m4t-v2
+#### Zoznámte sa so seamless-m4t-v2
 
-Pozrite si [kartu modelu](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) na Hugging Face pre viac informácií.
+Ďalšie informácie nájdete na [karte modelu](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) na Hugging Face.
 Toto je technická architektúra modelov reč-reč:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
@@ -207,19 +207,19 @@ Toto je technická architektúra modelov reč-reč:
 
 #### Stiahnutie skriptov
 
-Tento playbook obsahuje skripty pripravené na použitie. Stiahnite si všetky do rovnakého adresára ako prostredie, ktoré ste vytvorili.
+Táto príručka obsahuje pripravené skripty na okamžité použitie. Stiahnite si ich všetky do rovnakého adresára ako prostredie, ktoré ste vytvorili.
 
 | Skript | Popis | Použitie |
-|--------|-------|----------|
+|--------|-------------|-------|
 | [infer.py](assets/infer.py) | Základné generovanie textu pomocou LLM | `python infer.py` |
-| [input1.wav](assets/input1.wav) | Príkladový zvukový súbor | N/A |
-| [lang_list.py](assets/lang_list.py) | Súbor podpory jazykov | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | Intuitívne rozhranie pre preklad reči | `python gradio_demo.py --no-share` |
+| [input1.wav](assets/input1.wav) | Príklad zvukového súboru | N/A |
+| [lang_list.py](assets/lang_list.py) | Súbor s podporou jazykov | N/A |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuitívne UI pre preklad reči | `python gradio_demo.py --no-share` |
 
 
-### Začíname so súborom infer.py
+### Začíname so skriptom infer.py
 
-Na spustenie skriptu vykonajte 
+Ak chcete skript spustiť, zadajte príkaz 
 ```bash
 python infer.py
 ```
@@ -227,7 +227,7 @@ python infer.py
  
   
 #### Vysvetlenie kódu
-**Úryvok 1: Import potrebných závislostí**
+**Ukážka 1: Import potrebných závislostí**
 
 ```python 
 import os
@@ -254,9 +254,9 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**Úryvok 2: Načítanie modelov z HuggingFace**
+**Ukážka 2: Načítanie modelov z HuggingFace**
 
-Táto funkcia prijme ID modelu a stiahne model, ak ešte nie je stiahnutý. Potom vráti procesor a model pre použitie v ďalšej funkcii.
+Táto funkcia prijíma ID modelu a stiahne model, ak ešte nebol stiahnutý. Následne vráti procesor a model, ktoré použije ďalšia funkcia.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -275,7 +275,7 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Úryvok 3: Vstupný zvukový klip vo formáte .wav a jeho predspracovanie**
+**Ukážka 3: Vstupný zvukový klip .wav a jeho predspracovanie**
 
 Táto funkcia načíta zvukový klip a prevzorkuje ho na cieľovú vzorkovaciu frekvenciu.
 ```python
@@ -297,9 +297,9 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**Úryvok 4: Spustenie inferencie**
+**Ukážka 4: Spustenie inferencie**
 
-Táto funkcia spustí inferenciu s modelom a vráti vygenerovaný výstup.
+Táto funkcia spúšťa inferenciu s modelom a vracia vygenerovaný výstup.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -327,9 +327,9 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
     return audio_array, elapsed
 ```
 
-**Úryvok 5: Uloženie preloženého súboru**
+**Ukážka 5: Uloženie preloženého súboru**
 
-Táto funkcia uloží pole zvuku do súboru .WAV. 
+Táto funkcia ukladá zvukové pole do súboru .WAV. 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -392,16 +392,16 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Spustenie ukážky Gradio UI:
+### Spustenie demonštrácie Gradio UI:
 
-Teraz, keď ste spustili základný príklad skriptu, nasledujúce pokyny poskytujú užitočné rozhranie, ktoré nadväzuje na napísaný kód a uľahčuje živý preklad reči na reč.
+Teraz, keď ste spustili základný príklad skriptu, nasledujúce pokyny poskytujú užitočné UI, ktoré nadväzuje na napísaný kód a uľahčuje živý preklad reči na reč.
 
 #### Spustenie Gradio lokálne
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Potom otvorte webový prehliadač na adrese `http://127.0.0.1:7860` pre prístup k rozhraniu.
+Následne otvorte webový prehliadač na adrese `http://127.0.0.1:7860`, aby ste získali prístup k UI.
 
 
 ### Príklad Gradio UI:
@@ -523,12 +523,12 @@ PY
 
 ## Ďalšie kroky
 
-- Kombinujte desiatky jazykov pre rýchly preklad.
-- Zdieľajte svoju ukážku s ostatnými: Pridajte --share na vytvorenie verejného odkazu, ku ktorému môže ktokoľvek pristupovať na diaľku, alebo nasaďte trvalo pomocou Hugging Face Spaces
+- Kombinujte desiatky jazykov pre rýchly preklad. 
+- Zdieľajte svoju demonštráciu s ostatnými: Pridajte --share na vytvorenie verejného odkazu, ku ktorému má prístup ktokoľvek na diaľku, alebo ju natrvalo nasaďte pomocou Hugging Face Spaces
 
 ## Zdroje
 
-Nižšie sú uvedené ďalšie zdroje pre viac informácií o preklade reči na reč:  
-* Repozitár je tu https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Výskumná akademická literatúra súvisiaca s témou „Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Zdieľanie a nasadenie Gradio: [Sprievodca zdieľaním aplikácie](https://www.gradio.app/guides/sharing-your-app) a [Nasadenie na Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+Nižšie nájdete niekoľko ďalších zdrojov na hlbšie spoznanie prekladu reči na reč:  
+* Repozitár nájdete tu https://huggingface.co/facebook/seamless-m4t-v2-large 
+* Akademický výskum týkajúci sa témy „Seamless: Multilingual Expressive and Streaming Speech Translation“
+* Zdieľanie a nasadenie Gradio: [Sprievodca zdieľaním vašej aplikácie](https://www.gradio.app/guides/sharing-your-app) a [Nasadenie na Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

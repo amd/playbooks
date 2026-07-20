@@ -1,5 +1,5 @@
 {
   "id": "cvml",
   "title": "Helyi számítógépes látás AMD Ryzen™ AI NPU-val",
-  "description": "Helyi észlelési képességek kiépítése a CVML SDK segítségével Ryzen AI és AMD ROCm™ szoftver alapján"
+  "description": "Helyi érzékelési képességek kiépítése a CVML SDK segítségével, Ryzen AI és AMD ROCm™ szoftverre alapozva"
 }

@@ -6,11 +6,11 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Node.js 22.22.1 LTS — рекомендуемая версия для данной платформы.
+Node.js 22.22.1 LTS является рекомендуемой версией для этой платформы.
 
 <!-- @os:windows -->
 
-1. Загрузите установщик для Windows 64-bit с сайта [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+1. Скачайте установщик для Windows 64-бит с [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
 2. Запустите установщик и следуйте инструкциям
 3. Проверьте установку:
 ```cmd
@@ -38,4 +38,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **Примечание**: Дополнительные варианты установки и поддерживаемые платформы см. на странице [Node.js Downloads](https://nodejs.org/en/download/).
+> **Примечание**: см. [Node.js Downloads](https://nodejs.org/en/download/) для дополнительных вариантов установки и платформ.

@@ -4,38 +4,38 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
-> Ez a playbook speciális tageket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom helyes előnézetéhez látogasson el az [amd.com/playbooks](https://amd.com/playbooks) oldalra.
+> Ez a playbook olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. Az [amd.com/playbooks](https://amd.com/playbooks) oldalon tekintheted meg a tartalom megfelelő előnézetét.
 <!-- @github-only:end -->
 
 ## Áttekintés
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Ez a playbook legalább **32 GB** rendszermemóriát igényel.
+> Ehhez a playbookhoz legalább **32GB** rendszermemória szükséges.
 <!-- @device:end -->
 
-Az n8n egy munkafolyamat-automatizálási platform, amely lehetővé teszi alkalmazások és szolgáltatások összekapcsolását egy vizuális, csomópontalapú szerkesztővel.
+Az n8n egy munkafolyamat-automatizálási platform, amellyel egy vizuális, csomópont-alapú szerkesztő segítségével kapcsolhatod össze az alkalmazásokat és szolgáltatásokat.
 
-Ez a playbook megtanítja, hogyan állítson be egy mesterséges intelligencia által vezérelt pénzügyi hírek összefoglalóját, amely lekéri az AP News üzleti rovatát, kinyeri a legfontosabb főcímeket, és a rendszeren futó helyi LLM segítségével befektetőknek szóló összefoglalót készít.
+Ez a playbook megtanítja, hogyan állíts be egy AI-alapú pénzügyi hírösszegzőt, amely lekéri az AP News üzleti szekcióját, kinyeri a legfontosabb híreket, és a rendszereden futó helyi LLM-et használja egy befektetőknek szóló összefoglaló elkészítéséhez.
 
-## Mit fog megtanulni
+## Mit fogsz tanulni
 
-- Hogyan telepítse és indítsa el az n8n-t
-- Előre elkészített munkafolyamat importálása és konfigurálása
-- Csatlakozás a Lemonade-hez a natív n8n integráción keresztül
+- Hogyan telepítsd és indítsd el az n8n-t
+- Egy előre elkészített munkafolyamat importálása és konfigurálása
+- Csatlakozás a Lemonade-hoz a natív n8n integráció segítségével
 - A munkafolyamat csomópontjainak és az adatáramlásnak a megértése
 
 ## Mi az a Lemonade?
 
-A [Lemonade](https://lemonade-server.ai) egy helyi LLM kiszolgáló platform, amelyet AMD hardverhez fejlesztettek. OpenAI-kompatibilis API-t biztosít, amely teljes egészében a gépen fut – az adatok soha nem hagyják el az eszközt.
+A [Lemonade](https://lemonade-server.ai) egy helyi LLM-kiszolgáló platform, amelyet AMD hardverekhez fejlesztettek ki. Egy OpenAI-kompatibilis API-t biztosít, amely teljes egészében a saját gépeden fut – az adataid soha nem hagyják el az eszközödet.
 
-Ebben a playbookban a Lemonade-et egy helyi LLM kiszolgálására használjuk, amelyhez az n8n csatlakozik mesterséges intelligencia által vezérelt feladatokhoz.
+Ebben a playbookban a Lemonade-ot használjuk egy helyi LLM kiszolgálására, amelyhez az n8n csatlakozik AI-alapú feladatokhoz.
 
-Az n8n tartalmaz egy **natív Lemonade csomópontot** (`Lemonade Chat Model`), amely elsőrangú integrációt biztosít – nincs szükség manuális konfigurációra. Ez egyszerűvé teszi a helyi LLM csatlakoztatását az automatizálási munkafolyamatokhoz.
+Az n8n tartalmaz egy **natív Lemonade csomópontot** (`Lemonade Chat Model`), amely elsőrangú integrációt biztosít – nincs szükség manuális konfigurálásra. Ez leegyszerűsíti a helyi LLM összekapcsolását az automatizálási munkafolyamatokkal.
 
-## A memóriakonfiguráció beállítása
+## A memória konfigurálása
 
 <!-- @require:memory-config -->
 
@@ -45,7 +45,7 @@ Az n8n tartalmaz egy **natív Lemonade csomópontot** (`Lemonade Chat Model`), a
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Szoftver-előfeltételek telepítése
+## Szoftveres előfeltételek telepítése
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
@@ -192,9 +192,9 @@ npm -v
 
 ## Az n8n telepítése
 <!-- @os:windows -->
-Telepítse az n8n-t globálisan az npm segítségével.
+Telepítsd az n8n-t globálisan az npm segítségével.
 
-> **Megjegyzés**: Előfordulhat, hogy néhány npm figyelmeztetést lát. Ez várható.
+> **Megjegyzés**: Előfordulhat, hogy néhány npm figyelmeztetést látsz. Ez normális.
 
 ```bash
 npm install -g n8n
@@ -217,36 +217,36 @@ n8n --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Tipp**: A Windows-felhasználóknak előfordulhat, hogy módosítaniuk kell a PowerShell végrehajtási házirendjét (pl.
-> RemoteSigned vagy Unrestricted értékre állítva) egyes PowerShell-parancsok futtatása előtt.
+> **Tipp**: Windows felhasználóknak szükséges lehet módosítaniuk a PowerShell végrehajtási házirendjét (pl.
+> RemoteSigned vagy Unrestricted értékre állítva) néhány PowerShell parancs futtatása előtt.
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **PATH-probléma**: Ha az `n8n --version` azt jelzi, hogy a parancs nem található, győződjön meg arról, hogy az npm globális bin könyvtára szerepel a felhasználói `PATH`-ban. A szokásos telepítési útvonal: `C:\Users\<username>\AppData\Roaming\npm`. 
-> Adja hozzá ezt a felhasználói útvonalhoz (Rendszerkörnyezeti változók szerkesztése > Környezeti változók > Felhasználói útvonal szerkesztése), majd töltse újra a terminált.
+> **PATH probléma**: Ha az `n8n --version` parancsra azt kapod, hogy a parancs nem található, győződj meg róla, hogy az npm globális bin könyvtára szerepel a felhasználói `PATH`-ban. A szokásos telepítési útvonal a `C:\Users\<username>\AppData\Roaming\npm`.
+> Add hozzá ezt a felhasználói PATH-hoz (Rendszerkörnyezeti változók szerkesztése > Környezeti változók > Felhasználói PATH szerkesztése), majd töltsd újra a terminált.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 Most a Podman szolgáltatást fogjuk használni az n8n telepítésünk konténerizálásához.
 
-Töltse le a következőt egy tetszőleges könyvtárba: [compose.yml](assets/compose.yml)
+Kérjük, töltsd le a következőt egy általad választott könyvtárba: [compose.yml](assets/compose.yml)
 
-Abban a könyvtárban futtassa a következő parancsot:
+Ebben a könyvtárban futtasd a következő parancsot:
 ```bash
 podman compose up -d
 ```
 
-Ez telepíti az n8n-t, és tartós tárolóba ír.
+Ennek telepítenie kell az n8n-t, és íratnia kell egy tartós tárolóba.
 
-Indítsa el az n8n-t úgy, hogy beírja a `localhost:5678` címet a böngésző címsorába.
+Indítsd el az n8n-t a `localhost:5678` cím böngésző címsorába való beírásával.
 <!-- @os:end -->
 
 <!-- @os:windows -->
 ## Az n8n indítása
 
-Indítsa el az n8n-t a terminálból:
+Indítsd el az n8n-t a terminálból:
 
 ```bash
 n8n start
@@ -317,27 +317,27 @@ echo "OK: n8n server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Az n8n elindít egy helyi webszervert. Nyomja meg a `'o'` billentyűt, vagy nyissa meg a böngészőben a `http://localhost:5678` címet a szerkesztő eléréséhez.
+Az n8n elindít egy helyi webszervert. Nyomd meg az `'o'` billentyűt, vagy nyisd meg a böngésződben a `http://localhost:5678` címet a szerkesztő eléréséhez.
 <!-- @os:end -->
 
 
-> **Tipp**: Tartsa nyitva a terminálablakot az n8n használata közben. Bezárása leállíthatja a szervert.
+> **Tipp**: Tartsd nyitva a terminálablakot az n8n használata közben. Bezárása leállíthatja a szervert.
 
 ## A Lemonade indítása
 
-A Lemonade az a helyi szerver, amely futtatja a modellt és csatlakozik az n8n-hez.
+A Lemonade az a helyi szerver, amely futtatni fogja a modellt, és csatlakozik az n8n-hez.
 
 <!-- @os:linux -->
-Nyissa meg a Lemonade grafikus felületét a tálcán lévő Lemonade ikonra kattintva. Innen böngészhet modellek és háttérrendszerek között, valamint betöltheti az előre telepített modelleket.
+Nyisd meg a Lemonade GUI-t a tálcán található Lemonade ikonra kattintva. Itt tallózhatsz a modellek és backendek között, valamint betöltheted az előre telepített modelleket.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Nyissa meg a Lemonade grafikus felületét a Lemonade ikonra kattintva. Jobb gombbal kattintson a tálcaikonra az alkalmazás megnyitásához. Ezután modelleket, háttérrendszereket adhat hozzá, és betöltheti az előre telepített modelleket.
+Nyisd meg a Lemonade GUI-t a Lemonade ikonra kattintva. Kattints jobb gombbal a tálcaikonra az alkalmazás megnyitásához. Ezután hozzáadhatsz modelleket, backendeket, és betöltheted az előre telepített modelleket.
 <!-- @os:end -->
 
->**Tipp**: Futás után a Lemonade grafikus felülete a http://localhost:13305 címen is elérhető.
+>**Tipp**: Elindítás után a Lemonade GUI a http://localhost:13305 címen is elérhető
 
-Alternatívaként nyisson meg egy terminált, és futtassa a `lemonade list` parancsot a telepített modellek megtekintéséhez. Ezután futtassa:
+Alternatívaként megnyithatsz egy terminált, és futtathatod a `lemonade list` parancsot, hogy megnézd, mely modellek vannak telepítve. Ezután futtasd:
 
 <!-- @device:halo_box -->
 <!-- @os:linux -->
@@ -370,26 +370,24 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 
 ### 1. lépés: Regisztráció vagy bejelentkezés az n8n-be
 
-Amikor először nyitja meg az n8n-t, a rendszer felkéri fiók létrehozására vagy bejelentkezésre:
+Amikor először megnyitod az n8n-t, egy fiók létrehozására vagy bejelentkezésre leszel felkérve:
 
-1. Nyissa meg a `http://localhost:5678` címet a böngészőben
-2. Hozzon létre egy új helyi fiókot az e-mail-címével, vagy jelentkezzen be, ha már van fiókja
+1. Nyisd meg a `http://localhost:5678` címet a böngésződben
+2. Hozz létre egy új helyi fiókot az e-mail címeddel, vagy jelentkezz be, ha már van fiókod
 3. Bejelentkezés után megjelenik az n8n irányítópultja
 
-> **Tipp**: Ha ki van zárva a fiókjából, próbálja meg az `n8n user-management:reset` parancsot
+> **Tipp**: Ha kizártad magad a fiókodból, próbáld meg az `n8n user-management:reset` parancsot
 
 ### 2. lépés: A munkafolyamat importálása
 
-Biztosítottunk egy előre elkészített munkafolyamatot, amelyet közvetlenül importálhat:
+Biztosítottunk egy előre elkészített munkafolyamatot, amelyet közvetlenül importálhatsz:
 
-1. Töltse le a következő munkafolyamat-fájlt: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. Kattintson a **Start from Scratch** gombra a munkafolyamat-szerkesztő megnyitásához. Alternatívaként kattintson a + gombra a bal felső sarokban, majd az **Add workflow** lehetőségre.
-3. Kattintson a jobb felső sávban lévő **...** menüre (három pont), és válassza az **Import from file** lehetőséget
-4. Válassza ki a letöltött `financial-news-workflow.json` fájlt
+1. Töltsd le a következő munkafolyamat-fájlt: [financial-news-workflow.json](assets/financial-news-workflow.json)
+2. Kattints a **Start from Scratch** gombra a munkafolyamat-szerkesztő megnyitásához. Alternatívaként kattints a bal felső sarokban lévő + gombra, majd az **Add workflow** lehetőségre.
+3. Kattints a jobb felső sarokban lévő **...** menüre (három pont), majd válaszd az **Import from file** lehetőséget
+4. Válaszd ki a letöltött `financial-news-workflow.json` fájlt
 5. A munkafolyamat megjelenik a vásznon
-
-
-### 3. lépés: A munkafolyamat megértése
+### 3. lépés: A munkafolyamat megismerése
 
 Az importált munkafolyamat 9 összekapcsolt csomópontot tartalmaz:
 
@@ -399,46 +397,46 @@ Az importált munkafolyamat 9 összekapcsolt csomópontot tartalmaz:
 
 | Csomópont | Cél |
 |------|---------|
-| **When clicking 'Execute workflow'** | Manuális indítás a munkafolyamat elindításához |
-| **Fetch Financial News Webpage** | HTTP GET kérés a `https://apnews.com/business` címre |
-| **Delay to Ensure Page Load** | Várakozási csomópont az oldaltartalom teljes betöltésének biztosítására |
-| **Extract News Headlines & Text** | HTML csomópont, amely CSS-szelektorok segítségével kinyeri a főcímeket, szerkesztői válogatásokat, kiemelt híreket és regionális híreket |
-| **Clean Extracted News Data** | Set csomópont, amely az összes kinyert adatot egyetlen szövegmezőbe kombinálja |
-| **AI Financial News Summarizer** | AI-ügynök, amely pénzügyi elemző rendszerprompttal dolgozza fel a híreket |
-| **Lemonade Chat Model** | Csatlakozik a helyi Lemonade szerverhez, amely az LLM-et futtatja |
-| **Structured Output Parser** | Az AI kimenetét strukturált JSON formátumba alakítja |
+| **When clicking 'Execute workflow'** | Kézi indító a munkafolyamat elindításához |
+| **Fetch Financial News Webpage** | HTTP GET kérés a következő címre: `https://apnews.com/business` |
+| **Delay to Ensure Page Load** | Wait csomópont, amely biztosítja, hogy az oldal tartalma teljesen betöltődjön |
+| **Extract News Headlines & Text** | HTML csomópont, amely CSS-szelektorok segítségével kinyeri a hírcímeket, a szerkesztői válogatásokat, a legfontosabb híreket és a regionális híreket |
+| **Clean Extracted News Data** | Set csomópont, amely az összes kinyert adatot egyetlen szövegmezőbe egyesíti |
+| **AI Financial News Summarizer** | AI Agent, amely egy pénzügyi elemzői rendszerprompt segítségével dolgozza fel a híreket |
+| **Lemonade Chat Model** | Csatlakozik a helyi Lemonade szerverhez, amelyen az LLM fut |
+| **Structured Output Parser** | Strukturált JSON formátumra alakítja az AI kimenetét |
 | **Convert to File** | Az összefoglalót letölthető fájllá alakítja |
 
-### 4. lépés: A Lemonade hitelesítő adatok konfigurálása
+### 4. lépés: A Lemonade hitelesítő adatok beállítása
 
-A munkafolyamat futtatása előtt csatlakoztatnia kell a helyi Lemonade szerverhez:
+Mielőtt futtatnád a munkafolyamatot, csatlakoztatnod kell a helyi Lemonade szerverhez:
 
-1. Kattintson duplán az n8n-ben lévő **Lemonade Chat Model** csomópontra
-2. A **Credential to connect with** legördülő menüben válassza a **Create New Credential** lehetőséget
-3. Adja meg az alábbi táblázatban szereplő értékeket, majd kattintson a mentés gombra.
-4. Válassza ki a Lemonade Serverben betöltött megfelelő modellt.
+1. Kattints duplán a **Lemonade Chat Model** csomópontra az n8n-ben
+2. A **Credential to connect with** legördülő menüben válaszd a **Create New Credential** lehetőséget
+3. Add meg az alábbi táblázatban szereplő értékeket, majd kattints a mentésre.
+4. Válaszd ki a Lemonade Server-en betöltött, megfelelő modellt.
 
   | Mező | Érték |
   |-------|-------|
   | **Base URL** | `http://localhost:13305/api/v1` |
   | **API Key** | `lemonade` |
 
-> **Megjegyzés**: A tesztelés előtt futtassa a `lemonade status` parancsot egy terminálban annak megerősítéséhez, hogy a Lemonade szerver fut.
+> **Megjegyzés**: A teszt előtt futtasd a `lemonade status` parancsot egy terminálban, hogy megerősítsd, a Lemonade szerver fut.
 <!-- @device:halo_box -->
-> Ez a munkafolyamat a GPT-OSS-120B modellt használja, amely előre telepítve van a Lemonade-ben. Ezt más betöltött modellekre is módosíthatja a Lemonade Chat Model csomópont beállításaiban.
+> Ez a munkafolyamat a GPT-OSS-120B modellt használja, amely előre telepítve van a Lemonade-ben. Ezt megváltoztathatod más, a Lemonade Chat Model csomópont beállításaiban betöltött modellekre.
 <!-- @device:end -->
 
 ### 5. lépés: A munkafolyamat tesztelése
 
-1. Győződjön meg arról, hogy a Lemonade fut és egy modell be van töltve
-2. Kattintson az **Execute workflow** gombra a vászon alsó közepén
-3. Figyelje meg, ahogy az egyes csomópontok balról jobbra hajtódnak végre – befejezéskor zöldre váltanak
-4. Kattintson duplán az **AI Financial News Summarizer** csomópontra az alsó panelen megjelenő generált összefoglaló megtekintéséhez.
-5. Kattintson duplán a **Convert to File** csomópontra a megfelelő szövegfájl letöltéséhez az alsó panelről.
+1. Győződj meg róla, hogy a Lemonade fut, és egy modell be van töltve
+2. Kattints az **Execute workflow** gombra a vászon alján középen
+3. Figyeld meg, ahogy az egyes csomópontok balról jobbra futnak le – zöldre váltanak, amikor elkészültek
+4. Kattints duplán az **AI Financial News Summarizer** csomópontra, hogy megtekintsd a generált összefoglalót az alsó panelen.
+5. Kattints duplán a **Convert to File** csomópontra, hogy letöltsd a megfelelő szöveges fájlt az alsó panelen.
 
-## Az AI-ügynök megértése
+## Az AI Agent megismerése
 
-Az AI Financial News Summarizer egy pénzügyi elemzésre tervezett rendszerpromptot használ:
+Az AI Financial News Summarizer egy pénzügyi elemzésre kialakított rendszerpromptot használ:
 
 ```
 You are an AI financial analyst. Your role is to read, understand, and
@@ -450,26 +448,26 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-Az ügynök megkapja a megtisztított híradatokat, és strukturált összefoglalót ad ki piaci hangulattal együtt.
+Az ügynök megkapja a megtisztított hírdatokat, és egy strukturált összefoglalót ad ki a piaci hangulattal együtt.
 
 ### A munkafolyamat mentése
 
-Kattintson a munkafolyamat nevére a tetején, és nevezze át, ha kívánja. A munkafolyamatok automatikusan mentődnek munka közben.
+Kattints a munkafolyamat nevére a tetején, és nevezd át, ha szeretnéd. A munkafolyamatok automatikusan mentődnek munka közben.
 
 ## Következő lépések
 
-- **Ütemezett automatizálás**: Cserélje le a manuális indítót egy **Schedule Trigger**-re a napi futtatáshoz
-- **Értesítések küldése**: Adjon hozzá egy **Discord**, **Slack** vagy **Email** csomópontot az összefoglalók fogadásához
-- **Különböző modellek kipróbálása**: Módosítsa a modellt a Lemonade Chat Model csomópontban, hogy különböző LLM-ekkel kísérletezzen
-- **Kinyerés testreszabása**: Módosítsa a HTML Extract csomópont CSS-szelektorait különböző hírszekciókat célozva
-- **Különböző háttérrendszerek kipróbálása**: Az n8n támogatja az [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio és más helyi LLM háttérrendszereket is
+- **Automatizálás ütemezése**: Cseréld le a Manual Trigger-t egy **Schedule Trigger**-re, hogy naponta fusson
+- **Értesítések küldése**: Adj hozzá egy **Discord**, **Slack** vagy **Email** csomópontot az összefoglalók fogadásához
+- **Próbálj ki más modelleket**: Változtasd meg a modellt a Lemonade Chat Model csomópontban, hogy különböző LLM-ekkel kísérletezz
+- **Kinyerés testreszabása**: Módosítsd a HTML Extract csomópont CSS-szelektorait, hogy más hírkategóriákat célozz meg
+- **Próbálj ki más háttérrendszereket**: Az n8n támogatja az [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio és más helyi LLM háttérrendszereket is
 
-### n8n sablonok felfedezése
+### Fedezd fel az n8n sablonokat
 
-Az n8n több száz előre elkészített munkafolyamat-sablonnal rendelkezik. Böngésszen a hivatalos sablonkönyvtárban:
+Az n8n több száz előre elkészített munkafolyamat-sablonnal rendelkezik. Böngészd a hivatalos sablonkönyvtárat itt:
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
-Keressen rá az „AI", „LLM" vagy „automation" kifejezésekre, hogy importálható és testreszabható munkafolyamatokat találjon.
+Keress rá az „AI”, „LLM” vagy „automatizálás” kifejezésekre, hogy olyan munkafolyamatokat találj, amelyeket importálhatsz és testre szabhatsz.
 
-További információkért tekintse meg az [n8n dokumentációját](https://docs.n8n.io/).
+További információért nézd meg az [n8n dokumentációját](https://docs.n8n.io/).

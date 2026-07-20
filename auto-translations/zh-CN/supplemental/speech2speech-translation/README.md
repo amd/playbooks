@@ -6,26 +6,26 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> 本剧本使用了 GitHub 无法渲染的特殊标记。请访问 [amd.com/playbooks](https://amd.com/playbooks) 以正确预览此内容。
 <!-- @github-only:end -->
 
 ## 概述
 
-AMD ROCm™ 软件与 PyTorch 技术栈共同构建了一个统一的端侧 AI 生态系统。它同时支持 Windows 和 Linux，并为包括 Ryzen™ AI APU 和 Radeon™ GPU 在内的多种设备提供官方支持。
+AMD ROCm™ 软件和 PyTorch 技术栈为设备端 AI 打造了统一的生态系统。它可同时在 Windows 和 Linux 上运行，并官方支持包括 Ryzen™ AI APU 和 Radeon™ GPU 在内的多种设备。
 
-本 playbook 将教您如何在边缘端完全本地化地运行低延迟、富有表现力且保护隐私的语音到语音翻译。
+本剧本将教您如何完全在边缘设备上运行低延迟、富有表现力且私密的语音到语音翻译。
 
-## 您将学到的内容
+## 您将学到什么
 
 - 如何搭建语音到语音环境
-- 如何编写 Python 代码以加载和使用语音到语音模型
+- 如何编写 Python 代码来加载和使用语音-语音模型
 - 如何运行并体验 Gradio UI
 
-## 为什么使用实时语音到语音翻译？
+## 为什么要使用实时语音到语音翻译？
 
-- 消除翻译与语言障碍之间的摩擦
-- 无需尴尬停顿即可传达语气、情感和意图
-- 实现全球协作并加快决策速度
+- 消除翻译与语言之间的障碍
+- 在没有尴尬停顿的情况下传达语气、情感和意图
+- 促进全球协作并加快决策速度
 
 ## 设置内存配置
 
@@ -33,18 +33,18 @@ AMD ROCm™ 软件与 PyTorch 技术栈共同构建了一个统一的端侧 AI �
 
 <!-- @device:halo_box -->
 ## 检查软件更新
-> **注意**：如果未安装 VS Code，您可以通过 Ryzen AI 开发者中心进行安装。
+> **注意**：如果未安装 VS Code，可以通过 Ryzen AI Developer Center 进行安装。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 安装软件前置条件
+## 安装软件先决条件
 
 ### 创建虚拟环境
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-在 Linux 上，打开终端并运行以下命令，创建一个已安装 ROCm+Pytorch 的 venv：
+在 Linux 上，打开终端并运行以下命令以创建一个已预装 ROCm+Pytorch 的 venv：
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -58,13 +58,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**授予您的用户访问 GPU 设备的权限**（需注销并重新登录后生效）：
+**为您的用户授予 GPU 设备访问权限**（需要退出登录并重新登录才能生效）：
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-在 Linux 上，打开终端并运行以下命令创建 venv：
+在 Linux 上，打开终端并运行以下命令以创建 venv：
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -80,7 +80,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-在 Windows 上，在您选择的目录中打开终端，并按照以下命令创建一个已安装 ROCm+Pytorch 的 venv：
+在 Windows 上，在您选择的目录中打开终端，并按照以下命令创建一个已预装 ROCm+Pytorch 的 venv：
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -90,7 +90,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **提示**：Windows 用户在运行某些 PowerShell 命令之前，可能需要修改 PowerShell 执行策略（例如，将其设置为 RemoteSigned 或 Unrestricted）。
+> **提示**：Windows 用户在运行某些 PowerShell 命令之前，可能需要修改 PowerShell 执行策略（例如设置为 RemoteSigned 或 Unrestricted）。
 
 <!-- @device:end -->
 
@@ -105,7 +105,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **提示**：Windows 用户在运行某些 PowerShell 命令之前，可能需要修改 PowerShell 执行策略（例如，将其设置为 RemoteSigned 或 Unrestricted）。
+> **提示**：Windows 用户在运行某些 PowerShell 命令之前，可能需要修改 PowerShell 执行策略（例如设置为 RemoteSigned 或 Unrestricted）。
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -193,39 +193,39 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## 设置语音到语音演示
+## 搭建语音到语音演示
 
 #### 了解 seamless-m4t-v2
 
 请查看 Hugging Face 上的[模型卡片](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)以获取更多信息。
-以下是语音到语音模型的技术架构：
+以下是语音-语音模型的技术架构：
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### 下载脚本
 
-本 playbook 包含可直接使用的脚本。请将所有脚本下载到您创建环境的同一目录中。
+本剧本包含可直接使用的脚本。请将它们全部下载到您所创建环境的同一目录中。
 
-| 脚本 | 描述 | 用法 |
+| 脚本 | 说明 | 用法 |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | 基本 LLM 文本生成 | `python infer.py` |
-| [input1.wav](assets/input1.wav) | 示例音频文件 | N/A |
-| [lang_list.py](assets/lang_list.py) | 语言支持文件 | N/A |
+| [infer.py](assets/infer.py) | 基础 LLM 文本生成 | `python infer.py` |
+| [input1.wav](assets/input1.wav) | 示例音频文件 | 不适用 |
+| [lang_list.py](assets/lang_list.py) | 语言支持文件 | 不适用 |
 | [gradio_demo.py](assets/gradio_demo.py) | 用于语音翻译的直观 UI | `python gradio_demo.py --no-share` |
 
 
 ### 从 infer.py 开始
 
-要执行脚本，请运行 
+要执行该脚本，请运行 
 ```bash
 python infer.py
 ```
-> **注意**：您可能会看到一些警告，这是正常现象。
+> **注意**：您可能会看到一些警告。这是正常现象。
  
   
 #### 代码说明
-**代码片段 1：导入必要的依赖项**
+**片段 1：导入必要的依赖项**
 
 ```python 
 import os
@@ -252,9 +252,9 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**代码片段 2：从 HuggingFace 加载模型**
+**片段 2：从 HuggingFace 加载模型**
 
-此函数接收模型 ID，若模型尚未下载则进行下载，然后返回处理器和模型供下一个函数使用。
+此函数接收一个模型 ID，如果尚未下载该模型，则会下载该模型。然后返回处理器和模型供下一个函数使用。
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -273,9 +273,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**代码片段 3：输入音频片段 .wav 文件并进行预处理**
+**片段 3：输入音频片段 .wav 文件并进行预处理**
 
-此函数加载音频片段并将其重采样至目标采样率。
+此函数加载音频片段并将其重采样为目标采样率。
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -295,9 +295,9 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**代码片段 4：运行推理**
+**片段 4：运行推理**
 
-此函数使用模型运行推理并返回生成的输出。
+此函数使用模型运行推理，并返回生成的输出。
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -325,7 +325,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
     return audio_array, elapsed
 ```
 
-**代码片段 5：保存翻译后的文件**
+**片段 5：保存翻译后的文件**
 
 此函数将音频数组保存为 .WAV 文件。
 ```python
@@ -392,14 +392,14 @@ echo "PASS: infer.py created out1.wav successfully"
 
 ### 运行 Gradio UI 演示：
 
-现在您已经运行了一个基本脚本示例，以下说明提供了一个实用的 UI，它在我们已编写的代码基础上进行了扩展，使实时语音到语音翻译变得更加便捷。
+现在您已经运行了一个基础脚本示例，接下来的说明将提供一个便捷的 UI，它基于我们编写的代码构建，让实时语音-语音翻译变得简单易用。
 
 #### 在本地运行 Gradio
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-然后，在浏览器中打开 `http://127.0.0.1:7860` 以访问 UI。
+然后，在网页浏览器中打开 `http://127.0.0.1:7860` 以访问该 UI。
 
 
 ### Gradio UI 示例：
@@ -521,12 +521,12 @@ PY
 
 ## 后续步骤
 
-- 在数十种语言之间灵活切换，实现快速翻译。
-- 与他人分享您的演示：添加 --share 可创建任何人都能远程访问的公共链接，或使用 Hugging Face Spaces 进行永久部署。
+- 混合搭配数十种语言以实现快速翻译。
+- 与他人分享您的演示：添加 --share 以创建一个任何人都可以远程访问的公共链接，或使用 Hugging Face Spaces 进行永久部署
 
 ## 资源
 
-以下是一些了解语音到语音翻译的额外资源：
-* 模型仓库地址：https://huggingface.co/facebook/seamless-m4t-v2-large
-* 与"Seamless: Multilingual Expressive and Streaming Speech Translation"相关的学术研究
-* Gradio 分享与部署：[应用分享指南](https://www.gradio.app/guides/sharing-your-app) 和 [部署到 Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+以下是一些了解语音到语音翻译的更多资源：
+* 相关仓库位于 https://huggingface.co/facebook/seamless-m4t-v2-large
+* 与“Seamless: Multilingual Expressive and Streaming Speech Translation”相关的学术研究
+* Gradio 分享与部署：[分享您的应用指南](https://www.gradio.app/guides/sharing-your-app) 和 [部署到 Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

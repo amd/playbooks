@@ -1,5 +1,5 @@
 {
   "id": "open-webui-chat",
   "title": "Open WebUI에서 LLM과 채팅하기",
-  "description": "Open WebUI를 사용하여 로컬에서 LLM과 채팅하세요."
+  "description": "Open WebUI를 사용하여 LLM과 로컬에서 채팅하세요."
 }

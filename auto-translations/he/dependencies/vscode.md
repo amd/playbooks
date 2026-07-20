@@ -8,26 +8,26 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-ניתן להתקין את VS Code מ**מרכז המפתחים של AMD Ryzen™ AI**. עבור ללשונית **Updates** והתקן את VS Code אם הוא אינו מותקן כבר.
+ניתן להתקין את VS Code מתוך **AMD Ryzen™ AI Developer Center**. עברו ללשונית **Updates** והתקינו את VS Code אם הוא אינו מותקן כבר.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-ניתן להתקין את VS Code מ**מרכז המפתחים של AMD Ryzen™ AI**. עבור ללשונית **Manage** והתקן את VS Code אם הוא אינו מותקן כבר.
+ניתן להתקין את VS Code מתוך **AMD Ryzen™ AI Developer Center**. עברו ללשונית **Manage** והתקינו את VS Code אם הוא אינו מותקן כבר.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. הורד את קובץ ההתקנה של Windows מ: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
-2. לחץ על הקובץ שהורדת `VSCodeUserSetup-x64-1.108.2.exe` כדי להתקין את VS Code.
+1. הורידו את קובץ ההתקנה עבור Windows מהכתובת: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+2. לחצו על הקובץ שהורדתם `VSCodeUserSetup-x64-1.108.2.exe` כדי להתקין את VS Code.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-1. הורד את חבילת ההתקנה של Debian מ: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
-2. לחץ על הקובץ שהורדת `code_1.108.2-1769004815_amd64.deb` כדי להתקין את VS Code.
+1. הורידו את חבילת ההתקנה עבור Debian מהכתובת: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
+2. לחצו על הקובץ שהורדתם `code_1.108.2-1769004815_amd64.deb` כדי להתקין את VS Code.
 
 <!-- @os:end -->
 <!-- @device:end -->

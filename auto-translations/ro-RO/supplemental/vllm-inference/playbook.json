@@ -1,5 +1,5 @@
 {
   "id": "vllm-inference",
-  "title": "Noțiuni de bază despre vLLM",
+  "title": "Noțiuni introductive despre vLLM",
   "description": "Aflați cum să rulați inferența și servirea folosind vLLM containerizat pe GPU-ul integrat"
 }

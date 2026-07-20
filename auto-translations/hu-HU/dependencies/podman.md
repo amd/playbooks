@@ -6,16 +6,15 @@ SPDX-License-Identifier: MIT
 
 ### Podman
 
-A Podman egy Linux-alapú konténerizációs szoftver.
+A Podman egy konténerizációs szoftver Linuxhoz.
 
-
-**1. lépés**: Telepítse az alapvető Podman motort és az önálló Compose V2 elemző bővítményt.
+**1. lépés**: Telepítse a Podman alapmotort és az önálló Compose V2 elemzőbővítményt.
 
 ```bash
 sudo apt update && sudo apt install -y podman docker-compose-plugin podman-compose
 ```
 
-**2. lépés**: Ellenőrizze a Podman és a Compose működését.
+**2. lépés**: Ellenőrizze a Podmant és a Compose-t
 
 ```bash
 podman --version
@@ -27,7 +26,7 @@ podman-compose --version
 ```bash
 sudo systemctl enable --now podman.socket
 ```
-**4. lépés**: Futtasson egy ideiglenes tesztkonténert annak ellenőrzésére, hogy a motor sikeresen le tudja-e tölteni és végre tudja-e hajtani a képeket.
+**4. lépés**: Futtasson egy ideiglenes tesztkonténert annak ellenőrzésére, hogy a motor sikeresen le tudja-e tölteni és futtatni a képfájlokat.
 
 ```bash
 sudo podman run --rm docker.io/library/hello-world

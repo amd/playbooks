@@ -8,26 +8,26 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code, **AMD Ryzen™ AI Developer Center**'dan yüklenebilir. **Updates** sekmesine gidin ve VS Code henüz yüklü değilse yükleyin.
+VS Code, **AMD Ryzen™ AI Developer Center** üzerinden yüklenebilir. **Updates** sekmesine gidin ve VS Code henüz mevcut değilse yükleyin.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code, **AMD Ryzen™ AI Developer Center**'dan yüklenebilir. **Manage** sekmesine gidin ve VS Code henüz yüklü değilse yükleyin.
+VS Code, **AMD Ryzen™ AI Developer Center** üzerinden yüklenebilir. **Manage** sekmesine gidin ve VS Code henüz mevcut değilse yükleyin.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Windows kurulum yürütülebilir dosyasını şu adresten indirin: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
-2. VS Code'u yüklemek için indirilen `VSCodeUserSetup-x64-1.108.2.exe` dosyasına tıklayın.
+1. Windows kurulum çalıştırılabilir dosyasını şu adresten indirin: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+2. VS Code'u yüklemek için indirdiğiniz `VSCodeUserSetup-x64-1.108.2.exe` dosyasına tıklayın.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
 1. Debian kurulum paketini şu adresten indirin: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
-2. VS Code'u yüklemek için indirilen `code_1.108.2-1769004815_amd64.deb` dosyasına tıklayın.
+2. VS Code'u yüklemek için indirdiğiniz `code_1.108.2-1769004815_amd64.deb` dosyasına tıklayın.
 
 <!-- @os:end -->
 <!-- @device:end -->

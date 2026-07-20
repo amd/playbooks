@@ -8,19 +8,19 @@ SPDX-License-Identifier: MIT
 
 เอกสารนี้อธิบายการกำหนดค่าแพลตฟอร์มที่คาดหวังสำหรับการรัน playbook นี้
 
-## แอปพลิเคชัน/เฟรมเวิร์กที่จำเป็น
+## แอป/เฟรมเวิร์กที่จำเป็น
 
 ### Windows/Linux
-ควรติดตั้ง Lemonade ล่วงหน้าจาก [ที่นี่](https://lemonade-server.ai/install_options.html)
+ควรติดตั้ง Lemonade ไว้ล่วงหน้าจาก [ที่นี่](https://lemonade-server.ai/install_options.html)
 
-- **Open WebUI** (แอปเว็บฝั่ง frontend)
-- **Lemonade Server** (เซิร์ฟเวอร์โมเดลฝั่ง backend)
+- **Open WebUI** (เว็บแอปส่วนหน้า)
+- **Lemonade Server** (เซิร์ฟเวอร์โมเดลส่วนหลัง)
 
-> Playbook นี้รัน **Lemonade** (Lemonade server/app) แบบ **native** ส่วน **Open WebUI** รันในรูปแบบ **container** บน Linux (ผ่าน Podman) และในรูปแบบ **Python package** บน Windows แพ็กเกจ `open-webui` บน PyPI รองรับ Python ≤ 3.12 เท่านั้น ดังนั้น container บน Linux จึงช่วยหลีกเลี่ยงการจัดการ Python เวอร์ชันเก่า
+> playbook นี้รัน **Lemonade** (Lemonade server/app) แบบ **native** ส่วน **Open WebUI** รันเป็น **container** บน Linux (ผ่าน Podman) และเป็น **Python package** บน Windows แพ็กเกจ `open-webui` PyPI รองรับเฉพาะ Python ≤ 3.12 เท่านั้น ดังนั้น container บน Linux จึงช่วยหลีกเลี่ยงการต้องจัดการ Python เวอร์ชันเก่า
 
 ## โมเดล (ใน Lemonade)
 
-ควรดาวน์โหลดโมเดลภายใน **Lemonade app** (โดยใช้ Model Manager ที่มีในตัว) หรือผ่านคำสั่งจัดการโมเดลของ Lemonade (`lemonade pull <model_name>`) Playbook นี้ถือว่าโมเดลที่แนะนำด้านล่างได้รับการดาวน์โหลดแล้วและปรากฏในรายการ endpoint ของโมเดล
+ควรดาวน์โหลดโมเดลภายใน **Lemonade app** (โดยใช้ Model Manager ในตัว) หรือผ่านคำสั่งจัดการโมเดลของ Lemonade (`lemonade pull <model_name>`) playbook นี้ถือว่าโมเดลที่แนะนำด้านล่างได้ถูกดาวน์โหลดและปรากฏอยู่ใน endpoint รายการโมเดลแล้ว
 
 ตรวจสอบความพร้อมใช้งานของโมเดล:
 - เปิด: `http://localhost:13305/api/v1/models`
@@ -28,18 +28,18 @@ SPDX-License-Identifier: MIT
 
 ### โมเดลที่แนะนำ
 
-| ความสามารถ | Model ID | หมายเหตุ |
+| ความสามารถ | รหัสโมเดล | หมายเหตุ |
 |---|----|-----|
-| LLM (รับข้อความ → ส่งออกข้อความ) | `Qwen3-4B-Hybrid` (หรือที่คล้ายกัน) | โมเดล LLM ของ Lemonade ใดก็ได้สำหรับการสนทนา การเติมข้อความ การเขียนโค้ด หรือการให้เหตุผล |
-| VLM (รับภาพ → ส่งออกข้อความ) | `Qwen3.5-4B-GGUF` (หรือโมเดลใดก็ได้ในหมวด **Vision**) | โมเดล multimodal/vision ใดก็ได้ที่รับภาพเป็นส่วนหนึ่งของ input |
-| การสร้างภาพ (รับข้อความ → ส่งออกภาพ) | `SDXL-Turbo` (หรือโมเดลใดก็ได้ในหมวด **Image**) | โมเดล Stable Diffusion ใดก็ได้ที่สร้างภาพจาก text prompt |
-| เสียง (รับเสียงพูด → ส่งออกข้อความ) | `Whisper-Large-v3` (หรือโมเดลใดก็ได้ในหมวด **Audio**) | โมเดล ASR ใดก็ได้ที่แปลงเสียงเป็นข้อความ |
+| LLM (ข้อความ → ข้อความ) | `Qwen3-4B-Hybrid` (หรือใกล้เคียง) | โมเดล LLM ใดก็ได้ของ Lemonade สำหรับแชท การเติมข้อความให้สมบูรณ์ การเขียนโค้ด หรือการให้เหตุผล |
+| VLM (รูปภาพ → ข้อความ) | `Qwen3.5-4B-GGUF` (หรือโมเดลใดก็ได้ในหมวดหมู่ **Vision**) | โมเดลมัลติโมดัล/รองรับการมองเห็นใดก็ได้ที่สามารถรับรูปภาพเป็นส่วนหนึ่งของอินพุตได้ |
+| การสร้างภาพ (ข้อความ → รูปภาพ) | `SDXL-Turbo` (หรือโมเดลใดก็ได้ในหมวดหมู่ **Image**) | โมเดล Stable Diffusion ใดก็ได้ที่สร้างรูปภาพจากพรอมต์ข้อความ |
+| เสียง (เสียงพูด → ข้อความ) | `Whisper-Large-v3` (หรือโมเดลใดก็ได้ในหมวดหมู่ **Audio**) | โมเดล ASR ใดก็ได้ที่แปลงเสียงเป็นข้อความ |
 
 <p align="center">
   <img src="assets/lemonade_model_manager.png" alt="Lemonade Model Manager" width="600"/>
 </p>
 
-## พอร์ตที่ใช้งาน
+## พอร์ตที่ใช้
 
 - **Lemonade Server:** `http://localhost:13305`
 - **Open WebUI:** `http://localhost:8080`

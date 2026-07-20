@@ -6,45 +6,45 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Bu playbook, GitHub'ın işleyemediği özel etiketler kullanmaktadır. Bu içeriği doğru şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
+> Bu kılavuz, GitHub'ın işleyemediği özel etiketler kullanır. Bu içeriği doğru şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
 <!-- @github-only:end -->
 
 ## Genel Bakış
 
-AMD ROCm™ yazılımı ve PyTorch yığını, cihaz üzerinde yapay zeka için birleşik bir ekosistem oluşturur. Ryzen™ AI APU'lar ve Radeon™ GPU'lar dahil geniş bir cihaz yelpazesi için resmi destekle hem Windows hem de Linux'ta çalışır.
+AMD ROCm™ yazılımı ve PyTorch yığını, cihaz üzerinde AI için birleşik bir ekosistem oluşturur. Ryzen™ AI APU'lar ve Radeon™ GPU'lar dahil olmak üzere geniş bir cihaz yelpazesi için resmi destekle hem Windows hem de Linux'ta çalışır.
 
-Bu playbook, düşük gecikmeli, etkileyici ve gizli konuşmadan konuşmaya çeviriyi tamamen uç noktada nasıl çalıştıracağınızı öğretecektir.
+Bu kılavuz size, düşük gecikmeli, ifade gücü yüksek ve tamamen uç noktada (edge) çalışan özel konuşmadan konuşmaya çeviriyi nasıl gerçekleştireceğinizi öğretecek.
 
 ## Neler Öğreneceksiniz
 
-- Konuşmadan konuşmaya ortamı nasıl kurulur
-- Konuşmadan konuşmaya modelleri yüklemek ve kullanmak için Python kodu nasıl yazılır
-- Gradio kullanıcı arayüzü nasıl çalıştırılır ve deneyimlenir
+- Konuşmadan konuşmaya ortamının nasıl kurulacağı
+- Konuşmadan konuşmaya modellerini yüklemek ve kullanmak için Python kodunun nasıl yazılacağı
+- Gradio kullanıcı arayüzünün nasıl çalıştırılacağı ve üzerinde deney yapılacağı
 
-## Neden gerçek zamanlı konuşmadan konuşmaya çeviri kullanılmalı?
+## Gerçek zamanlı konuşmadan konuşmaya çeviri neden kullanılmalı?
 
 - Çeviri ve dil engelleri arasındaki sürtünmeyi ortadan kaldırır
-- Tonu, duyguyu ve niyeti garip duraklamalar olmadan iletir
+- Tonu, duyguyu ve niyeti garip duraksamalar olmadan aktarır
 - Küresel iş birliğini ve daha hızlı karar almayı mümkün kılar
 
-## Bellek Yapılandırmasını Ayarlama
+## Bellek Yapılandırmasının Ayarlanması
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Yazılım Güncellemelerini Kontrol Etme
-> **Not**: VS Code yüklü değilse, Ryzen AI Developer Center ile yükleyebilirsiniz.
+## Yazılım Güncellemelerini Kontrol Edin
+> **Not**: VS Code kurulu değilse, Ryzen AI Developer Center ile kurabilirsiniz.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Yazılım Ön Koşullarını Yükleme
+## Yazılım Ön Koşullarının Kurulması
 
 ### Sanal Ortam Oluşturma
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Linux'ta bir terminal açın ve ROCm+PyTorch önceden yüklenmiş bir venv oluşturmak için aşağıdaki komutu çalıştırın:
+Linux'ta, bir terminal açın ve ROCm+Pytorch'un önceden kurulu olduğu bir venv oluşturmak için aşağıdaki komutu çalıştırın:
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -58,13 +58,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Kullanıcınıza GPU aygıtlarına erişim izni verin** (bunun geçerli olması için oturumu kapatıp yeniden açın):
+**Kullanıcınıza GPU cihazlarına erişim izni verin** (bunun etkili olması için oturumu kapatıp tekrar açın):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Linux'ta bir terminal açın ve bir venv oluşturmak için aşağıdaki komutu çalıştırın:
+Linux'ta, bir terminal açın ve bir venv oluşturmak için aşağıdaki komutu çalıştırın:
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -80,7 +80,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Windows'ta, seçtiğiniz dizinde bir terminal açın ve ROCm+PyTorch önceden yüklenmiş bir venv oluşturmak için komutları izleyin:
+Windows'ta, seçtiğiniz dizinde bir terminal açın ve ROCm+Pytorch'un önceden kurulu olduğu bir venv oluşturmak için aşağıdaki komutları izleyin:
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -90,13 +90,12 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **İpucu**: Windows kullanıcılarının bazı PowerShell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini değiştirmeleri gerekebilir (örneğin,
-> RemoteSigned veya Unrestricted olarak ayarlamak).
+> **İpucu**: Windows kullanıcılarının bazı PowerShell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini (Execution Policy) değiştirmesi gerekebilir (örneğin, RemoteSigned veya Unrestricted olarak ayarlamak).
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Windows'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin:
+Windows'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için aşağıdaki komutları izleyin:
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -106,13 +105,12 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **İpucu**: Windows kullanıcılarının bazı PowerShell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini değiştirmeleri gerekebilir (örneğin,
-> RemoteSigned veya Unrestricted olarak ayarlamak).
+> **İpucu**: Windows kullanıcılarının bazı PowerShell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini (Execution Policy) değiştirmesi gerekebilir (örneğin, RemoteSigned veya Unrestricted olarak ayarlamak).
 
 <!-- @device:end -->
 <!-- @os:end -->
 
-### Temel Bağımlılıkları Yükleme
+### Temel Bağımlılıkların Kurulması
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -122,7 +120,7 @@ s2st-env\Scripts\activate
 
 ### Ek Bağımlılıklar
 
-m4t bağımlılıklarını pip kullanarak yükleyin:
+pip kullanarak m4t bağımlılıklarını kurun:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
@@ -195,29 +193,29 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Konuşmadan konuşmaya demosunu kurma
+## Konuşmadan konuşmaya demosunun kurulması
 
 #### seamless-m4t-v2 hakkında bilgi edinin
 
 Daha fazla bilgi için Hugging Face üzerindeki [model kartına](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) göz atın.
-Bu, konuşmadan konuşmaya modellerinin teknik mimarisidir:
+Bu, konuşmadan konuşmaya modellerin teknik mimarisidir:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### Betikleri İndirin
 
-Bu playbook, kullanıma hazır betikler içermektedir. Lütfen hepsini oluşturduğunuz ortamla aynı dizine indirin.
+Bu kılavuz, kullanıma hazır betikler içerir. Lütfen hepsini oluşturduğunuz ortamla aynı dizine indirin.
 
 | Betik | Açıklama | Kullanım |
 |--------|-------------|-------|
 | [infer.py](assets/infer.py) | Temel LLM metin üretimi | `python infer.py` |
-| [input1.wav](assets/input1.wav) | Örnek Ses Dosyası | N/A |
-| [lang_list.py](assets/lang_list.py) | Dil Destek Dosyası | N/A |
+| [input1.wav](assets/input1.wav) | Örnek Ses dosyası | Yok |
+| [lang_list.py](assets/lang_list.py) | Dil Desteği Dosyası | Yok |
 | [gradio_demo.py](assets/gradio_demo.py) | Konuşma Çevirisi için Sezgisel Kullanıcı Arayüzü | `python gradio_demo.py --no-share` |
 
 
-### infer.py ile Başlama
+### infer.py ile Başlarken
 
 Betiği çalıştırmak için 
 ```bash
@@ -226,8 +224,8 @@ python infer.py
 > **Not**: Bazı uyarılar görebilirsiniz. Bu beklenen bir durumdur.
  
   
-#### Kodu Açıklama
-**Parça 1: Gerekli bağımlılıkları içe aktarma**
+#### Kodun Açıklanması
+**Parça 1: Gerekli bağımlılıkların içe aktarılması**
 
 ```python 
 import os
@@ -254,9 +252,9 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**Parça 2: Modelleri HuggingFace'ten yükleme**
+**Parça 2: Modellerin HuggingFace'ten yüklenmesi**
 
-Bu fonksiyon bir model kimliği alır ve model henüz indirilmemişse indirir. Ardından bir sonraki fonksiyonun kullanması için işlemciyi ve modeli döndürür.
+Bu işlev bir model kimliği alır ve model henüz indirilmemişse indirir. Ardından bir sonraki işlevin kullanması için işlemciyi (processor) ve modeli döndürür.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -275,9 +273,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Parça 3: Giriş ses klibi .wav dosyası ve ön işleme**
+**Parça 3: Giriş ses klibi .wav dosyasının girilmesi ve ön işlenmesi**
 
-Bu fonksiyon ses klibini yükler ve hedef hıza yeniden örnekler.
+Bu işlev ses klibini yükler ve hedef orana yeniden örnekler.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -297,9 +295,9 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**Parça 4: Çıkarım çalıştırma**
+**Parça 4: Çıkarım (inference) çalıştırma**
 
-Bu fonksiyon model ile çıkarım çalıştırır ve üretilen çıktıyı döndürür.
+Bu işlev model ile çıkarım çalıştırır ve üretilen çıktıyı döndürür.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -329,7 +327,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **Parça 5: Çevrilen dosyayı kaydetme**
 
-Bu fonksiyon ses dizisini bir .WAV dosyasına kaydeder. 
+Bu işlev ses dizisini bir .WAV dosyasına kaydeder. 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -392,19 +390,19 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Gradio kullanıcı arayüzü demosunu çalıştırma:
+### Gradio Kullanıcı Arayüzü Demosunun Çalıştırılması:
 
-Temel bir betik örneği çalıştırdığınıza göre, aşağıdaki talimatlar yazdığımız kod üzerine inşa edilmiş ve canlı konuşmadan konuşmaya çeviriyi kolaylaştıran kullanışlı bir kullanıcı arayüzü sunmaktadır.
+Artık temel bir örnek betiği çalıştırdığınıza göre, aşağıdaki talimatlar yazdığımız kodun üzerine inşa edilen ve canlı konuşmadan konuşmaya çeviriyi kolaylaştıran yararlı bir kullanıcı arayüzü sağlar.
 
-#### Gradio'yu Yerel Olarak Çalıştırma
+#### Gradio'yu Yerel Olarak Çalıştırın
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Ardından, kullanıcı arayüzüne erişmek için web tarayıcınızı `http://127.0.0.1:7860` adresinde açın.
+Ardından, kullanıcı arayüzüne erişmek için web tarayıcınızda `http://127.0.0.1:7860` adresini açın.
 
 
-### Gradio kullanıcı arayüzü örneği:
+### Gradio Kullanıcı Arayüzü örneği:
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
@@ -524,11 +522,11 @@ PY
 ## Sonraki Adımlar
 
 - Hızlı çeviri için düzinelerce dil arasında karıştırıp eşleştirin.
-- Demonuzu başkalarıyla paylaşın: Herkesin uzaktan erişebileceği bir genel bağlantı oluşturmak için --share ekleyin veya Hugging Face Spaces kullanarak kalıcı olarak dağıtın.
+- Demonuzu başkalarıyla paylaşın: Herkesin uzaktan erişebileceği herkese açık bir bağlantı oluşturmak için --share ekleyin veya Hugging Face Spaces kullanarak kalıcı olarak dağıtın
 
 ## Kaynaklar
 
-Konuşmadan konuşmaya çeviri hakkında daha fazla bilgi edinmek için bazı ek kaynaklar aşağıda verilmiştir:  
-* Depo burada: https://huggingface.co/facebook/seamless-m4t-v2-large 
+Konuşmadan konuşmaya çeviri hakkında daha fazla bilgi edinmek için aşağıda bazı ek kaynaklar bulunmaktadır:
+* Depo burada: https://huggingface.co/facebook/seamless-m4t-v2-large
 * "Seamless: Multilingual Expressive and Streaming Speech Translation" ile ilgili akademik araştırmalar
 * Gradio paylaşımı ve dağıtımı: [Uygulamanızı Paylaşma Kılavuzu](https://www.gradio.app/guides/sharing-your-app) ve [Hugging Face Spaces'e Dağıtım](https://shafiqulai.github.io/blogs/blog_5.html)

@@ -19,15 +19,15 @@ VS Code voidaan asentaa **AMD Ryzen™ AI Developer Center** -sovelluksesta. Sii
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Lataa Windows-asennuksen suoritettava tiedosto osoitteesta: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
-2. Napsauta ladattua tiedostoa `VSCodeUserSetup-x64-1.108.2.exe` asentaaksesi VS Code.
+1. Lataa Windows-asennusohjelma osoitteesta: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+2. Asenna VS Code napsauttamalla ladattua tiedostoa `VSCodeUserSetup-x64-1.108.2.exe`.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
 1. Lataa Debian-asennuspaketti osoitteesta: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
-2. Napsauta ladattua tiedostoa `code_1.108.2-1769004815_amd64.deb` asentaaksesi VS Code.
+2. Asenna VS Code napsauttamalla ladattua tiedostoa `code_1.108.2-1769004815_amd64.deb`.
 
 <!-- @os:end -->
 <!-- @device:end -->

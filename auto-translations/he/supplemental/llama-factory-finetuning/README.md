@@ -1,41 +1,41 @@
 ## סקירה כללית
 
-כוונון עדין יעיל הוא חיוני להתאמת מודלים שפתיים גדולים (LLMs) למשימות במורד הזרם. LLaMA-Factory היא פלטפורמה קוד-פתוח ידידותית למשתמש המייעלת את האימון והכוונון העדין של מודלים שפתיים גדולים ומודלים מולטי-מודאליים. היא מאפשרת למשתמשים להתאים מאות מודלים מאומנים מראש באופן מקומי עם מינימום קוד.
+כוונון עדין יעיל הוא חיוני להתאמת מודלי שפה גדולים (LLMs) למשימות ייעודיות. LLaMA Factory היא פלטפורמה קוד-פתוח וידידותית למשתמש, המייעלת את האימון והכוונון העדין של מודלי שפה גדולים ומודלים רב-מודליים. היא מאפשרת למשתמשים להתאים מאות מודלים מאומנים מראש באופן מקומי עם מינימום כתיבת קוד.
 
-מדריך זה מלמד אתכם כיצד לכוונן LLMs באמצעות LLaMA-Factory על חומרת AMD המקומית שלכם.
+מדריך זה מלמד אתכם כיצד לכוונן עדין LLMs באמצעות LLaMA Factory על חומרת AMD המקומית שלכם.
 
 <!-- @device:stx,krk -->
-> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות לפחות **32 GB של זיכרון RAM במערכת**, כאשר לפחות **16 GB ממנו זמינים ל-GPU** (16 ה-GB הם חלק מ-32 ה-GB, לא בנוסף אליהם).
+> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות לפחות **32 GB של זיכרון מערכת (RAM)**, כאשר לפחות **16 GB מתוכם זמינים ל-GPU** (16 ה-GB הם חלק מ-32 ה-GB, ולא בנוסף להם).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות לפחות **16 GB של זיכרון GPU כולל** ו-**32 GB של זיכרון RAM במערכת**.
-> - ב-Windows, זיכרון ה-GPU הכולל משלב את ה-VRAM הייעודי של כרטיס המסך עם זיכרון GPU משותף (שאול מ-RAM של המערכת).
-> - לכן, כרטיסים עם פחות מ-16 GB של VRAM ייעודי עדיין יכולים להריץ מדריך זה על ידי שימוש בזיכרון GPU משותף כדי לכסות את ההפרש.
+> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות לפחות **16 GB של זיכרון GPU כולל** ו-**32 GB של זיכרון מערכת (RAM)**.
+> - ב-Windows, זיכרון ה-GPU הכולל משלב את ה-VRAM הייעודי של כרטיס הגרפיקה עם זיכרון GPU משותף (מושאל מזיכרון המערכת).
+> - לכן, כרטיסים עם פחות מ-16 GB של VRAM ייעודי עדיין יכולים להריץ מדריך זה באמצעות שימוש בזיכרון GPU משותף כדי להשלים את ההפרש.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות כרטיס מסך עם לפחות **16 GB של זיכרון GPU ייעודי** ו-**32 GB של זיכרון RAM במערכת**.
-> - ב-Linux, האימון מתבצע כולו ב-VRAM הייעודי של כרטיס המסך.
-> - הוא אינו חוזר לזיכרון GPU משותף (RAM של המערכת) כאשר ה-VRAM אוזל.
-> - כרטיסים עם פחות מ-16 GB של VRAM ייעודי יאזלו מזיכרון במהלך האימון ב-Linux, גם אם למערכת יש הרבה RAM.
+> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות כרטיס גרפיקה עם לפחות **16 GB של זיכרון GPU ייעודי** ו-**32 GB של זיכרון מערכת (RAM)**.
+> - ב-Linux, האימון פועל כולו בזיכרון ה-VRAM הייעודי של כרטיס הגרפיקה.
+> - הוא אינו נופל חזרה לזיכרון GPU משותף (זיכרון מערכת) כאשר ה-VRAM אוזל.
+> - כרטיסים עם פחות מ-16 GB של VRAM ייעודי ייתקלו באזילת זיכרון במהלך האימון ב-Linux, גם אם למערכת יש שפע של RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## מה תלמדו
 
-- כיצד להגדיר את LLaMA-Factory עם תוכנת AMD ROCm™
-- כיצד להגדיר פרמטרי כוונון עדין של LLM (תוך שימוש ב-Qwen/Qwen3-4B-Instruct-2507 כדוגמה)
-- כיצד להריץ כוונון עדין של LLaMA-Factory
-- כיצד להריץ הסקה עם המודל המכוונן
+- כיצד להגדיר את LLaMA Factory עם תוכנת AMD ROCm™
+- כיצד להגדיר פרמטרים לכוונון עדין של LLM (באמצעות Qwen/Qwen3-4B-Instruct-2507 כדוגמה)
+- כיצד להריץ כוונון עדין באמצעות LLaMA Factory
+- כיצד להריץ הסקה (inference) עם המודל המכוונן
 - כיצד לייצא את המודל המכוונן
 
 ## זמן משוער
 
-- משך: ביצוע מדריך זה ייקח כ-60 דקות (בהתאם לגודל המודל/מערך הנתונים ומהירות הרשת).
-- עיינו ב-[LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) לקבלת מידע נוסף.
+- משך זמן: יידרשו כ-60 דקות להרצת מדריך זה (בהתאם לגודל המודל/מערך הנתונים שלכם ומהירות הרשת).
+- עיינו ב-[LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) למידע נוסף.
 
 ## הגדרת תצורת הזיכרון
 
@@ -83,7 +83,7 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**הענקת גישת המשתמש שלכם להתקני GPU** (התנתקו והתחברו מחדש כדי שזה ייכנס לתוקף):
+**הענקת גישה למשתמש שלכם להתקני GPU** (התנתקו והתחברו מחדש כדי שהשינוי ייכנס לתוקף):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -153,11 +153,11 @@ python -m pip install huggingface_hub
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### התקנת LLaMA-Factory
+### התקנת LLaMA Factory
 
-LLaMA-Factory תלויה ב-PyTorch. כבר אמורה להיות לכם גרסה מותקנת בהתאם לדרישות לעיל.
+LLaMA Factory תלויה ב-PyTorch. אמור להיות מותקן אצלכם כבר בהתאם לדרישות שלעיל.
 
-הורידו את קוד המקור מ-[מאגר GitHub הרשמי של LLaMA Factory](https://github.com/hiyouga/LlamaFactory), והתקינו את התלויות שלו.
+הורידו את קוד המקור מ-[מאגר ה-GitHub הרשמי של LLaMA Factory](https://github.com/hiyouga/LlamaFactory), והתקינו את התלויות שלו.
 
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
@@ -182,7 +182,7 @@ pip install -r requirements/metrics.txt
 <!-- @test:end --> 
 <!-- @device:end -->
 
-ודאו ש-`llamafactory-cli` ניתן להרצה.
+ודאו האם `llamafactory-cli` ניתן להרצה.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-llamafactory-cli timeout=60 hidden=False setup=activate-venv -->
@@ -209,32 +209,30 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-פלט לדוגמה:
+דוגמה לפלט:
 
 <p align="center">
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-לאחר התקנה מוצלחת של LLaMA-Factory, בואו נריץ עליו כוונון עדין.
+לאחר שהתקנתם בהצלחה את LLaMA Factory, בואו נריץ כוונון עדין עליו.
 
 ## שימוש ב-LLaMA Factory CLI לכוונון עדין
 
-סעיף זה יכסה כיצד להכין מערכי נתונים לכוונון עדין, להגדיר פרמטרי LoRA/QLoRA, ולהריץ כוונון עדין של LoRA.
+חלק זה יסקור כיצד להכין מערכי נתונים לכוונון עדין, להגדיר פרמטרים של LoRA/QLoRA, ולהריץ כוונון עדין באמצעות LoRA.
 
-### הכנת מערך נתונים
+### הכנת מערך הנתונים
 
-LLaMA-Factory תומכת במערכי נתונים לכוונון עדין בפורמט Alpaca ובפורמט ShareGPT. כל מערכי הנתונים הזמינים הוגדרו ב-[dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). אם אתם משתמשים במערך נתונים מותאם אישית, אנא ודאו להוסיף תיאור מערך נתונים ב-`dataset_info.json` ולציין את שם מערך הנתונים לפני האימון. פרטים נוספים ניתן למצוא בתיעוד שלהם [כאן](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
+LLaMA Factory תומכת בכוונון עדין של מערכי נתונים בפורמט Alpaca ובפורמט ShareGPT. כל מערכי הנתונים הזמינים הוגדרו בקובץ [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). אם אתם משתמשים במערך נתונים מותאם אישית, ודאו שהוספתם תיאור מערך נתונים בקובץ `dataset_info.json` וציינתם את שם מערך הנתונים לפני האימון. ניתן למצוא פרטים בתיעוד שלהם [כאן](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
-במדריך זה, נשתמש במערכי הנתונים identity ו-alpaca_en_demo כדוגמה, ונגדיר את מידע מערך הנתונים בשלב הבא.
+במדריך זה, נשתמש במערכי הנתונים identity ו-alpaca_en_demo כדוגמה, ונגדיר את פרטי מערך הנתונים בשלב הבא.
+### הגדרת פרמטרים לכוונון עדין
 
+LLaMA Factory תומכת בכמה סכמות כוונון עדין.
 
-### הגדרת פרמטרי כוונון עדין
-
-LLaMA-Factory תומכת במספר תכניות כוונון עדין.
-
-| תכניות כוונון עדין | דוגמאות LLaMA-Factory |
+| סכמות כוונון עדין | דוגמאות LLaMA Factory |
 |-----------|------|
-| פרמטר מלא    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
+| כוונון פרמטרים מלא    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
 | כוונון עדין LoRA  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
 | כוונון עדין QLoRA | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
@@ -259,39 +257,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-קבצי תצורה לדוגמה אלה ציינו פרמטרי מודל, פרמטרי שיטת כוונון עדין, פרמטרי מערך נתונים, פרמטרי הערכה ועוד. ניתן להגדיר אותם בהתאם לצרכים שלכם. במדריך זה, נשתמש ב-[qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml).
+קובצי התצורה לדוגמה הללו כבר מציינים פרמטרים של המודל, פרמטרים של שיטת הכוונון העדין, פרמטרים של מערך הנתונים, פרמטרים להערכה, ועוד. תוכלו להגדיר אותם בהתאם לצרכים שלכם. במדריך זה, נשתמש בקובץ [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
-**הסבר על פרמטרים מרכזיים:**
-- `model_name_or_path` - שם מודל Hugging Face או נתיב קובץ מודל מקומי.
-- `stage` - שלב האימון. אפשרויות: rm (מידול תגמול), pt (אימון מקדים), sft (כוונון עדין מפוקח), PPO, DPO, KTO, ORPO.
+**הסבר על הפרמטרים המרכזיים:**
+- `model_name_or_path` - שם המודל ב-Hugging Face או נתיב מקומי לקובץ המודל.
+- `stage` - שלב האימון. אפשרויות: rm (מידול תגמול), pt (אימון מוקדם), sft (כוונון עדין מונחה - Supervised Fine-Tuning), PPO, DPO, KTO, ORPO.
 - `do_train` - true לאימון, false להערכה
-- `finetuning_type` - שיטת כוונון עדין. אפשרויות: freeze, lora, full
-- `lora_rank` - הממד של המטריצה בדרגה נמוכה המשמשת ב-LoRA, ערכים טיפוסיים: 4, 6, 8, 16 (ערכים קטנים יותר = פחות פרמטרים = כוונון עדין מהיר יותר; ערכים גדולים יותר = התאמה טובה יותר למשימה אך שימוש גבוה יותר במשאבים).
-- `lora_target` - מודולי יעד לשיטת LoRA. ברירת מחדל: all.
-- `dataset` - מערך/י נתונים לשימוש. השתמשו ב-"," להפרדת מספר מערכי נתונים
-- `output_dir` - נתיב פלט הכוונון העדין
-- `logging_steps` - מרווח רישום ביומן בצעדים
-- `save_steps` - מרווח שמירת נקודת ביקורת של המודל.
-- `overwrite_output_dir` - האם לאפשר דריסת ספריית הפלט.
-- `per_device_train_batch_size` - גודל אצווה לאימון לכל התקן.
-- `gradient_accumulation_steps` - מספר צעדי צבירת גרדיאנט.
-- `learning_rate` - קצב למידה
-- `num_train_epochs` - מספר תקופות אימון
-- `lr_scheduler_type` - לוח זמנים לקצב למידה. אפשרויות: linear, cosine, polynomial, constant, וכו'.
-- `warmup_ratio` - יחס חימום קצב למידה
+- `finetuning_type` - שיטת הכוונון העדין. אפשרויות: freeze, lora, full
+- `lora_rank` - הממדיות של המטריצה בדרגה נמוכה המשמשת ב-LoRA, ערכים אופייניים: 4, 6, 8, 16 (ערכים קטנים יותר = פחות פרמטרים = כוונון עדין מהיר יותר; ערכים גדולים יותר = התאמה טובה יותר למשימה אך שימוש גבוה יותר במשאבים).
+- `lora_target` - מודולי היעד עבור שיטת LoRA. ברירת מחדל: all.
+- `dataset` - מערך(י) הנתונים לשימוש. יש להשתמש ב-"," להפרדה בין מספר מערכי נתונים
+- `output_dir` - נתיב הפלט של הכוונון העדין
+- `logging_steps` - מרווח הרישום ביומן, בצעדים
+- `save_steps` - מרווח שמירת נקודות ביקורת (checkpoint) של המודל.
+- `overwrite_output_dir` - האם לאפשר דריסה של תיקיית הפלט.
+- `per_device_train_batch_size` - גודל אצוות האימון לכל התקן.
+- `gradient_accumulation_steps` - מספר צעדי צבירת הגרדיאנטים.
+- `learning_rate` - קצב הלמידה
+- `num_train_epochs` - מספר תקופות האימון (epochs)
+- `lr_scheduler_type` - לוח קצב הלמידה. אפשרויות: linear, cosine, polynomial, constant, וכדומה.
+- `warmup_ratio` - יחס חימום קצב הלמידה
 
 <!-- @os:linux -->
-נשנה את ערך ברירת המחדל של `lora_rank` כדי להריץ כוונון עדין על AMD Ryzen™ ו-AMD Radeon™ GPUs.
+נשנה את ערך ברירת המחדל של `lora_rank` כדי להריץ כוונון עדין על GPU של ‎AMD Ryzen™‎ ו-‎AMD Radeon™‎.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-נעדכן את תצורת כוונון ה-LoRA העדין המוגדרת כברירת מחדל לתאימות טובה יותר עם AMD Ryzen™ ו-AMD Radeon™ GPUs:
-- הגדרת `lora_rank` מ-`8` ל-`6` כדי להפחית את השימוש בזיכרון במהלך הכוונון העדין.
-- שימוש ב-`fp16` במקום `bf16` לתאימות רחבה יותר עם AMD GPU וצריכת זיכרון נמוכה יותר.
-- הגדרת `dataloader_num_workers` ל-`0` ב-Windows כדי למנוע שגיאות `"Can't pickle local object<>"` הנגרמות מטעינת נתונים במולטי-פרוססינג.
+נעדכן את תצורת ברירת המחדל של כוונון עדין LoRA לתאימות טובה יותר עם GPU של ‎AMD Ryzen™‎ ו-‎AMD Radeon™‎:
+- נשנה את `lora_rank` מ-`8` ל-`6` כדי להפחית את השימוש בזיכרון במהלך הכוונון העדין.
+- נשתמש ב-`fp16` במקום `bf16` לתאימות רחבה יותר עם GPU של AMD ולשימוש נמוך יותר בזיכרון.
+- נגדיר את `dataloader_num_workers` ל-`0` במערכת Windows כדי למנוע שגיאות מסוג `"Can't pickle local object<>"` הנגרמות מטעינת נתונים מרובת-תהליכים.
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -311,13 +309,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### הרצת כוונון עדין של LLaMA-Factory
+### הרצת כוונון עדין ב-LLaMA Factory
 
-**llamafactory-cli** הוא כלי ממשק שורת הפקודה (CLI) הרשמי של LLaMA-Factory, שפותח כדי לפשט תהליכי עבודה מקצה לקצה של LLM (הכנת נתונים ← כוונון עדין ← הערכה ← פריסה) ללא כתיבת קוד מורכב.
+**llamafactory-cli** הוא כלי שורת הפקודה (CLI) הרשמי עבור LLaMA Factory, שפותח כדי לפשט תהליכי עבודה מקצה-לקצה עם LLM (הכנת נתונים ← כוונון עדין ← הערכה ← פריסה) ללא צורך בכתיבת קוד מורכב.
 
-לאימון/כוונון עדין, **llamafactory-cli train** הוא תת-הפקודה המרכזית של LLaMA Factory CLI. הוא מפשט תהליכי עבודה של כוונון עדין (עיבוד מקדים של נתונים, כוונון היפר-פרמטרים, אופטימיזציה של חומרה) לפקודת CLI אחת, תומך במספר פרדיגמות כוונון עדין (LoRA/QLoRA/כוונון עדין מלא) ומותאם ל-GPUs עם משאבים מוגבלים (למשל, QLoRA על 16GB VRAM).
+עבור אימון/כוונון עדין, **llamafactory-cli train** היא תת-הפקודה המרכזית של ה-CLI של LLaMA Factory. היא מפשטת תהליכי כוונון עדין (עיבוד נתונים מקדים, כוונון היפרפרמטרים, אופטימיזציה לחומרה) לפקודת CLI אחת, תוך תמיכה במספר פרדיגמות כוונון עדין (LoRA/QLoRA/כוונון פרמטרים מלא) והיא מותאמת ל-GPU עם משאבים מוגבלים (למשל, QLoRA על 16GB VRAM).
 
-ניתן להריץ כוונון עדין של LLaMA-Factory באמצעות הפקודה הבאה, המבוססת על קובץ התצורה המשונה של כוונון עדין Qwen3 LoRA.
+ניתן להריץ כוונון עדין ב-LLaMA Factory באמצעות הפקודה הבאה, המבוססת על קובץ התצורה המעודכן של כוונון עדין Qwen3 LoRA.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -393,7 +391,7 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 <!-- @test:end --> 
 <!-- @os:end -->
 
-לאחר הרצת כוונון עדין של LLM, כל הפלטים שנוצרו מאוחסנים ב-"output_dir", כולל קבצי נקודת ביקורת של המודל, קבצי תצורה ומדדי אימון.
+לאחר הרצת הכוונון העדין של ה-LLM, כל הפלטים שנוצרו נשמרים תחת "output_dir", כולל קובצי נקודות ביקורת (checkpoint) של המודל, קובצי תצורה, ומדדי אימון.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -432,14 +430,14 @@ print(f"Found adapter weights: {adapter_weights}")
 
 ### בדיקת המודל המכוונן
 
-**llamafactory-cli chat** מיועד לצ'אט/הסקה אינטראקטיביים עם LLMs (הן מודלים בסיסיים והן מודלים מכווננים עם LoRA). LLaMA-Factory מספקת תצורת דוגמה להרצת הסקה של מודלים מכווננים ב-[examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). ניתן גם לשנות תצורת דוגמה זו כדי לשנות את ההגדרות, כגון ה-backend של ההסקה.
+**llamafactory-cli chat** מיועד לצ'אט/הסקה אינטראקטיביים עם LLM (הן מודלים בסיסיים והן מודלים מכווננים עם LoRA). LLaMA Factory מספקת תצורת דוגמה להרצת הסקה של מודלים מכווננים בתיקייה [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). ניתן גם לשנות את תצורת הדוגמה הזו כדי לשנות הגדרות, כגון מנוע ההסקה.
 
 השתמשו בפקודה הבאה כדי לבדוק את המודל המכוונן של Qwen3:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
-דוגמה לצ'אט עם המודל המכוונן מוצגת להלן:
+דוגמה לצ'אט באמצעות המודל המכוונן מוצגת להלן:
 
 <p align="center">
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Fine-Tuned model" width="600"/>
@@ -448,14 +446,14 @@ llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 
 ### ייצוא המודל המכוונן
 
-לשימוש בסביבת ייצור, המודל המאומן מראש ומתאם ה-LoRA צריכים להתמזג ולהיות מיוצאים למודל יחיד. מודל ממוזג זה ניתן לשימוש כקובץ מודל Hugging Face רגיל. LLaMA-Factory מספקת תצורות דוגמה ב-[examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
+לצורך תרחישי שימוש בייצור, יש למזג ולייצא את המודל המאומן מראש ואת מתאם ה-LoRA למודל אחד. מודל ממוזג זה יכול לשמש כקובץ מודל רגיל של Hugging Face. LLaMA Factory מספקת תצורות דוגמה בתיקייה [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
 השתמשו בפקודה הבאה כדי לייצא את המודל המכוונן של Qwen3:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
-תוצאת ייצוא המודל המכוונן מוצגת להלן.
+התוצאה של ייצוא המודל המכוונן מוצגת להלן.
 
 <p align="center">
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Fine-Tuned model " width="600"/>
@@ -556,28 +554,27 @@ if not model_files:
 
 print("PASS: Exported merged model output looks correct")
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
+## שימוש בממשק הגרפי (GUI) של LLaMA Factory
 
-## שימוש בממשק המשתמש הגרפי של LLaMA-Factory
-
-`LLaMA-Factory` תומכת גם בכוונון עדין ללא קוד של LLMs דרך ממשק משתמש ווב בדפדפן.
+`LLaMA-Factory` תומך גם בכוונון עדין (fine-tuning) של מודלי שפה ללא כתיבת קוד, באמצעות ממשק משתמש מבוסס דפדפן (Web UI).
 
 השתמשו בפקודה הבאה כדי לפתוח אותו:
 
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI` מציע ממשק יעיל לניהול תהליכי עבודה של למידת מכונה, כולל אימון, הערכה, חיזוי, צ'אט וייצוא מודלים. להלן הקדמה קצרה לכל לשונית:
+`LlamaFactory Web UI` מציע ממשק פשוט לניהול תהליכי עבודה של למידת מכונה, כולל אימון, הערכה, חיזוי, שיחה וייצוא מודלים. להלן הסבר קצר על כל לשונית:
 
-* **Train**: לשונית זו מאפשרת לכם לבחור מודל ומערך נתונים, להגדיר פרמטרי אימון ולהתחיל את תהליך האימון. חשוב להבין את הפרמטרים החובה והאופציונליים כדי לייעל את הגדרת האימון.
-* **Evaluate & Predict**: לאחר האימון, ניתן להעריך את ביצועי המודל ולבצע חיזויים באמצעות לשונית זו. היא מספקת תובנות לגבי דיוק המודל ויעילותו על נתונים חדשים.
-* **Chat**: לאחר השלמת האימון, טענו את המודל בלשונית Chat כדי לתקשר איתו ולראות את תוצאות עבודתכם. תכונה זו מאפשרת תקשורת בזמן אמת עם המודל המאומן.
-* **Export**: לשונית זו מאפשרת ייצוא מודלים מאומנים לפריסה או לשימוש נוסף. ניתן לשמור את המודלים שלכם בפורמטים שונים המתאימים ליישומים שונים.
+* **Train**: לשונית זו מאפשרת לבחור מודל ומערך נתונים, להגדיר פרמטרי אימון, ולהתחיל בתהליך האימון. חשוב להבין את הפרמטרים החובה והאופציונליים כדי לייעל את הגדרת האימון.
+* **Evaluate & Predict**: לאחר האימון, ניתן להעריך את ביצועי המודל ולבצע חיזויים באמצעות לשונית זו. היא מספקת תובנות לגבי הדיוק והיעילות של המודל על נתונים חדשים.
+* **Chat**: לאחר השלמת האימון, ניתן לטעון את המודל בלשונית Chat כדי לתקשר איתו ולראות את תוצאות העבודה. תכונה זו מאפשרת תקשורת בזמן אמת עם המודל המאומן.
+* **Export**: לשונית זו מאפשרת ייצוא של מודלים מאומנים לצורך פריסה או שימוש נוסף. ניתן לשמור את המודלים בפורמטים שונים המתאימים ליישומים שונים.
 
-להנחיה מפורטת, אנו ממליצים לעיין בתיעוד הרשמי ב-[מאגר GitHub של LlamaFactory](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) וב-[LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). בנוסף, [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) מספק תובנות יקרות ערך לגבי הממשק ופונקציונליותו.
+לקבלת הנחיות מפורטות, מומלץ לעיין בתיעוד הרשמי ב[מאגר GitHub של LlamaFactory](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) וב[LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). בנוסף, [ה-Wiki של LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) מספק תובנות חשובות לגבי הממשק ותפקודיו.
 
-## השלבים הבאים
-- נסו מודלים שונים כגון `gpt-oss` ומודלים מתקדמים אחרים.
-- התנסו עם backends שונים על המודל המכוונן
- 
-לתיעוד נוסף, בקרו בכתובת: https://llamafactory.readthedocs.io/en/latest/
+## הצעדים הבאים
+- נסו מודלים שונים כגון `gpt-oss` ומודלים מתקדמים נוספים.
+- נסו קצות (backends) שונות על גבי המודל המכוונן
+
+למידע נוסף, בקרו ב: https://llamafactory.readthedocs.io/en/latest/

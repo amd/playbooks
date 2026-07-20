@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Το Node.js 22.22.1 LTS είναι η συνιστώμενη έκδοση για αυτή την πλατφόρμα.
+Η έκδοση Node.js 22.22.1 LTS είναι η προτεινόμενη έκδοση για αυτήν την πλατφόρμα.
 
 <!-- @os:windows -->
 
@@ -38,4 +38,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **Σημείωση**: Ανατρέξτε στο [Node.js Downloads](https://nodejs.org/en/download/) για επιπλέον επιλογές εγκατάστασης και πλατφόρμες.
+> **Σημείωση**: Δείτε το [Node.js Downloads](https://nodejs.org/en/download/) για επιπλέον επιλογές εγκατάστασης και πλατφόρμες.

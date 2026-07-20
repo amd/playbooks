@@ -6,22 +6,22 @@ SPDX-License-Identifier: MIT
 
 # Platformkonfiguration
 
-Dette dokument beskriver den forventede platformkonfiguration til at køre dette playbook.
+Dette dokument beskriver den forventede platformkonfiguration for at køre denne playbook.
 
-## Påkrævede apps / frameworks
+## Krævede apps/frameworks
 
-| Komponent       | Forventet konfiguration              | Noter                                                                        |
+| Komponent       | Forventet konfiguration               | Bemærkninger                                                                        |
 | --------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
-| Python          | Python med `venv`-understøttelse   | Bruges til at oprette og aktivere `kernel-env`                               |
-| ROCm Python SDK | ROCm 7.13-pakkefamilie               | Installeres via playbook-afhængighedsflowet                                  |
-| PyTorch ROCm    | PyTorch 2.11.0 + ROCm 7.13           | Påkrævet for `torch.cuda`, HIP-runtime, JIT-kompilering og `CUDAExtension`  |
-| GPU Driver      | AMD GPU-driver med ROCm/HIP-understøttelse | Påkrævet, før PyTorch kan registrere AMD GPU'en                        |
+| Python          | Python med `venv`-understøttelse         | Bruges til at oprette og aktivere `kernel-env`                                     |
+| ROCm Python SDK | ROCm 7.13-pakkefamilie             | Installeres gennem playbookens afhængighedsflow                               |
+| PyTorch ROCm    | PyTorch 2.11.0 + ROCm 7.13           | Påkrævet for `torch.cuda`, HIP-runtime, JIT-kompilering og `CUDAExtension` |
+| GPU-driver      | AMD GPU-driver med ROCm/HIP-understøttelse | Påkrævet, før PyTorch kan registrere AMD GPU'en                               |
 
-> Bemærk: Hvis du kører på AMD Ryzen™ AI Halo Developer Platform, er AMD ROCm™-software og PyTorch forudinstalleret.
+> Bemærk: Hvis du kører på AMD Ryzen™ AI Halo Developer Platform, er AMD ROCm™-softwaren og PyTorch forudinstalleret.
 
-## Linux-forudsætninger
+## Forudsætninger for Linux
 
-Følgende systempakker er påkrævede:
+Følgende systempakker er påkrævet:
 
 ```bash
 sudo apt update
@@ -30,17 +30,17 @@ sudo apt install -y python3-venv build-essential gcc g++
 
 * `python3-venv` er påkrævet for at oprette `kernel-env`.
 * `build-essential`, `gcc` og `g++` er påkrævet til C++-udvidelsesgennemgangene.
-* `amd-smi` bruges til Linux GPU-synligheds-/udnyttelsestjek.
+* `amd-smi` bruges til synlighed/udnyttelsestjek af GPU'en på Linux.
 
 C++-udvidelseseksemplerne bygger native `.so`-moduler fra `.cu`-filer ved hjælp af PyTorchs `CUDAExtension`-sti.
 
-## Windows-forudsætninger
+## Forudsætninger for Windows
 
-Windows-kørere kræver:
+Windows-runnere kræver:
 
-* Python tilgængeligt via `python`
-* Installer seneste: [AMD Software: Adrenalin Edition™](https://www.amd.com/en/products/software/adrenalin.html)
-* [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) eller [nyere](https://visualstudio.microsoft.com/vs/community/) med arbejdsbelastningen **Desktop development with C++**
+* Python tilgængelig via `python`
+* Installer nyeste: [AMD Software: Adrenalin Edition™](https://www.amd.com/en/products/software/adrenalin.html)
+* [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) eller [nyere](https://visualstudio.microsoft.com/vs/community/) med workloaden **Desktop development with C++**
 
 Visual Studio C++-miljøet skal levere:
 * `vcvars64.bat`

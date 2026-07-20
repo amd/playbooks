@@ -48,4 +48,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "to
 <!-- @test:end -->
 <!-- @device:end -->
 
-للأجهزة الأخرى، يرجى الرجوع إلى [هذا الرابط](https://rocm.docs.amd.com/en/7.13.0-preview/frameworks/pytorch/install.html) للحصول على التعليمات الكاملة.
+للأجهزة الأخرى، يُرجى الرجوع إلى [هذا الرابط](https://rocm.docs.amd.com/en/7.13.0-preview/frameworks/pytorch/install.html) للحصول على التعليمات الكاملة.

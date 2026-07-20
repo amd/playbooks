@@ -4,23 +4,23 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Configurarea Platformei
+# Configurarea platformei
 
-Acest document descrie configurarea așteptată a platformei pentru rularea acestui playbook.
+Acest document descrie configurarea platformei preconizată pentru rularea acestui playbook.
 
-## Aplicații/Framework-uri Necesare
+## Aplicații/framework-uri necesare
 
 ### Windows/Linux
-Lemonade ar trebui să fie pre-instalat de [aici](https://lemonade-server.ai/install_options.html).
+Lemonade ar trebui să fie preinstalat de [aici](https://lemonade-server.ai/install_options.html). 
 
 - **Open WebUI** (aplicație web frontend)
 - **Lemonade Server** (server backend pentru modele)
 
-> Acest playbook rulează **Lemonade** (server/aplicație Lemonade) **nativ**. **Open WebUI** rulează ca un **container** pe Linux (prin Podman) și ca un **pachet Python** pe Windows. Pachetul PyPI `open-webui` suportă doar Python ≤ 3.12, astfel containerul Linux evită necesitatea gestionării versiunilor mai vechi de Python.
+> Acest playbook rulează **Lemonade** (Lemonade server/app) **nativ**. **Open WebUI** rulează ca un **container** pe Linux (prin Podman) și ca un **pachet Python** pe Windows. Pachetul PyPI `open-webui` este compatibil doar cu Python ≤ 3.12, astfel încât containerul Linux evită necesitatea gestionării unor versiuni mai vechi de Python.  
 
 ## Modele (în Lemonade)
 
-Modelele ar trebui descărcate în **aplicația Lemonade** (folosind Managerul de Modele integrat) sau prin comenzile de gestionare a modelelor din Lemonade (`lemonade pull <model_name>`). Acest playbook presupune că modelele recomandate de mai jos sunt descărcate și apar în endpoint-ul listei de modele.
+Modelele ar trebui descărcate în interiorul **aplicației Lemonade** (folosind Model Manager-ul integrat) sau prin comenzile de gestionare a modelelor din Lemonade (`lemonade pull <model_name>`). Acest playbook presupune că modelele recomandate de mai jos sunt descărcate și apar în endpoint-ul cu lista de modele.
 
 Verificați disponibilitatea modelelor:
 - Deschideți: `http://localhost:13305/api/v1/models`
@@ -28,11 +28,11 @@ Verificați disponibilitatea modelelor:
 
 ### Modele recomandate
 
-| Capacitate | ID Model | Note |
+| Capabilitate | ID model | Note |
 |---|----|-----|
-| LLM (Intrare text → Ieșire text) | `Qwen3-4B-Hybrid` (sau similar) | Orice model LLM din Lemonade pentru chat, completare text, programare sau raționament |
-| VLM (Imagine → Text) | `Qwen3.5-4B-GGUF` (sau orice model din categoria **Vision**) | Orice model multimodal/cu capacitate vizuală care poate accepta imagini ca parte a intrării |
-| Generare Imagini (Text → Imagine) | `SDXL-Turbo` (sau orice model din categoria **Image**) | Orice model Stable Diffusion care generează imagini pentru un prompt text |
+| LLM (Intrare text → Ieșire text) | `Qwen3-4B-Hybrid` (sau similar) | Orice model LLM din Lemonade pentru chat, completare de text, programare sau raționament |
+| VLM (Imagine → Text) | `Qwen3.5-4B-GGUF` (sau orice model din categoria **Vision**) | Orice model multimodal/cu capabilități vizuale care poate prelua imagini ca parte din datele de intrare |
+| Generare de imagini (Text → Imagine) | `SDXL-Turbo` (sau orice model din categoria **Image**) | Orice model Stable Diffusion care generează imagini pe baza unui prompt text |
 | Audio (Vorbire → Text) | `Whisper-Large-v3` (sau orice model din categoria **Audio**) | Orice model ASR care convertește audio în text |
 
 <p align="center">
@@ -44,4 +44,4 @@ Verificați disponibilitatea modelelor:
 - **Lemonade Server:** `http://localhost:13305`
 - **Open WebUI:** `http://localhost:8080`
 
-Dacă aceste porturi sunt deja utilizate pe sistemul dumneavoastră, modificați-le la pornirea serverului (serverelor).
+Dacă aceste porturi sunt deja utilizate pe sistemul dumneavoastră, schimbați-le la pornirea serverului(elor).

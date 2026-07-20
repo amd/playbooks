@@ -6,32 +6,32 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ez a playbook olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom helyes megtekintéséhez látogasson el az [amd.com/playbooks](https://amd.com/playbooks) oldalra.
 <!-- @github-only:end -->
 
-# Két Ryzen™ AI Halo klaszterezése RPC-vel
+# Két Ryzen™ AI Halo klaszterezése RPC segítségével
 
 ## Áttekintés
 
-A Ryzen™ AI Halo már képes nagy nyelvi modellek helyi futtatására. A klaszterezés ezt tovább viszi azáltal, hogy több rendszer GPU memóriáját kombinálja egy helyi hálózaton keresztül, így még nagyobb modellekhez férhetsz hozzá erősebb következtetési képességekkel, jobb kódgenerálással és mélyebb többnyelvű megértéssel – mindezt teljesen a saját hardvereden.
+Az Ön Ryzen™ AI Halo rendszere már önmagában is képes helyben futtatni nagy nyelvi modelleket. A klaszterezés ezt viszi tovább azáltal, hogy több rendszer GPU memóriáját kombinálja egy helyi hálózaton keresztül, így még nagyobb modellekhez férhet hozzá, erősebb következtetési képességgel, jobb kódgenerálással és mélyebb többnyelvű megértéssel, mindezt teljes egészében a saját hardverén.
 
-Ez a playbook megtanítja, hogyan klaszterezz két Ryzen AI Halo rendszert a llama.cpp RPC motorjával, és hogyan futtasd a GLM 4.7-et, egy 358 milliárd paraméteres modellt, mindkét gépen AMD ROCm™ gyorsítással.
+Ez a playbook megtanítja, hogyan lehet két Ryzen AI Halo rendszert klaszterezni a llama.cpp RPC motorjával, és hogyan futtatható a GLM 4.7, egy 358 milliárd paraméteres modell mindkét gépen, AMD ROCm™ gyorsítással.
 
-## Mit fogsz megtanulni
+## Amit meg fog tanulni
 
-- Hogyan bővítsd a VRAM-foglalást Ryzen AI Halo rendszereken
+- Hogyan bővítheti a VRAM allokációt Ryzen AI Halo rendszereken
 - A llama.cpp telepítése ROCm és RPC támogatással
-- RPC worker konfigurálása és elosztott következtetés indítása két csomópont között
+- Egy RPC worker konfigurálása és az elosztott következtetés (inference) elindítása két csomóponton
 - Egy 358 milliárd paraméteres modell futtatása két hálózatba kötött Ryzen AI Halo rendszeren
 
 ## A memóriakonfiguráció beállítása
 
-> **Megjegyzés**: Ezt a lépést mindkét gépen (1. gép és 2. gép) el kell végezni.
+> **Megjegyzés**: Ezt a lépést mind az 1., mind a 2. gépen végezze el.
 
 <!-- @os:windows -->
-Windows rendszeren a nagyobb, több memóriát igénylő modellek futtatásához az AMD Variable Graphics Memory (iGPU VRAM) foglalást kell használnunk.
+Windows rendszeren, ha nagyobb memóriát igénylő modelleket szeretne futtatni, az AMD Variable Graphics Memory (iGPU VRAM) allokációt kell használnunk.
 
-Ezt az AMD Software: Adrenalin Edition vezérlőpult megnyitásával és a következő útvonalra navigálással lehet elvégezni: `Performance > Tuning > AMD Variable Graphics Memory`. Állítsd az értéket **96 GB**-ra. A változtatások érvénybe lépéséhez indítsd újra a rendszert.
+Ezt az AMD Software: Adrenalin Edition vezérlőpult megnyitásával és a következő útvonalra navigálva teheti meg: `Performance > Tuning > AMD Variable Graphics Memory`. Állítsa be az értéket **96 GB**-ra. A módosítások érvénybe lépéséhez indítsa újra a rendszert.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -40,38 +40,38 @@ Ezt az AMD Software: Adrenalin Edition vezérlőpult megnyitásával és a köve
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Linux rendszeren a ROCm egy megosztott rendszermemória-készletet használ, amely alapértelmezés szerint a rendszermemória felére van beállítva.
+Linux rendszeren a ROCm egy megosztott rendszermemória-készletet használ, amely alapértelmezés szerint a rendszermemória felére van konfigurálva.
 
-Ez az érték növelhető a kernel Translation Table Manager (TTM) lapbeállításának módosításával, az alábbi utasítások szerint. Az AMD azt javasolja, hogy a BIOS-ban állítsd be a minimális dedikált VRAM-ot (0,5 GB).
+Ez a mennyiség a kernel Translation Table Manager (TTM) oldalbeállításának módosításával növelhető, a következő útmutató alapján. Az AMD azt javasolja, hogy a BIOS-ban állítsa be a minimális dedikált VRAM-ot (0,5 GB).
 
-* Telepítsd a pipx segédprogramot, és add hozzá a pipx által telepített csomagok elérési útját a rendszer keresési útvonalához.
+* Telepítse a pipx segédprogramot, és adja hozzá a pipx által telepített csomagok útvonalát a rendszer keresési útvonalához.
 
   ```bash
   sudo apt install pipx
   pipx ensurepath
   ```
 
-* Telepítsd az amd-debug-tools csomagot a PyPI-ről.
+* Telepítse az amd-debug-tools csomagot a PyPI-ből.
   ```bash
   pipx install amd-debug-tools
   ```
 
-* Futtasd az amd-ttm eszközt a megosztott memória jelenlegi beállításainak lekérdezéséhez.
+* Futtassa az amd-ttm eszközt a megosztott memória jelenlegi beállításainak lekérdezéséhez.
   ```bash
   amd-ttm
   ```
 
-* Konfiguráld újra a megosztott memória beállításait **120 GB**-ra:
+* Állítsa be a megosztott memória beállításait **120 GB**-ra:
   ```bash
   amd-ttm --set 120
   ```
 
-* A változtatások érvénybe lépéséhez indítsd újra a rendszert.
+* A módosítások érvénybe lépéséhez indítsa újra a rendszert.
 
 
 <!-- @os:end -->
 <!-- @device:halo_box -->
-## Szoftverfrissítések ellenőrzése
+## Ellenőrizze a szoftverfrissítéseket
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -79,22 +79,22 @@ Ez az érték növelhető a kernel Translation Table Manager (TTM) lapbeállít�
 
 ### Hardver
 
-Ez a playbook két Ryzen AI Halo egységet és egy Ethernet kapcsolót igényel, csillag topológiában összekötve, ahol minden egység közvetlenül a kapcsolóhoz van csatlakoztatva.
+Ehhez a playbookhoz két Ryzen AI Halo egységre és egy Ethernet kapcsolóra van szükség, csillag topológiában összekötve, ahol minden egység közvetlenül csatlakozik a kapcsolóhoz.
 
-| Összetevő | Mennyiség | Leírás |
+| Komponens | Mennyiség | Leírás |
 |-----------|----------|-------------|
 | Ryzen AI Halo | 2 | A klasztert alkotó számítási csomópontok |
-| 10 Gbps Ethernet kapcsoló | 1 | Központi kapcsoló a több csomópontos Ryzen AI Halo kommunikáció lehetővé tételéhez (legalább 2 port) |
-| Ethernet kábel | 2 | Minden Halo egységet a kapcsolóhoz csatlakoztat (Cat 7 vagy magasabb ajánlott) |
+| 10 Gbps-os Ethernet kapcsoló | 1 | Központi kapcsoló, amely lehetővé teszi a több csomópontos Ryzen AI Halo kommunikációt (legalább 2 port) |
+| Ethernet kábel | 2 | Az egyes Halo egységeket köti össze a kapcsolóval (Cat 7 vagy magasabb ajánlott) |
 
-> **Megjegyzés**: Két Ethernet kapcsolóport szükséges a két Ryzen AI Halo egység csatlakoztatásához. Egy harmadik port szükséges, ha a modellt egy különálló kliensgépről éred el az egyik Halo egység helyett.
+> **Megjegyzés**: Két Ethernet kapcsolóportra van szükség a két Ryzen AI Halo egység összekapcsolásához. Egy harmadik portra akkor van szükség, ha a modellhez egy külön kliensgépről fér hozzá, nem pedig az egyik Halo egységről.
 
 ### Szoftver
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @require:driver -->
 <!-- @device:end -->
-Kérjük, telepítsd a következőket:
+Telepítse a következőket:
 - [Git](https://git-scm.com/downloads/win)
 - [Python](https://www.python.org/downloads/)
 - [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) a **Desktop Development with C++** munkaterheléssel
@@ -107,15 +107,15 @@ sudo apt install git cmake python3 python3-pip
 ```
 <!-- @os:end -->
 
-## Fizikai hardver beállítása
+## Fizikai hardverbeállítás
 
-> **Megjegyzés**: Ezt a lépést mindkét gépen (1. gép és 2. gép) el kell végezni.
+> **Megjegyzés**: Ezt a lépést mind az 1., mind a 2. gépen végezze el.
 
-Csatlakoztass minden Ryzen AI Halo egységet az Ethernet kapcsolóhoz Cat 7 (vagy magasabb) kábellel. Ez hozza létre a csomópontok közötti nagy sebességű kommunikációhoz használt 10 Gbps kapcsolatot.
+Csatlakoztassa mindkét Ryzen AI Halo egységet az Ethernet kapcsolóhoz egy Cat 7 (vagy magasabb) kábellel. Ez hozza létre a csomópontok közötti nagy sebességű kommunikációhoz használt 10 Gbps-os kapcsolatot.
 <!-- @os:linux -->
-### 1. Hálózati interfészek meghatározása
+### 1. A hálózati interfészek meghatározása
 
-Minden gépen keresd meg a hálózati interfész nevét, és jegyezd fel (az alábbiakban `IFNAME`-ként hivatkozunk rá). Futtasd:
+Mindegyik gépen keresse meg a hálózati interfész nevét, és jegyezze fel (a továbbiakban `IFNAME`-ként hivatkozunk rá). Futtassa:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
@@ -127,36 +127,36 @@ Ez közvetlenül kiírja az interfész nevét, például:
 enp191s0
 ```
 
-### 2. Hálózati kapcsolat sebességének ellenőrzése
+### 2. A hálózati kapcsolat sebességének ellenőrzése
 
-Erősítsd meg, hogy a kapcsolat aktív és teljes sebességen fut az interfész sebességének ellenőrzésével:
+Győződjön meg róla, hogy a kapcsolat aktív és teljes sebességgel működik, az interfész sebességének ellenőrzésével:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **Megjegyzés**: Cseréld le az `<IFNAME>` értéket az [1. Hálózati interfészek meghatározása](#1-determine-network-interfaces) lépésből kapott interfésznévre.
+> **Megjegyzés**: Cserélje ki a `<IFNAME>` értéket az [1. A hálózati interfészek meghatározása](#1-determine-network-interfaces) lépésben kapott kimeneti interfész nevére
 
-`10000Mb/s` sebességet kell látnod:
+A sebességnek `10000Mb/s`-nak kell lennie:
 
 ```bash
 	Speed: 10000Mb/s
 ```
 
-> **Megjegyzés**: Ha a sebesség alacsonyabb, mint `10000Mb/s`, vagy a kapcsolat nem jön létre, ellenőrizd a kábel csatlakozását, és győződj meg arról, hogy a kapcsolóport 10 Gbps-ra van beállítva. Egyes kapcsolóknál le kell tiltani az automatikus tárgyalást, és manuálisan kell beállítani a kapcsolat sebességét; lásd a kapcsoló dokumentációját.
+> **Megjegyzés**: Ha a sebesség alacsonyabb, mint `10000Mb/s`, vagy a kapcsolat nem jön létre, ellenőrizze a kábelcsatlakozást, és győződjön meg róla, hogy a kapcsoló portja 10 Gbps-ra van állítva. Egyes kapcsolók esetén az automatikus egyeztetést ki kell kapcsolni, és a kapcsolat sebességét manuálisan kell beállítani; ehhez tekintse meg a kapcsoló dokumentációját.
 
 <!-- @os:end -->
 
 <!-- @os:windows -->
-### Hálózati kapcsolat sebességének ellenőrzése
+### A hálózati kapcsolat sebességének ellenőrzése
 
-Minden gépen ellenőrizd a hálózati interfészek kapcsolati sebességét:
+Mindegyik gépen ellenőrizze a hálózati interfészek kapcsolat sebességét:
 
 ```powershell
 Get-NetAdapter | Select-Object Name, Status, LinkSpeed
 ```
 
-Az Ethernet interfésznek `Up` állapotban kell lennie és `10 Gbps` sebességen kell futnia:
+Az Ethernet interfésznek `Up` állapotban kell lennie, és `10 Gbps` sebességgel kell működnie:
 
 ```powershell
 Name      Status  LinkSpeed
@@ -164,43 +164,43 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **Megjegyzés**: Ha a sebesség alacsonyabb, mint `10 Gbps`, vagy a kapcsolat nem jön létre, ellenőrizd a kábel csatlakozását, és győződj meg arról, hogy a kapcsolóport 10 Gbps-ra van beállítva. Egyes kapcsolóknál le kell tiltani az automatikus tárgyalást, és manuálisan kell beállítani a kapcsolat sebességét; lásd a kapcsoló dokumentációját.
+> **Megjegyzés**: Ha a sebesség alacsonyabb, mint `10 Gbps`, vagy a kapcsolat nem jön létre, ellenőrizze a kábelcsatlakozást, és győződjön meg róla, hogy a kapcsoló portja 10 Gbps-ra van állítva. Egyes kapcsolók esetén az automatikus egyeztetést ki kell kapcsolni, és a kapcsolat sebességét manuálisan kell beállítani; ehhez tekintse meg a kapcsoló dokumentációját.
 
 <!-- @os:end -->
 
 ## A llama.cpp telepítése
 
-> **Megjegyzés**: Ezt a lépést mindkét gépen (1. gép és 2. gép) el kell végezni.
+> **Megjegyzés**: Ezt a lépést mind az 1., mind a 2. gépen végezze el.
 
 Két telepítési lehetőség áll rendelkezésre:
 
-- [1. lehetőség: Lemonade SDK (Ajánlott)](#option-1-lemonade-sdk-recommended) – előre lefordított binárisok, leggyorsabb beállítás
-- [2. lehetőség: Manuális forráskód-fordítás](#option-2-manual-source-build) – fordítás forrásból, teljes irányítással a fordítási jelzők felett
+- [1. lehetőség: Lemonade SDK (ajánlott)](#option-1-lemonade-sdk-recommended) - előre elkészített binárisok, leggyorsabb beállítás
+- [2. lehetőség: Manuális forráskódból történő build](#option-2-manual-source-build) - build forráskódból, teljes kontrollal a build flag-ek felett
 
-### 1. lehetőség: Lemonade SDK (Ajánlott)
+### 1. lehetőség: Lemonade SDK (ajánlott)
 
-A Lemonade SDK éjszakai buildeket biztosít a llama.cpp-hez AMD ROCm 7 gyorsítással, olyan GPU-kat célozva, mint a gfx1151 (Strix Halo / Ryzen AI Max+ 395) és más újabb Radeon architektúrák.
+A Lemonade SDK a llama.cpp éjszakai (nightly) buildjeit biztosítja AMD ROCm 7 gyorsítással, olyan GPU-kat célozva meg, mint a gfx1151 (Strix Halo / Ryzen AI Max+ 395) és más újabb Radeon architektúrák.
 
 <!-- @os:windows -->
-#### 1. lépés: Az előre lefordított binárisok letöltése
+#### 1. lépés: Az előre elkészített binárisok letöltése
 
-Navigálj a legújabb kiadás oldalára, és töltsd le a platformodnak és GPU célodnak megfelelő archívumot:
+Navigáljon a legfrissebb kiadás oldalára, és töltse le a platformjának és GPU-célpontjának megfelelő archívumot:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
-Töltsd le a `llama-bxxxx-windows-rocm-gfx1151-x64.zip` nevű fájlt (ahol `xxxx` a build száma).
+Töltse le a `llama-bxxxx-windows-rocm-gfx1151-x64.zip` nevű fájlt (ahol az `xxxx` a build számát jelöli).
 
 #### 2. lépés: A binárisok kicsomagolása
 
-Csomagold ki a letöltött archívumot:
+Csomagolja ki a letöltött archívumot:
 
 ```bash
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-Ez a könyvtár most tartalmazza a `llama-cli.exe`, `llama-server.exe` és `rpc-server.exe` ROCm-kompatibilis buildjeit, amelyek előre le vannak fordítva a Ryzen AI Halo rendszeredhez.
+Ez a könyvtár immár tartalmazza a `llama-cli.exe`, a `llama-server.exe` és az `rpc-server.exe` ROCm-alapú buildjeit, amelyeket a Ryzen AI Halo rendszerhez fordítottak le előre.
 
-#### 3. lépés: GPU-felismerés ellenőrzése
+#### 3. lépés: A GPU-felismerés ellenőrzése
 
 ```bash
 .\llama-cli.exe --list-devices
@@ -217,13 +217,13 @@ Available devices:
 <!-- @os:end -->
 
 <!-- @os:linux -->
-#### 1. lépés: Az előre lefordított binárisok letöltése
+#### 1. lépés: Az előre elkészített binárisok letöltése
 
-Navigálj a legújabb kiadás oldalára, és töltsd le a platformodnak és GPU célodnak megfelelő archívumot:
+Navigáljon a legfrissebb kiadás oldalára, és töltse le a platformjának és GPU-célpontjának megfelelő archívumot:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
-Töltsd le a `llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip` nevű fájlt (ahol `xxxx` a build száma).
+Töltse le a `llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip` nevű fájlt (ahol az `xxxx` a build számát jelöli).
 
 #### 2. lépés: A binárisok kicsomagolása és előkészítése
 
@@ -233,9 +233,9 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-Ez a könyvtár most tartalmazza a `llama-cli`, `llama-server` és `rpc-server` ROCm-kompatibilis buildjeit, amelyek előre le vannak fordítva a Ryzen AI Halo rendszeredhez.
+Ez a könyvtár immár tartalmazza a `llama-cli`, a `llama-server` és az `rpc-server` ROCm-alapú buildjeit, amelyeket a Ryzen AI Halo rendszerhez fordítottak le előre.
 
-#### 3. lépés: GPU-felismerés ellenőrzése
+#### 3. lépés: A GPU-felismerés ellenőrzése
 
 ```bash
 ./llama-cli --list-devices
@@ -251,21 +251,21 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 <!-- @os:end -->
-Miután a llama.cpp minden csomóponton elő van készítve, folytasd a [Modell letöltése](#downloading-the-model) résszel.
+Miután a llama.cpp mindkét csomóponton elő van készítve, folytassa a [Modell letöltése](#downloading-the-model) résszel.
 
-### 2. lehetőség: Manuális forráskód-fordítás
+### 2. lehetőség: Kézi forrásból történő build
 
 <!-- @os:windows -->
-#### 1. lépés: A llama.cpp fordítása
+#### 1. lépés: A llama.cpp buildelése
 
-Nyisd meg az **x64 Native Tools Command Prompt** ablakot (a Visual Studio Build Tools-szal telepítve), és klónozd a tárolót:
+Nyissa meg az **x64 Native Tools Command Prompt** ablakot (a Visual Studio Build Tools telepíti), és klónozza a repót:
 
 ```cmd
 git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-Add hozzá a HIP-et az útvonalhoz, és fordítsd le ROCm és RPC támogatással:
+Adja hozzá a HIP-et az elérési útjához, majd buildeljen ROCm és RPC támogatással:
 
 ```cmd
 set PATH=%HIP_PATH%\bin;%PATH%
@@ -273,14 +273,14 @@ cmake -S . -B rocm -G Ninja -DGGML_HIP=ON -DGGML_RPC=ON -DGPU_TARGETS=gfx1151 -D
 cmake --build rocm --config Release
 ```
 
-| Fordítási jelző | Cél |
+| Build jelző | Cél |
 |-----------|---------|
-| `-DGGML_HIP=ON` | Engedélyezi a ROCm/HIP szoftververmet |
+| `-DGGML_HIP=ON` | Engedélyezi a ROCm/HIP szoftverkészletet |
 | `-DGGML_RPC=ON` | Engedélyezi az RPC-t az elosztott következtetéshez |
-| `-DGPU_TARGETS=gfx1151` | A Ryzen AI Halo GPU-t célozza (Radeon 8060s) |
+| `-DGPU_TARGETS=gfx1151` | A Ryzen AI Halo GPU-t (Radeon 8060s) célozza meg |
 | `-G Ninja` | A Ninja build rendszert használja |
 
-#### 2. lépés: GPU-felismerés ellenőrzése
+#### 2. lépés: A GPU-felismerés ellenőrzése
 
 ```cmd
 cd rocm\bin
@@ -296,44 +296,44 @@ Available devices:
   ROCm0: AMD Radeon(TM) Graphics (110511 MiB, 110357 MiB free)
 ```
 
-#### 3. lépés: A HIP hozzáadása a felhasználói útvonalhoz
+#### 3. lépés: A HIP hozzáadása a felhasználói elérési úthoz
 
-A fenti fordítási lépés csak az aktuális munkamenethez állította be a `%HIP_PATH%\bin` értéket. Ahhoz, hogy a HIP könyvtárak bármely terminálban elérhetők legyenek (nem csak az x64 Native Tools Command Prompt-ban), add hozzá állandóan a felhasználói `PATH`-hoz:
+A fenti buildlépés a `%HIP_PATH%\bin` értéket csak az aktuális munkamenetre állította be. Ahhoz, hogy a HIP-könyvtárak bármely terminálban elérhetők legyenek (nem csak az x64 Native Tools Command Prompt-ban), adja hozzá véglegesen a felhasználói `PATH`-hoz:
 
 ```cmd
 powershell -Command "[System.Environment]::SetEnvironmentVariable('Path', [System.Environment]::GetEnvironmentVariable('Path', 'User') + ';%HIP_PATH%\bin', 'User')"
 ```
 
-Miután a llama.cpp minden csomóponton elő van készítve, folytasd a [Modell letöltése](#downloading-the-model) résszel.
+Miután a llama.cpp mindkét csomóponton elő van készítve, folytassa a [Modell letöltése](#downloading-the-model) résszel.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-#### 1. lépés: A llama.cpp fordítása
+#### 1. lépés: A llama.cpp buildelése
 
-Klónozd a tárolót:
+Klónozza a repót:
 
 ```bash
 git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-Fordítsd le ROCm és RPC támogatással:
+Buildeljen ROCm és RPC támogatással:
 
 ```bash
 cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DGGML_HIP_ROCWMMA_FATTN=ON -DAMDGPU_TARGETS="gfx1151"
 cmake --build rocm --config Release -j$(nproc)
 ```
 
-| Fordítási jelző | Cél |
+| Build jelző | Cél |
 |-----------|---------|
-| `-DGGML_HIP=ON` | Engedélyezi a ROCm szoftververmet |
+| `-DGGML_HIP=ON` | Engedélyezi a ROCm szoftverkészletet |
 | `-DGGML_RPC=ON` | Engedélyezi az RPC-t az elosztott következtetéshez |
-| `-DGGML_HIP_ROCWMMA_FATTN=ON` | Engedélyezi a rocWMMA-t a továbbfejlesztett Flash Attention funkcióhoz AMD GPU-kon |
-| `-DAMDGPU_TARGETS="gfx1151"` | A Ryzen AI Halo GPU-t célozza (Radeon 8060s) |
+| `-DGGML_HIP_ROCWMMA_FATTN=ON` | Engedélyezi a rocWMMA-t a jobb Flash Attention teljesítményhez AMD GPU-kon |
+| `-DAMDGPU_TARGETS="gfx1151"` | A Ryzen AI Halo GPU-t (Radeon 8060s) célozza meg |
 
-További fordítási lehetőségekért lásd a [llama.cpp fordítási dokumentációját](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
+További build opciókért tekintse meg a [llama.cpp build dokumentációját](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
 
-#### 2. lépés: GPU-felismerés ellenőrzése
+#### 2. lépés: A GPU-felismerés ellenőrzése
 
 ```bash
 cd rocm/bin
@@ -350,14 +350,14 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 
-Miután a llama.cpp minden csomóponton elő van készítve, folytasd a [Modell letöltése](#downloading-the-model) résszel.
+Miután a llama.cpp mindkét csomóponton elő van készítve, folytassa a [Modell letöltése](#downloading-the-model) résszel.
 <!-- @os:end -->
 
 ## A modell letöltése
 
-Ez a playbook a [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7)-et használja, egy 358 milliárd paraméteres modellt `Q4_K_XL` kvantálásban az [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL)-tól. Ennél a kvantálásnál a modell körülbelül 205 GB tárhelyet igényel, és belefér két Ryzen AI Halo csomópont kombinált GPU memóriájába.
+Ez a útmutató a [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7) modellt használja, amely egy 358B paraméteres modell `Q4_K_XL` kvantálásban az [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL) forrásból. Ezen a kvantálási szinten a modell körülbelül 205 GB tárhelyet igényel, és beleférhet két Ryzen AI Halo csomópont kombinált GPU-memóriájába.
 
-Töltsd le a GGUF fájlokat a Hugging Face CLI segítségével:
+Töltse le a GGUF-fájlokat a Hugging Face CLI segítségével:
 <!-- @os:linux -->
 ```bash
 pip install huggingface-hub
@@ -376,17 +376,17 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
 ```
 <!-- @os:end -->
 
-> **Megjegyzés**: A modell letöltését az 1. gépen (a vezérlőn) kell elvégezni. Az RPC worker csomópontoknak nincs szükségük a modellfájlok helyi másolatára.
+> **Megjegyzés**: A modell letöltését az 1. gépen (a vezérlőn) kell elvégezni. Az RPC munkavégző csomópontoknak nincs szükségük a modellfájlok helyi másolatára.
 
-## A modell indítása a klaszteren
+## A modell elindítása a klaszteren
 
-A llama.cpp RPC (Remote Procedure Call) motor lehetővé teszi, hogy egyetlen llama.cpp példány a modell rétegeit távoli workerekre töltse ki a hálózaton keresztül. Az egyik gép **vezérlőként** (1. gép) működik, kezelve a tokenizálást, ütemezést és vezénylést. A másik gép egy könnyűsúlyú **RPC szervert** futtat (2. gép), amely a GPU memóriáját és számítási kapacitását a vezérlő rendelkezésére bocsátja.
+A llama.cpp RPC (Remote Procedure Call) motorja lehetővé teszi, hogy egyetlen llama.cpp példány áthelyezze a modell rétegeit távoli munkavégzőkre a hálózaton keresztül. Az egyik gép **vezérlőként** (1. gép) működik, amely a tokenizálást, az ütemezést és az orchesztrációt végzi. A másik gép egy könnyűsúlyú **RPC szervert** futtat (2. gép), amely a GPU-memóriáját és számítási kapacitását teszi elérhetővé a vezérlő számára.
 
-Betöltéskor a llama.cpp mindkét csomópont között szétdarabolja a modellt. A betöltés után a következtetés úgy zajlik, mintha egyetlen gyorsítón futna. Az RPC a háttérben kezeli a tenzorátadásokat és a szinkronizálást.
+Betöltéskor a llama.cpp mindkét csomóponton szétosztja a modellt. A betöltés után a következtetés úgy zajlik, mintha egyetlen gyorsítón futna. Az RPC a háttérben kezeli a tenzorátviteleket és a szinkronizálást.
 
-### 1. lépés: Az RPC szerver indítása (2. gép)
+### 1. lépés: Az RPC szerver elindítása (2. gép)
 
-A 2. gépen indítsd el az RPC szervert, hogy a GPU erőforrásait elérhetővé tedd a vezérlő számára:
+A 2. gépen indítsa el az RPC szervert, hogy elérhetővé tegye a GPU-erőforrásait a vezérlő számára:
 <!-- @os:linux -->
 ```bash
 ./rpc-server -p 50053 -c --host 0.0.0.0
@@ -401,19 +401,19 @@ A 2. gépen indítsd el az RPC szervert, hogy a GPU erőforrásait elérhetővé
 
 | Jelző | Cél |
 |------|---------|
-| `-p` | Az RPC szerver által használt port |
-| `-c` | Helyi gyorsítótárat engedélyez a nagy tenzorokhoz, elkerülve az ismételt hálózati átviteleket a modell betöltése során |
-| `--host` | IP-cím, amelyhez az RPC szerver kötődik (`0.0.0.0` az összes interfészhez) |
+| `-p` | Az a port, amelyen az RPC szerver közvetít |
+| `-c` | Engedélyezi a nagy tenzorok helyi gyorsítótárazását, elkerülve az ismétlődő hálózati átviteleket a modell betöltése közben |
+| `--host` | Az IP-cím, amelyre az RPC szervert kötik (`0.0.0.0` az összes interfészhez) |
 
-További lehetőségekért lásd a [llama.cpp RPC dokumentációját](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
+További opciókért tekintse meg a [llama.cpp RPC dokumentációját](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
-### 2. lépés: A modell indítása (1. gép)
+### 2. lépés: A modell elindítása (1. gép)
 
-Miután az RPC szerver fut a 2. gépen, indítsd el a következtetést az 1. gépről a `llama-cli` vagy a `llama-server` segítségével.
+Miután az RPC szerver fut a 2. gépen, indítsa el a következtetést az 1. gépről a `llama-cli` vagy a `llama-server` segítségével.
 
 #### llama-cli
 
-A `llama-cli` terminál alapú felületet biztosít a modellel való közvetlen interakcióhoz. Ideális teljesítményméréshez, hibakereséshez és alacsony szintű kísérletezéshez.
+A `llama-cli` egy terminálalapú felületet biztosít a modellel való közvetlen interakcióhoz. Ideális teljesítménytesztekhez, hibakereséshez és alacsony szintű kísérletezéshez.
 
 <!-- @os:linux -->
 ```bash
@@ -426,11 +426,11 @@ A `llama-cli` terminál alapú felületet biztosít a modellel való közvetlen 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Az `<RPC_WORKER_IP>` megkeresése**: A 2. gépen futtasd a `hostname -I | awk '{print $1}'` parancsot a helyi IP-cím megkereséséhez.
+> **A `<RPC_WORKER_IP>` megkeresése**: A 2. gépen futtassa a `hostname -I | awk '{print $1}'` parancsot a helyi IP-cím megkereséséhez.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Megjegyzés**: Ezt a parancsot a Terminálban (Powershell) futtasd.
+> **Megjegyzés**: Ezt a parancsot a Terminal (Powershell) ablakban futtassa.
 
 ```powershell
 .\llama-cli.exe `
@@ -442,17 +442,16 @@ A `llama-cli` terminál alapú felületet biztosít a modellel való közvetlen 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Az `<RPC_WORKER_IP>` megkeresése**: A 2. gépen futtasd az `ipconfig | findstr /C:"IPv4"` parancsot a Terminálban (Powershell) a helyi IP-cím megkereséséhez.
+> **A `<RPC_WORKER_IP>` megkeresése**: A 2. gépen futtassa az `ipconfig | findstr /C:"IPv4"` parancsot a Terminal (Powershell) ablakban a helyi IP-cím megkereséséhez.
 
 <!-- @os:end -->
 
-Futás közben a `llama-cli` megjeleníti a modell betöltési folyamatát, majd egy interaktív promptba lép, ahol közvetlenül cseveghet a modellel:
+Miután elindult, a `llama-cli` megjeleníti a modell betöltési folyamatát, majd belép egy interaktív promptba, ahol közvetlenül csevegehet a modellel:
 
-![llama-cli futtatja a GLM 4.7-et két csomóponton](assets/llama-cli-example.png)
-
+![llama-cli GLM 4.7-et futtat két csomóponton](assets/llama-cli-example.png)
 #### llama-server
 
-A `llama-server` ugyanazt a következtetési motort teszi elérhetővé egy állandó szerverfolyamaton keresztül, integrált webes felhasználói felülettel és OpenAI-kompatibilis HTTP API-val. Ez az előnyben részesített felület hosszabb futású telepítésekhez, több felhasználós hozzáféréshez és külső eszközökkel való integrációhoz.
+A `llama-server` ugyanazt a következtetési motort teszi elérhetővé egy állandóan futó szerverfolyamaton keresztül, beépített webes felhasználói felülettel és OpenAI-kompatibilis HTTP API-val. Ez az előnyben részesített felület a hosszabb ideig futó telepítésekhez, a többfelhasználós hozzáféréshez és a külső eszközökkel való integrációhoz.
 
 <!-- @os:linux -->
 ```bash
@@ -467,11 +466,11 @@ A `llama-server` ugyanazt a következtetési motort teszi elérhetővé egy áll
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Az `<RPC_WORKER_IP>` megkeresése**: A 2. gépen futtasd a `hostname -I | awk '{print $1}'` parancsot a helyi IP-cím megkereséséhez.
+> **A `<RPC_WORKER_IP>` megkeresése**: A 2. gépen futtassa a `hostname -I | awk '{print $1}'` parancsot a helyi IP-cím megkereséséhez.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Megjegyzés**: Ezt a parancsot a Terminálban (Powershell) futtasd.
+> **Megjegyzés**: Ezt a parancsot terminálban (Powershell) futtassa.
 
 ```powershell
 .\llama-server.exe `
@@ -485,38 +484,38 @@ A `llama-server` ugyanazt a következtetési motort teszi elérhetővé egy áll
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Az `<RPC_WORKER_IP>` megkeresése**: A 2. gépen futtasd az `ipconfig | findstr /C:"IPv4"` parancsot a Terminálban (Powershell) a helyi IP-cím megkereséséhez.
+> **A `<RPC_WORKER_IP>` megkeresése**: A 2. gépen futtassa az `ipconfig | findstr /C:"IPv4"` parancsot terminálban (Powershell) a helyi IP-cím megkereséséhez.
 <!-- @os:end -->
 
-Az indítás után nyisd meg a `http://<HOST_IP>:8081` címet a böngésződben a beépített webes felhasználói felület eléréséhez. Ez egy böngésző alapú csevegési felületet biztosít a modellel való interakcióhoz:
+Az indítás után nyissa meg a `http://<HOST_IP>:8081` címet a böngészőjében, hogy hozzáférjen a beépített webes felhasználói felülethez. Ez egy böngészőalapú csevegőfelületet biztosít a modellel való interakcióhoz:
 
-![llama-server webes felhasználói felület futtatja a GLM 4.7-et két csomóponton](assets/llama-server-example.png)
+![A GLM 4.7 modellt két csomóponton futtató llama-server webes felhasználói felülete](assets/llama-server-example.png)
 
 <!-- @os:linux -->
-> **A `<HOST_IP>` megkeresése**: Az 1. gépen futtasd a `hostname -I | awk '{print $1}'` parancsot a helyi IP-cím megkereséséhez.
+> **A `<HOST_IP>` megkeresése**: Az 1. gépen futtassa a `hostname -I | awk '{print $1}'` parancsot a helyi IP-cím megkereséséhez.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **A `<HOST_IP>` megkeresése**: Az 1. gépen futtasd az `ipconfig | findstr /C:"IPv4"` parancsot a Terminálban (Powershell) a helyi IP-cím megkereséséhez.
+> **A `<HOST_IP>` megkeresése**: Az 1. gépen futtassa az `ipconfig | findstr /C:"IPv4"` parancsot terminálban (Powershell) a helyi IP-cím megkereséséhez.
 <!-- @os:end -->
 
-#### Paraméter-referencia
+#### Paraméterreferencia
 
 | Jelző | Cél |
 |------|---------|
-| `-m` | A GGUF modellfájl elérési útja (az első szilánkot használd: `00001-of-00005`) |
-| `-c` | Kontextusméret tokenekben. A nagyobb értékek több memóriát használnak |
+| `-m` | A GGUF modellfájl elérési útja (az első szeletet használja, `00001-of-00005`) |
+| `-c` | A kontextusméret tokenben. A nagyobb értékek több memóriát használnak |
 | `-fa on` | Engedélyezi a rocWMMA Flash Attention funkciót a jobb teljesítmény érdekében AMD GPU-kon |
-| `-ngl 999` | Az összes modellréteget a GPU-ra tölti ki |
-| `--no-mmap` | Letiltja a memória-leképezést, csökkentve a betöltési időt, ha a modell mérete meghaladja a rendszer RAM-ját, de belefér a VRAM-ba |
-| `--host` | IP-cím, amelyhez a `llama-server` kötődik (csak `llama-server`) |
-| `--port` | Port, amelyen a HTTP API-t kiszolgálja (csak `llama-server`) |
-| `--rpc` | Vesszővel elválasztott RPC worker végpontok listája (`IP:port`) |
+| `-ngl 999` | Az összes modellréteget áthelyezi a GPU-ra |
+| `--no-mmap` | Letiltja a memórialeképezést, csökkentve a betöltési időt, ha a modell mérete meghaladja a rendszer RAM-ját, de elfér a VRAM-ban |
+| `--host` | Az IP-cím, amelyhez a `llama-server` csatlakozik (csak `llama-server`) |
+| `--port` | A port, amelyen a HTTP API elérhető (csak `llama-server`) |
+| `--rpc` | Vesszővel elválasztott lista az RPC munkavégző végpontjairól (`IP:port`) |
 
-A teljes paraméterhasználatért lásd a [llama-cli dokumentációját](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) és a [llama-server dokumentációját](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
+A teljes paraszterhasználatért tekintse meg a [llama-cli dokumentációt](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) és a [llama-server dokumentációt](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
 
 ## Következő lépések
 
-- **Harmadik féltől származó alkalmazások csatlakoztatása**: A `llama-server` OpenAI-kompatibilis API-t tesz elérhetővé. Irányítsd bármely OpenAI-kompatibilis alkalmazást (például Open WebUI) a `http://<HOST_IP>:8081` címre bármilyen helyőrző API-kulccsal (pl. `none`) a klaszterhez való csatlakozáshoz
-- **Más modellek felfedezése**: Böngéssz kvantált GGUF-ok között a [Hugging Face](https://huggingface.co/models?search=gguf) oldalon, hogy megtaláld a klasztered kombinált GPU memóriájába illő modelleket
-- **Skálázás négy csomópontra**: Adj hozzá még két Ryzen AI Halo rendszert további RPC workerként, hogy hozzáférj az 1 billió paraméteres skálájú modellekhez. Add meg a további végpontokat a `--rpc` paraméternek vesszővel elválasztott listaként (pl. `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)
+- **Külső alkalmazások csatlakoztatása**: A `llama-server` egy OpenAI-kompatibilis API-t tesz elérhetővé. Irányítson bármilyen OpenAI-kompatibilis alkalmazást (például az Open WebUI-t) a `http://<HOST_IP>:8081` címre bármilyen helyőrző API-kulccsal (pl. `none`), hogy csatlakozzon a klaszteréhez
+- **Más modellek felfedezése**: Böngésszen kvantált GGUF-okat a [Hugging Face](https://huggingface.co/models?search=gguf) oldalon, hogy olyan modelleket találjon, amelyek beleférnek a klaszter együttes GPU-memóriájába
+- **Skálázás négy csomópontra**: Adjon hozzá még két Ryzen AI Halo rendszert további RPC munkavégzőként, hogy 1 billió paraméteres méretű modellekhez férjen hozzá. Adja meg a további végpontokat a `--rpc` paraméterhez vesszővel elválasztott listaként (pl. `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)

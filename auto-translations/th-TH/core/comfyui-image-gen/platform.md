@@ -8,16 +8,16 @@ SPDX-License-Identifier: MIT
 
 เอกสารนี้อธิบายการกำหนดค่าแพลตฟอร์มที่คาดหวังสำหรับการรัน playbook นี้
 
-## แอปพลิเคชัน/เฟรมเวิร์กที่จำเป็น
+## แอป/เฟรมเวิร์กที่จำเป็น
 ### Windows/Linux
 
-ควรติดตั้ง ComfyUI ล่วงหน้าโดยใช้คำแนะนำที่ให้ไว้ใน[คู่มือการติดตั้ง ComfyUI](../../dependencies/comfyui.md)
+ควรติดตั้ง ComfyUI ล่วงหน้าโดยใช้คำแนะนำที่ระบุไว้ใน [คู่มือการติดตั้ง ComfyUI](../../dependencies/comfyui.md)
 
 ## โมเดลที่จำเป็น
 
 ### Windows/Linux
 
-โมเดลต่อไปนี้จะต้องมีอยู่ในไดเรกทอรีที่ติดตั้ง ComfyUI ภายในโฟลเดอร์ `models`
+โมเดลต่อไปนี้ต้องมีอยู่ในไดเรกทอรีที่ติดตั้ง ComfyUI ภายในโฟลเดอร์ `models`
 
 | ประเภทโมเดล | ชื่อไฟล์ | ขนาด | ตำแหน่ง | ดาวน์โหลด |
 |------------|----------|------|----------|----------|
@@ -27,4 +27,4 @@ SPDX-License-Identifier: MIT
 | VAE | `ae.safetensors` | 319.77 MB | `models/vae/` | [ลิงก์](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors) |
 
 
-เพื่อทดสอบว่าโมเดลถูกวางไว้อย่างถูกต้องหรือไม่ [ให้ดูตัวอย่าง ComfyUI playbook ผ่านเว็บไซต์ onboarding](../../README.md#previewing-the-playbooks) และทำตามคำแนะนำ โมเดลถูกวางไว้อย่างถูกต้องหากไม่มีหน้า "Models not found" ปรากฏขึ้นเมื่อเปิดใช้งานเทมเพลต Z-Image Turbo
+หากต้องการทดสอบว่าโมเดลถูกวางไว้อย่างถูกต้องหรือไม่ ให้ [แสดงตัวอย่าง playbook ของ ComfyUI โดยใช้เว็บไซต์ onboarding](../../README.md#previewing-the-playbooks) แล้วทำตามคำแนะนำ โมเดลจะถูกวางไว้อย่างถูกต้องหากไม่มีหน้า "Models not found" ปรากฏขึ้นเมื่อเปิดใช้งานเทมเพลต Z-Image Turbo

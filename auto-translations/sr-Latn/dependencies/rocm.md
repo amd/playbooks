@@ -11,12 +11,12 @@ SPDX-License-Identifier: MIT
 sudo usermod -a -G render,video $LOGNAME
 ```
 
-**Restartujte sistem da biste primenili podešavanja.**
+**Ponovo pokrenite sistem da biste primenili podešavanja.**
 ```bash
 sudo reboot
 ```
 
-**Instalirajte ROCm u kreiranom virtuelnom okruženju.**
+**Instalirajte ROCm u kreirano virtuelno okruženje.**
 > **Napomena**: Uverite se da je virtuelno okruženje aktivno pre nego što nastavite.
 
 <!-- @device:halo,halo_box -->
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-Za dodatnu pomoć pri instalaciji, pogledajte ovaj [link](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Za dodatnu pomoć oko instalacije, pogledajte ovaj [link](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).

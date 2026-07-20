@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA on AMD:n avoimen lähdekoodin kehys tekoälyagenttien rakentamiseen, jotka toimivat paikallisesti AMD-laitteistolla Ryzen AI -kiihdytyksen avulla.
+GAIA on AMD:n avoimen lähdekoodin kehys tekoälyagenttien rakentamiseen, jotka toimivat paikallisesti AMD-laitteistolla Ryzen AI -kiihdytyksellä.
 
 #### GAIA:n asentaminen
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Avaa Windowsissa pääte haluamassasi hakemistossa ja luo venv seuraavilla komennoilla.
+1. Avaa Windowsissa pääte haluamaasi hakemistoon ja luo venv seuraavilla komennoilla.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Asenna sitten **Gaia** käyttämällä `pip`-komentoa
+2. Asenna sitten **Gaia** käyttämällä `pip`-työkalua
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -30,7 +30,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Avaa Linuxissa pääte haluamassasi hakemistossa ja luo venv seuraavilla komennoilla.
+1. Avaa Linuxissa pääte haluamaasi hakemistoon ja luo venv seuraavilla komennoilla.
 <!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Asenna sitten **Gaia** käyttämällä `pip`-komentoa
+2. Asenna sitten **Gaia** käyttämällä `pip`-työkalua
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Avaa Windowsissa pääte haluamassasi hakemistossa ja luo venv seuraavilla komennoilla.
+1. Avaa Windowsissa pääte haluamaasi hakemistoon ja luo venv seuraavilla komennoilla.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Asenna sitten **Gaia** käyttämällä `pip`-komentoa
+2. Asenna sitten **Gaia** käyttämällä `pip`-työkalua
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -71,7 +71,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Avaa Linuxissa pääte haluamassasi hakemistossa ja luo venv seuraavilla komennoilla.
+1. Avaa Linuxissa pääte haluamaasi hakemistoon ja luo venv seuraavilla komennoilla.
 <!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Asenna sitten **Gaia** käyttämällä `pip`-komentoa
+2. Asenna sitten **Gaia** käyttämällä `pip`-työkalua
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -93,13 +93,13 @@ pip install amd-gaia
 
 3. GAIA:n alustaminen
 
-Asennuksen jälkeen suorita `gaia init` Lemonade Serverin määrittämiseksi ja mallien lataamiseksi:
+Suorita asennuksen jälkeen `gaia init`, jotta voit määrittää Lemonade Serverin ja ladata mallit:
 
 ```bash
 gaia init
 ```
 
-Tämä asentaa Lemonade Serverin, lataa oletusmallit ja tarkistaa asennuksen.
+Tämä asentaa Lemonade Serverin, lataa oletusmallit ja varmistaa asennuksen toimivuuden.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -279,14 +279,14 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Asennuksen tarkistaminen
+#### Asennuksen varmistaminen
 
-Tarkista, että GAIA v0.16.2 tai uudempi on asennettu:
+Varmista, että GAIA v0.16.2 tai uudempi on asennettu:
 
 ```bash
 gaia --version
 ```
 
-> **Tärkeää**: Varmista, että Lemonade Server on käynnissä ennen GAIA:n käyttämistä. GAIA edellyttää, että Lemonade Server käynnistetään manuaalisesti.
+> **Tärkeää**: Varmista, että Lemonade Server on käynnissä ennen GAIA:n käyttöä. GAIA edellyttää, että Lemonade Server käynnistetään manuaalisesti.
 
-Lisätietoja on [GAIA-dokumentaatiossa](https://amd-gaia.ai).
+Lisätietoja saat [GAIA-dokumentaatiosta](https://amd-gaia.ai).

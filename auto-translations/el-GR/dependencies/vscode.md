@@ -8,11 +8,11 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-Το VS Code μπορεί να εγκατασταθεί από το **AMD Ryzen™ AI Developer Center**. Μεταβείτε στην καρτέλα **Updates** και εγκαταστήστε το VS Code εάν δεν υπάρχει ήδη.
+Το VS Code μπορεί να εγκατασταθεί από το **AMD Ryzen™ AI Developer Center**. Μεταβείτε στην καρτέλα **Updates** και εγκαταστήστε το VS Code αν δεν υπάρχει ήδη.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Το VS Code μπορεί να εγκατασταθεί από το **AMD Ryzen™ AI Developer Center**. Μεταβείτε στην καρτέλα **Manage** και εγκαταστήστε το VS Code εάν δεν υπάρχει ήδη.
+Το VS Code μπορεί να εγκατασταθεί από το **AMD Ryzen™ AI Developer Center**. Μεταβείτε στην καρτέλα **Manage** και εγκαταστήστε το VS Code αν δεν υπάρχει ήδη.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -20,14 +20,14 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 1. Κατεβάστε το εκτελέσιμο αρχείο εγκατάστασης για Windows από: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
-2. Κάντε κλικ στο ληφθέν αρχείο `VSCodeUserSetup-x64-1.108.2.exe` για να εγκαταστήσετε το VS Code.
+2. Κάντε κλικ στο κατεβασμένο αρχείο `VSCodeUserSetup-x64-1.108.2.exe` για να εγκαταστήσετε το VS Code.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
 1. Κατεβάστε το πακέτο εγκατάστασης Debian από: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
-2. Κάντε κλικ στο ληφθέν αρχείο `code_1.108.2-1769004815_amd64.deb` για να εγκαταστήσετε το VS Code.
+2. Κάντε κλικ στο κατεβασμένο αρχείο `code_1.108.2-1769004815_amd64.deb` για να εγκαταστήσετε το VS Code.
 
 <!-- @os:end -->
 <!-- @device:end -->

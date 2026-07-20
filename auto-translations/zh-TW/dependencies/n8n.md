@@ -23,6 +23,6 @@ npm install -g n8n
 npm install -g n8n
 ```
 
-> **注意**：請參閱 [n8n 文件](https://docs.n8n.io/hosting/installation/npm/) 以了解更多安裝選項。
+> **注意**：更多安裝選項請參閱 [n8n Documentation](https://docs.n8n.io/hosting/installation/npm/)。
 
 <!-- @os:end -->

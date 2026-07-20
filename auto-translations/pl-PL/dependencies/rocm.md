@@ -17,7 +17,7 @@ sudo reboot
 ```
 
 **Zainstaluj ROCm w utworzonym środowisku wirtualnym.**
-> **Uwaga**: Upewnij się, że środowisko wirtualne jest aktywne przed kontynuowaniem.
+> **Uwaga**: Przed kontynuowaniem upewnij się, że środowisko wirtualne jest aktywne.
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-Aby uzyskać dalszą pomoc dotyczącą instalacji, zapoznaj się z tym [linkiem](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Aby uzyskać dalszą pomoc dotyczącą instalacji, zobacz ten [link](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).

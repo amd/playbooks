@@ -24,7 +24,7 @@ playbooks. Each `<locale>/` subtree mirrors the layout of the top-level
 ```mermaid
 flowchart TD
   PR["PR merged to main (changes under playbooks/**)"] --> WF["translate-playbooks.yml"]
-  Dispatch["Manual run (workflow_dispatch: playbook + locales)"] --> WF
+  Dispatch["On-demand backfill (workflow_dispatch: playbook + locales)"] --> WF
   WF --> DETECT["Detect: which playbook(s) changed + did dependencies change?"]
   DETECT --> ENGINE["translate_playbook.py on a self-hosted runner"]
   ENGINE --> MASK["Mask code blocks, @-tags, links, image paths"]
@@ -42,9 +42,10 @@ The [`translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml)
 workflow runs when:
 - **A PR merges to `main`** touching `playbooks/**` (a new or edited playbook, or
   a changed shared dependency file). This is the maintenance path.
-- **Manually** via *Run workflow* (`workflow_dispatch`) - optionally for one
-  playbook, otherwise **all** playbooks; defaults to all 29 languages. This is
-  the backfill path.
+- **On-demand backfill** via *Run workflow* (`workflow_dispatch`) - optionally
+  for one playbook, otherwise **all** playbooks; defaults to all 29 languages.
+  This fires the same automated pipeline (used to re-translate everything after a
+  model change or when adding a language).
 
 ### 2. Detect what to translate
 On a merge, the workflow diffs the commit and translates **only** the affected
@@ -78,10 +79,12 @@ Only `README.md`, `platform.md`, the shared `dependencies/*.md`, and the
   Low-scoring files get one higher-temperature retry.
 
 ### 5. Idempotent + resumable
-Each file's English source hash, model, prompt version, and score are stored in
-`translation_accuracy.json`. A file is retranslated **only** when its English
-source changes (or the model/prompt version changes) - so re-runs skip unchanged
-files and an interrupted run resumes cleanly.
+Each file's English source hash, translator model, judge model, prompt version,
+and score are stored in `translation_accuracy.json`. A file is **re-translated**
+only when its English source, translator model (`LLM_MODEL`), or prompt version
+changes; if only the **judge model** (`LLM_JUDGE_MODEL`) changes, the existing
+translation is **re-scored** in place (no re-translation). Everything else is
+skipped - so re-runs are cheap and an interrupted run resumes cleanly.
 
 ### 6. Publish
 The workflow commits the results under `auto-translations/` and **direct-pushes**
@@ -100,10 +103,21 @@ The website resolves each file per locale in this order:
 All translation and scoring is done by [`translate_playbook.py`](../.github/scripts/translate_playbook.py).
 There is no SDK and no third-party dependency - it makes a plain HTTPS `POST` to a
 **configurable LLM API endpoint**. Because the endpoint, models, and auth are all
-supplied via environment variables, it can run against any compatible API
+supplied via a handful of `LLM_*` settings, it can run against any compatible API
 (self-hosted or private) - so the model text stays on infrastructure you control.
 
-| What | How it's configured | Notes |
+> [!NOTE]
+> **Environment variables vs. GitHub secrets - they're the same values, in two
+> places.** The script itself only ever reads **environment variables**
+> (`os.environ["LLM_MODEL"]`, etc.); it knows nothing about GitHub. GitHub
+> Actions **secrets** are just *where those values are stored* for CI: the
+> [`translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml)
+> workflow copies each secret into the job's environment (`LLM_MODEL: ${{ secrets.LLM_MODEL }}`),
+> so the script sees them as plain env vars. So you **set them once as repository
+> secrets** for CI; when running locally you just export the same `LLM_*` env
+> vars in your shell. The table below lists that shared set of names.
+
+| What | Env var (set as a GitHub secret for CI) | Notes |
 |------|---------------------|-------|
 | **Translator model** | `LLM_MODEL` | A capable large language model. |
 | **Judge / scorer model** | `LLM_JUDGE_MODEL` | A separate, independent model (ideally stronger) used only to score quality, to reduce self-evaluation bias. |
@@ -129,12 +143,11 @@ compatible LLM API you run.
 5. Second `POST` to the **judge model** with the source + translation to get the
    0-100 quality score, recorded in `translation_accuracy.json`.
 
-**Where it runs today vs. in production:** it currently runs from a machine that
-already has the LLM API configured (a stand-in for the runner). In production the
-identical script runs unchanged on a self-hosted runner via
+**Where it runs:** in production the script runs on a self-hosted runner via
 [`translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml), which
-reads the same `LLM_*` values from repository **secrets**. See the next
-section.
+reads the `LLM_*` values from repository **secrets** - fully automated, with no
+manual translation step. (The translations in this PR were produced by the same
+script ahead of the runner being provisioned.) See the next section.
 
 ---
 
@@ -154,49 +167,81 @@ section.
 | **Self-hosted runner with the `translation` label** | Coming soon |
 | **`LLM_*` repository secrets set** | Coming soon |
 | **Ephemeral runners (one job per fresh VM)** | Coming soon |
-| Environment approval gate on the workflow | Coming soon |
 | Website language selector for end users | Out of scope (website team) |
 
-Until the runner + secrets exist, the workflow is inert on `main` and the script
-is run manually. Nothing else changes when it goes live.
+Until the runner + secrets exist, the workflow does not run on `main`; the
+translations already in this PR were generated ahead of that. Once the runner and
+secrets are in place the workflow runs on its own - no code changes and no manual
+step.
 
-### What the runner infrastructure needs to provide
-1. An **ephemeral, self-hosted runner pool** registered to this repo (scoped to
-   this repo) that advertises the label the workflow targets:
-   `runs-on: [self-hosted, translation]`.
-2. Registered as **ephemeral / just-in-time** (one job per fresh runner, then
-   deregister) via a GitHub App - the recommended model for a public repo.
-3. Each runner image must have: **network egress to the configured LLM API
-   endpoint** plus `github.com`/PyPI, any **required TLS/proxy CA** trusted (so
-   HTTPS to the endpoint works), and **Python 3.13 + git**.
+> [!NOTE]
+> Everything below refers to one workflow file,
+> [`.github/workflows/translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml),
+> and to this repo's GitHub **Settings**. Line numbers are approximate - search
+> for the quoted key if they've shifted.
 
-### What the repository maintainers need to do
-1. **Add the `LLM_*` values as GitHub Actions secrets** (Settings → Secrets and
-   variables → Actions → *New repository secret*). The workflow reads them at run
-   time. Set each of these five:
+### What the runner infrastructure needs to provide (CI / infra team)
+1. **Register a self-hosted runner** in
+   **Settings → Actions → Runners → New self-hosted runner** (or an org-level
+   runner group scoped to this repo). During registration, give it **both labels
+   `self-hosted` and `translation`** so it matches the workflow's target:
+   ```yaml
+   # .github/workflows/translate-playbooks.yml  (~line 45)
+   runs-on: [self-hosted, translation]
+   ```
+   If you use a different label, change that `runs-on:` line to match (see
+   maintainer step 2).
+2. **Make it ephemeral / just-in-time** - register with `--ephemeral` (or via a
+   GitHub App / actions-runner-controller) so each job runs on a fresh runner
+   that deregisters after one job. This is the recommended model for a public repo.
+3. **Runner image prerequisites:** network egress to the configured LLM API
+   endpoint (`LLM_BASE_URL`) plus `github.com`/PyPI, any required **TLS/proxy CA**
+   trusted (so HTTPS to the endpoint works), and **Python 3.13 + git**
+   (the workflow's `actions/setup-python` step pins `3.13`).
+
+### What the repository maintainers need to do (GitHub admin)
+1. **Add the `LLM_*` values as GitHub Actions secrets:**
+   **Settings → Secrets and variables → Actions → *New repository secret*.**
+   These exact names are read in the workflow's `env:` block
+   (the `LLM_*: ${{ secrets.LLM_* }}` lines, ~lines 54-60 of
+   [`translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml)).
+   Set each of these five:
 
    | Secret name | What to put in it | Example |
    |-------------|-------------------|---------|
    | `LLM_PROVIDER` | API format of your endpoint: `anthropic` (Messages API) or `openai` (chat/completions). | `anthropic` |
    | `LLM_BASE_URL` | Base URL of the LLM API to call (no trailing `/v1/...`; the script appends the path). | `https://your-llm-gateway.example.com/Anthropic` |
-   | `LLM_MODEL` | The translator model name your endpoint exposes. | `Claude-Sonnet-4.6` |
-   | `LLM_JUDGE_MODEL` | An independent (ideally stronger) model used only to score quality. | `Claude-Opus-4.6` |
+   | `LLM_MODEL` | The translator model name your endpoint exposes. | `Claude-Sonnet-5` |
+   | `LLM_JUDGE_MODEL` | An independent (ideally stronger) model used only to score quality. | `Claude-Opus-4.8` |
    | `LLM_EXTRA_HEADERS` | JSON object of request headers used to authenticate, e.g. an API-management subscription key. | `{"Ocp-Apim-Subscription-Key":"<your-key>"}` |
 
    Get the actual endpoint URL, model names, and auth header from whoever
    operates the LLM API you're pointing at.
-2. Confirm the runner label matches `runs-on:` (or update the workflow to their
-   label).
-3. Add a GitHub **Environment with a required reviewer** so the runner only
-   executes after human approval, even on a merged change.
-4. Keep the **trusted-event triggers** as-is (push to `main` + manual dispatch;
-   never fork PRs), so untrusted code can't run on the self-hosted runner.
+2. **Confirm the runner label matches** the `runs-on:` line in
+   [`translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml)
+   (~line 45). If your runner uses a different label, edit that single line.
+3. **Keep the trusted-event triggers as-is.** The `on:` block
+   ([`translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml),
+   ~lines 15-22) fires only on `push` to `main` (`paths: ['playbooks/**']`) and
+   `workflow_dispatch` (on-demand backfill). **Do NOT add a `pull_request`
+   trigger** - that would let untrusted fork code run on the self-hosted runner.
+
+> [!NOTE]
+> **No manual approval step.** The workflow runs fully automatically once the
+> runner + secrets exist - there is intentionally **no environment/reviewer gate**.
+> That's safe here because the triggers above only run **already-trusted code**
+> (code that has already merged to `main`, or an on-demand backfill triggered by
+> someone with write access); fork PRs never run on the self-hosted runner. If you ever *did*
+> want a human to approve each run, you would add a GitHub Environment with a
+> required reviewer and an `environment:` key on the job - but that is not part of
+> this setup.
 
 ### The result
 Once the runner + secrets are in place, no code changes are needed: a PR that
 merges to `main` touching `playbooks/**` automatically translates the changed
 playbook(s) into all 29 languages on the ephemeral runner and direct-pushes the
-results here - the same behavior we exercise manually today.
+results here. In production this is entirely automated - there is no manual
+translation step.
 
 ---
 
@@ -256,8 +301,8 @@ Example entry:
 | `files` | Map of **English source path** (relative to repo root, e.g. `playbooks/core/<id>/README.md`) → record. | Keyed by source so it's obvious what each translation came from. |
 | `source_sha256` | SHA-256 of the **English source file** at the moment it was translated. | Staleness / idempotency: if the English source changes, its hash changes, so the file is retranslated; unchanged files are skipped. |
 | `prompt_version` | Version of the translation prompt + glossary ([`glossary.json`](../.github/scripts/glossary.json)). | Bumping it forces a full re-translation when the methodology changes. |
-| `model` | The model that produced the **translation**. | Provenance / reproducibility. |
-| `judge_model` | The independent model that produced the **score** (ideally stronger than `model`, e.g. Opus judging Sonnet). | Reduces self-evaluation bias; provenance for the number. |
+| `model` | The model that produced the **translation**. | Provenance, and a staleness key: changing `LLM_MODEL` triggers a full **re-translation** (which also re-scores). |
+| `judge_model` | The independent model that produced the **score** (ideally stronger than `model`, e.g. Opus judging Sonnet). | Reduces self-evaluation bias; provenance for the number. Also a staleness key: changing `LLM_JUDGE_MODEL` triggers a **re-score of the existing translation** (no re-translation). |
 | `quality_score` | Integer **0-100** accuracy/quality score for this file (see below). | This is the "how accurate is it" number we track. |
 | `quality_issues` | Short (<=25 word) note of the main issues the judge flagged. | Human-readable context for the score. |
 

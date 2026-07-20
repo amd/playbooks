@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. PowerShell 또는 명령 프롬프트 열기
+1. PowerShell 또는 명령 프롬프트를 엽니다
 2. npm을 사용하여 n8n을 전역으로 설치합니다:
 ```cmd
 npm install -g n8n

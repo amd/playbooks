@@ -4,25 +4,25 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# プラットフォーム設定
+# プラットフォーム構成
 
-このドキュメントでは、このプレイブックを実行するための想定プラットフォーム設定について説明します。
+このドキュメントでは、本プレイブックを実行するために想定されるプラットフォーム構成について説明します。
 
 ## Windows
 
-### LM Studio インストール
+### LM Studio のインストール
 
-LM Studio は事前にインストールされている必要があります：
+LM Studio は事前にインストールされている必要があります。
 
 | コンポーネント | バージョン | 場所 |
 |-----------|---------|----------|
-| **LM Studio (モデル + その他)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (プログラム)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (キャッシュ)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### モデルのダウンロード
 
-以下のモデルは、LM Studio のモデルディレクトリ（`C:\Users\...\.lmstudio\models`）にあらかじめ存在している必要があります：
+以下のモデルが、LM Studio のモデルディレクトリ(`C:\Users\...\.lmstudio\models`)にすでに存在している必要があります。
 
 | モデルタイプ | 量子化 | サイズ | 場所 |
 |------------|--------------|------|----------|
@@ -32,9 +32,9 @@ LM Studio は事前にインストールされている必要があります：
 
 ## Linux
 
-### LM Studio インストール
+### LM Studio のインストール
 
-詳細については、lmstudio.md（dependencies フォルダー内）を参照してください。
+詳細については、lmstudio.md(dependencies フォルダ内)を参照してください。
 
 ### モデルのダウンロード
 

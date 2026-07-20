@@ -1,5 +1,5 @@
 {
   "id": "clustering-rccl",
-  "title": "אשכול של שני Ryzen™ AI Halos עם RCCL",
-  "description": "הגדר אשכול רב-צמתים באמצעות שני התקני Ryzen™ AI Halo עם RCCL לעומסי עבודה מבוזרים"
+  "title": "אשכול (Clustering) של שני Ryzen™ AI Halo באמצעות RCCL",
+  "description": "הגדרת אשכול (cluster) מרובה צמתים באמצעות שני מכשירי Ryzen™ AI Halo עם RCCL עבור עומסי עבודה מבוזרים"
 }

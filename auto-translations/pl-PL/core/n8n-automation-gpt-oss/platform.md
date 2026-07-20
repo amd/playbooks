@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # Konfiguracja platformy
 
-Ten dokument opisuje oczekiwane konfiguracje platformy do uruchamiania tego playbooka.
+Ten dokument opisuje oczekiwane konfiguracje platformy do uruchomienia tego playbooka.
 
 ## Wymagania wstępne
 
@@ -14,20 +14,20 @@ Ten dokument opisuje oczekiwane konfiguracje platformy do uruchamiania tego play
 
 | Komponent | Wersja | Uwagi |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Preinstalowany i dostępny w PATH na AMD Ryzen™ AI Halo Developer Platform; na wszystkich innych urządzeniach należy zainstalować ręcznie |
-| **Lemonade Server** | najnowsza | Uruchomiony na `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Preinstalowany i dostępny w PATH na AMD Ryzen™ AI Halo Developer Platform; na wszystkich innych urządzeniach musi zostać zainstalowany ręcznie |
+| **Lemonade Server** | najnowsza | Działa na `http://localhost:13305/api/v1` |
 
 ### Linux
 
 | Komponent | Wersja | Uwagi |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Preinstalowany i dostępny w PATH na AMD Ryzen™ AI Halo Developer Platform; na wszystkich innych urządzeniach należy zainstalować ręcznie |
-| **Lemonade Server** | najnowsza | Uruchomiony na `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Preinstalowany i dostępny w PATH na AMD Ryzen™ AI Halo Developer Platform; na wszystkich innych urządzeniach musi zostać zainstalowany ręcznie |
+| **Lemonade Server** | najnowsza | Działa na `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-Serwer Lemonade powinien być uruchomiony z załadowanym modelem odpowiednim dla danego urządzenia (zapoznaj się z plikiem README, aby uzyskać polecenie `lemonade run` dla swojego urządzenia):
+Serwer Lemonade powinien być uruchomiony z modelem odpowiednim dla danego urządzenia (patrz README, aby poznać polecenie `lemonade run` dla Twojego urządzenia):
 
 | Urządzenie | Punkt końcowy | Model |
 |--------|----------|-------|

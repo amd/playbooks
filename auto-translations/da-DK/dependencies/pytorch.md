@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 #### PyTorch
 
-**Installer PyTorch med AMD ROCm™ software-understøttelse** i det oprettede virtuelle miljø:
+**Installer PyTorch med understøttelse af AMD ROCm™-software** i det oprettede virtuelle miljø:
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
@@ -48,4 +48,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "to
 <!-- @test:end -->
 <!-- @device:end -->
 
-For andre enheder bedes du se [dette link](https://rocm.docs.amd.com/en/7.13.0-preview/frameworks/pytorch/install.html) for fuldstændige instruktioner.
+For andre enheder henvises til [dette link](https://rocm.docs.amd.com/en/7.13.0-preview/frameworks/pytorch/install.html) for fulde instruktioner.

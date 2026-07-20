@@ -1,5 +1,5 @@
 {
   "id": "ollama-getting-started",
-  "title": "Az Ollama használatának megkezdése",
-  "description": "Telepítse az Ollama-t és futtasson LLM-eket helyben — csevegjen a terminálból, asztali alkalmazásból vagy REST API-n keresztül."
+  "title": "Első lépések az Ollama használatával",
+  "description": "Telepítsd az Ollamát, és futtass LLM-eket helyben – csevegj a terminálból, az asztali alkalmazásból vagy a REST API-n keresztül."
 }

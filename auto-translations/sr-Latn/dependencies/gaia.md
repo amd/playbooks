@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA je AMD-ov open-source framework za izgradnju AI agenata koji se izvršavaju lokalno na AMD hardveru uz Ryzen AI akceleraciju.
+GAIA je AMD-ov open-source okvir za izgradnju AI agenata koji se izvršavaju lokalno na AMD hardveru uz Ryzen AI akceleraciju.
 
-#### Instalacija GAIA
+#### Instaliranje GAIA-e
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Na Windows-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande za kreiranje venv-a.
+1. Na sistemu Windows otvorite terminal u direktorijumu po izboru i pratite komande za kreiranje venv-a.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Zatim, koristite `pip` za instalaciju **Gaia**
+2. Zatim koristite `pip` da instalirate **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -30,7 +30,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Na Linux-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande za kreiranje venv-a.
+1. Na sistemu Linux otvorite terminal u direktorijumu po izboru i pratite komande za kreiranje venv-a.
 <!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Zatim, koristite `pip` za instalaciju **Gaia**
+2. Zatim koristite `pip` da instalirate **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Na Windows-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande za kreiranje venv-a.
+1. Na sistemu Windows otvorite terminal u direktorijumu po izboru i pratite komande za kreiranje venv-a.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Zatim, koristite `pip` za instalaciju **Gaia**
+2. Zatim koristite `pip` da instalirate **Gaia**
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -71,7 +71,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Na Linux-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande za kreiranje venv-a.
+1. Na sistemu Linux otvorite terminal u direktorijumu po izboru i pratite komande za kreiranje venv-a.
 <!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Zatim, koristite `pip` za instalaciju **Gaia**
+2. Zatim koristite `pip` da instalirate **Gaia**
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -91,15 +91,15 @@ pip install amd-gaia
 <!-- @os:end -->
 <!-- @device:end -->
 
-3. Inicijalizacija GAIA
+3. Inicijalizacija GAIA-e
 
-Nakon instalacije, pokrenite `gaia init` da biste podesili Lemonade Server i preuzeli modele:
+Nakon instalacije, pokrenite `gaia init` da podesite Lemonade Server i preuzmete modele:
 
 ```bash
 gaia init
 ```
 
-Ovo instalira Lemonade Server, preuzima podrazumevane modele i verifikuje podešavanje.
+Ovo instalira Lemonade Server, preuzima podrazumevane modele i proverava podešavanje.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -279,14 +279,14 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Verifikacija instalacije
+#### Provera instalacije
 
-Proverite da li je instaliran GAIA v0.16.2 ili novija verzija:
+Proverite da li je GAIA v0.16.2 ili novija instalirana:
 
 ```bash
 gaia --version
 ```
 
-> **Važno**: Proverite da li je Lemonade Server pokrenut pre korišćenja GAIA. GAIA zahteva da Lemonade Server bude ručno pokrenut.
+> **Važno**: Uverite se da je Lemonade Server pokrenut pre korišćenja GAIA-e. GAIA zahteva da se Lemonade Server pokrene ručno.
 
 Za više informacija, pogledajte [GAIA dokumentaciju](https://amd-gaia.ai).

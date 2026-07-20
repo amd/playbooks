@@ -16,7 +16,7 @@ sudo usermod -a -G render,video $LOGNAME
 sudo reboot
 ```
 
-**ROCm'u oluşturulan sanal ortama yükleyin.**
+**ROCm'i oluşturulan sanal ortama kurun.**
 > **Not**: Devam etmeden önce sanal ortamın etkin olduğundan emin olun.
 
 <!-- @device:halo,halo_box -->
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-Daha fazla kurulum yardımı için lütfen bu [bağlantıya](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html) bakın.
+Kurulumla ilgili daha fazla yardım için lütfen bu [bağlantıya](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html) bakın.

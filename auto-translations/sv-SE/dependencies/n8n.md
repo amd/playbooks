@@ -23,6 +23,6 @@ Installera n8n globalt med npm:
 npm install -g n8n
 ```
 
-> **Obs**: Se [n8n Documentation](https://docs.n8n.io/hosting/installation/npm/) för fler installationsalternativ.
+> **Obs**: Se [n8n-dokumentationen](https://docs.n8n.io/hosting/installation/npm/) för fler installationsalternativ.
 
 <!-- @os:end -->

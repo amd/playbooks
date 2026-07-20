@@ -16,17 +16,17 @@ LM Studio by mělo být předinstalováno:
 
 | Komponenta | Verze | Umístění |
 |-----------|---------|----------|
-| **LM Studio (modely + různé)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (program)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (mezipaměť)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Modely + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Mezipaměť)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Stažení modelů
+### Stažení modelu
 
 Následující modely by již měly být přítomny v adresáři modelů LM Studio (`C:\Users\...\.lmstudio\models`):
 
 | Typ modelu | Kvantizace | Velikost | Umístění |
 |------------|--------------|------|----------|
-| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18,2 GB | `models\lmstudio-community` |
+| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
 ---
 
@@ -34,8 +34,8 @@ Následující modely by již měly být přítomny v adresáři modelů LM Stud
 
 ### Instalace LM Studio
 
-Další podrobnosti naleznete v souboru lmstudio.md (ve složce závislostí).
+Další podrobnosti naleznete v souboru lmstudio.md (uvnitř složky dependencies).
 
-### Stažení modelů
+### Stažení modelu
 
-Stejné jako v systému Windows.
+Stejné jako ve Windows.

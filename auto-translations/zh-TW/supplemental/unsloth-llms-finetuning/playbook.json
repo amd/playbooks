@@ -1,5 +1,5 @@
 {
   "id": "unsloth-llms-finetuning",
   "title": "使用 Unsloth 微調 LLM",
-  "description": "使用 Unsloth 進行記憶體高效的微調 LLMs™"
+  "description": "使用 Unsloth 進行記憶體高效的 LLM™ 微調"
 }

@@ -8,9 +8,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. Descarga el instalador más reciente de ComfyUI para Windows desde [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
+1. Descarga el instalador de ComfyUI para Windows más reciente desde [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
 2. Elige tu configuración de hardware: Selecciona `AMD ROCm`.
-3. Elige dónde instalar ComfyUI: Usa la ruta predeterminada o la carpeta de tu preferencia.
+3. Elige dónde instalar ComfyUI: Usa la ruta predeterminada o la carpeta que prefieras.
 4. Configuración de la aplicación de escritorio: Recomendamos deseleccionar "Automatic Updates" para asegurarte de estar usando la versión recomendada de esta aplicación.
 5. Presiona "Next" para comenzar la instalación.
 

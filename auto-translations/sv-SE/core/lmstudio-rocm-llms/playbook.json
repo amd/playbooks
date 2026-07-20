@@ -1,5 +1,5 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "Köra och servera LLM:er med LM Studio",
+  "title": "Kör och serverar LLM:er med LM Studio",
   "description": "Konfigurera LM Studio och LM Studio Server för att köra och tillhandahålla stora språkmodeller lokalt."
 }

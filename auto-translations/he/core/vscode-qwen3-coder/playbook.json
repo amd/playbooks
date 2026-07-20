@@ -1,5 +1,5 @@
 {
   "id": "vscode-qwen3-coder",
-  "title": "קידוד LLM מקומי עם VS Code ו-Qwen3-Coder",
-  "description": "השתמש ב-VS Code עם Qwen3-Coder הפועל מקומית לסיוע קוד פרטי."
+  "title": "קידוד עם LLM מקומי ב-VSCode וב-Qwen3-Coder",
+  "description": "השתמשו ב-VS Code עם Qwen3-Coder הפועל באופן מקומי לקבלת סיוע בכתיבת קוד באופן פרטי."
 }

@@ -9,10 +9,10 @@ SPDX-License-Identifier: MIT
 #### تثبيت Lemonade
 
 <!-- @os:windows -->
-قم بتنزيل أحدث مثبّت من [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) وشغّل ملف `.msi`.
+قم بتنزيل أحدث برنامج تثبيت من [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) وشغّل ملف `.msi`. 
 
 بعد التثبيت:
-- تتم إضافة واجهة سطر الأوامر `lemonade` إلى متغير PATH الخاص بنظامك تلقائيًا
+- تتم إضافة أداة سطر الأوامر `lemonade` إلى مسار PATH الخاص بنظامك تلقائيًا
 - من المتوقع أن يعمل خادم Lemonade في الخلفية تلقائيًا
 
 يمكنك أيضًا التثبيت بصمت من سطر الأوامر:
@@ -39,31 +39,31 @@ yay -S lemonade-server
 
 #### التحقق من تثبيت Lemonade
 
-افتح طرفية ونفّذ:
+افتح موجه الأوامر (terminal) وشغّل:
 ```bash
 lemonade --version
 ```
 
-يجب أن تظهر لك مخرجات مثل:
+يجب أن ترى ناتجًا مشابهًا لما يلي:
 ```
 lemonade version x.y.z
 ```
 
 إذا رأيت رقم إصدار، فهذا يعني أن Lemonade مثبّت بشكل صحيح وجاهز للاستخدام.
 
-للرجوع السريع، إليك أوامر Lemonade CLI الشائعة:
+للرجوع السريع، إليك أوامر سطر الأوامر الشائعة لـ Lemonade:
 
-| الأمر | ما يفعله |
+| الأمر | ما الذي يفعله |
 | --- | --- |
-| `lemonade --help` | يعرض جميع الأوامر والأعلام المتاحة. |
+| `lemonade --help` | يعرض جميع الأوامر والخيارات المتاحة. |
 | `lemonade --version` | يطبع إصدار Lemonade المثبّت. |
-| `lemonade status` | يؤكد ما إذا كان خادم Lemonade يعمل ويمكن الوصول إليه. عنوان URL الافتراضي لواجهة برمجة التطبيقات المتوافقة مع OpenAI هو `http://localhost:13305/api/v1`. |
-| `lemonade list` | يسرد النماذج المتاحة لإعداد Lemonade الخاص بك. |
-| `lemonade pull <MODEL_NAME>` | ينزّل نموذجًا دون تشغيله. |
-| `lemonade run <MODEL_NAME>` | ينزّل النموذج إذا لزم الأمر، ثم يشغّله للاستدلال/الدردشة. |
-| `lemonade run <MODEL_NAME> --llamacpp rocm` | يشغّل نموذج llama.cpp مع خلفية ROCm. |
-| `lemonade run <MODEL_NAME> --llamacpp vulkan` | يشغّل نموذج llama.cpp مع خلفية Vulkan. |
-| `lemonade config` | يعرض قيم تكوين Lemonade الحالية. |
+| `lemonade status` | يتحقق مما إذا كان خادم Lemonade يعمل ويمكن الوصول إليه. عنوان URL الأساسي الافتراضي لواجهة برمجة التطبيقات المتوافقة مع OpenAI هو `http://localhost:13305/api/v1`. |
+| `lemonade list` | يسرد النماذج المتاحة في إعداد Lemonade الخاص بك. |
+| `lemonade pull <MODEL_NAME>` | يقوم بتنزيل نموذج دون تشغيله. |
+| `lemonade run <MODEL_NAME>` | يقوم بتنزيل النموذج إذا لزم الأمر، ثم يبدأ تشغيله للاستدلال/المحادثة. |
+| `lemonade run <MODEL_NAME> --llamacpp rocm` | يبدأ تشغيل نموذج llama.cpp باستخدام خلفية ROCm. |
+| `lemonade run <MODEL_NAME> --llamacpp vulkan` | يبدأ تشغيل نموذج llama.cpp باستخدام خلفية Vulkan. |
+| `lemonade config` | يعرض قيم إعدادات Lemonade الحالية. |
 | `lemonade config set llamacpp.backend=rocm` | يضبط خلفية llama.cpp الافتراضية على ROCm. |
 
-للاطلاع على أحدث خيارات خادم Lemonade أو استكشاف الأخطاء وإصلاحها، يرجى الرجوع إلى [وثائق Lemonade الرسمية](https://lemonade-server.ai/docs/lemonade-cli/).
+للحصول على أحدث خيارات خادم Lemonade أو استكشاف الأخطاء وإصلاحها، يُرجى الرجوع إلى [الوثائق الرسمية لـ Lemonade](https://lemonade-server.ai/docs/lemonade-cli/).

@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 
 ### Herunterladen von Qwen3.5 9B in LM Studio
 
-Um das Qwen3.5 9B-Modell herunterzuladen:
+So laden Sie das Qwen3.5 9B-Modell herunter:
 
-1. Drücken Sie „Ctrl" + „Shift" + „M" auf Ihrer Tastatur oder klicken Sie auf die Registerkarte „Discover" (Lupensymbol) in der linken Seitenleiste
+1. Drücken Sie „Strg“ + „Umschalt“ + „M“ auf Ihrer Tastatur oder klicken Sie auf die Registerkarte „Discover“ (Lupensymbol) in der linken Seitenleiste
 2. Suchen Sie nach `Qwen3.5 9B`
-3. Wählen Sie eine Quantisierung (das empfohlene `Q4_K_M` ist eine gute Balance aus Größe und Qualität) und klicken Sie auf „Download"
+3. Wählen Sie eine Quantisierung aus (die empfohlene `Q4_K_M` bietet ein gutes Gleichgewicht zwischen Größe und Qualität) und klicken Sie auf Download
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download_qwen.png" alt="LM Studio Download Models" width="600"/>
 
-LM Studio lädt das Modell automatisch herunter und platziert es im richtigen Verzeichnis.
+LM Studio lädt das Modell automatisch herunter und legt es im richtigen Verzeichnis ab.
 
-Wenn Sie weitere Modelle herunterladen möchten, können Sie diese in der Registerkarte „Discover" suchen und LM Studio erledigt den Rest.
+Wenn Sie weitere Modelle herunterladen möchten, können Sie diese in der Registerkarte „Discover“ suchen, und LM Studio übernimmt den Rest.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-qwen-windows timeout=60 hidden=True -->

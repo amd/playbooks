@@ -4,35 +4,35 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Alustan konfigurointi
+# Alustan määritys
 
-Tässä asiakirjassa kuvataan tämän playbook-oppaan suorittamiseen tarvittava alustan konfigurointi.
+Tässä asiakirjassa kuvataan odotettu alustan määritys tämän playbookin suorittamista varten.
 
 ## Vaaditut sovellukset/kehykset
 
 ### Windows/Linux
-Lemonade tulee olla asennettuna etukäteen [täältä](https://lemonade-server.ai/install_options.html).
+Lemonade tulisi olla esiasennettuna [täältä](https://lemonade-server.ai/install_options.html). 
 
-- **Open WebUI** (selainpohjainen käyttöliittymäsovellus)
-- **Lemonade Server** (taustapalvelimen mallipalvelin)
+- **Open WebUI** (frontend-verkkosovellus)
+- **Lemonade Server** (backend-mallipalvelin)
 
-> Tämä playbook suorittaa **Lemonade**-palvelimen (Lemonade server/app) **natiivisti**. **Open WebUI** toimii **konttina** Linuxilla (Podmanin kautta) ja **Python-pakettina** Windowsilla. `open-webui` PyPI-paketti tukee vain Python ≤ 3.12 -versioita, joten Linux-kontti välttää vanhempien Python-versioiden hallinnan tarpeen.
+> Tämä playbook suorittaa **Lemonaden** (Lemonade server/app) **natiivisti**. **Open WebUI** toimii **konttina** Linuxissa (Podmanin kautta) ja **Python-pakettina** Windowsissa. `open-webui` PyPI-paketti tukee vain Python ≤ 3.12 -versioita, joten Linux-kontti välttää vanhempien Python-versioiden hallinnan tarpeen.  
 
 ## Mallit (Lemonadessa)
 
-Mallit tulee ladata **Lemonade**-sovelluksen sisällä (käyttämällä sisäänrakennettua Model Manager -hallintaa) tai Lemonaden mallinhallintakomennoilla (`lemonade pull <model_name>`). Tämä playbook olettaa, että alla suositellut mallit on ladattu ja ne näkyvät mallien listauspäätepistteessä.
+Mallit tulisi ladata **Lemonade-sovelluksen** sisällä (käyttäen sisäänrakennettua Model Manageria) tai Lemonaden mallinhallintakomentojen kautta (`lemonade pull <model_name>`). Tämä playbook olettaa, että alla suositellut mallit on ladattu ja ne näkyvät mallien listausrajapinnassa.
 
 Tarkista mallien saatavuus:
 - Avaa: `http://localhost:13305/api/v1/models`
-- Ladatut mallit näkyvät `"data"`-kohdan alla.
+- Ladatut mallit listataan kohdassa `"data"`.
 
 ### Suositellut mallit
 
-| Ominaisuus | Mallin tunnus | Huomiot |
+| Ominaisuus | Malli-ID | Huomiot |
 |---|----|-----|
-| LLM (Tekstisyöte → Tekstituloste) | `Qwen3-4B-Hybrid` (tai vastaava) | Mikä tahansa Lemonade LLM -malli chattiin, tekstin täydentämiseen, koodaukseen tai päättelyyn |
-| VLM (Kuva → Teksti) | `Qwen3.5-4B-GGUF` (tai mikä tahansa **Vision**-kategorian malli) | Mikä tahansa multimodaalinen/näkökykyinen malli, joka voi ottaa kuvia syötteenä |
-| Kuvien luonti (Teksti → Kuva) | `SDXL-Turbo` (tai mikä tahansa **Image**-kategorian malli) | Mikä tahansa Stable Diffusion -malli, joka luo kuvia tekstikehotteen perusteella |
+| LLM (Teksti sisään → Teksti ulos) | `Qwen3-4B-Hybrid` (tai vastaava) | Mikä tahansa Lemonade LLM -malli chattiin, tekstin täydennykseen, koodaukseen tai päättelyyn |
+| VLM (Kuva → Teksti) | `Qwen3.5-4B-GGUF` (tai mikä tahansa **Vision**-kategorian malli) | Mikä tahansa multimodaalinen/näkökykyinen malli, joka voi ottaa kuvia osana syötettään |
+| Kuvan generointi (Teksti → Kuva) | `SDXL-Turbo` (tai mikä tahansa **Image**-kategorian malli) | Mikä tahansa Stable Diffusion -malli, joka generoi kuvia tekstikehotteesta |
 | Ääni (Puhe → Teksti) | `Whisper-Large-v3` (tai mikä tahansa **Audio**-kategorian malli) | Mikä tahansa ASR-malli, joka muuntaa äänen tekstiksi |
 
 <p align="center">
@@ -44,4 +44,4 @@ Tarkista mallien saatavuus:
 - **Lemonade Server:** `http://localhost:13305`
 - **Open WebUI:** `http://localhost:8080`
 
-Jos nämä portit ovat jo käytössä järjestelmässäsi, vaihda ne palvelimia käynnistettäessä.
+Jos nämä portit ovat jo käytössä järjestelmässäsi, vaihda ne palvelinta/palvelimia käynnistettäessä.

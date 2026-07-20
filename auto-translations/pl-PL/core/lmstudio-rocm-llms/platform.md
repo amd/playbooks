@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # Konfiguracja platformy
 
-Ten dokument opisuje oczekiwane konfiguracje platformy do uruchamiania tego playbooka.
+Ten dokument opisuje oczekiwane konfiguracje platformy do uruchomienia tego playbooka.
 
 ## Windows
 
@@ -16,13 +16,13 @@ LM Studio powinno być wstępnie zainstalowane:
 
 | Komponent | Wersja | Lokalizacja |
 |-----------|---------|----------|
-| **LM Studio (Modele + Różne)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modele + Inne)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Pamięć podręczna)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Pobieranie modeli
+### Pobieranie modelu
 
-Następujące modele powinny być już obecne w katalogu modeli LM Studio (`C:\Users\...\.lmstudio\models`):
+Poniższe modele powinny już znajdować się w katalogu modeli LM Studio (`C:\Users\...\.lmstudio\models`):
 
 | Urządzenie | Typ modelu | Kwantyzacja | Rozmiar (GB) | Lokalizacja |
 | ----- |------------|--------------|------|----------|
@@ -37,6 +37,6 @@ Następujące modele powinny być już obecne w katalogu modeli LM Studio (`C:\U
 
 Więcej szczegółów znajdziesz w [lmstudio.md](../../dependencies/lmstudio.md).
 
-### Pobieranie modeli
+### Pobieranie modelu
 
 Tak samo jak w systemie Windows.

@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-A GAIA az AMD nyílt forráskódú keretrendszere AI ügynökök építéséhez, amelyek helyileg futnak AMD hardveren, Ryzen AI gyorsítással.
+A GAIA az AMD nyílt forráskódú keretrendszere olyan AI-ügynökök készítéséhez, amelyek helyben, AMD hardveren futnak Ryzen AI gyorsítással.
 
 #### A GAIA telepítése
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, és kövesse az alábbi parancsokat egy venv létrehozásához.
+1. Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Ezután használja a `pip` parancsot a **Gaia** telepítéséhez
+2. Ezután a `pip` segítségével telepítse a **Gaia**-t
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -30,7 +30,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux rendszeren nyisson meg egy terminált a kívánt könyvtárban, és kövesse az alábbi parancsokat egy venv létrehozásához.
+1. Linux rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
 <!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Ezután használja a `pip` parancsot a **Gaia** telepítéséhez
+2. Ezután a `pip` segítségével telepítse a **Gaia**-t
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, és kövesse az alábbi parancsokat egy venv létrehozásához.
+1. Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Ezután használja a `pip` parancsot a **Gaia** telepítéséhez
+2. Ezután a `pip` segítségével telepítse a **Gaia**-t
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -71,7 +71,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux rendszeren nyisson meg egy terminált a kívánt könyvtárban, és kövesse az alábbi parancsokat egy venv létrehozásához.
+1. Linux rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
 <!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Ezután használja a `pip` parancsot a **Gaia** telepítéséhez
+2. Ezután a `pip` segítségével telepítse a **Gaia**-t
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -287,6 +287,6 @@ Ellenőrizze, hogy a GAIA v0.16.2 vagy újabb verziója van-e telepítve:
 gaia --version
 ```
 
-> **Fontos**: Győződjön meg arról, hogy a Lemonade Server fut, mielőtt a GAIA-t használja. A GAIA megköveteli, hogy a Lemonade Servert manuálisan indítsák el.
+> **Fontos**: A GAIA használata előtt győződjön meg róla, hogy a Lemonade Server fut. A GAIA-nak manuálisan elindított Lemonade Serverre van szüksége.
 
-További információkért lásd a [GAIA dokumentációját](https://amd-gaia.ai).
+További információért lásd a [GAIA dokumentációját](https://amd-gaia.ai).

@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 <!-- @device:halo_box -->
 LM Studio kan worden geïnstalleerd vanuit het **AMD Ryzen™ AI Developer Center**. Ga naar het tabblad **Updates** en installeer LM Studio als het nog niet aanwezig is.
 
-Om LM Studio de vooraf geïnstalleerde modellen te laten zien, navigeer naar Instellingen > Algemeen > Modellenmap. Wijzig vervolgens het pad naar `C:\Users\Public\models`
+Om LM Studio de vooraf geïnstalleerde modellen te laten zien, navigeer je naar Settings > General > Models Directory. Wijzig vervolgens het pad naar `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -19,11 +19,11 @@ Om LM Studio de vooraf geïnstalleerde modellen te laten zien, navigeer naar Ins
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-1. Download het installatieprogramma hier: [https://lmstudio.ai/download](https://lmstudio.ai/download)
-2. Installeer.
+1. Download het installatieprogramma hier vandaan: [https://lmstudio.ai/download](https://lmstudio.ai/download)
+2. Installeer. 
 <!-- @device:end -->
 
-> Tip: Start na de installatie LM Studio eenmaal op om de CLI (`lms`) te initialiseren.
+> Tip: Start na installatie LM Studio één keer om de CLI (`lms`) te initialiseren.
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
 ```powershell
@@ -33,16 +33,16 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Opmerking: U kunt kiezen om de .deb of de AppImage te installeren.
-1. Download de appimage hier: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
-2. voer uit `sudo apt install libfuse2`
-3. voer uit `cd ~/Downloads`
-4. voer uit `chmod +x LM-Studio-*.AppImage`
-5. voer uit `./LM-Studio-*.AppImage`
-> Tip: Start na de installatie LM Studio eenmaal op om de CLI (`lms`) te initialiseren.
+> Opmerking: U kunt ervoor kiezen om ofwel de .deb ofwel de AppImage te installeren. 
+1. Download de appimage hier vandaan: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
+2. voer uit `sudo apt install libfuse2`  
+3. voer uit `cd ~/Downloads`  
+4. voer uit `chmod +x LM-Studio-*.AppImage`  
+5. voer uit `./LM-Studio-*.AppImage`  
+> Tip: Start na installatie LM Studio één keer om de CLI (`lms`) te initialiseren.
 
 <!-- @device:halo_box -->
-Om LM Studio de vooraf geïnstalleerde modellen te laten zien, navigeer naar Instellingen > Algemeen > Modellenmap. Wijzig vervolgens het pad naar `/var/cache/models`.
+Om LM Studio de vooraf geïnstalleerde modellen te laten zien, navigeer je naar Settings > General > Models Directory. Wijzig vervolgens het pad naar `/var/cache/models`.
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -53,5 +53,5 @@ Om LM Studio de vooraf geïnstalleerde modellen te laten zien, navigeer naar Ins
 ```bash
 lms --help
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->

@@ -4,38 +4,38 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Configuración de Plataforma — Lemonade Local AI
+# Configuración de la plataforma — Lemonade Local AI
 
-Este documento describe el software preinstalado, las rutas de modelos y los requisitos previos específicos de la plataforma que asume este playbook.
+Este documento describe el software preinstalado, las rutas de los modelos y los requisitos previos específicos de la plataforma que se asumen en este playbook.
 
-## Software Preinstalado
+## Software preinstalado
 
 | Software | Versión | Propósito |
-|----------|---------|---------|
-| Lemonade Server | Última versión | Servidor LLM local con API compatible con OpenAI |
-| Python | 3.10–3.13 | Requerido para el ejemplo del cliente OpenAI en Python |
+|----------|---------|-------------|
+| Lemonade Server | Última versión | Servidor local de LLM con API compatible con OpenAI |
+| Python | 3.10–3.13 | Necesario para el ejemplo del cliente de Python de OpenAI |
 
-## Almacenamiento de Modelos Predeterminado
+## Almacenamiento predeterminado de modelos
 
-Los modelos descargados a través de Lemonade se almacenan utilizando la especificación de Hugging Face Hub:
+Los modelos descargados a través de Lemonade se almacenan siguiendo la especificación de Hugging Face Hub:
 
-| Plataforma | Ruta Predeterminada |
+| Plataforma | Ruta predeterminada |
 |----------|-------------|
 | Windows | `%USERPROFILE%\.cache\huggingface\hub\` |
 | Linux | `~/.cache/huggingface/hub/` |
 
 Para cambiar la ubicación de almacenamiento, configure la variable de entorno `HF_HOME`.
 
-## Requisitos de Hardware
+## Requisitos de hardware
 
-| Objetivo de Hardware | Requisitos |
+| Objetivo de hardware | Requisitos |
 |----------------|-------------|
 | **CPU** | Cualquier procesador x86-64 moderno (AMD o Intel) |
-| **GPU (Vulkan)** | Cualquier GPU con soporte de controlador Vulkan |
-| **GPU (ROCm)** | AMD Radeon RX serie 7000/9000 o Radeon PRO W7000 series; AMD Ryzen AI MAX+ Pro 395 |
-| **NPU** | Procesador AMD Ryzen AI 300 series, Windows 11 |
+| **GPU (Vulkan)** | Cualquier GPU con soporte de driver Vulkan |
+| **GPU (ROCm)** | AMD Radeon serie RX 7000/9000 o Radeon PRO serie W7000; AMD Ryzen AI MAX+ Pro 395 |
+| **NPU** | Procesador AMD Ryzen AI serie 300, Windows 11 |
 
-## Requisitos de Red
+## Requisitos de red
 
-- Se requiere conexión a Internet para la descarga inicial del modelo (1–25 GB según el modelo)
-- No se requiere Internet después de que los modelos han sido descargados
+- Se requiere conexión a internet para la descarga inicial del modelo (1–25 GB según el modelo)
+- No se requiere internet después de descargar los modelos

@@ -11,20 +11,20 @@ Dit document beschrijft de verwachte platformconfiguraties voor het uitvoeren va
 ## Vereiste apps/frameworks
 ### Windows/Linux
 
-ComfyUI moet vooraf geïnstalleerd zijn aan de hand van de instructies in de [ComfyUI-installatiegids](../../dependencies/comfyui.md).
+ComfyUI moet vooraf zijn geïnstalleerd aan de hand van de instructies in de [ComfyUI-installatiehandleiding](../../dependencies/comfyui.md).
 
 ## Vereiste modellen
 
 ### Windows/Linux
 
-De volgende modellen moeten aanwezig zijn in de map waar ComfyUI is geïnstalleerd, in de map `models`.
+De volgende modellen moeten aanwezig zijn in de map waar ComfyUI is geïnstalleerd, binnen de map `models`.
 
-| Modeltype | Bestandsnaam | Grootte | Locatie | Downloaden |
+| Modeltype | Bestandsnaam | Grootte | Locatie | Download |
 |------------|----------|------|----------|----------|
-| Tekstencoder | `qwen_3_4b.safetensors` | 7,49 GB | `models/text_encoders/` | [Link](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors) |
-| LoRA | `pixel_art_style_z_image_turbo.safetensors` | 162,25 MB | `models/loras/` | [Link](https://huggingface.co/tarn59/pixel_art_style_lora_z_image_turbo/resolve/main/pixel_art_style_z_image_turbo.safetensors) |
-| Diffusiemodel | `z_image_turbo_bf16.safetensors` | 11,46 GB | `models/diffusion_models/` | [Link](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors) |
-| VAE | `ae.safetensors` | 319,77 MB | `models/vae/` | [Link](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors) |
+| Text Encoder | `qwen_3_4b.safetensors` | 7.49 GB | `models/text_encoders/` | [Link](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors) |
+| LoRA | `pixel_art_style_z_image_turbo.safetensors` | 162.25 MB | `models/loras/` | [Link](https://huggingface.co/tarn59/pixel_art_style_lora_z_image_turbo/resolve/main/pixel_art_style_z_image_turbo.safetensors) |
+| Diffusion Model | `z_image_turbo_bf16.safetensors` | 11.46 GB | `models/diffusion_models/` | [Link](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/diffusion_models/z_image_turbo_bf16.safetensors) |
+| VAE | `ae.safetensors` | 319.77 MB | `models/vae/` | [Link](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors) |
 
 
-Om te controleren of de modellen correct zijn geplaatst, [bekijt u het ComfyUI-playbook via de onboardingwebsite](../../README.md#previewing-the-playbooks) en volgt u de instructies. De modellen zijn correct geplaatst als er geen pagina "Modellen niet gevonden" verschijnt bij het starten van de Z-Image Turbo-sjabloon.
+Om te testen of de modellen correct zijn geplaatst, [bekijk je een voorbeeld van het ComfyUI-playbook via de onboardingwebsite](../../README.md#previewing-the-playbooks) en volg je de instructies. De modellen zijn correct geplaatst als er geen pagina "Models not found" verschijnt bij het opstarten van het Z-Image Turbo-sjabloon.

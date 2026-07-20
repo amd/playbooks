@@ -1,5 +1,5 @@
 {
   "id": "pytorch-finetuning",
-  "title": "Тонке налаштування LLM за допомогою PyTorch та програмного забезпечення AMD ROCm™",
-  "description": "Точне налаштування великих мовних моделей (LLM) за допомогою PyTorch та ROCm."
+  "title": "Тонке налаштування LLM за допомогою PyTorch і програмного забезпечення AMD ROCm™",
+  "description": "Тонке налаштування великих мовних моделей (LLM) за допомогою PyTorch і ROCm."
 }

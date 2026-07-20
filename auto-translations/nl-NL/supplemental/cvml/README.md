@@ -6,51 +6,51 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Dit playbook maakt gebruik van speciale tags die GitHub niet kan weergeven. Ga naar [amd.com/playbooks](https://amd.com/playbooks) om deze inhoud correct te bekijken.
 <!-- @github-only:end -->
 
 ## Overzicht
 
-De [Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) is een AMD C++ toolkit voor computer vision en machine learning die krachtige, on-device perceptiemogelijkheden biedt — waaronder diepteschatting, gezichtsdetectie en gezichtsnetwerk-tracking. Gebouwd bovenop de Ryzen AI-stuurprogramma's selecteert de bibliotheek automatisch de beste beschikbare hardware (GPU of NPU) voor inferentie, zodat u AI-functies aan C++-applicaties kunt toevoegen zonder u zorgen te maken over modeltraining of framework-integratie. Alle verwerking vindt lokaal op uw systeem plaats, waardoor het ideaal is voor privacygevoelige, lage-latentie-applicaties.
+De [Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) is een AMD C++ toolkit voor computer vision en machine learning die krachtige, on-device perceptiemogelijkheden biedt — waaronder dieptebepaling, gezichtsdetectie en face mesh-tracking. De library is gebouwd bovenop de Ryzen AI-drivers en selecteert automatisch de best beschikbare hardware (GPU of NPU) voor inferentie, zodat je AI-functies aan C++-toepassingen kunt toevoegen zonder je zorgen te maken over modeltraining of framework-integratie. Alle verwerking vindt lokaal op je systeem plaats, wat de library ideaal maakt voor privacygevoelige toepassingen met lage latentie.
 
-Dit playbook leert u hoe u de Ryzen AI CVML Library instelt, de meegeleverde voorbeeldapplicaties bouwt en gezichtsdetectie uitvoert op een voorbeeldafbeelding.
+Dit playbook leert je hoe je de Ryzen AI CVML Library instelt, de meegeleverde voorbeeldtoepassingen bouwt en gezichtsdetectie uitvoert op een voorbeeldafbeelding.
 
-## Wat U Leert
+## Wat je leert
 
-- Hoe u vereisten installeert en de Ryzen AI CVML Library op uw systeem instelt
+- Hoe je vereisten installeert en de Ryzen AI CVML Library op je systeem instelt
 - Hoe de CVML C++ API werkt: contexten, feature-objecten en afbeeldingsbuffers
-- Hoe u de meegeleverde voorbeeldapplicaties bouwt en uitvoert met CMake en OpenCV
-- Hoe u gezichtsdetectie uitvoert op een afbeelding met begrenzingsvakken en oriëntatiepunten
-- Hoe u CVML-functies integreert in uw eigen C++-applicaties
+- Hoe je de meegeleverde voorbeeldtoepassingen bouwt en uitvoert met CMake en OpenCV
+- Hoe je gezichtsdetectie uitvoert op een afbeelding met bounding boxes en landmarks
+- Hoe je CVML-functies in je eigen C++-toepassingen integreert
 
 <!-- @device:halo_box -->
-## Controleer op Software-updates
+## Controleren op software-updates
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Softwarevereisten Installeren
+## Software-vereisten installeren
 <!-- @require:driver -->
 
-## Aanvullende Afhankelijkheden
+## Aanvullende afhankelijkheden
 
-Zorg er vóór het begin voor dat u het volgende heeft:
+Zorg dat je voorafgaand aan het starten over het volgende beschikt:
 
 <!-- @os:windows -->
-- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — download `opencv-4.11.0-windows.exe`, voer het uit en extraheer naar een lokale map (bijv. `C:\opencv`)
+- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — download `opencv-4.11.0-windows.exe`, voer het uit en pak het uit naar een lokale map (bijv. `C:\opencv`)
 - [CMake](https://cmake.org/download/) — download het Windows x86-64 MSI-installatieprogramma en selecteer tijdens de installatie **"Add CMake to the system PATH for all users"**
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — installeer de meest recente beschikbare versie
-- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) met de workload "Desktop development with C++" (inclusief MSVC-compiler, Windows SDK en C++ build-tools)
+- [Ryzen AI NPU-driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — installeer de nieuwste beschikbare versie
+- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) met de workload "Desktop development with C++" (inclusief de MSVC-compiler, Windows SDK en C++-buildtools)
 <!-- @os:end -->
 
 <!-- @os:linux -->
-- OpenCV 4.11 — moet worden gebouwd vanuit de broncode (apt-pakketten op Ubuntu 22.04 en 24.04 bieden versie 4.11 niet). Zie [OpenCV Bouwen vanuit Broncode](#building-opencv-from-source) hieronder.
+- OpenCV 4.11 — moet vanuit de broncode worden gebouwd (apt-pakketten op Ubuntu 22.04 en 24.04 bieden geen versie 4.11 aan). Zie [OpenCV vanuit de broncode bouwen](#building-opencv-from-source) hieronder.
 - CMake — installeer via apt:
   ```bash
   sudo apt install cmake
   ```
 - Ubuntu 22.04 of 24.04 (kernel >= 6.11.0-21-generic)
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (Linux-installatieprogramma — vereist voor NPU-inferentie)
+- [Ryzen AI NPU-driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (Linux-installatieprogramma — vereist voor NPU-inferentie)
 - Vulkan SDK (geïnstalleerd in de sectie [Vulkan SDK](#vulkan-sdk) hieronder)
 <!-- @os:end -->
 
@@ -150,15 +150,15 @@ fi
 <!-- @test:end --> 
 <!-- @os:end -->
 
-## De CVML Library Instellen
+## De CVML Library instellen
 
-Maak een AMD-account aan op [account.amd.com](https://account.amd.com) als u er nog geen heeft, meld u dan aan om de Ryzen AI CVML Library te downloaden via de onderstaande portallink:
+Maak een AMD-account aan op [account.amd.com](https://account.amd.com) als je er nog geen hebt, en meld je vervolgens aan om de Ryzen AI CVML Library te downloaden via de onderstaande portallink:
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
 ```
 
-Na het downloaden extraheert u het pakket naar een lokale map (bijv. `C:\RyzenAI-Library` op Windows of `~/RyzenAI-Library` op Linux) en stelt u de omgevingsvariabele `AMD_CVML_SDK_ROOT` in op de geëxtraheerde locatie:
+Pak na het downloaden het pakket uit naar een lokale map (bijv. `C:\RyzenAI-Library` op Windows of `~/RyzenAI-Library` op Linux) en stel de omgevingsvariabele `AMD_CVML_SDK_ROOT` in op de uitgepakte locatie:
 
 <!-- @os:windows -->
 ```cmd
@@ -176,25 +176,25 @@ Het bibliotheekpakket bevat de volgende structuur:
 
 | Map | Inhoud |
 |--------|----------|
-| `cmake/` | Pakketinformatie voor de `find_package`-functie van CMake |
+| `cmake/` | Verpakkingsinformatie voor de `find_package`-functie van CMake |
 | `include/` | C++ header-bestanden (`cvml-depth-estimation.h`, `cvml-face-detector.h`, `cvml-face-mesh.h`, enz.) |
-| `windows/` | Binaire bestanden voor Windows (compilatietijd `.LIB` en runtime `.DLL`/`.GRAPHLIB`/`.AMODEL`-bestanden) |
-| `linux/` | Binaire bestanden voor Linux (compilatie- en runtime `.SO`-bestanden) |
-| `samples/` | Afzonderlijke voorbeeldapplicaties met broncode |
+| `windows/` | Binaire bestanden voor Windows (`.LIB`-bestanden voor compilatie en `.DLL`/`.GRAPHLIB`/`.AMODEL`-bestanden voor runtime) |
+| `linux/` | Binaire bestanden voor Linux (`.SO`-bestanden voor compilatie en runtime) |
+| `samples/` | Individuele voorbeeldtoepassingen met broncode |
 
 <!-- @os:linux -->
 
-### Linux-specifieke Instelling
+### Linux-specifieke instellingen
 
-#### OpenCV Bouwen vanuit Broncode
+#### OpenCV vanuit de broncode bouwen
 
-Installeer de OpenCV-bouwafhankelijkheden:
+Installeer de build-afhankelijkheden van OpenCV:
 
 ```bash
 sudo apt install unzip wget ubuntu-restricted-extras libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev libgtk-3-dev pkg-config ffmpeg
 ```
 
-Download, configureer en bouw OpenCV 4.11.0 met de contrib-modules (referentie: [OpenCV Linux installatiehandleiding](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
+Download, configureer en bouw OpenCV 4.11.0 met de contrib-modules (referentie: [OpenCV Linux install tutorial](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
 
 ```bash
 wget -O opencv-4.11.0.zip https://github.com/opencv/opencv/archive/4.11.0.zip
@@ -227,7 +227,7 @@ sudo apt update
 sudo apt install vulkan-sdk
 ```
 
-Als u Ubuntu 22.04 gebruikt, werk dan ook de MESA Vulkan-stuurprogramma's bij:
+Als je Ubuntu 22.04 gebruikt, werk dan ook de MESA Vulkan-drivers bij:
 
 ```bash
 sudo apt update && sudo apt upgrade
@@ -236,9 +236,9 @@ sudo apt update
 sudo apt upgrade
 ```
 
-#### Aanvullende Ubuntu 24.04-afhankelijkheden
+#### Aanvullende afhankelijkheden voor Ubuntu 24.04
 
-Als u Ubuntu 24.04 gebruikt, installeer dan aanvullende vereiste pakketten:
+Als je Ubuntu 24.04 gebruikt, installeer dan de extra vereiste pakketten:
 
 ```bash
 sudo apt install libavcodec-dev libavformat-dev libswscale-dev libnsl2 gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly -y
@@ -266,23 +266,23 @@ done
 
 ## Kernconcepten
 
-De CVML Library biedt een eenvoudige C++ API waarbij elke perceptiefunctie (diepteschatting, gezichtsdetectie, gezichtsnetwerk) een eigen header-bestand en feature-object heeft. U werkt niet met ruwe modellen — de bibliotheek verwerkt het laden van modellen, voorverwerking en inferentie automatisch.
+De CVML Library biedt een eenvoudige C++ API waarbij elke perceptiefunctie (dieptebepaling, gezichtsdetectie, face mesh) zijn eigen header-bestand en feature-object heeft. Je werkt niet met ruwe modellen — de library handelt het laden van modellen, de voorverwerking en de inferentie automatisch af.
 
-### Beschikbare Functies
+### Beschikbare functies
 
 | Functie | Header-bestand | Beschrijving |
 |---------|------------|-------------|
-| **Diepteschatting** | `cvml-depth-estimation.h` | Genereert per-pixel dieptekaarten van RGB-afbeeldingen |
-| **Gezichtsdetectie** | `cvml-face-detector.h` | Detecteert gezichten met begrenzingsvakken, oriëntatiepunten (ogen, neus, mond) en betrouwbaarheidsscores |
-| **Gezichtsnetwerk** | `cvml-face-mesh.h` | Volgt gedetailleerde gezichtsgeometrie met dichte netpunten |
+| **Dieptebepaling** | `cvml-depth-estimation.h` | Genereert diepteafbeeldingen per pixel op basis van RGB-afbeeldingen |
+| **Gezichtsdetectie** | `cvml-face-detector.h` | Detecteert gezichten met bounding boxes, landmarks (ogen, neus, mond) en betrouwbaarheidsscores |
+| **Face Mesh** | `cvml-face-mesh.h` | Volgt gedetailleerde gezichtsgeometrie met dichte mesh-punten |
 
 ### Programmeermodel
 
-Elke CVML-applicatie volgt hetzelfde vierstappenpatroon:
+Elke CVML-toepassing volgt hetzelfde patroon in vier stappen:
 
-1. **Maak een Context aan** — De `amd::cvml::Context` beheert gedeelde bronnen zoals logboekregistratie en selectie van de inferentie-backend.
-2. **Maak een Feature-object aan** — Instantieer de specifieke functie (bijv. `amd::cvml::DepthEstimation`) tegen de context.
-3. **Wikkel invoergegevens in** — Gebruik `amd::cvml::Image` om uw RGB-afbeeldingsbuffer in te kapselen zonder gegevens te kopiëren.
+1. **Een context aanmaken** — De `amd::cvml::Context` beheert gedeelde resources zoals logging en de selectie van de inferentie-backend.
+2. **Een feature-object aanmaken** — Instantieer de specifieke functie (bijv. `amd::cvml::DepthEstimation`) binnen de context.
+3. **Invoergegevens verpakken** — Gebruik `amd::cvml::Image` om je RGB-afbeeldingsbuffer te omvatten zonder gegevens te kopiëren.
 4. **Uitvoeren** — Roep de verwerkingsmethode van de functie aan en lees de resultaten.
 
 ```cpp
@@ -307,7 +307,7 @@ depth_estimation.GenerateDepthMap(input, &output);
 context->Release();
 ```
 
-### Inferentie-backend
+### Inferentiebackend
 
 De bibliotheek selecteert automatisch de beste hardware (GPU of NPU) voor elke bewerking. U kunt de backend ook expliciet instellen:
 
@@ -316,15 +316,15 @@ De bibliotheek selecteert automatisch de beste hardware (GPU of NPU) voor elke b
 context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 ```
 
-> **Opmerking:** Functies die de ONNX-backend gebruiken voor NPU-bewerkingen kunnen bij de eerste uitvoering een langere opstartvertraging ervaren. Volgende uitvoeringen zullen sneller zijn.
+> **Opmerking:** Functies die de ONNX-backend voor NPU-bewerkingen gebruiken, kunnen bij de eerste uitvoering een langere opstartvertraging ondervinden. Volgende uitvoeringen zullen sneller zijn.
 
-> **Opmerking:** Als het NPU-stuurprogramma niet is geïnstalleerd op het doelsysteem, zal de Ryzen AI CVML-bibliotheek automatisch terugvallen op de GPU-backend voor inferentiebewerkingen.
+> **Opmerking:** Als het NPU-stuurprogramma niet is geïnstalleerd op het doelsysteem, valt de Ryzen AI CVML-bibliotheek automatisch terug op de GPU-backend voor inferentiebewerkingen.
 
-## De Voorbeeldapplicaties Bouwen
+## De voorbeeldtoepassingen bouwen
 
-De CVML Library bevat kant-en-klare voorbeeldapplicaties voor elke functie. Laten we ze allemaal tegelijk bouwen.
+De CVML Library bevat kant-en-klare voorbeeldtoepassingen voor elke functie. Laten we ze allemaal in één keer bouwen.
 
-1. Stel de omgevingsvariabele `OPENCV_INSTALL_ROOT` in om naar uw OpenCV-installatie te verwijzen:
+1. Stel de omgevingsvariabele `OPENCV_INSTALL_ROOT` in zodat deze naar uw OpenCV-installatie verwijst:
 
    <!-- @os:windows -->
    ```cmd
@@ -383,7 +383,7 @@ De CVML Library bevat kant-en-klare voorbeeldapplicaties voor elke functie. Late
    ```
    <!-- @os:end -->
 
-3. Zorg er vóór het uitvoeren van een voorbeeld voor dat de CVML-runtimebestanden toegankelijk zijn:
+3. Zorg er voordat u een voorbeeld uitvoert voor dat de CVML-runtimebestanden toegankelijk zijn:
 
    <!-- @os:windows -->
    ```cmd
@@ -404,11 +404,11 @@ De CVML Library bevat kant-en-klare voorbeeldapplicaties voor elke functie. Late
    ```
    <!-- @os:end -->
 
-## Gezichtsdetectie Uitvoeren
+## Gezichtsdetectie uitvoeren
 
-Het gezichtsdetectie-voorbeeld detecteert gezichten in een afbeelding, video of live camerabeeld. Het tekent begrenzingsvakken, betrouwbaarheidsscores en vijf gezichtsoriëntatiepunten (twee ogen, neus en twee mondhoeken) op elk gedetecteerd gezicht.
+Het voorbeeld voor gezichtsdetectie detecteert gezichten in een afbeelding, video of live camerafeed. Het tekent begrenzingsvakken, betrouwbaarheidsscores en vijf gezichtslandmarks (twee ogen, neus en twee mondhoeken) op elk gedetecteerd gezicht.
 
-Navigeer eerst naar de map met het uitvoerbare gezichtsdetectiebestand:
+Navigeer eerst naar de map met het uitvoerbare bestand voor gezichtsdetectie:
 
 <!-- @os:windows -->
 ```cmd
@@ -422,7 +422,7 @@ cd build/cvml-sample-face-detection
 ```
 <!-- @os:end -->
 
-Download vervolgens een voorbeeldafbeelding om als invoer te gebruiken (foto door [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), gratis te gebruiken via Pexels):
+Download vervolgens een voorbeeldafbeelding om als invoer te gebruiken (foto van [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), vrij te gebruiken via Pexels):
 
 ```bash
 curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
@@ -442,7 +442,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-Er verschijnt een venster met de afbeelding met begrenzingsvakken rondom gedetecteerde gezichten, betrouwbaarheidsscores en gezichtsoriëntatiepunten (ogen, neus, mondhoeken).
+Er verschijnt een venster met de afbeelding met begrenzingsvakken rond gedetecteerde gezichten, betrouwbaarheidsscores en gezichtslandmarkpunten (ogen, neus, mondhoeken).
 
 <p align="center">
   <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
@@ -462,7 +462,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg -o output_face.jpg
 ```
 <!-- @os:end -->
 
-**Gebruik het nauwkeurige model** voor hogere nauwkeurigheid (ten koste van snelheid):
+**Gebruik het precieze model** voor hogere nauwkeurigheid (ten koste van snelheid):
 
 <!-- @os:windows -->
 ```cmd
@@ -476,11 +476,11 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 ```
 <!-- @os:end -->
 
-De gezichtsdetectiefunctie biedt twee modelvarianten:
+De functie voor gezichtsdetectie biedt twee modelvarianten:
 
-| Model | Snelheid | Nauwkeurigheid | Het beste voor |
+| Model | Snelheid | Nauwkeurigheid | Beste voor |
 |-------|-------|----------|----------|
-| `fast` (standaard) | Hogere FPS | Goed | Realtime cameraapplicaties |
+| `fast` (standaard) | Hogere FPS | Goed | Real-time cameratoepassingen |
 | `precise` | Lagere FPS | Beste | Fotoanalyse, hoge nauwkeurigheidsbehoeften |
 
 
@@ -717,9 +717,9 @@ done
 <!-- @test:end --> 
 <!-- @os:end -->
 
-## CVML Integreren in Uw Eigen Applicatie
+## CVML integreren in uw eigen toepassing
 
-Om de CVML Library in uw eigen C++-project te gebruiken, voegt u deze toe via CMake's `find_package`:
+Om de CVML Library in uw eigen C++-project te gebruiken, voegt u deze toe via `find_package` van CMake:
 
 ```cmake
 # Find the Ryzen AI CVML Library
@@ -729,7 +729,7 @@ find_package(RyzenAILibrary REQUIRED PATHS ${AMD_CVML_SDK_ROOT})
 target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 ```
 
-Waarbij `AMD_CVML_SDK_ROOT` verwijst naar de hoofdmap van de Ryzen AI CVML Library-map. Voeg vervolgens de juiste header in voor de functie die u wilt gebruiken:
+Waarbij `AMD_CVML_SDK_ROOT` verwijst naar de hoofdmap van de map van de Ryzen AI CVML Library. Neem vervolgens de juiste header op voor de functie die u wilt gebruiken:
 
 ```cpp
 #include <cvml-face-detector.h>   // for face detection
@@ -737,14 +737,14 @@ Waarbij `AMD_CVML_SDK_ROOT` verwijst naar de hoofdmap van de Ryzen AI CVML Libra
 #include <cvml-face-mesh.h>        // for face mesh
 ```
 
-## Volgende Stappen
+## Volgende stappen
 
-Navigeer voor elk onderstaand voorbeeld eerst naar de bijbehorende map met uitvoerbare bestanden, volgens hetzelfde patroon als de sectie [Gezichtsdetectie Uitvoeren](#running-face-detection) hierboven (bijv. `cd build\cvml-sample-depth-estimation\Release` op Windows of `cd build/cvml-sample-depth-estimation` op Linux). Voeg op Windows `.exe` toe aan elk commando (bijv. `cvml-sample-depth-estimation.exe`).
+Navigeer voor elk voorbeeld hieronder eerst naar de bijbehorende uitvoerbare map, volgens hetzelfde patroon als in de sectie [Running Face Detection](#running-face-detection) hierboven (bijvoorbeeld `cd build\cvml-sample-depth-estimation\Release` op Windows of `cd build/cvml-sample-depth-estimation` op Linux). Voeg op Windows `.exe` toe aan elk commando (bijvoorbeeld `cvml-sample-depth-estimation.exe`).
 
-- **Probeer Diepteschatting**: Voer `cvml-sample-depth-estimation -i sample_face.jpg` uit om een gekleurde dieptekaart te genereren — dichterbij gelegen objecten verschijnen in warme kleuren, verre objecten in koele kleuren
-- **Verken Gezichtsnetwerk**: Voer `cvml-sample-face-mesh -i sample_face.jpg` uit om gedetailleerde gezichtsgeometrie-tracking met dichte netpunten te zien
-- **Verwerk videobestanden**: Gebruik de vlaggen `-i` en `-o` op elk voorbeeld om video's te verwerken (bijv. `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
-- **Vergelijk modelvarianten**: Probeer `-m precise` versus de standaard `-m fast` bij gezichtsdetectie om de nauwkeurigheid/snelheidsafweging zelf te ervaren
-- **Bouw uw eigen app**: Gebruik de CMake-integratie en C++ API om CVML-functies toe te voegen aan uw eigen C++-applicaties
-- **Combineer functies**: Koppel gezichtsdetectie aan diepteschatting in dezelfde applicatie voor een rijker scènebegrip
-- **Blader door de broncode**: Lees de [Ryzen AI CVML Library op GitHub](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) voor header-documentatie, aanvullende voorbeelden en API-details
+- **Probeer Depth Estimation**: Voer `cvml-sample-depth-estimation -i sample_face.jpg` uit om een gekleurde dieptekaart te genereren — objecten die dichterbij zijn, verschijnen in warme kleuren, objecten verder weg in koele kleuren
+- **Verken Face Mesh**: Voer `cvml-sample-face-mesh -i sample_face.jpg` uit om dichte tracking van gezichtsgeometrie te zien met gedetailleerde mesh-punten
+- **Videobestanden verwerken**: Gebruik de vlaggen `-i` en `-o` bij elk voorbeeld om video's te verwerken (bijvoorbeeld `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
+- **Vergelijk modelvarianten**: Probeer `-m precise` versus de standaard `-m fast` bij gezichtsdetectie om de afweging tussen nauwkeurigheid en snelheid zelf te ervaren
+- **Bouw je eigen app**: Gebruik de CMake-integratie en de C++ API om CVML-functies aan je eigen C++-applicaties toe te voegen
+- **Combineer functies**: Koppel gezichtsdetectie aan Depth Estimation binnen dezelfde applicatie voor een rijker scènebegrip
+- **Bekijk de broncode**: Lees de [Ryzen AI CVML Library op GitHub](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) voor headerdocumentatie, extra voorbeelden en API-details

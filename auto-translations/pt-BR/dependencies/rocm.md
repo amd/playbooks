@@ -17,7 +17,7 @@ sudo reboot
 ```
 
 **Instale o ROCm no ambiente virtual criado.**
-> **Nota**: Certifique-se de que o ambiente virtual está ativo antes de prosseguir.
+> **Observação**: Certifique-se de que o ambiente virtual esteja ativo antes de continuar.
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->

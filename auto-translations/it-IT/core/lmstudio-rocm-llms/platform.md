@@ -4,27 +4,27 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Platform Configuration
+# Configurazione della piattaforma
 
-Questo documento descrive le configurazioni di piattaforma previste per l'esecuzione di questo playbook.
+Questo documento descrive le configurazioni della piattaforma previste per l'esecuzione di questo playbook.
 
 ## Windows
 
 ### Installazione di LM Studio
 
-LM Studio dovrebbe essere pre-installato:
+LM Studio dovrebbe essere già preinstallato:
 
-| Componente | Versione | Posizione |
+| Componente | Versione | Percorso |
 |-----------|---------|----------|
-| **LM Studio (Modelli + Varie)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modelli + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Programma)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Download dei Modelli
+### Download del modello
 
-I seguenti modelli dovrebbero essere già presenti nella directory dei modelli di LM Studio (`C:\Users\...\.lmstudio\models`):
+I seguenti modelli dovrebbero già essere presenti nella directory dei modelli di LM Studio (`C:\Users\...\.lmstudio\models`):
 
-| Dispositivo | Tipo di Modello | Quantizzazione | Dimensione (GB) | Posizione |
+| Dispositivo | Tipo di modello | Quantizzazione | Dimensione (GB) | Percorso |
 | ----- |------------|--------------|------|----------|
 | AMD Ryzen™ AI Halo Developer Platform <br> AMD Ryzen™ AI Max+ | OpenAI GPT-OSS 120B | `MXFP4` | 63.39 | `models\ggml-org` |
 | AMD Ryzen™ AI 300 HX <br> AMD Ryzen™ AI 300 <br> AMD Radeon™ 7000 Series Graphics <br> AMD Radeon™ 9000 Series Graphics | Qwen3.5 9B | `Q4_K_M` | 6.55 | `models\lmstudio-community` |
@@ -35,8 +35,8 @@ I seguenti modelli dovrebbero essere già presenti nella directory dei modelli d
 
 ### Installazione di LM Studio
 
-Consulta [lmstudio.md](../../dependencies/lmstudio.md) per ulteriori dettagli.
+Per maggiori dettagli, consultare [lmstudio.md](../../dependencies/lmstudio.md).
 
-### Download dei Modelli
+### Download del modello
 
 Come su Windows.

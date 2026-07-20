@@ -6,21 +6,21 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Tässä ohjekirjassa käytetään erikoismerkintöjä, joita GitHub ei pysty renderöimään. Käy osoitteessa [amd.com/playbooks](https://amd.com/playbooks) nähdäksesi tämän sisällön oikein esikatseltuna.
 <!-- @github-only:end -->
 
 ## Yleiskatsaus
 
 
-Haluatko ajaa tehokkaita tekoälykielimalleja omalla laitteistollasi? Tämä opas näyttää, miten se tehdään.
-Tässä opetusohjelmassa käytetään AMD ROCm™ -ohjelmiston käyttämää PyTorch-kirjastoa mallien ajamiseen. Mallit voivat tiivistää asiakirjoja, vastata kysymyksiin, tuottaa tekstiä ja paljon muuta – kaikki paikallisesti.
+Haluatko ajaa tehokkaita tekoälyn kielimalleja omalla laitteistollasi? Tämä opas näyttää, miten se tehdään.
+Tässä oppaassa käytetään PyTorchia, jota AMD ROCm™ -ohjelmisto tehostaa, mallien ajamiseen, jotka voivat tiivistää dokumentteja, vastata kysymyksiin, generoida tekstiä ja paljon muuta – kaikki paikallisesti.
 
 ## Mitä opit
 
-- Aja LLM-malleja, kuten gpt-oss-20b ja qwen3.5-4B, paikallisesti PyTorchin ja ROCm:n avulla
-- Luo asiakirjojen tiivistämistyökalu LLM-mallien avulla
+- LLM-mallien, kuten gpt-oss-20b ja qwen3.5-4B, ajaminen paikallisesti PyTorchin ja ROCm:n avulla
+- Dokumenttien tiivistystyökalun luominen LLM-malleja käyttäen
 
-## Muistikonfiguraation asettaminen
+## Muistiasetusten määrittäminen
 
 <!-- @require:memory-config -->
 
@@ -31,13 +31,13 @@ Tässä opetusohjelmassa käytetään AMD ROCm™ -ohjelmiston käyttämää PyT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmiston esivaatimusten asentaminen
 
-### Luo virtuaaliympäristö
+### Virtuaaliympäristön luominen
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Avaa Linuxissa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv-ympäristön, johon ROCm+Pytorch on jo asennettu.
+Avaa Linuxissa pääte haluamaasi hakemistoon ja seuraa ohjeita luodaksesi venv-ympäristön, johon ROCm+Pytorch on jo asennettu.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -50,13 +50,13 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
+**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos astuu voimaan):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Avaa Linuxissa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv-ympäristön.
+Avaa Linuxissa pääte haluamaasi hakemistoon ja seuraa ohjeita luodaksesi venv-ympäristön.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -72,7 +72,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Avaa Windowsissa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv-ympäristön, johon ROCm+Pytorch on jo asennettu.
+Avaa Windowsissa pääte haluamaasi hakemistoon ja seuraa ohjeita luodaksesi venv-ympäristön, johon ROCm+Pytorch on jo asennettu.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -83,7 +83,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Avaa Windowsissa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv-ympäristön.
+Avaa Windowsissa pääte haluamaasi hakemistoon ja seuraa ohjeita luodaksesi venv-ympäristön.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env
@@ -93,8 +93,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Vinkki**: Windows-käyttäjien saattaa olla tarpeen muuttaa PowerShell-suorituskäytäntöään (esim.
-> asettaa se RemoteSigned- tai Unrestricted-tilaan) ennen joidenkin PowerShell-komentojen suorittamista.
+> **Vihje**: Windows-käyttäjien on ehkä muutettava PowerShellin suoritusperiaatetta (Execution Policy) (esim.
+> asettamalla se arvoon RemoteSigned tai Unrestricted) ennen kuin jotkin PowerShell-komennot voidaan suorittaa.
 
 <!-- @os:end -->
 
@@ -142,14 +142,14 @@ pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Pikaopas esimerkkiskripteillä
+## Nopea aloitus esimerkkiskripteillä
 
-Tämä playbook sisältää valmiita skriptejä. Napsauta niitä esikatsellaksesi ja ladataksesi ne samaan hakemistoon kuin luomasi ympäristö.
+Tämä ohjekirja sisältää valmiita, käyttövalmiita skriptejä. Napsauta niitä esikatsellaksesi ja ladataksesi ne samaan hakemistoon, johon loit ympäristön.
 
 | Skripti | Kuvaus | Käyttö |
 |--------|-------------|-------|
-| [run_llm.py](assets/run_llm.py) | LLM-tekstin perusgenerointi | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Asiakirjojen tiivistäjä Harmony-tuella | `python summarizer.py --file document.txt` |
+| [run_llm.py](assets/run_llm.py) | Perus-LLM-tekstin generointi | `python run_llm.py` |
+| [summarizer.py](assets/summarizer.py) | Dokumenttien tiivistäjä Harmony-tuella | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -176,15 +176,15 @@ for script in ['run_llm.py', 'summarizer.py']:
 
 Molemmat skriptit tukevat:
 - Mallin valintaa `--model`-lipun avulla
-- Chat-mallipohjien muotoilua oikeaa mallin kehottamista varten, erityisen hyödyllistä asiakirjojen tiivistämisessä
+- Chat-mallipohjan muotoilua oikeaa mallikehotusta varten, mikä on erityisen hyödyllistä dokumenttien tiivistämisessä
 
-## Ensimmäisen LLM-mallin lataaminen ja ajaminen
+## Ensimmäisen LLM:n lataaminen ja ajaminen
 
 Mukana oleva [run_llm.py](assets/run_llm.py)-skripti näyttää, miten tekstiä generoidaan LLM-malleilla PyTorchin ja AMD ROCm:n avulla.
 
-> **Huomio:** Kun lataat mallin, Hugging Face Transformers tarkistaa ensin paikallisen välimuistinsa (`~/.cache/huggingface/hub` Linuxissa, `C:\Users\<user>\.cache\huggingface\hub` Windowsissa). Jos mallia ei ole välimuistissa, se ladataan automaattisesti huggingface.co-palvelusta. Ensimmäinen käynnistys voi kestää muutaman minuutin mallin koon ja verkon nopeuden mukaan.
+> **Huomio:** Kun lataat mallin, Hugging Face Transformers tarkistaa ensin paikallisen välimuistinsa (`~/.cache/huggingface/hub` Linuxissa, `C:\Users\<user>\.cache\huggingface\hub` Windowsissa). Jos mallia ei ole välimuistissa, se ladataan automaattisesti osoitteesta huggingface.co. Ensimmäinen ajokerta voi kestää muutaman minuutin mallin koosta ja verkkoyhteyden nopeudesta riippuen.
 
-Alla oleva koodinpätkä näyttää, miten mallia käytetään ja miten esitettyjä kysymyksiä mukautetaan.
+Alla oleva koodinpätkä näyttää, miten mallia käytetään ja miten kysyttäviä kysymyksiä voi mukauttaa.
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -259,11 +259,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Asiakirjojen tiivistäjän rakentaminen
+## Dokumenttien tiivistäjän rakentaminen
 
-Nyt kun olet generoinut paikallista LLM-tulostetta, voit rakentaa sen päälle käytännöllisen asiakirjojen tiivistäjän. Tässä osiossa käytät [summarizer.py](assets/summarizer.py)-skriptiä syöttääksesi .txt-tiedoston ja generoidaksesi siitä automaattisesti tiiviin yhteenvedon – kaikki paikallisesti GPU:llasi.
+Nyt kun olet tuottanut paikallista LLM-tulostetta, voit rakentaa sen päälle käytännöllisen dokumenttien tiivistäjän. Tässä osiossa käytät [summarizer.py](assets/summarizer.py)-skriptiä syöttääksesi .txt-tiedoston ja tuottaaksesi automaattisesti tiiviin yhteenvedon – kaikki paikallisesti GPU:llasi ajettuna.
 
-Skripti on suunniteltu toimimaan heti käyttövalmiina. Avaa skripti editorissa tutustuaksesi koodiin, mukauttaaksesi kehotteita ja säätääksesi parametreja, kuten pituutta ja lämpötilaa.
+Skripti on suunniteltu toimimaan sellaisenaan. Avaa skripti editorissa tutkiaksesi koodia, mukauttaaksesi kehotteita ja säätääksesi parametreja, kuten pituutta ja lämpötilaa (temperature).
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -291,24 +291,24 @@ python summarizer.py --file document.txt --max-length 400
 
 | Parametri | Mitä se ohjaa | Tyypilliset arvot |
 |-----------|------------------|----------------|
-| `max_new_tokens` | LLM:n tulosteen enimmäispituus | Käytä 50–500 tokenia tiivistelmiä varten. (1 token on noin 0,75 englanninkielistä sanaa) |
-| `temperature` | Luovuus. Matalat arvot tekevät tuloksesta tarkemman, korkeat arvot lisäävät arvaamattomuutta | - **0.1–0.3**: Tarkka, deterministinen (hyvä tiivistelmiä varten) <br> **0.5–0.7**: Tasapainoinen (yleiskäyttö) <br> **0.8–1.0**: Luova, vaihteleva (ideointi) |
-| `top_p` | Nucleus Sampling – matalat arvot rajoittavat mallin tulosteen kapeammaksi | **0.1-0.5**: Tiukka, ennustettava <br> **0.9-0.95**: (standardi, luonnollinen, keskustelumainen) |
+| `max_new_tokens` | LLM:n tulosteen enimmäispituus | Käytä 50–500 tokenia tiivistelmiin. (1 token vastaa noin 0,75 englanninkielistä sanaa) |
+| `temperature` | Luovuus. Matalat arvot tekevät tuloksesta täsmällisemmän, korkeat arvot arvaamattomamman | - **0,1–0,3**: Täsmällinen, deterministinen (hyvä tiivistelmiin) <br> **0,5–0,7**: Tasapainoinen (yleiskäyttöön) <br> **0,8–1,0**: Luova, vaihteleva (ideointiin) |
+| `top_p` | Nucleus Sampling – matalat arvot rajaavat mallin tuloksia suppeammaksi | **0,1–0,5**: Tiukka, ennustettava <br> **0,9–0,95**: (standardi, luonteva, keskustelunomainen) |
 
 
 ## Käytännön sovelluksia
 
-- **Tutkimusjulkaisujen analyysi**: Poimi keskeisiä löydöksiä monimutkaisista julkaisuista nopeaa tarkastelua varten
-- **Uutisten koostaminen**: Tiivistä uutisartikkelit lyhyiksi päivittäisiksi koosteiksi tai nostoksiksi
-- **Kokousmuistiinpanot**: Tiivistä transkriptit toimenpiteiksi ja lyhyiksi yhteenvedoiksi
-- **Juridisten asiakirjojen tarkastelu**: Poimi nopeasti olennaiset lausekkeet tai velvoitteet pitkistä juridisista teksteistä
-- **Koodin dokumentointi**: Luo tiiviit repositorion yleiskatsaukset ja funktioiden selitykset
+- **Tutkimusartikkelien analysointi**: Poimi keskeiset tulokset monimutkaisista julkaisuista nopeaa tarkastelua varten
+- **Uutisten koostaminen**: Tiivistä uutisartikkelit lyhyiksi päivittäisiksi koosteiksi tai nostoiksi
+- **Kokousmuistiinpanot**: Tiivistä litteroinnit toimenpiteiksi ja tiiviiksi yhteenvedoiksi
+- **Oikeudellisten dokumenttien tarkastelu**: Poimi olennaiset lausekkeet tai velvoitteet pitkistä oikeudellisista teksteistä nopeasti
+- **Koodin dokumentointi**: Luo tiiviitä repositorio-yleiskatsauksia ja funktioiden selityksiä
 
-## Seuraavat askeleet
+## Seuraavat vaiheet
 
-- **Hienosäätö**: Mukauta malleja omaan alaasi tai ammattisanastoosi paremman tarkkuuden saavuttamiseksi (katso hienosäätöä käsittelevät playbook-oppaat)
-- **RAG-järjestelmät**: Yhdistä LLM-mallit asiakirjojen hakuun kontekstikohtaisia vastauksia ja hakua varten
-- **Mallien tutkiminen**: Kokeile uusia malleja, kuten Llama 3, Phi-3 tai Qwen, parempien tulosten saavuttamiseksi
+- **Hienosäätö (fine-tuning)**: Mukauta malleja omalle alallesi tai erikoissanastollesi paremman tarkkuuden saavuttamiseksi (katso Fine-tuning-ohjekirjat)
+- **RAG-järjestelmät**: Yhdistä LLM-mallit dokumenttien hakuun kontekstitietoisia vastauksia ja hakuja varten
+- **Mallien tutkiminen**: Kokeile uusia malleja, kuten Llama 3, Phi-3 tai Qwen, parempien tulosten saamiseksi
 - **Tuotantokäyttöönotto**: Käytä työkaluja, kuten vLLM, skaalautuvaan LLM-palveluun organisaatioissa
 
-Järjestelmäsi antaa sinulle mahdollisuuden ajaa kehittyneitä kielimalleja paikallisesti. Kokeile eri malleja, kehotteita ja parametreja löytääksesi, mikä toimii parhaiten omiin sovelluksiisi.
+Järjestelmäsi antaa sinulle mahdollisuuden ajaa kehittyneitä kielimalleja paikallisesti. Kokeile erilaisia malleja, kehotteita ja parametreja löytääksesi, mikä toimii parhaiten omissa sovelluksissasi.

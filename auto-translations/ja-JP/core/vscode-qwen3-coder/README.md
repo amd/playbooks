@@ -6,33 +6,33 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> このプレイブックは、GitHub でレンダリングできない特殊なタグを使用しています。このコンテンツを正しくプレビューするには、[amd.com/playbooks](https://amd.com/playbooks) をご覧ください。
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> このプレイブックには、最低 **32GB** のシステムメモリが必要です。
+> This playbook requires a minimum of **32GB** of system memory.
 <!-- @device:end -->
 
 ## 概要
 
-コーディングエージェントは、大規模言語モデル（LLM）を搭載した AI エージェントとの協働を通じて、開発者を強力にサポートするツールです。ターミナルや VS Code などの開発環境に組み込むことができ、開発者のワークフローにシームレスに統合できます。
+コーディングエージェントは、大規模言語モデル(LLM)を活用したAIエージェントとの連携を通じて開発者を強力に支援するツールです。ターミナルやVS Codeなどの開発環境に組み込むことができ、開発者のワークフローにシームレスに統合できます。
 
-このチュートリアルでは、Cline、VS Code、および LM Studio を使用して、コーディングエージェントをローカルマシン上で完全に実行する方法を説明します。
+このチュートリアルでは、Cline、VS Code、LM Studioを使用して、コーディングエージェントを完全にローカルマシン上で実行する方法を紹介します。
 
-## 学習内容
+## このチュートリアルで学べること
 
-* ソフトウェアエンジニアリングタスクを支援するために、Cline コーディングエージェントと共に VS Code を実行する方法。
-* コーディングエージェントのローカル推論のために、Cline が LM Studio と通信するよう設定する方法。
+* ソフトウェアエンジニアリングタスクを支援するために、Clineコーディングエージェントを搭載したVS Codeを実行する方法。
+* コーディングエージェントのローカル推論のために、ClineをLM Studioと通信するよう設定する方法。
 * ローカルコーディングエージェントを使用して、実際のソフトウェアエンジニアリングタスクを解決する方法。
 
-## メモリ設定の構成
+## メモリ構成の設定
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## ソフトウェアアップデートの確認
-> **注意**: VS Code がインストールされていない場合は、Ryzen AI Developer Center からインストールできます。
+> **注記**: VS Codeがインストールされていない場合は、Ryzen AI Developer Centerからインストールできます。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -41,27 +41,27 @@ SPDX-License-Identifier: MIT
 
 <!-- @require:lmstudio,vscode -->
 
-## LM Studio の起動と設定
+## LM Studioの起動と設定
 
-コーディングエージェントを動かす LLM を提供するために LM Studio を使用します。
+コーディングエージェントを動かすLLMをサービングするためにLM Studioを使用します。
 
-- 検索バーで `LM Studio` を検索し、アプリケーションを起動します。次のページが表示されます。
+- 検索バーで`LM Studio`を検索し、アプリケーションを起動します。以下のページが表示されます。
 
-![LM Studio 初期画面](assets/initial-lm-studio.png)
+![LM Studio Initial Screen](assets/initial-lm-studio.png)
 
-次に、システムに LLM を読み込む必要があります。大きなコンテキスト長を持つ `Qwen3-Coder-30B-A3B` モデルを使用します。（まだインストールしていない場合は、「モデル」タブからインストールしてください。）
-- LM Studio ウィンドウ上部の検索バーをクリックするか、`CTRL+L` を押します。`Manually choose model load parameters` スイッチをクリックし、Qwen3-Coder-30B-A3B モデルをクリックします。
-- コンテキスト長を `4096` から `32768` に変更し、`GPU Offload` が最大になっていることを確認します。その後、`Load Model` をクリックします。
+次に、システム上にLLMをロードする必要があります。大きなコンテキスト長を持つ`Qwen3-Coder-30B-A3B`モデルを使用します。(まだインストールしていない場合は、Modelタブを使用してインストールしてください)。
+- LM Studioウィンドウ上部の検索バーをクリックするか、`CTRL+L`を押します。`Manually choose model load parameters`のスイッチをクリックし、次にQwen3-Coder-30B-A3Bモデルをクリックします。
+- コンテキスト長を`4096`から`32768`に変更し、`GPU Offload`が最大に設定されていることを確認します。その後、`Load Model`をクリックします。
 
-![モデルの選択](assets/model-list-zoomed.png)
+![Selecting Model](assets/model-list-zoomed.png)
 
-エージェントが大規模なコードベースを処理し、加えられた変更を記憶できるよう、大きなコンテキスト長を使用します。
+大きなコンテキスト長を使用することで、エージェントが大規模なコードベースを処理し、行われた変更を記憶できるようになります。
 
-![モデルの設定](assets/selecting-model-zoomed.png)
+![Configuring Model](assets/selecting-model-zoomed.png)
 
-次に、LM Studio サーバーを有効にする必要があります。
-- LM Studio の左側にある「Developer」タブをクリックするか、`CTRL+2` を押します。
-- ステータストグルを確認し、`Running` に設定されていることを確認します。
+次に、LM Studio Serverを有効にする必要があります。
+- LM Studioの左側にあるDeveloperタブをクリックするか、`CTRL+2`を押します。
+- ステータストグルをチェックし、`Running`に設定されていることを確認します。
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -81,7 +81,7 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @test:end -->
 <!-- @os:end -->
 
-![サーバーステータス](assets/lm-studio-server-status.png)
+![Server Status](assets/lm-studio-server-status.png)
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-load-qwen3-coder-windows timeout=1200 hidden=True -->
@@ -111,15 +111,15 @@ lms chat "$ID" -p "Reply with exactly: OK"
 <!-- @test:end -->
 <!-- @os:end -->
 
-## VS Code の起動と設定
+## VS Codeの起動と設定
 
-Cline 拡張機能を VS Code にインストールし、先ほど作成した LM Studio サーバーに接続します。
-- 検索バーで `VS Code` を検索し、アプリケーションを起動します。
-- VS Code の左列にある `Extensions` アイコンをクリックし、`Cline` を検索します。次に、`Install` ボタンをクリックします。
+VS CodeにCline拡張機能をインストールし、先ほど作成したLM Studioサーバーに接続します。
+- 検索バーで`VS Code`を検索し、アプリケーションを起動します。
+- VS Codeの左側の列にある`Extensions`アイコンをクリックし、`Cline`を検索します。次に`Install`ボタンをクリックします。
 
-![Cline 拡張機能のインストール](assets/installing-cline-vscode-extension.png)
+![Installing Cline Extension](assets/installing-cline-vscode-extension.png)
 
-- 左側に Cline アイコンが表示されます。それをクリックして Cline を開きます。`How will you use Cline?` というウィンドウが表示されます。LM Studio 経由でローカル LLM を使用するため、`Bring my own API Key` を選択し、`Continue` をクリックします。
+- 左側にClineアイコンが表示されます。それをクリックしてClineを開きます。`How will you use Cline?`と尋ねるウィンドウが表示されます。今回はLM Studio経由で動作するローカルLLMを使用するため、`Bring my own API Key`を選択し、`Continue`を押します。
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -139,34 +139,34 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 <!-- @test:end -->
 <!-- @os:end -->
 
-![アカウント作成](assets/cline-how-will-you-use-cline-zoomed.png)
+![Account Creation](assets/cline-how-will-you-use-cline-zoomed.png)
 
-次に、設定した LM Studio サーバーと通信するよう Cline を設定する必要があります。
-- API プロバイダーを `LM Studio`、モデルを `Qwen3-Coder-30B-A3B-GGUF` に設定します。
+次に、先ほどセットアップしたLM Studioサーバーと通信するようにClineを設定する必要があります。
+- API Providerを`LM Studio`に、モデルを`Qwen3-Coder-30B-A3B-GGUF`に設定します。
 
->**ヒント**: より新しいモデルが利用可能な場合があります。必要に応じて Qwen3.6 モデルをダウンロードして切り替えることを検討してください。
+>**ヒント**: 新しいモデルが利用可能な場合があります。必要に応じて、Qwen3.6モデルをダウンロードして切り替えることを検討してください。
 
 
-![モデルの設定](assets/cline-model-configuration-zoomed.png)
+![Model Configuration](assets/cline-model-configuration-zoomed.png)
 
-## 最初のプロジェクトの作成
+## 最初のプロジェクトを作成する
 
-ローカルエージェントを使ってウェブサイトを作成しましょう！Cline がファイルを作成する任意のディレクトリに VS Code を開きます。
-- これを行うには、VS Code の左上にある `File -> Open Folder` に移動し、`Documents` などのフォルダーを選択します。
+ローカルエージェントを使ってウェブサイトを作成してみましょう!Clineがファイルを作成する任意のディレクトリでVS Codeを開いてください。
+- これを行うには、VS Codeの左上にある`File -> Open Folder`に移動し、`Documents`のようなフォルダを選択します。
 
-![VS Code 空フォルダー](assets/open-cline-test.png)
+![VS Code Empty Folder](assets/open-cline-test.png)
 
-これでローカルコーディングエージェントにプロンプトを入力する準備が整いました。
-- 左列の Cline 拡張機能をクリックし、エージェントを起動するプロンプトを入力します。例として、次のプロンプトを使用しましょう：
+これでローカルコーディングエージェントにプロンプトを送る準備が整いました。
+- 左側の列にあるCline拡張機能をクリックし、エージェントを起動するためのプロンプトを入力します。例として、次のプロンプトを使用しましょう:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-エージェントはプロンプトに従ってファイルの作成を開始します。ユーザーは、以下に示すように VS Code でコードが生成される様子を確認できます。Cline がファイルを作成するたびに `Save` をクリックする必要がある場合があります。
+すると、エージェントはプロンプトに従ってファイルの作成を開始します。ユーザーは、以下に示すようにVS Code内でコードが生成される様子を確認できます。Clineがファイルを作成しようとするたびに、`Save`をクリックする必要がある場合があります。
 
-![Cline コード生成](assets/cline-code-generation.png)
+![Cline Code Generation](assets/cline-code-generation.png)
 
-ソフトウェアの生成後、エージェントは完了し、アプリケーションを実行できます。この場合、エージェントは `index.html`、`script.js`、`styles.css` の 3 つのファイルに書き込みました。HTML ファイルをダブルクリックするだけで、生成されたウェブサイトを読み込んで操作できます。
+ソフトウェアの生成後、エージェントの作業は完了し、アプリケーションを実行できます。この例では、エージェントは`index.html`、`script.js`、`styles.css`の3つのファイルに書き込みました。HTMLファイルをダブルクリックするだけで、生成されたウェブサイトを読み込んで操作できます。
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -239,23 +239,22 @@ lms server stop
 ```
 <!-- @test:end -->
 <!-- @os:end -->
-
 ## 次のステップ
 
-ウェブサイトを生成した後も、Cline を使ってウェブサイトを改善し続けることができます。考えられる改善点として次の 2 つがあります：
+Webサイトを生成した後も、Clineを使ってWebサイトの改善を続けることができます。改善案として、以下の2つが考えられます。
 
-- **ドキュメント**: エージェントに `Add a README` とプロンプトを入力するだけで、ウェブサイトを説明する `README.md` ファイルが生成されます。
-- **アニメーション**: `Add an animation that visually represents a large language model running on a laptop.` とモデルにプロンプトを入力して、ウェブサイトにアニメーションを追加します。
+- **ドキュメント作成**: `Add a README` とエージェントに指示するだけで、Webサイトを説明する `README.md` ファイルを生成できます。
+- **アニメーション**: `Add an animation that visually represents a large language model running on a laptop.` とモデルに指示することで、Webサイトにアニメーションを追加できます。
 
-このセットアップを使って他のアプリケーションの生成にも挑戦してみることをお勧めします。以下は私たちが試したいくつかの楽しい例です：
+読者の皆様には、この構成を使って他のアプリケーションを生成してみることをお勧めします。以下に、私たちが試して面白かった例をいくつか紹介します。
 
-- **レトロアーケードゲーム**: 他のプロンプトも試してみてください。次のプロンプトを使って、エージェントが `PyGame` パッケージを使用した Python のレトロスタイルゲームを作成するのも楽しいです：
+- **レトロアーケードゲーム**: 他のプロンプトも試してみてください。以下のプロンプトを使って、エージェントに `PyGame` パッケージを使ったPython製のレトロスタイルのゲームを作らせるのも面白いでしょう。
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **データ分析**: コーディングエージェントが特に役立つ分野の一つがスクリプティングとデータ分析です。これは、株価の可視化のためのデータ分析ソフトウェアを生成するローカルモデルの能力を示すプロンプトです：
+- **データ分析**: コーディングエージェントが特に役立つ分野の一つが、スクリプト作成とデータ分析です。以下は、株価の可視化のためのデータ分析ソフトウェアをローカルモデルが生成できることを示すプロンプトです。
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -263,8 +262,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## リソース
 
-コーディングエージェント、Cline、およびワークロードの実行についてさらに詳しく学ぶための追加リソースを以下に示します。
+以下は、コーディングエージェント、Cline、そして 上でのワークロードの実行についてさらに詳しく学ぶための追加リソースです。
 
-* AMD と LM Studio のパートナーシップおよび統合に関する詳細情報: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* AMD Ryzen™ AI および Radeon™ グラフィックスカードで Cline を実行する方法を解説した AMD ブログ: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
-* AI PC でコーディングエージェントをローカルに実行することに関する Cline ブログ: https://cline.bot/blog/local-models-amd
+* AMDとLM Studioのパートナーシップおよび統合に関する詳細情報: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
+* AMD Ryzen™ AIおよびRadeon™グラフィックスカードでClineを実行する方法を解説したAMDブログ: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* AI PC上でコーディングエージェントをローカル実行する方法についてのClineブログ: https://cline.bot/blog/local-models-amd

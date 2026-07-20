@@ -4,25 +4,25 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Platform Configuration
+# Platformkonfiguration
 
-Dette dokument beskriver de forventede platformskonfigurationer til at køre dette playbook.
+Dette dokument beskriver de forventede platformkonfigurationer til afvikling af denne playbook.
 
 ## Windows
 
-### LM Studio Installation
+### Installation af LM Studio
 
-LM Studio skal være forudinstalleret:
+LM Studio bør være forudinstalleret:
 
 | Komponent | Version | Placering |
 |-----------|---------|----------|
-| **LM Studio (Modeller + Diverse)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modeller + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Modeldownload
+### Download af model
 
-Følgende modeller skal allerede være til stede i LM Studio-modellernes mappe (`C:\Users\...\.lmstudio\models`):
+Følgende modeller bør allerede findes i LM Studios modelmappe (`C:\Users\...\.lmstudio\models`):
 
 | Enhed | Modeltype | Kvantisering | Størrelse (GB) | Placering |
 | ----- |------------|--------------|------|----------|
@@ -33,10 +33,10 @@ Følgende modeller skal allerede være til stede i LM Studio-modellernes mappe (
 
 ## Linux
 
-### LM Studio Installation
+### Installation af LM Studio
 
 Se [lmstudio.md](../../dependencies/lmstudio.md) for flere detaljer.
 
-### Modeldownload
+### Download af model
 
 Samme som på Windows.

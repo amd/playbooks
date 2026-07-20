@@ -6,38 +6,38 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ten podręcznik wykorzystuje specjalne znaczniki, których GitHub nie potrafi wyrenderować. Odwiedź stronę [amd.com/playbooks](https://amd.com/playbooks), aby poprawnie wyświetlić tę zawartość.
 <!-- @github-only:end -->
 
 ## Przegląd
 
 
 Chcesz uruchamiać zaawansowane modele językowe AI na własnym sprzęcie? Ten przewodnik pokaże Ci, jak to zrobić.
-Ten samouczek wykorzystuje PyTorch zasilany oprogramowaniem AMD ROCm™ do uruchamiania modeli, które potrafią streszczać dokumenty, odpowiadać na pytania, generować tekst i wiele więcej – wszystko działające lokalnie.
+Ten samouczek wykorzystuje PyTorch wspierany przez oprogramowanie AMD ROCm™ do uruchamiania modeli, które potrafią podsumowywać dokumenty, odpowiadać na pytania, generować tekst i wiele więcej — wszystko lokalnie.
 
 ## Czego się nauczysz
 
-- Uruchamiać modele LLM, takie jak gpt-oss-20b i qwen3.5-4B, lokalnie przy użyciu PyTorch i ROCm
-- Tworzyć narzędzie do streszczania dokumentów z wykorzystaniem modeli LLM
+- Uruchamianie modeli LLM, takich jak gpt-oss-20b i qwen3.5-4B, lokalnie przy użyciu PyTorch i ROCm
+- Tworzenie narzędzia do podsumowywania dokumentów przy użyciu modeli LLM
 
-## Konfigurowanie ustawień pamięci
+## Konfiguracja pamięci
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Sprawdzanie dostępnych aktualizacji oprogramowania
+## Sprawdzanie aktualizacji oprogramowania
 > **Uwaga**: Jeśli VS Code nie jest zainstalowany, możesz go zainstalować za pomocą Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalowanie wymagań wstępnych oprogramowania
+## Instalacja wymaganego oprogramowania
 
 ### Tworzenie środowiska wirtualnego
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv z już zainstalowanym ROCm+PyTorch.
+W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv z już zainstalowanym ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -50,7 +50,7 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Przyznaj swojemu użytkownikowi dostęp do urządzeń GPU** (wyloguj się i zaloguj ponownie, aby zmiany weszły w życie):
+**Nadaj swojemu użytkownikowi dostęp do urządzeń GPU** (wyloguj się i zaloguj ponownie, aby zmiana zaczęła obowiązywać):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -72,7 +72,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv z już zainstalowanym ROCm+PyTorch.
+W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv z już zainstalowanym ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -93,15 +93,15 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Wskazówka**: Użytkownicy systemu Windows mogą potrzebować zmodyfikować zasady wykonywania skryptów PowerShell (np.
-> ustawić je na RemoteSigned lub Unrestricted) przed uruchomieniem niektórych poleceń PowerShell.
+> **Wskazówka**: Użytkownicy systemu Windows mogą potrzebować zmodyfikować zasady wykonywania w PowerShell (np.
+> ustawiając ją na RemoteSigned lub Unrestricted) przed uruchomieniem niektórych poleceń PowerShell.
 
 <!-- @os:end -->
 
-### Instalowanie podstawowych zależności
+### Instalacja podstawowych zależności
 <!-- @require:driver,pytorch -->
 
-### Instalowanie dodatkowych zależności
+### Instalacja dodatkowych zależności
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
@@ -144,12 +144,12 @@ pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
 
 ## Szybki start z przykładowymi skryptami
 
-Ten playbook zawiera gotowe do użycia skrypty. Kliknij je, aby wyświetlić podgląd i pobrać je do tego samego katalogu, w którym utworzono środowisko.
+Ten podręcznik zawiera gotowe do użycia skrypty. Kliknij je, aby wyświetlić podgląd i pobrać je do tego samego katalogu co utworzone wcześniej środowisko.
 
 | Skrypt | Opis | Użycie |
-|--------|------|--------|
+|--------|-------------|-------|
 | [run_llm.py](assets/run_llm.py) | Podstawowe generowanie tekstu przez LLM | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Narzędzie do streszczania dokumentów z obsługą Harmony | `python summarizer.py --file document.txt` |
+| [summarizer.py](assets/summarizer.py) | Narzędzie do podsumowywania dokumentów z obsługą Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -176,13 +176,13 @@ for script in ['run_llm.py', 'summarizer.py']:
 
 Oba skrypty obsługują:
 - Wybór modelu za pomocą flagi `--model`
-- Formatowanie szablonu czatu dla właściwego promptowania modelu, szczególnie przydatne przy streszczaniu dokumentów
+- Formatowanie szablonu czatu w celu prawidłowego promptowania modelu, co jest szczególnie przydatne przy podsumowywaniu dokumentów
 
 ## Ładowanie i uruchamianie pierwszego modelu LLM
 
 Dołączony skrypt [run_llm.py](assets/run_llm.py) pokazuje, jak generować tekst za pomocą modeli LLM przy użyciu PyTorch i AMD ROCm.
 
-> **Uwaga:** Podczas ładowania modelu Hugging Face Transformers najpierw sprawdza lokalną pamięć podręczną (`~/.cache/huggingface/hub` w systemie Linux, `C:\Users\<user>\.cache\huggingface\hub` w systemie Windows). Jeśli model nie jest zapisany w pamięci podręcznej, zostanie automatycznie pobrany z huggingface.co. Pierwsze uruchomienie może potrwać kilka minut w zależności od rozmiaru modelu i prędkości sieci.
+> **Uwaga:** Podczas ładowania modelu Hugging Face Transformers najpierw sprawdza lokalną pamięć podręczną (`~/.cache/huggingface/hub` w systemie Linux, `C:\Users\<user>\.cache\huggingface\hub` w systemie Windows). Jeśli model nie znajduje się w pamięci podręcznej, zostaje automatycznie pobrany z huggingface.co. Pierwsze uruchomienie może potrwać kilka minut, w zależności od rozmiaru modelu i szybkości połączenia sieciowego.
 
 Poniższy fragment kodu pokazuje, jak korzystać z modelu i dostosowywać zadawane pytania.
 
@@ -259,11 +259,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Budowanie narzędzia do streszczania dokumentów
+## Tworzenie narzędzia do podsumowywania dokumentów
 
-Teraz, gdy udało Ci się wygenerować lokalne dane wyjściowe modelu LLM, możesz rozwinąć tę funkcjonalność, tworząc praktyczne narzędzie do streszczania dokumentów. W tej sekcji użyjesz skryptu [summarizer.py](assets/summarizer.py), aby podać plik .txt i automatycznie wygenerować zwięzłe podsumowanie – wszystko działające lokalnie na Twoim GPU.
+Teraz, gdy wygenerowałeś już lokalny wynik działania modelu LLM, możesz wykorzystać to do stworzenia praktycznego narzędzia do podsumowywania dokumentów. W tej sekcji użyjesz skryptu [summarizer.py](assets/summarizer.py), aby wczytać plik .txt i automatycznie wygenerować zwięzłe podsumowanie, działające w całości lokalnie na Twoim GPU.
 
-Skrypt jest zaprojektowany tak, aby działać od razu po uruchomieniu. Otwórz go w edytorze, aby zapoznać się z kodem, dostosować prompty i dostroić parametry, takie jak długość i temperatura.
+Skrypt jest przygotowany do działania od razu po uruchomieniu. Otwórz go w edytorze, aby zapoznać się z kodem, dostosować prompty i zmienić parametry, takie jak długość i temperatura.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -290,25 +290,25 @@ python summarizer.py --file document.txt --max-length 400
 ## Poznaj parametry generowania
 
 | Parametr | Co kontroluje | Typowe wartości |
-|----------|---------------|-----------------|
-| `max_new_tokens` | Maksymalna długość danych wyjściowych modelu LLM | Użyj 50–500 tokenów dla streszczeń. (1 token to około 0,75 słowa w języku angielskim) |
-| `temperature` | Kreatywność. Niskie wartości sprawiają, że model jest bardziej skupiony, podczas gdy wysokie wartości wiążą się z większą nieprzewidywalnością | - **0.1–0.3**: Skupiony, deterministyczny (dobry do streszczeń) <br> **0.5–0.7**: Zrównoważony (ogólne zastosowanie) <br> **0.8–1.0**: Kreatywny, zróżnicowany (burza mózgów) |
-| `top_p` | Próbkowanie jądrowe – niskie wartości ograniczają model do bardziej wąskich wyników | **0.1-0.5**: Ścisły, przewidywalny <br> **0.9-0.95**: (standardowy, naturalny, konwersacyjny) |
+|-----------|------------------|----------------|
+| `max_new_tokens` | Maksymalną długość wyniku generowanego przez model LLM | Użyj 50–500 tokenów dla podsumowań. (1 token to około 0,75 angielskiego słowa) |
+| `temperature` | Kreatywność. Niskie wartości sprawiają, że model jest bardziej skoncentrowany, a wysokie wprowadzają większą nieprzewidywalność | - **0.1–0.3**: skoncentrowane, deterministyczne (dobre do podsumowań) <br> **0.5–0.7**: zrównoważone (zastosowania ogólne) <br> **0.8–1.0**: kreatywne, zróżnicowane (burza mózgów) |
+| `top_p` | Nucleus Sampling — niskie wartości ograniczają model do węższego zakresu wyników | **0.1-0.5**: ścisłe, przewidywalne <br> **0.9-0.95**: (standardowe, naturalne, konwersacyjne) |
 
 
-## Zastosowania w rzeczywistym świecie
+## Zastosowania w praktyce
 
-- **Analiza artykułów naukowych**: Wyodrębnianie kluczowych wniosków ze złożonych publikacji do szybkiego przeglądu
-- **Agregacja wiadomości**: Streszczanie artykułów prasowych w krótkie codzienne przeglądy lub najważniejsze informacje
-- **Notatki ze spotkań**: Kondensowanie transkryptów do punktów działania i zwięzłych podsumowań
-- **Przegląd dokumentów prawnych**: Szybkie wyodrębnianie istotnych klauzul lub zobowiązań z obszernych tekstów prawnych
-- **Dokumentacja kodu**: Generowanie zwięzłych przeglądów repozytoriów i objaśnień funkcji
+- **Analiza artykułów naukowych**: Wyodrębnianie kluczowych wniosków ze złożonych publikacji w celu szybkiego przeglądu
+- **Agregacja wiadomości**: Podsumowywanie artykułów informacyjnych w krótkie, codzienne zestawienia lub najważniejsze punkty
+- **Notatki ze spotkań**: Skracanie transkrypcji do konkretnych zadań i zwięzłych podsumowań
+- **Przegląd dokumentów prawnych**: Szybkie wyodrębnianie istotnych klauzul lub zobowiązań z długich tekstów prawnych
+- **Dokumentacja kodu**: Generowanie zwięzłych przeglądów repozytoriów i wyjaśnień funkcji
 
 ## Kolejne kroki
 
-- **Dostrajanie**: Dostosowywanie modeli do swojej dziedziny lub żargonu w celu uzyskania lepszej dokładności (patrz playbooki dotyczące dostrajania)
-- **Systemy RAG**: Łączenie modeli LLM z wyszukiwaniem dokumentów w celu uzyskania odpowiedzi uwzględniających kontekst i wyszukiwania
-- **Eksploracja modeli**: Eksperymentowanie z nowymi modelami, takimi jak Llama 3, Phi-3 lub Qwen, w celu uzyskania lepszych wyników
-- **Wdrożenie produkcyjne**: Używanie narzędzi takich jak vLLM do skalowalnego serwowania modeli LLM w organizacjach
+- **Dostrajanie (fine-tuning)**: Dostosuj modele do swojej dziedziny lub terminologii branżowej, aby uzyskać lepszą dokładność (zobacz podręczniki dotyczące fine-tuningu)
+- **Systemy RAG**: Połącz modele LLM z wyszukiwaniem dokumentów, aby uzyskać odpowiedzi i wyszukiwanie z uwzględnieniem kontekstu
+- **Eksploracja modeli**: Eksperymentuj z nowymi modelami, takimi jak Llama 3, Phi-3 czy Qwen, aby uzyskać lepsze wyniki
+- **Wdrożenie produkcyjne**: Wykorzystaj narzędzia takie jak vLLM do skalowalnego serwowania modeli LLM w organizacjach
 
 Twój system daje Ci możliwość lokalnego uruchamiania zaawansowanych modeli językowych. Eksperymentuj z różnymi modelami, promptami i parametrami, aby odkryć, co najlepiej sprawdza się w Twoich zastosowaniach.

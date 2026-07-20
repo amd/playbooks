@@ -8,8 +8,8 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. PowerShell またはコマンドプロンプトを開く
-2. npm を使用して n8n をグローバルにインストールする:
+1. PowerShellまたはコマンドプロンプトを開きます
+2. npmを使用してn8nをグローバルにインストールします:
 ```cmd
 npm install -g n8n
 ```
@@ -18,11 +18,11 @@ npm install -g n8n
 
 <!-- @os:linux -->
 
-npm を使用して n8n をグローバルにインストールする:
+npmを使用してn8nをグローバルにインストールします:
 ```bash
 npm install -g n8n
 ```
 
-> **注意**: その他のインストールオプションについては、[n8n ドキュメント](https://docs.n8n.io/hosting/installation/npm/)を参照してください。
+> **注**: その他のインストール方法については[n8n Documentation](https://docs.n8n.io/hosting/installation/npm/)を参照してください。
 
 <!-- @os:end -->

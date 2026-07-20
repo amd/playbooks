@@ -2,28 +2,28 @@
 Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
-# Spustite OpenClaw s Lemonade Server ako backendom
+# Spustenie OpenClaw s Lemonade Server ako backendom
 
 ## Prehľad
 
-[**OpenClaw**](https://openclaw.ai/) je autonómny AI agent, ktorý dokáže písať a spúšťať kód, spravovať súbory a zvládať zložité viacstupňové úlohy vo vašom mene. Na rozdiel od chatovacieho asistenta, ktorý len odpovedá na otázky, OpenClaw vykonáva skutočné akcie vo vašom systéme – čo znamená, že potrebuje rýchly a schopný AI backend, ktorý dokáže udržať krok s náročnou slučkou agenta.
+[**OpenClaw**](https://openclaw.ai/) je autonómny AI agent, ktorý dokáže písať a spúšťať kód, spravovať súbory a vykonávať komplexné viacúrovňové úlohy vo vašom mene. Na rozdiel od chatového asistenta, ktorý len odpovedá na otázky, OpenClaw vykonáva skutočné akcie vo vašom systéme, čo znamená, že potrebuje rýchly a výkonný AI backend, ktorý dokáže držať krok s náročnou slučkou agenta.
 
-[**Lemonade Server**](https://lemonade-server.ai/) je práve takýto backend. Je to open-source lokálny inferenčný server, ktorý spúšťa modely GenAI priamo na vašom hardvéri a sprístupňuje ich prostredníctvom priemyselne štandardného OpenAI API.
+[**Lemonade Server**](https://lemonade-server.ai/) je práve takýto backend. Ide o open-source lokálny inferenčný server, ktorý spúšťa GenAI modely priamo na vašom hardvéri a sprístupňuje ich prostredníctvom priemyselne štandardného OpenAI API.
 
-Spolu tvoria plne lokálny zásobník AI agenta: Lemonade zabezpečuje inferenciu modelu a OpenClaw poskytuje slučku agenta, ktorá premieňa výstupy modelu na skutočné akcie.
+Spolu tvoria plne lokálny AI agentový stack: Lemonade sa stará o inferenciu modelu a OpenClaw poskytuje slučku agenta, ktorá premieňa výstupy modelu na skutočné akcie.
 
-> **Skôr než budete pokračovať:** OpenClaw je vysoko autonómny AI agent. Poskytnutie prístupu akéhokoľvek AI agenta k vášmu systému môže viesť k nepredvídateľným alebo neúmyselným výsledkom. Pokračujte iba vtedy, ak rozumiete rizikám a ste ochotní akceptovať, že autonómny softvér koná vo vašom mene.
+> **Skôr než budete pokračovať:** OpenClaw je vysoko autonómny AI agent. Poskytnutie prístupu k vášmu systému akémukoľvek AI agentovi môže viesť k nepredvídateľným alebo neúmyselným výsledkom. Pokračujte iba v prípade, že rozumiete rizikám a ste zmierení s tým, že softvér bude autonómne konať vo vašom mene.
 
 ---
 
 ## Čo sa naučíte
 
-Po dokončení tohto návodu budete schopní:
+Na konci tohto návodu budete schopní:
 
-- Dozvedieť sa o **Lemonade Server**
-- **Nainštalovať OpenClaw** a **nasmerovať ho na Lemonade Server** ako jeho AI backend.
-- **Spustiť bránu OpenClaw** a potvrdiť, že váš agent je pripravený pracovať.
-- **Pripojiť komunikačný kanál** (Discord alebo Telegram), aby ste mohli chatovať so svojím agentom z akéhokoľvek zariadenia.
+- Zoznámiť sa s **Lemonade Server**
+- **Nainštalovať OpenClaw** a **nasmerovať ho na Lemonade Server** ako svoj AI backend.
+- **Spustiť gateway OpenClaw** a potvrdiť, že váš agent je pripravený na prácu.
+- **Pripojiť komunikačný kanál** (Discord alebo Telegram), aby ste mohli komunikovať so svojím agentom z ľubovoľného zariadenia.
 
 ---
 
@@ -32,7 +32,7 @@ Po dokončení tohto návodu budete schopní:
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Skontrolujte aktualizácie softvéru
+## Kontrola aktualizácií softvéru
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -40,17 +40,17 @@ Po dokončení tohto návodu budete schopní:
 ## Inštalácia softvérových predpokladov
 
 <!-- @os:linux -->
-- PC s operačným systémom **Ubuntu 24.04+** alebo kompatibilnou distribúciou Linuxu založenou na Debiane s `apt-get`
-- Aspoň **12 GB RAM** (odporúča sa 64 GB+ pre väčšie modely)
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Voliteľné, na izoláciu OpenClaw)
+- PC so systémom **Ubuntu 24.04+** alebo kompatibilnou distribúciou Linuxu založenou na Debiane s `apt-get`
+- Minimálne **12 GB RAM** (odporúča sa 64 GB+ pre väčšie modely)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (voliteľné, na sandboxovanie OpenClaw)
 
-- **~10–30 GB voľného miesta na disku** pre váhy modelu
+- **~10 – 30 GB voľného miesta na disku** pre váhy modelu
 <!-- @os:end -->
 <!-- @os:windows -->
-- PC s operačným systémom **Windows 10/11**
-- Aspoň **12 GB RAM** (odporúča sa 64 GB+ pre väčšie modely)
-- **~10–30 GB voľného miesta na disku** pre váhy modelu
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Voliteľné, na izoláciu OpenClaw)
+- PC so systémom **Windows 10/11**
+- Minimálne **12 GB RAM** (odporúča sa 64 GB+ pre väčšie modely)
+- **~10 – 30 GB voľného miesta na disku** pre váhy modelu
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (voliteľné, na sandboxovanie OpenClaw)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -65,9 +65,9 @@ lemonade --version
 
 ---
 
-## Stiahnite a načítajte odporúčaný model
+## Stiahnutie a načítanie odporúčaného modelu
 
-Odporúčaný model pre tento návod je **Qwen3.6-35B-A3B-GGUF** od Unsloth, silný model MoE s kontextovým oknom 263k tokenov, ktorý je vhodný pre záťaže agentov. Tento model používa kvantizovaciu metódu UD-Q4_K_XL. Stiahnite ho teraz:
+Odporúčaným modelom pre tento návod je **Qwen3.6-35B-A3B-GGUF** od Unsloth, silný MoE model s kontextovým oknom 263k tokenov, ktorý je vhodný pre agentové úlohy. Tento model používa kvantizáciu UD-Q4_K_XL. Stiahnite si ho teraz:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
@@ -80,11 +80,11 @@ Potom ho načítajte s veľkým kontextovým oknom a uložte toto nastavenie pre
 lemonade unload
 lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 
-Predvolená dĺžka kontextu modelu je 262 144 tokenov. Ak narazíte na chyby nedostatku pamäte (OOM), zvážte zníženie kontextového okna. Keďže však Qwen3.6 využíva rozšírený kontext pre zložité úlohy, odporúčame zachovať dĺžku kontextu aspoň 128K tokenov, aby sa zachovali schopnosti myslenia.
+Model má predvolenú kontextovú dĺžku 262 144 tokenov. Ak narazíte na chyby nedostatku pamäte (OOM), zvážte zmenšenie kontextového okna. Keďže však Qwen3.6 využíva rozšírený kontext pre komplexné úlohy, odporúčame zachovať kontextovú dĺžku aspoň 128K tokenov, aby sa zachovali schopnosti uvažovania.
 
-> **Tip: Vypnite myslenie pre rýchlejšie odpovede agenta:** Qwen3.6-35B-A3B štandardne beží v režime myslenia, čo pred každou odpoveďou pridáva latenciu. V slučkách agentov sa táto réžia rýchlo hromadí. Repozitár [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) poskytuje hotovú konfiguráciu, ktorá myslenie vypína. Ak ju chcete použiť, stiahnite súbor a importujte ho:
+> **Tip: Vypnite uvažovanie pre rýchlejšie odpovede agenta:** Qwen3.6-35B-A3B beží predvolene v režime uvažovania, čo pridáva latenciu pred každou odpoveďou. Pri slučkách agenta sa táto réžia rýchlo kumuluje. Repozitár [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) poskytuje hotovú konfiguráciu, ktorá vypína uvažovanie. Ak ju chcete použiť, stiahnite si súbor a importujte ho:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -146,7 +146,7 @@ finally {
   Remove-Item $tmpBody -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -220,14 +220,14 @@ fi
 
 echo "OK: Lemonade chat/completions returned a response"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
 
 ## Nastavenie WSL
 
-OpenClaw spúšťame vo vnútri WSL (odporúčané) a pripájame ho k Lemonade bežiacemu natívne na Windows. Tým získate prostredie linuxového shellu pre OpenClaw, pričom GPU akcelerácia Lemonade zostáva na strane Windows.
+OpenClaw spúšťame vnútri WSL (odporúčané) a pripájame ho k Lemonade, ktorý beží natívne na Windows. To vám poskytne linuxové shellové prostredie pre OpenClaw a zároveň zachová GPU akceleráciu Lemonade na strane Windows.
 
 ### Inštalácia WSL a Ubuntu
 
@@ -245,7 +245,7 @@ wsl --install -d Ubuntu-24.04
 
 ### Povolenie systemd vo WSL
 
-Spustite toto vo vnútri terminálu Ubuntu:
+Spustite toto vnútri terminálu Ubuntu:
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -263,21 +263,21 @@ wsl
 
 ### Premostenie Lemonade z Windows do WSL
 
-WSL2 beží vo virtuálnej sieti. Lemonade na Windows sa viaže na `127.0.0.1`, ktorý WSL nemôže priamo dosiahnuť. Proxy port Windows presmeruje prevádzku z IP adresy brány WSL na localhost Windows.
+WSL2 beží vo virtuálnej sieti. Lemonade na Windows je viazaný na `127.0.0.1`, ku ktorému sa WSL nemôže dostať priamo. Port proxy vo Windows presmeruje prevádzku z gateway IP WSL na localhost Windows.
 
-**Nájdite IP adresu brány WSL** (spustite vo vnútri WSL):
+**Zistite vašu gateway IP WSL** (spustite vnútri WSL):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Pridajte proxy port** (spustite v PowerShell ako správca, nahraďte `<WSL-Gateway-IP>` IP adresou vašej brány WSL):
+**Pridajte port proxy** (spustite v PowerShell ako správca, pričom `<WSL-Gateway-IP>` nahraďte vašou gateway IP WSL):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Pridajte pravidlo brány firewall** (rovnaký PowerShell so zvýšenými oprávneniami):
+**Pridajte pravidlo brány firewall** (rovnaký zvýšený PowerShell):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
@@ -290,7 +290,7 @@ WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Ak ste v predchádzajúcom kroku už načítali model Qwen3.6-35B-A3B-GGUF, mali by ste vidieť výstup JSON podobný tomuto:
+Ak ste už v predchádzajúcom kroku načítali model Qwen3.6-35B-A3B-GGUF, mali by ste vidieť JSON výstup podobný tomuto:
 
 ```json
 {
@@ -308,7 +308,7 @@ Ak ste v predchádzajúcom kroku už načítali model Qwen3.6-35B-A3B-GGUF, mali
 }
 ```
 
-> Pravidlo `netsh portproxy` prežije reštarty, ale IP adresa brány WSL sa môže zmeniť po `wsl --shutdown`. Ak sa Lemonade stane nedostupným z WSL po reštarte, získajte aktualizovanú IP adresu brány a aktualizujte proxy s touto novou IP adresou.
+> Pravidlo `netsh portproxy` prežije reštarty, ale gateway IP WSL sa môže po `wsl --shutdown` zmeniť. Ak sa Lemonade po reštarte stane nedostupným z WSL, zistite aktualizovanú gateway IP a aktualizujte proxy touto novou IP.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -359,7 +359,7 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 
 ---
 <!-- @os:end -->
@@ -368,13 +368,13 @@ finally {
 
 ### Inštalácia OpenClaw
 <!-- @os:windows -->
-> Príkazy v tejto časti spúšťajte vo vnútri vášho **terminálu WSL**.
+> Príkazy v tejto časti spúšťajte vnútri vášho **terminálu WSL**.
 <!-- @os:end -->
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-Príznak `--no-onboard` preskočí interaktívneho sprievodcu nastavením – backend modelu nakonfigurujete manuálne v nasledujúcom kroku, čo vám dáva presnú kontrolu nad tým, ktorý model a server sa použijú.
+Príznak `--no-onboard` preskočí interaktívneho sprievodcu nastavením, backend modelu nakonfigurujete manuálne v ďalšom kroku, čo vám poskytne presnú kontrolu nad tým, ktorý model a server sa použijú.
 
 Otvorte nový terminál a potvrďte inštaláciu:
 
@@ -382,11 +382,11 @@ Otvorte nový terminál a potvrďte inštaláciu:
 openclaw --version
 ```
 
-> **Tip:** Ak po inštalácii vidíte `command not found`, pridajte globálny adresár bin npm do vašej PATH:
+> **Tip:** Ak sa po inštalácii zobrazí `command not found`, pridajte globálny bin adresár npm do PATH:
 > ```bash
 > export PATH="$HOME/.npm-global/bin:$PATH"
 > ```
-> Aby bola táto zmena trvalá, pridajte vyššie uvedený riadok do súboru `~/.bashrc` alebo `~/.zshrc`.
+> Ak to chcete zachovať natrvalo, pridajte vyššie uvedený riadok do súboru `~/.bashrc` alebo `~/.zshrc`.
 
 <!-- @os:linux -->
 <!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
@@ -399,7 +399,7 @@ node -v
 npm -v
 openclaw --version
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -438,13 +438,11 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
+### Konfigurácia OpenClaw na použitie Lemonade
 
-
-### Konfigurácia OpenClaw na používanie Lemonade
-
-Spustite neinteraktívne zavádzanie OpenClaw.
+Spustite neinteraktívne onboardingovanie OpenClaw.
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -486,7 +484,7 @@ openclaw onboard \
 
 Tento príkaz zapíše konfiguráciu OpenClaw do `~/.openclaw/openclaw.json`.
 
-> **Veľkosť kontextového okna OpenClaw:** Kompakcia OpenClaw sa spustí, keď `contextTokens > contextWindow − reserveTokens`. Predvolená hodnota `reserveTokensFloor` je 20 000 tokenov – spodná hranica, ktorá prepíše `reserveTokens`, keď je nižšia – takže akýkoľvek kontext modelu pod ~37k spustí nekonečnú slučku kompakcie. Nastavte nízku rezervu a jednorazovo vypnite spodnú hranicu vo vašej konfigurácii a toto nastavenie sa vzťahuje na každý model bez potreby ladenia pre jednotlivé modely:
+> **Nastavenie veľkosti kontextového okna v OpenClaw:** Kompaktovanie v OpenClaw sa spúšťa, keď `contextTokens > contextWindow − reserveTokens`. Predvolená hodnota `reserveTokensFloor` je 20 000 tokenov – ide o dolnú hranicu, ktorá prepíše `reserveTokens`, ak je nižšia, takže akýkoľvek kontext modelu pod ~37k spustí nekonečnú slučku kompaktovania. Nastavte v konfigurácii nízku rezervu a raz zakážte túto hranicu, a bude platiť pre každý model bez potreby ladenia pre jednotlivé modely:
 >
 > ```json
 > "compaction": {
@@ -495,13 +493,13 @@ Tento príkaz zapíše konfiguráciu OpenClaw do `~/.openclaw/openclaw.json`.
 > }
 > ```
 >
-> `reserveTokensFloor` je *spodná hranica* (minimálna ochrana), nie samotná rezerva – nastavenie iba spodnej hranice nemá žiadny efekt. `reserveTokensFloor: 0` vypína ochranu, takže nižšia hodnota `reserveTokens` je akceptovaná.
+> `reserveTokensFloor` je *dolná hranica* (minimálna poistka), nie samotná rezerva – nastavenie iba hranice nemá žiadny efekt. `reserveTokensFloor: 0` zakáže túto poistku, takže sa akceptuje nižšia hodnota `reserveTokens`.
 >
-> **Kedy to použiť:** Použite túto konfiguráciu, ak je efektívne kontextové okno vášho modelu pod ~37k, buď preto, že model je malý (napr. 8k, 16k, 32k), alebo preto, že ste ho zámerne obmedzili na nižšiu hodnotu (napr. načítanie modelu 128k, ale nastavenie kontextu na 16k v Lemonade). Bez toho OpenClaw pri spustení vstúpi do nekonečnej slučky kompakcie.
+> **Kedy toto použiť:** Túto konfiguráciu použite, ak je efektívne kontextové okno vášho modelu menšie ako ~37k, či už preto, že model je malý (napr. 8k, 16k, 32k), alebo preto, že ste ho zámerne obmedzili na nižšiu hodnotu (napr. načítanie modelu so 128k, ale nastavenie kontextu v Lemonade na 16k). Bez toho OpenClaw pri spustení vstúpi do nekonečnej slučky kompaktovania.
 >
-> **Veľké kontextové modely pri plnom kontexte:** Toto môžete úplne preskočiť. Predvolené nastavenia fungujú dobre – kompakcia sa spustí ešte pred naplnením okna a model má dostatok priestoru na generovanie dlhých odpovedí. Ak to predsa len použijete, majte na pamäti, že `reserveTokens: 4096` obmedzuje dĺžku odpovede na ~4k tokenov, čo môže prerušiť dlhé generovanie súborov alebo podrobné plány.
+> **Modely s veľkým kontextom pri plnom kontexte:** Toto môžete úplne preskočiť. Predvolené hodnoty fungujú dobre, kompaktovanie sa spustí ešte pred zaplnením okna a model má dostatok priestoru na generovanie dlhých odpovedí. Ak toto predsa len použijete, majte na pamäti, že `reserveTokens: 4096` obmedzí dĺžku odpovede na približne 4k tokenov, čo môže orezať dlhé generovanie súborov alebo podrobné plány.
 >
-> **Kde to pridať:** Umiestnite blok `compaction` do `agents.defaults` vo vašom `openclaw.json` (zvyčajne na `~/.openclaw/openclaw.json`):
+> **Kam toto pridať:** Umiestnite blok `compaction` do `agents.defaults` vo vašom súbore `openclaw.json` (zvyčajne na `~/.openclaw/openclaw.json`):
 >
 > ```json
 > {
@@ -520,13 +518,13 @@ Tento príkaz zapíše konfiguráciu OpenClaw do `~/.openclaw/openclaw.json`.
 > }
 > ```
 >
-> Zvyšok vašej konfigurácie (brána, kanály, modely atď.) zostáva nezmenený – treba pridať iba kľúč `compaction`.
+> Zvyšok vašej konfigurácie (gateway, kanály, modely atď.) zostáva nezmenený, pridať treba iba kľúč `compaction`.
 
-### (Odporúčané) Povolenie izolácie Docker
+### (Odporúčané) Povolenie sandboxingu v Docker
 
-OpenClaw môže smerovať všetky operácie agenta so súbormi a kódom cez izolovaný kontajner Docker namiesto ich priameho spúšťania na vašom hostiteľovi. Tým sa obmedzí dosah akejkoľvek neúmyselnej akcie na sandbox, pričom súborový systém a sieť vášho hostiteľa zostanú nedotknuté.
+OpenClaw dokáže smerovať všetky operácie agenta so súbormi a kódom cez izolovaný Docker kontajner namiesto ich priameho spúšťania na vašom hostiteľskom systéme. Tým sa dosah akejkoľvek neúmyselnej akcie obmedzí na sandbox, pričom súborový systém a sieť vášho hostiteľa zostanú nedotknuté.
 
-Jednorazovo zostavte obraz sandboxu (Docker musí byť nainštalovaný):
+Zostavte sandboxový image raz (Docker musí byť nainštalovaný):
 
 ```bash
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -645,31 +643,31 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-Kontajnery sandboxu štandardne **nemajú prístup k sieti**. Pozrite si [referenciu sandboxingu](https://docs.openclaw.ai/gateway/sandboxing) pre bind mounty a prepísanie sieťových nastavení.
+Sandboxové kontajnery predvolene **nemajú prístup k sieti**. Bind mounty a prepísanie sieťových nastavení nájdete v [referencii k sandboxingu](https://docs.openclaw.ai/gateway/sandboxing).
 
 > #### Riešenie problémov: Docker – prístup zamietnutý
->
-> Ak pri spúšťaní príkazov Docker dostanete chybu „permission denied":
->
+> 
+> Ak sa vám pri spúšťaní príkazov Docker zobrazí chyba „permission denied“:
+> 
 > **Krok 1: Pridajte svojho používateľa do skupiny docker**
->
+> 
 > ```bash
-> sudo groupadd docker                    # Vytvorte skupinu, ak je to potrebné
-> sudo usermod -aG docker $USER           # Pridajte sa do skupiny
-> newgrp docker                           # Aktivujte zmenu
-> docker run hello-world                  # Otestujte to
+> sudo groupadd docker                    # Vytvorenie skupiny, ak je potrebné
+> sudo usermod -aG docker $USER           # Pridanie seba samého do skupiny
+> newgrp docker                           # Aktivovanie zmeny
+> docker run hello-world                  # Otestovanie
 > ```
->
-> **Krok 2: Ak chyba pretrváva, použite trvalú opravu**
->
+> 
+> **Krok 2: Ak chyba pretrváva, použite trvalé riešenie**
+> 
 > ```bash
 > sudo chgrp docker /lib/systemd/system/docker.socket
 > sudo chmod g+w /lib/systemd/system/docker.socket
 > ```
->
-> Potom **reštartujte** váš systém.
->
-> **Rýchla dočasná oprava** (resetuje sa po reštarte):
+> 
+> Potom **reštartujte** systém.
+> 
+> **Rýchle dočasné riešenie** (po reštarte sa vynuluje):
 > ```bash
 > sudo chmod 666 /var/run/docker.sock
 > ```
@@ -708,7 +706,7 @@ grep -q "127.0.0.1:13305" "$config"
 
 echo "OK: OpenClaw onboarding wrote Lemonade configuration"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -749,7 +747,7 @@ grep -Eq '"workspaceAccess"[[:space:]]*:[[:space:]]*"none"' "$config"
 
 echo "OK: OpenClaw sandbox configuration was written"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 
@@ -819,7 +817,7 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 
@@ -891,12 +889,12 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
-### Spustenie brány OpenClaw
+### Spustenie brány OpenClaw (Gateway)
 
-Brána je proces OpenClaw, ktorý spravuje slučku agenta a obsluhuje dashboard:
+Gateway je proces OpenClaw, ktorý spravuje slučku agenta a poskytuje dashboard:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -949,7 +947,7 @@ fi
 
 echo "OK: OpenClaw gateway is reachable"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -1024,28 +1022,28 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
-Ak chcete otvoriť dashboard, spustite toto v druhom termináli, kým brána stále beží:
+Ak chcete otvoriť dashboard, spustite toto v druhom termináli, kým gateway stále beží:
 
 ```bash
 openclaw dashboard
 ```
 
-Keďže sa brána viaže na loopback, dashboard sa pri otvorení z rovnakého počítača automaticky overí – nie je potrebné zadávať token ani schvaľovať zariadenie pre lokálny prístup. Mali by ste vidieť dashboard OpenClaw s vaším modelom Lemonade uvedeným ako aktívny backend.
+Keďže gateway je viazaný na loopback, dashboard sa pri otvorení z toho istého počítača automaticky autentifikuje – na lokálny prístup nie je potrebné zadávať token ani schvaľovať zariadenie. Mali by ste vidieť dashboard OpenClaw s vaším modelom Lemonade uvedeným ako aktívny backend.
 
-> Ak ste povolili sandboxing, môžete ho overiť tak, že požiadate agenta, aby z dashboardu `spustil hostname`. Ak namiesto názvu hostiteľa vášho počítača vidíte krátke ID kontajnera, sandbox funguje.
+> Ak ste povolili sandboxing, môžete to overiť tak, že požiadate agenta, aby z dashboardu spustil `run hostname`. Ak sa namiesto názvu hostiteľa vášho počítača zobrazí krátke ID kontajnera, sandbox funguje.
 
-**Gratulujeme, vytvorili ste plne lokálny zásobník AI agenta od základov.**
+**Blahoželáme, vytvorili ste od základov plne lokálny AI agentový stack.**
 
-> **Potrebujete token brány?** Spustite `openclaw dashboard --no-open`, aby sa vytlačila URL adresa dashboardu s vloženým tokenom (zároveň sa pokúsi skopírovať ho do schránky). Alternatívne sa token nachádza na `gateway.auth.token` v `~/.openclaw/openclaw.json`.
+> **Potrebujete token pre gateway?** Spustite `openclaw dashboard --no-open`, čím sa vypíše URL adresa dashboardu so zabudovaným tokenom (tiež sa pokúsi skopírovať ho do schránky). Alternatívne sa token nachádza pod `gateway.auth.token` v súbore `~/.openclaw/openclaw.json`.
 >
-> **Schválenie vzdialeného zariadenia:** Keď otvoríte dashboard z druhého počítača alebo telefónu, prehliadač zobrazí ID žiadosti. Späť na počítači, kde beží brána, spustite:
+> **Schvaľovanie vzdialeného zariadenia:** Keď otvoríte dashboard z druhého počítača alebo telefónu, prehliadač zobrazí ID požiadavky. Späť na počítači, na ktorom beží gateway, spustite:
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> Toto je potrebné iba pre vzdialené alebo sekundárne zariadenia – prístup cez loopback z rovnakého počítača sa overuje automaticky.
+> Toto je potrebné iba pre vzdialené alebo sekundárne zariadenia, prístup z loopbacku na tom istom počítači sa autentifikuje automaticky.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1055,47 +1053,46 @@ Keďže sa brána viaže na loopback, dashboard sa pri otvorení z rovnakého po
 
 ## Voliteľné: Pripojenie komunikačného kanála
 
-Keď brána beží, môžete sa k svojmu lokálnemu agentovi dostať z akéhokoľvek zariadenia. Vyberte si možnosť, ktorá vyhovuje vášmu nastaveniu. OpenClaw podporuje [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) a ďalšie kanály – úplný zoznam nájdete na [docs.openclaw.ai](https://docs.openclaw.ai).
+Po spustení gateway sa dostanete k svojmu lokálnemu agentovi z ľubovoľného zariadenia. Vyberte možnosť, ktorá vyhovuje vášmu nastaveniu. OpenClaw podporuje [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) a ďalšie kanály, úplný zoznam nájdete na [docs.openclaw.ai](https://docs.openclaw.ai).
 
 ---
 
 ### Možnosť A: Discord
 
-Discord vyžaduje server, kde **máte prístup správcu**, aby ste mohli pridať bota. Ak zdieľate servery, ale nevlastníte žiadny, použite namiesto toho Možnosť B (Telegram).
+Discord vyžaduje server, na ktorom **máte administrátorský prístup**, aby ste mohli pridať bota. Ak zdieľate servery, ale žiadny nevlastníte, použite namiesto toho možnosť B (Telegram).
+#### Vytvorenie účtu a servera Discord
 
-#### Vytvorenie účtu Discord a servera
+Ak nemáte účet Discord, zaregistrujte sa na [discord.com](https://discord.com). Potrebujete tiež server, na ktorom máte administrátorské práva. Vytvorte ho kliknutím na ikonu **+** na bočnom paneli Discordu a výberom možnosti **Create My Own**. Súkromný server postačuje.
 
-Ak nemáte účet Discord, zaregistrujte sa na [discord.com](https://discord.com). Potrebujete tiež server, kde ste správcom – vytvorte ho kliknutím na ikonu **+** v bočnom paneli Discord a výberom **Create My Own**. Súkromný server je v poriadku.
+#### Vytvorenie aplikácie a bota Discord
 
-#### Vytvorenie aplikácie Discord a bota
-
-1. Prejdite na [Discord Developer Portal](https://discord.com/developers/applications) a kliknite na **New Application**. Zadajte názov (napr. „openclaw-bot").
-2. V bočnom paneli kliknite na **Bot**. Nastavte používateľské meno pre bota.
-3. Stále na stránke Bot, posuňte sa na **Privileged Gateway Intents** a povoľte:
+1. Prejdite do [Discord Developer Portal](https://discord.com/developers/applications) a kliknite na **New Application**. Zadajte mu názov (napr. „openclaw-bot").
+2. Na bočnom paneli kliknite na **Bot**. Nastavte používateľské meno bota.
+3. Na stránke Bot posuňte nadol na **Privileged Gateway Intents** a povoľte:
    - **Message Content Intent** (povinné)
    - **Server Members Intent** (odporúčané)
-4. Posuňte sa späť nahor a kliknite na **Reset Token**, aby ste vygenerovali token bota. Skopírujte ho.
+4. Posuňte sa späť nahor a kliknite na **Reset Token**, čím vygenerujete token vášho bota. Skopírujte si ho.
 
 #### Pridanie bota na váš server
 
-1. V bočnom paneli kliknite na **OAuth2/ URL Generator**.
-2. V časti **Scopes** povoľte `bot` a `applications.commands`.
-3. V časti **Bot Permissions** povoľte: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Skopírujte vygenerovanú URL adresu, vložte ju do prehliadača, vyberte váš server a potvrďte. Bot by sa teraz mal objaviť v zozname členov vášho servera.
+1. Na bočnom paneli kliknite na **OAuth2/ URL Generator**.
+2. V sekcii **Scopes** povoľte `bot` a `applications.commands`.
+3. V sekcii **Bot Permissions** povoľte: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
+4. Skopírujte vygenerovanú adresu URL, vložte ju do prehliadača, vyberte svoj server a potvrďte. Bot by sa teraz mal zobraziť v zozname členov vášho servera.
 
 #### Získanie vašich ID
 
-Povoľte Režim vývojára v Discord (**User Settings/ Advanced/ Developer Mode**), potom:
-- Kliknite pravým tlačidlom na ikonu vášho servera: **Copy Server ID**
-- Kliknite pravým tlačidlom na váš vlastný avatar: **Copy User ID**
+Povoľte Developer Mode v Discorde (**User Settings/ Advanced/ Developer Mode**), potom:
+- kliknite pravým tlačidlom na ikonu vášho servera: **Copy Server ID**
+- kliknite pravým tlačidlom na svoj avatar: **Copy User ID**
 
-#### Povolenie priamych správ od členov servera
+#### Povolenie súkromných správ od členov servera
 
-Kliknite pravým tlačidlom na ikonu vášho servera/ **Privacy Settings**/ zapnite **Direct Messages**. Tým umožníte botovi posielať vám priame správy, čo je potrebné pre krok párovania.
+Kliknite pravým tlačidlom na ikonu vášho servera/ **Privacy Settings**/ zapnite **Direct Messages**. Toto umožní botovi poslať vám súkromnú správu, čo je potrebné pre krok párovania.
 
 #### Konfigurácia OpenClaw pre Discord
 
-Uložte token bota ako premennú prostredia, potom vytvorte jeden súbor záplaty, ktorý povolí Discord, odkazuje na token a pridá váš server na zoznam povolených. Nahraďte `<server_id>` a `<user_id>` ID získanými vyššie.
+Uložte token vášho bota ako premennú prostredia, potom vytvorte jeden patch súbor, ktorý zapne Discord, odkazuje na token a pridá váš server do zoznamu povolených. Nahraďte `<server_id>` a `<user_id>` ID získanými vyššie.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1121,32 +1118,32 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **Nespoliehajte sa na to, že agent to nakonfiguruje.** Keď je sandboxing povolený, agent nemôže zapisovať do `~/.openclaw/openclaw.json` zvnútra sandboxu – namiesto toho použite vyššie uvedené príkazy CLI na hostiteľovi.
+> **Nespoliehajte sa na to, že o túto konfiguráciu požiadate agenta.** Keď je povolený sandboxing, agent nemôže zapisovať do `~/.openclaw/openclaw.json` zvnútra sandboxu, namiesto toho použite vyššie uvedené CLI príkazy na hostiteľovi.
 
-Reštartujte bránu, aby načítala novú konfiguráciu kanála:
+Reštartujte gateway, aby prevzal novú konfiguráciu kanála:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
 ```
 
-V priebehu niekoľkých sekúnd by ste mali vo výstupe brány vidieť `logged in to discord as <bot-name>`.
+V priebehu niekoľkých sekúnd by sa mal vo výstupe gateway zobraziť riadok `logged in to discord as <bot-name>`.
 
-#### Párovanie vášho účtu Discord
+#### Spárovanie vášho účtu Discord
 
-Pošlite botovi priamu správu v Discord. Bot odpovie krátkym párovacím kódom.
+Napíšte botovi súkromnú správu v Discorde. Odpovie krátkym párovacím kódom.
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-Schváľte ho na počítači, kde beží OpenClaw:
+Schváľte ho na počítači, na ktorom beží OpenClaw:
 ```bash
 openclaw pairing approve discord <CODE>
 ```
 
-> Párovací kód vyprší po jednej hodine.
+> Platnosť párovacích kódov vyprší po jednej hodine.
 
-Teraz môžete chatovať so svojím agentom priamo z Discord a preniesť úlohy na váš lokálny hardvér.
+Teraz môžete chatovať so svojím agentom priamo z Discordu a presúvať úlohy na svoj lokálny hardvér.
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1156,12 +1153,12 @@ Teraz môžete chatovať so svojím agentom priamo z Discord a preniesť úlohy 
 
 ### Možnosť B: Telegram
 
-Telegram je pre väčšinu používateľov jednoduchší ako Discord – nevyžaduje žiadny server ani prístup správcu.
+Telegram je pre väčšinu používateľov jednoduchší ako Discord, nevyžaduje žiadny server ani administrátorský prístup.
 
 #### Vytvorenie bota Telegram
 
 1. Otvorte Telegram a napíšte správu **@BotFather**.
-2. Pošlite `/newbot` a postupujte podľa pokynov. Uložte token bota, ktorý dostanete.
+2. Odošlite `/newbot` a postupujte podľa pokynov. Uložte si token bota, ktorý dostanete.
 
 #### Konfigurácia OpenClaw pre Telegram
 
@@ -1171,7 +1168,7 @@ Uložte token ako premennú prostredia:
 export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 ```
 
-Pridajte konfiguráciu kanála do `~/.openclaw/openclaw.json` (alebo ju záplatujte cez dashboard):
+Pridajte konfiguráciu kanála do `~/.openclaw/openclaw.json` (alebo ju upravte cez dashboard):
 
 ```json
 {
@@ -1185,23 +1182,23 @@ Pridajte konfiguráciu kanála do `~/.openclaw/openclaw.json` (alebo ju záplatu
 }
 ```
 
-Reštartujte bránu, potom pošlite botovi akúkoľvek správu v Telegram. Schváľte párovanie:
+Reštartujte gateway, potom pošlite svojmu botovi ľubovoľnú správu v Telegrame. Schváľte párovanie:
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-Párovací kód vyprší po jednej hodine. Teraz môžete chatovať so svojím agentom prostredníctvom priamej správy v Telegram.
+Platnosť párovacích kódov vyprší po jednej hodine. Teraz môžete chatovať so svojím agentom prostredníctvom súkromných správ v Telegrame.
 
 ---
 
 ## Ďalšie kroky
 
-Teraz, keď váš agent môže prijímať príkazy z vášho telefónu a konať na vašom lokálnom počítači, tu sú tri smery, ktoré stojí za to preskúmať:
+Teraz, keď váš agent dokáže prijímať príkazy z vášho telefónu a vykonávať ich na vašom lokálnom počítači, tu sú tri smery, ktoré stojí za to preskúmať:
 
-1. **Sumarizátor akciového trhu**: Naplánujte OpenClaw, aby v pevnom intervale získaval dáta z finančných API, sumarizoval pohyby dňa pomocou vášho lokálneho modelu a každé ráno posielal prehľad na váš telefón prostredníctvom zvoleného kanála.
+1. **Súhrn burzového trhu**: Naplánujte, aby OpenClaw v pravidelných intervaloch získaval dáta z finančných API, zhrnul denné pohyby pomocou vášho lokálneho modelu a odosielal súhrn na váš telefón každé ráno prostredníctvom vami zvoleného kanála.
 
-2. **Monitor dolaďovania**: Spustite trénovaciu úlohu na diaľku cez Telegram alebo Discord, potom nechajte agenta sledovať trénovací log a pravidelne hlásiť hodnoty straty, využitie GPU a využitie disku späť na váš telefón. Ak sa beh zastaví alebo VRAM prudko stúpne, dozviete sa to okamžite bez toho, aby ste museli byť pri počítači.
+2. **Monitorovanie fine-tuningu**: Spustite tréningovú úlohu na diaľku cez Telegram alebo Discord a nechajte agenta sledovať tréningový log a pravidelne hlásiť hodnoty loss, využitie GPU a stav disku na váš telefón. Ak sa beh zasekne alebo dôjde k skoku VRAM, dozviete sa to okamžite bez toho, aby ste museli byť pri počítači.
 
-3. **IoT s lokálnym VLM**: Nasmerujte kameru na vaše predné dvere, spustite vizuálny model na Lemonade a nechajte OpenClaw analyzovať snímky na požiadanie alebo na základe spúšťača. Opýtajte sa „prišli dnes nejaké balíky?" z vášho telefónu a získajte priamu odpoveď z vášho vlastného hardvéru.
+3. **IOT s lokálnym VLM**: Nasmerujte kameru na vaše vstupné dvere, spustite vision model na Lemonade a nechajte OpenClaw analyzovať snímky na požiadanie alebo pri spustení. Opýtajte sa „prišli dnes nejaké balíky?" zo svojho telefónu a dostanete priamu odpoveď z vlastného hardvéru.

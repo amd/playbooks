@@ -20,10 +20,10 @@ Pentru a permite LM Studio să vadă modelele preinstalate, navigați la Setting
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 1. Descărcați programul de instalare de aici: [https://lmstudio.ai/download](https://lmstudio.ai/download)
-2. Instalați.
+2. Instalați. 
 <!-- @device:end -->
 
-> Sfat: După instalare, lansați LM Studio o dată pentru a inițializa CLI (`lms`).
+> Sfat: După instalare, lansați LM Studio o dată pentru a inițializa CLI-ul (`lms`).
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
 ```powershell
@@ -33,13 +33,13 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Notă: Puteți alege să instalați fie .deb, fie AppImage.
-1. Descărcați appimage-ul de aici: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
-2. rulați `sudo apt install libfuse2`
-3. rulați `cd ~/Downloads`
-4. rulați `chmod +x LM-Studio-*.AppImage`
-5. rulați `./LM-Studio-*.AppImage`
-> Sfat: După instalare, lansați LM Studio o dată pentru a inițializa CLI (`lms`).
+> Notă: Puteți alege să instalați fie fișierul .deb, fie AppImage. 
+1. Descărcați appimage de aici: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
+2. rulați `sudo apt install libfuse2`  
+3. rulați `cd ~/Downloads`  
+4. rulați `chmod +x LM-Studio-*.AppImage`  
+5. rulați `./LM-Studio-*.AppImage`  
+> Sfat: După instalare, lansați LM Studio o dată pentru a inițializa CLI-ul (`lms`).
 
 <!-- @device:halo_box -->
 Pentru a permite LM Studio să vadă modelele preinstalate, navigați la Settings > General > Models Directory. Apoi schimbați calea la `/var/cache/models`.
@@ -53,5 +53,5 @@ Pentru a permite LM Studio să vadă modelele preinstalate, navigați la Setting
 ```bash
 lms --help
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->

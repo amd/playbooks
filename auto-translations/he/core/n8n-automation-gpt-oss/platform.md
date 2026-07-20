@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # תצורת פלטפורמה
 
-מסמך זה מתאר את תצורות הפלטפורמה הצפויות להפעלת ה-playbook הזה.
+מסמך זה מתאר את תצורות הפלטפורמה הצפויות להרצת ספר משחקים זה.
 
 ## דרישות מוקדמות
 
@@ -14,20 +14,20 @@ SPDX-License-Identifier: MIT
 
 | רכיב | גרסה | הערות |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | מותקן מראש וזמין ב-PATH על פלטפורמת AMD Ryzen™ AI Halo Developer Platform; יש להתקין ידנית בכל שאר המכשירים |
-| **Lemonade Server** | עדכנית | פועל על `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | מותקן מראש וזמין ב-PATH ב-AMD Ryzen™ AI Halo Developer Platform; יש להתקין ידנית בכל שאר המכשירים |
+| **Lemonade Server** | הגרסה העדכנית ביותר | פועל בכתובת `http://localhost:13305/api/v1` |
 
 ### Linux
 
 | רכיב | גרסה | הערות |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | מותקן מראש וזמין ב-PATH על פלטפורמת AMD Ryzen™ AI Halo Developer Platform; יש להתקין ידנית בכל שאר המכשירים |
-| **Lemonade Server** | עדכנית | פועל על `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | מותקן מראש וזמין ב-PATH ב-AMD Ryzen™ AI Halo Developer Platform; יש להתקין ידנית בכל שאר המכשירים |
+| **Lemonade Server** | הגרסה העדכנית ביותר | פועל בכתובת `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-שרת Lemonade אמור לפעול עם המודל המתאים למכשיר שנטען (ראה את ה-README לפקודת `lemonade run` עבור המכשיר שלך):
+שרת Lemonade צריך לפעול עם המודל המתאים למכשיר טעון (ראו את קובץ ה-README לפקודת `lemonade run` המתאימה למכשיר שלכם):
 
 | מכשיר | נקודת קצה | מודל |
 |--------|----------|-------|

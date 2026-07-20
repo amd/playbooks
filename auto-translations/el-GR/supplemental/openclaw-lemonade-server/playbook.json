@@ -1,5 +1,5 @@
 {
   "id": "openclaw-lemonade-server",
-  "title": "Εκτέλεση του OpenClaw Τοπικά με Lemonade Server",
-  "description": "Εγκαταστήστε και διαμορφώστε τον αυτόνομο πράκτορα τεχνητής νοημοσύνης OpenClaw με τον Lemonade Server."
+  "title": "Εκτέλεση του OpenClaw τοπικά με τον Lemonade Server",
+  "description": "Εγκατάσταση και διαμόρφωση του αυτόνομου AI πράκτορα OpenClaw με τον Lemonade Server."
 }

@@ -11,30 +11,30 @@ SPDX-License-Identifier: MIT
 
 ## 개요
 
-GAIA 에이전트는 로컬 LLM을 사용하여 추론하고 사용자가 정의한 도구를 호출하는 AI 어시스턴트입니다. 즉, 행동을 취할 수 있는 챗봇입니다. 클라우드 API 없이, 데이터가 머신 밖으로 나가지 않으며, API 키도 필요 없이 **100% 로컬**에서 실행됩니다.
+GAIA 에이전트는 로컬 LLM을 사용하여 추론하고 사용자가 정의한 도구를 호출하는 AI 어시스턴트입니다 — 행동을 취할 수 있는 챗봇이라고 생각하면 됩니다. 클라우드 API 없이, 데이터가 사용자의 머신을 벗어나지 않으며, API 키도 필요 없이 **100% 로컬**에서 실행됩니다.
 
-이 플레이북에서는 시스템의 RAM, GPU, NPU를 감지하고, 로컬 모델 카탈로그를 쿼리하며, 머신에서 실행할 수 있는 LLM을 추천하는 Hardware Advisor Agent를 구축합니다. 이는 즉시 유용한 결과물을 만들어내는 GAIA Agent SDK에 대한 실용적인 입문입니다.
+이 플레이북에서는 시스템의 RAM, GPU, NPU를 감지하고 로컬 모델 카탈로그를 조회하여 사용자의 머신에서 실행할 수 있는 LLM을 추천해주는 하드웨어 어드바이저 에이전트를 구축합니다. 이는 GAIA Agent SDK에 대한 실용적인 입문 과정으로, 곧바로 유용하게 활용할 수 있는 결과물을 만들어냅니다.
 
-## 학습 내용
+## 배울 내용
 
-- 사용자 정의 도구로 GAIA 에이전트를 만드는 방법
-- LemonadeClient SDK를 사용하여 시스템 정보 및 모델 카탈로그 쿼리하기
+- 커스텀 도구를 사용하여 GAIA 에이전트를 만드는 방법
+- LemonadeClient SDK를 사용하여 시스템 정보 및 모델 카탈로그 조회하기
 - 플랫폼별 GPU/NPU 감지 (Windows PowerShell 및 Linux lspci)
-- 70% 규칙을 사용한 메모리 기반 모델 크기 조정
-- 자연어 하드웨어 쿼리를 위한 대화형 CLI 구축
+- 70% 규칙을 사용한 메모리 기반 모델 크기 산정
+- 자연어 하드웨어 질의를 위한 대화형 CLI 구축
 
-## 메모리 구성 설정
+## 메모리 구성 설정하기
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## 소프트웨어 업데이트 확인
-> **참고**: VS Code가 설치되어 있지 않은 경우 Ryzen AI Developer Center에서 설치할 수 있습니다.
+> **참고**: VS Code가 설치되어 있지 않다면 Ryzen AI Developer Center를 통해 설치할 수 있습니다.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 소프트웨어 사전 요구 사항 설치
+## 소프트웨어 필수 구성 요소 설치
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
@@ -64,11 +64,11 @@ which python3
 
 ## 시작하기
 
-먼저 완성된 에이전트를 실행하여 무엇을 만들고 있는지 확인하세요. 그런 다음 코드를 단계별로 살펴보겠습니다.
+먼저 완성된 에이전트를 실행하여 무엇을 만들게 될지 확인해봅니다. 그런 다음 코드를 단계별로 살펴보겠습니다.
 
-### 미리 빌드된 예제 실행
+### 사전 구축된 예제 실행하기
 
-이 플레이북에는 완성된 [hardware_advisor_agent.py](assets/hardware_advisor_agent.py)가 포함되어 있습니다. 원하는 디렉터리에 다운로드하고 실행하여 완성된 에이전트를 확인하세요:
+이 플레이북에는 완전한 [hardware_advisor_agent.py](assets/hardware_advisor_agent.py)가 포함되어 있습니다. 원하는 디렉터리에 다운로드한 다음 실행하여 완성된 에이전트가 동작하는 모습을 확인하세요:
 
 ```bash
 python hardware_advisor_agent.py
@@ -96,7 +96,7 @@ print("PASS: hardware_advisor_agent.py has valid syntax")
 ```
 <!-- @test:end --> 
 
-**질문해 보세요:** "What size LLM can I run?"
+**시도해볼 질문:** "What size LLM can I run?"
 
 **예상 출력:**
 
@@ -119,7 +119,7 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 
 **축하합니다** - 에이전트를 만들었습니다!
 
-플레이북의 나머지 부분에서는 스크립트의 각 부분이 어떻게 작동하는지 설명하므로, 처음부터 이해할 수 있습니다.
+이 플레이북의 나머지 부분에서는 스크립트의 각 부분이 어떻게 작동하는지 설명하여, 처음부터 차근차근 이해할 수 있도록 돕습니다.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -259,21 +259,21 @@ echo "OK: hardware_advisor_agent.py started successfully"
 <!-- @os:end --> 
 
 
-## 아키텍처 이해
+## 아키텍처 이해하기
 
-Hardware Advisor Agent는 세 가지 구성 요소를 결합합니다:
+하드웨어 어드바이저 에이전트는 세 가지 구성 요소를 결합합니다:
 
 - **LemonadeClient SDK** — 시스템 정보 및 모델 카탈로그 API
 - **플랫폼별 감지** — GPU 정보를 위한 Windows PowerShell / Linux lspci
-- **메모리 계산** — 안전한 모델 크기 조정을 위한 70% 규칙
+- **메모리 계산** — 안전한 모델 크기 산정을 위한 70% 규칙
 
-데이터는 다음 순서로 흐릅니다: 사용자 쿼리 → 에이전트가 도구 선택 → 도구가 LemonadeClient + OS 감지 호출 → 에이전트가 결과를 종합하여 추천 생성.
+데이터는 다음 순서로 흐릅니다: 사용자 질의 → 에이전트가 도구 선택 → 도구가 LemonadeClient + OS 감지 호출 → 에이전트가 결과를 종합하여 추천 생성.
 
 ### LemonadeClient SDK
 
-LemonadeClient는 시스템 감지, NPU/GPU 가용성, 모델 카탈로그 쿼리를 위한 통합 API를 제공합니다.
+LemonadeClient는 시스템 감지, NPU/GPU 가용성, 모델 카탈로그 조회를 위한 통합 API를 제공합니다.
 
-**가져오기 및 초기화:**
+**임포트 및 초기화:**
 
 ```python
 from gaia.llm.lemonade_client import LemonadeClient
@@ -341,7 +341,7 @@ response = client.list_models(show_all=True)
 }
 ```
 
-**`get_model_info(model_id)`** — 특정 모델의 크기 추정값을 반환합니다:
+**`get_model_info(model_id)`** — 특정 모델의 크기 추정치를 반환합니다:
 
 ```python
 model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
@@ -357,11 +357,11 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 
 ### 플랫폼별 GPU 감지
 
-에이전트는 GPU 감지를 위해 PyTorch 대신 OS 네이티브 명령을 사용합니다. 이 방식은 GPU 드라이버 없이도 작동하고, (CUDA 지원 GPU뿐만 아니라) 모든 GPU를 감지하며, 무거운 라이브러리 가져오기를 피할 수 있습니다.
+이 에이전트는 GPU 감지를 위해 PyTorch 대신 OS 고유 명령어를 사용합니다. 이 방식은 GPU 드라이버가 설치되어 있지 않아도 작동하고, (CUDA 지원 여부와 관계없이) 모든 GPU를 감지하며, 무거운 라이브러리 임포트를 피할 수 있습니다.
 
 <!-- @os:windows -->
 
-Windows에서 에이전트는 PowerShell을 사용하여 WMI를 쿼리합니다:
+Windows에서는 에이전트가 PowerShell을 사용하여 WMI를 조회합니다:
 
 ```python
 ps_command = (
@@ -380,7 +380,7 @@ result = subprocess.run(
 
 <!-- @os:linux -->
 
-Linux에서 에이전트는 lspci를 사용합니다:
+Linux에서는 에이전트가 lspci를 사용합니다:
 
 ```python
 result = subprocess.run(
@@ -394,7 +394,7 @@ result = subprocess.run(
 
 ### 70% 메모리 규칙
 
-> **규칙:** 모델 크기는 추론 작업(KV 캐시, 배치 처리 버퍼, 런타임 메모리 급증)을 위한 30% 오버헤드를 남기기 위해 사용 가능한 RAM의 70% 미만이어야 합니다.
+> **규칙:** 추론 작업(KV 캐시, 배치 처리 버퍼, 런타임 메모리 스파이크)을 위한 30%의 여유 공간을 남기기 위해 모델 크기는 사용 가능한 RAM의 70% 미만이어야 합니다.
 
 ```
 System: 32 GB RAM
@@ -403,13 +403,13 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 70B model (~42 GB):   Too large
 ```
 
-## 에이전트 단계별 코딩 (선택 사항)
+## 단계별로 에이전트 코딩하기 (선택 사항)
 
-`hardware_advisor_agent.py`라는 **하나의 파일**을 만들고 기능을 점진적으로 추가합니다. 각 단계는 이전 단계를 기반으로 합니다.
+`hardware_advisor_agent.py`라는 **하나의 파일**을 만들고 점진적으로 기능을 추가합니다. 각 단계는 이전 단계를 기반으로 합니다.
 
-### 1단계: 에이전트 골격
+### 1단계: 에이전트 뼈대
 
-최소한의 에이전트 구조로 시작합니다 — 클래스와 기본 시스템 프롬프트만 있습니다. 에이전트에는 아직 도구가 없습니다.
+최소한의 에이전트 구조 — 클래스와 기본 시스템 프롬프트만 — 로 시작합니다. 아직 도구는 없습니다.
 
 ```python
 from gaia import Agent
@@ -436,7 +436,7 @@ if __name__ == "__main__":
     print("Agent created successfully!")
 ```
 
-실행하여 확인합니다:
+실행하여 확인하세요:
 
 ```bash
 python hardware_advisor_agent.py
@@ -452,9 +452,9 @@ Agent created successfully!
 
 ### 2단계: GPU 및 하드웨어 감지
 
-`_get_gpu_info()` 헬퍼 메서드와 `get_hardware_info()` 도구를 추가합니다. 이를 통해 에이전트가 대화형이 됩니다 — 이제 시스템 사양에 대해 쿼리할 수 있습니다.
+`_get_gpu_info()` 헬퍼 메서드와 `get_hardware_info()` 도구를 추가합니다. 이제 에이전트가 대화형이 되어 시스템 사양을 질의할 수 있습니다.
 
-**파일 상단의 가져오기를 업데이트합니다:**
+파일 상단의 **임포트를 업데이트**하세요:
 
 ```python
 from typing import Any, Dict
@@ -463,7 +463,7 @@ from gaia import Agent, tool
 from gaia.llm.lemonade_client import LemonadeClient
 ```
 
-**`_get_system_prompt()` 메서드 뒤에 `_get_gpu_info()` 헬퍼를 추가합니다:**
+`_get_system_prompt()` 메서드 뒤에 **`_get_gpu_info()` 헬퍼를 추가**하세요:
 
 ```python
 def _get_gpu_info(self) -> Dict[str, Any]:
@@ -550,7 +550,7 @@ def _get_gpu_info(self) -> Dict[str, Any]:
     return {"name": "Not detected", "memory_mb": 0}
 ```
 
-**`_register_tools()` 메서드를 `get_hardware_info` 도구로 교체합니다:**
+**`_register_tools()` 메서드를 교체**하여 `get_hardware_info` 도구를 추가하세요:
 
 ```python
 def _register_tools(self):
@@ -607,7 +607,7 @@ def _register_tools(self):
             }
 ```
 
-**`__main__` 블록을 업데이트하여 대화형 테스트를 활성화합니다:**
+대화형 테스트를 활성화하도록 **`__main__` 블록을 업데이트**하세요:
 
 ```python
 if __name__ == "__main__":
@@ -626,13 +626,13 @@ if __name__ == "__main__":
             break
 ```
 
-실행하고 "Show me my system specs"라고 질문해 보세요:
+실행한 다음 "Show me my system specs"라고 질문해 보세요:
 
 ```bash
 python hardware_advisor_agent.py
 ```
 
-**예시 출력:**
+**출력 예시:**
 
 ```
 You: Show me my system specs
@@ -647,7 +647,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ### 3단계: 모델 카탈로그
 
-`_register_tools()` 내부의 `get_hardware_info` 함수 뒤에 `list_available_models()` 도구를 추가합니다. 이제 에이전트가 사용 가능한 모델을 알려줄 수 있습니다.
+`_register_tools()` 내부, `get_hardware_info` 함수 뒤에 `list_available_models()` 도구를 추가합니다. 이제 에이전트가 사용 가능한 모델을 알려줄 수 있습니다.
 
 ```python
     @tool(atomic=True)
@@ -689,13 +689,13 @@ Agent: Your system has excellent specs for running LLMs locally!
             }
 ```
 
-실행하고 "What models are available?"라고 질문해 보세요:
+실행한 다음 "What models are available?"라고 질문해 보세요:
 
 ```bash
 python hardware_advisor_agent.py
 ```
 
-**예시 출력:**
+**출력 예시:**
 
 ```
 You: What models are available?
@@ -710,7 +710,7 @@ Agent: I found 15 models in the catalog:
 
 ### 4단계: 스마트 추천
 
-`_register_tools()` 내부의 `list_available_models` 뒤에 `recommend_models()` 도구를 추가합니다. 이제 에이전트는 70% 규칙을 사용하여 시스템 메모리에 맞는 모델을 계산할 수 있습니다.
+`_register_tools()` 내부, `list_available_models` 뒤에 `recommend_models()` 도구를 추가합니다. 이제 에이전트는 70% 규칙을 사용하여 사용자 시스템의 메모리에 맞는 모델을 계산할 수 있습니다.
 
 ```python
     @tool(atomic=True)
@@ -769,13 +769,13 @@ Agent: I found 15 models in the catalog:
             }
 ```
 
-실행하고 "What size LLM can I run?"라고 질문해 보세요:
+실행한 다음 "What size LLM can I run?"이라고 질문해 보세요:
 
 ```bash
 python hardware_advisor_agent.py
 ```
 
-**예시 출력:**
+**출력 예시:**
 
 ```
 You: What size LLM can I run?
@@ -791,9 +791,9 @@ Top recommendations:
 
 ### 5단계: 프로덕션 CLI
 
-간단한 `__main__` 블록을 세련된 대화형 CLI로 교체합니다. 배너, 종료 명령, 더 나은 오류 처리가 추가됩니다.
+단순한 `__main__` 블록을 완성도 있는 대화형 CLI로 교체합니다. 배너, 종료 명령어, 더 나은 오류 처리가 추가됩니다.
 
-**전체 `if __name__ == "__main__":` 블록을 다음으로 교체합니다:**
+**`if __name__ == "__main__":` 블록 전체를 다음으로 교체**하세요:
 
 ```python
 def main():
@@ -843,32 +843,31 @@ if __name__ == "__main__":
 ```
 
 ---
+### 최종 확인
 
-### 최종 검증
+이제 `hardware_advisor_agent.py`에 다음 구성 요소가 모두 있어야 합니다:
 
-`hardware_advisor_agent.py`에는 이제 다음 구성 요소가 모두 포함되어야 합니다:
-
-- [x] 가져오기: `from typing import Any, Dict` 및 `from gaia import Agent, tool`
-- [x] `__init__` 및 시스템 프롬프트가 있는 `HardwareAdvisorAgent` 클래스
+- [x] Imports: `from typing import Any, Dict` 및 `from gaia import Agent, tool`
+- [x] `__init__`과 시스템 프롬프트를 갖춘 `HardwareAdvisorAgent` 클래스
 - [x] `_get_gpu_info()` 헬퍼 (Windows PowerShell + Linux lspci)
-- [x] GPU, NPU, OS 필드가 있는 `get_hardware_info()` 도구
-- [x] 레이블 및 크기 보강이 있는 `list_available_models()` 도구
-- [x] 70% 규칙, fits_in_ram, fits_in_gpu가 있는 `recommend_models()` 도구
-- [x] 대화형 CLI가 있는 `main()` 함수
+- [x] GPU, NPU, OS 필드를 포함한 `get_hardware_info()` 도구
+- [x] 레이블과 크기 정보가 포함된 `list_available_models()` 도구
+- [x] 70% 규칙, fits_in_ram, fits_in_gpu를 포함한 `recommend_models()` 도구
+- [x] 대화형 CLI를 위한 `main()` 함수
 
-**모든 것이 작동하는지 확인하기 위해 다음 쿼리를 테스트하세요:**
+**다음 질문들로 모든 것이 제대로 작동하는지 확인해 보세요:**
 
 - "What size LLM can I run?"
 - "Show me my system specs"
 - "What models are available?"
 - "Can I run a 30B model?"
 
-> **팁**: 완전한 구현은 [hardware_advisor_agent.py](assets/hardware_advisor_agent.py)에서 확인할 수 있습니다.
+> **팁**: 전체 구현은 [hardware_advisor_agent.py](assets/hardware_advisor_agent.py)에서 확인할 수 있습니다.
 
 ## 다음 단계
 
-- **LemonadeClient API 탐색** — [LemonadeClient SDK 문서](https://amd-gaia.ai/sdk/lemonade-client)에서 더 많은 시스템 및 모델 관리 기능을 알아보세요
-- **음성 상호작용 추가** — Whisper ASR과 Kokoro TTS를 통합하여 사용자가 음성으로 하드웨어 질문을 할 수 있도록 하세요. [Talk 가이드](https://amd-gaia.ai/guides/talk)를 참조하세요
-- **MCP 지원 추가** — 다른 도구가 쿼리할 수 있도록 hardware advisor를 MCP 서버로 노출하세요. [MCP 가이드](https://amd-gaia.ai/sdk/infrastructure/mcp)를 참조하세요
-- **추천 엔진 확장** — 레이어 오프로딩을 위한 GPU VRAM을 고려하거나, 초당 토큰 수를 추정하는 벤치마킹을 추가하세요
-- **멀티 에이전트 시스템 구축** — [Routing Agent](https://amd-gaia.ai/guides/routing)를 사용하여 hardware advisor를 코드 에이전트 또는 채팅 에이전트와 결합하세요
+- **LemonadeClient API 살펴보기** — [LemonadeClient SDK 문서](https://amd-gaia.ai/sdk/lemonade-client)에서 더 많은 시스템 및 모델 관리 기능을 알아보세요
+- **음성 상호작용 추가하기** — Whisper ASR과 Kokoro TTS를 통합하여 사용자가 음성으로 하드웨어 관련 질문을 할 수 있도록 하세요. [Talk 가이드](https://amd-gaia.ai/guides/talk)를 참고하세요
+- **MCP 지원 추가하기** — 하드웨어 어드바이저를 MCP 서버로 노출하여 다른 도구들이 이를 조회할 수 있도록 하세요. [MCP 가이드](https://amd-gaia.ai/sdk/infrastructure/mcp)를 참고하세요
+- **추천 엔진 확장하기** — 레이어 오프로딩을 위한 GPU VRAM을 고려하거나, 초당 토큰 수를 추정하는 벤치마킹 기능을 추가하세요
+- **멀티 에이전트 시스템 구축하기** — [Routing Agent](https://amd-gaia.ai/guides/routing)를 사용하여 하드웨어 어드바이저를 코드 에이전트나 채팅 에이전트와 결합하세요

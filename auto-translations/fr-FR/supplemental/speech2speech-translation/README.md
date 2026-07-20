@@ -6,26 +6,26 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ce playbook utilise des balises spéciales que GitHub ne peut pas afficher. Veuillez consulter [amd.com/playbooks](https://amd.com/playbooks) pour prévisualiser correctement ce contenu.
 <!-- @github-only:end -->
 
-## Vue d'ensemble
+## Aperçu
 
-Le logiciel AMD ROCm™ et la pile PyTorch créent un écosystème unifié pour l'IA sur appareil. Il fonctionne aussi bien sous Windows que sous Linux avec une prise en charge officielle d'une large gamme d'appareils, notamment les APU Ryzen™ AI et les GPU Radeon™.
+Le logiciel AMD ROCm™ et la pile PyTorch créent un écosystème unifié pour l'IA sur appareil. Cela fonctionne à la fois sous Windows et Linux, avec une prise en charge officielle d'un large éventail d'appareils, y compris les APU Ryzen™ AI et les GPU Radeon™.
 
-Ce playbook vous apprendra à exécuter une traduction vocale en temps réel, expressive et privée, entièrement en local.
+Ce playbook vous apprendra à exécuter une traduction voix-à-voix à faible latence, expressive et privée, entièrement en périphérie (edge).
 
-## Ce que vous apprendrez
+## Ce que vous allez apprendre
 
-- Comment configurer un environnement de traduction vocale
-- Comment écrire du code Python pour charger et utiliser des modèles de traduction vocale
-- Comment exécuter et expérimenter avec l'interface Gradio
+- Comment configurer un environnement de voix-à-voix
+- Comment écrire du code Python pour charger et utiliser des modèles voix-à-voix
+- Comment exécuter et expérimenter avec l'interface utilisateur Gradio
 
-## Pourquoi utiliser la traduction vocale en temps réel ?
+## Pourquoi utiliser la traduction voix-à-voix en temps réel ?
 
-- Supprime les frictions liées aux barrières linguistiques
+- Élimine les frictions entre la traduction et les barrières linguistiques
 - Transmet le ton, l'émotion et l'intention sans pauses gênantes
-- Favorise la collaboration mondiale et accélère la prise de décision
+- Permet la collaboration mondiale et une prise de décision plus rapide
 
 ## Configuration de la mémoire
 
@@ -33,7 +33,7 @@ Ce playbook vous apprendra à exécuter une traduction vocale en temps réel, ex
 
 <!-- @device:halo_box -->
 ## Vérifier les mises à jour logicielles
-> **Remarque** : Si VS Code n'est pas installé, vous pouvez l'installer via le Ryzen AI Developer Center.
+> **Remarque** : Si VS Code n'est pas installé, vous pouvez l'installer avec Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -44,7 +44,7 @@ Ce playbook vous apprendra à exécuter une traduction vocale en temps réel, ex
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Sous Linux, ouvrez un terminal et exécutez la commande suivante pour créer un venv avec ROCm+Pytorch déjà installé :
+Sous Linux, ouvrez un terminal et exécutez la commande suivante pour créer un venv avec ROCm+PyTorch déjà installé :
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -58,7 +58,7 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Accordez à votre utilisateur l'accès aux périphériques GPU** (déconnectez-vous puis reconnectez-vous pour que cela prenne effet) :
+**Accordez à votre utilisateur l'accès aux périphériques GPU** (déconnectez-vous et reconnectez-vous pour que cela prenne effet) :
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -80,7 +80,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Sous Windows, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv avec ROCm+Pytorch déjà installé :
+Sous Windows, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv avec ROCm+PyTorch déjà installé :
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -90,8 +90,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Conseil** : Les utilisateurs Windows devront peut-être modifier leur stratégie d'exécution PowerShell (par exemple,
-> la définir sur RemoteSigned ou Unrestricted) avant d'exécuter certaines commandes PowerShell.
+> **Astuce** : Les utilisateurs de Windows peuvent avoir besoin de modifier leur politique d'exécution PowerShell (par exemple,
+> en la définissant sur RemoteSigned ou Unrestricted) avant d'exécuter certaines commandes Powershell.
 
 <!-- @device:end -->
 
@@ -106,8 +106,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Conseil** : Les utilisateurs Windows devront peut-être modifier leur stratégie d'exécution PowerShell (par exemple,
-> la définir sur RemoteSigned ou Unrestricted) avant d'exécuter certaines commandes PowerShell.
+> **Astuce** : Les utilisateurs de Windows peuvent avoir besoin de modifier leur politique d'exécution PowerShell (par exemple,
+> en la définissant sur RemoteSigned ou Unrestricted) avant d'exécuter certaines commandes Powershell.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -195,35 +195,35 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Configurer la démo de traduction vocale
+## Configurer la démo voix-à-voix
 
 #### En savoir plus sur seamless-m4t-v2
 
-Consultez la [fiche du modèle](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) sur Hugging Face pour plus d'informations.
-Voici l'architecture technique des modèles de traduction vocale :
+Consultez la [fiche modèle](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) sur Hugging Face pour plus d'informations.
+Voici l'architecture technique des modèles voix-à-voix :
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### Télécharger les scripts
 
-Ce playbook inclut des scripts prêts à l'emploi. Veuillez tous les télécharger dans le même répertoire que l'environnement que vous avez créé.
+Ce playbook comprend des scripts prêts à l'emploi. Veuillez les télécharger tous dans le même répertoire que l'environnement que vous avez créé.
 
 | Script | Description | Utilisation |
-|--------|-------------|-------------|
+|--------|-------------|-------|
 | [infer.py](assets/infer.py) | Génération de texte LLM de base | `python infer.py` |
-| [input1.wav](assets/input1.wav) | Exemple de fichier audio | N/A |
+| [input1.wav](assets/input1.wav) | Fichier audio d'exemple | N/A |
 | [lang_list.py](assets/lang_list.py) | Fichier de prise en charge des langues | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | Interface intuitive pour la traduction vocale | `python gradio_demo.py --no-share` |
+| [gradio_demo.py](assets/gradio_demo.py) | Interface utilisateur intuitive pour la traduction vocale | `python gradio_demo.py --no-share` |
 
 
-### Démarrer avec infer.py
+### Commencer avec infer.py
 
 Pour exécuter le script, lancez 
 ```bash
 python infer.py
 ```
-> **Remarque** : Des avertissements peuvent apparaître. C'est normal.
+> **Remarque** : Vous pouvez voir certains avertissements. Cela est attendu.
  
   
 #### Explication du code
@@ -256,7 +256,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **Extrait 2 : Chargement des modèles depuis HuggingFace**
 
-Cette fonction prend un identifiant de modèle et télécharge le modèle s'il n'est pas déjà téléchargé. Elle retourne ensuite le processeur et le modèle pour que la fonction suivante puisse les utiliser.
+Cette fonction prend un ID de modèle et télécharge le modèle s'il n'est pas déjà téléchargé. Elle renvoie ensuite le processeur et le modèle pour que la fonction suivante puisse les utiliser.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -275,7 +275,7 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Extrait 3 : Fichier audio d'entrée .wav et prétraitement**
+**Extrait 3 : Fichier audio .wav d'entrée et prétraitement**
 
 Cette fonction charge le clip audio et le rééchantillonne au taux cible.
 ```python
@@ -299,7 +299,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
 
 **Extrait 4 : Exécuter l'inférence**
 
-Cette fonction exécute l'inférence avec le modèle et retourne la sortie générée.
+Cette fonction exécute l'inférence avec le modèle et renvoie la sortie générée.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -327,7 +327,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
     return audio_array, elapsed
 ```
 
-**Extrait 5 : Sauvegarder le fichier traduit**
+**Extrait 5 : Enregistrer le fichier traduit**
 
 Cette fonction enregistre le tableau audio dans un fichier .WAV. 
 ```python
@@ -392,19 +392,19 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Exécuter la démo de l'interface Gradio :
+### Exécuter la démo Gradio UI :
 
-Maintenant que vous avez exécuté un exemple de script de base, les instructions suivantes fournissent une interface conviviale qui s'appuie sur le code que nous avons écrit et facilite la traduction vocale en direct.
+Maintenant que vous avez exécuté un exemple de script de base, les instructions suivantes fournissent une interface utilisateur pratique qui s'appuie sur le code que nous avons écrit et facilite la traduction voix-à-voix en direct.
 
-#### Exécuter Gradio en local
+#### Exécuter Gradio localement
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Ensuite, ouvrez votre navigateur web à l'adresse `http://127.0.0.1:7860` pour accéder à l'interface.
+Ensuite, ouvrez votre navigateur web à l'adresse `http://127.0.0.1:7860` pour accéder à l'interface utilisateur.
 
 
-### Exemple d'interface Gradio :
+### Exemple d'interface utilisateur Gradio :
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
@@ -523,12 +523,12 @@ PY
 
 ## Prochaines étapes
 
-- Combinez des dizaines de langues pour une traduction rapide.
-- Partagez votre démo avec d'autres personnes : ajoutez --share pour créer un lien public accessible à distance par n'importe qui, ou déployez-la de façon permanente via Hugging Face Spaces.
+- Mélangez et associez des dizaines de langues pour une traduction rapide. 
+- Partagez votre démo avec d'autres personnes : ajoutez --share pour créer un lien public accessible à distance par n'importe qui, ou déployez de manière permanente en utilisant Hugging Face Spaces
 
 ## Ressources
 
-Voici quelques ressources supplémentaires pour en savoir plus sur la traduction vocale :  
-* Le dépôt est disponible ici https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Recherche académique relative à « Seamless: Multilingual Expressive and Streaming Speech Translation »
+Voici quelques ressources supplémentaires pour en savoir plus sur la traduction voix-à-voix :  
+* Le dépôt se trouve ici https://huggingface.co/facebook/seamless-m4t-v2-large 
+* Recherche académique liée à « Seamless: Multilingual Expressive and Streaming Speech Translation »
 * Partage et déploiement Gradio : [Guide de partage de votre application](https://www.gradio.app/guides/sharing-your-app) et [Déployer sur Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

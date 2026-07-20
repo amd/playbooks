@@ -6,37 +6,37 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> V tem priročniku so uporabljene posebne oznake, ki jih GitHub ne more upodobiti. Za pravilen predogled te vsebine obiščite [amd.com/playbooks](https://amd.com/playbooks).
 <!-- @github-only:end -->
 
-# Združevanje dveh sistemov Ryzen™ AI Halo z RCCL
+# Povezovanje dveh sistemov Ryzen™ AI Halo v gručo z RCCL
 
 ## Pregled
 
-Vaš sistem Ryzen™ AI Halo je že zmožen lokalno poganjati velike jezikovne modele. Združevanje v gručo to nadgradi s kombiniranjem pomnilnika GPU več sistemov prek lokalnega omrežja, kar vam omogoča dostop do še večjih modelov z močnejšim sklepanjem, boljšim generiranjem kode in globljim večjezičnim razumevanjem – vse skupaj v celoti na vaši lastni strojni opremi.
+Vaš sistem Ryzen™ AI Halo je že sposoben lokalno poganjati velike jezikovne modele. Povezovanje v gručo to zmožnost še razširi, saj združi pomnilnik GPU več sistemov prek lokalnega omrežja, kar vam omogoča dostop do še večjih modelov z močnejšim sklepanjem, boljšim generiranjem kode in globljim razumevanjem več jezikov – vse to popolnoma na vaši lastni strojni opremi.
 
-Ta priročnik vas uči, kako združiti dva sistema Ryzen AI Halo v gručo z uporabo RCCL (ROCm Communication Collectives Library) skupaj z vLLM ter poganjati Qwen3.5-397B, model s 397 milijardami parametrov, na obeh strojih s pospeševanjem ROCm.
+Ta priročnik vas nauči, kako povezati dva sistema Ryzen AI Halo v gručo z uporabo RCCL (ROCm Communication Collectives Library) skupaj z vLLM ter kako na obeh napravah zagnati Qwen3.5-397B, model s 397 milijardami parametrov, z pospeševanjem ROCm.
 
 ## Kaj se boste naučili
 
-- Kako razširiti dodelitev VRAM na sistemih Ryzen AI Halo
+- Kako razširiti dodelitev pomnilnika VRAM na sistemih Ryzen AI Halo
 - Zagon vLLM s podporo ROCm
-- Konfiguriranje RCCL za večvozliščno vzporedno sklepanje s tenzorji na dveh sistemih Ryzen AI Halo
-- Poganjanje modela s 397 milijardami parametrov na dveh omrežno povezanih sistemih Ryzen AI Halo
+- Konfiguracija RCCL za medvozliščno tenzorsko-paralelno sklepanje na dveh sistemih Ryzen AI Halo
+- Zagon modela s 397 milijardami parametrov na dveh povezanih sistemih Ryzen AI Halo
 
 ## Predpogoji
 
 ### Strojna oprema
 
-Ta priročnik zahteva dve enoti Ryzen AI Halo in en stikalo Ethernet, povezano v zvezdasto topologijo, pri čemer je vsaka enota neposredno žično priključena na stikalo.
+Ta priročnik zahteva dve enoti Ryzen AI Halo in eno omrežno stikalo Ethernet, povezani v zvezdasto topologijo, pri čemer je vsaka enota povezana neposredno s stikalom.
 
 | Komponenta | Količina | Opis |
 |-----------|----------|-------------|
-| Ryzen AI Halo | 2 | Računska vozlišča, ki tvorijo gručo |
-| Stikalo Ethernet 10 Gbps | 1 | Centralno stikalo za komunikacijo med vozlišči Ryzen AI Halo (vsaj 2 vrati) |
-| Kabel Ethernet | 2 | Poveže vsako enoto Halo s stikalom (priporočen Cat 7 ali višji) |
+| Ryzen AI Halo | 2 | Računalniška vozlišča, ki tvorita gručo |
+| 10-gigabitno omrežno stikalo Ethernet | 1 | Osrednje stikalo, ki omogoča komunikacijo med več vozlišči Ryzen AI Halo (vsaj 2 vrat) |
+| Kabel Ethernet | 2 | Poveže vsako enoto Halo s stikalom (priporočen Cat 7 ali boljši) |
 
-> **Opomba**: Za povezavo dveh enot Ryzen AI Halo sta potrebni dve vrati stikala Ethernet. Tretja vrata so potrebna, če do modela dostopate z ločenega odjemalskega računalnika namesto z ene od enot Halo.
+> **Opomba**: Za povezavo obeh enot Ryzen AI Halo sta potrebni dve vrata omrežnega stikala. Tretja vrata so potrebna, če do modela dostopate z ločenega odjemalskega računalnika namesto z ene od enot Halo.
 
 ### Programska oprema
 <!-- @os:linux -->
@@ -45,135 +45,134 @@ sudo apt install curl
 ```
 <!-- @os:end -->
 
-## Namestitev fizične strojne opreme
+## Fizična priprava strojne opreme
 
-> **Opomba**: Ta korak izvedite na obeh računalnikih – Računalniku 1 in Računalniku 2.
+> **Opomba**: Ta korak izvedite na Napravi 1 in Napravi 2.
 
-Vsako enoto Ryzen AI Halo priključite na stikalo Ethernet s kablom Cat 7 (ali višjim). S tem vzpostavite povezavo 10 Gbps, ki se uporablja za hitro komunikacijo med vozlišči.
+Vsako enoto Ryzen AI Halo povežite z omrežnim stikalom s kablom Cat 7 (ali boljšim). S tem vzpostavite 10-gigabitno povezavo, ki se uporablja za visokohitrostno komunikacijo med vozlišči.
 
-### 1. Določite omrežne vmesnike
+### 1. Ugotovitev omrežnih vmesnikov
 
-Na vsakem računalniku poiščite ime njegovega omrežnega vmesnika in si ga zabeležite (v nadaljevanju navodil bo označeno kot `IFNAME`). Zaženite:
+Na vsaki napravi poiščite ime njenega omrežnega vmesnika in si ga zapišite (v nadaljevanju navodil bo imenovan `IFNAME`). Zaženite:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
 ```
 
-To neposredno izpiše ime vmesnika, na primer:
+To izpiše ime vmesnika, na primer:
 
 ```bash
 enp191s0
 ```
 
-### 2. Preverite hitrosti omrežnih povezav
+### 2. Preverjanje hitrosti omrežne povezave
 
-Potrdite, da je povezava aktivna in deluje pri polni hitrosti, tako da preverite hitrost vašega vmesnika:
+Prepričajte se, da je povezava aktivna in deluje s polno hitrostjo, tako da preverite hitrost svojega vmesnika:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **Opomba**: Zamenjajte `<IFNAME>` z imenom izhodnega vmesnika iz razdelka [1. Določite omrežne vmesnike](#1-determine-network-interfaces)
+> **Opomba**: `<IFNAME>` zamenjajte z imenom izhodnega vmesnika iz razdelka [1. Ugotovitev omrežnih vmesnikov](#1-determine-network-interfaces)
 
-Prikazati bi se morala hitrost `10000Mb/s`:
+Videti bi morali hitrost `10000Mb/s`:
 
 ```bash
 	Speed: 10000Mb/s
 ```
 
-> **Opomba**: Če je hitrost nižja od `10000Mb/s` ali se povezava ne vzpostavi, preverite kabelsko priključitev in potrdite, da je vrata stikala nastavljeno na 10 Gbps. Nekatera stikala zahtevajo onemogočanje samodejnega pogajanja in ročno nastavitev hitrosti povezave; glejte dokumentacijo vašega stikala.
+> **Opomba**: Če je hitrost nižja od `10000Mb/s` ali povezava ne deluje, preverite kabelsko povezavo in se prepričajte, da so vrata stikala nastavljena na 10 Gb/s. Nekatera stikala zahtevajo, da onemogočite samodejno pogajanje o hitrosti in hitrost povezave nastavite ročno; za več informacij glejte dokumentacijo svojega stikala.
 
-## Razširitev dodelitve VRAM
+## Razširitev dodelitve pomnilnika VRAM
 
-> **Opomba**: Ta korak izvedite na obeh računalnikih – Računalniku 1 in Računalniku 2.
+> **Opomba**: Ta korak izvedite na Napravi 1 in Napravi 2.
 
-### Konfiguracija pomnilnika za poganjanje velikih modelov
+### Konfiguracija pomnilnika za zagon velikih modelov
 
-V sistemu Linux ROCm uporablja skupni sistemski pomnilniški bazen, ki je privzeto konfiguriran na polovico sistemskega pomnilnika.
+V sistemu Linux ROCm uporablja skupni sistemski pomnilniški nabor, ki je privzeto konfiguriran na polovico sistemskega pomnilnika.
 
-To količino je mogoče povečati s spremembo nastavitve strani Translation Table Manager (TTM) jedra, z naslednjimi navodili. AMD priporoča nastavitev minimalnega namenskega VRAM v BIOS-u (0,5 GB).
+To količino lahko povečate s spremembo nastavitve strani upravitelja prevajalne tabele (Translation Table Manager, TTM) jedra, in sicer po naslednjih navodilih. AMD priporoča, da v BIOS-u nastavite minimalno namensko VRAM (0,5 GB).
 
-* Namestite pripomoček pipx in dodajte pot za kolesa, nameščena s pipx, v sistemsko iskalno pot.
+* Namestite pripomoček pipx in dodajte pot za lupine (wheels), nameščene s pipx, v sistemsko iskalno pot.
 
   ```bash
   sudo apt install pipx
   pipx ensurepath
   ```
 
-* Namestite kolo amd-debug-tools iz PyPI.
+* Namestite lupino amd-debug-tools iz PyPI.
   ```bash
   pipx install amd-debug-tools
   ```
 
-* Zaženite orodje amd-ttm za poizvedbo o trenutnih nastavitvah skupnega pomnilnika.
+* Zaženite orodje amd-ttm za poizvedbo trenutnih nastavitev skupnega pomnilnika.
   ```bash
   amd-ttm
   ```
 
-* Znova konfigurirajte nastavitve skupnega pomnilnika na **120 GB**:
+* Ponovno konfigurirajte nastavitve skupnega pomnilnika na **120 GB**:
   ```bash
   amd-ttm --set 120
   ```
 
-* Znova zaženite sistem, da spremembe začnejo veljati.
+* Znova zaženite sistem, da se spremembe uveljavijo.
 
 ## Inicializacija vsebnika vLLM
 
-> **Opomba**: Ta korak izvedite na obeh računalnikih – Računalniku 1 in Računalniku 2.
+> **Opomba**: Ta korak izvedite na Napravi 1 in Napravi 2.
 
-Vaš Ryzen AI Halo je opremljen z vLLM, zapakiranim v vnaprej pripravljeno sliko vsebnika, ki jo zaženete z orodjem Podman – brezplačnim odprtokodnim orodjem za vsebnike.
+Vaš sistem Ryzen AI Halo je opremljen z vLLM, pakiranim znotraj vnaprej pripravljene vsebniške slike, ki jo zaženete z orodjem Podman, brezplačnim in odprtokodnim orodjem za vsebnike.
 
-### 1. Ustvarite imenik za prenos modelov
+### 1. Ustvarjanje mape za prenos modela
 
-Ko v tem priročniku strežete model Qwen3.5-397B, bo vLLM samodejno prenesel uteži modela v vaš sistem. Da zagotovite dostopnost teh uteži znotraj vsebnika, najprej ustvarite imenik za modele, ki ga vsebnik lahko priklopi:
+Ko boste v tem priročniku poganjali model Qwen3.5-397B, bo vLLM samodejno prenesel uteži modela v vaš sistem. Da bodo te uteži dostopne znotraj vsebnika, najprej ustvarite mapo za modele, ki jo bo vsebnik lahko priklopil:
 
 ```bash
 mkdir -p ~/.local/share/vLLM/models
 ```
 
-### 2. Zaženite vsebnik vLLM
+### 2. Zagon vsebnika vLLM
 
-Spodnji ukaz zažene vsebnik in vas postavi v interaktivno lupino. Priklopi imenik za modele, ki ste ga pravkar ustvarili, in posreduje vaš `IFNAME` spremenljivkama `NCCL_SOCKET_IFNAME` in `GLOO_SOCKET_IFNAME`, s čimer RCCL-u (knjižnici, ki jo vLLM uporablja za usklajevanje GPU-jev v gruči) sporoči, kateri vmesnik naj uporabi.
+Spodnji ukaz zažene vsebnik in vas postavi v interaktivno lupino. Priklopi mapo za modele, ki ste jo pravkar ustvarili, in posreduje vaš `IFNAME` spremenljivkama `NCCL_SOCKET_IFNAME` in `GLOO_SOCKET_IFNAME`, s čimer knjižnici RCCL (ki jo vLLM uporablja za usklajevanje procesnih enot GPU po celotni gruči) sporoči, kateri vmesnik naj uporabi.
 
-Zaženite vsebnik z:
+Zaženite vsebnik z ukazom:
 
 ```bash
 sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
 ```
 
-> **Opomba**: Zamenjajte `<IFNAME>` z imenom izhodnega vmesnika iz razdelka [1. Določite omrežne vmesnike](#1-determine-network-interfaces)
+> **Opomba**: `<IFNAME>` zamenjajte z imenom izhodnega vmesnika iz razdelka [1. Ugotovitev omrežnih vmesnikov](#1-determine-network-interfaces)
 
-## Poganjanje modela na gruči
+## Zagon modela v gruči
 
-vLLM uporablja Ray za orkestracijo gruče in RCCL za upravljanje komunikacije GPU-GPU med vozlišči. En računalnik deluje kot **glavo vozlišče** (Računalnik 1) in usklajuje sklepanje. Drugi se pridruži kot **delavsko vozlišče** (Računalnik 2) in prispeva svoj pomnilnik GPU ter računsko moč.
+vLLM uporablja Ray za orkestracijo gruče in RCCL za obravnavo komunikacije med procesnimi enotami GPU na različnih vozliščih. Ena naprava deluje kot **glavno vozlišče** (Naprava 1) in usklajuje sklepanje. Druga se pridruži kot **delovno vozlišče** (Naprava 2) ter prispeva svoj pomnilnik GPU in računsko zmogljivost.
 
 > **Opomba**: Ray je neobvezna odvisnost za vLLM in je na voljo samo znotraj vnaprej konfiguriranega vsebnika Podman.
 
-Ob zagonu vLLM razdeli model med obe vozlišči z uporabo tenzorske vzporednosti. Ko je model naložen, sklepanje poteka, kot da bi teklo na enem samem pospeševalniku.
+Ob zagonu vLLM razdeli model na oba vozla z uporabo tenzorske paralelizacije. Ko je model naložen, sklepanje poteka tako, kot da bi teklo na eni sami pospeševalni napravi.
 
-### Korak 1: Zaženite glavo vozlišče Ray (Računalnik 1)
+### Korak 1: Zagon glavnega vozlišča Ray (Naprava 1)
 
-Na Računalniku 1 zaženite glavo vozlišče Ray za inicializacijo gruče:
+Na Napravi 1 zaženite glavno vozlišče Ray, da inicializirate gručo:
 
 ```bash
 ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1
 ```
 
-> **Iskanje `<MACHINE_1_IP>`**: Na Računalniku 1 zaženite `hostname -I | awk '{print $1}'`, da poiščete njegov lokalni IP naslov.
+> **Iskanje `<MACHINE_1_IP>`**: Na Napravi 1 zaženite `hostname -I | awk '{print $1}'`, da poiščete njen lokalni naslov IP.
+### Korak 2: Pridružitev gruči (Naprava 2)
 
-### Korak 2: Pridružite se gruči (Računalnik 2)
-
-Na Računalniku 2 se povežite z glavnim vozliščem, da tvorite gručo:
+Na Napravi 2 se povežite z glavnim vozliščem, da tvorite gručo:
 
 ```bash
 ray start --address=<MACHINE_1_IP>:6379 --node-ip-address=<MACHINE_2_IP> --num-gpus=1
 ```
 
-> **Iskanje `<MACHINE_2_IP>`**: Na Računalniku 2 zaženite `hostname -I | awk '{print $1}'`, da poiščete njegov lokalni IP naslov.
+> **Iskanje `<MACHINE_2_IP>`**: Na Napravi 2 zaženite `hostname -I | awk '{print $1}'`, da poiščete njen lokalni IP naslov.
 
-### Korak 3: Strežite model (Računalnik 1)
+### Korak 3: Postrezite model (Naprava 1)
 
-Na Računalniku 1 zaženite strežnik vLLM. Ta bo samodejno prenesel model in ga začel strežiti prek obeh vozlišč:
+Na Napravi 1 zaženite strežnik vLLM. To bo samodejno preneslo model in ga začelo strežiti na obeh vozliščih:
 
 ```bash
 vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
@@ -194,41 +193,41 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
 | Zastavica | Namen |
 |------|---------|
 | `--port` | Vrata za streženje HTTP API-ja |
-| `--host` | IP naslov, na katerega se strežnik poveže (`0.0.0.0` za vse vmesnike) |
+| `--host` | IP naslov, na katerega se veže strežnik (`0.0.0.0` za vse vmesnike) |
 | `--max-model-len` | Največja dolžina konteksta v žetonih |
-| `--gpu-memory-utilization` | Delež pomnilnika GPU za dodelitev (0,0–1,0) |
+| `--gpu-memory-utilization` | Delež pomnilnika GPE, ki naj se dodeli (0.0–1.0) |
 | `--dtype` | Podatkovni tip za uteži modela |
-| `--tensor-parallel-size` | Število GPU-jev za razdelitev modela (nastavljeno na skupno število GPU-jev v gruči) |
-| `--distributed-executor-backend` | Zaledni sistem za večvozliščno izvajanje (`ray` za namestitve v gruči) |
-| `--enforce-eager` | Onemogoči prevajanje grafov CUDA za združljivost |
-| `--language-model-only` | Preskoči nalaganje pomožnih komponent modela (npr. kodiralnika slik) |
-| `--reasoning-parser` | Omogoči strukturirano razčlenjevanje izhodnih sklepov za model |
+| `--tensor-parallel-size` | Število GPE-jev, med katerimi naj se model razdeli (nastavite na skupno število GPE-jev v gruči) |
+| `--distributed-executor-backend` | Zaledje za izvajanje na več vozliščih (`ray` za razporeditve gruč) |
+| `--enforce-eager` | Onemogoči prevajanje grafov CUDA zaradi združljivosti |
+| `--language-model-only` | Preskoči nalaganje pomožnih komponent modela (npr. vizualnega kodirnika) |
+| `--reasoning-parser` | Omogoči razčlenjevanje strukturiranega izhoda sklepanja za model |
 
-Za celotno uporabo parametrov glejte [dokumentacijo vLLM](https://docs.vllm.ai/en/latest/configuration/engine_args/).
+Za popolno uporabo parametrov glejte [dokumentacijo vLLM](https://docs.vllm.ai/en/latest/configuration/engine_args/).
 
 ## Dostop do modela
 
-vLLM izpostavlja API, združljiv z OpenAI, zato lahko na svojo gručo povežete katerega koli združljivega odjemalca ali vmesnik. Ena priljubljena možnost je [Open WebUI](https://github.com/open-webui/open-webui), ki zagotavlja klepetalni vmesnik v brskalniku.
+vLLM izpostavi API, združljiv z OpenAI, tako da lahko na svojo gručo povežete kateri koli združljiv odjemalec ali vmesnik. Ena priljubljena možnost je [Open WebUI](https://github.com/open-webui/open-webui), ki ponuja klepetalni vmesnik prek brskalnika.
 
 Za povezavo Open WebUI z vašo končno točko vLLM:
 
-1. Odprite **Nastavitve** > **Skrbniška plošča** > **Povezave**
-2. Kliknite **+** pri **Upravljanje povezav OpenAI API**
-3. Nastavite **Vrsto povezave** na **Zunanja**
+1. Odprite **Settings** > **Admin Panel** > **Connections**
+2. Kliknite **+** na **Manage OpenAI API Connections**
+3. Nastavite **Connection Type** na **External**
 4. Nastavite **URL** na `http://<MACHINE_1_IP>:7000/v1`
-5. Pod **Avtentikacija** izberite **Brez** iz spustnega menija
-6. Pustite **ID-je modelov** prazne za samodejno odkrivanje vseh modelov iz končne točke
+5. Pod **Auth** izberite **None** iz spustnega seznama
+6. Pustite **Model IDs** prazno, da se samodejno odkrijejo vsi modeli iz končne točke
 
-> **Iskanje `<MACHINE_1_IP>`**: Na Računalniku 1 zaženite `hostname -I | awk '{print $1}'`, da poiščete njegov lokalni IP naslov. Če dostopate do Open WebUI z Računalnika 1, lahko uporabite `http://localhost:7000/v1`.
+> **Iskanje `<MACHINE_1_IP>`**: Na Napravi 1 zaženite `hostname -I | awk '{print $1}'`, da poiščete njen lokalni IP naslov. Če do Open WebUI dostopate z same Naprave 1, lahko uporabite `http://localhost:7000/v1`.
 
 ![Nastavitve povezave Open WebUI za končno točko vLLM](assets/openwebui-connection.png)
 
-Ko je povezava vzpostavljena, izberite model iz spustnega menija modelov v Open WebUI in začnite klepetati. Model zdaj teče na obeh vaših vozliščih Ryzen AI Halo:
+Ko je povezava vzpostavljena, izberite model iz spustnega seznama modelov v Open WebUI in začnite klepetati. Model zdaj deluje na obeh vaših vozliščih Ryzen AI Halo:
 
-![Klepet z modelom Qwen3.5-397B v Open WebUI](assets/openwebui-chat.png)
+![Klepet z Qwen3.5-397B v Open WebUI](assets/openwebui-chat.png)
 
 ## Naslednji koraki
 
-- **Raziščite druge modele**: Odkrijte nove modele na [Hugging Face](https://huggingface.co/models?&sort=trending), ki ustrezajo skupnemu pomnilniku GPU vaše gruče
-- **Razširite na štiri vozlišča**: Dodajte še dva sistema Ryzen AI Halo kot dodatna delavska vozlišča Ray za razdelitev modelov prek še več GPU-jev. To zahteva stikalo Ethernet z vsaj štirimi vrati, po eno za vsako vozlišče. Sledite razdelku [Korak 2: Pridružite se gruči](#step-2-join-the-cluster-machine-2) na vsakem dodatnem delavcu in ustrezno povečajte `--tensor-parallel-size`
-- **Preizkusite druge strategije vzporednosti**: vLLM podpira [vzporednost strokovnjakov](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) za modele mixture-of-experts in [podatkovno vzporednost](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) za večjo prepustnost. Eksperimentirajte z `--enable-expert-parallel` in `--data-parallel-size`, da poiščete najboljšo konfiguracijo za vaše delovno obremenitev
+- **Raziščite druge modele**: Odkrijte nove modele na [Hugging Face](https://huggingface.co/models?&sort=trending), ki ustrezajo skupnemu pomnilniku GPE vaše gruče
+- **Razširitev na štiri vozlišča**: Dodajte še dva sistema Ryzen AI Halo kot dodatna delovna vozlišča Ray za razdelitev modelov na še več GPE-jev. To zahteva ethernetno stikalo z vsaj štirimi vrati, po enim za vsako vozlišče. Sledite navodilom v [Korak 2: Pridružitev gruči](#step-2-join-the-cluster-machine-2) na vsakem dodatnem delovnem vozlišču in ustrezno povečajte `--tensor-parallel-size`
+- **Preizkusite druge strategije paralelizma**: vLLM podpira [ekspertni paralelizem](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) za modele tipa mixture-of-experts in [podatkovni paralelizem](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) za višjo prepustnost. Eksperimentirajte z `--enable-expert-parallel` in `--data-parallel-size`, da najdete najboljšo konfiguracijo za vašo delovno obremenitev

@@ -2,32 +2,32 @@
 Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
-# Suorita OpenClaw Lemonade Server -taustajärjestelmällä
+# Suorita OpenClaw Lemonade Serverillä taustajärjestelmänä
 
 ## Yleiskatsaus
 
-[**OpenClaw**](https://openclaw.ai/) on autonominen tekoälyagentti, joka voi kirjoittaa ja suorittaa koodia, hallita tiedostoja ja suorittaa monimutkaisia monivaiheisia tehtäviä puolestasi. Toisin kuin chat-assistentti, joka vain vastaa kysymyksiin, OpenClaw tekee todellisia toimia järjestelmässäsi – mikä tarkoittaa, että se tarvitsee nopean ja tehokkaan tekoälytaustajärjestelmän, joka pysyy vaativan agenttisilmukan tahdissa.
+[**OpenClaw**](https://openclaw.ai/) on autonominen tekoälyagentti, joka pystyy kirjoittamaan ja suorittamaan koodia, hallitsemaan tiedostoja ja suorittamaan monimutkaisia moniosaisia tehtäviä puolestasi. Toisin kuin chat-avustaja, joka vain vastaa kysymyksiin, OpenClaw suorittaa todellisia toimia järjestelmässäsi, mikä tarkoittaa, että se tarvitsee nopean ja tehokkaan tekoälytaustajärjestelmän, joka pysyy vaativan agenttisilmukan tahdissa.
 
-[**Lemonade Server**](https://lemonade-server.ai/) on tuo taustajärjestelmä. Se on avoimen lähdekoodin paikallinen inferenssipalvelin, joka suorittaa GenAI-malleja suoraan laitteistollasi ja tarjoaa ne alan standardin mukaisen OpenAI API:n kautta.
+[**Lemonade Server**](https://lemonade-server.ai/) on tämä taustajärjestelmä. Se on avoimen lähdekoodin paikallinen päättelypalvelin, joka suorittaa GenAI-malleja suoraan laitteistollasi ja tarjoaa ne käyttöön alan standardin OpenAI API:n kautta.
 
-Yhdessä ne muodostavat täysin paikallisen tekoälyagenttipinon: Lemonade hoitaa mallin inferenssin ja OpenClaw tarjoaa agenttisilmukan, joka muuttaa mallin tulosteet todellisiksi toimiksi.
+Yhdessä ne muodostavat täysin paikallisen tekoälyagenttipinon: Lemonade huolehtii mallin päättelystä, ja OpenClaw tarjoaa agenttisilmukan, joka muuttaa mallin tulosteet todellisiksi toimiksi.
 
-> **Ennen kuin jatkat:** OpenClaw on erittäin autonominen tekoälyagentti. Minkä tahansa tekoälyagentin pääsyn antaminen järjestelmääsi voi johtaa arvaamattomiin tai tahattomiin seurauksiin. Jatka vain, jos ymmärrät riskit ja olet valmis siihen, että autonominen ohjelmisto toimii puolestasi.
+> **Ennen kuin jatkat:** OpenClaw on erittäin autonominen tekoälyagentti. Minkä tahansa tekoälyagentin päästäminen käsiksi järjestelmääsi voi johtaa arvaamattomiin tai tahattomiin lopputuloksiin. Jatka vain, jos ymmärrät riskit ja hyväksyt sen, että autonominen ohjelmisto toimii puolestasi.
 
 ---
 
 ## Mitä opit
 
-Tämän oppaan lopussa osaat:
+Tämän ohjeen lopussa osaat:
 
-- Oppia **Lemonade Serveristä**
-- **Asentaa OpenClaw'n** ja **osoittaa sen Lemonade Serveriin** tekoälytaustajärjestelmänä.
-- **Käynnistää OpenClaw-yhdyskäytävän** ja varmistaa, että agenttisi on valmis toimimaan.
-- **Yhdistää viestintäkanavan** (Discord tai Telegram), jotta voit jutella agenttisi kanssa miltä tahansa laitteelta.
+- Tutustua **Lemonade Serveriin**
+- **Asentaa OpenClaw'n** ja **määrittää sen käyttämään Lemonade Serveriä** tekoälytaustajärjestelmänään.
+- **Käynnistää OpenClaw-yhdyskäytävän** ja varmistaa, että agenttisi on valmis työskentelemään.
+- **Yhdistää viestintäkanavan** (Discord tai Telegram), jotta voit keskustella agenttisi kanssa mistä tahansa laitteesta.
 
 ---
 
-## Muistikonfiguraation asettaminen
+## Muistiasetuksen määrittäminen
 
 <!-- @require:memory-config -->
 
@@ -37,20 +37,20 @@ Tämän oppaan lopussa osaat:
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmiston edellytysten asentaminen
 
 <!-- @os:linux -->
 - PC, jossa on **Ubuntu 24.04+** tai yhteensopiva Debian-pohjainen Linux-jakelu, jossa on `apt-get`
 - Vähintään **12 Gt RAM-muistia** (64 Gt+ suositellaan suuremmille malleille)
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (valinnainen, OpenClaw'n hiekkalaatikointia varten)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (valinnainen, OpenClaw'n hiekkalaatikointiin)
 
-- **~10–30 Gt vapaata levytilaa** mallipainoja varten
+- **~10–30 Gt vapaata levytilaa** mallien painoille
 <!-- @os:end -->
 <!-- @os:windows -->
 - PC, jossa on **Windows 10/11**
 - Vähintään **12 Gt RAM-muistia** (64 Gt+ suositellaan suuremmille malleille)
-- **~10–30 Gt vapaata levytilaa** mallipainoja varten
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (valinnainen, OpenClaw'n hiekkalaatikointia varten)
+- **~10–30 Gt vapaata levytilaa** mallien painoille
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (valinnainen, OpenClaw'n hiekkalaatikointiin)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -65,15 +65,15 @@ lemonade --version
 
 ---
 
-## Suositeltu malli: lataa ja aseta se käyttöön
+## Lataa ja avaa suositeltu malli
 
-Tämän oppaan suositeltu malli on **Qwen3.6-35B-A3B-GGUF** Unslothilta – tehokas MoE-malli, jossa on 263k-tokenin kontekstiikkuna ja joka soveltuu hyvin agenttiworkloadeihin. Tämä malli käyttää UD-Q4_K_XL-kvantisointia. Lataa se nyt:
+Tämän ohjeen suositeltu malli on **Qwen3.6-35B-A3B-GGUF** Unslothilta, vahva MoE-malli, jossa on 263k-tokenin kontekstiikkuna ja joka soveltuu hyvin agenttityökuormiin. Tämä malli käyttää UD-Q4_K_XL-kvantisointia. Lataa se nyt:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-Lataa se sitten suurella kontekstiikkunalla ja tallenna asetus tulevia käynnistyksiä varten:
+Avaa se sitten laajalla kontekstiikkunalla ja tallenna tämä asetus tulevia ajokertoja varten:
 
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
@@ -82,9 +82,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end --> 
 
-Mallin oletuskontekstin pituus on 262 144 tokenia. Jos kohtaat muistin loppumisvirheitä (OOM), harkitse kontekstiikkunan pienentämistä. Koska Qwen3.6 hyödyntää laajennettua kontekstia monimutkaisissa tehtävissä, suosittelemme kuitenkin pitämään kontekstin pituuden vähintään 128K tokenissa ajattelukyvyn säilyttämiseksi.
+Mallin oletuskontekstipituus on 262 144 tokenia. Jos kohtaat muistin loppumisesta johtuvia (OOM) virheitä, harkitse kontekstiikkunan pienentämistä. Koska Qwen3.6 kuitenkin hyödyntää laajennettua kontekstia monimutkaisissa tehtävissä, suosittelemme pitämään kontekstipituuden vähintään 128K tokenissa ajattelukyvyn säilyttämiseksi.
 
-> **Vinkki: Poista ajattelu käytöstä nopeampien agenttivastauksien saamiseksi:** Qwen3.6-35B-A3B toimii oletuksena ajattelutilassa, mikä lisää viivettä ennen jokaista vastausta. Agenttisilmukoissa tämä ylikuorma kertyy nopeasti. [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) -repositorio tarjoaa valmiin konfiguraation, joka poistaa ajattelun käytöstä. Käyttääksesi sitä, lataa tiedosto ja tuo se:
+> **Vinkki: Poista ajattelu käytöstä nopeampia agenttivastauksia varten:** Qwen3.6-35B-A3B toimii oletusarvoisesti ajattelutilassa, mikä lisää viivettä ennen jokaista vastausta. Agenttisilmukoissa tämä ylimääräinen viive kertyy nopeasti. [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) -repositorio tarjoaa valmiin määrityksen, joka poistaa ajattelun käytöstä. Käytä sitä lataamalla tiedosto ja tuomalla se:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -225,9 +225,9 @@ echo "OK: Lemonade chat/completions returned a response"
 
 <!-- @os:windows -->
 
-## Aseta WSL käyttöön
+## Asenna WSL
 
-Suoritamme OpenClaw'n WSL:n sisällä (suositeltu) ja yhdistämme sen Windowsissa natiivisti toimivaan Lemonadeen. Tämä antaa sinulle Linux-komentotulkkiympäristön OpenClaw'lle samalla kun Lemonaden GPU-kiihdytys pysyy Windows-puolella.
+Suoritamme OpenClaw'n WSL:n sisällä (suositeltu) ja yhdistämme sen Windowsissa natiivisti käynnissä olevaan Lemonadeen. Tämä antaa sinulle Linux-komentoriviympäristön OpenClaw'lle säilyttäen samalla Lemonaden GPU-kiihdytyksen Windows-puolella.
 
 ### Asenna WSL ja Ubuntu
 
@@ -245,7 +245,7 @@ wsl --install -d Ubuntu-24.04
 
 ### Ota systemd käyttöön WSL:ssä
 
-Suorita tämä Ubuntu-terminaalin sisällä:
+Suorita tämä Ubuntu-päätteessä:
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -261,36 +261,36 @@ wsl --shutdown
 wsl
 ```
 
-### Silloita Lemonade Windowsista WSL:ään
+### Yhdistä Lemonade Windowsista WSL:ään
 
-WSL2 toimii virtuaaliverkossa. Windowsin Lemonade sitoutuu osoitteeseen `127.0.0.1`, johon WSL ei pääse suoraan. Windows-porttiproxy välittää liikenteen WSL-yhdyskäytävän IP-osoitteesta Windowsin localhostiin.
+WSL2 toimii virtuaaliverkossa. Windowsissa toimiva Lemonade sitoutuu osoitteeseen `127.0.0.1`, johon WSL ei pääse suoraan käsiksi. Windowsin porttiproksi ohjaa liikenteen WSL-yhdyskäytävän IP-osoitteesta Windowsin localhostiin.
 
-**Etsi WSL-yhdyskäytävän IP-osoite** (suorita WSL:n sisällä):
+**Etsi WSL-yhdyskäytäväsi IP-osoite** (suorita WSL:n sisällä):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Lisää porttiproxy** (suorita PowerShellissä järjestelmänvalvojana, korvaa `<WSL-Gateway-IP>` WSL-yhdyskäytävän IP-osoitteellasi):
+**Lisää porttiproksi** (suorita PowerShellissä järjestelmänvalvojana, korvaa `<WSL-Gateway-IP>` WSL-yhdyskäytäväsi IP-osoitteella):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Lisää palomuurisääntö** (sama korotettu PowerShell):
+**Lisää palomuurisääntö** (samassa korotetuissa oikeuksissa toimivassa PowerShellissä):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**Tarkista WSL:stä**:
+**Vahvista WSL:stä**:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Jos olet jo ladannut Qwen3.6-35B-A3B-GGUF-mallin edellisessä vaiheessa, sinun pitäisi nähdä JSON-tuloste tähän tapaan:
+Jos olet jo ladannut Qwen3.6-35B-A3B-GGUF-mallin edellisessä vaiheessa, sinun pitäisi nähdä tämänkaltainen JSON-tuloste:
 
 ```json
 {
@@ -308,7 +308,7 @@ Jos olet jo ladannut Qwen3.6-35B-A3B-GGUF-mallin edellisessä vaiheessa, sinun p
 }
 ```
 
-> `netsh portproxy` -sääntö säilyy uudelleenkäynnistysten jälkeen, mutta WSL-yhdyskäytävän IP-osoite voi muuttua `wsl --shutdown` -komennon jälkeen. Jos Lemonade ei ole enää tavoitettavissa WSL:stä uudelleenkäynnistyksen jälkeen, hae päivitetty yhdyskäytävän IP-osoite ja päivitä proxy tällä uudella IP-osoitteella.
+> `netsh portproxy` -sääntö säilyy uudelleenkäynnistysten yli, mutta WSL-yhdyskäytävän IP-osoite voi muuttua `wsl --shutdown` -komennon jälkeen. Jos Lemonade ei ole enää tavoitettavissa WSL:stä uudelleenkäynnistyksen jälkeen, hae päivitetty yhdyskäytävän IP-osoite ja päivitä proksi tällä uudella osoitteella.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -364,25 +364,25 @@ finally {
 ---
 <!-- @os:end -->
 
-## Asenna ja konfiguroi OpenClaw
+## Asenna ja määritä OpenClaw
 
 ### Asenna OpenClaw
 <!-- @os:windows -->
-> Suorita tämän osion komennot **WSL-terminaalissasi**.
+> Suorita tämän osion komennot **WSL-päätteessäsi**.
 <!-- @os:end -->
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-`--no-onboard`-lippu ohittaa interaktiivisen asennusvelhon – konfiguroi mallin taustajärjestelmä manuaalisesti seuraavassa vaiheessa, mikä antaa sinulle tarkan hallinnan siitä, mitä mallia ja palvelinta käytetään.
+`--no-onboard`-lippu ohittaa interaktiivisen asennusvelhon; määrität mallitaustajärjestelmän manuaalisesti seuraavassa vaiheessa, mikä antaa sinulle tarkan hallinnan siitä, mitä mallia ja palvelinta käytetään.
 
-Avaa uusi terminaali ja vahvista asennus:
+Avaa uusi pääte ja vahvista asennus:
 
 ```bash
 openclaw --version
 ```
 
-> **Vinkki:** Jos näet `command not found` asennuksen jälkeen, lisää npm:n globaali bin-hakemisto PATH-muuttujaasi:
+> **Vinkki:** Jos näet asennuksen jälkeen viestin `command not found`, lisää npm:n globaali bin-hakemisto PATH-muuttujaan:
 > ```bash
 > export PATH="$HOME/.npm-global/bin:$PATH"
 > ```
@@ -440,11 +440,9 @@ finally {
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
+### Configure OpenClaw käyttämään Lemonadea
 
-
-### Konfiguroi OpenClaw käyttämään Lemonadea
-
-Suorita OpenClaw'n ei-interaktiivinen käyttöönotto.
+Suorita OpenClaw:n ei-interaktiivinen käyttöönotto.
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -484,9 +482,9 @@ openclaw onboard \
 ```
 <!-- @os:end -->
 
-Tämä komento kirjoittaa OpenClaw'n konfiguraation tiedostoon `~/.openclaw/openclaw.json`.
+Tämä komento kirjoittaa OpenClaw:n määrityksen tiedostoon `~/.openclaw/openclaw.json`.
 
-> **OpenClaw-kontekstiikkunan mitoitus:** OpenClaw'n tiivistys käynnistyy, kun `contextTokens > contextWindow − reserveTokens`. Oletusarvoinen `reserveTokensFloor` on 20 000 tokenia – alaraja, joka ohittaa `reserveTokens`-arvon, kun se on pienempi – joten mikä tahansa mallikonteksti alle ~37k käynnistää loputtoman tiivistyssilmukan. Aseta matala varaus ja poista alaraja käytöstä kerran konfiguraatiossasi, ja se koskee kaikkia malleja ilman mallikohtaista säätöä:
+> **OpenClaw-kontekstiikkunan koko:** OpenClaw:n tiivistys käynnistyy, kun `contextTokens > contextWindow − reserveTokens`. Oletusarvoinen `reserveTokensFloor` on 20 000 tokenia, mikä on alaraja, joka ohittaa arvon `reserveTokens`, kun se on pienempi, joten mikä tahansa mallin konteksti alle noin 37 000 tokenin käynnistää loputtoman tiivistyssilmukan. Aseta pieni reservi ja poista alaraja käytöstä kerran omassa määrityksessäsi, ja se pätee jokaiseen malliin, ilman mallikohtaista säätöä:
 >
 > ```json
 > "compaction": {
@@ -495,13 +493,13 @@ Tämä komento kirjoittaa OpenClaw'n konfiguraation tiedostoon `~/.openclaw/open
 > }
 > ```
 >
-> `reserveTokensFloor` on *alaraja* (minimivahti), ei varaus itse – pelkän alarajan asettamisella ei ole vaikutusta. `reserveTokensFloor: 0` poistaa vahdin käytöstä, jolloin pienempi `reserveTokens`-arvo hyväksytään.
+> `reserveTokensFloor` on *alaraja* (vähimmäissuoja), ei itse reservi, joten pelkän alarajan asettamisella ei ole vaikutusta. `reserveTokensFloor: 0` poistaa suojan käytöstä, jotta pienempi `reserveTokens`-arvo hyväksytään.
 >
-> **Milloin tätä käytetään:** Käytä tätä konfiguraatiota, jos mallisi tehokas kontekstiikkuna on alle ~37k – joko siksi, että malli on pieni (esim. 8k, 16k, 32k) tai koska olet tarkoituksella rajoittanut sen pienemmäksi (esim. lataat 128k-mallin mutta asetat kontekstin 16k:ksi Lemonadessa). Ilman tätä OpenClaw joutuu loputtomaan tiivistyssilmukkaan käynnistyksen yhteydessä.
+> **Milloin tätä sovelletaan:** Käytä tätä määritystä, jos mallisi tehokas kontekstiikkuna on alle noin 37 000 tokenia, joko siksi, että malli on pieni (esim. 8k, 16k, 32k) tai siksi, että olet tarkoituksella rajoittanut sen pienempään arvoon (esim. ladannut 128k-mallin mutta asettanut kontekstin arvoon 16k Lemonadessa). Ilman tätä OpenClaw ajautuu loputtomaan tiivistyssilmukkaan käynnistyksessä.
 >
-> **Suurikontekstiset mallit täydellä kontekstilla:** Voit ohittaa tämän kokonaan. Oletusasetukset toimivat hyvin – tiivistys käynnistyy hyvissä ajoin ennen ikkunan täyttymistä ja mallilla on riittävästi tilaa pitkien vastausten tuottamiseen. Jos kuitenkin sovellat tätä, huomaa, että `reserveTokens: 4096` rajoittaa vastauksen pituuden ~4k tokeniin, mikä saattaa katkaista pitkän tiedoston luomisen tai yksityiskohtaiset suunnitelmat.
+> **Suuren kontekstin mallit täydellä kontekstilla:** Voit ohittaa tämän kokonaan. Oletusasetukset toimivat hyvin, tiivistys käynnistyy hyvissä ajoin ennen ikkunan täyttymistä, ja mallilla on runsaasti tilaa pitkien vastausten tuottamiseen. Jos sovellat tätä silti, huomioi, että `reserveTokens: 4096` rajoittaa vastauksen pituuden noin 4k tokeniin, mikä voi katkaista pitkien tiedostojen luonnin tai yksityiskohtaiset suunnitelmat.
 >
-> **Mihin tämä lisätään:** Sijoita `compaction`-lohko `agents.defaults`-lohkon sisään `openclaw.json`-tiedostossasi (yleensä `~/.openclaw/openclaw.json`):
+> **Mihin tämä lisätään:** Sijoita `compaction`-lohko `agents.defaults`-osion sisään `openclaw.json`-tiedostossasi (yleensä polussa `~/.openclaw/openclaw.json`):
 >
 > ```json
 > {
@@ -520,13 +518,13 @@ Tämä komento kirjoittaa OpenClaw'n konfiguraation tiedostoon `~/.openclaw/open
 > }
 > ```
 >
-> Muu konfiguraatiosi (yhdyskäytävä, kanavat, mallit jne.) pysyy muuttumattomana – vain `compaction`-avain täytyy lisätä.
+> Määrityksen loppuosa (gateway, kanavat, mallit jne.) pysyy ennallaan, vain `compaction`-avain tarvitsee lisätä.
 
 ### (Suositeltu) Ota Docker-hiekkalaatikointi käyttöön
 
-OpenClaw voi reitittää kaikki agentin tiedosto- ja koodioperaatiot eristetyn Docker-säilön kautta sen sijaan, että ne suoritettaisiin suoraan isäntäkoneellasi. Tämä rajoittaa tahattomien toimien vaikutusalueen hiekkalaatikkoon, jättäen isäntäkoneesi tiedostojärjestelmän ja verkon koskemattomiksi.
+OpenClaw voi ohjata kaikki agentin tiedosto- ja koodioperaatiot eristetyn Docker-säiliön kautta sen sijaan, että ne suoritettaisiin suoraan isäntäkoneella. Tämä rajoittaa minkä tahansa tahattoman toiminnon vaikutuksen hiekkalaatikkoon, jättäen isäntäkoneesi tiedostojärjestelmän ja verkon koskemattomaksi.
 
-Rakenna hiekkalaatikkokuva kerran (Docker täytyy olla asennettuna):
+Rakenna hiekkalaatikkokuva kerran (Dockerin on oltava asennettuna):
 
 ```bash
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -626,7 +624,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Suorita tämä lisätäksesi `sandbox`-avaimen olemassa olevaan `agents.defaults`-lohkoon tiedostossa `~/.openclaw/openclaw.json`:
+Suorita tämä lisätäksesi `sandbox`-avaimen olemassa olevan `agents.defaults`-lohkon sisään tiedostossa `~/.openclaw/openclaw.json`:
 
 ```bash
 cat > sandbox.patch.json5 <<JSON5
@@ -645,22 +643,22 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-Hiekkalaatikkosäilöillä ei ole **oletuksena verkkoyhteyttä**. Katso [hiekkalaatikointireferenssi](https://docs.openclaw.ai/gateway/sandboxing) bind-liitoksista ja verkon ohituksista.
+Hiekkalaatikkosäiliöillä **ei ole verkkoyhteyttä** oletuksena. Katso [hiekkalaatikoinnin viitedokumentaatio](https://docs.openclaw.ai/gateway/sandboxing) bind-liitoksia ja verkkoasetusten ohituksia varten.
 
-> #### Vianmääritys: Docker-käyttöoikeus evätty
+> #### Vianmääritys: Dockerin käyttöoikeus evätty
 > 
 > Jos saat "permission denied" -virheen Docker-komentoja suorittaessasi:
 > 
 > **Vaihe 1: Lisää käyttäjäsi docker-ryhmään**
 > 
 > ```bash
-> sudo groupadd docker                    # Luo ryhmä tarvittaessa
-> sudo usermod -aG docker $USER           # Lisää itsesi ryhmään
-> newgrp docker                           # Aktivoi muutos
-> docker run hello-world                  # Testaa se
+> sudo groupadd docker                    # Create group if needed
+> sudo usermod -aG docker $USER           # Add yourself to the group
+> newgrp docker                           # Activate the change
+> docker run hello-world                  # Test it
 > ```
 > 
-> **Vaihe 2: Jos virhe jatkuu, käytä pysyvää korjausta**
+> **Vaihe 2: Jos virhe jatkuu, tee pysyvä korjaus**
 > 
 > ```bash
 > sudo chgrp docker /lib/systemd/system/docker.socket
@@ -896,7 +894,7 @@ finally {
 
 ### Käynnistä OpenClaw-yhdyskäytävä
 
-Yhdyskäytävä on OpenClaw-prosessi, joka hallinnoi agenttisilmukkaa ja palvelee kojelautaa:
+Yhdyskäytävä on OpenClaw-prosessi, joka hallinnoi agenttisilmukkaa ja tarjoilee kojelautaa:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -1027,25 +1025,25 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-Avaa kojelauta suorittamalla tämä toisessa terminaalissa yhdyskäytävän ollessa vielä käynnissä:
+Avataksesi kojelaudan, suorita tämä toisessa päätteessä yhdyskäytävän ollessa yhä käynnissä:
 
 ```bash
 openclaw dashboard
 ```
 
-Koska yhdyskäytävä sitoutuu loopback-osoitteeseen, kojelauta todentaa automaattisesti, kun se avataan samalta koneelta – tokenia ei tarvitse syöttää eikä laitteen hyväksyntää tarvita paikalliseen käyttöön. Sinun pitäisi nähdä OpenClaw-kojelauta, jossa Lemonade-mallisi on listattu aktiivisena taustajärjestelmänä.
+Koska yhdyskäytävä sitoutuu takaisinkytkentäosoitteeseen, kojelauta todentaa automaattisesti, kun se avataan samalta koneelta, eikä tunnuksen syöttöä tai laitteen hyväksyntää tarvita paikallista käyttöä varten. Sinun pitäisi nähdä OpenClaw-kojelauta, jossa Lemonade-mallisi näkyy aktiivisena taustajärjestelmänä.
 
-> Jos olet ottanut hiekkalaatikoinnin käyttöön, voit tarkistaa sen pyytämällä agenttia suorittamaan `run hostname` kojelaudasta. Jos näet lyhyen säilötunnuksen koneesi isäntänimen sijaan, hiekkalaatikko toimii.
+> Jos olet ottanut hiekkalaatikoinnin käyttöön, voit vahvistaa sen pyytämällä agenttia suorittamaan `run hostname` kojelaudalta. Jos näet lyhyen säiliötunnuksen koneesi isäntänimen sijaan, hiekkalaatikko toimii.
 
-**Onnittelut – olet rakentanut täysin paikallisen tekoälyagenttipinon alusta alkaen.**
+**Onnittelut, olet rakentanut täysin paikallisen tekoälyagenttipinon alusta alkaen.**
 
-> **Tarvitsetko yhdyskäytävätokenin?** Suorita `openclaw dashboard --no-open` tulostaaksesi kojelaudan URL-osoitteen tokenin kanssa upotettuna (se yrittää myös kopioida sen leikepöydällesi). Vaihtoehtoisesti token löytyy kohdasta `gateway.auth.token` tiedostossa `~/.openclaw/openclaw.json`.
+> **Tarvitsetko yhdyskäytävän tunnuksen?** Suorita `openclaw dashboard --no-open` tulostaaksesi kojelaudan osoitteen, jossa tunnus on mukana (se myös yrittää kopioida sen leikepöydälle). Vaihtoehtoisesti tunnus löytyy kohdasta `gateway.auth.token` tiedostossa `~/.openclaw/openclaw.json`.
 >
-> **Etälaitteen hyväksyminen:** Kun avaat kojelaudan toiselta koneelta tai puhelimelta, selain näyttää pyyntötunnuksen. Suorita yhdyskäytävää pyörittävällä koneella:
+> **Etälaitteen hyväksyminen:** Kun avaat kojelaudan toiselta koneelta tai puhelimelta, selain näyttää pyyntötunnuksen. Suorita yhdyskäytävää ajavalla koneella:
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> Tätä tarvitaan vain etä- tai toissijaisille laitteille – loopback-käyttö samalta koneelta todentaa automaattisesti.
+> Tätä tarvitaan vain etä- tai toissijaisille laitteille, saman koneen takaisinkytkentäkäyttö todentaa automaattisesti.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1055,47 +1053,46 @@ Koska yhdyskäytävä sitoutuu loopback-osoitteeseen, kojelauta todentaa automaa
 
 ## Valinnainen: Yhdistä viestintäkanava
 
-Kun yhdyskäytävä on käynnissä, voit tavoittaa paikallisen agenttisi miltä tahansa laitteelta. Valitse tilanteeseesi sopiva vaihtoehto. OpenClaw tukee [Discordia](https://docs.openclaw.ai/channels/discord), [Telegramia](https://docs.openclaw.ai/channels/telegram) ja muita kanavia – katso täydellinen lista osoitteesta [docs.openclaw.ai](https://docs.openclaw.ai).
+Kun yhdyskäytävä on käynnissä, voit tavoittaa paikallisen agenttisi mistä tahansa laitteesta. Valitse asetuksiisi sopiva vaihtoehto. OpenClaw tukee [Discordia](https://docs.openclaw.ai/channels/discord), [Telegramia](https://docs.openclaw.ai/channels/telegram) ja muita kanavia, katso täydellinen luettelo osoitteesta [docs.openclaw.ai](https://docs.openclaw.ai).
 
 ---
 
 ### Vaihtoehto A: Discord
 
-Discord vaatii palvelimen, jossa sinulla on **järjestelmänvalvojan oikeudet** botin lisäämiseksi. Jos jaat palvelimia mutta et omista yhtään, käytä sen sijaan Vaihtoehtoa B (Telegram).
+Discord vaatii palvelimen, jossa **sinulla on ylläpitäjän oikeudet** bottia lisätäksesi. Jos jaat palvelimia, mutta et omista yhtään, käytä sen sijaan vaihtoehtoa B (Telegram).
+#### Luo Discord-tili ja -palvelin
 
-#### Luo Discord-tili ja palvelin
-
-Jos sinulla ei ole Discord-tiliä, rekisteröidy osoitteessa [discord.com](https://discord.com). Tarvitset myös palvelimen, jossa olet järjestelmänvalvoja – luo sellainen napsauttamalla **+**-kuvaketta Discord-sivupalkissa ja valitsemalla **Create My Own**. Yksityinen palvelin käy hyvin.
+Jos sinulla ei ole Discord-tiliä, rekisteröidy osoitteessa [discord.com](https://discord.com). Tarvitset myös palvelimen, jossa olet järjestelmänvalvoja. Luo sellainen napsauttamalla **+**-kuvaketta Discordin sivupalkissa ja valitsemalla **Create My Own**. Yksityinen palvelin käy hyvin.
 
 #### Luo Discord-sovellus ja botti
 
-1. Siirry [Discord Developer Portaliin](https://discord.com/developers/applications) ja napsauta **New Application**. Anna sille nimi (esim. "openclaw-bot").
-2. Napsauta sivupalkissa **Bot**. Aseta botille käyttäjänimi.
-3. Vieläkin Bot-sivulla, vieritä kohtaan **Privileged Gateway Intents** ja ota käyttöön:
+1. Siirry [Discord Developer Portal](https://discord.com/developers/applications) -sivulle ja napsauta **New Application**. Anna sille nimi (esim. "openclaw-bot").
+2. Napsauta sivupalkista **Bot**. Aseta botille käyttäjänimi.
+3. Vieritä edelleen Bot-sivulla kohtaan **Privileged Gateway Intents** ja ota käyttöön:
    - **Message Content Intent** (pakollinen)
    - **Server Members Intent** (suositeltu)
-4. Vieritä takaisin ylös ja napsauta **Reset Token** luodaksesi bottitokenin. Kopioi se.
+4. Vieritä takaisin ylös ja napsauta **Reset Token** luodaksesi botin tunnuksen (token). Kopioi se.
 
-#### Lisää botti palvelimellesi
+#### Lisää botti palvelimeesi
 
-1. Napsauta sivupalkissa **OAuth2/ URL Generator**.
-2. Kohdassa **Scopes**, ota käyttöön `bot` ja `applications.commands`.
-3. Kohdassa **Bot Permissions**, ota käyttöön: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Kopioi luotu URL-osoite, liitä se selaimeen, valitse palvelimesi ja vahvista. Botin pitäisi nyt näkyä palvelimesi jäsenlistalla.
+1. Napsauta sivupalkista **OAuth2/ URL Generator**.
+2. Ota kohdassa **Scopes** käyttöön `bot` ja `applications.commands`.
+3. Ota kohdassa **Bot Permissions** käyttöön: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
+4. Kopioi luotu URL-osoite, liitä se selaimeesi, valitse palvelimesi ja vahvista. Botin pitäisi nyt näkyä palvelimesi jäsenluettelossa.
 
-#### Kerää tunnuksesi
+#### Kerää tunnisteesi
 
-Ota kehittäjätila käyttöön Discordissa (**User Settings/ Advanced/ Developer Mode**), sitten:
-- Napsauta palvelimesi kuvaketta hiiren oikealla painikkeella: **Copy Server ID**
-- Napsauta omaa avatartasi hiiren oikealla painikkeella: **Copy User ID**
+Ota Discordissa käyttöön Developer Mode (**User Settings/ Advanced/ Developer Mode**) ja tee sitten seuraavat:
+- Napsauta palvelimesi kuvaketta hiiren kakkospainikkeella: **Copy Server ID**
+- Napsauta omaa avatariasi hiiren kakkospainikkeella: **Copy User ID**
 
-#### Salli suoraviestit palvelimen jäseniltä
+#### Salli yksityisviestit palvelimen jäseniltä
 
-Napsauta palvelimesi kuvaketta hiiren oikealla painikkeella/ **Privacy Settings**/ kytke päälle **Direct Messages**. Tämä sallii botin lähettää sinulle suoraviestejä, mikä vaaditaan paritusvaiheessa.
+Napsauta palvelimesi kuvaketta hiiren kakkospainikkeella / **Privacy Settings** / kytke päälle **Direct Messages**. Tämä sallii botin lähettää sinulle yksityisviestin, mikä on vaadittu pariliitosvaihetta varten.
 
-#### Konfiguroi OpenClaw Discordia varten
+#### Määritä OpenClaw Discordia varten
 
-Tallenna bottitokenisi ympäristömuuttujana, luo sitten yksittäinen korjaustiedosto, joka ottaa Discordin käyttöön, viittaa tokeniin ja sallii palvelimesi. Korvaa `<server_id>` ja `<user_id>` yllä kerätyillä tunnuksilla.
+Tallenna botin tunnus (token) ympäristömuuttujaan ja luo sitten yksi patch-tiedosto, joka ottaa Discordin käyttöön, viittaa tunnukseen ja sallii palvelimesi (allowlist). Korvaa `<server_id>` ja `<user_id>` yllä kerätyillä tunnisteilla.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1121,32 +1118,32 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **Älä luota agentin tekemään tämän konfiguraation.** Kun hiekkalaatikointi on käytössä, agentti ei pysty kirjoittamaan tiedostoon `~/.openclaw/openclaw.json` hiekkalaatikon sisältä – käytä sen sijaan yllä olevia CLI-komentoja isäntäkoneella.
+> **Älä luota siihen, että pyydät agenttia määrittämään tämän.** Kun hiekkalaatikointi (sandboxing) on käytössä, agentti ei voi kirjoittaa tiedostoon `~/.openclaw/openclaw.json` hiekkalaatikon sisältä, käytä sen sijaan yllä olevia CLI-komentoja isäntäkoneella.
 
-Käynnistä yhdyskäytävä uudelleen, jotta se ottaa uuden kanavan konfiguraation käyttöön:
+Käynnistä yhdyskäytävä (gateway) uudelleen, jotta se ottaa käyttöön uuden kanava-asetuksen:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
 ```
 
-Sinun pitäisi nähdä `logged in to discord as <bot-name>` yhdyskäytävän tulosteessa muutaman sekunnin kuluessa.
+Sinun pitäisi nähdä `logged in to discord as <bot-name>` yhdyskäytävän tulosteessa muutaman sekunnin sisällä.
 
-#### Paritus Discord-tilisi kanssa
+#### Yhdistä Discord-tilisi
 
-Lähetä botille suoraviesti Discordissa. Se vastaa lyhyellä paritusskoodilla.
+Lähetä botille yksityisviesti Discordissa. Se vastaa lyhyellä pariliitoskoodilla.
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-Hyväksy se OpenClaw'ta pyörittävällä koneella:
+Hyväksy se koneella, jolla OpenClaw on käynnissä:
 ```bash
 openclaw pairing approve discord <CODE>
 ```
 
-> Paritusskoodit vanhenevat tunnin kuluttua.
+> Pariliitoskoodit vanhenevat tunnin kuluttua.
 
-Voit nyt jutella agenttisi kanssa suoraan Discordista ja siirtää tehtäviä paikalliselle laitteistollesi.
+Voit nyt keskustella agenttisi kanssa suoraan Discordista ja siirtää tehtäviä paikalliselle laitteistollesi.
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1156,22 +1153,22 @@ Voit nyt jutella agenttisi kanssa suoraan Discordista ja siirtää tehtäviä pa
 
 ### Vaihtoehto B: Telegram
 
-Telegram on useimmille käyttäjille yksinkertaisempi kuin Discord – se ei vaadi palvelinta eikä järjestelmänvalvojan oikeuksia.
+Telegram on useimmille käyttäjille yksinkertaisempi kuin Discord, se ei vaadi palvelinta eikä ylläpitäjän oikeuksia.
 
 #### Luo Telegram-botti
 
-1. Avaa Telegram ja lähetä viesti **@BotFather**-botille.
-2. Lähetä `/newbot` ja seuraa ohjeita. Tallenna se antama bottitokeni.
+1. Avaa Telegram ja lähetä viesti käyttäjälle **@BotFather**.
+2. Lähetä `/newbot` ja seuraa ohjeita. Tallenna botin tunnus (token), jonka saat.
 
-#### Konfiguroi OpenClaw Telegramia varten
+#### Määritä OpenClaw Telegramia varten
 
-Tallenna tokeni ympäristömuuttujana:
+Tallenna tunnus ympäristömuuttujaan:
 
 ```bash
 export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 ```
 
-Lisää kanavan konfiguraatio tiedostoon `~/.openclaw/openclaw.json` (tai korjaa se kojelaudan kautta):
+Lisää kanavan määritykset tiedostoon `~/.openclaw/openclaw.json` (tai patchaa se hallintapaneelin kautta):
 
 ```json
 {
@@ -1185,23 +1182,23 @@ Lisää kanavan konfiguraatio tiedostoon `~/.openclaw/openclaw.json` (tai korjaa
 }
 ```
 
-Käynnistä yhdyskäytävä uudelleen, lähetä sitten botillesi mikä tahansa viesti Telegramissa. Hyväksy paritus:
+Käynnistä yhdyskäytävä uudelleen ja lähetä sitten botillesi mikä tahansa viesti Telegramissa. Hyväksy pariliitos:
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-Paritusskoodit vanhenevat tunnin kuluttua. Voit nyt jutella agenttisi kanssa Telegram-suoraviestin kautta.
+Pariliitoskoodit vanhenevat tunnin kuluttua. Voit nyt keskustella agenttisi kanssa Telegramin yksityisviestien kautta.
 
 ---
 
 ## Seuraavat vaiheet
 
-Nyt kun agenttisi voi vastaanottaa komentoja puhelimestasi ja toimia paikallisella koneellasi, tässä on kolme suuntaa, joita kannattaa tutkia:
+Nyt kun agenttisi voi vastaanottaa komentoja puhelimestasi ja toimia paikallisella koneellasi, tässä on kolme tutkimisen arvoista suuntaa:
 
-1. **Osakemarkkinoiden yhteenveto**: Aikatauluta OpenClaw hakemaan tietoja rahoitusrajapinnoista kiinteällä aikavälillä, tiivistämään päivän liikkeet paikallisella mallillasi ja lähettämään yhteenveto puhelimeesi joka aamu valitsemasi kanavan kautta.
+1. **Osakemarkkinoiden yhteenveto**: Ajasta OpenClaw hakemaan tietoa rahoitusalan rajapinnoista (API) kiinteällä aikavälillä, tekemään yhteenvedon päivän liikkeistä paikallisella mallillasi ja lähettämään koosteen puhelimeesi joka aamu valitsemasi kanavan kautta.
 
-2. **Hienosäätömonitori**: Käynnistä harjoitustehtävä etänä Telegramin tai Discordin kautta, anna sitten agentin seurata harjoituslokia ja raportoida säännöllisesti häviöarvot, GPU-käyttöaste ja levynkäyttö puhelimeesi. Jos ajo pysähtyy tai VRAM piikkaa, saat tiedon välittömästi ilman, että sinun täytyy olla koneen ääressä.
+2. **Hienosäätötyön valvonta**: Käynnistä koulutustyö etänä Telegramin tai Discordin kautta ja anna agentin seurata koulutuslokia sekä raportoida säännöllisesti häviöarvot (loss), GPU:n käyttöasteen ja levytilan käytön puhelimeesi. Jos ajo pysähtyy tai VRAM:n käyttö piikkaa, saat siitä tiedon välittömästi ilman, että sinun tarvitsee olla koneen ääressä.
 
-3. **IoT paikallisella VLM:llä**: Suuntaa kamera etuovellesi, suorita näkökykyä hyödyntävä malli Lemonadessa ja anna OpenClaw'n analysoida kuvia pyydettäessä tai laukaisimen perusteella. Kysy "saapuiko tänään paketteja?" puhelimestasi ja saa suora vastaus omalta laitteistoltasi.
+3. **IoT paikallisella VLM:llä**: Suuntaa kamera etuovellesi, aja näkömalli Lemonadella ja anna OpenClaw'n analysoida kuvia pyynnöstä tai laukaisimen perusteella. Kysy puhelimestasi "saapuiko tänään paketteja?" ja saat suoran vastauksen omalta laitteistoltasi.

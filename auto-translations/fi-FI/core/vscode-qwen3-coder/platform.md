@@ -6,27 +6,27 @@ SPDX-License-Identifier: MIT
 
 # Alustan konfigurointi
 
-Tässä asiakirjassa kuvataan tämän playbook-ohjelman suorittamiseen tarvittavat alustan konfiguraatiot.
+Tässä asiakirjassa kuvataan odotetut alustan konfiguraatiot tämän ohjekirjan suorittamista varten.
 
 ## Windows
 
 ### LM Studio -asennus
 
-LM Studio tulee olla esiasennettuna:
+LM Studion tulisi olla valmiiksi asennettuna:
 
 | Komponentti | Versio | Sijainti |
 |-----------|---------|----------|
-| **LM Studio (Mallit + Muut)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Mallit + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Ohjelma)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Välimuisti)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Mallin lataaminen
+### Mallin lataus
 
-Seuraavien mallien tulee olla jo valmiina LM Studio -mallihakemistossa (`C:\Users\...\.lmstudio\models`):
+Seuraavien mallien tulisi jo olla LM Studion mallihakemistossa (`C:\Users\...\.lmstudio\models`):
 
 | Mallityyppi | Kvantisointi | Koko | Sijainti |
 |------------|--------------|------|----------|
-| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18,2 GB | `models\lmstudio-community` |
+| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
 ---
 
@@ -34,8 +34,8 @@ Seuraavien mallien tulee olla jo valmiina LM Studio -mallihakemistossa (`C:\User
 
 ### LM Studio -asennus
 
-Katso lisätietoja tiedostosta lmstudio.md (dependencies-kansiossa).
+Katso lisätietoja tiedostosta lmstudio.md (dependencies-kansion sisällä).
 
-### Mallin lataaminen
+### Mallin lataus
 
 Sama kuin Windowsissa.

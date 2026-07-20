@@ -5,20 +5,21 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
 > 이 플레이북은 GitHub에서 렌더링할 수 없는 특수 태그를 사용합니다. 이 콘텐츠를 올바르게 미리 보려면 [amd.com/playbooks](https://amd.com/playbooks)를 방문하세요.
 <!-- @github-only:end -->
 
 ## 개요
 
-[Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library)는 깊이 추정, 얼굴 감지, 얼굴 메시 추적 등 강력한 온디바이스 인식 기능을 제공하는 AMD C++ 컴퓨터 비전 및 머신 러닝 툴킷입니다. Ryzen AI 드라이버 위에 구축된 이 라이브러리는 추론을 위해 사용 가능한 최적의 하드웨어(GPU 또는 NPU)를 자동으로 선택하므로, 모델 학습이나 프레임워크 통합에 대한 걱정 없이 C++ 애플리케이션에 AI 기능을 추가할 수 있습니다. 모든 처리는 시스템 로컬에서 이루어지므로 개인 정보 보호가 중요하고 낮은 지연 시간이 요구되는 애플리케이션에 이상적입니다.
+[Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library)는 심도 추정, 얼굴 감지, 얼굴 메시 추적을 포함하여 강력한 온디바이스 인식 기능을 제공하는 AMD의 C++ 컴퓨터 비전 및 머신러닝 툴킷입니다. Ryzen AI 드라이버를 기반으로 구축된 이 라이브러리는 추론에 가장 적합한 하드웨어(GPU 또는 NPU)를 자동으로 선택하므로 모델 학습이나 프레임워크 통합을 걱정하지 않고도 C++ 애플리케이션에 AI 기능을 추가할 수 있습니다. 모든 처리는 시스템에서 로컬로 이루어지므로 개인정보 보호가 중요하고 지연 시간이 짧아야 하는 애플리케이션에 이상적입니다.
 
-이 플레이북에서는 Ryzen AI CVML Library를 설정하고, 포함된 샘플 애플리케이션을 빌드하며, 샘플 이미지에서 얼굴 감지를 실행하는 방법을 설명합니다.
+이 플레이북에서는 Ryzen AI CVML Library를 설정하고, 포함된 샘플 애플리케이션을 빌드하며, 샘플 이미지에서 얼굴 감지를 실행하는 방법을 배웁니다.
 
 ## 학습 내용
 
-- 시스템에 필수 구성 요소를 설치하고 Ryzen AI CVML Library를 설정하는 방법
-- CVML C++ API의 작동 방식: 컨텍스트, 기능 객체, 이미지 버퍼
+- 시스템에 사전 요구 사항을 설치하고 Ryzen AI CVML Library를 설정하는 방법
+- CVML C++ API가 작동하는 방식: 컨텍스트, 기능 객체, 이미지 버퍼
 - CMake와 OpenCV를 사용하여 포함된 샘플 애플리케이션을 빌드하고 실행하는 방법
 - 경계 상자와 랜드마크를 사용하여 이미지에서 얼굴 감지를 실행하는 방법
 - CVML 기능을 자체 C++ 애플리케이션에 통합하는 방법
@@ -29,28 +30,28 @@ SPDX-License-Identifier: MIT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 소프트웨어 필수 구성 요소 설치
+## 소프트웨어 사전 요구 사항 설치
 <!-- @require:driver -->
 
 ## 추가 종속성
 
-시작하기 전에 다음 항목이 준비되어 있는지 확인하세요:
+시작하기 전에 다음이 준비되어 있는지 확인하세요:
 
 <!-- @os:windows -->
-- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — `opencv-4.11.0-windows.exe`를 다운로드하여 실행하고 로컬 폴더(예: `C:\opencv`)에 압축을 해제합니다
-- [CMake](https://cmake.org/download/) — Windows x86-64 MSI 설치 프로그램을 다운로드하고 설치 중에 **"Add CMake to the system PATH for all users"**를 선택합니다
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — 최신 버전을 설치합니다
-- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) — "Desktop development with C++" 워크로드 포함(MSVC 컴파일러, Windows SDK, C++ 빌드 도구 포함)
+- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — `opencv-4.11.0-windows.exe`를 다운로드하여 실행하고 로컬 폴더(예: `C:\opencv`)에 압축을 풉니다
+- [CMake](https://cmake.org/download/) — Windows x86-64 MSI 설치 프로그램을 다운로드하고 설치 중 **"Add CMake to the system PATH for all users"**를 선택합니다
+- [Ryzen AI NPU 드라이버](https://ryzenai.docs.amd.com/en/latest/inst.html) — 최신 버전을 설치합니다
+- "Desktop development with C++" 워크로드가 포함된 [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe)(MSVC 컴파일러, Windows SDK, C++ 빌드 도구 포함)
 <!-- @os:end -->
 
 <!-- @os:linux -->
-- OpenCV 4.11 — 소스에서 빌드해야 합니다(Ubuntu 22.04 및 24.04의 apt 패키지는 버전 4.11을 제공하지 않음). 아래 [소스에서 OpenCV 빌드](#building-opencv-from-source) 섹션을 참조하세요.
-- CMake — apt를 통해 설치:
+- OpenCV 4.11 — 소스에서 빌드해야 합니다(Ubuntu 22.04 및 24.04의 apt 패키지는 4.11 버전을 제공하지 않습니다). 아래 [소스에서 OpenCV 빌드하기](#building-opencv-from-source)를 참조하세요.
+- CMake — apt를 통해 설치합니다:
   ```bash
   sudo apt install cmake
   ```
 - Ubuntu 22.04 또는 24.04(커널 >= 6.11.0-21-generic)
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers)(Linux 설치 프로그램 — NPU 추론에 필요)
+- [Ryzen AI NPU 드라이버](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers)(Linux 설치 프로그램 — NPU 추론에 필요)
 - Vulkan SDK(아래 [Vulkan SDK](#vulkan-sdk) 섹션에서 설치)
 <!-- @os:end -->
 
@@ -152,13 +153,13 @@ fi
 
 ## CVML Library 설정
 
-AMD 계정이 없다면 [account.amd.com](https://account.amd.com)에서 계정을 만든 후 로그인하여 아래 포털 링크에서 Ryzen AI CVML Library를 다운로드하세요:
+[account.amd.com](https://account.amd.com)에서 AMD 계정이 없는 경우 계정을 생성한 다음, 로그인하여 아래 포털 링크에서 Ryzen AI CVML Library를 다운로드하세요:
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
 ```
 
-다운로드 후 패키지를 로컬 디렉터리(예: Windows의 경우 `C:\RyzenAI-Library`, Linux의 경우 `~/RyzenAI-Library`)에 압축 해제하고, `AMD_CVML_SDK_ROOT` 환경 변수를 압축 해제된 위치로 설정합니다:
+다운로드 후 패키지를 로컬 디렉터리(예: Windows에서는 `C:\RyzenAI-Library`, Linux에서는 `~/RyzenAI-Library`)에 압축 해제하고 `AMD_CVML_SDK_ROOT` 환경 변수를 압축 해제한 위치로 설정하세요:
 
 <!-- @os:windows -->
 ```cmd
@@ -184,9 +185,9 @@ export AMD_CVML_SDK_ROOT=~/RyzenAI-Library
 
 <!-- @os:linux -->
 
-### Linux 전용 설정
+### Linux 관련 설정
 
-#### 소스에서 OpenCV 빌드
+#### 소스에서 OpenCV 빌드하기
 
 OpenCV 빌드 종속성을 설치합니다:
 
@@ -194,7 +195,7 @@ OpenCV 빌드 종속성을 설치합니다:
 sudo apt install unzip wget ubuntu-restricted-extras libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev libgtk-3-dev pkg-config ffmpeg
 ```
 
-OpenCV 4.11.0을 contrib 모듈과 함께 다운로드, 구성 및 빌드합니다(참고: [OpenCV Linux 설치 튜토리얼](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
+contrib 모듈과 함께 OpenCV 4.11.0을 다운로드, 구성 및 빌드합니다(참고: [OpenCV Linux 설치 튜토리얼](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
 
 ```bash
 wget -O opencv-4.11.0.zip https://github.com/opencv/opencv/archive/4.11.0.zip
@@ -213,7 +214,7 @@ cmake -DBUILD_opencv_world=ON \
 cmake --build . --target install
 ```
 
-공유 라이브러리는 `<build>/install/lib/` 아래에 설치됩니다. 이후 단계에서 `install` 디렉터리를 `OPENCV_INSTALL_ROOT`로 사용하세요.
+공유 라이브러리는 `<build>/install/lib/` 아래에 설치됩니다. 이후 단계에서는 `install` 디렉터리를 `OPENCV_INSTALL_ROOT`로 사용하세요.
 
 #### Vulkan SDK
 
@@ -227,7 +228,7 @@ sudo apt update
 sudo apt install vulkan-sdk
 ```
 
-Ubuntu 22.04를 실행 중인 경우 MESA Vulkan 드라이버도 업데이트합니다:
+Ubuntu 22.04를 사용 중이라면 MESA Vulkan 드라이버도 업데이트하세요:
 
 ```bash
 sudo apt update && sudo apt upgrade
@@ -236,9 +237,9 @@ sudo apt update
 sudo apt upgrade
 ```
 
-#### Ubuntu 24.04 추가 종속성
+#### 추가 Ubuntu 24.04 종속성
 
-Ubuntu 24.04를 실행 중인 경우 추가로 필요한 패키지를 설치합니다:
+Ubuntu 24.04를 사용 중이라면 추가로 필요한 패키지를 설치하세요:
 
 ```bash
 sudo apt install libavcodec-dev libavformat-dev libswscale-dev libnsl2 gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly -y
@@ -266,15 +267,15 @@ done
 
 ## 핵심 개념
 
-CVML Library는 각 인식 기능(깊이 추정, 얼굴 감지, 얼굴 메시)이 자체 헤더 파일과 기능 객체를 갖는 간단한 C++ API를 제공합니다. 원시 모델을 직접 다루지 않아도 되며, 라이브러리가 모델 로딩, 전처리, 추론을 자동으로 처리합니다.
+CVML Library는 각 인식 기능(심도 추정, 얼굴 감지, 얼굴 메시)이 고유한 헤더 파일과 기능 객체를 갖는 간단한 C++ API를 제공합니다. 원시 모델을 직접 다루지 않아도 되며, 라이브러리가 모델 로딩, 전처리, 추론을 자동으로 처리합니다.
 
 ### 사용 가능한 기능
 
 | 기능 | 헤더 파일 | 설명 |
 |---------|------------|-------------|
-| **깊이 추정** | `cvml-depth-estimation.h` | RGB 이미지에서 픽셀별 깊이 맵을 생성합니다 |
-| **얼굴 감지** | `cvml-face-detector.h` | 경계 상자, 랜드마크(눈, 코, 입), 신뢰도 점수로 얼굴을 감지합니다 |
-| **얼굴 메시** | `cvml-face-mesh.h` | 밀집 메시 포인트로 상세한 얼굴 기하학을 추적합니다 |
+| **심도 추정** | `cvml-depth-estimation.h` | RGB 이미지에서 픽셀 단위 심도 맵을 생성합니다 |
+| **얼굴 감지** | `cvml-face-detector.h` | 경계 상자, 랜드마크(눈, 코, 입), 신뢰도 점수와 함께 얼굴을 감지합니다 |
+| **얼굴 메시** | `cvml-face-mesh.h` | 조밀한 메시 포인트로 세부적인 얼굴 기하 구조를 추적합니다 |
 
 ### 프로그래밍 모델
 
@@ -316,15 +317,15 @@ context->Release();
 context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 ```
 
-> **참고:** NPU 작업에 ONNX 백엔드를 사용하는 기능은 첫 번째 실행 시 더 긴 시작 지연이 발생할 수 있습니다. 이후 실행은 더 빠릅니다.
+> **참고:** NPU 작업에 ONNX 백엔드를 사용하는 기능은 처음 실행 시 시작 지연 시간이 더 길어질 수 있습니다. 이후 실행에서는 더 빨라집니다.
 
-> **참고:** 대상 시스템에 NPU 드라이버가 설치되어 있지 않은 경우, Ryzen AI CVML 라이브러리는 추론 작업을 위해 자동으로 GPU 백엔드로 폴백합니다.
+> **참고:** 대상 시스템에 NPU 드라이버가 설치되어 있지 않으면 Ryzen AI CVML 라이브러리는 추론 작업을 위해 자동으로 GPU 백엔드로 대체됩니다.
 
-## 샘플 애플리케이션 빌드
+## 샘플 애플리케이션 빌드하기
 
-CVML Library에는 각 기능에 대한 즉시 빌드 가능한 샘플 애플리케이션이 포함되어 있습니다. 한 번에 모두 빌드해 보겠습니다.
+CVML 라이브러리에는 각 기능에 대해 바로 빌드할 수 있는 샘플 애플리케이션이 포함되어 있습니다. 한 번에 모두 빌드해 보겠습니다.
 
-1. `OPENCV_INSTALL_ROOT` 환경 변수를 OpenCV 설치 위치로 설정합니다:
+1. `OPENCV_INSTALL_ROOT` 환경 변수를 설정하여 OpenCV 설치 위치를 가리키도록 합니다:
 
    <!-- @os:windows -->
    ```cmd
@@ -365,7 +366,7 @@ CVML Library에는 각 기능에 대한 즉시 빌드 가능한 샘플 애플리
    ```
    <!-- @os:end -->
 
-   빌드가 성공하면 실행 파일은 다음 위치에 있습니다:
+   빌드에 성공하면 실행 파일은 다음 위치에 생성됩니다:
 
    <!-- @os:windows -->
    ```
@@ -383,7 +384,7 @@ CVML Library에는 각 기능에 대한 즉시 빌드 가능한 샘플 애플리
    ```
    <!-- @os:end -->
 
-3. 샘플을 실행하기 전에 CVML 런타임 파일에 액세스할 수 있는지 확인합니다:
+3. 샘플을 실행하기 전에 CVML 런타임 파일에 접근할 수 있는지 확인합니다:
 
    <!-- @os:windows -->
    ```cmd
@@ -404,11 +405,11 @@ CVML Library에는 각 기능에 대한 즉시 빌드 가능한 샘플 애플리
    ```
    <!-- @os:end -->
 
-## 얼굴 감지 실행
+## 얼굴 인식 실행하기
 
-얼굴 감지 샘플은 이미지, 동영상 또는 라이브 카메라 피드에서 얼굴을 감지합니다. 감지된 각 얼굴에 경계 상자, 신뢰도 점수, 5개의 얼굴 랜드마크(양쪽 눈, 코, 양쪽 입 끝)를 그립니다.
+얼굴 인식 샘플은 이미지, 동영상 또는 실시간 카메라 피드에서 얼굴을 감지합니다. 감지된 각 얼굴에 대해 경계 상자, 신뢰도 점수, 그리고 다섯 개의 얼굴 랜드마크(두 눈, 코, 입 양쪽 끝)를 그려서 표시합니다.
 
-먼저 얼굴 감지 실행 파일 폴더로 이동합니다:
+먼저 얼굴 인식 실행 파일 폴더로 이동합니다:
 
 <!-- @os:windows -->
 ```cmd
@@ -422,13 +423,13 @@ cd build/cvml-sample-face-detection
 ```
 <!-- @os:end -->
 
-그런 다음 입력으로 사용할 샘플 이미지를 다운로드합니다([Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/) 제공 사진, Pexels를 통해 무료로 사용 가능):
+그런 다음 입력으로 사용할 샘플 이미지를 다운로드합니다(사진 제공: [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), Pexels를 통해 무료로 사용 가능):
 
 ```bash
 curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
 ```
 
-**샘플 이미지에서 얼굴 감지 실행:**
+**샘플 이미지에서 얼굴 인식 실행하기:**
 
 <!-- @os:windows -->
 ```cmd
@@ -442,13 +443,13 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-감지된 얼굴 주위에 경계 상자, 신뢰도 점수, 얼굴 랜드마크 포인트(눈, 코, 입 끝)가 표시된 이미지가 창에 나타납니다.
+감지된 얼굴 주변의 경계 상자, 신뢰도 점수, 얼굴 랜드마크 포인트(눈, 코, 입 가장자리)가 표시된 이미지 창이 나타납니다.
 
 <p align="center">
   <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
 </p>
 
-**주석이 달린 출력을 파일로 저장:**
+**주석이 표시된 출력을 파일로 저장하기:**
 
 <!-- @os:windows -->
 ```cmd
@@ -462,7 +463,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg -o output_face.jpg
 ```
 <!-- @os:end -->
 
-**정밀 모델 사용** — 속도를 희생하여 더 높은 정확도를 얻습니다:
+더 높은 정확도를 위해 **정밀 모델을 사용하기**(속도를 희생함):
 
 <!-- @os:windows -->
 ```cmd
@@ -476,12 +477,12 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 ```
 <!-- @os:end -->
 
-얼굴 감지 기능은 두 가지 모델 변형을 제공합니다:
+얼굴 인식 기능은 두 가지 모델 변형을 제공합니다:
 
-| 모델 | 속도 | 정확도 | 최적 용도 |
+| 모델 | 속도 | 정확도 | 최적 사용처 |
 |-------|-------|----------|----------|
-| `fast` (기본값) | 높은 FPS | 양호 | 실시간 카메라 애플리케이션 |
-| `precise` | 낮은 FPS | 최고 | 사진 분석, 높은 정확도가 필요한 경우 |
+| `fast` (기본값) | 더 높은 FPS | 양호 | 실시간 카메라 애플리케이션 |
+| `precise` | 더 낮은 FPS | 최고 | 사진 분석, 높은 정확도가 필요한 경우 |
 
 
 <!-- @os:windows -->
@@ -717,9 +718,9 @@ done
 <!-- @test:end --> 
 <!-- @os:end -->
 
-## CVML을 자체 애플리케이션에 통합
+## 자체 애플리케이션에 CVML 통합하기
 
-자체 C++ 프로젝트에서 CVML Library를 사용하려면 CMake의 `find_package`를 통해 추가합니다:
+자체 C++ 프로젝트에서 CVML 라이브러리를 사용하려면 CMake의 `find_package`를 통해 추가합니다:
 
 ```cmake
 # Find the Ryzen AI CVML Library
@@ -729,7 +730,7 @@ find_package(RyzenAILibrary REQUIRED PATHS ${AMD_CVML_SDK_ROOT})
 target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 ```
 
-여기서 `AMD_CVML_SDK_ROOT`는 Ryzen AI CVML Library 폴더의 루트를 가리킵니다. 그런 다음 원하는 기능에 맞는 헤더를 포함합니다:
+여기서 `AMD_CVML_SDK_ROOT`는 Ryzen AI CVML 라이브러리 폴더의 루트를 가리킵니다. 그런 다음 사용하려는 기능에 맞는 헤더를 포함합니다:
 
 ```cpp
 #include <cvml-face-detector.h>   // for face detection
@@ -739,12 +740,12 @@ target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 
 ## 다음 단계
 
-아래의 각 샘플에 대해 먼저 해당 실행 파일 폴더로 이동하세요. 위의 [얼굴 감지 실행](#running-face-detection) 섹션과 동일한 패턴을 따릅니다(예: Windows의 경우 `cd build\cvml-sample-depth-estimation\Release`, Linux의 경우 `cd build/cvml-sample-depth-estimation`). Windows에서는 각 명령에 `.exe`를 추가합니다(예: `cvml-sample-depth-estimation.exe`).
+아래 각 샘플에 대해, 위의 [얼굴 감지 실행하기](#running-face-detection) 섹션과 동일한 방식으로 먼저 실행 파일 폴더로 이동하십시오 (예: Windows에서는 `cd build\cvml-sample-depth-estimation\Release`, Linux에서는 `cd build/cvml-sample-depth-estimation`). Windows에서는 각 명령어 끝에 `.exe`를 붙이십시오 (예: `cvml-sample-depth-estimation.exe`).
 
-- **깊이 추정 시도**: `cvml-sample-depth-estimation -i sample_face.jpg`를 실행하여 색상화된 깊이 맵을 생성합니다 — 가까운 물체는 따뜻한 색상으로, 먼 물체는 차가운 색상으로 표시됩니다
-- **얼굴 메시 탐색**: `cvml-sample-face-mesh -i sample_face.jpg`를 실행하여 상세한 메시 포인트로 밀집 얼굴 기하학 추적을 확인합니다
-- **동영상 파일 처리**: 모든 샘플에서 `-i` 및 `-o` 플래그를 사용하여 동영상을 처리합니다(예: `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
-- **모델 변형 비교**: 얼굴 감지에서 `-m precise`와 기본값 `-m fast`를 직접 비교하여 정확도/속도 트레이드오프를 확인합니다
-- **자체 앱 빌드**: CMake 통합과 C++ API를 사용하여 자체 C++ 애플리케이션에 CVML 기능을 추가합니다
-- **기능 결합**: 동일한 애플리케이션에서 얼굴 감지와 깊이 추정을 연결하여 더 풍부한 장면 이해를 구현합니다
-- **소스 탐색**: [GitHub의 Ryzen AI CVML Library](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library)에서 헤더 문서, 추가 샘플, API 세부 정보를 확인합니다
+- **깊이 추정 사용해보기**: `cvml-sample-depth-estimation -i sample_face.jpg`를 실행하여 색상화된 깊이 맵을 생성합니다 — 가까운 물체는 따뜻한 색상으로, 먼 물체는 차가운 색상으로 표시됩니다
+- **얼굴 메쉬 살펴보기**: `cvml-sample-face-mesh -i sample_face.jpg`를 실행하여 상세한 메쉬 포인트로 조밀한 얼굴 기하학 추적을 확인합니다
+- **비디오 파일 처리하기**: 모든 샘플에서 `-i` 및 `-o` 플래그를 사용하여 비디오를 처리할 수 있습니다 (예: `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
+- **모델 변형 비교하기**: 얼굴 감지에서 기본값인 `-m fast` 대신 `-m precise`를 사용해보고 정확도와 속도 간의 트레이드오프를 직접 확인합니다
+- **나만의 앱 빌드하기**: CMake 통합 및 C++ API를 사용하여 여러분의 C++ 애플리케이션에 CVML 기능을 추가합니다
+- **기능 결합하기**: 동일한 애플리케이션 내에서 얼굴 감지와 깊이 추정을 연결하여 더욱 풍부한 장면 이해를 구현합니다
+- **소스 코드 살펴보기**: 헤더 문서, 추가 샘플 및 API 세부 정보는 [GitHub의 Ryzen AI CVML Library](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library)를 참고하십시오

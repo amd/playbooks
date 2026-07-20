@@ -6,37 +6,37 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> คู่มือนี้ใช้แท็กพิเศษที่ GitHub ไม่สามารถแสดงผลได้ กรุณาเข้าไปที่ [amd.com/playbooks](https://amd.com/playbooks) เพื่อดูตัวอย่างเนื้อหานี้อย่างถูกต้อง
 <!-- @github-only:end -->
 
-# การคลัสเตอร์ Ryzen™ AI Halo สองเครื่องด้วย RCCL
+# การรวมคลัสเตอร์ Ryzen™ AI Halo สองเครื่องด้วย RCCL
 
 ## ภาพรวม
 
-Ryzen™ AI Halo ของคุณสามารถรันโมเดลภาษาขนาดใหญ่ในเครื่องได้อยู่แล้ว การคลัสเตอร์จะยกระดับความสามารถนี้ขึ้นไปอีก โดยรวม GPU memory ของหลายระบบเข้าด้วยกันผ่านเครือข่ายท้องถิ่น ทำให้คุณเข้าถึงโมเดลขนาดใหญ่ขึ้นที่มีความสามารถในการอนุมานที่แข็งแกร่งกว่า สร้างโค้ดได้ดีกว่า และเข้าใจหลายภาษาได้ลึกซึ้งกว่า ทั้งหมดนี้บนฮาร์ดแวร์ของคุณเองอย่างสมบูรณ์
+Ryzen™ AI Halo ของคุณสามารถรันโมเดลภาษาขนาดใหญ่แบบโลคัลได้อยู่แล้ว การรวมคลัสเตอร์จะพาความสามารถนี้ไปอีกขั้น ด้วยการรวมหน่วยความจำ GPU ของหลายระบบเข้าด้วยกันผ่านเครือข่ายภายใน ทำให้คุณเข้าถึงโมเดลที่มีขนาดใหญ่ขึ้นได้ พร้อมความสามารถในการให้เหตุผลที่แข็งแกร่งขึ้น การสร้างโค้ดที่ดีขึ้น และความเข้าใจภาษาหลายภาษาที่ลึกซึ้งยิ่งขึ้น ทั้งหมดนี้เกิดขึ้นบนฮาร์ดแวร์ของคุณเองทั้งสิ้น
 
-Playbook นี้จะสอนวิธีคลัสเตอร์ระบบ Ryzen AI Halo สองเครื่องโดยใช้ RCCL (ROCm Communication Collectives Library) ร่วมกับ vLLM และรัน Qwen3.5-397B ซึ่งเป็นโมเดลที่มีพารามิเตอร์ 397B บนทั้งสองเครื่องพร้อมการเร่งความเร็วด้วย ROCm
+คู่มือนี้จะสอนวิธีการรวมคลัสเตอร์ระบบ Ryzen AI Halo สองเครื่องโดยใช้ RCCL (ROCm Communication Collectives Library) ร่วมกับ vLLM และรัน Qwen3.5-397B ซึ่งเป็นโมเดลขนาด 397 พันล้านพารามิเตอร์ ข้ามทั้งสองเครื่องด้วยการเร่งความเร็วผ่าน ROCm
 
 ## สิ่งที่คุณจะได้เรียนรู้
 
 - วิธีขยายการจัดสรร VRAM บนระบบ Ryzen AI Halo
-- การเปิดใช้งาน vLLM พร้อมรองรับ ROCm
-- การกำหนดค่า RCCL สำหรับการอนุมานแบบ tensor-parallel หลายโหนดบนระบบ Ryzen AI Halo สองเครื่อง
-- การรันโมเดลพารามิเตอร์ 397B บนระบบ Ryzen AI Halo สองเครื่องที่เชื่อมต่อกันผ่านเครือข่าย
+- การเปิดใช้งาน vLLM ด้วยการรองรับ ROCm
+- การกำหนดค่า RCCL สำหรับการอนุมานแบบ tensor-parallel หลายโหนดข้ามระบบ Ryzen AI Halo สองเครื่อง
+- การรันโมเดลขนาด 397 พันล้านพารามิเตอร์ข้ามระบบ Ryzen AI Halo สองเครื่องที่เชื่อมต่อผ่านเครือข่าย
 
 ## ข้อกำหนดเบื้องต้น
 
 ### ฮาร์ดแวร์
 
-Playbook นี้ต้องใช้ Ryzen AI Halo สองหน่วยและ Ethernet switch หนึ่งตัว เชื่อมต่อในรูปแบบ star topology โดยแต่ละหน่วยเชื่อมต่อโดยตรงกับ switch
+คู่มือนี้ต้องการหน่วย Ryzen AI Halo สองเครื่องและสวิตช์ Ethernet หนึ่งตัว โดยเชื่อมต่อในรูปแบบโทโพโลยีดาว (star topology) ที่แต่ละเครื่องเชื่อมต่อโดยตรงกับสวิตช์
 
 | ส่วนประกอบ | จำนวน | คำอธิบาย |
 |-----------|----------|-------------|
-| Ryzen AI Halo | 2 | โหนดประมวลผลที่ประกอบเป็นคลัสเตอร์ |
-| Ethernet switch 10Gbps | 1 | Switch กลางสำหรับการสื่อสารระหว่างโหนด Ryzen AI Halo หลายเครื่อง (อย่างน้อย 2 พอร์ต) |
-| สาย Ethernet | 2 | เชื่อมต่อแต่ละหน่วย Halo กับ switch (แนะนำ Cat 7 หรือสูงกว่า) |
+| Ryzen AI Halo | 2 | โหนดประมวลผลที่ประกอบกันเป็นคลัสเตอร์ |
+| สวิตช์ Ethernet 10Gbps | 1 | สวิตช์ศูนย์กลางเพื่อให้ระบบ Ryzen AI Halo หลายโหนดสื่อสารกันได้ (อย่างน้อย 2 พอร์ต) |
+| สาย Ethernet | 2 | เชื่อมต่อแต่ละหน่วย Halo เข้ากับสวิตช์ (แนะนำ Cat 7 ขึ้นไป) |
 
-> **หมายเหตุ**: ต้องใช้พอร์ต Ethernet switch สองพอร์ตเพื่อเชื่อมต่อ Ryzen AI Halo สองหน่วย หากคุณเข้าถึงโมเดลจากเครื่อง client แยกต่างหากแทนที่จะเป็นจากหน่วย Halo ใดหน่วยหนึ่ง จะต้องใช้พอร์ตที่สาม
+> **หมายเหตุ**: ต้องใช้พอร์ตสวิตช์ Ethernet สองพอร์ตเพื่อเชื่อมต่อหน่วย Ryzen AI Halo ทั้งสองเครื่อง จำเป็นต้องมีพอร์ตที่สามหากคุณเข้าถึงโมเดลจากเครื่องไคลเอนต์แยกต่างหาก แทนที่จะเข้าถึงจากหนึ่งในหน่วย Halo โดยตรง
 
 ### ซอฟต์แวร์
 <!-- @os:linux -->
@@ -47,19 +47,19 @@ sudo apt install curl
 
 ## การตั้งค่าฮาร์ดแวร์ทางกายภาพ
 
-> **หมายเหตุ**: ดำเนินการขั้นตอนนี้บนทั้ง Machine 1 และ Machine 2
+> **หมายเหตุ**: ทำขั้นตอนนี้ให้ครบทั้งบน Machine 1 และ Machine 2
 
-เชื่อมต่อแต่ละหน่วย Ryzen AI Halo กับ Ethernet switch โดยใช้สาย Cat 7 (หรือสูงกว่า) ซึ่งจะสร้างลิงก์ 10Gbps ที่ใช้สำหรับการสื่อสารความเร็วสูงระหว่างโหนด
+เชื่อมต่อหน่วย Ryzen AI Halo แต่ละเครื่องเข้ากับสวิตช์ Ethernet โดยใช้สาย Cat 7 (หรือสูงกว่า) ซึ่งจะสร้างลิงก์ 10Gbps ที่ใช้สำหรับการสื่อสารความเร็วสูงระหว่างโหนดต่าง ๆ
 
-### 1. ระบุ Network Interface
+### 1. กำหนดอินเทอร์เฟซเครือข่าย
 
-บนแต่ละเครื่อง ให้ค้นหาชื่อ network interface และจดบันทึกไว้ (จะถูกอ้างอิงในคำแนะนำที่เหลือในชื่อ `IFNAME`) รันคำสั่ง:
+บนแต่ละเครื่อง ให้หาชื่ออินเทอร์เฟซเครือข่ายและจดบันทึกไว้ (จะถูกเรียกในคำแนะนำที่เหลือว่า `IFNAME`) รันคำสั่ง:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
 ```
 
-คำสั่งนี้จะพิมพ์ชื่อ interface โดยตรง ตัวอย่างเช่น:
+คำสั่งนี้จะแสดงชื่ออินเทอร์เฟซโดยตรง ตัวอย่างเช่น:
 
 ```bash
 enp191s0
@@ -67,13 +67,13 @@ enp191s0
 
 ### 2. ตรวจสอบความเร็วลิงก์เครือข่าย
 
-ยืนยันว่าลิงก์ทำงานอยู่และรันด้วยความเร็วเต็มโดยตรวจสอบความเร็วของ interface ของคุณ:
+ยืนยันว่าลิงก์เปิดใช้งานและทำงานที่ความเร็วเต็มโดยตรวจสอบความเร็วของอินเทอร์เฟซของคุณ:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **หมายเหตุ**: แทนที่ `<IFNAME>` ด้วยชื่อ interface ที่ได้จาก [1. ระบุ Network Interface](#1-determine-network-interfaces)
+> **หมายเหตุ**: แทนที่ `<IFNAME>` ด้วยชื่ออินเทอร์เฟซที่ได้จาก [1. กำหนดอินเทอร์เฟซเครือข่าย](#1-determine-network-interfaces)
 
 คุณควรเห็นความเร็ว `10000Mb/s`:
 
@@ -81,75 +81,75 @@ sudo ethtool <IFNAME> | grep Speed
 	Speed: 10000Mb/s
 ```
 
-> **หมายเหตุ**: หากความเร็วต่ำกว่า `10000Mb/s` หรือลิงก์ไม่ขึ้นมา ให้ตรวจสอบการเชื่อมต่อสายและยืนยันว่าพอร์ต switch ถูกตั้งค่าเป็น 10Gbps บาง switch อาจต้องปิดการใช้งาน auto-negotiation และตั้งค่าความเร็วลิงก์ด้วยตนเอง โปรดดูเอกสารประกอบของ switch ของคุณ
+> **หมายเหตุ**: หากความเร็วต่ำกว่า `10000Mb/s` หรือลิงก์ไม่ทำงาน ให้ตรวจสอบการเชื่อมต่อสายและยืนยันว่าพอร์ตสวิตช์ตั้งค่าเป็น 10Gbps สวิตช์บางรุ่นอาจต้องปิดการทำงานของการเจรจาอัตโนมัติ (auto-negotiation) และตั้งค่าความเร็วลิงก์ด้วยตนเอง โปรดดูเอกสารของสวิตช์ของคุณ
 
 ## การขยายการจัดสรร VRAM
 
-> **หมายเหตุ**: ดำเนินการขั้นตอนนี้บนทั้ง Machine 1 และ Machine 2
+> **หมายเหตุ**: ทำขั้นตอนนี้ให้ครบทั้งบน Machine 1 และ Machine 2
 
 ### การกำหนดค่าหน่วยความจำสำหรับการรันโมเดลขนาดใหญ่
 
-บน Linux, ROCm ใช้ shared system memory pool และ pool นี้ถูกกำหนดค่าเริ่มต้นที่ครึ่งหนึ่งของหน่วยความจำระบบ
+บน Linux, ROCm ใช้พูลหน่วยความจำระบบร่วมกัน (shared system memory pool) และพูลนี้ถูกกำหนดค่าเริ่มต้นไว้ที่ครึ่งหนึ่งของหน่วยความจำระบบ
 
-ปริมาณนี้สามารถเพิ่มได้โดยการเปลี่ยนการตั้งค่า Translation Table Manager (TTM) page ของ kernel ตามคำแนะนำต่อไปนี้ AMD แนะนำให้ตั้งค่า minimum dedicated VRAM ใน BIOS (0.5 GB)
+ปริมาณนี้สามารถเพิ่มได้โดยการเปลี่ยนการตั้งค่าเพจของ Translation Table Manager (TTM) ของเคอร์เนล ตามคำแนะนำต่อไปนี้ AMD แนะนำให้ตั้งค่า VRAM เฉพาะขั้นต่ำใน BIOS (0.5 GB)
 
-* ติดตั้ง pipx utility และเพิ่ม path สำหรับ wheels ที่ติดตั้งโดย pipx เข้าไปใน system search path
+* ติดตั้งยูทิลิตี pipx และเพิ่มพาธสำหรับวีล (wheel) ที่ติดตั้งโดย pipx ลงในพาธค้นหาของระบบ
 
   ```bash
   sudo apt install pipx
   pipx ensurepath
   ```
 
-* ติดตั้ง amd-debug-tools wheel จาก PyPI
+* ติดตั้งวีล amd-debug-tools จาก PyPI
   ```bash
   pipx install amd-debug-tools
   ```
 
-* รัน amd-ttm tool เพื่อตรวจสอบการตั้งค่าปัจจุบันของ shared memory
+* รันเครื่องมือ amd-ttm เพื่อตรวจสอบการตั้งค่าปัจจุบันสำหรับหน่วยความจำที่ใช้ร่วมกัน
   ```bash
   amd-ttm
   ```
 
-* กำหนดค่า shared memory ใหม่เป็น **120 GB**:
+* ตั้งค่าหน่วยความจำที่ใช้ร่วมกันใหม่เป็น **120 GB**:
   ```bash
   amd-ttm --set 120
   ```
 
 * รีบูตระบบเพื่อให้การเปลี่ยนแปลงมีผล
 
-## การเริ่มต้น vLLM Container
+## การเริ่มต้นคอนเทนเนอร์ vLLM
 
-> **หมายเหตุ**: ดำเนินการขั้นตอนนี้บนทั้ง Machine 1 และ Machine 2
+> **หมายเหตุ**: ทำขั้นตอนนี้ให้ครบทั้งบน Machine 1 และ Machine 2
 
-Ryzen AI Halo ของคุณมาพร้อมกับ vLLM ที่บรรจุอยู่ใน container image ที่สร้างไว้ล่วงหน้า ซึ่งคุณรันโดยใช้ Podman ซึ่งเป็นเครื่องมือ container แบบฟรีและโอเพนซอร์ส
+Ryzen AI Halo ของคุณมาพร้อมกับ vLLM ที่บรรจุอยู่ในอิมเมจคอนเทนเนอร์ที่สร้างไว้ล่วงหน้า ซึ่งคุณรันโดยใช้ Podman ซึ่งเป็นเครื่องมือคอนเทนเนอร์แบบฟรีและโอเพนซอร์ส
 
-### 1. สร้างไดเรกทอรีดาวน์โหลดโมเดล
+### 1. สร้างไดเรกทอรีสำหรับดาวน์โหลดโมเดล
 
-เมื่อคุณ serve โมเดล Qwen3.5-397B ใน playbook นี้ vLLM จะดาวน์โหลด model weights ไปยังระบบของคุณโดยอัตโนมัติ เพื่อให้แน่ใจว่า weights เหล่านั้นสามารถเข้าถึงได้จากภายใน container ให้สร้างไดเรกทอรี models ที่ container สามารถ mount ได้ก่อน:
+เมื่อคุณให้บริการโมเดล Qwen3.5-397B ในคู่มือนี้ vLLM จะดาวน์โหลดน้ำหนักโมเดล (model weights) ไปยังระบบของคุณโดยอัตโนมัติ เพื่อให้แน่ใจว่าน้ำหนักเหล่านั้นสามารถเข้าถึงได้จากภายในคอนเทนเนอร์ ก่อนอื่นให้สร้างไดเรกทอรี models ที่คอนเทนเนอร์สามารถเมาท์ได้:
 
 ```bash
 mkdir -p ~/.local/share/vLLM/models
 ```
 
-### 2. เปิดใช้งาน vLLM Container
+### 2. เปิดใช้งานคอนเทนเนอร์ vLLM
 
-คำสั่งด้านล่างจะเปิดใช้งาน container และนำคุณเข้าสู่ interactive shell โดยจะ mount ไดเรกทอรี models ที่คุณเพิ่งสร้างและส่ง `IFNAME` ของคุณไปยัง `NCCL_SOCKET_IFNAME` และ `GLOO_SOCKET_IFNAME` เพื่อบอก RCCL (ไลบรารีที่ vLLM ใช้ในการประสานงาน GPU ทั่วทั้งคลัสเตอร์) ว่าจะใช้ interface ใด
+คำสั่งด้านล่างจะเปิดใช้งานคอนเทนเนอร์และนำคุณเข้าสู่เชลล์แบบโต้ตอบ โดยจะเมาท์ไดเรกทอรี models ที่คุณเพิ่งสร้างขึ้น และส่งค่า `IFNAME` ของคุณไปยัง `NCCL_SOCKET_IFNAME` และ `GLOO_SOCKET_IFNAME` เพื่อบอก RCCL (ไลบรารีที่ vLLM ใช้ในการประสานงาน GPU ทั่วทั้งคลัสเตอร์) ว่าจะใช้อินเทอร์เฟซใด
 
-เริ่มต้น container ด้วย:
+เริ่มต้นคอนเทนเนอร์ด้วย:
 
 ```bash
 sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
 ```
 
-> **หมายเหตุ**: แทนที่ `<IFNAME>` ด้วยชื่อ interface ที่ได้จาก [1. ระบุ Network Interface](#1-determine-network-interfaces)
+> **หมายเหตุ**: แทนที่ `<IFNAME>` ด้วยชื่ออินเทอร์เฟซที่ได้จาก [1. กำหนดอินเทอร์เฟซเครือข่าย](#1-determine-network-interfaces)
 
 ## การรันโมเดลบนคลัสเตอร์
 
-vLLM ใช้ Ray ในการจัดการคลัสเตอร์และ RCCL ในการจัดการการสื่อสาร GPU-to-GPU ระหว่างโหนด เครื่องหนึ่งทำหน้าที่เป็น **head node** (Machine 1) ซึ่งประสานงานการอนุมาน อีกเครื่องเข้าร่วมเป็น **worker node** (Machine 2) โดยสนับสนุน GPU memory และการประมวลผล
+vLLM ใช้ Ray เพื่อจัดการคลัสเตอร์และ RCCL เพื่อจัดการการสื่อสารระหว่าง GPU กับ GPU ข้ามโหนด เครื่องหนึ่งทำหน้าที่เป็น **head node** (Machine 1) ประสานงานการอนุมาน อีกเครื่องหนึ่งเข้าร่วมเป็น **worker node** (Machine 2) โดยมีส่วนร่วมด้วยหน่วยความจำ GPU และการประมวลผลของตัวเอง
 
-> **หมายเหตุ**: Ray เป็น optional dependency สำหรับ vLLM และใช้งานได้เฉพาะจากภายใน Podman container ที่กำหนดค่าไว้ล่วงหน้าเท่านั้น
+> **หมายเหตุ**: Ray เป็นดีเพนเดนซี (dependency) ทางเลือกสำหรับ vLLM และมีให้ใช้งานเฉพาะจากภายในคอนเทนเนอร์ Podman ที่กำหนดค่าไว้ล่วงหน้าเท่านั้น
 
-เมื่อเริ่มต้น vLLM จะแบ่งโมเดลระหว่างทั้งสองโหนดโดยใช้ tensor parallelism เมื่อโหลดแล้ว การอนุมานจะดำเนินการเหมือนกับการรันบน accelerator เดียว
+เมื่อเริ่มต้น vLLM จะแบ่งโมเดลข้ามทั้งสองโหนดโดยใช้ tensor parallelism เมื่อโหลดเสร็จแล้ว การอนุมานจะดำเนินไปราวกับกำลังทำงานอยู่บนตัวเร่งความเร็วเพียงตัวเดียว
 
 ### ขั้นตอนที่ 1: เริ่มต้น Ray Head Node (Machine 1)
 
@@ -159,8 +159,7 @@ vLLM ใช้ Ray ในการจัดการคลัสเตอร์�
 ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1
 ```
 
-> **การค้นหา `<MACHINE_1_IP>`**: บน Machine 1 รัน `hostname -I | awk '{print $1}'` เพื่อค้นหา IP address ในเครื่องของมัน
-
+> **การหา `<MACHINE_1_IP>`**: บน Machine 1 ให้รัน `hostname -I | awk '{print $1}'` เพื่อหาที่อยู่ IP ภายในของเครื่อง
 ### ขั้นตอนที่ 2: เข้าร่วมคลัสเตอร์ (Machine 2)
 
 บน Machine 2 ให้เชื่อมต่อกับ head node เพื่อสร้างคลัสเตอร์:
@@ -169,11 +168,11 @@ ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1
 ray start --address=<MACHINE_1_IP>:6379 --node-ip-address=<MACHINE_2_IP> --num-gpus=1
 ```
 
-> **การค้นหา `<MACHINE_2_IP>`**: บน Machine 2 รัน `hostname -I | awk '{print $1}'` เพื่อค้นหา IP address ในเครื่องของมัน
+> **การหา `<MACHINE_2_IP>`**: บน Machine 2 ให้รันคำสั่ง `hostname -I | awk '{print $1}'` เพื่อค้นหาที่อยู่ IP ภายในของเครื่อง
 
-### ขั้นตอนที่ 3: Serve โมเดล (Machine 1)
+### ขั้นตอนที่ 3: เสิร์ฟโมเดล (Machine 1)
 
-บน Machine 1 ให้เปิดใช้งาน vLLM server ซึ่งจะดาวน์โหลดโมเดลโดยอัตโนมัติและเริ่ม serve บนทั้งสองโหนด:
+บน Machine 1 ให้เปิดใช้งาน vLLM server ซึ่งจะดาวน์โหลดโมเดลโดยอัตโนมัติและเริ่มเสิร์ฟโมเดลข้ามทั้งสองโหนด:
 
 ```bash
 vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
@@ -189,46 +188,46 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
   --reasoning-parser qwen3
 ```
 
-#### อ้างอิงพารามิเตอร์
+#### รายการพารามิเตอร์
 
-| Flag | วัตถุประสงค์ |
+| แฟล็ก | วัตถุประสงค์ |
 |------|---------|
-| `--port` | พอร์ตสำหรับ serve HTTP API |
-| `--host` | IP address ที่จะผูก server ไว้ (`0.0.0.0` สำหรับทุก interface) |
-| `--max-model-len` | ความยาว context สูงสุดในหน่วย token |
-| `--gpu-memory-utilization` | สัดส่วนของ GPU memory ที่จะจัดสรร (0.0–1.0) |
-| `--dtype` | ประเภทข้อมูลสำหรับ model weights |
-| `--tensor-parallel-size` | จำนวน GPU ที่จะแบ่งโมเดลออก (ตั้งค่าเป็นจำนวน GPU ทั้งหมดในคลัสเตอร์) |
-| `--distributed-executor-backend` | Backend สำหรับการรันแบบหลายโหนด (`ray` สำหรับการ deploy คลัสเตอร์) |
+| `--port` | พอร์ตสำหรับเสิร์ฟ HTTP API |
+| `--host` | ที่อยู่ IP สำหรับผูก server (`0.0.0.0` สำหรับทุกอินเทอร์เฟซ) |
+| `--max-model-len` | ความยาวบริบทสูงสุดในหน่วยโทเคน |
+| `--gpu-memory-utilization` | สัดส่วนของหน่วยความจำ GPU ที่จะจัดสรร (0.0–1.0) |
+| `--dtype` | ชนิดข้อมูลสำหรับน้ำหนักของโมเดล |
+| `--tensor-parallel-size` | จำนวน GPU ที่จะแบ่งโมเดลข้าม (ตั้งค่าเป็นจำนวน GPU ทั้งหมดในคลัสเตอร์) |
+| `--distributed-executor-backend` | แบ็กเอนด์สำหรับการทำงานแบบหลายโหนด (`ray` สำหรับการติดตั้งใช้งานแบบคลัสเตอร์) |
 | `--enforce-eager` | ปิดใช้งานการคอมไพล์ CUDA graph เพื่อความเข้ากันได้ |
-| `--language-model-only` | ข้ามการโหลด auxiliary model components (เช่น vision encoder) |
-| `--reasoning-parser` | เปิดใช้งานการแยกวิเคราะห์ผลลัพธ์การอนุมานแบบมีโครงสร้างสำหรับโมเดล |
+| `--language-model-only` | ข้ามการโหลดส่วนประกอบเสริมของโมเดล (เช่น vision encoder) |
+| `--reasoning-parser` | เปิดใช้งานการแยกวิเคราะห์เอาต์พุตการให้เหตุผลแบบมีโครงสร้างสำหรับโมเดล |
 
-สำหรับการใช้งานพารามิเตอร์แบบเต็ม โปรดดู [เอกสาร vLLM](https://docs.vllm.ai/en/latest/configuration/engine_args/)
+สำหรับรายละเอียดการใช้งานพารามิเตอร์ทั้งหมด โปรดดู [เอกสารประกอบของ vLLM](https://docs.vllm.ai/en/latest/configuration/engine_args/)
 
 ## การเข้าถึงโมเดล
 
-vLLM เปิดเผย API ที่เข้ากันได้กับ OpenAI ดังนั้นคุณสามารถเชื่อมต่อ client หรือ interface ที่เข้ากันได้กับคลัสเตอร์ของคุณ ตัวเลือกยอดนิยมหนึ่งคือ [Open WebUI](https://github.com/open-webui/open-webui) ซึ่งมี chat interface แบบใช้เบราว์เซอร์
+vLLM เปิดเผย API ที่เข้ากันได้กับ OpenAI ดังนั้นคุณจึงสามารถเชื่อมต่อไคลเอนต์หรืออินเทอร์เฟซที่เข้ากันได้ใด ๆ เข้ากับคลัสเตอร์ของคุณได้ ตัวเลือกยอดนิยมตัวหนึ่งคือ [Open WebUI](https://github.com/open-webui/open-webui) ซึ่งมีอินเทอร์เฟซแชทแบบเบราว์เซอร์ให้ใช้งาน
 
-เพื่อเชื่อมต่อ Open WebUI กับ vLLM endpoint ของคุณ:
+หากต้องการเชื่อมต่อ Open WebUI เข้ากับปลายทาง vLLM ของคุณ:
 
 1. เปิด **Settings** > **Admin Panel** > **Connections**
-2. คลิก **+** บน **Manage OpenAI API Connections**
+2. คลิก **+** ที่ **Manage OpenAI API Connections**
 3. ตั้งค่า **Connection Type** เป็น **External**
 4. ตั้งค่า **URL** เป็น `http://<MACHINE_1_IP>:7000/v1`
-5. ใต้ **Auth** ให้เลือก **None** จาก dropdown
-6. ปล่อย **Model IDs** ว่างไว้เพื่อค้นพบโมเดลทั้งหมดจาก endpoint โดยอัตโนมัติ
+5. ภายใต้ **Auth** ให้เลือก **None** จากเมนูแบบเลื่อนลง
+6. เว้น **Model IDs** ว่างไว้เพื่อค้นหาโมเดลทั้งหมดจากปลายทางโดยอัตโนมัติ
 
-> **การค้นหา `<MACHINE_1_IP>`**: บน Machine 1 รัน `hostname -I | awk '{print $1}'` เพื่อค้นหา IP address ในเครื่องของมัน หากเข้าถึง Open WebUI จาก Machine 1 เอง คุณสามารถใช้ `http://localhost:7000/v1`
+> **การหา `<MACHINE_1_IP>`**: บน Machine 1 ให้รันคำสั่ง `hostname -I | awk '{print $1}'` เพื่อค้นหาที่อยู่ IP ภายในของเครื่อง หากเข้าถึง Open WebUI จาก Machine 1 เอง คุณสามารถใช้ `http://localhost:7000/v1` ได้
 
-![การตั้งค่าการเชื่อมต่อ Open WebUI สำหรับ vLLM endpoint](assets/openwebui-connection.png)
+![การตั้งค่าการเชื่อมต่อ Open WebUI สำหรับปลายทาง vLLM](assets/openwebui-connection.png)
 
-เมื่อเชื่อมต่อแล้ว ให้เลือกโมเดลจาก model dropdown ใน Open WebUI และเริ่มสนทนา โมเดลกำลังรันอยู่บนโหนด Ryzen AI Halo ทั้งสองของคุณ:
+เมื่อเชื่อมต่อแล้ว ให้เลือกโมเดลจากเมนูแบบเลื่อนลงของโมเดลใน Open WebUI แล้วเริ่มแชทได้เลย ตอนนี้โมเดลกำลังทำงานข้ามโหนด Ryzen AI Halo ทั้งสองของคุณแล้ว:
 
-![การสนทนากับ Qwen3.5-397B ใน Open WebUI](assets/openwebui-chat.png)
+![การแชทกับ Qwen3.5-397B ใน Open WebUI](assets/openwebui-chat.png)
 
 ## ขั้นตอนถัดไป
 
-- **สำรวจโมเดลอื่น**: ค้นพบโมเดลใหม่บน [Hugging Face](https://huggingface.co/models?&sort=trending) ที่พอดีกับ GPU memory รวมของคลัสเตอร์ของคุณ
-- **ขยายเป็นสี่โหนด**: เพิ่มระบบ Ryzen AI Halo อีกสองเครื่องเป็น Ray worker เพิ่มเติมเพื่อแบ่งโมเดลบน GPU จำนวนมากขึ้น ซึ่งต้องใช้ Ethernet switch ที่มีอย่างน้อยสี่พอร์ต หนึ่งพอร์ตต่อโหนด ทำตาม [ขั้นตอนที่ 2: เข้าร่วมคลัสเตอร์](#step-2-join-the-cluster-machine-2) บน worker เพิ่มเติมแต่ละเครื่องและเพิ่ม `--tensor-parallel-size` ตามความเหมาะสม
-- **ลองกลยุทธ์ parallelism อื่น**: vLLM รองรับ [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) สำหรับโมเดล mixture-of-experts และ [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) สำหรับ throughput ที่สูงขึ้น ทดลองกับ `--enable-expert-parallel` และ `--data-parallel-size` เพื่อค้นหาการกำหนดค่าที่ดีที่สุดสำหรับ workload ของคุณ
+- **สำรวจโมเดลอื่น ๆ**: ค้นพบโมเดลใหม่ ๆ บน [Hugging Face](https://huggingface.co/models?&sort=trending) ที่เหมาะกับหน่วยความจำ GPU รวมของคลัสเตอร์ของคุณ
+- **ขยายเป็นสี่โหนด**: เพิ่มระบบ Ryzen AI Halo อีกสองเครื่องเป็น Ray worker เพิ่มเติม เพื่อแบ่งโมเดลข้าม GPU ได้มากยิ่งขึ้น ซึ่งต้องใช้ Ethernet switch ที่มีอย่างน้อยสี่พอร์ต หนึ่งพอร์ตต่อหนึ่งโหนด ทำตาม [ขั้นตอนที่ 2: เข้าร่วมคลัสเตอร์](#step-2-join-the-cluster-machine-2) กับ worker เพิ่มเติมแต่ละเครื่อง และเพิ่มค่า `--tensor-parallel-size` ตามความเหมาะสม
+- **ลองใช้กลยุทธ์การประมวลผลแบบขนานอื่น ๆ**: vLLM รองรับ [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) สำหรับโมเดลแบบ mixture-of-experts และ [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) เพื่อปริมาณงานที่สูงขึ้น ทดลองใช้ `--enable-expert-parallel` และ `--data-parallel-size` เพื่อค้นหาการกำหนดค่าที่ดีที่สุดสำหรับภาระงานของคุณ

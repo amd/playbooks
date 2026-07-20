@@ -8,10 +8,10 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. Download den seneste Windows ComfyUI-installer fra [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
+1. Download den nyeste Windows ComfyUI-installationsfil fra [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
 2. Vælg din hardwareopsætning: Vælg `AMD ROCm`.
-3. Vælg, hvor du vil installere ComfyUI: Brug standardstien eller din foretrukne mappe.
-4. Desktop App-indstillinger: Vi anbefaler at fravælge "Automatic Updates" for at sikre, at du bruger den anbefalede version af denne app.
+3. Vælg, hvor ComfyUI skal installeres: Brug standardstien eller din foretrukne mappe.
+4. Desktop App-indstillinger: Vi anbefaler, at du fravælger "Automatic Updates" for at sikre, at du bruger den anbefalede version af denne app.
 5. Tryk på "Next" for at starte installationen.
 
 <!-- @os:end -->
@@ -22,14 +22,14 @@ SPDX-License-Identifier: MIT
 git clone https://github.com/Comfy-Org/ComfyUI.git
 ```
 
-#### (Valgfrit) Tjek en specifik version ud
+#### (Valgfrit) Vælg en bestemt version
 ```bash
 git checkout v0.19.2
 ```
 
 #### Installer ComfyUI-krav
 
-Med det virtuelle Python-miljø aktiveret, kør:
+Med det virtuelle Python-miljø aktiveret skal du køre:
 ```bash
 cd ComfyUI
 pip install -r requirements.txt

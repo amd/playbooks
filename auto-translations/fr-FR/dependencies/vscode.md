@@ -8,11 +8,11 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code peut être installé depuis le **AMD Ryzen™ AI Developer Center**. Accédez à l'onglet **Updates** et installez VS Code s'il n'est pas déjà présent.
+VS Code peut être installé depuis l'**AMD Ryzen™ AI Developer Center**. Accédez à l'onglet **Updates** et installez VS Code s'il n'est pas déjà présent.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code peut être installé depuis le **AMD Ryzen™ AI Developer Center**. Accédez à l'onglet **Manage** et installez VS Code s'il n'est pas déjà présent.
+VS Code peut être installé depuis l'**AMD Ryzen™ AI Developer Center**. Accédez à l'onglet **Manage** et installez VS Code s'il n'est pas déjà présent.
 <!-- @os:end -->
 <!-- @device:end -->
 

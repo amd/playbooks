@@ -4,20 +4,20 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### LM Studio'da GPT-OSS 120B İndirme
+### LM Studio Üzerinde GPT-OSS 120B İndirme
 
 GPT-OSS 120B modelini indirmek için:
 
 1. Klavyenizde "Ctrl" + "Shift" + "M" tuşlarına basın veya sol kenar çubuğundaki "Discover" sekmesine (Büyüteç simgesi) tıklayın
-2. `ggml-org/gpt-oss-120b-GGUF` için arama yapın
-3. `mxfp4` seçeneğini seçin ve İndir'e tıklayın
+2. `ggml-org/gpt-oss-120b-GGUF` araması yapın
+3. `mxfp4` seçeneğini seçin ve Download'a tıklayın
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download.png" alt="LM Studio Download Models" width="600"/>
 
-LM Studio, modeli otomatik olarak indirecek ve doğru dizine yerleştirecektir.
+LM Studio, modeli otomatik olarak indirip doğru dizine yerleştirecektir.
 
-Ek modeller indirmek isterseniz, bunları Discover sekmesinde arayabilirsiniz; gerisini LM Studio halledecektir.
+Ek modeller indirmek isterseniz, bunları Discover sekmesinde arayabilirsiniz; LM Studio gerisini halledecektir.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-windows timeout=60 hidden=True -->

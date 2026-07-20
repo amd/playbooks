@@ -11,18 +11,18 @@ Tento dokument popisuje očekávanou konfiguraci platformy pro spuštění tohot
 ## Požadované aplikace/frameworky
 
 ### Windows/Linux
-Lemonade by mělo být předem nainstalováno odtud: [zde](https://lemonade-server.ai/install_options.html).
+Lemonade by mělo být předem nainstalováno [odsud](https://lemonade-server.ai/install_options.html). 
 
 - **Open WebUI** (frontendová webová aplikace)
-- **Lemonade Server** (backendový modelový server)
+- **Lemonade Server** (backendový server modelů)
 
-> Tento playbook spouští **Lemonade** (server/aplikaci Lemonade) **nativně**. **Open WebUI** běží jako **kontejner** na Linuxu (přes Podman) a jako **balíček Python** na Windows. Balíček `open-webui` PyPI podporuje pouze Python ≤ 3.12, takže linuxový kontejner zabraňuje nutnosti spravovat starší verze Pythonu.
+> Tento playbook spouští **Lemonade** (Lemonade server/aplikaci) **nativně**. **Open WebUI** běží jako **kontejner** na Linuxu (pomocí Podman) a jako **Python balíček** na Windows. Balíček `open-webui` z PyPI podporuje pouze Python ≤ 3.12, takže kontejner na Linuxu umožňuje vyhnout se nutnosti spravovat starší verze Pythonu.  
 
 ## Modely (v Lemonade)
 
-Modely by měly být staženy v **aplikaci Lemonade** (pomocí vestavěného Správce modelů) nebo prostřednictvím příkazů pro správu modelů Lemonade (`lemonade pull <model_name>`). Tento playbook předpokládá, že níže doporučené modely jsou staženy a zobrazují se v koncovém bodu seznamu modelů.
+Modely by měly být stahovány přímo v **aplikaci Lemonade** (pomocí vestavěného Model Manageru) nebo pomocí příkazů pro správu modelů v Lemonade (`lemonade pull <model_name>`). Tento playbook předpokládá, že níže doporučené modely jsou stažené a zobrazují se v koncovém bodu seznamu modelů.
 
-Ověření dostupnosti modelů:
+Kontrola dostupnosti modelů:
 - Otevřete: `http://localhost:13305/api/v1/models`
 - Stažené modely budou uvedeny pod `"data"`.
 
@@ -30,10 +30,10 @@ Ověření dostupnosti modelů:
 
 | Schopnost | ID modelu | Poznámky |
 |---|----|-----|
-| LLM (textový vstup → textový výstup) | `Qwen3-4B-Hybrid` (nebo podobný) | Jakýkoli LLM model Lemonade pro chat, dokončování textu, kódování nebo uvažování |
-| VLM (obrázek → text) | `Qwen3.5-4B-GGUF` (nebo jakýkoli model v kategorii **Vision**) | Jakýkoli multimodální/vizuálně schopný model, který může přijímat obrázky jako součást vstupu |
-| Generování obrázků (text → obrázek) | `SDXL-Turbo` (nebo jakýkoli model v kategorii **Image**) | Jakýkoli model Stable Diffusion, který generuje obrázky na základě textového promptu |
-| Zvuk (řeč → text) | `Whisper-Large-v3` (nebo jakýkoli model v kategorii **Audio**) | Jakýkoli ASR model, který převádí zvuk na text |
+| LLM (Text na vstupu → Text na výstupu) | `Qwen3-4B-Hybrid` (nebo podobný) | Libovolný LLM model z Lemonade pro chat, doplňování textu, kódování nebo uvažování |
+| VLM (Obrázek → Text) | `Qwen3.5-4B-GGUF` (nebo jakýkoli model v kategorii **Vision**) | Libovolný multimodální model se schopností zpracování obrázků, který dokáže přijímat obrázky jako součást svého vstupu |
+| Generování obrázků (Text → Obrázek) | `SDXL-Turbo` (nebo jakýkoli model v kategorii **Image**) | Libovolný model Stable Diffusion, který generuje obrázky na základě textové výzvy |
+| Zvuk (Řeč → Text) | `Whisper-Large-v3` (nebo jakýkoli model v kategorii **Audio**) | Libovolný ASR model, který převádí zvuk na text |
 
 <p align="center">
   <img src="assets/lemonade_model_manager.png" alt="Lemonade Model Manager" width="600"/>
@@ -44,4 +44,4 @@ Ověření dostupnosti modelů:
 - **Lemonade Server:** `http://localhost:13305`
 - **Open WebUI:** `http://localhost:8080`
 
-Pokud jsou tyto porty ve vašem systému již obsazeny, změňte je při spouštění serveru (serverů).
+Pokud jsou tyto porty ve vašem systému již používány, změňte je při spouštění serveru(ů).

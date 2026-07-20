@@ -9,10 +9,10 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 1. Pobierz najnowszy instalator ComfyUI dla systemu Windows ze strony [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
-2. Wybierz konfigurację sprzętową: Wybierz `AMD ROCm`.
+2. Wybierz swoją konfigurację sprzętową: Wybierz `AMD ROCm`.
 3. Wybierz miejsce instalacji ComfyUI: Użyj domyślnej ścieżki lub preferowanego folderu.
-4. Ustawienia aplikacji desktopowej: Zalecamy odznaczenie opcji „Automatyczne aktualizacje", aby mieć pewność, że używasz zalecanej wersji tej aplikacji.
-5. Naciśnij „Dalej", aby rozpocząć instalację.
+4. Ustawienia aplikacji desktopowej: Zalecamy odznaczenie opcji „Automatic Updates”, aby mieć pewność, że korzystasz z zalecanej wersji tej aplikacji.
+5. Naciśnij „Next”, aby rozpocząć instalację.
 
 <!-- @os:end -->
 
@@ -22,7 +22,7 @@ SPDX-License-Identifier: MIT
 git clone https://github.com/Comfy-Org/ComfyUI.git
 ```
 
-#### (Opcjonalnie) Przełącz się na określoną wersję
+#### (Opcjonalnie) Przełącz się na konkretną wersję
 ```bash
 git checkout v0.19.2
 ```
@@ -35,6 +35,6 @@ cd ComfyUI
 pip install -r requirements.txt
 ```
 
-> **Uwaga**: Więcej informacji znajdziesz na stronie [ComfyUI GitHub](https://github.com/comfy-org/ComfyUI).
+> **Uwaga**: Więcej informacji znajdziesz na [ComfyUI GitHub](https://github.com/comfy-org/ComfyUI).
 
 <!-- @os:end -->

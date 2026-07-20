@@ -8,11 +8,11 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code može biti instaliran iz **AMD Ryzen™ AI Developer Center**. Idite na karticu **Updates** i instalirajte VS Code ako već nije prisutan.
+VS Code se može instalirati iz **AMD Ryzen™ AI Developer Center**. Idite na karticu **Updates** i instalirajte VS Code ako već nije prisutan.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code može biti instaliran iz **AMD Ryzen™ AI Developer Center**. Idite na karticu **Manage** i instalirajte VS Code ako već nije prisutan.
+VS Code se može instalirati iz **AMD Ryzen™ AI Developer Center**. Idite na karticu **Manage** i instalirajte VS Code ako već nije prisutan.
 <!-- @os:end -->
 <!-- @device:end -->
 

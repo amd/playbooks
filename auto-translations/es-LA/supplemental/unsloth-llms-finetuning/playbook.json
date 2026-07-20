@@ -1,5 +1,5 @@
 {
   "id": "unsloth-llms-finetuning",
-  "title": "Ajuste fino de LLMs con Unsloth",
-  "description": "Usa Unsloth para LLMs™ ajustados finamente con memoria eficiente"
+  "title": "Ajuste fino de LLM con Unsloth",
+  "description": "Utiliza Unsloth para ajustar (fine-tuning) LLM™ de manera eficiente en memoria"
 }

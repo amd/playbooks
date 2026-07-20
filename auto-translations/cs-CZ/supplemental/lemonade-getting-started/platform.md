@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 
 # Konfigurace platformy — Lemonade Local AI
 
-Tento dokument popisuje předinstalovaný software, cesty k modelům a předpoklady specifické pro platformu, které tento playbook předpokládá.
+Tento dokument popisuje předinstalovaný software, cesty k modelům a specifické požadavky na platformu předpokládané v tomto playbooku.
 
 ## Předinstalovaný software
 
 | Software | Verze | Účel |
 |----------|---------|---------|
-| Lemonade Server | Nejnovější vydání | Lokální LLM server s OpenAI-kompatibilním API |
-| Python | 3.10–3.13 | Vyžadováno pro příklad s OpenAI Python klientem |
+| Lemonade Server | Nejnovější vydání | Lokální LLM server s API kompatibilním s OpenAI |
+| Python | 3.10–3.13 | Vyžadován pro příklad klienta OpenAI Python |
 
 ## Výchozí úložiště modelů
 
-Modely stažené prostřednictvím Lemonade jsou uloženy podle specifikace Hugging Face Hub:
+Modely stažené prostřednictvím Lemonade jsou ukládány podle specifikace Hugging Face Hub:
 
 | Platforma | Výchozí cesta |
 |----------|-------------|
@@ -28,12 +28,12 @@ Chcete-li změnit umístění úložiště, nastavte proměnnou prostředí `HF_
 
 ## Hardwarové požadavky
 
-| Cílový hardware | Požadavky |
+| Hardwarový cíl | Požadavky |
 |----------------|-------------|
-| **CPU** | Jakýkoliv moderní procesor x86-64 (AMD nebo Intel) |
-| **GPU (Vulkan)** | Jakýkoliv GPU s podporou ovladače Vulkan |
-| **GPU (ROCm)** | AMD Radeon RX 7000/9000 series nebo Radeon PRO W7000 series; AMD Ryzen AI MAX+ Pro 395 |
-| **NPU** | Procesor AMD Ryzen AI 300 series, Windows 11 |
+| **CPU** | Jakýkoli moderní procesor x86-64 (AMD nebo Intel) |
+| **GPU (Vulkan)** | Jakékoli GPU s podporou ovladače Vulkan |
+| **GPU (ROCm)** | AMD Radeon RX řady 7000/9000 nebo Radeon PRO řady W7000; AMD Ryzen AI MAX+ Pro 395 |
+| **NPU** | Procesor AMD Ryzen AI řady 300, Windows 11 |
 
 ## Síťové požadavky
 

@@ -4,9 +4,9 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Configurarea Platformei
+# Configurarea platformei
 
-Acest document descrie configurațiile de platformă așteptate pentru rularea acestui playbook.
+Acest document descrie configurațiile de platformă preconizate pentru rularea acestui playbook.
 
 ## Cerințe preliminare
 
@@ -14,20 +14,20 @@ Acest document descrie configurațiile de platformă așteptate pentru rularea a
 
 | Componentă | Versiune | Note |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Pre-instalat și disponibil în PATH pe AMD Ryzen™ AI Halo Developer Platform; trebuie instalat manual pe toate celelalte dispozitive |
-| **Lemonade Server** | latest | Rulează pe `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Preinstalat și disponibil în PATH pe AMD Ryzen™ AI Halo Developer Platform; trebuie instalat manual pe toate celelalte dispozitive |
+| **Lemonade Server** | cea mai recentă | Rulează pe `http://localhost:13305/api/v1` |
 
 ### Linux
 
 | Componentă | Versiune | Note |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Pre-instalat și disponibil în PATH pe AMD Ryzen™ AI Halo Developer Platform; trebuie instalat manual pe toate celelalte dispozitive |
-| **Lemonade Server** | latest | Rulează pe `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Preinstalat și disponibil în PATH pe AMD Ryzen™ AI Halo Developer Platform; trebuie instalat manual pe toate celelalte dispozitive |
+| **Lemonade Server** | cea mai recentă | Rulează pe `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-Serverul Lemonade ar trebui să ruleze cu modelul corespunzător dispozitivului încărcat (consultați README pentru comanda `lemonade run` specifică dispozitivului dvs.):
+Serverul Lemonade trebuie să ruleze cu modelul adecvat dispozitivului încărcat (consultați README pentru comanda `lemonade run` corespunzătoare dispozitivului dvs.):
 
 | Dispozitiv | Endpoint | Model |
 |--------|----------|-------|

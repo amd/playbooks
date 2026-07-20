@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 
-بالنسبة لـ Ryzen AI Halo، تبلغ ذاكرة GPU المخصصة الافتراضية 64 جيجابايت، وهي كافية لمعظم أعباء العمل. بالنسبة للنماذج الأكبر أو السياقات الأطول، قد تساعد زيادتها إلى 96 جيجابايت. للضبط، افتح **AMD Software: Adrenalin Edition™** وانتقل إلى **Performance → Tuning → AMD Variable Graphics Memory**. أعد التشغيل لتصبح التغييرات سارية المفعول.
+بالنسبة لـ Ryzen AI Halo، تكون ذاكرة GPU المخصصة افتراضيًا 64 جيجابايت، وهي كافية لمعظم أعباء العمل. بالنسبة للنماذج الأكبر أو السياقات الأطول، قد يساعد زيادتها إلى 96 جيجابايت. لضبط ذلك، افتح **AMD Software: Adrenalin Edition™** وانتقل إلى **Performance → Tuning → AMD Variable Graphics Memory**. أعد التشغيل حتى تسري التغييرات.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo,stx,krk -->
 
-لتغيير قيمة ذاكرة GPU المخصصة، افتح **AMD Software: Adrenalin Edition™** وانتقل إلى **Performance → Tuning → AMD Variable Graphics Memory**. أعد التشغيل لتصبح التغييرات سارية المفعول.
+لتغيير قيمة ذاكرة GPU المخصصة، افتح **AMD Software: Adrenalin Edition™** وانتقل إلى **Performance → Tuning → AMD Variable Graphics Memory**. أعد التشغيل حتى تسري التغييرات.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -30,11 +30,11 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:linux -->
 
-على Linux، لتشغيل نماذج أكبر، قم بزيادة مجموعة **الذاكرة المشتركة** المتاحة لـ GPU. قد يتضمن ذلك ضبط ذاكرة GPU المخصصة في BIOS على الحد الأدنى، حتى يمكن تعظيم مجموعة الذاكرة المشتركة.
+على Linux، لتشغيل نماذج أكبر، قم بزيادة **مجمع الذاكرة المشتركة** المتاح لوحدة GPU. قد يتطلب ذلك ضبط ذاكرة GPU المخصصة في BIOS إلى الحد الأدنى، بحيث يمكن زيادة مجمع الذاكرة المشتركة إلى أقصى حد.
 
 <!-- @device:halo_box -->
 
-بالنسبة لـ AMD Ryzen™ AI Halo، الإعداد الافتراضي هو 96 جيجابايت مشتركة. لتعديل ذلك، افتح **AMD Ryzen™ AI Developer Center** وانتقل إلى علامة التبويب **Settings**. ضمن **Graphics Performance Settings**، قم بزيادة شريط تمرير **Shared Video Memory**، ثم انقر على **Apply Changes** وأعد التشغيل لتصبح التغييرات سارية المفعول.
+بالنسبة لـ AMD Ryzen™ AI Halo، القيمة الافتراضية هي 96 جيجابايت مشتركة. لتعديل هذا، افتح **AMD Ryzen™ AI Developer Center** وانتقل إلى علامة التبويب **Settings**. ضمن **Graphics Performance Settings**، قم بزيادة شريط التمرير **Shared Video Memory**، ثم انقر فوق **Apply Changes** وأعد التشغيل حتى تسري التغييرات.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/linux_mem_new.png" alt="AMD Ryzen AI Developer Center — Graphics Performance Settings with Shared Video Memory slider" width="600"/>
@@ -44,16 +44,16 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo,stx,krk -->
 
-قم بزيادة مجموعة الذاكرة المشتركة عن طريق تغيير إعداد صفحة مدير جدول الترجمة (TTM) الخاص بالنواة. توصي AMD بضبط الحد الأدنى من VRAM المخصصة في BIOS (0.5 جيجابايت) حتى يكون الحد الأقصى من الذاكرة متاحاً كذاكرة مشتركة.
+قم بزيادة مجمع الذاكرة المشتركة عن طريق تغيير إعداد صفحة مدير جدول الترجمة (TTM) الخاص بالنواة. توصي AMD بضبط الحد الأدنى من ذاكرة VRAM المخصصة في BIOS (0.5 جيجابايت) بحيث يكون الحد الأقصى متاحًا كذاكرة مشتركة.
 
-1. قم بتثبيت الأداة المساعدة `pipx` وأضف المسار لعجلات المثبتة عبر pipx إلى مسار البحث في النظام:
+1. قم بتثبيت أداة `pipx` وأضف المسار الخاص بالحزم المثبتة عبر pipx إلى مسار البحث في النظام:
 
    ```bash
    sudo apt install pipx
    pipx ensurepath
    ```
 
-2. قم بتثبيت عجلة `amd-debug-tools` من PyPI:
+2. قم بتثبيت حزمة `amd-debug-tools` من PyPI:
 
    ```bash
    pipx install amd-debug-tools
@@ -71,7 +71,7 @@ SPDX-License-Identifier: MIT
    amd-ttm --set <NUM>
    ```
 
-5. أعد التشغيل لتصبح التغييرات سارية المفعول.
+5. أعد التشغيل حتى تسري التغييرات.
 
 <!-- @device:end -->
 

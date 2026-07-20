@@ -16,8 +16,8 @@ sudo usermod -a -G render,video $LOGNAME
 sudo reboot
 ```
 
-**Telepítse a ROCm-ot a létrehozott virtuális környezetbe.**
-> **Megjegyzés**: A folytatás előtt győződjön meg arról, hogy a virtuális környezet aktív.
+**Telepítse a ROCm-ot a létrehozott virtuális környezetben.**
+> **Megjegyzés**: Győződjön meg róla, hogy a virtuális környezet aktív, mielőtt folytatná.
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-További telepítési segítségért tekintse meg ezt a [hivatkozást](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+A telepítéssel kapcsolatos további segítségért kérjük, tekintse meg ezt a [linket](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).

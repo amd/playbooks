@@ -4,24 +4,24 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Configurarea Platformei
+# Configurarea platformei
 
-Acest document descrie configurarea așteptată a platformei pentru rularea acestui playbook.
+Acest document descrie configurația de platformă preconizată pentru rularea acestui playbook.
 
-## Aplicații / Framework-uri Necesare
+## Aplicații/framework-uri necesare
 
-| Componentă      | Configurare Așteptată                | Note                                                                         |
+| Componentă       | Configurație preconizată               | Note                                                                        |
 | --------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
-| Python          | Python cu suport `venv`            | Utilizat pentru a crea și activa `kernel-env`                                |
-| ROCm Python SDK | Familia de pachete ROCm 7.13         | Instalat prin fluxul de dependențe al playbook-ului                          |
-| PyTorch ROCm    | PyTorch 2.11.0 + ROCm 7.13           | Necesar pentru `torch.cuda`, runtime HIP, compilare JIT și `CUDAExtension`  |
-| Driver GPU      | Driver AMD GPU cu suport ROCm/HIP    | Necesar înainte ca PyTorch să poată detecta GPU-ul AMD                       |
+| Python          | Python cu suport pentru `venv`         | Utilizat pentru a crea și activa `kernel-env`                                     |
+| ROCm Python SDK | Familia de pachete ROCm 7.13             | Instalat prin fluxul de dependențe al playbook-ului                               |
+| PyTorch ROCm    | PyTorch 2.11.0 + ROCm 7.13           | Necesar pentru `torch.cuda`, runtime-ul HIP, compilarea JIT și `CUDAExtension` |
+| Driver GPU      | Driver AMD GPU cu suport ROCm/HIP | Necesar înainte ca PyTorch să poată detecta GPU-ul AMD                               |
 
-> Notă: Dacă rulați pe AMD Ryzen™ AI Halo Developer Platform, AMD ROCm™ software și PyTorch sunt preinstalate.
+> Notă: Dacă rulați pe AMD Ryzen™ AI Halo Developer Platform, software-ul AMD ROCm™ și PyTorch sunt preinstalate.
 
-## Cerințe Preliminare Linux
+## Cerințe preliminare pentru Linux
 
-Următoarele pachete de sistem sunt necesare:
+Sunt necesare următoarele pachete de sistem:
 
 ```bash
 sudo apt update
@@ -29,22 +29,22 @@ sudo apt install -y python3-venv build-essential gcc g++
 ```
 
 * `python3-venv` este necesar pentru a crea `kernel-env`.
-* `build-essential`, `gcc` și `g++` sunt necesare pentru parcurgerea exemplelor cu extensii C++.
-* `amd-smi` este utilizat pentru verificarea vizibilității/utilizării GPU-ului pe Linux.
+* `build-essential`, `gcc` și `g++` sunt necesare pentru ghidurile pas cu pas privind extensiile C++.
+* `amd-smi` este utilizat pentru verificările de vizibilitate/utilizare a GPU-ului pe Linux.
 
-Exemplele cu extensii C++ compilează module native `.so` din fișiere `.cu` folosind calea `CUDAExtension` a PyTorch.
+Exemplele de extensii C++ construiesc module native `.so` din fișiere `.cu` folosind calea `CUDAExtension` a PyTorch.
 
-## Cerințe Preliminare Windows
+## Cerințe preliminare pentru Windows
 
-Rularea pe Windows necesită:
+Executoarele Windows necesită:
 
-* Python disponibil prin comanda `python`
+* Python disponibil prin `python`
 * Instalați cea mai recentă versiune: [AMD Software: Adrenalin Edition™](https://www.amd.com/en/products/software/adrenalin.html)
-* [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) sau [mai nou](https://visualstudio.microsoft.com/vs/community/) cu volumul de lucru **Dezvoltare desktop cu C++**
+* [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) sau [o versiune mai nouă](https://visualstudio.microsoft.com/vs/community/) cu sarcina de lucru **Desktop development with C++**
 
-Mediul C++ din Visual Studio trebuie să furnizeze:
+Mediul Visual Studio C++ trebuie să ofere:
 * `vcvars64.bat`
 * `cl.exe`
-* Căile de includere și bibliotecă ale Windows SDK
+* Căile pentru include-uri și biblioteci ale Windows SDK
 
-Exemplele cu extensii C++ compilează module native `.pyd` din fișiere `.cu` folosind calea `CUDAExtension` a PyTorch.
+Exemplele de extensii C++ construiesc module native `.pyd` din fișiere `.cu` folosind calea `CUDAExtension` a PyTorch.

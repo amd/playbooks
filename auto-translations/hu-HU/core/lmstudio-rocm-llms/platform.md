@@ -6,25 +6,25 @@ SPDX-License-Identifier: MIT
 
 # Platform Configuration
 
-Ez a dokumentum a playbook futtatásához szükséges platform-konfigurációkat írja le.
+Ez a dokumentum ismerteti a jelen playbook futtatásához szükséges elvárt platformkonfigurációkat.
 
 ## Windows
 
 ### LM Studio telepítés
 
-Az LM Studio előre telepítve kell legyen:
+Az LM Studio-nak előre telepítve kell lennie:
 
-| Összetevő | Verzió | Helyszín |
+| Komponens | Verzió | Hely |
 |-----------|---------|----------|
-| **LM Studio (Modellek + Egyéb)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modellek + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Gyorsítótár)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Modell letöltés
+### Modell letöltése
 
 A következő modelleknek már jelen kell lenniük az LM Studio modellek könyvtárában (`C:\Users\...\.lmstudio\models`):
 
-| Eszköz | Modell típus | Kvantálás | Méret (GB) | Helyszín |
+| Eszköz | Modell típusa | Kvantálás | Méret (GB) | Hely |
 | ----- |------------|--------------|------|----------|
 | AMD Ryzen™ AI Halo Developer Platform <br> AMD Ryzen™ AI Max+ | OpenAI GPT-OSS 120B | `MXFP4` | 63.39 | `models\ggml-org` |
 | AMD Ryzen™ AI 300 HX <br> AMD Ryzen™ AI 300 <br> AMD Radeon™ 7000 Series Graphics <br> AMD Radeon™ 9000 Series Graphics | Qwen3.5 9B | `Q4_K_M` | 6.55 | `models\lmstudio-community` |
@@ -37,6 +37,6 @@ A következő modelleknek már jelen kell lenniük az LM Studio modellek könyvt
 
 További részletekért lásd: [lmstudio.md](../../dependencies/lmstudio.md).
 
-### Modell letöltés
+### Modell letöltése
 
-Megegyezik a Windows rendszeren alkalmazottal.
+Ugyanaz, mint Windows esetén.

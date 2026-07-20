@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA, AMD donanımında Ryzen AI hızlandırmasıyla yerel olarak çalışan AI ajanları oluşturmak için AMD'nin açık kaynaklı çerçevesidir.
+GAIA, Ryzen AI hızlandırmasıyla AMD donanımında yerel olarak çalışan AI aracıları oluşturmak için AMD'nin açık kaynaklı çerçevesidir.
 
-#### GAIA Kurulumu
+#### GAIA'nın Kurulumu
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Windows'ta, istediğiniz dizinde bir terminal açın ve venv oluşturmak için komutları izleyin.
+1. Windows'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Ardından, **Gaia**'yı yüklemek için `pip` kullanın
+2. Ardından, **Gaia**'yı kurmak için `pip` kullanın
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -30,7 +30,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux'ta, istediğiniz dizinde bir terminal açın ve venv oluşturmak için komutları izleyin.
+1. Linux'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
 <!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Ardından, **Gaia**'yı yüklemek için `pip` kullanın
+2. Ardından, **Gaia**'yı kurmak için `pip` kullanın
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Windows'ta, istediğiniz dizinde bir terminal açın ve venv oluşturmak için komutları izleyin.
+1. Windows'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Ardından, **Gaia**'yı yüklemek için `pip` kullanın
+2. Ardından, **Gaia**'yı kurmak için `pip` kullanın
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -71,7 +71,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux'ta, istediğiniz dizinde bir terminal açın ve venv oluşturmak için komutları izleyin.
+1. Linux'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
 <!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Ardından, **Gaia**'yı yüklemek için `pip` kullanın
+2. Ardından, **Gaia**'yı kurmak için `pip` kullanın
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -91,15 +91,15 @@ pip install amd-gaia
 <!-- @os:end -->
 <!-- @device:end -->
 
-3. GAIA'yı Başlatma
+3. GAIA'nın Başlatılması
 
-Kurulumun ardından, Lemonade Server'ı kurmak ve modelleri indirmek için `gaia init` komutunu çalıştırın:
+Kurulumdan sonra, Lemonade Server'ı ayarlamak ve modelleri indirmek için `gaia init` komutunu çalıştırın:
 
 ```bash
 gaia init
 ```
 
-Bu işlem Lemonade Server'ı yükler, varsayılan modelleri indirir ve kurulumu doğrular.
+Bu, Lemonade Server'ı kurar, varsayılan modelleri indirir ve kurulumu doğrular.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -279,9 +279,9 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Kurulumu Doğrulama
+#### Kurulumun Doğrulanması
 
-GAIA v0.16.2 veya daha yeni bir sürümün yüklü olduğunu doğrulayın:
+GAIA v0.16.2 veya sonrasının kurulu olduğunu doğrulayın:
 
 ```bash
 gaia --version

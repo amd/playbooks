@@ -8,11 +8,11 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. Lataa uusin Windows ComfyUI -asennusohjelma osoitteesta [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
+1. Lataa uusin Windows-käyttöjärjestelmälle tarkoitettu ComfyUI-asennusohjelma osoitteesta [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
 2. Valitse laitteistokokoonpanosi: Valitse `AMD ROCm`.
-3. Valitse ComfyUI:n asennussijainti: Käytä oletuspolkua tai haluamaasi kansiota.
-4. Työpöytäsovelluksen asetukset: Suosittelemme poistamaan valinnan "Automatic Updates", jotta käytät sovelluksen suositeltua versiota.
-5. Paina "Next" aloittaaksesi asennuksen.
+3. Valitse, mihin ComfyUI asennetaan: Käytä oletuspolkua tai haluamaasi kansiota.
+4. Työpöytäsovelluksen asetukset: Suosittelemme poistamaan valinnan "Automatic Updates" -kohdasta, jotta käytössäsi on tämän sovelluksen suositeltu versio.
+5. Aloita asennus painamalla "Next".
 
 <!-- @os:end -->
 
@@ -22,7 +22,7 @@ SPDX-License-Identifier: MIT
 git clone https://github.com/Comfy-Org/ComfyUI.git
 ```
 
-#### (Valinnainen) Siirry tiettyyn versioon
+#### (Valinnainen) Vaihda tiettyyn versioon
 ```bash
 git checkout v0.19.2
 ```
@@ -35,6 +35,6 @@ cd ComfyUI
 pip install -r requirements.txt
 ```
 
-> **Huomio**: Katso lisätietoja [ComfyUI GitHub](https://github.com/comfy-org/ComfyUI) -sivulta.
+> **Huomautus**: Katso lisätietoja osoitteesta [ComfyUI GitHub](https://github.com/comfy-org/ComfyUI).
 
 <!-- @os:end -->

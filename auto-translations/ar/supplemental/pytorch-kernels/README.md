@@ -6,57 +6,57 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> يستخدم هذا الدليل علامات خاصة لا يستطيع GitHub عرضها. يرجى زيارة [amd.com/playbooks](https://amd.com/playbooks) لمعاينة هذا المحتوى بشكل صحيح.
+> يستخدم هذا الدليل التعليمي وسومًا خاصة لا يمكن لـ GitHub عرضها. يُرجى زيارة [amd.com/playbooks](https://amd.com/playbooks) لمعاينة هذا المحتوى بشكل صحيح.
 <!-- @github-only:end -->
 
 ## نظرة عامة
 
-اكتب نواة GPU من الصفر، وقم بتجميعها، وشغّلها على AMD GPU، وراقب ارتفاع معدل الاستخدام. يوضح هذا الدليل كيفية عمل الحوسبة على GPU فعلياً: اكتب كود النواة، ونفّذه بالتوازي عبر آلاف الخيوط.
+اكتب نواة GPU من الصفر، قم بتجميعها، شغّلها على وحدة معالجة رسومات AMD، وشاهد نسبة الاستخدام ترتفع. يوضح هذا الدليل التعليمي كيفية عمل حوسبة GPU فعليًا: كتابة كود النواة، وتنفيذه بشكل متوازٍ عبر آلاف الخيوط (threads).
 
-> **ملاحظة**: هذا دليل معقد نسبياً، وقد يتطلب بعض التصحيح والتعديلات الإضافية.
+> **ملاحظة**: هذا دليل تعليمي معقد إلى حد ما، وقد يتطلب بعض التصحيح والتعديلات الإضافية.
 
 ## ما ستتعلمه
 
 <!-- @os:windows -->
-- كيفية عمل نوى GPU: الشبكات، والكتل، والخيوط، ونموذج الفهرسة الذي يربطها بالبيانات
-- كيف يتيح لك مكدس AMD ROCm/HIP كتابة كود بأسلوب CUDA يعمل على AMD GPUs دون تعديل
-- كيفية تجميع نواة في وقت التشغيل باستخدام `torch.cuda._compile_kernel`
-- كيفية بناء امتداد C++ أصلي للنواة باستخدام `CUDAExtension` + pybind11، قابل للاستيراد من Python
+- كيفية عمل نوى GPU: الشبكات (grids)، الكتل (blocks)، الخيوط (threads)، ونموذج الفهرسة الذي يربطها بالبيانات
+- كيف تتيح مكدس AMD ROCm/HIP كتابة كود بأسلوب CUDA يعمل على وحدات معالجة رسومات AMD دون أي تعديل
+- كيفية تجميع نواة أثناء وقت التشغيل باستخدام `torch.cuda._compile_kernel`
+- كيفية بناء امتداد نواة C++ أصلي باستخدام `CUDAExtension` + pybind11، قابل للاستيراد من Python
 <!-- @os:end -->
 <!-- @os:linux -->
-- كيفية عمل نوى GPU: الشبكات، والكتل، والخيوط، ونموذج الفهرسة الذي يربطها بالبيانات
-- كيف يتيح لك مكدس AMD ROCm/HIP كتابة كود بأسلوب CUDA يعمل على AMD GPUs دون تعديل
-- كيفية تجميع نواة في وقت التشغيل باستخدام `torch.cuda._compile_kernel`
-- كيفية بناء امتداد C++ أصلي للنواة باستخدام `CUDAExtension` + pybind11، قابل للاستيراد من Python
-- كيفية قياس وقت تنفيذ النواة ومراقبة استخدام GPU المباشر باستخدام `amd-smi`
+- كيفية عمل نوى GPU: الشبكات (grids)، الكتل (blocks)، الخيوط (threads)، ونموذج الفهرسة الذي يربطها بالبيانات
+- كيف تتيح مكدس AMD ROCm/HIP كتابة كود بأسلوب CUDA يعمل على وحدات معالجة رسومات AMD دون أي تعديل
+- كيفية تجميع نواة أثناء وقت التشغيل باستخدام `torch.cuda._compile_kernel`
+- كيفية بناء امتداد نواة C++ أصلي باستخدام `CUDAExtension` + pybind11، قابل للاستيراد من Python
+- كيفية قياس وقت تنفيذ النواة ومراقبة استخدام GPU مباشرةً باستخدام `amd-smi`
 <!-- @os:end -->
 
 ---
 
-يغطي هذا الدليل نهجين لتطوير النوى:
+يغطي هذا الدليل التعليمي طريقتين لتطوير النوى:
 
 <!-- @os:windows -->
-| النهج | نقطة الدخول |
+| الطريقة | نقطة الدخول |
 |---|---|
-| **التجميع الفوري (JIT)** | `torch.cuda._compile_kernel`، اكتب نواة كسلسلة نصية Python، دون خطوة بناء |
-| **امتداد C++** | `CUDAExtension` + pybind11: جمّع ملف `.cu` إلى ملف `.pyd` أصلي واستورده |
+| **التجميع أثناء وقت التشغيل (JIT)** | `torch.cuda._compile_kernel`، اكتب النواة كسلسلة نصية بلغة Python، دون أي خطوة بناء |
+| **امتداد C++** | `CUDAExtension` + pybind11: قم بتجميع ملف `.cu` إلى ملف `.pyd` أصلي واستورده |
 <!-- @os:end -->
 <!-- @os:linux -->
-| النهج | نقطة الدخول |
+| الطريقة | نقطة الدخول |
 |---|---|
-| **التجميع الفوري (JIT)** | `torch.cuda._compile_kernel`، اكتب نواة كسلسلة نصية Python، دون خطوة بناء |
-| **امتداد C++** | `CUDAExtension` + pybind11: جمّع ملف `.cu` إلى ملف `.so` أصلي واستورده |
+| **التجميع أثناء وقت التشغيل (JIT)** | `torch.cuda._compile_kernel`، اكتب النواة كسلسلة نصية بلغة Python، دون أي خطوة بناء |
+| **امتداد C++** | `CUDAExtension` + pybind11: قم بتجميع ملف `.cu` إلى ملف `.so` أصلي واستورده |
 <!-- @os:end -->
 
-كلا النهجين يعملان على AMD GPUs. هذا ممكن لأن بناء ROCm في PyTorch يربط سطح واجهة برمجة تطبيقات CUDA بالكامل بـ HIP. وهذا يعني أن `torch.cuda` و`CUDAExtension` وصياغة نواة CUDA تعمل جميعها على أجهزة AMD بشكل شفاف.
+تعمل كلتا الطريقتين على وحدات معالجة رسومات AMD. وهذا ممكن لأن بناء PyTorch الخاص بـ ROCm يقوم بتعيين سطح واجهة برمجة تطبيقات CUDA بأكمله إلى HIP. وهذا يعني أن `torch.cuda`، و`CUDAExtension`، وصياغة نواة CUDA كلها تعمل بشفافية على أجهزة AMD.
 
 ---
 
-## الخلفية النظرية
+## الخلفية
 
 ### ما هي نواة GPU؟
 
-نواة GPU هي دالة تعمل بالتوازي عبر آلاف خيوط GPU في آنٍ واحد. على عكس دالة CPU التي تُنفَّذ مرة واحدة لكل استدعاء، تُطلَق النواة بـ**شبكة** من **الكتل**، تحتوي كل منها على عدد كبير من **الخيوط**، وتنفّذ جميعها نفس الكود على بيانات مختلفة.
+نواة GPU هي دالة تعمل بشكل متوازٍ عبر آلاف خيوط GPU في نفس الوقت. على عكس دالة CPU التي تُنفَّذ مرة واحدة لكل استدعاء، يتم إطلاق النواة عبر **شبكة (grid)** من **الكتل (blocks)**، كل كتلة تحتوي على العديد من **الخيوط (threads)**، وجميعها تنفذ نفس الكود على بيانات مختلفة.
 
 <p align="center">
   <img src="assets/grid_threads.png" width="900"/>
@@ -71,45 +71,45 @@ SPDX-License-Identifier: MIT
 | `gridDim` | عدد الكتل في الشبكة |
 | `blockDim` | عدد الخيوط لكل كتلة |
 
-يمتلك كل خيط وصولاً إلى ثلاثة متغيرات مدمجة للقراءة فقط:
+يمتلك كل خيط إمكانية الوصول إلى ثلاثة متغيرات مضمّنة للقراءة فقط:
 
 | المتغير | المعنى |
 |---|---|
 | `blockIdx.x` | الكتلة التي ينتمي إليها هذا الخيط |
 | `blockDim.x` | عدد الخيوط في كتلة واحدة |
-| `threadIdx.x` | فهرس الخيط داخل كتلته |
+| `threadIdx.x` | فهرس الخيط ضمن كتلته |
 
-### معرّف الخيط العالمي
+### معرّف الخيط العام
 
-تُجمع هذه المتغيرات لحساب فهرس خيط فريد عالمياً:
+يتم دمج هذه المتغيرات لحساب فهرس خيط فريد عالميًا:
 
 ```c
 int idx = blockIdx.x * blockDim.x + threadIdx.x;
 ```
 
-إجمالي الخيوط = `gridDim.x * blockDim.x`. يعالج كل خيط عنصراً واحداً بشكل مستقل. هذا هو أساس **التوازي في البيانات**. تعمل نفس العملية على عناصر كثيرة في آنٍ واحد، دون أي تبعية بين الخيوط.
+إجمالي الخيوط = `gridDim.x * blockDim.x`. يعالج كل خيط عنصرًا واحدًا بشكل مستقل. هذا هو أساس **التوازي في البيانات (data parallelism)**. تُنفَّذ نفس العملية على عناصر عديدة في آن واحد، دون أي اعتماد بين الخيوط.
 
 ---
 
-### نموذج تنفيذ GPU: موجات الواجهة (Wavefronts)
+### نموذج تنفيذ GPU: مويجات الخيوط (Wavefronts)
 
-تُنفّذ AMD GPUs الخيوط في مجموعات من **32** تُسمى **wavefronts**. تُنفّذ جميع الخيوط في wavefront نفس التعليمة في آنٍ واحد. يؤثر هذا على اختيارات حجم الكتلة الأمثل (256 خيطاً = 8 wavefronts = كفاءة جدولة جيدة).
+تنفذ وحدات معالجة رسومات AMD الخيوط في مجموعات مكونة من **32** خيطًا تسمى **مويجات (wavefronts)**. تعمل جميع الخيوط في المويجة الواحدة على نفس التعليمة في آن واحد. يؤثر هذا على اختيار حجم الكتلة الأمثل (256 خيطًا = 8 مويجات = كفاءة جدولة جيدة).
 
-### برمجة AMD GPU: HIP + ROCm
+### برمجة GPU من AMD: HIP + ROCm
 
-**ROCm** هو مكدس حوسبة GPU مفتوح المصدر من AMD (برامج تشغيل، ومجمّعات، ومكتبات، وبيئة تشغيل). يقع **HIP** فوقه، مصمم ليكون متطابقاً من الناحية النحوية مع CUDA. يربط بناء ROCm في PyTorch بشكل شفاف `torch.cuda.*` بـ HIP، لذا يعمل نفس الكود على AMD GPUs.
+**ROCm** هو مكدس الحوسبة مفتوح المصدر الخاص بـ AMD لوحدات معالجة الرسومات (برامج التشغيل، المترجمات، المكتبات، وقت التشغيل). تعمل **HIP** فوقه، وهي مصممة لتكون مطابقة نحويًا لـ CUDA. يقوم بناء PyTorch الخاص بـ ROCm بتعيين `torch.cuda.*` بشفافية إلى HIP، لذا يعمل نفس الكود على وحدات معالجة رسومات AMD.
 
 ---
 
 ### PyTorch + AMD/HIP
 
-يوفر PyTorch بناء ROCm حيث يكون سطح واجهة برمجة تطبيقات CUDA (`torch.cuda.*`) مدعوماً بشكل شفاف بواسطة HIP. وهذا يعني:
+يوفر PyTorch بناءً لـ ROCm حيث يكون سطح واجهة برمجة تطبيقات CUDA (`torch.cuda.*`) مدعومًا بشفافية بواسطة HIP. وهذا يعني:
 
-- `torch.cuda.is_available()` يعمل على AMD GPUs مع ROCm
-- `tensor.to("cuda")` يخصص الذاكرة على AMD GPU
-- `torch.version.hip` يكشف عن إصدار HIP
+- تعمل `torch.cuda.is_available()` على وحدات معالجة رسومات AMD مع ROCm
+- تخصص `tensor.to("cuda")` الذاكرة على وحدة معالجة رسومات AMD
+- يعرض `torch.version.hip` إصدار HIP
 
-يكشف PyTorch أيضاً عن `torch.cuda._compile_kernel()`، وهو اختصار عالي المستوى لتجميع سلسلة نواة خام فورياً والحصول على كائن قابل للاستدعاء، دون الحاجة إلى خطوة بناء منفصلة.
+يوفر PyTorch أيضًا `torch.cuda._compile_kernel()`، وهو اختصار عالي المستوى لتجميع سلسلة نواة خام أثناء وقت التشغيل والحصول على دالة قابلة للاستدعاء، دون الحاجة إلى خطوة بناء منفصلة.
 
 ---
 
@@ -119,11 +119,11 @@ int idx = blockIdx.x * blockDim.x + threadIdx.x;
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## تثبيت المتطلبات الأساسية للبرامج
+## تثبيت متطلبات البرامج الأساسية
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### المتطلبات الأساسية - Windows
-- تثبيت أحدث إصدار: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- قم بتثبيت أحدث إصدار من: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -131,7 +131,7 @@ int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-على Linux، افتح طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة venv مع تثبيت ROCm+PyTorch مسبقاً.
+على Linux، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة افتراضية (venv) مثبَّت عليها ROCm+Pytorch مسبقًا.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -144,13 +144,13 @@ source kernel-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**امنح مستخدمك حق الوصول إلى أجهزة GPU** (سجّل الخروج وأعد الدخول لتفعيل هذا الإعداد):
+**امنح مستخدمك صلاحية الوصول إلى أجهزة GPU** (يجب تسجيل الخروج والدخول مرة أخرى ليصبح هذا نافذًا):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-على Linux، افتح طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة venv.
+على Linux، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة افتراضية (venv).
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -164,7 +164,7 @@ source kernel-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-على Windows، افتح طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة venv.
+على Windows، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة افتراضية (venv).
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv kernel-env
@@ -173,8 +173,8 @@ kernel-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
-> **تلميح**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell (مثلاً
-> ضبطها على RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر PowerShell.
+> **نصيحة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell الخاصة بهم (مثل
+> تعيينها إلى RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
 
 <!-- @os:end -->
 ### تثبيت التبعيات الأساسية
@@ -193,7 +193,7 @@ kernel-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-> **ملاحظة:** لهذا الدليل التطبيقي، يجب تثبيت ROCm و PyTorch داخل البيئة الافتراضية حتى على Ryzen AI Halo، إذ يتطلب تجميع النواة المخصصة توفر ترويسات التطوير الكاملة.
+> **ملاحظة:** بالنسبة لهذا الدليل التوجيهي، يجب تثبيت ROCm وPyTorch في البيئة الافتراضية حتى على Ryzen AI Halo، نظرًا لأن تجميع النواة (kernel) المخصصة يتطلب رؤوس التطوير (development headers) الكاملة.
 
 تثبيت ROCm:
 ```powershell
@@ -227,9 +227,9 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 ### تثبيت التبعيات الإضافية
 
 <!-- @os:linux -->
-قم بتثبيت سلسلة أدوات البناء C/C++ لنظام Linux. هذه تبعية على مستوى النظام وهي مطلوبة لعروض امتداد C++ التفصيلية لأن `CUDAExtension` يبني وحدات `.so` أصلية من ملفات `.cu`.
+قم بتثبيت سلسلة أدوات بناء (build toolchain) لغتي C/C++ الخاصة بلينكس. هذه تبعية على مستوى النظام وهي مطلوبة لشروحات امتداد C++ لأن `CUDAExtension` يقوم ببناء وحدات `.so` أصلية من ملفات `.cu`.
 
-شغّل هذا الأمر مرة واحدة على جهاز Linux، خارج البيئة الافتراضية Python التي تم إنشاؤها:
+قم بتشغيل هذا مرة واحدة على جهاز لينكس، خارج البيئة الافتراضية لبايثون التي تم إنشاؤها:
 
 ```bash
 sudo apt update
@@ -237,7 +237,7 @@ sudo apt install -y build-essential gcc g++
 ```
 <!-- @os:end -->
 
-بعد تفعيل البيئة الافتراضية `kernel-env`، قم بتثبيت تبعيات بناء Python:
+بعد تفعيل البيئة الافتراضية `kernel-env`، قم بتثبيت تبعيات بناء بايثون:
 <!-- @test:id=install-deps timeout=60 setup=activate-venv -->
 ```bash
 python -m pip install "setuptools<82" wheel ninja
@@ -260,22 +260,22 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:end -->
 
 <!-- @os:windows -->
-يرجى التأكد من تثبيت [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) أو [إصدار أحدث](https://visualstudio.microsoft.com/vs/community/) مع حمل العمل **Desktop development with C++**.
+يرجى التأكد من تثبيت [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) أو [إصدار أحدث](https://visualstudio.microsoft.com/vs/community/) مع حزمة عمل **Desktop development with C++**.
 
-> **ملاحظة**: إعداد بيئة C++ في Visual Studio مطلوب فقط لأسلوب **امتداد C++**. وهو غير مطلوب لأسلوب التجميع في وقت التشغيل JIT.
+> **ملاحظة**: إعداد بيئة Visual Studio C++ هذه مطلوب فقط لنهج **امتداد C++**. وهو غير مطلوب لنهج تجميع JIT.
 
-افتح طرفية PowerShell وشغّل الأوامر التالية قبل بناء امتداد C++.
+افتح طرفية PowerShell وقم بتشغيل الأوامر التالية قبل بناء امتداد C++.
 
-**الخطوة 1: البحث عن بيئة C++ المثبتة في Visual Studio**
+**الخطوة 1: العثور على بيئة Visual Studio C++ المثبتة**
 
-**(أ) تحديد موقع `vswhere.exe`، الذي يُثبَّت مع Visual Studio Installer**
+**(A) حدد موقع `vswhere.exe`، الذي يتم تثبيته مع Visual Studio Installer**
 ```powershell
 $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 
 if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(ب) البحث عن `vcvars64.bat` من Visual Studio 2022 أو أحدث مع أدوات بناء C++**
+**(B) ابحث عن `vcvars64.bat` من Visual Studio 2022 أو إصدار أحدث مع أدوات بناء C++**
 
 ```powershell
 $Vcvars = & $VsWhere `
@@ -288,15 +288,15 @@ $Vcvars = & $VsWhere `
 if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(ج) طباعة بيئة C++ الخاصة بـ Visual Studio المستخدمة**
+**(C) اطبع بيئة Visual Studio C++ المستخدمة**
 
 ```powershell
 Write-Host "Using Visual Studio C++ environment: $Vcvars"
 ```
 
-**الخطوة 2: تفعيل بيئة بناء C++ في Visual Studio**
+**الخطوة 2: تفعيل بيئة بناء Visual Studio C++**
 
-**(أ) تشغيل `vcvars64.bat` والتقاط البيئة التي يضبطها**
+**(A) قم بتشغيل `vcvars64.bat` والتقط البيئة التي يقوم بإعدادها**
 
 هذا يجعل `cl.exe` و`INCLUDE` و`LIB` و`LIBPATH` ومسارات Windows SDK متاحة.
 
@@ -310,7 +310,7 @@ if ($ExitCode -ne 0) {
 }
 ```
 
-**(ب) استيراد متغيرات بيئة Visual Studio إلى جلسة PowerShell الحالية**
+**(B) استورد متغيرات بيئة Visual Studio إلى جلسة PowerShell هذه**
 
 ```powershell
 $VsEnv | ForEach-Object {
@@ -320,7 +320,7 @@ $VsEnv | ForEach-Object {
 }
 ```
 
-**الخطوة 3: التحقق من توفر مترجم Microsoft C++**
+**الخطوة 3: تحقق من توفر مترجم Microsoft C++**
 
 ```powershell
 where.exe cl
@@ -366,7 +366,7 @@ Write-Host "OK: Visual Studio C++ build environment is available."
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### ضبط متغيرات البيئة
+#### تعيين متغيرات البيئة
 <!-- @os:linux -->
 <!-- @test:id=set-env-variables-linux timeout=300 setup=activate-venv -->
 ```bash
@@ -417,7 +417,7 @@ $env:DISTUTILS_USE_SDK = "1"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-تحقق من أن AMD GPU مرئي باستخدام:
+تحقق من ظهور وحدة معالجة الرسوميات (GPU) من AMD باستخدام:
 <!-- @test:id=amd-smi-linux timeout=60 setup=activate-venv -->
 ```bash
 amd-smi
@@ -552,29 +552,29 @@ $code | python -
 
 ## تنزيل الملفات المطلوبة
 
-أنشئ هيكل الدليل التالي بإنشاء **مجلدين جديدين** وتنزيل الملفات المقابلة:
+قم بإنشاء بنية الدليل التالية عن طريق إنشاء **مجلدين جديدين** وتنزيل الملفات المقابلة:
 
 | الدليل | الملفات المطلوب تنزيلها | الوصف |
 |-----------|-------------------|-------------|
-| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| ملفات JIT وامتداد C++ لنواة جمع المتجهات |
-| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | ملفات JIT وامتداد C++ لنواة ضرب المصفوفات |
+| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| ملفات JIT وامتداد C++ لنواة (kernel) جمع المتجهات |
+| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | ملفات JIT وامتداد C++ لنواة (kernel) ضرب المصفوفات |
 
 
-## العروض التفصيلية
+## الشروحات
 
-### العرض التفصيلي 1: جمع المتجهات
+### الشرح 1: جمع المتجهات
 
-#### الأسلوب أ: التجميع في وقت التشغيل JIT
+#### النهج أ: تجميع JIT
 
-يعني التجميع في وقت التشغيل JIT (Just-In-Time) أن النواة تُكتب كسلسلة نصية خام بلغة C++ داخل Python وتُجمَّع أثناء التشغيل، دون الحاجة إلى خطوات بناء إضافية.
+يعني تجميع JIT (Just-In-Time) أن النواة (kernel) مكتوبة كسلسلة نصية خام بلغة C++ داخل بايثون ويتم تجميعها في وقت التشغيل، دون الحاجة إلى خطوات بناء إضافية.
 
-لاستخدام [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)، تأكد من تنزيله ثم شغّل:
+لاستخدام [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)، تأكد من تنزيله وقم بتشغيل:
 ```bash
 cd Vector_Addition # if not already inside the directory
 python add_one_kernel.py
 ```
 
-**مقتطفات الكود الرئيسية**
+**مقتطفات الشفرة الرئيسية**
 ```python
 import torch
 
@@ -614,31 +614,31 @@ print("First 5 elements:", x[:5].cpu())
 #Expected output: tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @os:linux -->
-> **تلميح**: يُشغّل السكريبت أيضاً خيطاً في الخلفية يستطلع `amd-smi` كل 100 مللي ثانية لتسجيل ذروة استخدام GPU ومتوسطه خلال تشغيل النواة.
+> **نصيحة**: يقوم البرنامج النصي أيضًا بتشغيل خيط (thread) في الخلفية يستطلع `amd-smi` كل 100 مللي ثانية لتسجيل ذروة ومتوسط استخدام وحدة معالجة الرسوميات (GPU) أثناء تشغيل النواة (kernel).
 <!-- @os:end -->
 
-> **ملاحظة**: **لماذا حجم الكتلة 256؟** <br>
-> - تستخدم النواة **256 خيطاً لكل كتلة** لأن ذلك يتوافق جيداً مع **نموذج تنفيذ الموجة الأمامية في AMD GPUs**.
-> - تذكر أن أجهزة AMD تنفّذ الخيوط في مجموعات من 32 خيطاً، مما ينتج عنه 8 موجات أمامية لكل كتلة. (8 موجات أمامية × 32 خيطاً = كتلة واحدة)
+> **ملاحظة**: **لماذا حجم الكتلة (Block Size) هو 256؟** <br>
+> - تستخدم النواة (kernel) **256 خيطًا (thread) لكل كتلة (block)** لأنها تتوافق بشكل جيد مع **نموذج تنفيذ الموجة (wavefront) في وحدات معالجة الرسوميات (GPU) من AMD**.
+> - تذكر أن أجهزة AMD تنفذ الخيوط (threads) في مجموعات من 32 خيطًا، مما ينتج عنه 8 موجات (wavefronts) لكل كتلة (block). (8 موجات × 32 خيطًا = كتلة واحدة)
 
 
-**ما يقوم به حمل العمل:**
+**ما الذي يقوم به عبء العمل:**
 
-تضيف النواة عملاً إضافياً اصطناعياً لإظهار استخدام GPU:
+تقوم النواة (kernel) بإضافة عمل إضافي بشكل مصطنع لإظهار استخدام وحدة معالجة الرسوميات (GPU):
 
-- **100,000,000 عنصر** في الموتر
-- **الحلقة الداخلية تعمل 1,000 مرة** لكل عنصر لكل إطلاق للنواة  
-- **200 إطلاق للنواة** إجمالاً
+- **100,000,000 عنصر** في الموتّر (tensor)
+- **الحلقة الداخلية تعمل 1,000 مرة** لكل عنصر في كل تشغيل للنواة (kernel launch)
+- **200 تشغيل** للنواة (kernel launches) إجمالاً
 
-**الحسابات:**  
-- كل عنصر: يُزاد بمقدار 1 × 1,000 تكرار × 200 إطلاق = 200,000  
-- النتيجة النهائية: 1.0 (القيمة الابتدائية) + 200,000 (عمليات الجمع) = 200,001.0
+**الحساب:**  
+- كل عنصر: يتم زيادته بمقدار 1 × 1,000 تكرار × 200 تشغيل = 200,000  
+- النتيجة النهائية: 1.0 (القيمة الابتدائية) + 200,000 (الإضافات) = 200,001.0
 
 **لماذا الحلقة الداخلية؟**  
-- بدون حلقة `for (int i = 0; i < 1000; i++)`، ستنتهي 200 عملية إطلاق فوراً ولن تتمكن أدوات المراقبة من التقاط استخدام GPU بشكل ذي معنى. يجعل العمل الاصطناعي كل تشغيل للنواة طويلاً بما يكفي لأدوات المراقبة لقياس الأداء.
+- بدون حلقة `for (int i = 0; i < 1000; i++)`، ستنتهي 200 عملية تشغيل على الفور ولن تتمكن أدوات المراقبة من التقاط استخدام ذي معنى لوحدة معالجة الرسوميات (GPU). العمل المصطنع يجعل كل تشغيل للنواة (kernel) يستغرق وقتًا كافيًا لتتمكن أدوات المراقبة من قياس الأداء.
 
 <!-- @os:linux -->
-**المخرجات المتوقعة:** [ستتفاوت أرقام الأداء]
+**المخرجات المتوقعة:**[ستختلف أرقام الأداء]
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
@@ -648,7 +648,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **ملاحظة**: على Windows، لا يُدعم `amd-smi`. لتتبع استخدام GPU، يمكنك استخدام إدارة المهام، حيث يجب أن ترى ارتفاعاً مؤقتاً في الاستخدام عند تشغيل البرنامج.
+> **ملاحظة**: على ويندوز، `amd-smi` غير مدعوم. لتتبع استخدام وحدة معالجة الرسوميات (GPU)، يمكنك استخدام مدير المهام (Task Manager)، حيث يجب أن ترى ارتفاعًا موجزًا في الاستخدام عند تشغيل البرنامج.
 
 **المخرجات المتوقعة:**
 ```
@@ -657,7 +657,7 @@ Elapsed time: 2.753s
 No GPU Usage captured.
 ```
 <!-- @os:end -->
-**أحسنت! لقد شغّلت للتو أول نواة GPU خاصة بك.**
+**عمل رائع! لقد قمت للتو بتشغيل أول نواة (kernel) لوحدة معالجة الرسوميات (GPU) الخاصة بك.**
 
 <!-- @os:linux -->
 <!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
@@ -798,32 +798,32 @@ $code | python -
 <!-- @os:end -->
 
 ---
-#### النهج B: امتداد C++
+#### الطريقة ب: امتداد C++
 
-النهج الثاني أكثر يدوية: اكتب النواة وربط Python في ملف `.cu` واحد، وقم بتجميعه بشكل أصلي باستخدام نظام بناء PyTorch، ثم استورده إلى Python.
+الطريقة الثانية أكثر يدوية: تُكتب النواة والربط الخاص بـ Python في ملف `.cu` واحد، ثم تُجمّع بشكل أصلي باستخدام نظام بناء PyTorch، وتُستورد إلى Python.
 
 <!-- @os:windows -->
-> **ملاحظة**: يتطلب نهج امتداد C++ بيئة بناء Visual Studio C++ لأن PyTorch يجمّع ملف `.cu` المصدر إلى وحدة امتداد `.pyd` أصلية. يعتمد بناء هذا الامتداد الأصلي على سلسلة أدوات Microsoft C++ (المترجم، والرابط، وأدوات البناء) التي يوفرها Visual Studio. قم بتشغيل أوامر تفعيل Visual Studio من قسم الإعداد قبل بناء الامتداد.
+> **ملاحظة**: تتطلب طريقة امتداد C++ بيئة بناء Visual Studio C++ لأن PyTorch يجمّع ملف المصدر `.cu` إلى وحدة امتداد `.pyd` أصلية. يعتمد بناء ذلك الامتداد الأصلي على سلسلة أدوات Microsoft C++ (المترجم، الرابط، وأدوات البناء) التي يوفرها Visual Studio. شغّل أوامر تفعيل Visual Studio من قسم الإعداد قبل بناء الامتداد.
 <!-- @os:end -->
 
-قم بتنزيل الملفات التالية إذا لم تكن قد فعلت ذلك بالفعل:
+نزّل الملفات التالية إن لم تكن قد فعلت ذلك بعد:
 <!-- @os:windows -->
 | الملف | الدور |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | النواة + المشغّل + ربط pybind11، كل شيء في ملف واحد |
-| [setup.py](assets/Vector_Addition/setup.py) | سكريبت البناء، يستخدم `CUDAExtension` لتجميع `.cu` إلى `.pyd` |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | سكريبت Python الذي يشغّل المخرجات المبنية |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | النواة + المُطلق + ربط pybind11، كل شيء في ملف واحد |
+| [setup.py](assets/Vector_Addition/setup.py) | نص بناء، يستخدم `CUDAExtension` لتجميع ملف `.cu` إلى `.pyd` |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | نص Python يشغّل النواتج المبنية |
 <!-- @os:end -->
 
 <!-- @os:linux -->
 | الملف | الدور |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | النواة + المشغّل + ربط pybind11، كل شيء في ملف واحد |
-| [setup.py](assets/Vector_Addition/setup.py) | سكريبت البناء، يستخدم `CUDAExtension` لتجميع `.cu` إلى `.so` |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | سكريبت Python الذي يشغّل المخرجات المبنية |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | النواة + المُطلق + ربط pybind11، كل شيء في ملف واحد |
+| [setup.py](assets/Vector_Addition/setup.py) | نص بناء، يستخدم `CUDAExtension` لتجميع ملف `.cu` إلى `.so` |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | نص Python يشغّل النواتج المبنية |
 <!-- @os:end -->
 
-#### **الخطوة 1: النواة والمشغّل والربط** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
+#### **الخطوة 1: النواة، المُطلق، والربط** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -849,8 +849,8 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
->**تلميح**: لماذا نستخدم `hipDeviceSynchronize()`؟ <br>
-> - إطلاق نوى GPU غير متزامن. عندما يشغّل CPU الأمر `add_one<<<grid_size, block_size>>>(data, n);` فإنه سينفّذ التعليمة التالية فوراً دون انتظار GPU. يجبر `hipDeviceSynchronize()` CPU على الانتظار حتى تكتمل نواة GPU.
+>**نصيحة**: لماذا نستخدم `hipDeviceSynchronize()`؟ <br>
+> - عمليات إطلاق نواة GPU غير متزامنة. عندما يُشغّل CPU الأمر `add_one<<<grid_size, block_size>>>(data, n);` فإنه سينفذ التعليمة التالية فورًا دون انتظار GPU. يجبر `hipDeviceSynchronize()` وحدة CPU على الانتظار حتى تكتمل نواة GPU.
 
 #### **الخطوة 2: البناء**
 ```bash
@@ -859,20 +859,21 @@ pip install --no-build-isolation -v .
 >**ملاحظة**: يبحث هذا الأمر عن `setup.py` في الدليل الحالي لبناء ملف .cu الذي أنشأناه.
 
 
-`CUDAExtension` هو مساعد بناء CUDA من `torch.utils.cpp_extension`. مع ROCm، يُعيد PyTorch **تعيين `CUDAExtension` لاستخدام `hipcc`** بدلاً من `nvcc`. يعترض ROCm مسار البناء ويوجّهه عبر مترجم HIP، مما يُنقل كود CUDA إلى AMD.
+`CUDAExtension` هو مساعد بناء CUDA من `torch.utils.cpp_extension`. مع ROCm، **يعيد PyTorch توجيه `CUDAExtension` لاستخدام `hipcc`** بدلاً من `nvcc`. يعترض ROCm مسار البناء ويوجّهه عبر مترجم HIP، محوّلاً كود CUDA إلى AMD.
 
 ينتج عن ذلك الملفات التالية:
 <!-- @os:windows -->
 - `build/`: دليل يحتوي على ملفات `.pyd`
-- `add_one_kernel.hip`: مصدر HIP الناتج عن تحويل ملف `.cu` إلى HIP؛ وهذا ما قام `hipcc` بتجميعه فعلياً
+- `add_one_kernel.hip`: مصدر HIP الناتج عن تحويل ملف `.cu`؛ هذا ما جمّعه `hipcc` فعليًا
 <!-- @os:end -->
+
 <!-- @os:linux -->
 - `build/`: دليل يحتوي على ملفات `.so`
-- `add_one_kernel.hip`: مصدر HIP الناتج عن تحويل ملف `.cu` إلى HIP؛ وهذا ما قام `hipcc` بتجميعه فعلياً
+- `add_one_kernel.hip`: مصدر HIP الناتج عن تحويل ملف `.cu`؛ هذا ما جمّعه `hipcc` فعليًا
 <!-- @os:end -->
 
 #### **الخطوة 3: الاستخدام من Python** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)):
-نفّذ هذا السكريبت لرؤية النواة في العمل:
+نفّذ هذا النص لرؤية النواة أثناء العمل:
 ```bash
 cd Vector_Addition # if not already in directory
 python run_compiled_addition.py
@@ -1022,40 +1023,40 @@ finally {
 
 ---
 
-### العرض التفصيلي 2: ضرب المصفوفات
+### الشرح التفصيلي 2: ضرب المصفوفات
 
 يحسب ضرب المصفوفات **C = A × B** حيث:
-- **A** هي M×N (صفوف × أعمدة)
-- **B** هي N×K  
-- **C** هي M×K (النتيجة)
+- **A** بحجم M×N (صفوف × أعمدة)
+- **B** بحجم N×K  
+- **C** بحجم M×K (النتيجة)
 
-يُعرَّف كل عنصر في المخرجات على النحو التالي:
+يُعرَّف كل عنصر ناتج كما يلي:
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-يُحسب كل عنصر من C بشكل مستقل، مما يجعل هذه العملية مثالية للتوازي على GPU.
+يُحسب كل عنصر في C بشكل مستقل، مما يجعل هذا مثاليًا للتوازي على GPU.
 
-#### كيفية تعيينها على خيوط GPU
+#### كيف يتم تعيينه إلى خيوط GPU
 
-على عكس جمع المتجهات (أحادي البعد)، ينتج ضرب المصفوفات **مخرجات ثنائية الأبعاد**، لذا نستخدم **شبكة خيوط ثنائية الأبعاد**:
+على عكس جمع المتجهات (أحادي البعد)، ينتج ضرب المصفوفات **مخرجًا ثنائي الأبعاد**، لذا نستخدم **شبكة خيوط ثنائية الأبعاد**:
 
 | | جمع المتجهات | ضرب المصفوفات |
 |---|---|---|
-| **شكل المخرجات** | مصفوفة أحادية البعد | مصفوفة ثنائية الأبعاد (M×K) |
-| **تعيين الخيوط** | خيط واحد ← عنصر واحد | خيط واحد ← عنصر مخرجات واحد |
+| **شكل المخرج** | مصفوفة أحادية البعد | مصفوفة ثنائية الأبعاد (M×K) |
+| **تعيين الخيوط** | خيط واحد ← عنصر واحد | خيط واحد ← عنصر مخرج واحد |
 | **نمط الإطلاق** | شبكة أحادية البعد: `(grid_x, 1, 1)` | شبكة ثنائية الأبعاد: `(grid_x, grid_y, 1)` |
-| **حجم الكتلة** | `(256, 1, 1)` | `(16, 16, 1)` = 256 خيطاً |
+| **حجم الكتلة** | `(256, 1, 1)` | `(16, 16, 1)` = 256 خيطًا |
 
-يحسب كل خيط عنصراً واحداً من مصفوفة المخرجات C. الخيط في الموضع `(row, col)` يحسب `C[row][col]` بضرب الصف المقابل من A في العمود المقابل من B.
+يحسب كل خيط عنصرًا واحدًا من مصفوفة الخرج C. يحسب الخيط الموجود في الموضع `(row, col)` القيمة `C[row][col]` بضرب الصف المقابل من A في العمود المقابل من B.
 
-**تخطيط الذاكرة**: ذاكرة GPU مسطّحة (أحادية البعد)، لكن المصفوفات مخزّنة صفاً تلو الآخر. للوصول إلى `A[row][col]`، تستخدم النواة `A[row * N + col]`.
-
-
-#### النهج A: التجميع في وقت التشغيل (JIT):
-
-كما في العرض التفصيلي 1، تُكتب النواة كسلسلة نصية خام بلغة C++ داخل Python وتُجمَّع في وقت التشغيل عبر JIT المدمج في PyTorch.
+**تخطيط الذاكرة**: ذاكرة GPU مسطحة (أحادية البعد)، لكن المصفوفات تُخزَّن صفًا تلو الآخر. للوصول إلى `A[row][col]`، تستخدم النواة `A[row * N + col]`.
 
 
-لاستخدام [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)، تأكد من تنزيله ثم شغّله:
+#### الطريقة أ: التجميع الآني (JIT):
+
+كما في الشرح التفصيلي 1، تُكتب النواة كسلسلة C++ خام داخل Python وتُجمَّع وقت التشغيل عبر آلية JIT المدمجة في PyTorch.
+
+
+لاستخدام [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)، تأكد من تنزيله ثم شغّل:
 ```bash
 cd Matrix_Multiplication # if not already inside the directory
 python matmul_kernel.py
@@ -1112,10 +1113,10 @@ max_err = (C - C_ref).abs().max().item()
 print(f"Max error vs torch.mm: {max_err:.6f}")
 ```
 
-يتحقق السكريبت من النتيجة مقارنةً بـ `torch.mm` بتسامح صغير. قد تُنتج العمليات الحسابية للفاصلة العائمة على GPU اختلافات عددية صغيرة مقارنةً بتطبيقات CPU بسبب ترتيب التقليص المتوازي.
+يتحقق النص من النتيجة مقارنةً بـ `torch.mm` بهامش تسامح صغير. قد يُنتج الحساب العددي العشري على وحدات GPU فروقات عددية طفيفة مقارنة بتطبيقات CPU بسبب ترتيب الاختزال المتوازي.
 
 <!-- @os:linux -->
-**المخرجات المتوقعة:** [ستتفاوت أرقام الأداء]
+**المخرجات المتوقعة:** [ستختلف أرقام الأداء]
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -1125,7 +1126,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **ملاحظة**: على Windows، لا يُدعم `amd-smi`. لتتبع استخدام GPU، يمكنك استخدام إدارة المهام، حيث يجب أن ترى ارتفاعاً مؤقتاً في الاستخدام عند تشغيل البرنامج.
+> **ملاحظة**: على نظام Windows، لا يُدعم `amd-smi`. لمتابعة استخدام GPU، يمكنك استخدام مدير المهام، حيث يجب أن تلاحظ ارتفاعًا مؤقتًا في الاستخدام عند تشغيل البرنامج.
 
 **المخرجات المتوقعة:**
 ```
@@ -1300,31 +1301,31 @@ $code | python -
 <!-- @os:end -->
 
 ---
-#### النهج B: امتداد C++
+#### النهج ب: امتداد ++C
 
-النهج الثاني أكثر يدوية: اكتب النواة وربط Python في ملف `.cu` واحد، وقم بتجميعه بشكل أصلي باستخدام نظام بناء PyTorch، ثم استورده إلى Python.
+النهج الثاني أكثر يدوية: كتابة النواة (kernel) وربط Python في ملف `.cu` واحد، وتجميعه بشكل أصلي باستخدام نظام بناء PyTorch، واستيراده إلى Python.
 
 <!-- @os:windows -->
-> **ملاحظة**: يتطلب نهج امتداد C++ بيئة بناء Visual Studio C++ لأن PyTorch يقوم بتجميع ملف المصدر `.cu` إلى وحدة امتداد `.pyd` أصلية. يعتمد بناء هذا الامتداد الأصلي على سلسلة أدوات Microsoft C++ (المترجم، والرابط، وأدوات البناء) التي توفرها Visual Studio. قم بتشغيل أوامر تفعيل Visual Studio من قسم الإعداد قبل بناء الامتداد.
+> **ملاحظة**: يتطلب نهج امتداد ++C بيئة بناء Visual Studio C++ لأن PyTorch يجمّع ملف مصدر `.cu` إلى وحدة امتداد `.pyd` أصلية. يعتمد بناء هذا الامتداد الأصلي على سلسلة أدوات Microsoft C++ (المترجم، الرابط، وأدوات البناء) التي توفرها Visual Studio. قم بتشغيل أوامر تفعيل Visual Studio من قسم الإعداد قبل بناء الامتداد.
 <!-- @os:end -->
 
-قم بتنزيل الملفات التالية إذا لم تكن قد فعلت ذلك بالفعل:
+قم بتنزيل الملفات التالية إذا لم تكن قد فعلت ذلك بعد:
 <!-- @os:windows -->
 | الملف | الدور |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | النواة + المشغّل + ربط pybind11 |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | سكريبت البناء، يستخدم `CUDAExtension` لتجميع `.cu` إلى `.pyd` |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | سكريبت Python الذي يشغّل المخرجات المبنية |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | النواة + المُشغّل + ربط pybind11 |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | نص بناء، يستخدم `CUDAExtension` لتجميع ملف `.cu` إلى `.pyd` |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | نص Python يقوم بتشغيل المخرجات المبنية |
 <!-- @os:end -->
 <!-- @os:linux -->
 | الملف | الدور |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | النواة + المشغّل + ربط pybind11 |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | سكريبت البناء، يستخدم `CUDAExtension` لتجميع `.cu` إلى `.so` |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | سكريبت Python الذي يشغّل المخرجات المبنية |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | النواة + المُشغّل + ربط pybind11 |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | نص بناء، يستخدم `CUDAExtension` لتجميع ملف `.cu` إلى `.so` |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | نص Python يقوم بتشغيل المخرجات المبنية |
 <!-- @os:end -->
 
-#### **الخطوة 1: النواة والمشغّل والربط** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
+#### **الخطوة 1: النواة، والمُشغّل، والربط** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -1364,47 +1365,47 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
-بالمقارنة مع `add_one_launcher` في العرض التفصيلي 1، يقوم المشغّل هنا بما يلي:
-- يأخذ موترَين كمدخلات بدلاً من واحد
-- يستخلص جميع الأبعاد الثلاثة (M، N، K) من أشكال الموترات، دون الحاجة إلى تمرير الحجم يدوياً من Python
-- يخصص موتر الإخراج C ويعيده، بدلاً من التعديل في المكان
+مقارنة بـ `add_one_launcher` في الشرح التوضيحي الأول، فإن المُشغّل هنا:
+- يأخذ مصفوفتي إدخال بدلاً من واحدة
+- يشتق الأبعاد الثلاثة جميعها (M، N، K) من أشكال المصفوفات، دون تمرير حجم يدوي من Python
+- يخصص ويعيد مصفوفة الإخراج C، بدلاً من التعديل في المكان
 - يستخدم `dim3` لكل من الشبكة والكتلة للتعبير عن شكل الإطلاق ثنائي الأبعاد
 
 #### **الخطوة 2: البناء**
 ```bash
 pip install --no-build-isolation -v .
 ```
-> **ملاحظة**: يبحث هذا الأمر عن `setup.py` في الدليل الحالي لبناء ملف .cu الذي أنشأناه.
+>**ملاحظة**: يبحث هذا الأمر عن `setup.py` في الدليل الحالي لبناء ملف .cu الذي أنشأناه.
 
 
-ينتج عن ذلك الملفات التالية:
+ينتج عن هذا الملفات التالية:
 <!-- @os:windows -->
 - `build/`: دليل يحتوي على ملفات `.pyd`
-- `matmul_kernel.hip`: مصدر HIP الناتج عن تحويل ملف `.cu` إلى HIP؛ وهذا ما قام `hipcc` بتجميعه فعلياً
+- `matmul_kernel.hip`: مصدر HIP الذي تم توليده من عملية hipify لملف `.cu`؛ وهذا ما قام `hipcc` فعليًا بتجميعه
 <!-- @os:end -->
 <!-- @os:linux -->
 - `build/`: دليل يحتوي على ملفات `.so`
-- `matmul_kernel.hip`: مصدر HIP الناتج عن تحويل ملف `.cu` إلى HIP؛ وهذا ما قام `hipcc` بتجميعه فعلياً
+- `matmul_kernel.hip`: مصدر HIP الذي تم توليده من عملية hipify لملف `.cu`؛ وهذا ما قام `hipcc` فعليًا بتجميعه
 <!-- @os:end -->
 
 #### **الخطوة 3: الاستخدام من Python** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)):
-نفّذ هذا السكريبت لرؤية النواة في العمل:
+نفّذ هذا النص لرؤية النواة أثناء العمل:
 ```bash
 cd Matrix_Multiplication # if not already in directory
 python run_compiled_multiply.py
 ```
 
-**المخرجات المتوقعة:**
+**الناتج المتوقع:**
 ```
 Result: tensor([[19., 22.],
         [43., 50.]])
 ```
 
-**رائع! لقد نفّذت للتو ضرب المصفوفات على GPU.** هذه نقطة تحول كبرى لأن ضرب المصفوفات هو العمود الفقري لعمليات التعلم الآلي الحديثة مثل:
+**رائع! لقد قمت للتو بتنفيذ ضرب المصفوفات على وحدة معالجة الرسومات (GPU).** يُعد هذا إنجازًا كبيرًا لأن ضرب المصفوفات هو العمود الفقري لعمليات التعلم الآلي الحديثة مثل:
 - طبقات الشبكات العصبية
 - آليات الانتباه
-- التضمينات
-- المحوّلات
+- التضمينات (Embeddings)
+- المحوّلات (Transformers)
 
 <!-- @os:linux -->
 <!-- @test:id=matmul-extension-linux timeout=600 hidden=True setup=activate-venv -->
@@ -1554,15 +1555,15 @@ finally {
 
 ## الخطوات التالية
 
-لقد تعلمت كتابة نوى GPU وتجميعها وإطلاقها باستخدام كل من التجميع الفوري (JIT) وامتدادات C++ للعمليات التوازية الأساسية.
+لقد تعلمت كتابة، وتجميع، وإطلاق نوى GPU باستخدام كل من التجميع الفوري (JIT) وامتدادات ++C للعمليات المتوازية الأساسية.
 
 **تحسينات الأداء:**
-- **تقسيم الذاكرة المشتركة إلى بلاطات** - تخزين كتل البيانات مؤقتاً لتقليل الوصول إلى الذاكرة العامة
-- **تنسيق الذاكرة** - تحسين أنماط الوصول إلى الذاكرة لزيادة عرض النطاق الترددي
+- **تجانب الذاكرة المشتركة (Shared memory tiling)** - تخزين كتل البيانات مؤقتًا لتقليل الوصول إلى الذاكرة العامة
+- **دمج الذاكرة (Memory coalescing)** - تحسين أنماط الوصول إلى الذاكرة لعرض النطاق الترددي
 
-**الخوارزميات الواقعية:**
-- **الالتفاف ثنائي الأبعاد** - يتحرك مرشح صغير (نواة) عبر صورة، محسوباً كل بكسل في المخرجات من مجموع موزون للبكسلات المجاورة. يُقدّم هذا حسابات القالب وتقسيم الذاكرة المشتركة إلى بلاطات، حيث تُعيد الخيوط استخدام مناطق الصورة المتداخلة لتقليل الوصول إلى الذاكرة العامة.
-- **دالة Softmax**: تحوّل Softmax متجهاً من الأرقام إلى احتمالات مجموعها 1، وتُستخدم بشكل شائع في مخرجات الشبكات العصبية. يُقدّم تنفيذها بكفاءة على GPU تقليلات متوازية وتقنيات الاستقرار العددي أثناء معالجة المتجهات الكبيرة.
+**خوارزميات واقعية:**
+- **التطبيق التلافيفي ثنائي الأبعاد (2D Convolution)** - يمر مرشح صغير (نواة) عبر صورة، ويحسب كل بكسل إخراج من مجموع مرجح للبكسلات المجاورة. يُدخل هذا حسابات القوالب (stencil) وتجانب الذاكرة المشتركة، حيث تعيد الخيوط استخدام مناطق الصورة المتداخلة لتقليل الوصول إلى الذاكرة العامة.
+- **دالة Softmax**: تحول Softmax متجهًا من الأرقام إلى احتمالات يكون مجموعها 1، وتُستخدم بشكل شائع في مخرجات الشبكات العصبية. يُدخل تنفيذها بكفاءة على GPU عمليات الاختزال المتوازية وتقنيات الاستقرار العددي أثناء معالجة متجهات كبيرة.
 
 **اعتبارات الإنتاج:**
 - **معالجة الأخطاء** - التحقق من الحدود وإدارة الأجهزة

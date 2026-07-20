@@ -1,5 +1,5 @@
 {
   "id": "pytorch-finetuning",
-  "title": "LLM's fine-tunen met PyTorch en AMD ROCm™-software",
+  "title": "Fijnafstemmen van LLM's met PyTorch en AMD ROCm™ Software",
   "description": "Verfijn grote taalmodellen (LLM's) met behulp van PyTorch en ROCm."
 }

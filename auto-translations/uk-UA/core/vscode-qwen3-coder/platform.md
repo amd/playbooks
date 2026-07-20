@@ -6,25 +6,25 @@ SPDX-License-Identifier: MIT
 
 # Конфігурація платформи
 
-Цей документ описує очікувані конфігурації платформи для запуску цього посібника.
+У цьому документі описано очікувані конфігурації платформи для виконання цього playbook.
 
 ## Windows
 
 ### Встановлення LM Studio
 
-LM Studio має бути попередньо встановлений:
+LM Studio має бути попередньо встановлено:
 
 | Компонент | Версія | Розташування |
 |-----------|---------|----------|
-| **LM Studio (Моделі + Різне)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (Програма)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (Кеш)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### Завантаження моделі
 
-Наступні моделі вже мають бути присутні в директорії моделей LM Studio (`C:\Users\...\.lmstudio\models`):
+Наведені нижче моделі мають вже перебувати в каталозі моделей LM Studio (`C:\Users\...\.lmstudio\models`):
 
-| Тип моделі | Квантизація | Розмір | Розташування |
+| Тип моделі | Квантування | Розмір | Розташування |
 |------------|--------------|------|----------|
 | Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
@@ -34,8 +34,8 @@ LM Studio має бути попередньо встановлений:
 
 ### Встановлення LM Studio
 
-Докладніше див. у файлі lmstudio.md (у папці залежностей).
+Докладніші відомості наведено в lmstudio.md (у папці dependencies).
 
 ### Завантаження моделі
 
-Те саме, що й у Windows.
+Так само, як і в Windows.

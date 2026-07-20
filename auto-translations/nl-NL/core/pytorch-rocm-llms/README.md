@@ -5,39 +5,40 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Deze playbook gebruikt speciale tags die GitHub niet kan weergeven. Bezoek [amd.com/playbooks](https://amd.com/playbooks) om deze inhoud correct te bekijken.
 <!-- @github-only:end -->
 
 ## Overzicht
 
 
-Wilt u krachtige AI-taalmodellen op uw eigen hardware uitvoeren? Deze handleiding laat u zien hoe.
-Deze tutorial gebruikt PyTorch aangedreven door AMD ROCm™-software om modellen uit te voeren die documenten kunnen samenvatten, vragen kunnen beantwoorden, tekst kunnen genereren en meer, allemaal lokaal uitgevoerd.
+Wilt u krachtige AI-taalmodellen op uw eigen hardware uitvoeren? Deze handleiding laat zien hoe.
+Deze tutorial gebruikt PyTorch, aangedreven door AMD ROCm™-software, om modellen uit te voeren die documenten kunnen samenvatten, vragen kunnen beantwoorden, tekst kunnen genereren, en meer, allemaal lokaal draaiend.
 
-## Wat U Leert
+## Wat u leert
 
-- LLM's zoals gpt-oss-20b en qwen3.5-4B lokaal uitvoeren met PyTorch en ROCm
-- Een tool voor het samenvatten van documenten maken met behulp van LLM's
+- Voer LLM's zoals gpt-oss-20b en qwen3.5-4B lokaal uit met PyTorch en ROCm
+- Maak een hulpmiddel voor documentsamenvatting met LLM's
 
-## De Geheugenconfiguratie Instellen
+## De geheugenconfiguratie instellen
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Controleren op Software-updates
-> **Opmerking**: Als VS Code niet is geïnstalleerd, kunt u het installeren via het Ryzen AI Developer Center.
+## Controleren op software-updates
+> **Opmerking**: Als VS Code niet is geïnstalleerd, kunt u het installeren via Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Software-vereisten Installeren
+## Software-vereisten installeren
 
-### Een Virtuele Omgeving Aanmaken
+### Een virtuele omgeving maken
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Open op Linux een terminal in de map van uw keuze en volg de opdrachten om een venv aan te maken met ROCm+Pytorch al geïnstalleerd.
+Open op Linux een terminal in de map van uw keuze en volg de commando's om een venv te maken met ROCm+PyTorch al geïnstalleerd.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -50,13 +51,13 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Verleen uw gebruiker toegang tot GPU-apparaten** (log uit en weer in om dit van kracht te laten worden):
+**Geef uw gebruiker toegang tot GPU-apparaten** (log uit en opnieuw in om dit van kracht te laten worden):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Open op Linux een terminal in de map van uw keuze en volg de opdrachten om een venv aan te maken.
+Open op Linux een terminal in de map van uw keuze en volg de commando's om een venv te maken.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -72,7 +73,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Open op Windows een terminal in de map van uw keuze en volg de opdrachten om een venv aan te maken met ROCm+Pytorch al geïnstalleerd.
+Open op Windows een terminal in de map van uw keuze en volg de commando's om een venv te maken met ROCm+PyTorch al geïnstalleerd.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -83,7 +84,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Open op Windows een terminal in de map van uw keuze en volg de opdrachten om een venv aan te maken.
+Open op Windows een terminal in de map van uw keuze en volg de commando's om een venv te maken.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env
@@ -93,15 +94,15 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Tip**: Windows-gebruikers moeten mogelijk hun PowerShell-uitvoeringsbeleid aanpassen (bijv.
-> instellen op RemoteSigned of Unrestricted) voordat ze bepaalde PowerShell-opdrachten uitvoeren.
+> **Tip**: Windows-gebruikers moeten mogelijk hun PowerShell Execution Policy aanpassen (bijvoorbeeld
+> door deze in te stellen op RemoteSigned of Unrestricted) voordat ze sommige PowerShell-commando's uitvoeren.
 
 <!-- @os:end -->
 
-### Basisafhankelijkheden Installeren
+### Basisafhankelijkheden installeren
 <!-- @require:driver,pytorch -->
 
-### Aanvullende Afhankelijkheden Installeren
+### Aanvullende afhankelijkheden installeren
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
@@ -142,14 +143,14 @@ pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Snel Starten met Voorbeeldscripts
+## Snelle start met voorbeeldscripts
 
-Dit playbook bevat kant-en-klare scripts. Klik erop om ze te bekijken en download ze naar dezelfde map als de omgeving die u hebt aangemaakt.
+Deze playbook bevat kant-en-klare scripts. Klik erop om ze te bekijken en te downloaden naar dezelfde map als de omgeving die u hebt gemaakt.
 
 | Script | Beschrijving | Gebruik |
 |--------|-------------|-------|
-| [run_llm.py](assets/run_llm.py) | Basistekstgeneratie met LLM | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Documentsamenvatting met Harmony-ondersteuning | `python summarizer.py --file document.txt` |
+| [run_llm.py](assets/run_llm.py) | Basis LLM-tekstgeneratie | `python run_llm.py` |
+| [summarizer.py](assets/summarizer.py) | Documentsamenvatter met Harmony-ondersteuning | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -176,15 +177,15 @@ for script in ['run_llm.py', 'summarizer.py']:
 
 Beide scripts ondersteunen:
 - Modelselectie via de `--model`-vlag
-- Opmaak van chatsjablonen voor correcte modelprompting, vooral nuttig voor het samenvatten van documenten
+- Chatsjabloonformattering voor correcte modelprompting, vooral nuttig voor documentsamenvatting
 
-## Uw Eerste LLM Laden en Uitvoeren
+## Uw eerste LLM laden en uitvoeren
 
-Het meegeleverde script [run_llm.py](assets/run_llm.py) laat zien hoe u tekst kunt genereren met LLM's via PyTorch en AMD ROCm.
+Het meegeleverde script [run_llm.py](assets/run_llm.py) laat zien hoe u tekst genereert met LLM's met behulp van PyTorch en AMD ROCm.
 
 > **Opmerking:** Wanneer u een model laadt, controleert Hugging Face Transformers eerst de lokale cache (`~/.cache/huggingface/hub` op Linux, `C:\Users\<user>\.cache\huggingface\hub` op Windows). Als het model niet in de cache staat, wordt het automatisch gedownload van huggingface.co. De eerste uitvoering kan enkele minuten duren, afhankelijk van de modelgrootte en netwerksnelheid.
 
-Het onderstaande fragment laat zien hoe u het model kunt gebruiken en de gestelde vragen kunt aanpassen.
+Het onderstaande fragment laat zien hoe u het model gebruikt en de gestelde vragen aanpast.
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -259,11 +260,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Een Documentsamenvatting Bouwen
+## Een documentsamenvatter bouwen
 
-Nu u lokale LLM-uitvoer hebt gegenereerd, kunt u daarop voortbouwen door een praktische documentsamenvatting te maken. In dit gedeelte gebruikt u het script [summarizer.py](assets/summarizer.py) om een .txt-bestand in te voeren en automatisch een beknopte samenvatting te genereren, allemaal lokaal uitgevoerd op uw GPU.
+Nu u lokale LLM-output hebt gegenereerd, kunt u hierop voortbouwen door een praktische documentsamenvatter te maken. In dit gedeelte gebruikt u het script [summarizer.py](assets/summarizer.py) om een .txt-bestand in te voeren en automatisch een beknopte samenvatting te genereren, allemaal lokaal draaiend op uw GPU.
 
-Het script is ontworpen om direct te werken. Open het script in een editor om de code te verkennen, prompts aan te passen en parameters zoals lengte en temperatuur te verfijnen.
+Het script is ontworpen om direct te werken. Open het script in een editor om de code te verkennen, prompts aan te passen en parameters zoals lengte en temperatuur bij te stellen.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -287,28 +288,28 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## Meer Informatie over Generatieparameters
+## Meer weten over generatieparameters
 
-| Parameter | Wat Het Regelt | Typische Waarden |
+| Parameter | Wat het regelt | Typische waarden |
 |-----------|------------------|----------------|
-| `max_new_tokens` | De maximale lengte van de uitvoer van de LLM | Gebruik 50–500 tokens voor samenvattingen. (1 token is ongeveer 0,75 Engelse woorden) |
-| `temperature` | Creativiteit. Lage waarden maken het gefocust, terwijl hoge waarden meer onvoorspelbaarheid met zich meebrengen | - **0.1–0.3**: Gefocust, deterministisch (goed voor samenvattingen) <br> **0.5–0.7**: Gebalanceerd (algemeen gebruik) <br> **0.8–1.0**: Creatief, gevarieerd (brainstormen) |
-| `top_p` | Nucleus Sampling - Lage waarden beperken het model tot engere uitvoer | **0.1-0.5**: Strikt, voorspelbaar <br> **0.9-0.95**: (standaard, natuurlijk, conversationeel) |
+| `max_new_tokens` | De maximale lengte van de output van de LLM | Gebruik 50–500 tokens voor samenvattingen. (1 token is ongeveer 0,75 Engelse woorden) |
+| `temperature` | Creativiteit. Lage waarden maken het gefocust, terwijl hoge waarden meer onvoorspelbaarheid met zich meebrengen | - **0.1–0.3**: Gefocust, deterministisch (goed voor samenvattingen) <br> **0.5–0.7**: Uitgebalanceerd (algemeen gebruik) <br> **0.8–1.0**: Creatief, gevarieerd (brainstormen) |
+| `top_p` | Nucleus Sampling - Lage waarden beperken het model tot smallere uitvoer | **0.1-0.5**: Strikt, voorspelbaar <br> **0.9-0.95**: (standaard, natuurlijk, conversationeel) |
 
 
-## Toepassingen in de Praktijk
+## Praktijktoepassingen
 
-- **Analyse van Onderzoeksartikelen**: Extraheer belangrijke bevindingen uit complexe publicaties voor snelle beoordeling
+- **Analyse van onderzoekspapers**: Haal belangrijke bevindingen uit complexe publicaties voor snelle beoordeling
 - **Nieuwsaggregatie**: Vat nieuwsartikelen samen tot beknopte dagelijkse overzichten of hoogtepunten
-- **Vergadernotities**: Verdicht transcripties tot actiepunten en beknopte samenvattingen
-- **Beoordeling van Juridische Documenten**: Extraheer snel relevante clausules of verplichtingen uit lange juridische teksten
-- **Codedocumentatie**: Genereer beknopte repository-overzichten en functietoelichtingen
+- **Vergadernotities**: Comprimeer transcripties tot actiepunten en beknopte samenvattingen
+- **Beoordeling van juridische documenten**: Haal snel relevante clausules of verplichtingen uit lange juridische teksten
+- **Codedocumentatie**: Genereer beknopte repository-overzichten en functieomschrijvingen
 
-## Volgende Stappen
+## Volgende stappen
 
-- **Fijnafstelling**: Pas modellen aan uw specifieke vakgebied of jargon aan voor betere nauwkeurigheid (zie Fine-tuning Playbooks)
-- **RAG-systemen**: Combineer LLM's met documentophaling voor contextbewuste antwoorden en zoekopdrachten
+- **Fine-tuning**: Pas modellen aan uw specifieke vakgebied of jargon aan voor betere nauwkeurigheid (zie de Fine-tuning Playbooks)
+- **RAG-systemen**: Combineer LLM's met documentretrieval voor contextbewuste antwoorden en zoekopdrachten
 - **Modelverkenning**: Experimenteer met nieuwe modellen zoals Llama 3, Phi-3 of Qwen voor betere resultaten
-- **Productie-implementatie**: Gebruik tools zoals vLLM voor schaalbare LLM-dienstverlening in organisaties
+- **Productie-implementatie**: Gebruik tools zoals vLLM voor schaalbare LLM-serving in organisaties
 
-Uw systeem geeft u de mogelijkheid om geavanceerde taalmodellen lokaal uit te voeren. Experimenteer met verschillende modellen, prompts en parameters om te ontdekken wat het beste werkt voor uw toepassingen.
+Uw systeem geeft u de kracht om geavanceerde taalmodellen lokaal uit te voeren. Experimenteer met verschillende modellen, prompts en parameters om te ontdekken wat het beste werkt voor uw toepassingen.

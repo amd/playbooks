@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA er AMDs open source-framework til at bygge AI-agenter, der kører lokalt på AMD-hardware med Ryzen AI-acceleration.
+GAIA er AMD's open source-framework til at bygge AI-agenter, der kører lokalt på AMD-hardware med Ryzen AI-acceleration.
 
 #### Installation af GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. På Windows skal du åbne en terminal i den ønskede mappe og følge kommandoerne for at oprette et venv.
+1. På Windows skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,7 +30,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. På Linux skal du åbne en terminal i den ønskede mappe og følge kommandoerne for at oprette et venv.
+1. På Linux skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
 <!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. På Windows skal du åbne en terminal i den ønskede mappe og følge kommandoerne for at oprette et venv.
+1. På Windows skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,7 +71,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. På Linux skal du åbne en terminal i den ønskede mappe og følge kommandoerne for at oprette et venv.
+1. På Linux skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
 <!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -279,14 +279,14 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Verificering af installation
+#### Bekræftelse af installation
 
-Verificer, at GAIA v0.16.2 eller nyere er installeret:
+Bekræft, at GAIA v0.16.2 eller nyere er installeret:
 
 ```bash
 gaia --version
 ```
 
-> **Vigtigt**: Sørg for, at Lemonade Server kører, inden du bruger GAIA. GAIA kræver, at Lemonade Server startes manuelt.
+> **Vigtigt**: Sørg for, at Lemonade Server kører, før du bruger GAIA. GAIA kræver, at Lemonade Server startes manuelt.
 
-For yderligere oplysninger, se [GAIA-dokumentationen](https://amd-gaia.ai).
+For yderligere information, se [GAIA-dokumentationen](https://amd-gaia.ai).

@@ -1,5 +1,5 @@
 {
   "id": "gaia-agents",
-  "title": "การสร้าง Agent ตัวแรกของคุณด้วย GAIA",
-  "description": "สร้าง AI agent แบบ 100% local — ไม่ต้องใช้ cloud API ใช้ GAIA SDK เพื่อสร้างที่ปรึกษาด้านฮาร์ดแวร์"
+  "title": "การสร้างเอเจนต์แรกของคุณด้วย GAIA",
+  "description": "สร้างเอเจนต์ AI แบบโลคัล 100% — ไม่ต้องใช้ cloud API ใช้ GAIA SDK เพื่อสร้างที่ปรึกษาด้านฮาร์ดแวร์"
 }

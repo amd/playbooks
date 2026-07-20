@@ -1,5 +1,5 @@
 {
   "id": "cvml",
-  "title": "رؤية الحاسوب المحلية مع AMD Ryzen™ AI NPU",
-  "description": "بناء قدرات الإدراك المحلي باستخدام CVML SDK على Ryzen AI وبرنامج AMD ROCm™"
+  "title": "الرؤية الحاسوبية المحلية باستخدام وحدة معالجة الشبكة العصبية AMD Ryzen™ AI",
+  "description": "قم ببناء قدرات الإدراك المحلي باستخدام CVML SDK فوق Ryzen AI وبرنامج AMD ROCm™"
 }

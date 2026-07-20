@@ -6,27 +6,27 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Questo playbook utilizza tag speciali che GitHub non è in grado di visualizzare. Visitare [amd.com/playbooks](https://amd.com/playbooks) per visualizzare correttamente questo contenuto.
 <!-- @github-only:end -->
 
 ## Panoramica
 
 
-Vuoi eseguire potenti modelli linguistici AI sul tuo hardware? Questa guida ti mostra come farlo.
-Questo tutorial utilizza PyTorch basato sul software AMD ROCm™ per eseguire modelli in grado di riassumere documenti, rispondere a domande, generare testo e molto altro, il tutto in esecuzione locale.
+Vuoi eseguire potenti modelli linguistici AI sul tuo hardware? Questa guida ti mostra come fare.
+Questo tutorial utilizza PyTorch basato su software AMD ROCm™ per eseguire modelli in grado di riassumere documenti, rispondere a domande, generare testo e molto altro, il tutto in locale.
 
 ## Cosa Imparerai
 
-- Eseguire LLM come gpt-oss-20b e qwen3.5-4B in locale usando PyTorch e ROCm
-- Creare uno strumento di riepilogo documenti usando gli LLM
+- Eseguire LLM come gpt-oss-20b e qwen3.5-4B in locale utilizzando PyTorch e ROCm
+- Creare uno strumento di riassunto documenti utilizzando gli LLM
 
-## Configurazione della Memoria
+## Impostazione della Configurazione della Memoria
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Verifica degli Aggiornamenti Software
-> **Nota**: Se VS Code non è installato, puoi installarlo tramite il Ryzen AI Developer Center.
+> **Nota**: Se VS Code non è installato, puoi installarlo con Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -37,7 +37,7 @@ Questo tutorial utilizza PyTorch basato sul software AMD ROCm™ per eseguire mo
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Su Linux, apri un terminale nella directory di tua scelta e segui i comandi per creare un venv con ROCm+Pytorch già installato.
+Su Linux, apri un terminale nella directory a tua scelta e segui i comandi per creare un venv con ROCm+Pytorch già installati.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -50,13 +50,13 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Concedi al tuo utente l'accesso ai dispositivi GPU** (esci e rientra affinché le modifiche abbiano effetto):
+**Concedi al tuo utente l'accesso ai dispositivi GPU** (esci e rientra nell'account affinché la modifica abbia effetto):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Su Linux, apri un terminale nella directory di tua scelta e segui i comandi per creare un venv.
+Su Linux, apri un terminale nella directory a tua scelta e segui i comandi per creare un venv.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -72,7 +72,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Su Windows, apri un terminale nella directory di tua scelta e segui i comandi per creare un venv con ROCm+Pytorch già installato.
+Su Windows, apri un terminale nella directory a tua scelta e segui i comandi per creare un venv con ROCm+Pytorch già installati.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -83,7 +83,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Su Windows, apri un terminale nella directory di tua scelta e segui i comandi per creare un venv.
+Su Windows, apri un terminale nella directory a tua scelta e segui i comandi per creare un venv.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env
@@ -93,7 +93,7 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Suggerimento**: Gli utenti Windows potrebbero dover modificare la propria PowerShell Execution Policy (ad esempio
+> **Suggerimento**: Gli utenti Windows potrebbero dover modificare la loro Execution Policy di PowerShell (ad esempio,
 > impostandola su RemoteSigned o Unrestricted) prima di eseguire alcuni comandi Powershell.
 
 <!-- @os:end -->
@@ -144,12 +144,12 @@ pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
 
 ## Avvio Rapido con Script di Esempio
 
-Questo playbook include script pronti all'uso. Clicca su di essi per visualizzarli in anteprima e scaricarli nella stessa directory in cui hai creato l'ambiente.
+Questo playbook include script pronti all'uso. Fai clic su di essi per visualizzarne l'anteprima e scaricarli nella stessa directory dell'ambiente che hai creato.
 
 | Script | Descrizione | Utilizzo |
 |--------|-------------|-------|
 | [run_llm.py](assets/run_llm.py) | Generazione di testo LLM di base | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Riepilogatore di documenti con supporto Harmony | `python summarizer.py --file document.txt` |
+| [summarizer.py](assets/summarizer.py) | Riassunto documenti con supporto Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -176,15 +176,15 @@ for script in ['run_llm.py', 'summarizer.py']:
 
 Entrambi gli script supportano:
 - Selezione del modello tramite il flag `--model`
-- Formattazione del template di chat per una corretta impostazione dei prompt del modello, particolarmente utile per il riepilogo di documenti
+- Formattazione del template di chat per una corretta creazione dei prompt del modello, particolarmente utile per il riassunto di documenti
 
-## Caricamento ed Esecuzione del Primo LLM
+## Caricamento ed Esecuzione del Tuo Primo LLM
 
-Lo script incluso [run_llm.py](assets/run_llm.py) mostra come generare testo con gli LLM usando PyTorch e AMD ROCm.
+Lo script incluso [run_llm.py](assets/run_llm.py) mostra come generare testo con gli LLM utilizzando PyTorch e AMD ROCm.
 
-> **Nota:** Quando carichi un modello, Hugging Face Transformers verifica prima la cache locale (`~/.cache/huggingface/hub` su Linux, `C:\Users\<user>\.cache\huggingface\hub` su Windows). Se il modello non è in cache, viene scaricato automaticamente da huggingface.co. La prima esecuzione potrebbe richiedere alcuni minuti a seconda delle dimensioni del modello e della velocità di rete.
+> **Nota:** Quando carichi un modello, Hugging Face Transformers controlla prima la sua cache locale (`~/.cache/huggingface/hub` su Linux, `C:\Users\<user>\.cache\huggingface\hub` su Windows). Se il modello non è memorizzato nella cache, viene scaricato automaticamente da huggingface.co. La prima esecuzione potrebbe richiedere alcuni minuti a seconda delle dimensioni del modello e della velocità della rete.
 
-Il frammento di codice seguente mostra come utilizzare il modello e personalizzare le domande poste.
+Il seguente frammento mostra come utilizzare il modello e personalizzare le domande poste.
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -259,11 +259,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Creazione di un Riepilogatore di Documenti
+## Creazione di uno Strumento di Riassunto Documenti
 
-Ora che hai generato output LLM in locale, puoi sviluppare ulteriormente creando un pratico riepilogatore di documenti. In questa sezione utilizzerai lo script [summarizer.py](assets/summarizer.py) per fornire un file .txt e generare automaticamente un riepilogo conciso, il tutto in esecuzione locale sulla tua GPU.
+Ora che hai generato un output LLM in locale, puoi sviluppare ulteriormente questo risultato creando uno strumento pratico di riassunto documenti. In questa sezione, utilizzerai lo script [summarizer.py](assets/summarizer.py) per fornire un file .txt e generare automaticamente un riassunto conciso, il tutto eseguito in locale sulla tua GPU.
 
-Lo script è progettato per funzionare immediatamente. Aprilo in un editor per esplorare il codice, personalizzare i prompt e modificare parametri come lunghezza e temperatura.
+Lo script è progettato per funzionare immediatamente. Apri lo script in un editor per esplorare il codice, personalizzare i prompt e regolare parametri come la lunghezza e la temperatura.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -291,24 +291,24 @@ python summarizer.py --file document.txt --max-length 400
 
 | Parametro | Cosa Controlla | Valori Tipici |
 |-----------|------------------|----------------|
-| `max_new_tokens` | La lunghezza massima dell'output dell'LLM | Usa 50–500 token per i riepiloghi. (1 token equivale a circa 0,75 parole in inglese) |
-| `temperature` | Creatività. Valori bassi lo rendono più focalizzato, mentre valori alti introducono maggiore imprevedibilità | - **0.1–0.3**: Focalizzato, deterministico (adatto per i riepiloghi) <br> **0.5–0.7**: Bilanciato (uso generale) <br> **0.8–1.0**: Creativo, vario (brainstorming) |
-| `top_p` | Nucleus Sampling - Valori bassi limitano il modello a output più ristretti | **0.1-0.5**: Rigoroso, prevedibile <br> **0.9-0.95**: (standard, naturale, conversazionale) |
+| `max_new_tokens` | La lunghezza massima dell'output dell'LLM | Utilizza 50–500 token per i riassunti. (1 token corrisponde a circa 0,75 parole inglesi) |
+| `temperature` | Creatività. Valori bassi lo rendono focalizzato, mentre valori alti comportano maggiore imprevedibilità | - **0.1–0.3**: Focalizzato, deterministico (adatto per i riassunti) <br> **0.5–0.7**: Bilanciato (uso generale) <br> **0.8–1.0**: Creativo, vario (brainstorming) |
+| `top_p` | Nucleus Sampling - Valori bassi limitano il modello a output più ristretti | **0.1-0.5**: Rigoroso, prevedibile <br> **0.9-0.95**: (standard, naturale, colloquiale) |
 
 
 ## Applicazioni nel Mondo Reale
 
-- **Analisi di Articoli di Ricerca**: Estrai i risultati principali da pubblicazioni complesse per una revisione rapida
-- **Aggregazione di Notizie**: Riassumi articoli di notizie in brevi digest giornalieri o highlights
-- **Note di Riunione**: Condensa le trascrizioni in elementi d'azione e riepiloghi concisi
+- **Analisi di Documenti di Ricerca**: Estrai i risultati chiave da pubblicazioni complesse per una revisione rapida
+- **Aggregazione di Notizie**: Riassumi articoli di notizie in brevi digest giornalieri o punti salienti
+- **Note di Riunioni**: Condensa le trascrizioni in elementi d'azione e riassunti concisi
 - **Revisione di Documenti Legali**: Estrai rapidamente clausole o obblighi rilevanti da lunghi testi legali
 - **Documentazione del Codice**: Genera panoramiche concise dei repository e spiegazioni delle funzioni
 
 ## Prossimi Passi
 
-- **Fine-tuning**: Adatta i modelli al tuo campo specifico o gergo per una maggiore precisione (vedi i Playbook di Fine-tuning)
-- **Sistemi RAG**: Combina gli LLM con il recupero di documenti per risposte e ricerche contestualmente consapevoli
+- **Fine-tuning**: Adatta i modelli al tuo settore specifico o al tuo gergo per una maggiore precisione (vedi i Playbook di Fine-tuning)
+- **Sistemi RAG**: Combina gli LLM con il recupero di documenti per risposte e ricerche contestuali
 - **Esplorazione dei Modelli**: Sperimenta con nuovi modelli come Llama 3, Phi-3 o Qwen per risultati migliori
-- **Distribuzione in Produzione**: Usa strumenti come vLLM per un servizio LLM scalabile nelle organizzazioni
+- **Distribuzione in Produzione**: Utilizza strumenti come vLLM per la fornitura scalabile di LLM nelle organizzazioni
 
-Il tuo sistema ti offre la potenza di eseguire sofisticati modelli linguistici in locale. Sperimenta con diversi modelli, prompt e parametri per scoprire cosa funziona meglio per le tue applicazioni.
+Il tuo sistema ti offre la possibilità di eseguire sofisticati modelli linguistici in locale. Sperimenta con diversi modelli, prompt e parametri per scoprire cosa funziona meglio per le tue applicazioni.

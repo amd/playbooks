@@ -12,7 +12,7 @@ GAIA er AMDs åpen kildekode-rammeverk for å bygge AI-agenter som kjører lokal
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. På Windows, åpne en terminal i valgfri katalog og følg kommandoene for å opprette et venv.
+1. På Windows åpner du en terminal i katalogen du ønsker og følger kommandoene for å opprette et venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Bruk deretter `pip` for å installere **Gaia**
+2. Bruk deretter `pip` til å installere **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -30,7 +30,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. På Linux, åpne en terminal i valgfri katalog og følg kommandoene for å opprette et venv.
+1. På Linux åpner du en terminal i katalogen du ønsker og følger kommandoene for å opprette et venv.
 <!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Bruk deretter `pip` for å installere **Gaia**
+2. Bruk deretter `pip` til å installere **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. På Windows, åpne en terminal i valgfri katalog og følg kommandoene for å opprette et venv.
+1. På Windows åpner du en terminal i katalogen du ønsker og følger kommandoene for å opprette et venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Bruk deretter `pip` for å installere **Gaia**
+2. Bruk deretter `pip` til å installere **Gaia**
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -71,7 +71,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. På Linux, åpne en terminal i valgfri katalog og følg kommandoene for å opprette et venv.
+1. På Linux åpner du en terminal i katalogen du ønsker og følger kommandoene for å opprette et venv.
 <!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Bruk deretter `pip` for å installere **Gaia**
+2. Bruk deretter `pip` til å installere **Gaia**
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -93,7 +93,7 @@ pip install amd-gaia
 
 3. Initialisere GAIA
 
-Etter installasjonen, kjør `gaia init` for å sette opp Lemonade Server og laste ned modeller:
+Etter installasjonen kjører du `gaia init` for å sette opp Lemonade Server og laste ned modeller:
 
 ```bash
 gaia init
@@ -279,9 +279,9 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Verifisere installasjonen
+#### Bekrefte installasjonen
 
-Verifiser at GAIA v0.16.2 eller nyere er installert:
+Bekreft at GAIA v0.16.2 eller nyere er installert:
 
 ```bash
 gaia --version

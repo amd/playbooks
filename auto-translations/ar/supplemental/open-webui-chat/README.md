@@ -6,37 +6,37 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> يستخدم هذا الدليل علامات خاصة لا يستطيع GitHub عرضها. يرجى زيارة [amd.com/playbooks](https://amd.com/playbooks) لمعاينة هذا المحتوى بشكل صحيح.
+> يستخدم هذا الدليل التوجيهي علامات خاصة لا يمكن لـ GitHub عرضها. يُرجى زيارة [amd.com/playbooks](https://amd.com/playbooks) لمعاينة هذا المحتوى بشكل صحيح.
 <!-- @github-only:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> يتطلب هذا الدليل حداً أدنى من **32 جيجابايت** من ذاكرة النظام.
+> يتطلب هذا الدليل التوجيهي حدًا أدنى قدره **32 جيجابايت** من ذاكرة النظام.
 <!-- @device:end -->
 
 ## نظرة عامة
 
-[Open WebUI](https://docs.openwebui.com) هي واجهة مستضافة ذاتياً تعمل عبر المتصفح، وتوفر تجربة دردشة مألوفة مع عملها كواجهة أمامية لخادم نماذج ذكاء اصطناعي واحد أو أكثر. بدلاً من الارتباط بمزود واحد، يمكن لـ Open WebUI الاتصال بـ **أي خلفية تعرض واجهة برمجة تطبيقات متوافقة مع OpenAI**، مما يتيح لك تبديل النماذج والقدرات دون تغيير الواجهة.
+[Open WebUI](https://docs.openwebui.com) هي واجهة مستضافة ذاتيًا وقائمة على المتصفح توفر تجربة روبوت دردشة مألوفة مع العمل كواجهة أمامية لخادم واحد أو أكثر من خوادم نماذج الذكاء الاصطناعي. بدلًا من الارتباط بمزود واحد، يمكن لـ Open WebUI الاتصال بأي **خلفية تعرض واجهة برمجة تطبيقات متوافقة مع OpenAI**، مما يتيح لك تبديل النماذج والإمكانيات دون تغيير الواجهات.
 
-في هذا الدليل، نستخدم [**Lemonade**](https://lemonade-server.ai) كخلفية لأنها تعرض **نقطة نهاية موحدة متوافقة مع OpenAI** تدعم أنماطاً متعددة:
+في هذا الدليل التوجيهي، نستخدم [**Lemonade**](https://lemonade-server.ai) كخلفية لأنها تعرض **نقطة نهاية موحدة متوافقة مع OpenAI** تدعم أنماطًا متعددة:
 - **نماذج اللغة الكبيرة (LLMs)** لتوليد النصوص
 - **نماذج الرؤية** لفهم الصور
 - **Stable Diffusion** لتوليد الصور
-- **نماذج النسخ الصوتي** لتحويل الكلام إلى نص
+- **نماذج نسخ الصوت** لتحويل الكلام إلى نص
 
-يتيح لك هذا الإعداد استكشاف **سير العمل متعدد الأنماط بالكامل من البداية إلى النهاية**.
+يتيح لك هذا الإعداد استكشاف **سير العمل متعدد الوسائط الكامل من البداية إلى النهاية**.
 
 ---
 
 ## ما ستتعلمه
 
-بنهاية هذا الدليل، ستكون قادراً على:
+بنهاية هذا الدليل، ستكون قادرًا على:
 
-- توصيل Open WebUI بخلفية محلية متوافقة مع OpenAI (Lemonade)
-- الدردشة مع نموذج لغوي كبير محلي من متصفحك
-- رفع صورة وطرح أسئلة على نموذج رؤية حولها
+- ربط Open WebUI بخلفية محلية متوافقة مع OpenAI (Lemonade)
+- الدردشة مع نموذج لغة كبير محلي من متصفحك
+- تحميل صورة وطرح أسئلة على نموذج رؤية بشأنها
 - توليد صور من مطالبات نصية باستخدام نماذج Stable Diffusion (SDXL-Turbo / SDXL)
-- فهم النموذج الذهني حتى تتمكن من استخدام خلفيات أخرى (Ollama، vLLM، llama.cpp server، إلخ)
+- فهم النموذج الذهني حتى تتمكن من استخدام خلفيات أخرى (Ollama، vLLM، خادم llama.cpp، إلخ)
 
 ---
 
@@ -44,38 +44,38 @@ SPDX-License-Identifier: MIT
 
 ### المكونات الثلاثة
 
-| المكوّن | ما يفعله | أمثلة |
+| العنصر | ما يقوم به | أمثلة |
 |---|---|---|
 | الواجهة الأمامية (UI) | تطبيق الويب الذي تتفاعل معه | Open WebUI |
-| الخلفية (خادم النماذج) | يستضيف النماذج ويعرض نقاط نهاية HTTP | Lemonade، Ollama، vLLM، llama.cpp server، خوادم متوافقة مع OpenAI |
+| الخلفية (خادم النموذج) | يستضيف النماذج ويعرض نقاط نهاية HTTP | Lemonade، Ollama، vLLM، خادم llama.cpp، خوادم متوافقة مع OpenAI |
 | النماذج | نماذج LLM / الرؤية / الانتشار / الصوت الفعلية | CodeLlama، DeepSeek، Gemma-MM، SDXL، SD-Turbo، Whisper |
 
-#### لماذا تهم "واجهة برمجة التطبيقات المتوافقة مع OpenAI"
+#### لماذا تُعد "واجهة برمجة تطبيقات متوافقة مع OpenAI" مهمة
 
-تم بناء Open WebUI حول نقاط نهاية OpenAI القياسية، مثل:
+تم بناء Open WebUI حول نقاط نهاية قياسية بأسلوب OpenAI، مثل:
   - الدردشة: `/chat/completions`
   - قائمة النماذج: `/models`
   - توليد الصور: `/images/generations`
-  - النسخ الصوتي: `/audio/transcriptions`
+  - نسخ الصوت: `/audio/transcriptions`
 
-تعرض Lemonade هذه النقاط تحت `http://localhost:13305/api/v1/...`
+يعرض Lemonade هذه ضمن `http://localhost:13305/api/v1/...`
 
-إذا كانت الخلفية تدعم تلك النقاط، يمكن لـ Open WebUI التواصل معها بإعداد بسيط. لهذا السبب يمكننا تبديل الخلفيات دون تغيير سير عملنا.
+إذا كانت الخلفية تدعم نقاط النهاية هذه، يمكن لـ Open WebUI التواصل معها بأقل إعداد ممكن. لهذا السبب يمكننا تبديل الخلفيات دون تغيير سير عملنا.
 
 #### خدمتان، منفذان
 
-طوال هذا الدليل ستعمل مع خدمتين منفصلتين:
+طوال هذا الدليل التوجيهي، ستعمل مع خدمتين منفصلتين:
 
-| الخدمة | الرابط | ما تفعله هناك |
+| الخدمة | العنوان | ما تفعله هناك |
 |---|---|---|
 | **Lemonade** (واجهة رسومية) | `http://localhost:13305` | تصفح النماذج وتنزيلها وإدارتها |
-| **Open WebUI** | `http://localhost:8080` | الدردشة، رفع الصور، توليد الصور — الواجهة التي يتعامل معها المستخدم |
+| **Open WebUI** | `http://localhost:8080` | الدردشة وتحميل الصور وتوليد الصور — الواجهة الموجهة للمستخدم |
 
-تشغّل Lemonade النماذج؛ وOpen WebUI هي الواجهة التي تتفاعل معها. استخدم واجهة Lemonade الرسومية لتنزيل نماذجك أولاً، ثم استخدمها من Open WebUI.
+يُشغّل Lemonade النماذج؛ ويُعد Open WebUI الواجهة التي تتفاعل معها. استخدم واجهة Lemonade الرسومية لتنزيل نماذجك أولًا، ثم استخدمها من Open WebUI.
 
 ---
 
-## ضبط إعداد الذاكرة
+## ضبط إعدادات الذاكرة
 
 <!-- @require:memory-config -->
 
@@ -87,7 +87,7 @@ SPDX-License-Identifier: MIT
 
 ## الإعداد لمرة واحدة
 
-يحتاج هذا الدليل إلى تشغيل Lemonade كخلفية، وعلى Linux، محرك حاويات (Podman) لتشغيل Open WebUI. قم بإعداد هذه المتطلبات قبل تثبيت Open WebUI.
+يحتاج هذا الدليل التوجيهي إلى تشغيل Lemonade كخلفية، وعلى Linux، محرك حاويات (Podman) لتشغيل Open WebUI. قم بإعداد هذه العناصر قبل تثبيت Open WebUI.
 
 <!-- @os:windows -->
 <!-- @device:halo_box,halo,stx,krk -->
@@ -122,10 +122,10 @@ lemonade --version
 قبل تثبيت Open WebUI، تأكد من تنزيل النماذج التي تريد استخدامها وجاهزيتها في Lemonade.
 
 1. افتح واجهة Lemonade الرسومية على `http://localhost:13305`.
-2. تصفح النماذج المتاحة ونزّل التي تريد استخدامها (مثل نموذج LLM للدردشة، ونموذج رؤية، و/أو نموذج Stable Diffusion لتوليد الصور).
+2. تصفح النماذج المتاحة ونزّل النماذج التي تريد استخدامها (على سبيل المثال، نموذج لغة كبير للدردشة، ونموذج رؤية، و/أو نموذج Stable Diffusion لتوليد الصور).
 3. تأكد من إمكانية الوصول إلى واجهة برمجة التطبيقات بزيارة `http://localhost:13305/api/v1/models` في متصفحك — يجب أن ترى النماذج التي نزّلتها مدرجة.
 
-> يجب تنزيل النماذج في **Lemonade** (`localhost:13305`) قبل أن تظهر في **Open WebUI** (`localhost:8080`). إذا لم يظهر نموذج ما في Open WebUI لاحقاً، عد إلى هنا وتحقق من Lemonade أولاً.
+> يجب تنزيل النماذج في **Lemonade** (`localhost:13305`) قبل أن تظهر في **Open WebUI** (`localhost:8080`). إذا لم يظهر نموذج ما في Open WebUI لاحقًا، ارجع إلى هنا وتحقق من Lemonade أولًا.
 
 
 <!-- @os:windows -->
@@ -470,13 +470,13 @@ PY
 <!-- @os:windows -->
 ### 1. تثبيت Python 3.12
 
-يتطلب Open WebUI **Python 3.12** — ولا يُثبَّت على Python 3.13 أو أحدث. يتيح لك مشغّل Python على Windows (`py`) تثبيت 3.12 جنباً إلى جنب مع أي إصدار Python موجود دون تعارضات.
+يتطلب Open WebUI **Python 3.12** — لا يتم تثبيته على Python 3.13 أو أحدث. يتيح لك مُشغّل Python الخاص بـ Windows (`py`) تثبيت 3.12 جنبًا إلى جنب مع أي إصدار Python موجود بالفعل دون أي تعارضات.
 
 ```powershell
 winget install Python.Python.3.12
 ```
 
-أغلق الطرفية وأعد فتحها بعد التثبيت، ثم تحقق:
+أغلق نافذة الطرفية وأعد فتحها بعد التثبيت، ثم تحقق من ذلك:
 
 ```powershell
 py -3.12 --version
@@ -484,7 +484,7 @@ py -3.12 --version
 ```
 
 <!-- @device:halo_box -->
-> **ملاحظة:** يأتي نظامك مع Python 3.13 مثبتاً مسبقاً. لا يؤثر تثبيت 3.12 عليه — يستمر `python` في استخدام 3.13، ويستهدف `py -3.12` الإصدار 3.12 فقط عند الحاجة.
+> **ملاحظة:** يأتي نظامك مع Python 3.13 مثبتًا مسبقًا. تثبيت 3.12 لا يؤثر عليه — يستمر `python` في استخدام 3.13، بينما يستهدف `py -3.12` الإصدار 3.12 فقط عند الحاجة إليه.
 <!-- @device:end -->
 
 <!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
@@ -566,17 +566,17 @@ Write-Host "OK: open-webui CLI is available"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-سنستخدم الآن خدمة Podman لتحويل تثبيت Open WebUI إلى حاوية.
+سنستخدم الآن خدمة Podman لوضع تثبيت Open WebUI الخاص بنا في حاوية.
 
-يرجى تنزيل الملف التالي في مجلد من اختيارك: [compose.yml](assets/compose.yml)
+يُرجى تنزيل الملف التالي إلى دليل من اختيارك: [compose.yml](assets/compose.yml)
 
-في ذلك المجلد، شغّل الأمر التالي:
+في ذلك الدليل، شغّل الأمر التالي:
 
 ```bash
 podman compose up -d
 ```
 
-يسحب هذا الأمر صورة Open WebUI ويكتب إلى التخزين الدائم.
+يقوم هذا بسحب صورة Open WebUI والكتابة إلى التخزين الدائم.
 
 شغّل Open WebUI بكتابة `localhost:8080` في شريط عنوان متصفحك.
 
@@ -645,18 +645,18 @@ echo "OK: podman compose can parse compose.yml"
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **تلميح**: يوفر Open WebUI أيضاً خيارات تثبيت أخرى على صفحة [GitHub](https://github.com/open-webui/open-webui) الخاصة به.
+> **تلميح**: يوفر Open WebUI أيضًا خيارات تثبيت أخرى على [GitHub](https://github.com/open-webui/open-webui) الخاص بهم.
 ## بدء تشغيل خادم Open WebUI
 
 <!-- @os:windows -->
-- شغّل الأمر التالي لتشغيل خادم Open WebUI HTTP:
+- شغّل الأمر التالي لبدء تشغيل خادم Open WebUI HTTP:
 ```bash
 open-webui serve
 ```
 <!-- @os:end -->
 
 - في المتصفح، انتقل إلى `http://localhost:8080`.
-- سيطلب منك Open WebUI إنشاء حساب مسؤول محلي. بمجرد تسجيل الدخول، ستظهر لك واجهة الدردشة.
+- سيطلب منك Open WebUI إنشاء حساب مسؤول محلي. بمجرد تسجيل الدخول، ستشاهد واجهة الدردشة.
 
 <p align="center">
   <img src="assets/open-webui_chat_interface.png" alt="Open WebUI Chat Interface" width="600"/>
@@ -667,7 +667,7 @@ open-webui serve
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> يعمل الحاوية في الخلفية. من الدليل الذي يحتوي على `compose.yml`، أدِرها باستخدام `podman compose down` (إيقاف) و`podman compose up -d` (تشغيل). تظل حساباتك وإعداداتك محفوظة في وحدة التخزين `open_webui_data`.
+> يعمل الحاوية في الخلفية. من الدليل الذي يحتوي على `compose.yml`، يمكنك إدارته باستخدام `podman compose down` (للإيقاف) و`podman compose up -d` (للتشغيل). تبقى حساباتك وإعداداتك محفوظة في وحدة التخزين `open_webui_data`.
 <!-- @os:end -->
 
 
@@ -756,74 +756,74 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 ## ربط Open WebUI بـ Lemonade
 
-الآن بعد أن أصبحت كلتا الخدمتين تعملان — Lemonade على `localhost:13305` و Open WebUI على `localhost:8080` — قم بربطهما حتى يتمكن Open WebUI من استخدام نماذج Lemonade.
+بما أن كلتا الخدمتين تعملان الآن — Lemonade على `localhost:13305` وOpen WebUI على `localhost:8080` — قم بربطهما ليتمكن Open WebUI من استخدام نماذج Lemonade.
 
 في Open WebUI:
 
-1. انقر على **أيقونة ملف تعريف المستخدم** في الزاوية العلوية اليمنى، ثم اختر **الإعدادات**.
+1. انقر على **أيقونة الملف الشخصي للمستخدم** في الزاوية العلوية اليمنى، ثم اختر **الإعدادات (Settings)**.
 
    <p align="center">
      <img src="assets/open_settings.png" alt="Click the user profile icon" width="300"/>
    </p>
 
-2. في لوحة الإعدادات، انقر على **إعدادات المسؤول** في أسفل اليسار.
+2. في لوحة الإعدادات، انقر على **إعدادات المسؤول (Admin Settings)** في أسفل اليسار.
 
    <p align="center">
      <img src="assets/click_admin_settings.png" alt="Select Admin Settings" width="450"/>
    </p>
 
-3. في الشريط الجانبي لإعدادات المسؤول، انقر على **الاتصالات** (أو انتقل مباشرةً إلى `http://localhost:8080/admin/settings/connections`).
+3. في الشريط الجانبي لإعدادات المسؤول، انقر على **الاتصالات (Connections)** (أو انتقل مباشرة إلى `http://localhost:8080/admin/settings/connections`).
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Admin Settings Connections page" width="600"/>
    </p>
 
-4. ضمن **OpenAI API**، أضف اتصالاً جديداً:
-   - **عنوان URL الأساسي:** `http://localhost:13305/api/v1`
+4. ضمن **OpenAI API**، أضف اتصالاً جديدًا:
+   - **عنوان URL الأساسي (Base URL):** `http://localhost:13305/api/v1`
    - **مفتاح API:** `-` (شرطة واحدة تعمل للاستخدام المحلي)
 
    <p align="center">
      <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
    </p>
 
-5. تأكد من أنه ضمن **"إدارة اتصالات OpenAI API"**، يكون `http://localhost:13305/api/v1` فقط مفعّلاً. عطّل أي اتصالات أخرى (مثل اتصال OpenAI الافتراضي).
+5. تأكد من أنه ضمن **"إدارة اتصالات OpenAI API"**، يكون فقط `http://localhost:13305/api/v1` مفعّلاً. عطّل أي اتصالات أخرى (مثل اتصال OpenAI الافتراضي).
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Manage OpenAI API Connections with only Lemonade enabled" width="600"/>
    </p>
 
-6. انقر على **حفظ**.
+6. انقر على **حفظ (Save)**.
 
-7. **(موصى به)** عطّل ميزات التوليد التلقائي للحفاظ على استجابة Open WebUI مع نماذج اللغة الكبيرة المحلية. انتقل إلى **إعدادات المسؤول ← الإعدادات ← الواجهة** وأوقف تشغيل:
-   - توليد العنوان
-   - توليد المتابعة
-   - توليد الوسوم
+7. **(موصى به)** عطّل ميزات التوليد التلقائي للحفاظ على استجابة Open WebUI مع النماذج اللغوية المحلية. اذهب إلى **إعدادات المسؤول ← الإعدادات ← الواجهة (Admin Settings → Settings → Interface)** وأوقف تشغيل:
+   - توليد العنوان (Title Generation)
+   - توليد المتابعة (Follow Up Generation)
+   - توليد الوسوم (Tags Generation)
 
    <p align="center">
      <img src="assets/admin_settings.png" alt="Admin Settings Interface — disable Title, Follow Up, and Tags Generation" width="600"/>
    </p>
 
-8. انقر على **حفظ**، ثم عد إلى `http://localhost:8080`.
-9. انقر على القائمة المنسدلة للنموذج — يجب أن ترى النماذج التي نزّلتها من Lemonade.
+8. انقر على **حفظ (Save)**، ثم عد إلى `http://localhost:8080`.
+9. انقر على القائمة المنسدلة للنماذج — يجب أن ترى النماذج التي قمت بتنزيلها من Lemonade.
 
 ---
 
 ## الأنشطة الرئيسية
 
-الآن، أنت جاهز تماماً. لنلقِ نظرة على ثلاثة أشياء مثيرة للاهتمام يمكنك القيام بها.
+الآن، أصبح كل شيء جاهزًا. لنلقِ نظرة على ثلاثة أشياء مثيرة للاهتمام يمكنك القيام بها.
 
 ---
 
-### النشاط 1: الدردشة مع نموذج لغة كبير محلي
+### النشاط 1: الدردشة مع نموذج لغوي محلي
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk -->
-1. انقر على القائمة المنسدلة في أعلى يسار الواجهة. سيعرض ذلك نماذج Lemonade المثبتة لديك. اختر أحدها للمتابعة. (مثال: `Qwen3-4B-Hybrid`).
+1. انقر على القائمة المنسدلة في أعلى يسار الواجهة. سيعرض هذا نماذج Lemonade المثبتة لديك. اختر واحدًا للمتابعة. (مثال: `Qwen3-4B-Hybrid`).
 
     <p align="center">
       <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
     </p>
 
-2. أدخل رسالة إلى نموذج اللغة الكبير وانقر على إرسال (أو اضغط Enter). سيستغرق النموذج بضع ثوانٍ للتحميل في الذاكرة ثم ستشاهد الاستجابة تتدفق.
+2. أدخل رسالة إلى النموذج اللغوي وانقر على إرسال (أو اضغط Enter). سيستغرق النموذج اللغوي بضع ثوانٍ ليتم تحميله في الذاكرة، ثم سترى الاستجابة تتدفق.
 
     <p align="center">
       <img src="assets/sending_a_message.png" alt="Sending a message" width="37.5%"/>
@@ -832,13 +832,13 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-1. انقر على القائمة المنسدلة في أعلى يسار الواجهة. سيعرض ذلك نماذج Lemonade المثبتة لديك. اختر أحدها للمتابعة. (مثال: `Qwen3.5-4B-GGUF`).
+1. انقر على القائمة المنسدلة في أعلى يسار الواجهة. سيعرض هذا نماذج Lemonade المثبتة لديك. اختر واحدًا للمتابعة. (مثال: `Qwen3.5-4B-GGUF`).
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. أدخل رسالة إلى نموذج اللغة الكبير وانقر على إرسال (أو اضغط Enter). سيستغرق النموذج بضع ثوانٍ للتحميل في الذاكرة ثم ستشاهد الاستجابة تتدفق.
+2. أدخل رسالة إلى النموذج اللغوي وانقر على إرسال (أو اضغط Enter). سيستغرق النموذج اللغوي بضع ثوانٍ ليتم تحميله في الذاكرة، ثم سترى الاستجابة تتدفق.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -848,7 +848,7 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 3. سيستجيب النموذج في الدردشة.
 
-4. في هذا الوقت، افتح `Task Manager` على نظامك. ستلاحظ **ارتفاع استخدام GPU أو NPU** بناءً على ما إذا كان النموذج الذي اخترته **هجيناً** أو **NPU** على التوالي. باستخدام مدير المهام، يمكنك التأكد من أنك تشغّل النموذج محلياً.
+4. في هذه الأثناء، افتح `Task Manager` على نظامك. ستلاحظ **استخدامًا عاليًا لوحدة معالجة الرسومات أو وحدة معالجة الشبكة العصبية (GPU أو NPU)** بناءً على ما إذا كان النموذج الذي اخترته من نوع **Hybrid** أو **NPU** على التوالي. باستخدام مدير المهام، يمكنك التأكد من أنك تشغّل النموذج محليًا.
 
     <p align="center">
       <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
@@ -856,13 +856,13 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. انقر على القائمة المنسدلة في أعلى يسار الواجهة. سيعرض ذلك نماذج Lemonade المثبتة لديك. اختر أحدها للمتابعة. (مثال: `Qwen3.5-4B-GGUF`).
+1. انقر على القائمة المنسدلة في أعلى يسار الواجهة. سيعرض هذا نماذج Lemonade المثبتة لديك. اختر واحدًا للمتابعة. (مثال: `Qwen3.5-4B-GGUF`).
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. أدخل رسالة إلى نموذج اللغة الكبير وانقر على إرسال (أو اضغط Enter). سيستغرق النموذج بضع ثوانٍ للتحميل في الذاكرة ثم ستشاهد الاستجابة تتدفق.
+2. أدخل رسالة إلى النموذج اللغوي وانقر على إرسال (أو اضغط Enter). سيستغرق النموذج اللغوي بضع ثوانٍ ليتم تحميله في الذاكرة، ثم سترى الاستجابة تتدفق.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -872,50 +872,50 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 3. سيستجيب النموذج في الدردشة.
 <!-- @os:end -->
 
-هذا يؤكد أن Open WebUI يمكنه إرسال الطلبات إلى Lemonade باستخدام نقطة نهاية الدردشة المتوافقة مع OpenAI.
+يؤكد هذا أن Open WebUI يمكنه إرسال الطلبات إلى Lemonade باستخدام نقطة نهاية الدردشة المتوافقة مع OpenAI.
 
 ---
 
-### النشاط 2: رفع صورة وطرح أسئلة عليها (الرؤية)
+### النشاط 2: تحميل صورة وطرح أسئلة عليها (الرؤية)
 
-يتطلب هذا نموذجاً يدعم إدخال الصور (نموذج رؤية أو متعدد الوسائط).
+يتطلب هذا نموذجًا يدعم إدخال الصور (نموذج رؤية أو متعدد الوسائط).
 
-1. انقر على أيقونة التصفية، اختر "حسب الفئة"، ثم اختر نموذجاً من قسم **الرؤية** (مثل: `Qwen3.5-4B-GGUF`)
+1. انقر على أيقونة التصفية، اختر "حسب الفئة (By Category)"، ثم اختر نموذجًا من قسم **الرؤية (Vision)** (مثل `Qwen3.5-4B-GGUF`)
 
    <p align="center">
      <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
    </p>
 
-2. انقر على زر **`+`** في مربع الرسالة وارفع صورة
-3. اطرح سؤالاً يستلزم فهماً حقيقياً للصورة: `Do you think this is a well-designed GUI?`
+2. انقر على زر **`+`** في مربع الرسالة وقم بتحميل صورة
+3. اطرح سؤالاً يستلزم فهمًا حقيقيًا للصورة: `Do you think this is a well-designed GUI?`
 
    <p align="center">
      <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="43%"/>
      <img src="assets/vlm_response.png" alt="VLM Response" width="40%"/>
    </p>
 
-4. يجيب النموذج بناءً على محتوى الصورة، وليس على نص عام.
+4. يجيب النموذج بناءً على محتوى الصورة، وليس نصًا عامًا.
 
 يوضح هذا أن Open WebUI يمكنه إرسال طلبات متعددة الوسائط (نص + صورة) عبر الواجهة الخلفية (Lemonade) إلى نموذج رؤية.
 
 ---
 
 <!-- @os:windows -->
-### النشاط 3: توليد صورة من موجّه نصي (Stable Diffusion)
+### النشاط 3: توليد صورة من موجه نصي (Stable Diffusion)
 
-لا تدعم نماذج Stable Diffusion توليد النصوص، بل تولّد الصور فقط من خلال واجهة برمجة تطبيقات الصور.
+نماذج Stable Diffusion لا تدعم توليد النصوص، فهي فقط تولّد الصور من خلال واجهة برمجة تطبيقات الصور (Images API).
 
 #### الخطوة 1: تهيئة توليد الصور في Open WebUI
 
-1. في واجهة Lemonade (`http://localhost:13305`)، ابحث عن `SDXL-Turbo` (سريع) أو `SDXL-Base-1.0` (جودة أعلى) ونزّله.
-2. انتقل إلى **إعدادات المسؤول ← الصور** (http://localhost:8080/admin/settings/images)
+1. في واجهة Lemonade الرسومية (`http://localhost:13305`)، ابحث عن `SDXL-Turbo` (سريع) أو `SDXL-Base-1.0` (جودة أعلى) وقم بتنزيله.
+2. اذهب إلى **إعدادات المسؤول ← الصور (Admin Settings → Images)** (http://localhost:8080/admin/settings/images)
 3. اضبط:
-   - **توليد الصور:** تشغيل
-   - **محرك توليد الصور:** الافتراضي (OpenAI)
+   - **توليد الصور (Image Generation):** تشغيل (ON)
+   - **محرك توليد الصور (Image Generation Engine):** الافتراضي (OpenAI)
    - **عنوان URL الأساسي لـ OpenAI API:** `http://localhost:13305/api/v1`
    - **مفتاح OpenAI API:** `-`
-   - **النموذج:** `SDXL-Turbo` أو `SDXL-Base-1.0`
-4. إذا أردت إضافة معاملات إضافية، أضفها في حقل النص بصيغة JSON. على سبيل المثال: `{ "steps": 4, "cfg_scale": 1 }`. اطّلع على المعاملات المتاحة في [توليد الصور (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+   - **النموذج (Model):** `SDXL-Turbo` أو `SDXL-Base-1.0`
+4. إذا أردت إضافة المزيد من المعلمات، أضفها إلى حقل النص بصيغة JSON. على سبيل المثال: `{ "steps": 4, "cfg_scale": 1 }`. راجع المعلمات المتاحة على [توليد الصور (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
@@ -923,50 +923,50 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 5. احفظ
 #### الخطوة 2: السماح بتوليد الصور للنموذج
-تضمن هذه الخطوة تفعيل توليد الصور كقدرة لنموذجك.
-1. انتقل إلى **Admin Settings → Models** (http://localhost:8080/admin/settings/models) واختر نموذجك
-2. قم بتشغيل `Image Generation`
+تضمن هذه الخطوة تفعيل توليد الصور كإحدى قدرات النموذج الخاص بك.
+1. اذهب إلى **Admin Settings → Models** (http://localhost:8080/admin/settings/models) واختر نموذجك
+2. فعّل `Image Generation`
 
    <p align="center">
      <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
      <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
    </p>
 
-#### الخطوة 3: توليد صورة من شاشة المحادثة
+#### الخطوة 3: توليد صورة من شاشة الدردشة
 
-1. عد إلى المحادثة على `http://localhost:8080`.
-2. اختر **نموذج LLM لتوليد النصوص** من القائمة المنسدلة للنماذج (مثال: Qwen، Llama). **لا تختر نموذج Stable Diffusion** لأن هذا محدد نموذج المحادثة.
-3. في منطقة الرسائل، انقر على **Integrations**، وقم بتفعيل **Image**.
-4. استخدم موجهاً مثل: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
-5. يتم توليد صورة وتظهر في المحادثة.
+1. عد إلى الدردشة على `http://localhost:8080`.
+2. اختر **نموذج توليد نص (LLM)** من القائمة المنسدلة للنماذج (مثال: Qwen، Llama). **لا تختر نموذج Stable Diffusion** لأن هذا محدد نموذج الدردشة.
+3. في منطقة الرسائل، انقر على **Integrations**، وفعّل خيار **Image**.
+4. استخدم موجّهًا مثل: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
+5. سيتم توليد صورة وستظهر في الدردشة.
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-يُثبت هذا أن Open WebUI يمكنه تنسيق سير عمل "ثنائي الجزء":
-  - يساعد LLM في تحسين الموجه
-  - يتم توليد الصورة عبر نقطة نهاية الصور في Lemonade باستخدام Stable Diffusion
+هذا يوضح أن Open WebUI يمكنه تنسيق سير عمل "من جزئين":
+  - يساعد الـLLM في تحسين الموجّه
+  - يتم توليد الصورة عبر نقطة نهاية Images الخاصة بـLemonade باستخدام Stable Diffusion
 <!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-### النشاط 3: توليد صورة من موجه نصي (Stable Diffusion)
+### النشاط 3: توليد صورة من موجّه نصي (Stable Diffusion)
 
-لا تدعم نماذج Stable Diffusion توليد النصوص، بل تولّد الصور فقط من خلال Images API.
+نماذج Stable Diffusion لا تدعم توليد النصوص، بل تولّد الصور فقط من خلال واجهة برمجة التطبيقات Images API.
 
 #### الخطوة 1: تهيئة توليد الصور في Open WebUI
 
-1. في واجهة Lemonade الرسومية (`http://localhost:13305`)، ابحث عن `SDXL-Turbo` (سريع) أو `SDXL-Base-1.0` (جودة أعلى) وقم بتنزيله.
-2. انتقل إلى **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
-3. اضبط:
+1. في واجهة Lemonade GUI (`http://localhost:13305`)، ابحث عن `SDXL-Turbo` (سريع) أو `SDXL-Base-1.0` (جودة أعلى) وقم بتنزيله.
+2. اذهب إلى **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
+3. اضبط الإعدادات التالية:
    - **Image Generation:** ON
    - **Image Generation Engine:** Default (OpenAI)
    - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` أو `SDXL-Base-1.0`
-4. إذا أردت إضافة معاملات إضافية، أضفها إلى حقل النص بصيغة JSON. على سبيل المثال: `{ "steps": 4, "cfg_scale": 1 }`. اطلع على المعاملات المتاحة في [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+4. إذا أردت إضافة المزيد من المعاملات، أضفها إلى الحقل النصي بصيغة JSON. على سبيل المثال: `{ "steps": 4, "cfg_scale": 1 }`. راجع المعاملات المتاحة في [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
@@ -976,31 +976,31 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 
 #### الخطوة 2: السماح بتوليد الصور للنموذج
-تضمن هذه الخطوة تفعيل توليد الصور كقدرة لنموذجك.
-1. انتقل إلى **Admin Settings → Models** (http://localhost:8080/admin/settings/models) واختر نموذجك
-2. قم بتشغيل `Image Generation`
+تضمن هذه الخطوة تفعيل توليد الصور كإحدى قدرات النموذج الخاص بك.
+1. اذهب إلى **Admin Settings → Models** (http://localhost:8080/admin/settings/models) واختر نموذجك
+2. فعّل `Image Generation`
 
    <p align="center">
      <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
      <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
    </p>
 
-#### الخطوة 3: توليد صورة من شاشة المحادثة
+#### الخطوة 3: توليد صورة من شاشة الدردشة
 
-1. عد إلى المحادثة على `http://localhost:8080`.
-2. اختر **نموذج LLM لتوليد النصوص** من القائمة المنسدلة للنماذج (مثال: Qwen، Llama). **لا تختر نموذج Stable Diffusion** لأن هذا محدد نموذج المحادثة.
-3. في منطقة الرسائل، انقر على **Integrations**، وقم بتفعيل **Image**.
-4. استخدم موجهاً مثل: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
-5. يتم توليد صورة وتظهر في المحادثة.
+1. عد إلى الدردشة على `http://localhost:8080`.
+2. اختر **نموذج توليد نص (LLM)** من القائمة المنسدلة للنماذج (مثال: Qwen، Llama). **لا تختر نموذج Stable Diffusion** لأن هذا محدد نموذج الدردشة.
+3. في منطقة الرسائل، انقر على **Integrations**، وفعّل خيار **Image**.
+4. استخدم موجّهًا مثل: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
+5. سيتم توليد صورة وستظهر في الدردشة.
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-يُثبت هذا أن Open WebUI يمكنه تنسيق سير عمل "ثنائي الجزء":
-  - يساعد LLM في تحسين الموجه
-  - يتم توليد الصورة عبر نقطة نهاية الصور في Lemonade باستخدام Stable Diffusion
+هذا يوضح أن Open WebUI يمكنه تنسيق سير عمل "من جزئين":
+  - يساعد الـLLM في تحسين الموجّه
+  - يتم توليد الصورة عبر نقطة نهاية Images الخاصة بـLemonade باستخدام Stable Diffusion
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -1009,39 +1009,39 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 ## استكشاف الأخطاء وإصلاحها
 
 ### "لا تظهر أي نماذج في Open WebUI"
-- أولاً، تحقق من Lemonade: افتح `http://localhost:13305/api/v1/models` في متصفح وتأكد من أن نماذجك مدرجة ومنزّلة
-- ثم، تحقق من اتصال Open WebUI: انتقل إلى **Admin Settings → Connections** على `http://localhost:8080/admin/settings/connections` وتحقق من أن Base URL هو `http://localhost:13305/api/v1`
+- أولًا، تحقق من Lemonade: افتح `http://localhost:13305/api/v1/models` في المتصفح وتأكد من ظهور نماذجك وأنها تم تنزيلها
+- بعد ذلك، تحقق من اتصال Open WebUI: اذهب إلى **Admin Settings → Connections** على `http://localhost:8080/admin/settings/connections` وتحقق من أن Base URL هو `http://localhost:13305/api/v1`
 
 ### رسالة الخطأ "This model does not support chat completion"
-- لقد اخترت نموذج صور (SDXL-Turbo / SDXL-Base-1.0) في القائمة المنسدلة لنموذج المحادثة.
-- **الحل**: اختر نموذج LLM للمحادثة، واستخدم مفتاح تبديل الصور وإعدادات Images للتوليد.
+- لقد اخترت نموذج صور (SDXL-Turbo / SDXL-Base-1.0) من القائمة المنسدلة لنموذج الدردشة.
+- **الحل**: اختر نموذج LLM للدردشة، واستخدم مفتاح تبديل Image وإعدادات Images للتوليد.
 <p align="center">
   <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
 </p>
 
-### أخطاء توليد الصور/انتهاء المهلة
-- ابدأ بـ `SDXL-Turbo` أولاً (سريع، خطوات أقل)
-- بعد التأكد من عمله، بدّل نموذج الصور إلى `SDXL-Base-1.0` للحصول على جودة أعلى
+### أخطاء/انتهاء مهلة توليد الصور
+- ابدأ بـ`SDXL-Turbo` أولًا (سريع، خطوات أقل)
+- بمجرد أن يعمل بشكل جيد، انتقل إلى نموذج الصور `SDXL-Base-1.0` للحصول على جودة أعلى
 
 ---
 
 ## الخطوات التالية
 
-أصبح لديك الآن **"مجموعة ذكاء اصطناعي محلية"** تعمل بالكامل، وهي واجهة مستخدم واحدة تتحكم في أنواع متعددة من النماذج من خلال واجهة برمجة تطبيقات موحدة.
+أصبح لديك الآن **'حزمة ذكاء اصطناعي محلية'** عاملة، وهي واجهة مستخدم واحدة تتحكم في أنواع متعددة من النماذج عبر واجهة برمجة تطبيقات موحدة.
 
-إليك ثلاثة توسعات تفتح سير عمل جديدة كلياً:
+فيما يلي ثلاثة توسعات تفتح آفاقًا جديدة تمامًا لسير العمل:
 
 ### 1. تحويل الكلام إلى نص باستخدام Whisper
 
-جرّب تحويل الصوت إلى نص باستخدام نموذج Whisper، ثم أدخله إلى نموذج LLM للتلخيص أو استخراج بنود العمل أو إعادة الصياغة. هذا هو الأساس لملاحظات الاجتماعات والمساعدين الصوتيين.
+جرّب تحويل الصوت إلى نص باستخدام نموذج Whisper، ثم أدخله إلى LLM للتلخيص، أو استخراج بنود العمل، أو إعادة الصياغة. هذا هو الأساس لملاحظات الاجتماعات والمساعدين الصوتيين.
 
 ### 2. برمجة Python داخل Open WebUI
 
-استخدم تجربة تنفيذ الكود المدمجة في Open WebUI لتشغيل مقاطع Python، وفحص المخرجات، والتكرار بشكل أسرع—دون مغادرة الواجهة. [مرجع](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
+استخدم تجربة تنفيذ الأكواد المدمجة في Open WebUI لتشغيل مقاطع Python، وفحص المخرجات، والتكرار بشكل أسرع—دون مغادرة الواجهة. [مرجع](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
 
 ### 3. عرض HTML داخل Open WebUI
 
-اعرض مخرجات HTML مباشرةً في الواجهة. هذا قوي بشكل مدهش لبناء نماذج أولية سريعة وتقارير منسقة ومقاطع تفاعلية. [مرجع](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
+اعرض مخرجات HTML مباشرة في الواجهة. هذه ميزة قوية بشكل مفاجئ لبناء نماذج أولية سريعة، وتقارير منسّقة، ومقاطع تفاعلية. [مرجع](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
 
 ---
 
@@ -1049,9 +1049,9 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 - [Open WebUI (GitHub)](https://github.com/open-webui/open-webui)
 - [Lemonade (GitHub)](https://github.com/lemonade-sdk/lemonade)
-- [توثيق Lemonade Server](https://lemonade-server.ai/docs)
+- [وثائق Lemonade Server](https://lemonade-server.ai/docs)
 - [واجهة سطر أوامر Lemonade Server](https://lemonade-server.ai/docs/lemonade-cli/)
-- [دليل تكامل Lemonade ↔ Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui)
+- [دليل تكامل Lemonade مع Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui)
 - [مواصفات واجهة برمجة تطبيقات Lemonade Server (نقاط النهاية)](https://lemonade-server.ai/docs/server/server_spec)
-- [جولة فيديو (Lemonade)](https://www.youtube.com/watch?v=mcf7dDybUco)
-- [جولة فيديو (Open WebUI + Lemonade)](https://www.youtube.com/watch?v=yZs-Yzl736E)
+- [شرح مرئي (Lemonade)](https://www.youtube.com/watch?v=mcf7dDybUco)
+- [شرح مرئي (Open WebUI + Lemonade)](https://www.youtube.com/watch?v=yZs-Yzl736E)

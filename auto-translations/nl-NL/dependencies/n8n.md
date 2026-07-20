@@ -23,6 +23,6 @@ Installeer n8n globaal met npm:
 npm install -g n8n
 ```
 
-> **Opmerking**: Zie [n8n Documentatie](https://docs.n8n.io/hosting/installation/npm/) voor meer installatieopties.
+> **Opmerking**: Zie [n8n-documentatie](https://docs.n8n.io/hosting/installation/npm/) voor meer installatie-opties.
 
 <!-- @os:end -->

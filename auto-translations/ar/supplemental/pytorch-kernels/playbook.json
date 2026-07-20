@@ -1,5 +1,5 @@
 {
   "id": "pytorch-kernels",
-  "title": "بناء نوى GPU مخصصة باستخدام PyTorch و AMD ROCm™",
-  "description": "اكتب وحسّن نوى GPU مخصصة باستخدام PyTorch وبرنامج AMD ROCm™"
+  "title": "بناء نواة GPU مخصصة باستخدام PyTorch وAMD ROCm™",
+  "description": "اكتب النواة المخصصة (kernels) لوحدة معالجة الرسوميات (GPU) وحسّنها باستخدام PyTorch وبرنامج AMD ROCm™"
 }

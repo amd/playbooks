@@ -15,9 +15,9 @@ SPDX-License-Identifier: MIT
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download.png" alt="LM Studio Download Models" width="600"/>
 
-سيقوم LM Studio تلقائيًا بتنزيل النموذج ووضعه في المجلد الصحيح.
+سيقوم LM Studio تلقائيًا بتنزيل النموذج ووضعه في الدليل الصحيح.
 
-إذا كنت ترغب في تنزيل نماذج إضافية، يمكنك البحث عنها في تبويب Discover وسيتولى LM Studio الباقي.
+إذا رغبت في تنزيل نماذج إضافية، يمكنك البحث عنها في تبويب Discover وسيتولى LM Studio الباقي.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-windows timeout=60 hidden=True -->

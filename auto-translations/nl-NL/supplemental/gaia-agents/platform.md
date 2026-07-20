@@ -12,12 +12,12 @@ Dit document beschrijft de verwachte platformconfiguraties voor het uitvoeren va
 
 ### Windows/Linux
 
-GAIA moet vooraf worden geïnstalleerd aan de hand van de instructies in de [GAIA-installatiegids](../../dependencies/gaia.md).
+GAIA moet vooraf zijn geïnstalleerd volgens de instructies in de [GAIA-installatiehandleiding](../../dependencies/gaia.md).
 
-Lemonade Server moet vooraf worden geïnstalleerd aan de hand van de instructies in de [Lemonade-installatiegids](../../dependencies/lemonade.md).
+Lemonade Server moet vooraf zijn geïnstalleerd volgens de instructies in de [Lemonade-installatiehandleiding](../../dependencies/lemonade.md).
 
 ## Vereiste modellen
 
 ### Windows/Linux
 
-De Hardware Advisor Agent gebruikt **Qwen3-Coder-30B** voor agentredenering. Dit model wordt automatisch gedownload tijdens `gaia init`. Er zijn geen handmatige modeldownloads vereist.
+De Hardware Advisor Agent gebruikt **Qwen3-Coder-30B** voor agentredenering. Dit model wordt automatisch gedownload tijdens `gaia init`. Handmatig modellen downloaden is niet nodig.

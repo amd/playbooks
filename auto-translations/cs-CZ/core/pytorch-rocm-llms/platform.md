@@ -8,39 +8,39 @@ SPDX-License-Identifier: MIT
 
 Tento dokument popisuje očekávané konfigurace platformy pro spuštění tohoto playbooku.
 
-## Předpoklady
+## Požadavky
 
-PyTorch s podporou ROCm je předinstalován na platformě AMD Ryzen™ AI Halo Developer Platform. Pro všechna ostatní zařízení musí uživatelé nainstalovat PyTorch s podporou ROCm ručně. Postupujte prosím podle příslušné části pro váš operační systém:
+PyTorch s podporou ROCm je předinstalován na platformě AMD Ryzen™ AI Halo Developer Platform. U všech ostatních zařízení musí uživatelé nainstalovat PyTorch s podporou ROCm ručně. Postupujte podle příslušné části pro váš operační systém:
 
 ### Windows
 
-| Komponenta    | Verze           | Poznámky                          |
+| Komponenta     | Verze         | Poznámky                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 nebo novější | Předinstalován na platformě AMD Ryzen AI Halo Developer Platform; na všech ostatních zařízeních je nutná ruční instalace |
+| **PyTorch**   | 2.9 nebo novější    | Předinstalováno na platformě AMD Ryzen AI Halo Developer Platform; na všech ostatních zařízeních je nutné nainstalovat ručně |
 
 ### Linux
 
-| Komponenta    | Verze           | Poznámky                          |
+| Komponenta     | Verze         | Poznámky                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 nebo novější | Předinstalován na platformě AMD Ryzen AI Halo Developer Platform; na všech ostatních zařízeních je nutná ruční instalace |
+| **PyTorch**   | 2.9 nebo novější    | Předinstalováno na platformě AMD Ryzen AI Halo Developer Platform; na všech ostatních zařízeních je nutné nainstalovat ručně |
 
 ## Požadované modely
 
 Následující modely jsou otestovány a optimalizovány pro vaši platformu:
 
 | Model | Parametry | Velikost | Umístění ke stažení |
-|-------|-----------|----------|---------------------|
-| **openai/gpt-oss-20b** | 20B | ~40 GB | Předinstalován na platformě AMD Ryzen AI Halo Developer Platform; na všech ostatních zařízeních je nutná ruční instalace |
+|-------|------------|------|-------------------|
+| **openai/gpt-oss-20b** | 20B | ~40GB | Předinstalováno na platformě AMD Ryzen AI Halo Developer Platform; na všech ostatních zařízeních je nutné nainstalovat ručně |
 
-Modely budou automaticky staženy do adresáře mezipaměti Hugging Face:
+Modely budou automaticky stahovány do mezipaměti Hugging Face:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
-Zajistěte alespoň **50 GB volného místa** pro uložení modelů.
+Zajistěte alespoň **50 GB volného místa** pro úložiště modelů.
 
 ## Požadavky na síť
 
-Počáteční nastavení vyžaduje přístup k internetu pro stažení modelů z Hugging Face. Po stažení může playbook běžet offline.
+Počáteční nastavení vyžaduje přístup k internetu ke stažení modelů z Hugging Face. Po stažení může playbook fungovat offline.
 
 - První stažení modelů může trvat **5–10 minut** v závislosti na velikosti modelu a rychlosti připojení
-- Modely jsou uloženy v místní mezipaměti a není třeba je znovu stahovat
+- Modely jsou uloženy lokálně v mezipaměti a není třeba je stahovat znovu

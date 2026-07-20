@@ -1,5 +1,5 @@
 {
   "id": "gaia-agents",
-  "title": "GAIA-agentin rakentaminen ensimmäistä kertaa",
-  "description": "Rakenna 100 % paikallinen tekoälyagentti — ei pilvi-API:ja tarvita. Käytä GAIA SDK:ta laitteistoneuvonantajan luomiseen."
+  "title": "Ensimmäisen agentin rakentaminen GAIA:lla",
+  "description": "Rakenna 100 % paikallinen tekoälyagentti – pilvi-API-yhteyksiä ei tarvita. Luo laitteistoneuvoja GAIA SDK:n avulla."
 }

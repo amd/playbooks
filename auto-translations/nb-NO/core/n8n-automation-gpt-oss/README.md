@@ -6,41 +6,41 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Denne oppskriften bruker spesielle tagger som GitHub ikke kan gjengi. Besøk [amd.com/playbooks](https://amd.com/playbooks) for å forhåndsvise dette innholdet på riktig måte.
 <!-- @github-only:end -->
 
 ## Oversikt
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> This playbook requires a minimum of **32GB** of system memory.
+> Denne oppskriften krever minimum **32GB** med systemminne.
 <!-- @device:end -->
 
-n8n er en plattform for arbeidsflytautomatisering som lar deg koble sammen apper og tjenester ved hjelp av en visuell nodbasert editor.
+n8n er en plattform for arbeidsflytautomatisering som lar deg koble sammen apper og tjenester ved hjelp av en visuell, nodebasert editor.
 
-Denne playbooken lærer deg hvordan du setter opp en KI-drevet finansnyhetsoppsummerer som henter innhold fra AP News sin forretningsseksjon, trekker ut viktige overskrifter og bruker en lokal LLM som kjører på systemet ditt til å generere et investorfokusert sammendrag.
+Denne oppskriften lærer deg hvordan du setter opp en AI-drevet oppsummerer for finansnyheter som skraper AP News' næringslivsseksjon, trekker ut viktige overskrifter, og bruker en lokal LLM som kjører på systemet ditt for å generere et investorfokusert sammendrag.
 
 ## Hva du vil lære
 
 - Hvordan installere og starte n8n
 - Importere og konfigurere en ferdigbygd arbeidsflyt
 - Koble til Lemonade ved hjelp av den innebygde n8n-integrasjonen
-- Forstå arbeidsflytsnoder og dataflyt
+- Forstå arbeidsflytnoder og dataflyt
 
 ## Hva er Lemonade?
 
-[Lemonade](https://lemonade-server.ai) er en lokal LLM-serveringsplattform bygget for AMD-maskinvare. Den tilbyr et OpenAI-kompatibelt API som kjører helt på maskinen din – dataene dine forlater aldri enheten din.
+[Lemonade](https://lemonade-server.ai) er en lokal LLM-serveringsplattform bygget for AMD-maskinvare. Den tilbyr et OpenAI-kompatibelt API som kjører fullstendig på maskinen din — dataene dine forlater aldri enheten din.
 
-I denne playbooken bruker vi Lemonade til å kjøre en lokal LLM som n8n kobler seg til for KI-drevne oppgaver.
+I denne oppskriften bruker vi Lemonade til å tilby en lokal LLM som n8n kobler til for AI-drevne oppgaver.
 
-n8n inkluderer en **innebygd Lemonade-node** (`Lemonade Chat Model`) som gir en førsteklasses integrasjon – ingen manuell konfigurasjon nødvendig. Dette gjør det enkelt å koble din lokale LLM til automatiseringsarbeidsflyter.
+n8n inkluderer en **innebygd Lemonade-node** (`Lemonade Chat Model`) som gir en førsteklasses integrasjon - ingen manuell konfigurasjon nødvendig. Dette gjør det enkelt å koble den lokale LLM-en din til automatiserte arbeidsflyter.
 
 ## Angi minnekonfigurasjonen
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Se etter programvareoppdateringer
+## Sjekk etter programvareoppdateringer
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -217,30 +217,30 @@ n8n --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Tips**: Windows-brukere må kanskje endre PowerShell-kjøringspolicyen (f.eks.
-> sette den til RemoteSigned eller Unrestricted) før de kjører noen PowerShell-kommandoer.
+> **Tips**: Windows-brukere må kanskje endre PowerShell-kjøreretningslinjen (Execution Policy) (f.eks.
+> ved å sette den til RemoteSigned eller Unrestricted) før de kjører enkelte PowerShell-kommandoer.
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **PATH-problem**: Hvis `n8n --version` sier at kommandoen ikke ble funnet, må du sørge for at npm sin globale bin-katalog er i brukerens `PATH`. Den vanlige installasjonsstien er `C:\Users\<username>\AppData\Roaming\npm`. 
-> Legg dette til i brukerstien (Rediger systemets miljøvariabler > Miljøvariabler > Rediger brukerstien) og last inn terminalen på nytt.
+> **PATH-problem**: Hvis `n8n --version` sier at kommandoen ikke ble funnet, må du sørge for at npm sin globale bin-mappe ligger i brukerens `PATH`. Den vanlige installasjonsbanen er `C:\Users\<username>\AppData\Roaming\npm`. 
+> Legg denne til i brukerbanen (Rediger systemets miljøvariabler > Miljøvariabler > Rediger brukerbane) og last inn terminalen på nytt. 
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 Vi skal nå bruke Podman-tjenesten til å containerisere n8n-installasjonen vår.
 
-Last ned følgende til en valgfri katalog: [compose.yml](assets/compose.yml)
+Last ned følgende til en mappe etter eget valg: [compose.yml](assets/compose.yml)
 
-Kjør følgende kommando i den katalogen:
+I den mappen kjører du følgende kommando:
 ```bash
 podman compose up -d
 ```
 
-Dette bør installere n8n og skrive til vedvarende lagring.
+Dette bør installere n8n og skrive til en persistent lagring.
 
-Start n8n ved å skrive `localhost:5678` i nettleserens adresselinje.
+Start n8n ved å skrive `localhost:5678` i adressefeltet i nettleseren din.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -317,27 +317,27 @@ echo "OK: n8n server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-n8n starter en lokal webserver. Trykk `'o'` eller åpne nettleseren din på `http://localhost:5678` for å få tilgang til editoren.
+n8n starter en lokal webserver. Trykk `'o'` eller åpne nettleseren din til `http://localhost:5678` for å få tilgang til editoren.
 <!-- @os:end -->
 
 
-> **Tips**: Hold terminalvinduet åpent mens du bruker n8n. Å lukke det kan stoppe serveren.
+> **Tips**: Hold terminalvinduet åpent mens du bruker n8n. Hvis du lukker det, kan det stoppe serveren.
 
 ## Starte Lemonade
 
-Lemonade er den lokale serveren som kjører en modell og kobler seg til n8n.
+Lemonade er den lokale serveren som vil kjøre en modell og koble til n8n. 
 
 <!-- @os:linux -->
-Åpne Lemonade-grensesnittet ved å klikke på Lemonade-ikonet i oppgavelinjen. Du kan bla gjennom modeller, backends og laste inn de forhåndsinstallerte modellene herfra.
+Åpne Lemonade-GUI-et ved å klikke på Lemonade-ikonet i oppgavelinjen. Herfra kan du bla gjennom modeller, backends og laste inn de forhåndsinstallerte modellene.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Åpne Lemonade-grensesnittet ved å klikke på Lemonade-ikonet. Høyreklikk på systemstatusikonet for å åpne appen. Deretter kan du legge til modeller, backends og laste inn de forhåndsinstallerte modellene.
+Åpne Lemonade-GUI-et ved å klikke på Lemonade-ikonet. Høyreklikk på systemstatusikonet for å åpne appen. Deretter kan du legge til modeller, backends og laste inn de forhåndsinstallerte modellene.
 <!-- @os:end -->
 
->**Tips**: Når det kjører, er Lemonade-grensesnittet også tilgjengelig på http://localhost:13305
+>**Tips**: Når det kjører, er Lemonade-GUI-et også tilgjengelig på http://localhost:13305
 
-Alternativt kan du åpne en terminal og kjøre `lemonade list` for å se hvilke modeller som er installert. Kjør deretter:
+Alternativt kan du åpne en terminal og kjøre `lemonade list` for å se hvilke modeller som er installert. Deretter kjører du:
 
 <!-- @device:halo_box -->
 <!-- @os:linux -->
@@ -368,27 +368,26 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 
 ## Sette opp arbeidsflyten
 
-### Trinn 1: Registrer deg eller logg inn i n8n
+### Trinn 1: Registrer deg eller logg inn på n8n
 
-Når du åpner n8n for første gang, blir du bedt om å opprette en konto eller logge inn:
+Første gang du åpner n8n, blir du bedt om å opprette en konto eller logge inn:
 
 1. Åpne `http://localhost:5678` i nettleseren din
-2. Opprett en ny lokal konto med e-postadressen din, eller logg inn hvis du allerede har en
+2. Opprett en ny lokal konto med e-posten din, eller logg inn hvis du allerede har en
 3. Når du er logget inn, ser du n8n-dashbordet
 
-> **Tips**: Hvis du er utestengt fra kontoen din, prøv `n8n user-management:reset`
+> **Tips**: Hvis du er utestengt fra kontoen din, kan du prøve `n8n user-management:reset`
 
 ### Trinn 2: Importer arbeidsflyten
 
-Vi har levert en ferdigbygd arbeidsflyt som du kan importere direkte:
+Vi har tilbudt en ferdigbygd arbeidsflyt som du kan importere direkte:
 
 1. Last ned følgende arbeidsflytfil: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. Klikk **Start from Scratch** for å åpne arbeidsflyt-editoren. Alternativt kan du klikke på +-knappen øverst til venstre og deretter **Add workflow**.
-3. Klikk på **...**-menyen (tre prikker) øverst til høyre og velg **Import from file**
-4. Velg den nedlastede `financial-news-workflow.json`-filen
-5. Arbeidsflyten vises på lerretet
-
-### Trinn 3: Forstå arbeidsflyten
+2. Klikk **Start from Scratch** for å åpne arbeidsflyteditoren. Alternativt kan du klikke på +-knappen øverst til venstre, og deretter **Add workflow**.
+3. Klikk på **...**-menyen (tre prikker) i den øverste raden til høyre og velg **Import from file**
+4. Velg den nedlastede filen `financial-news-workflow.json`
+5. Arbeidsflyten vil vises på lerretet
+### Steg 3: Forstå arbeidsflyten
 
 Den importerte arbeidsflyten inneholder 9 tilkoblede noder:
 
@@ -400,20 +399,20 @@ Den importerte arbeidsflyten inneholder 9 tilkoblede noder:
 |------|---------|
 | **When clicking 'Execute workflow'** | Manuell utløser for å starte arbeidsflyten |
 | **Fetch Financial News Webpage** | HTTP GET-forespørsel til `https://apnews.com/business` |
-| **Delay to Ensure Page Load** | Ventenode for å sikre at sideinnholdet er fullstendig lastet |
-| **Extract News Headlines & Text** | HTML-node som trekker ut overskrifter, redaktørens utvalg, topphistorier og regionale nyheter ved hjelp av CSS-velgere |
-| **Clean Extracted News Data** | Set-node som kombinerer alle uttrukne data til ett enkelt tekstfelt |
-| **AI Financial News Summarizer** | KI-agent som behandler nyhetene med en systemmelding for finansanalytiker |
+| **Delay to Ensure Page Load** | Vent-node som sikrer at sideinnholdet er fullstendig lastet inn |
+| **Extract News Headlines & Text** | HTML-node som trekker ut overskrifter, redaktørens utvalg, toppsaker og regionale nyheter ved hjelp av CSS-velgere |
+| **Clean Extracted News Data** | Set-node som kombinerer alle uttrukne data i ett enkelt tekstfelt |
+| **AI Financial News Summarizer** | AI-agent som behandler nyhetene med en systemprompt for finansanalytiker |
 | **Lemonade Chat Model** | Kobler til din lokale Lemonade-server som kjører LLM-en |
-| **Structured Output Parser** | Formaterer KI-utdataene som strukturert JSON |
+| **Structured Output Parser** | Formaterer AI-utdataen som strukturert JSON |
 | **Convert to File** | Konverterer sammendraget til en nedlastbar fil |
 
-### Trinn 4: Konfigurer Lemonade-legitimasjon
+### Steg 4: Konfigurer Lemonade-legitimasjon
 
 Før du kjører arbeidsflyten, må du koble den til din lokale Lemonade-server:
 
 1. Dobbeltklikk på **Lemonade Chat Model**-noden i n8n
-2. I rullegardinmenyen **Credential to connect with** velger du **Create New Credential**
+2. I nedtrekksmenyen **Credential to connect with** velger du **Create New Credential**
 3. Skriv inn verdiene i tabellen nedenfor og klikk lagre.
 4. Velg den relevante modellen du har lastet inn i Lemonade Server.
 
@@ -424,20 +423,20 @@ Før du kjører arbeidsflyten, må du koble den til din lokale Lemonade-server:
 
 > **Merk**: Før du tester, kjør `lemonade status` i en terminal for å bekrefte at Lemonade-serveren kjører.
 <!-- @device:halo_box -->
-> Denne arbeidsflyten bruker GPT-OSS-120B, og den er forhåndsinstallert i Lemonade. Du kan endre dette til andre lastede modeller i innstillingene for Lemonade Chat Model-noden.
+> Denne arbeidsflyten bruker GPT-OSS-120B, og den er forhåndsinstallert i Lemonade. Du kan endre dette til andre innlastede modeller i innstillingene for Lemonade Chat Model-noden.
 <!-- @device:end -->
 
-### Trinn 5: Test arbeidsflyten
+### Steg 5: Test arbeidsflyten
 
 1. Sørg for at Lemonade kjører med en modell lastet inn
-2. Klikk **Execute workflow** nederst i midten av lerretet
-3. Se hver node kjøre fra venstre til høyre – de blir grønne når de er fullført
-4. Dobbeltklikk på **AI Financial News Summarizer**-noden for å se det genererte sammendraget i den nedre ruten.
-5. Dobbeltklikk på **Convert to File**-noden for å laste ned den tilsvarende tekstfilen i den nedre ruten.
+2. Klikk på **Execute workflow** nederst i midten på lerretet
+3. Se hver node kjøre fra venstre til høyre – de blir grønne når de er ferdige
+4. Dobbeltklikk på **AI Financial News Summarizer**-noden for å se det genererte sammendraget i det nederste panelet.
+5. Dobbeltklikk på **Convert to File**-noden for å laste ned den tilhørende tekstfilen i det nederste panelet.
 
-## Forstå KI-agenten
+## Forstå AI-agenten
 
-AI Financial News Summarizer bruker en systemmelding utformet for finansanalyse:
+AI Financial News Summarizer bruker en systemprompt utformet for finansanalyse:
 
 ```
 You are an AI financial analyst. Your role is to read, understand, and
@@ -449,19 +448,19 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-Agenten mottar de rensede nyhetsdataene og produserer et strukturert sammendrag med markedssentiment.
+Agenten mottar de rensede nyhetsdataene og gir ut et strukturert sammendrag med markedssentiment.
 
 ### Lagre arbeidsflyten din
 
-Klikk på arbeidsflytnavnet øverst og gi det nytt navn om ønskelig. Arbeidsflyter lagres automatisk mens du arbeider.
+Klikk på arbeidsflytnavnet øverst og gi den nytt navn om ønskelig. Arbeidsflyter lagres automatisk mens du jobber.
 
 ## Neste steg
 
-- **Planlegg automatisering**: Erstatt manuell utløser med en **Schedule Trigger** for å kjøre daglig
-- **Send varsler**: Legg til en **Discord**-, **Slack**- eller **E-post**-node for å motta sammendrag
-- **Prøv ulike modeller**: Endre modellen i Lemonade Chat Model-noden for å eksperimentere med ulike LLM-er
-- **Tilpass uttrekking**: Endre CSS-velgerne i HTML Extract-noden for å målrette ulike nyhetseksjoner
-- **Prøv ulike backends**: n8n støtter også [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio og andre lokale LLM-backends
+- **Planlegg automatisering**: Erstatt Manual Trigger med en **Schedule Trigger** for å kjøre daglig
+- **Send varsler**: Legg til en **Discord**-, **Slack**- eller **Email**-node for å motta sammendrag
+- **Prøv forskjellige modeller**: Endre modellen i Lemonade Chat Model-noden for å eksperimentere med forskjellige LLM-er
+- **Tilpass uttrekking**: Endre CSS-velgerne i HTML Extract-noden for å målrette mot andre nyhetsseksjoner
+- **Prøv forskjellige backend-løsninger**: n8n støtter også [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio og andre lokale LLM-backend-løsninger
 
 ### Utforsk n8n-maler
 

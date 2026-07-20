@@ -1,4 +1,4 @@
-# Configurarea Platformei
+# Configurarea platformei
 
 Acest document descrie configurațiile de platformă așteptate pentru rularea acestui playbook.
 
@@ -8,33 +8,33 @@ PyTorch cu suport ROCm este preinstalat pe AMD Ryzen™ AI Halo Developer Platfo
 
 ### Windows
 
-| Componentă    | Versiune        | Note                              |
+| Componentă     | Versiune         | Note                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 sau mai nou | Preinstalat pe AMD Ryzen AI Halo Developer Platform; trebuie instalat manual pe toate celelalte dispozitive |
+| **PyTorch**   | 2.8 sau mai nouă    | Preinstalat pe AMD Ryzen AI Halo Developer Platform; trebuie instalat manual pe toate celelalte dispozitive |
 
 ### Linux
 
-| Componentă    | Versiune        | Note                              |
+| Componentă     | Versiune         | Note                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 sau mai nou | Preinstalat pe AMD Ryzen AI Halo Developer Platform; trebuie instalat manual pe toate celelalte dispozitive |
+| **PyTorch**   | 2.8 sau mai nouă    | Preinstalat pe AMD Ryzen AI Halo Developer Platform; trebuie instalat manual pe toate celelalte dispozitive |
 
 ## Modele necesare
 
 Următoarele modele sunt testate și optimizate pentru platforma dvs.:
 
 | Model | Parametri | Dimensiune | Locație descărcare |
-|-------|-----------|------------|--------------------|
-| **facebook/seamless-m4t-v2-large** | 2.3B | ~10GB | Preinstalat pe AMD Ryzen AI Halo Developer Platform; trebuie instalat manual pe toate celelalte dispozitive |
+|-------|------------|------|-------------------|
+| **facebook/seamless-m4t-v2-large** | 2,3B | ~10GB | Preinstalat pe AMD Ryzen AI Halo Developer Platform; trebuie instalat manual pe toate celelalte dispozitive |
 
 Modelele vor fi descărcate automat în directorul cache Hugging Face:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
-Asigurați-vă că aveți cel puțin **20 GB spațiu liber** pentru stocarea modelelor.
+Asigurați-vă că aveți cel puțin **20GB spațiu liber** pentru stocarea modelelor.
 
 ## Cerințe de rețea
 
-Configurarea inițială necesită acces la internet pentru a descărca modele de pe Hugging Face. După descărcare, playbook-ul poate rula offline.
+Configurarea inițială necesită acces la internet pentru descărcarea modelelor de pe Hugging Face. După descărcare, playbook-ul poate rula offline.
 
-- Primele descărcări de modele pot dura **5-10 minute** în funcție de dimensiunea modelului și viteza conexiunii
-- Modelele sunt stocate local în cache și nu trebuie descărcate din nou
+- Descărcările inițiale ale modelelor pot dura **5-10 minute**, în funcție de dimensiunea modelului și viteza conexiunii
+- Modelele sunt stocate în cache local și nu trebuie descărcate din nou

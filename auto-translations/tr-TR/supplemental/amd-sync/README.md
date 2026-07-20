@@ -5,42 +5,43 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> Bu playbook, GitHub'ın işleyemediği özel etiketler kullanmaktadır. Bu içeriği doğru şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
+> Bu kılavuz, GitHub'ın işleyemediği özel etiketler kullanmaktadır. Bu içeriği doğru şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
 <!-- @github-only:end -->
 
-# AMD Sync ile Uzak Geliştirme
+# AMD Sync ile Uzaktan Geliştirme
 
 ## Genel Bakış
 
-**AMD Sync**, dizüstü bilgisayarınızı AMD Ryzen™ AI Halo için uzak bir kontrol merkezine dönüştürür. Manuel SSH, anahtar ve IDE kurulumunu atlayın — AMD Sync'i yükleyin ve Ryzen AI Halo üzerinde uzak terminal, VS Code, JupyterLab ve canlı GPU/CPU/bellek panosuna tek tıklamayla erişin.
+**AMD Sync**, dizüstü bilgisayarınızı AMD Ryzen™ AI Halo için uzaktan kumanda merkezine dönüştürür. Manuel SSH, anahtar ve IDE kurulumunu atlayın — AMD Sync'i yükleyin ve Ryzen AI Halo üzerinde uzak bir terminale, VS Code'a, JupyterLab'a ve canlı GPU/CPU/bellek panosuna tek tıkla erişim elde edin.
 
-Yerel makineniz tanıdık kalmaya devam eder; her komut, not defteri ve model Ryzen AI Halo üzerinde çalışır.
+Yerel makineniz tanıdık kalır; her komut, not defteri ve model Ryzen AI Halo üzerinde çalışır.
 
-> **İpucu**: Bu sayfa, AMDSync'e yönelik tüm yeni güncellemeleri içerecektir.
+> **İpucu**: Bu sayfa, AMDSync'e ilişkin yeni güncellemeleri içerecektir. 
 
-## Neler Öğreneceksiniz
+## Bu Sayfada Öğrenecekleriniz
 
-- Ryzen AI Halo üzerinde SSH'ı etkinleştirme ve AMD Sync'ten bağlanma
-- AMD Sync ile tek tıklamayla Ryzen AI Halo'ya karşı VS Code, Terminal, JupyterLab ve Canlı Metrikler başlatma
-- AMD Sync'in yönetilen proje klasörlerini kullanarak uzak çalışmayı düzenleme
+- Ryzen AI Halo üzerinde SSH'yi etkinleştirme ve AMD Sync'ten bağlanma
+- Ryzen AI Halo'ya karşı tek tıkla VS Code, Terminal, JupyterLab ve Canlı Metrikler'i başlatma
+- AMD Sync'in yönetilen proje klasörlerini kullanarak uzaktaki çalışmanızı düzenleme
 
 ---
 
 ## Temel Kavramlar
 
-AMD Sync'in iki tarafı vardır: bir **istemci** (AMD Sync uygulamasını çalıştıran dizüstü bilgisayarınız) ve bir **sunucu** (AMD Sync'in tünel açtığı bir SSH sunucusu çalıştıran Ryzen AI Halo). AMD Sync'ten başlattığınız her şey — VS Code, terminal, not defteri — yerel olarak açılır ancak Ryzen AI Halo üzerinde çalışır.
+AMD Sync'in iki tarafı vardır: bir **istemci** (dizüstü bilgisayarınız, AMD Sync uygulamasını çalıştırır) ve bir **sunucu** (Ryzen AI Halo, AMD Sync'in tünellediği bir SSH sunucusu çalıştırır). AMD Sync'ten başlattığınız her şey — VS Code, bir terminal, bir not defteri — yerel olarak açılır ancak Ryzen AI Halo üzerinde çalışır.
 
 > **Desteklenen istemciler:** Windows 11 ve Linux. macOS desteklenmemektedir.
 
 ---
 
-## Adım 1 — Ryzen AI Halo'da SSH'ı Etkinleştirme
+## Adım 1 — Ryzen AI Halo Üzerinde SSH'yi Etkinleştirme
 
 
-> **Not:** Windows'ta Ryzen AI Halo, SSH sunucusu *varsayılan olarak kapalı* şekilde gelir. Linux'ta ise SSH sunucusu *varsayılan olarak açık* şekilde gelir.
+> **Not:** Windows'ta, Ryzen AI Halo *varsayılan olarak kapalı* SSH sunucusuyla birlikte gelir. Linux'ta ise SSH sunucusu *varsayılan olarak açık* gelir.
 
-1. Ryzen AI Halo'da **AMD Ryzen™ AI Developer Center**'ı açın.
+1. Ryzen AI Halo üzerinde **AMD Ryzen™ AI Developer Center**'ı açın.
 2. **Remote** sekmesine gidin.
 3. **SSH Server**'ı açık konuma getirin.
 4. **Server Information** altında gösterilen **IP Address**, **Port** ve **Username** bilgilerini not edin — bunları AMD Sync'e yapıştıracaksınız.
@@ -49,42 +50,42 @@ AMD Sync'in iki tarafı vardır: bir **istemci** (AMD Sync uygulamasını çalı
   <img src="assets/halobox_remote_tab.png" alt="AMD Ryzen AI Developer Center Remote tab showing SSH Server toggle and Server Information"/>
 </div>
 
-> **Not:** Bu, Windows için AMD Developer Center'dır. Linux sürümünün kullanıcı arayüzü farklı olabilir, ancak benzer uzak işlevselliğe sahiptir.
+> **Not:** Bu, Windows için AMD Developer Center'dır. Linux sürümünün kullanıcı arayüzü farklı olabilir, ancak uzaktan işlevsellik benzerdir.
 
-> **İpucu:** AMD Sync, Developer Center'dan bir parola değil, o kullanıcının **işletim sistemi oturum açma parolasını** ister.
+> **İpucu:** AMD Sync, Developer Center'daki bir parola değil, o kullanıcının **işletim sistemi oturum açma parolasını** ister.
 
 ---
 
 ## Adım 2 — İstemcinize AMD Sync'i Yükleme
 
-AMD Sync, Windows 11 ve Linux üzerinde çalışır. İşletim sisteminiz için yükleyiciyi indirin, ardından aşağıdaki adımları izleyin. Kurulumun ardından **Get Started** ekranında **Accept & Install** seçeneğine tıklayın — AMD Sync tamamlandığında otomatik olarak başlar.
+AMD Sync, Windows 11 ve Linux üzerinde çalışır. İşletim sisteminize uygun yükleyiciyi indirin, ardından aşağıdaki adımları izleyin. Kurulumdan sonra, **Get Started** ekranında **Accept & Install**'a tıklayın — işlem tamamlandığında AMD Sync otomatik olarak başlar.
 
 ### Windows
 
-[AMDSyncInstaller.exe'yi İndirin](https://drivers.amd.com/drivers/amd-sync/windows/amdsyncinstaller.exe)
+[AMDSyncInstaller.exe İndirin](https://drivers.amd.com/drivers/amd-sync/windows/amdsyncinstaller.exe)
 
 1. `AMDSyncInstaller.exe` dosyasına çift tıklayın.
-2. **Accept & Install** seçeneğine tıklayın.
+2. **Accept & Install**'a tıklayın.
 
-> Windows Güvenlik Duvarı sizi uyarırsa, AMD Sync'in SSH üzerinden Ryzen AI Halo'ya ulaşabilmesi için ağ erişimine izin verin.
+> Windows Güvenlik Duvarı sizden izin isterse, AMD Sync'in Ryzen AI Halo'ya SSH üzerinden erişebilmesi için ağ erişimine izin verin.
 
 ### Linux
 
-Tercih ettiğiniz formatı indirmek için bağlantıya tıklayın:
+Tercih ettiğiniz biçimi indirmek için bağlantıya tıklayın:
 
-| Format | İndirme | Kurulum komutu |
+| Biçim | İndirme | Kurulum komutu |
 |--------|----------|-----------------|
 | `.deb` | [AMDSyncInstaller.deb](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.deb) | `sudo apt install ./amdsyncinstaller.deb` |
 | `.rpm` | [AMDSyncInstaller.rpm](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.rpm) | `sudo rpm -i ./amdsyncinstaller.rpm` |
 | `.AppImage` | [AMDSyncInstaller.AppImage](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.AppImage) | `chmod +x ./amdsyncinstaller.AppImage && ./amdsyncinstaller.AppImage` |
 
-> **Not:** Ubuntu App Center, yerel olarak açılan bir `.deb` dosyasını *"Potansiyel olarak güvensiz"* şeklinde işaretleyebilir. Bu, herhangi bir üçüncü taraf yerel yükleyici için standart bir uyarıdır. `.deb` dosyasına çift tıklamak başarısız olursa, yukarıdaki terminal komutunu kullanın.
+> **Not:** Ubuntu App Center, yerel olarak açılan bir `.deb` dosyasını *"Potansiyel olarak güvenli değil"* şeklinde işaretleyebilir. Bu, herhangi bir üçüncü taraf yerel yükleyici için standart bir uyarıdır. `.deb` dosyasına çift tıklamak başarısız olursa, yukarıdaki terminal komutunu kullanın.
 
 ---
 
 ## Adım 3 — Ryzen AI Halo'nuza Bağlanma
 
-İlk başlatmada AMD Sync, **Add a Remote Device** formunu gösterir. Developer Center'ın **Remote** sekmesindeki değerleri kullanarak doldurun.
+İlk başlatmada, AMD Sync **Add a Remote Device** formunu gösterir. Bu formu, Developer Center'ın **Remote** sekmesindeki değerleri kullanarak doldurun.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/connect_device.png" alt="AMD Sync Add a Remote Device form"/>
@@ -92,78 +93,77 @@ Tercih ettiğiniz formatı indirmek için bağlantıya tıklayın:
 
 | Alan | Notlar |
 |-------|-------|
-| **Device Name** *(isteğe bağlı)* | `Ryzen AI Halo` gibi kolay bir etiket. Varsayılan olarak `Device 1`, `Device 2`, … şeklindedir. |
+| **Device Name** *(isteğe bağlı)* | `Ryzen AI Halo` gibi anlaşılır bir etiket. Varsayılan olarak `Device 1`, `Device 2`, … şeklindedir. |
 | **Hostname or IP** | Remote sekmesinden |
-| **SSH Port** | Remote sekmesinden (yalnızca sayılar) |
-| **Username** | Ryzen AI Halo'daki işletim sistemi hesap adınız |
+| **SSH Port** | Remote sekmesinden (yalnızca rakamlar) |
+| **Username** | Ryzen AI Halo üzerindeki işletim sistemi hesap adınız |
 | **Password** | İşletim sistemi oturum açma parolanız — yazarken gizlenir |
 
-**Add Device** seçeneğine tıklayın. Kısa bir yükleme ekranının ardından **"Connection Successful"** mesajını görecek ve sistem tepsisinde yaşayan ana görünüme geçeceksiniz. Pencereyi kapatmak için dışına tıklayın; AMD Sync çalışmaya devam eder ve tek tıklamayla erişilebilir.
+**Add Device**'a tıklayın. Kısa bir yükleme ekranının ardından **"Connection Successful"** yazısını görecek ve sistem tepsinizde yer alan ana ekrana geçeceksiniz. Pencereyi kapatmak için dışına tıklayın; AMD Sync çalışmaya devam eder ve bir tık uzağınızda olur.
 
-> **Bağlantı başarısız olursa,** AMD Sync değerleriniz korunmuş şekilde forma geri döner. Olağan nedenler şunlardır: Ryzen AI Halo'da SSH'ın devre dışı olması, yanlış parola veya iki cihazın farklı ağlarda bulunması.
+> **Bağlantı başarısız olursa,** AMD Sync değerlerinizi koruyarak forma geri döner. Bunun genel nedenleri, Ryzen AI Halo üzerinde SSH'nin devre dışı olması, parolanın yanlış olması veya iki cihazın farklı ağlarda bulunmasıdır.
 
 ---
 
 ## Adım 4 — İlk Uzak Aracınızı Başlatma
 
-Ana görünüm size beş tek tıklamalı bileşen sunar — istemci ve Ryzen AI Halo'nun hangi işletim sistemini çalıştırdığından bağımsız olarak hepsi kullanılabilir.
+Ana ekran, istemcinin ve Ryzen AI Halo'nun hangi işletim sistemini çalıştırdığından bağımsız olarak kullanılabilen beş adet tek tıkla çalışan bileşen sunar.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/homepage_after_connect.png" alt="AMD Sync home view with Directory dropdown and launchers"/>
 </div>
 
-| Bileşen | Ne yapar |
+| Bileşen | İşlevi |
 |-----------|--------------|
-| **Directory** | Ryzen AI Halo'da VS Code, Terminal ve JupyterLab'ın açılacağı klasörü seçer. Varsayılan olarak yönetilen `Documents/AMD_Sync` çalışma alanına ayarlanır. |
-| **VS Code** | VS Code'u yerel olarak, seçilen klasöre SSH tüneli ile açar. |
-| **Terminal** | Seçilen klasörde Ryzen AI Halo'ya SSH ile bağlı yerel bir terminal açar. |
-| **JupyterLab** | Seçilen klasörün kapsamında, Ryzen AI Halo'ya SSH ile bağlı bir not defteri projesi başlatır. |
-| **Live Metrics** | Ryzen AI Halo'daki GPU, bellek ve CPU kullanımının gerçek zamanlı görünümü. |
+| **Directory** | VS Code, Terminal ve JupyterLab'ın açılacağı klasörü Ryzen AI Halo üzerinde seçer. Varsayılan olarak yönetilen bir `Documents/AMD_Sync` çalışma alanı kullanılır. |
+| **VS Code** | Seçilen klasöre bir SSH tüneli ile yerel olarak VS Code'u açar. |
+| **Terminal** | Ryzen AI Halo'ya SSH ile bağlı, seçilen klasörde yerel bir terminal açar. |
+| **JupyterLab** | Ryzen AI Halo'ya SSH ile bağlı, seçilen klasöre kapsamlandırılmış bir not defteri projesi başlatır. |
+| **Live Metrics** | Ryzen AI Halo üzerindeki GPU, bellek ve CPU kullanımının gerçek zamanlı görünümü. |
 
 ### VS Code'u Deneyin
 
-İlk başlatma için **VS Code**'u deneyin.
+İlk başlatmanız için **VS Code**'u deneyin.
 
-1. **Directory**'yi varsayılan `~/Documents/AMD_Sync` olarak bırakın.
+1. **Directory**'i varsayılan `~/Documents/AMD_Sync` olarak bırakın.
 2. **VS Code**'a tıklayın.
-3. AMD Sync, Ryzen AI Halo'da `Documents/AMD_Sync/Project_1` oluşturur ve VS Code'u yerel olarak, bu klasöre tünel açarak açar.
+3. AMD Sync, Ryzen AI Halo üzerinde `Documents/AMD_Sync/Project_1` klasörünü oluşturur ve VS Code'u yerel olarak açarak buna tünel kurar.
 
-Artık Ryzen AI Halo'da yaşayan dosyaları yerel VS Code kurulumunuzla düzenliyorsunuz. `helloworld.py` oluşturun, `print("hello world")` ekleyin, entegre terminali açın (`` Ctrl + ` ``) ve çalıştırın:
+Artık yerel VS Code kurulumunuzla Ryzen AI Halo üzerinde bulunan dosyaları düzenliyorsunuz. `helloworld.py` dosyasını oluşturun, `print("hello world")` satırını ekleyin, tümleşik terminali açın (`` Ctrl + ` ``) ve çalıştırın:
 
 <div align="center" style="max-width: 620px; margin: 1.5rem auto;">
   <img src="assets/vscode.png" alt="VS Code SSH-tunneled into Project_1 on the Ryzen AI Halo, running helloworld.py"/>
 </div>
 
-Durum çubuğunda **SSH: Linux** yazar — bu, kodunuzun dizüstü bilgisayarınızda değil Ryzen AI Halo'da çalıştığının kanıtıdır.
+Durum çubuğunda **SSH: Linux** yazısı görünür — bu, kodunuzun dizüstü bilgisayarınızda değil, Ryzen AI Halo üzerinde çalıştığının kanıtıdır.
+### Terminal'i Deneyin
 
-### Terminali Deneyin
-
-Klavyeden ayrılmadan aynı klasöre SSH üzerinden girmek için **Terminal**'e tıklayın.
+Klavyeden elinizi kaldırmadan SSH üzerinden aynı klasöre geçmek için **Terminal**'e tıklayın.
 
 <div align="center" style="max-width: 620px; margin: 1.5rem auto;">
   <img src="assets/terminal.png" alt="Local terminal SSH-connected to the Ryzen AI Halo in ~/Documents/AMD_Sync"/>
 </div>
 
-Windows'ta varsayılan terminal **PowerShell**'dir — tercih ederseniz Ayarlar menüsünden **Windows Command Prompt**'a geçebilirsiniz. Linux'ta AMD Sync, varsayılan sistem terminalinizi kullanır.
+Windows'ta varsayılan terminal **PowerShell**'dir — tercih ederseniz Ayarlar menüsünden **Windows Command Prompt**'a geçebilirsiniz. Linux'ta AMD Sync varsayılan sistem terminalinizi kullanır.
 
 ---
 
 ## Directory Nasıl Çalışır
 
-**Directory** açılır menüsü, AMD Sync'teki en önemli kontroldür — başlattığınız her aracın Ryzen AI Halo'da nereye yerleşeceğini belirler.
+**Directory** açılır menüsü, AMD Sync'teki en önemli tek kontroldür — başlattığınız her aracın Ryzen AI Halo üzerinde nereye yerleşeceğine bu belirler.
 
-- **`~/Documents/AMD_Sync` (varsayılan)** — Buradan VS Code veya JupyterLab başlatmak otomatik olarak yeni bir proje klasörü oluşturur (VS Code için `Project_1`, `Project_2`, …; JupyterLab için `Notebook_Project_1`, `Notebook_Project_2`, …).
-- **Mevcut proje klasörleri** — `AMD_Sync`'in doğrudan alt öğeleri (Ryzen AI Halo'da manuel olarak oluşturduğunuz klasörler dahil) açılır menüde görünür. En son kullandığınız klasör, bir sonraki seferde varsayılan olur.
-- **Özel yollar** — Ryzen AI Halo'da başka bir yerdeki klasörü açmak için herhangi bir mutlak yol yazın. AMD Sync yalnızca onu *açar* — `AMD_Sync` dışında klasör oluşturmaz ve özel yollar oturumlar arasında kaydedilmez.
+- **`~/Documents/AMD_Sync` (varsayılan)** — VS Code veya JupyterLab'ı buradan başlatmak otomatik olarak yeni bir proje klasörü oluşturur (VS Code için `Project_1`, `Project_2`, …; JupyterLab için `Notebook_Project_1`, `Notebook_Project_2`, …).
+- **Var olan proje klasörleri** — `AMD_Sync`'in doğrudan alt klasörü olan her klasör (Ryzen AI Halo üzerinde elle oluşturduğunuz klasörler dahil) açılır menüde görünür. En son kullandığınız klasör, bir sonraki seferde varsayılan olur.
+- **Özel yollar** — Ryzen AI Halo üzerinde başka bir yerdeki klasörü açmak için herhangi bir mutlak yol yazabilirsiniz. AMD Sync bunu yalnızca *açar* — `AMD_Sync` dışında klasör oluşturmaz ve özel yollar oturumlar arasında kaydedilmez.
 
-Özel bir yol çalışmazsa AMD Sync size nedenini söyler: geçersiz sözdizimi, klasör mevcut değil veya yol bir dosyaya işaret ediyor.
+Özel bir yol çalışmazsa AMD Sync nedenini size bildirir: geçersiz sözdizimi, klasör mevcut değil veya yol bir dosyayı işaret ediyor.
 
 ---
 
 ## Canlı Metrikler ve JupyterLab
 
-- **Live Metrics** — GPU, bellek ve CPU kullanımının canlı panosu. Uzak bir eğitim çalışmasının gerçekten donanıma ulaştığını doğrulamanın en hızlı yolu.
-- **JupyterLab** — Ryzen AI Halo'ya SSH ile bağlı, not defteri hücrelerini ve kabuk komutlarını kullanıcı arayüzünden ayrılmadan karıştırmak için kendi entegre terminaline sahip tam bir not defteri projesi.
+- **Canlı Metrikler** — GPU, bellek ve CPU kullanımının canlı bir panosu. Uzaktaki bir eğitim çalıştırmasının donanıma gerçekten ulaştığını doğrulamanın en hızlı yolu.
+- **JupyterLab** — SSH ile Ryzen AI Halo'ya bağlanmış tam bir notebook projesi; not defteri hücreleri ile kabuk komutlarını UI'dan çıkmadan bir arada kullanabilmeniz için kendi entegre terminaline sahiptir.
 
 ---
 
@@ -171,7 +171,7 @@ Windows'ta varsayılan terminal **PowerShell**'dir — tercih ederseniz Ayarlar 
 
 **Settings** menüsünde üç sekme bulunur:
 
-| Sekme | Kapsadığı alan |
+| Sekme | Neyi kapsar |
 |-----|----------------|
 | **Devices** | Başarıyla bağlandığınız her Ryzen AI Halo'yu listeler. Yeniden bağlanın, kimlik bilgilerini düzenleyin veya yeni bir cihaz ekleyin. |
 | **Information** | Belgelere ve forum desteğine bağlantılar. |
@@ -182,20 +182,20 @@ Windows'ta varsayılan terminal **PowerShell**'dir — tercih ederseniz Ayarlar 
 </div>
 
 
-- **Terminal türü (Windows)** — **PowerShell** (varsayılan) ve **Windows Command Prompt** arasında seçim yapın.
+- **Terminal türü (Windows)** — **PowerShell** (varsayılan) ile **Windows Command Prompt** arasında seçim yapın.
 - **Terminal türü (Linux)** — Yalnızca varsayılan sistem terminali kullanılabilir.
-- **Uygulama güncellemeleri** — Bu sekme, kullanıcı arayüzü içinden yeni AMD Sync sürümlerini kontrol etmek ve yüklemek için doğru yerdir; ayrı bir güncelleyiciye gerek yoktur.
+- **Uygulama güncellemeleri** — Bu sekme, UI içinden yeni AMD Sync sürümlerini kontrol edip yüklemek için doğru yerdir; ayrı bir güncelleyiciye gerek yoktur.
 
-> Bir cihaz, **Devices** altında yalnızca ilk başarılı bağlantının ardından görünür; bu nedenle başarısız girişimler listeyi karıştırmaz.
+> Bir cihaz, ancak başarılı bir ilk bağlantıdan sonra **Devices** altında görünür, böylece başarısız denemeler listeyi karıştırmaz.
 
 ---
 
 ## Sorun Giderme
 
-- **Bağlantı hemen başarısız oluyor** — Developer Center'daki Ryzen AI Halo'nun **Remote** sekmesinde SSH sunucusunun etkin olduğunu doğrulayın.
-- **Yanlış parola hatası** — Developer Center'dan alınan parolaları değil, Ryzen AI Halo'daki **işletim sistemi oturum açma parolanızı** kullanın.
-- **VS Code düğmesi hiçbir şey yapmıyor** — [code.visualstudio.com](https://code.visualstudio.com) adresinden istemci makinenize VS Code'u yükleyin.
-- **AMD Sync tepsi simgesi eksik (Linux/GNOME)** — AppIndicator uzantısını yükleyin ve etkinleştirin.
-- **`.deb` dosya yöneticisinden açılmıyor** — Terminalden `sudo apt install ./AMDSyncInstaller.deb` komutunu kullanın.
+- **Bağlantı hemen başarısız oluyor** — Ryzen AI Halo'nun Developer Center'daki **Remote** sekmesinde SSH sunucusunun etkin olduğunu doğrulayın.
+- **Yanlış parola hatası** — Ryzen AI Halo üzerinde Developer Center'dan alınan parolalar yerine **işletim sistemi giriş parolanızı** kullanın.
+- **VS Code düğmesi hiçbir şey yapmıyor** — İstemci makinenize [code.visualstudio.com](https://code.visualstudio.com) adresinden VS Code'u yükleyin.
+- **AMD Sync tepsi simgesi görünmüyor (Linux/GNOME)** — AppIndicator uzantısını yükleyip etkinleştirin.
+- **`.deb` dosya yöneticisinden açılmıyor** — Bir terminalden `sudo apt install ./AMDSyncInstaller.deb` komutunu kullanın.
 
 ---

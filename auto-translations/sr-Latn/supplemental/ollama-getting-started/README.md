@@ -6,44 +6,44 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ovaj vodič koristi posebne oznake koje GitHub ne može da prikaže. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste ispravno pregledali ovaj sadržaj.
 <!-- @github-only:end -->
 
 ## Pregled
 
-Ollama je popularan lagani alat za lokalno pokretanje velikih jezičkih modela. Upravlja preuzimanjem modela, kvantizacijom i posluživanjem putem jednostavnog interfejsa komandne linije i desktop aplikacije, tako da možete početi da razgovarate sa LLM-om za samo nekoliko minuta.
+Ollama je popularan lagan alat za pokretanje velikih jezičkih modela lokalno. On se brine o preuzimanju modela, kvantizaciji i servisiranju iza jednostavnog interfejsa komandne linije i desktop aplikacije, tako da možete od nule da počnete da ćaskate sa LLM-om za nekoliko minuta.
 
-Ovaj playbook vas vodi kroz instalaciju Ollame, preuzimanje GPT-OSS 20B modela i razgovor s njim, kako putem terminala tako i putem desktop aplikacije.
+Ovaj vodič vas provodi kroz instalaciju Ollama, preuzimanje modela GPT-OSS 20B i vođenje razgovora sa njim, kako kroz terminal tako i kroz desktop aplikaciju.
 
 ## Šta ćete naučiti
 
-- Kako da instalirate i pokrenete Ollamu na svom sistemu
-- Kako da preuzmete i pokrenete GPT-OSS 20B model lokalno
-- Kako da razgovarate sa modelima koristeći CLI
-- Kako da programski upućujete upite modelima putem REST API-ja
+- Kako da instalirate i pokrenete Ollama na vašem sistemu
+- Preuzimanje i pokretanje modela GPT-OSS 20B lokalno
+- Ćaskanje sa modelima koristeći CLI
+- Programsko upitivanje modela putem REST API-ja
 
 ## Podešavanje konfiguracije memorije
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Proverite softverska ažuriranja
-> **Napomena**: Ako VS Code nije instaliran, možete ga instalirati putem Ryzen AI Developer Center-a.
+## Proverite ažuriranja softvera
+> **Napomena**: Ako VS Code nije instaliran, možete ga instalirati pomoću Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalacija softverskih preduslova
+## Instaliranje potrebnog softvera
 
 <!-- @require:driver -->
 
-### Instalacija Ollame
+### Instaliranje Ollama
 
 <!-- @os:windows -->
 
 1. Preuzmite instalacioni program sa [ollama.com/download](https://ollama.com/download).
 2. Pokrenite `.exe` instalacioni program i pratite uputstva.
-3. Nakon instalacije, Ollama radi kao pozadinska usluga i dostupna je iz terminala, desktop aplikacije i sistemske trake.
+3. Nakon instalacije, Ollama radi kao pozadinski servis i dostupan je iz terminala, desktop aplikacije i sistemske trake.
 
 Proverite instalaciju otvaranjem terminala i pokretanjem:
 
@@ -55,14 +55,14 @@ ollama --version
 ```powershell
 ollama --version
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 
-Trebalo bi da vidite broj instalirane verzije ispisane u konzoli.
+Trebalo bi da vidite ispisan broj instalirane verzije u konzoli.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-Pokrenite zvanični instalacioni skript:
+Pokrenite zvaničnu instalacionu skriptu:
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
@@ -78,28 +78,28 @@ ollama --version
 ```bash
 ollama --version
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 
-Trebalo bi da vidite broj instalirane verzije ispisane u konzoli.
+Trebalo bi da vidite ispisan broj instalirane verzije u konzoli.
 <!-- @os:end -->
 
 ## Preuzimanje prvog modela
 
-Ollama upravlja modelima putem registra sličnog kontejnerskim slikama. Da biste preuzeli GPT-OSS 20B:
+Ollama upravlja modelima putem registra sličnog slikama kontejnera (container images). Da biste preuzeli GPT-OSS 20B:
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-Ovo preuzima težine modela na vaš lokalni računar (otprilike 12 GB). Preuzimanje se dešava samo jednom, a naredna pokretanja učitavaju model sa diska.
+Ovo preuzima težine modela na vaš lokalni računar (približno 12 GB). Preuzimanje se dešava samo jednom, a naredna pokretanja učitavaju model sa diska.
 
-Možete potvrditi da je model dostupan sa:
+Možete potvrditi da je model dostupan pomoću:
 
 ```bash
 ollama list
 ```
 
-Trebalo bi da vidite `gpt-oss:20b` u izlazu zajedno sa veličinom i datumom poslednje izmene.
+Trebalo bi da vidite `gpt-oss:20b` u izlazu zajedno sa njegovom veličinom i datumom poslednje izmene.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
@@ -110,7 +110,7 @@ if (-not $list) { throw "ollama list returned no output" }
 if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
 Write-Host "OK: gpt-oss:20b is present in ollama list"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -167,61 +167,61 @@ echo "$list" | grep -q 'gpt-oss:20b' || {
 }
 echo "OK: gpt-oss:20b is present in ollama list"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
-### Imenovanje modela
+### Nazivi modela
 
-Nazivi Ollama modela prate format `name:tag`. Oznaka obično ukazuje na broj parametara ili varijantu kvantizacije. Neki korisni komandi za upravljanje modelima:
+Nazivi Ollama modela prate format `name:tag`. Oznaka (tag) obično označava broj parametara ili varijantu kvantizacije. Neke korisne komande za upravljanje modelima:
 
 | Komanda | Opis |
 |---------|-------------|
-| `ollama list` | Prikazuje sve preuzete modele |
-| `ollama pull <model>` | Preuzima model bez pokretanja |
-| `ollama rm <model>` | Uklanja model radi oslobađanja prostora na disku |
-| `ollama show <model>` | Prikazuje metapodatke i parametre modela |
+| `ollama list` | Prikaz svih preuzetih modela |
+| `ollama pull <model>` | Preuzimanje modela bez pokretanja |
+| `ollama rm <model>` | Uklanjanje modela radi oslobađanja prostora na disku |
+| `ollama show <model>` | Prikaz metapodataka i parametara modela |
 
-## Razgovor iz terminala
+## Ćaskanje iz terminala
 
-Pokrenite interaktivnu sesiju razgovora direktno iz komandne linije:
+Pokrenite interaktivnu sesiju ćaskanja direktno iz komandne linije:
 
 ```bash
 ollama run gpt-oss:20b
 ```
 
-Ollama učitava model u memoriju i otvara prompt. Pokušajte da ga nešto pitate:
+Ollama učitava model u memoriju i prebacuje vas u prompt. Pokušajte da ga nešto pitate:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-Model strimuje svoj odgovor token po token direktno u terminalu. Ukucajte `/bye` ili pritisnite `Ctrl+D` da biste izašli iz sesije.
+Model striming prenosi svoj odgovor token po token direktno u terminalu. Ukucajte `/bye` ili pritisnite `Ctrl+D` da izađete iz sesije.
 
-> **Savet**: Prvo pokretanje traje nekoliko sekundi dok se model učitava u memoriju. Naredni promptovi unutar iste sesije odgovaraju mnogo brže jer model ostaje učitan.
+> **Savet**: Prvo pokretanje traje nekoliko sekundi da bi se model učitao u memoriju. Naredni upiti u okviru iste sesije odgovaraju mnogo brže jer model ostaje učitan.
 
 <!-- @os:windows -->
-## Razgovor putem desktop aplikacije
+## Ćaskanje iz desktop aplikacije
 
-Ollama takođe dolazi sa desktop aplikacijom koja pruža čist interfejs za razgovor sa vašim modelima.
+Ollama takođe dolazi sa desktop aplikacijom koja pruža jednostavan interfejs za ćaskanje za interakciju sa vašim modelima.
 
-Otvorite **Ollama** iz Start menija ili kliknite na Ollama ikonu u sistemskoj traci i izaberite **Open Ollama**.
+Otvorite **Ollama** iz Start menija ili kliknite na ikonu Ollama u sistemskoj traci i izaberite **Open Ollama**.
 
-Kada se aplikacija otvori:
+Kada je aplikacija otvorena:
 
 1. Kliknite na **New Chat** u bočnoj traci.
 2. Izaberite **gpt-oss:20b** iz padajućeg menija modela u donjem desnom uglu oblasti za unos poruke.
-3. Ukucajte poruku i pritisnite Enter da biste počeli razgovor.
+3. Ukucajte poruku i pritisnite Enter da počnete ćaskanje.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-Desktop aplikacija čuva istoriju vaših razgovora u bočnoj traci, što olakšava vraćanje na prethodne razgovore.
+Desktop aplikacija čuva istoriju vaših razgovora u bočnoj traci, što olakšava ponovni pregled prethodnih razgovora.
 <!-- @os:end -->
 
 ## Korišćenje REST API-ja
 
-Nakon instalacije, Ollama radi kao pozadinska usluga i izlaže REST API na `http://localhost:11434` koji možete koristiti za integraciju modela u sopstvene aplikacije i skripte.
+Nakon instalacije, Ollama radi kao pozadinski servis i izlaže REST API na `http://localhost:11434` koji možete koristiti za integraciju modela u vaše sopstvene aplikacije i skripte.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -359,7 +359,7 @@ finally {
   }
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -530,7 +530,7 @@ print("OK: Python requests example works")
 PY
 "$py" "$python_smoke"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 ### Generisanje odgovora u terminalu
@@ -550,8 +550,8 @@ curl.exe http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "promp
 Odgovor je JSON objekat koji sadrži izlaz modela u polju `response`.
 
 
-### Primer u Python-u
-Sada kada možemo programski da pristupamo Ollama API-ju, pozovimo ga iz Python-a.
+### Python primer
+Sada kada možemo da pozovemo Ollama API programski, hajde da ga pozovemo iz Python-a.
 
 #### Kreiranje virtuelnog okruženja u terminalu
 
@@ -572,7 +572,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### Kreiranje Python fajla
-U istom direktorijumu, koristite VS Code ili drugi editor da kreirate .py fajl i kopirajte sledeći kod u njega. Zatim pokrenite fajl u aktiviranom okruženju sa `python your_file_name.py`
+U istom direktorijumu, koristite VS Code ili drugi uređivač da kreirate .py fajl i kopirajte sledeći kod u njega. Zatim pokrenite fajl u vašem aktiviranom okruženju pomoću `python your_file_name.py`
 
 ```python
 import requests
@@ -589,23 +589,22 @@ response = requests.post(
 print(response.json()["response"])
 ```
 
-### Ključni API endpointi
+### Ključne API tačke pristupa
 
-| Endpoint | Metoda | Svrha |
+| Tačka pristupa | Metoda | Svrha |
 |----------|--------|---------|
 | `/api/generate` | POST | Generisanje teksta u jednom koraku |
-| `/api/chat` | POST | Višekorni razgovor sa istorijom poruka |
-| `/api/tags` | GET | Lista dostupnih modela |
-| `/api/show` | POST | Prikaz detalja modela |
+| `/api/chat` | POST | Razgovor sa više poruka i istorijom poruka |
+| `/api/tags` | GET | Prikaz dostupnih modela |
+| `/api/show` | POST | Prikaz detalja o modelu |
 | `/api/pull` | POST | Preuzimanje modela iz registra |
 
 Za potpunu API referencu, pogledajte [Ollama API dokumentaciju](https://github.com/ollama/ollama/blob/main/docs/api.md).
-
 ## Sledeći koraci
 
-- **Isprobajte različite modele**: Pregledajte [Ollama biblioteku modela](https://ollama.com/library) da biste istražili stotine dostupnih modela, od malih asistenta za kodiranje do velikih modela za rezonovanje.
-- **Kreirajte prilagođene modele**: Koristite [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) da postavite prilagođene sistemske promptove, temperaturu i druge parametre za prilagođeno iskustvo.
-- **Gradite sa API-jem**: Koristite [Python](https://github.com/ollama/ollama-python) ili [JavaScript](https://github.com/ollama/ollama-js) klijentske biblioteke da integrirate Ollamu u vaše aplikacije.
-- **Povežite se sa frontend alatima**: Kombinujte Ollamu sa alatima poput [Open WebUI](https://github.com/open-webui/open-webui) za bogat interfejs za razgovor sa pretragom, personama i otpremanjem dokumenata.
+- **Isprobajte različite modele**: Pregledajte [Ollama biblioteku modela](https://ollama.com/library) da biste istražili stotine dostupnih modela, od malih asistenata za kodiranje do velikih modela za rezonovanje.
+- **Kreirajte prilagođene modele**: Koristite [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) da biste postavili prilagođene sistemske upite, temperaturu i druge parametre za prilagođeno iskustvo.
+- **Gradite pomoću API-ja**: Koristite [Python](https://github.com/ollama/ollama-python) ili [JavaScript](https://github.com/ollama/ollama-js) klijentske biblioteke da biste integrisali Ollama u svoje aplikacije.
+- **Povežite se sa korisničkim interfejsima**: Kombinujte Ollama sa alatima kao što je [Open WebUI](https://github.com/open-webui/open-webui) za funkcionalno bogat interfejs za ćaskanje sa pretragom, personama i otpremanjem dokumenata.
 
 Za više informacija, pogledajte [Ollama dokumentaciju](https://github.com/ollama/ollama/blob/main/README.md).

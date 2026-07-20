@@ -1,5 +1,5 @@
 {
   "id": "clustering-rpc-server",
   "title": "Clustering von zwei Ryzen™ AI Halos mit RPC",
-  "description": "Verteilte Inferenz mit RPC-Server auf zwei Ryzen™ AI Halo-Geräten mit llama.cpp einrichten, um Modelle mit 350B+ Parametern auszuführen"
+  "description": "Richten Sie verteilte Inferenz mithilfe eines RPC-Servers über zwei Ryzen™ AI Halo-Geräte mit llama.cpp ein, um Modelle mit 350B+ Parametern auszuführen"
 }

@@ -1,5 +1,5 @@
 {
   "id": "vllm-inference",
   "title": "Ξεκινώντας με το vLLM",
-  "description": "Μάθετε πώς να εκτελείτε inference και serving χρησιμοποιώντας containerized vLLM στο integrated GPU"
+  "description": "Μάθετε πώς να εκτελείτε συμπερασμό (inference) και εξυπηρέτηση (serving) χρησιμοποιώντας containerized vLLM στην ενσωματωμένη GPU"
 }

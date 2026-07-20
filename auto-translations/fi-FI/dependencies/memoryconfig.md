@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 
-Ryzen AI Halo -laitteessa omistettu GPU-muisti on oletuksena 64 Gt, mikä riittää useimpiin työkuormiin. Suuremmille malleille tai pidemmille konteksteille sen kasvattaminen 96 Gt:iin voi auttaa. Säätääksesi tätä, avaa **AMD Software: Adrenalin Edition™** ja siirry kohtaan **Performance → Tuning → AMD Variable Graphics Memory**. Käynnistä uudelleen, jotta muutokset tulevat voimaan.
+Ryzen AI Halo -laitteissa GPU:lle omistetun muistin oletusarvo on 64 Gt, mikä riittää useimpiin työkuormiin. Suurempien mallien tai pidempien kontekstien tapauksessa arvon nostaminen 96 Gt:iin voi auttaa. Voit muokata asetusta avaamalla **AMD Software: Adrenalin Edition™** -sovelluksen ja siirtymällä kohtaan **Performance → Tuning → AMD Variable Graphics Memory**. Käynnistä laite uudelleen, jotta muutokset tulevat voimaan.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -18,7 +18,7 @@ Ryzen AI Halo -laitteessa omistettu GPU-muisti on oletuksena 64 Gt, mikä riitt�
 
 <!-- @device:halo,stx,krk -->
 
-Muuttaaksesi omistetun GPU-muistin arvoa, avaa **AMD Software: Adrenalin Edition™** ja siirry kohtaan **Performance → Tuning → AMD Variable Graphics Memory**. Käynnistä uudelleen, jotta muutokset tulevat voimaan.
+Voit muuttaa GPU:lle omistetun muistin arvoa avaamalla **AMD Software: Adrenalin Edition™** -sovelluksen ja siirtymällä kohtaan **Performance → Tuning → AMD Variable Graphics Memory**. Käynnistä laite uudelleen, jotta muutokset tulevat voimaan.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -30,11 +30,11 @@ Muuttaaksesi omistetun GPU-muistin arvoa, avaa **AMD Software: Adrenalin Edition
 
 <!-- @os:linux -->
 
-Linuxissa suurempien mallien ajamiseksi kasvata GPU:lle käytettävissä olevaa **jaetun muistin** allokointia. Tämä saattaa edellyttää BIOS:ssa omistetun GPU-muistin asettamista minimiin, jotta jaetun muistin allas voidaan maksimoida.
+Linuxissa suurempien mallien ajamiseksi lisää GPU:n käytettävissä olevaa **jaetun muistin** poolia. Tämä saattaa edellyttää BIOS:ssa määritetyn GPU:lle omistetun muistin asettamista minimiin, jotta jaetun muistin poolin koko voidaan maksimoida.
 
 <!-- @device:halo_box -->
 
-AMD Ryzen™ AI Halo -laitteessa oletus on 96 Gt jaettua muistia. Muokataksesi tätä, avaa **AMD Ryzen™ AI Developer Center** ja siirry **Settings**-välilehdelle. Kohdassa **Graphics Performance Settings** kasvata **Shared Video Memory** -liukusäädintä, napsauta sitten **Apply Changes** ja käynnistä uudelleen, jotta muutokset tulevat voimaan.
+AMD Ryzen™ AI Halo -laitteissa oletusarvo on 96 Gt jaettua muistia. Voit muokata tätä avaamalla **AMD Ryzen™ AI Developer Center** -sovelluksen ja siirtymällä **Settings**-välilehdelle. Nosta **Graphics Performance Settings** -osiossa **Shared Video Memory** -liukusäädintä, napsauta sitten **Apply Changes** ja käynnistä laite uudelleen, jotta muutokset tulevat voimaan.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/linux_mem_new.png" alt="AMD Ryzen AI Developer Center — Graphics Performance Settings with Shared Video Memory slider" width="600"/>
@@ -44,34 +44,34 @@ AMD Ryzen™ AI Halo -laitteessa oletus on 96 Gt jaettua muistia. Muokataksesi t
 
 <!-- @device:halo,stx,krk -->
 
-Kasvata jaetun muistin allokointia muuttamalla ytimen Translation Table Manager (TTM) -sivuasetusta. AMD suosittelee asettamaan BIOS:ssa omistetun VRAM:n minimiin (0,5 Gt), jotta maksimaalinen määrä on käytettävissä jaettuna muistina.
+Kasvata jaetun muistin poolia muuttamalla kernelin Translation Table Manager (TTM) -sivuasetusta. AMD suosittelee asettamaan BIOS:ssa omistetun VRAM:n minimiarvoon (0,5 Gt), jotta mahdollisimman suuri määrä muistia on käytettävissä jaettuna muistina.
 
-1. Asenna `pipx`-apuohjelma ja lisää pipx:llä asennettujen pakettien polku järjestelmän hakupolkuun:
+1. Asenna `pipx`-työkalu ja lisää pipx:llä asennettujen wheel-pakettien polku järjestelmän hakupolkuun:
 
    ```bash
    sudo apt install pipx
    pipx ensurepath
    ```
 
-2. Asenna `amd-debug-tools`-paketti PyPI:stä:
+2. Asenna `amd-debug-tools`-wheel PyPI:stä:
 
    ```bash
    pipx install amd-debug-tools
    ```
 
-3. Kysy nykyiset jaetun muistin asetukset:
+3. Tarkista nykyiset jaetun muistin asetukset:
 
    ```bash
    amd-ttm
    ```
 
-4. Kasvata jaetun muistin allokointia (yksikkönä Gt):
+4. Kasvata jaetun muistin määrää (yksikkö Gt):
 
    ```bash
    amd-ttm --set <NUM>
    ```
 
-5. Käynnistä uudelleen, jotta muutokset tulevat voimaan.
+5. Käynnistä laite uudelleen, jotta muutokset tulevat voimaan.
 
 <!-- @device:end -->
 

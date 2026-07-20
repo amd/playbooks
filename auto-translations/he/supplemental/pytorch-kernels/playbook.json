@@ -1,5 +1,5 @@
 {
   "id": "pytorch-kernels",
-  "title": "בניית GPU Kernels מותאמים אישית עם PyTorch ו-AMD ROCm™",
-  "description": "כתיבה ואופטימיזציה של GPU kernels מותאמים אישית באמצעות PyTorch ו-AMD ROCm™ software"
+  "title": "בניית ליבות GPU מותאמות אישית עם PyTorch ו-AMD ROCm™",
+  "description": "כתיבה ואופטימיזציה של קרנלי GPU מותאמים אישית באמצעות PyTorch ותוכנת AMD ROCm™"
 }

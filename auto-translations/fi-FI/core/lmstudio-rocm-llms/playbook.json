@@ -1,5 +1,5 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "LLM-mallien ajaminen ja tarjoaminen LM Studiolla",
-  "description": "Määritä LM Studio ja LM Studio Server suorittamaan ja tarjoamaan suuria kielimalleja paikallisesti."
+  "title": "Suorita ja jaa LLM-malleja LM Studiolla",
+  "description": "Ota LM Studio ja LM Studio Server käyttöön suurten kielimallien ajamiseksi ja tarjoamiseksi paikallisesti."
 }

@@ -4,30 +4,30 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Alustan Konfiguraatio
+# Alustan konfigurointi
 
-Tässä asiakirjassa kuvataan odotetut alustan konfiguraatiot tämän playbook-ohjelman suorittamiseen.
+Tässä dokumentissa kuvataan tämän playbookin ajamiseen odotetut alustan konfiguraatiot.
 
 ## Edellytykset
 
 ### Windows
 
-| Komponentti | Versio | Huomiot |
+| Komponentti | Versio | Huomautukset |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Esiasennettu ja saatavilla PATH-muuttujassa AMD Ryzen™ AI Halo Developer Platform -alustalla; on asennettava manuaalisesti kaikille muille laitteille |
-| **Lemonade Server** | uusin | Käynnissä osoitteessa `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Esiasennettu ja saatavilla PATH-muuttujassa AMD Ryzen™ AI Halo Developer Platform -alustalla; on asennettava manuaalisesti kaikkiin muihin laitteisiin |
+| **Lemonade Server** | latest | Käynnissä osoitteessa `http://localhost:13305/api/v1` |
 
 ### Linux
 
-| Komponentti | Versio | Huomiot |
+| Komponentti | Versio | Huomautukset |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Esiasennettu ja saatavilla PATH-muuttujassa AMD Ryzen™ AI Halo Developer Platform -alustalla; on asennettava manuaalisesti kaikille muille laitteille |
-| **Lemonade Server** | uusin | Käynnissä osoitteessa `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Esiasennettu ja saatavilla PATH-muuttujassa AMD Ryzen™ AI Halo Developer Platform -alustalla; on asennettava manuaalisesti kaikkiin muihin laitteisiin |
+| **Lemonade Server** | latest | Käynnissä osoitteessa `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-Lemonade-palvelimen tulee olla käynnissä laitteelle sopiva malli ladattuna (katso README `lemonade run` -komennosta laitteellesi):
+Lemonade-palvelimen tulisi olla käynnissä laitteelle sopiva malli ladattuna (katso README:sta `lemonade run` -komento laitteellesi):
 
 | Laite | Päätepiste | Malli |
 |--------|----------|-------|

@@ -8,25 +8,25 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code можно установить из **AMD Ryzen™ AI Developer Center**. Перейдите на вкладку **Updates** и установите VS Code, если он ещё не установлен.
+VS Code можно установить через **AMD Ryzen™ AI Developer Center**. Перейдите на вкладку **Updates** и установите VS Code, если он ещё не установлен.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code можно установить из **AMD Ryzen™ AI Developer Center**. Перейдите на вкладку **Manage** и установите VS Code, если он ещё не установлен.
+VS Code можно установить через **AMD Ryzen™ AI Developer Center**. Перейдите на вкладку **Manage** и установите VS Code, если он ещё не установлен.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Загрузите исполняемый файл установщика для Windows по адресу: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+1. Загрузите установочный исполняемый файл для Windows по ссылке: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
 2. Нажмите на загруженный файл `VSCodeUserSetup-x64-1.108.2.exe`, чтобы установить VS Code.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-1. Загрузите пакет установки для Debian по адресу: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
+1. Загрузите установочный пакет Debian по ссылке: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
 2. Нажмите на загруженный файл `code_1.108.2-1769004815_amd64.deb`, чтобы установить VS Code.
 
 <!-- @os:end -->

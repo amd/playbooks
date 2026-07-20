@@ -455,6 +455,23 @@ def produce_markdown(src_text, locale, cfg, glossary_terms):
     return text, score, issues
 
 
+def judge_id_of(cfg):
+    """The judge model currently in effect (falls back to the translator model)."""
+    return cfg.get("judge_model") or cfg["model"]
+
+
+def translation_is_current(entry, src_hash, prompt_version, cfg, out_path):
+    """True when the existing translation still matches the source, prompt, and
+    translator model (i.e. it does NOT need re-translating). Judge model is checked
+    separately, since a judge change only needs a re-score, not a re-translation."""
+    return (
+        entry.get("source_sha256") == src_hash
+        and entry.get("prompt_version") == prompt_version
+        and entry.get("model") == cfg["model"]
+        and out_path.exists()
+    )
+
+
 def translate_playbook_json(src_json_path, locale, cfg, glossary_terms):
     meta = json.loads(src_json_path.read_text(encoding="utf-8"))
     out = {"id": meta.get("id")}
@@ -526,15 +543,19 @@ def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt
         # Output tree mirrors playbooks/ WITHOUT the extra "playbooks" layer:
         # auto-translations/<locale>/<cat>/<id>/<file>
         out_path = TRANSLATIONS_ROOT / locale / cat / playbook_id / fname
+        judge_id = judge_id_of(cfg)
 
-        up_to_date = (
-            entry.get("source_sha256") == src_hash
-            and entry.get("prompt_version") == prompt_version
-            and entry.get("model") == cfg["model"]
-            and out_path.exists()
-        )
-        if up_to_date and not cfg["force"]:
-            print(f"  [skip] {rel} (up to date)", flush=True)
+        if translation_is_current(entry, src_hash, prompt_version, cfg, out_path) and not cfg["force"]:
+            if entry.get("judge_model") == judge_id:
+                print(f"  [skip] {rel} (up to date)", flush=True)
+                continue
+            # Translation is still valid but the judge model changed: re-score the
+            # existing translation (no re-translation needed).
+            score, issues = judge_translation(src_text, out_path.read_text(encoding="utf-8"), locale, cfg)
+            entry.update(quality_score=score, quality_issues=issues, judge_model=judge_id)
+            manifest["files"][rel] = entry
+            changed += 1
+            print(f"  [rescore] {rel}  (score {score}, judge {judge_id})", flush=True)
             continue
 
         try:
@@ -567,14 +588,24 @@ def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt
         # Mirror the source layout: translated title/description go into a
         # playbook.json inside the playbook's own folder (not a separate metadata/).
         out_path = TRANSLATIONS_ROOT / locale / cat / playbook_id / "playbook.json"
-        up_to_date = (
-            entry.get("source_sha256") == src_hash
-            and entry.get("prompt_version") == prompt_version
-            and entry.get("model") == cfg["model"]
-            and out_path.exists()
-        )
-        if up_to_date and not cfg["force"]:
+        judge_id = judge_id_of(cfg)
+        if translation_is_current(entry, src_hash, prompt_version, cfg, out_path) and not cfg["force"] and entry.get("judge_model") == judge_id:
             print(f"  [skip] {rel} metadata (up to date)", flush=True)
+        elif translation_is_current(entry, src_hash, prompt_version, cfg, out_path) and not cfg["force"]:
+            # Translation still valid but the judge model changed: re-score only.
+            try:
+                meta_src = json.loads(src_text)
+                meta_out = json.loads(out_path.read_text(encoding="utf-8"))
+                src_join = "\n".join(str(meta_src.get(f, "")) for f in ("title", "description"))
+                tgt_join = "\n".join(str(meta_out.get(f, "")) for f in ("title", "description"))
+                score, issues = judge_translation(src_join, tgt_join, locale, cfg)
+                entry.update(quality_score=score, quality_issues=issues, judge_model=judge_id)
+                manifest["files"][rel] = entry
+                changed += 1
+                print(f"  [rescore] {rel} (title/description)  (score {score}, judge {judge_id})", flush=True)
+            except (RuntimeError, ValueError, json.JSONDecodeError) as e:
+                print(f"  [FAIL] {rel} metadata rescore: {e}", flush=True)
+                failures.append((rel, str(e)))
         else:
             try:
                 meta_out = translate_playbook_json(pj, locale, cfg, glossary_terms)
@@ -617,15 +648,18 @@ def process_dependencies(locale, cfg, glossary_terms, prompt_version):
         src_hash = sha256(src_text)
         entry = manifest["files"].get(rel, {})
         out_path = TRANSLATIONS_ROOT / locale / "dependencies" / src.name
+        judge_id = judge_id_of(cfg)
 
-        up_to_date = (
-            entry.get("source_sha256") == src_hash
-            and entry.get("prompt_version") == prompt_version
-            and entry.get("model") == cfg["model"]
-            and out_path.exists()
-        )
-        if up_to_date and not cfg["force"]:
-            print(f"  [skip] {rel} (up to date)", flush=True)
+        if translation_is_current(entry, src_hash, prompt_version, cfg, out_path) and not cfg["force"]:
+            if entry.get("judge_model") == judge_id:
+                print(f"  [skip] {rel} (up to date)", flush=True)
+                continue
+            # Translation still valid but the judge model changed: re-score only.
+            score, issues = judge_translation(src_text, out_path.read_text(encoding="utf-8"), locale, cfg)
+            entry.update(quality_score=score, quality_issues=issues, judge_model=judge_id)
+            manifest["files"][rel] = entry
+            changed += 1
+            print(f"  [rescore] {rel}  (score {score}, judge {judge_id})", flush=True)
             continue
 
         try:

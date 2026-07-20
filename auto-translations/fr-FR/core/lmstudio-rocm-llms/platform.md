@@ -16,13 +16,13 @@ LM Studio doit être préinstallé :
 
 | Composant | Version | Emplacement |
 |-----------|---------|----------|
-| **LM Studio (Modèles + Divers)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modèles + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Programme)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Téléchargement des modèles
+### Téléchargement du modèle
 
-Les modèles suivants doivent déjà être présents dans le répertoire des modèles LM Studio (`C:\Users\...\.lmstudio\models`) :
+Les modèles suivants doivent déjà être présents dans le répertoire des modèles de LM Studio (`C:\Users\...\.lmstudio\models`) :
 
 | Appareil | Type de modèle | Quantification | Taille (Go) | Emplacement |
 | ----- |------------|--------------|------|----------|
@@ -35,8 +35,8 @@ Les modèles suivants doivent déjà être présents dans le répertoire des mod
 
 ### Installation de LM Studio
 
-Consultez [lmstudio.md](../../dependencies/lmstudio.md) pour plus de détails.
+Voir [lmstudio.md](../../dependencies/lmstudio.md) pour plus de détails.
 
-### Téléchargement des modèles
+### Téléchargement du modèle
 
 Identique à Windows.

@@ -8,18 +8,18 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-يمكن تثبيت VS Code من **مركز مطوري AMD Ryzen™ AI**. انتقل إلى علامة التبويب **Updates** وقم بتثبيت VS Code إذا لم يكن موجوداً بالفعل.
+يمكن تثبيت VS Code من **AMD Ryzen™ AI Developer Center**. انتقل إلى علامة التبويب **Updates** وقم بتثبيت VS Code إذا لم يكن موجودًا بالفعل.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-يمكن تثبيت VS Code من **مركز مطوري AMD Ryzen™ AI**. انتقل إلى علامة التبويب **Manage** وقم بتثبيت VS Code إذا لم يكن موجوداً بالفعل.
+يمكن تثبيت VS Code من **AMD Ryzen™ AI Developer Center**. انتقل إلى علامة التبويب **Manage** وقم بتثبيت VS Code إذا لم يكن موجودًا بالفعل.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. قم بتنزيل ملف التثبيت التنفيذي لنظام Windows من: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+1. قم بتنزيل ملف التثبيت التنفيذي الخاص بـ Windows من: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
 2. انقر على الملف الذي تم تنزيله `VSCodeUserSetup-x64-1.108.2.exe` لتثبيت VS Code.
 
 <!-- @os:end -->

@@ -6,22 +6,22 @@ SPDX-License-Identifier: MIT
 
 # Plattformkonfigurasjon
 
-Dette dokumentet beskriver de forventede plattformkonfigurasjonene for å kjøre denne spilleboken.
+Dette dokumentet beskriver de forventede plattformkonfigurasjonene for å kjøre denne playbooken.
 
 ## Forutsetninger
 
-PyTorch med ROCm-støtte er forhåndsinstallert på AMD Ryzen™ AI Halo Developer Platform. For alle andre enheter må brukere installere PyTorch med ROCm-støtte manuelt. Se relevant seksjon for ditt operativsystem:
+PyTorch med ROCm-støtte er forhåndsinstallert på AMD Ryzen™ AI Halo Developer Platform. For alle andre enheter må brukere manuelt installere PyTorch med ROCm-støtte. Se den relevante delen for ditt operativsystem:
 
 ### Windows
 
 | Komponent     | Versjon         | Merknader                             |
-|---------------|-----------------|---------------------------------------|
+|---------------|-----------------|-----------------------------------|
 | **PyTorch**   | 2.9 eller nyere    | Forhåndsinstallert på AMD Ryzen AI Halo Developer Platform; må installeres manuelt på alle andre enheter |
 
 ### Linux
 
 | Komponent     | Versjon         | Merknader                             |
-|---------------|-----------------|---------------------------------------|
+|---------------|-----------------|-----------------------------------|
 | **PyTorch**   | 2.9 eller nyere    | Forhåndsinstallert på AMD Ryzen AI Halo Developer Platform; må installeres manuelt på alle andre enheter |
 
 ## Nødvendige modeller
@@ -29,18 +29,18 @@ PyTorch med ROCm-støtte er forhåndsinstallert på AMD Ryzen™ AI Halo Develop
 Følgende modeller er testet og optimalisert for din plattform:
 
 | Modell | Parametere | Størrelse | Nedlastingssted |
-|--------|------------|-----------|-----------------|
+|-------|------------|------|-------------------|
 | **openai/gpt-oss-20b** | 20B | ~40GB | Forhåndsinstallert på AMD Ryzen AI Halo Developer Platform; må installeres manuelt på alle andre enheter |
 
-Modeller lastes automatisk ned til Hugging Face sin hurtigbufferkatalog:
+Modeller vil automatisk lastes ned til Hugging Face-hurtigbufferkatalogen:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
-Sørg for minst **50 GB ledig plass** for modelllagring.
+Sørg for at det er minst **50 GB ledig plass** til modellagring.
 
 ## Nettverkskrav
 
-Første gangs oppsett krever internettilgang for å laste ned modeller fra Hugging Face. Etter nedlasting kan spilleboken kjøres uten nett.
+Førstegangsoppsett krever internettilgang for å laste ned modeller fra Hugging Face. Etter nedlasting kan playbooken kjøres uten internettilkobling.
 
-- Første gangs nedlasting av modeller kan ta **5–10 minutter** avhengig av modellstørrelse og tilkoblingshastighet
-- Modeller bufres lokalt og trenger ikke lastes ned på nytt
+- Førstegangs nedlasting av modeller kan ta **5–10 minutter** avhengig av modellstørrelse og tilkoblingshastighet
+- Modeller lagres i hurtigbuffer lokalt og trenger ikke lastes ned på nytt

@@ -6,21 +6,21 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ez a playbook speciális tageket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom helyes előnézetéhez látogasson el az [amd.com/playbooks](https://amd.com/playbooks) oldalra.
+> Ez az útmutató olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom megfelelő megtekintéséhez látogasson el a [amd.com/playbooks](https://amd.com/playbooks) oldalra.
 <!-- @github-only:end -->
 
 
 ## Áttekintés
 
-A vLLM egy nagy teljesítményű következtetési motor, amelyet nagy nyelvi modellekhez (LLM-ekhez) terveztek. Optimalizált kiszolgálást biztosít folyamatos kötegeléssel a nagy átviteli sebesség érdekében, valamint OpenAI-kompatibilis API-t a zökkenőmentes alkalmazásintegrációhoz. Ez teszi a vLLM-et kiválóvá az éles környezetű telepítésekhez, ahol a sebesség és az erőforrás-hatékonyság kritikus fontosságú.
+A vLLM egy nagy teljesítményű következtetési motor, amelyet nagy nyelvi modellek (LLM-ek) számára terveztek. Optimalizált kiszolgálást biztosít folyamatos kötegeléssel a nagy átviteli sebesség érdekében, valamint egy OpenAI-kompatibilis API-t a zökkenőmentes alkalmazásintegrációhoz. Ez teszi a vLLM-et kiválóvá olyan éles környezetű üzembe helyezésekhez, ahol a sebesség és az erőforrás-hatékonyság kritikus fontosságú.
 
-Ez a playbook megtanítja, hogyan kell LLM-eket kiszolgálni konténerizált vLLM segítségével az integrált GPU-n, és hogyan lehet modellekkel kommunikálni az OpenAI Python API-n keresztül.
+Ez az útmutató megtanítja, hogyan szolgáltasson LLM-eket konténerizált vLLM használatával az integrált GPU-n, és hogyan lépjen kapcsolatba a modellekkel az OpenAI Python API-n keresztül.
 
-## Mit fog megtanulni
+## Amit meg fog tanulni
 
 - Hogyan állítson be és indítson el egy vLLM szervert AMD ROCm™ támogatással
-- Hogyan kommunikáljon modellekkel OpenAI-kompatibilis API végpontokon keresztül
-- Hogyan küldjön promptokat a helyi szervernek a `vllm-prompt` segítségével
+- Hogyan lépjen kapcsolatba a modellekkel OpenAI-kompatibilis API végpontokon keresztül
+- Hogyan küldjön promptokat a helyi szerverre a `vllm-prompt` használatával
 
 ## A memóriakonfiguráció beállítása
 
@@ -29,28 +29,28 @@ Ez a playbook megtanítja, hogyan kell LLM-eket kiszolgálni konténerizált vLL
 <!-- @device:halo_box -->
 ## Szoftverfrissítések ellenőrzése
 
-> **Megjegyzés**: Ha a VS Code nincs telepítve, az AMD Ryzen™ AI Developer Center segítségével telepítheti.
+> **Megjegyzés**: Ha a VS Code nincs telepítve, telepítheti az AMD Ryzen™ AI Developer Center segítségével.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Szoftver-előfeltételek telepítése
+## A szükséges szoftverek telepítése
 
-Ez a playbook egy előre elkészített konténerképet használ, amely tartalmazza a vLLM-et, a ROCm támogatást és a szerver indításához szükséges segédszkripteket. Nem szükséges manuálisan telepíteni a PyTorch-ot, a vLLM-et vagy a helyi playbook szkripteket.
+Ez az útmutató egy előre elkészített konténerképet használ, amely tartalmazza a vLLM-et, a ROCm támogatást, valamint a szerver indításához szükséges segédszkripteket. Nem szükséges manuálisan telepítenie a PyTorch-ot, a vLLM-et vagy a helyi útmutató szkripteket.
 
-Nincs gazdagép oldali vLLM telepítési lépés. Indítsa el a vLLM-et a következővel:
+Nincs szükség host oldali vLLM telepítési lépésre. Indítsa el a vLLM-et a következővel:
 
 ```bash
 vllm-launch
 ```
 
-Az indító elindítja a konténert, az integrált GPU-t célozza meg, és egy helyi OpenAI-kompatibilis vLLM szervert tesz elérhetővé. Alternatívaként kattintson a vLLM ikonra a tálcán.
+Az indító elindítja a konténert, az integrált GPU-t célozza meg, és elérhetővé tesz egy helyi OpenAI-kompatibilis vLLM szervert. Alternatív megoldásként kattintson a vLLM ikonra a tálcán.
 
-## Gyors kezdés
+## Gyorsindítás
 
-### 1. Ellenőrizze, hogy a vLLM szerver fut-e
+### 1. A vLLM szerver futásának ellenőrzése
 
-A `vllm-launch` néhány percet vehet igénybe az inicializáláshoz. Miután elindul, a szerver a `http://localhost:8001` címen érhető el. Tartsa nyitva az indítási terminált, mivel a szerver az előtérben fut, majd nyisson meg egy külön terminált a további lépésekhez. Az alábbi példák a `Qwen/Qwen3-1.7B` modellt használják; ha az indítója más modellre van konfigurálva, helyettesítse azt a modell azonosítóval a kérésekben.
+A `vllm-launch` néhány percet vehet igénybe az inicializáláshoz. Miután elindult, a szerver a `http://localhost:8001` címen érhető el. Tartsa nyitva az indító terminált, mivel a szerver előtérben fut, majd nyisson meg egy külön terminált a fennmaradó lépésekhez. Az alábbi példák a `Qwen/Qwen3-1.7B` modellt használják; ha az indítója más modellre van konfigurálva, helyettesítse be azt a modellazonosítót a kérésekben.
 
 ### 2. Prompt küldése
 
@@ -60,9 +60,9 @@ Használja a mellékelt `vllm-prompt` szkriptet, hogy kérést küldjön a helyi
 vllm-prompt "Tell me a story"
 ```
 
-### 3. Csevegés a modellel az OpenAI Python API segítségével
+### 3. Csevegés a modellel az OpenAI Python API használatával
 
-Mivel a vLLM OpenAI-kompatibilis API-t tesz elérhetővé, az `openai` Python csomaggal kommunikálhat vele.
+Mivel a vLLM egy OpenAI-kompatibilis API-t biztosít, az `openai` Python csomaggal léphet vele kapcsolatba.
 
 Először hozzon létre egy Python virtuális környezetet:
 
@@ -80,7 +80,7 @@ Telepítse az OpenAI csomagot
 pip install openai
 ```
 
-Hozzon létre egy `OpenAI` klienst, amely a helyi vLLM szerverre mutat az OpenAI szerverei helyett. Az `api_key` szükséges a kliens számára, de a vLLM nem ellenőrzi, így bármilyen karakterlánc megfelel:
+Hozzon létre egy `OpenAI` klienst, amely a helyi vLLM szerverre mutat az OpenAI szerverei helyett. Az `api_key` szükséges a klienshez, de a vLLM nem ellenőrzi, így bármilyen karakterlánc megfelel:
 
 ```python
 from openai import OpenAI
@@ -91,7 +91,7 @@ client = OpenAI(
 )
 ```
 
-Ezután küldjön egy csevegés-kiegészítési kérést. Ez ugyanazt az üzenetformátumot használja, mint az OpenAI API — szerepekkel ellátott üzenetek listája, mint például `"user"` és `"assistant"`. A `stream=True` beállítása azt jelenti, hogy a válasz fokozatosan érkezik meg, nem egyszerre:
+Ezután küldjön egy csevegés-kiegészítési kérést. Ez ugyanazt az üzenetformátumot használja, mint az OpenAI API — üzenetek listáját olyan szerepekkel, mint a `"user"` és `"assistant"`. A `stream=True` beállítása azt jelenti, hogy a válasz fokozatosan, nem pedig egyszerre érkezik meg:
 
 ```python
 response = client.chat.completions.create(
@@ -104,7 +104,7 @@ response = client.chat.completions.create(
 )
 ```
 
-Végül iteráljon a streamelt darabokon, és nyomtassa ki az egyes szövegrészeket, ahogy megérkeznek:
+Végül iteráljon végig a streamelt darabokon, és írja ki a szöveg minden egyes részét, ahogy megérkezik:
 
 ```python
 for chunk in response:
@@ -118,7 +118,7 @@ A mellékelt [chat_with_model.py](assets/chat_with_model.py) szkript tartalmazza
 
 ## Hibaelhárítás
 
-### Kapcsolat megtagadva
+### Connection refused
 
 Győződjön meg arról, hogy a szerver fut:
 ```bash
@@ -127,23 +127,23 @@ curl http://localhost:8001/health
 
 ## Összefoglalás
 
-Ebben a playbookban megtanulta, hogyan kell:
+Ebben az útmutatóban megtanulta, hogyan:
 
-- Konténerizált vLLM-et indítani ROCm támogatással az integrált GPU-n
-- vLLM szervert elindítani OpenAI-kompatibilis API végpontokkal a 8001-es porton
-- Promptokat küldeni a `vllm-prompt` segítségével
-- API hívásokat intézni a vLLM szerverhez streaming és nem streaming kérések segítségével
-- Általános problémákat elhárítani a szerver indításával, a memóriával és a kliens kapcsolatokkal kapcsolatban
+- Indítson konténerizált vLLM-et ROCm támogatással az integrált GPU-n
+- Indítson egy vLLM szervert OpenAI-kompatibilis API végpontokkal a 8001-es porton
+- Küldjön promptokat a `vllm-prompt` használatával
+- Hajtson végre API hívásokat a vLLM szerverhez mind streamelt, mind nem streamelt kérésekkel
+- Hárítson el gyakori problémákat a szerver indításával, a memóriával és a kliens kapcsolatokkal kapcsolatban
 
-Most már rendelkezik egy konténerizált vLLM telepítéssel a nagy nyelvi modellek optimalizált teljesítménnyel történő kiszolgálásához az integrált GPU-n.
+Most már rendelkezik egy konténerizált vLLM üzembe helyezéssel, amely nagy nyelvi modelleket szolgál ki optimalizált teljesítménnyel az integrált GPU-n.
 
 ## Következő lépések
 
-- **Próbáljon ki különböző modelleket** — Cserélje le a modellt a `vllm-launch` konfigurációban, hogy különböző LLM-ekkel kísérletezzen és hasonlítsa össze a teljesítményt.
+- **Próbáljon ki különböző modelleket** — Cserélje ki a modellt a `vllm-launch` konfigurációban, hogy kísérletezzen különböző LLM-ekkel, és összehasonlítsa a teljesítményt.
 - **Építsen alkalmazást** — Használja az OpenAI-kompatibilis API-t a vLLM integrálásához egy Python alkalmazásba, chatbotba vagy automatizálási munkafolyamatba.
-- **Finomhangolja és kiszolgálja** — Finomhangolja a modellt LoRA vagy QLoRA segítségével, majd telepítse vLLM-mel az optimalizált következtetéshez.
+- **Finomhangolás és kiszolgálás** — Finomhangoljon egy modellt LoRA vagy QLoRA használatával, majd telepítse a vLLM-mel optimalizált következtetéshez.
 
-## További erőforrások
+## További források
 
-- **[vLLM hivatalos dokumentáció](https://docs.vllm.ai/)** — Átfogó útmutatók és API referenciák
-- **[vLLM GitHub adattár](https://github.com/vllm-project/vllm)** — Forráskód, hibajegyek és közösségi megbeszélések
+- **[vLLM hivatalos dokumentáció](https://docs.vllm.ai/)** — Átfogó útmutatók és API-referenciák
+- **[vLLM GitHub tároló](https://github.com/vllm-project/vllm)** — Forráskód, hibajegyek és közösségi beszélgetések

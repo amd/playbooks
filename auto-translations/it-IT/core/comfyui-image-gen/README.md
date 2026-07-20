@@ -5,34 +5,35 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Questa guida utilizza tag speciali che GitHub non è in grado di visualizzare. Visita [amd.com/playbooks](https://amd.com/playbooks) per visualizzare correttamente questo contenuto.
 <!-- @github-only:end -->
 
 ## Panoramica
 
-ComfyUI è un'interfaccia potente basata su nodi per Stable Diffusion e altri modelli di diffusione. A differenza delle tradizionali interfacce text-to-image con semplici caselle di prompt, ComfyUI espone l'intero pipeline di generazione delle immagini come un grafo visivo, offrendoti un controllo dettagliato su ogni fase, dalla codifica del testo alla manipolazione dello spazio latente fino alla decodifica finale.
+ComfyUI è un'interfaccia potente basata su nodi per Stable Diffusion e altri modelli di diffusione. A differenza delle tradizionali interfacce di generazione da testo a immagine con semplici caselle per il prompt, ComfyUI espone l'intera pipeline di generazione delle immagini come un grafico visivo, offrendoti un controllo dettagliato su ogni fase, dalla codifica del testo alla manipolazione dello spazio latente fino alla decodifica finale.
 
 Questo tutorial ti insegna come utilizzare ComfyUI con il modello Z Image Turbo sulla tua GPU per generare immagini AI di alta qualità.
 
-## Cosa Imparerai
+## Cosa imparerai
 
-- Come avviare ComfyUI e caricare il template Z-Image Turbo
-- Comprensione dei componenti del pipeline di diffusione
-- Generazione di immagini e ottimizzazione dei parametri di generazione
-- Salvataggio e condivisione dei workflow
+- Come avviare ComfyUI e caricare il template di Z-Image Turbo
+- Comprendere i componenti della pipeline di diffusione
+- Generare immagini e ottimizzare i parametri di generazione
+- Salvare e condividere i workflow
 
-## Impostazione della Configurazione della Memoria
+## Impostazione della configurazione della memoria
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Verifica degli Aggiornamenti Software
+## Verifica degli aggiornamenti software
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Installazione dei Prerequisiti Software
+## Installazione dei prerequisiti software
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -41,13 +42,13 @@ Questo tutorial ti insegna come utilizzare ComfyUI con il modello Z Image Turbo 
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Concedi al tuo utente l'accesso ai dispositivi GPU** (esci e rientra affinché le modifiche abbiano effetto):
+**Concedi al tuo utente l'accesso ai dispositivi GPU** (esci e rientra nel sistema affinché la modifica abbia effetto):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-#### Crea un Ambiente Virtuale
+#### Creare un ambiente virtuale
 Su Linux, apri un terminale nella directory di tua scelta ed esegui il seguente comando per creare un venv:
 
 <!-- @test:id=create-venv-linux timeout=300 -->
@@ -287,13 +288,13 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-Per avviare ComfyUI su Windows, fai clic sul launcher ComfyUI Desktop che si trova sul Desktop. Segui i passaggi per installare la versione locale con AMD.
+Per avviare ComfyUI su Windows, fai clic sul launcher desktop di ComfyUI presente sul tuo Desktop. Segui i passaggi per installare la versione locale con AMD.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Quindi, fai clic sul pulsante ComfyUI nella parte superiore centrale dell'app. Si aprirà una scheda delle impostazioni. Apri la scheda Storage e assicurati che i percorsi siano impostati come segue per accedere ai modelli preinstallati.
+Successivamente, fai clic sul pulsante ComfyUI in alto al centro dell'app. Si aprirà una scheda delle impostazioni. Apri la scheda Storage e assicurati che i percorsi siano impostati come segue per accedere ai modelli preinstallati.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
@@ -303,8 +304,8 @@ Quindi, fai clic sul pulsante ComfyUI nella parte superiore centrale dell'app. S
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Per avviare ComfyUI su Linux, fai clic sul collegamento ComfyUI nella barra delle applicazioni. Dovrebbe aprirsi automaticamente in una finestra del browser.
->**Suggerimento**: ComfyUI e i suoi modelli sono archiviati in `~/.local/share/ComfyUI/models`. Qui puoi aggiungere manualmente workflow o nuovi modelli.
+Per avviare ComfyUI su Linux, fai clic sulla scorciatoia di ComfyUI nella barra delle applicazioni. Dovrebbe aprirsi automaticamente in una finestra del browser.
+>**Suggerimento**: ComfyUI e i suoi modelli sono archiviati in `~/.local/share/ComfyUI/models`. È qui che puoi aggiungere manualmente workflow o nuovi modelli.
 
 
 <!-- @os:end -->
@@ -312,90 +313,90 @@ Per avviare ComfyUI su Linux, fai clic sul collegamento ComfyUI nella barra dell
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-Per avviare ComfyUI su Windows, fai semplicemente clic sul collegamento ComfyUI sul Desktop.
+Per avviare ComfyUI su Windows, fai semplicemente clic sulla scorciatoia di ComfyUI sul tuo Desktop.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
 Per avviare ComfyUI:
 
-1. Assicurati di trovarti nella directory di ComfyUI. 
+1. Assicurati di trovarti all'interno della directory di ComfyUI. 
 2. Esegui `python3 main.py --use-pytorch-cross-attention`
 
 ComfyUI avvia un server web locale. Apri il browser all'indirizzo `http://127.0.0.1:8188` per accedere all'interfaccia.
 
-> **Suggerimento**: Tieni aperta la finestra del terminale mentre usi ComfyUI. Chiuderla interromperà il server.
+> **Suggerimento**: Tieni aperta la finestra del terminale mentre utilizzi ComfyUI. Chiuderla arresterà il server.
 <!-- @os:end -->
 <!-- @device:end -->
 
 
-## Trovare il Template Z-Image Turbo
+## Trovare il template di Z-Image Turbo
 
-Prima di generare immagini, devi caricare il template Z-Image Turbo. Ecco come trovarlo:
+Prima di generare immagini, devi caricare il template di Z-Image Turbo. Ecco come trovarlo:
 
-1. **Guarda il bordo sinistro dello schermo**—c'è una barra degli strumenti verticale che va dall'alto verso il basso sul lato più a sinistra dell'app.
+1. **Osserva il bordo più a sinistra dello schermo**: c'è una barra degli strumenti verticale che scorre dall'alto verso il basso sul lato sinistro dell'app.
 
-2. **Trova l'icona della cartella**—in quella barra degli strumenti sinistra, cerca un'icona che assomiglia a una cartella. Quando ci passi sopra con il mouse, è etichettata "Templates."
+2. **Trova l'icona della cartella**: in quella barra degli strumenti a sinistra, cerca un'icona a forma di cartella. Passandoci sopra con il mouse, viene visualizzata l'etichetta "Templates".
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
 </p>
 
-3. **Fai clic sull'icona della cartella**—si apre il pannello Templates.
+3. **Fai clic sull'icona della cartella**: si aprirà il pannello Templates.
 
-4. **Cerca "Z-Image Turbo"**—usa la barra di ricerca o scorri tra i template disponibili per trovare il workflow Z-Image Turbo Text To Image, quindi fai clic per caricarlo.
+4. **Cerca "Z-Image Turbo"**: usa la barra di ricerca o scorri tra i template disponibili per trovare il workflow Z-Image Turbo Text To Image, quindi fai clic per caricarlo.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
 </p>
 
-## Download dei Modelli
+## Download dei modelli
 
 <!-- @require:comfyui-models -->
 
-## Comprensione dell'Interfaccia
+## Comprendere l'interfaccia
 
-Quando il template Z-Image Turbo viene caricato, vedrai un canvas con 2 nodi principali. Il primo nodo si chiama 'Text to Image (Z-Image-Turbo)', e il secondo nodo serve per visualizzare l'immagine. 
+Quando il template di Z-Image Turbo viene caricato, vedrai una tela con 2 nodi principali. Il primo nodo si chiama "Text to Image (Z-Image-Turbo)", mentre il secondo nodo serve per visualizzare l'immagine.
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
 </p>
 
 
-Sul nodo Z-Image, fai clic sul pulsante in alto a destra per espandere il nodo e visualizzare il sottografo.
+Sul nodo Z-Image, fai clic sul pulsante in alto a destra per espandere il nodo e visualizzare il subgraph.
 
 <p align="center">
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
 </p>
 
-### Componenti del Pipeline
+### Componenti della pipeline
 
-Il workflow Z-Image Turbo utilizza quattro componenti chiave del modello che lavorano insieme:
+Il workflow di Z-Image Turbo utilizza quattro componenti chiave del modello che lavorano insieme:
 
 | Componente | Ruolo |
 |-----------|------|
-| **Text Encoder** (Qwen 3 4B) | Converte il tuo prompt testuale in embedding comprensibili dal modello di diffusione |
-| **Diffusion Model** (Z-Image Turbo) | La rete neurale principale che denoisa iterativamente le rappresentazioni latenti in immagini |
-| **VAE** (Variational Autoencoder) | Codifica le immagini da/verso lo spazio latente (decodifica i latenti finali in pixel) |
-| **LoRA** (opzionale) | Adattatori leggeri che modificano lo stile o il soggetto senza riaddestrare il modello base |
+| **Text Encoder** (Qwen 3 4B) | Converte il tuo prompt testuale in embedding che il modello di diffusione è in grado di comprendere |
+| **Diffusion Model** (Z-Image Turbo) | La rete neurale principale che riduce iterativamente il rumore delle rappresentazioni latenti trasformandole in immagini |
+| **VAE** (Variational Autoencoder) | Codifica/decodifica le immagini da e verso lo spazio latente (decodifica i latenti finali in pixel) |
+| **LoRA** (opzionale) | Adattatori leggeri che modificano lo stile o il soggetto senza dover riaddestrare il modello di base |
 
 Ogni nodo nel workflow corrisponde a uno di questi componenti. I dati fluiscono da sinistra a destra: testo → embedding → denoising guidato → latenti → immagine finale.
 
-## Generare la Tua Prima Immagine
+## Generare la tua prima immagine
 
 Il modello Z-Image Turbo è già caricato. Per generare un'immagine:
 
-1. **Inserisci il tuo prompt** nel nodo Z-Image principale. Sii descrittivo. Ecco un esempio:
+1. **Inserisci il tuo prompt** nel nodo principale Z-Image. Sii descrittivo. Ecco un esempio:
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-2. **(Opzionale)**: Conferma o modifica eventuali altre impostazioni specifiche all'interno del sottografo.
-3. **Fai clic sul blu "Run Workflow"** nell'angolo destro (o premi `Ctrl+Enter`)
-4. Osserva i nodi evidenziarsi man mano che ogni passaggio viene eseguito
+2. **(Facoltativo)**: conferma o modifica eventuali altre impostazioni specifiche all'interno del subgraph.
+3. **Fai clic sul pulsante blu "Run Workflow"** nell'angolo destro (oppure premi `Ctrl+Enter`)
+4. Osserva i nodi evidenziarsi man mano che ogni fase viene eseguita
 
-L'intera esecuzione del workflow dovrebbe completarsi in meno di 30 secondi. L'immagine generata appare nel nodo **Save Image** e viene salvata nella cartella `output/`.
+L'intera esecuzione del workflow dovrebbe completarsi in meno di 30 secondi. L'immagine generata viene visualizzata nel nodo **Save Image** e salvata nella cartella `output/`.
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -567,64 +568,63 @@ ls -1t ComfyUI/output/*.png | head -n 5
 <!-- @os:end -->
 
 
-## Regolazione dei Parametri di Generazione
-
-### Impostazioni di KSampler
+## Regolazione dei parametri di generazione
+### Impostazioni KSampler
 
 Il nodo KSampler controlla il processo di diffusione principale:
 
 | Parametro | Cosa Controlla | Consigliato per Z-Image Turbo |
 |-----------|------------------|-------------------------------|
-| **steps** | Numero di iterazioni di denoising | 4–10 (i modelli turbo sono distillati per un numero inferiore di passaggi) |
-| **cfg** | Scala di guidance classifier-free—quanto seguire fedelmente il prompt | 1.0–2.0 (i modelli turbo usano una guidance molto bassa) |
-| **sampler_name** | Algoritmo di denoising | `euler` e `res_multistep` funzionano bene per i modelli turbo |
+| **steps** | Numero di iterazioni di denoising | 4–10 (i modelli turbo sono distillati per un numero inferiore di step) |
+| **cfg** | Scala di guidance senza classificatore—quanto seguire fedelmente il prompt | 1.0–2.0 (i modelli turbo usano una guidance molto bassa) |
+| **sampler_name** | Algoritmo di denoising | `euler` e `res_multistep` funzionano bene con i modelli turbo |
 | **scheduler** | Curva del programma di rumore | `normal` o `simple` |
-| **seed** | Seed casuale per la riproducibilità | Imposta valori fissi per iterare su una composizione |
+| **seed** | Seme casuale per la riproducibilità | Imposta valori fissi per iterare su una composizione |
 
 ### Dimensione dell'Immagine
 
-Per regolare le dimensioni dell'output, trova il nodo **Empty Latent Image** e modifica **width** e **height**. Mantieni le dimensioni pari o inferiori a 1024 pixel sul lato più lungo per una qualità ottimale.
+Per modificare le dimensioni di output, individua il nodo **Empty Latent Image** e modifica **width** e **height**. Mantieni le dimensioni a 1024 pixel o meno sul lato più lungo per una qualità ottimale.
 
 ### ModelSamplingAuraFlow
 
-Il nodo **ModelSamplingAuraFlow** è un modificatore di campionamento specializzato che regola il modo in cui il processo di diffusione gestisce la pianificazione del rumore. Vedrai questo nodo collegato all'output del modello nel workflow Z-Image Turbo.
+Il nodo **ModelSamplingAuraFlow** è un modificatore di campionamento specializzato che regola il modo in cui il processo di diffusione gestisce il programma di rumore. Vedrai questo nodo collegato all'output del modello nel workflow di Z-Image Turbo.
 
 | Parametro | Cosa Controlla | Valori Consigliati |
 |-----------|------------------|-------------------|
-| **shift** | Regola la tempistica del programma di rumore—valori più alti spostano il raffinamento dei dettagli verso i passaggi successivi | 1.0–4.0 (il valore predefinito è 3.0) |
+| **shift** | Regola la tempistica del programma di rumore—valori più alti spostano una maggiore raffinatezza dei dettagli verso gli step successivi | 1.0–4.0 (il valore predefinito è 3.0) |
 
 Quando regolare **shift**:
 
-- **Valori bassi (1.0–2.0)**: Convergenza più rapida, adatta per composizioni semplici
-- **Valori alti (3.0–4.0)**: Raffinamento più graduale, può migliorare i dettagli fini in scene complesse
+- **Valori più bassi (1.0–2.0)**: Convergenza più rapida, adatta a composizioni semplici
+- **Valori più alti (3.0–4.0)**: Raffinamento più graduale, può migliorare i dettagli fini in scene complesse
 
-Il metodo di campionamento AuraFlow è specificamente progettato per modelli flow-matching come Z-Image Turbo, garantendo una distribuzione corretta del rumore durante l'intero processo di generazione.
+Il metodo di campionamento AuraFlow è progettato specificamente per modelli a flow-matching come Z-Image Turbo, garantendo una corretta distribuzione del rumore durante l'intero processo di generazione.
 
 ## Lavorare con i Workflow
 
 ### Salvataggio dei Workflow
 
-Fai clic sul pulsante **Save** nel menu per esportare il tuo workflow come file JSON. Questo acquisisce:
+Fai clic sul pulsante **Save** nel menu per esportare il tuo workflow come file JSON. Questo salva:
 
-- Tutti i nodi e i loro parametri
+- Tutti i nodi e i relativi parametri
 - Tutte le connessioni tra i nodi
 - Il testo del prompt corrente
 
 ### Caricamento dei Workflow
 
-Trascina un file JSON del workflow sul canvas, oppure usa **Load** dal menu. Il workflow Z-Image Turbo che vedi per impostazione predefinita viene caricato da un file di workflow salvato.
+Trascina un file JSON di workflow sul canvas, oppure usa **Load** dal menu. Il workflow di Z-Image Turbo che vedi per impostazione predefinita viene caricato da un file di workflow salvato.
 
 ### Condivisione dei Workflow
 
-I workflow sono autonomi—condividi il file JSON con i colleghi e potranno riprodurre esattamente la tua configurazione. Questo rende ComfyUI eccellente per la sperimentazione collaborativa.
+I workflow sono autonomi—condividi il file JSON con i colleghi, e potranno riprodurre esattamente la tua configurazione. Questo rende ComfyUI eccellente per la sperimentazione collaborativa.
 
 ## Prossimi Passi
 
-- **Esplora i nodi LoRA**: Applica adattatori di stile o soggetto senza riaddestrare
-- **Aggiungi prompt negativi**: Collega un secondo nodo CLIP Text Encode all'input di condizionamento **negative** di KSampler per guidare il modello lontano da caratteristiche indesiderate come sfocatura, artefatti o filigrane
-- **Crea workflow personalizzati**: Concatena più generazioni, aggiungi upscaling o crea variazioni di immagini
-- **Sfoglia i workflow della community**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) contiene molti workflow pronti all'uso
+- **Esplora i nodi LoRA**: Applica adattatori di stile o soggetto senza dover riaddestrare il modello
+- **Aggiungi prompt negativi**: Collega un secondo nodo CLIP Text Encode all'input di conditioning **negative** del KSampler per guidare il modello lontano da caratteristiche indesiderate come sfocatura, artefatti o filigrane
+- **Crea workflow personalizzati**: Concatena più generazioni, aggiungi upscaling, o crea variazioni di immagine
+- **Esplora i workflow della community**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) offre molti workflow pronti all'uso
 
-Il punto di forza di ComfyUI è la sperimentazione: collega i nodi in modo diverso, regola i parametri e osserva come ogni modifica influisce sull'output. Questa esplorazione pratica sviluppa l'intuizione su come funzionano i modelli di diffusione.
+Il punto di forza di ComfyUI è la sperimentazione: collega i nodi in modi diversi, regola i parametri e osserva come ogni modifica influisce sull'output. Questa esplorazione pratica sviluppa l'intuizione su come funzionano i modelli di diffusione.
 
-Per ulteriori informazioni, consulta la [Documentazione di ComfyUI](https://docs.comfy.org/).
+Per maggiori informazioni, consulta la [Documentazione ComfyUI](https://docs.comfy.org/).

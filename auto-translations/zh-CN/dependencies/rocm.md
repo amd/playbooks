@@ -16,8 +16,8 @@ sudo usermod -a -G render,video $LOGNAME
 sudo reboot
 ```
 
-**在已创建的虚拟环境中安装 ROCm。**
-> **注意**：在继续操作之前，请确保虚拟环境已激活。
+**在创建的虚拟环境中安装 ROCm。**
+> **注意**：在继续之前，请确保虚拟环境处于激活状态。
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->

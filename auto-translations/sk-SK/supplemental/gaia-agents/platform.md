@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 
 # Konfigurácia platformy
 
-Tento dokument popisuje očakávané konfigurácie platformy pre spustenie tohto playbooku.
+Tento dokument popisuje očakávané konfigurácie platformy na spustenie tejto príručky.
 
 ## Požadované aplikácie/frameworky
 
 ### Windows/Linux
 
-GAIA by mala byť predinštalovaná podľa pokynov uvedených v [Sprievodcovi inštaláciou GAIA](../../dependencies/gaia.md).
+GAIA by mala byť predinštalovaná podľa pokynov uvedených v [Návode na inštaláciu GAIA](../../dependencies/gaia.md).
 
-Lemonade Server by mal byť predinštalovaný podľa pokynov uvedených v [Sprievodcovi inštaláciou Lemonade](../../dependencies/lemonade.md).
+Lemonade Server by mal byť predinštalovaný podľa pokynov uvedených v [Návode na inštaláciu Lemonade](../../dependencies/lemonade.md).
 
 ## Požadované modely
 
 ### Windows/Linux
 
-Agent Hardware Advisor používa **Qwen3-Coder-30B** na uvažovanie agenta. Tento model sa stiahne automaticky počas `gaia init`. Nie sú potrebné žiadne manuálne sťahovania modelov.
+Agent Hardware Advisor používa na uvažovanie agenta model **Qwen3-Coder-30B**. Tento model sa automaticky stiahne počas `gaia init`. Manuálne sťahovanie modelov nie je potrebné.

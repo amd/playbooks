@@ -6,49 +6,49 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> מדריך זה משתמש בתגיות מיוחדות ש-GitHub אינו יכול להציג. יש לבקר בכתובת [amd.com/playbooks](https://amd.com/playbooks) כדי לצפות בתוכן זה כראוי.
 <!-- @github-only:end -->
 
 ## סקירה כללית
 
-כתוב kernel של GPU מאפס, קמפל אותו, הפעל אותו על GPU של AMD, וצפה בניצולת מזנקת. ה-playbook הזה מראה כיצד חישוב GPU עובד בפועל: כתוב את קוד ה-kernel, והפעל אותו במקביל על פני אלפי threads.
+כתבו kernel של GPU מאפס, קמפלו אותו, הפעילו אותו על AMD GPU, וצפו בזינוק בניצולת. מדריך זה מציג כיצד חישוב GPU עובד בפועל: כתיבת קוד ה-kernel, והרצתו במקביל על פני אלפי threads.
 
-> **הערה**: זהו playbook מורכב למדי, שעשוי לדרוש ניפוי שגיאות ושינויים נוספים.
+> **הערה**: זהו מדריך מורכב למדי, שעשוי לדרוש דיבוג ושינויים נוספים.
 
-## מה תלמד
+## מה תלמדו
 
 <!-- @os:windows -->
 - כיצד kernels של GPU עובדים: grids, blocks, threads, ומודל האינדוקס שממפה אותם לנתונים
-- כיצד מחסנית AMD ROCm/HIP מאפשרת לך לכתוב קוד בסגנון CUDA שרץ על GPUs של AMD ללא שינוי
+- כיצד ערימת AMD ROCm/HIP מאפשרת לכתוב קוד בסגנון CUDA שרץ על AMD GPUs ללא שינוי
 - כיצד לקמפל kernel בזמן ריצה באמצעות `torch.cuda._compile_kernel`
-- כיצד לבנות תוסף C++ נייטיב עם `CUDAExtension` + pybind11, שניתן לייבא מ-Python
+- כיצד לבנות תוסף kernel מקורי ב-C++ עם `CUDAExtension` + pybind11, שניתן לייבא מ-Python
 <!-- @os:end -->
 <!-- @os:linux -->
 - כיצד kernels של GPU עובדים: grids, blocks, threads, ומודל האינדוקס שממפה אותם לנתונים
-- כיצד מחסנית AMD ROCm/HIP מאפשרת לך לכתוב קוד בסגנון CUDA שרץ על GPUs של AMD ללא שינוי
+- כיצד ערימת AMD ROCm/HIP מאפשרת לכתוב קוד בסגנון CUDA שרץ על AMD GPUs ללא שינוי
 - כיצד לקמפל kernel בזמן ריצה באמצעות `torch.cuda._compile_kernel`
-- כיצד לבנות תוסף C++ נייטיב עם `CUDAExtension` + pybind11, שניתן לייבא מ-Python
-- כיצד למדוד זמן הרצת kernel ולנטר ניצולת GPU חיה עם `amd-smi`
+- כיצד לבנות תוסף kernel מקורי ב-C++ עם `CUDAExtension` + pybind11, שניתן לייבא מ-Python
+- כיצד למדוד את זמן ביצוע ה-kernel ולנטר ניצולת GPU בזמן אמת עם `amd-smi`
 <!-- @os:end -->
 
 ---
 
-ה-playbook הזה מכסה שני גישות לפיתוח kernel:
+מדריך זה מכסה שתי גישות לפיתוח kernels:
 
 <!-- @os:windows -->
 | גישה | נקודת כניסה |
 |---|---|
-| **קימפול JIT** | `torch.cuda._compile_kernel`, כתוב kernel כמחרוזת Python, ללא שלב בנייה |
-| **תוסף C++** | `CUDAExtension` + pybind11: קמפל קובץ `.cu` לתוך `.pyd` נייטיב וייבא אותו |
+| **קימפול JIT** | `torch.cuda._compile_kernel`, כתיבת kernel כמחרוזת Python, ללא שלב build |
+| **תוסף C++** | `CUDAExtension` + pybind11: קימפול קובץ `.cu` ל-`.pyd` מקורי וייבואו |
 <!-- @os:end -->
 <!-- @os:linux -->
 | גישה | נקודת כניסה |
 |---|---|
-| **קימפול JIT** | `torch.cuda._compile_kernel`, כתוב kernel כמחרוזת Python, ללא שלב בנייה |
-| **תוסף C++** | `CUDAExtension` + pybind11: קמפל קובץ `.cu` לתוך `.so` נייטיב וייבא אותו |
+| **קימפול JIT** | `torch.cuda._compile_kernel`, כתיבת kernel כמחרוזת Python, ללא שלב build |
+| **תוסף C++** | `CUDAExtension` + pybind11: קימפול קובץ `.cu` ל-`.so` מקורי וייבואו |
 <!-- @os:end -->
 
-שתי הגישות רצות על GPUs של AMD. הדבר אפשרי מכיוון שבנייה ROCm של PyTorch ממפה את כל משטח ה-API של CUDA ל-HIP. משמעות הדבר היא ש-`torch.cuda`, `CUDAExtension`, ותחביר kernel של CUDA עובדים על חומרת AMD באופן שקוף.
+שתי הגישות פועלות על AMD GPUs. הדבר אפשרי מכיוון שבניית ROCm של PyTorch ממפה את כל שטח ה-API של CUDA ל-HIP. משמעות הדבר היא ש-`torch.cuda`, `CUDAExtension`, ותחביר kernel של CUDA פועלים כולם על חומרת AMD בצורה שקופה.
 
 ---
 
@@ -56,65 +56,65 @@ SPDX-License-Identifier: MIT
 
 ### מהו GPU Kernel?
 
-GPU kernel הוא פונקציה שרצה במקביל על פני אלפי threads של GPU בו-זמנית. בניגוד לפונקציית CPU שמתבצעת פעם אחת לכל קריאה, kernel מופעל עם **grid** של **blocks**, שכל אחד מהם מכיל threads רבים, כולם מבצעים את אותו קוד על נתונים שונים.
+GPU kernel הוא פונקציה הרצה במקביל על פני אלפי threads של GPU בו-זמנית. בניגוד לפונקציית CPU המבוצעת פעם אחת בכל קריאה, kernel מופעל עם **grid** של **blocks**, כל אחד מכיל threads רבים, כולם מבצעים את אותו הקוד על נתונים שונים.
 
 <p align="center">
   <img src="assets/grid_threads.png" width="900"/>
 </p>
 
-### מודל אינדוקס Threads
+### מודל אינדוקס Thread
 
-בעת הפעלת kernel אתה מציין שני ממדים:
+בעת הפעלת kernel יש לציין שני ממדים:
 
 | משתנה | משמעות |
 |---|---|
-| `gridDim` | מספר blocks ב-grid |
-| `blockDim` | מספר threads לכל block |
+| `gridDim` | מספר ה-blocks ב-grid |
+| `blockDim` | מספר ה-threads ב-block |
 
 לכל thread יש גישה לשלושה משתנים מובנים לקריאה בלבד:
 
 | משתנה | משמעות |
 |---|---|
-| `blockIdx.x` | לאיזה block שייך ה-thread הזה |
-| `blockDim.x` | מספר threads בblock אחד |
+| `blockIdx.x` | ל-block איזה thread זה שייך |
+| `blockDim.x` | מספר ה-threads ב-block אחד |
 | `threadIdx.x` | אינדקס ה-thread בתוך ה-block שלו |
 
 ### מזהה Thread גלובלי
 
-משתנים אלה משולבים לחישוב אינדקס thread ייחודי גלובלי:
+משתנים אלה משולבים יחד כדי לחשב אינדקס thread ייחודי גלובלי:
 
 ```c
 int idx = blockIdx.x * blockDim.x + threadIdx.x;
 ```
 
-סך כל ה-threads = `gridDim.x * blockDim.x`. כל thread מעבד אלמנט אחד באופן עצמאי. זוהי הבסיס של **מקביליות נתונים**. אותה פעולה רצה על אלמנטים רבים בו-זמנית, ללא תלות בין-thread.
+סך ה-threads = `gridDim.x * blockDim.x`. כל thread מעבד אלמנט אחד באופן עצמאי. זהו הבסיס ל**מקביליות נתונים** (data parallelism). אותה פעולה רצה על אלמנטים רבים בו-זמנית, ללא תלות בין threads.
 
 ---
 
-### מודל הרצת GPU: Wavefronts
+### מודל ביצוע GPU: Wavefronts
 
-GPUs של AMD מבצעים threads בקבוצות של **32** הנקראות **wavefronts**. כל ה-threads ב-wavefront מריצים את אותה הוראה בו-זמנית. זה משפיע על בחירות גודל block אופטימליות (256 threads = 8 wavefronts = יעילות תזמון טובה).
+AMD GPUs מבצעים threads בקבוצות של **32** הנקראות **wavefronts**. כל ה-threads ב-wavefront מריצים את אותה הוראה בו-זמנית. הדבר משפיע על בחירת גודל block אופטימלי (256 threads = 8 wavefronts = יעילות תזמון טובה).
 
-### תכנות GPU של AMD: HIP + ROCm
+### תכנות AMD GPU: HIP + ROCm
 
-**ROCm** היא מחסנית חישוב GPU בקוד פתוח של AMD (מנהלי התקן, מהדרים, ספריות, זמן ריצה). **HIP** יושב מעליה, מתוכנן להיות זהה תחבירית ל-CUDA. בנייה ROCm של PyTorch ממפה באופן שקוף את `torch.cuda.*` ל-HIP, כך שאותו קוד עובד על GPUs של AMD.
+**ROCm** היא ערימת מחשוב GPU בקוד פתוח של AMD (drivers, קומפיילרים, ספריות, runtime). **HIP** יושב מעליה, ומתוכנן להיות זהה תחבירית ל-CUDA. בניית ROCm של PyTorch ממפה בצורה שקופה את `torch.cuda.*` ל-HIP, כך שאותו קוד פועל על AMD GPUs.
 
 ---
 
 ### PyTorch + AMD/HIP
 
-PyTorch מספק בנייה ROCm שבה משטח ה-API של CUDA (`torch.cuda.*`) מגובה באופן שקוף על ידי HIP. משמעות הדבר:
+PyTorch מספקת בנייה של ROCm שבה שטח ה-API של CUDA (`torch.cuda.*`) נתמך בצורה שקופה על ידי HIP. משמעות הדבר היא:
 
-- `torch.cuda.is_available()` עובד על GPUs של AMD עם ROCm
-- `tensor.to("cuda")` מקצה על ה-GPU של AMD
-- `torch.version.hip` חושף את גרסת HIP
+- `torch.cuda.is_available()` פועל על AMD GPUs עם ROCm
+- `tensor.to("cuda")` מקצה זיכרון על AMD GPU
+- `torch.version.hip` חושף את גרסת ה-HIP
 
-PyTorch גם חושף את `torch.cuda._compile_kernel()`, קיצור דרך ברמה גבוהה לקימפול JIT של מחרוזת kernel גולמית וקבלת callable בחזרה, ללא צורך בשלב בנייה נפרד.
+PyTorch גם חושפת את `torch.cuda._compile_kernel()`, קיצור דרך ברמה גבוהה לקימפול JIT של מחרוזת kernel גולמית וקבלת callable, ללא צורך בשלב build נפרד.
 
 ---
 
 <!-- @device:halo_box -->
-## בדוק עדכוני תוכנה
+## בדיקת עדכוני תוכנה
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -123,7 +123,7 @@ PyTorch גם חושף את `torch.cuda._compile_kernel()`, קיצור דרך ב�
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### דרישות מוקדמות - Windows
-- התקן את הגרסה האחרונה: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- התקינו את הגרסה העדכנית ביותר של: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -131,7 +131,7 @@ PyTorch גם חושף את `torch.cuda._compile_kernel()`, קיצור דרך ב�
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-ב-Linux, פתח טרמינל בספרייה לבחירתך ועקוב אחר הפקודות ליצירת venv עם ROCm+Pytorch מותקנים כבר.
+ב-Linux, פתחו טרמינל בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv עם ROCm+Pytorch מותקנים מראש.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -144,13 +144,13 @@ source kernel-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**הענק למשתמש שלך גישה להתקני GPU** (התנתק והתחבר מחדש כדי שזה ייכנס לתוקף):
+**הענקת גישה למשתמש שלכם להתקני GPU** (יש להתנתק ולהתחבר מחדש כדי שהשינוי ייכנס לתוקף):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-ב-Linux, פתח טרמינל בספרייה לבחירתך ועקוב אחר הפקודות ליצירת venv.
+ב-Linux, פתחו טרמינל בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -164,7 +164,7 @@ source kernel-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-ב-Windows, פתח טרמינל בספרייה לבחירתך ועקוב אחר הפקודות ליצירת venv.
+ב-Windows, פתחו טרמינל בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv kernel-env
@@ -173,8 +173,8 @@ kernel-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
-> **טיפ**: משתמשי Windows עשויים להצטרך לשנות את מדיניות הביצוע של PowerShell (לדוגמה,
-> להגדיר אותה ל-RemoteSigned או Unrestricted) לפני הרצת חלק מפקודות Powershell.
+> **טיפ**: ייתכן שמשתמשי Windows יצטרכו לשנות את מדיניות ההרשאות של PowerShell (Execution Policy) (למשל
+> להגדיר אותה ל-RemoteSigned או Unrestricted) לפני הרצת חלק מפקודות ה-PowerShell.
 
 <!-- @os:end -->
 ### התקנת תלויות בסיסיות
@@ -193,14 +193,14 @@ kernel-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-> **הערה:** עבור ספר המשחק הזה, ROCm ו-PyTorch צריכים להיות מותקנים בתוך הסביבה הווירטואלית גם ב-Ryzen AI Halo, מכיוון שקומפילציה של ליבות מותאמות אישית דורשת את כותרות הפיתוח המלאות.
+> **הערה:** עבור המדריך הזה, יש להתקין את ROCm ו-PyTorch לתוך הסביבה הווירטואלית גם ב-Ryzen AI Halo, מכיוון שהידור ליבות מותאמות אישית דורש את כותרות הפיתוח המלאות.
 
-התקן את ROCm:
+התקנת ROCm:
 ```powershell
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[libraries,devel]"
 ```
 
-התקן את PyTorch:
+התקנת PyTorch:
 ```powershell
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
 ```
@@ -227,9 +227,9 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 ### התקנת תלויות נוספות
 
 <!-- @os:linux -->
-התקן את שרשרת כלי הבנייה C/C++ של Linux. זוהי תלות ברמת המערכת ונדרשת עבור הדרכות הרחבת C++ מכיוון ש-`CUDAExtension` בונה מודולי `.so` מקוריים מקבצי `.cu`.
+התקן את שרשרת הכלים לבנייה של C/C++ עבור Linux. זוהי תלות ברמת המערכת והיא נדרשת עבור מדריכי ההרחבות ב-C++ מכיוון ש-`CUDAExtension` בונה מודולי `.so` מקוריים מקבצי `.cu`.
 
-הרץ פעם אחת על מכונת Linux, מחוץ לסביבה הווירטואלית של Python שנוצרה:
+הרץ זאת פעם אחת על מכונת ה-Linux, מחוץ לסביבה הווירטואלית של Python שנוצרה:
 
 ```bash
 sudo apt update
@@ -260,22 +260,22 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:end -->
 
 <!-- @os:windows -->
-אנא ודא ש-[Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) או [גרסה חדשה יותר](https://visualstudio.microsoft.com/vs/community/) מותקן עם עומס העבודה **Desktop development with C++**.
+יש לוודא ש-[Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) או [חדש יותר](https://visualstudio.microsoft.com/vs/community/) מותקן עם עומס העבודה **Desktop development with C++**.
 
-> **הערה**: הגדרת סביבת C++ של Visual Studio נדרשת רק עבור גישת **הרחבת C++**. היא אינה נדרשת עבור גישת קומפילציית JIT.
+> **הערה**: הגדרת סביבת ה-C++ של Visual Studio נדרשת רק עבור גישת ה-**C++ Extension**. היא אינה נדרשת עבור גישת JIT Compilation.
 
-פתח מסוף PowerShell והרץ את הפקודות הבאות לפני בניית הרחבת C++.
+פתח מסוף PowerShell והרץ את הפקודות הבאות לפני בניית הרחבת ה-C++.
 
-**שלב 1: מצא את סביבת C++ של Visual Studio המותקנת**
+**שלב 1: איתור סביבת ה-C++ של Visual Studio המותקנת**
 
-**(A) אתר את `vswhere.exe`, המותקן עם מתקין Visual Studio**
+**(א) איתור `vswhere.exe`, המותקן יחד עם Visual Studio Installer**
 ```powershell
 $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 
 if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(B) מצא את `vcvars64.bat` מ-Visual Studio 2022 או חדש יותר עם כלי בנייה C++**
+**(ב) איתור `vcvars64.bat` מ-Visual Studio 2022 או חדש יותר עם כלי בנייה של C++**
 
 ```powershell
 $Vcvars = & $VsWhere `
@@ -288,17 +288,17 @@ $Vcvars = & $VsWhere `
 if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(C) הדפס את סביבת C++ של Visual Studio בשימוש**
+**(ג) הדפסת סביבת ה-C++ של Visual Studio שבשימוש**
 
 ```powershell
 Write-Host "Using Visual Studio C++ environment: $Vcvars"
 ```
 
-**שלב 2: הפעל את סביבת הבנייה C++ של Visual Studio**
+**שלב 2: הפעלת סביבת הבנייה של Visual Studio C++**
 
-**(A) הרץ את `vcvars64.bat` ולכוד את הסביבה שהוא מגדיר**
+**(א) הרץ את `vcvars64.bat` וקלוט את הסביבה שהוא מגדיר**
 
-פעולה זו הופכת את `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` ונתיבי Windows SDK לזמינים.
+פעולה זו הופכת את `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH`, ונתיבי Windows SDK לזמינים.
 
 ```powershell
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
@@ -310,7 +310,7 @@ if ($ExitCode -ne 0) {
 }
 ```
 
-**(B) ייבא את משתני הסביבה של Visual Studio לסשן PowerShell הנוכחי**
+**(ב) ייבא את משתני הסביבה של Visual Studio לתוך הסשן הזה של PowerShell**
 
 ```powershell
 $VsEnv | ForEach-Object {
@@ -320,7 +320,7 @@ $VsEnv | ForEach-Object {
 }
 ```
 
-**שלב 3: ודא שמהדר C++ של Microsoft זמין**
+**שלב 3: ודא שמהדר ה-C++ של Microsoft זמין**
 
 ```powershell
 where.exe cl
@@ -550,23 +550,23 @@ $code | python -
 
 ---
 
-## הורדת קבצים נדרשים
+## הורדת הקבצים הנדרשים
 
-צור את מבנה הספריות הבא על ידי יצירת **2 תיקיות חדשות** והורדת הקבצים המתאימים:
+צור את מבנה התיקיות הבא על ידי יצירת **2 תיקיות חדשות** והורדת הקבצים המתאימים:
 
-| ספרייה | קבצים להורדה | תיאור |
+| תיקייה | קבצים להורדה | תיאור |
 |-----------|-------------------|-------------|
-| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| קבצי JIT והרחבת C++ לליבת חיבור וקטורים |
-| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | קבצי JIT והרחבת C++ לליבת כפל מטריצות |
+| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| קבצי JIT והרחבת C++ עבור ליבת חיבור וקטורים |
+| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | קבצי JIT והרחבת C++ עבור ליבת כפל מטריצות |
 
 
-## הדרכות
+## מדריכים מודרכים
 
-### הדרכה 1: חיבור וקטורים
+### מדריך 1: חיבור וקטורים
 
-#### גישה א': קומפילציית JIT
+#### גישה א': הידור JIT
 
-קומפילציית JIT (Just-In-Time) משמעותה שהליבה כתובה כמחרוזת C++ גולמית בתוך Python ומקומפלת בזמן ריצה, ללא צורך בשלבי בנייה נוספים.
+הידור JIT (Just-In-Time) פירושו שהליבה נכתבת כמחרוזת C++ גולמית בתוך Python ומהודרת בזמן ריצה, ללא צורך בשלבי בנייה נוספים.
 
 כדי להשתמש ב-[add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py), ודא שהוא הורד והרץ:
 ```bash
@@ -614,31 +614,31 @@ print("First 5 elements:", x[:5].cpu())
 #Expected output: tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @os:linux -->
-> **טיפ**: הסקריפט גם מפעיל חוט רקע שסוקר את `amd-smi` כל 100 אלפיות שנייה כדי לתעד את שיא וממוצע ניצול ה-GPU במהלך הרצת הליבה.
+> **טיפ**: הסקריפט גם מפעיל תהליכון (thread) ברקע הסוקר את `amd-smi` כל 100 מילישניות כדי לתעד ניצולת GPU שיא וממוצעת במהלך ריצת הליבה.
 <!-- @os:end -->
 
 > **הערה**: **מדוע גודל הבלוק הוא 256?** <br>
-> - הליבה משתמשת ב-**256 חוטים לכל בלוק** מכיוון שזה מתיישב היטב עם **מודל ביצוע ה-wavefront של GPU של AMD**.
-> - זכור שחומרת AMD מבצעת חוטים בקבוצות של 32 חוטים, מה שמביא ל-8 wavefronts לכל בלוק. (8 wavefronts x 32 חוטים = בלוק 1)
+> - הליבה משתמשת ב-**256 תהליכונים (threads) לבלוק** מכיוון שזה מתיישר היטב עם **מודל הביצוע ה-wavefront של GPUs מבית AMD**.
+> - יש לזכור שחומרת AMD מבצעת תהליכונים בקבוצות של 32 תהליכונים, מה שמביא ל-8 wavefronts לכל בלוק. (8 wavefronts x 32 תהליכונים = בלוק אחד)
 
 
-**מה עומס העבודה עושה:**
+**מה עושה עומס העבודה:**
 
-הליבה מוסיפה עבודה נוספת באופן מלאכותי כדי להדגים ניצול GPU:
+הליבה מוסיפה באופן מלאכותי עבודה נוספת כדי להדגים ניצולת GPU:
 
-- **100,000,000 אלמנטים** בטנסור
-- **לולאה פנימית רצה 1,000 פעמים** לכל אלמנט לכל הפעלת ליבה  
-- **200 הפעלות ליבה** בסך הכל
+- **100,000,000 איברים** בטנזור
+- **הלולאה הפנימית רצה 1,000 פעמים** לכל איבר בכל הפעלת ליבה  
+- **200 הפעלות ליבה** בסך הכול
 
 **חישוב:**  
-- כל אלמנט: מוגדל ב-1 × 1,000 איטרציות × 200 הפעלות = 200,000  
-- תוצאה סופית: 1.0 (ערך התחלתי) + 200,000 (חיבורים) = 200,001.0
+- כל איבר: מוגדל ב-1 × 1,000 איטרציות × 200 הפעלות = 200,000  
+- תוצאה סופית: 1.0 (ערך התחלתי) + 200,000 (תוספות) = 200,001.0
 
 **מדוע הלולאה הפנימית?**  
-- ללא לולאת `for (int i = 0; i < 1000; i++)`, 200 הפעלות היו מסתיימות מיידית וכלי הניטור לא היו לוכדים ניצול GPU משמעותי. העבודה המלאכותית גורמת לכל הרצת ליבה להיות ארוכה מספיק כדי שכלי הניטור יוכלו למדוד ביצועים.
+- ללא הלולאה `for (int i = 0; i < 1000; i++)`, 200 הפעלות היו מסתיימות באופן מיידי וכלי הניטור לא היו לוכדים ניצולת GPU משמעותית. העבודה המלאכותית גורמת לכל הפעלת ליבה להימשך זמן ארוך מספיק כדי שכלי הניטור יוכלו למדוד ביצועים.
 
 <!-- @os:linux -->
-**פלט צפוי:** [מספרי הביצועים ישתנו]
+**פלט צפוי:**[מספרי הביצועים ישתנו]
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
@@ -648,7 +648,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **הערה**: ב-Windows, `amd-smi` אינו נתמך. כדי לעקוב אחר ניצול GPU, תוכל להשתמש במנהל המשימות, שם אמור להיות גלוי קפיצה קצרה בניצול כאשר תריץ את התוכנית.
+> **הערה**: ב-Windows, `amd-smi` אינו נתמך. כדי לעקוב אחר ניצולת ה-GPU, ניתן להשתמש במנהל המשימות (Task Manager), שם אמורה להיראות קפיצה קצרה בניצולת בעת הרצת התוכנית.
 
 **פלט צפוי:**
 ```
@@ -657,7 +657,7 @@ Elapsed time: 2.753s
 No GPU Usage captured.
 ```
 <!-- @os:end -->
-**עבודה יפה! הרצת את ליבת ה-GPU הראשונה שלך.**
+**עבודה נהדרת! הרגע הרצת את ליבת ה-GPU הראשונה שלך.**
 
 <!-- @os:linux -->
 <!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
@@ -798,32 +798,32 @@ $code | python -
 <!-- @os:end -->
 
 ---
-#### גישה B: הרחבת C++
+#### גישה ב': הרחבת C++
 
-הגישה השנייה היא ידנית יותר: כתיבת הקרנל וה-Python binding לקובץ `.cu` יחיד, קומפילציה שלו באופן מקורי באמצעות מערכת הבנייה של PyTorch, וייבואו ל-Python.
+הגישה השנייה ידנית יותר: כתיבת הקרנל וכריכת ה-Python לקובץ `.cu` יחיד, קומפילציה שלו באופן טבעי באמצעות מערכת הבנייה של PyTorch, וייבואו לתוך Python.
 
 <!-- @os:windows -->
-> **הערה**: גישת הרחבת C++ דורשת את סביבת הבנייה של Visual Studio C++ מכיוון ש-PyTorch מקמפל את קובץ המקור `.cu` למודול הרחבה מקורי מסוג `.pyd`. בניית ההרחבה המקורית הזו תלויה בשרשרת הכלים של Microsoft C++ (מהדר, מקשר וכלי בנייה) המסופקת על ידי Visual Studio. הפעל את פקודות ההפעלה של Visual Studio מסעיף ההגדרות לפני בניית ההרחבה.
+> **הערה**: גישת הרחבת ה-C++ דורשת את סביבת הבנייה של Visual Studio C++ מכיוון ש-PyTorch מקמפל את קובץ המקור `.cu` למודול הרחבה טבעי `.pyd`. בניית ההרחבה הטבעית הזו תלויה בשרשרת הכלים של Microsoft C++ (מהדר, מקשר וכלי בנייה) המסופקת על ידי Visual Studio. הריצו את פקודות ההפעלה של Visual Studio מסעיף ההגדרה לפני בניית ההרחבה.
 <!-- @os:end -->
 
-הורד את הקבצים הבאים אם טרם עשית זאת:
+הורידו את הקבצים הבאים אם עדיין לא עשיתם זאת:
 <!-- @os:windows -->
 | קובץ | תפקיד |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | קרנל + משגר + קישור pybind11, הכל בקובץ אחד |
-| [setup.py](assets/Vector_Addition/setup.py) | סקריפט בנייה, משתמש ב-`CUDAExtension` לקומפילציה של `.cu` ל-`.pyd` |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | סקריפט Python שמריץ את הארטיפקטים שנבנו |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | קרנל + מפעיל + כריכת pybind11, הכל בקובץ אחד |
+| [setup.py](assets/Vector_Addition/setup.py) | סקריפט בנייה, משתמש ב-`CUDAExtension` כדי לקמפל את ה-`.cu` ל-`.pyd` |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | סקריפט Python שמריץ את התוצרים שנבנו |
 <!-- @os:end -->
 
 <!-- @os:linux -->
 | קובץ | תפקיד |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | קרנל + משגר + קישור pybind11, הכל בקובץ אחד |
-| [setup.py](assets/Vector_Addition/setup.py) | סקריפט בנייה, משתמש ב-`CUDAExtension` לקומפילציה של `.cu` ל-`.so` |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | סקריפט Python שמריץ את הארטיפקטים שנבנו |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | קרנל + מפעיל + כריכת pybind11, הכל בקובץ אחד |
+| [setup.py](assets/Vector_Addition/setup.py) | סקריפט בנייה, משתמש ב-`CUDAExtension` כדי לקמפל את ה-`.cu` ל-`.so` |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | סקריפט Python שמריץ את התוצרים שנבנו |
 <!-- @os:end -->
 
-#### **שלב 1: הקרנל, המשגר והקישור** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
+#### **שלב 1: הקרנל, המפעיל והכריכה** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -850,29 +850,30 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 ```
 
 >**טיפ**: מדוע להשתמש ב-`hipDeviceSynchronize()`? <br>
-> - השקות קרנל של GPU הן אסינכרוניות. כאשר ה-CPU מריץ את `add_one<<<grid_size, block_size>>>(data, n);` הוא יבצע מיד את ההוראה הבאה מבלי להמתין ל-GPU. `hipDeviceSynchronize()` מאלץ את ה-CPU להמתין עד שקרנל ה-GPU יסתיים.
+> - הפעלות של קרנל GPU הן אסינכרוניות. כאשר ה-CPU מריץ את `add_one<<<grid_size, block_size>>>(data, n);` הוא יבצע מיד את ההוראה הבאה מבלי להמתין ל-GPU. `hipDeviceSynchronize()` מכריח את ה-CPU להמתין עד שהקרנל של ה-GPU יסתיים.
 
 #### **שלב 2: בנייה**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**הערה**: פקודה זו מחפשת את `setup.py` בספרייה הנוכחית כדי לבנות את קובץ ה-.cu שיצרנו.
+>**הערה**: פקודה זו מחפשת את `setup.py` בתיקייה הנוכחית כדי לבנות את קובץ ה-.cu שיצרנו.
 
 
-`CUDAExtension` הוא עוזר בנייה של CUDA מ-`torch.utils.cpp_extension`. עם ROCm, PyTorch **ממפה מחדש את `CUDAExtension` לשימוש ב-`hipcc`** במקום `nvcc`. ROCm מיירט את נתיב הבנייה ומנתב אותו דרך מהדר HIP, ומבצע פורטינג של קוד CUDA ל-AMD.
+`CUDAExtension` הוא כלי עזר לבניית CUDA מתוך `torch.utils.cpp_extension`. עם ROCm, PyTorch **ממפה מחדש את `CUDAExtension` כך שישתמש ב-`hipcc`** במקום ב-`nvcc`. ROCm מיירט את נתיב הבנייה ומנתב אותו דרך מהדר ה-HIP, ומעביר קוד CUDA לפלטפורמת AMD.
 
 פעולה זו מייצרת את הקבצים הבאים:
 <!-- @os:windows -->
-- `build/`: ספרייה עם קבצי `.pyd`
-- `add_one_kernel.hip`: קוד המקור של HIP שנוצר על ידי hipification של קובץ `.cu`; זה מה ש-`hipcc` קימפל בפועל
+- `build/`: תיקייה עם קובצי `.pyd`
+- `add_one_kernel.hip`: מקור ה-HIP שנוצר מ"היפוף" (hipify) של קובץ ה-`.cu`; זה מה ש-`hipcc` בפועל קימפל
 <!-- @os:end -->
+
 <!-- @os:linux -->
-- `build/`: ספרייה עם קבצי `.so`
-- `add_one_kernel.hip`: קוד המקור של HIP שנוצר על ידי hipification של קובץ `.cu`; זה מה ש-`hipcc` קימפל בפועל
+- `build/`: תיקייה עם קובצי `.so`
+- `add_one_kernel.hip`: מקור ה-HIP שנוצר מ"היפוף" (hipify) של קובץ ה-`.cu`; זה מה ש-`hipcc` בפועל קימפל
 <!-- @os:end -->
 
 #### **שלב 3: שימוש מ-Python** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)):
-הרץ את הסקריפט הזה כדי לראות את הקרנל בפעולה:
+הריצו סקריפט זה כדי לראות את הקרנל בפעולה:
 ```bash
 cd Vector_Addition # if not already in directory
 python run_compiled_addition.py
@@ -1029,33 +1030,33 @@ finally {
 - **B** היא N×K  
 - **C** היא M×K (התוצאה)
 
-כל איבר פלט מוגדר כ:
+כל אלמנט בפלט מוגדר כך:
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-כל איבר של C מחושב באופן עצמאי, מה שהופך זאת למושלם לעיבוד מקבילי ב-GPU.
+כל אלמנט של C מחושב באופן עצמאי, מה שהופך זאת למושלם לביצוע מקבילי ב-GPU.
 
-#### כיצד זה ממופה לתהליכוני GPU
+#### כיצד זה ממופה לתהליכונים (threads) של ה-GPU
 
-בשונה מחיבור וקטורים (חד-ממדי), כפל מטריצות מייצר **פלט דו-ממדי**, לכן אנו משתמשים ב**רשת דו-ממדית של תהליכונים**:
+בשונה מחיבור וקטורים (חד-ממדי), כפל מטריצות מייצר **פלט דו-ממדי**, ולכן אנו משתמשים ב**רשת דו-ממדית של תהליכונים**:
 
 | | חיבור וקטורים | כפל מטריצות |
 |---|---|---|
 | **צורת הפלט** | מערך חד-ממדי | מטריצה דו-ממדית (M×K) |
-| **מיפוי תהליכונים** | תהליכון 1 → איבר 1 | תהליכון 1 → איבר פלט 1 |
-| **תבנית השקה** | רשת חד-ממדית: `(grid_x, 1, 1)` | רשת דו-ממדית: `(grid_x, grid_y, 1)` |
+| **מיפוי תהליכונים** | תהליכון אחד → אלמנט אחד | תהליכון אחד → אלמנט פלט אחד |
+| **דפוס הפעלה** | רשת חד-ממדית: `(grid_x, 1, 1)` | רשת דו-ממדית: `(grid_x, grid_y, 1)` |
 | **גודל בלוק** | `(256, 1, 1)` | `(16, 16, 1)` = 256 תהליכונים |
 
-כל תהליכון מחשב איבר אחד של מטריצת הפלט C. תהליכון במיקום `(row, col)` מחשב את `C[row][col]` על ידי כפל השורה המתאימה של A בעמודה המתאימה של B.
+כל תהליכון מחשב אלמנט אחד של מטריצת הפלט C. תהליכון במיקום `(row, col)` מחשב את `C[row][col]` על ידי הכפלת השורה המתאימה של A בעמודה המתאימה של B.
 
-**פריסת זיכרון**: זיכרון ה-GPU הוא שטוח (חד-ממדי), אך מטריצות מאוחסנות שורה אחר שורה. כדי לגשת ל-`A[row][col]`, הקרנל משתמש ב-`A[row * N + col]`.
-
-
-#### גישה A: קומפילציה JIT:
-
-כמו בהדרכה 1, הקרנל נכתב כמחרוזת C++ גולמית בתוך Python ומקומפל בזמן ריצה דרך ה-JIT המובנה של PyTorch.
+**פריסת זיכרון**: זיכרון ה-GPU שטוח (חד-ממדי), אך המטריצות מאוחסנות שורה אחר שורה. כדי לגשת אל `A[row][col]`, הקרנל משתמש ב-`A[row * N + col]`.
 
 
-כדי להשתמש ב-[matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py), ודא שהוא הורד והרץ:
+#### גישה א': קומפילציית JIT:
+
+כמו בהדרכה 1, הקרנל נכתב כמחרוזת C++ גולמית בתוך Python ומקומפל בזמן ריצה באמצעות מנגנון ה-JIT המובנה של PyTorch.
+
+
+כדי להשתמש ב-[matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py), ודאו שהוא הורד והריצו:
 ```bash
 cd Matrix_Multiplication # if not already inside the directory
 python matmul_kernel.py
@@ -1112,10 +1113,10 @@ max_err = (C - C_ref).abs().max().item()
 print(f"Max error vs torch.mm: {max_err:.6f}")
 ```
 
-הסקריפט מאמת את התוצאה מול `torch.mm` עם סבילות קטנה. חישובים של נקודה צפה ב-GPU עשויים לייצר הבדלים מספריים קטנים בהשוואה למימושי CPU בשל סדר הצמצום המקבילי.
+הסקריפט מאמת את התוצאה מול `torch.mm` בסבילות קטנה. חשבון נקודה צפה ב-GPU עשוי לייצר הבדלים מספריים קטנים בהשוואה למימושי CPU עקב סדר הצטברות (reduction) מקבילי.
 
 <!-- @os:linux -->
-**פלט צפוי:** [מספרי הביצועים ישתנו]
+**פלט צפוי:**[מספרי הביצועים ישתנו]
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -1125,7 +1126,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **הערה**: ב-Windows, `amd-smi` אינו נתמך. כדי לעקוב אחר ניצול ה-GPU, תוכל להשתמש במנהל המשימות, שם אמור להיות גל קצר של ניצול כאשר תריץ את התוכנית.
+> **הערה**: ב-Windows, `amd-smi` אינו נתמך. כדי לעקוב אחר ניצול ה-GPU, ניתן להשתמש במנהל המשימות, שם אמורה להופיע קפיצה קצרה בניצול כאשר תריצו את התוכנית.
 
 **פלט צפוי:**
 ```
@@ -1300,31 +1301,31 @@ $code | python -
 <!-- @os:end -->
 
 ---
-#### גישה ב': תוסף C++
+#### גישה B: הרחבת ++C
 
-הגישה השנייה היא ידנית יותר: כתיבת הקרנל וה-Python binding לקובץ `.cu` יחיד, קומפילציה שלו באופן מקורי באמצעות מערכת הבנייה של PyTorch, וייבואו ל-Python.
+הגישה השנייה ידנית יותר: כתיבת הקרנל וקישור Python (Python binding) לקובץ `.cu` יחיד, קומפילציה שלו באופן טבעי (native) באמצעות מערכת הבנייה (build system) של PyTorch, וייבוא שלו ל-Python.
 
 <!-- @os:windows -->
-> **הערה**: גישת תוסף C++ דורשת את סביבת הבנייה של Visual Studio C++ מכיוון ש-PyTorch מקמפל את קובץ המקור `.cu` למודול תוסף מקורי מסוג `.pyd`. בניית התוסף המקורי הזה תלויה בשרשרת הכלים של Microsoft C++ (מהדר, מקשר וכלי בנייה) שמסופקת על ידי Visual Studio. הפעל את פקודות ההפעלה של Visual Studio מסעיף ההגדרות לפני בניית התוסף.
+> **הערה**: גישת הרחבת ++C דורשת את סביבת הבנייה של Visual Studio C++ מכיוון ש-PyTorch מקמפל את קובץ המקור `.cu` למודול הרחבה `.pyd` טבעי (native). בניית ההרחבה הטבעית הזו תלויה בשרשרת הכלים (toolchain) של Microsoft ++C (מהדר, מקשר וכלי בנייה) המסופקת על ידי Visual Studio. הריצו את פקודות ההפעלה של Visual Studio מחלק ההגדרה לפני בניית ההרחבה.
 <!-- @os:end -->
 
-הורד את הקבצים הבאים אם טרם עשית זאת:
+הורידו את הקבצים הבאים אם עדיין לא עשיתם זאת:
 <!-- @os:windows -->
 | קובץ | תפקיד |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + launcher + pybind11 binding |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | סקריפט בנייה, משתמש ב-`CUDAExtension` לקומפילציה של `.cu` ל-`.pyd` |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | קרנל + launcher + קישור pybind11 |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | סקריפט בנייה, משתמש ב-`CUDAExtension` כדי לקמפל את ה-`.cu` ל-`.pyd` |
 | [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | סקריפט Python שמריץ את הארטיפקטים שנבנו |
 <!-- @os:end -->
 <!-- @os:linux -->
 | קובץ | תפקיד |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + launcher + pybind11 binding |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | סקריפט בנייה, משתמש ב-`CUDAExtension` לקומפילציה של `.cu` ל-`.so` |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | קרנל + launcher + קישור pybind11 |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | סקריפט בנייה, משתמש ב-`CUDAExtension` כדי לקמפל את ה-`.cu` ל-`.so` |
 | [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | סקריפט Python שמריץ את הארטיפקטים שנבנו |
 <!-- @os:end -->
 
-#### **שלב 1: הקרנל, ה-launcher וה-binding** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
+#### **שלב 1: הקרנל, ה-launcher והקישור** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -1365,30 +1366,30 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 ```
 
 בהשוואה ל-`add_one_launcher` בהדרכה 1, ה-launcher כאן:
-- מקבל שני טנסורי קלט במקום אחד
-- גוזר את שלושת הממדים (M, N, K) מצורות הטנסורים, ללא העברת גודל ידנית מ-Python
-- מקצה ומחזיר את טנסור הפלט C, במקום לשנות במקום
-- משתמש ב-`dim3` הן לרשת והן לבלוק כדי לבטא את צורת ההשקה הדו-ממדית
+- לוקח שני טנזורי קלט במקום אחד
+- גוזר את כל שלושת הממדים (M, N, K) מצורות הטנזורים, ללא העברת גודל ידנית מ-Python
+- מקצה ומחזיר את טנזור הפלט C, במקום לשנות במקום (in-place)
+- משתמש ב-`dim3` הן עבור הרשת (grid) והן עבור הבלוק (block) כדי לבטא את צורת ההשקה הדו-ממדית
 
 #### **שלב 2: בנייה**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**הערה**: פקודה זו מחפשת את `setup.py` בספרייה הנוכחית כדי לבנות את קובץ ה-.cu שיצרנו.
+>**הערה**: פקודה זו מחפשת את `setup.py` בתיקייה הנוכחית כדי לבנות את קובץ ה-.cu שיצרנו.
 
 
 פעולה זו מייצרת את הקבצים הבאים:
 <!-- @os:windows -->
-- `build/`: ספרייה עם קבצי `.pyd`
-- `matmul_kernel.hip`: קוד המקור של HIP שנוצר על ידי hipify של קובץ `.cu`; זה מה ש-`hipcc` קימפל בפועל
+- `build/`: תיקייה עם קבצי ה-`.pyd`
+- `matmul_kernel.hip`: קוד המקור HIP שנוצר מהמרת (hipifying) קובץ ה-`.cu`; זהו למעשה מה ש-`hipcc` קימפל
 <!-- @os:end -->
 <!-- @os:linux -->
-- `build/`: ספרייה עם קבצי `.so`
-- `matmul_kernel.hip`: קוד המקור של HIP שנוצר על ידי hipify של קובץ `.cu`; זה מה ש-`hipcc` קימפל בפועל
+- `build/`: תיקייה עם קבצי ה-`.so`
+- `matmul_kernel.hip`: קוד המקור HIP שנוצר מהמרת (hipifying) קובץ ה-`.cu`; זהו למעשה מה ש-`hipcc` קימפל
 <!-- @os:end -->
 
 #### **שלב 3: שימוש מ-Python** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)):
-הפעל סקריפט זה כדי לראות את הקרנל בפעולה:
+הריצו את הסקריפט הזה כדי לראות את הקרנל בפעולה:
 ```bash
 cd Matrix_Multiplication # if not already in directory
 python run_compiled_multiply.py
@@ -1400,11 +1401,11 @@ Result: tensor([[19., 22.],
         [43., 50.]])
 ```
 
-**מצוין! זה עתה מימשת כפל מטריצות על ה-GPU.** זהו אבן דרך משמעותית מכיוון שכפל מטריצות הוא עמוד השדרה של פעולות למידת מכונה מודרניות כגון:
-- שכבות רשת נוירונים
-- מנגנוני Attention
-- Embeddings
-- Transformers
+**מעולה! הרגע יישמתם כפל מטריצות על ה-GPU.** זהו אבן דרך משמעותית מכיוון שכפל מטריצות הוא עמוד השדרה של פעולות למידת מכונה מודרניות כמו:
+- שכבות רשת עצבית
+- מנגנוני קשב (attention)
+- הטמעות (embeddings)
+- טרנספורמרים
 
 <!-- @os:linux -->
 <!-- @test:id=matmul-extension-linux timeout=600 hidden=True setup=activate-venv -->
@@ -1552,18 +1553,18 @@ finally {
 
 ---
 
-## השלבים הבאים
+## הצעדים הבאים
 
-למדת לכתוב, לקמפל ולהשיק קרנלים של GPU באמצעות גם קומפילציה JIT וגם תוספי C++ לפעולות מקביליות בסיסיות.
+למדתם לכתוב, לקמפל ולהשיק קרנלי GPU באמצעות קומפילציית JIT והרחבות ++C עבור פעולות מקבילות בסיסיות.
 
 **אופטימיזציות ביצועים:**
-- **Shared memory tiling** - שמירת בלוקי נתונים במטמון כדי להפחית גישה לזיכרון גלובלי
-- **Memory coalescing** - אופטימיזציה של דפוסי גישה לזיכרון לרוחב פס
+- **ריצוף זיכרון משותף (shared memory tiling)** - שמירה במטמון של בלוקי נתונים כדי להפחית גישה לזיכרון גלובלי
+- **מיזוג זיכרון (memory coalescing)** - אופטימיזציה של דפוסי גישה לזיכרון עבור רוחב פס
 
 **אלגוריתמים מהעולם האמיתי:**
-- **קונבולוציה דו-ממדית** - פילטר קטן (קרנל) מחליק על פני תמונה, מחשב כל פיקסל פלט מסכום משוקלל של פיקסלים שכנים. זה מציג חישובי stencil ו-shared memory tiling, שבהם threads עושים שימוש חוזר באזורי תמונה חופפים כדי להפחית גישה לזיכרון גלובלי.
-- **פונקציית Softmax**: Softmax ממירה וקטור של מספרים להסתברויות שמסתכמות ל-1, בשימוש נפוץ בפלטי רשת נוירונים. מימוש יעיל שלה על GPU מציג reductions מקביליות וטכניקות יציבות מספרית בעת עיבוד וקטורים גדולים.
+- **קונבולוציה דו-ממדית (2D Convolution)** - מסנן (קרנל) קטן נע על פני תמונה, ומחשב כל פיקסל פלט מסכום משוקלל של פיקסלים שכנים. זה מציג חישובי stencil וריצוף זיכרון משותף, שבהם threads עושים שימוש חוזר באזורי תמונה חופפים כדי להפחית גישה לזיכרון גלובלי.
+- **פונקציית Softmax**: Softmax ממירה וקטור של מספרים להסתברויות שסכומן 1, נפוץ בשימוש בפלטי רשתות עצביות. יישום יעיל שלה על GPU מציג רדוקציות מקבילות וטכניקות יציבות מספרית תוך עיבוד וקטורים גדולים.
 
 **שיקולי ייצור:**
-- **טיפול בשגיאות** - בדיקת גבולות וניהול מכשיר
-- **אינטגרציה עם PyTorch** - אופרטורים מותאמים אישית עם תמיכה ב-autograd
+- **טיפול בשגיאות** - בדיקת גבולות וניהול מכשירים
+- **אינטגרציה עם PyTorch** - אופרטורים מותאמים אישית עם תמיכת autograd

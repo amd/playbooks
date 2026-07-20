@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA est le framework open-source d'AMD pour créer des agents IA qui s'exécutent localement sur du matériel AMD avec l'accélération Ryzen AI.
+GAIA est le framework open source d'AMD pour créer des agents d'IA fonctionnant localement sur du matériel AMD avec l'accélération Ryzen AI.
 
 #### Installation de GAIA
 
@@ -99,7 +99,7 @@ Après l'installation, exécutez `gaia init` pour configurer Lemonade Server et 
 gaia init
 ```
 
-Cette commande installe Lemonade Server, télécharge les modèles par défaut et vérifie la configuration.
+Cela installe Lemonade Server, télécharge les modèles par défaut et vérifie la configuration.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->

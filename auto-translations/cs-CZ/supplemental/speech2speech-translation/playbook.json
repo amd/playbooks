@@ -1,5 +1,5 @@
 {
   "id": "speech2speech-translation",
-  "title": "Překlad řeči na řeč v reálném čase",
-  "description": "Sestavte překlad řeči na řeč v reálném čase na svém lokálním hardwaru."
+  "title": "Simultánní překlad řeči do řeči v reálném čase",
+  "description": "Vytvořte si na svém lokálním hardwaru překlad řeči na řeč v reálném čase."
 }

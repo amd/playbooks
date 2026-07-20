@@ -8,8 +8,8 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. Ouvrez PowerShell ou l'invite de commandes
-2. Installez n8n globalement avec npm :
+1. Ouvrez PowerShell ou l'Invite de commandes
+2. Installez n8n globalement à l'aide de npm :
 ```cmd
 npm install -g n8n
 ```
@@ -18,11 +18,11 @@ npm install -g n8n
 
 <!-- @os:linux -->
 
-Installez n8n globalement avec npm :
+Installez n8n globalement à l'aide de npm :
 ```bash
 npm install -g n8n
 ```
 
-> **Remarque** : Consultez la [documentation n8n](https://docs.n8n.io/hosting/installation/npm/) pour d'autres options d'installation.
+> **Remarque** : Consultez la [Documentation n8n](https://docs.n8n.io/hosting/installation/npm/) pour découvrir d'autres options d'installation.
 
 <!-- @os:end -->

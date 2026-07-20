@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # プラットフォーム構成
 
-このドキュメントでは、このプレイブックを実行するための想定プラットフォーム構成について説明します。
+このドキュメントでは、このプレイブックを実行するために想定されるプラットフォーム構成について説明します。
 
 ## 前提条件
 
@@ -14,20 +14,20 @@ SPDX-License-Identifier: MIT
 
 | コンポーネント | バージョン | 備考 |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | AMD Ryzen™ AI Halo Developer Platform にはプリインストール済みで PATH に追加されています。その他のデバイスでは手動インストールが必要です |
-| **Lemonade Server** | latest | `http://localhost:13305/api/v1` で実行中 |
+| **Node.js** | 22.16+ | AMD Ryzen™ AI Halo Developer Platform には事前インストール済みで PATH 上で利用可能。それ以外のすべてのデバイスでは手動でインストールする必要があります |
+| **Lemonade Server** | latest | `http://localhost:13305/api/v1` 上で実行中 |
 
 ### Linux
 
 | コンポーネント | バージョン | 備考 |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | AMD Ryzen™ AI Halo Developer Platform にはプリインストール済みで PATH に追加されています。その他のデバイスでは手動インストールが必要です |
-| **Lemonade Server** | latest | `http://localhost:13305/api/v1` で実行中 |
+| **Node.js** | 22.16+ | AMD Ryzen™ AI Halo Developer Platform には事前インストール済みで PATH 上で利用可能。それ以外のすべてのデバイスでは手動でインストールする必要があります |
+| **Lemonade Server** | latest | `http://localhost:13305/api/v1` 上で実行中 |
 
 
 ## Lemonade LLM
 
-Lemonade サーバーは、デバイスに適したモデルを読み込んだ状態で実行されている必要があります（お使いのデバイスの `lemonade run` コマンドについては README を参照してください）：
+Lemonade server は、デバイスに適したモデルをロードした状態で実行されている必要があります(お使いのデバイス向けの `lemonade run` コマンドについては README を参照してください)。
 
 | デバイス | エンドポイント | モデル |
 |--------|----------|-------|

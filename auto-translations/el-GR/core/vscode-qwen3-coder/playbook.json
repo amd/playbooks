@@ -1,5 +1,5 @@
 {
   "id": "vscode-qwen3-coder",
-  "title": "Τοπική κωδικοποίηση LLM με VS Code και Qwen3-Coder",
-  "description": "Χρησιμοποιήστε VS Code με τοπικά εκτελούμενο Qwen3-Coder για ιδιωτική βοήθεια κώδικα."
+  "title": "Τοπικός προγραμματισμός LLM με VSCode και Qwen3-Coder",
+  "description": "Χρησιμοποιήστε το VS Code με το τοπικά εκτελούμενο Qwen3-Coder για ιδιωτική βοήθεια κώδικα."
 }

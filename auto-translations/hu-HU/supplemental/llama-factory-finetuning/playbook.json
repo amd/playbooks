@@ -1,5 +1,5 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "LLM-ek finomhangolása LLaMA-Factory segítségével",
-  "description": "Nagy nyelvi modellek (LLM-ek) finomhangolása LLaMA-Factory és LoRA technikák segítségével."
+  "title": "LLM-ek finomhangolása LLaMA Factory használatával",
+  "description": "Nagy nyelvi modellek (LLM-ek) finomhangolása LLaMA Factory és LoRA technikák segítségével."
 }

@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # Plattformkonfigurasjon
 
-Dette dokumentet beskriver de forventede plattformkonfigurasjonene for å kjøre denne spilleboken.
+Dette dokumentet beskriver de forventede plattformkonfigurasjonene for å kjøre denne spillebok.
 
 ## Windows
 
@@ -16,13 +16,13 @@ LM Studio bør være forhåndsinstallert:
 
 | Komponent | Versjon | Plassering |
 |-----------|---------|----------|
-| **LM Studio (Modeller + Div)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modeller + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Buffer)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### Modellnedlasting
 
-Følgende modeller bør allerede være til stede i LM Studio-modellkatalogen (`C:\Users\...\.lmstudio\models`):
+Følgende modeller bør allerede være til stede i LM Studios modellkatalog (`C:\Users\...\.lmstudio\models`):
 
 | Enhet | Modelltype | Kvantisering | Størrelse (GB) | Plassering |
 | ----- |------------|--------------|------|----------|
@@ -35,7 +35,7 @@ Følgende modeller bør allerede være til stede i LM Studio-modellkatalogen (`C
 
 ### LM Studio-installasjon
 
-Se [lmstudio.md](../../dependencies/lmstudio.md) for mer informasjon.
+Se [lmstudio.md](../../dependencies/lmstudio.md) for flere detaljer.
 
 ### Modellnedlasting
 

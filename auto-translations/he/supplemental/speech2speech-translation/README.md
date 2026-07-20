@@ -6,24 +6,24 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> מדריך זה משתמש בתגיות מיוחדות ש-GitHub אינו יכול לעבד. בקרו בכתובת [amd.com/playbooks](https://amd.com/playbooks) כדי להציג תוכן זה כראוי.
 <!-- @github-only:end -->
 
 ## סקירה כללית
 
-תוכנת AMD ROCm™ ומחסנית PyTorch יוצרות מערכת אקולוגית מאוחדת לבינה מלאכותית על המכשיר. היא פועלת הן על Windows והן על Linux עם תמיכה רשמית במגוון רחב של מכשירים, כולל APU מסוג Ryzen™ AI ו-GPU מסוג Radeon™.
+תוכנת AMD ROCm™ וערימת PyTorch יוצרות מערכת אקולוגית מאוחדת עבור בינה מלאכותית על המכשיר. היא פועלת הן ב-Windows והן ב-Linux עם תמיכה רשמית במגוון רחב של מכשירים, כולל APU‏ Ryzen™ AI וכרטיסי מסך Radeon™.
 
-מדריך זה ילמד אתכם כיצד להפעיל תרגום דיבור-לדיבור בזמן אמת, עם השהייה נמוכה, ביטוי עשיר ופרטיות מלאה — לחלוטין על המכשיר.
+מדריך זה ילמד אתכם כיצד להריץ תרגום דיבור-לדיבור באיכות גבוהה, בעל השהיה נמוכה ופרטי לחלוטין, לגמרי בקצה הרשת (edge).
 
 ## מה תלמדו
 
-- כיצד להגדיר סביבת דיבור-לדיבור
-- כיצד לכתוב קוד Python לטעינה ושימוש במודלים של דיבור-לדיבור
-- כיצד להפעיל ולהתנסות עם ממשק המשתמש של Gradio
+- כיצד להגדיר סביבת עבודה לתרגום דיבור-לדיבור
+- כיצד לכתוב קוד Python לטעינה ולשימוש במודלים לתרגום דיבור-לדיבור
+- כיצד להריץ ולהתנסות בממשק המשתמש Gradio
 
 ## מדוע להשתמש בתרגום דיבור-לדיבור בזמן אמת?
 
-- מסיר חסמים בין תרגום ומחסומי שפה
+- מסיר חיכוך בין תרגום למחסומי שפה
 - מעביר טון, רגש וכוונה ללא הפסקות מביכות
 - מאפשר שיתוף פעולה גלובלי וקבלת החלטות מהירה יותר
 
@@ -32,19 +32,19 @@ SPDX-License-Identifier: MIT
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## בדיקת עדכוני תוכנה
-> **הערה**: אם VS Code אינו מותקן, ניתן להתקינו דרך Ryzen AI Developer Center.
+## בדקו אם קיימים עדכוני תוכנה
+> **הערה**: אם VS Code אינו מותקן, ניתן להתקין אותו באמצעות Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות תוכנה מוקדמות
+## התקנת דרישות מוקדמות של התוכנה
 
 ### יצירת סביבה וירטואלית
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-על Linux, פתחו טרמינל והריצו את הפקודה הבאה ליצירת venv עם ROCm+Pytorch מותקנים מראש:
+ב-Linux, פתחו מסוף (terminal) והריצו את הפקודה הבאה כדי ליצור venv עם ROCm+Pytorch מותקנים מראש:
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -58,13 +58,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**הענקת גישת משתמש למכשירי GPU** (התנתקו והתחברו מחדש כדי שהשינוי ייכנס לתוקף):
+**הענקת גישה למשתמש שלכם להתקני GPU** (התנתקו והתחברו מחדש כדי שהשינוי ייכנס לתוקף):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-על Linux, פתחו טרמינל והריצו את הפקודה הבאה ליצירת venv:
+ב-Linux, פתחו מסוף (terminal) והריצו את הפקודה הבאה כדי ליצור venv:
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -80,7 +80,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-על Windows, פתחו טרמינל בתיקייה לבחירתכם ופעלו לפי הפקודות ליצירת venv עם ROCm+Pytorch מותקנים מראש:
+ב-Windows, פתחו מסוף בתיקייה לבחירתכם ובצעו את הפקודות הבאות כדי ליצור venv עם ROCm+Pytorch מותקנים מראש:
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -90,13 +90,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **טיפ**: משתמשי Windows עשויים להזדקק לשינוי מדיניות הביצוע של PowerShell (למשל,
-> הגדרתה ל-RemoteSigned או Unrestricted) לפני הרצת חלק מפקודות Powershell.
+> **טיפ**: ייתכן שמשתמשי Windows יצטרכו לשנות את מדיניות ההרשאות (Execution Policy) של PowerShell (למשל,
+> להגדיר אותה כ-RemoteSigned או Unrestricted) לפני הרצת פקודות מסוימות ב-PowerShell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-על Windows, פתחו טרמינל בתיקייה לבחירתכם ופעלו לפי הפקודות ליצירת venv:
+ב-Windows, פתחו מסוף בתיקייה לבחירתכם ובצעו את הפקודות הבאות כדי ליצור venv:
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -106,8 +106,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **טיפ**: משתמשי Windows עשויים להזדקק לשינוי מדיניות הביצוע של PowerShell (למשל,
-> הגדרתה ל-RemoteSigned או Unrestricted) לפני הרצת חלק מפקודות Powershell.
+> **טיפ**: ייתכן שמשתמשי Windows יצטרכו לשנות את מדיניות ההרשאות (Execution Policy) של PowerShell (למשל,
+> להגדיר אותה כ-RemoteSigned או Unrestricted) לפני הרצת פקודות מסוימות ב-PowerShell.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -195,39 +195,39 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## הגדרת הדגמת דיבור-לדיבור
+## הגדרת הדגמת תרגום דיבור-לדיבור
 
-#### למידה על seamless-m4t-v2
+#### מידע על seamless-m4t-v2
 
-עיינו ב[כרטיס המודל](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) ב-Hugging Face לקבלת מידע נוסף.
-זוהי הארכיטקטורה הטכנית של מודלי דיבור-לדיבור:
+עיינו ב[כרטיס המודל](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) ב-Hugging Face למידע נוסף.
+זוהי הארכיטקטורה הטכנית של מודלי הדיבור-לדיבור:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### הורדת סקריפטים
 
-מדריך זה כולל סקריפטים מוכנים לשימוש. אנא הורידו את כולם לאותה תיקייה שבה יצרתם את הסביבה.
+מדריך זה כולל סקריפטים מוכנים לשימוש. אנא הורידו את כולם לאותה תיקייה שבה נמצאת הסביבה שיצרתם.
 
 | סקריפט | תיאור | שימוש |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | יצירת טקסט בסיסית עם LLM | `python infer.py` |
-| [input1.wav](assets/input1.wav) | קובץ שמע לדוגמה | N/A |
-| [lang_list.py](assets/lang_list.py) | קובץ תמיכה בשפות | N/A |
+| [infer.py](assets/infer.py) | יצירת טקסט בסיסית באמצעות LLM | `python infer.py` |
+| [input1.wav](assets/input1.wav) | קובץ אודיו לדוגמה | לא רלוונטי |
+| [lang_list.py](assets/lang_list.py) | קובץ תמיכת שפות | לא רלוונטי |
 | [gradio_demo.py](assets/gradio_demo.py) | ממשק משתמש אינטואיטיבי לתרגום דיבור | `python gradio_demo.py --no-share` |
 
 
-### תחילת עבודה עם infer.py
+### התחלה עם infer.py
 
-להרצת הסקריפט, הריצו 
+כדי להריץ את הסקריפט, הריצו 
 ```bash
 python infer.py
 ```
-> **הערה**: ייתכן שתראו אזהרות מסוימות. זה צפוי.
+> **הערה**: ייתכן שתראו כמה אזהרות. זה צפוי.
  
   
-#### הסבר הקוד
-**קטע 1: ייבוא התלויות הנדרשות**
+#### הסבר על הקוד
+**קטע 1: ייבוא התלויות הדרושות**
 
 ```python 
 import os
@@ -256,7 +256,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **קטע 2: טעינת המודלים מ-HuggingFace**
 
-פונקציה זו מקבלת מזהה מודל ומורידה אותו אם טרם הורד. לאחר מכן היא מחזירה את המעבד והמודל לשימוש הפונקציה הבאה.
+פונקציה זו מקבלת מזהה מודל ומורידה את המודל אם הוא עדיין לא הורד. לאחר מכן היא מחזירה את המעבד (processor) ואת המודל לשימוש הפונקציה הבאה.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -275,9 +275,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**קטע 3: קובץ שמע .wav כקלט ועיבוד מקדים שלו**
+**קטע 3: קליטת קובץ קול קלט .wav ועיבודו המקדים**
 
-פונקציה זו טוענת את קובץ השמע ומדגמת אותו מחדש לקצב היעד.
+פונקציה זו טוענת את קובץ הקול ומדגמת אותו מחדש (resample) לקצב היעד.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -297,7 +297,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**קטע 4: הרצת הסקה**
+**קטע 4: הרצת ההסקה (inference)**
 
 פונקציה זו מריצה הסקה עם המודל ומחזירה את הפלט שנוצר.
 ```python
@@ -329,7 +329,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **קטע 5: שמירת הקובץ המתורגם**
 
-פונקציה זו שומרת את מערך השמע לקובץ .WAV. 
+פונקציה זו שומרת את מערך האודיו לקובץ WAV.
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -392,19 +392,19 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### הרצת הדגמת ממשק המשתמש של Gradio:
+### הרצת ממשק המשתמש Gradio:
 
-כעת שהרצתם דוגמת סקריפט בסיסית, ההוראות הבאות מספקות ממשק משתמש שימושי הבנוי על הקוד שכתבנו ומאפשר תרגום דיבור-לדיבור חי בקלות.
+לאחר שהרצתם דוגמת סקריפט בסיסית, ההוראות הבאות מספקות ממשק משתמש שימושי הבנוי על הקוד שכתבנו והופך את תרגום הדיבור-לדיבור בזמן אמת לקל יותר.
 
 #### הרצת Gradio מקומית
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-לאחר מכן, פתחו את דפדפן האינטרנט שלכם בכתובת `http://127.0.0.1:7860` לגישה לממשק המשתמש.
+לאחר מכן, פתחו את דפדפן האינטרנט שלכם בכתובת `http://127.0.0.1:7860` כדי לגשת לממשק המשתמש.
 
 
-### דוגמת ממשק המשתמש של Gradio:
+### דוגמת ממשק המשתמש Gradio:
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
@@ -521,14 +521,14 @@ PY
 <!-- @os:end -->
 
 
-## השלבים הבאים
+## הצעדים הבאים
 
-- שלבו בין עשרות שפות לתרגום מהיר.
-- שתפו את ההדגמה שלכם עם אחרים: הוסיפו --share ליצירת קישור ציבורי שכל אחד יכול לגשת אליו מרחוק, או פרסו באופן קבוע באמצעות Hugging Face Spaces
+- שלבו וערבבו בין עשרות שפות לתרגום מהיר.
+- שתפו את ההדגמה שלכם עם אחרים: הוסיפו --share כדי ליצור קישור ציבורי שכל אחד יכול לגשת אליו מרחוק, או פרסו באופן קבוע באמצעות Hugging Face Spaces
 
 ## משאבים
 
-להלן מספר משאבים נוספים ללמידה נוספת על תרגום דיבור-לדיבור:  
-* המאגר נמצא כאן https://huggingface.co/facebook/seamless-m4t-v2-large 
+להלן כמה משאבים נוספים כדי ללמוד עוד על תרגום דיבור-לדיבור:
+* המאגר נמצא כאן https://huggingface.co/facebook/seamless-m4t-v2-large
 * מחקר אקדמי הקשור ל-"Seamless: Multilingual Expressive and Streaming Speech Translation"
-* שיתוף ופריסה של Gradio: [מדריך שיתוף האפליקציה שלך](https://www.gradio.app/guides/sharing-your-app) ו[פריסה ב-Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* שיתוף ופריסה של Gradio: [מדריך שיתוף האפליקציה שלכם](https://www.gradio.app/guides/sharing-your-app) ו[פריסה ל-Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

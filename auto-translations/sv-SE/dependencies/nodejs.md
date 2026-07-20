@@ -10,7 +10,7 @@ Node.js 22.22.1 LTS är den rekommenderade versionen för denna plattform.
 
 <!-- @os:windows -->
 
-1. Ladda ned Windows 64-bitars installationsprogram från [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+1. Ladda ner Windows 64-bit-installationsprogrammet från [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
 2. Kör installationsprogrammet och följ anvisningarna
 3. Verifiera installationen:
 ```cmd
@@ -38,4 +38,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **Obs**: Se [Node.js-nedladdningar](https://nodejs.org/en/download/) för ytterligare installationsalternativ och plattformar.
+> **Obs**: Se [Node.js Downloads](https://nodejs.org/en/download/) för ytterligare installationsalternativ och plattformar.

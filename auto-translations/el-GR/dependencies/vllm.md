@@ -6,10 +6,10 @@ SPDX-License-Identifier: MIT
 
 ### vLLM
 
-Το vLLM παρέχεται μέσω ενός προκατασκευασμένου container image με υποστήριξη ROCm. Χρησιμοποιήστε την εντολή εκκίνησης αντί να εγκαταστήσετε απευθείας το vLLM ή το PyTorch στον host:
+Το vLLM παρέχεται μέσω μιας προκατασκευασμένης εικόνας container με υποστήριξη ROCm. Χρησιμοποιήστε την εντολή launcher αντί να εγκαταστήσετε το vLLM ή το PyTorch απευθείας στον host:
 
 ```bash
 vllm-launch
 ```
 
-Η εκκίνηση ξεκινά το container, στοχεύει στο integrated GPU και εκθέτει το OpenAI-compatible vLLM API στο `http://localhost:8001`.
+Ο launcher εκκινεί το container, στοχεύει την ενσωματωμένη GPU και εκθέτει το συμβατό με OpenAI API του vLLM στο `http://localhost:8001`.

@@ -8,18 +8,18 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code można zainstalować z **AMD Ryzen™ AI Developer Center**. Przejdź do zakładki **Updates** i zainstaluj VS Code, jeśli nie jest jeszcze zainstalowany.
+VS Code można zainstalować z **AMD Ryzen™ AI Developer Center**. Przejdź do zakładki **Updates** i zainstaluj VS Code, jeśli nie jest jeszcze obecny.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code można zainstalować z **AMD Ryzen™ AI Developer Center**. Przejdź do zakładki **Manage** i zainstaluj VS Code, jeśli nie jest jeszcze zainstalowany.
+VS Code można zainstalować z **AMD Ryzen™ AI Developer Center**. Przejdź do zakładki **Manage** i zainstaluj VS Code, jeśli nie jest jeszcze obecny.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Pobierz instalator systemu Windows ze strony: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+1. Pobierz plik wykonywalny instalatora dla systemu Windows ze strony: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
 2. Kliknij pobrany plik `VSCodeUserSetup-x64-1.108.2.exe`, aby zainstalować VS Code.
 
 <!-- @os:end -->

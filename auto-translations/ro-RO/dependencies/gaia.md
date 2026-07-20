@@ -12,7 +12,7 @@ GAIA este framework-ul open-source al AMD pentru construirea de agenți AI care 
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Pe Windows, deschideți un terminal în directorul dorit și urmați comenzile pentru a crea un venv.
+1. Pe Windows, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Apoi, utilizați `pip` pentru a instala **Gaia**
+2. Apoi, folosiți `pip` pentru a instala **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -30,7 +30,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Pe Linux, deschideți un terminal în directorul dorit și urmați comenzile pentru a crea un venv.
+1. Pe Linux, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv.
 <!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Apoi, utilizați `pip` pentru a instala **Gaia**
+2. Apoi, folosiți `pip` pentru a instala **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Pe Windows, deschideți un terminal în directorul dorit și urmați comenzile pentru a crea un venv.
+1. Pe Windows, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Apoi, utilizați `pip` pentru a instala **Gaia**
+2. Apoi, folosiți `pip` pentru a instala **Gaia**
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -71,7 +71,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Pe Linux, deschideți un terminal în directorul dorit și urmați comenzile pentru a crea un venv.
+1. Pe Linux, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv.
 <!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Apoi, utilizați `pip` pentru a instala **Gaia**
+2. Apoi, folosiți `pip` pentru a instala **Gaia**
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -281,12 +281,12 @@ fi
 
 #### Verificarea instalării
 
-Verificați că GAIA v0.16.2 sau o versiune ulterioară este instalată:
+Verificați dacă GAIA v0.16.2 sau o versiune ulterioară este instalată:
 
 ```bash
 gaia --version
 ```
 
-> **Important**: Asigurați-vă că Lemonade Server rulează înainte de a utiliza GAIA. GAIA necesită ca Lemonade Server să fie pornit manual.
+> **Important**: Asigurați-vă că Lemonade Server rulează înainte de a folosi GAIA. GAIA necesită ca Lemonade Server să fie pornit manual.
 
 Pentru mai multe informații, consultați [documentația GAIA](https://amd-gaia.ai).

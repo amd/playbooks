@@ -1,5 +1,5 @@
 {
   "id": "ollama-getting-started",
-  "title": "Premiers pas avec Ollama",
-  "description": "Installez Ollama et exécutez des LLM localement — discutez depuis le terminal, une application de bureau ou une API REST."
+  "title": "Prise en main d'Ollama",
+  "description": "Installez Ollama et exécutez des LLM en local — discutez depuis le terminal, l'application de bureau ou l'API REST."
 }

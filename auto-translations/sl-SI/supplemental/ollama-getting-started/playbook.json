@@ -1,5 +1,5 @@
 {
   "id": "ollama-getting-started",
-  "title": "Začetek dela z Ollama",
-  "description": "Namestite Ollama in zaženite LLM-je lokalno — klepetajte prek terminala, namizne aplikacije ali REST API-ja."
+  "title": "Prvi koraki z Ollamo",
+  "description": "Namestite Ollama in zaganjajte velike jezikovne modele lokalno – klepetajte prek terminala, namizne aplikacije ali API-ja REST."
 }

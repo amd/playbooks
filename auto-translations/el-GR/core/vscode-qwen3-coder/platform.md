@@ -16,15 +16,15 @@ SPDX-License-Identifier: MIT
 
 | Στοιχείο | Έκδοση | Τοποθεσία |
 |-----------|---------|----------|
-| **LM Studio (Μοντέλα + Διάφορα)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (Πρόγραμμα)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### Λήψη Μοντέλου
 
-Τα παρακάτω μοντέλα θα πρέπει να υπάρχουν ήδη στον κατάλογο μοντέλων του LM Studio (`C:\Users\...\.lmstudio\models`):
+Τα ακόλουθα μοντέλα θα πρέπει να βρίσκονται ήδη στον κατάλογο μοντέλων του LM Studio (`C:\Users\...\.lmstudio\models`):
 
-| Τύπος Μοντέλου | Κβαντοποίηση | Μέγεθος | Τοποθεσία |
+| Τύπος Μοντέλου | Κβαντισμός | Μέγεθος | Τοποθεσία |
 |------------|--------------|------|----------|
 | Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
@@ -38,4 +38,4 @@ SPDX-License-Identifier: MIT
 
 ### Λήψη Μοντέλου
 
-Ίδια με τα Windows.
+Ίδια διαδικασία με τα Windows.

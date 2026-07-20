@@ -5,19 +5,20 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ovaj priručnik koristi posebne oznake koje GitHub ne može da prikaže. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste ispravno pregledali ovaj sadržaj.
 <!-- @github-only:end -->
 
 ## Pregled
 
-LM Studio je moćan GUI wrapper za [llama.cpp](https://github.com/ggml-org/llama.cpp) i takođe pruža [OpenAI kompatibilan endpoint](https://lmstudio.ai/docs/developer/openai-compat) za lokalno posluživanje modela. LM Studio pruža jednostavan, ali moćan interfejs za lako preuzimanje i postavljanje modela. LM Studio nudi i Vulkan i AMD ROCm™ softverske bekende (nazvane runtimeovi) za AMD korisnike.
+LM Studio je moćan omotač zasnovan na grafičkom korisničkom interfejsu za [llama.cpp](https://github.com/ggml-org/llama.cpp), a takođe pruža i [krajnju tačku kompatibilnu sa OpenAI](https://lmstudio.ai/docs/developer/openai-compat) za lokalno posluživanje modela. LM Studio pruža jednostavan, ali moćan interfejs za jednostavno preuzimanje i primenu modela. LM Studio nudi kako Vulkan tako i AMD ROCm™ softverske pozadinske sisteme (nazvane runtime-ovi) za AMD korisnike.
 
 
 ## Šta ćete naučiti
-- Kako da konfigurišete i koristite LM Studio za iskorišćavanje lokalnog hardvera
-- Testiranje i upravljanje LLM-ovima u potpuno oflajn okruženju
-- Posluživanje modela putem OpenAI kompatibilnog API-ja za pokretanje prilagođenih tokova rada i aplikacija
+- Kako da konfigurišete i koristite LM Studio da biste iskoristili svoj lokalni hardver
+- Testiranje i upravljanje LLM-ovima u potpuno offline okruženju
+- Posluživanje modela putem OpenAI kompatibilnog API-ja za pokretanje prilagođenih radnih tokova i aplikacija
 
 
 ## Podešavanje konfiguracije memorije
@@ -25,20 +26,20 @@ LM Studio je moćan GUI wrapper za [llama.cpp](https://github.com/ggml-org/llama
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Provera softverskih ažuriranja
+## Provera ažuriranja softvera
 
 <!-- @os:linux -->
-> **Napomena**: Možete instalirati VS Code putem AMD Ryzen™ AI Developer Center-a. Za LM Studio, pratite uputstva za instalaciju u nastavku.
+> **Napomena**: VS Code možete instalirati putem AMD Ryzen™ AI Developer Center-a. Za LM Studio pratite instalaciona uputstva ispod.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Napomena**: Ako VS Code ili LM Studio nisu instalirani, možete ih instalirati iz AMD Ryzen™ AI Developer Center-a.
+> **Napomena**: Ako VS Code ili LM Studio nisu instalirani, možete ih instalirati putem AMD Ryzen™ AI Developer Center-a. 
 <!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalacija softverskih preduslova
+## Instaliranje softverskih preduslova
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -61,16 +62,16 @@ LM Studio je moćan GUI wrapper za [llama.cpp](https://github.com/ggml-org/llama
 <!-- @require:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
-## Razgovor sa LLM-om
-Naučite kako da počnete da razgovarate sa LLM-om na nivou ChatGPT-a potpuno lokalno.
+## Ćaskanje sa LLM-om
+Naučite kako da započnete ćaskanje sa LLM-om kvaliteta ChatGPT-a potpuno lokalno.  
 
-1. Otvorite LMStudio.
-2. Pritisnite `Ctrl + L` da otvorite Model Loader, izaberite `Manually choose model load parameters` i kliknite na `${model_name}`
-3. Proverite da je opcija "show advanced settings" označena.
-4. Promenite `Context Length` po želji. Veća dužina konteksta znači više memorije modela, ali i više korišćene sistemske memorije. Preporučeno za ovaj playbook je 4096.
-5. Proverite da je `GPU Offload` postavljen na maksimum i da je `Flash Attention` uključen (Cache Quantizations može ostati isključeno)
+1. Otvorite LMStudio. 
+2. Pritisnite `Ctrl + L` da otvorite učitavač modela, izaberite `Manually choose model load parameters`, i kliknite na `${model_name}`
+3. Proverite da li je opcija „show advanced settings“ označena.  
+4. Promenite `Context Length` po želji. Veća dužina konteksta znači veću memoriju modela, ali i veću potrošnju sistemske memorije. Za ovaj priručnik se preporučuje 4096.
+5. Proverite da je `GPU Offload` podešen na maksimum i da je `Flash Attention` uključen (Cache Quantizations mogu ostati isključeni)
 6. Označite `Remember settings` i kliknite na `Load Model`.
-7. Ako niste u prozoru za razgovor, pritisnite `Ctrl + 1` ili kliknite na dugme 👾 u gornjem levom uglu ekrana.
+7. Ako niste u prozoru za ćaskanje, pritisnite `Ctrl + 1` ili kliknite na dugme 👾 u gornjem levom uglu ekrana.
 8. Pošaljite poruku i počnite da komunicirate sa modelom!
 
 <!-- @os:windows -->
@@ -113,19 +114,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Savet**: Dužina konteksta odnosi se na memoriju modela. Flash attention poboljšava brzinu obrade uz smanjenje korišćenja memorije. GPU Offload prebacuje računanje na grafičku karticu radi bržih odgovora.
+> **Savet**: Dužina konteksta se odnosi na memoriju modela. Flash attention poboljšava brzinu obrade uz smanjenje potrošnje memorije. GPU Offload prebacuje obradu na grafičku karticu radi bržih odgovora.
 
-## Posluživanje LLM-ova putem OpenAI kompatibilnog endpointa
+## Posluživanje LLM-ova putem OpenAI kompatibilne krajnje tačke
 
-LM Studio takođe nudi OpenAI kompatibilan endpoint u obliku LM Studio Server-a. Ovo je već demonstrirano u agentnom toku rada za kodiranje sa Cline-om [ovde](../playbooks/vscode-qwen3-coder). Još jedan čest slučaj upotrebe je povezivanje LM Studio Server-a sa bilo kojom veb aplikacijom (React, Node.js, Python) slanjem standardnih HTTP zahteva na endpoint za inferenciju.
+LM Studio takođe nudi krajnju tačku kompatibilnu sa OpenAI u vidu LM Studio Server-a. Ovo je već demonstrirano u radnom toku agentskog kodiranja sa Cline [ovde](../playbooks/vscode-qwen3-coder). Drugi čest slučaj upotrebe je povezivanje LM Studio Server-a sa bilo kojom veb aplikacijom (React, Node.js, Python) slanjem standardnih HTTP zahteva ka inferentnoj krajnjoj tački.
 
 Da biste podesili LM Studio Server, koristite sledeća uputstva:
 
-1. Na levoj strani, kliknite na karticu `Developer` (ikona komandne linije) ili `Ctrl + 2`, a zatim kliknite na `Server Settings`.
-2. (Opciono): Ako želite da poslužujete model preko vaše LAN mreže, označite `Serve on Local Network`. Ako želite da koristite sa veb sajtom ili opsežnim pozivanjem unutar VS Code, označite `Enable CORS`.
-3. U gornjem levom uglu, proverite da server radi klikom na dugme za prebacivanje ispred `Status`.
-4. OpenAI kompatibilan endpoint će sada biti pokrenut. Adresa je obično na http://127.0.0.1:1234
-5. Ako model već nije učitan, možete ga učitati klikom na `Load Model` i praćenjem prethodno pomenutih koraka.
+1. Na levoj strani kliknite na karticu `Developer` (ikona komandne linije) ili pritisnite `Ctrl + 2`, a zatim kliknite na `Server Settings`.  
+2. (Opciono): Ako želite da poslužujete model preko svoje lokalne mreže, označite `Serve on Local Network`. Ako želite da ga koristite sa veb-sajtom ili opsežnim pozivanjem unutar VS Code-a, označite `Enable CORS`. 
+3. U gornjem levom uglu, proverite da li je server pokrenut klikom na prekidač ispred natpisa `Status`.
+4. Sada će raditi krajnja tačka kompatibilna sa OpenAI. Adresa je obično na http://127.0.0.1:1234  
+5. Ako model nije već učitan, možete ga učitati klikom na `Load Model` i sledeći prethodno pomenute korake. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -133,7 +134,7 @@ Da biste podesili LM Studio Server, koristite sledeća uputstva:
 lms server start --port 1234
 curl.exe -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -142,29 +143,27 @@ curl.exe -s http://127.0.0.1:1234/v1/models
 lms server start --port 1234
 curl -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 
-Ovaj model će sada biti dostupan putem LM Studio Server endpointa i podržavaće OpenAI endpointe uključujući:
+Ovaj model će sada biti dostupan putem LM Studio Server krajnje tačke i podržavaće OpenAI krajnje tačke, uključujući:
 
-| Endpoint | Metod | Dokumentacija |
+| Krajnja tačka | Metod | Dokumentacija |
 |------------|----------|----------|
 | /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
 | /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
-| /v1/chat/completions | POST | [Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
+| /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-
-
-#### Primer: Pingovanje vašeg endpointa
-Pošto smo upravo kreirali OpenAI kompatibilan endpoint, pogledajmo kako da ga integrišemo u Python razvojno okruženje (kao što je VSCode) i koristimo vaš sistem kao lokalni API provajder.
+#### Primer: Pingovanje vašeg Endpoint-a
+Pošto smo upravo kreirali OpenAI Compatible endpoint, hajde da vidimo kako da ga integrišete u razvojno okruženje za Python (kao što je VSCode) i koristite svoj sistem kao lokalnog API Provider-a.
 
 1. Kreirajte Python virtuelno okruženje:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    Na Linux-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande za kreiranje venv-a.
+    Na Linux-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande da biste kreirali venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -174,13 +173,13 @@ Pošto smo upravo kreirali OpenAI kompatibilan endpoint, pogledajmo kako da ga i
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Dodelite svom korisniku pristup GPU uređajima** (odjavite se i ponovo prijavite da bi ovo stupilo na snagu):
+**Odobrite svom korisniku pristup GPU uređajima** (odjavite se i ponovo prijavite da bi ovo stupilo na snagu):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    Na Linux-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande za kreiranje venv-a.
+    Na Linux-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande da biste kreirali venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -192,26 +191,26 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    Na Windows-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande za kreiranje venv-a.
+    Na Windows-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande da biste kreirali venv.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **Savet**: Korisnici Windows-a možda će morati da izmene svoju PowerShell politiku izvršavanja (npr.
-    > postavljanjem na RemoteSigned ili Unrestricted) pre pokretanja nekih Powershell komandi.
+    > **Savet**: Windows korisnicima će možda biti potrebno da izmene svoju PowerShell Execution Policy (npr.
+    > da je postave na RemoteSigned ili Unrestricted) pre pokretanja pojedinih Powershell komandi.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    Na Windows-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande za kreiranje venv-a.
+    Na Windows-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande da biste kreirali venv.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **Savet**: Korisnici Windows-a možda će morati da izmene svoju PowerShell politiku izvršavanja (npr.
-    > postavljanjem na RemoteSigned ili Unrestricted) pre pokretanja nekih Powershell komandi.
+    > **Savet**: Windows korisnicima će možda biti potrebno da izmene svoju PowerShell Execution Policy (npr.
+    > da je postave na RemoteSigned ili Unrestricted) pre pokretanja pojedinih Powershell komandi.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -221,7 +220,7 @@ sudo usermod -aG render,video $LOGNAME
     pip install openai
     ```
 
-3. Pokrenite sledeću skriptu da pingujete endpoint koji smo upravo kreirali.
+3. Pokrenite sledeću skriptu da biste pingovali endpoint koji smo upravo kreirali.
     ```python
     from openai import OpenAI
 
@@ -273,7 +272,7 @@ req = urllib.request.Request(
 with urllib.request.urlopen(req, timeout=60) as r:
  print(r.read().decode("utf-8", "replace"))
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -298,7 +297,7 @@ req = urllib.request.Request(
 with urllib.request.urlopen(req, timeout=60) as r:
  print(r.read().decode("utf-8", "replace"))
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -321,18 +320,18 @@ lms unload "$ID" || true
 lms ps
 lms server stop
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
-#### (Opciono): Prebacivanje između runtimeova
+#### (Opciono): Menjanje između Runtime-ova
 
-1. Pritisnite `Ctrl + Shift + R` na tastaturi. Alternativno, kliknite na karticu `Discover` (lupa) na levoj strani, a zatim kliknite na `Runtime` u iskačućem prozoru.
-2. Trebalo bi da vidite `Runtime Selections`, gde se padajući meni može koristiti za promenu runtimea.
+1. Pritisnite `Ctrl + Shift + R` na tastaturi. Alternativno, kliknite na karticu `Discover` (lupa) sa leve strane, a zatim kliknite na `Runtime` u iskačućem prozoru.
+2. Zatim biste trebalo da vidite `Runtime Selections`, gde možete koristiti padajući meni da promenite runtime.
 
 
 ## Sledeći koraci
 
-- **Integracija prilagođenih aplikacija**: Integrišite sopstvene Python skripte ili aplikacije koristeći lokalni OpenAI kompatibilan API.
-- **Napredni frontendovi**: Povežite moćne interfejse poput Open WebUI sa vašim serverom za upravljanje istorijom razgovora i personama.
+- **Integracija prilagođene aplikacije**: Integrišite sopstvene Python skripte ili aplikacije koristeći lokalni OpenAI-compatible API.
+- **Napredni frontend-ovi**: Povežite moćne interfejse poput Open WebUI sa svojim serverom radi istorije čata i upravljanja personama.
 
 Za više dokumentacije, posetite: https://lmstudio.ai/docs/developer

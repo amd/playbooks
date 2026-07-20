@@ -4,7 +4,7 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### Descarga de GPT-OSS 120B en LM Studio
+### Descargando GPT-OSS 120B en LM Studio
 
 Para descargar el modelo GPT-OSS 120B:
 

@@ -15,9 +15,9 @@ SPDX-License-Identifier: MIT
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download.png" alt="LM Studio Download Models" width="600"/>
 
-LM Studio автоматично завантажить модель і розмістить її у правильній директорії.
+LM Studio автоматично завантажить модель і розмістить її в потрібному каталозі.
 
-Якщо ви бажаєте завантажити додаткові моделі, ви можете знайти їх у вкладці Discover, і LM Studio впорається з усім іншим.
+Якщо ви хочете завантажити додаткові моделі, ви можете знайти їх на вкладці Discover, а LM Studio зробить усе інше.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-windows timeout=60 hidden=True -->

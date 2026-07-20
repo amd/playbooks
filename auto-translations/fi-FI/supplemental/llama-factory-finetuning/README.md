@@ -1,43 +1,43 @@
 ## Yleiskatsaus
 
-Tehokas hienosäätö on välttämätöntä suurten kielimallien (LLM) mukauttamiseksi jatkotehtäviin. LLaMA-Factory on avoimen lähdekoodin ja käyttäjäystävällinen alusta, joka yksinkertaistaa suurten kielimallien ja multimodaalisten mallien kouluttamista ja hienosäätöä. Sen avulla käyttäjät voivat mukauttaa satoja esikoulutettuja malleja paikallisesti minimaalisella koodauksella.
+Tehokas hienosäätö on olennaista suurten kielimallien (LLM) mukauttamisessa alavirran tehtäviin. LLaMA Factory on avoimen lähdekoodin ja käyttäjäystävällinen alusta, joka virtaviivaistaa suurten kielimallien ja multimodaalisten mallien koulutusta ja hienosäätöä. Sen avulla käyttäjät voivat mukauttaa satoja esikoulutettuja malleja paikallisesti minimaalisella koodaustyöllä.
 
-Tämä opas opettaa sinulle, kuinka hienosäätää LLM-malleja LLaMA-Factoryn avulla paikallisella AMD-laitteistollasi.
+Tässä ohjekirjassa opit hienosäätämään LLM-malleja LLaMA Factorylla paikallisella AMD-laitteistolla.
 
 <!-- @device:stx,krk -->
-> **Huomio:** Tämän oppaan hienosäätötekniikat vaativat vähintään **32 Gt järjestelmämuistia (RAM)**, josta vähintään **16 Gt on oltava GPU:n käytettävissä** (nämä 16 Gt sisältyvät 32 Gt:iin, eivät ole sen lisäksi).
+> **Huomautus:** Tässä ohjekirjassa käsitellyt hienosäätötekniikat vaativat vähintään **32 Gt järjestelmämuistia**, josta vähintään **16 Gt on GPU:n käytettävissä** (16 Gt on osa 32 Gt:sta, ei sen lisäksi).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Huomio:** Tämän oppaan hienosäätötekniikat vaativat vähintään **16 Gt GPU-muistia yhteensä** ja **32 Gt järjestelmämuistia (RAM)**.
-> - Windowsissa GPU-muistin kokonaismäärä koostuu näytönohjaimen omasta VRAM-muistista sekä jaetusta GPU-muistista (lainattu järjestelmämuistista).
-> - Siksi näytönohjaimet, joissa on alle 16 Gt omaa VRAM-muistia, voivat silti suorittaa tämän oppaan käyttämällä jaettua GPU-muistia erotuksen kattamiseen.
+> **Huomautus:** Tässä ohjekirjassa käsitellyt hienosäätötekniikat vaativat vähintään **16 Gt GPU-muistia yhteensä** ja **32 Gt järjestelmämuistia**.
+> - Windowsissa GPU:n kokonaismuisti yhdistää näytönohjaimen dedikoidun VRAM-muistin ja jaetun GPU-muistin (lainattu järjestelmämuistista).
+> - Tämän ansiosta myös näytönohjaimet, joissa on alle 16 Gt dedikoitua VRAM-muistia, voivat suorittaa tämän ohjekirjan käyttämällä jaettua GPU-muistia erotuksen kattamiseen.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Huomio:** Tämän oppaan hienosäätötekniikat vaativat näytönohjaimen, jossa on vähintään **16 Gt omaa GPU-muistia**, sekä **32 Gt järjestelmämuistia (RAM)**.
-> - Linuxissa koulutus suoritetaan kokonaan näytönohjaimen omassa VRAM-muistissa.
-> - Se ei siirry käyttämään jaettua GPU-muistia (järjestelmämuistia), kun VRAM loppuu.
-> - Näytönohjaimet, joissa on alle 16 Gt omaa VRAM-muistia, loppuvat muistista koulutuksen aikana Linuxissa, vaikka järjestelmässä olisi runsaasti RAM-muistia.
+> **Huomautus:** Tässä ohjekirjassa käsitellyt hienosäätötekniikat vaativat näytönohjaimen, jossa on vähintään **16 Gt dedikoitua GPU-muistia**, ja **32 Gt järjestelmämuistia**.
+> - Linuxissa koulutus toimii kokonaan näytönohjaimen dedikoidussa VRAM-muistissa.
+> - Se ei siirry käyttämään jaettua GPU-muistia (järjestelmämuistia), kun VRAM loppuu kesken.
+> - Näytönohjaimet, joissa on alle 16 Gt dedikoitua VRAM-muistia, jäävät ilman muistia koulutuksen aikana Linuxissa, vaikka järjestelmässä olisi runsaasti RAM-muistia.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Mitä opit
 
-- Kuinka asentaa LLaMA-Factory AMD ROCm™ -ohjelmiston kanssa
-- Kuinka määrittää LLM-hienosäätöparametrit (esimerkkinä Qwen/Qwen3-4B-Instruct-2507)
-- Kuinka suorittaa LLaMA-Factory-hienosäätö
-- Kuinka suorittaa päättely hienosäädetyllä mallilla
-- Kuinka viedä hienosäädetty malli
+- Kuinka asennat LLaMA Factoryn AMD ROCm™ -ohjelmiston kanssa
+- Kuinka määrität LLM-hienosäädön parametrit (käyttäen esimerkkinä mallia Qwen/Qwen3-4B-Instruct-2507)
+- Kuinka suoritat LLaMA Factory -hienosäädön
+- Kuinka suoritat päättelyn hienosäädetyllä mallilla
+- Kuinka viet hienosäädetyn mallin
 
-## Arvioitu aika
+## Arvioitu kesto
 
-- Kesto: Tämän oppaan suorittaminen kestää noin 60 minuuttia (riippuen mallisi/tietoaineistosi koosta ja verkkonopeudesta).
-- Lisätietoja löydät [LLaMA-Factoryn GitHubista](https://github.com/hiyouga/LlamaFactory).
+- Kesto: Tämän ohjekirjan suorittaminen kestää noin 60 minuuttia (riippuen mallin/datajoukon koosta ja verkkoyhteyden nopeudesta).
+- Katso lisätietoja [LLaMA Factory GitHubista](https://github.com/hiyouga/LlamaFactory).
 
-## Muistikonfiguraation asettaminen
+## Muistiasetusten määrittäminen
 
 <!-- @require:memory-config -->
 
@@ -47,7 +47,7 @@ Tämä opas opettaa sinulle, kuinka hienosäätää LLM-malleja LLaMA-Factoryn a
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmiston esivaatimusten asentaminen
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -83,7 +83,7 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
+**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta tämä tulee voimaan):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -129,7 +129,7 @@ llamafactory-env\Scripts\activate
  
 ### Lisäriippuvuuksien asentaminen
 
-> **Huomio**: Varmista, että Python-versio on 3.11, 3.12 tai 3.13
+> **Huomautus**: Varmista, että Python-versio on 3.11, 3.12 tai 3.13
 
 ```bash
 pip install huggingface_hub
@@ -153,11 +153,11 @@ python -m pip install huggingface_hub
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Asenna LLaMA-Factory
+### Asenna LLaMA Factory
 
-LLaMA-Factory on riippuvainen PyTorchista. Sen pitäisi olla jo asennettuna yllä olevien vaatimusten mukaisesti.
+LLaMA Factory riippuu PyTorchista. Sen pitäisi olla jo asennettuna yllä olevien vaatimusten mukaisesti.
 
-Lataa lähdekoodi [LLaMA-Factoryn virallisesta GitHub-repositoriosta](https://github.com/hiyouga/LlamaFactory) ja asenna sen riippuvuudet.
+Lataa lähdekoodi [LLaMA Factoryn virallisesta GitHub-repositoriosta](https://github.com/hiyouga/LlamaFactory) ja asenna sen riippuvuudet.
 
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
@@ -215,26 +215,24 @@ Esimerkkituloste:
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-Kun LLaMA-Factory on asennettu onnistuneesti, suoritetaan hienosäätö sen avulla.
+Nyt kun LLaMA Factory on asennettu onnistuneesti, suoritetaan hienosäätö sillä.
 
-## LLaMA-Factory CLI:n käyttäminen hienosäätöön
+## LLaMA Factory CLI:n käyttäminen hienosäätöön
 
-Tässä osiossa käsitellään hienosäätötietoaineistojen valmistelua, LoRA/QLoRA-parametrien määrittämistä ja LoRA-hienosäädön suorittamista.
+Tässä osiossa käsitellään hienosäätödatajoukkojen valmistelua, LoRA/QLoRA-parametrien määrittämistä ja LoRA-hienosäädön suorittamista.
 
-### Tietoaineiston valmistelu
+### Datajoukon valmistelu
 
-LLaMA-Factory tukee hienosäätötietoaineistoja Alpaca-muodossa ja ShareGPT-muodossa. Kaikki saatavilla olevat tietoaineistot on määritelty tiedostossa [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Jos käytät mukautettua tietoaineistoa, varmista, että lisäät tietoaineiston kuvauksen `dataset_info.json`-tiedostoon ja määrität tietoaineiston nimen ennen koulutusta. Lisätietoja löytyy heidän dokumentaatiostaan [täältä](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
+LLaMA Factory tukee hienosäätödatajoukkoja Alpaca-muodossa ja ShareGPT-muodossa. Kaikki saatavilla olevat datajoukot on määritelty tiedostossa [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Jos käytät omaa datajoukkoa, varmista, että lisäät datajoukon kuvauksen tiedostoon `dataset_info.json` ja määrität datajoukon nimen ennen koulutusta. Lisätietoja löytyy heidän dokumentaatiostaan [täältä](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
-Tässä oppaassa käytämme esimerkkinä identity- ja alpaca_en_demo-tietoaineistoja ja määritämme tietoaineiston tiedot seuraavassa vaiheessa.
+Tässä ohjekirjassa käytämme esimerkkinä identity- ja alpaca_en_demo-datajoukkoja, ja määritämme datajoukon tiedot seuraavassa vaiheessa.
+### Hienosäätöparametrien määritys
 
+LLaMA Factory tukee useita hienosäätömenetelmiä.
 
-### Hienosäätöparametrien konfigurointi
-
-LLaMA-Factory tukee useita hienosäätömenetelmiä.
-
-| Hienosäätömenetelmät | LLaMA-Factory-esimerkit |
+| Hienosäätömenetelmät | LLaMA Factory -esimerkit |
 |-----------|------|
-| Täysi parametrihienosäätö    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
+| Täysparametrinen    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
 | LoRA-hienosäätö  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
 | QLoRA-hienosäätö | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
@@ -259,39 +257,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-Nämä esimerkkikonfiguraatiotiedostot sisältävät malliparametrit, hienosäätömenetelmän parametrit, tietoaineistoparametrit, arviointiparametrit ja paljon muuta. Voit määrittää ne omien tarpeidesi mukaan. Tässä oppaassa käytämme tiedostoa [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml).
+Näissä esimerkkien määritystiedostoissa on määritetty malliparametrit, hienosäätömenetelmän parametrit, tietoaineiston parametrit, arviointiparametrit ja muuta. Voit muokata niitä omien tarpeidesi mukaan. Tässä oppaassa käytämme tiedostoa [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
 **Keskeisten parametrien selitykset:**
 - `model_name_or_path` - Hugging Face -mallin nimi tai paikallisen mallitiedoston polku.
-- `stage` - Koulutuksen vaihe. Vaihtoehdot: rm (reward modeling), pt (pretrain), sft (ohjattu hienosäätö), PPO, DPO, KTO, ORPO.
-- `do_train` - true koulutukselle, false arviointia varten
+- `stage` - Koulutusvaihe. Vaihtoehdot: rm (reward modeling), pt (esikoulutus), sft (ohjattu hienosäätö), PPO, DPO, KTO, ORPO.
+- `do_train` - true koulutusta varten, false arviointia varten
 - `finetuning_type` - Hienosäätömenetelmä. Vaihtoehdot: freeze, lora, full
-- `lora_rank` - LoRA:ssa käytetyn matalan rankin matriisin dimensionaalisuus, tyypilliset arvot: 4, 6, 8, 16 (pienemmät arvot = vähemmän parametreja = nopeampi hienosäätö; suuremmat arvot = parempi tehtäväadaptaatio mutta suurempi resurssien käyttö).
-- `lora_target` - LoRA-menetelmän kohdemodullit. Oletus: all.
-- `dataset` - Käytettävä tietoaineisto tai tietoaineistot. Käytä "," erottamaan useita tietoaineistoja
-- `output_dir` - Hienosäädön tulostuspolku
-- `logging_steps` - Lokitusväli askeleissa
+- `lora_rank` - LoRA-menetelmässä käytettävän matalan asteen matriisin dimensio, tyypilliset arvot: 4, 6, 8, 16 (pienemmät arvot = vähemmän parametreja = nopeampi hienosäätö; suuremmat arvot = parempi mukautuminen tehtävään, mutta suurempi resurssien kulutus).
+- `lora_target` - LoRA-menetelmän kohdemoduulit. Oletus: all.
+- `dataset` - Käytettävä(t) tietoaineisto(t). Erota useat tietoaineistot pilkulla “,”
+- `output_dir` - Hienosäädön tulospolku
+- `logging_steps` - Lokitusväli askelina
 - `save_steps` - Mallin tarkistuspisteen tallennusväli.
-- `overwrite_output_dir` - Sallitaanko tulostushakemiston ylikirjoittaminen.
+- `overwrite_output_dir` - Salliiko tulostushakemiston ylikirjoittamisen.
 - `per_device_train_batch_size` - Koulutuksen eräkoko laitetta kohden.
-- `gradient_accumulation_steps` - Gradienttien kertymisaskelten määrä.
+- `gradient_accumulation_steps` - Gradienttien kasautumisaskelten määrä.
 - `learning_rate` - Oppimisnopeus
-- `num_train_epochs` - Koulutusepookkien määrä
+- `num_train_epochs` - Koulutusepookien määrä
 - `lr_scheduler_type` - Oppimisnopeuden aikataulu. Vaihtoehdot: linear, cosine, polynomial, constant jne.
 - `warmup_ratio` - Oppimisnopeuden lämmittelysuhde
 
 <!-- @os:linux -->
-Muutamme `lora_rank`-oletusarvoa suorittaaksemme hienosäädön AMD Ryzen™- ja AMD Radeon™ GPU:illa.
+Muutamme `lora_rank`-parametrin oletusarvoa suorittaaksemme hienosäädön AMD Ryzen™- ja AMD Radeon™ -grafiikkasuorittimilla.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Päivitämme LoRA-hienosäädön oletuskonfiguraation paremman yhteensopivuuden saavuttamiseksi AMD Ryzen™- ja AMD Radeon™ GPU:iden kanssa:
-- Asetetaan `lora_rank` arvosta `8` arvoon `6` muistin käytön vähentämiseksi hienosäädön aikana.
-- Käytetään `fp16`:ta `bf16`:n sijaan laajemman AMD GPU -yhteensopivuuden ja pienemmän muistin käytön vuoksi.
-- Asetetaan `dataloader_num_workers` arvoon `0` Windowsissa, jotta vältetään `"Can't pickle local object<>"` -virheet, jotka johtuvat moniprosessoinnin datalatauksesta.
+Päivitämme oletusarvoisen LoRA-hienosäädön määrityksen paremman yhteensopivuuden saavuttamiseksi AMD Ryzen™- ja AMD Radeon™ -grafiikkasuorittimien kanssa:
+- Aseta `lora_rank` arvosta `8` arvoon `6` vähentääksesi muistinkäyttöä hienosäädön aikana.
+- Käytä `fp16`-muotoa `bf16`-muodon sijaan laajemman AMD-grafiikkasuoritinyhteensopivuuden ja pienemmän muistinkäytön saavuttamiseksi.
+- Aseta `dataloader_num_workers` arvoon `0` Windowsissa välttääksesi moniprosessisen tietojenlatauksen aiheuttamat `"Can't pickle local object<>"` -virheet.
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -311,13 +309,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### Suorita LLaMA-Factory-hienosäätö
+### LLaMA Factory -hienosäädön suorittaminen 
 
-**llamafactory-cli** on LLaMA-Factoryn virallinen komentorivityökalu (CLI), joka on kehitetty yksinkertaistamaan LLM-työnkulkuja päästä päähän (datan valmistelu → hienosäätö → arviointi → käyttöönotto) ilman monimutkaisen koodin kirjoittamista.
+**llamafactory-cli** on LLaMA Factoryn virallinen komentorivikäyttöliittymä (CLI), joka on kehitetty yksinkertaistamaan päästä-päähän-LLM-työnkulkuja (tietojen valmistelu → hienosäätö → arviointi → käyttöönotto) ilman monimutkaisen koodin kirjoittamista.
 
-Koulutusta/hienosäätöä varten **llamafactory-cli train** on LLaMA-Factory CLI:n ydinalikomento. Se abstrahoi hienosäätötyönkulut (datan esikäsittely, hyperparametrien viritys, laitteiston optimointi) yhdeksi CLI-komennoksi, tukee useita hienosäätöparadigmoja (LoRA/QLoRA/täysi hienosäätö) ja on optimoitu vähäresurssisille GPU:ille (esim. QLoRA 16 Gt VRAM:lla).
+Koulutusta/hienosäätöä varten **llamafactory-cli train** on LLaMA Factory CLI:n ydinalikomento. Se abstrahoi hienosäätötyönkulut (tietojen esikäsittely, hyperparametrien viritys, laitteistooptimointi) yhdeksi CLI-komennoksi, tukee useita hienosäätöparadigmoja (LoRA/QLoRA/täysi hienosäätö) ja on optimoitu vähäresurssisille GPU:ille (esim. QLoRA 16 Gt:n VRAM-muistilla).
 
-Voit suorittaa LLaMA-Factory-hienosäädön seuraavalla komennolla, joka perustuu muokattuun Qwen3 LoRA -hienosäätökonfiguraatiotiedostoon.
+Voit suorittaa LLaMA Factory -hienosäädön seuraavalla komennolla, joka perustuu Qwen3 LoRA -hienosäädön muokattuun määritystiedostoon.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -393,7 +391,7 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 <!-- @test:end --> 
 <!-- @os:end -->
 
-LLM-hienosäädön suorittamisen jälkeen kaikki luodut tulosteet tallennetaan "output_dir"-hakemistoon, mukaan lukien mallin tarkistuspistetiedostot, konfiguraatiotiedostot ja koulutusmetriikat.
+LLM-hienosäädön suorittamisen jälkeen kaikki luodut tulosteet tallennetaan hakemistoon "output_dir", mukaan lukien mallin tarkistuspistetiedostot, määritystiedostot ja koulutusmittarit.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -430,32 +428,32 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end --> 
 
-### Testaa hienosäädetty malli
+### Hienosäädetyn mallin testaaminen 
 
-**llamafactory-cli chat** on suunniteltu interaktiiviseen chat-käyttöön/päättelyyn LLM-mallien kanssa (sekä perusmallit että LoRA-hienosäädetyt mallit). LLaMA-Factory tarjoaa esimerkkikonfiguraation hienosäädettyjen mallien päättelyn suorittamiseen hakemistossa [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). Voit myös muokata tätä esimerkkikonfiguraatiota muuttaaksesi asetuksia, kuten päättelytaustajärjestelmää.
+**llamafactory-cli chat** on suunniteltu interaktiiviseen keskusteluun/päättelyyn LLM-mallien kanssa (sekä perusmallit että LoRA-hienosäädetyt mallit). LLaMA Factory tarjoaa esimerkkimäärityksen hienosäädettyjen mallien päättelyn suorittamiseen kohteessa [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). Voit myös muokata tätä esimerkkimääritystä muuttaaksesi asetuksia, kuten päättelytaustajärjestelmää.
 
-Käytä seuraavaa komentoa Qwen3-hienosäädetyn mallin testaamiseen:
+Käytä seuraavaa komentoa testataksesi Qwen3-hienosäädettyä mallia:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
-Alla on esimerkki chat-keskustelusta hienosäädetyn mallin kanssa:
+Esimerkki hienosäädettyä mallia käyttävästä keskustelusta on esitetty alla:
 
 <p align="center">
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Fine-Tuned model" width="600"/>
 </p>
 
 
-### Vie hienosäädetty malli
+### Hienosäädetyn mallin vienti
 
-Tuotantokäyttötapauksissa esikoulutettu malli ja LoRA-adapteri on yhdistettävä ja vietävä yhdeksi malliksi. Tätä yhdistettyä mallia voidaan käyttää tavallisena Hugging Face -mallitiedostona. LLaMA-Factory tarjoaa esimerkkikonfiguraatiot hakemistossa [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
+Tuotantokäyttötapauksissa esikoulutettu malli ja LoRA-adapteri on yhdistettävä ja vietävä yhdeksi malliksi. Tätä yhdistettyä mallia voidaan käyttää tavallisena Hugging Face -mallitiedostona. LLaMA Factory tarjoaa esimerkkimääritykset kohteessa [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
-Käytä seuraavaa komentoa Qwen3-hienosäädetyn mallin viemiseen:
+Käytä seuraavaa komentoa viedäksesi Qwen3-hienosäädetyn mallin:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
-Hienosäädetyn mallin viennin tulos on esitetty alla.
+Hienosäädetyn mallin vientitulos on esitetty alla.
 
 <p align="center">
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Fine-Tuned model " width="600"/>
@@ -556,25 +554,24 @@ if not model_files:
 
 print("PASS: Exported merged model output looks correct")
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
+## LLaMA Factory -käyttöliittymän käyttäminen
 
-## LLaMA-Factory GUI:n käyttäminen
-
-`LLaMA-Factory` tukee myös LLM-mallien koodittomia hienosäätöjä selaimen verkkokäyttöliittymän kautta.
+`LLaMA-Factory` tukee myös LLM-mallien nollakoodista hienosäätöä selaimessa toimivan web-käyttöliittymän kautta.
 
 Avaa se seuraavalla komennolla:
 
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI` tarjoaa virtaviivaistetun käyttöliittymän koneoppimisen työnkulkujen hallintaan, mukaan lukien koulutus, arviointi, ennustaminen, chat-toiminto ja mallien vienti. Tässä on lyhyt esittely jokaisesta välilehdestä:
+`LlamaFactory Web UI` tarjoaa selkeän käyttöliittymän koneoppimisen työnkulkujen hallintaan, mukaan lukien koulutuksen, arvioinnin, ennustamisen, keskustelun ja mallien viennin. Tässä lyhyt esittely kustakin välilehdestä:
 
-* **Train**: Tällä välilehdellä voit valita mallin ja tietoaineiston, määrittää koulutusparametrit ja käynnistää koulutusprosessin. On tärkeää ymmärtää pakolliset ja valinnaiset parametrit koulutusasetuksen optimoimiseksi.
-* **Evaluate & Predict**: Koulutuksen jälkeen voit arvioida mallin suorituskykyä ja tehdä ennusteita tällä välilehdellä. Se tarjoaa tietoa mallin tarkkuudesta ja tehokkuudesta uudella datalla.
-* **Chat**: Kun koulutus on valmis, lataa malli Chat-välilehdelle ollaksesi vuorovaikutuksessa sen kanssa ja nähdäksesi työsi tulokset. Tämä ominaisuus mahdollistaa reaaliaikaisen viestinnän koulutetun mallin kanssa.
-* **Export**: Tämä välilehti helpottaa koulutettujen mallien vientiä käyttöönottoa tai jatkokäyttöä varten. Voit tallentaa mallisi eri muodoissa, jotka sopivat eri sovelluksiin.
+* **Train**: Tällä välilehdellä voit valita mallin ja datasetin, määrittää koulutusparametrit ja käynnistää koulutusprosessin. On tärkeää ymmärtää pakolliset ja valinnaiset parametrit koulutusasetusten optimoimiseksi.
+* **Evaluate & Predict**: Koulutuksen jälkeen voit arvioida mallin suorituskykyä ja tehdä ennusteita tämän välilehden avulla. Se tarjoaa näkemyksiä mallin tarkkuudesta ja tehokkuudesta uuden datan kanssa.
+* **Chat**: Kun koulutus on valmis, lataa malli Chat-välilehdelle vuorovaikutusta varten ja katso työsi tulokset. Tämän ominaisuuden avulla voit kommunikoida koulutetun mallin kanssa reaaliajassa.
+* **Export**: Tämä välilehti helpottaa koulutettujen mallien viemistä käyttöönottoa tai jatkokäyttöä varten. Voit tallentaa mallisi eri sovelluksiin sopivissa muodoissa.
 
-Yksityiskohtaista ohjausta varten suosittelemme tutustumaan viralliseen dokumentaatioon [LlamaFactory GitHub -repositoriossa](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) ja [LlamaFactory ReadTheDocsissa](https://llamafactory.readthedocs.io/en/latest). Lisäksi [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) tarjoaa arvokkaita näkemyksiä käyttöliittymästä ja sen toiminnoista.
+Yksityiskohtaisia ohjeita varten suosittelemme tutustumaan viralliseen dokumentaatioon [LlamaFactory GitHub -repositoriossa](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) ja [LlamaFactory ReadTheDocs -sivustolla](https://llamafactory.readthedocs.io/en/latest). Lisäksi [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) tarjoaa arvokasta tietoa käyttöliittymästä ja sen toiminnoista.
 
 ## Seuraavat vaiheet
 - Kokeile eri malleja, kuten `gpt-oss` ja muita huippuluokan malleja.

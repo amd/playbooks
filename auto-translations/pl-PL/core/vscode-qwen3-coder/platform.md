@@ -16,17 +16,17 @@ LM Studio powinno być wstępnie zainstalowane:
 
 | Komponent | Wersja | Lokalizacja |
 |-----------|---------|----------|
-| **LM Studio (Modele + Różne)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modele + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (Pamięć podręczna)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Pobieranie modeli
+### Pobieranie modelu
 
-Następujące modele powinny być już obecne w katalogu modeli LM Studio (`C:\Users\...\.lmstudio\models`):
+Następujące modele powinny już znajdować się w katalogu modeli LM Studio (`C:\Users\...\.lmstudio\models`):
 
 | Typ modelu | Kwantyzacja | Rozmiar | Lokalizacja |
 |------------|--------------|------|----------|
-| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18,2 GB | `models\lmstudio-community` |
+| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
 ---
 
@@ -34,8 +34,8 @@ Następujące modele powinny być już obecne w katalogu modeli LM Studio (`C:\U
 
 ### Instalacja LM Studio
 
-Więcej szczegółów znajdziesz w pliku lmstudio.md (w folderze dependencies).
+Więcej informacji można znaleźć w pliku lmstudio.md (w folderze dependencies).
 
-### Pobieranie modeli
+### Pobieranie modelu
 
 Tak samo jak w systemie Windows.

@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA é o framework de código aberto da AMD para construção de agentes de IA que rodam localmente em hardware AMD com aceleração Ryzen AI.
+GAIA é a estrutura de código aberto da AMD para criar agentes de IA que são executados localmente em hardware AMD com aceleração Ryzen AI.
 
 #### Instalando o GAIA
 
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Em seguida, use `pip` para instalar o **Gaia**
+2. Em seguida, use o `pip` para instalar o **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Em seguida, use `pip` para instalar o **Gaia**
+2. Em seguida, use o `pip` para instalar o **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Em seguida, use `pip` para instalar o **Gaia**
+2. Em seguida, use o `pip` para instalar o **Gaia**
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Em seguida, use `pip` para instalar o **Gaia**
+2. Em seguida, use o `pip` para instalar o **Gaia**
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -279,7 +279,7 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Verificando a Instalação
+#### Verificando a instalação
 
 Verifique se o GAIA v0.16.2 ou posterior está instalado:
 
@@ -287,6 +287,6 @@ Verifique se o GAIA v0.16.2 ou posterior está instalado:
 gaia --version
 ```
 
-> **Importante**: Certifique-se de que o Lemonade Server está em execução antes de usar o GAIA. O GAIA requer que o Lemonade Server seja iniciado manualmente.
+> **Importante**: certifique-se de que o Lemonade Server esteja em execução antes de usar o GAIA. O GAIA exige que o Lemonade Server seja iniciado manualmente.
 
-Para mais informações, consulte a [documentação do GAIA](https://amd-gaia.ai).
+Para obter mais informações, consulte a [documentação do GAIA](https://amd-gaia.ai).

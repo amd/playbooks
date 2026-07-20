@@ -4,546 +4,546 @@
     "playbooks/core/comfyui-image-gen/README.md": {
       "source_sha256": "5f3da10f7fae3dc68416413efd91668449de4a5796ccf600a591bb1621817f18",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: some technical terms left untranslated where Thai equivalents exist (e.g., 'workflow', 'subgraph'); overall excellent fluency, accuracy, and code/URL preservation."
+      "quality_issues": "Excellent translation; code, URLs, tags intact. Minor: 'ตัวแบบ' for subject slightly ambiguous. Otherwise fluent and accurate."
     },
     "playbooks/core/comfyui-image-gen/platform.md": {
       "source_sha256": "e8a6884590d062f17595a57f2aadf5abe686c3169f53f3181544259336435c47",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'playbook' and 'onboarding' left untranslated but acceptable as technical terms. Overall excellent accuracy and fluency."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, all code/URLs/numbers intact. Minor: technical terms untranslated but acceptable."
     },
     "playbooks/core/comfyui-image-gen/playbook.json": {
       "source_sha256": "7fbbe78699fe6dbb9f4812e99b949d9c7daa2f88f52ee0f87cbb4641d0f5baae",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'stunning' translated as 'สวยงาม' (beautiful) is slightly less emphatic but acceptable."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 78,
+      "quality_issues": "Title mistranslated as progressive 'กำลังสร้าง' (generating in progress) instead of gerund heading; slightly awkward phrasing."
     },
     "playbooks/dependencies/comfyui.md": {
       "source_sha256": "1364f858fb8176db125d258fd392b33e0c2ec1d9f50983f5648926384717a436",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Desktop App Settings' translated slightly loosely; overall excellent with all code, URLs, and brand terms intact."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent, code/URLs intact. 'ข้อกำหนด' for requirements slightly ambiguous but acceptable."
     },
     "playbooks/dependencies/comfyui_models.md": {
       "source_sha256": "8cb46545df5efaaae1521a92e385e95f3dcdabdbdd3a8ddce9c94a0e0680a9b5",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 97,
-      "quality_issues": "Near-flawless translation; all code, HTML, URLs, and brand terms preserved correctly."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent translation; code, URLs, and markup intact."
     },
     "playbooks/dependencies/driver.md": {
       "source_sha256": "bdde05c0805a03d019eedad5bd7dc53a862c6b1f5ffeee6743fdfb73ef39de73",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: missing period at end of first section's intro sentence; 'distribution' left untranslated but acceptable in Thai tech context."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, code/URLs/brands intact; minor natural phrasing choices only"
     },
     "playbooks/dependencies/gaia.md": {
       "source_sha256": "4837a0e4fd45ede7efc3d903c1bb65484d0805c6e45657d2b097b23c063bb935",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Near-flawless. Minor nit: 'เอกสารประกอบ GAIA' slightly formal but acceptable for 'GAIA documentation'."
+      "quality_issues": "Accurate, fluent translation; code, URLs, numbers intact. Minor slight awkwardness in the 'Important' note phrasing."
     },
     "playbooks/dependencies/lemonade.md": {
       "source_sha256": "428d83bf7ddb03e55ae4c09580554a56ff49d91b924eba6758bb9f106eb7b46a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor nuance: 'is expected to run' softened to 'จะทำงาน'; mixed Thai/English terms natural for tech docs; overall excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: 'expected to run' softened, but negligible."
     },
     "playbooks/dependencies/lmstudio.md": {
       "source_sha256": "7bf63eab985e835155ecc012bee6c157069e27bc9030a3a975ef0652fe0b5443",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'รัน' is transliteration of 'run'; native 'เรียกใช้' might be preferred. Otherwise excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact. Minor: alt text left untranslated but acceptable."
     },
     "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
       "source_sha256": "e33b569398da8f57d5da1bbd94f0c0e005ee7a4c206a577236f785cba3865fcd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 97,
-      "quality_issues": "Near-flawless translation; all code, HTML, URLs, brand names preserved correctly."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent, all code blocks, URLs, and brand terms intact."
     },
     "playbooks/dependencies/lmstudio_models_qwen3_9b.md": {
       "source_sha256": "51c02b376e3faea175b98d9d6586c91a9524c83348cedf4bd76323499a3d486e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Near-flawless. 'quantization' left untranslated (acceptable technical term). Minor: dropped 'automatically' emphasis nuance is fine."
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact. Minor: transliteration of 'quantization' acceptable."
     },
     "playbooks/dependencies/memoryconfig.md": {
       "source_sha256": "45f82fd83ae2477a8f1afaebee688689addef39939bb0597c8f1cfb83591473f",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: '96GB shared' rendered as 'shared 96GB' (word order). Overall excellent, all code/HTML/brand terms intact."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, terminology consistent; code blocks, URLs, brands intact. No notable errors."
     },
     "playbooks/dependencies/n8n.md": {
       "source_sha256": "921441b6697d8ab93bbbc5a9bb71d737f616df42dd40a39b063af61e5aa5c6fa",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'globally' translated as 'แบบ global' mixes English; could use 'แบบทั่วระบบ' for full localization."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, all code/URLs intact; minor stylistic use of English 'global'."
     },
     "playbooks/dependencies/nodejs.md": {
       "source_sha256": "9df41526a5c8035b380150c56be8f29cad65da0286a8ee16fe0a49426436939b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Code comments left untranslated (minor inconsistency). Otherwise accurate, fluent, and preserves all URLs/code/brand terms."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent translation; all code, URLs, numbers intact."
     },
     "playbooks/dependencies/podman.md": {
       "source_sha256": "4e8c2edd4b805a8395f03ddc6b7ff096e6352a7c404616b59a05edc257f0bccd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'parsing plugin' translated as 'ปลั๊กอินสำหรับการแยกวิเคราะห์' slightly awkward but acceptable. Mixed Thai/English terms consistent with domain norms."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, code blocks intact. Minor: 'parsing' nuance omitted but negligible."
     },
     "playbooks/dependencies/pytorch.md": {
       "source_sha256": "ba5ed9d425c6685dd285c639438efc74c1e8d9d561442bad6412b9adc8164d82",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'full instructions' translated as 'คำแนะนำฉบับสมบูรณ์' is acceptable but slightly formal. Otherwise flawless."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent; code/URLs/numbers intact. Minor: trailing period omitted at end."
     },
     "playbooks/dependencies/rocm.md": {
       "source_sha256": "af961dbef80b407b98ee05fd0e5f816418bf097d384460ca5a57e7844bf38813",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Minor: missing period after 'video' in first bold line; otherwise flawless."
+      "quality_issues": "Accurate, fluent translation; code, URLs, brand terms intact. Minor: missing period at end."
     },
     "playbooks/dependencies/softwareupdate.md": {
       "source_sha256": "2d5cb11ce696297d74dfbb9d140b765dc64add55f1bdcbdd27fb3498ca3871f5",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'your Ryzen AI Halo' could retain full brand name; otherwise accurate, fluent, all code/URLs/brand terms intact."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact. Minor: 'อื่นๆ' slightly adds nuance."
     },
     "playbooks/dependencies/vllm.md": {
       "source_sha256": "8876f624743d3b843409b5cd523a262e60ba53539710bf26c00d80a88153391e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "\"integrated GPU\" translated as \"iGPU\" instead of \"GPU ในตัว\" or similar Thai phrasing; minor inconsistency but understandable."
+      "quality_issues": "Accurate, fluent; minor: 'exposes' as 'เปิดใช้งาน' slightly loose but acceptable."
     },
     "playbooks/dependencies/vscode.md": {
       "source_sha256": "09b668411f70fb8781a2d0d7c7e4417250e610839d0f6213d5f2ff846ceda8f2",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: trailing period removed from URL in Windows download step 1. Otherwise accurate and fluent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent, all code blocks, URLs, brands intact. Minor: trailing periods after URLs dropped."
     },
     "playbooks/core/lmstudio-rocm-llms/README.md": {
       "source_sha256": "f0c7074a75cf11c9c9bb8b3508a87f66c8c08fa3e96832ece9f55e7dc5f85b91",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Docs' column header translated inconsistently; some English terms left untranslated but acceptable for technical audience."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; code, URLs, tags, numbers intact. Minor stylistic redundancy in memory-config heading."
     },
     "playbooks/core/lmstudio-rocm-llms/platform.md": {
       "source_sha256": "f731064c13c2ca273ea6bbc804e0b3309a1f4d385e3b58b35575f5e8430a3b86",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: 'การควอนไทซ์' is an acceptable but informal transliteration of 'Quantization'. Overall excellent with all code, URLs, brand names, and numbers intact."
+      "quality_issues": "Accurate, fluent translation; code, URLs, numbers intact. Minor: 'quantization' rendered phonetically."
     },
     "playbooks/core/lmstudio-rocm-llms/playbook.json": {
       "source_sha256": "43aa660e28f5698ceef07211ce4a2b2c197d5463917e8311049c6410a9bdbb57",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'ในเครื่องของคุณ' adds 'ของคุณ' (your) not in source 'locally'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; brand terms intact. Minor: 'ในเครื่อง' slightly ambiguous but acceptable for 'locally'."
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
       "source_sha256": "19066843d638353adb3a11fe7f188f59a66c1f11eeaa7037af97a5c21308d4df",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: some English terms left untranslated (e.g., 'canvas', 'backend', 'tray') but acceptable in Thai tech context. Overall excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 91,
+      "quality_issues": "Stray '#' added before @github-only tag; otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/core/n8n-automation-gpt-oss/platform.md": {
       "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Near-flawless. Minor nit: 'playbook' left untranslated, but acceptable as technical term."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact. Minor: 'latest' left untranslated but acceptable."
     },
     "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
       "source_sha256": "068a5d7d2996ca2c8b37535eddf9fe38ab421d56ee509a426d96835a96ab3f74",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Excellent translation. 'Local LLMs' rendered as 'LLM ในเครื่อง' is accurate. All brand names preserved."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; brands intact. Minor: 'การทำงานอัตโนมัติ' slightly less natural than 'การทำเวิร์กโฟลว์อัตโนมัติ'."
     },
     "playbooks/core/pytorch-rocm-llms/README.md": {
       "source_sha256": "a7f0693c43a5a31e55ffb32b5050099e5297ec77456daff75cf33edf91794d7a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: untranslated GitHub callout block; code comments left in English (acceptable). Overall excellent fluency and accuracy."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, terminology consistent; code, URLs, tags all intact. Minor: section heading 'Setting the Memory Configuration' slightly condensed."
     },
     "playbooks/core/pytorch-rocm-llms/platform.md": {
       "source_sha256": "f10bd86c45555b65939b97bf0e599a75ce90d5ec18c61a68a98463d34c1e31d2",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: table headers left untranslated (Component, Version, Notes, Model, etc.), but acceptable for technical docs."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, code blocks and terminology intact. Minor: '50GB free space' slightly reworded but faithful."
     },
     "playbooks/core/pytorch-rocm-llms/playbook.json": {
       "source_sha256": "e4aba2b4e1928b5162037673172f666cb991a500469e027743d01f3ee26955ef",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "Minor: 'language model' left untranslated; could use Thai equivalent or keep consistent with 'LLMs' abbreviation already used."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent, terminology and brand terms intact; minor stylistic naturalness only."
     },
     "playbooks/core/vscode-qwen3-coder/README.md": {
       "source_sha256": "25da94f89aec651b737075b56e6c558256a645c2a44b96204163e9c87c857fae",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Resources section retains incomplete source sentence ('running workloads on'). Minor mixing of English/Thai terms, but acceptable for technical content."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, numbers intact. Minor inconsistency mixing English/Thai for terms like prompt/agent."
     },
     "playbooks/core/vscode-qwen3-coder/platform.md": {
       "source_sha256": "14c7eec60b483e4bedb5e465673d89e07466088a9ed9c59d7964c3466cf89410",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: 'การควอนไทซ์' is an uncommon transliteration; 'playbook' left untranslated but acceptable. Overall excellent."
+      "quality_issues": "Accurate, fluent; code/URLs/numbers intact. Table headers left in English, acceptable for technical context."
     },
     "playbooks/core/vscode-qwen3-coder/playbook.json": {
       "source_sha256": "7ce988423e60b386afb4d619e4c1f54b387b839fe588261ab5aaf63e13dee220",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Title uses 'VS Code' instead of 'VSCode' as in source, but acceptable variant. Otherwise accurate and fluent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate and fluent; 'การช่วยเหลือด้านโค้ด' slightly literal but acceptable."
     },
     "playbooks/supplemental/amd-sync/README.md": {
       "source_sha256": "ae7dafe9ebacacdff50f8cf23f8e03d49e1b648456a6b33fabaa84d4fc8c3c0e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: GitHub callout block left untranslated; some UI terms like 'system tray' could be localized. Overall excellent fluency, accuracy, and preservation of code/URLs/brand terms."
+      "quality_issues": "Accurate, fluent translation; code/URLs/brands intact; only minor missing blank line before one heading."
     },
     "playbooks/supplemental/amd-sync/playbook.json": {
       "source_sha256": "dd916e95fa31e2909a5ce0b7809b56adcc87c799638d3b136deadf1ec0bd4940",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor restructuring of 'one-click' placement; overall accurate and fluent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Slight restructuring; 'Live Metrics' separated from list but meaning preserved. Fluent and accurate overall."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
       "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Anchor link '#1-determine-network-interfaces' not updated to match Thai heading '#1-ระบุ-network-interface'. Minor inconsistency in singular/plural 'Interface' vs 'Interfaces'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent, accurate translation. Code, URLs, numbers intact. Minor: one missing blank line before Step 2 heading."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
       "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "Missing ™ symbol after first 'Ryzen' in the title; 'distributed workloads' slightly simplified to 'งานแบบกระจาย'"
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; brand/terms intact. Minor: 'Halos' plurality nuance slightly simplified."
     },
     "playbooks/supplemental/clustering-rpc-server/playbook.json": {
       "source_sha256": "afee8d03bc9faa092036cbf4a62ec9db4252a49f25273438a7e4e5bbc2b4a10c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: '350B+' translated as '350B ขึ้นไป' is acceptable but slightly expanded; overall excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent; brand/technical terms intact. Minor: '350B+ models' rendered as 'ขนาด 350B+' acceptable."
     },
     "playbooks/supplemental/ollama-getting-started/README.md": {
       "source_sha256": "5cb90cfa647fafa9f99ad8b659211c2e1806cd11f9fff3ceb351b56a90e6f227",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: some technical terms left untranslated (e.g., 'frontend', 'personas') where Thai equivalents exist; overall excellent accuracy and fluency."
+      "quality_issues": "Fluent, accurate translation; code/URLs/brands intact; minor 'จุดปลาย' for endpoint slightly awkward but acceptable."
     },
     "playbooks/supplemental/ollama-getting-started/playbook.json": {
       "source_sha256": "642990e3570bb0888cd87c78e2c61d19eea1864677052a0f04d7aa2a7c0f5414",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 97,
-      "quality_issues": "Excellent translation; all terms and formatting preserved."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Accurate and fluent; terminology and technical terms preserved correctly."
     },
     "playbooks/supplemental/open-webui-chat/platform.md": {
       "source_sha256": "1cc71fc518a4ba7e507047973d835456dc836155b3365f0e7fb64ed1f81d85cb",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Text input → Text output' translated as 'รับข้อความ → ส่งออกข้อความ' adds verbs not in original; otherwise excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent; code, URLs, brands intact. Minor: 'server(s)' plurality slightly flattened."
     },
     "playbooks/supplemental/open-webui-chat/playbook.json": {
       "source_sha256": "b7c488fe64673b9b617a974c4b360661b6afe299f3410c1120db34a6e794a0fd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "Inconsistent use of 'LLMs' vs 'LLM' in translation; 'locally' translated as 'ในเครื่องของคุณ' is acceptable but slightly expanded."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Slight redundancy in 'ในเครื่องแบบโลคัล' (locally repeated), but accurate and fluent."
     },
     "playbooks/supplemental/cvml/README.md": {
       "source_sha256": "a238f52921afd44cf45727cfafb0f4d99ceeb97b18b1c785362c8938554f6004",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: anchor link #building-opencv-from-source not localized to match Thai heading; #running-face-detection same issue. Otherwise excellent."
+      "quality_issues": "Accurate, fluent translation; code, URLs, brands intact. Minor inconsistency: 'เมช' vs 'ตาข่าย' for mesh."
     },
     "playbooks/supplemental/cvml/playbook.json": {
       "source_sha256": "53796041ee0532656e093dbb4bbac2c3bddbf15e76f7646824fa6360f1232a8c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "Minor fluency: 'แบบโลคัล' and 'เฉพาะที่' both translate 'local' but inconsistently; 'on top of' simplified to 'บน' loses nuance slightly."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 82,
+      "quality_issues": "Title left 'Local Computer Vision' untranslated; otherwise accurate, fluent, terms and brands intact."
     },
     "playbooks/supplemental/gaia-agents/README.md": {
       "source_sha256": "feb74d6ee2839ece7d3918fb2910e2b7cf09cfdde6191742b776c521910f960a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'agent' translated inconsistently as 'ตัวแทน' vs keeping 'agent'; some English phrases left untranslated in example outputs (acceptable for code context)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent Thai; code blocks, URLs, numbers intact; consistent terminology; minor stylistic variation in agent/tool terms."
     },
     "playbooks/supplemental/gaia-agents/platform.md": {
       "source_sha256": "0aa409f73352dbe5489bcbff783403a39bd4049ae44238f8ce107165f02cf43c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "\"agent reasoning\" translated as \"การประมวลผลของเอเจนต์\" (agent processing) loses the nuance of \"reasoning\"; minor spacing before markdown link brackets."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent translation; all technical terms, code, URLs intact. Minor: playbook untranslated (acceptable)."
     },
     "playbooks/supplemental/gaia-agents/playbook.json": {
       "source_sha256": "e835f7da0097042741c5558f5fc14a57f25b24f807ef5c277ee6cf9793212ed9",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Minor inconsistency: 'Agent' capitalized in title but lowercase 'agent' in body. Otherwise accurate and natural."
+      "quality_issues": "Accurate and fluent; 'ที่ปรึกษาด้านฮาร์ดแวร์' slightly generic but acceptable for 'hardware advisor'."
     },
     "playbooks/supplemental/lemonade-getting-started/platform.md": {
       "source_sha256": "091ccd8efa90e078a5d740aac0e40d742ad91f5898d0de9e1574d62e6778ec17",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'playbook' left untranslated; 'specification' translated as 'ข้อกำหนด' is acceptable but slightly ambiguous."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; code, numbers, brands intact. Minor: 'สมมติไว้' slightly formal for 'assumed'."
     },
     "playbooks/supplemental/lemonade-getting-started/playbook.json": {
       "source_sha256": "444b1e3ddf1a59c5357878cb7e88b0db243e7c9a9d544095a2b8bdd3b8ba648a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Very accurate and fluent. Minor nit: 'โอเพนซอร์ส' is acceptable transliteration."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; minor inconsistency using 'ในเครื่อง' and 'โลคัล' for local."
     },
     "playbooks/supplemental/llama-factory-finetuning/README.md": {
       "source_sha256": "38f43810c9ea7c04ad70e180795d64b81ab9e45fd01413ecd26a1d4e7283bde1",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Minor: 'LLaMA Factory' inconsistently rendered as 'LLaMA-Factory'; some technical terms left untranslated but acceptable for audience."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, code/URLs/brands intact. Minor: mixed terminology (fine-tuning vs ปรับแต่ง), 'ของมัน' slightly informal."
     },
     "playbooks/supplemental/llama-factory-finetuning/playbook.json": {
       "source_sha256": "e8a8cd9cebcb66736e1cfb707fd792795defcb4f4facb6b80f722be826b2a89b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Minor: 'LLaMA Factory' changed to 'LLaMA-Factory' (hyphenated), slightly altering the brand name."
+      "quality_issues": "Brand inconsistency: LLaMA-Factory vs LLaMA Factory; otherwise accurate and fluent."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
       "source_sha256": "99df141310754dea218b61260f021d4fd7aec64a922654db64ed473b877e6351",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "Minor: 'autonomous AI agent' left untranslated; could be translated or kept as-is for technical context."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate and fluent; brand terms intact; minor stylistic phrasing but publishable quality."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
       "source_sha256": "bc2cba716bb866957cf930a234b9080bd64c863a18e6f77f7e98c3f51f0868fc",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "Step 5 truncated, missing vLLM/hardware detail. Steps 6-7 omitted entirely. Minor fluency nits in a few sentences."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent, terminology consistent; code blocks, URLs, numbers intact. Minor stylistic variation in tech terms only."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
       "source_sha256": "34841c22920fdf111d2a7ab0b640af96555cc1aa0376103acf8ea62e336609af",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Fine-Tuning' translated as 'การปรับแต่ง' is acceptable but 'การปรับจูน' could be more precise. Overall excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent; minor redundancy with dual English/Thai terms, otherwise excellent."
     },
     "playbooks/supplemental/pytorch-kernels/platform.md": {
       "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Table headers 'Component' and 'Expected Configuration' left untranslated; 'Windows runners' translated as 'ผู้ใช้งาน Windows' (users) instead of runners."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, numbers, brands intact. Fluent and accurate throughout."
     },
     "playbooks/supplemental/pytorch-kernels/playbook.json": {
       "source_sha256": "30272b772a010c694249bc9a4f83fe9676ee2fa98cf3ec96dbca4f3be4ae3916",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor inconsistency: 'Kernels' capitalized in title but lowercase 'kernel' in subtitle."
+      "quality_issues": "Accurate, fluent, terminology and brand terms intact; minor stylistic nits only."
     },
     "playbooks/supplemental/speech2speech-translation/README.md": {
       "source_sha256": "c6e008753ea3a6442c32774e44345e39fd5b5b64534fcb837541f2220c66d1fd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'expressive' translated as 'มีความเป็นธรรมชาติ' (natural) instead of 'มีการแสดงออก'; 'speech-speech' inconsistently kept vs translated."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent Thai; code/URLs intact. Minor: 'การพึ่งพา' for dependencies slightly literal but acceptable."
     },
     "playbooks/supplemental/speech2speech-translation/platform.md": {
       "source_sha256": "ac5b39917b7a533154f6a0f823949356905a766e067a7efcd000d63584cb36a3",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'playbook' left untranslated (acceptable as technical term). Overall excellent accuracy, fluency, and preservation of formatting."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, code/URLs/numbers intact; table headers left untranslated but acceptable for technical context"
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
       "source_sha256": "48eb7b7b031b9e676748a482854cf10fb41555109fa05ec9a06a8992baf282cf",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'local hardware' translated as 'ฮาร์ดแวร์ของคุณเอง' (your own hardware) instead of 'ฮาร์ดแวร์ภายในเครื่อง' (local hardware)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Title omits speech-to-speech nuance (just 'speech translation'); body accurate and fluent."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
       "source_sha256": "a2ee5a621944612fd1d5ac526c6b844f0f528a0c696c178ac8f85f170ab7467c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: anchor link '#known-warnings' not updated to Thai heading; slight inconsistency mixing English/Thai terms, but acceptable for technical content."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, tags intact. Minor terminology inconsistency (playbook rendered as เอกสาร/เพลย์บุ๊ก)."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/platform.md": {
       "source_sha256": "45dc9cd1642f32761ed88326b25e7df018482c93832b386c31464522eb62066b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Source says 'Download from HF' but translation says 'ดาวน์โหลดจาก Hugging Face' — minor expansion. Table headers left untranslated, which is acceptable for technical docs."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; code, numbers, URLs, brands intact. Minor terminology consistency only."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/playbook.json": {
       "source_sha256": "3204669893381cf35615253a77a5fab815e3d2e3cc61269de7441781b2a6aebc",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 82,
-      "quality_issues": "Inconsistent use of 'LLM' vs 'LLMs'; mixed Thai/English phrasing for 'fine-tune' vs 'การปรับแต่งอย่างละเอียด'; adequate but slightly unpolished."
+      "quality_issues": "Trademark symbol misplaced; 'fine-tuned LLMs™' rendered awkwardly; minor fluency loss but meaning preserved."
     },
     "playbooks/supplemental/vllm-inference/README.md": {
       "source_sha256": "24dc5ebde274af75275e075ca2423138e0d67d3de03f1cebbee30fb9ac5940f4",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: some English terms left untranslated (e.g., 'streaming', 'non-streaming', 'foreground') where Thai equivalents exist; otherwise accurate and fluent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: 'ที่สำคัญ' slightly awkward for 'critical'. Fluent and accurate throughout."
     },
     "playbooks/supplemental/vllm-inference/playbook.json": {
       "source_sha256": "0db881869b8d489317f0445edf4b420f738173b9c82c6488074e8948f7d6351c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "\"integrated GPU\" translated as \"GPU แบบรวม\" is slightly ambiguous; \"GPU แบบบูรณาการ\" or \"GPU ในตัว\" may be clearer."
+      "quality_issues": "iGPU abbreviation differs from source 'integrated GPU' but conveys meaning; otherwise accurate and fluent."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
       "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: some anchor links not localized (e.g., #downloading-the-model); image alt text inconsistently translated; 'reasoning' translated as 'อนุมาน' (inference) losing nuance."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: 'Step' headings and some anchor link labels left untranslated; slight inconsistency Machine/เครื่อง."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
       "source_sha256": "b3613af14dd94ab44888f2d3013af6b10e1685c5e4915765507065117303be9a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: some terms left untranslated (e.g., 'vision', 'speech-to-text'); image alt text inconsistently translated; very minor fluency nits."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Minor: inconsistent flashcard term (การ์ดคำศัพท์/แฟลชการ์ด); slight prompt/พรอมป์ variation. Code, URLs, numbers intact; fluent and accurate."
     },
     "playbooks/supplemental/open-webui-chat/README.md": {
       "source_sha256": "b257e5d4c3accfd50265d7b75ea8258159b037cbbe57dcc9241bad746554c929",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor inconsistency: some UI terms left in English (good practice), but 'Save' sometimes translated as 'บันทึก' and sometimes left as 'Save'. Missing blank line before 'Starting Open WebUI Server' sec"
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Some headings left untranslated (Main Activities, Starting/Connecting sections); otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
       "source_sha256": "3870cbf9cdec77fbb11f99c2751de2826fce765a431d52a853a9c034727e7225",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
-      "quality_issues": "Minor fluency nits: 'ค่าใช้จ่าย' for 'overhead' slightly informal; some mixed Thai/English phrasing could be smoother; all code, URLs, brand names intact."
+      "quality_issues": "Minor: '263k' rendered as 263,000; 'financial API' left partly untranslated. Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "ef647656230fb6a512ac0b98b573e61f729e4c14de2bdcd4b33a1c733c1a9e2c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: some English terms left untranslated where Thai equivalents exist (e.g., 'background thread', 'flat'); overall excellent accuracy, fluency, and preservation of code/URLs/brand terms."
+      "quality_issues": "Accurate, fluent, code/URLs/numbers intact; consistent terminology; only minor stylistic mixing of English/Thai terms."
     }
   }
 }

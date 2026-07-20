@@ -4,12 +4,12 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### GPT-OSS 120B:n lataaminen LM Studiossa
+### GPT-OSS 120B:n lataaminen LM Studiolla
 
-GPT-OSS 120B -mallin lataamiseksi:
+GPT-OSS 120B -mallin lataaminen:
 
-1. Paina näppäimistöltä "Ctrl" + "Shift" + "M" tai napsauta vasemman sivupalkin "Discover"-välilehteä (suurennuslasi-kuvake)
-2. Etsi `ggml-org/gpt-oss-120b-GGUF`
+1. Paina näppäimistöltä "Ctrl" + "Shift" + "M" tai napsauta vasemmassa sivupalkissa olevaa "Discover"-välilehteä (suurennuslasin kuvake)
+2. Hae `ggml-org/gpt-oss-120b-GGUF`
 3. Valitse `mxfp4` ja napsauta Download
 
 <p align="center">
@@ -17,7 +17,7 @@ GPT-OSS 120B -mallin lataamiseksi:
 
 LM Studio lataa mallin automaattisesti ja sijoittaa sen oikeaan hakemistoon.
 
-Jos haluat ladata lisää malleja, voit etsiä niitä Discover-välilehdeltä ja LM Studio hoitaa loput.
+Jos haluat ladata lisää malleja, voit etsiä niitä Discover-välilehdeltä, ja LM Studio hoitaa loput.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-windows timeout=60 hidden=True -->

@@ -10,9 +10,9 @@ Node.js 22.22.1 LTS on suositeltu versio tälle alustalle.
 
 <!-- @os:windows -->
 
-1. Lataa Windows 64-bittinen asennusohjelma osoitteesta [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+1. Lataa Windows 64-bit -asennusohjelma osoitteesta [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
 2. Suorita asennusohjelma ja seuraa ohjeita
-3. Tarkista asennus:
+3. Vahvista asennus:
 ```cmd
 node --version
 npm --version
@@ -38,4 +38,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **Huomio**: Katso [Node.js-lataukset](https://nodejs.org/en/download/) lisäasennusvaihtoehtoja ja alustoja varten.
+> **Huomautus**: Katso [Node.js-lataukset](https://nodejs.org/en/download/) saadaksesi lisää asennusvaihtoehtoja ja alustoja.

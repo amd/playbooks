@@ -1,5 +1,5 @@
 {
   "id": "ollama-getting-started",
   "title": "Kom i gang med Ollama",
-  "description": "Installer Ollama og kjør LLM-er lokalt – chat fra terminalen, skrivebordsappen eller REST API."
+  "description": "Installer Ollama og kjør LLM-er lokalt – chat fra terminalen, skrivebordsappen eller REST-API-et."
 }

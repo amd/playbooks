@@ -4,546 +4,546 @@
     "playbooks/core/comfyui-image-gen/README.md": {
       "source_sha256": "5f3da10f7fae3dc68416413efd91668449de4a5796ccf600a591bb1621817f18",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "Minor: 'kehoa' should be 'kehotetta' (cfg description); 'template' inconsistently translated as 'malli' vs 'työnkulku'; 'ehdoitus' should be 'ehdollistus' (conditioning)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 91,
+      "quality_issues": "Minor typos: 'peruslmallin' (peruslmallin), 'latenttiedustuksista' spacing. Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/core/comfyui-image-gen/platform.md": {
       "source_sha256": "e8a6884590d062f17595a57f2aadf5abe686c3169f53f3181544259336435c47",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Minor: 'Gt/Mt' for GB/MB is correct Finnish; 'mallinetta' is slightly unusual for 'template'; overall very accurate and fluent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'ComfyUI tulee olla' should be 'ComfyUI:n tulee olla'; text encoder/diffusion model untranslated but acceptable."
     },
     "playbooks/core/comfyui-image-gen/playbook.json": {
       "source_sha256": "7fbbe78699fe6dbb9f4812e99b949d9c7daa2f88f52ee0f87cbb4641d0f5baae",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 82,
-      "quality_issues": "Minor grammatical issue: 'Luo upea' should be 'Luo upeita' (plural adjective needed to match plural noun 'kuvia')."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'ComfyUIta' inflection awkward; otherwise accurate and fluent."
     },
     "playbooks/dependencies/comfyui.md": {
       "source_sha256": "1364f858fb8176db125d258fd392b33e0c2ec1d9f50983f5648926384717a436",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Automatic Updates' and 'Next' left untranslated, but acceptable as UI labels."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; code, URLs, brand terms intact. Minor: UI labels kept in English (acceptable)."
     },
     "playbooks/dependencies/comfyui_models.md": {
       "source_sha256": "8cb46545df5efaaae1521a92e385e95f3dcdabdbdd3a8ddce9c94a0e0680a9b5",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'when prompted that missing models have been detected' slightly simplified but acceptable."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 93,
+      "quality_issues": "Accurate and fluent; 'Download' button label kept in English, acceptable if UI is untranslated."
     },
     "playbooks/dependencies/driver.md": {
       "source_sha256": "bdde05c0805a03d019eedad5bd7dc53a862c6b1f5ffeee6743fdfb73ef39de73",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "\"asennusvirtausta\" is an awkward translation of \"flow\"; \"löydät\" should be \"löydät\" or better \"katso\"; minor fluency issues."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Excellent translation; UI terms untranslated (acceptable), all code/URLs/markup intact, natural Finnish."
     },
     "playbooks/dependencies/gaia.md": {
       "source_sha256": "4837a0e4fd45ede7efc3d903c1bb65484d0805c6e45657d2b097b23c063bb935",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Flawless translation; all code, URLs, brand names intact; natural Finnish fluency throughout."
+      "quality_issues": "Minor: 'agenttien...jotka' relative clause slightly ambiguous. Code, URLs, brands intact."
     },
     "playbooks/dependencies/lemonade.md": {
       "source_sha256": "428d83bf7ddb03e55ae4c09580554a56ff49d91b924eba6758bb9f106eb7b46a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'API-perus-URL' is slightly awkward; 'odotetaan käynnistyvän' slightly shifts meaning from 'is expected to run'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor fluency: 'Nopeaa viitteeksi' awkward; 'koko asennusvaihtoehdot' slightly unnatural. Code, URLs, brands intact."
     },
     "playbooks/dependencies/lmstudio.md": {
       "source_sha256": "7bf63eab985e835155ecc012bee6c157069e27bc9030a3a975ef0652fe0b5443",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor typo: 'siirry' appears twice (correct), but overall excellent. 'run' translated as 'suorita' is acceptable."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; code/URLs/brands intact. UI terms kept in English (appropriate for Windows/Linux menus)."
     },
     "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
       "source_sha256": "e33b569398da8f57d5da1bbd94f0c0e005ee7a4c206a577236f785cba3865fcd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Download' button label left untranslated, but acceptable as UI element."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: 'Download' button left untranslated but consistent with UI convention."
     },
     "playbooks/dependencies/lmstudio_models_qwen3_9b.md": {
       "source_sha256": "51c02b376e3faea175b98d9d6586c91a9524c83348cedf4bd76323499a3d486e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Download' button label left untranslated, which is acceptable but inconsistent with translating other UI terms."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: 'Download' button left untranslated but consistent with UI."
     },
     "playbooks/dependencies/memoryconfig.md": {
       "source_sha256": "45f82fd83ae2477a8f1afaebee688689addef39939bb0597c8f1cfb83591473f",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'pool' translated inconsistently as 'allokointi' and 'allas'; 'Säätääksesi' slightly formal but acceptable."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; all code, URLs, brands intact. Minor stylistic naturalness only."
     },
     "playbooks/dependencies/n8n.md": {
       "source_sha256": "921441b6697d8ab93bbbc5a9bb71d737f616df42dd40a39b063af61e5aa5c6fa",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'Note' translated as 'Huomio' (acceptable but 'Huom' is also common). Slight rephrasing of the note sentence, but meaning preserved."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Link text 'n8n Documentation' left untranslated but acceptable; otherwise accurate and fluent."
     },
     "playbooks/dependencies/nodejs.md": {
       "source_sha256": "9df41526a5c8035b380150c56be8f29cad65da0286a8ee16fe0a49426436939b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 82,
-      "quality_issues": "Bash code block comments left untranslated in Finnish. Minor inconsistency in translation completeness."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'saadaksesi' slightly awkward calque; otherwise accurate and fluent, code/URLs intact."
     },
     "playbooks/dependencies/podman.md": {
       "source_sha256": "4e8c2edd4b805a8395f03ddc6b7ff096e6352a7c404616b59a05edc257f0bccd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Minor inconsistency: 'kontainerointiohjelmisto' vs 'konttisuoritusympäristön' mixes transliteration styles. 'Jäsennysliitännäinen' is slightly awkward."
+      "quality_issues": "\"pistoke\" awkward for socket; \"levykuvia\" imprecise for container images; otherwise accurate and fluent."
     },
     "playbooks/dependencies/pytorch.md": {
       "source_sha256": "ba5ed9d425c6685dd285c639438efc74c1e8d9d561442bad6412b9adc8164d82",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'AMD ROCm™ -ohjelmistotuen kanssa' slightly awkward compound; otherwise flawless."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent translation; code blocks, URLs, and terms intact."
     },
     "playbooks/dependencies/rocm.md": {
       "source_sha256": "af961dbef80b407b98ee05fd0e5f816418bf097d384460ca5a57e7844bf38813",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'linkistä' is slightly informal; all code, URLs, and brand terms are intact."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent translation; code, URLs, brands intact. No notable issues."
     },
     "playbooks/dependencies/softwareupdate.md": {
       "source_sha256": "2d5cb11ce696297d74dfbb9d140b765dc64add55f1bdcbdd27fb3498ca3871f5",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'reboot' translated as 'käynnistä laite uudelleen' is acceptable but slightly less precise than 'käynnistä uudelleen'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact. Minor: UI labels kept in English, appropriate here."
     },
     "playbooks/dependencies/vllm.md": {
       "source_sha256": "8876f624743d3b843409b5cd523a262e60ba53539710bf26c00d80a88153391e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'isäntäjärjestelmälle' slightly verbose for 'host'; overall excellent translation."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent; minor: 'PyTorch:n' colon style, 'konttikuvana' slightly literal but acceptable."
     },
     "playbooks/dependencies/vscode.md": {
       "source_sha256": "09b668411f70fb8781a2d0d7c7e4417250e610839d0f6213d5f2ff846ceda8f2",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'installation executable' translated slightly loosely; overall excellent with all code, URLs, and brand terms intact."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact. Minor: UI labels left untranslated but appropriate."
     },
     "playbooks/core/lmstudio-rocm-llms/README.md": {
       "source_sha256": "f0c7074a75cf11c9c9bb8b3508a87f66c8c08fa3e96832ece9f55e7dc5f85b91",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Typo 'päätepistteeseen' (should be 'päätepisteeseen'); minor inconsistency leaving some UI terms untranslated."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Inconsistent terminology (endpoint/päätepiste, klikkaa/napsauta); missing blank line before Example heading. Otherwise accurate, fluent, code intact."
     },
     "playbooks/core/lmstudio-rocm-llms/platform.md": {
       "source_sha256": "f731064c13c2ca273ea6bbc804e0b3309a1f4d385e3b58b35575f5e8430a3b86",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Title 'Platform Configuration' left untranslated. 'Msc' translated as 'Muut' is reasonable but slightly loose. 'GB' correctly localized to 'Gt'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact. 'ohjekirja' for playbook slightly loose but acceptable."
     },
     "playbooks/core/lmstudio-rocm-llms/playbook.json": {
       "source_sha256": "43aa660e28f5698ceef07211ce4a2b2c197d5463917e8311049c6410a9bdbb57",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Minor: 'ajaminen' vs 'suorittamaan' inconsistency in verb choice between title and body."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "\"jaa\" (share) imprecise for serving; otherwise accurate and fluent."
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
       "source_sha256": "19066843d638353adb3a11fe7f188f59a66c1f11eeaa7037af97a5c21308d4df",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Opus-4.8",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 93,
-      "quality_issues": "Minor: 'talousutisten' typo (should be 'talousuutisten'); some UI labels left untranslated by design; overall excellent quality."
+      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: 'ohjekirja' for playbook slightly off; missing blank line before Step 3 heading."
     },
     "playbooks/core/n8n-automation-gpt-oss/platform.md": {
       "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Opus-4.8",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: 'Alustan Konfiguraatio' title capitalization is non-standard Finnish; 'playbook-ohjelman' is slightly awkward but acceptable."
+      "quality_issues": "Accurate, fluent, code/URLs/brands intact. Minor: 'latest' left untranslated in table, acceptable."
     },
     "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
       "source_sha256": "068a5d7d2996ca2c8b37535eddf9fe38ab421d56ee509a426d96835a96ab3f74",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "\"uutistiivistelmä\" should be \"uutistiivistäjä\" (summarizer = tool/agent, not summary). Minor inflection issue with \"Lemonade:n\"."
+      "model": "Claude-Opus-4.8",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Natural, accurate; 'uutistiivistäjä' slightly awkward but acceptable; brand terms and formatting intact"
     },
     "playbooks/core/pytorch-rocm-llms/README.md": {
       "source_sha256": "a7f0693c43a5a31e55ffb32b5050099e5297ec77456daff75cf33edf91794d7a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'playbook' left untranslated in places; bash comments left in English (acceptable for code). Overall excellent fluency and accuracy."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, tags intact. Minor: 'ohjekirja' for playbook slightly loose; comment lines in code left untranslated (acceptable)."
     },
     "playbooks/core/pytorch-rocm-llms/platform.md": {
       "source_sha256": "f10bd86c45555b65939b97bf0e599a75ce90d5ec18c61a68a98463d34c1e31d2",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: ~40GB translated as ~40 Gt (correct Finnish convention). Overall excellent, natural Finnish with accurate terminology and intact code/URLs."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Excellent translation; 'ohjekirja' for playbook slightly imprecise but clarified with parenthetical. Code, numbers, brands intact."
     },
     "playbooks/core/pytorch-rocm-llms/playbook.json": {
       "source_sha256": "e4aba2b4e1928b5162037673172f666cb991a500469e027743d01f3ee26955ef",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'PC' translated as 'tietokoneellasi' loses informal tone; otherwise accurate and fluent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Slight awkwardness: 'PyTorch- ja AMD ROCm™ -ohjelmiston' groups PyTorch under 'ohjelmiston' imprecisely; otherwise accurate."
     },
     "playbooks/core/vscode-qwen3-coder/README.md": {
       "source_sha256": "25da94f89aec651b737075b56e6c558256a645c2a44b96204163e9c87c857fae",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: untranslated GitHub callout tags and some UI strings left in English; source Resources sentence incomplete, translation smoothed it."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code/URLs intact. Minor: 'greeted by page' rendered as 'näytöllä' acceptable; trailing sentence incomplete in both source and translation."
     },
     "playbooks/core/vscode-qwen3-coder/platform.md": {
       "source_sha256": "14c7eec60b483e4bedb5e465673d89e07466088a9ed9c59d7964c3466cf89410",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Msc' translated as 'Muut' is a reasonable guess but not exact; '18.2' correctly localized to '18,2'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Playbook rendered as 'ohjekirja' (suboptimal); otherwise accurate, fluent, code/numbers intact."
     },
     "playbooks/core/vscode-qwen3-coder/playbook.json": {
       "source_sha256": "7ce988423e60b386afb4d619e4c1f54b387b839fe588261ab5aaf63e13dee220",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "Minor: 'VSCode' in source title rendered as 'VS Code' (acceptable but inconsistent with source). Colon-based inflection ('Qwen3-Coder:lla') is slightly awkward but grammatically standard in Finnish."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'suoritettavan' slightly awkward; 'running' better as 'toimivan'. Otherwise accurate and fluent."
     },
     "playbooks/supplemental/amd-sync/README.md": {
       "source_sha256": "ae7dafe9ebacacdff50f8cf23f8e03d49e1b648456a6b33fabaa84d4fc8c3c0e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'projektikohteiden' slightly awkward for 'project folders'; some UI strings left untranslated by design. Overall excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 93,
+      "quality_issues": "Minor: 'foorumituen tukeen' redundant; slight awkwardness in SSH-server toggle phrasing. Otherwise fluent, accurate, tags/URLs intact."
     },
     "playbooks/supplemental/amd-sync/playbook.json": {
       "source_sha256": "dd916e95fa31e2909a5ce0b7809b56adcc87c799638d3b136deadf1ec0bd4940",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'one-click remote' nuance slightly shifted but meaning preserved."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Live Metrics could be treated more consistently; otherwise accurate and fluent."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
       "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Anchor links not localized (e.g. #1-determine-network-interfaces instead of Finnish anchors); minor phrasing like 'verkotetuilla' should be 'verkotetuilla' (inflection nit)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 91,
+      "quality_issues": "Minor typo 'Moninosolmuisen'; anchor links kept English (acceptable). Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
       "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Minor: 'monen solmun' could be 'monisolmuinen' for more natural Finnish compound form."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Good; minor phrasing 'Halon' inflection slightly awkward but acceptable and clear."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
       "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'verkotetuilla' should be 'verkotetuilla' (partitive case error), anchor links not localized (#downloading-the-model vs Finnish heading), 'etenee' typo for 'etenee' is fine but 'ajaisi' slightl"
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor: inconsistent capitalization (Koneella vs koneella), 'koontaminen' nonstandard, '1 biljoonan' (trillion=biljoona, correct). Otherwise accurate, code/URLs intact."
     },
     "playbooks/supplemental/clustering-rpc-server/playbook.json": {
       "source_sha256": "afee8d03bc9faa092036cbf4a62ec9db4252a49f25273438a7e4e5bbc2b4a10c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Minor: 'Set up' translated as 'Asenna' (install) rather than 'Määritä' (configure/set up)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "\"350B+\" expanded to \"350 miljardin parametrin\"—accurate interpretation but adds \"parametrin\" not in source; otherwise fluent."
     },
     "playbooks/supplemental/ollama-getting-started/README.md": {
       "source_sha256": "5cb90cfa647fafa9f99ad8b659211c2e1806cd11f9fff3ceb351b56a90e6f227",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'token-by-token' translated as 'merkki kerrallaan' (character, not token); @github-only block left untranslated; 'ilmaisee' should be 'ilmaisaa' (minor typo)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'säilöntäkuvia' odd for container images; missing blank line before Next Steps heading. Otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/ollama-getting-started/playbook.json": {
       "source_sha256": "642990e3570bb0888cd87c78e2c61d19eea1864677052a0f04d7aa2a7c0f5414",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'LLM-malleja' is slightly redundant (LLM already contains 'models'), but acceptable in Finnish usage."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'keskustele päätteestä' slightly off (should be 'päätteessä/käsin'); otherwise accurate and fluent."
     },
     "playbooks/supplemental/open-webui-chat/README.md": {
       "source_sha256": "b257e5d4c3accfd50265d7b75ea8258159b037cbbe57dcc9241bad746554c929",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Translation truncated at the very end ('rakent...'). Minor: some UI terms left untranslated inconsistently. Overall high quality."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'konteinaamiseen' awkward neologism; 'näkömalli' for vision acceptable. Code blocks, URLs, numbers intact."
     },
     "playbooks/supplemental/open-webui-chat/platform.md": {
       "source_sha256": "1cc71fc518a4ba7e507047973d835456dc836155b3365f0e7fb64ed1f81d85cb",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor typo: 'listauspäätepistteessä' should be 'listauspäätepisteessä'. Otherwise excellent translation."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'Lemonade tulisi olla' should be 'Lemonaden tulisi olla'; slightly awkward but otherwise accurate and fluent."
     },
     "playbooks/supplemental/open-webui-chat/playbook.json": {
       "source_sha256": "b7c488fe64673b9b617a974c4b360661b6afe299f3410c1120db34a6e794a0fd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 82,
-      "quality_issues": "Minor fluency issues: 'LLM:ien' is awkward inflection; 'chattailuun' is informal but acceptable. Brand name 'Open WebUI' preserved correctly."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate and fluent; minor redundancy in 'LLM-mallien' (LLM already means model)."
     },
     "playbooks/supplemental/cvml/README.md": {
       "source_sha256": "a238f52921afd44cf45727cfafb0f4d99ceeb97b18b1c785362c8938554f6004",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: anchor link #running-face-detection not updated to Finnish heading anchor; 'renderöimään' is acceptable but informal."
+      "quality_issues": "Minor: 'puretun sijaintiin' slightly awkward genitive; otherwise fluent, accurate, code/URLs/brands intact."
     },
     "playbooks/supplemental/cvml/playbook.json": {
       "source_sha256": "53796041ee0532656e093dbb4bbac2c3bddbf15e76f7646824fa6360f1232a8c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "\"päälle\" is slightly awkward; \"pohjalta\" or \"avulla\" would be more natural for \"on top of\"."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent; 'pohjalta' slightly awkward for 'on top of' but acceptable. Terminology and brands intact."
     },
     "playbooks/supplemental/gaia-agents/README.md": {
       "source_sha256": "feb74d6ee2839ece7d3918fb2910e2b7cf09cfdde6191742b776c521910f960a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'ylikuormitusvaraksi' is awkward for 'overhead'; some English UI strings left untranslated by design; 'kokotäydennyksellä' slightly unclear for 'size enrichment'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Fluent, accurate, code/URLs intact. 'labels' rendered as 'nimikkeet'—slightly off; minor terminology nits otherwise excellent."
     },
     "playbooks/supplemental/gaia-agents/platform.md": {
       "source_sha256": "0aa409f73352dbe5489bcbff783403a39bd4049ae44238f8ce107165f02cf43c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'playbook-ohjelman' is slightly awkward; 'kehykset' for 'Frameworks' is acceptable but less common in tech Finnish."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'GAIA tulee olla asennettu' slightly awkward (should be 'GAIA:n tulee olla'); 'ohjekirja' for playbook debatable."
     },
     "playbooks/supplemental/gaia-agents/playbook.json": {
       "source_sha256": "e835f7da0097042741c5558f5fc14a57f25b24f807ef5c277ee6cf9793212ed9",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "Title slightly rephrased; 'ensimmäistä kertaa' shifts meaning from 'Your First' to 'for the first time'. Minor fluency nit with API:ja."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'GAIA:lla' spacing convention debatable; otherwise accurate and fluent."
     },
     "playbooks/supplemental/lemonade-getting-started/platform.md": {
       "source_sha256": "091ccd8efa90e078a5d740aac0e40d742ad91f5898d0de9e1574d62e6778ec17",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Typo: 'esiasennetttu' should be 'esiasennettu' (double t)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; all technical terms, code blocks, URLs, and numbers intact. Minor stylistic naturalness only."
     },
     "playbooks/supplemental/lemonade-getting-started/playbook.json": {
       "source_sha256": "444b1e3ddf1a59c5357878cb7e88b0db243e7c9a9d544095a2b8bdd3b8ba648a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'Lemonade' translated as 'Lemonade-palvelimen' adds 'palvelimen' not in original title context; slight redundancy with 'paikallinen' and 'paikallisesti'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Title slightly awkward ('käytön kanssa'); 'ajamaan' colloquial but acceptable; otherwise accurate and fluent."
     },
     "playbooks/supplemental/llama-factory-finetuning/README.md": {
       "source_sha256": "38f43810c9ea7c04ad70e180795d64b81ab9e45fd01413ecd26a1d4e7283bde1",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'loppuvat muistista' slightly awkward phrasing; some English comments in code blocks left untranslated (acceptable for code)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Minor: 'downstream tasks' rendered literally as 'alavirran tehtäviin'; slight inconsistency ohjekirja/opas/datajoukko/dataset. Code, URLs, brands intact."
     },
     "playbooks/supplemental/llama-factory-finetuning/playbook.json": {
       "source_sha256": "e8a8cd9cebcb66736e1cfb707fd792795defcb4f4facb6b80f722be826b2a89b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Minor: 'LLaMA-Factory-' compound hyphenation slightly awkward; otherwise accurate and fluent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Title slightly awkward ('Hienosäätö LLM-malleille' better as 'LLM-mallien hienosäätö'); otherwise accurate and fluent."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
       "source_sha256": "3870cbf9cdec77fbb11f99c2751de2826fce765a431d52a853a9c034727e7225",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor nits: 'agenttiworkloadeihin' is an awkward compound; 'paritusskoodilla' slightly unusual; section heading differs slightly from source ('Pull and Load')"
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "One heading left untranslated ('### Configure OpenClaw käyttämään Lemonadea'); otherwise fluent, accurate, code intact."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
       "source_sha256": "99df141310754dea218b61260f021d4fd7aec64a922654db64ed473b877e6351",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 82,
-      "quality_issues": "\"OpenClaw'n\" uses awkward apostrophe for Finnish genitive; should be \"OpenClaw:n\". Minor fluency issues with compound word formation."
+      "quality_issues": "Inconsistent brand term: 'Lemonade-palvelimella' vs 'Lemonade Server'; 'OpenClaw-autonominen' compound slightly awkward."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
       "source_sha256": "bc2cba716bb866957cf930a234b9080bd64c863a18e6f77f7e98c3f51f0868fc",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor nits: 'täyttä hienosäätöä' should be 'täydellistä hienosäätöä'; anchor link not localized; some English comments in code left untranslated (acceptable)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Consistent, accurate; minor terminology inconsistency (adapteri/sovittimet); 'ohjekirja' for playbook slightly off. Otherwise fluent and complete."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
       "source_sha256": "34841c22920fdf111d2a7ab0b640af96555cc1aa0376103acf8ea62e336609af",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 82,
-      "quality_issues": "Title uses allative 'malleille' (for models) instead of genitive/partitive; should be 'LLM-mallien hienosäätö'. Minor case inconsistency with 'PyTorch' missing suffix in body."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; minor: LLM acronym expansion order slightly awkward but acceptable."
     },
     "playbooks/supplemental/pytorch-kernels/platform.md": {
       "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'playbook' left partially untranslated as 'playbook-kokonaisuuden'; workload name kept in English is acceptable but could note it's untranslated."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Accurate, fluent, code/URLs intact. 'ohjekirjan' for playbook acceptable; minor stylistic choices only."
     },
     "playbooks/supplemental/pytorch-kernels/playbook.json": {
       "source_sha256": "30272b772a010c694249bc9a4f83fe9676ee2fa98cf3ec96dbca4f3be4ae3916",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Minor: 'PyTorch-' with hyphen in subtitle slightly awkward but acceptable compound form in Finnish."
+      "quality_issues": "Minor: 'ympäristöllä' slightly interpretive but acceptable; otherwise accurate and fluent, terms/brands intact."
     },
     "playbooks/supplemental/speech2speech-translation/README.md": {
       "source_sha256": "c6e008753ea3a6442c32774e44345e39fd5b5b64534fcb837541f2220c66d1fd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'playbook' left untranslated; slight awkwardness in 'Yhdistelemällä' rephrasing; otherwise excellent fluency, accuracy, and intact code/URLs."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: 'processor' rendered as 'prosessori' slightly ambiguous but acceptable."
     },
     "playbooks/supplemental/speech2speech-translation/platform.md": {
       "source_sha256": "ac5b39917b7a533154f6a0f823949356905a766e067a7efcd000d63584cb36a3",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "2.3B→2,3 mrd and ~10GB→~10 Gt are valid Finnish localizations. Minor: 'mrd' could be 'miljardia' for clarity. Overall excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'GB' rendered inconsistently (~10Gt vs 20 Gt); otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
       "source_sha256": "48eb7b7b031b9e676748a482854cf10fb41555109fa05ec9a06a8992baf282cf",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Excellent translation, natural Finnish. Minor stylistic note: 'puheesta puheeksi -käännös' hyphenation could be debated."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate and fluent; 'Rakenna' slightly literal but acceptable for technical context."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
       "source_sha256": "a2ee5a621944612fd1d5ac526c6b844f0f528a0c696c178ac8f85f170ab7467c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'ei ole vaikuttunut' is awkward (should be 'ei vaikuta siihen'); anchor link #known-warnings not updated to #tunnetut-varoitukset."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Excellent translation; code, URLs, tags intact. Minor: 'ohjekirja' slightly formal for playbook; a few stiff phrasings."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/platform.md": {
       "source_sha256": "45dc9cd1642f32761ed88326b25e7df018482c93832b386c31464522eb62066b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: '20GB' translated as '20 Gt' (Finnish convention, acceptable); 'Download Location' → 'Latauslinkki' slightly shifts meaning."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Fluent, accurate; code/numbers/brands intact. Minor: 'odotetut' slightly redundant, 'ohjekirja' debatable for playbook."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/playbook.json": {
       "source_sha256": "3204669893381cf35615253a77a5fab815e3d2e3cc61269de7441781b2a6aebc",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 75,
-      "quality_issues": "\"Hienosäätö LLM-malleille\" should be \"LLM-mallien hienosäätö Unsloth-työkalulla\"; allative case incorrect for this context."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Trademark symbol misplaced onto LLM-mallien; minor phrasing awkwardness but adequate and fluent."
     },
     "playbooks/supplemental/vllm-inference/README.md": {
       "source_sha256": "24dc5ebde274af75275e075ca2423138e0d67d3de03f1cebbee30fb9ac5940f4",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'käynnistystermiaali' should be 'käynnistusterminaali' (typo). Code comment left untranslated (acceptable). Overall excellent fluency and accuracy."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Inconsistent 'konteroitu/konteroidun' (nonstandard neologism for containerized); minor terminology choices, otherwise accurate and fluent."
     },
     "playbooks/supplemental/vllm-inference/playbook.json": {
       "source_sha256": "0db881869b8d489317f0445edf4b420f738173b9c82c6488074e8948f7d6351c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Minor: 'palvelu' could be more specific as 'tarjoilu' (serving in ML context), but acceptable."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 82,
+      "quality_issues": "'palvelua' awkward for serving; 'konteinoitua' non-standard term; otherwise accurate and fluent."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "ef647656230fb6a512ac0b98b573e61f729e4c14de2bdcd4b33a1c733c1a9e2c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Minor terminology inconsistency: 'Vaiheistus/Läpikäynti' used interchangeably for 'Walkthrough'. 'aaltoetusuoritusmalli' and 'aaltofronti' inconsistent wavefront translations."
+      "quality_issues": "Minor inconsistency: kernel translated as both 'kerneli' and 'ydin'; 'ohjeisto/ohjekirja/läpikäynti' vary for playbook/walkthrough. Otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
       "source_sha256": "b3613af14dd94ab44888f2d3013af6b10e1685c5e4915765507065117303be9a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Minor typo 'siirry' (should be 'siirry'→ok actually valid colloquial but 'siirry' is nonstandard; correct is 'siirry'), 'äänimaalli' typo for 'äänimalli', some awkward phrasing, 'tai kautta' formattin"
+      "quality_issues": "Minor: 'via' translation misplaced after code block breaking flow; 'tukisanakone' awkward for flashcard generator. Otherwise accurate, fluent, code/URLs intact."
     }
   }
 }

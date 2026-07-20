@@ -11,44 +11,44 @@ SPDX-License-Identifier: MIT
 
 ## Prezentare generală
 
-Scrieți un kernel GPU de la zero, compilați-l, lansați-l pe un GPU AMD și urmăriți cum crește utilizarea. Acest playbook arată cum funcționează de fapt calculul GPU: scrieți codul kernelului și executați-l în paralel pe mii de fire de execuție.
+Scrieți un kernel GPU de la zero, compilați-l, lansați-l pe un GPU AMD și observați creșterea utilizării. Acest playbook arată cum funcționează efectiv calculul pe GPU: scrieți codul kernelului și executați-l în paralel pe mii de fire de execuție (threads).
 
 > **Notă**: Acesta este un playbook destul de complex, care poate necesita depanare și modificări suplimentare.
 
 ## Ce veți învăța
 
 <!-- @os:windows -->
-- Cum funcționează kernelurile GPU: grile, blocuri, fire de execuție și modelul de indexare care le mapează la date
+- Cum funcționează kernelurile GPU: grile, blocuri, fire de execuție și modelul de indexare care le asociază cu datele
 - Cum stiva AMD ROCm/HIP vă permite să scrieți cod în stil CUDA care rulează pe GPU-uri AMD fără modificări
-- Cum să compilați un kernel la runtime folosind `torch.cuda._compile_kernel`
-- Cum să construiți o extensie C++ nativă pentru kernel cu `CUDAExtension` + pybind11, importabilă din Python
+- Cum să compilați un kernel la momentul execuției folosind `torch.cuda._compile_kernel`
+- Cum să construiți o extensie kernel nativă în C++ cu `CUDAExtension` + pybind11, importabilă din Python
 <!-- @os:end -->
 <!-- @os:linux -->
-- Cum funcționează kernelurile GPU: grile, blocuri, fire de execuție și modelul de indexare care le mapează la date
+- Cum funcționează kernelurile GPU: grile, blocuri, fire de execuție și modelul de indexare care le asociază cu datele
 - Cum stiva AMD ROCm/HIP vă permite să scrieți cod în stil CUDA care rulează pe GPU-uri AMD fără modificări
-- Cum să compilați un kernel la runtime folosind `torch.cuda._compile_kernel`
-- Cum să construiți o extensie C++ nativă pentru kernel cu `CUDAExtension` + pybind11, importabilă din Python
-- Cum să măsurați timpul de execuție al kernelului și să monitorizați utilizarea live a GPU-ului cu `amd-smi`
+- Cum să compilați un kernel la momentul execuției folosind `torch.cuda._compile_kernel`
+- Cum să construiți o extensie kernel nativă în C++ cu `CUDAExtension` + pybind11, importabilă din Python
+- Cum să măsurați timpul de execuție al kernelului și să monitorizați utilizarea GPU în timp real cu `amd-smi`
 <!-- @os:end -->
 
 ---
 
-Acest playbook acoperă două abordări pentru dezvoltarea kernelurilor:
+Acest playbook acoperă două abordări pentru dezvoltarea de kerneluri:
 
 <!-- @os:windows -->
 | Abordare | Punct de intrare |
 |---|---|
-| **Compilare JIT** | `torch.cuda._compile_kernel`, scrieți un kernel ca șir Python, fără etapă de compilare |
+| **Compilare JIT** | `torch.cuda._compile_kernel`, scrieți un kernel ca șir de caractere Python, fără pas de build |
 | **Extensie C++** | `CUDAExtension` + pybind11: compilați un fișier `.cu` într-un `.pyd` nativ și importați-l |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Abordare | Punct de intrare |
 |---|---|
-| **Compilare JIT** | `torch.cuda._compile_kernel`, scrieți un kernel ca șir Python, fără etapă de compilare |
+| **Compilare JIT** | `torch.cuda._compile_kernel`, scrieți un kernel ca șir de caractere Python, fără pas de build |
 | **Extensie C++** | `CUDAExtension` + pybind11: compilați un fișier `.cu` într-un `.so` nativ și importați-l |
 <!-- @os:end -->
 
-Ambele abordări rulează pe GPU-uri AMD. Acest lucru este posibil deoarece build-ul ROCm al PyTorch mapează întreaga suprafață a API-ului CUDA la HIP. Aceasta înseamnă că `torch.cuda`, `CUDAExtension` și sintaxa kernelurilor CUDA funcționează transparent pe hardware AMD.
+Ambele abordări rulează pe GPU-uri AMD. Acest lucru este posibil deoarece build-ul ROCm al PyTorch mapează întreaga suprafață a API-ului CUDA la HIP. Aceasta înseamnă că `torch.cuda`, `CUDAExtension` și sintaxa kernelurilor CUDA funcționează toate transparent pe hardware AMD.
 
 ---
 
@@ -56,7 +56,7 @@ Ambele abordări rulează pe GPU-uri AMD. Acest lucru este posibil deoarece buil
 
 ### Ce este un kernel GPU?
 
-Un kernel GPU este o funcție care rulează în paralel pe mii de fire de execuție GPU simultan. Spre deosebire de o funcție CPU care se execută o singură dată per apel, un kernel este lansat cu o **grilă** de **blocuri**, fiecare conținând mai multe **fire de execuție**, toate executând același cod pe date diferite.
+Un kernel GPU este o funcție care rulează în paralel pe mii de fire de execuție GPU simultan. Spre deosebire de o funcție CPU care se execută o singură dată per apel, un kernel este lansat cu o **grilă** de **blocuri**, fiecare conținând multe **fire de execuție**, toate executând același cod pe date diferite.
 
 <p align="center">
   <img src="assets/grid_threads.png" width="900"/>
@@ -64,14 +64,14 @@ Un kernel GPU este o funcție care rulează în paralel pe mii de fire de execu�
 
 ### Modelul de indexare a firelor de execuție
 
-La lansarea unui kernel specificați două dimensiuni:
+Când lansați un kernel, specificați două dimensiuni:
 
 | Variabilă | Semnificație |
 |---|---|
 | `gridDim` | Numărul de blocuri din grilă |
 | `blockDim` | Numărul de fire de execuție per bloc |
 
-Fiecare fir de execuție are acces la trei variabile încorporate doar pentru citire:
+Fiecare fir de execuție are acces la trei variabile predefinite, doar-citire:
 
 | Variabilă | Semnificație |
 |---|---|
@@ -79,25 +79,25 @@ Fiecare fir de execuție are acces la trei variabile încorporate doar pentru ci
 | `blockDim.x` | Numărul de fire de execuție dintr-un bloc |
 | `threadIdx.x` | Indexul firului de execuție în cadrul blocului său |
 
-### ID global al firului de execuție
+### ID-ul global al firului de execuție
 
-Aceste variabile sunt combinate pentru a calcula un index unic global al firului de execuție:
+Aceste variabile sunt combinate pentru a calcula un index global unic al firului de execuție:
 
 ```c
 int idx = blockIdx.x * blockDim.x + threadIdx.x;
 ```
 
-Numărul total de fire de execuție = `gridDim.x * blockDim.x`. Fiecare fir de execuție procesează un element în mod independent. Aceasta este baza **paralelismului de date**. Aceeași operație rulează pe mai multe elemente simultan, fără dependență între fire de execuție.
+Total fire de execuție = `gridDim.x * blockDim.x`. Fiecare fir de execuție procesează un element în mod independent. Aceasta este baza **paralelismului de date**. Aceeași operație rulează pe multe elemente simultan, fără dependențe între fire de execuție.
 
 ---
 
 ### Modelul de execuție GPU: Wavefronts
 
-GPU-urile AMD execută firele de execuție în grupuri de **32** numite **wavefronts**. Toate firele de execuție dintr-un wavefront rulează aceeași instrucțiune simultan. Acest lucru afectează alegerile optime ale dimensiunii blocului (256 fire de execuție = 8 wavefronts = eficiență bună de planificare).
+GPU-urile AMD execută firele de execuție în grupuri de **32**, numite **wavefronts**. Toate firele de execuție dintr-un wavefront rulează aceeași instrucțiune simultan. Acest lucru afectează alegerea dimensiunii optime a blocului (256 fire de execuție = 8 wavefronts = eficiență bună a planificării).
 
 ### Programarea GPU AMD: HIP + ROCm
 
-**ROCm** este stiva de calcul GPU open-source a AMD (drivere, compilatoare, biblioteci, runtime). **HIP** se află deasupra, proiectat să fie sintactic identic cu CUDA. Build-ul ROCm al PyTorch mapează transparent `torch.cuda.*` la HIP, astfel încât același cod funcționează pe GPU-uri AMD.
+**ROCm** este stiva open-source de calcul GPU a AMD (drivere, compilatoare, biblioteci, runtime). **HIP** se situează deasupra, fiind conceput pentru a fi identic sintactic cu CUDA. Build-ul ROCm al PyTorch mapează transparent `torch.cuda.*` la HIP, astfel încât același cod funcționează pe GPU-uri AMD.
 
 ---
 
@@ -106,10 +106,10 @@ GPU-urile AMD execută firele de execuție în grupuri de **32** numite **wavefr
 PyTorch livrează un build ROCm în care suprafața API-ului CUDA (`torch.cuda.*`) este susținută transparent de HIP. Aceasta înseamnă că:
 
 - `torch.cuda.is_available()` funcționează pe GPU-uri AMD cu ROCm
-- `tensor.to("cuda")` alocă pe GPU-ul AMD
+- `tensor.to("cuda")` alocă memorie pe GPU-ul AMD
 - `torch.version.hip` expune versiunea HIP
 
-PyTorch expune de asemenea `torch.cuda._compile_kernel()`, o scurtătură de nivel înalt pentru compilarea JIT a unui șir de kernel brut și obținerea unui obiect apelabil, fără a fi nevoie de o etapă de compilare separată.
+PyTorch expune de asemenea `torch.cuda._compile_kernel()`, o comandă rapidă de nivel înalt pentru a compila JIT un șir de caractere reprezentând un kernel și a obține un apelabil, fără a fi nevoie de un pas de build separat.
 
 ---
 
@@ -119,7 +119,7 @@ PyTorch expune de asemenea `torch.cuda._compile_kernel()`, o scurtătură de niv
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalarea cerințelor preliminare software
+## Instalarea cerințelor software preliminare
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Cerințe preliminare - Windows
@@ -131,7 +131,7 @@ PyTorch expune de asemenea `torch.cuda._compile_kernel()`, o scurtătură de niv
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Pe Linux, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv cu ROCm+Pytorch deja instalat.
+Pe Linux, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv cu ROCm+Pytorch deja instalate.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -144,7 +144,7 @@ source kernel-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Acordați utilizatorului dvs. acces la dispozitivele GPU** (deconectați-vă și reconectați-vă pentru ca aceasta să intre în vigoare):
+**Acordați-i utilizatorului dvs. acces la dispozitivele GPU** (deconectați-vă și reconectați-vă pentru ca acest lucru să aibă efect):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -173,8 +173,8 @@ kernel-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
-> **Sfat**: Utilizatorii Windows poate fi necesar să modifice Politica de execuție PowerShell (de exemplu,
-> setând-o la RemoteSigned sau Unrestricted) înainte de a rula unele comenzi Powershell.
+> **Sfat**: Utilizatorii Windows ar putea fi nevoiți să modifice Politica de execuție PowerShell (de exemplu,
+> setând-o la RemoteSigned sau Unrestricted) înainte de a rula anumite comenzi PowerShell.
 
 <!-- @os:end -->
 ### Instalarea Dependențelor de Bază
@@ -193,7 +193,7 @@ kernel-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-> **Notă:** Pentru acest ghid, ROCm și PyTorch trebuie instalate în mediul virtual chiar și pe Ryzen AI Halo, deoarece compilarea kernelurilor personalizate necesită antetele complete de dezvoltare.
+> **Notă:** Pentru acest playbook, ROCm și PyTorch trebuie instalate în mediul virtual chiar și pe Ryzen AI Halo, deoarece compilarea kernelurilor personalizate necesită header-ele complete de dezvoltare.
 
 Instalați ROCm:
 ```powershell
@@ -227,9 +227,9 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 ### Instalarea Dependențelor Suplimentare
 
 <!-- @os:linux -->
-Instalați lanțul de instrumente de compilare C/C++ pentru Linux. Aceasta este o dependență la nivel de sistem și este necesară pentru ghidurile de extensii C++ deoarece `CUDAExtension` construiește module native `.so` din fișiere `.cu`.
+Instalați lanțul de instrumente de compilare Linux C/C++. Aceasta este o dependență la nivel de sistem și este necesară pentru tutorialele cu extensii C++, deoarece `CUDAExtension` construiește module native `.so` din fișiere `.cu`.
 
-Rulați aceasta o singură dată pe mașina Linux, în afara mediului virtual Python creat:
+Rulați această comandă o singură dată pe mașina Linux, în afara mediului virtual Python creat:
 
 ```bash
 sudo apt update
@@ -237,7 +237,7 @@ sudo apt install -y build-essential gcc g++
 ```
 <!-- @os:end -->
 
-După activarea mediului virtual `kernel-env`, instalați dependențele Python pentru compilare:
+După activarea mediului virtual `kernel-env`, instalați dependențele de compilare Python:
 <!-- @test:id=install-deps timeout=60 setup=activate-venv -->
 ```bash
 python -m pip install "setuptools<82" wheel ninja
@@ -260,13 +260,13 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Asigurați-vă că [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) sau o [versiune mai nouă](https://visualstudio.microsoft.com/vs/community/) este instalat cu sarcina de lucru **Dezvoltare desktop cu C++**.
+Vă rugăm să vă asigurați că [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) sau [o versiune mai nouă](https://visualstudio.microsoft.com/vs/community/) este instalat(ă) cu sarcina de lucru **Desktop development with C++**.
 
-> **Notă**: Această configurare a mediului C++ Visual Studio este necesară doar pentru abordarea **Extensie C++**. Nu este necesară pentru abordarea de Compilare JIT.
+> **Notă**: Această configurare a mediului Visual Studio C++ este necesară doar pentru abordarea **C++ Extension**. Nu este necesară pentru abordarea de compilare JIT.
 
 Deschideți un terminal PowerShell și rulați următoarele comenzi înainte de a construi extensia C++.
 
-**Pasul 1: Găsiți mediul C++ Visual Studio instalat**
+**Pasul 1: Găsiți mediul Visual Studio C++ instalat**
 
 **(A) Localizați `vswhere.exe`, care este instalat împreună cu Visual Studio Installer**
 ```powershell
@@ -275,7 +275,7 @@ $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.e
 if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(B) Găsiți `vcvars64.bat` din Visual Studio 2022 sau mai nou cu instrumente de compilare C++**
+**(B) Găsiți `vcvars64.bat` din Visual Studio 2022 sau o versiune mai nouă cu instrumente de compilare C++**
 
 ```powershell
 $Vcvars = & $VsWhere `
@@ -288,17 +288,17 @@ $Vcvars = & $VsWhere `
 if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(C) Afișați mediul C++ Visual Studio utilizat**
+**(C) Afișați mediul Visual Studio C++ utilizat**
 
 ```powershell
 Write-Host "Using Visual Studio C++ environment: $Vcvars"
 ```
 
-**Pasul 2: Activați mediul de compilare C++ Visual Studio**
+**Pasul 2: Activați mediul de compilare Visual Studio C++**
 
 **(A) Rulați `vcvars64.bat` și capturați mediul pe care îl configurează**
 
-Aceasta face disponibile `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` și căile Windows SDK.
+Acest lucru face disponibile `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` și căile Windows SDK.
 
 ```powershell
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
@@ -320,7 +320,7 @@ $VsEnv | ForEach-Object {
 }
 ```
 
-**Pasul 3: Verificați că compilatorul Microsoft C++ este disponibil**
+**Pasul 3: Verificați dacă compilatorul Microsoft C++ este disponibil**
 
 ```powershell
 where.exe cl
@@ -366,7 +366,7 @@ Write-Host "OK: Visual Studio C++ build environment is available."
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Setarea Variabilelor de Mediu
+#### Setați Variabilele de Mediu
 <!-- @os:linux -->
 <!-- @test:id=set-env-variables-linux timeout=300 setup=activate-venv -->
 ```bash
@@ -417,7 +417,7 @@ $env:DISTUTILS_USE_SDK = "1"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Verificați că GPU-ul AMD este vizibil cu:
+Verificați dacă GPU-ul AMD este vizibil cu:
 <!-- @test:id=amd-smi-linux timeout=60 setup=activate-venv -->
 ```bash
 amd-smi
@@ -552,21 +552,21 @@ $code | python -
 
 ## Descărcarea Fișierelor Necesare
 
-Creați următoarea structură de directoare prin crearea celor **2 foldere noi** și descărcarea fișierelor corespunzătoare:
+Creați următoarea structură de directoare creând cele **2 foldere noi** și descărcând fișierele corespunzătoare:
 
 | Director | Fișiere de Descărcat | Descriere |
 |-----------|-------------------|-------------|
-| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| Fișiere JIT și extensie C++ pentru kernelul de adunare vectorială |
-| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Fișiere JIT și extensie C++ pentru kernelul de înmulțire matriceală |
+| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| Fișiere JIT și extensie C++ pentru kernelul de adunare a vectorilor |
+| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Fișiere JIT și extensie C++ pentru kernelul de înmulțire a matricelor |
 
 
-## Ghiduri Pas cu Pas
+## Tutoriale
 
-### Ghid 1: Adunare Vectorială
+### Tutorialul 1: Adunarea Vectorilor
 
 #### Abordarea A: Compilare JIT
 
-Compilarea JIT (Just-In-Time) înseamnă că kernelul este scris ca un șir C++ brut în interiorul Python și compilat la rulare, fără a fi necesari pași suplimentari de construire.
+Compilarea JIT (Just-In-Time) înseamnă că kernelul este scris ca un șir de caractere C++ brut în interiorul Python și compilat în timpul execuției, fără a fi nevoie de pași de compilare suplimentari.
 
 Pentru a utiliza [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py), asigurați-vă că este descărcat și rulați:
 ```bash
@@ -614,31 +614,31 @@ print("First 5 elements:", x[:5].cpu())
 #Expected output: tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @os:linux -->
-> **Sfat**: Scriptul lansează, de asemenea, un fir de execuție în fundal care interoghează `amd-smi` la fiecare 100ms pentru a înregistra utilizarea maximă și medie a GPU-ului în timpul rulării kernelului.
+> **Sfat**: Scriptul generează, de asemenea, un fir de execuție în fundal care interoghează `amd-smi` la fiecare 100ms pentru a înregistra utilizarea maximă și medie a GPU-ului în timpul rulării kernelului.
 <!-- @os:end -->
 
-> **Notă**: **De ce este dimensiunea blocului 256?** <br>
-> - Kernelul folosește **256 de fire pe bloc** deoarece se aliniază bine cu **modelul de execuție wavefront al GPU-urilor AMD**.
-> - Rețineți că hardware-ul AMD execută firele în grupuri de 32 de fire, rezultând 8 wavefront-uri pe bloc. (8 wavefront-uri x 32 fire = 1 bloc)
+> **Notă**: **De ce dimensiunea blocului este 256?** <br>
+> - Kernelul folosește **256 de fire de execuție per bloc** deoarece se aliniază bine cu **modelul de execuție wavefront al GPU-urilor AMD**.
+> - Rețineți că hardware-ul AMD execută firele de execuție în grupuri de 32 de fire, rezultând 8 wavefronturi per bloc. (8 wavefronturi x 32 de fire = 1 bloc)
 
 
 **Ce face sarcina de lucru:**
 
-Kernelul adaugă artificial muncă suplimentară pentru a demonstra utilizarea GPU-ului:
+Kernelul adaugă artificial lucru suplimentar pentru a demonstra utilizarea GPU-ului:
 
 - **100.000.000 de elemente** în tensor
-- **Bucla internă rulează de 1.000 de ori** per element per lansare de kernel  
+- **Bucla interioară rulează de 1.000 de ori** per element per lansare de kernel  
 - **200 de lansări de kernel** în total
 
-**Calcul:**  
-- Fiecare element: este incrementat cu 1 × 1.000 de iterații × 200 de lansări = 200.000  
-- Rezultat final: 1,0 (valoare de pornire) + 200.000 (adunări) = 200.001,0
+**Matematică:**  
+- Fiecare element: este incrementat cu 1 × 1.000 iterații × 200 lansări = 200.000  
+- Rezultat final: 1.0 (valoare inițială) + 200.000 (adunări) = 200.001,0
 
-**De ce bucla internă?**  
-- Fără bucla `for (int i = 0; i < 1000; i++)`, cele 200 de lansări s-ar termina instantaneu și instrumentele de monitorizare nu ar putea captura o utilizare semnificativă a GPU-ului. Munca artificială face ca fiecare rulare de kernel să dureze suficient de mult pentru ca instrumentele de monitorizare să măsoare performanța.
+**De ce bucla interioară?**  
+- Fără bucla `for (int i = 0; i < 1000; i++)`, cele 200 de lansări s-ar termina instantaneu, iar instrumentele de monitorizare nu ar putea capta o utilizare semnificativă a GPU-ului. Munca artificială face ca fiecare rulare a kernelului să dureze suficient de mult pentru ca instrumentele de monitorizare să poată măsura performanța.
 
 <!-- @os:linux -->
-**Rezultat așteptat:** [Valorile de performanță vor varia]
+**Rezultat așteptat:**[Valorile de performanță vor varia]
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
@@ -648,7 +648,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Notă**: Pe Windows, `amd-smi` nu este suportat. Pentru a urmări utilizarea GPU-ului, puteți folosi Task Manager, unde ar trebui să vedeți un vârf scurt de utilizare când rulați programul.
+> **Notă**: Pe Windows, `amd-smi` nu este suportat. Pentru a urmări utilizarea GPU-ului, puteți folosi Task Manager, unde ar trebui să vedeți un scurt vârf de utilizare atunci când rulați programul.
 
 **Rezultat așteptat:**
 ```
@@ -657,7 +657,7 @@ Elapsed time: 2.753s
 No GPU Usage captured.
 ```
 <!-- @os:end -->
-**Felicitări! Tocmai ați rulat primul dvs. kernel GPU.**
+**Bună treabă! Tocmai ați rulat primul dumneavoastră kernel GPU.**
 
 <!-- @os:linux -->
 <!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
@@ -800,17 +800,17 @@ $code | python -
 ---
 #### Abordarea B: Extensie C++
 
-A doua abordare este mai manuală: scrieți kernel-ul și legătura Python într-un singur fișier `.cu`, compilați-l nativ folosind sistemul de build al PyTorch și importați-l în Python.
+A doua abordare este mai manuală: scrieți nucleul și legătura Python într-un singur fișier `.cu`, compilați-l nativ folosind sistemul de build al PyTorch și importați-l în Python.
 
 <!-- @os:windows -->
-> **Notă**: Abordarea prin Extensie C++ necesită mediul de build Visual Studio C++ deoarece PyTorch compilează fișierul sursă `.cu` într-un modul de extensie nativ `.pyd`. Construirea acelei extensii native depinde de lanțul de instrumente Microsoft C++ (compilator, linker și instrumente de build) furnizat de Visual Studio. Rulați comenzile de activare Visual Studio din secțiunea de configurare înainte de a construi extensia.
+> **Notă**: Abordarea prin Extensie C++ necesită mediul de build Visual Studio C++, deoarece PyTorch compilează fișierul sursă `.cu` într-un modul de extensie nativ `.pyd`. Construirea acelei extensii native depinde de lanțul de instrumente C++ Microsoft (compilator, linker și instrumente de build) oferit de Visual Studio. Rulați comenzile de activare Visual Studio din secțiunea de configurare înainte de a construi extensia.
 <!-- @os:end -->
 
 Descărcați următoarele fișiere dacă nu ați făcut-o deja:
 <!-- @os:windows -->
 | Fișier | Rol |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + lansator + legătură pybind11, totul într-un singur fișier |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Nucleu + launcher + legătură pybind11, totul într-un singur fișier |
 | [setup.py](assets/Vector_Addition/setup.py) | Script de build, folosește `CUDAExtension` pentru a compila `.cu` într-un `.pyd` |
 | [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Script Python care rulează artefactele construite |
 <!-- @os:end -->
@@ -818,12 +818,12 @@ Descărcați următoarele fișiere dacă nu ați făcut-o deja:
 <!-- @os:linux -->
 | Fișier | Rol |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + lansator + legătură pybind11, totul într-un singur fișier |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Nucleu + launcher + legătură pybind11, totul într-un singur fișier |
 | [setup.py](assets/Vector_Addition/setup.py) | Script de build, folosește `CUDAExtension` pentru a compila `.cu` într-un `.so` |
 | [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Script Python care rulează artefactele construite |
 <!-- @os:end -->
 
-#### **Pasul 1: Kernel-ul, lansatorul și legătura** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
+#### **Pasul 1: Nucleul, launcher-ul și legătura** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -849,8 +849,8 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
->**Sfat**: De ce să folosiți `hipDeviceSynchronize()`? <br>
-> - Lansările de kernel GPU sunt asincrone. Când CPU-ul rulează `add_one<<<grid_size, block_size>>>(data, n);`, ar executa imediat instrucțiunea următoare fără a aștepta GPU-ul. `hipDeviceSynchronize()` forțează CPU-ul să aștepte până când kernel-ul GPU se finalizează.
+>**Sfat**: De ce se folosește `hipDeviceSynchronize()`? <br>
+> - Lansările de nuclee GPU sunt asincrone. Când CPU-ul rulează `add_one<<<grid_size, block_size>>>(data, n);`, acesta ar executa imediat următoarea instrucțiune fără a aștepta GPU-ul. `hipDeviceSynchronize()` forțează CPU-ul să aștepte până când nucleul GPU se finalizează.
 
 #### **Pasul 2: Build**
 ```bash
@@ -859,20 +859,21 @@ pip install --no-build-isolation -v .
 >**Notă**: Această comandă caută `setup.py` în directorul curent pentru a construi fișierul .cu pe care l-am creat.
 
 
-`CUDAExtension` este un ajutor de build CUDA din `torch.utils.cpp_extension`. Cu ROCm, PyTorch **remapează `CUDAExtension` pentru a folosi `hipcc`** în loc de `nvcc`. ROCm interceptează calea de build și o direcționează prin compilatorul HIP, portând codul CUDA pe AMD.
+`CUDAExtension` este un ajutor de build CUDA din `torch.utils.cpp_extension`. Cu ROCm, PyTorch **remapează `CUDAExtension` să folosească `hipcc`** în loc de `nvcc`. ROCm interceptează calea de build și o direcționează prin compilatorul HIP, portând codul CUDA pe AMD.
 
 Aceasta produce următoarele fișiere:
 <!-- @os:windows -->
 - `build/`: director cu fișierele `.pyd`
-- `add_one_kernel.hip`: sursa HIP generată prin hipificarea fișierului `.cu`; acesta este ceea ce `hipcc` a compilat efectiv
+- `add_one_kernel.hip`: sursa HIP generată prin hipificarea fișierului `.cu`; aceasta este ceea ce a compilat efectiv `hipcc`
 <!-- @os:end -->
+
 <!-- @os:linux -->
 - `build/`: director cu fișierele `.so`
-- `add_one_kernel.hip`: sursa HIP generată prin hipificarea fișierului `.cu`; acesta este ceea ce `hipcc` a compilat efectiv
+- `add_one_kernel.hip`: sursa HIP generată prin hipificarea fișierului `.cu`; aceasta este ceea ce a compilat efectiv `hipcc`
 <!-- @os:end -->
 
 #### **Pasul 3: Utilizare din Python** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)):
-Executați acest script pentru a vedea kernel-ul în acțiune:
+Executați acest script pentru a vedea nucleul în acțiune:
 ```bash
 cd Vector_Addition # if not already in directory
 python run_compiled_addition.py
@@ -1022,37 +1023,37 @@ finally {
 
 ---
 
-### Parcurgerea 2: Înmulțirea Matricelor
+### Ghid pas cu pas 2: Înmulțirea matricelor
 
 Înmulțirea matricelor calculează **C = A × B** unde:
 - **A** este M×N (rânduri × coloane)
 - **B** este N×K  
 - **C** este M×K (rezultatul)
 
-Fiecare element de ieșire este definit ca:
+Fiecare element de ieșire este definit astfel:
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-Fiecare element al lui C este calculat independent, ceea ce face aceasta perfectă pentru paralelismul GPU.
+Fiecare element al lui C este calculat independent, ceea ce face acest lucru perfect pentru paralelismul GPU.
 
-#### Cum Se Mapează pe Fire de Execuție GPU
+#### Cum se mapează pe firele de execuție GPU
 
 Spre deosebire de adunarea vectorilor (1D), înmulțirea matricelor produce o **ieșire 2D**, deci folosim o **grilă 2D de fire de execuție**:
 
-| | Adunare Vectori | Înmulțire Matrice |
+| | Adunarea vectorilor | Înmulțirea matricelor |
 |---|---|---|
 | **Forma ieșirii** | Array 1D | Matrice 2D (M×K) |
 | **Maparea firelor** | 1 fir → 1 element | 1 fir → 1 element de ieșire |
-| **Modelul de lansare** | Grilă 1D: `(grid_x, 1, 1)` | Grilă 2D: `(grid_x, grid_y, 1)` |
-| **Dimensiunea blocului** | `(256, 1, 1)` | `(16, 16, 1)` = 256 fire |
+| **Model de lansare** | Grilă 1D: `(grid_x, 1, 1)` | Grilă 2D: `(grid_x, grid_y, 1)` |
+| **Dimensiune bloc** | `(256, 1, 1)` | `(16, 16, 1)` = 256 fire |
 
-Fiecare fir calculează un element al matricei de ieșire C. Firul de la poziția `(row, col)` calculează `C[row][col]` înmulțind rândul corespunzător din A cu coloana corespunzătoare din B.
+Fiecare fir calculează un element al matricei de ieșire C. Firul aflat la poziția `(row, col)` calculează `C[row][col]` prin înmulțirea rândului corespunzător din A cu coloana corespunzătoare din B.
 
-**Dispunerea în Memorie**: Memoria GPU este plată (1D), dar matricele sunt stocate rând cu rând. Pentru a accesa `A[row][col]`, kernel-ul folosește `A[row * N + col]`.
+**Aspectul memoriei**: Memoria GPU este plată (1D), dar matricele sunt stocate rând cu rând. Pentru a accesa `A[row][col]`, nucleul folosește `A[row * N + col]`.
 
 
 #### Abordarea A: Compilare JIT:
 
-Ca și în Parcurgerea 1, kernel-ul este scris ca un șir C++ brut în interiorul Python și compilat la runtime prin JIT-ul integrat al PyTorch.
+Ca și în Ghidul pas cu pas 1, nucleul este scris ca un șir C++ brut în interiorul Python și compilat la runtime prin JIT-ul încorporat al PyTorch.
 
 
 Pentru a folosi [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py), asigurați-vă că este descărcat și rulați:
@@ -1061,7 +1062,7 @@ cd Matrix_Multiplication # if not already inside the directory
 python matmul_kernel.py
 ```
 
-**Fragmente de Cod Cheie**
+**Fragmente de cod cheie**
 ```python
 import torch
 
@@ -1112,10 +1113,10 @@ max_err = (C - C_ref).abs().max().item()
 print(f"Max error vs torch.mm: {max_err:.6f}")
 ```
 
-Scriptul verifică rezultatul față de `torch.mm` cu o toleranță mică. Aritmetica în virgulă mobilă pe GPU-uri poate produce mici diferențe numerice față de implementările CPU din cauza ordinii de reducere paralelă.
+Scriptul verifică rezultatul comparativ cu `torch.mm` folosind o toleranță mică. Aritmetica în virgulă mobilă pe GPU-uri poate produce diferențe numerice mici comparativ cu implementările pe CPU, din cauza ordinii de reducere paralelă.
 
 <!-- @os:linux -->
-**Rezultat așteptat:** [Numerele de performanță vor varia]
+**Rezultat așteptat:**[Numerele de performanță vor varia]
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -1125,7 +1126,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Notă**: Pe Windows, `amd-smi` nu este suportat. Pentru a urmări utilizarea GPU, puteți folosi Task Manager, unde ar trebui să vedeți un vârf scurt de utilizare când rulați programul.
+> **Notă**: Pe Windows, `amd-smi` nu este suportat. Pentru a urmări utilizarea GPU-ului, puteți folosi Task Manager, unde ar trebui să observați un scurt vârf de utilizare atunci când rulați programul.
 
 **Rezultat așteptat:**
 ```
@@ -1302,29 +1303,29 @@ $code | python -
 ---
 #### Abordarea B: Extensie C++
 
-A doua abordare este mai manuală: scrieți kernel-ul și legătura Python într-un singur fișier `.cu`, compilați-l nativ folosind sistemul de build al PyTorch și importați-l în Python.
+A doua abordare este mai manuală: se scrie kernelul și legătura Python într-un singur fișier `.cu`, se compilează nativ folosind sistemul de build al PyTorch și se importă în Python.
 
 <!-- @os:windows -->
-> **Notă**: Abordarea prin extensie C++ necesită mediul de build Visual Studio C++ deoarece PyTorch compilează fișierul sursă `.cu` într-un modul de extensie nativ `.pyd`. Construirea acelei extensii native depinde de lanțul de instrumente Microsoft C++ (compilator, linker și instrumente de build) furnizat de Visual Studio. Rulați comenzile de activare Visual Studio din secțiunea de configurare înainte de a construi extensia.
+> **Notă**: Abordarea prin Extensie C++ necesită mediul de build Visual Studio C++ deoarece PyTorch compilează fișierul sursă `.cu` într-un modul de extensie nativ `.pyd`. Construirea acelei extensii native depinde de lanțul de instrumente Microsoft C++ (compilator, linker și instrumente de build) furnizat de Visual Studio. Rulați comenzile de activare Visual Studio din secțiunea de configurare înainte de a construi extensia.
 <!-- @os:end -->
 
 Descărcați următoarele fișiere dacă nu ați făcut-o deja:
 <!-- @os:windows -->
 | Fișier | Rol |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + lansator + legătură pybind11 |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | Script de build, folosește `CUDAExtension` pentru a compila `.cu` într-un `.pyd` |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + launcher + legătură pybind11 |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Script de build, folosește `CUDAExtension` pentru a compila `.cu`-ul într-un `.pyd` |
 | [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Script Python care rulează artefactele construite |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Fișier | Rol |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + lansator + legătură pybind11 |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | Script de build, folosește `CUDAExtension` pentru a compila `.cu` într-un `.so` |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + launcher + legătură pybind11 |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Script de build, folosește `CUDAExtension` pentru a compila `.cu`-ul într-un `.so` |
 | [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Script Python care rulează artefactele construite |
 <!-- @os:end -->
 
-#### **Pasul 1: Kernel-ul, lansatorul și legătura** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
+#### **Pasul 1: Kernelul, launcher-ul și legătura** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -1364,11 +1365,11 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
-Față de `add_one_launcher` din Tutorialul 1, lansatorul de aici:
-- Primește două tensori de intrare în loc de unul
-- Derivă toate cele trei dimensiuni (M, N, K) din formele tensorilor, fără a transmite manual dimensiunea din Python
-- Alocă și returnează tensorul de ieșire C, în loc să modifice în loc
-- Folosește `dim3` atât pentru grilă cât și pentru bloc pentru a exprima forma de lansare 2D
+Comparativ cu `add_one_launcher` din Ghidul 1, launcher-ul de aici:
+- Preia doi tensori de intrare în loc de unul
+- Derivă toate cele trei dimensiuni (M, N, K) din formele tensorilor, fără transmiterea manuală a dimensiunilor din Python
+- Alocă și returnează tensorul de ieșire C, în loc să modifice in-place
+- Folosește `dim3` atât pentru grid, cât și pentru block, pentru a exprima forma de lansare 2D
 
 #### **Pasul 2: Build**
 ```bash
@@ -1379,16 +1380,16 @@ pip install --no-build-isolation -v .
 
 Aceasta produce următoarele fișiere:
 <!-- @os:windows -->
-- `build/`:  director cu fișierele `.pyd`
-- `matmul_kernel.hip`:  sursa HIP generată prin hipificarea fișierului `.cu`; acesta este ceea ce `hipcc` a compilat efectiv
+- `build/`: director cu fișierele `.pyd`
+- `matmul_kernel.hip`: sursa HIP generată prin hipificarea fișierului `.cu`; aceasta este ceea ce a compilat de fapt `hipcc`
 <!-- @os:end -->
 <!-- @os:linux -->
-- `build/`:  director cu fișierele `.so`
-- `matmul_kernel.hip`:  sursa HIP generată prin hipificarea fișierului `.cu`; acesta este ceea ce `hipcc` a compilat efectiv
+- `build/`: director cu fișierele `.so`
+- `matmul_kernel.hip`: sursa HIP generată prin hipificarea fișierului `.cu`; aceasta este ceea ce a compilat de fapt `hipcc`
 <!-- @os:end -->
 
 #### **Pasul 3: Utilizare din Python** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)):
-Executați acest script pentru a vedea kernel-ul în acțiune:
+Executați acest script pentru a vedea kernelul în acțiune:
 ```bash
 cd Matrix_Multiplication # if not already in directory
 python run_compiled_multiply.py
@@ -1400,11 +1401,11 @@ Result: tensor([[19., 22.],
         [43., 50.]])
 ```
 
-**Excelent! Tocmai ați implementat înmulțirea matricelor pe GPU.** Acesta este un jalon major deoarece înmulțirea matricelor reprezintă fundamentul operațiunilor moderne de machine learning, cum ar fi:
+**Excelent! Tocmai ați implementat înmulțirea matricelor pe GPU.** Acesta este un moment de referință major deoarece înmulțirea matricelor este coloana vertebrală a operațiilor moderne de învățare automată precum:
 - Straturile rețelelor neuronale
 - Mecanismele de atenție
-- Embedding-uri
-- Transformere
+- Embeddings
+- Transformers
 
 <!-- @os:linux -->
 <!-- @test:id=matmul-extension-linux timeout=600 hidden=True setup=activate-venv -->
@@ -1552,18 +1553,18 @@ finally {
 
 ---
 
-## Pași următori
+## Pașii următori
 
-Ați învățat să scrieți, să compilați și să lansați kernel-uri GPU folosind atât compilarea JIT, cât și extensiile C++ pentru operații paralele de bază.
+Ați învățat să scrieți, compilați și lansați kernele GPU folosind atât compilarea JIT, cât și extensiile C++ pentru operații paralele de bază.
 
 **Optimizări de performanță:**
-- **Tiling cu memorie partajată** - Stocați în cache blocuri de date pentru a reduce accesul la memoria globală
-- **Coalescența memoriei** - Optimizați modelele de acces la memorie pentru lățime de bandă
+- **Tiling în memoria partajată (shared memory)** - Stocați în cache blocuri de date pentru a reduce accesul la memoria globală
+- **Coalescerea memoriei** - Optimizați tiparele de acces la memorie pentru lățimea de bandă
 
 **Algoritmi din lumea reală:**
-- **Convoluție 2D** - Un filtru mic (kernel) glisează peste o imagine, calculând fiecare pixel de ieșire dintr-o sumă ponderată a pixelilor vecini. Aceasta introduce calcule de tip stencil și tiling cu memorie partajată, unde firele de execuție reutilizează regiuni suprapuse ale imaginii pentru a reduce accesul la memoria globală.
-- **Funcția Softmax**: Softmax convertește un vector de numere în probabilități care sumează la 1, utilizată frecvent în ieșirile rețelelor neuronale. Implementarea sa eficientă pe GPU introduce reduceri paralele și tehnici de stabilitate numerică în procesarea vectorilor mari.
+- **Convoluție 2D** - Un filtru mic (kernel) glisează pe o imagine, calculând fiecare pixel de ieșire dintr-o sumă ponderată a pixelilor vecini. Aceasta introduce calcule de tip stencil și tiling în memoria partajată, unde thread-urile reutilizează regiuni de imagine suprapuse pentru a reduce accesul la memoria globală.
+- **Funcția Softmax**: Softmax convertește un vector de numere în probabilități care însumează 1, utilizat frecvent la ieșirile rețelelor neuronale. Implementarea sa eficientă pe GPU introduce reduceri paralele și tehnici de stabilitate numerică în timpul procesării vectorilor mari.
 
-**Considerații pentru producție:**
+**Considerații de producție:**
 - **Gestionarea erorilor** - Verificarea limitelor și gestionarea dispozitivelor
-- **Integrarea PyTorch** - Operatori personalizați cu suport autograd
+- **Integrare cu PyTorch** - Operatori personalizați cu suport pentru autograd

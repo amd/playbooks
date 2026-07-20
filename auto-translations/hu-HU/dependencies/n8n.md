@@ -8,8 +8,8 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. Nyissa meg a PowerShell-t vagy a Parancssort
-2. Telepítse az n8n-t globálisan npm segítségével:
+1. Nyisd meg a PowerShell-t vagy a Parancssort
+2. Telepítsd az n8n-t globálisan az npm segítségével:
 ```cmd
 npm install -g n8n
 ```
@@ -18,7 +18,7 @@ npm install -g n8n
 
 <!-- @os:linux -->
 
-Telepítse az n8n-t globálisan npm segítségével:
+Telepítsd az n8n-t globálisan az npm segítségével:
 ```bash
 npm install -g n8n
 ```

@@ -6,22 +6,22 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> 此 playbook 使用 GitHub 無法渲染的特殊標籤。請前往 [amd.com/playbooks](https://amd.com/playbooks) 以正確預覽此內容。
+> 此手冊使用 GitHub 無法呈現的特殊標籤。請造訪 [amd.com/playbooks](https://amd.com/playbooks) 以正確預覽此內容。
 <!-- @github-only:end -->
 
-## 概覽
+## 概述
 
-[Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) 是 AMD 的 C++ 電腦視覺與機器學習工具套件，提供強大的裝置端感知能力——包括深度估計、人臉偵測和人臉網格追蹤。此程式庫建構於 Ryzen AI 驅動程式之上，能自動選擇最佳可用硬體（GPU 或 NPU）進行推論，讓您無需擔心模型訓練或框架整合，即可將 AI 功能加入 C++ 應用程式。所有處理均在本機系統上進行，非常適合對隱私敏感、低延遲的應用場景。
+[Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) 是一套 AMD C++ 電腦視覺與機器學習工具套件，可提供強大的裝置端感知能力——包括深度估計、人臉偵測及人臉網格追蹤。該函式庫建構於 Ryzen AI 驅動程式之上，會自動選擇最合適的可用硬體（GPU 或 NPU）進行推論，讓您無需擔心模型訓練或框架整合，即可為 C++ 應用程式加入 AI 功能。所有處理皆在您的系統上本機執行，非常適合對隱私敏感、需要低延遲的應用程式。
 
-此 playbook 將教您如何設定 Ryzen AI CVML Library、建置隨附的範例應用程式，並對範例圖片執行人臉偵測。
+本手冊將教您如何設定 Ryzen AI CVML Library、建置隨附的範例應用程式，並在範例影像上執行人臉偵測。
 
-## 您將學到的內容
+## 您將學到什麼
 
-- 如何安裝必要條件並在系統上設定 Ryzen AI CVML Library
-- CVML C++ API 的運作方式：上下文、功能物件和圖像緩衝區
-- 如何使用 CMake 和 OpenCV 建置並執行隨附的範例應用程式
-- 如何對圖片執行人臉偵測，並標示邊界框和特徵點
-- 如何將 CVML 功能整合至您自己的 C++ 應用程式
+- 如何在系統上安裝先決條件並設定 Ryzen AI CVML Library
+- CVML C++ API 的運作方式：情境（context）、功能物件與影像緩衝區
+- 如何使用 CMake 與 OpenCV 建置並執行隨附的範例應用程式
+- 如何在影像上執行人臉偵測，並顯示邊界框與特徵點
+- 如何將 CVML 功能整合到您自己的 C++ 應用程式中
 
 <!-- @device:halo_box -->
 ## 檢查軟體更新
@@ -29,29 +29,29 @@ SPDX-License-Identifier: MIT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 安裝軟體必要條件
+## 安裝軟體先決條件
 <!-- @require:driver -->
 
-## 其他相依套件
+## 其他相依項目
 
-開始之前，請確保您已具備以下項目：
+在開始之前，請確認您已具備以下項目：
 
 <!-- @os:windows -->
-- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — 下載 `opencv-4.11.0-windows.exe`，執行後解壓縮至本機資料夾（例如 `C:\opencv`）
-- [CMake](https://cmake.org/download/) — 下載 Windows x86-64 MSI 安裝程式，安裝時選擇 **「Add CMake to the system PATH for all users」**
+- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — 下載 `opencv-4.11.0-windows.exe`，執行並解壓縮到本機資料夾（例如 `C:\opencv`）
+- [CMake](https://cmake.org/download/) — 下載 Windows x86-64 MSI 安裝程式，並在安裝過程中選取「**將 CMake 加入所有使用者的系統 PATH**」
 - [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — 安裝最新可用版本
-- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe)，並選擇「Desktop development with C++」工作負載（包含 MSVC 編譯器、Windows SDK 和 C++ 建置工具）
+- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) 並安裝「使用 C++ 的傳統型開發」工作負載（包含 MSVC 編譯器、Windows SDK 及 C++ 建置工具）
 <!-- @os:end -->
 
 <!-- @os:linux -->
-- OpenCV 4.11 — 必須從原始碼建置（Ubuntu 22.04 和 24.04 上的 apt 套件不提供 4.11 版本）。請參閱下方的[從原始碼建置 OpenCV](#building-opencv-from-source)。
+- OpenCV 4.11 — 必須從原始碼建置（Ubuntu 22.04 及 24.04 上的 apt 套件並未提供 4.11 版）。請參閱下方的[從原始碼建置 OpenCV](#building-opencv-from-source)。
 - CMake — 透過 apt 安裝：
   ```bash
   sudo apt install cmake
   ```
 - Ubuntu 22.04 或 24.04（核心版本 >= 6.11.0-21-generic）
 - [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers)（Linux 安裝程式——NPU 推論所需）
-- Vulkan SDK（在下方的 [Vulkan SDK](#vulkan-sdk) 章節中安裝）
+- Vulkan SDK（於下方的 [Vulkan SDK](#vulkan-sdk) 章節中安裝）
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -152,13 +152,13 @@ fi
 
 ## 設定 CVML Library
 
-若您尚未擁有 AMD 帳號，請至 [account.amd.com](https://account.amd.com) 建立帳號，然後登入並從以下入口連結下載 Ryzen AI CVML Library：
+如果您尚未擁有帳號，請至 [account.amd.com](https://account.amd.com) 建立 AMD 帳號，然後登入以透過以下入口網站連結下載 Ryzen AI CVML Library：
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
 ```
 
-下載完成後，將套件解壓縮至本機目錄（例如 Windows 上的 `C:\RyzenAI-Library` 或 Linux 上的 `~/RyzenAI-Library`），並將 `AMD_CVML_SDK_ROOT` 環境變數設定為解壓縮位置：
+下載完成後，將套件解壓縮至本機目錄（例如 Windows 上的 `C:\RyzenAI-Library`，或 Linux 上的 `~/RyzenAI-Library`），並將 `AMD_CVML_SDK_ROOT` 環境變數設定為解壓縮的位置：
 
 <!-- @os:windows -->
 ```cmd
@@ -172,23 +172,23 @@ export AMD_CVML_SDK_ROOT=~/RyzenAI-Library
 ```
 <!-- @os:end -->
 
-程式庫套件包含以下結構：
+該函式庫套件包含以下結構：
 
 | 資料夾 | 內容 |
 |--------|----------|
-| `cmake/` | CMake `find_package` 函式的封裝資訊 |
+| `cmake/` | 供 CMake 的 `find_package` 函式使用的封裝資訊 |
 | `include/` | C++ 標頭檔（`cvml-depth-estimation.h`、`cvml-face-detector.h`、`cvml-face-mesh.h` 等） |
-| `windows/` | Windows 的二進位檔案（編譯時期 `.LIB` 及執行時期 `.DLL`/`.GRAPHLIB`/`.AMODEL` 檔案） |
-| `linux/` | Linux 的二進位檔案（編譯及執行時期 `.SO` 檔案） |
-| `samples/` | 含原始碼的個別範例應用程式 |
+| `windows/` | Windows 二進位檔（編譯期的 `.LIB` 及執行期的 `.DLL`/`.GRAPHLIB`/`.AMODEL` 檔案） |
+| `linux/` | Linux 二進位檔（編譯及執行期的 `.SO` 檔案） |
+| `samples/` | 各個包含原始碼的範例應用程式 |
 
 <!-- @os:linux -->
 
-### Linux 專屬設定
+### Linux 專用設定
 
 #### 從原始碼建置 OpenCV
 
-安裝 OpenCV 建置相依套件：
+安裝 OpenCV 建置相依項目：
 
 ```bash
 sudo apt install unzip wget ubuntu-restricted-extras libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev libgtk-3-dev pkg-config ffmpeg
@@ -213,7 +213,7 @@ cmake -DBUILD_opencv_world=ON \
 cmake --build . --target install
 ```
 
-共享程式庫安裝於 `<build>/install/lib/` 下。在後續步驟中，請將 `install` 目錄作為 `OPENCV_INSTALL_ROOT` 使用。
+共用函式庫會安裝於 `<build>/install/lib/` 之下。請在後續步驟中將 `install` 目錄用作 `OPENCV_INSTALL_ROOT`。
 
 #### Vulkan SDK
 
@@ -227,7 +227,7 @@ sudo apt update
 sudo apt install vulkan-sdk
 ```
 
-若您執行的是 Ubuntu 22.04，請同時更新 MESA Vulkan 驅動程式：
+若您使用的是 Ubuntu 22.04，請同時更新 MESA Vulkan 驅動程式：
 
 ```bash
 sudo apt update && sudo apt upgrade
@@ -236,9 +236,9 @@ sudo apt update
 sudo apt upgrade
 ```
 
-#### Ubuntu 24.04 額外相依套件
+#### 其他 Ubuntu 24.04 相依項目
 
-若您執行的是 Ubuntu 24.04，請安裝額外所需套件：
+若您使用的是 Ubuntu 24.04，請安裝其他必要套件：
 
 ```bash
 sudo apt install libavcodec-dev libavformat-dev libswscale-dev libnsl2 gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly -y
@@ -266,24 +266,24 @@ done
 
 ## 核心概念
 
-CVML Library 提供簡單的 C++ API，每個感知功能（深度估計、人臉偵測、人臉網格）都有各自的標頭檔和功能物件。您無需直接操作原始模型——程式庫會自動處理模型載入、前處理和推論。
+CVML Library 提供簡單易用的 C++ API，其中每個感知功能（深度估計、人臉偵測、人臉網格）都有各自的標頭檔與功能物件。您無需直接處理原始模型——該函式庫會自動處理模型載入、前處理及推論。
 
 ### 可用功能
 
-| 功能 | 標頭檔 | 說明 |
+| 功能 | 標頭檔 | 描述 |
 |---------|------------|-------------|
-| **深度估計** | `cvml-depth-estimation.h` | 從 RGB 圖像生成逐像素深度圖 |
-| **人臉偵測** | `cvml-face-detector.h` | 偵測人臉，並提供邊界框、特徵點（眼睛、鼻子、嘴巴）和信心分數 |
-| **人臉網格** | `cvml-face-mesh.h` | 以密集網格點追蹤詳細的臉部幾何形狀 |
+| **深度估計** | `cvml-depth-estimation.h` | 從 RGB 影像產生逐像素深度圖 |
+| **人臉偵測** | `cvml-face-detector.h` | 偵測人臉，包含邊界框、特徵點（眼睛、鼻子、嘴巴）及信心分數 |
+| **人臉網格** | `cvml-face-mesh.h` | 使用密集網格點追蹤詳細的臉部幾何形狀 |
 
 ### 程式設計模型
 
 每個 CVML 應用程式都遵循相同的四步驟模式：
 
-1. **建立上下文** — `amd::cvml::Context` 管理共享資源，例如日誌記錄和推論後端選擇。
-2. **建立功能物件** — 針對上下文實例化特定功能（例如 `amd::cvml::DepthEstimation`）。
-3. **封裝輸入資料** — 使用 `amd::cvml::Image` 封裝您的 RGB 圖像緩衝區，無需複製資料。
-4. **執行** — 呼叫功能的處理方法並讀取結果。
+1. **建立情境（Context）** — `amd::cvml::Context` 負責管理共用資源，例如日誌記錄及推論後端的選擇。
+2. **建立功能物件** — 根據該情境實例化特定功能（例如 `amd::cvml::DepthEstimation`）。
+3. **包裝輸入資料** — 使用 `amd::cvml::Image` 封裝您的 RGB 影像緩衝區，無需複製資料。
+4. **執行** — 呼叫該功能的處理方法並讀取結果。
 
 ```cpp
 // Step 1: Create context
@@ -309,22 +309,22 @@ context->Release();
 
 ### 推論後端
 
-程式庫會自動為每個操作選擇最佳硬體（GPU 或 NPU）。您也可以明確設定後端：
+此函式庫會自動為每項操作選擇最合適的硬體（GPU 或 NPU）。您也可以明確設定後端：
 
 ```cpp
 // Let the library choose the best hardware (default)
 context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 ```
 
-> **注意：** 使用 ONNX 後端進行 NPU 操作的功能，在首次執行時可能會有較長的啟動延遲。後續執行將會更快。
+> **注意：** 使用 ONNX 後端進行 NPU 操作的功能，在首次執行時可能會有較長的啟動延遲。後續執行速度將會更快。
 
-> **注意：** 若目標系統未安裝 NPU 驅動程式，Ryzen AI CVML library 將自動回退至 GPU 後端進行推論操作。
+> **注意：** 若目標系統未安裝 NPU 驅動程式，Ryzen AI CVML 函式庫將自動回退至 GPU 後端來執行推論操作。
 
 ## 建置範例應用程式
 
-CVML Library 包含每個功能的即用型範例應用程式。讓我們一次建置所有範例。
+CVML Library 為每項功能都提供了可直接建置的範例應用程式。讓我們一次全部建置它們。
 
-1. 將 `OPENCV_INSTALL_ROOT` 環境變數設定為指向您的 OpenCV 安裝位置：
+1. 設定 `OPENCV_INSTALL_ROOT` 環境變數，指向您的 OpenCV 安裝路徑：
 
    <!-- @os:windows -->
    ```cmd
@@ -365,7 +365,7 @@ CVML Library 包含每個功能的即用型範例應用程式。讓我們一次�
    ```
    <!-- @os:end -->
 
-   建置成功後，可執行檔位於：
+   建置成功後，可執行檔會位於：
 
    <!-- @os:windows -->
    ```
@@ -383,7 +383,7 @@ CVML Library 包含每個功能的即用型範例應用程式。讓我們一次�
    ```
    <!-- @os:end -->
 
-3. 執行任何範例之前，請確保 CVML 執行時期檔案可被存取：
+3. 執行任何範例之前，請確認可存取 CVML 執行階段檔案：
 
    <!-- @os:windows -->
    ```cmd
@@ -406,9 +406,9 @@ CVML Library 包含每個功能的即用型範例應用程式。讓我們一次�
 
 ## 執行人臉偵測
 
-人臉偵測範例可偵測圖片、影片或即時攝影機畫面中的人臉。它會在每個偵測到的人臉上繪製邊界框、信心分數和五個臉部特徵點（兩眼、鼻子和兩側嘴角）。
+人臉偵測範例可偵測圖片、影片或即時相機畫面中的人臉。它會在每張偵測到的臉上繪製邊界框、信賴分數，以及五個臉部特徵點（兩眼、鼻子、兩個嘴角）。
 
-首先，導覽至人臉偵測可執行檔資料夾：
+首先，導覽至人臉偵測可執行檔所在的資料夾：
 
 <!-- @os:windows -->
 ```cmd
@@ -422,7 +422,7 @@ cd build/cvml-sample-face-detection
 ```
 <!-- @os:end -->
 
-然後下載範例圖片作為輸入（照片由 [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/) 提供，可透過 Pexels 免費使用）：
+接著下載一張範例圖片作為輸入內容（照片由 [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/) 提供，透過 Pexels 免費使用）：
 
 ```bash
 curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
@@ -442,13 +442,13 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-畫面將出現一個視窗，顯示圖片並在偵測到的人臉周圍標示邊界框、信心分數和臉部特徵點（眼睛、鼻子、嘴角）。
+畫面中會出現一個視窗，顯示圖片中偵測到的人臉邊界框、信賴分數，以及臉部特徵點（眼睛、鼻子、嘴角）。
 
 <p align="center">
   <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
 </p>
 
-**將標注後的輸出儲存至檔案：**
+**將標註後的輸出儲存為檔案：**
 
 <!-- @os:windows -->
 ```cmd
@@ -462,7 +462,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg -o output_face.jpg
 ```
 <!-- @os:end -->
 
-**使用精確模型**以獲得更高準確度（但速度較慢）：
+**使用精確模型**以獲得更高的準確度（但速度較慢）：
 
 <!-- @os:windows -->
 ```cmd
@@ -478,9 +478,9 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 
 人臉偵測功能提供兩種模型變體：
 
-| 模型 | 速度 | 準確度 | 最適用於 |
+| 模型 | 速度 | 準確度 | 最適合用於 |
 |-------|-------|----------|----------|
-| `fast`（預設） | 較高 FPS | 良好 | 即時攝影機應用 |
+| `fast`（預設） | 較高 FPS | 良好 | 即時相機應用程式 |
 | `precise` | 較低 FPS | 最佳 | 照片分析、高準確度需求 |
 
 
@@ -719,7 +719,7 @@ done
 
 ## 將 CVML 整合至您自己的應用程式
 
-若要在您自己的 C++ 專案中使用 CVML Library，請透過 CMake 的 `find_package` 加入：
+若要在您自己的 C++ 專案中使用 CVML Library，請透過 CMake 的 `find_package` 加入它：
 
 ```cmake
 # Find the Ryzen AI CVML Library
@@ -729,7 +729,7 @@ find_package(RyzenAILibrary REQUIRED PATHS ${AMD_CVML_SDK_ROOT})
 target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 ```
 
-其中 `AMD_CVML_SDK_ROOT` 指向 Ryzen AI CVML Library 資料夾的根目錄。然後為您想使用的功能引入對應的標頭檔：
+其中 `AMD_CVML_SDK_ROOT` 指向 Ryzen AI CVML Library 資料夾的根目錄。接著引入您所需功能對應的標頭檔：
 
 ```cpp
 #include <cvml-face-detector.h>   // for face detection
@@ -737,14 +737,14 @@ target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 #include <cvml-face-mesh.h>        // for face mesh
 ```
 
-## 後續步驟
+## 下一步
 
-對於以下每個範例，請先依照上方[執行人臉偵測](#running-face-detection)章節的相同模式導覽至其可執行檔資料夾（例如 Windows 上的 `cd build\cvml-sample-depth-estimation\Release` 或 Linux 上的 `cd build/cvml-sample-depth-estimation`）。在 Windows 上，請在每個指令後附加 `.exe`（例如 `cvml-sample-depth-estimation.exe`）。
+對於以下每個範例，請先依照上方[執行人臉偵測](#running-face-detection)一節相同的模式，切換到其可執行檔所在的資料夾（例如在 Windows 上執行 `cd build\cvml-sample-depth-estimation\Release`，或在 Linux 上執行 `cd build/cvml-sample-depth-estimation`）。在 Windows 上，請在每個指令後加上 `.exe`（例如 `cvml-sample-depth-estimation.exe`）。
 
-- **試用深度估計**：執行 `cvml-sample-depth-estimation -i sample_face.jpg` 以生成彩色深度圖——較近的物體以暖色顯示，較遠的物體以冷色顯示
-- **探索人臉網格**：執行 `cvml-sample-face-mesh -i sample_face.jpg` 以查看含詳細網格點的密集臉部幾何追蹤
-- **處理影片檔案**：在任何範例上使用 `-i` 和 `-o` 旗標來處理影片（例如 `cvml-sample-face-detection -i video.mp4 -o output.mp4`）
-- **比較模型變體**：在人臉偵測上試用 `-m precise` 與預設的 `-m fast`，親身體驗準確度與速度的取捨
-- **建置您自己的應用程式**：使用 CMake 整合和 C++ API，將 CVML 功能加入您自己的 C++ 應用程式
-- **組合功能**：在同一個應用程式中串聯人臉偵測與深度估計，以獲得更豐富的場景理解
-- **瀏覽原始碼**：閱讀 [GitHub 上的 Ryzen AI CVML Library](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library)，以獲取標頭文件說明、其他範例和 API 詳細資訊
+- **試試深度估測**：執行 `cvml-sample-depth-estimation -i sample_face.jpg` 以產生彩色深度圖——較近的物體會以暖色顯示，較遠的則以冷色顯示
+- **探索臉部網格**：執行 `cvml-sample-face-mesh -i sample_face.jpg` 以查看具有詳細網格點的密集臉部幾何追蹤
+- **處理影片檔案**：在任何範例中使用 `-i` 與 `-o` 旗標來處理影片（例如 `cvml-sample-face-detection -i video.mp4 -o output.mp4`）
+- **比較模型變體**：在人臉偵測中嘗試 `-m precise` 與預設的 `-m fast`，親身體驗準確度與速度之間的取捨
+- **建立你自己的應用程式**：使用 CMake 整合與 C++ API，將 CVML 功能加入你自己的 C++ 應用程式
+- **結合多種功能**：在同一個應用程式中串接人臉偵測與深度估測，以獲得更豐富的場景理解
+- **瀏覽原始碼**：閱讀 [GitHub 上的 Ryzen AI CVML Library](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) 以取得標頭檔文件、更多範例與 API 詳細資訊

@@ -6,26 +6,26 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Acest playbook folosește etichete speciale pe care GitHub nu le poate reda. Vă rugăm să vizitați [amd.com/playbooks](https://amd.com/playbooks) pentru a previzualiza corect acest conținut.
 <!-- @github-only:end -->
 
 ## Prezentare generală
 
 
-Doriți să rulați modele de limbaj AI puternice pe propriul hardware? Acest ghid vă arată cum.
-Acest tutorial folosește PyTorch alimentat de software-ul AMD ROCm™ pentru a rula modele care pot rezuma documente, răspunde la întrebări, genera text și multe altele, toate rulând local.
+Doriți să rulați modele lingvistice AI puternice pe propriul hardware? Acest ghid vă arată cum.
+Acest tutorial folosește PyTorch, susținut de software-ul AMD ROCm™, pentru a rula modele care pot rezuma documente, răspunde la întrebări, genera text și multe altele, toate rulând local.
 
 ## Ce veți învăța
 
-- Rulați LLM-uri precum gpt-oss-20b și qwen3.5-4B local folosind PyTorch și ROCm
+- Rulați LLM-uri precum gpt-oss-20b și qwen3.5-4B local, folosind PyTorch și ROCm
 - Creați un instrument de rezumare a documentelor folosind LLM-uri
 
-## Configurarea memoriei
+## Setarea configurației memoriei
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Verificați actualizările de software
+## Verificați actualizările software-ului
 > **Notă**: Dacă VS Code nu este instalat, îl puteți instala cu Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
@@ -37,7 +37,7 @@ Acest tutorial folosește PyTorch alimentat de software-ul AMD ROCm™ pentru a 
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Pe Linux, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv cu ROCm+Pytorch deja instalat.
+Pe Linux, deschideți un terminal în directorul dorit și urmați comenzile pentru a crea un venv cu ROCm+Pytorch deja instalate.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -50,13 +50,13 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Acordați utilizatorului dvs. acces la dispozitivele GPU** (deconectați-vă și reconectați-vă pentru ca aceasta să intre în vigoare):
+**Acordați utilizatorului dvs. acces la dispozitivele GPU** (deconectați-vă și reconectați-vă pentru ca aceasta să aibă efect):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Pe Linux, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv.
+Pe Linux, deschideți un terminal în directorul dorit și urmați comenzile pentru a crea un venv.
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -72,7 +72,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Pe Windows, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv cu ROCm+Pytorch deja instalat.
+Pe Windows, deschideți un terminal în directorul dorit și urmați comenzile pentru a crea un venv cu ROCm+Pytorch deja instalate.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -83,7 +83,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Pe Windows, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv.
+Pe Windows, deschideți un terminal în directorul dorit și urmați comenzile pentru a crea un venv.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env
@@ -93,7 +93,7 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Sfat**: Utilizatorii de Windows poate fi necesar să modifice politica de execuție PowerShell (de exemplu,
+> **Sfat**: Este posibil ca utilizatorii Windows să trebuiască să modifice Politica de execuție PowerShell (de exemplu,
 > setând-o la RemoteSigned sau Unrestricted) înainte de a rula unele comenzi Powershell.
 
 <!-- @os:end -->
@@ -144,12 +144,12 @@ pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
 
 ## Pornire rapidă cu scripturi exemplu
 
-Acest playbook include scripturi gata de utilizare. Faceți clic pe ele pentru a le previzualiza și descărca în același director cu mediul creat.
+Acest playbook include scripturi gata de utilizare. Faceți clic pe ele pentru a le previzualiza și descărca în același director cu mediul pe care l-ați creat.
 
 | Script | Descriere | Utilizare |
-|--------|-----------|-----------|
-| [run_llm.py](assets/run_llm.py) | Generare de text de bază cu LLM | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Rezumator de documente cu suport Harmony | `python summarizer.py --file document.txt` |
+|--------|-------------|-------|
+| [run_llm.py](assets/run_llm.py) | Generare de text LLM de bază | `python run_llm.py` |
+| [summarizer.py](assets/summarizer.py) | Instrument de rezumare a documentelor cu suport Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -174,15 +174,15 @@ for script in ['run_llm.py', 'summarizer.py']:
 ```
 <!-- @test:end -->
 
-Ambele scripturi suportă:
-- Selectarea modelului prin indicatorul `--model`
-- Formatarea șablonului de chat pentru promptarea corectă a modelului, deosebit de utilă pentru rezumarea documentelor
+Ambele scripturi acceptă:
+- Selectarea modelului prin steagul `--model`
+- Formatarea șabloanelor de chat pentru instrucțiuni corecte ale modelului, deosebit de utilă pentru rezumarea documentelor
 
 ## Încărcarea și rularea primului dvs. LLM
 
-Scriptul inclus [run_llm.py](assets/run_llm.py) arată cum să generați text cu LLM-uri folosind PyTorch și AMD ROCm.
+Scriptul inclus [run_llm.py](assets/run_llm.py) arată cum se generează text cu LLM-uri folosind PyTorch și AMD ROCm.
 
-> **Notă:** Când încărcați un model, Hugging Face Transformers verifică mai întâi memoria sa cache locală (`~/.cache/huggingface/hub` pe Linux, `C:\Users\<user>\.cache\huggingface\hub` pe Windows). Dacă modelul nu este în cache, se descarcă automat de pe huggingface.co. Prima rulare poate dura câteva minute în funcție de dimensiunea modelului și viteza rețelei.
+> **Notă:** Când încărcați un model, Hugging Face Transformers verifică mai întâi memoria cache locală (`~/.cache/huggingface/hub` pe Linux, `C:\Users\<user>\.cache\huggingface\hub` pe Windows). Dacă modelul nu este în cache, acesta este descărcat automat de pe huggingface.co. Prima rulare poate dura câteva minute, în funcție de dimensiunea modelului și viteza rețelei.
 
 Fragmentul de mai jos arată cum să utilizați modelul și să personalizați întrebările adresate.
 
@@ -259,11 +259,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Construirea unui rezumator de documente
+## Construirea unui instrument de rezumare a documentelor
 
-Acum că ați generat output local cu LLM, puteți construi pe această bază un rezumator de documente practic. În această secțiune, veți folosi scriptul [summarizer.py](assets/summarizer.py) pentru a introduce un fișier .txt și a genera automat un rezumat concis, totul rulând local pe GPU-ul dvs.
+Acum că ați generat un rezultat LLM local, puteți construi pe baza acestuia realizând un instrument practic de rezumare a documentelor. În această secțiune, veți utiliza scriptul [summarizer.py](assets/summarizer.py) pentru a introduce un fișier .txt și a genera automat un rezumat concis, totul rulând local pe GPU-ul dvs.
 
-Scriptul este conceput să funcționeze imediat. Deschideți scriptul într-un editor pentru a explora codul, a personaliza prompturile și a ajusta parametri precum lungimea și temperatura.
+Scriptul este conceput să funcționeze fără configurări suplimentare. Deschideți scriptul într-un editor pentru a explora codul, a personaliza instrucțiunile (prompts) și a ajusta parametri precum lungimea și temperatura.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -290,25 +290,25 @@ python summarizer.py --file document.txt --max-length 400
 ## Aflați despre parametrii de generare
 
 | Parametru | Ce controlează | Valori tipice |
-|-----------|----------------|---------------|
-| `max_new_tokens` | Lungimea maximă a output-ului LLM-ului | Folosiți 50–500 de tokeni pentru rezumate. (1 token reprezintă aproximativ 0,75 cuvinte în engleză) |
-| `temperature` | Creativitate. Valorile mici îl fac mai concentrat, în timp ce valorile mari aduc mai multă imprevizibilitate | - **0.1–0.3**: Concentrat, determinist (bun pentru rezumate) <br> **0.5–0.7**: Echilibrat (utilizare generală) <br> **0.8–1.0**: Creativ, variat (brainstorming) |
-| `top_p` | Eșantionare nucleu - Valorile mici limitează modelul la output-uri mai înguste | **0.1-0.5**: Strict, previzibil <br> **0.9-0.95**: (standard, natural, conversațional) |
+|-----------|------------------|----------------|
+| `max_new_tokens` | Lungimea maximă a rezultatului LLM-ului | Utilizați 50–500 de token-uri pentru rezumate. (1 token reprezintă aproximativ 0,75 cuvinte în limba engleză) |
+| `temperature` | Creativitatea. Valorile mici îl fac concentrat, în timp ce valorile mari aduc mai multă imprevizibilitate | - **0,1–0,3**: Concentrat, determinist (bun pentru rezumate) <br> **0,5–0,7**: Echilibrat (utilizare generală) <br> **0,8–1,0**: Creativ, variat (brainstorming) |
+| `top_p` | Eșantionare de tip nucleu (Nucleus Sampling) - Valorile mici limitează modelul la rezultate mai restrânse | **0,1-0,5**: Strict, previzibil <br> **0,9-0,95**: (standard, natural, conversațional) |
 
 
-## Aplicații în lumea reală
+## Aplicații din lumea reală
 
-- **Analiza articolelor de cercetare**: Extrageți concluziile cheie din publicații complexe pentru o revizuire rapidă
-- **Agregarea știrilor**: Rezumați articolele de știri în digest-uri zilnice scurte sau evidențieri
-- **Note de ședință**: Condensați transcrierile în elemente acționabile și rezumate concise
-- **Revizuirea documentelor juridice**: Extrageți rapid clauze sau obligații relevante din texte juridice lungi
-- **Documentarea codului**: Generați prezentări concise ale depozitelor și explicații ale funcțiilor
+- **Analiza lucrărilor de cercetare**: Extrageți concluziile cheie din publicații complexe pentru o revizuire rapidă
+- **Agregarea știrilor**: Rezumați articolele de știri în sinteze zilnice scurte sau evidențieri
+- **Notițe de întâlnire**: Condensați transcrierile în elemente de acțiune și rezumate concise
+- **Revizuirea documentelor juridice**: Extrageți rapid clauzele sau obligațiile relevante din texte juridice lungi
+- **Documentarea codului**: Generați prezentări concise ale depozitelor de cod și explicații ale funcțiilor
 
-## Pași următori
+## Pașii următori
 
-- **Ajustare fină**: Adaptați modelele la domeniul sau jargonul dvs. specific pentru o acuratețe mai bună (consultați Playbook-urile de ajustare fină)
-- **Sisteme RAG**: Combinați LLM-urile cu recuperarea documentelor pentru răspunsuri și căutări conștiente de context
+- **Fine-tuning**: Adaptați modelele la domeniul sau jargonul dvs. specific pentru o acuratețe mai bună (consultați Playbook-urile de Fine-tuning)
+- **Sisteme RAG**: Combinați LLM-urile cu regăsirea documentelor pentru răspunsuri și căutări conștiente de context
 - **Explorarea modelelor**: Experimentați cu modele noi precum Llama 3, Phi-3 sau Qwen pentru rezultate mai bune
-- **Implementare în producție**: Folosiți instrumente precum vLLM pentru servirea scalabilă a LLM-urilor în organizații
+- **Implementare în producție**: Utilizați instrumente precum vLLM pentru servirea scalabilă a LLM-urilor în organizații
 
-Sistemul dvs. vă oferă puterea de a rula modele de limbaj sofisticate local. Experimentați cu diferite modele, prompturi și parametri pentru a descoperi ce funcționează cel mai bine pentru aplicațiile dvs.
+Sistemul dvs. vă oferă puterea de a rula modele lingvistice sofisticate local. Experimentați cu diferite modele, instrucțiuni (prompts) și parametri pentru a descoperi ce funcționează cel mai bine pentru aplicațiile dvs.

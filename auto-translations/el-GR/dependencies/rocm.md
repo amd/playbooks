@@ -16,8 +16,8 @@ sudo usermod -a -G render,video $LOGNAME
 sudo reboot
 ```
 
-**Εγκαταστήστε το ROCm στο δημιουργημένο εικονικό περιβάλλον.**
-> **Σημείωση**: Βεβαιωθείτε ότι το εικονικό περιβάλλον είναι ενεργό πριν συνεχίσετε.
+**Εγκαταστήστε το ROCm στο εικονικό περιβάλλον που δημιουργήσατε.**
+> **Σημείωση**: Βεβαιωθείτε ότι το εικονικό περιβάλλον είναι ενεργό πριν προχωρήσετε.
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-Για περαιτέρω βοήθεια σχετικά με την εγκατάσταση, ανατρέξτε σε αυτόν τον [σύνδεσμο](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Για περισσότερη βοήθεια σχετικά με την εγκατάσταση, δείτε αυτόν τον [σύνδεσμο](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).

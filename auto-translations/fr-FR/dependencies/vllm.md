@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### vLLM
 
-vLLM est fourni via une image de conteneur préconstruite avec la prise en charge de ROCm. Utilisez la commande du lanceur au lieu d'installer vLLM ou PyTorch directement sur l'hôte :
+vLLM est fourni sous la forme d'une image de conteneur préconstruite avec prise en charge de ROCm. Utilisez la commande du lanceur au lieu d'installer vLLM ou PyTorch directement sur l'hôte :
 
 ```bash
 vllm-launch

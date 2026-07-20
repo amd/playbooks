@@ -16,7 +16,7 @@ sudo usermod -a -G render,video $LOGNAME
 sudo reboot
 ```
 
-**Namestite ROCm v ustvarjeno virtualno okolje.**
+**Namestite ROCm v ustvarjenem virtualnem okolju.**
 > **Opomba**: Pred nadaljevanjem se prepričajte, da je virtualno okolje aktivno.
 
 <!-- @device:halo,halo_box -->

@@ -4,38 +4,38 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
-> Bu playbook, GitHub'ın işleyemediği özel etiketler kullanmaktadır. Bu içeriği doğru şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
+> Bu kılavuz GitHub'ın işleyemediği özel etiketler kullanmaktadır. Bu içeriği doğru bir şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
 <!-- @github-only:end -->
 
 ## Genel Bakış
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Bu playbook, minimum **32GB** sistem belleği gerektirir.
+> Bu kılavuz en az **32GB** sistem belleği gerektirir.
 <!-- @device:end -->
 
-n8n, görsel düğüm tabanlı bir düzenleyici kullanarak uygulamaları ve hizmetleri birbirine bağlamanıza olanak tanıyan bir iş akışı otomasyon platformudur.
+n8n, uygulamaları ve hizmetleri görsel bir düğüm tabanlı editör kullanarak birbirine bağlamanıza olanak tanıyan bir iş akışı otomasyon platformudur.
 
-Bu playbook, AP News iş bölümünü tarayan, önemli başlıkları çıkaran ve yatırımcı odaklı bir özet oluşturmak için sisteminizde çalışan yerel bir LLM kullanan yapay zeka destekli bir finansal haber özetleyicisinin nasıl kurulacağını öğretir.
+Bu kılavuz, AP News iş dünyası bölümünü tarayan, önemli manşetleri çıkaran ve sisteminizde çalışan yerel bir LLM kullanarak yatırımcı odaklı bir özet oluşturan yapay zeka destekli bir finans haberleri özetleyicisinin nasıl kurulacağını öğretir.
 
 ## Neler Öğreneceksiniz
 
-- n8n nasıl kurulur ve başlatılır
-- Önceden oluşturulmuş bir iş akışını içe aktarma ve yapılandırma
-- Yerel n8n entegrasyonunu kullanarak Lemonade'e bağlanma
+- n8n'i nasıl kuracağınız ve başlatacağınız
+- Önceden oluşturulmuş bir iş akışını nasıl içe aktaracağınız ve yapılandıracağınız
+- Yerel n8n entegrasyonunu kullanarak Lemonade'e nasıl bağlanacağınız
 - İş akışı düğümlerini ve veri akışını anlama
 
 ## Lemonade Nedir?
 
-[Lemonade](https://lemonade-server.ai), AMD donanımı için geliştirilmiş yerel bir LLM sunum platformudur. Tamamen makinenizde çalışan OpenAI uyumlu bir API sağlar; verileriniz hiçbir zaman cihazınızdan çıkmaz.
+[Lemonade](https://lemonade-server.ai), AMD donanımı için oluşturulmuş yerel bir LLM sunum platformudur. Tamamen makinenizde çalışan OpenAI uyumlu bir API sağlar—verileriniz asla cihazınızdan ayrılmaz.
 
-Bu playbook'ta, n8n'in yapay zeka destekli görevler için bağlandığı yerel bir LLM sunmak amacıyla Lemonade kullanıyoruz.
+Bu kılavuzda, n8n'in yapay zeka destekli görevler için bağlandığı yerel bir LLM'i sunmak amacıyla Lemonade'i kullanıyoruz.
 
-n8n, birinci sınıf entegrasyon sağlayan **yerel bir Lemonade düğümü** (`Lemonade Chat Model`) içerir; manuel yapılandırmaya gerek yoktur. Bu, yerel LLM'nizi otomasyon iş akışlarına bağlamayı kolaylaştırır.
+n8n, manuel yapılandırmaya gerek kalmadan birinci sınıf entegrasyon sağlayan **yerel bir Lemonade düğümü** (`Lemonade Chat Model`) içerir. Bu, yerel LLM'inizi otomasyon iş akışlarına bağlamayı basitleştirir.
 
-## Bellek Yapılandırmasını Ayarlama
+## Bellek Yapılandırmasının Ayarlanması
 
 <!-- @require:memory-config -->
 
@@ -45,7 +45,7 @@ n8n, birinci sınıf entegrasyon sağlayan **yerel bir Lemonade düğümü** (`L
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Yazılım Ön Koşullarını Yükleme
+## Yazılım Ön Koşullarının Kurulumu
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
@@ -190,9 +190,9 @@ npm -v
 ```
 <!-- @test:end -->
 
-## n8n'i Yükleme
+## n8n Kurulumu
 <!-- @os:windows -->
-npm kullanarak n8n'i global olarak yükleyin.
+n8n'i npm kullanarak global olarak kurun.
 
 > **Not**: Bazı npm uyarıları görebilirsiniz. Bu beklenen bir durumdur.
 
@@ -217,28 +217,28 @@ n8n --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **İpucu**: Windows kullanıcılarının bazı PowerShell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini değiştirmeleri gerekebilir (örneğin,
-> RemoteSigned veya Unrestricted olarak ayarlama).
+> **İpucu**: Windows kullanıcılarının bazı Powershell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini değiştirmesi gerekebilir (örneğin,
+> RemoteSigned veya Unrestricted olarak ayarlamak gibi).
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **PATH Sorunu**: `n8n --version` komutu "komut bulunamadı" hatası veriyorsa, npm global bin dizininin kullanıcı `PATH`'inde olduğundan emin olun. Olağan kurulum yolu `C:\Users\<username>\AppData\Roaming\npm` konumundadır.
+> **PATH Sorunu**: `n8n --version` komutu "command not found" hatası veriyorsa, npm global bin dizininizin kullanıcı `PATH`'inde olduğundan emin olun. Genellikle kurulum yolu `C:\Users\<username>\AppData\Roaming\npm` konumundadır.
 > Bunu kullanıcı yoluna ekleyin (Sistem ortam değişkenlerini düzenle > Ortam Değişkenleri > Kullanıcı Yolunu Düzenle) ve terminali yeniden başlatın.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-n8n kurulumumuzu kapsayıcıya almak için Podman hizmetini kullanacağız.
+Şimdi n8n kurulumumuzu konteynerleştirmek için Podman servisini kullanacağız.
 
-Lütfen aşağıdakileri istediğiniz bir dizine indirin: [compose.yml](assets/compose.yml)
+Lütfen aşağıdakini seçtiğiniz bir dizine indirin: [compose.yml](assets/compose.yml)
 
-O dizinde aşağıdaki komutu çalıştırın:
+O dizinde, aşağıdaki komutu çalıştırın:
 ```bash
 podman compose up -d
 ```
 
-Bu işlem n8n'i yüklemeli ve kalıcı depolamaya yazmalıdır.
+Bu, n8n'i kurmalı ve kalıcı depolamaya yazmalıdır.
 
 Tarayıcınızın adres çubuğuna `localhost:5678` yazarak n8n'i başlatın.
 <!-- @os:end -->
@@ -246,7 +246,7 @@ Tarayıcınızın adres çubuğuna `localhost:5678` yazarak n8n'i başlatın.
 <!-- @os:windows -->
 ## n8n'i Başlatma
 
-n8n'i terminalden başlatın:
+Terminalden n8n'i başlatın:
 
 ```bash
 n8n start
@@ -317,7 +317,7 @@ echo "OK: n8n server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-n8n yerel bir web sunucusu başlatır. Düzenleyiciye erişmek için `'o'` tuşuna basın veya tarayıcınızda `http://localhost:5678` adresini açın.
+n8n yerel bir web sunucusu başlatır. Editöre erişmek için `'o'` tuşuna basın veya tarayıcınızı `http://localhost:5678` adresine açın.
 <!-- @os:end -->
 
 
@@ -325,19 +325,19 @@ n8n yerel bir web sunucusu başlatır. Düzenleyiciye erişmek için `'o'` tuşu
 
 ## Lemonade'i Başlatma
 
-Lemonade, bir model çalıştıracak ve n8n'e bağlanacak yerel sunucudur.
+Lemonade, bir modeli çalıştıracak ve n8n'e bağlanacak yerel sunucudur.
 
 <!-- @os:linux -->
-Görev çubuğundaki Lemonade simgesine tıklayarak Lemonade GUI'yi açın. Buradan modellere, arka uçlara göz atabilir ve önceden yüklenmiş modelleri yükleyebilirsiniz.
+Görev çubuğundaki Lemonade Simgesine tıklayarak Lemonade GUI'sini açın. Buradan modellere, arka uçlara göz atabilir ve önceden kurulmuş modelleri yükleyebilirsiniz.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Lemonade simgesine tıklayarak Lemonade GUI'yi açın. Uygulamayı açmak için sistem tepsisi simgesine sağ tıklayın. Ardından model, arka uç ekleyebilir ve önceden yüklenmiş modelleri yükleyebilirsiniz.
+Lemonade Simgesine tıklayarak Lemonade GUI'sini açın. Uygulamayı açmak için tepsi simgesine sağ tıklayın. Ardından modeller, arka uçlar ekleyebilir ve önceden kurulmuş modelleri yükleyebilirsiniz.
 <!-- @os:end -->
 
->**İpucu**: Çalışmaya başladıktan sonra Lemonade GUI'ye http://localhost:13305 adresinden de erişilebilir.
+>**İpucu**: Çalıştıktan sonra, Lemonade GUI'sine http://localhost:13305 adresinden de erişilebilir
 
-Alternatif olarak, bir terminal açıp hangi modellerin yüklü olduğunu görmek için `lemonade list` komutunu çalıştırabilirsiniz. Ardından şunu çalıştırın:
+Alternatif olarak, bir terminal açıp hangi modellerin kurulu olduğunu görmek için `lemonade list` komutunu çalıştırabilirsiniz. Ardından şunu çalıştırın:
 
 <!-- @device:halo_box -->
 <!-- @os:linux -->
@@ -366,30 +366,28 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 <!-- @device:end -->
 
 
-## İş Akışını Kurma
+## İş Akışının Kurulumu
 
 ### Adım 1: n8n'e Kaydolun veya Giriş Yapın
 
-n8n'i ilk açtığınızda bir hesap oluşturmanız veya giriş yapmanız istenecektir:
+n8n'i ilk açtığınızda, bir hesap oluşturmanız veya giriş yapmanız istenecektir:
 
 1. Tarayıcınızda `http://localhost:5678` adresini açın
 2. E-postanızla yeni bir yerel hesap oluşturun veya zaten bir hesabınız varsa giriş yapın
 3. Giriş yaptıktan sonra n8n panosunu göreceksiniz
 
-> **İpucu**: Hesabınıza erişemiyorsanız `n8n user-management:reset` komutunu deneyin
+> **İpucu**: Hesabınızdan kilitlenirseniz, `n8n user-management:reset` komutunu deneyin
 
 ### Adım 2: İş Akışını İçe Aktarın
 
 Doğrudan içe aktarabileceğiniz önceden oluşturulmuş bir iş akışı sağladık:
 
-1. Aşağıdaki iş akışı dosyasını indirin: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. İş akışı düzenleyicisini açmak için **Start from Scratch** seçeneğine tıklayın. Alternatif olarak, sol üstteki + Düğmesine ve ardından **Add workflow** seçeneğine tıklayın.
-3. Sağ üst çubuktaki **...** menüsüne (üç nokta) tıklayın ve **Import from file** seçeneğini seçin
+1. Şu iş akışı dosyasını indirin: [financial-news-workflow.json](assets/financial-news-workflow.json)
+2. İş akışı editörünü açmak için **Start from Scratch**'e tıklayın. Alternatif olarak, sol üstteki + Düğmesine tıklayın ve ardından **Add workflow**'a tıklayın.
+3. Sağ üst çubuktaki **...** menüsüne (üç nokta) tıklayın ve **Import from file**'ı seçin
 4. İndirilen `financial-news-workflow.json` dosyasını seçin
 5. İş akışı tuval üzerinde görünecektir
-
-
-### Adım 3: İş Akışını Anlama
+### Adım 3: İş Akışını Anlamak
 
 İçe aktarılan iş akışı, birbirine bağlı 9 düğüm içerir:
 
@@ -401,21 +399,21 @@ Doğrudan içe aktarabileceğiniz önceden oluşturulmuş bir iş akışı sağl
 |------|---------|
 | **When clicking 'Execute workflow'** | İş akışını başlatmak için manuel tetikleyici |
 | **Fetch Financial News Webpage** | `https://apnews.com/business` adresine HTTP GET isteği |
-| **Delay to Ensure Page Load** | Sayfa içeriğinin tam olarak yüklenmesini sağlamak için bekleme düğümü |
-| **Extract News Headlines & Text** | CSS seçicileri kullanarak başlıkları, editörün seçimlerini, öne çıkan haberleri ve bölgesel haberleri çıkaran HTML düğümü |
+| **Delay to Ensure Page Load** | Sayfa içeriğinin tamamen yüklenmesini sağlamak için bekleme düğümü |
+| **Extract News Headlines & Text** | CSS seçicilerini kullanarak başlıkları, editör seçkilerini, öne çıkan haberleri ve bölgesel haberleri çıkaran HTML düğümü |
 | **Clean Extracted News Data** | Çıkarılan tüm verileri tek bir metin alanında birleştiren Set düğümü |
-| **AI Financial News Summarizer** | Haberleri bir finansal analist sistem istemi ile işleyen AI Agent |
-| **Lemonade Chat Model** | LLM çalıştıran yerel Lemonade sunucunuza bağlanır |
+| **AI Financial News Summarizer** | Haberleri bir finansal analist sistem istemiyle işleyen AI Agent |
+| **Lemonade Chat Model** | LLM'i çalıştıran yerel Lemonade sunucunuza bağlanır |
 | **Structured Output Parser** | AI çıktısını yapılandırılmış JSON olarak biçimlendirir |
 | **Convert to File** | Özeti indirilebilir bir dosyaya dönüştürür |
 
-### Adım 4: Lemonade Kimlik Bilgilerini Yapılandırın
+### Adım 4: Lemonade Kimlik Bilgilerini Yapılandırma
 
-İş akışını çalıştırmadan önce yerel Lemonade sunucunuza bağlamanız gerekir:
+İş akışını çalıştırmadan önce, onu yerel Lemonade sunucunuza bağlamanız gerekir:
 
-1. n8n'deki **Lemonade Chat Model** düğümüne çift tıklayın
-2. **Credential to connect with** açılır menüsünde **Create New Credential** seçeneğini seçin
-3. Aşağıdaki tablodaki değerleri girin ve kaydet'e tıklayın.
+1. n8n'de **Lemonade Chat Model** düğümüne çift tıklayın
+2. **Credential to connect with** açılır menüsünden **Create New Credential** seçeneğini seçin
+3. Aşağıdaki tablodaki değerleri girin ve kaydetmek için tıklayın.
 4. Lemonade Server'da yüklediğiniz ilgili modeli seçin.
 
   | Alan | Değer |
@@ -425,18 +423,18 @@ Doğrudan içe aktarabileceğiniz önceden oluşturulmuş bir iş akışı sağl
 
 > **Not**: Test etmeden önce, Lemonade sunucusunun çalıştığını doğrulamak için bir terminalde `lemonade status` komutunu çalıştırın.
 <!-- @device:halo_box -->
-> Bu iş akışı GPT-OSS-120B kullanır ve Lemonade'de önceden yüklenmiştir. Bunu Lemonade Chat Model düğüm ayarlarında yüklü diğer modellerle değiştirebilirsiniz.
+> Bu iş akışı GPT-OSS-120B kullanır ve bu model Lemonade'de önceden yüklenmiştir. Bunu, Lemonade Chat Model düğümü ayarlarında yüklü diğer modellerle değiştirebilirsiniz.
 <!-- @device:end -->
 
-### Adım 5: İş Akışını Test Edin
+### Adım 5: İş Akışını Test Etme
 
 1. Lemonade'in bir model yüklü olarak çalıştığından emin olun
-2. Tuvalin alt ortasındaki **Execute workflow** seçeneğine tıklayın
-3. Her düğümün soldan sağa doğru çalıştığını izleyin; tamamlandığında yeşile dönerler
+2. Tuvalin alt orta kısmındaki **Execute workflow** düğmesine tıklayın
+3. Her düğümün soldan sağa çalışmasını izleyin—tamamlandıklarında yeşile dönerler
 4. Oluşturulan özeti alt bölmede görmek için **AI Financial News Summarizer** düğümüne çift tıklayın.
 5. Alt bölmede ilgili metin dosyasını indirmek için **Convert to File** düğümüne çift tıklayın.
 
-## AI Agent'ı Anlama
+## AI Agent'ı Anlamak
 
 AI Financial News Summarizer, finansal analiz için tasarlanmış bir sistem istemi kullanır:
 
@@ -450,26 +448,26 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-Agent, temizlenmiş haber verilerini alır ve piyasa duyarlılığıyla birlikte yapılandırılmış bir özet çıktısı üretir.
+Agent, temizlenmiş haber verilerini alır ve piyasa duyarlılığına sahip yapılandırılmış bir özet çıktısı verir.
 
 ### İş Akışınızı Kaydetme
 
-Üstteki iş akışı adına tıklayın ve isterseniz yeniden adlandırın. İş akışları çalışırken otomatik olarak kaydedilir.
+Üst kısımdaki iş akışı adına tıklayın ve isterseniz yeniden adlandırın. İş akışları çalışırken otomatik olarak kaydedilir.
 
 ## Sonraki Adımlar
 
-- **Zamanlama otomasyonu**: Günlük çalıştırmak için Manuel Tetikleyiciyi bir **Schedule Trigger** ile değiştirin
-- **Bildirim gönderme**: Özetleri almak için bir **Discord**, **Slack** veya **Email** düğümü ekleyin
-- **Farklı modeller deneyin**: Farklı LLM'lerle denemek için Lemonade Chat Model düğümündeki modeli değiştirin
-- **Çıkarmayı özelleştirin**: Farklı haber bölümlerini hedeflemek için HTML Extract düğümünün CSS seçicilerini değiştirin
-- **Farklı arka uçlar deneyin**: n8n ayrıca [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio ve diğer yerel LLM arka uçlarını da destekler
+- **Otomasyonu zamanlayın**: Her gün çalıştırmak için Manual Trigger'ı bir **Schedule Trigger** ile değiştirin
+- **Bildirim gönderin**: Özetleri almak için bir **Discord**, **Slack** veya **Email** düğümü ekleyin
+- **Farklı modelleri deneyin**: Farklı LLM'lerle denemeler yapmak için Lemonade Chat Model düğümündeki modeli değiştirin
+- **Çıkarımı özelleştirin**: Farklı haber bölümlerini hedeflemek için HTML Extract düğümünün CSS seçicilerini değiştirin
+- **Farklı arka uçları deneyin**: n8n ayrıca [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio ve diğer yerel LLM arka uçlarını destekler
 
 ### n8n Şablonlarını Keşfedin
 
-n8n'in yüzlerce önceden oluşturulmuş iş akışı şablonu vardır. Resmi şablon kitaplığına şu adresten göz atın:
+n8n'de yüzlerce önceden oluşturulmuş iş akışı şablonu bulunur. Resmi şablon kitaplığına şu adresten göz atın:
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
-İçe aktarıp özelleştirebileceğiniz iş akışlarını bulmak için "AI", "LLM" veya "automation" anahtar kelimelerini arayın.
+İçe aktarıp özelleştirebileceğiniz iş akışlarını bulmak için "AI", "LLM" veya "automation" araması yapın.
 
-Daha fazla bilgi için [n8n Belgelerine](https://docs.n8n.io/) göz atın.
+Daha fazla bilgi için [n8n Documentation](https://docs.n8n.io/) sayfasına göz atın.

@@ -8,25 +8,25 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code kan installeras från **AMD Ryzen™ AI Developer Center**. Gå till fliken **Updates** och installera VS Code om det inte redan finns.
+VS Code kan installeras från **AMD Ryzen™ AI Developer Center**. Gå till fliken **Updates** och installera VS Code om det inte redan finns installerat.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code kan installeras från **AMD Ryzen™ AI Developer Center**. Gå till fliken **Manage** och installera VS Code om det inte redan finns.
+VS Code kan installeras från **AMD Ryzen™ AI Developer Center**. Gå till fliken **Manage** och installera VS Code om det inte redan finns installerat.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Ladda ned Windows-installationsfilen från: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+1. Ladda ner Windows-installationsfilen från: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
 2. Klicka på den nedladdade filen `VSCodeUserSetup-x64-1.108.2.exe` för att installera VS Code.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-1. Ladda ned Debian-installationspaketet från: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
+1. Ladda ner Debian-installationspaketet från: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
 2. Klicka på den nedladdade filen `code_1.108.2-1769004815_amd64.deb` för att installera VS Code.
 
 <!-- @os:end -->

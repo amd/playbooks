@@ -8,11 +8,11 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code je možné nainštalovať z **AMD Ryzen™ AI Developer Center**. Prejdite na kartu **Updates** a nainštalujte VS Code, ak ešte nie je prítomný.
+VS Code je možné nainštalovať z **AMD Ryzen™ AI Developer Center**. Prejdite na kartu **Updates** a nainštalujte VS Code, ak ešte nie je nainštalovaný.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code je možné nainštalovať z **AMD Ryzen™ AI Developer Center**. Prejdite na kartu **Manage** a nainštalujte VS Code, ak ešte nie je prítomný.
+VS Code je možné nainštalovať z **AMD Ryzen™ AI Developer Center**. Prejdite na kartu **Manage** a nainštalujte VS Code, ak ešte nie je nainštalovaný.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -20,14 +20,14 @@ VS Code je možné nainštalovať z **AMD Ryzen™ AI Developer Center**. Prejdi
 <!-- @os:windows -->
 
 1. Stiahnite si inštalačný spustiteľný súbor pre Windows z: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
-2. Kliknite na stiahnutý súbor `VSCodeUserSetup-x64-1.108.2.exe` a nainštalujte VS Code.
+2. Kliknutím na stiahnutý súbor `VSCodeUserSetup-x64-1.108.2.exe` nainštalujte VS Code.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
 1. Stiahnite si inštalačný balík pre Debian z: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
-2. Kliknite na stiahnutý súbor `code_1.108.2-1769004815_amd64.deb` a nainštalujte VS Code.
+2. Kliknutím na stiahnutý súbor `code_1.108.2-1769004815_amd64.deb` nainštalujte VS Code.
 
 <!-- @os:end -->
 <!-- @device:end -->

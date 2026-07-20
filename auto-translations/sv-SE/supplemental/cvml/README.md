@@ -6,25 +6,25 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Denna spelbok använder speciella taggar som GitHub inte kan rendera. Besök [amd.com/playbooks](https://amd.com/playbooks) för att förhandsgranska detta innehåll korrekt.
 <!-- @github-only:end -->
 
 ## Översikt
 
-[Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) är ett AMD C++ verktygsbibliotek för datorseende och maskininlärning som erbjuder kraftfulla perceptionsfunktioner på enheten — inklusive djupskattning, ansiktsdetektering och ansiktsmesh-spårning. Biblioteket är byggt ovanpå Ryzen AI-drivrutinerna och väljer automatiskt den bästa tillgängliga hårdvaran (GPU eller NPU) för inferens, vilket gör att du kan lägga till AI-funktioner i C++-applikationer utan att behöva oroa dig för modellträning eller ramverksintegration. All bearbetning sker lokalt på ditt system, vilket gör det idealiskt för integritetskänsliga applikationer med låg latens.
+[Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) är ett verktygspaket från AMD för datorseende och maskininlärning i C++ som tillhandahåller kraftfulla perceptionsfunktioner på enheten — inklusive djupuppskattning, ansiktsdetektering och spårning av ansiktsnät. Biblioteket är byggt ovanpå Ryzen AI-drivrutinerna och väljer automatiskt bästa tillgängliga hårdvara (GPU eller NPU) för inferens, vilket gör att du kan lägga till AI-funktioner i C++-applikationer utan att behöva bekymra dig om modellträning eller ramverksintegration. All bearbetning sker lokalt på ditt system, vilket gör det idealiskt för integritetskänsliga applikationer med låg latens.
 
-Den här playbooken lär dig hur du konfigurerar Ryzen AI CVML Library, bygger de medföljande exempelapplikationerna och kör ansiktsdetektering på en exempelbild.
+Denna spelbok lär dig hur du konfigurerar Ryzen AI CVML Library, bygger de medföljande exempelapplikationerna och kör ansiktsdetektering på en exempelbild.
 
 ## Vad du kommer att lära dig
 
 - Hur du installerar förutsättningar och konfigurerar Ryzen AI CVML Library på ditt system
-- Hur CVML C++ API fungerar: kontexter, featureobjekt och bildbuffertar
+- Hur CVML C++ API fungerar: kontexter, funktionsobjekt och bildbuffertar
 - Hur du bygger och kör de medföljande exempelapplikationerna med CMake och OpenCV
 - Hur du kör ansiktsdetektering på en bild med avgränsningsrutor och landmärken
 - Hur du integrerar CVML-funktioner i dina egna C++-applikationer
 
 <!-- @device:halo_box -->
-## Kontrollera programvaruuppdateringar
+## Kontrollera efter programuppdateringar
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -37,20 +37,20 @@ Den här playbooken lär dig hur du konfigurerar Ryzen AI CVML Library, bygger d
 Innan du börjar, se till att du har följande:
 
 <!-- @os:windows -->
-- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — ladda ned `opencv-4.11.0-windows.exe`, kör det och extrahera till en lokal mapp (t.ex. `C:\opencv`)
-- [CMake](https://cmake.org/download/) — ladda ned Windows x86-64 MSI-installationsprogrammet och välj **"Add CMake to the system PATH for all users"** under installationen
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — installera den senaste tillgängliga versionen
-- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) med arbetsbelastningen "Desktop development with C++" (inkluderar MSVC-kompilatorn, Windows SDK och C++ byggverktyg)
+- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — ladda ner `opencv-4.11.0-windows.exe`, kör den och packa upp till en lokal mapp (t.ex. `C:\opencv`)
+- [CMake](https://cmake.org/download/) — ladda ner Windows x86-64 MSI-installationsprogrammet och välj under installationen **"Add CMake to the system PATH for all users"**
+- [Ryzen AI NPU-drivrutin](https://ryzenai.docs.amd.com/en/latest/inst.html) — installera den senast tillgängliga versionen
+- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) med arbetsbelastningen "Desktop development with C++" (inkluderar MSVC-kompilatorn, Windows SDK och C++-byggverktyg)
 <!-- @os:end -->
 
 <!-- @os:linux -->
-- OpenCV 4.11 — måste byggas från källkod (apt-paket på Ubuntu 22.04 och 24.04 tillhandahåller inte version 4.11). Se [Bygga OpenCV från källkod](#building-opencv-from-source) nedan.
+- OpenCV 4.11 — måste byggas från källkod (apt-paketen på Ubuntu 22.04 och 24.04 tillhandahåller inte version 4.11). Se [Bygga OpenCV från källkod](#building-opencv-from-source) nedan.
 - CMake — installera via apt:
   ```bash
   sudo apt install cmake
   ```
 - Ubuntu 22.04 eller 24.04 (kernel >= 6.11.0-21-generic)
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (Linux-installationsprogram — krävs för NPU-inferens)
+- [Ryzen AI NPU-drivrutin](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (Linux-installationsprogram — krävs för NPU-inferens)
 - Vulkan SDK (installeras i avsnittet [Vulkan SDK](#vulkan-sdk) nedan)
 <!-- @os:end -->
 
@@ -152,13 +152,13 @@ fi
 
 ## Konfigurera CVML Library
 
-Skapa ett AMD-konto på [account.amd.com](https://account.amd.com) om du inte redan har ett, logga sedan in för att ladda ned Ryzen AI CVML Library från portallänken nedan:
+Skapa ett AMD-konto på [account.amd.com](https://account.amd.com) om du inte redan har ett, logga sedan in för att ladda ner Ryzen AI CVML Library från portallänken nedan:
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
 ```
 
-Efter nedladdning, extrahera paketet till en lokal katalog (t.ex. `C:\RyzenAI-Library` på Windows eller `~/RyzenAI-Library` på Linux) och ange miljövariabeln `AMD_CVML_SDK_ROOT` till den extraherade platsen:
+Packa efter nedladdningen upp paketet till en lokal katalog (t.ex. `C:\RyzenAI-Library` på Windows eller `~/RyzenAI-Library` på Linux) och ställ in miljövariabeln `AMD_CVML_SDK_ROOT` till den uppackade platsen:
 
 <!-- @os:windows -->
 ```cmd
@@ -172,19 +172,19 @@ export AMD_CVML_SDK_ROOT=~/RyzenAI-Library
 ```
 <!-- @os:end -->
 
-Bibliotekspaketet innehåller följande struktur:
+Biblioteksparaketet innehåller följande struktur:
 
 | Mapp | Innehåll |
 |--------|----------|
 | `cmake/` | Paketeringsinformation för CMakes `find_package`-funktion |
-| `include/` | C++ header-filer (`cvml-depth-estimation.h`, `cvml-face-detector.h`, `cvml-face-mesh.h`, osv.) |
+| `include/` | C++-headerfiler (`cvml-depth-estimation.h`, `cvml-face-detector.h`, `cvml-face-mesh.h`, med flera) |
 | `windows/` | Binärfiler för Windows (kompileringstids-`.LIB` och körtids-`.DLL`/`.GRAPHLIB`/`.AMODEL`-filer) |
 | `linux/` | Binärfiler för Linux (kompilerings- och körtids-`.SO`-filer) |
-| `samples/` | Individuella exempelapplikationer med källkod |
+| `samples/` | Enskilda exempelapplikationer med källkod |
 
 <!-- @os:linux -->
 
-### Linux-specifik konfiguration
+### Linuxspecifik konfiguration
 
 #### Bygga OpenCV från källkod
 
@@ -194,7 +194,7 @@ Installera byggberoenden för OpenCV:
 sudo apt install unzip wget ubuntu-restricted-extras libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev libgtk-3-dev pkg-config ffmpeg
 ```
 
-Ladda ned, konfigurera och bygg OpenCV 4.11.0 med contrib-modulerna (referens: [OpenCV Linux-installationsguide](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
+Ladda ner, konfigurera och bygg OpenCV 4.11.0 med contrib-modulerna (referens: [OpenCV Linux install tutorial](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
 
 ```bash
 wget -O opencv-4.11.0.zip https://github.com/opencv/opencv/archive/4.11.0.zip
@@ -266,24 +266,24 @@ done
 
 ## Grundläggande koncept
 
-CVML Library tillhandahåller ett enkelt C++ API där varje perceptionsfunktion (djupskattning, ansiktsdetektering, ansiktsmesh) har sin egen header-fil och sitt eget featureobjekt. Du arbetar inte med råa modeller — biblioteket hanterar modellinläsning, förbearbetning och inferens automatiskt.
+CVML Library tillhandahåller ett enkelt C++ API där varje perceptionsfunktion (djupuppskattning, ansiktsdetektering, ansiktsnät) har sin egen headerfil och sitt eget funktionsobjekt. Du arbetar inte med råa modeller — biblioteket hanterar automatiskt modellinläsning, förbearbetning och inferens.
 
 ### Tillgängliga funktioner
 
-| Funktion | Header-fil | Beskrivning |
+| Funktion | Headerfil | Beskrivning |
 |---------|------------|-------------|
-| **Djupskattning** | `cvml-depth-estimation.h` | Genererar per-pixel djupkartor från RGB-bilder |
+| **Djupuppskattning** | `cvml-depth-estimation.h` | Genererar pixelvisa djupkartor från RGB-bilder |
 | **Ansiktsdetektering** | `cvml-face-detector.h` | Detekterar ansikten med avgränsningsrutor, landmärken (ögon, näsa, mun) och konfidenspoäng |
-| **Ansiktsmesh** | `cvml-face-mesh.h` | Spårar detaljerad ansiktsgeometri med täta meshpunkter |
+| **Ansiktsnät** | `cvml-face-mesh.h` | Spårar detaljerad ansiktsgeometri med täta nätpunkter |
 
 ### Programmeringsmodell
 
-Varje CVML-applikation följer samma fyrastegsprocess:
+Varje CVML-applikation följer samma fyrstegsmönster:
 
 1. **Skapa en kontext** — `amd::cvml::Context` hanterar delade resurser som loggning och val av inferensbackend.
-2. **Skapa ett featureobjekt** — Instansiera den specifika funktionen (t.ex. `amd::cvml::DepthEstimation`) mot kontexten.
-3. **Omslut indata** — Använd `amd::cvml::Image` för att kapsla in din RGB-bildbuffert utan att kopiera data.
-4. **Kör** — Anropa featurens bearbetningsmetod och läs resultaten.
+2. **Skapa ett funktionsobjekt** — Instansiera den specifika funktionen (t.ex. `amd::cvml::DepthEstimation`) mot kontexten.
+3. **Kapsla in indata** — Använd `amd::cvml::Image` för att kapsla in din RGB-bildbuffert utan att kopiera data.
+4. **Kör** — Anropa funktionens bearbetningsmetod och läs resultaten.
 
 ```cpp
 // Step 1: Create context
@@ -309,20 +309,20 @@ context->Release();
 
 ### Inferensbackend
 
-Biblioteket väljer automatiskt den bästa hårdvaran (GPU eller NPU) för varje operation. Du kan också ange backend explicit:
+Biblioteket väljer automatiskt den bästa hårdvaran (GPU eller NPU) för varje operation. Du kan även ange backend explicit:
 
 ```cpp
 // Let the library choose the best hardware (default)
 context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 ```
 
-> **Obs:** Funktioner som använder ONNX-backend för NPU-operationer kan uppleva längre startfördröjning vid första körningen. Efterföljande körningar kommer att vara snabbare.
+> **Obs!** Funktioner som använder ONNX-backend för NPU-operationer kan uppleva längre startfördröjning vid första körningen. Efterföljande körningar kommer att vara snabbare.
 
-> **Obs:** Om NPU-drivrutinen inte är installerad på målsystemet kommer Ryzen AI CVML-biblioteket automatiskt att falla tillbaka till GPU-backend för inferensoperationer.
+> **Obs!** Om NPU-drivrutinen inte är installerad på målsystemet kommer Ryzen AI CVML-biblioteket automatiskt att falla tillbaka till GPU-backend för inferensoperationer.
 
 ## Bygga exempelapplikationerna
 
-CVML Library inkluderar färdiga exempelapplikationer för varje funktion. Låt oss bygga dem alla på en gång.
+CVML-biblioteket innehåller färdiga att bygga exempelapplikationer för varje funktion. Låt oss bygga dem alla på en gång.
 
 1. Ange miljövariabeln `OPENCV_INSTALL_ROOT` så att den pekar på din OpenCV-installation:
 
@@ -365,7 +365,7 @@ CVML Library inkluderar färdiga exempelapplikationer för varje funktion. Låt 
    ```
    <!-- @os:end -->
 
-   Efter ett lyckat bygge finns de körbara filerna på:
+   Efter en lyckad byggnation finns de körbara filerna på:
 
    <!-- @os:windows -->
    ```
@@ -383,7 +383,7 @@ CVML Library inkluderar färdiga exempelapplikationer för varje funktion. Låt 
    ```
    <!-- @os:end -->
 
-3. Innan du kör något exempel, se till att CVML-körtidsfilerna är tillgängliga:
+3. Innan du kör något exempel, se till att CVML-runtime-filerna är tillgängliga:
 
    <!-- @os:windows -->
    ```cmd
@@ -406,7 +406,7 @@ CVML Library inkluderar färdiga exempelapplikationer för varje funktion. Låt 
 
 ## Köra ansiktsdetektering
 
-Ansiktsdetekteringsexemplet detekterar ansikten i en bild, video eller ett livekameraflöde. Det ritar avgränsningsrutor, konfidenspoäng och fem ansiktslandmärken (två ögon, näsa och två mungipor) på varje detekterat ansikte.
+Exemplet för ansiktsdetektering upptäcker ansikten i en bild, video eller livesänd kameraström. Det ritar begränsningsrutor, konfidenspoäng och fem ansiktslandmärken (två ögon, näsa och två munkanter) på varje upptäckt ansikte.
 
 Navigera först till mappen med den körbara filen för ansiktsdetektering:
 
@@ -422,7 +422,7 @@ cd build/cvml-sample-face-detection
 ```
 <!-- @os:end -->
 
-Ladda sedan ned en exempelbild att använda som indata (foto av [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), fri att använda via Pexels):
+Ladda sedan ner en exempelbild att använda som indata (foto av [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), fri att använda via Pexels):
 
 ```bash
 curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
@@ -442,13 +442,13 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-Ett fönster visas med bilden med avgränsningsrutor runt detekterade ansikten, konfidenspoäng och ansiktslandmärkespunkter (ögon, näsa, mungipor).
+Ett fönster visas med bilden med begränsningsrutor runt upptäckta ansikten, konfidenspoäng och punkter för ansiktslandmärken (ögon, näsa, munkanter).
 
 <p align="center">
   <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
 </p>
 
-**Spara den annoterade utdatan till en fil:**
+**Spara den kommenterade utdatan till en fil:**
 
 <!-- @os:windows -->
 ```cmd
@@ -476,7 +476,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 ```
 <!-- @os:end -->
 
-Ansiktsdetekteringsfunktionen erbjuder två modellvarianter:
+Funktionen för ansiktsdetektering erbjuder två modellvarianter:
 
 | Modell | Hastighet | Noggrannhet | Bäst för |
 |-------|-------|----------|----------|
@@ -719,7 +719,7 @@ done
 
 ## Integrera CVML i din egen applikation
 
-För att använda CVML Library i ditt eget C++-projekt, lägg till det via CMakes `find_package`:
+För att använda CVML-biblioteket i ditt eget C++-projekt, lägg till det via CMakes `find_package`:
 
 ```cmake
 # Find the Ryzen AI CVML Library
@@ -729,7 +729,7 @@ find_package(RyzenAILibrary REQUIRED PATHS ${AMD_CVML_SDK_ROOT})
 target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 ```
 
-Där `AMD_CVML_SDK_ROOT` pekar på roten av Ryzen AI CVML Library-mappen. Inkludera sedan lämplig header för den funktion du vill använda:
+Där `AMD_CVML_SDK_ROOT` pekar på roten av mappen för Ryzen AI CVML-biblioteket. Inkludera sedan lämplig header för funktionen du vill använda:
 
 ```cpp
 #include <cvml-face-detector.h>   // for face detection
@@ -739,12 +739,12 @@ Där `AMD_CVML_SDK_ROOT` pekar på roten av Ryzen AI CVML Library-mappen. Inklud
 
 ## Nästa steg
 
-För varje exempel nedan, navigera först till dess körbara mapp enligt samma mönster som i avsnittet [Köra ansiktsdetektering](#running-face-detection) ovan (t.ex. `cd build\cvml-sample-depth-estimation\Release` på Windows eller `cd build/cvml-sample-depth-estimation` på Linux). På Windows, lägg till `.exe` i varje kommando (t.ex. `cvml-sample-depth-estimation.exe`).
+För varje exempel nedan navigerar du först till dess körbara mapp, enligt samma mönster som beskrivs i avsnittet [Running Face Detection](#running-face-detection) ovan (t.ex. `cd build\cvml-sample-depth-estimation\Release` på Windows eller `cd build/cvml-sample-depth-estimation` på Linux). På Windows lägger du till `.exe` efter varje kommando (t.ex. `cvml-sample-depth-estimation.exe`).
 
-- **Prova djupskattning**: Kör `cvml-sample-depth-estimation -i sample_face.jpg` för att generera en färglagd djupkarta — objekt nära kameran visas i varma färger, avlägsna objekt i kalla färger
-- **Utforska ansiktsmesh**: Kör `cvml-sample-face-mesh -i sample_face.jpg` för att se detaljerad ansiktsgeometrispårning med täta meshpunkter
+- **Prova djupuppskattning**: Kör `cvml-sample-depth-estimation -i sample_face.jpg` för att generera en färgkodad djupkarta – objekt närmare kameran visas i varma färger, medan mer avlägsna objekt visas i kalla färger
+- **Utforska Face Mesh**: Kör `cvml-sample-face-mesh -i sample_face.jpg` för att se detaljerad spårning av ansiktsgeometri med täta punkter i nätet
 - **Bearbeta videofiler**: Använd flaggorna `-i` och `-o` på valfritt exempel för att bearbeta videor (t.ex. `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
-- **Jämför modellvarianter**: Prova `-m precise` mot standard `-m fast` vid ansiktsdetektering för att se avvägningen mellan noggrannhet och hastighet i praktiken
-- **Bygg din egen app**: Använd CMake-integrationen och C++ API för att lägga till CVML-funktioner i dina egna C++-applikationer
-- **Kombinera funktioner**: Kedja ansiktsdetektering med djupskattning i samma applikation för rikare scenförståelse
-- **Bläddra i källkoden**: Läs [Ryzen AI CVML Library på GitHub](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) för header-dokumentation, ytterligare exempel och API-detaljer
+- **Jämför modellvarianter**: Prova `-m precise` jämfört med standardvärdet `-m fast` för ansiktsdetektering för att själv uppleva avvägningen mellan noggrannhet och hastighet
+- **Bygg din egen app**: Använd CMake-integrationen och C++-API:et för att lägga till CVML-funktioner i dina egna C++-applikationer
+- **Kombinera funktioner**: Länka samman ansiktsdetektering med djupuppskattning i samma applikation för en rikare scenförståelse
+- **Bläddra i källkoden**: Läs [Ryzen AI CVML Library på GitHub](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) för dokumentation av headerfiler, ytterligare exempel och API-detaljer

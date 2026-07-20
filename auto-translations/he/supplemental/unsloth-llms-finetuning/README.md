@@ -6,45 +6,45 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> מדריך זה משתמש בתגיות מיוחדות ש-GitHub אינו יכול לרנדר. יש לבקר בכתובת [amd.com/playbooks](https://amd.com/playbooks) כדי להציג את התוכן הזה כראוי.
 <!-- @github-only:end -->
 
 ## סקירה כללית
 
-מדריך זה מראה כיצד לכוונן דק (fine-tune) מודל שפה באופן מקומי עם Unsloth על חומרת AMD.
+מדריך זה מראה כיצד לבצע כוונון עדין (fine-tune) של מודל שפה באופן מקומי באמצעות Unsloth על חומרת AMD.
 
-הוא משתמש בדוגמה קצרה של כוונון דק מפוקח (SFT) עם מתאמי LoRA על `unsloth/gemma-4-E4B-it`, תוך שימוש בתת-קבוצה של מערך הנתונים `mlabonne/FineTome-100k`. המטרה היא לספק לך תהליך עבודה פשוט מקצה לקצה המכסה הגדרה, אימון, הסקה ושמירת התוצאה המכוונת.
+הוא משתמש בדוגמת Supervised Fine-Tuning (SFT) קצרה עם מתאמי LoRA על `unsloth/gemma-4-E4B-it`, תוך שימוש בתת-קבוצה של מערך הנתונים `mlabonne/FineTome-100k`. המטרה היא לספק לך זרימת עבודה פשוטה מקצה לקצה שמכסה הגדרה, אימון, הסקה ושמירה של התוצאה המכוונת.
 
-הדוגמה מתוכננת להיות מעשית וקלה לשינוי, כך שתוכל להשתמש בה כנקודת התחלה עבור מערכי הנתונים והמודלים שלך.
+הדוגמה תוכננה להיות פרקטית וקלה לשינוי, כך שתוכל להשתמש בה כנקודת התחלה עבור מערכי הנתונים והמודלים שלך.
 
-## מה תלמד
+## מה תלמדו
 
 - כיצד להגדיר את סביבת Unsloth
-- כיצד לכוונן דק מודל LLM באמצעות SFT עם Unsloth
-- כיצד לשמור את התוצאה המכוונת באחסון מקומי
+- כיצד לכוונן עדין LLM באמצעות SFT עם Unsloth
+- כיצד לשמור את התוצאה המכוונת בעדינות באחסון מקומי
 
 <!-- @device:halo,stx,krk -->
-> **הערה:** טכניקות הכוונון הדק במדריך זה דורשות לפחות 24 GB של זיכרון GPU ו-32 GB של זיכרון RAM במערכת.
+> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות לפחות 24GB של זיכרון GPU ו-32GB של זיכרון מערכת RAM.
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **הערה:** טכניקות הכוונון הדק במדריך זה דורשות לפחות 24 GB של זיכרון GPU ו-32 GB של זיכרון RAM במערכת.
+> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות לפחות 24GB של זיכרון GPU ו-32GB של זיכרון מערכת RAM.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **הערה:** טכניקות הכוונון הדק במדריך זה דורשות לפחות 24 GB של זיכרון GPU **ייעודי** ו-32 GB של זיכרון RAM במערכת.
+> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות לפחות 24GB של זיכרון GPU **ייעודי** ו-32GB של זיכרון מערכת RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
-## מדוע Unsloth?
+## למה Unsloth?
 
-Unsloth מקל על הפעלת כוונון דק של מודלי LLM על חומרה מקומית על ידי הפחתת השימוש בזיכרון והאצת האימון בהשוואה להגדרה רגילה.
+Unsloth הופך את הכוונון העדין של LLM לקל יותר להרצה על חומרה מקומית על ידי צמצום השימוש בזיכרון והאצת האימון בהשוואה להגדרה סטנדרטית.
 
-במדריך זה, אנו משתמשים ב-Unsloth יחד עם **SFT מבוסס LoRA**. המשמעות היא שהמודל הבסיסי נשאר קפוא ברובו, בעוד שמאומן קבוצה קטנה בהרבה של משקלי מתאם. זהו פתרון מתאים לפיתוח מקומי מכיוון שהוא קל יותר מכוונון דק מלא ומהיר יותר לאיטרציה.
+במדריך זה, אנו משתמשים ב-Unsloth יחד עם **SFT מבוסס-LoRA**. כלומר, המודל הבסיסי נשאר קפוא ברובו, בעוד שקבוצה קטנה בהרבה של משקלי מתאם מאומנת. זוהי התאמה טובה לפיתוח מקומי מכיוון שהיא קלה יותר מכוונון עדין מלא ומהירה יותר לביצוע איטרציות.
 
-Unsloth תומך גם בגישות אימון אחרות, כולל QLoRA ותהליכי עבודה של למידה מחיזוקים. מדריך זה מתמקד בנתיב הפשוט ביותר תחילה: דוגמה קטנה של כוונון דק עם LoRA שמשתמשים יכולים להריץ, להבין ולהרחיב.
+Unsloth תומכת גם בגישות אימון נוספות, כולל QLoRA וזרימות עבודה של למידת חיזוק. מדריך זה מתמקד בתחילה בנתיב הפשוט ביותר: דוגמת כוונון עדין קטנה מבוססת LoRA שמשתמשים יכולים להריץ, להבין ולהרחיב.
 
 ## הגדרת תצורת הזיכרון
 
@@ -57,7 +57,7 @@ Unsloth תומך גם בגישות אימון אחרות, כולל QLoRA ותה�
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות תוכנה מוקדמות
+## התקנת דרישות מוקדמות של תוכנה
 
 ### יצירת סביבה וירטואלית
 
@@ -75,7 +75,7 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**הענק למשתמש שלך גישה להתקני GPU** (התנתק והתחבר מחדש כדי שהשינוי ייכנס לתוקף):
+**הענק למשתמש שלך גישה להתקני GPU** (יש להתנתק ולהתחבר מחדש כדי שהשינוי ייכנס לתוקף):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -158,10 +158,10 @@ pip install triton-windows
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **הערה:** במהלך הייבוא, Unsloth עשוי לבדוק נתיבי האצה אופציונליים של `bitsandbytes`. בגרסאות ROCm מסוימות, ייתכן שתראה הודעה כגון `bitsandbytes library load error: Configured ROCm binary not found`. מדריך זה משתמש בכוונון דק רגיל עם LoRA עם `optim="adamw_torch"`, ולכן אנו לא מסתמכים על האופטימייזר של `bitsandbytes` או על QLoRA בדגימה של 4-ביט. ניתן להתעלם בבטחה מהודעה זו.
+> **הערה:** במהלך הייבוא, ייתכן ש-Unsloth יבדוק נתיבי האצה אופציונליים של `bitsandbytes`. בגרסאות ROCm מסוימות, ייתכן שתראה הודעה כגון `bitsandbytes library load error: Configured ROCm binary not found`. מדריך זה משתמש בכוונון עדין סטנדרטי מבוסס LoRA עם `optim="adamw_torch"`, ולכן איננו מסתמכים על האופטימייזר `bitsandbytes` או על QLoRA 4-bit. ניתן להתעלם בבטחה מהודעה זו.
 
 <!-- @os:windows -->
-> **הערה:** ב-Windows ROCm, Unsloth ידפיס מספר אזהרות בעת ההפעלה — ראה [אזהרות ידועות](#known-warnings) להלן. כל אלה בטוחות להתעלמות; האימון פועל כראוי.
+> **הערה:** ב-ROCm של Windows, Unsloth תדפיס מספר אזהרות בעת ההפעלה — ראה [אזהרות ידועות](#known-warnings) להלן. ניתן להתעלם בבטחה מכל האזהרות הללו; האימון עובד כראוי.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -184,11 +184,11 @@ print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
-## הורדת סקריפט הכוונון הדק של Unsloth
+## הורדת סקריפט הכוונון העדין של Unsloth
 
 במקום לבצע כל שלב באופן ידני, מדריך זה מספק סקריפט נקי מקצה לקצה כאן: [test_unsloth.py](assets/test_unsloth.py).
 
-הרץ את הקוד הבא כדי להפעיל את הסקריפט:
+הרץ את הקוד הבא כדי להריץ את הסקריפט:
 
 ```bash
 python test_unsloth.py
@@ -221,21 +221,21 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-שאר המדריך יעבור באופן רעיוני על כל שלב מרכזי של הסקריפט.
+יתר המדריך יעבור באופן קונספטואלי על כל שלב מרכזי בסקריפט.
 
 ## כיצד זה עובד
 
-סקריפט test_unsloth.py מבצע את השלבים הבאים:
+הסקריפט test_unsloth.py מבצע את השלבים הבאים:
 * **טעינת מודל**: טוען את unsloth/gemma-4-E4B-it באמצעות FastModel.
-* **הכנת נתונים**: מתקנן את מערך הנתונים (למשל, FineTome-100k) ומיישם את תבנית הצ'אט של Gemma-4.
-* **יישום LoRA**: מוסיף מתאמים למודולי שפה, תשומת לב ו-MLP לאימון יעיל.
-* **אימון**: משתמש ב-SFTTrainer עם מיסוך הפסד על תגובות בלבד.
-* **הסקה**: מריץ בדיקת יצירה מהירה לאימות הביצועים.
+* **הכנת נתונים**: מבצע סטנדרטיזציה למערך הנתונים (לדוגמה, FineTome-100k) ומחיל את תבנית הצ'אט של Gemma-4.
+* **החלת LoRA**: מוסיף מתאמים למודולי שפה, קשב ו-MLP לצורך אימון יעיל.
+* **אימון**: משתמש ב-SFTTrainer עם מיסוך אובדן (loss masking) של תגובות בלבד.
+* **הסקה**: מריץ בדיקת יצירה מהירה כדי לאמת ביצועים.
 * **שמירה**: מייצא מתאמי LoRA באופן מקומי.
 
-## תצורת מפתח
+## תצורה מרכזית
 
-ניתן לשנות את הקבועים הבאים כדי להתאים אישית את הריצה שלך:
+ניתן לשנות את הקבועים הבאים כדי להתאים אישית את ההרצה שלך:
 
 ```python
 MODEL_NAME = "unsloth/gemma-4-E4B-it"
@@ -244,9 +244,9 @@ DATASET_NAME = "mlabonne/FineTome-100k"
 OUTPUT_DIR = "gemma_4_lora"
 ```
 
-דוגמה להודעת הברוכים הבאים של Unsloth ופלט בעת טעינת משקלי המודל:
+דוגמה להודעת הפתיחה של Unsloth ולפלט בעת טעינת משקלי המודל:
 
-![טקסט חלופי](assets/welcome.png)
+![alt text](assets/welcome.png)
 
 ## הכנת מערך הנתונים
 
@@ -255,20 +255,20 @@ OUTPUT_DIR = "gemma_4_lora"
 mlabonne/FineTome-100k
 ```
 מערך הנתונים:
-* מומר לפורמט צ'אט
+* מומר לתבנית צ'אט
 * מעובד באמצעות תבנית הצ'אט של Gemma-4
-* מנוקה להסרת אסימוני BOS כפולים
+* מנוקה כדי להסיר אסימוני BOS כפולים
 
 ## אימון המודל
 
 הסקריפט מריץ הדגמת אימון קצרה, עם הפרמטרים הבאים:
-- ~50 צעדים
-- גודל אצווה קטן
-- צבירת גרדיאנטים
+- כ-50 צעדים
+- גודל אצווה (batch) קטן
+- צבירת גרדיאנטים (Gradient accumulation)
 
 במהלך האימון, תראה יומנים כגון:
 
-![טקסט חלופי](assets/training.png)
+![alt text](assets/training.png)
 
 
 ## שמירה ופריסה
@@ -317,7 +317,7 @@ print(f"Found adapter weights: {adapter_weights}")
 ### שמירת מודל ממוזג (עבור vLLM)
 
 <!-- @os:windows -->
-> **הערה:** vLLM אינו תומך ב-Windows. כדי לפרוס את המודל המכוונן שלך ב-Windows, השתמש ב-llama.cpp (ראה [ייצוא GGUF](#export-gguf-for-llamacpp) להלן) או העבר את המודל הממוזג למכונת Linux המריצה vLLM.
+> **הערה:** vLLM אינה תומכת ב-Windows. כדי לפרוס את המודל המכוונן שלך ב-Windows, השתמש ב-llama.cpp (ראה [ייצוא GGUF](#export-gguf-for-llamacpp) להלן) או העבר את המודל הממוזג למחשב Linux שמריץ vLLM.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -369,31 +369,31 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 <!-- @os:windows -->
 ## אזהרות ידועות
 
-אזהרות אלה מודפסות על ידי Unsloth בעת ההפעלה ב-Windows ROCm וכולן בטוחות להתעלמות:
+אזהרות אלו מודפסות על ידי Unsloth בעת ההפעלה ב-Windows ROCm וכולן בטוחות להתעלמות:
 
-| אזהרה | סיבה | בטוח להתעלמות? |
+| אזהרה | סיבה | בטוח להתעלם? |
 |---|---|---|
-| `bitsandbytes library load error` | ל-bitsandbytes אין גרסת בנייה עבור Windows ROCm | כן — מדריך זה משתמש ב-`adamw_torch`, לא ב-bnb |
-| `No ROCm platform found for torch.distributed` | ל-ROCm-on-Windows חסר אימון מבוזר | כן — אימון על GPU יחיד אינו מושפע |
-| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth מסמן גרסאות בנייה שאינן Linux | כן — Windows ROCm עובד עבור SFT על GPU יחיד |
-| `triton is not available` | ל-Triton אין גרסת בנייה עבור Windows | כן — Unsloth חוזר לגרעיני PyTorch |
+| `bitsandbytes library load error` | ל-bitsandbytes אין build עבור Windows ROCm | כן — playbook זה משתמש ב-`adamw_torch`, לא ב-bnb |
+| `No ROCm platform found for torch.distributed` | ל-ROCm על Windows חסרה תמיכה באימון מבוזר | כן — אימון עם GPU יחיד אינו מושפע |
+| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth מסמנת builds שאינם Linux | כן — Windows ROCm עובד עבור SFT עם GPU יחיד |
+| `triton is not available` | ל-Triton אין build עבור Windows | כן — Unsloth חוזרת לקרנלים (kernels) של PyTorch |
 
-האימון יתקדם כראוי למרות אזהרות אלה.
+האימון יתקדם כראוי למרות אזהרות אלו.
 <!-- @os:end -->
 
-## השלבים הבאים
-- נסה את [Unsloth Studio](https://unsloth.ai/docs/new/studio), ממשק GUI אינטואיטיבי עבור Unsloth
-- אמן על מערכי הנתונים הספציפיים שלך
-- נסה כוונון דק עם היפר-פרמטרים שונים
-- פרוס עם vLLM או llama.cpp
-- נסה QLoRA להגדרה עם זיכרון נמוך יותר
+## הצעדים הבאים
+- נסו את [Unsloth Studio](https://unsloth.ai/docs/new/studio), ממשק GUI אינטואיטיבי עבור Unsloth
+- אמנו על מערכי הנתונים הספציפיים שלכם
+- נסו כוונון עדין (finetuning) עם היפרפרמטרים שונים
+- פרסו עם vLLM או llama.cpp
+- נסו QLoRA להגדרה עם צריכת זיכרון נמוכה יותר
 
 ## משאבים
 
-להלן מספר משאבים נוספים ללמידה נוספת על Unsloth וכוונון דק:
+להלן כמה משאבים נוספים ללימוד נוסף על Unsloth וכוונון עדין (finetuning):
 
 * [תיעוד Unsloth](https://docs.unsloth.ai)
 
 * [Unsloth ב-GitHub](https://github.com/unslothai/unsloth)
 
-* [מדריך כוונון דק של Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)
+* [מדריך הכוונון העדין של Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)

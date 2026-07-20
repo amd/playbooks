@@ -12,12 +12,12 @@ SPDX-License-Identifier: MIT
 
 ### Windows/Linux
 
-GAIA는 [GAIA 설치 가이드](../../dependencies/gaia.md)에 제공된 지침을 사용하여 사전 설치되어 있어야 합니다.
+GAIA는 [GAIA 설치 가이드](../../dependencies/gaia.md)에 제공된 지침에 따라 사전 설치되어 있어야 합니다.
 
-Lemonade Server는 [Lemonade 설치 가이드](../../dependencies/lemonade.md)에 제공된 지침을 사용하여 사전 설치되어 있어야 합니다.
+Lemonade Server는 [Lemonade 설치 가이드](../../dependencies/lemonade.md)에 제공된 지침에 따라 사전 설치되어 있어야 합니다.
 
 ## 필수 모델
 
 ### Windows/Linux
 
-Hardware Advisor Agent는 에이전트 추론을 위해 **Qwen3-Coder-30B**를 사용합니다. 이 모델은 `gaia init` 실행 중에 자동으로 다운로드됩니다. 수동으로 모델을 다운로드할 필요가 없습니다.
+Hardware Advisor Agent는 에이전트 추론을 위해 **Qwen3-Coder-30B**를 사용합니다. 이 모델은 `gaia init` 실행 시 자동으로 다운로드됩니다. 수동으로 모델을 다운로드할 필요는 없습니다.

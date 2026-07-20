@@ -14,20 +14,20 @@ Ta dokument opisuje pričakovane konfiguracije platforme za izvajanje tega priro
 
 | Komponenta | Različica | Opombe |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Predhodno nameščen in na voljo v PATH na platformi AMD Ryzen™ AI Halo Developer Platform; na vseh ostalih napravah ga je treba namestiti ročno |
-| **Lemonade Server** | najnovejša | Deluje na `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Vnaprej nameščen in dosegljiv v PATH na platformi AMD Ryzen™ AI Halo Developer Platform; na vseh drugih napravah ga je treba namestiti ročno |
+| **Lemonade Server** | najnovejša | Se izvaja na `http://localhost:13305/api/v1` |
 
 ### Linux
 
 | Komponenta | Različica | Opombe |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Predhodno nameščen in na voljo v PATH na platformi AMD Ryzen™ AI Halo Developer Platform; na vseh ostalih napravah ga je treba namestiti ročno |
-| **Lemonade Server** | najnovejša | Deluje na `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Vnaprej nameščen in dosegljiv v PATH na platformi AMD Ryzen™ AI Halo Developer Platform; na vseh drugih napravah ga je treba namestiti ročno |
+| **Lemonade Server** | najnovejša | Se izvaja na `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-Strežnik Lemonade mora delovati z naloženim modelom, primernim za napravo (glejte README za ukaz `lemonade run` za vašo napravo):
+Strežnik Lemonade mora delovati z naloženim modelom, ustreznim za napravo (glejte README za ukaz `lemonade run` za vašo napravo):
 
 | Naprava | Končna točka | Model |
 |--------|----------|-------|

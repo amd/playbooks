@@ -4,25 +4,25 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# تهيئة المنصة
+# تكوين المنصة
 
-يصف هذا المستند تهيئات المنصة المتوقعة لتشغيل هذا الدليل التشغيلي.
+يصف هذا المستند تكوينات المنصة المتوقعة لتشغيل هذا الدليل التشغيلي.
 
 ## Windows
 
 ### تثبيت LM Studio
 
-يجب أن يكون LM Studio مثبتاً مسبقاً:
+يجب أن يكون LM Studio مثبتًا مسبقًا:
 
-| المكوّن | الإصدار | الموقع |
+| المكون | الإصدار | الموقع |
 |-----------|---------|----------|
-| **LM Studio (النماذج والمتنوعات)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (البرنامج)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (الذاكرة المؤقتة)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### تنزيل النماذج
+### تنزيل النموذج
 
-يجب أن تكون النماذج التالية موجودة مسبقاً في مجلد نماذج LM Studio (`C:\Users\...\.lmstudio\models`):
+يجب أن تكون النماذج التالية موجودة بالفعل في دليل نماذج LM Studio (`C:\Users\...\.lmstudio\models`):
 
 | نوع النموذج | التكميم | الحجم | الموقع |
 |------------|--------------|------|----------|
@@ -34,8 +34,8 @@ SPDX-License-Identifier: MIT
 
 ### تثبيت LM Studio
 
-راجع ملف lmstudio.md (داخل مجلد التبعيات) لمزيد من التفاصيل.
+راجع lmstudio.md (داخل مجلد dependencies) لمزيد من التفاصيل.
 
-### تنزيل النماذج
+### تنزيل النموذج
 
-نفس الأمر كما هو على Windows.
+نفس الإجراء المتبع في Windows.

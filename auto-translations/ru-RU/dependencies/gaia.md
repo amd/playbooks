@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA — это открытый фреймворк AMD для создания ИИ-агентов, работающих локально на оборудовании AMD с ускорением Ryzen AI.
+GAIA — это платформа AMD с открытым исходным кодом для создания ИИ-агентов, работающих локально на оборудовании AMD с ускорением Ryzen AI.
 
 #### Установка GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. В Windows откройте терминал в выбранном каталоге и выполните команды для создания виртуального окружения (venv).
+1. В Windows откройте терминал в выбранном каталоге и выполните команды для создания venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,7 +30,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. В Linux откройте терминал в выбранном каталоге и выполните команды для создания виртуального окружения (venv).
+1. В Linux откройте терминал в выбранном каталоге и выполните команды для создания venv.
 <!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. В Windows откройте терминал в выбранном каталоге и выполните команды для создания виртуального окружения (venv).
+1. В Windows откройте терминал в выбранном каталоге и выполните команды для создания venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,7 +71,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. В Linux откройте терминал в выбранном каталоге и выполните команды для создания виртуального окружения (venv).
+1. В Linux откройте терминал в выбранном каталоге и выполните команды для создания venv.
 <!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -93,13 +93,13 @@ pip install amd-gaia
 
 3. Инициализация GAIA
 
-После установки выполните `gaia init` для настройки Lemonade Server и загрузки моделей:
+После установки выполните `gaia init`, чтобы настроить Lemonade Server и загрузить модели:
 
 ```bash
 gaia init
 ```
 
-Это установит Lemonade Server, загрузит модели по умолчанию и проверит корректность настройки.
+Это устанавливает Lemonade Server, загружает модели по умолчанию и проверяет настройку.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,12 +281,12 @@ fi
 
 #### Проверка установки
 
-Убедитесь, что установлена GAIA версии 0.16.2 или более поздней:
+Убедитесь, что установлена версия GAIA v0.16.2 или более поздняя:
 
 ```bash
 gaia --version
 ```
 
-> **Важно**: Перед использованием GAIA убедитесь, что Lemonade Server запущен. GAIA требует ручного запуска Lemonade Server.
+> **Важно**: перед использованием GAIA убедитесь, что Lemonade Server запущен. GAIA требует, чтобы Lemonade Server был запущен вручную.
 
-Для получения дополнительной информации см. [документацию GAIA](https://amd-gaia.ai).
+Дополнительную информацию см. в [документации GAIA](https://amd-gaia.ai).

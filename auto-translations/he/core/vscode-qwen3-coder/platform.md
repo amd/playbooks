@@ -6,25 +6,25 @@ SPDX-License-Identifier: MIT
 
 # תצורת פלטפורמה
 
-מסמך זה מתאר את תצורות הפלטפורמה הצפויות להפעלת ה-playbook הזה.
+מסמך זה מתאר את תצורות הפלטפורמה הצפויות להרצת playbook זה.
 
 ## Windows
 
 ### התקנת LM Studio
 
-יש להתקין את LM Studio מראש:
+יש להתקין מראש את LM Studio:
 
 | רכיב | גרסה | מיקום |
 |-----------|---------|----------|
-| **LM Studio (מודלים + שונות)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (תוכנית)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (מטמון)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### הורדת מודל
+### הורדת מודלים
 
-המודלים הבאים אמורים להיות קיימים כבר בתיקיית המודלים של LM Studio (`C:\Users\...\.lmstudio\models`):
+המודלים הבאים אמורים להיות כבר קיימים בתיקיית המודלים של LM Studio (`C:\Users\...\.lmstudio\models`):
 
-| סוג מודל | כימות | גודל | מיקום |
+| סוג מודל | קוונטיזציה | גודל | מיקום |
 |------------|--------------|------|----------|
 | Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
@@ -34,8 +34,8 @@ SPDX-License-Identifier: MIT
 
 ### התקנת LM Studio
 
-ראו את lmstudio.md (בתוך תיקיית התלויות) לפרטים נוספים.
+ראו lmstudio.md (בתוך תיקיית dependencies) למידע נוסף.
 
-### הורדת מודל
+### הורדת מודלים
 
 זהה ל-Windows.

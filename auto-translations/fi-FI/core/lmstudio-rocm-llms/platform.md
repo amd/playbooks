@@ -4,25 +4,25 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Platform Configuration
+# Alustan määritys
 
-Tämä asiakirja kuvaa tämän playbook-ohjelman suorittamiseen odotettavissa olevat alustan kokoonpanot.
+Tässä asiakirjassa kuvataan tämän ohjekirjan suorittamiseen tarvittavat alustan odotetut määritykset.
 
 ## Windows
 
 ### LM Studio -asennus
 
-LM Studio tulee olla esiasennettuna:
+LM Studion tulisi olla valmiiksi asennettuna:
 
 | Komponentti | Versio | Sijainti |
 |-----------|---------|----------|
-| **LM Studio (Mallit + Muut)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Mallit + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Ohjelma)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Välimuisti)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### Mallin lataus
 
-Seuraavien mallien tulee olla jo valmiina LM Studio -mallihakemistossa (`C:\Users\...\.lmstudio\models`):
+Seuraavien mallien tulisi jo olla LM Studion mallihakemistossa (`C:\Users\...\.lmstudio\models`):
 
 | Laite | Mallityyppi | Kvantisointi | Koko (Gt) | Sijainti |
 | ----- |------------|--------------|------|----------|

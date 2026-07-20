@@ -1,5 +1,5 @@
 {
   "id": "clustering-rpc-server",
-  "title": "Clustering dvou Ryzen™ AI Halo pomocí RPC",
-  "description": "Nastavte distribuované odvozování pomocí RPC serveru napříč dvěma zařízeními Ryzen™ AI Halo s llama.cpp pro spouštění modelů 350B+"
+  "title": "Clustrování dvou zařízení Ryzen™ AI Halo přes RPC",
+  "description": "Nastavení distribuovaného odvozování pomocí RPC serveru na dvou zařízeních Ryzen™ AI Halo pomocí llama.cpp pro spouštění modelů s 350B+ parametry"
 }

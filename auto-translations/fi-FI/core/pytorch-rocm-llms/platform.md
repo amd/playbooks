@@ -4,43 +4,43 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Alustan konfigurointi
+# Alustan määritys
 
-Tässä asiakirjassa kuvataan tämän playbook-oppaan suorittamiseen tarvittavat alustan konfiguraatiot.
+Tässä asiakirjassa kuvataan tämän ohjekirjan (playbook) suorittamiseen tarvittavat alustan määritykset.
 
 ## Edellytykset
 
-PyTorch ROCm-tuella on esiasennettu AMD Ryzen™ AI Halo Developer Platform -alustalle. Kaikkien muiden laitteiden käyttäjien on asennettava PyTorch ROCm-tuella manuaalisesti. Katso käyttöjärjestelmääsi koskeva osio:
+ROCm-tuella varustettu PyTorch on asennettu valmiiksi AMD Ryzen™ AI Halo Developer Platform -alustalle. Kaikissa muissa laitteissa käyttäjien on asennettava ROCm-tuella varustettu PyTorch manuaalisesti. Katso käyttöjärjestelmääsi koskeva osio:
 
 ### Windows
 
-| Komponentti   | Versio          | Huomiot                           |
+| Komponentti     | Versio         | Huomiot                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 tai uudempi | Esiasennettu AMD Ryzen AI Halo Developer Platform -alustalle; asennettava manuaalisesti kaikille muille laitteille |
+| **PyTorch**   | 2.9 tai uudempi    | Asennettu valmiiksi AMD Ryzen AI Halo Developer Platform -alustalle; kaikissa muissa laitteissa asennettava manuaalisesti |
 
 ### Linux
 
-| Komponentti   | Versio          | Huomiot                           |
+| Komponentti     | Versio         | Huomiot                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 tai uudempi | Esiasennettu AMD Ryzen AI Halo Developer Platform -alustalle; asennettava manuaalisesti kaikille muille laitteille |
+| **PyTorch**   | 2.9 tai uudempi    | Asennettu valmiiksi AMD Ryzen AI Halo Developer Platform -alustalle; kaikissa muissa laitteissa asennettava manuaalisesti |
 
 ## Vaaditut mallit
 
 Seuraavat mallit on testattu ja optimoitu alustallesi:
 
-| Malli | Parametrit | Koko | Lataussijainti |
-|-------|------------|------|----------------|
-| **openai/gpt-oss-20b** | 20B | ~40 Gt | Esiasennettu AMD Ryzen AI Halo Developer Platform -alustalle; asennettava manuaalisesti kaikille muille laitteille |
+| Malli | Parametrit | Koko | Latauspaikka |
+|-------|------------|------|-------------------|
+| **openai/gpt-oss-20b** | 20B | ~40GB | Asennettu valmiiksi AMD Ryzen AI Halo Developer Platform -alustalle; kaikissa muissa laitteissa asennettava manuaalisesti |
 
 Mallit ladataan automaattisesti Hugging Face -välimuistihakemistoon:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
-Varmista, että mallien tallentamiseen on vähintään **50 Gt vapaata tilaa**.
+Varmista, että käytettävissä on vähintään **50 Gt vapaata tilaa** mallien tallennusta varten.
 
 ## Verkkovaatimukset
 
-Alkuasennus vaatii internet-yhteyden mallien lataamiseksi Hugging Face -palvelusta. Latauksen jälkeen playbook voidaan suorittaa offline-tilassa.
+Alkuasennus edellyttää internetyhteyttä mallien lataamiseksi Hugging Facesta. Latauksen jälkeen ohjekirjaa voidaan käyttää offline-tilassa.
 
-- Ensimmäiset mallilataukset voivat kestää **5–10 minuuttia** mallin koosta ja yhteysnopeudesta riippuen
-- Mallit tallennetaan paikalliseen välimuistiin, eikä niitä tarvitse ladata uudelleen
+- Mallien ensimmäinen lataus voi kestää **5–10 minuuttia** mallin koosta ja yhteysnopeudesta riippuen
+- Mallit tallennetaan välimuistiin paikallisesti, eikä niitä tarvitse ladata uudelleen

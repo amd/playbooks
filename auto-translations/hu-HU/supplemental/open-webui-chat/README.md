@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ez a playbook speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom helyes előnézetéhez látogasson el az [amd.com/playbooks](https://amd.com/playbooks) oldalra.
+> Ez a playbook olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. Az oldal helyes előnézetéhez látogasson el a [amd.com/playbooks](https://amd.com/playbooks) oldalra.
 <!-- @github-only:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -16,62 +16,62 @@ SPDX-License-Identifier: MIT
 
 ## Áttekintés
 
-Az [Open WebUI](https://docs.openwebui.com) egy önállóan üzemeltetett, böngészőalapú felület, amely ismerős chatbot-élményt nyújt, miközben egy vagy több AI modellkiszolgáló előtétrendszereként működik. Ahelyett, hogy egyetlen szolgáltatóhoz kötné magát, az Open WebUI **bármely olyan háttérrendszerhez csatlakozhat, amely OpenAI-kompatibilis API-t tesz elérhetővé**, így modellek és képességek cserélhetők a felhasználói felület váltása nélkül.
+Az [Open WebUI](https://docs.openwebui.com) egy önállóan üzemeltethető, böngészőalapú felület, amely ismerős chatbot élményt nyújt, miközben egy vagy több AI modellszerver frontendjeként működik. Ahelyett, hogy egyetlen szolgáltatóhoz lenne kötve, az Open WebUI **bármilyen, OpenAI-kompatibilis API-t biztosító háttérrendszerhez** képes csatlakozni, így modelleket és funkciókat válthat anélkül, hogy felületet kellene váltania.
 
-Ebben a playbookban a [**Lemonade**](https://lemonade-server.ai) szolgál háttérrendszerként, mivel **egységes OpenAI-kompatibilis végpontot** tesz elérhetővé, amely több modalitást támogat:
+Ebben a playbookban a [**Lemonade**](https://lemonade-server.ai) szolgáltatást használjuk háttérrendszerként, mivel az egy **egységes, OpenAI-kompatibilis végpontot** biztosít, amely több modalitást is támogat:
 - **Nagy nyelvi modellek (LLM-ek)** szöveggeneráláshoz
-- **Látásmodellek** képek értelmezéséhez
+- **Vizuális modellek** képértelmezéshez
 - **Stable Diffusion** képgeneráláshoz
-- **Hangátirat-modellek** beszédfelismeréshez
+- **Hangátírási modellek** beszéd szöveggé alakításához
 
-Ez a beállítás lehetővé teszi a **teljes multimodális munkafolyamat végponttól végpontig történő** felfedezését.
+Ez a beállítás lehetővé teszi, hogy **végigjárja a teljes multimodális munkafolyamatot**.
 
 ---
 
-## Mit fog megtanulni
+## Amit tanulni fog
 
 A végére képes lesz:
 
-- Az Open WebUI csatlakoztatására egy helyi OpenAI-kompatibilis háttérrendszerhez (Lemonade)
-- Helyi LLM-mel való csevegésre a böngészőből
-- Kép feltöltésére és látásmodellnek feltett kérdések megválaszoltatására
-- Képek generálására szöveges utasítások alapján Stable Diffusion modellek segítségével (SDXL-Turbo / SDXL)
-- A mentális modell megértésére, hogy más háttérrendszereket is használhasson (Ollama, vLLM, llama.cpp server stb.)
+- Az Open WebUI csatlakoztatására egy helyi, OpenAI-kompatibilis háttérrendszerhez (Lemonade)
+- Csevegésre egy helyi LLM-mel a böngészőjéből
+- Kép feltöltésére és kérdések feltevésére egy vizuális modellnek a képpel kapcsolatban
+- Képek generálására szöveges promptokból Stable Diffusion modellek (SDXL-Turbo / SDXL) segítségével
+- A gondolkodási modell megértésére, hogy más háttérrendszereket is használhasson (Ollama, vLLM, llama.cpp server stb.)
 
 ---
 
-## Alapfogalmak (mentális modell)
+## Alapfogalmak (gondolkodási modell)
 
 ### A három összetevő
 
-| Elem | Feladata | Példák |
+| Elem | Mit csinál | Példák |
 |---|---|---|
-| Előtétrendszer (UI) | A webalkalmazás, amellyel interakcióba lép | Open WebUI |
-| Háttérrendszer (modellkiszolgáló) | Modelleket üzemeltet és HTTP végpontokat tesz elérhetővé | Lemonade, Ollama, vLLM, llama.cpp server, OpenAI-kompatibilis kiszolgálók |
-| Modellek | A tényleges LLM / látás / diffúziós / hangmodellek | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
+| Frontend (felhasználói felület) | A webalkalmazás, amellyel interakcióba lép | Open WebUI |
+| Backend (modellszerver) | Modelleket hostol és HTTP végpontokat biztosít | Lemonade, Ollama, vLLM, llama.cpp server, OpenAI-kompatibilis szerverek |
+| Modellek | A tényleges LLM / vizuális / diffúziós / hang modellek | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
 
-#### Miért fontos az „OpenAI-kompatibilis API"?
+#### Miért számít az „OpenAI-kompatibilis API”
 
 Az Open WebUI szabványos OpenAI-stílusú végpontokra épül, például:
   - Csevegés: `/chat/completions`
   - Modelllista: `/models`
   - Képgenerálás: `/images/generations`
-  - Hangátirat: `/audio/transcriptions`
+  - Hangátírás: `/audio/transcriptions`
 
-A Lemonade ezeket a `http://localhost:13305/api/v1/...` cím alatt teszi elérhetővé.
+A Lemonade ezeket a `http://localhost:13305/api/v1/...` alatt teszi elérhetővé.
 
-Ha egy háttérrendszer támogatja ezeket a végpontokat, az Open WebUI minimális beállítással kommunikálhat vele. Ezért cserélhetők a háttérrendszerek a munkafolyamat megváltoztatása nélkül.
+Ha egy háttérrendszer támogatja ezeket a végpontokat, az Open WebUI minimális beállítással tud kommunikálni vele. Ezért tudunk háttérrendszert váltani a munkafolyamat módosítása nélkül.
 
 #### Két szolgáltatás, két port
 
-A playbook során két különálló szolgáltatással fog dolgozni:
+Ebben a playbookban két különálló szolgáltatással fog dolgozni:
 
 | Szolgáltatás | URL | Mit csinál ott |
 |---|---|---|
 | **Lemonade** (GUI) | `http://localhost:13305` | Modellek böngészése, letöltése és kezelése |
-| **Open WebUI** | `http://localhost:8080` | Csevegés, képek feltöltése, képek generálása — a felhasználói felület |
+| **Open WebUI** | `http://localhost:8080` | Csevegés, képek feltöltése, képek generálása — a felhasználó felé néző felület |
 
-A Lemonade futtatja a modelleket; az Open WebUI az a felület, amellyel interakcióba lép. Először töltse le a modelleket a Lemonade GUI-ban, majd használja azokat az Open WebUI-ból.
+A Lemonade futtatja a modelleket; az Open WebUI az a felület, amellyel Ön interakcióba lép. Először a Lemonade GUI-t használja a modellek letöltéséhez, majd ezeket az Open WebUI-ból használja.
 
 ---
 
@@ -87,7 +87,7 @@ A Lemonade futtatja a modelleket; az Open WebUI az a felület, amellyel interakc
 
 ## Egyszeri beállítás
 
-Ehhez a playbookhoz szükséges, hogy a Lemonade háttérrendszerként fusson, és Linux esetén egy konténermotor (Podman) az Open WebUI futtatásához. Ezeket az Open WebUI telepítése előtt kell beállítani.
+Ehhez a playbookhoz szükséges a Lemonade háttérrendszerként való futtatása, valamint Linux esetén egy konténermotor (Podman) az Open WebUI futtatásához. Ezeket állítsa be, mielőtt telepítené az Open WebUI-t.
 
 <!-- @os:windows -->
 <!-- @device:halo_box,halo,stx,krk -->
@@ -122,10 +122,10 @@ lemonade --version
 Az Open WebUI telepítése előtt győződjön meg arról, hogy a használni kívánt modellek le vannak töltve és készen állnak a Lemonade-ben.
 
 1. Nyissa meg a Lemonade GUI-t a `http://localhost:13305` címen.
-2. Böngésszen az elérhető modellek között, és töltse le azokat, amelyeket használni szeretne (pl. egy LLM csevegéshez, egy látásmodell és/vagy egy Stable Diffusion modell képgeneráláshoz).
-3. Ellenőrizze, hogy az API elérhető-e, a `http://localhost:13305/api/v1/models` cím böngészőben való megnyitásával — látnia kell a letöltött modelleket felsorolva.
+2. Böngéssze az elérhető modelleket, és töltse le azokat, amelyeket használni szeretne (pl. egy LLM-et csevegéshez, egy vizuális modellt, és/vagy egy Stable Diffusion modellt képgeneráláshoz).
+3. Ellenőrizze, hogy az API elérhető-e a `http://localhost:13305/api/v1/models` böngészőben történő megnyitásával — ekkor meg kell jelennie a letöltött modellek listájának.
 
-> A modelleket a **Lemonade**-ben (`localhost:13305`) kell letölteni, mielőtt megjelennének az **Open WebUI**-ban (`localhost:8080`). Ha egy modell később nem jelenik meg az Open WebUI-ban, térjen vissza ide, és először ellenőrizze a Lemonade-et.
+> A modelleket a **Lemonade**-ben (`localhost:13305`) kell letölteni, mielőtt megjelennének az **Open WebUI**-ban (`localhost:8080`). Ha később egy modell nem jelenik meg az Open WebUI-ban, először itt, a Lemonade-nél ellenőrizze.
 
 
 <!-- @os:windows -->
@@ -468,15 +468,15 @@ PY
 ## Az Open WebUI telepítése
 
 <!-- @os:windows -->
-### 1. A Python 3.12 telepítése
+### 1. Telepítse a Python 3.12-t
 
-Az Open WebUI **Python 3.12**-t igényel — Python 3.13 vagy újabb verzióra nem telepíthető. A Windows Python Launcher (`py`) lehetővé teszi a 3.12 párhuzamos telepítését bármely meglévő Python-verzió mellett, ütközések nélkül.
+Az Open WebUI-hoz **Python 3.12** szükséges — Python 3.13+ verzión nem telepíthető. A Windows Python Launcher (`py`) lehetővé teszi a 3.12 telepítését a már meglévő Python verzió mellett, konfliktusok nélkül.
 
 ```powershell
 winget install Python.Python.3.12
 ```
 
-A telepítés után zárja be és nyissa meg újra a terminált, majd ellenőrizze:
+Telepítés után zárja be, majd nyissa meg újra a terminált, majd ellenőrizze:
 
 ```powershell
 py -3.12 --version
@@ -484,7 +484,7 @@ py -3.12 --version
 ```
 
 <!-- @device:halo_box -->
-> **Megjegyzés:** A rendszere előre telepített Python 3.13-mal érkezik. A 3.12 telepítése nem érinti azt — a `python` továbbra is a 3.13-at használja, és a `py -3.12` csak akkor célozza a 3.12-t, amikor szüksége van rá.
+> **Megjegyzés:** A rendszerén előre telepített Python 3.13 található. A 3.12 telepítése ezt nem érinti — a `python` továbbra is a 3.13-at használja, a `py -3.12` pedig csak akkor célozza meg a 3.12-t, amikor szüksége van rá.
 <!-- @device:end -->
 
 <!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
@@ -499,7 +499,7 @@ Write-Host "OK: $v"
 ```
 <!-- @test:end --> 
 
-### 2. Virtuális környezet létrehozása és az Open WebUI telepítése
+### 2. Hozzon létre egy virtuális környezetet és telepítse az Open WebUI-t
 
 ```powershell
 mkdir openwebui
@@ -568,15 +568,15 @@ Write-Host "OK: open-webui CLI is available"
 <!-- @os:linux -->
 Most a Podman szolgáltatást fogjuk használni az Open WebUI telepítésének konténerizálásához.
 
-Töltse le a következőt egy tetszőleges könyvtárba: [compose.yml](assets/compose.yml)
+Kérjük, töltse le a következőt egy tetszőleges könyvtárba: [compose.yml](assets/compose.yml)
 
-Abban a könyvtárban futtassa a következő parancsot:
+Ebben a könyvtárban futtassa a következő parancsot:
 
 ```bash
 podman compose up -d
 ```
 
-Ez letölti az Open WebUI képet és tartós tárolóba ír.
+Ez letölti az Open WebUI image-et, és a tartós tárolóba írja.
 
 Indítsa el az Open WebUI-t a `localhost:8080` böngésző címsorába való beírásával.
 
@@ -645,9 +645,8 @@ echo "OK: podman compose can parse compose.yml"
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Tipp**: Az Open WebUI más telepítési lehetőségeket is kínál a [GitHub](https://github.com/open-webui/open-webui) oldalán.
-
-## Az Open WebUI szerver indítása
+> **Tipp**: Az Open WebUI további telepítési lehetőségeket is biztosít a [GitHub](https://github.com/open-webui/open-webui) oldalán.
+## Open WebUI Szerver Indítása
 
 <!-- @os:windows -->
 - Futtassa a következő parancsot az Open WebUI HTTP szerver elindításához:
@@ -656,19 +655,19 @@ open-webui serve
 ```
 <!-- @os:end -->
 
-- Egy böngészőben navigáljon a `http://localhost:8080` címre.
-- Az Open WebUI felkéri egy helyi rendszergazdai fiók létrehozására. Bejelentkezés után megjelenik a csevegési felület.
+- Böngészőben nyissa meg a következő címet: `http://localhost:8080`.
+- Az Open WebUI kérni fogja, hogy hozzon létre egy helyi rendszergazdai fiókot. Miután bejelentkezett, megjelenik a csevegési felület.
 
 <p align="center">
   <img src="assets/open-webui_chat_interface.png" alt="Open WebUI Chat Interface" width="600"/>
 </p>
 
 <!-- @os:windows -->
-> Tartsa nyitva a terminálablakot. Bezárása leállítja az Open WebUI-t.
+> Hagyja nyitva a terminálablakot. Ha bezárja, az Open WebUI leáll.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> A konténer a háttérben fut. A `compose.yml` fájlt tartalmazó könyvtárból kezelje a `podman compose down` (leállítás) és `podman compose up -d` (indítás) parancsokkal. Fiókjai és beállításai megmaradnak az `open_webui_data` kötetben.
+> A konténer a háttérben fut. A `compose.yml` fájlt tartalmazó könyvtárból a `podman compose down` (leállítás) és a `podman compose up -d` (indítás) parancsokkal kezelheti. A fiókjai és beállításai az `open_webui_data` kötetben maradnak meg.
 <!-- @os:end -->
 
 
@@ -755,76 +754,76 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 <!-- @test:end --> 
 <!-- @os:end --> 
 
-## Az Open WebUI csatlakoztatása a Lemonade-hez
+## Az Open WebUI Csatlakoztatása a Lemonade-hoz
 
-Most, hogy mindkét szolgáltatás fut — a Lemonade a `localhost:13305` címen és az Open WebUI a `localhost:8080` címen —, csatlakoztassa őket, hogy az Open WebUI használhassa a Lemonade modelljeit.
+Most, hogy mindkét szolgáltatás fut — a Lemonade a `localhost:13305`, az Open WebUI pedig a `localhost:8080` címen —, kösse össze őket, hogy az Open WebUI használhassa a Lemonade modelljeit.
 
 Az Open WebUI-ban:
 
-1. Kattintson a **felhasználói profil ikonra** a jobb felső sarokban, majd válassza a **Beállítások** lehetőséget.
+1. Kattintson a **felhasználói profil ikonra** a jobb felső sarokban, majd válassza a **Settings** lehetőséget.
 
    <p align="center">
      <img src="assets/open_settings.png" alt="Click the user profile icon" width="300"/>
    </p>
 
-2. A Beállítások panelen kattintson a bal alsó sarokban lévő **Adminisztrátori beállítások** lehetőségre.
+2. A Settings panelen kattintson az **Admin Settings** lehetőségre a bal alsó sarokban.
 
    <p align="center">
      <img src="assets/click_admin_settings.png" alt="Select Admin Settings" width="450"/>
    </p>
 
-3. Az Adminisztrátori beállítások oldalsávjában kattintson a **Kapcsolatok** lehetőségre (vagy navigáljon közvetlenül a `http://localhost:8080/admin/settings/connections` címre).
+3. Az Admin Settings oldalsávban kattintson a **Connections** lehetőségre (vagy navigáljon közvetlenül a `http://localhost:8080/admin/settings/connections` címre).
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Admin Settings Connections page" width="600"/>
    </p>
 
 4. Az **OpenAI API** alatt adjon hozzá egy új kapcsolatot:
-   - **Alap URL:** `http://localhost:13305/api/v1`
-   - **API-kulcs:** `-` (egyetlen kötőjel is működik helyi használathoz)
+   - **Base URL:** `http://localhost:13305/api/v1`
+   - **API Key:** `-` (helyi használatra egy kötőjel is megfelel)
 
    <p align="center">
      <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
    </p>
 
-5. Győződjön meg arról, hogy az **„OpenAI API-kapcsolatok kezelése"** alatt csak a `http://localhost:13305/api/v1` van engedélyezve. Tiltson le minden más kapcsolatot (pl. az alapértelmezett OpenAI-kapcsolatot).
+5. Győződjön meg róla, hogy a **"Manage OpenAI API Connections"** alatt csak a `http://localhost:13305/api/v1` van engedélyezve. Tiltson le minden más kapcsolatot (pl. az alapértelmezett OpenAI-t).
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Manage OpenAI API Connections with only Lemonade enabled" width="600"/>
    </p>
 
-6. Kattintson a **Mentés** gombra.
+6. Kattintson a **Save** gombra.
 
-7. **(Ajánlott)** Tiltsa le az automatikus generálási funkciókat, hogy az Open WebUI reszponzív maradjon a helyi LLM-ekkel. Lépjen az **Adminisztrátori beállítások → Beállítások → Felület** menüpontra, és kapcsolja ki:
-   - Cím generálása
-   - Követő kérdések generálása
-   - Címkék generálása
+7. **(Ajánlott)** Tiltsa le az automatikus generálási funkciókat, hogy az Open WebUI reszponzív maradjon a helyi LLM-ekkel. Menjen az **Admin Settings → Settings → Interface** menübe, és kapcsolja ki a következőket:
+   - Title Generation
+   - Follow Up Generation
+   - Tags Generation
 
    <p align="center">
      <img src="assets/admin_settings.png" alt="Admin Settings Interface — disable Title, Follow Up, and Tags Generation" width="600"/>
    </p>
 
-8. Kattintson a **Mentés** gombra, majd térjen vissza a `http://localhost:8080` címre.
-9. Kattintson a modell legördülő menüre — látnia kell a Lemonade-ből letöltött modelleket.
+8. Kattintson a **Save** gombra, majd térjen vissza a `http://localhost:8080` címre.
+9. Kattintson a modell legördülő menüre — meg kell jelenniük a Lemonade-ből letöltött modelleknek.
 
 ---
 
-## Fő tevékenységek
+## Fő Tevékenységek
 
-Most minden be van állítva. Nézzünk meg három érdekes dolgot, amit megtehet.
+Most már minden be van állítva. Nézzünk meg három érdekes dolgot, amit kipróbálhat.
 
 ---
 
-### 1. tevékenység: Csevegés helyi LLM-mel
+### 1. Tevékenység: Csevegés Egy Helyi LLM-mel
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk -->
-1. Kattintson a felület bal felső sarkában lévő legördülő menüre. Ez megjeleníti a telepített Lemonade modelleket. Válasszon egyet a folytatáshoz. (példa: `Qwen3-4B-Hybrid`).
+1. Kattintson a legördülő menüre a felület bal felső sarkában. Ez megjeleníti a telepített Lemonade modelleket. Válasszon egyet a folytatáshoz. (példa: `Qwen3-4B-Hybrid`).
 
     <p align="center">
       <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
     </p>
 
-2. Írjon be egy üzenetet az LLM-nek, és kattintson a küldés gombra (vagy nyomja meg az Enter billentyűt). Az LLM néhány másodpercet vesz igénybe a memóriába töltéshez, majd látni fogja a választ megjelenni.
+2. Írjon be egy üzenetet az LLM-nek, és kattintson a küldésre (vagy nyomja meg az Entert). Az LLM-nek néhány másodpercbe telik betöltődni a memóriába, majd megjelenik a válasz folyamatosan érkezve.
 
     <p align="center">
       <img src="assets/sending_a_message.png" alt="Sending a message" width="37.5%"/>
@@ -833,13 +832,13 @@ Most minden be van állítva. Nézzünk meg három érdekes dolgot, amit megtehe
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-1. Kattintson a felület bal felső sarkában lévő legördülő menüre. Ez megjeleníti a telepített Lemonade modelleket. Válasszon egyet a folytatáshoz. (példa: `Qwen3.5-4B-GGUF`).
+1. Kattintson a legördülő menüre a felület bal felső sarkában. Ez megjeleníti a telepített Lemonade modelleket. Válasszon egyet a folytatáshoz. (példa: `Qwen3.5-4B-GGUF`).
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. Írjon be egy üzenetet az LLM-nek, és kattintson a küldés gombra (vagy nyomja meg az Enter billentyűt). Az LLM néhány másodpercet vesz igénybe a memóriába töltéshez, majd látni fogja a választ megjelenni.
+2. Írjon be egy üzenetet az LLM-nek, és kattintson a küldésre (vagy nyomja meg az Entert). Az LLM-nek néhány másodpercbe telik betöltődni a memóriába, majd megjelenik a válasz folyamatosan érkezve.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -849,7 +848,7 @@ Most minden be van állítva. Nézzünk meg három érdekes dolgot, amit megtehe
 
 3. A modell válaszol a csevegésben.
 
-4. Ekkor nyissa meg a `Feladatkezelőt` a rendszeren. **Magas GPU vagy NPU kihasználtságot** fog látni attól függően, hogy a kiválasztott modell **Hybrid** vagy **NPU** típusú-e. A feladatkezelő segítségével megerősítheti, hogy a modellt helyileg futtatja.
+4. Ekkor nyissa meg a `Task Manager` alkalmazást a rendszerén. **Magas GPU- vagy NPU-kihasználtságot** fog látni attól függően, hogy a kiválasztott modell **Hybrid** vagy **NPU** típusú-e. A Task Manager segítségével megerősítheti, hogy a modellt helyben futtatja.
 
     <p align="center">
       <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
@@ -857,13 +856,13 @@ Most minden be van állítva. Nézzünk meg három érdekes dolgot, amit megtehe
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Kattintson a felület bal felső sarkában lévő legördülő menüre. Ez megjeleníti a telepített Lemonade modelleket. Válasszon egyet a folytatáshoz. (példa: `Qwen3.5-4B-GGUF`).
+1. Kattintson a legördülő menüre a felület bal felső sarkában. Ez megjeleníti a telepített Lemonade modelleket. Válasszon egyet a folytatáshoz. (példa: `Qwen3.5-4B-GGUF`).
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. Írjon be egy üzenetet az LLM-nek, és kattintson a küldés gombra (vagy nyomja meg az Enter billentyűt). Az LLM néhány másodpercet vesz igénybe a memóriába töltéshez, majd látni fogja a választ megjelenni.
+2. Írjon be egy üzenetet az LLM-nek, és kattintson a küldésre (vagy nyomja meg az Entert). Az LLM-nek néhány másodpercbe telik betöltődni a memóriába, majd megjelenik a válasz folyamatosan érkezve.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -873,62 +872,60 @@ Most minden be van állítva. Nézzünk meg három érdekes dolgot, amit megtehe
 3. A modell válaszol a csevegésben.
 <!-- @os:end -->
 
-Ez igazolja, hogy az Open WebUI képes kéréseket küldeni a Lemonade-nek az OpenAI-kompatibilis csevegési végponton keresztül.
+Ez igazolja, hogy az Open WebUI képes kéréseket küldeni a Lemonade-nek az OpenAI-kompatibilis chat végponton keresztül.
 
 ---
 
-### 2. tevékenység: Kép feltöltése és kérdések feltevése (látás)
+### 2. Tevékenység: Kép Feltöltése és Kérdések Feltevése (Vision)
 
-Ehhez olyan modell szükséges, amely támogatja a képbemenetet (látás- vagy multimodális modell).
+Ehhez olyan modellre van szükség, amely támogatja a képbevitelt (Vision vagy Multimodal modell).
 
-1. Kattintson a szűrő ikonra, válassza a „Kategória szerint" lehetőséget, majd válasszon egy modellt a **Látás** szakaszból (pl. `Qwen3.5-4B-GGUF`)
+1. Kattintson a szűrő ikonra, válassza a "By Category" lehetőséget, majd válasszon egy modellt a **Vision** kategóriából (pl. `Qwen3.5-4B-GGUF`)
 
    <p align="center">
      <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
    </p>
 
-2. Kattintson az üzenetmezőben lévő **`+`** gombra, és töltsön fel egy képet
-3. Tegyen fel olyan kérdést, amely valódi képértelmezést igényel: `Do you think this is a well-designed GUI?`
+2. Kattintson a **`+`** gombra az üzenetmezőben, és töltsön fel egy képet
+3. Tegyen fel valamit, ami valódi képmegértést igényel: `Do you think this is a well-designed GUI?`
 
    <p align="center">
      <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="43%"/>
      <img src="assets/vlm_response.png" alt="VLM Response" width="40%"/>
    </p>
 
-4. A modell a kép tartalma alapján válaszol, nem általános szöveg alapján.
+4. A modell a kép tartalma alapján válaszol, nem pedig általános szöveggel.
 
-Ez bemutatja, hogy az Open WebUI képes multimodális kéréseket (szöveg + kép) küldeni a háttérrendszeren (Lemonade) keresztül egy látásmodellnek.
+Ez bizonyítja, hogy az Open WebUI multimodális kéréseket (szöveg + kép) tud küldeni a háttérrendszeren (Lemonade) keresztül egy vision modellnek.
 
 ---
 
 <!-- @os:windows -->
-### 3. tevékenység: Kép generálása szöveges utasításból (Stable Diffusion)
+### 3. Tevékenység: Kép Generálása Szöveges Prompt Alapján (Stable Diffusion)
 
-A Stable Diffusion modellek nem támogatják a szöveggenerálást, csak képeket generálnak a Képek API-n keresztül.
+A Stable Diffusion modellek nem támogatják a szöveggenerálást, kizárólag képeket generálnak az Images API-n keresztül. 
 
-#### 1. lépés: Képgenerálás konfigurálása az Open WebUI-ban
+#### 1. Lépés: Kép Generálás Konfigurálása az Open WebUI-ban
 
-1. A Lemonade GUI-ban (`http://localhost:13305`) keressen rá az `SDXL-Turbo` (gyors) vagy `SDXL-Base-1.0` (jobb minőség) modellre, és töltse le.
-2. Lépjen az **Adminisztrátori beállítások → Képek** menüpontra (http://localhost:8080/admin/settings/images)
+1. A Lemonade GUI-ban (`http://localhost:13305`) keresse meg az `SDXL-Turbo` (gyors) vagy az `SDXL-Base-1.0` (jobb minőségű) modellt, és töltse le.
+2. Menjen az **Admin Settings → Images** menübe (http://localhost:8080/admin/settings/images)
 3. Állítsa be:
-   - **Képgenerálás:** BE
-   - **Képgenerálási motor:** Alapértelmezett (OpenAI)
-   - **OpenAI API alap URL:** `http://localhost:13305/api/v1`
-   - **OpenAI API-kulcs:** `-`
-   - **Modell:** `SDXL-Turbo` vagy `SDXL-Base-1.0`
-4. Ha további paramétereket szeretne hozzáadni, adja meg azokat a szövegmezőben JSON formátumban. Például: `{ "steps": 4, "cfg_scale": 1 }`. Az elérhető paramétereket lásd a [Képgenerálás (Stable Diffusion CPP)](https://lemonade-server.ai/models.html) oldalon.
+   - **Image Generation:** ON
+   - **Image Generation Engine:** Default (OpenAI)
+   - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
+   - **OpenAI API Key:** `-`
+   - **Model:** `SDXL-Turbo` vagy `SDXL-Base-1.0`
+4. Ha további paramétereket szeretne hozzáadni, adja hozzá őket a szövegmezőhöz JSON formátumban. Például: `{ "steps": 4, "cfg_scale": 1 }`. Az elérhető paraméterekért lásd: [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
    </p>
 
 5. Mentés
-
-
-#### 2. lépés: Képgenerálás engedélyezése a modellhez
-Ez a lépés biztosítja, hogy a képgenerálást képességként engedélyezze a modelljéhez.
-1. Lépjen az **Adminisztrátori beállítások → Modellek** menüpontra (http://localhost:8080/admin/settings/models), és válassza ki a modelljét
-2. Kapcsolja be a `Képgenerálás` lehetőséget
+#### 2. lépés: Kép generálásának engedélyezése a modellhez
+Ez a lépés biztosítja, hogy engedélyezze a Kép generálását mint képességet a modelljéhez.
+1. Menjen a **Admin Settings → Models** (http://localhost:8080/admin/settings/models) oldalra, és válassza ki a modelljét
+2. Kapcsolja be a `Image Generation` opciót
 
    <p align="center">
      <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
@@ -937,39 +934,39 @@ Ez a lépés biztosítja, hogy a képgenerálást képességként engedélyezze 
 
 #### 3. lépés: Kép generálása a csevegési képernyőről
 
-1. Térjen vissza a csevegéshez a `http://localhost:8080` címen.
-2. Válasszon egy **szöveggeneráló LLM-et** a modell legördülő menüből (példa: Qwen, Llama). **Ne válasszon Stable Diffusion modellt**, mivel ez egy csevegési modell választó.
-3. Az üzenetterületen kattintson az **Integrációk** lehetőségre, és kapcsolja BE a **Kép** kapcsolót.
-4. Használjon egy ilyen utasítást: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
-5. Egy kép generálódik és megjelenik a csevegésben.
+1. Menjen vissza a csevegéshez a `http://localhost:8080` címen.
+2. Válasszon egy **szöveggeneráló LLM-et** a modell legördülő menüben (például: Qwen, Llama). **Ne válasszon Stable Diffusion modellt**, mivel ez egy csevegési modellválasztó.
+3. Az üzenetmezőben kattintson az **Integrations** gombra, és kapcsolja BE az **Image** opciót.
+4. Használjon egy ehhez hasonló promptot: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
+5. Egy kép generálódik, és megjelenik a csevegésben.
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-Ez igazolja, hogy az Open WebUI képes koordinálni egy „kétrészes" munkafolyamatot:
-  - Az LLM segít finomítani az utasítást
-  - A kép a Lemonade Képek végpontján keresztül generálódik a Stable Diffusion segítségével
+Ez igazolja, hogy az Open WebUI képes koordinálni egy „kétrészes” munkafolyamatot:
+  - Az LLM segít finomítani a promptot
+  - A kép a Lemonade Images végpontján keresztül generálódik Stable Diffusion segítségével
 <!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-### 3. tevékenység: Kép generálása szöveges utasításból (Stable Diffusion)
+### 3. tevékenység: Kép generálása szöveges promptból (Stable Diffusion)
 
-A Stable Diffusion modellek nem támogatják a szöveggenerálást, csak képeket generálnak a Képek API-n keresztül.
+A Stable Diffusion modellek nem támogatják a szöveggenerálást, csak az Images API-n keresztül generálnak képeket.
 
-#### 1. lépés: Képgenerálás konfigurálása az Open WebUI-ban
+#### 1. lépés: Kép generálás konfigurálása az Open WebUI-ban
 
-1. A Lemonade GUI-ban (`http://localhost:13305`) keressen rá az `SDXL-Turbo` (gyors) vagy `SDXL-Base-1.0` (jobb minőség) modellre, és töltse le.
-2. Lépjen az **Adminisztrátori beállítások → Képek** menüpontra (http://localhost:8080/admin/settings/images)
+1. A Lemonade GUI-ban (`http://localhost:13305`) keressen rá az `SDXL-Turbo` (gyors) vagy `SDXL-Base-1.0` (magasabb minőség) modellre, és töltse le.
+2. Menjen a **Admin Settings → Images** (http://localhost:8080/admin/settings/images) oldalra
 3. Állítsa be:
-   - **Képgenerálás:** BE
-   - **Képgenerálási motor:** Alapértelmezett (OpenAI)
-   - **OpenAI API alap URL:** `http://localhost:13305/api/v1`
-   - **OpenAI API-kulcs:** `-`
-   - **Modell:** `SDXL-Turbo` vagy `SDXL-Base-1.0`
-4. Ha további paramétereket szeretne hozzáadni, adja meg azokat a szövegmezőben JSON formátumban. Például: `{ "steps": 4, "cfg_scale": 1 }`. Az elérhető paramétereket lásd a [Képgenerálás (Stable Diffusion CPP)](https://lemonade-server.ai/models.html) oldalon.
+   - **Image Generation:** ON
+   - **Image Generation Engine:** Default (OpenAI)
+   - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
+   - **OpenAI API Key:** `-`
+   - **Model:** `SDXL-Turbo` vagy `SDXL-Base-1.0`
+4. Ha további paramétereket szeretne hozzáadni, adja hozzá őket a szövegmezőhöz JSON formátumban. Például: `{ "steps": 4, "cfg_scale": 1 }`. Az elérhető paraméterek itt találhatók: [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
@@ -978,10 +975,10 @@ A Stable Diffusion modellek nem támogatják a szöveggenerálást, csak képeke
 5. Mentés
 
 
-#### 2. lépés: Képgenerálás engedélyezése a modellhez
-Ez a lépés biztosítja, hogy a képgenerálást képességként engedélyezze a modelljéhez.
-1. Lépjen az **Adminisztrátori beállítások → Modellek** menüpontra (http://localhost:8080/admin/settings/models), és válassza ki a modelljét
-2. Kapcsolja be a `Képgenerálás` lehetőséget
+#### 2. lépés: Kép generálásának engedélyezése a modellhez
+Ez a lépés biztosítja, hogy engedélyezze a Kép generálását mint képességet a modelljéhez.
+1. Menjen a **Admin Settings → Models** (http://localhost:8080/admin/settings/models) oldalra, és válassza ki a modelljét
+2. Kapcsolja be a `Image Generation` opciót
 
    <p align="center">
      <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
@@ -990,20 +987,20 @@ Ez a lépés biztosítja, hogy a képgenerálást képességként engedélyezze 
 
 #### 3. lépés: Kép generálása a csevegési képernyőről
 
-1. Térjen vissza a csevegéshez a `http://localhost:8080` címen.
-2. Válasszon egy **szöveggeneráló LLM-et** a modell legördülő menüből (példa: Qwen, Llama). **Ne válasszon Stable Diffusion modellt**, mivel ez egy csevegési modell választó.
-3. Az üzenetterületen kattintson az **Integrációk** lehetőségre, és kapcsolja BE a **Kép** kapcsolót.
-4. Használjon egy ilyen utasítást: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
-5. Egy kép generálódik és megjelenik a csevegésben.
+1. Menjen vissza a csevegéshez a `http://localhost:8080` címen.
+2. Válasszon egy **szöveggeneráló LLM-et** a modell legördülő menüben (például: Qwen, Llama). **Ne válasszon Stable Diffusion modellt**, mivel ez egy csevegési modellválasztó.
+3. Az üzenetmezőben kattintson az **Integrations** gombra, és kapcsolja BE az **Image** opciót.
+4. Használjon egy ehhez hasonló promptot: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
+5. Egy kép generálódik, és megjelenik a csevegésben.
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-Ez igazolja, hogy az Open WebUI képes koordinálni egy „kétrészes" munkafolyamatot:
-  - Az LLM segít finomítani az utasítást
-  - A kép a Lemonade Képek végpontján keresztül generálódik a Stable Diffusion segítségével
+Ez igazolja, hogy az Open WebUI képes koordinálni egy „kétrészes” munkafolyamatot:
+  - Az LLM segít finomítani a promptot
+  - A kép a Lemonade Images végpontján keresztül generálódik Stable Diffusion segítségével
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -1011,33 +1008,50 @@ Ez igazolja, hogy az Open WebUI képes koordinálni egy „kétrészes" munkafol
 
 ## Hibaelhárítás
 
-### „Nem jelennek meg modellek az Open WebUI-ban"
-- Először ellenőrizze a Lemonade-et: nyissa meg a `http://localhost:13305/api/v1/models` címet egy böngészőben, és ellenőrizze, hogy a modelljei listázva és letöltve vannak-e
-- Ezután ellenőrizze az Open WebUI kapcsolatát: lépjen az **Adminisztrátori beállítások → Kapcsolatok** menüpontra a `http://localhost:8080/admin/settings/connections` címen, és ellenőrizze, hogy az alap URL `http://localhost:13305/api/v1`
+### „Nem jelennek meg modellek az Open WebUI-ban”
+- Először ellenőrizze a Lemonade-et: nyissa meg a `http://localhost:13305/api/v1/models` címet egy böngészőben, és győződjön meg róla, hogy a modelljei szerepelnek a listán és le vannak töltve
+- Ezután ellenőrizze az Open WebUI kapcsolatot: menjen a **Admin Settings → Connections** oldalra a `http://localhost:8080/admin/settings/connections` címen, és ellenőrizze, hogy a Base URL `http://localhost:13305/api/v1`
 
-### „Ez a modell nem támogatja a csevegési kiegészítést" hibaüzenet
-- Egy képmodellt (SDXL-Turbo / SDXL-Base-1.0) választott a csevegési modell legördülő menüből.
-- **Megoldás**: válasszon LLM-et a csevegéshez, és használja a Kép kapcsolót + Képek beállításokat a generáláshoz.
+### „Ez a modell nem támogatja a csevegés-kiegészítést” hibaüzenet
+- Kép modellt (SDXL-Turbo / SDXL-Base-1.0) választott ki a csevegési modell legördülő menüben.
+- **Megoldás**: válasszon egy LLM-et a csevegéshez, és használja az Image kapcsolót + az Images beállításokat a generáláshoz.
 <p align="center">
   <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
 </p>
 
-### Képgenerálási hibák/időtúllépések
+### Kép generálási hibák/időtúllépések
 - Kezdje az `SDXL-Turbo` modellel (gyors, kevesebb lépés)
-- Ha működik, váltson a képmodellt `SDXL-Base-1.0`-ra a jobb minőség érdekében
+- Ha ez működik, váltson az `SDXL-Base-1.0` modellre a jobb minőség érdekében
 
 ---
 
 ## Következő lépések
 
-Most már rendelkezik egy működő **„helyi AI-veremmel"** — egyetlen felhasználói felület, amely szabványos API-n keresztül több modelltípust vezérel.
+Most már rendelkezik egy működő **„helyi AI-stackkel”**, egy olyan egységes felülettel, amely több modelltípust vezérel egy szabványos API-n keresztül.
 
-Íme három bővítés, amely teljesen új munkafolyamatokat nyit meg:
+Íme három bővítési lehetőség, amelyek teljesen új munkafolyamatokat tesznek lehetővé:
 
-### 1. Beszédfelismerés Whisperrel
+### 1. Beszéd-szöveg átalakítás Whisperrel
 
-Próbálja meg hangot szöveggé alakítani egy Whisper modell segítségével, majd adja be egy LLM-nek összefoglaláshoz, teendők kinyeréséhez vagy átíráshoz. Ez az alapja az értekezlet-jegyzeteknek és a hangvezérelt asszisztenseknek.
+Próbálja meg hangot szöveggé alakítani egy Whisper modell segítségével, majd táplálja be egy LLM-be összefoglaláshoz, teendők kiemeléséhez vagy átíráshoz. Ez az alapja a megbeszélési jegyzeteknek és a hangvezérelt asszisztenseknek.
 
 ### 2. Python kódolás az Open WebUI-ban
 
-Használja az Open WebUI beépített kódfuttatási élményét Python kódrészletek futtatásához, kimenetek vizsgálatához és gyorsabb iterációhoz — anélkül, hogy elhagyná a felhasználói felületet. [Referencia](https://lemonade-server.ai/docs/server/apps/open-webui/#python
+Használja az Open WebUI beépített kódfuttatási élményét Python-kódrészletek futtatásához, kimenetek megtekintéséhez és gyorsabb iterációhoz — anélkül, hogy elhagyná a felületet. [Referencia](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
+
+### 3. HTML renderelés az Open WebUI-ban
+
+HTML-kimenetek közvetlen renderelése a felületen. Ez meglepően hasznos gyors prototípusok, formázott jelentések és interaktív részletek létrehozásához. [Referencia](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
+
+---
+
+## Hivatkozások
+
+- [Open WebUI (GitHub)](https://github.com/open-webui/open-webui)
+- [Lemonade (GitHub)](https://github.com/lemonade-sdk/lemonade)
+- [Lemonade Server dokumentáció](https://lemonade-server.ai/docs)
+- [Lemonade Server CLI](https://lemonade-server.ai/docs/lemonade-cli/)
+- [Lemonade ↔ Open WebUI integrációs útmutató](https://lemonade-server.ai/docs/server/apps/open-webui)
+- [Lemonade Server API specifikáció (végpontok)](https://lemonade-server.ai/docs/server/server_spec)
+- [Videós bemutató (Lemonade)](https://www.youtube.com/watch?v=mcf7dDybUco)
+- [Videós bemutató (Open WebUI + Lemonade)](https://www.youtube.com/watch?v=yZs-Yzl736E)

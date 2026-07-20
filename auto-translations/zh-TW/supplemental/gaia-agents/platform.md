@@ -4,19 +4,19 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# 平台配置
+# 平台設定
 
-本文件說明執行此 playbook 的預期平台配置。
+本文件說明執行此手冊所需的預期平台設定。
 
-## 必要應用程式/框架
+## 必要的應用程式／框架
 
 ### Windows/Linux
 
-GAIA 應依照 [GAIA 安裝指南](../../dependencies/gaia.md) 中提供的說明預先安裝。
+應依照 [GAIA 安裝指南](../../dependencies/gaia.md) 中提供的說明，預先安裝 GAIA。
 
-Lemonade Server 應依照 [Lemonade 安裝指南](../../dependencies/lemonade.md) 中提供的說明預先安裝。
+應依照 [Lemonade 安裝指南](../../dependencies/lemonade.md) 中提供的說明，預先安裝 Lemonade Server。
 
-## 必要模型
+## 必要的模型
 
 ### Windows/Linux
 

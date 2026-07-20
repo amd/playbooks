@@ -1,5 +1,5 @@
 {
   "id": "unsloth-llms-finetuning",
   "title": "Unsloth로 LLM 파인튜닝하기",
-  "description": "메모리 효율적인 파인튜닝 LLM™을 위해 Unsloth 사용하기"
+  "description": "메모리 효율적인 미세 조정 LLM™을 위해 Unsloth를 사용하세요"
 }

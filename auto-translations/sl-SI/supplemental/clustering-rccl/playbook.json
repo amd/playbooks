@@ -1,5 +1,5 @@
 {
   "id": "clustering-rccl",
-  "title": "Združevanje dveh Ryzen™ AI Halo z RCCL",
-  "description": "Nastavite večvozliščno gručo z dvema napravama Ryzen™ AI Halo z RCCL za porazdeljene delovne obremenitve"
+  "title": "Gručenje dveh sistemov Ryzen™ AI Halo z uporabo RCCL",
+  "description": "Nastavitev gruče z več vozlišči z uporabo dveh naprav Ryzen™ AI Halo z RCCL za porazdeljene delovne obremenitve"
 }

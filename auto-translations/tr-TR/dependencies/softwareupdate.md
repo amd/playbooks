@@ -6,11 +6,11 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 
-Başlamadan önce, Ryzen AI Halo cihazınızda en son yazılımın yüklü olduğundan emin olun. **AMD Ryzen™ AI Developer Center** uygulamasını açın ve hem uygulamanın kendisi hem de ek yazılımlar için mevcut güncellemeleri kontrol edin.
+Başlamadan önce, Ryzen AI Halo cihazınızda en son yazılımın yüklü olduğundan emin olun. **AMD Ryzen™ AI Developer Center**'ı açın ve hem uygulamanın kendisi hem de ek yazılımlar için mevcut güncellemeleri kontrol edin.
 
 <!-- @os:windows -->
 
-**Updates** sekmesine gidin. Güncellemeler mevcutsa, devam etmeden önce bunları yükleyin ve yeniden başlatın.
+**Updates** sekmesine gidin. Güncellemeler mevcutsa, bunları yükleyin ve devam etmeden önce yeniden başlatın.
 
 <p align="center">
   <img src="/api/dependencies/assets/software-update/windows.png" alt="AMD Ryzen AI Developer Center — Updates tab on Windows" width="600"/>
@@ -20,7 +20,7 @@ Başlamadan önce, Ryzen AI Halo cihazınızda en son yazılımın yüklü oldu�
 
 <!-- @os:linux -->
 
-**Manage** sekmesine gidin. Güncellemeler mevcutsa, devam etmeden önce bunları yükleyin ve yeniden başlatın.
+**Manage** sekmesine gidin. Güncellemeler mevcutsa, bunları yükleyin ve devam etmeden önce yeniden başlatın.
 
 <p align="center">
   <img src="/api/dependencies/assets/software-update/linux.png" alt="AMD Ryzen AI Developer Center — Manage tab on Linux" width="600"/>

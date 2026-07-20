@@ -6,57 +6,57 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Tässä kokoelmassa käytetään erikoismerkintöjä, joita GitHub ei pysty renderöimään. Käy osoitteessa [amd.com/playbooks](https://amd.com/playbooks) nähdäksesi tämän sisällön oikein esikatseltuna.
 <!-- @github-only:end -->
 
 ## Yleiskatsaus
 
-Kirjoita GPU-ydin tyhjästä, käännä se, käynnistä se AMD GPU:lla ja seuraa käyttöasteen nousua. Tämä playbook näyttää, miten GPU-laskenta todella toimii: kirjoita ytimen koodi ja suorita se rinnakkain tuhansien säikeiden yli.
+Kirjoita GPU-kerneli tyhjästä, käännä se, käynnistä se AMD-GPU:lla ja katso, kuinka käyttöaste nousee. Tämä ohjeisto näyttää, miten GPU-laskenta oikeasti toimii: kirjoita kernelikoodi ja suorita se rinnakkain tuhansissa säikeissä.
 
-> **Huomio**: Tämä on melko monimutkainen playbook, joka saattaa vaatia lisävirheenkorjausta ja muutoksia.
+> **Huomio**: Tämä on melko monimutkainen ohjeisto, joka saattaa vaatia hieman ylimääräistä virheenkorjausta ja muokkauksia.
 
 ## Mitä opit
 
 <!-- @os:windows -->
-- Miten GPU-ytimet toimivat: ruudukot, lohkot, säikeet ja indeksointimalli, joka yhdistää ne dataan
-- Miten AMD ROCm/HIP-pino mahdollistaa CUDA-tyylisen koodin kirjoittamisen, joka toimii AMD GPU:illa ilman muutoksia
-- Miten ydin käännetään ajonaikaisesti käyttäen `torch.cuda._compile_kernel`
-- Miten rakennetaan natiivi C++-ydinlaajennus `CUDAExtension` + pybind11:llä, joka on tuotavissa Pythonista
+- Miten GPU-kernelit toimivat: gridit, lohkot, säikeet ja indeksointimalli, joka yhdistää ne dataan
+- Miten AMD:n ROCm/HIP-pino mahdollistaa CUDA-tyylisen koodin kirjoittamisen, joka toimii AMD-GPU:illa ilman muutoksia
+- Miten kerneli käännetään ajonaikaisesti käyttäen komentoa `torch.cuda._compile_kernel`
+- Miten rakennetaan natiivi C++-kernelilaajennus käyttäen `CUDAExtension`- ja pybind11-työkaluja, joka on tuotavissa Pythonista
 <!-- @os:end -->
 <!-- @os:linux -->
-- Miten GPU-ytimet toimivat: ruudukot, lohkot, säikeet ja indeksointimalli, joka yhdistää ne dataan
-- Miten AMD ROCm/HIP-pino mahdollistaa CUDA-tyylisen koodin kirjoittamisen, joka toimii AMD GPU:illa ilman muutoksia
-- Miten ydin käännetään ajonaikaisesti käyttäen `torch.cuda._compile_kernel`
-- Miten rakennetaan natiivi C++-ydinlaajennus `CUDAExtension` + pybind11:llä, joka on tuotavissa Pythonista
-- Miten mitataan ytimen suoritusaika ja seurataan reaaliaikaista GPU:n käyttöastetta `amd-smi`:llä
+- Miten GPU-kernelit toimivat: gridit, lohkot, säikeet ja indeksointimalli, joka yhdistää ne dataan
+- Miten AMD:n ROCm/HIP-pino mahdollistaa CUDA-tyylisen koodin kirjoittamisen, joka toimii AMD-GPU:illa ilman muutoksia
+- Miten kerneli käännetään ajonaikaisesti käyttäen komentoa `torch.cuda._compile_kernel`
+- Miten rakennetaan natiivi C++-kernelilaajennus käyttäen `CUDAExtension`- ja pybind11-työkaluja, joka on tuotavissa Pythonista
+- Miten mitataan kernelin suoritusaikaa ja seurataan GPU:n käyttöastetta reaaliajassa `amd-smi`-työkalulla
 <!-- @os:end -->
 
 ---
 
-Tämä playbook kattaa kaksi lähestymistapaa ytimen kehittämiseen:
+Tämä ohjeisto kattaa kaksi lähestymistapaa kernelien kehittämiseen:
 
 <!-- @os:windows -->
 | Lähestymistapa | Aloituspiste |
 |---|---|
-| **JIT-kääntäminen** | `torch.cuda._compile_kernel`, kirjoita ydin Python-merkkijonona ilman erillistä käännösvaihetta |
+| **JIT-kääntäminen** | `torch.cuda._compile_kernel`, kirjoita kerneli Python-merkkijonona, ilman erillistä koontivaihetta |
 | **C++-laajennus** | `CUDAExtension` + pybind11: käännä `.cu`-tiedosto natiiviksi `.pyd`-tiedostoksi ja tuo se |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Lähestymistapa | Aloituspiste |
 |---|---|
-| **JIT-kääntäminen** | `torch.cuda._compile_kernel`, kirjoita ydin Python-merkkijonona ilman erillistä käännösvaihetta |
+| **JIT-kääntäminen** | `torch.cuda._compile_kernel`, kirjoita kerneli Python-merkkijonona, ilman erillistä koontivaihetta |
 | **C++-laajennus** | `CUDAExtension` + pybind11: käännä `.cu`-tiedosto natiiviksi `.so`-tiedostoksi ja tuo se |
 <!-- @os:end -->
 
-Molemmat lähestymistavat toimivat AMD GPU:illa. Tämä on mahdollista, koska PyTorchin ROCm-versio yhdistää koko CUDA API -pinnan HIP:iin. Tämä tarkoittaa, että `torch.cuda`, `CUDAExtension` ja CUDA-ytimen syntaksi toimivat kaikki AMD-laitteistolla läpinäkyvästi.
+Molemmat lähestymistavat toimivat AMD-GPU:illa. Tämä on mahdollista, koska PyTorchin ROCm-versio kuvaa koko CUDA-rajapinnan HIP:iin. Tämä tarkoittaa, että `torch.cuda`, `CUDAExtension` ja CUDA-kernelisyntaksi toimivat kaikki AMD-laitteistolla läpinäkyvästi.
 
 ---
 
 ## Tausta
 
-### Mikä on GPU-ydin?
+### Mikä on GPU-kerneli?
 
-GPU-ydin on funktio, joka suoritetaan rinnakkain tuhansien GPU-säikeiden yli samanaikaisesti. Toisin kuin CPU-funktio, joka suoritetaan kerran per kutsu, ydin käynnistetään **lohkojen** **ruudukolla**, jossa jokainen lohko sisältää monia **säikeitä**, jotka kaikki suorittavat samaa koodia eri datalla.
+GPU-kerneli on funktio, joka suoritetaan rinnakkain tuhansissa GPU-säikeissä samanaikaisesti. Toisin kuin CPU-funktio, joka suoritetaan kerran per kutsu, kerneli käynnistetään **gridinä**, joka koostuu **lohkoista**, joista jokainen sisältää monta **säiettä**, jotka kaikki suorittavat samaa koodia eri datalla.
 
 <p align="center">
   <img src="assets/grid_threads.png" width="900"/>
@@ -64,14 +64,14 @@ GPU-ydin on funktio, joka suoritetaan rinnakkain tuhansien GPU-säikeiden yli sa
 
 ### Säikeiden indeksointimalli
 
-Ydintä käynnistettäessä määritetään kaksi ulottuvuutta:
+Kerneliä käynnistettäessä määritetään kaksi ulottuvuutta:
 
 | Muuttuja | Merkitys |
 |---|---|
-| `gridDim` | Lohkojen määrä ruudukossa |
-| `blockDim` | Säikeiden määrä per lohko |
+| `gridDim` | Lohkojen määrä gridissä |
+| `blockDim` | Säikeiden määrä lohkoa kohti |
 
-Jokaisella säikeellä on pääsy kolmeen sisäänrakennettuun vain luku -muuttujaan:
+Jokaisella säikeellä on pääsy kolmeen sisäänrakennettuun, vain luku -muuttujaan:
 
 | Muuttuja | Merkitys |
 |---|---|
@@ -79,37 +79,37 @@ Jokaisella säikeellä on pääsy kolmeen sisäänrakennettuun vain luku -muuttu
 | `blockDim.x` | Säikeiden määrä yhdessä lohkossa |
 | `threadIdx.x` | Säikeen indeksi lohkonsa sisällä |
 
-### Globaali säietunniste
+### Globaali säie-tunniste
 
-Nämä muuttujat yhdistetään laskemaan maailmanlaajuisesti yksilöllinen säieindeksi:
+Näitä muuttujia yhdistetään globaalisti yksilöllisen säie-indeksin laskemiseksi:
 
 ```c
 int idx = blockIdx.x * blockDim.x + threadIdx.x;
 ```
 
-Säikeiden kokonaismäärä = `gridDim.x * blockDim.x`. Jokainen säie käsittelee yhden elementin itsenäisesti. Tämä on **dataparallelismin** perusta. Sama operaatio suoritetaan monille elementeille samanaikaisesti ilman säikeiden välistä riippuvuutta.
+Säikeitä yhteensä = `gridDim.x * blockDim.x`. Jokainen säie käsittelee yhtä elementtiä itsenäisesti. Tämä on **datarinnakkaisuuden** perusta. Sama operaatio suoritetaan monelle elementille kerralla ilman säikeiden välisiä riippuvuuksia.
 
 ---
 
-### GPU:n suoritusmalli: Aaltofrontit
+### GPU:n suoritusmalli: Wavefrontit
 
-AMD GPU:t suorittavat säikeitä **32** säikeen ryhmissä, joita kutsutaan **aaltofroneiksi**. Kaikki aaltofrontin säikeet suorittavat saman käskyn samanaikaisesti. Tämä vaikuttaa optimaalisten lohkokokojen valintaan (256 säiettä = 8 aaltofrontia = hyvä ajoitustehokkuus).
+AMD-GPU:t suorittavat säikeitä **32**:n ryhmissä, joita kutsutaan **wavefronteiksi**. Kaikki wavefrontin säikeet suorittavat samaa käskyä samanaikaisesti. Tämä vaikuttaa optimaalisen lohkokoon valintaan (256 säiettä = 8 wavefronttia = hyvä ajoituustehokkuus).
 
-### AMD GPU -ohjelmointi: HIP + ROCm
+### AMD-GPU-ohjelmointi: HIP + ROCm
 
-**ROCm** on AMD:n avoimen lähdekoodin GPU-laskentapino (ajurit, kääntäjät, kirjastot, ajoympäristö). **HIP** sijaitsee sen päällä ja on suunniteltu syntaktisesti identtiseksi CUDA:n kanssa. PyTorchin ROCm-versio yhdistää `torch.cuda.*`-kutsut läpinäkyvästi HIP:iin, joten sama koodi toimii AMD GPU:illa.
+**ROCm** on AMD:n avoimen lähdekoodin GPU-laskentapino (ajurit, kääntäjät, kirjastot, ajonaikainen ympäristö). **HIP** toimii sen päällä ja on suunniteltu syntaktisesti identtiseksi CUDA:n kanssa. PyTorchin ROCm-versio kuvaa `torch.cuda.*`-rajapinnan läpinäkyvästi HIP:iin, joten sama koodi toimii AMD-GPU:illa.
 
 ---
 
 ### PyTorch + AMD/HIP
 
-PyTorch toimittaa ROCm-version, jossa CUDA API -pinta (`torch.cuda.*`) on läpinäkyvästi HIP:n tukema. Tämä tarkoittaa:
+PyTorch toimittaa ROCm-version, jossa CUDA-rajapinta (`torch.cuda.*`) on läpinäkyvästi toteutettu HIP:in avulla. Tämä tarkoittaa, että:
 
-- `torch.cuda.is_available()` toimii AMD GPU:illa ROCm:n kanssa
-- `tensor.to("cuda")` varaa muistia AMD GPU:lta
+- `torch.cuda.is_available()` toimii AMD-GPU:illa ROCm:n kanssa
+- `tensor.to("cuda")` varaa muistia AMD-GPU:lta
 - `torch.version.hip` paljastaa HIP-version
 
-PyTorch tarjoaa myös `torch.cuda._compile_kernel()`:n, korkean tason pikakuvakkeen JIT-kääntää raaka ytimen merkkijono ja palauttaa kutsuttavan objektin ilman erillistä käännösvaihetta.
+PyTorch tarjoaa myös funktion `torch.cuda._compile_kernel()`, joka on ylätason oikotie raa'an kernelimerkkijonon JIT-kääntämiseen ja kutsuttavan funktion saamiseen ilman erillistä koontivaihetta.
 
 ---
 
@@ -119,19 +119,19 @@ PyTorch tarjoaa myös `torch.cuda._compile_kernel()`:n, korkean tason pikakuvakk
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmiston esivaatimusten asentaminen
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-### Edellytykset - Windows
-- Asenna uusin versio: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+### Esivaatimukset - Windows
+- Asenna uusin: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
 <!-- @os:end -->
 
-### Luo virtuaaliympäristö
+### Virtuaaliympäristön luominen
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Avaa Linuxissa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv:n, johon ROCm+PyTorch on jo asennettu.
+Linuxissa avaa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv, jossa ROCm+PyTorch on jo asennettu.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -144,13 +144,13 @@ source kernel-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
+**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta tämä astuu voimaan):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Avaa Linuxissa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv:n.
+Linuxissa avaa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -164,7 +164,7 @@ source kernel-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Avaa Windowsissa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv:n.
+Windowsissa avaa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv kernel-env
@@ -173,8 +173,8 @@ kernel-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
-> **Vinkki**: Windows-käyttäjien saattaa olla tarpeen muuttaa PowerShell-suorituskäytäntöään (esim.
-> asettamalla se RemoteSigned- tai Unrestricted-tilaan) ennen joidenkin PowerShell-komentojen suorittamista.
+> **Vihje**: Windows-käyttäjien on ehkä muokattava PowerShellin suorituskäytäntöä (esim.
+> asettamalla se arvoon RemoteSigned tai Unrestricted) ennen joidenkin PowerShell-komentojen suorittamista.
 
 <!-- @os:end -->
 ### Perusriippuvuuksien asentaminen
@@ -193,7 +193,7 @@ kernel-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-> **Huomio:** Tässä ohjekirjassa ROCm ja PyTorch täytyy asentaa virtuaaliympäristöön myös Ryzen AI Halo -laitteella, koska mukautettu ytimen kääntäminen vaatii täydet kehitysotsikkotiedostot.
+> **Huom:** Tätä ohjekirjaa varten ROCm ja PyTorch on asennettava virtuaaliympäristöön jopa Ryzen AI Halo -laitteessa, sillä mukautettujen kernelien kääntäminen edellyttää täydellisiä kehitysotsikkotiedostoja.
 
 Asenna ROCm:
 ```powershell
@@ -227,7 +227,7 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 ### Lisäriippuvuuksien asentaminen
 
 <!-- @os:linux -->
-Asenna Linux C/C++ -rakennustyökaluketju. Tämä on järjestelmätason riippuvuus ja vaaditaan C++-laajennusten vaiheistuksissa, koska `CUDAExtension` rakentaa natiivia `.so`-moduuleja `.cu`-tiedostoista.
+Asenna Linuxin C/C++-käännöstyökaluketju. Tämä on järjestelmätason riippuvuus, ja se vaaditaan C++-laajennusesittelyjä varten, koska `CUDAExtension` kääntää natiiveja `.so`-moduuleja `.cu`-tiedostoista.
 
 Suorita tämä kerran Linux-koneella, luodun Python-virtuaaliympäristön ulkopuolella:
 
@@ -237,7 +237,7 @@ sudo apt install -y build-essential gcc g++
 ```
 <!-- @os:end -->
 
-Aktivoituasi `kernel-env`-virtuaaliympäristön, asenna Python-rakennusriippuvuudet:
+Kun olet aktivoinut `kernel-env`-virtuaaliympäristön, asenna Python-käännösriippuvuudet:
 <!-- @test:id=install-deps timeout=60 setup=activate-venv -->
 ```bash
 python -m pip install "setuptools<82" wheel ninja
@@ -260,11 +260,11 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Varmista, että [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) tai [uudempi](https://visualstudio.microsoft.com/vs/community/) on asennettuna **Desktop development with C++** -työkuormalla.
+Varmista, että [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) tai [uudempi](https://visualstudio.microsoft.com/vs/community/) on asennettu **Desktop development with C++** -työtaakalla.
 
-> **Huomio**: Tämä Visual Studio C++ -ympäristön asennus vaaditaan vain **C++-laajennus**-lähestymistapaa varten. Sitä ei tarvita JIT-kääntämisen lähestymistavassa.
+> **Huom**: Tämä Visual Studio C++ -ympäristön asennus vaaditaan vain **C++-laajennus**-lähestymistapaa varten. Sitä ei tarvita JIT-kääntämisen lähestymistavassa.
 
-Avaa PowerShell-pääte ja suorita seuraavat komennot ennen C++-laajennuksen rakentamista.
+Avaa PowerShell-pääte ja suorita seuraavat komennot ennen C++-laajennuksen kääntämistä.
 
 **Vaihe 1: Etsi asennettu Visual Studio C++ -ympäristö**
 
@@ -275,7 +275,7 @@ $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.e
 if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(B) Etsi `vcvars64.bat` Visual Studio 2022:sta tai uudemmasta C++-rakennustyökaluilla**
+**(B) Etsi `vcvars64.bat` Visual Studio 2022:sta tai uudemmasta, jossa on C++-käännöstyökalut**
 
 ```powershell
 $Vcvars = & $VsWhere `
@@ -288,17 +288,17 @@ $Vcvars = & $VsWhere `
 if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(C) Tulosta käytössä oleva Visual Studio C++ -ympäristö**
+**(C) Tulosta käytettävä Visual Studio C++ -ympäristö**
 
 ```powershell
 Write-Host "Using Visual Studio C++ environment: $Vcvars"
 ```
 
-**Vaihe 2: Aktivoi Visual Studio C++ -rakennusympäristö**
+**Vaihe 2: Aktivoi Visual Studio C++ -käännösympäristö**
 
 **(A) Suorita `vcvars64.bat` ja tallenna sen asettama ympäristö**
 
-Tämä tekee `cl.exe`:n, `INCLUDE`:n, `LIB`:n, `LIBPATH`:n ja Windows SDK -polut saataville.
+Tämä tekee `cl.exe`-tiedoston, `INCLUDE`-, `LIB`-, `LIBPATH`- ja Windows SDK -polut saataville.
 
 ```powershell
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
@@ -310,7 +310,7 @@ if ($ExitCode -ne 0) {
 }
 ```
 
-**(B) Tuo Visual Studio -ympäristömuuttujat tähän PowerShell-istuntoon**
+**(B) Tuo Visual Studion ympäristömuuttujat tähän PowerShell-istuntoon**
 
 ```powershell
 $VsEnv | ForEach-Object {
@@ -320,7 +320,7 @@ $VsEnv | ForEach-Object {
 }
 ```
 
-**Vaihe 3: Varmista, että Microsoftin C++-kääntäjä on saatavilla**
+**Vaihe 3: Varmista, että Microsoft C++ -kääntäjä on saatavilla**
 
 ```powershell
 where.exe cl
@@ -366,7 +366,7 @@ Write-Host "OK: Visual Studio C++ build environment is available."
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Ympäristömuuttujien asettaminen
+#### Aseta ympäristömuuttujat
 <!-- @os:linux -->
 <!-- @test:id=set-env-variables-linux timeout=300 setup=activate-venv -->
 ```bash
@@ -417,7 +417,7 @@ $env:DISTUTILS_USE_SDK = "1"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Varmista, että AMD GPU on näkyvissä komennolla:
+Varmista, että AMD-GPU on näkyvissä:
 <!-- @test:id=amd-smi-linux timeout=60 setup=activate-venv -->
 ```bash
 amd-smi
@@ -550,31 +550,31 @@ $code | python -
 
 ---
 
-## Tarvittavien tiedostojen lataaminen
+## Lataa tarvittavat tiedostot
 
 Luo seuraava hakemistorakenne tekemällä **2 uutta kansiota** ja lataamalla vastaavat tiedostot:
 
 | Hakemisto | Ladattavat tiedostot | Kuvaus |
 |-----------|-------------------|-------------|
-| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| JIT- ja C++-laajennustiedostot vektorilisäysytimelle |
-| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | JIT- ja C++-laajennustiedostot matriisikertolaskuytimelle |
+| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| JIT- ja C++-laajennustiedostot vektorien yhteenlaskukernelille |
+| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | JIT- ja C++-laajennustiedostot matriisikertolaskukernelille |
 
 
-## Vaiheistukset
+## Ohjekirjat
 
-### Vaiheistus 1: Vektorilisäys
+### Ohjekirja 1: Vektorien yhteenlasku
 
 #### Lähestymistapa A: JIT-kääntäminen
 
-JIT (Just-In-Time) -kääntäminen tarkoittaa, että ydin kirjoitetaan raakana C++-merkkijonona Pythonin sisällä ja käännetään ajon aikana ilman ylimääräisiä rakennusvaiheita.
+JIT (Just-In-Time) -kääntäminen tarkoittaa, että kerneli kirjoitetaan raakana C++-merkkijonona Pythonin sisällä ja käännetään ajon aikana ilman ylimääräisiä käännösvaiheita.
 
-Käyttääksesi tiedostoa [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py), varmista että se on ladattu ja suorita:
+Käyttääksesi tiedostoa [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py), varmista, että se on ladattu, ja suorita:
 ```bash
 cd Vector_Addition # if not already inside the directory
 python add_one_kernel.py
 ```
 
-**Tärkeimmät koodinpätkät**
+**Keskeiset koodinpätkät**
 ```python
 import torch
 
@@ -614,31 +614,31 @@ print("First 5 elements:", x[:5].cpu())
 #Expected output: tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @os:linux -->
-> **Vinkki**: Skripti käynnistää myös taustaketjun, joka kyselee `amd-smi`:ltä 100 ms välein kirjatakseen GPU:n huippu- ja keskimääräisen käyttöasteen ytimen suorituksen aikana.
+> **Vinkki**: Skripti käynnistää myös taustasäikeen, joka kyselee `amd-smi`-komentoa 100 ms:n välein rekisteröidäkseen GPU:n huippu- ja keskimääräisen käytön kernelin ajon aikana.
 <!-- @os:end -->
 
-> **Huomio**: **Miksi lohkokoko on 256?** <br>
-> - Ydin käyttää **256 säiettä per lohko**, koska se sopii hyvin yhteen **AMD GPU:iden aaltoetusuoritusmalliin**.
-> - Muistathan, että AMD-laitteisto suorittaa säikeitä 32 säikeen ryhmissä, mikä tuottaa 8 aaltoeturyhmää per lohko. (8 aaltoeturyhmää × 32 säiettä = 1 lohko)
+> **Huom**: **Miksi lohkokoko on 256?** <br>
+> - Kerneli käyttää **256 säiettä lohkoa kohden**, koska se sopii hyvin yhteen **AMD-GPU:iden wavefront-suoritusmallin** kanssa.
+> - Muista, että AMD-laitteisto suorittaa säikeitä 32 säikeen ryhmissä, mikä tuottaa 8 wavefrontia lohkoa kohden. (8 wavefrontia x 32 säiettä = 1 lohko)
 
 
 **Mitä työkuorma tekee:**
 
-Ydin lisää keinotekoisesti ylimääräistä työtä GPU:n käyttöasteen havainnollistamiseksi:
+Kerneli lisää keinotekoisesti ylimääräistä työtä osoittaakseen GPU:n käyttöastetta:
 
 - **100 000 000 elementtiä** tensorissa
-- **Sisäinen silmukka suoritetaan 1 000 kertaa** per elementti per ytimen käynnistys  
-- **200 ytimen käynnistystä** yhteensä
+- **Sisempi silmukka toistuu 1000 kertaa** elementtiä kohden kernelin käynnistystä kohden  
+- **200 kernelin käynnistystä** yhteensä
 
-**Laskenta:**  
-- Jokainen elementti: kasvaa 1:llä × 1 000 iteraatiota × 200 käynnistystä = 200 000  
-- Lopputulos: 1,0 (lähtöarvo) + 200 000 (lisäykset) = 200 001,0
+**Matematiikka:**  
+- Jokainen elementti: kasvaa arvolla 1 × 1000 iteraatiota × 200 käynnistystä = 200 000  
+- Lopputulos: 1,0 (alkuarvo) + 200 000 (lisäykset) = 200 001,0
 
-**Miksi sisäinen silmukka?**  
-- Ilman `for (int i = 0; i < 1000; i++)` -silmukkaa 200 käynnistystä valmistuisi välittömästi eikä seurantatyökalut tallentaisi merkityksellistä GPU:n käyttöastetta. Keinotekoinen työ tekee jokaisesta ytimen suorituksesta riittävän pitkän, jotta seurantatyökalut voivat mitata suorituskykyä.
+**Miksi sisempi silmukka?**  
+- Ilman `for (int i = 0; i < 1000; i++)` -silmukkaa 200 käynnistystä valmistuisi hetkessä, eivätkä seurantatyökalut ehtisi rekisteröidä merkityksellistä GPU:n käyttöastetta. Keinotekoinen työ saa jokaisen kernelin ajon kestämään riittävän kauan, jotta seurantatyökalut voivat mitata suorituskykyä.
 
 <!-- @os:linux -->
-**Odotettu tuloste:** [Suorituskykyarvot vaihtelevat]
+**Odotettu tuloste:**[Suorituskykyluvut vaihtelevat]
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
@@ -648,7 +648,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Huomio**: Windowsissa `amd-smi` ei ole tuettu. GPU:n käyttöasteen seuraamiseksi voit käyttää Tehtävienhallintaa, jossa sinun pitäisi nähdä lyhyt käyttöastepiikki ohjelman suorituksen aikana.
+> **Huom**: Windowsissa `amd-smi` ei ole tuettu. GPU:n käyttöastetta voi seurata Tehtävienhallinnasta, jossa pitäisi näkyä lyhyt käyttöasteen piikki ohjelman ajon aikana.
 
 **Odotettu tuloste:**
 ```
@@ -657,7 +657,7 @@ Elapsed time: 2.753s
 No GPU Usage captured.
 ```
 <!-- @os:end -->
-**Hienoa työtä! Suoritit juuri ensimmäisen GPU-ytimesi.**
+**Hienoa työtä! Juuri ajoit ensimmäisen GPU-kernelisi.**
 
 <!-- @os:linux -->
 <!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
@@ -798,32 +798,32 @@ $code | python -
 <!-- @os:end -->
 
 ---
-#### Lähestymistapa B: C++-laajennus
+#### Lähestymistapa B: C++-laajennos
 
-Toinen lähestymistapa on manuaalisempi: kirjoita ydin ja Python-sidonta yhteen `.cu`-tiedostoon, käännä se natiivisti PyTorchin rakennusjärjestelmällä ja tuo se Pythoniin.
+Toinen lähestymistapa on manuaalisempi: kirjoita ydin (kernel) ja Python-sidos yhteen `.cu`-tiedostoon, käännä se natiivisti PyTorchin build-järjestelmällä ja tuo se Pythoniin.
 
 <!-- @os:windows -->
-> **Huomio**: C++-laajennuslähestymistapa vaatii Visual Studio C++ -rakennusympäristön, koska PyTorch kääntää `.cu`-lähdetiedoston natiiviksi `.pyd`-laajennusmoduuliksi. Tämän natiivilaajennuksen rakentaminen riippuu Visual Studion tarjoamasta Microsoft C++ -työkaluketjusta (kääntäjä, linkittäjä ja rakennustyökalut). Suorita Visual Studio -aktivointikomennot asennusosiosta ennen laajennuksen rakentamista.
+> **Huom**: C++-laajennos-lähestymistapa vaatii Visual Studio C++ -käännösympäristön, koska PyTorch kääntää `.cu`-lähdetiedoston natiiviksi `.pyd`-laajennosmoduuliksi. Tämän natiivin laajennoksen rakentaminen edellyttää Visual Studion tarjoamaa Microsoft C++ -työkaluketjua (kääntäjä, linkkeri ja build-työkalut). Suorita Visual Studion aktivointikomennot asennusosiosta ennen laajennoksen rakentamista.
 <!-- @os:end -->
 
 Lataa seuraavat tiedostot, jos et ole vielä ladannut niitä:
 <!-- @os:windows -->
 | Tiedosto | Rooli |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Ydin + käynnistäjä + pybind11-sidonta, kaikki yhdessä tiedostossa |
-| [setup.py](assets/Vector_Addition/setup.py) | Rakennusskripti, käyttää `CUDAExtension`-toimintoa `.cu`-tiedoston kääntämiseen `.pyd`-muotoon |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Ydin + käynnistin + pybind11-sidos, kaikki yhdessä tiedostossa |
+| [setup.py](assets/Vector_Addition/setup.py) | Build-skripti, käyttää `CUDAExtension`-luokkaa `.cu`-tiedoston kääntämiseen `.pyd`-muotoon |
 | [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Python-skripti, joka suorittaa rakennetut artefaktit |
 <!-- @os:end -->
 
 <!-- @os:linux -->
 | Tiedosto | Rooli |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Ydin + käynnistäjä + pybind11-sidonta, kaikki yhdessä tiedostossa |
-| [setup.py](assets/Vector_Addition/setup.py) | Rakennusskripti, käyttää `CUDAExtension`-toimintoa `.cu`-tiedoston kääntämiseen `.so`-muotoon |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Ydin + käynnistin + pybind11-sidos, kaikki yhdessä tiedostossa |
+| [setup.py](assets/Vector_Addition/setup.py) | Build-skripti, käyttää `CUDAExtension`-luokkaa `.cu`-tiedoston kääntämiseen `.so`-muotoon |
 | [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Python-skripti, joka suorittaa rakennetut artefaktit |
 <!-- @os:end -->
 
-#### **Vaihe 1: Ydin, käynnistäjä ja sidonta** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
+#### **Vaihe 1: Ydin, käynnistin ja sidos** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -850,25 +850,26 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 ```
 
 >**Vinkki**: Miksi käyttää `hipDeviceSynchronize()`-funktiota? <br>
-> - GPU-ytimen käynnistykset ovat asynkronisia. Kun CPU suorittaa `add_one<<<grid_size, block_size>>>(data, n);`, se siirtyisi välittömästi seuraavaan käskyyn odottamatta GPU:ta. `hipDeviceSynchronize()` pakottaa CPU:n odottamaan, kunnes GPU-ydin on valmis.
+> - GPU-ytimien käynnistykset ovat asynkronisia. Kun CPU suorittaa rivin `add_one<<<grid_size, block_size>>>(data, n);`, se suorittaisi välittömästi seuraavan käskyn odottamatta GPU:ta. `hipDeviceSynchronize()` pakottaa CPU:n odottamaan, kunnes GPU-ydin on suoritettu loppuun.
 
-#### **Vaihe 2: Rakentaminen**
+#### **Vaihe 2: Käännä**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**Huomio**: Tämä komento etsii `setup.py`-tiedostoa nykyisestä hakemistosta rakentaakseen luomamme .cu-tiedoston.
+>**Huom**: Tämä komento etsii `setup.py`-tiedostoa nykyisestä hakemistosta kääntääkseen luomamme .cu-tiedoston.
 
 
-`CUDAExtension` on CUDA-rakennusapuohjelma `torch.utils.cpp_extension`-kirjastosta. ROCm:n kanssa PyTorch **uudelleenmappaa `CUDAExtension`-toiminnon käyttämään `hipcc`-kääntäjää** `nvcc`:n sijaan. ROCm sieppaa rakennuspolun ja ohjaa sen HIP-kääntäjän kautta, siirtäen CUDA-koodin AMD:lle.
+`CUDAExtension` on `torch.utils.cpp_extension`-moduulin CUDA-käännösapuri. ROCm:n kanssa PyTorch **uudelleenohjaa `CUDAExtension`-luokan käyttämään `hipcc`-kääntäjää** `nvcc`:n sijaan. ROCm sieppaa käännöspolun ja ohjaa sen HIP-kääntäjän kautta, siirtäen CUDA-koodin AMD-laitteille.
 
 Tämä tuottaa seuraavat tiedostot:
 <!-- @os:windows -->
 - `build/`: hakemisto, jossa `.pyd`-tiedostot sijaitsevat
-- `add_one_kernel.hip`: HIP-lähde, jonka hipify-prosessi on luonut `.cu`-tiedostosta; tämä on se, mitä `hipcc` todella käänsi
+- `add_one_kernel.hip`: HIP-lähdekoodi, joka on syntynyt `.cu`-tiedoston hipify-muunnoksesta; tämän `hipcc` todellisuudessa kääntää
 <!-- @os:end -->
+
 <!-- @os:linux -->
 - `build/`: hakemisto, jossa `.so`-tiedostot sijaitsevat
-- `add_one_kernel.hip`: HIP-lähde, jonka hipify-prosessi on luonut `.cu`-tiedostosta; tämä on se, mitä `hipcc` todella käänsi
+- `add_one_kernel.hip`: HIP-lähdekoodi, joka on syntynyt `.cu`-tiedoston hipify-muunnoksesta; tämän `hipcc` todellisuudessa kääntää
 <!-- @os:end -->
 
 #### **Vaihe 3: Käyttö Pythonista** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)):
@@ -1025,34 +1026,34 @@ finally {
 ### Läpikäynti 2: Matriisikertolasku
 
 Matriisikertolasku laskee **C = A × B**, jossa:
-- **A** on M×N (rivit × sarakkeet)
+- **A** on M×N (rivejä × sarakkeita)
 - **B** on N×K  
 - **C** on M×K (tulos)
 
-Jokainen tulosalkio määritellään seuraavasti:
+Jokainen tuloselementti määritellään seuraavasti:
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-Jokainen C:n alkio lasketaan itsenäisesti, mikä tekee tästä täydellisen GPU-rinnakkaisuudelle.
+Jokainen C:n elementti lasketaan itsenäisesti, mikä tekee tästä täydellisen GPU-rinnakkaistamiseen.
 
-#### Kuinka se kuvautuu GPU-säikeisiin
+#### Kuinka se kartoittuu GPU-säikeisiin
 
-Toisin kuin vektorilisäys (1D), matriisikertolasku tuottaa **2D-tulosteen**, joten käytämme **2D-säiehilaa**:
+Toisin kuin vektorien yhteenlasku (1D), matriisikertolasku tuottaa **2D-tulosteen**, joten käytämme **2D-säiehilaa**:
 
-| | Vektorilisäys | Matriisikertolasku |
+| | Vektorien yhteenlasku | Matriisikertolasku |
 |---|---|---|
 | **Tulosteen muoto** | 1D-taulukko | 2D-matriisi (M×K) |
-| **Säiekuvaus** | 1 säie → 1 alkio | 1 säie → 1 tulosalkio |
+| **Säikeiden kartoitus** | 1 säie → 1 elementti | 1 säie → 1 tuloselementti |
 | **Käynnistysmalli** | 1D-hila: `(grid_x, 1, 1)` | 2D-hila: `(grid_x, grid_y, 1)` |
-| **Lohkon koko** | `(256, 1, 1)` | `(16, 16, 1)` = 256 säiettä |
+| **Lohkokoko** | `(256, 1, 1)` | `(16, 16, 1)` = 256 säiettä |
 
-Jokainen säie laskee yhden tulosmatriisin C alkion. Säie kohdassa `(row, col)` laskee `C[row][col]` kertomalla A:n vastaavan rivin B:n vastaavalla sarakkeella.
+Jokainen säie laskee yhden C-tulosmatriisin elementin. Säie sijainnissa `(row, col)` laskee arvon `C[row][col]` kertomalla A:n vastaavan rivin B:n vastaavalla sarakkeella.
 
-**Muistiasettelu**: GPU-muisti on tasainen (1D), mutta matriisit tallennetaan rivi riviltä. Päästäkseen alkioon `A[row][col]` ydin käyttää `A[row * N + col]`.
+**Muistin asettelu**: GPU-muisti on litteä (1D), mutta matriisit tallennetaan rivi kerrallaan. Elementtiin `A[row][col]` päästäksesi ydin käyttää muotoa `A[row * N + col]`.
 
 
-#### Lähestymistapa A: JIT-kääntäminen:
+#### Lähestymistapa A: JIT-käännös:
 
-Kuten läpikäynnissä 1, ydin kirjoitetaan raakana C++-merkkijonona Pythonin sisällä ja käännetään ajonaikaisesti PyTorchin sisäänrakennetun JIT:n avulla.
+Kuten Läpikäynnissä 1, ydin kirjoitetaan raakana C++-merkkijonona Pythonin sisällä ja käännetään ajon aikana PyTorchin sisäänrakennetulla JIT-kääntäjällä.
 
 
 Käyttääksesi tiedostoa [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py), varmista että se on ladattu ja suorita:
@@ -1061,7 +1062,7 @@ cd Matrix_Multiplication # if not already inside the directory
 python matmul_kernel.py
 ```
 
-**Tärkeimmät koodinpätkät**
+**Keskeiset koodinpätkät**
 ```python
 import torch
 
@@ -1112,10 +1113,10 @@ max_err = (C - C_ref).abs().max().item()
 print(f"Max error vs torch.mm: {max_err:.6f}")
 ```
 
-Skripti tarkistaa tuloksen `torch.mm`-funktiota vastaan pienellä toleranssilla. Liukulukuaritmetiikka GPU:lla voi tuottaa pieniä numeerisia eroja verrattuna CPU-toteutuksiin rinnakkaisen reduktionjärjestyksen vuoksi.
+Skripti varmistaa tuloksen vertaamalla sitä funktioon `torch.mm` pienellä toleranssilla. Liukulukuaritmetiikka GPU:illa saattaa tuottaa pieniä numeerisia eroja verrattuna CPU-toteutuksiin rinnakkaisen reduktiojärjestyksen vuoksi.
 
 <!-- @os:linux -->
-**Odotettu tuloste:** [Suorituskykyarvot vaihtelevat]
+**Odotettu tuloste:**[Suorituskykyluvut voivat vaihdella]
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -1125,7 +1126,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Huomio**: Windowsissa `amd-smi` ei ole tuettu. GPU:n käyttöasteen seurantaan voit käyttää Tehtävienhallintaa, jossa sinun pitäisi nähdä lyhyt käyttöastepiikki ohjelman suorituksen aikana.
+> **Huom**: Windowsissa `amd-smi` ei ole tuettu. GPU:n käyttöasteen seuraamiseen voit käyttää Tehtävienhallintaa, jossa pitäisi näkyä lyhyt käyttöasteen piikki, kun suoritat ohjelman.
 
 **Odotettu tuloste:**
 ```
@@ -1300,31 +1301,31 @@ $code | python -
 <!-- @os:end -->
 
 ---
-#### Lähestymistapa B: C++-laajennus
+#### Menetelmä B: C++-laajennus
 
-Toinen lähestymistapa on manuaalisempi: kirjoita ydin ja Python-sidonta yhteen `.cu`-tiedostoon, käännä se natiivisti PyTorchin rakennusjärjestelmällä ja tuo se Pythoniin.
+Toinen menetelmä on manuaalisempi: kirjoita ydin ja Python-sidonta yhteen `.cu`-tiedostoon, käännä se natiivisti PyTorchin käännösjärjestelmällä ja tuo se Pythoniin.
 
 <!-- @os:windows -->
-> **Huomio**: C++-laajennuslähestymistapa vaatii Visual Studio C++ -rakennusympäristön, koska PyTorch kääntää `.cu`-lähdetiedoston natiiviksi `.pyd`-laajennusmoduuliksi. Tämän natiivikäännöksen rakentaminen riippuu Microsoftin C++-työkaluketjusta (kääntäjä, linkittäjä ja rakennustyökalut), jonka Visual Studio tarjoaa. Suorita Visual Studion aktivointikomennot asennusosiosta ennen laajennuksen rakentamista.
+> **Huomautus**: C++-laajennusmenetelmä vaatii Visual Studio C++ -käännösympäristön, koska PyTorch kääntää `.cu`-lähdetiedoston natiiviksi `.pyd`-laajennusmoduuliksi. Tämän natiivin laajennuksen kääntäminen edellyttää Visual Studion tarjoamaa Microsoft C++ -työkaluketjua (kääntäjä, linkittäjä ja käännöstyökalut). Suorita Visual Studion aktivointikomennot asennusosiosta ennen laajennuksen kääntämistä.
 <!-- @os:end -->
 
-Lataa seuraavat tiedostot, jos et ole vielä ladannut niitä:
+Lataa seuraavat tiedostot, jos et ole vielä tehnyt niin:
 <!-- @os:windows -->
 | Tiedosto | Rooli |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Ydin + käynnistäjä + pybind11-sidonta |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | Rakennusskripti, käyttää `CUDAExtension`-toimintoa `.cu`-tiedoston kääntämiseen `.pyd`-muotoon |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python-skripti, joka suorittaa rakennetut artefaktit |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Ydin + käynnistin + pybind11-sidonta |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Käännösskripti, käyttää `CUDAExtension`-luokkaa `.cu`-tiedoston kääntämiseen `.pyd`-tiedostoksi |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python-skripti, joka suorittaa käännetyt artefaktit |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Tiedosto | Rooli |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Ydin + käynnistäjä + pybind11-sidonta |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | Rakennusskripti, käyttää `CUDAExtension`-toimintoa `.cu`-tiedoston kääntämiseen `.so`-muotoon |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python-skripti, joka suorittaa rakennetut artefaktit |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Ydin + käynnistin + pybind11-sidonta |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Käännösskripti, käyttää `CUDAExtension`-luokkaa `.cu`-tiedoston kääntämiseen `.so`-tiedostoksi |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python-skripti, joka suorittaa käännetyt artefaktit |
 <!-- @os:end -->
 
-#### **Vaihe 1: Ydin, käynnistäjä ja sidonta** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
+#### **Vaihe 1: Ydin, käynnistin ja sidonta** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -1364,27 +1365,27 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
-Verrattuna `add_one_launcher`-funktioon läpikäynnissä 1, tämän käynnistäjä:
+Verrattuna `add_one_launcher`-toteutukseen läpikäynnissä 1, tämän käynnistimen erot ovat:
 - Ottaa kaksi syötetensoria yhden sijaan
-- Johtaa kaikki kolme dimensiota (M, N, K) tensorien muodoista ilman manuaalista koon välittämistä Pythonista
-- Allokoi ja palauttaa tulostensori C:n sen sijaan, että muuttaisi sitä paikallaan
-- Käyttää `dim3`-rakennetta sekä ruudukolle että lohkolle 2D-käynnistysmuodon ilmaisemiseen
+- Johtaa kaikki kolme ulottuvuutta (M, N, K) tensorien muodoista, ilman manuaalista koon välittämistä Pythonista
+- Allokoi ja palauttaa tulostensorin C sen sijaan, että muokkaisi paikan päällä
+- Käyttää `dim3`-tyyppiä sekä ruudukolle että lohkolle ilmaisemaan 2D-käynnistysmuodon
 
-#### **Vaihe 2: Rakentaminen**
+#### **Vaihe 2: Käännä**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**Huomio**: Tämä komento etsii `setup.py`-tiedostoa nykyisestä hakemistosta rakentaakseen luomamme .cu-tiedoston.
+>**Huomautus**: Tämä komento etsii `setup.py`-tiedoston nykyisestä hakemistosta kääntääkseen luomamme .cu-tiedoston.
 
 
 Tämä tuottaa seuraavat tiedostot:
 <!-- @os:windows -->
-- `build/`: hakemisto, joka sisältää `.pyd`-tiedostot
-- `matmul_kernel.hip`: HIP-lähdekoodi, joka on luotu hipifioimalla `.cu`-tiedosto; tämä on se, mitä `hipcc` todella käänsi
+- `build/`: hakemisto, jossa on `.pyd`-tiedostot
+- `matmul_kernel.hip`: HIP-lähdekoodi, joka on luotu hipifioimalla `.cu`-tiedosto; tämän `hipcc` todellisuudessa käänsi
 <!-- @os:end -->
 <!-- @os:linux -->
-- `build/`: hakemisto, joka sisältää `.so`-tiedostot
-- `matmul_kernel.hip`: HIP-lähdekoodi, joka on luotu hipifioimalla `.cu`-tiedosto; tämä on se, mitä `hipcc` todella käänsi
+- `build/`: hakemisto, jossa on `.so`-tiedostot
+- `matmul_kernel.hip`: HIP-lähdekoodi, joka on luotu hipifioimalla `.cu`-tiedosto; tämän `hipcc` todellisuudessa käänsi
 <!-- @os:end -->
 
 #### **Vaihe 3: Käyttö Pythonista** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)):
@@ -1400,10 +1401,10 @@ Result: tensor([[19., 22.],
         [43., 50.]])
 ```
 
-**Hienoa! Olet juuri toteuttanut matriisikertolaskun GPU:lla.** Tämä on merkittävä virstanpylväs, koska matriisikertolasku on modernien koneoppimisoperaatioiden perusta, kuten:
-- Neuroverkkokerrokset
-- Huomiomekanismit
-- Upotukset
+**Loistavaa! Juuri toteutit matriisikertolaskun GPU:lla.** Tämä on merkittävä virstanpylväs, sillä matriisikertolasku on modernien koneoppimisoperaatioiden selkäranka, kuten:
+- Neuroverkkojen kerrokset
+- Attentiomekanismit
+- Upotukset (embeddings)
 - Transformerit
 
 <!-- @os:linux -->
@@ -1554,16 +1555,16 @@ finally {
 
 ## Seuraavat vaiheet
 
-Olet oppinut kirjoittamaan, kääntämään ja käynnistämään GPU-ytimiä sekä JIT-käännöksellä että C++-laajennuksilla perusrinnakkaisoperaatioita varten.
+Olet oppinut kirjoittamaan, kääntämään ja käynnistämään GPU-ytimiä sekä JIT-kääntämisen että C++-laajennusten avulla perustason rinnakkaisoperaatioihin.
 
-**Suorituskykyoptimointeja:**
-- **Jaetun muistin ruudukointi** – Tallenna dataplohkoja välimuistiin globaalin muistin käytön vähentämiseksi
-- **Muistin koalessointi** – Optimoi muistin käyttömallit kaistanleveyden parantamiseksi
+**Suorituskykyoptimoinnit:**
+- **Jaetun muistin tiilitys (tiling)** - Välimuistita datalohkoja vähentääksesi globaalin muistin käyttöä
+- **Muistin yhdistäminen (coalescing)** - Optimoi muistinkäyttömallit kaistanleveyden hyödyntämiseksi
 
-**Tosielämän algoritmeja:**
-- **2D-konvoluutio** – Pieni suodatin (ydin) liukuu kuvan yli laskien jokaisen tulostepikseliin painotetun summan naapuripikseleistä. Tämä esittelee stensiililaskennan ja jaetun muistin ruudukoinnin, jossa säikeet käyttävät uudelleen päällekkäisiä kuva-alueita globaalin muistin käytön vähentämiseksi.
-- **Softmax-funktio**: Softmax muuntaa lukuvektorin todennäköisyyksiksi, joiden summa on 1, ja sitä käytetään yleisesti neuroverkkojen tulosteissa. Sen tehokas toteuttaminen GPU:lla esittelee rinnakkaisreduktiot ja numeerisen vakauden tekniikat suurten vektorien käsittelyssä.
+**Todellisen maailman algoritmit:**
+- **2D-konvoluutio** - Pieni suodatin (ydin) liukuu kuvan yli ja laskee kunkin tulospikselin naapuripikselien painotettuna summana. Tämä esittelee sabluunalaskennan (stencil computation) ja jaetun muistin tiilityksen, joissa säikeet käyttävät uudelleen päällekkäisiä kuva-alueita globaalin muistin käytön vähentämiseksi.
+- **Softmax-funktio**: Softmax muuntaa lukuvektorin todennäköisyyksiksi, joiden summa on 1; sitä käytetään yleisesti neuroverkkojen tulosteissa. Sen tehokas toteuttaminen GPU:lla esittelee rinnakkaiset redusoinnit ja numeerisen vakauden tekniikat suurten vektorien käsittelyssä.
 
-**Tuotantoon liittyviä näkökohtia:**
-- **Virheenkäsittely** – Rajojen tarkistus ja laitteiden hallinta
-- **PyTorch-integraatio** – Mukautetut operaattorit autograd-tuella
+**Tuotantoon liittyvät näkökohdat:**
+- **Virheenkäsittely** - Rajatarkistukset ja laitehallinta
+- **PyTorch-integraatio** - Mukautetut operaattorit autograd-tuella

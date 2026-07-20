@@ -6,27 +6,28 @@ SPDX-License-Identifier: MIT
 
 ### Podman
 
-Podman הוא תוכנת קונטיינריזציה עבור Linux.
+Podman היא תוכנת קונטיינריזציה עבור Linux.
 
-**שלב 1**: התקן את מנוע Podman הבסיסי ואת תוסף הפענוח העצמאי Compose V2.
+
+**שלב 1**: התקינו את מנוע ה-Podman הבסיסי ואת תוסף ה-Compose V2 העצמאי.
 
 ```bash
 sudo apt update && sudo apt install -y podman docker-compose-plugin podman-compose
 ```
 
-**שלב 2**: אמת את Podman ו-Compose
+**שלב 2**: אמתו את Podman ואת Compose
 
 ```bash
 podman --version
 podman-compose --version
 ```
 
-**שלב 3**: הפעל את שקע ה-API של Podman ברמת המערכת כדי שתוסף ה-Compose יוכל לתקשר עם סביבת זמן הריצה של הקונטיינרים.
+**שלב 3**: הפעילו את שקע ה-API הגלובלי של Podman כך שתוסף ה-Compose יוכל לתקשר עם סביבת ההרצה של הקונטיינרים.
 
 ```bash
 sudo systemctl enable --now podman.socket
 ```
-**שלב 4**: הפעל קונטיינר בדיקה זמני כדי לאמת שהמנוע יכול למשוך ולהפעיל תמונות בהצלחה.
+**שלב 4**: הריצו קונטיינר בדיקה זמני כדי לוודא שהמנוע מסוגל למשוך ולהריץ תמונות בהצלחה.
 
 ```bash
 sudo podman run --rm docker.io/library/hello-world

@@ -12,4 +12,4 @@ vLLM wird über ein vorgefertigtes Container-Image mit ROCm-Unterstützung berei
 vllm-launch
 ```
 
-Der Launcher startet den Container, zielt auf die integrierte GPU ab und stellt die OpenAI-kompatible vLLM-API unter `http://localhost:8001` bereit.
+Der Launcher startet den Container, adressiert die integrierte GPU und stellt die OpenAI-kompatible vLLM-API unter `http://localhost:8001` bereit.

@@ -1,5 +1,5 @@
 {
   "id": "openclaw-lemonade-server",
   "title": "Lemonade Server ile OpenClaw'ı Yerel Olarak Çalıştırma",
-  "description": "Lemonade Server ile OpenClaw otonom AI ajanını yükleyin ve yapılandırın."
+  "description": "OpenClaw otonom yapay zeka aracısını Lemonade Server ile kurun ve yapılandırın."
 }

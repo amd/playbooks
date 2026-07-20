@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### ComfyUI Modelleri
 
-Daha önce önceden indirilmiş ComfyUI modellerini sildiyseniz veya bunları ilk kez indirmek istiyorsanız, eksik modellerin tespit edildiğine dair bildirim geldiğinde her bir modeldeki `Download` düğmesine basmanız yeterlidir.
+Daha önce önceden indirilmiş ComfyUI modellerini sildiyseniz veya bunları ilk kez indirmek istiyorsanız, eksik modellerin tespit edildiği bildirildiğinde her bir modelin üzerindeki `Download` düğmesine basmanız yeterlidir.
 Model dosyalarını doğru konumlara manuel olarak yerleştirmeniz gerekebilir.
 
 <p align="center">

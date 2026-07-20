@@ -8,10 +8,10 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. Preuzmite najnoviji Windows ComfyUI instalater sa [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
-2. Odaberite konfiguraciju hardvera: Izaberite `AMD ROCm`.
-3. Odaberite gde da instalirate ComfyUI: Koristite podrazumevanu putanju ili željenu fasciklu.
-4. Podešavanja aplikacije za radnu površinu: Preporučujemo da poništite izbor opcije "Automatic Updates" kako biste bili sigurni da koristite preporučenu verziju ove aplikacije.
+1. Preuzmite najnoviju Windows ComfyUI instalaciju sa [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
+2. Izaberite vašu hardversku konfiguraciju: Izaberite `AMD ROCm`.
+3. Izaberite gde želite da instalirate ComfyUI: Koristite podrazumevanu putanju ili željeni folder.
+4. Podešavanja desktop aplikacije: Preporučujemo da isključite opciju "Automatic Updates" kako biste bili sigurni da koristite preporučenu verziju ove aplikacije.
 5. Pritisnite "Next" da biste započeli instalaciju.
 
 <!-- @os:end -->
@@ -22,12 +22,12 @@ SPDX-License-Identifier: MIT
 git clone https://github.com/Comfy-Org/ComfyUI.git
 ```
 
-#### (Opciono) Prebacivanje na određenu verziju
+#### (Opciono) Preuzimanje određene verzije
 ```bash
 git checkout v0.19.2
 ```
 
-#### Instalacija zahteva za ComfyUI
+#### Instaliranje ComfyUI zahteva
 
 Sa aktiviranim Python virtuelnim okruženjem, pokrenite:
 ```bash

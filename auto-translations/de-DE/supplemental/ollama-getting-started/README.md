@@ -6,34 +6,34 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Dieses Playbook verwendet spezielle Tags, die GitHub nicht rendern kann. Bitte besuchen Sie [amd.com/playbooks](https://amd.com/playbooks), um diesen Inhalt korrekt anzuzeigen.
 <!-- @github-only:end -->
 
-## Übersicht
+## Überblick
 
-Ollama ist ein beliebtes, schlankes Tool zum lokalen Ausführen großer Sprachmodelle. Es übernimmt das Herunterladen, die Quantisierung und das Bereitstellen von Modellen über eine einfache Befehlszeilenschnittstelle und eine Desktop-App, sodass Sie innerhalb von Minuten mit einem LLM chatten können.
+Ollama ist ein beliebtes, leichtgewichtiges Tool zum lokalen Ausführen großer Sprachmodelle. Es übernimmt das Herunterladen von Modellen, die Quantisierung und die Bereitstellung hinter einer einfachen Befehlszeilenschnittstelle und Desktop-App, sodass Sie innerhalb weniger Minuten mit einem LLM chatten können.
 
-Dieses Playbook führt Sie durch die Installation von Ollama, das Herunterladen des GPT-OSS 20B-Modells und das Führen eines Gesprächs damit – sowohl über das Terminal als auch über die Desktop-App.
+Dieses Playbook führt Sie durch die Installation von Ollama, das Herunterladen des GPT-OSS 20B-Modells und eine Unterhaltung damit, sowohl über das Terminal als auch über die Desktop-App.
 
 ## Was Sie lernen werden
 
 - Wie Sie Ollama auf Ihrem System installieren und starten
 - Das GPT-OSS 20B-Modell lokal herunterladen und ausführen
 - Mit Modellen über die CLI chatten
-- Modelle programmgesteuert über die REST-API abfragen
+- Modelle programmatisch über die REST-API abfragen
 
-## Speicherkonfiguration festlegen
+## Einstellen der Speicherkonfiguration
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Auf Software-Updates prüfen
-> **Hinweis**: Falls VS Code nicht installiert ist, können Sie es über das Ryzen AI Developer Center installieren.
+## Nach Software-Updates suchen
+> **Hinweis**: Wenn VS Code nicht installiert ist, können Sie es mit dem Ryzen AI Developer Center installieren.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Software-Voraussetzungen installieren
+## Installation der Software-Voraussetzungen
 
 <!-- @require:driver -->
 
@@ -41,11 +41,11 @@ Dieses Playbook führt Sie durch die Installation von Ollama, das Herunterladen 
 
 <!-- @os:windows -->
 
-1. Laden Sie den Installer von [ollama.com/download](https://ollama.com/download) herunter.
-2. Führen Sie den `.exe`-Installer aus und folgen Sie den Anweisungen.
+1. Laden Sie das Installationsprogramm von [ollama.com/download](https://ollama.com/download) herunter.
+2. Führen Sie das `.exe`-Installationsprogramm aus und folgen Sie den Anweisungen.
 3. Nach der Installation läuft Ollama als Hintergrunddienst und ist über das Terminal, die Desktop-App und das System-Tray zugänglich.
 
-Überprüfen Sie die Installation, indem Sie ein Terminal öffnen und folgenden Befehl ausführen:
+Überprüfen Sie die Installation, indem Sie ein Terminal öffnen und Folgendes ausführen:
 
 ```powershell
 ollama --version
@@ -57,7 +57,7 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-Die installierte Versionsnummer sollte in der Konsole ausgegeben werden.
+Sie sollten die installierte Versionsnummer in der Konsole ausgegeben sehen.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -80,18 +80,18 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-Die installierte Versionsnummer sollte in der Konsole ausgegeben werden.
+Sie sollten die installierte Versionsnummer in der Konsole ausgegeben sehen.
 <!-- @os:end -->
 
 ## Ihr erstes Modell herunterladen
 
-Ollama verwaltet Modelle über eine Registry, ähnlich wie Container-Images. So laden Sie GPT-OSS 20B herunter:
+Ollama verwaltet Modelle über eine Registry, ähnlich wie bei Container-Images. Um GPT-OSS 20B herunterzuladen:
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-Dabei werden die Modellgewichte auf Ihren lokalen Rechner heruntergeladen (ca. 12 GB). Der Download erfolgt nur einmal; bei nachfolgenden Ausführungen wird das Modell von der Festplatte geladen.
+Dies lädt die Modellgewichte auf Ihren lokalen Rechner herunter (ca. 12 GB). Der Download erfolgt nur einmal, nachfolgende Ausführungen laden das Modell von der Festplatte.
 
 Sie können bestätigen, dass das Modell verfügbar ist, mit:
 
@@ -99,7 +99,7 @@ Sie können bestätigen, dass das Modell verfügbar ist, mit:
 ollama list
 ```
 
-In der Ausgabe sollte `gpt-oss:20b` zusammen mit seiner Größe und dem Datum der letzten Änderung erscheinen.
+Sie sollten `gpt-oss:20b` in der Ausgabe zusammen mit Größe und letztem Änderungsdatum sehen.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
@@ -172,14 +172,14 @@ echo "OK: gpt-oss:20b is present in ollama list"
 
 ### Modellbenennung
 
-Ollama-Modellnamen folgen dem Format `name:tag`. Der Tag gibt in der Regel die Parameteranzahl oder die Quantisierungsvariante an. Einige nützliche Befehle zur Modellverwaltung:
+Ollama-Modellnamen folgen dem Format `name:tag`. Der Tag gibt üblicherweise die Parameteranzahl oder die Quantisierungsvariante an. Einige nützliche Befehle zur Modellverwaltung:
 
 | Befehl | Beschreibung |
 |---------|-------------|
 | `ollama list` | Alle heruntergeladenen Modelle anzeigen |
 | `ollama pull <model>` | Ein Modell herunterladen, ohne es auszuführen |
 | `ollama rm <model>` | Ein Modell entfernen, um Speicherplatz freizugeben |
-| `ollama show <model>` | Modell-Metadaten und Parameter anzeigen |
+| `ollama show <model>` | Modell-Metadaten und -Parameter anzeigen |
 
 ## Chatten über das Terminal
 
@@ -189,39 +189,39 @@ Starten Sie eine interaktive Chat-Sitzung direkt über die Befehlszeile:
 ollama run gpt-oss:20b
 ```
 
-Ollama lädt das Modell in den Arbeitsspeicher und öffnet eine Eingabeaufforderung. Stellen Sie eine Frage:
+Ollama lädt das Modell in den Speicher und öffnet eine Eingabeaufforderung. Versuchen Sie, etwas zu fragen:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-Das Modell gibt seine Antwort Token für Token direkt im Terminal aus. Geben Sie `/bye` ein oder drücken Sie `Ctrl+D`, um die Sitzung zu beenden.
+Das Modell streamt seine Antwort Token für Token direkt im Terminal. Geben Sie `/bye` ein oder drücken Sie `Ctrl+D`, um die Sitzung zu beenden.
 
-> **Tipp**: Der erste Start dauert einige Sekunden, bis das Modell in den Arbeitsspeicher geladen ist. Nachfolgende Eingaben innerhalb derselben Sitzung werden deutlich schneller beantwortet, da das Modell geladen bleibt.
+> **Tipp**: Der erste Durchlauf dauert einige Sekunden, um das Modell in den Speicher zu laden. Nachfolgende Prompts innerhalb derselben Sitzung reagieren viel schneller, da das Modell geladen bleibt.
 
 <!-- @os:windows -->
 ## Chatten über die Desktop-App
 
-Ollama wird auch mit einer Desktop-Anwendung geliefert, die eine übersichtliche Chat-Oberfläche für die Interaktion mit Ihren Modellen bietet.
+Ollama wird auch mit einer Desktop-Anwendung ausgeliefert, die eine übersichtliche Chat-Oberfläche für die Interaktion mit Ihren Modellen bietet.
 
 Öffnen Sie **Ollama** über das Startmenü oder klicken Sie auf das Ollama-Symbol im System-Tray und wählen Sie **Open Ollama**.
 
 Sobald die App geöffnet ist:
 
 1. Klicken Sie in der Seitenleiste auf **New Chat**.
-2. Wählen Sie **gpt-oss:20b** aus dem Modell-Dropdown in der unteren rechten Ecke des Chat-Eingabebereichs.
-3. Geben Sie eine Nachricht ein und drücken Sie die Eingabetaste, um mit dem Chatten zu beginnen.
+2. Wählen Sie **gpt-oss:20b** aus dem Modell-Dropdown-Menü in der unteren rechten Ecke des Chat-Eingabebereichs.
+3. Geben Sie eine Nachricht ein und drücken Sie die Eingabetaste, um den Chat zu starten.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-Die Desktop-App speichert den Verlauf Ihrer Gespräche in der Seitenleiste, sodass Sie frühere Chats leicht wieder aufrufen können.
+Die Desktop-App speichert einen Verlauf Ihrer Unterhaltungen in der Seitenleiste, sodass Sie frühere Chats leicht wiederfinden können.
 <!-- @os:end -->
 
-## Die REST-API verwenden
+## Verwendung der REST-API
 
-Nach der Installation läuft Ollama als Hintergrunddienst und stellt eine REST-API unter `http://localhost:11434` bereit, über die Sie Modelle in Ihre eigenen Anwendungen und Skripte integrieren können.
+Nach der Installation läuft Ollama als Hintergrunddienst und stellt eine REST-API unter `http://localhost:11434` bereit, die Sie nutzen können, um Modelle in Ihre eigenen Anwendungen und Skripte zu integrieren.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -551,7 +551,7 @@ Die Antwort ist ein JSON-Objekt, das die Ausgabe des Modells im Feld `response` 
 
 
 ### Python-Beispiel
-Nachdem wir die Ollama-API programmgesteuert aufrufen können, rufen wir sie nun aus Python heraus auf.
+Nachdem wir die Ollama-API nun programmatisch ansprechen können, rufen wir sie von Python aus auf.
 
 #### Eine virtuelle Umgebung im Terminal erstellen
 
@@ -572,7 +572,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### Eine Python-Datei erstellen
-Verwenden Sie im selben Verzeichnis VS Code oder einen anderen Editor, um eine .py-Datei zu erstellen, und kopieren Sie den folgenden Code hinein. Führen Sie die Datei anschließend in Ihrer aktivierten Umgebung mit `python your_file_name.py` aus.
+Verwenden Sie im selben Verzeichnis VS Code oder einen anderen Editor, um eine .py-Datei zu erstellen, und kopieren Sie den folgenden Code hinein. Führen Sie die Datei dann in Ihrer aktivierten Umgebung mit `python your_file_name.py` aus.
 
 ```python
 import requests
@@ -593,19 +593,18 @@ print(response.json()["response"])
 
 | Endpunkt | Methode | Zweck |
 |----------|--------|---------|
-| `/api/generate` | POST | Einzel-Turn-Textgenerierung |
-| `/api/chat` | POST | Mehrturnige Konversation mit Nachrichtenverlauf |
+| `/api/generate` | POST | Einzelne Textgenerierung |
+| `/api/chat` | POST | Mehrteilige Unterhaltung mit Nachrichtenverlauf |
 | `/api/tags` | GET | Verfügbare Modelle auflisten |
 | `/api/show` | POST | Modelldetails anzeigen |
 | `/api/pull` | POST | Ein Modell aus der Registry herunterladen |
 
-Die vollständige API-Referenz finden Sie in der [Ollama-API-Dokumentation](https://github.com/ollama/ollama/blob/main/docs/api.md).
-
+Die vollständige API-Referenz finden Sie in der [Ollama API-Dokumentation](https://github.com/ollama/ollama/blob/main/docs/api.md).
 ## Nächste Schritte
 
-- **Andere Modelle ausprobieren**: Durchsuchen Sie die [Ollama-Modellbibliothek](https://ollama.com/library), um Hunderte verfügbarer Modelle zu entdecken – von kleinen Coding-Assistenten bis hin zu großen Reasoning-Modellen.
-- **Eigene Modelle erstellen**: Verwenden Sie eine [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md), um benutzerdefinierte System-Prompts, Temperatur und andere Parameter für ein maßgeschneidertes Erlebnis festzulegen.
-- **Mit der API entwickeln**: Nutzen Sie die [Python](https://github.com/ollama/ollama-python)- oder [JavaScript](https://github.com/ollama/ollama-js)-Client-Bibliotheken, um Ollama in Ihre Anwendungen zu integrieren.
-- **Mit Frontends verbinden**: Kombinieren Sie Ollama mit Tools wie [Open WebUI](https://github.com/open-webui/open-webui) für eine funktionsreiche Chat-Oberfläche mit Suche, Personas und Dokument-Upload.
+- **Verschiedene Modelle ausprobieren**: Durchsuchen Sie die [Ollama-Modellbibliothek](https://ollama.com/library), um Hunderte verfügbarer Modelle zu entdecken, von kleinen Coding-Assistenten bis hin zu großen Reasoning-Modellen.
+- **Benutzerdefinierte Modelle erstellen**: Verwenden Sie eine [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md), um benutzerdefinierte Systemprompts, die Temperatur und andere Parameter für ein maßgeschneidertes Erlebnis festzulegen.
+- **Mit der API entwickeln**: Nutzen Sie die [Python](https://github.com/ollama/ollama-python)- oder [JavaScript](https://github.com/ollama/ollama-js)-Clientbibliotheken, um Ollama in Ihre Anwendungen zu integrieren.
+- **Mit Frontends verbinden**: Kombinieren Sie Ollama mit Tools wie [Open WebUI](https://github.com/open-webui/open-webui) für eine funktionsreiche Chat-Oberfläche mit Suche, Personas und Dokumenten-Upload.
 
 Weitere Informationen finden Sie in der [Ollama-Dokumentation](https://github.com/ollama/ollama/blob/main/README.md).

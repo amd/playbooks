@@ -15,9 +15,9 @@ Za prenos modela GPT-OSS 120B:
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download.png" alt="LM Studio Download Models" width="600"/>
 
-LM Studio bo samodejno prenesel model in ga namestil v pravilni imenik.
+LM Studio bo samodejno prenesel model in ga postavil v ustrezno mapo.
 
-Če želite prenesti dodatne modele, jih lahko poiščete v zavihku Discover in LM Studio bo poskrbel za ostalo.
+Če želite prenesti dodatne modele, jih lahko poiščete v zavihku Discover, LM Studio pa bo poskrbel za preostalo.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-windows timeout=60 hidden=True -->

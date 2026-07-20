@@ -1,5 +1,5 @@
 {
   "id": "cvml",
-  "title": "AMD Ryzen™ AI NPU を使用したローカルコンピュータービジョン",
-  "description": "Ryzen AI と AMD ROCm™ ソフトウェアを基盤として CVML SDK を使用し、ローカル認識機能を構築する"
+  "title": "AMD Ryzen™ AI NPU によるローカルコンピュータビジョン",
+  "description": "Ryzen AIおよびAMD ROCm™ソフトウェア上でCVML SDKを使用してローカル知覚機能を構築"
 }

@@ -13,12 +13,12 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Acest playbook necesită minimum **32 GB** de memorie de sistem.
+> Acest playbook necesită minimum **32GB** memorie de sistem.
 <!-- @device:end -->
 
 n8n este o platformă de automatizare a fluxurilor de lucru care vă permite să conectați aplicații și servicii folosind un editor vizual bazat pe noduri.
 
-Acest playbook vă învață cum să configurați un rezumator de știri financiare bazat pe AI, care extrage date din secțiunea de afaceri AP News, identifică titlurile principale și folosește un LLM local care rulează pe sistemul dvs. pentru a genera un rezumat orientat către investitori.
+Acest playbook vă învață cum să configurați un sumarizator de știri financiare bazat pe AI, care extrage secțiunea de afaceri de pe AP News, extrage titlurile principale și folosește un LLM local rulând pe sistemul dumneavoastră pentru a genera un rezumat orientat spre investitori.
 
 ## Ce veți învăța
 
@@ -29,23 +29,23 @@ Acest playbook vă învață cum să configurați un rezumator de știri financi
 
 ## Ce este Lemonade?
 
-[Lemonade](https://lemonade-server.ai) este o platformă locală de servire LLM construită pentru hardware AMD. Oferă un API compatibil OpenAI care rulează în întregime pe mașina dvs. — datele dvs. nu părăsesc niciodată dispozitivul.
+[Lemonade](https://lemonade-server.ai) este o platformă locală de servire LLM construită pentru hardware AMD. Oferă un API compatibil OpenAI care rulează în întregime pe mașina dumneavoastră—datele dumneavoastră nu părăsesc niciodată dispozitivul.
 
 În acest playbook, folosim Lemonade pentru a servi un LLM local la care n8n se conectează pentru sarcini bazate pe AI.
 
-n8n include un **nod nativ Lemonade** (`Lemonade Chat Model`) care oferă o integrare de primă clasă — nu este necesară configurarea manuală. Aceasta face ca conectarea LLM-ului local la fluxurile de lucru de automatizare să fie simplă.
+n8n include un **nod nativ Lemonade** (`Lemonade Chat Model`) care oferă o integrare de prim rang - nu este nevoie de configurare manuală. Acest lucru face conectarea LLM-ului dumneavoastră local la fluxurile de automatizare simplă și directă.
 
 ## Configurarea memoriei
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Verificarea actualizărilor software
+## Verificați actualizările software-ului
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalarea cerințelor software preliminare
+## Instalarea cerințelor preliminare software
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
@@ -194,7 +194,7 @@ npm -v
 <!-- @os:windows -->
 Instalați n8n global folosind npm.
 
-> **Notă**: Este posibil să vedeți câteva avertismente npm. Acest lucru este de așteptat.
+> **Notă**: Este posibil să vedeți unele avertismente npm. Acest lucru este normal.
 
 ```bash
 npm install -g n8n
@@ -217,14 +217,14 @@ n8n --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Sfat**: Utilizatorii Windows poate fi necesar să modifice Politica de execuție PowerShell (de ex.
+> **Sfat**: Utilizatorii Windows ar putea avea nevoie să modifice Politica de Executare PowerShell (de exemplu,
 > setând-o la RemoteSigned sau Unrestricted) înainte de a rula unele comenzi Powershell.
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **Problemă PATH**: Dacă `n8n --version` afișează că comanda nu a fost găsită, asigurați-vă că directorul bin global npm se află în `PATH`-ul utilizatorului. Calea obișnuită de instalare este `C:\Users\<username>\AppData\Roaming\npm`.
-> Adăugați aceasta la calea utilizatorului (Editați variabilele de mediu ale sistemului > Variabile de mediu > Editați calea utilizatorului) și reporniți terminalul.
+> **Problemă PATH**: Dacă `n8n --version` afișează comanda negăsită, asigurați-vă că directorul global bin npm este inclus în `PATH`-ul utilizatorului. Calea obișnuită de instalare este la `C:\Users\<username>\AppData\Roaming\npm`.
+> Adăugați acest lucru la calea utilizatorului (Editați variabilele de mediu de sistem > Variabile de mediu > Editați Calea Utilizatorului) și reîncărcați terminalul.
 
 <!-- @os:end -->
 
@@ -321,21 +321,21 @@ n8n pornește un server web local. Apăsați `'o'` sau deschideți browserul la 
 <!-- @os:end -->
 
 
-> **Sfat**: Mențineți fereastra terminalului deschisă în timp ce utilizați n8n. Închiderea acesteia ar putea opri serverul.
+> **Sfat**: Păstrați fereastra terminalului deschisă în timp ce folosiți n8n. Închiderea acesteia ar putea opri serverul.
 
 ## Lansarea Lemonade
 
 Lemonade este serverul local care va rula un model și se va conecta la n8n.
 
 <!-- @os:linux -->
-Deschideți interfața grafică Lemonade făcând clic pe pictograma Lemonade din bara de activități. Puteți naviga printre modele, backend-uri și puteți încărca modelele pre-instalate de aici.
+Deschideți interfața grafică Lemonade dând clic pe pictograma Lemonade din bara de sarcini. Puteți naviga printre modele, backend-uri și încărca modelele preinstalate de aici.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Deschideți interfața grafică Lemonade făcând clic pe pictograma Lemonade. Faceți clic dreapta pe pictograma din tavă pentru a deschide aplicația. Apoi, puteți adăuga modele, backend-uri și puteți încărca modelele pre-instalate.
+Deschideți interfața grafică Lemonade dând clic pe pictograma Lemonade. Faceți clic dreapta pe pictograma din bara de sistem pentru a deschide aplicația. Apoi, puteți adăuga modele, backend-uri și încărca modelele preinstalate.
 <!-- @os:end -->
 
->**Sfat**: Odată pornită, interfața grafică Lemonade este accesibilă și la http://localhost:13305
+>**Sfat**: Odată pornită, interfața grafică Lemonade este de asemenea accesibilă la http://localhost:13305
 
 Alternativ, puteți deschide un terminal și rula `lemonade list` pentru a vedea ce modele sunt instalate. Apoi, rulați:
 
@@ -373,21 +373,20 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 Când deschideți n8n pentru prima dată, vi se va solicita să creați un cont sau să vă conectați:
 
 1. Deschideți `http://localhost:5678` în browser
-2. Creați un cont local nou cu adresa dvs. de e-mail sau conectați-vă dacă aveți deja unul
+2. Creați un cont local nou cu adresa dumneavoastră de e-mail, sau conectați-vă dacă aveți deja unul
 3. Odată conectat, veți vedea tabloul de bord n8n
 
-> **Sfat**: Dacă sunteți blocat din contul dvs., încercați `n8n user-management:reset`
+> **Sfat**: Dacă sunteți blocat în afara contului dumneavoastră, încercați `n8n user-management:reset`
 
 ### Pasul 2: Importați fluxul de lucru
 
-Am furnizat un flux de lucru pre-construit pe care îl puteți importa direct:
+Am pregătit un flux de lucru preconstruit pe care îl puteți importa direct:
 
 1. Descărcați următorul fișier de flux de lucru: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. Faceți clic pe **Start from Scratch** pentru a deschide editorul de flux de lucru. Alternativ, faceți clic pe butonul + din colțul din stânga sus, apoi pe **Add workflow**.
+2. Faceți clic pe **Start from Scratch** pentru a deschide editorul fluxului de lucru. Alternativ, faceți clic pe butonul + din colțul din stânga sus, apoi pe **Add workflow**.
 3. Faceți clic pe meniul **...** (trei puncte) din bara din dreapta sus și selectați **Import from file**
-4. Selectați fișierul `financial-news-workflow.json` descărcat
-5. Fluxul de lucru va apărea pe canvas
-
+4. Selectați fișierul descărcat `financial-news-workflow.json`
+5. Fluxul de lucru va apărea pe canava de lucru
 ### Pasul 3: Înțelegerea fluxului de lucru
 
 Fluxul de lucru importat conține 9 noduri conectate:
@@ -398,23 +397,23 @@ Fluxul de lucru importat conține 9 noduri conectate:
 
 | Nod | Scop |
 |------|---------|
-| **When clicking 'Execute workflow'** | Declanșator manual pentru a porni fluxul de lucru |
+| **When clicking 'Execute workflow'** | Declanșator manual pentru pornirea fluxului de lucru |
 | **Fetch Financial News Webpage** | Cerere HTTP GET către `https://apnews.com/business` |
-| **Delay to Ensure Page Load** | Nod de așteptare pentru a asigura că conținutul paginii este complet încărcat |
+| **Delay to Ensure Page Load** | Nod de așteptare pentru a asigura încărcarea completă a conținutului paginii |
 | **Extract News Headlines & Text** | Nod HTML care extrage titluri, selecțiile editorului, știrile principale și știrile regionale folosind selectori CSS |
-| **Clean Extracted News Data** | Nod Set care combină toate datele extrase într-un singur câmp text |
-| **AI Financial News Summarizer** | Agent AI care procesează știrile cu un prompt de sistem pentru analist financiar |
-| **Lemonade Chat Model** | Se conectează la serverul local Lemonade care rulează LLM-ul |
-| **Structured Output Parser** | Formatează ieșirea AI ca JSON structurat |
+| **Clean Extracted News Data** | Nod Set care combină toate datele extrase într-un singur câmp de text |
+| **AI Financial News Summarizer** | Agent AI care procesează știrile folosind un prompt de sistem pentru analist financiar |
+| **Lemonade Chat Model** | Se conectează la serverul Lemonade local care rulează LLM-ul |
+| **Structured Output Parser** | Formatează rezultatul AI ca JSON structurat |
 | **Convert to File** | Convertește rezumatul într-un fișier descărcabil |
 
-### Pasul 4: Configurați acreditările Lemonade
+### Pasul 4: Configurarea acreditărilor Lemonade
 
-Înainte de a rula fluxul de lucru, trebuie să îl conectați la serverul local Lemonade:
+Înainte de a rula fluxul de lucru, trebuie să îl conectați la serverul Lemonade local:
 
 1. Faceți dublu clic pe nodul **Lemonade Chat Model** din n8n
-2. În meniul derulant **Credential to connect with** selectați **Create New Credential**
-3. Introduceți valorile din tabelul de mai jos și faceți clic pe salvare.
+2. Din meniul derulant **Credential to connect with** selectați **Create New Credential**
+3. Introduceți valorile din tabelul de mai jos și faceți clic pe save.
 4. Alegeți modelul relevant pe care l-ați încărcat în Lemonade Server.
 
   | Câmp | Valoare |
@@ -424,20 +423,20 @@ Fluxul de lucru importat conține 9 noduri conectate:
 
 > **Notă**: Înainte de testare, rulați `lemonade status` într-un terminal pentru a confirma că serverul Lemonade rulează.
 <!-- @device:halo_box -->
-> Acest flux de lucru folosește GPT-OSS-120B și este pre-instalat în Lemonade. Puteți schimba aceasta cu alte modele încărcate în setările nodului Lemonade Chat Model.
+> Acest flux de lucru utilizează GPT-OSS-120B, care este preinstalat în Lemonade. Puteți schimba acest lucru cu alte modele încărcate în setările nodului Lemonade Chat Model.
 <!-- @device:end -->
 
-### Pasul 5: Testați fluxul de lucru
+### Pasul 5: Testarea fluxului de lucru
 
 1. Asigurați-vă că Lemonade rulează cu un model încărcat
-2. Faceți clic pe **Execute workflow** în centrul de jos al canvas-ului
-3. Urmăriți fiecare nod executându-se de la stânga la dreapta — acestea devin verzi când sunt complete
+2. Faceți clic pe **Execute workflow** din partea de jos-centru a canvasului
+3. Urmăriți cum se execută fiecare nod de la stânga la dreapta — devin verzi la finalizare
 4. Faceți dublu clic pe nodul **AI Financial News Summarizer** pentru a vedea rezumatul generat în panoul de jos.
-5. Faceți dublu clic pe nodul **Convert to File** pentru a descărca fișierul text corespunzător din panoul de jos.
+5. Faceți dublu clic pe nodul **Convert to File** pentru a descărca fișierul text corespunzător în panoul de jos.
 
 ## Înțelegerea agentului AI
 
-AI Financial News Summarizer folosește un prompt de sistem conceput pentru analiza financiară:
+AI Financial News Summarizer folosește un prompt de sistem conceput pentru analiză financiară:
 
 ```
 You are an AI financial analyst. Your role is to read, understand, and
@@ -449,26 +448,26 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-Agentul primește datele de știri curățate și produce un rezumat structurat cu sentimentul pieței.
+Agentul primește datele curățate ale știrilor și produce un rezumat structurat cu sentimentul pieței.
 
 ### Salvarea fluxului de lucru
 
 Faceți clic pe numele fluxului de lucru din partea de sus și redenumiți-l dacă doriți. Fluxurile de lucru se salvează automat pe măsură ce lucrați.
 
-## Pași următori
+## Pașii următori
 
-- **Automatizare programată**: Înlocuiți declanșatorul manual cu un **Schedule Trigger** pentru a rula zilnic
+- **Programați automatizarea**: Înlocuiți Manual Trigger cu un **Schedule Trigger** pentru a rula zilnic
 - **Trimiteți notificări**: Adăugați un nod **Discord**, **Slack** sau **Email** pentru a primi rezumate
 - **Încercați modele diferite**: Schimbați modelul din nodul Lemonade Chat Model pentru a experimenta cu diferite LLM-uri
-- **Personalizați extracția**: Modificați selectorii CSS ai nodului HTML Extract pentru a viza diferite secțiuni de știri
-- **Încercați backend-uri diferite**: n8n acceptă și [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio și alte backend-uri LLM locale
+- **Personalizați extracția**: Modificați selectorii CSS ai nodului HTML Extract pentru a viza secțiuni diferite de știri
+- **Încercați backend-uri diferite**: n8n suportă de asemenea [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio și alte backend-uri LLM locale
 
 ### Explorați șabloanele n8n
 
-n8n dispune de sute de șabloane de flux de lucru pre-construite. Navigați în biblioteca oficială de șabloane la:
+n8n are sute de șabloane de flux de lucru predefinite. Răsfoiți biblioteca oficială de șabloane la:
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
-Căutați „AI", „LLM" sau „automation" pentru a găsi fluxuri de lucru pe care le puteți importa și personaliza.
+Căutați „AI”, „LLM” sau „automation” pentru a găsi fluxuri de lucru pe care le puteți importa și personaliza.
 
 Pentru mai multe informații, consultați [Documentația n8n](https://docs.n8n.io/).

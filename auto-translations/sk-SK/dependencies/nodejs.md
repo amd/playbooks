@@ -10,7 +10,7 @@ Node.js 22.22.1 LTS je odporúčaná verzia pre túto platformu.
 
 <!-- @os:windows -->
 
-1. Stiahnite si inštalátor pre Windows 64-bit z [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+1. Stiahnite si Windows 64-bit Installer zo stránky [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
 2. Spustite inštalátor a postupujte podľa pokynov
 3. Overte inštaláciu:
 ```cmd

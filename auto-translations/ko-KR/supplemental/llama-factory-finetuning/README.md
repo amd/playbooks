@@ -1,40 +1,40 @@
 ## 개요
 
-효율적인 파인튜닝은 대규모 언어 모델(LLM)을 다운스트림 작업에 적용하는 데 필수적입니다. LLaMA-Factory는 대규모 언어 모델 및 멀티모달 모델의 학습과 파인튜닝을 간소화하는 오픈소스 사용자 친화적 플랫폼입니다. 최소한의 코딩으로 수백 개의 사전 학습된 모델을 로컬에서 커스터마이징할 수 있습니다.
+효율적인 파인튜닝은 대규모 언어 모델(LLM)을 다운스트림 작업에 맞게 조정하는 데 매우 중요합니다. LLaMA Factory는 오픈소스이면서 사용하기 쉬운 플랫폼으로, 대규모 언어 모델과 멀티모달 모델의 학습 및 파인튜닝 과정을 간소화합니다. 사용자는 최소한의 코딩만으로 수백 개의 사전 학습된 모델을 로컬에서 커스터마이징할 수 있습니다.
 
-이 플레이북은 로컬 AMD 하드웨어에서 LLaMA-Factory를 사용하여 LLM을 파인튜닝하는 방법을 안내합니다.
+이 플레이북은 로컬 AMD 하드웨어에서 LLaMA Factory를 사용해 LLM을 파인튜닝하는 방법을 안내합니다.
 
 <!-- @device:stx,krk -->
-> **참고:** 이 플레이북의 파인튜닝 기법을 사용하려면 최소 **32GB의 시스템 RAM**이 필요하며, 그 중 최소 **16GB가 GPU에서 사용 가능**해야 합니다(16GB는 32GB의 일부이며, 추가로 필요한 것이 아닙니다).
+> **참고:** 이 플레이북의 파인튜닝 기법은 최소 **32GB의 시스템 RAM**이 필요하며, 그중 최소 **16GB는 GPU에서 사용 가능**해야 합니다(이 16GB는 32GB에 포함된 것이며, 추가로 필요한 것이 아닙니다).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **참고:** 이 플레이북의 파인튜닝 기법을 사용하려면 최소 **16GB의 총 GPU 메모리**와 **32GB의 시스템 RAM**이 필요합니다.
-> - Windows에서 총 GPU 메모리는 그래픽 카드의 전용 VRAM과 공유 GPU 메모리(시스템 RAM에서 빌려온 것)를 합산합니다.
-> - 따라서 전용 VRAM이 16GB 미만인 카드도 공유 GPU 메모리를 활용하여 부족한 용량을 보완함으로써 이 플레이북을 실행할 수 있습니다.
+> **참고:** 이 플레이북의 파인튜닝 기법은 최소 **16GB의 총 GPU 메모리**와 **32GB의 시스템 RAM**이 필요합니다.
+> - Windows에서 총 GPU 메모리는 그래픽 카드의 전용 VRAM과 공유 GPU 메모리(시스템 RAM에서 가져온 메모리)를 합한 값입니다.
+> - 따라서 전용 VRAM이 16GB 미만인 카드라도 공유 GPU 메모리로 부족분을 보충하여 이 플레이북을 실행할 수 있습니다.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **참고:** 이 플레이북의 파인튜닝 기법을 사용하려면 최소 **16GB의 전용 GPU 메모리**를 갖춘 그래픽 카드와 **32GB의 시스템 RAM**이 필요합니다.
+> **참고:** 이 플레이북의 파인튜닝 기법은 최소 **16GB의 전용 GPU 메모리**를 가진 그래픽 카드와 **32GB의 시스템 RAM**이 필요합니다.
 > - Linux에서는 학습이 전적으로 그래픽 카드의 전용 VRAM에서 실행됩니다.
-> - VRAM이 부족할 경우 공유 GPU 메모리(시스템 RAM)로 폴백되지 않습니다.
-> - 전용 VRAM이 16GB 미만인 카드는 시스템에 RAM이 충분하더라도 Linux에서 학습 중 메모리 부족이 발생합니다.
+> - VRAM이 부족해져도 공유 GPU 메모리(시스템 RAM)로 대체되지 않습니다.
+> - 전용 VRAM이 16GB 미만인 카드는 시스템에 RAM이 충분하더라도 Linux에서 학습 중 메모리가 부족해집니다.
 <!-- @os:end -->
 <!-- @device:end -->
 
-## 학습 내용
+## 배울 내용
 
-- AMD ROCm™ 소프트웨어와 함께 LLaMA-Factory를 설정하는 방법
-- LLM 파인튜닝 파라미터 구성 방법 (Qwen/Qwen3-4B-Instruct-2507을 예시로 사용)
-- LLaMA-Factory 파인튜닝 실행 방법
+- AMD ROCm™ 소프트웨어로 LLaMA Factory를 설정하는 방법
+- LLM 파인튜닝 매개변수를 구성하는 방법(Qwen/Qwen3-4B-Instruct-2507을 예로 사용)
+- LLaMA Factory 파인튜닝을 실행하는 방법
 - 파인튜닝된 모델로 추론을 실행하는 방법
-- 파인튜닝된 모델을 내보내는 방법
+- 파인튜닝된 모델을 내보내는 방법 
 
 ## 예상 소요 시간
 
-- 소요 시간: 이 플레이북을 실행하는 데 약 60분이 소요됩니다(모델/데이터셋 크기 및 네트워크 속도에 따라 다를 수 있습니다).
+- 소요 시간: 이 플레이북을 실행하는 데 약 60분이 걸립니다(모델/데이터셋 크기와 네트워크 속도에 따라 다름).
 - 자세한 내용은 [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory)를 참조하세요.
 
 ## 메모리 구성 설정
@@ -47,7 +47,7 @@
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 소프트웨어 사전 요구 사항 설치
+## 소프트웨어 필수 구성 요소 설치
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -83,7 +83,7 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**GPU 장치에 대한 사용자 접근 권한 부여** (적용되려면 로그아웃 후 다시 로그인하세요):
+**사용자에게 GPU 장치 접근 권한 부여**(적용하려면 로그아웃 후 다시 로그인):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -129,7 +129,7 @@ llamafactory-env\Scripts\activate
  
 ### 추가 종속성 설치
 
-> **참고**: Python 버전이 3.11, 3.12 또는 3.13인지 확인하세요.
+> **참고**: Python 버전이 3.11, 3.12, 3.13 중 하나인지 확인하세요
 
 ```bash
 pip install huggingface_hub
@@ -155,7 +155,7 @@ python -m pip install huggingface_hub
 
 ### LLaMA Factory 설치
 
-LLaMA-Factory는 PyTorch에 의존합니다. 위의 요구 사항에 따라 이미 설치되어 있어야 합니다.
+LLaMA Factory는 PyTorch에 의존합니다. 위 요구 사항에 따라 이미 설치되어 있어야 합니다.
 
 [LLaMA Factory 공식 GitHub 저장소](https://github.com/hiyouga/LlamaFactory)에서 소스 코드를 다운로드하고 종속성을 설치합니다.
 
@@ -209,33 +209,31 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-출력 예시:
+예시 출력:
 
 <p align="center">
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-LLaMA-Factory를 성공적으로 설치했으니, 이제 파인튜닝을 실행해 보겠습니다.
+LLaMA Factory 설치를 성공적으로 마쳤으니, 이제 파인튜닝을 실행해 보겠습니다.
 
-## 파인튜닝을 위한 LLaMA Factory CLI 사용
+## LLaMA Factory CLI를 사용한 파인튜닝 
 
-이 섹션에서는 파인튜닝 데이터셋 준비, LoRA/QLoRA 파라미터 구성, LoRA 파인튜닝 실행 방법을 다룹니다.
+이 섹션에서는 파인튜닝 데이터셋을 준비하고, LoRA/QLoRA 매개변수를 구성하며, LoRA 파인튜닝을 실행하는 방법을 다룹니다.
 
 ### 데이터셋 준비
 
-LLaMA-Factory는 Alpaca 형식과 ShareGPT 형식의 파인튜닝 데이터셋을 지원합니다. 사용 가능한 모든 데이터셋은 [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json)에 정의되어 있습니다. 커스텀 데이터셋을 사용하는 경우, `dataset_info.json`에 데이터셋 설명을 추가하고 학습 전에 데이터셋 이름을 지정해야 합니다. 자세한 내용은 [공식 문서](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html)에서 확인할 수 있습니다.
+LLaMA Factory는 Alpaca 형식과 ShareGPT 형식의 파인튜닝 데이터셋을 지원합니다. 사용 가능한 모든 데이터셋은 [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json)에 정의되어 있습니다. 사용자 지정 데이터셋을 사용하는 경우, `dataset_info.json`에 데이터셋 설명을 추가하고 학습 전에 데이터셋 이름을 지정해야 합니다. 자세한 내용은 [여기](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html) 문서를 참조하세요.
 
-이 플레이북에서는 identity 및 alpaca_en_demo 데이터셋을 예시로 사용하며, 다음 단계에서 데이터셋 정보를 구성합니다.
+이 플레이북에서는 예시로 identity 및 alpaca_en_demo 데이터셋을 사용하며, 다음 단계에서 데이터셋 정보를 구성합니다.
+### 파인튜닝 매개변수 구성
 
+LLaMA Factory는 여러 파인튜닝 방식을 지원합니다.
 
-### 파인튜닝 파라미터 구성
-
-LLaMA-Factory는 여러 파인튜닝 방식을 지원합니다.
-
-| 파인튜닝 방식 | LLaMA Factory 예시 |
+| 파인튜닝 방식 | LLaMA Factory 예제 |
 |-----------|------|
-| 전체 파라미터 | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
-| LoRA 파인튜닝 | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
+| 전체 매개변수(Full-Parameter)    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
+| LoRA 파인튜닝  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
 | QLoRA 파인튜닝 | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
 <!-- @test:id=verify-llamafactory-files timeout=60 hidden=True setup=activate-venv -->
@@ -259,24 +257,24 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-이 예시 구성 파일에는 모델 파라미터, 파인튜닝 방법 파라미터, 데이터셋 파라미터, 평가 파라미터 등이 지정되어 있습니다. 필요에 따라 구성할 수 있습니다. 이 플레이북에서는 [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml)을 사용합니다.
+이러한 예제 구성 파일에는 모델 매개변수, 파인튜닝 방법 매개변수, 데이터셋 매개변수, 평가 매개변수 등이 지정되어 있습니다. 필요에 맞게 이를 구성할 수 있습니다. 이 플레이북에서는 [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml)을 사용합니다.
 
-**주요 파라미터 설명:**
+**주요 매개변수 설명:**
 - `model_name_or_path` - Hugging Face 모델 이름 또는 로컬 모델 파일 경로.
-- `stage` - 학습 단계. 옵션: rm (보상 모델링), pt (사전 학습), sft (지도 파인튜닝), PPO, DPO, KTO, ORPO.
-- `do_train` - 학습은 true, 평가는 false
+- `stage` - 훈련 단계. 옵션: rm(보상 모델링), pt(사전 훈련), sft(지도 파인튜닝), PPO, DPO, KTO, ORPO.
+- `do_train` - 훈련 시 true, 평가 시 false
 - `finetuning_type` - 파인튜닝 방법. 옵션: freeze, lora, full
-- `lora_rank` - LoRA에서 사용되는 저랭크 행렬의 차원. 일반적인 값: 4, 6, 8, 16 (값이 작을수록 파라미터 수가 적고 파인튜닝이 빠름; 값이 클수록 작업 적응력이 높지만 리소스 사용량이 증가).
+- `lora_rank` - LoRA에서 사용되는 저랭크 행렬의 차원, 일반적인 값: 4, 6, 8, 16(값이 작을수록 매개변수 수가 적어 파인튜닝 속도가 빠르지만, 값이 클수록 작업 적응력이 향상되나 리소스 사용량이 증가함).
 - `lora_target` - LoRA 방법의 대상 모듈. 기본값: all.
-- `dataset` - 사용할 데이터셋. 여러 데이터셋을 구분하려면 ","를 사용
-- `output_dir` - 파인튜닝 출력 경로
-- `logging_steps` - 스텝 단위 로깅 간격
+- `dataset` - 사용할 데이터셋. 여러 데이터셋을 지정할 때는 “,”로 구분
+- `output_dir` - 파인튜닝 결과 출력 경로
+- `logging_steps` - 로깅 간격(스텝 단위)
 - `save_steps` - 모델 체크포인트 저장 간격.
 - `overwrite_output_dir` - 출력 디렉터리 덮어쓰기 허용 여부.
-- `per_device_train_batch_size` - 장치당 학습 배치 크기.
+- `per_device_train_batch_size` - 디바이스당 훈련 배치 크기.
 - `gradient_accumulation_steps` - 그래디언트 누적 스텝 수.
 - `learning_rate` - 학습률
-- `num_train_epochs` - 학습 에포크 수
+- `num_train_epochs` - 훈련 에포크 수
 - `lr_scheduler_type` - 학습률 스케줄. 옵션: linear, cosine, polynomial, constant 등.
 - `warmup_ratio` - 학습률 워밍업 비율
 
@@ -289,9 +287,9 @@ sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.ya
 
 <!-- @os:windows -->
 AMD Ryzen™ 및 AMD Radeon™ GPU와의 호환성을 높이기 위해 기본 LoRA 파인튜닝 구성을 다음과 같이 업데이트합니다:
-- 파인튜닝 중 메모리 사용량을 줄이기 위해 `lora_rank`를 `8`에서 `6`으로 변경합니다.
+- 파인튜닝 중 메모리 사용량을 줄이기 위해 `lora_rank`를 `8`에서 `6`으로 설정합니다.
 - 더 넓은 AMD GPU 호환성과 낮은 메모리 사용량을 위해 `bf16` 대신 `fp16`을 사용합니다.
-- 멀티프로세싱 데이터 로딩으로 인한 `"Can't pickle local object<>"` 오류를 방지하기 위해 Windows에서 `dataloader_num_workers`를 `0`으로 설정합니다.
+- 멀티프로세싱 데이터 로딩으로 인해 발생하는 `"Can't pickle local object<>"` 오류를 방지하기 위해 Windows에서 `dataloader_num_workers`를 `0`으로 설정합니다.
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -313,11 +311,11 @@ Set-Content -Path $filePath -Value $newContent
 
 ### LLaMA Factory 파인튜닝 실행
 
-**llamafactory-cli**는 LLaMA-Factory의 공식 명령줄 인터페이스(CLI) 도구로, 복잡한 코드 작성 없이 엔드투엔드 LLM 워크플로우(데이터 준비 → 파인튜닝 → 평가 → 배포)를 간소화하기 위해 개발되었습니다.
+**llamafactory-cli**는 복잡한 코드를 작성하지 않고도 엔드투엔드 LLM 워크플로우(데이터 준비 → 파인튜닝 → 평가 → 배포)를 간소화하기 위해 개발된 LLaMA Factory의 공식 명령줄 인터페이스(CLI) 도구입니다.
 
-학습/파인튜닝의 경우, **llamafactory-cli train**은 LLaMA Factory CLI의 핵심 서브커맨드입니다. 데이터 전처리, 하이퍼파라미터 튜닝, 하드웨어 최적화 등의 파인튜닝 워크플로우를 단일 CLI 명령으로 추상화하며, 여러 파인튜닝 패러다임(LoRA/QLoRA/전체 파인튜닝)을 지원하고 저사양 GPU(예: 16GB VRAM에서의 QLoRA)에 최적화되어 있습니다.
+훈련/파인튜닝의 경우, **llamafactory-cli train**은 LLaMA Factory CLI의 핵심 하위 명령입니다. 이 명령은 파인튜닝 워크플로우(데이터 전처리, 하이퍼파라미터 튜닝, 하드웨어 최적화)를 단일 CLI 명령으로 추상화하며, 여러 파인튜닝 패러다임(LoRA/QLoRA/전체 파인튜닝)을 지원하고 리소스가 제한된 GPU(예: 16GB VRAM에서의 QLoRA)에 최적화되어 있습니다.
 
-수정된 Qwen3 LoRA 파인튜닝 구성 파일을 기반으로 다음 명령을 사용하여 LLaMA-Factory 파인튜닝을 실행할 수 있습니다.
+다음 명령을 사용하여 수정된 Qwen3 LoRA 파인튜닝 구성 파일을 기반으로 LLaMA Factory 파인튜닝을 실행할 수 있습니다.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -353,7 +351,7 @@ fi
 
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -390,10 +388,10 @@ if (Select-String -Path $filePath -Pattern '^save_total_limit:' -Quiet) {
 
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
-LLM 파인튜닝 실행 후, 모델 체크포인트 파일, 구성 파일, 학습 메트릭을 포함한 모든 생성된 출력물이 "output_dir"에 저장됩니다.
+LLM 파인튜닝 실행 후, 모델 체크포인트 파일, 구성 파일, 훈련 메트릭을 포함한 모든 생성된 출력이 "output_dir"에 저장됩니다.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -428,18 +426,18 @@ if not adapter_weights:
 print("PASS: LLaMA Factory training output looks correct")
 print(f"Found adapter weights: {adapter_weights}")
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 
-### 파인튜닝된 모델 테스트
+### 파인튜닝된 모델 테스트하기
 
-**llamafactory-cli chat**은 LLM(기본 모델 및 LoRA 파인튜닝 모델 모두)과의 대화형 채팅/추론을 위해 설계되었습니다. LLaMA-Factory는 [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference)에서 파인튜닝된 모델의 추론을 실행하기 위한 샘플 구성을 제공합니다. 추론 백엔드 등의 설정을 변경하기 위해 이 샘플 구성을 수정할 수도 있습니다.
+**llamafactory-cli chat**은 LLM(기본 모델 및 LoRA로 파인튜닝된 모델 모두)과의 대화형 채팅/추론을 위해 설계되었습니다. LLaMA Factory는 [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference)에서 파인튜닝된 모델의 추론을 실행하기 위한 샘플 구성을 제공합니다. 추론 백엔드와 같은 설정을 변경하기 위해 이 샘플 구성을 수정할 수도 있습니다.
 
-다음 명령을 사용하여 Qwen3 파인튜닝 모델을 테스트합니다:
+다음 명령을 사용하여 Qwen3 파인튜닝된 모델을 테스트합니다:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
-파인튜닝된 모델을 사용한 채팅 예시는 아래와 같습니다:
+파인튜닝된 모델을 사용한 채팅 예시는 다음과 같습니다:
 
 <p align="center">
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Fine-Tuned model" width="600"/>
@@ -448,14 +446,14 @@ llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 
 ### 파인튜닝된 모델 내보내기
 
-프로덕션 사용 사례의 경우, 사전 학습된 모델과 LoRA 어댑터를 병합하여 단일 모델로 내보내야 합니다. 이 병합된 모델은 일반 Hugging Face 모델 파일로 사용할 수 있습니다. LLaMA-Factory는 [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora)에서 샘플 구성을 제공합니다.
+프로덕션 사용 사례를 위해서는 사전 훈련된 모델과 LoRA 어댑터를 병합하여 단일 모델로 내보내야 합니다. 이 병합된 모델은 일반적인 Hugging Face 모델 파일로 사용할 수 있습니다. LLaMA Factory는 [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora)에서 샘플 구성을 제공합니다.
 
-다음 명령을 사용하여 Qwen3 파인튜닝 모델을 내보냅니다:
+다음 명령을 사용하여 Qwen3 파인튜닝된 모델을 내보냅니다:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
-파인튜닝된 모델 내보내기 결과는 아래와 같습니다.
+파인튜닝된 모델을 내보낸 결과는 다음과 같습니다.
 
 <p align="center">
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Fine-Tuned model " width="600"/>
@@ -485,7 +483,7 @@ PY
 
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 
@@ -526,7 +524,7 @@ if (-not (Test-Path "examples/merge_lora/qwen3_lora_sft_ci.yaml")) {throw "FAIL:
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 if ($LASTEXITCODE -ne 0) {throw "FAIL: llamafactory-cli export failed"}
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @test:id=verify-llamafactory-export-output timeout=120 hidden=True setup=activate-venv -->
@@ -556,28 +554,27 @@ if not model_files:
 
 print("PASS: Exported merged model output looks correct")
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
+## LLaMA Factory GUI 사용하기
 
-## LLaMA Factory GUI 사용
+`LLaMA-Factory`는 브라우저에서 웹 UI를 통해 코드 작성 없이 LLM을 파인튜닝할 수 있는 기능도 지원합니다.
 
-`LLaMA-Factory`는 브라우저의 웹 UI를 통한 코드 없는 LLM 파인튜닝도 지원합니다.
-
-다음 명령을 사용하여 실행합니다:
+다음 명령어를 사용하여 열 수 있습니다:
 
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI`는 학습, 평가, 예측, 채팅, 모델 내보내기를 포함한 머신러닝 워크플로우 관리를 위한 간소화된 인터페이스를 제공합니다. 각 탭에 대한 간략한 소개는 다음과 같습니다:
+`LlamaFactory Web UI`는 학습, 평가, 예측, 채팅, 모델 내보내기 등 머신러닝 워크플로우를 관리할 수 있는 간편한 인터페이스를 제공합니다. 각 탭에 대한 간단한 소개는 다음과 같습니다:
 
-* **Train**: 이 탭에서는 모델과 데이터셋을 선택하고, 학습 파라미터를 구성하며, 학습 프로세스를 시작할 수 있습니다. 학습 설정을 최적화하려면 필수 및 선택적 파라미터를 이해하는 것이 중요합니다.
-* **Evaluate & Predict**: 학습 후 이 탭을 사용하여 모델의 성능을 평가하고 예측을 수행할 수 있습니다. 새로운 데이터에 대한 모델의 정확도와 효과성에 대한 인사이트를 제공합니다.
-* **Chat**: 학습이 완료되면 Chat 탭에서 모델을 로드하여 상호작용하고 작업 결과를 확인합니다. 이 기능을 통해 학습된 모델과 실시간으로 대화할 수 있습니다.
-* **Export**: 이 탭은 배포 또는 추가 사용을 위한 학습된 모델 내보내기를 지원합니다. 다양한 애플리케이션에 적합한 여러 형식으로 모델을 저장할 수 있습니다.
+* **Train**: 이 탭에서는 모델과 데이터셋을 선택하고, 학습 매개변수를 구성하며, 학습 프로세스를 시작할 수 있습니다. 학습 설정을 최적화하려면 필수 매개변수와 선택적 매개변수를 이해하는 것이 중요합니다.
+* **Evaluate & Predict**: 학습이 끝난 후 이 탭을 사용하여 모델의 성능을 평가하고 예측을 수행할 수 있습니다. 새로운 데이터에 대한 모델의 정확도와 효과에 대한 인사이트를 제공합니다.
+* **Chat**: 학습이 완료되면 Chat 탭에서 모델을 로드하여 상호작용하고 작업 결과를 확인할 수 있습니다. 이 기능을 통해 학습된 모델과 실시간으로 소통할 수 있습니다.
+* **Export**: 이 탭에서는 배포나 추가 활용을 위해 학습된 모델을 내보낼 수 있습니다. 다양한 애플리케이션에 적합한 형식으로 모델을 저장할 수 있습니다.
 
-자세한 안내는 [LlamaFactory GitHub 저장소](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio)와 [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest)의 공식 문서를 참조하시기 바랍니다. 또한 [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui)에서 인터페이스와 기능에 대한 유용한 정보를 확인할 수 있습니다.
+자세한 안내는 [LlamaFactory GitHub repository](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) 및 [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest)의 공식 문서를 참고하시기 바랍니다. 또한 [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui)에서도 인터페이스와 그 기능에 대한 유용한 정보를 확인할 수 있습니다.
 
 ## 다음 단계
-- `gpt-oss` 및 기타 최신 모델을 사용해 보세요.
+- `gpt-oss`와 같은 다양한 모델 및 기타 최신 모델을 사용해 보세요.
 - 파인튜닝된 모델에서 다양한 백엔드를 실험해 보세요.
  
-더 많은 문서는 다음을 방문하세요: https://llamafactory.readthedocs.io/en/latest/
+더 많은 문서는 다음 주소를 방문해 주세요: https://llamafactory.readthedocs.io/en/latest/ 

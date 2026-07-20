@@ -6,22 +6,22 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ez a playbook speciális tageket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom helyes előnézetéhez látogasson el az [amd.com/playbooks](https://amd.com/playbooks) oldalra.
+> Ez a playbook olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom megfelelő megtekintéséhez látogass el az [amd.com/playbooks](https://amd.com/playbooks) oldalra.
 <!-- @github-only:end -->
 
 ## Áttekintés
 
-A [Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) egy AMD C++ számítógépes látás és gépi tanulás eszközkészlet, amely hatékony, eszközön futó észlelési képességeket biztosít — beleértve a mélységbecslést, az arcfelismerést és az archáló-követést. A Ryzen AI meghajtókra épülve a könyvtár automatikusan kiválasztja a legjobb elérhető hardvert (GPU vagy NPU) a következtetéshez, lehetővé téve, hogy AI-funkciókat adjon C++ alkalmazásokhoz anélkül, hogy modellbetanítással vagy keretrendszer-integrációval kellene foglalkoznia. Minden feldolgozás helyileg, a rendszeren történik, így ideális az adatvédelmi szempontból érzékeny, kis késleltetésű alkalmazásokhoz.
+A [Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) egy AMD C++ számítógépes látás és gépi tanulási eszközkészlet, amely nagy teljesítményű, eszközön futó észlelési képességeket biztosít — beleértve a mélységbecslést, arcfelismerést és archáló-követést. A Ryzen AI illesztőprogramokra épülve a könyvtár automatikusan kiválasztja a következtetéshez rendelkezésre álló legjobb hardvert (GPU vagy NPU), így AI-funkciókat adhatsz C++ alkalmazásaidhoz anélkül, hogy modellbetanítással vagy keretrendszer-integrációval kellene foglalkoznod. Minden feldolgozás helyben, a rendszereden történik, így ideális választás adatvédelem szempontjából érzékeny, alacsony késleltetést igénylő alkalmazásokhoz.
 
-Ez a playbook megtanítja, hogyan állítsa be a Ryzen AI CVML Library-t, hogyan fordítsa le a mellékelt mintaalkalmazásokat, és hogyan futtasson arcfelismerést egy mintaképen.
+Ez a playbook megtanítja, hogyan állítsd be a Ryzen AI CVML Library-t, hogyan fordítsd le a mellékelt mintaalkalmazásokat, és hogyan futtass arcfelismerést egy mintaképen.
 
-## Mit fog megtanulni
+## Amit tanulni fogsz
 
-- Hogyan telepítse az előfeltételeket és állítsa be a Ryzen AI CVML Library-t a rendszerén
-- Hogyan működik a CVML C++ API: kontextusok, funkcioobjektumok és képpufferek
-- Hogyan fordítsa le és futtassa a mellékelt mintaalkalmazásokat CMake és OpenCV segítségével
-- Hogyan futtasson arcfelismerést egy képen határolódobozokkal és jellegpontokkal
-- Hogyan integrálja a CVML-funkciókat saját C++ alkalmazásaiba
+- Hogyan telepítsd az előfeltételeket, és hogyan állítsd be a Ryzen AI CVML Library-t a rendszereden
+- Hogyan működik a CVML C++ API: kontextusok, funkcióobjektumok és képpufferek
+- Hogyan fordítsd le és futtasd a mellékelt mintaalkalmazásokat CMake és OpenCV segítségével
+- Hogyan futtass arcfelismerést egy képen, körülhatároló dobozokkal és jellemzőpontokkal
+- Hogyan integráld a CVML funkciókat saját C++ alkalmazásaidba
 
 <!-- @device:halo_box -->
 ## Szoftverfrissítések ellenőrzése
@@ -34,24 +34,24 @@ Ez a playbook megtanítja, hogyan állítsa be a Ryzen AI CVML Library-t, hogyan
 
 ## További függőségek
 
-A kezdés előtt győződjön meg arról, hogy rendelkezik a következőkkel:
+Mielőtt elkezdenéd, győződj meg róla, hogy rendelkezésedre áll a következő:
 
 <!-- @os:windows -->
-- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — töltse le az `opencv-4.11.0-windows.exe` fájlt, futtassa, és csomagolja ki egy helyi mappába (pl. `C:\opencv`)
-- [CMake](https://cmake.org/download/) — töltse le a Windows x86-64 MSI telepítőt, és a telepítés során válassza a **„Add CMake to the system PATH for all users"** lehetőséget
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — telepítse a legújabb elérhető verziót
-- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) a „Desktop development with C++" munkaterheléssel (tartalmazza az MSVC fordítót, a Windows SDK-t és a C++ fordítóeszközöket)
+- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — töltsd le az `opencv-4.11.0-windows.exe` fájlt, futtasd, és csomagold ki egy helyi mappába (pl. `C:\opencv`)
+- [CMake](https://cmake.org/download/) — töltsd le a Windows x86-64 MSI telepítőt, és a telepítés során válaszd az **"Add CMake to the system PATH for all users"** opciót
+- [Ryzen AI NPU illesztőprogram](https://ryzenai.docs.amd.com/en/latest/inst.html) — telepítsd a legújabb elérhető verziót
+- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) a "Desktop development with C++" munkaterhelés-csomaggal (tartalmazza az MSVC fordítót, a Windows SDK-t és a C++ build eszközöket)
 <!-- @os:end -->
 
 <!-- @os:linux -->
-- OpenCV 4.11 — forrásból kell lefordítani (az Ubuntu 22.04 és 24.04 apt csomagjai nem biztosítják a 4.11-es verziót). Lásd az alábbi [OpenCV fordítása forrásból](#building-opencv-from-source) részt.
-- CMake — telepítse apt segítségével:
+- OpenCV 4.11 — forrásból kell lefordítani (az Ubuntu 22.04 és 24.04 apt csomagjai nem tartalmazzák a 4.11-es verziót). Lásd az alábbi [OpenCV fordítása forrásból](#building-opencv-from-source) szakaszt.
+- CMake — telepítsd apt segítségével:
   ```bash
   sudo apt install cmake
   ```
 - Ubuntu 22.04 vagy 24.04 (kernel >= 6.11.0-21-generic)
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (Linux telepítő — NPU következtetéshez szükséges)
-- Vulkan SDK (az alábbi [Vulkan SDK](#vulkan-sdk) részben telepítve)
+- [Ryzen AI NPU illesztőprogram](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (Linux telepítő — szükséges az NPU-alapú következtetéshez)
+- Vulkan SDK (az alábbi [Vulkan SDK](#vulkan-sdk) szakaszban telepítve)
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -152,13 +152,13 @@ fi
 
 ## A CVML Library beállítása
 
-Hozzon létre AMD-fiókot az [account.amd.com](https://account.amd.com) oldalon, ha még nincs, majd jelentkezzen be a Ryzen AI CVML Library letöltéséhez az alábbi portállinken keresztül:
+Hozz létre egy AMD fiókot az [account.amd.com](https://account.amd.com) oldalon, ha még nincs, majd jelentkezz be, hogy letöltsd a Ryzen AI CVML Library-t az alábbi portál linkről:
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
 ```
 
-A letöltés után csomagolja ki a csomagot egy helyi könyvtárba (pl. `C:\RyzenAI-Library` Windows esetén vagy `~/RyzenAI-Library` Linux esetén), és állítsa be az `AMD_CVML_SDK_ROOT` környezeti változót a kicsomagolt helyre:
+A letöltés után csomagold ki a csomagot egy helyi könyvtárba (pl. `C:\RyzenAI-Library` Windows alatt vagy `~/RyzenAI-Library` Linux alatt), és állítsd be az `AMD_CVML_SDK_ROOT` környezeti változót a kicsomagolt helyre:
 
 <!-- @os:windows -->
 ```cmd
@@ -176,10 +176,10 @@ A könyvtárcsomag a következő struktúrát tartalmazza:
 
 | Mappa | Tartalom |
 |--------|----------|
-| `cmake/` | Csomagolási információk a CMake `find_package` funkciójához |
+| `cmake/` | Csomagolási információk a CMake `find_package` függvényéhez |
 | `include/` | C++ fejlécfájlok (`cvml-depth-estimation.h`, `cvml-face-detector.h`, `cvml-face-mesh.h` stb.) |
-| `windows/` | Bináris fájlok Windows-hoz (fordítási idejű `.LIB` és futásidejű `.DLL`/`.GRAPHLIB`/`.AMODEL` fájlok) |
-| `linux/` | Bináris fájlok Linux-hoz (fordítási és futásidejű `.SO` fájlok) |
+| `windows/` | Windows bináris fájlok (fordítási idejű `.LIB` és futásidejű `.DLL`/`.GRAPHLIB`/`.AMODEL` fájlok) |
+| `linux/` | Linux bináris fájlok (fordítási és futásidejű `.SO` fájlok) |
 | `samples/` | Egyedi mintaalkalmazások forráskóddal |
 
 <!-- @os:linux -->
@@ -188,13 +188,13 @@ A könyvtárcsomag a következő struktúrát tartalmazza:
 
 #### OpenCV fordítása forrásból
 
-Telepítse az OpenCV fordítási függőségeit:
+Telepítsd az OpenCV build-függőségeit:
 
 ```bash
 sudo apt install unzip wget ubuntu-restricted-extras libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev libgtk-3-dev pkg-config ffmpeg
 ```
 
-Töltse le, konfigurálja és fordítsa le az OpenCV 4.11.0-t a contrib modulokkal (hivatkozás: [OpenCV Linux telepítési útmutató](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
+Töltsd le, konfiguráld és fordítsd le az OpenCV 4.11.0-t a contrib modulokkal együtt (hivatkozás: [OpenCV Linux telepítési útmutató](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
 
 ```bash
 wget -O opencv-4.11.0.zip https://github.com/opencv/opencv/archive/4.11.0.zip
@@ -213,11 +213,11 @@ cmake -DBUILD_opencv_world=ON \
 cmake --build . --target install
 ```
 
-A megosztott könyvtárak a `<build>/install/lib/` könyvtár alatt kerülnek telepítésre. Használja az `install` könyvtárat `OPENCV_INSTALL_ROOT` értékeként a későbbi lépésekben.
+A megosztott könyvtárak a `<build>/install/lib/` alatt kerülnek telepítésre. Használd az `install` könyvtárat `OPENCV_INSTALL_ROOT`-ként a további lépésekben.
 
 #### Vulkan SDK
 
-Telepítse a Vulkan SDK-t:
+Telepítsd a Vulkan SDK-t:
 
 ```bash
 UBUNTU_CODENAME=$(. /etc/os-release; echo "$UBUNTU_CODENAME")
@@ -227,7 +227,7 @@ sudo apt update
 sudo apt install vulkan-sdk
 ```
 
-Ha Ubuntu 22.04-et futtat, frissítse a MESA Vulkan meghajtókat is:
+Ha Ubuntu 22.04-et használsz, frissítsd a MESA Vulkan illesztőprogramokat is:
 
 ```bash
 sudo apt update && sudo apt upgrade
@@ -238,7 +238,7 @@ sudo apt upgrade
 
 #### További Ubuntu 24.04 függőségek
 
-Ha Ubuntu 24.04-et futtat, telepítse a szükséges további csomagokat:
+Ha Ubuntu 24.04-et használsz, telepítsd a további szükséges csomagokat:
 
 ```bash
 sudo apt install libavcodec-dev libavformat-dev libswscale-dev libnsl2 gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly -y
@@ -266,24 +266,24 @@ done
 
 ## Alapfogalmak
 
-A CVML Library egy egyszerű C++ API-t biztosít, ahol minden észlelési funkciónak (mélységbecslés, arcfelismerés, archáló) saját fejlécfájlja és funkcioobjektuma van. Nem nyers modellekkel dolgozik — a könyvtár automatikusan kezeli a modell betöltését, az előfeldolgozást és a következtetést.
+A CVML Library egy egyszerű C++ API-t biztosít, amelyben minden észlelési funkciónak (mélységbecslés, arcfelismerés, archáló) saját fejlécfájlja és funkcióobjektuma van. Nem nyers modellekkel dolgozol — a könyvtár automatikusan kezeli a modellbetöltést, előfeldolgozást és következtetést.
 
 ### Elérhető funkciók
 
 | Funkció | Fejlécfájl | Leírás |
 |---------|------------|-------------|
 | **Mélységbecslés** | `cvml-depth-estimation.h` | Pixelenkénti mélységtérképeket generál RGB képekből |
-| **Arcfelismerés** | `cvml-face-detector.h` | Arcokat észlel határolódobozokkal, jellegpontokkal (szemek, orr, száj) és megbízhatósági pontszámokkal |
-| **Archáló** | `cvml-face-mesh.h` | Részletes arci geometriát követ sűrű hálópontokkal |
+| **Arcfelismerés** | `cvml-face-detector.h` | Arcokat detektál körülhatároló dobozokkal, jellemzőpontokkal (szemek, orr, száj) és megbízhatósági pontszámokkal |
+| **Archáló** | `cvml-face-mesh.h` | Részletes arcgeometriát követ sűrű hálópontokkal |
 
 ### Programozási modell
 
 Minden CVML alkalmazás ugyanazt a négylépéses mintát követi:
 
 1. **Kontextus létrehozása** — Az `amd::cvml::Context` kezeli a megosztott erőforrásokat, például a naplózást és a következtetési háttérrendszer kiválasztását.
-2. **Funkcioobjektum létrehozása** — Példányosítsa az adott funkciót (pl. `amd::cvml::DepthEstimation`) a kontextushoz képest.
-3. **Bemeneti adatok becsomagolása** — Használja az `amd::cvml::Image`-t az RGB képpuffer becsomagolásához adatmásolás nélkül.
-4. **Végrehajtás** — Hívja meg a funkció feldolgozási metódusát és olvassa le az eredményeket.
+2. **Funkcióobjektum létrehozása** — Példányosítsd a kívánt funkciót (pl. `amd::cvml::DepthEstimation`) a kontextushoz kapcsolva.
+3. **Bemeneti adatok becsomagolása** — Használd az `amd::cvml::Image`-et az RGB képpuffer becsomagolásához, adatmásolás nélkül.
+4. **Végrehajtás** — Hívd meg a funkció feldolgozó metódusát, és olvasd ki az eredményeket.
 
 ```cpp
 // Step 1: Create context
@@ -309,22 +309,22 @@ context->Release();
 
 ### Következtetési háttérrendszer
 
-A könyvtár automatikusan kiválasztja a legjobb hardvert (GPU vagy NPU) minden művelethez. A háttérrendszert explicit módon is beállíthatja:
+A könyvtár automatikusan kiválasztja az egyes műveletekhez a legjobb hardvert (GPU vagy NPU). A háttérrendszert explicit módon is beállíthatja:
 
 ```cpp
 // Let the library choose the best hardware (default)
 context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 ```
 
-> **Megjegyzés:** Az ONNX háttérrendszert NPU-műveletekhez használó funkciók az első futtatáskor hosszabb indítási késleltetést tapasztalhatnak. A következő futtatások gyorsabbak lesznek.
+> **Megjegyzés:** Előfordulhat, hogy az NPU-műveletekhez ONNX háttérrendszert használó funkciók az első futtatáskor hosszabb indítási késleltetést tapasztalnak. A további futtatások gyorsabbak lesznek.
 
-> **Megjegyzés:** Ha az NPU meghajtó nincs telepítve a célrendszeren, a Ryzen AI CVML könyvtár automatikusan visszavált a GPU háttérrendszerre a következtetési műveletekhez.
+> **Megjegyzés:** Ha az NPU-illesztőprogram nincs telepítve a célrendszeren, a Ryzen AI CVML könyvtár automatikusan visszavált a GPU háttérrendszerre a következtetési műveletekhez.
 
-## A mintaalkalmazások fordítása
+## A mintaalkalmazások összeállítása
 
-A CVML Library minden funkcióhoz tartalmaz azonnal lefordítható mintaalkalmazásokat. Fordítsuk le mindet egyszerre.
+A CVML Library minden funkcióhoz tartalmaz azonnal összeállítható mintaalkalmazásokat. Állítsuk össze ezeket egyszerre.
 
-1. Állítsa be az `OPENCV_INSTALL_ROOT` környezeti változót, hogy az OpenCV telepítési helyére mutasson:
+1. Állítsa be az `OPENCV_INSTALL_ROOT` környezeti változót úgy, hogy az OpenCV-telepítésére mutasson:
 
    <!-- @os:windows -->
    ```cmd
@@ -343,7 +343,7 @@ A CVML Library minden funkcióhoz tartalmaz azonnal lefordítható mintaalkalmaz
    ```
    <!-- @os:end -->
 
-2. Fordítsa le a mintákat CMake segítségével:
+2. Állítsa össze a mintákat a CMake segítségével:
 
    <!-- @os:windows -->
    ```cmd
@@ -365,7 +365,7 @@ A CVML Library minden funkcióhoz tartalmaz azonnal lefordítható mintaalkalmaz
    ```
    <!-- @os:end -->
 
-   Sikeres fordítás után a végrehajtható fájlok a következő helyen találhatók:
+   A sikeres összeállítás után a futtatható fájlok itt találhatók:
 
    <!-- @os:windows -->
    ```
@@ -406,9 +406,9 @@ A CVML Library minden funkcióhoz tartalmaz azonnal lefordítható mintaalkalmaz
 
 ## Arcfelismerés futtatása
 
-Az arcfelismerési minta arcokat észlel egy képen, videón vagy élő kameraképen. Határolódobozokat, megbízhatósági pontszámokat és öt arci jellegpontot (két szem, orr és két szájszél) rajzol minden észlelt arcra.
+Az arcfelismerési minta arcokat érzékel egy képen, videóban vagy élő kamerás forrásban. Minden érzékelt archoz kirajzol egy határolókeretet, egy megbízhatósági pontszámot, valamint öt arc-jellemzőpontot (két szem, orr és a száj két sarka).
 
-Először navigáljon az arcfelismerési végrehajtható fájl mappájába:
+Először navigáljon az arcfelismerés futtatható fájljának mappájába:
 
 <!-- @os:windows -->
 ```cmd
@@ -442,13 +442,13 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-Megjelenik egy ablak, amely az észlelt arcok körüli határolódobozokkal, megbízhatósági pontszámokkal és arci jellegpontokkal (szemek, orr, szájszélek) ellátott képet mutatja.
+Megjelenik egy ablak, amely a képet mutatja az érzékelt arcok körüli határolókeretekkel, megbízhatósági pontszámokkal és arc-jellemzőpontokkal (szemek, orr, száj sarkai).
 
 <p align="center">
   <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
 </p>
 
-**A megjegyzésekkel ellátott kimenet mentése fájlba:**
+**Az annotált kimenet mentése fájlba:**
 
 <!-- @os:windows -->
 ```cmd
@@ -462,7 +462,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg -o output_face.jpg
 ```
 <!-- @os:end -->
 
-**A pontos modell használata** a nagyobb pontosságért (a sebesség rovására):
+**A precíz modell használata** nagyobb pontosság érdekében (a sebesség rovására):
 
 <!-- @os:windows -->
 ```cmd
@@ -478,10 +478,10 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 
 Az arcfelismerési funkció két modellváltozatot kínál:
 
-| Modell | Sebesség | Pontosság | Legjobb felhasználás |
+| Modell | Sebesség | Pontosság | Legalkalmasabb |
 |-------|-------|----------|----------|
-| `fast` (alapértelmezett) | Magasabb FPS | Jó | Valós idejű kameraapplikációk |
-| `precise` | Alacsonyabb FPS | Legjobb | Képelemzés, nagy pontossági igények |
+| `fast` (alapértelmezett) | Magasabb képkockasebesség | Jó | Valós idejű kamerás alkalmazások |
+| `precise` | Alacsonyabb képkockasebesség | Legjobb | Fényképelemzés, nagy pontosságot igénylő igények |
 
 
 <!-- @os:windows -->
@@ -717,9 +717,9 @@ done
 <!-- @test:end --> 
 <!-- @os:end -->
 
-## A CVML integrálása saját alkalmazásba
+## A CVML integrálása saját alkalmazásába
 
-A CVML Library saját C++ projektben való használatához adja hozzá a CMake `find_package` funkcióján keresztül:
+Ahhoz, hogy a CVML Library-t saját C++ projektjében használja, adja hozzá a CMake `find_package` parancsával:
 
 ```cmake
 # Find the Ryzen AI CVML Library
@@ -729,7 +729,7 @@ find_package(RyzenAILibrary REQUIRED PATHS ${AMD_CVML_SDK_ROOT})
 target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 ```
 
-Ahol az `AMD_CVML_SDK_ROOT` a Ryzen AI CVML Library mappájának gyökerére mutat. Ezután foglalja bele a kívánt funkcióhoz tartozó megfelelő fejlécet:
+Ahol az `AMD_CVML_SDK_ROOT` a Ryzen AI CVML Library mappa gyökerére mutat. Ezután illessze be a megfelelő fejlécfájlt a kívánt funkcióhoz:
 
 ```cpp
 #include <cvml-face-detector.h>   // for face detection
@@ -739,12 +739,12 @@ Ahol az `AMD_CVML_SDK_ROOT` a Ryzen AI CVML Library mappájának gyökerére mut
 
 ## Következő lépések
 
-Az alábbi minták mindegyikénél először navigáljon a végrehajtható fájl mappájába, ugyanolyan mintát követve, mint az [Arcfelismerés futtatása](#running-face-detection) részben (pl. `cd build\cvml-sample-depth-estimation\Release` Windows esetén vagy `cd build/cvml-sample-depth-estimation` Linux esetén). Windows esetén fűzze hozzá a `.exe` kiterjesztést minden parancshoz (pl. `cvml-sample-depth-estimation.exe`).
+Az alábbi mintapéldák mindegyikéhez először navigálj a hozzá tartozó futtatható mappába, a fent található [Arcfelismerés futtatása](#running-face-detection) szakaszban bemutatott mintát követve (pl. `cd build\cvml-sample-depth-estimation\Release` Windows rendszeren, vagy `cd build/cvml-sample-depth-estimation` Linux rendszeren). Windows esetén minden parancshoz fűzd hozzá a `.exe` kiterjesztést (pl. `cvml-sample-depth-estimation.exe`).
 
-- **Próbálja ki a mélységbecslést**: Futtassa a `cvml-sample-depth-estimation -i sample_face.jpg` parancsot egy színezett mélységtérkép generálásához — a közelebbi objektumok meleg színekben, a távolabbiak hideg színekben jelennek meg
-- **Fedezze fel az archálót**: Futtassa a `cvml-sample-face-mesh -i sample_face.jpg` parancsot a részletes hálópontokkal ellátott sűrű arci geometriakövetés megtekintéséhez
-- **Videofájlok feldolgozása**: Használja a `-i` és `-o` jelzőket bármely mintán videók feldolgozásához (pl. `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
-- **Modellváltozatok összehasonlítása**: Próbálja ki a `-m precise` és az alapértelmezett `-m fast` lehetőséget az arcfelismerésen, hogy első kézből tapasztalja meg a pontosság/sebesség kompromisszumot
-- **Saját alkalmazás fejlesztése**: Használja a CMake-integrációt és a C++ API-t CVML-funkciók hozzáadásához saját C++ alkalmazásaihoz
-- **Funkciók kombinálása**: Láncolja össze az arcfelismerést a mélységbecsléssel ugyanabban az alkalmazásban a gazdagabb jelenetértelmezés érdekében
-- **Böngésszen a forráskódban**: Olvassa el a [Ryzen AI CVML Library a GitHub-on](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) oldalt a fejléc dokumentációért, további mintákért és API-részletekért
+- **Próbáld ki a mélységbecslést**: Futtasd a `cvml-sample-depth-estimation -i sample_face.jpg` parancsot egy színezett mélységtérkép előállításához — a közelebbi objektumok meleg színekkel, a távolabbiak hideg színekkel jelennek meg
+- **Fedezd fel az Archáló funkciót**: Futtasd a `cvml-sample-face-mesh -i sample_face.jpg` parancsot, hogy sűrű arcgeometriai követést láss részletes hálópontokkal
+- **Videófájlok feldolgozása**: Használd a `-i` és `-o` kapcsolókat bármelyik mintán videók feldolgozásához (pl. `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
+- **Modellváltozatok összehasonlítása**: Próbáld ki a `-m precise` kapcsolót az alapértelmezett `-m fast` helyett az arcfelismerésnél, hogy saját tapasztalatból lásd a pontosság és sebesség közti kompromisszumot
+- **Építs saját alkalmazást**: Használd a CMake integrációt és a C++ API-t, hogy CVML funkciókat adj hozzá saját C++ alkalmazásaidhoz
+- **Kombináld a funkciókat**: Kapcsold össze az arcfelismerést a mélységbecsléssel ugyanabban az alkalmazásban a gazdagabb jelenetértelmezés érdekében
+- **Böngészd a forráskódot**: Olvasd el a [Ryzen AI CVML Library a GitHubon](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) oldalt a fejlécdokumentációért, további mintákért és API-részletekért

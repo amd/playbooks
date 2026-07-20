@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 
 ### הורדת Qwen3.5 9B ב-LM Studio
 
-להורדת מודל Qwen3.5 9B:
+כדי להוריד את מודל Qwen3.5 9B:
 
-1. לחץ על "Ctrl" + "Shift" + "M" במקלדת או לחץ על לשונית "Discover" (סמל זכוכית מגדלת) בסרגל הצד השמאלי
-2. חפש את `Qwen3.5 9B`
-3. בחר כמות (ה-`Q4_K_M` המומלץ הוא איזון טוב בין גודל לאיכות) ולחץ על Download
+1. לחצו על "Ctrl" + "Shift" + "M" במקלדת או לחצו על הלשונית "Discover" (סמל זכוכית מגדלת) בסרגל הצד השמאלי
+2. חפשו את `Qwen3.5 9B`
+3. בחרו קוונטיזציה (מומלץ `Q4_K_M` המהווה איזון טוב בין גודל לאיכות) ולחצו על Download
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download_qwen.png" alt="LM Studio Download Models" width="600"/>
 
-LM Studio יוריד אוטומטית את המודל וימקם אותו בתיקייה הנכונה.
+LM Studio יוריד את המודל באופן אוטומטי וימקם אותו בתיקייה הנכונה.
 
-אם ברצונך להוריד מודלים נוספים, תוכל לחפש אותם בלשונית Discover ו-LM Studio יטפל בשאר.
+אם ברצונכם להוריד מודלים נוספים, תוכלו לחפש אותם בלשונית Discover ו-LM Studio יטפל בשאר.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-qwen-windows timeout=60 hidden=True -->

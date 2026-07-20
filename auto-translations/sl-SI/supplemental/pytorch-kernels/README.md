@@ -6,29 +6,29 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ta priročnik uporablja posebne oznake, ki jih GitHub ne more upodobiti. Za pravilen predogled te vsebine obiščite [amd.com/playbooks](https://amd.com/playbooks).
 <!-- @github-only:end -->
 
 ## Pregled
 
-Napišite GPU jedro od začetka, ga prevedite, zaženite na AMD GPU in opazujte, kako se izkoriščenost poveča. Ta priročnik prikazuje, kako GPU računanje dejansko deluje: napišite kodo jedra in jo izvajajte vzporedno prek tisočih niti.
+Napišite jedro GPU od začetka, ga prevedite, zaženite na GPU-ju AMD in opazujte, kako izraba naraste. Ta priročnik prikazuje, kako pravzaprav deluje računanje na GPU-ju: napišete kodo jedra in jo izvedete vzporedno na tisočih niti.
 
-> **Opomba**: To je precej zapleten priročnik, ki morda zahteva nekaj dodatnega odpravljanja napak in sprememb.
+> **Opomba**: To je precej zapleten priročnik, ki lahko zahteva dodatno odpravljanje napak in prilagoditve.
 
 ## Kaj se boste naučili
 
 <!-- @os:windows -->
-- Kako delujejo GPU jedra: mreže, bloki, niti in indeksni model, ki jih preslika na podatke
-- Kako AMD ROCm/HIP sklad omogoča pisanje kode v slogu CUDA, ki se izvaja na AMD GPU brez sprememb
-- Kako prevesti jedro med izvajanjem z `torch.cuda._compile_kernel`
-- Kako zgraditi izvorno razširitev C++ z `CUDAExtension` + pybind11, ki jo je mogoče uvoziti iz Pythona
+- Kako delujejo jedra GPU: mreže, bloki, niti in model indeksiranja, ki jih preslika na podatke
+- Kako sklad AMD ROCm/HIP omogoča pisanje kode v slogu CUDA, ki se izvaja na GPU-jih AMD brez sprememb
+- Kako prevesti jedro med izvajanjem z uporabo `torch.cuda._compile_kernel`
+- Kako izdelati nativno razširitev jedra v C++ z uporabo `CUDAExtension` + pybind11, ki jo je mogoče uvoziti iz Pythona
 <!-- @os:end -->
 <!-- @os:linux -->
-- Kako delujejo GPU jedra: mreže, bloki, niti in indeksni model, ki jih preslika na podatke
-- Kako AMD ROCm/HIP sklad omogoča pisanje kode v slogu CUDA, ki se izvaja na AMD GPU brez sprememb
-- Kako prevesti jedro med izvajanjem z `torch.cuda._compile_kernel`
-- Kako zgraditi izvorno razširitev C++ z `CUDAExtension` + pybind11, ki jo je mogoče uvoziti iz Pythona
-- Kako izmeriti čas izvajanja jedra in spremljati živo izkoriščenost GPU z `amd-smi`
+- Kako delujejo jedra GPU: mreže, bloki, niti in model indeksiranja, ki jih preslika na podatke
+- Kako sklad AMD ROCm/HIP omogoča pisanje kode v slogu CUDA, ki se izvaja na GPU-jih AMD brez sprememb
+- Kako prevesti jedro med izvajanjem z uporabo `torch.cuda._compile_kernel`
+- Kako izdelati nativno razširitev jedra v C++ z uporabo `CUDAExtension` + pybind11, ki jo je mogoče uvoziti iz Pythona
+- Kako izmeriti čas izvajanja jedra in spremljati izrabo GPU-ja v živo z `amd-smi`
 <!-- @os:end -->
 
 ---
@@ -38,25 +38,25 @@ Ta priročnik zajema dva pristopa za razvoj jeder:
 <!-- @os:windows -->
 | Pristop | Vstopna točka |
 |---|---|
-| **JIT prevajanje** | `torch.cuda._compile_kernel`, napišite jedro kot niz v Pythonu, brez koraka gradnje |
-| **Razširitev C++** | `CUDAExtension` + pybind11: prevedite datoteko `.cu` v izvorno `.pyd` in jo uvozite |
+| **Prevajanje JIT** | `torch.cuda._compile_kernel`, napišite jedro kot niz Python brez koraka gradnje |
+| **Razširitev C++** | `CUDAExtension` + pybind11: prevedite datoteko `.cu` v nativno datoteko `.pyd` in jo uvozite |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Pristop | Vstopna točka |
 |---|---|
-| **JIT prevajanje** | `torch.cuda._compile_kernel`, napišite jedro kot niz v Pythonu, brez koraka gradnje |
-| **Razširitev C++** | `CUDAExtension` + pybind11: prevedite datoteko `.cu` v izvorno `.so` in jo uvozite |
+| **Prevajanje JIT** | `torch.cuda._compile_kernel`, napišite jedro kot niz Python brez koraka gradnje |
+| **Razširitev C++** | `CUDAExtension` + pybind11: prevedite datoteko `.cu` v nativno datoteko `.so` in jo uvozite |
 <!-- @os:end -->
 
-Oba pristopa delujeta na AMD GPU. To je mogoče, ker PyTorch-ova gradnja ROCm preslika celotno površino CUDA API na HIP. To pomeni, da `torch.cuda`, `CUDAExtension` in sintaksa jeder CUDA delujejo na AMD strojni opremi transparentno.
+Oba pristopa delujeta na GPU-jih AMD. To je mogoče, ker gradnja PyTorch za ROCm preslika celotno površino API-ja CUDA na HIP. To pomeni, da `torch.cuda`, `CUDAExtension` in sintaksa jeder CUDA vsi delujejo na strojni opremi AMD pregledno.
 
 ---
 
 ## Ozadje
 
-### Kaj je GPU jedro?
+### Kaj je jedro GPU?
 
-GPU jedro je funkcija, ki se vzporedno izvaja prek tisočih GPU niti hkrati. Za razliko od funkcije CPU, ki se izvede enkrat na klic, se jedro zažene z **mrežo** **blokov**, od katerih vsak vsebuje veliko **niti**, ki vse izvajajo isto kodo na različnih podatkih.
+Jedro GPU je funkcija, ki se izvaja vzporedno na tisočih niti GPU-ja hkrati. Za razliko od funkcije CPE-ja, ki se izvede enkrat na klic, se jedro zažene z **mrežo** **blokov**, od katerih vsak vsebuje veliko **niti**, ki vse izvajajo isto kodo na različnih podatkih.
 
 <p align="center">
   <img src="assets/grid_threads.png" width="900"/>
@@ -64,7 +64,7 @@ GPU jedro je funkcija, ki se vzporedno izvaja prek tisočih GPU niti hkrati. Za 
 
 ### Model indeksiranja niti
 
-Ko zaženete jedro, določite dve dimenziji:
+Pri zagonu jedra določite dve dimenziji:
 
 | Spremenljivka | Pomen |
 |---|---|
@@ -75,41 +75,41 @@ Vsaka nit ima dostop do treh vgrajenih spremenljivk samo za branje:
 
 | Spremenljivka | Pomen |
 |---|---|
-| `blockIdx.x` | Kateremu bloku ta nit pripada |
+| `blockIdx.x` | Kateremu bloku pripada ta nit |
 | `blockDim.x` | Število niti v enem bloku |
 | `threadIdx.x` | Indeks niti znotraj njenega bloka |
 
 ### Globalni ID niti
 
-Te spremenljivke se združijo za izračun globalno edinstvenega indeksa niti:
+Te spremenljivke se združijo za izračun globalno enoličnega indeksa niti:
 
 ```c
 int idx = blockIdx.x * blockDim.x + threadIdx.x;
 ```
 
-Skupno število niti = `gridDim.x * blockDim.x`. Vsaka nit neodvisno obdela en element. To je temelj **podatkovne vzporednosti**. Ista operacija se izvaja na številnih elementih hkrati, brez odvisnosti med nitmi.
+Skupno število niti = `gridDim.x * blockDim.x`. Vsaka nit neodvisno obdela en element. To je temelj **podatkovne vzporednosti**. Ista operacija se izvaja na veliko elementih hkrati, brez medsebojne odvisnosti niti.
 
 ---
 
-### Model izvajanja GPU: Wavefronti
+### Model izvajanja GPU: valovne fronte (wavefronts)
 
-AMD GPU izvajajo niti v skupinah po **32**, ki se imenujejo **wavefronti**. Vse niti v wavefrontu hkrati izvajajo isto navodilo. To vpliva na optimalne izbire velikosti blokov (256 niti = 8 wavefrontov = dobra učinkovitost razporejanja).
+GPU-ji AMD izvajajo niti v skupinah po **32**, imenovanih **valovne fronte (wavefronts)**. Vse niti v valovni fronti izvajajo isti ukaz hkrati. To vpliva na izbiro optimalne velikosti bloka (256 niti = 8 valovnih front = dobra učinkovitost razporejanja).
 
-### Programiranje AMD GPU: HIP + ROCm
+### Programiranje GPU-ja AMD: HIP + ROCm
 
-**ROCm** je AMD-jev odprtokodni sklad za GPU računanje (gonilniki, prevajalniki, knjižnice, izvajalno okolje). **HIP** je zgrajen na vrhu in je zasnovan tako, da je sintaktično identičen CUDA. PyTorch-ova gradnja ROCm transparentno preslika `torch.cuda.*` na HIP, tako da ista koda deluje na AMD GPU.
+**ROCm** je odprtokodni sklad za računanje na GPU-ju podjetja AMD (gonilniki, prevajalniki, knjižnice, izvajalno okolje). **HIP** deluje na vrhu tega sklada in je zasnovan tako, da je sintaktično enak CUDA. Gradnja PyTorch za ROCm pregledno preslika `torch.cuda.*` na HIP, tako da ista koda deluje na GPU-jih AMD.
 
 ---
 
 ### PyTorch + AMD/HIP
 
-PyTorch ima gradnjo ROCm, kjer je površina CUDA API (`torch.cuda.*`) transparentno podprta s HIP. To pomeni:
+PyTorch ponuja gradnjo za ROCm, kjer je površina API-ja CUDA (`torch.cuda.*`) pregledno podprta s HIP. To pomeni:
 
-- `torch.cuda.is_available()` deluje na AMD GPU z ROCm
-- `tensor.to("cuda")` dodeli pomnilnik na AMD GPU
+- `torch.cuda.is_available()` deluje na GPU-jih AMD z ROCm
+- `tensor.to("cuda")` dodeli pomnilnik na GPU-ju AMD
 - `torch.version.hip` razkrije različico HIP
 
-PyTorch prav tako izpostavlja `torch.cuda._compile_kernel()`, visokonivojsko bližnjico za JIT prevajanje niza surovega jedra in pridobitev klicljivega objekta, brez potrebe po ločenem koraku gradnje.
+PyTorch prav tako ponuja `torch.cuda._compile_kernel()`, hitrejšo bližnjico za prevajanje JIT surovega niza jedra in pridobitev klicljivega objekta, brez potrebe po ločenem koraku gradnje.
 
 ---
 
@@ -119,11 +119,11 @@ PyTorch prav tako izpostavlja `torch.cuda._compile_kernel()`, visokonivojsko bli
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Namestitev predpogojev programske opreme
+## Namestitev zahtevane programske opreme
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Predpogoji - Windows
-- Namestite najnovejše: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- Namestite najnovejšo različico: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -131,7 +131,7 @@ PyTorch prav tako izpostavlja `torch.cuda._compile_kernel()`, visokonivojsko bli
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-V Linuxu odprite terminal v izbranem imeniku in sledite ukazom za ustvarjanje venv z že nameščenima ROCm+PyTorch.
+V Linuxu odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje virtualnega okolja (venv) z že nameščenima ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -144,13 +144,13 @@ source kernel-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Dodelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev se odjavite in znova prijavite):
+**Dodelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev se morate odjaviti in ponovno prijaviti):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-V Linuxu odprite terminal v izbranem imeniku in sledite ukazom za ustvarjanje venv.
+V Linuxu odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje virtualnega okolja (venv).
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -164,7 +164,7 @@ source kernel-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-V Windowsu odprite terminal v izbranem imeniku in sledite ukazom za ustvarjanje venv.
+V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje virtualnega okolja (venv).
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv kernel-env
@@ -173,8 +173,8 @@ kernel-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
-> **Nasvet**: Uporabniki sistema Windows morda morajo spremeniti pravilnik izvajanja PowerShell (npr.
-> nastaviti ga na RemoteSigned ali Unrestricted) pred izvajanjem nekaterih ukazov PowerShell.
+> **Nasvet**: Uporabniki sistema Windows bodo morda morali spremeniti pravilnik izvajanja PowerShell (Execution Policy) (npr.
+> nastaviti ga na RemoteSigned ali Unrestricted), preden zaženejo nekatere ukaze PowerShell.
 
 <!-- @os:end -->
 ### Namestitev osnovnih odvisnosti
@@ -193,7 +193,7 @@ kernel-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-> **Opomba:** Za ta priročnik morata biti ROCm in PyTorch nameščena v virtualno okolje tudi na Ryzen AI Halo, saj prevajanje po meri zahteva celotne razvojne glave.
+> **Opomba:** Za ta priročnik je treba ROCm in PyTorch namestiti v virtualno okolje tudi na Ryzen AI Halo, saj kompilacija prilagojenih jeder zahteva popolne razvojne glave (headers).
 
 Namestite ROCm:
 ```powershell
@@ -227,9 +227,9 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 ### Namestitev dodatnih odvisnosti
 
 <!-- @os:linux -->
-Namestite orodijsko verigo za gradnjo Linux C/C++. To je odvisnost na ravni sistema in je potrebna za vodiče po razširitvah C++, ker `CUDAExtension` gradi izvorne module `.so` iz datotek `.cu`.
+Namestite Linux C/C++ orodno verigo za gradnjo. To je odvisnost na sistemski ravni in je potrebna za vodiče po razširitvah C++, ker `CUDAExtension` zgradi izvorne module `.so` iz datotek `.cu`.
 
-To zaženite enkrat na računalniku z Linuxom, zunaj ustvarjenega virtualnega okolja Python:
+To zaženite enkrat na Linux računalniku, izven ustvarjenega virtualnega okolja Python:
 
 ```bash
 sudo apt update
@@ -260,15 +260,15 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Zagotovite, da je nameščen [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) ali [novejši](https://visualstudio.microsoft.com/vs/community/) z delovnim obremenilom **Namizni razvoj s C++**.
+Prosimo, poskrbite, da je nameščen [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) ali [novejši](https://visualstudio.microsoft.com/vs/community/) z delovnim obremenitvijo **Desktop development with C++**.
 
-> **Opomba**: Ta nastavitev okolja Visual Studio C++ je potrebna samo za pristop **razširitve C++**. Za pristop s prevajanjem JIT ni potrebna.
+> **Opomba**: Ta nastavitev okolja Visual Studio C++ je potrebna samo za pristop **C++ Extension**. Za pristop JIT Compilation ni potrebna.
 
 Odprite terminal PowerShell in pred gradnjo razširitve C++ zaženite naslednje ukaze.
 
-**1. korak: Poiščite nameščeno okolje Visual Studio C++**
+**Korak 1: Poiščite nameščeno okolje Visual Studio C++**
 
-**(A) Poiščite `vswhere.exe`, ki je nameščen z namestitvenim programom Visual Studio**
+**(A) Poiščite `vswhere.exe`, ki se namesti z Visual Studio Installer**
 ```powershell
 $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 
@@ -294,11 +294,11 @@ if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 202
 Write-Host "Using Visual Studio C++ environment: $Vcvars"
 ```
 
-**2. korak: Aktivirajte okolje za gradnjo Visual Studio C++**
+**Korak 2: Aktivirajte okolje za gradnjo Visual Studio C++**
 
 **(A) Zaženite `vcvars64.bat` in zajemite okolje, ki ga nastavi**
 
-S tem postanejo `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` in poti Windows SDK na voljo.
+To omogoči dostop do `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` in poti Windows SDK.
 
 ```powershell
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
@@ -320,7 +320,7 @@ $VsEnv | ForEach-Object {
 }
 ```
 
-**3. korak: Preverite, ali je prevajalnik Microsoft C++ na voljo**
+**Korak 3: Preverite, ali je prevajalnik Microsoft C++ na voljo**
 
 ```powershell
 where.exe cl
@@ -366,7 +366,7 @@ Write-Host "OK: Visual Studio C++ build environment is available."
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Nastavitev spremenljivk okolja
+#### Nastavite spremenljivke okolja
 <!-- @os:linux -->
 <!-- @test:id=set-env-variables-linux timeout=300 setup=activate-venv -->
 ```bash
@@ -417,7 +417,7 @@ $env:DISTUTILS_USE_SDK = "1"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Preverite, ali je AMD GPU viden, z:
+Preverite, ali je AMD GPU viden z ukazom:
 <!-- @test:id=amd-smi-linux timeout=60 setup=activate-venv -->
 ```bash
 amd-smi
@@ -552,29 +552,29 @@ $code | python -
 
 ## Prenos zahtevanih datotek
 
-Ustvarite naslednjo strukturo imenikov tako, da ustvarite **2 novi mapi** in prenesete ustrezne datoteke:
+Ustvarite naslednjo strukturo map tako, da ustvarite **2 novi mapi** in prenesete ustrezne datoteke:
 
-| Imenik | Datoteke za prenos | Opis |
+| Mapa | Datoteke za prenos | Opis |
 |-----------|-------------------|-------------|
-| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| Datoteke JIT in razširitve C++ za jedro vektorskega seštevanja |
-| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Datoteke JIT in razširitve C++ za jedro množenja matrik |
+| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| Datoteke JIT in C++ extension za jedro seštevanja vektorjev |
+| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Datoteke JIT in C++ extension za jedro množenja matrik |
 
 
-## Vodniki
+## Vodiči po korakih
 
-### Vodnik 1: Vektorsko seštevanje
+### Vodič po korakih 1: Seštevanje vektorjev
 
-#### Pristop A: Prevajanje JIT
+#### Pristop A: JIT Compilation
 
-Prevajanje JIT (Just-In-Time) pomeni, da je jedro zapisano kot neobdelani niz C++ znotraj Pythona in prevedeno med izvajanjem, brez potrebe po dodatnih korakih gradnje.
+JIT (Just-In-Time) kompilacija pomeni, da je jedro napisano kot surov niz C++ znotraj Python in prevedeno med izvajanjem, brez potrebe po dodatnih korakih gradnje.
 
-Če želite uporabiti [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py), se prepričajte, da je prenesena, in zaženite:
+Za uporabo [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py) se prepričajte, da je prenesen, in zaženite:
 ```bash
 cd Vector_Addition # if not already inside the directory
 python add_one_kernel.py
 ```
 
-**Ključni odseki kode**
+**Ključni izsečki kode**
 ```python
 import torch
 
@@ -614,31 +614,31 @@ print("First 5 elements:", x[:5].cpu())
 #Expected output: tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @os:linux -->
-> **Nasvet**: Skripta prav tako zažene nit v ozadju, ki vsake 100 ms anketira `amd-smi`, da beleži največjo in povprečno izkoriščenost GPU med izvajanjem jedra.
+> **Nasvet**: Skripta prav tako sproži ozadnjo nit, ki vsakih 100 ms poizveduje `amd-smi`, da beleži najvišjo in povprečno izkoriščenost GPU med izvajanjem jedra.
 <!-- @os:end -->
 
 > **Opomba**: **Zakaj je velikost bloka 256?** <br>
-> - Jedro uporablja **256 niti na blok**, ker se dobro ujema z **modelom izvajanja valovnih front AMD GPU**.
-> - Upoštevajte, da AMD strojna oprema izvaja niti v skupinah po 32 niti, kar ima za posledico 8 valovnih front na blok. (8 valovnih front × 32 niti = 1 blok)
+> - Jedro uporablja **256 niti na blok**, ker se dobro ujema z **modelom izvajanja wavefront na AMD GPU-jih**.
+> - Ne pozabite, da strojna oprema AMD izvaja niti v skupinah po 32 niti, kar rezultira v 8 wavefrontih na blok. (8 wavefrontov x 32 niti = 1 blok)
 
 
-**Kaj delovna obremenitev počne:**
+**Kaj naredi delovna obremenitev:**
 
-Jedro umetno dodaja dodatno delo za prikaz izkoriščenosti GPU:
+Jedro umetno doda dodatno delo za prikaz izkoriščenosti GPU:
 
 - **100.000.000 elementov** v tenzorju
-- **Notranja zanka se izvede 1.000-krat** na element na zagon jedra  
-- **200 zagonov jedra** skupaj
+- **Notranja zanka se izvede 1.000-krat** na element ob vsakem zagonu jedra
+- Skupno **200 zagonov jedra**
 
 **Matematika:**  
-- Vsak element: se poveča za 1 × 1.000 ponovitev × 200 zagonov = 200.000  
-- Končni rezultat: 1,0 (začetna vrednost) + 200.000 (seštevanja) = 200.001,0
+- Vsak element: se poveča za 1 × 1.000 iteracij × 200 zagonov = 200.000  
+- Končni rezultat: 1,0 (začetna vrednost) + 200.000 (seštevanja) = 200001,0
 
 **Zakaj notranja zanka?**  
-- Brez zanke `for (int i = 0; i < 1000; i++)` bi se 200 zagonov končalo takoj in orodja za nadzor ne bi zajela smiselne izkoriščenosti GPU. Umetno delo naredi vsak zagon jedra dovolj dolg, da ga orodja za nadzor lahko izmerijo.
+- Brez zanke `for (int i = 0; i < 1000; i++)` bi se 200 zagonov zaključilo takoj, orodja za spremljanje pa ne bi zajela smiselne izkoriščenosti GPU. Umetno delo poskrbi, da vsak zagon jedra traja dovolj dolgo, da lahko orodja za spremljanje izmerijo zmogljivost.
 
 <!-- @os:linux -->
-**Pričakovani izhod:** [Številke zmogljivosti se bodo razlikovale]
+**Pričakovan izpis:**[Vrednosti zmogljivosti se bodo razlikovale]
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
@@ -648,16 +648,16 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Opomba**: V sistemu Windows `amd-smi` ni podprt. Za sledenje izkoriščenosti GPU lahko uporabite Upravitelja opravil, kjer bi morali ob zagonu programa opaziti kratek skok izkoriščenosti.
+> **Opomba**: V sistemu Windows `amd-smi` ni podprt. Za spremljanje izkoriščenosti GPU lahko uporabite Upravitelja opravil, kjer bi morali ob zagonu programa videti kratek skok izkoriščenosti.
 
-**Pričakovani izhod:**
+**Pričakovan izpis:**
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
 No GPU Usage captured.
 ```
 <!-- @os:end -->
-**Odlično! Pravkar ste zagnali svoje prvo jedro GPU.**
+**Odlično opravljeno! Pravkar ste zagnali svoje prvo jedro GPU.**
 
 <!-- @os:linux -->
 <!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
@@ -798,32 +798,32 @@ $code | python -
 <!-- @os:end -->
 
 ---
-#### Pristop B: Razširitev C++
+#### Pristop B: razširitev C++
 
-Drugi pristop je bolj ročen: napišite jedro in vezavo Python v eno samo datoteko `.cu`, jo prevedite nativno z uporabo PyTorchovega sistema za gradnjo in jo uvozite v Python.
+Drugi pristop je bolj ročen: jedro in Python-vezavo zapišete v eno samo datoteko `.cu`, jo prevedete izvorno z uporabo PyTorch-ovega sistema za gradnjo in jo uvozite v Python.
 
 <!-- @os:windows -->
-> **Opomba**: Pristop z razširitvijo C++ zahteva gradbeno okolje Visual Studio C++, ker PyTorch prevede izvorno datoteko `.cu` v nativni razširitveni modul `.pyd`. Gradnja te nativne razširitve je odvisna od Microsoftove orodne verige C++ (prevajalnik, povezovalnik in gradbena orodja), ki jo zagotavlja Visual Studio. Pred gradnjo razširitve zaženite aktivacijske ukaze Visual Studio iz razdelka za nastavitev.
+> **Opomba**: pristop z razširitvijo C++ zahteva razvojno okolje Visual Studio C++, ker PyTorch prevede izvorno datoteko `.cu` v izvorni razširitveni modul `.pyd`. Gradnja tega izvornega razširitvenega modula je odvisna od Microsoftove verige orodij C++ (prevajalnik, povezovalnik in orodja za gradnjo), ki jih zagotavlja Visual Studio. Pred gradnjo razširitve zaženite ukaze za aktivacijo Visual Studia iz razdelka o nastavitvi.
 <!-- @os:end -->
 
-Prenesite naslednje datoteke, če jih še nimate:
+Prenesite naslednje datoteke, če jih še niste:
 <!-- @os:windows -->
 | Datoteka | Vloga |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Jedro + zaganjač + vezava pybind11, vse v eni datoteki |
-| [setup.py](assets/Vector_Addition/setup.py) | Skript za gradnjo, uporablja `CUDAExtension` za prevajanje `.cu` v `.pyd` |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Skript Python, ki zažene zgrajene artefakte |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Jedro + zaganjalnik + vezava pybind11, vse v eni datoteki |
+| [setup.py](assets/Vector_Addition/setup.py) | Skripta za gradnjo, uporablja `CUDAExtension` za prevajanje datoteke `.cu` v `.pyd` |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Python skripta, ki zažene zgrajene artefakte |
 <!-- @os:end -->
 
 <!-- @os:linux -->
 | Datoteka | Vloga |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Jedro + zaganjač + vezava pybind11, vse v eni datoteki |
-| [setup.py](assets/Vector_Addition/setup.py) | Skript za gradnjo, uporablja `CUDAExtension` za prevajanje `.cu` v `.so` |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Skript Python, ki zažene zgrajene artefakte |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Jedro + zaganjalnik + vezava pybind11, vse v eni datoteki |
+| [setup.py](assets/Vector_Addition/setup.py) | Skripta za gradnjo, uporablja `CUDAExtension` za prevajanje datoteke `.cu` v `.so` |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Python skripta, ki zažene zgrajene artefakte |
 <!-- @os:end -->
 
-#### **1. korak: Jedro, zaganjač in vezava** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
+#### **Korak 1: Jedro, zaganjalnik in vezava** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -849,36 +849,37 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
->**Nasvet**: Zakaj uporabiti `hipDeviceSynchronize()`? <br>
-> - Zagoni jedra GPU so asinhroni. Ko CPU izvede `add_one<<<grid_size, block_size>>>(data, n);`, bi takoj izvedel naslednji ukaz, ne da bi čakal na GPU. `hipDeviceSynchronize()` prisili CPU, da počaka, dokler jedro GPU ne zaključi.
+>**Nasvet**: zakaj uporabiti `hipDeviceSynchronize()`? <br>
+> - Zagoni jeder GPE so asinhroni. Ko CPE zažene `add_one<<<grid_size, block_size>>>(data, n);`, bi takoj izvedel naslednji ukaz, ne da bi počakal na GPE. `hipDeviceSynchronize()` prisili CPE, da počaka, dokler se jedro GPE ne dokonča.
 
-#### **2. korak: Gradnja**
+#### **Korak 2: Gradnja**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**Opomba**: Ta ukaz poišče `setup.py` v trenutnem imeniku za gradnjo datoteke .cu, ki smo jo ustvarili.
+>**Opomba**: ta ukaz išče `setup.py` v trenutnem imeniku, da bi zgradil ustvarjeno datoteko .cu.
 
 
-`CUDAExtension` je pomočnik za gradnjo CUDA iz `torch.utils.cpp_extension`. Z ROCm PyTorch **preusmeri `CUDAExtension` na uporabo `hipcc`** namesto `nvcc`. ROCm prestreže pot gradnje in jo usmeri skozi prevajalnik HIP ter prenese kodo CUDA na AMD.
+`CUDAExtension` je pomočnik za gradnjo CUDA iz `torch.utils.cpp_extension`. Pri ROCm PyTorch **preusmeri `CUDAExtension`, da uporablja `hipcc`** namesto `nvcc`. ROCm prestreže pot gradnje in jo usmeri skozi prevajalnik HIP, s čimer prenese kodo CUDA na AMD.
 
 To ustvari naslednje datoteke:
 <!-- @os:windows -->
 - `build/`: imenik z datotekami `.pyd`
 - `add_one_kernel.hip`: izvorna koda HIP, ustvarjena s hipifikacijo datoteke `.cu`; to je tisto, kar je `hipcc` dejansko prevedel
 <!-- @os:end -->
+
 <!-- @os:linux -->
 - `build/`: imenik z datotekami `.so`
 - `add_one_kernel.hip`: izvorna koda HIP, ustvarjena s hipifikacijo datoteke `.cu`; to je tisto, kar je `hipcc` dejansko prevedel
 <!-- @os:end -->
 
-#### **3. korak: Uporaba iz Pythona** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)):
-Zaženite ta skript, da vidite jedro v akciji:
+#### **Korak 3: Uporaba iz Pythona** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)):
+Izvedite to skripto, da vidite jedro v akciji:
 ```bash
 cd Vector_Addition # if not already in directory
 python run_compiled_addition.py
 ```
 
-**Pričakovani izhod:**
+**Pričakovani izpis:**
 ```
 Before: tensor([1., 1., 1., 1., 1., 1., 1., 1., 1., 1.], device='cuda:0')
 After: tensor([2., 2., 2., 2., 2., 2., 2., 2., 2., 2.], device='cuda:0')
@@ -1032,11 +1033,11 @@ Množenje matrik izračuna **C = A × B**, kjer:
 Vsak izhodni element je definiran kot:
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-Vsak element C se izračuna neodvisno, kar je idealno za vzporednost GPU.
+Vsak element matrike C se izračuna neodvisno, zaradi česar je to idealno za paralelizem GPE.
 
-#### Kako se preslika na niti GPU
+#### Kako se to preslika na niti GPE
 
-Za razliko od seštevanja vektorjev (1D) množenje matrik ustvari **2D izhod**, zato uporabimo **2D mrežo niti**:
+Za razliko od seštevanja vektorjev (1D), množenje matrik ustvari **2D izhod**, zato uporabimo **2D mrežo niti**:
 
 | | Seštevanje vektorjev | Množenje matrik |
 |---|---|---|
@@ -1047,21 +1048,21 @@ Za razliko od seštevanja vektorjev (1D) množenje matrik ustvari **2D izhod**, 
 
 Vsaka nit izračuna en element izhodne matrike C. Nit na položaju `(row, col)` izračuna `C[row][col]` z množenjem ustrezne vrstice A z ustreznim stolpcem B.
 
-**Pomnilniška postavitev**: Pomnilnik GPU je raven (1D), matrike pa so shranjene vrstico za vrstico. Za dostop do `A[row][col]` jedro uporablja `A[row * N + col]`.
+**Postavitev pomnilnika**: pomnilnik GPE je ravninski (1D), vendar so matrike shranjene vrstico za vrstico. Za dostop do `A[row][col]` jedro uporabi `A[row * N + col]`.
 
 
-#### Pristop A: JIT prevajanje:
+#### Pristop A: pravočasno prevajanje (JIT):
 
-Kot v vodiču 1 je jedro napisano kot neobdelani niz C++ znotraj Pythona in prevedeno med izvajanjem prek PyTorchovega vgrajenega JIT.
+Tako kot pri vodiču 1 je jedro zapisano kot surov niz C++ znotraj Pythona in prevedeno ob izvajanju prek vgrajenega JIT-a PyTorch.
 
 
-Za uporabo [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py) se prepričajte, da je prenesen, in zaženite:
+Za uporabo datoteke [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py) se prepričajte, da je prenesena, in zaženite:
 ```bash
 cd Matrix_Multiplication # if not already inside the directory
 python matmul_kernel.py
 ```
 
-**Ključni odseki kode**
+**Ključni odlomki kode**
 ```python
 import torch
 
@@ -1112,10 +1113,10 @@ max_err = (C - C_ref).abs().max().item()
 print(f"Max error vs torch.mm: {max_err:.6f}")
 ```
 
-Skript preveri rezultat glede na `torch.mm` z majhno toleranco. Aritmetika s plavajočo vejico na GPU lahko ustvari majhne numerične razlike v primerjavi z implementacijami CPU zaradi vrstnega reda vzporedne redukcije.
+Skripta preveri rezultat glede na `torch.mm` z majhno toleranco. Aritmetika s plavajočo vejico na GPE lahko povzroči majhne numerične razlike v primerjavi z izvedbami na CPE zaradi vrstnega reda paralelne redukcije.
 
 <!-- @os:linux -->
-**Pričakovani izhod:** [Številke zmogljivosti se bodo razlikovale]
+**Pričakovani izpis:** [Zmogljivostne številke se bodo razlikovale]
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -1125,9 +1126,9 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Opomba**: V sistemu Windows `amd-smi` ni podprt. Za sledenje izkoriščenosti GPU lahko uporabite Upravitelja opravil, kjer bi morali ob zagonu programa opaziti kratek skok izkoriščenosti.
+> **Opomba**: v operacijskem sistemu Windows `amd-smi` ni podprt. Za spremljanje izkoriščenosti GPE lahko uporabite Upravitelja opravil, kjer bi morali ob zagonu programa videti kratek skok izkoriščenosti.
 
-**Pričakovani izhod:**
+**Pričakovani izpis:**
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -1302,29 +1303,29 @@ $code | python -
 ---
 #### Pristop B: Razširitev C++
 
-Drugi pristop je bolj ročen: napišite jedro in vezavo Python v eno samo datoteko `.cu`, jo prevedite nativno z uporabo PyTorchovega sistema za gradnjo in jo uvozite v Python.
+Drugi pristop je bolj ročen: kodo jedra in Python vezavo zapišete v eno samo datoteko `.cu`, jo prevedete izvorno z uporabo PyTorchevega gradbenega sistema in jo uvozite v Python.
 
 <!-- @os:windows -->
-> **Opomba**: Pristop z razširitvijo C++ zahteva gradbeno okolje Visual Studio C++, ker PyTorch prevede izvorno datoteko `.cu` v nativni razširitveni modul `.pyd`. Gradnja te nativne razširitve je odvisna od Microsoftove orodne verige C++ (prevajalnik, povezovalnik in orodja za gradnjo), ki jo zagotavlja Visual Studio. Pred gradnjo razširitve zaženite aktivacijske ukaze Visual Studio iz razdelka za nastavitev.
+> **Opomba**: Pristop z razširitvijo C++ zahteva gradbeno okolje Visual Studio C++, ker PyTorch prevede izvorno datoteko `.cu` v izvorni razširitveni modul `.pyd`. Gradnja tega izvornega modula je odvisna od orodne verige Microsoft C++ (prevajalnika, povezovalnika in gradbenih orodij), ki jih zagotavlja Visual Studio. Pred gradnjo razširitve zaženite ukaze za aktivacijo Visual Studia iz razdelka o namestitvi.
 <!-- @os:end -->
 
-Prenesite naslednje datoteke, če tega še niste storili:
+Če tega še niste storili, prenesite naslednje datoteke:
 <!-- @os:windows -->
 | Datoteka | Vloga |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Jedro + zaganjalnik + vezava pybind11 |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | Skript za gradnjo, uporablja `CUDAExtension` za prevajanje `.cu` v `.pyd` |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Skript Python, ki zažene zgrajene artefakte |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Jedro + zaganjalnik + pybind11 vezava |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Gradbeni skript, ki uporablja `CUDAExtension` za prevod `.cu` v `.pyd` |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python skript, ki zažene zgrajene artefakte |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Datoteka | Vloga |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Jedro + zaganjalnik + vezava pybind11 |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | Skript za gradnjo, uporablja `CUDAExtension` za prevajanje `.cu` v `.so` |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Skript Python, ki zažene zgrajene artefakte |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Jedro + zaganjalnik + pybind11 vezava |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Gradbeni skript, ki uporablja `CUDAExtension` za prevod `.cu` v `.so` |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python skript, ki zažene zgrajene artefakte |
 <!-- @os:end -->
 
-#### **1. korak: Jedro, zaganjalnik in vezava** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
+#### **Korak 1: Jedro, zaganjalnik in vezava** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -1364,46 +1365,46 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
-V primerjavi z `add_one_launcher` v Vodiču 1 zaganjalnik tukaj:
-- Sprejme dve vhodni tenzorji namesto ene
-- Iz oblik tenzorjev izpelje vse tri dimenzije (M, N, K), brez ročnega posredovanja velikosti iz Pythona
-- Dodeli in vrne izhodni tenzor C, namesto da bi ga spremenil na mestu
-- Uporablja `dim3` za mrežo in blok, da izrazi 2D obliko zagona
+V primerjavi z `add_one_launcher` iz Vodiča po korakih 1 zaganjalnik tukaj:
+- Sprejme dva vhodna tenzorja namesto enega
+- Izpelje vse tri dimenzije (M, N, K) iz oblik tenzorjev, brez ročnega posredovanja velikosti iz Pythona
+- Dodeli in vrne izhodni tenzor C, namesto da bi ga spreminjal na mestu
+- Za mrežo in blok uporablja `dim3`, da izrazi 2D obliko zagona
 
-#### **2. korak: Gradnja**
+#### **Korak 2: Gradnja**
 ```bash
 pip install --no-build-isolation -v .
 ```
-> **Opomba**: Ta ukaz poišče `setup.py` v trenutnem imeniku za gradnjo datoteke .cu, ki smo jo ustvarili.
+>**Opomba**: Ta ukaz za gradnjo ustvarjene datoteke `.cu` v trenutnem imeniku poišče `setup.py`.
 
 
 To ustvari naslednje datoteke:
 <!-- @os:windows -->
-- `build/`: imenik z datotekami `.pyd`
-- `matmul_kernel.hip`: vir HIP, ustvarjen s hipifikacijo datoteke `.cu`; to je tisto, kar je `hipcc` dejansko prevedel
+- `build/`:  imenik z datotekami `.pyd`
+- `matmul_kernel.hip`:  izvorna koda HIP, ustvarjena s pretvorbo (hipify) datoteke `.cu`; to je tisto, kar je `hipcc` dejansko prevedel
 <!-- @os:end -->
 <!-- @os:linux -->
-- `build/`: imenik z datotekami `.so`
-- `matmul_kernel.hip`: vir HIP, ustvarjen s hipifikacijo datoteke `.cu`; to je tisto, kar je `hipcc` dejansko prevedel
+- `build/`:  imenik z datotekami `.so`
+- `matmul_kernel.hip`:  izvorna koda HIP, ustvarjena s pretvorbo (hipify) datoteke `.cu`; to je tisto, kar je `hipcc` dejansko prevedel
 <!-- @os:end -->
 
-#### **3. korak: Uporaba iz Pythona** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)):
-Zaženite ta skript, da si ogledate jedro v akciji:
+#### **Korak 3: Uporaba iz Pythona** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)):
+Zaženite ta skript, da vidite jedro v akciji:
 ```bash
 cd Matrix_Multiplication # if not already in directory
 python run_compiled_multiply.py
 ```
 
-**Pričakovani izhod:**
+**Pričakovan izpis:**
 ```
 Result: tensor([[19., 22.],
         [43., 50.]])
 ```
 
-**Odlično! Pravkar ste implementirali množenje matrik na GPU.** To je pomemben mejnik, ker je množenje matrik hrbtenica sodobnih operacij strojnega učenja, kot so:
-- Plasti nevronskih mrež
+**Odlično! Pravkar ste implementirali množenje matrik na GPU-ju.** To je pomemben mejnik, saj je množenje matrik hrbtenica sodobnih operacij strojnega učenja, kot so:
+- Sloji nevronskih mrež
 - Mehanizmi pozornosti
-- Vdelavi
+- Vdelave (embeddings)
 - Transformerji
 
 <!-- @os:linux -->
@@ -1554,16 +1555,16 @@ finally {
 
 ## Naslednji koraki
 
-Naučili ste se pisati, prevajati in zaganjati jedra GPU z uporabo tako JIT prevajanja kot razširitev C++ za osnovne vzporedne operacije.
+Naučili ste se pisati, prevajati in zaganjati jedra GPU z uporabo tako sprotnega (JIT) prevajanja kot razširitev C++ za osnovne vzporedne operacije.
 
 **Optimizacije zmogljivosti:**
-- **Razdeljevanje v ploščice s skupnim pomnilnikom** – Predpomnjenje blokov podatkov za zmanjšanje dostopa do globalnega pomnilnika
-- **Koalesciranje pomnilnika** – Optimizacija vzorcev dostopa do pomnilnika za pasovno širino
+- **Tlakovanje s souporabljenim pomnilnikom (shared memory tiling)** - Predpomnenje blokov podatkov za zmanjšanje dostopa do globalnega pomnilnika
+- **Zlivanje pomnilniških dostopov (memory coalescing)** - Optimizacija vzorcev dostopa do pomnilnika za pasovno širino
 
 **Algoritmi iz resničnega sveta:**
-- **2D konvolucija** – Majhen filter (jedro) drsi čez sliko in za vsak izhodni piksel izračuna uteženo vsoto sosednjih pikslov. To uvaja izračune šablone in razdeljevanje v ploščice s skupnim pomnilnikom, kjer niti znova uporabijo prekrivajoče se regije slike za zmanjšanje dostopa do globalnega pomnilnika.
-- **Funkcija Softmax**: Softmax pretvori vektor števil v verjetnosti, katerih vsota je 1, kar se pogosto uporablja v izhodih nevronskih mrež. Učinkovita implementacija na GPU uvaja vzporedne redukcije in tehnike numerične stabilnosti pri obdelavi velikih vektorjev.
+- **2D konvolucija** - Majhen filter (jedro) drsi po sliki in izračuna vsak izhodni piksel kot uteženo vsoto sosednjih pikslov. To uvede stencil izračune in tlakovanje s souporabljenim pomnilnikom, kjer niti ponovno uporabljajo prekrivajoča se območja slike za zmanjšanje dostopa do globalnega pomnilnika.
+- **Funkcija Softmax**: Softmax pretvori vektor števil v verjetnosti, ki se seštejejo v 1, kar se pogosto uporablja pri izhodih nevronskih mrež. Učinkovita implementacija na GPU-ju uvede vzporedne redukcije in tehnike numerične stabilnosti pri obdelavi velikih vektorjev.
 
-**Vidiki za produkcijsko okolje:**
-- **Obravnavanje napak** – Preverjanje meja in upravljanje naprav
-- **Integracija PyTorch** – Operatorji po meri s podporo za autograd
+**Preudarki za produkcijsko uporabo:**
+- **Obravnava napak** - Preverjanje mej in upravljanje naprav
+- **Integracija s PyTorch** - Operatorji po meri s podporo za avtomatski odvod (autograd)

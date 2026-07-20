@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Node.js 22.22.1 LTS 是此平台的建議版本。
+Node.js 22.22.1 LTS 是此平台建議使用的版本。
 
 <!-- @os:windows -->
 
@@ -38,4 +38,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **注意**：請參閱 [Node.js 下載頁面](https://nodejs.org/en/download/) 以取得其他安裝選項與平台資訊。
+> **注意**：如需其他安裝選項與平台，請參閱 [Node.js 下載頁面](https://nodejs.org/en/download/)。

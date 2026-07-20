@@ -1,5 +1,5 @@
 {
   "id": "clustering-rccl",
-  "title": "두 개의 Ryzen™ AI Halo를 RCCL로 클러스터링하기",
-  "description": "두 개의 Ryzen™ AI Halo 장치와 RCCL을 사용하여 분산 워크로드를 위한 멀티 노드 클러스터 설정"
+  "title": "Ryzen™ AI Halo 두 대를 RCCL로 클러스터링하기",
+  "description": "RCCL를 사용하여 두 대의 Ryzen™ AI Halo 장치로 멀티 노드 클러스터를 구성하여 분산 워크로드 실행"
 }

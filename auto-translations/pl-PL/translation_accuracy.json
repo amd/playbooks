@@ -4,546 +4,546 @@
     "playbooks/core/comfyui-image-gen/README.md": {
       "source_sha256": "5f3da10f7fae3dc68416413efd91668449de4a5796ccf600a591bb1621817f18",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: decimal commas (1,0–2,0) follow Polish convention but source uses dots; 'prompt' left untranslated inconsistently; overall excellent quality."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, tags intact. Minor: 'podmiotu' slightly off for 'subject'."
     },
     "playbooks/core/comfyui-image-gen/platform.md": {
       "source_sha256": "e8a6884590d062f17595a57f2aadf5abe686c3169f53f3181544259336435c47",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: decimal separators correctly localized; 'Pobieranie' slightly less precise than 'Pobierz' for 'Download' column header."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: some technical terms left in English, acceptable."
     },
     "playbooks/core/comfyui-image-gen/playbook.json": {
       "source_sha256": "7fbbe78699fe6dbb9f4812e99b949d9c7daa2f88f52ee0f87cbb4641d0f5baae",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Minor awkwardness with 'z Z Image Turbo' (preposition 'z' colliding with brand name 'Z'), but brand terms preserved."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Accurate, fluent; 'z Z Image Turbo' slightly awkward but acceptable."
     },
     "playbooks/dependencies/comfyui.md": {
       "source_sha256": "1364f858fb8176db125d258fd392b33e0c2ec1d9f50983f5648926384717a436",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'Checkout' translated as 'Przełącz się na' is acceptable but slightly verbose; overall excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "UI strings 'Automatic Updates'/'Next' left in English, acceptable but could be localized/quoted differently. Otherwise accurate and fluent."
     },
     "playbooks/dependencies/comfyui_models.md": {
       "source_sha256": "8cb46545df5efaaae1521a92e385e95f3dcdabdbdd3a8ddce9c94a0e0680a9b5",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'usunąłeś' uses masculine singular; gender-neutral form could be preferable."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; masculine 'usunąłeś' assumes gender, minor stylistic nit."
     },
     "playbooks/dependencies/driver.md": {
       "source_sha256": "bdde05c0805a03d019eedad5bd7dc53a862c6b1f5ffeee6743fdfb73ef39de73",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "UI labels 'Driver and Software' and 'Manage Updates' left untranslated, which is acceptable for software UI but inconsistent with translating other terms. Minor: 'przepływu' is an awkward calque of 'f"
+      "quality_issues": "UI labels and link text left untranslated (acceptable if matching product UI); otherwise accurate and fluent."
     },
     "playbooks/dependencies/gaia.md": {
       "source_sha256": "4837a0e4fd45ede7efc3d903c1bb65484d0805c6e45657d2b097b23c063bb935",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Near-flawless. All code, URLs, brand names intact. Polish prose natural and accurate. Minor nit: 'otwartoźródłowy' could be 'open-source'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent translation; code, URLs, brands intact."
     },
     "playbooks/dependencies/lemonade.md": {
       "source_sha256": "428d83bf7ddb03e55ae4c09580554a56ff49d91b924eba6758bb9f106eb7b46a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Powinieneś' could be more inclusive (gender-neutral). Overall excellent, accurate translation with all code, URLs, and brand terms intact."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "\"domyślnie\" for \"expected to\" slightly off; \"Powinieneś\" gendered. Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/dependencies/lmstudio.md": {
       "source_sha256": "7bf63eab985e835155ecc012bee6c157069e27bc9030a3a975ef0652fe0b5443",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: UI labels like 'Updates', 'Settings > General > Models Directory' left untranslated, but this is acceptable for software UI references."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent; UI terms left in English intentionally. Code, URLs, brands intact."
     },
     "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
       "source_sha256": "e33b569398da8f57d5da1bbd94f0c0e005ee7a4c206a577236f785cba3865fcd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "\"Discover\" and \"Download\" left untranslated, which is acceptable for UI labels but slightly inconsistent."
+      "quality_issues": "Accurate, fluent; code/URLs intact. 'Download' button left untranslated but acceptable as UI label."
     },
     "playbooks/dependencies/lmstudio_models_qwen3_9b.md": {
       "source_sha256": "51c02b376e3faea175b98d9d6586c91a9524c83348cedf4bd76323499a3d486e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: UI labels 'Discover' and 'Download' left untranslated without explicit note, but acceptable for software UI terms."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent, accurate translation; code, URLs, brands intact. Minor: 'Download' button left in English (consistent choice)."
     },
     "playbooks/dependencies/memoryconfig.md": {
       "source_sha256": "45f82fd83ae2477a8f1afaebee688689addef39939bb0597c8f1cfb83591473f",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'kół' (wheels) translated as 'koło/kół' is awkward; 'stron' for 'page setting' is slightly imprecise. All code, URLs, brand names intact."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact; UI labels correctly kept in English."
     },
     "playbooks/dependencies/n8n.md": {
       "source_sha256": "921441b6697d8ab93bbbc5a9bb71d737f616df42dd40a39b063af61e5aa5c6fa",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'wiersz polecenia' could be 'Wiersz polecenia' for consistency as a proper noun."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent translation; code, URLs, and formatting intact."
     },
     "playbooks/dependencies/nodejs.md": {
       "source_sha256": "9df41526a5c8035b380150c56be8f29cad65da0286a8ee16fe0a49426436939b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 82,
-      "quality_issues": "Bash code comments left untranslated in Polish version; inconsistent translation approach between sections."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent, all code/URLs/numbers intact; minor stylistic nit only"
     },
     "playbooks/dependencies/podman.md": {
       "source_sha256": "4e8c2edd4b805a8395f03ddc6b7ff096e6352a7c404616b59a05edc257f0bccd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'standalone Compose V2 parsing plugin' translated slightly loosely as 'samodzielną wtyczkę do parsowania Compose V2'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; code, brands, URLs intact. Minor stylistic naturalness only."
     },
     "playbooks/dependencies/pytorch.md": {
       "source_sha256": "ba5ed9d425c6685dd285c639438efc74c1e8d9d561442bad6412b9adc8164d82",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Minor: 'support' nuance slightly simplified; otherwise flawless with all code, URLs, and brand terms intact."
+      "quality_issues": "Accurate, fluent; code/URLs intact. Minor slight redundancy in final sentence."
     },
     "playbooks/dependencies/rocm.md": {
       "source_sha256": "af961dbef80b407b98ee05fd0e5f816418bf097d384460ca5a57e7844bf38813",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'linkiem' could be more natural as 'odnośnikiem' or rephrased; otherwise flawless."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent, all code blocks, URLs, and markup intact."
     },
     "playbooks/dependencies/softwareupdate.md": {
       "source_sha256": "2d5cb11ce696297d74dfbb9d140b765dc64add55f1bdcbdd27fb3498ca3871f5",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Alt text left untranslated; minor stylistic choice to add 'komputer' (acceptable)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Fluent, accurate, code/URLs intact; UI tab names kept in English (acceptable), minor stylistic choice only."
     },
     "playbooks/dependencies/vllm.md": {
       "source_sha256": "8876f624743d3b843409b5cd523a262e60ba53539710bf26c00d80a88153391e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'launcher' translated inconsistently as 'polecenie uruchamiające' then 'Program uruchamiający'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 91,
+      "quality_issues": "Minor fluency: 'zgodne z OpenAI API vLLM' slightly awkward word order; otherwise accurate, intact code/URL."
     },
     "playbooks/dependencies/vscode.md": {
       "source_sha256": "09b668411f70fb8781a2d0d7c7e4417250e610839d0f6213d5f2ff846ceda8f2",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'installation executable' translated as 'instalator' loses specificity; UI tab names kept untranslated (acceptable). Overall excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 97,
+      "quality_issues": "Accurate, fluent; code/URLs intact. UI tab names left in English (acceptable given brand context)."
     },
     "playbooks/core/lmstudio-rocm-llms/README.md": {
       "source_sha256": "f0c7074a75cf11c9c9bb8b3508a87f66c8c08fa3e96832ece9f55e7dc5f85b91",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'witryną' typo for 'stroną' in step 2 of server setup; some UI strings left untranslated by design but inconsistently mixed."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'agentowego kodowania' slightly awkward; otherwise accurate, fluent, code/URLs/tags intact."
     },
     "playbooks/core/lmstudio-rocm-llms/platform.md": {
       "source_sha256": "f731064c13c2ca273ea6bbc804e0b3309a1f4d385e3b58b35575f5e8430a3b86",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: 'Msc' translated as 'Różne' is a reasonable guess but uncertain; 'playbook' left as 'playbooka' is acceptable but slightly informal."
+      "quality_issues": "Accurate, fluent; code/URLs/numbers intact. Minor: 'Msc' rendered as 'Inne' slightly loose."
     },
     "playbooks/core/lmstudio-rocm-llms/playbook.json": {
       "source_sha256": "43aa660e28f5698ceef07211ce4a2b2c197d5463917e8311049c6410a9bdbb57",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'obsługiwanie' could be 'serwowanie' for closer technical match to 'serving'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, terminology and brand terms intact; minor stylistic polish possible"
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
       "source_sha256": "19066843d638353adb3a11fe7f188f59a66c1f11eeaa7037af97a5c21308d4df",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: some UI labels left untranslated (e.g. 'Start from Scratch', 'Add workflow') which is acceptable but inconsistent; 'agregator' slightly misrepresents 'summarizer'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "\"Streszczacz\" is awkward neologism; minor missing blank line before Step 3 header. Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/core/n8n-automation-gpt-oss/platform.md": {
       "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Preinstalowany' is a calque; 'wstępnie zainstalowany' would be more natural. Otherwise excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact; minor anglicism 'playbooka' acceptable."
     },
     "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
       "source_sha256": "068a5d7d2996ca2c8b37535eddf9fe38ab421d56ee509a426d96835a96ab3f74",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 78,
-      "quality_issues": "\"news summarizer\" translated as \"agregator wiadomości z podsumowaniami\" (news aggregator with summaries) instead of \"narzędzie do podsumowywania wiadomości\" — shifts meaning from summarizer to aggrega"
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "'streszczacz wiadomości' is awkward neologism; 'podsumowywacz/generator streszczeń' better. Otherwise accurate, brands intact."
     },
     "playbooks/core/pytorch-rocm-llms/README.md": {
       "source_sha256": "a7f0693c43a5a31e55ffb32b5050099e5297ec77456daff75cf33edf91794d7a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'playbook' left untranslated in one instance; bash comments left in English (acceptable for code). Overall excellent, fluent, accurate translation."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: comments in bash examples left untranslated (acceptable)."
     },
     "playbooks/core/pytorch-rocm-llms/platform.md": {
       "source_sha256": "f10bd86c45555b65939b97bf0e599a75ce90d5ec18c61a68a98463d34c1e31d2",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: ™ symbol missing from 'AMD Ryzen AI Halo' in table rows (present in source as 'AMD Ryzen™ AI Halo Developer Platform' only in prerequisites)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, code/URLs/numbers intact; minor 'przetestowane... pod kątem' slight stiffness, otherwise excellent."
     },
     "playbooks/core/pytorch-rocm-llms/playbook.json": {
       "source_sha256": "e4aba2b4e1928b5162037673172f666cb991a500469e027743d01f3ee26955ef",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'powerful' translated as 'zaawansowane' (advanced) instead of 'potężne' (powerful), slight semantic shift."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; 'komputerze PC' slightly redundant; otherwise clean, brands/terms intact."
     },
     "playbooks/core/vscode-qwen3-coder/README.md": {
       "source_sha256": "25da94f89aec651b737075b56e6c558256a645c2a44b96204163e9c87c857fae",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Incomplete sentence in Resources intro preserved from source. Some UI strings left untranslated intentionally. Minor: 'wymagań wstępnych oprogramowania' slightly awkward."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Excellent translation; code/URLs intact. Minor: truncated source sentence 'running on' faithfully carried over."
     },
     "playbooks/core/vscode-qwen3-coder/platform.md": {
       "source_sha256": "14c7eec60b483e4bedb5e465673d89e07466088a9ed9c59d7964c3466cf89410",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Msc' translated as 'Różne' is a reasonable guess but uncertain; 'playbook' left as 'playbooka' is acceptable."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; all code, numbers, URLs, and brand terms intact."
     },
     "playbooks/core/vscode-qwen3-coder/playbook.json": {
       "source_sha256": "7ce988423e60b386afb4d619e4c1f54b387b839fe588261ab5aaf63e13dee220",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'kodowanie LLM' slightly awkward; brand terms and code names preserved correctly."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; minor: 'kodowanie z LLM' slightly awkward but acceptable."
     },
     "playbooks/supplemental/amd-sync/README.md": {
       "source_sha256": "ae7dafe9ebacacdff50f8cf23f8e03d49e1b648456a6b33fabaa84d4fc8c3c0e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: some UI labels left untranslated inconsistently (e.g., 'Remote', 'Device Name'); GitHub-only block not translated; 'aktualnego pulpitu' slightly awkward for 'live dashboard'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Minor inconsistency: 'Directory' left in English in table but translated as 'Katalog' later; missing blank line before one heading."
     },
     "playbooks/supplemental/amd-sync/playbook.json": {
       "source_sha256": "dd916e95fa31e2909a5ce0b7809b56adcc87c799638d3b136deadf1ec0bd4940",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor fluency: 'uzyskaj jednym kliknięciem' slightly awkward word order; could be 'uzyskaj zdalny VS Code jednym kliknięciem'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 78,
+      "quality_issues": "Title translates 'AMD Sync' as generic 'synchronizacją' instead of keeping brand name; inconsistent with body."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
       "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: anchor links not localized (e.g. #1-determine-network-interfaces instead of Polish anchors), 'kół' for 'wheels' is slightly awkward."
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: 'workery' anglicism, mixed comma/dot decimals, one missing blank line before Krok 2."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
       "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Klastrowanie' is a less common calque; 'Tworzenie klastra' might be more natural."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent; brands/terms intact. 'Klastrowanie' slightly awkward but acceptable."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
       "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Anchor links not localized (e.g. #downloading-the-model, #option-1-lemonade-sdk-recommended remain English); 'broadcast' translated as 'nasłuchiwał' (minor semantic shift); untranslated GitHub-only bl"
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Excellent translation; code, URLs, numbers intact. Minor: '1 trillion' rendered as 'biliona' (correct Polish). Anchor links kept English but consistent."
     },
     "playbooks/supplemental/clustering-rpc-server/playbook.json": {
       "source_sha256": "afee8d03bc9faa092036cbf4a62ec9db4252a49f25273438a7e4e5bbc2b4a10c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Klastrowanie' is a less natural calque; 'Klasteryzacja' or 'Łączenie w klaster' might be more idiomatic."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate; 'układów' slightly interprets 'devices' as chips vs later 'urządzeniach', minor inconsistency."
     },
     "playbooks/supplemental/ollama-getting-started/README.md": {
       "source_sha256": "5cb90cfa647fafa9f99ad8b659211c2e1806cd11f9fff3ceb351b56a90e6f227",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "GitHub-only block left untranslated; minor inconsistency in bullet list grammar (infinitives vs. 'Jak'); 'systemowe podpowiedzi' slightly awkward for 'system prompts'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Fluent, accurate; code/URLs intact. Minor: heading spacing before 'Następne kroki'; English prompt left untranslated (acceptable)."
     },
     "playbooks/supplemental/ollama-getting-started/playbook.json": {
       "source_sha256": "642990e3570bb0888cd87c78e2c61d19eea1864677052a0f04d7aa2a7c0f5414",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Zainstaluj Ollama' could be 'Zainstaluj Ollamę' for proper Polish grammar with direct object."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate and fluent; minor: 'Rozpoczynanie' slightly awkward vs 'Pierwsze kroki'"
     },
     "playbooks/supplemental/open-webui-chat/README.md": {
       "source_sha256": "b257e5d4c3accfd50265d7b75ea8258159b037cbbe57dcc9241bad746554c929",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'podpowiedzi' used for 'prompts' is acceptable but inconsistent; some UI labels left untranslated intentionally; overall excellent quality."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Minor: 'oba usługi' should be 'obie usługi'; some UI terms left untranslated intentionally. Code, URLs, brands intact."
     },
     "playbooks/supplemental/open-webui-chat/platform.md": {
       "source_sha256": "1cc71fc518a4ba7e507047973d835456dc836155b3365f0e7fb64ed1f81d85cb",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'reasoning' translated as 'wnioskowania' (could also mean 'inference'); 'text prompt' as 'podpowiedzi tekstowej' is slightly informal."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; all code, URLs, brands intact; natural fluent Polish with accurate terminology."
     },
     "playbooks/supplemental/open-webui-chat/playbook.json": {
       "source_sha256": "b7c488fe64673b9b617a974c4b360661b6afe299f3410c1120db34a6e794a0fd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'LLMs' simplified to 'LLM' (losing plural marking), but acceptable in Polish."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; minor stylistic redundancy but terminology and brand names intact"
     },
     "playbooks/supplemental/cvml/README.md": {
       "source_sha256": "a238f52921afd44cf45727cfafb0f4d99ceeb97b18b1c785362c8938554f6004",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: anchor links reference English IDs (#building-opencv-from-source, #running-face-detection) instead of Polish anchors; code comments left in English (acceptable but inconsistent)."
+      "quality_issues": "Some section links kept English anchors (untranslated visible text); otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/cvml/playbook.json": {
       "source_sha256": "53796041ee0532656e093dbb4bbac2c3bddbf15e76f7646824fa6360f1232a8c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Very minor: 'na bazie' slightly shifts meaning of 'on top of', but acceptable."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent; brand terms and trademarks intact. Minor: 'opartego' slightly ambiguous grammatically."
     },
     "playbooks/supplemental/gaia-agents/README.md": {
       "source_sha256": "feb74d6ee2839ece7d3918fb2910e2b7cf09cfdde6191742b776c521910f960a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: some English left untranslated in example outputs and code comments; 'playbook' consistently rendered as 'poradnik' which is acceptable but slightly informal."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, numbers intact. Minor inconsistency: example queries left in English but final test queries translated to Polish."
     },
     "playbooks/supplemental/gaia-agents/platform.md": {
       "source_sha256": "0aa409f73352dbe5489bcbff783403a39bd4049ae44238f8ce107165f02cf43c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "\"Agent doradcy sprzętowego\" is an awkward translation of \"Hardware Advisor Agent\"; \"wnioskowania agenta\" is slightly unnatural for \"agent reasoning\"."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Fluent, accurate; code/URLs/brands intact. Minor: 'Hardware Advisor Agent' left untranslated (acceptable as term)."
     },
     "playbooks/supplemental/gaia-agents/playbook.json": {
       "source_sha256": "e835f7da0097042741c5558f5fc14a57f25b24f807ef5c277ee6cf9793212ed9",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'chmurowych API' slightly awkward but acceptable; overall excellent translation."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 93,
+      "quality_issues": "Natural, accurate; 'GAIA SDK' word order slightly non-idiomatic (should be 'SDK GAIA')."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
       "source_sha256": "b3613af14dd94ab44888f2d3013af6b10e1685c5e4915765507065117303be9a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: 'playbook' inconsistently translated as 'poradnik'/'przewodnik'; some English UI strings left untranslated (acceptable for technical docs); prompt text left in English (intentional)."
+      "quality_issues": "Excellent translation; code/URLs/numbers intact. Minor: 'wizja' for vision slightly literal; masculine-only address form."
     },
     "playbooks/supplemental/lemonade-getting-started/platform.md": {
       "source_sha256": "091ccd8efa90e078a5d740aac0e40d742ad91f5898d0de9e1574d62e6778ec17",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "\"series\" left untranslated in GPU/NPU rows; minor but consistent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, numbers, brands intact. Minor: 'Cel' slightly literal for 'Purpose', acceptable."
     },
     "playbooks/supplemental/lemonade-getting-started/playbook.json": {
       "source_sha256": "444b1e3ddf1a59c5357878cb7e88b0db243e7c9a9d544095a2b8bdd3b8ba648a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Very good translation. Minor: 'lokalnie' placement slightly awkward but acceptable."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "\"open-source'owego\" awkward hybrid; otherwise accurate and fluent."
     },
     "playbooks/supplemental/llama-factory-finetuning/README.md": {
       "source_sha256": "38f43810c9ea7c04ad70e180795d64b81ab9e45fd01413ecd26a1d4e7283bde1",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'LLaMA Factory' inconsistently hyphenated as 'LLaMA-Factory' throughout; PowerShell code comments left untranslated (acceptable for code)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent, fluent translation; code, URLs, brands intact. Minor: 'zadań końcowych' for downstream is slightly literal."
     },
     "playbooks/supplemental/llama-factory-finetuning/playbook.json": {
       "source_sha256": "e8a8cd9cebcb66736e1cfb707fd792795defcb4f4facb6b80f722be826b2a89b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'LLaMA Factory' changed to 'LLaMA-Factory' (hyphenated), slight inconsistency with source brand name."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate and fluent; minor imperative-vs-descriptive stylistic choice acceptable."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
       "source_sha256": "3870cbf9cdec77fbb11f99c2751de2826fce765a431d52a853a9c034727e7225",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor nits: 'otwartoźródłowy' could be 'open-source'; some terms like 'piaskownica' are correct but slightly unusual in tech Polish; overall excellent quality."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent fluent translation; code/URLs/numbers intact. Minor: '263-tysięcznym oknem' slightly awkward but acceptable."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
       "source_sha256": "99df141310754dea218b61260f021d4fd7aec64a922654db64ed473b877e6351",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Inconsistent translation of 'Lemonade Server': translated as 'serwerem Lemonade' in title but left as 'Lemonade Server' in subtitle."
+      "quality_issues": "Inconsistent brand handling: 'serwerem Lemonade' vs 'Lemonade Server' in body; minor stylistic inconsistency."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
       "source_sha256": "bc2cba716bb866957cf930a234b9080bd64c863a18e6f77f7e98c3f51f0868fc",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: code comments left in English (acceptable), some terms like 'wsad' for batch are correct but less common than 'batch size' in Polish ML context."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Minor terminology inconsistency (batch/wsad mixed); 'nieprzygotowane wstępnie' slightly awkward. Otherwise fluent, accurate, code intact."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
       "source_sha256": "34841c22920fdf111d2a7ab0b640af96555cc1aa0376103acf8ea62e336609af",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'LLMs' abbreviated without plural marker in Polish, but acceptable convention."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Redundant parenthetical '(fine-tuning)' repeated twice; slightly awkward but accurate, terminology and brands intact."
     },
     "playbooks/supplemental/pytorch-kernels/platform.md": {
       "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "\"Windows runners\" translated as \"Środowiska uruchomieniowe Windows\" is slightly inaccurate; \"preinstalowane\" is a calque; minor stylistic nits."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "'obciążeniem roboczym' for workload is awkward; otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/pytorch-kernels/playbook.json": {
       "source_sha256": "30272b772a010c694249bc9a4f83fe9676ee2fa98cf3ec96dbca4f3be4ae3916",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'jąder/jądra GPU' is acceptable but 'kerneli GPU' is more common in Polish tech contexts."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "\"kerneli/kernele\" acceptable anglicism; some prefer \"jąder\". Otherwise accurate, fluent, brands intact."
     },
     "playbooks/supplemental/speech2speech-translation/README.md": {
       "source_sha256": "c6e008753ea3a6442c32774e44345e39fd5b5b64534fcb837541f2220c66d1fd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: untranslated GitHub callout block; 'playbook' left untranslated in a few spots; otherwise excellent fluency, accuracy, and intact code/URLs."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, tags intact. Minor: 'Miksuj i dopasowuj' slightly literal."
     },
     "playbooks/supplemental/speech2speech-translation/platform.md": {
       "source_sha256": "ac5b39917b7a533154f6a0f823949356905a766e067a7efcd000d63584cb36a3",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: ™ symbol dropped from 'AMD Ryzen™ AI Halo' in table rows; 'playbook' left untranslated (acceptable as loanword)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, code/numbers/brands intact. Minor: 'zoptymalizowane pod kątem Twojej platformy' slightly wordy but correct."
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
       "source_sha256": "48eb7b7b031b9e676748a482854cf10fb41555109fa05ec9a06a8992baf282cf",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor stylistic choice: 'Zbuduj system' adds 'system' not in source, but improves Polish fluency."
+      "quality_issues": "Accurate and fluent; minor addition 'rozwiązanie' slightly expands source but improves naturalness."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
       "source_sha256": "a2ee5a621944612fd1d5ac526c6b844f0f528a0c696c178ac8f85f170ab7467c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: anchor link #known-warnings not updated to match translated heading #znane-ostrzeżenia; 'alt text' translated inconsistently."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Minor inconsistency: 'poradnik' used once vs 'playbook' elsewhere; otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/platform.md": {
       "source_sha256": "45dc9cd1642f32761ed88326b25e7df018482c93832b386c31464522eb62066b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Missing ™ symbol in table rows for 'AMD Ryzen AI Halo'; minor stylistic choices like 'preinstalowany' vs 'wstępnie zainstalowany'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, technical terms and code preserved. Minor natural phrasing choices only."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/playbook.json": {
       "source_sha256": "3204669893381cf35615253a77a5fab815e3d2e3cc61269de7441781b2a6aebc",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 85,
-      "quality_issues": "Minor: 'Fine-tuned LLMs' trademark phrase slightly reworded; 'pamięciooszczędnego' is acceptable but slightly awkward compound."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Trademark symbol misplaced (should be on Unsloth per source); otherwise accurate, fluent."
     },
     "playbooks/supplemental/vllm-inference/README.md": {
       "source_sha256": "24dc5ebde274af75275e075ca2423138e0d67d3de03f1cebbee30fb9ac5940f4",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Code comment left untranslated; minor stylistic choices like 'poradnik' for 'playbook' are acceptable but slightly informal."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Fluent, accurate; code, URLs, brands intact. Minor terminology anglicisms (batchowanie, serwowanie) acceptable in context."
     },
     "playbooks/supplemental/vllm-inference/playbook.json": {
       "source_sha256": "0db881869b8d489317f0445edf4b420f738173b9c82c6488074e8948f7d6351c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "\"obsługę\" is slightly vague for \"serving\" (model serving); could use \"serwowanie\" for technical precision."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "\"serwowanie\" is awkward; \"skonteneryzowanego\" uncommon but acceptable; otherwise accurate and fluent."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "ef647656230fb6a512ac0b98b573e61f729e4c14de2bdcd4b33a1c733c1a9e2c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'jąder'/'jądra' used inconsistently alongside 'kerneli'; untranslated GitHub callout block at top; code comments left in English (acceptable for technical docs)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code/URLs/numbers intact, fluent technical Polish, consistent terminology. Minor stylistic nits only."
     }
   }
 }

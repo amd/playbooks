@@ -6,34 +6,34 @@ SPDX-License-Identifier: MIT
 
 # Konfiguracija platforme
 
-Ovaj dokument opisuje očekivanu konfiguraciju platforme za pokretanje ovog priručnika.
+Ovaj dokument opisuje očekivanu konfiguraciju platforme za pokretanje ovog playbook-a.
 
-## Potrebne aplikacije/okviri
+## Obavezne aplikacije/frameworkovi
 
 ### Windows/Linux
-Lemonade treba biti unapred instaliran odavde [ovde](https://lemonade-server.ai/install_options.html).
+Lemonade treba biti unapred instaliran odavde [here](https://lemonade-server.ai/install_options.html).
 
 - **Open WebUI** (frontend veb aplikacija)
-- **Lemonade Server** (pozadinski server modela)
+- **Lemonade Server** (bekend server modela)
 
-> Ovaj priručnik pokreće **Lemonade** (Lemonade server/aplikacija) **nativno**. **Open WebUI** se pokreće kao **kontejner** na Linux-u (putem Podman-a) i kao **Python paket** na Windows-u. `open-webui` PyPI paket podržava samo Python ≤ 3.12, pa Linux kontejner izbegava potrebu za upravljanjem starijim verzijama Python-a.
+> Ovaj playbook pokreće **Lemonade** (Lemonade server/aplikaciju) **nativno**. **Open WebUI** se pokreće kao **kontejner** na Linuxu (preko Podman-a) i kao **Python paket** na Windows-u. Paket `open-webui` sa PyPI podržava samo Python ≤ 3.12, tako da Linux kontejner izbegava potrebu za upravljanjem starijim verzijama Python-a.
 
 ## Modeli (u Lemonade)
 
-Modeli treba da budu preuzeti unutar **Lemonade aplikacije** (koristeći ugrađeni Menadžer modela) ili putem Lemonade komandi za upravljanje modelima (`lemonade pull <model_name>`). Ovaj priručnik pretpostavlja da su preporučeni modeli navedeni ispod preuzeti i da se prikazuju na krajnjoj tački liste modela.
+Modeli treba da se preuzmu unutar **Lemonade aplikacije** (koristeći ugrađeni Model Manager) ili preko Lemonade komandi za upravljanje modelima (`lemonade pull <model_name>`). Ovaj playbook pretpostavlja da su preporučeni modeli ispod preuzeti i da se prikazuju u endpoint-u liste modela.
 
-Proverite dostupnost modela:
+Provera dostupnosti modela:
 - Otvorite: `http://localhost:13305/api/v1/models`
-- Preuzeti modeli biće navedeni pod `"data"`.
+- Preuzeti modeli će biti navedeni pod `"data"`.
 
 ### Preporučeni modeli
 
 | Mogućnost | ID modela | Napomene |
 |---|----|-----|
-| LLM (Tekstualni ulaz → Tekstualni izlaz) | `Qwen3-4B-Hybrid` (ili sličan) | Bilo koji Lemonade LLM model za ćaskanje, dopunjavanje teksta, kodiranje ili zaključivanje |
-| VLM (Slika → Tekst) | `Qwen3.5-4B-GGUF` (ili bilo koji model iz kategorije **Vision**) | Bilo koji multimodalni/vizuelno sposobni model koji može da prima slike kao deo ulaza |
+| LLM (Tekstualni unos → Tekstualni izlaz) | `Qwen3-4B-Hybrid` (ili sličan) | Bilo koji Lemonade LLM model za ćaskanje, dovršavanje teksta, kodiranje ili rezonovanje |
+| VLM (Slika → Tekst) | `Qwen3.5-4B-GGUF` (ili bilo koji model iz kategorije **Vision**) | Bilo koji multimodalni model sa podrškom za vizuelni sadržaj koji može da prihvati slike kao deo svog ulaza |
 | Generisanje slika (Tekst → Slika) | `SDXL-Turbo` (ili bilo koji model iz kategorije **Image**) | Bilo koji Stable Diffusion model koji generiše slike na osnovu tekstualnog upita |
-| Audio (Govor → Tekst) | `Whisper-Large-v3` (ili bilo koji model iz kategorije **Audio**) | Bilo koji ASR model koji konvertuje audio u tekst |
+| Audio (Govor → Tekst) | `Whisper-Large-v3` (ili bilo koji model iz kategorije **Audio**) | Bilo koji ASR model koji pretvara audio u tekst |
 
 <p align="center">
   <img src="assets/lemonade_model_manager.png" alt="Lemonade Model Manager" width="600"/>

@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 #### ROCm
 
-**Lägg till den aktuella användaren i render- och videogrupperna.** 
+**Lägg till den aktuella användaren i grupperna render och video.** 
 ```bash
 sudo usermod -a -G render,video $LOGNAME
 ```
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-För ytterligare hjälp med installationen, se denna [länk](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+För ytterligare installationshjälp, se den här [länken](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).

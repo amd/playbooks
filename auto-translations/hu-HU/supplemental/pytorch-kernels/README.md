@@ -5,58 +5,59 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ez a playbook olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom helyes előnézetéhez kérjük, látogasson el a [amd.com/playbooks](https://amd.com/playbooks) oldalra.
 <!-- @github-only:end -->
 
 ## Áttekintés
 
-Írj egy GPU kernelt a nulláról, fordítsd le, indítsd el egy AMD GPU-n, és figyeld, ahogy a kihasználtság megugrík. Ez a playbook bemutatja, hogyan működik valójában a GPU számítás: írd meg a kernel kódját, és hajtsd végre párhuzamosan több ezer szálon.
+Írjon egy GPU kernelt a semmiből, fordítsa le, indítsa el egy AMD GPU-n, és figyelje meg, ahogy a kihasználtság megugrik. Ez a playbook bemutatja, hogyan működik valójában a GPU-alapú számítás: megírja a kernelkódot, majd párhuzamosan végrehajtja azt több ezer szálon.
 
 > **Megjegyzés**: Ez egy meglehetősen összetett playbook, amely némi extra hibakeresést és módosítást igényelhet.
 
-## Mit fogsz megtanulni
+## Amit tanulni fog
 
 <!-- @os:windows -->
-- Hogyan működnek a GPU kernelek: rácsok, blokkok, szálak, és az indexelési modell, amely ezeket az adatokhoz rendeli
-- Hogyan teszi lehetővé az AMD ROCm/HIP stack, hogy CUDA-stílusú kódot írj, amely módosítás nélkül fut AMD GPU-kon
-- Hogyan fordíts le egy kernelt futásidőben a `torch.cuda._compile_kernel` segítségével
-- Hogyan építs natív C++ kernel kiterjesztést `CUDAExtension` + pybind11 segítségével, amely Pythonból importálható
+- Hogyan működnek a GPU kernelek: rácsok (grids), blokkok, szálak, és az indexelési modell, amely ezeket az adatokhoz rendeli
+- Hogyan teszi lehetővé az AMD ROCm/HIP stack, hogy CUDA-stílusú kódot írjon, amely módosítás nélkül fut AMD GPU-kon
+- Hogyan fordítson le egy kernelt futásidőben a `torch.cuda._compile_kernel` segítségével
+- Hogyan építsen natív C++ kernel kiterjesztést a `CUDAExtension` + pybind11 segítségével, amely Pythonból importálható
 <!-- @os:end -->
 <!-- @os:linux -->
-- Hogyan működnek a GPU kernelek: rácsok, blokkok, szálak, és az indexelési modell, amely ezeket az adatokhoz rendeli
-- Hogyan teszi lehetővé az AMD ROCm/HIP stack, hogy CUDA-stílusú kódot írj, amely módosítás nélkül fut AMD GPU-kon
-- Hogyan fordíts le egy kernelt futásidőben a `torch.cuda._compile_kernel` segítségével
-- Hogyan építs natív C++ kernel kiterjesztést `CUDAExtension` + pybind11 segítségével, amely Pythonból importálható
-- Hogyan mérd a kernel végrehajtási idejét, és hogyan figyelj élő GPU kihasználtságot az `amd-smi` segítségével
+- Hogyan működnek a GPU kernelek: rácsok (grids), blokkok, szálak, és az indexelési modell, amely ezeket az adatokhoz rendeli
+- Hogyan teszi lehetővé az AMD ROCm/HIP stack, hogy CUDA-stílusú kódot írjon, amely módosítás nélkül fut AMD GPU-kon
+- Hogyan fordítson le egy kernelt futásidőben a `torch.cuda._compile_kernel` segítségével
+- Hogyan építsen natív C++ kernel kiterjesztést a `CUDAExtension` + pybind11 segítségével, amely Pythonból importálható
+- Hogyan mérje a kernel végrehajtási idejét, és hogyan figyelje élőben a GPU kihasználtságát az `amd-smi` segítségével
 <!-- @os:end -->
 
 ---
 
-Ez a playbook két megközelítést mutat be a kernel fejlesztéshez:
+Ez a playbook a kernelfejlesztés két megközelítését mutatja be:
 
 <!-- @os:windows -->
 | Megközelítés | Belépési pont |
 |---|---|
-| **JIT fordítás** | `torch.cuda._compile_kernel`, írj egy kernelt Python stringként, build lépés nélkül |
-| **C++ kiterjesztés** | `CUDAExtension` + pybind11: fordíts egy `.cu` fájlt natív `.pyd` fájllá és importáld |
+| **JIT fordítás** | `torch.cuda._compile_kernel`, a kernel megírása Python stringként, build lépés nélkül |
+| **C++ kiterjesztés** | `CUDAExtension` + pybind11: egy `.cu` fájl lefordítása natív `.pyd` fájllá, majd importálás |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Megközelítés | Belépési pont |
 |---|---|
-| **JIT fordítás** | `torch.cuda._compile_kernel`, írj egy kernelt Python stringként, build lépés nélkül |
-| **C++ kiterjesztés** | `CUDAExtension` + pybind11: fordíts egy `.cu` fájlt natív `.so` fájllá és importáld |
+| **JIT fordítás** | `torch.cuda._compile_kernel`, a kernel megírása Python stringként, build lépés nélkül |
+| **C++ kiterjesztés** | `CUDAExtension` + pybind11: egy `.cu` fájl lefordítása natív `.so` fájllá, majd importálás |
 <!-- @os:end -->
 
-Mindkét megközelítés AMD GPU-kon fut. Ez azért lehetséges, mert a PyTorch ROCm buildje a teljes CUDA API felületet HIP-re képezi le. Ez azt jelenti, hogy a `torch.cuda`, a `CUDAExtension` és a CUDA kernel szintaxis mind átláthatóan működik AMD hardveren.
+Mindkét megközelítés fut AMD GPU-kon. Ez azért lehetséges, mert a PyTorch ROCm build-je a teljes CUDA API felületet HIP-re képezi le. Ez azt jelenti, hogy a `torch.cuda`, a `CUDAExtension` és a CUDA kernel szintaxis mind átlátszó módon működik AMD hardveren.
 
 ---
 
 ## Háttér
 
-### Mi az a GPU kernel?
+### Mi az a GPU Kernel?
 
-A GPU kernel egy olyan függvény, amely párhuzamosan fut több ezer GPU szálon egyszerre. Ellentétben egy CPU függvénnyel, amely hívásonként egyszer hajtódik végre, egy kernelt egy **rácsból** álló **blokkokkal** indítanak el, amelyek mindegyike sok **szálat** tartalmaz, és mindegyik ugyanazt a kódot hajtja végre különböző adatokon.
+A GPU kernel egy olyan függvény, amely egyidejűleg több ezer GPU szálon fut párhuzamosan. Egy CPU-függvénnyel ellentétben, amely híváskor egyszer fut le, a kernel egy **blokkokból** álló **rács** (grid) segítségével kerül elindításra, ahol minden blokk sok **szálat** (thread) tartalmaz, és mindegyik ugyanazt a kódot hajtja végre eltérő adatokon.
 
 <p align="center">
   <img src="assets/grid_threads.png" width="900"/>
@@ -64,52 +65,52 @@ A GPU kernel egy olyan függvény, amely párhuzamosan fut több ezer GPU szálo
 
 ### Szálindexelési modell
 
-Egy kernel indításakor két dimenziót kell megadni:
+Egy kernel indításakor két dimenziót kell megadnia:
 
 | Változó | Jelentés |
 |---|---|
-| `gridDim` | Blokkok száma a rácsban |
-| `blockDim` | Szálak száma blokkonként |
+| `gridDim` | A rácsban lévő blokkok száma |
+| `blockDim` | Blokkonkénti szálak száma |
 
-Minden szálnak hozzáférése van három beépített, csak olvasható változóhoz:
+Minden szál három beépített, csak olvasható változóhoz fér hozzá:
 
 | Változó | Jelentés |
 |---|---|
-| `blockIdx.x` | Melyik blokkhoz tartozik ez a szál |
-| `blockDim.x` | Szálak száma egy blokkban |
-| `threadIdx.x` | Szálindex a blokkon belül |
+| `blockIdx.x` | Melyik blokkhoz tartozik az adott szál |
+| `blockDim.x` | Egy blokkban lévő szálak száma |
+| `threadIdx.x` | A szál indexe a blokkján belül |
 
-### Globális szál azonosító
+### Globális szálazonosító
 
-Ezeket a változókat kombinálva számítható ki egy globálisan egyedi szálindex:
+Ezeket a változókat kombinálva kiszámítható egy globálisan egyedi szálindex:
 
 ```c
 int idx = blockIdx.x * blockDim.x + threadIdx.x;
 ```
 
-Az összes szál száma = `gridDim.x * blockDim.x`. Minden szál egymástól függetlenül dolgoz fel egy elemet. Ez az **adatpárhuzamosság** alapja. Ugyanaz a művelet egyszerre fut sok elemen, szálak közötti függőség nélkül.
+Az összes szál száma = `gridDim.x * blockDim.x`. Minden szál egy elemet dolgoz fel önállóan. Ez a **data parallelism** (adatpárhuzamosság) alapja. Ugyanaz a művelet fut le sok elemen egyszerre, szálak közötti függőség nélkül.
 
 ---
 
 ### GPU végrehajtási modell: Wavefrontok
 
-Az AMD GPU-k **32**-es csoportokban hajtják végre a szálakat, amelyeket **wavefront**-oknak neveznek. Egy wavefront összes szála egyszerre hajtja végre ugyanazt az utasítást. Ez befolyásolja az optimális blokkméret megválasztását (256 szál = 8 wavefront = jó ütemezési hatékonyság).
+Az AMD GPU-k **32**-es csoportokban hajtják végre a szálakat, amelyeket **wavefrontnak** neveznek. Egy wavefront összes szála ugyanazt az utasítást hajtja végre egyidejűleg. Ez befolyásolja az optimális blokkméret-választást (256 szál = 8 wavefront = jó ütemezési hatékonyság).
 
 ### AMD GPU programozás: HIP + ROCm
 
-A **ROCm** az AMD nyílt forráskódú GPU számítási stackje (illesztőprogramok, fordítók, könyvtárak, futtatókörnyezet). A **HIP** erre épül, és szintaktikailag azonosnak lett tervezve a CUDA-val. A PyTorch ROCm buildje átláthatóan leképezi a `torch.cuda.*` hívásokat HIP-re, így ugyanaz a kód AMD GPU-kon is működik.
+A **ROCm** az AMD nyílt forráskódú GPU számítási stack-je (illesztőprogramok, fordítók, könyvtárak, futtatókörnyezet). A **HIP** ezen a rétegen fut, és úgy tervezték, hogy szintaktikailag azonos legyen a CUDA-val. A PyTorch ROCm build-je átlátszó módon képezi le a `torch.cuda.*`-ot HIP-re, így ugyanaz a kód működik AMD GPU-kon is.
 
 ---
 
 ### PyTorch + AMD/HIP
 
-A PyTorch egy ROCm buildet szállít, ahol a CUDA API felület (`torch.cuda.*`) átláthatóan HIP által van kiszolgálva. Ez azt jelenti:
+A PyTorch egy olyan ROCm build-et kínál, ahol a CUDA API felületet (`torch.cuda.*`) átlátszó módon a HIP biztosítja. Ez azt jelenti, hogy:
 
-- A `torch.cuda.is_available()` AMD GPU-kon is működik ROCm-mal
-- A `tensor.to("cuda")` az AMD GPU-n foglal memóriát
-- A `torch.version.hip` a HIP verziót teszi elérhetővé
+- a `torch.cuda.is_available()` működik AMD GPU-kon ROCm-mal
+- a `tensor.to("cuda")` az AMD GPU-n foglal memóriát
+- a `torch.version.hip` felfedi a HIP verzióját
 
-A PyTorch emellett elérhetővé teszi a `torch.cuda._compile_kernel()` függvényt, amely egy magas szintű parancsikon egy nyers kernel string JIT fordítására, és visszaad egy hívható objektumot, külön build lépés nélkül.
+A PyTorch emellett elérhetővé teszi a `torch.cuda._compile_kernel()`-t is, amely egy magas szintű parancsikon egy nyers kernel string JIT lefordításához, és egy hívható objektum visszaadásához, külön build lépés nélkül.
 
 ---
 
@@ -123,7 +124,7 @@ A PyTorch emellett elérhetővé teszi a `torch.cuda._compile_kernel()` függvé
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Előfeltételek - Windows
-- Telepítsd a legújabb verziót: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- Telepítse a legújabb verziót: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -131,7 +132,7 @@ A PyTorch emellett elérhetővé teszi a `torch.cuda._compile_kernel()` függvé
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Linuxon nyiss meg egy terminált a kívánt könyvtárban, és kövesd az utasításokat egy ROCm+PyTorch-csal előre telepített venv létrehozásához.
+Linux alatt nyisson meg egy terminált a választott könyvtárban, majd kövesse a parancsokat egy olyan venv létrehozásához, amelyben már telepítve van a ROCm+PyTorch.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -144,13 +145,13 @@ source kernel-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Adj hozzáférést a felhasználódnak a GPU eszközökhöz** (a hatályba lépéshez jelentkezz ki és be):
+**Adjon hozzáférést a felhasználójának a GPU eszközökhöz** (a hatásba lépéshez jelentkezzen ki, majd vissza):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Linuxon nyiss meg egy terminált a kívánt könyvtárban, és kövesd az utasításokat egy venv létrehozásához.
+Linux alatt nyisson meg egy terminált a választott könyvtárban, majd kövesse a parancsokat egy venv létrehozásához.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -164,7 +165,7 @@ source kernel-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Windowson nyiss meg egy terminált a kívánt könyvtárban, és kövesd az utasításokat egy venv létrehozásához.
+Windows alatt nyisson meg egy terminált a választott könyvtárban, majd kövesse a parancsokat egy venv létrehozásához.
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv kernel-env
@@ -173,11 +174,11 @@ kernel-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
-> **Tipp**: A Windows felhasználóknak esetleg módosítaniuk kell a PowerShell végrehajtási házirendjét (pl.
-> állítsák RemoteSigned vagy Unrestricted értékre) egyes PowerShell parancsok futtatása előtt.
+> **Tipp**: Előfordulhat, hogy a Windows felhasználóknak módosítaniuk kell a PowerShell végrehajtási házirendjét (pl.
+> RemoteSigned vagy Unrestricted értékre állítva) néhány PowerShell parancs futtatása előtt.
 
 <!-- @os:end -->
-### Az alapvető függőségek telepítése
+### Alapvető függőségek telepítése
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
 <!-- @require:rocm,pytorch -->
@@ -193,7 +194,7 @@ kernel-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-> **Megjegyzés:** Ehhez a útmutatóhoz a ROCm és a PyTorch telepítése szükséges a virtuális környezetbe még a Ryzen AI Halo esetén is, mivel az egyéni kernel fordítása a teljes fejlesztői fejléceket igényli.
+> **Megjegyzés:** Ehhez a playbookhoz a ROCm-ot és a PyTorch-ot a virtuális környezetbe kell telepíteni, még a Ryzen AI Halo esetén is, mivel az egyedi kernelfordításhoz a teljes fejlesztői fejlécekre van szükség.
 
 Telepítse a ROCm-ot:
 ```powershell
@@ -227,9 +228,9 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 ### További függőségek telepítése
 
 <!-- @os:linux -->
-Telepítse a Linux C/C++ fordítói eszközláncot. Ez rendszerszintű függőség, és szükséges a C++ bővítmény útmutatókhoz, mivel a `CUDAExtension` natív `.so` modulokat fordít `.cu` fájlokból.
+Telepítse a Linux C/C++ build eszközláncot. Ez egy rendszerszintű függőség, és szükséges a C++ kiterjesztés bemutatókhoz, mivel a `CUDAExtension` natív `.so` modulokat épít `.cu` fájlokból.
 
-Futtassa ezt egyszer a Linux gépen, a létrehozott Python virtuális környezeten kívül:
+Ezt egyszer futtassa a Linux gépen, a létrehozott Python virtuális környezeten kívül:
 
 ```bash
 sudo apt update
@@ -237,7 +238,7 @@ sudo apt install -y build-essential gcc g++
 ```
 <!-- @os:end -->
 
-A `kernel-env` virtuális környezet aktiválása után telepítse a Python fordítási függőségeket:
+A `kernel-env` virtuális környezet aktiválása után telepítse a Python build függőségeket:
 <!-- @test:id=install-deps timeout=60 setup=activate-venv -->
 ```bash
 python -m pip install "setuptools<82" wheel ninja
@@ -260,22 +261,22 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Győződjön meg arról, hogy a [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) vagy [újabb verzió](https://visualstudio.microsoft.com/vs/community/) telepítve van a **Asztali fejlesztés C++ segítségével** munkaterheléssel.
+Kérjük, győződjön meg róla, hogy a [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) vagy [újabb](https://visualstudio.microsoft.com/vs/community/) telepítve van a **Desktop development with C++** munkaterheléssel.
 
-> **Megjegyzés**: Ez a Visual Studio C++ környezet beállítása csak a **C++ bővítmény** megközelítéshez szükséges. A JIT fordítási megközelítéshez nem szükséges.
+> **Megjegyzés**: Ez a Visual Studio C++ környezet beállítás csak a **C++ Extension** megközelítéshez szükséges. A JIT Compilation megközelítéshez nem szükséges.
 
-Nyisson meg egy PowerShell terminált, és futtassa a következő parancsokat a C++ bővítmény fordítása előtt.
+Nyisson meg egy PowerShell terminált, és futtassa az alábbi parancsokat a C++ kiterjesztés elkészítése előtt.
 
 **1. lépés: Keresse meg a telepített Visual Studio C++ környezetet**
 
-**(A) Keresse meg a `vswhere.exe` fájlt, amely a Visual Studio Installer-rel együtt települ**
+**(A) Keresse meg a `vswhere.exe`-t, amely a Visual Studio Installerrel települ**
 ```powershell
 $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 
 if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(B) Keresse meg a `vcvars64.bat` fájlt a Visual Studio 2022-ből vagy újabb verzióból C++ fordítói eszközökkel**
+**(B) Keresse meg a `vcvars64.bat`-ot a Visual Studio 2022-ből vagy újabb verzióból, C++ build eszközökkel**
 
 ```powershell
 $Vcvars = & $VsWhere `
@@ -288,17 +289,17 @@ $Vcvars = & $VsWhere `
 if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(C) Nyomtassa ki a használt Visual Studio C++ környezetet**
+**(C) Írassa ki a használt Visual Studio C++ környezetet**
 
 ```powershell
 Write-Host "Using Visual Studio C++ environment: $Vcvars"
 ```
 
-**2. lépés: Aktiválja a Visual Studio C++ fordítói környezetet**
+**2. lépés: A Visual Studio C++ build környezet aktiválása**
 
-**(A) Futtassa a `vcvars64.bat` fájlt, és rögzítse az általa beállított környezetet**
+**(A) Futtassa a `vcvars64.bat`-ot, és rögzítse a beállított környezetet**
 
-Ez elérhetővé teszi a `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` és Windows SDK útvonalakat.
+Ez elérhetővé teszi a `cl.exe`-t, az `INCLUDE`, `LIB`, `LIBPATH` változókat és a Windows SDK elérési útjait.
 
 ```powershell
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
@@ -310,7 +311,7 @@ if ($ExitCode -ne 0) {
 }
 ```
 
-**(B) Importálja a Visual Studio környezeti változókat ebbe a PowerShell munkamenetbe**
+**(B) Importálja a Visual Studio környezeti változóit ebbe a PowerShell munkamenetbe**
 
 ```powershell
 $VsEnv | ForEach-Object {
@@ -417,7 +418,7 @@ $env:DISTUTILS_USE_SDK = "1"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Ellenőrizze, hogy az AMD GPU látható-e a következő paranccsal:
+Ellenőrizze, hogy az AMD GPU látható-e a következővel:
 <!-- @test:id=amd-smi-linux timeout=60 setup=activate-venv -->
 ```bash
 amd-smi
@@ -556,25 +557,25 @@ Hozza létre a következő könyvtárstruktúrát a **2 új mappa** létrehozás
 
 | Könyvtár | Letöltendő fájlok | Leírás |
 |-----------|-------------------|-------------|
-| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| JIT és C++ bővítmény fájlok vektorösszeadási kernelhez |
-| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | JIT és C++ bővítmény fájlok mátrixszorzási kernelhez |
+| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| JIT és C++ kiterjesztés fájlok a vektorösszeadás kernelhez |
+| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | JIT és C++ kiterjesztés fájlok a mátrixszorzás kernelhez |
 
 
-## Útmutatók
+## Bemutatók
 
-### 1. útmutató: Vektorösszeadás
+### 1. bemutató: Vektorösszeadás
 
 #### A megközelítés: JIT fordítás
 
-A JIT (Just-In-Time, azaz igény szerinti) fordítás azt jelenti, hogy a kernel nyers C++ karakterláncként van megírva a Pythonban, és futásidőben kerül lefordításra, anélkül hogy további fordítási lépések szükségesek lennének.
+A JIT (Just-In-Time) fordítás azt jelenti, hogy a kernel egy nyers C++ string formájában van megírva a Pythonban, és futásidőben kerül lefordításra, extra build lépések nélkül.
 
-Az [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py) használatához győződjön meg arról, hogy le van töltve, majd futtassa:
+Az [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py) használatához győződjön meg róla, hogy le van töltve, majd futtassa:
 ```bash
 cd Vector_Addition # if not already inside the directory
 python add_one_kernel.py
 ```
 
-**Főbb kódrészletek**
+**Kulcs kódrészletek**
 ```python
 import torch
 
@@ -614,31 +615,31 @@ print("First 5 elements:", x[:5].cpu())
 #Expected output: tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @os:linux -->
-> **Tipp**: A szkript egy háttérszálat is indít, amely 100 ms-onként lekérdezi az `amd-smi` eszközt, hogy naplózza a csúcs- és átlagos GPU-kihasználtságot a kernel futása során.
+> **Tipp**: A szkript emellett indít egy háttérszálat is, amely 100 ms-onként lekérdezi az `amd-smi`-t, hogy naplózza a csúcs- és átlagos GPU-kihasználtságot a kernel futása közben.
 <!-- @os:end -->
 
 > **Megjegyzés**: **Miért 256 a blokkméret?** <br>
-> - A kernel **blokkonként 256 szálat** használ, mert ez jól illeszkedik az **AMD GPU-k hullámfront végrehajtási modelljéhez**.
-> - Ne feledje, hogy az AMD hardver 32 szálból álló csoportokban hajtja végre a szálakat, ami blokkonként 8 hullámfrontot eredményez. (8 hullámfront × 32 szál = 1 blokk)
+> - A kernel **256 szálat blokkonként** használ, mert ez jól illeszkedik az **AMD GPU-k wavefront végrehajtási modelljéhez**.
+> - Emlékeztetőül: az AMD hardver 32 szálas csoportokban hajtja végre a szálakat, ami blokkonként 8 wavefrontot eredményez. (8 wavefront x 32 szál = 1 blokk)
 
 
-**Mit csinál a munkaterhelés:**
+**Mit végez a munkaterhelés:**
 
-A kernel mesterségesen extra munkát ad hozzá a GPU-kihasználtság bemutatásához:
+A kernel mesterségesen extra munkát ad hozzá, hogy szemléltesse a GPU-kihasználtságot:
 
 - **100 000 000 elem** a tenzorban
-- **A belső ciklus 1 000-szer fut** elemenként kernel indításonként  
-- **200 kernel indítás** összesen
+- A **belső ciklus 1000-szer fut** elemenként, kernelindításonként  
+- **200 kernelindítás** összesen
 
 **Matematika:**  
-- Minden elem: 1-gyel növekszik × 1 000 iteráció × 200 indítás = 200 000  
-- Végeredmény: 1,0 (kezdőérték) + 200 000 (összeadás) = 200 001,0
+- Minden elem: 1-gyel nő × 1000 iteráció × 200 indítás = 200 000  
+- Végeredmény: 1,0 (kezdőérték) + 200 000 (növelések) = 200 001,0
 
-**Miért van szükség a belső ciklusra?**  
-- A `for (int i = 0; i < 1000; i++)` ciklus nélkül a 200 indítás azonnal befejeződne, és a megfigyelési eszközök nem rögzítenének érdemi GPU-kihasználtságot. A mesterséges munka elég hosszúra nyújtja az egyes kernel futásokat ahhoz, hogy a megfigyelési eszközök mérni tudják a teljesítményt.
+**Miért a belső ciklus?**  
+- A `for (int i = 0; i < 1000; i++)` ciklus nélkül a 200 indítás azonnal befejeződne, és a monitorozó eszközök nem tudnának érdemi GPU-kihasználtságot rögzíteni. A mesterséges munka elég hosszúra nyújtja az egyes kernelfutásokat ahhoz, hogy a monitorozó eszközök mérni tudják a teljesítményt.
 
 <!-- @os:linux -->
-**Várható kimenet:** [A teljesítményszámok eltérhetnek]
+**Elvárt kimenet:**[A teljesítményértékek eltérőek lehetnek]
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
@@ -648,16 +649,16 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Megjegyzés**: Windows rendszeren az `amd-smi` nem támogatott. A GPU-kihasználtság nyomon követéséhez használhatja a Feladatkezelőt, ahol a program futtatásakor rövid kihasználtsági csúcsot kell látnia.
+> **Megjegyzés**: Windows rendszeren az `amd-smi` nem támogatott. A GPU-kihasználtság nyomon követéséhez használhatja a Feladatkezelőt, ahol a program futtatásakor egy rövid kihasználtsági csúcsot kell látnia.
 
-**Várható kimenet:**
+**Elvárt kimenet:**
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
 No GPU Usage captured.
 ```
 <!-- @os:end -->
-**Szép munka! Épp most futtatta az első GPU kerneljét.**
+**Szép munka! Éppen most futtatta le az első GPU-kernelét.**
 
 <!-- @os:linux -->
 <!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
@@ -800,27 +801,27 @@ $code | python -
 ---
 #### B megközelítés: C++ kiterjesztés
 
-A második megközelítés manuálisabb: a kernelt és a Python kötést egyetlen `.cu` fájlba írjuk, natívan fordítjuk le a PyTorch build rendszerével, majd importáljuk Pythonba.
+A második megközelítés kézi jellegű: a kernel és a Python-kötés egyetlen `.cu` fájlba kerül, natívan lefordítva a PyTorch build rendszerével, majd importálva Pythonba.
 
 <!-- @os:windows -->
-> **Megjegyzés**: A C++ kiterjesztés megközelítés a Visual Studio C++ build környezetet igényli, mivel a PyTorch a `.cu` forrásfájlt natív `.pyd` kiterjesztési modulba fordítja. Ennek a natív kiterjesztésnek a felépítése a Visual Studio által biztosított Microsoft C++ eszközlánctól (fordító, linker és build eszközök) függ. A kiterjesztés felépítése előtt futtassa a Visual Studio aktiválási parancsait a beállítási szakaszból.
+> **Megjegyzés**: A C++ kiterjesztés megközelítés a Visual Studio C++ build környezetet igényli, mivel a PyTorch a `.cu` forrásfájlt natív `.pyd` kiterjesztésmodullá fordítja. Ennek a natív kiterjesztésnek az elkészítése a Visual Studio által biztosított Microsoft C++ eszközlánctól (fordító, linker és build eszközök) függ. Futtassa a Visual Studio aktiváló parancsait a beállítási szakaszból, mielőtt lefordítaná a kiterjesztést.
 <!-- @os:end -->
 
 Töltse le a következő fájlokat, ha még nem tette meg:
 <!-- @os:windows -->
-| Fájl | Szerepkör |
+| Fájl | Szerep |
 |---|---|
 | [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + indító + pybind11 kötés, minden egy fájlban |
-| [setup.py](assets/Vector_Addition/setup.py) | Build szkript, a `CUDAExtension` segítségével fordítja a `.cu` fájlt `.pyd` formátumba |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Python szkript, amely futtatja a lefordított összetevőket |
+| [setup.py](assets/Vector_Addition/setup.py) | Build szkript, `CUDAExtension`-t használ a `.cu` fájl `.pyd`-vé fordításához |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Python szkript, amely lefuttatja a lefordított artefaktumokat |
 <!-- @os:end -->
 
 <!-- @os:linux -->
-| Fájl | Szerepkör |
+| Fájl | Szerep |
 |---|---|
 | [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + indító + pybind11 kötés, minden egy fájlban |
-| [setup.py](assets/Vector_Addition/setup.py) | Build szkript, a `CUDAExtension` segítségével fordítja a `.cu` fájlt `.so` formátumba |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Python szkript, amely futtatja a lefordított összetevőket |
+| [setup.py](assets/Vector_Addition/setup.py) | Build szkript, `CUDAExtension`-t használ a `.cu` fájl `.so`-vá fordításához |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Python szkript, amely lefuttatja a lefordított artefaktumokat |
 <!-- @os:end -->
 
 #### **1. lépés: A kernel, az indító és a kötés** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
@@ -849,30 +850,31 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
->**Tipp**: Miért használjuk a `hipDeviceSynchronize()` függvényt? <br>
-> - A GPU kernel indítások aszinkronok. Amikor a CPU futtatja az `add_one<<<grid_size, block_size>>>(data, n);` utasítást, azonnal végrehajtja a következő utasítást anélkül, hogy megvárná a GPU-t. A `hipDeviceSynchronize()` arra kényszeríti a CPU-t, hogy várjon, amíg a GPU kernel befejeződik.
+>**Tipp**: Miért használjuk a `hipDeviceSynchronize()`-t? <br>
+> - A GPU kernel indítások aszinkronok. Amikor a CPU futtatja az `add_one<<<grid_size, block_size>>>(data, n);` sort, azonnal végrehajtja a következő utasítást anélkül, hogy megvárná a GPU-t. A `hipDeviceSynchronize()` arra kényszeríti a CPU-t, hogy megvárja a GPU kernel befejezését.
 
-#### **2. lépés: Fordítás**
+#### **2. lépés: Build**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**Megjegyzés**: Ez a parancs a `setup.py` fájlt keresi az aktuális könyvtárban, hogy lefordítsa az általunk létrehozott .cu fájlt.
+>**Megjegyzés**: Ez a parancs a `setup.py` fájlt keresi az aktuális könyvtárban a létrehozott .cu fájl lefordításához.
 
 
-A `CUDAExtension` egy CUDA build segédeszköz a `torch.utils.cpp_extension` csomagból. ROCm esetén a PyTorch **átirányítja a `CUDAExtension`-t, hogy `hipcc`-t használjon** `nvcc` helyett. A ROCm elfogja a build útvonalat, és a HIP fordítón keresztül irányítja, portolva a CUDA kódot AMD-re.
+A `CUDAExtension` a `torch.utils.cpp_extension` egy CUDA build segédeszköze. ROCm esetén a PyTorch **átirányítja a `CUDAExtension`-t, hogy `hipcc`-t használjon** az `nvcc` helyett. A ROCm elfogja a build útvonalat, és a HIP fordítón keresztül irányítja, átültetve a CUDA kódot AMD-re.
 
 Ez a következő fájlokat hozza létre:
 <!-- @os:windows -->
 - `build/`: könyvtár a `.pyd` fájlokkal
-- `add_one_kernel.hip`: a `.cu` fájl hipifikálásával generált HIP forrás; ezt fordítja le ténylegesen a `hipcc`
+- `add_one_kernel.hip`: a `.cu` fájl hipify-olásával létrejött HIP forrás; ezt fordította valójában a `hipcc`
 <!-- @os:end -->
+
 <!-- @os:linux -->
 - `build/`: könyvtár a `.so` fájlokkal
-- `add_one_kernel.hip`: a `.cu` fájl hipifikálásával generált HIP forrás; ezt fordítja le ténylegesen a `hipcc`
+- `add_one_kernel.hip`: a `.cu` fájl hipify-olásával létrejött HIP forrás; ezt fordította valójában a `hipcc`
 <!-- @os:end -->
 
 #### **3. lépés: Használat Pythonból** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)):
-Futtassa ezt a szkriptet a kernel működésének megtekintéséhez:
+Futtassa ezt a szkriptet, hogy lássa a kernelt működés közben:
 ```bash
 cd Vector_Addition # if not already in directory
 python run_compiled_addition.py
@@ -1024,44 +1026,44 @@ finally {
 
 ### 2. bemutató: Mátrixszorzás
 
-A mátrixszorzás kiszámítja a **C = A × B** értéket, ahol:
+A mátrixszorzás kiszámítja a **C = A × B** eredményt, ahol:
 - **A** M×N méretű (sorok × oszlopok)
-- **B** N×K méretű
+- **B** N×K méretű  
 - **C** M×K méretű (az eredmény)
 
-Minden kimeneti elem a következőképpen van definiálva:
+Minden kimeneti elem a következőképpen definiált:
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-A C minden eleme egymástól függetlenül kerül kiszámításra, ami tökéletessé teszi a GPU párhuzamosság számára.
+A C minden eleme egymástól függetlenül számítható ki, ami tökéletessé teszi ezt a GPU-s párhuzamosításhoz.
 
-#### Hogyan képeződik le GPU szálakra
+#### Hogyan képeződik le a GPU szálakra
 
-A vektorösszeadással (1D) ellentétben a mátrixszorzás **2D kimenetet** produkál, ezért **2D szálrácsot** használunk:
+A vektoros összeadástól (1D) eltérően a mátrixszorzás **2D kimenetet** eredményez, ezért **2D szálrácsot** használunk:
 
-| | Vektorösszeadás | Mátrixszorzás |
+| | Vektoros összeadás | Mátrixszorzás |
 |---|---|---|
-| **Kimenet alakja** | 1D tömb | 2D mátrix (M×K) |
-| **Szál leképezés** | 1 szál → 1 elem | 1 szál → 1 kimeneti elem |
+| **Kimeneti alak** | 1D tömb | 2D mátrix (M×K) |
+| **Szálleképezés** | 1 szál → 1 elem | 1 szál → 1 kimeneti elem |
 | **Indítási minta** | 1D rács: `(grid_x, 1, 1)` | 2D rács: `(grid_x, grid_y, 1)` |
-| **Blokk mérete** | `(256, 1, 1)` | `(16, 16, 1)` = 256 szál |
+| **Blokkméret** | `(256, 1, 1)` | `(16, 16, 1)` = 256 szál |
 
-Minden szál a C kimeneti mátrix egy elemét számítja ki. A `(row, col)` pozícióban lévő szál kiszámítja a `C[row][col]` értéket az A megfelelő sorának és a B megfelelő oszlopának megszorzásával.
+Minden szál a C kimeneti mátrix egy elemét számítja ki. A `(row, col)` pozícióban lévő szál a `C[row][col]`-t számítja ki az A megfelelő sorának és B megfelelő oszlopának szorzásával.
 
-**Memóriaelrendezés**: A GPU memória lapos (1D), de a mátrixok sorfolytonosan vannak tárolva. Az `A[row][col]` eléréséhez a kernel az `A[row * N + col]` kifejezést használja.
-
-
-#### A megközelítés: JIT fordítás
-
-Az 1. bemutatóhoz hasonlóan a kernel nyers C++ karakterláncként van megírva Pythonon belül, és futásidőben kerül lefordításra a PyTorch beépített JIT-jén keresztül.
+**Memóriaelrendezés**: A GPU memória lapos (1D), de a mátrixok soronként tárolódnak. Az `A[row][col]` eléréséhez a kernel az `A[row * N + col]`-t használja.
 
 
-A [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py) használatához győződjön meg arról, hogy le van töltve, majd futtassa:
+#### A megközelítés: JIT fordítás:
+
+Az 1. bemutatóhoz hasonlóan a kernel nyers C++ karakterláncként van megírva a Pythonon belül, és futásidőben lesz lefordítva a PyTorch beépített JIT-jén keresztül.
+
+
+A [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py) használatához győződjön meg róla, hogy le van töltve, majd futtassa:
 ```bash
 cd Matrix_Multiplication # if not already inside the directory
 python matmul_kernel.py
 ```
 
-**Főbb kódrészletek**
+**Kulcsfontosságú kódrészletek**
 ```python
 import torch
 
@@ -1112,10 +1114,10 @@ max_err = (C - C_ref).abs().max().item()
 print(f"Max error vs torch.mm: {max_err:.6f}")
 ```
 
-A szkript az eredményt a `torch.mm` függvénnyel ellenőrzi kis tűréshatárral. A GPU-kon végzett lebegőpontos aritmetika kis numerikus eltéréseket produkálhat a CPU implementációkhoz képest a párhuzamos redukció sorrendje miatt.
+A szkript kis tűréssel ellenőrzi az eredményt a `torch.mm`-mel szemben. A lebegőpontos aritmetika GPU-kon kis numerikus eltéréseket eredményezhet a CPU implementációkhoz képest a párhuzamos redukció sorrendje miatt.
 
 <!-- @os:linux -->
-**Várt kimenet:** [A teljesítményszámok eltérhetnek]
+**Várt kimenet:**[A teljesítményértékek eltérhetnek]
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -1125,7 +1127,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Megjegyzés**: Windows rendszeren az `amd-smi` nem támogatott. A GPU kihasználtság nyomon követéséhez használhatja a Feladatkezelőt, ahol a program futtatásakor rövid kihasználtsági csúcsot kell látnia.
+> **Megjegyzés**: Windows rendszeren az `amd-smi` nem támogatott. A GPU kihasználtságának nyomon követéséhez használhatja a Feladatkezelőt, ahol egy rövid kihasználtsági csúcsot kell látnia, amikor futtatja a programot.
 
 **Várt kimenet:**
 ```
@@ -1302,26 +1304,26 @@ $code | python -
 ---
 #### B megközelítés: C++ kiterjesztés
 
-A második megközelítés manuálisabb: a kernelt és a Python kötést egyetlen `.cu` fájlba kell írni, natívan lefordítani a PyTorch build rendszerével, majd importálni Pythonba.
+A második megközelítés kézi jellegű: a kernelt és a Python-kötést egyetlen `.cu` fájlba írjuk, natívan lefordítjuk a PyTorch build rendszerével, majd importáljuk Pythonba.
 
 <!-- @os:windows -->
-> **Megjegyzés**: A C++ kiterjesztés megközelítés a Visual Studio C++ build környezetet igényli, mivel a PyTorch a `.cu` forrásfájlt natív `.pyd` kiterjesztési modulba fordítja. Ennek a natív kiterjesztésnek a felépítése a Visual Studio által biztosított Microsoft C++ eszközlánctól (fordító, linker és build eszközök) függ. A kiterjesztés felépítése előtt futtassa a Visual Studio aktiválási parancsait a beállítási szakaszból.
+> **Megjegyzés**: A C++ kiterjesztés megközelítés a Visual Studio C++ build környezetet igényli, mivel a PyTorch a `.cu` forrásfájlt natív `.pyd` kiterjesztésmodullá fordítja. Ennek a natív kiterjesztésnek a felépítése a Visual Studio által biztosított Microsoft C++ eszközlánctól (fordító, linker és build eszközök) függ. Futtassa a Visual Studio aktiválási parancsait a beállítási szakaszból, mielőtt felépítené a kiterjesztést.
 <!-- @os:end -->
 
 Töltse le a következő fájlokat, ha még nem tette meg:
 <!-- @os:windows -->
-| Fájl | Szerepkör |
+| Fájl | Szerep |
 |---|---|
 | [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + indító + pybind11 kötés |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | Build szkript, a `CUDAExtension` segítségével fordítja a `.cu` fájlt `.pyd` formátumba |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python szkript, amely futtatja a lefordított összetevőket |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Build szkript, `CUDAExtension`-t használ a `.cu` fájl `.pyd`-vé fordításához |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python szkript, amely futtatja a felépített artefaktumokat |
 <!-- @os:end -->
 <!-- @os:linux -->
-| Fájl | Szerepkör |
+| Fájl | Szerep |
 |---|---|
 | [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + indító + pybind11 kötés |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | Build szkript, a `CUDAExtension` segítségével fordítja a `.cu` fájlt `.so` formátumba |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python szkript, amely futtatja a lefordított összetevőket |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Build szkript, `CUDAExtension`-t használ a `.cu` fájl `.so`-vá fordításához |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python szkript, amely futtatja a felépített artefaktumokat |
 <!-- @os:end -->
 
 #### **1. lépés: A kernel, az indító és a kötés** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
@@ -1364,31 +1366,31 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
-Az 1. áttekintőben szereplő `add_one_launcher`-hez képest az itt lévő indító:
+Az 1. bemutatóban szereplő `add_one_launcher`-hez képest az itteni indító:
 - Egy helyett két bemeneti tenzort fogad
-- Mindhárom dimenziót (M, N, K) a tenzor alakjából vezeti le, nincs szükség manuális méretátadásra Pythonból
+- Mindhárom dimenziót (M, N, K) a tenzorok alakjából származtatja, nincs szükség manuális méretátadásra Pythonból
 - Lefoglalja és visszaadja a C kimeneti tenzort, ahelyett hogy helyben módosítaná
-- `dim3`-at használ mind a rácshoz, mind a blokkhoz a 2D indítási alak kifejezéséhez
+- `dim3`-at használ a griden és a blokkon egyaránt, hogy kifejezze a 2D indítási alakot
 
 #### **2. lépés: Fordítás**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**Megjegyzés**: Ez a parancs az aktuális könyvtárban keresi a `setup.py` fájlt az általunk létrehozott .cu fájl fordításához.
+>**Megjegyzés**: Ez a parancs a `setup.py` fájlt keresi az aktuális könyvtárban, hogy felépítse az általunk létrehozott .cu fájlt.
 
 
 Ez a következő fájlokat hozza létre:
 <!-- @os:windows -->
 - `build/`: könyvtár a `.pyd` fájlokkal
-- `matmul_kernel.hip`: a `.cu` fájl hipifikálásával generált HIP forrás; ezt fordítja le ténylegesen a `hipcc`
+- `matmul_kernel.hip`: a HIP forrás, amely a `.cu` fájl hipify-olásával jött létre; ezt fordította le ténylegesen a `hipcc`
 <!-- @os:end -->
 <!-- @os:linux -->
 - `build/`: könyvtár a `.so` fájlokkal
-- `matmul_kernel.hip`: a `.cu` fájl hipifikálásával generált HIP forrás; ezt fordítja le ténylegesen a `hipcc`
+- `matmul_kernel.hip`: a HIP forrás, amely a `.cu` fájl hipify-olásával jött létre; ezt fordította le ténylegesen a `hipcc`
 <!-- @os:end -->
 
 #### **3. lépés: Használat Pythonból** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)):
-Futtassa ezt a szkriptet a kernel működésének megtekintéséhez:
+Futtassa ezt a szkriptet, hogy lássa a kernelt működés közben:
 ```bash
 cd Matrix_Multiplication # if not already in directory
 python run_compiled_multiply.py
@@ -1400,11 +1402,11 @@ Result: tensor([[19., 22.],
         [43., 50.]])
 ```
 
-**Remek! Éppen most valósított meg mátrixszorzást a GPU-n.** Ez egy jelentős mérföldkő, mivel a mátrixszorzás a modern gépi tanulási műveletek alapköve, mint például:
+**Kiváló! Éppen most valósította meg a mátrixszorzást a GPU-n.** Ez jelentős mérföldkő, mivel a mátrixszorzás a modern gépi tanulási műveletek gerince, mint például:
 - Neurális hálózati rétegek
-- Figyelmi mechanizmusok
+- Figyelem (attention) mechanizmusok
 - Beágyazások
-- Transformerek
+- Transzformerek
 
 <!-- @os:linux -->
 <!-- @test:id=matmul-extension-linux timeout=600 hidden=True setup=activate-venv -->
@@ -1554,16 +1556,16 @@ finally {
 
 ## Következő lépések
 
-Megtanulta, hogyan írhat, fordíthat és indíthat GPU kerneleket JIT fordítás és C++ kiterjesztések segítségével alapvető párhuzamos műveletekhez.
+Megtanulta, hogyan írjon, fordítson és indítson el GPU kernelt JIT fordítás és C++ kiterjesztések használatával alapvető párhuzamos műveletekhez.
 
 **Teljesítményoptimalizálások:**
-- **Megosztott memória csempézés** – Adatblokkok gyorsítótárazása a globális memória-hozzáférés csökkentése érdekében
-- **Memória koaleszcencia** – Memória-hozzáférési minták optimalizálása a sávszélesség érdekében
+- **Megosztott memória csempézés (tiling)** - Adatblokkok gyorsítótárazása a globális memóriaelérés csökkentése érdekében
+- **Memóriaegyesítés (coalescing)** - A memóriaelérési minták optimalizálása a sávszélesség érdekében
 
 **Valós algoritmusok:**
-- **2D konvolúció** – Egy kis szűrő (kernel) végigcsúszik egy képen, és minden kimeneti pixelt a szomszédos pixelek súlyozott összegeként számítja ki. Ez bevezeti a sablonszámításokat és a megosztott memória csempézést, ahol a szálak újrafelhasználják az átfedő képrégiókat a globális memória-hozzáférés csökkentése érdekében.
-- **Softmax függvény**: A Softmax egy számvektort 1-re összegző valószínűségekké alakít, amelyet általánosan használnak neurális hálózatok kimeneteinél. Hatékony GPU-n való megvalósítása párhuzamos redukciókat és numerikus stabilitási technikákat vezet be nagy vektorok feldolgozása közben.
+- **2D konvolúció** - Egy kis szűrő (kernel) végigcsúszik egy képen, minden kimeneti pixelt a szomszédos pixelek súlyozott összegéből számítva. Ez bevezeti a stencil számításokat és a megosztott memória csempézését, ahol a szálak újrahasznosítják az átfedő képrégiókat a globális memóriaelérés csökkentése érdekében.
+- **Softmax függvény**: A softmax egy számvektort valószínűségekké alakít, amelyek összege 1, gyakran használt neurális hálózati kimenetekben. Hatékony GPU-s megvalósítása bevezeti a párhuzamos redukciókat és a numerikus stabilitási technikákat nagy vektorok feldolgozása közben.
 
-**Éles környezeti szempontok:**
-- **Hibakezelés** – Határellenőrzés és eszközkezelés
-- **PyTorch integráció** – Egyéni operátorok autograd támogatással
+**Éles környezeti megfontolások:**
+- **Hibakezelés** - Határellenőrzés és eszközkezelés
+- **PyTorch integráció** - Egyéni operátorok autograd támogatással

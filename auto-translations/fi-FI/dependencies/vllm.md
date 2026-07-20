@@ -6,10 +6,10 @@ SPDX-License-Identifier: MIT
 
 ### vLLM
 
-vLLM toimitetaan valmiiksi rakennetun konttikuvan kautta ROCm-tuella. Käytä käynnistyskomentoa vLLM:n tai PyTorchin suoran asentamisen sijaan isäntäjärjestelmälle:
+vLLM tarjotaan valmiiksi rakennettuna konttikuvana, jossa on ROCm-tuki. Käytä käynnistyskomentoa sen sijaan, että asentaisit vLLM:n tai PyTorch:n suoraan isäntäkoneelle:
 
 ```bash
 vllm-launch
 ```
 
-Käynnistyskomento käynnistää kontin, kohdistaa integroidun GPU:n ja tarjoaa OpenAI-yhteensopivan vLLM API:n osoitteessa `http://localhost:8001`.
+Käynnistyskomento käynnistää kontin, kohdistaa sen integroituun GPU:hun ja tarjoaa OpenAI-yhteensopivan vLLM API:n osoitteessa `http://localhost:8001`.

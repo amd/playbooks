@@ -1,24 +1,24 @@
-# Platform Yapılandırması
+# Platform Konfigürasyonu
 
-Bu belge, bu playbook'u çalıştırmak için beklenen platform yapılandırmalarını açıklamaktadır.
+Bu belge, bu playbook'un çalıştırılması için beklenen platform konfigürasyonlarını açıklar.
 
 ## Ön Koşullar
 
-ROCm destekli PyTorch, AMD Ryzen™ AI Halo Developer Platform üzerine önceden yüklenmiş olarak gelir. Diğer tüm cihazlar için kullanıcıların ROCm destekli PyTorch'u manuel olarak yüklemesi gerekmektedir. Lütfen işletim sisteminize uygun bölüme başvurun:
+ROCm desteğine sahip PyTorch, AMD Ryzen™ AI Halo Developer Platform üzerinde önceden yüklenmiş olarak gelir. Diğer tüm cihazlarda kullanıcıların ROCm desteğine sahip PyTorch'u manuel olarak yüklemesi gerekir. Lütfen işletim sisteminize uygun bölüme bakın:
 
 
 ### Windows
 
-| Bileşen       | Sürüm           | Notlar                            |
+| Bileşen     | Sürüm         | Notlar                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.11.x + ROCm 7.13  | AMD Ryzen AI Halo Developer Platform üzerine önceden yüklenmiş olarak gelir; diğer tüm cihazlarda manuel olarak yüklenmelidir |
+| **PyTorch**   | 2.11.x + ROCm 7.13  | AMD Ryzen AI Halo Developer Platform üzerinde önceden yüklüdür; diğer tüm cihazlarda manuel olarak yüklenmelidir |
 
 
 ### Linux
 
-| Bileşen       | Sürüm           | Notlar                            |
+| Bileşen     | Sürüm         | Notlar                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.11.x + ROCm 7.13   | AMD Ryzen AI Halo Developer Platform üzerine önceden yüklenmiş olarak gelir; diğer tüm cihazlarda manuel olarak yüklenmelidir |
+| **PyTorch**   | 2.11.x + ROCm 7.13   | AMD Ryzen AI Halo Developer Platform üzerinde önceden yüklüdür; diğer tüm cihazlarda manuel olarak yüklenmelidir |
 
 
 ## Gerekli Modeller
@@ -27,15 +27,15 @@ Aşağıdaki modeller platformunuz için test edilmiş ve optimize edilmiştir:
 
 | Model | Parametreler | Boyut | İndirme Konumu |
 |-------|------------|------|-------------------|
-| **unsloth/gemma-4-E4B-it** | 8B | ~16GB | HF'den İndir
+| **unsloth/gemma-4-E4B-it** | 8B | ~16GB | HF'den indirin
 
 Modeller otomatik olarak Hugging Face önbellek dizinine indirilecektir: `~/.cache/huggingface/hub/`
 
-Model depolama alanı için en az **20 GB boş alan** bulundurun.
+Model depolama için en az **20GB boş alan** olduğundan emin olun.
 
 ## Ağ Gereksinimleri
 
-İlk kurulum, Hugging Face'ten model indirmek için internet erişimi gerektirir. İndirme işleminin ardından playbook çevrimdışı olarak çalıştırılabilir.
+İlk kurulum, modelleri Hugging Face'ten indirmek için internet erişimi gerektirir. İndirme işleminden sonra playbook çevrimdışı olarak çalışabilir.
 
-- İlk kez yapılan model indirmeleri, model boyutuna ve bağlantı hızına bağlı olarak **5-10 dakika** sürebilir
-- Modeller yerel olarak önbelleğe alınır ve yeniden indirilmesi gerekmez
+- İlk model indirmeleri, model boyutuna ve bağlantı hızına bağlı olarak **5-10 dakika** sürebilir
+- Modeller yerel olarak önbelleğe alınır ve tekrar indirilmesi gerekmez

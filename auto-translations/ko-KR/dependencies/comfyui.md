@@ -9,15 +9,15 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 1. [download.comfy.org](https://download.comfy.org/windows/nsis/x64)에서 최신 Windows ComfyUI 설치 프로그램을 다운로드합니다.
-2. 하드웨어 설정을 선택합니다: `AMD ROCm`을 선택하세요.
-3. ComfyUI를 설치할 위치를 선택합니다: 기본 경로 또는 원하는 폴더를 사용하세요.
-4. 데스크톱 앱 설정: 권장 버전을 사용하고 있는지 확인하기 위해 "Automatic Updates"를 선택 해제하는 것을 권장합니다.
-5. "Next"를 눌러 설치를 시작합니다.
+2. 하드웨어 설정 선택: `AMD ROCm`을 선택합니다.
+3. ComfyUI를 설치할 위치 선택: 기본 경로를 사용하거나 원하는 폴더를 사용합니다.
+4. Desktop App 설정: 권장 버전의 앱을 사용하도록 "Automatic Updates"의 선택을 해제하는 것을 권장합니다.
+5. 설치를 시작하려면 "Next"를 누릅니다.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-#### ComfyUI 복제
+#### ComfyUI 클론
 ```bash
 git clone https://github.com/Comfy-Org/ComfyUI.git
 ```

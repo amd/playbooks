@@ -6,64 +6,64 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Denna spelbok använder speciella taggar som GitHub inte kan rendera. Besök [amd.com/playbooks](https://amd.com/playbooks) för att förhandsgranska detta innehåll korrekt.
 <!-- @github-only:end -->
 
 ## Översikt
 
-Den här playbooken visar hur du finjusterar en språkmodell lokalt med Unsloth på AMD-hårdvara.
+Denna spelbok visar hur du finjusterar en språkmodell lokalt med Unsloth på AMD-hårdvara.
 
-Den använder ett kort exempel på Supervised Fine-Tuning (SFT) med LoRA-adaptrar på `unsloth/gemma-4-E4B-it`, med hjälp av en delmängd av datasetet `mlabonne/FineTome-100k`. Målet är att ge dig ett enkelt heltäckande arbetsflöde som täcker installation, träning, inferens och sparande av det finjusterade resultatet.
+Den använder ett kort exempel på övervakad finjustering (SFT) med LoRA-adaptrar på `unsloth/gemma-4-E4B-it`, med en delmängd av datasetet `mlabonne/FineTome-100k`. Målet är att ge dig ett enkelt end-to-end-arbetsflöde som täcker installation, träning, inferens och sparande av det finjusterade resultatet.
 
-Exemplet är utformat för att vara praktiskt och enkelt att modifiera, så att du kan använda det som utgångspunkt för dina egna dataset och modeller.
+Exemplet är utformat för att vara praktiskt och enkelt att modifiera, så du kan använda det som en utgångspunkt för dina egna dataset och modeller.
 
 ## Vad du kommer att lära dig
 
-- Hur du konfigurerar Unsloth-miljön
-- Hur du finjusterar en LLM med SFT via Unsloth
-- Hur du sparar det finjusterade resultatet i lokal lagring
+- Hur man konfigurerar Unsloth-miljön
+- Hur man finjusterar en LLM med SFT och Unsloth
+- Hur man sparar det finjusterade resultatet lokalt
 
 <!-- @device:halo,stx,krk -->
-> **Obs:** Finjusteringsteknikerna i den här playbooken kräver minst 24 GB GPU-minne och 32 GB systemminne.
+> **Obs:** Finjusteringsteknikerna i denna spelbok kräver minst 24 GB GPU-minne och 32 GB systemminne.
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Obs:** Finjusteringsteknikerna i den här playbooken kräver minst 24 GB GPU-minne och 32 GB systemminne.
+> **Obs:** Finjusteringsteknikerna i denna spelbok kräver minst 24 GB GPU-minne och 32 GB systemminne.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Obs:** Finjusteringsteknikerna i den här playbooken kräver minst 24 GB **dedikerat** GPU-minne och 32 GB systemminne.
+> **Obs:** Finjusteringsteknikerna i denna spelbok kräver minst 24 GB **dedikerat** GPU-minne och 32 GB systemminne.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Varför Unsloth?
 
-Unsloth gör LLM-finjustering enklare att köra på lokal hårdvara genom att minska minnesanvändningen och påskynda träningen jämfört med en standardkonfiguration.
+Unsloth gör det enklare att köra LLM-finjustering på lokal hårdvara genom att minska minnesanvändningen och snabba upp träningen jämfört med en standardkonfiguration.
 
-I den här playbooken använder vi Unsloth tillsammans med **LoRA-baserad SFT**. Det innebär att basmodellen i stort sett förblir fryst, medan en mycket mindre uppsättning adaptervikter tränas. Detta passar bra för lokal utveckling eftersom det är lättare än fullständig finjustering och snabbare att iterera på.
+I denna spelbok använder vi Unsloth tillsammans med **LoRA-baserad SFT**. Det innebär att basmodellen till största delen förblir fryst, medan en mycket mindre uppsättning adaptervikter tränas. Detta passar bra för lokal utveckling eftersom det är lättare än full finjustering och snabbare att iterera med.
 
-Unsloth stöder även andra träningsmetoder, inklusive QLoRA och arbetsflöden för förstärkningsinlärning. Den här playbooken fokuserar på den enklaste vägen först: ett litet LoRA-finjusteringsexempel som användare kan köra, förstå och bygga vidare på.
+Unsloth stöder även andra träningsmetoder, inklusive QLoRA och arbetsflöden för förstärkningsinlärning. Denna spelbok fokuserar först på den enklaste vägen: ett litet LoRA-finjusteringsexempel som användare kan köra, förstå och utöka.
 
-## Konfigurera minnesinställningarna
+## Konfigurera minnesinställningar
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Kontrollera om det finns programuppdateringar
-> **Obs**: Om VS Code inte är installerat kan du installera det via Ryzen AI Developer Center.
+## Kontrollera programvaruuppdateringar
+> **Obs**: Om VS Code inte är installerat kan du installera det med Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Installera nödvändiga programvaruförutsättningar
+## Installera nödvändig programvara
 
 ### Skapa en virtuell miljö
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Öppna en terminal och skapa en venv med AMD ROCm™-programvara och PyTorch redan installerade:
+Öppna en terminal och skapa en venv med AMD ROCm™-programvara och PyTorch redan installerat:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -158,10 +158,10 @@ pip install triton-windows
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Obs:** Vid import kan Unsloth söka igenom valfria `bitsandbytes`-accelerationsvägar. På vissa ROCm-versioner kan du se ett meddelande som `bitsandbytes library load error: Configured ROCm binary not found`. Den här playbooken använder standard LoRA-finjustering med `optim="adamw_torch"`, så vi förlitar oss inte på `bitsandbytes`-optimeraren eller 4-bitars QLoRA. Det här meddelandet kan ignoreras utan problem.
+> **Obs:** Under import kan Unsloth undersöka valfria accelerationsvägar för `bitsandbytes`. På vissa ROCm-versioner kan du se ett meddelande som `bitsandbytes library load error: Configured ROCm binary not found`. Denna spelbok använder standard LoRA-finjustering med `optim="adamw_torch"`, så vi förlitar oss inte på `bitsandbytes`-optimeraren eller 4-bitars QLoRA. Detta meddelande kan ignoreras utan problem.
 
 <!-- @os:windows -->
-> **Obs:** På Windows ROCm kommer Unsloth att skriva ut flera varningar vid start — se [Kända varningar](#known-warnings) nedan. Dessa är alla säkra att ignorera; träningen fungerar korrekt.
+> **Obs:** På Windows ROCm kommer Unsloth att skriva ut flera varningar vid uppstart — se [Kända varningar](#known-warnings) nedan. Dessa kan alla ignoreras utan problem; träningen fungerar korrekt.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -184,9 +184,9 @@ print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
-## Ladda ned Unsloth-finjusteringsskriptet
+## Ladda ner Unsloth-finjusteringsskriptet
 
-Istället för att manuellt utföra varje steg tillhandahåller den här playbooken ett komplett heltäckande skript här: [test_unsloth.py](assets/test_unsloth.py).
+Istället för att manuellt utföra varje steg tillhandahåller denna spelbok ett rent, heltäckande skript här: [test_unsloth.py](assets/test_unsloth.py).
 
 Kör följande kod för att köra skriptet:
 
@@ -221,19 +221,19 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-Resten av playbooken går konceptuellt igenom varje viktigt steg i skriptet.
+Resten av spelboken går konceptuellt igenom varje huvudsteg i skriptet.
 
 ## Hur det fungerar
 
 Skriptet test_unsloth.py utför följande steg:
 * **Ladda modell**: Laddar unsloth/gemma-4-E4B-it med FastModel.
 * **Förbered data**: Standardiserar datasetet (t.ex. FineTome-100k) och tillämpar Gemma-4-chattmallen.
-* **Tillämpa LoRA**: Lägger till adaptrar för språk-, uppmärksamhets- och MLP-moduler för effektiv träning.
-* **Träna**: Använder SFTTrainer med förlustmaskering enbart för svar.
+* **Applicera LoRA**: Lägger till adaptrar i språk-, uppmärksamhets- och MLP-moduler för effektiv träning.
+* **Träna**: Använder SFTTrainer med maskering av förlust endast för svar.
 * **Inferens**: Kör ett snabbt genereringstest för att verifiera prestanda.
 * **Spara**: Exporterar LoRA-adaptrar lokalt.
 
-## Nyckelkonfiguration
+## Viktig konfiguration
 
 Du kan ändra följande konstanter för att anpassa din körning:
 
@@ -244,7 +244,7 @@ DATASET_NAME = "mlabonne/FineTome-100k"
 OUTPUT_DIR = "gemma_4_lora"
 ```
 
-Exempel på Unsloths välkomstmeddelande och utdata när modellvikterna laddas:
+Exempel på Unsloths välkomstmeddelande och utdata vid laddning av modellvikterna:
 
 ![alt text](assets/welcome.png)
 
@@ -254,26 +254,26 @@ Vi använder en delmängd av:
 ```text
 mlabonne/FineTome-100k
 ```
-Datasetet:
-* Konverteras till chattformat
-* Bearbetas med Gemma-4-chattmallen
-* Rensas för att ta bort duplicerade BOS-tokens
+Datasetet är:
+* Konverterat till chattformat
+* Bearbetat med Gemma-4-chattmallen
+* Rensat för att ta bort dubbla BOS-tokens
 
 ## Träna modellen
 
-Skriptet kör en kort träningsdemo med följande parametrar:
+Skriptet kör en kort träningsdemo, med följande parametrar:
 - ~50 steg
 - Liten batchstorlek
 - Gradientackumulering
 
-Under träningen ser du loggar som:
+Under träningen kommer du att se loggar som:
 
 ![alt text](assets/training.png)
 
 
-## Sparande och driftsättning
+## Sparande och distribution
 
-### Lokal sparning (LoRA)
+### Lokalt sparande (LoRA)
 
 Skriptet sparar automatiskt LoRA-adaptrar till OUTPUT_DIR.
 ```python
@@ -314,14 +314,14 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end -->
 
-### Spara sammanslagen modell (för vLLM)
+### Spara sammanfogad modell (för vLLM)
 
 <!-- @os:windows -->
-> **Obs:** vLLM stöder inte Windows. För att driftsätta din finjusterade modell på Windows, använd llama.cpp (se [Exportera GGUF](#export-gguf-for-llamacpp) nedan) eller överför den sammanslagna modellen till en Linux-maskin som kör vLLM.
+> **Obs:** vLLM stöder inte Windows. För att distribuera din finjusterade modell på Windows, använd llama.cpp (se [Exportera GGUF](#export-gguf-for-llamacpp) nedan) eller överför den sammanfogade modellen till en Linux-maskin som kör vLLM.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-För driftsättning med vLLM, slå samman adaptrarna till en fullständig modell:
+För distribution med vLLM, sammanfoga adaptrarna till en fullständig modell:
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
@@ -369,28 +369,28 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 <!-- @os:windows -->
 ## Kända varningar
 
-Dessa varningar skrivs ut av Unsloth vid start på Windows ROCm och är alla säkra att ignorera:
+Dessa varningar skrivs ut av Unsloth vid uppstart på Windows ROCm och är alla säkra att ignorera:
 
-| Varning | Orsak | Säker att ignorera? |
+| Varning | Anledning | Säker att ignorera? |
 |---|---|---|
-| `bitsandbytes library load error` | bitsandbytes saknar Windows ROCm-bygge | Ja — den här playbooken använder `adamw_torch`, inte bnb |
+| `bitsandbytes library load error` | bitsandbytes har ingen Windows ROCm-build | Ja — den här playbooken använder `adamw_torch`, inte bnb |
 | `No ROCm platform found for torch.distributed` | ROCm på Windows saknar stöd för distribuerad träning | Ja — träning med en enda GPU påverkas inte |
-| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth flaggar icke-Linux-byggen | Ja — Windows ROCm fungerar för SFT med en enda GPU |
-| `triton is not available` | Triton saknar Windows-bygge | Ja — Unsloth faller tillbaka på PyTorch-kärnor |
+| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth flaggar builds som inte är Linux | Ja — Windows ROCm fungerar för SFT med en enda GPU |
+| `triton is not available` | Triton har ingen Windows-build | Ja — Unsloth faller tillbaka på PyTorch-kärnor |
 
-Träningen fortlöper korrekt trots dessa varningar.
+Träningen fortsätter korrekt trots dessa varningar.
 <!-- @os:end -->
 
 ## Nästa steg
-- Prova [Unsloth Studio](https://unsloth.ai/docs/new/studio), ett intuitivt grafiskt gränssnitt för Unsloth
-- Träna på dina egna specifika dataset
+- Prova [Unsloth Studio](https://unsloth.ai/docs/new/studio), ett intuitivt GUI för Unsloth
+- Träna på dina egna specifika datamängder
 - Prova finjustering med olika hyperparametrar
-- Driftsätt med vLLM eller llama.cpp
-- Prova QLoRA för en konfiguration med lägre minnesanvändning
+- Distribuera med vLLM eller llama.cpp
+- Prova QLoRA för en lösning med lägre minnesanvändning
 
 ## Resurser
 
-Nedan finns några ytterligare resurser för att lära dig mer om Unsloth och finjustering:
+Nedan finns ytterligare resurser för att lära dig mer om Unsloth och finjustering:
 
 * [Unsloth-dokumentation](https://docs.unsloth.ai)
 

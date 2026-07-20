@@ -10,8 +10,8 @@ Node.js 22.22.1 LTS est la version recommandée pour cette plateforme.
 
 <!-- @os:windows -->
 
-1. Téléchargez le programme d'installation Windows 64 bits depuis [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
-2. Exécutez le programme d'installation et suivez les instructions
+1. Téléchargez l'installateur Windows 64 bits depuis [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+2. Exécutez l'installateur et suivez les instructions
 3. Vérifiez l'installation :
 ```cmd
 node --version
@@ -38,4 +38,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **Remarque** : Consultez [Téléchargements Node.js](https://nodejs.org/en/download/) pour des options d'installation supplémentaires et d'autres plateformes.
+> **Remarque** : consultez [Téléchargements Node.js](https://nodejs.org/en/download/) pour d'autres options d'installation et plateformes.

@@ -9,13 +9,13 @@ SPDX-License-Identifier: MIT
 #### התקנת Lemonade
 
 <!-- @os:windows -->
-הורד את המתקין העדכני מ-[lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) והפעל את קובץ ה-`.msi`.
+הורידו את תוכנית ההתקנה העדכנית ביותר מ-[lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) והריצו את קובץ ה-`.msi`. 
 
 לאחר ההתקנה:
 - ה-CLI של `lemonade` מתווסף אוטומטית ל-PATH של המערכת
-- שרת Lemonade אמור לפעול ברקע באופן אוטומטי
+- שרת Lemonade אמור לרוץ ברקע באופן אוטומטי
 
-ניתן גם להתקין בשקט משורת הפקודה:
+ניתן גם להתקין באופן שקט משורת הפקודה:
 ```cmd
 msiexec /i lemonade-server-minimal.msi /qn
 ```
@@ -33,37 +33,37 @@ sudo apt install lemonade-server
 yay -S lemonade-server
 ```
 
-להפצות אחרות או להתקנה מקוד המקור, ראה את [אפשרויות ההתקנה המלאות](https://lemonade-server.ai/docs/guide/install/).
+עבור הפצות אחרות או להתקנה מהמקור, ראו [אפשרויות ההתקנה המלאות](https://lemonade-server.ai/docs/guide/install/).
 <!-- @os:end -->
 
 
 #### אימות התקנת Lemonade
 
-פתח מסוף והפעל:
+פתחו מסוף והריצו:
 ```bash
 lemonade --version
 ```
 
-אמור להופיע פלט כגון:
+אמורה להופיע פלט כמו:
 ```
 lemonade version x.y.z
 ```
 
-אם מופיע מספר גרסה, Lemonade מותקן כראוי ומוכן לשימוש.
+אם אתם רואים מספר גרסה, סימן ש-Lemonade הותקן כראוי ומוכן לשימוש.
 
-לעיון מהיר, להלן פקודות CLI נפוצות של Lemonade:
+לעיון מהיר, הנה פקודות CLI נפוצות של Lemonade:
 
 | פקודה | מה היא עושה |
 | --- | --- |
-| `lemonade --help` | מציג את כל הפקודות והדגלים הזמינים. |
-| `lemonade --version` | מדפיס את גרסת Lemonade המותקנת. |
-| `lemonade status` | מאשר האם שרת Lemonade פועל ונגיש. כתובת ה-API הבסיסית התואמת ל-OpenAI כברירת מחדל היא `http://localhost:13305/api/v1`. |
-| `lemonade list` | מפרט את המודלים הזמינים להגדרת Lemonade שלך. |
-| `lemonade pull <MODEL_NAME>` | מוריד מודל מבלי להפעיל אותו. |
-| `lemonade run <MODEL_NAME>` | מוריד את המודל במידת הצורך, ולאחר מכן מפעיל אותו לצורך הסקה/שיחה. |
-| `lemonade run <MODEL_NAME> --llamacpp rocm` | מפעיל מודל llama.cpp עם ה-backend של ROCm. |
-| `lemonade run <MODEL_NAME> --llamacpp vulkan` | מפעיל מודל llama.cpp עם ה-backend של Vulkan. |
-| `lemonade config` | מציג את ערכי התצורה הנוכחיים של Lemonade. |
-| `lemonade config set llamacpp.backend=rocm` | מגדיר את ה-backend הברירת מחדל של llama.cpp ל-ROCm. |
+| `lemonade --help` | מציגה את כל הפקודות והדגלים הזמינים. |
+| `lemonade --version` | מדפיסה את גרסת Lemonade המותקנת. |
+| `lemonade status` | מוודאת האם שרת Lemonade פועל ונגיש. כתובת הבסיס ברירת המחדל של ה-API התואם ל-OpenAI היא `http://localhost:13305/api/v1`. |
+| `lemonade list` | מציגה רשימה של מודלים הזמינים להתקנת Lemonade שלכם. |
+| `lemonade pull <MODEL_NAME>` | מורידה מודל מבלי להפעיל אותו. |
+| `lemonade run <MODEL_NAME>` | מורידה את המודל במידת הצורך, ולאחר מכן מפעילה אותו להסקה/צ'אט. |
+| `lemonade run <MODEL_NAME> --llamacpp rocm` | מפעילה מודל llama.cpp עם ה-backend של ROCm. |
+| `lemonade run <MODEL_NAME> --llamacpp vulkan` | מפעילה מודל llama.cpp עם ה-backend של Vulkan. |
+| `lemonade config` | מציגה את ערכי התצורה הנוכחיים של Lemonade. |
+| `lemonade config set llamacpp.backend=rocm` | מגדירה את ה-backend ברירת המחדל של llama.cpp ל-ROCm. |
 
-לאפשרויות שרת Lemonade העדכניות ביותר או לפתרון בעיות, אנא עיין ב[תיעוד הרשמי של Lemonade](https://lemonade-server.ai/docs/lemonade-cli/).
+עבור אפשרויות שרת Lemonade העדכניות ביותר או פתרון בעיות, עיינו ב-[תיעוד הרשמי של Lemonade](https://lemonade-server.ai/docs/lemonade-cli/).

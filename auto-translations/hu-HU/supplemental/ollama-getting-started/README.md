@@ -6,21 +6,21 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ez a segédlet olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom helyes megtekintéséhez kérjük, látogasson el a [amd.com/playbooks](https://amd.com/playbooks) oldalra.
 <!-- @github-only:end -->
 
 ## Áttekintés
 
-Az Ollama egy népszerű, könnyűsúlyú eszköz nagy nyelvi modellek helyi futtatásához. Kezeli a modellek letöltését, kvantálását és kiszolgálását egy egyszerű parancssori felületen és asztali alkalmazáson keresztül, így percek alatt elkezdhetsz csevegni egy LLM-mel.
+Az Ollama egy népszerű, könnyűsúlyú eszköz nagy nyelvi modellek helyi futtatásához. Kezeli a modellek letöltését, kvantálását és kiszolgálását egy egyszerű parancssori felület és asztali alkalmazás mögött, így percek alatt eljuthat a nulláról egy LLM-mel folytatott beszélgetésig.
 
-Ez a playbook végigvezet az Ollama telepítésén, a GPT-OSS 20B modell letöltésén és egy beszélgetés folytatásán – mind a terminálon, mind az asztali alkalmazáson keresztül.
+Ez a segédlet végigvezeti az Ollama telepítésén, a GPT-OSS 20B modell letöltésén, és egy vele folytatott beszélgetésen, mind a terminálon, mind az asztali alkalmazáson keresztül.
 
-## Mit fogsz megtanulni
+## Amit meg fog tanulni
 
-- Hogyan telepítsd és indítsd el az Ollama-t a rendszereden
-- A GPT-OSS 20B modell helyi letöltése és futtatása
-- Csevegés modellekkel a CLI segítségével
-- Modellek programozott lekérdezése a REST API-n keresztül
+- Hogyan telepítse és indítsa el az Ollama-t a rendszerén
+- Töltse le és futtassa a GPT-OSS 20B modellt helyben
+- Beszélgessen modellekkel a CLI használatával
+- Kérdezze le a modelleket programozottan a REST API-n keresztül
 
 ## A memóriakonfiguráció beállítása
 
@@ -28,12 +28,12 @@ Ez a playbook végigvezet az Ollama telepítésén, a GPT-OSS 20B modell letölt
 
 <!-- @device:halo_box -->
 ## Szoftverfrissítések ellenőrzése
-> **Megjegyzés**: Ha a VS Code nincs telepítve, a Ryzen AI Developer Center segítségével telepítheted.
+> **Megjegyzés**: Ha a VS Code nincs telepítve, telepítheti a Ryzen AI Developer Centerrel.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Szoftver-előfeltételek telepítése
+## Szoftveres előfeltételek telepítése
 
 <!-- @require:driver -->
 
@@ -41,11 +41,11 @@ Ez a playbook végigvezet az Ollama telepítésén, a GPT-OSS 20B modell letölt
 
 <!-- @os:windows -->
 
-1. Töltsd le a telepítőt az [ollama.com/download](https://ollama.com/download) oldalról.
-2. Futtasd a `.exe` telepítőt, és kövesd az utasításokat.
-3. A telepítés után az Ollama háttérszolgáltatásként fut, és elérhető a terminálból, az asztali alkalmazásból és a rendszertálcáról.
+1. Töltse le a telepítőt innen: [ollama.com/download](https://ollama.com/download).
+2. Futtassa a `.exe` telepítőt, és kövesse az utasításokat.
+3. A telepítés után az Ollama háttérszolgáltatásként fut, és elérhető a terminálból, az asztali alkalmazásból, valamint a rendszertálcáról.
 
-Ellenőrizd a telepítést egy terminál megnyitásával és a következő parancs futtatásával:
+Ellenőrizze a telepítést egy terminál megnyitásával és a következő parancs futtatásával:
 
 ```powershell
 ollama --version
@@ -57,18 +57,18 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-A konzolon megjelenik a telepített verziószám.
+A konzolon a telepített verziószámnak kell megjelennie.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-Futtasd a hivatalos telepítő szkriptet:
+Futtassa a hivatalos telepítő szkriptet:
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-Ellenőrizd a telepítést:
+Ellenőrizze a telepítést:
 
 ```bash
 ollama --version
@@ -80,26 +80,26 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-A konzolon megjelenik a telepített verziószám.
+A konzolon a telepített verziószámnak kell megjelennie.
 <!-- @os:end -->
 
 ## Az első modell letöltése
 
-Az Ollama a modelleket egy konténerképekhez hasonló nyilvántartáson keresztül kezeli. A GPT-OSS 20B letöltéséhez:
+Az Ollama a modelleket egy, a konténerképekhez hasonló regiszteren keresztül kezeli. A GPT-OSS 20B letöltéséhez:
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-Ez letölti a modell súlyait a helyi gépedre (körülbelül 12 GB). A letöltés csak egyszer történik meg, a következő futtatások a modellt lemezről töltik be.
+Ez letölti a modell súlyait a helyi gépre (körülbelül 12 GB). A letöltés csak egyszer történik meg, a további futtatások a lemezről töltik be a modellt.
 
-A modell elérhetőségét a következővel ellenőrizheted:
+A modell elérhetőségét a következővel ellenőrizheti:
 
 ```bash
 ollama list
 ```
 
-A kimenetben látni fogod a `gpt-oss:20b` bejegyzést a méretével és az utolsó módosítás dátumával együtt.
+A kimenetben látnia kell a `gpt-oss:20b` bejegyzést a méretével és az utolsó módosítás dátumával együtt.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
@@ -170,7 +170,7 @@ echo "OK: gpt-oss:20b is present in ollama list"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Modellnevezési konvenciók
+### Modellnevek
 
 Az Ollama modellnevei a `name:tag` formátumot követik. A tag általában a paraméterszámot vagy a kvantálási változatot jelzi. Néhány hasznos parancs a modellek kezeléséhez:
 
@@ -178,50 +178,50 @@ Az Ollama modellnevei a `name:tag` formátumot követik. A tag általában a par
 |---------|-------------|
 | `ollama list` | Az összes letöltött modell megjelenítése |
 | `ollama pull <model>` | Modell letöltése futtatás nélkül |
-| `ollama rm <model>` | Modell eltávolítása a lemezterület felszabadításához |
+| `ollama rm <model>` | Modell eltávolítása lemezterület felszabadításához |
 | `ollama show <model>` | Modell metaadatainak és paramétereinek megjelenítése |
 
-## Csevegés a terminálból
+## Beszélgetés a terminálból
 
-Indíts interaktív csevegési munkamenetet közvetlenül a parancssorból:
+Indítson interaktív beszélgetést közvetlenül a parancssorból:
 
 ```bash
 ollama run gpt-oss:20b
 ```
 
-Az Ollama betölti a modellt a memóriába, és egy prompthoz juttat. Próbálj meg valamit kérdezni:
+Az Ollama betölti a modellt a memóriába, és beviszi Önt egy promptba. Próbáljon meg kérdezni tőle valamit:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-A modell token-ről tokenre streameli a választ közvetlenül a terminálban. A munkamenet befejezéséhez írd be a `/bye` parancsot, vagy nyomj `Ctrl+D` billentyűkombinációt.
+A modell a válaszát tokenenként, közvetlenül a terminálban közvetíti (streameli). A munkamenetből való kilépéshez írja be a `/bye` parancsot, vagy nyomja meg a `Ctrl+D` billentyűkombinációt.
 
-> **Tipp**: Az első futtatás néhány másodpercet vesz igénybe a modell memóriába töltéséhez. Az ugyanazon munkameneten belüli következő promptok sokkal gyorsabban válaszolnak, mivel a modell betöltve marad.
+> **Tipp**: Az első futtatás néhány másodpercet vesz igénybe a modell memóriába töltéséhez. Az ugyanazon a munkameneten belüli további promptok sokkal gyorsabban válaszolnak, mivel a modell betöltve marad.
 
 <!-- @os:windows -->
-## Csevegés az asztali alkalmazásból
+## Beszélgetés az asztali alkalmazásból
 
-Az Ollama egy asztali alkalmazással is rendelkezik, amely tiszta csevegési felületet biztosít a modellekkel való interakcióhoz.
+Az Ollama emellett egy asztali alkalmazással is rendelkezik, amely tiszta chat felületet biztosít a modellekkel való interakcióhoz.
 
-Nyisd meg az **Ollama** alkalmazást a Start menüből, vagy kattints az Ollama ikonra a rendszertálcán, és válaszd az **Open Ollama** lehetőséget.
+Nyissa meg az **Ollama** alkalmazást a Start menüből, vagy kattintson az Ollama ikonra a rendszertálcán, majd válassza az **Open Ollama** lehetőséget.
 
-Miután az alkalmazás megnyílt:
+Az alkalmazás megnyitása után:
 
-1. Kattints az **New Chat** gombra az oldalsávban.
-2. Válaszd a **gpt-oss:20b** modellt a csevegési beviteli terület jobb alsó sarkában lévő modell legördülő menüből.
-3. Írj be egy üzenetet, és nyomj Entert a csevegés megkezdéséhez.
+1. Kattintson az oldalsávon az **New Chat** gombra.
+2. Válassza a **gpt-oss:20b** opciót a modell legördülő menüből, a chat beviteli terület jobb alsó sarkában.
+3. Írjon be egy üzenetet, és nyomja meg az Entert a beszélgetés elindításához.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-Az asztali alkalmazás az oldalsávban tárolja a beszélgetések előzményeit, így könnyen visszatérhetsz a korábbi csevegésekhez.
+Az asztali alkalmazás megőrzi a beszélgetések előzményeit az oldalsávon, így könnyen visszatérhet a korábbi beszélgetésekhez.
 <!-- @os:end -->
 
 ## A REST API használata
 
-A telepítés után az Ollama háttérszolgáltatásként fut, és egy REST API-t tesz elérhetővé a `http://localhost:11434` címen, amelyet saját alkalmazásaidba és szkriptjeidbe integrálhatsz.
+Telepítés után az Ollama háttérszolgáltatásként fut, és egy REST API-t tesz elérhetővé a `http://localhost:11434` címen, amelyet felhasználhat a modellek saját alkalmazásaiba és szkriptjeibe való integrálásához.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -572,7 +572,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### Python fájl létrehozása
-Ugyanabban a könyvtárban használd a VS Code-ot vagy egy másik szerkesztőt egy .py fájl létrehozásához, és másold bele az alábbi kódot. Ezután futtasd a fájlt az aktivált környezetedben a `python your_file_name.py` paranccsal.
+Ugyanabban a könyvtárban használja a VS Code-ot vagy egy másik szerkesztőt egy .py fájl létrehozásához, és másolja bele a következő kódot. Ezután futtassa a fájlt az aktivált környezetében a `python your_file_name.py` paranccsal
 
 ```python
 import requests
@@ -589,23 +589,22 @@ response = requests.post(
 print(response.json()["response"])
 ```
 
-### Főbb API végpontok
+### Kulcsfontosságú API végpontok
 
 | Végpont | Metódus | Cél |
 |----------|--------|---------|
-| `/api/generate` | POST | Egylépéses szöveggenerálás |
-| `/api/chat` | POST | Többlépéses beszélgetés üzenettörténettel |
+| `/api/generate` | POST | Egyfordulós szöveggenerálás |
+| `/api/chat` | POST | Többfordulós beszélgetés üzenetelőzményekkel |
 | `/api/tags` | GET | Elérhető modellek listázása |
-| `/api/show` | POST | Modell részleteinek megjelenítése |
-| `/api/pull` | POST | Modell letöltése a nyilvántartásból |
+| `/api/show` | POST | Modell adatainak megjelenítése |
+| `/api/pull` | POST | Modell letöltése a regiszterből |
 
-A teljes API-referenciáért lásd az [Ollama API dokumentációját](https://github.com/ollama/ollama/blob/main/docs/api.md).
-
+A teljes API referenciáért lásd az [Ollama API dokumentációját](https://github.com/ollama/ollama/blob/main/docs/api.md).
 ## Következő lépések
 
-- **Próbálj ki különböző modelleket**: Böngészd az [Ollama modellkönyvtárát](https://ollama.com/library), ahol több száz elérhető modellt fedezhetsz fel, a kis kódolási asszisztensektől a nagy érvelési modellekig.
-- **Hozz létre egyéni modelleket**: Használj egy [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) fájlt egyéni rendszerpromptok, hőmérséklet és egyéb paraméterek beállításához a személyre szabott élmény érdekében.
-- **Fejlessz az API-val**: Használd a [Python](https://github.com/ollama/ollama-python) vagy [JavaScript](https://github.com/ollama/ollama-js) klienskönyvtárakat az Ollama alkalmazásaidba való integrálásához.
-- **Csatlakozz frontend eszközökhöz**: Párosítsd az Ollama-t olyan eszközökkel, mint az [Open WebUI](https://github.com/open-webui/open-webui), egy funkciógazdag csevegési felületért kereséssel, személyiségekkel és dokumentumfeltöltéssel.
+- **Próbáljon ki különböző modelleket**: Böngéssze az [Ollama modellkönyvtárat](https://ollama.com/library), hogy felfedezze a több száz elérhető modellt, a kis kódolási asszisztensektől a nagy következtető modellekig.
+- **Egyéni modellek létrehozása**: Használjon egy [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) fájlt egyéni rendszerpromptok, hőmérséklet és egyéb paraméterek beállításához a személyre szabott élmény érdekében.
+- **Fejlesztés az API-val**: Használja a [Python](https://github.com/ollama/ollama-python) vagy [JavaScript](https://github.com/ollama/ollama-js) kliens könyvtárakat az Ollama alkalmazásaiba történő integrálásához.
+- **Kapcsolódás frontendekhez**: Párosítsa az Ollama-t olyan eszközökkel, mint az [Open WebUI](https://github.com/open-webui/open-webui), hogy funkciókban gazdag csevegőfelületet kapjon kereséssel, személyiségekkel és dokumentumfeltöltéssel.
 
-További információkért tekintsd meg az [Ollama dokumentációját](https://github.com/ollama/ollama/blob/main/README.md).
+További információért tekintse meg az [Ollama dokumentációt](https://github.com/ollama/ollama/blob/main/README.md).

@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 #### ROCm
 
-**Fügen Sie den aktuellen Benutzer den Gruppen „render" und „video" hinzu.** 
+**Fügen Sie den aktuellen Benutzer zu den Gruppen render und video hinzu.** 
 ```bash
 sudo usermod -a -G render,video $LOGNAME
 ```

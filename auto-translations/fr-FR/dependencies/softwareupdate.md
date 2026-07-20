@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 
-Avant de commencer, assurez-vous que votre Ryzen AI Halo dispose des derniers logiciels installés. Ouvrez le **AMD Ryzen™ AI Developer Center** et vérifiez les mises à jour disponibles, aussi bien pour l'application elle-même que pour les logiciels supplémentaires.
+Avant de commencer, assurez-vous que votre Ryzen AI Halo dispose de la dernière version du logiciel. Ouvrez le **AMD Ryzen™ AI Developer Center** et vérifiez la disponibilité de mises à jour, à la fois pour l'application elle-même et pour les logiciels supplémentaires.
 
 <!-- @os:windows -->
 

@@ -12,4 +12,4 @@ vLLM มีให้ใช้งานผ่านอิมเมจคอนเ
 vllm-launch
 ```
 
-launcher จะเริ่มต้นคอนเทนเนอร์ กำหนดเป้าหมายไปที่ iGPU และเปิดเผย vLLM API ที่เข้ากันได้กับ OpenAI บน `http://localhost:8001`
+launcher จะเริ่มต้นคอนเทนเนอร์ กำหนดเป้าหมายไปที่ integrated GPU และเปิดใช้งาน OpenAI-compatible vLLM API ที่ `http://localhost:8001`

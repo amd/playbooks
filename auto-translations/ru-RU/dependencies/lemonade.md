@@ -9,13 +9,13 @@ SPDX-License-Identifier: MIT
 #### Установка Lemonade
 
 <!-- @os:windows -->
-Загрузите последнюю версию установщика с [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) и запустите файл `.msi`.
+Загрузите последний установщик с [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) и запустите файл `.msi`.
 
 После установки:
 - CLI `lemonade` автоматически добавляется в системный PATH
-- Ожидается, что сервер Lemonade будет автоматически работать в фоновом режиме
+- Сервер Lemonade автоматически запускается в фоновом режиме
 
-Также можно выполнить тихую установку из командной строки:
+Вы также можете выполнить тихую установку из командной строки:
 ```cmd
 msiexec /i lemonade-server-minimal.msi /qn
 ```
@@ -33,7 +33,7 @@ sudo apt install lemonade-server
 yay -S lemonade-server
 ```
 
-Для других дистрибутивов или установки из исходного кода см. [полный список вариантов установки](https://lemonade-server.ai/docs/guide/install/).
+Сведения о других дистрибутивах или установке из исходного кода см. в разделе [полные варианты установки](https://lemonade-server.ai/docs/guide/install/).
 <!-- @os:end -->
 
 
@@ -44,26 +44,26 @@ yay -S lemonade-server
 lemonade --version
 ```
 
-Вы должны увидеть вывод следующего вида:
+Вы должны увидеть вывод, подобный следующему:
 ```
 lemonade version x.y.z
 ```
 
-Если отображается номер версии, Lemonade установлен корректно и готов к работе.
+Если отображается номер версии, значит Lemonade установлен правильно и готов к работе.
 
-Для быстрого ознакомления ниже приведены распространённые команды CLI Lemonade:
+Для быстрого доступа ниже приведены распространённые команды CLI Lemonade:
 
 | Команда | Что делает |
 | --- | --- |
-| `lemonade --help` | Отображает все доступные команды и флаги. |
+| `lemonade --help` | Показывает все доступные команды и флаги. |
 | `lemonade --version` | Выводит установленную версию Lemonade. |
-| `lemonade status` | Подтверждает, запущен ли сервер Lemonade и доступен ли он. URL-адрес базового API, совместимого с OpenAI, по умолчанию: `http://localhost:13305/api/v1`. |
-| `lemonade list` | Выводит список моделей, доступных в вашей конфигурации Lemonade. |
+| `lemonade status` | Подтверждает, запущен ли сервер Lemonade и доступен ли он. Базовый URL-адрес API, совместимого с OpenAI, по умолчанию — `http://localhost:13305/api/v1`. |
+| `lemonade list` | Выводит список моделей, доступных в вашей установке Lemonade. |
 | `lemonade pull <MODEL_NAME>` | Загружает модель без её запуска. |
 | `lemonade run <MODEL_NAME>` | При необходимости загружает модель, затем запускает её для инференса/чата. |
 | `lemonade run <MODEL_NAME> --llamacpp rocm` | Запускает модель llama.cpp с бэкендом ROCm. |
 | `lemonade run <MODEL_NAME> --llamacpp vulkan` | Запускает модель llama.cpp с бэкендом Vulkan. |
 | `lemonade config` | Отображает текущие значения конфигурации Lemonade. |
-| `lemonade config set llamacpp.backend=rocm` | Устанавливает бэкенд llama.cpp по умолчанию на ROCm. |
+| `lemonade config set llamacpp.backend=rocm` | Задаёт бэкенд llama.cpp по умолчанию как ROCm. |
 
-Актуальные параметры сервера Lemonade и сведения об устранении неполадок см. в [официальной документации Lemonade](https://lemonade-server.ai/docs/lemonade-cli/).
+Актуальные сведения о параметрах сервера Lemonade и устранении неполадок см. в [официальной документации Lemonade](https://lemonade-server.ai/docs/lemonade-cli/).

@@ -11,19 +11,19 @@ SPDX-License-Identifier: MIT
 
 ## 개요
 
-🍋 **Lemonade**는 대형 언어 모델(LLM), 이미지 생성기, 오디오 모델을 자신의 하드웨어에서 직접 실행할 수 있는 오픈 소스 로컬 AI 서버입니다. 업계 표준인 **OpenAI API**를 통해 모델을 노출하므로, OpenAI와 함께 작동하는 모든 앱이 즉시 Lemonade와 함께 작동할 수 있습니다. 이 플레이북을 마치면 Lemonade를 사용하여 자신의 머신에서 로컬로 모델을 실행할 수 있게 됩니다.
+🍋 **Lemonade**는 대규모 언어 모델(LLM), 이미지 생성기, 오디오 모델을 자신의 하드웨어에서 직접 실행할 수 있게 해주는 오픈소스 로컬 AI 서버입니다. 업계 표준인 **OpenAI API**를 통해 모델을 노출하므로, OpenAI와 작동하는 모든 앱이 Lemonade와도 즉시 작동합니다. 이 플레이북을 마칠 때쯤이면 Lemonade를 사용하여 자신의 머신에서 로컬로 모델을 실행하게 될 것입니다.
 
-## 학습 내용
+## 배우게 될 내용
 
-이 플레이북을 마치면 다음을 수행할 수 있습니다:
+이 플레이북을 마치면 다음을 할 수 있게 됩니다:
 
-* **Lemonade Server 설치** 및 실행 중인지 확인하기.
-* **단일 명령으로 LLM 다운로드 및 채팅하기**.
-* **웹 UI 탐색** 및 비전, 음성-텍스트 변환, 이미지 생성 등 다양한 모달리티 시도하기.
-* **Vulkan과 AMD ROCm™ 소프트웨어 간에 GPU 백엔드 전환하기**.
-* **OpenAI 호환 API를 사용하여 로컬 LLM으로 구동되는 Python 앱 빌드하기**.
+* **Lemonade Server를 설치**하고 실행 중인지 확인합니다.
+* 단일 명령으로 **LLM을 다운로드하고 대화**합니다.
+* **웹 UI를 탐색**하고 비전, 음성-텍스트 변환, 이미지 생성과 같은 다양한 모달리티를 시도합니다.
+* Vulkan과 AMD ROCm™ 소프트웨어 간에 **GPU 백엔드를 전환**합니다.
+* OpenAI 호환 API를 사용하여 로컬 LLM으로 구동되는 **Python 앱을 빌드**합니다.
 <!-- @device:halo_box,halo,stx,krk -->
-* **AMD Neural Processing Unit (NPU)에서 모델 실행하기** — AMD Ryzen™ AI 하드웨어에서 Hybrid 및 FLM 실행 모드 사용.
+* AMD Ryzen™ AI 하드웨어에서 Hybrid 및 FLM 실행 모드를 사용하여 **AMD Neural Processing Unit(NPU)에서 모델을 실행**합니다.
 <!-- @device:end -->
 
 ## 메모리 구성 설정
@@ -36,17 +36,17 @@ SPDX-License-Identifier: MIT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 소프트웨어 사전 요구 사항 설치
+## 소프트웨어 필수 구성 요소 설치
 
-시작하기 전에 다음을 확인하세요:
+시작하기 전에 다음이 준비되어 있는지 확인하세요:
 
-- **Windows 11** 또는 지원되는 **Linux** 배포판(Ubuntu 24.04+, Fedora, Debian)을 실행하는 PC
-- 1~7단계에서 사용되는 런타임 모델(`Gemma-4-E2B-it-GGUF`, ~3 GB)에는 **16 GB RAM**이 권장됩니다. 6단계의 더 큰 코드 생성 모델(`Qwen3.5-35B-A3B-GGUF`, ~20 GB)을 사용하려면 **32 GB+**가 권장됩니다.
-- **~4–30 GB의 여유 디스크 공간** (다운로드하는 모델에 따라 다름). 이 가이드에서 가장 큰 모델은 약 20 GB입니다.
-- **Python 3.10–3.13** (Python 앱 섹션에서 사용)
-- 인터넷 연결 (유선 또는 무선)
+- **Windows 11**을 실행하는 PC 또는 지원되는 **Linux** 배포판(Ubuntu 24.04 이상, Fedora, Debian)
+- 1~7단계에서 사용되는 런타임 모델(`Gemma-4-E2B-it-GGUF`, 약 3GB)에는 **16GB RAM**이 권장됩니다. 6단계에서 더 큰 코드 생성 모델(`Qwen3.5-35B-A3B-GGUF`, 약 20GB)을 사용하려면 **32GB 이상**이 권장됩니다.
+- 다운로드하는 모델에 따라 **약 4~30GB의 여유 디스크 공간**이 필요합니다. 이 가이드에서 가장 큰 모델은 약 20GB입니다.
+- **Python 3.10~3.13**(Python 앱 섹션에서 사용됨)
+- 인터넷 연결(유선 또는 무선)
 <!-- @device:halo_box,halo,stx,krk -->
-- [선택 사항] NPU에서 모델을 실행하려면 AMD XDNA 2 NPU(Ryzen AI 300/400/Max 300 시리즈 또는 Z2 Extreme)와 [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers)에서 설치한 최신 드라이버가 필요합니다.
+- [선택 사항] NPU에서 모델을 실행하려면 [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers)에서 최신 드라이버가 설치된 AMD XDNA 2 NPU(Ryzen AI 300/400/Max 300 시리즈 또는 Z2 Extreme)
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
@@ -166,44 +166,44 @@ echo "OK: Model Gemma-4-E2B-it-GGUF responded"
 
 ## 핵심 개념 — 로컬 AI 서버의 작동 방식
 
-모델을 실행하기 전에, 이러한 설정이 *왜* 이렇게 구성되어 있는지 이해하는 것이 중요합니다. Lemonade는 **로컬 모델 서버**로, AI 모델을 메모리에 로드하고 클라우드 AI 서비스처럼 HTTP를 통해 애플리케이션에 노출하는 프로세스입니다.
+모델을 실행하기 전에 *왜* 이러한 방식으로 설정되어 있는지 이해하는 것이 좋습니다. Lemonade는 **로컬 모델 서버**로, AI 모델을 메모리에 로드하고 클라우드 AI 서비스와 마찬가지로 HTTP를 통해 애플리케이션에 노출하는 프로세스입니다.
 
-### 왜 서버인가?
+### 왜 서버인가요?
 
 | 이점 | 사용자에게 의미하는 것 |
 |---------|----------------------|
-| **간소화된 통합** | 앱이 하드웨어별 C++ 또는 Python 라이브러리를 다루는 대신 하나의 HTTP API와 통신합니다. |
-| **공유 모델** | 단일 로드된 모델이 여러 앱을 동시에 서비스할 수 있어, RAM을 낭비하는 중복 복사본이 없습니다. |
-| **클라우드-로컬 이식성** | OpenAI 클라우드 API용으로 작성된 코드가 URL 하나만 변경하면 Lemonade에서 작동합니다. |
-| **관심사 분리** | 모델 관리, 스트리밍, 장애 허용은 서버가 처리하므로 개발자는 앱에 집중할 수 있습니다. |
+| **간소화된 통합** | 앱은 하드웨어별 C++ 또는 Python 라이브러리를 다루는 대신 하나의 HTTP API와 통신합니다. |
+| **모델 공유** | 하나의 로드된 모델이 여러 앱을 동시에 서비스할 수 있어, 중복된 사본이 RAM을 낭비하지 않습니다. |
+| **클라우드-로컬 이식성** | OpenAI의 클라우드 API용으로 작성된 코드는 URL 하나만 변경하면 Lemonade와 작동합니다. |
+| **관심사의 분리** | 모델 관리, 스트리밍, 장애 허용은 서버가 처리하므로 개발자는 자신의 앱에 집중할 수 있습니다. |
 
 ### OpenAI API 표준
 
-Lemonade는 ChatGPT, Azure OpenAI 및 수십 개의 다른 서비스에서 사용하는 것과 동일한 인터페이스인 **OpenAI API**를 구현합니다. 대화 모델은 간단합니다:
+Lemonade는 ChatGPT, Azure OpenAI 및 수십 개의 다른 서비스에서 사용되는 것과 동일한 인터페이스인 **OpenAI API**를 구현합니다. 대화 모델은 간단합니다:
 
 | 역할 | 대화 주체 |
 |------|---------------|
-| **system** | 모델에 대한 지침 (페르소나, 제약 조건, 사용 가능한 도구) |
+| **system** | 모델에 대한 지침(페르소나, 제약 조건, 사용 가능한 도구) |
 | **user** | 사람(또는 애플리케이션)이 모델에게 보내는 메시지 |
 | **assistant** | 모델이 생성한 응답 |
 
-즉, OpenAI를 지원하는 모든 라이브러리나 앱은 Lemonade Server가 실행 중인 동안 `http://localhost:13305/api/v1`을 가리키도록 설정하면 Lemonade와 통신할 수 있습니다.
+즉, OpenAI를 지원하는 모든 라이브러리나 앱은 Lemonade Server가 실행 중일 때 `http://localhost:13305/api/v1`을 가리키기만 하면 Lemonade와 통신할 수 있습니다.
 
 ## 주요 활동 — 첫 번째 로컬 AI 채팅
 
-LLM을 다운로드하고 대화를 나눠 보겠습니다. AI는 완전히 자신의 머신에서 실행됩니다.
+LLM을 다운로드하여 AI를 전적으로 자신의 머신에서 실행하며 대화를 나눠보겠습니다.
 
 ### 1단계: 모델 다운로드 및 실행
 
-Lemonade에는 엄선된 모델 라이브러리가 포함되어 있습니다. 비전 지원을 포함한 유능하고 컴팩트한 모델인 **Gemma-4-E2B-it**부터 시작해 보겠습니다. 터미널을 열고 다음을 실행하세요:
+Lemonade는 엄선된 모델 라이브러리와 함께 제공됩니다. 비전 지원을 포함하는 강력하고 소형인 **Gemma-4-E2B-it**부터 시작해보겠습니다. 터미널을 열고 다음을 실행하세요:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF
 ```
 
-이 단일 명령은 세 가지 작업을 수행합니다:
+이 명령 하나로 세 가지 작업이 수행됩니다:
 
-1. 아직 다운로드되지 않은 경우 Hugging Face에서 모델(~3 GB)을 **다운로드**합니다. (시간이 걸릴 수 있습니다)
+1. 모델(약 3GB)이 아직 다운로드되지 않은 경우 Hugging Face에서 **다운로드**합니다. (시간이 걸릴 수 있음)
 2. 포트 13305에서 Lemonade Server 프로세스를 **시작**합니다.
 3. 모델과 채팅을 시작할 수 있도록 **Lemonade App을 엽니다**.
 
@@ -216,17 +216,17 @@ Windows에서는 Lemonade App이 자동으로 실행되어 즉시 채팅을 시�
 Linux에서는 브라우저를 열고 `http://localhost:13305`로 이동하여 웹 앱에 접근하세요.
 <!-- @os:end -->
 
-다음과 같이 질문을 입력해 보세요:
+질문을 입력해보세요:
 
 ```
 What are three fun facts about lemons?
 ```
 
-모델이 채팅 창에서 직접 응답합니다. **축하합니다! 대형 언어 모델을 로컬에서 실행하고 있습니다.**
+모델이 채팅 창에서 직접 응답합니다. **축하합니다! 이제 대규모 언어 모델을 로컬에서 실행하고 있습니다.**
 
 ![로그가 표시된 Lemonade App](../../dependencies/assets/ChatwithLogs.png)
 
-Lemonade App의 서버 로그 창에서 각 응답 후 모델 성능에 대한 텔레메트리 데이터를 확인할 수 있습니다. 예를 들어:
+Lemonade App의 Server Logs 창에서 각 응답 후 모델의 성능에 대한 원격 측정 데이터를 확인할 수 있습니다. 예를 들면:
 
 ```
  === Telemetry ===
@@ -237,49 +237,49 @@ TPS:           95.99
 =================
 ```
 
-### 2단계: 웹 인터페이스 및 다양한 모달리티 탐색
+### 2단계: 웹 인터페이스와 다양한 모달리티 살펴보기
 
-Lemonade에는 다음을 수행할 수 있는 내장 웹 인터페이스가 포함되어 있습니다:
+Lemonade에는 다음과 같은 기능을 제공하는 내장 웹 인터페이스가 포함되어 있습니다:
 
-- 친숙한 채팅 창에서 로드된 모델과 **상호작용**
-- 모델 관리자 탭에서 **모델 탐색**
+- 익숙한 채팅 창에서 로드된 모델과 **상호작용**
+- Model Manager 탭에서 모델 **찾아보기**
 - 원클릭으로 **새 모델 다운로드**
 
-웹 UI의 **모델 관리자** 탭을 사용하여 다양한 모달리티 간에 전환해 보세요. 레시피별 또는 카테고리별로 모델을 탐색할 수 있습니다:
+웹 UI의 **Model Manager** 탭에서 Recipe별 또는 Category별로 모델을 찾아보며 다양한 모달리티 간 전환을 시도해 보세요:
 
-1. **비전:** 이미 로드된 `Gemma-4-E2B-it-GGUF` 모델은 비전을 지원합니다. 채팅 창에 이미지를 붙여넣고 모델에게 설명을 요청해 보세요.
-2. **이미지 생성:** 이미지 카테고리에서 모델 관리자를 통해 `SDXL-Turbo`와 같은 이미지 모델을 다운로드한 후, Lemonade 이미지 생성기를 사용하여 프롬프트를 입력하고 로컬에서 이미지를 생성해 보세요.
-3. **오디오:** 오디오 카테고리에서 음성-텍스트 변환이 가능한 `Whisper-Tiny`와 같은 오디오 모델을 다운로드하세요. 오디오 녹음을 제공하여 로컬에서 텍스트로 변환할 수 있습니다. 텍스트-음성 변환의 경우, 스피치 카테고리에서 `kokoro-v1`과 같은 모델을 사용해 보세요.
+1. **Vision:** 이미 로드된 `Gemma-4-E2B-it-GGUF` 모델은 비전을 지원합니다. 채팅창에 이미지를 붙여넣고 모델에게 이미지를 설명해달라고 요청해 보세요.
+2. **Image generation:** Image 카테고리에서 Model Manager를 통해 `SDXL-Turbo`와 같은 이미지 모델을 다운로드한 다음, Lemonade Image Generator를 사용해 프롬프트를 입력하고 로컬에서 이미지를 생성해 보세요.
+3. **Audio:** Audio 카테고리에서 음성을 텍스트로 변환할 수 있는 `Whisper-Tiny`와 같은 오디오 모델을 다운로드하세요. 녹음된 오디오를 제공하면 로컬에서 텍스트로 변환됩니다. 텍스트를 음성으로 변환하려면 Speech 카테고리의 `kokoro-v1`과 같은 모델을 시도해 보세요.
 
-![Lemonade를 활용한 멀티 모달리티](../../dependencies/assets/multi_modality.png)
+![Lemonade의 멀티모달리티](../../dependencies/assets/multi_modality.png)
 
 ### 3단계: 다른 백엔드로 모델 사용해 보기
 
-Lemonade 앱에서 모델 위에 마우스를 올리면 기어 아이콘이 표시됩니다. 이를 클릭하면 원하는 백엔드 선택을 포함한 모델 옵션을 설정할 수 있습니다.
+Lemonade 앱에서 모델 위에 마우스를 올리면 톱니바퀴 아이콘이 표시됩니다. 이 아이콘을 클릭하면 원하는 백엔드 선택을 포함하여 모델에 대한 옵션을 선택할 수 있습니다.
 
-기본적으로 Lemonade는 GPU 가속을 위해 Vulkan을 사용합니다. 지원되는 AMD 외장 GPU가 있는 경우 ROCm으로 전환할 수 있습니다.
+기본적으로 Lemonade는 GPU 가속을 위해 Vulkan을 사용합니다. 지원되는 AMD 개별 GPU가 있는 경우 ROCm으로 전환할 수 있습니다.
 
 ![Lemonade 백엔드 선택](../../dependencies/assets/lemonademodeloptions.png)
 
 설치된 백엔드를 관리하려면 가장 왼쪽 열의 백엔드 버튼을 클릭하세요.
 
-또는 다음 명령을 사용하여 백엔드를 지정할 수 있습니다:
+또는 다음 명령을 사용하여 백엔드를 지정할 수도 있습니다:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF --llamacpp rocm
 ```
 
-환경 변수 `LEMONADE_LLAMACPP`에 `vulkan`, `rocm`, 또는 `cpu` 값을 설정하여 기본 백엔드를 지정할 수도 있습니다.
+환경 변수 `LEMONADE_LLAMACPP`를 `vulkan`, `rocm`, `cpu` 값 중 하나로 설정하여 기본 백엔드를 지정할 수도 있습니다.
 
 ---
 
-## 더 깊이 알아보기 — Python으로 AI 기반 앱 만들기
+## 한 단계 더 나아가기 — Python으로 AI 기반 앱 구축하기
 
-로컬 AI 서버의 진정한 강점은 어떤 애플리케이션이든 단 몇 줄의 코드만으로 연결할 수 있다는 점입니다. 이를 증명하기 위해, 주제를 입력하면 플래시카드를 생성하고 대화형으로 퀴즈를 풀 수 있는 작지만 실용적인 **학습 플래시카드 생성기**를 만들어 보겠습니다.
+로컬 AI 서버의 진정한 강점은 어떤 애플리케이션이든 단 몇 줄의 코드만으로 연결할 수 있다는 점입니다. 이를 직접 확인하기 위해 주제를 입력하면 플래시카드를 생성하고, 이를 이용해 대화형으로 스스로 퀴즈를 낼 수 있는 작지만 실용적인 **학습용 플래시카드 생성기**를 만들어 보겠습니다.
 
 ### 4단계: 서버 시작
 
-Lemonade 서버가 실행 중인지 확인하세요. 서버는 일반적으로 설치 후 백그라운드에서 자동으로 시작됩니다. 확인하려면 다음을 실행하세요:
+Lemonade 서버가 실행 중인지 확인하세요. 설치 후 일반적으로 백그라운드에서 자동으로 시작됩니다. 확인하려면 다음을 실행하세요:
 
 ```
 lemonade status
@@ -287,7 +287,7 @@ lemonade status
 
 `Server is running on port 13305`와 같은 메시지가 표시되어야 합니다.
 
-서버가 실행 중이 아닌 경우, Lemonade 앱을 열어 시작하세요. 기본 포트 **13305**를 사용하세요 (트레이 아이콘에서 확인하거나 선택할 수 있습니다).
+서버가 실행 중이 아니라면 Lemonade 앱을 열어 시작하세요. 기본 포트인 **13305**를 사용합니다(트레이 아이콘에서 확인하거나 선택할 수 있습니다).
 
 ### 5단계: OpenAI Python 클라이언트 설치
 
@@ -371,16 +371,16 @@ python3 -c "from openai import OpenAI; print('OK')"
 
 ### 6단계: 플래시카드 앱 만들기
 
-코드를 생성하기 위해 다른 모델을 다운로드해 보겠습니다: `Qwen3.5-35B-A3B-GGUF`. 이 모델은 크기가 크고(~20 GB) 성능이 뛰어나며, RAM이 32 GB 이상인 시스템에 가장 적합합니다. RAM이 부족한 경우 `Qwen3.5-9B-GGUF`(~6 GB)를 대신 사용해 보세요.
+코드 생성을 위해 다른 모델인 `Qwen3.5-35B-A3B-GGUF`를 다운로드해 보겠습니다. 이 모델은 크기가 크고(약 20GB) 성능이 뛰어나며 32GB 이상의 RAM을 갖춘 시스템에 가장 적합합니다. 사용 가능한 RAM이 더 적다면 대신 `Qwen3.5-9B-GGUF`(약 6GB)를 시도해 보세요.
 
-UI에서 다운로드하거나 다음을 실행할 수 있습니다:
+UI에서 다운로드하거나 다음을 실행하여 다운로드할 수 있습니다:
 ```
 lemonade run Qwen3.5-35B-A3B-GGUF
 ```
 
-Lemonade 채팅 UI에 다음 프롬프트를 입력하여 간단한 플래시카드 앱의 코드를 생성하세요.
+다음 프롬프트를 Lemonade Chat UI에 입력하여 간단한 Flashcard 앱의 코드를 생성하세요.
 
-Qwen3.5-35B-A3B-GGUF(코드 작성에 더 뛰어난 대형 모델)를 사용하여 Python 앱을 생성하고, 앱 자체는 런타임에 Gemma-4-E2B-it-GGUF(이미 다운로드한 소형 모델)를 호출합니다. 생성된 코드는 원하는 파일에 복사하여 Python에서 실행할 수 있습니다.
+Python 앱을 생성하는 데는 Qwen3.5-35B-A3B-GGUF(코드 작성에 더 뛰어난 대형 모델)를 사용하고, 앱 자체는 런타임에 이미 다운로드한 소형 모델인 Gemma-4-E2B-it-GGUF를 호출합니다. 생성된 코드는 원하는 파일에 복사하여 Python에서 실행할 수 있습니다.
 
 ```
 Generate a Python script that uses the OpenAI Python library to call a local LLM and create an interactive flashcard study tool.
@@ -413,9 +413,9 @@ Structure:
    - Offers to start the quiz.
 ```
 
-> **팁**: 철저한 프롬프트 작성과 두 모델 시스템을 활용하여 리소스와 속도를 최적화하는 표준 엔지니어링 관행을 따랐습니다.
+> **팁**: 철저한 프롬프트 작성과 리소스 및 속도 최적화를 위한 이중 모델 시스템 사용을 통해 표준 엔지니어링 관행을 준수했습니다.
 
-편의를 위해 [`flashcards.py`](assets/flashcards.py)에 샘플 출력을 제공했습니다. 해당 디렉터리에 자유롭게 다운로드하세요. 어느 방법을 사용하든 이제 실행 가능한 Python 파일이 준비되어 있어야 합니다.
+편의를 위해 [`flashcards.py`](assets/flashcards.py)에 예제 출력을 제공했습니다. 원하는 디렉터리에 자유롭게 다운로드하세요. 어느 쪽이든, 이제 실행 가능한 Python 파일을 갖게 됩니다.
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=900 hidden=True -->
@@ -471,7 +471,7 @@ python3 lemonade_python_smoke.py
 python flashcards.py # replace with your file name
 ```
 
-**다음과 같은 결과가 표시되어야 합니다:**
+**다음과 같은 결과가 표시됩니다:**
 
 ```
 🍋 Lemonade Flashcard Generator
@@ -505,63 +505,63 @@ Did you get it right? (y/n): y
 🏆 Score: 4/5
 ```
 
-약 150줄의 코드로 로컬 LLM을 기반으로 하는 완전히 기능하는 학습 도구를 만들었습니다. 관리할 API 키도 없고, 사용 비용도 없으며, 데이터가 사용자의 기기를 벗어나지 않습니다.
+약 150줄의 코드로 로컬 LLM을 기반으로 하는 완전한 기능의 학습 도구를 만들었습니다. 관리할 API 키도 없고, 사용 비용도 없으며, 데이터가 컴퓨터 밖으로 나가지 않습니다.
 
-> **핵심 인사이트:** `client = OpenAI(base_url=...) ` 줄이 이 앱을 OpenAI 클라우드 대신 Lemonade에 연결하는 *유일한* 부분임을 주목하세요. 나머지 코드는 OpenAI 호환 서비스를 대상으로 작성하는 코드와 동일합니다. OpenAI Python 라이브러리를 사용해 본 적이 있다면, 이미 Lemonade로 앱을 만드는 방법을 알고 있는 것입니다.
+> **핵심 포인트:** `client = OpenAI(base_url=...) ` 줄이 이 앱을 OpenAI 클라우드가 아닌 Lemonade에 연결하는 *유일한* 부분이라는 점에 주목하세요. 나머지 코드는 OpenAI 호환 서비스를 대상으로 작성하는 코드와 동일합니다. OpenAI Python 라이브러리를 사용해본 적이 있다면, 이미 Lemonade로 앱을 만드는 방법을 알고 있는 셈입니다.
 
 ### 이것이 보여주는 것
 
-이 작은 앱은 여러 실제 통합 패턴을 활용합니다:
+이 작은 앱은 여러 실제 통합 패턴을 보여줍니다:
 
-| 패턴 | 적용 위치 |
+| 패턴 | 나타나는 위치 |
 |---------|-----------------|
-| **시스템 프롬프트** | `"system"` 메시지가 LLM에게 구조화된 JSON을 출력하도록 지시 |
-| **구조화된 출력** | 앱이 LLM의 응답을 JSON으로 파싱하여 플래시카드 생성 |
-| **무상태 요청** | 각 `generate_flashcards()` 호출은 독립적으로 실행 |
-| **오류 처리** | `try/except`가 LLM 출력이 유효한 JSON이 아닌 경우를 우아하게 처리 |
+| **시스템 프롬프트** | `"system"` 메시지는 LLM에게 구조화된 JSON을 출력하도록 지시합니다 |
+| **구조화된 출력** | 앱은 LLM의 응답을 JSON으로 파싱하여 플래시카드를 만듭니다 |
+| **상태 비저장 요청** | 각 `generate_flashcards()` 호출은 독립적입니다 |
+| **오류 처리** | `try/except`는 LLM의 출력이 유효한 JSON이 아닌 경우를 우아하게 처리합니다 |
 
-이러한 패턴은 챗봇, 코드 어시스턴트, 콘텐츠 생성기, 자동화 도구 등 모든 애플리케이션으로 확장할 수 있습니다.
+이와 동일한 패턴은 챗봇, 코드 어시스턴트, 콘텐츠 생성기, 자동화 도구 등 모든 애플리케이션에 확장 적용됩니다.
 
 #### 보너스 챌린지
 
-* 추가 도전으로, [여기](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py)에 제공된 예시를 참고하여 플래시카드를 사용자에게 읽어주도록 앱을 업데이트해 보세요.
+* 추가 도전을 원한다면, [여기](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py)에 제공된 예제를 참고하여 플래시카드를 사용자에게 음성으로 읽어주도록 앱을 업데이트해 보세요.
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
-## NPU에서 모델 실행 (선택 사항)
+## NPU에서 모델 실행하기 (선택 사항)
 
-Ryzen AI 300/400/Max 300 시리즈 또는 Z2 Extreme을 보유하고 있다면, 기기에 AI 워크로드를 위해 특별히 설계된 전용 칩인 **신경 처리 장치(NPU)**가 내장되어 있습니다. NPU에서 모델을 실행하면 GPU를 사용하는 것보다 전력 효율이 높아, 백그라운드 AI 작업, 장시간 세션, 배터리 구동 환경에 이상적입니다.
+Ryzen AI 300/400/Max 300 시리즈 또는 Z2 Extreme을 보유하고 있다면, 사용 중인 기기에는 AI 워크로드 전용으로 설계된 전용 칩인 **신경 처리 장치(Neural Processing Unit, NPU)** 가 내장되어 있습니다. NPU에서 모델을 실행하면 GPU를 사용하는 것보다 전력 효율이 높기 때문에 백그라운드 AI 작업, 장시간 세션, 배터리 사용 환경에 이상적입니다.
 
-Lemonade는 동일한 OpenAI API 뒤에서 투명하게 동작하는 세 가지 NPU 실행 모드를 지원합니다:
+Lemonade는 세 가지 NPU 실행 모드를 지원하며, 모두 동일한 OpenAI API 뒤에서 투명하게 동작합니다.
 
-| 모드 | 동작 방식 | 레시피 | 예시 모델 |
+| 모드 | 동작 방식 | Recipe | 예시 모델 |
 |------|-------------|--------|----------------|
-| **하이브리드 (NPU + iGPU)** | NPU가 프롬프트를 처리하고, iGPU가 토큰을 생성 | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
+| **Hybrid (NPU + iGPU)** | NPU가 프롬프트를 처리하고, iGPU가 토큰을 생성 | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
 | **NPU 전용** | 전체 추론이 NPU에서 실행 | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
-| **FLM** | NPU에서 FastFlowLM 엔진을 사용하며, AMD XDNA2에 최적화 | FLM (`flm`) | qwen3.5-4b-FLM |
+| **FLM** | AMD XDNA2에 최적화된 FastFlowLM 엔진을 NPU에서 사용 | FLM (`flm`) | qwen3.5-4b-FLM |
 
 ### 요구 사항
 
 - **AMD Ryzen AI 300/400 시리즈 또는 Z2 시리즈** 프로세서
-- **FLM** 모델의 경우: FLM 런타임은 Lemonade 앱 내에서 설치하거나, FLM 모델 실행 시 Lemonade가 자동으로 FLM 런타임을 설치합니다. FastFlowLM에 대해 자세히 알아보려면 [여기](https://fastflowlm.com/docs/)를 참조하세요.
+- **FLM** 모델의 경우: FLM 런타임은 Lemonade 앱 내에서 설치하거나, FLM 모델을 실행할 때 Lemonade가 자동으로 FLM 런타임을 설치합니다. FastFlowLM에 대해 더 알아보려면 [여기](https://fastflowlm.com/docs/)를 참조하세요.
 
 
-### 8단계: 하이브리드 모델 실행
+### 8단계: Hybrid 모델 실행하기
 
-하이브리드 모델은 속도와 효율성의 균형을 위해 NPU와 iGPU 간에 작업을 분산합니다. Lemonade 앱에서 `Ryzen AI LLM` 목록의 모델(예: `Qwen3-4B-Hybrid`)을 선택하거나, 다음 명령어를 사용하여 실행하세요:
+Hybrid 모델은 속도와 효율성의 균형을 위해 NPU와 iGPU 간에 작업을 분할합니다. Lemonade 앱에서 `Ryzen AI LLM` 목록에서 모델을 선택하세요(예: `Qwen3-4B-Hybrid`). 또는 다음 명령을 사용하여 실행할 수 있습니다.
 
 ```
 lemonade run Qwen3-4B-Hybrid
 ```
 
-Lemonade가 NPU를 자동으로 감지하고 **Ryzen AI LLM** 백엔드를 설치합니다.
+Lemonade는 사용 중인 NPU를 자동으로 감지하고 **Ryzen AI LLM** 백엔드를 설치합니다.
 
-> **내부적으로 어떤 일이 일어나나요?** 메시지를 전송하면 NPU가 전체 프롬프트를 병렬로 처리합니다(이를 "프리필"이라고 합니다). 그런 다음 iGPU가 한 번에 하나의 토큰씩 응답을 생성합니다(이를 "디코드"라고 합니다). 이 하이브리드 방식은 각 칩의 강점을 활용합니다.
+> **내부적으로 어떤 일이 일어날까요?** 메시지를 전송하면 NPU가 전체 프롬프트를 병렬로 처리합니다(이를 "prefill"이라고 합니다). 그런 다음 iGPU가 응답을 한 번에 하나씩 토큰 단위로 생성합니다(이를 "decode"라고 합니다). 이러한 하이브리드 방식은 각 칩의 강점을 최대한 활용합니다.
 
-### 9단계: FLM 모델 실행
+### 9단계: FLM 모델 실행하기
 
-FastFlowLM (FLM) 모델은 AMD의 XDNA2 NPU 아키텍처에 특별히 최적화되어 있으며, 크기 대비 매우 빠를 수 있습니다. 예를 들어, `FastFlowLM NPU` 목록에서 `qwen3.5-4b-FLM`을 선택하거나 다음 명령어를 사용하세요:
+FastFlowLM(FLM) 모델은 AMD의 XDNA2 NPU 아키텍처에 특별히 최적화되어 있으며, 크기 대비 매우 빠른 속도를 제공할 수 있습니다. 예를 들어 `FastFlowLM NPU` 목록에서 `qwen3.5-4b-FLM`을 선택하거나 다음 명령을 사용하세요.
 
 <!-- @os:windows -->
 Windows에서 `FastFlowLM`을 활성화하려면:
@@ -575,20 +575,20 @@ Windows에서 `FastFlowLM`을 활성화하려면:
 
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
-`Lemonade` 앱을 처음 실행하면 `FastFlowNPU` 백엔드가 기본적으로 활성화되어 있지 않습니다.
+`Lemonade` 앱을 처음 실행하면 `FastFlowNPU` 백엔드는 기본적으로 활성화되어 있지 않습니다. 
 로컬 앱이 설치 페이지를 열어 설정 과정을 안내합니다.
 
 Linux에서 `FastFlowLM`을 활성화하려면:
 
 * `Lemonade` 앱을 엽니다.
-* [공식 FLM](https://lemonade-server.ai/flm_npu_linux.html) 문서를 방문하여 Linux 배포판을 선택한 후 FLM 설치 단계를 따릅니다.
-* 설치 페이지의 안내에 따라 백포트를 활성화합니다.
+* [공식 FLM](https://lemonade-server.ai/flm_npu_linux.html) 문서를 방문하여 사용 중인 Linux 배포판을 선택한 후 FLM 설치 단계를 따릅니다.
+* 설치 페이지에 안내된 대로 백포트(backports)를 활성화합니다.
 * [태그 페이지](https://github.com/FastFlowLM/FastFlowLM/tags)에서 최신 `v0.9.x` 릴리스를 다운로드합니다.
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
 >[!Note]
-AMD Halo Developer Platform의 경우 Debian 13을 선택해야 합니다.
+AMD Halo Developer Platform의 경우 반드시 Debian 13을 선택하세요.
 ```
 fastflowlm_0.9.X_debian13_amd64.deb
 ```
@@ -600,19 +600,19 @@ fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 ```
 <!-- @device:end -->
 * 다운로드한 `.deb` 패키지를 설치합니다.
-* 권장 사항: `Lemonade App`을 종료하고 다시 열어 변경 사항이 감지되도록 합니다.
-* 권장 사항: `Backends Manager`를 열고 Install `FastFlowNPU` Backend를 클릭합니다.
+* 권장: `Lemonade App`을 종료했다가 다시 열어 변경 사항이 인식되도록 합니다.
+* 권장: `Backends Manager`를 열고 `FastFlowNPU` Backend를 Install합니다.
 <!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @device:halo_box,halo,stx,krk -->
-설치가 성공적으로 완료되면 **Lemonade Desktop App** 내 **Download Manager**에서 `flm:npu`가 완료된 것을 확인할 수 있습니다.
+설치가 성공적으로 완료되면 **Lemonade Desktop App** 내의 **Download Manager**에서 `flm:npu`가 완료된 것을 확인할 수 있습니다.
 <p align="center">
   <img width="400" height="400" src="assets/FFLM-installationWizard.png" />
 </p>
-그런 다음 사용 가능한 FFLM 모델 중 하나를 선택하여 NPU 백엔드를 사용할 수 있습니다.
+이후 사용 가능한 FFLM 모델 중 하나를 선택하여 NPU 백엔드 사용을 시작할 수 있습니다.
 
-특정 모델의 경우, [모델 페이지](https://fastflowlm.com/docs/models/qwen/)에서 원하는 모델을 다운로드하고 문서에 제공된 Shell 명령어를 사용하여 유효성을 검사하세요.
+특정 모델의 경우, [모델 페이지](https://fastflowlm.com/docs/models/qwen/)에서 원하는 모델을 다운로드하고 문서에 제공된 Shell 명령을 사용하여 검증하세요.
 ```
 flm run qwen3.5-4b-FLM
 ```
@@ -621,20 +621,20 @@ flm run qwen3.5-4b-FLM
 lemonade run qwen3.5-4b-FLM
 ```
 를 통해
-FLM 모델에는 가장 인기 있는 아키텍처(Gemma 3, Qwen 3, Llama 3, DeepSeek R1)가 포함되어 있으며, 1 GB 미만부터 13 GB 이상까지 다양합니다.
-Lemonade가 NPU를 자동으로 감지하고 **FastFlowLM NPU** 백엔드를 설치합니다.
+FLM 모델에는 가장 인기 있는 아키텍처(Gemma 3, Qwen 3, Llama 3, DeepSeek R1) 중 일부가 포함되어 있으며, 1GB 미만부터 13GB 이상까지 다양합니다.
+Lemonade는 사용 중인 NPU를 자동으로 감지하고 **FastFlowLM NPU** 백엔드를 설치합니다.
 
 <!-- @os:windows -->
-> **팁:** 최상의 NPU 성능을 위해 터보 모드를 활성화하세요:
+> **팁:** 최상의 NPU 성능을 위해 터보 모드를 활성화하세요.
 > ```
 > cd C:\Windows\System32\AMD
 > .\xrt-smi configure --pmode turbo
 > ```
 <!-- @os:end -->
 
-### 모델 전환
+### 모델 전환하기
 
-6단계의 플래시카드 앱은 NPU 모델에서도 작동합니다. 모델 이름만 변경하면 됩니다:
+6단계의 플래시카드 앱은 NPU 모델에서도 작동합니다. 모델 이름만 변경하면 됩니다.
 
 ```python
 # In flashcards.py, swap the model to run on NPU instead of GPU
@@ -647,14 +647,14 @@ response = client.chat.completions.create(
 
 ## 다음 단계
 
-자신의 하드웨어에서 로컬 AI 서버가 실행되고 있습니다. 다음으로 진행할 내용은 다음과 같습니다:
+이제 사용자의 하드웨어에서 로컬 AI 서버가 실행 중입니다. 다음으로 진행할 수 있는 단계는 다음과 같습니다.
 
-1. **즐겨 사용하는 앱 연결**: Lemonade는 [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/) 및 [더 많은 앱](https://lemonade-server.ai/marketplace)과 즉시 연동됩니다.
+1. **즐겨 사용하는 앱과 연결하기**: Lemonade는 [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/), 그리고 [기타 여러 앱](https://lemonade-server.ai/marketplace)과 별도의 설정 없이 바로 작동합니다.
 
-2. **더 많은 모델 탐색**: 전체 [모델 라이브러리](https://lemonade-server.ai/docs/server/server_models/)를 탐색하여 코딩, 추론, 비전 등에 최적화된 모델을 찾아보세요. Lemonade 앱 또는 `lemonade list`를 사용하여 사용 가능한 항목을 확인하세요.
+2. **더 많은 모델 살펴보기**: 코딩, 추론, 비전 등에 최적화된 모델을 찾으려면 전체 [모델 라이브러리](https://lemonade-server.ai/docs/server/server_models/)를 살펴보세요. Lemonade 앱이나 `lemonade list`를 사용하여 사용 가능한 모델을 확인할 수 있습니다.
 
-3. **ROCm GPU 가속 활성화**: 지원되는 AMD GPU가 있다면 ROCm 백엔드로 전환하세요: `lemonade config set llamacpp.backend=rocm`. [지원되는 AMD GPU](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations)를 참조하세요.
+3. **ROCm GPU 가속 활성화하기**: 지원되는 AMD GPU가 있다면 ROCm 백엔드로 전환하세요: `lemonade config set llamacpp.backend=rocm`. [지원되는 AMD GPU](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations) 목록을 참조하세요.
 
-4. **전체 API 사양 읽기**: Lemonade는 채팅 완성, 임베딩, 오디오 전사, 이미지 생성, 텍스트 음성 변환 등을 지원합니다. 모든 엔드포인트에 대해서는 [서버 사양](https://lemonade-server.ai/docs/server/server_spec/)을 참조하세요.
+4. **전체 API 사양 읽어보기**: Lemonade는 채팅 완성, 임베딩, 오디오 전사, 이미지 생성, 텍스트 음성 변환 등을 지원합니다. 모든 엔드포인트에 대한 자세한 내용은 [Server Spec](https://lemonade-server.ai/docs/server/server_spec/)을 참조하세요.
 
-5. **기여하기**: Lemonade는 오픈 소스입니다. [기여 가이드](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md)를 확인하고 [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)를 찾아보세요.
+5. **기여하기**: Lemonade는 오픈 소스 프로젝트입니다. [기여 가이드](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md)를 확인하고 [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)를 살펴보세요.

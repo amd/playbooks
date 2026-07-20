@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 <!-- @device:halo_box -->
 LM Studio peut être installé depuis le **AMD Ryzen™ AI Developer Center**. Accédez à l'onglet **Updates** et installez LM Studio s'il n'est pas déjà présent.
 
-Pour permettre à LM Studio de voir les modèles pré-installés, naviguez vers Settings > General > Models Directory. Modifiez ensuite le chemin vers `C:\Users\Public\models`
+Pour permettre à LM Studio de voir les modèles préinstallés, accédez à Settings > General > Models Directory. Modifiez ensuite le chemin en `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -19,11 +19,11 @@ Pour permettre à LM Studio de voir les modèles pré-installés, naviguez vers 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-1. Téléchargez le programme d'installation ici : [https://lmstudio.ai/download](https://lmstudio.ai/download)
-2. Installez.
+1. Téléchargez l'installateur depuis : [https://lmstudio.ai/download](https://lmstudio.ai/download)
+2. Installez-le. 
 <!-- @device:end -->
 
-> Conseil : Après l'installation, lancez LM Studio une fois pour initialiser le CLI (`lms`).
+> Conseil : Après l'installation, lancez LM Studio une fois pour initialiser la CLI (`lms`).
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
 ```powershell
@@ -33,16 +33,16 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Remarque : Vous pouvez choisir d'installer soit le .deb, soit l'AppImage.
-1. Téléchargez l'appimage ici : [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
-2. exécutez `sudo apt install libfuse2`
-3. exécutez `cd ~/Downloads`
-4. exécutez `chmod +x LM-Studio-*.AppImage`
-5. exécutez `./LM-Studio-*.AppImage`
-> Conseil : Après l'installation, lancez LM Studio une fois pour initialiser le CLI (`lms`).
+> Remarque : Vous pouvez choisir d'installer soit le .deb, soit l'AppImage. 
+1. Téléchargez l'appimage depuis : [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
+2. exécutez `sudo apt install libfuse2`  
+3. exécutez `cd ~/Downloads`  
+4. exécutez `chmod +x LM-Studio-*.AppImage`  
+5. exécutez `./LM-Studio-*.AppImage`  
+> Conseil : Après l'installation, lancez LM Studio une fois pour initialiser la CLI (`lms`).
 
 <!-- @device:halo_box -->
-Pour permettre à LM Studio de voir les modèles pré-installés, naviguez vers Settings > General > Models Directory. Modifiez ensuite le chemin vers `/var/cache/models`.
+Pour permettre à LM Studio de voir les modèles préinstallés, accédez à Settings > General > Models Directory. Modifiez ensuite le chemin en `/var/cache/models`.
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -53,5 +53,5 @@ Pour permettre à LM Studio de voir les modèles pré-installés, naviguez vers 
 ```bash
 lms --help
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->

@@ -6,20 +6,20 @@ SPDX-License-Identifier: MIT
 
 # Plattformskonfiguration
 
-Det här dokumentet beskriver den förväntade plattformskonfigurationen för att köra den här spelboken.
+Detta dokument beskriver den förväntade plattformskonfigurationen för att köra denna playbook.
 
-## Nödvändiga appar / ramverk
+## Obligatoriska appar/ramverk
 
-| Komponent       | Förväntad konfiguration              | Anteckningar                                                                 |
+| Komponent       | Förväntad konfiguration               | Anteckningar                                                                        |
 | --------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
-| Python          | Python med `venv`-stöd             | Används för att skapa och aktivera `kernel-env`                              |
-| ROCm Python SDK | ROCm 7.13-paketfamilj                | Installeras via spelbokens beroendeflöde                                     |
-| PyTorch ROCm    | PyTorch 2.11.0 + ROCm 7.13           | Krävs för `torch.cuda`, HIP-körtid, JIT-kompilering och `CUDAExtension`     |
-| GPU-drivrutin   | AMD GPU-drivrutin med ROCm/HIP-stöd  | Krävs innan PyTorch kan identifiera AMD GPU                                  |
+| Python          | Python med `venv`-stöd         | Används för att skapa och aktivera `kernel-env`                                     |
+| ROCm Python SDK | ROCm 7.13-paketfamiljen             | Installeras genom playbookens beroendeflöde                               |
+| PyTorch ROCm    | PyTorch 2.11.0 + ROCm 7.13           | Krävs för `torch.cuda`, HIP-runtime, JIT-kompilering och `CUDAExtension` |
+| GPU-drivrutin      | AMD GPU-drivrutin med ROCm/HIP-stöd | Krävs innan PyTorch kan identifiera AMD GPU:n                               |
 
 > Obs: Om du kör på AMD Ryzen™ AI Halo Developer Platform är AMD ROCm™-programvara och PyTorch förinstallerade.
 
-## Linux-förutsättningar
+## Förutsättningar för Linux
 
 Följande systempaket krävs:
 
@@ -29,22 +29,22 @@ sudo apt install -y python3-venv build-essential gcc g++
 ```
 
 * `python3-venv` krävs för att skapa `kernel-env`.
-* `build-essential`, `gcc` och `g++` krävs för genomgångarna av C++-tillägg.
-* `amd-smi` används för kontroller av GPU-synlighet/användning i Linux.
+* `build-essential`, `gcc` och `g++` krävs för genomgångarna med C++-tillägg.
+* `amd-smi` används för kontroll av GPU-synlighet/-användning på Linux.
 
-C++-tilläggsexemplen bygger inbyggda `.so`-moduler från `.cu`-filer med hjälp av PyTorch:s `CUDAExtension`-sökväg.
+Exemplen med C++-tillägg bygger inbyggda `.so`-moduler från `.cu`-filer med hjälp av PyTorchs `CUDAExtension`-metod.
 
-## Windows-förutsättningar
+## Förutsättningar för Windows
 
-Windows-körningar kräver:
+Windows-körningsmiljöer kräver:
 
 * Python tillgängligt via `python`
-* Installera senaste: [AMD Software: Adrenalin Edition™](https://www.amd.com/en/products/software/adrenalin.html)
-* [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) eller [nyare](https://visualstudio.microsoft.com/vs/community/) med arbetsbelastningen **Skrivbordsutveckling med C++**
+* Installera senaste version: [AMD Software: Adrenalin Edition™](https://www.amd.com/en/products/software/adrenalin.html)
+* [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) eller [nyare](https://visualstudio.microsoft.com/vs/community/) med arbetsbelastningen **Desktop development with C++**
 
-Visual Studio C++-miljön måste tillhandahålla:
+Visual Studios C++-miljö måste tillhandahålla:
 * `vcvars64.bat`
 * `cl.exe`
-* Windows SDK-inkluderings- och bibliotekssökvägar
+* Sökvägar till Windows SDK:s include- och biblioteksfiler
 
-C++-tilläggsexemplen bygger inbyggda `.pyd`-moduler från `.cu`-filer med hjälp av PyTorch:s `CUDAExtension`-sökväg.
+Exemplen med C++-tillägg bygger inbyggda `.pyd`-moduler från `.cu`-filer med hjälp av PyTorchs `CUDAExtension`-metod.

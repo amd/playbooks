@@ -4,29 +4,29 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Configurazione della Piattaforma
+# Configurazione della piattaforma
 
-Questo documento descrive le configurazioni di piattaforma previste per l'esecuzione di questo playbook.
+Questo documento descrive le configurazioni della piattaforma previste per l'esecuzione di questo playbook.
 
 ## Windows
 
 ### Installazione di LM Studio
 
-LM Studio dovrebbe essere pre-installato:
+LM Studio dovrebbe essere già preinstallato:
 
-| Componente | Versione | Percorso |
+| Componente | Versione | Posizione |
 |-----------|---------|----------|
-| **LM Studio (Modelli + Varie)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (Programma)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Download del Modello
+### Download del modello
 
 I seguenti modelli dovrebbero essere già presenti nella directory dei modelli di LM Studio (`C:\Users\...\.lmstudio\models`):
 
-| Tipo di Modello | Quantizzazione | Dimensione | Percorso |
+| Tipo di modello | Quantizzazione | Dimensione | Posizione |
 |------------|--------------|------|----------|
-| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18,2 GB | `models\lmstudio-community` |
+| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
 ---
 
@@ -34,8 +34,8 @@ I seguenti modelli dovrebbero essere già presenti nella directory dei modelli d
 
 ### Installazione di LM Studio
 
-Consultare lmstudio.md (nella cartella delle dipendenze) per ulteriori dettagli.
+Per maggiori dettagli, consultare lmstudio.md (all'interno della cartella dependencies).
 
-### Download del Modello
+### Download del modello
 
 Come su Windows.

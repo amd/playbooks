@@ -1,5 +1,5 @@
 {
   "id": "openclaw-lemonade-server",
-  "title": "Запуск OpenClaw локально с Lemonade Server",
-  "description": "Установите и настройте автономный агент ИИ OpenClaw с Lemonade Server."
+  "title": "Локальный запуск OpenClaw с помощью Lemonade Server",
+  "description": "Установка и настройка автономного ИИ-агента OpenClaw с Lemonade Server."
 }

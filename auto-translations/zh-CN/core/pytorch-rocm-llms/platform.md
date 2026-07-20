@@ -6,41 +6,41 @@ SPDX-License-Identifier: MIT
 
 # 平台配置
 
-本文档描述了运行此 playbook 的预期平台配置。
+本文档介绍了运行此 playbook 所需的平台配置。
 
 ## 前提条件
 
-AMD Ryzen™ AI Halo 开发者平台已预装支持 ROCm 的 PyTorch。对于所有其他设备，用户必须手动安装支持 ROCm 的 PyTorch。请参阅适用于您操作系统的相关章节：
+支持 ROCm 的 PyTorch 已预装在 AMD Ryzen™ AI Halo Developer Platform 上。对于所有其他设备，用户必须手动安装支持 ROCm 的 PyTorch。请参考适用于您操作系统的相应部分：
 
 ### Windows
 
-| 组件 | 版本 | 说明 |
+| 组件          | 版本            | 备注                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch** | 2.9 或更高版本 | AMD Ryzen AI Halo 开发者平台已预装；所有其他设备必须手动安装 |
+| **PyTorch**   | 2.9 或更高版本  | 已预装在 AMD Ryzen AI Halo Developer Platform 上；必须在所有其他设备上手动安装 |
 
 ### Linux
 
-| 组件 | 版本 | 说明 |
+| 组件          | 版本            | 备注                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch** | 2.9 或更高版本 | AMD Ryzen AI Halo 开发者平台已预装；所有其他设备必须手动安装 |
+| **PyTorch**   | 2.9 或更高版本  | 已预装在 AMD Ryzen AI Halo Developer Platform 上；必须在所有其他设备上手动安装 |
 
 ## 所需模型
 
-以下模型已针对您的平台进行测试和优化：
+以下模型已针对您的平台进行了测试和优化：
 
 | 模型 | 参数量 | 大小 | 下载位置 |
 |-------|------------|------|-------------------|
-| **openai/gpt-oss-20b** | 20B | ~40GB | AMD Ryzen AI Halo 开发者平台已预装；所有其他设备必须手动安装 |
+| **openai/gpt-oss-20b** | 20B | ~40GB | 已预装在 AMD Ryzen AI Halo Developer Platform 上；必须在所有其他设备上手动安装 |
 
-模型将自动下载至 Hugging Face 缓存目录：
+模型将自动下载到 Hugging Face 缓存目录：
 - **Windows**：`C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**：`~/.cache/huggingface/hub/`
 
-请确保模型存储至少有 **50GB 可用空间**。
+请确保至少有 **50GB 可用空间** 用于模型存储。
 
 ## 网络要求
 
-初始设置需要访问互联网以从 Hugging Face 下载模型。下载完成后，playbook 可离线运行。
+初始设置需要互联网连接才能从 Hugging Face 下载模型。下载完成后，playbook 可以离线运行。
 
-- 首次模型下载可能需要 **5-10 分钟**，具体取决于模型大小和网络速度
-- 模型会缓存至本地，无需重复下载
+- 首次下载模型可能需要 **5-10 分钟**，具体取决于模型大小和网络连接速度
+- 模型会在本地缓存，无需重复下载

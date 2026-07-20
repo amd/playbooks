@@ -12,22 +12,22 @@ SPDX-License-Identifier: MIT
 
 ### Windows
 
-| ส่วนประกอบ | เวอร์ชัน | หมายเหตุ |
+| องค์ประกอบ | เวอร์ชัน | หมายเหตุ |
 |-----------|---------|-------|
 | **Node.js** | 22.16+ | ติดตั้งไว้ล่วงหน้าและพร้อมใช้งานใน PATH บน AMD Ryzen™ AI Halo Developer Platform; ต้องติดตั้งด้วยตนเองบนอุปกรณ์อื่นทั้งหมด |
-| **Lemonade Server** | latest | กำลังทำงานบน `http://localhost:13305/api/v1` |
+| **Lemonade Server** | latest | กำลังทำงานที่ `http://localhost:13305/api/v1` |
 
 ### Linux
 
-| ส่วนประกอบ | เวอร์ชัน | หมายเหตุ |
+| องค์ประกอบ | เวอร์ชัน | หมายเหตุ |
 |-----------|---------|-------|
 | **Node.js** | 22.16+ | ติดตั้งไว้ล่วงหน้าและพร้อมใช้งานใน PATH บน AMD Ryzen™ AI Halo Developer Platform; ต้องติดตั้งด้วยตนเองบนอุปกรณ์อื่นทั้งหมด |
-| **Lemonade Server** | latest | กำลังทำงานบน `http://localhost:13305/api/v1` |
+| **Lemonade Server** | latest | กำลังทำงานที่ `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-เซิร์ฟเวอร์ Lemonade ควรทำงานโดยโหลดโมเดลที่เหมาะสมกับอุปกรณ์ (ดู README สำหรับคำสั่ง `lemonade run` ของอุปกรณ์คุณ):
+เซิร์ฟเวอร์ Lemonade ควรกำลังทำงานอยู่พร้อมกับโมเดลที่เหมาะสมกับอุปกรณ์ที่โหลดไว้ (ดูคำสั่ง `lemonade run` สำหรับอุปกรณ์ของคุณได้ที่ README):
 
 | อุปกรณ์ | Endpoint | โมเดล |
 |--------|----------|-------|

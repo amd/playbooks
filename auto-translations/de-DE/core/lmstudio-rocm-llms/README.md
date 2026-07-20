@@ -6,39 +6,39 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Dieses Playbook verwendet spezielle Tags, die GitHub nicht rendern kann. Bitte besuchen Sie [amd.com/playbooks](https://amd.com/playbooks), um diesen Inhalt korrekt anzuzeigen.
 <!-- @github-only:end -->
 
-## Übersicht
+## Überblick
 
-LM Studio ist ein leistungsstarker GUI-basierter Wrapper für [llama.cpp](https://github.com/ggml-org/llama.cpp) und bietet außerdem einen [OpenAI-kompatiblen Endpunkt](https://lmstudio.ai/docs/developer/openai-compat) für die lokale Modellbereitstellung. LM Studio bietet eine einfache, aber leistungsstarke Oberfläche zum einfachen Herunterladen und Bereitstellen von Modellen. LM Studio bietet AMD-Nutzern sowohl Vulkan- als auch AMD ROCm™-Software-Backends (sogenannte Runtimes).
+LM Studio ist ein leistungsstarker, GUI-basierter Wrapper für [llama.cpp](https://github.com/ggml-org/llama.cpp) und bietet außerdem einen [OpenAI-kompatiblen Endpunkt](https://lmstudio.ai/docs/developer/openai-compat) für die lokale Bereitstellung von Modellen. LM Studio bietet eine einfache, aber leistungsstarke Oberfläche, um Modelle einfach herunterzuladen und bereitzustellen. LM Studio bietet für AMD-Nutzer sowohl Vulkan- als auch AMD ROCm™-Software-Backends (sogenannte Runtimes).
 
 
 ## Was Sie lernen werden
 - Wie Sie LM Studio konfigurieren und nutzen, um Ihre lokale Hardware optimal einzusetzen
-- LLMs in einer vollständig offline Umgebung testen und verwalten
-- Modelle über eine OpenAI-kompatible API bereitstellen, um benutzerdefinierte Workflows und Apps zu betreiben
+- LLMs in einer vollständig offline arbeitenden Umgebung testen und verwalten
+- Modelle über eine OpenAI-kompatible API bereitstellen, um benutzerdefinierte Workflows und Anwendungen zu unterstützen
 
 
-## Speicherkonfiguration festlegen
+## Konfigurieren des Arbeitsspeichers
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Auf Software-Updates prüfen
+## Nach Software-Updates suchen
 
 <!-- @os:linux -->
 > **Hinweis**: Sie können VS Code über das AMD Ryzen™ AI Developer Center installieren. Für LM Studio folgen Sie bitte den nachstehenden Installationsanweisungen.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Hinweis**: Falls VS Code oder LM Studio nicht installiert ist, können Sie diese über das AMD Ryzen™ AI Developer Center installieren.
+> **Hinweis**: Falls VS Code oder LM Studio nicht installiert sind, können Sie diese über das AMD Ryzen™ AI Developer Center installieren. 
 <!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Software-Voraussetzungen installieren
+## Installation der Software-Voraussetzungen
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -61,16 +61,16 @@ LM Studio ist ein leistungsstarker GUI-basierter Wrapper für [llama.cpp](https:
 <!-- @require:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
-## Mit einem LLM chatten
-Erfahren Sie, wie Sie vollständig lokal mit einem LLM auf ChatGPT-Niveau chatten können.
+## Chatten mit einem LLM
+Erfahren Sie, wie Sie mit einem LLM auf ChatGPT-Niveau vollständig lokal zu chatten beginnen.  
 
-1. Öffnen Sie LMStudio.
+1. Öffnen Sie LMStudio. 
 2. Drücken Sie `Ctrl + L`, um den Model Loader zu öffnen, wählen Sie `Manually choose model load parameters` und klicken Sie auf `${model_name}`
-3. Stellen Sie sicher, dass „show advanced settings" aktiviert ist.
-4. Ändern Sie die `Context Length` nach Bedarf. Eine höhere Kontextlänge bedeutet mehr Modellspeicher, aber auch mehr genutzten Systemspeicher. Für dieses Playbook wird 4096 empfohlen.
-5. Stellen Sie sicher, dass `GPU Offload` auf Maximum gesetzt und `Flash Attention` aktiviert ist (Cache Quantizations können deaktiviert bleiben).
+3. Stellen Sie sicher, dass „show advanced settings“ aktiviert ist.  
+4. Ändern Sie `Context Length` nach Bedarf. Eine höhere Kontextlänge bedeutet mehr Modellspeicher, aber auch mehr genutzten Systemspeicher. Für dieses Playbook wird 4096 empfohlen.
+5. Stellen Sie sicher, dass `GPU Offload` auf das Maximum eingestellt ist und `Flash Attention` aktiviert ist (Cache-Quantisierungen können deaktiviert bleiben).
 6. Aktivieren Sie `Remember settings` und klicken Sie auf `Load Model`.
-7. Falls Sie sich nicht im Chat-Fenster befinden, drücken Sie `Ctrl + 1` oder klicken Sie auf die Schaltfläche 👾 oben links auf dem Bildschirm.
+7. Falls Sie sich nicht im Chat-Fenster befinden, drücken Sie `Ctrl + 1` oder klicken Sie oben links im Bildschirm auf die Schaltfläche 👾.
 8. Senden Sie eine Nachricht und beginnen Sie mit der Interaktion mit dem Modell!
 
 <!-- @os:windows -->
@@ -113,19 +113,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Tipp**: Die Kontextlänge bezieht sich auf den Speicher des Modells. Flash Attention verbessert die Verarbeitungsgeschwindigkeit bei gleichzeitig reduziertem Speicherverbrauch. GPU Offload verlagert die Berechnung auf die Grafikkarte für schnellere Antworten.
+> **Tipp**: Die Kontextlänge bezieht sich auf das Gedächtnis des Modells. Flash Attention verbessert die Verarbeitungsgeschwindigkeit und reduziert gleichzeitig den Speicherverbrauch. GPU Offload verlagert die Berechnung auf die Grafikkarte, um schnellere Antworten zu ermöglichen.
 
 ## LLMs über einen OpenAI-kompatiblen Endpunkt bereitstellen
 
-LM Studio bietet außerdem einen OpenAI-kompatiblen Endpunkt in Form des LM Studio Servers. Dieser wurde bereits in einem agentischen Coding-Workflow mit Cline [hier](../playbooks/vscode-qwen3-coder) demonstriert. Ein weiterer häufiger Anwendungsfall ist die Verbindung des LM Studio Servers mit einer beliebigen Webanwendung (React, Node.js, Python) durch das Senden standardmäßiger HTTP-Anfragen an den Inferenz-Endpunkt.
+LM Studio bietet außerdem einen OpenAI-kompatiblen Endpunkt in Form des LM Studio Servers. Dies wurde bereits in einem agentischen Coding-Workflow mit Cline [hier](../playbooks/vscode-qwen3-coder) demonstriert. Ein weiterer gängiger Anwendungsfall ist die Verbindung des LM Studio Servers mit einer beliebigen Webanwendung (React, Node.js, Python), indem standardmäßige HTTP-Anfragen an den Inferenz-Endpunkt gesendet werden.
 
 Um den LM Studio Server einzurichten, folgen Sie diesen Anweisungen:
 
-1. Klicken Sie auf der linken Seite auf den Tab `Developer` (Befehlszeilen-Symbol) oder `Ctrl + 2` und dann auf `Server Settings`.
-2. (Optional): Wenn Sie das Modell über Ihr LAN bereitstellen möchten, aktivieren Sie `Serve on Local Network`. Wenn Sie es mit einer Website oder umfangreichem Aufruf innerhalb von VS Code verwenden möchten, aktivieren Sie `Enable CORS`.
-3. Stellen Sie in der oberen linken Ecke sicher, dass der Server läuft, indem Sie auf die Umschalttaste vor `Status` klicken.
-4. Ein OpenAI-kompatibler Endpunkt wird nun ausgeführt. Die Adresse lautet in der Regel http://127.0.0.1:1234
-5. Falls noch kein Modell geladen ist, können Sie es laden, indem Sie auf `Load Model` klicken und die zuvor beschriebenen Schritte befolgen.
+1. Klicken Sie auf der linken Seite auf die Registerkarte `Developer` (Befehlszeilensymbol) oder drücken Sie `Ctrl + 2` und klicken Sie dann auf `Server Settings`.  
+2. (Optional): Wenn Sie das Modell über Ihr LAN bereitstellen möchten, aktivieren Sie `Serve on Local Network`. Wenn Sie es mit einer Website oder umfangreichen Aufrufen innerhalb von VS Code verwenden möchten, aktivieren Sie `Enable CORS`. 
+3. Stellen Sie oben links sicher, dass der Server läuft, indem Sie auf den Schalter vor `Status` klicken.
+4. Nun läuft ein OpenAI-kompatibler Endpunkt. Die Adresse lautet üblicherweise http://127.0.0.1:1234  
+5. Falls noch kein Modell geladen ist, können Sie es laden, indem Sie auf `Load Model` klicken und die zuvor beschriebenen Schritte befolgen. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -146,7 +146,7 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @os:end -->
 
 
-Dieses Modell ist nun über den LM Studio Server-Endpunkt zugänglich und unterstützt OpenAI-Endpunkte, darunter:
+Dieses Modell ist nun über den LM Studio Server-Endpunkt erreichbar und unterstützt OpenAI-Endpunkte, darunter:
 
 | Endpunkt | Methode | Dokumentation |
 |------------|----------|----------|
@@ -155,16 +155,14 @@ Dieses Modell ist nun über den LM Studio Server-Endpunkt zugänglich und unters
 | /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
+#### Beispiel: Ping an Ihren Endpunkt senden
+Nachdem Sie soeben den OpenAI-kompatiblen Endpunkt erstellt haben, sehen wir uns an, wie Sie diesen in eine Python-Entwicklungsumgebung (wie VSCode) integrieren und Ihr System als lokalen API-Anbieter nutzen können.
 
-
-#### Beispiel: Ihren Endpunkt anpingen
-Nachdem wir den OpenAI-kompatiblen Endpunkt erstellt haben, schauen wir uns an, wie dieser in eine Python-Entwicklungsumgebung (wie VSCode) integriert und Ihr System als lokaler API-Anbieter genutzt werden kann.
-
-1. Erstellen Sie eine virtuelle Python-Umgebung:
+1. Erstellen Sie eine Python-virtuelle Umgebung:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    Öffnen Sie unter Linux ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
+    Öffnen Sie unter Linux ein Terminal in einem Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -180,7 +178,7 @@ Nachdem wir den OpenAI-kompatiblen Endpunkt erstellt haben, schauen wir uns an, 
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    Öffnen Sie unter Linux ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
+    Öffnen Sie unter Linux ein Terminal in einem Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -192,26 +190,26 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    Öffnen Sie unter Windows ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
+    Öffnen Sie unter Windows ein Terminal in einem Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **Tipp**: Windows-Benutzer müssen möglicherweise ihre PowerShell-Ausführungsrichtlinie anpassen (z. B.
-    > auf RemoteSigned oder Unrestricted setzen), bevor sie einige PowerShell-Befehle ausführen.
+    > **Tipp**: Windows-Benutzer müssen möglicherweise ihre PowerShell-Ausführungsrichtlinie ändern (z. B.
+    > auf RemoteSigned oder Unrestricted festlegen), bevor sie einige PowerShell-Befehle ausführen können.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    Öffnen Sie unter Windows ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
+    Öffnen Sie unter Windows ein Terminal in einem Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **Tipp**: Windows-Benutzer müssen möglicherweise ihre PowerShell-Ausführungsrichtlinie anpassen (z. B.
-    > auf RemoteSigned oder Unrestricted setzen), bevor sie einige PowerShell-Befehle ausführen.
+    > **Tipp**: Windows-Benutzer müssen möglicherweise ihre PowerShell-Ausführungsrichtlinie ändern (z. B.
+    > auf RemoteSigned oder Unrestricted festlegen), bevor sie einige PowerShell-Befehle ausführen können.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -324,15 +322,15 @@ lms server stop
 <!-- @test:end --> 
 <!-- @os:end -->
 
-#### (Optional): Zwischen Runtimes wechseln
+#### (Optional): Zwischen Laufzeitumgebungen wechseln
 
-1. Drücken Sie `Ctrl + Shift + R` auf Ihrer Tastatur. Alternativ klicken Sie auf den Tab `Discover` (Lupensymbol) auf der linken Seite und dann auf `Runtime` im Popup-Fenster.
-2. Sie sollten dann `Runtime Selections` sehen, wo das Dropdown-Menü zum Wechseln der Runtime verwendet werden kann.
+1. Drücken Sie `Ctrl + Shift + R` auf Ihrer Tastatur. Alternativ klicken Sie auf die Registerkarte `Discover` (Lupe) auf der linken Seite und dann im Popup-Fenster auf `Runtime`.
+2. Daraufhin sollten Sie `Runtime Selections` sehen, wo Sie über das Dropdown-Menü die Laufzeitumgebung ändern können.
 
 
 ## Nächste Schritte
 
-- **Integration benutzerdefinierter Apps**: Integrieren Sie Ihre eigenen Python-Skripte oder Anwendungen über die lokale OpenAI-kompatible API.
+- **Integration eigener Anwendungen**: Integrieren Sie Ihre eigenen Python-Skripte oder Anwendungen über die lokale OpenAI-kompatible API.
 - **Erweiterte Frontends**: Verbinden Sie leistungsstarke Oberflächen wie Open WebUI mit Ihrem Server für Chatverlauf und Persona-Verwaltung.
 
 Weitere Dokumentation finden Sie unter: https://lmstudio.ai/docs/developer

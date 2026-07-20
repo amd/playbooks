@@ -23,6 +23,6 @@ npm install -g n8n
 npm install -g n8n
 ```
 
-> **หมายเหตุ**: ดู [เอกสารประกอบ n8n](https://docs.n8n.io/hosting/installation/npm/) สำหรับตัวเลือกการติดตั้งเพิ่มเติม
+> **หมายเหตุ**: ดู [n8n Documentation](https://docs.n8n.io/hosting/installation/npm/) สำหรับตัวเลือกการติดตั้งเพิ่มเติม
 
 <!-- @os:end -->

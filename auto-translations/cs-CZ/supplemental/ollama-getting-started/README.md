@@ -6,29 +6,29 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Tento playbook používá speciální značky, které GitHub neumí zobrazit. Pro správné zobrazení tohoto obsahu navštivte prosím [amd.com/playbooks](https://amd.com/playbooks).
 <!-- @github-only:end -->
 
 ## Přehled
 
-Ollama je populární lehký nástroj pro lokální spouštění velkých jazykových modelů. Zajišťuje stahování modelů, kvantizaci a obsluhu prostřednictvím jednoduchého rozhraní příkazového řádku a desktopové aplikace, takže můžete začít chatovat s LLM během několika minut.
+Ollama je oblíbený lehký nástroj pro lokální spouštění velkých jazykových modelů. Zajišťuje stahování modelů, kvantizaci a jejich zpřístupnění prostřednictvím jednoduchého rozhraní příkazové řádky a desktopové aplikace, takže se během několika minut dostanete od nuly k chatování s LLM.
 
-Tento playbook vás provede instalací Ollama, stažením modelu GPT-OSS 20B a konverzací s ním – prostřednictvím terminálu i desktopové aplikace.
+Tento playbook vás provede instalací Ollama, stažením modelu GPT-OSS 20B a konverzací s ním, a to jak z terminálu, tak z desktopové aplikace.
 
 ## Co se naučíte
 
 - Jak nainstalovat a spustit Ollama ve vašem systému
-- Stáhnout a spustit model GPT-OSS 20B lokálně
-- Chatovat s modely pomocí CLI
-- Dotazovat se na modely programově prostřednictvím REST API
+- Jak stáhnout a spustit model GPT-OSS 20B lokálně
+- Jak chatovat s modely pomocí CLI
+- Jak dotazovat modely programově přes REST API
 
 ## Nastavení konfigurace paměti
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Kontrola aktualizací softwaru
-> **Poznámka**: Pokud VS Code není nainstalován, můžete ho nainstalovat pomocí Ryzen AI Developer Center.
+## Zkontrolujte aktualizace softwaru
+> **Poznámka**: Pokud nemáte nainstalovaný VS Code, můžete jej nainstalovat pomocí Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -41,9 +41,9 @@ Tento playbook vás provede instalací Ollama, stažením modelu GPT-OSS 20B a k
 
 <!-- @os:windows -->
 
-1. Stáhněte instalátor z [ollama.com/download](https://ollama.com/download).
-2. Spusťte instalátor `.exe` a postupujte podle pokynů.
-3. Po instalaci běží Ollama jako služba na pozadí a je přístupná z terminálu, desktopové aplikace a systémové lišty.
+1. Stáhněte instalační program z [ollama.com/download](https://ollama.com/download).
+2. Spusťte instalační program `.exe` a postupujte podle pokynů.
+3. Po instalaci běží Ollama jako služba na pozadí a je přístupná z terminálu, desktopové aplikace i systémové lišty.
 
 Ověřte instalaci otevřením terminálu a spuštěním:
 
@@ -57,7 +57,7 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-Měli byste vidět číslo nainstalované verze vytištěné v konzoli.
+Na konzoli by se mělo zobrazit číslo nainstalované verze.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -80,26 +80,26 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-Měli byste vidět číslo nainstalované verze vytištěné v konzoli.
+Na konzoli by se mělo zobrazit číslo nainstalované verze.
 <!-- @os:end -->
 
 ## Stažení prvního modelu
 
-Ollama spravuje modely prostřednictvím registru podobného kontejnerovým obrazům. Stažení GPT-OSS 20B:
+Ollama spravuje modely prostřednictvím registru podobného kontejnerovým obrazům. Chcete-li stáhnout GPT-OSS 20B:
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-Tím se stáhnou váhy modelu do vašeho lokálního počítače (přibližně 12 GB). Stahování proběhne pouze jednou a při dalších spuštěních se model načte z disku.
+Tím se stáhnou váhy modelu na váš lokální počítač (přibližně 12 GB). Ke stažení dojde pouze jednou, další spuštění pak model načtou z disku.
 
-Dostupnost modelu můžete potvrdit pomocí:
+Dostupnost modelu můžete ověřit pomocí:
 
 ```bash
 ollama list
 ```
 
-Ve výstupu byste měli vidět `gpt-oss:20b` spolu s jeho velikostí a datem poslední úpravy.
+V. výstupu by se měl zobrazit `gpt-oss:20b` spolu s jeho velikostí a datem poslední úpravy.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
@@ -172,32 +172,32 @@ echo "OK: gpt-oss:20b is present in ollama list"
 
 ### Pojmenování modelů
 
-Názvy modelů Ollama se řídí formátem `name:tag`. Značka obvykle označuje počet parametrů nebo variantu kvantizace. Některé užitečné příkazy pro správu modelů:
+Názvy modelů Ollama mají formát `name:tag`. Tag obvykle udává počet parametrů nebo variantu kvantizace. Několik užitečných příkazů pro správu modelů:
 
 | Příkaz | Popis |
 |---------|-------------|
-| `ollama list` | Zobrazit všechny stažené modely |
-| `ollama pull <model>` | Stáhnout model bez jeho spuštění |
-| `ollama rm <model>` | Odebrat model a uvolnit místo na disku |
-| `ollama show <model>` | Zobrazit metadata a parametry modelu |
+| `ollama list` | Zobrazí všechny stažené modely |
+| `ollama pull <model>` | Stáhne model bez jeho spuštění |
+| `ollama rm <model>` | Odstraní model a uvolní místo na disku |
+| `ollama show <model>` | Zobrazí metadata a parametry modelu |
 
 ## Chatování z terminálu
 
-Spusťte interaktivní chatovací relaci přímo z příkazového řádku:
+Spusťte interaktivní chatovací relaci přímo z příkazové řádky:
 
 ```bash
 ollama run gpt-oss:20b
 ```
 
-Ollama načte model do paměti a zobrazí výzvu. Zkuste se na něco zeptat:
+Ollama načte model do paměti a přesune vás do promptu. Zkuste se ho na něco zeptat:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-Model streamuje svou odpověď token po tokenu přímo v terminálu. Zadejte `/bye` nebo stiskněte `Ctrl+D` pro ukončení relace.
+Model streamuje svou odpověď token po tokenu přímo v terminálu. Chcete-li relaci ukončit, zadejte `/bye` nebo stiskněte `Ctrl+D`.
 
-> **Tip**: První spuštění trvá několik sekund, než se model načte do paměti. Následné dotazy ve stejné relaci reagují mnohem rychleji, protože model zůstává načtený.
+> **Tip**: První spuštění trvá několik sekund, než se model načte do paměti. Další prompty v rámci stejné relace reagují mnohem rychleji, protože model zůstává načtený.
 
 <!-- @os:windows -->
 ## Chatování z desktopové aplikace
@@ -209,19 +209,19 @@ Otevřete **Ollama** z nabídky Start nebo klikněte na ikonu Ollama v systémov
 Po otevření aplikace:
 
 1. Klikněte na **New Chat** v postranním panelu.
-2. Vyberte **gpt-oss:20b** z rozevíracího seznamu modelů v pravém dolním rohu oblasti pro zadávání zpráv.
-3. Napište zprávu a stiskněte Enter pro zahájení chatu.
+2. Vyberte **gpt-oss:20b** z rozbalovací nabídky modelu v pravém dolním rohu oblasti pro zadávání zprávy.
+3. Napište zprávu a stisknutím klávesy Enter zahajte konverzaci.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-Desktopová aplikace uchovává historii vašich konverzací v postranním panelu, což usnadňuje návrat k předchozím chatům.
+Desktopová aplikace uchovává historii vašich konverzací v postranním panelu, takže se k předchozím chatům snadno vrátíte.
 <!-- @os:end -->
 
-## Použití REST API
+## Používání REST API
 
-Po instalaci běží Ollama jako služba na pozadí a zpřístupňuje REST API na adrese `http://localhost:11434`, které můžete použít k integraci modelů do vlastních aplikací a skriptů.
+Po instalaci běží Ollama jako služba na pozadí a zpřístupňuje REST API na adrese `http://localhost:11434`, které můžete využít k integraci modelů do vlastních aplikací a skriptů.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -533,7 +533,7 @@ PY
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Generování odpovědi v terminálu
+### Vygenerování odpovědi v terminálu
 
 <!-- @os:linux -->
 ```bash
@@ -547,11 +547,11 @@ curl.exe http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "promp
 ```
 <!-- @os:end -->
 
-Odpověď je objekt JSON obsahující výstup modelu v poli `response`.
+Odpovědí je objekt JSON obsahující výstup modelu v poli `response`.
 
 
 ### Příklad v Pythonu
-Nyní, když můžeme programově volat Ollama API, zavolejme ho z Pythonu.
+Nyní, když můžeme volat API Ollama programově, si ho zavoláme z Pythonu.
 
 #### Vytvoření virtuálního prostředí v terminálu
 
@@ -571,8 +571,8 @@ ollama-env\Scripts\activate
 pip install requests
 ```
 <!-- @os:end -->
-#### Vytvoření souboru Python
-Ve stejném adresáři použijte VS Code nebo jiný editor k vytvoření souboru .py a zkopírujte do něj následující kód. Poté spusťte soubor v aktivovaném prostředí pomocí `python your_file_name.py`
+#### Vytvoření souboru v Pythonu
+Ve stejném adresáři použijte VS Code nebo jiný editor a vytvořte soubor .py, do kterého zkopírujete následující kód. Poté soubor spusťte ve svém aktivovaném prostředí pomocí `python your_file_name.py`
 
 ```python
 import requests
@@ -593,19 +593,18 @@ print(response.json()["response"])
 
 | Koncový bod | Metoda | Účel |
 |----------|--------|---------|
-| `/api/generate` | POST | Jednorázové generování textu |
+| `/api/generate` | POST | Generování textu v jedné konverzační relaci |
 | `/api/chat` | POST | Vícekolová konverzace s historií zpráv |
-| `/api/tags` | GET | Výpis dostupných modelů |
+| `/api/tags` | GET | Seznam dostupných modelů |
 | `/api/show` | POST | Zobrazení podrobností o modelu |
 | `/api/pull` | POST | Stažení modelu z registru |
 
-Úplnou referenci API naleznete v [dokumentaci Ollama API](https://github.com/ollama/ollama/blob/main/docs/api.md).
-
+Úplnou dokumentaci API najdete v [dokumentaci API Ollama](https://github.com/ollama/ollama/blob/main/docs/api.md).
 ## Další kroky
 
-- **Vyzkoušejte různé modely**: Procházejte [knihovnu modelů Ollama](https://ollama.com/library) a prozkoumejte stovky dostupných modelů, od malých pomocníků pro kódování až po velké modely pro uvažování.
-- **Vytvářejte vlastní modely**: Použijte [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) k nastavení vlastních systémových výzev, teploty a dalších parametrů pro přizpůsobený zážitek.
-- **Vyvíjejte s API**: Použijte klientské knihovny pro [Python](https://github.com/ollama/ollama-python) nebo [JavaScript](https://github.com/ollama/ollama-js) k integraci Ollama do vašich aplikací.
-- **Připojte se k frontendům**: Spárujte Ollama s nástroji jako [Open WebUI](https://github.com/open-webui/open-webui) pro funkčně bohaté chatovací rozhraní s vyhledáváním, personami a nahráváním dokumentů.
+- **Vyzkoušejte různé modely**: Prohlédněte si [knihovnu modelů Ollama](https://ollama.com/library) a objevte stovky dostupných modelů, od malých asistentů pro programování až po velké modely pro pokročilé uvažování.
+- **Vytvořte vlastní modely**: Použijte [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) k nastavení vlastních systémových promptů, teploty a dalších parametrů pro přizpůsobený zážitek.
+- **Vytvářejte aplikace pomocí API**: Použijte klientské knihovny pro [Python](https://github.com/ollama/ollama-python) nebo [JavaScript](https://github.com/ollama/ollama-js) k integraci Ollama do vašich aplikací.
+- **Propojte s frontendy**: Zkombinujte Ollama s nástroji, jako je [Open WebUI](https://github.com/open-webui/open-webui), a získejte tak bohaté chatovací rozhraní s vyhledáváním, personami a nahráváním dokumentů.
 
 Další informace naleznete v [dokumentaci Ollama](https://github.com/ollama/ollama/blob/main/README.md).

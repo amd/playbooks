@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA to otwartoźródłowy framework AMD do budowania agentów AI działających lokalnie na sprzęcie AMD z akceleracją Ryzen AI.
+GAIA to opracowana przez AMD platforma open source do budowania agentów AI działających lokalnie na sprzęcie AMD z akceleracją Ryzen AI.
 
-#### Instalacja GAIA
+#### Instalowanie GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć venv.
+1. W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,7 +30,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć venv.
+1. W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv.
 <!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć venv.
+1. W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,7 +71,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć venv.
+1. W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv.
 <!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -99,7 +99,7 @@ Po instalacji uruchom `gaia init`, aby skonfigurować Lemonade Server i pobrać 
 gaia init
 ```
 
-Polecenie to instaluje Lemonade Server, pobiera domyślne modele i weryfikuje konfigurację.
+Powoduje to zainstalowanie Lemonade Server, pobranie domyślnych modeli oraz weryfikację konfiguracji.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,12 +281,12 @@ fi
 
 #### Weryfikacja instalacji
 
-Sprawdź, czy zainstalowana jest GAIA w wersji 0.16.2 lub nowszej:
+Sprawdź, czy zainstalowana jest wersja GAIA v0.16.2 lub nowsza:
 
 ```bash
 gaia --version
 ```
 
-> **Ważne**: Przed użyciem GAIA upewnij się, że Lemonade Server jest uruchomiony. GAIA wymaga ręcznego uruchomienia Lemonade Server.
+> **Ważne**: Przed rozpoczęciem korzystania z GAIA upewnij się, że Lemonade Server jest uruchomiony. GAIA wymaga ręcznego uruchomienia Lemonade Server.
 
-Więcej informacji znajdziesz w [dokumentacji GAIA](https://amd-gaia.ai).
+Więcej informacji można znaleźć w [dokumentacji GAIA](https://amd-gaia.ai).

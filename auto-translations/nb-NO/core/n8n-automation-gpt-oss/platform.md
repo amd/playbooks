@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # Plattformkonfigurasjon
 
-Dette dokumentet beskriver de forventede plattformkonfigurasjonene for å kjøre denne spilleboken.
+Dette dokumentet beskriver de forventede plattformkonfigurasjonene for kjøring av denne playbooken.
 
 ## Forutsetninger
 
@@ -15,19 +15,19 @@ Dette dokumentet beskriver de forventede plattformkonfigurasjonene for å kjøre
 | Komponent | Versjon | Merknader |
 |-----------|---------|-------|
 | **Node.js** | 22.16+ | Forhåndsinstallert og tilgjengelig i PATH på AMD Ryzen™ AI Halo Developer Platform; må installeres manuelt på alle andre enheter |
-| **Lemonade Server** | siste | Kjører på `http://localhost:13305/api/v1` |
+| **Lemonade Server** | nyeste | Kjører på `http://localhost:13305/api/v1` |
 
 ### Linux
 
 | Komponent | Versjon | Merknader |
 |-----------|---------|-------|
 | **Node.js** | 22.16+ | Forhåndsinstallert og tilgjengelig i PATH på AMD Ryzen™ AI Halo Developer Platform; må installeres manuelt på alle andre enheter |
-| **Lemonade Server** | siste | Kjører på `http://localhost:13305/api/v1` |
+| **Lemonade Server** | nyeste | Kjører på `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-Lemonade-serveren bør kjøre med den enhetspassende modellen lastet inn (se README for `lemonade run`-kommandoen for din enhet):
+Lemonade-serveren bør kjøre med den enhetsspesifikke modellen lastet inn (se README for `lemonade run`-kommandoen for enheten din):
 
 | Enhet | Endepunkt | Modell |
 |--------|----------|-------|

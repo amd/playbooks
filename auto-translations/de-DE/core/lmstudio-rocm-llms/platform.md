@@ -4,15 +4,15 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Platform Configuration
+# Plattformkonfiguration
 
 Dieses Dokument beschreibt die erwarteten Plattformkonfigurationen für die Ausführung dieses Playbooks.
 
 ## Windows
 
-### LM Studio Installation
+### LM Studio-Installation
 
-LM Studio sollte vorinstalliert sein:
+LM Studio sollte bereits vorinstalliert sein:
 
 | Komponente | Version | Speicherort |
 |-----------|---------|----------|
@@ -33,10 +33,10 @@ Die folgenden Modelle sollten bereits im LM Studio-Modellverzeichnis vorhanden s
 
 ## Linux
 
-### LM Studio Installation
+### LM Studio-Installation
 
 Weitere Details finden Sie unter [lmstudio.md](../../dependencies/lmstudio.md).
 
 ### Modell-Download
 
-Identisch mit Windows.
+Wie unter Windows.

@@ -4,20 +4,20 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# 平台配置 — Lemonade Local AI
+# 平台配置 — Lemonade 本地 AI
 
-本文件說明此 playbook 所假設的預安裝軟體、模型路徑及平台特定先決條件。
+本文件說明此指南所假設的預先安裝軟體、模型路徑，以及平台特定的先決條件。
 
-## 預安裝軟體
+## 預先安裝軟體
 
 | 軟體 | 版本 | 用途 |
 |----------|---------|---------|
 | Lemonade Server | 最新版本 | 具備 OpenAI 相容 API 的本地 LLM 伺服器 |
-| Python | 3.10–3.13 | OpenAI Python 客戶端範例所需 |
+| Python | 3.10–3.13 | OpenAI Python 用戶端範例所需 |
 
 ## 預設模型儲存位置
 
-透過 Lemonade 下載的模型依照 Hugging Face Hub 規範儲存：
+透過 Lemonade 下載的模型會依照 Hugging Face Hub 規範進行儲存：
 
 | 平台 | 預設路徑 |
 |----------|-------------|
@@ -37,5 +37,5 @@ SPDX-License-Identifier: MIT
 
 ## 網路需求
 
-- 首次下載模型時需要網際網路連線（依模型大小約需 1–25 GB）
-- 模型下載完成後無需網際網路連線
+- 初次下載模型時需要網際網路連線（依模型不同約 1–25 GB）
+- 模型下載完成後即無需網際網路連線

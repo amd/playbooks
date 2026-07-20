@@ -6,25 +6,25 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ta priročnik uporablja posebne oznake, ki jih GitHub ne more prikazati. Za pravilen predogled te vsebine obiščite [amd.com/playbooks](https://amd.com/playbooks).
 <!-- @github-only:end -->
 
 ## Pregled
 
-[Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) je AMD C++ zbirka orodij za računalniški vid in strojno učenje, ki zagotavlja zmogljive zmožnosti zaznavanja na napravi — vključno z ocenjevanjem globine, zaznavanjem obrazov in sledenjem mrežice obraza. Zgrajena na vrhu gonilnikov Ryzen AI, knjižnica samodejno izbere najboljšo razpoložljivo strojno opremo (GPU ali NPU) za sklepanje, kar vam omogoča dodajanje funkcij umetne inteligence v aplikacije C++ brez skrbi glede učenja modelov ali integracije ogrodja. Vsa obdelava poteka lokalno na vašem sistemu, kar jo naredi idealno za aplikacije, občutljive na zasebnost, z nizko zakasnitvijo.
+[Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) je AMD-jev C++ nabor orodij za računalniški vid in strojno učenje, ki zagotavlja zmogljive zaznavne funkcije na napravi – vključno z ocenjevanjem globine, zaznavanjem obrazov in sledenjem mreži obraza. Knjižnica je zgrajena na gonilnikih Ryzen AI in samodejno izbere najboljšo razpoložljivo strojno opremo (GPU ali NPU) za sklepanje, kar vam omogoča dodajanje funkcij umetne inteligence v aplikacije C++, ne da bi vas skrbelo za učenje modelov ali integracijo ogrodij. Vsa obdelava poteka lokalno v vašem sistemu, zaradi česar je idealna za aplikacije, občutljive na zasebnost in zahtevne glede zakasnitve.
 
-Ta priročnik vas uči, kako nastaviti Ryzen AI CVML Library, zgraditi vključene vzorčne aplikacije in zagnati zaznavanje obrazov na vzorčni sliki.
+Ta priročnik vas nauči, kako nastaviti knjižnico Ryzen AI CVML Library, zgraditi priložene vzorčne aplikacije in izvesti zaznavanje obrazov na vzorčni sliki.
 
 ## Kaj se boste naučili
 
-- Kako namestiti predpogoje in nastaviti Ryzen AI CVML Library na vašem sistemu
-- Kako deluje CVML C++ API: konteksti, objekti funkcij in medpomnilniki slik
-- Kako zgraditi in zagnati vključene vzorčne aplikacije z uporabo CMake in OpenCV
-- Kako zagnati zaznavanje obrazov na sliki z omejevalnimi okvirji in orientacijskimi točkami
-- Kako integrirati funkcije CVML v lastne aplikacije C++
+- Kako namestiti predpogoje in nastaviti knjižnico Ryzen AI CVML Library v vašem sistemu
+- Kako deluje C++ API za CVML: konteksti, funkcijski objekti in slikovni medpomnilniki
+- Kako zgraditi in zagnati priložene vzorčne aplikacije z uporabo CMake in OpenCV
+- Kako izvesti zaznavanje obrazov na sliki z okvirji in orientacijskimi točkami
+- Kako integrirati funkcije CVML v svoje lastne aplikacije C++
 
 <!-- @device:halo_box -->
-## Preverite posodobitve programske opreme
+## Preverjanje posodobitev programske opreme
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -34,23 +34,23 @@ Ta priročnik vas uči, kako nastaviti Ryzen AI CVML Library, zgraditi vključen
 
 ## Dodatne odvisnosti
 
-Pred začetkom zagotovite, da imate naslednje:
+Preden začnete, se prepričajte, da imate naslednje:
 
 <!-- @os:windows -->
-- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — prenesite `opencv-4.11.0-windows.exe`, zaženite ga in razpakirajte v lokalno mapo (npr. `C:\opencv`)
-- [CMake](https://cmake.org/download/) — prenesite namestitveni program Windows x86-64 MSI in med namestitvijo izberite **"Add CMake to the system PATH for all users"**
+- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — prenesite `opencv-4.11.0-windows.exe`, ga zaženite in razpakirajte v lokalno mapo (npr. `C:\opencv`)
+- [CMake](https://cmake.org/download/) — prenesite namestitveni program MSI za Windows x86-64 in med namestitvijo izberite **"Add CMake to the system PATH for all users"**
 - [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — namestite najnovejšo razpoložljivo različico
-- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) z delovnim obremenilom »Desktop development with C++« (vključuje prevajalnik MSVC, Windows SDK in orodja za gradnjo C++)
+- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) z delovnim obremenitvijo »Desktop development with C++« (vključuje prevajalnik MSVC, Windows SDK in orodja za izgradnjo C++)
 <!-- @os:end -->
 
 <!-- @os:linux -->
-- OpenCV 4.11 — mora biti zgrajen iz izvorne kode (paketi apt v Ubuntu 22.04 in 24.04 ne zagotavljajo različice 4.11). Glejte [Gradnja OpenCV iz izvorne kode](#building-opencv-from-source) spodaj.
+- OpenCV 4.11 — mora biti zgrajen iz izvorne kode (apt paketi na Ubuntu 22.04 in 24.04 ne zagotavljajo različice 4.11). Glejte [Building OpenCV from Source](#building-opencv-from-source) spodaj.
 - CMake — namestite prek apt:
   ```bash
   sudo apt install cmake
   ```
 - Ubuntu 22.04 ali 24.04 (jedro >= 6.11.0-21-generic)
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (namestitveni program za Linux — zahtevan za sklepanje NPU)
+- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (namestitveni program za Linux – zahtevan za sklepanje na NPU)
 - Vulkan SDK (nameščen v razdelku [Vulkan SDK](#vulkan-sdk) spodaj)
 <!-- @os:end -->
 
@@ -152,13 +152,13 @@ fi
 
 ## Nastavitev knjižnice CVML
 
-Ustvarite račun AMD na [account.amd.com](https://account.amd.com), če ga še nimate, nato se prijavite in prenesite Ryzen AI CVML Library s spodnje povezave portala:
+Ustvarite račun AMD na [account.amd.com](https://account.amd.com), če ga še nimate, nato se prijavite za prenos knjižnice Ryzen AI CVML Library prek spodnje povezave portala:
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
 ```
 
-Po prenosu razpakirajte paket v lokalni imenik (npr. `C:\RyzenAI-Library` v sistemu Windows ali `~/RyzenAI-Library` v sistemu Linux) in nastavite okoljsko spremenljivko `AMD_CVML_SDK_ROOT` na lokacijo razpakiranega paketa:
+Po prenosu razpakirajte paket v lokalno mapo (npr. `C:\RyzenAI-Library` v sistemu Windows ali `~/RyzenAI-Library` v sistemu Linux) in nastavite spremenljivko okolja `AMD_CVML_SDK_ROOT` na razpakirano mesto:
 
 <!-- @os:windows -->
 ```cmd
@@ -176,25 +176,25 @@ Paket knjižnice vsebuje naslednjo strukturo:
 
 | Mapa | Vsebina |
 |--------|----------|
-| `cmake/` | Informacije o pakiranju za funkcijo `find_package` CMake |
+| `cmake/` | Podatki za pakiranje za funkcijo `find_package` orodja CMake |
 | `include/` | Datoteke glave C++ (`cvml-depth-estimation.h`, `cvml-face-detector.h`, `cvml-face-mesh.h` itd.) |
 | `windows/` | Binarne datoteke za Windows (datoteke `.LIB` za čas prevajanja in `.DLL`/`.GRAPHLIB`/`.AMODEL` za čas izvajanja) |
-| `linux/` | Binarne datoteke za Linux (datoteke `.SO` za čas prevajanja in izvajanja) |
+| `linux/` | Binarne datoteke za Linux (datoteke `.SO` za prevajanje in izvajanje) |
 | `samples/` | Posamezne vzorčne aplikacije z izvorno kodo |
 
 <!-- @os:linux -->
 
-### Nastavitev za Linux
+### Nastavitev, specifična za Linux
 
-#### Gradnja OpenCV iz izvorne kode
+#### Izgradnja OpenCV iz izvorne kode
 
-Namestite odvisnosti za gradnjo OpenCV:
+Namestite odvisnosti za izgradnjo OpenCV:
 
 ```bash
 sudo apt install unzip wget ubuntu-restricted-extras libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev libgtk-3-dev pkg-config ffmpeg
 ```
 
-Prenesite, konfigurirajte in zgradite OpenCV 4.11.0 z moduli contrib (referenca: [Vadnica za namestitev OpenCV v Linuxu](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
+Prenesite, konfigurirajte in zgradite OpenCV 4.11.0 z moduli contrib (referenca: [OpenCV Linux install tutorial](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
 
 ```bash
 wget -O opencv-4.11.0.zip https://github.com/opencv/opencv/archive/4.11.0.zip
@@ -213,7 +213,7 @@ cmake -DBUILD_opencv_world=ON \
 cmake --build . --target install
 ```
 
-Deljene knjižnice so nameščene pod `<build>/install/lib/`. Uporabite imenik `install` kot `OPENCV_INSTALL_ROOT` v kasnejših korakih.
+Deljene knjižnice se namestijo v `<build>/install/lib/`. Uporabite mapo `install` kot `OPENCV_INSTALL_ROOT` v naslednjih korakih.
 
 #### Vulkan SDK
 
@@ -264,26 +264,26 @@ done
 
 <!-- @os:end -->
 
-## Osnovni koncepti
+## Temeljni koncepti
 
-CVML Library zagotavlja preprost C++ API, kjer ima vsaka funkcija zaznavanja (ocenjevanje globine, zaznavanje obrazov, mrežica obraza) svojo datoteko glave in objekt funkcije. Ne delate z neobdelanimi modeli — knjižnica samodejno obravnava nalaganje modelov, predprocesiranje in sklepanje.
+Knjižnica CVML zagotavlja preprost C++ API, kjer ima vsaka zaznavna funkcija (ocenjevanje globine, zaznavanje obrazov, mreža obraza) svojo lastno datoteko glave in funkcijski objekt. Ne delate z neobdelanimi modeli — knjižnica samodejno poskrbi za nalaganje modelov, predobdelavo in sklepanje.
 
 ### Razpoložljive funkcije
 
 | Funkcija | Datoteka glave | Opis |
 |---------|------------|-------------|
-| **Ocenjevanje globine** | `cvml-depth-estimation.h` | Ustvari karte globine na piksel iz slik RGB |
-| **Zaznavanje obrazov** | `cvml-face-detector.h` | Zazna obraze z omejevalnimi okvirji, orientacijskimi točkami (oči, nos, usta) in ocenami zaupanja |
-| **Mrežica obraza** | `cvml-face-mesh.h` | Sledi podrobni geometriji obraza z gostimi točkami mrežice |
+| **Ocenjevanje globine** | `cvml-depth-estimation.h` | Ustvarja globinske karte na ravni slikovnih pik iz slik RGB |
+| **Zaznavanje obrazov** | `cvml-face-detector.h` | Zaznava obraze z okvirji, orientacijskimi točkami (oči, nos, usta) in stopnjami zaupanja |
+| **Mreža obraza** | `cvml-face-mesh.h` | Sledi podrobni geometriji obraza z gostimi točkami mreže |
 
 ### Programski model
 
-Vsaka aplikacija CVML sledi istemu štiristopenjskemu vzorcu:
+Vsaka aplikacija CVML sledi enakemu štiristopenjskemu vzorcu:
 
-1. **Ustvarite kontekst** — `amd::cvml::Context` upravlja skupne vire, kot so beleženje in izbira zaledja za sklepanje.
-2. **Ustvarite objekt funkcije** — Ustvarite instanco specifične funkcije (npr. `amd::cvml::DepthEstimation`) glede na kontekst.
-3. **Ovijte vhodne podatke** — Uporabite `amd::cvml::Image` za enkapsulacijo medpomnilnika slike RGB brez kopiranja podatkov.
-4. **Izvedite** — Pokličite metodo obdelave funkcije in preberite rezultate.
+1. **Ustvarite kontekst** — `amd::cvml::Context` upravlja skupne vire, kot sta beleženje in izbira zaledja za sklepanje.
+2. **Ustvarite funkcijski objekt** — ustvarite instanco določene funkcije (npr. `amd::cvml::DepthEstimation`) glede na kontekst.
+3. **Ovijte vhodne podatke** — uporabite `amd::cvml::Image` za enkapsulacijo medpomnilnika slike RGB brez kopiranja podatkov.
+4. **Izvedite** — pokličite metodo za obdelavo funkcije in preberite rezultate.
 
 ```cpp
 // Step 1: Create context
@@ -316,15 +316,15 @@ Knjižnica samodejno izbere najboljšo strojno opremo (GPU ali NPU) za vsako ope
 context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 ```
 
-> **Opomba:** Funkcije, ki za operacije NPU uporabljajo zaledje ONNX, lahko pri prvem zagonu doživijo daljšo začetno zakasnitev. Nadaljnji zagoni bodo hitrejši.
+> **Opomba:** pri funkcijah, ki za operacije NPU uporabljajo zaledje ONNX, se lahko ob prvem zagonu pojavi daljša zakasnitev zagona. Nadaljnji zagoni bodo hitrejši.
 
-> **Opomba:** Če gonilnik NPU ni nameščen na ciljnem sistemu, bo knjižnica Ryzen AI CVML samodejno preklopila na zaledje GPU za operacije sklepanja.
+> **Opomba:** če na ciljnem sistemu ni nameščen gonilnik NPU, bo knjižnica Ryzen AI CVML za operacije sklepanja samodejno preklopila na zaledje GPU.
 
-## Gradnja vzorčnih aplikacij
+## Izdelava vzorčnih aplikacij
 
-CVML Library vključuje vzorčne aplikacije, pripravljene za gradnjo, za vsako funkcijo. Zgradimo jih vse naenkrat.
+Knjižnica CVML vključuje vzorčne aplikacije, pripravljene za izdelavo, za vsako funkcijo. Izdelajmo jih vse naenkrat.
 
-1. Nastavite okoljsko spremenljivko `OPENCV_INSTALL_ROOT`, da kaže na vašo namestitev OpenCV:
+1. Nastavite spremenljivko okolja `OPENCV_INSTALL_ROOT`, da kaže na vašo namestitev OpenCV:
 
    <!-- @os:windows -->
    ```cmd
@@ -343,7 +343,7 @@ CVML Library vključuje vzorčne aplikacije, pripravljene za gradnjo, za vsako f
    ```
    <!-- @os:end -->
 
-2. Zgradite vzorce s CMake:
+2. Izdelajte vzorce s CMake:
 
    <!-- @os:windows -->
    ```cmd
@@ -365,7 +365,7 @@ CVML Library vključuje vzorčne aplikacije, pripravljene za gradnjo, za vsako f
    ```
    <!-- @os:end -->
 
-   Po uspešni gradnji so izvršljive datoteke na naslednji lokaciji:
+   Po uspešni izdelavi se izvedljive datoteke nahajajo tukaj:
 
    <!-- @os:windows -->
    ```
@@ -383,7 +383,7 @@ CVML Library vključuje vzorčne aplikacije, pripravljene za gradnjo, za vsako f
    ```
    <!-- @os:end -->
 
-3. Pred zagonom katerega koli vzorca zagotovite, da so datoteke izvajanja CVML dostopne:
+3. Preden zaženete katerikoli vzorec, se prepričajte, da so datoteke izvajalnega okolja CVML dostopne:
 
    <!-- @os:windows -->
    ```cmd
@@ -406,9 +406,9 @@ CVML Library vključuje vzorčne aplikacije, pripravljene za gradnjo, za vsako f
 
 ## Zagon zaznavanja obrazov
 
-Vzorec zaznavanja obrazov zazna obraze na sliki, videu ali v živo iz kamere. Na vsakem zaznanem obrazu nariše omejevalne okvirje, ocene zaupanja in pet orientacijskih točk obraza (dve očesi, nos in dva robova ust).
+Vzorec za zaznavanje obrazov zazna obraze na sliki, videoposnetku ali v živi kamerski sliki. Za vsak zaznan obraz nariše okvirje, ocene zaupanja in pet obraznih orientacijskih točk (dve očesi, nos in dva roba ust).
 
-Najprej se pomaknite v mapo z izvršljivo datoteko za zaznavanje obrazov:
+Najprej se pomaknite v mapo z izvedljivo datoteko za zaznavanje obrazov:
 
 <!-- @os:windows -->
 ```cmd
@@ -422,7 +422,7 @@ cd build/cvml-sample-face-detection
 ```
 <!-- @os:end -->
 
-Nato prenesite vzorčno sliko za uporabo kot vhod (fotografija avtorja [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), prosta za uporabo prek Pexels):
+Nato prenesite vzorčno sliko za uporabo kot vhod (fotografija avtorja [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), na voljo za brezplačno uporabo prek Pexels):
 
 ```bash
 curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
@@ -442,7 +442,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-Prikazalo se bo okno s sliko z omejevalnimi okvirji okoli zaznanih obrazov, ocenami zaupanja in točkami orientacijskih točk obraza (oči, nos, robovi ust).
+Prikaže se okno s sliko, na kateri so okvirji okoli zaznanih obrazov, ocene zaupanja in točke obraznih orientacijskih znakov (oči, nos, robovi ust).
 
 <p align="center">
   <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
@@ -462,7 +462,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg -o output_face.jpg
 ```
 <!-- @os:end -->
 
-**Uporabite natančni model** za večjo točnost (na račun hitrosti):
+**Uporabite natančen model** za višjo natančnost (na račun hitrosti):
 
 <!-- @os:windows -->
 ```cmd
@@ -478,10 +478,10 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 
 Funkcija zaznavanja obrazov ponuja dve različici modela:
 
-| Model | Hitrost | Točnost | Najboljše za |
+| Model | Hitrost | Natančnost | Najprimernejše za |
 |-------|-------|----------|----------|
-| `fast` (privzeto) | Višji FPS | Dobra | Aplikacije s kamero v realnem času |
-| `precise` | Nižji FPS | Najboljša | Analiza fotografij, potrebe po visoki točnosti |
+| `fast` (privzeto) | Višji FPS | Dobro | Aplikacije s kamero v realnem času |
+| `precise` | Nižji FPS | Najboljše | Analizo fotografij, potrebe po visoki natančnosti |
 
 
 <!-- @os:windows -->
@@ -717,9 +717,9 @@ done
 <!-- @test:end --> 
 <!-- @os:end -->
 
-## Integracija CVML v lastno aplikacijo
+## Vključevanje CVML v lastno aplikacijo
 
-Če želite uporabiti CVML Library v lastnem projektu C++, jo dodajte prek CMake-ove funkcije `find_package`:
+Za uporabo knjižnice CVML v svojem projektu C++ jo dodajte prek CMake-ovega `find_package`:
 
 ```cmake
 # Find the Ryzen AI CVML Library
@@ -729,7 +729,7 @@ find_package(RyzenAILibrary REQUIRED PATHS ${AMD_CVML_SDK_ROOT})
 target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 ```
 
-Kjer `AMD_CVML_SDK_ROOT` kaže na koren mape Ryzen AI CVML Library. Nato vključite ustrezno glavo za funkcijo, ki jo želite:
+Kjer `AMD_CVML_SDK_ROOT` kaže na koren mape knjižnice Ryzen AI CVML. Nato vključite ustrezno glavo za funkcijo, ki jo želite uporabiti:
 
 ```cpp
 #include <cvml-face-detector.h>   // for face detection
@@ -739,12 +739,12 @@ Kjer `AMD_CVML_SDK_ROOT` kaže na koren mape Ryzen AI CVML Library. Nato vključ
 
 ## Naslednji koraki
 
-Za vsak spodnji vzorec se najprej pomaknite v njegovo mapo z izvršljivo datoteko po istem vzorcu kot v razdelku [Zagon zaznavanja obrazov](#running-face-detection) zgoraj (npr. `cd build\cvml-sample-depth-estimation\Release` v sistemu Windows ali `cd build/cvml-sample-depth-estimation` v sistemu Linux). V sistemu Windows dodajte `.exe` vsakemu ukazu (npr. `cvml-sample-depth-estimation.exe`).
+Za vsak spodnji primer se najprej pomaknite v njegovo izvedljivo mapo, po enakem vzorcu kot v zgornjem razdelku [Running Face Detection](#running-face-detection) (npr. `cd build\cvml-sample-depth-estimation\Release` v sistemu Windows ali `cd build/cvml-sample-depth-estimation` v sistemu Linux). V sistemu Windows vsakemu ukazu dodajte pripono `.exe` (npr. `cvml-sample-depth-estimation.exe`).
 
-- **Preizkusite ocenjevanje globine**: Zaženite `cvml-sample-depth-estimation -i sample_face.jpg`, da ustvarite barvno karto globine — bližnji predmeti so prikazani v toplih barvah, oddaljeni v hladnih
-- **Raziščite mrežico obraza**: Zaženite `cvml-sample-face-mesh -i sample_face.jpg`, da si ogledate podrobno sledenje geometriji obraza z gostimi točkami mrežice
-- **Obdelajte video datoteke**: Uporabite zastavici `-i` in `-o` na katerem koli vzorcu za obdelavo videoposnetkov (npr. `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
-- **Primerjajte različice modelov**: Preizkusite `-m precise` v primerjavi s privzetim `-m fast` pri zaznavanju obrazov, da neposredno vidite kompromis med točnostjo in hitrostjo
-- **Zgradite lastno aplikacijo**: Uporabite integracijo CMake in C++ API za dodajanje funkcij CVML v lastne aplikacije C++
-- **Kombinirajte funkcije**: Povežite zaznavanje obrazov z ocenjevanjem globine v isti aplikaciji za bogatejše razumevanje scene
-- **Preglejte izvorno kodo**: Preberite [Ryzen AI CVML Library na GitHub](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) za dokumentacijo glave, dodatne vzorce in podrobnosti API-ja
+- **Preizkusite oceno globine**: Zaženite `cvml-sample-depth-estimation -i sample_face.jpg`, da ustvarite obarvano globinsko sliko — bližji predmeti se prikažejo v toplih barvah, oddaljeni pa v hladnih
+- **Raziščite mrežo obraza**: Zaženite `cvml-sample-face-mesh -i sample_face.jpg`, da si ogledate gosto sledenje geometriji obraza s podrobnimi točkami mreže
+- **Obdelava video datotek**: Uporabite zastavici `-i` in `-o` na kateremkoli primeru za obdelavo videoposnetkov (npr. `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
+- **Primerjajte različice modelov**: Preizkusite `-m precise` v primerjavi s privzetim `-m fast` pri zaznavanju obrazov, da na lastne oči vidite razmerje med natančnostjo in hitrostjo
+- **Zgradite lastno aplikacijo**: Uporabite integracijo CMake in vmesnik C++ API za dodajanje funkcij CVML v svoje lastne aplikacije C++
+- **Združite funkcije**: Povežite zaznavanje obraza z oceno globine v isti aplikaciji za bogatejše razumevanje prizora
+- **Prebrskajte izvorno kodo**: Preberite [Ryzen AI CVML Library on GitHub](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) za dokumentacijo glav, dodatne primere in podrobnosti o API-ju

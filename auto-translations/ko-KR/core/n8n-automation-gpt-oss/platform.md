@@ -14,20 +14,20 @@ SPDX-License-Identifier: MIT
 
 | 구성 요소 | 버전 | 참고 사항 |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | AMD Ryzen™ AI Halo Developer Platform에는 사전 설치되어 PATH에서 사용 가능; 다른 모든 장치에는 수동으로 설치해야 함 |
-| **Lemonade Server** | 최신 | `http://localhost:13305/api/v1`에서 실행 중 |
+| **Node.js** | 22.16+ | AMD Ryzen™ AI Halo Developer Platform에는 사전 설치되어 PATH에서 사용 가능하지만, 다른 모든 장치에서는 수동으로 설치해야 합니다 |
+| **Lemonade Server** | latest | `http://localhost:13305/api/v1`에서 실행 중 |
 
 ### Linux
 
 | 구성 요소 | 버전 | 참고 사항 |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | AMD Ryzen™ AI Halo Developer Platform에는 사전 설치되어 PATH에서 사용 가능; 다른 모든 장치에는 수동으로 설치해야 함 |
-| **Lemonade Server** | 최신 | `http://localhost:13305/api/v1`에서 실행 중 |
+| **Node.js** | 22.16+ | AMD Ryzen™ AI Halo Developer Platform에는 사전 설치되어 PATH에서 사용 가능하지만, 다른 모든 장치에서는 수동으로 설치해야 합니다 |
+| **Lemonade Server** | latest | `http://localhost:13305/api/v1`에서 실행 중 |
 
 
 ## Lemonade LLM
 
-Lemonade 서버는 장치에 적합한 모델이 로드된 상태로 실행 중이어야 합니다(해당 장치의 `lemonade run` 명령은 README를 참조하세요):
+Lemonade 서버는 장치에 적합한 모델이 로드된 상태로 실행되어야 합니다(사용 중인 장치의 `lemonade run` 명령은 README를 참조하세요):
 
 | 장치 | 엔드포인트 | 모델 |
 |--------|----------|-------|

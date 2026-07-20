@@ -10,9 +10,9 @@ SPDX-License-Identifier: MIT
 
 1. Ladda ner den senaste Windows ComfyUI-installationsfilen från [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
 2. Välj din hårdvarukonfiguration: Välj `AMD ROCm`.
-3. Välj var du vill installera ComfyUI: Använd standardsökvägen eller din föredragna mapp.
+3. Välj var ComfyUI ska installeras: Använd standardsökvägen eller en mapp du föredrar.
 4. Inställningar för skrivbordsappen: Vi rekommenderar att du avmarkerar "Automatic Updates" för att säkerställa att du använder den rekommenderade versionen av appen.
-5. Tryck på "Next" för att påbörja installationen.
+5. Tryck på "Next" för att starta installationen.
 
 <!-- @os:end -->
 

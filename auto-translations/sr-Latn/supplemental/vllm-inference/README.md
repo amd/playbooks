@@ -6,20 +6,20 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ovaj priručnik koristi posebne oznake koje GitHub ne može prikazati. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste ispravno pregledali ovaj sadržaj.
+> Ovaj priručnik koristi posebne oznake koje GitHub ne može da prikaže. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste ispravno pregledali ovaj sadržaj.
 <!-- @github-only:end -->
 
 
 ## Pregled
 
-vLLM je visokoučinski engine za inferencu dizajniran za velike jezičke modele (LLM). Pruža optimizovano posluživanje sa kontinuiranim grupiranjem za visok propusni opseg i OpenAI-kompatibilan API za besprekorno integrisanje aplikacija. Zbog toga je vLLM odličan za produkcijska okruženja gde su brzina i efikasnost resursa od ključnog značaja.
+vLLM je visokoperformansni mehanizam za zaključivanje dizajniran za velike jezičke modele (LLM). Pruža optimizovano posluživanje sa kontinuiranim grupisanjem (batching) za visoku propusnost i API kompatibilan sa OpenAI za jednostavnu integraciju aplikacija. Ovo čini vLLM odličnim izborom za produkciona okruženja gde su brzina i efikasnost resursa ključni.
 
-Ovaj priručnik vas uči kako da poslužujete LLM-ove koristeći kontejnerizovani vLLM na integrisanom GPU-u i kako da komunicirate sa modelima putem OpenAI Python API-ja.
+Ovaj priručnik vas uči kako da poslužujete LLM-ove pomoću kontejnerizovanog vLLM-a na integrisanom GPU-u i kako da komunicirate sa modelima preko OpenAI Python API-ja.
 
 ## Šta ćete naučiti
 
-- Kako da podesite i pokrenete vLLM server sa AMD ROCm™ podrškom
-- Kako da komunicirate sa modelima putem OpenAI-kompatibilnih API krajnjih tačaka
+- Kako da podesite i pokrenete vLLM server sa podrškom za AMD ROCm™
+- Kako da komunicirate sa modelima preko API krajnjih tačaka kompatibilnih sa OpenAI
 - Kako da šaljete upite lokalnom serveru pomoću `vllm-prompt`
 
 ## Podešavanje konfiguracije memorije
@@ -27,44 +27,44 @@ Ovaj priručnik vas uči kako da poslužujete LLM-ove koristeći kontejnerizovan
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Proverite da li postoje ažuriranja softvera
+## Proverite ažuriranja softvera
 
-> **Napomena**: Ako VS Code nije instaliran, možete ga instalirati putem AMD Ryzen™ AI Developer Center-a.
+> **Napomena**: Ako VS Code nije instaliran, možete ga instalirati pomoću AMD Ryzen™ AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalacija softverskih preduslova
+## Instaliranje softverskih preduslova
 
-Ovaj priručnik koristi unapred izgrađenu sliku kontejnera koja uključuje vLLM, ROCm podršku i pomoćne skripte potrebne za pokretanje servera. Ne morate ručno instalirati PyTorch, vLLM niti lokalne skripte priručnika.
+Ovaj priručnik koristi unapred izgrađenu (prebuilt) sliku kontejnera koja uključuje vLLM, ROCm podršku i pomoćne skripte potrebne za pokretanje servera. Nije potrebno ručno instalirati PyTorch, vLLM, niti lokalne skripte priručnika.
 
-Ne postoji korak instalacije vLLM-a na strani hosta. Pokrenite vLLM sa:
+Ne postoji korak instalacije vLLM-a na hostu. Pokrenite vLLM pomoću:
 
 ```bash
 vllm-launch
 ```
 
-Pokretač pokreće kontejner, cilja integrisani GPU i izlaže lokalni OpenAI-kompatibilan vLLM server. Alternativno, kliknite na ikonu vLLM u traci zadataka.
+Pokretač (launcher) pokreće kontejner, ciljano koristi integrisani GPU i izlaže lokalni vLLM server kompatibilan sa OpenAI. Alternativno, kliknite na vLLM ikonu na traci zadataka.
 
 ## Brzi početak
 
 ### 1. Potvrdite da vLLM server radi
 
-`vllm-launch` može potrajati nekoliko minuta da inicijalizuje sve. Kada se pokrene, server je dostupan na `http://localhost:8001`. Ostavite terminal za pokretanje otvoren jer server radi u prvom planu, a zatim otvorite poseban terminal za preostale korake. Primeri ispod koriste `Qwen/Qwen3-1.7B`; ako je vaš pokretač konfigurisan za drugi model, zamenite taj ID modela u zahtevima.
+Skripti `vllm-launch` može biti potrebno nekoliko minuta da inicijalizuje sve. Kada se pokrene, server je dostupan na `http://localhost:8001`. Ostavite otvoren terminal za pokretanje jer server radi u prvom planu, a zatim otvorite poseban terminal za preostale korake. Primeri ispod koriste `Qwen/Qwen3-1.7B`; ako je vaš pokretač konfigurisan za drugi model, zamenite tim identifikatorom modela u zahtevima.
 
 ### 2. Pošaljite upit
 
-Koristite priloženu skriptu `vllm-prompt` da pošaljete zahtev lokalnom vLLM OpenAI-kompatibilnom serveru:
+Koristite priloženu skriptu `vllm-prompt` da pošaljete zahtev lokalnom vLLM serveru kompatibilnom sa OpenAI:
 
 ```bash
 vllm-prompt "Tell me a story"
 ```
 
-### 3. Razgovarajte sa modelom koristeći OpenAI Python API
+### 3. Ćaskajte sa modelom pomoću OpenAI Python API-ja
 
-Pošto vLLM izlaže OpenAI-kompatibilan API, možete koristiti Python paket `openai` za komunikaciju sa njim.
+Pošto vLLM izlaže API kompatibilan sa OpenAI, možete koristiti Python paket `openai` za komunikaciju sa njim.
 
-Prvo, kreirajte Python virtuelno okruženje:
+Prvo, kreirajte virtuelno Python okruženje:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
@@ -80,7 +80,7 @@ Instalirajte OpenAI paket
 pip install openai
 ```
 
-Kreirajte `OpenAI` klijent koji pokazuje na lokalni vLLM server umesto na OpenAI-jeve servere. `api_key` je obavezan za klijenta, ali vLLM ga ne validira, pa bilo koji string funkcioniše:
+Kreirajte `OpenAI` klijenta usmerenog na lokalni vLLM server umesto na OpenAI servere. `api_key` je obavezan za klijenta, ali vLLM ga ne validira, pa bilo koji niz karaktera funkcioniše:
 
 ```python
 from openai import OpenAI
@@ -91,7 +91,7 @@ client = OpenAI(
 )
 ```
 
-Zatim pošaljite zahtev za dovršavanje razgovora. Ovo koristi isti format poruka kao OpenAI API — listu poruka sa ulogama poput `"user"` i `"assistant"`. Postavljanje `stream=True` znači da će odgovor stizati postepeno umesto odjednom:
+Zatim, pošaljite zahtev za dovršavanje ćaskanja (chat completion). Ovo koristi isti format poruka kao OpenAI API — listu poruka sa ulogama poput `"user"` i `"assistant"`. Postavljanje `stream=True` znači da će odgovor stizati postepeno, a ne odjednom:
 
 ```python
 response = client.chat.completions.create(
@@ -104,7 +104,7 @@ response = client.chat.completions.create(
 )
 ```
 
-Na kraju, iterirajte kroz strimovane delove i štampajte svaki deo teksta kako stiže:
+Na kraju, prođite kroz strimovane delove i ispišite svaki komad teksta kako stiže:
 
 ```python
 for chunk in response:
@@ -118,7 +118,7 @@ Priložena skripta [chat_with_model.py](assets/chat_with_model.py) sadrži ceo p
 
 ## Rešavanje problema
 
-### Veza odbijena
+### Konekcija odbijena
 
 Proverite da li server radi:
 ```bash
@@ -127,23 +127,23 @@ curl http://localhost:8001/health
 
 ## Rezime
 
-U ovom priručniku ste naučili kako da:
+U ovom priručniku naučili ste kako da:
 
 - Pokrenete kontejnerizovani vLLM sa ROCm podrškom na integrisanom GPU-u
-- Pokrenete vLLM server sa OpenAI-kompatibilnim API krajnjim tačkama na portu 8001
+- Pokrenete vLLM server sa API krajnjim tačkama kompatibilnim sa OpenAI na portu 8001
 - Šaljete upite pomoću `vllm-prompt`
 - Upućujete API pozive vLLM serveru koristeći i strimovane i nestrimovane zahteve
-- Rešavate uobičajene probleme sa pokretanjem servera, memorijom i klijentskim vezama
+- Rešavate uobičajene probleme pri pokretanju servera, memoriji i konekcijama klijenta
 
 Sada imate kontejnerizovano vLLM okruženje za posluživanje velikih jezičkih modela sa optimizovanim performansama na integrisanom GPU-u.
 
 ## Sledeći koraci
 
-- **Isprobajte različite modele** — Zamenite model u konfiguraciji `vllm-launch` da eksperimentišete sa različitim LLM-ovima i uporedite performanse.
-- **Izgradite aplikaciju** — Koristite OpenAI-kompatibilan API da integišete vLLM u Python aplikaciju, četbota ili tok automatizacije.
-- **Fino podešavanje i posluživanje** — Fino podesite model koristeći LoRA ili QLoRA, a zatim ga postavite sa vLLM-om za optimizovanu inferencu.
+- **Isprobajte različite modele** — Zamenite model u konfiguraciji `vllm-launch` da biste eksperimentisali sa različitim LLM-ovima i uporedili performanse.
+- **Napravite aplikaciju** — Koristite API kompatibilan sa OpenAI da integrišete vLLM u Python aplikaciju, chatbot ili automatizovani radni tok.
+- **Fino podesite i poslužujte** — Fino podesite model koristeći LoRA ili QLoRA, a zatim ga primenite pomoću vLLM-a za optimizovano zaključivanje.
 
 ## Dodatni resursi
 
-- **[Zvanična dokumentacija vLLM](https://docs.vllm.ai/)** — Sveobuhvatni vodiči i API reference
-- **[vLLM GitHub repozitorijum](https://github.com/vllm-project/vllm)** — Izvorni kod, problemi i diskusije zajednice
+- **[Zvanična dokumentacija za vLLM](https://docs.vllm.ai/)** — Sveobuhvatni vodiči i reference za API
+- **[vLLM GitHub repozitorijum](https://github.com/vllm-project/vllm)** — Izvorni kod, problemi (issues) i diskusije zajednice

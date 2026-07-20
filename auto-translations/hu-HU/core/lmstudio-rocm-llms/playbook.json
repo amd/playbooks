@@ -1,5 +1,5 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "LLM-ek futtatása és kiszolgálása LM Studio segítségével",
-  "description": "Állítsa be az LM Studio-t és az LM Studio Servert a nagy nyelvi modellek helyi futtatásához és kiszolgálásához."
+  "title": "LLM-ek futtatása és kiszolgálása LM Studio használatával",
+  "description": "Az LM Studio és az LM Studio Server beállítása nagy nyelvi modellek helyi futtatásához és kiszolgálásához."
 }

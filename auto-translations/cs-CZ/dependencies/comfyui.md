@@ -8,11 +8,11 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. Stáhněte nejnovější instalátor ComfyUI pro Windows z [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
-2. Zvolte nastavení hardwaru: Vyberte `AMD ROCm`.
-3. Zvolte, kam nainstalovat ComfyUI: Použijte výchozí cestu nebo vámi preferovanou složku.
-4. Nastavení desktopové aplikace: Doporučujeme zrušit výběr možnosti „Automatic Updates", abyste zajistili používání doporučené verze této aplikace.
-5. Stiskněte „Next" pro zahájení instalace.
+1. Stáhněte si nejnovější instalační program ComfyUI pro Windows z [download.comfy.org](https://download.comfy.org/windows/nsis/x64).
+2. Vyberte konfiguraci hardwaru: Zvolte `AMD ROCm`.
+3. Vyberte, kam se má ComfyUI nainstalovat: Použijte výchozí cestu nebo preferovanou složku.
+4. Nastavení desktopové aplikace: Doporučujeme zrušit zaškrtnutí možnosti „Automatic Updates“, abyste měli jistotu, že používáte doporučenou verzi této aplikace.
+5. Stisknutím tlačítka „Next“ zahajte instalaci.
 
 <!-- @os:end -->
 
@@ -29,7 +29,7 @@ git checkout v0.19.2
 
 #### Instalace požadavků ComfyUI
 
-S aktivovaným virtuálním prostředím Python spusťte:
+Po aktivaci virtuálního prostředí Python spusťte:
 ```bash
 cd ComfyUI
 pip install -r requirements.txt

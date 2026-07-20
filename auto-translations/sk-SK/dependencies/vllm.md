@@ -12,4 +12,4 @@ vLLM je poskytovaný prostredníctvom vopred zostaveného kontajnerového obrazu
 vllm-launch
 ```
 
-Spúšťač spustí kontajner, zacieli na integrovaný GPU a sprístupní OpenAI-kompatibilné vLLM API na `http://localhost:8001`.
+Spúšťač spustí kontajner, zacieli na integrovanú GPU a sprístupní OpenAI-kompatibilné vLLM API na `http://localhost:8001`.

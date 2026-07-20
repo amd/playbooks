@@ -6,10 +6,10 @@ SPDX-License-Identifier: MIT
 
 ### vLLM
 
-vLLM は ROCm サポートを含むビルド済みコンテナイメージとして提供されています。ホストに vLLM や PyTorch を直接インストールする代わりに、ランチャーコマンドを使用してください：
+vLLMはROCm対応のビルド済みコンテナイメージとして提供されています。ホストに直接vLLMやPyTorchをインストールするのではなく、ランチャーコマンドを使用してください。
 
 ```bash
 vllm-launch
 ```
 
-ランチャーはコンテナを起動し、統合 GPU をターゲットとして、OpenAI 互換の vLLM API を `http://localhost:8001` で公開します。
+このランチャーはコンテナを起動し、統合GPUを対象として、OpenAI互換のvLLM APIを`http://localhost:8001`で公開します。

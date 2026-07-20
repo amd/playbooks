@@ -6,44 +6,44 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Bu kılavuz, GitHub'ın işleyemediği özel etiketler kullanmaktadır. Bu içeriği doğru bir şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
 <!-- @github-only:end -->
 
 ## Genel Bakış
 
-Bu eğitim, PyTorch ve ROCm kullanarak büyük bir dil modelini (LLM) ince ayar yapmak için adım adım örnekler sunmaktadır. Standart ince ayardan bellek açısından verimli Parametre Verimli İnce Ayar (PEFT) stratejilerine kadar çeşitli teknikleri kapsamakta olup modelleri ihtiyaçlarınıza göre kolayca uyarlamanızı sağlar.
+Bu eğitim, PyTorch ve ROCm ile büyük bir dil modelinin (LLM) ince ayarını yapmak için adım adım örnekler sunar. Standart ince ayardan bellek açısından verimli Parametre Verimli İnce Ayar (PEFT) stratejilerine kadar çeşitli teknikleri kapsar, böylece modelleri ihtiyaçlarınıza kolayca uyarlayabilirsiniz.
 
-**Kullanılan Model**: google/gemma-3-4b-it  *(kısıtlıysa [HF kimlik doğrulamasını etkinleştir](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) bölümüne bakın)*  
+**Kullanılan Model**: google/gemma-3-4b-it  *(kısıtlıysa bkz. [HF kimlik doğrulamasını etkinleştirin](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models))*  
 **Donanım**: ROCm destekli AMD Radeon™ GPU  
-**Çerçeve**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Pekiştirmeli Öğrenme (TRL))
+**Çerçeve**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
-> **Not:** **GPT-OSS-20B** dahil diğer model mimarilerini de deneyebilirsiniz; bunun için sağlanan eğitim betiklerindeki modeli değiştirmeniz yeterlidir.
-> Tam ince ayar için en az 32 GB GPU belleği ve 64 GB sistem RAM'i gerekmektedir.
+> **Not:** Verilen eğitim betiklerinde modeli değiştirerek **GPT-OSS-20B** dahil olmak üzere diğer model mimarilerini de deneyebilirsiniz.
+> Tam ince ayar için en az 32 GB GPU belleği ve 64 GB sistem RAM'i gereklidir.
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
-> **Not:** LoRA ve QLoRA ince ayarı için en az 16 GB GPU belleği ve 32 GB sistem RAM'i gerekmektedir.
+> **Not:** LoRA ve QLoRA ince ayarı için en az 16 GB GPU belleği ve 32 GB sistem RAM'i gereklidir.
 <!-- @device:end -->
 
-## Neler Öğreneceksiniz
+## Öğrenecekleriniz
 
-- PyTorch ve ROCm ile LoRA, QLoRA ve tam ince ayar kullanarak bir LLM'nin nasıl ince ayar yapılacağı
-- İnce ayarlı modelinizin nasıl kaydedileceği ve dağıtılacağı
-- Eğitimin nasıl izleneceği ve yaygın sorunların nasıl giderileceği
+- PyTorch ve ROCm ile LoRA, QLoRA ve tam ince ayar kullanarak bir LLM'nin nasıl ince ayarı yapılır
+- İnce ayarlanmış modelinizi nasıl kaydedip dağıtabilirsiniz
+- Eğitimi nasıl izleyebilir ve yaygın sorunları nasıl giderebilirsiniz
 
-## Bellek Yapılandırmasını Ayarlama
+## Bellek Yapılandırmasının Ayarlanması
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Yazılım Güncellemelerini Kontrol Etme
-> **Not**: VS Code yüklü değilse Ryzen AI Developer Center ile yükleyebilirsiniz.
+## Yazılım Güncellemelerini Kontrol Edin
+> **Not**: VS Code yüklü değilse, Ryzen AI Developer Center ile yükleyebilirsiniz.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Yazılım Ön Koşullarını Yükleme
+## Yazılım Ön Koşullarının Kurulumu
 
 #### Sanal Ortam Oluşturma
 
@@ -61,7 +61,7 @@ source finetune-venv/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Kullanıcınıza GPU aygıtlarına erişim izni verin** (bunun geçerli olması için oturumu kapatıp yeniden açın):
+**Kullanıcınıza GPU aygıtlarına erişim izni verin** (bunun etkili olması için oturumu kapatıp yeniden açın):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -101,7 +101,7 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 <!-- @os:end -->
 
-#### Temel Bağımlılıkları Yükleme
+#### Temel Bağımlılıkların Kurulumu
 <!-- @require:pytorch -->
 
 #### Ek Bağımlılıklar
@@ -115,7 +115,7 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandb
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** Burada yalnızca temel paketler test edilmekte ve desteklenmektedir. **bitsandbytes, Windows'ta iyi desteklenmemektedir**; bu nedenle Windows kurulumu bunu atlar. Windows'ta LoRA veya tam ince ayar kullanın (QLoRA, bitsandbytes gerektirir ve Linux için tasarlanmıştır).
+**Windows:** Burada yalnızca temel paketler test edilmiş ve desteklenmektedir. **bitsandbytes Windows'ta iyi desteklenmemektedir**, bu nedenle Windows kurulumu bunu içermez; Windows'ta LoRA veya tam ince ayar kullanın (QLoRA, bitsandbytes gerektirir ve Linux için tasarlanmıştır).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
@@ -123,11 +123,11 @@ pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate p
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### HF kimlik doğrulamasını etkinleştirme (kısıtlı veya özel / önceden yüklenmemiş modeller)
+#### HF kimlik doğrulamasını etkinleştirin (kısıtlı veya özel / önceden yüklenmemiş modeller)
 
-Bu örnekte **kısıtlı** bir model olan **google/gemma-3-4b-it** kullanıyoruz. Modelin koşullarını Hugging Face üzerinde kabul etmeniz ve ardından eğitim betiklerinin modeli indirebilmesi için kimlik doğrulaması yapmanız gerekmektedir.
+Bu örnekte, **kısıtlı** bir model olan **google/gemma-3-4b-it** kullanıyoruz. Modelin Hugging Face üzerindeki koşullarını kabul etmeniz ve ardından eğitim betiklerinin onu indirebilmesi için kimlik doğrulaması yapmanız gerekir.
 
-1. **Lisansı kabul edin:** [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it) adresini açın, oturum açın (veya bir hesap oluşturun) ve model sayfasındaki lisans/koşulları kabul edin (örn. "Kabul et ve depoya eriş").
+1. **Lisansı kabul edin:** [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it) adresini açın, oturum açın (veya bir hesap oluşturun) ve model sayfasındaki lisansı/koşulları kabul edin (örn. "Agree and access repository").
 2. **Yükleyin ve oturum açın:** Hugging Face CLI'yi yükleyin, ardından standart oturum açma işlemini çalıştırın:
 
 ```bash
@@ -232,13 +232,13 @@ sys.exit(r.returncode)
 <!-- @device:end -->
 ---
 
-## Teknikleri Anlama
+## Teknikleri Anlamak
 
 ### LoRA Nedir?
 
-**LoRA (Düşük Sıralı Uyarlama)**, temel modeli dondurarak yalnızca belirli katmanlara eklenen küçük "adaptör" matrislerini eğitir.
+**LoRA (Low-Rank Adaptation)**, temel modeli donmuş halde tutar ve yalnızca belirli katmanlara eklenen küçük "adaptör" matrislerini eğitir.
 
-- **Temel fikir**: Milyonlarca parametreye sahip büyük bir ağırlık matrisini güncellemek yerine, düşük sıralı bir güncelleme öğrenilir (çarpımı çok daha az parametreye sahip iki küçük matris). Bu, eğitilebilir parametre sayısını ve VRAM kullanımını büyük ölçüde azaltırken tam ince ayar kalitesinin büyük bölümünü korur.
+- **Temel fikir**: milyonlarca parametreye sahip devasa bir ağırlık matrisini güncellemek yerine, düşük dereceli bir güncelleme öğreniriz (çarpımı çok daha az parametreye sahip olan iki küçük matris). Bu, tam ince ayar kalitesinin çoğunu korurken eğitilebilir parametrelerde ve VRAM'de büyük bir azalma sağlar.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -253,7 +253,7 @@ W_updated = W + B × A
 
 ### QLoRA Nedir?
 
-**QLoRA**, **4-bit niceleme** ile **LoRA**'yı birleştirir. Temel model 4-bit olarak yüklenir (büyük bellek tasarrufu sağlar) ve yalnızca LoRA adaptörleri daha yüksek hassasiyetle eğitilir. Böylece LoRA'nın parametre verimliliğini ve çok daha düşük VRAM kullanımını elde edersiniz; tam hassasiyetli LoRA ile karşılaştırıldığında küçük bir kalite ödünü söz konusudur. 4-bit nicelemenin sayısal kararsızlıklara (kayıp artışları veya NaN'lar) yol açabileceğini unutmayın; bu nedenle yeterli VRAM mevcutsa kullanıcılar genellikle **LoRA**'yı tercih edebilir.
+**QLoRA**, **4-bit nicemleme**yi **LoRA** ile birleştirir. Temel model 4-bit olarak yüklenir (büyük bellek tasarrufu sağlar) ve yalnızca LoRA adaptörleri daha yüksek hassasiyette eğitilir. Böylece LoRA'nın parametre verimliliğini artı çok daha düşük VRAM'i elde edersiniz; tam hassasiyetli LoRA'ya kıyasla küçük bir kalite ödünleşimi ile. 4-bit nicemlemenin sayısal kararsızlıklara (kayıp sıçramaları veya NaN değerleri) neden olabileceğini unutmayın, bu nedenle kullanıcılar yeterli VRAM mevcutsa genellikle **LoRA**'yı tercih edebilir.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -261,47 +261,46 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **Not**: `openai/gpt-oss-20b` gibi MXFP4 temel modeller için QLoRA yerine **LoRA** (`train_lora.py`) kullanmanızı öneririz. QLoRA betiğinin `bitsandbytes` 4-bit yolu genellikle MXFP4 ağırlıklarını BF16'ya dönüştürür; bu nedenle çalışma standart LoRA gibi davranır. Yerel MXFP4, kaynaktan derlenen `bitsandbytes` ve eşleşen bir Transformers/Triton/çekirdek yığını gerektirir. [Transformers MXFP4 belgelerine](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4) bakın.
+> **Not**: `openai/gpt-oss-20b` gibi MXFP4 temel modeller için, QLoRA yerine **LoRA** (`train_lora.py`) kullanmanızı öneririz. QLoRA betiğinin `bitsandbytes` 4-bit yolu genellikle MXFP4 ağırlıklarını BF16'ya dequantize eder, bu nedenle çalıştırma standart LoRA gibi davranır. Yerel MXFP4, kaynaktan derlenmiş `bitsandbytes` ile eşleşen bir Transformers/Triton/kernels yığını gerektirir. Bkz. [Transformers MXFP4 dokümantasyonu](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
 
 ### 2. Yönteminizi Seçin
 
 | Yöntem | Bellek | Hız | Kalite | En İyi Kullanım |
-|--------|--------|-----|--------|-----------------|
+|--------|--------|-------|---------|----------|
 | **QLoRA** (yalnızca Linux) | 12-16GB | En Hızlı | %90-95 | Düşük Bellek Kullanımı |
 | **LoRA** | 24-32GB | Hızlı | %95-98 | Dengeli yaklaşım |
 | **Tam** | 80GB+ | En Yavaş | %100 | Maksimum kalite |
-
 ### 3. Eğitimi Çalıştırın
 
 **Veri kümesi ve modelin öğrendikleri**  
-Betikler, veri kümesini sohbet örneklerine dönüştürür. Örneğin, QLoRA betiği **Abirate/english_quotes** kullanır: her örnek şu şekilde bir kullanıcı–asistan çiftine dönüşür:
+Betikler, veri kümesini sohbet örneklerine dönüştürür. Örneğin, QLoRA betiği **Abirate/english_quotes** veri kümesini kullanır: her örnek şu şekilde bir kullanıcı-asistan çifti haline gelir:
 
-- **Kullanıcı:** "Bana şu konuda bir alıntı ver: &lt;etiket&gt;"
-- **Asistan:** "&lt;alıntı&gt; – &lt;yazar&gt;"
+- **Kullanıcı:** “Bana şu konuda bir alıntı ver: &lt;etiket&gt;”
+- **Asistan:** “&lt;alıntı&gt; – &lt;yazar&gt;”
 
-İnce ayar, modele bir konu hakkında alıntı isteyen komutlara yanıt vermeyi ve bunları `<alıntı metni> - <yazar>` biçiminde döndürmeyi öğretir. LoRA ve tam ince ayar betikleri **databricks/databricks-dolly-15k** kullanır (genel talimat/yanıt çiftleri); bu nedenle tam görev betiğe göre değişir; temel fikir aynıdır: modeli seçtiğiniz veri kümesine ve biçime uyarlayın.
+İnce ayar (fine-tuning), modele bir konu hakkında alıntı isteyen komutlara yanıt vermeyi ve bunları `<alıntı metni> - <yazar>` biçiminde döndürmeyi öğretir. LoRA ve tam ince ayar betikleri **databricks/databricks-dolly-15k** (genel talimat/yanıt çiftleri) veri kümesini kullanır, bu nedenle tam olarak gerçekleştirilen görev betiğe göre değişir; fikir aynıdır - modeli seçtiğiniz veri kümesine ve biçime uyarlamak.
 
-Aşağıda mevcut eğitim yöntemlerinin bir özeti yer almaktadır. Her yöntem kendi betiğine bağlantı verir ve doğru yaklaşımı seçmenize yardımcı olacak kısa bir açıklama sunar.
+Aşağıda mevcut eğitim yöntemlerinin bir özeti bulunmaktadır. Her yöntem kendi betiğine bağlantı verir ve doğru yaklaşımı seçmenize yardımcı olacak kısa bir açıklama sağlar.
 
-| Betik | Yöntem | Açıklama | Tipik VRAM | Önerilen Kullanım |
-|-------|--------|----------|------------|-------------------|
-| [`train_lora.py`](assets/train_lora.py) | **LoRA** | Temel modeli dondururken küçük adaptör matrislerini eğitir. 3–5 kat daha hızlı; ~%95–98 tam kalite. | 24–32GB | İleri düzey kullanıcılar; birden fazla adaptör; daha fazla VRAM |
-| [`train_qlora.py`](assets/train_qlora.py) *(yalnızca Linux)* | **QLoRA** | 4-bit niceleme + LoRA adaptörleri. En düşük bellek kullanımı, en hızlı, küçük kalite ödünü. `bitsandbytes` gerektirir (yalnızca Linux). | 12–16GB | Çoğu kullanıcı; hızlı denemeler; sınırlı VRAM |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Tam İnce Ayar** | Tüm model parametrelerini günceller. Maksimum kalite; en yüksek bellek ve hesaplama kullanımı. | 40GB+ | Maksimum kalite; araştırma; büyük VRAM |
+| Betik                           | Yöntem            | Açıklama                                                                                                         | Tipik VRAM | Önerilen Kullanım                                 |
+|-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Temel modeli dondururken küçük adaptör matrislerini eğitir. 3-5 kat daha hızlı; ~%95-98 tam kalite.                         | 24–32GB      | İleri düzey kullanıcılar; birden fazla adaptör; daha fazla VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(Yalnızca Linux)*             | **QLoRA**       | 4 bit niceleme + LoRA adaptörleri. En düşük bellek kullanımı, en hızlı, küçük bir kalite ödünleşimi. `bitsandbytes` gerektirir (yalnızca Linux).                            | 12–16GB      | Çoğu kullanıcı; hızlı deneyler; sınırlı VRAM      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Tam İnce Ayar** | Tüm model parametrelerini günceller. Maksimum kalite; en yüksek bellek ve hesaplama kullanımı.                                    | 40GB+        | Maksimum kalite; araştırma; büyük VRAM           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Not:** Tam ince ayar (`train_full_finetuning.py`) 64 GB'tan fazla sistem RAM'i gerektirebilir ve bu cihazda uygulanabilir olmayabilir. Bunun yerine LoRA veya QLoRA kullanmayı düşünün.
+> **Not:** Tam ince ayar (`train_full_finetuning.py`) 64GB'den fazla sistem RAM'i gerektirebilir ve bu cihazda uygulanabilir olmayabilir. Bunun yerine LoRA veya QLoRA kullanmayı düşünün.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Not:** Tam ince ayar (`train_full_finetuning.py`) 64 GB'tan fazla sistem RAM'i gerektirebilir ve bu cihazda uygulanabilir olmayabilir. Bunun yerine LoRA kullanmayı düşünün.
+> **Not:** Tam ince ayar (`train_full_finetuning.py`) 64GB'den fazla sistem RAM'i gerektirebilir ve bu cihazda uygulanabilir olmayabilir. Bunun yerine LoRA kullanmayı düşünün.
 <!-- @os:end -->
 <!-- @device:end -->
 
-Tercih ettiğiniz `Eğitim yöntemini` seçin, ilgili betiği indirin ve sanal ortamınızı etkin tutarak aşağıdaki komutu kullanarak çalıştırın:
+Tercih ettiğiniz `Training method` (Eğitim yöntemi) seçeneğini seçin, ilgili betiği indirin ve sanal ortamınızı etkin tutarak aşağıdaki komutla çalıştırın: 
 
 ```python
 python3 train_<method_name>.py.
@@ -349,7 +348,7 @@ outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-### LoRA Adaptörünü Temel Modelle Birleştirme
+### LoRA Adaptörünü Temel Modele Birleştirme
 
 ```python
 # Merge LoRA/QLoRA adapter weights into the base model for standalone inference
@@ -359,11 +358,11 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **Not:**  
-- Model dizin adının (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) eğitimden elde ettiğiniz gerçek çıktı klasörüyle eşleştiğinden emin olun.  
-- QLoRA yerine LoRA kullandıysanız yolu buna göre değiştirin.  
-- Bazı Gemma modelleri `from_pretrained` içinde `trust_remote_code=True` belirtilmesini gerektirebilir; ilgili bir uyarı görürseniz ekleyin.
+- Model dizini adının (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`), eğitiminizden elde ettiğiniz gerçek çıktı klasörüyle eşleştiğinden emin olun.  
+- QLoRA yerine LoRA kullandıysanız, yolu buna göre değiştirmeniz yeterlidir.  
+- Bazı Gemma modelleri, `from_pretrained` içinde `trust_remote_code=True` belirtilmesini gerektirir; ilgili bir uyarı görürseniz bunu ekleyin.
 
-Daha fazla özel ayar (dolgu belirteçleri, aygıt vb.) için eğitimde kullandığınız betiğe başvurun.
+Daha fazla özel ayar (doldurma belirteçleri, cihaz vb.) için kullandığınız eğitim betiğine bakın.
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -461,7 +460,7 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ### Kendi Veri Kümenizi Kullanma
 
-Tüm betikler aynı veri kümesi biçimini kullanır. Yükleme bölümünü değiştirin:
+Tüm betikler aynı veri kümesi biçimini kullanır. Yükleme bölümünü şununla değiştirin:
 
 ```python
 from datasets import load_dataset
@@ -487,13 +486,13 @@ def format_instruction(example):
 dataset = dataset.map(format_instruction)
 ```
 
-**Yerel JSON/JSONL dosyası için Veri Kümesi Biçimi:**
+**Yerel JSON/JSONL Dosyası için Veri Kümesi Biçimi:**
 
-Bu yöntemi kullanırken JSON dosyalarınızın ayrıştırma hatalarını önlemek için doğru yapılandırıldığından emin olun.
+Bu yöntemi kullanırken, ayrıştırma hatalarından kaçınmak için JSON dosyalarınızın doğru şekilde yapılandırıldığından emin olun. 
 
-Aşağıdaki yönergelere uyulması gerekmektedir:
-* **Dosya Biçimlendirme:** JSON dosyaları, uygun yapı ve sözdizimini sağlamak için bir Tümleşik Geliştirme Ortamı'nda (IDE) biçimlendirilmelidir.
-* **Gerekli Anahtarlar:** Özel JSON dosyası `instruction` ve `response` anahtarlarını içermelidir. Bu anahtarlar yöntemin doğru çalışması için zorunludur.
+Aşağıdaki yönergelere uyulmalıdır:
+* **Dosya Biçimlendirmesi:** JSON dosyaları, doğru yapı ve sözdizimini sağlamak için bir Entegre Geliştirme Ortamı (IDE) içinde biçimlendirilmelidir.
+* **Gerekli Anahtarlar:** Özel JSON dosyası, `instruction` ve `response` anahtarlarını içermelidir. Bu anahtarlar, yöntemin doğru çalışması için gereklidir.
 ```json
 [
   {
@@ -506,15 +505,15 @@ Aşağıdaki yönergelere uyulması gerekmektedir:
   }
 ]
 ```
-**Hugging Face Hub veri kümesi için Veri Kümesi Biçimi**
+**Hugging Face Hub Veri Kümesi için Veri Kümesi Biçimi**
 
-Hugging Face'ten veri kümeleri kullanırken sorunsuz entegrasyonu kolaylaştırmak için veri kümelerinizin doğru yapılandırıldığından emin olun.
+Hugging Face'ten veri kümeleri kullanırken, sorunsuz entegrasyonu kolaylaştırmak için veri kümelerinizin doğru şekilde yapılandırıldığından emin olun. 
 
 Aşağıdaki yönergelere uyulmalıdır:
-* **Talimat-Yanıt Çifti:** `instruction-response` çifti içeren veri kümelerine odaklanın. Bu yapı, amaçlanan işlevsellik için zorunludur.
-* **Özel Anahtar Değişikliği:** Veri kümeniz `instruction-response` yapısına uymuyorsa `format_instruction()` işlevini değiştirme seçeneğiniz vardır. Bu, gerektiğinde belirli anahtarları barındırmanıza olanak tanır.
+* **Talimat-Yanıt Çifti:** `instruction-response` çifti içeren veri kümelerine odaklanın. Bu yapı, amaçlanan işlevsellik için gereklidir.
+* **Özel Anahtar Değişikliği:** Veri kümeniz `instruction-response` yapısına uymuyorsa, belirli anahtarları karşılamak için `format_instruction()` işlevini değiştirme seçeneğiniz vardır.
 
-Örnek Ayarlama: Veri kümesinin çıktısının ayarlanması gereken durumlarda, gereksinimlerinize uyacak şekilde format_instruction() işlevi içindeki yanıt bölümünü değiştirebilirsiniz.
+Örnek Uyarlama: Veri kümesinin çıktısının ayarlanması gereken durumlarda, gereksinimlerinize uyacak şekilde format_instruction() işlevi içindeki yanıt bölümünü değiştirebilirsiniz.
 ```python
 def format_instruction(example):
     return {
@@ -524,9 +523,9 @@ def format_instruction(example):
         ]
     }
 ```
-**CSV dosyası için Veri Kümesi Biçimi**
+**CSV Dosyası için Veri Kümesi Biçimi**
 
-Betiği CSV dosya biçimiyle kullanmak için CSV dosyasının `instruction` ve `response` adlı sütunlar içerdiğinden emin olmanız gerekmektedir.
+Betiğin CSV dosya biçimini kullanmasını sağlamak için, CSV dosyasının `instruction` ve `response` adlı sütunlar içerdiğinden emin olmanız gerekir. 
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
@@ -535,13 +534,13 @@ instruction,response
 
 ### Eğitim Parametrelerini Ayarlama
 
-Eğitim betiğini düzenleyin ve değişkenleri hedeflerinize göre değiştirin: **öğrenme hızı** (`LR`), **dönem sayısı** (`EPOCHS`), **toplu iş boyutu** (`BATCH_SIZE`), **gradyan birikimi** (`GRAD_ACCUM_STEPS`) ve LoRA/QLoRA için **sıra** (`LORA_R`). Daha hızlı çalışmalar için daha az dönem ve daha yüksek öğrenme hızı (LR) kullanın; daha iyi kalite için daha fazla dönem ve daha düşük LR kullanın. Bellek yetersizliği hatalarıyla karşılaşırsanız toplu iş boyutunu veya dizi uzunluğunu azaltın.
+Eğitim betiğini düzenleyin ve değişkenleri hedeflerinize uygun şekilde değiştirin: **öğrenme oranı** (`LR`), **epok sayısı** (`EPOCHS`), **grup boyutu** (`BATCH_SIZE`), **gradyan birikimi** (`GRAD_ACCUM_STEPS`) ve LoRA/QLoRA için **rank** (`LORA_R`). Daha hızlı çalıştırmalar için daha az epok ve daha yüksek bir öğrenme oranı (LR) kullanın; daha iyi kalite için daha fazla epok ve daha düşük bir LR kullanın. Bellek yetersizliği hatalarıyla karşılaşırsanız grup boyutunu veya dizi uzunluğunu azaltın.
 
-### Bellek Optimizasyon İpuçları
+### Bellek Optimizasyonu İpuçları
 
 Bellek yetersizliği hatalarıyla karşılaşırsanız:
 
-**1. Toplu İş Boyutunu Azaltın:**
+**1. Grup Boyutunu Azaltın:**
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
@@ -557,7 +556,7 @@ max_seq_length=256  # Instead of 512
 Full → LoRA → QLoRA
 ```
 
-**4. Gradyan Kontrol Noktasını Etkinleştirin (yalnızca tam ince ayar):**
+**4. Gradyan Kontrol Noktalarını Etkinleştirin (Yalnızca tam ince ayar için):**
 ```python
 model.gradient_checkpointing_enable()
 ```
@@ -566,7 +565,7 @@ model.gradient_checkpointing_enable()
 
 ## İzleme ve Hata Ayıklama
 
-### GPU Belleğini İzleme
+### GPU Belleğini İzleyin
 
 ```bash
 # Check ROCm GPU status
@@ -576,31 +575,31 @@ watch -n 1 amd-smi
 rocm-smi --showmeminfo vram
 ```
 
-### (İsteğe Bağlı) Weights & Biases ile Deneyleri Takip Etme
+### (İsteğe Bağlı) Deneyleri Weights & Biases ile Takip Edin
 
-Çalışmaları ve metrikleri [Weights & Biases](https://wandb.ai) üzerine kaydetmek için:
+Çalıştırmaları ve metrikleri [Weights & Biases](https://wandb.ai) hizmetine kaydetmek için:
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-Eğitim betiğinde, eğitici yapılandırmasında `report_to="wandb"` ve isteğe bağlı olarak `run_name="your-experiment-name"` ayarlayın. Wandb kullanmayı tercih etmiyorsanız `report_to` değerini varsayılanda bırakın veya `"none"` olarak ayarlayın.
+Eğitim betiğinde, trainer yapılandırmasında `report_to="wandb"` ve isteğe bağlı olarak `run_name="your-experiment-name"` ayarlayın. Wandb kullanmak istemiyorsanız, `report_to` değerini varsayılanında bırakın veya `"none"` olarak ayarlayın.
 
 ### Yaygın Sorunlar
 
 #### Bellek Yetersizliği (OOM)
 
-**Çözüm:** Toplu iş boyutunu azaltın ve/veya QLoRA kullanın
+**Çözüm:** Grup boyutunu (batch size) azaltın ve/veya QLoRA kullanın
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16
 # Or: python train_qlora.py
 ```
 
-#### Kayıp Azalmıyor
+#### Kayıp (Loss) Azalmıyor
 
-**Çözüm:** Öğrenme hızını ayarlayın
+**Çözüm:** Öğrenme oranını ayarlayın
 ```python
 LR = 1e-4  # Try lower
 # or
@@ -609,20 +608,20 @@ LR = 5e-4  # Try higher
 
 #### Yavaş Eğitim
 
-**Çözüm:** Bellek izin veriyorsa toplu iş boyutunu artırın
+**Çözüm:** Bellek izin veriyorsa grup boyutunu (batch size) artırın
 ```python
 BATCH_SIZE = 8
 ```
 ## Sonraki Adımlar
 
-Başarılı bir ince ayar tamamladıktan sonra modelinizden daha fazla yararlanmak için aşağıdaki adımları göz önünde bulundurun:
+Başarılı bir ince ayar tamamladıktan sonra, modelinizden daha fazla verim almak için aşağıdaki sonraki adımları değerlendirin:
 
-1. **Değerlendirin**: Genellemeyi ölçmek ve aşırı öğrenmeyi önlemek için ayrılmış test verileri üzerinde kapsamlı değerlendirme yapın.
-2. **Deneyin**: Daha iyi doğruluk, hız ve bellek dengesi için farklı hiper parametre değerlerini deneyin.
-3. **Takip Edin**: Tekrarlanabilir araştırma için tüm denemelerinizi (ve ilgili metrikleri) Weights & Biases ile kaydedin.
-4. **Deneyin**: Modeli özel kullanım durumunuza göre uyarlamak için kendi özel veri kümelerinizde eğitin.
-5. **Dağıtın**: İnce ayarlı modelinizi uyumlu donanımda vLLM gibi verimli arka uçları kullanarak hızlı çıkarım için dağıtın.
-6. **Keşfedin**: İstem mühendisliği, karma hassasiyet ve daha uzun dizi uzunlukları dahil gelişmiş teknikleri inceleyin.
-7. **Eğitin**: Farklı görevler veya alanlar için birden fazla LoRA adaptörü eğitin ve gerektiğinde bunları değiştirin.
+1. **Değerlendirin**: Genelleme yeteneğini ölçmek ve aşırı öğrenmeyi (overfitting) önlemek için ayrılmış test verileri üzerinde kapsamlı bir şekilde değerlendirme yapın.
+2. **Deneyin**: Daha iyi doğruluk, hız ve bellek dengesi için farklı hiperparametre değerlerini deneyin.
+3. **Takip edin**: Tekrarlanabilir araştırmalar için tüm deneylerinizi (ve ilgili metrikleri) Weights & Biases ile takip edin.
+4. **Deneyin**: Modeli kendi kullanım senaryonuza özel olarak uyarlamak için kendi özel veri kümeleriniz üzerinde eğitim yapmayı deneyin.
+5. **Dağıtın**: Uyumlu donanımlarda vLLM gibi verimli arka uçları kullanarak ince ayar yapılmış modelinizi hızlı çıkarım (inference) için dağıtın.
+6. **Keşfedin**: İstem mühendisliği (prompt engineering), karma hassasiyet (mixed precision) ve daha uzun dizi uzunlukları gibi gelişmiş teknikleri keşfedin.
+7. **Eğitin**: Farklı görevler veya alanlar için birden fazla LoRA adaptörü eğitin ve gerektiğinde bunları birbirleriyle değiştirin.
 
 ---

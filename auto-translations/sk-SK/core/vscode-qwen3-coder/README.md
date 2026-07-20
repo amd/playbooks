@@ -6,25 +6,25 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Táto príručka používa špeciálne značky, ktoré GitHub nedokáže vykresliť. Navštívte prosím [amd.com/playbooks](https://amd.com/playbooks) na správne zobrazenie tohto obsahu.
 <!-- @github-only:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> This playbook requires a minimum of **32GB** of system memory.
+> Táto príručka vyžaduje minimálne **32 GB** systémovej pamäte.
 <!-- @device:end -->
 
 ## Prehľad
 
-Kódovacie agenty sú výkonné nástroje, ktoré umožňujú vývojárom spolupracovať s AI agentmi podporovanými veľkými jazykovými modelmi (LLM). Môžu byť integrované priamo do vývojového prostredia, napríklad do terminálu alebo VS Code, čo umožňuje bezproblémové začlenenie do pracovného postupu vývojára.
+Kódovacie agenty sú výkonné nástroje, ktoré posilňujú vývojárov prostredníctvom spolupráce s AI agentmi poháňanými veľkými jazykovými modelmi (LLM). Dajú sa vložiť priamo do vývojového prostredia, ako je terminál alebo VS Code, čím sa bezproblémovo integrujú do pracovného postupu vývojára.
 
-Tento návod ukazuje, ako používať Cline, VS Code a LM Studio na spustenie kódovacieho agenta úplne na vašom lokálnom počítači.
+Tento návod ukazuje, ako použiť Cline, VS Code a LM Studio na spustenie kódovacieho agenta úplne lokálne na vašom počítači.
 
 ## Čo sa naučíte
 
 * Ako spustiť VS Code s kódovacím agentom Cline na pomoc pri úlohách softvérového inžinierstva.
 * Ako nakonfigurovať Cline na komunikáciu s LM Studio pre lokálnu inferenciu kódovacích agentov.
-* Ako používať lokálne kódovacie agenty na riešenie reálnych úloh softvérového inžinierstva.
+* Ako používať lokálnych kódovacích agentov na riešenie reálnych úloh softvérového inžinierstva. 
 
 ## Nastavenie konfigurácie pamäte
 
@@ -32,7 +32,7 @@ Tento návod ukazuje, ako používať Cline, VS Code a LM Studio na spustenie k�
 
 <!-- @device:halo_box -->
 ## Kontrola aktualizácií softvéru
-> **Poznámka**: Ak VS Code nie je nainštalovaný, môžete ho nainštalovať pomocou Ryzen AI Developer Center.
+> **Poznámka**: Ak nemáte nainštalovaný VS Code, môžete ho nainštalovať pomocou Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -45,23 +45,23 @@ Tento návod ukazuje, ako používať Cline, VS Code a LM Studio na spustenie k�
 
 Na obsluhu LLM, ktorý poháňa kódovacieho agenta, použijeme LM Studio.
 
-- Do vyhľadávacieho panela zadajte `LM Studio` a spustite aplikáciu. Zobrazí sa vám nasledujúca stránka.
+- Do vyhľadávacieho panela zadajte `LM Studio` a spustite aplikáciu. Zobrazí sa vám nasledujúca obrazovka.
 
 ![Úvodná obrazovka LM Studio](assets/initial-lm-studio.png)
 
-Ďalej musíme načítať LLM do systému. Použijeme model `Qwen3-Coder-30B-A3B` s veľkou dĺžkou kontextu. (Ak ste ho ešte nenainštalovali, použite kartu Model na jeho inštaláciu).
+Ďalej musíme do systému načítať LLM. Použijeme model `Qwen3-Coder-30B-A3B` s veľkou dĺžkou kontextu. (Ak ho ešte nemáte, nainštalujte ho pomocou karty Model).
 - Kliknite na vyhľadávací panel v hornej časti okna LM Studio alebo stlačte `CTRL+L`. Kliknite na prepínač `Manually choose model load parameters` a potom kliknite na model Qwen3-Coder-30B-A3B.
-- Zmeňte dĺžku kontextu z `4096` na `32768` a uistite sa, že `GPU Offload` je nastavený na maximum. Potom kliknite na `Load Model`.
+- Zmeňte dĺžku kontextu zo `4096` na `32768` a uistite sa, že `GPU Offload` je nastavené na maximum. Potom kliknite na `Load Model`
 
 ![Výber modelu](assets/model-list-zoomed.png)
 
-Používame veľkú dĺžku kontextu, aby agent mohol spracovávať rozsiahle kódové základne a pamätať si vykonané zmeny.
+Používame veľkú dĺžku kontextu, aby agent dokázal spracovať veľké kódové základne a pamätal si vykonané zmeny.
 
 ![Konfigurácia modelu](assets/selecting-model-zoomed.png)
 
-Ďalej musíme povoliť server LM Studio.
-- Kliknite na kartu Developer alebo stlačte `CTRL+2` v LM Studio na ľavej strane.
-- Skontrolujte stavový prepínač a uistite sa, že je nastavený na `Running`.
+Ďalej musíme povoliť LM Studio Server. 
+- Kliknite na kartu Developer alebo stlačte `CTRL+2` v LM Studio vľavo.
+- Skontrolujte prepínač stavu a uistite sa, že je nastavený na `Running`.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -113,13 +113,13 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ## Spustenie a konfigurácia VS Code
 
-Nainštalujeme rozšírenie Cline vo VS Code a prepojíme ho so serverom LM Studio, ktorý sme práve vytvorili.
+Nainštalujeme rozšírenie Cline vo VS Code a pripojíme ho k serveru LM Studio, ktorý sme práve vytvorili.
 - Do vyhľadávacieho panela zadajte `VS Code` a spustite aplikáciu.
-- Kliknite na ikonu `Extensions` v ľavom stĺpci VS Code a vyhľadajte `Cline`. Potom kliknite na tlačidlo `Install`.
+- Kliknite na ikonu `Extensions` v ľavom stĺpci VS Code a vyhľadajte `Cline`. Potom kliknite na tlačidlo `Install`. 
 
 ![Inštalácia rozšírenia Cline](assets/installing-cline-vscode-extension.png)
 
-- Na ľavej strane by mala byť prítomná ikona Cline. Kliknite na ňu, aby ste otvorili Cline. Zobrazí sa okno s otázkou `How will you use Cline?` Keďže budeme používať lokálny LLM spustený cez LM Studio, vyberte `Bring my own API Key` a kliknite na `Continue`.
+- Vľavo by sa mala zobraziť ikona Cline. Kliknutím na ňu otvoríte Cline. Zobrazí sa okno s otázkou `How will you use Cline?` Keďže budeme používať lokálny LLM spustený cez LM Studio, vyberte `Bring my own API Key` a kliknite na `Continue`. 
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -141,32 +141,32 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 
 ![Vytvorenie účtu](assets/cline-how-will-you-use-cline-zoomed.png)
 
-Ďalej musíme nakonfigurovať Cline na komunikáciu so serverom LM Studio, ktorý sme nastavili.
-- Nastavte API Provider na `LM Studio` a model na `Qwen3-Coder-30B-A3B-GGUF`.
+Ďalej musíme nakonfigurovať Cline na komunikáciu so serverom LM Studio, ktorý sme nastavili. 
+- Nastavte API Provider na `LM Studio` a model na `Qwen3-Coder-30B-A3B-GGUF`. 
 
->**Tip**: Môžu byť dostupné novšie modely. Ak chcete, zvážte stiahnutie a prepnutie na modely Qwen3.6.
+>**Tip**: K dispozícii môžu byť novšie modely. Ak chcete, zvážte stiahnutie a prechod na modely Qwen3.6.
 
 
 ![Konfigurácia modelu](assets/cline-model-configuration-zoomed.png)
 
 ## Vytvorenie vášho prvého projektu
 
-Použijeme nášho lokálneho agenta na vytvorenie webovej stránky! Otvorte VSCode v ľubovoľnom adresári, kde Cline vytvorí súbory.
-- Ak to chcete urobiť, prejdite na `File -> Open Folder` v ľavom hornom rohu VS Code a vyberte priečinok, napríklad `Documents`.
+Použime nášho lokálneho agenta na vytvorenie webovej stránky! Otvorte VS Code v adresári podľa vlastného výberu, kde Cline vytvorí súbory.
+- Prejdite na `File -> Open Folder` v ľavom hornom rohu VS Code a vyberte priečinok, napríklad `Documents`.
 
-![Prázdny priečinok VS Code](assets/open-cline-test.png)
+![Prázdny priečinok vo VS Code](assets/open-cline-test.png)
 
-Teraz sme pripravení zadať pokyn lokálnemu kódovaciemu agentovi.
-- Kliknite na rozšírenie Cline v ľavom stĺpci a zadajte výzvu na spustenie agenta. Ako príklad použijeme nasledujúcu výzvu:
+Teraz sme pripravení zadať výzvu lokálnemu kódovaciemu agentovi. 
+- Kliknite na rozšírenie Cline v ľavom stĺpci a zadajte výzvu na spustenie agenta. Ako príklad použime nasledujúcu výzvu:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-Agent potom začne vytvárať súbory podľa výzvy. Ako používateľ môžete sledovať generovanie kódu vo VS Code, ako je znázornené nižšie. Možno budete musieť kliknúť na `Save` zakaždým, keď Cline chce vytvoriť súbor.
+Agent následne začne vytvárať súbory podľa zadanej výzvy. Ako používateľ môžete sledovať generovanie kódu vo VS Code, ako je znázornené nižšie. Pri každom vytváraní súboru bude možno potrebné kliknúť na `Save`. 
 
 ![Generovanie kódu v Cline](assets/cline-code-generation.png)
 
-Po vygenerovaní softvéru je agent hotový a môžete spustiť aplikáciu. V tomto prípade agent zapísal do troch súborov: `index.html`, `script.js` a `styles.css`. Jednoduchým dvojitým kliknutím na súbor HTML môžeme načítať a interagovať s vygenerovanou webovou stránkou.
+Po vygenerovaní softvéru je práca agenta dokončená a môžete aplikáciu spustiť. V tomto prípade agent zapísal do troch súborov: `index.html`, `script.js` a `styles.css`. Jednoduchým dvojitým kliknutím na HTML súbor môžeme načítať vygenerovanú webovú stránku a interagovať s ňou.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -239,23 +239,22 @@ lms server stop
 ```
 <!-- @test:end -->
 <!-- @os:end -->
-
 ## Ďalšie kroky
 
-Po vygenerovaní webovej stránky môžete pokračovať v práci s Cline na jej vylepšení. Dve možné vylepšenia sú:
+Po vygenerovaní webovej stránky môžete naďalej spolupracovať s Cline na jej vylepšovaní. Dve možné vylepšenia sú:
 
-- **Dokumentácia**: Na vygenerovanie súboru `README.md`, ktorý dokumentuje webovú stránku, stačí agentovi zadať výzvu `Add a README`.
-- **Animácia**: Zadajte modelu výzvu `Add an animation that visually represents a large language model running on a laptop.` na pridanie animácie na webovú stránku.
+- **Dokumentácia**: Stačí zadať agentovi príkaz `Add a README`, aby vygeneroval súbor `README.md`, ktorý dokumentuje webovú stránku.
+- **Animácia**: Zadajte modelu príkaz `Add an animation that visually represents a large language model running on a laptop.`, aby vygeneroval animáciu pre webovú stránku.
 
-Odporúčame čitateľovi skúsiť generovať ďalšie aplikácie pomocou tohto nastavenia. Nižšie sú uvedené niektoré zábavné príklady, ktoré sme vyskúšali:
+Povzbudzujeme čitateľa, aby skúsil vygenerovať aj iné aplikácie pomocou tohto nastavenia. Nižšie sú uvedené niektoré zaujímavé príklady, ktoré sme vyskúšali:
 
-- **Retro arkádové hry**: Vyskúšajte ďalšie výzvy. Môže byť tiež zábavné nechať agenta vytvárať retro hry v Pythone pomocou balíka `PyGame` s nasledujúcou výzvou:
+- **Retro arkádové hry**: Vyskúšajte niektoré ďalšie prompty. Pre agenta môže byť tiež zábavné vytvárať retro hry v Pythone pomocou balíka `PyGame` s nasledujúcim promptom:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **Analýza dát**: Jednou z oblastí, kde sú kódovacie agenty obzvlášť užitočné, je skriptovanie a analýza dát. Toto je výzva na ukázanie schopnosti lokálneho modelu generovať softvér na analýzu dát pre vizualizáciu cien akcií:
+- **Analýza dát**: Jednou z oblastí, kde sú kódovacie agenti obzvlášť užitoční, je skriptovanie a analýza dát. Toto je prompt na demonštráciu schopnosti lokálneho modelu generovať softvér na analýzu dát pre vizualizáciu cien akcií:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -263,8 +262,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## Zdroje
 
-Nižšie sú uvedené niektoré ďalšie zdroje, kde sa môžete dozvedieť viac o kódovacích agentoch, Cline a spúšťaní pracovných záťaží na
+Nižšie sú uvedené ďalšie zdroje, kde sa dozviete viac o kódovacích agentoch, Cline a spúšťaní pracovných záťaží na 
 
-* Viac informácií o partnerstve a integrácii AMD LM Studio: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* Blog AMD s návodom na spustenie Cline na AMD Ryzen™ AI a Radeon™ Graphics Cards: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* Ďalšie informácie o partnerstve a integrácii AMD s LM Studio: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
+* Blog AMD s návodom na spúšťanie Cline na grafických kartách AMD Ryzen™ AI a Radeon™: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
 * Blog Cline o spúšťaní kódovacích agentov lokálne na AI PC: https://cline.bot/blog/local-models-amd

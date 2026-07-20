@@ -6,9 +6,9 @@ SPDX-License-Identifier: MIT
 
 # Configuration de la plateforme
 
-Ce document décrit les configurations de plateforme attendues pour l'exécution de ce playbook.
+Ce document décrit les configurations de plateforme attendues pour exécuter ce playbook.
 
-## Applications/Frameworks requis
+## Applications/frameworks requis
 
 ### Windows/Linux
 
@@ -20,4 +20,4 @@ Lemonade Server doit être préinstallé en suivant les instructions fournies da
 
 ### Windows/Linux
 
-L'agent Hardware Advisor utilise **Qwen3-Coder-30B** pour le raisonnement de l'agent. Ce modèle est téléchargé automatiquement lors de l'exécution de `gaia init`. Aucun téléchargement manuel de modèle n'est requis.
+Le Hardware Advisor Agent utilise **Qwen3-Coder-30B** pour le raisonnement de l'agent. Ce modèle est téléchargé automatiquement lors de `gaia init`. Aucun téléchargement manuel de modèle n'est requis.

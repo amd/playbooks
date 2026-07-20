@@ -4,30 +4,30 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Platform Configuration
+# Platformkonfiguráció
 
-Ez a dokumentum a playbook futtatásához szükséges platform-konfigurációkat írja le.
+Ez a dokumentum ismerteti a jelen forgatókönyv futtatásához szükséges platformkonfigurációkat.
 
 ## Előfeltételek
 
 ### Windows
 
-| Összetevő | Verzió | Megjegyzések |
+| Komponens | Verzió | Megjegyzések |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Előre telepítve és elérhető a PATH-ban az AMD Ryzen™ AI Halo Developer Platform eszközön; minden más eszközön manuálisan kell telepíteni |
-| **Lemonade Server** | legújabb | A következő címen fut: `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Az AMD Ryzen™ AI Halo Developer Platform eszközön előre telepítve és a PATH-ban elérhető; minden más eszközön manuálisan kell telepíteni |
+| **Lemonade Server** | legfrissebb | A `http://localhost:13305/api/v1` címen fut |
 
 ### Linux
 
-| Összetevő | Verzió | Megjegyzések |
+| Komponens | Verzió | Megjegyzések |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Előre telepítve és elérhető a PATH-ban az AMD Ryzen™ AI Halo Developer Platform eszközön; minden más eszközön manuálisan kell telepíteni |
-| **Lemonade Server** | legújabb | A következő címen fut: `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Az AMD Ryzen™ AI Halo Developer Platform eszközön előre telepítve és a PATH-ban elérhető; minden más eszközön manuálisan kell telepíteni |
+| **Lemonade Server** | legfrissebb | A `http://localhost:13305/api/v1` címen fut |
 
 
 ## Lemonade LLM
 
-A Lemonade szervernek futnia kell az eszközhöz megfelelő betöltött modellel (lásd a README-t a `lemonade run` parancshoz az adott eszközön):
+A Lemonade szervernek futnia kell a megfelelő, az adott eszközhöz illő betöltött modellel (lásd az README fájlt az eszközéhez tartozó `lemonade run` parancshoz):
 
 | Eszköz | Végpont | Modell |
 |--------|----------|-------|

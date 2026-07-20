@@ -11,12 +11,12 @@ SPDX-License-Identifier: MIT
 sudo usermod -a -G render,video $LOGNAME
 ```
 
-**Reštartujte systém, aby sa nastavenia uplatnili.**
+**Reštartujte systém, aby sa nastavenia prejavili.**
 ```bash
 sudo reboot
 ```
 
-**Nainštalujte ROCm vo vytvorenom virtuálnom prostredí.**
+**Nainštalujte ROCm do vytvoreného virtuálneho prostredia.**
 > **Poznámka**: Pred pokračovaním sa uistite, že je virtuálne prostredie aktívne.
 
 <!-- @device:halo,halo_box -->

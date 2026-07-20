@@ -6,10 +6,10 @@ SPDX-License-Identifier: MIT
 
 ### vLLM
 
-vLLM jest dostarczany jako gotowy obraz kontenera z obsługą ROCm. Zamiast instalować vLLM lub PyTorch bezpośrednio na hoście, użyj polecenia uruchamiającego:
+vLLM jest dostarczany w postaci gotowego obrazu kontenera z obsługą ROCm. Zamiast instalować vLLM lub PyTorch bezpośrednio na hoście, użyj polecenia uruchamiającego (launcher):
 
 ```bash
 vllm-launch
 ```
 
-Program uruchamiający startuje kontener, kieruje działanie na zintegrowany GPU i udostępnia API vLLM zgodne z OpenAI pod adresem `http://localhost:8001`.
+Launcher uruchamia kontener, kieruje działanie na zintegrowany GPU i udostępnia zgodne z OpenAI API vLLM pod adresem `http://localhost:8001`.

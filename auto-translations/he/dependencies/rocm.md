@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-לעזרה נוספת בהתקנה, ראה [קישור](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html) זה.
+לקבלת עזרה נוספת בהתקנה, עיין ב[קישור](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html) זה.

@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### vLLM
 
-vLLM, ROCm desteğiyle önceden oluşturulmuş bir konteyner imajı aracılığıyla sağlanmaktadır. Ana makineye doğrudan vLLM veya PyTorch yüklemek yerine başlatıcı komutunu kullanın:
+vLLM, ROCm desteğine sahip önceden oluşturulmuş bir konteyner görüntüsü aracılığıyla sağlanır. vLLM veya PyTorch'u doğrudan ana makineye yüklemek yerine başlatıcı komutunu kullanın:
 
 ```bash
 vllm-launch

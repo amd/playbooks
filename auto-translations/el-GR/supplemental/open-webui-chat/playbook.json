@@ -1,5 +1,5 @@
 {
   "id": "open-webui-chat",
-  "title": "Συνομιλία με LLMs στο Open WebUI",
-  "description": "Χρησιμοποιήστε το Open WebUI για να συνομιλήσετε με LLMs τοπικά."
+  "title": "Συνομιλία με LLM στο Open WebUI",
+  "description": "Χρησιμοποιήστε το Open WebUI για συνομιλία με LLM τοπικά."
 }

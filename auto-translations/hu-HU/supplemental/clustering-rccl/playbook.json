@@ -1,5 +1,5 @@
 {
   "id": "clustering-rccl",
   "title": "Két Ryzen™ AI Halo klaszterezése RCCL-lel",
-  "description": "Állítson be többcsomópontos fürtöt két Ryzen™ AI Halo eszközzel RCCL segítségével elosztott munkaterhelésekhez"
+  "description": "Multi-node fürt beállítása két Ryzen™ AI Halo eszköz és RCCL használatával elosztott munkaterhelésekhez"
 }

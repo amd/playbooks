@@ -27,7 +27,7 @@ podman-compose --version
 ```bash
 sudo systemctl enable --now podman.socket
 ```
-**步骤 4**：运行一个临时测试容器，以验证引擎能够成功拉取并执行镜像。
+**步骤 4**：运行一个临时测试容器，以验证引擎能否成功拉取并执行镜像。
 
 ```bash
 sudo podman run --rm docker.io/library/hello-world

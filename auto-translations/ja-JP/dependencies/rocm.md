@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 
 #### ROCm
 
-**現在のユーザーをrenderグループおよびvideoグループに追加します。** 
+**現在のユーザーをrenderグループとvideoグループに追加します。** 
 ```bash
 sudo usermod -a -G render,video $LOGNAME
 ```
 
-**設定を適用するためにシステムを再起動します。**
+**設定を反映させるためにシステムを再起動します。**
 ```bash
 sudo reboot
 ```
 
 **作成した仮想環境にROCmをインストールします。**
-> **注意**: 続行する前に仮想環境がアクティブになっていることを確認してください。
+> **注**: 続行する前に、仮想環境が有効になっていることを確認してください。
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-インストールに関するさらなるサポートについては、こちらの[リンク](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html)をご参照ください。
+インストールに関する詳細なヘルプについては、こちらの[リンク](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html)をご覧ください。

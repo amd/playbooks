@@ -6,42 +6,42 @@ SPDX-License-Identifier: MIT
 
 # תצורת פלטפורמה
 
-מסמך זה מתאר את תצורת הפלטפורמה הנדרשת להפעלת ספר המשחקים הזה.
+מסמך זה מתאר את תצורת הפלטפורמה הצפויה להרצת playbook זה.
 
-## אפליקציות/מסגרות נדרשות
+## אפליקציות/מסגרות עבודה נדרשות
 
 ### Windows/Linux
-יש להתקין את Lemonade מראש מ[כאן](https://lemonade-server.ai/install_options.html).
+יש להתקין מראש את Lemonade מ[כאן](https://lemonade-server.ai/install_options.html).
 
-- **Open WebUI** (אפליקציית ווב צד לקוח)
-- **Lemonade Server** (שרת מודלים צד שרת)
+- **Open WebUI** (אפליקציית web מסוג frontend)
+- **Lemonade Server** (שרת מודלים מסוג backend)
 
-> ספר המשחקים הזה מריץ את **Lemonade** (שרת/אפליקציית Lemonade) **באופן מקורי**. **Open WebUI** רץ כ**מיכל** על Linux (באמצעות Podman) וכ**חבילת Python** על Windows. חבילת ה-PyPI של `open-webui` תומכת ב-Python ≤ 3.12 בלבד, ולכן מיכל ה-Linux מונע את הצורך בניהול גרסאות Python ישנות יותר.
+> ה-playbook הזה מריץ את **Lemonade** (שרת/אפליקציית Lemonade) **באופן native**. **Open WebUI** רץ כ-**container** ב-Linux (דרך Podman) וכ-**חבילת Python** ב-Windows. חבילת ה-PyPI בשם `open-webui` תומכת רק בגרסאות Python ≤ 3.12, כך שה-container ב-Linux מונע את הצורך לנהל גרסאות Python ישנות יותר.
 
 ## מודלים (ב-Lemonade)
 
-יש להוריד מודלים בתוך **אפליקציית Lemonade** (באמצעות מנהל המודלים המובנה) או דרך פקודות ניהול המודלים של Lemonade‏ (`lemonade pull <model_name>`). ספר המשחקים הזה מניח שהמודלים המומלצים שלהלן הורדו ומופיעים בנקודת הקצה של רשימת המודלים.
+יש להוריד מודלים בתוך **אפליקציית Lemonade** (באמצעות Model Manager המובנה) או דרך פקודות ניהול המודלים של Lemonade (`lemonade pull <model_name>`). ה-playbook הזה מניח שהמודלים המומלצים הבאים הורדו ומופיעים ברשימת ה-endpoint של המודלים.
 
 בדיקת זמינות מודלים:
-- פתח: `http://localhost:13305/api/v1/models`
-- המודלים שהורדו יופיעו תחת `"data"`.
+- פתיחה: `http://localhost:13305/api/v1/models`
+- מודלים שהורדו יופיעו תחת `"data"`.
 
 ### מודלים מומלצים
 
 | יכולת | מזהה מודל | הערות |
 |---|----|-----|
-| LLM (קלט טקסט ← פלט טקסט) | `Qwen3-4B-Hybrid` (או דומה) | כל מודל LLM של Lemonade לצ'אט, השלמת טקסט, קידוד או הסקה |
-| VLM (תמונה ← טקסט) | `Qwen3.5-4B-GGUF` (או כל מודל בקטגוריית **Vision**) | כל מודל רב-מודאלי/בעל יכולת ראייה שיכול לקבל תמונות כחלק מהקלט שלו |
-| יצירת תמונות (טקסט ← תמונה) | `SDXL-Turbo` (או כל מודל בקטגוריית **Image**) | כל מודל Stable Diffusion שמייצר תמונות מהנחיית טקסט |
-| שמע (דיבור ← טקסט) | `Whisper-Large-v3` (או כל מודל בקטגוריית **Audio**) | כל מודל ASR שממיר שמע לטקסט |
+| LLM (קלט טקסט → פלט טקסט) | `Qwen3-4B-Hybrid` (או דומה) | כל מודל LLM של Lemonade לצ'אט, השלמת טקסט, קידוד או הסקה |
+| VLM (תמונה → טקסט) | `Qwen3.5-4B-GGUF` (או כל מודל בקטגוריית **Vision**) | כל מודל multimodal/בעל יכולת ראייה שיכול לקבל תמונות כחלק מהקלט שלו |
+| יצירת תמונות (טקסט → תמונה) | `SDXL-Turbo` (או כל מודל בקטגוריית **Image**) | כל מודל Stable Diffusion שיוצר תמונות עבור prompt טקסטואלי |
+| שמע (דיבור → טקסט) | `Whisper-Large-v3` (או כל מודל בקטגוריית **Audio**) | כל מודל ASR הממיר שמע לטקסט |
 
 <p align="center">
   <img src="assets/lemonade_model_manager.png" alt="Lemonade Model Manager" width="600"/>
 </p>
 
-## פורטים בשימוש
+## יציאות (Ports) בשימוש
 
 - **Lemonade Server:** `http://localhost:13305`
 - **Open WebUI:** `http://localhost:8080`
 
-אם פורטים אלה כבר בשימוש במערכת שלך, שנה אותם בעת הפעלת השרת/ים.
+אם היציאות הללו כבר נמצאות בשימוש במערכת שלך, יש לשנות אותן בעת הפעלת השרת/שרתים.

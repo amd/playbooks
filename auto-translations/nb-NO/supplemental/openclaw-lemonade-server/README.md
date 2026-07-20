@@ -6,28 +6,28 @@ SPDX-License-Identifier: MIT
 
 ## Oversikt
 
-[**OpenClaw**](https://openclaw.ai/) er en autonom AI-agent som kan skrive og kjøre kode, administrere filer og arbeide gjennom komplekse flertrinnoppgaver på dine vegne. I motsetning til en chatassistent som bare svarer på spørsmål, utfører OpenClaw faktiske handlinger på systemet ditt, noe som betyr at den trenger en rask og kapabel AI-backend som kan holde tritt med en krevende agentløkke.
+[**OpenClaw**](https://openclaw.ai/) er en autonom AI-agent som kan skrive og kjøre kode, administrere filer og arbeide gjennom komplekse flertrinnsoppgaver på dine vegne. I motsetning til en chat-assistent som bare svarer på spørsmål, utfører OpenClaw ekte handlinger på systemet ditt, noe som betyr at den trenger en rask, kapabel AI-backend som kan holde tritt med en krevende agentløkke.
 
-[**Lemonade Server**](https://lemonade-server.ai/) er den backenden. Det er en åpen kildekode lokal inferensserver som kjører GenAI-modeller direkte på maskinvaren din og eksponerer dem gjennom den bransjestandardiserte OpenAI API.
+[**Lemonade Server**](https://lemonade-server.ai/) er den backenden. Det er en åpen kildekode-basert lokal inferensserver som kjører GenAI-modeller direkte på maskinvaren din og eksponerer dem gjennom det bransjestandardiserte OpenAI API-et.
 
-Sammen utgjør de en fullt lokal AI-agentstack: Lemonade håndterer modellinferens, og OpenClaw tilbyr agentløkken som gjør modellutdata om til virkelige handlinger.
+Sammen utgjør de en fullstendig lokal AI-agentstack: Lemonade håndterer modellinferens, og OpenClaw leverer agentløkken som omgjør modellutdata til reelle handlinger.
 
-> **Før du fortsetter:** OpenClaw er en svært autonom AI-agent. Å gi en AI-agent tilgang til systemet ditt kan føre til uforutsigbare eller utilsiktede resultater. Fortsett bare hvis du forstår risikoen og er komfortabel med at autonom programvare handler på dine vegne.
+> **Før du fortsetter:** OpenClaw er en svært autonom AI-agent. Å gi en AI-agent tilgang til systemet ditt kan føre til uforutsigbare eller utilsiktede utfall. Fortsett bare hvis du forstår risikoen og er komfortabel med at autonom programvare handler på dine vegne.
 
 ---
 
 ## Hva du vil lære
 
-Når du er ferdig med denne spilleboken, vil du kunne:
+Ved slutten av denne playbooken vil du kunne:
 
 - Lære om **Lemonade Server**
-- **Installere OpenClaw** og **peke den mot Lemonade Server** som AI-backend.
-- **Starte OpenClaw-gatewayen** og bekrefte at agenten din er klar til å arbeide.
+- **Installere OpenClaw** og **peke den mot Lemonade Server** som sin AI-backend.
+- **Starte OpenClaw-gatewayen** og bekrefte at agenten din er klar til å jobbe.
 - **Koble til en kommunikasjonskanal** (Discord eller Telegram) slik at du kan chatte med agenten din fra hvilken som helst enhet.
 
 ---
 
-## Angi minnekonfigurasjonen
+## Konfigurere minneinnstillingene
 
 <!-- @require:memory-config -->
 
@@ -41,16 +41,16 @@ Når du er ferdig med denne spilleboken, vil du kunne:
 
 <!-- @os:linux -->
 - En PC som kjører **Ubuntu 24.04+** eller en kompatibel Debian-basert Linux-distribusjon med `apt-get`
-- Minst **12 GB RAM** (64 GB+ anbefalt for større modeller)
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Valgfritt, for sandkasseisolering av OpenClaw)
+- Minst **12 GB RAM** (64 GB+ anbefales for større modeller)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Valgfritt, for sandboxing av OpenClaw)
 
 - **~10–30 GB ledig diskplass** for modellvekter
 <!-- @os:end -->
 <!-- @os:windows -->
 - En PC som kjører **Windows 10/11**
-- Minst **12 GB RAM** (64 GB+ anbefalt for større modeller)
+- Minst **12 GB RAM** (64 GB+ anbefales for større modeller)
 - **~10–30 GB ledig diskplass** for modellvekter
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Valgfritt, for sandkasseisolering av OpenClaw)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Valgfritt, for sandboxing av OpenClaw)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -67,13 +67,13 @@ lemonade --version
 
 ## Hent og last inn den anbefalte modellen
 
-Den anbefalte modellen for denne spilleboken er **Qwen3.6-35B-A3B-GGUF** fra Unsloth, en sterk MoE-modell med et kontekstvindu på 263k tokens som er godt egnet til agentarbeidsbelastninger. Denne modellen bruker UD-Q4_K_XL-kvantisering. Hent den nå:
+Den anbefalte modellen for denne playbooken er **Qwen3.6-35B-A3B-GGUF** fra Unsloth, en sterk MoE-modell med et kontekstvindu på 263k tokens som er godt egnet til agentarbeidsbelastninger. Denne modellen bruker UD-Q4_K_XL-kvantisering. Hent den nå:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-Last den deretter inn med et stort kontekstvindu og lagre den innstillingen for fremtidige kjøringer:
+Last den deretter inn med et stort kontekstvindu og lagre denne innstillingen for fremtidige kjøringer:
 
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
@@ -82,9 +82,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end --> 
 
-Modellen har en standard kontekstlengde på 262 144 tokens. Hvis du opplever feil om utilstrekkelig minne (OOM), bør du vurdere å redusere kontekstvinduet. Siden Qwen3.6 imidlertid utnytter utvidet kontekst for komplekse oppgaver, anbefaler vi å opprettholde en kontekstlengde på minst 128K tokens for å bevare tenkningsevnene.
+Modellen har en standard kontekstlengde på 262 144 tokens. Hvis du støter på minnefeil (OOM), kan du vurdere å redusere kontekstvinduet. Men siden Qwen3.6 utnytter utvidet kontekst for komplekse oppgaver, anbefaler vi å opprettholde en kontekstlengde på minst 128K tokens for å bevare tenkeevnen.
 
-> **Tips: Deaktiver tenkning for raskere agentsvar:** Qwen3.6-35B-A3B kjører i tenkemodus som standard, noe som legger til ventetid før hvert svar. For agentløkker akkumuleres denne forsinkelsen raskt. [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json)-repositoriet tilbyr en ferdig konfigurasjon som deaktiverer tenkning. For å bruke den, last ned filen og importer den:
+> **Tips: Slå av tenking for raskere agentresponser:** Qwen3.6-35B-A3B kjører i tenkemodus som standard, noe som legger til latens før hver respons. For agentløkker akkumuleres denne overheaden raskt. Repoet [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) tilbyr en ferdig konfigurasjon som slår av tenking. For å bruke den, last ned filen og importer den:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -225,9 +225,9 @@ echo "OK: Lemonade chat/completions returned a response"
 
 <!-- @os:windows -->
 
-## Sett opp WSL
+## Sette opp WSL
 
-Vi kjører OpenClaw inne i WSL (anbefalt) og kobler det til Lemonade som kjører nativt på Windows. Dette gir deg et Linux-skallmiljø for OpenClaw mens Lemonade beholder GPU-akselerasjonen på Windows-siden.
+Vi kjører OpenClaw inne i WSL (Anbefalt) og kobler den til Lemonade som kjører nativt på Windows. Dette gir deg et Linux-skallmiljø for OpenClaw, samtidig som Lemonades GPU-akselerasjon beholdes på Windows-siden.
 
 ### Installer WSL og Ubuntu
 
@@ -261,17 +261,17 @@ wsl --shutdown
 wsl
 ```
 
-### Bro Lemonade fra Windows inn i WSL
+### Broforbind Lemonade fra Windows inn i WSL
 
-WSL2 kjører i et virtuelt nettverk. Lemonade på Windows binder seg til `127.0.0.1`, som WSL ikke kan nå direkte. En Windows-portproxy videresender trafikk fra WSL-gateway-IP-en til Windows localhost.
+WSL2 kjører i et virtuelt nettverk. Lemonade på Windows binder til `127.0.0.1`, som WSL ikke kan nå direkte. En Windows-portproxy videresender trafikk fra WSL-gatewayens IP til Windows localhost.
 
-**Finn WSL-gateway-IP-en din** (kjør inne i WSL):
+**Finn din WSL-gateway-IP** (kjør inne i WSL):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Legg til portproxyen** (kjør i PowerShell som administrator, erstatt `<WSL-Gateway-IP>` med WSL-gateway-IP-en din):
+**Legg til portproxyen** (kjør i PowerShell som administrator, og erstatt `<WSL-Gateway-IP>` med din WSL-gateway-IP):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
@@ -374,7 +374,7 @@ finally {
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-Flagget `--no-onboard` hopper over den interaktive oppsettveiviseren. Du vil konfigurere modellbackenden manuelt i neste trinn, noe som gir deg presis kontroll over hvilken modell og server som brukes.
+Flagget `--no-onboard` hopper over den interaktive oppsettveiviseren; du vil konfigurere modellbackenden manuelt i neste trinn, noe som gir deg presis kontroll over hvilken modell og server som brukes.
 
 Åpne en ny terminal og bekreft installasjonen:
 
@@ -382,11 +382,11 @@ Flagget `--no-onboard` hopper over den interaktive oppsettveiviseren. Du vil kon
 openclaw --version
 ```
 
-> **Tips:** Hvis du ser `command not found` etter installasjonen, legg til npms globale bin-katalog i PATH-en din:
+> **Tips:** Hvis du ser `command not found` etter installasjonen, legg til npms globale bin-katalog i PATH:
 > ```bash
 > export PATH="$HOME/.npm-global/bin:$PATH"
 > ```
-> For å gjøre dette permanent, legg til linjen ovenfor i filen `~/.bashrc` eller `~/.zshrc`.
+> For å gjøre dette permanent, legg til linjen over i `~/.bashrc`- eller `~/.zshrc`-filen din.
 
 <!-- @os:linux -->
 <!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
@@ -440,8 +440,6 @@ finally {
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
-
-
 ### Konfigurer OpenClaw til å bruke Lemonade
 
 Kjør OpenClaws ikke-interaktive onboarding.
@@ -486,7 +484,7 @@ openclaw onboard \
 
 Denne kommandoen skriver OpenClaws konfigurasjon til `~/.openclaw/openclaw.json`.
 
-> **Størrelsessetting av OpenClaw-kontekstvindu:** OpenClaws komprimering utløses når `contextTokens > contextWindow − reserveTokens`. Standard `reserveTokensFloor` er 20 000 tokens – en nedre grense som overstyrer `reserveTokens` når den er lavere – så enhver modellkontekst under ~37k vil utløse en uendelig komprimeringsløkke. Angi en lav reserve og deaktiver gulvet én gang i konfigurasjonen din, og det gjelder for alle modeller uten behov for per-modell-justering:
+> **OpenClaw kontekstvindu-størrelse:** OpenClaws kompaktering utløses når `contextTokens > contextWindow − reserveTokens`. Standard `reserveTokensFloor` er 20 000 tokens, en nedre grense som overstyrer `reserveTokens` når den er lavere, så enhver modellkontekst under ~37k vil utløse en uendelig kompakteringssløyfe. Sett en lav reserve og deaktiver den nedre grensen én gang i konfigurasjonen, så gjelder det for hver modell, ingen tuning per modell er nødvendig:
 >
 > ```json
 > "compaction": {
@@ -495,13 +493,13 @@ Denne kommandoen skriver OpenClaws konfigurasjon til `~/.openclaw/openclaw.json`
 > }
 > ```
 >
-> `reserveTokensFloor` er en *nedre grense* (minimumsvakt), ikke selve reserven – å angi bare gulvet har ingen effekt. `reserveTokensFloor: 0` deaktiverer vakten slik at den lavere `reserveTokens` aksepteres.
+> `reserveTokensFloor` er en *nedre grense* (minimumsvern), ikke selve reserven, å bare sette den nedre grensen har ingen effekt. `reserveTokensFloor: 0` deaktiverer vernet slik at den lavere `reserveTokens` godtas.
 >
-> **Når du skal bruke dette:** Bruk denne konfigurasjonen hvis modellens effektive kontekstvindu er under ~37k, enten fordi modellen er liten (f.eks. 8k, 16k, 32k) eller fordi du bevisst har begrenset den til en lavere verdi (f.eks. laster en 128k-modell men setter kontekst til 16k i Lemonade). Uten dette går OpenClaw inn i en uendelig komprimeringsløkke ved oppstart.
+> **Når du skal bruke dette:** Bruk denne konfigurasjonen hvis modellens effektive kontekstvindu er under ~37k, enten fordi modellen er liten (f.eks. 8k, 16k, 32k) eller fordi du bevisst har begrenset den til en lavere verdi (f.eks. laster inn en 128k-modell, men setter konteksten til 16k i Lemonade). Uten dette går OpenClaw inn i en uendelig kompakteringssløyfe ved oppstart.
 >
-> **Store kontekstmodeller ved full kontekst:** Du kan hoppe over dette helt. Standardinnstillingene fungerer fint – komprimering vil starte lenge før vinduet fylles, og modellen har rikelig plass til å generere lange svar. Hvis du likevel bruker det, vær oppmerksom på at `reserveTokens: 4096` begrenser responslengden til ~4k tokens, noe som kan avskjære lang filoppretting eller detaljerte planer.
+> **Modeller med stort kontekstvindu ved full kontekst:** Du kan hoppe over dette helt. Standardinnstillingene fungerer fint, kompaktering starter godt før vinduet fylles opp, og modellen har god plass til å generere lange svar. Hvis du likevel bruker dette, vær oppmerksom på at `reserveTokens: 4096` begrenser svarlengden til ~4k tokens, noe som kan avbryte generering av lange filer eller detaljerte planer.
 >
-> **Hvor du skal legge dette til:** Plasser `compaction`-blokken inne i `agents.defaults` i `openclaw.json` (vanligvis på `~/.openclaw/openclaw.json`):
+> **Hvor du skal legge til dette:** Plasser `compaction`-blokken inne i `agents.defaults` i `openclaw.json`-filen din (vanligvis under `~/.openclaw/openclaw.json`):
 >
 > ```json
 > {
@@ -520,13 +518,13 @@ Denne kommandoen skriver OpenClaws konfigurasjon til `~/.openclaw/openclaw.json`
 > }
 > ```
 >
-> Resten av konfigurasjonen din (gateway, kanaler, modeller osv.) forblir uendret – bare `compaction`-nøkkelen trenger å legges til.
+> Resten av konfigurasjonen din (gateway, kanaler, modeller osv.) forblir uendret, kun `compaction`-nøkkelen trenger å legges til.
 
-### (Anbefalt) Aktiver Docker-sandkasseisolering
+### (Anbefalt) Aktiver Docker-sandboxing
 
-OpenClaw kan rute alle agent-fil- og kodeoperasjoner gjennom en isolert Docker-container i stedet for å kjøre dem direkte på verten din. Dette begrenser konsekvensene av utilsiktede handlinger til sandkassen, og lar vertens filsystem og nettverk forbli urørt.
+OpenClaw kan rute alle agentens fil- og kodeoperasjoner gjennom en isolert Docker-container i stedet for å kjøre dem direkte på verten din. Dette begrenser konsekvensene av eventuelle utilsiktede handlinger til sandboxen, slik at vertens filsystem og nettverk forblir uberørt.
 
-Bygg sandkassebildet én gang (Docker må være installert):
+Bygg sandbox-avbildet én gang (Docker må være installert):
 
 ```bash
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -645,19 +643,19 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-Sandkassecontainere har **ingen nettverkstilgang** som standard. Se [sandkassereferansen](https://docs.openclaw.ai/gateway/sandboxing) for bind-monteringer og nettverksoverstyringer.
+Sandbox-containere har **ingen nettverkstilgang** som standard. Se [sandboxing-referansen](https://docs.openclaw.ai/gateway/sandboxing) for bind-monteringer og nettverksoverstyringer.
 
-> #### Feilsøking: Docker-tillatelse nektet
+> #### Feilsøking: Docker Permission Denied
 > 
 > Hvis du får "permission denied" når du kjører Docker-kommandoer:
 > 
 > **Trinn 1: Legg brukeren din til docker-gruppen**
 > 
 > ```bash
-> sudo groupadd docker                    # Opprett gruppe om nødvendig
-> sudo usermod -aG docker $USER           # Legg deg selv til gruppen
-> newgrp docker                           # Aktiver endringen
-> docker run hello-world                  # Test det
+> sudo groupadd docker                    # Create group if needed
+> sudo usermod -aG docker $USER           # Add yourself to the group
+> newgrp docker                           # Activate the change
+> docker run hello-world                  # Test it
 > ```
 > 
 > **Trinn 2: Hvis feilen vedvarer, bruk den permanente løsningen**
@@ -667,9 +665,9 @@ Sandkassecontainere har **ingen nettverkstilgang** som standard. Se [sandkassere
 > sudo chmod g+w /lib/systemd/system/docker.socket
 > ```
 > 
-> **Start deretter systemet på nytt.**
+> Deretter **omstart** systemet ditt.
 > 
-> **Rask midlertidig løsning** (tilbakestilles etter omstart):
+> **Rask midlertidig løsning** (nullstilles etter omstart):
 > ```bash
 > sudo chmod 666 /var/run/docker.sock
 > ```
@@ -896,7 +894,7 @@ finally {
 
 ### Start OpenClaw-gatewayen
 
-Gatewayen er OpenClaw-prosessen som administrerer agentløkken og betjener dashbordet:
+Gatewayen er OpenClaw-prosessen som styrer agentsløyfen og serverer dashbordet:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -1033,19 +1031,19 @@ For å åpne dashbordet, kjør dette i en andre terminal mens gatewayen fortsatt
 openclaw dashboard
 ```
 
-Siden gatewayen binder seg til loopback, autentiseres dashbordet automatisk når det åpnes fra samme maskin – ingen tokeninntasting eller enhetsgodkjenning er nødvendig for lokal tilgang. Du bør se OpenClaw-dashbordet med Lemonade-modellen din oppført som aktiv backend.
+Fordi gatewayen bindes til loopback, autentiseres dashbordet automatisk når det åpnes fra samme maskin, ingen tokeninnlegging eller enhetsgodkjenning er nødvendig for lokal tilgang. Du bør se OpenClaw-dashbordet med Lemonade-modellen din oppført som den aktive backend-en.
 
-> Hvis du har aktivert sandkasseisolering, kan du verifisere det ved å be agenten om å `run hostname` fra dashbordet. Hvis du ser en kort container-ID i stedet for maskinens vertsnavn, fungerer sandkassen.
+> Hvis du har aktivert sandboxing, kan du bekrefte dette ved å be agenten om å `run hostname` fra dashbordet. Hvis du ser en kort container-ID i stedet for maskinens vertsnavn, fungerer sandboxen.
 
-**Gratulerer, du har bygget en fullt lokal AI-agentstack fra bunnen av.**
+**Gratulerer, du har bygget en fullstendig lokal AI-agentstack fra bunnen av.**
 
-> **Trenger du gateway-tokenet?** Kjør `openclaw dashboard --no-open` for å skrive ut dashbord-URL-en med tokenet innebygd (den forsøker også å kopiere det til utklippstavlen). Alternativt finnes tokenet på `gateway.auth.token` i `~/.openclaw/openclaw.json`.
+> **Trenger du gateway-tokenet?** Kjør `openclaw dashboard --no-open` for å skrive ut dashboard-URL-en med tokenet innebygd (det forsøker også å kopiere det til utklippstavlen din). Alternativt finner du tokenet under `gateway.auth.token` i `~/.openclaw/openclaw.json`.
 >
-> **Godkjenne en ekstern enhet:** Når du åpner dashbordet fra en annen maskin eller telefon, viser nettleseren en forespørsels-ID. Tilbake på maskinen som kjører gatewayen, kjør:
+> **Godkjenne en ekstern enhet:** Når du åpner dashbordet fra en andre maskin eller telefon, viser nettleseren en forespørsels-ID. Tilbake på maskinen som kjører gatewayen, kjør:
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> Dette er bare nødvendig for eksterne eller sekundære enheter – loopback-tilgang fra samme maskin autentiseres automatisk.
+> Dette er kun nødvendig for eksterne eller sekundære enheter, loopback-tilgang fra samme maskin autentiseres automatisk.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1055,47 +1053,46 @@ Siden gatewayen binder seg til loopback, autentiseres dashbordet automatisk når
 
 ## Valgfritt: Koble til en kommunikasjonskanal
 
-Når gatewayen kjører, kan du nå den lokale agenten din fra hvilken som helst enhet. Velg alternativet som passer for oppsettet ditt. OpenClaw støtter [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) og andre kanaler – se den fullstendige listen på [docs.openclaw.ai](https://docs.openclaw.ai).
+Når gatewayen kjører, kan du nå din lokale agent fra hvilken som helst enhet. Velg alternativet som passer oppsettet ditt. OpenClaw støtter [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram), og andre kanaler, se hele listen på [docs.openclaw.ai](https://docs.openclaw.ai).
 
 ---
 
 ### Alternativ A: Discord
 
-Discord krever en server der **du har administratortilgang** for å legge til en bot. Hvis du deler servere men ikke eier noen, bruk alternativ B (Telegram) i stedet.
-
+Discord krever en server der **du har administratortilgang** for å legge til en bot. Hvis du deler servere, men ikke eier noen, bruk Alternativ B (Telegram) i stedet.
 #### Opprett en Discord-konto og server
 
-Hvis du ikke har en Discord-konto, registrer deg på [discord.com](https://discord.com). Du trenger også en server der du er administrator – opprett en ved å klikke på **+**-ikonet i Discord-sidefeltet og velge **Create My Own**. En privat server fungerer fint.
+Hvis du ikke har en Discord-konto, kan du registrere deg på [discord.com](https://discord.com). Du trenger også en server der du er administrator, opprett en ved å klikke på **+**-ikonet i Discord-sidefeltet og velge **Create My Own**. En privat server fungerer fint.
 
 #### Opprett en Discord-applikasjon og bot
 
-1. Gå til [Discord Developer Portal](https://discord.com/developers/applications) og klikk **New Application**. Gi den et navn (f.eks. "openclaw-bot").
-2. Klikk **Bot** i sidefeltet. Angi et brukernavn for boten.
+1. Gå til [Discord Developer Portal](https://discord.com/developers/applications) og klikk på **New Application**. Gi den et navn (f.eks. "openclaw-bot").
+2. I sidefeltet klikker du på **Bot**. Sett et brukernavn for boten.
 3. Fortsatt på Bot-siden, rull ned til **Privileged Gateway Intents** og aktiver:
    - **Message Content Intent** (påkrevd)
    - **Server Members Intent** (anbefalt)
-4. Rull tilbake opp og klikk **Reset Token** for å generere bot-tokenet ditt. Kopier det.
+4. Rull opp igjen og klikk på **Reset Token** for å generere bot-tokenet ditt. Kopier det.
 
-#### Legg boten til serveren din
+#### Legg boten til i serveren din
 
-1. Klikk **OAuth2/ URL Generator** i sidefeltet.
-2. Under **Scopes**, aktiver `bot` og `applications.commands`.
-3. Under **Bot Permissions**, aktiver: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Kopier den genererte URL-en, lim den inn i nettleseren din, velg serveren din og bekreft. Boten skal nå vises i serverens medlemsliste.
+1. I sidefeltet klikker du på **OAuth2/ URL Generator**.
+2. Under **Scopes** aktiverer du `bot` og `applications.commands`.
+3. Under **Bot Permissions** aktiverer du: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
+4. Kopier den genererte URL-en, lim den inn i nettleseren din, velg serveren din, og bekreft. Boten skal nå vises i medlemslisten til serveren din.
 
 #### Samle inn ID-ene dine
 
-Aktiver utviklermodus i Discord (**User Settings/ Advanced/ Developer Mode**), deretter:
-- Høyreklikk serverens ikon: **Copy Server ID**
-- Høyreklikk din egen avatar: **Copy User ID**
+Aktiver utviklermodus i Discord (**User Settings/ Advanced/ Developer Mode**), og deretter:
+- Høyreklikk på serverikonet ditt: **Copy Server ID**
+- Høyreklikk på din egen avatar: **Copy User ID**
 
-#### Tillat direktemeldinger fra servermedlemmer
+#### Tillat DM-er fra servermedlemmer
 
-Høyreklikk serverens ikon/ **Privacy Settings**/ slå på **Direct Messages**. Dette lar boten sende deg direktemeldinger, noe som er nødvendig for paring.
+Høyreklikk på serverikonet ditt/ **Privacy Settings**/ slå på **Direct Messages**. Dette gjør at boten kan sende deg DM, noe som er nødvendig for sammenkoblingssteget.
 
 #### Konfigurer OpenClaw for Discord
 
-Lagre bot-tokenet ditt som en miljøvariabel, og opprett deretter én enkelt oppdateringsfil som aktiverer Discord, refererer til tokenet og hvitelister serveren din. Erstatt `<server_id>` og `<user_id>` med ID-ene samlet inn ovenfor.
+Lagre bot-tokenet ditt som en miljøvariabel, opprett deretter en enkelt patch-fil som aktiverer Discord, refererer til tokenet, og hviteliser serveren din. Erstatt `<server_id>` og `<user_id>` med ID-ene du samlet inn ovenfor.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1121,32 +1118,32 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **Ikke stol på å be agenten konfigurere dette.** Når sandkasseisolering er aktivert, kan ikke agenten skrive til `~/.openclaw/openclaw.json` fra innsiden av sandkassen – bruk CLI-kommandoene ovenfor på verten i stedet.
+> **Ikke stol på å be agenten om å konfigurere dette.** Når sandkasse er aktivert, kan ikke agenten skrive til `~/.openclaw/openclaw.json` fra innsiden av sandkassen, bruk CLI-kommandoene ovenfor på verten i stedet.
 
-Start gatewayen på nytt slik at den henter den nye kanalkonfigurasjonen:
+Start gatewayen på nytt slik at den tar i bruk den nye kanalkonfigurasjonen:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
 ```
 
-Du bør se `logged in to discord as <bot-name>` i gateway-utdataene innen noen sekunder.
+Du bør se `logged in to discord as <bot-name>` i gateway-loggen i løpet av noen sekunder.
 
-#### Par Discord-kontoen din
+#### Koble sammen Discord-kontoen din
 
-Send boten en direktemelding i Discord. Den vil svare med en kort paringskode.
+Send en DM til boten i Discord. Den vil svare med en kort sammenkoblingskode.
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-Godkjenn den på maskinen som kjører OpenClaw:
+Godkjenn det på maskinen som kjører OpenClaw:
 ```bash
 openclaw pairing approve discord <CODE>
 ```
 
-> Paringskoder utløper etter én time.
+> Sammenkoblingskoder utløper etter en time.
 
-Du kan nå chatte med agenten din direkte fra Discord og overlate oppgaver til den lokale maskinvaren din.
+Du kan nå chatte med agenten din direkte fra Discord og overføre oppgaver til din lokale maskinvare.
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1156,12 +1153,12 @@ Du kan nå chatte med agenten din direkte fra Discord og overlate oppgaver til d
 
 ### Alternativ B: Telegram
 
-Telegram er enklere enn Discord for de fleste brukere – det krever ingen server og ingen administratortilgang.
+Telegram er enklere enn Discord for de fleste brukere, det krever ingen server og ingen administratortilgang.
 
 #### Opprett en Telegram-bot
 
-1. Åpne Telegram og send melding til **@BotFather**.
-2. Send `/newbot` og følg instruksjonene. Lagre bot-tokenet du mottar.
+1. Åpne Telegram og send en melding til **@BotFather**.
+2. Send `/newbot` og følg instruksjonene. Lagre bot-tokenet du får.
 
 #### Konfigurer OpenClaw for Telegram
 
@@ -1171,7 +1168,7 @@ Lagre tokenet som en miljøvariabel:
 export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 ```
 
-Legg til kanalkonfigurasjonen i `~/.openclaw/openclaw.json` (eller oppdater den via dashbordet):
+Legg til kanalkonfigurasjonen i `~/.openclaw/openclaw.json` (eller patch den via dashbordet):
 
 ```json
 {
@@ -1185,23 +1182,23 @@ Legg til kanalkonfigurasjonen i `~/.openclaw/openclaw.json` (eller oppdater den 
 }
 ```
 
-Start gatewayen på nytt, send deretter boten en melding i Telegram. Godkjenn paringen:
+Start gatewayen på nytt, og send deretter boten din en melding i Telegram. Godkjenn sammenkoblingen:
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-Paringskoder utløper etter én time. Du kan nå chatte med agenten din via Telegram-direktemelding.
+Sammenkoblingskoder utløper etter en time. Du kan nå chatte med agenten din via Telegram DM.
 
 ---
 
 ## Neste steg
 
-Nå som agenten din kan motta kommandoer fra telefonen din og handle på den lokale maskinen, er her tre retninger verdt å utforske:
+Nå som agenten din kan motta kommandoer fra telefonen din og handle på den lokale maskinen din, er her tre retninger det er verdt å utforske:
 
-1. **Aksjemarkedsoppsummerer**: Planlegg OpenClaw til å hente data fra finansielle API-er med et fast intervall, oppsummer dagens bevegelser med den lokale modellen din, og send et sammendrag til telefonen din hver morgen via den valgte kanalen.
+1. **Oppsummering av aksjemarkedet**: Planlegg OpenClaw til å hente data fra finansielle API-er med et fast intervall, oppsummer dagens bevegelser med din lokale modell, og send en oppsummering til telefonen din hver morgen via kanalen du har valgt.
 
-2. **Finjusteringsmonitor**: Start en treningsjobb eksternt via Telegram eller Discord, og la deretter agenten følge treningsloggen og rapportere periodiske tapsverdier, GPU-utnyttelse og diskbruk tilbake til telefonen din. Hvis kjøringen stopper opp eller VRAM-bruken øker kraftig, får du vite det umiddelbart uten å måtte være ved maskinen.
+2. **Overvåking av finjustering**: Start en treningsjobb eksternt via Telegram eller Discord, og la deretter agenten følge treningsloggen og rapportere periodiske tapsverdier, GPU-utnyttelse og diskbruk tilbake til telefonen din. Hvis kjøringen stopper opp eller VRAM-bruken skyter i været, får du vite det umiddelbart uten å måtte være ved maskinen.
 
-3. **IOT med en lokal VLM**: Pek et kamera mot inngangsdøren din, kjør en visjonsmodell på Lemonade, og la OpenClaw analysere bilder på forespørsel eller ved en utløser. Spør "kom det noen pakker i dag?" fra telefonen og få et direkte svar fra din egen maskinvare.
+3. **IOT med en lokal VLM**: Rett et kamera mot inngangsdøren din, kjør en visjonsmodell på Lemonade, og la OpenClaw analysere bilder på forespørsel eller ved en utløser. Spør "kom det noen pakker i dag?" fra telefonen din og få et rett svar fra din egen maskinvare.

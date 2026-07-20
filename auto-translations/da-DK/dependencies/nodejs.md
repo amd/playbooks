@@ -11,7 +11,7 @@ Node.js 22.22.1 LTS er den anbefalede version til denne platform.
 <!-- @os:windows -->
 
 1. Download Windows 64-bit installationsprogrammet fra [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
-2. Kør installationsprogrammet og følg vejledningen
+2. Kør installationsprogrammet, og følg vejledningen
 3. Bekræft installationen:
 ```cmd
 node --version

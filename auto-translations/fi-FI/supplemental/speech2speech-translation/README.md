@@ -6,45 +6,45 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Tässä ohjeessa käytetään erikoismerkintöjä, joita GitHub ei pysty renderöimään. Käy osoitteessa [amd.com/playbooks](https://amd.com/playbooks) nähdäksesi tämän sisällön oikein esikatseltuna.
 <!-- @github-only:end -->
 
 ## Yleiskatsaus
 
-AMD ROCm™ -ohjelmisto ja PyTorch-pino muodostavat yhtenäisen ekosysteemin laitteella tapahtuvalle tekoälylle. Se toimii sekä Windowsilla että Linuxilla ja tukee virallisesti laajaa valikoimaa laitteita, mukaan lukien Ryzen™ AI APU:t ja Radeon™ GPU:t.
+AMD ROCm™ -ohjelmisto ja PyTorch-pino muodostavat yhtenäisen ekosysteemin laitteessa tapahtuvaa tekoälyä varten. Se toimii sekä Windowsissa että Linuxissa, ja sillä on virallinen tuki laajalle joukolle laitteita, mukaan lukien Ryzen™ AI -APU:t ja Radeon™-näytönohjaimet.
 
-Tämä playbook opettaa sinulle, kuinka suorittaa matalaviiveinen, ilmaisuvoimainen ja yksityinen puheesta puheeseen -käännös kokonaan reunalaitteella.
+Tämä ohje opettaa, kuinka voit ajaa vähäviiveistä, ilmaisuvoimaista ja yksityistä puheesta puheeksi -käännöstä kokonaan reunalaitteella.
 
 ## Mitä opit
 
-- Kuinka puheesta puheeseen -ympäristö asetetaan
-- Kuinka kirjoittaa Python-koodia puheesta puheeseen -mallien lataamiseen ja käyttämiseen
-- Kuinka ajaa ja kokeilla Gradio-käyttöliittymää
+- Kuinka puheesta puheeksi -ympäristö otetaan käyttöön
+- Kuinka kirjoitetaan Python-koodia puhe-puhe-mallien lataamiseen ja käyttöön
+- Kuinka Gradio-käyttöliittymää ajetaan ja kokeillaan
 
-## Miksi käyttää reaaliaikaista puheesta puheeseen -käännöstä?
+## Miksi käyttää reaaliaikaista puheesta puheeksi -käännöstä?
 
-- Poistaa kitkaa käännöksen ja kielimuurien väliltä
+- Poistaa kitkan käännöksen ja kielimuurien väliltä
 - Välittää sävyn, tunteen ja tarkoituksen ilman kiusallisia taukoja
 - Mahdollistaa globaalin yhteistyön ja nopeamman päätöksenteon
 
-## Muistikonfiguraation asettaminen
+## Muistiasetuksen määrittäminen
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
-> **Huomio**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centerin kautta.
+> **Huomautus**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centerin avulla.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmiston esivaatimusten asentaminen
 
-### Luo virtuaaliympäristö
+### Virtuaaliympäristön luominen
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Avaa Linuxilla terminaali ja suorita seuraava komento luodaksesi venv:n, johon ROCm+Pytorch on jo asennettu:
+Avaa Linuxissa pääte ja suorita seuraava komento luodaksesi venv-ympäristön, johon ROCm+PyTorch on jo asennettu:
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -58,13 +58,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
+**Myönnä käyttäjällesi käyttöoikeus GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Avaa Linuxilla terminaali ja suorita seuraava komento luodaksesi venv:n:
+Avaa Linuxissa pääte ja suorita seuraava komento luodaksesi venv-ympäristön:
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -80,7 +80,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Avaa Windowsilla terminaali haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv:n, johon ROCm+Pytorch on jo asennettu:
+Avaa Windowsissa pääte haluamaasi hakemistoon ja seuraa komentoja luodaksesi venv-ympäristön, johon ROCm+PyTorch on jo asennettu:
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -90,13 +90,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Vinkki**: Windows-käyttäjien saattaa olla tarpeen muokata PowerShell-suorituskäytäntöään (esim.
-> asettaa se RemoteSigned- tai Unrestricted-tilaan) ennen joidenkin PowerShell-komentojen suorittamista.
+> **Vinkki**: Windows-käyttäjien on ehkä muutettava PowerShellin suorituskäytäntöä (esim.
+> asetettava se arvoon RemoteSigned tai Unrestricted) ennen kuin osa PowerShell-komennoista voidaan suorittaa.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Avaa Windowsilla terminaali haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv:n:
+Avaa Windowsissa pääte haluamaasi hakemistoon ja seuraa komentoja luodaksesi venv-ympäristön:
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -106,8 +106,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Vinkki**: Windows-käyttäjien saattaa olla tarpeen muokata PowerShell-suorituskäytäntöään (esim.
-> asettaa se RemoteSigned- tai Unrestricted-tilaan) ennen joidenkin PowerShell-komentojen suorittamista.
+> **Vinkki**: Windows-käyttäjien on ehkä muutettava PowerShellin suorituskäytäntöä (esim.
+> asetettava se arvoon RemoteSigned tai Unrestricted) ennen kuin osa PowerShell-komennoista voidaan suorittaa.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -122,7 +122,7 @@ s2st-env\Scripts\activate
 
 ### Lisäriippuvuudet
 
-Asenna m4t-riippuvuudet pipin avulla:
+Asenna m4t-riippuvuudet pip:n avulla:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
@@ -195,39 +195,39 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Puheesta puheeseen -demon asettaminen
+## Puheesta puheeksi -esittelyn käyttöönotto
 
-#### Tutustu seamless-m4t-v2:een
+#### Tietoa mallista seamless-m4t-v2
 
-Tutustu [mallikorttiin](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) Hugging Facessa saadaksesi lisätietoja.
-Tämä on puheesta puheeseen -mallien tekninen arkkitehtuuri:
+Lisätietoja saat [mallikortista](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) Hugging Facessa.
+Tämä on puhe-puhe-mallien tekninen arkkitehtuuri:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
-#### Lataa skriptit
+#### Skriptien lataaminen
 
-Tämä playbook sisältää valmiita skriptejä. Lataa ne kaikki samaan hakemistoon kuin luomasi ympäristö.
+Tämä ohje sisältää valmiiksi käytettävissä olevia skriptejä. Lataa ne kaikki samaan hakemistoon, johon loit ympäristön.
 
 | Skripti | Kuvaus | Käyttö |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | Perustason LLM-tekstin generointi | `python infer.py` |
-| [input1.wav](assets/input1.wav) | Esimerkkiäänitiedosto | N/A |
-| [lang_list.py](assets/lang_list.py) | Kielitukitiedosto | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | Intuitiivinen käyttöliittymä puheenkäännökseen | `python gradio_demo.py --no-share` |
+| [infer.py](assets/infer.py) | Perus-LLM-tekstin generointi | `python infer.py` |
+| [input1.wav](assets/input1.wav) | Esimerkkiäänitiedosto | Ei sovellu |
+| [lang_list.py](assets/lang_list.py) | Kielituen tiedosto | Ei sovellu |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuitiivinen käyttöliittymä puheen kääntämiseen | `python gradio_demo.py --no-share` |
 
 
-### Aloittaminen infer.py:llä
+### Aloitus infer.py:llä
 
 Suorita skripti ajamalla 
 ```bash
 python infer.py
 ```
-> **Huomio**: Saatat nähdä joitakin varoituksia. Tämä on odotettua.
+> **Huomautus**: Saatat nähdä joitakin varoituksia. Tämä on odotettua.
  
   
 #### Koodin selitys
-**Pätkä 1: Tarvittavien riippuvuuksien tuominen**
+**Katkelma 1: Tarvittavien riippuvuuksien tuonti**
 
 ```python 
 import os
@@ -254,9 +254,9 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**Pätkä 2: Mallien lataaminen HuggingFacesta**
+**Katkelma 2: Mallien lataaminen HuggingFacesta**
 
-Tämä funktio ottaa mallin tunnisteen ja lataa mallin, jos sitä ei ole vielä ladattu. Se palauttaa sitten prosessorin ja mallin seuraavaa funktiota varten.
+Tämä funktio ottaa vastaan mallin tunnisteen ja lataa mallin, jos sitä ei ole vielä ladattu. Se palauttaa sitten prosessorin ja mallin seuraavan funktion käyttöön.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -275,9 +275,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Pätkä 3: Syöteääniklipin .wav-tiedosto ja sen esikäsittely**
+**Katkelma 3: Syöteäänileikkeen .wav-tiedoston lataus ja esikäsittely**
 
-Tämä funktio lataa ääniklipin ja muuntaa sen näytteenottotaajuuden kohdetaajuuteen.
+Tämä funktio lataa äänileikkeen ja näytteistää sen uudelleen tavoitetaajuudelle.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -297,7 +297,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**Pätkä 4: Päättelyn suorittaminen**
+**Katkelma 4: Päättelyn suorittaminen**
 
 Tämä funktio suorittaa päättelyn mallilla ja palauttaa generoidun tulosteen.
 ```python
@@ -327,7 +327,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
     return audio_array, elapsed
 ```
 
-**Pätkä 5: Käännetyn tiedoston tallentaminen**
+**Katkelma 5: Käännetyn tiedoston tallentaminen**
 
 Tämä funktio tallentaa äänitaulukon .WAV-tiedostoon. 
 ```python
@@ -392,19 +392,19 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Gradio-käyttöliittymädemon ajaminen:
+### Gradio-käyttöliittymäesittelyn ajaminen:
 
-Nyt kun olet suorittanut perustason skriptiesimerkin, seuraavat ohjeet tarjoavat hyödyllisen käyttöliittymän, joka rakentuu kirjoittamamme koodin päälle ja tekee reaaliaikaisesta puheesta puheeseen -käännöksestä helppoa.
+Nyt kun olet ajanut perusesimerkkiskriptin, seuraavat ohjeet tarjoavat hyödyllisen käyttöliittymän, joka rakentuu kirjoittamamme koodin päälle ja tekee reaaliaikaisesta puhe-puhe-käännöksestä helppoa.
 
 #### Aja Gradio paikallisesti
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Avaa sitten selaimesi osoitteessa `http://127.0.0.1:7860` päästäksesi käyttöliittymään.
+Avaa sitten verkkoselaimesi osoitteessa `http://127.0.0.1:7860` päästäksesi käyttöliittymään.
 
 
-### Gradio-käyttöliittymäesimerkki:
+### Esimerkki Gradio-käyttöliittymästä:
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
@@ -521,14 +521,14 @@ PY
 <!-- @os:end -->
 
 
-## Seuraavat askeleet
+## Seuraavat vaiheet
 
-- Yhdistelemällä kymmeniä kieliä voit tehdä nopeita käännöksiä.
-- Jaa demosi muille: Lisää --share luodaksesi julkisen linkin, johon kuka tahansa voi päästä etänä, tai ota käyttöön pysyvästi Hugging Face Spacesin avulla.
+- Yhdistele ja vertaile kymmeniä kieliä nopeaa kääntämistä varten. 
+- Jaa esittelysi muille: Lisää --share luodaksesi julkisen linkin, johon kuka tahansa pääsee käsiksi etäältä, tai ota se pysyvästi käyttöön Hugging Face Spacesin avulla
 
 ## Resurssit
 
-Alla on lisäresursseja puheesta puheeseen -käännöksestä lisätietojen saamiseksi:  
-* Repo löytyy täältä: https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Tutkimuskirjallisuus aiheesta "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Gradion jakaminen ja käyttöönotto: [Sovelluksen jakamisopas](https://www.gradio.app/guides/sharing-your-app) ja [Ota käyttöön Hugging Face Spacesissa](https://shafiqulai.github.io/blogs/blog_5.html)
+Alla on lisää resursseja puheesta puheeksi -kääntämisestä oppimiseen:  
+* Repositorio löytyy osoitteesta https://huggingface.co/facebook/seamless-m4t-v2-large 
+* Akateeminen tutkimus aiheesta "Seamless: Multilingual Expressive and Streaming Speech Translation"
+* Gradion jakaminen ja käyttöönotto: [Sovelluksesi jakamisopas](https://www.gradio.app/guides/sharing-your-app) ja [Käyttöönotto Hugging Face Spacesiin](https://shafiqulai.github.io/blogs/blog_5.html)

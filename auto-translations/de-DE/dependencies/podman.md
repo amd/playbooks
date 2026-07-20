@@ -9,13 +9,13 @@ SPDX-License-Identifier: MIT
 Podman ist eine Containerisierungssoftware für Linux.
 
 
-**Schritt 1**: Installieren Sie die Podman-Kern-Engine und das eigenständige Compose V2-Parsing-Plugin.
+**Schritt 1**: Installieren Sie die Kern-Engine von Podman und das eigenständige Compose-V2-Parsing-Plugin.
 
 ```bash
 sudo apt update && sudo apt install -y podman docker-compose-plugin podman-compose
 ```
 
-**Schritt 2**: Podman und Compose überprüfen
+**Schritt 2**: Überprüfen Sie Podman und Compose
 
 ```bash
 podman --version

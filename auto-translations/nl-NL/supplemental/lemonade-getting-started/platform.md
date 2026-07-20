@@ -6,14 +6,14 @@ SPDX-License-Identifier: MIT
 
 # Platformconfiguratie — Lemonade Local AI
 
-Dit document beschrijft de vooraf geïnstalleerde software, modelpaden en platformspecifieke vereisten die door dit playbook worden verondersteld.
+Dit document beschrijft de vooraf geïnstalleerde software, modelpaden en platformspecifieke vereisten die in deze playbook worden verondersteld.
 
 ## Vooraf geïnstalleerde software
 
 | Software | Versie | Doel |
 |----------|---------|---------|
 | Lemonade Server | Nieuwste release | Lokale LLM-server met OpenAI-compatibele API |
-| Python | 3.10–3.13 | Vereist voor het OpenAI Python-clientvoorbeeld |
+| Python | 3.10–3.13 | Vereist voor het voorbeeld van de OpenAI Python-client |
 
 ## Standaard modelopslag
 
@@ -31,11 +31,11 @@ Om de opslaglocatie te wijzigen, stelt u de omgevingsvariabele `HF_HOME` in.
 | Hardwaredoel | Vereisten |
 |----------------|-------------|
 | **CPU** | Elke moderne x86-64-processor (AMD of Intel) |
-| **GPU (Vulkan)** | Elke GPU met ondersteuning voor Vulkan-stuurprogramma's |
+| **GPU (Vulkan)** | Elke GPU met ondersteuning voor Vulkan-drivers |
 | **GPU (ROCm)** | AMD Radeon RX 7000/9000-serie of Radeon PRO W7000-serie; AMD Ryzen AI MAX+ Pro 395 |
 | **NPU** | AMD Ryzen AI 300-serie processor, Windows 11 |
 
 ## Netwerkvereisten
 
-- Internetverbinding vereist voor de initiële modeldownload (1–25 GB afhankelijk van het model)
+- Internetverbinding vereist voor het initieel downloaden van modellen (1–25 GB, afhankelijk van het model)
 - Geen internet vereist nadat modellen zijn gedownload

@@ -6,17 +6,17 @@ SPDX-License-Identifier: MIT
 
 #### ROCm
 
-**أضف المستخدم الحالي إلى مجموعتَي render وvideo.** 
+**أضف المستخدم الحالي إلى مجموعتي render و video.** 
 ```bash
 sudo usermod -a -G render,video $LOGNAME
 ```
 
-**أعد تشغيل نظامك لتطبيق الإعدادات.**
+**أعد تشغيل النظام لتطبيق الإعدادات.**
 ```bash
 sudo reboot
 ```
 
-**ثبّت ROCm في البيئة الافتراضية التي أنشأتها.**
+**قم بتثبيت ROCm في البيئة الافتراضية التي تم إنشاؤها.**
 > **ملاحظة**: تأكد من أن البيئة الافتراضية نشطة قبل المتابعة.
 
 <!-- @device:halo,halo_box -->
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-للحصول على مزيد من المساعدة في التثبيت، يرجى الاطلاع على هذا [الرابط](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+لمزيد من المساعدة في التثبيت، يُرجى الاطلاع على هذا [الرابط](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).

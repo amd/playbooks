@@ -1,5 +1,5 @@
 {
   "id": "unsloth-llms-finetuning",
-  "title": "Unslothを使用したLLMのファインチューニング",
-  "description": "メモリ効率の高いファインチューニング済みLLM™にUnslothを使用する"
+  "title": "UnslothによるLLMのファインチューニング",
+  "description": "Unsloth™を使用してメモリ効率の良いファインチューニングされたLLMを実現"
 }

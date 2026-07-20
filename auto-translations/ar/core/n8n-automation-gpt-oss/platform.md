@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # تكوين المنصة
 
-يصف هذا المستند تكوينات المنصة المتوقعة لتشغيل هذا الدليل التشغيلي.
+يصف هذا المستند تكوينات المنصة المتوقعة لتشغيل هذا الدليل الإرشادي.
 
 ## المتطلبات الأساسية
 
@@ -14,20 +14,20 @@ SPDX-License-Identifier: MIT
 
 | المكوّن | الإصدار | ملاحظات |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | مثبّت مسبقاً ومتاح في PATH على AMD Ryzen™ AI Halo Developer Platform؛ يجب تثبيته يدوياً على جميع الأجهزة الأخرى |
-| **Lemonade Server** | الأحدث | يعمل على `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | مثبت مسبقًا ومتاح في PATH على منصة AMD Ryzen™ AI Halo Developer Platform؛ يجب تثبيته يدويًا على جميع الأجهزة الأخرى |
+| **Lemonade Server** | latest | يعمل على `http://localhost:13305/api/v1` |
 
 ### Linux
 
 | المكوّن | الإصدار | ملاحظات |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | مثبّت مسبقاً ومتاح في PATH على AMD Ryzen™ AI Halo Developer Platform؛ يجب تثبيته يدوياً على جميع الأجهزة الأخرى |
-| **Lemonade Server** | الأحدث | يعمل على `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | مثبت مسبقًا ومتاح في PATH على منصة AMD Ryzen™ AI Halo Developer Platform؛ يجب تثبيته يدويًا على جميع الأجهزة الأخرى |
+| **Lemonade Server** | latest | يعمل على `http://localhost:13305/api/v1` |
 
 
-## Lemonade LLM
+## نموذج Lemonade LLM
 
-يجب أن يكون خادم Lemonade قيد التشغيل مع تحميل النموذج المناسب للجهاز (راجع ملف README للاطلاع على أمر `lemonade run` الخاص بجهازك):
+يجب أن يكون خادم Lemonade قيد التشغيل مع تحميل النموذج المناسب للجهاز (راجع ملف README الخاص بأمر `lemonade run` لجهازك):
 
 | الجهاز | نقطة النهاية | النموذج |
 |--------|----------|-------|

@@ -6,72 +6,72 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ta priročnik uporablja posebne oznake, ki jih GitHub ne more prikazati. Za pravilen ogled te vsebine obiščite [amd.com/playbooks](https://amd.com/playbooks).
+> Ta priročnik uporablja posebne oznake, ki jih GitHub ne more prikazati. Za pravilen predogled te vsebine obiščite [amd.com/playbooks](https://amd.com/playbooks).
 <!-- @github-only:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Ta priročnik zahteva najmanj **32 GB** sistemskega pomnilnika.
+> Ta priročnik zahteva vsaj **32 GB** sistemskega pomnilnika.
 <!-- @device:end -->
 
 ## Pregled
 
-[Open WebUI](https://docs.openwebui.com) je samostojno gostovan, brskalniški vmesnik, ki zagotavlja znano izkušnjo klepetalnega robota in hkrati deluje kot čelni del za enega ali več strežnikov AI modelov. Namesto da bi bil vezan na enega ponudnika, se Open WebUI lahko poveže z **vsakim zaledjem, ki izpostavlja API, združljiv z OpenAI**, tako da lahko zamenjate modele in zmogljivosti brez menjave vmesnika.
+[Open WebUI](https://docs.openwebui.com) je samostojno gostovan, brskalniško osnovan vmesnik, ki ponuja znano izkušnjo klepetalnega robota, hkrati pa deluje kot vmesnik za enega ali več strežnikov modelov AI. Namesto da bi bil vezan na enega ponudnika, se lahko Open WebUI poveže s **katerim koli zalednim sistemom, ki izpostavlja API, združljiv z OpenAI**, tako da lahko zamenjate modele in zmožnosti brez menjave uporabniškega vmesnika.
 
-V tem priročniku uporabljamo [**Lemonade**](https://lemonade-server.ai) kot zaledje, ker izpostavlja **enoten končni točki, združljiv z OpenAI**, ki podpira več modalnosti:
-- **Veliki jezikovni modeli (LLM)** za generiranje besedila
-- **Vizijski modeli** za razumevanje slik
+V tem priročniku uporabljamo [**Lemonade**](https://lemonade-server.ai) kot zaledni sistem, ker izpostavlja **enotno končno točko, združljivo z OpenAI**, ki podpira več modalnosti:
+- **Velike jezikovne modele (LLM)** za generiranje besedila
+- **Vizualne modele** za razumevanje slik
 - **Stable Diffusion** za generiranje slik
-- **Modeli za transkripcijo zvoka** za pretvorbo govora v besedilo
+- **Modele za prepis zvoka** za pretvorbo govora v besedilo
 
-Ta nastavitev vam omogoča, da raziščete **celoten multimodalni potek dela od začetka do konca**.
+Ta nastavitev vam omogoča raziskovanje **celotnega multimodalnega poteka dela od začetka do konca**.
 
 ---
 
 ## Kaj se boste naučili
 
-Ob koncu boste znali:
+Na koncu boste znali:
 
-- Povezati Open WebUI z lokalnim zaledjem, združljivim z OpenAI (Lemonade)
+- Povezati Open WebUI z lokalnim zalednim sistemom, združljivim z OpenAI (Lemonade)
 - Klepetati z lokalnim LLM iz brskalnika
-- Naložiti sliko in vizijskemu modelu postavljati vprašanja o njej
-- Generirati slike iz besedilnih pozivov z modeli Stable Diffusion (SDXL-Turbo / SDXL)
-- Razumeti miselni model, da lahko uporabljate druga zaledja (Ollama, vLLM, llama.cpp server itd.)
+- Naložiti sliko in postavljati vprašanja vizualnemu modelu o njej
+- Generirati slike iz besedilnih pozivov z uporabo modelov Stable Diffusion (SDXL-Turbo / SDXL)
+- Razumeti miselni model, da boste lahko uporabljali tudi druge zaledne sisteme (Ollama, vLLM, strežnik llama.cpp itd.)
 
 ---
 
-## Temeljni koncepti (miselni model)
+## Osnovni koncepti (miselni model)
 
 ### Tri komponente
 
-| Del | Kaj počne | Primeri |
+| Komponenta | Kaj počne | Primeri |
 |---|---|---|
-| Čelni del (UI) | Spletna aplikacija, s katero komunicirate | Open WebUI |
-| Zaledje (strežnik modelov) | Gosti modele in izpostavlja HTTP končne točke | Lemonade, Ollama, vLLM, llama.cpp server, strežniki, združljivi z OpenAI |
-| Modeli | Dejanski LLM / vizijski / difuzijski / zvočni modeli | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
+| Frontend (uporabniški vmesnik) | Spletna aplikacija, s katero komunicirate | Open WebUI |
+| Backend (strežnik modelov) | Gosti modele in izpostavlja HTTP končne točke | Lemonade, Ollama, vLLM, strežnik llama.cpp, strežniki, združljivi z OpenAI |
+| Modeli | Dejanski modeli LLM / vizualni / difuzijski / zvočni modeli | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
 
-#### Zakaj je »API, združljiv z OpenAI« pomemben
+#### Zakaj je pomemben "API, združljiv z OpenAI"
 
 Open WebUI je zgrajen okoli standardnih končnih točk v slogu OpenAI, kot so:
   - Klepet: `/chat/completions`
   - Seznam modelov: `/models`
   - Generiranje slik: `/images/generations`
-  - Transkripcija zvoka: `/audio/transcriptions`
+  - Prepis zvoka: `/audio/transcriptions`
 
-Lemonade jih izpostavlja pod `http://localhost:13305/api/v1/...`
+Lemonade te izpostavi pod `http://localhost:13305/api/v1/...`
 
-Če zaledje podpira te končne točke, se Open WebUI z njim poveže z minimalno nastavitvijo. Zato lahko zamenjamo zaledja brez spremembe poteka dela.
+Če zaledni sistem podpira te končne točke, lahko Open WebUI z njim komunicira z minimalno nastavitvijo. Zato lahko zamenjamo zaledne sisteme, ne da bi spreminjali svoj potek dela.
 
-#### Dve storitvi, dve vrati
+#### Dve storitvi, dva vrat
 
 V tem priročniku boste delali z dvema ločenima storitvama:
 
 | Storitev | URL | Kaj tam počnete |
 |---|---|---|
-| **Lemonade** (GUI) | `http://localhost:13305` | Brskate, prenašate in upravljate modele |
-| **Open WebUI** | `http://localhost:8080` | Klepetate, nalagate slike, generirate slike — vmesnik za uporabnike |
+| **Lemonade** (grafični vmesnik) | `http://localhost:13305` | Brskanje, prenos in upravljanje modelov |
+| **Open WebUI** | `http://localhost:8080` | Klepet, nalaganje slik, generiranje slik — uporabniški vmesnik |
 
-Lemonade poganja modele; Open WebUI je vmesnik, s katerim komunicirate. Najprej uporabite GUI Lemonade za prenos modelov, nato pa jih uporabljajte iz Open WebUI.
+Lemonade poganja modele; Open WebUI je vmesnik, s katerim komunicirate. Najprej uporabite grafični vmesnik Lemonade za prenos modelov, nato jih uporabite iz Open WebUI.
 
 ---
 
@@ -87,7 +87,7 @@ Lemonade poganja modele; Open WebUI je vmesnik, s katerim komunicirate. Najprej 
 
 ## Enkratna nastavitev
 
-Ta priročnik potrebuje Lemonade, ki deluje kot zaledje, in v Linuxu pogonski stroj za vsebnike (Podman) za zagon Open WebUI. To nastavite pred namestitvijo Open WebUI.
+Ta priročnik zahteva, da Lemonade teče kot zaledni sistem, in na sistemu Linux mehanizem za vsebnike (Podman) za zagon Open WebUI. Nastavite ju, preden namestite Open WebUI.
 
 <!-- @os:windows -->
 <!-- @device:halo_box,halo,stx,krk -->
@@ -119,13 +119,13 @@ lemonade --version
 
 ## Prenos modelov v Lemonade
 
-Pred namestitvijo Open WebUI se prepričajte, da so modeli, ki jih želite uporabljati, preneseni in pripravljeni v Lemonade.
+Preden namestite Open WebUI, se prepričajte, da so modeli, ki jih želite uporabljati, preneseni in pripravljeni v Lemonade.
 
-1. Odprite GUI Lemonade na `http://localhost:13305`.
-2. Preglejte razpoložljive modele in prenesite tiste, ki jih želite uporabljati (npr. LLM za klepet, vizijski model in/ali model Stable Diffusion za generiranje slik).
-3. Potrdite, da je API dosegljiv, tako da v brskalniku obiščete `http://localhost:13305/api/v1/models` — videti bi morali seznam prenesenih modelov.
+1. Odprite grafični vmesnik Lemonade na naslovu `http://localhost:13305`.
+2. Prebrskajte razpoložljive modele in prenesite tiste, ki jih želite uporabljati (npr. LLM za klepet, vizualni model in/ali model Stable Diffusion za generiranje slik).
+3. Preverite dosegljivost API-ja tako, da obiščete `http://localhost:13305/api/v1/models` v brskalniku — videti bi morali seznam prenesenih modelov.
 
-> Modeli morajo biti preneseni v **Lemonade** (`localhost:13305`), preden se lahko prikažejo v **Open WebUI** (`localhost:8080`). Če se model pozneje ne prikaže v Open WebUI, se vrnite sem in najprej preverite Lemonade.
+> Modeli morajo biti preneseni v **Lemonade** (`localhost:13305`), preden se lahko prikažejo v **Open WebUI** (`localhost:8080`). Če se model kasneje ne prikaže v Open WebUI, se vrnite sem in najprej preverite Lemonade.
 
 
 <!-- @os:windows -->
@@ -470,13 +470,13 @@ PY
 <!-- @os:windows -->
 ### 1. Namestite Python 3.12
 
-Open WebUI zahteva **Python 3.12** — ne namesti se na Python 3.13+. Zaganjalnik Windows Python (`py`) vam omogoča namestitev 3.12 vzporedno z obstoječo različico Pythona brez konfliktov.
+Open WebUI zahteva **Python 3.12** — ne namesti se na Python 3.13+. Windows Python Launcher (`py`) omogoča namestitev različice 3.12 vzporedno s katero koli obstoječo različico Pythona brez konfliktov.
 
 ```powershell
 winget install Python.Python.3.12
 ```
 
-Po namestitvi zaprite in znova odprite terminal, nato preverite:
+Po namestitvi zaprite in ponovno odprite terminal, nato preverite:
 
 ```powershell
 py -3.12 --version
@@ -484,7 +484,7 @@ py -3.12 --version
 ```
 
 <!-- @device:halo_box -->
-> **Opomba:** Vaš sistem ima vnaprej nameščen Python 3.13. Namestitev 3.12 ga ne vpliva — `python` še naprej uporablja 3.13, `py -3.12` pa cilja na 3.12 samo takrat, ko ga potrebujete.
+> **Opomba:** Vaš sistem ima že vnaprej nameščen Python 3.13. Namestitev 3.12 nanj ne vpliva — `python` še naprej uporablja 3.13, `py -3.12` pa cilja na 3.12 samo takrat, ko jo potrebujete.
 <!-- @device:end -->
 
 <!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
@@ -499,7 +499,7 @@ Write-Host "OK: $v"
 ```
 <!-- @test:end --> 
 
-### 2. Ustvarite virtualno okolje in namestite Open WebUI
+### 2. Ustvarite navidezno okolje in namestite Open WebUI
 
 ```powershell
 mkdir openwebui
@@ -566,17 +566,17 @@ Write-Host "OK: open-webui CLI is available"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Zdaj bomo uporabili storitev Podman za vsebnikovanje naše namestitve Open WebUI.
+Zdaj bomo uporabili storitev Podman za kontejnerizacijo namestitve Open WebUI.
 
-Prenesite naslednje v imenik po vaši izbiri: [compose.yml](assets/compose.yml)
+Prenesite naslednje v mapo po vaši izbiri: [compose.yml](assets/compose.yml)
 
-V tem imeniku zaženite naslednji ukaz:
+V tej mapi zaženite naslednji ukaz:
 
 ```bash
 podman compose up -d
 ```
 
-To prenese sliko Open WebUI in zapiše v trajno shrambo.
+S tem se prenese slika Open WebUI in zapiše v trajno shrambo.
 
 Zaženite Open WebUI tako, da v naslovno vrstico brskalnika vnesete `localhost:8080`.
 
@@ -645,30 +645,29 @@ echo "OK: podman compose can parse compose.yml"
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Nasvet**: Open WebUI ponuja tudi druge možnosti namestitve na svojem [GitHub](https://github.com/open-webui/open-webui).
-
+> **Nasvet**: Open WebUI ponuja tudi druge možnosti namestitve na svojem [GitHubu](https://github.com/open-webui/open-webui).
 ## Zagon strežnika Open WebUI
 
 <!-- @os:windows -->
-- Zaženite naslednji ukaz za zagon HTTP strežnika Open WebUI:
+- Zaženite naslednji ukaz za zagon strežnika HTTP Open WebUI:
 ```bash
 open-webui serve
 ```
 <!-- @os:end -->
 
-- V brskalniku se pomaknite na `http://localhost:8080`.
-- Open WebUI vas bo prosil, da ustvarite lokalni skrbniški račun. Ko ste prijavljeni, boste videli vmesnik za klepet.
+- V brskalniku odprite `http://localhost:8080`.
+- Open WebUI vas bo pozval, da ustvarite lokalni skrbniški račun. Ko se prijavite, boste videli vmesnik za klepet.
 
 <p align="center">
   <img src="assets/open-webui_chat_interface.png" alt="Open WebUI Chat Interface" width="600"/>
 </p>
 
 <!-- @os:windows -->
-> Okno terminala pustite odprto. Zapiranje ga ustavi Open WebUI.
+> Terminalsko okno naj ostane odprto. Če ga zaprete, se Open WebUI ustavi.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Vsebnik deluje v ozadju. Iz imenika, ki vsebuje `compose.yml`, ga upravljajte z `podman compose down` (ustavitev) in `podman compose up -d` (zagon). Vaši računi in nastavitve se ohranijo v nosilcu `open_webui_data`.
+> Vsebnik se izvaja v ozadju. Iz mape, ki vsebuje `compose.yml`, ga upravljajte z ukazoma `podman compose down` (zaustavitev) in `podman compose up -d` (zagon). Vaši računi in nastavitve se ohranijo v datotečnem sistemu `open_webui_data`.
 <!-- @os:end -->
 
 
@@ -757,74 +756,74 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 ## Povezovanje Open WebUI z Lemonade
 
-Zdaj, ko sta obe storitvi v teku — Lemonade na `localhost:13305` in Open WebUI na `localhost:8080` — ju povežite, da bo Open WebUI lahko uporabljal modele Lemonade.
+Zdaj, ko oba servisa delujeta — Lemonade na `localhost:13305` in Open WebUI na `localhost:8080` — ju povežite, da bo Open WebUI lahko uporabljal modele iz Lemonade.
 
 V Open WebUI:
 
-1. Kliknite **ikono uporabniškega profila** v zgornjem desnem kotu, nato izberite **Nastavitve**.
+1. Kliknite **ikono uporabniškega profila** v zgornjem desnem kotu, nato izberite **Settings**.
 
    <p align="center">
      <img src="assets/open_settings.png" alt="Click the user profile icon" width="300"/>
    </p>
 
-2. Na plošči Nastavitve kliknite **Skrbniške nastavitve** spodaj levo.
+2. V podoknu nastavitev kliknite **Admin Settings** v spodnjem levem kotu.
 
    <p align="center">
      <img src="assets/click_admin_settings.png" alt="Select Admin Settings" width="450"/>
    </p>
 
-3. V stranski vrstici Skrbniških nastavitev kliknite **Povezave** (ali se neposredno pomaknite na `http://localhost:8080/admin/settings/connections`).
+3. V stranski vrstici Admin Settings kliknite **Connections** (ali odprite neposredno `http://localhost:8080/admin/settings/connections`).
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Admin Settings Connections page" width="600"/>
    </p>
 
 4. Pod **OpenAI API** dodajte novo povezavo:
-   - **Osnovni URL:** `http://localhost:13305/api/v1`
-   - **Ključ API:** `-` (ena pomišljaj deluje za lokalno)
+   - **Base URL:** `http://localhost:13305/api/v1`
+   - **API Key:** `-` (za lokalno uporabo zadostuje en pomišljaj)
 
    <p align="center">
      <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
    </p>
 
-5. Prepričajte se, da je pod **»Upravljanje povezav OpenAI API«** omogočen samo `http://localhost:13305/api/v1`. Onemogočite vse druge povezave (npr. privzeto OpenAI).
+5. Prepričajte se, da je pod **»Manage OpenAI API Connections«** omogočena samo povezava `http://localhost:13305/api/v1`. Onemogočite vse druge povezave (npr. privzeto povezavo OpenAI).
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Manage OpenAI API Connections with only Lemonade enabled" width="600"/>
    </p>
 
-6. Kliknite **Shrani**.
+6. Kliknite **Save**.
 
-7. **(Priporočeno)** Onemogočite funkcije samodejnega generiranja, da bo Open WebUI ostal odziven z lokalnimi LLM. Pojdite na **Skrbniške nastavitve → Nastavitve → Vmesnik** in izklopite:
-   - Generiranje naslovov
-   - Generiranje nadaljnjih vprašanj
-   - Generiranje oznak
+7. **(Priporočeno)** Onemogočite funkcije samodejnega generiranja, da bo Open WebUI ostal odziven pri delu z lokalnimi jezikovnimi modeli. Pojdite na **Admin Settings → Settings → Interface** in izklopite:
+   - Title Generation
+   - Follow Up Generation
+   - Tags Generation
 
    <p align="center">
      <img src="assets/admin_settings.png" alt="Admin Settings Interface — disable Title, Follow Up, and Tags Generation" width="600"/>
    </p>
 
-8. Kliknite **Shrani**, nato se vrnite na `http://localhost:8080`.
-9. Kliknite spustni meni modelov — videti bi morali modele, ki ste jih prenesli iz Lemonade.
+8. Kliknite **Save**, nato se vrnite na `http://localhost:8080`.
+9. Kliknite spustni meni z modeli — videli boste modele, ki ste jih prenesli iz Lemonade.
 
 ---
 
 ## Glavne dejavnosti
 
-Zdaj ste vse nastavljeni. Oglejmo si tri zanimive stvari, ki jih lahko naredite.
+Zdaj imate vse nastavljeno. Poglejmo tri zanimive stvari, ki jih lahko naredite.
 
 ---
 
 ### Dejavnost 1: Klepet z lokalnim LLM
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk -->
-1. Kliknite spustni meni v zgornjem levem delu vmesnika. Prikazali se bodo modeli Lemonade, ki ste jih namestili. Izberite enega za nadaljevanje. (primer: `Qwen3-4B-Hybrid`).
+1. Kliknite spustni meni v zgornjem levem kotu vmesnika. Prikazani bodo nameščeni modeli Lemonade. Izberite enega za nadaljevanje (primer: `Qwen3-4B-Hybrid`).
 
     <p align="center">
       <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
     </p>
 
-2. Vnesite sporočilo za LLM in kliknite pošlji (ali pritisnite Enter). LLM bo potreboval nekaj sekund za nalaganje v pomnilnik, nato pa boste videli, kako se odgovor prikazuje.
+2. Vnesite sporočilo za LLM in kliknite pošlji (ali pritisnite Enter). Nalaganje LLM v pomnilnik bo trajalo nekaj sekund, nato pa se bo odgovor prikazoval sproti.
 
     <p align="center">
       <img src="assets/sending_a_message.png" alt="Sending a message" width="37.5%"/>
@@ -833,13 +832,13 @@ Zdaj ste vse nastavljeni. Oglejmo si tri zanimive stvari, ki jih lahko naredite.
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-1. Kliknite spustni meni v zgornjem levem delu vmesnika. Prikazali se bodo modeli Lemonade, ki ste jih namestili. Izberite enega za nadaljevanje. (primer: `Qwen3.5-4B-GGUF`).
+1. Kliknite spustni meni v zgornjem levem kotu vmesnika. Prikazani bodo nameščeni modeli Lemonade. Izberite enega za nadaljevanje (primer: `Qwen3.5-4B-GGUF`).
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. Vnesite sporočilo za LLM in kliknite pošlji (ali pritisnite Enter). LLM bo potreboval nekaj sekund za nalaganje v pomnilnik, nato pa boste videli, kako se odgovor prikazuje.
+2. Vnesite sporočilo za LLM in kliknite pošlji (ali pritisnite Enter). Nalaganje LLM v pomnilnik bo trajalo nekaj sekund, nato pa se bo odgovor prikazoval sproti.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -849,7 +848,7 @@ Zdaj ste vse nastavljeni. Oglejmo si tri zanimive stvari, ki jih lahko naredite.
 
 3. Model bo odgovoril v klepetu.
 
-4. Zdaj odprite `Upravitelja opravil` na svojem sistemu. Videli boste **visoko izkoriščenost GPU ali NPU** glede na to, ali je izbrani model **Hybrid** ali **NPU**. Z upraviteljem opravil lahko potrdite, da model poganjate lokalno.
+4. Zdaj odprite `Task Manager` v svojem sistemu. Videli boste **visoko obremenitev GPU-ja ali NPU-ja**, glede na to, ali je izbrani model **Hybrid** ali **NPU**. S pomočjo upravitelja opravil lahko potrdite, da model dejansko izvajate lokalno.
 
     <p align="center">
       <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
@@ -857,13 +856,13 @@ Zdaj ste vse nastavljeni. Oglejmo si tri zanimive stvari, ki jih lahko naredite.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Kliknite spustni meni v zgornjem levem delu vmesnika. Prikazali se bodo modeli Lemonade, ki ste jih namestili. Izberite enega za nadaljevanje. (primer: `Qwen3.5-4B-GGUF`).
+1. Kliknite spustni meni v zgornjem levem kotu vmesnika. Prikazani bodo nameščeni modeli Lemonade. Izberite enega za nadaljevanje (primer: `Qwen3.5-4B-GGUF`).
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. Vnesite sporočilo za LLM in kliknite pošlji (ali pritisnite Enter). LLM bo potreboval nekaj sekund za nalaganje v pomnilnik, nato pa boste videli, kako se odgovor prikazuje.
+2. Vnesite sporočilo za LLM in kliknite pošlji (ali pritisnite Enter). Nalaganje LLM v pomnilnik bo trajalo nekaj sekund, nato pa se bo odgovor prikazoval sproti.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -873,61 +872,59 @@ Zdaj ste vse nastavljeni. Oglejmo si tri zanimive stvari, ki jih lahko naredite.
 3. Model bo odgovoril v klepetu.
 <!-- @os:end -->
 
-To potrjuje, da Open WebUI lahko pošilja zahteve Lemonade prek končne točke za klepet, združljive z OpenAI.
+To potrjuje, da lahko Open WebUI pošilja zahteve Lemonade prek končne točke za klepet, združljive z OpenAI.
 
 ---
 
-### Dejavnost 2: Nalaganje slike in postavljanje vprašanj (vizija)
+### Dejavnost 2: Naložite sliko in postavljajte vprašanja (vid)
 
-Za to je potreben model, ki podpira slikovni vnos (vizijski ali multimodalni model).
+Za to potrebujete model, ki podpira vhodne slike (model za vid oz. multimodalni model).
 
-1. Kliknite ikono filtra, izberite »Po kategoriji«, nato izberite model iz razdelka **Vizija** (npr. `Qwen3.5-4B-GGUF`)
+1. Kliknite ikono filtra, izberite »By Category«, nato izberite model iz razdelka **Vision** (npr. `Qwen3.5-4B-GGUF`)
 
    <p align="center">
      <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
    </p>
 
 2. Kliknite gumb **`+`** v polju za sporočilo in naložite sliko
-3. Postavite vprašanje, ki zahteva resnično razumevanje slike: `Do you think this is a well-designed GUI?`
+3. Zastavite vprašanje, ki zahteva dejansko razumevanje slike: `Do you think this is a well-designed GUI?`
 
    <p align="center">
      <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="43%"/>
      <img src="assets/vlm_response.png" alt="VLM Response" width="40%"/>
    </p>
 
-4. Model odgovori na podlagi vsebine slike, ne splošnega besedila.
+4. Model odgovori na podlagi vsebine slike, ne s splošnim besedilom.
 
-To dokazuje, da Open WebUI lahko pošilja multimodalne zahteve (besedilo + slika) prek zaledja (Lemonade) vizijskemu modelu.
+To dokazuje, da lahko Open WebUI pošilja multimodalne zahteve (besedilo + slika) prek zaledja (Lemonade) do modela za vid.
 
 ---
 
 <!-- @os:windows -->
-### Dejavnost 3: Generiranje slike iz besedilnega poziva (Stable Diffusion)
+### Dejavnost 3: Ustvarite sliko iz besedilnega poziva (Stable Diffusion)
 
-Modeli Stable Diffusion ne podpirajo generiranja besedila, generirajo samo slike prek API-ja za slike.
+Modeli Stable Diffusion ne podpirajo generiranja besedila, temveč ustvarjajo samo slike prek API-ja za slike (Images API).
 
 #### 1. korak: Konfiguracija generiranja slik v Open WebUI
 
-1. V GUI Lemonade (`http://localhost:13305`) poiščite `SDXL-Turbo` (hitro) ali `SDXL-Base-1.0` (višja kakovost) in ga prenesite.
-2. Pojdite na **Skrbniške nastavitve → Slike** (http://localhost:8080/admin/settings/images)
+1. V vmesniku Lemonade GUI (`http://localhost:13305`) poiščite `SDXL-Turbo` (hitro) ali `SDXL-Base-1.0` (višja kakovost) in ga prenesite.
+2. Pojdite na **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
 3. Nastavite:
-   - **Generiranje slik:** VKLOPLJENO
-   - **Pogon za generiranje slik:** Privzeto (OpenAI)
-   - **Osnovni URL OpenAI API:** `http://localhost:13305/api/v1`
-   - **Ključ OpenAI API:** `-`
+   - **Image Generation:** ON
+   - **Image Generation Engine:** Default (OpenAI)
+   - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
+   - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` ali `SDXL-Base-1.0`
-4. Če želite dodati več parametrov, jih dodajte v besedilno polje kot JSON. Na primer: `{ "steps": 4, "cfg_scale": 1 }`. Razpoložljive parametre si oglejte na [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+4. Če želite dodati več parametrov, jih vnesite v besedilno polje v obliki JSON. Na primer: `{ "steps": 4, "cfg_scale": 1 }`. Razpoložljive parametre si oglejte na [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
    </p>
 
 5. Shranite
-
-
 #### 2. korak: Omogočite generiranje slik za model
-Ta korak zagotavlja, da omogočite generiranje slik kot zmogljivost za vaš model.
-1. Pojdite na **Skrbniške nastavitve → Modeli** (http://localhost:8080/admin/settings/models) in izberite svoj model
+Ta korak zagotovi, da za svoj model omogočite generiranje slik kot zmožnost.
+1. Pojdite v **Admin Settings → Models** (http://localhost:8080/admin/settings/models) in izberite svoj model
 2. Vklopite `Image Generation`
 
    <p align="center">
@@ -935,39 +932,39 @@ Ta korak zagotavlja, da omogočite generiranje slik kot zmogljivost za vaš mode
      <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
    </p>
 
-#### 3. korak: Generirajte sliko z zaslona klepeta
+#### 3. korak: Ustvarite sliko z zaslona klepeta
 
-1. Vrnite se na klepet na `http://localhost:8080`.
-2. V spustnem meniju modelov izberite **LLM za generiranje besedila** (primer: Qwen, Llama). **Ne izberite modela Stable Diffusion**, saj je to izbirnik modela za klepet.
-3. V območju za sporočila kliknite **Integracije** in vklopite **Slika**.
+1. Pojdite nazaj v klepet na `http://localhost:8080`.
+2. V spustnem meniju modela izberite **jezikovni model za generiranje besedila** (primer: Qwen, Llama). **Ne izbirajte modela Stable Diffusion**, saj gre za izbirnik klepetalnega modela.
+3. V območju sporočila kliknite **Integrations** in preklopite **Image** na ON.
 4. Uporabite poziv, kot je: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
-5. Slika se generira in prikaže v klepetu.
+5. Slika se ustvari in prikaže v klepetu.
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-To dokazuje, da Open WebUI lahko usklajuje »dvostopenjski« potek dela:
+To potrjuje, da Open WebUI lahko usklajuje "dvodelni" potek dela:
   - LLM pomaga izboljšati poziv
-  - Slika se generira prek končne točke za slike Lemonade z uporabo Stable Diffusion
+  - slika se ustvari prek Lemonade-ove končne točke Images z uporabo Stable Diffusion
 <!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-### Dejavnost 3: Generiranje slike iz besedilnega poziva (Stable Diffusion)
+### Aktivnost 3: Ustvarite sliko iz besedilnega poziva (Stable Diffusion)
 
-Modeli Stable Diffusion ne podpirajo generiranja besedila, generirajo samo slike prek API-ja za slike.
+Modeli Stable Diffusion ne podpirajo generiranja besedila, ustvarjajo samo slike prek API-ja Images.
 
-#### 1. korak: Konfiguracija generiranja slik v Open WebUI
+#### 1. korak: Konfigurirajte generiranje slik v Open WebUI
 
-1. V GUI Lemonade (`http://localhost:13305`) poiščite `SDXL-Turbo` (hitro) ali `SDXL-Base-1.0` (višja kakovost) in ga prenesite.
-2. Pojdite na **Skrbniške nastavitve → Slike** (http://localhost:8080/admin/settings/images)
+1. V Lemonade GUI (`http://localhost:13305`) poiščite `SDXL-Turbo` (hitro) ali `SDXL-Base-1.0` (višja kakovost) in ga prenesite.
+2. Pojdite v **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
 3. Nastavite:
-   - **Generiranje slik:** VKLOPLJENO
-   - **Pogon za generiranje slik:** Privzeto (OpenAI)
-   - **Osnovni URL OpenAI API:** `http://localhost:13305/api/v1`
-   - **Ključ OpenAI API:** `-`
+   - **Image Generation:** ON
+   - **Image Generation Engine:** Default (OpenAI)
+   - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
+   - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` ali `SDXL-Base-1.0`
 4. Če želite dodati več parametrov, jih dodajte v besedilno polje kot JSON. Na primer: `{ "steps": 4, "cfg_scale": 1 }`. Razpoložljive parametre si oglejte na [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
@@ -979,8 +976,8 @@ Modeli Stable Diffusion ne podpirajo generiranja besedila, generirajo samo slike
 
 
 #### 2. korak: Omogočite generiranje slik za model
-Ta korak zagotavlja, da omogočite generiranje slik kot zmogljivost za vaš model.
-1. Pojdite na **Skrbniške nastavitve → Modeli** (http://localhost:8080/admin/settings/models) in izberite svoj model
+Ta korak zagotovi, da za svoj model omogočite generiranje slik kot zmožnost.
+1. Pojdite v **Admin Settings → Models** (http://localhost:8080/admin/settings/models) in izberite svoj model
 2. Vklopite `Image Generation`
 
    <p align="center">
@@ -988,22 +985,22 @@ Ta korak zagotavlja, da omogočite generiranje slik kot zmogljivost za vaš mode
      <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
    </p>
 
-#### 3. korak: Generirajte sliko z zaslona klepeta
+#### 3. korak: Ustvarite sliko z zaslona klepeta
 
-1. Vrnite se na klepet na `http://localhost:8080`.
-2. V spustnem meniju modelov izberite **LLM za generiranje besedila** (primer: Qwen, Llama). **Ne izberite modela Stable Diffusion**, saj je to izbirnik modela za klepet.
-3. V območju za sporočila kliknite **Integracije** in vklopite **Slika**.
+1. Pojdite nazaj v klepet na `http://localhost:8080`.
+2. V spustnem meniju modela izberite **jezikovni model za generiranje besedila** (primer: Qwen, Llama). **Ne izbirajte modela Stable Diffusion**, saj gre za izbirnik klepetalnega modela.
+3. V območju sporočila kliknite **Integrations** in preklopite **Image** na ON.
 4. Uporabite poziv, kot je: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
-5. Slika se generira in prikaže v klepetu.
+5. Slika se ustvari in prikaže v klepetu.
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-To dokazuje, da Open WebUI lahko usklajuje »dvostopenjski« potek dela:
+To potrjuje, da Open WebUI lahko usklajuje "dvodelni" potek dela:
   - LLM pomaga izboljšati poziv
-  - Slika se generira prek končne točke za slike Lemonade z uporabo Stable Diffusion
+  - slika se ustvari prek Lemonade-ove končne točke Images z uporabo Stable Diffusion
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -1011,50 +1008,50 @@ To dokazuje, da Open WebUI lahko usklajuje »dvostopenjski« potek dela:
 
 ## Odpravljanje težav
 
-### »V Open WebUI se ne prikaže noben model«
-- Najprej preverite Lemonade: v brskalniku odprite `http://localhost:13305/api/v1/models` in potrdite, da so vaši modeli navedeni in preneseni
-- Nato preverite povezavo Open WebUI: pojdite na **Skrbniške nastavitve → Povezave** na `http://localhost:8080/admin/settings/connections` in preverite, ali je osnovni URL `http://localhost:13305/api/v1`
+### "V Open WebUI se ne prikaže noben model"
+- Najprej preverite Lemonade: odprite `http://localhost:13305/api/v1/models` v brskalniku in potrdite, da so vaši modeli navedeni in preneseni
+- Nato preverite povezavo Open WebUI: pojdite v **Admin Settings → Connections** na `http://localhost:8080/admin/settings/connections` in preverite, ali je Base URL nastavljen na `http://localhost:13305/api/v1`
 
-### Sporočilo o napaki »Ta model ne podpira dokončanja klepeta«
-- V spustnem meniju modela za klepet ste izbrali model za slike (SDXL-Turbo / SDXL-Base-1.0).
-- **Rešitev**: za klepet izberite LLM, za generiranje pa uporabite preklop Slika in nastavitve Slike.
+### Sporočilo o napaki "This model does not support chat completion"
+- V spustnem meniju klepetalnega modela ste izbrali model za slike (SDXL-Turbo / SDXL-Base-1.0).
+- **Rešitev**: za klepet izberite LLM, za generiranje pa uporabite preklop Image + nastavitve Images.
 <p align="center">
   <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
 </p>
 
-### Napake/prekoračitve časa pri generiranju slik
-- Začnite najprej z `SDXL-Turbo` (hitro, manj korakov)
-- Ko deluje, preklopite model slik na `SDXL-Base-1.0` za kakovost
+### Napake/časovne omejitve pri generiranju slik
+- Začnite z `SDXL-Turbo` (hitro, manj korakov)
+- Ko deluje, preklopite model za slike na `SDXL-Base-1.0` za boljšo kakovost
 
 ---
 
 ## Naslednji koraki
 
-Zdaj imate delujoč **»lokalni AI sklad«** — en vmesnik, ki nadzoruje več vrst modelov prek standardnega API-ja.
+Zdaj imate delujoč **'lokalni sklad umetne inteligence'** – en sam uporabniški vmesnik, ki nadzoruje več vrst modelov prek standardnega API-ja.
 
 Tukaj so tri razširitve, ki odklenejo povsem nove poteke dela:
 
-### 1. Pretvorba govora v besedilo z Whisper
+### 1. Pretvorba govora v besedilo z Whisperjem
 
-Poskusite pretvoriti zvok v besedilo z modelom Whisper, nato ga posredujte LLM za povzemanje, določanje akcijskih točk ali prepisovanje. To je temelj za zapisnike sestankov in glasovne asistente.
+Poskusite pretvoriti zvok v besedilo z modelom Whisper, nato pa ga podajte v LLM za povzemanje, seznam opravil ali preoblikovanje. To je osnova za zapiske sestankov in glasovno vodene pomočnike.
 
 ### 2. Kodiranje v Pythonu znotraj Open WebUI
 
-Uporabite vgrajeno izkušnjo izvajanja kode v Open WebUI za zagon odlomkov Python, pregledovanje izhodov in hitrejše iteriranje — brez zapuščanja vmesnika. [Referenca](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
+Uporabite vgrajeno izkušnjo izvajanja kode v Open WebUI za zagon Python odsekov, pregled izhodov in hitrejše iteriranje – brez zapuščanja uporabniškega vmesnika. [Vir](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
 
 ### 3. Upodabljanje HTML znotraj Open WebUI
 
-Upodabljajte HTML izhode neposredno v vmesniku. To je presenetljivo zmogljivo za hitro gradnjo prototipov, oblikovanih poročil in interaktivnih odlomkov. [Referenca](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
+Neposredno upodabljajte izhode HTML v vmesniku. To je presenetljivo zmogljivo za izdelavo hitrih prototipov, oblikovanih poročil in interaktivnih odsekov. [Vir](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
 
 ---
 
-## Reference
+## Viri
 
 - [Open WebUI (GitHub)](https://github.com/open-webui/open-webui)
 - [Lemonade (GitHub)](https://github.com/lemonade-sdk/lemonade)
-- [Dokumentacija strežnika Lemonade](https://lemonade-server.ai/docs)
-- [CLI strežnika Lemonade](https://lemonade-server.ai/docs/lemonade-cli/)
+- [Dokumentacija Lemonade Server](https://lemonade-server.ai/docs)
+- [Lemonade Server CLI](https://lemonade-server.ai/docs/lemonade-cli/)
 - [Vodnik za integracijo Lemonade ↔ Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui)
-- [Specifikacija API-ja strežnika Lemonade (končne točke)](https://lemonade-server.ai/docs/server/server_spec)
+- [Specifikacija API-ja Lemonade Server (končne točke)](https://lemonade-server.ai/docs/server/server_spec)
 - [Video vodič (Lemonade)](https://www.youtube.com/watch?v=mcf7dDybUco)
 - [Video vodič (Open WebUI + Lemonade)](https://www.youtube.com/watch?v=yZs-Yzl736E)

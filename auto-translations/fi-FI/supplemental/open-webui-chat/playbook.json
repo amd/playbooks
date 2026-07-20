@@ -1,5 +1,5 @@
 {
   "id": "open-webui-chat",
-  "title": "Chattailu LLM-mallien kanssa Open WebUI:ssa",
-  "description": "Käytä Open WebUI:ta chattailuun LLM:ien kanssa paikallisesti."
+  "title": "LLM-keskustelu Open WebUI:ssa",
+  "description": "Käytä Open WebUI:ta LLM-mallien kanssa keskusteluun paikallisesti."
 }

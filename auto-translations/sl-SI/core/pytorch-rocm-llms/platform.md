@@ -6,41 +6,41 @@ SPDX-License-Identifier: MIT
 
 # Konfiguracija platforme
 
-Ta dokument opisuje pričakovane konfiguracije platforme za izvajanje tega priročnika.
+Ta dokument opisuje pričakovane konfiguracije platforme za izvajanje tega vodnika (playbook).
 
 ## Predpogoji
 
-PyTorch s podporo za ROCm je predhodno nameščen na platformi AMD Ryzen™ AI Halo Developer Platform. Za vse druge naprave morajo uporabniki ročno namestiti PyTorch s podporo za ROCm. Prosimo, glejte ustrezni razdelek za vaš operacijski sistem:
+PyTorch s podporo za ROCm je vnaprej nameščen na platformi AMD Ryzen™ AI Halo Developer Platform. Za vse ostale naprave morajo uporabniki ročno namestiti PyTorch s podporo za ROCm. Prosimo, oglejte si ustrezen razdelek za svoj operacijski sistem:
 
 ### Windows
 
-| Komponenta    | Različica       | Opombe                            |
+| Komponenta     | Različica         | Opombe                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 ali novejša | Predhodno nameščen na platformi AMD Ryzen AI Halo Developer Platform; na vseh drugih napravah ga je treba namestiti ročno |
+| **PyTorch**   | 2.9 ali novejši    | Vnaprej nameščen na AMD Ryzen AI Halo Developer Platform; na vseh ostalih napravah je treba namestiti ročno |
 
 ### Linux
 
-| Komponenta    | Različica       | Opombe                            |
+| Komponenta     | Različica         | Opombe                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.9 ali novejša | Predhodno nameščen na platformi AMD Ryzen AI Halo Developer Platform; na vseh drugih napravah ga je treba namestiti ročno |
+| **PyTorch**   | 2.9 ali novejši    | Vnaprej nameščen na AMD Ryzen AI Halo Developer Platform; na vseh ostalih napravah je treba namestiti ročno |
 
 ## Zahtevani modeli
 
-Naslednji modeli so preizkušeni in optimizirani za vašo platformo:
+Naslednji modeli so testirani in optimizirani za vašo platformo:
 
-| Model | Parametri | Velikost | Lokacija prenosa |
-|-------|-----------|----------|------------------|
-| **openai/gpt-oss-20b** | 20B | ~40 GB | Predhodno nameščen na platformi AMD Ryzen AI Halo Developer Platform; na vseh drugih napravah ga je treba namestiti ročno |
+| Model | Parametri | Velikost | Mesto za prenos |
+|-------|------------|------|-------------------|
+| **openai/gpt-oss-20b** | 20B | ~40GB | Vnaprej nameščen na AMD Ryzen AI Halo Developer Platform; na vseh ostalih napravah je treba namestiti ročno |
 
-Modeli bodo samodejno preneseni v imenik predpomnilnika Hugging Face:
+Modeli bodo samodejno preneseni v predpomnilniški imenik Hugging Face:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
 Zagotovite vsaj **50 GB prostega prostora** za shranjevanje modelov.
 
-## Omrežne zahteve
+## Zahteve glede omrežja
 
-Začetna namestitev zahteva dostop do interneta za prenos modelov iz Hugging Face. Po prenosu lahko priročnik deluje brez povezave.
+Začetna namestitev zahteva dostop do interneta za prenos modelov iz Hugging Face. Po prenosu lahko vodnik (playbook) deluje brez povezave.
 
 - Prvi prenosi modelov lahko trajajo **5–10 minut**, odvisno od velikosti modela in hitrosti povezave
-- Modeli so predpomnjeni lokalno in jih ni treba znova prenašati
+- Modeli se shranijo lokalno v predpomnilnik in jih ni treba ponovno prenašati

@@ -6,23 +6,23 @@ SPDX-License-Identifier: MIT
 
 # 플랫폼 구성
 
-이 문서는 이 플레이북을 실행하기 위한 예상 플랫폼 구성을 설명합니다.
+이 문서는 이 플레이북을 실행하기 위해 예상되는 플랫폼 구성을 설명합니다.
 
 ## Windows
 
 ### LM Studio 설치
 
-LM Studio가 사전 설치되어 있어야 합니다:
+LM Studio가 사전에 설치되어 있어야 합니다:
 
 | 구성 요소 | 버전 | 위치 |
 |-----------|---------|----------|
-| **LM Studio (모델 + 기타)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (프로그램)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (캐시)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### 모델 다운로드
 
-다음 모델들이 LM Studio 모델 디렉터리(`C:\Users\...\.lmstudio\models`)에 이미 존재해야 합니다:
+다음 모델이 LM Studio 모델 디렉터리(`C:\Users\...\.lmstudio\models`)에 이미 존재해야 합니다:
 
 | 모델 유형 | 양자화 | 크기 | 위치 |
 |------------|--------------|------|----------|
@@ -34,7 +34,7 @@ LM Studio가 사전 설치되어 있어야 합니다:
 
 ### LM Studio 설치
 
-자세한 내용은 lmstudio.md(dependencies 폴더 내)를 참조하십시오.
+자세한 내용은 lmstudio.md(dependencies 폴더 내)를 참조하세요.
 
 ### 모델 다운로드
 

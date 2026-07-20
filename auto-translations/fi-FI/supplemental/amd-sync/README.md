@@ -6,70 +6,71 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Tässä opaskirjassa käytetään erikoismerkintöjä, joita GitHub ei pysty näyttämään. Käy osoitteessa [amd.com/playbooks](https://amd.com/playbooks), jotta näet tämän sisällön oikein.
 <!-- @github-only:end -->
 
 # Etäkehitys AMD Syncin avulla
 
 ## Yleiskatsaus
 
-**AMD Sync** muuttaa kannettavasi AMD Ryzen™ AI Halon etäohjaamoon. Unohda manuaalinen SSH-, avain- ja IDE-määritys — asenna AMD Sync ja saat yhdellä napsautuksella pääsyn etäterminaaliin, VS Codeen, JupyterLabiin sekä reaaliaikaiseen GPU/CPU/muisti-kojelautaan Ryzen AI Halossa.
+**AMD Sync** muuttaa kannettavan tietokoneesi AMD Ryzen™ AI Halo -laitteen etäohjaamoksi. Ohita manuaalinen SSH-, avain- ja IDE-asetusten teko — asenna AMD Sync ja saat yhden napsautuksen etäpäätteen, VS Coden, JupyterLabin ja reaaliaikaisen GPU/CPU/muisti-kojelaudan käyttöösi Ryzen AI Halo -laitteella.
 
-Paikallinen koneesi pysyy tuttuna; jokainen komento, muistikirja ja malli suoritetaan Ryzen AI Halossa.
+Paikallinen laitteesi pysyy tuttuna; jokainen komento, muistikirja ja malli suoritetaan Ryzen AI Halo -laitteella.
 
-> **Vinkki**: Tämä sivu sisältää kaikki AMDSyncin uudet päivitykset.
+> **Vinkki**: Tämä sivu sisältää kaikki AMDSyncin uudet päivitykset. 
 
 ## Mitä opit
 
-- SSH:n käyttöönotto Ryzen AI Halossa ja siihen yhdistäminen AMD Syncin kautta
-- VS Coden, terminaalin, JupyterLabin ja reaaliaikaisten mittareiden käynnistäminen Ryzen AI Haloa vasten yhdellä napsautuksella
-- Etätyön järjestäminen AMD Syncin hallittujen projektikohteiden avulla
+- Ottamaan SSH:n käyttöön Ryzen AI Halo -laitteella ja yhdistämään siihen AMD Syncistä
+- Käynnistämään VS Coden, päätteen, JupyterLabin ja Live Metrics -näkymän Ryzen AI Halo -laitetta vasten yhdellä napsautuksella
+- Järjestämään etätyötä AMD Syncin hallinnoimien projektikansioiden avulla
 
 ---
 
-## Peruskäsitteet
+## Perusteet
 
-AMD Syncissä on kaksi puolta: **asiakas** (kannettavasi, jossa AMD Sync -sovellus on käynnissä) ja **palvelin** (Ryzen AI Halo, jossa SSH-palvelin on käynnissä ja johon AMD Sync muodostaa tunnelin). Kaikki AMD Syncistä käynnistämäsi — VS Code, terminaali, muistikirja — avautuu paikallisesti, mutta suoritetaan Ryzen AI Halossa.
+AMD Syncillä on kaksi puolta: **asiakas** (kannettava tietokoneesi, jossa AMD Sync -sovellus on käynnissä) ja **palvelin** (Ryzen AI Halo, jossa on käynnissä SSH-palvelin, johon AMD Sync muodostaa tunnelin). Kaikki AMD Syncistä käynnistämäsi — VS Code, pääte, muistikirja — avautuu paikallisesti mutta suoritetaan Ryzen AI Halo -laitteella.
 
-> **Tuetut asiakkaat:** Windows 11 ja Linux. macOS ei ole tuettu.
+> **Tuetut asiakaslaitteet:** Windows 11 ja Linux. macOS ei ole tuettu.
 
 ---
 
-## Vaihe 1 — SSH:n käyttöönotto Ryzen AI Halossa
+## Vaihe 1 — Ota SSH käyttöön Ryzen AI Halo -laitteella
 
-> **Huomio:** Windowsissa Ryzen AI Halo toimitetaan SSH-palvelin *oletuksena pois päältä*. Linuxissa se toimitetaan SSH-palvelin *oletuksena päällä*.
 
-1. Avaa Ryzen AI Halossa **AMD Ryzen™ AI Developer Center**.
-2. Siirry **Remote**-välilehteen.
+> **Huomautus:** Windowsissa Ryzen AI Halo -laite toimitetaan SSH-palvelin *oletuksena pois päältä*. Linuxissa se toimitetaan SSH-palvelin *oletuksena päällä*.
+
+1. Avaa Ryzen AI Halo -laitteella **AMD Ryzen™ AI Developer Center**.
+2. Siirry **Remote**-välilehdelle.
 3. Kytke **SSH Server** päälle.
-4. Merkitse muistiin **IP-osoite**, **portti** ja **käyttäjänimi**, jotka näkyvät kohdassa **Server Information** — liität ne AMD Synciin.
+4. Merkitse muistiin **Server Information** -kohdassa näkyvät **IP Address**-, **Port**- ja **Username**-tiedot — liität ne myöhemmin AMD Synciin.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/halobox_remote_tab.png" alt="AMD Ryzen AI Developer Center Remote tab showing SSH Server toggle and Server Information"/>
 </div>
 
-> **Huomio:** Tämä on AMD Developer Center Windowsille. Linuxin versio saattaa näyttää erilaiselta, mutta siinä on vastaava etätoiminnallisuus.
+> **Huomautus:** Tämä on Windowsin AMD Developer Center. Linux-versiossa käyttöliittymä voi olla erilainen, mutta etätoiminnot ovat samankaltaisia.
 
 > **Vinkki:** AMD Sync pyytää kyseisen käyttäjän **käyttöjärjestelmän kirjautumissalasanaa**, ei Developer Centerin salasanaa.
 
 ---
 
-## Vaihe 2 — AMD Syncin asentaminen asiakkaalle
+## Vaihe 2 — Asenna AMD Sync asiakaslaitteellesi
 
-AMD Sync toimii Windows 11:ssä ja Linuxissa. Lataa asennusohjelma käyttöjärjestelmällesi ja noudata alla olevia ohjeita. Asennuksen jälkeen napsauta **Accept & Install** **Get Started** -näytöllä — AMD Sync käynnistyy automaattisesti, kun asennus on valmis.
+AMD Sync toimii Windows 11:ssä ja Linuxissa. Lataa käyttöjärjestelmääsi vastaava asennusohjelma ja seuraa alla olevia ohjeita. Asennuksen jälkeen napsauta **Accept & Install** **Get Started** -näytöllä — AMD Sync käynnistyy automaattisesti, kun asennus on valmis.
 
 ### Windows
 
 [Lataa AMDSyncInstaller.exe](https://drivers.amd.com/drivers/amd-sync/windows/amdsyncinstaller.exe)
 
-1. Kaksoisnapsauta `AMDSyncInstaller.exe`.
+1. Kaksoisnapsauta `AMDSyncInstaller.exe`-tiedostoa.
 2. Napsauta **Accept & Install**.
 
-> Jos Windows Firewall pyytää lupaa, salli AMD Syncin verkkoyhteys, jotta se voi tavoittaa Ryzen AI Halon SSH:n kautta.
+> Jos Windowsin palomuuri kysyy lupaa, salli AMD Syncille verkkoyhteys, jotta se voi tavoittaa Ryzen AI Halo -laitteen SSH:n kautta.
 
 ### Linux
 
-Napsauta linkkiä ladataksesi haluamasi muodon:
+Napsauta linkkiä ladataksesi haluamasi tiedostomuodon:
 
 | Muoto | Lataus | Asennuskomento |
 |--------|----------|-----------------|
@@ -77,35 +78,35 @@ Napsauta linkkiä ladataksesi haluamasi muodon:
 | `.rpm` | [AMDSyncInstaller.rpm](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.rpm) | `sudo rpm -i ./amdsyncinstaller.rpm` |
 | `.AppImage` | [AMDSyncInstaller.AppImage](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.AppImage) | `chmod +x ./amdsyncinstaller.AppImage && ./amdsyncinstaller.AppImage` |
 
-> **Huomio:** Ubuntu App Center saattaa merkitä paikallisesti avatun `.deb`-tiedoston *"Mahdollisesti vaaralliseksi."* Tämä on tavallinen varoitus kaikille kolmannen osapuolen paikallisille asennusohjelmille. Jos `.deb`-tiedoston kaksoisnapsautus epäonnistuu, käytä yllä olevaa terminaalikomentoa.
+> **Huomautus:** Ubuntu App Center saattaa merkitä paikallisesti avatun `.deb`-tiedoston *"Potentially unsafe"* (mahdollisesti vaaralliseksi). Tämä on tavanomainen varoitus mille tahansa kolmannen osapuolen paikalliselle asennusohjelmalle. Jos `.deb`-tiedoston kaksoisnapsautus ei onnistu, käytä yllä olevaa päätekomentoa.
 
 ---
 
-## Vaihe 3 — Yhdistäminen Ryzen AI Haloon
+## Vaihe 3 — Yhdistä Ryzen AI Halo -laitteeseesi
 
-Ensimmäisellä käynnistyskerralla AMD Sync näyttää **Add a Remote Device** -lomakkeen. Täytä se Developer Centerin **Remote**-välilehden arvoilla.
+Ensimmäisellä käynnistyskerralla AMD Sync näyttää **Add a Remote Device** -lomakkeen. Täytä se Developer Centerin **Remote**-välilehdeltä saamillasi arvoilla.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/connect_device.png" alt="AMD Sync Add a Remote Device form"/>
 </div>
 
-| Kenttä | Huomiot |
+| Kenttä | Huomautukset |
 |-------|-------|
-| **Device Name** *(valinnainen)* | Kuvaava nimi, kuten `Ryzen AI Halo`. Oletuksena `Device 1`, `Device 2`, … |
+| **Device Name** *(valinnainen)* | Kuvaava nimi, esimerkiksi `Ryzen AI Halo`. Oletusarvot ovat `Device 1`, `Device 2`, … |
 | **Hostname or IP** | Remote-välilehdeltä |
-| **SSH Port** | Remote-välilehdeltä (vain numerot) |
-| **Username** | Käyttöjärjestelmätilisi nimi Ryzen AI Halossa |
-| **Password** | Käyttöjärjestelmän kirjautumissalasanasi — peitetty kirjoittaessasi |
+| **SSH Port** | Remote-välilehdeltä (vain numeroita) |
+| **Username** | Käyttöjärjestelmätilisi nimi Ryzen AI Halo -laitteella |
+| **Password** | Käyttöjärjestelmän kirjautumissalasanasi — piilotetaan kirjoitettaessa |
 
-Napsauta **Add Device**. Lyhyen latausnäytön jälkeen näet **"Connection Successful"** ja päädyt kotinäkymään, joka sijaitsee järjestelmäpalkissasi. Napsauta ikkunan ulkopuolelle sulkeaksesi sen; AMD Sync jää käynnissä ja on yhden napsautuksen päässä.
+Napsauta **Add Device**. Lyhyen latausnäytön jälkeen näet ilmoituksen **"Connection Successful"** ja saavut aloitusnäkymään, joka sijaitsee järjestelmän ilmoitusalueella. Sulje ikkuna napsauttamalla sen ulkopuolelle; AMD Sync jää käyntiin ja on aina yhden napsautuksen päässä.
 
-> **Jos yhteys epäonnistuu,** AMD Sync palaa lomakkeeseen säilyttäen syöttämäsi arvot. Tavallisimmat syyt ovat SSH:n poissaolo käytöstä Ryzen AI Halossa, väärä salasana tai laitteiden sijainti eri verkoissa.
+> **Jos yhteys epäonnistuu,** AMD Sync palaa lomakkeeseen arvojesi säilyessä. Yleisimmät syyt ovat SSH:n olevan pois käytöstä Ryzen AI Halo -laitteella, väärä salasana tai laitteiden oleminen eri verkoissa.
 
 ---
 
-## Vaihe 4 — Ensimmäisen etätyökalun käynnistäminen
+## Vaihe 4 — Käynnistä ensimmäinen etätyökalusi
 
-Kotinäkymässä on viisi yhdellä napsautuksella käytettävää komponenttia — kaikki käytettävissä riippumatta siitä, mitä käyttöjärjestelmää asiakas ja Ryzen AI Halo käyttävät.
+Aloitusnäkymä tarjoaa viisi yhden napsautuksen komponenttia — kaikki käytettävissä riippumatta siitä, mitä käyttöjärjestelmää asiakaslaite ja Ryzen AI Halo käyttävät.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/homepage_after_connect.png" alt="AMD Sync home view with Directory dropdown and launchers"/>
@@ -113,56 +114,55 @@ Kotinäkymässä on viisi yhdellä napsautuksella käytettävää komponenttia �
 
 | Komponentti | Mitä se tekee |
 |-----------|--------------|
-| **Directory** | Valitsee kansion Ryzen AI Halossa, johon VS Code, terminaali ja JupyterLab avautuvat. Oletuksena hallittu `Documents/AMD_Sync`-työtila. |
+| **Directory** | Valitsee kansion Ryzen AI Halo -laitteella, jossa VS Code, Terminal ja JupyterLab avautuvat. Oletuksena hallinnoitu `Documents/AMD_Sync`-työtila. |
 | **VS Code** | Avaa VS Coden paikallisesti SSH-tunnelilla valittuun kansioon. |
-| **Terminal** | Avaa paikallisen terminaalin SSH-yhteydellä Ryzen AI Haloon valitussa kansiossa. |
-| **JupyterLab** | Käynnistää muistikirjaprojektin SSH-yhteydellä Ryzen AI Haloon, rajattuna valittuun kansioon. |
-| **Live Metrics** | Reaaliaikainen näkymä GPU:n, muistin ja CPU:n käyttöasteesta Ryzen AI Halossa. |
+| **Terminal** | Avaa paikallisen päätteen SSH-yhteydellä Ryzen AI Halo -laitteeseen, valitussa kansiossa. |
+| **JupyterLab** | Käynnistää muistikirjaprojektin SSH-yhteydellä Ryzen AI Halo -laitteeseen, rajattuna valittuun kansioon. |
+| **Live Metrics** | Reaaliaikainen näkymä Ryzen AI Halo -laitteen GPU-, muisti- ja CPU-käytöstä. |
 
 ### Kokeile VS Codea
 
-Ensimmäiseksi käynnistykseksi kokeile **VS Codea**.
+Kokeile ensimmäisellä käynnistyskerralla **VS Codea**.
 
-1. Jätä **Directory** oletukseen `~/Documents/AMD_Sync`.
+1. Jätä **Directory** oletusarvoon `~/Documents/AMD_Sync`.
 2. Napsauta **VS Code**.
-3. AMD Sync luo `Documents/AMD_Sync/Project_1`-kansion Ryzen AI Haloon ja avaa VS Coden paikallisesti tunnelöituna siihen.
+3. AMD Sync luo kansion `Documents/AMD_Sync/Project_1` Ryzen AI Halo -laitteelle ja avaa VS Coden paikallisesti tunneloituna siihen.
 
-Nyt muokkaat tiedostoja, jotka sijaitsevat Ryzen AI Halossa, paikallisella VS Code -asetuksellasi. Luo `helloworld.py`, lisää `print("hello world")`, avaa integroitu terminaali (`` Ctrl + ` ``) ja suorita se:
+Muokkaat nyt tiedostoja, jotka sijaitsevat Ryzen AI Halo -laitteella, käyttäen paikallista VS Code -asennustasi. Luo `helloworld.py`-tiedosto, lisää siihen `print("hello world")`, avaa integroitu pääte (`` Ctrl + ` ``) ja suorita se:
 
 <div align="center" style="max-width: 620px; margin: 1.5rem auto;">
   <img src="assets/vscode.png" alt="VS Code SSH-tunneled into Project_1 on the Ryzen AI Halo, running helloworld.py"/>
 </div>
 
-Tilapalkissa lukee **SSH: Linux** — todiste siitä, että koodisi suoritetaan Ryzen AI Halossa, ei kannettavassasi.
+Tilapalkissa lukee **SSH: Linux** — todiste siitä, että koodisi suoritetaan Ryzen AI Halo -laitteella, ei kannettavassa tietokoneessasi.
+### Kokeile Terminaalia
 
-### Kokeile terminaalia
-
-Napsauta **Terminal** pudotaksesi samaan kansioon SSH:n kautta ilman näppäimistöltä poistumista.
+Napsauta **Terminal**-painiketta siirtyäksesi samaan kansioon SSH:n kautta poistumatta näppäimistön äärestä.
 
 <div align="center" style="max-width: 620px; margin: 1.5rem auto;">
   <img src="assets/terminal.png" alt="Local terminal SSH-connected to the Ryzen AI Halo in ~/Documents/AMD_Sync"/>
 </div>
 
-Windowsissa oletusterminaali on **PowerShell** — vaihda **Windows Command Promptiin** Asetukset-valikosta, jos haluat. Linuxissa AMD Sync käyttää järjestelmäsi oletusterminaalia.
+Windowsissa oletusterminaali on **PowerShell** — vaihda **Windows Command Prompt** -vaihtoehtoon asetusvalikosta, jos haluat. Linuxissa AMD Sync käyttää järjestelmäsi oletusterminaalia.
 
 ---
 
-## Kuinka hakemisto toimii
+## Miten hakemisto toimii
 
-**Directory**-pudotusvalikko on AMD Syncin tärkein ohjain — se päättää, mihin jokainen käynnistämäsi työkalu sijoittuu Ryzen AI Halossa.
+**Directory**-pudotusvalikko on AMD Syncin tärkein yksittäinen säädin — se määrittää, minne jokainen käynnistämäsi työkalu sijoittuu Ryzen AI Halo -laitteella.
 
-- **`~/Documents/AMD_Sync` (oletus)** — VS Coden tai JupyterLabin käynnistäminen tästä luo automaattisesti uuden projektikohtaisen kansion (`Project_1`, `Project_2`, … VS Codelle; `Notebook_Project_1`, `Notebook_Project_2`, … JupyterLabille).
-- **Olemassa olevat projektikansiot** — Kaikki `AMD_Sync`-kansion välittömät alikansiot (mukaan lukien kansiot, jotka luot manuaalisesti Ryzen AI Halossa) näkyvät pudotusvalikossa. Viimeksi käyttämästäsi kansiosta tulee seuraavan kerran oletus.
-- **Mukautetut polut** — Kirjoita mikä tahansa absoluuttinen polku avataksesi kansion muualta Ryzen AI Halossa. AMD Sync vain *avaa* sen — se ei luo kansioita `AMD_Sync`-kansion ulkopuolelle, eikä mukautettuja polkuja tallenneta istuntojen välillä.
+- **`~/Documents/AMD_Sync` (oletus)** — VS Coden tai JupyterLabin käynnistäminen tästä luo automaattisesti uuden projektikansion (`Project_1`, `Project_2`, … VS Codelle; `Notebook_Project_1`, `Notebook_Project_2`, … JupyterLabille).
+- **Olemassa olevat projektikansiot** — Mikä tahansa `AMD_Sync`-kansion suora alikansio (mukaan lukien kansiot, jotka luot manuaalisesti Ryzen AI Halo -laitteella) näkyy pudotusvalikossa. Viimeksi käyttämästäsi kansiosta tulee oletus seuraavalla kerralla.
+- **Mukautetut polut** — Kirjoita mikä tahansa absoluuttinen polku avataksesi kansion muualta Ryzen AI Halo -laitteelta. AMD Sync ainoastaan *avaa* sen — se ei luo kansioita `AMD_Sync`-kansion ulkopuolelle, eivätkä mukautetut polut tallennu istuntojen välillä.
 
-Jos mukautettu polku ei toimi, AMD Sync kertoo syyn: virheellinen syntaksi, kansiota ei ole olemassa tai polku osoittaa tiedostoon.
+Jos mukautettu polku ei toimi, AMD Sync kertoo miksi: virheellinen syntaksi, kansiota ei ole olemassa tai polku osoittaa tiedostoon.
 
 ---
 
 ## Live Metrics ja JupyterLab
 
-- **Live Metrics** — Reaaliaikainen kojelauta GPU:n, muistin ja CPU:n käyttöasteesta. Nopein tapa varmistaa, että etäkoulutusajo todella käyttää laitteistoa.
-- **JupyterLab** — Täydellinen muistikirjaprojekti SSH-yhteydellä Ryzen AI Haloon, omalla integroidulla terminaalilla muistikirjasolujen ja komentotulkkikomentojen yhdistämiseen ilman käyttöliittymästä poistumista.
+- **Live Metrics** — Reaaliaikainen kojelauta GPU-, muisti- ja CPU-käytöstä. Nopein tapa varmistaa, että etäkäytössä oleva koulutusajo todella kuormittaa laitteistoa.
+- **JupyterLab** — Täysimittainen muistikirjaprojekti, joka on SSH-yhteydessä Ryzen AI Halo -laitteeseen, ja jossa on oma integroitu terminaali muistikirjan solujen ja komentorivikomentojen yhdistämiseen poistumatta käyttöliittymästä.
 
 ---
 
@@ -172,28 +172,29 @@ Jos mukautettu polku ei toimi, AMD Sync kertoo syyn: virheellinen syntaksi, kans
 
 | Välilehti | Mitä se kattaa |
 |-----|----------------|
-| **Devices** | Listaa kaikki Ryzen AI Halot, joihin olet yhdistänyt onnistuneesti. Yhdistä uudelleen, muokkaa tunnistetietoja tai lisää uusi laite. |
-| **Information** | Linkit dokumentaatioon ja foorumitukeen. |
-| **Customize** | Sijoita sovellus uudelleen työpöydällä, vaihda terminaalityyppiä (vain Windows) ja tarkista AMD Sync -päivitykset. |
+| **Devices** | Luettelo jokaisesta Ryzen AI Halo -laitteesta, johon olet onnistuneesti yhdistänyt. Muodosta yhteys uudelleen, muokkaa tunnuksia tai lisää uusi laite. |
+| **Information** | Linkit dokumentaatioon ja foorumituen tukeen. |
+| **Customize** | Siirrä sovellus työpöydälläsi, vaihda terminaalityyppiä (vain Windows) ja tarkista AMD Sync -päivitykset. |
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/customize_tab.png" alt="AMD Sync Settings menu Customize tab"/>
 </div>
 
-- **Terminaalityyppi (Windows)** — Valitse **PowerShellin** (oletus) ja **Windows Command Promptin** välillä.
-- **Terminaalityyppi (Linux)** — Vain järjestelmän oletusterminaali on käytettävissä.
-- **Sovelluspäivitykset** — Tämä välilehti on oikea paikka tarkistaa ja asentaa uudet AMD Sync -versiot käyttöliittymästä; erillistä päivitysohjelmaa ei tarvita.
 
-> Laite näkyy **Devices**-kohdassa vasta onnistuneen ensimmäisen yhteyden jälkeen, joten epäonnistuneet yritykset eivät täytä listaa.
+- **Terminaalityyppi (Windows)** — Valitse **PowerShellin** (oletus) ja **Windows Command Promptin** väliltä.
+- **Terminaalityyppi (Linux)** — Käytettävissä on vain järjestelmän oletusterminaali.
+- **Sovelluspäivitykset** — Tämä välilehti on oikea paikka tarkistaa ja asentaa uusia AMD Sync -versioita suoraan käyttöliittymästä; erillistä päivitysohjelmaa ei tarvita.
+
+> Laite näkyy **Devices**-kohdassa vasta onnistuneen ensimmäisen yhteyden jälkeen, joten epäonnistuneet yritykset eivät tuki listaa.
 
 ---
 
 ## Vianmääritys
 
-- **Yhteys epäonnistuu välittömästi** — Varmista, että SSH-palvelin on käytössä Ryzen AI Halon **Remote**-välilehdellä Developer Centerissä.
-- **Väärä salasana -virhe** — Käytä Ryzen AI Halon **käyttöjärjestelmän kirjautumissalasanaa**, älä Developer Centeristä otettuja salasanoja.
+- **Yhteys epäonnistuu heti** — Varmista, että SSH-palvelin on käytössä Ryzen AI Halo -laitteen **Remote**-välilehdellä Developer Centerissä.
+- **Väärä salasana -virhe** — Käytä Ryzen AI Halo -laitteen **käyttöjärjestelmän kirjautumissalasanaa**, älä Developer Centeristä otettuja salasanoja.
 - **VS Code -painike ei tee mitään** — Asenna VS Code asiakaskoneellesi osoitteesta [code.visualstudio.com](https://code.visualstudio.com).
-- **AMD Sync -ilmaisinalue puuttuu (Linux/GNOME)** — Asenna ja ota käyttöön AppIndicator-laajennus.
-- **`.deb` ei avaudu tiedostonhallinnasta** — Käytä `sudo apt install ./AMDSyncInstaller.deb` terminaalista.
+- **AMD Sync -ilmaisinkuvake puuttuu (Linux/GNOME)** — Asenna ja ota käyttöön AppIndicator-laajennus.
+- **`.deb`-tiedosto ei avaudu tiedostonhallinnasta** — Käytä komentoa `sudo apt install ./AMDSyncInstaller.deb` terminaalista.
 
 ---

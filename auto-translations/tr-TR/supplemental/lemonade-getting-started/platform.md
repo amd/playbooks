@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 
 # Platform Configuration — Lemonade Local AI
 
-Bu belge, bu playbook tarafından varsayılan olarak kullanılan önceden yüklenmiş yazılımları, model yollarını ve platforma özgü ön koşulları açıklamaktadır.
+Bu belge, bu kılavuzun varsaydığı önceden yüklenmiş yazılımları, model yollarını ve platforma özgü ön koşulları açıklar.
 
-## Önceden Yüklenmiş Yazılımlar
+## Önceden Yüklenmiş Yazılım
 
 | Yazılım | Sürüm | Amaç |
 |----------|---------|---------|
-| Lemonade Server | En son sürüm | OpenAI uyumlu API ile yerel LLM sunucusu |
-| Python | 3.10–3.13 | OpenAI Python istemci örneği için gereklidir |
+| Lemonade Server | En son sürüm | OpenAI uyumlu API'ye sahip yerel LLM sunucusu |
+| Python | 3.10–3.13 | OpenAI Python istemcisi örneği için gereklidir |
 
-## Varsayılan Model Depolama Alanı
+## Varsayılan Model Depolama
 
-Lemonade aracılığıyla indirilen modeller, Hugging Face Hub belirtimine göre depolanır:
+Lemonade aracılığıyla indirilen modeller, Hugging Face Hub spesifikasyonu kullanılarak depolanır:
 
 | Platform | Varsayılan Yol |
 |----------|-------------|
@@ -38,4 +38,4 @@ Depolama konumunu değiştirmek için `HF_HOME` ortam değişkenini ayarlayın.
 ## Ağ Gereksinimleri
 
 - İlk model indirmesi için internet bağlantısı gereklidir (modele bağlı olarak 1–25 GB)
-- Modeller indirildikten sonra internet bağlantısı gerekmez
+- Modeller indirildikten sonra internete gerek yoktur

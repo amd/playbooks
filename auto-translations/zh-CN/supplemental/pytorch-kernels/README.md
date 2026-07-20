@@ -6,57 +6,57 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> 本手册使用了 GitHub 无法渲染的特殊标签。请访问 [amd.com/playbooks](https://amd.com/playbooks) 以正确预览此内容。
 <!-- @github-only:end -->
 
 ## 概述
 
-从头编写一个 GPU 内核，编译它，在 AMD GPU 上启动它，并观察利用率飙升。本 playbook 展示了 GPU 计算的实际工作原理：编写内核代码，并在数千个线程上并行执行。
+从零开始编写一个 GPU kernel，编译它，在 AMD GPU 上启动它，并观察利用率飙升。本手册展示 GPU 计算的实际工作原理：编写 kernel 代码，并在数千个线程中并行执行它。
 
-> **注意**：这是一个相当复杂的 playbook，可能需要一些额外的调试和修改。
+> **注意**：这是一个相当复杂的手册，可能需要一些额外的调试和修改。
 
-## 您将学到的内容
+## 你将学到什么
 
 <!-- @os:windows -->
-- GPU 内核的工作原理：网格、块、线程，以及将它们映射到数据的索引模型
-- AMD ROCm/HIP 栈如何让您编写 CUDA 风格的代码，并在 AMD GPU 上无需修改即可运行
-- 如何使用 `torch.cuda._compile_kernel` 在运行时编译内核
-- 如何使用 `CUDAExtension` + pybind11 构建原生 C++ 内核扩展，并从 Python 中导入
+- GPU kernel 是如何工作的：网格（grid）、块（block）、线程（thread），以及将它们映射到数据的索引模型
+- AMD ROCm/HIP 技术栈如何让你编写的 CUDA 风格代码无需修改即可在 AMD GPU 上运行
+- 如何使用 `torch.cuda._compile_kernel` 在运行时编译 kernel
+- 如何使用 `CUDAExtension` + pybind11 构建一个原生 C++ kernel 扩展，并从 Python 中导入它
 <!-- @os:end -->
 <!-- @os:linux -->
-- GPU 内核的工作原理：网格、块、线程，以及将它们映射到数据的索引模型
-- AMD ROCm/HIP 栈如何让您编写 CUDA 风格的代码，并在 AMD GPU 上无需修改即可运行
-- 如何使用 `torch.cuda._compile_kernel` 在运行时编译内核
-- 如何使用 `CUDAExtension` + pybind11 构建原生 C++ 内核扩展，并从 Python 中导入
-- 如何测量内核执行时间，并使用 `amd-smi` 监控实时 GPU 利用率
+- GPU kernel 是如何工作的：网格（grid）、块（block）、线程（thread），以及将它们映射到数据的索引模型
+- AMD ROCm/HIP 技术栈如何让你编写的 CUDA 风格代码无需修改即可在 AMD GPU 上运行
+- 如何使用 `torch.cuda._compile_kernel` 在运行时编译 kernel
+- 如何使用 `CUDAExtension` + pybind11 构建一个原生 C++ kernel 扩展，并从 Python 中导入它
+- 如何测量 kernel 执行时间，并使用 `amd-smi` 实时监控 GPU 利用率
 <!-- @os:end -->
 
 ---
 
-本 playbook 涵盖两种内核开发方法：
+本手册涵盖两种 kernel 开发方法：
 
 <!-- @os:windows -->
 | 方法 | 入口点 |
 |---|---|
-| **JIT 编译** | `torch.cuda._compile_kernel`，将内核作为 Python 字符串编写，无需构建步骤 |
-| **C++ 扩展** | `CUDAExtension` + pybind11：将 `.cu` 文件编译为原生 `.pyd` 并导入 |
+| **JIT 编译** | `torch.cuda._compile_kernel`，将 kernel 编写为 Python 字符串，无需构建步骤 |
+| **C++ 扩展** | `CUDAExtension` + pybind11：将 `.cu` 文件编译为原生 `.pyd` 并导入它 |
 <!-- @os:end -->
 <!-- @os:linux -->
 | 方法 | 入口点 |
 |---|---|
-| **JIT 编译** | `torch.cuda._compile_kernel`，将内核作为 Python 字符串编写，无需构建步骤 |
-| **C++ 扩展** | `CUDAExtension` + pybind11：将 `.cu` 文件编译为原生 `.so` 并导入 |
+| **JIT 编译** | `torch.cuda._compile_kernel`，将 kernel 编写为 Python 字符串，无需构建步骤 |
+| **C++ 扩展** | `CUDAExtension` + pybind11：将 `.cu` 文件编译为原生 `.so` 并导入它 |
 <!-- @os:end -->
 
-两种方法均可在 AMD GPU 上运行。这是因为 PyTorch 的 ROCm 构建将整个 CUDA API 接口映射到 HIP。这意味着 `torch.cuda`、`CUDAExtension` 和 CUDA 内核语法都能在 AMD 硬件上透明地工作。
+这两种方法都可以在 AMD GPU 上运行。这是因为 PyTorch 的 ROCm 构建版本将整个 CUDA API 表面映射到了 HIP。这意味着 `torch.cuda`、`CUDAExtension` 以及 CUDA kernel 语法都可以在 AMD 硬件上透明地工作。
 
 ---
 
 ## 背景知识
 
-### 什么是 GPU 内核？
+### 什么是 GPU Kernel？
 
-GPU 内核是一种在数千个 GPU 线程上同时并行运行的函数。与每次调用只执行一次的 CPU 函数不同，内核以**网格**（grid）中的**块**（block）为单位启动，每个块包含多个**线程**（thread），所有线程在不同数据上执行相同的代码。
+GPU kernel 是一个可以同时在数千个 GPU 线程中并行运行的函数。与每次调用只执行一次的 CPU 函数不同，kernel 是通过一个由多个 **块（block）** 组成的 **网格（grid）** 来启动的，每个块包含许多 **线程（thread）**，它们都在不同的数据上执行相同的代码。
 
 <p align="center">
   <img src="assets/grid_threads.png" width="900"/>
@@ -64,52 +64,52 @@ GPU 内核是一种在数千个 GPU 线程上同时并行运行的函数。与�
 
 ### 线程索引模型
 
-启动内核时，您需要指定两个维度：
+启动 kernel 时，你需要指定两个维度：
 
 | 变量 | 含义 |
 |---|---|
-| `gridDim` | 网格中的块数 |
-| `blockDim` | 每个块中的线程数 |
+| `gridDim` | 网格中的块数量 |
+| `blockDim` | 每个块中的线程数量 |
 
-每个线程可以访问三个内置只读变量：
+每个线程都可以访问三个内置的只读变量：
 
 | 变量 | 含义 |
 |---|---|
-| `blockIdx.x` | 该线程所属的块编号 |
-| `blockDim.x` | 一个块中的线程数 |
-| `threadIdx.x` | 线程在其块内的索引 |
+| `blockIdx.x` | 该线程属于哪个块 |
+| `blockDim.x` | 一个块中的线程数量 |
+| `threadIdx.x` | 线程在其所属块内的索引 |
 
 ### 全局线程 ID
 
-这些变量组合起来计算出全局唯一的线程索引：
+这些变量组合起来可以计算出一个全局唯一的线程索引：
 
 ```c
 int idx = blockIdx.x * blockDim.x + threadIdx.x;
 ```
 
-总线程数 = `gridDim.x * blockDim.x`。每个线程独立处理一个元素。这是**数据并行**的基础。相同的操作同时在多个元素上运行，线程之间没有依赖关系。
+总线程数 = `gridDim.x * blockDim.x`。每个线程独立处理一个元素。这是**数据并行**的基础。相同的操作会同时在许多元素上运行，线程之间没有依赖关系。
 
 ---
 
-### GPU 执行模型：Wavefront
+### GPU 执行模型：波前（Wavefronts）
 
-AMD GPU 以 **32** 个线程为一组执行，称为 **wavefront**。一个 wavefront 中的所有线程同时执行相同的指令。这影响了最优块大小的选择（256 个线程 = 8 个 wavefront = 良好的调度效率）。
+AMD GPU 以称为 **波前（wavefront）** 的 **32** 个线程为一组来执行线程。波前中的所有线程会同时执行相同的指令。这会影响最佳块大小的选择（256 个线程 = 8 个波前 = 良好的调度效率）。
 
 ### AMD GPU 编程：HIP + ROCm
 
-**ROCm** 是 AMD 的开源 GPU 计算栈（驱动程序、编译器、库、运行时）。**HIP** 位于其上层，设计上与 CUDA 语法完全相同。PyTorch 的 ROCm 构建透明地将 `torch.cuda.*` 映射到 HIP，因此相同的代码可在 AMD GPU 上运行。
+**ROCm** 是 AMD 的开源 GPU 计算技术栈（驱动程序、编译器、库、运行时）。**HIP** 构建在其之上，其设计目标是在语法上与 CUDA 保持一致。PyTorch 的 ROCm 构建版本会将 `torch.cuda.*` 透明地映射到 HIP，因此相同的代码可以在 AMD GPU 上运行。
 
 ---
 
 ### PyTorch + AMD/HIP
 
-PyTorch 提供 ROCm 构建版本，其中 CUDA API 接口（`torch.cuda.*`）由 HIP 透明支持。这意味着：
+PyTorch 提供了一个 ROCm 构建版本，其中 CUDA API 表面（`torch.cuda.*`）由 HIP 透明地支撑。这意味着：
 
-- `torch.cuda.is_available()` 可在搭载 ROCm 的 AMD GPU 上正常工作
-- `tensor.to("cuda")` 在 AMD GPU 上分配内存
-- `torch.version.hip` 暴露 HIP 版本信息
+- `torch.cuda.is_available()` 在装有 ROCm 的 AMD GPU 上可以正常工作
+- `tensor.to("cuda")` 会在 AMD GPU 上分配内存
+- `torch.version.hip` 会暴露 HIP 版本
 
-PyTorch 还提供了 `torch.cuda._compile_kernel()`，这是一个高级快捷方式，可 JIT 编译原始内核字符串并返回一个可调用对象，无需单独的构建步骤。
+PyTorch 还提供了 `torch.cuda._compile_kernel()`，这是一个高级快捷方式，可以即时编译原始的 kernel 字符串并返回一个可调用对象，而无需单独的构建步骤。
 
 ---
 
@@ -119,11 +119,11 @@ PyTorch 还提供了 `torch.cuda._compile_kernel()`，这是一个高级快捷�
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 安装软件前提条件
+## 安装软件依赖项
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### 前提条件 - Windows
-- 安装最新版：[AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- 安装最新版本：[AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -131,7 +131,7 @@ PyTorch 还提供了 `torch.cuda._compile_kernel()`，这是一个高级快捷�
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-在 Linux 上，在您选择的目录中打开终端，按照以下命令创建一个已安装 ROCm+PyTorch 的 venv。
+在 Linux 上，在你选择的目录中打开一个终端，按照以下命令创建一个已经安装好 ROCm+Pytorch 的 venv。
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -144,13 +144,13 @@ source kernel-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**授予您的用户访问 GPU 设备的权限**（注销并重新登录后生效）：
+**授予你的用户访问 GPU 设备的权限**（需要注销并重新登录才能生效）：
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-在 Linux 上，在您选择的目录中打开终端，按照以下命令创建一个 venv。
+在 Linux 上，在你选择的目录中打开一个终端，按照以下命令创建一个 venv。
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 sudo apt update
@@ -164,7 +164,7 @@ source kernel-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-在 Windows 上，在您选择的目录中打开终端，按照以下命令创建一个 venv。
+在 Windows 上，在你选择的目录中打开一个终端，按照以下命令创建一个 venv。
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv kernel-env
@@ -173,7 +173,8 @@ kernel-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
-> **提示**：Windows 用户在运行某些 PowerShell 命令之前，可能需要修改 PowerShell 执行策略（例如，将其设置为 RemoteSigned 或 Unrestricted）。
+> **提示**：Windows 用户在运行某些 PowerShell 命令之前，可能需要修改其 PowerShell 执行策略（例如，
+> 将其设置为 RemoteSigned 或 Unrestricted）。
 
 <!-- @os:end -->
 ### 安装基本依赖项
@@ -192,14 +193,14 @@ kernel-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-> **注意：** 对于本教程，即使在 Ryzen AI Halo 上，也需要将 ROCm 和 PyTorch 安装到虚拟环境中，因为自定义内核编译需要完整的开发头文件。
+> **注意：** 对于本手册,即使在 Ryzen AI Halo 上,也需要在虚拟环境中安装 ROCm 和 PyTorch,因为自定义内核编译需要完整的开发头文件。
 
-安装 ROCm：
+安装 ROCm:
 ```powershell
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[libraries,devel]"
 ```
 
-安装 PyTorch：
+安装 PyTorch:
 ```powershell
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
 ```
@@ -226,9 +227,9 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 ### 安装其他依赖项
 
 <!-- @os:linux -->
-安装 Linux C/C++ 构建工具链。这是一个系统级依赖项，C++ 扩展演练需要用到它，因为 `CUDAExtension` 会从 `.cu` 文件编译原生 `.so` 模块。
+安装 Linux C/C++ 构建工具链。这是系统级依赖项,是 C++ 扩展演练所必需的,因为 `CUDAExtension` 需要从 `.cu` 文件构建原生 `.so` 模块。
 
-在 Linux 机器上运行一次，在已创建的 Python 虚拟环境之外执行：
+请在 Linux 机器上运行一次此操作,在创建的 Python 虚拟环境之外:
 
 ```bash
 sudo apt update
@@ -236,7 +237,7 @@ sudo apt install -y build-essential gcc g++
 ```
 <!-- @os:end -->
 
-激活 `kernel-env` 虚拟环境后，安装 Python 构建依赖项：
+激活 `kernel-env` 虚拟环境后,安装 Python 构建依赖项:
 <!-- @test:id=install-deps timeout=60 setup=activate-venv -->
 ```bash
 python -m pip install "setuptools<82" wheel ninja
@@ -259,22 +260,22 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:end -->
 
 <!-- @os:windows -->
-请确保已安装 [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) 或[更新版本](https://visualstudio.microsoft.com/vs/community/)，并选择了**使用 C++ 的桌面开发**工作负载。
+请确保已安装 [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) 或[更新版本](https://visualstudio.microsoft.com/vs/community/),并包含**使用 C++ 的桌面开发**工作负载。
 
-> **注意**：Visual Studio C++ 环境设置仅适用于 **C++ 扩展**方式，JIT 编译方式不需要此设置。
+> **注意**：此 Visual Studio C++ 环境设置仅在 **C++ 扩展**方法中需要。JIT 编译方法不需要此设置。
 
-打开 PowerShell 终端，在构建 C++ 扩展之前运行以下命令。
+打开 PowerShell 终端,并在构建 C++ 扩展之前运行以下命令。
 
 **步骤 1：查找已安装的 Visual Studio C++ 环境**
 
-**(A) 找到 `vswhere.exe`，该文件随 Visual Studio Installer 一起安装**
+**(A) 定位随 Visual Studio Installer 一起安装的 `vswhere.exe`**
 ```powershell
 $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 
 if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(B) 从 Visual Studio 2022 或更新版本（含 C++ 构建工具）中找到 `vcvars64.bat`**
+**(B) 从 Visual Studio 2022 或更新版本中查找带有 C++ 构建工具的 `vcvars64.bat`**
 
 ```powershell
 $Vcvars = & $VsWhere `
@@ -295,9 +296,9 @@ Write-Host "Using Visual Studio C++ environment: $Vcvars"
 
 **步骤 2：激活 Visual Studio C++ 构建环境**
 
-**(A) 运行 `vcvars64.bat` 并捕获其设置的环境变量**
+**(A) 运行 `vcvars64.bat` 并捕获其设置的环境**
 
-这将使 `cl.exe`、`INCLUDE`、`LIB`、`LIBPATH` 以及 Windows SDK 路径可用。
+这将使 `cl.exe`、`INCLUDE`、`LIB`、`LIBPATH` 和 Windows SDK 路径可用。
 
 ```powershell
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
@@ -309,7 +310,7 @@ if ($ExitCode -ne 0) {
 }
 ```
 
-**(B) 将 Visual Studio 环境变量导入当前 PowerShell 会话**
+**(B) 将 Visual Studio 环境变量导入此 PowerShell 会话**
 
 ```powershell
 $VsEnv | ForEach-Object {
@@ -416,7 +417,7 @@ $env:DISTUTILS_USE_SDK = "1"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-使用以下命令验证 AMD GPU 是否可见：
+使用以下命令验证 AMD GPU 是否可见:
 <!-- @test:id=amd-smi-linux timeout=60 setup=activate-venv -->
 ```bash
 amd-smi
@@ -551,23 +552,23 @@ $code | python -
 
 ## 下载所需文件
 
-通过创建 **2 个新文件夹** 并下载对应文件，建立以下目录结构：
+创建以下目录结构,方法是新建 **2 个文件夹**并下载相应的文件:
 
-| 目录 | 需下载的文件 | 描述 |
+| 目录 | 需下载的文件 | 说明 |
 |-----------|-------------------|-------------|
-| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| 向量加法内核的 JIT 和 C++ 扩展文件 |
-| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | 矩阵乘法内核的 JIT 和 C++ 扩展文件 |
+| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| 用于向量加法内核的 JIT 和 C++ 扩展文件 |
+| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | 用于矩阵乘法内核的 JIT 和 C++ 扩展文件 |
 
 
 ## 演练
 
 ### 演练 1：向量加法
 
-#### 方式 A：JIT 编译
+#### 方法 A：JIT 编译
 
-JIT（即时）编译是指将内核以原始 C++ 字符串的形式写在 Python 内部，并在运行时编译，无需额外的构建步骤。
+JIT（即时）编译意味着内核以原始 C++ 字符串的形式写在 Python 中,并在运行时编译,无需额外的构建步骤。
 
-要使用 [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)，请确保已下载该文件，然后运行：
+要使用 [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py),请确保已下载该文件并运行:
 ```bash
 cd Vector_Addition # if not already inside the directory
 python add_one_kernel.py
@@ -613,31 +614,31 @@ print("First 5 elements:", x[:5].cpu())
 #Expected output: tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @os:linux -->
-> **提示**：该脚本还会启动一个后台线程，每隔 100ms 轮询一次 `amd-smi`，以记录内核运行期间的峰值和平均 GPU 利用率。
+> **提示**：该脚本还会启动一个后台线程,每 100ms 轮询一次 `amd-smi`,以记录内核运行期间的峰值和平均 GPU 利用率。
 <!-- @os:end -->
 
-> **注意**：**为什么块大小是 256？** <br>
-> - 内核使用**每块 256 个线程**，因为这与 **AMD GPU 的波前执行模型**非常契合。
-> - 回顾一下，AMD 硬件以 32 个线程为一组执行，每块产生 8 个波前。（8 个波前 × 32 个线程 = 1 个块）
+> **注意**：**为什么区块大小是 256？** <br>
+> - 内核使用**每个区块 256 个线程**,因为这与 **AMD GPU 的波前执行模型**很好地契合。
+> - 请记住,AMD 硬件以 32 个线程为一组执行线程,因此每个区块产生 8 个波前。（8 个波前 x 32 个线程 = 1 个区块）
 
 
-**工作负载的作用：**
+**该工作负载的作用：**
 
-内核人为地添加了额外工作以演示 GPU 利用率：
+该内核人为地添加额外工作以展示 GPU 利用率：
 
-- 张量中有 **1 亿个元素**
-- **内层循环每个元素每次内核启动运行 1,000 次**
-- 共 **200 次内核启动**
+- 张量中包含 **100,000,000 个元素**
+- 每次内核启动时,每个元素的**内循环运行 1,000 次**
+- 总共 **200 次内核启动**
 
-**计算过程：**  
-- 每个元素：增加 1 × 1,000 次迭代 × 200 次启动 = 200,000  
-- 最终结果：1.0（初始值）+ 200,000（累加）= 200,001.0
+**数学计算：**  
+- 每个元素：递增 1 × 1,000 次迭代 × 200 次启动 = 200,000  
+- 最终结果：1.0（初始值）+ 200,000（累加值）= 200,001.0
 
-**为什么需要内层循环？**  
-- 如果没有 `for (int i = 0; i < 1000; i++)` 循环，200 次启动会瞬间完成，监控工具将无法捕获有意义的 GPU 利用率。人为增加的工作量使每次内核运行时间足够长，以便监控工具测量性能。
+**为什么需要内循环？**  
+- 如果没有 `for (int i = 0; i < 1000; i++)` 循环,200 次启动会立即完成,监控工具将无法捕获有意义的 GPU 利用率数据。人为添加的工作量使每次内核运行的时间足够长,便于监控工具测量性能。
 
 <!-- @os:linux -->
-**预期输出：**[性能数据因设备而异]
+**预期输出：**[性能数据会有所不同]
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
@@ -647,7 +648,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **注意**：在 Windows 上不支持 `amd-smi`。要跟踪 GPU 利用率，可以使用任务管理器，运行程序时应能看到利用率短暂飙升。
+> **注意**：在 Windows 上,不支持 `amd-smi`。要跟踪 GPU 利用率,可以使用任务管理器,运行程序时你应该会看到短暂的利用率峰值。
 
 **预期输出：**
 ```
@@ -656,7 +657,7 @@ Elapsed time: 2.753s
 No GPU Usage captured.
 ```
 <!-- @os:end -->
-**干得好！您刚刚运行了第一个 GPU 内核。**
+**做得好！你刚刚运行了第一个 GPU 内核。**
 
 <!-- @os:linux -->
 <!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
@@ -799,30 +800,30 @@ $code | python -
 ---
 #### 方法 B：C++ 扩展
 
-第二种方法更为手动：将内核和 Python 绑定写入单个 `.cu` 文件，使用 PyTorch 的构建系统对其进行本地编译，然后将其导入 Python。
+第二种方法更加手动：将内核和 Python 绑定写入单个 `.cu` 文件，使用 PyTorch 的构建系统进行本机编译，然后将其导入 Python。
 
 <!-- @os:windows -->
-> **注意**：C++ 扩展方法需要 Visual Studio C++ 构建环境，因为 PyTorch 会将 `.cu` 源文件编译为本地 `.pyd` 扩展模块。构建该本地扩展依赖于 Visual Studio 提供的 Microsoft C++ 工具链（编译器、链接器和构建工具）。在构建扩展之前，请先运行设置部分中的 Visual Studio 激活命令。
+> **注意**：C++ 扩展方法需要 Visual Studio C++ 构建环境，因为 PyTorch 会将 `.cu` 源文件编译为本机 `.pyd` 扩展模块。构建该本机扩展依赖于 Visual Studio 提供的 Microsoft C++ 工具链（编译器、链接器和构建工具）。在构建扩展之前，请先运行设置章节中的 Visual Studio 激活命令。
 <!-- @os:end -->
 
-如果尚未下载，请下载以下文件：
+如果尚未下载以下文件，请先下载：
 <!-- @os:windows -->
 | 文件 | 作用 |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | 内核 + 启动器 + pybind11 绑定，所有内容在一个文件中 |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | 内核 + 启动器 + pybind11 绑定，全部在一个文件中 |
 | [setup.py](assets/Vector_Addition/setup.py) | 构建脚本，使用 `CUDAExtension` 将 `.cu` 编译为 `.pyd` |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | 运行构建产物的 Python 脚本 |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | 运行构建好的产物的 Python 脚本 |
 <!-- @os:end -->
 
 <!-- @os:linux -->
 | 文件 | 作用 |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | 内核 + 启动器 + pybind11 绑定，所有内容在一个文件中 |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | 内核 + 启动器 + pybind11 绑定，全部在一个文件中 |
 | [setup.py](assets/Vector_Addition/setup.py) | 构建脚本，使用 `CUDAExtension` 将 `.cu` 编译为 `.so` |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | 运行构建产物的 Python 脚本 |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | 运行构建好的产物的 Python 脚本 |
 <!-- @os:end -->
 
-#### **步骤 1：内核、启动器和绑定** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu))：
+#### **步骤 1：内核、启动器和绑定**（[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)）：
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -848,30 +849,30 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
->**提示**：为什么使用 `hipDeviceSynchronize()`？<br>
-> - GPU 内核启动是异步的。当 CPU 运行 `add_one<<<grid_size, block_size>>>(data, n);` 时，它会立即执行下一条指令，而不等待 GPU。`hipDeviceSynchronize()` 强制 CPU 等待，直到 GPU 内核完成。
+>**提示**：为什么要使用 `hipDeviceSynchronize()`？<br>
+> - GPU 内核启动是异步的。当 CPU 运行 `add_one<<<grid_size, block_size>>>(data, n);` 时，它会立即执行下一条指令，而不会等待 GPU。`hipDeviceSynchronize()` 会强制 CPU 等待，直到 GPU 内核执行完成。
 
 #### **步骤 2：构建**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**注意**：此命令在当前目录中查找 `setup.py`，以构建我们创建的 .cu 文件。
+>**注意**：此命令会在当前目录中查找 `setup.py`，以构建我们创建的 .cu 文件。
 
 
-`CUDAExtension` 是来自 `torch.utils.cpp_extension` 的 CUDA 构建辅助工具。在 ROCm 下，PyTorch **将 `CUDAExtension` 重新映射为使用 `hipcc`** 而非 `nvcc`。ROCm 拦截构建路径并通过 HIP 编译器进行路由，将 CUDA 代码移植到 AMD。
+`CUDAExtension` 是来自 `torch.utils.cpp_extension` 的 CUDA 构建辅助工具。在 ROCm 环境下，PyTorch 会**将 `CUDAExtension` 重新映射为使用 `hipcc`**，而不是 `nvcc`。ROCm 会拦截构建路径，并将其通过 HIP 编译器进行路由，从而将 CUDA 代码移植到 AMD。
 
 这将生成以下文件：
 <!-- @os:windows -->
 - `build/`：包含 `.pyd` 文件的目录
-- `add_one_kernel.hip`：通过 hipify 处理 `.cu` 文件生成的 HIP 源文件；这是 `hipcc` 实际编译的内容
+- `add_one_kernel.hip`：对 `.cu` 文件进行 hipify 转换后生成的 HIP 源代码；这才是 `hipcc` 实际编译的内容
 <!-- @os:end -->
 <!-- @os:linux -->
 - `build/`：包含 `.so` 文件的目录
-- `add_one_kernel.hip`：通过 hipify 处理 `.cu` 文件生成的 HIP 源文件；这是 `hipcc` 实际编译的内容
+- `add_one_kernel.hip`：对 `.cu` 文件进行 hipify 转换后生成的 HIP 源代码；这才是 `hipcc` 实际编译的内容
 <!-- @os:end -->
 
-#### **步骤 3：从 Python 中使用** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py))：
-执行此脚本以查看内核的实际效果：
+#### **步骤 3：从 Python 中使用**（[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)）：
+执行此脚本以查看内核的运行效果：
 ```bash
 cd Vector_Addition # if not already in directory
 python run_compiled_addition.py
@@ -1021,12 +1022,12 @@ finally {
 
 ---
 
-### 演练 2：矩阵乘法
+### 演示 2：矩阵乘法
 
 矩阵乘法计算 **C = A × B**，其中：
-- **A** 为 M×N（行 × 列）
-- **B** 为 N×K  
-- **C** 为 M×K（结果）
+- **A** 是 M×N（行 × 列）
+- **B** 是 N×K  
+- **C** 是 M×K（结果）
 
 每个输出元素定义为：
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
@@ -1035,7 +1036,7 @@ C 的每个元素都是独立计算的，这使其非常适合 GPU 并行处理�
 
 #### 如何映射到 GPU 线程
 
-与向量加法（一维）不同，矩阵乘法产生**二维输出**，因此我们使用**二维线程网格**：
+与（一维的）向量加法不同，矩阵乘法产生的是**二维输出**，因此我们使用**二维线程网格**：
 
 | | 向量加法 | 矩阵乘法 |
 |---|---|---|
@@ -1044,17 +1045,17 @@ C 的每个元素都是独立计算的，这使其非常适合 GPU 并行处理�
 | **启动模式** | 一维网格：`(grid_x, 1, 1)` | 二维网格：`(grid_x, grid_y, 1)` |
 | **块大小** | `(256, 1, 1)` | `(16, 16, 1)` = 256 个线程 |
 
-每个线程计算输出矩阵 C 的一个元素。位于 `(row, col)` 位置的线程通过将 A 的对应行与 B 的对应列相乘来计算 `C[row][col]`。
+每个线程计算输出矩阵 C 中的一个元素。位于 `(row, col)` 位置的线程通过将 A 的相应行与 B 的相应列相乘，来计算 `C[row][col]`。
 
-**内存布局**：GPU 内存是扁平的（一维），但矩阵按行存储。要访问 `A[row][col]`，内核使用 `A[row * N + col]`。
+**内存布局**：GPU 内存是扁平的（一维），但矩阵是按行存储的。要访问 `A[row][col]`，内核使用 `A[row * N + col]`。
 
 
 #### 方法 A：JIT 编译：
 
-与演练 1 类似，内核以原始 C++ 字符串的形式写在 Python 内部，并通过 PyTorch 内置的 JIT 在运行时编译。
+与演示 1 类似，内核在 Python 中以原始 C++ 字符串的形式编写，并通过 PyTorch 内置的 JIT 在运行时进行编译。
 
 
-要使用 [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)，请确保已下载并运行：
+要使用 [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)，请确保已下载该文件，然后运行：
 ```bash
 cd Matrix_Multiplication # if not already inside the directory
 python matmul_kernel.py
@@ -1111,10 +1112,10 @@ max_err = (C - C_ref).abs().max().item()
 print(f"Max error vs torch.mm: {max_err:.6f}")
 ```
 
-该脚本使用较小的容差将结果与 `torch.mm` 进行验证。由于并行归约顺序的不同，GPU 上的浮点运算与 CPU 实现相比可能产生微小的数值差异。
+该脚本会以较小的容差将结果与 `torch.mm` 进行验证。由于并行归约顺序的不同，GPU 上的浮点运算相比 CPU 实现可能会产生细微的数值差异。
 
 <!-- @os:linux -->
-**预期输出：**[性能数据因环境而异]
+**预期输出：**[性能数据会有所不同]
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -1124,7 +1125,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **注意**：在 Windows 上，不支持 `amd-smi`。要跟踪 GPU 利用率，可以使用任务管理器，在运行程序时应能看到利用率短暂飙升。
+> **注意**：在 Windows 上，不支持 `amd-smi`。要跟踪 GPU 利用率，可以使用任务管理器，运行程序时应能看到短暂的利用率峰值。
 
 **预期输出：**
 ```
@@ -1301,26 +1302,26 @@ $code | python -
 ---
 #### 方法 B：C++ 扩展
 
-第二种方法更为手动：将内核和 Python 绑定写入单个 `.cu` 文件，使用 PyTorch 的构建系统对其进行本地编译，然后将其导入 Python。
+第二种方法更为手动：将内核和 Python 绑定写入单个 `.cu` 文件，使用 PyTorch 的构建系统进行本地编译，然后将其导入 Python。
 
 <!-- @os:windows -->
-> **注意**：C++ 扩展方法需要 Visual Studio C++ 构建环境，因为 PyTorch 会将 `.cu` 源文件编译为本地 `.pyd` 扩展模块。构建该本地扩展依赖于 Visual Studio 提供的 Microsoft C++ 工具链（编译器、链接器和构建工具）。在构建扩展之前，请先运行设置部分中的 Visual Studio 激活命令。
+> **注意**：C++ 扩展方法需要 Visual Studio C++ 构建环境，因为 PyTorch 会将 `.cu` 源文件编译成本地的 `.pyd` 扩展模块。构建该本地扩展依赖于 Visual Studio 提供的 Microsoft C++ 工具链（编译器、链接器和构建工具）。在构建扩展之前，请先运行设置部分中的 Visual Studio 激活命令。
 <!-- @os:end -->
 
-如果尚未下载，请下载以下文件：
+如果尚未下载以下文件，请先下载：
 <!-- @os:windows -->
 | 文件 | 作用 |
 |---|---|
 | [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | 内核 + 启动器 + pybind11 绑定 |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | 构建脚本，使用 `CUDAExtension` 将 `.cu` 编译为 `.pyd` |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | 运行构建产物的 Python 脚本 |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | 构建脚本，使用 `CUDAExtension` 将 `.cu` 编译成 `.pyd` |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | 运行已构建产物的 Python 脚本 |
 <!-- @os:end -->
 <!-- @os:linux -->
 | 文件 | 作用 |
 |---|---|
 | [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | 内核 + 启动器 + pybind11 绑定 |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | 构建脚本，使用 `CUDAExtension` 将 `.cu` 编译为 `.so` |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | 运行构建产物的 Python 脚本 |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | 构建脚本，使用 `CUDAExtension` 将 `.cu` 编译成 `.so` |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | 运行已构建产物的 Python 脚本 |
 <!-- @os:end -->
 
 #### **步骤 1：内核、启动器和绑定** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu))：
@@ -1363,11 +1364,11 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
-与演练 1 中的 `add_one_launcher` 相比，此处的启动器：
-- 接受两个输入张量而非一个
-- 从张量形状中推导出全部三个维度（M、N、K），无需从 Python 手动传递大小
-- 分配并返回输出张量 C，而非原地修改
-- 对网格和块均使用 `dim3` 来表达二维启动形状
+与演练 1 中的 `add_one_launcher` 相比，这里的启动器：
+- 接受两个输入张量，而不是一个
+- 从张量形状中推导出所有三个维度（M、N、K），无需从 Python 手动传递大小
+- 分配并返回输出张量 C，而不是原地修改
+- 对网格和线程块都使用 `dim3` 来表达二维启动形状
 
 #### **步骤 2：构建**
 ```bash
@@ -1376,18 +1377,18 @@ pip install --no-build-isolation -v .
 >**注意**：此命令会在当前目录中查找 `setup.py`，以构建我们创建的 .cu 文件。
 
 
-此操作将生成以下文件：
+这将生成以下文件：
 <!-- @os:windows -->
 - `build/`：包含 `.pyd` 文件的目录
-- `matmul_kernel.hip`：通过 hipify `.cu` 文件生成的 HIP 源文件；这是 `hipcc` 实际编译的内容
+- `matmul_kernel.hip`：对 `.cu` 文件进行 hipify 后生成的 HIP 源文件；这是 `hipcc` 实际编译的内容
 <!-- @os:end -->
 <!-- @os:linux -->
 - `build/`：包含 `.so` 文件的目录
-- `matmul_kernel.hip`：通过 hipify `.cu` 文件生成的 HIP 源文件；这是 `hipcc` 实际编译的内容
+- `matmul_kernel.hip`：对 `.cu` 文件进行 hipify 后生成的 HIP 源文件；这是 `hipcc` 实际编译的内容
 <!-- @os:end -->
 
-#### **步骤 3：从 Python 中使用** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py))：
-执行此脚本以查看内核的实际运行效果：
+#### **步骤 3：在 Python 中使用** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py))：
+执行此脚本以查看内核的运行效果：
 ```bash
 cd Matrix_Multiplication # if not already in directory
 python run_compiled_multiply.py
@@ -1399,7 +1400,7 @@ Result: tensor([[19., 22.],
         [43., 50.]])
 ```
 
-**太棒了！您刚刚在 GPU 上实现了矩阵乘法。** 这是一个重要的里程碑，因为矩阵乘法是现代机器学习操作的核心，例如：
+**太棒了！你刚刚实现了 GPU 上的矩阵乘法。** 这是一个重要的里程碑，因为矩阵乘法是现代机器学习操作的支柱，例如：
 - 神经网络层
 - 注意力机制
 - 嵌入
@@ -1553,16 +1554,16 @@ finally {
 
 ## 后续步骤
 
-您已学会使用 JIT 编译和 C++ 扩展两种方式，为基本并行操作编写、编译和启动 GPU 内核。
+您已经学会了如何使用 JIT 编译和 C++ 扩展来编写、编译和启动 GPU 内核，以执行基本的并行操作。
 
 **性能优化：**
 - **共享内存分块** - 缓存数据块以减少全局内存访问
 - **内存合并** - 优化内存访问模式以提升带宽
 
 **实际算法：**
-- **二维卷积** - 一个小型滤波器（内核）在图像上滑动，通过对相邻像素的加权求和来计算每个输出像素。这引入了模板计算和共享内存分块，线程可复用重叠的图像区域以减少全局内存访问。
-- **Softmax 函数**：Softmax 将一组数值转换为总和为 1 的概率，常用于神经网络的输出层。在 GPU 上高效实现它需要引入并行归约和数值稳定性技术，同时处理大型向量。
+- **2D 卷积** - 一个小的滤波器（内核）在图像上滑动，通过相邻像素的加权和计算每个输出像素。这引入了模板计算和共享内存分块技术，线程可以重用重叠的图像区域以减少全局内存访问。
+- **Softmax 函数**：Softmax 将一个数字向量转换为总和为 1 的概率，常用于神经网络输出。要在 GPU 上高效实现它，需要引入并行归约和数值稳定性技术，同时处理大型向量。
 
-**生产注意事项：**
+**生产环境注意事项：**
 - **错误处理** - 边界检查和设备管理
-- **PyTorch 集成** - 支持自动微分的自定义算子
+- **PyTorch 集成** - 支持自动求导的自定义算子

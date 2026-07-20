@@ -8,26 +8,26 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code สามารถติดตั้งได้จาก **AMD Ryzen™ AI Developer Center** ไปที่แท็บ **Updates** และติดตั้ง VS Code หากยังไม่ได้ติดตั้ง
+VS Code สามารถติดตั้งได้จาก **AMD Ryzen™ AI Developer Center** ไปที่แท็บ **Updates** และติดตั้ง VS Code หากยังไม่มีอยู่
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code สามารถติดตั้งได้จาก **AMD Ryzen™ AI Developer Center** ไปที่แท็บ **Manage** และติดตั้ง VS Code หากยังไม่ได้ติดตั้ง
+VS Code สามารถติดตั้งได้จาก **AMD Ryzen™ AI Developer Center** ไปที่แท็บ **Manage** และติดตั้ง VS Code หากยังไม่มีอยู่
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. ดาวน์โหลดไฟล์ติดตั้งสำหรับ Windows จาก: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable
-2. คลิกที่ไฟล์ที่ดาวน์โหลด `VSCodeUserSetup-x64-1.108.2.exe` เพื่อติดตั้ง VS Code
+1. ดาวน์โหลดไฟล์สำหรับติดตั้งบน Windows จาก: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable
+2. คลิกที่ไฟล์ที่ดาวน์โหลดมา `VSCodeUserSetup-x64-1.108.2.exe` เพื่อติดตั้ง VS Code
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-1. ดาวน์โหลดแพ็กเกจติดตั้ง Debian จาก: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable
-2. คลิกที่ไฟล์ที่ดาวน์โหลด `code_1.108.2-1769004815_amd64.deb` เพื่อติดตั้ง VS Code
+1. ดาวน์โหลดแพ็กเกจสำหรับติดตั้งบน Debian จาก: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable
+2. คลิกที่ไฟล์ที่ดาวน์โหลดมา `code_1.108.2-1769004815_amd64.deb` เพื่อติดตั้ง VS Code
 
 <!-- @os:end -->
 <!-- @device:end -->

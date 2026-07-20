@@ -4,9 +4,9 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Platform Configuration
+# Конфігурація платформи
 
-Цей документ описує очікувані конфігурації платформи для запуску цього посібника.
+Цей документ описує очікувані конфігурації платформи для виконання цього посібника.
 
 ## Windows
 
@@ -16,15 +16,15 @@ LM Studio має бути попередньо встановлено:
 
 | Компонент | Версія | Розташування |
 |-----------|---------|----------|
-| **LM Studio (Моделі + Різне)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (Програма)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (Кеш)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Завантаження моделей
+### Завантаження моделі
 
-Наступні моделі вже мають бути присутні в каталозі моделей LM Studio (`C:\Users\...\.lmstudio\models`):
+Наступні моделі мають вже бути присутні в каталозі моделей LM Studio (`C:\Users\...\.lmstudio\models`):
 
-| Пристрій | Тип моделі | Квантизація | Розмір (ГБ) | Розташування |
+| Пристрій | Тип моделі | Квантування | Розмір (ГБ) | Розташування |
 | ----- |------------|--------------|------|----------|
 | AMD Ryzen™ AI Halo Developer Platform <br> AMD Ryzen™ AI Max+ | OpenAI GPT-OSS 120B | `MXFP4` | 63.39 | `models\ggml-org` |
 | AMD Ryzen™ AI 300 HX <br> AMD Ryzen™ AI 300 <br> AMD Radeon™ 7000 Series Graphics <br> AMD Radeon™ 9000 Series Graphics | Qwen3.5 9B | `Q4_K_M` | 6.55 | `models\lmstudio-community` |
@@ -35,8 +35,8 @@ LM Studio має бути попередньо встановлено:
 
 ### Встановлення LM Studio
 
-Докладніше див. у [lmstudio.md](../../dependencies/lmstudio.md).
+Дивіться [lmstudio.md](../../dependencies/lmstudio.md) для отримання додаткової інформації.
 
-### Завантаження моделей
+### Завантаження моделі
 
-Те саме, що й у Windows.
+Так само, як і на Windows.

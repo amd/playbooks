@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Node.js 22.22.1 LTS היא הגרסה המומלצת לפלטפורמה זו.
+Node.js 22.22.1 LTS היא הגרסה המומלצת עבור פלטפורמה זו.
 
 <!-- @os:windows -->
 
-1. הורד את מתקין Windows 64-bit מ-[nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
-2. הפעל את המתקין ופעל לפי ההוראות
-3. אמת את ההתקנה:
+1. הורידו את מתקין 64-bit עבור Windows מתוך [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+2. הריצו את המתקין ופעלו לפי ההנחיות
+3. וודאו שההתקנה בוצעה בהצלחה:
 ```cmd
 node --version
 npm --version
@@ -38,4 +38,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **הערה**: ראה [הורדות Node.js](https://nodejs.org/en/download/) לאפשרויות התקנה ופלטפורמות נוספות.
+> **הערה**: ראו [Node.js Downloads](https://nodejs.org/en/download/) לאפשרויות התקנה ופלטפורמות נוספות.

@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 sudo usermod -a -G render,video $LOGNAME
 ```
 
-**Restartujte systém, aby se nastavení projevila.**
+**Restartujte systém, aby se změny projevily.**
 ```bash
 sudo reboot
 ```
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-Další pomoc s instalací naleznete na tomto [odkazu](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Další nápovědu k instalaci naleznete na tomto [odkazu](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).

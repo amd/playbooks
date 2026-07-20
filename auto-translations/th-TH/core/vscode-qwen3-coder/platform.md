@@ -12,9 +12,9 @@ SPDX-License-Identifier: MIT
 
 ### การติดตั้ง LM Studio
 
-LM Studio ควรได้รับการติดตั้งไว้ล่วงหน้า:
+ควรติดตั้ง LM Studio ไว้ล่วงหน้า:
 
-| ส่วนประกอบ | เวอร์ชัน | ตำแหน่งที่ตั้ง |
+| Component | Version | Location |
 |-----------|---------|----------|
 | **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
@@ -24,7 +24,7 @@ LM Studio ควรได้รับการติดตั้งไว้ล�
 
 โมเดลต่อไปนี้ควรมีอยู่แล้วในไดเรกทอรีโมเดลของ LM Studio (`C:\Users\...\.lmstudio\models`):
 
-| ประเภทโมเดล | การควอนไทซ์ | ขนาด | ตำแหน่งที่ตั้ง |
+| Model Type | Quantization | Size | Location |
 |------------|--------------|------|----------|
 | Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
@@ -34,7 +34,7 @@ LM Studio ควรได้รับการติดตั้งไว้ล�
 
 ### การติดตั้ง LM Studio
 
-ดูรายละเอียดเพิ่มเติมได้ที่ lmstudio.md (ในโฟลเดอร์ dependencies)
+ดู lmstudio.md (ภายในโฟลเดอร์ dependencies) สำหรับรายละเอียดเพิ่มเติม
 
 ### การดาวน์โหลดโมเดล
 

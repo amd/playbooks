@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. Avaa PowerShell tai komentokehote
+1. Avaa PowerShell tai Command Prompt
 2. Asenna n8n globaalisti npm:n avulla:
 ```cmd
 npm install -g n8n
@@ -23,6 +23,6 @@ Asenna n8n globaalisti npm:n avulla:
 npm install -g n8n
 ```
 
-> **Huomio**: Katso lisää asennusvaihtoehtoja [n8n-dokumentaatiosta](https://docs.n8n.io/hosting/installation/npm/).
+> **Huomautus**: Katso lisää asennusvaihtoehtoja täältä: [n8n Documentation](https://docs.n8n.io/hosting/installation/npm/).
 
 <!-- @os:end -->

@@ -12,9 +12,9 @@ Dieses Dokument beschreibt die erwarteten Plattformkonfigurationen für die Ausf
 
 ### Windows/Linux
 
-GAIA sollte mithilfe der Anweisungen in der [GAIA-Installationsanleitung](../../dependencies/gaia.md) vorinstalliert werden.
+GAIA sollte gemäß den Anweisungen im [GAIA-Installationsleitfaden](../../dependencies/gaia.md) vorinstalliert sein.
 
-Lemonade Server sollte mithilfe der Anweisungen in der [Lemonade-Installationsanleitung](../../dependencies/lemonade.md) vorinstalliert werden.
+Lemonade Server sollte gemäß den Anweisungen im [Lemonade-Installationsleitfaden](../../dependencies/lemonade.md) vorinstalliert sein.
 
 ## Erforderliche Modelle
 

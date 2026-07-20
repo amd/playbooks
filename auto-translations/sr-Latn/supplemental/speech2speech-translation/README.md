@@ -6,39 +6,39 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ovaj vodič koristi posebne oznake koje GitHub ne može da prikaže. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste ispravno pregledali ovaj sadržaj.
 <!-- @github-only:end -->
 
 ## Pregled
 
-AMD ROCm™ softver i PyTorch stek stvaraju jedinstven ekosistem za AI na uređaju. Radi i na Windows-u i na Linux-u sa zvaničnom podrškom za širok spektar uređaja, uključujući Ryzen™ AI APU-ove i Radeon™ GPU-ove.
+AMD ROCm™ softver i PyTorch skup alata zajedno čine jedinstven ekosistem za AI na uređaju. Radi i na Windows-u i na Linux-u, uz zvaničnu podršku za širok spektar uređaja, uključujući Ryzen™ AI APU procesore i Radeon™ GPU-ove.
 
-Ovaj playbook će vas naučiti kako da pokrenete prevođenje govora u govor sa niskom latencijom, izražajno i privatno, u potpunosti na ivici mreže.
+Ovaj vodič će vas naučiti kako da pokrenete govor-u-govor prevod niske latencije, ekspresivan i privatan, u potpunosti na ivici mreže (edge).
 
 ## Šta ćete naučiti
 
-- Kako da podesite okruženje za prevođenje govora u govor
-- Kako da napišete Python kod za učitavanje i korišćenje modela za prevođenje govora u govor
+- Kako da podesite okruženje za govor-u-govor prevod
+- Kako da napišete Python kod za učitavanje i korišćenje modela za govor-u-govor
 - Kako da pokrenete i eksperimentišete sa Gradio korisničkim interfejsom
 
-## Zašto koristiti prevođenje govora u govor u realnom vremenu?
+## Zašto koristiti prevod govora u realnom vremenu?
 
-- Uklanja prepreke između prevođenja i jezičkih barijera
-- Prenosi ton, emociju i nameru bez neprijatnih pauza
+- Uklanja trvenje između prevoda i jezičkih barijera
+- Prenosi ton, emociju i nameru bez nezgodnih pauza
 - Omogućava globalnu saradnju i brže donošenje odluka
 
-## Podešavanje konfiguracije memorije
+## Podešavanje memorijske konfiguracije
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Proverite dostupnost softverskih ažuriranja
+## Provera softverskih ažuriranja
 > **Napomena**: Ako VS Code nije instaliran, možete ga instalirati putem Ryzen AI Developer Center-a.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalacija softverskih preduslova
+## Instaliranje softverskih preduslova
 
 ### Kreiranje virtuelnog okruženja
 
@@ -58,7 +58,7 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Dodelite svom korisniku pristup GPU uređajima** (odjavite se i ponovo prijavite da bi ovo stupilo na snagu):
+**Dodelite vašem korisniku pristup GPU uređajima** (odjavite se i ponovo prijavite da bi ovo stupilo na snagu):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -80,7 +80,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Na Windows-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande da biste kreirali venv sa već instaliranim ROCm+Pytorch:
+Na Windows-u, otvorite terminal u direktorijumu po izboru i pratite komande da biste kreirali venv sa već instaliranim ROCm+Pytorch:
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -90,13 +90,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Savet**: Korisnici Windows-a možda će morati da izmene PowerShell politiku izvršavanja (npr.
-> postavljanjem na RemoteSigned ili Unrestricted) pre pokretanja nekih Powershell komandi.
+> **Savet**: Windows korisnicima će možda biti potrebno da izmene svoju PowerShell Execution Policy (npr.
+> podešavanjem na RemoteSigned ili Unrestricted) pre pokretanja nekih Powershell komandi.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Na Windows-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande da biste kreirali venv:
+Na Windows-u, otvorite terminal u direktorijumu po izboru i pratite komande da biste kreirali venv:
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -106,13 +106,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Savet**: Korisnici Windows-a možda će morati da izmene PowerShell politiku izvršavanja (npr.
-> postavljanjem na RemoteSigned ili Unrestricted) pre pokretanja nekih Powershell komandi.
+> **Savet**: Windows korisnicima će možda biti potrebno da izmene svoju PowerShell Execution Policy (npr.
+> podešavanjem na RemoteSigned ili Unrestricted) pre pokretanja nekih Powershell komandi.
 
 <!-- @device:end -->
 <!-- @os:end -->
 
-### Instalacija osnovnih zavisnosti
+### Instaliranje osnovnih zavisnosti
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -195,29 +195,29 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Podešavanje demo aplikacije za prevođenje govora u govor
+## Podešavanje demonstracije govor-u-govor
 
 #### Saznajte više o seamless-m4t-v2
 
-Pogledajte [karticu modela](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) na Hugging Face za više informacija.
-Ovo je tehnička arhitektura modela za prevođenje govora u govor:
+Pogledajte [model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) na Hugging Face za više informacija.
+Ovo je tehnička arhitektura modela za govor-u-govor:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### Preuzimanje skripti
 
-Ovaj playbook uključuje skripte spremne za upotrebu. Preuzmite sve u isti direktorijum kao okruženje koje ste kreirali.
+Ovaj vodič uključuje gotove skripte spremne za upotrebu. Molimo vas da sve preuzmete u isti direktorijum kao okruženje koje ste kreirali.
 
 | Skripta | Opis | Upotreba |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | Osnovno generisanje teksta pomoću LLM-a | `python infer.py` |
+| [infer.py](assets/infer.py) | Osnovno generisanje teksta LLM-om | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Primer audio fajla | N/A |
-| [lang_list.py](assets/lang_list.py) | Fajl za podršku jezicima | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | Intuitivan korisnički interfejs za prevođenje govora | `python gradio_demo.py --no-share` |
+| [lang_list.py](assets/lang_list.py) | Fajl za podršku jezika | N/A |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuitivan korisnički interfejs za prevod govora | `python gradio_demo.py --no-share` |
 
 
-### Početak rada sa infer.py
+### Počinjemo sa infer.py
 
 Da biste izvršili skriptu, pokrenite 
 ```bash
@@ -227,7 +227,7 @@ python infer.py
  
   
 #### Objašnjenje koda
-**Isečak 1: Uvoz neophodnih zavisnosti**
+**Isečak 1: Uvoženje potrebnih zavisnosti**
 
 ```python 
 import os
@@ -254,9 +254,9 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**Isečak 2: Učitavanje modela sa HuggingFace-a**
+**Isečak 2: Učitavanje modela sa HuggingFace**
 
-Ova funkcija prima ID modela i preuzima model ako već nije preuzet. Zatim vraća procesor i model za upotrebu u sledećoj funkciji.
+Ova funkcija prima ID modela i preuzima model ukoliko već nije preuzet. Zatim vraća procesor i model koje sledeća funkcija koristi.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -275,9 +275,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Isečak 3: Ulazni audio isečak .wav fajl i njegova predobrada**
+**Isečak 3: Unos audio isečka .wav fajla i njegova predobrada**
 
-Ova funkcija učitava audio isečak i vrši resampling na ciljnu stopu.
+Ova funkcija učitava audio isečak i menja mu učestanost uzorkovanja na ciljanu vrednost.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -329,7 +329,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **Isečak 5: Čuvanje prevedenog fajla**
 
-Ova funkcija čuva niz audio podataka u .WAV fajl. 
+Ova funkcija čuva audio niz u .WAV fajl. 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -392,16 +392,16 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Pokretanje Gradio UI demo aplikacije:
+### Pokretanje Gradio UI demonstracije:
 
-Sada kada ste pokrenuli primer osnovne skripte, sledeća uputstva pružaju koristan korisnički interfejs koji nadograđuje kod koji smo napisali i olakšava prevođenje govora u govor uživo.
+Sada kada ste pokrenuli osnovni primer skripte, sledeća uputstva pružaju koristan korisnički interfejs koji se nadovezuje na kod koji smo napisali i olakšava prevod govora u realnom vremenu.
 
-#### Pokrenite Gradio lokalno
+#### Pokretanje Gradio lokalno
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Zatim otvorite vaš veb pregledač na adresi `http://127.0.0.1:7860` da biste pristupili korisničkom interfejsu.
+Zatim, otvorite vaš veb pregledač na adresi `http://127.0.0.1:7860` da biste pristupili korisničkom interfejsu.
 
 
 ### Primer Gradio korisničkog interfejsa:
@@ -523,12 +523,12 @@ PY
 
 ## Sledeći koraci
 
-- Kombinujte desetine jezika za brzo prevođenje.
-- Podelite svoju demo aplikaciju sa drugima: Dodajte --share da biste kreirali javni link koji bilo ko može da koristi remotely, ili je trajno postavite koristeći Hugging Face Spaces
+- Kombinujte i menjajte između desetina jezika za brz prevod. 
+- Podelite svoju demonstraciju sa drugima: Dodajte --share da biste kreirali javni link kojem svako može da pristupi na daljinu, ili je trajno postavite koristeći Hugging Face Spaces
 
 ## Resursi
 
-Ispod su neki dodatni resursi za učenje više o prevođenju govora u govor:  
+Ispod se nalaze dodatni resursi za dodatno upoznavanje sa prevodom govora u realnom vremenu:  
 * Repozitorijum se nalazi ovde https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Istraživačka literatura vezana za "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Deljenje i postavljanje Gradio aplikacija: [Vodič za deljenje vaše aplikacije](https://www.gradio.app/guides/sharing-your-app) i [Postavljanje na Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Akademska istraživanja vezana za "Seamless: Multilingual Expressive and Streaming Speech Translation"
+* Deljenje i postavljanje Gradio aplikacije: [Sharing Your App Guide](https://www.gradio.app/guides/sharing-your-app) i [Deploy to Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

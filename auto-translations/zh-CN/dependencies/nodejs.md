@@ -6,12 +6,12 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Node.js 22.22.1 LTS 是此平台的推荐版本。
+推荐在此平台上使用 Node.js 22.22.1 LTS 版本。
 
 <!-- @os:windows -->
 
 1. 从 [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi) 下载 Windows 64 位安装程序
-2. 运行安装程序并按照提示操作
+2. 运行安装程序并按照提示进行操作
 3. 验证安装：
 ```cmd
 node --version
@@ -38,4 +38,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **注意**：请参阅 [Node.js 下载](https://nodejs.org/en/download/) 以获取其他安装选项和平台信息。
+> **注意**：有关其他安装选项和平台，请参阅 [Node.js 下载](https://nodejs.org/en/download/)。

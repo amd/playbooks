@@ -8,25 +8,25 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code lahko namestite iz **AMD Ryzen™ AI Developer Center**. Pojdite na zavihek **Updates** in namestite VS Code, če še ni nameščen.
+VS Code lahko namestite iz **AMD Ryzen™ AI Developer Center**. Odprite zavihek **Updates** in namestite VS Code, če še ni prisoten.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code lahko namestite iz **AMD Ryzen™ AI Developer Center**. Pojdite na zavihek **Manage** in namestite VS Code, če še ni nameščen.
+VS Code lahko namestite iz **AMD Ryzen™ AI Developer Center**. Odprite zavihek **Manage** in namestite VS Code, če še ni prisoten.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Prenesite namestitveno datoteko za Windows z naslova: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+1. Prenesite izvedljivo namestitveno datoteko za Windows z naslova: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
 2. Kliknite na preneseno datoteko `VSCodeUserSetup-x64-1.108.2.exe`, da namestite VS Code.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-1. Prenesite namestitveni paket za Debian z naslova: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
+1. Prenesite namestitveni paket Debian z naslova: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
 2. Kliknite na preneseno datoteko `code_1.108.2-1769004815_amd64.deb`, da namestite VS Code.
 
 <!-- @os:end -->

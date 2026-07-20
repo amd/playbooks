@@ -1,5 +1,5 @@
 {
   "id": "openclaw-lemonade-server",
-  "title": "Lemonade Server로 OpenClaw 로컬 실행하기",
-  "description": "Lemonade Server를 사용하여 OpenClaw 자율 AI 에이전트를 설치하고 구성합니다."
+  "title": "로컬에서 Lemonade Server로 OpenClaw 실행하기",
+  "description": "Lemonade Server로 OpenClaw 자율 AI 에이전트를 설치하고 구성하세요."
 }

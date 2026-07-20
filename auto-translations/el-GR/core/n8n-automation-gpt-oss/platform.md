@@ -12,24 +12,24 @@ SPDX-License-Identifier: MIT
 
 ### Windows
 
-| Στοιχείο | Έκδοση | Σημειώσεις |
+| Component | Version | Notes |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Προεγκατεστημένο και διαθέσιμο στο PATH στην AMD Ryzen™ AI Halo Developer Platform· πρέπει να εγκατασταθεί χειροκίνητα σε όλες τις άλλες συσκευές |
+| **Node.js** | 22.16+ | Προεγκατεστημένο και διαθέσιμο στο PATH στην πλατφόρμα AMD Ryzen™ AI Halo Developer Platform· πρέπει να εγκατασταθεί χειροκίνητα σε όλες τις άλλες συσκευές |
 | **Lemonade Server** | latest | Εκτελείται στο `http://localhost:13305/api/v1` |
 
 ### Linux
 
-| Στοιχείο | Έκδοση | Σημειώσεις |
+| Component | Version | Notes |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Προεγκατεστημένο και διαθέσιμο στο PATH στην AMD Ryzen™ AI Halo Developer Platform· πρέπει να εγκατασταθεί χειροκίνητα σε όλες τις άλλες συσκευές |
+| **Node.js** | 22.16+ | Προεγκατεστημένο και διαθέσιμο στο PATH στην πλατφόρμα AMD Ryzen™ AI Halo Developer Platform· πρέπει να εγκατασταθεί χειροκίνητα σε όλες τις άλλες συσκευές |
 | **Lemonade Server** | latest | Εκτελείται στο `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-Ο διακομιστής Lemonade θα πρέπει να εκτελείται με το κατάλληλο μοντέλο για τη συσκευή φορτωμένο (δείτε το README για την εντολή `lemonade run` για τη συσκευή σας):
+Ο Lemonade server θα πρέπει να εκτελείται με το κατάλληλο για τη συσκευή μοντέλο φορτωμένο (ανατρέξτε στο README για την εντολή `lemonade run` για τη συσκευή σας):
 
-| Συσκευή | Endpoint | Μοντέλο |
+| Device | Endpoint | Model |
 |--------|----------|-------|
 | AMD Ryzen™ AI Halo Developer Platform <br> AMD Ryzen™ AI Max+ | `http://localhost:13305/api/v1` | `gpt-oss-120b-mxfp-GGUF` |
 | AMD Ryzen™ AI 300 HX <br> AMD Ryzen™ AI 300 <br> AMD Radeon™ 7000 Series Graphics <br> AMD Radeon™ 9000 Series Graphics | `http://localhost:13305/api/v1` | `gpt-oss-20b-mxfp4-GGUF` |

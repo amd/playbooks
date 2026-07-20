@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 #### PyTorch
 
-**Installera PyTorch med AMD ROCm™-programvarustöd** i den skapade virtuella miljön:
+**Installera PyTorch med stöd för AMD ROCm™-programvara** i den skapade virtuella miljön:
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->

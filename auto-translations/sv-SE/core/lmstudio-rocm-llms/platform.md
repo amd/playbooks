@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # Plattformskonfiguration
 
-Det här dokumentet beskriver de förväntade plattformskonfigurationerna för att köra den här spelboken.
+Detta dokument beskriver de förväntade plattformskonfigurationerna för att köra denna playbook.
 
 ## Windows
 
@@ -16,13 +16,13 @@ LM Studio bör vara förinstallerat:
 
 | Komponent | Version | Plats |
 |-----------|---------|----------|
-| **LM Studio (Modeller + Övrigt)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modeller + Diverse)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### Modellnedladdning
 
-Följande modeller bör redan finnas i LM Studio:s modellkatalog (`C:\Users\...\.lmstudio\models`):
+Följande modeller bör redan finnas i LM Studios modellkatalog (`C:\Users\...\.lmstudio\models`):
 
 | Enhet | Modelltyp | Kvantisering | Storlek (GB) | Plats |
 | ----- |------------|--------------|------|----------|

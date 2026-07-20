@@ -6,16 +6,16 @@ SPDX-License-Identifier: MIT
 
 ### Lemonade
 
-#### Lemonade-asennus
+#### Lemonaden asentaminen
 
 <!-- @os:windows -->
 Lataa uusin asennusohjelma osoitteesta [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) ja suorita `.msi`-tiedosto.
 
 Asennuksen jälkeen:
-- `lemonade` CLI lisätään automaattisesti järjestelmän PATH-muuttujaan
-- Lemonade-palvelimen odotetaan käynnistyvän automaattisesti taustalla
+- `lemonade`-CLI lisätään automaattisesti järjestelmän PATH-muuttujaan
+- Lemonade-palvelimen odotetaan käynnistyvän automaattisesti taustalle
 
-Voit myös asentaa hiljaisesti komentorivin kautta:
+Voit myös asentaa hiljaisesti komentoriviltä:
 ```cmd
 msiexec /i lemonade-server-minimal.msi /qn
 ```
@@ -33,7 +33,7 @@ sudo apt install lemonade-server
 yay -S lemonade-server
 ```
 
-Muita jakelupaketteja tai lähdekoodista asentamista varten katso [täydelliset asennusvaihtoehdot](https://lemonade-server.ai/docs/guide/install/).
+Muita jakeluita varten tai lähdekoodista asentamiseksi, katso [koko asennusvaihtoehdot](https://lemonade-server.ai/docs/guide/install/).
 <!-- @os:end -->
 
 
@@ -44,26 +44,26 @@ Avaa pääte ja suorita:
 lemonade --version
 ```
 
-Sinun pitäisi nähdä seuraavankaltainen tuloste:
+Näet tulosteen, joka näyttää tältä:
 ```
 lemonade version x.y.z
 ```
 
 Jos näet versionumeron, Lemonade on asennettu oikein ja valmis käytettäväksi.
 
-Pikaohjeeksi tässä ovat yleisimmät Lemonade CLI -komennot:
+Nopeaa viitteeksi, tässä yleisimmät Lemonade CLI -komennot:
 
 | Komento | Mitä se tekee |
 | --- | --- |
 | `lemonade --help` | Näyttää kaikki käytettävissä olevat komennot ja liput. |
 | `lemonade --version` | Tulostaa asennetun Lemonade-version. |
-| `lemonade status` | Vahvistaa, onko Lemonade-palvelin käynnissä ja tavoitettavissa. Oletusarvoinen OpenAI-yhteensopiva API-perus-URL on `http://localhost:13305/api/v1`. |
-| `lemonade list` | Listaa Lemonade-asennuksellesi saatavilla olevat mallit. |
+| `lemonade status` | Vahvistaa, onko Lemonade-palvelin käynnissä ja tavoitettavissa. Oletuksena käytettävä OpenAI-yhteensopiva API-perus-URL-osoite on `http://localhost:13305/api/v1`. |
+| `lemonade list` | Listaa mallit, jotka ovat käytettävissä Lemonade-asennuksessasi. |
 | `lemonade pull <MODEL_NAME>` | Lataa mallin käynnistämättä sitä. |
-| `lemonade run <MODEL_NAME>` | Lataa mallin tarvittaessa ja käynnistää sen päättelyä/keskustelua varten. |
+| `lemonade run <MODEL_NAME>` | Lataa mallin tarvittaessa ja käynnistää sen sitten päättelyä/keskustelua varten. |
 | `lemonade run <MODEL_NAME> --llamacpp rocm` | Käynnistää llama.cpp-mallin ROCm-taustajärjestelmällä. |
 | `lemonade run <MODEL_NAME> --llamacpp vulkan` | Käynnistää llama.cpp-mallin Vulkan-taustajärjestelmällä. |
-| `lemonade config` | Näyttää nykyiset Lemonade-konfiguraatioarvot. |
-| `lemonade config set llamacpp.backend=rocm` | Asettaa llama.cpp:n oletusarvoisen taustajärjestelmän ROCm:ksi. |
+| `lemonade config` | Näyttää nykyiset Lemonade-määritysarvot. |
+| `lemonade config set llamacpp.backend=rocm` | Asettaa oletusarvoiseksi llama.cpp-taustajärjestelmäksi ROCm:n. |
 
 Uusimpia Lemonade-palvelimen asetuksia tai vianmääritystä varten katso [virallinen Lemonade-dokumentaatio](https://lemonade-server.ai/docs/lemonade-cli/).

@@ -6,23 +6,23 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Este playbook usa tags especiais que o GitHub não consegue renderizar. Acesse [amd.com/playbooks](https://amd.com/playbooks) para visualizar corretamente este conteúdo.
 <!-- @github-only:end -->
 
 ## Visão Geral
 
-Ollama é uma ferramenta leve e popular para executar grandes modelos de linguagem localmente. Ela gerencia o download, a quantização e o serviço dos modelos por meio de uma interface de linha de comando simples e um aplicativo desktop, permitindo que você passe do zero a conversar com um LLM em minutos.
+Ollama é uma ferramenta leve e popular para executar grandes modelos de linguagem localmente. Ele cuida do download de modelos, quantização e serviço por trás de uma interface de linha de comando simples e de um aplicativo desktop, permitindo que você vá do zero a uma conversa com um LLM em minutos.
 
-Este playbook orienta você na instalação do Ollama, no download do modelo GPT-OSS 20B e na realização de uma conversa com ele, tanto pelo terminal quanto pelo aplicativo desktop.
+Este playbook orienta você na instalação do Ollama, no download do modelo GPT-OSS 20B e em como conversar com ele, tanto pelo terminal quanto pelo aplicativo desktop.
 
 ## O Que Você Vai Aprender
 
 - Como instalar e iniciar o Ollama no seu sistema
 - Baixar e executar o modelo GPT-OSS 20B localmente
 - Conversar com modelos usando a CLI
-- Consultar modelos programaticamente por meio da API REST
+- Consultar modelos programaticamente através da API REST
 
-## Configurando a Configuração de Memória
+## Definindo a Configuração de Memória
 
 <!-- @require:memory-config -->
 
@@ -43,7 +43,7 @@ Este playbook orienta você na instalação do Ollama, no download do modelo GPT
 
 1. Baixe o instalador em [ollama.com/download](https://ollama.com/download).
 2. Execute o instalador `.exe` e siga as instruções.
-3. Após a instalação, o Ollama é executado como um serviço em segundo plano e pode ser acessado pelo terminal, pelo aplicativo desktop e pela bandeja do sistema.
+3. Após a instalação, o Ollama é executado como um serviço em segundo plano e fica acessível pelo terminal, pelo aplicativo desktop e pela bandeja do sistema.
 
 Verifique a instalação abrindo um terminal e executando:
 
@@ -57,7 +57,7 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-Você deverá ver o número da versão instalada impresso no console.
+Você deve ver o número da versão instalada impresso no console.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -80,7 +80,7 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-Você deverá ver o número da versão instalada impresso no console.
+Você deve ver o número da versão instalada impresso no console.
 <!-- @os:end -->
 
 ## Baixando Seu Primeiro Modelo
@@ -91,7 +91,7 @@ O Ollama gerencia modelos por meio de um registro semelhante a imagens de contê
 ollama pull gpt-oss:20b
 ```
 
-Isso faz o download dos pesos do modelo para sua máquina local (aproximadamente 12 GB). O download ocorre apenas uma vez, e as execuções subsequentes carregam o modelo do disco.
+Isso baixa os pesos do modelo para sua máquina local (aproximadamente 12 GB). O download acontece apenas uma vez, e execuções subsequentes carregam o modelo a partir do disco.
 
 Você pode confirmar que o modelo está disponível com:
 
@@ -99,7 +99,7 @@ Você pode confirmar que o modelo está disponível com:
 ollama list
 ```
 
-Você deverá ver `gpt-oss:20b` na saída, junto com seu tamanho e data da última modificação.
+Você deve ver `gpt-oss:20b` na saída, junto com seu tamanho e a data da última modificação.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
@@ -170,16 +170,16 @@ echo "OK: gpt-oss:20b is present in ollama list"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Nomenclatura de Modelos
+### Nomenclatura dos Modelos
 
-Os nomes de modelos do Ollama seguem o formato `name:tag`. A tag geralmente indica a contagem de parâmetros ou a variante de quantização. Alguns comandos úteis para gerenciar modelos:
+Os nomes dos modelos do Ollama seguem o formato `name:tag`. A tag geralmente indica a quantidade de parâmetros ou a variante de quantização. Alguns comandos úteis para gerenciar modelos:
 
 | Comando | Descrição |
 |---------|-------------|
-| `ollama list` | Exibir todos os modelos baixados |
-| `ollama pull <model>` | Baixar um modelo sem executá-lo |
-| `ollama rm <model>` | Remover um modelo para liberar espaço em disco |
-| `ollama show <model>` | Exibir metadados e parâmetros do modelo |
+| `ollama list` | Mostra todos os modelos baixados |
+| `ollama pull <model>` | Baixa um modelo sem executá-lo |
+| `ollama rm <model>` | Remove um modelo para liberar espaço em disco |
+| `ollama show <model>` | Exibe metadados e parâmetros do modelo |
 
 ## Conversando pelo Terminal
 
@@ -189,15 +189,15 @@ Inicie uma sessão de chat interativa diretamente pela linha de comando:
 ollama run gpt-oss:20b
 ```
 
-O Ollama carrega o modelo na memória e exibe um prompt. Tente fazer uma pergunta:
+O Ollama carrega o modelo na memória e o leva a um prompt. Tente perguntar algo:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-O modelo transmite sua resposta token por token diretamente no terminal. Digite `/bye` ou pressione `Ctrl+D` para encerrar a sessão.
+O modelo transmite sua resposta token por token diretamente no terminal. Digite `/bye` ou pressione `Ctrl+D` para sair da sessão.
 
-> **Dica**: A primeira execução leva alguns segundos para carregar o modelo na memória. Os prompts subsequentes dentro da mesma sessão respondem muito mais rápido, pois o modelo permanece carregado.
+> **Dica**: A primeira execução leva alguns segundos para carregar o modelo na memória. Prompts subsequentes na mesma sessão respondem muito mais rápido, já que o modelo permanece carregado.
 
 <!-- @os:windows -->
 ## Conversando pelo Aplicativo Desktop
@@ -206,22 +206,22 @@ O Ollama também vem com um aplicativo desktop que oferece uma interface de chat
 
 Abra o **Ollama** pelo menu Iniciar ou clique no ícone do Ollama na bandeja do sistema e selecione **Open Ollama**.
 
-Após abrir o aplicativo:
+Com o aplicativo aberto:
 
 1. Clique em **New Chat** na barra lateral.
-2. Selecione **gpt-oss:20b** no menu suspenso de modelos no canto inferior direito da área de entrada do chat.
+2. Selecione **gpt-oss:20b** no menu suspenso de modelos, no canto inferior direito da área de entrada do chat.
 3. Digite uma mensagem e pressione Enter para começar a conversar.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-O aplicativo desktop mantém um histórico das suas conversas na barra lateral, facilitando o acesso a chats anteriores.
+O aplicativo desktop mantém um histórico das suas conversas na barra lateral, facilitando revisitar conversas anteriores.
 <!-- @os:end -->
 
 ## Usando a API REST
 
-Após a instalação, o Ollama é executado como um serviço em segundo plano e expõe uma API REST em `http://localhost:11434` que você pode usar para integrar modelos em seus próprios aplicativos e scripts.
+Após a instalação, o Ollama é executado como um serviço em segundo plano e expõe uma API REST em `http://localhost:11434` que você pode usar para integrar modelos às suas próprias aplicações e scripts.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -593,19 +593,18 @@ print(response.json()["response"])
 
 | Endpoint | Método | Finalidade |
 |----------|--------|---------|
-| `/api/generate` | POST | Geração de texto em turno único |
-| `/api/chat` | POST | Conversa em múltiplos turnos com histórico de mensagens |
-| `/api/tags` | GET | Listar modelos disponíveis |
-| `/api/show` | POST | Exibir detalhes do modelo |
-| `/api/pull` | POST | Baixar um modelo do registro |
+| `/api/generate` | POST | Geração de texto de turno único |
+| `/api/chat` | POST | Conversa de múltiplos turnos com histórico de mensagens |
+| `/api/tags` | GET | Lista os modelos disponíveis |
+| `/api/show` | POST | Mostra detalhes do modelo |
+| `/api/pull` | POST | Baixa um modelo do registro |
 
 Para a referência completa da API, consulte a [documentação da API do Ollama](https://github.com/ollama/ollama/blob/main/docs/api.md).
-
 ## Próximos Passos
 
 - **Experimente modelos diferentes**: Navegue pela [biblioteca de modelos do Ollama](https://ollama.com/library) para explorar centenas de modelos disponíveis, desde pequenos assistentes de codificação até grandes modelos de raciocínio.
 - **Crie modelos personalizados**: Use um [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) para definir prompts de sistema personalizados, temperatura e outros parâmetros para uma experiência sob medida.
-- **Desenvolva com a API**: Use as bibliotecas cliente em [Python](https://github.com/ollama/ollama-python) ou [JavaScript](https://github.com/ollama/ollama-js) para integrar o Ollama em seus aplicativos.
-- **Conecte a interfaces gráficas**: Combine o Ollama com ferramentas como o [Open WebUI](https://github.com/open-webui/open-webui) para uma interface de chat rica em recursos, com busca, personas e upload de documentos.
+- **Desenvolva com a API**: Use as bibliotecas cliente [Python](https://github.com/ollama/ollama-python) ou [JavaScript](https://github.com/ollama/ollama-js) para integrar o Ollama às suas aplicações.
+- **Conecte-se a interfaces (frontends)**: Combine o Ollama com ferramentas como o [Open WebUI](https://github.com/open-webui/open-webui) para obter uma interface de chat rica em recursos, com busca, personas e upload de documentos.
 
-Para mais informações, consulte a [documentação do Ollama](https://github.com/ollama/ollama/blob/main/README.md).
+Para mais informações, confira a [documentação do Ollama](https://github.com/ollama/ollama/blob/main/README.md).

@@ -5,35 +5,36 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Acest playbook folosește etichete speciale pe care GitHub nu le poate reda. Vă rugăm să vizitați [amd.com/playbooks](https://amd.com/playbooks) pentru a previzualiza corect acest conținut.
 <!-- @github-only:end -->
 
 ## Prezentare generală
 
-Ollama este un instrument ușor și popular pentru rularea locală a modelelor de limbaj de mari dimensiuni. Acesta gestionează descărcarea modelelor, cuantizarea și servirea printr-o interfață simplă de linie de comandă și o aplicație desktop, astfel încât să poți trece de la zero la o conversație cu un LLM în câteva minute.
+Ollama este un instrument popular și ușor pentru rularea locală a modelelor de limbaj de mari dimensiuni. Se ocupă de descărcarea modelelor, cuantizare și servire în spatele unei interfețe simple de linie de comandă și a unei aplicații desktop, astfel încât puteți trece de la zero la o conversație cu un LLM în câteva minute.
 
-Acest playbook te ghidează prin instalarea Ollama, descărcarea modelului GPT-OSS 20B și purtarea unei conversații cu acesta, atât prin terminal, cât și prin aplicația desktop.
+Acest playbook vă ghidează prin instalarea Ollama, descărcarea modelului GPT-OSS 20B și purtarea unei conversații cu acesta, atât prin terminal, cât și prin aplicația desktop.
 
-## Ce vei învăța
+## Ce veți învăța
 
-- Cum să instalezi și să lansezi Ollama pe sistemul tău
-- Cum să descarci și să rulezi local modelul GPT-OSS 20B
-- Cum să conversezi cu modele folosind CLI
-- Cum să interoghezi modele programatic prin REST API
+- Cum să instalați și să lansați Ollama pe sistemul dumneavoastră
+- Descărcarea și rularea modelului GPT-OSS 20B local
+- Conversarea cu modelele folosind CLI-ul
+- Interogarea programatică a modelelor prin API-ul REST
 
 ## Configurarea memoriei
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Verificarea actualizărilor de software
-> **Notă**: Dacă VS Code nu este instalat, îl poți instala cu Ryzen AI Developer Center.
+## Verificați actualizările software
+> **Notă**: Dacă VS Code nu este instalat, îl puteți instala cu Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalarea cerințelor software
+## Instalarea cerințelor software preliminare
 
 <!-- @require:driver -->
 
@@ -41,11 +42,11 @@ Acest playbook te ghidează prin instalarea Ollama, descărcarea modelului GPT-O
 
 <!-- @os:windows -->
 
-1. Descarcă programul de instalare de la [ollama.com/download](https://ollama.com/download).
-2. Rulează programul de instalare `.exe` și urmează instrucțiunile.
-3. Odată instalat, Ollama rulează ca un serviciu de fundal și este accesibil din terminal, aplicația desktop și bara de sistem.
+1. Descărcați programul de instalare de la [ollama.com/download](https://ollama.com/download).
+2. Rulați programul de instalare `.exe` și urmați instrucțiunile.
+3. Odată instalat, Ollama rulează ca serviciu în fundal și este accesibil din terminal, aplicația desktop și tava de sistem.
 
-Verifică instalarea deschizând un terminal și rulând:
+Verificați instalarea deschizând un terminal și rulând:
 
 ```powershell
 ollama --version
@@ -55,20 +56,20 @@ ollama --version
 ```powershell
 ollama --version
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 
-Ar trebui să vezi numărul versiunii instalate afișat în consolă.
+Ar trebui să vedeți numărul versiunii instalate afișat în consolă.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-Rulează scriptul oficial de instalare:
+Rulați scriptul oficial de instalare:
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-Verifică instalarea:
+Verificați instalarea:
 
 ```bash
 ollama --version
@@ -78,28 +79,28 @@ ollama --version
 ```bash
 ollama --version
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 
-Ar trebui să vezi numărul versiunii instalate afișat în consolă.
+Ar trebui să vedeți numărul versiunii instalate afișat în consolă.
 <!-- @os:end -->
 
 ## Descărcarea primului model
 
-Ollama gestionează modelele printr-un registru similar cu imaginile de containere. Pentru a descărca GPT-OSS 20B:
+Ollama gestionează modelele printr-un registru similar imaginilor de containere. Pentru a descărca GPT-OSS 20B:
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-Aceasta descarcă greutățile modelului pe mașina ta locală (aproximativ 12 GB). Descărcarea are loc o singură dată, iar rulările ulterioare încarcă modelul de pe disc.
+Aceasta descarcă ponderile modelului pe mașina dumneavoastră locală (aproximativ 12 GB). Descărcarea se realizează o singură dată, iar rulările ulterioare încarcă modelul de pe disc.
 
-Poți confirma că modelul este disponibil cu:
+Puteți confirma disponibilitatea modelului cu:
 
 ```bash
 ollama list
 ```
 
-Ar trebui să vezi `gpt-oss:20b` în rezultat, împreună cu dimensiunea și data ultimei modificări.
+Ar trebui să vedeți `gpt-oss:20b` în rezultat, împreună cu dimensiunea și data ultimei modificări.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
@@ -110,7 +111,7 @@ if (-not $list) { throw "ollama list returned no output" }
 if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
 Write-Host "OK: gpt-oss:20b is present in ollama list"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -167,7 +168,7 @@ echo "$list" | grep -q 'gpt-oss:20b' || {
 }
 echo "OK: gpt-oss:20b is present in ollama list"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 ### Denumirea modelelor
@@ -181,47 +182,47 @@ Numele modelelor Ollama urmează formatul `name:tag`. Eticheta indică de obicei
 | `ollama rm <model>` | Elimină un model pentru a elibera spațiu pe disc |
 | `ollama show <model>` | Afișează metadatele și parametrii modelului |
 
-## Conversație din terminal
+## Conversarea din terminal
 
-Lansează o sesiune de chat interactivă direct din linia de comandă:
+Lansați o sesiune de chat interactivă direct din linia de comandă:
 
 ```bash
 ollama run gpt-oss:20b
 ```
 
-Ollama încarcă modelul în memorie și te plasează într-un prompt. Încearcă să îl întrebi ceva:
+Ollama încarcă modelul în memorie și vă plasează într-un prompt. Încercați să-i puneți o întrebare:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-Modelul transmite răspunsul token cu token direct în terminal. Tastează `/bye` sau apasă `Ctrl+D` pentru a încheia sesiunea.
+Modelul transmite răspunsul token cu token direct în terminal. Tastați `/bye` sau apăsați `Ctrl+D` pentru a ieși din sesiune.
 
-> **Sfat**: Prima rulare durează câteva secunde pentru a încărca modelul în memorie. Prompturile ulterioare din aceeași sesiune răspund mult mai rapid, deoarece modelul rămâne încărcat.
+> **Sfat**: Prima rulare durează câteva secunde pentru a încărca modelul în memorie. Prompturile ulterioare din aceeași sesiune răspund mult mai rapid deoarece modelul rămâne încărcat.
 
 <!-- @os:windows -->
-## Conversație din aplicația desktop
+## Conversarea din aplicația desktop
 
-Ollama vine și cu o aplicație desktop care oferă o interfață de chat curată pentru interacțiunea cu modelele tale.
+Ollama vine, de asemenea, cu o aplicație desktop care oferă o interfață de chat clară pentru interacțiunea cu modelele dumneavoastră.
 
-Deschide **Ollama** din meniul Start sau fă clic pe pictograma Ollama din bara de sistem și selectează **Open Ollama**.
+Deschideți **Ollama** din meniul Start sau faceți clic pe pictograma Ollama din tava de sistem și selectați **Open Ollama**.
 
 Odată ce aplicația este deschisă:
 
-1. Fă clic pe **New Chat** în bara laterală.
-2. Selectează **gpt-oss:20b** din meniul derulant al modelului din colțul din dreapta jos al zonei de introducere a mesajelor.
-3. Tastează un mesaj și apasă Enter pentru a începe conversația.
+1. Faceți clic pe **New Chat** din bara laterală.
+2. Selectați **gpt-oss:20b** din meniul derulant de modele din colțul din dreapta jos al zonei de introducere a chatului.
+3. Introduceți un mesaj și apăsați Enter pentru a începe conversația.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-Aplicația desktop păstrează un istoric al conversațiilor tale în bara laterală, facilitând revenirea la chat-urile anterioare.
+Aplicația desktop păstrează un istoric al conversațiilor dumneavoastră în bara laterală, facilitând revizitarea conversațiilor anterioare.
 <!-- @os:end -->
 
-## Utilizarea REST API
+## Utilizarea API-ului REST
 
-După instalare, Ollama rulează ca un serviciu de fundal și expune un REST API pe `http://localhost:11434` pe care îl poți folosi pentru a integra modele în propriile aplicații și scripturi.
+După instalare, Ollama rulează ca serviciu în fundal și expune un API REST la `http://localhost:11434` pe care îl puteți folosi pentru a integra modele în propriile aplicații și scripturi.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -359,7 +360,7 @@ finally {
   }
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -530,7 +531,7 @@ print("OK: Python requests example works")
 PY
 "$py" "$python_smoke"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 ### Generarea unui răspuns în terminal
@@ -551,7 +552,7 @@ Răspunsul este un obiect JSON care conține rezultatul modelului în câmpul `r
 
 
 ### Exemplu Python
-Acum că putem accesa API-ul Ollama programatic, haideți să îl apelăm din Python.
+Acum că putem apela API-ul Ollama programatic, să-l apelăm din Python.
 
 #### Crearea unui mediu virtual în terminal
 
@@ -572,7 +573,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### Crearea unui fișier Python
-În același director, folosește VS Code sau un alt editor pentru a crea un fișier .py și copiază codul următor în el. Apoi, rulează fișierul în mediul tău activat cu `python your_file_name.py`
+În același director, folosiți VS Code sau alt editor pentru a crea un fișier .py și copiați următorul cod în el. Apoi, rulați fișierul în mediul dumneavoastră activat cu `python your_file_name.py`
 
 ```python
 import requests
@@ -589,23 +590,22 @@ response = requests.post(
 print(response.json()["response"])
 ```
 
-### Endpoint-uri principale ale API-ului
+### Endpoint-uri API cheie
 
 | Endpoint | Metodă | Scop |
 |----------|--------|---------|
-| `/api/generate` | POST | Generare de text cu un singur schimb |
-| `/api/chat` | POST | Conversație cu mai multe schimburi și istoricul mesajelor |
-| `/api/tags` | GET | Listarea modelelor disponibile |
-| `/api/show` | POST | Afișarea detaliilor modelului |
-| `/api/pull` | POST | Descărcarea unui model din registru |
+| `/api/generate` | POST | Generare de text cu o singură rundă |
+| `/api/chat` | POST | Conversație cu mai multe runde, cu istoric de mesaje |
+| `/api/tags` | GET | Listează modelele disponibile |
+| `/api/show` | POST | Afișează detaliile modelului |
+| `/api/pull` | POST | Descarcă un model din registru |
 
 Pentru referința completă a API-ului, consultați [documentația API Ollama](https://github.com/ollama/ollama/blob/main/docs/api.md).
-
 ## Pași următori
 
-- **Încearcă modele diferite**: Explorează [biblioteca de modele Ollama](https://ollama.com/library) pentru a descoperi sute de modele disponibile, de la asistenți mici de codare la modele mari de raționament.
-- **Creează modele personalizate**: Folosește un [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) pentru a seta prompturi de sistem personalizate, temperatură și alți parametri pentru o experiență adaptată.
-- **Construiește cu API-ul**: Folosește bibliotecile client [Python](https://github.com/ollama/ollama-python) sau [JavaScript](https://github.com/ollama/ollama-js) pentru a integra Ollama în aplicațiile tale.
-- **Conectează la interfețe frontend**: Asociază Ollama cu instrumente precum [Open WebUI](https://github.com/open-webui/open-webui) pentru o interfață de chat bogată în funcții, cu căutare, persoane și încărcare de documente.
+- **Încercați modele diferite**: Răsfoiți [biblioteca de modele Ollama](https://ollama.com/library) pentru a explora sute de modele disponibile, de la asistenți mici de programare până la modele mari de raționament.
+- **Creați modele personalizate**: Utilizați un [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) pentru a seta prompturi de sistem personalizate, temperatura și alți parametri pentru o experiență adaptată nevoilor dumneavoastră.
+- **Construiți cu ajutorul API-ului**: Utilizați bibliotecile client [Python](https://github.com/ollama/ollama-python) sau [JavaScript](https://github.com/ollama/ollama-js) pentru a integra Ollama în aplicațiile dumneavoastră.
+- **Conectați-vă la interfețe front-end**: Combinați Ollama cu instrumente precum [Open WebUI](https://github.com/open-webui/open-webui) pentru o interfață de chat bogată în funcționalități, cu căutare, personaje și încărcare de documente.
 
 Pentru mai multe informații, consultați [documentația Ollama](https://github.com/ollama/ollama/blob/main/README.md).

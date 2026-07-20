@@ -1,5 +1,5 @@
 {
   "id": "gaia-agents",
-  "title": "Az első ügynök létrehozása GAIA segítségével",
-  "description": "Építsen 100%-ban helyi AI-ügynököt — nincs szükség felhőalapú API-kra. Használja a GAIA SDK-t egy hardvertanácsadó létrehozásához."
+  "title": "GAIA első ügynökének felépítése",
+  "description": "Építs 100%-ban helyi AI-ügynököt – felhőalapú API-kra nincs szükség. Használd a GAIA SDK-t egy hardvertanácsadó létrehozásához."
 }

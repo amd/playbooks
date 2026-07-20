@@ -4,20 +4,20 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### A Qwen3.5 9B letöltése LM Studio-ban
+### A Qwen3.5 9B letöltése az LM Studio-ban
 
 A Qwen3.5 9B modell letöltéséhez:
 
-1. Nyomja meg a "Ctrl" + "Shift" + "M" billentyűkombinációt, vagy kattintson a bal oldalsávon található "Discover" fülre (Nagyító ikon)
-2. Keressen rá a `Qwen3.5 9B` kifejezésre
-3. Válasszon egy kvantálást (az ajánlott `Q4_K_M` jó egyensúlyt kínál a méret és a minőség között), majd kattintson a Download gombra
+1. Nyomja meg a "Ctrl" + "Shift" + "M" billentyűkombinációt, vagy kattintson a bal oldali oldalsávon a "Discover" fülre (nagyítóikon)
+2. Keressen rá erre: `Qwen3.5 9B`
+3. Válasszon egy kvantálást (az ajánlott `Q4_K_M` jó egyensúlyt biztosít méret és minőség között), majd kattintson a Download gombra
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download_qwen.png" alt="LM Studio Download Models" width="600"/>
 
-Az LM Studio automatikusan letölti a modellt, és a megfelelő könyvtárba helyezi.
+Az LM Studio automatikusan letölti, és a megfelelő könyvtárba helyezi a modellt.
 
-Ha további modelleket szeretne letölteni, a Discover fülön kereshet rájuk, és az LM Studio elvégzi a többit.
+Ha további modelleket szeretne letölteni, kereshet rájuk a Discover fülön, és az LM Studio elvégzi a többi lépést.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-qwen-windows timeout=60 hidden=True -->

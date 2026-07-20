@@ -19,14 +19,14 @@ VS Code можна встановити з **AMD Ryzen™ AI Developer Center**.
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Завантажте виконуваний файл інсталятора для Windows за посиланням: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+1. Завантажте виконуваний файл встановлення для Windows за посиланням: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
 2. Натисніть на завантажений файл `VSCodeUserSetup-x64-1.108.2.exe`, щоб встановити VS Code.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-1. Завантажте пакет інсталятора для Debian за посиланням: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
+1. Завантажте пакет встановлення для Debian за посиланням: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
 2. Натисніть на завантажений файл `code_1.108.2-1769004815_amd64.deb`, щоб встановити VS Code.
 
 <!-- @os:end -->

@@ -6,27 +6,27 @@ SPDX-License-Identifier: MIT
 
 # Konfiguracija platforme
 
-Ta dokument opisuje pričakovane konfiguracije platforme za izvajanje tega priročnika.
+Ta dokument opisuje pričakovane konfiguracije platforme za izvajanje tega priročnika (playbook).
 
 ## Windows
 
 ### Namestitev LM Studio
 
-LM Studio mora biti vnaprej nameščen:
+LM Studio mora biti predhodno nameščen:
 
 | Komponenta | Različica | Lokacija |
 |-----------|---------|----------|
-| **LM Studio (modeli + razno)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (modeli + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (program)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (predpomnilnik)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Prenos modelov
+### Prenos modela
 
-Naslednji modeli morajo biti že prisotni v imeniku modelov LM Studio (`C:\Users\...\.lmstudio\models`):
+Naslednji modeli morajo že biti prisotni v mapi z modeli LM Studio (`C:\Users\...\.lmstudio\models`):
 
 | Vrsta modela | Kvantizacija | Velikost | Lokacija |
 |------------|--------------|------|----------|
-| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18,2 GB | `models\lmstudio-community` |
+| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
 ---
 
@@ -34,8 +34,8 @@ Naslednji modeli morajo biti že prisotni v imeniku modelov LM Studio (`C:\Users
 
 ### Namestitev LM Studio
 
-Za več podrobnosti glejte lmstudio.md (v mapi odvisnosti).
+Za več podrobnosti glejte lmstudio.md (v mapi dependencies).
 
-### Prenos modelov
+### Prenos modela
 
 Enako kot v sistemu Windows.

@@ -4,546 +4,546 @@
     "playbooks/core/comfyui-image-gen/README.md": {
       "source_sha256": "5f3da10f7fae3dc68416413efd91668449de4a5796ccf600a591bb1621817f18",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor nits: 'avbrusning' is an unusual coinage for 'denoising'; 'brusschema' slightly awkward; untranslated English UI labels acceptable but inconsistent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: 'ämnesadaptrar' for subject adapters slightly awkward but acceptable."
     },
     "playbooks/core/comfyui-image-gen/platform.md": {
       "source_sha256": "e8a6884590d062f17595a57f2aadf5abe686c3169f53f3181544259336435c47",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'playbook' translated as 'spelbok' is unconventional; decimal commas correct for sv-SE. All code, URLs, brand terms intact."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Untranslated 'Text Encoder', 'Diffusion Model' in table; acceptable as terminology. Otherwise accurate and fluent."
     },
     "playbooks/core/comfyui-image-gen/playbook.json": {
       "source_sha256": "7fbbe78699fe6dbb9f4812e99b949d9c7daa2f88f52ee0f87cbb4641d0f5baae",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 97,
-      "quality_issues": "Near-flawless translation. All brand names and terms preserved correctly."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Title 'Genererar' should be 'Generera' (gerund vs imperative/heading form); otherwise accurate and fluent."
     },
     "playbooks/dependencies/comfyui.md": {
       "source_sha256": "1364f858fb8176db125d258fd392b33e0c2ec1d9f50983f5648926384717a436",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'this app' → 'appen' loses 'this'; UI strings like 'Automatic Updates'/'Next' kept in English, which is acceptable but inconsistent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "UI strings 'Automatic Updates'/'Next' left untranslated; otherwise accurate and fluent."
     },
     "playbooks/dependencies/comfyui_models.md": {
       "source_sha256": "8cb46545df5efaaae1521a92e385e95f3dcdabdbdd3a8ddce9c94a0e0680a9b5",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'pre-downloaded' translated as 'förinstallerade' (pre-installed) instead of 'förnedladdade'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "\"förnedladdade\" is a typo/awkward (should be förnedladdade→förhandsnedladdade); \"uppmanas att\" slightly awkward phrasing."
     },
     "playbooks/dependencies/driver.md": {
       "source_sha256": "bdde05c0805a03d019eedad5bd7dc53a862c6b1f5ffeee6743fdfb73ef39de73",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "UI strings like 'Driver and Software' and 'Manage Updates' left untranslated, which is acceptable but inconsistent with translating 'Startmeny'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "UI labels 'Driver and Software'/'Manage Updates' left untranslated but likely intentional; otherwise accurate."
     },
     "playbooks/dependencies/gaia.md": {
       "source_sha256": "4837a0e4fd45ede7efc3d903c1bb65484d0805c6e45657d2b097b23c063bb935",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Minor: 'kommandona' could be 'kommandoen'; 'setup' translated as 'konfigurationen' is acceptable but slightly shifts meaning."
+      "quality_issues": "Accurate, fluent, code/URLs/brands intact. Minor: 'hårdvara' could be 'maskinvara' but acceptable."
     },
     "playbooks/dependencies/lemonade.md": {
       "source_sha256": "428d83bf7ddb03e55ae4c09580554a56ff49d91b924eba6758bb9f106eb7b46a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'utdata som liknar' slightly awkward; 'redo att användas' fine but slightly differs from 'ready to go'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent translation; code, URLs, brands intact. No meaningful errors."
     },
     "playbooks/dependencies/lmstudio.md": {
       "source_sha256": "7bf63eab985e835155ecc012bee6c157069e27bc9030a3a975ef0652fe0b5443",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: UI terms like 'Updates', 'Settings' left untranslated, but acceptable for software navigation context."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; code, URLs, brands intact. UI menu terms left in English (acceptable convention)."
     },
     "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
       "source_sha256": "e33b569398da8f57d5da1bbd94f0c0e005ee7a4c206a577236f785cba3865fcd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Download' and 'Discover' left untranslated as UI labels, which is acceptable but inconsistent with translating other terms."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent; code, URLs, brands intact. Minor: 'Download' button left untranslated but acceptable."
     },
     "playbooks/dependencies/lmstudio_models_qwen3_9b.md": {
       "source_sha256": "51c02b376e3faea175b98d9d6586c91a9524c83348cedf4bd76323499a3d486e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "UI terms 'Discover' and 'Download' left untranslated; minor but intentional for usability."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation, code/URLs intact. Minor: 'Download' button kept in English, acceptable as UI element."
     },
     "playbooks/dependencies/memoryconfig.md": {
       "source_sha256": "45f82fd83ae2477a8f1afaebee688689addef39939bb0597c8f1cfb83591473f",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'delade minnespool' grammar slightly awkward; 'wheels' translated as 'paket' (acceptable but imprecise)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; code, URLs, brands intact. Minor: UI terms left in English (acceptable given code blocks)."
     },
     "playbooks/dependencies/n8n.md": {
       "source_sha256": "921441b6697d8ab93bbbc5a9bb71d737f616df42dd40a39b063af61e5aa5c6fa",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'n8n Documentation' link text left untranslated; could be 'n8n-dokumentation'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent; code, URLs, brands intact. Minor stylistic only."
     },
     "playbooks/dependencies/nodejs.md": {
       "source_sha256": "9df41526a5c8035b380150c56be8f29cad65da0286a8ee16fe0a49426436939b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 82,
-      "quality_issues": "Code block comments left untranslated in bash section; surrounding prose is translated but inline comments remain in English."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent; code comments untranslated (acceptable per source)."
     },
     "playbooks/dependencies/podman.md": {
       "source_sha256": "4e8c2edd4b805a8395f03ddc6b7ff096e6352a7c404616b59a05edc257f0bccd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'parsing plugin' → 'tolkningsplugin' slightly awkward; 'successfully' omitted in Step 4."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 91,
+      "quality_issues": "\"API-uttaget\" (socket) slightly awkward; otherwise accurate, fluent, code intact."
     },
     "playbooks/dependencies/pytorch.md": {
       "source_sha256": "ba5ed9d425c6685dd285c639438efc74c1e8d9d561442bad6412b9adc8164d82",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'programvarustöd' could be 'programvarusupport'; otherwise flawless."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Flawless; code, URLs, brands intact. Fluent natural Swedish."
     },
     "playbooks/dependencies/rocm.md": {
       "source_sha256": "af961dbef80b407b98ee05fd0e5f816418bf097d384460ca5a57e7844bf38813",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 97,
-      "quality_issues": "Near-flawless. Minor: 'denna länk' could be 'den här länken' for more natural Swedish."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 100,
+      "quality_issues": "None; accurate, fluent, code/URLs/brands intact"
     },
     "playbooks/dependencies/softwareupdate.md": {
       "source_sha256": "2d5cb11ce696297d74dfbb9d140b765dc64add55f1bdcbdd27fb3498ca3871f5",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: alt text left untranslated; tab names kept in English is acceptable for UI references."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Tab names kept in English (Updates/Manage), arguably correct if UI untranslated; otherwise fluent and accurate."
     },
     "playbooks/dependencies/vllm.md": {
       "source_sha256": "8876f624743d3b843409b5cd523a262e60ba53539710bf26c00d80a88153391e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'launcher' translated inconsistently as 'startkommandot' then 'Startprogrammet'. 'exponerar' is slightly technical but acceptable."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent, code/URLs intact; 'startkommandot' slightly loose for launcher but acceptable."
     },
     "playbooks/dependencies/vscode.md": {
       "source_sha256": "09b668411f70fb8781a2d0d7c7e4417250e610839d0f6213d5f2ff846ceda8f2",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Near-flawless. Minor: 'installation executable' simplified to 'installationsfilen'; UI tab names left untranslated (acceptable)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent; UI tab names left in English intentionally. Code, URLs, brands intact."
     },
     "playbooks/core/lmstudio-rocm-llms/README.md": {
       "source_sha256": "f0c7074a75cf11c9c9bb8b3508a87f66c8c08fa3e96832ece9f55e7dc5f85b91",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: untranslated UI strings kept intentionally; 'playbook' left untranslated in step 4; overall excellent fluency and accuracy."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Excellent; 'spelbok' for playbook and 'omslag' for wrapper are debatable but understandable; code/tags intact."
     },
     "playbooks/core/lmstudio-rocm-llms/platform.md": {
       "source_sha256": "f731064c13c2ca273ea6bbc804e0b3309a1f4d385e3b58b35575f5e8430a3b86",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Msc' translated as 'Övrigt' is a reasonable guess but not certain; 'spelboken' for 'playbook' is acceptable but slightly informal."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: 'Msc' rendered as 'Diverse' is a reasonable interpretation."
     },
     "playbooks/core/lmstudio-rocm-llms/playbook.json": {
       "source_sha256": "43aa660e28f5698ceef07211ce4a2b2c197d5463917e8311049c6410a9bdbb57",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Minor inconsistency: title uses 'servera' but body uses 'tillhandahålla' for 'serve'. Both are acceptable but inconsistent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Title verb form 'serverar' slightly inconsistent with 'serving'; otherwise accurate and fluent."
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
       "source_sha256": "19066843d638353adb3a11fe7f188f59a66c1f11eeaa7037af97a5c21308d4df",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: untranslated GitHub admonition tags (NOTE/IMPORTANT), some UI strings left in English by design, 'playbook' used untranslated inconsistently."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Cyrillic char in 'редigerare' (should be redigerare); missing blank line before Step 3 heading; otherwise accurate."
     },
     "playbooks/core/n8n-automation-gpt-oss/platform.md": {
       "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: 'spelboken' for 'playbook' is acceptable but slightly informal; 'enhetslämpliga' is a slight neologism."
+      "quality_issues": "Excellent translation; code, URLs, brands intact. 'Ändpunkt' slightly awkward but acceptable."
     },
     "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
       "source_sha256": "068a5d7d2996ca2c8b37535eddf9fe38ab421d56ee509a426d96835a96ab3f74",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'LLM:er' is acceptable Swedish pluralization but slightly informal."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; 'nyhetssammanfattare' slightly awkward but acceptable; brand terms intact."
     },
     "playbooks/core/pytorch-rocm-llms/README.md": {
       "source_sha256": "a7f0693c43a5a31e55ffb32b5050099e5297ec77456daff75cf33edf91794d7a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'playbook-et' slightly awkward (could be 'denna playbook'); bash comments left untranslated (acceptable); 'Kärnsampning' for 'Nucleus Sampling' is fine but uncommon."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'spelbok' for playbook is literal/awkward; 'Kontrollera efter' slightly off. Code/tags/URLs intact, fluent overall."
     },
     "playbooks/core/pytorch-rocm-llms/platform.md": {
       "source_sha256": "f10bd86c45555b65939b97bf0e599a75ce90d5ec18c61a68a98463d34c1e31d2",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'spelboken' is a literal translation of 'playbook' that may not be idiomatic in Swedish technical contexts."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, brands, numbers intact. Minor: 'playbook' left untranslated but acceptable."
     },
     "playbooks/core/pytorch-rocm-llms/playbook.json": {
       "source_sha256": "e4aba2b4e1928b5162037673172f666cb991a500469e027743d01f3ee26955ef",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 97,
-      "quality_issues": "Near-flawless translation; minor stylistic nit with 'LLM:er' colon convention but it is standard Swedish."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Accurate, fluent, brand terms and symbols intact; minor stylistic naturalness only."
     },
     "playbooks/core/vscode-qwen3-coder/README.md": {
       "source_sha256": "25da94f89aec651b737075b56e6c558256a645c2a44b96204163e9c87c857fae",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Untranslated NOTE/IMPORTANT blocks at top; incomplete sentence in Resources intro preserved from source; minor: 'statustogeln' slightly awkward."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Truncated source phrase 'running workloads on' faithfully reproduced. Minor anglicisms (promta) acceptable."
     },
     "playbooks/core/vscode-qwen3-coder/platform.md": {
       "source_sha256": "14c7eec60b483e4bedb5e465673d89e07466088a9ed9c59d7964c3466cf89410",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Msc' translated as 'Övrigt' is interpretive; 'spelboken' for 'playbook' is acceptable but slightly informal."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, code/URLs/numbers intact. Minor: 'dependencies' folder could be localized but acceptable."
     },
     "playbooks/core/vscode-qwen3-coder/playbook.json": {
       "source_sha256": "7ce988423e60b386afb4d619e4c1f54b387b839fe588261ab5aaf63e13dee220",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor inconsistency: 'VSCode' in title vs 'VS Code' in body, but this mirrors the source exactly. Translation is accurate and natural."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'kodassistans' slightly awkward; otherwise accurate, fluent, terms intact"
     },
     "playbooks/supplemental/amd-sync/README.md": {
       "source_sha256": "ae7dafe9ebacacdff50f8cf23f8e03d49e1b648456a6b33fabaa84d4fc8c3c0e",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "GitHub-only block left untranslated; minor phrasing like 'Fel lösenordsfel' is slightly awkward; UI strings kept in English appropriately."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent, fluent translation; code, URLs, brands intact. Minor: one missing blank line before '### Prova terminalen'."
     },
     "playbooks/supplemental/amd-sync/playbook.json": {
       "source_sha256": "dd916e95fa31e2909a5ce0b7809b56adcc87c799638d3b136deadf1ec0bd4940",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'enklicksåtkomst till fjärr-' slightly verbose vs original 'one-click remote'; otherwise accurate and fluent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; 'Live Metrics' left untranslated but acceptable as feature name."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
       "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Anchor links not localized (e.g. #1-determine-network-interfaces instead of Swedish anchors); minor inconsistency 'modelskatalog' vs 'modellnedladdning'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Minor: 'spelbok' for playbook is literal but acceptable; 'visuell kodare' for vision encoder slightly awkward. Otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
       "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Klustring' is uncommon in Swedish; 'flernodigt' is acceptable but slightly awkward."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent; minor repetition of 'med' slightly clunky. Brand terms and RCCL intact."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
       "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Anchor links not localized (e.g. #downloading-the-model vs #ladda-ned-modellen); minor: 'modelladdning' could be 'modellinläsning'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor inconsistency: 'spelbok' vs 'handbok' for playbook; anchor links kept in English but functional. Otherwise fluent, accurate, code intact."
     },
     "playbooks/supplemental/clustering-rpc-server/playbook.json": {
       "source_sha256": "afee8d03bc9faa092036cbf4a62ec9db4252a49f25273438a7e4e5bbc2b4a10c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'modeller på 350B+' slightly awkward; 'med över 350B parametrar' or '350B+-modeller' would be more natural."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Title 'Clustering' rendered as noun 'Kluster'; '350 B+' spacing/added 'parametrar' slightly overspecified but acceptable."
     },
     "playbooks/supplemental/ollama-getting-started/README.md": {
       "source_sha256": "5cb90cfa647fafa9f99ad8b659211c2e1806cd11f9fff3ceb351b56a90e6f227",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "GitHub-only banner left untranslated; minor stylistic nits like 'spelboken' for 'playbook'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "\"Spelbok\" for playbook is awkward; \"Kontrollera efter programuppdateringar\" slightly off. Code, URLs, brands intact."
     },
     "playbooks/supplemental/ollama-getting-started/playbook.json": {
       "source_sha256": "642990e3570bb0888cd87c78e2c61d19eea1864677052a0f04d7aa2a7c0f5414",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 97,
-      "quality_issues": "Near-flawless translation. 'LLM:er' is the correct Swedish plural form. All brand terms and technical terms preserved."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, terminology intact; minor stylistic nits only."
     },
     "playbooks/supplemental/open-webui-chat/README.md": {
       "source_sha256": "b257e5d4c3accfd50265d7b75ea8258159b037cbbe57dcc9241bad746554c929",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'användarvända' should be 'användarvänliga'; untranslated GitHub-only callout text; prompt examples left in English (acceptable but inconsistent)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor: 'spelbok' for playbook slightly awkward; 'chattbottupplevelse' typo. Code, URLs, brand terms intact."
     },
     "playbooks/supplemental/open-webui-chat/platform.md": {
       "source_sha256": "1cc71fc518a4ba7e507047973d835456dc836155b3365f0e7fb64ed1f81d85cb",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'synkapabel' is an unusual compound; 'visionkapabel' or 'bildkapabel' would be more natural."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'synförmögen' slightly awkward; 'liständpunkt' for endpoint acceptable but stilted. Otherwise accurate, fluent, all code/URLs intact."
     },
     "playbooks/supplemental/open-webui-chat/playbook.json": {
       "source_sha256": "b7c488fe64673b9b617a974c4b360661b6afe299f3410c1120db34a6e794a0fd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 97,
-      "quality_issues": "Excellent translation. 'LLM:er' is the standard Swedish pluralization of LLM."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Header better as 'Chatta med' (infinitive) than 'Chattar med'; otherwise accurate."
     },
     "playbooks/supplemental/cvml/README.md": {
       "source_sha256": "a238f52921afd44cf45727cfafb0f4d99ceeb97b18b1c785362c8938554f6004",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: anchor link '#building-opencv-from-source' not updated to match translated heading; 'featureobjekt' used as loanword blend."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'begränsningsrutor'/'avgränsningsrutor' inconsistency; 'spelbok' for playbook debatable. Code/URLs intact."
     },
     "playbooks/supplemental/cvml/playbook.json": {
       "source_sha256": "53796041ee0532656e093dbb4bbac2c3bddbf15e76f7646824fa6360f1232a8c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 82,
-      "quality_issues": "\"Lokal datorseende\" is grammatically awkward; should be \"Lokalt datorseende\" (neuter agreement). Otherwise accurate and fluent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Grammar: 'Lokal datorseende' should be 'Lokalt datorseende' (neuter agreement); otherwise accurate."
     },
     "playbooks/supplemental/gaia-agents/README.md": {
       "source_sha256": "feb74d6ee2839ece7d3918fb2910e2b7cf09cfdde6191742b776c521910f960a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: some English left untranslated in code comments/output blocks; 'storleksberikande' is slightly awkward phrasing."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Final verification test queries translated to Swedish though source keeps English UI examples; minor inconsistency. Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/gaia-agents/platform.md": {
       "source_sha256": "0aa409f73352dbe5489bcbff783403a39bd4049ae44238f8ce107165f02cf43c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'spelbok' for 'playbook' is acceptable but 'playbook' might be preferred in tech context."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "\"Spelbok\" is literal for playbook; otherwise accurate, fluent, terms and code intact."
     },
     "playbooks/supplemental/gaia-agents/playbook.json": {
       "source_sha256": "e835f7da0097042741c5558f5fc14a57f25b24f807ef5c277ee6cf9793212ed9",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: 'moln-API:er' is acceptable but 'moln-API:er' could also be 'cloud-API:er'; overall excellent translation."
+      "quality_issues": "Natural, accurate; brand terms intact. Minor: 'hårdvarurådgivare' slightly literal but acceptable."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
       "source_sha256": "b3613af14dd94ab44888f2d3013af6b10e1685c5e4915765507065117303be9a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'chattavslutningar' for 'chat completions' is awkward; untranslated GitHub-only block; 'stödd' slightly informal for 'supported'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Excellent translation; 'diskret GPU' slightly awkward word order; code/URLs/tags all intact and accurate."
     },
     "playbooks/supplemental/lemonade-getting-started/platform.md": {
       "source_sha256": "091ccd8efa90e078a5d740aac0e40d742ad91f5898d0de9e1574d62e6778ec17",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "\"spelbok\" for \"playbook\" is a minor terminology choice; otherwise excellent translation."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, terminology and code intact; minor stylistic nit 'seriens processor' slightly awkward."
     },
     "playbooks/supplemental/lemonade-getting-started/playbook.json": {
       "source_sha256": "444b1e3ddf1a59c5357878cb7e88b0db243e7c9a9d544095a2b8bdd3b8ba648a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 88,
-      "quality_issues": "\"öppen källkods-server för lokal AI\" is slightly awkward; \"lokal AI-server med öppen källkod\" would be more natural."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Awkward 'öppen källkod-baserad'; 'öppen källkod' would be more natural. Otherwise accurate."
     },
     "playbooks/supplemental/llama-factory-finetuning/README.md": {
       "source_sha256": "38f43810c9ea7c04ad70e180795d64b81ab9e45fd01413ecd26a1d4e7283bde1",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "\"Den här spelböckens lär dig\" is grammatically incorrect (should be \"Den här spelboken lär dig\"). Minor inconsistency using \"spelboken\" as translation for \"playbook\"."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent, fluent translation; code, URLs, numbers intact. Minor: 'Kontrollera efter' slightly awkward; 'handledning' inconsistency with 'handbok'."
     },
     "playbooks/supplemental/llama-factory-finetuning/playbook.json": {
       "source_sha256": "e8a8cd9cebcb66736e1cfb707fd792795defcb4f4facb6b80f722be826b2a89b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'LLaMA Factory' hyphenated as 'LLaMA-Factory'; acronym 'LLMs' rendered as 'LLM' without plural in body text."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Minor inconsistency: LLM:er vs (LLM); otherwise accurate and fluent."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
       "source_sha256": "3870cbf9cdec77fbb11f99c2751de2826fce765a431d52a853a9c034727e7225",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "Minor: 'det backenden' should be 'den backenden'; 'spelguiden' for 'playbook' is slightly informal; a few minor stylistic inconsistencies."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Excellent, fluent translation; code/URLs intact. Minor: 'onåbar' should be 'onåbar/oåtkomlig', 'förfråge-ID' slightly awkward. Terminology consistent."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
       "source_sha256": "99df141310754dea218b61260f021d4fd7aec64a922654db64ed473b877e6351",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Very accurate translation. Minor stylistic choice: 'Köra' as imperative/infinitive heading is natural in Swedish."
+      "quality_issues": "Accurate, fluent, brand terms intact; natural phrasing."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
       "source_sha256": "bc2cba716bb866957cf930a234b9080bd64c863a18e6f77f7e98c3f51f0868fc",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Anpassning av anpassade nycklar' is slightly awkward phrasing; code comments left in English (acceptable). Overall excellent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Minor: 'spelbok' for playbook slightly literal; 'spärrad' for gated acceptable. Code blocks, URLs, brands intact."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
       "source_sha256": "34841c22920fdf111d2a7ab0b640af96555cc1aa0376103acf8ea62e336609af",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'LLM' in parenthetical should be 'LLM:er' for consistency with the title usage."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent; brand terms and abbreviations intact. Minor stylistic nits only."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "ef647656230fb6a512ac0b98b573e61f729e4c14de2bdcd4b33a1c733c1a9e2c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 92,
-      "quality_issues": "Minor awkward phrasing: 'kärnätillägg' should be 'kärntillägg'; 'spelboken' gender mismatch ('den här spelboken' is fine but 'Det här spelboken' earlier is inconsistent)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Untranslated heading 'Installing Basic Dependencies'; minor term inconsistency (kärna/kernel, startprogram/startare, Metod/Ansats)."
     },
     "playbooks/supplemental/pytorch-kernels/platform.md": {
       "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Minor: 'spelboken' for 'playbook' is unconventional; 'inbyggda' for 'native' is acceptable but slightly ambiguous."
+      "quality_issues": "Excellent translation; all code, URLs, brands intact. Minor: 'playbook' left untranslated (acceptable)."
     },
     "playbooks/supplemental/pytorch-kernels/playbook.json": {
       "source_sha256": "30272b772a010c694249bc9a4f83fe9676ee2fa98cf3ec96dbca4f3be4ae3916",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 97,
-      "quality_issues": "Near-flawless translation; all brand names and trademarks preserved correctly."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate; 'GPU-kärnor' for kernels is acceptable but could be seen as literal in ML context."
     },
     "playbooks/supplemental/speech2speech-translation/README.md": {
       "source_sha256": "c6e008753ea3a6442c32774e44345e39fd5b5b64534fcb837541f2220c66d1fd",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'på kanten' (edge) is a slightly awkward calque; 'speech-speech' inconsistently rendered; untranslated GitHub callout block."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Minor: 'friktion mellan översättnings- och språkbarriärer' slightly awkward; 'ljuduppsättning' for audio array imprecise. Code/URLs intact."
     },
     "playbooks/supplemental/speech2speech-translation/platform.md": {
       "source_sha256": "ac5b39917b7a533154f6a0f823949356905a766e067a7efcd000d63584cb36a3",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "\"spelboken\" is a literal translation of \"playbook\" that sounds slightly unnatural in Swedish technical docs; minor stylistic nit."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code, numbers, brands intact. Minor: 'playbook' left untranslated but consistent."
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
       "source_sha256": "48eb7b7b031b9e676748a482854cf10fb41555109fa05ec9a06a8992baf282cf",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 82,
-      "quality_issues": "Compound word errors: should be 'Realtids-tal-till-tal-översättning' or 'Tal-till-tal-översättning i realtid'. Awkward phrasing with 'realtids tal-till-tal'."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 78,
+      "quality_issues": "Title mistranslates 'speech-to-speech' as 'speech recognition and speech translation'; body is accurate."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
       "source_sha256": "a2ee5a621944612fd1d5ac526c6b844f0f528a0c696c178ac8f85f170ab7467c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: anchor link #known-warnings not updated to Swedish #kända-varningar; 'Kända varningar' heading may not match."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor inconsistency: 'spelbok' vs 'playbook/playbooken' used interchangeably. Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/platform.md": {
       "source_sha256": "45dc9cd1642f32761ed88326b25e7df018482c93832b386c31464522eb62066b",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 93,
-      "quality_issues": "\"spelboken\" is a literal translation of \"playbook\" that sounds unnatural in Swedish technical context; consider \"handboken\" or keeping \"playbook\"."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, terminology and code intact; minor stylistic choices only."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/playbook.json": {
       "source_sha256": "3204669893381cf35615253a77a5fab815e3d2e3cc61269de7441781b2a6aebc",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'LLMs' trademark symbol placement slightly shifted but acceptable. Translation is accurate and fluent."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Trademark symbol placement slightly off; otherwise accurate and fluent."
     },
     "playbooks/supplemental/vllm-inference/README.md": {
       "source_sha256": "24dc5ebde274af75275e075ca2423138e0d67d3de03f1cebbee30fb9ac5940f4",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'chattavslutningsförfrågan' is awkward for 'chat completion request'; GitHub-only block left untranslated (acceptable but inconsistent)."
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Fluent, accurate; 'spelbok' for playbook is questionable but consistent. Code, URLs, brands intact."
     },
     "playbooks/supplemental/vllm-inference/playbook.json": {
       "source_sha256": "0db881869b8d489317f0445edf4b420f738173b9c82c6488074e8948f7d6351c",
       "prompt_version": "2",
-      "model": "Claude-Sonnet-4.6",
-      "judge_model": "Claude-Opus-4.6",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Minor grammar: 'den integrerade GPU' should be 'den integrerade GPU:n' or 'den integrerade grafikprocessorn'. 'Serving' left untranslated."
+      "quality_issues": "\"serving\" left untranslated; otherwise accurate and fluent."
     }
   }
 }

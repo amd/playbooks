@@ -1,5 +1,5 @@
 {
   "id": "vllm-inference",
-  "title": "Első lépések a vLLM-mel",
-  "description": "Ismerje meg, hogyan futtathat következtetést és kiszolgálást konténerizált vLLM segítségével az integrált GPU-n"
+  "title": "Első lépések a vLLM használatával",
+  "description": "Ismerje meg, hogyan futtatható következtetés és kiszolgálás konténerizált vLLM használatával az integrált GPU-n"
 }

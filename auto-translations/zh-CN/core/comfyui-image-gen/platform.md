@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 
 # 平台配置
 
-本文档描述了运行此 playbook 的预期平台配置。
+本文档描述了运行此工作手册所需的预期平台配置。
 
-## 所需应用/框架
+## 必需的应用程序/框架
 ### Windows/Linux
 
-ComfyUI 应按照 [ComfyUI 安装指南](../../dependencies/comfyui.md) 中提供的说明预先安装。
+应按照[ComfyUI 安装指南](../../dependencies/comfyui.md)中提供的说明预先安装 ComfyUI。
 
-## 所需模型
+## 必需的模型
 
 ### Windows/Linux
 
-以下模型必须存在于 ComfyUI 安装目录下的 `models` 文件夹中。
+以下模型必须存在于安装 ComfyUI 的目录下的 `models` 文件夹中。
 
 | 模型类型 | 文件名 | 大小 | 位置 | 下载 |
 |------------|----------|------|----------|----------|
@@ -27,4 +27,4 @@ ComfyUI 应按照 [ComfyUI 安装指南](../../dependencies/comfyui.md) 中提�
 | VAE | `ae.safetensors` | 319.77 MB | `models/vae/` | [链接](https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors) |
 
 
-要测试模型是否正确放置，请[通过引导网站预览 ComfyUI playbook](../../README.md#previewing-the-playbooks) 并按照说明操作。如果在启动 Z-Image Turbo 模板时未出现"未找到模型"页面，则说明模型已正确放置。
+要测试模型是否已正确放置，请[使用引导网站预览 ComfyUI 工作手册](../../README.md#previewing-the-playbooks)并按照说明操作。如果启动 Z-Image Turbo 模板时未出现“未找到模型”页面，则说明模型已正确放置。

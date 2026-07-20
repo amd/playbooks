@@ -1,5 +1,5 @@
 {
   "id": "vllm-inference",
   "title": "Primeros pasos con vLLM",
-  "description": "Aprende cómo ejecutar inferencia y servicio usando vLLM en contenedor en la GPU integrada"
+  "description": "Aprenda a ejecutar inferencia y servicio (serving) mediante vLLM en contenedores en la GPU integrada"
 }

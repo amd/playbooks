@@ -6,12 +6,12 @@ SPDX-License-Identifier: MIT
 
 #### ROCm
 
-**Voeg de huidige gebruiker toe aan de render- en videogroepen.** 
+**Voeg de huidige gebruiker toe aan de render- en video-groepen.** 
 ```bash
 sudo usermod -a -G render,video $LOGNAME
 ```
 
-**Herstart uw systeem om de instellingen toe te passen.**
+**Start uw systeem opnieuw op om de instellingen toe te passen.**
 ```bash
 sudo reboot
 ```
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-Voor verdere hulp bij de installatie, raadpleeg deze [link](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Zie voor verdere installatiehulp deze [link](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).

@@ -1,43 +1,43 @@
 ## ภาพรวม
 
-การ Fine-tuning ที่มีประสิทธิภาพมีความสำคัญอย่างยิ่งสำหรับการปรับใช้ Large Language Models (LLMs) กับงานปลายทาง LLaMA-Factory คือแพลตฟอร์มโอเพนซอร์สที่ใช้งานง่าย ซึ่งช่วยให้กระบวนการฝึกและ Fine-tuning ของ Large Language Models และ Multimodal Models เป็นไปอย่างราบรื่น โดยอนุญาตให้ผู้ใช้ปรับแต่งโมเดลที่ผ่านการฝึกมาแล้วหลายร้อยโมเดลในเครื่องของตนเองด้วยโค้ดที่น้อยที่สุด
+การปรับแต่งอย่างมีประสิทธิภาพ (Efficient fine-tuning) มีความสำคัญอย่างยิ่งต่อการปรับให้โมเดลภาษาขนาดใหญ่ (LLMs) เหมาะสมกับงานปลายทาง LLaMA Factory เป็นแพลตฟอร์มโอเพนซอร์สที่ใช้งานง่าย ซึ่งช่วยให้การฝึกและปรับแต่งโมเดลภาษาขนาดใหญ่และโมเดลแบบมัลติโมดัลเป็นไปอย่างราบรื่น ช่วยให้ผู้ใช้สามารถปรับแต่งโมเดลที่ผ่านการฝึกล่วงหน้าหลายร้อยโมเดลได้ในเครื่องของตนเองโดยแทบไม่ต้องเขียนโค้ด
 
-Playbook นี้จะสอนวิธี Fine-tune LLMs โดยใช้ LLaMA-Factory บนฮาร์ดแวร์ AMD ของคุณในเครื่อง
+คู่มือนี้จะสอนวิธีการปรับแต่ง LLMs โดยใช้ LLaMA Factory บนฮาร์ดแวร์ AMD ในเครื่องของคุณ
 
 <!-- @device:stx,krk -->
-> **หมายเหตุ:** เทคนิค Fine-tuning ใน Playbook นี้ต้องการ RAM ของระบบอย่างน้อย **32 GB** โดยมีอย่างน้อย **16 GB ที่พร้อมใช้งานสำหรับ GPU** (16 GB นั้นเป็นส่วนหนึ่งของ 32 GB ไม่ใช่เพิ่มเติมจากนั้น)
+> **หมายเหตุ:** เทคนิคการปรับแต่งในคู่มือนี้ต้องการ **RAM ระบบอย่างน้อย 32 GB** โดยต้องมี **อย่างน้อย 16 GB ที่ใช้งานได้กับ GPU** (16 GB นี้เป็นส่วนหนึ่งของ 32 GB ไม่ใช่เพิ่มเติมจากนั้น)
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **หมายเหตุ:** เทคนิค Fine-tuning ใน Playbook นี้ต้องการหน่วยความจำ GPU รวมอย่างน้อย **16 GB** และ RAM ของระบบ **32 GB**
-> - บน Windows หน่วยความจำ GPU รวมจะรวม VRAM เฉพาะของการ์ดจอเข้ากับหน่วยความจำ GPU ที่แชร์ (ยืมมาจาก RAM ของระบบ)
-> - ดังนั้น การ์ดที่มี VRAM เฉพาะน้อยกว่า 16 GB ยังสามารถรัน Playbook นี้ได้โดยใช้หน่วยความจำ GPU ที่แชร์เพื่อชดเชยส่วนที่ขาด
+> **หมายเหตุ:** เทคนิคการปรับแต่งในคู่มือนี้ต้องการ **หน่วยความจำ GPU รวมอย่างน้อย 16 GB** และ **RAM ระบบ 32 GB**
+> - บน Windows หน่วยความจำ GPU รวมประกอบด้วย VRAM เฉพาะของการ์ดจอผสมกับหน่วยความจำ GPU ที่ใช้ร่วมกัน (ยืมมาจาก RAM ระบบ)
+> - ดังนั้น การ์ดที่มี VRAM เฉพาะน้อยกว่า 16 GB ก็ยังสามารถรันคู่มือนี้ได้โดยใช้หน่วยความจำ GPU ที่ใช้ร่วมกันมาชดเชยส่วนต่าง
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **หมายเหตุ:** เทคนิค Fine-tuning ใน Playbook นี้ต้องการการ์ดจอที่มีหน่วยความจำ GPU เฉพาะอย่างน้อย **16 GB** และ RAM ของระบบ **32 GB**
+> **หมายเหตุ:** เทคนิคการปรับแต่งในคู่มือนี้ต้องการการ์ดจอที่มี **หน่วยความจำ GPU เฉพาะอย่างน้อย 16 GB** และ **RAM ระบบ 32 GB**
 > - บน Linux การฝึกจะทำงานทั้งหมดใน VRAM เฉพาะของการ์ดจอ
-> - ไม่มีการ Fallback ไปยังหน่วยความจำ GPU ที่แชร์ (RAM ของระบบ) เมื่อ VRAM หมด
-> - การ์ดที่มี VRAM เฉพาะน้อยกว่า 16 GB จะหน่วยความจำหมดระหว่างการฝึกบน Linux แม้ว่าระบบจะมี RAM เหลือเพียงพอก็ตาม
+> - ระบบจะไม่กลับไปใช้หน่วยความจำ GPU ที่ใช้ร่วมกัน (RAM ระบบ) เมื่อ VRAM หมด
+> - การ์ดที่มี VRAM เฉพาะน้อยกว่า 16 GB จะเกิดหน่วยความจำไม่พอระหว่างการฝึกบน Linux แม้ว่าระบบจะมี RAM เหลือเฟือก็ตาม
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## สิ่งที่คุณจะได้เรียนรู้
 
-- วิธีตั้งค่า LLaMA-Factory ด้วยซอฟต์แวร์ AMD ROCm™
-- วิธีกำหนดค่าพารามิเตอร์ Fine-tuning ของ LLM (โดยใช้ Qwen/Qwen3-4B-Instruct-2507 เป็นตัวอย่าง)
-- วิธีรัน Fine-tuning ด้วย LLaMA-Factory
-- วิธีรัน Inference ด้วยโมเดลที่ผ่านการ Fine-tune แล้ว
-- วิธี Export โมเดลที่ผ่านการ Fine-tune แล้ว
+- วิธีการตั้งค่า LLaMA Factory ด้วยซอฟต์แวร์ AMD ROCm™
+- วิธีการกำหนดค่าพารามิเตอร์การปรับแต่ง LLM (โดยใช้ Qwen/Qwen3-4B-Instruct-2507 เป็นตัวอย่าง)
+- วิธีการรันการปรับแต่งด้วย LLaMA Factory
+- วิธีการรัน inference ด้วยโมเดลที่ปรับแต่งแล้ว
+- วิธีการส่งออกโมเดลที่ปรับแต่งแล้ว
 
-## เวลาที่ประมาณการ
+## ระยะเวลาโดยประมาณ
 
-- ระยะเวลา: ใช้เวลาประมาณ 60 นาทีในการรัน Playbook นี้ (ขึ้นอยู่กับขนาดโมเดล/ชุดข้อมูลและความเร็วเครือข่ายของคุณ)
+- ระยะเวลา: การรันคู่มือนี้จะใช้เวลาประมาณ 60 นาที (ขึ้นอยู่กับขนาดโมเดล/ชุดข้อมูลและความเร็วเครือข่ายของคุณ)
 - ดูข้อมูลเพิ่มเติมได้ที่ [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory)
 
-## การตั้งค่าการกำหนดค่าหน่วยความจำ
+## การตั้งค่าหน่วยความจำ
 
 <!-- @require:memory-config -->
 
@@ -47,7 +47,7 @@ Playbook นี้จะสอนวิธี Fine-tune LLMs โดยใช้ 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## การติดตั้งซอฟต์แวร์ที่จำเป็น
+## การติดตั้งซอฟต์แวร์ที่จำเป็นเบื้องต้น
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -67,7 +67,7 @@ pip --version
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### สร้าง Virtual Environment
+#### สร้างสภาพแวดล้อมเสมือน (Virtual Environment)
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
@@ -83,7 +83,7 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**ให้สิทธิ์ผู้ใช้ของคุณในการเข้าถึงอุปกรณ์ GPU** (ออกจากระบบและเข้าสู่ระบบใหม่เพื่อให้มีผล):
+**ให้สิทธิ์ผู้ใช้ของคุณเข้าถึงอุปกรณ์ GPU** (ออกจากระบบและเข้าสู่ระบบใหม่เพื่อให้มีผล):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -123,11 +123,11 @@ llamafactory-env\Scripts\activate
 <!-- @device:end -->
 <!-- @os:end -->
 
-### การติดตั้ง Dependencies พื้นฐาน
+### การติดตั้งไลบรารีพื้นฐานที่จำเป็น
 
 <!-- @require:pytorch,driver -->
  
-### การติดตั้ง Dependencies เพิ่มเติม
+### การติดตั้งไลบรารีเพิ่มเติมที่จำเป็น
 
 > **หมายเหตุ**: ตรวจสอบให้แน่ใจว่าเวอร์ชัน Python เป็น 3.11, 3.12 หรือ 3.13
 
@@ -155,9 +155,9 @@ python -m pip install huggingface_hub
 
 ### ติดตั้ง LLaMA Factory
 
-LLaMA-Factory ขึ้นอยู่กับ PyTorch คุณควรติดตั้งไว้แล้วตามข้อกำหนดข้างต้น
+LLaMA Factory ต้องพึ่งพา PyTorch คุณควรจะติดตั้งไว้แล้วตามข้อกำหนดข้างต้น
 
-ดาวน์โหลดซอร์สโค้ดจาก [LLaMA Factory official GitHub repository](https://github.com/hiyouga/LlamaFactory) และติดตั้ง Dependencies ของมัน
+ดาวน์โหลดซอร์สโค้ดจาก [LLaMA Factory official GitHub repository](https://github.com/hiyouga/LlamaFactory) แล้วติดตั้งไลบรารีที่จำเป็น
 
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
@@ -182,7 +182,7 @@ pip install -r requirements/metrics.txt
 <!-- @test:end --> 
 <!-- @device:end -->
 
-ตรวจสอบว่า `llamafactory-cli` สามารถรันได้หรือไม่
+ตรวจสอบว่า `llamafactory-cli` สามารถทำงานได้หรือไม่
 
 <!-- @os:linux -->
 <!-- @test:id=verify-llamafactory-cli timeout=60 hidden=False setup=activate-venv -->
@@ -215,24 +215,22 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-เมื่อติดตั้ง LLaMA-Factory สำเร็จแล้ว มาเริ่มรัน Fine-tuning กัน
+เมื่อติดตั้ง LLaMA Factory สำเร็จแล้ว มาเริ่มรันการปรับแต่งกัน
 
-## การใช้ LLaMA Factory CLI สำหรับ Fine Tuning
+## การใช้ LLaMA Factory CLI สำหรับการปรับแต่ง 
 
-ส่วนนี้จะครอบคลุมวิธีเตรียมชุดข้อมูล Fine-tuning กำหนดค่าพารามิเตอร์ LoRA/QLoRA และรัน LoRA Fine-tuning
+ส่วนนี้จะครอบคลุมวิธีการเตรียมชุดข้อมูลสำหรับการปรับแต่ง การกำหนดค่าพารามิเตอร์ LoRA/QLoRA และการรันการปรับแต่งด้วย LoRA
 
 ### การเตรียมชุดข้อมูล
 
-LLaMA-Factory รองรับชุดข้อมูล Fine-tuning ในรูปแบบ Alpaca และรูปแบบ ShareGPT ชุดข้อมูลที่มีอยู่ทั้งหมดได้ถูกกำหนดไว้ใน [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) หากคุณใช้ชุดข้อมูลที่กำหนดเอง โปรดตรวจสอบให้แน่ใจว่าได้เพิ่มคำอธิบายชุดข้อมูลใน `dataset_info.json` และระบุชื่อชุดข้อมูลก่อนการฝึก รายละเอียดสามารถดูได้ในเอกสารของพวกเขา [ที่นี่](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html)
+LLaMA Factory รองรับชุดข้อมูลสำหรับการปรับแต่งในรูปแบบ Alpaca และรูปแบบ ShareGPT ชุดข้อมูลทั้งหมดที่มีอยู่ถูกกำหนดไว้ใน [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) หากคุณใช้ชุดข้อมูลที่กำหนดเอง โปรดตรวจสอบให้แน่ใจว่าได้เพิ่มคำอธิบายชุดข้อมูลใน `dataset_info.json` และระบุชื่อชุดข้อมูลก่อนการฝึก สามารถดูรายละเอียดได้ในเอกสารของพวกเขา [ที่นี่](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html)
 
-ใน Playbook นี้ เราจะใช้ชุดข้อมูล identity และ alpaca_en_demo เป็นตัวอย่าง และกำหนดค่าข้อมูลชุดข้อมูลในขั้นตอนถัดไป
+ในคู่มือนี้ เราจะใช้ชุดข้อมูล identity และ alpaca_en_demo เป็นตัวอย่าง และจะกำหนดค่าข้อมูลชุดข้อมูลในขั้นตอนถัดไป
+### การกำหนดค่าพารามิเตอร์สำหรับการ Fine-tuning
 
+LLaMA Factory รองรับวิธีการ fine-tuning ได้หลายรูปแบบ
 
-### การกำหนดค่าพารามิเตอร์ Fine-tuning
-
-LLaMA-Factory รองรับรูปแบบ Fine-tuning หลายแบบ
-
-| รูปแบบ Fine-Tuning | ตัวอย่าง LLaMA-Factory |
+| Fine-Tuning schemes | LLaMA Factory Examples |
 |-----------|------|
 | Full-Parameter    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
 | LoRA fine-tuning  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
@@ -259,39 +257,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-ไฟล์การกำหนดค่าตัวอย่างเหล่านี้ได้ระบุพารามิเตอร์โมเดล พารามิเตอร์วิธี Fine-tuning พารามิเตอร์ชุดข้อมูล พารามิเตอร์การประเมิน และอื่นๆ คุณสามารถกำหนดค่าตามความต้องการของคุณเอง ใน Playbook นี้ เราจะใช้ [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml)
+ไฟล์การกำหนดค่าตัวอย่างเหล่านี้ได้ระบุพารามิเตอร์ของโมเดล พารามิเตอร์ของวิธีการ fine-tuning พารามิเตอร์ของชุดข้อมูล พารามิเตอร์การประเมินผล และอื่น ๆ ไว้แล้ว คุณสามารถกำหนดค่าเหล่านี้ได้ตามความต้องการของคุณเอง ในเพลย์บุ๊กนี้ เราจะใช้ [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml)
 
-**คำอธิบายพารามิเตอร์หลัก:**
-- `model_name_or_path` - ชื่อโมเดลบน Hugging Face หรือเส้นทางไฟล์โมเดลในเครื่อง
+**คำอธิบายพารามิเตอร์สำคัญ:**
+- `model_name_or_path` - ชื่อโมเดลจาก Hugging Face หรือพาธของไฟล์โมเดลในเครื่อง
 - `stage` - ขั้นตอนการฝึก ตัวเลือก: rm (reward modeling), pt (pretrain), sft (Supervised Fine-Tuning), PPO, DPO, KTO, ORPO
-- `do_train` - true สำหรับการฝึก, false สำหรับการประเมิน
-- `finetuning_type` - วิธี Fine-tuning ตัวเลือก: freeze, lora, full
-- `lora_rank` - มิติของ Low-rank Matrix ที่ใช้ใน LoRA ค่าทั่วไป: 4, 6, 8, 16 (ค่าน้อยกว่า = พารามิเตอร์น้อยกว่า = Fine-tuning เร็วกว่า; ค่ามากกว่า = การปรับตัวกับงานดีกว่าแต่ใช้ทรัพยากรมากกว่า)
+- `do_train` - true สำหรับการฝึก, false สำหรับการประเมินผล
+- `finetuning_type` - วิธีการ fine-tuning ตัวเลือก: freeze, lora, full
+- `lora_rank` - มิติของเมทริกซ์อันดับต่ำ (low-rank matrix) ที่ใช้ใน LoRA ค่าโดยทั่วไป: 4, 6, 8, 16 (ค่าน้อยกว่า = พารามิเตอร์น้อยกว่า = fine-tuning เร็วขึ้น; ค่ามากกว่า = ปรับตัวเข้ากับงานได้ดีกว่าแต่ใช้ทรัพยากรมากขึ้น)
 - `lora_target` - โมดูลเป้าหมายสำหรับวิธี LoRA ค่าเริ่มต้น: all
 - `dataset` - ชุดข้อมูลที่จะใช้ ใช้ "," เพื่อแยกชุดข้อมูลหลายชุด
-- `output_dir` - เส้นทาง Output ของ Fine-tuning
-- `logging_steps` - ช่วงการบันทึก Log เป็นจำนวน Steps
-- `save_steps` - ช่วงการบันทึก Checkpoint ของโมเดล
-- `overwrite_output_dir` - อนุญาตให้เขียนทับไดเรกทอรี Output หรือไม่
-- `per_device_train_batch_size` - ขนาด Batch การฝึกต่ออุปกรณ์
-- `gradient_accumulation_steps` - จำนวน Steps ของการสะสม Gradient
+- `output_dir` - พาธผลลัพธ์ของการ fine-tuning
+- `logging_steps` - ช่วงเวลาการบันทึกล็อกเป็นจำนวนสเต็ป
+- `save_steps` - ช่วงเวลาการบันทึก checkpoint ของโมเดล
+- `overwrite_output_dir` - อนุญาตให้เขียนทับไดเรกทอรีผลลัพธ์หรือไม่
+- `per_device_train_batch_size` - ขนาด batch สำหรับการฝึกต่อหนึ่งอุปกรณ์
+- `gradient_accumulation_steps` - จำนวนสเต็ปการสะสม gradient
 - `learning_rate` - อัตราการเรียนรู้
-- `num_train_epochs` - จำนวน Epoch การฝึก
-- `lr_scheduler_type` - ตารางอัตราการเรียนรู้ ตัวเลือก: linear, cosine, polynomial, constant เป็นต้น
-- `warmup_ratio` - อัตราส่วน Warmup ของอัตราการเรียนรู้
+- `num_train_epochs` - จำนวน epoch ในการฝึก
+- `lr_scheduler_type` - รูปแบบการปรับอัตราการเรียนรู้ ตัวเลือก: linear, cosine, polynomial, constant เป็นต้น
+- `warmup_ratio` - อัตราส่วนการวอร์มอัพอัตราการเรียนรู้
 
 <!-- @os:linux -->
-เราจะแก้ไขค่าเริ่มต้นของ `lora_rank` เพื่อรัน Fine-tuning บน AMD Ryzen™ & AMD Radeon™ GPUs
+เราจะแก้ไขค่าเริ่มต้นของ `lora_rank` เพื่อรัน fine-tuning บน AMD Ryzen™ & AMD Radeon™ GPU
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-เราจะอัปเดตการกำหนดค่า LoRA Fine-tuning เริ่มต้นเพื่อให้เข้ากันได้ดีขึ้นกับ AMD Ryzen™ และ AMD Radeon™ GPUs:
-- ตั้งค่า `lora_rank` จาก `8` เป็น `6` เพื่อลดการใช้หน่วยความจำระหว่าง Fine-tuning
-- ใช้ `fp16` แทน `bf16` เพื่อความเข้ากันได้กับ AMD GPU ที่กว้างขึ้นและการใช้หน่วยความจำที่ต่ำลง
-- ตั้งค่า `dataloader_num_workers` เป็น `0` บน Windows เพื่อหลีกเลี่ยงข้อผิดพลาด `"Can't pickle local object<>"` ที่เกิดจากการโหลดข้อมูลแบบ Multiprocessing
+เราจะอัปเดตการกำหนดค่า LoRA fine-tuning เริ่มต้นเพื่อให้เข้ากันได้ดียิ่งขึ้นกับ AMD Ryzen™ และ AMD Radeon™ GPU:
+- เปลี่ยน `lora_rank` จาก `8` เป็น `6` เพื่อลดการใช้หน่วยความจำระหว่างการ fine-tuning
+- ใช้ `fp16` แทน `bf16` เพื่อความเข้ากันได้ที่กว้างขึ้นกับ AMD GPU และลดการใช้หน่วยความจำ
+- ตั้งค่า `dataloader_num_workers` เป็น `0` บน Windows เพื่อหลีกเลี่ยงข้อผิดพลาด `"Can't pickle local object<>"` ที่เกิดจากการโหลดข้อมูลแบบ multiprocessing
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -311,13 +309,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### รัน LLaMA Factory Fine-Tuning
+### รัน LLaMA Factory Fine-Tuning 
 
-**llamafactory-cli** คือเครื่องมือ Command-line Interface (CLI) อย่างเป็นทางการสำหรับ LLaMA-Factory ที่พัฒนาขึ้นเพื่อลดความซับซ้อนของ Workflow LLM แบบ End-to-end (การเตรียมข้อมูล → Fine-tuning → การประเมิน → การ Deploy) โดยไม่ต้องเขียนโค้ดที่ซับซ้อน
+**llamafactory-cli** เป็นเครื่องมือ command-line interface (CLI) อย่างเป็นทางการสำหรับ LLaMA Factory ที่พัฒนาขึ้นเพื่อลดความซับซ้อนของขั้นตอนการทำงานกับ LLM แบบครบวงจร (การเตรียมข้อมูล → fine-tuning → การประเมินผล → การปรับใช้) โดยไม่ต้องเขียนโค้ดที่ซับซ้อน
 
-สำหรับการฝึก/Fine-tuning **llamafactory-cli train** คือ Subcommand หลักของ LLaMA Factory CLI ซึ่งรวม Workflow Fine-tuning (การประมวลผลข้อมูลล่วงหน้า การปรับ Hyperparameter การปรับแต่งฮาร์ดแวร์) ไว้ในคำสั่ง CLI เดียว รองรับ Paradigm Fine-tuning หลายแบบ (LoRA/QLoRA/Full Fine-Tuning) และได้รับการปรับแต่งสำหรับ GPU ที่มีทรัพยากรจำกัด (เช่น QLoRA บน VRAM 16GB)
+สำหรับการฝึก/fine-tuning **llamafactory-cli train** เป็นคำสั่งย่อยหลักของ LLaMA Factory CLI โดยจะย่อขั้นตอนการทำงานของ fine-tuning (การประมวลผลข้อมูลล่วงหน้า การปรับ hyperparameter การเพิ่มประสิทธิภาพฮาร์ดแวร์) ให้เหลือเพียงคำสั่ง CLI เดียว รองรับรูปแบบ fine-tuning ได้หลายแบบ (LoRA/QLoRA/Full Fine-Tuning) และได้รับการปรับให้เหมาะสมสำหรับ GPU ที่มีทรัพยากรจำกัด (เช่น QLoRA บน VRAM 16GB)
 
-คุณสามารถรัน LLaMA-Factory Fine-tuning โดยใช้คำสั่งต่อไปนี้ ซึ่งอ้างอิงจากไฟล์การกำหนดค่าที่แก้ไขแล้วของ Qwen3 LoRA Fine-tuning
+คุณสามารถรัน LLaMA Factory fine-tuning โดยใช้คำสั่งต่อไปนี้ ซึ่งอ้างอิงจากไฟล์การกำหนดค่าที่แก้ไขแล้วของ Qwen3 LoRA fine-tuning
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -393,7 +391,7 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 <!-- @test:end --> 
 <!-- @os:end -->
 
-หลังจากรัน LLM Fine-tuning แล้ว ผลลัพธ์ที่สร้างขึ้นทั้งหมดจะถูกเก็บไว้ใน "output_dir" รวมถึงไฟล์ Checkpoint ของโมเดล ไฟล์การกำหนดค่า และ Metrics การฝึก
+หลังจากรัน LLM fine-tuning เสร็จแล้ว ผลลัพธ์ทั้งหมดที่สร้างขึ้นจะถูกจัดเก็บไว้ใน "output_dir" ซึ่งประกอบด้วยไฟล์ checkpoint ของโมเดล ไฟล์การกำหนดค่า และตัวชี้วัดการฝึก
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -430,32 +428,32 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end --> 
 
-### ทดสอบโมเดลที่ผ่านการ Fine-tune แล้ว
+### ทดสอบโมเดลที่ผ่านการ fine-tuning แล้ว 
 
-**llamafactory-cli chat** ออกแบบมาสำหรับการแชท/Inference แบบโต้ตอบกับ LLMs (ทั้งโมเดลพื้นฐานและโมเดลที่ผ่านการ LoRA Fine-tune แล้ว) LLaMA-Factory มีการกำหนดค่าตัวอย่างสำหรับรัน Inference ของโมเดลที่ผ่านการ Fine-tune แล้วใน [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) คุณยังสามารถแก้ไขการกำหนดค่าตัวอย่างนี้เพื่อเปลี่ยนการตั้งค่า เช่น Backend ของ Inference
+**llamafactory-cli chat** ออกแบบมาสำหรับการแชท/การอนุมานแบบโต้ตอบกับ LLM (ทั้งโมเดลพื้นฐานและโมเดลที่ fine-tuning ด้วย LoRA) LLaMA Factory มีการกำหนดค่าตัวอย่างสำหรับรันการอนุมานของโมเดลที่ fine-tuning แล้วใน [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) คุณยังสามารถแก้ไขการกำหนดค่าตัวอย่างนี้เพื่อเปลี่ยนแปลงการตั้งค่า เช่น backend การอนุมาน
 
-ใช้คำสั่งต่อไปนี้เพื่อทดสอบโมเดล Qwen3 ที่ผ่านการ Fine-tune แล้ว:
+ใช้คำสั่งต่อไปนี้เพื่อทดสอบโมเดล Qwen3 ที่ fine-tuning แล้ว:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
-ตัวอย่างการแชทโดยใช้โมเดลที่ผ่านการ Fine-tune แล้วแสดงไว้ด้านล่าง:
+ตัวอย่างการแชทโดยใช้โมเดลที่ fine-tuning แล้วแสดงไว้ด้านล่าง:
 
 <p align="center">
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Fine-Tuned model" width="600"/>
 </p>
 
 
-### Export โมเดลที่ผ่านการ Fine-tune แล้ว
+### ส่งออกโมเดลที่ผ่านการ fine-tuning แล้ว
 
-สำหรับกรณีการใช้งานในระดับ Production โมเดลที่ผ่านการฝึกมาแล้วและ LoRA Adapter จำเป็นต้องถูกรวมและ Export เป็นโมเดลเดียว โมเดลที่รวมแล้วนี้สามารถใช้เป็นไฟล์โมเดล Hugging Face ปกติได้ LLaMA-Factory มีการกำหนดค่าตัวอย่างใน [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora)
+สำหรับกรณีการใช้งานจริง (production) จำเป็นต้องรวม (merge) โมเดลที่ผ่านการฝึกล่วงหน้าและ LoRA adapter เข้าด้วยกัน แล้วส่งออกเป็นโมเดลเดียว โมเดลที่รวมกันนี้สามารถใช้เป็นไฟล์โมเดล Hugging Face ทั่วไปได้ LLaMA Factory มีการกำหนดค่าตัวอย่างใน [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora)
 
-ใช้คำสั่งต่อไปนี้เพื่อ Export โมเดล Qwen3 ที่ผ่านการ Fine-tune แล้ว:
+ใช้คำสั่งต่อไปนี้เพื่อส่งออกโมเดล Qwen3 ที่ fine-tuning แล้ว:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
-ผลลัพธ์ของการ Export โมเดลที่ผ่านการ Fine-tune แล้วแสดงไว้ด้านล่าง
+ผลลัพธ์ของการส่งออกโมเดลที่ fine-tuning แล้วแสดงไว้ด้านล่าง
 
 <p align="center">
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Fine-Tuned model " width="600"/>
@@ -557,27 +555,26 @@ if not model_files:
 print("PASS: Exported merged model output looks correct")
 ```
 <!-- @test:end --> 
+## การใช้งาน LLaMA Factory GUI
 
-## การใช้ LLaMA Factory GUI
+`LLaMA-Factory` ยังรองรับการปรับแต่งโมเดลภาษาขนาดใหญ่ (LLM) แบบไม่ต้องเขียนโค้ดผ่านเว็บ UI ในเบราว์เซอร์อีกด้วย
 
-`LLaMA-Factory` ยังรองรับการ Fine-tune LLMs แบบไม่ต้องเขียนโค้ดผ่าน Web UI ในเบราว์เซอร์
-
-ใช้คำสั่งต่อไปนี้เพื่อเปิด:
+ใช้คำสั่งต่อไปนี้เพื่อเปิดใช้งาน:
 
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI` มีอินเทอร์เฟซที่เรียบง่ายสำหรับจัดการ Workflow Machine Learning รวมถึงการฝึก การประเมิน การทำนาย การแชท และการ Export โมเดล ต่อไปนี้คือการแนะนำสั้นๆ ของแต่ละแท็บ:
+`LlamaFactory Web UI` มอบอินเทอร์เฟซที่กระชับสำหรับการจัดการเวิร์กโฟลว์แมชชีนเลิร์นนิง ซึ่งรวมถึงการฝึกโมเดล การประเมินผล การพยากรณ์ การแชท และการส่งออกโมเดล ต่อไปนี้คือคำแนะนำโดยย่อสำหรับแต่ละแท็บ:
 
-* **Train**: แท็บนี้ช่วยให้คุณเลือกโมเดลและชุดข้อมูล กำหนดค่าพารามิเตอร์การฝึก และเริ่มกระบวนการฝึก การทำความเข้าใจพารามิเตอร์ที่จำเป็นและไม่จำเป็นมีความสำคัญในการปรับแต่งการตั้งค่าการฝึกให้เหมาะสม
-* **Evaluate & Predict**: หลังจากการฝึก คุณสามารถประเมินประสิทธิภาพของโมเดลและทำการทำนายโดยใช้แท็บนี้ ซึ่งให้ข้อมูลเชิงลึกเกี่ยวกับความแม่นยำและประสิทธิผลของโมเดลบนข้อมูลใหม่
-* **Chat**: เมื่อการฝึกเสร็จสมบูรณ์ โหลดโมเดลในแท็บ Chat เพื่อโต้ตอบกับมันและดูผลลัพธ์ของงานของคุณ ฟีเจอร์นี้เปิดใช้งานการสื่อสารแบบ Real-time กับโมเดลที่ผ่านการฝึกแล้ว
-* **Export**: แท็บนี้อำนวยความสะดวกในการ Export โมเดลที่ผ่านการฝึกแล้วสำหรับการ Deploy หรือการใช้งานต่อไป คุณสามารถบันทึกโมเดลของคุณในรูปแบบต่างๆ ที่เหมาะสมสำหรับแอปพลิเคชันที่แตกต่างกัน
+* **Train**: แท็บนี้ช่วยให้คุณเลือกโมเดลและชุดข้อมูล กำหนดค่าพารามิเตอร์การฝึก และเริ่มกระบวนการฝึกโมเดล การทำความเข้าใจพารามิเตอร์ที่จำเป็นและพารามิเตอร์ที่เป็นตัวเลือกเป็นสิ่งสำคัญเพื่อให้การตั้งค่าการฝึกมีประสิทธิภาพสูงสุด
+* **Evaluate & Predict**: หลังจากการฝึกเสร็จสิ้น คุณสามารถประเมินประสิทธิภาพของโมเดลและทำการพยากรณ์โดยใช้แท็บนี้ ซึ่งให้ข้อมูลเชิงลึกเกี่ยวกับความแม่นยำและประสิทธิผลของโมเดลกับข้อมูลใหม่
+* **Chat**: เมื่อการฝึกเสร็จสมบูรณ์แล้ว ให้โหลดโมเดลในแท็บ Chat เพื่อโต้ตอบกับโมเดลและดูผลลัพธ์ของงานที่คุณทำ คุณสมบัตินี้ช่วยให้สามารถสื่อสารกับโมเดลที่ผ่านการฝึกได้แบบเรียลไทม์
+* **Export**: แท็บนี้อำนวยความสะดวกในการส่งออกโมเดลที่ผ่านการฝึกเพื่อนำไปใช้งานจริงหรือใช้งานต่อ คุณสามารถบันทึกโมเดลของคุณในรูปแบบต่าง ๆ ที่เหมาะสมกับแอปพลิเคชันที่แตกต่างกันได้
 
-สำหรับคำแนะนำโดยละเอียด เราขอแนะนำให้คุณอ้างอิงเอกสารอย่างเป็นทางการใน [LlamaFactory GitHub repository](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) และ [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) นอกจากนี้ [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) ยังให้ข้อมูลเชิงลึกที่มีคุณค่าเกี่ยวกับอินเทอร์เฟซและฟังก์ชันการทำงานของมัน
+สำหรับคำแนะนำโดยละเอียด เราขอแนะนำให้คุณอ้างอิงเอกสารทางการที่ [LlamaFactory GitHub repository](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) และ [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) นอกจากนี้ [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) ยังให้ข้อมูลเชิงลึกที่มีคุณค่าเกี่ยวกับอินเทอร์เฟซและฟังก์ชันการทำงานต่าง ๆ ของมัน
 
 ## ขั้นตอนถัดไป
-- ลองใช้โมเดลต่างๆ เช่น `gpt-oss` และโมเดลที่ทันสมัยอื่นๆ
-- ทดลองใช้ Backend ต่างๆ บนโมเดลที่ผ่านการ Fine-tune แล้ว
+- ลองใช้โมเดลอื่น ๆ เช่น `gpt-oss` และโมเดลล้ำสมัยอื่น ๆ
+- ทดลองใช้แบ็กเอนด์ที่แตกต่างกันบนโมเดลที่ผ่านการปรับแต่งแล้ว
  
 สำหรับเอกสารเพิ่มเติม โปรดเยี่ยมชม: https://llamafactory.readthedocs.io/en/latest/

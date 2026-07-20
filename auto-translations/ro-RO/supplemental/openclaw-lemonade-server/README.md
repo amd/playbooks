@@ -6,24 +6,24 @@ SPDX-License-Identifier: MIT
 
 ## Prezentare generală
 
-[**OpenClaw**](https://openclaw.ai/) este un agent AI autonom care poate scrie și rula cod, gestiona fișiere și rezolva sarcini complexe cu mai mulți pași în numele dvs. Spre deosebire de un asistent de chat care răspunde doar la întrebări, OpenClaw efectuează acțiuni reale pe sistemul dvs., ceea ce înseamnă că are nevoie de un backend AI rapid și capabil, care să țină pasul cu un ciclu de agent solicitant.
+[**OpenClaw**](https://openclaw.ai/) este un agent AI autonom care poate scrie și rula cod, gestiona fișiere și parcurge sarcini complexe în mai multe etape în numele dumneavoastră. Spre deosebire de un asistent de chat care doar răspunde la întrebări, OpenClaw efectuează acțiuni reale pe sistemul dumneavoastră, ceea ce înseamnă că are nevoie de un backend AI rapid și capabil, care să facă față unui ciclu de agent solicitant.
 
-[**Lemonade Server**](https://lemonade-server.ai/) este acel backend. Este un server de inferență local open-source care rulează modele GenAI direct pe hardware-ul dvs. și le expune prin intermediul API-ului standard din industrie OpenAI.
+[**Lemonade Server**](https://lemonade-server.ai/) este acel backend. Este un server de inferență local open-source care rulează modele GenAI direct pe hardware-ul dumneavoastră și le expune printr-un API standard în industrie, compatibil cu OpenAI.
 
-Împreună, formează o stivă de agent AI complet locală: Lemonade gestionează inferența modelului, iar OpenClaw furnizează ciclul de agent care transformă ieșirile modelului în acțiuni reale.
+Împreună, formează un stack de agent AI complet local: Lemonade se ocupă de inferența modelului, iar OpenClaw oferă ciclul de agent care transformă rezultatele modelului în acțiuni reale.
 
-> **Înainte de a continua:** OpenClaw este un agent AI cu un grad ridicat de autonomie. Acordarea accesului oricărui agent AI la sistemul dvs. poate duce la rezultate imprevizibile sau neintenționate. Continuați numai dacă înțelegeți riscurile și sunteți confortabil cu software autonom care acționează în numele dvs.
+> **Înainte de a continua:** OpenClaw este un agent AI extrem de autonom. Oferirea accesului la sistemul dumneavoastră oricărui agent AI poate duce la rezultate imprevizibile sau neintenționate. Continuați numai dacă înțelegeți riscurile și sunteți confortabil cu software autonom care acționează în numele dumneavoastră.
 
 ---
 
 ## Ce veți învăța
 
-La sfârșitul acestui ghid veți putea:
+Până la finalul acestui ghid veți putea:
 
 - Afla despre **Lemonade Server**
-- **Instala OpenClaw** și **a-l direcționa către Lemonade Server** ca backend AI.
-- **Porni gateway-ul OpenClaw** și a confirma că agentul dvs. este pregătit să lucreze.
-- **Conecta un canal de comunicare** (Discord sau Telegram) pentru a putea conversa cu agentul dvs. de pe orice dispozitiv.
+- **Instala OpenClaw** și **îl configura să folosească Lemonade Server** ca backend AI.
+- **Porni gateway-ul OpenClaw** și confirma că agentul dumneavoastră este pregătit să lucreze.
+- **Conecta un canal de comunicare** (Discord sau Telegram) pentru a putea discuta cu agentul dumneavoastră de pe orice dispozitiv.
 
 ---
 
@@ -32,17 +32,17 @@ La sfârșitul acestui ghid veți putea:
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Verificarea actualizărilor de software
+## Verificarea actualizărilor software
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalarea cerințelor software preliminare
+## Instalarea cerințelor prealabile software
 
 <!-- @os:linux -->
-- Un PC care rulează **Ubuntu 24.04+** sau o distribuție Linux compatibilă bazată pe Debian cu `apt-get`
+- Un PC care rulează **Ubuntu 24.04+** sau o distribuție Linux compatibilă bazată pe Debian, cu `apt-get`
 - Cel puțin **12 GB de RAM** (64 GB+ recomandat pentru modele mai mari)
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Opțional, pentru izolarea OpenClaw în sandbox)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Opțional, pentru izolarea (sandboxing) OpenClaw)
 
 - **~10–30 GB spațiu liber pe disc** pentru ponderile modelului
 <!-- @os:end -->
@@ -50,7 +50,7 @@ La sfârșitul acestui ghid veți putea:
 - Un PC care rulează **Windows 10/11**
 - Cel puțin **12 GB de RAM** (64 GB+ recomandat pentru modele mai mari)
 - **~10–30 GB spațiu liber pe disc** pentru ponderile modelului
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Opțional, pentru izolarea OpenClaw în sandbox)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Opțional, pentru izolarea (sandboxing) OpenClaw)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -65,9 +65,9 @@ lemonade --version
 
 ---
 
-## Descărcarea și încărcarea modelului recomandat
+## Descărcați și încărcați modelul recomandat
 
-Modelul recomandat pentru acest ghid este **Qwen3.6-35B-A3B-GGUF** de la Unsloth, un model MoE puternic cu o fereastră de context de 263k tokeni, bine adaptat pentru sarcini de agent. Acest model utilizează cuantizarea UD-Q4_K_XL. Descărcați-l acum:
+Modelul recomandat pentru acest ghid este **Qwen3.6-35B-A3B-GGUF** de la Unsloth, un model MoE puternic cu o fereastră de context de 263k tokeni, foarte potrivit pentru sarcinile de agent. Acest model folosește cuantizarea UD-Q4_K_XL. Descărcați-l acum:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
@@ -82,9 +82,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end --> 
 
-Modelul are o lungime de context implicită de 262.144 de tokeni. Dacă întâmpinați erori de memorie insuficientă (OOM), luați în considerare reducerea ferestrei de context. Cu toate acestea, deoarece Qwen3.6 valorifică contextul extins pentru sarcini complexe, vă recomandăm să mențineți o lungime de context de cel puțin 128K tokeni pentru a păstra capacitățile de gândire.
+Modelul are o lungime de context implicită de 262.144 tokeni. Dacă întâmpinați erori de memorie insuficientă (OOM), luați în considerare reducerea ferestrei de context. Totuși, deoarece Qwen3.6 folosește context extins pentru sarcini complexe, vă recomandăm să mențineți o lungime de context de cel puțin 128K tokeni pentru a păstra capacitățile de raționament.
 
-> **Sfat: Dezactivați gândirea pentru răspunsuri mai rapide ale agentului:** Qwen3.6-35B-A3B rulează în modul de gândire implicit, ceea ce adaugă latență înainte de fiecare răspuns. Pentru ciclurile de agent, această suprasarcină se acumulează rapid. Depozitul [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) oferă o configurație gata pregătită care dezactivează gândirea. Pentru a o utiliza, descărcați fișierul și importați-l:
+> **Sfat: Dezactivați modul de raționament pentru răspunsuri mai rapide ale agentului:** Qwen3.6-35B-A3B rulează implicit în modul de raționament (thinking mode), ceea ce adaugă latență înainte de fiecare răspuns. Pentru ciclurile de agent, această suprasarcină se acumulează rapid. Depozitul [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) oferă o configurație gata făcută care dezactivează raționamentul. Pentru a o utiliza, descărcați fișierul și importați-l:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -227,9 +227,9 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## Configurarea WSL
 
-Rulăm OpenClaw în interiorul WSL (Recomandat) și îl conectăm la Lemonade care rulează nativ pe Windows. Aceasta vă oferă un mediu shell Linux pentru OpenClaw, menținând în același timp accelerarea GPU a Lemonade pe partea Windows.
+Rulăm OpenClaw în interiorul WSL (Recomandat) și îl conectăm la Lemonade, care rulează nativ pe Windows. Astfel obțineți un mediu shell Linux pentru OpenClaw, păstrând în același timp accelerarea GPU a Lemonade pe partea Windows.
 
-### Instalarea WSL și Ubuntu
+### Instalați WSL și Ubuntu
 
 Deschideți PowerShell ca Administrator și instalați kernelul WSL:
 
@@ -243,9 +243,9 @@ Apoi instalați Ubuntu:
 wsl --install -d Ubuntu-24.04
 ```
 
-### Activarea systemd în WSL
+### Activați systemd în WSL
 
-Rulați aceasta în interiorul terminalului Ubuntu:
+Rulați această comandă în terminalul Ubuntu:
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -261,23 +261,23 @@ wsl --shutdown
 wsl
 ```
 
-### Conectarea Lemonade din Windows în WSL
+### Conectați (bridge) Lemonade de pe Windows în WSL
 
-WSL2 rulează într-o rețea virtuală. Lemonade pe Windows se leagă la `127.0.0.1`, pe care WSL nu îl poate accesa direct. Un proxy de port Windows redirecționează traficul de la IP-ul gateway-ului WSL către localhost-ul Windows.
+WSL2 rulează într-o rețea virtuală. Lemonade de pe Windows se leagă la `127.0.0.1`, la care WSL nu poate ajunge direct. Un proxy de port Windows redirecționează traficul de la IP-ul de gateway WSL către localhost-ul Windows.
 
-**Găsiți IP-ul gateway-ului WSL** (rulați în interiorul WSL):
+**Găsiți IP-ul de gateway WSL** (rulați în interiorul WSL):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Adăugați proxy-ul de port** (rulați în PowerShell ca Administrator, înlocuind `<WSL-Gateway-IP>` cu IP-ul gateway-ului dvs. WSL):
+**Adăugați proxy-ul de port** (rulați în PowerShell ca Administrator, înlocuind `<WSL-Gateway-IP>` cu IP-ul dumneavoastră de gateway WSL):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Adăugați o regulă de firewall** (același PowerShell elevat):
+**Adăugați o regulă de firewall** (același PowerShell ridicat):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
@@ -290,7 +290,7 @@ WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Dacă ați încărcat deja modelul Qwen3.6-35B-A3B-GGUF în pasul anterior, ar trebui să vedeți o ieșire JSON de genul acesta:
+Dacă ați încărcat deja modelul Qwen3.6-35B-A3B-GGUF în pasul anterior, ar trebui să vedeți un rezultat JSON precum acesta:
 
 ```json
 {
@@ -308,7 +308,7 @@ Dacă ați încărcat deja modelul Qwen3.6-35B-A3B-GGUF în pasul anterior, ar t
 }
 ```
 
-> Regula `netsh portproxy` supraviețuiește repornirilor, dar IP-ul gateway-ului WSL se poate schimba după `wsl --shutdown`. Dacă Lemonade devine inaccesibil din WSL după o repornire, obțineți IP-ul actualizat al gateway-ului și actualizați proxy-ul cu acest nou IP.
+> Regula `netsh portproxy` supraviețuiește repornirilor, dar IP-ul de gateway WSL se poate schimba după `wsl --shutdown`. Dacă Lemonade devine inaccesibil din WSL după o repornire, obțineți IP-ul de gateway actualizat și actualizați proxy-ul cu acest nou IP.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -366,15 +366,15 @@ finally {
 
 ## Instalarea și configurarea OpenClaw
 
-### Instalarea OpenClaw
+### Instalați OpenClaw
 <!-- @os:windows -->
-> Rulați comenzile din această secțiune în interiorul **terminalului WSL**.
+> Rulați comenzile din această secțiune în interiorul terminalului **WSL**.
 <!-- @os:end -->
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-Indicatorul `--no-onboard` omite expertul de configurare interactiv; veți configura manual backend-ul modelului în pasul următor, ceea ce vă oferă control precis asupra modelului și serverului utilizat.
+Opțiunea `--no-onboard` omite asistentul interactiv de configurare; veți configura manual backend-ul modelului în pasul următor, ceea ce vă oferă control precis asupra modelului și serverului utilizate.
 
 Deschideți un terminal nou și confirmați instalarea:
 
@@ -382,11 +382,11 @@ Deschideți un terminal nou și confirmați instalarea:
 openclaw --version
 ```
 
-> **Sfat:** Dacă vedeți `command not found` după instalare, adăugați directorul bin global al npm la PATH-ul dvs.:
+> **Sfat:** Dacă vedeți `command not found` după instalare, adăugați directorul global bin al npm la PATH:
 > ```bash
 > export PATH="$HOME/.npm-global/bin:$PATH"
 > ```
-> Pentru a face această modificare permanentă, adăugați linia de mai sus în fișierul dvs. `~/.bashrc` sau `~/.zshrc`.
+> Pentru a face acest lucru permanent, adăugați linia de mai sus în fișierul dumneavoastră `~/.bashrc` sau `~/.zshrc`.
 
 <!-- @os:linux -->
 <!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
@@ -440,11 +440,9 @@ finally {
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
+### Configurați OpenClaw pentru a utiliza Lemonade
 
-
-### Configurarea OpenClaw pentru a utiliza Lemonade
-
-Rulați onboarding-ul non-interactiv al OpenClaw.
+Rulați integrarea non-interactivă a OpenClaw.
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -486,7 +484,7 @@ openclaw onboard \
 
 Această comandă scrie configurația OpenClaw în `~/.openclaw/openclaw.json`.
 
-> **Dimensionarea ferestrei de context OpenClaw:** Compactarea OpenClaw se declanșează când `contextTokens > contextWindow − reserveTokens`. Valoarea implicită `reserveTokensFloor` este de 20.000 de tokeni, un prag minim care suprascrie `reserveTokens` când este mai mic, astfel orice context de model sub ~37k va declanșa o buclă infinită de compactare. Setați o rezervă mică și dezactivați pragul minim o dată în configurația dvs. și se aplică fiecărui model, fără ajustare per model:
+> **Dimensionarea ferestrei de context OpenClaw:** Compactarea OpenClaw se declanșează atunci când `contextTokens > contextWindow − reserveTokens`. Valoarea implicită `reserveTokensFloor` este de 20.000 de token-uri, un prag minim care suprascrie `reserveTokens` atunci când acesta este mai mic, astfel încât orice context de model sub ~37k va declanșa o buclă infinită de compactare. Setați o rezervă mică și dezactivați pragul minim o singură dată în configurația voastră, iar aceasta se va aplica fiecărui model, fără a fi nevoie de ajustare pentru fiecare model în parte:
 >
 > ```json
 > "compaction": {
@@ -495,13 +493,13 @@ Această comandă scrie configurația OpenClaw în `~/.openclaw/openclaw.json`.
 > }
 > ```
 >
-> `reserveTokensFloor` este un *prag minim* (gardă minimă), nu rezerva în sine; setarea doar a pragului minim nu are niciun efect. `reserveTokensFloor: 0` dezactivează garda, astfel încât valoarea mai mică `reserveTokens` este acceptată.
+> `reserveTokensFloor` reprezintă un *prag minim* (o valoare de siguranță), nu rezerva propriu-zisă; setarea doar a acestui prag nu are niciun efect. `reserveTokensFloor: 0` dezactivează garda, astfel încât valoarea mai mică `reserveTokens` este acceptată.
 >
-> **Când să aplicați aceasta:** Utilizați această configurație dacă fereastra de context efectivă a modelului dvs. este sub ~37k, fie pentru că modelul este mic (de ex. 8k, 16k, 32k), fie pentru că ați limitat-o intenționat la o valoare mai mică (de ex. încărcând un model de 128k dar setând contextul la 16k în Lemonade). Fără aceasta, OpenClaw intră într-o buclă infinită de compactare la pornire.
+> **Când se aplică:** Utilizați această configurație dacă fereastra de context efectivă a modelului dumneavoastră este sub ~37k, fie deoarece modelul este mic (de ex. 8k, 16k, 32k), fie deoarece ați limitat intenționat contextul la o valoare mai mică (de ex. încărcați un model de 128k, dar setați contextul la 16k în Lemonade). Fără această setare, OpenClaw intră într-o buclă infinită de compactare la pornire.
 >
-> **Modele cu context mare la context complet:** Puteți omite complet aceasta. Valorile implicite funcționează bine, compactarea va interveni cu mult înainte ca fereastra să se umple și modelul are suficient spațiu pentru a genera răspunsuri lungi. Dacă o aplicați, rețineți că `reserveTokens: 4096` limitează lungimea răspunsului la ~4k tokeni, ceea ce poate trunchia generarea de fișiere lungi sau planuri detaliate.
+> **Modele cu context mare, la context complet:** Puteți omite complet acest pas. Valorile implicite funcționează bine, compactarea se va declanșa cu mult înainte ca fereastra să se umple, iar modelul va avea spațiu suficient pentru a genera răspunsuri lungi. Dacă totuși aplicați această setare, rețineți că `reserveTokens: 4096` limitează lungimea răspunsului la ~4k token-uri, ceea ce poate trunchia generarea de fișiere lungi sau planuri detaliate.
 >
-> **Unde să adăugați aceasta:** Plasați blocul `compaction` în interiorul `agents.defaults` din `openclaw.json` (de obicei la `~/.openclaw/openclaw.json`):
+> **Unde se adaugă:** Plasați blocul `compaction` în interiorul `agents.defaults` din fișierul `openclaw.json` (de obicei la `~/.openclaw/openclaw.json`):
 >
 > ```json
 > {
@@ -520,11 +518,11 @@ Această comandă scrie configurația OpenClaw în `~/.openclaw/openclaw.json`.
 > }
 > ```
 >
-> Restul configurației dvs. (gateway, canale, modele etc.) rămâne neschimbat; doar cheia `compaction` trebuie adăugată.
+> Restul configurației voastre (gateway, canale, modele etc.) rămâne neschimbat, este necesar să adăugați doar cheia `compaction`.
 
-### (Recomandat) Activarea izolării Docker în sandbox
+### (Recomandat) Activați sandboxing-ul Docker
 
-OpenClaw poate direcționa toate operațiunile de fișiere și cod ale agentului printr-un container Docker izolat, în loc să le ruleze direct pe gazda dvs. Aceasta limitează impactul oricărei acțiuni neintenționate la sandbox, lăsând sistemul de fișiere și rețeaua gazdei dvs. neafectate.
+OpenClaw poate direcționa toate operațiunile agentului asupra fișierelor și codului printr-un container Docker izolat, în loc să le execute direct pe sistemul gazdă. Acest lucru limitează raza de acțiune a oricărei acțiuni neintenționate la sandbox, lăsând sistemul de fișiere și rețeaua gazdei neatinse.
 
 Construiți imaginea sandbox o singură dată (Docker trebuie să fie instalat):
 
@@ -626,7 +624,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Rulați aceasta pentru a adăuga cheia `sandbox` în interiorul blocului existent `agents.defaults` din `~/.openclaw/openclaw.json`:
+Rulați această comandă pentru a adăuga cheia `sandbox` în interiorul blocului existent `agents.defaults` din `~/.openclaw/openclaw.json`:
 
 ```bash
 cat > sandbox.patch.json5 <<JSON5
@@ -645,31 +643,31 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-Containerele sandbox nu au **acces la rețea** implicit. Consultați [referința de sandboxing](https://docs.openclaw.ai/gateway/sandboxing) pentru montări bind și suprascrierea rețelei.
+Containerele sandbox **nu au acces la rețea** în mod implicit. Consultați [referința despre sandboxing](https://docs.openclaw.ai/gateway/sandboxing) pentru montări de volume și suprascrieri de rețea.
 
-> #### Depanare: Permisiune refuzată Docker
+> #### Depanare: Permisiune Docker refuzată
 > 
-> Dacă primiți "permission denied" la rularea comenzilor Docker:
+> Dacă primiți mesajul „permission denied” la rularea comenzilor Docker:
 > 
-> **Pasul 1: Adăugați utilizatorul dvs. în grupul docker**
+> **Pasul 1: Adăugați utilizatorul vostru în grupul docker**
 > 
 > ```bash
 > sudo groupadd docker                    # Creați grupul dacă este necesar
 > sudo usermod -aG docker $USER           # Adăugați-vă în grup
 > newgrp docker                           # Activați modificarea
-> docker run hello-world                  # Testați-o
+> docker run hello-world                  # Testați
 > ```
 > 
-> **Pasul 2: Dacă eroarea persistă, aplicați remedierea permanentă**
+> **Pasul 2: Dacă eroarea persistă, aplicați soluția permanentă**
 > 
 > ```bash
 > sudo chgrp docker /lib/systemd/system/docker.socket
 > sudo chmod g+w /lib/systemd/system/docker.socket
 > ```
 > 
-> Apoi **reporniți** sistemul dvs.
+> Apoi **reporniți** sistemul.
 > 
-> **Remediere temporară rapidă** (se resetează după repornire):
+> **Soluție temporară rapidă** (se resetează după repornire):
 > ```bash
 > sudo chmod 666 /var/run/docker.sock
 > ```
@@ -894,9 +892,9 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Pornirea gateway-ului OpenClaw
+### Porniți OpenClaw Gateway
 
-Gateway-ul este procesul OpenClaw care gestionează ciclul de agent și servește tabloul de bord:
+Gateway-ul este procesul OpenClaw care gestionează bucla agentului și servește tabloul de bord (dashboard):
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -1027,25 +1025,25 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-Pentru a deschide tabloul de bord, rulați aceasta într-un al doilea terminal în timp ce gateway-ul este încă în funcțiune:
+Pentru a deschide tabloul de bord, rulați această comandă într-un al doilea terminal, în timp ce gateway-ul rulează în continuare:
 
 ```bash
 openclaw dashboard
 ```
 
-Deoarece gateway-ul se leagă la loopback, tabloul de bord se autentifică automat când este deschis de pe aceeași mașină — nu este necesară introducerea unui token sau aprobarea dispozitivului pentru accesul local. Ar trebui să vedeți tabloul de bord OpenClaw cu modelul dvs. Lemonade listat ca backend activ.
+Deoarece gateway-ul se leagă la loopback, tabloul de bord se autentifică automat atunci când este deschis de pe același sistem, fără a fi necesară introducerea unui token sau aprobarea dispozitivului pentru accesul local. Ar trebui să vedeți tabloul de bord OpenClaw cu modelul Lemonade afișat ca backend activ.
 
-> Dacă ați activat sandboxing-ul, îl puteți verifica cerând agentului să `run hostname` din tabloul de bord. Dacă vedeți un ID scurt de container în loc de numele de gazdă al mașinii dvs., sandbox-ul funcționează.
+> Dacă ați activat sandboxing-ul, îl puteți verifica cerându-i agentului să `run hostname` din tabloul de bord. Dacă vedeți un ID scurt de container în loc de numele gazdei sistemului vostru, sandbox-ul funcționează.
 
-**Felicitări, ați construit o stivă de agent AI complet locală de la zero.**
+**Felicitări, ați construit de la zero un stack complet local de agent AI.**
 
-> **Aveți nevoie de tokenul gateway-ului?** Rulați `openclaw dashboard --no-open` pentru a afișa URL-ul tabloului de bord cu tokenul inclus (încearcă, de asemenea, să îl copieze în clipboard). Alternativ, tokenul se află la `gateway.auth.token` în `~/.openclaw/openclaw.json`.
+> **Aveți nevoie de token-ul gateway-ului?** Rulați `openclaw dashboard --no-open` pentru a afișa URL-ul tabloului de bord cu token-ul inclus (comanda încearcă, de asemenea, să îl copieze în clipboard). Alternativ, token-ul se află la `gateway.auth.token` în `~/.openclaw/openclaw.json`.
 >
-> **Aprobarea unui dispozitiv la distanță:** Când deschideți tabloul de bord de pe o a doua mașină sau telefon, browserul afișează un ID de solicitare. Înapoi pe mașina care rulează gateway-ul, executați:
+> **Aprobarea unui dispozitiv la distanță:** Când deschideți tabloul de bord de pe un al doilea sistem sau telefon, browserul afișează un ID de cerere. Pe sistemul pe care rulează gateway-ul, rulați:
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> Aceasta este necesară doar pentru dispozitive la distanță sau secundare — accesul loopback de pe aceeași mașină se autentifică automat.
+> Acest lucru este necesar doar pentru dispozitive la distanță sau secundare, accesul prin loopback de pe același sistem se autentifică automat.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1053,49 +1051,48 @@ Deoarece gateway-ul se leagă la loopback, tabloul de bord se autentifică autom
 
 ---
 
-## Opțional: Conectarea unui canal de comunicare
+## Opțional: Conectați un canal de comunicare
 
-Odată ce gateway-ul este în funcțiune, puteți accesa agentul dvs. local de pe orice dispozitiv. Alegeți opțiunea care se potrivește configurației dvs. OpenClaw acceptă [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) și alte canale — consultați lista completă la [docs.openclaw.ai](https://docs.openclaw.ai).
+Odată ce gateway-ul rulează, puteți accesa agentul vostru local de pe orice dispozitiv. Alegeți opțiunea care se potrivește configurației voastre. OpenClaw acceptă [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) și alte canale, consultați lista completă la [docs.openclaw.ai](https://docs.openclaw.ai).
 
 ---
 
 ### Opțiunea A: Discord
 
-Discord necesită un server unde **aveți acces de administrator** pentru a adăuga un bot. Dacă partajați servere, dar nu dețineți niciunul, utilizați Opțiunea B (Telegram) în schimb.
+Discord necesită un server pe care **aveți acces de administrator** pentru a adăuga un bot. Dacă folosiți servere partajate, dar nu dețineți unul, utilizați în schimb Opțiunea B (Telegram).
+#### Creați un cont și un server Discord
 
-#### Crearea unui cont și server Discord
+Dacă nu aveți un cont Discord, înscrieți-vă la [discord.com](https://discord.com). De asemenea, aveți nevoie de un server pe care sunteți administrator; creați unul apăsând pe pictograma **+** din bara laterală Discord și selectând **Create My Own**. Un server privat este suficient.
 
-Dacă nu aveți un cont Discord, înregistrați-vă la [discord.com](https://discord.com). Aveți nevoie și de un server unde sunteți administrator — creați unul făcând clic pe pictograma **+** din bara laterală Discord și selectând **Create My Own**. Un server privat este în regulă.
+#### Creați o aplicație și un bot Discord
 
-#### Crearea unei aplicații și bot Discord
-
-1. Accesați [Portalul pentru Dezvoltatori Discord](https://discord.com/developers/applications) și faceți clic pe **New Application**. Dați-i un nume (de ex. "openclaw-bot").
-2. În bara laterală, faceți clic pe **Bot**. Setați un nume de utilizator pentru bot.
-3. Tot pe pagina Bot, derulați la **Privileged Gateway Intents** și activați:
+1. Accesați [Discord Developer Portal](https://discord.com/developers/applications) și apăsați **New Application**. Dați-i un nume (de exemplu, „openclaw-bot”).
+2. În bara laterală, apăsați **Bot**. Setați un nume de utilizator pentru bot.
+3. Tot pe pagina Bot, derulați până la **Privileged Gateway Intents** și activați:
    - **Message Content Intent** (obligatoriu)
    - **Server Members Intent** (recomandat)
-4. Derulați înapoi sus și faceți clic pe **Reset Token** pentru a genera tokenul botului dvs. Copiați-l.
+4. Derulați înapoi în sus și apăsați **Reset Token** pentru a genera tokenul botului. Copiați-l.
 
-#### Adăugarea botului pe serverul dvs.
+#### Adăugați botul pe serverul dumneavoastră
 
-1. În bara laterală, faceți clic pe **OAuth2/ URL Generator**.
+1. În bara laterală, apăsați **OAuth2/ URL Generator**.
 2. Sub **Scopes**, activați `bot` și `applications.commands`.
 3. Sub **Bot Permissions**, activați: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Copiați URL-ul generat, lipiți-l în browser, selectați serverul dvs. și confirmați. Botul ar trebui să apară acum în lista de membri a serverului dvs.
+4. Copiați URL-ul generat, inserați-l în browser, selectați serverul și confirmați. Botul ar trebui să apară acum în lista de membri a serverului dumneavoastră.
 
-#### Colectarea ID-urilor dvs.
+#### Adunați ID-urile necesare
 
 Activați Modul Dezvoltator în Discord (**User Settings/ Advanced/ Developer Mode**), apoi:
-- Faceți clic dreapta pe pictograma serverului dvs.: **Copy Server ID**
-- Faceți clic dreapta pe propriul avatar: **Copy User ID**
+- Click dreapta pe pictograma serverului dumneavoastră: **Copy Server ID**
+- Click dreapta pe propriul avatar: **Copy User ID**
 
-#### Permiterea mesajelor directe de la membrii serverului
+#### Permiteți mesajele directe de la membrii serverului
 
-Faceți clic dreapta pe pictograma serverului dvs./ **Privacy Settings**/ activați **Direct Messages**. Aceasta permite botului să vă trimită mesaje directe, ceea ce este necesar pentru pasul de asociere.
+Click dreapta pe pictograma serverului/ **Privacy Settings**/ activați **Direct Messages**. Acest lucru permite botului să vă trimită mesaje directe, ceea ce este necesar pentru etapa de asociere.
 
-#### Configurarea OpenClaw pentru Discord
+#### Configurați OpenClaw pentru Discord
 
-Stocați tokenul botului dvs. ca variabilă de mediu, apoi creați un singur fișier de patch care activează Discord, referențiază tokenul și permite serverul dvs. Înlocuiți `<server_id>` și `<user_id>` cu ID-urile colectate mai sus.
+Stocați tokenul botului ca variabilă de mediu, apoi creați un singur fișier patch care activează Discord, face referire la token și include serverul dumneavoastră în lista de acces. Înlocuiți `<server_id>` și `<user_id>` cu ID-urile adunate mai sus.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1121,9 +1118,9 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **Nu vă bazați pe a cere agentului să configureze aceasta.** Când sandboxing-ul este activat, agentul nu poate scrie în `~/.openclaw/openclaw.json` din interiorul sandbox-ului — utilizați comenzile CLI de mai sus pe gazdă în schimb.
+> **Nu vă bazați pe faptul că îi cereți agentului să configureze acest lucru.** Când sandboxing-ul este activat, agentul nu poate scrie în `~/.openclaw/openclaw.json` din interiorul sandbox-ului; folosiți în schimb comenzile CLI de mai sus pe mașina gazdă.
 
-Reporniți gateway-ul pentru a prelua noua configurație a canalului:
+Reporniți gateway-ul astfel încât acesta să preia noua configurație a canalului:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -1131,22 +1128,22 @@ openclaw gateway run --bind loopback --port 18789
 
 Ar trebui să vedeți `logged in to discord as <bot-name>` în ieșirea gateway-ului în câteva secunde.
 
-#### Asocierea contului dvs. Discord
+#### Asociați-vă contul Discord
 
-Trimiteți un mesaj direct botului în Discord. Acesta va răspunde cu un cod scurt de asociere.
+Trimiteți un mesaj direct botului pe Discord. Acesta va răspunde cu un scurt cod de asociere.
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-Aprobați-l pe mașina care rulează OpenClaw:
+Aprobați-l pe mașina pe care rulează OpenClaw:
 ```bash
 openclaw pairing approve discord <CODE>
 ```
 
 > Codurile de asociere expiră după o oră.
 
-Acum puteți conversa cu agentul dvs. direct din Discord și delega sarcini hardware-ului dvs. local.
+Acum puteți discuta cu agentul dumneavoastră direct din Discord și puteți delega sarcini către hardware-ul local.
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1156,14 +1153,14 @@ Acum puteți conversa cu agentul dvs. direct din Discord și delega sarcini hard
 
 ### Opțiunea B: Telegram
 
-Telegram este mai simplu decât Discord pentru majoritatea utilizatorilor — nu necesită niciun server și niciun acces de administrator.
+Telegram este mai simplu decât Discord pentru majoritatea utilizatorilor, nu necesită server și nici acces de administrator.
 
-#### Crearea unui bot Telegram
+#### Creați un bot Telegram
 
-1. Deschideți Telegram și trimiteți un mesaj la **@BotFather**.
+1. Deschideți Telegram și trimiteți un mesaj către **@BotFather**.
 2. Trimiteți `/newbot` și urmați instrucțiunile. Salvați tokenul botului pe care vi-l oferă.
 
-#### Configurarea OpenClaw pentru Telegram
+#### Configurați OpenClaw pentru Telegram
 
 Stocați tokenul ca variabilă de mediu:
 
@@ -1171,7 +1168,7 @@ Stocați tokenul ca variabilă de mediu:
 export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 ```
 
-Adăugați configurația canalului în `~/.openclaw/openclaw.json` (sau aplicați un patch prin tabloul de bord):
+Adăugați configurația canalului în `~/.openclaw/openclaw.json` (sau aplicați-o prin patch din dashboard):
 
 ```json
 {
@@ -1185,23 +1182,23 @@ Adăugați configurația canalului în `~/.openclaw/openclaw.json` (sau aplicaț
 }
 ```
 
-Reporniți gateway-ul, apoi trimiteți botului dvs. orice mesaj în Telegram. Aprobați asocierea:
+Reporniți gateway-ul, apoi trimiteți botului dumneavoastră orice mesaj pe Telegram. Aprobați asocierea:
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-Codurile de asociere expiră după o oră. Acum puteți conversa cu agentul dvs. prin mesaj direct Telegram.
+Codurile de asociere expiră după o oră. Acum puteți discuta cu agentul dumneavoastră prin mesaje directe pe Telegram.
 
 ---
 
-## Pași următori
+## Pașii următori
 
-Acum că agentul dvs. poate primi comenzi de pe telefon și poate acționa pe mașina dvs. locală, iată trei direcții care merită explorate:
+Acum că agentul dumneavoastră poate primi comenzi de pe telefon și poate acționa pe mașina dumneavoastră locală, iată trei direcții demne de explorat:
 
-1. **Rezumator al pieței de valori**: Programați OpenClaw să preia date din API-uri financiare la un interval fix, să rezume mișcările zilei cu modelul dvs. local și să trimită un rezumat pe telefon în fiecare dimineață prin canalul ales.
+1. **Sumarizator al pieței bursiere**: Programați OpenClaw să preia date de la API-uri financiare la un interval fix, să sumarizeze mișcările zilei cu modelul dumneavoastră local și să trimită un rezumat pe telefon în fiecare dimineață prin canalul ales.
 
-2. **Monitor de fine-tuning**: Porniți de la distanță un job de antrenament prin Telegram sau Discord, apoi lăsați agentul să urmărească jurnalul de antrenament și să raporteze periodic valorile de pierdere, utilizarea GPU și utilizarea discului pe telefon. Dacă rularea se blochează sau VRAM crește brusc, aflați imediat fără a fi nevoie să fiți la mașină.
+2. **Monitor de fine-tuning**: Porniți un job de antrenare de la distanță prin Telegram sau Discord, apoi puneți agentul să urmărească jurnalul de antrenare și să raporteze periodic valorile de loss, utilizarea GPU-ului și utilizarea discului înapoi pe telefonul dumneavoastră. Dacă rularea se blochează sau VRAM-ul crește brusc, aflați imediat, fără să fie nevoie să fiți la mașină.
 
-3. **IOT cu un VLM local**: Îndreptați o cameră spre ușa de intrare, rulați un model de viziune pe Lemonade și lăsați OpenClaw să analizeze cadrele la cerere sau la un declanșator. Întrebați "au sosit colete astăzi?" de pe telefon și primiți un răspuns direct de la propriul hardware.
+3. **IOT cu un VLM local**: Îndreptați o cameră spre ușa de la intrare, rulați un model de viziune pe Lemonade și puneți OpenClaw să analizeze cadrele la cerere sau la declanșarea unui trigger. Întrebați „au sosit colete azi?” de pe telefon și primiți un răspuns direct de la propriul hardware.

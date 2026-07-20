@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 1. Odprite PowerShell ali ukazni poziv
-2. Namestite n8n globalno z npm:
+2. Namestite n8n globalno z uporabo npm:
 ```cmd
 npm install -g n8n
 ```
@@ -18,7 +18,7 @@ npm install -g n8n
 
 <!-- @os:linux -->
 
-Namestite n8n globalno z npm:
+Namestite n8n globalno z uporabo npm:
 ```bash
 npm install -g n8n
 ```

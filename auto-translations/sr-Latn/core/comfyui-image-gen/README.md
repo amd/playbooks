@@ -6,33 +6,33 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Ovaj vodič koristi posebne oznake koje GitHub ne može da prikaže. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste ispravno pregledali ovaj sadržaj.
 <!-- @github-only:end -->
 
 ## Pregled
 
-ComfyUI je moćan interfejs zasnovan na čvorovima za Stable Diffusion i druge difuzione modele. Za razliku od tradicionalnih interfejsa za generisanje slika iz teksta sa jednostavnim poljima za unos upita, ComfyUI izlaže celokupan cevovod za generisanje slika kao vizuelni graf, dajući vam preciznu kontrolu nad svakim korakom — od kodiranja teksta do manipulacije latentnim prostorom do finalnog dekodiranja.
+ComfyUI je moćan, čvorno zasnovan interfejs za Stable Diffusion i druge difuzione modele. Za razliku od tradicionalnih interfejsa za pretvaranje teksta u sliku sa jednostavnim poljima za unos, ComfyUI izlaže ceo pipeline generisanja slike kao vizuelni graf, dajući vam preciznu kontrolu nad svakim korakom, od enkodiranja teksta preko manipulacije latentnim prostorom do finalnog dekodiranja.
 
-Ovaj tutorijal vas uči kako da koristite ComfyUI sa Z Image Turbo modelom na vašem GPU-u za generisanje visokokvalitetnih AI slika.
+Ovaj vodič vas uči kako da koristite ComfyUI sa modelom Z Image Turbo na vašem GPU-u kako biste generisali visokokvalitetne AI slike.
 
 ## Šta ćete naučiti
 
 - Kako da pokrenete ComfyUI i učitate Z-Image Turbo šablon
-- Razumevanje komponenti difuzionog cevovoda
+- Razumevanje komponenti difuzionog pipeline-a
 - Generisanje slika i podešavanje parametara generisanja
-- Čuvanje i deljenje tokova rada
+- Čuvanje i deljenje radnih tokova
 
-## Postavljanje konfiguracije memorije
+## Podešavanje konfiguracije memorije
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Proverite da li postoje ažuriranja softvera
+## Provera ažuriranja softvera
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instaliranje softverskih preduslova
+## Instaliranje neophodnog softvera
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -41,7 +41,7 @@ Ovaj tutorijal vas uči kako da koristite ComfyUI sa Z Image Turbo modelom na va
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Dodelite svom korisniku pristup GPU uređajima** (odjavite se i ponovo prijavite da bi ovo stupilo na snagu):
+**Dodelite vašem korisniku pristup GPU uređajima** (odjavite se i ponovo prijavite da bi ovo stupilo na snagu):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -287,13 +287,13 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-Da biste pokrenuli ComfyUI na Windows-u, kliknite na ComfyUI Desktop pokretač koji se nalazi na vašoj radnoj površini. Pratite korake za instalaciju lokalne verzije sa AMD.
+Da biste pokrenuli ComfyUI na Windows-u, kliknite na ComfyUI Desktop Launcher koji se nalazi na vašoj radnoj površini. Pratite korake da biste instalirali lokalnu verziju sa AMD-om.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Zatim kliknite na dugme ComfyUI na vrhu sredine aplikacije. Ovo će otvoriti karticu sa podešavanjima. Otvorite karticu Storage i proverite da su putanje postavljene na sledeći način kako biste pristupili unapred instaliranim modelima.
+Zatim kliknite na dugme ComfyUI na vrhu sredine aplikacije. Ovo će otvoriti karticu sa podešavanjima. Otvorite karticu Storage i uverite se da su putanje podešene na sledeći način kako biste pristupili unapred instaliranim modelima.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
@@ -303,8 +303,8 @@ Zatim kliknite na dugme ComfyUI na vrhu sredine aplikacije. Ovo će otvoriti kar
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Da biste pokrenuli ComfyUI na Linux-u, kliknite na ComfyUI prečicu u traci zadataka. Trebalo bi da se automatski otvori u prozoru pregledača.
->**Savet**: ComfyUI i njegovi modeli se čuvaju na `~/.local/share/ComfyUI/models`. Ovde možete ručno dodavati tokove rada ili nove modele.
+Da biste pokrenuli ComfyUI na Linux-u, kliknite na ComfyUI prečicu na taskbar-u. Trebalo bi da se sam otvori u prozoru pregledača.
+>**Savet**: ComfyUI i njegovi modeli se čuvaju na `~/.local/share/ComfyUI/models`. Ovde možete ručno da dodate radne tokove ili nove modele.
 
 
 <!-- @os:end -->
@@ -319,12 +319,12 @@ Da biste pokrenuli ComfyUI na Windows-u, jednostavno kliknite na ComfyUI prečic
 
 Da biste pokrenuli ComfyUI:
 
-1. Proverite da se nalazite unutar ComfyUI direktorijuma. 
+1. Uverite se da se nalazite u ComfyUI direktorijumu. 
 2. Pokrenite `python3 main.py --use-pytorch-cross-attention`
 
-ComfyUI pokreće lokalni veb server. Otvorite pregledač na adresi `http://127.0.0.1:8188` da biste pristupili interfejsu.
+ComfyUI pokreće lokalni veb server. Otvorite pregledač na `http://127.0.0.1:8188` da biste pristupili interfejsu.
 
-> **Savet**: Ostavite prozor terminala otvorenim dok koristite ComfyUI. Zatvaranjem će se zaustaviti server.
+> **Savet**: Ostavite prozor terminala otvorenim dok koristite ComfyUI. Zatvaranje prozora će zaustaviti server.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -333,17 +333,17 @@ ComfyUI pokreće lokalni veb server. Otvorite pregledač na adresi `http://127.0
 
 Pre generisanja slika, potrebno je da učitate Z-Image Turbo šablon. Evo kako da ga pronađete:
 
-1. **Pogledajte krajnji levi rub ekrana** — postoji vertikalna traka sa alatkama koja se proteže od vrha do dna na krajnjoj levoj strani aplikacije.
+1. **Pogledajte na krajnjoj levoj ivici ekrana** — tu se nalazi vertikalna traka sa alatkama koja se pruža od vrha do dna na krajnjoj levoj strani aplikacije.
 
-2. **Pronađite ikonu fascikle** — u toj levoj traci sa alatkama, potražite ikonu koja izgleda kao fascikla. Kada pređete mišem preko nje, označena je kao "Templates."
+2. **Pronađite ikonicu fascikle** — u toj levoj traci sa alatkama, potražite ikonicu koja liči na fasciklu. Kada pređete mišem preko nje, označena je kao "Templates".
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
 </p>
 
-3. **Kliknite na ikonu fascikle** — ovo otvara panel sa šablonima.
+3. **Kliknite na ikonicu fascikle** — ovo otvara panel Templates.
 
-4. **Potražite "Z-Image Turbo"** — koristite traku za pretragu ili skrolujte kroz dostupne šablone da biste pronašli Z-Image Turbo Text To Image tok rada, a zatim kliknite da biste ga učitali.
+4. **Pretražite "Z-Image Turbo"** — koristite traku za pretragu ili skrolujte kroz dostupne šablone da biste pronašli radni tok Z-Image Turbo Text To Image, a zatim kliknite da ga učitate.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -355,7 +355,7 @@ Pre generisanja slika, potrebno je da učitate Z-Image Turbo šablon. Evo kako d
 
 ## Razumevanje interfejsa
 
-Kada se Z-Image Turbo šablon učita, videćete platno sa 2 glavna čvora. Prvi čvor se zove 'Text to Image (Z-Image-Turbo)', a drugi je za pregledanje slike. 
+Kada se učita Z-Image Turbo šablon, videćete platno sa 2 glavna čvora. Prvi čvor se zove 'Text to Image (Z-Image-Turbo)', a drugi čvor služi za pregled slike. 
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
@@ -368,24 +368,24 @@ Na Z-Image čvoru, kliknite na dugme u gornjem desnom uglu da biste proširili �
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
 </p>
 
-### Komponente cevovoda
+### Komponente pipeline-a
 
-Z-Image Turbo tok rada koristi četiri ključne komponente modela koje rade zajedno:
+Radni tok Z-Image Turbo koristi četiri ključne komponente modela koje rade zajedno:
 
 | Komponenta | Uloga |
 |-----------|------|
-| **Koder teksta** (Qwen 3 4B) | Pretvara vaš tekstualni upit u ugradnje koje difuzioni model razume |
-| **Difuzioni model** (Z-Image Turbo) | Osnovna neuronska mreža koja iterativno uklanja šum iz latentnih reprezentacija u slike |
-| **VAE** (Varijacioni autoenkoder) | Kodira slike u/iz latentnog prostora (dekodira finalne latente u piksele) |
-| **LoRA** (opciono) | Lagani adapteri koji menjaju stil ili subjekt bez ponovnog treniranja osnovnog modela |
+| **Text Encoder** (Qwen 3 4B) | Pretvara vaš tekstualni prompt u embedding-e koje difuzioni model razume |
+| **Diffusion Model** (Z-Image Turbo) | Osnovna neuronska mreža koja iterativno uklanja šum iz latentnih reprezentacija i pretvara ih u slike |
+| **VAE** (Variational Autoencoder) | Enkoduje slike u/iz latentnog prostora (dekoduje finalne latente u piksele) |
+| **LoRA** (opciono) | Lagani adapteri koji menjaju stil ili subjekat bez ponovnog treniranja osnovnog modela |
 
-Svaki čvor u toku rada odgovara jednoj od ovih komponenti. Podaci teku s leva na desno: tekst → ugradnje → vođeno uklanjanje šuma → latenti → finalna slika.
+Svaki čvor u radnom toku odgovara jednoj od ovih komponenti. Podaci teku sleva nadesno: tekst → embedding-i → vođeno uklanjanje šuma → latenti → finalna slika.
 
 ## Generisanje vaše prve slike
 
-Z-Image Turbo model je već učitan. Da biste generisali sliku:
+Model Z-Image Turbo je već učitan. Da biste generisali sliku:
 
-1. **Unesite vaš upit** u glavni Z-Image čvor. Budite opisni. Evo primera:
+1. **Unesite vaš prompt** u glavni Z-Image čvor. Budite deskriptivni. Evo primera:
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
@@ -393,9 +393,9 @@ Z-Image Turbo model je već učitan. Da biste generisali sliku:
    ```
 2. **(Opciono)**: Potvrdite ili prilagodite bilo koja druga specifična podešavanja unutar podgrafa.
 3. **Kliknite na plavo dugme "Run Workflow"** u desnom uglu (ili pritisnite `Ctrl+Enter`)
-4. Posmatrajte kako se čvorovi ističu dok se svaki korak izvršava
+4. Posmatrajte kako se čvorovi osvetljavaju dok se svaki korak izvršava
 
-Celokupno izvršavanje toka rada trebalo bi da se završi za manje od 30 sekundi. Vaša generisana slika pojavljuje se u čvoru **Save Image** i čuva se u fascikli `output/`.
+Ceo radni tok bi trebalo da se izvrši za manje od 30 sekundi. Vaša generisana slika se pojavljuje u čvoru **Save Image** i čuva se u fascikli `output/`.
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -568,63 +568,62 @@ ls -1t ComfyUI/output/*.png | head -n 5
 
 
 ## Podešavanje parametara generisanja
-
 ### Podešavanja KSampler-a
 
-Čvor KSampler kontroliše osnovni difuzioni proces:
+Čvor KSampler kontroliše osnovni proces difuzije:
 
 | Parametar | Šta kontroliše | Preporučeno za Z-Image Turbo |
 |-----------|------------------|-------------------------------|
-| **steps** | Broj iteracija uklanjanja šuma | 4–10 (turbo modeli su destilisani za manji broj koraka) |
-| **cfg** | Skala vođenja bez klasifikatora — koliko blisko pratiti upit | 1.0–2.0 (turbo modeli koriste veoma nisko vođenje) |
-| **sampler_name** | Algoritam uklanjanja šuma | `euler` i `res_multistep` dobro rade za turbo modele |
+| **steps** | Broj iteracija uklanjanja šuma | 4–10 (turbo modeli su destilovani za manji broj koraka) |
+| **cfg** | Skala vođenja bez klasifikatora (classifier-free guidance) — koliko blisko se prati prompt | 1.0–2.0 (turbo modeli koriste veoma nisko vođenje) |
+| **sampler_name** | Algoritam za uklanjanje šuma | `euler` i `res_multistep` dobro funkcionišu za turbo modele |
 | **scheduler** | Kriva rasporeda šuma | `normal` ili `simple` |
 | **seed** | Nasumično seme za reproduktivnost | Postavite fiksne vrednosti da biste iterirali na kompoziciji |
 
 ### Veličina slike
 
-Da biste podesili izlazne dimenzije, pronađite čvor **Empty Latent Image** i izmenite **width** i **height**. Zadržite dimenzije na ili ispod 1024 piksela na najdužoj strani za optimalnu kvalitetu.
+Da biste podesili dimenzije izlaza, pronađite čvor **Empty Latent Image** i izmenite **width** i **height**. Držite dimenzije na ili ispod 1024 piksela na najdužoj strani radi optimalnog kvaliteta.
 
 ### ModelSamplingAuraFlow
 
-Čvor **ModelSamplingAuraFlow** je specijalizovani modifikator uzorkovanja koji prilagođava način na koji difuzioni proces rukuje rasporedom šuma. Videćete ovaj čvor povezan sa izlazom modela u Z-Image Turbo toku rada.
+Čvor **ModelSamplingAuraFlow** je specijalizovani modifikator uzorkovanja koji podešava kako proces difuzije obrađuje raspored šuma. Videćete ovaj čvor povezan sa izlazom modela u Z-Image Turbo radnom toku.
 
 | Parametar | Šta kontroliše | Preporučene vrednosti |
 |-----------|------------------|-------------------|
-| **shift** | Prilagođava vremenski raspored šuma — više vrednosti guraju više preciziranja detalja ka kasnijim koracima | 1.0–4.0 (podrazumevano je 3.0) |
+| **shift** | Podešava tajming rasporeda šuma — veće vrednosti prebacuju više usavršavanja detalja na kasnije korake | 1.0–4.0 (podrazumevano je 3.0) |
 
-Kada prilagoditi **shift**:
+Kada podesiti **shift**:
 
 - **Niže vrednosti (1.0–2.0)**: Brža konvergencija, dobro za jednostavne kompozicije
-- **Više vrednosti (3.0–4.0)**: Postepeno preciziranje, može poboljšati fine detalje u složenim scenama
+- **Više vrednosti (3.0–4.0)**: Postepenije usavršavanje, može poboljšati fine detalje u složenim scenama
 
-Metoda uzorkovanja AuraFlow je specifično dizajnirana za modele koji koriste podudaranje toka kao što je Z-Image Turbo, obezbeđujući pravilnu distribuciju šuma tokom celokupnog procesa generisanja.
+Metod uzorkovanja AuraFlow je posebno dizajniran za modele koji koriste flow-matching, poput Z-Image Turbo, obezbeđujući pravilnu raspodelu šuma tokom celog procesa generisanja.
 
-## Rad sa tokovima rada
+## Rad sa radnim tokovima
 
-### Čuvanje tokova rada
+### Čuvanje radnih tokova
 
-Kliknite na dugme **Save** u meniju da biste izvezli vaš tok rada kao JSON datoteku. Ovo beleži:
+Kliknite na dugme **Save** u meniju da biste izvezli svoj radni tok kao JSON fajl. Ovo obuhvata:
 
 - Sve čvorove i njihove parametre
 - Sve veze između čvorova
-- Trenutni tekst upita
+- Trenutni tekst prompta
 
-### Učitavanje tokova rada
+### Učitavanje radnih tokova
 
-Prevucite JSON datoteku toka rada na platno ili koristite **Load** iz menija. Z-Image Turbo tok rada koji vidite podrazumevano se učitava iz sačuvane datoteke toka rada.
+Prevucite JSON fajl radnog toka na platno, ili koristite **Load** iz menija. Z-Image Turbo radni tok koji podrazumevano vidite učitan je iz sačuvanog fajla radnog toka.
 
-### Deljenje tokova rada
+### Deljenje radnih tokova
 
-Tokovi rada su samostalni — podelite JSON datoteku sa kolegama i oni mogu reprodukovati vaše tačno podešavanje. Ovo čini ComfyUI odličnim za kolaborativno eksperimentisanje.
+Radni tokovi su samostalni — podelite JSON fajl sa kolegama, i oni mogu reprodukovati vaše tačno podešavanje. Ovo čini ComfyUI odličnim za zajedničko eksperimentisanje.
 
 ## Sledeći koraci
 
-- **Istražite LoRA čvorove**: Primenite adaptere stila ili subjekta bez ponovnog treniranja
-- **Dodajte negativne upite**: Povežite drugi CLIP Text Encode čvor sa **negative** uslovnim ulazom KSampler-a da biste usmerili model dalje od neželjenih karakteristika kao što su zamućenost, artefakti ili vodeni žigovi
-- **Izgradite prilagođene tokove rada**: Povežite više generisanja, dodajte povećanje rezolucije ili kreirajte varijacije slika
-- **Pregledajte tokove rada zajednice**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) ima mnogo tokova rada spremnih za upotrebu
+- **Istražite LoRA čvorove**: Primenite adaptere za stil ili subjekat bez ponovnog treniranja
+- **Dodajte negativne promptove**: Povežite drugi CLIP Text Encode čvor sa **negative** ulazom za kondicioniranje na KSampler-u da biste usmerili model dalje od neželjenih karakteristika poput zamućenja, artefakata ili vodenih žigova
+- **Napravite prilagođene radne tokove**: Povežite više generisanja u lanac, dodajte uvećanje rezolucije ili kreirajte varijacije slika
+- **Pregledajte radne tokove zajednice**: [ComfyUI primeri](https://github.com/comfyanonymous/ComfyUI_examples) sadrže mnoge spremne radne tokove za korišćenje
 
-Snaga ComfyUI-a leži u eksperimentisanju: povežite čvorove na različite načine, prilagodite parametre i posmatrajte kako svaka promena utiče na izlaz. Ovo praktično istraživanje gradi intuiciju o tome kako difuzioni modeli funkcionišu.
+Snaga ComfyUI-ja leži u eksperimentisanju: povezujte čvorove na različite načine, podešavajte parametre i posmatrajte kako svaka promena utiče na izlaz. Ovo praktično istraživanje gradi intuiciju o tome kako funkcionišu difuzioni modeli.
 
 Za više informacija, pogledajte [ComfyUI dokumentaciju](https://docs.comfy.org/).

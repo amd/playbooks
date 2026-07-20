@@ -8,25 +8,25 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code az **AMD Ryzen™ AI Developer Center**-ből telepíthető. Lépjen az **Updates** fülre, és telepítse a VS Code-ot, ha még nincs jelen.
+A VS Code telepíthető az **AMD Ryzen™ AI Developer Center** oldalról. Lépjen az **Updates** fülre, és telepítse a VS Code-ot, ha még nincs telepítve.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code az **AMD Ryzen™ AI Developer Center**-ből telepíthető. Lépjen a **Manage** fülre, és telepítse a VS Code-ot, ha még nincs jelen.
+A VS Code telepíthető az **AMD Ryzen™ AI Developer Center** oldalról. Lépjen a **Manage** fülre, és telepítse a VS Code-ot, ha még nincs telepítve.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Töltse le a Windows telepítési futtatható fájlt innen: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+1. Töltse le a Windows telepítő futtatható fájlt innen: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
 2. Kattintson a letöltött `VSCodeUserSetup-x64-1.108.2.exe` fájlra a VS Code telepítéséhez.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-1. Töltse le a Debian telepítési csomagot innen: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
+1. Töltse le a Debian telepítőcsomagot innen: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
 2. Kattintson a letöltött `code_1.108.2-1769004815_amd64.deb` fájlra a VS Code telepítéséhez.
 
 <!-- @os:end -->

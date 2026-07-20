@@ -5,36 +5,37 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> Ez a playbook speciális tageket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom helyes előnézetéhez látogasson el az [amd.com/playbooks](https://amd.com/playbooks) oldalra.
+> Ez a playbook olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom helyes megtekintéséhez látogass el az [amd.com/playbooks](https://amd.com/playbooks) oldalra.
 <!-- @github-only:end -->
 
 ## Áttekintés
 
-A GAIA ügynökök olyan AI asszisztensek, amelyek egy helyi LLM-et használnak a gondolkodáshoz és az Ön által definiált eszközök meghívásához — mint olyan chatbotok, amelyek képesek cselekedni. **100%-ban helyileg** futnak, felhőalapú API-k nélkül, az adatok nem hagyják el a gépét, és nincs szükség API-kulcsokra.
+A GAIA ügynökök olyan AI asszisztensek, amelyek egy helyi LLM-et használnak az érveléshez és az általad definiált eszközök meghívásához — olyan chatbotok, amelyek képesek cselekedni. **100%-ban helyben** futnak, felhő alapú API-k nélkül, anélkül, hogy bármilyen adat elhagyná a gépedet, és API-kulcsok sem szükségesek.
 
-Ebben a playbookban egy Hardware Advisor Agent-et fog felépíteni, amely felismeri a rendszer RAM-ját, GPU-ját és NPU-ját, lekérdezi a helyi modellkatalógust, és ajánlást tesz arra vonatkozóan, hogy melyik LLM-eket képes futtatni a gépe. Ez egy gyakorlati bevezetés a GAIA Agent SDK-ba, amely azonnal hasznos eredményt produkál.
+Ebben a playbookban egy Hardware Advisor Agentet fogsz építeni, amely érzékeli a rendszered RAM-ját, GPU-ját és NPU-ját, lekérdezi a helyi modellkatalógust, és javaslatot tesz arra, hogy mely LLM-eket tudja futtatni a géped. Ez egy gyakorlatias bevezetés a GAIA Agent SDK-ba, amely azonnal hasznos eredményt ad.
 
-## Mit fog megtanulni
+## Amit meg fogsz tanulni
 
-- Hogyan hozzon létre egy GAIA ügynököt egyéni eszközökkel
+- Hogyan hozz létre egy GAIA ügynököt egyedi eszközökkel
 - A LemonadeClient SDK használata rendszerinformációk és modellkatalógusok lekérdezéséhez
-- Platform-specifikus GPU/NPU felismerés (Windows PowerShell és Linux lspci)
-- Memória-alapú modellméretezés a 70%-os szabály segítségével
-- Interaktív CLI felépítése természetes nyelvű hardverlekérdezésekhez
+- Platformspecifikus GPU/NPU-érzékelés (Windows PowerShell és Linux lspci)
+- Memória alapú modellméretezés a 70%-os szabály segítségével
+- Interaktív CLI építése természetes nyelvű hardverkérdésekhez
 
-## A memóriakonfiguráció beállítása
+## A memória konfigurálása
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Szoftverfrissítések ellenőrzése
-> **Megjegyzés**: Ha a VS Code nincs telepítve, a Ryzen AI Developer Center segítségével telepítheti.
+## Ellenőrizd a szoftverfrissítéseket
+> **Megjegyzés**: Ha a VS Code nincs telepítve, telepítheted a Ryzen AI Developer Centerrel.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Szoftver-előfeltételek telepítése
+## Szoftverelőfeltételek telepítése
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
@@ -64,11 +65,11 @@ which python3
 
 ## Első lépések
 
-Először futtassa a kész ügynököt, hogy lássa, mit épít. Ezután lépésről lépésre végigmegyünk a kódon.
+Először futtasd le a kész ügynököt, hogy lásd, mit fogsz építeni. Ezután lépésről lépésre végigmegyünk a kódon.
 
 ### Az előre elkészített példa futtatása
 
-Ez a playbook tartalmazza a teljes [hardware_advisor_agent.py](assets/hardware_advisor_agent.py) fájlt. Töltse le egy tetszőleges könyvtárba, és futtassa, hogy lássa a kész ügynököt működés közben:
+Ez a playbook tartalmazza a teljes [hardware_advisor_agent.py](assets/hardware_advisor_agent.py) fájlt. Töltsd le egy tetszőleges könyvtárba, és futtasd, hogy megnézd a kész ügynököt működés közben:
 
 ```bash
 python hardware_advisor_agent.py
@@ -96,7 +97,7 @@ print("PASS: hardware_advisor_agent.py has valid syntax")
 ```
 <!-- @test:end --> 
 
-**Próbálja megkérdezni:** "What size LLM can I run?"
+**Próbáld ezt kérdezni:** "What size LLM can I run?"
 
 **Várt kimenet:**
 
@@ -117,9 +118,9 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 - NPU acceleration available for smaller models
 ```
 
-**Gratulálunk** — felépített egy ügynököt!
+**Gratulálunk** – sikeresen felépítettél egy ügynököt!
 
-A playbook többi része elmagyarázza, hogyan működik a szkript minden egyes része, hogy az alapoktól megértse azt.
+A playbook hátralévő része azt fogja bemutatni, hogyan működik a szkript minden egyes része, hogy a legelejétől megértsd.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -261,17 +262,17 @@ echo "OK: hardware_advisor_agent.py started successfully"
 
 ## Az architektúra megértése
 
-A Hardware Advisor Agent három összetevőt kombinál:
+A Hardware Advisor Agent három komponenst egyesít:
 
 - **LemonadeClient SDK** — Rendszerinformációs és modellkatalógus API-k
-- **Platform-specifikus felismerés** — Windows PowerShell / Linux lspci a GPU-információkhoz
+- **Platformspecifikus érzékelés** — Windows PowerShell / Linux lspci a GPU-információkhoz
 - **Memóriaszámítások** — 70%-os szabály a biztonságos modellméretezéshez
 
-Az adatok sorban haladnak ezeken keresztül: felhasználói lekérdezés → az ügynök kiválaszt egy eszközt → az eszköz meghívja a LemonadeClient-et és az operációs rendszer felismerését → az ügynök összefoglalja az eredményeket egy ajánlásba.
+Az adatok az alábbi sorrendben áramlanak: felhasználói kérdés → az ügynök kiválaszt egy eszközt → az eszköz meghívja a LemonadeClientet + az operációs rendszer érzékelését → az ügynök az eredményeket egy javaslattá szintetizálja.
 
 ### LemonadeClient SDK
 
-A LemonadeClient egységes API-t biztosít a rendszerfelismeréshez, az NPU/GPU elérhetőségéhez és a modellkatalógus-lekérdezésekhez.
+A LemonadeClient egységes API-t biztosít a rendszerérzékeléshez, az NPU/GPU elérhetőségéhez és a modellkatalógus-lekérdezésekhez.
 
 **Importálás és inicializálás:**
 
@@ -341,7 +342,7 @@ response = client.list_models(show_all=True)
 }
 ```
 
-**`get_model_info(model_id)`** — Visszaadja egy adott modell méretbecsléseit:
+**`get_model_info(model_id)`** — Visszaadja egy adott modell méretbecslését:
 
 ```python
 model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
@@ -355,13 +356,13 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 }
 ```
 
-### Platform-specifikus GPU-felismerés
+### Platformspecifikus GPU-érzékelés
 
-Az ügynök operációs rendszer-natív parancsokat használ a GPU-felismeréshez a PyTorch helyett. Ez GPU-meghajtók telepítése nélkül is működik, felismeri az összes GPU-t (nem csak a CUDA-képeseket), és elkerüli a nehéz könyvtárak importálását.
+Az ügynök az operációs rendszer natív parancsait használja a GPU-érzékeléshez, nem pedig a PyTorch-ot. Ez GPU-illesztőprogramok nélkül is működik, minden GPU-t érzékel (nem csak a CUDA-képeseket), és elkerüli a nehéz könyvtárimportokat.
 
 <!-- @os:windows -->
 
-Windows rendszeren az ügynök PowerShell-t használ a WMI lekérdezéséhez:
+Windows rendszeren az ügynök PowerShellt használ a WMI lekérdezéséhez:
 
 ```python
 ps_command = (
@@ -394,7 +395,7 @@ result = subprocess.run(
 
 ### A 70%-os memóriaszabály
 
-> **Szabály:** A modell méretének kisebbnek kell lennie a rendelkezésre álló RAM 70%-ánál, hogy 30% tartalék maradjon az inferencia-műveletekhez (KV gyorsítótár, kötegelt feldolgozási pufferek, futásidejű memória-csúcsok).
+> **Szabály:** A modell méretének kisebbnek kell lennie a rendelkezésre álló RAM 70%-ánál, hogy 30% ráhagyás maradjon az inferencia műveletekhez (KV-cache, kötegelt feldolgozási pufferek, futásidejű memóriacsúcsok).
 
 ```
 System: 32 GB RAM
@@ -403,13 +404,13 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 70B model (~42 GB):   Too large
 ```
 
-## Az ügynök lépésről lépésre történő kódolása (opcionális)
+## Az ügynök kódolása lépésről lépésre (opcionális)
 
-Létrehoz **egy fájlt** `hardware_advisor_agent.py` néven, és fokozatosan bővíti a funkciókat. Minden lépés az előzőre épül.
+Létre fogsz hozni **egyetlen fájlt** `hardware_advisor_agent.py` néven, és fokozatosan hozzáadod a funkciókat. Minden lépés az előzőre épül.
 
 ### 1. lépés: Az ügynök váza
 
-Kezdje egy minimális ügynökstruktúrával — csak az osztállyal és egy alapvető rendszerprompttal. Az ügynöknek még nincsenek eszközei.
+Kezdd egy minimális ügynökstruktúrával — csak az osztály és egy alapvető rendszerprompt. Az ügynöknek még nincsenek eszközei.
 
 ```python
 from gaia import Agent
@@ -436,7 +437,7 @@ if __name__ == "__main__":
     print("Agent created successfully!")
 ```
 
-Futtassa az ellenőrzéshez:
+Futtasd, hogy ellenőrizd:
 
 ```bash
 python hardware_advisor_agent.py
@@ -450,11 +451,11 @@ Agent created successfully!
 
 ---
 
-### 2. lépés: GPU és hardverfelismerés
+### 2. lépés: GPU- és hardverérzékelés
 
-Adja hozzá a `_get_gpu_info()` segédmetódust és a `get_hardware_info()` eszközt. Ez interaktívvá teszi az ügynököt — mostantól lekérdezheti a rendszer specifikációit.
+Add hozzá a `_get_gpu_info()` segédmetódust és a `get_hardware_info()` eszközt. Ez interaktívvá teszi az ügynököt — most már lekérdezheted tőle a rendszer specifikációit.
 
-**Frissítse az importokat** a fájl tetején:
+**Frissítsd az importokat** a fájl elején:
 
 ```python
 from typing import Any, Dict
@@ -463,7 +464,7 @@ from gaia import Agent, tool
 from gaia.llm.lemonade_client import LemonadeClient
 ```
 
-**Adja hozzá a `_get_gpu_info()` segédmetódust** a `_get_system_prompt()` metódus után:
+**Add hozzá a `_get_gpu_info()` segédmetódust** a `_get_system_prompt()` metódus után:
 
 ```python
 def _get_gpu_info(self) -> Dict[str, Any]:
@@ -550,7 +551,7 @@ def _get_gpu_info(self) -> Dict[str, Any]:
     return {"name": "Not detected", "memory_mb": 0}
 ```
 
-**Cserélje le a `_register_tools()` metódust** a `get_hardware_info` eszközzel:
+**Cseréld le a `_register_tools()` metódust** a `get_hardware_info` eszközre:
 
 ```python
 def _register_tools(self):
@@ -607,7 +608,7 @@ def _register_tools(self):
             }
 ```
 
-**Frissítse a `__main__` blokkot** az interaktív tesztelés engedélyezéséhez:
+**Frissítsd a `__main__` blokkot** az interaktív teszteléshez:
 
 ```python
 if __name__ == "__main__":
@@ -626,7 +627,7 @@ if __name__ == "__main__":
             break
 ```
 
-Futtassa, és próbálja megkérdezni: "Show me my system specs":
+Futtasd, és próbáld megkérdezni: "Show me my system specs":
 
 ```bash
 python hardware_advisor_agent.py
@@ -647,7 +648,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ### 3. lépés: Modellkatalógus
 
-Adja hozzá a `list_available_models()` eszközt a `_register_tools()` metóduson belül, a `get_hardware_info` függvény után. Az ügynök mostantól meg tudja mondani, milyen modellek érhetők el.
+Add hozzá a `list_available_models()` eszközt a `_register_tools()`-on belül, a `get_hardware_info` funkció után. Az ügynök most már meg tudja mondani, milyen modellek érhetők el.
 
 ```python
     @tool(atomic=True)
@@ -689,7 +690,7 @@ Adja hozzá a `list_available_models()` eszközt a `_register_tools()` metóduso
             }
 ```
 
-Futtassa, és próbálja megkérdezni: "What models are available?":
+Futtasd, és próbáld megkérdezni: "What models are available?":
 
 ```bash
 python hardware_advisor_agent.py
@@ -708,9 +709,9 @@ Agent: I found 15 models in the catalog:
 
 ---
 
-### 4. lépés: Intelligens ajánlások
+### 4. lépés: Okos ajánlások
 
-Adja hozzá a `recommend_models()` eszközt a `_register_tools()` metóduson belül, a `list_available_models` után. Az ügynök mostantól ki tudja számítani, hogy melyik modellek férnek el a rendszer memóriájában a 70%-os szabály alapján.
+Add hozzá a `recommend_models()` eszközt a `_register_tools()`-on belül, a `list_available_models` után. Az ügynök mostantól ki tudja számítani, hogy mely modellek férnek el a rendszered memóriájában a 70%-os szabály alapján.
 
 ```python
     @tool(atomic=True)
@@ -769,7 +770,7 @@ Adja hozzá a `recommend_models()` eszközt a `_register_tools()` metóduson bel
             }
 ```
 
-Futtassa, és próbálja megkérdezni: "What size LLM can I run?":
+Futtasd, és próbáld megkérdezni: "What size LLM can I run?":
 
 ```bash
 python hardware_advisor_agent.py
@@ -791,9 +792,9 @@ Top recommendations:
 
 ### 5. lépés: Éles CLI
 
-Cserélje le az egyszerű `__main__` blokkot egy csiszolt interaktív CLI-re. Ez hozzáad egy bannert, kilépési parancsokat és jobb hibakezelést.
+Cseréld le az egyszerű `__main__` blokkot egy csiszolt, interaktív CLI-re. Ez hozzáad egy fejlécet, kilépési parancsokat és jobb hibakezelést.
 
-**Cserélje le a teljes `if __name__ == "__main__":` blokkot** erre:
+**Cseréld le a teljes `if __name__ == "__main__":` blokkot** erre:
 
 ```python
 def main():
@@ -843,32 +844,31 @@ if __name__ == "__main__":
 ```
 
 ---
-
 ### Végső ellenőrzés
 
-A `hardware_advisor_agent.py` fájlnak most már tartalmaznia kell az összes alábbi összetevőt:
+A `hardware_advisor_agent.py` fájlodnak most már tartalmaznia kell az összes alábbi komponenst:
 
 - [x] Importok: `from typing import Any, Dict` és `from gaia import Agent, tool`
-- [x] `HardwareAdvisorAgent` osztály `__init__` metódussal és rendszerprompttal
-- [x] `_get_gpu_info()` segédmetódus (Windows PowerShell + Linux lspci)
-- [x] `get_hardware_info()` eszköz GPU-, NPU- és operációs rendszer-mezőkkel
-- [x] `list_available_models()` eszköz címkékkel és méretgazdagítással
-- [x] `recommend_models()` eszköz 70%-os szabállyal, fits_in_ram és fits_in_gpu mezőkkel
+- [x] `HardwareAdvisorAgent` osztály `__init__` metódussal és rendszerpromttal
+- [x] `_get_gpu_info()` segédfüggvény (Windows PowerShell + Linux lspci)
+- [x] `get_hardware_info()` eszköz GPU, NPU és OS mezőkkel
+- [x] `list_available_models()` eszköz címkékkel és mérettel bővítve
+- [x] `recommend_models()` eszköz a 70%-os szabállyal, fits_in_ram és fits_in_gpu mezőkkel
 - [x] `main()` függvény interaktív CLI-vel
 
-**Tesztelje ezeket a lekérdezéseket a helyes működés megerősítéséhez:**
+**Teszteld ezeket a lekérdezéseket, hogy minden működik-e:**
 
-- "What size LLM can I run?"
-- "Show me my system specs"
-- "What models are available?"
-- "Can I run a 30B model?"
+- "Milyen méretű LLM-et tudok futtatni?"
+- "Mutasd meg a rendszerem specifikációit"
+- "Milyen modellek érhetők el?"
+- "Tudok futtatni egy 30B-s modellt?"
 
-> **Tipp**: A teljes implementáció elérhető a [hardware_advisor_agent.py](assets/hardware_advisor_agent.py) fájlban.
+> **Tipp**: A teljes implementáció elérhető itt: [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
 
 ## Következő lépések
 
-- **Fedezze fel a LemonadeClient API-kat** — Fedezzen fel további rendszer- és modellkezelési lehetőségeket a [LemonadeClient SDK dokumentációjában](https://amd-gaia.ai/sdk/lemonade-client)
-- **Adjon hozzá hanginterakciót** — Integrálja a Whisper ASR-t és a Kokoro TTS-t, hogy a felhasználók hangon tehessenek fel hardverkérdéseket. Lásd a [Talk útmutatót](https://amd-gaia.ai/guides/talk)
-- **Adjon hozzá MCP-támogatást** — Tegye elérhetővé a hardver-tanácsadót MCP-szerverként, hogy más eszközök is lekérdezhessék. Lásd az [MCP útmutatót](https://amd-gaia.ai/sdk/infrastructure/mcp)
-- **Bővítse az ajánlórendszert** — Vegye figyelembe a GPU VRAM-ot a rétegek kiszervezéséhez, vagy adjon hozzá benchmarkolást a másodpercenkénti tokenek becslésére
-- **Építsen többügynökös rendszert** — Kombinálja a hardver-tanácsadót egy kód-ügynökkel vagy chat-ügynökkel a [Routing Agent](https://amd-gaia.ai/guides/routing) segítségével
+- **Fedezd fel a LemonadeClient API-kat** — Ismerd meg a további rendszer- és modellkezelési lehetőségeket a [LemonadeClient SDK dokumentációban](https://amd-gaia.ai/sdk/lemonade-client)
+- **Adj hozzá hangalapú interakciót** — Integrálj Whisper ASR-t és Kokoro TTS-t, hogy a felhasználók beszéddel is feltehessék a hardverrel kapcsolatos kérdéseiket. Lásd a [Talk útmutatót](https://amd-gaia.ai/guides/talk)
+- **Adj hozzá MCP-támogatást** — Tedd elérhetővé a hardver-tanácsadót MCP szerverként, hogy más eszközök is lekérdezhessék. Lásd az [MCP útmutatót](https://amd-gaia.ai/sdk/infrastructure/mcp)
+- **Bővítsd az ajánlómotort** — Vedd figyelembe a GPU VRAM-ot a rétegek kiszervezéséhez, vagy adj hozzá benchmarkingot a másodpercenkénti tokenszám becsléséhez
+- **Építs többügynökös rendszert** — Kombináld a hardver-tanácsadót egy kódügynökkel vagy csevegő ügynökkel a [Routing Agent](https://amd-gaia.ai/guides/routing) segítségével

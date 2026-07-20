@@ -6,21 +6,21 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ovaj priručnik koristi posebne oznake koje GitHub ne može prikazati. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste ispravno pregledali ovaj sadržaj.
+> Ovaj vodič koristi posebne oznake koje GitHub ne može da prikaže. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste ispravno pregledali ovaj sadržaj.
 <!-- @github-only:end -->
 
 ## Pregled
 
-GAIA agenti su AI asistenti koji koriste lokalni LLM za razmišljanje i pozivanje alata koje vi definišete — poput četbotova koji mogu da preduzimaju akcije. Rade **100% lokalno** bez cloud API-ja, bez podataka koji napuštaju vaš računar i bez potrebe za API ključevima.
+GAIA agenti su AI asistenti koji koriste lokalni LLM za rezonovanje i pozivanje alata koje sami definišete — kao čet-botovi koji mogu da preduzimaju akcije. Rade **100% lokalno**, bez cloud API-ja, bez podataka koji napuštaju vaš računar i bez potrebnih API ključeva.
 
-U ovom priručniku, izgradićete Hardware Advisor Agent koji detektuje RAM, GPU i NPU vašeg sistema, upituje lokalni katalog modela i preporučuje koje LLM-ove vaš računar može da pokrene. Ovo je praktičan uvod u GAIA Agent SDK koji proizvodi nešto odmah korisno.
+U ovom vodiču, izgradićete Hardware Advisor agenta koji detektuje RAM, GPU i NPU vašeg sistema, pretražuje lokalni katalog modela i preporučuje koje LLM-ove vaš računar može da pokrene. To je praktičan uvod u GAIA Agent SDK koji odmah proizvodi nešto korisno.
 
 ## Šta ćete naučiti
 
-- Kako da kreirate GAIA agenta sa prilagođenim alatima
-- Korišćenje LemonadeClient SDK-a za upitivanje informacija o sistemu i kataloga modela
+- Kako da napravite GAIA agenta sa prilagođenim alatima
+- Korišćenje LemonadeClient SDK-a za upit sistemskih informacija i kataloga modela
 - Detekcija GPU/NPU specifična za platformu (Windows PowerShell i Linux lspci)
-- Određivanje veličine modela na osnovu memorije korišćenjem pravila 70%
+- Određivanje veličine modela na osnovu memorije koristeći pravilo od 70%
 - Izgradnja interaktivnog CLI-ja za upite o hardveru na prirodnom jeziku
 
 ## Podešavanje konfiguracije memorije
@@ -29,12 +29,12 @@ U ovom priručniku, izgradićete Hardware Advisor Agent koji detektuje RAM, GPU 
 
 <!-- @device:halo_box -->
 ## Proverite ažuriranja softvera
-> **Napomena**: Ako VS Code nije instaliran, možete ga instalirati putem Ryzen AI Developer Center-a.
+> **Napomena**: Ako VS Code nije instaliran, možete ga instalirati pomoću Ryzen AI Developer Center-a.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalacija softverskih preduslova
+## Instaliranje softverskih preduslova
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
@@ -62,13 +62,13 @@ which python3
 <!-- @require:lemonade -->
 <!-- @require:gaia -->
 
-## Početak rada
+## Počnimo
 
-Najpre pokrenite gotovog agenta da biste videli šta gradite. Zatim ćemo proći kroz kod korak po korak.
+Prvo pokrenite gotovog agenta kako biste videli šta ćete graditi. Zatim ćemo proći kroz kod korak po korak.
 
-### Pokrenite unapred izgrađeni primer
+### Pokretanje gotovog primera
 
-Ovaj priručnik uključuje kompletan [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Preuzmite ga u direktorijum po vašem izboru i pokrenite ga da biste videli gotovog agenta u akciji:
+Ovaj vodič uključuje kompletan [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Preuzmite ga u direktorijum po vašem izboru i pokrenite ga da vidite gotovog agenta u akciji:
 
 ```bash
 python hardware_advisor_agent.py
@@ -96,7 +96,7 @@ print("PASS: hardware_advisor_agent.py has valid syntax")
 ```
 <!-- @test:end --> 
 
-**Pokušajte da pitate:** "What size LLM can I run?"
+**Probajte da pitate:** "What size LLM can I run?"
 
 **Očekivani izlaz:**
 
@@ -117,9 +117,9 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 - NPU acceleration available for smaller models
 ```
 
-**Čestitamo** — izgradili ste agenta!
+**Čestitamo** - napravili ste agenta! 
 
-Ostatak priručnika će objašnjavati kako svaki deo skripte funkcioniše, kako biste ga razumeli od osnova.
+U ostatku vodiča objasnićemo kako svaki deo skripte funkcioniše, kako biste to razumeli od početka.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -261,17 +261,17 @@ echo "OK: hardware_advisor_agent.py started successfully"
 
 ## Razumevanje arhitekture
 
-Hardware Advisor Agent kombinuje tri komponente:
+Hardware Advisor agent kombinuje tri komponente:
 
-- **LemonadeClient SDK** — API-ji za informacije o sistemu i katalog modela
-- **Detekcija specifična za platformu** — Windows PowerShell / Linux lspci za informacije o GPU-u
-- **Proračuni memorije** — pravilo 70% za bezbedno određivanje veličine modela
+- **LemonadeClient SDK** — API-ji za sistemske informacije i katalog modela
+- **Detekcija specifična za platformu** — Windows PowerShell / Linux lspci za GPU informacije
+- **Kalkulacije memorije** — pravilo od 70% za bezbedno određivanje veličine modela
 
-Podaci prolaze kroz ove komponente u nizu: korisnički upit → agent bira alat → alat poziva LemonadeClient + detekciju OS-a → agent sintetiše rezultate u preporuku.
+Podaci prolaze kroz ove komponente redom: upit korisnika → agent bira alat → alat poziva LemonadeClient + OS detekciju → agent sintetiše rezultate u preporuku.
 
 ### LemonadeClient SDK
 
-LemonadeClient pruža objedinjeni API za detekciju sistema, dostupnost NPU/GPU-a i upite kataloga modela.
+LemonadeClient pruža jedinstveni API za detekciju sistema, dostupnost NPU/GPU i upite kataloga modela.
 
 **Uvoz i inicijalizacija:**
 
@@ -323,7 +323,7 @@ info = client.get_system_info()
 
 <!-- @os:end -->
 
-**`list_models(show_all=True)`** — Vraća kompletan katalog modela:
+**`list_models(show_all=True)`** — Vraća potpuni katalog modela:
 
 ```python
 response = client.list_models(show_all=True)
@@ -341,7 +341,7 @@ response = client.list_models(show_all=True)
 }
 ```
 
-**`get_model_info(model_id)`** — Vraća procene veličine za određeni model:
+**`get_model_info(model_id)`** — Vraća procenu veličine za određeni model:
 
 ```python
 model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
@@ -357,11 +357,11 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 
 ### Detekcija GPU-a specifična za platformu
 
-Agent koristi komande nativne za OS umesto PyTorch-a za detekciju GPU-a. Ovo funkcioniše bez instaliranih GPU drajvera, detektuje sve GPU-ove (ne samo one sa CUDA podrškom) i izbegava uvoz teških biblioteka.
+Agent koristi komande native za OS umesto PyTorch-a za detekciju GPU-a. Ovo funkcioniše bez instaliranih GPU drajvera, detektuje sve GPU-ove (ne samo one koji podržavaju CUDA), i izbegava uvoz teških biblioteka.
 
 <!-- @os:windows -->
 
-Na Windows-u, agent koristi PowerShell za upitivanje WMI-ja:
+Na Windows-u, agent koristi PowerShell za upit WMI-ja:
 
 ```python
 ps_command = (
@@ -392,9 +392,9 @@ result = subprocess.run(
 
 <!-- @os:end -->
 
-### Pravilo memorije 70%
+### Pravilo od 70% memorije
 
-> **Pravilo:** Veličina modela treba da bude manja od 70% dostupnog RAM-a kako bi se ostavilo 30% rezerve za operacije inferencije (KV keš, baferi za obradu serija, skokovi u potrošnji memorije tokom izvršavanja).
+> **Pravilo:** Veličina modela treba da bude manja od 70% dostupnog RAM-a kako bi se ostavilo 30% dodatnog prostora za operacije inferencije (KV keš, baferi za obradu u serijama, skokovi u iskorišćenju memorije u toku rada).
 
 ```
 System: 32 GB RAM
@@ -403,13 +403,13 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 70B model (~42 GB):   Too large
 ```
 
-## Kodiranje agenta korak po korak (opciono)
+## Programiranje agenta korak po korak (opciono)
 
-Kreiraćete **jednu datoteku** pod nazivom `hardware_advisor_agent.py` i postepeno dodavati funkcionalnosti. Svaki korak se nadovezuje na prethodni.
+Napravićete **jednu datoteku** pod nazivom `hardware_advisor_agent.py` i postepeno dodavati funkcionalnosti. Svaki korak se nadovezuje na prethodni.
 
-### Korak 1: Kostur agenta
+### Korak 1: Skelet agenta
 
-Počnite sa minimalnom strukturom agenta — samo klasa i osnovni sistemski prompt. Agent još nema alate.
+Počnite sa minimalnom strukturom agenta — samo klasa i osnovni sistemski prompt. Agent za sada nema alate.
 
 ```python
 from gaia import Agent
@@ -436,7 +436,7 @@ if __name__ == "__main__":
     print("Agent created successfully!")
 ```
 
-Pokrenite ga da proverite:
+Pokrenite ga da biste proverili:
 
 ```bash
 python hardware_advisor_agent.py
@@ -452,9 +452,9 @@ Agent created successfully!
 
 ### Korak 2: Detekcija GPU-a i hardvera
 
-Dodajte pomoćnu metodu `_get_gpu_info()` i alat `get_hardware_info()`. Ovo čini agenta interaktivnim — sada možete da ga upitate o specifikacijama sistema.
+Dodajte pomoćnu metodu `_get_gpu_info()` i alat `get_hardware_info()`. Ovo čini agenta interaktivnim — sada možete da ga pitate o specifikacijama sistema.
 
-**Ažurirajte uvoz** na vrhu datoteke:
+**Ažurirajte uvoze (imports)** na vrhu datoteke:
 
 ```python
 from typing import Any, Dict
@@ -463,7 +463,7 @@ from gaia import Agent, tool
 from gaia.llm.lemonade_client import LemonadeClient
 ```
 
-**Dodajte pomoćnu metodu `_get_gpu_info()`** nakon metode `_get_system_prompt()`:
+**Dodajte pomoćnu funkciju `_get_gpu_info()`** nakon metode `_get_system_prompt()`:
 
 ```python
 def _get_gpu_info(self) -> Dict[str, Any]:
@@ -550,7 +550,7 @@ def _get_gpu_info(self) -> Dict[str, Any]:
     return {"name": "Not detected", "memory_mb": 0}
 ```
 
-**Zamenite metodu `_register_tools()`** alatom `get_hardware_info`:
+**Zamenite metodu `_register_tools()`** sa alatom `get_hardware_info`:
 
 ```python
 def _register_tools(self):
@@ -607,7 +607,7 @@ def _register_tools(self):
             }
 ```
 
-**Ažurirajte blok `__main__`** da biste omogućili interaktivno testiranje:
+**Ažurirajte `__main__` blok** kako biste omogućili interaktivno testiranje:
 
 ```python
 if __name__ == "__main__":
@@ -710,7 +710,7 @@ Agent: I found 15 models in the catalog:
 
 ### Korak 4: Pametne preporuke
 
-Dodajte alat `recommend_models()` unutar `_register_tools()`, nakon `list_available_models`. Agent sada može da izračuna koji modeli staju u memoriju vašeg sistema koristeći pravilo 70%.
+Dodajte alat `recommend_models()` unutar `_register_tools()`, nakon `list_available_models`. Agent sada može da izračuna koji modeli staju u memoriju vašeg sistema koristeći pravilo od 70%.
 
 ```python
     @tool(atomic=True)
@@ -789,11 +789,11 @@ Top recommendations:
 
 ---
 
-### Korak 5: Produkcijski CLI
+### Korak 5: Produkcioni CLI
 
-Zamenite jednostavan blok `__main__` uglađenim interaktivnim CLI-jem. Ovo dodaje baner, komande za izlaz i bolje rukovanje greškama.
+Zamenite jednostavan `__main__` blok uglačanim interaktivnim CLI-jem. Ovo dodaje baner, komande za izlaz i bolju obradu grešaka.
 
-**Zamenite ceo blok `if __name__ == "__main__":` sa:**
+**Zamenite ceo `if __name__ == "__main__":` blok** sa:
 
 ```python
 def main():
@@ -843,32 +843,31 @@ if __name__ == "__main__":
 ```
 
 ---
+### Finalna provera
 
-### Finalna verifikacija
+Vaš `hardware_advisor_agent.py` sada treba da sadrži sve ove komponente:
 
-Vaš `hardware_advisor_agent.py` sada treba da ima sve ove komponente:
-
-- [x] Uvoz: `from typing import Any, Dict` i `from gaia import Agent, tool`
+- [x] Uvozi: `from typing import Any, Dict` i `from gaia import Agent, tool`
 - [x] Klasa `HardwareAdvisorAgent` sa `__init__` i sistemskim promptom
-- [x] Pomoćna metoda `_get_gpu_info()` (Windows PowerShell + Linux lspci)
+- [x] Pomoćna funkcija `_get_gpu_info()` (Windows PowerShell + Linux lspci)
 - [x] Alat `get_hardware_info()` sa poljima za GPU, NPU i OS
-- [x] Alat `list_available_models()` sa oznakama i obogaćivanjem veličine
-- [x] Alat `recommend_models()` sa pravilom 70%, fits_in_ram, fits_in_gpu
-- [x] Funkcija `main()` sa interaktivnim CLI-jem
+- [x] Alat `list_available_models()` sa oznakama i obogaćivanjem informacijama o veličini
+- [x] Alat `recommend_models()` sa pravilom od 70%, fits_in_ram, fits_in_gpu
+- [x] Funkcija `main()` sa interaktivnim CLI
 
-**Testirajte ove upite da biste potvrdili da sve funkcioniše:**
+**Testirajte ove upite kako biste potvrdili da sve radi:**
 
-- "What size LLM can I run?"
-- "Show me my system specs"
-- "What models are available?"
-- "Can I run a 30B model?"
+- "Koje veličine LLM-a mogu da pokrenem?"
+- "Prikaži mi specifikacije mog sistema"
+- "Koji su modeli dostupni?"
+- "Mogu li da pokrenem model od 30B?"
 
-> **Savet**: Kompletna implementacija dostupna je na [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
+> **Savet**: Kompletna implementacija je dostupna na [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
 
 ## Sledeći koraci
 
-- **Istražite LemonadeClient API-je** — Otkrijte više mogućnosti za upravljanje sistemom i modelima u [LemonadeClient SDK dokumentaciji](https://amd-gaia.ai/sdk/lemonade-client)
-- **Dodajte glasovnu interakciju** — Integrisajte Whisper ASR i Kokoro TTS kako biste korisnicima omogućili da postavljaju pitanja o hardveru govorom. Pogledajte [Talk vodič](https://amd-gaia.ai/guides/talk)
-- **Dodajte MCP podršku** — Izložite hardware advisor kao MCP server kako bi ga drugi alati mogli upitivati. Pogledajte [MCP vodič](https://amd-gaia.ai/sdk/infrastructure/mcp)
-- **Proširite mehanizam preporuka** — Uzmite u obzir GPU VRAM za prebacivanje slojeva ili dodajte merenje performansi za procenu tokena u sekundi
-- **Izgradite višeagentni sistem** — Kombinujte hardware advisor sa agentom za kod ili agentom za ćaskanje koristeći [Routing Agent](https://amd-gaia.ai/guides/routing)
+- **Istražite LemonadeClient API-je** — Otkrijte dodatne mogućnosti upravljanja sistemom i modelima u [LemonadeClient SDK dokumentaciji](https://amd-gaia.ai/sdk/lemonade-client)
+- **Dodajte glasovnu interakciju** — Integrišite Whisper ASR i Kokoro TTS kako bi korisnici mogli da postavljaju pitanja o hardveru govorom. Pogledajte [Talk vodič](https://amd-gaia.ai/guides/talk)
+- **Dodajte MCP podršku** — Izložite hardverskog savetnika kao MCP server kako bi drugi alati mogli da mu upućuju upite. Pogledajte [MCP vodič](https://amd-gaia.ai/sdk/infrastructure/mcp)
+- **Proširite mehanizam preporuka** — Uzmite u obzir GPU VRAM za rasterećivanje slojeva, ili dodajte benčmarking za procenu broja tokena u sekundi
+- **Izgradite sistem sa više agenata** — Kombinujte hardverskog savetnika sa agentom za kod ili agentom za ćaskanje koristeći [Routing Agent](https://amd-gaia.ai/guides/routing)

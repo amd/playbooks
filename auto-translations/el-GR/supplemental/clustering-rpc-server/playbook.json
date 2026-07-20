@@ -1,5 +1,5 @@
 {
   "id": "clustering-rpc-server",
-  "title": "Ομαδοποίηση δύο Ryzen™ AI Halo με RPC",
-  "description": "Ρύθμιση κατανεμημένης εξαγωγής συμπερασμάτων χρησιμοποιώντας RPC server σε δύο συσκευές Ryzen™ AI Halo με llama.cpp για εκτέλεση μοντέλων 350B+"
+  "title": "Ομαδοποίηση (Clustering) δύο Ryzen™ AI Halo με RPC",
+  "description": "Ρύθμιση κατανεμημένης εξαγωγής συμπερασμάτων με χρήση διακομιστή RPC σε δύο συσκευές Ryzen™ AI Halo με llama.cpp για την εκτέλεση μοντέλων 350B+"
 }

@@ -2,28 +2,28 @@
 Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
-# Lemonade Server'ı arka uç olarak kullanarak OpenClaw'ı çalıştırın
+# OpenClaw'ı Lemonade Server ile Arka Uç Olarak Çalıştırma
 
 ## Genel Bakış
 
-[**OpenClaw**](https://openclaw.ai/), kod yazıp çalıştırabilen, dosyaları yönetebilen ve sizin adınıza karmaşık çok adımlı görevleri yerine getirebilen özerk bir AI ajanıdır. Yalnızca sorulara yanıt veren bir sohbet asistanının aksine, OpenClaw sisteminizde gerçek eylemler gerçekleştirir; bu da talep eden bir ajan döngüsüne ayak uydurabilecek hızlı ve yetenekli bir AI arka ucuna ihtiyaç duyduğu anlamına gelir.
+[**OpenClaw**](https://openclaw.ai/), kod yazıp çalıştırabilen, dosyaları yönetebilen ve sizin adınıza karmaşık, çok adımlı görevleri yürütebilen özerk bir yapay zeka aracısıdır. Yalnızca soruları yanıtlayan bir sohbet asistanının aksine, OpenClaw sisteminizde gerçek eylemler gerçekleştirir; bu da talepkâr bir aracı döngüsüne ayak uydurabilecek hızlı ve yetkin bir yapay zeka arka ucuna ihtiyaç duyduğu anlamına gelir.
 
-[**Lemonade Server**](https://lemonade-server.ai/) işte bu arka uçtur. GenAI modellerini doğrudan donanımınızda çalıştıran ve bunları sektör standardı OpenAI API'si aracılığıyla sunan açık kaynaklı bir yerel çıkarım sunucusudur.
+[**Lemonade Server**](https://lemonade-server.ai/) tam olarak bu arka ucu sağlar. GenAI modellerini doğrudan donanımınızda çalıştıran ve bunları endüstri standardı OpenAI API'si üzerinden sunan açık kaynaklı, yerel bir çıkarım (inference) sunucusudur.
 
-Birlikte, tamamen yerel bir AI ajan yığını oluştururlar: Lemonade model çıkarımını üstlenirken, OpenClaw model çıktılarını gerçek eylemlere dönüştüren ajan döngüsünü sağlar.
+Bir araya geldiklerinde, tamamen yerel bir yapay zeka aracısı yığını oluştururlar: Lemonade model çıkarımını üstlenirken, OpenClaw model çıktılarını gerçek eylemlere dönüştüren aracı döngüsünü sağlar.
 
-> **Devam etmeden önce:** OpenClaw, son derece özerk bir AI ajanıdır. Herhangi bir AI ajanına sisteminize erişim vermek, öngörülemeyen veya istenmeyen sonuçlara yol açabilir. Yalnızca riskleri anlıyor ve özerk yazılımın sizin adınıza hareket etmesinden rahatsızlık duymuyorsanız devam edin.
+> **Devam etmeden önce:** OpenClaw, oldukça özerk bir yapay zeka aracısıdır. Herhangi bir yapay zeka aracısına sisteminize erişim vermek, öngörülemeyen veya istenmeyen sonuçlara yol açabilir. Yalnızca riskleri anladıysanız ve özerk yazılımın sizin adınıza hareket etmesinden rahatsanız devam edin.
 
 ---
 
-## Neler Öğreneceksiniz
+## Bu Rehberde Öğrenecekleriniz
 
-Bu kılavuzun sonunda şunları yapabileceksiniz:
+Bu rehberin sonunda şunları yapabileceksiniz:
 
-- **Lemonade Server** hakkında bilgi edinmek
-- **OpenClaw'ı yüklemek** ve AI arka ucu olarak **Lemonade Server'a yönlendirmek**.
-- **OpenClaw ağ geçidini başlatmak** ve ajanınızın çalışmaya hazır olduğunu doğrulamak.
-- Herhangi bir cihazdan ajanınızla sohbet edebilmek için **bir iletişim kanalı bağlamak** (Discord veya Telegram).
+- **Lemonade Server** hakkında bilgi edinme
+- **OpenClaw'ı kurma** ve yapay zeka arka ucu olarak **Lemonade Server'a yönlendirme**.
+- **OpenClaw ağ geçidini (gateway) başlatma** ve aracınızın çalışmaya hazır olduğunu doğrulama.
+- Aracınızla herhangi bir cihazdan sohbet edebilmek için **bir iletişim kanalı bağlama** (Discord veya Telegram).
 
 ---
 
@@ -32,25 +32,25 @@ Bu kılavuzun sonunda şunları yapabileceksiniz:
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Yazılım Güncellemelerini Kontrol Etme
+## Yazılım Güncellemelerini Kontrol Edin
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Yazılım Ön Koşullarını Yükleme
+## Yazılım Ön Koşullarını Kurma
 
 <!-- @os:linux -->
-- `apt-get` ile **Ubuntu 24.04+** veya uyumlu bir Debian tabanlı Linux dağıtımı çalıştıran bir PC
+- `apt-get` içeren **Ubuntu 24.04+** çalıştıran bir PC veya uyumlu bir Debian tabanlı Linux dağıtımı
 - En az **12 GB RAM** (daha büyük modeller için 64 GB+ önerilir)
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (İsteğe bağlı, OpenClaw'ı sandbox ortamında çalıştırmak için)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (İsteğe bağlı, OpenClaw'ı sanal ortamda (sandbox) çalıştırmak için)
 
-- Model ağırlıkları için **~10–30 GB boş disk alanı**
+- Model ağırlıkları için **~10-30 GB boş disk alanı**
 <!-- @os:end -->
 <!-- @os:windows -->
 - **Windows 10/11** çalıştıran bir PC
 - En az **12 GB RAM** (daha büyük modeller için 64 GB+ önerilir)
-- Model ağırlıkları için **~10–30 GB boş disk alanı**
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (İsteğe bağlı, OpenClaw'ı sandbox ortamında çalıştırmak için)
+- Model ağırlıkları için **~10-30 GB boş disk alanı**
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (İsteğe bağlı, OpenClaw'ı sanal ortamda (sandbox) çalıştırmak için)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -65,26 +65,26 @@ lemonade --version
 
 ---
 
-## Önerilen Modeli Çekme ve Yükleme
+## Önerilen Modeli İndirin ve Yükleyin
 
-Bu kılavuz için önerilen model, Unsloth'tan **Qwen3.6-35B-A3B-GGUF**'tur; ajan iş yükleri için oldukça uygun olan, 263k token bağlam penceresine sahip güçlü bir MoE modelidir. Bu model UD-Q4_K_XL nicemleme kullanır. Şimdi çekin:
+Bu rehber için önerilen model, Unsloth'tan **Qwen3.6-35B-A3B-GGUF**'dur; aracı iş yüklerine son derece uygun, 263k token bağlam penceresine sahip güçlü bir MoE modelidir. Bu model UD-Q4_K_XL nicemlemesini (quantization) kullanır. Şimdi indirin:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-Ardından büyük bir bağlam penceresiyle yükleyin ve bu ayarı gelecekteki çalıştırmalar için kaydedin:
+Ardından geniş bir bağlam penceresiyle yükleyin ve bu ayarı sonraki çalıştırmalar için kaydedin:
 
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
 lemonade unload
 lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 
-Modelin varsayılan bağlam uzunluğu 262.144 token'dır. Yetersiz bellek (OOM) hatalarıyla karşılaşırsanız bağlam penceresini küçültmeyi düşünebilirsiniz. Ancak Qwen3.6, karmaşık görevler için genişletilmiş bağlamdan yararlandığından, düşünme yeteneklerini korumak adına en az 128K token'lık bir bağlam uzunluğu korumanızı öneririz.
+Modelin varsayılan bağlam uzunluğu 262.144 tokendir. Bellek yetersizliği (OOM) hatalarıyla karşılaşırsanız, bağlam penceresini küçültmeyi düşünebilirsiniz. Ancak Qwen3.6, karmaşık görevler için genişletilmiş bağlamdan yararlandığından, düşünme yeteneklerini korumak amacıyla en az 128K token'lık bir bağlam uzunluğu sürdürmenizi öneririz.
 
-> **İpucu: Daha hızlı ajan yanıtları için düşünmeyi devre dışı bırakın:** Qwen3.6-35B-A3B varsayılan olarak düşünme modunda çalışır; bu da her yanıttan önce gecikmeye neden olur. Ajan döngülerinde bu ek yük hızla birikir. [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) deposu, düşünmeyi devre dışı bırakan hazır bir yapılandırma sunar. Kullanmak için dosyayı indirin ve içe aktarın:
+> **İpucu: Daha hızlı aracı yanıtları için düşünmeyi devre dışı bırakın:** Qwen3.6-35B-A3B varsayılan olarak düşünme modunda çalışır; bu da her yanıttan önce gecikme ekler. Aracı döngülerinde bu ek yük hızla birikir. [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) deposu, düşünmeyi devre dışı bırakan hazır bir yapılandırma sunar. Kullanmak için dosyayı indirin ve içe aktarın:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -146,7 +146,7 @@ finally {
   Remove-Item $tmpBody -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -220,30 +220,30 @@ fi
 
 echo "OK: Lemonade chat/completions returned a response"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
 
-## WSL'yi Kurma
+## WSL Kurulumu
 
-OpenClaw'ı WSL içinde çalıştırıyoruz (Önerilir) ve Windows'ta yerel olarak çalışan Lemonade'e bağlıyoruz. Bu, OpenClaw için bir Linux kabuk ortamı sağlarken Lemonade'in GPU hızlandırmasını Windows tarafında tutar.
+OpenClaw'ı WSL içinde çalıştırıyoruz (Önerilir) ve Windows üzerinde yerel olarak çalışan Lemonade'e bağlıyoruz. Bu, Lemonade'in GPU hızlandırmasını Windows tarafında korurken, OpenClaw için bir Linux kabuk (shell) ortamı sağlar.
 
-### WSL ve Ubuntu'yu Yükleme
+### WSL ve Ubuntu'yu Kurun
 
-PowerShell'i Yönetici olarak açın ve WSL çekirdeğini yükleyin:
+PowerShell'i Yönetici olarak açın ve WSL çekirdeğini kurun:
 
 ```powershell
 wsl --install --no-distribution
 ```
 
-Ardından Ubuntu'yu yükleyin:
+Ardından Ubuntu'yu kurun:
 
 ```powershell
 wsl --install -d Ubuntu-24.04
 ```
 
-### WSL'de systemd'yi Etkinleştirme
+### WSL'de systemd'i Etkinleştirin
 
 Bunu Ubuntu terminalinin içinde çalıştırın:
 
@@ -261,9 +261,9 @@ wsl --shutdown
 wsl
 ```
 
-### Lemonade'i Windows'tan WSL'ye Köprüleme
+### Lemonade'i Windows'tan WSL'ye Köprüleyin
 
-WSL2 sanal bir ağda çalışır. Windows'taki Lemonade `127.0.0.1`'e bağlanır; WSL buna doğrudan erişemez. Bir Windows port proxy'si, WSL ağ geçidi IP'sinden gelen trafiği Windows localhost'a yönlendirir.
+WSL2 sanal bir ağda çalışır. Windows üzerindeki Lemonade `127.0.0.1` adresine bağlanır ve WSL bu adrese doğrudan erişemez. Bir Windows bağlantı noktası vekili (port proxy), trafiği WSL ağ geçidi IP'sinden Windows yerel ana bilgisayarına yönlendirir.
 
 **WSL ağ geçidi IP'nizi bulun** (WSL içinde çalıştırın):
 
@@ -271,13 +271,13 @@ WSL2 sanal bir ağda çalışır. Windows'taki Lemonade `127.0.0.1`'e bağlanır
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Port proxy'yi ekleyin** (Yönetici olarak PowerShell'de çalıştırın, `<WSL-Gateway-IP>` kısmını WSL ağ geçidi IP'nizle değiştirin):
+**Bağlantı noktası vekilini ekleyin** (Yönetici olarak PowerShell'de çalıştırın, `<WSL-Gateway-IP>` yerine WSL ağ geçidi IP'nizi yazın):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Güvenlik duvarı kuralı ekleyin** (aynı yükseltilmiş PowerShell'de):
+**Bir güvenlik duvarı kuralı ekleyin** (aynı yükseltilmiş PowerShell'de):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
@@ -290,7 +290,7 @@ WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Önceki adımda Qwen3.6-35B-A3B-GGUF modelini zaten yüklediyseniz, şuna benzer bir JSON çıktısı görmelisiniz:
+Önceki adımda Qwen3.6-35B-A3B-GGUF modelini zaten yüklediyseniz, aşağıdaki gibi bir JSON çıktısı görmelisiniz:
 
 ```json
 {
@@ -308,7 +308,7 @@ curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 }
 ```
 
-> `netsh portproxy` kuralı yeniden başlatmalarda geçerliliğini korur, ancak WSL ağ geçidi IP'si `wsl --shutdown` sonrasında değişebilir. Yeniden başlatmanın ardından Lemonade WSL'den erişilemez hale gelirse, güncellenmiş ağ geçidi IP'sini alın ve proxy'yi bu yeni IP ile güncelleyin.
+> `netsh portproxy` kuralı yeniden başlatmalardan sonra da geçerliliğini korur, ancak `wsl --shutdown` sonrasında WSL ağ geçidi IP'si değişebilir. Yeniden başlatmadan sonra Lemonade'e WSL'den erişilemiyorsa, güncellenmiş ağ geçidi IP'sini alıp vekili bu yeni IP ile güncelleyin.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -359,22 +359,22 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 
 ---
 <!-- @os:end -->
 
-## OpenClaw'ı Yükleme ve Yapılandırma
+## OpenClaw'ı Kurma ve Yapılandırma
 
-### OpenClaw'ı Yükleme
+### OpenClaw'ı Kurun
 <!-- @os:windows -->
-> Bu bölümdeki komutları **WSL terminalinizin** içinde çalıştırın.
+> Bu bölümdeki komutları **WSL terminaliniz** içinde çalıştırın.
 <!-- @os:end -->
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-`--no-onboard` bayrağı etkileşimli kurulum sihirbazını atlar; model arka ucunu bir sonraki adımda manuel olarak yapılandıracaksınız; bu da hangi modelin ve sunucunun kullanılacağı üzerinde tam kontrol sağlar.
+`--no-onboard` bayrağı, etkileşimli kurulum sihirbazını atlar; model arka ucunu bir sonraki adımda elle yapılandıracaksınız, bu da hangi model ve sunucunun kullanıldığı üzerinde hassas denetim sağlar.
 
 Yeni bir terminal açın ve kurulumu doğrulayın:
 
@@ -382,7 +382,7 @@ Yeni bir terminal açın ve kurulumu doğrulayın:
 openclaw --version
 ```
 
-> **İpucu:** Kurulumun ardından `command not found` görürseniz, npm'nin global bin dizinini PATH'inize ekleyin:
+> **İpucu:** Kurulumdan sonra `command not found` görürseniz, npm'in genel bin dizinini PATH'inize ekleyin:
 > ```bash
 > export PATH="$HOME/.npm-global/bin:$PATH"
 > ```
@@ -399,7 +399,7 @@ node -v
 npm -v
 openclaw --version
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -438,13 +438,11 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
-
-
 ### OpenClaw'ı Lemonade Kullanacak Şekilde Yapılandırma
 
-OpenClaw'ın etkileşimsiz ekleme işlemini çalıştırın.
+OpenClaw'ın etkileşimsiz katılım (onboarding) sürecini çalıştırın.
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -486,7 +484,7 @@ openclaw onboard \
 
 Bu komut, OpenClaw'ın yapılandırmasını `~/.openclaw/openclaw.json` dosyasına yazar.
 
-> **OpenClaw bağlam penceresi boyutlandırma:** OpenClaw'ın sıkıştırması `contextTokens > contextWindow − reserveTokens` olduğunda tetiklenir. Varsayılan `reserveTokensFloor` 20.000 token'dır; bu, daha düşük olduğunda `reserveTokens`'ı geçersiz kılan bir alt sınırdır; dolayısıyla ~37k'nın altındaki herhangi bir model bağlamı sonsuz bir sıkıştırma döngüsü tetikler. Yapılandırmanızda bir kez düşük bir rezerv ayarlayın ve alt sınırı devre dışı bırakın; bu her model için geçerli olur, model başına ayarlama gerekmez:
+> **OpenClaw bağlam penceresi boyutlandırması:** OpenClaw'ın sıkıştırma (compaction) işlemi, `contextTokens > contextWindow − reserveTokens` olduğunda tetiklenir. Varsayılan `reserveTokensFloor` değeri 20.000 token'dır; bu, daha düşük olduğunda `reserveTokens` değerini geçersiz kılan bir taban değeridir, dolayısıyla yaklaşık 37 bin token'ın altındaki herhangi bir model bağlamı sonsuz bir sıkıştırma döngüsünü tetikler. Yapılandırmanızda düşük bir rezerv ayarlayıp tabanı bir kez devre dışı bırakırsanız, bu ayar model başına ince ayar gerektirmeden her modele uygulanır:
 >
 > ```json
 > "compaction": {
@@ -495,13 +493,13 @@ Bu komut, OpenClaw'ın yapılandırmasını `~/.openclaw/openclaw.json` dosyası
 > }
 > ```
 >
-> `reserveTokensFloor` bir *alt sınırdır* (minimum koruma), rezervin kendisi değildir; yalnızca alt sınırı ayarlamanın hiçbir etkisi yoktur. `reserveTokensFloor: 0`, korumayı devre dışı bırakır, böylece daha düşük `reserveTokens` kabul edilir.
+> `reserveTokensFloor`, rezervin kendisi değil, bir *taban* (minimum koruma) değeridir; yalnızca tabanı ayarlamanın bir etkisi olmaz. `reserveTokensFloor: 0`, korumayı devre dışı bırakarak daha düşük `reserveTokens` değerinin kabul edilmesini sağlar.
 >
-> **Ne zaman uygulanır:** Modelinizin etkin bağlam penceresi ~37k'nın altındaysa bu yapılandırmayı kullanın; ya model küçük olduğu için (örn. 8k, 16k, 32k) ya da bağlamı kasıtlı olarak daha düşük bir değere sınırladığınız için (örn. 128k'lık bir model yükleyip Lemonade'de bağlamı 16k olarak ayarlamak). Bu olmadan, OpenClaw başlangıçta sonsuz bir sıkıştırma döngüsüne girer.
+> **Ne zaman uygulanmalı:** Modelinizin etkin bağlam penceresi yaklaşık 37 bin token'ın altındaysa bu yapılandırmayı kullanın; bu durum ister modelin küçük olmasından (örneğin 8k, 16k, 32k) ister kasıtlı olarak daha düşük bir değere sınırlandırılmış olmasından (örneğin 128k'lık bir modeli yükleyip Lemonade'de bağlamı 16k olarak ayarlamaktan) kaynaklansın geçerlidir. Bu ayar yapılmazsa, OpenClaw başlangıçta sonsuz bir sıkıştırma döngüsüne girer.
 >
-> **Tam bağlamlı büyük bağlam modelleri:** Bunu tamamen atlayabilirsiniz. Varsayılanlar iyi çalışır; sıkıştırma pencere dolmadan çok önce devreye girer ve modelin uzun yanıtlar üretmek için yeterli alanı vardır. Bunu uygularsanız, `reserveTokens: 4096`'nın yanıt uzunluğunu ~4k token ile sınırladığını ve bunun uzun dosya oluşturma veya ayrıntılı planları kesebileceğini unutmayın.
+> **Tam bağlamda büyük bağlamlı modeller:** Bunu tamamen atlayabilirsiniz. Varsayılan ayarlar iyi çalışır, sıkıştırma pencere dolmadan önce devreye girer ve modelin uzun yanıtlar üretmesi için yeterli alan bulunur. Yine de uygularsanız, `reserveTokens: 4096` yanıt uzunluğunu yaklaşık 4k token ile sınırlar; bu da uzun dosya oluşturma veya ayrıntılı planların kesilmesine neden olabilir.
 >
-> **Nereye eklenir:** `compaction` bloğunu `openclaw.json` dosyanızdaki `agents.defaults` içine yerleştirin (genellikle `~/.openclaw/openclaw.json` konumunda):
+> **Bunu nereye eklemeli:** `compaction` bloğunu `openclaw.json` dosyanızdaki (genellikle `~/.openclaw/openclaw.json` konumunda) `agents.defaults` içine yerleştirin:
 >
 > ```json
 > {
@@ -520,13 +518,13 @@ Bu komut, OpenClaw'ın yapılandırmasını `~/.openclaw/openclaw.json` dosyası
 > }
 > ```
 >
-> Yapılandırmanızın geri kalanı (ağ geçidi, kanallar, modeller vb.) değişmeden kalır; yalnızca `compaction` anahtarının eklenmesi gerekir.
+> Yapılandırmanızın geri kalanı (gateway, kanallar, modeller vb.) değişmeden kalır, yalnızca `compaction` anahtarının eklenmesi gerekir.
 
-### (Önerilir) Docker Sandbox'ını Etkinleştirme
+### (Önerilir) Docker Sandbox'ı Etkinleştirme
 
-OpenClaw, tüm ajan dosya ve kod işlemlerini doğrudan ana makinenizde çalıştırmak yerine yalıtılmış bir Docker kapsayıcısı üzerinden yönlendirebilir. Bu, istenmeyen herhangi bir eylemin etkisini sandbox ile sınırlar ve ana makine dosya sisteminizi ile ağınızı dokunulmaz bırakır.
+OpenClaw, tüm aracı dosya ve kod işlemlerini doğrudan ana makinenizde çalıştırmak yerine izole bir Docker konteyneri üzerinden yönlendirebilir. Bu, herhangi bir istenmeyen eylemin etki alanını sandbox ile sınırlandırır ve ana makinenizin dosya sistemini ile ağını etkilenmeden bırakır.
 
-Sandbox görüntüsünü bir kez oluşturun (Docker yüklü olmalıdır):
+Sandbox görüntüsünü bir kez oluşturun (Docker kurulu olmalıdır):
 
 ```bash
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -626,7 +624,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-`~/.openclaw/openclaw.json` dosyasındaki mevcut `agents.defaults` bloğuna `sandbox` anahtarını eklemek için bunu çalıştırın:
+`~/.openclaw/openclaw.json` dosyasındaki mevcut `agents.defaults` bloğunun içine `sandbox` anahtarını eklemek için bunu çalıştırın:
 
 ```bash
 cat > sandbox.patch.json5 <<JSON5
@@ -645,31 +643,31 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-Sandbox kapsayıcılarının varsayılan olarak **ağ erişimi yoktur**. Bağlama noktaları ve ağ geçersiz kılmaları için [sandbox referansına](https://docs.openclaw.ai/gateway/sandboxing) bakın.
+Sandbox konteynerlerinin varsayılan olarak **ağ erişimi yoktur**. Bağlı bağlantı noktaları (bind mount) ve ağ geçersiz kılmaları için [sandboxing referansına](https://docs.openclaw.ai/gateway/sandboxing) bakın.
 
-> #### Sorun Giderme: Docker İzin Reddedildi
->
-> Docker komutlarını çalıştırırken "permission denied" hatası alırsanız:
->
+> #### Sorun Giderme: Docker İzni Reddedildi
+> 
+> Docker komutlarını çalıştırırken "permission denied" hatası alıyorsanız:
+> 
 > **Adım 1: Kullanıcınızı docker grubuna ekleyin**
->
+> 
 > ```bash
-> sudo groupadd docker                    # Gerekirse grubu oluşturun
+> sudo groupadd docker                    # Gerekliyse grubu oluşturun
 > sudo usermod -aG docker $USER           # Kendinizi gruba ekleyin
 > newgrp docker                           # Değişikliği etkinleştirin
 > docker run hello-world                  # Test edin
 > ```
->
+> 
 > **Adım 2: Hata devam ederse kalıcı düzeltmeyi uygulayın**
->
+> 
 > ```bash
 > sudo chgrp docker /lib/systemd/system/docker.socket
 > sudo chmod g+w /lib/systemd/system/docker.socket
 > ```
->
+> 
 > Ardından sisteminizi **yeniden başlatın**.
->
-> **Hızlı geçici düzeltme** (yeniden başlatmadan sonra sıfırlanır):
+> 
+> **Hızlı geçici çözüm** (yeniden başlatmadan sonra sıfırlanır):
 > ```bash
 > sudo chmod 666 /var/run/docker.sock
 > ```
@@ -708,7 +706,7 @@ grep -q "127.0.0.1:13305" "$config"
 
 echo "OK: OpenClaw onboarding wrote Lemonade configuration"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -749,7 +747,7 @@ grep -Eq '"workspaceAccess"[[:space:]]*:[[:space:]]*"none"' "$config"
 
 echo "OK: OpenClaw sandbox configuration was written"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 
@@ -819,7 +817,7 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 
@@ -891,12 +889,12 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
-### OpenClaw Ağ Geçidini Başlatma
+### OpenClaw Gateway'i Başlatma
 
-Ağ geçidi, ajan döngüsünü yöneten ve panoyu sunan OpenClaw sürecidir:
+Gateway, aracı döngüsünü yöneten ve paneli (dashboard) sunan OpenClaw sürecidir:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -949,7 +947,7 @@ fi
 
 echo "OK: OpenClaw gateway is reachable"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -1024,28 +1022,28 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
-Ağ geçidi hâlâ çalışırken panoyu açmak için ikinci bir terminalde şunu çalıştırın:
+Paneli açmak için, gateway hâlâ çalışırken bunu ikinci bir terminalde çalıştırın:
 
 ```bash
 openclaw dashboard
 ```
 
-Ağ geçidi geri döngüye bağlandığından, pano aynı makineden açıldığında otomatik olarak kimlik doğrular; yerel erişim için token girişi veya cihaz onayı gerekmez. OpenClaw panosunu, etkin arka uç olarak listelenen Lemonade modelinizle birlikte görmelisiniz.
+Gateway loopback'e bağlandığından, panel aynı makineden açıldığında otomatik olarak kimlik doğrular; yerel erişim için token girişi veya cihaz onayı gerekmez. Etkin arka uç olarak listelenen Lemonade modelinizle birlikte OpenClaw panelini görmelisiniz.
 
-> Sandbox'ı etkinleştirdiyseniz, ajandan panodan `run hostname` komutunu çalıştırmasını isteyerek doğrulayabilirsiniz. Makinenizin ana bilgisayar adı yerine kısa bir kapsayıcı kimliği görürseniz, sandbox çalışıyor demektir.
+> Sandbox'ı etkinleştirdiyseniz, panelden aracıya `run hostname` çalıştırmasını isteyerek bunu doğrulayabilirsiniz. Makinenizin ana bilgisayar adı yerine kısa bir konteyner kimliği görüyorsanız, sandbox çalışıyor demektir.
 
-**Tebrikler, sıfırdan tamamen yerel bir AI ajan yığını oluşturdunuz.**
+**Tebrikler, sıfırdan tamamen yerel bir AI aracı yığını oluşturdunuz.**
 
-> **Ağ geçidi token'ına mı ihtiyacınız var?** Token'ın gömülü olduğu pano URL'sini yazdırmak için `openclaw dashboard --no-open` komutunu çalıştırın (aynı zamanda panoya kopyalamayı da dener). Alternatif olarak, token `~/.openclaw/openclaw.json` dosyasındaki `gateway.auth.token` konumundadır.
+> **Gateway token'ı mı gerekiyor?** Panel URL'sini token gömülü olarak yazdırmak için `openclaw dashboard --no-open` komutunu çalıştırın (ayrıca panoya kopyalamayı da dener). Alternatif olarak, token `~/.openclaw/openclaw.json` dosyasında `gateway.auth.token` konumundadır.
 >
-> **Uzak bir cihazı onaylama:** Panoyu ikinci bir makineden veya telefondan açtığınızda, tarayıcı bir istek kimliği görüntüler. Ağ geçidini çalıştıran makinede şunu çalıştırın:
+> **Uzak bir cihazı onaylama:** Paneli ikinci bir makineden veya telefondan açtığınızda, tarayıcı bir istek kimliği (request ID) görüntüler. Gateway'i çalıştıran makineye dönüp şunu çalıştırın:
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> Bu yalnızca uzak veya ikincil cihazlar için gereklidir; aynı makineden geri döngü erişimi otomatik olarak kimlik doğrular.
+> Bu yalnızca uzak veya ikincil cihazlar için gereklidir; aynı makineden loopback erişimi otomatik olarak kimlik doğrular.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1055,47 +1053,46 @@ Ağ geçidi geri döngüye bağlandığından, pano aynı makineden açıldığ�
 
 ## İsteğe Bağlı: Bir İletişim Kanalı Bağlama
 
-Ağ geçidi çalışmaya başladıktan sonra yerel ajanınıza herhangi bir cihazdan ulaşabilirsiniz. Kurulumunuza uyan seçeneği belirleyin. OpenClaw, [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) ve diğer kanalları destekler; tam listeye [docs.openclaw.ai](https://docs.openclaw.ai) adresinden ulaşabilirsiniz.
+Gateway çalışmaya başladığında yerel aracınıza herhangi bir cihazdan erişebilirsiniz. Kurulumunuza uygun seçeneği belirleyin. OpenClaw [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) ve diğer kanalları destekler; tam listeyi [docs.openclaw.ai](https://docs.openclaw.ai) adresinde görebilirsiniz.
 
 ---
 
 ### Seçenek A: Discord
 
-Discord, bot eklemek için **yönetici erişiminizin olduğu** bir sunucu gerektirir. Sunucuları paylaşıyorsanız ancak bir sunucunuz yoksa, bunun yerine Seçenek B'yi (Telegram) kullanın.
+Discord, bir bot eklemek için **yönetici erişiminize sahip olduğunuz** bir sunucu gerektirir. Sunucuları paylaşıyor ancak birine sahip değilseniz, bunun yerine Seçenek B'yi (Telegram) kullanın.
+#### Bir Discord hesabı ve sunucusu oluşturun
 
-#### Discord hesabı ve sunucusu oluşturma
+Bir Discord hesabınız yoksa [discord.com](https://discord.com) adresinden kaydolun. Ayrıca yönetici olduğunuz bir sunucuya ihtiyacınız var; Discord kenar çubuğundaki **+** simgesine tıklayıp **Create My Own** seçeneğini seçerek bir tane oluşturun. Özel bir sunucu yeterlidir.
 
-Discord hesabınız yoksa [discord.com](https://discord.com) adresinden kaydolun. Ayrıca yönetici olduğunuz bir sunucuya ihtiyacınız vardır; Discord kenar çubuğundaki **+** simgesine tıklayıp **Create My Own** seçeneğini belirleyerek bir tane oluşturun. Özel bir sunucu uygundur.
+#### Bir Discord uygulaması ve botu oluşturun
 
-#### Discord uygulaması ve botu oluşturma
-
-1. [Discord Geliştirici Portalı](https://discord.com/developers/applications)'na gidin ve **New Application**'a tıklayın. Bir ad verin (örn. "openclaw-bot").
+1. [Discord Developer Portal](https://discord.com/developers/applications) adresine gidin ve **New Application** düğmesine tıklayın. Ona bir isim verin (örneğin "openclaw-bot").
 2. Kenar çubuğunda **Bot**'a tıklayın. Bot için bir kullanıcı adı belirleyin.
-3. Hâlâ Bot sayfasındayken **Privileged Gateway Intents** bölümüne inin ve şunları etkinleştirin:
+3. Yine Bot sayfasında, **Privileged Gateway Intents** bölümüne kaydırın ve şunları etkinleştirin:
    - **Message Content Intent** (gerekli)
    - **Server Members Intent** (önerilir)
-4. Yukarı kaydırın ve bot token'ınızı oluşturmak için **Reset Token**'a tıklayın. Kopyalayın.
+4. Yukarı geri kaydırın ve bot tokeninizi oluşturmak için **Reset Token**'a tıklayın. Kopyalayın.
 
-#### Botu sunucunuza ekleme
+#### Botu sunucunuza ekleyin
 
 1. Kenar çubuğunda **OAuth2/ URL Generator**'a tıklayın.
-2. **Scopes** altında `bot` ve `applications.commands`'ı etkinleştirin.
+2. **Scopes** altında `bot` ve `applications.commands` seçeneklerini etkinleştirin.
 3. **Bot Permissions** altında şunları etkinleştirin: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
 4. Oluşturulan URL'yi kopyalayın, tarayıcınıza yapıştırın, sunucunuzu seçin ve onaylayın. Bot artık sunucunuzun üye listesinde görünmelidir.
 
-#### Kimliklerinizi toplama
+#### Kimliklerinizi toplayın
 
-Discord'da Geliştirici Modunu etkinleştirin (**Kullanıcı Ayarları/ Gelişmiş/ Geliştirici Modu**), ardından:
+Discord'da Geliştirici Modunu etkinleştirin (**User Settings/ Advanced/ Developer Mode**), ardından:
 - Sunucu simgenize sağ tıklayın: **Copy Server ID**
 - Kendi avatarınıza sağ tıklayın: **Copy User ID**
 
-#### Sunucu üyelerinden gelen DM'lere izin verme
+#### Sunucu üyelerinden gelen DM'lere izin verin
 
-Sunucu simgenize sağ tıklayın/ **Privacy Settings**/ **Direct Messages**'ı açın. Bu, botun size DM göndermesine izin verir; eşleştirme adımı için gereklidir.
+Sunucu simgenize sağ tıklayın/ **Privacy Settings**/ **Direct Messages**'ı açık konuma getirin. Bu, botun size DM göndermesine izin verir; bu, eşleştirme adımı için gereklidir.
 
-#### OpenClaw'ı Discord için yapılandırma
+#### OpenClaw'ı Discord için yapılandırın
 
-Bot token'ınızı bir ortam değişkeni olarak saklayın, ardından Discord'u etkinleştiren, token'a başvuran ve sunucunuzu izin listesine ekleyen tek bir yama dosyası oluşturun. `<server_id>` ve `<user_id>` kısımlarını yukarıda toplanan kimliklerle değiştirin.
+Bot tokeninizi bir ortam değişkeni olarak saklayın, ardından Discord'u etkinleştiren, tokene referans veren ve sunucunuzu izin listesine ekleyen tek bir yama dosyası oluşturun. Yukarıda toplanan kimlikleri kullanarak `<server_id>` ve `<user_id>` yerine kendi değerlerinizi yazın.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1121,19 +1118,19 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **Bunu ajanın yapılandırmasını istemesine güvenmeyin.** Sandbox etkinleştirildiğinde, ajan sandbox içinden `~/.openclaw/openclaw.json` dosyasına yazamaz; bunun yerine yukarıdaki CLI komutlarını ana makinede kullanın.
+> **Aracıyı bunu yapılandırması için görevlendirmeye güvenmeyin.** Sandbox etkinleştirildiğinde, aracı sandbox içinden `~/.openclaw/openclaw.json` dosyasına yazamaz; bunun yerine yukarıdaki CLI komutlarını ana makinede kullanın.
 
-Yeni kanal yapılandırmasını alması için ağ geçidini yeniden başlatın:
+Yeni kanal yapılandırmasını almasını sağlamak için gateway'i yeniden başlatın:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
 ```
 
-Birkaç saniye içinde ağ geçidi çıktısında `logged in to discord as <bot-name>` ifadesini görmelisiniz.
+Birkaç saniye içinde gateway çıktısında `logged in to discord as <bot-name>` ifadesini görmelisiniz.
 
-#### Discord hesabınızı eşleştirme
+#### Discord hesabınızı eşleştirin
 
-Discord'da bota DM gönderin. Bot kısa bir eşleştirme koduyla yanıt verecektir.
+Discord'da bota DM gönderin. Kısa bir eşleştirme kodu ile yanıt verecektir.
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
@@ -1144,9 +1141,9 @@ OpenClaw'ı çalıştıran makinede onaylayın:
 openclaw pairing approve discord <CODE>
 ```
 
-> Eşleştirme kodları bir saat sonra sona erer.
+> Eşleştirme kodları bir saat sonra geçerliliğini yitirir.
 
-Artık ajanınızla doğrudan Discord'dan sohbet edebilir ve görevleri yerel donanımınıza devredebilirsiniz.
+Artık doğrudan Discord'dan aracınızla sohbet edebilir ve görevleri yerel donanımınıza aktarabilirsiniz.
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1158,20 +1155,20 @@ Artık ajanınızla doğrudan Discord'dan sohbet edebilir ve görevleri yerel do
 
 Telegram, çoğu kullanıcı için Discord'dan daha basittir; sunucu veya yönetici erişimi gerektirmez.
 
-#### Telegram botu oluşturma
+#### Bir Telegram botu oluşturun
 
 1. Telegram'ı açın ve **@BotFather**'a mesaj gönderin.
-2. `/newbot` gönderin ve istemleri takip edin. Size verilen bot token'ını kaydedin.
+2. `/newbot` gönderin ve yönergeleri izleyin. Verdiği bot tokenini kaydedin.
 
-#### OpenClaw'ı Telegram için yapılandırma
+#### OpenClaw'ı Telegram için yapılandırın
 
-Token'ı bir ortam değişkeni olarak saklayın:
+Tokeni bir ortam değişkeni olarak saklayın:
 
 ```bash
 export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 ```
 
-Kanal yapılandırmasını `~/.openclaw/openclaw.json` dosyasına ekleyin (veya pano aracılığıyla yama yapın):
+Kanal yapılandırmasını `~/.openclaw/openclaw.json` dosyasına ekleyin (veya kontrol panelinden yamalayın):
 
 ```json
 {
@@ -1185,23 +1182,23 @@ Kanal yapılandırmasını `~/.openclaw/openclaw.json` dosyasına ekleyin (veya 
 }
 ```
 
-Ağ geçidini yeniden başlatın, ardından Telegram'da botunuza herhangi bir mesaj gönderin. Eşleştirmeyi onaylayın:
+Gateway'i yeniden başlatın, ardından Telegram'da botunuza herhangi bir mesaj gönderin. Eşleştirmeyi onaylayın:
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-Eşleştirme kodları bir saat sonra sona erer. Artık ajanınızla Telegram DM aracılığıyla sohbet edebilirsiniz.
+Eşleştirme kodları bir saat sonra geçerliliğini yitirir. Artık Telegram DM üzerinden aracınızla sohbet edebilirsiniz.
 
 ---
 
 ## Sonraki Adımlar
 
-Ajanınız artık telefonunuzdan komut alabilir ve yerel makinenizde işlem yapabilir; işte keşfetmeye değer üç yön:
+Artık aracınız telefonunuzdan komutlar alıp yerel makinenizde işlem yapabildiğine göre, keşfedilmeye değer üç yön var:
 
-1. **Borsa özetleyici**: OpenClaw'ı belirli aralıklarla finansal API'lerden veri çekecek şekilde zamanlayın, günün hareketlerini yerel modelinizle özetleyin ve her sabah seçtiğiniz kanal aracılığıyla telefonunuza bir özet gönderin.
+1. **Borsa özetleyici**: OpenClaw'ı sabit bir aralıkta finansal API'lerden veri çekecek, günün hareketlerini yerel modelinizle özetleyecek ve her sabah seçtiğiniz kanal üzerinden telefonunuza bir özet gönderecek şekilde zamanlayın.
 
-2. **İnce ayar monitörü**: Telegram veya Discord aracılığıyla uzaktan bir eğitim işi başlatın, ardından ajanın eğitim günlüğünü takip etmesini ve periyodik kayıp değerlerini, GPU kullanımını ve disk kullanımını telefonunuza raporlamasını sağlayın. Çalışma durur veya VRAM ani artış yaparsa, makinenin başında olmadan anında haberdar olursunuz.
+2. **İnce ayar izleyicisi**: Telegram veya Discord üzerinden uzaktan bir eğitim işi başlatın, ardından aracının eğitim günlüğünü izlemesini ve periyodik kayıp değerlerini, GPU kullanımını ve disk kullanımını telefonunuza raporlamasını sağlayın. Çalışma durursa veya VRAM ani yükselirse, makinenin başında olmanıza gerek kalmadan hemen haberdar olursunuz.
 
-3. **Yerel bir VLM ile IoT**: Ön kapınıza bir kamera yöneltin, Lemonade üzerinde bir görme modeli çalıştırın ve OpenClaw'ın kareleri talep üzerine veya bir tetikleyiciyle analiz etmesini sağlayın. Telefonunuzdan "bugün herhangi bir paket geldi mi?" diye sorun ve kendi donanımınızdan doğrudan bir yanıt alın.
+3. **Yerel bir VLM ile IOT**: Ön kapınıza bir kamera yönlendirin, Lemonade üzerinde bir görü modeli çalıştırın ve OpenClaw'ın kareleri talep üzerine veya bir tetikleyiciyle analiz etmesini sağlayın. Telefonunuzdan "bugün herhangi bir paket geldi mi?" diye sorun ve kendi donanımınızdan doğrudan bir yanıt alın.

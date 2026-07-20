@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### Modelli ComfyUI
 
-Se in precedenza hai eliminato i modelli ComfyUI pre-scaricati o desideri scaricarli per la prima volta, premi semplicemente il pulsante `Download` su ciascuno dei modelli quando viene segnalato che sono stati rilevati modelli mancanti.
+Se in precedenza hai eliminato i modelli ComfyUI pre-scaricati o se desideri scaricarli per la prima volta, ti basta premere il pulsante `Download` su ciascuno dei modelli quando viene segnalato che sono stati rilevati modelli mancanti.
 Potrebbe essere necessario posizionare manualmente i file dei modelli nelle posizioni corrette.
 
 <p align="center">

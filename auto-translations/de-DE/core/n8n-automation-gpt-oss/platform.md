@@ -14,20 +14,20 @@ Dieses Dokument beschreibt die erwarteten Plattformkonfigurationen für die Ausf
 
 | Komponente | Version | Hinweise |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Vorinstalliert und im PATH verfügbar auf der AMD Ryzen™ AI Halo Developer Platform; muss auf allen anderen Geräten manuell installiert werden |
-| **Lemonade Server** | neueste | Läuft auf `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Auf der AMD Ryzen™ AI Halo Developer Platform vorinstalliert und im PATH verfügbar; muss auf allen anderen Geräten manuell installiert werden |
+| **Lemonade Server** | latest | Läuft unter `http://localhost:13305/api/v1` |
 
 ### Linux
 
 | Komponente | Version | Hinweise |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Vorinstalliert und im PATH verfügbar auf der AMD Ryzen™ AI Halo Developer Platform; muss auf allen anderen Geräten manuell installiert werden |
-| **Lemonade Server** | neueste | Läuft auf `http://localhost:13305/api/v1` |
+| **Node.js** | 22.16+ | Auf der AMD Ryzen™ AI Halo Developer Platform vorinstalliert und im PATH verfügbar; muss auf allen anderen Geräten manuell installiert werden |
+| **Lemonade Server** | latest | Läuft unter `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-Der Lemonade Server sollte mit dem gerätespezifischen Modell geladen laufen (siehe README für den `lemonade run`-Befehl für Ihr Gerät):
+Der Lemonade Server sollte mit dem für das Gerät geeigneten Modell laufen (siehe README für den `lemonade run`-Befehl für Ihr Gerät):
 
 | Gerät | Endpunkt | Modell |
 |--------|----------|-------|

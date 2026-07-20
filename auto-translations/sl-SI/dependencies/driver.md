@@ -5,9 +5,9 @@ SPDX-License-Identifier: MIT
 -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-### AMD GPU Driver
+### Gonilnik AMD GPU
 
-Posodobite na najnovejši AMD GPU gonilnik z uporabo [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
+Posodobite na najnovejši gonilnik AMD GPU s pomočjo [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
 
 1. Odprite `AMD Software: Adrenalin Edition` iz menija Start ali sistemske vrstice.
 2. Pomaknite se na **Driver and Software**, kliknite **Manage Updates**.
@@ -23,9 +23,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 
 <!-- @os:linux -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-### AMD GPU Driver
+### Gonilnik AMD GPU
 
-Namestite AMD GPU gonilnik (amdgpu) z uporabo toka Radeon Software for Linux (RSL). Za navodila za vašo distribucijo glejte [Namestitev jedrnega gonilnika](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Namestite gonilnik AMD GPU (amdgpu) s pomočjo poteka Radeon Software for Linux (RSL). Za navodila za svojo distribucijo glejte [Namestitev gonilnika jedra](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
 
 <!-- @device:end -->
 <!-- @os:end -->

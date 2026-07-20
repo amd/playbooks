@@ -4,7 +4,7 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Configuración de la Plataforma
+# Configuración de la plataforma
 
 Este documento describe las configuraciones de plataforma esperadas para ejecutar este playbook.
 
@@ -15,19 +15,19 @@ Este documento describe las configuraciones de plataforma esperadas para ejecuta
 | Componente | Versión | Notas |
 |-----------|---------|-------|
 | **Node.js** | 22.16+ | Preinstalado y disponible en PATH en la AMD Ryzen™ AI Halo Developer Platform; debe instalarse manualmente en todos los demás dispositivos |
-| **Lemonade Server** | latest | En ejecución en `http://localhost:13305/api/v1` |
+| **Lemonade Server** | latest | Ejecutándose en `http://localhost:13305/api/v1` |
 
 ### Linux
 
 | Componente | Versión | Notas |
 |-----------|---------|-------|
 | **Node.js** | 22.16+ | Preinstalado y disponible en PATH en la AMD Ryzen™ AI Halo Developer Platform; debe instalarse manualmente en todos los demás dispositivos |
-| **Lemonade Server** | latest | En ejecución en `http://localhost:13305/api/v1` |
+| **Lemonade Server** | latest | Ejecutándose en `http://localhost:13305/api/v1` |
 
 
-## LLM de Lemonade
+## Lemonade LLM
 
-El servidor Lemonade debe estar en ejecución con el modelo apropiado para el dispositivo cargado (consulte el README para el comando `lemonade run` correspondiente a su dispositivo):
+El servidor Lemonade debe estar ejecutándose con el modelo adecuado para el dispositivo cargado (consulte el README para conocer el comando `lemonade run` correspondiente a su dispositivo):
 
 | Dispositivo | Endpoint | Modelo |
 |--------|----------|-------|

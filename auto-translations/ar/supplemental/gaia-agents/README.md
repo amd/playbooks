@@ -6,35 +6,35 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> يستخدم هذا الدليل التطبيقي علامات خاصة لا يستطيع GitHub عرضها. يرجى زيارة [amd.com/playbooks](https://amd.com/playbooks) لمعاينة هذا المحتوى بشكل صحيح.
+> يستخدم هذا الدليل التوجيهي علامات خاصة لا يمكن لـ GitHub عرضها. يرجى زيارة [amd.com/playbooks](https://amd.com/playbooks) لمعاينة هذا المحتوى بشكل صحيح.
 <!-- @github-only:end -->
 
 ## نظرة عامة
 
-وكلاء GAIA هم مساعدون ذكاء اصطناعي يستخدمون نموذج لغوي محلي للتفكير واستدعاء الأدوات التي تحددها — مثل روبوتات المحادثة القادرة على اتخاذ إجراءات. تعمل **بنسبة 100% محلياً** دون واجهات برمجة سحابية، ودون مغادرة بياناتك للجهاز، ودون الحاجة إلى مفاتيح API.
+وكلاء GAIA هم مساعدون بالذكاء الاصطناعي يستخدمون نموذج لغوي كبير (LLM) محلي للتفكير واستدعاء الأدوات التي تحددها — مثل روبوتات الدردشة القادرة على اتخاذ إجراءات. يعملون **بشكل محلي بنسبة 100%** دون واجهات برمجة تطبيقات سحابية، ودون خروج أي بيانات من جهازك، ودون الحاجة إلى مفاتيح API.
 
-في هذا الدليل التطبيقي، ستبني وكيل مستشار الأجهزة الذي يكتشف ذاكرة الوصول العشوائي (RAM) وGPU وNPU في نظامك، ويستعلم عن كتالوج النماذج المحلية، ويوصي بنماذج LLM التي يمكن لجهازك تشغيلها. إنها مقدمة عملية لـ GAIA Agent SDK تنتج شيئاً مفيداً فوراً.
+في هذا الدليل التوجيهي، ستقوم ببناء وكيل مستشار الأجهزة (Hardware Advisor Agent) الذي يكتشف ذاكرة الوصول العشوائي (RAM) الخاصة بنظامك، ووحدة معالجة الرسومات (GPU)، ووحدة معالجة الشبكة العصبية (NPU)، ويستعلم عن كتالوج النماذج المحلي، ويوصي بالنماذج اللغوية الكبيرة (LLMs) التي يمكن لجهازك تشغيلها. إنه مقدمة عملية لحزمة تطوير وكلاء GAIA (GAIA Agent SDK) تنتج شيئًا مفيدًا على الفور.
 
 ## ما ستتعلمه
 
 - كيفية إنشاء وكيل GAIA بأدوات مخصصة
-- استخدام LemonadeClient SDK للاستعلام عن معلومات النظام وكتالوجات النماذج
-- اكتشاف GPU/NPU الخاص بالمنصة (Windows PowerShell وLinux lspci)
-- تحديد حجم النموذج بناءً على الذاكرة باستخدام قاعدة 70%
-- بناء واجهة سطر أوامر تفاعلية للاستعلامات بلغة طبيعية عن الأجهزة
+- استخدام حزمة LemonadeClient SDK للاستعلام عن معلومات النظام وكتالوجات النماذج
+- الكشف الخاص بالمنصة عن وحدة معالجة الرسومات (GPU) ووحدة معالجة الشبكة العصبية (NPU) (باستخدام PowerShell على Windows و lspci على Linux)
+- تحديد حجم النموذج بناءً على الذاكرة باستخدام قاعدة الـ 70%
+- بناء واجهة سطر أوامر (CLI) تفاعلية للاستعلامات باللغة الطبيعية عن الأجهزة
 
-## ضبط إعداد الذاكرة
+## ضبط إعدادات الذاكرة
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## التحقق من تحديثات البرامج
-> **ملاحظة**: إذا لم يكن VS Code مثبتاً، يمكنك تثبيته من خلال Ryzen AI Developer Center.
+> **ملاحظة**: إذا لم يكن VS Code مثبتًا، يمكنك تثبيته باستخدام Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## تثبيت المتطلبات الأساسية للبرامج
+## تثبيت متطلبات البرامج الأساسية
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
@@ -64,11 +64,11 @@ which python3
 
 ## البدء
 
-شغّل الوكيل الجاهز أولاً لترى ما الذي تبنيه. ثم سنستعرض الكود خطوة بخطوة.
+قم أولاً بتشغيل الوكيل المكتمل لترى ما ستقوم ببنائه. بعد ذلك، سنستعرض الكود خطوة بخطوة.
 
-### تشغيل المثال الجاهز
+### تشغيل المثال الجاهز مسبقًا
 
-يتضمن هذا الدليل التطبيقي الملف الكامل [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). قم بتنزيله في مجلد من اختيارك وشغّله لترى الوكيل الجاهز في العمل:
+يتضمن هذا الدليل التوجيهي الملف الكامل [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). قم بتنزيله إلى الدليل الذي تختاره وشغّله لترى الوكيل المكتمل قيد العمل:
 
 ```bash
 python hardware_advisor_agent.py
@@ -96,9 +96,9 @@ print("PASS: hardware_advisor_agent.py has valid syntax")
 ```
 <!-- @test:end --> 
 
-**جرّب السؤال:** "What size LLM can I run?"
+**جرّب أن تسأل:** "ما حجم النموذج اللغوي الكبير (LLM) الذي يمكنني تشغيله؟"
 
-**المخرجات المتوقعة:**
+**الناتج المتوقع:**
 
 ```
 ============================================================
@@ -117,9 +117,9 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 - NPU acceleration available for smaller models
 ```
 
-**تهانينا** - لقد بنيت وكيلاً!
+**تهانينا** - لقد قمت ببناء وكيل! 
 
-سيشرح باقي الدليل التطبيقي كيفية عمل كل جزء من النص البرمجي، حتى تفهمه من الأساس.
+سيشرح باقي هذا الدليل التوجيهي كيفية عمل كل جزء من الكود، حتى تتمكن من فهمه من الأساس.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -263,15 +263,15 @@ echo "OK: hardware_advisor_agent.py started successfully"
 
 يجمع وكيل مستشار الأجهزة بين ثلاثة مكونات:
 
-- **LemonadeClient SDK** — واجهات برمجة معلومات النظام وكتالوج النماذج
-- **الاكتشاف الخاص بالمنصة** — Windows PowerShell / Linux lspci لمعلومات GPU
-- **حسابات الذاكرة** — قاعدة 70% لتحديد حجم النموذج الآمن
+- **حزمة LemonadeClient SDK** — واجهات برمجة تطبيقات لمعلومات النظام وكتالوج النماذج
+- **الكشف الخاص بالمنصة** — PowerShell على Windows / lspci على Linux للحصول على معلومات وحدة معالجة الرسومات (GPU)
+- **حسابات الذاكرة** — قاعدة الـ 70% لتحديد حجم النموذج بأمان
 
-تتدفق البيانات عبر هذه المكونات بالتسلسل: استعلام المستخدم ← يختار الوكيل أداة ← تستدعي الأداة LemonadeClient + اكتشاف نظام التشغيل ← يجمع الوكيل النتائج في توصية.
+تتدفق البيانات عبر هذه المكونات بالتسلسل التالي: استعلام المستخدم ← يختار الوكيل أداة ← تستدعي الأداة LemonadeClient وكشف نظام التشغيل ← يقوم الوكيل بتجميع النتائج في توصية.
 
-### LemonadeClient SDK
+### حزمة LemonadeClient SDK
 
-يوفر LemonadeClient واجهة برمجة موحدة لاكتشاف النظام وتوافر NPU/GPU والاستعلام عن كتالوج النماذج.
+توفر حزمة LemonadeClient واجهة برمجة تطبيقات موحدة للكشف عن النظام، وتوفر وحدة معالجة الشبكة العصبية (NPU) ووحدة معالجة الرسومات (GPU)، والاستعلامات على كتالوج النماذج.
 
 **الاستيراد والتهيئة:**
 
@@ -281,7 +281,7 @@ from gaia.llm.lemonade_client import LemonadeClient
 client = LemonadeClient(keep_alive=True)
 ```
 
-**`get_system_info()`** — يُرجع نظام التشغيل والمعالج وذاكرة الوصول العشوائي وتوافر الأجهزة:
+**`get_system_info()`** — تُعيد نظام التشغيل، ومعالج (CPU)، وذاكرة الوصول العشوائي (RAM)، وتوافر الأجهزة:
 
 ```python
 info = client.get_system_info()
@@ -323,7 +323,7 @@ info = client.get_system_info()
 
 <!-- @os:end -->
 
-**`list_models(show_all=True)`** — يُرجع كتالوج النماذج الكامل:
+**`list_models(show_all=True)`** — تُعيد كتالوج النماذج الكامل:
 
 ```python
 response = client.list_models(show_all=True)
@@ -341,7 +341,7 @@ response = client.list_models(show_all=True)
 }
 ```
 
-**`get_model_info(model_id)`** — يُرجع تقديرات الحجم لنموذج محدد:
+**`get_model_info(model_id)`** — تُعيد تقديرات الحجم لنموذج محدد:
 
 ```python
 model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
@@ -355,13 +355,13 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 }
 ```
 
-### اكتشاف GPU الخاص بالمنصة
+### الكشف الخاص بالمنصة عن وحدة معالجة الرسومات (GPU)
 
-يستخدم الوكيل أوامر نظام التشغيل الأصلية بدلاً من PyTorch لاكتشاف GPU. يعمل هذا دون تثبيت تعريفات GPU، ويكتشف جميع وحدات GPU (وليس فقط تلك المدعومة بـ CUDA)، ويتجنب استيراد المكتبات الثقيلة.
+يستخدم الوكيل أوامر أصلية لنظام التشغيل بدلاً من PyTorch للكشف عن وحدة معالجة الرسومات (GPU). يعمل هذا دون الحاجة إلى تعريفات (drivers) لوحدة معالجة الرسومات مثبتة، ويكتشف جميع وحدات معالجة الرسومات (وليس فقط تلك المتوافقة مع CUDA)، ويتجنب استيراد مكتبات ثقيلة.
 
 <!-- @os:windows -->
 
-على Windows، يستخدم الوكيل PowerShell للاستعلام عن WMI:
+على نظام Windows، يستخدم الوكيل PowerShell للاستعلام عن WMI:
 
 ```python
 ps_command = (
@@ -380,7 +380,7 @@ result = subprocess.run(
 
 <!-- @os:linux -->
 
-على Linux، يستخدم الوكيل lspci:
+على نظام Linux، يستخدم الوكيل lspci:
 
 ```python
 result = subprocess.run(
@@ -394,7 +394,7 @@ result = subprocess.run(
 
 ### قاعدة الذاكرة 70%
 
-> **القاعدة:** يجب أن يكون حجم النموذج أقل من 70% من ذاكرة الوصول العشوائي المتاحة لترك هامش 30% لعمليات الاستدلال (ذاكرة التخزين المؤقت KV، ومخازن معالجة الدُفعات، وارتفاعات ذاكرة وقت التشغيل).
+> **القاعدة:** يجب أن يكون حجم النموذج أقل من 70% من ذاكرة الوصول العشوائي (RAM) المتاحة لترك 30% كهامش إضافي لعمليات الاستدلال (ذاكرة التخزين المؤقت KV، ومخازن معالجة الدُفعات، وارتفاعات ذاكرة وقت التشغيل المؤقتة).
 
 ```
 System: 32 GB RAM
@@ -403,13 +403,13 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 70B model (~42 GB):   Too large
 ```
 
-## ترميز الوكيل خطوة بخطوة (اختياري)
+## كتابة كود الوكيل خطوة بخطوة (اختياري)
 
-ستنشئ **ملفاً واحداً** يُسمى `hardware_advisor_agent.py` وتضيف الميزات تدريجياً. كل خطوة تبني على السابقة.
+ستقوم بإنشاء **ملف واحد** باسم `hardware_advisor_agent.py` وإضافة الميزات تدريجيًا. تعتمد كل خطوة على الخطوة السابقة.
 
-### الخطوة 1: هيكل الوكيل
+### الخطوة 1: هيكل الوكيل الأساسي
 
-ابدأ ببنية وكيل بسيطة — مجرد الفئة وموجه نظام أساسي. لا يمتلك الوكيل أدوات بعد.
+ابدأ ببنية وكيل بسيطة — فقط الفئة (class) وموجه نظام أساسي (system prompt). لا يملك الوكيل أي أدوات بعد.
 
 ```python
 from gaia import Agent
@@ -442,7 +442,7 @@ if __name__ == "__main__":
 python hardware_advisor_agent.py
 ```
 
-المخرجات المتوقعة:
+الناتج المتوقع:
 
 ```
 Agent created successfully!
@@ -450,11 +450,11 @@ Agent created successfully!
 
 ---
 
-### الخطوة 2: اكتشاف GPU والأجهزة
+### الخطوة 2: الكشف عن وحدة معالجة الرسومات (GPU) والأجهزة
 
-أضف الطريقة المساعدة `_get_gpu_info()` وأداة `get_hardware_info()`. هذا يجعل الوكيل تفاعلياً — يمكنك الآن الاستعلام عن مواصفات النظام.
+أضف الدالة المساعدة `_get_gpu_info()` والأداة `get_hardware_info()`. يجعل هذا الوكيل تفاعليًا — يمكنك الآن الاستعلام منه عن مواصفات النظام.
 
-**حدّث الاستيرادات** في أعلى الملف:
+**قم بتحديث عمليات الاستيراد (imports)** في أعلى الملف:
 
 ```python
 from typing import Any, Dict
@@ -463,7 +463,7 @@ from gaia import Agent, tool
 from gaia.llm.lemonade_client import LemonadeClient
 ```
 
-**أضف المساعد `_get_gpu_info()`** بعد طريقة `_get_system_prompt()`:
+**أضف الدالة المساعدة `_get_gpu_info()`** بعد الدالة `_get_system_prompt()`:
 
 ```python
 def _get_gpu_info(self) -> Dict[str, Any]:
@@ -550,7 +550,7 @@ def _get_gpu_info(self) -> Dict[str, Any]:
     return {"name": "Not detected", "memory_mb": 0}
 ```
 
-**استبدل طريقة `_register_tools()`** بأداة `get_hardware_info`:
+**استبدل الدالة `_register_tools()`** بأداة `get_hardware_info`:
 
 ```python
 def _register_tools(self):
@@ -607,7 +607,7 @@ def _register_tools(self):
             }
 ```
 
-**حدّث كتلة `__main__`** لتمكين الاختبار التفاعلي:
+**قم بتحديث كتلة `__main__`** لتفعيل الاختبار التفاعلي:
 
 ```python
 if __name__ == "__main__":
@@ -626,13 +626,13 @@ if __name__ == "__main__":
             break
 ```
 
-شغّل وجرّب السؤال "Show me my system specs":
+شغّله وجرّب أن تسأل "أظهر لي مواصفات نظامي":
 
 ```bash
 python hardware_advisor_agent.py
 ```
 
-**مثال على المخرجات:**
+**مثال على الناتج:**
 
 ```
 You: Show me my system specs
@@ -647,7 +647,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ### الخطوة 3: كتالوج النماذج
 
-أضف أداة `list_available_models()` داخل `_register_tools()`، بعد دالة `get_hardware_info`. يمكن للوكيل الآن إخبارك بالنماذج المتاحة.
+أضف الأداة `list_available_models()` داخل `_register_tools()`، بعد دالة `get_hardware_info`. يمكن للوكيل الآن إخبارك بالنماذج المتاحة.
 
 ```python
     @tool(atomic=True)
@@ -689,13 +689,13 @@ Agent: Your system has excellent specs for running LLMs locally!
             }
 ```
 
-شغّل وجرّب السؤال "What models are available?":
+شغّله وجرّب أن تسأل "ما النماذج المتاحة؟":
 
 ```bash
 python hardware_advisor_agent.py
 ```
 
-**مثال على المخرجات:**
+**مثال على الناتج:**
 
 ```
 You: What models are available?
@@ -710,7 +710,7 @@ Agent: I found 15 models in the catalog:
 
 ### الخطوة 4: التوصيات الذكية
 
-أضف أداة `recommend_models()` داخل `_register_tools()`، بعد `list_available_models`. يمكن للوكيل الآن حساب النماذج التي تناسب ذاكرة نظامك باستخدام قاعدة 70%.
+أضف الأداة `recommend_models()` داخل `_register_tools()`، بعد `list_available_models`. يمكن للوكيل الآن حساب النماذج التي تتناسب مع ذاكرة نظامك باستخدام قاعدة الـ 70%.
 
 ```python
     @tool(atomic=True)
@@ -769,13 +769,13 @@ Agent: I found 15 models in the catalog:
             }
 ```
 
-شغّل وجرّب السؤال "What size LLM can I run?":
+شغّله وجرّب أن تسأل "ما حجم النموذج اللغوي الكبير (LLM) الذي يمكنني تشغيله؟":
 
 ```bash
 python hardware_advisor_agent.py
 ```
 
-**مثال على المخرجات:**
+**مثال على الناتج:**
 
 ```
 You: What size LLM can I run?
@@ -789,11 +789,11 @@ Top recommendations:
 
 ---
 
-### الخطوة 5: واجهة سطر الأوامر للإنتاج
+### الخطوة 5: واجهة سطر أوامر (CLI) جاهزة للإنتاج
 
-استبدل كتلة `__main__` البسيطة بواجهة سطر أوامر تفاعلية متقنة. تضيف هذا لافتة ترحيبية وأوامر للخروج ومعالجة أفضل للأخطاء.
+استبدل كتلة `__main__` البسيطة بواجهة سطر أوامر (CLI) تفاعلية مصقولة. يضيف هذا شعارًا، وأوامر للخروج، ومعالجة أفضل للأخطاء.
 
-**استبدل كتلة `if __name__ == "__main__":` بأكملها** بـ:
+**استبدل كتلة `if __name__ == "__main__":` بأكملها** بما يلي:
 
 ```python
 def main():
@@ -843,32 +843,31 @@ if __name__ == "__main__":
 ```
 
 ---
-
 ### التحقق النهائي
 
-يجب أن يحتوي ملف `hardware_advisor_agent.py` الآن على جميع هذه المكونات:
+يجب أن يحتوي ملف `hardware_advisor_agent.py` الخاص بك الآن على جميع هذه المكونات:
 
-- [x] الاستيرادات: `from typing import Any, Dict` و`from gaia import Agent, tool`
-- [x] فئة `HardwareAdvisorAgent` مع `__init__` وموجه النظام
-- [x] المساعد `_get_gpu_info()` (Windows PowerShell + Linux lspci)
-- [x] أداة `get_hardware_info()` مع حقول GPU وNPU ونظام التشغيل
+- [x] عمليات الاستيراد: `from typing import Any, Dict` و `from gaia import Agent, tool`
+- [x] فئة `HardwareAdvisorAgent` مع `__init__` وموجه النظام (system prompt)
+- [x] دالة مساعدة `_get_gpu_info()` (بوويرشيل ويندوز + lspci على لينكس)
+- [x] أداة `get_hardware_info()` مع حقول GPU و NPU ونظام التشغيل
 - [x] أداة `list_available_models()` مع التسميات وإثراء الحجم
-- [x] أداة `recommend_models()` مع قاعدة 70% وfits_in_ram وfits_in_gpu
+- [x] أداة `recommend_models()` مع قاعدة الـ 70%، و`fits_in_ram`، و`fits_in_gpu`
 - [x] دالة `main()` مع واجهة سطر أوامر تفاعلية
 
-**اختبر هذه الاستعلامات للتأكد من أن كل شيء يعمل:**
+**اختبر هذه الاستفسارات للتأكد من أن كل شيء يعمل:**
 
 - "What size LLM can I run?"
 - "Show me my system specs"
 - "What models are available?"
 - "Can I run a 30B model?"
 
-> **نصيحة**: التنفيذ الكامل متاح في [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
+> **نصيحة**: التنفيذ الكامل متوفر في [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
 
 ## الخطوات التالية
 
-- **استكشف واجهات برمجة LemonadeClient** — اكتشف المزيد من إمكانيات إدارة النظام والنماذج في [وثائق LemonadeClient SDK](https://amd-gaia.ai/sdk/lemonade-client)
-- **أضف التفاعل الصوتي** — ادمج Whisper ASR وKokoro TTS للسماح للمستخدمين بطرح أسئلة الأجهزة بالكلام. راجع [دليل Talk](https://amd-gaia.ai/guides/talk)
+- **استكشف واجهات برمجة تطبيقات LemonadeClient** — اكتشف المزيد من إمكانيات إدارة النظام والنماذج في [توثيق LemonadeClient SDK](https://amd-gaia.ai/sdk/lemonade-client)
+- **أضف التفاعل الصوتي** — ادمج Whisper ASR و Kokoro TTS للسماح للمستخدمين بطرح أسئلة حول الأجهزة عن طريق التحدث. راجع [دليل Talk](https://amd-gaia.ai/guides/talk)
 - **أضف دعم MCP** — اعرض مستشار الأجهزة كخادم MCP حتى تتمكن الأدوات الأخرى من الاستعلام عنه. راجع [دليل MCP](https://amd-gaia.ai/sdk/infrastructure/mcp)
-- **وسّع محرك التوصيات** — ضع في الاعتبار VRAM الخاص بـ GPU لتفريغ الطبقات، أو أضف قياس الأداء لتقدير الرموز في الثانية
-- **ابنِ نظاماً متعدد الوكلاء** — ادمج مستشار الأجهزة مع وكيل كود أو وكيل محادثة باستخدام [Routing Agent](https://amd-gaia.ai/guides/routing)
+- **وسّع محرك التوصيات** — ضع في الاعتبار ذاكرة GPU VRAM لتفريغ الطبقات، أو أضف اختبار أداء لتقدير عدد الرموز في الثانية
+- **ابنِ نظام وكلاء متعدد** — ادمج مستشار الأجهزة مع وكيل برمجة أو وكيل محادثة باستخدام [وكيل التوجيه (Routing Agent)](https://amd-gaia.ai/guides/routing)

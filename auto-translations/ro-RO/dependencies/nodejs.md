@@ -38,4 +38,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **Notă**: Consultați [Descărcări Node.js](https://nodejs.org/en/download/) pentru opțiuni suplimentare de instalare și platforme.
+> **Notă**: Consultați [Node.js Downloads](https://nodejs.org/en/download/) pentru opțiuni suplimentare de instalare și platforme.

@@ -8,8 +8,8 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. Otwórz PowerShell lub wiersz polecenia
-2. Zainstaluj n8n globalnie przy użyciu npm:
+1. Otwórz PowerShell lub wiersz poleceń
+2. Zainstaluj n8n globalnie za pomocą npm:
 ```cmd
 npm install -g n8n
 ```
@@ -18,7 +18,7 @@ npm install -g n8n
 
 <!-- @os:linux -->
 
-Zainstaluj n8n globalnie przy użyciu npm:
+Zainstaluj n8n globalnie za pomocą npm:
 ```bash
 npm install -g n8n
 ```

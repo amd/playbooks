@@ -1,5 +1,5 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "การรันและให้บริการ LLMs ด้วย LM Studio",
-  "description": "ตั้งค่า LM Studio และ LM Studio Server เพื่อรันและให้บริการโมเดลภาษาขนาดใหญ่ในเครื่องของคุณ"
+  "title": "การรันและให้บริการ LLM ด้วย LM Studio",
+  "description": "ตั้งค่า LM Studio และ LM Studio Server เพื่อรันและให้บริการโมเดลภาษาขนาดใหญ่ในเครื่อง"
 }

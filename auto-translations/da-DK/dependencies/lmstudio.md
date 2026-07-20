@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 <!-- @device:halo_box -->
-LM Studio kan installeres fra **AMD Ryzen™ AI Developer Center**. Gå til fanen **Updates** og installer LM Studio, hvis det ikke allerede er til stede.
+LM Studio kan installeres fra **AMD Ryzen™ AI Developer Center**. Gå til fanen **Updates**, og installer LM Studio, hvis det ikke allerede findes.
 
 For at give LM Studio adgang til de forudinstallerede modeller skal du navigere til Settings > General > Models Directory. Skift derefter stien til `C:\Users\Public\models`
 
@@ -20,10 +20,10 @@ For at give LM Studio adgang til de forudinstallerede modeller skal du navigere 
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 1. Download installationsprogrammet herfra: [https://lmstudio.ai/download](https://lmstudio.ai/download)
-2. Installer.
+2. Installer. 
 <!-- @device:end -->
 
-> Tip: Efter installation skal du starte LM Studio én gang for at initialisere CLI'en (`lms`).
+> Tip: Start LM Studio én gang efter installationen for at initialisere CLI'en (`lms`).
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
 ```powershell
@@ -33,13 +33,13 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Bemærk: Du kan vælge at installere enten .deb eller AppImage.
-1. Download appimage herfra: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
-2. kør `sudo apt install libfuse2`
-3. kør `cd ~/Downloads`
-4. kør `chmod +x LM-Studio-*.AppImage`
-5. kør `./LM-Studio-*.AppImage`
-> Tip: Efter installation skal du starte LM Studio én gang for at initialisere CLI'en (`lms`).
+> Bemærk: Du kan vælge at installere enten .deb-filen eller AppImage-filen. 
+1. Download AppImage-filen herfra: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
+2. kør `sudo apt install libfuse2`  
+3. kør `cd ~/Downloads`  
+4. kør `chmod +x LM-Studio-*.AppImage`  
+5. kør `./LM-Studio-*.AppImage`  
+> Tip: Start LM Studio én gang efter installationen for at initialisere CLI'en (`lms`).
 
 <!-- @device:halo_box -->
 For at give LM Studio adgang til de forudinstallerede modeller skal du navigere til Settings > General > Models Directory. Skift derefter stien til `/var/cache/models`.
@@ -53,5 +53,5 @@ For at give LM Studio adgang til de forudinstallerede modeller skal du navigere 
 ```bash
 lms --help
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->

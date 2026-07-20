@@ -5,35 +5,36 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> このプレイブックは GitHub でレンダリングできない特殊タグを使用しています。コンテンツを正しくプレビューするには [amd.com/playbooks](https://amd.com/playbooks) をご覧ください。
+> このプレイブックには、GitHub ではレンダリングできない特殊なタグが使用されています。このコンテンツを正しくプレビューするには、[amd.com/playbooks](https://amd.com/playbooks) をご覧ください。
 <!-- @github-only:end -->
 
 ## 概要
 
-AMD ROCm™ ソフトウェアと PyTorch スタックは、オンデバイス AI のための統合エコシステムを構築します。Ryzen™ AI APU や Radeon™ GPU を含む幅広いデバイスを公式サポートし、Windows と Linux の両方で動作します。
+AMD ROCm™ ソフトウェアと PyTorch スタックは、オンデバイス AI のための統合されたエコシステムを構築します。Windows と Linux の両方で動作し、Ryzen™ AI APU や Radeon™ GPU を含む幅広いデバイスを公式にサポートしています。
 
-このプレイブックでは、低遅延で表現力豊かなプライベートな音声間翻訳をエッジ上で完全に実行する方法を学びます。
+このプレイブックでは、低レイテンシで表現力豊かなプライベートな音声対音声翻訳を、エッジ上で完結させて実行する方法を学びます。
 
-## 学習内容
+## このプレイブックで学べること
 
-- 音声間翻訳環境のセットアップ方法
-- 音声間モデルを読み込んで使用する Python コードの書き方
-- Gradio UI の実行と実験方法
+- 音声対音声環境のセットアップ方法
+- 音声対音声モデルを読み込んで使用するための Python コードの書き方
+- Gradio UI の実行と実験の方法
 
-## リアルタイム音声間翻訳を使う理由
+## リアルタイム音声対音声翻訳を使用する理由
 
-- 翻訳と言語の壁による摩擦を解消する
-- 不自然な間なしにトーン、感情、意図を伝える
-- グローバルなコラボレーションと迅速な意思決定を可能にする
+- 翻訳と言語の壁の間にある摩擦を取り除く
+- ぎこちない間を取ることなく、トーン、感情、意図を伝える
+- グローバルなコラボレーションとより迅速な意思決定を可能にする
 
-## メモリ設定の構成
+## メモリ構成の設定
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## ソフトウェアアップデートの確認
-> **注意**: VS Code がインストールされていない場合は、Ryzen AI Developer Center からインストールできます。
+> **注**: VS Code がインストールされていない場合は、Ryzen AI Developer Center からインストールできます。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -44,7 +45,7 @@ AMD ROCm™ ソフトウェアと PyTorch スタックは、オンデバイス A
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Linux では、ターミナルを開き、以下のプロンプトを実行して ROCm+Pytorch がインストール済みの venv を作成します：
+Linux では、ターミナルを開き、以下のプロンプトを実行して、ROCm+PyTorch がすでにインストールされた venv を作成します。
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -58,13 +59,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**GPU デバイスへのユーザーアクセスを許可します**（有効にするにはログアウトして再度ログインしてください）：
+**ユーザーに GPU デバイスへのアクセス権を付与します**（これを有効にするには、いったんログアウトして再度ログインしてください）:
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Linux では、ターミナルを開き、以下のプロンプトを実行して venv を作成します：
+Linux では、ターミナルを開き、以下のプロンプトを実行して venv を作成します。
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -80,7 +81,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Windows では、任意のディレクトリでターミナルを開き、以下のコマンドに従って ROCm+Pytorch がインストール済みの venv を作成します：
+Windows では、任意のディレクトリでターミナルを開き、以下のコマンドに従って、ROCm+PyTorch がすでにインストールされた venv を作成します。
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -90,13 +91,12 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **ヒント**: Windows ユーザーは、一部の PowerShell コマンドを実行する前に PowerShell 実行ポリシーを変更する必要がある場合があります（例：
-> RemoteSigned または Unrestricted に設定する）。
+> **ヒント**: Windows ユーザーは、一部の PowerShell コマンドを実行する前に、PowerShell 実行ポリシーを変更する必要がある場合があります（例: RemoteSigned または Unrestricted に設定する）。
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Windows では、任意のディレクトリでターミナルを開き、以下のコマンドに従って venv を作成します：
+Windows では、任意のディレクトリでターミナルを開き、以下のコマンドに従って venv を作成します。
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -106,8 +106,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **ヒント**: Windows ユーザーは、一部の PowerShell コマンドを実行する前に PowerShell 実行ポリシーを変更する必要がある場合があります（例：
-> RemoteSigned または Unrestricted に設定する）。
+> **ヒント**: Windows ユーザーは、一部の PowerShell コマンドを実行する前に、PowerShell 実行ポリシーを変更する必要がある場合があります（例: RemoteSigned または Unrestricted に設定する）。
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -122,7 +121,7 @@ s2st-env\Scripts\activate
 
 ### 追加の依存関係
 
-pip を使用して m4t の依存関係をインストールします：
+pip を使用して m4t の依存関係をインストールします:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
@@ -195,19 +194,19 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## 音声間翻訳デモのセットアップ
+## 音声対音声デモのセットアップ
 
 #### seamless-m4t-v2 について学ぶ
 
 詳細については、Hugging Face の[モデルカード](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)をご覧ください。
-以下は音声間モデルの技術アーキテクチャです：
+以下は音声対音声モデルの技術アーキテクチャです:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### スクリプトのダウンロード
 
-このプレイブックにはすぐに使えるスクリプトが含まれています。作成した環境と同じディレクトリにすべてダウンロードしてください。
+このプレイブックには、すぐに使用できるスクリプトが含まれています。これらすべてを、作成した環境と同じディレクトリにダウンロードしてください。
 
 | スクリプト | 説明 | 使用方法 |
 |--------|-------------|-------|
@@ -219,15 +218,15 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 
 ### infer.py から始める
 
-スクリプトを実行するには 
+スクリプトを実行するには、以下を実行してください: 
 ```bash
 python infer.py
 ```
-> **注意**: いくつかの警告が表示される場合があります。これは想定内の動作です。
+> **注**: 警告が表示されることがありますが、これは想定内です。
  
   
 #### コードの説明
-**スニペット 1: 必要な依存関係のインポート**
+**スニペット 1: 必要な依存関係をインポートする**
 
 ```python 
 import os
@@ -256,7 +255,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **スニペット 2: HuggingFace からモデルを読み込む**
 
-この関数はモデル ID を受け取り、まだダウンロードされていない場合はモデルをダウンロードします。次の関数が使用するプロセッサとモデルを返します。
+この関数はモデル ID を受け取り、まだダウンロードされていない場合はモデルをダウンロードします。次に、次の関数で使用するためのプロセッサとモデルを返します。
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -275,9 +274,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**スニペット 3: 入力音声クリップ .wav ファイルを読み込んで前処理する**
+**スニペット 3: 入力音声クリップの .wav ファイルを読み込み前処理する**
 
-この関数は音声クリップを読み込み、ターゲットレートにリサンプリングします。
+この関数は音声クリップを読み込み、対象のサンプルレートにリサンプリングします。
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -297,7 +296,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**スニペット 4: 推論を実行する**
+**スニペット 4: 推論の実行**
 
 この関数はモデルで推論を実行し、生成された出力を返します。
 ```python
@@ -327,7 +326,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
     return audio_array, elapsed
 ```
 
-**スニペット 5: 翻訳済みファイルを保存する**
+**スニペット 5: 翻訳されたファイルを保存する**
 
 この関数は音声配列を .WAV ファイルに保存します。
 ```python
@@ -392,19 +391,19 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Gradio UI デモの実行：
+### Gradio UI デモの実行:
 
-基本的なスクリプトの例を実行したので、次の手順では、これまで作成したコードを基に構築された便利な UI を提供し、ライブの音声間翻訳を簡単に行えるようにします。
+基本的なスクリプトの例を実行したところで、以下の手順では、これまでに書いたコードをベースにしたわかりやすい UI を使用して、ライブの音声対音声翻訳を簡単に行う方法を説明します。
 
 #### Gradio をローカルで実行する
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-次に、ウェブブラウザで `http://127.0.0.1:7860` を開いて UI にアクセスします。
+次に、Web ブラウザで `http://127.0.0.1:7860` を開き、UI にアクセスします。
 
 
-### Gradio UI の例：
+### Gradio UI の例:
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
@@ -523,12 +522,12 @@ PY
 
 ## 次のステップ
 
-- 数十の言語を組み合わせて素早く翻訳する。
-- デモを他の人と共有する：--share を追加してリモートからアクセスできる公開リンクを作成するか、Hugging Face Spaces を使用して永続的にデプロイする。
+- 数十種類の言語を組み合わせて、素早く翻訳を行いましょう。
+- デモを他の人と共有する: --share を追加すると、誰でもリモートでアクセスできる公開リンクを作成できます。また、Hugging Face Spaces を使用して永続的にデプロイすることもできます。
 
 ## リソース
 
-音声間翻訳の詳細については、以下の追加リソースをご覧ください：
-* リポジトリはこちら https://huggingface.co/facebook/seamless-m4t-v2-large
-* 「Seamless: Multilingual Expressive and Streaming Speech Translation」に関連する研究学術論文
-* Gradio の共有とデプロイ：[アプリ共有ガイド](https://www.gradio.app/guides/sharing-your-app) および [Hugging Face Spaces へのデプロイ](https://shafiqulai.github.io/blogs/blog_5.html)
+音声対音声翻訳についてさらに詳しく学ぶための追加リソースを以下に示します:
+* リポジトリはこちらです https://huggingface.co/facebook/seamless-m4t-v2-large
+* 「Seamless: Multilingual Expressive and Streaming Speech Translation」に関連する研究論文
+* Gradio の共有とデプロイ: [アプリの共有ガイド](https://www.gradio.app/guides/sharing-your-app) および [Hugging Face Spaces へのデプロイ](https://shafiqulai.github.io/blogs/blog_5.html)

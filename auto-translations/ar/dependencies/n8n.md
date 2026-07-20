@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. افتح PowerShell أو موجه الأوامر
+1. افتح PowerShell أو Command Prompt
 2. ثبّت n8n بشكل عام باستخدام npm:
 ```cmd
 npm install -g n8n
@@ -23,6 +23,6 @@ npm install -g n8n
 npm install -g n8n
 ```
 
-> **ملاحظة**: راجع [توثيق n8n](https://docs.n8n.io/hosting/installation/npm/) لمزيد من خيارات التثبيت.
+> **ملاحظة**: راجع [وثائق n8n](https://docs.n8n.io/hosting/installation/npm/) لمزيد من خيارات التثبيت.
 
 <!-- @os:end -->

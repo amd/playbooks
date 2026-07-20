@@ -1,5 +1,5 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "כוונון עדין של מודלי LLM עם LLaMA-Factory",
-  "description": "כוונון עדין של מודלים שפתיים גדולים (LLMs) באמצעות LLaMA-Factory וטכניקות LoRA."
+  "title": "כוונון עדין (Fine-Tuning) של מודלי שפה גדולים (LLMs) עם LLaMA Factory",
+  "description": "כוונון עדין (Fine-tuning) של מודלי שפה גדולים (LLMs) באמצעות טכניקות LLaMA Factory ו-LoRA."
 }

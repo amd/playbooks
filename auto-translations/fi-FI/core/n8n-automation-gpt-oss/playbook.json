@@ -1,5 +1,5 @@
 {
   "id": "n8n-automation-gpt-oss",
-  "title": "Työnkulkujen automatisointi n8n:llä ja paikallisilla LLM-malleilla",
-  "description": "Rakenna tekoälypohjainen uutistiivistelmä n8n:n ja Lemonade:n avulla."
+  "title": "Työnkulkujen automatisointi n8n:llä ja paikallisilla LLM:illä",
+  "description": "Rakenna tekoälypohjainen uutistiivistäjä käyttäen n8n:ää ja Lemonadea."
 }

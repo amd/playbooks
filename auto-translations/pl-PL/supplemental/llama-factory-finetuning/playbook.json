@@ -1,5 +1,5 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "Dostrajanie LLM za pomocą LLaMA-Factory",
-  "description": "Dostrajaj duże modele językowe (LLM) przy użyciu LLaMA-Factory i technik LoRA."
+  "title": "Dostrajanie modeli LLM za pomocą LLaMA Factory",
+  "description": "Dostrajaj duże modele językowe (LLM) przy użyciu LLaMA Factory i technik LoRA."
 }

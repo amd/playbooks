@@ -1,5 +1,5 @@
 {
   "id": "pytorch-finetuning",
   "title": "LLM-ek finomhangolása PyTorch és AMD ROCm™ szoftverrel",
-  "description": "Nagy nyelvi modellek (LLM-ek) finomhangolása PyTorch és ROCm segítségével."
+  "description": "Nagy nyelvi modellek (LLM-ek) finomhangolása PyTorch és ROCm használatával."
 }

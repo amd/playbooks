@@ -6,33 +6,33 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Deze playbook maakt gebruik van speciale tags die GitHub niet kan weergeven. Bezoek [amd.com/playbooks](https://amd.com/playbooks) om deze inhoud correct te bekijken.
 <!-- @github-only:end -->
 
 ## Overzicht
 
-ComfyUI is een krachtige, op nodes gebaseerde interface voor Stable Diffusion en andere diffusiemodellen. In tegenstelling tot traditionele tekst-naar-afbeelding-interfaces met eenvoudige promptvakken, stelt ComfyUI de volledige beeldgeneratiepijplijn bloot als een visuele grafiek, waardoor u nauwkeurige controle heeft over elke stap, van tekstcodering tot manipulatie van de latente ruimte tot de uiteindelijke decodering.
+ComfyUI is een krachtige, op nodes gebaseerde interface voor Stable Diffusion en andere diffusiemodellen. In tegenstelling tot traditionele tekst-naar-afbeelding-interfaces met eenvoudige promptvakken, presenteert ComfyUI de volledige beeldgeneratiepijplijn als een visuele graaf, waardoor je fijnmazige controle hebt over elke stap, van tekstcodering tot manipulatie van de latente ruimte tot uiteindelijke decodering.
 
-Deze tutorial leert u hoe u ComfyUI gebruikt met het Z Image Turbo-model op uw GPU om hoogwaardige AI-afbeeldingen te genereren.
+Deze tutorial leert je hoe je ComfyUI met het Z Image Turbo-model op je GPU gebruikt om hoogwaardige AI-afbeeldingen te genereren.
 
-## Wat U Leert
+## Wat je leert
 
-- Hoe u ComfyUI start en de Z-Image Turbo-sjabloon laadt
+- Hoe je ComfyUI start en de Z-Image Turbo-template laadt
 - Inzicht in de componenten van de diffusiepijplijn
 - Afbeeldingen genereren en generatieparameters afstemmen
 - Workflows opslaan en delen
 
-## De Geheugenconfiguratie Instellen
+## De geheugenconfiguratie instellen
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Controleren op Software-updates
+## Controleren op software-updates
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Softwarevereisten Installeren
+## De softwarevereisten installeren
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -41,14 +41,14 @@ Deze tutorial leert u hoe u ComfyUI gebruikt met het Z Image Turbo-model op uw G
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Verleen uw gebruiker toegang tot GPU-apparaten** (log uit en weer in om dit van kracht te laten worden):
+**Geef je gebruiker toegang tot GPU-apparaten** (log uit en weer in om dit van kracht te laten worden):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-#### Een Virtuele Omgeving Aanmaken
-Open op Linux een terminal in de map van uw keuze en voer de volgende opdracht uit om een venv aan te maken:
+#### Een virtuele omgeving maken
+Open op Linux een terminal in de map van je keuze en voer de volgende opdracht uit om een venv te maken:
 
 <!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
@@ -283,17 +283,17 @@ echo "OK: ComfyUI server is reachable!"
 <!-- @os:end -->
 
 
-## ComfyUI Starten
+## ComfyUI starten
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-Om ComfyUI op Windows te starten, klikt u op de ComfyUI Desktop Launcher die u op uw bureaublad vindt. Volg de stappen om de lokale versie met AMD te installeren.
+Om ComfyUI op Windows te starten, klik je op de ComfyUI Desktop Launcher die je op je bureaublad vindt. Volg de stappen om de lokale versie met AMD te installeren.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Klik vervolgens op de ComfyUI-knop bovenaan het midden van de app. Dit opent een instellingstabblad. Open het tabblad Opslag en zorg ervoor dat de paden als volgt zijn ingesteld om toegang te krijgen tot de vooraf geïnstalleerde modellen.
+Klik vervolgens op de ComfyUI-knop bovenin het midden van de app. Hierdoor wordt een instellingentabblad geopend. Open het tabblad Storage en zorg ervoor dat de paden als volgt zijn ingesteld om toegang te krijgen tot de vooraf geïnstalleerde modellen.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
@@ -303,8 +303,8 @@ Klik vervolgens op de ComfyUI-knop bovenaan het midden van de app. Dit opent een
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Om ComfyUI op Linux te starten, klikt u op de ComfyUI-snelkoppeling in de taakbalk. Het zou vanzelf in een browservenster moeten openen.
->**Tip**: ComfyUI en zijn modellen worden opgeslagen in `~/.local/share/ComfyUI/models`. Dit is waar u handmatig workflows of nieuwe modellen kunt toevoegen.
+Om ComfyUI op Linux te starten, klik je op de ComfyUI-snelkoppeling in de taakbalk. Deze zou vanzelf in een browservenster moeten openen.
+>**Tip**: ComfyUI en de bijbehorende modellen worden opgeslagen op `~/.local/share/ComfyUI/models`. Hier kun je handmatig workflows of nieuwe modellen toevoegen.
 
 
 <!-- @os:end -->
@@ -312,90 +312,90 @@ Om ComfyUI op Linux te starten, klikt u op de ComfyUI-snelkoppeling in de taakba
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-Om ComfyUI op Windows te starten, klikt u eenvoudig op de ComfyUI-snelkoppeling op uw bureaublad.
+Om ComfyUI op Windows te starten, klik je gewoon op de ComfyUI-snelkoppeling op je bureaublad.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
 Om ComfyUI te starten:
 
-1. Zorg ervoor dat u zich in de ComfyUI-map bevindt. 
+1. Zorg ervoor dat je je in de ComfyUI-map bevindt.
 2. Voer `python3 main.py --use-pytorch-cross-attention` uit
 
-ComfyUI start een lokale webserver. Open uw browser naar `http://127.0.0.1:8188` om toegang te krijgen tot de interface.
+ComfyUI start een lokale webserver. Open je browser naar `http://127.0.0.1:8188` om toegang te krijgen tot de interface.
 
-> **Tip**: Houd het terminalvenster open terwijl u ComfyUI gebruikt. Als u het sluit, wordt de server gestopt.
+> **Tip**: Houd het terminalvenster open terwijl je ComfyUI gebruikt. Als je het sluit, stopt de server.
 <!-- @os:end -->
 <!-- @device:end -->
 
 
-## De Z-Image Turbo-sjabloon Vinden
+## De Z-Image Turbo-template vinden
 
-Voordat u afbeeldingen genereert, moet u de Z-Image Turbo-sjabloon laden. Zo vindt u deze:
+Voordat je afbeeldingen kunt genereren, moet je de Z-Image Turbo-template laden. Zo vind je deze:
 
-1. **Kijk aan de uiterste linkerkant van het scherm**—er is een verticale werkbalk die van boven naar beneden loopt aan de meest linkse zijde van de app.
+1. **Kijk naar de uiterst linkerrand van het scherm**—daar loopt een verticale werkbalk van boven naar beneden aan de linkerkant van de app.
 
-2. **Zoek het mappictogram**—zoek in die linker werkbalk naar een pictogram dat eruitziet als een map. Wanneer u erover beweegt, is het gelabeld als "Templates."
+2. **Zoek het mapicoon**—kijk in die linker werkbalk naar een icoon dat op een map lijkt. Als je erover zweeft, wordt het gelabeld als "Templates."
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
 </p>
 
-3. **Klik op het mappictogram**—dit opent het paneel Templates.
+3. **Klik op het mapicoon**—hiermee wordt het paneel Templates geopend.
 
-4. **Zoek naar "Z-Image Turbo"**—gebruik de zoekbalk of scroll door de beschikbare sjablonen om de Z-Image Turbo Text To Image-workflow te vinden en klik om deze te laden.
+4. **Zoek naar "Z-Image Turbo"**—gebruik de zoekbalk of blader door de beschikbare templates om de workflow Z-Image Turbo Text To Image te vinden, en klik erop om deze te laden.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
 </p>
 
-## Modellen Downloaden
+## Modellen downloaden
 
 <!-- @require:comfyui-models -->
 
-## De Interface Begrijpen
+## De interface begrijpen
 
-Wanneer de Z-Image Turbo-sjabloon wordt geladen, ziet u een canvas met 2 hoofdknooppunten. Het eerste knooppunt heet 'Text to Image (Z-Image-Turbo)' en het tweede knooppunt is voor het bekijken van de afbeelding.
+Wanneer de Z-Image Turbo-template wordt geladen, zie je een canvas met 2 hoofdnodes. De eerste node heet 'Text to Image (Z-Image-Turbo)', en de tweede node is voor het bekijken van de afbeelding.
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
 </p>
 
 
-Klik op de Z-Image-node op de knop rechtsboven om de node uit te vouwen en de subgrafiek te bekijken.
+Klik op de Z-Image-node op de knop rechtsboven om de node uit te vouwen en de subgraaf te bekijken.
 
 <p align="center">
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
 </p>
 
-### Pijplijncomponenten
+### Onderdelen van de pijplijn
 
 De Z-Image Turbo-workflow gebruikt vier belangrijke modelcomponenten die samenwerken:
 
 | Component | Rol |
 |-----------|------|
-| **Tekstencoder** (Qwen 3 4B) | Converteert uw tekstprompt naar embeddings die het diffusiemodel begrijpt |
-| **Diffusiemodel** (Z-Image Turbo) | Het centrale neurale netwerk dat latente representaties iteratief ontruist tot afbeeldingen |
-| **VAE** (Variationele Autoencoder) | Codeert afbeeldingen naar/van de latente ruimte (decodeert de uiteindelijke latenten naar pixels) |
+| **Tekstcodering** (Qwen 3 4B) | Zet je tekstprompt om in embeddings die het diffusiemodel begrijpt |
+| **Diffusiemodel** (Z-Image Turbo) | Het kern-neurale netwerk dat iteratief latente representaties omzet in afbeeldingen door ruisreductie |
+| **VAE** (Variational Autoencoder) | Codeert afbeeldingen naar/van de latente ruimte (decodeert de uiteindelijke latents naar pixels) |
 | **LoRA** (optioneel) | Lichtgewicht adapters die stijl of onderwerp aanpassen zonder het basismodel opnieuw te trainen |
 
-Elk knooppunt in de workflow komt overeen met een van deze componenten. Gegevens stromen van links naar rechts: tekst → embeddings → begeleide ontruising → latenten → uiteindelijke afbeelding.
+Elke node in de workflow komt overeen met een van deze componenten. Data stroomt van links naar rechts: tekst → embeddings → begeleide ruisreductie → latents → uiteindelijke afbeelding.
 
-## Uw Eerste Afbeelding Genereren
+## Je eerste afbeelding genereren
 
 Het Z-Image Turbo-model is al geladen. Om een afbeelding te genereren:
 
-1. **Voer uw prompt in** in de hoofd Z-Image-node. Wees beschrijvend. Hier is een voorbeeld:
+1. **Voer je prompt in** in de hoofd-Z-Image-node. Wees beschrijvend. Hier is een voorbeeld:
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-2. **(Optioneel)**: Bevestig of pas eventuele andere specifieke instellingen binnen de subgrafiek aan.
-3. **Klik op de blauwe "Run Workflow"** in de rechterhoek (of druk op `Ctrl+Enter`)
-4. Bekijk hoe de knooppunten oplichten terwijl elke stap wordt uitgevoerd
+2. **(Optioneel)**: Bevestig of pas eventuele andere specifieke instellingen binnen de subgraaf aan.
+3. **Klik op de blauwe knop "Run Workflow"** in de rechterhoek (of druk op `Ctrl+Enter`)
+4. Kijk hoe de nodes oplichten terwijl elke stap wordt uitgevoerd
 
-De volledige uitvoering van de workflow zou in minder dan 30 seconden moeten zijn voltooid. Uw gegenereerde afbeelding verschijnt in het knooppunt **Save Image** en wordt opgeslagen in de map `output/`.
+De volledige uitvoering van de workflow zou binnen 30 seconden voltooid moeten zijn. Je gegenereerde afbeelding verschijnt in de node **Save Image** en wordt opgeslagen in de map `output/`.
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -567,64 +567,63 @@ ls -1t ComfyUI/output/*.png | head -n 5
 <!-- @os:end -->
 
 
-## Generatieparameters Aanpassen
-
+## Generatieparameters aanpassen
 ### KSampler-instellingen
 
-Het KSampler-knooppunt beheert het kernproces van de diffusie:
+De KSampler-node bestuurt het kernproces van diffusie:
 
-| Parameter | Wat Het Beheert | Aanbevolen voor Z-Image Turbo |
+| Parameter | Wat het bestuurt | Aanbevolen voor Z-Image Turbo |
 |-----------|------------------|-------------------------------|
-| **steps** | Aantal ontruisingsiteraties | 4–10 (turbomodellen zijn gedistilleerd voor minder stappen) |
-| **cfg** | Classifier-vrije begeleidingsschaal—hoe nauwkeurig de prompt wordt gevolgd | 1.0–2.0 (turbomodellen gebruiken zeer lage begeleiding) |
-| **sampler_name** | Ontruisingsalgoritme | `euler` en `res_multistep` werken goed voor turbomodellen |
-| **scheduler** | Ruisschedulecurve | `normal` of `simple` |
-| **seed** | Willekeurige seed voor reproduceerbaarheid | Stel vaste waarden in om op een compositie te itereren |
+| **steps** | Aantal denoising-iteraties | 4–10 (turbo-modellen zijn gedistilleerd voor minder stappen) |
+| **cfg** | Classifier-free guidance scale—hoe strikt de prompt gevolgd wordt | 1.0–2.0 (turbo-modellen gebruiken zeer lage guidance) |
+| **sampler_name** | Denoising-algoritme | `euler` en `res_multistep` werken goed voor turbo-modellen |
+| **scheduler** | Curve van het noise schedule | `normal` of `simple` |
+| **seed** | Willekeurige seed voor reproduceerbaarheid | Stel vaste waarden in om te itereren op een compositie |
 
 ### Afbeeldingsgrootte
 
-Om de uitvoerdimensies aan te passen, zoekt u het knooppunt **Empty Latent Image** en wijzigt u **width** en **height**. Houd de afmetingen op of onder 1024 pixels aan de langste zijde voor optimale kwaliteit.
+Om de uitvoerafmetingen aan te passen, zoek de **Empty Latent Image**-node en wijzig **width** en **height**. Houd de afmetingen op of onder 1024 pixels aan de langste zijde voor optimale kwaliteit.
 
 ### ModelSamplingAuraFlow
 
-Het knooppunt **ModelSamplingAuraFlow** is een gespecialiseerde samplingmodifier die aanpast hoe het diffusieproces omgaat met ruisplanning. U ziet dit knooppunt verbonden met de modeluitvoer in de Z-Image Turbo-workflow.
+De **ModelSamplingAuraFlow**-node is een gespecialiseerde sampling-modifier die aanpast hoe het diffusieproces de noise scheduling afhandelt. Je ziet deze node verbonden met de model-output in de Z-Image Turbo workflow.
 
-| Parameter | Wat Het Beheert | Aanbevolen Waarden |
+| Parameter | Wat het bestuurt | Aanbevolen waarden |
 |-----------|------------------|-------------------|
-| **shift** | Past de timing van het ruisschema aan—hogere waarden verschuiven meer detailverbetering naar latere stappen | 1.0–4.0 (standaard is 3.0) |
+| **shift** | Past de timing van het noise schedule aan—hogere waarden verschuiven meer detailverfijning naar latere stappen | 1.0–4.0 (standaard is 3.0) |
 
-Wanneer u **shift** aanpast:
+Wanneer **shift** aan te passen:
 
-- **Lagere waarden (1.0–2.0)**: Snellere convergentie, goed voor eenvoudige composities
-- **Hogere waarden (3.0–4.0)**: Meer geleidelijke verfijning, kan fijne details in complexe scènes verbeteren
+- **Lagere waarden (1.0–2.0)**: Snellere convergentie, geschikt voor eenvoudige composities
+- **Hogere waarden (3.0–4.0)**: Geleidelijkere verfijning, kan fijne details verbeteren in complexe scènes
 
-De AuraFlow-samplingmethode is specifiek ontworpen voor flow-matching-modellen zoals Z-Image Turbo, waardoor een correcte ruisverdeling gedurende het gehele generatieproces wordt gewaarborgd.
+De AuraFlow-samplingmethode is specifiek ontworpen voor flow-matching-modellen zoals Z-Image Turbo, en zorgt voor een correcte noise-distributie gedurende het hele generatieproces.
 
-## Werken met Workflows
+## Werken met workflows
 
-### Workflows Opslaan
+### Workflows opslaan
 
-Klik op de knop **Save** in het menu om uw workflow als een JSON-bestand te exporteren. Dit legt het volgende vast:
+Klik op de knop **Save** in het menu om je workflow te exporteren als een JSON-bestand. Dit legt vast:
 
-- Alle knooppunten en hun parameters
-- Alle verbindingen tussen knooppunten
+- Alle nodes en hun parameters
+- Alle verbindingen tussen nodes
 - Huidige prompttekst
 
-### Workflows Laden
+### Workflows laden
 
-Sleep een workflow-JSON-bestand naar het canvas of gebruik **Load** vanuit het menu. De Z-Image Turbo-workflow die u standaard ziet, wordt geladen vanuit een opgeslagen workflowbestand.
+Sleep een JSON-workflowbestand naar het canvas, of gebruik **Load** in het menu. De Z-Image Turbo workflow die je standaard ziet, wordt geladen vanuit een opgeslagen workflowbestand.
 
-### Workflows Delen
+### Workflows delen
 
-Workflows zijn op zichzelf staand—deel het JSON-bestand met collega's en zij kunnen uw exacte configuratie reproduceren. Dit maakt ComfyUI uitstekend geschikt voor collaboratief experimenteren.
+Workflows zijn op zichzelf staand—deel het JSON-bestand met collega's, zodat zij je exacte opstelling kunnen reproduceren. Dit maakt ComfyUI uitstekend geschikt voor gezamenlijk experimenteren.
 
-## Volgende Stappen
+## Volgende stappen
 
-- **Verken LoRA-knooppunten**: Pas stijl- of onderwerpAdapters toe zonder opnieuw te trainen
-- **Voeg negatieve prompts toe**: Verbind een tweede CLIP Text Encode-knooppunt met de **negative** conditioneringsinvoer van KSampler om het model weg te sturen van ongewenste kenmerken zoals vervaging, artefacten of watermerken
-- **Bouw aangepaste workflows**: Koppel meerdere generaties, voeg upscaling toe of maak afbeeldingsvariaties
-- **Blader door community-workflows**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) heeft veel kant-en-klare workflows
+- **Verken LoRA-nodes**: Pas stijl- of onderwerp-adapters toe zonder opnieuw te trainen
+- **Voeg negatieve prompts toe**: Verbind een tweede CLIP Text Encode-node met de **negative**-conditioning-input van KSampler om het model weg te sturen van ongewenste kenmerken zoals wazigheid, artefacten of watermerken
+- **Bouw aangepaste workflows**: Koppel meerdere generaties, voeg upscaling toe, of maak afbeeldingsvariaties
+- **Blader door community-workflows**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) bevat veel kant-en-klare workflows
 
-De kracht van ComfyUI ligt in experimenteren: verbind knooppunten anders, pas parameters aan en observeer hoe elke wijziging de uitvoer beïnvloedt. Deze praktische verkenning bouwt intuïtie op voor hoe diffusiemodellen werken.
+De kracht van ComfyUI ligt in experimenteren: verbind nodes op verschillende manieren, pas parameters aan, en observeer hoe elke verandering de output beïnvloedt. Deze praktische verkenning bouwt intuïtie op voor hoe diffusiemodellen werken.
 
-Voor meer informatie, bekijk de [ComfyUI-documentatie](https://docs.comfy.org/).
+Kijk voor meer informatie op de [ComfyUI-documentatie](https://docs.comfy.org/).

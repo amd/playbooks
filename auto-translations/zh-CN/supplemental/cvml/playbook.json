@@ -1,5 +1,5 @@
 {
   "id": "cvml",
   "title": "使用 AMD Ryzen™ AI NPU 实现本地计算机视觉",
-  "description": "使用 CVML SDK 在 Ryzen AI 和 AMD ROCm™ 软件之上构建本地感知能力"
+  "description": "在 Ryzen AI 和 AMD ROCm™ 软件之上,使用 CVML SDK 构建本地感知能力"
 }

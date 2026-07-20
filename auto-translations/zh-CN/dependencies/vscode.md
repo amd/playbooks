@@ -8,11 +8,11 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code 可以从 **AMD Ryzen™ AI Developer Center** 安装。前往 **Updates** 选项卡，如果尚未安装 VS Code，请进行安装。
+可以从 **AMD Ryzen™ AI Developer Center** 安装 VS Code。前往 **Updates** 选项卡，如果尚未安装 VS Code，请进行安装。
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code 可以从 **AMD Ryzen™ AI Developer Center** 安装。前往 **Manage** 选项卡，如果尚未安装 VS Code，请进行安装。
+可以从 **AMD Ryzen™ AI Developer Center** 安装 VS Code。前往 **Manage** 选项卡，如果尚未安装 VS Code，请进行安装。
 <!-- @os:end -->
 <!-- @device:end -->
 

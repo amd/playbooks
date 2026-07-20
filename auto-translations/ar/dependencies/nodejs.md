@@ -6,12 +6,12 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Node.js 22.22.1 LTS هو الإصدار الموصى به لهذه المنصة.
+الإصدار Node.js 22.22.1 LTS هو الإصدار الموصى به لهذه المنصة.
 
 <!-- @os:windows -->
 
-1. قم بتنزيل مثبّت Windows 64-bit من [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
-2. شغّل المثبّت واتبع التعليمات
+1. حمّل مثبت Windows 64-bit من [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+2. شغّل المثبت واتبع التعليمات
 3. تحقق من التثبيت:
 ```cmd
 node --version
@@ -38,4 +38,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **ملاحظة**: راجع [تنزيلات Node.js](https://nodejs.org/en/download/) للاطلاع على خيارات تثبيت إضافية ومنصات أخرى.
+> **ملاحظة**: راجع [تنزيلات Node.js](https://nodejs.org/en/download/) للحصول على خيارات ومنصات تثبيت إضافية.

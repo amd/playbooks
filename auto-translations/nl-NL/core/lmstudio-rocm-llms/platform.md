@@ -4,23 +4,23 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Platform Configuration
+# Platformconfiguratie
 
 Dit document beschrijft de verwachte platformconfiguraties voor het uitvoeren van dit playbook.
 
 ## Windows
 
-### LM Studio Installatie
+### LM Studio-installatie
 
-LM Studio moet vooraf geïnstalleerd zijn:
+LM Studio moet vooraf zijn geïnstalleerd:
 
 | Component | Versie | Locatie |
 |-----------|---------|----------|
-| **LM Studio (Modellen + Overig)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Models + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Programma)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Model Downloaden
+### Model downloaden
 
 De volgende modellen moeten al aanwezig zijn in de LM Studio-modellenmap (`C:\Users\...\.lmstudio\models`):
 
@@ -33,10 +33,10 @@ De volgende modellen moeten al aanwezig zijn in de LM Studio-modellenmap (`C:\Us
 
 ## Linux
 
-### LM Studio Installatie
+### LM Studio-installatie
 
 Zie [lmstudio.md](../../dependencies/lmstudio.md) voor meer details.
 
-### Model Downloaden
+### Model downloaden
 
 Hetzelfde als op Windows.

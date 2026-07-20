@@ -6,85 +6,85 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> يستخدم هذا الدليل الإرشادي علامات خاصة لا يمكن لـ GitHub عرضها. يُرجى زيارة [amd.com/playbooks](https://amd.com/playbooks) لمعاينة هذا المحتوى بشكل صحيح.
 <!-- @github-only:end -->
 
 # التطوير عن بُعد باستخدام AMD Sync
 
 ## نظرة عامة
 
-يحوّل **AMD Sync** جهاز الكمبيوتر المحمول الخاص بك إلى لوحة تحكم عن بُعد لجهاز AMD Ryzen™ AI Halo. تخطَّ الإعداد اليدوي لـ SSH والمفاتيح وبيئة التطوير — ثبّت AMD Sync واحصل على وصول بنقرة واحدة إلى طرفية عن بُعد، و VS Code، و JupyterLab، ولوحة مراقبة مباشرة لـ GPU/CPU/الذاكرة على جهاز Ryzen AI Halo.
+يحوّل **AMD Sync** حاسوبك المحمول إلى قمرة قيادة عن بُعد لجهاز AMD Ryzen™ AI Halo. تخطَّ الإعداد اليدوي لـ SSH والمفاتيح وبيئة التطوير المتكاملة — قم بتثبيت AMD Sync واحصل بنقرة واحدة على طرفية (terminal) عن بُعد، وVS Code، وJupyterLab، ولوحة معلومات حية لوحدة معالجة الرسومات (GPU) ووحدة المعالجة المركزية (CPU) والذاكرة على Ryzen AI Halo.
 
-يبقى جهازك المحلي مألوفاً؛ كل أمر ودفتر ملاحظات ونموذج يُنفَّذ على جهاز Ryzen AI Halo.
+يظل جهازك المحلي مألوفًا؛ فكل أمر ودفتر ملاحظات ونموذج يعمل على Ryzen AI Halo.
 
-> **تلميح**: ستحتوي هذه الصفحة على أي تحديثات جديدة لـ AMDSync.
+> **نصيحة**: ستحتوي هذه الصفحة على أي تحديثات جديدة لـ AMDSync.
 
 ## ما ستتعلمه
 
-- تفعيل SSH على جهاز Ryzen AI Halo والاتصال به من AMD Sync
-- تشغيل VS Code والطرفية و JupyterLab والمقاييس المباشرة على جهاز Ryzen AI Halo بنقرة واحدة
+- تفعيل SSH على Ryzen AI Halo والاتصال به من AMD Sync
+- تشغيل VS Code والطرفية (Terminal) وJupyterLab والمقاييس الحية (Live Metrics) على Ryzen AI Halo بنقرة واحدة
 - تنظيم العمل عن بُعد باستخدام مجلدات المشاريع المُدارة في AMD Sync
 
 ---
 
 ## المفاهيم الأساسية
 
-يتكون AMD Sync من جانبين: **عميل** (جهازك المحمول الذي يشغّل تطبيق AMD Sync) و**خادم** (جهاز Ryzen AI Halo الذي يشغّل خادم SSH الذي يتصل به AMD Sync عبر نفق). كل ما تشغّله من AMD Sync — VS Code أو طرفية أو دفتر ملاحظات — يُفتح محلياً لكنه يُنفَّذ على جهاز Ryzen AI Halo.
+يتكوّن AMD Sync من طرفين: **عميل** (client) (حاسوبك المحمول، الذي يشغّل تطبيق AMD Sync) و**خادم** (server) (Ryzen AI Halo، الذي يشغّل خادم SSH يقوم AMD Sync بإنشاء نفق (tunnel) داخله). كل ما تشغّله من AMD Sync — VS Code، أو طرفية، أو دفتر ملاحظات — يُفتح محليًا لكنه يُنفَّذ على Ryzen AI Halo.
 
-> **الأنظمة المدعومة للعميل:** Windows 11 وLinux. نظام macOS غير مدعوم.
+> **العملاء المدعومون:** Windows 11 وLinux. نظام macOS غير مدعوم.
 
 ---
 
-## الخطوة 1 — تفعيل SSH على جهاز Ryzen AI Halo
+## الخطوة 1 — تفعيل SSH على Ryzen AI Halo
 
 
-> **ملاحظة:** على Windows، يأتي جهاز Ryzen AI Halo مع خادم SSH *مُعطَّلاً بشكل افتراضي*. على Linux، يأتي مع خادم SSH *مُفعَّلاً بشكل افتراضي*.
+> **ملاحظة:** على نظام Windows، يأتي جهاز Ryzen AI Halo مع خادم SSH *معطّلًا افتراضيًا*. أما على Linux، فيأتي مع خادم SSH *مفعّلًا افتراضيًا*.
 
-1. على جهاز Ryzen AI Halo، افتح **AMD Ryzen™ AI Developer Center**.
-2. انتقل إلى تبويب **Remote**.
-3. فعّل **SSH Server**.
-4. لاحظ **عنوان IP** و**المنفذ** و**اسم المستخدم** المعروضة تحت **Server Information** — ستحتاج إلى لصقها في AMD Sync.
+1. على جهاز Ryzen AI Halo، افتح **مركز مطوري AMD Ryzen™ AI** (AMD Ryzen™ AI Developer Center).
+2. انتقل إلى علامة التبويب **Remote**.
+3. فعّل خيار **SSH Server**.
+4. لاحظ **عنوان IP**، و**المنفذ (Port)**، و**اسم المستخدم (Username)** الظاهرة تحت **معلومات الخادم (Server Information)** — ستحتاج إلى لصقها في AMD Sync.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/halobox_remote_tab.png" alt="AMD Ryzen AI Developer Center Remote tab showing SSH Server toggle and Server Information"/>
 </div>
 
-> **ملاحظة:** هذا هو AMD Developer Center لنظام Windows. قد يختلف مظهر نسخة Linux، لكنها تتضمن وظائف مشابهة للعمل عن بُعد.
+> **ملاحظة:** هذا هو مركز مطوري AMD الخاص بنظام Windows. قد يختلف واجهة الإصدار الخاص بـ Linux، لكنه يوفّر وظائف مماثلة للعمل عن بُعد.
 
-> **تلميح:** يطلب AMD Sync **كلمة مرور تسجيل الدخول إلى نظام التشغيل** لذلك المستخدم، وليس كلمة مرور من Developer Center.
+> **نصيحة:** يطلب AMD Sync **كلمة مرور تسجيل الدخول لنظام التشغيل (OS login password)** لذلك المستخدم، وليس كلمة مرور من مركز المطورين.
 
 ---
 
 ## الخطوة 2 — تثبيت AMD Sync على جهاز العميل
 
-يعمل AMD Sync على Windows 11 وLinux. نزّل المثبّت المناسب لنظام تشغيلك، ثم اتبع الخطوات أدناه. بعد التثبيت، انقر على **Accept & Install** في شاشة **Get Started** — يُشغَّل AMD Sync تلقائياً عند الانتهاء.
+يعمل AMD Sync على نظامي Windows 11 وLinux. قم بتنزيل المثبِّت الخاص بنظام التشغيل لديك، ثم اتبع الخطوات أدناه. بعد التثبيت، انقر على **Accept & Install** في شاشة **Get Started** — سيُطلق AMD Sync تلقائيًا عند الانتهاء.
 
 ### Windows
 
 [تنزيل AMDSyncInstaller.exe](https://drivers.amd.com/drivers/amd-sync/windows/amdsyncinstaller.exe)
 
-1. انقر نقراً مزدوجاً على `AMDSyncInstaller.exe`.
+1. انقر نقرًا مزدوجًا على `AMDSyncInstaller.exe`.
 2. انقر على **Accept & Install**.
 
-> إذا طالبك جدار حماية Windows، اسمح لـ AMD Sync بالوصول إلى الشبكة حتى يتمكن من الوصول إلى جهاز Ryzen AI Halo عبر SSH.
+> إذا طلب منك جدار حماية Windows إذنًا، فاسمح لـ AMD Sync بالوصول إلى الشبكة حتى يتمكن من الوصول إلى Ryzen AI Halo عبر SSH.
 
 ### Linux
 
-انقر على الرابط لتنزيل الصيغة التي تفضّلها:
+انقر على الرابط لتنزيل التنسيق الذي تفضّله:
 
-| الصيغة | التنزيل | أمر التثبيت |
+| التنسيق | التنزيل | أمر التثبيت |
 |--------|----------|-----------------|
 | `.deb` | [AMDSyncInstaller.deb](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.deb) | `sudo apt install ./amdsyncinstaller.deb` |
 | `.rpm` | [AMDSyncInstaller.rpm](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.rpm) | `sudo rpm -i ./amdsyncinstaller.rpm` |
 | `.AppImage` | [AMDSyncInstaller.AppImage](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.AppImage) | `chmod +x ./amdsyncinstaller.AppImage && ./amdsyncinstaller.AppImage` |
 
-> **ملاحظة:** قد يُصنّف Ubuntu App Center ملف `.deb` المفتوح محلياً على أنه *"غير آمن محتملاً."* هذا هو التحذير المعتاد لأي مثبّت محلي من طرف ثالث. إذا فشل النقر المزدوج على ملف `.deb`، استخدم أمر الطرفية أعلاه.
+> **ملاحظة:** قد يُصنِّف مركز تطبيقات Ubuntu ملف `.deb` المفتوح محليًا على أنه *"قد يكون غير آمن."* هذا هو التحذير المعتاد لأي مثبِّت محلي من جهة خارجية. إذا فشل النقر المزدوج على ملف `.deb`، فاستخدم أمر الطرفية أعلاه.
 
 ---
 
-## الخطوة 3 — الاتصال بجهاز Ryzen AI Halo
+## الخطوة 3 — الاتصال بجهاز Ryzen AI Halo الخاص بك
 
-عند التشغيل الأول، يعرض AMD Sync نموذج **Add a Remote Device**. أدخل القيم من تبويب **Remote** في Developer Center.
+عند التشغيل لأول مرة، يعرض AMD Sync نموذج **Add a Remote Device**. قم بملئه باستخدام القيم من علامة التبويب **Remote** في مركز المطورين.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/connect_device.png" alt="AMD Sync Add a Remote Device form"/>
@@ -92,90 +92,89 @@ SPDX-License-Identifier: MIT
 
 | الحقل | ملاحظات |
 |-------|-------|
-| **Device Name** *(اختياري)* | تسمية ودية مثل `Ryzen AI Halo`. الافتراضي هو `Device 1`، `Device 2`، … |
-| **Hostname or IP** | من تبويب Remote |
-| **SSH Port** | من تبويب Remote (أرقام فقط) |
-| **Username** | اسم حساب نظام التشغيل على جهاز Ryzen AI Halo |
-| **Password** | كلمة مرور تسجيل الدخول إلى نظام التشغيل — مخفية أثناء الكتابة |
+| **اسم الجهاز** *(اختياري)* | تسمية مألوفة مثل `Ryzen AI Halo`. الإعداد الافتراضي هو `Device 1`، `Device 2`، … |
+| **Hostname or IP** | من علامة التبويب Remote |
+| **SSH Port** | من علامة التبويب Remote (أرقام فقط) |
+| **Username** | اسم حساب نظام التشغيل الخاص بك على Ryzen AI Halo |
+| **Password** | كلمة مرور تسجيل الدخول لنظام التشغيل الخاصة بك — تظهر مموّهة أثناء الكتابة |
 
-انقر على **Add Device**. بعد شاشة تحميل قصيرة، ستظهر رسالة **"Connection Successful"** وستنتقل إلى العرض الرئيسي الموجود في علبة النظام. انقر خارج النافذة لإغلاقها؛ يبقى AMD Sync يعمل ويمكن الوصول إليه بنقرة واحدة.
+انقر على **Add Device**. بعد شاشة تحميل قصيرة، سترى رسالة **"Connection Successful"** وستنتقل إلى الشاشة الرئيسية، التي تقيم في شريط النظام (system tray). انقر خارج النافذة لإغلاقها؛ يبقى AMD Sync يعمل ويكون متاحًا بنقرة واحدة.
 
-> **إذا فشل الاتصال،** يعود AMD Sync إلى النموذج مع الاحتفاظ بقيمك. الأسباب الشائعة هي تعطيل SSH على جهاز Ryzen AI Halo، أو كلمة مرور خاطئة، أو وجود الجهازين على شبكات مختلفة.
+> **إذا فشل الاتصال،** يعود AMD Sync إلى النموذج مع الاحتفاظ بالقيم التي أدخلتها. الأسباب الشائعة هي تعطيل SSH على Ryzen AI Halo، أو كلمة المرور الخاطئة، أو وجود الجهازين على شبكتين مختلفتين.
 
 ---
 
 ## الخطوة 4 — تشغيل أول أداة عن بُعد
 
-يمنحك العرض الرئيسي خمسة مكوّنات بنقرة واحدة — جميعها متاحة بغض النظر عن نظام التشغيل الذي يعمل عليه العميل وجهاز Ryzen AI Halo.
+توفّر لك الشاشة الرئيسية خمسة مكوّنات بنقرة واحدة — وكلها متاحة بغض النظر عن نظام التشغيل الذي يعمل عليه العميل وRyzen AI Halo.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/homepage_after_connect.png" alt="AMD Sync home view with Directory dropdown and launchers"/>
 </div>
 
-| المكوّن | ما يفعله |
+| المكوّن | ما الذي يقوم به |
 |-----------|--------------|
-| **Directory** | يختار المجلد على جهاز Ryzen AI Halo الذي سيُفتح فيه VS Code والطرفية و JupyterLab. الافتراضي هو مساحة عمل `Documents/AMD_Sync` المُدارة. |
-| **VS Code** | يفتح VS Code محلياً مع نفق SSH إلى المجلد المحدد. |
-| **Terminal** | يفتح طرفية محلية متصلة بـ SSH بجهاز Ryzen AI Halo، في المجلد المحدد. |
-| **JupyterLab** | يشغّل مشروع دفتر ملاحظات متصلاً بـ SSH بجهاز Ryzen AI Halo، محدوداً بالمجلد المحدد. |
-| **Live Metrics** | عرض في الوقت الفعلي لاستخدام GPU والذاكرة و CPU على جهاز Ryzen AI Halo. |
+| **Directory** | يحدد المجلد على Ryzen AI Halo الذي سيُفتح فيه VS Code والطرفية وJupyterLab. الإعداد الافتراضي هو مساحة عمل مُدارة `Documents/AMD_Sync`. |
+| **VS Code** | يفتح VS Code محليًا مع نفق SSH إلى المجلد المحدد. |
+| **Terminal** | يفتح طرفية محلية متصلة عبر SSH بـ Ryzen AI Halo، في المجلد المحدد. |
+| **JupyterLab** | يُطلق مشروع دفتر ملاحظات متصل عبر SSH بـ Ryzen AI Halo، ومحصور في المجلد المحدد. |
+| **Live Metrics** | عرض في الوقت الفعلي لاستخدام GPU والذاكرة وCPU على Ryzen AI Halo. |
 
 ### جرّب VS Code
 
-للتشغيل الأول، جرّب **VS Code**.
+في أول عملية تشغيل لك، جرّب **VS Code**.
 
-1. اترك **Directory** على الافتراضي `~/Documents/AMD_Sync`.
+1. اترك **Directory** على الإعداد الافتراضي `~/Documents/AMD_Sync`.
 2. انقر على **VS Code**.
-3. ينشئ AMD Sync مجلد `Documents/AMD_Sync/Project_1` على جهاز Ryzen AI Halo ويفتح VS Code محلياً متصلاً به عبر نفق.
+3. ينشئ AMD Sync المجلد `Documents/AMD_Sync/Project_1` على Ryzen AI Halo ويفتح VS Code محليًا، متصلًا بنفق إليه.
 
-أنت الآن تحرّر ملفات موجودة على جهاز Ryzen AI Halo باستخدام إعداد VS Code المحلي الخاص بك. أنشئ ملف `helloworld.py`، أضف `print("hello world")`، افتح الطرفية المدمجة (`` Ctrl + ` ``)، وشغّله:
+أنت الآن تحرّر ملفات موجودة على Ryzen AI Halo باستخدام إعداد VS Code المحلي الخاص بك. أنشئ ملف `helloworld.py`، وأضف `print("hello world")`، ثم افتح الطرفية المدمجة (`` Ctrl + ` ``)، وشغّله:
 
 <div align="center" style="max-width: 620px; margin: 1.5rem auto;">
   <img src="assets/vscode.png" alt="VS Code SSH-tunneled into Project_1 on the Ryzen AI Halo, running helloworld.py"/>
 </div>
 
-يعرض شريط الحالة **SSH: Linux** — دليل على أن كودك يعمل على جهاز Ryzen AI Halo وليس على جهازك المحمول.
+يعرض شريط الحالة **SSH: Linux** — دليل على أن الكود الخاص بك يعمل على Ryzen AI Halo، وليس على حاسوبك المحمول.
+### جرّب Terminal
 
-### جرّب الطرفية
-
-انقر على **Terminal** للانتقال مباشرة إلى نفس المجلد عبر SSH دون مغادرة لوحة المفاتيح.
+انقر على **Terminal** للدخول إلى نفس المجلد عبر SSH دون ترك لوحة المفاتيح.
 
 <div align="center" style="max-width: 620px; margin: 1.5rem auto;">
   <img src="assets/terminal.png" alt="Local terminal SSH-connected to the Ryzen AI Halo in ~/Documents/AMD_Sync"/>
 </div>
 
-على Windows، الطرفية الافتراضية هي **PowerShell** — يمكنك التبديل إلى **Windows Command Prompt** من قائمة الإعدادات إذا كنت تفضّل ذلك. على Linux، يستخدم AMD Sync طرفية النظام الافتراضية.
+في نظام Windows، الطرفية الافتراضية هي **PowerShell** — يمكنك التبديل إلى **Windows Command Prompt** من قائمة الإعدادات إذا كنت تفضل ذلك. في نظام Linux، يستخدم AMD Sync الطرفية الافتراضية لنظامك.
 
 ---
 
-## كيفية عمل Directory
+## كيف يعمل الدليل (Directory)
 
-القائمة المنسدلة **Directory** هي أهم عنصر تحكم في AMD Sync — فهي تحدد المكان الذي تُفتح فيه كل أداة تشغّلها على جهاز Ryzen AI Halo.
+القائمة المنسدلة **Directory** هي أهم عنصر تحكم منفرد في AMD Sync — فهي تحدد أين يهبط كل أداة تُطلقها على Ryzen AI Halo.
 
-- **`~/Documents/AMD_Sync` (الافتراضي)** — يؤدي تشغيل VS Code أو JupyterLab من هنا إلى إنشاء مجلد مشروع جديد تلقائياً (`Project_1`، `Project_2`، … لـ VS Code؛ `Notebook_Project_1`، `Notebook_Project_2`، … لـ JupyterLab).
-- **مجلدات المشاريع الموجودة** — يظهر أي مجلد فرعي مباشر من `AMD_Sync` (بما في ذلك المجلدات التي تنشئها يدوياً على جهاز Ryzen AI Halo) في القائمة المنسدلة. يصبح آخر مجلد استخدمته هو الافتراضي في المرة القادمة.
-- **المسارات المخصصة** — اكتب أي مسار مطلق لفتح مجلد في مكان آخر على جهاز Ryzen AI Halo. يقتصر AMD Sync على *فتحه* فقط — لن ينشئ مجلدات خارج `AMD_Sync`، ولا تُحفظ المسارات المخصصة بين الجلسات.
+- **`~/Documents/AMD_Sync` (الافتراضي)** — يؤدي تشغيل VS Code أو JupyterLab من هنا إلى إنشاء مجلد مشروع جديد تلقائيًا (`Project_1`، `Project_2`، … لـ VS Code؛ و`Notebook_Project_1`، `Notebook_Project_2`، … لـ JupyterLab).
+- **مجلدات المشاريع الموجودة** — يظهر في القائمة المنسدلة أي مجلد فرعي مباشر تابع لـ `AMD_Sync` (بما في ذلك المجلدات التي تنشئها يدويًا على Ryzen AI Halo). يصبح آخر مجلد استخدمته هو الافتراضي في المرة القادمة.
+- **المسارات المخصصة** — اكتب أي مسار مطلق لفتح مجلد في مكان آخر على Ryzen AI Halo. يقوم AMD Sync فقط *بفتح* المجلد — لن ينشئ مجلدات خارج `AMD_Sync`، ولا يتم حفظ المسارات المخصصة بين الجلسات.
 
-إذا لم يعمل مسار مخصص، يخبرك AMD Sync بالسبب: صياغة غير صحيحة، أو المجلد غير موجود، أو المسار يشير إلى ملف.
-
----
-
-## المقاييس المباشرة و JupyterLab
-
-- **Live Metrics** — لوحة مراقبة مباشرة لاستخدام GPU والذاكرة و CPU. أسرع طريقة للتأكد من أن عملية تدريب عن بُعد تستخدم الأجهزة فعلاً.
-- **JupyterLab** — مشروع دفتر ملاحظات كامل متصل بـ SSH بجهاز Ryzen AI Halo، مع طرفية مدمجة خاصة به للجمع بين خلايا دفتر الملاحظات وأوامر الصدفة دون مغادرة الواجهة.
+إذا لم يعمل مسار مخصص، يخبرك AMD Sync بالسبب: بنية غير صالحة، أو المجلد غير موجود، أو المسار يشير إلى ملف.
 
 ---
 
-## الإعدادات والأجهزة المتعددة
+## Live Metrics و JupyterLab
+
+- **Live Metrics** — لوحة معلومات مباشرة لاستخدام الـ GPU والذاكرة والـ CPU. إنها أسرع طريقة للتأكد من أن عملية تدريب عن بُعد تستخدم العتاد فعليًا.
+- **JupyterLab** — مشروع دفتر ملاحظات كامل متصل عبر SSH بـ Ryzen AI Halo، مزود بطرفية مدمجة خاصة به لمزج خلايا الدفتر مع أوامر الصدفة دون مغادرة الواجهة.
+
+---
+
+## الإعدادات وأجهزة متعددة
 
 تحتوي قائمة **Settings** على ثلاثة تبويبات:
 
-| التبويب | ما يغطيه |
+| التبويب | ما يشمله |
 |-----|----------------|
-| **Devices** | يسرد كل جهاز Ryzen AI Halo اتصلت به بنجاح. أعد الاتصال أو عدّل بيانات الاعتماد أو أضف جهازاً جديداً. |
+| **Devices** | يسرد كل جهاز Ryzen AI Halo اتصلت به بنجاح. أعد الاتصال، أو عدّل بيانات الاعتماد، أو أضف جهازًا جديدًا. |
 | **Information** | روابط إلى الوثائق ودعم المنتدى. |
-| **Customize** | أعد تحديد موضع التطبيق على سطح المكتب، وبدّل نوع الطرفية (Windows فقط)، وتحقق من تحديثات AMD Sync. |
+| **Customize** | أعد تموضع التطبيق على سطح مكتبك، وبدّل نوع الطرفية (Windows فقط)، وتحقق من تحديثات AMD Sync. |
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/customize_tab.png" alt="AMD Sync Settings menu Customize tab"/>
@@ -183,19 +182,19 @@ SPDX-License-Identifier: MIT
 
 
 - **نوع الطرفية (Windows)** — اختر بين **PowerShell** (الافتراضي) و**Windows Command Prompt**.
-- **نوع الطرفية (Linux)** — طرفية النظام الافتراضية فقط متاحة.
-- **تحديثات التطبيق** — هذا التبويب هو المكان المناسب للتحقق من إصدارات AMD Sync الجديدة وتثبيتها من داخل الواجهة؛ لا حاجة إلى أداة تحديث منفصلة.
+- **نوع الطرفية (Linux)** — تتوفر فقط الطرفية الافتراضية للنظام.
+- **تحديثات التطبيق** — هذا التبويب هو المكان المناسب للتحقق من إصدارات جديدة من AMD Sync وتثبيتها من داخل الواجهة؛ لا حاجة إلى أداة تحديث منفصلة.
 
-> يظهر الجهاز تحت **Devices** فقط بعد نجاح الاتصال الأول، لذا لن تُزحم القائمة بالمحاولات الفاشلة.
+> لا يظهر الجهاز ضمن **Devices** إلا بعد نجاح أول اتصال، لذا لن تزدحم القائمة بالمحاولات الفاشلة.
 
 ---
 
 ## استكشاف الأخطاء وإصلاحها
 
-- **فشل الاتصال فوراً** — تأكد من تفعيل خادم SSH في تبويب **Remote** في Developer Center على جهاز Ryzen AI Halo.
-- **خطأ كلمة مرور خاطئة** — استخدم **كلمة مرور تسجيل الدخول إلى نظام التشغيل** على جهاز Ryzen AI Halo، وليس كلمات المرور المأخوذة من Developer Center.
-- **زر VS Code لا يستجيب** — ثبّت VS Code على جهاز العميل من [code.visualstudio.com](https://code.visualstudio.com).
-- **أيقونة علبة النظام لـ AMD Sync مفقودة (Linux/GNOME)** — ثبّت امتداد AppIndicator وفعّله.
-- **ملف `.deb` لا يُفتح من مدير الملفات** — استخدم `sudo apt install ./AMDSyncInstaller.deb` من الطرفية.
+- **فشل الاتصال فورًا** — تأكد من تفعيل خادم SSH على تبويب **Remote** في Developer Center الخاص بجهاز Ryzen AI Halo.
+- **خطأ كلمة المرور خاطئة** — استخدم **كلمة مرور تسجيل الدخول لنظام التشغيل** الخاصة بجهاز Ryzen AI Halo، وليس كلمات المرور المأخوذة من Developer Center.
+- **زر VS Code لا يفعل شيئًا** — ثبّت VS Code على جهازك العميل من [code.visualstudio.com](https://code.visualstudio.com).
+- **أيقونة AMD Sync في شريط النظام مفقودة (Linux/GNOME)** — ثبّت وفعّل امتداد AppIndicator.
+- **ملف `.deb` لا يفتح من مدير الملفات** — استخدم `sudo apt install ./AMDSyncInstaller.deb` من الطرفية.
 
 ---

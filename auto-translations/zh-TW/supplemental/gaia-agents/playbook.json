@@ -1,5 +1,5 @@
 {
   "id": "gaia-agents",
-  "title": "使用 GAIA 建立您的第一個 Agent",
-  "description": "建立一個 100% 本地端的 AI 代理——無需雲端 API。使用 GAIA SDK 建立一個硬體顧問。"
+  "title": "使用 GAIA 建立您的第一個代理程式",
+  "description": "建立 100% 本地 AI 代理程式——無需雲端 API。使用 GAIA SDK 建立硬體顧問。"
 }

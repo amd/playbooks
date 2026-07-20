@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 
 # Konfigurácia platformy
 
-Tento dokument popisuje očakávanú konfiguráciu platformy pre spustenie tohto playbooku.
+Tento dokument popisuje očakávanú konfiguráciu platformy na spustenie tohto playbooku.
 
-## Požadované aplikácie / frameworky
+## Požadované aplikácie/frameworky
 
 | Komponent       | Očakávaná konfigurácia               | Poznámky                                                                        |
-| --------------- | ------------------------------------ | ---------------------------------------------------------------------------- |
+| --------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
 | Python          | Python s podporou `venv`         | Používa sa na vytvorenie a aktiváciu `kernel-env`                                     |
-| ROCm Python SDK | Rodina balíkov ROCm 7.13             | Inštalovaná prostredníctvom toku závislostí playbooku                               |
-| PyTorch ROCm    | PyTorch 2.11.0 + ROCm 7.13           | Vyžadované pre `torch.cuda`, HIP runtime, JIT kompiláciu a `CUDAExtension` |
-| GPU Driver      | AMD GPU ovládač s podporou ROCm/HIP | Vyžadované pred tým, ako PyTorch dokáže detekovať AMD GPU                               |
+| ROCm Python SDK | Rodina balíkov ROCm 7.13             | Nainštalované prostredníctvom procesu závislostí playbooku                               |
+| PyTorch ROCm    | PyTorch 2.11.0 + ROCm 7.13           | Vyžaduje sa pre `torch.cuda`, HIP runtime, JIT kompiláciu a `CUDAExtension` |
+| Ovládač GPU      | Ovládač AMD GPU s podporou ROCm/HIP | Vyžaduje sa pred tým, ako PyTorch dokáže rozpoznať AMD GPU                               |
 
-> Poznámka: Ak používate AMD Ryzen™ AI Halo Developer Platform, AMD ROCm™ softvér a PyTorch sú predinštalované.
+> Poznámka: Ak používate AMD Ryzen™ AI Halo Developer Platform, softvér AMD ROCm™ a PyTorch sú predinštalované.
 
 ## Predpoklady pre Linux
 
@@ -28,23 +28,23 @@ sudo apt update
 sudo apt install -y python3-venv build-essential gcc g++
 ```
 
-* `python3-venv` je vyžadované na vytvorenie `kernel-env`.
-* `build-essential`, `gcc` a `g++` sú vyžadované pre návody na rozšírenia C++.
-* `amd-smi` sa používa na kontrolu viditeľnosti/využitia GPU v Linuxe.
+* `python3-venv` je potrebný na vytvorenie `kernel-env`.
+* `build-essential`, `gcc` a `g++` sú potrebné pre návody týkajúce sa rozšírení v jazyku C++.
+* `amd-smi` sa používa na kontrolu viditeľnosti/vyťaženia GPU v systéme Linux.
 
-Príklady rozšírení C++ zostavujú natívne moduly `.so` zo súborov `.cu` pomocou cesty `CUDAExtension` v PyTorch.
+Príklady rozšírení v jazyku C++ zostavujú natívne moduly `.so` zo súborov `.cu` pomocou cesty `CUDAExtension` v PyTorch.
 
 ## Predpoklady pre Windows
 
-Spúšťače pre Windows vyžadujú:
+Runnery pre Windows vyžadujú:
 
 * Python dostupný cez `python`
 * Nainštalujte najnovšiu verziu: [AMD Software: Adrenalin Edition™](https://www.amd.com/en/products/software/adrenalin.html)
-* [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) alebo [novší](https://visualstudio.microsoft.com/vs/community/) s pracovnou záťažou **Vývoj desktopových aplikácií v C++**
+* [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) alebo [novší](https://visualstudio.microsoft.com/vs/community/) so záťažou **Desktop development with C++**
 
-Prostredie C++ vo Visual Studio musí poskytovať:
+Prostredie Visual Studio C++ musí poskytovať:
 * `vcvars64.bat`
 * `cl.exe`
 * Cesty k hlavičkovým súborom a knižniciam Windows SDK
 
-Príklady rozšírení C++ zostavujú natívne moduly `.pyd` zo súborov `.cu` pomocou cesty `CUDAExtension` v PyTorch.
+Príklady rozšírení v jazyku C++ zostavujú natívne moduly `.pyd` zo súborov `.cu` pomocou cesty `CUDAExtension` v PyTorch.

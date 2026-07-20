@@ -12,12 +12,12 @@ Ta dokument opisuje pričakovane konfiguracije platforme za izvajanje tega priro
 
 ### Windows/Linux
 
-GAIA mora biti predhodno nameščena z uporabo navodil, navedenih v [Vodniku za namestitev GAIA](../../dependencies/gaia.md).
+GAIA mora biti vnaprej nameščena po navodilih iz [Vodnika za namestitev GAIA](../../dependencies/gaia.md).
 
-Lemonade Server mora biti predhodno nameščen z uporabo navodil, navedenih v [Vodniku za namestitev Lemonade](../../dependencies/lemonade.md).
+Lemonade Server mora biti vnaprej nameščen po navodilih iz [Vodnika za namestitev Lemonade](../../dependencies/lemonade.md).
 
 ## Zahtevani modeli
 
 ### Windows/Linux
 
-Agent za svetovanje glede strojne opreme uporablja **Qwen3-Coder-30B** za sklepanje agenta. Ta model se samodejno prenese med `gaia init`. Ročno prenašanje modelov ni potrebno.
+Agent Hardware Advisor za sklepanje agenta uporablja **Qwen3-Coder-30B**. Ta model se samodejno prenese med izvajanjem ukaza `gaia init`. Ročni prenos modelov ni potreben.

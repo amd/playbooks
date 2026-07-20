@@ -12,15 +12,15 @@ Tento dokument popisuje očekávané konfigurace platformy pro spuštění tohot
 
 ### Instalace LM Studio
 
-LM Studio by mělo být předinstalováno:
+LM Studio by měl být předem nainstalován:
 
 | Komponenta | Verze | Umístění |
 |-----------|---------|----------|
-| **LM Studio (Modely + Různé)** | v0.4.0 | `C:\Users\...\.lmstudio` |
-| **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (Mezipaměť)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (modely + ostatní)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (program)** | v0.4.0 | `C:\Program Files\LM Studio` |
+| **LM Studio (mezipaměť)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Stažení modelů
+### Stažení modelu
 
 Následující modely by již měly být přítomny v adresáři modelů LM Studio (`C:\Users\...\.lmstudio\models`):
 
@@ -37,6 +37,6 @@ Následující modely by již měly být přítomny v adresáři modelů LM Stud
 
 Další podrobnosti naleznete v [lmstudio.md](../../dependencies/lmstudio.md).
 
-### Stažení modelů
+### Stažení modelu
 
-Stejné jako v systému Windows.
+Stejné jako ve Windows.

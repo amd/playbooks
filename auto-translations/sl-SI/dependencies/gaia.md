@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA je AMD-jev odprtokodni okvir za gradnjo AI agentov, ki delujejo lokalno na AMD strojni opremi s pospeševanjem Ryzen AI.
+GAIA je AMD-jevo odprtokodno ogrodje za izdelavo agentov umetne inteligence, ki se izvajajo lokalno na strojni opremi AMD s pospeševanjem Ryzen AI.
 
 #### Namestitev GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. V sistemu Windows odprite terminal v izbranem imeniku in sledite ukazom za ustvarjanje venv.
+1. V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,7 +30,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. V sistemu Linux odprite terminal v izbranem imeniku in sledite ukazom za ustvarjanje venv.
+1. V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
 <!-- @test:id=create-venv-halo-box-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. V sistemu Windows odprite terminal v izbranem imeniku in sledite ukazom za ustvarjanje venv.
+1. V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,7 +71,7 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. V sistemu Linux odprite terminal v izbranem imeniku in sledite ukazom za ustvarjanje venv.
+1. V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
 <!-- @test:id=create-venv-linux timeout=60 -->
 ```bash
 sudo apt update
@@ -93,13 +93,13 @@ pip install amd-gaia
 
 3. Inicializacija GAIA
 
-Po namestitvi zaženite `gaia init` za nastavitev Lemonade Server in prenos modelov:
+Po namestitvi zaženite `gaia init`, da nastavite Lemonade Server in prenesete modele:
 
 ```bash
 gaia init
 ```
 
-To namesti Lemonade Server, prenese privzete modele in preveri nastavitev.
+S tem se namesti Lemonade Server, prenesejo privzeti modeli in preveri nastavitev.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,12 +281,12 @@ fi
 
 #### Preverjanje namestitve
 
-Preverite, ali je nameščena različica GAIA v0.16.2 ali novejša:
+Preverite, ali je nameščena GAIA različica 0.16.2 ali novejša:
 
 ```bash
 gaia --version
 ```
 
-> **Pomembno**: Pred uporabo GAIA se prepričajte, da Lemonade Server deluje. GAIA zahteva, da se Lemonade Server zažene ročno.
+> **Pomembno**: Pred uporabo GAIA se prepričajte, da je Lemonade Server zagnan. GAIA zahteva, da je Lemonade Server zagnan ročno.
 
 Za več informacij glejte [dokumentacijo GAIA](https://amd-gaia.ai).

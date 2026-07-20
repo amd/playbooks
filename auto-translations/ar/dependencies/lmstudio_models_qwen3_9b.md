@@ -10,14 +10,14 @@ SPDX-License-Identifier: MIT
 
 1. اضغط على "Ctrl" + "Shift" + "M" على لوحة المفاتيح أو انقر على تبويب "Discover" (أيقونة العدسة المكبرة) في الشريط الجانبي الأيسر
 2. ابحث عن `Qwen3.5 9B`
-3. اختر مستوى التكميم (يُعدّ `Q4_K_M` الموصى به توازناً جيداً بين الحجم والجودة) وانقر على Download
+3. اختر مستوى التكميم (يُنصح باستخدام `Q4_K_M` لأنه يوفر توازناً جيداً بين الحجم والجودة) ثم انقر على تنزيل
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download_qwen.png" alt="LM Studio Download Models" width="600"/>
 
-سيقوم LM Studio تلقائياً بتنزيل النموذج ووضعه في المجلد الصحيح.
+سيقوم LM Studio تلقائياً بتنزيل النموذج ووضعه في الدليل الصحيح.
 
-إذا كنت ترغب في تنزيل نماذج إضافية، يمكنك البحث عنها في تبويب Discover وسيتولى LM Studio الباقي.
+إذا رغبت في تنزيل نماذج إضافية، يمكنك البحث عنها في تبويب Discover وسيتولى LM Studio الباقي.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-qwen-windows timeout=60 hidden=True -->

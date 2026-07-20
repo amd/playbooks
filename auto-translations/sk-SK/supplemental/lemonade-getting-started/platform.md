@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 
 # Konfigurácia platformy — Lemonade Local AI
 
-Tento dokument popisuje predinštalovaný softvér, cesty k modelom a predpoklady špecifické pre platformu, ktoré tento playbook predpokladá.
+Tento dokument opisuje predinštalovaný softvér, cesty k modelom a špecifické predpoklady platformy predpokladané touto príručkou.
 
 ## Predinštalovaný softvér
 
 | Softvér | Verzia | Účel |
 |----------|---------|---------|
-| Lemonade Server | Najnovšie vydanie | Lokálny LLM server s OpenAI-kompatibilným API |
-| Python | 3.10–3.13 | Vyžadovaný pre príklad s OpenAI Python klientom |
+| Lemonade Server | Najnovšia verzia | Lokálny LLM server s OpenAI-kompatibilným API |
+| Python | 3.10–3.13 | Vyžaduje sa pre príklad klienta OpenAI Python |
 
 ## Predvolené úložisko modelov
 
-Modely stiahnuté cez Lemonade sú uložené podľa špecifikácie Hugging Face Hub:
+Modely stiahnuté prostredníctvom Lemonade sa ukladajú podľa špecifikácie Hugging Face Hub:
 
 | Platforma | Predvolená cesta |
 |----------|-------------|
@@ -31,11 +31,11 @@ Ak chcete zmeniť umiestnenie úložiska, nastavte premennú prostredia `HF_HOME
 | Cieľový hardvér | Požiadavky |
 |----------------|-------------|
 | **CPU** | Akýkoľvek moderný procesor x86-64 (AMD alebo Intel) |
-| **GPU (Vulkan)** | Akýkoľvek GPU s podporou Vulkan ovládača |
-| **GPU (ROCm)** | AMD Radeon RX 7000/9000 series alebo Radeon PRO W7000 series; AMD Ryzen AI MAX+ Pro 395 |
-| **NPU** | Procesor AMD Ryzen AI 300 series, Windows 11 |
+| **GPU (Vulkan)** | Akékoľvek GPU s podporou ovládača Vulkan |
+| **GPU (ROCm)** | AMD Radeon RX radu 7000/9000 alebo Radeon PRO radu W7000; AMD Ryzen AI MAX+ Pro 395 |
+| **NPU** | Procesor AMD Ryzen AI radu 300, Windows 11 |
 
 ## Sieťové požiadavky
 
-- Na počiatočné stiahnutie modelu je potrebné internetové pripojenie (1–25 GB v závislosti od modelu)
+- Na počiatočné stiahnutie modelu je potrebné internetové pripojenie (1 – 25 GB v závislosti od modelu)
 - Po stiahnutí modelov nie je internet potrebný

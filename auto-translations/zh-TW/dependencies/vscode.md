@@ -8,11 +8,11 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code 可從 **AMD Ryzen™ AI Developer Center** 安裝。前往 **Updates** 標籤，若尚未安裝 VS Code，請進行安裝。
+可從 **AMD Ryzen™ AI Developer Center** 安裝 VS Code。前往 **Updates** 分頁，若尚未安裝 VS Code，請進行安裝。
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code 可從 **AMD Ryzen™ AI Developer Center** 安裝。前往 **Manage** 標籤，若尚未安裝 VS Code，請進行安裝。
+可從 **AMD Ryzen™ AI Developer Center** 安裝 VS Code。前往 **Manage** 分頁，若尚未安裝 VS Code，請進行安裝。
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -20,14 +20,14 @@ VS Code 可從 **AMD Ryzen™ AI Developer Center** 安裝。前往 **Manage** �
 <!-- @os:windows -->
 
 1. 從以下網址下載 Windows 安裝執行檔：https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable。
-2. 點擊已下載的檔案 `VSCodeUserSetup-x64-1.108.2.exe` 以安裝 VS Code。
+2. 點擊下載的檔案 `VSCodeUserSetup-x64-1.108.2.exe` 以安裝 VS Code。
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
 1. 從以下網址下載 Debian 安裝套件：https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable。
-2. 點擊已下載的檔案 `code_1.108.2-1769004815_amd64.deb` 以安裝 VS Code。
+2. 點擊下載的檔案 `code_1.108.2-1769004815_amd64.deb` 以安裝 VS Code。
 
 <!-- @os:end -->
 <!-- @device:end -->

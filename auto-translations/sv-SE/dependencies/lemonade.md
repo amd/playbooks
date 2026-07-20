@@ -9,13 +9,13 @@ SPDX-License-Identifier: MIT
 #### Installera Lemonade
 
 <!-- @os:windows -->
-Ladda ned det senaste installationsprogrammet från [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) och kör `.msi`-filen.
+Ladda ner det senaste installationsprogrammet från [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) och kör `.msi`-filen.
 
 Efter installationen:
-- `lemonade` CLI läggs automatiskt till i systemets PATH
+- CLI-kommandot `lemonade` läggs automatiskt till i systemets PATH
 - Lemonade-servern förväntas köras automatiskt i bakgrunden
 
-Du kan också installera tyst från kommandoraden:
+Du kan även installera tyst från kommandoraden:
 ```cmd
 msiexec /i lemonade-server-minimal.msi /qn
 ```
@@ -44,14 +44,14 @@ För andra distributioner eller för att installera från källkod, se [fullstä
 lemonade --version
 ```
 
-Du bör se utdata som liknar:
+Du bör se utdata som liknar följande:
 ```
 lemonade version x.y.z
 ```
 
 Om du ser ett versionsnummer är Lemonade korrekt installerat och redo att användas.
 
-Här är en snabbreferens med vanliga Lemonade CLI-kommandon:
+Som snabbreferens, här är vanliga Lemonade CLI-kommandon:
 
 | Kommando | Vad det gör |
 | --- | --- |
@@ -59,11 +59,11 @@ Här är en snabbreferens med vanliga Lemonade CLI-kommandon:
 | `lemonade --version` | Skriver ut den installerade Lemonade-versionen. |
 | `lemonade status` | Bekräftar om Lemonade-servern körs och är nåbar. Standard-URL:en för det OpenAI-kompatibla API:et är `http://localhost:13305/api/v1`. |
 | `lemonade list` | Listar modeller som är tillgängliga för din Lemonade-installation. |
-| `lemonade pull <MODEL_NAME>` | Laddar ned en modell utan att starta den. |
-| `lemonade run <MODEL_NAME>` | Laddar ned modellen vid behov och startar den sedan för inferens/chatt. |
+| `lemonade pull <MODEL_NAME>` | Laddar ner en modell utan att starta den. |
+| `lemonade run <MODEL_NAME>` | Laddar ner modellen om det behövs och startar den sedan för inferens/chatt. |
 | `lemonade run <MODEL_NAME> --llamacpp rocm` | Startar en llama.cpp-modell med ROCm-backend. |
 | `lemonade run <MODEL_NAME> --llamacpp vulkan` | Startar en llama.cpp-modell med Vulkan-backend. |
-| `lemonade config` | Visar aktuella Lemonade-konfigurationsvärden. |
-| `lemonade config set llamacpp.backend=rocm` | Ställer in standard-llama.cpp-backend till ROCm. |
+| `lemonade config` | Visar de aktuella konfigurationsvärdena för Lemonade. |
+| `lemonade config set llamacpp.backend=rocm` | Ställer in standard-backend för llama.cpp till ROCm. |
 
-För de senaste Lemonade-serveralternativen eller felsökning, se den [officiella Lemonade-dokumentationen](https://lemonade-server.ai/docs/lemonade-cli/).
+För de senaste alternativen för Lemonade-servern eller felsökning, se den [officiella Lemonade-dokumentationen](https://lemonade-server.ai/docs/lemonade-cli/).

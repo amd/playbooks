@@ -8,18 +8,18 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code kan worden geïnstalleerd vanuit het **AMD Ryzen™ AI Developer Center**. Ga naar het tabblad **Updates** en installeer VS Code als dit nog niet aanwezig is.
+VS Code kan worden geïnstalleerd vanuit het **AMD Ryzen™ AI Developer Center**. Ga naar het tabblad **Updates** en installeer VS Code als het nog niet aanwezig is.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code kan worden geïnstalleerd vanuit het **AMD Ryzen™ AI Developer Center**. Ga naar het tabblad **Manage** en installeer VS Code als dit nog niet aanwezig is.
+VS Code kan worden geïnstalleerd vanuit het **AMD Ryzen™ AI Developer Center**. Ga naar het tabblad **Manage** en installeer VS Code als het nog niet aanwezig is.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Download het Windows-installatie-uitvoerbaar bestand van: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+1. Download het Windows-installatieprogramma (executable) van: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
 2. Klik op het gedownloade bestand `VSCodeUserSetup-x64-1.108.2.exe` om VS Code te installeren.
 
 <!-- @os:end -->

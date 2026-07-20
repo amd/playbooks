@@ -6,25 +6,25 @@ SPDX-License-Identifier: MIT
 
 # Platform Configuration
 
-Bu belge, bu playbook'u çalıştırmak için beklenen platform yapılandırmalarını açıklamaktadır.
+Bu belge, bu playbook'u çalıştırmak için beklenen platform yapılandırmalarını açıklar.
 
 ## Windows
 
 ### LM Studio Kurulumu
 
-LM Studio önceden kurulu olmalıdır:
+LM Studio önceden kurulmuş olmalıdır:
 
 | Bileşen | Sürüm | Konum |
 |-----------|---------|----------|
-| **LM Studio (Modeller + Çeşitli)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modeller + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Önbellek)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### Model İndirme
 
-Aşağıdaki modeller LM Studio modeller dizininde (`C:\Users\...\.lmstudio\models`) zaten mevcut olmalıdır:
+Aşağıdaki modeller LM Studio modeller dizininde (`C:\Users\...\.lmstudio\models`) zaten bulunuyor olmalıdır:
 
-| Cihaz | Model Türü | Kuantizasyon | Boyut (GB) | Konum |
+| Cihaz | Model Türü | Nicemleme | Boyut (GB) | Konum |
 | ----- |------------|--------------|------|----------|
 | AMD Ryzen™ AI Halo Developer Platform <br> AMD Ryzen™ AI Max+ | OpenAI GPT-OSS 120B | `MXFP4` | 63.39 | `models\ggml-org` |
 | AMD Ryzen™ AI 300 HX <br> AMD Ryzen™ AI 300 <br> AMD Radeon™ 7000 Series Graphics <br> AMD Radeon™ 9000 Series Graphics | Qwen3.5 9B | `Q4_K_M` | 6.55 | `models\lmstudio-community` |
@@ -35,8 +35,8 @@ Aşağıdaki modeller LM Studio modeller dizininde (`C:\Users\...\.lmstudio\mode
 
 ### LM Studio Kurulumu
 
-Daha fazla ayrıntı için bkz. [lmstudio.md](../../dependencies/lmstudio.md).
+Daha fazla bilgi için bkz. [lmstudio.md](../../dependencies/lmstudio.md).
 
 ### Model İndirme
 
-Windows ile aynıdır.
+Windows'takiyle aynıdır.

@@ -11,18 +11,18 @@ Este documento descreve a configuração de plataforma esperada para executar es
 ## Aplicativos/Frameworks Necessários
 
 ### Windows/Linux
-O Lemonade deve ser pré-instalado a partir [daqui](https://lemonade-server.ai/install_options.html).
+O Lemonade deve estar pré-instalado a partir [daqui](https://lemonade-server.ai/install_options.html). 
 
-- **Open WebUI** (aplicativo web de frontend)
-- **Lemonade Server** (servidor de modelos backend)
+- **Open WebUI** (aplicativo web frontend)
+- **Lemonade Server** (servidor de modelo backend)
 
-> Este playbook executa o **Lemonade** (servidor/aplicativo Lemonade) de forma **nativa**. O **Open WebUI** é executado como um **contêiner** no Linux (via Podman) e como um **pacote Python** no Windows. O pacote `open-webui` do PyPI suporta apenas Python ≤ 3.12, portanto o contêiner Linux evita a necessidade de gerenciar versões mais antigas do Python.
+> Este playbook executa o **Lemonade** (servidor/aplicativo Lemonade) **nativamente**. O **Open WebUI** é executado como um **container** no Linux (via Podman) e como um **pacote Python** no Windows. O pacote PyPI `open-webui` suporta apenas Python ≤ 3.12, portanto o container Linux evita a necessidade de gerenciar versões mais antigas do Python.  
 
 ## Modelos (no Lemonade)
 
-Os modelos devem ser baixados dentro do **aplicativo Lemonade** (usando o Gerenciador de Modelos integrado) ou por meio dos comandos de gerenciamento de modelos do Lemonade (`lemonade pull <model_name>`). Este playbook assume que os modelos recomendados abaixo foram baixados e aparecem no endpoint da lista de modelos.
+Os modelos devem ser baixados dentro do **aplicativo Lemonade** (usando o Model Manager integrado) ou por meio dos comandos de gerenciamento de modelos do Lemonade (`lemonade pull <model_name>`). Este playbook presume que os modelos recomendados abaixo estejam baixados e apareçam no endpoint de listagem de modelos.
 
-Verifique a disponibilidade dos modelos:
+Verifique a disponibilidade do modelo:
 - Abra: `http://localhost:13305/api/v1/models`
 - Os modelos baixados serão listados em `"data"`.
 
@@ -30,9 +30,9 @@ Verifique a disponibilidade dos modelos:
 
 | Capacidade | ID do Modelo | Observações |
 |---|----|-----|
-| LLM (Entrada de texto → Saída de texto) | `Qwen3-4B-Hybrid` (ou similar) | Qualquer modelo LLM do Lemonade para chat, conclusão de texto, codificação ou raciocínio |
-| VLM (Imagem → Texto) | `Qwen3.5-4B-GGUF` (ou qualquer modelo na categoria **Vision**) | Qualquer modelo multimodal/com capacidade de visão que aceite imagens como parte de sua entrada |
-| Geração de Imagens (Texto → Imagem) | `SDXL-Turbo` (ou qualquer modelo na categoria **Image**) | Qualquer modelo Stable Diffusion que gere imagens a partir de um prompt de texto |
+| LLM (Entrada de texto → Saída de texto) | `Qwen3-4B-Hybrid` (ou similar) | Qualquer modelo LLM do Lemonade para chat, completação de texto, codificação ou raciocínio |
+| VLM (Imagem → Texto) | `Qwen3.5-4B-GGUF` (ou qualquer modelo na categoria **Vision**) | Qualquer modelo multimodal/com capacidade de visão que possa receber imagens como parte de sua entrada |
+| Geração de Imagem (Texto → Imagem) | `SDXL-Turbo` (ou qualquer modelo na categoria **Image**) | Qualquer modelo Stable Diffusion que gere imagens a partir de um prompt de texto |
 | Áudio (Fala → Texto) | `Whisper-Large-v3` (ou qualquer modelo na categoria **Audio**) | Qualquer modelo ASR que converta áudio em texto |
 
 <p align="center">

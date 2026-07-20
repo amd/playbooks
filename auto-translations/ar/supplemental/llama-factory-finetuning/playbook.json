@@ -1,5 +1,5 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "ضبط دقيق لنماذج LLM باستخدام LLaMA-Factory",
-  "description": "ضبط دقيق للنماذج اللغوية الكبيرة (LLMs) باستخدام LLaMA-Factory وتقنيات LoRA."
+  "title": "ضبط النماذج اللغوية الكبيرة بدقة باستخدام LLaMA-Factory",
+  "description": "ضبط النماذج اللغوية الكبيرة (LLMs) باستخدام LLaMA Factory وتقنيات LoRA."
 }

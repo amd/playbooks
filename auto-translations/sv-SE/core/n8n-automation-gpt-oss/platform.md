@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # Plattformskonfiguration
 
-Det här dokumentet beskriver de förväntade plattformskonfigurationerna för att köra den här spelboken.
+Detta dokument beskriver de förväntade plattformskonfigurationerna för att köra denna playbook.
 
 ## Förutsättningar
 
@@ -14,22 +14,22 @@ Det här dokumentet beskriver de förväntade plattformskonfigurationerna för a
 
 | Komponent | Version | Anteckningar |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Förinstallerad och tillgänglig i PATH på AMD Ryzen™ AI Halo Developer Platform; måste installeras manuellt på alla andra enheter |
+| **Node.js** | 22.16+ | Förinstallerat och tillgängligt i PATH på AMD Ryzen™ AI Halo Developer Platform; måste installeras manuellt på alla andra enheter |
 | **Lemonade Server** | senaste | Körs på `http://localhost:13305/api/v1` |
 
 ### Linux
 
 | Komponent | Version | Anteckningar |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | Förinstallerad och tillgänglig i PATH på AMD Ryzen™ AI Halo Developer Platform; måste installeras manuellt på alla andra enheter |
+| **Node.js** | 22.16+ | Förinstallerat och tillgängligt i PATH på AMD Ryzen™ AI Halo Developer Platform; måste installeras manuellt på alla andra enheter |
 | **Lemonade Server** | senaste | Körs på `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-Lemonade-servern bör köras med den enhetslämpliga modellen inläst (se README för kommandot `lemonade run` för din enhet):
+Lemonade-servern bör vara igång med den för enheten lämpliga modellen inläst (se README för kommandot `lemonade run` för din enhet):
 
-| Enhet | Slutpunkt | Modell |
+| Enhet | Ändpunkt | Modell |
 |--------|----------|-------|
 | AMD Ryzen™ AI Halo Developer Platform <br> AMD Ryzen™ AI Max+ | `http://localhost:13305/api/v1` | `gpt-oss-120b-mxfp-GGUF` |
 | AMD Ryzen™ AI 300 HX <br> AMD Ryzen™ AI 300 <br> AMD Radeon™ 7000 Series Graphics <br> AMD Radeon™ 9000 Series Graphics | `http://localhost:13305/api/v1` | `gpt-oss-20b-mxfp4-GGUF` |

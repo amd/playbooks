@@ -6,22 +6,22 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Tämä playbook käyttää erityisiä tageja, joita GitHub ei pysty renderöimään. Vieraile osoitteessa [amd.com/playbooks](https://amd.com/playbooks) nähdäksesi tämän sisällön oikein.
+> Tässä ohjekirjassa käytetään erikoismerkintöjä, joita GitHub ei pysty renderöimään. Käy osoitteessa [amd.com/playbooks](https://amd.com/playbooks) tarkastellaksesi tätä sisältöä oikein.
 <!-- @github-only:end -->
 
 ## Yleiskatsaus
 
-[Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) on AMD:n C++ konenäkö- ja koneoppimistoolkit, joka tarjoaa tehokkaita laitteella tapahtuvia havainnointiominaisuuksia — mukaan lukien syvyysarviointi, kasvojen tunnistus ja kasvoverkkojen seuranta. Ryzen AI -ajureiden päälle rakennettu kirjasto valitsee automaattisesti parhaan saatavilla olevan laitteiston (GPU tai NPU) päättelyä varten, jolloin voit lisätä tekoälyominaisuuksia C++-sovelluksiin ilman huolta mallin kouluttamisesta tai kehysintegraatiosta. Kaikki käsittely tapahtuu paikallisesti järjestelmässäsi, mikä tekee siitä ihanteellisen yksityisyyttä vaativille ja matalan viiveen sovelluksille.
+[Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) on AMD:n C++-pohjainen konenäön ja koneoppimisen työkalupakki, joka tarjoaa tehokkaita, laitteessa suoritettavia havainnointiominaisuuksia — mukaan lukien syvyysarviointi, kasvojentunnistus ja kasvoverkon seuranta. Kirjasto on rakennettu Ryzen AI -ohjainten päälle, ja se valitsee automaattisesti parhaan käytettävissä olevan laitteiston (GPU tai NPU) päättelyä varten, jolloin voit lisätä tekoälyominaisuuksia C++-sovelluksiin ilman huolta mallien koulutuksesta tai kehysten integroinnista. Kaikki käsittely tapahtuu paikallisesti järjestelmässäsi, mikä tekee siitä ihanteellisen yksityisyyttä vaativiin, matalan viiveen sovelluksiin.
 
-Tämä playbook opettaa sinulle, kuinka Ryzen AI CVML Library asennetaan, mukana tulevat esimerkkisovellukset rakennetaan ja kasvojen tunnistus suoritetaan esimerkkikuvalle.
+Tämä ohjekirja opettaa sinulle, miten asennat Ryzen AI CVML Library -kirjaston, rakennat mukana tulevat esimerkkisovellukset ja suoritat kasvojentunnistuksen esimerkkikuvalle.
 
 ## Mitä opit
 
-- Kuinka asentaa edellytykset ja ottaa Ryzen AI CVML Library käyttöön järjestelmässäsi
-- Kuinka CVML C++ API toimii: kontekstit, ominaisuusobjektit ja kuvapuskurit
-- Kuinka rakentaa ja ajaa mukana tulevat esimerkkisovellukset CMaken ja OpenCV:n avulla
-- Kuinka suorittaa kasvojen tunnistus kuvalle rajoituslaatikoiden ja maamerkkien kanssa
-- Kuinka integroida CVML-ominaisuuksia omiin C++-sovelluksiisi
+- Miten asennat esivaatimukset ja määrität Ryzen AI CVML Library -kirjaston järjestelmääsi
+- Miten CVML:n C++-rajapinta toimii: kontekstit, ominaisuusobjektit ja kuvapuskurit
+- Miten rakennat ja suoritat mukana tulevat esimerkkisovellukset käyttäen CMakea ja OpenCV:tä
+- Miten suoritat kasvojentunnistuksen kuvalle rajaavine laatikoineen ja tunnuspisteineen
+- Miten integroit CVML-ominaisuudet omiin C++-sovelluksiisi
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
@@ -29,28 +29,28 @@ Tämä playbook opettaa sinulle, kuinka Ryzen AI CVML Library asennetaan, mukana
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmiston esivaatimusten asentaminen
 <!-- @require:driver -->
 
-## Lisäriippuvuudet
+## Muut riippuvuudet
 
 Ennen aloittamista varmista, että sinulla on seuraavat:
 
 <!-- @os:windows -->
-- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — lataa `opencv-4.11.0-windows.exe`, suorita se ja pura paikalliseen kansioon (esim. `C:\opencv`)
+- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — lataa `opencv-4.11.0-windows.exe`, suorita se ja pura tiedostot paikalliseen kansioon (esim. `C:\opencv`)
 - [CMake](https://cmake.org/download/) — lataa Windows x86-64 MSI -asennusohjelma ja valitse asennuksen aikana **"Add CMake to the system PATH for all users"**
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/inst.html) — asenna uusin saatavilla oleva versio
+- [Ryzen AI NPU -ohjain](https://ryzenai.docs.amd.com/en/latest/inst.html) — asenna uusin saatavilla oleva versio
 - [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) "Desktop development with C++" -työkuormalla (sisältää MSVC-kääntäjän, Windows SDK:n ja C++-rakennustyökalut)
 <!-- @os:end -->
 
 <!-- @os:linux -->
-- OpenCV 4.11 — täytyy rakentaa lähdekoodista (Ubuntu 22.04:n ja 24.04:n apt-paketit eivät tarjoa versiota 4.11). Katso [OpenCV:n rakentaminen lähdekoodista](#building-opencv-from-source) alta.
+- OpenCV 4.11 — täytyy rakentaa lähdekoodista (Ubuntu 22.04:n ja 24.04:n apt-paketit eivät tarjoa versiota 4.11). Katso alta [OpenCV:n rakentaminen lähdekoodista](#building-opencv-from-source).
 - CMake — asenna apt:n kautta:
   ```bash
   sudo apt install cmake
   ```
 - Ubuntu 22.04 tai 24.04 (kernel >= 6.11.0-21-generic)
-- [Ryzen AI NPU driver](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (Linux-asennusohjelma — vaaditaan NPU-päättelyä varten)
+- [Ryzen AI NPU -ohjain](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (Linux-asennusohjelma — vaaditaan NPU-päättelyyn)
 - Vulkan SDK (asennetaan alla olevassa [Vulkan SDK](#vulkan-sdk) -osiossa)
 <!-- @os:end -->
 
@@ -150,15 +150,15 @@ fi
 <!-- @test:end --> 
 <!-- @os:end -->
 
-## CVML-kirjaston käyttöönotto
+## CVML-kirjaston määrittäminen
 
-Luo AMD-tili osoitteessa [account.amd.com](https://account.amd.com) jos sinulla ei vielä ole sellaista, kirjaudu sitten sisään ladataksesi Ryzen AI CVML Library alla olevasta portaalin linkistä:
+Luo AMD-tili osoitteessa [account.amd.com](https://account.amd.com), jos sinulla ei vielä ole tiliä, ja kirjaudu sitten sisään ladataksesi Ryzen AI CVML Library -kirjaston alla olevasta portaalilinkistä:
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
 ```
 
-Latauksen jälkeen pura paketti paikalliseen hakemistoon (esim. `C:\RyzenAI-Library` Windowsissa tai `~/RyzenAI-Library` Linuxissa) ja aseta `AMD_CVML_SDK_ROOT`-ympäristömuuttuja purettuun sijaintiin:
+Latauksen jälkeen pura paketti paikalliseen hakemistoon (esim. `C:\RyzenAI-Library` Windowsissa tai `~/RyzenAI-Library` Linuxissa) ja aseta `AMD_CVML_SDK_ROOT`-ympäristömuuttuja osoittamaan puretun sijaintiin:
 
 <!-- @os:windows -->
 ```cmd
@@ -176,15 +176,15 @@ Kirjastopaketti sisältää seuraavan rakenteen:
 
 | Kansio | Sisältö |
 |--------|----------|
-| `cmake/` | Pakkaustieto CMaken `find_package`-funktiota varten |
+| `cmake/` | Pakkaustiedot CMaken `find_package`-funktiota varten |
 | `include/` | C++-otsikkotiedostot (`cvml-depth-estimation.h`, `cvml-face-detector.h`, `cvml-face-mesh.h` jne.) |
-| `windows/` | Binaaritiedostot Windowsille (käännösaikaiset `.LIB`- ja ajonaikaiset `.DLL`-/`.GRAPHLIB`-/`.AMODEL`-tiedostot) |
-| `linux/` | Binaaritiedostot Linuxille (käännös- ja ajonaikaiset `.SO`-tiedostot) |
+| `windows/` | Binääritiedostot Windowsille (käännösaikaiset `.LIB`- ja ajonaikaiset `.DLL`/`.GRAPHLIB`/`.AMODEL`-tiedostot) |
+| `linux/` | Binääritiedostot Linuxille (käännös- ja ajonaikaiset `.SO`-tiedostot) |
 | `samples/` | Yksittäiset esimerkkisovellukset lähdekoodeineen |
 
 <!-- @os:linux -->
 
-### Linux-kohtainen käyttöönotto
+### Linux-kohtaiset asetukset
 
 #### OpenCV:n rakentaminen lähdekoodista
 
@@ -194,7 +194,7 @@ Asenna OpenCV:n rakennusriippuvuudet:
 sudo apt install unzip wget ubuntu-restricted-extras libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev libgtk-3-dev pkg-config ffmpeg
 ```
 
-Lataa, konfiguroi ja rakenna OpenCV 4.11.0 contrib-moduulien kanssa (viite: [OpenCV Linux -asennusopas](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
+Lataa, määritä ja rakenna OpenCV 4.11.0 contrib-moduulien kanssa (viite: [OpenCV Linux install tutorial](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
 
 ```bash
 wget -O opencv-4.11.0.zip https://github.com/opencv/opencv/archive/4.11.0.zip
@@ -227,7 +227,7 @@ sudo apt update
 sudo apt install vulkan-sdk
 ```
 
-Jos käytät Ubuntu 22.04:ää, päivitä myös MESA Vulkan -ajurit:
+Jos käytät Ubuntu 22.04:ää, päivitä myös MESA Vulkan -ohjaimet:
 
 ```bash
 sudo apt update && sudo apt upgrade
@@ -266,24 +266,24 @@ done
 
 ## Peruskäsitteet
 
-CVML Library tarjoaa yksinkertaisen C++ API:n, jossa jokaisella havainnointiominaisuudella (syvyysarviointi, kasvojen tunnistus, kasvoverkko) on oma otsikkotiedostonsa ja ominaisuusobjektinsa. Et työskentele raakojen mallien kanssa — kirjasto hoitaa mallin lataamisen, esikäsittelyn ja päättelyn automaattisesti.
+CVML Library tarjoaa yksinkertaisen C++-rajapinnan, jossa jokaisella havainnointiominaisuudella (syvyysarviointi, kasvojentunnistus, kasvoverkko) on oma otsikkotiedostonsa ja ominaisuusobjektinsa. Sinun ei tarvitse työskennellä raakojen mallien kanssa — kirjasto hoitaa mallin lataamisen, esikäsittelyn ja päättelyn automaattisesti.
 
-### Saatavilla olevat ominaisuudet
+### Käytettävissä olevat ominaisuudet
 
 | Ominaisuus | Otsikkotiedosto | Kuvaus |
 |---------|------------|-------------|
-| **Syvyysarviointi** | `cvml-depth-estimation.h` | Luo pikselikohtaisia syvyyskarttoja RGB-kuvista |
-| **Kasvojen tunnistus** | `cvml-face-detector.h` | Tunnistaa kasvot rajoituslaatikoiden, maamerkkien (silmät, nenä, suu) ja luottamuspisteiden kanssa |
-| **Kasvoverkko** | `cvml-face-mesh.h` | Seuraa yksityiskohtaista kasvogeometriaa tiheillä verkostopisteillä |
+| **Syvyysarviointi** | `cvml-depth-estimation.h` | Tuottaa pikselikohtaisia syvyyskarttoja RGB-kuvista |
+| **Kasvojentunnistus** | `cvml-face-detector.h` | Havaitsee kasvot rajaavine laatikoineen, tunnuspisteineen (silmät, nenä, suu) ja luottamuspisteineen |
+| **Kasvoverkko** | `cvml-face-mesh.h` | Seuraa yksityiskohtaista kasvojen geometriaa tiheillä verkkopisteillä |
 
 ### Ohjelmointimalli
 
-Jokainen CVML-sovellus noudattaa samaa nelivaiheista kaavaa:
+Jokainen CVML-sovellus noudattaa samaa neljän vaiheen mallia:
 
-1. **Luo konteksti** — `amd::cvml::Context` hallinnoi jaettuja resursseja, kuten lokitusta ja päättelytaustan valintaa.
-2. **Luo ominaisuusobjekti** — Luo instanssi tietystä ominaisuudesta (esim. `amd::cvml::DepthEstimation`) kontekstia vasten.
-3. **Kääri syötedata** — Käytä `amd::cvml::Image`-luokkaa RGB-kuvapuskurisi kapseloimiseen ilman datan kopiointia.
-4. **Suorita** — Kutsu ominaisuuden käsittelymenetelmää ja lue tulokset.
+1. **Luo konteksti** — `amd::cvml::Context` hallinnoi jaettuja resursseja, kuten lokitusta ja päättelytaustajärjestelmän valintaa.
+2. **Luo ominaisuusobjekti** — Instansioi haluttu ominaisuus (esim. `amd::cvml::DepthEstimation`) kontekstia vasten.
+3. **Kääri syöttödata** — Käytä `amd::cvml::Image`-luokkaa RGB-kuvapuskurisi kapseloimiseen ilman datan kopiointia.
+4. **Suorita** — Kutsu ominaisuuden käsittelymetodia ja lue tulokset.
 
 ```cpp
 // Step 1: Create context
@@ -307,22 +307,22 @@ depth_estimation.GenerateDepthMap(input, &output);
 context->Release();
 ```
 
-### Päättelytausta
+### Päättelytausta (Inference Backend)
 
-Kirjasto valitsee automaattisesti parhaan laitteiston (GPU tai NPU) kullekin operaatiolle. Voit myös asettaa taustan eksplisiittisesti:
+Kirjasto valitsee automaattisesti kullekin toiminnolle parhaan laitteiston (GPU tai NPU). Voit myös asettaa taustajärjestelmän eksplisiittisesti:
 
 ```cpp
 // Let the library choose the best hardware (default)
 context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 ```
 
-> **Huomio:** Ominaisuudet, jotka käyttävät ONNX-taustaa NPU-operaatioihin, saattavat kokea pidemmän käynnistysviiveen ensimmäisellä suorituskerralla. Myöhemmät suorituskerrat ovat nopeampia.
+> **Huomautus:** Ominaisuudet, jotka käyttävät ONNX-taustajärjestelmää NPU-toiminnoissa, saattavat kokea pidemmän käynnistysviiveen ensimmäisellä ajokerralla. Seuraavat ajot ovat nopeampia.
 
-> **Huomio:** Jos NPU-ajuria ei ole asennettu kohdejärjestelmään, Ryzen AI CVML -kirjasto siirtyy automaattisesti GPU-taustaan päättelyoperaatioita varten.
+> **Huomautus:** Jos NPU-ajuria ei ole asennettu kohdejärjestelmään, Ryzen AI CVML -kirjasto siirtyy automaattisesti käyttämään GPU-taustajärjestelmää päättelytoiminnoissa.
 
-## Esimerkkisovellusten rakentaminen
+## Esimerkkisovellusten kääntäminen
 
-CVML Library sisältää valmiiksi rakennettavat esimerkkisovellukset jokaiselle ominaisuudelle. Rakennetaan ne kaikki kerralla.
+CVML-kirjasto sisältää valmiiksi käännettävät esimerkkisovellukset jokaista ominaisuutta varten. Käännetään ne kaikki kerralla.
 
 1. Aseta `OPENCV_INSTALL_ROOT`-ympäristömuuttuja osoittamaan OpenCV-asennukseesi:
 
@@ -343,7 +343,7 @@ CVML Library sisältää valmiiksi rakennettavat esimerkkisovellukset jokaiselle
    ```
    <!-- @os:end -->
 
-2. Rakenna esimerkit CMakella:
+2. Käännä esimerkit CMakella:
 
    <!-- @os:windows -->
    ```cmd
@@ -365,7 +365,7 @@ CVML Library sisältää valmiiksi rakennettavat esimerkkisovellukset jokaiselle
    ```
    <!-- @os:end -->
 
-   Onnistuneen rakennuksen jälkeen suoritettavat tiedostot sijaitsevat:
+   Onnistuneen käännöksen jälkeen suoritettavat tiedostot sijaitsevat seuraavasti:
 
    <!-- @os:windows -->
    ```
@@ -383,7 +383,7 @@ CVML Library sisältää valmiiksi rakennettavat esimerkkisovellukset jokaiselle
    ```
    <!-- @os:end -->
 
-3. Ennen minkään esimerkin ajamista varmista, että CVML-ajonaikaistiedostot ovat saatavilla:
+3. Ennen minkään esimerkin ajamista varmista, että CVML-ajonaikaiset tiedostot ovat saatavilla:
 
    <!-- @os:windows -->
    ```cmd
@@ -404,11 +404,11 @@ CVML Library sisältää valmiiksi rakennettavat esimerkkisovellukset jokaiselle
    ```
    <!-- @os:end -->
 
-## Kasvojen tunnistuksen suorittaminen
+## Kasvojentunnistuksen suorittaminen
 
-Kasvojen tunnistuksen esimerkki tunnistaa kasvot kuvasta, videosta tai live-kamerasyötteestä. Se piirtää rajoituslaatikot, luottamuspisteet ja viisi kasvomaamerkkiä (kaksi silmää, nenä ja kaksi suun reunaa) jokaiselle tunnistetulle kasvolle.
+Kasvojentunnistuksen esimerkki tunnistaa kasvoja kuvasta, videosta tai suorasta kamerasyötteestä. Se piirtää rajauslaatikot, luottamuspisteet ja viisi kasvonpiirrettä (kaksi silmää, nenä ja kaksi suunkulmaa) jokaiselle havaitulle kasvolle.
 
-Siirry ensin kasvojen tunnistuksen suoritettavan tiedoston kansioon:
+Siirry ensin kasvojentunnistuksen suoritettavan tiedoston kansioon:
 
 <!-- @os:windows -->
 ```cmd
@@ -422,13 +422,13 @@ cd build/cvml-sample-face-detection
 ```
 <!-- @os:end -->
 
-Lataa sitten esimerkkikuva käytettäväksi syötteenä (kuva: [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), vapaa käyttää Pexelsin kautta):
+Lataa sitten esimerkkikuva käytettäväksi syötteenä (kuva: [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), vapaasti käytettävissä Pexelsin kautta):
 
 ```bash
 curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
 ```
 
-**Suorita kasvojen tunnistus esimerkkikuvalle:**
+**Suorita kasvojentunnistus esimerkkikuvalle:**
 
 <!-- @os:windows -->
 ```cmd
@@ -442,13 +442,13 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-Näyttöön ilmestyy ikkuna, jossa näkyy kuva rajoituslaatikoiden kanssa tunnistettujen kasvojen ympärillä, luottamuspisteet ja kasvomaamerkkipisteet (silmät, nenä, suun reunat).
+Näyttöön avautuu ikkuna, jossa näkyy kuva havaittujen kasvojen ympärillä olevine rajauslaatikoineen, luottamuspisteineen ja kasvonpiirrepisteineen (silmät, nenä, suunkulmat).
 
 <p align="center">
   <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
 </p>
 
-**Tallenna merkitty tulos tiedostoon:**
+**Tallenna merkitty tuloste tiedostoon:**
 
 <!-- @os:windows -->
 ```cmd
@@ -462,7 +462,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg -o output_face.jpg
 ```
 <!-- @os:end -->
 
-**Käytä tarkkaa mallia** korkeampaa tarkkuutta varten (nopeuden kustannuksella):
+**Käytä tarkkaa mallia** paremman tarkkuuden saavuttamiseksi (nopeuden kustannuksella):
 
 <!-- @os:windows -->
 ```cmd
@@ -476,12 +476,12 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 ```
 <!-- @os:end -->
 
-Kasvojen tunnistusominaisuus tarjoaa kaksi mallivarianttia:
+Kasvojentunnistusominaisuus tarjoaa kaksi mallivaihtoehtoa:
 
-| Malli | Nopeus | Tarkkuus | Parhaiten sopii |
+| Malli | Nopeus | Tarkkuus | Sopii parhaiten |
 |-------|-------|----------|----------|
 | `fast` (oletus) | Korkeampi FPS | Hyvä | Reaaliaikaiset kamerasovellukset |
-| `precise` | Matalampi FPS | Paras | Valokuva-analyysi, korkean tarkkuuden tarpeet |
+| `precise` | Alhaisempi FPS | Paras | Valokuva-analyysi, korkean tarkkuuden tarpeet |
 
 
 <!-- @os:windows -->
@@ -719,7 +719,7 @@ done
 
 ## CVML:n integrointi omaan sovellukseesi
 
-Käyttääksesi CVML Library -kirjastoa omassa C++-projektissasi, lisää se CMaken `find_package`-komennon kautta:
+Käyttääksesi CVML-kirjastoa omassa C++-projektissasi lisää se CMaken `find_package`-komennolla:
 
 ```cmake
 # Find the Ryzen AI CVML Library
@@ -729,7 +729,7 @@ find_package(RyzenAILibrary REQUIRED PATHS ${AMD_CVML_SDK_ROOT})
 target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 ```
 
-Missä `AMD_CVML_SDK_ROOT` osoittaa Ryzen AI CVML Library -kansion juureen. Sisällytä sitten sopiva otsikko haluamallesi ominaisuudelle:
+Missä `AMD_CVML_SDK_ROOT` osoittaa Ryzen AI CVML -kirjastokansion juureen. Sisällytä sitten sopiva otsikkotiedosto haluamaasi ominaisuutta varten:
 
 ```cpp
 #include <cvml-face-detector.h>   // for face detection
@@ -739,12 +739,12 @@ Missä `AMD_CVML_SDK_ROOT` osoittaa Ryzen AI CVML Library -kansion juureen. Sis�
 
 ## Seuraavat vaiheet
 
-Siirry jokaisen alla olevan esimerkin kohdalla ensin sen suoritettavan tiedoston kansioon noudattaen samaa kaavaa kuin [Kasvojen tunnistuksen suorittaminen](#running-face-detection) -osiossa (esim. `cd build\cvml-sample-depth-estimation\Release` Windowsissa tai `cd build/cvml-sample-depth-estimation` Linuxissa). Windowsissa lisää `.exe` jokaisen komennon perään (esim. `cvml-sample-depth-estimation.exe`).
+Siirry kunkin alla olevan esimerkin kohdalla ensin sen suoritettavaan kansioon noudattaen samaa kaavaa kuin edellä olevassa [Kasvojentunnistuksen suorittaminen](#running-face-detection) -osiossa (esim. `cd build\cvml-sample-depth-estimation\Release` Windowsissa tai `cd build/cvml-sample-depth-estimation` Linuxissa). Windowsissa lisää `.exe` jokaisen komennon perään (esim. `cvml-sample-depth-estimation.exe`).
 
-- **Kokeile syvyysarviointia**: Suorita `cvml-sample-depth-estimation -i sample_face.jpg` luodaksesi väritetyn syvyyskartan — lähemmät kohteet näkyvät lämpimissä väreissä, kaukaisemmat viileissä väreissä
-- **Tutustu kasvoverkkoihin**: Suorita `cvml-sample-face-mesh -i sample_face.jpg` nähdäksesi tiheän kasvogeometrian seurannan yksityiskohtaisilla verkostopisteillä
-- **Käsittele videotiedostoja**: Käytä `-i`- ja `-o`-lippuja missä tahansa esimerkissä videoiden käsittelyyn (esim. `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
-- **Vertaile mallivariantteja**: Kokeile `-m precise` vs. oletusarvoinen `-m fast` kasvojen tunnistuksessa nähdäksesi tarkkuuden ja nopeuden välisen kompromissin käytännössä
-- **Rakenna oma sovelluksesi**: Käytä CMake-integraatiota ja C++ API:a lisätäksesi CVML-ominaisuuksia omiin C++-sovelluksiisi
-- **Yhdistä ominaisuuksia**: Ketjuta kasvojen tunnistus syvyysarvioinnin kanssa samassa sovelluksessa rikkaampaa kohtauksen ymmärtämistä varten
-- **Selaa lähdekoodia**: Lue [Ryzen AI CVML Library GitHubissa](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) otsikkodokumentaatiota, lisäesimerkkejä ja API-tietoja varten
+- **Kokeile syvyysarviointia**: Suorita `cvml-sample-depth-estimation -i sample_face.jpg` luodaksesi väritetyn syvyyskartan — lähempänä olevat kohteet näkyvät lämpiminä väreinä, kauempana olevat viileinä väreinä
+- **Tutustu kasvoverkkoon**: Suorita `cvml-sample-face-mesh -i sample_face.jpg` nähdäksesi tiheän kasvojen geometrian seurannan yksityiskohtaisilla verkkopisteillä
+- **Käsittele videotiedostoja**: Käytä `-i`- ja `-o`-lippuja missä tahansa esimerkissä käsitelläksesi videoita (esim. `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
+- **Vertaile mallivariantteja**: Kokeile `-m precise` -asetusta oletuksena olevan `-m fast` -asetuksen sijaan kasvojentunnistuksessa nähdäksesi tarkkuuden ja nopeuden välisen kompromissin käytännössä
+- **Rakenna oma sovelluksesi**: Käytä CMake-integraatiota ja C++-API:a lisätäksesi CVML-ominaisuuksia omiin C++-sovelluksiisi
+- **Yhdistä ominaisuuksia**: Ketjuta kasvojentunnistus syvyysarvioinnin kanssa samassa sovelluksessa laajemman kohtausymmärryksen saavuttamiseksi
+- **Selaa lähdekoodia**: Lue [Ryzen AI CVML Library GitHubissa](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) saadaksesi otsikkotiedoston dokumentaation, lisää esimerkkejä ja API-tietoja

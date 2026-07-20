@@ -4,18 +4,18 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### Sťahovanie Qwen3.5 9B v LM Studio
+### Sťahovanie modelu Qwen3.5 9B v LM Studio
 
 Ak chcete stiahnuť model Qwen3.5 9B:
 
-1. Stlačte „Ctrl" + „Shift" + „M" na klávesnici alebo kliknite na kartu „Discover" (ikona lupy) v ľavom bočnom paneli
+1. Stlačte "Ctrl" + "Shift" + "M" na klávesnici alebo kliknite na kartu "Discover" (ikona lupy) na ľavom bočnom paneli
 2. Vyhľadajte `Qwen3.5 9B`
-3. Vyberte kvantizáciu (odporúčaná `Q4_K_M` predstavuje dobrý kompromis medzi veľkosťou a kvalitou) a kliknite na Download
+3. Vyberte kvantizáciu (odporúčaná `Q4_K_M` predstavuje dobrý pomer medzi veľkosťou a kvalitou) a kliknite na Download
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download_qwen.png" alt="LM Studio Download Models" width="600"/>
 
-LM Studio automaticky stiahne model a umiestni ho do správneho adresára.
+LM Studio model automaticky stiahne a umiestni do správneho adresára.
 
 Ak si želáte stiahnuť ďalšie modely, môžete ich vyhľadať na karte Discover a LM Studio sa postará o zvyšok.
 

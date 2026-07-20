@@ -1,5 +1,5 @@
 {
   "id": "pytorch-rocm-llms",
-  "title": "הרצת LLMs על PyTorch עם תוכנת AMD ROCm™",
-  "description": "למד להריץ מודלים שפה עוצמתיים במחשב שלך עם PyTorch ותוכנת AMD ROCm™ כדי לסכם מסמכים במהירות ובקלות."
+  "title": "הרצת מודלי שפה גדולים (LLM) על PyTorch עם תוכנת AMD ROCm™",
+  "description": "למדו כיצד להריץ מודלי שפה עוצמתיים במחשב האישי שלכם באמצעות PyTorch ותוכנת AMD ROCm™ כדי לסכם מסמכים במהירות ובקלות."
 }

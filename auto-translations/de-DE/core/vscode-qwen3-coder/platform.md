@@ -10,9 +10,9 @@ Dieses Dokument beschreibt die erwarteten Plattformkonfigurationen für die Ausf
 
 ## Windows
 
-### LM Studio Installation
+### LM Studio-Installation
 
-LM Studio sollte vorinstalliert sein:
+LM Studio sollte bereits vorinstalliert sein:
 
 | Komponente | Version | Speicherort |
 |-----------|---------|----------|
@@ -22,20 +22,20 @@ LM Studio sollte vorinstalliert sein:
 
 ### Modell-Download
 
-Die folgenden Modelle sollten bereits im LM Studio Modellverzeichnis vorhanden sein (`C:\Users\...\.lmstudio\models`):
+Die folgenden Modelle sollten bereits im LM Studio-Modellverzeichnis vorhanden sein (`C:\Users\...\.lmstudio\models`):
 
 | Modelltyp | Quantisierung | Größe | Speicherort |
 |------------|--------------|------|----------|
-| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18,2 GB | `models\lmstudio-community` |
+| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
 ---
 
 ## Linux
 
-### LM Studio Installation
+### LM Studio-Installation
 
-Weitere Details finden Sie in lmstudio.md (im Abhängigkeitsordner).
+Weitere Details finden Sie in lmstudio.md (im Ordner dependencies).
 
 ### Modell-Download
 
-Identisch wie unter Windows.
+Wie unter Windows.

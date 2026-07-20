@@ -6,36 +6,36 @@ SPDX-License-Identifier: MIT
 
 # Plattformkonfigurasjon
 
-Dette dokumentet beskriver de forventede plattformkonfigurasjonene for å kjøre denne spilleboken.
+Dette dokumentet beskriver de forventede plattformkonfigurasjonene for kjøring av denne playbooken.
 
 ## Windows
 
-### LM Studio-installasjon
+### Installasjon av LM Studio
 
-LM Studio bør være forhåndsinstallert:
+LM Studio skal være forhåndsinstallert:
 
 | Komponent | Versjon | Plassering |
 |-----------|---------|----------|
-| **LM Studio (Modeller + Div)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modeller + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
-| **LM Studio (Cache)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
+| **LM Studio (Buffer)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
-### Modellnedlasting
+### Nedlasting av modell
 
-Følgende modeller bør allerede være til stede i LM Studio-modellkatalogen (`C:\Users\...\.lmstudio\models`):
+Følgende modeller skal allerede være tilstede i LM Studio-modellmappen (`C:\Users\...\.lmstudio\models`):
 
 | Modelltype | Kvantisering | Størrelse | Plassering |
 |------------|--------------|------|----------|
-| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18,2 GB | `models\lmstudio-community` |
+| Qwen3 Coder 30B A3b Instruct | `Q4 K M` | 18.2 GB | `models\lmstudio-community` |
 
 ---
 
 ## Linux
 
-### LM Studio-installasjon
+### Installasjon av LM Studio
 
-Se lmstudio.md (inne i avhengighetsmappen) for flere detaljer.
+Se lmstudio.md (inne i dependencies-mappen) for flere detaljer.
 
-### Modellnedlasting
+### Nedlasting av modell
 
 Samme som på Windows.

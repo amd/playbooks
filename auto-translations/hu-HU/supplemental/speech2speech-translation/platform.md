@@ -1,40 +1,40 @@
-# Platform Configuration
+# Platform-konfiguráció
 
-Ez a dokumentum a playbook futtatásához szükséges platform-konfigurációkat írja le.
+Ez a dokumentum ismerteti a jelen playbook futtatásához szükséges platformkonfigurációkat.
 
 ## Előfeltételek
 
-PyTorch ROCm-támogatással előre telepítve van az AMD Ryzen™ AI Halo Developer Platform eszközön. Minden más eszköz esetén a felhasználóknak manuálisan kell telepíteniük a PyTorch-ot ROCm-támogatással. Kérjük, tekintse meg az operációs rendszerének megfelelő részt:
+A ROCm támogatással rendelkező PyTorch előre telepítve van az AMD Ryzen™ AI Halo Developer Platformon. Minden más eszközön a felhasználóknak manuálisan kell telepíteniük a ROCm támogatással rendelkező PyTorch-ot. Kérjük, tekintse meg az operációs rendszerének megfelelő szakaszt:
 
 ### Windows
 
-| Összetevő     | Verzió          | Megjegyzések                      |
+| Komponens     | Verzió         | Megjegyzések                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 vagy újabb  | Előre telepítve az AMD Ryzen AI Halo Developer Platform eszközön; minden más eszközön manuálisan kell telepíteni |
+| **PyTorch**   | 2.8 vagy újabb    | Előre telepítve az AMD Ryzen AI Halo Developer Platformon; minden más eszközön manuálisan kell telepíteni |
 
 ### Linux
 
-| Összetevő     | Verzió          | Megjegyzések                      |
+| Komponens     | Verzió         | Megjegyzések                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 vagy újabb  | Előre telepítve az AMD Ryzen AI Halo Developer Platform eszközön; minden más eszközön manuálisan kell telepíteni |
+| **PyTorch**   | 2.8 vagy újabb    | Előre telepítve az AMD Ryzen AI Halo Developer Platformon; minden más eszközön manuálisan kell telepíteni |
 
 ## Szükséges modellek
 
-A következő modellek teszteltek és optimalizáltak az Ön platformjához:
+A következő modellek le vannak tesztelve és optimalizálva vannak az Ön platformjához:
 
 | Modell | Paraméterek | Méret | Letöltési hely |
-|--------|-------------|-------|----------------|
-| **facebook/seamless-m4t-v2-large** | 2.3B | ~10GB | Előre telepítve az AMD Ryzen AI Halo Developer Platform eszközön; minden más eszközön manuálisan kell telepíteni |
+|-------|------------|------|-------------------|
+| **facebook/seamless-m4t-v2-large** | 2,3B | ~10GB | Előre telepítve az AMD Ryzen AI Halo Developer Platformon; minden más eszközön manuálisan kell telepíteni |
 
-A modellek automatikusan letöltődnek a Hugging Face gyorsítótár könyvtárába:
+A modellek automatikusan letöltésre kerülnek a Hugging Face gyorsítótár-könyvtárba:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
-Győződjön meg arról, hogy legalább **20 GB szabad hely** áll rendelkezésre a modellek tárolásához.
+Gondoskodjon legalább **20 GB szabad tárhelyről** a modellek tárolásához.
 
 ## Hálózati követelmények
 
-A kezdeti beállításhoz internetkapcsolat szükséges a modellek Hugging Face-ről való letöltéséhez. A letöltés után a playbook offline módban is futtatható.
+A kezdeti beállításhoz internetkapcsolat szükséges a modellek Hugging Face-ről történő letöltéséhez. A letöltés után a playbook offline is futtatható.
 
-- Az első modellletöltések a modell méretétől és a kapcsolat sebességétől függően **5–10 percet** vehetnek igénybe
-- A modellek helyben gyorsítótárazódnak, és nem szükséges újra letölteni őket
+- Az első alkalommal történő modell-letöltések a modell méretétől és a kapcsolat sebességétől függően **5-10 percet** vehetnek igénybe
+- A modellek helyileg gyorsítótárazásra kerülnek, és nem szükséges őket ismételten letölteni

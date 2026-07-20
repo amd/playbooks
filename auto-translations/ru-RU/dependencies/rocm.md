@@ -11,13 +11,13 @@ SPDX-License-Identifier: MIT
 sudo usermod -a -G render,video $LOGNAME
 ```
 
-**Перезапустите систему для применения настроек.**
+**Перезагрузите систему, чтобы применить настройки.**
 ```bash
 sudo reboot
 ```
 
-**Установите ROCm в созданное виртуальное окружение.**
-> **Примечание**: Убедитесь, что виртуальное окружение активировано перед продолжением.
+**Установите ROCm в созданном виртуальном окружении.**
+> **Примечание**: Перед выполнением этого шага убедитесь, что виртуальное окружение активно.
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
@@ -59,4 +59,4 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-Для получения дополнительной помощи по установке, пожалуйста, перейдите по этой [ссылке](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Дополнительную информацию по установке можно найти по этой [ссылке](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).

@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 Podman est un logiciel de conteneurisation pour Linux.
 
 
-**Étape 1** : Installez le moteur Podman principal et le plugin d'analyse Compose V2 autonome.
+**Étape 1** : Installez le moteur Podman de base et le plugin autonome d'analyse Compose V2.
 
 ```bash
 sudo apt update && sudo apt install -y podman docker-compose-plugin podman-compose
@@ -22,7 +22,7 @@ podman --version
 podman-compose --version
 ```
 
-**Étape 3** : Activez le socket API Podman à l'échelle du système afin que le plugin Compose puisse communiquer avec le runtime de conteneur.
+**Étape 3** : Activez le socket API Podman à l'échelle du système afin que le plugin Compose puisse communiquer avec l'environnement d'exécution des conteneurs.
 
 ```bash
 sudo systemctl enable --now podman.socket

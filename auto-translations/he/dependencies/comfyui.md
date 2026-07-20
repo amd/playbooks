@@ -8,33 +8,33 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 
-1. הורד את מתקין ComfyUI העדכני ל-Windows מ-[download.comfy.org](https://download.comfy.org/windows/nsis/x64).
-2. בחר את הגדרת החומרה שלך: בחר `AMD ROCm`.
-3. בחר היכן להתקין את ComfyUI: השתמש בנתיב ברירת המחדל או בתיקייה המועדפת עליך.
-4. הגדרות אפליקציית שולחן העבודה: אנו ממליצים לבטל את הסימון של "עדכונים אוטומטיים" כדי להבטיח שאתה משתמש בגרסה המומלצת של אפליקציה זו.
-5. לחץ על "Next" כדי להתחיל בהתקנה.
+1. הורידו את מתקין ה-Windows העדכני ביותר של ComfyUI מ-[download.comfy.org](https://download.comfy.org/windows/nsis/x64).
+2. בחרו את תצורת החומרה שלכם: בחרו ב-`AMD ROCm`.
+3. בחרו היכן להתקין את ComfyUI: השתמשו בנתיב ברירת המחדל או בתיקייה המועדפת עליכם.
+4. הגדרות אפליקציית שולחן העבודה: אנו ממליצים לבטל את הסימון של "Automatic Updates" כדי להבטיח שאתם משתמשים בגרסה המומלצת של אפליקציה זו.
+5. לחצו על "Next" כדי להתחיל בהתקנה.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-#### שכפל את ComfyUI
+#### שכפלו את ComfyUI
 ```bash
 git clone https://github.com/Comfy-Org/ComfyUI.git
 ```
 
-#### (אופציונלי) בדוק גרסה ספציפית
+#### (אופציונלי) עברו לגרסה ספציפית
 ```bash
 git checkout v0.19.2
 ```
 
-#### התקן את דרישות ComfyUI
+#### התקינו את הדרישות של ComfyUI
 
-כאשר סביבת Python הווירטואלית מופעלת, הרץ:
+לאחר הפעלת סביבת ה-Python הווירטואלית, הריצו:
 ```bash
 cd ComfyUI
 pip install -r requirements.txt
 ```
 
-> **הערה**: ראה [ComfyUI GitHub](https://github.com/comfy-org/ComfyUI) למידע נוסף.
+> **הערה**: ראו [ComfyUI GitHub](https://github.com/comfy-org/ComfyUI) למידע נוסף.
 
 <!-- @os:end -->

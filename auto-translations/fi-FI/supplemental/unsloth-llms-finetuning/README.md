@@ -6,64 +6,64 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> Tässä ohjekirjassa käytetään erikoismerkintöjä, joita GitHub ei pysty renderöimään. Käy osoitteessa [amd.com/playbooks](https://amd.com/playbooks) nähdäksesi tämän sisällön oikein.
 <!-- @github-only:end -->
 
 ## Yleiskatsaus
 
-Tämä playbook näyttää, kuinka kielimalli hienosäädetään paikallisesti Unsloth-työkalulla AMD-laitteistolla.
+Tämä ohjekirja näyttää, miten kielimalli hienosäädetään paikallisesti Unslothilla AMD-laitteistolla.
 
-Se käyttää lyhyttä Supervised Fine-Tuning (SFT) -esimerkkiä LoRA-adaptereilla mallilla `unsloth/gemma-4-E4B-it`, hyödyntäen osajoukkoa `mlabonne/FineTome-100k`-datasetistä. Tavoitteena on tarjota yksinkertainen päästä päähän -työnkulku, joka kattaa asennuksen, koulutuksen, inferenssin ja hienosäädetyn tuloksen tallentamisen.
+Siinä käytetään lyhyttä ohjatun hienosäädön (Supervised Fine-Tuning, SFT) esimerkkiä LoRA-adaptereilla mallissa `unsloth/gemma-4-E4B-it`, hyödyntäen osajoukkoa `mlabonne/FineTome-100k`-tietoaineistosta. Tavoitteena on tarjota yksinkertainen päästä päähän -työnkulku, joka kattaa asennuksen, koulutuksen, päättelyn ja hienosäädetyn tuloksen tallentamisen.
 
-Esimerkki on suunniteltu käytännölliseksi ja helposti muokattavaksi, joten voit käyttää sitä lähtökohtana omille dataseteillesi ja malleillesi.
+Esimerkki on suunniteltu käytännönläheiseksi ja helposti muokattavaksi, joten voit käyttää sitä lähtökohtana omille tietoaineistoillesi ja malleillesi.
 
 ## Mitä opit
 
-- Kuinka Unsloth-ympäristö asennetaan
-- Kuinka LLM hienosäädetään SFT:llä Unsloth-työkalulla
-- Kuinka hienosäädetty tulos tallennetaan paikalliseen tallennustilaan
+- Miten Unsloth-ympäristö asennetaan
+- Miten LLM hienosäädetään SFT:llä käyttäen Unslothia
+- Miten hienosäädetty tulos tallennetaan paikalliseen tallennustilaan
 
 <!-- @device:halo,stx,krk -->
-> **Huomio:** Tämän playbookin hienosäätötekniikat vaativat vähintään 24 Gt GPU-muistia ja 32 Gt järjestelmämuistia.
+> **Huomautus:** Tässä ohjekirjassa käytettävät hienosäätötekniikat vaativat vähintään 24 Gt GPU-muistia ja 32 Gt järjestelmämuistia.
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Huomio:** Tämän playbookin hienosäätötekniikat vaativat vähintään 24 Gt GPU-muistia ja 32 Gt järjestelmämuistia.
+> **Huomautus:** Tässä ohjekirjassa käytettävät hienosäätötekniikat vaativat vähintään 24 Gt GPU-muistia ja 32 Gt järjestelmämuistia.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Huomio:** Tämän playbookin hienosäätötekniikat vaativat vähintään 24 Gt **dedikoitua** GPU-muistia ja 32 Gt järjestelmämuistia.
+> **Huomautus:** Tässä ohjekirjassa käytettävät hienosäätötekniikat vaativat vähintään 24 Gt **erillistä** GPU-muistia ja 32 Gt järjestelmämuistia.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Miksi Unsloth?
 
-Unsloth helpottaa LLM-hienosäätöä paikallisella laitteistolla vähentämällä muistinkäyttöä ja nopeuttamalla koulutusta verrattuna tavalliseen asennukseen.
+Unsloth helpottaa LLM-hienosäädön suorittamista paikallisella laitteistolla vähentämällä muistinkäyttöä ja nopeuttamalla koulutusta verrattuna tavalliseen asetukseen.
 
-Tässä playbookissa käytämme Unslotha yhdessä **LoRA-pohjaisen SFT:n** kanssa. Tämä tarkoittaa, että perusmalli pysyy suurimmaksi osaksi jäädytettynä, kun taas paljon pienempi joukko adapterin painoja koulutetaan. Tämä sopii hyvin paikalliseen kehitykseen, koska se on kevyempää kuin täysi hienosäätö ja nopeampaa iteroida.
+Tässä ohjekirjassa käytämme Unslothia yhdessä **LoRA-pohjaisen SFT:n** kanssa. Tämä tarkoittaa, että peruskielimalli pysyy suurelta osin jäädytettynä, kun taas paljon pienempi joukko adapteripainoja koulutetaan. Tämä sopii hyvin paikalliseen kehitykseen, koska se on kevyempi kuin täysi hienosäätö ja nopeampi iteroida.
 
-Unsloth tukee myös muita koulutustapoja, kuten QLoRA:a ja vahvistusoppimisen työnkulkuja. Tämä playbook keskittyy ensin yksinkertaisimpaan polkuun: pieneen LoRA-hienosäätöesimerkkiin, jonka käyttäjät voivat ajaa, ymmärtää ja laajentaa.
+Unsloth tukee myös muita koulutustapoja, mukaan lukien QLoRA ja vahvistusoppimisen työnkulkuja. Tämä ohjekirja keskittyy ensin yksinkertaisimpaan polkuun: pieneen LoRA-hienosäätöesimerkkiin, jonka käyttäjät voivat suorittaa, ymmärtää ja laajentaa.
 
-## Muistikonfiguraation asettaminen
+## Muistiasetuksen määrittäminen
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
-> **Huomio**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centerin kautta.
+> **Huomautus**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centerin kautta.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmiston esivaatimusten asentaminen
 
-### Luo virtuaaliympäristö
+### Virtuaaliympäristön luominen
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Avaa terminaali ja luo venv, johon AMD ROCm™ -ohjelmisto ja PyTorch on jo asennettu:
+Avaa pääte ja luo venv-ympäristö, jossa AMD ROCm™ -ohjelmisto ja PyTorch ovat jo asennettuina:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -75,13 +75,13 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
+**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta tämä tulee voimaan):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Avaa terminaali ja luo venv:
+Avaa pääte ja luo venv-ympäristö:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -95,10 +95,10 @@ source unsloth-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Huomio:** Windows vaatii Python 3.13:n.
+> **Huomautus:** Python 3.13 vaaditaan Windowsissa.
 
 <!-- @device:halo_box -->
-Avaa PowerShell-terminaali ja luo virtuaaliympäristö:
+Avaa PowerShell-pääte ja luo virtuaaliympäristö:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env --system-site-packages
@@ -109,7 +109,7 @@ python -m venv unsloth-env --system-site-packages
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Avaa PowerShell-terminaali ja luo virtuaaliympäristö:
+Avaa PowerShell-pääte ja luo virtuaaliympäristö:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env
@@ -158,10 +158,10 @@ pip install triton-windows
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Huomio:** Tuonnin aikana Unsloth saattaa kokeilla valinnaisia `bitsandbytes`-kiihdytyspolkuja. Joissakin ROCm-versioissa saatat nähdä viestin kuten `bitsandbytes library load error: Configured ROCm binary not found`. Tämä playbook käyttää tavallista LoRA-hienosäätöä `optim="adamw_torch"`-asetuksella, joten emme nojaa `bitsandbytes`-optimoijaan tai 4-bittiseen QLoRA:han. Tämä viesti voidaan turvallisesti ohittaa.
+> **Huomautus:** Tuonnin aikana Unsloth saattaa tutkia valinnaisia `bitsandbytes`-kiihdytyspolkuja. Joissakin ROCm-versioissa saatat nähdä viestin, kuten `bitsandbytes library load error: Configured ROCm binary not found`. Tämä ohjekirja käyttää tavanomaista LoRA-hienosäätöä asetuksella `optim="adamw_torch"`, joten emme ole riippuvaisia `bitsandbytes`-optimoijasta tai 4-bittisestä QLoRA:sta. Tämän viestin voi turvallisesti jättää huomiotta.
 
 <!-- @os:windows -->
-> **Huomio:** Windows ROCm -ympäristössä Unsloth tulostaa useita varoituksia käynnistyksen yhteydessä — katso [Tunnetut varoitukset](#known-warnings) alta. Nämä kaikki voidaan turvallisesti ohittaa; koulutus toimii oikein.
+> **Huomautus:** Windows ROCm -ympäristössä Unsloth tulostaa käynnistyksen yhteydessä useita varoituksia — katso [Tunnetut varoitukset](#known-warnings) alla. Nämä kaikki voi turvallisesti jättää huomiotta; koulutus toimii oikein.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -186,7 +186,7 @@ print("PASS: All required imports succeeded")
 
 ## Lataa Unsloth-hienosäätöskripti
 
-Sen sijaan, että suorittaisit jokaisen vaiheen manuaalisesti, tämä playbook tarjoaa selkeän, päästä päähän -skriptin täällä: [test_unsloth.py](assets/test_unsloth.py).
+Sen sijaan, että suoritettaisiin jokainen vaihe manuaalisesti, tämä ohjekirja tarjoaa selkeän, päästä päähän -skriptin täällä: [test_unsloth.py](assets/test_unsloth.py).
 
 Suorita seuraava koodi skriptin ajamiseksi:
 
@@ -221,21 +221,21 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-Playbookin loppuosa käy käsitteellisesti läpi jokaisen skriptin päävaiheen.
+Ohjekirjan loppuosa käy käsitteellisesti läpi jokaisen skriptin tärkeimmän vaiheen.
 
-## Kuinka se toimii
+## Miten se toimii
 
 test_unsloth.py-skripti suorittaa seuraavat vaiheet:
-* **Lataa malli**: Lataa unsloth/gemma-4-E4B-it FastModel-luokan avulla.
-* **Valmistelee datan**: Standardisoi datasetin (esim. FineTome-100k) ja soveltaa Gemma-4-chat-mallipohjaa.
-* **Soveltaa LoRA:a**: Lisää adapterit kieli-, huomio- ja MLP-moduuleihin tehokasta koulutusta varten.
-* **Kouluttaa**: Käyttää SFTTraineria vain vastauksen häviöpeittämisellä.
-* **Inferenssi**: Suorittaa nopean generointitestin suorituskyvyn varmistamiseksi.
-* **Tallentaa**: Vie LoRA-adapterit paikallisesti.
+* **Mallin lataus**: Lataa unsloth/gemma-4-E4B-it -mallin käyttäen FastModel-luokkaa.
+* **Datan valmistelu**: Standardisoi tietoaineiston (esim. FineTome-100k) ja soveltaa Gemma-4-keskustelumallipohjaa.
+* **LoRA:n soveltaminen**: Lisää adaptereita kieli-, huomio- ja MLP-moduuleihin tehokasta koulutusta varten.
+* **Koulutus**: Käyttää SFTTraineria vastauskohtaisella häviön maskauksella.
+* **Päättely**: Suorittaa nopean generointitestin suorituskyvyn tarkistamiseksi.
+* **Tallennus**: Vie LoRA-adapterit paikallisesti.
 
-## Keskeinen konfiguraatio
+## Keskeiset asetukset
 
-Voit muokata seuraavia vakioita mukauttaaksesi ajoa:
+Voit muokata seuraavia vakioita ajon mukauttamiseksi:
 
 ```python
 MODEL_NAME = "unsloth/gemma-4-E4B-it"
@@ -244,38 +244,38 @@ DATASET_NAME = "mlabonne/FineTome-100k"
 OUTPUT_DIR = "gemma_4_lora"
 ```
 
-Esimerkki Unsloth-tervetuloviestistä ja tulosteesta mallin painoja ladattaessa:
+Esimerkki Unslothin tervetuloviestistä ja tulosteesta mallin painojen latautuessa:
 
-![vaihtoehtoinen teksti](assets/welcome.png)
+![alt text](assets/welcome.png)
 
-## Valmistele datasetti
+## Tietoaineiston valmistelu
 
-Käytämme osajoukkoa seuraavasta:
+Käytämme osajoukkoa:
 ```text
 mlabonne/FineTome-100k
 ```
-Datasetti on:
-* Muunnettu chat-muotoon
-* Käsitelty Gemma-4-chat-mallipohjalla
-* Puhdistettu poistamalla päällekkäiset BOS-tunnukset
+Tietoaineisto on:
+* Muunnettu keskustelumuotoon
+* Käsitelty Gemma-4-keskustelumallipohjalla
+* Puhdistettu duplikaatti-BOS-tunnisteista
 
-## Kouluta malli
+## Mallin koulutus
 
-Skripti suorittaa lyhyen koulutusesittelyn seuraavilla parametreilla:
+Skripti suorittaa lyhyen koulutusdemonstraation seuraavilla parametreilla:
 - ~50 askelta
 - Pieni eräkoko
-- Gradienttien kertyminen
+- Gradienttien kumulointi
 
-Koulutuksen aikana näet lokeja kuten:
+Koulutuksen aikana näet lokeja, kuten:
 
-![vaihtoehtoinen teksti](assets/training.png)
+![alt text](assets/training.png)
 
 
-## Tallentaminen ja käyttöönotto
+## Tallennus ja käyttöönotto
 
-### Paikallinen tallentaminen (LoRA)
+### Paikallinen tallennus (LoRA)
 
-Skripti tallentaa LoRA-adapterit automaattisesti OUTPUT_DIR-hakemistoon.
+Skripti tallentaa automaattisesti LoRA-adapterit OUTPUT_DIR-hakemistoon.
 ```python
 model.save_pretrained("gemma_4_lora")  
 tokenizer.save_pretrained("gemma_4_lora")
@@ -314,14 +314,14 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end -->
 
-### Tallenna yhdistetty malli (vLLM:ää varten)
+### Yhdistetyn mallin tallentaminen (vLLM:ää varten)
 
 <!-- @os:windows -->
-> **Huomio:** vLLM ei tue Windowsia. Ottaaksesi hienosäädetyn mallisi käyttöön Windowsissa, käytä llama.cpp:tä (katso [Vie GGUF](#export-gguf-for-llamacpp) alta) tai siirrä yhdistetty malli Linux-koneelle, jossa vLLM on käynnissä.
+> **Huomautus:** vLLM ei tue Windowsia. Ottaaksesi hienosäädetyn mallisi käyttöön Windowsissa, käytä llama.cpp:tä (katso [Vie GGUF](#export-gguf-for-llamacpp) alla) tai siirrä yhdistetty malli Linux-koneelle, jossa vLLM on käynnissä.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Yhdistä adapterit täydeksi malliksi vLLM-käyttöönottoa varten:
+Käyttöönottoa varten vLLM:llä, yhdistä adapterit täydeksi malliksi:
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
@@ -359,9 +359,9 @@ print("PASS: Merged model output looks correct")
 ```
 <!-- @test:end -->
 
-### Vie GGUF (llama.cpp:tä varten)
+### GGUF:n vienti (llama.cpp:tä varten)
 
-Muunna suoraan GGUF-muotoon paikallista inferenssiä varten:
+Muunna suoraan GGUF-muotoon paikallista päättelyä varten:
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
@@ -369,28 +369,28 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 <!-- @os:windows -->
 ## Tunnetut varoitukset
 
-Nämä varoitukset tulostaa Unsloth käynnistyksen yhteydessä Windows ROCm -ympäristössä, ja ne kaikki voidaan turvallisesti ohittaa:
+Nämä varoitukset tulostaa Unsloth käynnistyksen yhteydessä Windows ROCm -ympäristössä, ja ne kaikki voi turvallisesti jättää huomiotta:
 
-| Varoitus | Syy | Turvallinen ohittaa? |
+| Varoitus | Syy | Voiko jättää huomiotta? |
 |---|---|---|
-| `bitsandbytes library load error` | bitsandbytes-kirjastolla ei ole Windows ROCm -versiota | Kyllä — tämä playbook käyttää `adamw_torch`-optimoijaa, ei bnb:tä |
-| `No ROCm platform found for torch.distributed` | ROCm Windowsilla ei tue hajautettua koulutusta | Kyllä — yksittäisen GPU:n koulutus ei ole vaikuttunut |
-| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth merkitsee muut kuin Linux-versiot | Kyllä — Windows ROCm toimii yksittäisen GPU:n SFT:ssä |
-| `triton is not available` | Tritonilla ei ole Windows-versiota | Kyllä — Unsloth käyttää varasuunnitelmana PyTorch-ytimiä |
+| `bitsandbytes library load error` | bitsandbytes-kirjastolle ei ole Windows ROCm -käännöstä | Kyllä — tämä ohje käyttää `adamw_torch`-optimoijaa, ei bnb:tä |
+| `No ROCm platform found for torch.distributed` | Windows-versiosta ROCm:sta puuttuu hajautetun koulutuksen tuki | Kyllä — yhden GPU:n koulutus ei tästä kärsi |
+| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth merkitsee muut kuin Linux-käännökset | Kyllä — Windows ROCm toimii yhden GPU:n SFT-koulutukseen |
+| `triton is not available` | Tritonille ei ole Windows-käännöstä | Kyllä — Unsloth käyttää tällöin PyTorch-ytimiä |
 
-Koulutus etenee oikein näistä varoituksista huolimatta.
+Koulutus etenee näistä varoituksista huolimatta oikein.
 <!-- @os:end -->
 
-## Seuraavat askeleet
+## Seuraavat vaiheet
 - Kokeile [Unsloth Studiota](https://unsloth.ai/docs/new/studio), intuitiivista graafista käyttöliittymää Unslothille
-- Kouluta omilla erityisdataseteillasi
+- Kouluta omilla erityisillä datajoukoillasi
 - Kokeile hienosäätöä eri hyperparametreilla
 - Ota käyttöön vLLM:llä tai llama.cpp:llä
-- Kokeile QLoRA:a pienemmän muistinkäytön asennuksessa
+- Kokeile QLoRA:a vähemmän muistia vaativaa asetusta varten
 
 ## Resurssit
 
-Alla on lisäresursseja Unslothin ja hienosäädön oppimiseen:
+Alla on lisää resursseja, joiden avulla voit oppia lisää Unslothista ja hienosäädöstä:
 
 * [Unsloth-dokumentaatio](https://docs.unsloth.ai)
 

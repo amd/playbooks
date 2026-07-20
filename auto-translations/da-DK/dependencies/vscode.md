@@ -8,18 +8,18 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-VS Code kan installeres fra **AMD Ryzen™ AI Developer Center**. Gå til fanen **Updates** og installer VS Code, hvis det ikke allerede er til stede.
+VS Code kan installeres fra **AMD Ryzen™ AI Developer Center**. Gå til fanen **Updates**, og installer VS Code, hvis det ikke allerede findes.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-VS Code kan installeres fra **AMD Ryzen™ AI Developer Center**. Gå til fanen **Manage** og installer VS Code, hvis det ikke allerede er til stede.
+VS Code kan installeres fra **AMD Ryzen™ AI Developer Center**. Gå til fanen **Manage**, og installer VS Code, hvis det ikke allerede findes.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Download Windows-installationsfilen fra: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
+1. Download eksekverbar Windows-installationsfil fra: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
 2. Klik på den downloadede fil `VSCodeUserSetup-x64-1.108.2.exe` for at installere VS Code.
 
 <!-- @os:end -->

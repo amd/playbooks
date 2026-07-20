@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # Konfiguracija platforme
 
-Ovaj dokument opisuje očekivane konfiguracije platforme za pokretanje ovog priručnika.
+Ovaj dokument opisuje očekivane konfiguracije platforme za pokretanje ovog playbook-a.
 
 ## Windows
 
@@ -16,13 +16,13 @@ LM Studio treba biti unapred instaliran:
 
 | Komponenta | Verzija | Lokacija |
 |-----------|---------|----------|
-| **LM Studio (Modeli + Razno)** | v0.4.0 | `C:\Users\...\.lmstudio` |
+| **LM Studio (Modeli + Msc)** | v0.4.0 | `C:\Users\...\.lmstudio` |
 | **LM Studio (Program)** | v0.4.0 | `C:\Program Files\LM Studio` |
 | **LM Studio (Keš)** | v0.4.0 | `C:\Users\...\AppData\Roaming\LM Studio` |
 
 ### Preuzimanje modela
 
-Sledeći modeli već treba da budu prisutni u direktorijumu modela LM Studio (`C:\Users\...\.lmstudio\models`):
+Sledeći modeli bi već trebalo da se nalaze u direktorijumu modela LM Studio (`C:\Users\...\.lmstudio\models`):
 
 | Uređaj | Tip modela | Kvantizacija | Veličina (GB) | Lokacija |
 | ----- |------------|--------------|------|----------|

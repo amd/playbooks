@@ -19,8 +19,8 @@ Da biste omogućili LM Studio-u da vidi unapred instalirane modele, idite na Set
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-1. Preuzmite instalater odavde: [https://lmstudio.ai/download](https://lmstudio.ai/download)
-2. Instalirajte.
+1. Preuzmite instalacioni program odavde: [https://lmstudio.ai/download](https://lmstudio.ai/download)
+2. Instalirajte. 
 <!-- @device:end -->
 
 > Savet: Nakon instalacije, pokrenite LM Studio jednom da biste inicijalizovali CLI (`lms`).
@@ -33,12 +33,12 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Napomena: Možete odabrati da instalirate .deb ili AppImage.
+> Napomena: Možete izabrati da instalirate .deb ili AppImage. 
 1. Preuzmite appimage odavde: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
-2. pokrenite `sudo apt install libfuse2`
-3. pokrenite `cd ~/Downloads`
-4. pokrenite `chmod +x LM-Studio-*.AppImage`
-5. pokrenite `./LM-Studio-*.AppImage`
+2. pokrenite `sudo apt install libfuse2`  
+3. pokrenite `cd ~/Downloads`  
+4. pokrenite `chmod +x LM-Studio-*.AppImage`  
+5. pokrenite `./LM-Studio-*.AppImage`  
 > Savet: Nakon instalacije, pokrenite LM Studio jednom da biste inicijalizovali CLI (`lms`).
 
 <!-- @device:halo_box -->
@@ -53,5 +53,5 @@ Da biste omogućili LM Studio-u da vidi unapred instalirane modele, idite na Set
 ```bash
 lms --help
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->

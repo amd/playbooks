@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 #### ROCm
 
-**將當前使用者加入 render 和 video 群組。** 
+**將目前使用者加入 render 和 video 群組。** 
 ```bash
 sudo usermod -a -G render,video $LOGNAME
 ```
@@ -16,8 +16,8 @@ sudo usermod -a -G render,video $LOGNAME
 sudo reboot
 ```
 
-**在已建立的虛擬環境中安裝 ROCm。**
-> **注意**：在繼續之前，請確保虛擬環境已啟用。
+**在建立的虛擬環境中安裝 ROCm。**
+> **注意**：請確保在繼續操作前虛擬環境已啟用。
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->

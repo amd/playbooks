@@ -2,28 +2,28 @@
 Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
-# 以 Lemonade Server 作为后端运行 OpenClaw
+# 使用 Lemonade Server 作为后端运行 OpenClaw
 
 ## 概述
 
-[**OpenClaw**](https://openclaw.ai/) 是一款自主 AI 智能体，能够编写并运行代码、管理文件，以及代表您处理复杂的多步骤任务。与仅回答问题的聊天助手不同，OpenClaw 会在您的系统上执行真实操作，因此它需要一个快速、强大的 AI 后端来跟上高强度的智能体循环。
+[**OpenClaw**](https://openclaw.ai/) 是一个自主 AI 智能体，能够代表你编写和运行代码、管理文件，并处理复杂的多步骤任务。与只能回答问题的聊天助手不同，OpenClaw 会在你的系统上执行真实的操作，这意味着它需要一个快速、强大的 AI 后端来跟上其高要求的智能体循环。
 
-[**Lemonade Server**](https://lemonade-server.ai/) 正是这样的后端。它是一款开源本地推理服务器，可直接在您的硬件上运行 GenAI 模型，并通过行业标准的 OpenAI API 对外提供服务。
+[**Lemonade Server**](https://lemonade-server.ai/) 正是这样的后端。它是一个开源的本地推理服务器，可以直接在你的硬件上运行 GenAI 模型，并通过业界标准的 OpenAI API 对外提供服务。
 
-两者共同构成了一套完全本地化的 AI 智能体技术栈：Lemonade 负责模型推理，OpenClaw 提供智能体循环，将模型输出转化为真实操作。
+两者结合，构成了一套完全本地化的 AI 智能体技术栈：Lemonade 负责模型推理，而 OpenClaw 提供智能体循环，将模型输出转化为真实的操作。
 
-> **继续之前请注意：** OpenClaw 是一款高度自主的 AI 智能体。授予任何 AI 智能体访问您系统的权限可能导致不可预测或意外的结果。请仅在您了解相关风险并愿意接受自主软件代表您执行操作的情况下继续。
+> **在继续之前：** OpenClaw 是一个高度自主的 AI 智能体。让任何 AI 智能体访问你的系统都可能导致不可预测或非预期的结果。请仅在你理解相关风险并愿意让自主软件代表你行事的情况下继续操作。
 
 ---
 
-## 您将学到什么
+## 你将学到什么
 
-完成本手册后，您将能够：
+完成本操作指南后，你将能够：
 
 - 了解 **Lemonade Server**
-- **安装 OpenClaw** 并**将其指向 Lemonade Server** 作为其 AI 后端。
-- **启动 OpenClaw 网关**并确认您的智能体已准备就绪。
-- **连接通信渠道**（Discord 或 Telegram），以便从任何设备与您的智能体对话。
+- **安装 OpenClaw**，并**将其指向 Lemonade Server**作为其 AI 后端。
+- **启动 OpenClaw 网关**，并确认你的智能体已准备就绪。
+- **连接通信渠道**（Discord 或 Telegram），以便你可以从任何设备与你的智能体聊天。
 
 ---
 
@@ -37,20 +37,20 @@ SPDX-License-Identifier: MIT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 安装软件前提条件
+## 安装软件先决条件
 
 <!-- @os:linux -->
-- 运行 **Ubuntu 24.04+** 或兼容的基于 Debian 的 Linux 发行版（需支持 `apt-get`）的 PC
-- 至少 **12 GB RAM**（建议 64 GB+ 以运行更大的模型）
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/)（可选，用于沙箱化 OpenClaw）
+- 一台运行 **Ubuntu 24.04+** 或兼容的、基于 Debian 且具备 `apt-get` 的 Linux 发行版的电脑
+- 至少 **12 GB 内存**（推荐 64 GB 以上以支持更大的模型）
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/)（可选，用于对 OpenClaw 进行沙盒隔离）
 
-- **约 10–30 GB 可用磁盘空间**（用于存储模型权重）
+- 用于模型权重的**约 10–30 GB 可用磁盘空间**
 <!-- @os:end -->
 <!-- @os:windows -->
-- 运行 **Windows 10/11** 的 PC
-- 至少 **12 GB RAM**（建议 64 GB+ 以运行更大的模型）
-- **约 10–30 GB 可用磁盘空间**（用于存储模型权重）
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)（可选，用于沙箱化 OpenClaw）
+- 一台运行 **Windows 10/11** 的电脑
+- 至少 **12 GB 内存**（推荐 64 GB 以上以支持更大的模型）
+- 用于模型权重的**约 10–30 GB 可用磁盘空间**
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)（可选，用于对 OpenClaw 进行沙盒隔离）
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -67,24 +67,24 @@ lemonade --version
 
 ## 拉取并加载推荐模型
 
-本手册推荐的模型为来自 Unsloth 的 **Qwen3.6-35B-A3B-GGUF**，这是一款具有 263k token 上下文窗口的强大 MoE 模型，非常适合智能体工作负载。该模型使用 UD-Q4_K_XL 量化。立即拉取：
+本操作指南推荐的模型是 Unsloth 提供的 **Qwen3.6-35B-A3B-GGUF**，这是一款出色的 MoE 模型，具有 263k token 的上下文窗口，非常适合智能体工作负载。该模型使用 UD-Q4_K_XL 量化。现在拉取该模型：
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-然后以较大的上下文窗口加载它，并保存该设置以供后续运行使用：
+然后以较大的上下文窗口加载它，并保存该设置以供以后运行使用：
 
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
 lemonade unload
 lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 
-该模型的默认上下文长度为 262,144 个 token。如果遇到内存不足（OOM）错误，请考虑缩小上下文窗口。但由于 Qwen3.6 在复杂任务中会利用扩展上下文，我们建议将上下文长度保持在至少 128K token，以保留思考能力。
+该模型的默认上下文长度为 262,144 个 token。如果遇到内存不足（OOM）错误，可以考虑减小上下文窗口。不过，由于 Qwen3.6 依赖扩展上下文来处理复杂任务，我们建议至少保持 128K token 的上下文长度，以保留其思考能力。
 
-> **提示：禁用思考模式以加快智能体响应速度：** Qwen3.6-35B-A3B 默认以思考模式运行，这会在每次响应前增加延迟。在智能体循环中，这种开销会迅速累积。[lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) 仓库提供了一个现成的配置文件，可禁用思考模式。要使用它，请下载该文件并导入：
+> **提示：禁用思考模式以获得更快的智能体响应：** Qwen3.6-35B-A3B 默认以思考模式运行，这会在每次响应前增加延迟。对于智能体循环来说，这种开销会迅速累积。[lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) 仓库提供了一个可直接使用的、禁用思考模式的配置文件。要使用它，请下载该文件并导入：
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -146,7 +146,7 @@ finally {
   Remove-Item $tmpBody -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -220,18 +220,18 @@ fi
 
 echo "OK: Lemonade chat/completions returned a response"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
 
 ## 设置 WSL
 
-我们在 WSL 内运行 OpenClaw（推荐），并将其连接到在 Windows 上原生运行的 Lemonade。这为 OpenClaw 提供了 Linux shell 环境，同时保留了 Lemonade 在 Windows 端的 GPU 加速。
+我们在 WSL 中运行 OpenClaw（推荐做法），并将其连接到在 Windows 上原生运行的 Lemonade。这样可以为 OpenClaw 提供一个 Linux Shell 环境，同时在 Windows 一侧保留 Lemonade 的 GPU 加速能力。
 
 ### 安装 WSL 和 Ubuntu
 
-以管理员身份打开 PowerShell 并安装 WSL 内核：
+以管理员身份打开 PowerShell，并安装 WSL 内核：
 
 ```powershell
 wsl --install --no-distribution
@@ -245,7 +245,7 @@ wsl --install -d Ubuntu-24.04
 
 ### 在 WSL 中启用 systemd
 
-在 Ubuntu 终端内运行以下命令：
+在 Ubuntu 终端中运行以下命令：
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -263,34 +263,34 @@ wsl
 
 ### 将 Lemonade 从 Windows 桥接到 WSL
 
-WSL2 运行在虚拟网络中。Windows 上的 Lemonade 绑定到 `127.0.0.1`，WSL 无法直接访问。Windows 端口代理将流量从 WSL 网关 IP 转发到 Windows 本地回环地址。
+WSL2 运行在一个虚拟网络中。Windows 上的 Lemonade 绑定到 `127.0.0.1`，而 WSL 无法直接访问该地址。可以通过 Windows 端口代理，将流量从 WSL 网关 IP 转发到 Windows 本地地址。
 
-**查找您的 WSL 网关 IP**（在 WSL 内运行）：
+**查找你的 WSL 网关 IP**（在 WSL 中运行）：
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**添加端口代理**（以管理员身份在 PowerShell 中运行，将 `<WSL-Gateway-IP>` 替换为您的 WSL 网关 IP）：
+**添加端口代理**（以管理员身份在 PowerShell 中运行，将 `<WSL-Gateway-IP>` 替换为你的 WSL 网关 IP）：
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**添加防火墙规则**（在同一提升权限的 PowerShell 中）：
+**添加防火墙规则**（在同一个提升权限的 PowerShell 中运行）：
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**从 WSL 验证**：
+**从 WSL 中验证**：
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-如果您已在上一步中加载了 Qwen3.6-35B-A3B-GGUF 模型，您应该会看到如下 JSON 输出：
+如果你在上一步中已经加载了 Qwen3.6-35B-A3B-GGUF 模型，应该会看到如下的 JSON 输出：
 
 ```json
 {
@@ -308,7 +308,7 @@ curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 }
 ```
 
-> `netsh portproxy` 规则在重启后仍然有效，但 WSL 网关 IP 可能在 `wsl --shutdown` 后发生变化。如果重启后 Lemonade 在 WSL 中无法访问，请获取更新后的网关 IP 并用新 IP 更新代理。
+> `netsh portproxy` 规则在重启后依然有效，但 WSL 网关 IP 可能会在执行 `wsl --shutdown` 后发生变化。如果重启后 WSL 无法访问 Lemonade，请获取更新后的网关 IP，并使用该新 IP 更新代理设置。
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -359,7 +359,7 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 
 ---
 <!-- @os:end -->
@@ -368,25 +368,25 @@ finally {
 
 ### 安装 OpenClaw
 <!-- @os:windows -->
-> 本节中的命令请在您的 **WSL 终端**内运行。
+> 请在你的 **WSL 终端**中运行本节中的命令。
 <!-- @os:end -->
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-`--no-onboard` 标志会跳过交互式设置向导，您将在下一步手动配置模型后端，从而精确控制所使用的模型和服务器。
+`--no-onboard` 标志会跳过交互式设置向导，你将在下一步中手动配置模型后端，这样可以精确控制所使用的模型和服务器。
 
-打开新终端并确认安装：
+打开一个新终端并确认安装情况：
 
 ```bash
 openclaw --version
 ```
 
-> **提示：** 如果安装后看到 `command not found`，请将 npm 的全局 bin 目录添加到您的 PATH：
+> **提示：** 如果安装后出现 `command not found`，请将 npm 的全局 bin 目录添加到你的 PATH 中：
 > ```bash
 > export PATH="$HOME/.npm-global/bin:$PATH"
 > ```
-> 要使此设置永久生效，请将上述行添加到您的 `~/.bashrc` 或 `~/.zshrc` 文件中。
+> 若要使此设置永久生效，请将上面这行内容添加到你的 `~/.bashrc` 或 `~/.zshrc` 文件中。
 
 <!-- @os:linux -->
 <!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
@@ -399,7 +399,7 @@ node -v
 npm -v
 openclaw --version
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -438,13 +438,11 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
+### 配置 OpenClaw 以使用 Lemonade
 
-
-### 配置 OpenClaw 使用 Lemonade
-
-运行 OpenClaw 的非交互式引导程序。
+运行 OpenClaw 的非交互式引导。
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -484,9 +482,9 @@ openclaw onboard \
 ```
 <!-- @os:end -->
 
-此命令将 OpenClaw 的配置写入 `~/.openclaw/openclaw.json`。
+此命令会将 OpenClaw 的配置写入 `~/.openclaw/openclaw.json`。
 
-> **OpenClaw 上下文窗口大小调整：** 当 `contextTokens > contextWindow − reserveTokens` 时，OpenClaw 的压缩功能会触发。默认的 `reserveTokensFloor` 为 20,000 个 token，这是一个下限值，当 `reserveTokens` 低于该值时会覆盖它，因此任何低于约 37k 的模型上下文都会触发无限压缩循环。在配置中设置一个较低的保留值并禁用下限，该设置将应用于所有模型，无需逐个模型调整：
+> **OpenClaw 上下文窗口大小设置：** 当 `contextTokens > contextWindow − reserveTokens` 时，OpenClaw 的压缩机制会被触发。默认的 `reserveTokensFloor` 为 20,000 个 token，这是一个下限值,当其低于 `reserveTokens` 时会覆盖后者,因此任何低于约 37k 的模型上下文都会触发无限压缩循环。在配置中设置一个较低的保留值并禁用该下限,这样只需一次设置即可应用于每个模型,无需针对每个模型单独调整：
 >
 > ```json
 > "compaction": {
@@ -495,13 +493,13 @@ openclaw onboard \
 > }
 > ```
 >
-> `reserveTokensFloor` 是一个*下限*（最小保护值），而非保留值本身，仅设置下限不会产生效果。`reserveTokensFloor: 0` 会禁用该保护，使较低的 `reserveTokens` 值生效。
+> `reserveTokensFloor` 是一个*下限*（最小保护值），而非保留值本身,仅设置该下限不会产生任何效果。`reserveTokensFloor: 0` 会禁用该保护机制,从而使较低的 `reserveTokens` 值生效。
 >
-> **何时应用此配置：** 如果您的模型有效上下文窗口低于约 37k，无论是因为模型本身较小（例如 8k、16k、32k），还是因为您在 Lemonade 中有意将其限制为较低值（例如加载 128k 模型但将上下文设置为 16k），请使用此配置。若不应用此配置，OpenClaw 在启动时会进入无限压缩循环。
+> **何时应用此配置：** 如果你的模型的有效上下文窗口低于约 37k（无论是因为模型本身较小，例如 8k、16k、32k，还是因为你有意将其限制为更低的值，例如加载了一个 128k 模型但在 Lemonade 中将上下文设置为 16k），请使用此配置。否则，OpenClaw 在启动时会进入无限压缩循环。
 >
-> **大上下文模型使用完整上下文时：** 您可以完全跳过此配置。默认设置运行良好，压缩会在窗口填满之前触发，模型有足够的空间生成长响应。如果您确实应用了此配置，请注意 `reserveTokens: 4096` 会将响应长度限制在约 4k token，这可能会截断长文件生成或详细计划。
+> **大上下文模型使用完整上下文时：** 你可以完全跳过此配置。默认设置即可正常工作，压缩机制会在窗口填满之前及时启动，模型也有充足的空间生成较长的回复。如果你确实应用了此配置，请注意 `reserveTokens: 4096` 会将回复长度限制在约 4k token，这可能会截断较长的文件生成或详细计划。
 >
-> **添加位置：** 将 `compaction` 块放置在 `openclaw.json` 中 `agents.defaults` 内（通常位于 `~/.openclaw/openclaw.json`）：
+> **在何处添加此配置：** 将 `compaction` 代码块放置在 `openclaw.json`（通常位于 `~/.openclaw/openclaw.json`）中的 `agents.defaults` 内部：
 >
 > ```json
 > {
@@ -520,13 +518,13 @@ openclaw onboard \
 > }
 > ```
 >
-> 您配置的其余部分（网关、渠道、模型等）保持不变，只需添加 `compaction` 键即可。
+> 配置的其余部分（gateway、channels、models 等）保持不变，只需添加 `compaction` 键即可。
 
-### （推荐）启用 Docker 沙箱
+### （推荐）启用 Docker 沙盒
 
-OpenClaw 可以将所有智能体文件和代码操作路由到隔离的 Docker 容器中，而不是直接在宿主机上运行。这将任何意外操作的影响范围限制在沙箱内，保持宿主机文件系统和网络不受影响。
+OpenClaw 可以将所有代理文件和代码操作路由到一个隔离的 Docker 容器中，而不是直接在主机上运行。这样可以将任何意外操作的影响范围限制在沙盒内，使你的主机文件系统和网络不受影响。
 
-构建沙箱镜像一次（需要已安装 Docker）：
+构建一次沙盒镜像（必须已安装 Docker）：
 
 ```bash
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -626,7 +624,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-运行以下命令，将 `sandbox` 键添加到 `~/.openclaw/openclaw.json` 中现有的 `agents.defaults` 块内：
+运行以下命令，在 `~/.openclaw/openclaw.json` 中现有的 `agents.defaults` 代码块内添加 `sandbox` 键：
 
 ```bash
 cat > sandbox.patch.json5 <<JSON5
@@ -645,31 +643,31 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-沙箱容器默认**没有网络访问权限**。有关绑定挂载和网络覆盖，请参阅[沙箱参考文档](https://docs.openclaw.ai/gateway/sandboxing)。
+沙盒容器默认**没有网络访问权限**。有关绑定挂载和网络覆盖设置，请参阅[沙盒参考文档](https://docs.openclaw.ai/gateway/sandboxing)。
 
-> #### 故障排除：Docker 权限被拒绝
->
-> 如果运行 Docker 命令时出现"permission denied"错误：
->
-> **步骤 1：将您的用户添加到 docker 组**
->
+> #### 故障排查：Docker 权限被拒绝
+> 
+> 如果在运行 Docker 命令时出现“权限被拒绝”的提示：
+> 
+> **步骤 1：将你的用户添加到 docker 组**
+> 
 > ```bash
-> sudo groupadd docker                    # 如需要则创建组
-> sudo usermod -aG docker $USER           # 将自己添加到组
-> newgrp docker                           # 激活更改
+> sudo groupadd docker                    # 如果需要,创建该组
+> sudo usermod -aG docker $USER           # 将自己添加到该组
+> newgrp docker                           # 使更改生效
 > docker run hello-world                  # 测试
 > ```
->
-> **步骤 2：如果错误仍然存在，应用永久修复**
->
+> 
+> **步骤 2：如果问题仍然存在，请应用永久修复方案**
+> 
 > ```bash
 > sudo chgrp docker /lib/systemd/system/docker.socket
 > sudo chmod g+w /lib/systemd/system/docker.socket
 > ```
->
-> 然后**重启**您的系统。
->
-> **临时快速修复**（重启后失效）：
+> 
+> 然后**重启**你的系统。
+> 
+> **快速临时修复方案**（重启后失效）：
 > ```bash
 > sudo chmod 666 /var/run/docker.sock
 > ```
@@ -708,7 +706,7 @@ grep -q "127.0.0.1:13305" "$config"
 
 echo "OK: OpenClaw onboarding wrote Lemonade configuration"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -749,7 +747,7 @@ grep -Eq '"workspaceAccess"[[:space:]]*:[[:space:]]*"none"' "$config"
 
 echo "OK: OpenClaw sandbox configuration was written"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 
@@ -819,7 +817,7 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 
@@ -891,12 +889,12 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 ### 启动 OpenClaw 网关
 
-网关是管理智能体循环并提供仪表板服务的 OpenClaw 进程：
+网关是 OpenClaw 用于管理代理循环并提供仪表盘服务的进程：
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -949,7 +947,7 @@ fi
 
 echo "OK: OpenClaw gateway is reachable"
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -1024,28 +1022,28 @@ finally {
   Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 }
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
-要打开仪表板，请在网关仍在运行时，在第二个终端中运行以下命令：
+要打开仪表盘，请在网关仍在运行的情况下，在第二个终端中运行以下命令：
 
 ```bash
 openclaw dashboard
 ```
 
-由于网关绑定到回环地址，从同一台机器打开仪表板时会自动完成身份验证，本地访问无需输入令牌或进行设备审批。您应该能看到 OpenClaw 仪表板，并显示您的 Lemonade 模型为当前活跃后端。
+由于网关绑定到回环地址，因此从同一台机器打开仪表盘时会自动完成身份验证，本地访问无需输入令牌或进行设备批准。你应该会看到 OpenClaw 仪表盘，其中列出了你的 Lemonade 模型作为活动后端。
 
-> 如果您已启用沙箱，可以通过在仪表板中要求智能体 `run hostname` 来验证。如果看到的是短容器 ID 而非您机器的主机名，则说明沙箱正在正常工作。
+> 如果你已启用沙盒功能，可以通过在仪表盘中让代理执行 `run hostname` 来验证其是否正常工作。如果显示的是一个简短的容器 ID，而不是你机器的主机名，则说明沙盒正在正常工作。
 
-**恭喜，您已从零开始构建了一套完全本地化的 AI 智能体技术栈。**
+**恭喜，你已经从零开始构建了一个完全本地化的 AI 代理技术栈。**
 
-> **需要网关令牌？** 运行 `openclaw dashboard --no-open` 可打印包含嵌入令牌的仪表板 URL（同时会尝试将其复制到剪贴板）。或者，令牌也可在 `~/.openclaw/openclaw.json` 的 `gateway.auth.token` 中找到。
+> **需要网关令牌？** 运行 `openclaw dashboard --no-open` 即可打印出包含令牌的仪表盘 URL（该命令还会尝试将其复制到剪贴板）。或者，你也可以在 `~/.openclaw/openclaw.json` 中的 `gateway.auth.token` 处找到该令牌。
 >
-> **审批远程设备：** 当您从第二台机器或手机打开仪表板时，浏览器会显示一个请求 ID。回到运行网关的机器上，执行：
+> **批准远程设备：** 当你从第二台机器或手机打开仪表盘时，浏览器会显示一个请求 ID。回到运行网关的机器上，运行：
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> 这仅适用于远程或辅助设备，从同一台机器通过回环地址访问会自动完成身份验证。
+> 只有远程或次要设备才需要执行此操作，来自同一台机器的回环访问会自动完成身份验证。
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1055,47 +1053,46 @@ openclaw dashboard
 
 ## 可选：连接通信渠道
 
-网关运行后，您可以从任何设备访问您的本地智能体。请选择适合您设置的选项。OpenClaw 支持 [Discord](https://docs.openclaw.ai/channels/discord)、[Telegram](https://docs.openclaw.ai/channels/telegram) 及其他渠道，完整列表请参阅 [docs.openclaw.ai](https://docs.openclaw.ai)。
+网关运行后，你可以从任何设备访问本地代理。请选择适合你使用场景的选项。OpenClaw 支持 [Discord](https://docs.openclaw.ai/channels/discord)、[Telegram](https://docs.openclaw.ai/channels/telegram) 以及其他渠道，完整列表请参阅 [docs.openclaw.ai](https://docs.openclaw.ai)。
 
 ---
 
 ### 选项 A：Discord
 
-Discord 需要一个**您拥有管理员权限**的服务器来添加机器人。如果您只是共享服务器但不拥有其中任何一个，请改用选项 B（Telegram）。
-
+Discord 需要一个**你拥有管理员权限**的服务器才能添加机器人。如果你与他人共用服务器但并非所有者，请改用选项 B（Telegram）。
 #### 创建 Discord 账号和服务器
 
-如果您没有 Discord 账号，请在 [discord.com](https://discord.com) 注册。您还需要一个您是管理员的服务器，点击 Discord 侧边栏中的 **+** 图标并选择 **Create My Own** 即可创建。私人服务器即可。
+如果你还没有 Discord 账号，请在 [discord.com](https://discord.com) 注册。你还需要一个你拥有管理员权限的服务器，点击 Discord 侧边栏中的 **+** 图标并选择 **Create My Own** 即可创建一个。私有服务器即可满足需求。
 
 #### 创建 Discord 应用和机器人
 
-1. 前往 [Discord 开发者门户](https://discord.com/developers/applications)，点击 **New Application**。为其命名（例如"openclaw-bot"）。
-2. 在侧边栏中点击 **Bot**，为机器人设置用户名。
-3. 仍在 Bot 页面，向下滚动到 **Privileged Gateway Intents** 并启用：
+1. 前往 [Discord Developer Portal](https://discord.com/developers/applications)，点击 **New Application**。为其命名（例如“openclaw-bot”）。
+2. 在侧边栏中点击 **Bot**。为机器人设置一个用户名。
+3. 仍在 Bot 页面上，滚动到 **Privileged Gateway Intents**，并启用：
    - **Message Content Intent**（必需）
    - **Server Members Intent**（推荐）
-4. 向上滚动并点击 **Reset Token** 以生成您的机器人令牌。复制它。
+4. 向上滚动，点击 **Reset Token** 生成你的机器人令牌。复制它。
 
-#### 将机器人添加到您的服务器
+#### 将机器人添加到你的服务器
 
 1. 在侧边栏中点击 **OAuth2/ URL Generator**。
 2. 在 **Scopes** 下，启用 `bot` 和 `applications.commands`。
 3. 在 **Bot Permissions** 下，启用：View Channels、Send Messages、Read Message History、Embed Links、Attach Files。
-4. 复制生成的 URL，粘贴到浏览器中，选择您的服务器并确认。机器人现在应出现在您服务器的成员列表中。
+4. 复制生成的 URL，粘贴到浏览器中，选择你的服务器并确认。此时机器人应该已出现在你服务器的成员列表中。
 
-#### 收集您的 ID
+#### 收集你的 ID
 
-在 Discord 中启用开发者模式（**用户设置/ 高级/ 开发者模式**），然后：
-- 右键点击您的服务器图标：**Copy Server ID**
-- 右键点击您自己的头像：**Copy User ID**
+在 Discord 中启用开发者模式（**User Settings/ Advanced/ Developer Mode**），然后：
+- 右键点击你的服务器图标：**Copy Server ID**
+- 右键点击你自己的头像：**Copy User ID**
 
-#### 允许服务器成员发送私信
+#### 允许服务器成员向你发送私信
 
-右键点击您的服务器图标/ **隐私设置**/ 开启 **Direct Messages**。这允许机器人向您发送私信，这是配对步骤所必需的。
+右键点击你的服务器图标/ **Privacy Settings**/ 打开 **Direct Messages** 开关。这样机器人才能向你发送私信，这是配对步骤所必需的。
 
 #### 为 Discord 配置 OpenClaw
 
-将您的机器人令牌存储为环境变量，然后创建一个补丁文件，启用 Discord、引用令牌并将您的服务器加入白名单。将 `<server_id>` 和 `<user_id>` 替换为上面收集的 ID。
+将你的机器人令牌存储为环境变量，然后创建一个补丁文件，用来启用 Discord、引用该令牌，并将你的服务器加入白名单。将 `<server_id>` 和 `<user_id>` 替换为上面收集到的 ID。
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1121,32 +1118,32 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **请勿依赖智能体来完成此配置。** 启用沙箱后，智能体无法从沙箱内部写入 `~/.openclaw/openclaw.json`，请改为在宿主机上使用上述 CLI 命令。
+> **不要依赖让智能体（agent）来配置此项。** 启用沙箱后，智能体无法从沙箱内部写入 `~/.openclaw/openclaw.json`，请改为在主机上使用上述 CLI 命令。
 
-重启网关以使其加载新的渠道配置：
+重启网关，使其加载新的频道配置：
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
 ```
 
-几秒钟内，您应该能在网关输出中看到 `logged in to discord as <bot-name>`。
+在几秒钟内，你应该会在网关输出中看到 `logged in to discord as <bot-name>`。
 
-#### 配对您的 Discord 账号
+#### 配对你的 Discord 账号
 
-在 Discord 中向机器人发送私信，它会回复一个短配对码。
+在 Discord 中给机器人发送私信。它会回复一个简短的配对码。
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-在运行 OpenClaw 的机器上审批：
+在运行 OpenClaw 的机器上批准该配对：
 ```bash
 openclaw pairing approve discord <CODE>
 ```
 
-> 配对码在一小时后过期。
+> 配对码将在一小时后过期。
 
-您现在可以直接从 Discord 与您的智能体对话，并将任务卸载到您的本地硬件上。
+现在你可以直接从 Discord 与你的智能体聊天，并将任务分配给你的本地硬件。
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1158,10 +1155,10 @@ openclaw pairing approve discord <CODE>
 
 对大多数用户来说，Telegram 比 Discord 更简单，它不需要服务器，也不需要管理员权限。
 
-#### 创建 Telegram 机器人
+#### 创建一个 Telegram 机器人
 
-1. 打开 Telegram 并向 **@BotFather** 发送消息。
-2. 发送 `/newbot` 并按照提示操作。保存它给您的机器人令牌。
+1. 打开 Telegram 并给 **@BotFather** 发消息。
+2. 发送 `/newbot` 并按提示操作。保存它给你的机器人令牌。
 
 #### 为 Telegram 配置 OpenClaw
 
@@ -1171,7 +1168,7 @@ openclaw pairing approve discord <CODE>
 export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 ```
 
-将渠道配置添加到 `~/.openclaw/openclaw.json`（或通过仪表板进行修补）：
+将频道配置添加到 `~/.openclaw/openclaw.json`（或通过仪表盘对其打补丁）：
 
 ```json
 {
@@ -1185,23 +1182,23 @@ export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 }
 ```
 
-重启网关，然后在 Telegram 中向您的机器人发送任意消息。审批配对：
+重启网关，然后在 Telegram 中给你的机器人发送任意消息。批准该配对：
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-配对码在一小时后过期。您现在可以通过 Telegram 私信与您的智能体对话。
+配对码将在一小时后过期。现在你可以通过 Telegram 私信与你的智能体聊天。
 
 ---
 
 ## 后续步骤
 
-现在您的智能体可以接收来自手机的命令并在本地机器上执行操作，以下是三个值得探索的方向：
+既然你的智能体现在可以从你的手机接收命令并在你的本地机器上执行操作，以下有三个值得探索的方向：
 
-1. **股市摘要器**：安排 OpenClaw 按固定间隔从金融 API 获取数据，用您的本地模型总结当天的市场动态，并每天早晨通过您选择的渠道将摘要推送到您的手机。
+1. **股市摘要生成器**：安排 OpenClaw 按固定时间间隔从金融 API 获取数据，用你的本地模型总结当天的行情变动，并通过你选择的频道每天早上将摘要推送到你的手机上。
 
-2. **微调监控器**：通过 Telegram 或 Discord 远程启动训练任务，然后让智能体跟踪训练日志，并将定期的损失值、GPU 利用率和磁盘使用情况报告到您的手机。如果运行停滞或显存激增，您无需守在机器旁即可立即得知。
+2. **微调监控器**：通过 Telegram 或 Discord 远程启动一个训练任务，然后让智能体持续跟踪训练日志，并定期将损失值、GPU 利用率和磁盘使用情况报告回你的手机。如果训练卡住或显存（VRAM）出现峰值，你无需守在机器旁就能立即知晓。
 
-3. **结合本地 VLM 的物联网应用**：将摄像头对准您的前门，在 Lemonade 上运行视觉模型，让 OpenClaw 按需或按触发条件分析画面。从手机询问"今天有包裹送到吗？"，直接从您自己的硬件获得答案。
+3. **搭配本地视觉语言模型（VLM）的物联网应用**：将摄像头对准你的前门，在 Lemonade 上运行一个视觉模型，让 OpenClaw 按需或在触发条件下分析画面帧。从你的手机上问“今天有包裹送达吗？”，即可从你自己的硬件上得到直接的回答。

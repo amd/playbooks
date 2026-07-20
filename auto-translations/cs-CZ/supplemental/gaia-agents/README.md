@@ -6,20 +6,20 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Tento playbook používá speciální tagy, které GitHub nedokáže vykreslit. Pro správné zobrazení tohoto obsahu navštivte [amd.com/playbooks](https://amd.com/playbooks).
+> Tento playbook používá speciální značky, které GitHub neumí zobrazit. Pro správné zobrazení tohoto obsahu navštivte prosím [amd.com/playbooks](https://amd.com/playbooks).
 <!-- @github-only:end -->
 
 ## Přehled
 
-Agenti GAIA jsou AI asistenti, kteří využívají lokální LLM k uvažování a volání nástrojů, které definujete — podobně jako chatboti, kteří mohou provádět akce. Běží **100% lokálně** bez cloudových API, bez odesílání dat z vašeho počítače a bez nutnosti API klíčů.
+GAIA agenti jsou AI asistenti, kteří používají lokální LLM k uvažování a volání nástrojů, jež definujete – jako chatboti, kteří dokáží provádět akce. Běží **100% lokálně** bez cloudových API, bez odesílání dat mimo váš počítač a bez nutnosti API klíčů.
 
-V tomto playbooku vytvoříte Hardware Advisor Agent, který zjistí RAM, GPU a NPU vašeho systému, dotáže se lokálního katalogu modelů a doporučí, které LLM váš počítač dokáže spustit. Jde o praktický úvod do GAIA Agent SDK, jehož výsledkem je něco okamžitě užitečného.
+V tomto playbooku vytvoříte Hardware Advisor Agenta, který detekuje RAM, GPU a NPU vašeho systému, dotazuje se na lokální katalog modelů a doporučí, které LLM váš počítač dokáže spustit. Jde o praktický úvod do GAIA Agent SDK, jehož výsledkem je něco okamžitě užitečného.
 
 ## Co se naučíte
 
 - Jak vytvořit GAIA agenta s vlastními nástroji
-- Používání LemonadeClient SDK pro dotazování na informace o systému a katalogy modelů
-- Detekce GPU/NPU specifická pro platformu (Windows PowerShell a Linux lspci)
+- Použití LemonadeClient SDK k dotazování systémových informací a katalogů modelů
+- Detekci GPU/NPU specifickou pro platformu (Windows PowerShell a Linux lspci)
 - Určování velikosti modelu na základě paměti pomocí pravidla 70 %
 - Vytvoření interaktivního CLI pro dotazy na hardware v přirozeném jazyce
 
@@ -29,12 +29,12 @@ V tomto playbooku vytvoříte Hardware Advisor Agent, který zjistí RAM, GPU a 
 
 <!-- @device:halo_box -->
 ## Kontrola aktualizací softwaru
-> **Poznámka**: Pokud VS Code není nainstalován, můžete ho nainstalovat pomocí Ryzen AI Developer Center.
+> **Poznámka**: Pokud nemáte nainstalované VS Code, můžete jej nainstalovat pomocí Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalace softwarových předpokladů
+## Instalace potřebného softwaru
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
@@ -64,11 +64,11 @@ which python3
 
 ## Začínáme
 
-Nejprve spusťte hotového agenta, abyste viděli, co vytváříte. Poté projdeme kód krok za krokem.
+Nejprve spusťte hotového agenta, abyste viděli, co budete vytvářet. Poté si projdeme kód krok za krokem.
 
-### Spuštění předpřipraveného příkladu
+### Spuštění hotového příkladu
 
-Tento playbook obsahuje kompletní soubor [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Stáhněte ho do libovolného adresáře a spusťte, abyste viděli hotového agenta v akci:
+Tento playbook obsahuje kompletní [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Stáhněte jej do libovolného adresáře a spusťte, abyste viděli hotového agenta v akci:
 
 ```bash
 python hardware_advisor_agent.py
@@ -96,7 +96,7 @@ print("PASS: hardware_advisor_agent.py has valid syntax")
 ```
 <!-- @test:end --> 
 
-**Zkuste se zeptat:** „Jak velký LLM mohu spustit?"
+**Zkuste se zeptat:** „Jak velký LLM mohu spustit?“
 
 **Očekávaný výstup:**
 
@@ -117,9 +117,9 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 - NPU acceleration available for smaller models
 ```
 
-**Gratulujeme** — vytvořili jste agenta!
+**Gratulujeme** – vytvořili jste agenta!
 
-Zbytek playbooku vysvětluje, jak každá část skriptu funguje, abyste ji pochopili od základů.
+Zbytek playbooku vysvětlí, jak funguje každá část skriptu, abyste tomu porozuměli od základu.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -263,11 +263,11 @@ echo "OK: hardware_advisor_agent.py started successfully"
 
 Hardware Advisor Agent kombinuje tři komponenty:
 
-- **LemonadeClient SDK** — API pro informace o systému a katalog modelů
+- **LemonadeClient SDK** — API pro systémové informace a katalog modelů
 - **Detekce specifická pro platformu** — Windows PowerShell / Linux lspci pro informace o GPU
 - **Výpočty paměti** — pravidlo 70 % pro bezpečné určení velikosti modelu
 
-Data procházejí těmito komponentami v pořadí: dotaz uživatele → agent vybere nástroj → nástroj volá LemonadeClient + detekci OS → agent syntetizuje výsledky do doporučení.
+Data protékají v tomto pořadí: dotaz uživatele → agent zvolí nástroj → nástroj volá LemonadeClient + detekci OS → agent syntetizuje výsledky do doporučení.
 
 ### LemonadeClient SDK
 
@@ -357,11 +357,11 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 
 ### Detekce GPU specifická pro platformu
 
-Agent používá příkazy nativní pro OS místo PyTorch pro detekci GPU. Funguje bez nainstalovaných ovladačů GPU, detekuje všechny GPU (nejen ty s podporou CUDA) a vyhýbá se importu těžkých knihoven.
+Agent pro detekci GPU používá nativní příkazy operačního systému spíše než PyTorch. To funguje i bez nainstalovaných ovladačů GPU, detekuje všechny GPU (nejen ty s podporou CUDA) a vyhýbá se importům náročných knihoven.
 
 <!-- @os:windows -->
 
-Na Windows agent používá PowerShell pro dotazování WMI:
+Na Windows agent používá PowerShell k dotazování WMI:
 
 ```python
 ps_command = (
@@ -392,9 +392,9 @@ result = subprocess.run(
 
 <!-- @os:end -->
 
-### Pravidlo 70 % pro paměť
+### Pravidlo 70 % paměti
 
-> **Pravidlo:** Velikost modelu by měla být menší než 70 % dostupné RAM, aby zbývalo 30 % rezervy pro operace inference (KV cache, vyrovnávací paměti pro dávkové zpracování, špičky spotřeby paměti za běhu).
+> **Pravidlo:** Velikost modelu by měla být menší než 70 % dostupné RAM, aby zbylo 30 % jako rezerva pro operace inference (KV cache, vyrovnávací paměti pro dávkové zpracování, dočasné nárůsty paměti za běhu).
 
 ```
 System: 32 GB RAM
@@ -405,11 +405,11 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 
 ## Kódování agenta krok za krokem (volitelné)
 
-Vytvoříte **jeden soubor** s názvem `hardware_advisor_agent.py` a postupně budete přidávat funkce. Každý krok navazuje na předchozí.
+Vytvoříte **jeden soubor** s názvem `hardware_advisor_agent.py` a postupně do něj budete přidávat funkce. Každý krok navazuje na ten předchozí.
 
 ### Krok 1: Kostra agenta
 
-Začněte s minimální strukturou agenta — pouze třídou a základním systémovým promptem. Agent zatím nemá žádné nástroje.
+Začněte minimální strukturou agenta – pouze třída a základní systémový prompt. Agent zatím nemá žádné nástroje.
 
 ```python
 from gaia import Agent
@@ -436,7 +436,7 @@ if __name__ == "__main__":
     print("Agent created successfully!")
 ```
 
-Spusťte pro ověření:
+Spusťte ji pro ověření:
 
 ```bash
 python hardware_advisor_agent.py
@@ -452,7 +452,7 @@ Agent created successfully!
 
 ### Krok 2: Detekce GPU a hardwaru
 
-Přidejte pomocnou metodu `_get_gpu_info()` a nástroj `get_hardware_info()`. Tím se agent stane interaktivním — nyní se ho můžete dotazovat na specifikace systému.
+Přidejte pomocnou metodu `_get_gpu_info()` a nástroj `get_hardware_info()`. Tím se agent stane interaktivním – nyní se ho můžete dotazovat na specifikace systému.
 
 **Aktualizujte importy** v horní části souboru:
 
@@ -607,7 +607,7 @@ def _register_tools(self):
             }
 ```
 
-**Aktualizujte blok `__main__`** pro povolení interaktivního testování:
+**Aktualizujte blok `__main__`**, aby umožňoval interaktivní testování:
 
 ```python
 if __name__ == "__main__":
@@ -626,7 +626,7 @@ if __name__ == "__main__":
             break
 ```
 
-Spusťte a zkuste se zeptat „Ukáže mi specifikace mého systému":
+Spusťte a zkuste se zeptat „Ukaž mi specifikace mého systému“:
 
 ```bash
 python hardware_advisor_agent.py
@@ -647,7 +647,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ### Krok 3: Katalog modelů
 
-Přidejte nástroj `list_available_models()` uvnitř `_register_tools()`, za funkci `get_hardware_info`. Agent nyní dokáže říct, jaké modely jsou dostupné.
+Přidejte nástroj `list_available_models()` uvnitř `_register_tools()`, za funkci `get_hardware_info`. Nyní vám agent dokáže sdělit, jaké modely jsou k dispozici.
 
 ```python
     @tool(atomic=True)
@@ -689,7 +689,7 @@ Přidejte nástroj `list_available_models()` uvnitř `_register_tools()`, za fun
             }
 ```
 
-Spusťte a zkuste se zeptat „Jaké modely jsou dostupné?":
+Spusťte a zkuste se zeptat „Jaké modely jsou k dispozici?“:
 
 ```bash
 python hardware_advisor_agent.py
@@ -769,7 +769,7 @@ Přidejte nástroj `recommend_models()` uvnitř `_register_tools()`, za `list_av
             }
 ```
 
-Spusťte a zkuste se zeptat „Jak velký LLM mohu spustit?":
+Spusťte a zkuste se zeptat „Jak velký LLM mohu spustit?“:
 
 ```bash
 python hardware_advisor_agent.py
@@ -791,9 +791,9 @@ Top recommendations:
 
 ### Krok 5: Produkční CLI
 
-Nahraďte jednoduchý blok `__main__` propracovaným interaktivním CLI. Přidá banner, příkazy pro ukončení a lepší zpracování chyb.
+Nahraďte jednoduchý blok `__main__` propracovaným interaktivním CLI. Tím se přidá banner, příkazy pro ukončení a lepší zpracování chyb.
 
-**Nahraďte celý blok `if __name__ == "__main__":` tímto:**
+**Nahraďte celý blok `if __name__ == "__main__":`** tímto:
 
 ```python
 def main():
@@ -843,32 +843,31 @@ if __name__ == "__main__":
 ```
 
 ---
-
 ### Závěrečné ověření
 
-Váš soubor `hardware_advisor_agent.py` by nyní měl obsahovat všechny tyto komponenty:
+Váš `hardware_advisor_agent.py` by nyní měl obsahovat všechny tyto komponenty:
 
 - [x] Importy: `from typing import Any, Dict` a `from gaia import Agent, tool`
 - [x] Třída `HardwareAdvisorAgent` s `__init__` a systémovým promptem
-- [x] Pomocná metoda `_get_gpu_info()` (Windows PowerShell + Linux lspci)
+- [x] Pomocná funkce `_get_gpu_info()` (Windows PowerShell + Linux lspci)
 - [x] Nástroj `get_hardware_info()` s poli GPU, NPU a OS
 - [x] Nástroj `list_available_models()` s popisky a obohacením o velikost
 - [x] Nástroj `recommend_models()` s pravidlem 70 %, fits_in_ram, fits_in_gpu
 - [x] Funkce `main()` s interaktivním CLI
 
-**Otestujte tyto dotazy pro potvrzení, že vše funguje:**
+**Otestujte tyto dotazy, abyste ověřili, že vše funguje:**
 
-- „Jak velký LLM mohu spustit?"
-- „Ukáže mi specifikace mého systému"
-- „Jaké modely jsou dostupné?"
-- „Mohu spustit model 30B?"
+- „Jak velký LLM mohu spustit?“
+- „Zobraz mi specifikace mého systému“
+- „Jaké modely jsou k dispozici?“
+- „Mohu spustit model o velikosti 30B?“
 
-> **Tip**: Kompletní implementace je dostupná na [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
+> **Tip**: Kompletní implementace je k dispozici na adrese [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
 
 ## Další kroky
 
-- **Prozkoumejte LemonadeClient API** — Objevte další možnosti správy systému a modelů v [dokumentaci LemonadeClient SDK](https://amd-gaia.ai/sdk/lemonade-client)
-- **Přidejte hlasovou interakci** — Integrujte Whisper ASR a Kokoro TTS, aby uživatelé mohli klást otázky o hardwaru hlasem. Viz [průvodce Talk](https://amd-gaia.ai/guides/talk)
-- **Přidejte podporu MCP** — Zpřístupněte hardware advisor jako MCP server, aby se na něj mohly dotazovat další nástroje. Viz [průvodce MCP](https://amd-gaia.ai/sdk/infrastructure/mcp)
-- **Rozšiřte doporučovací engine** — Zohledněte VRAM GPU pro přesun vrstev nebo přidejte benchmarking pro odhad tokenů za sekundu
-- **Vytvořte multi-agentní systém** — Kombinujte hardware advisor s kódovacím agentem nebo chatovacím agentem pomocí [Routing Agent](https://amd-gaia.ai/guides/routing)
+- **Prozkoumejte API klienta LemonadeClient** — Objevte další možnosti správy systému a modelů v [dokumentaci LemonadeClient SDK](https://amd-gaia.ai/sdk/lemonade-client)
+- **Přidejte hlasovou interakci** — Integrujte Whisper ASR a Kokoro TTS, aby uživatelé mohli klást dotazy o hardwaru mluveným slovem. Viz [průvodce Talk](https://amd-gaia.ai/guides/talk)
+- **Přidejte podporu MCP** — Zpřístupněte poradce pro hardware jako server MCP, aby jej mohly dotazovat i další nástroje. Viz [průvodce MCP](https://amd-gaia.ai/sdk/infrastructure/mcp)
+- **Rozšiřte doporučovací mechanismus** — Zohledněte VRAM GPU pro odlehčení vrstev nebo přidejte benchmarking pro odhad tokenů za sekundu
+- **Vytvořte systém s více agenty** — Zkombinujte poradce pro hardware s kódovacím agentem nebo chatovacím agentem pomocí [Routing Agent](https://amd-gaia.ai/guides/routing)

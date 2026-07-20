@@ -5,27 +5,28 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
+> 本手冊使用 GitHub 無法呈現的特殊標籤。請造訪 [amd.com/playbooks](https://amd.com/playbooks) 以正確預覽此內容。
 <!-- @github-only:end -->
 
-## 概覽
+## 概述
 
-AMD ROCm™ 軟體與 PyTorch 堆疊共同構建了一個統一的裝置端 AI 生態系統。它同時支援 Windows 和 Linux，並正式支援多種裝置，包括 Ryzen™ AI APU 和 Radeon™ GPU。
+AMD ROCm™ 軟體與 PyTorch 堆疊共同打造了統一的裝置端 AI 生態系統。此技術可在 Windows 與 Linux 上運作，並正式支援包括 Ryzen™ AI APU 與 Radeon™ GPU 在內的多種裝置。
 
-本 playbook 將教您如何在邊緣端完整執行低延遲、富有表現力且具隱私保護的語音轉語音翻譯。
+本手冊將教您如何完全在邊緣裝置上執行低延遲、富有表現力且具隱私性的語音對語音翻譯。
 
-## 您將學到的內容
+## 您將學到什麼
 
-- 如何設定語音轉語音環境
-- 如何撰寫 Python 程式碼以載入並使用語音轉語音模型
-- 如何執行並實驗 Gradio UI
+- 如何設定語音對語音環境
+- 如何撰寫 Python 程式碼以載入並使用語音對語音模型
+- 如何執行並試用 Gradio UI
 
-## 為何使用即時語音轉語音翻譯？
+## 為什麼要使用即時語音對語音翻譯？
 
-- 消除翻譯與語言障礙之間的摩擦
+- 消除翻譯與語言隔閡之間的摩擦
 - 傳達語氣、情感與意圖，無需尷尬的停頓
-- 實現全球協作並加快決策速度
+- 促進全球協作與更快速的決策制定
 
 ## 設定記憶體配置
 
@@ -33,7 +34,7 @@ AMD ROCm™ 軟體與 PyTorch 堆疊共同構建了一個統一的裝置端 AI �
 
 <!-- @device:halo_box -->
 ## 檢查軟體更新
-> **注意**：若未安裝 VS Code，您可以透過 Ryzen AI Developer Center 進行安裝。
+> **注意**：若尚未安裝 VS Code，您可以透過 Ryzen AI Developer Center 進行安裝。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -44,7 +45,7 @@ AMD ROCm™ 軟體與 PyTorch 堆疊共同構建了一個統一的裝置端 AI �
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-在 Linux 上，開啟終端機並執行以下指令，以建立已安裝 ROCm+Pytorch 的 venv：
+在 Linux 上，開啟終端機並執行下列指令，以建立已預先安裝 ROCm+PyTorch 的虛擬環境（venv）：
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -58,13 +59,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**授予您的使用者存取 GPU 裝置的權限**（需登出後重新登入才能生效）：
+**授予您的使用者存取 GPU 裝置的權限**（需要登出並重新登入才能生效）：
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-在 Linux 上，開啟終端機並執行以下指令以建立 venv：
+在 Linux 上，開啟終端機並執行下列指令以建立虛擬環境：
 
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
@@ -80,7 +81,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-在 Windows 上，於您選擇的目錄中開啟終端機，並依照以下指令建立已安裝 ROCm+Pytorch 的 venv：
+在 Windows 上，於您選擇的目錄中開啟終端機，並依照下列指令建立已預先安裝 ROCm+PyTorch 的虛擬環境（venv）：
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -90,13 +91,12 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **提示**：Windows 使用者在執行某些 PowerShell 指令前，可能需要修改 PowerShell 執行原則（例如
-> 將其設定為 RemoteSigned 或 Unrestricted）。
+> **提示**：Windows 使用者在執行部分 PowerShell 指令之前，可能需要修改其 PowerShell 執行原則（例如將其設定為 RemoteSigned 或 Unrestricted）。
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-在 Windows 上，於您選擇的目錄中開啟終端機，並依照以下指令建立 venv：
+在 Windows 上，於您選擇的目錄中開啟終端機，並依照下列指令建立虛擬環境：
 
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
@@ -106,8 +106,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **提示**：Windows 使用者在執行某些 PowerShell 指令前，可能需要修改 PowerShell 執行原則（例如
-> 將其設定為 RemoteSigned 或 Unrestricted）。
+> **提示**：Windows 使用者在執行部分 PowerShell 指令之前，可能需要修改其 PowerShell 執行原則（例如將其設定為 RemoteSigned 或 Unrestricted）。
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -195,35 +194,35 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## 設定語音轉語音示範
+## 設定語音對語音示範
 
 #### 了解 seamless-m4t-v2
 
-請至 Hugging Face 查看[模型卡](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)以獲取更多資訊。
-以下是語音轉語音模型的技術架構：
+請參閱 Hugging Face 上的[模型卡](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)以取得更多資訊。
+以下為語音對語音模型的技術架構：
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### 下載腳本
 
-本 playbook 包含可直接使用的腳本。請將所有腳本下載至您所建立環境的同一目錄中。
+本手冊包含可直接使用的腳本。請將所有腳本下載至您所建立環境的相同目錄下。
 
 | 腳本 | 說明 | 用法 |
 |--------|-------------|-------|
 | [infer.py](assets/infer.py) | 基本 LLM 文字生成 | `python infer.py` |
-| [input1.wav](assets/input1.wav) | 範例音訊檔案 | N/A |
-| [lang_list.py](assets/lang_list.py) | 語言支援檔案 | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | 語音翻譯直覺化 UI | `python gradio_demo.py --no-share` |
+| [input1.wav](assets/input1.wav) | 範例音訊檔案 | 不適用 |
+| [lang_list.py](assets/lang_list.py) | 語言支援檔案 | 不適用 |
+| [gradio_demo.py](assets/gradio_demo.py) | 直覺式語音翻譯 UI | `python gradio_demo.py --no-share` |
 
 
 ### 從 infer.py 開始
 
-若要執行腳本，請執行 
+若要執行此腳本，請執行 
 ```bash
 python infer.py
 ```
-> **注意**：您可能會看到一些警告，這是預期中的情況。
+> **注意**：您可能會看到一些警告訊息，這是正常現象。
  
   
 #### 程式碼說明
@@ -256,7 +255,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **片段 2：從 HuggingFace 載入模型**
 
-此函式接受模型 ID，若模型尚未下載則進行下載。接著回傳處理器與模型供下一個函式使用。
+此函式接收一個模型 ID，並在尚未下載模型時進行下載。接著會回傳處理器（processor）與模型（model），供下一個函式使用。
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -275,9 +274,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**片段 3：輸入音訊片段 .wav 檔案並進行預處理**
+**片段 3：輸入音訊片段 .wav 檔並進行前處理**
 
-此函式載入音訊片段並將其重新取樣至目標取樣率。
+此函式會載入音訊片段，並將其重新取樣至目標取樣率。
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -299,7 +298,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
 
 **片段 4：執行推論**
 
-此函式使用模型執行推論並回傳生成的輸出結果。
+此函式會使用模型執行推論，並回傳產生的輸出結果。
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -329,7 +328,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **片段 5：儲存翻譯後的檔案**
 
-此函式將音訊陣列儲存為 .WAV 檔案。
+此函式會將音訊陣列儲存為 .WAV 檔案。
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -394,14 +393,14 @@ echo "PASS: infer.py created out1.wav successfully"
 
 ### 執行 Gradio UI 示範：
 
-現在您已執行了基本的腳本範例，以下說明提供了一個實用的 UI，它以我們所撰寫的程式碼為基礎，讓即時語音轉語音翻譯變得更加便捷。
+現在您已執行過基本腳本範例，接下來的說明將提供一個實用的 UI，建立在我們已撰寫的程式碼之上，讓即時語音對語音翻譯變得更加容易。
 
 #### 在本機執行 Gradio
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-接著，在您的網頁瀏覽器中開啟 `http://127.0.0.1:7860` 以存取 UI。
+接著，於您的網頁瀏覽器中開啟 `http://127.0.0.1:7860` 以存取此 UI。
 
 
 ### Gradio UI 範例：
@@ -523,12 +522,12 @@ PY
 
 ## 後續步驟
 
-- 在數十種語言之間自由搭配，實現快速翻譯。
-- 與他人分享您的示範：加入 --share 以建立任何人都可遠端存取的公開連結，或使用 Hugging Face Spaces 進行永久部署。
+- 混合搭配數十種語言以進行快速翻譯。
+- 與他人分享您的示範：加入 --share 以建立可供任何人遠端存取的公開連結，或使用 Hugging Face Spaces 進行永久部署
 
 ## 資源
 
-以下是一些可進一步了解語音轉語音翻譯的額外資源：
-* 儲存庫位於 https://huggingface.co/facebook/seamless-m4t-v2-large
+以下是一些其他資源，讓您進一步了解語音對語音翻譯：
+* 儲存庫位置：https://huggingface.co/facebook/seamless-m4t-v2-large
 * 與「Seamless: Multilingual Expressive and Streaming Speech Translation」相關的學術研究
-* Gradio 分享與部署：[應用程式分享指南](https://www.gradio.app/guides/sharing-your-app) 和 [部署至 Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Gradio 分享與部署：[分享您的應用程式指南](https://www.gradio.app/guides/sharing-your-app) 與 [部署至 Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

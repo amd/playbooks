@@ -6,9 +6,9 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA ist das Open-Source-Framework von AMD zum Erstellen von KI-Agenten, die lokal auf AMD-Hardware mit Ryzen AI-Beschleunigung ausgeführt werden.
+GAIA ist AMDs Open-Source-Framework zum Erstellen von KI-Agenten, die lokal auf AMD-Hardware mit Ryzen AI-Beschleunigung ausgeführt werden.
 
-#### GAIA installieren
+#### Installation von GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Verwenden Sie dann `pip`, um **Gaia** zu installieren
+2. Verwenden Sie anschließend `pip`, um **Gaia** zu installieren
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Verwenden Sie dann `pip`, um **Gaia** zu installieren
+2. Verwenden Sie anschließend `pip`, um **Gaia** zu installieren
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Verwenden Sie dann `pip`, um **Gaia** zu installieren
+2. Verwenden Sie anschließend `pip`, um **Gaia** zu installieren
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Verwenden Sie dann `pip`, um **Gaia** zu installieren
+2. Verwenden Sie anschließend `pip`, um **Gaia** zu installieren
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -99,7 +99,7 @@ Führen Sie nach der Installation `gaia init` aus, um den Lemonade Server einzur
 gaia init
 ```
 
-Dadurch wird Lemonade Server installiert, die Standardmodelle werden heruntergeladen und das Setup wird überprüft.
+Dies installiert den Lemonade Server, lädt die Standardmodelle herunter und überprüft die Einrichtung.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -279,7 +279,7 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Installation überprüfen
+#### Überprüfen der Installation
 
 Überprüfen Sie, ob GAIA v0.16.2 oder höher installiert ist:
 
@@ -287,6 +287,6 @@ fi
 gaia --version
 ```
 
-> **Wichtig**: Stellen Sie sicher, dass Lemonade Server ausgeführt wird, bevor Sie GAIA verwenden. GAIA erfordert, dass Lemonade Server manuell gestartet wird.
+> **Wichtig**: Stellen Sie sicher, dass der Lemonade Server läuft, bevor Sie GAIA verwenden. GAIA erfordert, dass der Lemonade Server manuell gestartet wird.
 
 Weitere Informationen finden Sie in der [GAIA-Dokumentation](https://amd-gaia.ai).

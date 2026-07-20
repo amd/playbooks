@@ -4,20 +4,20 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# Configurarea Platformei
+# Configurarea platformei
 
-Acest document descrie configurațiile de platformă așteptate pentru rularea acestui playbook.
+Acest document descrie configurațiile de platformă așteptate pentru rularea acestei cărți de rețete (playbook).
 
-## Aplicații/Framework-uri Necesare
-
-### Windows/Linux
-
-GAIA trebuie să fie preinstalat folosind instrucțiunile furnizate în [Ghidul de Instalare GAIA](../../dependencies/gaia.md).
-
-Lemonade Server trebuie să fie preinstalat folosind instrucțiunile furnizate în [Ghidul de Instalare Lemonade](../../dependencies/lemonade.md).
-
-## Modele Necesare
+## Aplicații/Framework-uri necesare
 
 ### Windows/Linux
 
-Hardware Advisor Agent utilizează **Qwen3-Coder-30B** pentru raționamentul agentului. Acest model este descărcat automat în timpul `gaia init`. Nu sunt necesare descărcări manuale de modele.
+GAIA ar trebui să fie preinstalat urmând instrucțiunile furnizate în [Ghidul de instalare GAIA](../../dependencies/gaia.md).
+
+Lemonade Server ar trebui să fie preinstalat urmând instrucțiunile furnizate în [Ghidul de instalare Lemonade](../../dependencies/lemonade.md).
+
+## Modele necesare
+
+### Windows/Linux
+
+Agentul Hardware Advisor utilizează **Qwen3-Coder-30B** pentru raționamentul agentului. Acest model este descărcat automat în timpul comenzii `gaia init`. Nu este necesară descărcarea manuală a niciunui model.

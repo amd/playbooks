@@ -1,5 +1,5 @@
 {
   "id": "vscode-qwen3-coder",
-  "title": "Lokální LLM kódování s VSCode a Qwen3-Coder",
-  "description": "Používejte VS Code s lokálně spuštěným Qwen3-Coder pro soukromou asistenci při psaní kódu."
+  "title": "Lokální kódování s LLM pomocí VSCode a Qwen3-Coder",
+  "description": "Použijte VS Code s lokálně běžícím Qwen3-Coder pro soukromou asistenci s kódem."
 }

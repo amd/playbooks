@@ -1,5 +1,5 @@
 {
   "id": "clustering-rccl",
-  "title": "تجميع وحدتي Ryzen™ AI Halo باستخدام RCCL",
-  "description": "إعداد مجموعة متعددة العقد باستخدام جهازين من Ryzen™ AI Halo مع RCCL لأعباء العمل الموزعة"
+  "title": "تجميع اثنين من Ryzen™ AI Halo باستخدام RCCL",
+  "description": "قم بإعداد مجموعة متعددة العقد باستخدام جهازي Ryzen™ AI Halo مع RCCL لأحمال العمل الموزعة"
 }
