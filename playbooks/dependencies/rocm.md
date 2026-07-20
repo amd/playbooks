@@ -19,7 +19,7 @@ sudo reboot
 **Install ROCm in the created virtual environment.**
 > **Note**: Ensure the virtual environment is active before proceeding.
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo_box,halo -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
 python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1151]==7.14.0"
