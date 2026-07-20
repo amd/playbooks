@@ -2,7 +2,7 @@
 Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
-# Run Hermes Agent with Lemonade Server as the backend
+# Running Hermes Agent Locally with Lemonade Server
 
 ## Overview
 
@@ -21,7 +21,7 @@ Together they form a fully local AI agent stack: Lemonade handles model inferenc
 By the end of this playbook you will be able to:
 
 - **Install Hermes Agent** and point it at **Lemonade Server** as its AI backend.
-- **(Recommended) Enable Docker sandboxing** to isolate the agent's actions from your host.
+- **(Recommended) Enable Docker/Podman sandboxing** to isolate the agent's actions from your host.
 - **Start the Hermes gateway** and confirm your agent is ready.
 - **Connect a communication channel** (Discord or Telegram) so you can chat with your agent from any device.
 
@@ -55,7 +55,7 @@ By the end of this playbook you will be able to:
 - **~10–30 GB of free disk space** for model weights
 - Podman (Optional, for sandboxing Hermes Agent). Install inside WSL:
   ```bash 
-  sudo apt-get install -y podman`
+  sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
@@ -913,7 +913,7 @@ Hermes can browse and extract content from websites using its built-in web tools
 
 To overcome this limitation, [Firecrawl](https://docs.firecrawl.dev/introduction) provides a self-hosted web crawling and content extraction service that can bypass these challenges and unlock the full potential of Hermes automation. 
 
-In this setup, Firecrawl runs as a set of Docker containers managed with Podman. To simplify lifecycle management and automatic startup, we register Firecrawl as a user-level `systemd` service that orchetrates the underlying Podman Compose stack. This allows Hermes to start, stop, and verify the Firecrawl service using standard `systemctl --user` commands instead of interacting with containers directly.
+In this setup, Firecrawl runs as a set of Docker containers managed with Podman. To simplify lifecycle management and automatic startup, we register Firecrawl as a user-level `systemd` service that orchestrates the underlying Podman Compose stack. This allows Hermes to start, stop, and verify the Firecrawl service using standard `systemctl --user` commands instead of interacting with containers directly.
 
 To keep things simple, we've broken the whole process into four steps:
 
