@@ -1205,3 +1205,22 @@ Now that your agent can receive commands from your phone and act on your local m
 2. **Fine-tuning monitor**: Kick off a training job remotely via Telegram or Discord, then have the agent tail the training log and report periodic loss values, GPU utilization, and disk usage back to your phone. If the run stalls or VRAM spikes, you find out immediately without needing to be at the machine.
 
 3. **IOT with a local VLM**: Point a camera at your front door, run a vision model on Lemonade, and have OpenClaw analyze frames on demand or on a trigger. Ask "did any packages arrive today?" from your phone and get a straight answer from your own hardware.
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->
