@@ -1,0 +1,141 @@
+1. Create an elevated repair script (ADMIN POWERSHELL)
+
+New-Item -ItemType Directory -Force C:\actions-runner\scripts | Out-Null
+notepad C:\actions-runner\scripts\Repair-LemonadeWslBridge.ps1
+
+
+2. Paste this into the file:
+
+$ErrorActionPreference = "Stop"
+$Distro = "Ubuntu-24.04"
+$LemonadePort = 13305
+$PrivateRemoteRanges = @("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
+function Test-UrlFromWindows {
+  param([string]$Url)
+
+  $oldPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    curl.exe -fsS --max-time 5 $Url *> $null
+    return ($LASTEXITCODE -eq 0)
+  }
+  finally {
+    $ErrorActionPreference = $oldPreference
+  }
+}
+function Test-UrlFromWsl {
+  param([string]$Url)
+  $oldPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    wsl -d $Distro -- bash -lc "curl -fsS --max-time 5 '$Url' >/dev/null 2>/dev/null" *> $null
+    return ($LASTEXITCODE -eq 0)
+  }
+  finally {
+    $ErrorActionPreference = $oldPreference
+  }
+}
+
+$WslGateway = (wsl -d $Distro -- bash -lc "ip route show default | sed -n 's/^default via \([^ ]*\).*/\1/p' | head -1").Trim()
+if (-not $WslGateway) {
+  throw "Could not determine WSL gateway IP"
+}
+
+$NativeUrl = "http://127.0.0.1:$LemonadePort/api/v1/models"
+$BridgeUrl = "http://${WslGateway}:$LemonadePort/api/v1/models"
+Write-Host "Current WSL gateway IP: $WslGateway"
+if (-not (Test-UrlFromWindows $NativeUrl)) {
+  throw "Native Windows Lemonade is not reachable at $NativeUrl"
+}
+Write-Host "OK: Native Windows Lemonade is reachable"
+
+if (Test-UrlFromWsl $BridgeUrl) {
+  Write-Host "OK: Existing WSL Lemonade bridge is already working"
+  exit 0
+}
+Write-Host "WSL Lemonade bridge is not working. Recreating portproxy and firewall rule..."
+netsh interface portproxy reset
+Remove-NetFirewallRule -DisplayName "Lemonade-WSL" -ErrorAction SilentlyContinue
+Restart-Service iphlpsvc -Force
+Set-Service iphlpsvc -StartupType Automatic
+netsh interface portproxy add v4tov4 `
+  listenaddress=$WslGateway listenport=$LemonadePort `
+  connectaddress=127.0.0.1 connectport=$LemonadePort
+New-NetFirewallRule `
+  -DisplayName "Lemonade-WSL" `
+  -Direction Inbound `
+  -Protocol TCP `
+  -LocalAddress $WslGateway `
+  -LocalPort $LemonadePort `
+  -RemoteAddress $PrivateRemoteRanges `
+  -Action Allow | Out-Null
+
+Start-Sleep -Seconds 2
+
+Write-Host "Current portproxy rules:"
+netsh interface portproxy show all
+if (-not (Test-UrlFromWindows $BridgeUrl)) {
+  throw "Windows portproxy is still not reachable at $BridgeUrl"
+}
+if (-not (Test-UrlFromWsl $BridgeUrl)) {
+  throw "WSL still cannot reach Windows Lemonade through $BridgeUrl"
+}
+Write-Host "OK: WSL Lemonade bridge repaired successfully"
+
+
+
+3. Run it once from Administrator PowerShell:
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\actions-runner\scripts\Repair-LemonadeWslBridge.ps1
+
+
+
+4. Automate it with Task Scheduler (run the following from ADMIN PowerShell):
+
+$TaskName = "Repair Lemonade WSL Bridge"
+$ScriptPath = "C:\actions-runner\scripts\Repair-LemonadeWslBridge.ps1"
+
+$Action = New-ScheduledTaskAction `
+ -Execute "powershell.exe" `
+ -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$ScriptPath`""
+
+$TriggerAtStartup = New-ScheduledTaskTrigger -AtStartup
+$TriggerAtLogon = New-ScheduledTaskTrigger -AtLogOn
+
+$Principal = New-ScheduledTaskPrincipal `
+ -UserId "$env:USERDOMAIN\$env:USERNAME" `
+ -LogonType Interactive `
+ -RunLevel Highest
+
+Register-ScheduledTask `
+ -TaskName $TaskName `
+ -Action $Action `
+ -Trigger $TriggerAtStartup,$TriggerAtLogon `
+ -Principal $Principal `
+ -Force
+
+
+5. Then test it:
+Start-ScheduledTask -TaskName "Repair Lemonade WSL Bridge"
+Start-Sleep -Seconds 10
+Get-ScheduledTaskInfo -TaskName "Repair Lemonade WSL Bridge"
+
+
+6. Then verify from WSL:
+wsl -d Ubuntu-24.04
+# Update PATH in the current WSL shell
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+echo "$PATH"
+which ip
+which awk
+which head
+
+WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
+echo "WINDOWS_HOST=$WINDOWS_HOST"
+curl -fsS "http://$WINDOWS_HOST:13305/api/v1/models" >/dev/null && echo "OK: WSL can reach Windows Lemonade"
+
+# Persist to PATH 
+grep -qxF 'export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"' ~/.bashrc || \
+echo 'export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"' >> ~/.bashrc
+
+source ~/.bashrc

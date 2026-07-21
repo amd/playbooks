@@ -315,14 +315,14 @@ If you’ve already loaded the Qwen3.6-35B-A3B-GGUF model in the previous step, 
  unreachable from WSL after a restart, retrieve the updated gateway IP
  and update the proxy rule accordingly.
 
-> **Recommendation:** To avoid gateway issues, we strongly suggest
-> the following shell configuration:
-> - **Windows commands** should be executed in **PowerShell**
-> - **WSL distro commands** should be executed in a **Command Prompt**,
-> run as **Administrator**
-> Using the correct shell environment for each context helps prevent
+ **Recommendation:** To avoid gateway issues, we strongly suggest the following shell configuration:
+ - **Windows commands** should be executed in **PowerShell**
+ - **WSL distro commands** should be executed in a **Command Prompt**,
+ run as **Administrator**
+Using the correct shell environment for each context helps prevent
 unexpected behavior caused by gateway IP address changes.
 
+> **Tip:** To avoid manual intervention, consider automating this check with a scheduled task or [OpenClaw Runner Startup script](assets/OpenClawRunnerSetup.txt) that validates connectivity and refreshes the bridge only when the gateway IP changes.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -1067,7 +1067,7 @@ ssh user@<host-ip>
  ```bash
  ssh -N -L 17879:127.0.0.1:17879 user@<host-ip>
  ```
-  **Note:** After entering your password, no output is expected — the terminal will appear to hang. This is correct behavior. The `-N` flag means "do not execute a remote command", so SSH simply sits there maintaining the tunnel.
+ **Note:** After entering your password, no output is expected - the terminal will appear to hang. This is correct behavior. The `-N` flag means "do not execute a remote command", so SSH simply sits there maintaining the tunnel.
 
 Then, on your **local machine**, open your browser and navigate to http://127.0.0.1:17879.
 
