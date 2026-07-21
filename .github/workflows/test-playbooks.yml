@@ -125,6 +125,13 @@ jobs:
     env:
       PYTHONUTF8: 1
       PYTHONIOENCODING: utf-8
+      # Cheap, race-preserving PyTorch diagnostics. No-ops for non-torch playbooks.
+      # Device-side asserts surface the actual failing kernel instead of a generic
+      # async launch failure (e.g. HSA 0x1016); C++ stacktraces cost nothing unless
+      # an exception is thrown. Do NOT add HIP_LAUNCH_BLOCKING here: it serializes
+      # launches and masks the async races we are trying to capture.
+      TORCH_USE_HIP_DSA: 1
+      TORCH_SHOW_CPP_STACKTRACES: 1
     strategy:
       fail-fast: false
       matrix:
@@ -144,6 +151,32 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
+      # Capture the PREVIOUS boot's kernel log up front. If an earlier job on this
+      # self-hosted runner hit a GPU fault that rebooted the box, the evidence only
+      # survives in the prior boot's journal (this job's boot is clean). Best-effort:
+      # needs passwordless sudo + persistent journald; failures are non-fatal.
+      - name: Pre-test GPU diagnostics (Linux)
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          mkdir -p ci-diag
+          { sudo journalctl -k -b -1 || true; } > ci-diag/kernel-prevboot.txt 2>&1
+          # GPU state from kernel sysfs (no ROCm userspace required; ROCm, when
+          # needed, is pip-installed per-venv and is not on PATH here).
+          for d in /sys/class/drm/card*/device; do [ -f "$d/mem_info_vram_used" ] || continue; echo "== $d =="; for f in mem_info_vram_total mem_info_vram_used mem_info_gtt_total mem_info_gtt_used gpu_busy_percent; do [ -f "$d/$f" ] && echo "$f=$(cat "$d/$f" 2>/dev/null)"; done; done > ci-diag/gpu-state-pre.txt 2>&1
+
+      - name: Pre-test GPU diagnostics (Windows)
+        if: matrix.platform == 'windows'
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path ci-diag | Out-Null
+          # Display-driver TDR / GPU-reset events (e.g. Event ID 4101) from the System log.
+          Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=(Get-Date).AddHours(-8)} -ErrorAction SilentlyContinue |
+            Where-Object { $_.Message -match 'amdgpu|display driver|TDR|4101|reset' } |
+            Format-List TimeCreated,Id,LevelDisplayName,Message | Out-File ci-diag/win-events-pre.txt
+          # GPU state from the driver (no ROCm userspace required)
+          Get-CimInstance Win32_VideoController | Select-Object Name,DriverVersion,@{n='AdapterRAM_GB';e={[math]::Round($_.AdapterRAM/1GB,1)}},Status | Format-List | Out-File ci-diag/gpu-state-pre.txt
+
       - name: Extract and run tests (Windows)
         if: matrix.platform == 'windows'
         id: run_tests_windows
@@ -158,12 +191,42 @@ jobs:
         run: |
           python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}"
 
+      # On failure, capture this boot's kernel log + GPU state. If the fault hard
+      # reboots the box, this step won't run (job dies) but the next job's pre-test
+      # step recovers it from the previous boot. Best-effort; failures non-fatal.
+      - name: Capture GPU fault diagnostics (Linux)
+        if: failure() && matrix.platform == 'linux'
+        shell: bash
+        run: |
+          mkdir -p ci-diag
+          { sudo journalctl -k -b 0 || true; } > ci-diag/kernel-thisboot.txt 2>&1
+          { sudo dmesg || true; } > ci-diag/dmesg.txt 2>&1
+          for d in /sys/class/drm/card*/device; do [ -f "$d/mem_info_vram_used" ] || continue; echo "== $d =="; for f in mem_info_vram_total mem_info_vram_used mem_info_gtt_total mem_info_gtt_used gpu_busy_percent; do [ -f "$d/$f" ] && echo "$f=$(cat "$d/$f" 2>/dev/null)"; done; done > ci-diag/gpu-state-fault.txt 2>&1
+
+      - name: Capture GPU fault diagnostics (Windows)
+        if: failure() && matrix.platform == 'windows'
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path ci-diag | Out-Null
+          Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=(Get-Date).AddHours(-2)} -ErrorAction SilentlyContinue |
+            Where-Object { $_.Message -match 'amdgpu|display driver|TDR|4101|reset' } |
+            Format-List TimeCreated,Id,LevelDisplayName,Message | Out-File ci-diag/win-events-fault.txt
+          Get-CimInstance Win32_VideoController | Select-Object Name,DriverVersion,@{n='AdapterRAM_GB';e={[math]::Round($_.AdapterRAM/1GB,1)}},Status | Format-List | Out-File ci-diag/gpu-state-fault.txt
+
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
+          if-no-files-found: ignore
+
+      - name: Upload GPU diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpu-diag-${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          path: ci-diag/
           if-no-files-found: ignore
 
       # Open / update a tracking issue for every failed test, but ONLY on the
