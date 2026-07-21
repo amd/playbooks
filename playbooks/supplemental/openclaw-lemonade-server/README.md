@@ -895,7 +895,6 @@ finally {
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @device:halo_box -->
 ## (Recommended) OpenClaw Integration with Firecrawl Services
 
 [Firecrawl](https://docs.firecrawl.dev/introduction) provides a self-hosted web crawling and content extraction service that can bypass these challenges and unlock the full potential of OpenClaw automation. 
@@ -1045,7 +1044,6 @@ To stop the service, run:
 ```bash
 systemctl --user stop firecrawl.service
 ```
-<!-- @device:end -->
 <!-- @os:end -->
 ---
 
