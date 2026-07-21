@@ -303,6 +303,8 @@ Then, click the ComfyUI button at the top-middle of the app. This will open a se
 <!-- @os:end -->
 
 <!-- @os:linux -->
+On the AMD Ryzen™ AI Halo, ComfyUI runs in a prebuilt container that requires no additional Python setup.
+
 To launch ComfyUI on Linux, click the ComfyUI shortcut in the taskbar. It should open by itself in a browser window.
 >**Tip**: ComfyUI and its models are stored at `~/.local/share/ComfyUI/models`. This is where you can manually add workflows or new models.
 

@@ -36,7 +36,7 @@ This playbook teaches you how to serve LLMs using containerized vLLM on the inte
 
 ## Installing Software Prerequisites
 
-This playbook uses a prebuilt container image that includes vLLM, ROCm support, and the helper scripts needed to launch the server. You do not need to install PyTorch, vLLM, or local playbook scripts manually.
+vLLM runs in a prebuilt container with ROCm and its dependencies pre-matched. No additional installation is required.
 
 There is no host-side vLLM installation step. Start vLLM with:
 
@@ -116,6 +116,82 @@ for chunk in response:
 The included [chat_with_model.py](assets/chat_with_model.py) script contains the entire example and can be downloaded.
 
 
+## Choosing and Configuring a Model
+
+By default, `vllm-launch` serves `Qwen/Qwen3-1.7B` as a test model on port `8001`. You can change the model, the port, and the vLLM serving parameters without rebuilding or editing the container.
+
+### Models tested by AMD
+
+The following models are pre-configured and validated by AMD:
+
+| Model | Notes |
+|-------|-------|
+| `Qwen/Qwen3-1.7B` | Default model. Lightweight and fast to load. |
+| `openai/gpt-oss-20b` | Larger model for higher-quality responses. |
+
+### Launching a different model
+
+Pass the model ID with `--model` (or `-m`):
+
+```bash
+vllm-launch --model openai/gpt-oss-20b
+```
+
+### Changing the port
+
+Pass a port above 1024 with `--port` (or `-p`); the default is `8001`:
+
+```bash
+vllm-launch --port 8080 --model openai/gpt-oss-20b
+```
+
+If you change the port, point your client's `base_url` at the same port (for example `http://localhost:8080/v1`).
+
+### Passing extra vLLM parameters
+
+Any additional arguments are forwarded directly to vLLM, so you can tune serving behavior such as context length or data type. There are two ways to supply them.
+
+**Inline**, after the launcher options:
+
+```bash
+vllm-launch --model openai/gpt-oss-20b --max-model-len 8192
+```
+
+**Persistently**, in a config file at `~/.local/share/vLLM/vllm-launch.conf`. This file does not exist by default — create it and add your arguments as a Bash array:
+
+```bash
+VLLM_EXTRA_ARGS=(--max-model-len 8192 --dtype float16)
+```
+
+Use `+=` to append to the default arguments instead of replacing them:
+
+```bash
+VLLM_EXTRA_ARGS+=(--max-model-len 8192)
+```
+
+To see all launcher options at any time, run:
+
+```bash
+vllm-launch --help
+```
+
+### Where models are stored
+
+`vllm-launch` looks for models in two locations:
+
+| Location | Path |
+|----------|------|
+| System models | `/var/cache/models` |
+| User models | `~/.local/share/vLLM/models` |
+
+You can place a downloaded model in either directory and launch it by passing its path or ID to `--model`:
+
+```bash
+vllm-launch --model /var/cache/models/my-model
+```
+
+> **Note**: Running your own downloaded model this way is expected to work once the model is placed in one of the directories above, but this workflow has not yet been officially validated by AMD.
+
 ## Troubleshooting
 
 ### Connection refused
@@ -139,7 +215,7 @@ You now have a containerized vLLM deployment for serving large language models w
 
 ## Next Steps
 
-- **Try different models** — Swap the model in the `vllm-launch` configuration to experiment with different LLMs and compare performance.
+- **Try different models** — Use `vllm-launch --model <model>` to experiment with different LLMs and compare performance (see [Choosing and Configuring a Model](#choosing-and-configuring-a-model)).
 - **Build an application** — Use the OpenAI-compatible API to integrate vLLM into a Python app, chatbot, or automation workflow.
 - **Fine-tune and serve** — Fine-tune a model using LoRA or QLoRA, then deploy it with vLLM for optimized inference.
 
