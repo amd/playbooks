@@ -154,7 +154,9 @@ jobs:
         run: |
           lemonade unload || true
           lms unload --all || true
-          # Ollama runs as a keep-alive service and holds models in VRAM; stop each.
+          # Ollama keeps models resident in VRAM via keep-alive; unload each MODEL
+          # ("ollama stop MODEL"). This frees the VRAM and leaves the server running,
+          # same as the lemonade/lms unloads above.
           ollama ps 2>/dev/null | awk 'NR>1{print $1}' | while read -r m; do [ -n "$m" ] && ollama stop "$m" 2>/dev/null || true; done || true
 
       - name: Free GPU before tests (Windows)
