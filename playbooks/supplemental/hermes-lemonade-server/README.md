@@ -906,7 +906,6 @@ Hermes will now spin up a persistent sandbox container and route all `terminal` 
 ---
 
 <!-- @os:linux -->
-<!-- @device:halo_box -->
 ## (Recommended) Hermes Integration with Firecrawl Services
 
 Hermes can browse and extract content from websites using its built-in web tools. However, many modern websites use bot-detection systems, which block simple HTTP requests and return challenge pages instead of the actual content. As a result, Hermes may be unable to reliably extract information from these sites.
@@ -1043,7 +1042,6 @@ To stop the service, run:
 ```bash
 systemctl --user stop firecrawl.service
 ```
-<!-- @device:end -->
 <!-- @os:end -->
 ---
 
