@@ -4,11 +4,11 @@
   "description": "Install and configure Hermes Agent autonomous AI agent with Lemonade Server as its local AI backend.",
   "time": 45,
   "supported_platforms": {
-    "halo": [
+    "halo_box": [
       "linux",
       "windows"
     ],
-    "halo_box": [
+    "halo": [
       "linux",
       "windows"
     ],
@@ -17,6 +17,18 @@
       "windows"
     ],
     "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
       "linux",
       "windows"
     ]
@@ -33,6 +45,18 @@
     "krk": [
       "linux",
       "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
     ]
   },
   "required_platforms": {
@@ -47,14 +71,26 @@
     "krk": [
       "linux",
       "windows"
-    ]
-  },
-  "published_platforms": {
-    "halo": [
+    ],
+    "rx7900xt": [
       "linux",
       "windows"
     ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "published_platforms": {
     "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
       "linux",
       "windows"
     ],
@@ -63,6 +99,18 @@
       "windows"
     ],
     "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
       "linux",
       "windows"
     ]
