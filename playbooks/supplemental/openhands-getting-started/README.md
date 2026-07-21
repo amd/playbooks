@@ -91,9 +91,11 @@ export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/b
 lemonade --version
 node -v
 npm -v
-uv --version
+# uv is provisioned/used transitively by agent-canvas; report it but don't gate on it
+# (not every runner ships uv, and the agent-canvas server test proves it works).
+uv --version || echo "uv not found on this runner (agent-canvas will bootstrap it)"
 
-echo "OK: lemonade, node, npm, and uv are all available"
+echo "OK: lemonade, node, and npm are all available"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -106,9 +108,10 @@ $ErrorActionPreference = "Stop"
 lemonade --version
 node -v
 npm -v
-uv --version
+# uv is provisioned/used transitively by agent-canvas; report it but don't gate on it.
+try { uv --version } catch { Write-Host "uv not found on this runner (agent-canvas will bootstrap it)" }
 
-Write-Host "OK: lemonade, node, npm, and uv are all available"
+Write-Host "OK: lemonade, node, and npm are all available"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -415,8 +418,14 @@ $ErrorActionPreference = "Stop"
 $log = Join-Path $env:TEMP "agent-canvas-ci.log"
 if (Test-Path $log) { Remove-Item $log -Force }
 
+# agent-canvas installs as a .cmd shim (npm global), which Start-Process cannot
+# launch directly ("%1 is not a valid Win32 application"). Run it through cmd.exe,
+# same pattern as the n8n playbook.
+$AGENT_CANVAS_CMD = "$env:APPDATA\npm\agent-canvas.cmd"
+if (-not (Test-Path $AGENT_CANVAS_CMD)) { throw "agent-canvas.cmd not found at $AGENT_CANVAS_CMD" }
+
 # First launch provisions a uv-managed Python env, so allow a generous startup window.
-$p = Start-Process -FilePath "agent-canvas" -NoNewWindow -PassThru -RedirectStandardOutput $log -RedirectStandardError "$log.err"
+$p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$AGENT_CANVAS_CMD`"" -NoNewWindow -PassThru -RedirectStandardOutput $log -RedirectStandardError "$log.err"
 try {
   $ok = $false
   for ($i = 0; $i -lt 300; $i++) {
