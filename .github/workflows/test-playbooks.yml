@@ -144,6 +144,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
+      # Free the GPU before every job. A prior lemonade/LM Studio playbook can
+      # strand a model on the shared runner (its unload teardown is skipped when
+      # an earlier test in that playbook fails), which OOMs the next job. This
+      # runs regardless of what ran before, so it also protects non-lemonade jobs.
+      - name: Free GPU before tests (Linux)
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          lemonade unload || true
+          lms unload --all || true
+
+      - name: Free GPU before tests (Windows)
+        if: matrix.platform == 'windows'
+        shell: powershell
+        run: |
+          try { lemonade unload } catch {}
+          try { lms unload --all } catch {}
+          exit 0
+
       - name: Extract and run tests (Windows)
         if: matrix.platform == 'windows'
         id: run_tests_windows
