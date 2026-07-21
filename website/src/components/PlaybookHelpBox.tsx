@@ -1,3 +1,7 @@
+// Copyright Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: MIT
+
 interface PlaybookHelpBoxProps {
   playbookTitle?: string;
 }
