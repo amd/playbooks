@@ -900,7 +900,7 @@ finally {
 
 [Firecrawl](https://docs.firecrawl.dev/introduction) provides a self-hosted web crawling and content extraction service that can bypass these challenges and unlock the full potential of OpenClaw automation. 
 
-In this setup, OpenClaw runs as a set of Docker containers managed with Podman. To simplify lifecycle management and automatic startup, we register Firecrawl as a user-level `systemd` service that orchetrates the underlying Podman Compose stack. This allows OpenClaw to start the gateway, stop, and verify the Firecrawl service using standard `systemctl --user` commands instead of interacting with containers directly. 
+In this setup, OpenClaw runs as a set of Docker containers managed with Podman. To simplify lifecycle management and automatic startup, we register Firecrawl as a user-level `systemd` service that orchestrates the underlying Podman Compose stack. This allows OpenClaw to start the gateway, stop, and verify the Firecrawl service using standard `systemctl --user` commands instead of interacting with containers directly. 
 
 To keep things simple, we've broken the whole process into four steps:
 
@@ -913,12 +913,12 @@ cd ~/.config/systemd/user
 ```
 Create and open a new file called `firecrawl.service`.
 ```bash
-sudo nano firecrawl.service
+nano firecrawl.service
 ```
 Copy and paste the following configuration:
 ```bash
 [Unit]
-Description=OpenClaw Gateway
+Description=OpenClaw Firecrawl Service
 After=podman.service
 Requires=podman.service
 
@@ -966,7 +966,7 @@ If successful, you should see the following output:
 
  `default.target.wants/` contains symbolic links to services that are configured to start automatically.
 
-### 2. Configure Firecrawl for your Service
+### 2. Configure Firecrawl
 
 [SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) is ideal for those who need full control over their scraping and data processing environments but comes with the trade-off of additional maintenance and configuration efforts.
 
@@ -983,7 +983,7 @@ HOST=0.0.0.0
 # ===== Firecrawl =====
 # FIRECRAWL_API_KEY="" # optional
 ```
-### 3. Deploying OpenClaw via Compose
+### 3. Deploy OpenClaw with Podman Compose
 
 Before moving on, make sure you have pulled the latest OpenClaw Docker image:
 ```bash
@@ -1035,7 +1035,7 @@ sudo chmod 777 ~/.openclaw/
 ```
 2. Read your gateway token:
 ```bash
-sudo cat ~/.openclaw/openclaw.json | grep "token"
+grep '"token"' ~/.openclaw/openclaw.json
 ```
 Locate the `OPENCLAW_GATEWAY_TOKEN` value in the output.
 
