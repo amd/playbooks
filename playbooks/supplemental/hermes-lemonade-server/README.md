@@ -926,7 +926,7 @@ cd ~/.config/systemd/user
 ```
 Create and open a new file called `firecrawl.service`.
 ```bash
-sudo nano firecrawl.service
+nano firecrawl.service
 ```
 Copy and paste the following configuration:
 ```bash
