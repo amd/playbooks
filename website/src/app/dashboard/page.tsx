@@ -1,3 +1,7 @@
+// Copyright Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: MIT
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -24,8 +28,9 @@ const HARDWARE_LABELS: Record<string, string> = {
   halo: "Ryzen™ AI Max",
   stx: "Ryzen™ AI 300 HX",
   krk: "Ryzen™ AI 300",
-  rx7900xt: "Radeon RX 7900 XT",
-  rx9070xt: "Radeon RX 9070 XT",
+  rx7900xt: "Radeon™ RX 7900 XT",
+  rx9070xt: "Radeon™ RX 9070 XT",
+  r9700: "Radeon™ AI PRO R9700",
 };
 
 const OS_LABELS = ["Windows", "Linux"];

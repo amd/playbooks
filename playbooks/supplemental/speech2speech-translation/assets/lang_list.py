@@ -1,3 +1,7 @@
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
 # Language dict
 language_code_to_name = {
     "afr": "Afrikaans",

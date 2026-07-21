@@ -1,3 +1,7 @@
+// Copyright Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: MIT
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
