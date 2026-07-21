@@ -62,6 +62,13 @@ lemonade --version
 <!-- @test:end -->
 
 <!-- @os:windows -->
+<!-- @test:id=lemonade-update-windows timeout=120 hidden=True -->
+```bash
+winget upgrade -e --id AMD.LemonadeServer
+lemonade --version
+```
+<!-- @test:end -->
+
 <!-- @test:id=lemonade-chat-gemma-windows timeout=1200 hidden=True -->
 ```powershell
 
@@ -96,8 +103,15 @@ Write-Host "OK: Model Gemma-4-E2B-it-GGUF responded"
 <!-- @test:end -->
 <!-- @os:end -->
 
-
 <!-- @os:linux -->
+<!-- @test:id=lemonade-update-linux timeout=120 hidden=True -->
+```bash
+sudo apt update
+sudo apt install --only-upgrade lemonade-server
+lemonade --version
+```
+<!-- @test:end -->
+
 <!-- @test:id=lemonade-chat-gemma-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
