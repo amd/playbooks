@@ -1034,7 +1034,7 @@ Now that everything is validated, start the service through `systemd`:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[The Hermes API](https://docs.firecrawl.dev/api-reference/v2-introduction) is accessible from within the interactive container, and the Web Dashboard is available on same host and port at http://127.0.0.1:9119.
+[The Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) is accessible from within the interactive container, and the Web Dashboard is available on same host and port at http://127.0.0.1:9119.
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
