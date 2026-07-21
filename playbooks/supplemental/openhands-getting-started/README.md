@@ -82,6 +82,37 @@ You need:
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 <!-- @device:end -->
 
+<!-- @os:linux -->
+<!-- @test:id=prereq-clis-linux timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+lemonade --version
+node -v
+npm -v
+uv --version
+
+echo "OK: lemonade, node, npm, and uv are all available"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=prereq-clis-windows timeout=120 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+lemonade --version
+node -v
+npm -v
+uv --version
+
+Write-Host "OK: lemonade, node, npm, and uv are all available"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 ## 1. Start Lemonade Server
 
 Start the model from the Lemonade CLI:
@@ -125,6 +156,125 @@ curl -sS "http://127.0.0.1:13305/api/v1/chat/completions" \
 
 If this returns a `choices` array, Lemonade is ready for Agent Canvas.
 
+<!-- @os:linux -->
+<!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+models_json=""
+for i in $(seq 1 120); do
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/models || true)"
+  if [ -n "$models_json" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$models_json" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:13305"
+  exit 1
+fi
+echo "OK: Lemonade server is responding"
+
+export MODELS_JSON="$models_json"
+
+python3 - <<'PY'
+import json
+import os
+import sys
+
+data = json.loads(os.environ["MODELS_JSON"])
+model_id = "${lemonade_model}"
+
+entry = None
+for item in data.get("data", []):
+    if item.get("id") == model_id:
+        entry = item
+        break
+
+if entry is None:
+    print(f"Model {model_id} is not present in Lemonade /api/v1/models.")
+    sys.exit(1)
+
+if not entry.get("downloaded", False):
+    print(f"Model {model_id} is present but not downloaded in Lemonade. Please download it before running CI.")
+    sys.exit(1)
+
+print(f"OK: {model_id} model is downloaded in Lemonade")
+PY
+
+body='{
+  "model": "${lemonade_model}",
+  "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
+  "temperature": 0,
+  "max_tokens": 32
+}'
+
+out="$(curl -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d "$body")"
+
+if [ -z "$out" ]; then
+  echo "Empty response from Lemonade chat/completions"
+  exit 1
+fi
+
+echo "OK: Lemonade chat/completions returned a response"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-chat-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$modelsJson = $null
+for ($i = 0; $i -lt 120; $i++) {
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
+  if ($modelsJson) { break }
+  Start-Sleep -Seconds 1
+}
+
+if (-not $modelsJson) {throw "Lemonade server not ready on http://127.0.0.1:13305"}
+Write-Host "OK: Lemonade server is responding"
+
+$parsed = $modelsJson | ConvertFrom-Json
+$entry = $parsed.data | Where-Object { $_.id -eq "${lemonade_model}" } | Select-Object -First 1
+
+if (-not $entry) {throw "Model ${lemonade_model} is not present in Lemonade /api/v1/models."}
+if (-not $entry.downloaded) {throw "Model ${lemonade_model} is present but not downloaded in Lemonade. Please download it before running CI."}
+Write-Host "OK: ${lemonade_model} model is downloaded in Lemonade"
+
+$body = @{
+  model = "${lemonade_model}"
+  messages = @(
+    @{
+      role = "user"
+      content = "Reply with exactly: OK"
+    }
+  )
+  temperature = 0
+  max_tokens = 32
+} | ConvertTo-Json -Depth 5
+
+$tmpBody = Join-Path $env:TEMP "openhands-lemonade-chat-body.json"
+[System.IO.File]::WriteAllText($tmpBody, $body, [System.Text.UTF8Encoding]::new($false))
+
+try {
+  $out = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
+    -H "Content-Type: application/json" `
+    --data-binary "@$tmpBody"
+  if (-not $out) {throw "Empty response from Lemonade chat/completions"}
+  Write-Host "OK: Lemonade chat/completions returned a response"
+}
+finally {
+  Remove-Item $tmpBody -Force -ErrorAction SilentlyContinue
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
 ## 3. Install and Launch Agent Canvas
 
 Install the published Agent Canvas package globally:
@@ -132,6 +282,59 @@ Install the published Agent Canvas package globally:
 ```bash
 npm install -g @openhands/agent-canvas
 ```
+
+<!-- @os:linux -->
+<!-- @test:id=agent-canvas-install-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+# Use a user-owned global npm prefix so the install needs no root (matches the
+# Troubleshooting section of this playbook).
+mkdir -p "$HOME/.npm-global"
+npm config set prefix "$HOME/.npm-global"
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+npm install -g @openhands/agent-canvas
+
+echo "OK: @openhands/agent-canvas installed globally"
+```
+<!-- @test:end -->
+
+<!-- @test:id=agent-canvas-version-linux timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+# Prefer --version; fall back to --help if this build has no --version flag.
+agent-canvas --version || agent-canvas --help
+
+echo "OK: agent-canvas CLI is on PATH"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=agent-canvas-install-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+npm install -g @openhands/agent-canvas
+
+Write-Host "OK: @openhands/agent-canvas installed globally"
+```
+<!-- @test:end -->
+
+<!-- @test:id=agent-canvas-version-windows timeout=120 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+# Prefer --version; fall back to --help if this build has no --version flag.
+try { agent-canvas --version } catch { agent-canvas --help }
+
+Write-Host "OK: agent-canvas CLI is on PATH"
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 Then start the full stack from a terminal:
 
@@ -154,6 +357,91 @@ healthy on the home screen.
 The `agent-canvas` command starts the agent server, the automation backend, and
 the web frontend together. You only need this one command to run OpenHands
 locally.
+
+<!-- @os:linux -->
+<!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+log="/tmp/agent-canvas-ci.log"
+p=""
+cleanup() {
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+rm -f "$log"
+
+# First launch provisions a uv-managed Python env, so allow a generous startup window.
+agent-canvas >"$log" 2>&1 &
+p=$!
+
+ok=false
+for i in $(seq 1 300); do
+  code="$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:8000/ || true)"
+  if [ "$code" = "200" ]; then
+    ok=true
+    break
+  fi
+  if ! kill -0 "$p" 2>/dev/null; then
+    echo "agent-canvas process exited before it finished starting"
+    break
+  fi
+  sleep 1
+done
+
+if [ "$ok" != "true" ]; then
+  echo "agent-canvas not ready on http://127.0.0.1:8000/"
+  echo "---- agent-canvas log ----"
+  cat "$log" || true
+  exit 1
+fi
+
+echo "OK: agent-canvas server is responding"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=agent-canvas-server-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$log = Join-Path $env:TEMP "agent-canvas-ci.log"
+if (Test-Path $log) { Remove-Item $log -Force }
+
+# First launch provisions a uv-managed Python env, so allow a generous startup window.
+$p = Start-Process -FilePath "agent-canvas" -NoNewWindow -PassThru -RedirectStandardOutput $log -RedirectStandardError "$log.err"
+try {
+  $ok = $false
+  for ($i = 0; $i -lt 300; $i++) {
+    $code = curl.exe -s -o NUL -w "%{http_code}" --max-time 2 http://127.0.0.1:8000/
+    if ($LASTEXITCODE -eq 0 -and $code -eq "200") { $ok = $true; break }
+    if ($p.HasExited) { Write-Host "agent-canvas process exited before it finished starting"; break }
+    Start-Sleep -Seconds 1
+  }
+  if (-not $ok) {
+    Write-Host "agent-canvas not ready on http://127.0.0.1:8000/"
+    Write-Host "---- agent-canvas log ----"
+    if (Test-Path $log) { Get-Content $log }
+    throw "agent-canvas not ready on http://127.0.0.1:8000/"
+  }
+  Write-Host "OK: agent-canvas server is responding"
+}
+finally {
+  # Kill whatever is listening on 8000, then the wrapper process.
+  $conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($conn) { Stop-Process -Id $conn.OwningProcess -Force -ErrorAction SilentlyContinue }
+  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 ## 4. Configure the Local LLM
 
@@ -305,3 +593,22 @@ the file again—all in the same conversation.
 - [Agent Canvas setup](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
 - [LLM profiles and model configuration](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
 - [Lemonade Server documentation](https://lemonade-server.ai/docs)
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->
