@@ -154,6 +154,8 @@ jobs:
         run: |
           lemonade unload || true
           lms unload --all || true
+          # Ollama runs as a keep-alive service and holds models in VRAM; stop each.
+          ollama ps 2>/dev/null | awk 'NR>1{print $1}' | while read -r m; do [ -n "$m" ] && ollama stop "$m" 2>/dev/null || true; done || true
 
       - name: Free GPU before tests (Windows)
         if: matrix.platform == 'windows'
@@ -161,6 +163,7 @@ jobs:
         run: |
           try { lemonade unload } catch {}
           try { lms unload --all } catch {}
+          try { ollama ps | Select-Object -Skip 1 | ForEach-Object { $m = ($_ -split '\s+')[0]; if ($m) { ollama stop $m } } } catch {}
           exit 0
 
       - name: Extract and run tests (Windows)
