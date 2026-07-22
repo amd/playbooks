@@ -226,7 +226,7 @@ body='{
   "model": "${lemonade_model}",
   "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
   "temperature": 0,
-  "max_tokens": 32
+  "max_tokens": 64
 }'
 
 out="$(curl -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
