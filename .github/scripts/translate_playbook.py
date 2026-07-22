@@ -843,6 +843,7 @@ def main():
     ap.add_argument("--min-score", type=int, default=None, help="Remediation threshold (default: LLM_QUALITY_THRESHOLD or 85)")
     ap.add_argument("--locales", required=True, help="Comma-separated locale codes, e.g. zh-CN,es-LA,fr-FR")
     ap.add_argument("--jobs", type=int, default=1, help="Parallel workers across locales (each locale owns its own manifest, so this is race-free)")
+    ap.add_argument("--retries", type=int, default=2, help="After the main pass, automatically re-attempt files that failed the structural gate this many times (failures are usually stochastic). Set 0 to disable.")
     ap.add_argument("--force", action="store_true", help="Retranslate even if up to date")
     ap.add_argument("--dry-run", action="store_true", help="Mask/round-trip only; do not call the model")
     args = ap.parse_args()
@@ -921,21 +922,42 @@ def main():
         return changed, failures
 
     jobs = max(1, args.jobs)
-    if jobs > 1 and len(locales) > 1:
-        from concurrent.futures import ThreadPoolExecutor
-        print(f"Running {len(locales)} locales with {jobs} parallel workers...", flush=True)
-        with ThreadPoolExecutor(max_workers=jobs) as ex:
-            results = list(ex.map(work, locales))
-    else:
-        results = [work(locale) for locale in locales]
 
+    def run_round(locs):
+        """Run work() for the given locales, in parallel when possible."""
+        if jobs > 1 and len(locs) > 1:
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=jobs) as ex:
+                return list(ex.map(work, locs))
+        return [work(loc) for loc in locs]
+
+    print(f"Running {len(locales)} locales with {jobs} parallel worker(s)...", flush=True)
+    results = run_round(locales)
     total_changed = sum(r[0] for r in results)
     all_failures = [x for r in results for x in r[1]]
+
+    # Structural-gate failures (placeholder mismatch / span-count) are usually
+    # stochastic - a fresh attempt on the same file almost always succeeds. Retry
+    # only the locales that still have failures; already-written files are "up to
+    # date" and skip, so each round re-attempts just the failures (no wasted work).
+    retries = max(0, args.retries)
+    attempt = 0
+    while all_failures and attempt < retries:
+        attempt += 1
+        failed_locales = sorted({loc for (loc, _rel, _err) in all_failures})
+        print(
+            f"\nRetry {attempt}/{retries}: re-attempting {len(all_failures)} failed "
+            f"file(s) across {len(failed_locales)} locale(s)...",
+            flush=True,
+        )
+        round_results = run_round(failed_locales)
+        total_changed += sum(r[0] for r in round_results)
+        all_failures = [x for r in round_results for x in r[1]]
 
     print(f"\nDone. {total_changed} file(s) written.", flush=True)
     write_quality_report()
     if all_failures:
-        print(f"{len(all_failures)} file(s) FAILED the structural gate:", flush=True)
+        print(f"{len(all_failures)} file(s) FAILED the structural gate after {retries} retr(y/ies):", flush=True)
         for locale, rel, err in all_failures:
             print(f"  - [{locale}] {rel}: {err}", flush=True)
         sys.exit(1)

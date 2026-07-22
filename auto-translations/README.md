@@ -30,7 +30,7 @@ flowchart TD
   ENGINE --> MASK["Mask code blocks, @-tags, links, image paths"]
   MASK --> MODEL["LLM translates PROSE only"]
   MODEL --> GATE{"Structural gate: code fences and @-tags match English?"}
-  GATE -- no --> RETRY["Retry once; if still bad, skip file + open issue"]
+  GATE -- no --> RETRY["Retry (incl. auto re-attempts); if still bad, skip file + open issue"]
   GATE -- yes --> SCORE["Independent judge model scores 0-100"]
   SCORE --> WRITE["Write auto-translations/<locale>/... + record score in translation_accuracy.json"]
   WRITE --> PUSH["Direct-push to the repo (skip ci)"]
@@ -71,8 +71,11 @@ Only `README.md`, `platform.md`, the shared `dependencies/*.md`, and the
 ### 4. Automatic quality gate (no human review)
 - **Structural gate:** the number and order of code fences and `@`-tags in the
   output must match the English source, and every placeholder must be restored.
-  On mismatch it retries once at higher temperature; if still broken it **skips
-  that file and opens a tracking issue** rather than committing broken output.
+  On mismatch it retries at higher temperature and, for large files, re-translates
+  section-by-section. Any files still failing after the main pass are re-attempted
+  automatically (`--retries`, default 2) since these misses are usually stochastic;
+  only files still broken after that are **skipped (never committed broken) and a
+  tracking issue is opened** that tags the maintainer.
 - **Quality score:** an independent judge model (ideally stronger than the
   translator) scores each file 0-100 (MQM/GEMBA). The score is recorded in the
   locale's `translation_accuracy.json` (see [below](#the-translation_accuracyjson-file)).
