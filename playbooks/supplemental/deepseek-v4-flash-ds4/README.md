@@ -25,14 +25,18 @@ This tutorial shows how to use `ds4-cockpit`, a terminal UI, to set up ds4, down
 - Starting the ds4 inference server and exposing an OpenAI-compatible endpoint
 - Connecting a Web UI or coding agent to the local server
 
-<!-- @setup:memory_config -->
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
 
 ## Installing Software Prerequisites
 
 > **System requirements for this configuration (single-node IQ2_XXS at 126k context):**
 > - A Strix Halo system with **at least 128 GB of unified memory**.
 > - **BIOS dedicated VRAM (UMA frame buffer) set to the minimum**, so the shared memory pool can be as large as possible.
-> - The GPU **shared-memory pool set to at least 110 GB**: run `amd-ttm --set 110` (see the memory configuration step above) and reboot. Lower values fail with out-of-memory when the model loads at a 126k context. If your system has less memory available, lower the **Context** value in Server Mode instead.
+> - The GPU **shared-memory pool set to at least 110 GB**: run `amd-ttm --set 110` (see the memory configuration step above) and reboot. Lower values can fail with out-of-memory when the model loads at a 126k context. If your system has less memory available, lower the **Context** value in Server Mode instead.
+>
+> **Note:** Try setting the **GPU shared-memory pool** to **110 GB** as a starting point. If you hit out-of-memory errors, raise the shared-memory pool or lower the context size.
 
 ds4-cockpit uses container toolboxes to run the ds4 engine. Install `podman`, `distrobox`, and `pipx`:
 
@@ -90,9 +94,8 @@ echo "OK: ds4-cockpit is installed and on PATH"
 
 ## Creating the Toolbox
 
-In the **Interactive Toolboxes** tab, select the latest available toolbox (e.g. `ds4-rocm-7.2.4`) and click **Create/Update**. This pulls the container image and creates the toolbox environment.
+In the **Interactive Toolboxes** tab, select the latest available/stable toolbox (e.g. `ds4-rocm-7.2.4`) and click **Create/Update**. This pulls the container image and creates the toolbox environment.
 
-> **Tip**: The toolbox version will change over time as newer ROCm builds are released. Pick the latest one available in the list.
 
 <p align="center">
   <img src="assets/ds4-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ds4-cockpit" width="800"/>
@@ -115,6 +118,8 @@ echo "OK: ds4 toolbox container image is present"
 ## Downloading the Model
 
 Go to the **Model Manager** tab. Select **IQ2_XXS imatrix (~80.8 GB)** from the dropdown and click **Download**. The model files will be saved to `~/ds4` by default (you can change the storage path).
+
+> **Note:** The IQ2_XXS model is roughly 80 GB, so the download can take a while depending on your connection. You can continue once it finishes.
 
 <p align="center">
   <img src="assets/ds4-cockpit-model-manager.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
@@ -148,7 +153,9 @@ fi
 
 ## Starting the Server
 
-Go to the **Server Mode** tab. Select the downloaded model and the toolbox, then configure the context size (e.g. 126000), host, and port (8000). When ready, click **Start ds4-server**.
+Go to the **Server Mode** tab. Select the downloaded model and the toolbox, then configure the context size, host, and port. When ready, click **Start ds4-server**.
+
+> **Tip** A context size of `126000` is a reasonable starting value that should fit on a single node — you can set it higher if you have memory to spare, or lower it if you run into out-of-memory errors. The port (`8000` in this guide) is arbitrary; pick any free port.
 
 > **KV Disk Cache (optional).** Turning on **KV Disk Cache** offloads the KV cache to disk (at **Host Cache Dir**, default `~/.cache/ds4-kv`) so repeated system prompts are restored from SSD instead of being recomputed. It's a performance optimization for coding-agent workflows with long, repeated prompts, and is **not required** to run the server.
 
