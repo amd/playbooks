@@ -1098,17 +1098,13 @@ If OpenClaw runs on a remote machine, you can reach its dashboard from your loca
    This prints the dashboard URL with the token embedded; copy the token to log in. (The token is also stored at `gateway.auth.token` in `~/.openclaw/openclaw.json`.)
 
 > **Approving a remote device:** When you open the dashboard from another machine or phone, the browser may display a request ID. On the **remote machine**, list the pending requests:
-
 > ```bash
 > openclaw devices list
 > ```
->
 > Then approve the matching request:
->
 > ```bash
 > openclaw devices approve <requestId>
 > ```
->
 > This is only needed for remote or secondary devices; loopback access from the same machine authenticates automatically. See the [Remote Access](https://docs.openclaw.ai/gateway/remote) documentation for details.
 
 <p align="center">
