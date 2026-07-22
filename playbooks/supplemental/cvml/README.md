@@ -503,8 +503,9 @@ $innerPs = Join-Path $ci "run_cvml.ps1"
 $log = Join-Path $ci "cvml.log"
 
 # Inner script (single-quoted here-string: not expanded here). It builds the
-# samples and runs all four executables, exiting non-zero on any failure. Its
-# combined stdout+stderr is redirected to cvml.log by the task action below.
+# samples and runs them (face detection twice, depth, and mesh), exiting
+# non-zero on any failure. Its combined stdout+stderr is redirected to cvml.log
+# by the task action below.
 $inner = @'
 $ErrorActionPreference = "Stop"
 $ci = $PSScriptRoot
@@ -573,7 +574,7 @@ try {
   $code = 1
 } finally {
   Pop-Location -ErrorAction SilentlyContinue
-  Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue
+  if ($work -and (Test-Path $work)) {Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue}
 }
 exit $code
 '@
@@ -601,6 +602,7 @@ try {
   if ($result -ne 0) {throw "cvml samples failed under S4U task (exit code $result)"}
 }
 finally {
+  Stop-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
   Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
   Remove-Item -Recurse -Force $ci -ErrorAction SilentlyContinue
 }
