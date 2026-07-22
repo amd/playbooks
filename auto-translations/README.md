@@ -53,7 +53,7 @@ playbook(s). If any `playbooks/dependencies/*.md` changed, it also retranslates
 the shared dependency content (used by the `@require`/`@setup` dropdowns).
 
 ### 3. Translate (prose only) on a self-hosted runner
-The job runs on a `[self-hosted, translation]` runner so it can reach the
+The job runs on a self-hosted runner labeled `translation` so it can reach the
 configured LLM API endpoint while the repository stays public. For each file,
 [`translate_playbook.py`](../.github/scripts/translate_playbook.py):
 1. **Masks** everything that must not change - fenced/inline code, the
@@ -164,9 +164,8 @@ script ahead of the runner being provisioned.) See the next section.
 | `localized-playbooks/` override + region-only playbooks | Implemented |
 | GitHub Actions workflow: triggers, detect-changed, direct-push, all 29 locales | Implemented |
 | Provider-agnostic client (Anthropic-style / OpenAI-compatible APIs) | Implemented |
-| **Self-hosted runner with the `translation` label** | Coming soon |
+| **Dedicated self-hosted runner labeled `translation`** | Coming soon |
 | **`LLM_*` repository secrets set** | Coming soon |
-| **Ephemeral runners (one job per fresh VM)** | Coming soon |
 | Website language selector for end users | Out of scope (website team) |
 
 Until the runner + secrets exist, the workflow does not run on `main`; the
@@ -181,19 +180,22 @@ step.
 > for the quoted key if they've shifted.
 
 ### What the runner infrastructure needs to provide (CI / infra team)
-1. **Register a self-hosted runner** in
+1. **Register a dedicated self-hosted runner** in
    **Settings → Actions → Runners → New self-hosted runner** (or an org-level
-   runner group scoped to this repo). During registration, give it **both labels
-   `self-hosted` and `translation`** so it matches the workflow's target:
+   runner group scoped to this repo). During registration, give it the
+   **`translation`** label so it matches the workflow's target (the `self-hosted`
+   label is applied automatically, so you don't need to add it):
    ```yaml
    # .github/workflows/translate-playbooks.yml  (~line 45)
-   runs-on: [self-hosted, translation]
+   runs-on: translation
    ```
    If you use a different label, change that `runs-on:` line to match (see
    maintainer step 2).
-2. **Make it ephemeral / just-in-time** - register with `--ephemeral` (or via a
-   GitHub App / actions-runner-controller) so each job runs on a fresh runner
-   that deregisters after one job. This is the recommended model for a public repo.
+2. **A persistent, dedicated machine is fine here** - it does not need to be
+   ephemeral. Persistent self-hosted runners are normally discouraged on public
+   repos because untrusted fork PRs could run on them, but this workflow only
+   triggers on trusted events (push to `main` + manual dispatch; never fork PRs -
+   see maintainer step 3), so a dedicated always-on runner is safe.
 3. **Runner image prerequisites:** network egress to the configured LLM API
    endpoint (`LLM_BASE_URL`) plus `github.com`/PyPI, any required **TLS/proxy CA**
    trusted (so HTTPS to the endpoint works), and **Python 3.13 + git**
@@ -239,7 +241,7 @@ step.
 ### The result
 Once the runner + secrets are in place, no code changes are needed: a PR that
 merges to `main` touching `playbooks/**` automatically translates the changed
-playbook(s) into all 29 languages on the ephemeral runner and direct-pushes the
+playbook(s) into all 29 languages on the dedicated runner and direct-pushes the
 results here. In production this is entirely automated - there is no manual
 translation step.
 

@@ -42,7 +42,7 @@ concurrency:
 jobs:
   translate:
     name: Translate playbooks
-    runs-on: [self-hosted, translation]
+    runs-on: translation
     env:
       # All 29 Lenovo languages (pt-BR covers both Brazilian Portuguese entries).
       DEFAULT_LOCALES: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
