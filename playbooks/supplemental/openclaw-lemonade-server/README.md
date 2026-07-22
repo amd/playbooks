@@ -337,6 +337,9 @@ In the output of `show all`, the stale Lemonade rule is the entry whose connect 
 
 The firewall rule you added during setup is bound to port `13305` (not the IP), so it keeps working and does not need to be recreated.
 
+> **Recommendation:** To avoid gateway issues, we strongly suggest the following shell configuration:
+> - **Windows commands** should be executed in **PowerShell**
+> - **WSL distro commands** should be executed in a **Command Prompt** (run as **Administrator**)
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
