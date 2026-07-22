@@ -11,11 +11,29 @@
       "linux"
     ]
   },
+  "tested_platforms": {
+    "halo": [
+      "linux"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "linux"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "linux"
+    ],
+    "halo": [
+      "linux"
+    ]
+  },
   "difficulty": "advanced",
   "isNew": true,
   "isFeatured": true,
   "developed": true,
-  "published": false,
+  "published": true,
   "tags": [
     "deepseek",
     "ds4",
