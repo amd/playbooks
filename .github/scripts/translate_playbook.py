@@ -780,7 +780,12 @@ def apply_disclaimers(locales):
     """Insert/refresh the machine-translation disclaimer on existing translated
     README.md/platform.md files, and set auto_translated=true in each translated
     playbook.json - without re-translating. Idempotent; safe to re-run and to run
-    after bumping the disclaimer version. Returns the number of files changed."""
+    after bumping the disclaimer version. Returns the number of files changed.
+
+    Only touches auto-translations/ (TRANSLATIONS_ROOT). Human-authored
+    localized-playbooks/ are intentionally never given the disclaimer - and since
+    they take precedence at render time, a human-localized file is served without
+    it."""
     if not TRANSLATIONS_ROOT.exists():
         print("No auto-translations/ tree found; nothing to do.", flush=True)
         return 0

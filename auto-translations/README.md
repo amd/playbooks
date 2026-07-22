@@ -124,6 +124,11 @@ for idempotent insert/refresh:
 - **Injection** happens in `translate_playbook.py` after scoring, so the disclaimer
   never affects the quality score. It is applied only to `README.md`/`platform.md`,
   not the shared `dependencies/*.md` snippets.
+- **Human-authored `localized-playbooks/` are exempt.** The disclaimer is only ever
+  written into `auto-translations/`; the script never touches `localized-playbooks/`.
+  And because render-time resolution is `localized-playbooks/` -> `auto-translations/`
+  -> English, a file a human localized is served **without** the disclaimer, while
+  the machine-translated fallback for any file they haven't localized still shows it.
 - **Metadata flag:** each translated `playbook.json` carries `"auto_translated": true`
   so the website / other consumers can detect machine-translated content.
 - **Backfill / refresh:** `python .github/scripts/translate_playbook.py --apply-disclaimers`
