@@ -5,20 +5,52 @@
   "time": 45,
   "supported_platforms": {
     "halo_box": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "stx": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "krk": [
-      "linux",
-      "windows"
+      "linux"
+    ]
+  },
+  "tested_platforms": {
+    "halo": [
+      "linux"
+    ],
+    "stx": [
+      "linux"
+    ],
+    "krk": [
+      "linux"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "linux"
+    ],
+    "stx": [
+      "linux"
+    ],
+    "krk": [
+      "linux"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "linux"
+    ],
+    "halo": [
+      "linux"
+    ],
+    "stx": [
+      "linux"
+    ],
+    "krk": [
+      "linux"
     ]
   },
   "difficulty": "intermediate",

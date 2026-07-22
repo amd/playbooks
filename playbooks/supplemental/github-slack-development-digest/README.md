@@ -75,13 +75,7 @@ test the automation, and Lemonade to run the LLM locally.
 
 ## Prerequisites
 
-<!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @require:lemonade,nodejs -->
-<!-- @os:end -->
 
 You need:
 
@@ -127,6 +121,12 @@ export DIGEST_TIMEZONE="America/New_York"
 
 Use an explicit `owner/repo` value for `GITHUB_REPO_FILTER`. Broad organization
 wildcards can return too much MCP context for local models.
+
+<!-- @test:id=lemonade-version timeout=60 hidden=True -->
+```bash
+lemonade --version
+```
+<!-- @test:end -->
 
 ## 1. Start Lemonade Server
 
@@ -179,6 +179,74 @@ curl -sS "${LEMONADE_BASE_URL}/chat/completions" \
 
 If this returns a `choices` array, Lemonade is ready for Agent Canvas.
 
+<!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+models_json=""
+for i in $(seq 1 120); do
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/models || true)"
+  if [ -n "$models_json" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$models_json" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:13305"
+  exit 1
+fi
+echo "OK: Lemonade server is responding"
+
+export MODELS_JSON="$models_json"
+python3 - <<'PY'
+import json
+import os
+import sys
+
+data = json.loads(os.environ["MODELS_JSON"])
+entry = None
+for item in data.get("data", []):
+    if item.get("id") == "${lemonade_model}":
+        entry = item
+        break
+
+if entry is None:
+    print("Model ${lemonade_model} is not present in Lemonade /api/v1/models.")
+    sys.exit(1)
+
+if not entry.get("downloaded", False):
+    print("Model ${lemonade_model} is present but not downloaded in Lemonade. Please download it.")
+    sys.exit(1)
+
+print("OK: ${lemonade_model} model is downloaded in Lemonade")
+PY
+
+body='{
+  "model": "${lemonade_model}",
+  "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
+  "temperature": 0,
+  "max_tokens": 32
+}'
+
+out="$(curl -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d "$body" || true)"
+
+if [ -z "$out" ]; then
+  echo "Empty response from Lemonade chat/completions"
+  exit 1
+fi
+```
+<!-- @test:end -->
+
+<!-- @test:id=node-npm-version timeout=60 hidden=True -->
+```bash
+node -v
+npm -v
+```
+<!-- @test:end -->
+
 ## 3. Start Agent Canvas
 
 Install the published Agent Canvas package and start the full stack:
@@ -199,6 +267,75 @@ The `agent-canvas` command starts the agent server, the automation backend, and
 the web frontend together. You only need this one command to run OpenHands
 locally. The rest of this playbook configures everything through the Agent
 Canvas UI in your browser.
+
+<!-- @test:id=uv-version timeout=60 hidden=True -->
+```bash
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+uv --version
+```
+<!-- @test:end -->
+
+<!-- @test:id=agent-canvas-version timeout=60 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+# Prefer --version; fall back to --help if this build has no --version flag.
+agent-canvas --version || agent-canvas --help
+echo "OK: agent-canvas CLI is on PATH"
+```
+<!-- @test:end -->
+
+<!-- @test:id=agent-canvas-start timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+log="/tmp/agent-canvas-test.log"
+p=""
+cleanup() {
+  set +e
+  for port in 8000 18000 18001 3001; do
+    pid="$(ss -ltnp 2>/dev/null | grep ":$port " | grep -oE 'pid=[0-9]+' | head -1 | cut -d= -f2)"
+    [ -n "$pid" ] && kill "$pid" 2>/dev/null
+  done
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null
+    sleep 2
+    kill -9 "$p" 2>/dev/null
+  fi
+}
+# Preserve the real exit code; cleanup must never flip a pass to a fail (or vice versa).
+trap 'rc=$?; cleanup; exit $rc' EXIT
+
+# First launch builds the agent server's uv-managed Python env, so allow a generous startup window.
+agent-canvas >"$log" 2>&1 &
+p=$!
+
+# Probe the agent-server backend health (18000/server_info), NOT just the 8000 ingress root:
+# the ingress serves the static frontend and returns 200 for / even when the agent-server is down.
+ok=false
+for i in $(seq 1 300); do
+  code="$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:18000/server_info || true)"
+  if [ "$code" = "200" ]; then
+    ok=true
+    break
+  fi
+  if ! kill -0 "$p" 2>/dev/null; then
+    echo "agent-canvas process exited before it finished starting"
+    break
+  fi
+  sleep 1
+done
+
+if [ "$ok" != "true" ]; then
+  echo "agent-server not ready on http://127.0.0.1:18000/server_info"
+  cat "$log" || true
+  exit 1
+fi
+
+echo "OK: agent-canvas agent-server is responding"
+```
+<!-- @test:end -->
 
 ## 4. Configure the Local LLM in the UI
 
@@ -288,6 +425,15 @@ connects and advertises tools. The GitHub server should list GitHub tools, and
 the Slack server should list Slack tools.
 
 ![Agent Canvas MCP page with GitHub and Slack servers installed](assets/04-mcp-servers-installed.png)
+
+<!-- @test:id=mcp-packages-resolve timeout=300 hidden=True -->
+```bash
+# The GitHub and Slack MCP servers run via npx and need real tokens to connect,
+# so CI only confirms the referenced packages resolve from the npm registry.
+npm view @modelcontextprotocol/server-github version
+npm view @modelcontextprotocol/server-slack version
+```
+<!-- @test:end -->
 
 ## 6. Create the Digest Automation
 
@@ -399,3 +545,10 @@ all work before relying on the schedule.
 - [OpenHands extensions repository](https://github.com/OpenHands/extensions)
 - [Model Context Protocol servers](https://github.com/modelcontextprotocol/servers)
 - [Slack MCP package](https://www.npmjs.com/package/@modelcontextprotocol/server-slack)
+
+<!-- @test:id=lemonade-unload timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
