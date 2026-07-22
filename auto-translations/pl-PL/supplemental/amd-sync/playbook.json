@@ -1,5 +1,6 @@
 {
   "id": "amd-sync",
   "title": "Zdalne programowanie z synchronizacją AMD",
-  "description": "Zainstaluj AMD Sync na swoim laptopie i uzyskaj zdalny dostęp jednym kliknięciem do VS Code, terminala, JupyterLab i metryk na żywo na Twoim AMD Ryzen™ AI Halo."
+  "description": "Zainstaluj AMD Sync na swoim laptopie i uzyskaj zdalny dostęp jednym kliknięciem do VS Code, terminala, JupyterLab i metryk na żywo na Twoim AMD Ryzen™ AI Halo.",
+  "auto_translated": true
 }

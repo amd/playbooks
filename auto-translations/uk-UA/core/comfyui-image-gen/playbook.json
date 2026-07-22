@@ -1,5 +1,6 @@
 {
   "id": "comfyui-image-gen",
   "title": "Генерація зображень за допомогою ComfyUI та Z Image Turbo",
-  "description": "Створюйте приголомшливі зображення, згенеровані ШІ, за допомогою ComfyUI із Z Image Turbo."
+  "description": "Створюйте приголомшливі зображення, згенеровані ШІ, за допомогою ComfyUI із Z Image Turbo.",
+  "auto_translated": true
 }

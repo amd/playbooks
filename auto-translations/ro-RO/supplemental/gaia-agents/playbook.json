@@ -1,5 +1,6 @@
 {
   "id": "gaia-agents",
   "title": "Construirea primului tău agent cu GAIA",
-  "description": "Construiți un agent AI 100% local — fără a fi nevoie de API-uri în cloud. Folosiți GAIA SDK pentru a crea un consilier hardware."
+  "description": "Construiți un agent AI 100% local — fără a fi nevoie de API-uri în cloud. Folosiți GAIA SDK pentru a crea un consilier hardware.",
+  "auto_translated": true
 }

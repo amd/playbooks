@@ -1,5 +1,6 @@
 {
   "id": "amd-sync",
   "title": "Fjernudvikling med AMD Sync",
-  "description": "Installer AMD Sync på din bærbare computer, og få fjernadgang med ét klik til VS Code, Terminal, JupyterLab og Live Metrics på din AMD Ryzen™ AI Halo."
+  "description": "Installer AMD Sync på din bærbare computer, og få fjernadgang med ét klik til VS Code, Terminal, JupyterLab og Live Metrics på din AMD Ryzen™ AI Halo.",
+  "auto_translated": true
 }

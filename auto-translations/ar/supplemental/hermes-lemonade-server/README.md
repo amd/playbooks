@@ -2,6 +2,12 @@
 Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
+
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **ترجمة آلية.** تمت ترجمة هذه الصفحة تلقائيًا من اللغة الإنجليزية ولم تتم مراجعتها من قبل مختص بشري. قد تحتوي على أخطاء، وقد تختلف بعض الخطوات أو الأوامر أو الروابط أو مدى توفر المنتج في لغتك أو منطقتك. إذا لاحظت وجود أي خطأ، يُرجى اعتماد نسخة الدليل الإرشادي (playbook) الأصلية باللغة الإنجليزية كمصدر موثوق.
+<!-- auto-translated-disclaimer:end -->
+
 # تشغيل Hermes Agent محليًا باستخدام Lemonade Server
 
 ## نظرة عامة

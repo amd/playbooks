@@ -1,5 +1,6 @@
 {
   "id": "n8n-automation-gpt-oss",
   "title": "n8n과 로컬 LLM을 활용한 워크플로 자동화",
-  "description": "n8n과 Lemonade를 사용하여 AI 기반 뉴스 요약기를 구축하세요."
+  "description": "n8n과 Lemonade를 사용하여 AI 기반 뉴스 요약기를 구축하세요.",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "n8n-automation-gpt-oss",
   "title": "Automatisierung von Workflows mit n8n und lokalen LLMs",
-  "description": "Erstellen Sie einen KI-gestützten Nachrichten-Zusammenfasser mit n8n und Lemonade."
+  "description": "Erstellen Sie einen KI-gestützten Nachrichten-Zusammenfasser mit n8n und Lemonade.",
+  "auto_translated": true
 }

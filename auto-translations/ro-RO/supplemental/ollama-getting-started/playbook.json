@@ -1,5 +1,6 @@
 {
   "id": "ollama-getting-started",
   "title": "Noțiuni introductive cu Ollama",
-  "description": "Instalați Ollama și rulați LLM-uri local — discutați prin chat din terminal, aplicația desktop sau API-ul REST."
+  "description": "Instalați Ollama și rulați LLM-uri local — discutați prin chat din terminal, aplicația desktop sau API-ul REST.",
+  "auto_translated": true
 }

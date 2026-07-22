@@ -1,5 +1,6 @@
 {
   "id": "pytorch-rocm-llms",
   "title": "AMD ROCm™ ソフトウェアで PyTorch を使って LLM を実行する",
-  "description": "PyTorchとAMD ROCm™ソフトウェアを使用して、PC上で強力な言語モデルを実行し、ドキュメントを迅速かつ簡単に要約する方法を学びましょう。"
+  "description": "PyTorchとAMD ROCm™ソフトウェアを使用して、PC上で強力な言語モデルを実行し、ドキュメントを迅速かつ簡単に要約する方法を学びましょう。",
+  "auto_translated": true
 }

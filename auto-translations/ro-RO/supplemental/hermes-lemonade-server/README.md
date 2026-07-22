@@ -2,6 +2,12 @@
 Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
+
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Traducere automată.** Această pagină a fost tradusă automat din engleză și nu a fost revizuită de o persoană. Poate conține erori, iar unii pași, comenzi, descărcări sau disponibilitatea produselor pot diferi în funcție de limba sau regiunea dumneavoastră. Dacă ceva pare incorect, considerați playbook-ul original în limba engleză drept sursă de referință.
+<!-- auto-translated-disclaimer:end -->
+
 # Rularea Hermes Agent local cu Lemonade Server
 
 ## Prezentare generală

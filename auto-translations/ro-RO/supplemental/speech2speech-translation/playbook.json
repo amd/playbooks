@@ -1,5 +1,6 @@
 {
   "id": "speech2speech-translation",
   "title": "Traducere vorbire-în-vorbire în timp real",
-  "description": "Construiește o traducere vorbire-în-vorbire în timp real pe hardware-ul tău local."
+  "description": "Construiește o traducere vorbire-în-vorbire în timp real pe hardware-ul tău local.",
+  "auto_translated": true
 }

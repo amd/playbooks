@@ -1,5 +1,6 @@
 {
   "id": "comfyui-image-gen",
   "title": "Képek generálása ComfyUI és Z Image Turbo használatával",
-  "description": "Lenyűgöző AI által generált képek készítése ComfyUI segítségével, Z Image Turbo használatával."
+  "description": "Lenyűgöző AI által generált képek készítése ComfyUI segítségével, Z Image Turbo használatával.",
+  "auto_translated": true
 }

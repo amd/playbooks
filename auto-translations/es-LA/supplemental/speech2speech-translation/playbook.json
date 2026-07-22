@@ -1,5 +1,6 @@
 {
   "id": "speech2speech-translation",
   "title": "Traducción de voz a voz en tiempo real",
-  "description": "Crea una traducción de voz a voz en tiempo real en tu hardware local."
+  "description": "Crea una traducción de voz a voz en tiempo real en tu hardware local.",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
   "title": "Rularea DeepSeek V4 Flash cu ds4",
-  "description": "Implementați DeepSeek V4 Flash local utilizând motorul de inferență ds4 și gestionați modelele interactiv cu ds4-cockpit."
+  "description": "Implementați DeepSeek V4 Flash local utilizând motorul de inferență ds4 și gestionați modelele interactiv cu ds4-cockpit.",
+  "auto_translated": true
 }

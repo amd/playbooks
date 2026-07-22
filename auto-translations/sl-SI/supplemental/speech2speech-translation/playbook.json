@@ -1,5 +1,6 @@
 {
   "id": "speech2speech-translation",
   "title": "Govorno-govorno prevajanje v realnem času",
-  "description": "Zgradite prevajanje govora v govor v realnem času na svoji lokalni strojni opremi."
+  "description": "Zgradite prevajanje govora v govor v realnem času na svoji lokalni strojni opremi.",
+  "auto_translated": true
 }

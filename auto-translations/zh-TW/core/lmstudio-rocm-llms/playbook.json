@@ -1,5 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
   "title": "使用 LM Studio 執行與提供 LLM 服務",
-  "description": "設定 LM Studio 和 LM Studio Server，以在本機執行並提供大型語言模型服務。"
+  "description": "設定 LM Studio 和 LM Studio Server，以在本機執行並提供大型語言模型服務。",
+  "auto_translated": true
 }

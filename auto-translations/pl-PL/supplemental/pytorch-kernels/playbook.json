@@ -1,5 +1,6 @@
 {
   "id": "pytorch-kernels",
   "title": "Tworzenie niestandardowych kerneli GPU za pomocą PyTorch i AMD ROCm™",
-  "description": "Pisz i optymalizuj niestandardowe kernele GPU przy użyciu PyTorch i oprogramowania AMD ROCm™"
+  "description": "Pisz i optymalizuj niestandardowe kernele GPU przy użyciu PyTorch i oprogramowania AMD ROCm™",
+  "auto_translated": true
 }

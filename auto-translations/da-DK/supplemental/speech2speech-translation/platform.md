@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Maskinoversættelse.** Denne side er automatisk oversat fra engelsk og er ikke blevet gennemgået af et menneske. Den kan indeholde fejl, og nogle trin, kommandoer, downloads eller produkttilgængelighed kan variere afhængigt af dit sprog eller din region. Hvis noget ser forkert ud, bør du betragte den engelske playbook som den autoritative kilde.
+<!-- auto-translated-disclaimer:end -->
+
 # Platform Configuration
 
 Dette dokument beskriver de forventede platformskonfigurationer for at køre denne playbook.

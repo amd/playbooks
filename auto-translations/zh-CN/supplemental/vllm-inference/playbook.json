@@ -1,5 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "vLLM 入门指南",
-  "description": "了解如何使用容器化 vLLM 在集成 GPU 上运行推理和服务"
+  "description": "了解如何使用容器化 vLLM 在集成 GPU 上运行推理和服务",
+  "auto_translated": true
 }

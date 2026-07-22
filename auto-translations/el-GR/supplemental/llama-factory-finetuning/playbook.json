@@ -1,5 +1,6 @@
 {
   "id": "llama-factory-finetuning",
   "title": "Λεπτομερής Συντονισμός LLM με LLaMA Factory",
-  "description": "Συντονίστε (fine-tune) μεγάλα γλωσσικά μοντέλα (LLMs) χρησιμοποιώντας τεχνικές LLaMA-Factory και LoRA."
+  "description": "Συντονίστε (fine-tune) μεγάλα γλωσσικά μοντέλα (LLMs) χρησιμοποιώντας τεχνικές LLaMA-Factory και LoRA.",
+  "auto_translated": true
 }

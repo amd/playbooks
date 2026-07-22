@@ -1,5 +1,6 @@
 {
   "id": "vscode-qwen3-coder",
   "title": "Helyi LLM-alapú kódolás VSCode-dal és Qwen3-Coder-rel",
-  "description": "Használja a VS Code-ot a helyben futó Qwen3-Coder modellel a privát kódsegítségért."
+  "description": "Használja a VS Code-ot a helyben futó Qwen3-Coder modellel a privát kódsegítségért.",
+  "auto_translated": true
 }

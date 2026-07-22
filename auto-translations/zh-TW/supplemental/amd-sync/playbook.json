@@ -1,5 +1,6 @@
 {
   "id": "amd-sync",
   "title": "AMD Sync 遠端開發",
-  "description": "在您的筆記型電腦上安裝 AMD Sync，即可在您的 AMD Ryzen™ AI Halo 上一鍵使用遠端 VS Code、Terminal、JupyterLab 和 Live Metrics。"
+  "description": "在您的筆記型電腦上安裝 AMD Sync，即可在您的 AMD Ryzen™ AI Halo 上一鍵使用遠端 VS Code、Terminal、JupyterLab 和 Live Metrics。",
+  "auto_translated": true
 }

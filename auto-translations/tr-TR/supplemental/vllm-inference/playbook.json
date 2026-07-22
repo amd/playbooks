@@ -1,5 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "vLLM ile Başlarken",
-  "description": "AMD entegre GPU üzerinde konteynerleştirilmiş vLLM kullanarak çıkarım (inference) ve sunum (serving) işlemlerinin nasıl yapılacağını öğrenin"
+  "description": "AMD entegre GPU üzerinde konteynerleştirilmiş vLLM kullanarak çıkarım (inference) ve sunum (serving) işlemlerinin nasıl yapılacağını öğrenin",
+  "auto_translated": true
 }

@@ -101,6 +101,37 @@ The website resolves each file per locale in this order:
 
 ---
 
+## Machine-translation disclaimer
+
+Every translated `README.md` / `platform.md` gets a localized caution at the very
+top - machine-translated, may contain mistakes, and some steps/commands/downloads
+or product availability may differ by language or region. It is inserted right
+after the license header (outside `@github-only`, so it renders on **both** GitHub
+and the website, which already renders `> [!WARNING]` alerts), wrapped in a marker
+for idempotent insert/refresh:
+
+```
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> <localized text>
+<!-- auto-translated-disclaimer:end -->
+```
+
+- **Text** lives in [`disclaimers.json`](../.github/scripts/disclaimers.json): a
+  canonical `en` string plus a curated per-locale `locales` map and a `version`.
+  English is the fallback for any missing locale. Bump `version` to force every
+  block to refresh on the next apply.
+- **Injection** happens in `translate_playbook.py` after scoring, so the disclaimer
+  never affects the quality score. It is applied only to `README.md`/`platform.md`,
+  not the shared `dependencies/*.md` snippets.
+- **Metadata flag:** each translated `playbook.json` carries `"auto_translated": true`
+  so the website / other consumers can detect machine-translated content.
+- **Backfill / refresh:** `python .github/scripts/translate_playbook.py --apply-disclaimers`
+  inserts or refreshes the disclaimer and sets the flag across existing translations
+  without re-translating. It is idempotent (defaults to all present locales).
+
+---
+
 ## The engine: which LLM, which API, and how it's called
 
 All translation and scoring is done by [`translate_playbook.py`](../.github/scripts/translate_playbook.py).

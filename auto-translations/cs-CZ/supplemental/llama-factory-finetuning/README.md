@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Strojový překlad.** Tato stránka byla automaticky přeložena z angličtiny a nebyla zkontrolována člověkem. Může obsahovat chyby a některé kroky, příkazy, soubory ke stažení nebo dostupnost produktů se mohou lišit ve vašem jazyce či regionu. Pokud vám cokoli připadá nesprávné, považujte za zdroj pravdivých informací původní anglický playbook.
+<!-- auto-translated-disclaimer:end -->
+
 ## Přehled
 
 Efektivní jemné doladění (fine-tuning) je zásadní pro přizpůsobení velkých jazykových modelů (LLM) konkrétním úlohám. LLaMA Factory je open-source a uživatelsky přívětivá platforma, která zjednodušuje trénování a jemné doladění velkých jazykových modelů a multimodálních modelů. Umožňuje uživatelům lokálně přizpůsobit stovky předtrénovaných modelů s minimálním množstvím psaní kódu.

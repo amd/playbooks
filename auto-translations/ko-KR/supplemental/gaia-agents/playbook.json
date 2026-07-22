@@ -1,5 +1,6 @@
 {
   "id": "gaia-agents",
   "title": "GAIA로 첫 번째 에이전트 구축하기",
-  "description": "100% 로컬 AI 에이전트를 구축하세요 — 클라우드 API가 필요 없습니다. GAIA SDK를 사용하여 하드웨어 어드바이저를 만들어 보세요."
+  "description": "100% 로컬 AI 에이전트를 구축하세요 — 클라우드 API가 필요 없습니다. GAIA SDK를 사용하여 하드웨어 어드바이저를 만들어 보세요.",
+  "auto_translated": true
 }

@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Maskinöversättning.** Den här sidan har automatiskt översatts från engelska och har inte granskats av en människa. Den kan innehålla fel, och vissa steg, kommandon, nedladdningar eller produkttillgänglighet kan skilja sig åt i ditt språk eller din region. Om något verkar fel bör du betrakta den ursprungliga engelska spelboken som den korrekta källan.
+<!-- auto-translated-disclaimer:end -->
+
 <!-- @github-only -->
 > [!IMPORTANT]
 > Denna guide använder speciella taggar som GitHub inte kan rendera. Besök [amd.com/playbooks](https://amd.com/playbooks) för att förhandsgranska innehållet korrekt.

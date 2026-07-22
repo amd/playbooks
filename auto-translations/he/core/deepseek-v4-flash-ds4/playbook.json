@@ -1,5 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
   "title": "מפעיל את DeepSeek V4 Flash עם ds4",
-  "description": "פרוס את DeepSeek V4 Flash באופן מקומי באמצעות מנוע ההסקה ds4 ונהל מודלים באופן אינטראקטיבי עם ds4-cockpit."
+  "description": "פרוס את DeepSeek V4 Flash באופן מקומי באמצעות מנוע ההסקה ds4 ונהל מודלים באופן אינטראקטיבי עם ds4-cockpit.",
+  "auto_translated": true
 }

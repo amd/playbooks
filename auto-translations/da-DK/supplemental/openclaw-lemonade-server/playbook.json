@@ -1,5 +1,6 @@
 {
   "id": "openclaw-lemonade-server",
   "title": "Kør OpenClaw lokalt med Lemonade Server",
-  "description": "Installer og konfigurer den autonome AI-agent OpenClaw med Lemonade Server."
+  "description": "Installer og konfigurer den autonome AI-agent OpenClaw med Lemonade Server.",
+  "auto_translated": true
 }

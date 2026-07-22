@@ -1,5 +1,6 @@
 {
   "id": "openhands-getting-started",
   "title": "Primeros pasos con OpenHands y un LLM local",
-  "description": "Instala Agent Canvas, conecta un modelo local de Lemonade y ejecuta tu primer agente de codificación de OpenHands en tu AMD Ryzen™ AI."
+  "description": "Instala Agent Canvas, conecta un modelo local de Lemonade y ejecuta tu primer agente de codificación de OpenHands en tu AMD Ryzen™ AI.",
+  "auto_translated": true
 }

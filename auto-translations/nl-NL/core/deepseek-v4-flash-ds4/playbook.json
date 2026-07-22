@@ -1,5 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
   "title": "Running DeepSeek V4 Flash met ds4",
-  "description": "Implementeer DeepSeek V4 Flash lokaal met de ds4-inferentie-engine en beheer modellen interactief met ds4-cockpit."
+  "description": "Implementeer DeepSeek V4 Flash lokaal met de ds4-inferentie-engine en beheer modellen interactief met ds4-cockpit.",
+  "auto_translated": true
 }

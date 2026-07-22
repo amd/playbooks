@@ -1,5 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "Kom i gang med vLLM",
-  "description": "Lær hvordan du kjører inferens og servering med containerbasert vLLM på den integrerte GPU-en"
+  "description": "Lær hvordan du kjører inferens og servering med containerbasert vLLM på den integrerte GPU-en",
+  "auto_translated": true
 }

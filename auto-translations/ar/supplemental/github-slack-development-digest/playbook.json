@@ -1,5 +1,6 @@
 {
   "id": "github-slack-development-digest",
   "title": "بناء ملخص تطوير يومي من GitHub إلى Slack باستخدام Agent Canvas",
-  "description": "قم بتكوين Agent Canvas وGitHub MCP وSlack MCP وأتمتة مجدولة لـ OpenHands تنشر ملخصًا (digest) من نموذج لغوي محلي."
+  "description": "قم بتكوين Agent Canvas وGitHub MCP وSlack MCP وأتمتة مجدولة لـ OpenHands تنشر ملخصًا (digest) من نموذج لغوي محلي.",
+  "auto_translated": true
 }

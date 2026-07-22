@@ -1,5 +1,6 @@
 {
   "id": "cvml",
   "title": "Paikallinen konenäkö AMD Ryzen™ AI NPU:lla",
-  "description": "Rakenna paikallisia havainnointiominaisuuksia CVML SDK:n avulla Ryzen AI- ja AMD ROCm™ -ohjelmiston pohjalta"
+  "description": "Rakenna paikallisia havainnointiominaisuuksia CVML SDK:n avulla Ryzen AI- ja AMD ROCm™ -ohjelmiston pohjalta",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "speech2speech-translation",
   "title": "Realtidsöversättning från tal till tal",
-  "description": "Bygg en realtidsöversättning från tal till tal på din lokala hårdvara."
+  "description": "Bygg en realtidsöversättning från tal till tal på din lokala hårdvara.",
+  "auto_translated": true
 }

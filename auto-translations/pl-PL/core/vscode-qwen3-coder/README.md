@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Tłumaczenie maszynowe.** Ta strona została automatycznie przetłumaczona z języka angielskiego i nie została zweryfikowana przez człowieka. Może zawierać błędy, a niektóre kroki, polecenia, pliki do pobrania lub dostępność produktów mogą różnić się w Twoim języku lub regionie. Jeśli coś wygląda niepoprawnie, należy traktować oryginalny angielski playbook jako źródło prawdy.
+<!-- auto-translated-disclaimer:end -->
+
 <!-- @github-only -->
 
 > [!IMPORTANT]

@@ -1,5 +1,6 @@
 {
   "id": "pytorch-finetuning",
   "title": "PyTorch ve AMD ROCm™ Yazılımı ile LLM'lerin İnce Ayarı",
-  "description": "PyTorch ve ROCm kullanarak büyük dil modellerini (LLM) ince ayar yapın."
+  "description": "PyTorch ve ROCm kullanarak büyük dil modellerini (LLM) ince ayar yapın.",
+  "auto_translated": true
 }

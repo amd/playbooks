@@ -65,6 +65,7 @@ PLAYBOOKS_ROOT = REPO_ROOT / "playbooks"
 DEPENDENCIES_DIR = PLAYBOOKS_ROOT / "dependencies"
 TRANSLATIONS_ROOT = REPO_ROOT / "auto-translations"
 GLOSSARY_PATH = SCRIPT_DIR / "glossary.json"
+DISCLAIMER_PATH = SCRIPT_DIR / "disclaimers.json"
 CATEGORIES = ["core", "supplemental"]
 
 # Files whose prose is translated (kept in the mirrored tree).
@@ -127,6 +128,16 @@ LICENSE_HEADER_RE = re.compile(r"^\ufeff?\s*<!--.*?SPDX-License-Identifier.*?-->
 SENTINEL = "\u2402L10N{}\u2403"  # unlikely to appear in prose or be altered
 SENTINEL_FIND = re.compile(r"\u2402L10N(\d+)\u2403")
 
+# Machine-translation disclaimer, injected at the top of each translated prose
+# file (outside @github-only so it renders on GitHub and the website). Wrapped in
+# a marker so it can be inserted/refreshed idempotently.
+DISCLAIMER_MARKER = "auto-translated-disclaimer"
+DISCLAIMER_BLOCK_RE = re.compile(
+    r"[ \t]*<!-- " + re.escape(DISCLAIMER_MARKER) + r"\b.*?"
+    r"<!-- " + re.escape(DISCLAIMER_MARKER) + r":end -->[ \t]*\n?",
+    re.DOTALL,
+)
+
 
 def mask_protected(text):
     """Replace protected spans with sentinels. Returns (masked, mapping)."""
@@ -169,6 +180,46 @@ def count_protected(text):
 def load_glossary():
     data = json.loads(GLOSSARY_PATH.read_text(encoding="utf-8"))
     return data.get("do_not_translate", []), str(data.get("prompt_version", "1"))
+
+
+_DISCLAIMERS = None
+
+
+def load_disclaimers():
+    global _DISCLAIMERS
+    if _DISCLAIMERS is None:
+        _DISCLAIMERS = json.loads(DISCLAIMER_PATH.read_text(encoding="utf-8"))
+    return _DISCLAIMERS
+
+
+def disclaimer_block(locale):
+    """The localized machine-translation admonition, wrapped in the idempotency
+    marker. Body falls back to English when a locale has no curated string."""
+    data = load_disclaimers()
+    version = str(data.get("version", "1"))
+    text = (data.get("locales", {}).get(locale) or data.get("en", "")).strip()
+    quoted = "\n".join((f"> {line}" if line else ">") for line in text.split("\n"))
+    return (
+        f"<!-- {DISCLAIMER_MARKER} v{version} -->\n"
+        f"> [!WARNING]\n"
+        f"{quoted}\n"
+        f"<!-- {DISCLAIMER_MARKER}:end -->"
+    )
+
+
+def ensure_disclaimer(text, locale):
+    """Insert (or refresh) the disclaimer block right after the license header,
+    before any content. Idempotent: an existing block is removed first, so this is
+    safe to run repeatedly and to re-run after bumping the disclaimer version."""
+    text = DISCLAIMER_BLOCK_RE.sub("", text)
+    block = disclaimer_block(locale)
+    m = LICENSE_HEADER_RE.match(text)
+    if m:
+        # Normalize whitespace around the insertion point so re-running is a no-op.
+        header = text[:m.end()].rstrip()
+        rest = text[m.end():].lstrip("\n")
+        return f"{header}\n\n{block}\n\n{rest}"
+    return f"{block}\n\n{text.lstrip(chr(10))}"
 
 
 def build_system_prompt(locale, glossary_terms):
@@ -522,6 +573,8 @@ def translate_playbook_json(src_json_path, locale, cfg, glossary_terms):
                 "no quotes or extra text."
             )
             out[field] = call_model(system_prompt, val, cfg).strip()
+    # Flag so the website / consumers can tell this metadata is machine-translated.
+    out["auto_translated"] = True
     return out
 
 
@@ -586,7 +639,7 @@ def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt
                 continue
             # Translation is still valid but the judge model changed: re-score the
             # existing translation (no re-translation needed).
-            score, issues = judge_translation(src_text, out_path.read_text(encoding="utf-8"), locale, cfg)
+            score, issues = judge_translation(src_text, DISCLAIMER_BLOCK_RE.sub("", out_path.read_text(encoding="utf-8")), locale, cfg)
             entry.update(quality_score=score, quality_issues=issues, judge_model=judge_id)
             manifest["files"][rel] = entry
             changed += 1
@@ -601,7 +654,9 @@ def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt
             continue
 
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(translated, encoding="utf-8")
+        # Prepend the machine-translation disclaimer (after scoring, so it never
+        # affects the quality score). Not applied to shared dependency files.
+        out_path.write_text(ensure_disclaimer(translated, locale), encoding="utf-8")
         manifest["files"][rel] = {
             "source_sha256": src_hash,
             "prompt_version": prompt_version,
@@ -690,7 +745,7 @@ def process_dependencies(locale, cfg, glossary_terms, prompt_version):
                 print(f"  [skip] {rel} (up to date)", flush=True)
                 continue
             # Translation still valid but the judge model changed: re-score only.
-            score, issues = judge_translation(src_text, out_path.read_text(encoding="utf-8"), locale, cfg)
+            score, issues = judge_translation(src_text, DISCLAIMER_BLOCK_RE.sub("", out_path.read_text(encoding="utf-8")), locale, cfg)
             entry.update(quality_score=score, quality_issues=issues, judge_model=judge_id)
             manifest["files"][rel] = entry
             changed += 1
@@ -719,6 +774,36 @@ def process_dependencies(locale, cfg, glossary_terms, prompt_version):
 
     save_manifest(locale, manifest)
     return changed, failures
+
+
+def apply_disclaimers(locales):
+    """Insert/refresh the machine-translation disclaimer on existing translated
+    README.md/platform.md files, and set auto_translated=true in each translated
+    playbook.json - without re-translating. Idempotent; safe to re-run and to run
+    after bumping the disclaimer version. Returns the number of files changed."""
+    if not TRANSLATIONS_ROOT.exists():
+        print("No auto-translations/ tree found; nothing to do.", flush=True)
+        return 0
+    changed = 0
+    for locale in locales:
+        loc_dir = TRANSLATIONS_ROOT / locale
+        if not loc_dir.is_dir():
+            continue
+        for fname in PROSE_FILES:
+            for f in sorted(loc_dir.rglob(fname)):
+                original = f.read_text(encoding="utf-8")
+                updated = ensure_disclaimer(original, locale)
+                if updated != original:
+                    f.write_text(updated, encoding="utf-8")
+                    changed += 1
+        for pj in sorted(loc_dir.rglob("playbook.json")):
+            data = json.loads(pj.read_text(encoding="utf-8"))
+            if data.get("auto_translated") is not True:
+                data["auto_translated"] = True
+                pj.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+                changed += 1
+    print(f"\nDone. Disclaimer/flag applied: {changed} file(s) updated across {len(locales)} locale(s).", flush=True)
+    return changed
 
 
 def write_quality_report():
@@ -840,17 +925,29 @@ def main():
     ap.add_argument("--all-playbooks", action="store_true", help="Translate every core + supplemental playbook")
     ap.add_argument("--dependencies", action="store_true", help="Translate the shared playbooks/dependencies/*.md files")
     ap.add_argument("--remediate", action="store_true", help="Re-score judge errors and re-translate sub-threshold files, then exit")
+    ap.add_argument("--apply-disclaimers", action="store_true", help="Insert/refresh the machine-translation disclaimer on existing translated README/platform files and set auto_translated in playbook.json, without re-translating. Idempotent. Defaults to all present locales when --locales is omitted.")
     ap.add_argument("--min-score", type=int, default=None, help="Remediation threshold (default: LLM_QUALITY_THRESHOLD or 85)")
-    ap.add_argument("--locales", required=True, help="Comma-separated locale codes, e.g. zh-CN,es-LA,fr-FR")
+    ap.add_argument("--locales", help="Comma-separated locale codes, e.g. zh-CN,es-LA,fr-FR (required except for --apply-disclaimers)")
     ap.add_argument("--jobs", type=int, default=1, help="Parallel workers across locales (each locale owns its own manifest, so this is race-free)")
     ap.add_argument("--retries", type=int, default=2, help="After the main pass, automatically re-attempt files that failed the structural gate this many times (failures are usually stochastic). Set 0 to disable.")
     ap.add_argument("--force", action="store_true", help="Retranslate even if up to date")
     ap.add_argument("--dry-run", action="store_true", help="Mask/round-trip only; do not call the model")
     args = ap.parse_args()
 
-    if not args.playbook and not args.all_playbooks and not args.dependencies and not args.remediate:
-        print("ERROR: specify --playbook <id>, --all-playbooks, --dependencies, and/or --remediate.", file=sys.stderr)
+    if not args.playbook and not args.all_playbooks and not args.dependencies and not args.remediate and not args.apply_disclaimers:
+        print("ERROR: specify --playbook <id>, --all-playbooks, --dependencies, --remediate, and/or --apply-disclaimers.", file=sys.stderr)
         sys.exit(2)
+
+    # Disclaimer backfill needs no model/secrets - handle it up front and exit.
+    if args.apply_disclaimers:
+        if args.locales:
+            apply_locales = [x.strip() for x in args.locales.split(",") if x.strip()]
+        elif TRANSLATIONS_ROOT.exists():
+            apply_locales = sorted(d.name for d in TRANSLATIONS_ROOT.iterdir() if d.is_dir())
+        else:
+            apply_locales = []
+        apply_disclaimers(apply_locales)
+        return
 
     cat, pb_dir = (None, None)
     if args.playbook:
@@ -886,6 +983,9 @@ def main():
         sys.exit(2)
 
     glossary_terms, prompt_version = load_glossary()
+    if not args.locales:
+        print("ERROR: --locales is required for translation/remediation.", file=sys.stderr)
+        sys.exit(2)
     locales = [x.strip() for x in args.locales.split(",") if x.strip()]
 
     if args.remediate:

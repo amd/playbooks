@@ -1,5 +1,6 @@
 {
   "id": "ollama-getting-started",
   "title": "Ξεκινώντας με το Ollama",
-  "description": "Εγκαταστήστε το Ollama και εκτελέστε LLM τοπικά — συνομιλήστε από το τερματικό, την εφαρμογή desktop ή το REST API."
+  "description": "Εγκαταστήστε το Ollama και εκτελέστε LLM τοπικά — συνομιλήστε από το τερματικό, την εφαρμογή desktop ή το REST API.",
+  "auto_translated": true
 }

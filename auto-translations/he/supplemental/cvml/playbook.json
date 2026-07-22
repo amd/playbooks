@@ -1,5 +1,6 @@
 {
   "id": "cvml",
   "title": "ראייה ממוחשבת מקומית עם AMD Ryzen™ AI NPU",
-  "description": "בנה יכולות תפיסה מקומיות (perception) באמצעות ה-CVML SDK על גבי Ryzen AI ותוכנת AMD ROCm™"
+  "description": "בנה יכולות תפיסה מקומיות (perception) באמצעות ה-CVML SDK על גבי Ryzen AI ותוכנת AMD ROCm™",
+  "auto_translated": true
 }

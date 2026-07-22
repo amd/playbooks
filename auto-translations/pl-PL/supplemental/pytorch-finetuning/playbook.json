@@ -1,5 +1,6 @@
 {
   "id": "pytorch-finetuning",
   "title": "Dostrajanie (fine-tuning) modeli LLM za pomocą PyTorch i oprogramowania AMD ROCm™",
-  "description": "Dostrajaj (fine-tuning) duże modele językowe (LLM) przy użyciu PyTorch i ROCm."
+  "description": "Dostrajaj (fine-tuning) duże modele językowe (LLM) przy użyciu PyTorch i ROCm.",
+  "auto_translated": true
 }

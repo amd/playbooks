@@ -1,5 +1,6 @@
 {
   "id": "ollama-getting-started",
   "title": "Začíname s Ollama",
-  "description": "Nainštalujte Ollama a spúšťajte modely LLM lokálne — chatujte z terminálu, desktopovej aplikácie alebo cez REST API."
+  "description": "Nainštalujte Ollama a spúšťajte modely LLM lokálne — chatujte z terminálu, desktopovej aplikácie alebo cez REST API.",
+  "auto_translated": true
 }

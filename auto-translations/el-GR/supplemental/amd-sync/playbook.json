@@ -1,5 +1,6 @@
 {
   "id": "amd-sync",
   "title": "Απομακρυσμένη ανάπτυξη με AMD Sync",
-  "description": "Εγκαταστήστε το AMD Sync στον φορητό σας υπολογιστή και αποκτήστε με ένα κλικ απομακρυσμένη πρόσβαση σε VS Code, Terminal, JupyterLab και Live Metrics στο AMD Ryzen™ AI Halo σας."
+  "description": "Εγκαταστήστε το AMD Sync στον φορητό σας υπολογιστή και αποκτήστε με ένα κλικ απομακρυσμένη πρόσβαση σε VS Code, Terminal, JupyterLab και Live Metrics στο AMD Ryzen™ AI Halo σας.",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "ollama-getting-started",
   "title": "Erste Schritte mit Ollama",
-  "description": "Installieren Sie Ollama und führen Sie LLMs lokal aus – chatten Sie über das Terminal, die Desktop-App oder die REST-API."
+  "description": "Installieren Sie Ollama und führen Sie LLMs lokal aus – chatten Sie über das Terminal, die Desktop-App oder die REST-API.",
+  "auto_translated": true
 }

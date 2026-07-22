@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **機器翻譯。**本頁面為英文自動翻譯版本,尚未經過人工審閱。內容可能存在錯誤,部分步驟、指令、下載項目或產品供應情況可能因您的語言或地區而有所不同。如發現任何內容有誤,請以英文原版 playbook 為準。
+<!-- auto-translated-disclaimer:end -->
+
 <!-- @github-only -->
 > [!IMPORTANT]
 > 此手冊使用 AMD Playbooks 網站解讀的 AMD Playbooks 註解標籤。GitHub 會轉譯 Markdown 內容,但不會轉譯裝置、作業系統、變數或隱藏測試指令。

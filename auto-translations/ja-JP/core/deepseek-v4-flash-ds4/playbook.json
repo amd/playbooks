@@ -1,5 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
   "title": "DeepSeek V4 Flashをds4で実行中",
-  "description": "ds4推論エンジンを使用してDeepSeek V4 Flashをローカルにデプロイし、ds4-cockpitでモデルをインタラクティブに管理する。"
+  "description": "ds4推論エンジンを使用してDeepSeek V4 Flashをローカルにデプロイし、ds4-cockpitでモデルをインタラクティブに管理する。",
+  "auto_translated": true
 }

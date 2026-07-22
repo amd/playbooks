@@ -1,5 +1,6 @@
 {
   "id": "comfyui-image-gen",
   "title": "使用 ComfyUI 和 Z Image Turbo 生成圖片",
-  "description": "使用 ComfyUI 搭配 Z Image Turbo，創造令人驚艷的 AI 生成圖像。"
+  "description": "使用 ComfyUI 搭配 Z Image Turbo，創造令人驚艷的 AI 生成圖像。",
+  "auto_translated": true
 }

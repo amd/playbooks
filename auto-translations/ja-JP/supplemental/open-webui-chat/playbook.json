@@ -1,5 +1,6 @@
 {
   "id": "open-webui-chat",
   "title": "Open WebUIでLLMとチャットする",
-  "description": "ローカルでLLMとチャットするためにOpen WebUIを使用します。"
+  "description": "ローカルでLLMとチャットするためにOpen WebUIを使用します。",
+  "auto_translated": true
 }

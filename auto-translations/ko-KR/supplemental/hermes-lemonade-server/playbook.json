@@ -1,5 +1,6 @@
 {
   "id": "hermes-lemonade-server",
   "title": "Lemonade Server로 Hermes 에이전트 로컬 실행하기",
-  "description": "Lemonade Server를 로컬 AI 백엔드로 사용하는 Hermes Agent 자율 AI 에이전트를 설치하고 구성하세요."
+  "description": "Lemonade Server를 로컬 AI 백엔드로 사용하는 Hermes Agent 자율 AI 에이전트를 설치하고 구성하세요.",
+  "auto_translated": true
 }

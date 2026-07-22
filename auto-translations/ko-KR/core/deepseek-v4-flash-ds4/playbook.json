@@ -1,5 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
   "title": "ds4로 DeepSeek V4 Flash 실행 중",
-  "description": "ds4 추론 엔진을 사용하여 DeepSeek V4 Flash를 로컬에 배포하고, ds4-cockpit으로 모델을 대화형으로 관리하세요."
+  "description": "ds4 추론 엔진을 사용하여 DeepSeek V4 Flash를 로컬에 배포하고, ds4-cockpit으로 모델을 대화형으로 관리하세요.",
+  "auto_translated": true
 }

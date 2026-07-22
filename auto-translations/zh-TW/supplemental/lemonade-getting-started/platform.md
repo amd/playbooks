@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **機器翻譯。**本頁面為英文自動翻譯版本,尚未經過人工審閱。內容可能存在錯誤,部分步驟、指令、下載項目或產品供應情況可能因您的語言或地區而有所不同。如發現任何內容有誤,請以英文原版 playbook 為準。
+<!-- auto-translated-disclaimer:end -->
+
 # 平台配置 — Lemonade 本地 AI
 
 本文件說明此指南所假設的預先安裝軟體、模型路徑，以及平台特定的先決條件。

@@ -1,5 +1,6 @@
 {
   "id": "clustering-rpc-server",
   "title": "Két Ryzen™ AI Halo klaszterezése RPC-vel",
-  "description": "Elosztott következtetés beállítása RPC-kiszolgáló használatával két Ryzen™ AI Halo eszközön llama.cpp-vel 350B+ paraméteres modellek futtatásához"
+  "description": "Elosztott következtetés beállítása RPC-kiszolgáló használatával két Ryzen™ AI Halo eszközön llama.cpp-vel 350B+ paraméteres modellek futtatásához",
+  "auto_translated": true
 }

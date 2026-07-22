@@ -1,5 +1,6 @@
 {
   "id": "openclaw-lemonade-server",
   "title": "使用 Lemonade Server 在本地运行 OpenClaw",
-  "description": "安装并配置基于 Lemonade Server 的 OpenClaw 自主 AI 代理。"
+  "description": "安装并配置基于 Lemonade Server 的 OpenClaw 自主 AI 代理。",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "openhands-getting-started",
   "title": "เริ่มต้นใช้งาน OpenHands กับ LLM ในเครื่อง",
-  "description": "ติดตั้ง Agent Canvas เชื่อมต่อกับโมเดล Lemonade ในเครื่อง แล้วรัน OpenHands coding agent ตัวแรกของคุณบน AMD Ryzen™ AI"
+  "description": "ติดตั้ง Agent Canvas เชื่อมต่อกับโมเดล Lemonade ในเครื่อง แล้วรัน OpenHands coding agent ตัวแรกของคุณบน AMD Ryzen™ AI",
+  "auto_translated": true
 }

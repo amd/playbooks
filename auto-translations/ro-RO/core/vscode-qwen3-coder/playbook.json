@@ -1,5 +1,6 @@
 {
   "id": "vscode-qwen3-coder",
   "title": "Programare cu LLM local folosind VS Code și Qwen3-Coder",
-  "description": "Utilizați VS Code cu Qwen3-Coder rulând local pentru asistență privată la codare."
+  "description": "Utilizați VS Code cu Qwen3-Coder rulând local pentru asistență privată la codare.",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "llama-factory-finetuning",
   "title": "Finjustering af LLM'er med LLaMA Factory",
-  "description": "Finjuster store sprogmodeller (LLM'er) ved hjælp af LLaMA Factory og LoRA-teknikker."
+  "description": "Finjuster store sprogmodeller (LLM'er) ved hjælp af LLaMA Factory og LoRA-teknikker.",
+  "auto_translated": true
 }

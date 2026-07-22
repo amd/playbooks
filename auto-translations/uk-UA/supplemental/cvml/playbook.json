@@ -1,5 +1,6 @@
 {
   "id": "cvml",
   "title": "Локальний комп'ютерний зір з AMD Ryzen™ AI NPU",
-  "description": "Створюйте локальні можливості сприйняття за допомогою CVML SDK на основі Ryzen AI та програмного забезпечення AMD ROCm™"
+  "description": "Створюйте локальні можливості сприйняття за допомогою CVML SDK на основі Ryzen AI та програмного забезпечення AMD ROCm™",
+  "auto_translated": true
 }

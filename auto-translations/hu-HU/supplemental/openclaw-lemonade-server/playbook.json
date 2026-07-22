@@ -1,5 +1,6 @@
 {
   "id": "openclaw-lemonade-server",
   "title": "Az OpenClaw futtatása helyben a Lemonade Server segítségével",
-  "description": "Az OpenClaw autonóm AI-ügynök telepítése és konfigurálása a Lemonade Server segítségével."
+  "description": "Az OpenClaw autonóm AI-ügynök telepítése és konfigurálása a Lemonade Server segítségével.",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "speech2speech-translation",
   "title": "Realtime spraak-naar-spraakvertaling",
-  "description": "Bouw een realtime spraak-naar-spraakvertaling op uw lokale hardware."
+  "description": "Bouw een realtime spraak-naar-spraakvertaling op uw lokale hardware.",
+  "auto_translated": true
 }

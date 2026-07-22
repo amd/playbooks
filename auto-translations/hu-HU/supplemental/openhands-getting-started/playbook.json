@@ -1,5 +1,6 @@
 {
   "id": "openhands-getting-started",
   "title": "Kezdő lépések az OpenHands és egy helyi LLM használatával",
-  "description": "Telepítse az Agent Canvas alkalmazást, csatlakoztasson egy helyi Lemonade modellt, és futtassa első OpenHands kódoló ügynökét az AMD Ryzen™ AI-n."
+  "description": "Telepítse az Agent Canvas alkalmazást, csatlakoztasson egy helyi Lemonade modellt, és futtassa első OpenHands kódoló ügynökét az AMD Ryzen™ AI-n.",
+  "auto_translated": true
 }

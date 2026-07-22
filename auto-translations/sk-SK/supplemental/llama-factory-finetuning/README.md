@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Strojový preklad.** Táto stránka bola automaticky preložená z angličtiny a nebola skontrolovaná človekom. Môže obsahovať chyby a niektoré kroky, príkazy, súbory na stiahnutie alebo dostupnosť produktov sa môžu vo vašom jazyku alebo regióne líšiť. Ak sa vám niečo zdá nesprávne, považujte pôvodný anglický playbook za zdroj pravdivých informácií.
+<!-- auto-translated-disclaimer:end -->
+
 ## Prehľad
 
 Efektívne dolaďovanie je nevyhnutné na prispôsobenie veľkých jazykových modelov (LLM) pre nadväzujúce úlohy. LLaMA Factory je open-source a používateľsky prívetivá platforma, ktorá zjednodušuje trénovanie a dolaďovanie veľkých jazykových modelov a multimodálnych modelov. Umožňuje používateľom lokálne prispôsobiť stovky predtrénovaných modelov s minimálnym kódovaním.

@@ -1,5 +1,6 @@
 {
   "id": "hermes-lemonade-server",
   "title": "Kjøring av Hermes Agent lokalt med Lemonade Server",
-  "description": "Installer og konfigurer den autonome AI-agenten Hermes Agent med Lemonade Server som lokal AI-backend."
+  "description": "Installer og konfigurer den autonome AI-agenten Hermes Agent med Lemonade Server som lokal AI-backend.",
+  "auto_translated": true
 }

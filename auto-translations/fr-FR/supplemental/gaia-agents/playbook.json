@@ -1,5 +1,6 @@
 {
   "id": "gaia-agents",
   "title": "Créer votre premier agent avec GAIA",
-  "description": "Créez un agent d'IA 100 % local, sans API cloud nécessaire. Utilisez le SDK GAIA pour créer un conseiller matériel."
+  "description": "Créez un agent d'IA 100 % local, sans API cloud nécessaire. Utilisez le SDK GAIA pour créer un conseiller matériel.",
+  "auto_translated": true
 }

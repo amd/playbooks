@@ -1,5 +1,6 @@
 {
   "id": "gaia-agents",
   "title": "Sestavení vašeho prvního agenta pomocí GAIA",
-  "description": "Vytvořte 100% lokálního AI agenta – bez potřeby cloudových API. Použijte GAIA SDK k vytvoření hardwarového poradce."
+  "description": "Vytvořte 100% lokálního AI agenta – bez potřeby cloudových API. Použijte GAIA SDK k vytvoření hardwarového poradce.",
+  "auto_translated": true
 }

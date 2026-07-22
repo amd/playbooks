@@ -1,5 +1,6 @@
 {
   "id": "github-slack-development-digest",
   "title": "Fejlesztési összefoglaló GitHub-ból Slack-be Agent Canvas segítségével",
-  "description": "Konfigurálja az Agent Canvas, a GitHub MCP, a Slack MCP szolgáltatásokat, valamint egy ütemezett OpenHands automatizálást, amely helyi LLM-alapú összefoglalót tesz közzé."
+  "description": "Konfigurálja az Agent Canvas, a GitHub MCP, a Slack MCP szolgáltatásokat, valamint egy ütemezett OpenHands automatizálást, amely helyi LLM-alapú összefoglalót tesz közzé.",
+  "auto_translated": true
 }

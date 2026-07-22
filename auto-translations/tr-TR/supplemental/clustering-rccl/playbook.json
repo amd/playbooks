@@ -1,5 +1,6 @@
 {
   "id": "clustering-rccl",
   "title": "İki Ryzen™ AI Halo'yu RCCL ile Kümeleme",
-  "description": "İki Ryzen™ AI Halo cihazı ve RCCL kullanarak dağıtık iş yükleri için çok düğümlü bir küme kurun"
+  "description": "İki Ryzen™ AI Halo cihazı ve RCCL kullanarak dağıtık iş yükleri için çok düğümlü bir küme kurun",
+  "auto_translated": true
 }

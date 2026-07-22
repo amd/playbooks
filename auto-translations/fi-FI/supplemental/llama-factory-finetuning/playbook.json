@@ -1,5 +1,6 @@
 {
   "id": "llama-factory-finetuning",
   "title": "Hienosäätö LLM-malleille LLaMA Factorylla",
-  "description": "Hienosäädä suuria kielimalleja (LLM) käyttämällä LLaMA Factory -työkalua ja LoRA-tekniikoita."
+  "description": "Hienosäädä suuria kielimalleja (LLM) käyttämällä LLaMA Factory -työkalua ja LoRA-tekniikoita.",
+  "auto_translated": true
 }

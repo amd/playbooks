@@ -1,5 +1,6 @@
 {
   "id": "cvml",
   "title": "使用 AMD Ryzen™ AI NPU 進行本機電腦視覺",
-  "description": "在 Ryzen AI 和 AMD ROCm™ 軟體之上使用 CVML SDK 建構本地感知能力"
+  "description": "在 Ryzen AI 和 AMD ROCm™ 軟體之上使用 CVML SDK 建構本地感知能力",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "speech2speech-translation",
   "title": "Reaaliaikainen puheesta puheeksi -käännös",
-  "description": "Rakenna reaaliaikainen puheesta puheeksi -käännös omalla paikallisella laitteistollasi."
+  "description": "Rakenna reaaliaikainen puheesta puheeksi -käännös omalla paikallisella laitteistollasi.",
+  "auto_translated": true
 }

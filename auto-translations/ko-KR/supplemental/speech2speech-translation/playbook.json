@@ -1,5 +1,6 @@
 {
   "id": "speech2speech-translation",
   "title": "실시간 음성-음성 번역",
-  "description": "로컬 하드웨어에서 실시간 음성 대 음성 번역을 구축하세요."
+  "description": "로컬 하드웨어에서 실시간 음성 대 음성 번역을 구축하세요.",
+  "auto_translated": true
 }

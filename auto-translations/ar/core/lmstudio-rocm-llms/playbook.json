@@ -1,5 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
   "title": "تشغيل نماذج اللغة الكبيرة وتقديمها باستخدام LM Studio",
-  "description": "قم بإعداد LM Studio وLM Studio Server لتشغيل نماذج اللغة الكبيرة وتقديمها محليًا."
+  "description": "قم بإعداد LM Studio وLM Studio Server لتشغيل نماذج اللغة الكبيرة وتقديمها محليًا.",
+  "auto_translated": true
 }

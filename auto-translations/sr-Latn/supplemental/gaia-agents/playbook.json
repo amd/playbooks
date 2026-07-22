@@ -1,5 +1,6 @@
 {
   "id": "gaia-agents",
   "title": "Izrada vašeg prvog agenta uz GAIA",
-  "description": "Napravite 100% lokalnog AI agenta — bez potrebe za cloud API-jima. Koristite GAIA SDK da kreirate savetnika za hardver."
+  "description": "Napravite 100% lokalnog AI agenta — bez potrebe za cloud API-jima. Koristite GAIA SDK da kreirate savetnika za hardver.",
+  "auto_translated": true
 }

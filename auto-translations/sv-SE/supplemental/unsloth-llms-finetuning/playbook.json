@@ -1,5 +1,6 @@
 {
   "id": "unsloth-llms-finetuning",
   "title": "Finjustering av LLM:er med Unsloth",
-  "description": "Använd Unsloth för minneseffektiva finjusterade LLM:er™"
+  "description": "Använd Unsloth för minneseffektiva finjusterade LLM:er™",
+  "auto_translated": true
 }

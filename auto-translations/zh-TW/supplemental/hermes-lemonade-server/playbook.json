@@ -1,5 +1,6 @@
 {
   "id": "hermes-lemonade-server",
   "title": "在本機使用 Lemonade Server 執行 Hermes Agent",
-  "description": "安裝並設定 Hermes Agent 自主 AI 代理程式,並以 Lemonade Server 作為其本機 AI 後端。"
+  "description": "安裝並設定 Hermes Agent 自主 AI 代理程式,並以 Lemonade Server 作為其本機 AI 後端。",
+  "auto_translated": true
 }

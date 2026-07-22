@@ -1,5 +1,6 @@
 {
   "id": "speech2speech-translation",
   "title": "即時語音對語音翻譯",
-  "description": "在本機硬體上建立即時語音轉語音翻譯功能。"
+  "description": "在本機硬體上建立即時語音轉語音翻譯功能。",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "n8n-automation-gpt-oss",
   "title": "n8nとローカルLLMによるワークフローの自動化",
-  "description": "n8nとLemonadeを使ってAI搭載のニュース要約ツールを構築する。"
+  "description": "n8nとLemonadeを使ってAI搭載のニュース要約ツールを構築する。",
+  "auto_translated": true
 }

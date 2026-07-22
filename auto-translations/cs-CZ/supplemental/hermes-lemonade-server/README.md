@@ -2,6 +2,12 @@
 Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
+
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Strojový překlad.** Tato stránka byla automaticky přeložena z angličtiny a nebyla zkontrolována člověkem. Může obsahovat chyby a některé kroky, příkazy, soubory ke stažení nebo dostupnost produktů se mohou lišit ve vašem jazyce či regionu. Pokud vám cokoli připadá nesprávné, považujte za zdroj pravdivých informací původní anglický playbook.
+<!-- auto-translated-disclaimer:end -->
+
 # Spuštění agenta Hermes lokálně pomocí Lemonade Server
 
 ## Přehled

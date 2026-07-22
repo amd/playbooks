@@ -1,5 +1,6 @@
 {
   "id": "open-webui-chat",
   "title": "Open WebUI'de LLM'lerle Sohbet Etme",
-  "description": "Yerel olarak LLM'lerle sohbet etmek için Open WebUI kullanın."
+  "description": "Yerel olarak LLM'lerle sohbet etmek için Open WebUI kullanın.",
+  "auto_translated": true
 }

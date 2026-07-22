@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Maskinöversättning.** Den här sidan har automatiskt översatts från engelska och har inte granskats av en människa. Den kan innehålla fel, och vissa steg, kommandon, nedladdningar eller produkttillgänglighet kan skilja sig åt i ditt språk eller din region. Om något verkar fel bör du betrakta den ursprungliga engelska spelboken som den korrekta källan.
+<!-- auto-translated-disclaimer:end -->
+
 ## Översikt
 
 Effektiv finjustering är avgörande för att anpassa stora språkmodeller (LLM) till nedströmsuppgifter. LLaMA Factory är en öppen källkodsplattform som är enkel att använda och som effektiviserar träning och finjustering av stora språkmodeller och multimodala modeller. Den gör det möjligt för användare att anpassa hundratals förtränade modeller lokalt med minimal kodning.

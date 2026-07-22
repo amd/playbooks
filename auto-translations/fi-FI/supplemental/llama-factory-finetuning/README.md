@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Konekäännös.** Tämä sivu on käännetty automaattisesti englannista, eikä sitä ole tarkistanut ihminen. Se saattaa sisältää virheitä, ja jotkin vaiheet, komennot, lataukset tai tuotteiden saatavuus voivat vaihdella kielesi tai alueesi mukaan. Jos jokin vaikuttaa virheelliseltä, pidä alkuperäistä englanninkielistä playbookia ensisijaisena lähteenä.
+<!-- auto-translated-disclaimer:end -->
+
 ## Yleiskatsaus
 
 Tehokas hienosäätö on olennaista suurten kielimallien (LLM) mukauttamisessa jatkokäyttötapauksiin. LLaMA Factory on avoimen lähdekoodin ja käyttäjäystävällinen alusta, joka yksinkertaistaa suurten kielimallien ja monimuotoisten mallien koulutusta ja hienosäätöä. Sen avulla käyttäjät voivat mukauttaa satoja esikoulutettuja malleja paikallisesti minimaalisella koodauksella.

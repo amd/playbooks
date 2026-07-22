@@ -1,5 +1,6 @@
 {
   "id": "open-webui-chat",
   "title": "Discuții cu LLM-uri în Open WebUI",
-  "description": "Utilizați Open WebUI pentru a discuta cu LLM-uri local."
+  "description": "Utilizați Open WebUI pentru a discuta cu LLM-uri local.",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "comfyui-image-gen",
   "title": "ComfyUIとZ Image Turboで画像を生成",
-  "description": "Z Image Turboを使用したComfyUIで、驚くほど美しいAI生成画像を作成しましょう。"
+  "description": "Z Image Turboを使用したComfyUIで、驚くほど美しいAI生成画像を作成しましょう。",
+  "auto_translated": true
 }

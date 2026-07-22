@@ -1,5 +1,6 @@
 {
   "id": "pytorch-finetuning",
   "title": "Ajustarea fină (fine-tuning) a LLM-urilor cu PyTorch și software-ul AMD ROCm™",
-  "description": "Reglați fin modele lingvistice mari (LLM) folosind PyTorch și ROCm."
+  "description": "Reglați fin modele lingvistice mari (LLM) folosind PyTorch și ROCm.",
+  "auto_translated": true
 }

@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **機器翻譯。**本頁面為英文自動翻譯版本,尚未經過人工審閱。內容可能存在錯誤,部分步驟、指令、下載項目或產品供應情況可能因您的語言或地區而有所不同。如發現任何內容有誤,請以英文原版 playbook 為準。
+<!-- auto-translated-disclaimer:end -->
+
 ## 概述
 
 高效微調對於將大型語言模型（LLM）調整以適應下游任務至關重要。LLaMA Factory 是一個開源且使用者友善的平台，能簡化大型語言模型與多模態模型的訓練與微調。它讓使用者能夠在本機以最少的程式撰寫，自訂數百種預訓練模型。

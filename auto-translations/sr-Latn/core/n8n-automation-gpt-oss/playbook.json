@@ -1,5 +1,6 @@
 {
   "id": "n8n-automation-gpt-oss",
   "title": "Automatizacija radnih tokova pomoću n8n i lokalnih LLM-ova",
-  "description": "Napravite AI sumarizator vesti koristeći n8n i Lemonade."
+  "description": "Napravite AI sumarizator vesti koristeći n8n i Lemonade.",
+  "auto_translated": true
 }

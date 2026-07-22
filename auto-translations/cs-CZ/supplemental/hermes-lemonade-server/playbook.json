@@ -1,5 +1,6 @@
 {
   "id": "hermes-lemonade-server",
   "title": "Spuštění agenta Hermes lokálně pomocí serveru Lemonade",
-  "description": "Nainstalujte a nakonfigurujte autonomního AI agenta Hermes Agent s Lemonade Server jako lokálním AI backendem."
+  "description": "Nainstalujte a nakonfigurujte autonomního AI agenta Hermes Agent s Lemonade Server jako lokálním AI backendem.",
+  "auto_translated": true
 }

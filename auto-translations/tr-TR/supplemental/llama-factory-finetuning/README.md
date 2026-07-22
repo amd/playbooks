@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Makine çevirisi.** Bu sayfa İngilizceden otomatik olarak çevrilmiştir ve bir kişi tarafından incelenmemiştir. Hatalar içerebilir ve bazı adımlar, komutlar, indirmeler veya ürün kullanılabilirliği dilinize veya bölgenize göre farklılık gösterebilir. Yanlış görünen bir şey varsa, orijinal İngilizce playbook'u kaynak olarak kabul edin.
+<!-- auto-translated-disclaimer:end -->
+
 ## Genel Bakış
 
 Büyük dil modellerini (LLM'ler) alt görevlere uyarlamak için verimli ince ayar (fine-tuning) hayati önem taşır. LLaMA Factory, büyük dil modellerinin ve çok modlu modellerin eğitimini ve ince ayarını kolaylaştıran açık kaynaklı ve kullanıcı dostu bir platformdur. Kullanıcıların minimum kodlamayla yüzlerce önceden eğitilmiş modeli yerel olarak özelleştirmesine olanak tanır.

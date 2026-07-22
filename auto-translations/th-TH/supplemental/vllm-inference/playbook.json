@@ -1,5 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "เริ่มต้นใช้งาน vLLM",
-  "description": "เรียนรู้วิธีการรันการอนุมาน (inference) และการให้บริการ (serving) โดยใช้ vLLM แบบคอนเทนเนอร์บน iGPU"
+  "description": "เรียนรู้วิธีการรันการอนุมาน (inference) และการให้บริการ (serving) โดยใช้ vLLM แบบคอนเทนเนอร์บน iGPU",
+  "auto_translated": true
 }

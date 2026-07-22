@@ -1,5 +1,6 @@
 {
   "id": "vscode-qwen3-coder",
   "title": "Lokaal LLM-coderen met VSCode en Qwen3-Coder",
-  "description": "Gebruik VS Code met lokaal draaiende Qwen3-Coder voor privécodeassistentie."
+  "description": "Gebruik VS Code met lokaal draaiende Qwen3-Coder voor privécodeassistentie.",
+  "auto_translated": true
 }

@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Mašinski prevod.** Ova stranica je automatski prevedena sa engleskog jezika i nije pregledana od strane čoveka. Može sadržati greške, a pojedini koraci, komande, preuzimanja ili dostupnost proizvoda mogu se razlikovati u vašem jeziku ili regionu. Ako nešto izgleda netačno, smatrajte da je originalni engleski playbook merodavan izvor.
+<!-- auto-translated-disclaimer:end -->
+
 ## Pregled
 
 Efikasno fino podešavanje je od ključnog značaja za prilagođavanje velikih jezičkih modela (LLM) zadacima nižeg nivoa. LLaMA Factory je platforma otvorenog koda koja je jednostavna za korišćenje i pojednostavljuje treniranje i fino podešavanje velikih jezičkih modela i multimodalnih modela. Omogućava korisnicima da lokalno prilagode stotine unapred obučenih modela uz minimalno pisanje koda.

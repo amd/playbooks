@@ -1,5 +1,6 @@
 {
   "id": "n8n-automation-gpt-oss",
   "title": "Automatizando fluxos de trabalho com n8n e LLMs locais",
-  "description": "Crie um resumidor de notícias com IA usando n8n e Lemonade."
+  "description": "Crie um resumidor de notícias com IA usando n8n e Lemonade.",
+  "auto_translated": true
 }

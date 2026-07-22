@@ -1,5 +1,6 @@
 {
   "id": "pytorch-kernels",
   "title": "PyTorchとAMD ROCm™によるカスタムGPUカーネルの構築",
-  "description": "PyTorchおよびAMD ROCm™ソフトウェアを使用してカスタムGPUカーネルを作成・最適化"
+  "description": "PyTorchおよびAMD ROCm™ソフトウェアを使用してカスタムGPUカーネルを作成・最適化",
+  "auto_translated": true
 }

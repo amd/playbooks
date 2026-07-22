@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Traduzione automatica.** Questa pagina è stata tradotta automaticamente dall'inglese e non è stata revisionata da un traduttore umano. Potrebbe contenere errori e alcuni passaggi, comandi, download o la disponibilità dei prodotti potrebbero variare in base alla lingua o alla regione. Se qualcosa non sembra corretto, fare riferimento al playbook originale in inglese come fonte autorevole.
+<!-- auto-translated-disclaimer:end -->
+
 ## Panoramica
 
 Il fine-tuning efficiente è fondamentale per adattare i modelli linguistici di grandi dimensioni (LLM) a compiti specifici. LLaMA Factory è una piattaforma open-source e di facile utilizzo che semplifica l'addestramento e il fine-tuning di modelli linguistici di grandi dimensioni e modelli multimodali. Consente agli utenti di personalizzare centinaia di modelli pre-addestrati localmente con una codifica minima.

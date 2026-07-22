@@ -1,5 +1,6 @@
 {
   "id": "clustering-rccl",
   "title": "將兩台 Ryzen™ AI Halo 進行 RCCL 叢集連接",
-  "description": "使用兩台 Ryzen™ AI Halo 裝置搭配 RCCL,設定多節點叢集以執行分散式工作負載"
+  "description": "使用兩台 Ryzen™ AI Halo 裝置搭配 RCCL,設定多節點叢集以執行分散式工作負載",
+  "auto_translated": true
 }

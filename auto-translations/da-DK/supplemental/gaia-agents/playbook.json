@@ -1,5 +1,6 @@
 {
   "id": "gaia-agents",
   "title": "Byg din første agent med GAIA",
-  "description": "Byg en 100 % lokal AI-agent — ingen cloud-API'er nødvendige. Brug GAIA SDK'et til at oprette en hardwarerådgiver."
+  "description": "Byg en 100 % lokal AI-agent — ingen cloud-API'er nødvendige. Brug GAIA SDK'et til at oprette en hardwarerådgiver.",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "vLLMを使ってみる",
-  "description": "統合GPUでコンテナ化されたvLLMを使用して推論とサービングを実行する方法を学びます"
+  "description": "統合GPUでコンテナ化されたvLLMを使用して推論とサービングを実行する方法を学びます",
+  "auto_translated": true
 }

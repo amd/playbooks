@@ -1,5 +1,6 @@
 {
   "id": "github-slack-development-digest",
   "title": "Bygg en GitHub-til-Slack-utviklingsoppsummering med Agent Canvas",
-  "description": "Konfigurer Agent Canvas, GitHub MCP, Slack MCP og en planlagt OpenHands-automatisering som publiserer et lokal-LLM-sammendrag."
+  "description": "Konfigurer Agent Canvas, GitHub MCP, Slack MCP og en planlagt OpenHands-automatisering som publiserer et lokal-LLM-sammendrag.",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "llama-factory-finetuning",
   "title": "Тонке налаштування LLM за допомогою LLaMA Factory",
-  "description": "Тонке налаштування великих мовних моделей (LLM) за допомогою LLaMA-Factory та методів LoRA."
+  "description": "Тонке налаштування великих мовних моделей (LLM) за допомогою LLaMA-Factory та методів LoRA.",
+  "auto_translated": true
 }

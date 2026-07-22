@@ -1,5 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
   "title": "Kör DeepSeek V4 Flash med ds4",
-  "description": "Distribuera DeepSeek V4 Flash lokalt med hjälp av inferensmotorn ds4 och hantera modeller interaktivt med ds4-cockpit."
+  "description": "Distribuera DeepSeek V4 Flash lokalt med hjälp av inferensmotorn ds4 och hantera modeller interaktivt med ds4-cockpit.",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "amd-sync",
   "title": "Etäkehitys AMD Sync -toiminnolla",
-  "description": "Asenna AMD Sync kannettavaan tietokoneeseesi ja saat yhdellä napsautuksella etäkäyttöön VS Coden, päätteen, JupyterLabin ja Live Metrics -toiminnon AMD Ryzen™ AI Halo -laitteessasi."
+  "description": "Asenna AMD Sync kannettavaan tietokoneeseesi ja saat yhdellä napsautuksella etäkäyttöön VS Coden, päätteen, JupyterLabin ja Live Metrics -toiminnon AMD Ryzen™ AI Halo -laitteessasi.",
+  "auto_translated": true
 }

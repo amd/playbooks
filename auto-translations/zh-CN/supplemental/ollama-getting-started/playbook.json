@@ -1,5 +1,6 @@
 {
   "id": "ollama-getting-started",
   "title": "Ollama 入门",
-  "description": "安装 Ollama，在本地运行 LLM——通过终端、桌面应用或 REST API 进行对话。"
+  "description": "安装 Ollama，在本地运行 LLM——通过终端、桌面应用或 REST API 进行对话。",
+  "auto_translated": true
 }

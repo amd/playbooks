@@ -1,5 +1,6 @@
 {
   "id": "pytorch-kernels",
   "title": "Erstellen benutzerdefinierter GPU-Kernel mit PyTorch und AMD ROCm™",
-  "description": "Schreiben und Optimieren benutzerdefinierter GPU-Kernels mit PyTorch und AMD ROCm™ Software"
+  "description": "Schreiben und Optimieren benutzerdefinierter GPU-Kernels mit PyTorch und AMD ROCm™ Software",
+  "auto_translated": true
 }

@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Traducción automática.** Esta página fue traducida automáticamente del inglés y no ha sido revisada por un humano. Puede contener errores, y algunos pasos, comandos, descargas o disponibilidad de productos pueden variar según su idioma o región. Si algo no parece correcto, considere el playbook original en inglés como la fuente de verdad.
+<!-- auto-translated-disclaimer:end -->
+
 # Configuración de la plataforma — Lemonade Local AI
 
 Este documento describe el software preinstalado, las rutas de los modelos y los requisitos previos específicos de la plataforma que se asumen en este playbook.

@@ -1,5 +1,6 @@
 {
   "id": "llama-factory-finetuning",
   "title": "Feinabstimmung von LLMs mit LLaMA Factory",
-  "description": "Feinabstimmung großer Sprachmodelle (LLMs) mit LLaMA Factory und LoRA-Techniken."
+  "description": "Feinabstimmung großer Sprachmodelle (LLMs) mit LLaMA Factory und LoRA-Techniken.",
+  "auto_translated": true
 }

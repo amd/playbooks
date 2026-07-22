@@ -1,5 +1,6 @@
 {
   "id": "amd-sync",
   "title": "التطوير عن بُعد باستخدام AMD Sync",
-  "description": "قم بتثبيت AMD Sync على جهازك المحمول واحصل بنقرة واحدة على VS Code وTerminal وJupyterLab وLive Metrics عن بُعد على جهاز AMD Ryzen™ AI Halo الخاص بك."
+  "description": "قم بتثبيت AMD Sync على جهازك المحمول واحصل بنقرة واحدة على VS Code وTerminal وJupyterLab وLive Metrics عن بُعد على جهاز AMD Ryzen™ AI Halo الخاص بك.",
+  "auto_translated": true
 }

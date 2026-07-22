@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Strojni prevod.** Ta stran je bila samodejno prevedena iz angleščine in je ni pregledal človek. Lahko vsebuje napake, nekateri koraki, ukazi, prenosi ali razpoložljivost izdelkov pa se lahko razlikujejo glede na vaš jezik ali regijo. Če se vam kaj zdi napačno, upoštevajte, da je izvirni angleški playbook merodajni vir.
+<!-- auto-translated-disclaimer:end -->
+
 ## Pregled
 
 Učinkovito fino prilagajanje je ključnega pomena za prilagajanje velikih jezikovnih modelov (LLM) nalogam nižje v verigi. LLaMA Factory je odprtokodna in uporabniku prijazna platforma, ki poenostavi učenje in fino prilagajanje velikih jezikovnih modelov ter multimodalnih modelov. Uporabnikom omogoča, da lokalno prilagodijo na stotine vnaprej naučenih modelov z minimalnim programiranjem.

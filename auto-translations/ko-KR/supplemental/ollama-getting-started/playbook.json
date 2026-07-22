@@ -1,5 +1,6 @@
 {
   "id": "ollama-getting-started",
   "title": "Ollama 시작하기",
-  "description": "Ollama를 설치하고 LLM을 로컬에서 실행하세요 — 터미널, 데스크톱 앱 또는 REST API에서 채팅할 수 있습니다."
+  "description": "Ollama를 설치하고 LLM을 로컬에서 실행하세요 — 터미널, 데스크톱 앱 또는 REST API에서 채팅할 수 있습니다.",
+  "auto_translated": true
 }

@@ -1,5 +1,6 @@
 {
   "id": "ollama-getting-started",
   "title": "Primeros pasos con Ollama",
-  "description": "Instala Ollama y ejecuta LLMs de forma local: chatea desde la terminal, la aplicación de escritorio o la API REST."
+  "description": "Instala Ollama y ejecuta LLMs de forma local: chatea desde la terminal, la aplicación de escritorio o la API REST.",
+  "auto_translated": true
 }

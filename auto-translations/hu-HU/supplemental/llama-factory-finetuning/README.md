@@ -4,6 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Gépi fordítás.** Ez az oldal automatikusan lett lefordítva angolról, és emberi lektorálás nem történt. Hibákat tartalmazhat, és egyes lépések, parancsok, letöltések vagy termékelérhetőségek eltérhetnek az Ön nyelvében vagy régiójában. Ha bármi hibásnak tűnik, tekintse az eredeti angol nyelvű playbookot mérvadó forrásnak.
+<!-- auto-translated-disclaimer:end -->
+
 ## Áttekintés
 
 A hatékony finomhangolás létfontosságú a nagy nyelvi modellek (LLM-ek) downstream feladatokhoz való adaptálásához. A LLaMA Factory egy nyílt forráskódú és felhasználóbarát platform, amely leegyszerűsíti a nagy nyelvi modellek és multimodális modellek betanítását és finomhangolását. Lehetővé teszi, hogy a felhasználók helyben, minimális kódolással testre szabjanak több száz előre betanított modellt.

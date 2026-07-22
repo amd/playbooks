@@ -1,5 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "vLLM 시작하기",
-  "description": "AMD 통합 GPU에서 컨테이너화된 vLLM을 사용하여 추론 및 서빙을 실행하는 방법을 알아보세요"
+  "description": "AMD 통합 GPU에서 컨테이너화된 vLLM을 사용하여 추론 및 서빙을 실행하는 방법을 알아보세요",
+  "auto_translated": true
 }
