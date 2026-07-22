@@ -922,7 +922,160 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Start the OpenClaw Gateway
+<!-- @os:linux -->
+## (Recommended) OpenClaw Integration with Firecrawl Services
+
+[Firecrawl](https://docs.firecrawl.dev/introduction) provides a self-hosted web crawling and content extraction service that can bypass these challenges and unlock the full potential of OpenClaw automation. 
+
+In this setup, OpenClaw runs as a set of Docker containers managed with Podman. To simplify lifecycle management and automatic startup, we register Firecrawl as a user-level `systemd` service that orchestrates the underlying Podman Compose stack. This allows OpenClaw to start the gateway, stop, and verify the Firecrawl service using standard `systemctl --user` commands instead of interacting with containers directly. 
+
+To keep things simple, we've broken the whole process into four steps:
+
+---
+
+### 1. Register the system service
+Navigate to the systemd user configuration directory:
+```bash
+cd ~/.config/systemd/user
+```
+Create and open a new file called `firecrawl.service`.
+```bash
+nano firecrawl.service
+```
+Copy and paste the following configuration:
+```bash
+[Unit]
+Description=OpenClaw Firecrawl Service
+After=podman.service
+Requires=podman.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=%h/firecrawl
+
+# Optional: Validate config before starting
+ExecStartPre=/usr/bin/podman compose -f openclaw-compose.yaml config --quiet
+
+# Generate token and write to .env file
+ExecStartPre=/bin/bash -c 'chmod 644 %h/firecrawl/.env && echo "OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)" > %h/firecrawl/.env'
+
+# Step 1: Start containers in detached mode
+ExecStart=/usr/bin/podman compose -f openclaw-compose.yaml up -d --remove-orphans
+
+# Step 2: Wait for container to be healthy/ready
+ExecStartPost=/bin/sleep 5
+
+# Step 3: Run onboarding inside container in detached mode
+ExecStartPost=/usr/bin/podman exec -d openclaw_gateway /bin/bash -c "openclaw onboard \
+    --non-interactive \
+    --accept-risk \
+    --mode local \
+    --auth-choice skip \
+    --gateway-auth token \
+    --gateway-token "$OPENCLAW_GATEWAY_TOKEN" "
+
+# Stop containers when the service stops
+ExecStop=/usr/bin/podman compose -f openclaw-compose.yaml down
+
+[Install]
+WantedBy=default.target
+```
+At this point, the service has been defined but not yet registered with `systemd`. 
+Make sure the filename matches exactly what you created above, then run:
+```bash
+systemctl --user daemon-reload
+systemctl --user enable firecrawl.service
+```
+If successful, you should see the following output:
+
+> **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
+
+ `default.target.wants/` contains symbolic links to services that are configured to start automatically.
+
+### 2. Configure Firecrawl
+
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) is ideal for those who need full control over their scraping and data processing environments but comes with the trade-off of additional maintenance and configuration efforts.
+
+Start by cloning the repository:
+```bash
+git clone https://github.com/firecrawl/firecrawl.git
+```
+Create `.env` in the root `/firecrawl` directory: 
+```bash
+# ===== Required ENVS ======
+PORT=3002
+HOST=0.0.0.0
+
+# ===== Firecrawl =====
+# FIRECRAWL_API_KEY="" # optional
+```
+### 3. Deploy OpenClaw with Podman Compose
+
+Before moving on, make sure you have pulled the latest OpenClaw Docker image:
+```bash
+podman pull ghcr.io/openclaw/openclaw:latest
+```
+Once that is done, download the OpenClaw Compose file [openclaw-compose.yaml](assets/openclaw-compose.yaml) and place it in the root `/firecrawl` directory:
+
+> This convention is required for `systemd` to locate and start the service correctly as specified in `WorkingDirectory=${HOME}/firecrawl`.
+
+> You can always expand the stack by adding additional Firecrawl services as needed. The full list of available services can be found in the official [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+
+### 4. Launch OpenClaw service through Firecrawl 
+
+Before handing control over to `systemd`, validate that everything works correctly by running the stack manually:
+```bash
+podman compose -f openclaw-compose.yaml up -d
+```
+If everything is configured correctly, you should see the OpenClaw container come up and your command line output should look similar to this:
+<p align="center">
+  <img src="assets/openclaw_health_verification.png" width="500" height="400" />
+</p>
+
+Once verified, bring the stack back down before proceeding:
+```bash
+podman compose -f openclaw-compose.yaml down
+```
+Before starting the service, you must ensure the correct ownership and permissions are set on the `firecrawl` directory and its `.env` file. 
+This is essential for the service to write your credentials at startup.
+```bash
+sudo chown ${USER}:${USER} ~/firecrawl/.env
+chmod 644 ~/firecrawl/.env
+```
+Now that everything is validated, start the service through `systemd`:
+```bash
+systemctl --user start firecrawl.service
+```
+[The OpenClaw Actions](https://docs.openclaw.ai/) are  accessible from within the interactive container, and the Web Dashboard is available on same host and port at http://127.0.0.1:18789.
+<p align="center">
+  <img src="assets/OpenClawWebUI-PodmanLaunch.png" width="500" height="500" />
+</p>
+
+### Obtaining Your `OPENCLAW_GATEWAY_TOKEN`
+
+Once the service is up and running, you will notice a new `.openclaw` directory created in your home folder (~/.openclaw). This directory is locked by default, so you'll need to unlock it to retrieve your gateway token.
+
+1. Grant access to the directory:
+```bash
+sudo chmod 777 ~/.openclaw/
+```
+2. Read your gateway token:
+```bash
+grep '"token"' ~/.openclaw/openclaw.json
+```
+Locate the `OPENCLAW_GATEWAY_TOKEN` value in the output.
+
+3. Open the gateway dashboard in your browser http://127.0.0.1:18789. Paste your token when prompted to authenticate.
+
+To stop the service, run:
+```bash
+systemctl --user stop firecrawl.service
+```
+<!-- @os:end -->
+---
+
+## Start the OpenClaw Gateway
 
 The gateway is the OpenClaw process that manages the agent loop and serves the dashboard:
 
