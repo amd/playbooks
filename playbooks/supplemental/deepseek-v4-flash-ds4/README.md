@@ -36,7 +36,7 @@ This tutorial shows how to use `ds4-cockpit`, a terminal UI, to set up ds4, down
 > - **BIOS dedicated VRAM (UMA frame buffer) set to the minimum**, so the shared memory pool can be as large as possible.
 > - The GPU **shared-memory pool set to at least 110 GB**: run `amd-ttm --set 110` (see the memory configuration step above) and reboot. Lower values can fail with out-of-memory when the model loads at a 126k context. If your system has less memory available, lower the **Context** value in Server Mode instead.
 >
-> **Note:** Try 110GB to start. If you hit out-of-memory errors, raise the shared-memory pool or lower the context size.
+> **Note:** Try setting the **GPU shared-memory pool** to **110 GB** as a starting point. If you hit out-of-memory errors, raise the shared-memory pool or lower the context size.
 
 ds4-cockpit uses container toolboxes to run the ds4 engine. Install `podman`, `distrobox`, and `pipx`:
 
