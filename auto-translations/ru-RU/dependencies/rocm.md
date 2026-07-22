@@ -16,13 +16,13 @@ sudo usermod -a -G render,video $LOGNAME
 sudo reboot
 ```
 
-**Установите ROCm в созданном виртуальном окружении.**
-> **Примечание**: Перед выполнением этого шага убедитесь, что виртуальное окружение активно.
+**Установите ROCm в созданное виртуальное окружение.**
+> **Примечание**: Перед тем как продолжить, убедитесь, что виртуальное окружение активно.
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo_box,halo -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1151]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -30,7 +30,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[l
 <!-- @device:stx -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1150]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -38,7 +38,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ "rocm[l
 <!-- @device:krk -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1152]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -46,7 +46,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "rocm[l
 <!-- @device:rx7900xt -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx110X-all/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1100]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -54,9 +54,9 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx110X-all/ "ro
 <!-- @device:rx9070xt,r9700 -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1201]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
 
-Дополнительную информацию по установке можно найти по этой [ссылке](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Для получения дополнительной помощи по установке см. [документацию ROCm 7.14](https://rocm.docs.amd.com/en/latest/install/rocm.html).

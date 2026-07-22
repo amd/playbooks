@@ -3,15 +3,16 @@ Copyright Advanced Micro Devices, Inc.
 
 SPDX-License-Identifier: MIT
 -->
+
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 ### AMD GPU-stuurprogramma
 
-Werk bij naar het nieuwste AMD GPU-stuurprogramma met behulp van [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
+Werk bij naar het nieuwste AMD GPU-stuurprogramma met [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
 
-1. Open `AMD Software: Adrenalin Edition` vanuit uw Startmenu of systeemvak.
-2. Navigeer naar **Driver and Software** en klik op **Manage Updates**.
-3. Als er een update beschikbaar is, volgt u de aanwijzingen om deze te downloaden en te installeren.
+1. Open `AMD Software: Adrenalin Edition` vanuit uw Start-menu of systeemvak.
+2. Navigeer naar **Driver and Software**, klik op **Manage Updates**.
+3. Als er een update beschikbaar is, volg dan de aanwijzingen om deze te downloaden en te installeren.
 
 <!-- @test:id=amd-gpu-visible-windows timeout=60 hidden=True -->
 ```powershell

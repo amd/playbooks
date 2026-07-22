@@ -6,15 +6,15 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Deze playbook maakt gebruik van speciale tags die GitHub niet kan weergeven. Bezoek [amd.com/playbooks](https://amd.com/playbooks) om deze inhoud correct te bekijken.
+> Dit playbook maakt gebruik van speciale tags die GitHub niet kan weergeven. Bezoek [amd.com/playbooks](https://amd.com/playbooks) om deze inhoud correct te bekijken.
 <!-- @github-only:end -->
 
 
 ## Overzicht
 
-vLLM is een krachtige inference-engine ontworpen voor grote taalmodellen (LLM's). Het biedt geoptimaliseerde serving met continuous batching voor een hoge doorvoer en een OpenAI-compatibele API voor naadloze applicatie-integratie. Dit maakt vLLM uitstekend geschikt voor productieomgevingen waarin snelheid en efficiënt gebruik van resources cruciaal zijn.
+vLLM is een krachtige inference-engine ontworpen voor large language models (LLM's). Het biedt geoptimaliseerde serving met continuous batching voor hoge doorvoer en een OpenAI-compatibele API voor naadloze applicatie-integratie. Dit maakt vLLM uitstekend geschikt voor productie-implementaties waarbij snelheid en efficiënt gebruik van resources cruciaal zijn.
 
-Deze playbook leert je hoe je LLM's serveert met behulp van gecontaineriseerde vLLM op de geïntegreerde GPU en hoe je met modellen kunt communiceren via de OpenAI Python API.
+Dit playbook leert je hoe je LLM's kunt serveren met behulp van gecontaineriseerde vLLM op de geïntegreerde GPU en hoe je met modellen kunt communiceren via de OpenAI Python API.
 
 ## Wat Je Zult Leren
 
@@ -29,42 +29,42 @@ Deze playbook leert je hoe je LLM's serveert met behulp van gecontaineriseerde v
 <!-- @device:halo_box -->
 ## Controleren op Software-updates
 
-> **Opmerking**: Als VS Code niet is geïnstalleerd, kun je het installeren met AMD Ryzen™ AI Developer Center.
+> **Opmerking**: Als VS Code niet is geïnstalleerd, kun je het installeren via AMD Ryzen™ AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Software-vereisten Installeren
+## Softwarevereisten Installeren
 
-Deze playbook maakt gebruik van een vooraf gebouwde container-image die vLLM, ROCm-ondersteuning en de hulpscripts bevat die nodig zijn om de server te starten. Je hoeft PyTorch, vLLM of lokale playbook-scripts niet handmatig te installeren.
+vLLM draait in een vooraf gebouwde container met ROCm en bijbehorende afhankelijkheden die vooraf zijn afgestemd. Er is geen extra installatie vereist.
 
-Er is geen stap voor vLLM-installatie op de host. Start vLLM met:
+Er is geen installatiestap voor vLLM aan de host-kant nodig. Start vLLM met:
 
 ```bash
 vllm-launch
 ```
 
-De launcher start de container, richt zich op de geïntegreerde GPU en stelt een lokale OpenAI-compatibele vLLM-server beschikbaar. Klik als alternatief op het vLLM-icoon in de taakbalk.
+De launcher start de container, richt zich op de geïntegreerde GPU en stelt een lokale OpenAI-compatibele vLLM-server beschikbaar. Klik als alternatief op het vLLM-pictogram in de taakbalk.
 
-## Snel Aan de Slag
+## Snelstart
 
-### 1. Bevestig Dat de vLLM-server Actief Is
+### 1. Bevestig dat de vLLM-server Draait
 
-Het kan een paar minuten duren voordat `vllm-launch` alles heeft geïnitialiseerd. Zodra de server start, is deze beschikbaar op `http://localhost:8001`. Houd de terminal waarin de server is gestart open, aangezien de server op de voorgrond draait, en open vervolgens een aparte terminal voor de resterende stappen. De onderstaande voorbeelden gebruiken `Qwen/Qwen3-1.7B`; als je launcher is geconfigureerd voor een ander model, vervang dan dat model-ID in de verzoeken.
+Het kan enkele minuten duren voordat `vllm-launch` alles heeft geïnitialiseerd. Zodra deze start, is de server beschikbaar op `http://localhost:8001`. Houd de start-terminal open, omdat de server op de voorgrond draait, en open een aparte terminal voor de resterende stappen. De voorbeelden hieronder gebruiken `Qwen/Qwen3-1.7B`; als jouw launcher is geconfigureerd voor een ander model, vervang dan dat model-ID in de verzoeken.
 
 ### 2. Verstuur een Prompt
 
-Gebruik het meegeleverde `vllm-prompt`-script om een verzoek te sturen naar de lokale OpenAI-compatibele vLLM-server:
+Gebruik het meegeleverde `vllm-prompt`-script om een verzoek naar de lokale OpenAI-compatibele vLLM-server te sturen:
 
 ```bash
 vllm-prompt "Tell me a story"
 ```
 
-### 3. Chat met het model met behulp van de OpenAI Python API
+### 3. Chat met het model via de OpenAI Python API
 
-Aangezien vLLM een OpenAI-compatibele API beschikbaar stelt, kun je het `openai` Python-pakket gebruiken om ermee te communiceren.
+Omdat vLLM een OpenAI-compatibele API blootstelt, kun je het `openai` Python-pakket gebruiken om ermee te communiceren.
 
-Maak eerst een Python virtuele omgeving aan:
+Maak eerst een Python virtuele omgeving:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
@@ -80,7 +80,7 @@ Installeer het OpenAI-pakket
 pip install openai
 ```
 
-Maak een `OpenAI`-client aan die verwijst naar de lokale vLLM-server in plaats van naar de servers van OpenAI. De `api_key` is vereist door de client, maar vLLM valideert deze niet, dus elke tekenreeks werkt:
+Maak een `OpenAI`-client aan die verwijst naar de lokale vLLM-server in plaats van naar de servers van OpenAI. De `api_key` is verplicht voor de client, maar vLLM controleert deze niet, dus elke tekenreeks werkt:
 
 ```python
 from openai import OpenAI
@@ -104,7 +104,7 @@ response = client.chat.completions.create(
 )
 ```
 
-Loop ten slotte door de gestreamde chunks en print elk stukje tekst zodra het binnenkomt:
+Doorloop tot slot de gestreamde chunks en druk elk stukje tekst af zodra het binnenkomt:
 
 ```python
 for chunk in response:
@@ -116,34 +116,109 @@ for chunk in response:
 Het meegeleverde [chat_with_model.py](assets/chat_with_model.py)-script bevat het volledige voorbeeld en kan worden gedownload.
 
 
+## Een Model Kiezen en Configureren
+
+Standaard serveert `vllm-launch` `Qwen/Qwen3-1.7B` als testmodel op poort `8001`. Je kunt het model, de poort en de vLLM-serveerparameters wijzigen zonder de container opnieuw te bouwen of te bewerken.
+
+### Door AMD Geteste Modellen
+
+De volgende modellen zijn vooraf geconfigureerd en gevalideerd door AMD:
+
+| Model | Opmerkingen |
+|-------|-------|
+| `Qwen/Qwen3-1.7B` | Standaardmodel. Lichtgewicht en snel te laden. |
+| `openai/gpt-oss-20b` | Groter model voor antwoorden van hogere kwaliteit. |
+
+### Een Ander Model Starten
+
+Geef het model-ID op met `--model` (of `-m`):
+
+```bash
+vllm-launch --model openai/gpt-oss-20b
+```
+
+### De Poort Wijzigen
+
+Geef een poort boven 1024 op met `--port` (of `-p`); de standaardwaarde is `8001`:
+
+```bash
+vllm-launch --port 8080 --model openai/gpt-oss-20b
+```
+
+Als je de poort wijzigt, richt de `base_url` van je client dan op dezelfde poort (bijvoorbeeld `http://localhost:8080/v1`).
+
+### Extra vLLM-parameters Doorgeven
+
+Alle extra argumenten worden rechtstreeks doorgestuurd naar vLLM, zodat je het serveergedrag kunt afstemmen, zoals de contextlengte of het datatype. Er zijn twee manieren om deze op te geven.
+
+**Inline**, na de launcher-opties:
+
+```bash
+vllm-launch --model openai/gpt-oss-20b --max-model-len 8192
+```
+
+**Permanent**, in een configuratiebestand op `~/.local/share/vLLM/vllm-launch.conf`. Dit bestand bestaat standaard niet — maak het aan en voeg je argumenten toe als een Bash-array:
+
+```bash
+VLLM_EXTRA_ARGS=(--max-model-len 8192 --dtype float16)
+```
+
+Gebruik `+=` om toe te voegen aan de standaardargumenten in plaats van deze te vervangen:
+
+```bash
+VLLM_EXTRA_ARGS+=(--max-model-len 8192)
+```
+
+Om op elk moment alle launcher-opties te bekijken, voer je uit:
+
+```bash
+vllm-launch --help
+```
+
+### Waar Modellen Worden Opgeslagen
+
+`vllm-launch` zoekt naar modellen op twee locaties:
+
+| Locatie | Pad |
+|----------|------|
+| Systeemmodellen | `/var/cache/models` |
+| Gebruikersmodellen | `~/.local/share/vLLM/models` |
+
+Je kunt een gedownload model in een van beide mappen plaatsen en het starten door het pad of ID ervan door te geven aan `--model`:
+
+```bash
+vllm-launch --model /var/cache/models/my-model
+```
+
+> **Opmerking**: Het op deze manier draaien van je eigen gedownloade model zou moeten werken zodra het model in een van de bovenstaande mappen is geplaatst, maar deze workflow is nog niet officieel gevalideerd door AMD.
+
 ## Probleemoplossing
 
-### Verbinding geweigerd
+### Verbinding Geweigerd
 
-Zorg ervoor dat de server actief is:
+Zorg ervoor dat de server draait:
 ```bash
 curl http://localhost:8001/health
 ```
 
 ## Samenvatting
 
-In deze playbook heb je geleerd hoe je:
+In dit playbook heb je geleerd hoe je:
 
-- Gecontaineriseerde vLLM start met ROCm-ondersteuning op de geïntegreerde GPU
+- Gecontaineriseerde vLLM start met ondersteuning voor ROCm op de geïntegreerde GPU
 - Een vLLM-server start met OpenAI-compatibele API-eindpunten op poort 8001
 - Prompts verstuurt met `vllm-prompt`
-- API-aanroepen doet naar de vLLM-server met zowel streaming als niet-streaming verzoeken
+- API-aanroepen doet naar de vLLM-server met zowel streaming- als niet-streamingverzoeken
 - Veelvoorkomende problemen oplost met het opstarten van de server, geheugen en clientverbindingen
 
-Je beschikt nu over een gecontaineriseerde vLLM-implementatie voor het serveren van grote taalmodellen met geoptimaliseerde prestaties op de geïntegreerde GPU.
+Je beschikt nu over een gecontaineriseerde vLLM-implementatie voor het serveren van large language models met geoptimaliseerde prestaties op de geïntegreerde GPU.
 
 ## Volgende Stappen
 
-- **Probeer verschillende modellen** — Wissel het model in de `vllm-launch`-configuratie om te experimenteren met verschillende LLM's en de prestaties te vergelijken.
+- **Probeer verschillende modellen** — Gebruik `vllm-launch --model <model>` om te experimenteren met verschillende LLM's en de prestaties te vergelijken (zie [Een Model Kiezen en Configureren](#choosing-and-configuring-a-model)).
 - **Bouw een applicatie** — Gebruik de OpenAI-compatibele API om vLLM te integreren in een Python-app, chatbot of automatiseringsworkflow.
-- **Fine-tune en serveer** — Fine-tune een model met LoRA of QLoRA, en implementeer het vervolgens met vLLM voor geoptimaliseerde inference.
-
-## Aanvullende Bronnen
+- **Fine-tunen en serveren** — Fine-tune een model met behulp van LoRA of QLoRA, en implementeer het vervolgens met vLLM voor geoptimaliseerde inference.
+## Aanvullende bronnen
 
 - **[Officiële vLLM-documentatie](https://docs.vllm.ai/)** — Uitgebreide handleidingen en API-referenties
-- **[vLLM GitHub-repository](https://github.com/vllm-project/vllm)** — Broncode, issues en community-discussies
+- **[vLLM GitHub-repository](https://github.com/vllm-project/vllm)** — Broncode, issues en communitydiscussies

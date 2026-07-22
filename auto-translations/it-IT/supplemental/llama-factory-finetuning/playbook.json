@@ -1,5 +1,5 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "Ottimizzazione fine-tuning dei LLM con LLaMA Factory",
+  "title": "Fine-tuning degli LLM con LLaMA Factory",
   "description": "Esegui il fine-tuning di modelli linguistici di grandi dimensioni (LLM) utilizzando LLaMA Factory e tecniche LoRA."
 }

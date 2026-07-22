@@ -1,10 +1,16 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Configuração da Plataforma
 
 Este documento descreve as configurações de plataforma esperadas para executar este playbook.
 
 ## Pré-requisitos
 
-O PyTorch com suporte a ROCm já vem pré-instalado na AMD Ryzen™ AI Halo Developer Platform. Para todos os outros dispositivos, os usuários devem instalar manualmente o PyTorch com suporte a ROCm. Consulte a seção relevante para o seu sistema operacional:
+O PyTorch com suporte a ROCm vem pré-instalado na AMD Ryzen™ AI Halo Developer Platform. Para todos os outros dispositivos, os usuários devem instalar manualmente o PyTorch com suporte a ROCm. Consulte a seção relevante para o seu sistema operacional:
 
 ### Windows
 
@@ -20,7 +26,7 @@ O PyTorch com suporte a ROCm já vem pré-instalado na AMD Ryzen™ AI Halo Deve
 
 ## Modelos Necessários
 
-Os modelos a seguir foram testados e otimizados para sua plataforma:
+Os seguintes modelos foram testados e otimizados para sua plataforma:
 
 | Modelo | Parâmetros | Tamanho | Local de Download |
 |-------|------------|------|-------------------|
@@ -30,11 +36,11 @@ Os modelos serão baixados automaticamente para o diretório de cache do Hugging
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
-Certifique-se de ter pelo menos **20 GB de espaço livre** para armazenamento dos modelos.
+Certifique-se de ter pelo menos **20GB de espaço livre** para armazenamento dos modelos.
 
 ## Requisitos de Rede
 
 A configuração inicial requer acesso à internet para baixar os modelos do Hugging Face. Após o download, o playbook pode ser executado offline.
 
-- O primeiro download dos modelos pode levar de **5 a 10 minutos**, dependendo do tamanho do modelo e da velocidade da conexão
+- Os downloads iniciais de modelos podem levar de **5 a 10 minutos**, dependendo do tamanho do modelo e da velocidade da conexão
 - Os modelos ficam armazenados em cache localmente e não precisam ser baixados novamente

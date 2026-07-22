@@ -1,0 +1,5 @@
+{
+  "id": "hermes-lemonade-server",
+  "title": "A Hermes ügynök helyi futtatása Lemonade Server segítségével",
+  "description": "Telepítse és konfigurálja a Hermes Agent önálló AI-ügynököt a Lemonade Server helyi AI-háttérrendszerrel."
+}

@@ -3,13 +3,14 @@ Copyright Advanced Micro Devices, Inc.
 
 SPDX-License-Identifier: MIT
 -->
+
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 ### Driver de GPU AMD
 
 Atualize para o driver de GPU AMD mais recente usando o [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
 
-1. Abra o `AMD Software: Adrenalin Edition` a partir do seu menu Iniciar ou da bandeja do sistema.
+1. Abra o `AMD Software: Adrenalin Edition` no menu Iniciar ou na bandeja do sistema.
 2. Navegue até **Driver and Software**, clique em **Manage Updates**.
 3. Se houver uma atualização disponível, siga as instruções para baixar e instalar.
 

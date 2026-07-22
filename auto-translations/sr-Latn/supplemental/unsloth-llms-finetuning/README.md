@@ -6,14 +6,14 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ovaj priručnik koristi posebne oznake koje GitHub ne može da prikaže. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste ispravno pregledali ovaj sadržaj.
+> Ovaj vodič koristi posebne oznake koje GitHub ne može da prikaže. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste ispravno pregledali ovaj sadržaj.
 <!-- @github-only:end -->
 
 ## Pregled
 
-Ovaj priručnik prikazuje kako da lokalno fino podesite jezički model pomoću Unsloth na AMD hardveru.
+Ovaj vodič pokazuje kako da lokalno fino podesite jezički model uz pomoć Unsloth na AMD hardveru.
 
-Koristi kratak primer nadgledanog fino podešavanja (SFT) sa LoRA adapterima na `unsloth/gemma-4-E4B-it`, koristeći podskup skupa podataka `mlabonne/FineTome-100k`. Cilj je da vam pruži jednostavan sveobuhvatan tok rada koji obuhvata podešavanje, treniranje, zaključivanje i čuvanje fino podešenog rezultata.
+Koristi kratak primer nadgledanog fino podešavanja (Supervised Fine-Tuning, SFT) sa LoRA adapterima na `unsloth/gemma-4-E4B-it`, koristeći podskup skupa podataka `mlabonne/FineTome-100k`. Cilj je da vam pruži jednostavan tok rada od početka do kraja koji obuhvata podešavanje, treniranje, zaključivanje (inference) i čuvanje fino podešenog rezultata.
 
 Primer je osmišljen da bude praktičan i lak za izmenu, tako da ga možete koristiti kao polaznu tačku za sopstvene skupove podataka i modele.
 
@@ -24,27 +24,32 @@ Primer je osmišljen da bude praktičan i lak za izmenu, tako da ga možete kori
 - Kako da sačuvate fino podešeni rezultat u lokalnom skladištu
 
 <!-- @device:halo,stx,krk -->
-> **Napomena:** Tehnike fino podešavanja u ovom priručniku zahtevaju najmanje 24 GB GPU memorije i 32 GB sistemske RAM memorije.
+> **Napomena:** Tehnike fino podešavanja u ovom vodiču zahtevaju najmanje **64 GB sistemske RAM memorije**, od čega najmanje **24 GB mora biti dostupno GPU-u** (tih 24 GB je deo od 64 GB, a ne dodatnih 24 GB).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Napomena:** Tehnike fino podešavanja u ovom priručniku zahtevaju najmanje 24 GB GPU memorije i 32 GB sistemske RAM memorije.
+> **Napomena:** Tehnike fino podešavanja u ovom vodiču zahtevaju najmanje **24 GB ukupne GPU memorije** i **32 GB sistemske RAM memorije**.
+> - Na Windows-u, ukupna GPU memorija kombinuje namensku VRAM memoriju grafičke kartice sa deljenom GPU memorijom (pozajmljenom iz sistemske RAM memorije).
+> - Zbog toga, kartice sa manje od 24 GB namenske VRAM memorije i dalje mogu da pokrenu ovaj vodič koristeći deljenu GPU memoriju da nadoknade razliku.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Napomena:** Tehnike fino podešavanja u ovom priručniku zahtevaju najmanje 24 GB **namenske** GPU memorije i 32 GB sistemske RAM memorije.
+> **Napomena:** Tehnike fino podešavanja u ovom vodiču zahtevaju grafičku karticu sa najmanje **24 GB namenske GPU memorije** i **32 GB sistemske RAM memorije**.
+> - Na Linux-u, treniranje se u potpunosti izvršava u namenskoj VRAM memoriji grafičke kartice.
+> - Ne prelazi se na deljenu GPU memoriju (sistemsku RAM memoriju) kada VRAM memorija ponestane.
+> - Kartice sa manje od 24 GB namenske VRAM memorije ostaće bez memorije tokom treniranja na Linux-u, čak i ako sistem ima dovoljno RAM memorije.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Zašto Unsloth?
 
-Unsloth olakšava fino podešavanje LLM-a na lokalnom hardveru smanjujući potrošnju memorije i ubrzavajući treniranje u poređenju sa standardnim podešavanjem.
+Unsloth olakšava pokretanje fino podešavanja LLM-a na lokalnom hardveru smanjenjem korišćenja memorije i ubrzavanjem treniranja u poređenju sa standardnim podešavanjem.
 
-U ovom priručniku koristimo Unsloth zajedno sa **SFT-om zasnovanim na LoRA**. To znači da osnovni model ostaje uglavnom zamrznut, dok se trenira mnogo manji skup težina adaptera. Ovo je dobar izbor za lokalni razvoj jer je lakše od potpunog fino podešavanja i brže za iteracije.
+U ovom vodiču koristimo Unsloth zajedno sa **LoRA-baziranim SFT-om**. To znači da osnovni model ostaje uglavnom zamrznut, dok se trenira mnogo manji skup težina adaptera. Ovo je dobar izbor za lokalni razvoj jer je lakše od potpunog fino podešavanja i brže za iterativan rad.
 
-Unsloth takođe podržava i druge pristupe treniranju, uključujući QLoRA i tokove rada zasnovane na učenju uz pojačanje. Ovaj priručnik se prvo fokusira na najjednostavniji put: mali primer LoRA fino podešavanja koji korisnici mogu da pokrenu, razumeju i prošire.
+Unsloth takođe podržava druge pristupe treniranju, uključujući QLoRA i radne tokove za pojačano učenje. Ovaj vodič se prvo fokusira na najjednostavniji put: mali primer LoRA fino podešavanja koji korisnici mogu da pokrenu, razumeju i prošire.
 
 ## Podešavanje konfiguracije memorije
 
@@ -52,18 +57,18 @@ Unsloth takođe podržava i druge pristupe treniranju, uključujući QLoRA i tok
 
 <!-- @device:halo_box -->
 ## Provera ažuriranja softvera
-> **Napomena**: Ako VS Code nije instaliran, možete ga instalirati putem Ryzen AI Developer Center.
+> **Napomena**: Ako VS Code nije instaliran, možete ga instalirati pomoću Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instaliranje potrebnog softvera
+## Instaliranje softverskih preduslova
 
 ### Kreiranje virtuelnog okruženja
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Otvorite terminal i kreirajte venv sa već instaliranim AMD ROCm™ softverom i PyTorch:
+Otvorite terminal i kreirajte venv sa već instaliranim AMD ROCm™ softverom i PyTorch-om:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -75,7 +80,7 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Dodelite korisniku pristup GPU uređajima** (odjavite se i ponovo prijavite da bi ovo stupilo na snagu):
+**Dodelite svom korisniku pristup GPU uređajima** (odjavite se i ponovo prijavite da bi ovo stupilo na snagu):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -142,7 +147,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 ### Dodatne zavisnosti
 
 <!-- @os:linux -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```bash
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 ```
@@ -150,7 +155,7 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```powershell
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 pip install triton-windows
@@ -158,10 +163,10 @@ pip install triton-windows
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Napomena:** Tokom uvoza, Unsloth može da proverava opcione puteve za `bitsandbytes` ubrzanje. Na nekim verzijama ROCm-a, možete videti poruku poput `bitsandbytes library load error: Configured ROCm binary not found`. Ovaj priručnik koristi standardno LoRA fino podešavanje sa `optim="adamw_torch"`, tako da se ne oslanjamo na `bitsandbytes` optimizator ili 4-bitni QLoRA. Ova poruka se može bezbedno zanemariti.
+> **Napomena:** Tokom uvoza, Unsloth može da proverava opcione ubrzane putanje `bitsandbytes`. Na nekim ROCm verzijama, možete videti poruku poput `bitsandbytes library load error: Configured ROCm binary not found`. Ovaj vodič koristi standardno LoRA fino podešavanje sa `optim="adamw_torch"`, tako da se ne oslanjamo na `bitsandbytes` optimizator ili 4-bitni QLoRA. Ova poruka se bezbedno može ignorisati.
 
 <!-- @os:windows -->
-> **Napomena:** Na Windows ROCm-u, Unsloth će ispisati nekoliko upozorenja prilikom pokretanja — pogledajte [Poznata upozorenja](#known-warnings) ispod. Sva su bezbedna za zanemarivanje; treniranje ispravno funkcioniše.
+> **Napomena:** Na Windows ROCm, Unsloth će prikazati nekoliko upozorenja pri pokretanju — pogledajte [Poznata upozorenja](#known-warnings) ispod. Sva su bezbedna za ignorisanje; treniranje radi ispravno.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -184,9 +189,9 @@ print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
-## Preuzmite Unsloth skriptu za fino podešavanje
+## Preuzimanje skripte za Unsloth fino podešavanje
 
-Umesto ručnog izvršavanja svakog koraka, ovaj priručnik pruža čistu, sveobuhvatnu skriptu ovde: [test_unsloth.py](assets/test_unsloth.py).
+Umesto ručnog izvršavanja svakog koraka, ovaj vodič pruža čistu skriptu od početka do kraja ovde: [test_unsloth.py](assets/test_unsloth.py).
 
 Pokrenite sledeći kod da biste izvršili skriptu:
 
@@ -221,16 +226,16 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-Ostatak priručnika će konceptualno proći kroz svaki glavni korak skripte. 
+Ostatak vodiča će konceptualno proći kroz svaki glavni korak skripte.
 
-## Kako to funkcioniše
+## Kako funkcioniše
 
 Skripta test_unsloth.py izvršava sledeće korake:
 * **Učitavanje modela**: Učitava unsloth/gemma-4-E4B-it koristeći FastModel.
 * **Priprema podataka**: Standardizuje skup podataka (npr. FineTome-100k) i primenjuje Gemma-4 chat šablon.
-* **Primena LoRA**: Dodaje adaptere na jezičke, pažnje (attention) i MLP module radi efikasnog treniranja.
-* **Treniranje**: Koristi SFTTrainer sa maskiranjem gubitka samo za odgovore.
-* **Zaključivanje**: Pokreće brzi test generisanja radi provere performansi.
+* **Primena LoRA**: Dodaje adaptere u jezičke, pažnja (attention) i MLP module radi efikasnog treniranja.
+* **Treniranje**: Koristi SFTTrainer sa maskiranjem gubitka samo na odgovorima (response-only loss masking).
+* **Zaključivanje (inference)**: Pokreće brzi test generisanja da bi se proverile performanse.
 * **Čuvanje**: Izvozi LoRA adaptere lokalno.
 
 ## Ključna konfiguracija
@@ -250,29 +255,28 @@ Primer Unsloth poruke dobrodošlice i izlaza prilikom učitavanja težina modela
 
 ## Priprema skupa podataka
 
-Koristimo podskup: 
+Koristimo podskup od:
 ```text
 mlabonne/FineTome-100k
 ```
-Skup podataka je: 
-* Konvertovan u format ćaskanja
+Skup podataka je:
+* Konvertovan u format ćaskanja (chat)
 * Obrađen korišćenjem Gemma-4 chat šablona
-* Očišćen radi uklanjanja duplikata BOS tokena
+* Očišćen kako bi se uklonili duplirani BOS tokeni
 
 ## Treniranje modela
 
 Skripta pokreće kratku demonstraciju treniranja, sa sledećim parametrima:
 - ~50 koraka
-- Mala veličina serije (batch)
+- Mala veličina serije (batch size)
 - Akumulacija gradijenta
 
-Tokom treniranja, videćete zapisnike poput:
+Tokom treniranja, videćete zapisnike (logs) poput sledećih:
 
 ![alt text](assets/training.png)
 
 
-## Čuvanje i implementacija
-
+## Čuvanje i primena (deployment)
 ### Lokalno čuvanje (LoRA)
 
 Skripta automatski čuva LoRA adaptere u OUTPUT_DIR.
@@ -314,14 +318,14 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end -->
 
-### Čuvanje spojenog modela (za vLLM) 
+### Sačuvajte spojeni model (za vLLM) 
 
 <!-- @os:windows -->
-> **Napomena:** vLLM ne podržava Windows. Da biste implementirali svoj fino podešeni model na Windows-u, koristite llama.cpp (pogledajte [Izvoz GGUF](#export-gguf-for-llamacpp) ispod) ili prenesite spojeni model na Linux mašinu koja pokreće vLLM.
+> **Napomena:** vLLM ne podržava Windows. Da biste implementirali svoj fino podešeni model na Windows-u, koristite llama.cpp (pogledajte [Izvoz GGUF](#export-gguf-for-llamacpp) ispod) ili prebacite spojeni model na Linux mašinu koja pokreće vLLM.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Za implementaciju sa vLLM, spojite adaptere u potpuni model:
+Za implementaciju sa vLLM, spojite adaptere u pun model:
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
@@ -361,7 +365,7 @@ print("PASS: Merged model output looks correct")
 
 ### Izvoz GGUF (za llama.cpp)
 
-Konvertujte direktno u GGUF za lokalno zaključivanje:
+Direktno konvertujte u GGUF za lokalno zaključivanje:
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
@@ -369,28 +373,28 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 <!-- @os:windows -->
 ## Poznata upozorenja
 
-Ova upozorenja ispisuje Unsloth prilikom pokretanja na Windows ROCm sistemu i sva su bezbedna za ignorisanje:
+Ova upozorenja ispisuje Unsloth prilikom pokretanja na Windows ROCm i sva je bezbedno ignorisati:
 
 | Upozorenje | Razlog | Bezbedno za ignorisanje? |
 |---|---|---|
 | `bitsandbytes library load error` | bitsandbytes nema Windows ROCm verziju | Da — ovaj vodič koristi `adamw_torch`, a ne bnb |
-| `No ROCm platform found for torch.distributed` | ROCm na Windows-u ne podržava distribuirano treniranje | Da — treniranje na jednom GPU-u nije pogođeno |
-| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth označava platforme koje nisu Linux | Da — Windows ROCm radi za SFT treniranje na jednom GPU-u |
-| `triton is not available` | Triton nema Windows verziju | Da — Unsloth se vraća na PyTorch kernele |
+| `No ROCm platform found for torch.distributed` | ROCm na Windows-u ne podržava distribuirano treniranje | Da — treniranje sa jednim GPU-om nije pogođeno |
+| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth označava verzije koje nisu za Linux | Da — Windows ROCm radi za SFT sa jednim GPU-om |
+| `triton is not available` | Triton nema Windows verziju | Da — Unsloth se oslanja na PyTorch kernele |
 
 Treniranje će se ispravno nastaviti uprkos ovim upozorenjima.
 <!-- @os:end -->
 
 ## Sledeći koraci
-- Isprobajte [Unsloth Studio](https://unsloth.ai/docs/new/studio), intuitivan grafički interfejs za Unsloth
-- Trenirajte na sopstvenim, specifičnim skupovima podataka
+- Isprobajte [Unsloth Studio](https://unsloth.ai/docs/new/studio), intuitivni GUI za Unsloth
+- Trenirajte na sopstvenim specifičnim skupovima podataka
 - Isprobajte fino podešavanje sa različitim hiperparametrima
-- Postavite model uz pomoć vLLM ili llama.cpp
-- Isprobajte QLoRA za postavku sa manjom potrošnjom memorije
+- Implementirajte pomoću vLLM ili llama.cpp
+- Isprobajte QLoRA za podešavanje sa manjom potrošnjom memorije
 
 ## Resursi
 
-Ispod se nalaze dodatni resursi za dalje upoznavanje sa Unsloth-om i fino podešavanjem:
+Ispod su dodatni resursi za dodatno upoznavanje sa Unsloth-om i fino podešavanjem:
 
 * [Unsloth dokumentacija](https://docs.unsloth.ai)
 

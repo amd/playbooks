@@ -1,0 +1,5 @@
+{
+  "id": "deepseek-v4-flash-ds4",
+  "title": "Spustenie DeepSeek V4 Flash s ds4",
+  "description": "Nasaďte DeepSeek V4 Flash lokálne pomocou inferenčného engine ds4 a spravujte modely interaktívne pomocou ds4-cockpit."
+}

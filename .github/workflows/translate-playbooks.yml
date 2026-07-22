@@ -147,7 +147,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue create \
-            --title "Automated translation failed on $(date -u +%Y-%m-%d)" \
-            --body "The Translate Playbooks workflow failed the structural validation gate (code fences or @-tags did not match the English source), or a playbook translation errored. See the run for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --label "localization" || echo "Could not create issue (label may be missing)."
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          TITLE="Automated translation failed on $(date -u +%Y-%m-%d)"
+          # Leading @-mention notifies @bconsolvo even if the assignee/label steps fail.
+          BODY="@bconsolvo the Translate Playbooks workflow failed: a playbook translation errored or did not pass the structural validation gate (code fences or @-tags did not match the English source). Run: $RUN_URL"
+          # Fall back progressively so a missing label or a non-assignable user never swallows the alert.
+          gh issue create --title "$TITLE" --body "$BODY" --assignee bconsolvo --label "translation" \
+            || gh issue create --title "$TITLE" --body "$BODY" --assignee bconsolvo \
+            || gh issue create --title "$TITLE" --body "$BODY"

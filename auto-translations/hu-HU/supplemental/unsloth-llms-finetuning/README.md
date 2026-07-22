@@ -7,45 +7,50 @@ SPDX-License-Identifier: MIT
 <!-- @github-only -->
 
 > [!IMPORTANT]
-> Ez a útmutató olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. Az tartalom megfelelő előnézetéhez látogasson el a(z) [amd.com/playbooks](https://amd.com/playbooks) oldalra.
+> Ez a playbook olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. A tartalom helyes megtekintéséhez látogasson el a [amd.com/playbooks](https://amd.com/playbooks) oldalra.
 <!-- @github-only:end -->
 
 ## Áttekintés
 
-Ez az útmutató bemutatja, hogyan lehet egy nyelvi modellt helyben finomhangolni Unsloth segítségével AMD hardveren.
+Ez a playbook bemutatja, hogyan lehet egy nyelvi modellt lokálisan finomhangolni Unsloth segítségével AMD hardveren.
 
-Egy rövid felügyelt finomhangolási (Supervised Fine-Tuning, SFT) példát használ LoRA adapterekkel a `unsloth/gemma-4-E4B-it` modellen, a `mlabonne/FineTome-100k` adathalmaz egy részhalmazát felhasználva. A cél egy egyszerű, végponttól végpontig terjedő munkafolyamat bemutatása, amely lefedi a beállítást, a tanítást, a következtetést és a finomhangolt eredmény mentését.
+Egy rövid felügyelt finomhangolási (Supervised Fine-Tuning, SFT) példát használ LoRA adapterekkel a `unsloth/gemma-4-E4B-it` modellen, a `mlabonne/FineTome-100k` adathalmaz egy részhalmazát felhasználva. A cél egy egyszerű, végponttól végpontig tartó munkafolyamat bemutatása, amely lefedi a beállítást, a betanítást, a következtetést (inference) és a finomhangolt eredmény mentését.
 
-A példa gyakorlati és könnyen módosítható kialakítású, így kiindulópontként használható saját adathalmazaihoz és modelljeihez.
+A példa gyakorlati és könnyen módosítható, így kiindulópontként használhatja saját adathalmazaihoz és modelljeihez.
 
 ## Amit meg fog tanulni
 
 - Hogyan állítsa be az Unsloth környezetet
-- Hogyan finomhangoljon egy LLM-et SFT segítségével az Unsloth használatával
+- Hogyan finomhangoljon egy LLM-et SFT segítségével Unsloth használatával
 - Hogyan mentse el a finomhangolt eredményt helyi tárhelyre
 
 <!-- @device:halo,stx,krk -->
-> **Megjegyzés:** Az ebben az útmutatóban szereplő finomhangolási technikákhoz legalább 24 GB GPU-memória és 32 GB rendszer-RAM szükséges.
+> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikák legalább **64 GB rendszer RAM-ot** igényelnek, amelyből legalább **24 GB-nak elérhetőnek kell lennie a GPU számára** (a 24 GB a 64 GB részét képezi, nem azon felül értendő).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Megjegyzés:** Az ebben az útmutatóban szereplő finomhangolási technikákhoz legalább 24 GB GPU-memória és 32 GB rendszer-RAM szükséges.
+> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikák legalább **24 GB teljes GPU memóriát** és **32 GB rendszer RAM-ot** igényelnek.
+> - Windows rendszeren a teljes GPU memória a videokártya dedikált VRAM-ját és a megosztott GPU memóriát (amelyet a rendszer RAM-jából kölcsönöz) is tartalmazza.
+> - Ezért a 24 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák is képesek futtatni ezt a playbookot, mivel a megosztott GPU memóriával pótolják a különbséget.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Megjegyzés:** Az ebben az útmutatóban szereplő finomhangolási technikákhoz legalább 24 GB **dedikált** GPU-memória és 32 GB rendszer-RAM szükséges.
+> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikák legalább **24 GB dedikált GPU memóriával** és **32 GB rendszer RAM-mal** rendelkező videokártyát igényelnek.
+> - Linux rendszeren a betanítás teljes egészében a videokártya dedikált VRAM-jában fut.
+> - Nem áll át megosztott GPU memóriára (rendszer RAM-ra), ha a VRAM elfogy.
+> - A 24 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák a betanítás során kifogynak a memóriából Linux rendszeren, még akkor is, ha a rendszerben bőven van RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Miért az Unsloth?
 
-Az Unsloth megkönnyíti az LLM-ek finomhangolását helyi hardveren azáltal, hogy csökkenti a memóriahasználatot és felgyorsítja a tanítást a szokásos beállításokhoz képest.
+Az Unsloth megkönnyíti az LLM-ek finomhangolásának futtatását helyi hardveren azáltal, hogy csökkenti a memóriahasználatot és felgyorsítja a betanítást egy szabványos beállításhoz képest.
 
-Ebben az útmutatóban az Unsloth-ot **LoRA-alapú SFT**-vel együtt használjuk. Ez azt jelenti, hogy az alapmodell nagyrészt lefagyasztva marad, miközben egy jóval kisebb adapter súlykészletet tanítunk. Ez jól illeszkedik a helyi fejlesztéshez, mivel könnyebb, mint a teljes finomhangolás, és gyorsabban lehet vele iterálni.
+Ebben a playbookban az Unslothot **LoRA-alapú SFT**-vel együtt használjuk. Ez azt jelenti, hogy az alapmodell nagyrészt befagyasztott marad, miközben egy sokkal kisebb adapter-súlykészletet tanítunk. Ez jól illeszkedik a helyi fejlesztéshez, mivel könnyebb, mint a teljes finomhangolás, és gyorsabban lehet vele iterálni.
 
-Az Unsloth más tanítási megközelítéseket is támogat, beleértve a QLoRA-t és a megerősítéses tanulási munkafolyamatokat is. Ez az útmutató először a legegyszerűbb útra összpontosít: egy kis LoRA finomhangolási példára, amelyet a felhasználók futtathatnak, megérthetnek és bővíthetnek.
+Az Unsloth más betanítási megközelítéseket is támogat, beleértve a QLoRA-t és a megerősítéses tanulási munkafolyamatokat. Ez a playbook a legegyszerűbb útra összpontosít elsőként: egy kis LoRA finomhangolási példára, amelyet a felhasználók futtathatnak, megérthetnek és bővíthetnek.
 
 ## A memóriakonfiguráció beállítása
 
@@ -76,7 +81,7 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Adjon hozzáférést felhasználójának a GPU-eszközökhöz** (a hatásbalépéshez jelentkezzen ki, majd vissza):
+**Adjon felhasználójának hozzáférést a GPU-eszközökhöz** (a hatás érvényesítéséhez jelentkezzen ki, majd vissza):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -96,7 +101,7 @@ source unsloth-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Megjegyzés:** Windows esetén Python 3.13 szükséges.
+> **Megjegyzés:** Windows rendszeren a Python 3.13 szükséges.
 
 <!-- @device:halo_box -->
 Nyisson meg egy PowerShell terminált, és hozzon létre egy virtuális környezetet:
@@ -143,7 +148,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 ### További függőségek
 
 <!-- @os:linux -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```bash
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 ```
@@ -151,7 +156,7 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```powershell
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 pip install triton-windows
@@ -159,10 +164,10 @@ pip install triton-windows
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Megjegyzés:** Importálás közben az Unsloth megpróbálhatja tesztelni az opcionális `bitsandbytes` gyorsítási útvonalakat. Egyes ROCm verziók esetén megjelenhet egy olyan üzenet, mint például: `bitsandbytes library load error: Configured ROCm binary not found`. Ez az útmutató szabványos LoRA finomhangolást használ `optim="adamw_torch"` beállítással, így nem támaszkodunk a `bitsandbytes` optimalizálóra vagy a 4 bites QLoRA-ra. Ez az üzenet nyugodtan figyelmen kívül hagyható.
+> **Megjegyzés:** Az importálás során az Unsloth opcionálisan próbálhatja a `bitsandbytes` gyorsítási útvonalakat. Egyes ROCm verziók esetén megjelenhet egy olyan üzenet, mint a `bitsandbytes library load error: Configured ROCm binary not found`. Ez a playbook szabványos LoRA finomhangolást használ `optim="adamw_torch"` beállítással, így nem támaszkodunk a `bitsandbytes` optimalizálóra vagy a 4 bites QLoRA-ra. Ez az üzenet nyugodtan figyelmen kívül hagyható.
 
 <!-- @os:windows -->
-> **Megjegyzés:** Windows ROCm esetén az Unsloth induláskor több figyelmeztetést is kiír – lásd a lenti [Ismert figyelmeztetések](#known-warnings) részt. Ezek mind nyugodtan figyelmen kívül hagyhatók; a tanítás megfelelően működik.
+> **Megjegyzés:** Windows ROCm alatt az Unsloth indításkor több figyelmeztetést is kiír — lásd az alábbi [Ismert figyelmeztetések](#known-warnings) részt. Ezek mindegyike nyugodtan figyelmen kívül hagyható; a betanítás megfelelően működik.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -187,9 +192,9 @@ print("PASS: All required imports succeeded")
 
 ## Az Unsloth finomhangoló szkript letöltése
 
-Ahelyett, hogy minden lépést manuálisan hajtana végre, ez az útmutató egy tiszta, végponttól végpontig terjedő szkriptet biztosít itt: [test_unsloth.py](assets/test_unsloth.py).
+Ahelyett, hogy minden lépést manuálisan hajtana végre, ez a playbook egy tiszta, végponttól végpontig tartó szkriptet biztosít itt: [test_unsloth.py](assets/test_unsloth.py).
 
-Futtassa a következő kódot a szkript végrehajtásához:
+A szkript futtatásához hajtsa végre a következő kódot:
 
 ```bash
 python test_unsloth.py
@@ -222,21 +227,21 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-Az útmutató további része koncepcionálisan végigvezeti a szkript minden fő lépését.
+A playbook hátralévő része koncepcionálisan végigmegy a szkript minden fő lépésén.
 
 ## Hogyan működik
 
 A test_unsloth.py szkript a következő lépéseket hajtja végre:
-* **Modell betöltése**: Betölti az unsloth/gemma-4-E4B-it modellt a FastModel segítségével.
-* **Adatok előkészítése**: Szabványosítja az adathalmazt (pl. FineTome-100k), és alkalmazza a Gemma-4 csevegési sablont.
-* **LoRA alkalmazása**: Adaptereket ad a nyelvi, figyelem- és MLP-modulokhoz a hatékony tanítás érdekében.
-* **Tanítás**: SFTTrainer-t használ csak-válasz veszteségmaszkolással.
-* **Következtetés**: Egy gyors generálási tesztet futtat a teljesítmény ellenőrzésére.
-* **Mentés**: Exportálja a LoRA adaptereket helyben.
+* **Modell betöltése**: Betölti a unsloth/gemma-4-E4B-it modellt a FastModel segítségével.
+* **Adatok előkészítése**: Szabványosítja az adathalmazt (pl. FineTome-100k), és alkalmazza a Gemma-4 chat sablont.
+* **LoRA alkalmazása**: Adaptereket ad hozzá a nyelvi, figyelmi (attention) és MLP modulokhoz a hatékony betanítás érdekében.
+* **Betanítás**: SFTTrainer-t használ, válasz-only veszteségmaszkolással.
+* **Következtetés (Inference)**: Egy gyors generálási tesztet futtat a teljesítmény ellenőrzésére.
+* **Mentés**: Exportálja a LoRA adaptereket helyi tárhelyre.
 
 ## Kulcskonfiguráció
 
-A futtatás testreszabásához módosíthatja a következő konstansokat:
+A futtatás testreszabásához a következő konstansokat módosíthatja:
 
 ```python
 MODEL_NAME = "unsloth/gemma-4-E4B-it"
@@ -251,29 +256,28 @@ Példa az Unsloth üdvözlő üzenetére és a modellsúlyok betöltésekor megj
 
 ## Adathalmaz előkészítése
 
-A következő részhalmazát használjuk:
+A következő adathalmaz egy részhalmazát használjuk:
 ```text
 mlabonne/FineTome-100k
 ```
-Az adathalmaz: 
-* Csevegési formátumra alakítva
-* A Gemma-4 csevegési sablon segítségével feldolgozva
-* Megtisztítva az ismétlődő BOS tokenektől
+Az adathalmaz:
+* Chat formátumba konvertálva
+* A Gemma-4 chat sablon segítségével feldolgozva
+* Megtisztítva a duplikált BOS tokenektől
 
-## A modell tanítása
+## A modell betanítása
 
-A szkript egy rövid tanítási bemutatót futtat, a következő paraméterekkel:
+A szkript egy rövid betanítási demót futtat, a következő paraméterekkel:
 - ~50 lépés
-- Kis kötegméret
+- Kis kötegméret (batch size)
 - Gradiens akkumuláció
 
-A tanítás során a következőhöz hasonló naplókat fog látni:
+A betanítás során az alábbihoz hasonló naplókat fog látni:
 
 ![alt text](assets/training.png)
 
 
 ## Mentés és üzembe helyezés
-
 ### Helyi mentés (LoRA)
 
 A szkript automatikusan elmenti a LoRA adaptereket az OUTPUT_DIR könyvtárba.
@@ -318,11 +322,11 @@ print(f"Found adapter weights: {adapter_weights}")
 ### Egyesített modell mentése (vLLM-hez) 
 
 <!-- @os:windows -->
-> **Megjegyzés:** A vLLM nem támogatja a Windows-t. A finomhangolt modell Windows alatti üzembe helyezéséhez használja a llama.cpp-t (lásd a lenti [GGUF exportálása](#export-gguf-for-llamacpp) részt), vagy vigye át az egyesített modellt egy Linux gépre, amelyen vLLM fut.
+> **Megjegyzés:** A vLLM nem támogatja a Windows rendszert. Ha a finomhangolt modellt Windows alatt szeretné üzembe helyezni, használja a llama.cpp-t (lásd az alábbi [GGUF exportálása](#export-gguf-for-llamacpp) szakaszt), vagy vigye át az egyesített modellt egy vLLM-et futtató Linux gépre.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-A vLLM-mel történő üzembe helyezéshez egyesítse az adaptereket egy teljes modellbe:
+A vLLM-mel történő üzembe helyezéshez egyesítse az adaptereket egy teljes modellé:
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
@@ -362,7 +366,7 @@ print("PASS: Merged model output looks correct")
 
 ### GGUF exportálása (llama.cpp-hez)
 
-Konvertálja közvetlenül GGUF formátumra a helyi következtetéshez:
+Közvetlen konvertálás GGUF formátumba a helyi következtetéshez:
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
@@ -370,28 +374,28 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 <!-- @os:windows -->
 ## Ismert figyelmeztetések
 
-Ezeket a figyelmeztetéseket az Unsloth nyomtatja ki induláskor Windows ROCm alatt, és mindegyik biztonságosan figyelmen kívül hagyható:
+Ezeket a figyelmeztetéseket az Unsloth jeleníti meg indításkor Windows ROCm rendszeren, és mindegyik biztonságosan figyelmen kívül hagyható:
 
 | Figyelmeztetés | Ok | Biztonságosan figyelmen kívül hagyható? |
 |---|---|---|
-| `bitsandbytes library load error` | A bitsandbytes-nak nincs Windows ROCm buildje | Igen — ez a playbook az `adamw_torch`-ot használja, nem a bnb-t |
-| `No ROCm platform found for torch.distributed` | A Windows-on futó ROCm nem támogatja az elosztott tanítást | Igen — az egy-GPU-s tanítást ez nem érinti |
-| `Unsloth: WARNING! You are using an unsupported platform` | Az Unsloth jelzi a nem Linux buildeket | Igen — a Windows ROCm működik egy-GPU-s SFT esetén |
-| `triton is not available` | A Tritonnak nincs Windows buildje | Igen — az Unsloth visszaáll a PyTorch kernelekre |
+| `bitsandbytes library load error` | A bitsandbytes-hoz nincs Windows ROCm build | Igen — ez a playbook az `adamw_torch`-ot használja, nem a bnb-t |
+| `No ROCm platform found for torch.distributed` | A ROCm Windowson nem támogatja az elosztott tanítást | Igen — az egy GPU-s tanítást ez nem érinti |
+| `Unsloth: WARNING! You are using an unsupported platform` | Az Unsloth jelzi a nem Linux buildeket | Igen — a Windows ROCm működik egy GPU-s SFT esetén |
+| `triton is not available` | A Tritonhoz nincs Windows build | Igen — az Unsloth ilyenkor a PyTorch kerneleket használja |
 
-A tanítás ezen figyelmeztetések ellenére is helyesen fog lezajlani.
+A tanítás ezen figyelmeztetések ellenére is helyesen zajlik le.
 <!-- @os:end -->
 
 ## Következő lépések
-- Próbáld ki az [Unsloth Studio](https://unsloth.ai/docs/new/studio) programot, egy intuitív felhasználói felületet az Unslothhoz
-- Taníts a saját, egyedi adathalmazaidon
-- Próbálkozz a finomhangolással eltérő hiperparaméterekkel
-- Telepítsd vLLM-mel vagy llama.cpp-vel
-- Próbáld ki a QLoRA-t egy kisebb memóriaigényű beállításhoz
+- Próbálja ki az [Unsloth Studio](https://unsloth.ai/docs/new/studio) eszközt, egy intuitív felhasználói felületet az Unslothhoz
+- Tanítson saját, egyedi adathalmazokon
+- Próbálkozzon a finomhangolással különböző hiperparaméterekkel
+- Helyezze üzembe vLLM-mel vagy llama.cpp-vel
+- Próbálja ki a QLoRA-t egy alacsonyabb memóriaigényű beállításhoz
 
 ## Erőforrások
 
-Az alábbiakban további forrásokat találsz, ha többet szeretnél megtudni az Unslothról és a finomhangolásról:
+Az alábbiakban további erőforrásokat talál, ha többet szeretne megtudni az Unslothról és a finomhangolásról:
 
 * [Unsloth dokumentáció](https://docs.unsloth.ai)
 

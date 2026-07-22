@@ -1,0 +1,39 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+# Διαμόρφωση Πλατφόρμας
+
+Αυτό το έγγραφο περιγράφει τις αναμενόμενες διαμορφώσεις πλατφόρμας για την εκτέλεση αυτού του playbook.
+
+## Απαιτούμενες Εφαρμογές/Πλαίσια Εργασίας
+
+### Windows/Linux
+
+- Ο **Lemonade Server** πρέπει να είναι εγκατεστημένος ακολουθώντας τον
+  [οδηγό εγκατάστασης Lemonade](https://lemonade-server.ai/docs/guide/install/).
+- **Node.js 22.12 ή νεότερη έκδοση** και `npm`, που χρησιμοποιούνται από το CLI `agent-canvas`.
+- **uv**, ο διαχειριστής πακέτων Python που χρησιμοποιεί το Agent Canvas για τη διαχείριση του
+  περιβάλλοντος του agent server. Εγκαταστήστε το από τον
+  [οδηγό εγκατάστασης uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+## Απαιτούμενα Μοντέλα
+
+### Windows/Linux
+
+Το ακόλουθο μοντέλο πρέπει να είναι διαθέσιμο στον Lemonade Server πριν από την έναρξη του
+playbook.
+
+| Τύπος Μοντέλου | Αναγνωριστικό Μοντέλου | Σημειώσεις |
+| --- | --- | --- |
+| Μοντέλο συνομιλίας GGUF | `Qwen3.6-35B-A3B-GGUF` | Εξυπηρετείται από τον Lemonade Server στο `http://127.0.0.1:13305/api/v1`. Χρησιμοποιήστε ένα μικρότερο μοντέλο GGUF σε συσκευές με λιγότερα από 32 GB μνήμης. |
+
+Εκκινήστε το μοντέλο με:
+
+```bash
+lemonade config set llamacpp.backend=vulkan
+lemonade config set ctx_size=65536
+lemonade run "Qwen3.6-35B-A3B-GGUF"
+```

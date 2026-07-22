@@ -6,14 +6,14 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Táto príručka používa špeciálne značky, ktoré GitHub nedokáže vykresliť. Ak chcete tento obsah správne zobraziť, navštívte stránku [amd.com/playbooks](https://amd.com/playbooks).
+> Táto príručka používa špeciálne značky, ktoré GitHub nedokáže vykresliť. Navštívte [amd.com/playbooks](https://amd.com/playbooks), aby sa vám tento obsah zobrazil správne.
 <!-- @github-only:end -->
 
 ## Prehľad
 
-Táto príručka ukazuje, ako lokálne doladiť jazykový model pomocou Unsloth na hardvéri AMD.
+Táto príručka ukazuje, ako doladiť jazykový model lokálne pomocou Unsloth na hardvéri AMD.
 
-Používa krátky príklad Supervised Fine-Tuning (SFT) s adaptérmi LoRA na modeli `unsloth/gemma-4-E4B-it`, pričom sa využíva podmnožina datasetu `mlabonne/FineTome-100k`. Cieľom je poskytnúť vám jednoduchý end-to-end pracovný postup, ktorý pokrýva nastavenie, trénovanie, inferenciu a uloženie doladeného výsledku.
+Používa krátky príklad riadeného doladenia (Supervised Fine-Tuning, SFT) s adaptérmi LoRA na modeli `unsloth/gemma-4-E4B-it`, s využitím podmnožiny datasetu `mlabonne/FineTome-100k`. Cieľom je poskytnúť vám jednoduchý end-to-end pracovný postup, ktorý zahŕňa nastavenie, tréning, inferenciu a uloženie doladeného výsledku.
 
 Príklad je navrhnutý tak, aby bol praktický a ľahko upraviteľný, takže ho môžete použiť ako východiskový bod pre vlastné datasety a modely.
 
@@ -24,27 +24,32 @@ Príklad je navrhnutý tak, aby bol praktický a ľahko upraviteľný, takže ho
 - Ako uložiť doladený výsledok do lokálneho úložiska
 
 <!-- @device:halo,stx,krk -->
-> **Poznámka:** Techniky doladenia v tejto príručke vyžadujú aspoň 24 GB pamäte GPU a 32 GB systémovej RAM.
+> **Poznámka:** Techniky doladenia v tejto príručke vyžadujú aspoň **64 GB systémovej pamäte RAM**, pričom aspoň **24 GB z nej musí byť dostupných pre GPU** (týchto 24 GB je súčasťou 64 GB, nie navyše).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Poznámka:** Techniky doladenia v tejto príručke vyžadujú aspoň 24 GB pamäte GPU a 32 GB systémovej RAM.
+> **Poznámka:** Techniky doladenia v tejto príručke vyžadujú aspoň **24 GB celkovej pamäte GPU** a **32 GB systémovej pamäte RAM**.
+> - V systéme Windows sa celková pamäť GPU skladá z vyhradenej pamäte VRAM grafickej karty a zdieľanej pamäte GPU (vypožičanej zo systémovej pamäte RAM).
+> - Vďaka tomu môžu túto príručku spustiť aj karty s menej ako 24 GB vyhradenej VRAM, keďže rozdiel doplní zdieľaná pamäť GPU.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Poznámka:** Techniky doladenia v tejto príručke vyžadujú aspoň 24 GB **vyhradenej** pamäte GPU a 32 GB systémovej RAM.
+> **Poznámka:** Techniky doladenia v tejto príručke vyžadujú grafickú kartu s aspoň **24 GB vyhradenej pamäte GPU** a **32 GB systémovej pamäte RAM**.
+> - V systéme Linux beží tréning výlučne vo vyhradenej pamäti VRAM grafickej karty.
+> - Pri vyčerpaní VRAM sa nevyužije zdieľaná pamäť GPU (systémová RAM) ako záloha.
+> - Karty s menej ako 24 GB vyhradenej VRAM dôjdu počas tréningu v systéme Linux o pamäť, aj keď má systém dostatok RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Prečo Unsloth?
 
-Unsloth uľahčuje spúšťanie doladenia LLM na lokálnom hardvéri tým, že znižuje spotrebu pamäte a zrýchľuje trénovanie v porovnaní so štandardným nastavením.
+Unsloth uľahčuje spustenie doladenia LLM na lokálnom hardvéri tým, že znižuje spotrebu pamäte a zrýchľuje tréning v porovnaní so štandardným nastavením.
 
-V tejto príručke používame Unsloth spolu s **LoRA-based SFT**. To znamená, že základný model zostáva väčšinou zmrazený, zatiaľ čo sa trénuje oveľa menšia sada váh adaptéra. Toto je vhodné pre lokálny vývoj, pretože je to ľahšie ako úplné doladenie a rýchlejšie na iteráciu.
+V tejto príručke používame Unsloth spolu s **SFT založeným na LoRA**. To znamená, že základný model zostáva väčšinou zmrazený, zatiaľ čo sa trénuje oveľa menšia sada váh adaptérov. Toto je vhodné pre lokálny vývoj, pretože je to ľahšie ako úplné doladenie a rýchlejšie na iteráciu.
 
-Unsloth tiež podporuje iné prístupy k trénovaniu, vrátane QLoRA a workflow s posilneným učením (reinforcement learning). Táto príručka sa zameriava predovšetkým na najjednoduchšiu cestu: malý príklad doladenia LoRA, ktorý si používatelia môžu spustiť, pochopiť a rozšíriť.
+Unsloth podporuje aj ďalšie prístupy k tréningu, vrátane QLoRA a pracovných postupov spevňovaného učenia. Táto príručka sa zameriava najprv na najjednoduchšiu cestu: malý príklad doladenia LoRA, ktorý používatelia môžu spustiť, pochopiť a rozšíriť.
 
 ## Nastavenie konfigurácie pamäte
 
@@ -75,7 +80,7 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Udeľte svojmu používateľovi prístup k zariadeniam GPU** (aby sa táto zmena prejavila, odhláste sa a znova prihláste):
+**Udeľte svojmu používateľovi prístup k zariadeniam GPU** (aby sa toto nastavenie prejavilo, odhláste sa a znova prihláste):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -142,7 +147,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 ### Ďalšie závislosti
 
 <!-- @os:linux -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```bash
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 ```
@@ -150,7 +155,7 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```powershell
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 pip install triton-windows
@@ -158,10 +163,10 @@ pip install triton-windows
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Poznámka:** Počas importu môže Unsloth preverovať voliteľné akceleračné cesty `bitsandbytes`. V niektorých verziách ROCm sa vám môže zobraziť správa ako `bitsandbytes library load error: Configured ROCm binary not found`. Táto príručka používa štandardné doladenie LoRA s `optim="adamw_torch"`, takže sa nespoliehame na optimalizátor `bitsandbytes` ani na 4-bitové QLoRA. Túto správu je možné bezpečne ignorovať.
+> **Poznámka:** Počas importu môže Unsloth otestovať voliteľné akceleračné cesty `bitsandbytes`. V niektorých verziách ROCm sa môže zobraziť správa ako `bitsandbytes library load error: Configured ROCm binary not found`. Táto príručka používa štandardné doladenie LoRA s `optim="adamw_torch"`, takže sa nespoliehame na optimalizátor `bitsandbytes` ani na 4-bitovú QLoRA. Túto správu môžete bezpečne ignorovať.
 
 <!-- @os:windows -->
-> **Poznámka:** Na Windows ROCm vypíše Unsloth pri spustení niekoľko upozornení — pozri [Known Warnings](#known-warnings) nižšie. Všetky je možné bezpečne ignorovať; trénovanie funguje správne.
+> **Poznámka:** V systéme Windows s ROCm vypíše Unsloth pri spustení niekoľko varovaní — pozrite si časť [Known Warnings](#known-warnings) nižšie. Všetky sú bezpečné na ignorovanie; tréning funguje správne.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -186,9 +191,9 @@ print("PASS: All required imports succeeded")
 
 ## Stiahnutie skriptu na doladenie Unsloth
 
-Namiesto ručného vykonávania jednotlivých krokov poskytuje táto príručka prehľadný, end-to-end skript tu: [test_unsloth.py](assets/test_unsloth.py).
+Namiesto manuálneho vykonávania jednotlivých krokov táto príručka poskytuje prehľadný end-to-end skript tu: [test_unsloth.py](assets/test_unsloth.py).
 
-Spustite nasledujúci kód na spustenie skriptu:
+Na spustenie skriptu spustite nasledujúci kód:
 
 ```bash
 python test_unsloth.py
@@ -221,16 +226,16 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-Zvyšok príručky koncepčne prejde jednotlivými hlavnými krokmi skriptu.
+Zvyšok príručky koncepčne prejde jednotlivými hlavnými krokmi skriptu. 
 
 ## Ako to funguje
 
 Skript test_unsloth.py vykonáva nasledujúce kroky:
 * **Načítanie modelu**: Načíta unsloth/gemma-4-E4B-it pomocou FastModel.
-* **Príprava dát**: Štandardizuje dataset (napr. FineTome-100k) a aplikuje šablónu chatu Gemma-4.
-* **Aplikácia LoRA**: Pridáva adaptéry do jazykových, pozornostných a MLP modulov na efektívne trénovanie.
-* **Trénovanie**: Používa SFTTrainer s maskovaním straty len na odpovede (response-only loss masking).
-* **Inferencia**: Spustí rýchly generačný test na overenie výkonu.
+* **Príprava dát**: Štandardizuje dataset (napr. FineTome-100k) a aplikuje chatovaciu šablónu Gemma-4.
+* **Aplikácia LoRA**: Pridá adaptéry do jazykových, pozornostných a MLP modulov na efektívny tréning.
+* **Tréning**: Používa SFTTrainer s maskovaním straty len na odpovede.
+* **Inferencia**: Spustí rýchly test generovania na overenie výkonu.
 * **Uloženie**: Exportuje adaptéry LoRA lokálne.
 
 ## Kľúčová konfigurácia
@@ -244,38 +249,37 @@ DATASET_NAME = "mlabonne/FineTome-100k"
 OUTPUT_DIR = "gemma_4_lora"
 ```
 
-Príklad uvítacej správy Unsloth a výstupu pri načítaní váh modelu:
+Príklad uvítacej správy Unsloth a výstupu pri načítavaní váh modelu:
 
 ![alt text](assets/welcome.png)
 
 ## Príprava datasetu
 
-Používame podmnožinu:
+Používame podmnožinu: 
 ```text
 mlabonne/FineTome-100k
 ```
 Dataset je: 
-* Konvertovaný do formátu chatu
-* Spracovaný pomocou šablóny chatu Gemma-4
+* Prevedený do formátu chatu
+* Spracovaný pomocou chatovacej šablóny Gemma-4
 * Vyčistený od duplicitných tokenov BOS
 
-## Trénovanie modelu
+## Tréning modelu
 
-Skript spúšťa krátku ukážku trénovania s nasledujúcimi parametrami:
+Skript spúšťa krátku ukážku tréningu s nasledujúcimi parametrami:
 - ~50 krokov
 - Malá veľkosť dávky
 - Akumulácia gradientu
 
-Počas trénovania uvidíte logy ako:
+Počas tréningu uvidíte logy ako:
 
 ![alt text](assets/training.png)
 
 
-## Ukladanie a nasadenie
+## Uloženie a nasadenie
+### Lokálne ukladanie (LoRA)
 
-### Lokálne uloženie (LoRA)
-
-Skript automaticky uloží adaptéry LoRA do OUTPUT_DIR.
+Skript automaticky ukladá LoRA adaptéry do OUTPUT_DIR.
 ```python
 model.save_pretrained("gemma_4_lora")  
 tokenizer.save_pretrained("gemma_4_lora")
@@ -321,7 +325,7 @@ print(f"Found adapter weights: {adapter_weights}")
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Na nasadenie s vLLM zlúčte adaptéry do plného modelu:
+Na nasadenie pomocou vLLM zlúčte adaptéry do úplného modelu:
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
@@ -361,7 +365,7 @@ print("PASS: Merged model output looks correct")
 
 ### Export GGUF (pre llama.cpp)
 
-Priamo konvertujte na GGUF pre lokálnu inferenciu:
+Priama konverzia do formátu GGUF na lokálnu inferenciu:
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
@@ -374,26 +378,26 @@ Tieto upozornenia vypisuje Unsloth pri spustení na Windows ROCm a všetky je be
 | Upozornenie | Dôvod | Bezpečné ignorovať? |
 |---|---|---|
 | `bitsandbytes library load error` | bitsandbytes nemá zostavenie pre Windows ROCm | Áno — táto príručka používa `adamw_torch`, nie bnb |
-| `No ROCm platform found for torch.distributed` | ROCm na Windows nepodporuje distribuované trénovanie | Áno — trénovanie na jednej GPU tým nie je ovplyvnené |
+| `No ROCm platform found for torch.distributed` | ROCm na Windows nepodporuje distribuované trénovanie | Áno — trénovanie na jednej GPU nie je ovplyvnené |
 | `Unsloth: WARNING! You are using an unsupported platform` | Unsloth označuje zostavenia mimo Linuxu | Áno — Windows ROCm funguje pre SFT na jednej GPU |
-| `triton is not available` | Triton nemá zostavenie pre Windows | Áno — Unsloth prejde na PyTorch jadrá |
+| `triton is not available` | Triton nemá zostavenie pre Windows | Áno — Unsloth prejde na jadrá PyTorch |
 
-Trénovanie bude prebiehať správne aj napriek týmto upozorneniam.
+Trénovanie bude napriek týmto upozorneniam prebiehať správne.
 <!-- @os:end -->
 
 ## Ďalšie kroky
 - Vyskúšajte [Unsloth Studio](https://unsloth.ai/docs/new/studio), intuitívne grafické rozhranie pre Unsloth
-- Trénujte na vlastných špecifických súboroch dát
-- Vyskúšajte doladenie s inými hyperparametrami
+- Trénujte na vlastných špecifických dátových sadách
+- Vyskúšajte doladenie s rôznymi hyperparametrami
 - Nasaďte pomocou vLLM alebo llama.cpp
-- Vyskúšajte QLoRA pre nastavenie s nižšou pamäťovou náročnosťou
+- Vyskúšajte QLoRA pre nastavenie s nižšími nárokmi na pamäť
 
 ## Zdroje
 
-Nižšie nájdete ďalšie zdroje, kde sa dozviete viac o Unsloth a doladzovaní:
+Nižšie sú uvedené ďalšie zdroje, kde sa dozviete viac o Unsloth a doladovaní:
 
 * [Dokumentácia Unsloth](https://docs.unsloth.ai)
 
 * [Unsloth na GitHube](https://github.com/unslothai/unsloth)
 
-* [Sprievodca doladzovaním Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)
+* [Sprievodca doladovaním Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)

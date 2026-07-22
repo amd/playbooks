@@ -1,5 +1,5 @@
 {
   "id": "amd-sync",
-  "title": "AMD-szinkronizálással végzett távoli fejlesztés",
-  "description": "Telepítsd az AMD Sync alkalmazást a laptopodra, és egy kattintással érd el a távoli VS Code-ot, Terminalt, JupyterLabet és az élő metrikákat az AMD Ryzen™ AI Halo gépeden."
+  "title": "Távoli fejlesztés AMD Sync szolgáltatással",
+  "description": "Telepítse az AMD Sync alkalmazást a laptopjára, és egy kattintással érje el a távoli VS Code-ot, Terminalt, JupyterLabet és az élő metrikákat az AMD Ryzen™ AI Halo eszközén."
 }

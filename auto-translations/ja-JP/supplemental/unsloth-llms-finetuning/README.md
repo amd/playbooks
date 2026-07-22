@@ -5,65 +5,71 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> このプレイブックには、GitHubでは正しくレンダリングできない特殊なタグが使用されています。このコンテンツを正しくプレビューするには、[amd.com/playbooks](https://amd.com/playbooks) をご覧ください。
+> このプレイブックでは、GitHub がレンダリングできない特殊なタグを使用しています。このコンテンツを正しくプレビューするには、[amd.com/playbooks](https://amd.com/playbooks) をご覧ください。
 <!-- @github-only:end -->
 
 ## 概要
 
-このプレイブックでは、AMDハードウェア上でUnslothを使用してローカルで言語モデルをファインチューニングする方法を紹介します。
+このプレイブックでは、AMD ハードウェア上で Unsloth を使用してローカルで言語モデルをファインチューニングする方法を説明します。
 
-`mlabonne/FineTome-100k` データセットのサブセットを使用し、`unsloth/gemma-4-E4B-it` に対してLoRAアダプターを用いた短いSupervised Fine-Tuning(SFT)の例を実施します。目標は、セットアップ、トレーニング、推論、ファインチューニング結果の保存をカバーする、シンプルなエンドツーエンドのワークフローを提供することです。
+このプレイブックでは、`mlabonne/FineTome-100k` データセットのサブセットを使用し、`unsloth/gemma-4-E4B-it` に対して LoRA アダプターを用いた短い Supervised Fine-Tuning (SFT) の例を紹介します。目的は、セットアップ、トレーニング、推論、ファインチューニング結果の保存までをカバーする、シンプルなエンドツーエンドのワークフローを示すことです。
 
-この例は実用的で修正しやすいように設計されているため、独自のデータセットやモデルの出発点として利用できます。
+この例は実用的で変更しやすいように設計されているため、独自のデータセットやモデルに取り組む際の出発点として活用できます。
 
-## 学習内容
+## このプレイブックで学べること
 
-- Unsloth環境のセットアップ方法
-- UnslothでSFTを使用してLLMをファインチューニングする方法
+- Unsloth 環境のセットアップ方法
+- Unsloth を使用して LLM を SFT でファインチューニングする方法
 - ファインチューニング結果をローカルストレージに保存する方法
 
 <!-- @device:halo,stx,krk -->
-> **注:** このプレイブックのファインチューニング手法には、少なくとも24GBのGPUメモリと32GBのシステムRAMが必要です。
+> **注:** このプレイブックのファインチューニング手法には、少なくとも **64 GB のシステム RAM** が必要で、そのうち少なくとも **24 GB を GPU が利用できる状態** である必要があります(この 24 GB はシステム RAM の 64 GB の一部であり、それに加えて必要というわけではありません)。
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **注:** このプレイブックのファインチューニング手法には、少なくとも24GBのGPUメモリと32GBのシステムRAMが必要です。
+> **注:** このプレイブックのファインチューニング手法には、少なくとも **24 GB の GPU メモリ総量** と **32 GB のシステム RAM** が必要です。
+> - Windows では、GPU メモリ総量はグラフィックスカード専用の VRAM と(システム RAM から借用される)共有 GPU メモリを合わせたものになります。
+> - そのため、専用 VRAM が 24 GB 未満のカードでも、共有 GPU メモリを使って不足分を補うことで、このプレイブックを実行できます。
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **注:** このプレイブックのファインチューニング手法には、少なくとも24GBの**専用**GPUメモリと32GBのシステムRAMが必要です。
+> **注:** このプレイブックのファインチューニング手法には、少なくとも **24 GB の専用 GPU メモリ** を持つグラフィックスカードと **32 GB のシステム RAM** が必要です。
+> - Linux では、トレーニングはすべてグラフィックスカードの専用 VRAM 内で実行されます。
+> - VRAM が不足しても、共有 GPU メモリ(システム RAM)へのフォールバックは行われません。
+> - 専用 VRAM が 24 GB 未満のカードは、システムに十分な RAM があっても、Linux 上でのトレーニング中にメモリ不足になります。
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Unslothを選ぶ理由
+## なぜ Unsloth なのか
 
-Unslothは、標準的なセットアップと比較してメモリ使用量を削減し、トレーニングを高速化することで、ローカルハードウェアでのLLMファインチューニングをより簡単に実行できるようにします。
+Unsloth は、メモリ使用量を削減し、標準的なセットアップと比較してトレーニングを高速化することで、ローカルハードウェア上での LLM ファインチューニングを容易にします。
 
-このプレイブックでは、Unslothを**LoRAベースのSFT**とともに使用します。つまり、ベースモデルはほぼ凍結されたままで、はるかに小規模なアダプター重みのセットがトレーニングされます。これはフルファインチューニングよりも軽量で、反復作業が速いため、ローカル開発に適しています。
+このプレイブックでは、Unsloth を **LoRA ベースの SFT** と組み合わせて使用します。つまり、ベースモデルはほぼ凍結されたままで、はるかに小規模なアダプターの重みのセットがトレーニングされます。これはフルファインチューニングよりも軽量で反復しやすいため、ローカル開発に適しています。
 
-Unslothは、QLoRAや強化学習ワークフローを含む他のトレーニング手法もサポートしています。このプレイブックでは、まず最もシンプルな方法、つまりユーザーが実行、理解、拡張できる小規模なLoRAファインチューニングの例に焦点を当てます。
+Unsloth は、QLoRA や強化学習ワークフローを含む他のトレーニング手法もサポートしています。このプレイブックでは、まず最もシンプルな方法を取り上げます。それは、ユーザーが実行、理解、拡張できる小規模な LoRA ファインチューニングの例です。
 
 ## メモリ構成の設定
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## ソフトウェアアップデートの確認
-> **注**: VS Codeがインストールされていない場合は、Ryzen AI Developer Centerからインストールできます。
+## ソフトウェアの更新を確認する
+> **注**: VS Code がインストールされていない場合は、Ryzen AI Developer Center からインストールできます。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## ソフトウェア前提条件のインストール
+## ソフトウェアの前提条件のインストール
 
 ### 仮想環境の作成
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-ターミナルを開き、AMD ROCm™ソフトウェアとPyTorchがあらかじめインストールされたvenvを作成します:
+ターミナルを開き、AMD ROCm™ ソフトウェアと PyTorch がすでにインストールされた venv を作成します:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -75,13 +81,13 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**ユーザーにGPUデバイスへのアクセス権を付与します**(これを有効にするには一度ログアウトして再度ログインしてください):
+**ユーザーに GPU デバイスへのアクセス権を付与します**(有効にするにはログアウトして再度ログインしてください):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-ターミナルを開き、venvを作成します:
+ターミナルを開き、venv を作成します:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -95,10 +101,10 @@ source unsloth-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **注:** Windowsの場合、Python 3.13が必要です。
+> **注:** Windows では Python 3.13 が必要です。
 
 <!-- @device:halo_box -->
-PowerShellターミナルを開き、仮想環境を作成します:
+PowerShell ターミナルを開き、仮想環境を作成します:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env --system-site-packages
@@ -109,7 +115,7 @@ python -m venv unsloth-env --system-site-packages
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-PowerShellターミナルを開き、仮想環境を作成します:
+PowerShell ターミナルを開き、仮想環境を作成します:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env
@@ -120,7 +126,7 @@ python -m venv unsloth-env
 <!-- @device:end -->
 <!-- @os:end -->
 
-### 基本依存関係のインストール
+### 基本的な依存関係のインストール
 <!-- @require:pytorch,driver -->
 
 <!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
@@ -142,7 +148,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 ### 追加の依存関係
 
 <!-- @os:linux -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```bash
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 ```
@@ -150,7 +156,7 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```powershell
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 pip install triton-windows
@@ -158,10 +164,10 @@ pip install triton-windows
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **注:** インポート中、Unslothはオプションの `bitsandbytes` アクセラレーションパスをプローブすることがあります。ROCmのバージョンによっては、`bitsandbytes library load error: Configured ROCm binary not found` のようなメッセージが表示されることがあります。このプレイブックでは `optim="adamw_torch"` を使用した標準的なLoRAファインチューニングを行うため、`bitsandbytes` オプティマイザーや4ビットQLoRAには依存していません。このメッセージは無視して問題ありません。
+> **注:** インポート時、Unsloth はオプションの `bitsandbytes` アクセラレーションパスをプローブすることがあります。一部の ROCm バージョンでは、`bitsandbytes library load error: Configured ROCm binary not found` のようなメッセージが表示される場合があります。このプレイブックでは `optim="adamw_torch"` を使用した標準的な LoRA ファインチューニングを行うため、`bitsandbytes` オプティマイザーや 4-bit QLoRA には依存していません。このメッセージは無視して問題ありません。
 
 <!-- @os:windows -->
-> **注:** Windows ROCmでは、Unslothは起動時にいくつかの警告を表示します — 以下の[既知の警告](#known-warnings)を参照してください。これらはすべて無視して問題なく、トレーニングは正常に動作します。
+> **注:** Windows 上の ROCm では、Unsloth は起動時にいくつかの警告を表示します — 下記の [既知の警告](#known-warnings) を参照してください。これらはすべて無視して問題なく、トレーニングは正常に動作します。
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -184,11 +190,11 @@ print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
-## Unslothファインチューニングスクリプトのダウンロード
+## Unsloth ファインチューニングスクリプトのダウンロード
 
-各ステップを手動で実行する代わりに、このプレイブックではクリーンなエンドツーエンドのスクリプトを提供しています: [test_unsloth.py](assets/test_unsloth.py)。
+各ステップを手動で実行する代わりに、このプレイブックでは、クリーンでエンドツーエンドのスクリプトをここに用意しています: [test_unsloth.py](assets/test_unsloth.py)。
 
-以下のコードを実行してスクリプトを実行します:
+次のコードを実行してスクリプトを実行します:
 
 ```bash
 python test_unsloth.py
@@ -221,21 +227,21 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-このプレイブックの残りの部分では、スクリプトの主要な各ステップを概念的に説明していきます。
+このプレイブックの残りの部分では、スクリプトの各主要ステップについて概念的に説明していきます。
 
 ## 仕組み
 
-test_unsloth.pyスクリプトは以下のステップを実行します:
-* **モデルの読み込み**: FastModelを使用してunsloth/gemma-4-E4B-itを読み込みます。
-* **データの準備**: データセット(例:FineTome-100k)を標準化し、Gemma-4チャットテンプレートを適用します。
-* **LoRAの適用**: 効率的なトレーニングのために、言語、アテンション、MLPモジュールにアダプターを追加します。
-* **トレーニング**: レスポンスのみの損失マスキングを使用してSFTTrainerを利用します。
-* **推論**: パフォーマンスを検証するためのクイック生成テストを実行します。
-* **保存**: LoRAアダプターをローカルにエクスポートします。
+test_unsloth.py スクリプトは以下のステップを実行します:
+* **モデルの読み込み**: FastModel を使用して unsloth/gemma-4-E4B-it を読み込みます。
+* **データの準備**: データセット(例: FineTome-100k)を標準化し、Gemma-4 チャットテンプレートを適用します。
+* **LoRA の適用**: 効率的なトレーニングのために、言語、アテンション、MLP モジュールにアダプターを追加します。
+* **トレーニング**: レスポンスのみの損失マスキングを使用して SFTTrainer を利用します。
+* **推論**: パフォーマンスを確認するために、簡単な生成テストを実行します。
+* **保存**: LoRA アダプターをローカルにエクスポートします。
 
-## 主要な構成
+## 主要な設定
 
-以下の定数を変更して、実行をカスタマイズできます:
+実行をカスタマイズするために、以下の定数を変更できます:
 
 ```python
 MODEL_NAME = "unsloth/gemma-4-E4B-it"
@@ -244,7 +250,7 @@ DATASET_NAME = "mlabonne/FineTome-100k"
 OUTPUT_DIR = "gemma_4_lora"
 ```
 
-モデルの重みを読み込む際のUnslothウェルカムメッセージと出力の例:
+モデルの重みを読み込む際の Unsloth のウェルカムメッセージと出力の例:
 
 ![alt text](assets/welcome.png)
 
@@ -254,28 +260,27 @@ OUTPUT_DIR = "gemma_4_lora"
 ```text
 mlabonne/FineTome-100k
 ```
-データセットは以下の処理が行われます:
+データセットは以下のように処理されます:
 * チャット形式に変換
-* Gemma-4チャットテンプレートを使用して処理
-* 重複するBOSトークンを除去するようクリーンアップ
+* Gemma-4 チャットテンプレートを使用して処理
+* 重複した BOS トークンを削除するようにクリーニング
 
 ## モデルのトレーニング
 
-このスクリプトは、以下のパラメータで短いトレーニングデモを実行します:
-- 約50ステップ
+このスクリプトは、以下のパラメーターで短いトレーニングデモを実行します:
+- 約 50 ステップ
 - 小さいバッチサイズ
 - 勾配累積
 
-トレーニング中、以下のようなログが表示されます:
+トレーニング中は、以下のようなログが表示されます:
 
 ![alt text](assets/training.png)
 
 
 ## 保存とデプロイ
-
 ### ローカル保存(LoRA)
 
-スクリプトは自動的にLoRAアダプターをOUTPUT_DIRに保存します。
+このスクリプトはLoRAアダプターをOUTPUT_DIRに自動的に保存します。
 ```python
 model.save_pretrained("gemma_4_lora")  
 tokenizer.save_pretrained("gemma_4_lora")
@@ -317,11 +322,11 @@ print(f"Found adapter weights: {adapter_weights}")
 ### マージ済みモデルの保存(vLLM用)
 
 <!-- @os:windows -->
-> **注:** vLLMはWindowsをサポートしていません。Windowsでファインチューニング済みモデルをデプロイするには、llama.cpp(以下の[GGUFのエクスポート](#export-gguf-for-llamacpp)を参照)を使用するか、マージ済みモデルをvLLMを実行しているLinuxマシンに転送してください。
+> **注:** vLLMはWindowsをサポートしていません。Windowsでファインチューニング済みモデルをデプロイするには、llama.cpp(下記の[GGUFのエクスポート](#export-gguf-for-llamacpp)を参照)を使用するか、マージ済みモデルをvLLMを実行しているLinuxマシンに転送してください。
 <!-- @os:end -->
 
 <!-- @os:linux -->
-vLLMでのデプロイ用に、アダプターをフルモデルにマージします:
+vLLMでのデプロイでは、アダプターをフルモデルにマージします。
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
@@ -361,7 +366,7 @@ print("PASS: Merged model output looks correct")
 
 ### GGUFのエクスポート(llama.cpp用)
 
-ローカル推論用に直接GGUFに変換します:
+ローカル推論のために直接GGUFに変換します。
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
@@ -369,31 +374,31 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 <!-- @os:windows -->
 ## 既知の警告
 
-これらの警告は、Windows ROCm 上で Unsloth の起動時に表示されますが、すべて無視して問題ありません。
+これらの警告は、Windows ROCm上でのUnslothの起動時に表示されますが、すべて無視して問題ありません。
 
-| 警告 | 理由 | 無視して問題ないか |
+| 警告 | 理由 | 無視しても安全か? |
 |---|---|---|
-| `bitsandbytes library load error` | bitsandbytes には Windows ROCm ビルドが存在しない | はい — 本プレイブックでは bnb ではなく `adamw_torch` を使用しています |
-| `No ROCm platform found for torch.distributed` | Windows 版 ROCm には分散トレーニング機能がない | はい — シングル GPU でのトレーニングには影響ありません |
-| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth が Linux 以外のビルドに対して警告を出す | はい — Windows ROCm はシングル GPU の SFT で動作します |
-| `triton is not available` | Triton には Windows 版が存在しない | はい — Unsloth は PyTorch カーネルにフォールバックします |
+| `bitsandbytes library load error` | bitsandbytesにはWindows ROCm用ビルドがない | はい — このプレイブックではbnbではなく`adamw_torch`を使用します |
+| `No ROCm platform found for torch.distributed` | Windows上のROCmには分散学習機能がない | はい — シングルGPUトレーニングには影響しません |
+| `Unsloth: WARNING! You are using an unsupported platform` | UnslothがLinux以外のビルドにフラグを立てる | はい — Windows ROCmはシングルGPUのSFTで動作します |
+| `triton is not available` | TritonにはWindows用ビルドがない | はい — UnslothはPyTorchカーネルにフォールバックします |
 
 これらの警告が表示されても、トレーニングは正常に進行します。
 <!-- @os:end -->
 
 ## 次のステップ
-- Unsloth 用の直感的な GUI である [Unsloth Studio](https://unsloth.ai/docs/new/studio) を試す
-- 自分自身の特定のデータセットでトレーニングする
-- 異なるハイパーパラメータでファインチューニングを試す
-- vLLM または llama.cpp でデプロイする
-- 低メモリ環境向けに QLoRA を試す
+- Unslothの直感的なGUIである[Unsloth Studio](https://unsloth.ai/docs/new/studio)を試す
+- 独自の特定のデータセットでトレーニングする
+- さまざまなハイパーパラメータでファインチューニングを試す
+- vLLMまたはllama.cppでデプロイする
+- 低メモリ環境向けにQLoRAを試す
 
 ## リソース
 
-Unsloth とファインチューニングについてさらに詳しく学ぶための追加リソースを以下に示します。
+Unslothとファインチューニングについてさらに詳しく学ぶための追加リソースを以下に示します。
 
-* [Unsloth Docs](https://docs.unsloth.ai)
+* [Unslothドキュメント](https://docs.unsloth.ai)
 
 * [Unsloth GitHub](https://github.com/unslothai/unsloth)
 
-* [Unsloth Fine-tuning Guide](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)
+* [Unslothファインチューニングガイド](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)

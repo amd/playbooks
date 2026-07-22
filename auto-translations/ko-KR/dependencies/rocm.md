@@ -11,18 +11,18 @@ SPDX-License-Identifier: MIT
 sudo usermod -a -G render,video $LOGNAME
 ```
 
-**설정을 적용하려면 시스템을 재시작합니다.**
+**설정을 적용하려면 시스템을 재시작하세요.**
 ```bash
 sudo reboot
 ```
 
 **생성한 가상 환경에 ROCm을 설치합니다.**
-> **참고**: 진행하기 전에 가상 환경이 활성화되어 있는지 확인하세요.
+> **참고**: 계속하기 전에 가상 환경이 활성화되어 있는지 확인하세요.
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo_box,halo -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1151]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -30,7 +30,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[l
 <!-- @device:stx -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1150]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -38,7 +38,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ "rocm[l
 <!-- @device:krk -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1152]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -46,7 +46,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "rocm[l
 <!-- @device:rx7900xt -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx110X-all/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1100]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -54,9 +54,9 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx110X-all/ "ro
 <!-- @device:rx9070xt,r9700 -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "rocm[libraries,devel]"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1201]==7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
 
-설치에 대한 자세한 도움말은 이 [링크](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html)를 참고하세요.
+설치에 대한 자세한 도움말은 [ROCm 7.14 문서](https://rocm.docs.amd.com/en/latest/install/rocm.html)를 참조하세요.

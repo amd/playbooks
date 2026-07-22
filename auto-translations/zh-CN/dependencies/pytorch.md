@@ -6,12 +6,12 @@ SPDX-License-Identifier: MIT
 
 #### PyTorch
 
-**在创建的虚拟环境中安装支持 AMD ROCm™ 软件的 PyTorch**:
+在已创建的虚拟环境中**安装支持 AMD ROCm™ 软件的 PyTorch**：
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1151]==2.12.0+rocm7.14.0" "torchvision[device-gfx1151]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -19,7 +19,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "torch=
 <!-- @device:stx -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1150]==2.12.0+rocm7.14.0" "torchvision[device-gfx1150]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -27,7 +27,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1150/ "torch=
 <!-- @device:krk -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1152]==2.12.0+rocm7.14.0" "torchvision[device-gfx1152]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -35,7 +35,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1152/ "torch=
 <!-- @device:rx7900xt -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx110X-all/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1100]==2.12.0+rocm7.14.0" "torchvision[device-gfx1100]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -43,9 +43,9 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx110X-all/ "to
 <!-- @device:rx9070xt,r9700 -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx120X-all/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1201]==2.12.0+rocm7.14.0" "torchvision[device-gfx1201]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
 
-有关其他设备，请参阅[此链接](https://rocm.docs.amd.com/en/7.13.0-preview/frameworks/pytorch/install.html)获取完整说明。
+如需了解其他设备，请参阅 [ROCm 7.14 文档](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html) 获取完整说明。

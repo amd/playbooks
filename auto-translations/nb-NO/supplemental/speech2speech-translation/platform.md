@@ -1,10 +1,16 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Plattformkonfigurasjon
 
-Dette dokumentet beskriver de forventede plattformkonfigurasjonene for å kjøre denne spillboken.
+Dette dokumentet beskriver de forventede plattformkonfigurasjonene for å kjøre denne playbooken.
 
 ## Forutsetninger
 
-PyTorch med ROCm-støtte er forhåndsinstallert på AMD Ryzen™ AI Halo Developer Platform. For alle andre enheter må brukere manuelt installere PyTorch med ROCm-støtte. Se relevant avsnitt for ditt operativsystem:
+PyTorch med ROCm-støtte er forhåndsinstallert på AMD Ryzen™ AI Halo Developer Platform. For alle andre enheter må brukere manuelt installere PyTorch med ROCm-støtte. Se den relevante seksjonen for ditt operativsystem:
 
 ### Windows
 
@@ -24,17 +30,17 @@ Følgende modeller er testet og optimalisert for din plattform:
 
 | Modell | Parametere | Størrelse | Nedlastingssted |
 |-------|------------|------|-------------------|
-| **facebook/seamless-m4t-v2-large** | 2,3 B | ~10 GB | Forhåndsinstallert på AMD Ryzen AI Halo Developer Platform; må installeres manuelt på alle andre enheter |
+| **facebook/seamless-m4t-v2-large** | 2,3B | ~10GB | Forhåndsinstallert på AMD Ryzen AI Halo Developer Platform; må installeres manuelt på alle andre enheter |
 
-Modeller lastes automatisk ned til Hugging Face-hurtigbufferkatalogen:
+Modeller vil bli lastet ned automatisk til Hugging Face-hurtigbufferkatalogen:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
-Sørg for minst **20 GB ledig plass** til modellagring.
+Sørg for minst **20GB ledig plass** for lagring av modeller.
 
 ## Nettverkskrav
 
-Førstegangsoppsett krever internettilgang for å laste ned modeller fra Hugging Face. Etter nedlasting kan spillboken kjøres uten nett.
+Førstegangsoppsett krever internettilgang for å laste ned modeller fra Hugging Face. Etter nedlasting kan playbooken kjøres uten nett.
 
-- Nedlasting av modeller for første gang kan ta **5–10 minutter**, avhengig av modellstørrelse og tilkoblingshastighet
-- Modeller mellomlagres lokalt og trenger ikke lastes ned på nytt
+- Nedlasting av modeller for første gang kan ta **5-10 minutter** avhengig av modellstørrelse og tilkoblingshastighet
+- Modeller lagres i hurtigbufferen lokalt og trenger ikke å lastes ned på nytt

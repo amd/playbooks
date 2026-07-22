@@ -1,0 +1,5 @@
+{
+  "id": "deepseek-v4-flash-ds4",
+  "title": "Zagon DeepSeek V4 Flash z ds4",
+  "description": "Namestite DeepSeek V4 Flash lokalno z uporabo sklepalnega mehanizma `ds4` in interaktivno upravljajte modele z orodjem `ds4-cockpit`."
+}

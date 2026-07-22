@@ -3,6 +3,7 @@ Copyright Advanced Micro Devices, Inc.
 
 SPDX-License-Identifier: MIT
 -->
+
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 ### Driver GPU AMD
@@ -25,7 +26,7 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 ### Driver GPU AMD
 
-Installa il driver GPU AMD (amdgpu) utilizzando il flusso Radeon Software for Linux (RSL). Per le istruzioni relative alla tua distribuzione, consulta [Installazione del driver del kernel](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Installa il driver GPU AMD (amdgpu) utilizzando il flusso Radeon Software for Linux (RSL). Per le istruzioni relative alla tua distribuzione, consulta [Install the kernel driver](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
 
 <!-- @device:end -->
 <!-- @os:end -->

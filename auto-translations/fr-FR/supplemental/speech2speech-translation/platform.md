@@ -1,10 +1,16 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Configuration de la plateforme
 
 Ce document décrit les configurations de plateforme attendues pour exécuter ce playbook.
 
 ## Prérequis
 
-PyTorch avec prise en charge ROCm est préinstallé sur l'AMD Ryzen™ AI Halo Developer Platform. Pour tous les autres appareils, les utilisateurs doivent installer manuellement PyTorch avec prise en charge ROCm. Veuillez vous référer à la section correspondant à votre système d'exploitation :
+PyTorch avec support ROCm est préinstallé sur l'AMD Ryzen™ AI Halo Developer Platform. Pour tous les autres appareils, les utilisateurs doivent installer manuellement PyTorch avec support ROCm. Veuillez vous référer à la section correspondant à votre système d'exploitation :
 
 ### Windows
 
@@ -34,7 +40,7 @@ Assurez-vous de disposer d'au moins **20 Go d'espace libre** pour le stockage de
 
 ## Exigences réseau
 
-La configuration initiale nécessite un accès Internet pour télécharger les modèles depuis Hugging Face. Une fois le téléchargement effectué, le playbook peut fonctionner hors ligne.
+La configuration initiale nécessite un accès internet pour télécharger les modèles depuis Hugging Face. Après le téléchargement, le playbook peut fonctionner hors ligne.
 
 - Les premiers téléchargements de modèles peuvent prendre **5 à 10 minutes** selon la taille du modèle et la vitesse de connexion
 - Les modèles sont mis en cache localement et n'ont pas besoin d'être retéléchargés

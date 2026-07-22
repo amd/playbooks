@@ -1,0 +1,5 @@
+{
+  "id": "deepseek-v4-flash-ds4",
+  "title": "Εκτέλεση του DeepSeek V4 Flash με ds4",
+  "description": "Ανάπτυξη του DeepSeek V4 Flash τοπικά χρησιμοποιώντας τη μηχανή συμπερασμού ds4 και διαχείριση μοντέλων διαδραστικά με το ds4-cockpit."
+}

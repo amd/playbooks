@@ -1,24 +1,30 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Konfigurácia platformy
 
-Tento dokument popisuje očakávané konfigurácie platformy na spustenie tohto playbooku.
+Tento dokument popisuje očakávané konfigurácie platformy na spustenie tejto príručky (playbook).
 
 ## Predpoklady
 
-PyTorch s podporou ROCm je predinštalovaný na platforme AMD Ryzen™ AI Halo Developer Platform. Pri všetkých ostatných zariadeniach musia používatelia nainštalovať PyTorch s podporou ROCm manuálne. Prosím, pozrite si príslušnú sekciu pre váš operačný systém:
+PyTorch s podporou ROCm je predinštalovaný na platforme AMD Ryzen™ AI Halo Developer Platform. Na všetkých ostatných zariadeniach musia používatelia nainštalovať PyTorch s podporou ROCm manuálne. Prosím, pozrite si príslušnú sekciu pre váš operačný systém:
 
 
 ### Windows
 
 | Komponent     | Verzia         | Poznámky                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.11.x + ROCm 7.13  | Predinštalovaný na platforme AMD Ryzen AI Halo Developer Platform; na všetkých ostatných zariadeniach je potrebné ho nainštalovať manuálne |
+| **PyTorch**   | 2.11.x + ROCm 7.13  | Predinštalovaný na AMD Ryzen AI Halo Developer Platform; na všetkých ostatných zariadeniach musí byť nainštalovaný manuálne |
 
 
 ### Linux
 
 | Komponent     | Verzia         | Poznámky                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.11.x + ROCm 7.13   | Predinštalovaný na platforme AMD Ryzen AI Halo Developer Platform; na všetkých ostatných zariadeniach je potrebné ho nainštalovať manuálne |
+| **PyTorch**   | 2.11.x + ROCm 7.13   | Predinštalovaný na AMD Ryzen AI Halo Developer Platform; na všetkých ostatných zariadeniach musí byť nainštalovaný manuálne |
 
 
 ## Požadované modely
@@ -31,11 +37,11 @@ Nasledujúce modely sú otestované a optimalizované pre vašu platformu:
 
 Modely budú automaticky stiahnuté do vyrovnávacej pamäte Hugging Face: `~/.cache/huggingface/hub/`
 
-Zaistite aspoň **20 GB voľného miesta** na ukladanie modelov.
+Zabezpečte aspoň **20 GB voľného miesta** na ukladanie modelov.
 
-## Požiadavky na sieť
+## Sieťové požiadavky
 
-Počiatočné nastavenie vyžaduje internetové pripojenie na stiahnutie modelov z Hugging Face. Po stiahnutí môže playbook fungovať offline.
+Počiatočné nastavenie vyžaduje prístup na internet na stiahnutie modelov z Hugging Face. Po stiahnutí môže príručka (playbook) fungovať offline.
 
-- Prvé stiahnutie modelov môže trvať **5 – 10 minút** v závislosti od veľkosti modelu a rýchlosti pripojenia
-- Modely sú uložené lokálne v cache a nie je potrebné ich opätovne sťahovať
+- Prvotné sťahovanie modelov môže trvať **5 – 10 minút** v závislosti od veľkosti modelu a rýchlosti pripojenia
+- Modely sú uložené lokálne vo vyrovnávacej pamäti a nie je potrebné ich opätovne sťahovať

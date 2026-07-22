@@ -3,9 +3,10 @@ Copyright Advanced Micro Devices, Inc.
 
 SPDX-License-Identifier: MIT
 -->
+
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-### Driverul AMD GPU
+### Driver AMD GPU
 
 Actualizați la cel mai recent driver AMD GPU folosind [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
 
@@ -23,9 +24,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 
 <!-- @os:linux -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-### Driverul AMD GPU
+### Driver AMD GPU
 
-Instalați driverul AMD GPU (amdgpu) folosind fluxul Radeon Software for Linux (RSL). Pentru instrucțiuni specifice distribuției dvs., consultați [Instalați driverul de kernel](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Instalați driverul AMD GPU (amdgpu) folosind fluxul Radeon Software for Linux (RSL). Pentru instrucțiuni specifice distribuției dvs., consultați [Install the kernel driver](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
 
 <!-- @device:end -->
 <!-- @os:end -->

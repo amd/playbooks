@@ -1,26 +1,32 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Configurazione della piattaforma
 
-Questo documento descrive le configurazioni della piattaforma previste per l'esecuzione di questo playbook.
+Questo documento descrive le configurazioni di piattaforma previste per l'esecuzione di questo playbook.
 
 ## Prerequisiti
 
-PyTorch con supporto ROCm è preinstallato su AMD Ryzen™ AI Halo Developer Platform. Per tutti gli altri dispositivi, gli utenti devono installare manualmente PyTorch con supporto ROCm. Fare riferimento alla sezione pertinente per il proprio sistema operativo:
+PyTorch con supporto ROCm è preinstallato su AMD Ryzen™ AI Halo Developer Platform. Per tutti gli altri dispositivi, gli utenti devono installare manualmente PyTorch con supporto ROCm. Fare riferimento alla sezione relativa al proprio sistema operativo:
 
 ### Windows
 
 | Componente     | Versione         | Note                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 o versioni successive    | Preinstallato su AMD Ryzen AI Halo Developer Platform; deve essere installato manualmente su tutti gli altri dispositivi |
+| **PyTorch**   | 2.8 o successiva    | Preinstallato su AMD Ryzen AI Halo Developer Platform; deve essere installato manualmente su tutti gli altri dispositivi |
 
 ### Linux
 
 | Componente     | Versione         | Note                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 o versioni successive    | Preinstallato su AMD Ryzen AI Halo Developer Platform; deve essere installato manualmente su tutti gli altri dispositivi |
+| **PyTorch**   | 2.8 o successiva    | Preinstallato su AMD Ryzen AI Halo Developer Platform; deve essere installato manualmente su tutti gli altri dispositivi |
 
 ## Modelli richiesti
 
-I seguenti modelli sono testati e ottimizzati per la piattaforma in uso:
+I seguenti modelli sono testati e ottimizzati per la tua piattaforma:
 
 | Modello | Parametri | Dimensione | Posizione di download |
 |-------|------------|------|-------------------|

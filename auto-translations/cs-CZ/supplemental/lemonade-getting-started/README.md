@@ -6,24 +6,24 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Tento playbook používá speciální značky, které GitHub neumí vykreslit. Pro správné zobrazení tohoto obsahu prosím navštivte [amd.com/playbooks](https://amd.com/playbooks).
+> Tento playbook používá speciální značky, které GitHub neumí zobrazit. Pro správné zobrazení tohoto obsahu navštivte prosím [amd.com/playbooks](https://amd.com/playbooks).
 <!-- @github-only:end -->
 
 ## Přehled
 
-🍋 **Lemonade** je open-source lokální AI server, který umožňuje spouštět velké jazykové modely (LLM), generátory obrázků a audio modely přímo na vašem vlastním hardwaru. Modely zpřístupňuje prostřednictvím standardního rozhraní **OpenAI API**, takže jakákoli aplikace fungující s OpenAI bude okamžitě fungovat i s Lemonade. Na konci tohoto playbooku budete používat Lemonade ke spouštění modelů lokálně na vašem počítači.
+🍋 **Lemonade** je open-source lokální AI server, který umožňuje spouštět velké jazykové modely (LLM), generátory obrázků a audio modely přímo na vašem vlastním hardwaru. Modely zpřístupňuje prostřednictvím standardního rozhraní **OpenAI API**, takže jakákoli aplikace, která funguje s OpenAI, může okamžitě fungovat i s Lemonade. Na konci tohoto playbooku budete používat Lemonade ke spouštění modelů lokálně na vašem počítači.
 
 ## Co se naučíte
 
 Na konci tohoto playbooku budete schopni:
 
 * **Nainstalovat Lemonade Server** a ověřit, že běží.
-* **Stáhnout LLM a chatovat s ním** jediným příkazem.
-* **Prozkoumat webové uživatelské rozhraní** a vyzkoušet různé modality, jako je vidění, přepis řeči na text a generování obrázků.
-* **Přepínat GPU backendy** mezi Vulkan a AMD ROCm™ software.
-* **Vytvořit Python aplikaci** poháněnou lokálním LLM pomocí OpenAI-kompatibilního API.
+* **Stáhnout LLM a konverzovat s ním** pomocí jediného příkazu.
+* **Prozkoumat webové rozhraní** a vyzkoušet různé modality, jako je vidění, přepis řeči na text a generování obrázků.
+* **Přepínat mezi GPU backendy** Vulkan a AMD ROCm™ software.
+* **Vytvořit Python aplikaci** poháněnou lokálním LLM pomocí rozhraní kompatibilního s OpenAI API.
 <!-- @device:halo_box,halo,stx,krk -->
-* **Spouštět modely na AMD Neural Processing Unit (NPU)** pomocí režimů provádění Hybrid a FLM na hardwaru AMD Ryzen™ AI.
+* **Spouštět modely na neuronové procesorové jednotce AMD (NPU)** pomocí režimů provádění Hybrid a FLM na hardwaru AMD Ryzen™ AI.
 <!-- @device:end -->
 
 ## Nastavení konfigurace paměti
@@ -36,17 +36,17 @@ Na konci tohoto playbooku budete schopni:
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalace softwarových předpokladů
+## Instalace softwarových požadavků
 
 Než začnete, ujistěte se, že máte:
 
 - PC se systémem **Windows 11** nebo podporovanou distribucí **Linux** (Ubuntu 24.04+, Fedora, Debian)
-- **16 GB RAM** je doporučeno pro runtime model použitý v krocích 1–7 (`Gemma-4-E2B-it-GGUF`, ~3 GB). **32 GB+** je doporučeno, pokud chcete v kroku 6 použít větší model pro generování kódu (`Qwen3.5-35B-A3B-GGUF`, ~20 GB).
-- **~4–30 GB volného místa na disku**, v závislosti na modelech, které stáhnete. Největší model v této příručce má přibližně 20 GB.
-- **Python 3.10–3.13** (použitý v sekci Python aplikace)
-- Internetové připojení (drátové nebo bezdrátové)
+- Doporučeno je **16 GB RAM** pro runtime model použitý v krocích 1–7 (`Gemma-4-E2B-it-GGUF`, ~3 GB). **32 GB+** je doporučeno, pokud chcete použít větší model pro generování kódu v kroku 6 (`Qwen3.5-35B-A3B-GGUF`, ~20 GB).
+- **~4–30 GB volného místa na disku**, v závislosti na tom, které modely stáhnete. Největší model v tomto průvodci má přibližně 20 GB.
+- **Python 3.10–3.13** (používaný v části s Python aplikací)
+- Internetové připojení (kabelové nebo bezdrátové)
 <!-- @device:halo_box,halo,stx,krk -->
-- [Volitelně] AMD XDNA 2 NPU (Ryzen AI řady 300/400/Max 300 nebo Z2 Extreme) s nejnovějším nainstalovaným ovladačem z [Pokynů k instalaci softwaru Ryzen AI](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers), pokud chcete spustit model na NPU.
+- [Volitelně] AMD XDNA 2 NPU (řada Ryzen AI 300/400/Max 300 nebo Z2 Extreme) s nejnovějším nainstalovaným ovladačem z [pokynů k instalaci softwaru Ryzen AI](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers), pokud chcete spouštět model na NPU.
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
@@ -62,6 +62,13 @@ lemonade --version
 <!-- @test:end -->
 
 <!-- @os:windows -->
+<!-- @test:id=lemonade-update-windows timeout=120 hidden=True -->
+```bash
+winget upgrade -e --id AMD.LemonadeServer
+lemonade --version
+```
+<!-- @test:end -->
+
 <!-- @test:id=lemonade-chat-gemma-windows timeout=1200 hidden=True -->
 ```powershell
 
@@ -96,8 +103,15 @@ Write-Host "OK: Model Gemma-4-E2B-it-GGUF responded"
 <!-- @test:end -->
 <!-- @os:end -->
 
-
 <!-- @os:linux -->
+<!-- @test:id=lemonade-update-linux timeout=120 hidden=True -->
+```bash
+sudo apt update
+sudo apt install --only-upgrade lemonade-server
+lemonade --version
+```
+<!-- @test:end -->
+
 <!-- @test:id=lemonade-chat-gemma-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
@@ -164,7 +178,7 @@ echo "OK: Model Gemma-4-E2B-it-GGUF responded"
 
 ---
 
-## Základní koncepty — Jak fungují lokální AI servery
+## Klíčové koncepty — Jak fungují lokální AI servery
 
 Než spustíme model, stojí za to pochopit, *proč* je vše nastaveno tímto způsobem. Lemonade je **lokální model server**, tedy proces, který načítá AI modely do paměti a zpřístupňuje je aplikacím přes HTTP, stejně jako by to dělala cloudová AI služba.
 
@@ -172,10 +186,10 @@ Než spustíme model, stojí za to pochopit, *proč* je vše nastaveno tímto zp
 
 | Výhoda | Co to pro vás znamená |
 |---------|----------------------|
-| **Zjednodušená integrace** | Aplikace komunikují s jedním HTTP API namísto práce s hardwarově specifickými knihovnami C++ nebo Python. |
+| **Zjednodušená integrace** | Aplikace komunikují s jedním HTTP API místo toho, aby se zabývaly hardwarově specifickými knihovnami C++ nebo Python. |
 | **Sdílené modely** | Jeden načtený model může obsluhovat více aplikací najednou, žádné duplicitní kopie zabírající vaši RAM. |
-| **Přenositelnost z cloudu na lokál** | Kód napsaný pro cloudové API OpenAI funguje s Lemonade po změně jedné URL adresy. |
-| **Oddělení odpovědností** | Správu modelů, streamování a odolnost proti chybám řeší server, takže vývojáři se mohou soustředit na svou aplikaci. |
+| **Přenositelnost mezi cloudem a lokálním prostředím** | Kód napsaný pro cloudové API OpenAI funguje s Lemonade po změně jedné URL adresy. |
+| **Oddělení odpovědností** | Správu modelů, streamování a odolnost proti chybám řeší server, takže se vývojáři mohou soustředit na svou aplikaci. |
 
 ### Standard OpenAI API
 
@@ -183,19 +197,19 @@ Lemonade implementuje **OpenAI API**, stejné rozhraní, jaké používá ChatGP
 
 | Role | Kdo mluví |
 |------|---------------|
-| **system** | Instrukce pro model (osobnost, omezení, dostupné nástroje) |
-| **user** | Zprávy od člověka (nebo aplikace) modelu |
+| **system** | Instrukce pro model (persona, omezení, dostupné nástroje) |
+| **user** | Zprávy od člověka (nebo aplikace) směrem k modelu |
 | **assistant** | Odpovědi generované modelem |
 
-To znamená, že jakákoli knihovna nebo aplikace podporující OpenAI dokáže komunikovat s Lemonade, pokud ji nasměrujete na `http://localhost:13305/api/v1`, zatímco běží Lemonade Server.
+To znamená, že jakákoli knihovna nebo aplikace, která podporuje OpenAI, může komunikovat s Lemonade tím, že ji nasměruje na `http://localhost:13305/api/v1`, zatímco Lemonade Server běží.
 
 ## Hlavní aktivita — Váš první lokální AI chat
 
-Pojďme stáhnout LLM a vést s ním konverzaci, přičemž AI poběží zcela na vašem vlastním počítači.
+Pojďme si stáhnout LLM a vést s ním konverzaci, přičemž AI poběží zcela na vašem vlastním počítači.
 
 ### Krok 1: Stažení a spuštění modelu
 
-Lemonade se dodává s kurátorovanou knihovnou modelů. Začněme s modelem **Gemma-4-E2B-it**, což je výkonný a kompaktní model, který zahrnuje podporu vidění. Otevřete terminál a spusťte:
+Lemonade obsahuje kurátorovanou knihovnu modelů. Začněme s **Gemma-4-E2B-it**, výkonným a kompaktním modelem, který zahrnuje podporu vidění. Otevřete terminál a spusťte:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF
@@ -205,15 +219,15 @@ Tento jediný příkaz udělá tři věci:
 
 1. **Stáhne** model (~3 GB) z Hugging Face, pokud ještě není stažen. (Může to nějakou dobu trvat)
 2. **Spustí** proces Lemonade Server na portu 13305.
-3. **Otevře Lemonade App**, abyste mohli začít chatovat s modelem.
+3. **Otevře Lemonade App**, abyste mohli začít s modelem konverzovat.
 
 
 <!-- @os:windows -->
-Na Windows se Lemonade App spustí automaticky a můžete okamžitě začít chatovat. Pokud jste nainstalovali balíček `minimal.msi`, aplikace není součástí instalace. Pro zahájení chatu otevřete webový prohlížeč a přejděte na `http://localhost:13305`.
+Ve Windows se aplikace Lemonade App spustí automaticky a můžete okamžitě začít chatovat. Pokud jste nainstalovali balíček `minimal.msi`, aplikace není součástí instalace. Pro zahájení chatování otevřete webový prohlížeč a přejděte na `http://localhost:13305`.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Na Linuxu otevřete prohlížeč a přejděte na `http://localhost:13305`, abyste získali přístup k webové aplikaci.
+V Linuxu otevřete prohlížeč a přejděte na `http://localhost:13305` pro přístup k webové aplikaci.
 <!-- @os:end -->
 
 Zkuste napsat otázku:
@@ -222,11 +236,11 @@ Zkuste napsat otázku:
 What are three fun facts about lemons?
 ```
 
-Model odpoví přímo v chatovacím okně. **Gratulujeme! Právě spouštíte velký jazykový model lokálně.**
+Model odpoví přímo v okně chatu. **Gratulujeme! Nyní spouštíte velký jazykový model lokálně.**
 
-![Lemonade App se zobrazenými protokoly](../../dependencies/assets/ChatwithLogs.png)
+![Aplikace Lemonade se zobrazenými protokoly](../../dependencies/assets/ChatwithLogs.png)
 
-V panelu Server Logs v aplikaci Lemonade App najdete telemetrické údaje o výkonu modelu po každé odpovědi. Například:
+V panelu Server Logs v aplikaci Lemonade App najdete telemetrická data o výkonu modelu po každé odpovědi. Například:
 
 ```
  === Telemetry ===
@@ -239,31 +253,31 @@ TPS:           95.99
 
 ### Krok 2: Prozkoumejte webové rozhraní a různé modality
 
-Lemonade obsahuje zabudované webové rozhraní, ve kterém můžete:
+Lemonade obsahuje vestavěné webové rozhraní, kde můžete:
 
 - **Komunikovat** s načteným modelem ve známém chatovacím okně
 - **Procházet modely** na kartě Model Manager
 - **Stahovat nové modely** jedním kliknutím
 
-Zkuste přepínat mezi různými modalitami pomocí karty **Model Manager** ve webovém uživatelském rozhraní, kde můžete procházet modely podle recepce (Recipe) nebo podle kategorie:
+Zkuste přepínat mezi různými modalitami pomocí karty **Model Manager** ve webovém UI, kde můžete procházet modely podle receptu (Recipe) nebo kategorie (Category):
 
-1. **Vidění (Vision):** Model `Gemma-4-E2B-it-GGUF`, který již máte načtený, podporuje vidění. Vložte obrázek do chatovacího okna a požádejte model, aby ho popsal.
-2. **Generování obrázků:** V kategorii Image stáhněte model pro obrázky, například `SDXL-Turbo`, ze Správce modelů, poté použijte Lemonade Image Generator k zadání promptu a lokálnímu vygenerování obrázku.
-3. **Zvuk:** V kategorii Audio stáhněte audio model, například `Whisper-Tiny`, který umí převádět řeč na text. Poskytněte nahrávku zvuku k lokálnímu přepisu. Pro převod textu na řeč vyzkoušejte některý z modelů v kategorii Speech, například `kokoro-v1`.
+1. **Vidění (Vision):** Model `Gemma-4-E2B-it-GGUF`, který již máte načtený, podporuje vidění. Vložte obrázek do chatovacího okna a požádejte model, aby jej popsal.
+2. **Generování obrázků:** V kategorii Image si z Model Manageru stáhněte model pro generování obrázků, například `SDXL-Turbo`, a poté pomocí generátoru obrázků Lemonade zadejte prompt a vygenerujte obrázek lokálně.
+3. **Zvuk (Audio):** V kategorii Audio si stáhněte zvukový model, například `Whisper-Tiny`, který umí převádět řeč na text. Poskytněte nahrávku zvuku k lokálnímu přepisu. Pro převod textu na řeč vyzkoušejte jeden z modelů v kategorii Speech, například `kokoro-v1`.
 
 ![Multi-Modality with Lemonade](../../dependencies/assets/multi_modality.png)
 
 ### Krok 3: Vyzkoušejte model s jiným backendem
 
-Když najedete myší na model v aplikaci Lemonade, uvidíte ikonu ozubeného kola. Kliknutím na ni můžete vybrat možnosti pro daný model, včetně volby požadovaného backendu.
+Když najedete myší na model v aplikaci Lemonade, zobrazí se ikona ozubeného kola. Kliknutím na ni můžete vybrat možnosti pro daný model, včetně volby požadovaného backendu.
 
-Ve výchozím nastavení Lemonade používá Vulkan pro GPU akceleraci. Pokud máte podporovanou samostatnou grafickou kartu AMD, můžete přepnout na ROCm.
+Ve výchozím nastavení Lemonade pro akceleraci GPU používá Vulkan. Pokud máte podporovanou samostatnou grafickou kartu AMD, můžete přepnout na ROCm.
 
 ![Lemonade Select Backend](../../dependencies/assets/lemonademodeloptions.png)
 
 Pro správu nainstalovaných backendů klikněte na tlačítko backendu v nejlevějším sloupci.
 
-Alternativně můžete zadat backend pomocí následujícího příkazu:
+Alternativně můžete backend zadat pomocí následujícího příkazu:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF --llamacpp rocm
@@ -273,9 +287,9 @@ Výchozí backend můžete také nastavit pomocí proměnné prostředí `LEMONA
 
 ---
 
-## Jdeme dál — vytvoření aplikace s podporou AI v Pythonu
+## Jdeme dál — vytvořte aplikaci s podporou AI v Pythonu
 
-Skutečná síla lokálního AI serveru spočívá v tom, že se k němu může připojit jakákoli aplikace pomocí pouhých několika řádků kódu. Abychom to dokázali, sestavme si malý, ale funkční **generátor studijních kartiček**, kterému zadáte téma, on vygeneruje kartičky a vy se pak můžete interaktivně zkoušet.
+Skutečná síla lokálního AI serveru spočívá v tom, že se k němu může připojit jakákoli aplikace pomocí pouhých několika řádků kódu. Abychom to dokázali, pojďme si vytvořit malý, ale funkční **generátor studijních kartiček (flashcards)**, kterému zadáte téma, on vygeneruje kartičky a vy se pak můžete interaktivně zkoušet.
 
 ### Krok 4: Spusťte server
 
@@ -287,11 +301,11 @@ lemonade status
 
 Měli byste vidět zprávu podobnou této: `Server is running on port 13305`.
 
-Pokud server neběží, spusťte ho otevřením aplikace Lemonade. Použijte výchozí port **13305** (můžete jej potvrdit nebo vybrat z ikony v systémové liště).
+Pokud server neběží, spusťte jej otevřením aplikace Lemonade. Použijte výchozí port **13305** (můžete jej potvrdit nebo zvolit v ikoně v systémové liště).
 
-### Krok 5: Nainstalujte OpenAI Python Client
+### Krok 5: Nainstalujte OpenAI Python klienta
 
-V terminálu vytvořte venv a nainstalujte OpenAI Python Client pomocí následujících příkazů:
+V terminálu vytvořte venv a nainstalujte OpenAI Python klienta pomocí následujících příkazů:
 <!-- @os:linux -->
 ```bash
 # Your specific version of Linux may have different commands
@@ -369,18 +383,18 @@ python3 -c "from openai import OpenAI; print('OK')"
 <!-- @test:end -->
 <!-- @os:end -->
 
-### Krok 6: Sestavte aplikaci s kartičkami
+### Krok 6: Vytvořte aplikaci Flashcard
 
-Stáhněme si jiný model pro generování kódu: `Qwen3.5-35B-A3B-GGUF`. Jedná se o velký (~20 GB) a výkonný model, který je nejvhodnější pro systémy s 32 GB+ RAM. Pokud máte k dispozici méně RAM, vyzkoušejte místo něj `Qwen3.5-9B-GGUF` (~6 GB).
+Pojďme si stáhnout jiný model pro generování kódu: `Qwen3.5-35B-A3B-GGUF`. Jedná se o velký (~20 GB) a výkonný model, který je nejvhodnější pro systémy s 32 GB+ RAM. Pokud máte k dispozici méně RAM, vyzkoušejte místo něj `Qwen3.5-9B-GGUF` (~6 GB).
 
-Můžete jej stáhnout z uživatelského rozhraní nebo spustit následující:
+Můžete jej stáhnout z UI nebo spustit následující příkaz:
 ```
 lemonade run Qwen3.5-35B-A3B-GGUF
 ```
 
-Zadejte následující prompt do chatovacího uživatelského rozhraní Lemonade Chat pro vygenerování kódu jednoduché aplikace s kartičkami.
+Zadejte následující prompt do chatovacího UI Lemonade, aby se vygeneroval kód jednoduché aplikace Flashcard. 
 
-Použijeme Qwen3.5-35B-A3B-GGUF (větší model, který lépe píše kód) k vygenerování naší Python aplikace, a samotná aplikace bude za běhu volat Gemma-4-E2B-it-GGUF (menší model, který jste již stáhli). Kód pak lze zkopírovat do souboru dle vlastního výběru a spustit v Pythonu.
+Pro generování naší aplikace v Pythonu použijeme Qwen3.5-35B-A3B-GGUF (větší model, lépe umí psát kód), přičemž samotná aplikace bude za běhu volat Gemma-4-E2B-it-GGUF (menší model, který jste si již stáhli). Kód pak lze zkopírovat do souboru dle vlastního výběru a spustit v Pythonu.
 
 ```
 Generate a Python script that uses the OpenAI Python library to call a local LLM and create an interactive flashcard study tool.
@@ -413,9 +427,9 @@ Structure:
    - Offers to start the quiz.
 ```
 
-> **Tip**: Dodrželi jsme standardní inženýrské postupy důkladnou tvorbou promptu a použitím systému se dvěma modely pro optimalizaci zdrojů a rychlosti.
+> **Tip**: Dodrželi jsme standardní inženýrské postupy díky pečlivé tvorbě promptu a použití systému dvou modelů pro optimalizaci zdrojů a rychlosti.
 
-Pro vaše pohodlí jsme poskytli ukázkový výstup v souboru [`flashcards.py`](assets/flashcards.py). Neváhejte si jej stáhnout do svého adresáře. Tak či onak byste nyní měli mít soubor v Pythonu, který lze spustit.
+Pro vaše pohodlí jsme poskytli ukázkový výstup v souboru [`flashcards.py`](assets/flashcards.py). Neváhejte si jej stáhnout do svého adresáře. Tak jako tak byste nyní měli mít soubor Python, který lze spustit.
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=900 hidden=True -->
@@ -505,9 +519,9 @@ Did you get it right? (y/n): y
 🏆 Score: 4/5
 ```
 
-Přibližně ve 150 řádcích kódu jste vytvořili plně funkční studijní nástroj poháněný lokálním LLM. Není potřeba spravovat žádný API klíč, nevznikají žádné náklady na používání a žádná data neopouštějí vaše zařízení.
+Na přibližně 150 řádcích kódu jste vytvořili plně funkční studijní nástroj poháněný lokálním LLM. Není třeba spravovat žádný API klíč, nevznikají žádné náklady za používání a žádná data neopouštějí váš počítač.
 
-> **Klíčový poznatek:** Všimněte si, že řádek `client = OpenAI(base_url=...) ` je *jediná* věc, která tuto aplikaci propojuje s Lemonade místo s cloudem OpenAI. Zbytek kódu je identický s tím, co byste napsali proti jakékoli službě kompatibilní s OpenAI. Pokud jste již někdy použili Python knihovnu OpenAI, už víte, jak vytvářet aplikace s Lemonade.
+> **Klíčový poznatek:** Všimněte si, že řádek `client = OpenAI(base_url=...) ` je *jediná* věc, která tuto aplikaci propojuje s Lemonade místo cloudu OpenAI. Zbytek kódu je totožný s tím, co byste napsali pro jakoukoli službu kompatibilní s OpenAI. Pokud jste někdy použili Python knihovnu OpenAI, už víte, jak vytvářet aplikace s Lemonade.
 
 ### Co to demonstruje
 
@@ -516,79 +530,79 @@ Tato malá aplikace využívá několik reálných integračních vzorů:
 | Vzor | Kde se objevuje |
 |---------|-----------------|
 | **Systémové prompty** | Zpráva `"system"` říká LLM, aby vygeneroval strukturovaný JSON |
-| **Strukturovaný výstup** | Aplikace parsuje odpověď LLM jako JSON pro vytvoření kartiček |
+| **Strukturovaný výstup** | Aplikace parsuje odpověď LLM jako JSON pro sestavení kartiček |
 | **Bezstavové požadavky** | Každé volání `generate_flashcards()` je nezávislé |
-| **Zpracování chyb** | Blok `try/except` elegantně řeší případy, kdy výstup LLM není platný JSON |
+| **Zpracování chyb** | `try/except` elegantně řeší případy, kdy výstup LLM není platný JSON |
 
-Tyto stejné vzory se škálují na jakoukoli aplikaci, jako jsou chatboti, asistenti pro psaní kódu, generátory obsahu, nástroje pro automatizaci.
+Tyto stejné vzory se dají aplikovat na jakoukoli aplikaci, jako jsou chatboti, asistenti pro psaní kódu, generátory obsahu nebo automatizační nástroje.
 
 #### Bonusová výzva
 
-* Pro dodatečnou výzvu zkuste upravit aplikaci tak, aby kartičky byly uživateli přečteny nahlas, s odkazem na příklad uvedený [zde](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py).
+* Pro dodatečnou výzvu zkuste aplikaci upravit tak, aby kartičky byly uživateli přečteny nahlas, s odkazem na ukázkový příklad dostupný [zde](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py).
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Spouštění modelů na NPU (volitelné)
 
-Pokud vlastníte řadu Ryzen AI 300/400/Max 300 nebo Z2 Extreme, vaše zařízení má vestavěnou **jednotku pro neuronové zpracování (NPU)**, což je vyhrazený čip navržený speciálně pro úlohy AI. Spouštění modelů na NPU je energeticky úspornější než použití GPU, což je ideální pro úlohy AI na pozadí, delší relace a použití na baterii.
+Pokud vlastníte zařízení řady Ryzen AI 300/400/Max 300 nebo Z2 Extreme, má vaše zařízení vestavěnou **Neural Processing Unit (NPU)**, což je dedikovaný čip navržený speciálně pro AI úlohy. Spouštění modelů na NPU je energeticky úspornější než použití GPU, což je ideální pro AI úlohy na pozadí, delší relace a použití na baterii.
 
 Lemonade podporuje tři režimy spouštění na NPU, přičemž všechny jsou transparentně dostupné přes stejné OpenAI API:
 
-| Režim | Jak funguje | Recept | Příklady modelů |
+| Režim | Jak to funguje | Recept | Příklady modelů |
 |------|-------------|--------|----------------|
-| **Hybridní (NPU + iGPU)** | NPU zpracovává výzvu, iGPU generuje tokeny | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
+| **Hybrid (NPU + iGPU)** | NPU zpracovává prompt, iGPU generuje tokeny | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
 | **Pouze NPU** | Celá inference běží na NPU | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
-| **FLM** | Používá engine FastFlowLM na NPU, optimalizovaný pro AMD XDNA2 | FLM (`flm`) | qwen3.5-4b-FLM |
+| **FLM** | Používá engine FastFlowLM na NPU, optimalizováno pro AMD XDNA2 | FLM (`flm`) | qwen3.5-4b-FLM |
 
 ### Požadavky
 
 - Procesor **AMD Ryzen AI řady 300/400 nebo Z2**
-- Pro modely **FLM**: Runtime FLM lze nainstalovat přímo z aplikace Lemonade, nebo jej Lemonade automaticky nainstaluje při spuštění modelu FLM. Více informací o FastFlowLM naleznete [zde](https://fastflowlm.com/docs/).
+- Pro modely **FLM**: Runtime FLM lze nainstalovat přímo v aplikaci Lemonade, případně Lemonade nainstaluje runtime FLM automaticky při spuštění modelu FLM. Více informací o FastFlowLM naleznete [zde](https://fastflowlm.com/docs/).
 
 
 ### Krok 8: Spuštění hybridního modelu
 
-Hybridní modely rozdělují práci mezi NPU a iGPU, čímž dosahují dobré rovnováhy mezi rychlostí a efektivitou. V aplikaci Lemonade vyberte model ze seznamu `Ryzen AI LLM`, například `Qwen3-4B-Hybrid`, nebo jej spusťte pomocí následujícího příkazu:
+Hybridní modely rozdělují práci mezi NPU a iGPU, což zajišťuje dobrou rovnováhu mezi rychlostí a efektivitou. V aplikaci Lemonade vyberte model ze seznamu `Ryzen AI LLM`, například `Qwen3-4B-Hybrid`, nebo jej spusťte pomocí následujícího příkazu:
 
 ```
 lemonade run Qwen3-4B-Hybrid
 ```
 
-Lemonade automaticky detekuje vaši NPU a nainstaluje backend **Ryzen AI LLM**.
+Lemonade automaticky detekuje vaše NPU a nainstaluje backend **Ryzen AI LLM**.
 
-> **Co se děje na pozadí?** Když odešlete zprávu, NPU zpracuje celou vaši výzvu paralelně (tomu se říká „prefill“). Poté převezme řízení iGPU a generuje odpověď token po tokenu (tomu se říká „decode“). Tento hybridní přístup využívá silné stránky obou čipů.
+> **Co se děje pod kapotou?** Když odešlete zprávu, NPU zpracuje celý váš prompt paralelně (tomu se říká „prefill“). Poté převezme řízení iGPU, které generuje odpověď token po tokenu (tomu se říká „decode“). Tento hybridní přístup využívá silné stránky obou čipů.
 
 ### Krok 9: Spuštění modelu FLM
 
-Modely FastFlowLM (FLM) jsou speciálně optimalizovány pro architekturu NPU XDNA2 od AMD a mohou být velmi rychlé vzhledem ke své velikosti. Například vyberte `qwen3.5-4b-FLM` ze seznamu `FastFlowLM NPU` nebo použijte následující příkaz:
+Modely FastFlowLM (FLM) jsou speciálně optimalizovány pro architekturu NPU AMD XDNA2 a mohou být velmi rychlé vzhledem ke své velikosti. Vyberte například `qwen3.5-4b-FLM` ze seznamu `FastFlowLM NPU`, nebo použijte následující příkaz:
 
 <!-- @os:windows -->
-Chcete-li povolit `FastFlowLM` ve Windows:
+Povolení `FastFlowLM` ve Windows:
 
 * Otevřete nabídku `Backends Manager`.
 * Vyhledejte kategorii backendu `FastFlowLM NPU`.
 * Klikněte na Install NPU.
-* Po dokončení instalace bude v rozbalovací nabídce FFLM k dispozici přibližně 36 výchozích modelů.
+* Po dokončení instalace bude v rozevírací nabídce FFLM k dispozici přibližně 36 výchozích modelů.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
 Při prvním spuštění aplikace `Lemonade` není backend `FastFlowNPU` ve výchozím nastavení povolen. 
-Místní aplikace otevře stránku s instalací, která vás provede nastavením.
+Lokální aplikace otevře stránku instalace, která vás provede nastavením.
 
-Chcete-li povolit `FastFlowLM` v Linuxu:
+Povolení `FastFlowLM` v Linuxu:
 
 * Otevřete aplikaci `Lemonade`.
-* Navštivte [oficiální dokumentaci FLM](https://lemonade-server.ai/flm_npu_linux.html) a postupujte podle instalačních kroků pro FLM výběrem vaší distribuce Linuxu.
-* Povolte backporty podle pokynů na stránce s instalací.
-* Stáhněte si nejnovější verzi `v0.9.x` ze [stránky s tagy](https://github.com/FastFlowLM/FastFlowLM/tags).'
+* Navštivte oficiální dokumentaci [official FLM](https://lemonade-server.ai/flm_npu_linux.html) a postupujte podle kroků instalace FLM výběrem vaší distribuce Linuxu.
+* Povolte backports podle pokynů na instalační stránce.
+* Stáhněte si nejnovější vydání `v0.9.x` ze [stránky s tagy](https://github.com/FastFlowLM/FastFlowLM/tags).'
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
 >[!Note]
-Pro AMD Halo Developer Platform nezapomeňte zvolit Debian 13.
+Pro AMD Halo Developer Platform je nutné zvolit Debian 13.
 ```
 fastflowlm_0.9.X_debian13_amd64.deb
 ```
@@ -600,19 +614,19 @@ fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 ```
 <!-- @device:end -->
 * Nainstalujte stažený balíček `.deb`.
-* Doporučeno: Ukončete aplikaci `Lemonade App` a znovu ji spusťte, aby se změny projevily.
+* Doporučeno: Ukončete aplikaci `Lemonade App` a spusťte ji znovu, aby se změny projevily.
 * Doporučeno: Otevřete `Backends Manager` a klikněte na Install `FastFlowNPU` Backend.
 <!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @device:halo_box,halo,stx,krk -->
-Po úspěšné instalaci byste měli vidět, že `flm:npu` bylo dokončeno ve **Správci stahování** uvnitř **Lemonade Desktop App**.
+Po úspěšné instalaci byste měli vidět, že `flm:npu` je dokončeno ve **Správci stahování** uvnitř **desktopové aplikace Lemonade**.
 <p align="center">
   <img width="400" height="400" src="assets/FFLM-installationWizard.png" />
 </p>
 Poté můžete vybrat kterýkoli z dostupných modelů FFLM a začít používat backend NPU.
 
-Pro konkrétní model si stáhněte požadovaný model ze [stránky modelů](https://fastflowlm.com/docs/models/qwen/) a ověřte jej pomocí příkazu shellu uvedeného v dokumentaci.
+Pro konkrétní model si stáhněte požadovaný model ze [stránky s modely](https://fastflowlm.com/docs/models/qwen/) a ověřte jej pomocí příkazu shellu uvedeného v dokumentaci.
 ```
 flm run qwen3.5-4b-FLM
 ```
@@ -622,7 +636,7 @@ lemonade run qwen3.5-4b-FLM
 ```
 
 Modely FLM zahrnují některé z nejpopulárnějších architektur (Gemma 3, Qwen 3, Llama 3 a DeepSeek R1) a jejich velikost se pohybuje od méně než 1 GB až po více než 13 GB.
-Lemonade automaticky detekuje vaši NPU a nainstaluje backend **FastFlowLM NPU**.
+Lemonade automaticky detekuje vaše NPU a nainstaluje backend **FastFlowLM NPU**.
 
 <!-- @os:windows -->
 > **Tip:** Pro nejlepší výkon NPU povolte turbo režim:
@@ -634,7 +648,7 @@ Lemonade automaticky detekuje vaši NPU a nainstaluje backend **FastFlowLM NPU**
 
 ### Přepínání modelů
 
-Aplikace s kartičkami z kroku 6 funguje i s modely na NPU, stačí změnit název modelu:
+Aplikace kartiček ze Kroku 6 funguje i s modely NPU, stačí jen změnit název modelu:
 
 ```python
 # In flashcards.py, swap the model to run on NPU instead of GPU
@@ -647,14 +661,33 @@ response = client.chat.completions.create(
 
 ## Další kroky
 
-Máte spuštěný lokální AI server na vlastním hardwaru, zde je návod, co dál:
+Nyní máte lokální AI server běžící na vlastním hardwaru. Zde je návod, co dělat dál:
 
-1. **Připojte své oblíbené aplikace**: Lemonade funguje bez dalšího nastavení s [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/) a [mnoha dalšími](https://lemonade-server.ai/marketplace).
+1. **Propojte své oblíbené aplikace**: Lemonade funguje bez dalšího nastavení s [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/) a [mnoha dalšími](https://lemonade-server.ai/marketplace).
 
-2. **Prohlédněte si více modelů**: Prozkoumejte celou [knihovnu modelů](https://lemonade-server.ai/docs/server/server_models/) a najděte modely optimalizované pro programování, uvažování, vidění a další. K zobrazení dostupných modelů použijte aplikaci Lemonade nebo příkaz `lemonade list`.
+2. **Prohlédněte si další modely**: Prozkoumejte kompletní [knihovnu modelů](https://lemonade-server.ai/docs/server/server_models/) a najděte modely optimalizované pro programování, uvažování, vidění a další. Použijte aplikaci Lemonade nebo příkaz `lemonade list`, kterým zjistíte, co je k dispozici.
 
-3. **Odemkněte akceleraci GPU pomocí ROCm**: Pokud vlastníte podporovanou GPU od AMD, přepněte na backend ROCm: `lemonade config set llamacpp.backend=rocm`. Viz [podporované GPU od AMD](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
+3. **Odemkněte akceleraci GPU pomocí ROCm**: Pokud máte podporované GPU AMD, přepněte na backend ROCm: `lemonade config set llamacpp.backend=rocm`. Viz [podporovaná GPU AMD](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
 
-4. **Přečtěte si úplnou specifikaci API**: Lemonade podporuje dokončování konverzací (chat completions), vkládání (embeddings), přepis zvuku, generování obrázků, převod textu na řeč a další. Kompletní přehled koncových bodů naleznete ve [specifikaci serveru](https://lemonade-server.ai/docs/server/server_spec/).
+4. **Přečtěte si kompletní specifikaci API**: Lemonade podporuje dokončování konverzací (chat completions), embeddingy, přepis zvuku, generování obrázků, převod textu na řeč a další. Kompletní přehled všech koncových bodů najdete ve [specifikaci serveru](https://lemonade-server.ai/docs/server/server_spec/).
 
 5. **Přispějte**: Lemonade je open source. Podívejte se na [průvodce přispíváním](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) a vyhledejte [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->

@@ -5,25 +5,24 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
-
 > [!IMPORTANT]
-> Tässä opaskirjassa käytetään erikoismerkintöjä, joita GitHub ei pysty näyttämään. Käy osoitteessa [amd.com/playbooks](https://amd.com/playbooks) nähdäksesi tämän sisällön oikein.
+> Tässä ohjekirjassa käytetään erikoismerkintöjä, joita GitHub ei pysty näyttämään. Käy osoitteessa [amd.com/playbooks](https://amd.com/playbooks) nähdäksesi tämän sisällön oikein.
 <!-- @github-only:end -->
 
 ## Yleiskatsaus
 
-ComfyUI on tehokas, solmupohjainen käyttöliittymä Stable Diffusionille ja muille diffuusiomalleille. Toisin kuin perinteiset teksti-kuva-käyttöliittymät yksinkertaisine kehotekenttineen, ComfyUI näyttää koko kuvantuotantoputken visuaalisena graafina, mikä antaa sinulle tarkan hallinnan jokaiseen vaiheeseen tekstin koodauksesta latenttiavaruuden käsittelyyn ja lopulliseen dekoodaukseen asti.
+ComfyUI on tehokas, solmupohjainen käyttöliittymä Stable Diffusionille ja muille diffuusiomalleille. Toisin kuin perinteiset tekstistä kuvaksi -käyttöliittymät yksinkertaisine kehotekenttineen, ComfyUI paljastaa koko kuvantuotantoputken visuaalisena kaaviona, mikä antaa sinulle tarkan hallinnan jokaiseen vaiheeseen tekstin koodauksesta latenttiavaruuden käsittelyyn ja lopulliseen dekoodaukseen asti.
 
-Tässä ohjeessa opit käyttämään ComfyUI:ta yhdessä Z Image Turbo -mallin kanssa GPU:lla korkealaatuisten tekoälykuvien luomiseen.
+Tämä opas opettaa sinulle, miten käytät ComfyUI:ta Z Image Turbo -mallin kanssa GPU:llasi korkealaatuisten tekoälykuvien luomiseen.
 
 ## Mitä opit
 
 - Kuinka käynnistää ComfyUI ja ladata Z-Image Turbo -malline
-- Diffuusioputken osien ymmärtäminen
-- Kuvien luominen ja generointiparametrien säätäminen
+- Diffuusioputken komponenttien ymmärtäminen
+- Kuvien luominen ja luontiparametrien säätäminen
 - Työnkulkujen tallentaminen ja jakaminen
 
-## Muistiasetusten määrittäminen
+## Muistin määrittäminen
 
 <!-- @require:memory-config -->
 
@@ -33,7 +32,7 @@ Tässä ohjeessa opit käyttämään ComfyUI:ta yhdessä Z Image Turbo -mallin k
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmiston edellytysten asentaminen
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -42,14 +41,14 @@ Tässä ohjeessa opit käyttämään ComfyUI:ta yhdessä Z Image Turbo -mallin k
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Anna käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
+**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
 #### Luo virtuaaliympäristö
-Avaa Linuxissa pääte valitsemaasi hakemistoon ja suorita seuraava komento venv-ympäristön luomiseksi:
+Avaa Linuxissa pääte haluamassasi hakemistossa ja suorita seuraava komento venv-ympäristön luomiseksi:
 
 <!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
@@ -288,13 +287,13 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-Käynnistä ComfyUI Windowsissa napsauttamalla ComfyUI Desktop -käynnistintä, joka löytyy työpöydältäsi. Seuraa vaiheita asentaaksesi paikallisen version AMD:llä.
+Käynnistääksesi ComfyUI:n Windowsissa, napsauta ComfyUI Desktop Launcher -kuvaketta, joka löytyy työpöydältäsi. Seuraa vaiheita asentaaksesi paikallisen version AMD:n kanssa.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Napsauta sitten sovelluksen yläkeskellä olevaa ComfyUI-painiketta. Tämä avaa asetusvälilehden. Avaa Storage-välilehti ja varmista, että polut on asetettu seuraavasti, jotta pääset käsiksi esiasennettuihin malleihin.
+Napsauta sitten sovelluksen yläkeskellä olevaa ComfyUI-painiketta. Tämä avaa asetusvälilehden. Avaa Storage-välilehti ja varmista, että polut on asetettu seuraavasti, jotta pääset käsiksi valmiiksi asennettuihin malleihin.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
@@ -304,8 +303,10 @@ Napsauta sitten sovelluksen yläkeskellä olevaa ComfyUI-painiketta. Tämä avaa
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Käynnistä ComfyUI Linuxissa napsauttamalla ComfyUI-pikakuvaketta tehtäväpalkissa. Sen pitäisi avautua itsestään selainikkunaan.
->**Vinkki**: ComfyUI ja sen mallit tallennetaan sijaintiin `~/.local/share/ComfyUI/models`. Täältä voit lisätä työnkulkuja tai uusia malleja manuaalisesti.
+AMD Ryzen™ AI Halo -laitteilla ComfyUI toimii valmiiksi rakennetussa kontissa, joka ei vaadi lisää Python-asennuksia.
+
+Käynnistääksesi ComfyUI:n Linuxissa, napsauta ComfyUI-pikakuvaketta tehtäväpalkissa. Sen pitäisi avautua itsestään selainikkunassa.
+>**Vihje**: ComfyUI ja sen mallit tallennetaan sijaintiin `~/.local/share/ComfyUI/models`. Täältä voit lisätä työnkulkuja tai uusia malleja manuaalisesti.
 
 
 <!-- @os:end -->
@@ -313,30 +314,30 @@ Käynnistä ComfyUI Linuxissa napsauttamalla ComfyUI-pikakuvaketta tehtäväpalk
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-Käynnistä ComfyUI Windowsissa napsauttamalla yksinkertaisesti työpöydälläsi olevaa ComfyUI-pikakuvaketta.
+Käynnistääksesi ComfyUI:n Windowsissa, napsauta yksinkertaisesti työpöydälläsi olevaa ComfyUI-pikakuvaketta.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-ComfyUI:n käynnistäminen:
+Käynnistääksesi ComfyUI:n:
 
 1. Varmista, että olet ComfyUI-hakemistossa. 
 2. Suorita `python3 main.py --use-pytorch-cross-attention`
 
-ComfyUI käynnistää paikallisen verkkopalvelimen. Avaa selaimessasi osoite `http://127.0.0.1:8188` päästäksesi käyttöliittymään.
+ComfyUI käynnistää paikallisen web-palvelimen. Avaa selaimesi osoitteessa `http://127.0.0.1:8188` päästäksesi käyttöliittymään.
 
-> **Vinkki**: Pidä pääteikkuna auki ComfyUI:n käytön ajan. Sen sulkeminen pysäyttää palvelimen.
+> **Vihje**: Pidä pääteikkuna auki ComfyUI:ta käyttäessäsi. Sen sulkeminen pysäyttää palvelimen.
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 ## Z-Image Turbo -mallineen löytäminen
 
-Ennen kuvien luomista sinun täytyy ladata Z-Image Turbo -malline. Näin löydät sen:
+Ennen kuvien luomista sinun on ladattava Z-Image Turbo -malline. Näin löydät sen:
 
-1. **Katso näytön aivan vasenta reunaa**—sovelluksen vasemmassa laidassa kulkee pystysuuntainen työkalupalkki ylhäältä alas.
+1. **Katso näytön äärimmäistä vasenta reunaa**—sovelluksen vasemmassa laidassa kulkee pystysuora työkalupalkki ylhäältä alas.
 
-2. **Etsi kansiokuvake**—etsi kyseisestä vasemmasta työkalupalkista kuvaketta, joka näyttää kansiolta. Kun viet hiiren sen päälle, sen nimi on "Templates".
+2. **Etsi kansiokuvake**—etsi tästä vasemman laidan työkalupalkista kuvaketta, joka näyttää kansiolta. Kun viet hiiren sen päälle, se on nimetty "Templates."
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
@@ -344,7 +345,7 @@ Ennen kuvien luomista sinun täytyy ladata Z-Image Turbo -malline. Näin löydä
 
 3. **Napsauta kansiokuvaketta**—tämä avaa Templates-paneelin.
 
-4. **Hae "Z-Image Turbo"**—käytä hakupalkkia tai selaa saatavilla olevia malleja löytääksesi Z-Image Turbo Text To Image -työnkulun, ja napsauta sitten ladataksesi sen.
+4. **Etsi "Z-Image Turbo"**—käytä hakupalkkia tai selaa saatavilla olevia mallineita löytääksesi Z-Image Turbo Text To Image -työnkulun, ja napsauta sitten ladataksesi sen.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -356,7 +357,7 @@ Ennen kuvien luomista sinun täytyy ladata Z-Image Turbo -malline. Näin löydä
 
 ## Käyttöliittymän ymmärtäminen
 
-Kun Z-Image Turbo -malline latautuu, näet piirtoalueen, jolla on 2 pääsolmua. Ensimmäinen solmu on nimeltään "Text to Image (Z-Image-Turbo)", ja toinen solmu on kuvan katselua varten. 
+Kun Z-Image Turbo -malline latautuu, näet kanvaasin, jossa on 2 pääsolmua. Ensimmäinen solmu on nimeltään 'Text to Image (Z-Image-Turbo)', ja toinen solmu on kuvan katselua varten. 
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
@@ -369,22 +370,21 @@ Napsauta Z-Image-solmun oikeassa yläkulmassa olevaa painiketta laajentaaksesi s
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
 </p>
 
-### Putken osat
+### Putken komponentit
 
 Z-Image Turbo -työnkulku käyttää neljää keskeistä mallikomponenttia, jotka toimivat yhdessä:
 
 | Komponentti | Rooli |
 |-----------|------|
-| **Text Encoder** (Qwen 3 4B) | Muuntaa tekstikehotteesi upotuksiksi (embeddings), joita diffuusiomalli ymmärtää |
-| **Diffusion Model** (Z-Image Turbo) | Ydinneuroverkko, joka poistaa iteratiivisesti kohinaa latenttiedustuksista muodostaen kuvia |
+| **Tekstikooderi** (Qwen 3 4B) | Muuntaa tekstikehotteesi upotuksiksi, joita diffuusiomalli ymmärtää |
+| **Diffuusiomalli** (Z-Image Turbo) | Ydinneuroverkko, joka iteratiivisesti poistaa kohinaa latenttiedustuksista muodostaen kuvia |
 | **VAE** (Variational Autoencoder) | Koodaa kuvia latenttiavaruuteen ja takaisin (dekoodaa lopulliset latentit pikseleiksi) |
-| **LoRA** (valinnainen) | Kevyitä sovittimia, jotka muokkaavat tyyliä tai aihetta ilman peruslmallin uudelleenkouluttamista |
+| **LoRA** (valinnainen) | Kevyitä adaptereita, jotka muokkaavat tyyliä tai aihetta ilman perusmallin uudelleenkoulutusta |
 
-Jokainen työnkulun solmu vastaa yhtä näistä komponenteista. Data virtaa vasemmalta oikealle: teksti → upotukset → ohjattu kohinanpoisto → latentit → lopullinen kuva.
-
+Jokainen työnkulun solmu vastaa yhtä näistä komponenteista. Data kulkee vasemmalta oikealle: teksti → upotukset → ohjattu kohinanpoisto → latentit → lopullinen kuva.
 ## Ensimmäisen kuvan luominen
 
-Z-Image Turbo -malli on jo ladattu. Luodaksesi kuvan:
+Z-Image Turbo -malli on jo ladattu. Kuvan luominen:
 
 1. **Kirjoita kehotteesi** pääasialliseen Z-Image-solmuun. Ole kuvaileva. Tässä esimerkki:
    ```
@@ -392,11 +392,11 @@ Z-Image Turbo -malli on jo ladattu. Luodaksesi kuvan:
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-2. **(Valinnainen)**: Vahvista tai säädä muita alagraafin sisällä olevia asetuksia.
-3. **Napsauta sinistä "Run Workflow" -painiketta** oikeassa kulmassa (tai paina `Ctrl+Enter`)
-4. Seuraa, kuinka solmut korostuvat kunkin vaiheen suorituksen aikana
+2. **(Valinnainen)**: Vahvista tai säädä muita asetuksia alagraafissa.
+3. **Napsauta sinistä "Run Workflow" -painiketta** oikeassa yläkulmassa (tai paina `Ctrl+Enter`)
+4. Katso, kuinka solmut korostuvat kunkin vaiheen suorituksen aikana
 
-Koko työnkulun suorituksen pitäisi valmistua alle 30 sekunnissa. Luotu kuvasi näkyy **Save Image** -solmussa ja tallentuu `output/`-kansioon.
+Koko työnkulun suorituksen pitäisi valmistua alle 30 sekunnissa. Luotu kuva näkyy **Save Image** -solmussa ja tallennetaan `output/`-kansioon.
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -569,62 +569,63 @@ ls -1t ComfyUI/output/*.png | head -n 5
 
 
 ## Generointiparametrien säätäminen
+
 ### KSampler-asetukset
 
-KSampler-solmu ohjaa diffuusioprosessin ydintä:
+KSampler-solmu ohjaa varsinaista diffuusioprosessia:
 
 | Parametri | Mitä se ohjaa | Suositus Z-Image Turbolle |
 |-----------|------------------|-------------------------------|
-| **steps** | Kohinanpoiston iteraatioiden määrä | 4–10 (turbo-mallit on tislattu käyttämään vähemmän askeleita) |
-| **cfg** | Classifier-free guidance -asteikko – kuinka tarkasti kehotetta noudatetaan | 1,0–2,0 (turbo-mallit käyttävät hyvin matalaa ohjausta) |
-| **sampler_name** | Kohinanpoistoalgoritmi | `euler` ja `res_multistep` toimivat hyvin turbo-malleilla |
-| **scheduler** | Kohinan aikataulukäyrä | `normal` tai `simple` |
-| **seed** | Satunnaislukusiemen toistettavuutta varten | Aseta kiinteät arvot koostumuksen iterointia varten |
+| **steps** | Kohinanpoistoiteraatioiden määrä | 4–10 (turbo-mallit on tislattu vähempiä askelia varten) |
+| **cfg** | Classifier-free guidance -asteikko – kuinka tarkasti kehotetta noudatetaan | 1.0–2.0 (turbo-mallit käyttävät hyvin matalaa ohjausta) |
+| **sampler_name** | Kohinanpoistoalgoritmi | `euler` ja `res_multistep` toimivat hyvin turbo-malleille |
+| **scheduler** | Kohina-aikataulun käyrä | `normal` tai `simple` |
+| **seed** | Satunnaissiemen toistettavuutta varten | Aseta kiinteät arvot koostumuksen iterointia varten |
 
 ### Kuvan koko
 
-Voit säätää tulostuksen mittasuhteita etsimällä **Empty Latent Image** -solmun ja muokkaamalla **width**- ja **height**-arvoja. Pidä mitat enintään 1024 pikselissä pisimmällä sivulla parhaan laadun saavuttamiseksi.
+Säädä tulosteen mittasuhteita etsimällä **Empty Latent Image** -solmu ja muokkaamalla **width**- ja **height**-arvoja. Pidä mitat enintään 1024 pikselissä pisimmällä sivulla parhaan laadun saavuttamiseksi.
 
 ### ModelSamplingAuraFlow
 
-**ModelSamplingAuraFlow**-solmu on erikoistunut näytteenoton muunnin, joka säätää tapaa, jolla diffuusioprosessi käsittelee kohinan aikataulutusta. Tämä solmu on kytketty mallin ulostuloon Z-Image Turbo -työnkulussa.
+**ModelSamplingAuraFlow**-solmu on erikoistunut näytteistysmuuntaja, joka säätää sitä, miten diffuusioprosessi käsittelee kohina-aikataulutusta. Näet tämän solmun kytkettynä mallin ulostuloon Z-Image Turbo -työnkulussa.
 
 | Parametri | Mitä se ohjaa | Suositellut arvot |
 |-----------|------------------|-------------------|
-| **shift** | Säätää kohinan aikataulun ajoitusta – suuremmat arvot siirtävät yksityiskohtien tarkennusta myöhempiin askeliin | 1,0–4,0 (oletusarvo on 3,0) |
+| **shift** | Säätää kohina-aikataulun ajoitusta – suuremmat arvot siirtävät enemmän yksityiskohtien tarkennusta myöhempiin vaiheisiin | 1.0–4.0 (oletusarvo on 3.0) |
 
-Milloin kannattaa säätää **shift**-arvoa:
+Milloin **shift**-arvoa kannattaa säätää:
 
-- **Pienemmät arvot (1,0–2,0)**: Nopeampi konvergenssi, hyvä yksinkertaisiin koostumuksiin
-- **Suuremmat arvot (3,0–4,0)**: Asteittaisempi tarkennus, voi parantaa hienoja yksityiskohtia monimutkaisissa kuvissa
+- **Pienemmät arvot (1.0–2.0)**: Nopeampi konvergenssi, hyvä yksinkertaisille koostumuksille
+- **Suuremmat arvot (3.0–4.0)**: Vähittäisempi tarkennus, voi parantaa hienoja yksityiskohtia monimutkaisissa kohtauksissa
 
-AuraFlow-näytteenottomenetelmä on suunniteltu erityisesti flow-matching-malleille, kuten Z-Image Turbolle, varmistaen oikeanlaisen kohinajakauman koko generointiprosessin ajan.
+AuraFlow-näytteistysmenetelmä on suunniteltu erityisesti flow-matching-malleille, kuten Z-Image Turbolle, varmistaen oikean kohinajakauman koko generointiprosessin ajan.
 
-## Työnkulkujen käsittely
+## Työnkulkujen kanssa työskentely
 
 ### Työnkulkujen tallentaminen
 
-Napsauta valikon **Save**-painiketta viedäksesi työnkulkusi JSON-tiedostona. Tämä tallentaa:
+Napsauta **Save**-painiketta valikossa viedäksesi työnkulkusi JSON-tiedostona. Tämä tallentaa:
 
 - Kaikki solmut ja niiden parametrit
 - Kaikki solmujen väliset yhteydet
-- Nykyisen kehotetekstin
+- Nykyisen kehoteteksti
 
 ### Työnkulkujen lataaminen
 
-Vedä työnkulun JSON-tiedosto työtasolle tai käytä valikon **Load**-toimintoa. Oletuksena näkyvä Z-Image Turbo -työnkulku on ladattu tallennetusta työnkulkutiedostosta.
+Vedä työnkulun JSON-tiedosto piirtoalueelle tai käytä **Load**-toimintoa valikosta. Oletuksena näkyvä Z-Image Turbo -työnkulku on ladattu tallennetusta työnkulkutiedostosta.
 
 ### Työnkulkujen jakaminen
 
-Työnkulut ovat itsenäisiä kokonaisuuksia – jaa JSON-tiedosto kollegoille, jotta he voivat toistaa täsmälleen saman asetelman. Tämä tekee ComfyUI:sta erinomaisen työkalun yhteistyössä tehtävään kokeiluun.
+Työnkulut ovat itsenäisiä – jaa JSON-tiedosto kollegoiden kanssa, ja he voivat toistaa täsmälleen saman asetuksen. Tämä tekee ComfyUI:sta erinomaisen työkalun yhteistyössä tapahtuvaan kokeiluun.
 
 ## Seuraavat vaiheet
 
-- **Tutustu LoRA-solmuihin**: Käytä tyyli- tai aihe-adaptereita ilman uudelleenkoulutusta
-- **Lisää negatiivisia kehotteita**: Kytke toinen CLIP Text Encode -solmu KSamplerin **negative**-ehdollistustuloon ohjataksesi mallia pois ei-toivotuista piirteistä, kuten sumeudesta, artefakteista tai vesileimoista
-- **Rakenna mukautettuja työnkulkuja**: Ketjuta useita generointeja, lisää skaalausta ylöspäin tai luo kuvavariaatioita
-- **Selaa yhteisön työnkulkuja**: [ComfyUI-esimerkit](https://github.com/comfyanonymous/ComfyUI_examples) sisältää monia käyttövalmiita työnkulkuja
+- **Tutustu LoRA-solmuihin**: Käytä tyyli- tai aihesovittimia ilman uudelleenkoulutusta
+- **Lisää negatiivisia kehotteita**: Yhdistä toinen CLIP Text Encode -solmu KSamplerin **negative**-ehdollistustuloon ohjataksesi mallia pois ei-toivotuista piirteistä, kuten epäterävyydestä, artefakteista tai vesileimoista
+- **Rakenna mukautettuja työnkulkuja**: Ketjuta useita generointeja, lisää suurentamista tai luo kuvavariaatioita
+- **Selaa yhteisön työnkulkuja**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) sisältää monia valmiita käytettäviä työnkulkuja
 
-ComfyUI:n vahvuus on kokeilu: kytke solmuja eri tavoin, säädä parametreja ja tarkkaile, miten kukin muutos vaikuttaa tulokseen. Tämä käytännönläheinen tutkiminen kehittää intuitiota siitä, miten diffuusiomallit toimivat.
+ComfyUI:n vahvuus on kokeilu: yhdistä solmuja eri tavoin, säädä parametreja ja tarkkaile, miten kukin muutos vaikuttaa tulokseen. Tämä käytännönläheinen tutkiminen kehittää intuitiota siitä, miten diffuusiomallit toimivat.
 
 Lisätietoja saat [ComfyUI-dokumentaatiosta](https://docs.comfy.org/).

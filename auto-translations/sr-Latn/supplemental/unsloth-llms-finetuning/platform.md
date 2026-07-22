@@ -1,6 +1,12 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Konfiguracija platforme
 
-Ovaj dokument opisuje očekivane konfiguracije platforme za pokretanje ovog priručnika (playbook).
+Ovaj dokument opisuje očekivane konfiguracije platforme za pokretanje ovog priručnika.
 
 ## Preduslovi
 
@@ -25,17 +31,17 @@ PyTorch sa ROCm podrškom je unapred instaliran na AMD Ryzen™ AI Halo Develope
 
 Sledeći modeli su testirani i optimizovani za vašu platformu:
 
-| Model | Parametri | Veličina | Lokacija za preuzimanje |
+| Model | Parametri | Veličina | Lokacija preuzimanja |
 |-------|------------|------|-------------------|
 | **unsloth/gemma-4-E4B-it** | 8B | ~16GB | Preuzmite sa HF
 
-Modeli će biti automatski preuzeti u direktorijum keša Hugging Face: `~/.cache/huggingface/hub/`
+Modeli će biti automatski preuzeti u keš direktorijum za Hugging Face: `~/.cache/huggingface/hub/`
 
 Obezbedite najmanje **20GB slobodnog prostora** za skladištenje modela.
 
 ## Mrežni zahtevi
 
-Za početno podešavanje potreban je pristup internetu radi preuzimanja modela sa Hugging Face. Nakon preuzimanja, priručnik (playbook) može da radi bez internet konekcije.
+Početno podešavanje zahteva pristup internetu za preuzimanje modela sa Hugging Face. Nakon preuzimanja, priručnik može da radi van mreže.
 
 - Prvo preuzimanje modela može trajati **5-10 minuta**, u zavisnosti od veličine modela i brzine konekcije
-- Modeli se čuvaju lokalno u kešu i nije potrebno ponovo ih preuzimati
+- Modeli se lokalno keširaju i ne moraju ponovo da se preuzimaju

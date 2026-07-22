@@ -6,37 +6,37 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Este playbook usa tags especiais que o GitHub não consegue renderizar. Visite [amd.com/playbooks](https://amd.com/playbooks) para pré-visualizar corretamente este conteúdo.
+> Este playbook usa tags especiais que o GitHub não consegue renderizar. Acesse [amd.com/playbooks](https://amd.com/playbooks) para visualizar corretamente este conteúdo.
 <!-- @github-only:end -->
 
 
 ## Visão Geral
 
-vLLM é um mecanismo de inferência de alto desempenho projetado para grandes modelos de linguagem (LLMs). Ele fornece serviço otimizado com batching contínuo para alta taxa de transferência e uma API compatível com OpenAI para integração perfeita com aplicações. Isso torna o vLLM ótimo para implantações em produção onde velocidade e eficiência de recursos são críticas.
+vLLM é um mecanismo de inferência de alto desempenho projetado para modelos de linguagem grandes (LLMs). Ele fornece serviço otimizado com batching contínuo para alta taxa de transferência e uma API compatível com o OpenAI para integração perfeita com aplicações. Isso torna o vLLM ótimo para implantações em produção onde velocidade e eficiência de recursos são fundamentais.
 
-Este playbook ensina como servir LLMs usando o vLLM em contêiner na GPU integrada e interagir com modelos por meio da API Python da OpenAI.
+Este playbook ensina como servir LLMs usando o vLLM em contêiner na GPU integrada e interagir com modelos por meio da API Python do OpenAI.
 
 ## O Que Você Vai Aprender
 
-- Como configurar e iniciar um servidor vLLM com suporte a AMD ROCm™
-- Como interagir com modelos por meio de endpoints de API compatíveis com OpenAI
-- Como enviar prompts ao servidor local com `vllm-prompt`
+- Como configurar e iniciar um servidor vLLM com suporte AMD ROCm™
+- Como interagir com modelos por meio de endpoints de API compatíveis com o OpenAI
+- Como enviar prompts para o servidor local com `vllm-prompt`
 
-## Definindo a Configuração de Memória
+## Configurando a Memória
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Verificar Atualizações de Software
 
-> **Nota**: Se o VS Code não estiver instalado, você pode instalá-lo com o AMD Ryzen™ AI Developer Center.
+> **Observação**: Se o VS Code não estiver instalado, você pode instalá-lo com o AMD Ryzen™ AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalando os Pré-requisitos de Software
+## Instalando Pré-requisitos de Software
 
-Este playbook usa uma imagem de contêiner pré-construída que inclui vLLM, suporte a ROCm e os scripts auxiliares necessários para iniciar o servidor. Você não precisa instalar o PyTorch, o vLLM ou os scripts locais do playbook manualmente.
+O vLLM é executado em um contêiner pré-construído com o ROCm e suas dependências pré-combinadas. Nenhuma instalação adicional é necessária.
 
 Não há etapa de instalação do vLLM no host. Inicie o vLLM com:
 
@@ -44,25 +44,25 @@ Não há etapa de instalação do vLLM no host. Inicie o vLLM com:
 vllm-launch
 ```
 
-O launcher inicia o contêiner, direciona a GPU integrada e expõe um servidor vLLM local compatível com OpenAI. Como alternativa, clique no ícone do vLLM na barra de tarefas.
+O launcher inicia o contêiner, direciona para a GPU integrada e expõe um servidor vLLM local compatível com o OpenAI. Alternativamente, clique no ícone do vLLM na barra de tarefas.
 
 ## Início Rápido
 
-### 1. Confirme Que o Servidor vLLM Está em Execução
+### 1. Confirme que o Servidor vLLM Está em Execução
 
-O `vllm-launch` pode levar alguns minutos para inicializar tudo. Assim que iniciar, o servidor estará disponível em `http://localhost:8001`. Mantenha o terminal de inicialização aberto, pois o servidor é executado em primeiro plano; em seguida, abra um terminal separado para as demais etapas. Os exemplos abaixo usam `Qwen/Qwen3-1.7B`; se o seu launcher estiver configurado para outro modelo, substitua pelo ID desse modelo nas requisições.
+O `vllm-launch` pode levar alguns minutos para inicializar tudo. Assim que iniciar, o servidor estará disponível em `http://localhost:8001`. Mantenha o terminal de inicialização aberto, pois o servidor é executado em primeiro plano; então abra um terminal separado para as etapas restantes. Os exemplos abaixo usam `Qwen/Qwen3-1.7B`; se o seu launcher estiver configurado para um modelo diferente, substitua esse ID de modelo nas requisições.
 
 ### 2. Envie um Prompt
 
-Use o script `vllm-prompt` fornecido para enviar uma requisição ao servidor local vLLM compatível com OpenAI:
+Use o script `vllm-prompt` fornecido para enviar uma requisição ao servidor local vLLM compatível com o OpenAI:
 
 ```bash
 vllm-prompt "Tell me a story"
 ```
 
-### 3. Converse com o modelo usando a API Python da OpenAI
+### 3. Converse com o modelo usando a API Python do OpenAI
 
-Como o vLLM expõe uma API compatível com OpenAI, você pode usar o pacote Python `openai` para interagir com ela.
+Como o vLLM expõe uma API compatível com o OpenAI, você pode usar o pacote Python `openai` para interagir com ela.
 
 Primeiro, crie um ambiente virtual Python:
 
@@ -91,7 +91,7 @@ client = OpenAI(
 )
 ```
 
-Em seguida, envie uma requisição de chat completion. Isso usa o mesmo formato de mensagens da API da OpenAI — uma lista de mensagens com papéis como `"user"` e `"assistant"`. Definir `stream=True` significa que a resposta chegará de forma incremental, em vez de tudo de uma vez:
+Em seguida, envie uma requisição de chat completion. Isso usa o mesmo formato de mensagem da API OpenAI — uma lista de mensagens com funções como `"user"` e `"assistant"`. Definir `stream=True` significa que a resposta chegará de forma incremental em vez de de uma só vez:
 
 ```python
 response = client.chat.completions.create(
@@ -104,7 +104,7 @@ response = client.chat.completions.create(
 )
 ```
 
-Por fim, itere sobre os blocos transmitidos e imprima cada trecho de texto à medida que chega:
+Por fim, itere sobre os blocos transmitidos e imprima cada trecho de texto conforme chega:
 
 ```python
 for chunk in response:
@@ -115,6 +115,82 @@ for chunk in response:
 
 O script incluído [chat_with_model.py](assets/chat_with_model.py) contém o exemplo completo e pode ser baixado.
 
+
+## Escolhendo e Configurando um Modelo
+
+Por padrão, `vllm-launch` serve `Qwen/Qwen3-1.7B` como modelo de teste na porta `8001`. Você pode alterar o modelo, a porta e os parâmetros de serviço do vLLM sem reconstruir ou editar o contêiner.
+
+### Modelos testados pela AMD
+
+Os seguintes modelos são pré-configurados e validados pela AMD:
+
+| Modelo | Observações |
+|-------|-------|
+| `Qwen/Qwen3-1.7B` | Modelo padrão. Leve e rápido para carregar. |
+| `openai/gpt-oss-20b` | Modelo maior para respostas de qualidade superior. |
+
+### Iniciando um modelo diferente
+
+Informe o ID do modelo com `--model` (ou `-m`):
+
+```bash
+vllm-launch --model openai/gpt-oss-20b
+```
+
+### Alterando a porta
+
+Informe uma porta acima de 1024 com `--port` (ou `-p`); o padrão é `8001`:
+
+```bash
+vllm-launch --port 8080 --model openai/gpt-oss-20b
+```
+
+Se você alterar a porta, aponte o `base_url` do seu cliente para a mesma porta (por exemplo, `http://localhost:8080/v1`).
+
+### Passando parâmetros extras do vLLM
+
+Quaisquer argumentos adicionais são encaminhados diretamente ao vLLM, permitindo ajustar comportamentos de serviço, como o comprimento do contexto ou o tipo de dado. Há duas formas de fornecê-los.
+
+**Inline**, após as opções do launcher:
+
+```bash
+vllm-launch --model openai/gpt-oss-20b --max-model-len 8192
+```
+
+**De forma persistente**, em um arquivo de configuração em `~/.local/share/vLLM/vllm-launch.conf`. Esse arquivo não existe por padrão — crie-o e adicione seus argumentos como um array Bash:
+
+```bash
+VLLM_EXTRA_ARGS=(--max-model-len 8192 --dtype float16)
+```
+
+Use `+=` para adicionar aos argumentos padrão em vez de substituí-los:
+
+```bash
+VLLM_EXTRA_ARGS+=(--max-model-len 8192)
+```
+
+Para ver todas as opções do launcher a qualquer momento, execute:
+
+```bash
+vllm-launch --help
+```
+
+### Onde os modelos são armazenados
+
+`vllm-launch` procura modelos em dois locais:
+
+| Local | Caminho |
+|----------|------|
+| Modelos do sistema | `/var/cache/models` |
+| Modelos do usuário | `~/.local/share/vLLM/models` |
+
+Você pode colocar um modelo baixado em qualquer um dos diretórios e iniciá-lo informando seu caminho ou ID em `--model`:
+
+```bash
+vllm-launch --model /var/cache/models/my-model
+```
+
+> **Observação**: Espera-se que a execução do seu próprio modelo baixado dessa forma funcione assim que o modelo for colocado em um dos diretórios acima, mas esse fluxo de trabalho ainda não foi oficialmente validado pela AMD.
 
 ## Solução de Problemas
 
@@ -129,21 +205,20 @@ curl http://localhost:8001/health
 
 Neste playbook, você aprendeu a:
 
-- Iniciar o vLLM em contêiner com suporte a ROCm na GPU integrada
-- Iniciar um servidor vLLM com endpoints de API compatíveis com OpenAI na porta 8001
+- Iniciar o vLLM em contêiner com suporte ROCm na GPU integrada
+- Iniciar um servidor vLLM com endpoints de API compatíveis com o OpenAI na porta 8001
 - Enviar prompts com `vllm-prompt`
-- Fazer chamadas de API ao servidor vLLM usando requisições em streaming e não streaming
-- Solucionar problemas comuns relacionados à inicialização do servidor, memória e conexões de cliente
+- Fazer chamadas de API ao servidor vLLM usando requisições com e sem streaming
+- Solucionar problemas comuns de inicialização do servidor, memória e conexões de cliente
 
-Agora você tem uma implantação de vLLM em contêiner para servir grandes modelos de linguagem com desempenho otimizado na GPU integrada.
+Agora você tem uma implantação do vLLM em contêiner para servir modelos de linguagem grandes com desempenho otimizado na GPU integrada.
 
 ## Próximos Passos
 
-- **Experimente modelos diferentes** — Troque o modelo na configuração do `vllm-launch` para experimentar diferentes LLMs e comparar o desempenho.
-- **Construa uma aplicação** — Use a API compatível com OpenAI para integrar o vLLM a um aplicativo Python, chatbot ou fluxo de automação.
-- **Ajuste fino e sirva** — Faça o ajuste fino de um modelo usando LoRA ou QLoRA e, em seguida, implante-o com o vLLM para inferência otimizada.
-
+- **Experimente modelos diferentes** — Use `vllm-launch --model <model>` para experimentar diferentes LLMs e comparar o desempenho (veja [Escolhendo e Configurando um Modelo](#choosing-and-configuring-a-model)).
+- **Construa uma aplicação** — Use a API compatível com o OpenAI para integrar o vLLM a um aplicativo Python, chatbot ou fluxo de trabalho de automação.
+- **Ajuste fino e sirva** — Faça o ajuste fino de um modelo usando LoRA ou QLoRA e depois implante-o com o vLLM para inferência otimizada.
 ## Recursos Adicionais
 
 - **[Documentação Oficial do vLLM](https://docs.vllm.ai/)** — Guias abrangentes e referências de API
-- **[Repositório GitHub do vLLM](https://github.com/vllm-project/vllm)** — Código-fonte, issues e discussões da comunidade
+- **[Repositório GitHub do vLLM](https://github.com/vllm-project/vllm)** — Código-fonte, problemas e discussões da comunidade

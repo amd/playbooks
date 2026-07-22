@@ -1,170 +1,170 @@
 {
   "per_locale": {
     "ar": {
-      "files_scored": 68,
-      "mean": 93.5,
+      "files_scored": 78,
+      "mean": 93.2,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "cs-CZ": {
-      "files_scored": 68,
-      "mean": 92.6,
+      "files_scored": 78,
+      "mean": 92.8,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "da-DK": {
-      "files_scored": 68,
-      "mean": 93.6,
+      "files_scored": 78,
+      "mean": 93.3,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "de-DE": {
-      "files_scored": 68,
-      "mean": 93.8,
+      "files_scored": 78,
+      "mean": 93.7,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "el-GR": {
-      "files_scored": 68,
+      "files_scored": 78,
       "mean": 92.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "es-LA": {
-      "files_scored": 68,
-      "mean": 94.0,
-      "min": 78,
+      "files_scored": 78,
+      "mean": 93.6,
+      "min": 84,
       "judge_model": "Claude-Opus-4.8"
     },
     "fi-FI": {
-      "files_scored": 68,
-      "mean": 92.0,
-      "min": 82,
+      "files_scored": 78,
+      "mean": 92.2,
+      "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-FR": {
-      "files_scored": 68,
+      "files_scored": 78,
       "mean": 93.0,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "he": {
-      "files_scored": 68,
-      "mean": 93.1,
+      "files_scored": 78,
+      "mean": 92.9,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "hu-HU": {
-      "files_scored": 68,
+      "files_scored": 78,
       "mean": 92.2,
-      "min": 78,
+      "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "it-IT": {
-      "files_scored": 68,
-      "mean": 93.8,
+      "files_scored": 78,
+      "mean": 94.2,
       "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "ja-JP": {
-      "files_scored": 68,
+      "files_scored": 78,
       "mean": 94.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ko-KR": {
-      "files_scored": 68,
-      "mean": 94.2,
-      "min": 82,
+      "files_scored": 78,
+      "mean": 93.8,
+      "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "nb-NO": {
-      "files_scored": 68,
-      "mean": 92.4,
+      "files_scored": 78,
+      "mean": 92.1,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "nl-NL": {
-      "files_scored": 68,
-      "mean": 92.6,
-      "min": 82,
+      "files_scored": 78,
+      "mean": 92.5,
+      "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pl-PL": {
-      "files_scored": 68,
-      "mean": 93.7,
-      "min": 78,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "pt-BR": {
-      "files_scored": 68,
-      "mean": 94.2,
-      "min": 78,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "ro-RO": {
-      "files_scored": 68,
+      "files_scored": 78,
       "mean": 93.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
+    "pt-BR": {
+      "files_scored": 78,
+      "mean": 94.0,
+      "min": 78,
+      "judge_model": "Claude-Opus-4.8"
+    },
+    "ro-RO": {
+      "files_scored": 78,
+      "mean": 93.4,
+      "min": 84,
+      "judge_model": "Claude-Opus-4.8"
+    },
     "ru-RU": {
-      "files_scored": 68,
-      "mean": 93.3,
+      "files_scored": 78,
+      "mean": 92.8,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "sk-SK": {
-      "files_scored": 68,
+      "files_scored": 78,
       "mean": 92.2,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sl-SI": {
-      "files_scored": 68,
-      "mean": 91.1,
+      "files_scored": 78,
+      "mean": 91.3,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "sr-Latn": {
-      "files_scored": 68,
-      "mean": 91.7,
+      "files_scored": 78,
+      "mean": 91.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sv-SE": {
-      "files_scored": 68,
-      "mean": 93.0,
-      "min": 78,
+      "files_scored": 78,
+      "mean": 92.7,
+      "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "th-TH": {
-      "files_scored": 68,
-      "mean": 93.6,
+      "files_scored": 78,
+      "mean": 93.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "tr-TR": {
-      "files_scored": 68,
-      "mean": 92.9,
-      "min": 82,
+      "files_scored": 78,
+      "mean": 92.8,
+      "min": 80,
       "judge_model": "Claude-Opus-4.8"
     },
     "uk-UA": {
-      "files_scored": 68,
-      "mean": 93.6,
+      "files_scored": 78,
+      "mean": 93.2,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 68,
-      "mean": 93.0,
-      "min": 72,
+      "files_scored": 78,
+      "mean": 93.6,
+      "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-TW": {
-      "files_scored": 68,
-      "mean": 93.9,
+      "files_scored": 78,
+      "mean": 93.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     }
@@ -175,12 +175,6 @@
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 72,
       "issues": "Redundant 'Ottimizzazione fine-tuning'; trademark ™ misplaced from Unsloth to LLM; 'fine-tuned' rendered as generic 'ottimizzati'."
-    },
-    {
-      "locale": "zh-CN",
-      "file": "playbooks/supplemental/clustering-rccl/playbook.json",
-      "score": 72,
-      "issues": "Title awkward 'AMD' added not in source; '聚簇...的RCCL' mistranslates 'Clustering with RCCL'."
     },
     {
       "locale": "cs-CZ",
@@ -201,22 +195,10 @@
       "issues": "Trademark symbol misplaced (should follow Unsloth, not LLM); 'Fine-Tuning' terminology inconsistent between title and body."
     },
     {
-      "locale": "es-LA",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Trademark symbol misplaced (should follow Unsloth, not LLM); slightly redundant parenthetical; otherwise accurate and fluent."
-    },
-    {
       "locale": "fr-FR",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
       "issues": "Trademark symbol misplaced (should follow LLMs, not the phrase); terminology inconsistency (Ajustement fin vs affinés)."
-    },
-    {
-      "locale": "hu-HU",
-      "file": "playbooks/supplemental/amd-sync/playbook.json",
-      "score": 78,
-      "issues": "Title mistranslates 'AMD Sync' as 'AMD-szinkronizálással' instead of keeping brand name; otherwise accurate and fluent."
     },
     {
       "locale": "ja-JP",
@@ -231,6 +213,12 @@
       "issues": "Trademark symbol misplaced; source has 'fine-tuned LLMs™' but translation attaches ™ to Unsloth."
     },
     {
+      "locale": "nl-NL",
+      "file": "playbooks/core/deepseek-v4-flash-ds4/playbook.json",
+      "score": 78,
+      "issues": "Title 'Running' left untranslated; should be 'DeepSeek V4 Flash draaien' or similar."
+    },
+    {
       "locale": "pl-PL",
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 78,
@@ -243,34 +231,22 @@
       "issues": "Title translated 'AMD Sync' as 'sincronização AMD' but kept brand elsewhere; inconsistent brand handling."
     },
     {
-      "locale": "ro-RO",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Trademark symbol misplaced (should follow Unsloth, not LLM); awkward phrasing 'ajustate fin cu eficiență a memoriei'."
-    },
-    {
-      "locale": "sl-SI",
-      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Awkward 'fino prilagajanje'; parenthetical '(fine-tune)' clutters; 'LLaMA-Factory' hyphen inconsistent with brand."
-    },
-    {
       "locale": "sl-SI",
       "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
       "score": 78,
       "issues": "Redundant English glosses in parentheses; 'fino prilagajanje' awkward for fine-tuning, though terms and brands intact."
     },
     {
-      "locale": "sv-SE",
-      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
-      "score": 78,
-      "issues": "Title mistranslates 'speech-to-speech' as 'speech recognition and speech translation'; body is accurate."
-    },
-    {
       "locale": "th-TH",
       "file": "playbooks/core/comfyui-image-gen/playbook.json",
       "score": 78,
       "issues": "Title mistranslated as progressive 'กำลังสร้าง' (generating in progress) instead of gerund heading; slightly awkward phrasing."
+    },
+    {
+      "locale": "tr-TR",
+      "file": "playbooks/supplemental/speech2speech-translation/platform.md",
+      "score": 80,
+      "issues": "Headings left untranslated (Platform Configuration, Prerequisites, Required Models, Network Requirements); table headers untranslated. Body translation accurate and fluent."
     },
     {
       "locale": "cs-CZ",
@@ -285,16 +261,10 @@
       "issues": "Inconsistent terminology (Feinabstimmung vs Fine-Tuning); trademark symbol misplaced from original 'fine-tuned LLMs™'."
     },
     {
-      "locale": "fi-FI",
-      "file": "playbooks/supplemental/vllm-inference/playbook.json",
+      "locale": "hu-HU",
+      "file": "playbooks/core/deepseek-v4-flash-ds4/playbook.json",
       "score": 82,
-      "issues": "'palvelua' awkward for serving; 'konteinoitua' non-standard term; otherwise accurate and fluent."
-    },
-    {
-      "locale": "it-IT",
-      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
-      "score": 82,
-      "issues": "Title redundant: 'Ottimizzazione fine-tuning' pleonastic; otherwise accurate, fluent, terms intact."
+      "issues": "Title phrasing awkward ('Futtatás:' colon-style); otherwise accurate, terms intact, fluent."
     },
     {
       "locale": "it-IT",
@@ -303,16 +273,10 @@
       "issues": "Title omits 'speech-to-speech' nuance; 'voce a voce' slightly awkward but acceptable; overall accurate and fluent."
     },
     {
-      "locale": "ko-KR",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "locale": "pl-PL",
+      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
       "score": 82,
-      "issues": "Inconsistent terminology (파인튜닝 vs 미세 조정); slightly awkward phrasing in second line."
-    },
-    {
-      "locale": "nl-NL",
-      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
-      "score": 82,
-      "issues": "Inconsistent terminology: 'Fijnafstemmen' vs 'Verfijn' for fine-tuning; 'Fijnafstemmen' is awkward but acceptable."
+      "issues": "Title adds 'codzienny' (daily) not in source; 'from development' loosely rendered. Otherwise accurate, fluent, terms intact."
     },
     {
       "locale": "sk-SK",
@@ -325,6 +289,12 @@
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 82,
       "issues": "Trademark symbol misplaced (should follow Unsloth, not LLM); otherwise accurate and fluent."
+    },
+    {
+      "locale": "sl-SI",
+      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent brand form 'LLaMA-Factory' vs 'LLaMA Factory'; 'fino prilagajanje' awkward; second sentence omits fine-tuning nuance."
     },
     {
       "locale": "sl-SI",
@@ -345,34 +315,10 @@
       "issues": "Title left 'Local Computer Vision' untranslated; otherwise accurate, fluent, terms and brands intact."
     },
     {
-      "locale": "th-TH",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 82,
-      "issues": "Trademark symbol misplaced; 'fine-tuned LLMs™' rendered awkwardly; minor fluency loss but meaning preserved."
-    },
-    {
       "locale": "tr-TR",
       "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
       "score": 82,
       "issues": "Second sentence grammar awkward: 'modellerini ince ayar yapın' should be 'modellerinde ince ayar yapın' or 'ince ayarlayın'."
-    },
-    {
-      "locale": "tr-TR",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 82,
-      "issues": "Trademark symbol ™ misplaced; should follow Unsloth brand, not sentence end. Otherwise accurate and fluent."
-    },
-    {
-      "locale": "tr-TR",
-      "file": "playbooks/supplemental/vllm-inference/playbook.json",
-      "score": 82,
-      "issues": "Added 'AMD' not in source; 'çıkarım/sunum' acceptable but adds slight interpretation."
-    },
-    {
-      "locale": "zh-CN",
-      "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
-      "score": 82,
-      "issues": "Added 'AMD' not in source; 'RPC server' left untranslated but acceptable; otherwise accurate and fluent."
     },
     {
       "locale": "zh-CN",
@@ -394,15 +340,15 @@
     },
     {
       "locale": "ro-RO",
-      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 84,
-      "issues": "Awkward 'construiește o traducere'; 'vorbire-în-vorbire' unusual hyphenation but understandable; otherwise accurate."
+      "issues": "Trademark symbol misplaced (belongs to LLMs, not memory phrase); slightly awkward phrasing but accurate."
     },
     {
       "locale": "sr-Latn",
-      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
+      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
       "score": 84,
-      "issues": "Minor: 'agent' should be accusative 'agenta'; brand hyphenation slightly awkward but acceptable."
+      "issues": "'digest' left untranslated inconsistently (earlier 'dnevni pregled'); otherwise accurate, fluent, terms intact."
     }
   ]
 }

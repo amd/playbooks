@@ -1,0 +1,5 @@
+{
+  "id": "hermes-lemonade-server",
+  "title": "在本地使用 Lemonade Server 运行 Hermes Agent",
+  "description": "安装并配置 Hermes Agent 自主 AI 代理，使用 Lemonade Server 作为其本地 AI 后端。"
+}

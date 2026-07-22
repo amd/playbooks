@@ -1,10 +1,16 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Configuración de la plataforma
 
 Este documento describe las configuraciones de plataforma esperadas para ejecutar este playbook.
 
-## Requisitos previos
+## Prerrequisitos
 
-PyTorch con soporte para ROCm viene preinstalado en la AMD Ryzen™ AI Halo Developer Platform. Para todos los demás dispositivos, los usuarios deben instalar PyTorch con soporte para ROCm manualmente. Consulta la sección correspondiente a tu sistema operativo:
+PyTorch con soporte ROCm viene preinstalado en la AMD Ryzen™ AI Halo Developer Platform. Para todos los demás dispositivos, los usuarios deben instalar manualmente PyTorch con soporte ROCm. Consulta la sección correspondiente a tu sistema operativo:
 
 
 ### Windows
@@ -23,7 +29,7 @@ PyTorch con soporte para ROCm viene preinstalado en la AMD Ryzen™ AI Halo Deve
 
 ## Modelos requeridos
 
-Los siguientes modelos están probados y optimizados para tu plataforma:
+Los siguientes modelos han sido probados y optimizados para tu plataforma:
 
 | Modelo | Parámetros | Tamaño | Ubicación de descarga |
 |-------|------------|------|-------------------|
@@ -31,11 +37,11 @@ Los siguientes modelos están probados y optimizados para tu plataforma:
 
 Los modelos se descargarán automáticamente al directorio de caché de Hugging Face: `~/.cache/huggingface/hub/`
 
-Asegúrate de tener al menos **20 GB de espacio libre** para el almacenamiento de modelos.
+Asegúrate de tener al menos **20GB de espacio libre** para el almacenamiento de modelos.
 
 ## Requisitos de red
 
 La configuración inicial requiere acceso a internet para descargar los modelos desde Hugging Face. Después de la descarga, el playbook puede ejecutarse sin conexión.
 
-- Las primeras descargas de modelos pueden tardar entre **5 y 10 minutos**, según el tamaño del modelo y la velocidad de conexión
-- Los modelos se almacenan en caché localmente y no es necesario volver a descargarlos
+- Las primeras descargas de modelos pueden tardar entre **5 y 10 minutos**, dependiendo del tamaño del modelo y de la velocidad de la conexión
+- Los modelos quedan almacenados en caché localmente y no es necesario volver a descargarlos

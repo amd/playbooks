@@ -6,25 +6,25 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ce guide utilise des balises spéciales que GitHub ne peut pas afficher. Veuillez consulter [amd.com/playbooks](https://amd.com/playbooks) pour prévisualiser correctement ce contenu.
+> Ce playbook utilise des balises spéciales que GitHub ne peut pas afficher. Veuillez consulter [amd.com/playbooks](https://amd.com/playbooks) pour prévisualiser correctement ce contenu.
 <!-- @github-only:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Ce guide nécessite un minimum de **32 Go** de mémoire système.
+> Ce playbook nécessite un minimum de **32 Go** de mémoire système.
 <!-- @device:end -->
 
-## Présentation
+## Vue d'ensemble
 
-Les agents de codage sont des outils puissants qui permettent aux développeurs de collaborer avec des agents IA reposant sur des modèles de langage de grande taille (LLM). Ils peuvent être intégrés directement dans l'environnement de développement, comme le terminal ou VS Code, permettant une intégration fluide dans le flux de travail d'un développeur.
+Les agents de codage sont des outils puissants qui permettent aux développeurs de collaborer avec des agents IA reposant sur des grands modèles de langage (LLM). Ils peuvent être intégrés à l'environnement de développement, comme le terminal ou VS Code, permettant une intégration fluide dans le flux de travail d'un développeur.
 
 Ce tutoriel montre comment utiliser Cline, VS Code et LM Studio pour exécuter un agent de codage entièrement sur votre machine locale.
 
 ## Ce que vous allez apprendre
 
-* Comment exécuter VS Code avec l'agent de codage Cline pour faciliter les tâches d'ingénierie logicielle.
-* Comment configurer Cline pour communiquer avec LM Studio afin d'effectuer l'inférence locale des agents de codage.
-* Comment utiliser des agents de codage locaux pour résoudre des tâches d'ingénierie logicielle concrètes.
+* Comment exécuter VS Code avec l'agent de codage Cline pour aider aux tâches d'ingénierie logicielle.
+* Comment configurer Cline pour communiquer avec LM Studio pour l'inférence locale des agents de codage.
+* Comment utiliser des agents de codage locaux pour résoudre des problèmes concrets d'ingénierie logicielle.
 
 ## Configuration de la mémoire
 
@@ -32,7 +32,7 @@ Ce tutoriel montre comment utiliser Cline, VS Code et LM Studio pour exécuter u
 
 <!-- @device:halo_box -->
 ## Vérifier les mises à jour logicielles
-> **Remarque** : Si VS Code n'est pas installé, vous pouvez l'installer avec le Ryzen AI Developer Center.
+> **Remarque** : Si VS Code n'est pas installé, vous pouvez l'installer avec Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -49,19 +49,19 @@ Nous allons utiliser LM Studio pour servir le LLM alimentant l'agent de codage.
 
 ![Écran initial de LM Studio](assets/initial-lm-studio.png)
 
-Ensuite, nous devons charger le LLM sur le système. Nous allons utiliser le modèle `Qwen3-Coder-30B-A3B` avec une grande longueur de contexte. (Utilisez l'onglet Model pour l'installer si ce n'est pas déjà fait).
-- Cliquez sur la barre de recherche en haut de la fenêtre LM Studio ou appuyez sur `CTRL+L`. Cliquez sur le commutateur `Manually choose model load parameters`, puis cliquez sur le modèle Qwen3-Coder-30B-A3B.
-- Changez la longueur de contexte de `4096` à `32768`, et assurez-vous que `GPU Offload` est réglé au maximum. Ensuite, cliquez sur `Load Model`
+Ensuite, nous devons charger le LLM sur le système. Nous allons utiliser le modèle `Qwen3-Coder-30B-A3B` avec une longueur de contexte importante. (Utilisez l'onglet Model pour l'installer si ce n'est pas déjà fait).
+- Cliquez sur la barre de recherche en haut de la fenêtre LM Studio ou appuyez sur `CTRL+L`. Cliquez sur le commutateur `Manually choose model load parameters` puis cliquez sur le modèle Qwen3-Coder-30B-A3B.
+- Changez la longueur de contexte de `4096` à `32768`, et assurez-vous que `GPU Offload` est au maximum. Puis, cliquez sur `Load Model`
 
 ![Sélection du modèle](assets/model-list-zoomed.png)
 
-Nous utilisons une grande longueur de contexte afin que l'agent puisse traiter des bases de code volumineuses et se souvenir des modifications apportées.
+Nous utilisons une longueur de contexte importante afin que l'agent puisse traiter de grandes bases de code et se souvenir des modifications apportées.
 
 ![Configuration du modèle](assets/selecting-model-zoomed.png)
 
-Ensuite, nous devons activer le serveur LM Studio.
-- Cliquez sur l'onglet Developer ou appuyez sur `CTRL+2` dans LM Studio, sur la gauche.
-- Vérifiez le bouton de statut et assurez-vous qu'il est réglé sur `Running`.
+Ensuite, nous devons activer le serveur LM Studio. 
+- Cliquez sur l'onglet Developer ou appuyez sur `CTRL+2` dans LM Studio à gauche.
+- Vérifiez le bouton bascule de statut et assurez-vous qu'il est réglé sur `Running`.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -84,15 +84,49 @@ curl -s http://127.0.0.1:1234/v1/models
 ![Statut du serveur](assets/lm-studio-server-status.png)
 
 <!-- @os:windows -->
+<!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
+```powershell
+# CI: pin a GPU (Vulkan) runtime so tests don't fall back to the CPU engine.
+lms runtime ls
+$rt = ((lms runtime ls) -match 'vulkan' | Select-Object -First 1)
+if ($rt) {
+  lms runtime select (($rt.Trim() -split '\s+')[0])
+  lms runtime ls | Select-String 'ENGINE|✓'
+} else {
+  Write-Output "WARNING: no Vulkan runtime installed; GPU acceleration unavailable. Install with: lms get <vulkan-runtime>"
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
 <!-- @test:id=lmstudio-load-qwen3-coder-windows timeout=1200 hidden=True -->
 ```powershell
 lms unload --all
 lms ps
 $ID = "qwen3coder-32k-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
+# retry once: large-model loads can transiently fail under memory pressure
 lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y
+if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y }
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-select-gpu-runtime-linux timeout=120 hidden=True -->
+```bash
+# CI: pin a GPU (Vulkan) runtime so tests don't fall back to the CPU engine.
+lms runtime ls
+GPU_RT="$(lms runtime ls 2>/dev/null | awk '/vulkan/{print $1; exit}')"
+if [ -n "$GPU_RT" ]; then
+  lms runtime select "$GPU_RT"
+  lms runtime ls | grep -E 'ENGINE|✓'
+else
+  echo "WARNING: no Vulkan runtime installed; GPU acceleration unavailable. Install with: lms get <vulkan-runtime>"
+fi
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -104,7 +138,8 @@ lms unload --all || true
 lms ps
 ID="qwen3coder-32k-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
-lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y
+# retry once: large-model loads can transiently fail under memory pressure
+lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y; }
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -115,11 +150,11 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 Nous allons installer l'extension Cline dans VS Code et la connecter au serveur LM Studio que nous venons de créer.
 - Dans la barre de recherche, recherchez `VS Code` et lancez l'application.
-- Cliquez sur l'icône `Extensions` dans la colonne de gauche de VS Code et recherchez `Cline`. Ensuite, cliquez sur le bouton `Install`.
+- Cliquez sur l'icône `Extensions` dans la colonne de gauche de VS Code et recherchez `Cline`. Puis, cliquez sur le bouton `Install`. 
 
 ![Installation de l'extension Cline](assets/installing-cline-vscode-extension.png)
 
-- Une icône Cline devrait apparaître sur la gauche. Cliquez dessus pour ouvrir Cline. Une fenêtre s'affichera avec la question `How will you use Cline?`. Comme nous allons utiliser un LLM local exécuté via LM Studio, sélectionnez `Bring my own API Key` et cliquez sur `Continue`.
+- Une icône Cline devrait apparaître à gauche. Cliquez dessus pour ouvrir Cline. Une fenêtre demandera `How will you use Cline?`. Comme nous allons utiliser un LLM local fonctionnant via LM Studio, sélectionnez `Bring my own API Key` et cliquez sur `Continue`. 
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -139,34 +174,34 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 <!-- @test:end -->
 <!-- @os:end -->
 
-![Création de compte](assets/cline-how-will-you-use-cline-zoomed.png)
+![Création du compte](assets/cline-how-will-you-use-cline-zoomed.png)
 
-Ensuite, nous devons configurer Cline pour qu'il communique avec le serveur LM Studio que nous avons configuré.
-- Définissez le fournisseur d'API (`API Provider`) sur `LM Studio` et le modèle sur `Qwen3-Coder-30B-A3B-GGUF`.
+Ensuite, nous devons configurer Cline pour qu'il communique avec le serveur LM Studio que nous avons configuré. 
+- Réglez le API Provider sur `LM Studio` et le modèle sur `Qwen3-Coder-30B-A3B-GGUF`. 
 
 >**Astuce** : Des modèles plus récents peuvent être disponibles. Envisagez de télécharger et de passer aux modèles Qwen3.6 si vous le souhaitez.
 
 
 ![Configuration du modèle](assets/cline-model-configuration-zoomed.png)
 
-## Créer votre premier projet
+## Création de votre premier projet
 
 Utilisons notre agent local pour créer un site web ! Ouvrez VS Code dans un répertoire de votre choix où Cline créera les fichiers.
 - Pour ce faire, allez dans `File -> Open Folder` en haut à gauche de VS Code et choisissez un dossier comme `Documents`.
 
-![Dossier vide dans VS Code](assets/open-cline-test.png)
+![Dossier vide de VS Code](assets/open-cline-test.png)
 
-Nous sommes maintenant prêts à donner des instructions à l'agent de codage local.
-- Cliquez sur l'extension Cline dans la colonne de gauche et saisissez une instruction pour démarrer l'agent. Par exemple, utilisons l'instruction suivante :
+Nous sommes maintenant prêts à interroger l'agent de codage local. 
+- Cliquez sur l'extension Cline dans la colonne de gauche et saisissez une invite pour lancer l'agent. Par exemple, utilisons l'invite suivante :
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-L'agent commencera alors à créer des fichiers en fonction de l'instruction. En tant qu'utilisateur, vous pouvez voir le code se générer dans VS Code, comme illustré ci-dessous. Vous devrez peut-être cliquer sur `Save` à chaque fois que Cline souhaite créer un fichier.
+L'agent commencera alors à créer des fichiers selon l'invite. En tant qu'utilisateur, vous pouvez observer le code être généré dans VS Code comme illustré ci-dessous. Il se peut que vous deviez cliquer sur `Save` à chaque fois que Cline souhaite créer un fichier. 
 
 ![Génération de code par Cline](assets/cline-code-generation.png)
 
-Une fois le logiciel généré, l'agent a terminé et vous pouvez exécuter l'application. Dans ce cas, l'agent a écrit dans trois fichiers : `index.html`, `script.js` et `styles.css`. En double-cliquant simplement sur le fichier HTML, nous pouvons charger et interagir avec le site web généré.
+Après avoir généré le logiciel, l'agent a terminé et vous pouvez exécuter l'application. Dans ce cas, l'agent a écrit trois fichiers : `index.html`, `script.js`, et `styles.css`. En double-cliquant simplement sur le fichier HTML, nous pouvons charger et interagir avec le site web généré.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -183,12 +218,12 @@ req = urllib.request.Request(
         "model": model_id,
         "messages": [{"role":"user","content":"Write a Python function add(a,b) that returns a+b. Only output code."}],
         "temperature": 0,
-        "max_tokens": 500
+        "max_tokens": 64
     }).encode("utf-8"),
     headers={"Content-Type":"application/json"},
     method="POST",
 )
-with urllib.request.urlopen(req, timeout=60) as r:
+with urllib.request.urlopen(req, timeout=120) as r:
     print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end -->
@@ -206,12 +241,12 @@ req = urllib.request.Request(
         "model": model_id,
         "messages": [{"role":"user","content":"Write a Python function add(a,b) that returns a+b. Only output code."}],
         "temperature": 0,
-        "max_tokens": 500
+        "max_tokens": 64
     }).encode("utf-8"),
     headers={"Content-Type":"application/json"},
     method="POST",
 )
-with urllib.request.urlopen(req, timeout=60) as r:
+with urllib.request.urlopen(req, timeout=120) as r:
     print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end -->
@@ -243,18 +278,18 @@ lms server stop
 
 Après avoir généré le site web, vous pouvez continuer à travailler avec Cline pour l'améliorer. Voici deux améliorations possibles :
 
-- **Documentation** : Il suffit de demander à l'agent `Add a README` pour que celui-ci génère un fichier `README.md` documentant le site web.
+- **Documentation** : Il suffit de demander à l'agent `Add a README` pour qu'il génère un fichier `README.md` documentant le site web.
 - **Animation** : Demandez au modèle `Add an animation that visually represents a large language model running on a laptop.` pour générer une animation à ajouter au site web.
 
 Nous encourageons le lecteur à essayer de générer d'autres applications à l'aide de cette configuration. Voici quelques exemples amusants que nous avons testés :
 
-- **Jeux d'arcade rétro** : Essayez d'autres invites. Il peut également être amusant de demander à l'agent de créer des jeux de style rétro en Python à l'aide du package `PyGame` avec l'invite suivante :
+- **Jeux d'arcade rétro** : Essayez d'autres prompts. Il peut également être amusant de demander à l'agent de créer des jeux de style rétro en Python à l'aide du package `PyGame`, avec le prompt suivant :
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **Analyse de données** : Un domaine où les agents de codage sont particulièrement utiles est celui du scripting et de l'analyse de données. Voici une invite pour illustrer la capacité du modèle local à générer un logiciel d'analyse de données pour la visualisation des cours boursiers :
+- **Analyse de données** : Le scripting et l'analyse de données sont des domaines où les agents de codage sont particulièrement utiles. Voici un prompt permettant de démontrer la capacité du modèle local à générer un logiciel d'analyse de données pour la visualisation des cours boursiers :
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -264,6 +299,6 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 Voici quelques ressources supplémentaires pour en savoir plus sur les agents de codage, Cline, et l'exécution de charges de travail sur 
 
-* Plus d'informations sur le partenariat et l'intégration entre AMD et LM Studio : https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* Article de blog AMD expliquant comment exécuter Cline sur des cartes AMD Ryzen™ AI et Radeon™ Graphics : https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* Plus d'informations sur le partenariat et l'intégration AMD LM Studio : https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
+* Article de blog AMD expliquant comment exécuter Cline sur les cartes AMD Ryzen™ AI et Radeon™ Graphics : https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
 * Article de blog Cline sur l'exécution locale d'agents de codage sur des PC IA : https://cline.bot/blog/local-models-amd

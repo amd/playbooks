@@ -5,25 +5,24 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
-
 > [!IMPORTANT]
-> Ten poradnik wykorzystuje specjalne znaczniki, których GitHub nie potrafi wyrenderować. Odwiedź stronę [amd.com/playbooks](https://amd.com/playbooks), aby poprawnie wyświetlić tę zawartość.
+> Ten poradnik wykorzystuje specjalne znaczniki, których GitHub nie może wyrenderować. Odwiedź stronę [amd.com/playbooks](https://amd.com/playbooks), aby poprawnie wyświetlić tę treść.
 <!-- @github-only:end -->
 
 ## Przegląd
 
-ComfyUI to zaawansowany, oparty na węzłach interfejs dla Stable Diffusion oraz innych modeli dyfuzyjnych. W przeciwieństwie do tradycyjnych interfejsów tekst-na-obraz z prostymi polami promptów, ComfyUI udostępnia cały potok generowania obrazu w postaci wizualnego grafu, dając pełną kontrolę nad każdym etapem — od kodowania tekstu, przez manipulację w przestrzeni ukrytej (latent space), aż po finalne dekodowanie.
+ComfyUI to zaawansowany, oparty na węzłach interfejs dla Stable Diffusion i innych modeli dyfuzyjnych. W przeciwieństwie do tradycyjnych interfejsów tekst-na-obraz z prostym polem promptu, ComfyUI udostępnia cały potok generowania obrazu jako wizualny graf, dając pełną kontrolę nad każdym etapem — od kodowania tekstu, przez manipulację przestrzenią latentną, aż po ostateczne dekodowanie.
 
-Ten poradnik pokazuje, jak korzystać z ComfyUI z modelem Z Image Turbo na swoim GPU, aby generować wysokiej jakości obrazy AI.
+Ten samouczek pokazuje, jak korzystać z ComfyUI z modelem Z Image Turbo na Twoim GPU, aby generować wysokiej jakości obrazy AI.
 
 ## Czego się nauczysz
 
 - Jak uruchomić ComfyUI i wczytać szablon Z-Image Turbo
 - Zrozumienie komponentów potoku dyfuzyjnego
-- Generowanie obrazów i dostrajanie parametrów generowania
+- Generowanie obrazów i dostrajanie parametrów generacji
 - Zapisywanie i udostępnianie przepływów pracy
 
-## Konfiguracja pamięci
+## Ustawianie konfiguracji pamięci
 
 <!-- @require:memory-config -->
 
@@ -33,7 +32,7 @@ Ten poradnik pokazuje, jak korzystać z ComfyUI z modelem Z Image Turbo na swoim
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalacja wymaganego oprogramowania
+## Instalowanie wymaganego oprogramowania
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -42,14 +41,14 @@ Ten poradnik pokazuje, jak korzystać z ComfyUI z modelem Z Image Turbo na swoim
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Nadaj swojemu użytkownikowi dostęp do urządzeń GPU** (wyloguj się i zaloguj ponownie, aby zmiana zaczęła obowiązywać):
+**Nadaj swojemu użytkownikowi dostęp do urządzeń GPU** (aby to zadziałało, wyloguj się i zaloguj ponownie):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
 #### Tworzenie środowiska wirtualnego
-W systemie Linux otwórz terminal w wybranym katalogu i uruchom poniższe polecenie, aby utworzyć środowisko wirtualne (venv):
+W systemie Linux otwórz terminal w wybranym katalogu i uruchom poniższe polecenie, aby utworzyć venv:
 
 <!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
@@ -288,13 +287,13 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-Aby uruchomić ComfyUI w systemie Windows, kliknij launcher ComfyUI Desktop znajdujący się na pulpicie. Postępuj zgodnie z krokami, aby zainstalować lokalną wersję z AMD.
+Aby uruchomić ComfyUI w systemie Windows, kliknij Launcher ComfyUI Desktop znajdujący się na pulpicie. Postępuj zgodnie z krokami, aby zainstalować lokalną wersję z AMD.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Następnie kliknij przycisk ComfyUI na górnym środku aplikacji. Otworzy się zakładka ustawień. Otwórz zakładkę Storage i upewnij się, że ścieżki są ustawione zgodnie z poniższym, aby uzyskać dostęp do wstępnie zainstalowanych modeli.
+Następnie kliknij przycisk ComfyUI na środku u góry aplikacji. Otworzy się karta ustawień. Otwórz kartę Storage i upewnij się, że ścieżki są ustawione w następujący sposób, aby uzyskać dostęp do wstępnie zainstalowanych modeli.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
@@ -304,6 +303,8 @@ Następnie kliknij przycisk ComfyUI na górnym środku aplikacji. Otworzy się z
 <!-- @os:end -->
 
 <!-- @os:linux -->
+Na AMD Ryzen™ AI Halo, ComfyUI działa w gotowym kontenerze, który nie wymaga dodatkowej konfiguracji Pythona.
+
 Aby uruchomić ComfyUI w systemie Linux, kliknij skrót ComfyUI na pasku zadań. Powinien otworzyć się samodzielnie w oknie przeglądarki.
 >**Wskazówka**: ComfyUI i jego modele są przechowywane w `~/.local/share/ComfyUI/models`. To tutaj możesz ręcznie dodawać przepływy pracy lub nowe modele.
 
@@ -325,7 +326,7 @@ Aby uruchomić ComfyUI:
 
 ComfyUI uruchamia lokalny serwer WWW. Otwórz przeglądarkę pod adresem `http://127.0.0.1:8188`, aby uzyskać dostęp do interfejsu.
 
-> **Wskazówka**: Trzymaj okno terminala otwarte podczas korzystania z ComfyUI. Zamknięcie go zatrzyma serwer.
+> **Wskazówka**: Podczas korzystania z ComfyUI pozostaw okno terminala otwarte. Zamknięcie go zatrzyma serwer.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -334,7 +335,7 @@ ComfyUI uruchamia lokalny serwer WWW. Otwórz przeglądarkę pod adresem `http:/
 
 Przed wygenerowaniem obrazów musisz wczytać szablon Z-Image Turbo. Oto jak go znaleźć:
 
-1. **Spójrz na lewą krawędź ekranu** — znajduje się tam pionowy pasek narzędzi biegnący od góry do dołu po lewej stronie aplikacji.
+1. **Spójrz na lewy skraj ekranu** — po lewej stronie aplikacji, od góry do dołu, biegnie pionowy pasek narzędzi.
 
 2. **Znajdź ikonę folderu** — w tym lewym pasku narzędzi poszukaj ikony przypominającej folder. Po najechaniu na nią kursorem zobaczysz etykietę „Templates”.
 
@@ -342,7 +343,7 @@ Przed wygenerowaniem obrazów musisz wczytać szablon Z-Image Turbo. Oto jak go 
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
 </p>
 
-3. **Kliknij ikonę folderu** — otworzy się panel szablonów (Templates).
+3. **Kliknij ikonę folderu** — otworzy się panel Templates.
 
 4. **Wyszukaj „Z-Image Turbo”** — użyj paska wyszukiwania lub przewiń dostępne szablony, aby znaleźć przepływ pracy Z-Image Turbo Text To Image, a następnie kliknij, aby go wczytać.
 
@@ -356,7 +357,7 @@ Przed wygenerowaniem obrazów musisz wczytać szablon Z-Image Turbo. Oto jak go 
 
 ## Zrozumienie interfejsu
 
-Po wczytaniu szablonu Z-Image Turbo zobaczysz płótno z 2 głównymi węzłami. Pierwszy węzeł nazywa się „Text to Image (Z-Image-Turbo)”, a drugi służy do podglądu obrazu. 
+Po wczytaniu szablonu Z-Image Turbo zobaczysz płótno z dwoma głównymi węzłami. Pierwszy węzeł nazywa się „Text to Image (Z-Image-Turbo)”, a drugi służy do podglądu obrazu. 
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
@@ -375,18 +376,17 @@ Przepływ pracy Z-Image Turbo wykorzystuje cztery kluczowe komponenty modelu, kt
 
 | Komponent | Rola |
 |-----------|------|
-| **Enkoder tekstu** (Qwen 3 4B) | Przekształca Twój prompt tekstowy w osadzenia (embeddings), które rozumie model dyfuzyjny |
-| **Model dyfuzyjny** (Z-Image Turbo) | Główna sieć neuronowa, która iteracyjnie odszumia reprezentacje ukryte (latent) w obrazy |
-| **VAE** (Variational Autoencoder) | Koduje obrazy do/z przestrzeni ukrytej (dekoduje finalne dane latentne w piksele) |
+| **Text Encoder** (Qwen 3 4B) | Konwertuje Twój prompt tekstowy na osadzenia (embeddings) zrozumiałe dla modelu dyfuzyjnego |
+| **Diffusion Model** (Z-Image Turbo) | Główna sieć neuronowa, która iteracyjnie usuwa szum z reprezentacji latentnych, przekształcając je w obrazy |
+| **VAE** (Variational Autoencoder) | Koduje obrazy do/z przestrzeni latentnej (dekoduje ostateczne latenty na piksele) |
 | **LoRA** (opcjonalnie) | Lekkie adaptery modyfikujące styl lub temat bez konieczności ponownego trenowania modelu bazowego |
 
-Każdy węzeł w przepływie pracy odpowiada jednemu z tych komponentów. Dane przepływają od lewej do prawej: tekst → osadzenia → sterowane odszumianie → dane latentne → finalny obraz.
-
+Każdy węzeł w przepływie pracy odpowiada jednemu z tych komponentów. Dane przepływają od lewej do prawej: tekst → osadzenia → sterowane usuwanie szumu → latenty → końcowy obraz.
 ## Generowanie pierwszego obrazu
 
 Model Z-Image Turbo jest już wczytany. Aby wygenerować obraz:
 
-1. **Wpisz swój prompt** w głównym węźle Z-Image. Bądź opisowy. Oto przykład:
+1. **Wpisz swój prompt** w głównym węźle Z-Image Node. Bądź opisowy. Oto przykład:
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
@@ -394,9 +394,9 @@ Model Z-Image Turbo jest już wczytany. Aby wygenerować obraz:
    ```
 2. **(Opcjonalnie)**: Potwierdź lub dostosuj inne konkretne ustawienia w podgrafie.
 3. **Kliknij niebieski przycisk „Run Workflow”** w prawym rogu (lub naciśnij `Ctrl+Enter`)
-4. Obserwuj, jak węzły podświetlają się w miarę wykonywania każdego kroku
+4. Obserwuj, jak podświetlają się węzły w miarę wykonywania kolejnych kroków
 
-Całe wykonanie przepływu pracy powinno zakończyć się w mniej niż 30 sekund. Wygenerowany obraz pojawi się w węźle **Save Image** i zostanie zapisany w folderze `output/`.
+Wykonanie całego przepływu pracy powinno zająć mniej niż 30 sekund. Wygenerowany obraz pojawi się w węźle **Save Image** i zostanie zapisany w folderze `output/`.
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -569,42 +569,43 @@ ls -1t ComfyUI/output/*.png | head -n 5
 
 
 ## Dostosowywanie parametrów generowania
+
 ### Ustawienia KSampler
 
-Węzeł KSampler kontroluje główny proces dyfuzji:
+Węzeł KSampler kontroluje podstawowy proces dyfuzji:
 
 | Parametr | Co kontroluje | Zalecane dla Z-Image Turbo |
 |-----------|------------------|-------------------------------|
-| **steps** | Liczba iteracji odszumiania | 4–10 (modele turbo są destylowane pod mniejszą liczbę kroków) |
-| **cfg** | Skala classifier-free guidance—jak ściśle podążać za promptem | 1.0–2.0 (modele turbo używają bardzo niskiego guidance) |
-| **sampler_name** | Algorytm odszumiania | `euler` oraz `res_multistep` sprawdzają się dobrze w przypadku modeli turbo |
+| **steps** | Liczba iteracji odszumiania | 4–10 (modele turbo są destylowane pod kątem mniejszej liczby kroków) |
+| **cfg** | Skala klasyfikator-free guidance—jak ściśle podążać za promptem | 1.0–2.0 (modele turbo używają bardzo niskiego guidance) |
+| **sampler_name** | Algorytm odszumiania | `euler` i `res_multistep` działają dobrze w przypadku modeli turbo |
 | **scheduler** | Krzywa harmonogramu szumu | `normal` lub `simple` |
 | **seed** | Ziarno losowości dla powtarzalności | Ustaw stałe wartości, aby iterować nad kompozycją |
 
 ### Rozmiar obrazu
 
-Aby dostosować wymiary wyjściowe, znajdź węzeł **Empty Latent Image** i zmodyfikuj **width** oraz **height**. Utrzymuj wymiary na poziomie 1024 pikseli lub mniej po dłuższym boku, aby uzyskać optymalną jakość.
+Aby dostosować wymiary wyjściowe, znajdź węzeł **Empty Latent Image** i zmodyfikuj **width** oraz **height**. Utrzymuj wymiary na poziomie 1024 pikseli lub mniej na dłuższym boku, aby uzyskać optymalną jakość.
 
 ### ModelSamplingAuraFlow
 
-Węzeł **ModelSamplingAuraFlow** to wyspecjalizowany modyfikator próbkowania, który dostosowuje sposób obsługi harmonogramu szumu przez proces dyfuzji. Zobaczysz ten węzeł podłączony do wyjścia modelu w przepływie pracy Z-Image Turbo.
+Węzeł **ModelSamplingAuraFlow** to specjalistyczny modyfikator próbkowania, który dostosowuje sposób, w jaki proces dyfuzji obsługuje harmonogramowanie szumu. Zobaczysz ten węzeł połączony z wyjściem modelu w przepływie pracy Z-Image Turbo.
 
 | Parametr | Co kontroluje | Zalecane wartości |
 |-----------|------------------|-------------------|
-| **shift** | Dostosowuje harmonogram czasowy szumu—wyższe wartości przesuwają więcej doprecyzowania szczegółów na późniejsze kroki | 1.0–4.0 (wartość domyślna to 3.0) |
+| **shift** | Dostosowuje harmonogram czasowy szumu—wyższe wartości przesuwają więcej dopracowywania szczegółów na późniejsze kroki | 1.0–4.0 (wartość domyślna to 3.0) |
 
 Kiedy dostosować **shift**:
 
-- **Niższe wartości (1.0–2.0)**: Szybsza konwergencja, dobra dla prostych kompozycji
-- **Wyższe wartości (3.0–4.0)**: Bardziej stopniowe doprecyzowanie, może poprawić drobne szczegóły w złożonych scenach
+- **Niższe wartości (1.0–2.0)**: Szybsza zbieżność, dobra dla prostych kompozycji
+- **Wyższe wartości (3.0–4.0)**: Bardziej stopniowe dopracowywanie, może poprawić drobne szczegóły w złożonych scenach
 
-Metoda próbkowania AuraFlow jest zaprojektowana specjalnie dla modeli typu flow-matching, takich jak Z-Image Turbo, zapewniając prawidłowy rozkład szumu w całym procesie generowania.
+Metoda próbkowania AuraFlow jest specjalnie zaprojektowana dla modeli opartych na dopasowaniu przepływu (flow-matching), takich jak Z-Image Turbo, zapewniając prawidłowy rozkład szumu w całym procesie generowania.
 
 ## Praca z przepływami pracy
 
 ### Zapisywanie przepływów pracy
 
-Kliknij przycisk **Save** w menu, aby wyeksportować swój przepływ pracy jako plik JSON. Zostaną w nim zapisane:
+Kliknij przycisk **Save** w menu, aby wyeksportować przepływ pracy jako plik JSON. Zawiera on:
 
 - Wszystkie węzły i ich parametry
 - Wszystkie połączenia między węzłami
@@ -612,19 +613,19 @@ Kliknij przycisk **Save** w menu, aby wyeksportować swój przepływ pracy jako 
 
 ### Wczytywanie przepływów pracy
 
-Przeciągnij plik JSON przepływu pracy na płótno lub użyj opcji **Load** z menu. Domyślnie wyświetlany przepływ pracy Z-Image Turbo jest wczytywany z zapisanego pliku przepływu pracy.
+Przeciągnij plik JSON z przepływem pracy na obszar roboczy lub użyj opcji **Load** z menu. Domyślnie wyświetlany przepływ pracy Z-Image Turbo jest wczytywany z zapisanego pliku przepływu pracy.
 
 ### Udostępnianie przepływów pracy
 
-Przepływy pracy są samowystarczalne—udostępnij plik JSON współpracownikom, a będą oni mogli odtworzyć dokładnie taką samą konfigurację. Dzięki temu ComfyUI doskonale nadaje się do wspólnych eksperymentów.
+Przepływy pracy są samodzielne—udostępnij plik JSON współpracownikom, a będą mogli odtworzyć dokładnie taką samą konfigurację. Dzięki temu ComfyUI doskonale nadaje się do wspólnych eksperymentów.
 
-## Kolejne kroki
+## Następne kroki
 
-- **Poznaj węzły LoRA**: Zastosuj adaptery stylu lub podmiotu bez ponownego trenowania
-- **Dodaj negatywne prompty**: Podłącz drugi węzeł CLIP Text Encode do wejścia warunkowania **negative** w KSampler, aby odsunąć model od niepożądanych cech, takich jak rozmycie, artefakty czy znaki wodne
-- **Twórz niestandardowe przepływy pracy**: Łącz wiele generacji, dodawaj upscaling lub twórz warianty obrazów
-- **Przeglądaj przepływy pracy społeczności**: [Przykłady ComfyUI](https://github.com/comfyanonymous/ComfyUI_examples) zawierają wiele gotowych do użycia przepływów pracy
+- **Poznaj węzły LoRA**: Stosuj adaptery stylu lub tematu bez ponownego trenowania
+- **Dodaj negatywne prompty**: Podłącz drugi węzeł CLIP Text Encode do wejścia kondycjonowania **negative** w KSampler, aby ukierunkować model z dala od niepożądanych elementów, takich jak rozmycie, artefakty czy znaki wodne
+- **Twórz niestandardowe przepływy pracy**: Łącz wiele generacji, dodawaj upscaling lub twórz warianty obrazu
+- **Przeglądaj przepływy pracy społeczności**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) zawiera wiele gotowych do użycia przepływów pracy
 
-Siłą ComfyUI jest eksperymentowanie: łącz węzły na różne sposoby, dostosowuj parametry i obserwuj, jak każda zmiana wpływa na wynik. Ta praktyczna eksploracja buduje intuicję dotyczącą działania modeli dyfuzyjnych.
+Siłą ComfyUI jest eksperymentowanie: łącz węzły w różny sposób, dostosowuj parametry i obserwuj, jak każda zmiana wpływa na wynik. Ta praktyczna eksploracja buduje intuicję dotyczącą działania modeli dyfuzyjnych.
 
-Aby uzyskać więcej informacji, zapoznaj się z [Dokumentacją ComfyUI](https://docs.comfy.org/).
+Aby uzyskać więcej informacji, zapoznaj się z [dokumentacją ComfyUI](https://docs.comfy.org/).

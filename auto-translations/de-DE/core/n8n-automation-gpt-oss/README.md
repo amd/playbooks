@@ -4,35 +4,36 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# <!-- @github-only -->
+# Übersetzung
 
+<!-- @github-only -->
 > [!IMPORTANT]
-> Dieses Playbook verwendet spezielle Tags, die GitHub nicht darstellen kann. Bitte besuchen Sie [amd.com/playbooks](https://amd.com/playbooks), um diesen Inhalt korrekt anzuzeigen.
+> Dieses Playbook verwendet spezielle Tags, die GitHub nicht rendern kann. Bitte besuchen Sie [amd.com/playbooks](https://amd.com/playbooks), um diesen Inhalt korrekt anzuzeigen.
 <!-- @github-only:end -->
 
-## Übersicht
+## Überblick
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Dieses Playbook erfordert mindestens **32GB** Arbeitsspeicher.
+> Dieses Playbook erfordert mindestens **32 GB** Systemspeicher.
 <!-- @device:end -->
 
 n8n ist eine Workflow-Automatisierungsplattform, mit der Sie Apps und Dienste über einen visuellen, knotenbasierten Editor verbinden können.
 
-Dieses Playbook zeigt Ihnen, wie Sie einen KI-gestützten Zusammenfasser für Finanznachrichten einrichten, der den Wirtschaftsbereich von AP News durchsucht, wichtige Schlagzeilen extrahiert und ein lokales LLM auf Ihrem System nutzt, um eine investorenorientierte Zusammenfassung zu erstellen.
+Dieses Playbook zeigt Ihnen, wie Sie einen KI-gestützten Finanznachrichten-Zusammenfasser einrichten, der den Business-Bereich von AP News durchsucht, wichtige Schlagzeilen extrahiert und ein lokales LLM auf Ihrem System verwendet, um eine investorenorientierte Zusammenfassung zu erstellen.
 
 ## Was Sie lernen werden
 
-- Wie man n8n installiert und startet
+- Wie Sie n8n installieren und starten
 - Importieren und Konfigurieren eines vorgefertigten Workflows
-- Verbindung mit Lemonade über die native n8n-Integration
-- Verständnis von Workflow-Knoten und Datenfluss
+- Verbindung zu Lemonade über die native n8n-Integration
+- Verständnis der Workflow-Knoten und des Datenflusses
 
 ## Was ist Lemonade?
 
 [Lemonade](https://lemonade-server.ai) ist eine lokale LLM-Serving-Plattform, die für AMD-Hardware entwickelt wurde. Sie bietet eine OpenAI-kompatible API, die vollständig auf Ihrem Rechner läuft – Ihre Daten verlassen niemals Ihr Gerät.
 
-In diesem Playbook verwenden wir Lemonade, um ein lokales LLM bereitzustellen, mit dem n8n für KI-gestützte Aufgaben verbindet.
+In diesem Playbook verwenden wir Lemonade, um ein lokales LLM bereitzustellen, mit dem sich n8n für KI-gestützte Aufgaben verbindet.
 
 n8n enthält einen **nativen Lemonade-Knoten** (`Lemonade Chat Model`), der eine erstklassige Integration bietet – keine manuelle Konfiguration erforderlich. Dies macht das Verbinden Ihres lokalen LLM mit Automatisierungs-Workflows unkompliziert.
 
@@ -46,7 +47,7 @@ n8n enthält einen **nativen Lemonade-Knoten** (`Lemonade Chat Model`), der eine
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Installation der Software-Voraussetzungen
+## Installieren der Software-Voraussetzungen
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
@@ -191,11 +192,11 @@ npm -v
 ```
 <!-- @test:end -->
 
-## Installation von n8n
+## Installieren von n8n
 <!-- @os:windows -->
 Installieren Sie n8n global mit npm.
 
-> **Hinweis**: Möglicherweise sehen Sie einige npm-Warnungen. Das ist normal.
+> **Hinweis**: Möglicherweise sehen Sie einige npm-Warnungen. Dies ist zu erwarten.
 
 ```bash
 npm install -g n8n
@@ -218,19 +219,19 @@ n8n --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Tipp**: Windows-Benutzer müssen unter Umständen ihre PowerShell-Ausführungsrichtlinie anpassen (z. B.
-> auf RemoteSigned oder Unrestricted setzen), bevor sie einige PowerShell-Befehle ausführen können.
+> **Tipp**: Windows-Benutzer müssen möglicherweise ihre PowerShell-Ausführungsrichtlinie anpassen (z. B.
+> auf RemoteSigned oder Unrestricted setzen), bevor sie einige PowerShell-Befehle ausführen.
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **PATH-Problem**: Wenn `n8n --version` mit „command not found“ antwortet, stellen Sie sicher, dass sich das npm-Global-Bin-Verzeichnis im `PATH` des Benutzers befindet. Der übliche Installationspfad ist `C:\Users\<username>\AppData\Roaming\npm`.
-> Fügen Sie diesen dem Benutzerpfad hinzu (Systemumgebungsvariablen bearbeiten > Umgebungsvariablen > Benutzerpfad bearbeiten) und laden Sie das Terminal neu.
+> **PATH-Problem**: Wenn `n8n --version` mit „Befehl nicht gefunden“ antwortet, stellen Sie sicher, dass sich Ihr npm-Global-Bin-Verzeichnis im `PATH` des Benutzers befindet. Der übliche Installationspfad ist `C:\Users\<username>\AppData\Roaming\npm`.
+> Fügen Sie dies dem Benutzerpfad hinzu (Systemumgebungsvariablen bearbeiten > Umgebungsvariablen > Benutzerpfad bearbeiten) und starten Sie das Terminal neu.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Wir werden nun den Podman-Dienst verwenden, um unsere n8n-Installation zu containerisieren.
+Wir verwenden nun den Podman-Dienst, um unsere n8n-Installation zu containerisieren.
 
 Bitte laden Sie Folgendes in ein Verzeichnis Ihrer Wahl herunter: [compose.yml](assets/compose.yml)
 
@@ -239,9 +240,9 @@ Führen Sie in diesem Verzeichnis den folgenden Befehl aus:
 podman compose up -d
 ```
 
-Dadurch sollte n8n installiert und in einen persistenten Speicher geschrieben werden.
+Dies sollte n8n installieren und in einen persistenten Speicher schreiben.
 
-Starten Sie n8n, indem Sie `localhost:5678` in die Adressleiste Ihres Browsers eingeben.
+Starten Sie n8n, indem Sie `localhost:5678` in Ihre Browser-Adresszeile eingeben.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -322,18 +323,18 @@ n8n startet einen lokalen Webserver. Drücken Sie `'o'` oder öffnen Sie Ihren B
 <!-- @os:end -->
 
 
-> **Tipp**: Lassen Sie das Terminalfenster geöffnet, während Sie n8n verwenden. Wenn Sie es schließen, wird der Server möglicherweise beendet.
+> **Tipp**: Lassen Sie das Terminal-Fenster geöffnet, während Sie n8n verwenden. Das Schließen könnte den Server stoppen.
 
 ## Starten von Lemonade
 
 Lemonade ist der lokale Server, der ein Modell ausführt und sich mit n8n verbindet.
 
 <!-- @os:linux -->
-Öffnen Sie die Lemonade-GUI, indem Sie auf das Lemonade-Symbol in der Taskleiste klicken. Von hier aus können Sie Modelle und Backends durchsuchen sowie die vorinstallierten Modelle laden.
+Öffnen Sie die Lemonade-GUI, indem Sie auf das Lemonade-Symbol in der Taskleiste klicken. Von hier aus können Sie Modelle und Backends durchsuchen und die vorinstallierten Modelle laden.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Öffnen Sie die Lemonade-GUI, indem Sie auf das Lemonade-Symbol klicken. Klicken Sie mit der rechten Maustaste auf das Tray-Symbol, um die App zu öffnen. Anschließend können Sie Modelle und Backends hinzufügen sowie die vorinstallierten Modelle laden.
+Öffnen Sie die Lemonade-GUI, indem Sie auf das Lemonade-Symbol klicken. Klicken Sie mit der rechten Maustaste auf das Tray-Symbol, um die App zu öffnen. Anschließend können Sie Modelle und Backends hinzufügen und die vorinstallierten Modelle laden.
 <!-- @os:end -->
 
 >**Tipp**: Sobald sie läuft, ist die Lemonade-GUI auch unter http://localhost:13305 erreichbar
@@ -374,10 +375,10 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 Wenn Sie n8n zum ersten Mal öffnen, werden Sie aufgefordert, ein Konto zu erstellen oder sich anzumelden:
 
 1. Öffnen Sie `http://localhost:5678` in Ihrem Browser
-2. Erstellen Sie ein neues lokales Konto mit Ihrer E-Mail-Adresse oder melden Sie sich an, falls Sie bereits eines haben
+2. Erstellen Sie ein neues lokales Konto mit Ihrer E-Mail-Adresse, oder melden Sie sich an, falls Sie bereits eines haben
 3. Nach der Anmeldung sehen Sie das n8n-Dashboard
 
-> **Tipp**: Falls Sie von Ihrem Konto ausgesperrt sind, versuchen Sie `n8n user-management:reset`
+> **Tipp**: Wenn Sie von Ihrem Konto ausgesperrt sind, versuchen Sie `n8n user-management:reset`
 
 ### Schritt 2: Den Workflow importieren
 
@@ -385,7 +386,7 @@ Wir haben einen vorgefertigten Workflow bereitgestellt, den Sie direkt importier
 
 1. Laden Sie die folgende Workflow-Datei herunter: [financial-news-workflow.json](assets/financial-news-workflow.json)
 2. Klicken Sie auf **Start from Scratch**, um den Workflow-Editor zu öffnen. Alternativ klicken Sie oben links auf die Schaltfläche +, und dann auf **Add workflow**.
-3. Klicken Sie oben rechts auf das **...**-Menü (drei Punkte) und wählen Sie **Import from file**
+3. Klicken Sie oben rechts auf das Menü **...** (drei Punkte) und wählen Sie **Import from file**
 4. Wählen Sie die heruntergeladene Datei `financial-news-workflow.json` aus
 5. Der Workflow erscheint auf der Arbeitsfläche
 ### Schritt 3: Den Workflow verstehen
@@ -397,16 +398,16 @@ Der importierte Workflow enthält 9 verbundene Nodes:
 </p>
 
 | Node | Zweck |
-|------|---------|
+|------|-------|
 | **When clicking 'Execute workflow'** | Manueller Trigger zum Starten des Workflows |
 | **Fetch Financial News Webpage** | HTTP-GET-Anfrage an `https://apnews.com/business` |
-| **Delay to Ensure Page Load** | Wait-Node, der sicherstellt, dass der Seiteninhalt vollständig geladen ist |
-| **Extract News Headlines & Text** | HTML-Node, der Schlagzeilen, Redaktionsempfehlungen, Top-Meldungen und regionale Nachrichten mithilfe von CSS-Selektoren extrahiert |
-| **Clean Extracted News Data** | Set-Node, der alle extrahierten Daten in einem einzigen Textfeld zusammenfasst |
-| **AI Financial News Summarizer** | KI-Agent, der die Nachrichten mit einem System-Prompt für Finanzanalysten verarbeitet |
+| **Delay to Ensure Page Load** | Wait-Node, um sicherzustellen, dass der Seiteninhalt vollständig geladen ist |
+| **Extract News Headlines & Text** | HTML-Node, der Schlagzeilen, redaktionelle Empfehlungen, Top-Nachrichten und regionale Nachrichten mithilfe von CSS-Selektoren extrahiert |
+| **Clean Extracted News Data** | Set-Node, der alle extrahierten Daten in einem einzigen Textfeld zusammenführt |
+| **AI Financial News Summarizer** | KI-Agent, der die Nachrichten mit einem Systemprompt für Finanzanalysten verarbeitet |
 | **Lemonade Chat Model** | Verbindet sich mit Ihrem lokalen Lemonade-Server, auf dem das LLM läuft |
 | **Structured Output Parser** | Formatiert die KI-Ausgabe als strukturiertes JSON |
-| **Convert to File** | Wandelt die Zusammenfassung in eine herunterladbare Datei um |
+| **Convert to File** | Konvertiert die Zusammenfassung in eine herunterladbare Datei |
 
 ### Schritt 4: Lemonade-Anmeldedaten konfigurieren
 
@@ -415,14 +416,14 @@ Bevor Sie den Workflow ausführen, müssen Sie ihn mit Ihrem lokalen Lemonade-Se
 1. Doppelklicken Sie in n8n auf den Node **Lemonade Chat Model**
 2. Wählen Sie im Dropdown-Menü **Credential to connect with** die Option **Create New Credential**
 3. Geben Sie die Werte aus der folgenden Tabelle ein und klicken Sie auf Speichern.
-4. Wählen Sie das entsprechende Modell aus, das Sie im Lemonade Server geladen haben.
+4. Wählen Sie das entsprechende Modell aus, das Sie in Lemonade Server geladen haben.
 
   | Feld | Wert |
   |-------|-------|
   | **Base URL** | `http://localhost:13305/api/v1` |
   | **API Key** | `lemonade` |
 
-> **Hinweis**: Führen Sie vor dem Testen den Befehl `lemonade status` in einem Terminal aus, um zu bestätigen, dass der Lemonade-Server läuft.
+> **Hinweis**: Führen Sie vor dem Testen `lemonade status` in einem Terminal aus, um zu bestätigen, dass der Lemonade-Server läuft.
 <!-- @device:halo_box -->
 > Dieser Workflow verwendet GPT-OSS-120B, das bereits in Lemonade vorinstalliert ist. Sie können dies in den Einstellungen des Lemonade Chat Model-Nodes auf andere geladene Modelle ändern.
 <!-- @device:end -->
@@ -432,12 +433,12 @@ Bevor Sie den Workflow ausführen, müssen Sie ihn mit Ihrem lokalen Lemonade-Se
 1. Stellen Sie sicher, dass Lemonade läuft und ein Modell geladen ist
 2. Klicken Sie unten in der Mitte der Arbeitsfläche auf **Execute workflow**
 3. Beobachten Sie, wie jeder Node von links nach rechts ausgeführt wird – sie werden grün, sobald sie abgeschlossen sind
-4. Doppelklicken Sie auf den Node **AI Financial News Summarizer**, um die generierte Zusammenfassung im unteren Bereich zu sehen.
+4. Doppelklicken Sie auf den Node **AI Financial News Summarizer**, um die generierte Zusammenfassung im unteren Bereich anzuzeigen.
 5. Doppelklicken Sie auf den Node **Convert to File**, um die entsprechende Textdatei im unteren Bereich herunterzuladen.
 
 ## Den KI-Agenten verstehen
 
-Der AI Financial News Summarizer verwendet einen System-Prompt, der für Finanzanalysen konzipiert ist:
+Der AI Financial News Summarizer verwendet einen Systemprompt, der für Finanzanalysen konzipiert ist:
 
 ```
 You are an AI financial analyst. Your role is to read, understand, and
@@ -460,15 +461,34 @@ Klicken Sie oben auf den Workflow-Namen und benennen Sie ihn bei Bedarf um. Work
 - **Automatisierung planen**: Ersetzen Sie den Manual Trigger durch einen **Schedule Trigger**, um den Workflow täglich auszuführen
 - **Benachrichtigungen senden**: Fügen Sie einen **Discord**-, **Slack**- oder **Email**-Node hinzu, um Zusammenfassungen zu erhalten
 - **Verschiedene Modelle ausprobieren**: Ändern Sie das Modell im Lemonade Chat Model-Node, um mit unterschiedlichen LLMs zu experimentieren
-- **Extraktion anpassen**: Passen Sie die CSS-Selektoren des HTML-Extract-Nodes an, um andere Nachrichtenbereiche anzusprechen
+- **Extraktion anpassen**: Ändern Sie die CSS-Selektoren des HTML-Extract-Nodes, um andere Nachrichtenbereiche anzusteuern
 - **Verschiedene Backends ausprobieren**: n8n unterstützt außerdem [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio und andere lokale LLM-Backends
 
-### n8n-Vorlagen entdecken
+### n8n-Vorlagen erkunden
 
-n8n bietet Hunderte von vorgefertigten Workflow-Vorlagen. Durchstöbern Sie die offizielle Vorlagenbibliothek unter:
+n8n bietet Hunderte vorgefertigter Workflow-Vorlagen. Durchsuchen Sie die offizielle Vorlagenbibliothek unter:
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
 Suchen Sie nach „AI“, „LLM“ oder „automation“, um Workflows zu finden, die Sie importieren und anpassen können.
 
 Weitere Informationen finden Sie in der [n8n-Dokumentation](https://docs.n8n.io/).
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->

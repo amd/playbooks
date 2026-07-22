@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Plattformskonfiguration
 
 Detta dokument beskriver de förväntade plattformskonfigurationerna för att köra denna playbook.
@@ -27,7 +33,7 @@ Följande modeller är testade och optimerade för din plattform:
 
 | Modell | Parametrar | Storlek | Nedladdningsplats |
 |-------|------------|------|-------------------|
-| **unsloth/gemma-4-E4B-it** | 8B | ~16 GB | Ladda ner från HF
+| **unsloth/gemma-4-E4B-it** | 8B | ~16GB | Ladda ner från HF
 
 Modeller laddas automatiskt ner till Hugging Face-cachekatalogen: `~/.cache/huggingface/hub/`
 
@@ -35,7 +41,7 @@ Se till att det finns minst **20 GB ledigt utrymme** för modellagring.
 
 ## Nätverkskrav
 
-Den första konfigurationen kräver internetåtkomst för att ladda ner modeller från Hugging Face. Efter nedladdningen kan playbooken köras offline.
+Den initiala installationen kräver internetåtkomst för att ladda ner modeller från Hugging Face. Efter nedladdningen kan playbooken köras offline.
 
-- Första nedladdningen av modeller kan ta **5–10 minuter** beroende på modellstorlek och anslutningshastighet
+- Nedladdning av modeller för första gången kan ta **5–10 minuter** beroende på modellstorlek och anslutningshastighet
 - Modeller cachas lokalt och behöver inte laddas ner igen

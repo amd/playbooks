@@ -1,5 +1,5 @@
 {
   "id": "unsloth-llms-finetuning",
-  "title": "Fine-Tuning LLM ด้วย Unsloth",
-  "description": "ใช้ Unsloth เพื่อการปรับแต่ง (fine-tune) LLM ที่มีประสิทธิภาพด้านหน่วยความจำ™"
+  "title": "การปรับแต่ง LLM อย่างละเอียดด้วย Unsloth",
+  "description": "ใช้ Unsloth เพื่อสร้าง LLM ที่ผ่านการปรับแต่งอย่างมีประสิทธิภาพด้านหน่วยความจำ™"
 }

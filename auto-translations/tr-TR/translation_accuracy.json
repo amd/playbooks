@@ -2,12 +2,12 @@
   "locale": "tr-TR",
   "files": {
     "playbooks/core/comfyui-image-gen/README.md": {
-      "source_sha256": "5f3da10f7fae3dc68416413efd91668449de4a5796ccf600a591bb1621817f18",
+      "source_sha256": "111bc4e62952109ca5d59842c7fb7d21401dcad7f79a4e6039b91ab8d815303a",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Accurate, fluent, terminology consistent; code/URLs intact. Minor: 'seed/tohum' slightly wordy but acceptable."
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: one missing blank line before heading, consistent but acceptable terminology mixing."
     },
     "playbooks/core/comfyui-image-gen/platform.md": {
       "source_sha256": "e8a6884590d062f17595a57f2aadf5abe686c3169f53f3181544259336435c47",
@@ -42,12 +42,12 @@
       "quality_issues": "'Download' button kept in English matching UI; accurate, fluent. Minor: 'daha önce önceden' slight redundancy."
     },
     "playbooks/dependencies/driver.md": {
-      "source_sha256": "bdde05c0805a03d019eedad5bd7dc53a862c6b1f5ffeee6743fdfb73ef39de73",
+      "source_sha256": "2fb0597586a0f981cfef7ba290e1a1dd3b91921dde331dc283d062ae18a71d29",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
-      "quality_issues": "UI labels left in English (may be intentional); otherwise accurate, fluent, code/URLs intact."
+      "quality_issues": "UI labels left untranslated (Driver and Software, Manage Updates) — likely intentional; otherwise accurate and fluent."
     },
     "playbooks/dependencies/gaia.md": {
       "source_sha256": "4837a0e4fd45ede7efc3d903c1bb65484d0805c6e45657d2b097b23c063bb935",
@@ -122,20 +122,20 @@
       "quality_issues": "Accurate, fluent, terminology consistent; code blocks and technical terms intact."
     },
     "playbooks/dependencies/pytorch.md": {
-      "source_sha256": "ba5ed9d425c6685dd285c639438efc74c1e8d9d561442bad6412b9adc8164d82",
+      "source_sha256": "b87369d2e26312f97f17ae901248f1bd748adbdd814ac845a8bfb6e7a4c5cb47",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Minor redundancy: 'için...için' repetition slightly awkward but fully accurate; code intact."
+      "quality_score": 95,
+      "quality_issues": "Minor: 'için...için' repetition slightly awkward but accurate; code, URLs, numbers intact."
     },
     "playbooks/dependencies/rocm.md": {
-      "source_sha256": "af961dbef80b407b98ee05fd0e5f816418bf097d384460ca5a57e7844bf38813",
+      "source_sha256": "bd4c22df46d91bbf2cc7ba7304084260667b876cf8d5ea81a0d4c9c1c05b8b42",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 98,
-      "quality_issues": "Accurate, fluent, all code/URLs intact; minor natural phrasing only."
+      "quality_issues": "Accurate, fluent translation; code blocks, URLs, numbers all intact."
     },
     "playbooks/dependencies/softwareupdate.md": {
       "source_sha256": "2d5cb11ce696297d74dfbb9d140b765dc64add55f1bdcbdd27fb3498ca3871f5",
@@ -162,12 +162,12 @@
       "quality_issues": "Accurate, fluent; code, URLs, brands intact. UI tab names kept in English, consistent with source style."
     },
     "playbooks/core/lmstudio-rocm-llms/README.md": {
-      "source_sha256": "f0c7074a75cf11c9c9bb8b3508a87f66c8c08fa3e96832ece9f55e7dc5f85b91",
+      "source_sha256": "860cc2764568023f22c90b7ab8ec072ab7facded6dcedfd810960eea061aabfa",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Excellent translation; code blocks, URLs, tags intact. Minor: 'agentic' left untranslated, table separator line merged with heading."
+      "quality_issues": "Accurate, fluent, code/URLs/tags intact. Minor: missing blank line before Example heading; 'ajan tabanlı' slightly literal for agentic."
     },
     "playbooks/core/lmstudio-rocm-llms/platform.md": {
       "source_sha256": "f731064c13c2ca273ea6bbc804e0b3309a1f4d385e3b58b35575f5e8430a3b86",
@@ -186,12 +186,12 @@
       "quality_issues": "Accurate, fluent, terms and brand names intact; minor natural phrasing only."
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
-      "source_sha256": "19066843d638353adb3a11fe7f188f59a66c1f11eeaa7037af97a5c21308d4df",
+      "source_sha256": "2d3d825632356eca766a2b4dc8aa423d78f7e5619d62ea41defcf176ce144f98",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Stray '#' added before github-only comment; otherwise accurate, fluent, code/URLs intact."
+      "quality_issues": "Minor: '[!ÖNEMLİ]' altered GitHub tag; 'kilitli kalırsanız' slightly awkward; otherwise fluent, accurate, code intact."
     },
     "playbooks/core/n8n-automation-gpt-oss/platform.md": {
       "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
@@ -234,12 +234,12 @@
       "quality_issues": "Slight restructure: 'to summarize' rendered as parallel action rather than purpose, minor meaning shift."
     },
     "playbooks/core/vscode-qwen3-coder/README.md": {
-      "source_sha256": "25da94f89aec651b737075b56e6c558256a645c2a44b96204163e9c87c857fae",
+      "source_sha256": "bb562b4fb8e27bd9a758a8f872f20efff4a826095dfe12bfb30034eb7ca4bc1b",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'agent' translated inconsistently (ajan/aracı); 'Retro Arcade' rendered 'Retro Atari'. Code, URLs, numbers intact."
+      "quality_score": 94,
+      "quality_issues": "Excellent; code/URLs/brands intact. Minor: truncated source phrase 'running workloads on' rendered awkwardly but reasonably handled."
     },
     "playbooks/core/vscode-qwen3-coder/platform.md": {
       "source_sha256": "14c7eec60b483e4bedb5e465673d89e07466088a9ed9c59d7964c3466cf89410",
@@ -322,12 +322,12 @@
       "quality_issues": "Accurate and fluent; minor stylistic choice on 'Başlarken' but acceptable."
     },
     "playbooks/supplemental/open-webui-chat/README.md": {
-      "source_sha256": "b257e5d4c3accfd50265d7b75ea8258159b037cbbe57dcc9241bad746554c929",
+      "source_sha256": "b7ec1aa51edf9556e7d87dad4d5664888d4c52e80048ece5782e05e6ec8d1b78",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Minor inconsistency: 'görüntü modeli' vs 'Vision' terminology; 'bağlanabilir' slightly awkward. Code, URLs, brands intact."
+      "quality_score": 96,
+      "quality_issues": "Excellent, fluent translation; code/URLs/tags intact. Minor: 'Vision' rendered as 'Görme' slightly awkward but acceptable."
     },
     "playbooks/supplemental/open-webui-chat/platform.md": {
       "source_sha256": "1cc71fc518a4ba7e507047973d835456dc836155b3365f0e7fb64ed1f81d85cb",
@@ -402,12 +402,12 @@
       "quality_issues": "Slightly awkward appositive phrasing; 'Gen AI' left untranslated but acceptable as brand-like term."
     },
     "playbooks/supplemental/llama-factory-finetuning/README.md": {
-      "source_sha256": "38f43810c9ea7c04ad70e180795d64b81ab9e45fd01413ecd26a1d4e7283bde1",
+      "source_sha256": "30b146bd03fa8db4570ebcae7fb5980ce6948481bffa5c7cc03ffc559f7c710d",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Inconsistent terminology: 'ince ayar' vs untranslated 'fine-tuning/fine-tune' mixed throughout. Code, URLs, brands intact. Otherwise fluent and accurate."
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, terminology consistent. Code blocks, URLs, brand terms intact. Minor spacing/formatting nits before some headers."
     },
     "playbooks/supplemental/llama-factory-finetuning/playbook.json": {
       "source_sha256": "e8a8cd9cebcb66736e1cfb707fd792795defcb4f4facb6b80f722be826b2a89b",
@@ -418,28 +418,28 @@
       "quality_issues": "Accurate and fluent; minor stylistic variance in terminology (ince ayarlama vs ince ayardan geçirin)."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
-      "source_sha256": "3870cbf9cdec77fbb11f99c2751de2826fce765a431d52a853a9c034727e7225",
+      "source_sha256": "683efeea885d7ec0800eb93485220c7eb53fae3f639bf021b5152cd97f25bac9",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Excellent translation; code/URLs/numbers intact, fluent terminology. Minor 'ile' word-order slip in one sentence."
+      "quality_score": 90,
+      "quality_issues": "Title untranslated (intentional per pattern); consistent, accurate. Minor: 'talepkâr' slightly awkward, mixed agent/ajan terminology. Code, URLs, numbers intact."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
-      "source_sha256": "99df141310754dea218b61260f021d4fd7aec64a922654db64ed473b877e6351",
+      "source_sha256": "57b52b994ec56c93c379e746d04c74ffc0b3db8a53293f249f8c6190e8b12016",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
-      "quality_issues": "Accurate and fluent; 'agent' rendered as 'aracı' is acceptable but 'ajan' also common."
+      "quality_issues": "Accurate and fluent; brand terms intact. Minor: apostrophe in OpenClaw'u slightly awkward but acceptable."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
-      "source_sha256": "bc2cba716bb866957cf930a234b9080bd64c863a18e6f77f7e98c3f51f0868fc",
+      "source_sha256": "a12e09a3cf974e0beda1fb4813dbd7ed0da7e1d6ab88805d54fec30827f0eed8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
-      "quality_issues": "Minor: 'batch size' translated as 'grup boyutu' (unusual, 'yığın boyutu' preferred); otherwise accurate, fluent, tags/code intact."
+      "quality_issues": "Minor: 'grup boyutu' for batch size inconsistent with later 'batch boyutu'; otherwise accurate, fluent, tags/code intact."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
       "source_sha256": "34841c22920fdf111d2a7ab0b640af96555cc1aa0376103acf8ea62e336609af",
@@ -466,12 +466,12 @@
       "quality_issues": "Accurate; 'çekirdek' for kernel is common but 'kernel' often kept untranslated in ML context"
     },
     "playbooks/supplemental/speech2speech-translation/platform.md": {
-      "source_sha256": "ac5b39917b7a533154f6a0f823949356905a766e067a7efcd000d63584cb36a3",
+      "source_sha256": "594590b98fc8e24d4fc481dea81504dbf8ae3c6ab995e88070d68c50a84839d0",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Title 'Platform Configuration' left untranslated; otherwise accurate, fluent, code/numbers intact."
+      "quality_score": 80,
+      "quality_issues": "Headings left untranslated (Platform Configuration, Prerequisites, Required Models, Network Requirements); table headers untranslated. Body translation accurate and fluent."
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
       "source_sha256": "48eb7b7b031b9e676748a482854cf10fb41555109fa05ec9a06a8992baf282cf",
@@ -482,44 +482,44 @@
       "quality_issues": "Accurate and fluent; minor stylistic naturalness only."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
-      "source_sha256": "a2ee5a621944612fd1d5ac526c6b844f0f528a0c696c178ac8f85f170ab7467c",
+      "source_sha256": "619d596c72b22f8d6dd754f3dfe49aab68fb8e5875a3058bd1592b13da335ac5",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Excellent translation; code, URLs, tags intact. Minor: 'playbook' inconsistent (kılavuz vs playbook). Fluent, accurate terminology."
+      "quality_score": 95,
+      "quality_issues": "Minor: 'oyun kitabı' inconsistent with 'kılavuz' elsewhere; slight 'ince ayar yapacağınızı' phrasing. Code, URLs, numbers intact."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/platform.md": {
-      "source_sha256": "45dc9cd1642f32761ed88326b25e7df018482c93832b386c31464522eb62066b",
+      "source_sha256": "4725503ab96b16727c1e8a3be08c917dfee0be41adaad103dd70923785495cb1",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Accurate, fluent translation; code, numbers, brands intact. Minor: technical terms left in English appropriately."
+      "quality_issues": "Accurate, fluent translation; code, numbers, brands intact. Minor: 'Platform Yapılandırması' could be 'Platform' left untranslated inconsistency, negligible."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/playbook.json": {
       "source_sha256": "3204669893381cf35615253a77a5fab815e3d2e3cc61269de7441781b2a6aebc",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 82,
-      "quality_issues": "Trademark symbol ™ misplaced; should follow Unsloth brand, not sentence end. Otherwise accurate and fluent."
+      "quality_score": 88,
+      "quality_issues": "Trademark symbol misplaced (belongs after LLMs™ in source); otherwise accurate and fluent."
     },
     "playbooks/supplemental/vllm-inference/README.md": {
-      "source_sha256": "24dc5ebde274af75275e075ca2423138e0d67d3de03f1cebbee30fb9ac5940f4",
+      "source_sha256": "2c7c430c6bd3a17f01f85f6d212bc2f41134c5fccba880eaaa5c884374f75ed7",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Accurate, fluent, all code/URLs/brands intact. Minor: 'sunum' for serving slightly informal."
+      "quality_issues": "Accurate, fluent, terminology and code intact; minor spacing/heading nit near Additional Resources."
     },
     "playbooks/supplemental/vllm-inference/playbook.json": {
       "source_sha256": "0db881869b8d489317f0445edf4b420f738173b9c82c6488074e8948f7d6351c",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 82,
-      "quality_issues": "Added 'AMD' not in source; 'çıkarım/sunum' acceptable but adds slight interpretation."
+      "quality_score": 88,
+      "quality_issues": "Added 'AMD' not in source (minor addition/hallucination); otherwise accurate and fluent."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "ef647656230fb6a512ac0b98b573e61f729e4c14de2bdcd4b33a1c733c1a9e2c",
@@ -538,12 +538,92 @@
       "quality_issues": "Excellent, accurate translation. Code/URLs intact. Minor: 'private' rendered as 'özel' placed slightly awkwardly but acceptable."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
-      "source_sha256": "b3613af14dd94ab44888f2d3013af6b10e1685c5e4915765507065117303be9a",
+      "source_sha256": "2098a60be3d062ef9bb9e1e4f55086eaed8c629ac490dec69734b1e1a1c6b4ee",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 91,
+      "quality_issues": "Minor: 'veya lemonade run... üzerinden' phrasing awkward with line break; 'Görü' for vision unusual. Otherwise accurate, fluent, code/URLs intact."
+    },
+    "playbooks/core/deepseek-v4-flash-ds4/README.md": {
+      "source_sha256": "547f8d3dc8be793c698c67fd50466a5c4c27c2f154e87b0b36431ba2dc2b278f",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; code/URLs/brands intact. Minor: '3.6 GB' inconsistent decimal separator vs '80,8 GB'; missing blank line before Sonraki Adımlar."
+    },
+    "playbooks/core/deepseek-v4-flash-ds4/playbook.json": {
+      "source_sha256": "45498cef56dd0818dc2853a6cf895e283bbcd79d934ae35c298857305f6ab496",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Stray '#' added before github-only comment; minor 'aracılığıyla' ordering awkward. Otherwise accurate, fluent, code/URLs intact."
+      "quality_issues": "Accurate; 'dağıtın' for deploy acceptable but 'kur/çalıştırın' more natural in this context."
+    },
+    "playbooks/supplemental/github-slack-development-digest/README.md": {
+      "source_sha256": "bc32c1f17978924905775b38f78f9b2c77f936da0cb2f9517c1c0b0fed90a6eb",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Stray '# ' added before github-only comment; minor typo 'düğesine'. Otherwise accurate, fluent, terminology and code intact."
+    },
+    "playbooks/supplemental/github-slack-development-digest/platform.md": {
+      "source_sha256": "4a8da06a7d980811c2f8aa3f14f62b49e48aff6aa7282006d5b96f0994af1cc6",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Untranslated headings 'Platform Configuration' and link texts left in English; otherwise accurate and fluent."
+    },
+    "playbooks/supplemental/github-slack-development-digest/playbook.json": {
+      "source_sha256": "5fc048aff2c5cac99e62ea2eabaffed537d26e80aee8afbf43baeab7fa838256",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor: title slightly expanded but accurate; overall fluent and terminology intact"
+    },
+    "playbooks/supplemental/hermes-lemonade-server/README.md": {
+      "source_sha256": "c4f949a113333e08e4e7a94071c53faaaaf10b28389c8f9c86cf6a60c4ae55fa",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; consistent terminology, code/URLs intact. Minor: agent rendered inconsistently as aracı/ajan."
+    },
+    "playbooks/supplemental/hermes-lemonade-server/playbook.json": {
+      "source_sha256": "6d86d382c4b5a1b36bfacfb22ac9d79619331b277ea235a22b04fd125641788f",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Inconsistent 'Hermes Aracısı' vs 'Hermes Agent' brand handling; otherwise accurate and fluent."
+    },
+    "playbooks/supplemental/openhands-getting-started/README.md": {
+      "source_sha256": "ddc060e5f599615bd487640a564813f03c3f512ac214c7a2ce2e5447ff3935aa",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Minor: 'Runs the model that powers the agent' slightly redundant; missing blank line before section 6 heading. Otherwise accurate, fluent, code intact."
+    },
+    "playbooks/supplemental/openhands-getting-started/platform.md": {
+      "source_sha256": "ac6b6f224435cebeb5596d3e68d7235da3cf27fd91da775e28548d20fa513be2",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Accurate, fluent; minor: 'Platform Yapılandırması' could be 'Platform Yapılandırması' fine. Code, URLs, terms intact."
+    },
+    "playbooks/supplemental/openhands-getting-started/playbook.json": {
+      "source_sha256": "3be06de64cdaf99ea1f0f7fcea9adf91da5fea68994ce035f6565e888d8af862",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "\"coding agent\" rendered as \"kodlama aracı\" (tool) instead of \"ajan/aracısı\"; minor terminology loss."
     }
   }
 }

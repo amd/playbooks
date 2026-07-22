@@ -11,13 +11,13 @@ SPDX-License-Identifier: MIT
 
 ## Огляд
 
-LM Studio — це потужна обгортка з графічним інтерфейсом для [llama.cpp](https://github.com/ggml-org/llama.cpp), яка також надає [сумісну з OpenAI кінцеву точку](https://lmstudio.ai/docs/developer/openai-compat) для локального обслуговування моделей. LM Studio пропонує простий, але потужний інтерфейс для легкого завантаження та розгортання моделей. LM Studio пропонує бекенди (які називаються середовищами виконання) Vulkan та AMD ROCm™ для користувачів AMD.
+LM Studio — це потужна обгортка з графічним інтерфейсом для [llama.cpp](https://github.com/ggml-org/llama.cpp), яка також надає [сумісну з OpenAI кінцеву точку](https://lmstudio.ai/docs/developer/openai-compat) для локального обслуговування моделей. LM Studio пропонує простий, але потужний інтерфейс для легкого завантаження та розгортання моделей. LM Studio пропонує як бекенди Vulkan, так і AMD ROCm™ (звані середовищами виконання) для користувачів AMD.
 
 
 ## Що ви дізнаєтесь
-- Як налаштувати та використовувати LM Studio для використання вашого локального обладнання
+- Як налаштувати та використовувати LM Studio для використання можливостей вашого локального обладнання
 - Тестувати та керувати LLM у повністю офлайн-середовищі
-- Обслуговувати моделі через сумісний з OpenAI API для роботи власних робочих процесів і застосунків
+- Обслуговувати моделі через сумісний з OpenAI API для роботи власних робочих процесів та застосунків
 
 
 ## Налаштування конфігурації пам'яті
@@ -32,7 +32,7 @@ LM Studio — це потужна обгортка з графічним інт�
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Примітка**: Якщо VS Code або LM Studio не встановлено, ви можете встановити їх через AMD Ryzen™ AI Developer Center. 
+> **Примітка**: Якщо VS Code або LM Studio не встановлені, ви можете встановити їх з AMD Ryzen™ AI Developer Center. 
 <!-- @os:end -->
 
 <!-- @require:software-update -->
@@ -62,16 +62,32 @@ LM Studio — це потужна обгортка з графічним інт�
 <!-- @device:end -->
 
 ## Спілкування з LLM
-Дізнайтеся, як почати спілкуватися з LLM рівня ChatGPT повністю локально.  
+Дізнайтесь, як почати спілкуватися з LLM рівня ChatGPT повністю локально.  
 
 1. Відкрийте LMStudio. 
-2. Натисніть `Ctrl + L`, щоб відкрити завантажувач моделей, виберіть `Manually choose model load parameters` і клацніть на `${model_name}`
-3. Переконайтеся, що позначено "show advanced settings".  
-4. Змініть `Context Length` за бажанням. Більша довжина контексту означає більше використання пам'яті моделі, але й більше використання системної пам'яті. Для цього посібника рекомендовано 4096.
-5. Переконайтеся, що `GPU Offload` встановлено на максимум, а `Flash Attention` увімкнено (Cache Quantizations можна залишити вимкненим)
-6. Позначте `Remember settings` і клацніть на `Load Model`.
-7. Якщо ви не в чат-вікні, натисніть `Ctrl + 1` або клацніть на кнопку 👾 у верхньому лівому куті екрана.
-8. Надішліть повідомлення та почніть взаємодію з моделлю!
+2. Натисніть `Ctrl + L`, щоб відкрити завантажувач моделей, оберіть `Manually choose model load parameters` і натисніть на `${model_name}`
+3. Переконайтесь, що позначено "show advanced settings".  
+4. Змініть `Context Length` за бажанням. Більша довжина контексту означає більше споживання пам'яті моделлю, але більше використання системної пам'яті. Рекомендовано для цього посібника — 4096.
+5. Переконайтесь, що `GPU Offload` встановлено на максимум, а `Flash Attention` увімкнено (Cache Quantizations можуть залишатися вимкненими)
+6. Позначте `Remember settings` і натисніть на `Load Model`.
+7. Якщо ви не у вікні чату, натисніть `Ctrl + 1` або натисніть на кнопку 👾 у верхньому лівому куті екрана.
+8. Надішліть повідомлення та почніть взаємодіяти з моделлю!
+
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
+```powershell
+# CI: pin a GPU (Vulkan) runtime so tests don't fall back to the CPU engine.
+lms runtime ls
+$rt = ((lms runtime ls) -match 'vulkan' | Select-Object -First 1)
+if ($rt) {
+  lms runtime select (($rt.Trim() -split '\s+')[0])
+  lms runtime ls | Select-String 'ENGINE|✓'
+} else {
+  Write-Output "WARNING: no Vulkan runtime installed; GPU acceleration unavailable. Install with: lms get <vulkan-runtime>"
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-load-model-windows timeout=1200 hidden=True -->
@@ -80,9 +96,27 @@ lms unload --all
 lms ps
 $ID = "${lms_model}-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
+# retry once: large-model loads can transiently fail under memory pressure
 lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
+if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y }
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-select-gpu-runtime-linux timeout=120 hidden=True -->
+```bash
+# CI: pin a GPU (Vulkan) runtime so tests don't fall back to the CPU engine.
+lms runtime ls
+GPU_RT="$(lms runtime ls 2>/dev/null | awk '/vulkan/{print $1; exit}')"
+if [ -n "$GPU_RT" ]; then
+  lms runtime select "$GPU_RT"
+  lms runtime ls | grep -E 'ENGINE|✓'
+else
+  echo "WARNING: no Vulkan runtime installed; GPU acceleration unavailable. Install with: lms get <vulkan-runtime>"
+fi
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -94,7 +128,8 @@ lms unload --all || true
 lms ps
 ID="${lms_model}-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
+# retry once: large-model loads can transiently fail under memory pressure
+lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y; }
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -113,19 +148,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Порада**: Довжина контексту означає пам'ять моделі. Flash attention покращує швидкість обробки, зменшуючи використання пам'яті. GPU Offload перекладає обчислення на графічну карту для швидших відповідей.
+> **Порада**: Довжина контексту стосується пам'яті моделі. Flash attention покращує швидкість обробки, зменшуючи використання пам'яті. GPU Offload переносить обчислення на відеокарту для швидших відповідей.
 
 ## Обслуговування LLM через сумісну з OpenAI кінцеву точку
 
-LM Studio також пропонує сумісну з OpenAI кінцеву точку у вигляді LM Studio Server. Це вже було продемонстровано в агентному робочому процесі кодування з Cline [тут](../playbooks/vscode-qwen3-coder). Інший поширений випадок використання — підключення LM Studio Server до будь-якого веб-застосунку (React, Node.js, Python) шляхом надсилання стандартних HTTP-запитів до кінцевої точки інференсу.
+LM Studio також пропонує сумісну з OpenAI кінцеву точку у формі LM Studio Server. Це вже було продемонстровано в агентному робочому процесі кодування з Cline [тут](../playbooks/vscode-qwen3-coder). Іншим поширеним випадком використання є підключення LM Studio Server до будь-якого веб-застосунку (React, Node.js, Python) шляхом надсилання стандартних HTTP-запитів до кінцевої точки виведення.
 
-Щоб налаштувати LM Studio Server, скористайтеся наступними інструкціями:
+Щоб налаштувати LM Studio Server, скористайтесь наступними інструкціями:
 
-1. Ліворуч клацніть на вкладку `Developer` (іконка командного рядка) або натисніть `Ctrl + 2`, а потім клацніть на `Server Settings`.  
-2. (Необов'язково): Якщо ви хочете обслуговувати модель у своїй локальній мережі, позначте `Serve on Local Network`. Якщо ви хочете використовувати з вебсайтом або широким викликом у VS Code, позначте `Enable CORS`. 
-3. У верхньому лівому куті переконайтеся, що сервер запущено, клацнувши на перемикач біля `Status`.
+1. Ліворуч натисніть на вкладку `Developer` (значок командного рядка) або `Ctrl + 2`, а потім натисніть на `Server Settings`.  
+2. (Необов'язково): Якщо ви хочете обслуговувати модель у вашій локальній мережі, позначте `Serve on Local Network`. Якщо ви хочете використовувати з вебсайтом або розширеними викликами в межах VS Code, позначте `Enable CORS`. 
+3. У верхньому лівому куті переконайтесь, що сервер запущений, натиснувши на перемикач перед `Status`.
 4. Тепер буде запущено сумісну з OpenAI кінцеву точку. Адреса зазвичай http://127.0.0.1:1234  
-5. Якщо модель ще не завантажена, ви можете завантажити її, клацнувши `Load Model` та виконавши раніше згадані кроки. 
+5. Якщо модель ще не завантажена, ви можете завантажити її, натиснувши `Load Model` і виконавши раніше згадані кроки. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -150,19 +185,19 @@ curl -s http://127.0.0.1:1234/v1/models
 
 | Кінцева точка | Метод | Документація |
 |------------|----------|----------|
-| /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
-| /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
-| /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
-| /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
-| /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### Приклад: перевірка зʼєднання з ендпоінтом
-Щойно створивши OpenAI-сумісний ендпоінт, розгляньмо, як інтегрувати його в середовище розробки Python (наприклад, VSCode) і використовувати вашу систему як локального постачальника API.
+| /v1/models | GET | [Моделі](https://lmstudio.ai/docs/developer/openai-compat/models) |
+| /v1/responses | POST | [Відповіді](https://lmstudio.ai/docs/developer/openai-compat/responses) |
+| /v1/chat/completions | POST |	[Завершення чату](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
+| /v1/embeddings | POST | [Ембеддінги](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
+| /v1/completions | POST | [Завершення](https://lmstudio.ai/docs/developer/openai-compat/completions) |
+#### Приклад: пінгування вашого ендпоінту
+Щойно створивши OpenAI-сумісний ендпоінт, розглянемо, як інтегрувати його в середовище розробки Python (наприклад, VSCode) і використовувати вашу систему як локального постачальника API.
 
 1. Створіть віртуальне середовище Python:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    У Linux відкрийте термінал у потрібному каталозі та виконайте наведені команди для створення venv.
+    У Linux відкрийте термінал у потрібному каталозі та виконайте команди для створення venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -172,13 +207,13 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Надайте вашому користувачу доступ до пристроїв GPU** (щоб зміни набули чинності, вийдіть із системи та увійдіть знову):
+**Надайте вашому користувачу доступ до пристроїв GPU** (вийдіть із системи та увійдіть знову, щоб зміни набули чинності):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    У Linux відкрийте термінал у потрібному каталозі та виконайте наведені команди для створення venv.
+    У Linux відкрийте термінал у потрібному каталозі та виконайте команди для створення venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -190,26 +225,26 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    У Windows відкрийте термінал у потрібному каталозі та виконайте наведені команди для створення venv.
+    У Windows відкрийте термінал у потрібному каталозі та виконайте команди для створення venv.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
     > **Порада**: користувачам Windows може знадобитися змінити політику виконання PowerShell (наприклад,
-    > встановивши значення RemoteSigned або Unrestricted) перед виконанням деяких команд PowerShell.
+    > встановити значення RemoteSigned або Unrestricted) перед виконанням деяких команд Powershell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    У Windows відкрийте термінал у потрібному каталозі та виконайте наведені команди для створення venv.
+    У Windows відкрийте термінал у потрібному каталозі та виконайте команди для створення venv.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
     > **Порада**: користувачам Windows може знадобитися змінити політику виконання PowerShell (наприклад,
-    > встановивши значення RemoteSigned або Unrestricted) перед виконанням деяких команд PowerShell.
+    > встановити значення RemoteSigned або Unrestricted) перед виконанням деяких команд Powershell.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -219,7 +254,7 @@ sudo usermod -aG render,video $LOGNAME
     pip install openai
     ```
 
-3. Запустіть наступний скрипт, щоб перевірити зʼєднання зі щойно створеним ендпоінтом.
+3. Виконайте наступний скрипт, щоб пропінгувати щойно створений ендпоінт.
     ```python
     from openai import OpenAI
 
@@ -263,12 +298,12 @@ req = urllib.request.Request(
    "model": model_id,
    "messages": [{"role":"user","content":"What is 2 + 2? Reply with only the number."}],
    "temperature": 0,
-   "max_tokens": 500
+   "max_tokens": 64
  }).encode("utf-8"),
  headers={"Content-Type":"application/json"},
  method="POST",
 )
-with urllib.request.urlopen(req, timeout=60) as r:
+with urllib.request.urlopen(req, timeout=120) as r:
  print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end --> 
@@ -288,12 +323,12 @@ req = urllib.request.Request(
    "model": model_id,
    "messages": [{"role":"user","content":"What is 47 + 42? Reply with only the number in words."}],
    "temperature": 0,
-   "max_tokens": 500
+   "max_tokens": 64
  }).encode("utf-8"),
  headers={"Content-Type":"application/json"},
  method="POST",
 )
-with urllib.request.urlopen(req, timeout=60) as r:
+with urllib.request.urlopen(req, timeout=120) as r:
  print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end --> 
@@ -322,15 +357,15 @@ lms server stop
 <!-- @test:end --> 
 <!-- @os:end -->
 
-#### (Необовʼязково): перемикання між середовищами виконання
+#### (Опціонально): Перемикання між середовищами виконання (Runtimes)
 
-1. Натисніть `Ctrl + Shift + R` на клавіатурі. Або натисніть на вкладку `Discover` (значок лупи) ліворуч, а потім клацніть `Runtime` у спливному вікні.
-2. Ви побачите `Runtime Selections`, де за допомогою випадного меню можна змінити середовище виконання.
+1. Натисніть `Ctrl + Shift + R` на клавіатурі. Або клацніть на вкладку `Discover` (Збільшувальне скло) з лівого боку, а потім клацніть на `Runtime` у спливаючому вікні.
+2. Після цього ви побачите `Runtime Selections`, де за допомогою випадного меню можна змінити середовище виконання.
 
 
 ## Наступні кроки
 
-- **Інтеграція власних застосунків**: інтегруйте власні скрипти або застосунки Python за допомогою локального OpenAI-сумісного API.
-- **Розширені фронтенди**: підключіть потужні інтерфейси, такі як Open WebUI, до вашого сервера для роботи з історією чату та керування персонами.
+- **Інтеграція власного застосунку**: інтегруйте власні скрипти або застосунки Python за допомогою локального OpenAI-сумісного API.
+- **Розширені інтерфейси**: підключіть потужні інтерфейси, такі як Open WebUI, до вашого сервера для збереження історії чату та керування персонами.
 
-Додаткову документацію можна знайти за посиланням: https://lmstudio.ai/docs/developer
+Для отримання додаткової документації відвідайте: https://lmstudio.ai/docs/developer

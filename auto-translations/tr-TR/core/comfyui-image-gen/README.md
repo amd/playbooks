@@ -5,20 +5,21 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
+
 > [!IMPORTANT]
-> Bu kılavuz, GitHub'ın oluşturamayacağı özel etiketler kullanmaktadır. Bu içeriği doğru şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
+> Bu kılavuz, GitHub'ın işleyemediği özel etiketler kullanmaktadır. Bu içeriği doğru bir şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
 <!-- @github-only:end -->
 
 ## Genel Bakış
 
-ComfyUI, Stable Diffusion ve diğer difüzyon modelleri için güçlü, düğüm tabanlı bir arayüzdür. Basit istem kutularına sahip geleneksel metinden görüntüye arayüzlerin aksine, ComfyUI tüm görüntü oluşturma işlem hattını görsel bir grafik olarak sunar ve metin kodlamadan gizil (latent) alan manipülasyonuna ve son çözümlemeye kadar her adım üzerinde ince ayrıntılı kontrol sağlar.
+ComfyUI, Stable Diffusion ve diğer difüzyon modelleri için düğüm tabanlı, güçlü bir arayüzdür. Basit istem kutularına sahip geleneksel metinden görüntüye arayüzlerin aksine, ComfyUI tüm görüntü oluşturma iş hattını görsel bir grafik olarak sunar ve metin kodlamadan gizli (latent) uzay manipülasyonuna, nihai kod çözmeye kadar her adım üzerinde ayrıntılı kontrol sağlar.
 
-Bu eğitim, yüksek kaliteli yapay zeka görüntüleri oluşturmak için GPU'nuzda Z Image Turbo modeliyle ComfyUI'yi nasıl kullanacağınızı öğretir.
+Bu eğitim, GPU'nuzda yüksek kaliteli yapay zeka görüntüleri oluşturmak için ComfyUI'yi Z Image Turbo modeliyle nasıl kullanacağınızı öğretir.
 
-## Öğrenecekleriniz
+## Neler Öğreneceksiniz
 
-- ComfyUI'yi nasıl başlatacağınız ve Z-Image Turbo şablonunu nasıl yükleyeceğiniz
-- Difüzyon işlem hattı bileşenlerini anlama
+- ComfyUI'nin nasıl başlatılacağı ve Z-Image Turbo şablonunun nasıl yükleneceği
+- Difüzyon iş hattı bileşenlerini anlama
 - Görüntü oluşturma ve oluşturma parametrelerini ayarlama
 - İş akışlarını kaydetme ve paylaşma
 
@@ -41,7 +42,7 @@ Bu eğitim, yüksek kaliteli yapay zeka görüntüleri oluşturmak için GPU'nuz
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Kullanıcınıza GPU aygıtlarına erişim izni verin** (bunun etkili olması için oturumu kapatıp yeniden açın):
+**Kullanıcınıza GPU cihazlarına erişim izni verin** (bunun etkili olması için oturumu kapatıp yeniden açın):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -287,13 +288,13 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-ComfyUI'yi Windows'ta başlatmak için Masaüstünüzde bulunan ComfyUI Desktop Launcher'a tıklayın. AMD ile yerel sürümü yüklemek için adımları izleyin.
+ComfyUI'yi Windows'ta başlatmak için Masaüstünüzde bulunan ComfyUI Masaüstü Başlatıcısına tıklayın. AMD ile yerel sürümü yüklemek için adımları izleyin.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Ardından, uygulamanın üst orta kısmındaki ComfyUI düğmesine tıklayın. Bu bir ayarlar sekmesi açacaktır. Storage sekmesini açın ve önceden yüklenmiş modellere erişmek için yolların aşağıdaki gibi ayarlandığından emin olun.
+Ardından, uygulamanın üst ortasındaki ComfyUI düğmesine tıklayın. Bu, bir ayarlar sekmesi açacaktır. Storage sekmesini açın ve önceden yüklenmiş modellere erişmek için yolların aşağıdaki gibi ayarlandığından emin olun.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
@@ -303,8 +304,10 @@ Ardından, uygulamanın üst orta kısmındaki ComfyUI düğmesine tıklayın. B
 <!-- @os:end -->
 
 <!-- @os:linux -->
+AMD Ryzen™ AI Halo üzerinde, ComfyUI ek Python kurulumu gerektirmeyen önceden oluşturulmuş bir konteynerde çalışır.
+
 ComfyUI'yi Linux'ta başlatmak için görev çubuğundaki ComfyUI kısayoluna tıklayın. Kendiliğinden bir tarayıcı penceresinde açılmalıdır.
->**İpucu**: ComfyUI ve modelleri `~/.local/share/ComfyUI/models` konumunda saklanır. İş akışlarını veya yeni modelleri manuel olarak buradan ekleyebilirsiniz.
+>**İpucu**: ComfyUI ve modelleri `~/.local/share/ComfyUI/models` konumunda depolanır. İş akışlarını veya yeni modelleri manuel olarak buradan ekleyebilirsiniz.
 
 
 <!-- @os:end -->
@@ -319,12 +322,12 @@ ComfyUI'yi Windows'ta başlatmak için Masaüstünüzdeki ComfyUI kısayoluna t�
 
 ComfyUI'yi başlatmak için:
 
-1. ComfyUI dizini içinde olduğunuzdan emin olun. 
+1. ComfyUI dizininde olduğunuzdan emin olun.
 2. `python3 main.py --use-pytorch-cross-attention` komutunu çalıştırın
 
 ComfyUI yerel bir web sunucusu başlatır. Arayüze erişmek için tarayıcınızı `http://127.0.0.1:8188` adresine açın.
 
-> **İpucu**: ComfyUI'yi kullanırken terminal penceresini açık tutun. Kapatmak sunucuyu durduracaktır.
+> **İpucu**: ComfyUI'yi kullanırken terminal penceresini açık tutun. Kapatmanız sunucuyu durduracaktır.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -333,9 +336,9 @@ ComfyUI yerel bir web sunucusu başlatır. Arayüze erişmek için tarayıcını
 
 Görüntü oluşturmadan önce, Z-Image Turbo şablonunu yüklemeniz gerekir. İşte nasıl bulacağınız:
 
-1. **Ekranın en sol kenarına bakın**—uygulamanın en solunda yukarıdan aşağıya uzanan dikey bir araç çubuğu vardır.
+1. **Ekranın en sol kenarına bakın**—uygulamanın en solunda, üstten alta uzanan dikey bir araç çubuğu vardır.
 
-2. **Klasör simgesini bulun**—bu sol araç çubuğunda, klasöre benzeyen bir simge arayın. Üzerine geldiğinizde "Templates" olarak etiketlendiğini görürsünüz.
+2. **Klasör simgesini bulun**—o sol araç çubuğunda, klasöre benzeyen bir simge arayın. Üzerine geldiğinizde "Templates" olarak etiketlenmiştir.
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
@@ -343,7 +346,7 @@ Görüntü oluşturmadan önce, Z-Image Turbo şablonunu yüklemeniz gerekir. İ
 
 3. **Klasör simgesine tıklayın**—bu, Templates panelini açar.
 
-4. **"Z-Image Turbo" araması yapın**—arama çubuğunu kullanın veya Z-Image Turbo Text To Image iş akışını bulmak için mevcut şablonlar arasında gezinin, ardından yüklemek için tıklayın.
+4. **"Z-Image Turbo" için arama yapın**—Z-Image Turbo Text To Image iş akışını bulmak için arama çubuğunu kullanın veya mevcut şablonlar arasında gezinin, ardından yüklemek için tıklayın.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -362,40 +365,39 @@ Z-Image Turbo şablonu yüklendiğinde, 2 ana düğüme sahip bir tuval görecek
 </p>
 
 
-Z-Image düğümünde, düğümü genişletmek ve alt grafiği görmek için sağ üstteki düğmeye tıklayın.
+Z-Image düğümünde, Düğümü genişletmek ve alt grafiği görmek için sağ üst düğmeye tıklayın.
 
 <p align="center">
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
 </p>
 
-### İşlem Hattı Bileşenleri
+### İş Hattı Bileşenleri
 
 Z-Image Turbo iş akışı, birlikte çalışan dört temel model bileşeni kullanır:
 
 | Bileşen | Rol |
 |-----------|------|
-| **Text Encoder** (Qwen 3 4B) | Metin isteminizi difüzyon modelinin anladığı gömme (embedding) vektörlerine dönüştürür |
-| **Diffusion Model** (Z-Image Turbo) | Gizil (latent) temsilleri yinelemeli olarak gürültüden arındırarak görüntülere dönüştüren temel sinir ağı |
-| **VAE** (Variational Autoencoder) | Görüntüleri gizil alana/gizil alandan kodlar (son gizil verileri piksellere çözer) |
+| **Metin Kodlayıcı (Text Encoder)** (Qwen 3 4B) | Metin isteminizi, difüzyon modelinin anladığı gömme (embedding) vektörlerine dönüştürür |
+| **Difüzyon Modeli** (Z-Image Turbo) | Gizli (latent) temsilleri yinelemeli olarak arındırarak görüntülere dönüştüren temel sinir ağı |
+| **VAE** (Varyasyonel Otokodlayıcı) | Görüntüleri gizli uzaya/gizli uzaydan kodlar (nihai gizli değerleri piksellere çözer) |
 | **LoRA** (isteğe bağlı) | Temel modeli yeniden eğitmeden stili veya konuyu değiştiren hafif adaptörler |
 
-İş akışındaki her düğüm bu bileşenlerden birine karşılık gelir. Veri soldan sağa akar: metin → gömme vektörleri → yönlendirilmiş gürültü arındırma → gizil veriler → son görüntü.
-
+İş akışındaki her düğüm bu bileşenlerden birine karşılık gelir. Veri soldan sağa akar: metin → gömme vektörleri → yönlendirilmiş arındırma → gizli değerler → nihai görüntü.
 ## İlk Görüntünüzü Oluşturma
 
-Z-Image Turbo modeli zaten yüklenmiştir. Bir görüntü oluşturmak için:
+Z-Image Turbo modeli zaten yüklendi. Bir görüntü oluşturmak için:
 
-1. Ana Z-Image Düğümüne **isteminizi girin**. Betimleyici olun. İşte bir örnek:
+1. **İsteminizi (prompt) girin** ana Z-Image Node içinde. Açıklayıcı olun. İşte bir örnek:
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-2. **(İsteğe bağlı)**: Alt grafik içindeki diğer belirli ayarları onaylayın veya değiştirin.
-3. Sağ köşedeki mavi **"Run Workflow"** düğmesine tıklayın (veya `Ctrl+Enter` tuşlarına basın)
-4. Her adım çalıştırılırken düğümlerin vurgulandığını izleyin
+2. **(İsteğe bağlı)**: Subgraph içindeki diğer belirli ayarları onaylayın veya ince ayar yapın.
+3. Sağ köşedeki **mavi "Run Workflow"** düğmesine tıklayın (veya `Ctrl+Enter` tuşlarına basın)
+4. Her adım çalıştırıldıkça node'ların vurgulandığını izleyin
 
-Tüm iş akışı yürütmesi 30 saniyeden kısa sürede tamamlanmalıdır. Oluşturulan görüntünüz **Save Image** düğümünde görünür ve `output/` klasörüne kaydedilir.
+Tüm iş akışının çalışması 30 saniyeden kısa sürede tamamlanmalıdır. Oluşturulan görüntünüz **Save Image** node'unda görünür ve `output/` klasörüne kaydedilir.
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -568,62 +570,63 @@ ls -1t ComfyUI/output/*.png | head -n 5
 
 
 ## Oluşturma Parametrelerini Ayarlama
+
 ### KSampler Ayarları
 
-KSampler düğümü, temel difüzyon sürecini kontrol eder:
+KSampler node'u temel difüzyon sürecini kontrol eder:
 
-| Parametre | Neyi Kontrol Eder | Z-Image Turbo İçin Önerilen |
+| Parametre | Ne Kontrol Eder | Z-Image Turbo İçin Önerilen |
 |-----------|------------------|-------------------------------|
-| **steps** | Gürültü giderme yinelemelerinin sayısı | 4–10 (turbo modeller daha az adım için damıtılmıştır) |
-| **cfg** | Sınıflandırıcısız yönlendirme ölçeği—istemin ne kadar yakından takip edileceği | 1.0–2.0 (turbo modeller çok düşük yönlendirme kullanır) |
-| **sampler_name** | Gürültü giderme algoritması | `euler` ve `res_multistep`, turbo modeller için iyi çalışır |
+| **steps** | Gürültü giderme (denoising) yinelemelerinin sayısı | 4–10 (turbo modeller daha az adım için distile edilmiştir) |
+| **cfg** | Sınıflandırıcısız yönlendirme ölçeği (classifier-free guidance)—istemin ne kadar yakından takip edileceği | 1.0–2.0 (turbo modeller çok düşük yönlendirme kullanır) |
+| **sampler_name** | Gürültü giderme algoritması | `euler` ve `res_multistep` turbo modeller için iyi çalışır |
 | **scheduler** | Gürültü zamanlama eğrisi | `normal` veya `simple` |
 | **seed** | Yeniden üretilebilirlik için rastgele tohum değeri | Bir kompozisyon üzerinde yineleme yapmak için sabit değerler ayarlayın |
 
 ### Görüntü Boyutu
 
-Çıktı boyutlarını ayarlamak için **Empty Latent Image** düğümünü bulun ve **width** ile **height** değerlerini değiştirin. En iyi kalite için boyutları en uzun kenarda 1024 pikselde veya altında tutun.
+Çıktı boyutlarını ayarlamak için **Empty Latent Image** node'unu bulun ve **width** ile **height** değerlerini değiştirin. En iyi kalite için boyutları en uzun kenarda 1024 piksel veya altında tutun.
 
 ### ModelSamplingAuraFlow
 
-**ModelSamplingAuraFlow** düğümü, difüzyon sürecinin gürültü zamanlamasını nasıl ele aldığını ayarlayan özel bir örnekleme değiştiricisidir. Bu düğümü, Z-Image Turbo iş akışında model çıkışına bağlı olarak göreceksiniz.
+**ModelSamplingAuraFlow** node'u, difüzyon sürecinin gürültü zamanlamasını nasıl ele aldığını ayarlayan özel bir örnekleme değiştiricisidir. Z-Image Turbo iş akışında bu node'un model çıktısına bağlı olduğunu göreceksiniz.
 
-| Parametre | Neyi Kontrol Eder | Önerilen Değerler |
+| Parametre | Ne Kontrol Eder | Önerilen Değerler |
 |-----------|------------------|-------------------|
 | **shift** | Gürültü zamanlamasını ayarlar—daha yüksek değerler daha fazla detay iyileştirmesini sonraki adımlara iter | 1.0–4.0 (varsayılan 3.0'dır) |
 
-**shift** değerini ne zaman ayarlamalı:
+**shift** ne zaman ayarlanmalı:
 
-- **Daha düşük değerler (1.0–2.0)**: Daha hızlı yakınsama, basit kompozisyonlar için iyi
-- **Daha yüksek değerler (3.0–4.0)**: Daha kademeli iyileştirme, karmaşık sahnelerde ince detayları geliştirebilir
+- **Düşük değerler (1.0–2.0)**: Daha hızlı yakınsama, basit kompozisyonlar için iyi
+- **Yüksek değerler (3.0–4.0)**: Daha kademeli iyileştirme, karmaşık sahnelerde ince detayları geliştirebilir
 
-AuraFlow örnekleme yöntemi, Z-Image Turbo gibi akış eşleştirmeli (flow-matching) modeller için özel olarak tasarlanmıştır ve üretim süreci boyunca doğru gürültü dağılımını sağlar.
+AuraFlow örnekleme yöntemi, özellikle Z-Image Turbo gibi akış eşleştirmeli (flow-matching) modeller için tasarlanmıştır ve oluşturma süreci boyunca uygun gürültü dağılımını sağlar.
 
 ## İş Akışlarıyla Çalışma
 
 ### İş Akışlarını Kaydetme
 
-İş akışınızı bir JSON dosyası olarak dışa aktarmak için menüdeki **Save** düğmesine tıklayın. Bu işlem şunları kaydeder:
+İş akışınızı JSON dosyası olarak dışa aktarmak için menüdeki **Save** düğmesine tıklayın. Bu işlem şunları kaydeder:
 
-- Tüm düğümler ve bunların parametreleri
-- Düğümler arasındaki tüm bağlantılar
+- Tüm node'lar ve parametreleri
+- Node'lar arasındaki tüm bağlantılar
 - Geçerli istem metni
 
 ### İş Akışlarını Yükleme
 
-Bir iş akışı JSON dosyasını tuvale sürükleyin veya menüden **Load** seçeneğini kullanın. Varsayılan olarak gördüğünüz Z-Image Turbo iş akışı, kaydedilmiş bir iş akışı dosyasından yüklenir.
+Bir iş akışı JSON dosyasını tuvale (canvas) sürükleyin veya menüden **Load** seçeneğini kullanın. Varsayılan olarak gördüğünüz Z-Image Turbo iş akışı, kaydedilmiş bir iş akışı dosyasından yüklenir.
 
 ### İş Akışlarını Paylaşma
 
-İş akışları kendi kendine yeterlidir—JSON dosyasını meslektaşlarınızla paylaşın, böylece tam olarak sizin kurulumunuzu yeniden oluşturabilirler. Bu, ComfyUI'yi iş birliğine dayalı deneyler için mükemmel bir araç haline getirir.
+İş akışları kendi kendine yeterlidir—JSON dosyasını meslektaşlarınızla paylaşın, böylece tam olarak sizin kurulumunuzu yeniden oluşturabilirler. Bu, ComfyUI'yi işbirlikçi deneyler için mükemmel kılar.
 
 ## Sonraki Adımlar
 
-- **LoRA düğümlerini keşfedin**: Yeniden eğitim yapmadan stil veya konu adaptörleri uygulayın
-- **Negatif istemler ekleyin**: Modeli bulanıklık, artefaktlar veya filigranlar gibi istenmeyen özelliklerden uzaklaştırmak için KSampler'ın **negative** koşullandırma girişine ikinci bir CLIP Text Encode düğümü bağlayın
-- **Özel iş akışları oluşturun**: Birden fazla üretimi zincirleyin, büyütme (upscaling) ekleyin veya görüntü varyasyonları oluşturun
+- **LoRA node'larını keşfedin**: Yeniden eğitim yapmadan stil veya konu adaptörleri uygulayın
+- **Negatif istemler ekleyin**: KSampler'ın **negative** koşullandırma girişine ikinci bir CLIP Text Encode node'u bağlayarak modeli bulanıklık, artefaktlar veya filigranlar gibi istenmeyen özelliklerden uzaklaştırın
+- **Özel iş akışları oluşturun**: Birden fazla oluşturmayı zincirleyin, yükseltme (upscaling) ekleyin veya görüntü varyasyonları oluşturun
 - **Topluluk iş akışlarına göz atın**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) kullanıma hazır birçok iş akışı içerir
 
-ComfyUI'nin gücü deneyselliktir: düğümleri farklı şekillerde bağlayın, parametreleri ayarlayın ve her değişikliğin çıktıyı nasıl etkilediğini gözlemleyin. Bu uygulamalı keşif, difüzyon modellerinin nasıl çalıştığına dair sezgi geliştirir.
+ComfyUI'nin gücü deneyselliktir: node'ları farklı şekillerde bağlayın, parametreleri ayarlayın ve her değişikliğin çıktıyı nasıl etkilediğini gözlemleyin. Bu uygulamalı keşif, difüzyon modellerinin nasıl çalıştığına dair sezgi geliştirir.
 
 Daha fazla bilgi için [ComfyUI Documentation](https://docs.comfy.org/) sayfasına göz atın.

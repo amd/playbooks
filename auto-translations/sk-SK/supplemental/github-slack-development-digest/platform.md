@@ -1,0 +1,48 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+# Konfigurácia platformy
+
+Tento dokument popisuje očakávané konfigurácie platformy na spustenie tejto playbook.
+
+## Požadované aplikácie/rámce
+
+### Windows/Linux
+
+- **Lemonade Server** by mal byť nainštalovaný podľa
+  [návodu na inštaláciu Lemonade](https://lemonade-server.ai/docs/guide/install/).
+- **Node.js 22.12 alebo novší** a `npm`, ktoré používa CLI nástroj `agent-canvas` a MCP
+  servery spúšťané pomocou `npx`.
+- **uv**, správca balíkov Python, ktorý Agent Canvas používa na správu prostredia
+  agent servera. Nainštalujte ho z
+  [návodu na inštaláciu uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+## Požadované modely
+
+### Windows/Linux
+
+Nasledujúci model musí byť dostupný v Lemonade Server pred spustením
+playbook.
+
+| Typ modelu | ID modelu | Poznámky |
+| --- | --- | --- |
+| GGUF chatovací model | `Qwen3.6-35B-A3B-GGUF` | Poskytovaný Lemonade Server na `http://127.0.0.1:13305/api/v1`. Na zariadeniach s menej ako 32 GB pamäte použite menší GGUF model. |
+
+Spustite model pomocou:
+
+```bash
+lemonade config set llamacpp.backend=vulkan
+lemonade config set ctx_size=65536
+lemonade run "Qwen3.6-35B-A3B-GGUF"
+```
+
+## Externé prihlasovacie údaje
+
+Táto playbook vyžaduje:
+
+- GitHub token s prístupom na čítanie do repozitára, ktorý sa má sumarizovať.
+- Slack bot token s oprávneniami `chat:write` a prístupom na čítanie kanálov.
+- Slack team ID a ID cieľového Slack kanála.

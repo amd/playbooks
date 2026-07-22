@@ -6,46 +6,40 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ta priročnik uporablja posebne oznake, ki jih GitHub ne more upodobiti. Obiščite [amd.com/playbooks](https://amd.com/playbooks), da si to vsebino ogledate pravilno.
+> Ta priročnik uporablja posebne oznake, ki jih GitHub ne more prikazati. Za pravilen predogled te vsebine obiščite [amd.com/playbooks](https://amd.com/playbooks).
 <!-- @github-only:end -->
-
-## Pregled
-
+# Pregled
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
-> [!NOTE]
-> Ta priročnik zahteva vsaj **32 GB** sistemskega pomnilnika.
+> [!OPOMBA]
+> Ta vodnik zahteva vsaj **32 GB** sistemskega pomnilnika.
 <!-- @device:end -->
+n8n je platforma za avtomatizacijo delovnih tokov, ki omogoča povezovanje aplikacij in storitev z vizualnim urejevalnikom, ki temelji na vozliščih.
 
-n8n je platforma za avtomatizacijo delovnih tokov, ki omogoča povezovanje aplikacij in storitev prek vizualnega urejevalnika, temelječega na vozliščih.
-
-Ta priročnik vas nauči, kako nastaviti povzemalnik finančnih novic, ki temelji na umetni inteligenci, ki prečeše poslovni razdelek AP News, izlušči ključne naslove in uporabi lokalni LLM, ki teče v vašem sistemu, za generiranje povzetka, prilagojenega vlagateljem.
+Ta vodnik vas nauči, kako nastaviti s pomočjo umetne inteligence poganjan povzemalnik finančnih novic, ki poišče vsebino iz razdelka za posle na AP News, izvleče ključne naslove in uporabi lokalni LLM, ki teče v vašem sistemu, za generiranje povzetka, namenjenega vlagateljem.
 
 ## Kaj se boste naučili
 
 - Kako namestiti in zagnati n8n
 - Uvažanje in konfiguriranje vnaprej pripravljenega delovnega toka
-- Povezovanje z Lemonade z uporabo domače integracije n8n
+- Povezovanje z Lemonade prek native n8n integracije
 - Razumevanje vozlišč delovnega toka in pretoka podatkov
 
 ## Kaj je Lemonade?
 
-[Lemonade](https://lemonade-server.ai) je platforma za lokalno strežbo LLM, zgrajena za strojno opremo AMD. Zagotavlja API, združljiv z OpenAI, ki teče v celoti na vaši napravi – vaši podatki nikoli ne zapustijo naprave.
+[Lemonade](https://lemonade-server.ai) je platforma za lokalno strežbo LLM, zgrajena za strojno opremo AMD. Zagotavlja API, združljiv z OpenAI, ki teče v celoti na vaši napravi—vaši podatki nikoli ne zapustijo vaše naprave.
 
-V tem priročniku uporabljamo Lemonade za strežbo lokalnega LLM, s katerim se n8n poveže za naloge, temelječe na umetni inteligenci.
+V tem vodniku uporabljamo Lemonade za strežbo lokalnega LLM, s katerim se n8n poveže za naloge, ki jih poganja umetna inteligenca.
 
-n8n vključuje **domače vozlišče Lemonade** (`Lemonade Chat Model`), ki zagotavlja prvovrstno integracijo – ni potrebe po ročni konfiguraciji. To olajša povezovanje vašega lokalnega LLM z delovnimi tokovi za avtomatizacijo.
+n8n vključuje **native vozlišče Lemonade** (`Lemonade Chat Model`), ki zagotavlja integracijo prvega razreda - brez potrebe po ročni konfiguraciji. To omogoča preprosto povezovanje vašega lokalnega LLM z delovnimi tokovi avtomatizacije.
 
-## Nastavitev konfiguracije pomnilnika
-
+## Nastavljanje konfiguracije pomnilnika
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Preverjanje posodobitev programske opreme
-
+## Preveri posodobitve programske opreme
 <!-- @require:software-update -->
 <!-- @device:end -->
-
-## Namestitev potrebne programske opreme
+## Namestitev programskih predpogojev
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
@@ -189,7 +183,6 @@ node -v
 npm -v
 ```
 <!-- @test:end -->
-
 ## Namestitev n8n
 <!-- @os:windows -->
 Namestite n8n globalno z uporabo npm.
@@ -217,34 +210,32 @@ n8n --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Nasvet**: Uporabniki sistema Windows bodo morda morali spremeniti izvedbeno politiko PowerShell (npr.
-> jo nastaviti na RemoteSigned ali Unrestricted), preden zaženejo nekatere ukaze PowerShell.
+> **Nasvet**: Uporabniki sistema Windows bodo morda morali spremeniti izvedbeno pravilnik (Execution Policy) za PowerShell (npr. ga nastaviti na RemoteSigned ali Unrestricted), preden bodo lahko zagnali nekatere ukaze PowerShell.
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **Težava s PATH**: Če `n8n --version` sporoči, da ukaz ni najden, se prepričajte, da je vaš globalni bin imenik npm v uporabniškem `PATH`. Običajna namestitvena pot je `C:\Users\<username>\AppData\Roaming\npm`.
-> Dodajte to v uporabniško pot (Uredi sistemske spremenljivke okolja > Spremenljivke okolja > Uredi uporabniško pot) in ponovno naložite terminal.
-
+> **Težava s PATH**: Če `n8n --version` javi, da ukaz ni najden, se prepričajte, da je vaš globalni npm bin direktorij vključen v uporabniško spremenljivko `PATH`. Običajna namestitvena pot je `C:\Users\<username>\AppData\Roaming\npm`. 
+> Dodajte to pot v uporabniško spremenljivko PATH (Uredi sistemske spremenljivke okolja > Spremenljivke okolja > Uredi uporabniško pot) in znova naložite terminal.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Zdaj bomo uporabili storitev Podman za kontejnerizacijo naše namestitve n8n.
+Zdaj bomo uporabili storitev Podman za vsebnikizacijo naše namestitve n8n.
 
-Prosimo, prenesite naslednje v imenik po svoji izbiri: [compose.yml](assets/compose.yml)
+Prosimo, prenesite naslednje v mapo po vaši izbiri: [compose.yml](assets/compose.yml)
 
-V tem imeniku zaženite naslednji ukaz:
+V tej mapi zaženite naslednji ukaz:
 ```bash
 podman compose up -d
 ```
 
-S tem se bo n8n namestil in zapisal v trajno shrambo.
+To bi moralo namestiti n8n in zapisati podatke v trajno shrambo.
 
 Zaženite n8n tako, da v naslovno vrstico brskalnika vnesete `localhost:5678`.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-## Zagon n8n
+## Zaganjanje n8n
 
 Zaženite n8n iz terminala:
 
@@ -317,28 +308,23 @@ echo "OK: n8n server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-n8n zažene lokalni spletni strežnik. Pritisnite `'o'` ali odprite svoj brskalnik na naslovu `http://localhost:5678`, da dostopate do urejevalnika.
+n8n zažene lokalni spletni strežnik. Pritisnite `'o'` ali odprite brskalnik na naslovu `http://localhost:5678`, da dostopate do urejevalnika.
 <!-- @os:end -->
-
-
-> **Nasvet**: Med uporabo n8n pustite okno terminala odprto. Če ga zaprete, se lahko strežnik ustavi.
+> **Nasvet**: Med uporabo n8n naj bo okno terminala odprto. Če ga zaprete, se strežnik morda ustavi.
 
 ## Zagon Lemonade
 
-Lemonade je lokalni strežnik, ki bo zagnal model in se povezal z n8n.
-
+Lemonade je lokalni strežnik, ki bo zagnal model in ga povezal z n8n.
 <!-- @os:linux -->
-Odprite grafični vmesnik Lemonade tako, da kliknete ikono Lemonade v opravilni vrstici. Tukaj lahko brskate po modelih, zaledjih (backends) in naložite vnaprej nameščene modele.
+Odprite grafični vmesnik Lemonade tako, da kliknete ikono Lemonade v opravilni vrstici. Tukaj lahko brskate po modelih, zalednih sistemih (backends) in naložite vnaprej nameščene modele.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Odprite grafični vmesnik Lemonade tako, da kliknete ikono Lemonade. Z desnim klikom na ikono v pladnju odprite aplikacijo. Nato lahko dodate modele, zaledja (backends) in naložite vnaprej nameščene modele.
+Odprite grafični vmesnik Lemonade s klikom na ikono Lemonade. Z desnim klikom na ikono v sistemski vrstici odprete aplikacijo. Nato lahko dodate modele, zaledja (backends) in naložite vnaprej nameščene modele.
 <!-- @os:end -->
+>**Nasvet**: Ko je zagnan, je Lemonade GUI dostopen tudi na naslovu http://localhost:13305
 
->**Nasvet**: Ko je zagnan, je grafični vmesnik Lemonade dostopen tudi na http://localhost:13305
-
-Druga možnost je, da odprete terminal in zaženete `lemonade list`, da vidite, kateri modeli so nameščeni. Nato zaženite:
-
+Druga možnost je, da odprete terminal in zaženete `lemonade list`, da si ogledate, kateri modeli so nameščeni. Nato zaženite:
 <!-- @device:halo_box -->
 <!-- @os:linux -->
 ```bash
@@ -364,32 +350,30 @@ lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 ```
 <!-- @device:end -->
+## Nastavitev poteka dela
 
+### 1. korak: Prijavite se ali se vpišite v n8n
 
-## Nastavitev delovnega toka
+Ko prvič odprete n8n, boste pozvani, da ustvarite račun ali se vpišete:
 
-### 1. korak: Registracija ali prijava v n8n
+1. Odprite `http://localhost:5678` v brskalniku
+2. Ustvarite nov lokalni račun z vašim e-poštnim naslovom ali se vpišite, če ga že imate
+3. Ko se vpišete, boste videli nadzorno ploščo n8n
 
-Ko prvič odprete n8n, boste pozvani k ustvarjanju računa ali prijavi:
+> **Nasvet**: Če ste zaklenjeni izven svojega računa, poskusite `n8n user-management:reset`
 
-1. Odprite `http://localhost:5678` v svojem brskalniku
-2. Ustvarite nov lokalni račun z e-poštnim naslovom ali se prijavite, če ga že imate
-3. Ko ste prijavljeni, boste videli nadzorno ploščo n8n
+### 2. korak: Uvozite potek dela
 
-> **Nasvet**: Če ste izklenjeni iz svojega računa, poskusite `n8n user-management:reset`
+Priskrbeli smo vam vnaprej pripravljen potek dela, ki ga lahko uvozite neposredno:
 
-### 2. korak: Uvoz delovnega toka
-
-Zagotovili smo vnaprej pripravljen delovni tok, ki ga lahko uvozite neposredno:
-
-1. Prenesite naslednjo datoteko delovnega toka: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. Kliknite **Start from Scratch**, da odprete urejevalnik delovnega toka. Druga možnost je, da kliknete gumb + zgoraj levo in nato **Add workflow**.
+1. Prenesite naslednjo datoteko poteka dela: [financial-news-workflow.json](assets/financial-news-workflow.json)
+2. Kliknite **Start from Scratch**, da odprete urejevalnik poteka dela. Lahko pa tudi kliknete gumb + v zgornjem levem kotu in nato **Add workflow**.
 3. Kliknite meni **...** (tri pike) v zgornji desni vrstici in izberite **Import from file**
-4. Izberite prenesено datoteko `financial-news-workflow.json`
-5. Delovni tok se bo prikazal na platnu
+4. Izberite preneseno datoteko `financial-news-workflow.json`
+5. Potek dela se bo pojavil na platnu
 ### Korak 3: Razumevanje poteka dela
 
-Uvoženi potek dela vsebuje 9 povezanih vozlišč:
+Uvožen potek dela vsebuje 9 povezanih vozlišč:
 
 <p align="center">
   <img src="assets/workflow-overview.png" alt="n8n Financial News Workflow" width="800"/>
@@ -397,12 +381,12 @@ Uvoženi potek dela vsebuje 9 povezanih vozlišč:
 
 | Vozlišče | Namen |
 |------|---------|
-| **When clicking 'Execute workflow'** | Ročni sprožilec za zagon poteka dela |
+| **When clicking 'Execute workflow'** | Ročni sprožilec za začetek poteka dela |
 | **Fetch Financial News Webpage** | Zahteva HTTP GET na `https://apnews.com/business` |
 | **Delay to Ensure Page Load** | Vozlišče za čakanje, ki zagotovi popolno naložitev vsebine strani |
-| **Extract News Headlines & Text** | Vozlišče HTML, ki s CSS selektorji izvleče naslove, uredniške izbore, glavne zgodbe in regionalne novice |
-| **Clean Extracted News Data** | Vozlišče Set, ki združi vse izvlečene podatke v eno besedilno polje |
-| **AI Financial News Summarizer** | Agent AI, ki obdela novice s sistemskim pozivom finančnega analitika |
+| **Extract News Headlines & Text** | Vozlišče HTML, ki z uporabo selektorjev CSS izloči naslove, uredniške izbore, glavne novice in regionalne novice |
+| **Clean Extracted News Data** | Vozlišče Set, ki združi vse izločene podatke v eno besedilno polje |
+| **AI Financial News Summarizer** | Agent AI, ki obdela novice z uporabo sistemskega poziva finančnega analitika |
 | **Lemonade Chat Model** | Poveže se z vašim lokalnim strežnikom Lemonade, na katerem teče LLM |
 | **Structured Output Parser** | Oblikuje izhod AI kot strukturiran JSON |
 | **Convert to File** | Pretvori povzetek v datoteko za prenos |
@@ -413,25 +397,25 @@ Preden zaženete potek dela, ga morate povezati z vašim lokalnim strežnikom Le
 
 1. Dvokliknite vozlišče **Lemonade Chat Model** v n8n
 2. V spustnem meniju **Credential to connect with** izberite **Create New Credential**
-3. Vnesite vrednosti iz spodnje tabele in kliknite za shranjevanje.
-4. Izberite ustrezen model, ki ste ga naložili v Lemonade Server.
+3. Vnesite vrednosti iz spodnje tabele in kliknite »save«.
+4. Izberite ustrezni model, ki ste ga naložili v Lemonade Server.
 
   | Polje | Vrednost |
   |-------|-------|
   | **Base URL** | `http://localhost:13305/api/v1` |
   | **API Key** | `lemonade` |
 
-> **Opomba**: Pred testiranjem v terminalu zaženite `lemonade status`, da potrdite, da strežnik Lemonade deluje.
+> **Opomba**: Pred testiranjem v terminalu zaženite `lemonade status`, da preverite, ali strežnik Lemonade deluje.
 <!-- @device:halo_box -->
-> Ta potek dela uporablja GPT-OSS-120B, ki je v Lemonade že vnaprej nameščen. To lahko spremenite na druge naložene modele v nastavitvah vozlišča Lemonade Chat Model.
+> Ta potek dela uporablja GPT-OSS-120B, ki je v Lemonade vnaprej nameščen. To lahko spremenite na druge naložene modele v nastavitvah vozlišča Lemonade Chat Model.
 <!-- @device:end -->
 
-### Korak 5: Testiranje poteka dela
+### Korak 5: Preizkus poteka dela
 
-1. Prepričajte se, da Lemonade teče z naloženim modelom
+1. Preverite, da Lemonade deluje z naloženim modelom
 2. Kliknite **Execute workflow** na spodnjem sredinskem delu platna
-3. Opazujte, kako se posamezna vozlišča izvajajo od leve proti desni – ob dokončanju postanejo zelena
-4. Dvokliknite vozlišče **AI Financial News Summarizer**, da si ogledate ustvarjeni povzetek v spodnjem podoknu.
+3. Opazujte, kako se vsako vozlišče izvede od leve proti desni – ob dokončanju se obarva zeleno
+4. Dvokliknite vozlišče **AI Financial News Summarizer**, da si v spodnjem podoknu ogledate ustvarjeni povzetek.
 5. Dvokliknite vozlišče **Convert to File**, da v spodnjem podoknu prenesete ustrezno besedilno datoteko.
 
 ## Razumevanje agenta AI
@@ -448,7 +432,7 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-Agent prejme počiščene podatke o novicah in ustvari strukturiran povzetek s tržnim razpoloženjem.
+Agent prejme počiščene podatke o novicah in izpiše strukturiran povzetek z razpoloženjem na trgu.
 
 ### Shranjevanje poteka dela
 
@@ -456,18 +440,37 @@ Kliknite ime poteka dela na vrhu in ga po želji preimenujte. Poteki dela se med
 
 ## Naslednji koraki
 
-- **Načrtovanje avtomatizacije**: Zamenjajte Manual Trigger s **Schedule Trigger**, da se izvaja dnevno
-- **Pošiljanje obvestil**: Dodajte vozlišče **Discord**, **Slack** ali **Email**, da prejemate povzetke
-- **Preizkusite različne modele**: Spremenite model v vozlišču Lemonade Chat Model, da preizkusite različne LLM-je
-- **Prilagoditev izvlečka**: Spremenite CSS selektorje vozlišča HTML Extract, da ciljate na druge razdelke novic
-- **Preizkusite različna ozadja**: n8n podpira tudi [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio in druga lokalna ozadja LLM
+- **Načrtovanje avtomatizacije**: zamenjajte ročni sprožilec z vozliščem **Schedule Trigger**, da se izvaja vsak dan
+- **Pošiljanje obvestil**: dodajte vozlišče **Discord**, **Slack** ali **Email**, da prejemate povzetke
+- **Preizkusite različne modele**: spremenite model v vozlišču Lemonade Chat Model, da preizkusite različne LLM-je
+- **Prilagajanje izločanja**: spremenite selektorje CSS v vozlišču HTML Extract, da ciljate na druge razdelke novic
+- **Preizkusite različne zaledne rešitve**: n8n podpira tudi [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio in druge lokalne zaledne rešitve LLM
 
 ### Raziščite predloge n8n
 
-n8n ponuja na stotine vnaprej pripravljenih predlog poteka dela. Prebrskajte uradno knjižnico predlog na:
+n8n ponuja na stotine vnaprej pripravljenih predlog za poteke dela. Prebrskajte uradno knjižnico predlog na:
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
-Iščite "AI", "LLM" ali "automation", da najdete poteke dela, ki jih lahko uvozite in prilagodite.
+Poiščite »AI«, »LLM« ali »automation«, da najdete poteke dela, ki jih lahko uvozite in prilagodite.
 
 Za več informacij si oglejte [dokumentacijo n8n](https://docs.n8n.io/).
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->

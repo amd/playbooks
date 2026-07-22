@@ -4,38 +4,36 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-# n8n을 사용한 재무 뉴스 요약 자동화
-
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
-> 이 플레이북은 GitHub가 렌더링할 수 없는 특수 태그를 사용합니다. 이 콘텐츠를 올바르게 미리 보려면 [amd.com/playbooks](https://amd.com/playbooks)를 방문해 주세요.
+> 이 플레이북은 GitHub에서 렌더링할 수 없는 특수 태그를 사용합니다. 이 콘텐츠를 올바르게 미리 보려면 [amd.com/playbooks](https://amd.com/playbooks)를 방문하세요.
 <!-- @github-only:end -->
 
 ## 개요
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> 이 플레이북을 실행하려면 최소 **32GB**의 시스템 메모리가 필요합니다.
+> 이 플레이북에는 최소 **32GB**의 시스템 메모리가 필요합니다.
 <!-- @device:end -->
 
-n8n은 시각적 노드 기반 편집기를 사용하여 앱과 서비스를 연결할 수 있는 워크플로우 자동화 플랫폼입니다.
+n8n은 시각적 노드 기반 편집기를 사용하여 앱과 서비스를 연결할 수 있는 워크플로 자동화 플랫폼입니다.
 
-이 플레이북에서는 AP News 비즈니스 섹션을 스크래핑하고, 주요 헤드라인을 추출하며, 사용자 시스템에서 실행되는 로컬 LLM을 사용하여 투자자 중심의 요약을 생성하는 AI 기반 재무 뉴스 요약기를 설정하는 방법을 배웁니다.
+이 플레이북에서는 AP News 비즈니스 섹션을 스크래핑하고, 주요 헤드라인을 추출하며, 시스템에서 실행되는 로컬 LLM을 사용하여 투자자 중심의 요약을 생성하는 AI 기반 금융 뉴스 요약기를 설정하는 방법을 알아봅니다.
 
-## 배우게 될 내용
+## 학습 내용
 
 - n8n을 설치하고 실행하는 방법
-- 사전 구성된 워크플로우를 가져오고 구성하는 방법
-- 네이티브 n8n 통합을 사용하여 Lemonade에 연결하는 방법
-- 워크플로우 노드와 데이터 흐름 이해하기
+- 미리 빌드된 워크플로 가져오기 및 구성
+- 기본 제공되는 n8n 통합을 사용하여 Lemonade에 연결
+- 워크플로 노드와 데이터 흐름 이해
 
-## Lemonade란 무엇인가요?
+## Lemonade란?
 
-[Lemonade](https://lemonade-server.ai)는 AMD 하드웨어를 위해 구축된 로컬 LLM 서빙 플랫폼입니다. 완전히 사용자 컴퓨터에서 실행되는 OpenAI 호환 API를 제공합니다—데이터가 기기를 벗어나지 않습니다.
+[Lemonade](https://lemonade-server.ai)는 AMD 하드웨어용으로 제작된 로컬 LLM 서빙 플랫폼입니다. OpenAI 호환 API를 제공하며 전적으로 사용자의 컴퓨터에서 실행되므로 데이터가 기기 밖으로 나가지 않습니다.
 
-이 플레이북에서는 Lemonade를 사용하여 n8n이 AI 기반 작업을 위해 연결하는 로컬 LLM을 서빙합니다.
+이 플레이북에서는 Lemonade를 사용하여 로컬 LLM을 서빙하고, n8n이 이 LLM에 연결하여 AI 기반 작업을 수행합니다.
 
-n8n에는 **네이티브 Lemonade 노드**(`Lemonade Chat Model`)가 포함되어 있어 별도의 수동 구성 없이도 최고 수준의 통합을 제공합니다. 이를 통해 로컬 LLM을 자동화 워크플로우에 손쉽게 연결할 수 있습니다.
+n8n에는 별도의 수동 구성이 필요 없는 최고 수준의 통합을 제공하는 **기본 제공 Lemonade 노드**(`Lemonade Chat Model`)가 포함되어 있습니다. 이를 통해 로컬 LLM을 자동화 워크플로에 손쉽게 연결할 수 있습니다.
 
 ## 메모리 구성 설정
 
@@ -196,7 +194,7 @@ npm -v
 <!-- @os:windows -->
 npm을 사용하여 n8n을 전역으로 설치합니다.
 
-> **참고**: 일부 npm 경고가 표시될 수 있습니다. 이는 정상적인 현상입니다.
+> **참고**: npm 경고가 표시될 수 있습니다. 이는 정상입니다.
 
 ```bash
 npm install -g n8n
@@ -224,30 +222,30 @@ n8n --version
 
 
 <!-- @os:windows -->
-> **PATH 문제**: `n8n --version` 실행 시 명령을 찾을 수 없다는 메시지가 표시되면, npm 전역 bin 디렉터리가 사용자 `PATH`에 포함되어 있는지 확인하세요. 일반적인 설치 경로는 `C:\Users\<username>\AppData\Roaming\npm`입니다.
-> 이를 사용자 경로에 추가하고(시스템 환경 변수 편집 > 환경 변수 > 사용자 경로 편집) 터미널을 다시 시작하세요.
+> **PATH 문제**: `n8n --version`이 명령을 찾을 수 없다고 표시되면 npm 전역 bin 디렉터리가 사용자 `PATH`에 포함되어 있는지 확인하세요. 일반적인 설치 경로는 `C:\Users\<username>\AppData\Roaming\npm`입니다.
+> 이를 사용자 경로에 추가하고(시스템 환경 변수 편집 > 환경 변수 > 사용자 경로 편집) 터미널을 다시 로드하세요.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-이제 Podman 서비스를 사용하여 n8n 설치를 컨테이너화할 것입니다.
+이제 Podman 서비스를 사용하여 n8n 설치를 컨테이너화하겠습니다.
 
 원하는 디렉터리에 다음 파일을 다운로드하세요: [compose.yml](assets/compose.yml)
 
-해당 디렉터리에서 다음 명령을 실행하세요:
+해당 디렉터리에서 다음 명령을 실행합니다:
 ```bash
 podman compose up -d
 ```
 
-이렇게 하면 n8n이 설치되고 영구 저장소에 데이터가 기록됩니다.
+이렇게 하면 n8n이 설치되고 영구 스토리지에 기록됩니다.
 
-브라우저 주소창에 `localhost:5678`을 입력하여 n8n을 실행하세요.
+브라우저 주소 표시줄에 `localhost:5678`을 입력하여 n8n을 실행하세요.
 <!-- @os:end -->
 
 <!-- @os:windows -->
 ## n8n 실행
 
-터미널에서 n8n을 시작하세요:
+터미널에서 n8n을 시작합니다:
 
 ```bash
 n8n start
@@ -318,7 +316,7 @@ echo "OK: n8n server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-n8n이 로컬 웹 서버를 시작합니다. `'o'`를 누르거나 브라우저에서 `http://localhost:5678`을 열어 편집기에 접속하세요.
+n8n이 로컬 웹 서버를 시작합니다. `'o'`를 누르거나 브라우저를 `http://localhost:5678`로 열어 편집기에 접근하세요.
 <!-- @os:end -->
 
 
@@ -329,16 +327,16 @@ n8n이 로컬 웹 서버를 시작합니다. `'o'`를 누르거나 브라우저�
 Lemonade는 모델을 실행하고 n8n에 연결되는 로컬 서버입니다.
 
 <!-- @os:linux -->
-작업 표시줄에서 Lemonade 아이콘을 클릭하여 Lemonade GUI를 여세요. 여기서 모델과 백엔드를 탐색하고 사전 설치된 모델을 로드할 수 있습니다.
+작업 표시줄의 Lemonade 아이콘을 클릭하여 Lemonade GUI를 엽니다. 여기서 모델과 백엔드를 탐색하고 사전 설치된 모델을 로드할 수 있습니다.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Lemonade 아이콘을 클릭하여 Lemonade GUI를 여세요. 트레이 아이콘을 마우스 오른쪽 버튼으로 클릭하여 앱을 엽니다. 그런 다음 모델과 백엔드를 추가하고 사전 설치된 모델을 로드할 수 있습니다.
+Lemonade 아이콘을 클릭하여 Lemonade GUI를 엽니다. 트레이 아이콘을 마우스 오른쪽 버튼으로 클릭하여 앱을 엽니다. 그런 다음 모델과 백엔드를 추가하고 사전 설치된 모델을 로드할 수 있습니다.
 <!-- @os:end -->
 
->**팁**: 실행 중에는 Lemonade GUI에 http://localhost:13305 에서도 접속할 수 있습니다.
+>**팁**: 실행 중일 때는 http://localhost:13305 에서도 Lemonade GUI에 접근할 수 있습니다.
 
-또는 터미널을 열고 `lemonade list`를 실행하여 설치된 모델을 확인할 수 있습니다. 그런 다음 다음을 실행하세요:
+또는 터미널을 열고 `lemonade list`를 실행하여 설치된 모델을 확인할 수 있습니다. 그런 다음 다음을 실행합니다:
 
 <!-- @device:halo_box -->
 <!-- @os:linux -->
@@ -367,9 +365,9 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 <!-- @device:end -->
 
 
-## 워크플로우 설정하기
+## 워크플로 설정
 
-### 1단계: n8n에 가입하거나 로그인하기
+### 1단계: n8n 가입 또는 로그인
 
 n8n을 처음 열면 계정을 생성하거나 로그인하라는 메시지가 표시됩니다:
 
@@ -377,20 +375,20 @@ n8n을 처음 열면 계정을 생성하거나 로그인하라는 메시지가 �
 2. 이메일로 새 로컬 계정을 생성하거나, 이미 계정이 있다면 로그인합니다
 3. 로그인하면 n8n 대시보드가 표시됩니다
 
-> **팁**: 계정에서 잠긴 경우 `n8n user-management:reset`을 시도해 보세요
+> **팁**: 계정에서 잠긴 경우 `n8n user-management:reset`을 시도해보세요.
 
-### 2단계: 워크플로우 가져오기
+### 2단계: 워크플로 가져오기
 
-바로 가져올 수 있는 사전 구성된 워크플로우를 제공합니다:
+바로 가져올 수 있는 미리 빌드된 워크플로를 제공합니다:
 
-1. 다음 워크플로우 파일을 다운로드하세요: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. **Start from Scratch**를 클릭하여 워크플로우 편집기를 엽니다. 또는 왼쪽 상단의 + 버튼을 클릭한 다음 **Add workflow**를 클릭합니다.
-3. 오른쪽 상단 바의 **...** 메뉴(점 세 개)를 클릭하고 **Import from file**을 선택합니다
+1. 다음 워크플로 파일을 다운로드하세요: [financial-news-workflow.json](assets/financial-news-workflow.json)
+2. **Start from Scratch**를 클릭하여 워크플로 편집기를 엽니다. 또는 왼쪽 상단의 + 버튼을 클릭한 다음 **Add workflow**를 클릭합니다.
+3. 오른쪽 상단 바의 **...** 메뉴(점 3개)를 클릭하고 **Import from file**을 선택합니다
 4. 다운로드한 `financial-news-workflow.json` 파일을 선택합니다
-5. 캔버스에 워크플로우가 표시됩니다
-### 3단계: 워크플로우 이해하기
+5. 캔버스에 워크플로가 나타납니다
+### Step 3: 워크플로 이해하기
 
-가져온 워크플로우에는 9개의 연결된 노드가 포함되어 있습니다:
+가져온 워크플로에는 9개의 연결된 노드가 포함되어 있습니다:
 
 <p align="center">
   <img src="assets/workflow-overview.png" alt="n8n Financial News Workflow" width="800"/>
@@ -398,21 +396,21 @@ n8n을 처음 열면 계정을 생성하거나 로그인하라는 메시지가 �
 
 | 노드 | 목적 |
 |------|---------|
-| **When clicking 'Execute workflow'** | 워크플로우를 시작하는 수동 트리거 |
-| **Fetch Financial News Webpage** | `https://apnews.com/business`로의 HTTP GET 요청 |
+| **When clicking 'Execute workflow'** | 워크플로를 시작하는 수동 트리거 |
+| **Fetch Financial News Webpage** | `https://apnews.com/business`에 대한 HTTP GET 요청 |
 | **Delay to Ensure Page Load** | 페이지 콘텐츠가 완전히 로드되도록 보장하는 Wait 노드 |
-| **Extract News Headlines & Text** | CSS 선택자를 사용해 헤드라인, 편집자 추천, 주요 기사, 지역 뉴스를 추출하는 HTML 노드 |
+| **Extract News Headlines & Text** | CSS 선택자를 사용하여 헤드라인, 편집자 추천 기사, 주요 뉴스, 지역 뉴스를 추출하는 HTML 노드 |
 | **Clean Extracted News Data** | 추출된 모든 데이터를 하나의 텍스트 필드로 결합하는 Set 노드 |
-| **AI Financial News Summarizer** | 금융 분석가 시스템 프롬프트로 뉴스를 처리하는 AI 에이전트 |
+| **AI Financial News Summarizer** | 금융 분석가 시스템 프롬프트로 뉴스를 처리하는 AI Agent |
 | **Lemonade Chat Model** | 로컬 Lemonade 서버에서 실행 중인 LLM에 연결 |
-| **Structured Output Parser** | AI 출력을 구조화된 JSON 형식으로 포맷 |
-| **Convert to File** | 요약본을 다운로드 가능한 파일로 변환 |
+| **Structured Output Parser** | AI 출력을 구조화된 JSON으로 포맷 |
+| **Convert to File** | 요약을 다운로드 가능한 파일로 변환 |
 
-### 4단계: Lemonade 자격 증명 구성
+### Step 4: Lemonade 자격 증명 구성하기
 
-워크플로우를 실행하기 전에 로컬 Lemonade 서버에 연결해야 합니다:
+워크플로를 실행하기 전에 로컬 Lemonade 서버에 연결해야 합니다:
 
-1. n8n에서 **Lemonade Chat Model** 노드를 더블 클릭합니다
+1. n8n에서 **Lemonade Chat Model** 노드를 더블클릭합니다
 2. **Credential to connect with** 드롭다운 메뉴에서 **Create New Credential**을 선택합니다
 3. 아래 표의 값을 입력하고 저장을 클릭합니다.
 4. Lemonade Server에 로드해 둔 관련 모델을 선택합니다.
@@ -424,18 +422,18 @@ n8n을 처음 열면 계정을 생성하거나 로그인하라는 메시지가 �
 
 > **참고**: 테스트하기 전에 터미널에서 `lemonade status`를 실행하여 Lemonade 서버가 실행 중인지 확인하세요.
 <!-- @device:halo_box -->
-> 이 워크플로우는 GPT-OSS-120B를 사용하며, 이는 Lemonade에 사전 설치되어 있습니다. Lemonade Chat Model 노드 설정에서 이를 다른 로드된 모델로 변경할 수 있습니다.
+> 이 워크플로는 GPT-OSS-120B를 사용하며, 이는 Lemonade에 미리 설치되어 있습니다. Lemonade Chat Model 노드 설정에서 다른 로드된 모델로 변경할 수 있습니다.
 <!-- @device:end -->
 
-### 5단계: 워크플로우 테스트
+### Step 5: 워크플로 테스트하기
 
-1. Lemonade가 모델을 로드한 상태로 실행 중인지 확인합니다
+1. 모델이 로드된 상태로 Lemonade가 실행 중인지 확인합니다
 2. 캔버스 하단 중앙의 **Execute workflow**를 클릭합니다
-3. 각 노드가 왼쪽에서 오른쪽으로 실행되는 것을 확인합니다—완료되면 녹색으로 바뀝니다
-4. **AI Financial News Summarizer** 노드를 더블 클릭하여 하단 패널에서 생성된 요약을 확인합니다.
-5. **Convert to File** 노드를 더블 클릭하여 하단 패널에서 해당 텍스트 파일을 다운로드합니다.
+3. 각 노드가 왼쪽에서 오른쪽으로 실행되는 것을 확인합니다—완료되면 초록색으로 바뀝니다
+4. **AI Financial News Summarizer** 노드를 더블클릭하여 하단 패널에서 생성된 요약을 확인합니다.
+5. **Convert to File** 노드를 더블클릭하여 하단 패널에서 해당 텍스트 파일을 다운로드합니다.
 
-## AI 에이전트 이해하기
+## AI Agent 이해하기
 
 AI Financial News Summarizer는 금융 분석을 위해 설계된 시스템 프롬프트를 사용합니다:
 
@@ -451,24 +449,43 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 
 에이전트는 정리된 뉴스 데이터를 받아 시장 심리가 포함된 구조화된 요약을 출력합니다.
 
-### 워크플로우 저장하기
+### 워크플로 저장하기
 
-상단의 워크플로우 이름을 클릭하여 원하는 대로 이름을 변경하세요. 워크플로우는 작업하는 동안 자동으로 저장됩니다.
+상단의 워크플로 이름을 클릭하여 원하는 대로 이름을 변경하세요. 작업하는 동안 워크플로는 자동으로 저장됩니다.
 
 ## 다음 단계
 
-- **자동화 예약**: Manual Trigger를 **Schedule Trigger**로 교체하여 매일 실행
-- **알림 전송**: **Discord**, **Slack**, 또는 **Email** 노드를 추가하여 요약을 받아보기
-- **다른 모델 시도**: Lemonade Chat Model 노드에서 모델을 변경하여 다양한 LLM을 실험해보기
-- **추출 방식 커스터마이즈**: HTML Extract 노드의 CSS 선택자를 수정하여 다른 뉴스 섹션을 대상으로 지정
-- **다른 백엔드 시도**: n8n은 [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio 및 기타 로컬 LLM 백엔드도 지원합니다
+- **자동화 예약하기**: 매일 실행되도록 Manual Trigger를 **Schedule Trigger**로 교체하세요
+- **알림 보내기**: 요약을 받으려면 **Discord**, **Slack**, 또는 **Email** 노드를 추가하세요
+- **다른 모델 시도하기**: Lemonade Chat Model 노드에서 모델을 변경하여 다양한 LLM을 실험해보세요
+- **추출 방식 커스터마이징하기**: HTML Extract 노드의 CSS 선택자를 수정하여 다른 뉴스 섹션을 대상으로 지정하세요
+- **다른 백엔드 시도하기**: n8n은 [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio 및 기타 로컬 LLM 백엔드도 지원합니다
 
 ### n8n 템플릿 살펴보기
 
-n8n에는 수백 개의 사전 제작된 워크플로우 템플릿이 있습니다. 다음에서 공식 템플릿 라이브러리를 둘러보세요:
+n8n에는 수백 개의 미리 만들어진 워크플로 템플릿이 있습니다. 공식 템플릿 라이브러리를 둘러보세요:
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
-"AI", "LLM", 또는 "automation"을 검색하여 가져와서 커스터마이즈할 수 있는 워크플로우를 찾아보세요.
+가져와서 커스터마이징할 수 있는 워크플로를 찾으려면 "AI", "LLM", 또는 "automation"을 검색하세요.
 
-자세한 내용은 [n8n 문서](https://docs.n8n.io/)를 확인하세요.
+자세한 내용은 [n8n 문서](https://docs.n8n.io/)를 참조하세요.
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->

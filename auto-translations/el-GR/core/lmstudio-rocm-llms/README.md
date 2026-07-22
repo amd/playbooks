@@ -6,21 +6,21 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Αυτό το playbook χρησιμοποιεί ειδικές ετικέτες που το GitHub δεν μπορεί να αποδώσει. Επισκεφθείτε το [amd.com/playbooks](https://amd.com/playbooks) για να προεπισκοπήσετε σωστά αυτό το περιεχόμενο.
+> Αυτό το playbook χρησιμοποιεί ειδικές ετικέτες που το GitHub δεν μπορεί να αποδώσει. Επισκεφθείτε το [amd.com/playbooks](https://amd.com/playbooks) για να προβάλετε σωστά αυτό το περιεχόμενο.
 <!-- @github-only:end -->
 
 ## Επισκόπηση
 
-Το LM Studio είναι ένα ισχυρό, βασισμένο σε GUI wrapper για το [llama.cpp](https://github.com/ggml-org/llama.cpp) και παρέχει επίσης ένα [συμβατό με OpenAI endpoint](https://lmstudio.ai/docs/developer/openai-compat) για τοπική εξυπηρέτηση μοντέλων. Το LM Studio προσφέρει ένα απλό αλλά ισχυρό περιβάλλον για εύκολη λήψη και ανάπτυξη μοντέλων. Το LM Studio προσφέρει τόσο Vulkan όσο και AMD ROCm™ software backends (που ονομάζονται runtimes) για χρήστες AMD.
+Το LM Studio είναι ένα ισχυρό wrapper με γραφικό περιβάλλον (GUI) για το [llama.cpp](https://github.com/ggml-org/llama.cpp) και παρέχει επίσης ένα [συμβατό με OpenAI endpoint](https://lmstudio.ai/docs/developer/openai-compat) για τοπική εξυπηρέτηση μοντέλων. Το LM Studio προσφέρει μια απλή αλλά ισχυρή διεπαφή για εύκολη λήψη και ανάπτυξη μοντέλων. Το LM Studio προσφέρει τόσο backends (που ονομάζονται runtimes) Vulkan όσο και AMD ROCm™ software για χρήστες AMD.
 
 
 ## Τι θα μάθετε
-- Πώς να διαμορφώσετε και να χρησιμοποιήσετε το LM Studio για να αξιοποιήσετε το τοπικό σας υλικό
-- Να δοκιμάσετε και να διαχειριστείτε LLMs σε ένα εντελώς offline περιβάλλον
-- Να εξυπηρετήσετε μοντέλα μέσω OpenAI Compatible API για να ενισχύσετε προσαρμοσμένες ροές εργασίας και εφαρμογές
+- Πώς να ρυθμίσετε και να χρησιμοποιήσετε το LM Studio για να αξιοποιήσετε το τοπικό σας υλικό
+- Πώς να δοκιμάσετε και να διαχειριστείτε LLMs σε ένα εντελώς offline περιβάλλον
+- Πώς να εξυπηρετήσετε μοντέλα μέσω OpenAI Compatible API για την υποστήριξη προσαρμοσμένων ροών εργασίας και εφαρμογών
 
 
-## Ρύθμιση της Διαμόρφωσης Μνήμης
+## Ρύθμιση Διαμόρφωσης Μνήμης
 
 <!-- @require:memory-config -->
 
@@ -32,13 +32,13 @@ SPDX-License-Identifier: MIT
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Σημείωση**: Εάν το VS Code ή το LM Studio δεν είναι εγκατεστημένα, μπορείτε να τα εγκαταστήσετε από το AMD Ryzen™ AI Developer Center. 
+> **Σημείωση**: Εάν το VS Code ή το LM Studio δεν είναι εγκατεστημένα, μπορείτε να τα εγκαταστήσετε από το AMD Ryzen™ AI Developer Center.
 <!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Εγκατάσταση Προαπαιτούμενων Λογισμικού
+## Εγκατάσταση Προαπαιτούμενου Λογισμικού
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -62,16 +62,32 @@ SPDX-License-Identifier: MIT
 <!-- @device:end -->
 
 ## Συνομιλία με ένα LLM
-Μάθετε πώς να ξεκινήσετε να συνομιλείτε με ένα LLM επιπέδου ChatGPT εντελώς τοπικά.  
+Μάθετε πώς να ξεκινήσετε να συνομιλείτε με ένα LLM επιπέδου ChatGPT εντελώς τοπικά.
 
-1. Ανοίξτε το LMStudio. 
+1. Ανοίξτε το LMStudio.
 2. Πατήστε `Ctrl + L` για να ανοίξετε τον Model Loader, επιλέξτε `Manually choose model load parameters`, και κάντε κλικ στο `${model_name}`
-3. Βεβαιωθείτε ότι το "show advanced settings" είναι επιλεγμένο.  
-4. Αλλάξτε το `Context Length` όπως επιθυμείτε. Μεγαλύτερο context length σημαίνει περισσότερη μνήμη μοντέλου, αλλά περισσότερη χρήση μνήμης συστήματος. Συνιστάται για αυτό το playbook η τιμή 4096.
-5. Βεβαιωθείτε ότι το `GPU Offload` είναι ρυθμισμένο στο μέγιστο και το `Flash Attention` είναι ενεργοποιημένο (τα Cache Quantizations μπορούν να παραμείνουν απενεργοποιημένα)
-6. Επιλέξτε `Remember settings` και κάντε κλικ στο `Load Model`.
-7. Αν δεν βρίσκεστε στο παράθυρο συνομιλίας, πατήστε `Ctrl + 1` ή κάντε κλικ στο κουμπί 👾 στην επάνω αριστερή γωνία της οθόνης.
-8. Στείλτε ένα μήνυμα και ξεκινήστε την αλληλεπίδραση με το μοντέλο!
+3. Βεβαιωθείτε ότι το "show advanced settings" είναι επιλεγμένο.
+4. Αλλάξτε το `Context Length` όπως επιθυμείτε. Μεγαλύτερο μήκος περιεχομένου σημαίνει περισσότερη μνήμη μοντέλου, αλλά μεγαλύτερη χρήση μνήμης συστήματος. Συνιστάται για αυτό το playbook η τιμή 4096.
+5. Βεβαιωθείτε ότι το `GPU Offload` είναι ρυθμισμένο στο μέγιστο και ότι το `Flash Attention` είναι ενεργοποιημένο (τα Cache Quantizations μπορούν να παραμείνουν απενεργοποιημένα)
+6. Επιλέξτε το `Remember settings` και κάντε κλικ στο `Load Model`.
+7. Εάν δεν βρίσκεστε στο παράθυρο συνομιλίας, πατήστε `Ctrl + 1` ή κάντε κλικ στο κουμπί 👾 στο επάνω αριστερό μέρος της οθόνης.
+8. Στείλτε ένα μήνυμα και ξεκινήστε να αλληλεπιδράτε με το μοντέλο!
+
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
+```powershell
+# CI: pin a GPU (Vulkan) runtime so tests don't fall back to the CPU engine.
+lms runtime ls
+$rt = ((lms runtime ls) -match 'vulkan' | Select-Object -First 1)
+if ($rt) {
+  lms runtime select (($rt.Trim() -split '\s+')[0])
+  lms runtime ls | Select-String 'ENGINE|✓'
+} else {
+  Write-Output "WARNING: no Vulkan runtime installed; GPU acceleration unavailable. Install with: lms get <vulkan-runtime>"
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-load-model-windows timeout=1200 hidden=True -->
@@ -80,9 +96,27 @@ lms unload --all
 lms ps
 $ID = "${lms_model}-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
+# retry once: large-model loads can transiently fail under memory pressure
 lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
+if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y }
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-select-gpu-runtime-linux timeout=120 hidden=True -->
+```bash
+# CI: pin a GPU (Vulkan) runtime so tests don't fall back to the CPU engine.
+lms runtime ls
+GPU_RT="$(lms runtime ls 2>/dev/null | awk '/vulkan/{print $1; exit}')"
+if [ -n "$GPU_RT" ]; then
+  lms runtime select "$GPU_RT"
+  lms runtime ls | grep -E 'ENGINE|✓'
+else
+  echo "WARNING: no Vulkan runtime installed; GPU acceleration unavailable. Install with: lms get <vulkan-runtime>"
+fi
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -94,7 +128,8 @@ lms unload --all || true
 lms ps
 ID="${lms_model}-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
+# retry once: large-model loads can transiently fail under memory pressure
+lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y; }
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -113,19 +148,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Συμβουλή**: Το context length αναφέρεται στη μνήμη του μοντέλου. Το flash attention βελτιώνει την ταχύτητα επεξεργασίας ενώ μειώνει τη χρήση μνήμης. Το GPU Offload μεταφέρει τον υπολογισμό στην κάρτα γραφικών για ταχύτερες αποκρίσεις.
+> **Συμβουλή**: Το μήκος περιεχομένου (context length) αναφέρεται στη μνήμη του μοντέλου. Το Flash attention βελτιώνει την ταχύτητα επεξεργασίας μειώνοντας παράλληλα τη χρήση μνήμης. Το GPU Offload μεταφέρει τους υπολογισμούς στην κάρτα γραφικών για ταχύτερες αποκρίσεις.
 
 ## Εξυπηρέτηση LLMs μέσω ενός συμβατού με OpenAI endpoint
 
-Το LM Studio προσφέρει επίσης ένα συμβατό με OpenAI endpoint με τη μορφή του LM Studio Server. Αυτό έχει ήδη παρουσιαστεί σε μια agentic ροή εργασίας κωδικοποίησης με το Cline [εδώ](../playbooks/vscode-qwen3-coder). Μια άλλη κοινή περίπτωση χρήσης είναι η σύνδεση του LM Studio Server με οποιαδήποτε web εφαρμογή (React, Node.js, Python) μέσω αποστολής τυπικών HTTP αιτημάτων στο inference endpoint.
+Το LM Studio προσφέρει επίσης ένα συμβατό με OpenAI endpoint με τη μορφή του LM Studio Server. Αυτό έχει ήδη παρουσιαστεί σε μια ροή εργασίας agentic coding με το Cline [εδώ](../playbooks/vscode-qwen3-coder). Μια άλλη κοινή περίπτωση χρήσης είναι η σύνδεση του LM Studio Server με οποιαδήποτε web εφαρμογή (React, Node.js, Python) στέλνοντας τυπικά HTTP requests στο endpoint συμπερασμού (inference endpoint).
 
-Για να ρυθμίσετε το LM Studio Server, χρησιμοποιήστε τις παρακάτω οδηγίες:
+Για να ρυθμίσετε το LM Studio Server, ακολουθήστε τις παρακάτω οδηγίες:
 
-1. Στην αριστερή πλευρά, κάντε κλικ στην καρτέλα `Developer` (εικονίδιο γραμμής εντολών) ή `Ctrl + 2` και στη συνέχεια κάντε κλικ στο `Server Settings`.  
-2. (Προαιρετικό): Αν θέλετε να εξυπηρετήσετε το μοντέλο μέσω του τοπικού σας δικτύου (LAN), επιλέξτε `Serve on Local Network`. Αν θέλετε να το χρησιμοποιήσετε με έναν ιστότοπο ή για εκτεταμένες κλήσεις μέσα στο VS Code, επιλέξτε `Enable CORS`. 
+1. Στην αριστερή πλευρά, κάντε κλικ στην καρτέλα `Developer` (εικονίδιο γραμμής εντολών) ή πατήστε `Ctrl + 2` και στη συνέχεια κάντε κλικ στο `Server Settings`.
+2. (Προαιρετικό): Εάν θέλετε να εξυπηρετήσετε το μοντέλο μέσω του τοπικού σας δικτύου (LAN), επιλέξτε το `Serve on Local Network`. Εάν θέλετε να το χρησιμοποιήσετε με έναν ιστότοπο ή με εκτεταμένες κλήσεις μέσα στο VS Code, επιλέξτε το `Enable CORS`.
 3. Στην επάνω αριστερή γωνία, βεβαιωθείτε ότι ο διακομιστής εκτελείται κάνοντας κλικ στο κουμπί εναλλαγής μπροστά από το `Status`.
-4. Ένα συμβατό με OpenAI endpoint θα εκτελείται πλέον. Η διεύθυνση είναι συνήθως στο http://127.0.0.1:1234  
-5. Αν δεν έχει ήδη φορτωθεί κάποιο μοντέλο, μπορείτε να το φορτώσετε κάνοντας κλικ στο `Load Model` και ακολουθώντας τα βήματα που αναφέρθηκαν προηγουμένως. 
+4. Ένα συμβατό με OpenAI endpoint θα εκτελείται πλέον. Η διεύθυνση είναι συνήθως στο http://127.0.0.1:1234
+5. Εάν δεν είναι ήδη φορτωμένο κάποιο μοντέλο, μπορείτε να το φορτώσετε κάνοντας κλικ στο `Load Model` και ακολουθώντας τα βήματα που αναφέρθηκαν προηγουμένως.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -133,7 +168,7 @@ lms chat "$ID" -p "Reply with exactly: OK"
 lms server start --port 1234
 curl.exe -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -142,11 +177,11 @@ curl.exe -s http://127.0.0.1:1234/v1/models
 lms server start --port 1234
 curl -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 
-Αυτό το μοντέλο θα είναι πλέον προσβάσιμο μέσω του endpoint του LM Studio Server και θα υποστηρίζει OpenAI endpoints όπως:
+Αυτό το μοντέλο θα είναι πλέον προσβάσιμο μέσω του endpoint του LM Studio Server και θα υποστηρίζει endpoints συμβατά με OpenAI, όπως:
 
 | Endpoint | Method | Docs |
 |------------|----------|----------|
@@ -155,14 +190,14 @@ curl -s http://127.0.0.1:1234/v1/models
 | /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### Παράδειγμα: Ping του Endpoint σας
+#### Παράδειγμα: Ping στο Endpoint σας
 Αφού μόλις δημιουργήσατε το OpenAI Compatible endpoint, ας δούμε πώς να το ενσωματώσετε σε ένα περιβάλλον ανάπτυξης Python (όπως το VSCode) και να χρησιμοποιήσετε το σύστημά σας ως τοπικό API Provider.
 
 1. Δημιουργήστε ένα εικονικό περιβάλλον Python:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    Σε Linux, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv.
+    Στο Linux, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -178,7 +213,7 @@ curl -s http://127.0.0.1:1234/v1/models
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    Σε Linux, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv.
+    Στο Linux, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -190,25 +225,25 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    Σε Windows, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv.
+    Στα Windows, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **Συμβουλή**: Οι χρήστες των Windows ίσως χρειαστεί να τροποποιήσουν την Πολιτική Εκτέλεσης PowerShell τους (π.χ.
+    > **Συμβουλή**: Οι χρήστες Windows ενδέχεται να χρειαστεί να τροποποιήσουν την PowerShell Execution Policy τους (π.χ.
     > ρυθμίζοντάς την σε RemoteSigned ή Unrestricted) πριν εκτελέσουν ορισμένες εντολές Powershell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    Σε Windows, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv.
+    Στα Windows, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **Συμβουλή**: Οι χρήστες των Windows ίσως χρειαστεί να τροποποιήσουν την Πολιτική Εκτέλεσης PowerShell τους (π.χ.
+    > **Συμβουλή**: Οι χρήστες Windows ενδέχεται να χρειαστεί να τροποποιήσουν την PowerShell Execution Policy τους (π.χ.
     > ρυθμίζοντάς την σε RemoteSigned ή Unrestricted) πριν εκτελέσουν ορισμένες εντολές Powershell.
 
 <!-- @device:end -->
@@ -263,12 +298,12 @@ req = urllib.request.Request(
    "model": model_id,
    "messages": [{"role":"user","content":"What is 2 + 2? Reply with only the number."}],
    "temperature": 0,
-   "max_tokens": 500
+   "max_tokens": 64
  }).encode("utf-8"),
  headers={"Content-Type":"application/json"},
  method="POST",
 )
-with urllib.request.urlopen(req, timeout=60) as r:
+with urllib.request.urlopen(req, timeout=120) as r:
  print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end --> 
@@ -288,12 +323,12 @@ req = urllib.request.Request(
    "model": model_id,
    "messages": [{"role":"user","content":"What is 47 + 42? Reply with only the number in words."}],
    "temperature": 0,
-   "max_tokens": 500
+   "max_tokens": 64
  }).encode("utf-8"),
  headers={"Content-Type":"application/json"},
  method="POST",
 )
-with urllib.request.urlopen(req, timeout=60) as r:
+with urllib.request.urlopen(req, timeout=120) as r:
  print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end --> 
@@ -324,13 +359,13 @@ lms server stop
 
 #### (Προαιρετικό): Εναλλαγή μεταξύ Runtimes
 
-1. Πατήστε `Ctrl + Shift + R` στο πληκτρολόγιό σας. Εναλλακτικά κάντε κλικ στην καρτέλα `Discover` (Μεγεθυντικός Φακός) στην αριστερή πλευρά και μετά κάντε κλικ στο `Runtime` στο αναδυόμενο παράθυρο.
-2. Στη συνέχεια θα δείτε τις `Runtime Selections`, όπου το αναπτυσσόμενο μενού μπορεί να χρησιμοποιηθεί για να αλλάξετε το runtime.
+1. Πατήστε `Ctrl + Shift + R` στο πληκτρολόγιό σας. Εναλλακτικά, κάντε κλικ στην καρτέλα `Discover` (Μεγεθυντικός φακός) στην αριστερή πλευρά και μετά κάντε κλικ στο `Runtime` στο αναδυόμενο παράθυρο.
+2. Στη συνέχεια θα δείτε τα `Runtime Selections`, όπου το αναπτυσσόμενο μενού μπορεί να χρησιμοποιηθεί για να αλλάξετε το runtime.
 
 
 ## Επόμενα Βήματα
 
 - **Προσαρμοσμένη Ενσωμάτωση Εφαρμογής**: Ενσωματώστε τα δικά σας scripts ή εφαρμογές Python χρησιμοποιώντας το τοπικό OpenAI-compatible API.
-- **Προηγμένα Frontends**: Συνδέστε ισχυρές διεπαφές όπως το Open WebUI στον διακομιστή σας για ιστορικό συνομιλιών και διαχείριση προφίλ.
+- **Προηγμένα Frontends**: Συνδέστε ισχυρά περιβάλλοντα όπως το Open WebUI στον server σας για ιστορικό συνομιλιών και διαχείριση προσώπων (persona).
 
 Για περισσότερη τεκμηρίωση, επισκεφθείτε: https://lmstudio.ai/docs/developer

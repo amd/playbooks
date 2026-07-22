@@ -1,0 +1,5 @@
+{
+  "id": "deepseek-v4-flash-ds4",
+  "title": "รัน DeepSeek V4 Flash ด้วย ds4",
+  "description": "ปรับใช้ DeepSeek V4 Flash ในเครื่องโดยใช้เอนจินการอนุมาน ds4 และจัดการโมเดลแบบโต้ตอบด้วย ds4-cockpit"
+}

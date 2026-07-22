@@ -2,12 +2,12 @@
   "locale": "pt-BR",
   "files": {
     "playbooks/core/comfyui-image-gen/README.md": {
-      "source_sha256": "5f3da10f7fae3dc68416413efd91668449de4a5796ccf600a591bb1621817f18",
+      "source_sha256": "111bc4e62952109ca5d59842c7fb7d21401dcad7f79a4e6039b91ab8d815303a",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Minor inconsistency: 'workflow' vs 'fluxo de trabalho' used interchangeably. Code, URLs, brands intact. Fluent and accurate."
+      "quality_score": 90,
+      "quality_issues": "Stray '# ' added before @github-only comment; minor inconsistency (workflow vs fluxo de trabalho). Code, URLs, brands intact."
     },
     "playbooks/core/comfyui-image-gen/platform.md": {
       "source_sha256": "e8a6884590d062f17595a57f2aadf5abe686c3169f53f3181544259336435c47",
@@ -42,12 +42,12 @@
       "quality_issues": "Accurate, fluent; 'quando for solicitado que' slightly awkward but acceptable. Code/URLs intact."
     },
     "playbooks/dependencies/driver.md": {
-      "source_sha256": "bdde05c0805a03d019eedad5bd7dc53a862c6b1f5ffeee6743fdfb73ef39de73",
+      "source_sha256": "2fb0597586a0f981cfef7ba290e1a1dd3b91921dde331dc283d062ae18a71d29",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "UI strings and link text left untranslated (acceptable if UI is English); otherwise accurate and fluent."
+      "quality_issues": "UI strings 'Driver and Software'/'Manage Updates' and link text left untranslated; likely intentional but reduces localization consistency."
     },
     "playbooks/dependencies/gaia.md": {
       "source_sha256": "4837a0e4fd45ede7efc3d903c1bb65484d0805c6e45657d2b097b23c063bb935",
@@ -122,20 +122,20 @@
       "quality_issues": "Inconsistent 'containerização/contêiner' spelling; 'soquete' unusual (socket preferred); otherwise accurate, fluent, code intact."
     },
     "playbooks/dependencies/pytorch.md": {
-      "source_sha256": "ba5ed9d425c6685dd285c639438efc74c1e8d9d561442bad6412b9adc8164d82",
+      "source_sha256": "b87369d2e26312f97f17ae901248f1bd748adbdd814ac845a8bfb6e7a4c5cb47",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Awkward word order: 'AMD ROCm™ software' should be 'software AMD ROCm™'; otherwise accurate, code intact."
+      "quality_issues": "Awkward phrasing 'suporte ao AMD ROCm™ software'; better 'suporte ao software AMD ROCm™'. Code, URLs intact."
     },
     "playbooks/dependencies/rocm.md": {
-      "source_sha256": "af961dbef80b407b98ee05fd0e5f816418bf097d384460ca5a57e7844bf38813",
+      "source_sha256": "bd4c22df46d91bbf2cc7ba7304084260667b876cf8d5ea81a0d4c9c1c05b8b42",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 100,
-      "quality_issues": "None; accurate, fluent, all code/URLs/brands intact"
+      "quality_score": 98,
+      "quality_issues": "Excellent translation; code blocks, URLs, brands intact; fluent and accurate."
     },
     "playbooks/dependencies/softwareupdate.md": {
       "source_sha256": "2d5cb11ce696297d74dfbb9d140b765dc64add55f1bdcbdd27fb3498ca3871f5",
@@ -162,12 +162,12 @@
       "quality_issues": "Accurate, fluent, code/URLs intact; UI tab names left untranslated which is acceptable convention."
     },
     "playbooks/core/lmstudio-rocm-llms/README.md": {
-      "source_sha256": "f0c7074a75cf11c9c9bb8b3508a87f66c8c08fa3e96832ece9f55e7dc5f85b91",
+      "source_sha256": "860cc2764568023f22c90b7ab8ec072ab7facded6dcedfd810960eea061aabfa",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Minor: 'AMD ROCm™ software backends' rendered awkwardly as 'AMD ROCm™ software'. Otherwise accurate, fluent, code/tags intact."
+      "quality_issues": "Minor: 'AMD ROCm™ software backends' rendered awkwardly as 'AMD ROCm™ software'. Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/core/lmstudio-rocm-llms/platform.md": {
       "source_sha256": "f731064c13c2ca273ea6bbc804e0b3309a1f4d385e3b58b35575f5e8430a3b86",
@@ -186,12 +186,12 @@
       "quality_issues": "Accurate and fluent; 'Servindo' slightly literal but acceptable in tech context."
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
-      "source_sha256": "19066843d638353adb3a11fe7f188f59a66c1f11eeaa7037af97a5c21308d4df",
+      "source_sha256": "2d3d825632356eca766a2b4dc8aa423d78f7e5619d62ea41defcf176ce144f98",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Stray '#' added before @github-only tag; inconsistent workflow/fluxo de trabalho terminology; otherwise accurate, fluent, code intact."
+      "quality_issues": "Stray '#' added before @github-only tag; inconsistent workflow/fluxo de trabalho terminology; otherwise accurate and fluent."
     },
     "playbooks/core/n8n-automation-gpt-oss/platform.md": {
       "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
@@ -234,12 +234,12 @@
       "quality_issues": "Accurate, fluent, terminology and brand terms intact; minor stylistic naturalness only."
     },
     "playbooks/core/vscode-qwen3-coder/README.md": {
-      "source_sha256": "25da94f89aec651b737075b56e6c558256a645c2a44b96204163e9c87c857fae",
+      "source_sha256": "bb562b4fb8e27bd9a758a8f872f20efff4a826095dfe12bfb30034eb7ca4bc1b",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Accurate, fluent translation; code, URLs, numbers intact. UI strings appropriately left in English matching source."
+      "quality_issues": "Accurate, fluent translation; code/URLs/brands intact. Trailing incomplete source sentence faithfully preserved. Minor: 'clique no botão Manually choose' (switch) slightly off."
     },
     "playbooks/core/vscode-qwen3-coder/platform.md": {
       "source_sha256": "14c7eec60b483e4bedb5e465673d89e07466088a9ed9c59d7964c3466cf89410",
@@ -322,12 +322,12 @@
       "quality_issues": "None; accurate and fluent, terms intact."
     },
     "playbooks/supplemental/open-webui-chat/README.md": {
-      "source_sha256": "b257e5d4c3accfd50265d7b75ea8258159b037cbbe57dcc9241bad746554c929",
+      "source_sha256": "b7ec1aa51edf9556e7d87dad4d5664888d4c52e80048ece5782e05e6ec8d1b78",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Excellent translation; code/URLs/brands intact. Minor: 'Modelos de Linguagem Grandes' slightly awkward but acceptable."
+      "quality_issues": "Excellent; code/URLs/tags intact. Minor: 'autohospedada' spacing, 'Fala-para-Texto' awkward vs 'fala em texto'."
     },
     "playbooks/supplemental/open-webui-chat/platform.md": {
       "source_sha256": "1cc71fc518a4ba7e507047973d835456dc836155b3365f0e7fb64ed1f81d85cb",
@@ -386,12 +386,12 @@
       "quality_issues": "Accurate, fluent; 'APIs em nuvem' slightly less idiomatic than 'APIs na nuvem' but acceptable."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
-      "source_sha256": "b3613af14dd94ab44888f2d3013af6b10e1685c5e4915765507065117303be9a",
+      "source_sha256": "2098a60be3d062ef9bb9e1e4f55086eaed8c629ac490dec69734b1e1a1c6b4ee",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Minor: 'Ryzen AI 300/400/Max 300 série' awkward word order; otherwise accurate, fluent, code/URLs/tags intact."
+      "quality_score": 88,
+      "quality_issues": "Stray '# ' added before @github-only comment, breaking that tag's rendering. Otherwise accurate, fluent; code/URLs intact; minor inconsistency backend/back-end."
     },
     "playbooks/supplemental/lemonade-getting-started/platform.md": {
       "source_sha256": "091ccd8efa90e078a5d740aac0e40d742ad91f5898d0de9e1574d62e6778ec17",
@@ -410,12 +410,12 @@
       "quality_issues": "Inconsistent terminology: 'Gen AI' left in English while 'AI' translated to 'IA'."
     },
     "playbooks/supplemental/llama-factory-finetuning/README.md": {
-      "source_sha256": "38f43810c9ea7c04ad70e180795d64b81ab9e45fd01413ecd26a1d4e7283bde1",
+      "source_sha256": "30b146bd03fa8db4570ebcae7fb5980ce6948481bffa5c7cc03ffc559f7c710d",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Excellent; code/URLs/brands intact. Minor: inconsistent terminology (ajuste fino vs. fine-tuning), occasional missing blank line between sections."
+      "quality_score": 92,
+      "quality_issues": "Inconsistent terminology: mixes 'ajuste fino' and 'fine-tuning'; a couple markdown blank lines lost. Otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/llama-factory-finetuning/playbook.json": {
       "source_sha256": "e8a8cd9cebcb66736e1cfb707fd792795defcb4f4facb6b80f722be826b2a89b",
@@ -426,28 +426,28 @@
       "quality_issues": "Fluent, accurate; brands intact. Minor: 'as técnicas LLaMA Factory e LoRA' slightly implies both are techniques."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
-      "source_sha256": "3870cbf9cdec77fbb11f99c2751de2826fce765a431d52a853a9c034727e7225",
+      "source_sha256": "683efeea885d7ec0800eb93485220c7eb53fae3f639bf021b5152cd97f25bac9",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Minor: 'API padrão da indústria da OpenAI' slightly awkward phrasing; otherwise fluent, accurate, code/URLs intact."
+      "quality_issues": "Excellent, faithful translation. Code/URLs/numbers intact. Minor: 'resultar em resultados' slight redundancy; otherwise fluent and consistent."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
-      "source_sha256": "99df141310754dea218b61260f021d4fd7aec64a922654db64ed473b877e6351",
+      "source_sha256": "57b52b994ec56c93c379e746d04c74ffc0b3db8a53293f249f8c6190e8b12016",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Accurate, fluent, brand terms intact; natural phrasing throughout."
+      "quality_issues": "Accurate and fluent; brand terms intact. Minor stylistic naturalness only."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
-      "source_sha256": "bc2cba716bb866957cf930a234b9080bd64c863a18e6f77f7e98c3f51f0868fc",
+      "source_sha256": "a12e09a3cf974e0beda1fb4813dbd7ed0da7e1d6ab88805d54fec30827f0eed8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Excellent, accurate, fluent translation; code/comments preserved intact; minor inconsistency mixing 'ajuste fino' and 'fine-tuning'."
+      "quality_score": 94,
+      "quality_issues": "Minor: 'Configurando a Configuração de Memória' redundant heading; otherwise accurate, fluent, code/tags/URLs intact."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
       "source_sha256": "34841c22920fdf111d2a7ab0b640af96555cc1aa0376103acf8ea62e336609af",
@@ -490,12 +490,12 @@
       "quality_issues": "Minor: 'Configurando a Configuração de Memória' redundant; 'no edge' left untranslated but acceptable. Code/URLs intact."
     },
     "playbooks/supplemental/speech2speech-translation/platform.md": {
-      "source_sha256": "ac5b39917b7a533154f6a0f823949356905a766e067a7efcd000d63584cb36a3",
+      "source_sha256": "594590b98fc8e24d4fc481dea81504dbf8ae3c6ab995e88070d68c50a84839d0",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 98,
-      "quality_issues": "Accurate, fluent, terminology and code blocks intact. Minor natural adaptations only."
+      "quality_issues": "Accurate, fluent, terminology and code blocks intact; no meaningful errors."
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
       "source_sha256": "48eb7b7b031b9e676748a482854cf10fb41555109fa05ec9a06a8992baf282cf",
@@ -506,20 +506,20 @@
       "quality_issues": "Accurate and fluent; 'Crie' slightly literal for 'Build', but natural and correct."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
-      "source_sha256": "a2ee5a621944612fd1d5ac526c6b844f0f528a0c696c178ac8f85f170ab7467c",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 97,
-      "quality_issues": "Excellent translation; code, URLs, tags, anchors intact. Minor: 'PowerShell terminal' rendered as 'terminal do PowerShell' fine; negligible nits only."
-    },
-    "playbooks/supplemental/unsloth-llms-finetuning/platform.md": {
-      "source_sha256": "45dc9cd1642f32761ed88326b25e7df018482c93832b386c31464522eb62066b",
+      "source_sha256": "619d596c72b22f8d6dd754f3dfe49aab68fb8e5875a3058bd1592b13da335ac5",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Accurate, fluent translation; code, numbers, brands intact. Minor stylistic naturalness only."
+      "quality_issues": "Excellent, accurate translation; code, URLs, tags intact. Minor inconsistency in section header spacing/newlines only."
+    },
+    "playbooks/supplemental/unsloth-llms-finetuning/platform.md": {
+      "source_sha256": "4725503ab96b16727c1e8a3be08c917dfee0be41adaad103dd70923785495cb1",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, terminology consistent; code, numbers, brands intact. Minor stylistic nits only."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/playbook.json": {
       "source_sha256": "3204669893381cf35615253a77a5fab815e3d2e3cc61269de7441781b2a6aebc",
@@ -530,12 +530,12 @@
       "quality_issues": "Trademark symbol misplaced onto 'LLMs' in both; source ambiguous but translation slightly awkward phrasing. Otherwise accurate and fluent."
     },
     "playbooks/supplemental/vllm-inference/README.md": {
-      "source_sha256": "24dc5ebde274af75275e075ca2423138e0d67d3de03f1cebbee30fb9ac5940f4",
+      "source_sha256": "2c7c430c6bd3a17f01f85f6d212bc2f41134c5fccba880eaaa5c884374f75ed7",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Excellent; minor anglicisms (batching, launcher, streaming) acceptable; code/URLs/tags intact."
+      "quality_score": 95,
+      "quality_issues": "Anchor link kept in English (#choosing-and-configuring-a-model); minor 'de de uma só vez' typo. Otherwise accurate and fluent."
     },
     "playbooks/supplemental/vllm-inference/playbook.json": {
       "source_sha256": "0db881869b8d489317f0445edf4b420f738173b9c82c6488074e8948f7d6351c",
@@ -544,6 +544,86 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
       "quality_issues": "\"disponibilização\" for serving acceptable but slightly awkward; otherwise accurate and fluent."
+    },
+    "playbooks/core/deepseek-v4-flash-ds4/README.md": {
+      "source_sha256": "547f8d3dc8be793c698c67fd50466a5c4c27c2f154e87b0b36431ba2dc2b278f",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Excellent, accurate translation. Code/URLs/brands intact. Minor English terms left untranslated (appropriately). Slight redundancy 'precisão Q4 para melhor precisão'."
+    },
+    "playbooks/core/deepseek-v4-flash-ds4/playbook.json": {
+      "source_sha256": "45498cef56dd0818dc2853a6cf895e283bbcd79d934ae35c298857305f6ab496",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent; brand/code terms intact. Minor: 'Implante' slightly formal but acceptable."
+    },
+    "playbooks/supplemental/github-slack-development-digest/README.md": {
+      "source_sha256": "bc32c1f17978924905775b38f78f9b2c77f936da0cb2f9517c1c0b0fed90a6eb",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Accurate, fluent; minor inconsistency ('condenser' vs 'condenser'), some missing blank lines before headings. Code, URLs, brands intact."
+    },
+    "playbooks/supplemental/github-slack-development-digest/platform.md": {
+      "source_sha256": "4a8da06a7d980811c2f8aa3f14f62b49e48aff6aa7282006d5b96f0994af1cc6",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent, code/URLs/brands intact; only minor stylistic capitalization choices."
+    },
+    "playbooks/supplemental/github-slack-development-digest/playbook.json": {
+      "source_sha256": "5fc048aff2c5cac99e62ea2eabaffed537d26e80aee8afbf43baeab7fa838256",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "\"Digest\" left untranslated (inconsistent with later \"resumo\"); otherwise accurate and fluent."
+    },
+    "playbooks/supplemental/hermes-lemonade-server/README.md": {
+      "source_sha256": "c4f949a113333e08e4e7a94071c53faaaaf10b28389c8f9c86cf6a60c4ae55fa",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; code blocks, URLs, brands intact. Minor inconsistency: 'contêiner'/'container' mixed. All technical content preserved faithfully."
+    },
+    "playbooks/supplemental/hermes-lemonade-server/playbook.json": {
+      "source_sha256": "6d86d382c4b5a1b36bfacfb22ac9d79619331b277ea235a22b04fd125641788f",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Minor inconsistency: 'Agente Hermes' vs 'Hermes Agent'; otherwise accurate and fluent."
+    },
+    "playbooks/supplemental/openhands-getting-started/README.md": {
+      "source_sha256": "ddc060e5f599615bd487640a564813f03c3f512ac214c7a2ce2e5447ff3935aa",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent translation; minor spacing (missing blank line before section 6). UI labels appropriately kept in English, code/URLs intact."
+    },
+    "playbooks/supplemental/openhands-getting-started/platform.md": {
+      "source_sha256": "ac6b6f224435cebeb5596d3e68d7235da3cf27fd91da775e28548d20fa513be2",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 98,
+      "quality_issues": "Accurate, fluent, code/URLs/brand terms intact. Minor stylistic capitalization choices only."
+    },
+    "playbooks/supplemental/openhands-getting-started/playbook.json": {
+      "source_sha256": "3be06de64cdaf99ea1f0f7fcea9adf91da5fea68994ce035f6565e888d8af862",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent; brand terms and trademark preserved. Minor stylistic nits only."
     }
   }
 }

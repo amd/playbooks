@@ -2,17 +2,17 @@
 Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
-# Pokrenite OpenClaw sa Lemonade Server kao pozadinom
+# Pokrenite OpenClaw sa Lemonade Server kao pozadinskim sistemom
 
 ## Pregled
 
-[**OpenClaw**](https://openclaw.ai/) je autonomni AI agent koji može da piše i pokreće kod, upravlja fajlovima i obavlja složene zadatke u više koraka u vaše ime. Za razliku od chat asistenta koji samo odgovara na pitanja, OpenClaw preduzima stvarne akcije na vašem sistemu, što znači da mu je potrebna brza, sposobna AI pozadina koja može da isprati zahtevnu petlju agenta.
+[**OpenClaw**](https://openclaw.ai/) je autonomni AI agent koji može da piše i pokreće kod, upravlja fajlovima i obrađuje složene višestepene zadatke u vaše ime. Za razliku od chat asistenta koji samo odgovara na pitanja, OpenClaw preduzima stvarne akcije na vašem sistemu, što znači da mu je potreban brz i sposoban AI pozadinski sistem koji može da prati zahtevnu petlju agenta.
 
-[**Lemonade Server**](https://lemonade-server.ai/) je upravo ta pozadina. To je open-source lokalni server za inferenciju koji pokreće GenAI modele direktno na vašem hardveru i izlaže ih preko industrijskog standarda OpenAI API-ja.
+[**Lemonade Server**](https://lemonade-server.ai/) je taj pozadinski sistem. To je open-source lokalni inferencijski server koji pokreće GenAI modele direktno na vašem hardveru i izlaže ih putem industrijskog standarda OpenAI API-ja.
 
-Zajedno, oni formiraju potpuno lokalni AI agent stek: Lemonade se bavi inferencijom modela, a OpenClaw obezbeđuje petlju agenta koja pretvara izlaze modela u stvarne akcije.
+Zajedno, oni čine potpuno lokalni AI agent stek: Lemonade se bavi inferencijom modela, a OpenClaw obezbeđuje petlju agenta koja pretvara izlaze modela u stvarne akcije.
 
-> **Pre nego što nastavite:** OpenClaw je visoko autonomni AI agent. Davanje bilo kom AI agentu pristupa vašem sistemu može dovesti do nepredvidivih ili neželjenih ishoda. Nastavite samo ako razumete rizike i osećate se prijatno sa autonomnim softverom koji deluje u vaše ime.
+> **Pre nego što nastavite:** OpenClaw je veoma autonomni AI agent. Davanje bilo kom AI agentu pristupa vašem sistemu može dovesti do nepredvidivih ili nenamernih ishoda. Nastavite samo ako razumete rizike i osećate se prijatno sa autonomnim softverom koji deluje u vaše ime.
 
 ---
 
@@ -20,8 +20,8 @@ Zajedno, oni formiraju potpuno lokalni AI agent stek: Lemonade se bavi inferenci
 
 Do kraja ovog vodiča bićete u mogućnosti da:
 
-- Naučite o **Lemonade Server**-u
-- **Instalirate OpenClaw** i **usmerite ga na Lemonade Server** kao svoju AI pozadinu.
+- Naučite o **Lemonade Server**
+- **Instalirate OpenClaw** i **usmerite ga na Lemonade Server** kao svoj AI pozadinski sistem.
 - **Pokrenete OpenClaw gateway** i potvrdite da je vaš agent spreman za rad.
 - **Povežete komunikacioni kanal** (Discord ili Telegram) kako biste mogli da ćaskate sa svojim agentom sa bilo kog uređaja.
 
@@ -37,12 +37,12 @@ Do kraja ovog vodiča bićete u mogućnosti da:
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instaliranje potrebnog softvera
+## Instaliranje softverskih preduslova
 
 <!-- @os:linux -->
-- Računar sa **Ubuntu 24.04+** ili kompatibilnom Debian-baziranom Linux distribucijom sa `apt-get`
+- Računar sa **Ubuntu 24.04+** ili kompatibilnom Debian distribucijom Linuxa sa `apt-get`
 - Najmanje **12 GB RAM-a** (preporučuje se 64 GB+ za veće modele)
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (opcionalno, za sandboxing OpenClaw-a)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (opciono, za sandboxing OpenClaw)
 
 - **~10–30 GB slobodnog prostora na disku** za težine modela
 <!-- @os:end -->
@@ -50,7 +50,7 @@ Do kraja ovog vodiča bićete u mogućnosti da:
 - Računar sa **Windows 10/11**
 - Najmanje **12 GB RAM-a** (preporučuje se 64 GB+ za veće modele)
 - **~10–30 GB slobodnog prostora na disku** za težine modela
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (opcionalno, za sandboxing OpenClaw-a)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (opciono, za sandboxing OpenClaw)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -65,9 +65,9 @@ lemonade --version
 
 ---
 
-## Preuzmite i učitajte preporučeni model
+## Preuzimanje i učitavanje preporučenog modela
 
-Preporučeni model za ovaj vodič je **Qwen3.6-35B-A3B-GGUF** od Unsloth-a, snažan MoE model sa prozorom konteksta od 263k tokena koji je dobro prilagođen radnim opterećenjima agenata. Ovaj model koristi UD-Q4_K_XL kvantizaciju. Preuzmite ga sada:
+Preporučeni model za ovaj vodič je **Qwen3.6-35B-A3B-GGUF** od Unsloth, snažan MoE model sa prozorom konteksta od 263k tokena koji je dobro prilagođen radnim opterećenjima agenata. Ovaj model koristi UD-Q4_K_XL kvantizaciju. Preuzmite ga sada:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
@@ -82,9 +82,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end --> 
 
-Model ima podrazumevanu dužinu konteksta od 262.144 tokena. Ako naiđete na greške zbog nedostatka memorije (OOM), razmotrite smanjenje prozora konteksta. Međutim, pošto Qwen3.6 koristi prošireni kontekst za složene zadatke, savetujemo održavanje dužine konteksta od najmanje 128K tokena kako bi se očuvale sposobnosti razmišljanja.
+Model ima podrazumevanu dužinu konteksta od 262.144 tokena. Ako naiđete na greške zbog nedostatka memorije (OOM), razmotrite smanjenje prozora konteksta. Međutim, pošto Qwen3.6 koristi prošireni kontekst za složene zadatke, savetujemo da zadržite dužinu konteksta od najmanje 128K tokena kako bi se očuvale sposobnosti razmišljanja.
 
-> **Savet: Onemogućite razmišljanje za brže odgovore agenta:** Qwen3.6-35B-A3B se podrazumevano izvršava u režimu razmišljanja, što dodaje kašnjenje pre svakog odgovora. Za petlje agenata ovo opterećenje se brzo nagomilava. Repozitorijum [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) pruža gotovu konfiguraciju koja onemogućava razmišljanje. Da biste je koristili, preuzmite fajl i uvezite ga:
+> **Savet: Onemogućite razmišljanje za brže odgovore agenta:** Qwen3.6-35B-A3B se podrazumevano pokreće u režimu razmišljanja, što dodaje kašnjenje pre svakog odgovora. Za petlje agenta ovo opterećenje se brzo nagomilava. Repozitorijum [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) pruža gotovu konfiguraciju koja onemogućava razmišljanje. Da biste je koristili, preuzmite fajl i uvezite ga:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -227,9 +227,9 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## Podešavanje WSL-a
 
-OpenClaw pokrećemo unutar WSL-a (preporučeno) i povezujemo ga sa Lemonade-om koji se izvršava nativno na Windows-u. Ovo vam daje Linux okruženje ljuske za OpenClaw, dok Lemonade-ovo GPU ubrzanje ostaje na Windows strani.
+Pokrećemo OpenClaw unutar WSL-a (preporučeno) i povezujemo ga sa Lemonade koji se izvorno pokreće na Windows-u. Ovo vam daje Linux shell okruženje za OpenClaw, dok se GPU akceleracija Lemonade zadržava na strani Windows-a.
 
-### Instalirajte WSL i Ubuntu
+### Instaliranje WSL-a i Ubuntu-a
 
 Otvorite PowerShell kao administrator i instalirajte WSL kernel:
 
@@ -243,7 +243,7 @@ Zatim instalirajte Ubuntu:
 wsl --install -d Ubuntu-24.04
 ```
 
-### Omogućite systemd u WSL-u
+### Omogućavanje systemd u WSL-u
 
 Pokrenite ovo unutar Ubuntu terminala:
 
@@ -261,9 +261,9 @@ wsl --shutdown
 wsl
 ```
 
-### Premostite Lemonade sa Windows-a u WSL
+### Premošćavanje Lemonade sa Windows-a u WSL
 
-WSL2 se izvršava u virtuelnoj mreži. Lemonade na Windows-u se povezuje na `127.0.0.1`, koji WSL ne može direktno da dosegne. Windows port proxy prosleđuje saobraćaj sa WSL gateway IP adrese na Windows localhost.
+WSL2 se izvršava u virtuelnoj mreži. Lemonade na Windows-u se povezuje na `127.0.0.1`, do čega WSL ne može direktno da dopre. Windows port proxy prosleđuje saobraćaj sa WSL gateway IP adrese na Windows localhost.
 
 **Pronađite svoju WSL gateway IP adresu** (pokrenite unutar WSL-a):
 
@@ -277,7 +277,7 @@ ip route show default | awk '{print $3}' | head -1
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Dodajte pravilo zaštitnog zida** (isti pokrenuti PowerShell sa administratorskim pravima):
+**Dodajte pravilo firewall-a** (isti privilegovani PowerShell):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
@@ -290,7 +290,7 @@ WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Ako ste već učitali model Qwen3.6-35B-A3B-GGUF u prethodnom koraku, trebalo bi da vidite JSON izlaz poput ovog:
+Ako ste već učitali Qwen3.6-35B-A3B-GGUF model u prethodnom koraku, trebalo bi da vidite JSON izlaz poput ovog:
 
 ```json
 {
@@ -308,7 +308,7 @@ Ako ste već učitali model Qwen3.6-35B-A3B-GGUF u prethodnom koraku, trebalo bi
 }
 ```
 
-> `netsh portproxy` pravilo opstaje nakon ponovnog pokretanja, ali WSL gateway IP adresa se može promeniti nakon `wsl --shutdown`. Ako Lemonade postane nedostupan iz WSL-a nakon ponovnog pokretanja, dobijte ažuriranu gateway IP adresu i ažurirajte proxy sa ovom novom IP adresom.
+> Pravilo `netsh portproxy` opstaje nakon ponovnog pokretanja, ali WSL gateway IP adresa se može promeniti nakon `wsl --shutdown`. Ako Lemonade postane nedostupan iz WSL-a nakon ponovnog pokretanja, dobijte ažuriranu gateway IP adresu i ažurirajte proxy sa ovom novom IP adresom.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -364,17 +364,17 @@ finally {
 ---
 <!-- @os:end -->
 
-## Instalirajte i konfigurišite OpenClaw
+## Instalacija i konfiguracija OpenClaw
 
-### Instalirajte OpenClaw
+### Instaliranje OpenClaw
 <!-- @os:windows -->
-> Pokrenite komande iz ovog odeljka unutar vašeg **WSL terminala**.
+> Pokrenite komande u ovom odeljku unutar vašeg **WSL terminala**.
 <!-- @os:end -->
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-Oznaka `--no-onboard` preskače interaktivnog čarobnjaka za podešavanje; pozadinu modela ćete konfigurisati ručno u sledećem koraku, što vam daje preciznu kontrolu nad tim koji model i server se koriste.
+Oznaka `--no-onboard` preskače interaktivnog čarobnjaka za podešavanje, konfigurisaćete pozadinski model ručno u sledećem koraku, što vam daje precizniju kontrolu nad tim koji se model i server koriste.
 
 Otvorite novi terminal i potvrdite instalaciju:
 
@@ -382,7 +382,7 @@ Otvorite novi terminal i potvrdite instalaciju:
 openclaw --version
 ```
 
-> **Savet:** Ako nakon instalacije vidite `command not found`, dodajte npm-ov globalni bin direktorijum u vaš PATH:
+> **Savet:** Ako vidite `command not found` nakon instalacije, dodajte npm-ov globalni bin direktorijum u vaš PATH:
 > ```bash
 > export PATH="$HOME/.npm-global/bin:$PATH"
 > ```
@@ -440,9 +440,9 @@ finally {
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
-### Konfigurisanje OpenClaw da koristi Lemonade
+### Podešavanje OpenClaw-a za korišćenje Lemonade-a
 
-Pokrenite neinteraktivno onboarding OpenClaw-a.
+Pokrenite OpenClaw-ovo neinteraktivno onboarding podešavanje.
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -482,9 +482,9 @@ openclaw onboard \
 ```
 <!-- @os:end -->
 
-Ova komanda upisuje OpenClaw konfiguraciju u `~/.openclaw/openclaw.json`.
+Ova komanda upisuje OpenClaw-ovu konfiguraciju u `~/.openclaw/openclaw.json`.
 
-> **Podešavanje veličine kontekstnog prozora za OpenClaw:** Kompakcija u OpenClaw-u se pokreće kada `contextTokens > contextWindow − reserveTokens`. Podrazumevana vrednost `reserveTokensFloor` je 20.000 tokena, što je donja granica koja preglasava `reserveTokens` kada je ona niža, tako da će bilo koji kontekst modela ispod ~37k pokrenuti beskonačnu petlju kompakcije. Postavite nisku rezervu i onemogućite donju granicu jednom u vašoj konfiguraciji i to će se primeniti na svaki model, bez potrebe za podešavanjem po modelu:
+> **Podešavanje veličine kontekstnog prozora za OpenClaw:** OpenClaw-ova kompakcija se pokreće kada `contextTokens > contextWindow − reserveTokens`. Podrazumevana vrednost `reserveTokensFloor` je 20.000 tokena, donja granica koja poništava `reserveTokens` kada je niža, tako da bilo koji kontekst modela ispod ~37k pokreće beskonačnu petlju kompakcije. Postavite nisku rezervu i onemogućite donju granicu jednom u vašoj konfiguraciji i to će se primeniti na svaki model, bez potrebe za podešavanjem po modelu:
 >
 > ```json
 > "compaction": {
@@ -495,9 +495,9 @@ Ova komanda upisuje OpenClaw konfiguraciju u `~/.openclaw/openclaw.json`.
 >
 > `reserveTokensFloor` je *donja granica* (minimalna zaštita), a ne sama rezerva, postavljanje samo donje granice nema efekta. `reserveTokensFloor: 0` onemogućava zaštitu tako da se prihvata niža vrednost `reserveTokens`.
 >
-> **Kada ovo primeniti:** Koristite ovu konfiguraciju ako je efektivni kontekstni prozor vašeg modela manji od ~37k, bilo zato što je model mali (npr. 8k, 16k, 32k) ili zato što ste namerno ograničili kontekst na nižu vrednost (npr. učitali ste model od 128k, ali ste postavili kontekst na 16k u Lemonade-u). Bez ovoga, OpenClaw ulazi u beskonačnu petlju kompakcije pri pokretanju.
+> **Kada ovo primeniti:** Koristite ovu konfiguraciju ako je efektivni kontekstni prozor vašeg modela ispod ~37k, bilo zato što je model mali (npr. 8k, 16k, 32k) ili zato što ste namerno ograničili kontekst na nižu vrednost (npr. učitavanje modela od 128k, ali podešavanje konteksta na 16k u Lemonade-u). Bez ovoga, OpenClaw ulazi u beskonačnu petlju kompakcije prilikom pokretanja.
 >
-> **Modeli sa velikim kontekstom pri punom kapacitetu:** Ovo možete u potpunosti preskočiti. Podrazumevane vrednosti rade dobro, kompakcija će se pokrenuti mnogo pre nego što se prozor napuni, a model ima dovoljno prostora za generisanje dugih odgovora. Ako ipak primenite ovo, imajte u vidu da `reserveTokens: 4096` ograničava dužinu odgovora na ~4k tokena, što može prekinuti generisanje dugih fajlova ili detaljnih planova.
+> **Modeli velikog konteksta na punom kontekstu:** Ovo možete potpuno preskočiti. Podrazumevane vrednosti rade dobro, kompakcija će se pokrenuti mnogo pre nego što se prozor popuni, a model ima dovoljno prostora za generisanje dugih odgovora. Ako ipak primenite ovo, imajte na umu da `reserveTokens: 4096` ograničava dužinu odgovora na ~4k tokena, što može prekinuti generisanje dugih fajlova ili detaljnih planova.
 >
 > **Gde ovo dodati:** Postavite blok `compaction` unutar `agents.defaults` u vašem `openclaw.json` (obično na `~/.openclaw/openclaw.json`):
 >
@@ -518,13 +518,13 @@ Ova komanda upisuje OpenClaw konfiguraciju u `~/.openclaw/openclaw.json`.
 > }
 > ```
 >
-> Ostatak vaše konfiguracije (gateway, kanali, modeli itd.) ostaje nepromenjen, potrebno je dodati samo ključ `compaction`.
+> Ostatak vaše konfiguracije (gateway, kanali, modeli, itd.) ostaje nepromenjen, potrebno je dodati samo ključ `compaction`.
 
-### (Preporučeno) Omogućite Docker sandboxing
+### (Preporučeno) Omogućavanje Docker sandboxing-a
 
-OpenClaw može da usmeri sve operacije agenta nad fajlovima i kodom kroz izolovan Docker kontejner umesto da ih izvršava direktno na vašem hostu. Ovo ograničava domet bilo koje neželjene akcije na sandbox, ostavljajući fajl sistem i mrežu vašeg hosta netaknutim.
+OpenClaw može da usmeri sve operacije nad fajlovima i kodom agenta kroz izolovani Docker kontejner umesto da ih izvršava direktno na vašem host sistemu. Ovo ograničava domet svake nenamerne radnje na sandbox, ostavljajući vaš host fajl sistem i mrežu netaknutim.
 
-Izgradite sandbox sliku jednom (Docker mora biti instaliran):
+Izgradite sandbox image jednom (Docker mora biti instaliran):
 
 ```bash
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -624,7 +624,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Pokrenite ovo da dodate ključ `sandbox` unutar postojećeg bloka `agents.defaults` u `~/.openclaw/openclaw.json`:
+Pokrenite ovo da biste dodali ključ `sandbox` unutar postojećeg bloka `agents.defaults` u `~/.openclaw/openclaw.json`:
 
 ```bash
 cat > sandbox.patch.json5 <<JSON5
@@ -643,13 +643,13 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-Sandbox kontejneri **nemaju pristup mreži** podrazumevano. Pogledajte [referencu za sandboxing](https://docs.openclaw.ai/gateway/sandboxing) za bind mount-ove i mrežne izuzetke.
+Sandbox kontejneri podrazumevano **nemaju pristup mreži**. Pogledajte [referencu za sandboxing](https://docs.openclaw.ai/gateway/sandboxing) za bind mount-ove i mrežna prepisivanja.
 
 > #### Rešavanje problema: Docker Permission Denied
 > 
-> Ako dobijete "permission denied" prilikom izvršavanja Docker komandi:
+> Ako dobijete grešku „permission denied" prilikom pokretanja Docker komandi:
 > 
-> **Korak 1: Dodajte svog korisnika u docker grupu**
+> **Korak 1: Dodajte vašeg korisnika u docker grupu**
 > 
 > ```bash
 > sudo groupadd docker                    # Create group if needed
@@ -665,9 +665,9 @@ Sandbox kontejneri **nemaju pristup mreži** podrazumevano. Pogledajte [referenc
 > sudo chmod g+w /lib/systemd/system/docker.socket
 > ```
 > 
-> Zatim **restartujte** sistem.
+> Zatim **restartujte** vaš sistem.
 > 
-> **Brzo privremeno rešenje** (resetuje se nakon restarta):
+> **Brzo privremeno rešenje** (poništava se nakon restarta):
 > ```bash
 > sudo chmod 666 /var/run/docker.sock
 > ```
@@ -892,9 +892,161 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Pokretanje OpenClaw Gateway-a
+<!-- @os:linux -->
+## (Preporučeno) Integracija OpenClaw-a sa Firecrawl uslugama
 
-Gateway je OpenClaw proces koji upravlja petljom agenta i opslužuje kontrolnu tablu:
+[Firecrawl](https://docs.firecrawl.dev/introduction) pruža samostalno hostovanu uslugu za pretraživanje veba i izdvajanje sadržaja koja može da zaobiđe ove izazove i otključa pun potencijal OpenClaw automatizacije.
+
+U ovom podešavanju, OpenClaw radi kao skup Docker kontejnera kojima se upravlja pomoću Podman-a. Da bismo pojednostavili upravljanje životnim ciklusom i automatsko pokretanje, registrujemo Firecrawl kao `systemd` uslugu na nivou korisnika koja orkestrira osnovni Podman Compose stek. Ovo omogućava OpenClaw-u da pokrene gateway, zaustavi i proveri Firecrawl uslugu koristeći standardne `systemctl --user` komande umesto direktne interakcije sa kontejnerima.
+
+Da bismo stvari pojednostavili, ceo proces smo podelili u četiri koraka:
+
+---
+
+### 1. Registrovanje sistemske usluge
+Idite u direktorijum sa systemd korisničkom konfiguracijom:
+```bash
+cd ~/.config/systemd/user
+```
+Kreirajte i otvorite novi fajl pod nazivom `firecrawl.service`.
+```bash
+nano firecrawl.service
+```
+Kopirajte i nalepite sledeću konfiguraciju:
+```bash
+[Unit]
+Description=OpenClaw Firecrawl Service
+After=podman.service
+Requires=podman.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=%h/firecrawl
+
+# Optional: Validate config before starting
+ExecStartPre=/usr/bin/podman compose -f openclaw-compose.yaml config --quiet
+
+# Generate token and write to .env file
+ExecStartPre=/bin/bash -c 'chmod 644 %h/firecrawl/.env && echo "OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)" > %h/firecrawl/.env'
+
+# Step 1: Start containers in detached mode
+ExecStart=/usr/bin/podman compose -f openclaw-compose.yaml up -d --remove-orphans
+
+# Step 2: Wait for container to be healthy/ready
+ExecStartPost=/bin/sleep 5
+
+# Step 3: Run onboarding inside container in detached mode
+ExecStartPost=/usr/bin/podman exec -d openclaw_gateway /bin/bash -c "openclaw onboard \
+    --non-interactive \
+    --accept-risk \
+    --mode local \
+    --auth-choice skip \
+    --gateway-auth token \
+    --gateway-token "$OPENCLAW_GATEWAY_TOKEN" "
+
+# Stop containers when the service stops
+ExecStop=/usr/bin/podman compose -f openclaw-compose.yaml down
+
+[Install]
+WantedBy=default.target
+```
+U ovom trenutku, usluga je definisana, ali još nije registrovana kod `systemd`.
+Uverite se da naziv fajla tačno odgovara onom koji ste kreirali iznad, zatim pokrenite:
+```bash
+systemctl --user daemon-reload
+systemctl --user enable firecrawl.service
+```
+Ako je uspešno, trebalo bi da vidite sledeći izlaz:
+
+> **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
+
+ `default.target.wants/` sadrži simboličke linkove ka uslugama koje su konfigurisane da se pokreću automatski.
+### 2. Konfigurišite Firecrawl
+
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) je idealan za one kojima je potrebna potpuna kontrola nad okruženjima za scraping i obradu podataka, ali dolazi uz kompromis dodatnog održavanja i konfiguracije.
+
+Počnite kloniranjem repozitorijuma:
+```bash
+git clone https://github.com/firecrawl/firecrawl.git
+```
+Napravite `.env` u korenom direktorijumu `/firecrawl`: 
+```bash
+# ===== Required ENVS ======
+PORT=3002
+HOST=0.0.0.0
+
+# ===== Firecrawl =====
+# FIRECRAWL_API_KEY="" # optional
+```
+### 3. Postavite OpenClaw pomoću Podman Compose
+
+Pre nego što nastavite, uverite se da ste povukli najnoviju OpenClaw Docker sliku:
+```bash
+podman pull ghcr.io/openclaw/openclaw:latest
+```
+Kada to uradite, preuzmite OpenClaw Compose fajl [openclaw-compose.yaml](assets/openclaw-compose.yaml) i smestite ga u koreni direktorijum `/firecrawl`:
+
+> Ova konvencija je neophodna da bi `systemd` mogao da pronađe i pokrene servis ispravno, kao što je navedeno u `WorkingDirectory=${HOME}/firecrawl`.
+
+> Uvek možete proširiti stek dodavanjem dodatnih Firecrawl servisa po potrebi. Kompletnu listu dostupnih servisa možete pronaći u zvaničnom [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+
+### 4. Pokrenite OpenClaw servis kroz Firecrawl 
+
+Pre nego što prepustite kontrolu `systemd`-u, proverite da li sve radi ispravno tako što ćete ručno pokrenuti stek:
+```bash
+podman compose -f openclaw-compose.yaml up -d
+```
+Ako je sve pravilno konfigurisano, trebalo bi da vidite da se OpenClaw kontejner pokreće, a izlaz na komandnoj liniji trebalo bi da izgleda ovako:
+<p align="center">
+  <img src="assets/openclaw_health_verification.png" width="500" height="400" />
+</p>
+
+Kada to proverite, ugasite stek pre nego što nastavite dalje:
+```bash
+podman compose -f openclaw-compose.yaml down
+```
+Pre pokretanja servisa, morate se uveriti da su ispravno podešeni vlasništvo i dozvole za direktorijum `firecrawl` i njegov `.env` fajl. 
+Ovo je neophodno da bi servis mogao da upiše vaše kredencijale prilikom pokretanja.
+```bash
+sudo chown ${USER}:${USER} ~/firecrawl/.env
+chmod 644 ~/firecrawl/.env
+```
+Sada kada je sve provereno, pokrenite servis kroz `systemd`:
+```bash
+systemctl --user start firecrawl.service
+```
+[OpenClaw akcije](https://docs.openclaw.ai/) su dostupne iz interaktivnog kontejnera, a Web kontrolna tabla je dostupna na istom hostu i portu na adresi http://127.0.0.1:18789.
+<p align="center">
+  <img src="assets/OpenClawWebUI-PodmanLaunch.png" width="500" height="500" />
+</p>
+
+### Dobijanje vašeg `OPENCLAW_GATEWAY_TOKEN`-a
+
+Kada servis bude pokrenut, primetićete novi direktorijum `.openclaw` kreiran u vašem home direktorijumu (~/.openclaw). Ovaj direktorijum je podrazumevano zaključan, pa ćete morati da ga otključate kako biste dobili svoj gateway token.
+
+1. Odobrite pristup direktorijumu:
+```bash
+sudo chmod 777 ~/.openclaw/
+```
+2. Pročitajte svoj gateway token:
+```bash
+grep '"token"' ~/.openclaw/openclaw.json
+```
+Pronađite vrednost `OPENCLAW_GATEWAY_TOKEN` u izlazu.
+
+3. Otvorite kontrolnu tablu gateway-a u svom pretraživaču na adresi http://127.0.0.1:18789. Nalepite svoj token kada budete upitani za autentifikaciju.
+
+Da biste zaustavili servis, pokrenite:
+```bash
+systemctl --user stop firecrawl.service
+```
+<!-- @os:end -->
+---
+
+## Pokretanje OpenClaw gateway-a
+
+Gateway je OpenClaw proces koji upravlja petljom agenta i servira kontrolnu tablu:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -1025,25 +1177,25 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-Da biste otvorili kontrolnu tablu, pokrenite ovo u drugom terminalu dok gateway i dalje radi:
+Da biste otvorili kontrolnu tablu, pokrenite ovo u drugom terminalu dok je gateway i dalje pokrenut:
 
 ```bash
 openclaw dashboard
 ```
 
-Pošto se gateway povezuje na loopback, kontrolna tabla se automatski autentifikuje kada se otvori sa iste mašine, nije potreban unos tokena niti odobrenje uređaja za lokalni pristup. Trebalo bi da vidite OpenClaw kontrolnu tablu sa vašim Lemonade modelom navedenim kao aktivni backend.
+Pošto se gateway vezuje za loopback, kontrolna tabla se automatski autentifikuje kada se otvori sa istog računara, tako da nije potreban unos tokena niti odobrenje uređaja za lokalni pristup. Trebalo bi da vidite OpenClaw kontrolnu tablu sa vašim Lemonade modelom navedenim kao aktivnim bekendom.
 
-> Ako ste omogućili sandboxing, možete to proveriti tako što ćete zatražiti od agenta da izvrši `run hostname` sa kontrolne table. Ako vidite kratak ID kontejnera umesto naziva hosta vaše mašine, sandbox radi ispravno.
+> Ako ste omogućili sandboxing, možete to proveriti tako što ćete zatražiti od agenta da izvrši `run hostname` iz kontrolne table. Ako vidite kratki ID kontejnera umesto imena hosta vašeg računara, sandbox radi ispravno.
 
-**Čestitamo, izgradili ste potpuno lokalan AI agent stek od nule.**
+**Čestitamo, izgradili ste potpuno lokalni AI agent stek od nule.**
 
-> **Potreban vam je token za gateway?** Pokrenite `openclaw dashboard --no-open` da ispišete URL kontrolne table sa ugrađenim tokenom (takođe pokušava da ga kopira u vaš klipbord). Alternativno, token se nalazi na `gateway.auth.token` u `~/.openclaw/openclaw.json`.
+> **Potreban vam je gateway token?** Pokrenite `openclaw dashboard --no-open` da biste ispisali URL kontrolne table sa ugrađenim tokenom (takođe pokušava da ga kopira u vaš clipboard). Alternativno, token se nalazi na `gateway.auth.token` u `~/.openclaw/openclaw.json`.
 >
-> **Odobravanje udaljenog uređaja:** Kada otvorite kontrolnu tablu sa druge mašine ili telefona, pregledač prikazuje ID zahteva. Nazad na mašini na kojoj radi gateway, pokrenite:
+> **Odobravanje udaljenog uređaja:** Kada otvorite kontrolnu tablu sa drugog računara ili telefona, pretraživač prikazuje ID zahteva. Na računaru na kojem je pokrenut gateway, pokrenite:
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> Ovo je potrebno samo za udaljene ili sekundarne uređaje, pristup putem loopback-a sa iste mašine se automatski autentifikuje.
+> Ovo je potrebno samo za udaljene ili sekundarne uređaje, loopback pristup sa istog računara se automatski autentifikuje.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1051,48 +1203,48 @@ Pošto se gateway povezuje na loopback, kontrolna tabla se automatski autentifik
 
 ---
 
-## Opciono: Povežite kanal za komunikaciju
+## Opciono: Povežite komunikacioni kanal
 
-Kada gateway radi, možete pristupiti vašem lokalnom agentu sa bilo kog uređaja. Odaberite opciju koja odgovara vašem podešavanju. OpenClaw podržava [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) i druge kanale, pogledajte kompletnu listu na [docs.openclaw.ai](https://docs.openclaw.ai).
+Kada je gateway pokrenut, možete pristupiti svom lokalnom agentu sa bilo kog uređaja. Izaberite opciju koja odgovara vašem podešavanju. OpenClaw podržava [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram), i druge kanale, pogledajte kompletnu listu na [docs.openclaw.ai](https://docs.openclaw.ai).
 
 ---
 
 ### Opcija A: Discord
 
-Discord zahteva server na kome **imate administratorski pristup** da biste dodali bota. Ako delite servere, ali ne posedujete nijedan, koristite Opciju B (Telegram) umesto ovoga.
-#### Napravite Discord nalog i server
+Discord zahteva server na kojem **vi imate administratorski pristup** da biste dodali bota. Ako delite servere, ali ih ne posedujete, koristite Opciju B (Telegram) umesto ovoga.
 
-Ako nemate Discord nalog, registrujte se na [discord.com](https://discord.com). Takođe vam je potreban server na kome ste administrator, napravite ga klikom na ikonicu **+** u Discord bočnoj traci i izborom **Create My Own**. Privatni server je sasvim dovoljan.
+#### Kreiranje Discord naloga i servera
 
-#### Napravite Discord aplikaciju i bota
+Ako nemate Discord nalog, registrujte se na [discord.com](https://discord.com). Takođe vam je potreban server na kojem ste administrator, kreirajte ga klikom na ikonicu **+** u Discord bočnoj traci i izborom opcije **Create My Own**. Privatni server je sasvim dovoljan.
 
-1. Idite na [Discord Developer Portal](https://discord.com/developers/applications) i kliknite **New Application**. Dajte joj naziv (npr. „openclaw-bot").
-2. U bočnoj traci kliknite **Bot**. Postavite korisničko ime za bota.
-3. Na istoj Bot stranici, spustite se do **Privileged Gateway Intents** i omogućite:
+#### Kreiranje Discord aplikacije i bota
+
+1. Idite na [Discord Developer Portal](https://discord.com/developers/applications) i kliknite na **New Application**. Dajte mu ime (npr. "openclaw-bot").
+2. U bočnoj traci kliknite na **Bot**. Postavite korisničko ime za bota.
+3. Na istoj Bot stranici, skrolujte do **Privileged Gateway Intents** i omogućite:
    - **Message Content Intent** (obavezno)
    - **Server Members Intent** (preporučeno)
-4. Vratite se na vrh i kliknite **Reset Token** da generišete token bota. Kopirajte ga.
+4. Skrolujte nazad na vrh i kliknite na **Reset Token** da biste generisali token vašeg bota. Kopirajte ga.
 
-#### Dodajte bota na svoj server
+#### Dodavanje bota na vaš server
 
-1. U bočnoj traci kliknite **OAuth2/ URL Generator**.
+1. U bočnoj traci kliknite na **OAuth2/ URL Generator**.
 2. Pod **Scopes**, omogućite `bot` i `applications.commands`.
 3. Pod **Bot Permissions**, omogućite: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Kopirajte generisani URL, nalepite ga u pregledač, izaberite svoj server i potvrdite. Bot bi sada trebalo da se pojavi na listi članova vašeg servera.
-
+4. Kopirajte generisani URL, nalepite ga u pretraživač, izaberite svoj server i potvrdite. Bot bi sada trebalo da se pojavi na listi članova vašeg servera.
 #### Prikupite svoje ID-jeve
 
 Omogućite Developer Mode u Discord-u (**User Settings/ Advanced/ Developer Mode**), zatim:
-- Desnim klikom na ikonicu servera: **Copy Server ID**
-- Desnim klikom na svoj avatar: **Copy User ID**
+- Desni klik na ikonicu vašeg servera: **Copy Server ID**
+- Desni klik na sopstveni avatar: **Copy User ID**
 
-#### Dozvolite privatne poruke od članova servera
+#### Dozvolite DM poruke od članova servera
 
-Desni klik na ikonicu servera/ **Privacy Settings**/ uključite **Direct Messages**. Ovo omogućava botu da vam pošalje privatnu poruku, što je neophodno za korak uparivanja.
+Desni klik na ikonicu vašeg servera/ **Privacy Settings**/ uključite **Direct Messages**. Ovo omogućava botu da vam pošalje DM poruku, što je neophodno za korak uparivanja.
 
 #### Konfigurišite OpenClaw za Discord
 
-Sačuvajte token bota kao promenljivu okruženja, a zatim napravite jedan patch fajl koji omogućava Discord, referencira token i stavlja vaš server na listu dozvoljenih. Zamenite `<server_id>` i `<user_id>` ID-jevima prikupljenim iznad.
+Sačuvajte token vašeg bota kao promenljivu okruženja, zatim kreirajte jednu patch datoteku koja omogućava Discord, referiše token i dodaje vaš server na listu dozvoljenih. Zamenite `<server_id>` i `<user_id>` sa ID-jevima prikupljenim iznad.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1118,7 +1270,7 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **Nemojte se oslanjati na to da tražite od agenta da ovo konfiguriše.** Kada je sandboxing omogućen, agent ne može da piše u `~/.openclaw/openclaw.json` iz sandbox okruženja, umesto toga koristite gore navedene CLI komande na hostu.
+> **Nemojte se oslanjati na to da tražite od agenta da ovo konfiguriše.** Kada je sandboxing omogućen, agent ne može da piše u `~/.openclaw/openclaw.json` iznutra iz sandboxa, umesto toga koristite gore navedene CLI komande na hostu.
 
 Ponovo pokrenite gateway kako bi preuzeo novu konfiguraciju kanala:
 
@@ -1126,24 +1278,24 @@ Ponovo pokrenite gateway kako bi preuzeo novu konfiguraciju kanala:
 openclaw gateway run --bind loopback --port 18789
 ```
 
-U izlazu gateway-a biste trebalo da vidite `logged in to discord as <bot-name>` u roku od nekoliko sekundi.
+Trebalo bi da vidite `logged in to discord as <bot-name>` u izlazu gateway-a u roku od nekoliko sekundi.
 
 #### Uparite svoj Discord nalog
 
-Pošaljite botu privatnu poruku na Discord-u. Odgovoriće kratkim kodom za uparivanje.
+Pošaljite DM poruku botu na Discord-u. On će odgovoriti kratkim kodom za uparivanje.
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-Odobrite to na mašini na kojoj se izvršava OpenClaw:
+Odobrite to na mašini na kojoj radi OpenClaw:
 ```bash
 openclaw pairing approve discord <CODE>
 ```
 
-> Kodovi za uparivanje ističu nakon jednog sata.
+> Kodovi za uparivanje ističu nakon sat vremena.
 
-Sada možete da ćaskate sa svojim agentom direktno preko Discord-a i prebacujete zadatke na svoj lokalni hardver.
+Sada možete direktno da ćaskate sa svojim agentom iz Discord-a i prebacujete zadatke na svoj lokalni hardver.
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1155,7 +1307,7 @@ Sada možete da ćaskate sa svojim agentom direktno preko Discord-a i prebacujet
 
 Telegram je jednostavniji od Discord-a za većinu korisnika, ne zahteva server niti administratorski pristup.
 
-#### Napravite Telegram bota
+#### Kreirajte Telegram bota
 
 1. Otvorite Telegram i pošaljite poruku **@BotFather**.
 2. Pošaljite `/newbot` i pratite uputstva. Sačuvajte token bota koji dobijete.
@@ -1182,14 +1334,14 @@ Dodajte konfiguraciju kanala u `~/.openclaw/openclaw.json` (ili je patch-ujte pr
 }
 ```
 
-Ponovo pokrenite gateway, a zatim pošaljite botu bilo koju poruku na Telegram-u. Odobrite uparivanje:
+Ponovo pokrenite gateway, zatim pošaljite vašem botu bilo koju poruku na Telegram-u. Odobrite uparivanje:
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-Kodovi za uparivanje ističu nakon jednog sata. Sada možete da ćaskate sa svojim agentom preko Telegram privatnih poruka.
+Kodovi za uparivanje ističu nakon sat vremena. Sada možete da ćaskate sa svojim agentom putem Telegram DM poruka.
 
 ---
 
@@ -1197,8 +1349,27 @@ Kodovi za uparivanje ističu nakon jednog sata. Sada možete da ćaskate sa svoj
 
 Sada kada vaš agent može da prima komande sa vašeg telefona i deluje na vašoj lokalnoj mašini, evo tri pravca vredna istraživanja:
 
-1. **Sažimanje berzanskih kretanja**: Zakažite OpenClaw da povlači podatke sa finansijskih API-ja u fiksnom intervalu, sažme dnevna kretanja pomoću vašeg lokalnog modela i pošalje pregled na vaš telefon svakog jutra preko izabranog kanala.
+1. **Sumiranje berzanskog tržišta**: Zakažite OpenClaw da povlači podatke iz finansijskih API-jeva u fiksnom intervalu, sumira dnevna kretanja pomoću vašeg lokalnog modela i šalje pregled na vaš telefon svako jutro putem izabranog kanala.
 
-2. **Nadzor fine-tuning procesa**: Pokrenite trening posao daljinski preko Telegram-a ili Discord-a, a zatim neka agent prati log treninga i periodično prijavljuje vrednosti gubitka, iskorišćenost GPU-a i korišćenje diska nazad na vaš telefon. Ako se proces zaglavi ili dođe do skoka VRAM-a, saznaćete odmah bez potrebe da budete pored mašine.
+2. **Praćenje fino-podešavanja (fine-tuning)**: Pokrenite trening posao daljinski putem Telegram-a ili Discord-a, zatim neka agent prati (tail) log treninga i izveštava periodično o vrednostima gubitka (loss), iskorišćenosti GPU-a i upotrebi diska nazad na vaš telefon. Ako se pokretanje zaustavi ili dođe do skoka VRAM-a, saznaćete odmah bez potrebe da budete pored mašine.
 
-3. **IOT sa lokalnim VLM-om**: Usmerite kameru ka svojim ulaznim vratima, pokrenite vizuelni model na Lemonade-u i neka OpenClaw analizira kadrove na zahtev ili po okidaču. Pitajte „da li je danas stigao neki paket?" sa svog telefona i dobijte direktan odgovor sa sopstvenog hardvera.
+3. **IOT sa lokalnim VLM-om**: Usmerite kameru ka vašim ulaznim vratima, pokrenite vizuelni model na Lemonade-u i neka OpenClaw analizira kadrove na zahtev ili na osnovu okidača. Pitajte "da li su danas stigli neki paketi?" sa vašeg telefona i dobijte direktan odgovor sa sopstvenog hardvera.
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->

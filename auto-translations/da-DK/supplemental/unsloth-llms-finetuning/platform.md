@@ -1,24 +1,30 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Platformkonfiguration
 
-Dette dokument beskriver de forventede platformkonfigurationer til afvikling af denne playbook.
+Dette dokument beskriver de forventede platformkonfigurationer for at køre denne playbook.
 
 ## Forudsætninger
 
-PyTorch med ROCm-understøttelse er forudinstalleret på AMD Ryzen™ AI Halo Developer Platform. På alle andre enheder skal brugere manuelt installere PyTorch med ROCm-understøttelse. Se venligst det relevante afsnit for dit operativsystem:
+PyTorch med ROCm-understøttelse er forudinstalleret på AMD Ryzen™ AI Halo Developer Platform. For alle andre enheder skal brugere manuelt installere PyTorch med ROCm-understøttelse. Se venligst det relevante afsnit for dit operativsystem:
 
 
 ### Windows
 
 | Komponent     | Version         | Bemærkninger                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.11.x + ROCm 7.13  | Forudinstalleret på AMD Ryzen AI Halo Developer Platform; skal installeres manuelt på alle andre enheder |
+| **PyTorch**   | 2.11.x + ROCm 7.13  | Forudinstalleret på AMD Ryzen AI Halo Developer Platform; skal manuelt installeres på alle andre enheder |
 
 
 ### Linux
 
 | Komponent     | Version         | Bemærkninger                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.11.x + ROCm 7.13   | Forudinstalleret på AMD Ryzen AI Halo Developer Platform; skal installeres manuelt på alle andre enheder |
+| **PyTorch**   | 2.11.x + ROCm 7.13   | Forudinstalleret på AMD Ryzen AI Halo Developer Platform; skal manuelt installeres på alle andre enheder |
 
 
 ## Påkrævede modeller
@@ -31,11 +37,11 @@ Følgende modeller er testet og optimeret til din platform:
 
 Modeller downloades automatisk til Hugging Face-cachemappen: `~/.cache/huggingface/hub/`
 
-Sørg for at have mindst **20 GB ledig plads** til modellagring.
+Sørg for mindst **20 GB ledig plads** til modellagring.
 
 ## Netværkskrav
 
 Den indledende opsætning kræver internetadgang for at downloade modeller fra Hugging Face. Efter download kan playbooken køre offline.
 
-- Førstegangsdownload af modeller kan tage **5-10 minutter** afhængigt af modellens størrelse og forbindelseshastighed
-- Modeller caches lokalt og behøver ikke downloades igen
+- Første gang, modeller downloades, kan det tage **5-10 minutter** afhængigt af modelstørrelse og forbindelseshastighed
+- Modeller caches lokalt og skal ikke downloades igen

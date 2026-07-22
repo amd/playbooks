@@ -1,3 +1,9 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Platformconfiguratie
 
 Dit document beschrijft de verwachte platformconfiguraties voor het uitvoeren van dit playbook.
@@ -8,15 +14,15 @@ PyTorch met ROCm-ondersteuning is vooraf geïnstalleerd op het AMD Ryzen™ AI H
 
 ### Windows
 
-| Component     | Versie         | Opmerkingen                             |
+| Component     | Versie          | Opmerkingen                       |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 of nieuwer    | Vooraf geïnstalleerd op het AMD Ryzen AI Halo Developer Platform; moet handmatig worden geïnstalleerd op alle andere apparaten |
+| **PyTorch**   | 2.8 of nieuwer  | Vooraf geïnstalleerd op het AMD Ryzen AI Halo Developer Platform; moet handmatig worden geïnstalleerd op alle andere apparaten |
 
 ### Linux
 
-| Component     | Versie         | Opmerkingen                             |
+| Component     | Versie          | Opmerkingen                       |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 of nieuwer    | Vooraf geïnstalleerd op het AMD Ryzen AI Halo Developer Platform; moet handmatig worden geïnstalleerd op alle andere apparaten |
+| **PyTorch**   | 2.8 of nieuwer  | Vooraf geïnstalleerd op het AMD Ryzen AI Halo Developer Platform; moet handmatig worden geïnstalleerd op alle andere apparaten |
 
 ## Vereiste modellen
 
@@ -26,7 +32,7 @@ De volgende modellen zijn getest en geoptimaliseerd voor uw platform:
 |-------|------------|------|-------------------|
 | **facebook/seamless-m4t-v2-large** | 2.3B | ~10GB | Vooraf geïnstalleerd op het AMD Ryzen AI Halo Developer Platform; moet handmatig worden geïnstalleerd op alle andere apparaten |
 
-Modellen worden automatisch gedownload naar de Hugging Face cache-directory:
+Modellen worden automatisch gedownload naar de Hugging Face-cachemap:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
@@ -34,7 +40,7 @@ Zorg voor ten minste **20 GB vrije ruimte** voor modelopslag.
 
 ## Netwerkvereisten
 
-Voor de initiële installatie is internettoegang vereist om modellen van Hugging Face te downloaden. Na het downloaden kan het playbook offline worden uitgevoerd.
+Voor de initiële installatie is internettoegang vereist om modellen te downloaden van Hugging Face. Na het downloaden kan het playbook offline worden uitgevoerd.
 
-- Het downloaden van modellen voor de eerste keer kan **5-10 minuten** duren, afhankelijk van de modelgrootte en verbindingssnelheid
-- Modellen worden lokaal gecachet en hoeven niet opnieuw te worden gedownload
+- Het downloaden van modellen voor de eerste keer kan **5-10 minuten** duren, afhankelijk van de modelgrootte en de verbindingssnelheid
+- Modellen worden lokaal in de cache opgeslagen en hoeven niet opnieuw te worden gedownload

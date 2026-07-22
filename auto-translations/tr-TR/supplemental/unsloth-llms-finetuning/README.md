@@ -5,47 +5,51 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @github-only -->
-
 > [!IMPORTANT]
-> Bu kılavuz, GitHub'ın işleyemediği özel etiketler kullanmaktadır. Bu içeriği doğru şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
+> Bu kılavuz, GitHub'ın işleyemediği özel etiketler kullanır. Bu içeriği doğru şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
 <!-- @github-only:end -->
 
 ## Genel Bakış
 
-Bu kılavuz, AMD donanımında Unsloth kullanarak bir dil modelinin yerel olarak nasıl ince ayarlanacağını (fine-tune) gösterir.
+Bu kılavuz, AMD donanımında Unsloth kullanarak bir dil modelini yerel olarak nasıl ince ayar (fine-tune) yapacağınızı gösterir.
 
-`mlabonne/FineTome-100k` veri kümesinin bir alt kümesi kullanılarak `unsloth/gemma-4-E4B-it` üzerinde LoRA adaptörleriyle kısa bir Denetimli İnce Ayar (Supervised Fine-Tuning, SFT) örneği kullanır. Amaç, kurulum, eğitim, çıkarım (inference) ve ince ayarlı sonucu kaydetmeyi kapsayan basit, uçtan uca bir iş akışı sunmaktır.
+`mlabonne/FineTome-100k` veri kümesinin bir alt kümesi kullanılarak `unsloth/gemma-4-E4B-it` üzerinde LoRA bağdaştırıcılarıyla kısa bir Denetimli İnce Ayar (SFT) örneği kullanır. Amaç, kurulum, eğitim, çıkarım ve ince ayarlanmış sonucun kaydedilmesini kapsayan uçtan uca basit bir iş akışı sunmaktır.
 
-Örnek, pratik ve kolayca değiştirilebilir olacak şekilde tasarlanmıştır, böylece kendi veri kümeleriniz ve modelleriniz için bir başlangıç noktası olarak kullanabilirsiniz.
+Örnek, pratik ve kolayca değiştirilebilir olacak şekilde tasarlanmıştır; böylece kendi veri kümeleriniz ve modelleriniz için bir başlangıç noktası olarak kullanabilirsiniz.
 
 ## Neler Öğreneceksiniz
 
 - Unsloth ortamının nasıl kurulacağı
-- Unsloth ile SFT kullanarak bir LLM'nin nasıl ince ayarlanacağı
-- İnce ayarlı sonucun yerel depolamaya nasıl kaydedileceği
+- Unsloth ile SFT kullanarak bir LLM'nin nasıl ince ayar yapılacağı
+- İnce ayarlanmış sonucun yerel depolamaya nasıl kaydedileceği
 
 <!-- @device:halo,stx,krk -->
-> **Not:** Bu kılavuzdaki ince ayar teknikleri en az 24 GB GPU belleği ve 32 GB sistem RAM'i gerektirir.
+> **Not:** Bu kılavuzdaki ince ayar teknikleri en az **64 GB sistem RAM'i** gerektirir ve bunun en az **24 GB'ının GPU için kullanılabilir olması** gerekir (bu 24 GB, 64 GB'a ek değil, onun bir parçasıdır).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Not:** Bu kılavuzdaki ince ayar teknikleri en az 24 GB GPU belleği ve 32 GB sistem RAM'i gerektirir.
+> **Not:** Bu kılavuzdaki ince ayar teknikleri en az **24 GB toplam GPU belleği** ve **32 GB sistem RAM'i** gerektirir.
+> - Windows'ta toplam GPU belleği, ekran kartının ayrılmış VRAM'i ile paylaşımlı GPU belleğini (sistem RAM'inden ödünç alınan) birleştirir.
+> - Bu nedenle, ayrılmış VRAM'i 24 GB'ın altında olan kartlar, aradaki farkı kapatmak için paylaşımlı GPU belleğini kullanarak bu kılavuzu yine de çalıştırabilir.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Not:** Bu kılavuzdaki ince ayar teknikleri en az 24 GB **ayrılmış (dedicated)** GPU belleği ve 32 GB sistem RAM'i gerektirir.
+> **Not:** Bu kılavuzdaki ince ayar teknikleri en az **24 GB ayrılmış GPU belleğine** ve **32 GB sistem RAM'ine** sahip bir ekran kartı gerektirir.
+> - Linux'ta eğitim tamamen ekran kartının ayrılmış VRAM'i içinde çalışır.
+> - VRAM tükendiğinde paylaşımlı GPU belleğine (sistem RAM'i) geri düşmez.
+> - Ayrılmış VRAM'i 24 GB'ın altında olan kartlar, sistemde bol miktarda RAM olsa bile Linux'ta eğitim sırasında bellek yetersizliği yaşayacaktır.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Neden Unsloth?
 
-Unsloth, bellek kullanımını azaltarak ve standart bir kuruluma kıyasla eğitimi hızlandırarak LLM ince ayarını yerel donanımda çalıştırmayı kolaylaştırır.
+Unsloth, standart bir kuruluma kıyasla bellek kullanımını azaltıp eğitimi hızlandırarak LLM ince ayarının yerel donanımda çalıştırılmasını kolaylaştırır.
 
-Bu kılavuzda, Unsloth'u **LoRA tabanlı SFT** ile birlikte kullanıyoruz. Bu, temel modelin büyük ölçüde donmuş (frozen) kalırken, çok daha küçük bir adaptör ağırlıkları kümesinin eğitildiği anlamına gelir. Bu, tam ince ayardan daha hafif olduğu ve üzerinde hızlı yineleme yapılabildiği için yerel geliştirme açısından iyi bir seçimdir.
+Bu kılavuzda Unsloth'u **LoRA tabanlı SFT** ile birlikte kullanıyoruz. Bu, temel modelin büyük ölçüde dondurulmuş kalması, bunun yerine çok daha küçük bir bağdaştırıcı ağırlıkları kümesinin eğitilmesi anlamına gelir. Bu yaklaşım, tam ince ayara göre daha hafif ve üzerinde yineleme yapmak için daha hızlı olduğundan yerel geliştirme için iyi bir uyuma sahiptir.
 
-Unsloth ayrıca QLoRA ve pekiştirmeli öğrenme (reinforcement learning) iş akışları dahil olmak üzere başka eğitim yaklaşımlarını da destekler. Bu kılavuz önce en basit yola odaklanır: kullanıcıların çalıştırabileceği, anlayabileceği ve genişletebileceği küçük bir LoRA ince ayar örneği.
+Unsloth ayrıca QLoRA ve pekiştirmeli öğrenme iş akışları dahil olmak üzere başka eğitim yaklaşımlarını da destekler. Bu kılavuz, önce en basit yolu ele alır: kullanıcıların çalıştırabileceği, anlayabileceği ve genişletebileceği küçük bir LoRA ince ayar örneği.
 
 ## Bellek Yapılandırmasını Ayarlama
 
@@ -53,18 +57,18 @@ Unsloth ayrıca QLoRA ve pekiştirmeli öğrenme (reinforcement learning) iş ak
 
 <!-- @device:halo_box -->
 ## Yazılım Güncellemelerini Kontrol Etme
-> **Not**: VS Code yüklü değilse, Ryzen AI Developer Center ile yükleyebilirsiniz.
+> **Not**: VS Code kurulu değilse, Ryzen AI Developer Center ile kurabilirsiniz.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Yazılım Ön Koşullarını Yükleme
+## Yazılım Önkoşullarını Kurma
 
 ### Sanal Bir Ortam Oluşturma
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Bir terminal açın ve AMD ROCm™ yazılımı ile PyTorch zaten yüklü olan bir venv oluşturun:
+Bir terminal açın ve AMD ROCm™ yazılımı ile PyTorch'un önceden kurulu olduğu bir venv oluşturun:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -121,7 +125,7 @@ python -m venv unsloth-env
 <!-- @device:end -->
 <!-- @os:end -->
 
-### Temel Bağımlılıkları Yükleme
+### Temel Bağımlılıkları Kurma
 <!-- @require:pytorch,driver -->
 
 <!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
@@ -143,7 +147,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 ### Ek Bağımlılıklar
 
 <!-- @os:linux -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```bash
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 ```
@@ -151,7 +155,7 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=install-deps timeout=300 setup=activate-venv -->
+<!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```powershell
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 pip install triton-windows
@@ -159,10 +163,10 @@ pip install triton-windows
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Not:** İçe aktarma sırasında Unsloth, isteğe bağlı `bitsandbytes` hızlandırma yollarını sınayabilir. Bazı ROCm sürümlerinde `bitsandbytes library load error: Configured ROCm binary not found` gibi bir mesaj görebilirsiniz. Bu kılavuz `optim="adamw_torch"` ile standart LoRA ince ayarını kullanır, dolayısıyla `bitsandbytes` optimize edicisine veya 4-bit QLoRA'ya bağımlı değiliz. Bu mesaj güvenle göz ardı edilebilir.
+> **Not:** İçe aktarma sırasında Unsloth, isteğe bağlı `bitsandbytes` hızlandırma yollarını araştırabilir. Bazı ROCm sürümlerinde `bitsandbytes library load error: Configured ROCm binary not found` gibi bir mesaj görebilirsiniz. Bu kılavuz `optim="adamw_torch"` ile standart LoRA ince ayarını kullandığından `bitsandbytes` optimize edicisine veya 4-bit QLoRA'ya güvenmiyoruz. Bu mesaj güvenle göz ardı edilebilir.
 
 <!-- @os:windows -->
-> **Not:** Windows ROCm üzerinde Unsloth, başlangıçta çeşitli uyarılar yazdıracaktır — aşağıdaki [Bilinen Uyarılar](#known-warnings) bölümüne bakın. Bunların tümü göz ardı edilmesi güvenlidir; eğitim doğru şekilde çalışır.
+> **Not:** Windows ROCm üzerinde Unsloth, başlangıçta çeşitli uyarılar yazdıracaktır — aşağıdaki [Bilinen Uyarılar](#known-warnings) bölümüne bakın. Bunların tümü güvenle göz ardı edilebilir; eğitim düzgün şekilde çalışır.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -185,9 +189,9 @@ print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
-## Unsloth İnce Ayar Betiğini İndirin
+## Unsloth İnce Ayar Betiğini İndirme
 
-Her adımı manuel olarak yürütmek yerine, bu kılavuz burada temiz, uçtan uca bir betik sunar: [test_unsloth.py](assets/test_unsloth.py).
+Her adımı manuel olarak çalıştırmak yerine, bu kılavuz burada eksiksiz, uçtan uca bir betik sağlar: [test_unsloth.py](assets/test_unsloth.py).
 
 Betiği çalıştırmak için aşağıdaki kodu çalıştırın:
 
@@ -222,19 +226,19 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-Kılavuzun geri kalanı, betiğin her bir önemli adımından kavramsal olarak geçecektir.
+Kılavuzun geri kalanı, betiğin her bir ana adımını kavramsal olarak ele alacaktır. 
 
 ## Nasıl Çalışır
 
 test_unsloth.py betiği aşağıdaki adımları gerçekleştirir:
 * **Modeli Yükle**: FastModel kullanarak unsloth/gemma-4-E4B-it'i yükler.
-* **Veriyi Hazırla**: Veri kümesini (örn. FineTome-100k) standartlaştırır ve Gemma-4 sohbet şablonunu uygular.
-* **LoRA Uygula**: Verimli eğitim için dil, dikkat (attention) ve MLP modüllerine adaptörler ekler.
-* **Eğit**: Yanıt-yalnızca kayıp maskeleme (response-only loss masking) ile SFTTrainer kullanır.
+* **Veriyi Hazırla**: Veri kümesini (ör. FineTome-100k) standartlaştırır ve Gemma-4 sohbet şablonunu uygular.
+* **LoRA Uygula**: Verimli eğitim için dil, dikkat (attention) ve MLP modüllerine bağdaştırıcılar ekler.
+* **Eğit**: Yalnızca yanıta özgü kayıp maskeleme ile SFTTrainer kullanır.
 * **Çıkarım**: Performansı doğrulamak için hızlı bir üretim testi çalıştırır.
-* **Kaydet**: LoRA adaptörlerini yerel olarak dışa aktarır.
+* **Kaydet**: LoRA bağdaştırıcılarını yerel olarak dışa aktarır.
 
-## Temel Yapılandırma
+## Anahtar Yapılandırma
 
 Çalıştırmanızı özelleştirmek için aşağıdaki sabitleri değiştirebilirsiniz:
 
@@ -245,7 +249,7 @@ DATASET_NAME = "mlabonne/FineTome-100k"
 OUTPUT_DIR = "gemma_4_lora"
 ```
 
-Model ağırlıkları yüklenirken Unsloth karşılama mesajı ve çıktısının örneği:
+Model ağırlıkları yüklenirken Unsloth karşılama mesajı ve çıktısına örnek:
 
 ![alt text](assets/welcome.png)
 
@@ -264,19 +268,18 @@ Veri kümesi:
 
 Betik, aşağıdaki parametrelerle kısa bir eğitim gösterimi çalıştırır:
 - ~50 adım
-- Küçük parti (batch) boyutu
-- Gradyan birikimi (gradient accumulation)
+- Küçük yığın (batch) boyutu
+- Gradyan biriktirme
 
-Eğitim sırasında, aşağıdaki gibi günlükler (logs) göreceksiniz:
+Eğitim sırasında şu şekilde günlükler göreceksiniz:
 
 ![alt text](assets/training.png)
 
 
 ## Kaydetme ve Dağıtım
-
 ### Yerel Kaydetme (LoRA)
 
-Betik, LoRA adaptörlerini otomatik olarak OUTPUT_DIR'e kaydeder.
+Betik, LoRA bağdaştırıcılarını otomatik olarak OUTPUT_DIR içine kaydeder.
 ```python
 model.save_pretrained("gemma_4_lora")  
 tokenizer.save_pretrained("gemma_4_lora")
@@ -315,14 +318,14 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end -->
 
-### Birleştirilmiş modeli kaydet (vLLM için)
+### Birleştirilmiş modeli kaydetme (vLLM için) 
 
 <!-- @os:windows -->
-> **Not:** vLLM Windows'u desteklemez. İnce ayarlı modelinizi Windows'ta dağıtmak için llama.cpp kullanın (aşağıdaki [GGUF Dışa Aktarma](#export-gguf-for-llamacpp) bölümüne bakın) veya birleştirilmiş modeli vLLM çalıştıran bir Linux makinesine aktarın.
+> **Not:** vLLM, Windows'u desteklemez. İnce ayarlanmış modelinizi Windows üzerinde dağıtmak için llama.cpp kullanın (aşağıdaki [GGUF Dışa Aktarma](#export-gguf-for-llamacpp) bölümüne bakın) veya birleştirilmiş modeli vLLM çalıştıran bir Linux makinesine aktarın.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-vLLM ile dağıtım için adaptörleri tam bir modele birleştirin:
+vLLM ile dağıtım için, bağdaştırıcıları tam bir modelde birleştirin:
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
@@ -362,7 +365,7 @@ print("PASS: Merged model output looks correct")
 
 ### GGUF Dışa Aktarma (llama.cpp için)
 
-Yerel çıkarım için doğrudan GGUF'a dönüştürün:
+Yerel çıkarım için doğrudan GGUF formatına dönüştürün:
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
@@ -370,24 +373,24 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 <!-- @os:windows -->
 ## Bilinen Uyarılar
 
-Bu uyarılar, Windows ROCm üzerinde Unsloth başlatılırken yazdırılır ve hepsi göz ardı edilebilir:
+Bu uyarılar, Windows ROCm üzerinde başlangıçta Unsloth tarafından yazdırılır ve tamamı göz ardı edilmesi güvenlidir:
 
 | Uyarı | Neden | Göz ardı edilmesi güvenli mi? |
 |---|---|---|
-| `bitsandbytes library load error` | bitsandbytes'ın Windows ROCm derlemesi yok | Evet — bu playbook `bnb` değil `adamw_torch` kullanır |
-| `No ROCm platform found for torch.distributed` | Windows üzerindeki ROCm'de dağıtık eğitim desteği yok | Evet — tek GPU ile eğitim bundan etkilenmez |
-| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth, Linux olmayan derlemeleri işaretler | Evet — Windows ROCm, tek GPU ile SFT için çalışır |
-| `triton is not available` | Triton'ın Windows derlemesi yok | Evet — Unsloth, PyTorch çekirdeklerine geri döner |
+| `bitsandbytes library load error` | bitsandbytes'ın Windows ROCm derlemesi yoktur | Evet — bu oyun kitabı bnb yerine `adamw_torch` kullanır |
+| `No ROCm platform found for torch.distributed` | Windows üzerindeki ROCm, dağıtık eğitimden yoksundur | Evet — tek GPU eğitimi bundan etkilenmez |
+| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth, Linux olmayan derlemeleri işaretler | Evet — Windows ROCm, tek GPU SFT için çalışır |
+| `triton is not available` | Triton'un Windows derlemesi yoktur | Evet — Unsloth, PyTorch çekirdeklerine geri döner |
 
 Bu uyarılara rağmen eğitim doğru şekilde devam edecektir.
 <!-- @os:end -->
 
 ## Sonraki Adımlar
-- Unsloth için sezgisel bir grafik arayüz olan [Unsloth Studio](https://unsloth.ai/docs/new/studio)'yu deneyin
-- Kendi özel veri kümelerinizle eğitim yapın
-- Farklı hiperparametrelerle ince ayar yapmayı deneyin
-- vLLM veya llama.cpp ile dağıtım yapın
-- Daha düşük bellek kullanımlı bir kurulum için QLoRA'yı deneyin
+- Unsloth için sezgisel bir GUI olan [Unsloth Studio](https://unsloth.ai/docs/new/studio)'yu deneyin
+- Kendi özel veri kümelerinizle eğitin
+- Farklı hiper parametrelerle ince ayar yapmayı deneyin
+- vLLM veya llama.cpp ile dağıtın
+- Daha düşük bellek kullanımına sahip bir kurulum için QLoRA'yı deneyin
 
 ## Kaynaklar
 

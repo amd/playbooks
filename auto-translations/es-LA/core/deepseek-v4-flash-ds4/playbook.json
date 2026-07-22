@@ -1,0 +1,5 @@
+{
+  "id": "deepseek-v4-flash-ds4",
+  "title": "Ejecutando DeepSeek V4 Flash con ds4",
+  "description": "Implementa DeepSeek V4 Flash de forma local usando el motor de inferencia ds4 y administra los modelos de forma interactiva con ds4-cockpit."
+}

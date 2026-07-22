@@ -1,10 +1,16 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Konfiguracija platforme
 
-Ovaj dokument opisuje očekivane konfiguracije platforme za pokretanje ovog playbook-a.
+Ovaj dokument opisuje očekivane konfiguracije platforme za pokretanje ovog priručnika (playbook).
 
 ## Preduslovi
 
-PyTorch sa ROCm podrškom je unapred instaliran na AMD Ryzen™ AI Halo Developer Platform. Za sve ostale uređaje, korisnici moraju ručno instalirati PyTorch sa ROCm podrškom. Pogledajte odgovarajući odeljak za vaš operativni sistem:
+PyTorch sa ROCm podrškom je unapred instaliran na AMD Ryzen™ AI Halo Developer Platform. Za sve ostale uređaje, korisnici moraju ručno instalirati PyTorch sa ROCm podrškom. Pogledajte relevantnu sekciju za vaš operativni sistem:
 
 ### Windows
 
@@ -22,19 +28,19 @@ PyTorch sa ROCm podrškom je unapred instaliran na AMD Ryzen™ AI Halo Develope
 
 Sledeći modeli su testirani i optimizovani za vašu platformu:
 
-| Model | Parametri | Veličina | Lokacija za preuzimanje |
+| Model | Parametri | Veličina | Lokacija preuzimanja |
 |-------|------------|------|-------------------|
 | **facebook/seamless-m4t-v2-large** | 2.3B | ~10GB | Unapred instaliran na AMD Ryzen AI Halo Developer Platform; mora se ručno instalirati na svim ostalim uređajima |
 
-Modeli će automatski biti preuzeti u keš direktorijum za Hugging Face:
+Modeli će automatski biti preuzeti u Hugging Face keš direktorijum:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
 Obezbedite najmanje **20GB slobodnog prostora** za skladištenje modela.
 
-## Zahtevi za mrežu
+## Mrežni zahtevi
 
-Početno podešavanje zahteva pristup internetu za preuzimanje modela sa Hugging Face. Nakon preuzimanja, playbook može da radi bez internet konekcije.
+Početno podešavanje zahteva pristup internetu za preuzimanje modela sa Hugging Face. Nakon preuzimanja, priručnik može da radi bez internet konekcije.
 
-- Prvo preuzimanje modela može trajati **5-10 minuta**, u zavisnosti od veličine modela i brzine konekcije
-- Modeli se lokalno keširaju i nije ih potrebno ponovo preuzimati
+- Prvo preuzimanje modela može trajati **5-10 minuta** u zavisnosti od veličine modela i brzine konekcije
+- Modeli se keširaju lokalno i ne moraju se ponovo preuzimati

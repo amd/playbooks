@@ -1,10 +1,16 @@
-# Configurarea platformei
+<!--
+Copyright Advanced Micro Devices, Inc.
 
-Acest document descrie configurațiile de platformă preconizate pentru rularea acestui playbook.
+SPDX-License-Identifier: MIT
+-->
+
+# Configurația platformei
+
+Acest document descrie configurațiile de platformă așteptate pentru rularea acestui playbook.
 
 ## Cerințe preliminare
 
-PyTorch cu suport ROCm este preinstalat pe AMD Ryzen™ AI Halo Developer Platform. Pentru toate celelalte dispozitive, utilizatorii trebuie să instaleze manual PyTorch cu suport ROCm. Vă rugăm să consultați secțiunea relevantă pentru sistemul dumneavoastră de operare:
+PyTorch cu suport ROCm este preinstalat pe AMD Ryzen™ AI Halo Developer Platform. Pentru toate celelalte dispozitive, utilizatorii trebuie să instaleze manual PyTorch cu suport ROCm. Consultați secțiunea relevantă pentru sistemul dumneavoastră de operare:
 
 
 ### Windows
@@ -35,7 +41,7 @@ Asigurați-vă că aveți cel puțin **20 GB spațiu liber** pentru stocarea mod
 
 ## Cerințe de rețea
 
-Configurarea inițială necesită acces la internet pentru a descărca modele de pe Hugging Face. După descărcare, playbook-ul poate rula offline.
+Configurarea inițială necesită acces la internet pentru a descărca modelele de pe Hugging Face. După descărcare, playbook-ul poate rula offline.
 
-- Descărcările inițiale ale modelelor pot dura **5-10 minute**, în funcție de dimensiunea modelului și viteza conexiunii
+- Prima descărcare a modelelor poate dura **5-10 minute**, în funcție de dimensiunea modelului și viteza conexiunii
 - Modelele sunt stocate local în cache și nu trebuie descărcate din nou

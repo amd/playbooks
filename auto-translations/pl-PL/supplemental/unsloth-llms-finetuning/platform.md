@@ -1,29 +1,35 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Konfiguracja platformy
 
 Ten dokument opisuje oczekiwane konfiguracje platformy do uruchamiania tego playbooka.
 
 ## Wymagania wstępne
 
-PyTorch z obsługą ROCm jest preinstalowany na AMD Ryzen™ AI Halo Developer Platform. W przypadku wszystkich innych urządzeń użytkownicy muszą ręcznie zainstalować PyTorch z obsługą ROCm. Proszę zapoznać się z odpowiednią sekcją dla swojego systemu operacyjnego:
+PyTorch z obsługą ROCm jest preinstalowany na AMD Ryzen™ AI Halo Developer Platform. W przypadku wszystkich innych urządzeń użytkownicy muszą ręcznie zainstalować PyTorch z obsługą ROCm. Zapoznaj się z odpowiednią sekcją dla swojego systemu operacyjnego:
 
 
 ### Windows
 
 | Komponent     | Wersja         | Uwagi                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.11.x + ROCm 7.13  | Preinstalowany na AMD Ryzen AI Halo Developer Platform; musi być ręcznie zainstalowany na wszystkich innych urządzeniach |
+| **PyTorch**   | 2.11.x + ROCm 7.13  | Preinstalowany na AMD Ryzen AI Halo Developer Platform; na wszystkich innych urządzeniach musi zostać zainstalowany ręcznie |
 
 
 ### Linux
 
 | Komponent     | Wersja         | Uwagi                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.11.x + ROCm 7.13   | Preinstalowany na AMD Ryzen AI Halo Developer Platform; musi być ręcznie zainstalowany na wszystkich innych urządzeniach |
+| **PyTorch**   | 2.11.x + ROCm 7.13   | Preinstalowany na AMD Ryzen AI Halo Developer Platform; na wszystkich innych urządzeniach musi zostać zainstalowany ręcznie |
 
 
 ## Wymagane modele
 
-Poniższe modele zostały przetestowane i zoptymalizowane pod kątem Twojej platformy:
+Następujące modele zostały przetestowane i zoptymalizowane pod kątem Twojej platformy:
 
 | Model | Parametry | Rozmiar | Lokalizacja pobierania |
 |-------|------------|------|-------------------|
@@ -35,7 +41,7 @@ Zapewnij co najmniej **20GB wolnego miejsca** na przechowywanie modeli.
 
 ## Wymagania sieciowe
 
-Konfiguracja początkowa wymaga dostępu do internetu w celu pobrania modeli z Hugging Face. Po pobraniu playbook może działać offline.
+Wstępna konfiguracja wymaga dostępu do internetu w celu pobrania modeli z Hugging Face. Po pobraniu playbook może działać w trybie offline.
 
-- Pierwsze pobieranie modeli może zająć **5–10 minut**, w zależności od rozmiaru modelu i szybkości połączenia
-- Modele są zapisywane lokalnie w pamięci podręcznej i nie muszą być pobierane ponownie
+- Pierwsze pobieranie modeli może zająć **5-10 minut**, w zależności od rozmiaru modelu i prędkości połączenia
+- Modele są zapisywane lokalnie w pamięci podręcznej i nie wymagają ponownego pobierania

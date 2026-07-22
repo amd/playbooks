@@ -13,24 +13,48 @@ SPDX-License-Identifier: MIT
 
 Tento tutoriál poskytuje krok za krokem příklady pro doladění (fine-tuning) velkého jazykového modelu (LLM) pomocí PyTorch a ROCm. Zahrnuje několik technik, od standardního doladění až po paměťově efektivní strategie Parameter-Efficient Fine-Tuning (PEFT), takže můžete modely snadno přizpůsobit svým potřebám.
 
-**Použitý model**: google/gemma-3-4b-it  *(pokud je model uzamčený, viz [Povolení HF autentizace](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models))*  
+**Použitý model**: google/gemma-3-4b-it  *(pokud je model uzamčený (gated), viz [Povolení autentizace HF](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models))*  
 **Hardware**: GPU AMD Radeon™ s podporou ROCm  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
-> **Poznámka:** Můžete také vyzkoušet další architektury modelů, včetně **GPT-OSS-20B**, nahrazením modelu v poskytnutých trénovacích skriptech.
-> Úplné doladění vyžaduje alespoň 32 GB paměti GPU a 64 GB systémové paměti RAM.
+> **Poznámka:** 
+> - Úplné doladění (full fine-tuning) vyžaduje alespoň **64 GB systémové paměti RAM**, z toho alespoň **32 GB dostupných pro GPU** (těchto 32 GB je součástí oněch 64 GB, nikoli navíc).
+> - Můžete také vyzkoušet jiné architektury modelů, včetně **GPT-OSS-20B**, nahrazením modelu v poskytnutých trénovacích skriptech.
 <!-- @device:end -->
 
-<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
-> **Poznámka:** Doladění pomocí LoRA a QLoRA vyžaduje alespoň 16 GB paměti GPU a 32 GB systémové paměti RAM.
+
+<!-- @device:stx,krk -->
+<!-- @os:linux -->
+> **Poznámka:** Doladění pomocí LoRA a QLoRA vyžaduje alespoň **32 GB systémové paměti RAM**, z toho alespoň **16 GB dostupných pro GPU** (těchto 16 GB je součástí oněch 32 GB, nikoli navíc).
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Poznámka:** Doladění pomocí LoRA vyžaduje alespoň **32 GB systémové paměti RAM**, z toho alespoň **16 GB dostupných pro GPU** (těchto 16 GB je součástí oněch 32 GB, nikoli navíc).
+<!-- @os:end -->
+<!-- @device:end -->
+
+
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @os:linux -->
+> **Poznámka:** Doladění pomocí LoRA a QLoRA vyžaduje grafickou kartu s alespoň **16 GB vyhrazené paměti GPU** a **32 GB systémové paměti RAM**.
+> - V systému Linux probíhá trénování zcela ve vyhrazené paměti VRAM grafické karty.
+> - Nedochází k přechodu na sdílenou paměť GPU (systémovou RAM), když dojde VRAM.
+> - Kartám s méně než 16 GB vyhrazené VRAM dojde během trénování v systému Linux paměť, i když má systém dostatek RAM.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Poznámka:** Doladění pomocí LoRA vyžaduje alespoň **16 GB celkové paměti GPU** a **32 GB systémové paměti RAM**.
+> - Ve Windows kombinuje celková paměť GPU vyhrazenou VRAM grafické karty se sdílenou pamětí GPU (vypůjčenou ze systémové RAM).
+> - Karty s méně než 16 GB vyhrazené VRAM proto mohou tento playbook stále spustit, protože rozdíl doplní sdílená paměť GPU.
+<!-- @os:end -->
 <!-- @device:end -->
 
 ## Co se naučíte
 
-- Jak doladit LLM pomocí LoRA, QLoRA a úplného doladění s PyTorch a ROCm
-- Jak uložit a nasadit doladěný model
-- Jak sledovat trénink a řešit běžné problémy
+- Jak doladit LLM pomocí LoRA, QLoRA a úplného doladění (full fine-tuning) s PyTorch a ROCm
+- Jak uložit a nasadit svůj doladěný model
+- Jak sledovat trénování a ladit běžné problémy
 
 ## Nastavení konfigurace paměti
 
@@ -38,7 +62,7 @@ Tento tutoriál poskytuje krok za krokem příklady pro doladění (fine-tuning)
 
 <!-- @device:halo_box -->
 ## Kontrola aktualizací softwaru
-> **Poznámka**: Pokud VS Code není nainstalován, můžete jej nainstalovat pomocí Ryzen AI Developer Center.
+> **Poznámka**: Pokud není VS Code nainstalován, můžete jej nainstalovat pomocí Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -115,7 +139,7 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandb
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** Zde jsou testovány a podporovány pouze základní balíčky. **bitsandbytes není na Windows dobře podporován**, takže instalace pro Windows jej vynechává; na Windows použijte LoRA nebo úplné doladění (QLoRA vyžaduje bitsandbytes a je určeno pro Linux).
+**Windows:** Zde jsou testovány a podporovány pouze základní balíčky. **bitsandbytes není na Windows dobře podporován**, takže instalace pro Windows jej vynechává; na Windows použijte LoRA nebo úplné doladění (full fine-tuning) (QLoRA vyžaduje bitsandbytes a je určeno pro Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
@@ -123,12 +147,12 @@ pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate p
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Povolení HF autentizace (uzamčené nebo vlastní / nepředinstalované modely)
+#### Povolení autentizace HF (uzamčené nebo vlastní / nepředinstalované modely)
 
 V tomto příkladu používáme **google/gemma-3-4b-it**, což je **uzamčený (gated)** model. Musíte přijmout podmínky modelu na Hugging Face a poté se autentizovat, aby trénovací skripty mohly model stáhnout.
 
 1. **Přijměte licenci:** Otevřete [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), přihlaste se (nebo si vytvořte účet) a přijměte licenci/podmínky na stránce modelu (např. „Agree and access repository“).
-2. **Instalace a přihlášení:** Nainstalujte Hugging Face CLI a poté spusťte standardní přihlášení:
+2. **Nainstalujte a přihlaste se:** Nainstalujte Hugging Face CLI a poté spusťte standardní přihlášení:
 
 ```bash
 pip install huggingface_hub
@@ -236,9 +260,9 @@ sys.exit(r.returncode)
 
 ### Co je LoRA?
 
-**LoRA (Low-Rank Adaptation)** ponechává základní model zmrazený a trénuje pouze malé „adaptérové“ matice, které se přidávají k určitým vrstvám.
+**LoRA (Low-Rank Adaptation)** ponechává základní model zmrazený a trénuje pouze malé „adaptérové“ matice, které se přidávají k určitým vrstvám. 
 
-- **Klíčová myšlenka**: místo aktualizace obrovské váhové matice s miliony parametrů se naučíme aktualizaci s nízkou hodností (dvě malé matice, jejichž součin má mnohem méně parametrů). To přináší výrazné snížení počtu trénovatelných parametrů a spotřeby VRAM, přičemž si zachovává většinu kvality úplného doladění.
+- **Klíčová myšlenka**: místo aktualizace obrovské váhové matice s miliony parametrů se učíme aktualizaci s nízkou hodností (dvě malé matice, jejichž součin má mnohem méně parametrů). To přináší výrazné snížení počtu trénovatelných parametrů a nároků na VRAM, přičemž je zachována většina kvality úplného doladění (full fine-tuning).
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -253,7 +277,7 @@ W_updated = W + B × A
 
 ### Co je QLoRA?
 
-**QLoRA** kombinuje **4bitovou kvantizaci** s **LoRA**. Základní model se načte ve 4bitovém formátu (velká úspora paměti) a pouze adaptéry LoRA se trénují ve vyšší přesnosti. Získáte tak parametrickou efektivitu LoRA a mnohem nižší spotřebu VRAM, s malým kompromisem v kvalitě ve srovnání s LoRA v plné přesnosti. Upozorňujeme, že 4bitová kvantizace může způsobit numerické nestability (výkyvy ztráty nebo hodnoty NaN), takže uživatelé mohou často preferovat **LoRA**, pokud je k dispozici dostatek VRAM.
+**QLoRA** kombinuje **4bitovou kvantizaci** s **LoRA**. Základní model se načte ve 4bitové podobě (velká úspora paměti) a v přesnějším formátu se trénují pouze LoRA adaptéry. Získáte tak parametrickou efektivitu LoRA spolu s mnohem nižší spotřebou VRAM, s malým kompromisem v kvalitě oproti LoRA s plnou přesností. Upozorňujeme, že 4bitová kvantizace může způsobit numerickou nestabilitu (skoky ve ztrátové funkci nebo hodnoty NaN), takže uživatelé mohou často upřednostnit **LoRA**, pokud je k dispozici dostatek VRAM.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -261,54 +285,54 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **Poznámka**: Pro základní modely MXFP4, jako je `openai/gpt-oss-20b`, doporučujeme použít **LoRA** (`train_lora.py`) místo QLoRA. 4bitová cesta `bitsandbytes` ve skriptu QLoRA obvykle dekvantizuje váhy MXFP4 na BF16, takže běh se chová jako standardní LoRA. Nativní MXFP4 vyžaduje `bitsandbytes` sestavený ze zdrojového kódu spolu s odpovídajícím zásobníkem Transformers/Triton/kernels. Viz [dokumentaci Transformers k MXFP4](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Poznámka**: U základních modelů MXFP4, jako je `openai/gpt-oss-20b`, doporučujeme použít **LoRA** (`train_lora.py`) místo QLoRA. 4bitová cesta `bitsandbytes` ve skriptu QLoRA obvykle dekvantizuje váhy MXFP4 na BF16, takže se běh chová jako standardní LoRA. Nativní MXFP4 vyžaduje `bitsandbytes` sestavené ze zdrojového kódu spolu s odpovídající sadou Transformers/Triton/kernels. Viz [dokumentace Transformers MXFP4](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
-
-### 2. Vyberte si metodu
+### 2. Zvolte metodu
 
 | Metoda | Paměť | Rychlost | Kvalita | Nejvhodnější pro |
 |--------|--------|-------|---------|----------|
-| **QLoRA** (pouze Linux) | 12–16 GB | Nejrychlejší | 90–95 % | Nízké využití paměti |
-| **LoRA** | 24–32 GB | Rychlé | 95–98 % | Vyvážený přístup |
-| **Úplné** | 80 GB+ | Nejpomalejší | 100 % | Maximální kvalita |
-### 3. Spuštění trénování
+| **QLoRA** (pouze Linux) | 12-16GB | Nejrychlejší | 90-95 % | Nízkou spotřebu paměti |
+| **LoRA** | 24-32GB | Rychlá | 95-98 % | Vyvážený přístup |
+| **Full** | 80GB+ | Nejpomalejší | 100 % | Maximální kvalitu |
 
-**Dataset a co se model naučí**  
-Skripty převádějí dataset na příklady chatu. Například skript QLoRA používá **Abirate/english_quotes**: každý příklad se stane dvojicí uživatel–asistent, například:
+### 3. Spusťte trénování
+
+**Datová sada a co se model naučí**  
+Skripty převádějí datovou sadu na příklady konverzace. Například skript QLoRA používá **Abirate/english_quotes**: každý příklad se stane dvojicí uživatel–asistent, například:
 
 - **Uživatel:** „Give me a quote about: &lt;tag&gt;“
 - **Asistent:** „&lt;quote&gt; – &lt;author&gt;“
 
-Doladění učí model reagovat na výzvy žádající citáty na dané téma a vracet je ve formátu `<quote text> - <author>`. Skripty LoRA a full fine-tuning používají **databricks/databricks-dolly-15k** (obecné dvojice instrukce/odpověď), takže konkrétní úkol se liší podle skriptu; myšlenka je stejná – přizpůsobit model vámi zvolenému datasetu a formátu.
+Doladění (fine-tuning) naučí model reagovat na výzvy žádající citáty na dané téma a vracet je ve formátu `<quote text> - <author>`. Skripty LoRA a plné doladění používají **databricks/databricks-dolly-15k** (obecné dvojice instrukce/odpověď), takže se konkrétní úloha podle skriptu liší; princip je ale stejný – přizpůsobit model vaší zvolené datové sadě a formátu.
 
 Níže je shrnutí dostupných metod trénování. Každá metoda odkazuje na svůj skript a obsahuje stručný popis pro výběr správného přístupu.
 
 | Skript                           | Metoda            | Popis                                                                                                         | Typická VRAM | Doporučeno pro                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trénuje malé adaptérové matice při zmrazení základního modelu. 3–5x rychlejší; ~95–98 % kvality plného trénování.                         | 24–32GB      | Pokročilí uživatelé; více adaptérů; více VRAM    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(pouze Linux)*             | **QLoRA**       | 4bitová kvantizace + adaptéry LoRA. Nejnižší nároky na paměť, nejrychlejší, malý kompromis v kvalitě. Vyžaduje `bitsandbytes` (pouze Linux).                            | 12–16GB      | Většina uživatelů; rychlé experimenty; omezená VRAM      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Aktualizuje všechny parametry modelu. Maximální kvalita; nejvyšší nároky na paměť a výpočetní výkon.                                    | 40GB+        | Maximální kvalita; výzkum; velká VRAM           |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trénuje malé adaptérové matice při zmrazeném základním modelu. 3–5x rychlejší; ~95–98 % kvality plného doladění.                         | 24–32GB      | Pokročilé uživatele; více adaptérů; více VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(pouze Linux)*             | **QLoRA**       | 4bitová kvantizace + adaptéry LoRA. Nejnižší spotřeba paměti, nejrychlejší, malý kompromis v kvalitě. Vyžaduje `bitsandbytes` (pouze Linux).                            | 12–16GB      | Většinu uživatelů; rychlé experimenty; omezenou VRAM      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Plné doladění** | Aktualizuje všechny parametry modelu. Maximální kvalita; nejvyšší nároky na paměť a výpočetní výkon.                                    | 40GB+        | Maximální kvalitu; výzkum; velkou VRAM           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Poznámka:** Full fine-tuning (`train_full_finetuning.py`) může vyžadovat více než 64GB systémové RAM a na tomto zařízení nemusí být proveditelný. Zvažte místo toho použití LoRA nebo QLoRA.
+> **Poznámka:** Plné doladění (`train_full_finetuning.py`) může vyžadovat více než 64GB systémové paměti RAM a na tomto zařízení nemusí být proveditelné. Zvažte místo toho použití LoRA nebo QLoRA.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Poznámka:** Full fine-tuning (`train_full_finetuning.py`) může vyžadovat více než 64GB systémové RAM a na tomto zařízení nemusí být proveditelný. Zvažte místo toho použití LoRA.
+> **Poznámka:** Plné doladění (`train_full_finetuning.py`) může vyžadovat více než 64GB systémové paměti RAM a na tomto zařízení nemusí být proveditelné. Zvažte místo toho použití LoRA.
 <!-- @os:end -->
 <!-- @device:end -->
 
-Jednoduše vyberte preferovanou `Training method`, stáhněte odpovídající skript a spusťte jej pomocí příkazu při zachování aktivovaného virtuálního prostředí: 
+Jednoduše vyberte preferovanou `Training method`, stáhněte odpovídající skript a spusťte jej příkazem s aktivovaným virtuálním prostředím: 
 
 ```python
 python3 train_<method_name>.py.
 ```
 
-## Použití vašeho doladěného modelu
+## Používání vašeho doladěného modelu
 
-### Po Full Fine-Tuning
+### Po plném doladění
 
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -359,10 +383,10 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 
 **Poznámka:**  
 - Ujistěte se, že název adresáře modelu (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) odpovídá vaší skutečné výstupní složce z trénování.  
-- Pokud jste místo QLoRA použili LoRA, jednoduše nahraďte cestu odpovídajícím způsobem.  
-- Některé modely Gemma vyžadují uvedení `trust_remote_code=True` ve `from_pretrained`; přidejte, pokud se zobrazí související varování.
+- Pokud jste použili LoRA místo QLoRA, jednoduše odpovídajícím způsobem nahraďte cestu.  
+- Některé modely Gemma vyžadují specifikaci `trust_remote_code=True` v `from_pretrained`; přidejte ji, pokud uvidíte související varování.
 
-Pro další vlastní nastavení (padding tokeny, zařízení atd.) se podívejte do skriptu, který jste použili k trénování.
+Další vlastní nastavení (padding tokens, zařízení atd.) naleznete ve skriptu, který jste použili pro trénování.
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -458,9 +482,9 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ## Průvodce přizpůsobením
 
-### Použití vlastního datasetu
+### Použití vlastní datové sady
 
-Všechny skripty používají stejný formát datasetu. Nahraďte sekci pro načítání:
+Všechny skripty používají stejný formát datové sady. Nahraďte sekci načítání:
 
 ```python
 from datasets import load_dataset
@@ -486,7 +510,7 @@ def format_instruction(example):
 dataset = dataset.map(format_instruction)
 ```
 
-**Formát datasetu pro lokální soubor JSON/JSONL:**
+**Formát datové sady pro místní soubor JSON/JSONL:**
 
 Při použití této metody se ujistěte, že vaše soubory JSON mají správnou strukturu, aby nedocházelo k chybám při analýze. 
 
@@ -505,15 +529,15 @@ Je nutné dodržet následující pokyny:
   }
 ]
 ```
-**Formát datasetu pro dataset Hugging Face Hub**
+**Formát datové sady pro datovou sadu Hugging Face Hub**
 
-Při využívání datasetů z Hugging Face se ujistěte, že jsou vaše datasety správně strukturovány, aby byla zajištěna bezproblémová integrace. 
+Při použití datových sad z Hugging Face se ujistěte, že jsou vaše datové sady strukturovány správně, aby byla zajištěna bezproblémová integrace. 
 
-Měly by být dodrženy následující pokyny:
-* **Dvojice instrukce-odpověď:** Zaměřte se na datasety, které obsahují dvojici `instruction-response`. Tato struktura je nezbytná pro zamýšlenou funkčnost.
-* **Úprava vlastního klíče:** Pokud váš dataset neodpovídá struktuře `instruction-response`, máte možnost upravit funkci `format_instruction()`. To vám umožní přizpůsobit se konkrétním klíčům dle potřeby.
+Měli byste dodržet následující pokyny:
+* **Dvojice instrukce–odpověď:** Zaměřte se na datové sady, které obsahují dvojici `instruction-response`. Tato struktura je nezbytná pro zamýšlenou funkčnost.
+* **Úprava vlastních klíčů:** Pokud vaše datová sada neodpovídá struktuře `instruction-response`, máte možnost upravit funkci `format_instruction()`. To vám umožní přizpůsobit se konkrétním klíčům podle potřeby.
 
-Příklad úpravy: V případech, kdy je potřeba upravit výstup datasetu, můžete upravit sekci odpovědi ve funkci format_instruction() tak, aby vyhovovala vašim požadavkům.
+Příklad úpravy: V případech, kdy je potřeba upravit výstup datové sady, můžete upravit sekci odpovědi ve funkci format_instruction() tak, aby vyhovovala vašim požadavkům.
 ```python
 def format_instruction(example):
     return {
@@ -523,9 +547,9 @@ def format_instruction(example):
         ]
     }
 ```
-**Formát datasetu pro soubor CSV**
+**Formát datové sady pro soubor CSV**
 
-Aby skript mohl použít formát souboru CSV, musíte zajistit, že soubor CSV obsahuje sloupce s názvem `instruction` a `response`. 
+Aby skript mohl pracovat s formátem souboru CSV, musíte zajistit, že soubor CSV obsahuje sloupce nazvané `instruction` a `response`. 
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
@@ -534,11 +558,10 @@ instruction,response
 
 ### Úprava parametrů trénování
 
-Upravte trénovací skript a změňte proměnné tak, aby odpovídaly vašim cílům: **learning rate** (`LR`), **počet epoch** (`EPOCHS`), **velikost dávky** (`BATCH_SIZE`), **akumulace gradientu** (`GRAD_ACCUM_STEPS`) a pro LoRA/QLoRA **rank** (`LORA_R`). Pro rychlejší běhy použijte méně epoch a vyšší learning rate (LR); pro lepší kvalitu použijte více epoch a nižší LR. Pokud narazíte na chyby nedostatku paměti, snižte velikost dávky nebo délku sekvence.
-
+Upravte skript trénování a změňte proměnné podle svých cílů: **learning rate** (`LR`), **počet epoch** (`EPOCHS`), **velikost dávky** (`BATCH_SIZE`), **akumulace gradientů** (`GRAD_ACCUM_STEPS`) a pro LoRA/QLoRA **rank** (`LORA_R`). Pro rychlejší běhy použijte méně epoch a vyšší learning rate (LR); pro lepší kvalitu použijte více epoch a nižší LR. Pokud narazíte na chyby způsobené nedostatkem paměti, snižte velikost dávky nebo délku sekvence.
 ### Tipy pro optimalizaci paměti
 
-Pokud se setkáte s chybami nedostatku paměti:
+Pokud narazíte na chyby způsobené nedostatkem paměti:
 
 **1. Snižte velikost dávky:**
 ```python
@@ -546,7 +569,7 @@ BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
 ```
 
-**2. Snižte délku sekvence:**
+**2. Zkraťte délku sekvence:**
 ```python
 max_seq_length=256  # Instead of 512
 ```
@@ -556,14 +579,14 @@ max_seq_length=256  # Instead of 512
 Full → LoRA → QLoRA
 ```
 
-**4. Povolte Gradient Checkpointing (pouze pro full fine-tuning):**
+**4. Povolte Gradient Checkpointing (pouze u úplného doladění):**
 ```python
 model.gradient_checkpointing_enable()
 ```
 
 ---
 
-## Sledování a ladění chyb
+## Sledování a ladění
 
 ### Sledování paměti GPU
 
@@ -577,20 +600,20 @@ rocm-smi --showmeminfo vram
 
 ### (Volitelné) Sledování experimentů pomocí Weights & Biases
 
-Chcete-li zaznamenávat běhy a metriky do [Weights & Biases](https://wandb.ai):
+Pro zaznamenávání běhů a metrik do nástroje [Weights & Biases](https://wandb.ai):
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-V trénovacím skriptu nastavte `report_to="wandb"` a volitelně `run_name="your-experiment-name"` v konfiguraci traineru. Pokud nechcete používat Wandb, ponechte `report_to` na výchozí hodnotě nebo jej nastavte na `"none"`.
+Ve skriptu pro trénování nastavte `report_to="wandb"` a volitelně `run_name="your-experiment-name"` v konfiguraci traineru. Pokud nechcete používat Wandb, ponechte `report_to` na výchozí hodnotě nebo ho nastavte na `"none"`.
 
 ### Časté problémy
 
 #### Nedostatek paměti (OOM)
 
-**Řešení:** Zmenšete velikost dávky a/nebo použijte QLoRA
+**Řešení:** Snižte velikost dávky a/nebo použijte QLoRA
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16
@@ -608,20 +631,20 @@ LR = 5e-4  # Try higher
 
 #### Pomalé trénování
 
-**Řešení:** Zvyšte velikost dávky, pokud to paměť umožňuje
+**Řešení:** Pokud to paměť umožňuje, zvyšte velikost dávky
 ```python
 BATCH_SIZE = 8
 ```
 ## Další kroky
 
-Jakmile úspěšně dokončíte doladění, zvažte následující další kroky, abyste ze svého modelu vytěžili co nejvíce:
+Po úspěšném dokončení doladění zvažte následující další kroky, abyste ze svého modelu vytěžili co nejvíce:
 
-1. **Vyhodnoťte** model důkladně na testovacích datech, která nebyla použita při trénování, abyste změřili generalizaci a předešli přeučení.
-2. **Experimentujte** s různými hodnotami hyperparametrů, abyste dosáhli lepšího kompromisu mezi přesností, rychlostí a pamětí.
+1. **Vyhodnoťte** model důkladně na testovacích datech mimo trénovací sadu, abyste změřili schopnost generalizace a předešli přetrénování.
+2. **Experimentujte** s různými hodnotami hyperparametrů, abyste dosáhli lepšího poměru mezi přesností, rychlostí a spotřebou paměti.
 3. **Sledujte** všechny své experimenty (a odpovídající metriky) pomocí Weights & Biases pro reprodukovatelný výzkum.
-4. **Vyzkoušejte** trénování na vlastních datových sadách, abyste model přizpůsobili přímo svému případu užití.
+4. **Zkuste** trénovat na vlastních datových sadách, abyste model přizpůsobili přímo svému případu použití.
 5. **Nasaďte** svůj doladěný model pro rychlou inferenci pomocí efektivních backendů, jako je vLLM, na kompatibilním hardwaru.
-6. **Prozkoumejte** pokročilé techniky včetně prompt engineeringu, smíšené přesnosti a delších sekvencí.
-7. **Natrénujte** více LoRA adaptérů pro různé úlohy nebo domény a podle potřeby je zaměňujte.
+6. **Prozkoumejte** pokročilé techniky včetně prompt engineeringu, smíšené přesnosti a delších délek sekvencí.
+7. **Natrénujte** více LoRA adaptérů pro různé úlohy nebo domény a podle potřeby je přepínejte.
 
 ---

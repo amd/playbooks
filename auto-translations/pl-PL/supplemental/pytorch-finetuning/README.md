@@ -6,24 +6,48 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ten poradnik wykorzystuje specjalne znaczniki, których GitHub nie może wyrenderować. Odwiedź stronę [amd.com/playbooks](https://amd.com/playbooks), aby poprawnie wyświetlić tę treść.
+> Ten poradnik wykorzystuje specjalne tagi, których GitHub nie potrafi wyrenderować. Odwiedź [amd.com/playbooks](https://amd.com/playbooks), aby poprawnie wyświetlić tę treść.
 <!-- @github-only:end -->
 
 ## Przegląd
 
-Ten samouczek zawiera przykłady krok po kroku dotyczące dostrajania dużego modelu językowego (LLM) przy użyciu PyTorch i ROCm. Obejmuje kilka technik, od standardowego dostrajania po strategie efektywnego pod względem pamięci dostrajania parametrów (PEFT), dzięki czemu można łatwo dostosować modele do własnych potrzeb.
+Ten samouczek zawiera przykłady krok po kroku dotyczące dostrajania dużego modelu językowego (LLM) przy użyciu PyTorch i ROCm. Obejmuje kilka technik, od standardowego dostrajania po strategie efektywnego pod względem pamięci dostrajania parametrów (Parameter-Efficient Fine-Tuning, PEFT), dzięki czemu możesz łatwo dostosować modele do swoich potrzeb.
 
-**Użyty model**: google/gemma-3-4b-it  *(zobacz [Włącz uwierzytelnianie HF](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models), jeśli model jest zablokowany)*  
-**Sprzęt**: GPU AMD Radeon™ z obsługą ROCm  
+**Użyty model**: google/gemma-3-4b-it  *(zobacz [Włączanie uwierzytelniania HF](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models), jeśli model jest zablokowany)*  
+**Sprzęt**: karta graficzna AMD Radeon™ z obsługą ROCm  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
-> **Uwaga:** Możesz również wypróbować inne architektury modeli, w tym **GPT-OSS-20B**, podstawiając odpowiedni model w dostarczonych skryptach treningowych.
-> Pełne dostrajanie wymaga co najmniej 32 GB pamięci GPU i 64 GB pamięci RAM systemu.
+> **Uwaga:** 
+> - Pełne dostrajanie wymaga co najmniej **64 GB pamięci RAM systemu**, z czego co najmniej **32 GB musi być dostępne dla GPU** (32 GB stanowi część 64 GB, a nie jest dodatkiem do nich).
+> - Możesz również wypróbować inne architektury modeli, w tym **GPT-OSS-20B**, podstawiając model w dostarczonych skryptach treningowych.
 <!-- @device:end -->
 
-<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
-> **Uwaga:** Dostrajanie za pomocą LoRA i QLoRA wymaga co najmniej 16 GB pamięci GPU i 32 GB pamięci RAM systemu.
+
+<!-- @device:stx,krk -->
+<!-- @os:linux -->
+> **Uwaga:** Dostrajanie LoRA i QLoRA wymaga co najmniej **32 GB pamięci RAM systemu**, z czego co najmniej **16 GB musi być dostępne dla GPU** (16 GB stanowi część 32 GB, a nie jest dodatkiem do nich).
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Uwaga:** Dostrajanie LoRA wymaga co najmniej **32 GB pamięci RAM systemu**, z czego co najmniej **16 GB musi być dostępne dla GPU** (16 GB stanowi część 32 GB, a nie jest dodatkiem do nich).
+<!-- @os:end -->
+<!-- @device:end -->
+
+
+<!-- @device:rx7900xt,rx9070xt,r9700 -->
+<!-- @os:linux -->
+> **Uwaga:** Dostrajanie LoRA i QLoRA wymaga karty graficznej z co najmniej **16 GB dedykowanej pamięci GPU** i **32 GB pamięci RAM systemu**.
+> - W systemie Linux trening odbywa się wyłącznie w dedykowanej pamięci VRAM karty graficznej.
+> - Nie następuje przełączenie na współdzieloną pamięć GPU (pamięć RAM systemu), gdy VRAM się wyczerpie.
+> - Karty z mniej niż 16 GB dedykowanej pamięci VRAM wyczerpią pamięć podczas treningu w systemie Linux, nawet jeśli system ma dużo pamięci RAM.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Uwaga:** Dostrajanie LoRA wymaga co najmniej **16 GB całkowitej pamięci GPU** i **32 GB pamięci RAM systemu**.
+> - W systemie Windows całkowita pamięć GPU łączy dedykowaną pamięć VRAM karty graficznej ze współdzieloną pamięcią GPU (pożyczaną z pamięci RAM systemu).
+> - Dlatego karty z mniej niż 16 GB dedykowanej pamięci VRAM nadal mogą obsłużyć ten poradnik, wykorzystując współdzieloną pamięć GPU do uzupełnienia różnicy.
+<!-- @os:end -->
 <!-- @device:end -->
 
 ## Czego się nauczysz
@@ -32,20 +56,20 @@ Ten samouczek zawiera przykłady krok po kroku dotyczące dostrajania dużego mo
 - Jak zapisać i wdrożyć dostrojony model
 - Jak monitorować trening i debugować typowe problemy
 
-## Ustawianie konfiguracji pamięci
+## Konfigurowanie ustawień pamięci
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Sprawdzanie aktualizacji oprogramowania
-> **Uwaga**: Jeśli VS Code nie jest zainstalowany, możesz go zainstalować za pomocą Ryzen AI Developer Center.
+> **Uwaga**: Jeśli VS Code nie jest zainstalowane, możesz je zainstalować za pomocą Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalowanie wymagań wstępnych dotyczących oprogramowania
+## Instalowanie wymaganego oprogramowania
 
-#### Utwórz środowisko wirtualne
+#### Tworzenie środowiska wirtualnego
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
@@ -61,7 +85,7 @@ source finetune-venv/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Nadaj swojemu użytkownikowi dostęp do urządzeń GPU** (wyloguj się i zaloguj ponownie, aby zmiana zaczęła obowiązywać):
+**Przyznaj swojemu użytkownikowi dostęp do urządzeń GPU** (aby to zadziałało, wyloguj się i zaloguj ponownie):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -115,7 +139,7 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandb
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** Tutaj testowane i obsługiwane są tylko podstawowe pakiety. **bitsandbytes nie jest dobrze obsługiwane w systemie Windows**, więc instalacja dla Windows pomija ten pakiet; na Windows należy używać LoRA lub pełnego dostrajania (QLoRA wymaga bitsandbytes i jest przeznaczone dla systemu Linux).
+**Windows:** Testowane i obsługiwane są tutaj tylko podstawowe pakiety. **bitsandbytes nie jest dobrze obsługiwany w systemie Windows**, dlatego instalacja dla Windows pomija go; używaj LoRA lub pełnego dostrajania w systemie Windows (QLoRA wymaga bitsandbytes i jest przeznaczone dla systemu Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
@@ -123,12 +147,12 @@ pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate p
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Włącz uwierzytelnianie HF (modele zablokowane lub niestandardowe / nieprzygotowane wstępnie)
+#### Włączanie uwierzytelniania HF (zablokowane lub niestandardowe / nieprefabrykowane modele)
 
-W tym przykładzie używamy **google/gemma-3-4b-it**, czyli modelu **zablokowanego (gated)**. Musisz zaakceptować warunki modelu na Hugging Face, a następnie się uwierzytelnić, aby skrypty treningowe mogły go pobrać.
+W tym przykładzie używamy **google/gemma-3-4b-it**, który jest modelem **zablokowanym (gated)**. Musisz zaakceptować warunki modelu na Hugging Face, a następnie się uwierzytelnić, aby skrypty treningowe mogły go pobrać.
 
 1. **Zaakceptuj licencję:** Otwórz [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), zaloguj się (lub utwórz konto) i zaakceptuj licencję/warunki na stronie modelu (np. „Agree and access repository”).
-2. **Zainstaluj i zaloguj się:** Zainstaluj interfejs wiersza poleceń Hugging Face, a następnie uruchom standardowe logowanie:
+2. **Zainstaluj i zaloguj się:** Zainstaluj Hugging Face CLI, a następnie uruchom standardowe logowanie:
 
 ```bash
 pip install huggingface_hub
@@ -236,9 +260,9 @@ sys.exit(r.returncode)
 
 ### Czym jest LoRA?
 
-**LoRA (Low-Rank Adaptation)** zachowuje zamrożony model bazowy i trenuje jedynie niewielkie macierze „adapterów”, które są dodawane do wybranych warstw. 
+**LoRA (Low-Rank Adaptation)** utrzymuje model bazowy zamrożony i trenuje tylko małe macierze „adapterów”, które są dodawane do niektórych warstw. 
 
-- **Kluczowa idea**: zamiast aktualizować ogromną macierz wag z milionami parametrów, uczymy się aktualizacji o niskiej randze (dwie małe macierze, których iloczyn ma znacznie mniej parametrów). Daje to duże zmniejszenie liczby trenowanych parametrów i zużycia VRAM, przy jednoczesnym zachowaniu większości jakości pełnego dostrajania.
+- **Kluczowa idea**: zamiast aktualizować ogromną macierz wag z milionami parametrów, uczymy się aktualizacji o niskiej randze (dwie małe macierze, których iloczyn ma znacznie mniej parametrów). Daje to duże zmniejszenie liczby trenowalnych parametrów i zużycia VRAM, przy jednoczesnym zachowaniu większości jakości pełnego dostrajania.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -253,7 +277,7 @@ W_updated = W + B × A
 
 ### Czym jest QLoRA?
 
-**QLoRA** łączy **kwantyzację 4-bitową** z **LoRA**. Model bazowy jest wczytywany w 4 bitach (co daje duże oszczędności pamięci), a trenowane są jedynie adaptery LoRA, i to z wyższą precyzją. W ten sposób uzyskuje się efektywność parametrów LoRA oraz znacznie niższe zużycie VRAM, kosztem niewielkiego kompromisu jakościowego w porównaniu do LoRA w pełnej precyzji. Należy pamiętać, że kwantyzacja 4-bitowa może powodować niestabilności numeryczne (skoki wartości funkcji straty lub wartości NaN), dlatego użytkownicy często mogą preferować **LoRA**, jeśli dostępna jest wystarczająca ilość VRAM.
+**QLoRA** łączy **kwantyzację 4-bitową** z **LoRA**. Model bazowy jest ładowany w formacie 4-bitowym (co daje duże oszczędności pamięci), a tylko adaptery LoRA są trenowane z wyższą precyzją. Dzięki temu uzyskujesz efektywność parametryczną LoRA oraz znacznie niższe zużycie VRAM, kosztem niewielkiego kompromisu jakościowego w porównaniu z pełną precyzją LoRA. Należy pamiętać, że kwantyzacja 4-bitowa może powodować niestabilności numeryczne (skoki straty lub wartości NaN), więc użytkownicy mogą często preferować **LoRA**, jeśli dostępna jest wystarczająca ilość VRAM.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -261,46 +285,46 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **Uwaga**: W przypadku modeli bazowych MXFP4, takich jak `openai/gpt-oss-20b`, zalecamy korzystanie z **LoRA** (`train_lora.py`) zamiast QLoRA. Ścieżka 4-bitowa `bitsandbytes` w skrypcie QLoRA zazwyczaj dekwantyzuje wagi MXFP4 do BF16, więc uruchomienie zachowuje się jak standardowe LoRA. Natywne MXFP4 wymaga `bitsandbytes` zbudowanego ze źródeł oraz odpowiadającego mu stosu Transformers/Triton/kernels. Zobacz [dokumentację Transformers dotyczącą MXFP4](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Uwaga**: W przypadku bazowych modeli MXFP4, takich jak `openai/gpt-oss-20b`, zalecamy używanie **LoRA** (`train_lora.py`) zamiast QLoRA. Ścieżka 4-bitowa `bitsandbytes` w skrypcie QLoRA zazwyczaj dekwantyzuje wagi MXFP4 do BF16, więc uruchomienie zachowuje się jak standardowe LoRA. Natywny MXFP4 wymaga `bitsandbytes` zbudowanego ze źródeł oraz odpowiedniego stosu Transformers/Triton/kernels. Zobacz [dokumentację Transformers MXFP4](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
-
 ### 2. Wybierz metodę
 
 | Metoda | Pamięć | Szybkość | Jakość | Najlepsze zastosowanie |
 |--------|--------|-------|---------|----------|
 | **QLoRA** (tylko Linux) | 12-16GB | Najszybsza | 90-95% | Niskie zużycie pamięci |
-| **LoRA** | 24-32GB | Szybka | 95-98% | Podejście zbalansowane |
+| **LoRA** | 24-32GB | Szybka | 95-98% | Podejście zrównoważone |
 | **Full** | 80GB+ | Najwolniejsza | 100% | Maksymalna jakość |
-### 3. Uruchom trenowanie
 
-**Zbiór danych i czego uczy się model**  
-Skrypty przekształcają zbiór danych w przykłady konwersacji. Na przykład skrypt QLoRA korzysta z **Abirate/english_quotes**: każdy przykład staje się parą użytkownik–asystent, np.:
+### 3. Uruchom trening
 
-- **Użytkownik:** „Podaj cytat na temat: &lt;tag&gt;”
+**Zbiór danych i to, czego uczy się model**  
+Skrypty przekształcają zbiór danych w przykłady czatu. Na przykład skrypt QLoRA korzysta ze zbioru **Abirate/english_quotes**: każdy przykład staje się parą użytkownik–asystent, na przykład:
+
+- **Użytkownik:** „Podaj mi cytat na temat: &lt;tag&gt;”
 - **Asystent:** „&lt;cytat&gt; – &lt;autor&gt;”
 
-Dostrajanie uczy model odpowiadania na prompty z prośbą o cytaty na dany temat i zwracania ich w formacie `<quote text> - <author>`. Skrypty LoRA i pełnego dostrajania korzystają z **databricks/databricks-dolly-15k** (ogólne pary instrukcja/odpowiedź), więc dokładne zadanie różni się w zależności od skryptu; idea pozostaje ta sama - dostosuj model do wybranego zbioru danych i formatu.
+Dostrajanie uczy model odpowiadania na prompty proszące o cytaty na dany temat i zwracania ich w formacie `<treść cytatu> - <autor>`. Skrypty LoRA i pełnego dostrajania korzystają ze zbioru **databricks/databricks-dolly-15k** (ogólne pary instrukcja/odpowiedź), więc dokładne zadanie różni się w zależności od skryptu; idea jest jednak taka sama – dostosowanie modelu do wybranego zbioru danych i formatu.
 
-Poniżej znajduje się podsumowanie dostępnych metod trenowania. Każda metoda zawiera link do swojego skryptu oraz krótki opis pomocny w wyborze odpowiedniego podejścia.
+Poniżej znajduje się podsumowanie dostępnych metod treningu. Każda metoda zawiera link do swojego skryptu oraz krótki opis pomagający wybrać odpowiednie podejście.
 
 | Skrypt                           | Metoda            | Opis                                                                                                         | Typowe zużycie VRAM | Zalecane dla                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trenuje małe macierze adapterów, zamrażając model bazowy. 3–5x szybciej; ~95–98% pełnej jakości.                         | 24–32GB      | Zaawansowani użytkownicy; wiele adapterów; więcej VRAM    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(tylko Linux)*             | **QLoRA**       | Kwantyzacja 4-bitowa + adaptery LoRA. Najniższe zużycie pamięci, najszybsze, niewielki kompromis jakości. Wymaga `bitsandbytes` (tylko Linux).                            | 12–16GB      | Większość użytkowników; szybkie eksperymenty; ograniczony VRAM      |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trenuje małe macierze adaptera, zamrażając model bazowy. 3–5 razy szybsze; ~95–98% pełnej jakości.                         | 24–32GB      | Zaawansowani użytkownicy; wiele adapterów; więcej VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(tylko Linux)*             | **QLoRA**       | Kwantyzacja 4-bitowa + adaptery LoRA. Najniższe zużycie pamięci, najszybsze, niewielki kompromis jakościowy. Wymaga `bitsandbytes` (tylko Linux).                            | 12–16GB      | Większość użytkowników; szybkie eksperymenty; ograniczony VRAM      |
 | [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Pełne dostrajanie** | Aktualizuje wszystkie parametry modelu. Maksymalna jakość; najwyższe zużycie pamięci i mocy obliczeniowej.                                    | 40GB+      | Maksymalna jakość; badania; duża ilość VRAM           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Uwaga:** Pełne dostrajanie (`train_full_finetuning.py`) może wymagać więcej niż 64GB pamięci RAM systemu i może nie być wykonalne na tym urządzeniu. Rozważ zamiast tego użycie LoRA lub QLoRA.
+> **Uwaga:** Pełne dostrajanie (`train_full_finetuning.py`) może wymagać więcej niż 64GB pamięci RAM systemu i może być niewykonalne na tym urządzeniu. Rozważ zamiast tego użycie LoRA lub QLoRA.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Uwaga:** Pełne dostrajanie (`train_full_finetuning.py`) może wymagać więcej niż 64GB pamięci RAM systemu i może nie być wykonalne na tym urządzeniu. Rozważ zamiast tego użycie LoRA.
+> **Uwaga:** Pełne dostrajanie (`train_full_finetuning.py`) może wymagać więcej niż 64GB pamięci RAM systemu i może być niewykonalne na tym urządzeniu. Rozważ zamiast tego użycie LoRA.
 <!-- @os:end -->
 <!-- @device:end -->
 
-Po prostu wybierz preferowaną `Training method`, pobierz odpowiadający jej skrypt i wykonaj go za pomocą polecenia, zachowując aktywne środowisko wirtualne: 
+Wystarczy wybrać preferowaną `Training method`, pobrać odpowiedni skrypt i uruchomić go za pomocą poniższego polecenia, zachowując aktywne środowisko wirtualne: 
 
 ```python
 python3 train_<method_name>.py.
@@ -327,7 +351,7 @@ outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-### Po trenowaniu LoRA/QLoRA
+### Po treningu LoRA/QLoRA
 
 ```python
 from peft import AutoPeftModelForCausalLM
@@ -358,11 +382,11 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **Uwaga:**  
-- Upewnij się, że nazwa katalogu modelu (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) odpowiada rzeczywistemu folderowi wyjściowemu z trenowania.  
+- Upewnij się, że nazwa katalogu modelu (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) odpowiada rzeczywistemu folderowi wyjściowemu z treningu.  
 - Jeśli użyto LoRA zamiast QLoRA, po prostu podstaw odpowiednią ścieżkę.  
-- Niektóre modele Gemma wymagają podania `trust_remote_code=True` w `from_pretrained`; dodaj tę opcję, jeśli pojawi się odpowiednie ostrzeżenie.
+- Niektóre modele Gemma wymagają podania `trust_remote_code=True` w `from_pretrained`; dodaj to, jeśli pojawi się odpowiednie ostrzeżenie.
 
-Więcej niestandardowych ustawień (tokeny wypełniające, urządzenie itp.) znajdziesz w skrypcie użytym do trenowania.
+Aby uzyskać więcej niestandardowych ustawień (tokeny wypełniające, urządzenie itp.), zapoznaj się ze skryptem użytym do treningu.
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -488,11 +512,11 @@ dataset = dataset.map(format_instruction)
 
 **Format zbioru danych dla lokalnego pliku JSON/JSONL:**
 
-Korzystając z tej metody, upewnij się, że pliki JSON są prawidłowo skonstruowane, aby uniknąć błędów analizy. 
+Korzystając z tej metody, upewnij się, że pliki JSON są poprawnie ustrukturyzowane, aby uniknąć błędów parsowania. 
 
 Należy przestrzegać następujących wytycznych:
-* **Formatowanie pliku:** Pliki JSON powinny być sformatowane w zintegrowanym środowisku programistycznym (IDE), aby zapewnić prawidłową strukturę i składnię.
-* **Wymagane klucze:** Niestandardowy plik JSON musi zawierać klucze `instruction` i `response`. Klucze te są niezbędne do prawidłowego działania metody.
+* **Formatowanie pliku:** Pliki JSON powinny być formatowane w zintegrowanym środowisku programistycznym (IDE), aby zapewnić prawidłową strukturę i składnię.
+* **Wymagane klucze:** Niestandardowy plik JSON musi zawierać klucze `instruction` i `response`. Te klucze są niezbędne do prawidłowego działania metody.
 ```json
 [
   {
@@ -507,13 +531,13 @@ Należy przestrzegać następujących wytycznych:
 ```
 **Format zbioru danych dla zbioru danych Hugging Face Hub**
 
-Korzystając ze zbiorów danych z Hugging Face, upewnij się, że są one poprawnie skonstruowane, aby ułatwić bezproblemową integrację. 
+Korzystając ze zbiorów danych z Hugging Face, upewnij się, że są one poprawnie ustrukturyzowane, aby umożliwić bezproblemową integrację. 
 
 Należy przestrzegać następujących wytycznych:
-* **Para instrukcja-odpowiedź:** Skup się na zbiorach danych zawierających parę `instruction-response`. Ta struktura jest niezbędna do prawidłowego działania.
-* **Modyfikacja niestandardowych kluczy:** Jeśli zbiór danych nie jest zgodny ze strukturą `instruction-response`, masz możliwość zmodyfikowania funkcji `format_instruction()`. Pozwala to dostosować się do konkretnych kluczy w razie potrzeby.
+* **Para instrukcja-odpowiedź:** Skoncentruj się na zbiorach danych zawierających parę `instruction-response`. Taka struktura jest niezbędna do prawidłowego działania.
+* **Modyfikacja niestandardowych kluczy:** Jeśli Twój zbiór danych nie jest zgodny ze strukturą `instruction-response`, masz możliwość zmodyfikowania funkcji `format_instruction()`. Pozwala to na dostosowanie do konkretnych kluczy w razie potrzeby.
 
-Przykładowe dostosowanie: W przypadkach, gdy wynik zbioru danych wymaga dostosowania, możesz zmodyfikować sekcję odpowiedzi w funkcji format_instruction(), aby dopasować ją do swoich wymagań.
+Przykładowa modyfikacja: W przypadkach, gdy wynik zbioru danych wymaga dostosowania, można zmodyfikować sekcję odpowiedzi w funkcji format_instruction(), aby dopasować ją do swoich wymagań.
 ```python
 def format_instruction(example):
     return {
@@ -525,22 +549,21 @@ def format_instruction(example):
 ```
 **Format zbioru danych dla pliku CSV**
 
-Aby dostosować skrypt do formatu pliku CSV, musisz upewnić się, że plik CSV zawiera kolumny o nazwach `instruction` i `response`. 
+Aby dostosować skrypt do formatu pliku CSV, należy upewnić się, że plik CSV zawiera kolumny o nazwach `instruction` i `response`. 
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
 "Your second instruction here","Expected response here"
 ```
 
-### Dostosuj parametry trenowania
+### Dostosuj parametry treningu
 
-Edytuj skrypt trenujący i zmień zmienne, aby dopasować je do swoich celów: **współczynnik uczenia** (`LR`), **liczba epok** (`EPOCHS`), **rozmiar wsadu** (`BATCH_SIZE`), **akumulacja gradientu** (`GRAD_ACCUM_STEPS`) oraz w przypadku LoRA/QLoRA **ranga** (`LORA_R`). Aby przyspieszyć działanie, użyj mniejszej liczby epok i wyższego współczynnika uczenia (LR); aby uzyskać lepszą jakość, użyj większej liczby epok i niższego LR. Zmniejsz rozmiar wsadu lub długość sekwencji, jeśli napotkasz błędy braku pamięci.
-
+Edytuj skrypt treningowy i zmień zmienne, aby dopasować je do swoich celów: **współczynnik uczenia** (`LR`), **liczba epok** (`EPOCHS`), **rozmiar wsadu** (`BATCH_SIZE`), **akumulacja gradientu** (`GRAD_ACCUM_STEPS`) oraz dla LoRA/QLoRA **ranga** (`LORA_R`). Aby uzyskać szybsze uruchomienia, użyj mniejszej liczby epok i wyższego współczynnika uczenia (LR); aby uzyskać lepszą jakość, użyj większej liczby epok i niższego LR. Zmniejsz rozmiar wsadu lub długość sekwencji, jeśli wystąpią błędy braku pamięci.
 ### Wskazówki dotyczące optymalizacji pamięci
 
 Jeśli napotkasz błędy braku pamięci:
 
-**1. Zmniejsz rozmiar wsadu:**
+**1. Zmniejsz rozmiar batcha:**
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
@@ -556,7 +579,7 @@ max_seq_length=256  # Instead of 512
 Full → LoRA → QLoRA
 ```
 
-**4. Włącz punkty kontrolne gradientu (tylko pełne dostrajanie):**
+**4. Włącz Gradient Checkpointing (tylko przy pełnym dostrajaniu):**
 ```python
 model.gradient_checkpointing_enable()
 ```
@@ -575,7 +598,7 @@ watch -n 1 amd-smi
 rocm-smi --showmeminfo vram
 ```
 
-### (Opcjonalnie) Śledzenie eksperymentów za pomocą Weights & Biases
+### (Opcjonalnie) Śledź eksperymenty za pomocą Weights & Biases
 
 Aby rejestrować przebiegi i metryki w [Weights & Biases](https://wandb.ai):
 
@@ -584,7 +607,7 @@ pip install wandb
 wandb login
 ```
 
-W skrypcie treningowym ustaw `report_to="wandb"` oraz opcjonalnie `run_name="your-experiment-name"` w konfiguracji trenera. Jeśli nie chcesz korzystać z Wandb, pozostaw `report_to` z wartością domyślną lub ustaw ją na `"none"`.
+W skrypcie treningowym ustaw `report_to="wandb"` oraz opcjonalnie `run_name="your-experiment-name"` w konfiguracji trenera. Jeśli nie chcesz korzystać z Wandb, pozostaw `report_to` na wartości domyślnej lub ustaw ją na `"none"`.
 
 ### Typowe problemy
 
@@ -614,14 +637,14 @@ BATCH_SIZE = 8
 ```
 ## Kolejne kroki
 
-Po pomyślnym zakończeniu dostrajania warto rozważyć poniższe kolejne kroki, aby jeszcze lepiej wykorzystać swój model:
+Po pomyślnym zakończeniu dostrajania rozważ poniższe kolejne kroki, aby uzyskać więcej ze swojego modelu:
 
-1. **Oceń** dokładnie na wydzielonych danych testowych, aby zmierzyć zdolność uogólniania i uniknąć przeuczenia.
-2. **Eksperymentuj**, testując różne wartości hiperparametrów w celu uzyskania lepszych kompromisów między dokładnością, szybkością a zużyciem pamięci.
+1. **Oceń** dokładnie na wydzielonych danych testowych, aby zmierzyć zdolność do generalizacji i uniknąć przeuczenia.
+2. **Eksperymentuj**, wypróbowując różne wartości hiperparametrów w celu uzyskania lepszej dokładności, szybkości i kompromisów pamięciowych.
 3. **Śledź** wszystkie swoje eksperymenty (i odpowiadające im metryki) za pomocą Weights & Biases, aby zapewnić powtarzalność badań.
 4. **Wypróbuj** trenowanie na własnych, niestandardowych zbiorach danych, aby dostosować model specjalnie do swojego przypadku użycia.
-5. **Wdróż** swój dostrojony model do szybkiego wnioskowania, korzystając z wydajnych backendów, takich jak vLLM, na zgodnym sprzęcie.
+5. **Wdróż** swój dostrojony model do szybkiego wnioskowania, korzystając z wydajnych backendów, takich jak vLLM, na kompatybilnym sprzęcie.
 6. **Poznaj** zaawansowane techniki, w tym inżynierię promptów, precyzję mieszaną (mixed precision) oraz dłuższe długości sekwencji.
-7. **Trenuj** wiele adapterów LoRA dla różnych zadań lub domen i zamieniaj je w razie potrzeby.
+7. **Wytrenuj** wiele adapterów LoRA dla różnych zadań lub dziedzin i zamieniaj je w razie potrzeby.
 
 ---

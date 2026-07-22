@@ -1,0 +1,5 @@
+{
+  "id": "hermes-lemonade-server",
+  "title": "Lemonade Serverでローカルに実行するHermes Agent",
+  "description": "Hermes Agentの自律型AIエージェントをインストールおよび設定し、Lemonade Serverをそのローカルバックエンドとして使用します。"
+}

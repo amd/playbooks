@@ -1,40 +1,46 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
 # Platform Configuration
 
-Bu belge, bu playbook'u çalıştırmak için beklenen platform yapılandırmalarını açıklamaktadır.
+Bu belge, bu playbook'u çalıştırmak için beklenen platform yapılandırmalarını açıklar.
 
-## Ön Koşullar
+## Prerequisites
 
-ROCm desteğine sahip PyTorch, AMD Ryzen™ AI Halo Developer Platform üzerinde önceden yüklenmiştir. Diğer tüm cihazlarda kullanıcıların ROCm desteğine sahip PyTorch'u manuel olarak yüklemesi gerekir. Lütfen işletim sisteminize uygun bölüme bakın:
+ROCm desteğine sahip PyTorch, AMD Ryzen™ AI Halo Developer Platform üzerinde önceden yüklenmiştir. Diğer tüm cihazlarda kullanıcıların ROCm destekli PyTorch'u manuel olarak yüklemesi gerekir. Lütfen işletim sisteminize uygun bölüme bakın:
 
 ### Windows
 
-| Bileşen     | Sürüm         | Notlar                             |
+| Component     | Version         | Notes                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 veya daha yeni    | AMD Ryzen AI Halo Developer Platform üzerinde önceden yüklenmiştir; diğer tüm cihazlarda manuel olarak yüklenmelidir |
+| **PyTorch**   | 2.8 or newer    | AMD Ryzen AI Halo Developer Platform üzerinde önceden yüklüdür; diğer tüm cihazlarda manuel olarak yüklenmelidir |
 
 ### Linux
 
-| Bileşen     | Sürüm         | Notlar                             |
+| Component     | Version         | Notes                             |
 |---------------|-----------------|-----------------------------------|
-| **PyTorch**   | 2.8 veya daha yeni    | AMD Ryzen AI Halo Developer Platform üzerinde önceden yüklenmiştir; diğer tüm cihazlarda manuel olarak yüklenmelidir |
+| **PyTorch**   | 2.8 or newer    | AMD Ryzen AI Halo Developer Platform üzerinde önceden yüklüdür; diğer tüm cihazlarda manuel olarak yüklenmelidir |
 
-## Gerekli Modeller
+## Required Models
 
 Aşağıdaki modeller platformunuz için test edilmiş ve optimize edilmiştir:
 
-| Model | Parametreler | Boyut | İndirme Konumu |
+| Model | Parameters | Size | Download Location |
 |-------|------------|------|-------------------|
-| **facebook/seamless-m4t-v2-large** | 2.3B | ~10GB | AMD Ryzen AI Halo Developer Platform üzerinde önceden yüklenmiştir; diğer tüm cihazlarda manuel olarak yüklenmelidir |
+| **facebook/seamless-m4t-v2-large** | 2.3B | ~10GB | AMD Ryzen AI Halo Developer Platform üzerinde önceden yüklüdür; diğer tüm cihazlarda manuel olarak yüklenmelidir |
 
-Modeller otomatik olarak Hugging Face önbellek dizinine indirilecektir:
+Modeller, Hugging Face önbellek dizinine otomatik olarak indirilecektir:
 - **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
 - **Linux**: `~/.cache/huggingface/hub/`
 
-Model depolama için en az **20 GB boş alan** ayırdığınızdan emin olun.
+Model depolama için en az **20GB boş alan** olduğundan emin olun.
 
-## Ağ Gereksinimleri
+## Network Requirements
 
-İlk kurulum, Hugging Face'ten model indirmek için internet erişimi gerektirir. İndirme işleminden sonra playbook çevrimdışı olarak çalışabilir.
+İlk kurulum, Hugging Face'ten model indirmek için internet erişimi gerektirir. İndirme işleminden sonra playbook çevrimdışı olarak çalıştırılabilir.
 
 - İlk model indirmeleri, model boyutuna ve bağlantı hızına bağlı olarak **5-10 dakika** sürebilir
 - Modeller yerel olarak önbelleğe alınır ve tekrar indirilmesi gerekmez

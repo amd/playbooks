@@ -1,0 +1,5 @@
+{
+  "id": "github-slack-development-digest",
+  "title": "GitHub-to-Slack開発ダイジェストをAgent Canvasで構築する",
+  "description": "Agent Canvas、GitHub MCP、Slack MCP、およびローカルLLMダイジェストを投稿するスケジュール設定されたOpenHands自動化を構成します。"
+}

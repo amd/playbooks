@@ -6,18 +6,18 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> מדריך זה משתמש בתגיות מיוחדות ש-GitHub אינו יכול לעבד. יש לבקר בכתובת [amd.com/playbooks](https://amd.com/playbooks) כדי לצפות בתוכן זה כראוי.
+> מדריך זה משתמש בתגיות מיוחדות ש-GitHub אינו יכול לעבד. אנא בקרו בכתובת [amd.com/playbooks](https://amd.com/playbooks) כדי לצפות בתוכן זה כראוי.
 <!-- @github-only:end -->
 
 ## סקירה כללית
 
-LM Studio הוא עטיפה (wrapper) עוצמתית מבוססת ממשק גרפי עבור [llama.cpp](https://github.com/ggml-org/llama.cpp), והיא גם מספקת [נקודת קצה תואמת OpenAI](https://lmstudio.ai/docs/developer/openai-compat) להרצת מודלים באופן מקומי. LM Studio מספקת ממשק פשוט אך עוצמתי להורדה ולפריסה קלה של מודלים. LM Studio מציעה גם את Vulkan וגם את AMD ROCm™ software כמנועי backend (המכונים runtimes) עבור משתמשי AMD.
+LM Studio הוא עטיפה עוצמתית מבוססת ממשק גרפי עבור [llama.cpp](https://github.com/ggml-org/llama.cpp) והיא גם מספקת [נקודת קצה תואמת OpenAI](https://lmstudio.ai/docs/developer/openai-compat) להרצת מודלים באופן מקומי. LM Studio מספקת ממשק פשוט אך עוצמתי להורדה ופריסה קלה של מודלים. LM Studio מציעה גם Vulkan וגם תשתיות AMD ROCm™ (הנקראות runtimes) עבור משתמשי AMD.
 
 
 ## מה תלמדו
 - כיצד להגדיר ולהשתמש ב-LM Studio כדי לנצל את החומרה המקומית שלכם
 - לבדוק ולנהל מודלי LLM בסביבה שאינה מחוברת לרשת כלל
-- להגיש מודלים דרך API תואם OpenAI כדי להפעיל תהליכי עבודה ואפליקציות מותאמות אישית
+- להריץ מודלים דרך API תואם OpenAI כדי להפעיל זרימות עבודה ואפליקציות מותאמות אישית
 
 
 ## הגדרת תצורת הזיכרון
@@ -28,17 +28,17 @@ LM Studio הוא עטיפה (wrapper) עוצמתית מבוססת ממשק גר�
 ## בדיקת עדכוני תוכנה
 
 <!-- @os:linux -->
-> **הערה**: ניתן להתקין את VS Code דרך AMD Ryzen™ AI Developer Center. עבור LM Studio, יש לבצע את הוראות ההתקנה שלהלן.
+> **הערה**: ניתן להתקין את VS Code דרך AMD Ryzen™ AI Developer Center. עבור LM Studio, יש לפעול לפי הוראות ההתקנה שלהלן.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **הערה**: אם VS Code או LM Studio אינם מותקנים, ניתן להתקין אותם דרך AMD Ryzen™ AI Developer Center. 
+> **הערה**: אם VS Code או LM Studio אינם מותקנים, ניתן להתקין אותם מתוך AMD Ryzen™ AI Developer Center. 
 <!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות קדם של תוכנה
+## התקנת דרישות תוכנה מקדימות
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -62,16 +62,32 @@ LM Studio הוא עטיפה (wrapper) עוצמתית מבוססת ממשק גר�
 <!-- @device:end -->
 
 ## שיחה עם LLM
-למדו כיצד להתחיל לשוחח עם LLM ברמת ChatGPT באופן מקומי לחלוטין.  
+למדו כיצד להתחיל לשוחח עם מודל LLM ברמת ChatGPT באופן מקומי לחלוטין.  
 
 1. פתחו את LMStudio. 
-2. לחצו על `Ctrl + L` כדי לפתוח את טוען המודלים (Model Loader), בחרו ב-`Manually choose model load parameters`, ולחצו על `${model_name}`
-3. ודאו ש-"show advanced settings" מסומן.  
-4. שנו את `Context Length` כרצונכם. אורך הקשר גבוה יותר משמעו יותר זיכרון מודל, אך שימוש רב יותר בזיכרון המערכת. המומלץ עבור מדריך זה הוא 4096.
-5. ודאו ש-`GPU Offload` מוגדר למקסימום וש-`Flash Attention` פעיל (Cache Quantizations יכולות להישאר כבויות)
-6. סמנו את `Remember settings` ולחצו על `Load Model`.
-7. אם אינכם נמצאים בחלון הצ'אט, לחצו על `Ctrl + 1` או לחצו על כפתור ה-👾 בפינה השמאלית העליונה של המסך.
+2. הקישו `Ctrl + L` כדי לפתוח את טוען המודלים, בחרו `Manually choose model load parameters`, ולחצו על `${model_name}`
+3. ודאו ש"show advanced settings" מסומן.  
+4. שנו את `Context Length` כרצונכם. אורך הקשר גבוה יותר משמעו יותר זיכרון מודל, אך יותר שימוש בזיכרון המערכת. המומלץ עבור מדריך זה הוא 4096.
+5. ודאו ש-`GPU Offload` מוגדר למקסימום ו-`Flash Attention` פעיל (Cache Quantizations יכולים להישאר כבויים)
+6. סמנו `Remember settings` ולחצו על `Load Model`.
+7. אם אינכם נמצאים בחלון הצ'אט, הקישו `Ctrl + 1` או לחצו על כפתור ה-👾 בפינה השמאלית העליונה של המסך.
 8. שלחו הודעה והתחילו לתקשר עם המודל!
+
+<!-- @os:windows -->
+<!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
+```powershell
+# CI: pin a GPU (Vulkan) runtime so tests don't fall back to the CPU engine.
+lms runtime ls
+$rt = ((lms runtime ls) -match 'vulkan' | Select-Object -First 1)
+if ($rt) {
+  lms runtime select (($rt.Trim() -split '\s+')[0])
+  lms runtime ls | Select-String 'ENGINE|✓'
+} else {
+  Write-Output "WARNING: no Vulkan runtime installed; GPU acceleration unavailable. Install with: lms get <vulkan-runtime>"
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-load-model-windows timeout=1200 hidden=True -->
@@ -80,9 +96,27 @@ lms unload --all
 lms ps
 $ID = "${lms_model}-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
+# retry once: large-model loads can transiently fail under memory pressure
 lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
+if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y }
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=lmstudio-select-gpu-runtime-linux timeout=120 hidden=True -->
+```bash
+# CI: pin a GPU (Vulkan) runtime so tests don't fall back to the CPU engine.
+lms runtime ls
+GPU_RT="$(lms runtime ls 2>/dev/null | awk '/vulkan/{print $1; exit}')"
+if [ -n "$GPU_RT" ]; then
+  lms runtime select "$GPU_RT"
+  lms runtime ls | grep -E 'ENGINE|✓'
+else
+  echo "WARNING: no Vulkan runtime installed; GPU acceleration unavailable. Install with: lms get <vulkan-runtime>"
+fi
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -94,7 +128,8 @@ lms unload --all || true
 lms ps
 ID="${lms_model}-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
+# retry once: large-model loads can transiently fail under memory pressure
+lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y; }
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -113,19 +148,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **טיפ**: אורך ההקשר (Context length) מתייחס לזיכרון של המודל. Flash attention משפר את מהירות העיבוד תוך הפחתת השימוש בזיכרון. GPU Offload מעביר את החישוב לכרטיס הגרפי לצורך תגובות מהירות יותר.
+> **טיפ**: אורך ההקשר מתייחס לזיכרון של המודל. Flash attention משפר את מהירות העיבוד תוך הפחתת השימוש בזיכרון. GPU Offload מעביר חישוב לכרטיס הגרפי לתגובות מהירות יותר.
 
-## הגשת מודלי LLM דרך נקודת קצה תואמת OpenAI
+## הרצת מודלי LLM דרך נקודת קצה תואמת OpenAI
 
-LM Studio מציעה גם נקודת קצה תואמת OpenAI בצורת LM Studio Server. הדבר כבר הודגם בתהליך עבודה אגנטי לכתיבת קוד עם Cline [כאן](../playbooks/vscode-qwen3-coder). שימוש נפוץ נוסף הוא חיבור LM Studio Server לכל אפליקציית אינטרנט (React, Node.js, Python) על ידי שליחת בקשות HTTP סטנדרטיות לנקודת הקצה של ההסקה.
+LM Studio מציעה גם נקודת קצה תואמת OpenAI בצורת LM Studio Server. הדבר כבר הודגם בזרימת עבודה של קידוד אג'נטי עם Cline [כאן](../playbooks/vscode-qwen3-coder). שימוש נפוץ נוסף הוא חיבור LM Studio Server לכל אפליקציית ווב (React, Node.js, Python) על ידי שליחת בקשות HTTP סטנדרטיות לנקודת הקצה של ההסקה.
 
-כדי להגדיר את LM Studio Server, יש לפעול לפי ההוראות הבאות:
+כדי להגדיר את LM Studio Server, השתמשו בהוראות הבאות:
 
-1. בצד שמאל, לחצו על הכרטיסייה `Developer` (סמל שורת הפקודה) או `Ctrl + 2` ולאחר מכן לחצו על `Server Settings`.  
-2. (אופציונלי): אם ברצונכם להגיש את המודל דרך רשת ה-LAN שלכם, סמנו את `Serve on Local Network`. אם ברצונכם להשתמש באתר או בקריאות נרחבות בתוך VS Code, סמנו את `Enable CORS`. 
-3. בפינה השמאלית העליונה, ודאו שהשרת פועל על ידי לחיצה על כפתור המתג שמול `Status`.
-4. כעת תפעל נקודת קצה תואמת OpenAI. הכתובת היא בדרך כלל http://127.0.0.1:1234  
-5. אם מודל אינו טעון כבר, ניתן לטעון אותו על ידי לחיצה על `Load Model` ולבצע את השלבים שהוזכרו קודם. 
+1. בצד שמאל, לחצו על הכרטיסייה `Developer` (אייקון שורת הפקודה) או `Ctrl + 2` ולאחר מכן לחצו על `Server Settings`.  
+2. (אופציונלי): אם ברצונכם להריץ את המודל דרך רשת ה-LAN שלכם, סמנו `Serve on Local Network`. אם ברצונכם להשתמש עם אתר או קריאות נרחבות בתוך VS Code, סמנו `Enable CORS`. 
+3. בפינה השמאלית העליונה, ודאו שהשרת פועל על ידי לחיצה על כפתור המתג מול `Status`.
+4. נקודת קצה תואמת OpenAI תפעל כעת. הכתובת היא בדרך כלל בכתובת http://127.0.0.1:1234  
+5. אם מודל אינו טעון כבר, ניתן לטעון אותו על ידי לחיצה על `Load Model` ופעולה לפי השלבים שהוזכרו קודם. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -146,9 +181,9 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @os:end -->
 
 
-מודל זה יהיה כעת נגיש דרך נקודת הקצה של LM Studio Server ויתמוך בנקודות קצה של OpenAI, כולל:
+מודל זה יהיה כעת נגיש דרך נקודת הקצה של LM Studio Server ויתמוך בנקודות קצה תואמות OpenAI, כולל:
 
-| נקודת קצה | שיטה | תיעוד |
+| Endpoint | Method | Docs |
 |------------|----------|----------|
 | /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
 | /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
@@ -156,13 +191,13 @@ curl -s http://127.0.0.1:1234/v1/models
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
 #### דוגמה: פינג לנקודת הקצה שלך
-לאחר שיצרנו זה עתה את נקודת הקצה התואמת ל-OpenAI, בואו נראה כיצד לשלב אותה בסביבת פיתוח Python (כגון VSCode) ולהשתמש במערכת שלכם כספק API מקומי.
+לאחר שיצרנו את נקודת הקצה התואמת ל-OpenAI, בואו נבחן כיצד לשלב זאת בסביבת פיתוח Python (כגון VSCode) ולהשתמש במערכת שלכם כספק API מקומי.
 
 1. יצירת סביבה וירטואלית של Python:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    ב-Linux, פתחו טרמינל בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv.
+    ב-Linux, פתחו טרמינל בתיקייה הרצויה ופעלו לפי הפקודות ליצירת venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -178,7 +213,7 @@ curl -s http://127.0.0.1:1234/v1/models
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    ב-Linux, פתחו טרמינל בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv.
+    ב-Linux, פתחו טרמינל בתיקייה הרצויה ופעלו לפי הפקודות ליצירת venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -190,36 +225,36 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    ב-Windows, פתחו טרמינל בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv.
+    ב-Windows, פתחו טרמינל בתיקייה הרצויה ופעלו לפי הפקודות ליצירת venv.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **טיפ**: ייתכן שמשתמשי Windows יצטרכו לשנות את מדיניות ההרשאות (Execution Policy) של PowerShell שלהם (למשל,
-    > להגדיר אותה כ-RemoteSigned או Unrestricted) לפני הרצת חלק מפקודות ה-Powershell.
+    > **טיפ**: ייתכן שמשתמשי Windows יצטרכו לשנות את מדיניות ההרשאות (Execution Policy) של PowerShell (למשל,
+    > להגדיר אותה כ-RemoteSigned או Unrestricted) לפני הרצת חלק מפקודות PowerShell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    ב-Windows, פתחו טרמינל בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv.
+    ב-Windows, פתחו טרמינל בתיקייה הרצויה ופעלו לפי הפקודות ליצירת venv.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **טיפ**: ייתכן שמשתמשי Windows יצטרכו לשנות את מדיניות ההרשאות (Execution Policy) של PowerShell שלהם (למשל,
-    > להגדיר אותה כ-RemoteSigned או Unrestricted) לפני הרצת חלק מפקודות ה-Powershell.
+    > **טיפ**: ייתכן שמשתמשי Windows יצטרכו לשנות את מדיניות ההרשאות (Execution Policy) של PowerShell (למשל,
+    > להגדיר אותה כ-RemoteSigned או Unrestricted) לפני הרצת חלק מפקודות PowerShell.
 
 <!-- @device:end -->
 <!-- @os:end -->
 
-2. התקנת חבילת ה-OpenAI
+2. התקנת חבילת OpenAI
     ```bash
     pip install openai
     ```
 
-3. הריצו את הסקריפט הבא כדי לבצע פינג לנקודת הקצה שיצרנו זה עתה.
+3. הריצו את הסקריפט הבא כדי לבצע פינג לנקודת הקצה שיצרנו כעת.
     ```python
     from openai import OpenAI
 
@@ -263,12 +298,12 @@ req = urllib.request.Request(
    "model": model_id,
    "messages": [{"role":"user","content":"What is 2 + 2? Reply with only the number."}],
    "temperature": 0,
-   "max_tokens": 500
+   "max_tokens": 64
  }).encode("utf-8"),
  headers={"Content-Type":"application/json"},
  method="POST",
 )
-with urllib.request.urlopen(req, timeout=60) as r:
+with urllib.request.urlopen(req, timeout=120) as r:
  print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end --> 
@@ -288,12 +323,12 @@ req = urllib.request.Request(
    "model": model_id,
    "messages": [{"role":"user","content":"What is 47 + 42? Reply with only the number in words."}],
    "temperature": 0,
-   "max_tokens": 500
+   "max_tokens": 64
  }).encode("utf-8"),
  headers={"Content-Type":"application/json"},
  method="POST",
 )
-with urllib.request.urlopen(req, timeout=60) as r:
+with urllib.request.urlopen(req, timeout=120) as r:
  print(r.read().decode("utf-8", "replace"))
 ```
 <!-- @test:end --> 
@@ -324,13 +359,13 @@ lms server stop
 
 #### (אופציונלי): החלפה בין זמני ריצה (Runtimes)
 
-1. לחצו על `Ctrl + Shift + R` במקלדת. לחלופין, לחצו על הלשונית `Discover` (זכוכית מגדלת) בצד שמאל ולאחר מכן לחצו על `Runtime` בחלון הקופץ.
-2. לאחר מכן אמורים להופיע `Runtime Selections`, שם ניתן להשתמש בתפריט הנפתח כדי לשנות את זמן הריצה.
+1. לחצו על `Ctrl + Shift + R` במקלדת. לחלופין, לחצו על הכרטיסייה `Discover` (זכוכית מגדלת) בצד שמאל ולאחר מכן לחצו על `Runtime` בחלון הקופץ.
+2. לאחר מכן תראו את `Runtime Selections`, שבו ניתן להשתמש בתפריט הנפתח כדי לשנות את זמן הריצה.
 
 
-## הצעדים הבאים
+## השלבים הבאים
 
-- **שילוב אפליקציות מותאמות אישית**: שלבו את הסקריפטים או האפליקציות שלכם ב-Python באמצעות ה-API המקומי התואם ל-OpenAI.
-- **ממשקי משתמש מתקדמים**: חברו ממשקים חזקים כמו Open WebUI לשרת שלכם לניהול היסטוריית שיחות ופרסונות.
+- **שילוב אפליקציה מותאמת אישית**: שלבו את הסקריפטים או האפליקציות שלכם ב-Python באמצעות ה-API המקומי התואם ל-OpenAI.
+- **ממשקים קדמיים מתקדמים**: חברו ממשקים עוצמתיים כמו Open WebUI לשרת שלכם לניהול היסטוריית שיחות ופרסונות.
 
-למידע נוסף, בקרו בכתובת: https://lmstudio.ai/docs/developer
+לתיעוד נוסף, בקרו ב: https://lmstudio.ai/docs/developer
