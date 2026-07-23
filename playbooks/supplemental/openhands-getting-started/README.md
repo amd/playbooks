@@ -298,7 +298,7 @@ npm install -g @openhands/agent-canvas
 ```
 
 <!-- @os:linux -->
-<!-- @test:id=agent-canvas-install-linux timeout=1200 hidden=True -->
+<!-- @test:id=agent-canvas-version-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
 
@@ -308,16 +308,10 @@ mkdir -p "$HOME/.npm-global"
 npm config set prefix "$HOME/.npm-global"
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
-npm install -g @openhands/agent-canvas
-
-echo "OK: @openhands/agent-canvas installed globally"
-```
-<!-- @test:end -->
-
-<!-- @test:id=agent-canvas-version-linux timeout=120 hidden=True -->
-```bash
-set -euo pipefail
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+# Install agent-canvas only if the runner doesn't already have it.
+if ! command -v agent-canvas >/dev/null 2>&1; then
+  npm install -g @openhands/agent-canvas
+fi
 
 # Prefer --version; fall back to --help if this build has no --version flag.
 agent-canvas --version || agent-canvas --help
@@ -328,19 +322,14 @@ echo "OK: agent-canvas CLI is on PATH"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=agent-canvas-install-windows timeout=1200 hidden=True -->
+<!-- @test:id=agent-canvas-version-windows timeout=1200 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
-npm install -g @openhands/agent-canvas
-
-Write-Host "OK: @openhands/agent-canvas installed globally"
-```
-<!-- @test:end -->
-
-<!-- @test:id=agent-canvas-version-windows timeout=120 hidden=True -->
-```powershell
-$ErrorActionPreference = "Stop"
+# Install agent-canvas only if the runner doesn't already have it.
+if (-not (Get-Command agent-canvas -ErrorAction SilentlyContinue)) {
+  npm install -g @openhands/agent-canvas
+}
 
 # Prefer --version; fall back to --help if this build has no --version flag.
 try { agent-canvas --version } catch { agent-canvas --help }
