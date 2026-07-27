@@ -129,12 +129,14 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          Write-Host "Restarting $env:COMPUTERNAME (runner ${{ matrix.runner }}) in 5s..."
-          # /r = restart (NOT shutdown), /t 5 = 5s delay so this step can report
-          # success before the connection drops, /f = force apps closed so the
-          # reboot can't hang. The runner service must start on boot for the
-          # machine to rejoin the pool automatically.
-          shutdown /r /t 5 /f /c "Scheduled restart via GitHub Actions"
+          Write-Host "Restarting $env:COMPUTERNAME (runner ${{ matrix.runner }}) in 60s..."
+          # /r = restart (NOT shutdown), /t 60 = 60s delay, /f = force apps closed
+          # so the reboot can't hang. The delay must outlast the runner's post-job
+          # "Complete job" finalization; a short delay (was /t 5) reboots the box
+          # before the job reports back, so GitHub marks it failed after a ~10 min
+          # lost-communication timeout even though the reboot succeeded. The runner
+          # service must start on boot for the machine to rejoin the pool.
+          shutdown /r /t 60 /f /c "Scheduled restart via GitHub Actions"
 
       - name: Reboot (Linux)
         if: runner.os == 'Linux'
