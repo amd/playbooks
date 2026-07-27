@@ -1,0 +1,6 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "使用 LM Studio 运行和部署 LLM",
+  "description": "设置 LM Studio 和 LM Studio Server,以在本地运行和提供大语言模型服务。",
+  "auto_translated": true
+}

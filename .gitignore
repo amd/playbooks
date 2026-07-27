@@ -42,3 +42,10 @@ next-env.d.ts
 
 # github data cache
 github_issues_cache.json
+
+# translation run logs (redirected script output; not the committed _quality_report.*)
+_gen_*.txt
+
+# python cache
+__pycache__/
+*.pyc

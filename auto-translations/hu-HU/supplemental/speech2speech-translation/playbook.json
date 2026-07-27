@@ -1,0 +1,6 @@
+{
+  "id": "speech2speech-translation",
+  "title": "Valós idejű beszéd-beszéd fordítás",
+  "description": "Építs valós idejű, beszédből beszédbe fordítást a helyi hardvereden.",
+  "auto_translated": true
+}
