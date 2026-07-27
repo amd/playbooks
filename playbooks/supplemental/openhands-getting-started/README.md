@@ -346,7 +346,7 @@ launch Agent Canvas:
 agent-canvas --port 3000
 ```
 
-The same command works in PowerShell on Windows. Then open
+Then open
 `http://localhost:3000` instead. The default local backend should show as
 healthy on the home screen.
 
