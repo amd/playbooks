@@ -67,7 +67,7 @@ test the automation, and Lemonade to run the LLM locally.
 | MCP server | A Model Context Protocol server that gives an agent tools for an external service such as GitHub or Slack. | Lets the agent read GitHub and write to Slack. |
 | OpenHands automation | A scheduled or event-triggered agent conversation that fetches context, reasons over it, and writes a result somewhere. | The GitHub-to-Slack digest you build here. |
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
 > Coding-agent workflows benefit from a larger model and context window. Use at
 > least 32 GB of system memory, and prefer 64 GB or more for larger GGUF models.
@@ -98,9 +98,7 @@ Invite the Slack app to the target channel before testing the automation.
 
 ## Variables Used in This Playbook
 
-<!-- @device:halo,halo_box,stx,krk -->
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
-<!-- @device:end -->
 
 ```bash
 export LEMONADE_BASE_URL="http://127.0.0.1:13305/api/v1"
