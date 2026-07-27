@@ -1,3 +1,7 @@
+// Copyright Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: MIT
+
 "use client";
 
 import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";

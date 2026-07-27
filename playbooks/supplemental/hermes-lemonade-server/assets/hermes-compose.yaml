@@ -1,0 +1,44 @@
+name: hermes
+
+services:
+  hermes-gateway:
+    image: docker.io/nousresearch/hermes-agent
+    container_name: hermes_gateway
+    command: ["gateway", "run"]
+    # We omit the network for the Hermes service to avoid incompatibility,
+    # in order for the Hermes dashboard to be accessible outside of the container host.
+    network_mode: host
+    environment:
+      FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY}
+    env_file:
+      - .env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+
+  hermes-dashboard:
+    image: docker.io/nousresearch/hermes-agent
+    container_name: hermes_dashboard
+    command: ["hermes", "dashboard"]
+    network_mode: host
+    depends_on:
+      - hermes-gateway
+    env_file:
+      - .env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  fdb-data:
+  fdb-cluster-file:
