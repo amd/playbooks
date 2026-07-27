@@ -43,9 +43,9 @@ By the end of this playbook you will be able to:
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Optional, for sandboxing OpenClaw)
-
 - **~10–30 GB of free disk space** for model weights
 <!-- @os:end -->
+
 <!-- @os:windows -->
 - A PC running **Windows 10/11**
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
@@ -254,9 +254,10 @@ systemd=true
 EOF
 ```
 
-Restart WSL:
+Exit WSL and restart it:
 
 ```powershell
+exit
 wsl --shutdown
 wsl
 ```
@@ -276,6 +277,7 @@ ip route show default | awk '{print $3}' | head -1
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
+> Note: If you encounter a `netsh: command not found` error, please try using the explicit executable name instead - `netsh.exe`
 
 **Add a firewall rule** (same elevated PowerShell):
 
@@ -308,7 +310,36 @@ If you’ve already loaded the Qwen3.6-35B-A3B-GGUF model in the previous step, 
 }
 ```
 
-> The `netsh portproxy` rule survives reboots but the WSL gateway IP can change after `wsl --shutdown`. If Lemonade becomes unreachable from WSL after a restart, get the updated gateway IP and update the proxy with this new IP.
+#### Keeping the Bridge Working After a Restart
+
+The `netsh portproxy` rule survives reboots, but the WSL gateway IP can change after `wsl --shutdown` or a reboot. When it does, the proxy still points at the old IP and Lemonade becomes unreachable from WSL. If that happens, use one of the options below.
+
+**Option 1 (recommended) — Repair the bridge automatically.** To avoid doing this by hand each time, use a scheduled task that checks the bridge on every startup and sign-in and rebuilds it only when the gateway IP has changed. See the [Lemonade WSL bridge auto-repair guide](assets/RepairLemonadeWslBridge.md).
+
+
+**Option 2 — Repair the bridge manually.** First, get the current WSL gateway IP by running this inside WSL:
+
+```bash
+ip route show default | awk '{print $3}' | head -1
+```
+
+Copy this value; you'll use it in place of `<new-WSL-Gateway-IP>` below.
+
+Then, in an **elevated PowerShell** (Run as administrator), list the existing rules, delete only the stale Lemonade rule, and add a fresh one with the current IP:
+
+```powershell
+netsh interface portproxy show all
+netsh interface portproxy delete v4tov4 listenaddress=<old-WSL-Gateway-IP> listenport=13305
+netsh interface portproxy add v4tov4 listenaddress=<new-WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
+```
+
+In the output of `show all`, the stale Lemonade rule is the entry whose connect address is `127.0.0.1` on port `13305`; its listen address is your `<old-WSL-Gateway-IP>`. Deleting by that address removes only this rule and leaves any other port-proxy rules on your machine untouched.
+
+The firewall rule you added during setup is bound to port `13305` (not the IP), so it keeps working and does not need to be recreated.
+
+> **Recommendation:** To avoid gateway issues, we strongly suggest the following shell configuration:
+> - **Windows commands** should be executed in **PowerShell**
+> - **WSL distro commands** should be executed in a **Command Prompt** (run as **Administrator**)
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -1193,12 +1224,44 @@ Because the gateway binds to loopback, the dashboard auto-authenticates when ope
 **Congratulations, you've built a fully local AI agent stack from scratch.**
 
 > **Need the gateway token?** Run `openclaw dashboard --no-open` to print the dashboard URL with the token embedded (it also attempts to copy it to your clipboard). Alternatively, the token is at `gateway.auth.token` in `~/.openclaw/openclaw.json`.
->
-> **Approving a remote device:** When you open the dashboard from a second machine or phone, the browser displays a request ID. Back on the machine running the gateway, run:
+
+**Accessing the Dashboard from Another Device (via SSH Tunnel)**
+
+If OpenClaw runs on a remote machine, you can reach its dashboard from your local machine through an SSH tunnel. The tunnel forwards the gateway port (`18789`) so your local browser can talk to the remote gateway over `127.0.0.1`.
+
+1. From your **local machine**, connect to the remote machine once and accept the fingerprint prompt so the host is added to your known hosts:
+
+   ```bash
+   ssh user@<host-ip>
+   ```
+
+2. Still on your **local machine**, open the SSH tunnel:
+
+   ```bash
+   ssh -N -L 18789:127.0.0.1:18789 user@<host-ip>
+   ```
+
+   > **Note:** After you enter your password, the terminal shows no output and appears to hang. This is expected: the `-N` flag tells SSH not to run any remote command, so it simply holds the tunnel open. Leave this terminal running.
+
+3. On your **local machine**, open a browser and go to `http://127.0.0.1:18789`.
+
+4. On the **remote machine**, print the gateway token and paste it into the browser to log in:
+
+   ```bash
+   openclaw dashboard --no-open
+   ```
+
+   This prints the dashboard URL with the token embedded; copy the token to log in. (The token is also stored at `gateway.auth.token` in `~/.openclaw/openclaw.json`.)
+
+> **Approving a remote device:** When you open the dashboard from another machine or phone, the browser may display a request ID. On the **remote machine**, list the pending requests:
+> ```bash
+> openclaw devices list
+> ```
+> Then approve the matching request:
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> This is only needed for remote or secondary devices, loopback access from the same machine auto-authenticates.
+> This is only needed for remote or secondary devices; loopback access from the same machine authenticates automatically. See the [Remote Access](https://docs.openclaw.ai/gateway/remote) documentation for details.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
