@@ -5,114 +5,88 @@
   "time": 20,
   "supported_platforms": {
     "halo_box": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "stx": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "krk": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "rx7900xt": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "rx9070xt": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "r9700": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "tested_platforms": {
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "stx": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "krk": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "rx7900xt": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "rx9070xt": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "r9700": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "required_platforms": {
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "stx": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "krk": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "rx7900xt": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "rx9070xt": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "r9700": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "published_platforms": {
     "halo_box": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "halo": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "stx": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "krk": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "rx7900xt": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "rx9070xt": [
-      "linux",
-      "windows"
+      "linux"
     ],
     "r9700": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "difficulty": "beginner",
