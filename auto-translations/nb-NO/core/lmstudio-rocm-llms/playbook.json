@@ -1,0 +1,6 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Kjøring og servering av LLM-er med LM Studio",
+  "description": "Sett opp LM Studio og LM Studio Server for å kjøre og tilby store språkmodeller lokalt.",
+  "auto_translated": true
+}

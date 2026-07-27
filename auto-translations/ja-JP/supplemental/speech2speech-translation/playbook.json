@@ -1,0 +1,6 @@
+{
+  "id": "speech2speech-translation",
+  "title": "リアルタイム音声対音声翻訳",
+  "description": "ローカルハードウェア上でリアルタイム音声対音声翻訳を構築しましょう。",
+  "auto_translated": true
+}

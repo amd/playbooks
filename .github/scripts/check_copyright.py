@@ -193,16 +193,22 @@ def check_copyright(file_path: str, require_amd: bool = False) -> Optional[str]:
 def main():
     parser = argparse.ArgumentParser(description='Check copyright notices in files')
     parser.add_argument('--changed-files', help='Newline-separated list of changed files')
+    parser.add_argument('--changed-files-file', help='Path to a file with a newline-separated list of changed files (avoids shell arg-length limits on large changesets)')
     parser.add_argument('--require-amd', action='store_true', help='Require AMD copyright format')
     parser.add_argument('files', nargs='*', help='Specific files to check')
-    
+
     args = parser.parse_args()
-    
+
     files_to_check = []
-    
+
     if args.changed_files:
         files_to_check.extend(args.changed_files.strip().split('\n'))
-    
+
+    if args.changed_files_file:
+        # utf-8-sig tolerates a leading BOM if the list was produced on Windows.
+        with open(args.changed_files_file, encoding='utf-8-sig') as fh:
+            files_to_check.extend(fh.read().strip().split('\n'))
+
     if args.files:
         files_to_check.extend(args.files)
     

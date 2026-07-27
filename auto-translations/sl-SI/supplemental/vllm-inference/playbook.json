@@ -1,0 +1,6 @@
+{
+  "id": "vllm-inference",
+  "title": "Uvod v vLLM",
+  "description": "Naučite se, kako izvajati sklepanje (inference) in strežbo z uporabo kontejneriziranega vLLM na integriranem GPU-ju",
+  "auto_translated": true
+}
