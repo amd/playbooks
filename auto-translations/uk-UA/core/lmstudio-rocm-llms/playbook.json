@@ -1,0 +1,6 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Запуск і обслуговування LLM за допомогою LM Studio",
+  "description": "Налаштуйте LM Studio та LM Studio Server для локального запуску та обслуговування великих мовних моделей.",
+  "auto_translated": true
+}

@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "การรวมคลัสเตอร์ Ryzen™ AI Halo สองเครื่องด้วย RPC",
+  "description": "ตั้งค่าการอนุมานแบบกระจาย (distributed inference) โดยใช้ RPC server ระหว่างอุปกรณ์ Ryzen™ AI Halo สองเครื่องร่วมกับ llama.cpp เพื่อรันโมเดลขนาด 350B+",
+  "auto_translated": true
+}

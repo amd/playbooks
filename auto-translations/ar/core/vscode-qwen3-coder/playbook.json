@@ -1,0 +1,6 @@
+{
+  "id": "vscode-qwen3-coder",
+  "title": "البرمجة باستخدام نموذج لغوي محلي (LLM) في VSCode مع Qwen3-Coder",
+  "description": "استخدم VS Code مع Qwen3-Coder الذي يعمل محليًا للحصول على مساعدة برمجية خاصة.",
+  "auto_translated": true
+}

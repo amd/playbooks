@@ -1,0 +1,51 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **机器翻译。**本页面由英文自动翻译而成,尚未经过人工审核。其中可能存在错误,部分步骤、命令、下载内容或产品的可用性在您所在的语言或地区可能有所不同。如发现任何问题,请以英文原版 playbook 为准。
+<!-- auto-translated-disclaimer:end -->
+
+# 平台配置
+
+本文档描述了运行本 playbook 所需的预期平台配置。
+
+## 所需应用/框架
+
+### Windows/Linux
+
+- **Lemonade Server** 应按照
+  [Lemonade 安装指南](https://lemonade-server.ai/docs/guide/install/)进行安装。
+- **Node.js 22.12 或更高版本**及 `npm`，供 `agent-canvas` CLI 和通过 `npx` 启动的 MCP
+  服务器使用。
+- **uv**，Agent Canvas 用于管理智能体服务器环境的 Python 包管理器。请从
+  [uv 安装指南](https://docs.astral.sh/uv/getting-started/installation/)进行安装。
+
+## 所需模型
+
+### Windows/Linux
+
+在启动 playbook 之前，以下模型必须在 Lemonade Server 中可用。
+
+| 模型类型 | 模型 ID | 说明 |
+| --- | --- | --- |
+| GGUF 聊天模型 | `Qwen3.6-35B-A3B-GGUF` | 由 Lemonade Server 在 `http://127.0.0.1:13305/api/v1` 上提供服务。内存小于 32 GB 的设备请使用较小的 GGUF 模型。 |
+
+使用以下命令启动模型：
+
+```bash
+lemonade config set llamacpp.backend=vulkan
+lemonade config set ctx_size=65536
+lemonade run "Qwen3.6-35B-A3B-GGUF"
+```
+
+## 外部凭据
+
+本 playbook 需要：
+
+- 一个对被总结的仓库具有读取权限的 GitHub 令牌。
+- 一个具有 `chat:write` 权限和频道读取权限的 Slack 机器人令牌。
+- 一个 Slack 团队 ID 和目标 Slack 频道 ID。

@@ -1,0 +1,6 @@
+{
+  "id": "pytorch-kernels",
+  "title": "Egyedi GPU-kernelek készítése PyTorch és AMD ROCm™ segítségével",
+  "description": "Egyéni GPU-kernelek írása és optimalizálása PyTorch és AMD ROCm™ szoftver használatával",
+  "auto_translated": true
+}

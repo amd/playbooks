@@ -1,0 +1,6 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Het uitvoeren en aanbieden van LLM's met LM Studio",
+  "description": "Configureer LM Studio en LM Studio Server om grote taalmodellen lokaal uit te voeren en aan te bieden.",
+  "auto_translated": true
+}

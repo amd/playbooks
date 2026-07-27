@@ -1,0 +1,6 @@
+{
+  "id": "vscode-qwen3-coder",
+  "title": "VSCode ve Qwen3-Coder ile Yerel LLM Kodlama",
+  "description": "Özel kod yardımı için yerel olarak çalışan Qwen3-Coder ile VS Code kullanın.",
+  "auto_translated": true
+}

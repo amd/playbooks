@@ -1,0 +1,6 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "LM StudioでLLMを実行・提供する",
+  "description": "LM Studioを設定し、LM Studio Serverを使用してラージランゲージモデルをローカルで実行・提供します。",
+  "auto_translated": true
+}
