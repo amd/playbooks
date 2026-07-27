@@ -274,12 +274,12 @@
       "quality_issues": "Title mistranslates 'AMD Sync' as 'synchronizáciou AMD' instead of keeping brand name; body correct."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
-      "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
+      "source_sha256": "d02e5b448a59865cc2824aa03a21a1d50dc6a43f2daf86d4041ff733ad272ecc",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Inconsistent terminology: 'stroj/Zariadenie' for Machine, 'cluster/clustr/klaster' variants; otherwise accurate, fluent, code intact."
+      "quality_issues": "Corrupted opening comment tag ('# <!-- @github-only -->' with stray #); inconsistent Zariadenie/Počítač for 'Machine'; 'switch' vs 'prepínač' inconsistency. Otherwise accurate."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
       "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
@@ -290,12 +290,12 @@
       "quality_issues": "Accurate, fluent; 'Klastrovanie' slightly awkward neologism but acceptable technical term."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
-      "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
+      "source_sha256": "7e36a4d35383f5c81ee3a866fd4182241683e9b33228686bdad4a01cf8101735",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Minor terminology inconsistency (Stroj/Počítač, klaster/cluster mixed); otherwise accurate, fluent, code/URLs intact."
+      "quality_issues": "Minor inconsistency: 'clustrovanie/cluster' vs 'klaster'; 'engine' left untranslated in places. Otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/clustering-rpc-server/playbook.json": {
       "source_sha256": "afee8d03bc9faa092036cbf4a62ec9db4252a49f25273438a7e4e5bbc2b4a10c",
@@ -426,12 +426,12 @@
       "quality_issues": "Accurate and fluent; minor stylistic nit on 'lokálny chat' phrasing."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
-      "source_sha256": "683efeea885d7ec0800eb93485220c7eb53fae3f639bf021b5152cd97f25bac9",
+      "source_sha256": "5c1b5b7406b76412eb78878a5fbd3037f1e2474a0f1bfc2dda0d197ec09c7a02",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Minor: 'compaction' translated as 'kompresia' (compression) inconsistent with kept term elsewhere; otherwise accurate, code/URLs intact."
+      "quality_score": 93,
+      "quality_issues": "Minor: 'orchestrácie' grammatical error (should be 'orchestruje'); slightly awkward phrasing in 'uzrozumení'. Code/URLs intact."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
       "source_sha256": "57b52b994ec56c93c379e746d04c74ffc0b3db8a53293f249f8c6190e8b12016",
@@ -545,22 +545,6 @@
       "quality_score": 95,
       "quality_issues": "Excellent translation; code/URLs/numbers intact. Minor terminology mix (kernel/jadro/kernel inconsistent), a few English terms left untranslated but appropriate."
     },
-    "playbooks/core/deepseek-v4-flash-ds4/README.md": {
-      "source_sha256": "547f8d3dc8be793c698c67fd50466a5c4c27c2f154e87b0b36431ba2dc2b278f",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Minor: 'unified memory' rendered as 'zdieľanej pamäte'; slight inconsistency 'kódovacích agentov' vs 'agentov na programovanie'. Code/URLs intact."
-    },
-    "playbooks/core/deepseek-v4-flash-ds4/playbook.json": {
-      "source_sha256": "45498cef56dd0818dc2853a6cf895e283bbcd79d934ae35c298857305f6ab496",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'inferenčného engine' awkward, should be 'inferenčného enginu' for proper declension"
-    },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
       "source_sha256": "bc32c1f17978924905775b38f78f9b2c77f936da0cb2f9517c1c0b0fed90a6eb",
       "prompt_version": "2",
@@ -624,6 +608,22 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
       "quality_issues": "Minor: 'kódovacieho agenta' slightly awkward for coding agent; otherwise accurate, brands and terms intact."
+    },
+    "playbooks/supplemental/deepseek-v4-flash-ds4/README.md": {
+      "source_sha256": "cdda3c37ae369a04face29c80a0719dbdd4369cc798cb2d17d972622da506f89",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Minor: 'unified memory' rendered as 'zdieľanej' (shared) instead of 'zjednotenej'; missing blank line before one heading. Otherwise accurate, fluent, code intact."
+    },
+    "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json": {
+      "source_sha256": "5714ddfbffb608f3e9850673606585c60a803ecb32aea703edd1c758c1d36366",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 88,
+      "quality_issues": "Missing diacritic: 'Nasadite' should be 'Nasaďte'. Otherwise accurate and fluent."
     }
   }
 }

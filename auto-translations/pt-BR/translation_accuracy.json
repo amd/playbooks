@@ -274,12 +274,12 @@
       "quality_issues": "Title translated 'AMD Sync' as 'sincronização AMD' but kept brand elsewhere; inconsistent brand handling."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
-      "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
+      "source_sha256": "d02e5b448a59865cc2824aa03a21a1d50dc6a43f2daf86d4041ff733ad272ecc",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "github-only comment tag mangled into header; some anchor links point to English slugs and won't resolve; otherwise accurate and fluent."
+      "quality_score": 90,
+      "quality_issues": "Internal anchor links not localized (some point to English slugs, others translated), causing broken navigation. Otherwise fluent and accurate."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
       "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
@@ -290,12 +290,12 @@
       "quality_issues": "\"Clustering em\" awkward; \"multi-nó\" better as \"multinó\"; otherwise accurate and fluent"
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
-      "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
+      "source_sha256": "7e36a4d35383f5c81ee3a866fd4182241683e9b33228686bdad4a01cf8101735",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Excellent; code, URLs, brands intact. Minor: 'download the file matching' rendered fine; consistent quality throughout."
+      "quality_score": 92,
+      "quality_issues": "Minor inconsistency: 'playbook' translated as 'guia' once; 'worker/trabalhadores' inconsistent. Code, URLs, brands intact. Fluent, accurate overall."
     },
     "playbooks/supplemental/clustering-rpc-server/playbook.json": {
       "source_sha256": "afee8d03bc9faa092036cbf4a62ec9db4252a49f25273438a7e4e5bbc2b4a10c",
@@ -426,12 +426,12 @@
       "quality_issues": "Fluent, accurate; brands intact. Minor: 'as técnicas LLaMA Factory e LoRA' slightly implies both are techniques."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
-      "source_sha256": "683efeea885d7ec0800eb93485220c7eb53fae3f639bf021b5152cd97f25bac9",
+      "source_sha256": "5c1b5b7406b76412eb78878a5fbd3037f1e2474a0f1bfc2dda0d197ec09c7a02",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Excellent, faithful translation. Code/URLs/numbers intact. Minor: 'resultar em resultados' slight redundancy; otherwise fluent and consistent."
+      "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: occasional missing blank lines between sections, consistent anglicisms acceptable in technical context."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
       "source_sha256": "57b52b994ec56c93c379e746d04c74ffc0b3db8a53293f249f8c6190e8b12016",
@@ -545,22 +545,6 @@
       "quality_score": 88,
       "quality_issues": "\"disponibilização\" for serving acceptable but slightly awkward; otherwise accurate and fluent."
     },
-    "playbooks/core/deepseek-v4-flash-ds4/README.md": {
-      "source_sha256": "547f8d3dc8be793c698c67fd50466a5c4c27c2f154e87b0b36431ba2dc2b278f",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Excellent, accurate translation. Code/URLs/brands intact. Minor English terms left untranslated (appropriately). Slight redundancy 'precisão Q4 para melhor precisão'."
-    },
-    "playbooks/core/deepseek-v4-flash-ds4/playbook.json": {
-      "source_sha256": "45498cef56dd0818dc2853a6cf895e283bbcd79d934ae35c298857305f6ab496",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent; brand/code terms intact. Minor: 'Implante' slightly formal but acceptable."
-    },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
       "source_sha256": "bc32c1f17978924905775b38f78f9b2c77f936da0cb2f9517c1c0b0fed90a6eb",
       "prompt_version": "2",
@@ -624,6 +608,22 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
       "quality_issues": "Accurate, fluent; brand terms and trademark preserved. Minor stylistic nits only."
+    },
+    "playbooks/supplemental/deepseek-v4-flash-ds4/README.md": {
+      "source_sha256": "cdda3c37ae369a04face29c80a0719dbdd4369cc798cb2d17d972622da506f89",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Excellent; code/URLs intact. Minor missing blank line before 'Conectando um Agente' heading; consistent minor decimal inconsistencies (kept ~80.8 GB)."
+    },
+    "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json": {
+      "source_sha256": "5714ddfbffb608f3e9850673606585c60a803ecb32aea703edd1c758c1d36366",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent, brands and terms intact; minor stylistic naturalness only."
     }
   }
 }

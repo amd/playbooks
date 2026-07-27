@@ -1,169 +1,169 @@
 {
   "per_locale": {
     "ar": {
-      "files_scored": 78,
-      "mean": 93.2,
+      "files_scored": 80,
+      "mean": 93.3,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "cs-CZ": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 92.8,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "da-DK": {
-      "files_scored": 78,
-      "mean": 93.3,
+      "files_scored": 80,
+      "mean": 93.2,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "de-DE": {
-      "files_scored": 78,
-      "mean": 93.7,
-      "min": 82,
+      "files_scored": 80,
+      "mean": 93.5,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "el-GR": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 92.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "es-LA": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 93.6,
       "min": 84,
       "judge_model": "Claude-Opus-4.8"
     },
     "fi-FI": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 92.2,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-FR": {
-      "files_scored": 78,
-      "mean": 93.0,
+      "files_scored": 80,
+      "mean": 93.2,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "he": {
-      "files_scored": 78,
-      "mean": 92.9,
+      "files_scored": 80,
+      "mean": 92.8,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "hu-HU": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 92.2,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "it-IT": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 94.2,
       "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "ja-JP": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 94.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ko-KR": {
-      "files_scored": 78,
-      "mean": 93.8,
+      "files_scored": 80,
+      "mean": 94.0,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "nb-NO": {
-      "files_scored": 78,
-      "mean": 92.1,
+      "files_scored": 80,
+      "mean": 92.0,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "nl-NL": {
-      "files_scored": 78,
-      "mean": 92.5,
+      "files_scored": 80,
+      "mean": 92.3,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pl-PL": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 93.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-BR": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 94.0,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ro-RO": {
-      "files_scored": 78,
-      "mean": 93.4,
+      "files_scored": 80,
+      "mean": 93.5,
       "min": 84,
       "judge_model": "Claude-Opus-4.8"
     },
     "ru-RU": {
-      "files_scored": 78,
-      "mean": 92.8,
+      "files_scored": 80,
+      "mean": 92.9,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "sk-SK": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 92.2,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sl-SI": {
-      "files_scored": 78,
-      "mean": 91.3,
+      "files_scored": 80,
+      "mean": 91.2,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "sr-Latn": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 91.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sv-SE": {
-      "files_scored": 78,
-      "mean": 92.7,
+      "files_scored": 80,
+      "mean": 92.6,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "th-TH": {
-      "files_scored": 78,
-      "mean": 93.5,
-      "min": 78,
+      "files_scored": 80,
+      "mean": 93.2,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "tr-TR": {
-      "files_scored": 78,
-      "mean": 92.8,
+      "files_scored": 80,
+      "mean": 92.7,
       "min": 80,
       "judge_model": "Claude-Opus-4.8"
     },
     "uk-UA": {
-      "files_scored": 78,
-      "mean": 93.2,
+      "files_scored": 80,
+      "mean": 92.9,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 78,
-      "mean": 93.6,
-      "min": 82,
+      "files_scored": 80,
+      "mean": 93.4,
+      "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-TW": {
-      "files_scored": 78,
+      "files_scored": 80,
       "mean": 93.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
@@ -171,10 +171,22 @@
   },
   "below_threshold": [
     {
+      "locale": "de-DE",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 72,
+      "issues": "Untranslated 'Deploy' left in English; imperative structure inconsistent (Deploy...verwalten Sie)."
+    },
+    {
       "locale": "it-IT",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 72,
       "issues": "Redundant 'Ottimizzazione fine-tuning'; trademark ™ misplaced from Unsloth to LLM; 'fine-tuned' rendered as generic 'ottimizzati'."
+    },
+    {
+      "locale": "th-TH",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 72,
+      "issues": "Title left untranslated ('Running...'); 'inference engine' not localized. Otherwise accurate, brand terms intact."
     },
     {
       "locale": "cs-CZ",
@@ -219,6 +231,12 @@
       "issues": "Title 'Running' left untranslated; should be 'DeepSeek V4 Flash draaien' or similar."
     },
     {
+      "locale": "nl-NL",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 78,
+      "issues": "Untranslated 'Running' in title heading; otherwise accurate and fluent."
+    },
+    {
       "locale": "pl-PL",
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 78,
@@ -241,6 +259,12 @@
       "file": "playbooks/core/comfyui-image-gen/playbook.json",
       "score": 78,
       "issues": "Title mistranslated as progressive 'กำลังสร้าง' (generating in progress) instead of gerund heading; slightly awkward phrasing."
+    },
+    {
+      "locale": "zh-CN",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 78,
+      "issues": "Title mistranslated: 'Running...with ds4' rendered as passive 'is running', losing imperative/gerund meaning."
     },
     {
       "locale": "tr-TR",

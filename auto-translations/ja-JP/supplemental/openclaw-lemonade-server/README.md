@@ -8,55 +8,55 @@ SPDX-License-Identifier: MIT
 > **機械翻訳。** このページは英語から自動的に翻訳されたものであり、人による確認は行われていません。誤りが含まれている可能性があり、一部の手順、コマンド、ダウンロード、または製品の提供状況がお住まいの言語や地域と異なる場合があります。おかしな点がございましたら、英語版のプレイブックを正としてご参照ください。
 <!-- auto-translated-disclaimer:end -->
 
-# OpenClawをLemonade Serverバックエンドで実行する
+# OpenClaw を Lemonade Server バックエンドで実行する
 
 ## 概要
 
-[**OpenClaw**](https://openclaw.ai/)は、コードを書いて実行し、ファイルを管理し、複雑な複数ステップのタスクをあなたに代わって遂行できる自律型AIエージェントです。質問に答えるだけのチャットアシスタントとは異なり、OpenClawはシステム上で実際にアクションを実行するため、要求の厳しいエージェントループに対応できる高速で高性能なAIバックエンドを必要とします。
+[**OpenClaw**](https://openclaw.ai/) は、コードの記述と実行、ファイル管理、複雑な多段階タスクの遂行をユーザーに代わって行う自律型 AI エージェントです。単に質問に答えるだけのチャットアシスタントとは異なり、OpenClaw はシステム上で実際のアクションを実行します。そのため、要求の厳しいエージェントループに対応できる、高速かつ高性能な AI バックエンドが必要になります。
 
-[**Lemonade Server**](https://lemonade-server.ai/)がそのバックエンドです。これは、GenAIモデルをお使いのハードウェア上で直接実行し、業界標準のOpenAI APIを通じて公開するオープンソースのローカル推論サーバーです。
+[**Lemonade Server**](https://lemonade-server.ai/) はまさにそのバックエンドです。これはオープンソースのローカル推論サーバーであり、GenAI モデルをお使いのハードウェア上で直接実行し、業界標準の OpenAI API を通じて公開します。
 
-両者を組み合わせることで、完全にローカルなAIエージェントスタックが構成されます。Lemonadeがモデル推論を担当し、OpenClawがモデルの出力を実際のアクションに変換するエージェントループを提供します。
+両者を組み合わせることで、完全にローカルな AI エージェントスタックが構築されます。Lemonade がモデル推論を担当し、OpenClaw がモデルの出力を実際のアクションへと変換するエージェントループを提供します。
 
-> **続ける前に:** OpenClawは高度に自律的なAIエージェントです。どのようなAIエージェントであっても、システムへのアクセスを許可することで予測不能または意図しない結果が生じる可能性があります。リスクを理解し、自律的なソフトウェアが代理で動作することに納得できる場合にのみ、先に進んでください。
+> **続ける前に:** OpenClaw は高度に自律的な AI エージェントです。いかなる AI エージェントにもシステムへのアクセスを許可すると、予測不能または意図しない結果が生じる可能性があります。リスクを理解し、自律的なソフトウェアがユーザーに代わって動作することに納得できる場合にのみ、先に進んでください。
 
 ---
 
 ## このプレイブックで学べること
 
-このプレイブックを完了すると、以下ができるようになります。
+このプレイブックを完了すると、次のことができるようになります。
 
-- **Lemonade Server**について学ぶ
-- **OpenClawをインストール**し、AIバックエンドとして**Lemonade Serverを指定する**。
-- **OpenClawゲートウェイを起動**し、エージェントが動作可能な状態であることを確認する。
-- **コミュニケーションチャネル**（DiscordまたはTelegram）を接続し、任意のデバイスからエージェントとチャットできるようにする。
+- **Lemonade Server** について学ぶ
+- **OpenClaw をインストール**し、その AI バックエンドとして **Lemonade Server を指定する**。
+- **OpenClaw ゲートウェイを起動**し、エージェントが動作準備完了であることを確認する。
+- **通信チャンネル**（Discord または Telegram）を接続し、任意のデバイスからエージェントとチャットできるようにする。
 
 ---
 
-## メモリ設定の構成
+## メモリ設定を行う
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## ソフトウェアアップデートの確認
+## ソフトウェアの更新を確認する
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## ソフトウェア前提条件のインストール
+## ソフトウェアの前提条件をインストールする
 
 <!-- @os:linux -->
-- `apt-get`を使用できる**Ubuntu 24.04+**または互換性のあるDebianベースのLinuxディストリビューションを実行しているPC
-- 少なくとも**12 GBのRAM**（より大規模なモデルには64 GB以上を推奨）
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/)（オプション、OpenClawのサンドボックス化用）
-
-- モデルの重みのために**約10～30 GBの空きディスク容量**
+- `apt-get` を備えた **Ubuntu 24.04+** または互換性のある Debian ベースの Linux ディストリビューションを実行する PC
+- 少なくとも **12 GB の RAM**（より大きなモデルには 64 GB 以上を推奨）
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/)（オプション、OpenClaw をサンドボックス化する場合）
+- モデルの重みのために**約 10～30 GB の空きディスク容量**
 <!-- @os:end -->
+
 <!-- @os:windows -->
-- **Windows 10/11**を実行しているPC
-- 少なくとも**12 GBのRAM**（より大規模なモデルには64 GB以上を推奨）
-- モデルの重みのために**約10～30 GBの空きディスク容量**
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)（オプション、OpenClawのサンドボックス化用）
+- **Windows 10/11** を実行する PC
+- 少なくとも **12 GB の RAM**（より大きなモデルには 64 GB 以上を推奨）
+- モデルの重みのために**約 10～30 GB の空きディスク容量**
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)（オプション、OpenClaw をサンドボックス化する場合）
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -71,15 +71,15 @@ lemonade --version
 
 ---
 
-## 推奨モデルのプルとロード
+## 推奨モデルを取得しロードする
 
-このプレイブックでの推奨モデルは、Unsloth製の**Qwen3.6-35B-A3B-GGUF**です。これは、263kトークンのコンテキストウィンドウを持つ、エージェントのワークロードに適した強力なMoEモデルです。このモデルはUD-Q4_K_XL量子化を使用しています。今すぐプルしましょう。
+このプレイブックで推奨するモデルは、Unsloth の **Qwen3.6-35B-A3B-GGUF** です。これは 263k トークンのコンテキストウィンドウを持つ強力な MoE モデルで、エージェントのワークロードに適しています。このモデルは UD-Q4_K_XL 量子化を使用しています。今すぐ取得しましょう。
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-続いて、大きなコンテキストウィンドウでロードし、その設定を今後の実行のために保存します。
+次に、大きなコンテキストウィンドウでロードし、その設定を今後の実行のために保存します。
 
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
@@ -88,9 +88,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end --> 
 
-このモデルのデフォルトのコンテキスト長は262,144トークンです。メモリ不足（OOM）エラーが発生した場合は、コンテキストウィンドウを小さくすることを検討してください。ただし、Qwen3.6は複雑なタスクに拡張コンテキストを活用するため、思考能力を維持するために少なくとも128Kトークンのコンテキスト長を維持することをお勧めします。
+このモデルのデフォルトのコンテキスト長は 262,144 トークンです。メモリ不足（OOM）エラーが発生した場合は、コンテキストウィンドウを小さくすることを検討してください。ただし、Qwen3.6 は複雑なタスクのために拡張コンテキストを活用するため、思考能力を維持するにはコンテキスト長を少なくとも 128K トークンに保つことをお勧めします。
 
-> **ヒント: エージェントの応答を高速化するために思考モードを無効化する:** Qwen3.6-35B-A3Bはデフォルトで思考モードで動作し、各応答の前にレイテンシーが加わります。エージェントループではこのオーバーヘッドがすぐに蓄積します。[lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json)リポジトリには、思考モードを無効化するすぐに使える設定が用意されています。使用するには、ファイルをダウンロードしてインポートします。
+> **ヒント: エージェントの応答を高速化するために思考を無効化する:** Qwen3.6-35B-A3B はデフォルトで思考モードで動作し、各応答の前に遅延が加わります。エージェントループではこのオーバーヘッドが急速に蓄積します。[lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) リポジトリには、思考を無効化するための設定ファイルが用意されています。使用するには、ファイルをダウンロードしてインポートします。
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -231,27 +231,27 @@ echo "OK: Lemonade chat/completions returned a response"
 
 <!-- @os:windows -->
 
-## WSLのセットアップ
+## WSL をセットアップする
 
-OpenClawはWSL内で実行し（推奨）、Windows上でネイティブに動作するLemonadeに接続します。これにより、Lemonadeのウィンドウズ側でのGPUアクセラレーションを維持しつつ、OpenClaw用のLinuxシェル環境を得られます。
+OpenClaw は WSL 内で実行し（推奨）、Windows 上でネイティブに実行されている Lemonade に接続します。これにより、Lemonade の GPU アクセラレーションを Windows 側に保ちながら、OpenClaw 用の Linux シェル環境を利用できます。
 
-### WSLとUbuntuのインストール
+### WSL と Ubuntu をインストールする
 
-管理者としてPowerShellを開き、WSLカーネルをインストールします。
+PowerShell を管理者として開き、WSL カーネルをインストールします。
 
 ```powershell
 wsl --install --no-distribution
 ```
 
-続いてUbuntuをインストールします。
+次に Ubuntu をインストールします。
 
 ```powershell
 wsl --install -d Ubuntu-24.04
 ```
 
-### WSLでsystemdを有効化する
+### WSL で systemd を有効にする
 
-Ubuntuターミナル内で以下を実行します。
+Ubuntu ターミナル内で以下を実行します。
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -260,43 +260,45 @@ systemd=true
 EOF
 ```
 
-WSLを再起動します。
+WSL を終了して再起動します。
 
 ```powershell
+exit
 wsl --shutdown
 wsl
 ```
 
-### WindowsからWSLへのLemonadeのブリッジ
+### Windows から WSL へ Lemonade をブリッジする
 
-WSL2は仮想ネットワーク内で動作します。Windows上のLemonadeは`127.0.0.1`にバインドされますが、WSLから直接到達することはできません。Windowsのポートプロキシを使用して、WSLのゲートウェイIPからWindowsのlocalhostへトラフィックを転送します。
+WSL2 は仮想ネットワーク内で実行されます。Windows 上の Lemonade は `127.0.0.1` にバインドされますが、WSL から直接到達することはできません。Windows のポートプロキシを使用して、WSL のゲートウェイ IP から Windows のローカルホストへトラフィックを転送します。
 
-**WSLのゲートウェイIPを確認します**（WSL内で実行）。
+**WSL のゲートウェイ IP を確認する**（WSL 内で実行）:
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**ポートプロキシを追加します**（管理者としてPowerShellで実行し、`<WSL-Gateway-IP>`をお使いのWSLゲートウェイIPに置き換えてください）。
+**ポートプロキシを追加する**（PowerShell を管理者として実行し、`<WSL-Gateway-IP>` をお使いの WSL ゲートウェイ IP に置き換えてください）:
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
+> 注: `netsh: command not found` エラーが発生した場合は、代わりに明示的な実行ファイル名 `netsh.exe` を使用してみてください
 
-**ファイアウォールルールを追加します**（同じ昇格済みPowerShellで実行）。
+**ファイアウォールルールを追加する**（同じ昇格済み PowerShell で）:
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**WSLから確認します**。
+**WSL から確認する**:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-前のステップですでにQwen3.6-35B-A3B-GGUFモデルをロードしている場合は、以下のようなJSON出力が表示されるはずです。
+前のステップで Qwen3.6-35B-A3B-GGUF モデルを既にロードしている場合、以下のような JSON 出力が表示されるはずです。
 
 ```json
 {
@@ -314,7 +316,36 @@ curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 }
 ```
 
-> `netsh portproxy`ルールは再起動後も維持されますが、`wsl --shutdown`後にWSLのゲートウェイIPが変わることがあります。再起動後にWSLからLemonadeに到達できなくなった場合は、更新後のゲートウェイIPを取得し、新しいIPでプロキシを更新してください。
+#### 再起動後もブリッジを機能させ続ける
+
+`netsh portproxy` ルールは再起動後も残りますが、`wsl --shutdown` や再起動の後に WSL のゲートウェイ IP が変わることがあります。その場合、プロキシは古い IP を指したままとなり、Lemonade は WSL から到達できなくなります。そうなった場合は、以下のいずれかの方法を使用してください。
+
+**オプション 1（推奨）— ブリッジを自動的に修復する。** 毎回手動で対応する手間を省くため、起動時とサインイン時にブリッジをチェックし、ゲートウェイ IP が変わった場合にのみ再構築するスケジュールされたタスクを使用します。詳しくは [Lemonade WSL ブリッジ自動修復ガイド](assets/RepairLemonadeWslBridge.md) を参照してください。
+
+
+**オプション 2 — ブリッジを手動で修復する。** まず、WSL 内で次を実行して現在の WSL ゲートウェイ IP を取得します。
+
+```bash
+ip route show default | awk '{print $3}' | head -1
+```
+
+この値をコピーしてください。以下で `<new-WSL-Gateway-IP>` の代わりに使用します。
+
+次に、**管理者権限の PowerShell**（管理者として実行）で、既存のルールを一覧表示し、古い Lemonade のルールだけを削除して、現在の IP を使った新しいルールを追加します。
+
+```powershell
+netsh interface portproxy show all
+netsh interface portproxy delete v4tov4 listenaddress=<old-WSL-Gateway-IP> listenport=13305
+netsh interface portproxy add v4tov4 listenaddress=<new-WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
+```
+
+`show all` の出力において、古い Lemonade のルールは、接続アドレスが `127.0.0.1`、ポートが `13305` となっているエントリです。そのリッスンアドレスがあなたの `<old-WSL-Gateway-IP>` です。そのアドレスを指定して削除すると、このルールのみが削除され、マシン上の他のポートプロキシルールには影響しません。
+
+セットアップ時に追加したファイアウォールルールはポート `13305`（IP ではなく）に紐づいているため、引き続き機能し、再作成する必要はありません。
+
+> **推奨事項：** ゲートウェイの問題を避けるため、以下のシェル構成を強く推奨します。
+> - **Windows コマンド**は **PowerShell** で実行してください
+> - **WSL ディストロのコマンド**は（**管理者として**実行した）**コマンドプロンプト**で実行してください
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -370,17 +401,17 @@ finally {
 ---
 <!-- @os:end -->
 
-## OpenClawのインストールと構成
+## OpenClaw のインストールと設定
 
-### OpenClawのインストール
+### OpenClaw のインストール
 <!-- @os:windows -->
-> このセクションのコマンドは、**WSLターミナル**内で実行してください。
+> このセクションのコマンドは **WSL ターミナル**内で実行してください。
 <!-- @os:end -->
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-`--no-onboard`フラグは対話型セットアップウィザードをスキップします。次のステップでモデルバックエンドを手動で構成することになるため、どのモデルとサーバーを使用するかを細かく制御できます。
+`--no-onboard` フラグは対話型セットアップウィザードをスキップします。次のステップでモデルバックエンドを手動で設定するため、使用するモデルとサーバーを正確に制御できます。
 
 新しいターミナルを開き、インストールを確認します。
 
@@ -388,11 +419,11 @@ curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 openclaw --version
 ```
 
-> **ヒント:** インストール後に`command not found`と表示される場合は、npmのグローバルbinディレクトリをPATHに追加してください。
+> **ヒント：** インストール後に `command not found` と表示される場合は、npm のグローバル bin ディレクトリを PATH に追加してください。
 > ```bash
 > export PATH="$HOME/.npm-global/bin:$PATH"
 > ```
-> これを恒久的にするには、上記の行を`~/.bashrc`または`~/.zshrc`ファイルに追加してください。
+> これを永続的にするには、上記の行を `~/.bashrc` または `~/.zshrc` ファイルに追加してください。
 
 <!-- @os:linux -->
 <!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
@@ -446,9 +477,11 @@ finally {
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
-### OpenClawをLemonadeで使用するように設定する
 
-OpenClawの非対話型オンボーディングを実行します。
+
+### OpenClaw に Lemonade を使用させる設定
+
+OpenClaw の非対話型オンボーディングを実行します。
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -488,9 +521,9 @@ openclaw onboard \
 ```
 <!-- @os:end -->
 
-このコマンドは、OpenClawの設定を`~/.openclaw/openclaw.json`に書き込みます。
+このコマンドは、OpenClaw の設定を `~/.openclaw/openclaw.json` に書き込みます。
 
-> **OpenClawのコンテキストウィンドウサイズ設定:** OpenClawの圧縮処理は、`contextTokens > contextWindow − reserveTokens`のときにトリガーされます。デフォルトの`reserveTokensFloor`は20,000トークンで、これは`reserveTokens`より低い場合にそれを上書きする下限値であるため、コンテキストが約37k未満のモデルでは無限圧縮ループが発生します。設定内で一度低い予約値を設定し下限を無効化すれば、それがすべてのモデルに適用され、モデルごとの調整は不要です:
+> **OpenClaw のコンテキストウィンドウサイジング：** OpenClaw の圧縮（compaction）は `contextTokens > contextWindow − reserveTokens` の場合にトリガーされます。デフォルトの `reserveTokensFloor` は 20,000 トークンで、これは `reserveTokens` がそれより小さい場合に上書きする下限値であるため、コンテキストが約 37k を下回るモデルでは無限の圧縮ループが発生します。設定内で reserve を低く設定し、floor を一度無効にすれば、すべてのモデルに適用され、モデルごとの個別調整は不要です。
 >
 > ```json
 > "compaction": {
@@ -499,13 +532,13 @@ openclaw onboard \
 > }
 > ```
 >
-> `reserveTokensFloor`は*下限値*（最低保証値）であり、予約値そのものではないため、下限値のみを設定しても効果はありません。`reserveTokensFloor: 0`はこの保証を無効化し、より低い`reserveTokens`が受け入れられるようにします。
+> `reserveTokensFloor` は *floor*（下限のガード）であり、reserve そのものではないため、floor のみを設定しても効果はありません。`reserveTokensFloor: 0` はこのガードを無効にするため、より小さい `reserveTokens` の値が受け入れられます。
 >
-> **適用すべき場合:** モデルの実効コンテキストウィンドウが約37k未満の場合、この設定を使用してください。これは、モデル自体が小さい場合（例: 8k、16k、32k）や、意図的に低い値に制限している場合（例: 128kモデルをロードしつつLemonadeでコンテキストを16kに設定している場合）に該当します。この設定を行わないと、OpenClawは起動時に無限圧縮ループに陥ります。
+> **これを適用すべき場合：** モデルの有効なコンテキストウィンドウが約 37k を下回る場合にこの設定を使用してください。これは、モデル自体が小さい場合（例：8k、16k、32k）や、意図的に低い値に制限している場合（例：128k のモデルを読み込んでいるが、Lemonade でコンテキストを 16k に設定している場合）のいずれかに該当します。この設定を行わないと、OpenClaw は起動時に無限の圧縮ループに陥ります。
 >
-> **フルコンテキストの大規模コンテキストモデルの場合:** この設定は完全にスキップできます。デフォルト設定で問題なく動作し、ウィンドウが満杯になるかなり前に圧縮が開始され、モデルには長い応答を生成するための十分な余裕があります。もしこの設定を適用する場合は、`reserveTokens: 4096`によって応答長が約4kトークンに制限されることに注意してください。これにより、長いファイル生成や詳細な計画が途中で切れる可能性があります。
+> **フルコンテキストの大規模コンテキストモデルの場合：** この設定は完全にスキップしても構いません。デフォルトの設定で問題なく動作し、ウィンドウが埋まる前に圧縮が適切に働き、モデルには長い応答を生成する十分な余地があります。それでも適用する場合は、`reserveTokens: 4096` によって応答の長さが約 4k トークンに制限されることに注意してください。これにより、長いファイル生成や詳細なプランが途中で打ち切られる可能性があります。
 >
-> **設定を追加する場所:** `compaction`ブロックは、`openclaw.json`（通常は`~/.openclaw/openclaw.json`）内の`agents.defaults`の中に配置します:
+> **どこに追加するか：** `compaction` ブロックは、`openclaw.json`（通常は `~/.openclaw/openclaw.json`）内の `agents.defaults` の中に配置してください。
 >
 > ```json
 > {
@@ -524,13 +557,12 @@ openclaw onboard \
 > }
 > ```
 >
-> それ以外の設定（gateway、channels、modelsなど）は変更する必要はなく、`compaction`キーのみを追加すれば十分です。
+> 設定の残りの部分（gateway、channels、models など）はそのままで変更不要です。追加が必要なのは `compaction` キーのみです。
+### (推奨) Docker サンドボックス化を有効にする
 
-### （推奨）Dockerサンドボックス化を有効にする
+OpenClaw では、エージェントによるファイル操作やコード操作をホスト上で直接実行するのではなく、隔離された Docker コンテナ経由で実行させることができます。これにより、意図しない操作が発生した場合の影響範囲をサンドボックス内に限定し、ホストのファイルシステムやネットワークには影響を与えません。
 
-OpenClawは、エージェントによるファイル操作やコード操作をホスト上で直接実行するのではなく、すべて隔離されたDockerコンテナ経由で実行するように設定できます。これにより、意図しない操作が発生した場合の影響範囲がサンドボックス内に限定され、ホストのファイルシステムやネットワークには影響が及びません。
-
-サンドボックスイメージを一度だけビルドします（Dockerがインストールされている必要があります）:
+サンドボックス用のイメージを一度だけビルドします(Docker がインストールされている必要があります)。
 
 ```bash
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -630,7 +662,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-`~/.openclaw/openclaw.json`内の既存の`agents.defaults`ブロック内に`sandbox`キーを追加するには、次を実行します:
+`~/.openclaw/openclaw.json` 内にある既存の `agents.defaults` ブロックの中に `sandbox` キーを追加するには、以下を実行します。
 
 ```bash
 cat > sandbox.patch.json5 <<JSON5
@@ -649,22 +681,22 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-サンドボックスコンテナは、デフォルトでは**ネットワークアクセスを持ちません**。バインドマウントやネットワークのオーバーライドについては、[サンドボックス化に関するリファレンス](https://docs.openclaw.ai/gateway/sandboxing)を参照してください。
+サンドボックスコンテナは、デフォルトでは**ネットワークアクセスを持ちません**。バインドマウントやネットワークの上書き設定については、[サンドボックス化に関するリファレンス](https://docs.openclaw.ai/gateway/sandboxing)を参照してください。
 
-> #### トラブルシューティング: Dockerのアクセス権限が拒否される場合
+> #### トラブルシューティング: Docker のパーミッションが拒否される
 > 
-> Dockerコマンドの実行時に「permission denied」と表示される場合:
+> Docker コマンドを実行した際に「permission denied」と表示される場合:
 > 
-> **手順1: ユーザーをdockerグループに追加する**
+> **手順 1: ユーザーを docker グループに追加する**
 > 
 > ```bash
-> sudo groupadd docker                    # 必要に応じてグループを作成
-> sudo usermod -aG docker $USER           # 自分自身をグループに追加
-> newgrp docker                           # 変更を有効化
-> docker run hello-world                  # 動作確認
+> sudo groupadd docker                    # Create group if needed
+> sudo usermod -aG docker $USER           # Add yourself to the group
+> newgrp docker                           # Activate the change
+> docker run hello-world                  # Test it
 > ```
 > 
-> **手順2: エラーが解消しない場合は、恒久的な修正を適用する**
+> **手順 2: エラーが解消しない場合は、恒久的な対処を適用する**
 > 
 > ```bash
 > sudo chgrp docker /lib/systemd/system/docker.socket
@@ -673,7 +705,7 @@ openclaw config patch --file ./sandbox.patch.json5
 > 
 > その後、システムを**再起動**してください。
 > 
-> **一時的な簡易対応**（再起動後にリセットされます）:
+> **一時的な簡易対処**(再起動後にリセットされます):
 > ```bash
 > sudo chmod 666 /var/run/docker.sock
 > ```
@@ -899,26 +931,26 @@ finally {
 <!-- @os:end -->
 
 <!-- @os:linux -->
-## （推奨）FirecrawlサービスとのOpenClaw連携
+## (推奨) Firecrawl サービスとの OpenClaw 連携
 
-[Firecrawl](https://docs.firecrawl.dev/introduction)は、これらの課題を回避し、OpenClawによる自動化の可能性を最大限に引き出すことができる、セルフホスト型のWebクローリングおよびコンテンツ抽出サービスを提供します。
+[Firecrawl](https://docs.firecrawl.dev/introduction) は、こうした課題を回避し、OpenClaw の自動化の可能性を最大限に引き出すことができる、セルフホスト型の Web クローリングおよびコンテンツ抽出サービスを提供します。
 
-このセットアップでは、OpenClawはPodmanによって管理される一連のDockerコンテナとして実行されます。ライフサイクル管理と自動起動を簡素化するため、Firecrawlをユーザーレベルの`systemd`サービスとして登録し、基盤となるPodman Composeスタックをオーケストレーションします。これにより、コンテナを直接操作する代わりに、標準の`systemctl --user`コマンドを使用して、OpenClawのgatewayの起動・停止、およびFirecrawlサービスの検証が行えるようになります。
+このセットアップでは、OpenClaw は Podman によって管理される一連の Docker コンテナとして実行されます。ライフサイクル管理と自動起動を簡素化するために、Firecrawl をユーザーレベルの `systemd` サービスとして登録し、基盤となる Podman Compose スタックをオーケストレーションします。これにより、OpenClaw はコンテナと直接やり取りする代わりに、標準の `systemctl --user` コマンドを使用して、ゲートウェイの起動、停止、および Firecrawl サービスの検証を行うことができます。
 
-わかりやすくするため、プロセス全体を4つのステップに分けています:
+シンプルにするため、全体のプロセスを4つの手順に分けています。
 
 ---
 
 ### 1. システムサービスを登録する
-systemdのユーザー設定ディレクトリに移動します:
+systemd のユーザー設定ディレクトリに移動します。
 ```bash
 cd ~/.config/systemd/user
 ```
-`firecrawl.service`という名前の新しいファイルを作成し、開きます。
+`firecrawl.service` という新しいファイルを作成して開きます。
 ```bash
 nano firecrawl.service
 ```
-以下の設定内容をコピーして貼り付けます:
+以下の設定内容をコピーして貼り付けます。
 ```bash
 [Unit]
 Description=OpenClaw Firecrawl Service
@@ -957,26 +989,27 @@ ExecStop=/usr/bin/podman compose -f openclaw-compose.yaml down
 [Install]
 WantedBy=default.target
 ```
-この時点で、サービスは定義されていますが、まだ`systemd`には登録されていません。
-上記で作成したファイル名と完全に一致していることを確認してから、以下を実行してください:
+この時点では、サービスは定義済みですが、まだ `systemd` に登録されていません。
+上記で作成したファイル名と完全に一致していることを確認してから、以下を実行します。
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
 ```
-成功すると、次のような出力が表示されます:
+成功すると、以下のような出力が表示されます。
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
-`default.target.wants/`には、自動起動するように設定されたサービスへのシンボリックリンクが含まれています。
-### 2. Firecrawlの設定
+`default.target.wants/` には、自動起動するように設定されたサービスへのシンボリックリンクが含まれています。
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md)は、スクレイピングおよびデータ処理環境を完全に制御したいユーザーに最適ですが、その分メンテナンスや設定の手間が増えるというトレードオフがあります。
+### 2. Firecrawl を設定する
 
-まずリポジトリをクローンします:
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) は、スクレイピングおよびデータ処理環境を完全に制御したいユーザーに最適ですが、その分、追加のメンテナンスや設定の手間が発生するというトレードオフがあります。
+
+まず、リポジトリをクローンすることから始めます。
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-`/firecrawl`ルートディレクトリに`.env`を作成します: 
+`/firecrawl` ルートディレクトリ内に `.env` を作成します。
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -985,74 +1018,73 @@ HOST=0.0.0.0
 # ===== Firecrawl =====
 # FIRECRAWL_API_KEY="" # optional
 ```
-### 3. Podman ComposeでOpenClawをデプロイする
+### 3. Podman Compose で OpenClaw をデプロイする
 
-先に進む前に、最新のOpenClaw Dockerイメージをプルしていることを確認してください:
+先に進む前に、最新の OpenClaw Docker イメージを pull していることを確認してください。
 ```bash
 podman pull ghcr.io/openclaw/openclaw:latest
 ```
-完了したら、OpenClaw Composeファイル[openclaw-compose.yaml](assets/openclaw-compose.yaml)をダウンロードし、`/firecrawl`ルートディレクトリに配置します:
+これが完了したら、OpenClaw の Compose ファイル [openclaw-compose.yaml](assets/openclaw-compose.yaml) をダウンロードし、`/firecrawl` ルートディレクトリに配置します。
 
-> `WorkingDirectory=${HOME}/firecrawl`で指定されているように、`systemd`がサービスを正しく検出して起動するためには、この規約に従う必要があります。
+> `WorkingDirectory=${HOME}/firecrawl` で指定されている通り、`systemd` がサービスを正しく検出・起動するためには、この配置規則に従う必要があります。
 
-> 必要に応じて、Firecrawlサービスを追加してスタックをいつでも拡張できます。利用可能なサービスの全リストは、公式の[Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml)に記載されています。
+> 必要に応じて、追加の Firecrawl サービスを組み込むことで、スタックをいつでも拡張できます。利用可能なサービスの一覧は、公式の [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) で確認できます。
 
-### 4. FirecrawlからOpenClawサービスを起動する
+### 4. Firecrawl 経由で OpenClaw サービスを起動する
 
-`systemd`に制御を渡す前に、スタックを手動で実行してすべてが正しく動作することを確認します:
+`systemd` に制御を委ねる前に、スタックを手動で実行して、すべてが正しく動作することを確認します。
 ```bash
 podman compose -f openclaw-compose.yaml up -d
 ```
-すべてが正しく構成されていれば、OpenClawコンテナが立ち上がり、コマンドラインの出力は次のようになるはずです。
+すべてが正しく設定されていれば、OpenClaw コンテナが起動し、コマンドラインの出力は以下のようになるはずです。
 <p align="center">
   <img src="assets/openclaw_health_verification.png" width="500" height="400" />
 </p>
 
-確認できたら、先に進む前にスタックを停止します:
+確認が済んだら、次に進む前にスタックを停止します。
 ```bash
 podman compose -f openclaw-compose.yaml down
 ```
-サービスを開始する前に、`firecrawl`ディレクトリとその`.env`ファイルに正しい所有権と権限が設定されていることを確認する必要があります。
+サービスを起動する前に、`firecrawl` ディレクトリとその `.env` ファイルに、正しい所有権とパーミッションが設定されていることを確認する必要があります。
 これは、サービスが起動時に認証情報を書き込むために不可欠です。
 ```bash
 sudo chown ${USER}:${USER} ~/firecrawl/.env
 chmod 644 ~/firecrawl/.env
 ```
-すべての確認が済んだので、`systemd`経由でサービスを開始します:
+これですべての検証が完了したので、`systemd` 経由でサービスを起動します。
 ```bash
 systemctl --user start firecrawl.service
 ```
-[The OpenClaw Actions](https://docs.openclaw.ai/)はインタラクティブなコンテナ内からアクセス可能で、Webダッシュボードは同じホストとポート http://127.0.0.1:18789 で利用できます。
+[OpenClaw Actions](https://docs.openclaw.ai/) は、インタラクティブコンテナ内からアクセス可能であり、Web ダッシュボードは同じホストおよびポート(http://127.0.0.1:18789)で利用できます。
 <p align="center">
   <img src="assets/OpenClawWebUI-PodmanLaunch.png" width="500" height="500" />
 </p>
 
-### `OPENCLAW_GATEWAY_TOKEN`の取得
+### `OPENCLAW_GATEWAY_TOKEN` を取得する
 
-サービスが起動して実行されると、ホームフォルダー内に新しい`.openclaw`ディレクトリ(~/.openclaw)が作成されていることに気づくでしょう。このディレクトリはデフォルトでロックされているため、ゲートウェイトークンを取得するにはロックを解除する必要があります。
+サービスが起動して実行されると、ホームフォルダー(~/.openclaw)内に新しい `.openclaw` ディレクトリが作成されていることに気付くはずです。このディレクトリはデフォルトでロックされているため、ゲートウェイトークンを取得するにはロックを解除する必要があります。
 
-1. ディレクトリへのアクセス権を付与します:
+1. ディレクトリへのアクセス権を付与します。
 ```bash
 sudo chmod 777 ~/.openclaw/
 ```
-2. ゲートウェイトークンを読み取ります:
+2. ゲートウェイトークンを読み取ります。
 ```bash
 grep '"token"' ~/.openclaw/openclaw.json
 ```
-出力内で`OPENCLAW_GATEWAY_TOKEN`の値を探してください。
+出力の中から `OPENCLAW_GATEWAY_TOKEN` の値を探します。
 
-3. ブラウザでゲートウェイダッシュボード http://127.0.0.1:18789 を開きます。認証を求められたらトークンを貼り付けてください。
+3. ブラウザでゲートウェイダッシュボード(http://127.0.0.1:18789)を開きます。認証を求められたら、取得したトークンを貼り付けます。
 
-サービスを停止するには、次を実行します:
+サービスを停止するには、以下を実行します。
 ```bash
 systemctl --user stop firecrawl.service
 ```
 <!-- @os:end -->
 ---
+## OpenClaw ゲートウェイを起動する
 
-## OpenClaw Gatewayを起動する
-
-ゲートウェイは、エージェントループを管理しダッシュボードを提供するOpenClawプロセスです。
+ゲートウェイは、エージェントループを管理し、ダッシュボードを提供する OpenClaw プロセスです。
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -1183,25 +1215,57 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-ダッシュボードを開くには、ゲートウェイが実行されたままの状態で、2つ目のターミナルで次を実行します:
+ダッシュボードを開くには、ゲートウェイを実行したまま、2 つ目のターミナルで以下を実行します。
 
 ```bash
 openclaw dashboard
 ```
 
-ゲートウェイはループバックにバインドされているため、同じマシンから開いた場合、ダッシュボードは自動的に認証されます。ローカルアクセスにはトークンの入力やデバイス承認は必要ありません。アクティブなバックエンドとしてLemonadeモデルが表示されたOpenClawダッシュボードが表示されるはずです。
+ゲートウェイはループバックにバインドされているため、同じマシンから開いた場合、ダッシュボードは自動的に認証されます。ローカルアクセスにはトークンの入力もデバイスの承認も必要ありません。ダッシュボードには、アクティブなバックエンドとして Lemonade モデルが表示されているはずです。
 
-> サンドボックス化を有効にしている場合は、ダッシュボードからエージェントに`run hostname`を実行させることで確認できます。マシンのホスト名ではなく短いコンテナIDが表示されれば、サンドボックスは正常に機能しています。
+> サンドボックス機能を有効にしている場合は、ダッシュボードからエージェントに `run hostname` を実行させることで動作を確認できます。マシンのホスト名ではなく短いコンテナ ID が表示されれば、サンドボックスは正しく機能しています。
 
-**おめでとうございます。これで完全にローカルなAIエージェントスタックをゼロから構築できました。**
+**おめでとうございます。これで完全にローカルな AI エージェントスタックをゼロから構築できました。**
 
-> **ゲートウェイトークンが必要ですか？** `openclaw dashboard --no-open`を実行すると、トークンが埋め込まれたダッシュボードURLが表示されます(クリップボードへのコピーも試みられます)。あるいは、トークンは`~/.openclaw/openclaw.json`内の`gateway.auth.token`にあります。
->
-> **リモートデバイスの承認:** 2台目のマシンやスマートフォンからダッシュボードを開くと、ブラウザにリクエストIDが表示されます。ゲートウェイを実行しているマシンに戻り、次を実行します:
+> **ゲートウェイトークンが必要ですか？** `openclaw dashboard --no-open` を実行すると、トークンが埋め込まれたダッシュボード URL が出力されます（クリップボードへのコピーも自動的に試みられます）。あるいは、トークンは `~/.openclaw/openclaw.json` 内の `gateway.auth.token` にも保存されています。
+
+**別のデバイスからダッシュボードにアクセスする（SSH トンネル経由）**
+
+OpenClaw をリモートマシンで実行している場合、SSH トンネルを介してローカルマシンからそのダッシュボードにアクセスできます。トンネルはゲートウェイのポート（`18789`）を転送するため、ローカルのブラウザは `127.0.0.1` 経由でリモートのゲートウェイと通信できます。
+
+1. **ローカルマシン**から、一度リモートマシンに接続し、フィンガープリントの確認プロンプトを承認してホストを known hosts に追加します。
+
+   ```bash
+   ssh user@<host-ip>
+   ```
+
+2. 引き続き**ローカルマシン**で、SSH トンネルを開きます。
+
+   ```bash
+   ssh -N -L 18789:127.0.0.1:18789 user@<host-ip>
+   ```
+
+   > **注:** パスワードを入力した後、ターミナルには何も出力されず、フリーズしたように見えます。これは想定どおりの動作です。`-N` フラグは SSH にリモートコマンドを実行しないよう指示するもので、単にトンネルを開いたままにするだけです。このターミナルは実行したままにしておいてください。
+
+3. **ローカルマシン**でブラウザを開き、`http://127.0.0.1:18789` にアクセスします。
+
+4. **リモートマシン**でゲートウェイトークンを出力し、それをブラウザに貼り付けてログインします。
+
+   ```bash
+   openclaw dashboard --no-open
+   ```
+
+   これにより、トークンが埋め込まれたダッシュボード URL が出力されます。そのトークンをコピーしてログインしてください。（トークンは `~/.openclaw/openclaw.json` 内の `gateway.auth.token` にも保存されています。）
+
+> **リモートデバイスの承認:** 別のマシンやスマートフォンからダッシュボードを開くと、ブラウザにリクエスト ID が表示される場合があります。**リモートマシン**で、保留中のリクエストを一覧表示します。
+> ```bash
+> openclaw devices list
+> ```
+> 続いて、該当するリクエストを承認します。
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> これはリモートまたは2台目のデバイスの場合にのみ必要です。同じマシンからのループバックアクセスは自動的に認証されます。
+> これは、リモートまたは二次的なデバイスからアクセスする場合にのみ必要です。同じマシンからのループバックアクセスは自動的に認証されます。詳細については、[リモートアクセス](https://docs.openclaw.ai/gateway/remote)のドキュメントを参照してください。
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1211,46 +1275,47 @@ openclaw dashboard
 
 ## オプション: コミュニケーションチャネルを接続する
 
-ゲートウェイが実行されると、任意のデバイスからローカルエージェントにアクセスできるようになります。ご自身の環境に合ったオプションを選択してください。OpenClawは[Discord](https://docs.openclaw.ai/channels/discord)、[Telegram](https://docs.openclaw.ai/channels/telegram)、その他のチャネルをサポートしています。全リストは[docs.openclaw.ai](https://docs.openclaw.ai)をご覧ください。
+ゲートウェイが起動していれば、どのデバイスからでもローカルエージェントにアクセスできます。ご自身の環境に合ったオプションを選んでください。OpenClaw は [Discord](https://docs.openclaw.ai/channels/discord)、[Telegram](https://docs.openclaw.ai/channels/telegram)、その他のチャネルに対応しています。完全なリストは [docs.openclaw.ai](https://docs.openclaw.ai) をご覧ください。
 
 ---
 
-### オプションA: Discord
+### オプション A: Discord
 
-Discordでは、ボットを追加するために**管理者権限を持つ**サーバーが必要です。サーバーを共有していても所有していない場合は、代わりにオプションB(Telegram)をご利用ください。
+Discord を利用するには、**管理者権限を持つ**サーバーが必要です（ボットを追加するため）。サーバーを共有していても自分が所有者でない場合は、代わりにオプション B（Telegram）を使用してください。
 
-#### Discordアカウントとサーバーの作成
+#### Discord アカウントとサーバーを作成する
 
-Discordアカウントをお持ちでない場合は、[discord.com](https://discord.com)でサインアップしてください。また、管理者権限を持つサーバーも必要です。Discordサイドバーの**+**アイコンをクリックし、**Create My Own**を選択して作成してください。プライベートサーバーで問題ありません。
+Discord アカウントをお持ちでない場合は、[discord.com](https://discord.com) で登録してください。また、管理者権限を持つサーバーも必要です。Discord のサイドバーにある **+** アイコンをクリックし、**Create My Own** を選択して作成してください。プライベートサーバーで問題ありません。
 
-#### Discordアプリケーションとボットの作成
+#### Discord アプリケーションとボットを作成する
 
-1. [Discord Developer Portal](https://discord.com/developers/applications)にアクセスし、**New Application**をクリックします。名前を付けてください(例: "openclaw-bot")。
-2. サイドバーで**Bot**をクリックします。ボットのユーザー名を設定します。
-3. Botページ内で下にスクロールし、**Privileged Gateway Intents**で以下を有効にします:
-   - **Message Content Intent**(必須)
-   - **Server Members Intent**(推奨)
-4. 上にスクロールして戻り、**Reset Token**をクリックしてボットトークンを生成します。コピーしてください。
+1. [Discord Developer Portal](https://discord.com/developers/applications) にアクセスし、**New Application** をクリックします。名前を付けてください（例: "openclaw-bot"）。
+2. サイドバーで **Bot** をクリックします。ボットのユーザー名を設定します。
+3. 引き続き Bot ページで、**Privileged Gateway Intents** までスクロールし、以下を有効にします。
+   - **Message Content Intent**（必須）
+   - **Server Members Intent**（推奨）
+4. 上にスクロールして戻り、**Reset Token** をクリックしてボットトークンを生成します。トークンをコピーしてください。
 
-#### サーバーへのボットの追加
+#### ボットをサーバーに追加する
 
-1. サイドバーで**OAuth2/ URL Generator**をクリックします。
-2. **Scopes**で`bot`と`applications.commands`を有効にします。
-3. **Bot Permissions**で以下を有効にします: View Channels、Send Messages、Read Message History、Embed Links、Attach Files。
-4. 生成されたURLをコピーしてブラウザに貼り付け、サーバーを選択して確認します。ボットがサーバーのメンバーリストに表示されるはずです。
-#### IDを収集する
+1. サイドバーで **OAuth2/ URL Generator** をクリックします。
+2. **Scopes** で `bot` と `applications.commands` を有効にします。
+3. **Bot Permissions** で以下を有効にします: View Channels、Send Messages、Read Message History、Embed Links、Attach Files。
+4. 生成された URL をコピーしてブラウザに貼り付け、サーバーを選択して確定します。ボットがサーバーのメンバー一覧に表示されるはずです。
 
-Discordで開発者モードを有効にします(**ユーザー設定/ 詳細設定/ 開発者モード**)。その後:
-- サーバーアイコンを右クリック: **サーバーIDをコピー**
-- 自分のアバターを右クリック: **ユーザーIDをコピー**
+#### ID を収集する
 
-#### サーバーメンバーからのDMを許可する
+Discord でデベロッパーモードを有効にし（**User Settings/ Advanced/ Developer Mode**）、その後以下を行います。
+- サーバーアイコンを右クリック: **Copy Server ID**
+- 自分のアバターを右クリック: **Copy User ID**
 
-サーバーアイコンを右クリック/ **プライバシー設定**/ **ダイレクトメッセージ**をオンに切り替えます。これにより、ボットがあなたにDMを送れるようになり、ペアリング手順で必要になります。
+#### サーバーメンバーからの DM を許可する
 
-#### Discord用にOpenClawを設定する
+サーバーアイコンを右クリック/ **Privacy Settings**/ **Direct Messages** をオンに切り替えます。これにより、ボットがあなたに DM を送信できるようになり、ペアリング手順に必要です。
 
-ボットトークンを環境変数として保存し、Discordを有効化し、トークンを参照し、サーバーをallowlistに登録する単一のパッチファイルを作成します。上記で収集した`<server_id>`と`<user_id>`を実際のIDに置き換えてください。
+#### Discord 用に OpenClaw を設定する
+
+ボットトークンを環境変数として保存し、Discord を有効化してトークンを参照し、サーバーを許可リストに追加する単一のパッチファイルを作成します。上記で収集した ID を使って `<server_id>` と `<user_id>` を置き換えてください。
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1276,32 +1341,31 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **エージェントに設定を任せることに頼らないでください。** サンドボックスが有効な場合、エージェントはサンドボックス内から`~/.openclaw/openclaw.json`に書き込むことができません。代わりに、上記のCLIコマンドをホスト上で使用してください。
+> **エージェントに設定を任せるのはやめてください。** サンドボックス機能が有効な場合、エージェントはサンドボックス内から `~/.openclaw/openclaw.json` に書き込むことができません。代わりに、上記の CLI コマンドをホスト上で使用してください。
 
-新しいチャンネル設定を反映させるため、ゲートウェイを再起動します:
+新しいチャネル設定を反映させるため、ゲートウェイを再起動します。
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
 ```
 
-数秒以内にゲートウェイの出力に`logged in to discord as <bot-name>`と表示されるはずです。
-
+数秒以内に、ゲートウェイの出力に `logged in to discord as <bot-name>` と表示されるはずです。
 #### Discordアカウントをペアリングする
 
-Discordでボットにダイレクトメッセージを送ります。ボットは短いペアリングコードで返信します。
+Discordでボットにダイレクトメッセージを送ります。すると、短いペアリングコードが返信されます。
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-OpenClawを実行しているマシン上でそれを承認します:
+OpenClawを実行しているマシンで承認します:
 ```bash
 openclaw pairing approve discord <CODE>
 ```
 
-> ペアリングコードは1時間で期限切れになります。
+> ペアリングコードは1時間で失効します。
 
-これで、Discordから直接エージェントとチャットし、ローカルハードウェアにタスクをオフロードできるようになります。
+これで、Discordから直接エージェントとチャットし、タスクをローカルハードウェアにオフロードできるようになりました。
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1311,14 +1375,14 @@ openclaw pairing approve discord <CODE>
 
 ### オプションB: Telegram
 
-TelegramはほとんどのユーザーにとってDiscordよりシンプルで、サーバーも管理者権限も不要です。
+TelegramはほとんどのユーザーにとってDiscordよりもシンプルで、サーバーも管理者権限も不要です。
 
 #### Telegramボットを作成する
 
 1. Telegramを開き、**@BotFather**にメッセージを送ります。
-2. `/newbot`を送信し、指示に従います。渡されるボットトークンを保存してください。
+2. `/newbot`を送信し、案内に従います。渡されたボットトークンを保存してください。
 
-#### Telegram用にOpenClawを設定する
+#### TelegramでOpenClawを設定する
 
 トークンを環境変数として保存します:
 
@@ -1326,7 +1390,7 @@ TelegramはほとんどのユーザーにとってDiscordよりシンプルで�
 export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 ```
 
-チャンネル設定を`~/.openclaw/openclaw.json`に追加します(またはダッシュボード経由でパッチを適用します):
+`~/.openclaw/openclaw.json`にチャンネル設定を追加します(またはダッシュボード経由でパッチを適用します):
 
 ```json
 {
@@ -1347,19 +1411,19 @@ openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-ペアリングコードは1時間で期限切れになります。これで、TelegramのDMを通じてエージェントとチャットできるようになります。
+ペアリングコードは1時間で失効します。これで、Telegramのダイレクトメッセージからエージェントとチャットできるようになりました。
 
 ---
 
 ## 次のステップ
 
-これで、エージェントがスマートフォンからコマンドを受け取り、ローカルマシン上で動作できるようになったので、探求する価値のある3つの方向性を紹介します:
+これで、エージェントがスマートフォンからのコマンドを受け取り、ローカルマシン上で実行できるようになりました。ここでは、さらに探求する価値のある3つの方向性を紹介します。
 
-1. **株式市場サマライザー**: OpenClawをスケジュールして、一定間隔で金融APIからデータを取得し、ローカルモデルでその日の値動きを要約し、選択したチャンネルを通じて毎朝スマートフォンにダイジェストをプッシュします。
+1. **株式市場サマライザー**: OpenClawをスケジュール実行し、金融APIから一定間隔でデータを取得し、ローカルモデルでその日の値動きを要約して、毎朝選択したチャンネル経由でスマートフォンにダイジェストをプッシュします。
 
-2. **ファインチューニングモニター**: TelegramまたはDiscordからリモートでトレーニングジョブを開始し、エージェントにトレーニングログを追跡させ、定期的な損失値、GPU使用率、ディスク使用量をスマートフォンに報告させます。実行が停止したり、VRAMが急上昇したりした場合、マシンの前にいなくてもすぐに気付くことができます。
+2. **ファインチューニングモニター**: TelegramやDiscordを介してリモートでトレーニングジョブを開始し、エージェントにトレーニングログを追跡させ、損失値、GPU使用率、ディスク使用量を定期的にスマートフォンへ報告させます。実行が停止したりVRAMが急上昇したりした場合、マシンの前にいなくてもすぐに気付くことができます。
 
-3. **ローカルVLMを使ったIoT**: カメラを玄関に向け、Lemonade上でビジョンモデルを実行し、OpenClawにオンデマンドまたはトリガーでフレームを分析させます。スマートフォンから「今日荷物は届いた?」と尋ねれば、自分のハードウェアから的確な答えが得られます。
+3. **ローカルVLMを使ったIOT**: 玄関にカメラを向け、Lemonade上でビジョンモデルを実行し、OpenClawにオンデマンドまたはトリガーでフレームを分析させます。スマートフォンから「今日荷物は届いた?」と尋ねれば、自分自身のハードウェアから的確な答えが返ってきます。
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

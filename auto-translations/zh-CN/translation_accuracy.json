@@ -274,12 +274,12 @@
       "quality_issues": "Untranslated UI terms (Terminal, Live Metrics) acceptable but arguably should localize; otherwise accurate and fluent."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
-      "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
+      "source_sha256": "d02e5b448a59865cc2824aa03a21a1d50dc6a43f2daf86d4041ff733ad272ecc",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: '内存' for both memory/VRAM slightly ambiguous; mixed punctuation width in some sections."
+      "quality_score": 88,
+      "quality_issues": "Inconsistent terminology (Machine/机器, 你/您 mixed); anchor link mismatch in Next Steps; otherwise accurate and fluent."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
       "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
@@ -290,12 +290,12 @@
       "quality_issues": "Title slightly loose ('两台...的 RCCL 集群'); otherwise accurate, fluent, terms intact."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
-      "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
+      "source_sha256": "7e36a4d35383f5c81ee3a866fd4182241683e9b33228686bdad4a01cf8101735",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Untranslated headers ('Step 1'), inconsistent full-width vs half-width punctuation in latter half; otherwise accurate, fluent, code intact."
+      "quality_issues": "Minor: 'Machine' inconsistently translated (机器 vs Machine); memory/内存 vs VRAM/显存 slight inconsistency. Otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/clustering-rpc-server/playbook.json": {
       "source_sha256": "afee8d03bc9faa092036cbf4a62ec9db4252a49f25273438a7e4e5bbc2b4a10c",
@@ -426,12 +426,12 @@
       "quality_issues": "Accurate, fluent; minor: LLM abbreviation placement slightly different but acceptable."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
-      "source_sha256": "683efeea885d7ec0800eb93485220c7eb53fae3f639bf021b5152cd97f25bac9",
+      "source_sha256": "5c1b5b7406b76412eb78878a5fbd3037f1e2474a0f1bfc2dda0d197ec09c7a02",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Accurate, fluent, code intact. Minor: 'agent' rendered inconsistently (智能体/代理); inconsistent second-person (你/您) mixing across sections."
+      "quality_score": 95,
+      "quality_issues": "Excellent, fluent, accurate. Code/URLs intact. Minor: 'RAM' rendered as '内存' fine; a couple straight quotes in section headers."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
       "source_sha256": "57b52b994ec56c93c379e746d04c74ffc0b3db8a53293f249f8c6190e8b12016",
@@ -545,22 +545,6 @@
       "quality_score": 90,
       "quality_issues": "Minor inconsistency: 'kernel' rendered as both 内核 and kernel; slight terminology drift, otherwise accurate and fluent with code intact."
     },
-    "playbooks/core/deepseek-v4-flash-ds4/README.md": {
-      "source_sha256": "547f8d3dc8be793c698c67fd50466a5c4c27c2f154e87b0b36431ba2dc2b278f",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent, code/URLs intact; minor: missing blank line before '后续步骤' heading; 'coding agent' rendered 'editing/coding代理' acceptable."
-    },
-    "playbooks/core/deepseek-v4-flash-ds4/playbook.json": {
-      "source_sha256": "45498cef56dd0818dc2853a6cf895e283bbcd79d934ae35c298857305f6ab496",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent, terminology and brand terms intact; no notable issues."
-    },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
       "source_sha256": "bc32c1f17978924905775b38f78f9b2c77f936da0cb2f9517c1c0b0fed90a6eb",
       "prompt_version": "2",
@@ -624,6 +608,22 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
       "quality_issues": "Accurate, fluent; brands and terms intact. Minor stylistic redundancy with repeated '您的'."
+    },
+    "playbooks/supplemental/deepseek-v4-flash-ds4/README.md": {
+      "source_sha256": "cdda3c37ae369a04face29c80a0719dbdd4369cc798cb2d17d972622da506f89",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 91,
+      "quality_issues": "One omission: 'Lower values can fail with out-of-memory' slightly loosely rendered; otherwise accurate, fluent, code intact."
+    },
+    "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json": {
+      "source_sha256": "5714ddfbffb608f3e9850673606585c60a803ecb32aea703edd1c758c1d36366",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 78,
+      "quality_issues": "Title mistranslated: 'Running...with ds4' rendered as passive 'is running', losing imperative/gerund meaning."
     }
   }
 }

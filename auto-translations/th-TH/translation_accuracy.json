@@ -274,12 +274,12 @@
       "quality_issues": "Slight restructuring; 'Live Metrics' separated from list but meaning preserved. Fluent and accurate overall."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
-      "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
+      "source_sha256": "d02e5b448a59865cc2824aa03a21a1d50dc6a43f2daf86d4041ff733ad272ecc",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Excellent, accurate translation. Code, URLs, numbers intact. Minor: one missing blank line before Step 2 heading."
+      "quality_issues": "Minor: missing blank line before Step 2 heading; otherwise accurate, fluent, code/URLs/brands intact."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
       "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
@@ -506,12 +506,12 @@
       "quality_issues": "iGPU abbreviation differs from source 'integrated GPU' but conveys meaning; otherwise accurate and fluent."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
-      "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
+      "source_sha256": "7e36a4d35383f5c81ee3a866fd4182241683e9b33228686bdad4a01cf8101735",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: 'Step' headings and some anchor link labels left untranslated; slight inconsistency Machine/เครื่อง."
+      "quality_score": 91,
+      "quality_issues": "Accurate, fluent translation. Minor inconsistency: 'Machine 2' translated as 'เครื่องที่ 2' in some sections vs 'Machine 2' in others. Code/URLs intact."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
       "source_sha256": "2098a60be3d062ef9bb9e1e4f55086eaed8c629ac490dec69734b1e1a1c6b4ee",
@@ -530,12 +530,12 @@
       "quality_issues": "Several section headings left untranslated (Starting Open WebUI Server, Connecting..., Main Activities, Activity 1-3, Step 1); code/URLs intact."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
-      "source_sha256": "683efeea885d7ec0800eb93485220c7eb53fae3f639bf021b5152cd97f25bac9",
+      "source_sha256": "5c1b5b7406b76412eb78878a5fbd3037f1e2474a0f1bfc2dda0d197ec09c7a02",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
-      "quality_issues": "Excellent, fluent translation. Minor: 'run hostname' left untranslated in a tip; overall terminology and code intact."
+      "quality_issues": "Accurate, fluent translation; code/URLs/numbers intact. Minor: 'เชื่อมสัญญาณ' for bridge slightly awkward; occasional English term retention acceptable."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "ef647656230fb6a512ac0b98b573e61f729e4c14de2bdcd4b33a1c733c1a9e2c",
@@ -544,22 +544,6 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
       "quality_issues": "Accurate, fluent, code/URLs/numbers intact; consistent terminology; only minor stylistic mixing of English/Thai terms."
-    },
-    "playbooks/core/deepseek-v4-flash-ds4/README.md": {
-      "source_sha256": "547f8d3dc8be793c698c67fd50466a5c4c27c2f154e87b0b36431ba2dc2b278f",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Accurate, fluent translation; code/URLs/numbers intact. Minor: 'OpenAI-compatible' redundant phrasing (รองรับ OpenAI-compatible)."
-    },
-    "playbooks/core/deepseek-v4-flash-ds4/playbook.json": {
-      "source_sha256": "45498cef56dd0818dc2853a6cf895e283bbcd79d934ae35c298857305f6ab496",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate, fluent; brand/code terms intact. 'เอนจิน' acceptable but 'เอนจินการอนุมาน' slightly wordy."
     },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
       "source_sha256": "bc32c1f17978924905775b38f78f9b2c77f936da0cb2f9517c1c0b0fed90a6eb",
@@ -624,6 +608,22 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
       "quality_issues": "Minor: 'coding agent' left partially untranslated but acceptable; otherwise accurate and fluent."
+    },
+    "playbooks/supplemental/deepseek-v4-flash-ds4/README.md": {
+      "source_sha256": "cdda3c37ae369a04face29c80a0719dbdd4369cc798cb2d17d972622da506f89",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: missing blank line before 'Connecting Coding Agent' heading; 'model weights' rendered as 'น้ำหนักโมเดล' is literal but acceptable."
+    },
+    "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json": {
+      "source_sha256": "5714ddfbffb608f3e9850673606585c60a803ecb32aea703edd1c758c1d36366",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 72,
+      "quality_issues": "Title left untranslated ('Running...'); 'inference engine' not localized. Otherwise accurate, brand terms intact."
     }
   }
 }

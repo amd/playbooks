@@ -9,39 +9,40 @@ SPDX-License-Identifier: MIT
 > **Strojový preklad.** Táto stránka bola automaticky preložená z angličtiny a nebola skontrolovaná človekom. Môže obsahovať chyby a niektoré kroky, príkazy, súbory na stiahnutie alebo dostupnosť produktov sa môžu vo vašom jazyku alebo regióne líšiť. Ak sa vám niečo zdá nesprávne, považujte pôvodný anglický playbook za zdroj pravdivých informácií.
 <!-- auto-translated-disclaimer:end -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
+
 > [!IMPORTANT]
-> Tento návod používa špeciálne značky, ktoré GitHub nedokáže vykresliť. Navštívte prosím [amd.com/playbooks](https://amd.com/playbooks), aby sa vám tento obsah zobrazil správne.
+> Táto príručka používa špeciálne značky, ktoré GitHub nedokáže vykresliť. Navštívte prosím [amd.com/playbooks](https://amd.com/playbooks) na správne zobrazenie tohto obsahu.
 <!-- @github-only:end -->
 
-# Clustrovanie dvoch systémov Ryzen™ AI Halo pomocou RCCL
+# Klastrovanie dvoch Ryzen™ AI Halo pomocou RCCL
 
 ## Prehľad
 
-Váš Ryzen™ AI Halo je už teraz schopný lokálne spúšťať veľké jazykové modely. Clustrovanie posúva túto možnosť ešte ďalej tým, že kombinuje pamäť GPU viacerých systémov cez lokálnu sieť, čím vám poskytuje prístup k ešte väčším modelom so silnejším uvažovaním, lepším generovaním kódu a hlbším porozumením viacerým jazykom, a to výhradne na vašom vlastnom hardvéri.
+Váš Ryzen™ AI Halo je už schopný lokálne spúšťať veľké jazykové modely. Klastrovanie posúva túto možnosť ešte ďalej tým, že kombinuje pamäť GPU viacerých systémov cez lokálnu sieť, čím vám poskytuje prístup k ešte väčším modelom so silnejším uvažovaním, lepším generovaním kódu a hlbším viacjazyčným porozumením – to všetko výhradne na vašom vlastnom hardvéri.
 
-Tento návod vás naučí, ako vytvoriť cluster dvoch systémov Ryzen AI Halo pomocou RCCL (ROCm Communication Collectives Library) s vLLM a spustiť Qwen3.5-397B, model so 397 miliardami parametrov, na oboch strojoch súčasne s akceleráciou ROCm.
+Táto príručka vás naučí, ako naklastrovať dva systémy Ryzen AI Halo pomocou RCCL (ROCm Communication Collectives Library) spolu s vLLM a spustiť Qwen3.5-397B, model so 397 miliardami parametrov, naprieč oboma zariadeniami s akceleráciou ROCm.
 
 ## Čo sa naučíte
 
-- Ako rozšíriť pridelenie VRAM na systémoch Ryzen AI Halo
+- Ako rozšíriť alokáciu VRAM na systémoch Ryzen AI Halo
 - Spúšťanie vLLM s podporou ROCm
-- Konfigurácia RCCL pre viacuzlové tenzorovo-paralelné odvodzovanie naprieč dvoma systémami Ryzen AI Halo
-- Spustenie modelu so 397 miliardami parametrov naprieč dvoma sieťovo prepojenými systémami Ryzen AI Halo
+- Konfiguráciu RCCL pre multi-node tensor-paralelnú inferenciu naprieč dvoma systémami Ryzen AI Halo
+- Spustenie modelu so 397 miliardami parametrov naprieč dvoma prepojenými systémami Ryzen AI Halo v sieti
 
 ## Predpoklady
 
 ### Hardvér
 
-Tento návod vyžaduje dve jednotky Ryzen AI Halo a jeden ethernetový switch, zapojené v topológii hviezdy, pričom každá jednotka je pripojená priamo k switchu.
+Táto príručka vyžaduje dve jednotky Ryzen AI Halo a jeden ethernetový switch, prepojené v hviezdicovej topológii, pričom každá jednotka je zapojená priamo do switchu.
 
 | Komponent | Množstvo | Popis |
 |-----------|----------|-------------|
-| Ryzen AI Halo | 2 | Výpočtové uzly tvoriace cluster |
+| Ryzen AI Halo | 2 | Výpočtové uzly tvoriace klaster |
 | 10Gbps ethernetový switch | 1 | Centrálny switch umožňujúci komunikáciu medzi viacerými uzlami Ryzen AI Halo (aspoň 2 porty) |
-| Ethernetový kábel | 2 | Prepája každú jednotku Halo so switchom (odporúča sa kategória Cat 7 alebo vyššia) |
+| Ethernetový kábel | 2 | Prepája každú jednotku Halo so switchom (odporúča sa Cat 7 alebo vyšší) |
 
-> **Poznámka**: Na prepojenie dvoch jednotiek Ryzen AI Halo sú potrebné dva porty ethernetového switchu. Tretí port je potrebný, ak pristupujete k modelu zo samostatného klientskeho zariadenia namiesto jednej z jednotiek Halo.
+> **Poznámka**: Na prepojenie dvoch jednotiek Ryzen AI Halo sú potrebné dva porty ethernetového switchu. Tretí port je potrebný, ak k modelu pristupujete zo samostatného klientskeho počítača namiesto z jednej z jednotiek Halo.
 
 ### Softvér
 <!-- @os:linux -->
@@ -52,13 +53,13 @@ sudo apt install curl
 
 ## Fyzické nastavenie hardvéru
 
-> **Poznámka**: Tento krok vykonajte na oboch strojoch – Machine 1 aj Machine 2.
+> **Poznámka**: Tento krok vykonajte na Zariadení 1 aj Zariadení 2.
 
-Pripojte každú jednotku Ryzen AI Halo k ethernetovému switchu pomocou kábla kategórie Cat 7 (alebo vyššej). Tým sa vytvorí 10Gbps spojenie používané na vysokorýchlostnú komunikáciu medzi uzlami.
+Pripojte každú jednotku Ryzen AI Halo k ethernetovému switchu pomocou kábla Cat 7 (alebo vyššieho). Tým sa vytvorí 10Gbps prepojenie používané na vysokorýchlostnú komunikáciu medzi uzlami.
 
-### 1. Zistenie sieťových rozhraní
+### 1. Určenie sieťových rozhraní
 
-Na každom stroji zistite názov jeho sieťového rozhrania a poznačte si ho (v zvyšku pokynov sa naň bude odkazovať ako `IFNAME`). Spustite:
+Na každom zariadení zistite názov jeho sieťového rozhrania a poznamenajte si ho (v zvyšku pokynov sa naň bude odkazovať ako na `IFNAME`). Spustite:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
@@ -72,13 +73,13 @@ enp191s0
 
 ### 2. Overenie rýchlosti sieťového pripojenia
 
-Overte, že spojenie je aktívne a beží plnou rýchlosťou, kontrolou rýchlosti vášho rozhrania:
+Potvrďte, že spojenie je aktívne a beží plnou rýchlosťou, kontrolou rýchlosti vášho rozhrania:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **Poznámka**: Nahraďte `<IFNAME>` názvom výstupného rozhrania z kroku [1. Zistenie sieťových rozhraní](#1-determine-network-interfaces)
+> **Poznámka**: Nahraďte `<IFNAME>` názvom výstupného rozhrania z časti [1. Určenie sieťových rozhraní](#1-determine-network-interfaces)
 
 Mali by ste vidieť rýchlosť `10000Mb/s`:
 
@@ -86,19 +87,19 @@ Mali by ste vidieť rýchlosť `10000Mb/s`:
 	Speed: 10000Mb/s
 ```
 
-> **Poznámka**: Ak je rýchlosť nižšia ako `10000Mb/s` alebo sa spojenie nenadviaže, skontrolujte pripojenie kábla a overte, či je port switchu nastavený na 10Gbps. Niektoré switche vyžadujú deaktiváciu automatického vyjednávania a manuálne nastavenie rýchlosti spojenia; postupujte podľa dokumentácie svojho switchu.
+> **Poznámka**: Ak je rýchlosť nižšia než `10000Mb/s` alebo sa spojenie nenadviaže, skontrolujte zapojenie kábla a potvrďte, že port switchu je nastavený na 10Gbps. Niektoré switche vyžadujú vypnutie automatického vyjednávania a manuálne nastavenie rýchlosti spojenia; postupujte podľa dokumentácie k vášmu switchu.
 
-## Rozšírenie pridelenia VRAM
+## Rozšírenie alokácie VRAM
 
-> **Poznámka**: Tento krok vykonajte na oboch strojoch – Machine 1 aj Machine 2.
+> **Poznámka**: Tento krok vykonajte na Zariadení 1 aj Zariadení 2.
 
 ### Konfigurácia pamäte pre spúšťanie veľkých modelov
 
-V systéme Linux ROCm využíva zdieľaný pool systémovej pamäte, ktorý je predvolene nakonfigurovaný na polovicu systémovej pamäte.
+Na Linuxe ROCm využíva zdieľaný fond systémovej pamäte, ktorý je predvolene nakonfigurovaný na polovicu systémovej pamäte.
 
-Toto množstvo je možné zvýšiť zmenou nastavenia stránok Translation Table Manager (TTM) jadra podľa nasledujúcich pokynov. AMD odporúča nastaviť minimálnu vyhradenú VRAM v BIOS-e (0,5 GB).
+Toto množstvo je možné zvýšiť zmenou nastavenia stránok Translation Table Manager (TTM) v jadre nasledujúcimi pokynmi. AMD odporúča nastaviť minimálnu vyhradenú VRAM v BIOSe (0,5 GB).
 
-* Nainštalujte nástroj pipx a pridajte cestu k balíčkom (wheels) nainštalovaným pomocou pipx do systémovej vyhľadávacej cesty.
+* Nainštalujte nástroj pipx a pridajte cestu k balíčkom nainštalovaným cez pipx do systémovej vyhľadávacej cesty.
 
   ```bash
   sudo apt install pipx
@@ -124,13 +125,13 @@ Toto množstvo je možné zvýšiť zmenou nastavenia stránok Translation Table
 
 ## Inicializácia kontajnera vLLM
 
-> **Poznámka**: Tento krok vykonajte na oboch strojoch – Machine 1 aj Machine 2.
+> **Poznámka**: Tento krok vykonajte na Zariadení 1 aj Zariadení 2.
 
-Váš Ryzen AI Halo obsahuje vLLM zabalené v predpripravenom obraze kontajnera, ktorý spúšťate pomocou nástroja Podman, bezplatného open source nástroja na správu kontajnerov.
+Váš Ryzen AI Halo sa dodáva s vLLM zabaleným v predpripravenom obraze kontajnera, ktorý spúšťate pomocou nástroja Podman, bezplatného open source nástroja na kontajnery.
 
-### 1. Vytvorenie adresára na sťahovanie modelov
+### 1. Vytvorenie adresára na sťahovanie modelu
 
-Keď v tomto návode spustíte model Qwen3.5-397B, vLLM automaticky stiahne váhy modelu do vášho systému. Aby boli tieto váhy dostupné z vnútra kontajnera, najprv vytvorte adresár pre modely, ktorý bude môcť kontajner pripojiť:
+Keď v tejto príručke nasadíte model Qwen3.5-397B, vLLM automaticky stiahne váhy modelu do vášho systému. Aby ste zaistili, že tieto váhy budú dostupné aj z vnútra kontajnera, najprv vytvorte adresár pre modely, ktorý bude môcť kontajner pripojiť:
 
 ```bash
 mkdir -p ~/.local/share/vLLM/models
@@ -138,46 +139,46 @@ mkdir -p ~/.local/share/vLLM/models
 
 ### 2. Spustenie kontajnera vLLM
 
-Nasledujúci príkaz spustí kontajner a presunie vás do interaktívneho shellu. Pripája adresár pre modely, ktorý ste práve vytvorili, a odovzdáva váš `IFNAME` premenným `NCCL_SOCKET_IFNAME` a `GLOO_SOCKET_IFNAME`, čím oznamuje RCCL (knižnici, ktorú vLLM používa na koordináciu GPU naprieč clustrom), ktoré rozhranie má použiť.
+Nasledujúci príkaz spustí kontajner a otvorí interaktívny shell. Pripojí adresár pre modely, ktorý ste práve vytvorili, a odovzdá vaše `IFNAME` premenným `NCCL_SOCKET_IFNAME` a `GLOO_SOCKET_IFNAME`, čím oznámi RCCL (knižnici, ktorú vLLM používa na koordináciu GPU naprieč klastrom), ktoré rozhranie má použiť.
 
 Spustite kontajner príkazom:
 
 ```bash
-sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
+sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g --pids-limit=-1 -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
 ```
 
-> **Poznámka**: Nahraďte `<IFNAME>` názvom výstupného rozhrania z kroku [1. Zistenie sieťových rozhraní](#1-determine-network-interfaces)
+> **Poznámka**: Nahraďte `<IFNAME>` názvom výstupného rozhrania z časti [1. Určenie sieťových rozhraní](#1-determine-network-interfaces)
 
-## Spustenie modelu na clustri
+## Spustenie modelu na klastri
 
-vLLM využíva Ray na orchestráciu clustra a RCCL na zabezpečenie komunikácie medzi GPU naprieč uzlami. Jeden stroj funguje ako **hlavný uzol** (Machine 1), ktorý koordinuje odvodzovanie. Druhý sa pripája ako **pracovný uzol** (Machine 2) a prispieva svojou pamäťou GPU a výpočtovým výkonom.
+vLLM používa Ray na orchestráciu klastra a RCCL na spracovanie komunikácie medzi GPU naprieč uzlami. Jedno zariadenie funguje ako **hlavný uzol (head node)** (Zariadenie 1), ktorý koordinuje inferenciu. Druhé sa pripája ako **pracovný uzol (worker node)** (Zariadenie 2), pričom prispieva svojou pamäťou GPU a výpočtovým výkonom.
 
-> **Poznámka**: Ray je voliteľná závislosť pre vLLM a je dostupná iba z vnútra vopred nakonfigurovaného kontajnera Podman.
+> **Poznámka**: Ray je voliteľná závislosť pre vLLM a je dostupný iba z vnútra vopred nakonfigurovaného kontajnera Podman.
 
-Pri spustení vLLM rozdelí model naprieč oboma uzlami pomocou tenzorového paralelizmu. Po načítaní odvodzovanie prebieha, akoby bežalo na jedinom akcelerátore.
+Pri spustení vLLM rozdelí model naprieč oboma uzlami pomocou tensorového paralelizmu. Po načítaní prebieha inferencia, akoby bežala na jedinom akcelerátore.
 
-### Krok 1: Spustenie hlavného uzla Ray (Machine 1)
+### Krok 1: Spustenie hlavného uzla Ray (Zariadenie 1)
 
-Na stroji Machine 1 spustite hlavný uzol Ray na inicializáciu clustra:
+Na Zariadení 1 spustite hlavný uzol Ray na inicializáciu klastra:
 
 ```bash
 ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1
 ```
 
-> **Zistenie `<MACHINE_1_IP>`**: Na stroji Machine 1 spustite `hostname -I | awk '{print $1}'`, aby ste zistili jeho lokálnu IP adresu.
-### Krok 2: Pripojenie ku klastru (Zariadenie 2)
+> **Zistenie `<MACHINE_1_IP>`**: Na Zariadení 1 spustite `hostname -I | awk '{print $1}'` na zistenie jeho lokálnej IP adresy.
+### Krok 2: Pripojenie ku klastru (Počítač 2)
 
-Na Zariadení 2 sa pripojte k hlavnému uzlu a vytvorte klaster:
+Na počítači 2 sa pripojte k hlavnému uzlu, aby ste vytvorili klaster:
 
 ```bash
 ray start --address=<MACHINE_1_IP>:6379 --node-ip-address=<MACHINE_2_IP> --num-gpus=1
 ```
 
-> **Zisťovanie `<MACHINE_2_IP>`**: Na Zariadení 2 spustite príkaz `hostname -I | awk '{print $1}'`, aby ste zistili jeho lokálnu IP adresu.
+> **Zistenie `<MACHINE_2_IP>`**: Na počítači 2 spustite `hostname -I | awk '{print $1}'`, aby ste zistili jeho lokálnu IP adresu.
 
-### Krok 3: Sprístupnenie modelu (Zariadenie 1)
+### Krok 3: Sprístupnenie modelu (Počítač 1)
 
-Na Zariadení 1 spustite server vLLM. Tým sa automaticky stiahne model a začne sa jeho sprístupňovanie naprieč oboma uzlami:
+Na počítači 1 spustite server vLLM. Tým sa automaticky stiahne model a začne sa jeho sprístupňovanie naprieč oboma uzlami:
 
 ```bash
 vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
@@ -193,7 +194,7 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
   --reasoning-parser qwen3
 ```
 
-#### Prehľad parametrov
+#### Referencia parametrov
 
 | Príznak | Účel |
 |------|---------|
@@ -203,36 +204,36 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
 | `--gpu-memory-utilization` | Podiel pamäte GPU, ktorý sa má alokovať (0,0 – 1,0) |
 | `--dtype` | Dátový typ pre váhy modelu |
 | `--tensor-parallel-size` | Počet GPU, medzi ktoré sa má model rozdeliť (nastavte na celkový počet GPU v klastri) |
-| `--distributed-executor-backend` | Backend pre spúšťanie na viacerých uzloch (`ray` pre nasadenia v klastri) |
-| `--enforce-eager` | Vypína kompiláciu CUDA grafov kvôli kompatibilite |
+| `--distributed-executor-backend` | Backend pre vykonávanie na viacerých uzloch (`ray` pre nasadenia klastra) |
+| `--enforce-eager` | Vypne kompiláciu CUDA grafov kvôli kompatibilite |
 | `--language-model-only` | Preskočí načítanie pomocných komponentov modelu (napr. vizuálneho enkodéra) |
-| `--reasoning-parser` | Povolí štruktúrovaný výstup uvažovania (reasoning) pre model |
+| `--reasoning-parser` | Povolí štruktúrované parsovanie výstupu uvažovania pre model |
 
 Úplný popis parametrov nájdete v [dokumentácii vLLM](https://docs.vllm.ai/en/latest/configuration/engine_args/).
 
 ## Prístup k modelu
 
-vLLM poskytuje API kompatibilné s OpenAI, takže ku svojmu klastru môžete pripojiť ľubovoľného kompatibilného klienta alebo rozhranie. Jednou z obľúbených možností je [Open WebUI](https://github.com/open-webui/open-webui), ktoré poskytuje chatové rozhranie v prehliadači.
+vLLM poskytuje API kompatibilné s OpenAI, takže ku svojmu klastru môžete pripojiť ľubovoľného kompatibilného klienta alebo rozhranie. Jednou z obľúbených možností je [Open WebUI](https://github.com/open-webui/open-webui), ktoré poskytuje chatovacie rozhranie dostupné cez prehliadač.
 
 Ak chcete pripojiť Open WebUI k vášmu koncovému bodu vLLM:
 
 1. Otvorte **Settings** > **Admin Panel** > **Connections**
-2. Kliknite na **+** pri položke **Manage OpenAI API Connections**
+2. Kliknite na **+** pri **Manage OpenAI API Connections**
 3. Nastavte **Connection Type** na **External**
 4. Nastavte **URL** na `http://<MACHINE_1_IP>:7000/v1`
 5. V časti **Auth** vyberte z rozbaľovacieho zoznamu možnosť **None**
-6. Ponechajte pole **Model IDs** prázdne, aby sa automaticky rozpoznali všetky modely z daného koncového bodu
+6. Ponechajte **Model IDs** prázdne, aby sa automaticky zistili všetky modely z koncového bodu
 
-> **Zisťovanie `<MACHINE_1_IP>`**: Na Zariadení 1 spustite príkaz `hostname -I | awk '{print $1}'`, aby ste zistili jeho lokálnu IP adresu. Ak pristupujete k Open WebUI priamo zo Zariadenia 1, môžete použiť `http://localhost:7000/v1`.
+> **Zistenie `<MACHINE_1_IP>`**: Na počítači 1 spustite `hostname -I | awk '{print $1}'`, aby ste zistili jeho lokálnu IP adresu. Ak pristupujete k Open WebUI priamo z počítača 1, môžete použiť `http://localhost:7000/v1`.
 
 ![Nastavenia pripojenia Open WebUI pre koncový bod vLLM](assets/openwebui-connection.png)
 
-Po pripojení vyberte model z rozbaľovacieho zoznamu modelov v Open WebUI a začnite chatovať. Model teraz beží na oboch vašich uzloch Ryzen AI Halo:
+Po pripojení vyberte model z rozbaľovacieho zoznamu modelov v Open WebUI a začnite chatovať. Model teraz beží naprieč oboma vašimi uzlami Ryzen AI Halo:
 
-![Chatovanie s Qwen3.5-397B v Open WebUI](assets/openwebui-chat.png)
+![Chatovanie s modelom Qwen3.5-397B v Open WebUI](assets/openwebui-chat.png)
 
 ## Ďalšie kroky
 
-- **Preskúmajte ďalšie modely**: Objavte nové modely na [Hugging Face](https://huggingface.co/models?&sort=trending), ktoré sa zmestia do celkovej pamäte GPU vášho klastra
-- **Rozšírenie na štyri uzly**: Pridajte ďalšie dva systémy Ryzen AI Halo ako dodatočné pracovné uzly (Ray workers) na rozdelenie modelov medzi ešte väčší počet GPU. To si vyžaduje ethernetový switch aspoň so štyrmi portmi, jeden pre každý uzol. Na každom ďalšom pracovnom uzle postupujte podľa [Kroku 2: Pripojenie ku klastru](#step-2-join-the-cluster-machine-2) a zodpovedajúco zvýšte hodnotu `--tensor-parallel-size`
-- **Vyskúšajte ďalšie stratégie paralelizmu**: vLLM podporuje [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) pre modely typu mixture-of-experts a [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) pre vyššiu priepustnosť. Experimentujte s `--enable-expert-parallel` a `--data-parallel-size`, aby ste našli najlepšiu konfiguráciu pre svoju záťaž
+- **Preskúmajte ďalšie modely**: Objavte nové modely na [Hugging Face](https://huggingface.co/models?&sort=trending), ktoré sa zmestia do kombinovanej pamäte GPU vášho klastra
+- **Škálovanie na štyri uzly**: Pridajte ďalšie dva systémy Ryzen AI Halo ako ďalších pracovníkov (Ray workers), aby ste mohli rozdeľovať modely na ešte viac GPU. Vyžaduje si to ethernetový prepínač s aspoň štyrmi portmi, jedným pre každý uzol. Postupujte podľa [Krok 2: Pripojenie ku klastru](#step-2-join-the-cluster-machine-2) na každom ďalšom pracovníkovi a zodpovedajúco zvýšte `--tensor-parallel-size`
+- **Vyskúšajte iné stratégie paralelizmu**: vLLM podporuje [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) pre modely typu mixture-of-experts a [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) pre vyššiu priepustnosť. Experimentujte s `--enable-expert-parallel` a `--data-parallel-size`, aby ste našli najlepšiu konfiguráciu pre vašu záťaž

@@ -274,12 +274,12 @@
       "quality_issues": "Accurate, fluent; added 'πρόσβαση' clarifies but slightly expands source. Brands/terms intact."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
-      "source_sha256": "764c0cf4df09435043967d8b976f55ca261c704561e35c27902b7659b16036d8",
+      "source_sha256": "d02e5b448a59865cc2824aa03a21a1d50dc6a43f2daf86d4041ff733ad272ecc",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'διακόπτης' for switch is technically inaccurate (should be 'μεταγωγέας'); 'στο Μηχάνημα 1' grammatical case inconsistency. Code/URLs intact."
+      "quality_score": 88,
+      "quality_issues": "\"διακόπτης\" for Ethernet switch is awkward; inconsistent Machine/Μηχάνημα terminology; minor gender agreement slip 'τη τοπική'."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
       "source_sha256": "a9f6bfe276751f33e35c05c98e7a16349ad507f9632e070de7abe1057fb72e77",
@@ -506,12 +506,12 @@
       "quality_issues": "Fluent and accurate; 'containerized' left untranslated, slightly awkward but acceptable in technical context."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
-      "source_sha256": "8d9e85ebb36e0f8019f684a69f56d683ef7f67c32132d4acb04ddc0167fa6f48",
+      "source_sha256": "7e36a4d35383f5c81ee3a866fd4182241683e9b33228686bdad4a01cf8101735",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Untranslated 'Step' headings; minor inconsistency Machine/Μηχάνημα; 'επίκληση συμπερασμάτων' awkward for inference. Code/URLs intact."
+      "quality_issues": "Fluent, accurate, code/URLs intact. Minor inconsistency: 'Machine' vs 'Μηχάνημα'; 'διακόπτης' for switch is odd but acceptable."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
       "source_sha256": "2098a60be3d062ef9bb9e1e4f55086eaed8c629ac490dec69734b1e1a1c6b4ee",
@@ -530,12 +530,12 @@
       "quality_issues": "Minor: 'Ο κοντέινερ' wrong gender (should be neuter). Otherwise fluent, accurate, code/URLs/tags intact."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
-      "source_sha256": "683efeea885d7ec0800eb93485220c7eb53fae3f639bf021b5152cd97f25bac9",
+      "source_sha256": "5c1b5b7406b76412eb78878a5fbd3037f1e2474a0f1bfc2dda0d197ec09c7a02",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 94,
-      "quality_issues": "Excellent, fluent translation. Code, URLs, numbers intact. Minor inconsistency: 'agent' sometimes translated, sometimes kept English; 'συμπερασμού' slight term choice."
+      "quality_issues": "Fluent, accurate translation. Code, URLs, numbers intact. Minor: 'context window' rendered as 'παράθυρο περιεχομένου' (content), slightly imprecise but consistent."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "ef647656230fb6a512ac0b98b573e61f729e4c14de2bdcd4b33a1c733c1a9e2c",
@@ -544,22 +544,6 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
       "quality_issues": "Inconsistent 'Walkthrough' rendering ('Οδήγημα'/'Πλήρης οδηγός'/'Πρακτική Άσκηση'); otherwise accurate, fluent, code intact."
-    },
-    "playbooks/core/deepseek-v4-flash-ds4/README.md": {
-      "source_sha256": "547f8d3dc8be793c698c67fd50466a5c4c27c2f154e87b0b36431ba2dc2b278f",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Minor: 'efficiency-focused' rendered as 'έμφαση στην απόδοση' (performance vs efficiency); slight inconsistency in agent terminology. Code/URLs intact."
-    },
-    "playbooks/core/deepseek-v4-flash-ds4/playbook.json": {
-      "source_sha256": "45498cef56dd0818dc2853a6cf895e283bbcd79d934ae35c298857305f6ab496",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate, fluent; terminology intact. Minor word-order awkwardness in 'τοπικά' placement, but natural overall."
     },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
       "source_sha256": "bc32c1f17978924905775b38f78f9b2c77f936da0cb2f9517c1c0b0fed90a6eb",
@@ -624,6 +608,22 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
       "quality_issues": "\"πράκτορα κωδικοποίησης\" awkward; \"coding agent\" better as κωδικοποίησης→προγραμματισμού. Otherwise accurate, brands intact."
+    },
+    "playbooks/supplemental/deepseek-v4-flash-ds4/README.md": {
+      "source_sha256": "cdda3c37ae369a04face29c80a0719dbdd4369cc798cb2d17d972622da506f89",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 96,
+      "quality_issues": "Minor missing blank line before 'Σύνδεση ενός Coding Agent' heading. Code, URLs, numbers intact; terminology consistent and fluent."
+    },
+    "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json": {
+      "source_sha256": "5714ddfbffb608f3e9850673606585c60a803ecb32aea703edd1c758c1d36366",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent, terms and brand names intact; minor stylistic phrasing only."
     }
   }
 }
