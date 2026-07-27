@@ -130,12 +130,10 @@ jobs:
         shell: powershell
         run: |
           Write-Host "Restarting $env:COMPUTERNAME (runner ${{ matrix.runner }}) in 60s..."
-          # /r = restart (NOT shutdown), /t 60 = 60s delay, /f = force apps closed
-          # so the reboot can't hang. The delay must outlast the runner's post-job
-          # "Complete job" finalization; a short delay reboots the box
-          # before the job reports back. The runner
-          
-          # service must start on boot for the machine to rejoin the pool.
+          # /r = restart (NOT shutdown), /t 60 = 60s delay, /f = force apps closed so the reboot can't hang.
+          # The delay must outlast the runner's post-job "Complete job" finalization.
+          # A short delay reboots the box before the job reports back.
+          # The runner service must start on boot for the machine to rejoin the pool.
           shutdown /r /t 60 /f /c "Scheduled restart via GitHub Actions"
 
       - name: Reboot (Linux)
@@ -143,9 +141,8 @@ jobs:
         shell: bash
         run: |
           echo "Restarting $(hostname) (runner ${{ matrix.runner }}) now..."
-          # `sudo reboot` restarts the machine (NOT shutdown). It's backgrounded
-          # with a short delay so this step exits cleanly before the runner
-          # process is killed -- otherwise the reboot terminates the job mid-run
-          # and it reports a false failure. Requires passwordless sudo (or root).
+          # `sudo reboot` restarts the machine (NOT shutdown).
+          # It's backgrounded with a short delay so this step exits cleanly before the runner process is killed.
+          # Otherwise the reboot terminates the job mid-run and it reports a false failure. Requires passwordless sudo (or root).
           ( sleep 5 ; sudo --non-interactive reboot ) &
           echo "Reboot scheduled."
