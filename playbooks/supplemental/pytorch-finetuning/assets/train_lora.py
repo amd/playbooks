@@ -15,8 +15,15 @@ Training Speed: 3-5x faster than full fine-tuning
 """
 
 import gc
+import logging
 import os
 import torch
+
+# bitsandbytes logs a harmless "ROCm binary not found" error at import when its
+# prebuilt library does not match the runtime ROCm version. This script does not
+# use bitsandbytes for training, so silence its logger to avoid masking real
+# errors (e.g. OOM) in logs.
+logging.getLogger("bitsandbytes").setLevel(logging.CRITICAL)
 
 # Checks bitsandbytes and ensures it's only used if available and complete.
 try:
