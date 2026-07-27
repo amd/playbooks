@@ -51,7 +51,7 @@ at that model, and run your first coding task against a real project folder.
 | Agent Canvas | The browser UI and backend that runs OpenHands conversations and shows tool calls and file changes. | Launches the stack and hosts your conversation. |
 | Workspace | The project folder the agent is allowed to read and modify. | The target of the agent's edits and commands. |
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
 > Coding-agent workflows benefit from a larger model and context window. Use at
 > least 32 GB of system memory, and prefer 64 GB or more for larger GGUF models.
@@ -59,13 +59,8 @@ at that model, and run your first coding task against a real project folder.
 
 ## Prerequisites
 
-<!-- @os:linux -->
-<!-- @require:lemonade,nodejs -->
-<!-- @os:end -->
 
-<!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
-<!-- @os:end -->
 
 You need:
 
@@ -78,9 +73,7 @@ You need:
 - A project folder to work in. This can be any local git repository or code
   directory you want the agent to work on.
 
-<!-- @device:halo,halo_box,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
-<!-- @device:end -->
 
 <!-- @os:linux -->
 <!-- @test:id=prereq-clis-linux timeout=120 hidden=True -->
