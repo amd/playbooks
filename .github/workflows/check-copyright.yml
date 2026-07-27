@@ -27,11 +27,11 @@ jobs:
       - name: Get changed files and check contributor
         id: changed-files
         run: |
-          # Get list of changed files in this PR
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
-          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Write the changed-file list to a file (a PR can touch thousands of
+          # files - e.g. translations - which overflows the shell argument limit
+          # if passed inline to the checker).
+          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} > changed_files.txt
+          echo "Changed files: $(wc -l < changed_files.txt)"
           
           # Check if PR author is AMD employee
           AUTHOR_EMAIL="${{ github.event.pull_request.user.login }}"
@@ -50,9 +50,9 @@ jobs:
       - name: Check copyright notices
         run: |
           if [ "${{ steps.changed-files.outputs.require_amd_copyright }}" == "true" ]; then
-            python .github/scripts/check_copyright.py --changed-files "${{ steps.changed-files.outputs.changed_files }}" --require-amd
+            python .github/scripts/check_copyright.py --changed-files-file changed_files.txt --require-amd
           else
-            python .github/scripts/check_copyright.py --changed-files "${{ steps.changed-files.outputs.changed_files }}"
+            python .github/scripts/check_copyright.py --changed-files-file changed_files.txt
           fi
 
       - name: Display summary

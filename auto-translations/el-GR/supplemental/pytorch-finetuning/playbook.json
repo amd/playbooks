@@ -1,0 +1,6 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "Βελτιστοποίηση (Fine-Tuning) Μεγάλων Γλωσσικών Μοντέλων (LLM) με PyTorch και AMD ROCm™ Software",
+  "description": "Βελτιστοποιήστε (fine-tune) μεγάλα γλωσσικά μοντέλα (LLMs) χρησιμοποιώντας PyTorch και ROCm.",
+  "auto_translated": true
+}

@@ -1,0 +1,6 @@
+{
+  "id": "deepseek-v4-flash-ds4",
+  "title": "Running DeepSeek V4 Flash ด้วย ds4",
+  "description": "ปรับใช้ DeepSeek V4 Flash ในเครื่องโดยใช้ ds4 inference engine และจัดการโมเดลแบบอินเทอร์แอกทีฟด้วย ds4-cockpit",
+  "auto_translated": true
+}

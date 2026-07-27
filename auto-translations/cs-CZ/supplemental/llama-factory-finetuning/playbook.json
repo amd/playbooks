@@ -1,0 +1,6 @@
+{
+  "id": "llama-factory-finetuning",
+  "title": "Doladění (fine-tuning) LLM pomocí LLaMA Factory",
+  "description": "Doladění (fine-tuning) velkých jazykových modelů (LLM) pomocí technik LLaMA Factory a LoRA.",
+  "auto_translated": true
+}

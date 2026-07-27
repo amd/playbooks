@@ -1,0 +1,6 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "כוונון עדין (Fine-Tuning) של מודלי שפה גדולים (LLMs) עם PyTorch ותוכנת AMD ROCm™",
+  "description": "בצעו כוונון עדין (fine-tune) של מודלי שפה גדולים (LLMs) באמצעות PyTorch ו-ROCm.",
+  "auto_translated": true
+}

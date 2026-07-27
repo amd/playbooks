@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "Kluster med två Ryzen™ AI Halo via RPC",
+  "description": "Konfigurera distribuerad inferens med RPC-server mellan två Ryzen™ AI Halo-enheter med llama.cpp för att köra modeller på 350 B+ parametrar",
+  "auto_translated": true
+}

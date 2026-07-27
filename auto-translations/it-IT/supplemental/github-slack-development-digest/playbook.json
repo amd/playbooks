@@ -1,0 +1,6 @@
+{
+  "id": "github-slack-development-digest",
+  "title": "Crea un digest di sviluppo da GitHub a Slack con Agent Canvas",
+  "description": "Configura Agent Canvas, GitHub MCP, Slack MCP e un'automazione OpenHands pianificata che pubblica un digest LLM locale.",
+  "auto_translated": true
+}
