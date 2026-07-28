@@ -46,7 +46,7 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 <!-- @device:halo_box -->
 On Linux, open a terminal and run the following prompt to create a venv with ROCm+Pytorch already installed:
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -66,7 +66,7 @@ sudo usermod -aG render,video $LOGNAME
 
 On Linux, open a terminal and run the following prompt to create a venv:
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv

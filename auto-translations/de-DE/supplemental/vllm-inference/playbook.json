@@ -1,0 +1,6 @@
+{
+  "id": "vllm-inference",
+  "title": "Erste Schritte mit vLLM",
+  "description": "Erfahren Sie, wie Sie Inferenz und Serving mit containerisiertem vLLM auf der integrierten GPU ausführen",
+  "auto_translated": true
+}

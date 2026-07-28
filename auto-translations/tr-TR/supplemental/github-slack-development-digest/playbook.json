@@ -1,0 +1,6 @@
+{
+  "id": "github-slack-development-digest",
+  "title": "GitHub'dan Slack'e Geliştirme Özeti Oluşturmak için Agent Canvas Kullanımı",
+  "description": "Agent Canvas, GitHub MCP, Slack MCP ve yerel LLM özeti paylaşan zamanlanmış bir OpenHands otomasyonunu yapılandırın.",
+  "auto_translated": true
+}

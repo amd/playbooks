@@ -1,0 +1,6 @@
+{
+  "id": "github-slack-development-digest",
+  "title": "Twórz codzienny raport z rozwoju projektu na GitHub w Slacku za pomocą Agent Canvas",
+  "description": "Skonfiguruj Agent Canvas, GitHub MCP, Slack MCP oraz zaplanowaną automatyzację OpenHands, która publikuje podsumowanie lokalnego modelu LLM.",
+  "auto_translated": true
+}

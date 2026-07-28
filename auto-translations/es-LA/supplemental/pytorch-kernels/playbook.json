@@ -1,0 +1,6 @@
+{
+  "id": "pytorch-kernels",
+  "title": "Creación de kernels de GPU personalizados con PyTorch y AMD ROCm™",
+  "description": "Escriba y optimice kernels de GPU personalizados usando PyTorch y el software AMD ROCm™",
+  "auto_translated": true
+}

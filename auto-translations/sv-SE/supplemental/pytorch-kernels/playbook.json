@@ -1,0 +1,6 @@
+{
+  "id": "pytorch-kernels",
+  "title": "Bygga anpassade GPU-kärnor med PyTorch och AMD ROCm™",
+  "description": "Skriv och optimera anpassade GPU-kärnor med PyTorch och AMD ROCm™-programvara",
+  "auto_translated": true
+}

@@ -1,0 +1,73 @@
+# Translation quality report
+
+Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
+
+| Locale | Files | Mean | Min | Judge |
+|--------|-------|------|-----|-------|
+| ar | 80 | 93.3 | 88 | Claude-Opus-4.8 |
+| cs-CZ | 80 | 92.8 | 78 | Claude-Opus-4.8 |
+| da-DK | 80 | 93.2 | 88 | Claude-Opus-4.8 |
+| de-DE | 80 | 93.5 | 72 | Claude-Opus-4.8 |
+| el-GR | 80 | 92.6 | 78 | Claude-Opus-4.8 |
+| es-LA | 80 | 93.6 | 84 | Claude-Opus-4.8 |
+| fi-FI | 80 | 92.2 | 88 | Claude-Opus-4.8 |
+| fr-FR | 80 | 93.2 | 78 | Claude-Opus-4.8 |
+| he | 80 | 92.8 | 88 | Claude-Opus-4.8 |
+| hu-HU | 80 | 92.2 | 82 | Claude-Opus-4.8 |
+| it-IT | 80 | 94.2 | 72 | Claude-Opus-4.8 |
+| ja-JP | 80 | 94.1 | 78 | Claude-Opus-4.8 |
+| ko-KR | 80 | 94.0 | 88 | Claude-Opus-4.8 |
+| nb-NO | 80 | 92.0 | 88 | Claude-Opus-4.8 |
+| nl-NL | 80 | 92.3 | 78 | Claude-Opus-4.8 |
+| pl-PL | 80 | 93.6 | 78 | Claude-Opus-4.8 |
+| pt-BR | 80 | 94.0 | 78 | Claude-Opus-4.8 |
+| ro-RO | 80 | 93.5 | 84 | Claude-Opus-4.8 |
+| ru-RU | 80 | 92.9 | 88 | Claude-Opus-4.8 |
+| sk-SK | 80 | 92.2 | 82 | Claude-Opus-4.8 |
+| sl-SI | 80 | 91.2 | 78 | Claude-Opus-4.8 |
+| sr-Latn | 80 | 91.5 | 82 | Claude-Opus-4.8 |
+| sv-SE | 80 | 92.6 | 88 | Claude-Opus-4.8 |
+| th-TH | 80 | 93.2 | 72 | Claude-Opus-4.8 |
+| tr-TR | 80 | 92.7 | 80 | Claude-Opus-4.8 |
+| uk-UA | 80 | 92.9 | 88 | Claude-Opus-4.8 |
+| zh-CN | 80 | 93.4 | 78 | Claude-Opus-4.8 |
+| zh-TW | 80 | 93.5 | 82 | Claude-Opus-4.8 |
+
+## Files below 85 (34)
+
+| Locale | File | Score | Issues |
+|--------|------|-------|--------|
+| de-DE | playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json | 72 | Untranslated 'Deploy' left in English; imperative structure inconsistent (Deploy...verwalten Sie). |
+| it-IT | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 72 | Redundant 'Ottimizzazione fine-tuning'; trademark ™ misplaced from Unsloth to LLM; 'fine-tuned' rendered as generic 'ottimizzati'. |
+| th-TH | playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json | 72 | Title left untranslated ('Running...'); 'inference engine' not localized. Otherwise accurate, brand terms intact. |
+| cs-CZ | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should be on Unsloth/product name); slight redundancy 'jemné doladění' vs 'doladění'. |
+| el-GR | playbooks/supplemental/llama-factory-finetuning/playbook.json | 78 | "Λεπτομερής Συντονισμός" awkward for fine-tuning; "LLaMA-Factory" hyphenation inconsistent with brand; LoRA intact. |
+| el-GR | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should follow Unsloth, not LLM); 'Fine-Tuning' terminology inconsistent between title and body. |
+| fr-FR | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should follow LLMs, not the phrase); terminology inconsistency (Ajustement fin vs affinés). |
+| ja-JP | playbooks/supplemental/speech2speech-translation/playbook.json | 78 | "音声対音声" is awkward; "音声から音声への" or "スピーチ・トゥ・スピーチ" more natural. Otherwise accurate. |
+| ja-JP | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced; source has 'fine-tuned LLMs™' but translation attaches ™ to Unsloth. |
+| nl-NL | playbooks/core/deepseek-v4-flash-ds4/playbook.json | 78 | Title 'Running' left untranslated; should be 'DeepSeek V4 Flash draaien' or similar. |
+| nl-NL | playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json | 78 | Untranslated 'Running' in title heading; otherwise accurate and fluent. |
+| pl-PL | playbooks/supplemental/amd-sync/playbook.json | 78 | Title translates 'AMD Sync' as generic 'synchronizacją' instead of keeping brand name; inconsistent with body. |
+| pt-BR | playbooks/supplemental/amd-sync/playbook.json | 78 | Title translated 'AMD Sync' as 'sincronização AMD' but kept brand elsewhere; inconsistent brand handling. |
+| sl-SI | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | Redundant English glosses in parentheses; 'fino prilagajanje' awkward for fine-tuning, though terms and brands intact. |
+| th-TH | playbooks/core/comfyui-image-gen/playbook.json | 78 | Title mistranslated as progressive 'กำลังสร้าง' (generating in progress) instead of gerund heading; slightly awkward phrasing. |
+| zh-CN | playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json | 78 | Title mistranslated: 'Running...with ds4' rendered as passive 'is running', losing imperative/gerund meaning. |
+| tr-TR | playbooks/supplemental/speech2speech-translation/platform.md | 80 | Headings left untranslated (Platform Configuration, Prerequisites, Required Models, Network Requirements); table headers untranslated. Body translation accurate and fluent. |
+| cs-CZ | playbooks/supplemental/clustering-rccl/playbook.json | 82 | "Clustrování" awkward neologism; "vícenodový" non-standard (better: víceuzlový). Terminology intact, otherwise fluent and accurate. |
+| de-DE | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Inconsistent terminology (Feinabstimmung vs Fine-Tuning); trademark symbol misplaced from original 'fine-tuned LLMs™'. |
+| hu-HU | playbooks/core/deepseek-v4-flash-ds4/playbook.json | 82 | Title phrasing awkward ('Futtatás:' colon-style); otherwise accurate, terms intact, fluent. |
+| it-IT | playbooks/supplemental/speech2speech-translation/playbook.json | 82 | Title omits 'speech-to-speech' nuance; 'voce a voce' slightly awkward but acceptable; overall accurate and fluent. |
+| pl-PL | playbooks/supplemental/github-slack-development-digest/playbook.json | 82 | Title adds 'codzienny' (daily) not in source; 'from development' loosely rendered. Otherwise accurate, fluent, terms intact. |
+| sk-SK | playbooks/supplemental/amd-sync/playbook.json | 82 | Title mistranslates 'AMD Sync' as 'synchronizáciou AMD' instead of keeping brand name; body correct. |
+| sk-SK | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Trademark symbol misplaced (should follow Unsloth, not LLM); otherwise accurate and fluent. |
+| sl-SI | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Inconsistent brand form 'LLaMA-Factory' vs 'LLaMA Factory'; 'fino prilagajanje' awkward; second sentence omits fine-tuning nuance. |
+| sl-SI | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Redundant parenthetical (fine-tuning) repeated; trademark ™ misplaced from 'LLMs' brand context; otherwise accurate, fluent. |
+| sr-Latn | playbooks/supplemental/pytorch-kernels/playbook.json | 82 | Inconsistent terminology: 'kernela' vs 'jezgra' for same term; otherwise accurate, fluent, brands intact. |
+| th-TH | playbooks/supplemental/cvml/playbook.json | 82 | Title left 'Local Computer Vision' untranslated; otherwise accurate, fluent, terms and brands intact. |
+| tr-TR | playbooks/supplemental/pytorch-finetuning/playbook.json | 82 | Second sentence grammar awkward: 'modellerini ince ayar yapın' should be 'modellerinde ince ayar yapın' or 'ince ayarlayın'. |
+| zh-CN | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Second line awkward; trademark symbol misplaced (belongs to LLM brand, not translation); slightly literal phrasing. |
+| zh-TW | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | ™ symbol misplaced (belongs to Unsloth, not LLM); otherwise accurate and fluent. |
+| es-LA | playbooks/supplemental/pytorch-finetuning/playbook.json | 84 | Redundant '(fine-tune)' gloss awkward; 'LLMs' plural anglicized; otherwise accurate and fluent. |
+| ro-RO | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 84 | Trademark symbol misplaced (belongs to LLMs, not memory phrase); slightly awkward phrasing but accurate. |
+| sr-Latn | playbooks/supplemental/github-slack-development-digest/playbook.json | 84 | 'digest' left untranslated inconsistently (earlier 'dnevni pregled'); otherwise accurate, fluent, terms intact. |
