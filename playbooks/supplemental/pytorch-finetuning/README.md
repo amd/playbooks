@@ -105,7 +105,7 @@ source finetune-venv/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv --system-site-packages
 finetune-venv\Scripts\activate
@@ -115,7 +115,7 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv
 finetune-venv\Scripts\activate

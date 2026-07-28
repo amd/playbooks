@@ -59,11 +59,12 @@ class DocumentSummarizer:
         print(f"Loading {self.model_name}...")
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        device = "cuda" if torch.cuda.is_available() else "cpu"
         try:
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_name,
                 torch_dtype=torch.bfloat16,
-                device_map="auto",
+                device_map=device,  # whole model on one device; no CPU/meta offload
             )
         except (ValueError, KeyError):
             # Vision-language checkpoints (e.g. Qwen3.5) are not registered
@@ -72,7 +73,7 @@ class DocumentSummarizer:
             self.model = AutoModelForImageTextToText.from_pretrained(
                 self.model_name,
                 torch_dtype=torch.bfloat16,
-                device_map="auto",
+                device_map=device,  # whole model on one device; no CPU/meta offload
             )
         print("[OK] Model ready!\n")
     
