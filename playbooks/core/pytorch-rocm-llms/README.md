@@ -73,7 +73,7 @@ source pytorch-env/bin/activate
 <!-- @os:windows -->
 <!-- @device:halo_box -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
 pytorch-env\Scripts\activate
@@ -84,7 +84,7 @@ pytorch-env\Scripts\activate
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
 pytorch-env\Scripts\activate

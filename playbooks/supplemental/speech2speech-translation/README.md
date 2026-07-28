@@ -82,7 +82,7 @@ source s2st-env/bin/activate
 <!-- @device:halo_box -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed:
 
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv s2st-env --system-site-packages
 s2st-env\Scripts\activate
@@ -98,7 +98,7 @@ s2st-env\Scripts\activate
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv:
 
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv s2st-env
 s2st-env\Scripts\activate
