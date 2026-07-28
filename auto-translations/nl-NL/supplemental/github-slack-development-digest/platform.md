@@ -1,0 +1,53 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Automatische vertaling.** Deze pagina is automatisch vertaald vanuit het Engels en is niet door een mens gecontroleerd. Ze kan fouten bevatten en sommige stappen, commando's, downloads of productbeschikbaarheid kunnen afwijken in uw taal of regio. Raadpleeg bij twijfel de originele Engelstalige playbook als bron van waarheid.
+<!-- auto-translated-disclaimer:end -->
+
+# Platformconfiguratie
+
+Dit document beschrijft de verwachte platformconfiguraties voor het uitvoeren van dit playbook.
+
+## Vereiste apps/frameworks
+
+### Windows/Linux
+
+- **Lemonade Server** moet worden geïnstalleerd volgens de
+  [Lemonade-installatiehandleiding](https://lemonade-server.ai/docs/guide/install/).
+- **Node.js 22.12 of hoger** en `npm`, gebruikt door de `agent-canvas`-CLI en MCP-
+  servers die worden gestart met `npx`.
+- **uv**, de Python-pakketbeheerder die Agent Canvas gebruikt om de agent-
+  serveromgeving te beheren. Installeer het via de
+  [uv-installatiehandleiding](https://docs.astral.sh/uv/getting-started/installation/).
+
+## Vereiste modellen
+
+### Windows/Linux
+
+Het volgende model moet beschikbaar zijn voor Lemonade Server voordat het
+playbook wordt gestart.
+
+| Modeltype | Model-ID | Opmerkingen |
+| --- | --- | --- |
+| GGUF-chatmodel | `Qwen3.6-35B-A3B-GGUF` | Wordt aangeboden door Lemonade Server op `http://127.0.0.1:13305/api/v1`. Gebruik een kleiner GGUF-model op apparaten met minder dan 32 GB geheugen. |
+
+Start het model met:
+
+```bash
+lemonade config set llamacpp.backend=vulkan
+lemonade config set ctx_size=65536
+lemonade run "Qwen3.6-35B-A3B-GGUF"
+```
+
+## Externe inloggegevens
+
+Dit playbook vereist:
+
+- Een GitHub-token met leestoegang tot de repository die wordt samengevat.
+- Een Slack-bottoken met `chat:write` en leestoegang tot kanalen.
+- Een Slack-team-ID en het doel-Slack-kanaal-ID.

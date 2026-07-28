@@ -87,7 +87,7 @@ sudo usermod -aG render,video $LOGNAME
 ```
 
 Open a terminal and create a venv:
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv

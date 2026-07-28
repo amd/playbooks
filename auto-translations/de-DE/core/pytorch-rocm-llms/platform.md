@@ -1,0 +1,51 @@
+<!--
+Copyright Advanced Micro Devices, Inc.
+
+SPDX-License-Identifier: MIT
+-->
+
+<!-- auto-translated-disclaimer v1 -->
+> [!WARNING]
+> **Maschinelle Übersetzung.** Diese Seite wurde automatisch aus dem Englischen übersetzt und nicht von einem Menschen überprüft. Sie kann Fehler enthalten, und einige Schritte, Befehle, Downloads oder die Produktverfügbarkeit können in Ihrer Sprache oder Region abweichen. Wenn etwas nicht korrekt erscheint, betrachten Sie das englische Original-Playbook als maßgebliche Quelle.
+<!-- auto-translated-disclaimer:end -->
+
+# Plattformkonfiguration
+
+Dieses Dokument beschreibt die erwarteten Plattformkonfigurationen für die Ausführung dieses Playbooks.
+
+## Voraussetzungen
+
+PyTorch mit ROCm-Unterstützung ist auf der AMD Ryzen™ AI Halo Developer Platform bereits vorinstalliert. Für alle anderen Geräte müssen Benutzer PyTorch mit ROCm-Unterstützung manuell installieren. Bitte beachten Sie den entsprechenden Abschnitt für Ihr Betriebssystem:
+
+### Windows
+
+| Komponente     | Version         | Hinweise                             |
+|---------------|-----------------|-----------------------------------|
+| **PyTorch**   | 2.9 oder neuer    | Vorinstalliert auf der AMD Ryzen AI Halo Developer Platform; muss auf allen anderen Geräten manuell installiert werden |
+
+### Linux
+
+| Komponente     | Version         | Hinweise                             |
+|---------------|-----------------|-----------------------------------|
+| **PyTorch**   | 2.9 oder neuer    | Vorinstalliert auf der AMD Ryzen AI Halo Developer Platform; muss auf allen anderen Geräten manuell installiert werden |
+
+## Erforderliche Modelle
+
+Die folgenden Modelle wurden für Ihre Plattform getestet und optimiert:
+
+| Modell | Parameter | Größe | Download-Speicherort |
+|-------|------------|------|-------------------|
+| **openai/gpt-oss-20b** | 20B | ~40GB | Vorinstalliert auf der AMD Ryzen AI Halo Developer Platform; muss auf allen anderen Geräten manuell installiert werden |
+
+Modelle werden automatisch in das Hugging Face Cache-Verzeichnis heruntergeladen:
+- **Windows**: `C:\Users\<username>\.cache\huggingface\hub\`
+- **Linux**: `~/.cache/huggingface/hub/`
+
+Stellen Sie sicher, dass mindestens **50GB freier Speicherplatz** für die Modellspeicherung zur Verfügung steht.
+
+## Netzwerkanforderungen
+
+Die Ersteinrichtung erfordert Internetzugang, um Modelle von Hugging Face herunterzuladen. Nach dem Download kann das Playbook offline ausgeführt werden.
+
+- Der erstmalige Modell-Download kann je nach Modellgröße und Verbindungsgeschwindigkeit **5-10 Minuten** dauern
+- Modelle werden lokal zwischengespeichert und müssen nicht erneut heruntergeladen werden

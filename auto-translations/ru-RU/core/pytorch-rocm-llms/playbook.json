@@ -1,0 +1,6 @@
+{
+  "id": "pytorch-rocm-llms",
+  "title": "Запуск LLM в PyTorch с использованием AMD ROCm™ Software",
+  "description": "Научитесь запускать мощные языковые модели на своём ПК с помощью PyTorch и AMD ROCm™, чтобы быстро и легко создавать сводки документов.",
+  "auto_translated": true
+}

@@ -1,0 +1,6 @@
+{
+  "id": "vllm-inference",
+  "title": "vLLM 入門指南",
+  "description": "在整合式 GPU 上使用容器化的 vLLM 執行推論與服務",
+  "auto_translated": true
+}

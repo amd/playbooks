@@ -1,0 +1,6 @@
+{
+  "id": "github-slack-development-digest",
+  "title": "Δημιουργήστε ένα ημερήσιο δελτίο ανάπτυξης από GitHub σε Slack με Agent Canvas",
+  "description": "Διαμορφώστε το Agent Canvas, το GitHub MCP, το Slack MCP και έναν προγραμματισμένο αυτοματισμό OpenHands που δημοσιεύει μια σύνοψη τοπικού LLM.",
+  "auto_translated": true
+}

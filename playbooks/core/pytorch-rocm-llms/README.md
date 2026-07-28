@@ -38,7 +38,7 @@ This tutorial uses PyTorch powered by AMD ROCm™ software to run models that ca
 <!-- @os:linux -->
 <!-- @device:halo_box -->
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv with ROCm+Pytorch already installed.
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -57,7 +57,7 @@ sudo usermod -aG render,video $LOGNAME
 ```
 
 On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv

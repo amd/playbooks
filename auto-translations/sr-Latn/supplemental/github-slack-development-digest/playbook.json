@@ -1,0 +1,6 @@
+{
+  "id": "github-slack-development-digest",
+  "title": "Napravite dnevni pregled razvoja od GitHub-a do Slack-a pomoću Agent Canvas-a",
+  "description": "Konfigurišite Agent Canvas, GitHub MCP, Slack MCP i zakazanu OpenHands automatizaciju koja objavljuje digest lokalnog LLM-a.",
+  "auto_translated": true
+}
