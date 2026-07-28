@@ -57,6 +57,16 @@ at that model, and run your first coding task against a real project folder.
 > least 32 GB of system memory, and prefer 64 GB or more for larger GGUF models.
 <!-- @device:end -->
 
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
 ## Prerequisites
 
 
@@ -129,6 +139,10 @@ lemonade config set llamacpp.backend=vulkan
 lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
+
+> **Choose a model that fits your hardware.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) is a strong coding model but needs a large memory pool. If your device has limited memory or GPU VRAM, pick a smaller GGUF model from the Lemonade model library instead and use that model ID throughout this playbook.
+
+> **Note:** The first `lemonade run` downloads the model if it isn't already present, which can take a while depending on the model size and your connection.
 
 Lemonade exposes an OpenAI-compatible API at:
 
@@ -339,8 +353,8 @@ agent-canvas
 ```
 
 By default, Agent Canvas starts on `http://localhost:8000`. Open that URL in
-your browser. If port 8000 is already in use, pass `--port` (or `-p`) when you
-launch Agent Canvas:
+your browser. The port is not special — if 8000 is already in use, pass any
+free port with `--port` (or `-p`) when you launch Agent Canvas:
 
 ```bash
 agent-canvas --port 3000
@@ -570,9 +584,10 @@ the file again—all in the same conversation.
 - **Lemonade chat requests fail with a connection error:** confirm
   `curl -fsS "http://127.0.0.1:13305/api/v1/health"` succeeds and that
   Lemonade is still serving the model with `lemonade status`.
-- **The agent errors with a context-length or token-limit message:** restart
-  Lemonade with a larger `ctx_size` (for example `ctx_size=65536`), and start a
-  fresh conversation so the agent does not carry an oversized history.
+- **The agent errors with a context-length or token-limit message:** start a
+  fresh conversation so the agent does not carry an oversized history. If it
+  keeps happening, restart Lemonade with a larger `ctx_size` than the default
+  65536 (for example `ctx_size=131072`), memory permitting.
 - **The agent produces low-quality or incomplete edits:** switch to a larger
   model in Lemonade, or give the agent a smaller, more concrete task and let it
   finish before asking for the next change.
