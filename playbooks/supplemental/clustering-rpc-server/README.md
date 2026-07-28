@@ -320,7 +320,7 @@ cd llama.cpp
 Build with ROCm and RPC support:
 
 ```bash
-cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DGGML_HIP_ROCWMMA_FATTN=ON -DAMDGPU_TARGETS="gfx1151"
+cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DAMDGPU_TARGETS="gfx1151"
 cmake --build rocm --config Release -j$(nproc)
 ```
 
@@ -328,7 +328,6 @@ cmake --build rocm --config Release -j$(nproc)
 |-----------|---------|
 | `-DGGML_HIP=ON` | Enables the ROCm software stack |
 | `-DGGML_RPC=ON` | Enables RPC for distributed inference |
-| `-DGGML_HIP_ROCWMMA_FATTN=ON` | Enables rocWMMA for enhanced Flash Attention on AMD GPUs |
 | `-DAMDGPU_TARGETS="gfx1151"` | Targets the Ryzen AI Halo GPU (Radeon 8060s) |
 
 For more build options, refer to the [llama.cpp build documentation](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
