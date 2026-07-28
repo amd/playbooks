@@ -73,6 +73,16 @@ test the automation, and Lemonade to run the LLM locally.
 > least 32 GB of system memory, and prefer 64 GB or more for larger GGUF models.
 <!-- @device:end -->
 
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
 ## Prerequisites
 
 <!-- @require:lemonade,nodejs -->
@@ -83,6 +93,9 @@ You need:
   [Lemonade installation guide](https://lemonade-server.ai/docs/guide/install/).
 - Node.js 22.12 or later and `npm`, used to install the published Agent Canvas
   CLI and run MCP servers with `npx`.
+- `uv`, the Python package manager Agent Canvas uses to build the Agent
+  Server environment. If it is not already installed, install it from the
+  [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
 - A recent published `@openhands/agent-canvas` package with
   schema-driven agent settings, `LLMSummarizingCondenserSettings.max_tokens`,
   and LLM `custom_tokenizer` support.
@@ -103,10 +116,11 @@ Invite the Slack app to the target channel before testing the automation.
 ```bash
 export LEMONADE_BASE_URL="http://127.0.0.1:13305/api/v1"
 export LEMONADE_MODEL="Qwen3.6-35B-A3B-GGUF"
-export OPENHANDS_LLM_MODEL="openai/${LEMONADE_MODEL}"
-export QWEN_CUSTOM_TOKENIZER="Qwen/Qwen3.6-35B-A3B"
-export CONDENSER_MAX_TOKENS="56000"
 ```
+
+These two variables are used by the verification commands below. The model,
+tokenizer, and other LLM settings are entered directly in the Agent Canvas UI
+in later steps, so their literal values are shown inline where you need them.
 
 The following values are entered into the Agent Canvas UI in later steps. Set
 them here so you can copy them in:
@@ -136,6 +150,10 @@ lemonade config set ctx_size=65536
 lemonade run "${LEMONADE_MODEL}"
 ```
 
+> **Choose a model that fits your hardware.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) is a strong model for this workflow but needs a large memory pool. If your device has limited memory or GPU VRAM, pick a smaller GGUF model from the Lemonade model library and use that model ID (and its matching tokenizer) throughout this playbook.
+
+> **Note:** The first `lemonade run` downloads the model if it isn't already present, which can take a while depending on the model size and your connection.
+
 Lemonade exposes an OpenAI-compatible API at:
 
 ```text
@@ -144,7 +162,9 @@ http://127.0.0.1:13305/api/v1
 
 Optional: if Agent Canvas or the automation runner is not on the same machine,
 publish the Lemonade endpoint through a secure tunnel and use the HTTPS URL as
-the LLM base URL:
+the LLM base URL. [ngrok](https://ngrok.com/) exposes a local port to the
+internet over a secure HTTPS URL; it requires a free ngrok account, and you
+replace `YOUR_NGROK_DOMAIN.ngrok-free.dev` with your own reserved domain:
 
 ```bash
 ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
@@ -258,8 +278,12 @@ If the global npm install fails with a permissions error, see the npm
 permissions troubleshooting entry below.
 
 By default, Agent Canvas starts on `http://localhost:8000`. Open that URL in
-your browser. The default local backend should show as healthy on the home
-screen.
+your browser. The port is not special—if 8000 is already in use, pass any free
+port with `--port` (or `-p`). The default local backend should show as healthy
+on the home screen.
+
+> **Note:** The first launch builds the Agent Server's `uv`-managed Python
+> environment, so it can take a few minutes before the backend reports healthy.
 
 The `agent-canvas` command starts the agent server, the automation backend, and
 the web frontend together. You only need this one command to run OpenHands
@@ -342,8 +366,7 @@ On first launch, Agent Canvas opens an onboarding flow. In that flow:
 1. Keep **OpenHands** selected as the agent and click **Next**.
 2. On **Set up your LLM**, select **Advanced**.
 3. Keep **Authentication** set to **API key**.
-4. Set **Custom Model** to the `OPENHANDS_LLM_MODEL` value,
-   `openai/Qwen3.6-35B-A3B-GGUF`.
+4. Set **Custom Model** to `openai/Qwen3.6-35B-A3B-GGUF`.
 5. Set **Base URL** to `http://127.0.0.1:13305/api/v1`.
 6. For **API Key**, enter any non-empty placeholder such as `lemonade-local`.
    Lemonade does not require a real key, but the OpenHands client needs a value

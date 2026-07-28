@@ -2,7 +2,7 @@
   "id": "github-slack-development-digest",
   "title": "Build a GitHub-to-Slack Development Digest with Agent Canvas",
   "description": "Configure Agent Canvas, GitHub MCP, Slack MCP, and a scheduled OpenHands automation that posts a local-LLM digest.",
-  "time": 45,
+  "time": 60,
   "supported_platforms": {
     "halo_box": [
       "linux"
@@ -89,7 +89,7 @@
       "linux"
     ]
   },
-  "difficulty": "intermediate",
+  "difficulty": "advanced",
   "isNew": true,
   "isFeatured": false,
   "developed": true,
