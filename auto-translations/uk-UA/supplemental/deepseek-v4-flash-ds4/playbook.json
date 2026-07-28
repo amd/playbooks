@@ -1,0 +1,6 @@
+{
+  "id": "deepseek-v4-flash-ds4",
+  "title": "Виконання DeepSeek V4 Flash з ds4",
+  "description": "Розгорніть DeepSeek V4 Flash локально за допомогою механізму інференсу ds4 та керуйте моделями інтерактивно за допомогою ds4-cockpit.",
+  "auto_translated": true
+}

@@ -1,0 +1,6 @@
+{
+  "id": "deepseek-v4-flash-ds4",
+  "title": "DeepSeek V4 Flash futtatása ds4 használatával",
+  "description": "Telepítse helyben a DeepSeek V4 Flash modellt a ds4 inferenciamotor használatával, és kezelje interaktívan a modelleket a ds4-cockpit segítségével.",
+  "auto_translated": true
+}

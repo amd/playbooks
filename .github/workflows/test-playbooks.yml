@@ -148,24 +148,42 @@ jobs:
       # strand a model on the shared runner (its unload teardown is skipped when
       # an earlier test in that playbook fails), which OOMs the next job. This
       # runs regardless of what ran before, so it also protects non-lemonade jobs.
+      # Best-effort and time-bounded: a stuck unload must never wedge the job
+      # (see the ollama note below), so these steps are continue-on-error with a
+      # short timeout.
       - name: Free GPU before tests (Linux)
         if: matrix.platform == 'linux'
         shell: bash
+        continue-on-error: true
+        timeout-minutes: 5
         run: |
           lemonade unload || true
           lms unload --all || true
-          # Ollama keeps models resident in VRAM via keep-alive; unload each MODEL
-          # ("ollama stop MODEL"). This frees the VRAM and leaves the server running,
-          # same as the lemonade/lms unloads above.
-          ollama ps 2>/dev/null | awk 'NR>1{print $1}' | while read -r m; do [ -n "$m" ] && ollama stop "$m" 2>/dev/null || true; done || true
+          # Only unload ollama models if the server is already running. Running any
+          # ollama command otherwise starts the server, which can inherit this
+          # step's stdout and block it. This leaves the server running, same as the
+          # lemonade/lms unloads above.
+          if pgrep -x ollama >/dev/null 2>&1; then
+            ollama ps 2>/dev/null | awk 'NR>1{print $1}' | while read -r m; do [ -n "$m" ] && ollama stop "$m" 2>/dev/null || true; done || true
+          fi
 
       - name: Free GPU before tests (Windows)
         if: matrix.platform == 'windows'
         shell: powershell
+        continue-on-error: true
+        timeout-minutes: 5
         run: |
           try { lemonade unload } catch {}
           try { lms unload --all } catch {}
-          try { ollama ps | Select-Object -Skip 1 | ForEach-Object { $m = ($_ -split '\s+')[0]; if ($m) { ollama stop $m } } } catch {}
+          # Only unload ollama models if the server is already running. Running any
+          # ollama command otherwise auto-starts the server, which inherits this
+          # step's stdout handle and hangs the job (the pipeline never sees EOF).
+          if (Get-Process ollama -ErrorAction SilentlyContinue) {
+            try {
+              $models = & ollama ps 2>$null | Select-Object -Skip 1 | ForEach-Object { ($_ -split '\s+')[0] } | Where-Object { $_ }
+              foreach ($m in $models) { & ollama stop $m 2>$null | Out-Null }
+            } catch {}
+          }
           exit 0
 
       - name: Extract and run tests (Windows)
