@@ -489,12 +489,7 @@ The face detection feature offers two model variants:
 ```powershell
 $ErrorActionPreference = "Stop"
 
-# The Ryzen AI NPU (Vitis) CreateContext() fails when the process runs in the
-# runner's interactive console session (session 1), but succeeds in a
-# non-interactive logon. The self-hosted runner must stay in the console session
-# for GPU playbooks (e.g. LM Studio's Vulkan runtime). So we run the build and
-# samples inside a passwordless S4U scheduled task, whose non-interactive session
-# lets the NPU initialize correctly. See https://github.com/amd/playbooks/issues/416.
+# Build and run the samples inside a passwordless S4U scheduled task.
 
 $ci = Join-Path $env:USERPROFILE "cvml-ci"
 if (Test-Path $ci) {Remove-Item -Recurse -Force $ci}
