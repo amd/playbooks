@@ -9,61 +9,65 @@
     ]
   },
   "supported_platforms": {
-    "halo": [
-      "windows",
-      "linux"
-    ],
-    "stx": [
-      "windows",
-      "linux"
-    ],
-    "krk": [
-      "windows",
-      "linux"
-    ]
-  },
-  "published_platforms": {
-    "halo": [
-      "windows",
-      "linux"
-    ],
     "halo_box": [
+      "windows"
+    ],  
+    "halo": [
+      "linux",
       "windows"
     ],
     "stx": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "krk": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "tested_platforms": {
     "halo": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "krk": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "required_platforms": {
     "halo": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "krk": [
-      "windows",
-      "linux"
+      "linux",
+      "windows"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
     ]
   },
   "difficulty": "intermediate",
