@@ -109,7 +109,7 @@ model = AutoModelForCausalLM.from_pretrained(
     dtype=torch.bfloat16,             # Use BF16 for better stability and ROCm support (dtype not torch_dtype)
     device_map="auto",                # Automatically distribute across available GPUs
     trust_remote_code=True,
-    low_cpu_mem_usage=True            # Reduce CPU memory during loading
+    low_cpu_mem_usage=True,            # Reduce CPU memory during loading
     local_files_only=True
 )
 
