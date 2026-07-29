@@ -19,7 +19,7 @@ from datasets import load_dataset
 
 # Use ModelScope
 from modelscope.hub.snapshot_download import snapshot_download
-from modelscope.msdataset import MsDataset
+from modelscope.msdatasets import MsDataset
 
 # -----------------------
 # Utility functions
