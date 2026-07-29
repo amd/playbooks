@@ -111,8 +111,7 @@ if QUICK_TRAIN and os.environ.get("QUICK_TRAIN_MODEL"):
 n_samples = 8 if QUICK_TRAIN else 1000
 if QUICK_TRAIN:
     print("QUICK_TRAIN=1: using 1 step and a tiny dataset (smoke test).")
-ds = MsDataset.load("AI-ModelScope/databricks-dolly-15k", subset_name="default", split="train").to_hf_dataset()
-ds = ds.shuffle(seed=42).select(range(n_samples))
+ds = MsDataset.load("AI-ModelScope/databricks-dolly-15k", subset_name="default", split="train").shuffle(seed=42).select(range(n_samples))
 
 def format_chat(ex):
     if "messages" in ex:
