@@ -1,0 +1,148 @@
+{
+  "_comment": "Checklist config for the UX review agent (ux_review.py, invoked via /ux-review on a PR). Two kinds of checks: 'deterministic_rules' are mechanical pattern checks run in Python (no LLM); 'llm_rubric' drives the judgment-based pass sent to the model. Edit this file to tune the review without touching code. Severity order for the ranked output is defined by 'severity_order'.",
+  "rules_version": "1",
+
+  "severity_order": ["correctness", "consistency", "polish"],
+
+  "deterministic_rules": [
+    {
+      "id": "missing-memory-config",
+      "severity": "consistency",
+      "applies_to": "readme",
+      "type": "must_contain",
+      "pattern": "@require:memory-config",
+      "message": "README does not include the shared memory-configuration step. Nearly every Lemonade/GPU playbook opens with '## Setting the Memory Configuration' followed by '<!-- @require:memory-config -->'. Add it unless this playbook genuinely has no memory-pool requirement.",
+      "skip_if_contains": ["@require:memory-config"]
+    },
+    {
+      "id": "legacy-setup-memory-tag",
+      "severity": "correctness",
+      "applies_to": "readme",
+      "type": "must_not_contain",
+      "pattern": "@setup:memory[_-]config",
+      "message": "Found a legacy '@setup:memory_config' style tag. The correct, injected form is '@require:memory-config' (hyphen, @require). The @setup form is mis-parsed by the test runner and the memory-config content will not render."
+    },
+    {
+      "id": "software-update-scoping",
+      "severity": "consistency",
+      "applies_to": "readme",
+      "type": "paired_tags",
+      "pattern": "@require:software-update",
+      "requires_nearby": "@device:halo_box",
+      "message": "The '@require:software-update' block should be wrapped in a '<!-- @device:halo_box -->' / '<!-- @device:end -->' scope, matching sibling playbooks (the Developer Center software-update flow is halo_box-specific)."
+    },
+    {
+      "id": "docker-vs-podman",
+      "severity": "correctness",
+      "applies_to": "readme",
+      "type": "conflict",
+      "pattern_a": "podman install",
+      "pattern_a_regex": "(?i)apt[\\s-]+install[^\\n]*\\bpodman\\b",
+      "pattern_b_regex": "(?im)^\\s*docker\\s+run\\b",
+      "message": "This playbook installs/uses podman but also invokes 'docker run'. On a fresh AMD system that followed the podman steps, 'docker' may not exist. Use 'podman run' (or note that docker can be aliased to podman)."
+    },
+    {
+      "id": "trailing-backtick-in-command",
+      "severity": "correctness",
+      "applies_to": "readme",
+      "type": "regex_present",
+      "pattern_regex": "install[^\\n`]*`\\s*$",
+      "message": "A shell command line appears to end with a stray backtick, which will cause the shell to hang or error on copy-paste. Remove the trailing backtick."
+    },
+    {
+      "id": "sudo-user-systemd-unit",
+      "severity": "correctness",
+      "applies_to": "readme",
+      "type": "regex_present",
+      "pattern_regex": "(?i)sudo\\s+nano\\s+[^\\n]*\\.service",
+      "message": "A user-level systemd unit (managed with 'systemctl --user') is being edited with 'sudo', which creates a root-owned file the user service cannot manage. Drop 'sudo'."
+    },
+    {
+      "id": "playbook-json-time-present",
+      "severity": "consistency",
+      "applies_to": "playbook_json",
+      "type": "json_field_present",
+      "field": "time",
+      "message": "playbook.json is missing a 'time' estimate."
+    },
+    {
+      "id": "playbook-json-difficulty-present",
+      "severity": "consistency",
+      "applies_to": "playbook_json",
+      "type": "json_field_present",
+      "field": "difficulty",
+      "message": "playbook.json is missing a 'difficulty' value (beginner/intermediate/advanced)."
+    },
+    {
+      "id": "playbook-json-required-fields",
+      "severity": "consistency",
+      "applies_to": "playbook_json",
+      "type": "json_fields_present",
+      "fields": ["id", "title", "description", "supported_platforms", "published_platforms", "tags"],
+      "message": "playbook.json is missing one or more expected fields."
+    },
+    {
+      "id": "windows-content-without-windows-support",
+      "severity": "consistency",
+      "applies_to": "readme",
+      "type": "cross_check_platform",
+      "content_pattern": "@os:windows",
+      "json_platform": "windows",
+      "message": "The README contains '@os:windows' content, but playbook.json does not list 'windows' under supported_platforms for any device. That Windows content will never render on the site. Either add Windows support in playbook.json or remove/relocate the Windows-only content."
+    },
+    {
+      "id": "smaller-model-disclaimer",
+      "severity": "consistency",
+      "applies_to": "readme",
+      "type": "conditional_hint",
+      "trigger_regex": "(?i)\\b\\d{2,}B\\b|35B|70B|GGUF",
+      "hint_keywords": ["smaller model", "less memory", "limited memory", "VRAM", "fits your hardware"],
+      "message": "This playbook runs a large model but may not remind low-memory / low-VRAM devices to pick a smaller one. If small-VRAM devices are in supported_platforms, add a 'choose a smaller model if your hardware lacks memory' note at the run command."
+    },
+    {
+      "id": "first-run-download-note",
+      "severity": "polish",
+      "applies_to": "readme",
+      "type": "conditional_hint",
+      "trigger_regex": "(?i)lemonade\\s+(run|pull)|download the model|\\.gguf",
+      "hint_keywords": ["can take a while", "downloads the model", "first run", "depending on your connection"],
+      "message": "Large model downloads happen on first run but there may be no note setting that expectation. Consider a brief 'the first run downloads the model, which can take a while' note."
+    }
+  ],
+
+  "llm_rubric": {
+    "categories": [
+      {
+        "id": "clarity",
+        "weight": 3,
+        "prompt": "Are the instructions clear and unambiguous for a first-time user? Flag steps that assume unstated context, reference a UI element or path without saying where it is, or could be misread."
+      },
+      {
+        "id": "conciseness",
+        "weight": 2,
+        "prompt": "Is anything needlessly wordy or repeated? Flag redundant sentences, filler, or over-explanation. Do not recommend removing safety/disclaimer content."
+      },
+      {
+        "id": "consistency",
+        "weight": 3,
+        "prompt": "Does this playbook follow the conventions of the others: section ordering (memory config early, prerequisites, numbered steps), heading style, tone, and tag usage? Flag deviations."
+      },
+      {
+        "id": "grammar_spelling",
+        "weight": 2,
+        "prompt": "Flag grammar, spelling, capitalization, and punctuation errors, including mid-sentence capitalization and malformed lists."
+      },
+      {
+        "id": "correctness_risk",
+        "weight": 3,
+        "prompt": "Flag anything that would break on copy-paste or mislead the user: commands that won't run as written, wrong ports/paths, self-contradictory values, advice that is a no-op, or version/number claims that contradict other parts of the doc."
+      },
+      {
+        "id": "disclaimers",
+        "weight": 2,
+        "prompt": "Are appropriate caveats present where needed: hardware/memory requirements, untested or unofficial steps flagged as such, autonomous-agent risk warnings, and machine-specific assumptions? Flag missing or overstated claims (e.g. asserting a hard failure threshold that was never verified)."
+      }
+    ],
+    "instructions": "You are a documentation UX reviewer for AMD Ryzen AI Halo playbooks. Review ONLY the changed playbook provided. For each issue, give: a one-line title, the severity (correctness, consistency, or polish), a short explanation, and where possible the specific line or snippet. Do not rewrite the whole document. Do not invent problems; if a category is clean, say nothing for it. Prefer a small number of high-value findings over an exhaustive nitpick list. Never recommend removing safety, disclaimer, or licensing content."
+  }
+}

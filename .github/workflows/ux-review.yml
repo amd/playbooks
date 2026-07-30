@@ -1,0 +1,162 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: UX Review
+
+# On-demand UX review of the playbook(s) changed in a pull request.
+#
+# Trigger: comment "/ux-review" (optionally "/ux-review <playbook-id>") on a PR.
+# The agent runs the checklist in .github/scripts/ux_rules.json (deterministic
+# checks + an LLM rubric pass) over the playbook(s) this PR changes, then posts a
+# single ranked review comment. It is advisory only and makes no edits.
+#
+# Notes:
+# - issue_comment workflows always run the version of this file on the DEFAULT
+#   branch (main), not the PR branch. Iterate by merging to main.
+# - The gate job runs on a hosted runner and does the cheap auth/parse work. The
+#   review job only starts (on the self-hosted `translation` runner, which can
+#   reach the private LLM endpoint) once the caller is authorized, so an
+#   unauthorized comment never occupies the LLM runner.
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  # One in-flight review per PR; a newer /ux-review supersedes an older one.
+  group: ux-review-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Gate: cheap checks on a hosted runner. Decides whether the review runs.
+  # ---------------------------------------------------------------------------
+  gate:
+    name: Gate
+    if: >-
+      github.event.issue.pull_request != null &&
+      startsWith(github.event.comment.body, '/ux-review')
+    runs-on: ubuntu-latest
+    outputs:
+      allowed: ${{ steps.decide.outputs.allowed }}
+      playbook_arg: ${{ steps.parse.outputs.playbook_arg }}
+    steps:
+      - name: Decide authorization
+        id: decide
+        env:
+          AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
+        run: |
+          # Only repository collaborators (OWNER / MEMBER / COLLABORATOR) may run it.
+          case "$AUTHOR_ASSOCIATION" in
+            OWNER|MEMBER|COLLABORATOR) echo "allowed=true"  >> "$GITHUB_OUTPUT" ;;
+            *)                         echo "allowed=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Parse optional playbook id
+        id: parse
+        if: steps.decide.outputs.allowed == 'true'
+        env:
+          # Pass the untrusted comment body via env, never inline into the script,
+          # to avoid shell injection. Parsed literally with awk (never eval'd).
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          # First whitespace-delimited token after "/ux-review", if any.
+          ARG=$(printf '%s' "$COMMENT_BODY" | awk 'NR==1{print $2}')
+          # Accept only a safe playbook-id shape; otherwise treat as "no arg".
+          if printf '%s' "$ARG" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9._-]*$'; then
+            echo "playbook_arg=$ARG" >> "$GITHUB_OUTPUT"
+          else
+            echo "playbook_arg=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: React to the command
+        if: steps.decide.outputs.allowed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api -X POST \
+            "repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions" \
+            -f content=eyes || true
+
+      - name: Reject unauthorized caller
+        if: steps.decide.outputs.allowed != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" \
+            --body "The \`/ux-review\` command is limited to repository collaborators."
+
+  # ---------------------------------------------------------------------------
+  # Review: only runs when authorized. Needs the private LLM endpoint.
+  # ---------------------------------------------------------------------------
+  review:
+    name: UX review
+    needs: gate
+    if: needs.gate.outputs.allowed == 'true'
+    runs-on: translation
+    env:
+      LLM_PROVIDER: ${{ secrets.LLM_PROVIDER }}
+      LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+      LLM_MODEL: ${{ secrets.LLM_MODEL }}
+      LLM_EXTRA_HEADERS: ${{ secrets.LLM_EXTRA_HEADERS }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: 'utf-8'
+    steps:
+      - name: Resolve PR refs
+        id: pr
+        run: |
+          HEAD_REF=$(gh pr view "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" --json headRefName -q .headRefName)
+          echo "head_ref=$HEAD_REF" >> "$GITHUB_OUTPUT"
+          echo "PR #${{ github.event.issue.number }} head=$HEAD_REF"
+
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.head_ref }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Collect changed playbook files
+        id: changed
+        run: |
+          # gh gives the PR's changed file list directly, avoiding merge-base guesswork.
+          gh pr view "${{ github.event.issue.number }}" --repo "${{ github.repository }}" \
+            --json files -q '.files[].path' > "$RUNNER_TEMP/ux_changed_files.txt" || true
+          echo "Changed files:"
+          cat "$RUNNER_TEMP/ux_changed_files.txt" || true
+
+      - name: Run UX review
+        env:
+          PLAYBOOK_ARG: ${{ needs.gate.outputs.playbook_arg }}
+        run: |
+          REPORT="$RUNNER_TEMP/ux_report.md"
+          if [ -n "$PLAYBOOK_ARG" ]; then
+            python .github/scripts/ux_review.py --playbooks "$PLAYBOOK_ARG" --output "$REPORT"
+          else
+            python .github/scripts/ux_review.py \
+              --changed-files "$(cat "$RUNNER_TEMP/ux_changed_files.txt")" \
+              --output "$REPORT"
+          fi
+
+      - name: Post review comment
+        run: |
+          gh pr comment "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" \
+            --body-file "$RUNNER_TEMP/ux_report.md"
+
+      - name: Report failure
+        if: failure()
+        run: |
+          gh pr comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" \
+            --body "The UX review agent hit an error. See the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details." || true
