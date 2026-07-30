@@ -562,9 +562,7 @@ Create the following directory structure by making the **2 new folders** and dow
 | **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | JIT and C++ extension files for matrix multiplication kernel |
 
 
-## Walkthroughs
-
-### Walkthrough 1: Vector Addition
+## Walkthrough 1: Vector Addition
 
 #### Approach A:  JIT Compilation
 
@@ -1025,7 +1023,7 @@ finally {
 
 ---
 
-### Walkthrough 2: Matrix Multiplication
+## Walkthrough 2: Matrix Multiplication
 
 Matrix multiplication computes **C = A × B** where:
 - **A** is M×N (rows × columns)
