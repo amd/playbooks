@@ -133,7 +133,7 @@ finetune-venv\Scripts\activate
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0" "modelscope[datasets]"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -142,7 +142,7 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandb
 **Windows：** 此处仅测试并支持核心软件包。**bitsandbytes 在 Windows 上支持不佳**，因此 Windows 安装未包含该组件；请在 Windows 上使用 LoRA 或完整微调（QLoRA 需要 bitsandbytes，且适用于 Linux 系统）。
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0" "modelscope[datasets]"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
