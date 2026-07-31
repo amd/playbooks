@@ -1,0 +1,6 @@
+{
+  "id": "pytorch-kernels",
+  "title": "การสร้างเคอร์เนล GPU แบบกำหนดเองด้วย PyTorch และ AMD ROCm™",
+  "description": "เขียนและปรับแต่งเคอร์เนล GPU แบบกำหนดเองด้วย PyTorch และซอฟต์แวร์ AMD ROCm™",
+  "auto_translated": true
+}

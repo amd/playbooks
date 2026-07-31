@@ -1,3 +1,7 @@
+// Copyright Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Shared utilities for fetching GitHub Actions test results artifacts.
  *

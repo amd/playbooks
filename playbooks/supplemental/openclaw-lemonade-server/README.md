@@ -43,9 +43,9 @@ By the end of this playbook you will be able to:
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Optional, for sandboxing OpenClaw)
-
 - **~10–30 GB of free disk space** for model weights
 <!-- @os:end -->
+
 <!-- @os:windows -->
 - A PC running **Windows 10/11**
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
@@ -254,9 +254,10 @@ systemd=true
 EOF
 ```
 
-Restart WSL:
+Exit WSL and restart it:
 
 ```powershell
+exit
 wsl --shutdown
 wsl
 ```
@@ -276,6 +277,7 @@ ip route show default | awk '{print $3}' | head -1
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
+> Note: If you encounter a `netsh: command not found` error, please try using the explicit executable name instead - `netsh.exe`
 
 **Add a firewall rule** (same elevated PowerShell):
 
@@ -308,7 +310,36 @@ If you’ve already loaded the Qwen3.6-35B-A3B-GGUF model in the previous step, 
 }
 ```
 
-> The `netsh portproxy` rule survives reboots but the WSL gateway IP can change after `wsl --shutdown`. If Lemonade becomes unreachable from WSL after a restart, get the updated gateway IP and update the proxy with this new IP.
+#### Keeping the Bridge Working After a Restart
+
+The `netsh portproxy` rule survives reboots, but the WSL gateway IP can change after `wsl --shutdown` or a reboot. When it does, the proxy still points at the old IP and Lemonade becomes unreachable from WSL. If that happens, use one of the options below.
+
+**Option 1 (recommended) — Repair the bridge automatically.** To avoid doing this by hand each time, use a scheduled task that checks the bridge on every startup and sign-in and rebuilds it only when the gateway IP has changed. See the [Lemonade WSL bridge auto-repair guide](assets/RepairLemonadeWslBridge.md).
+
+
+**Option 2 — Repair the bridge manually.** First, get the current WSL gateway IP by running this inside WSL:
+
+```bash
+ip route show default | awk '{print $3}' | head -1
+```
+
+Copy this value; you'll use it in place of `<new-WSL-Gateway-IP>` below.
+
+Then, in an **elevated PowerShell** (Run as administrator), list the existing rules, delete only the stale Lemonade rule, and add a fresh one with the current IP:
+
+```powershell
+netsh interface portproxy show all
+netsh interface portproxy delete v4tov4 listenaddress=<old-WSL-Gateway-IP> listenport=13305
+netsh interface portproxy add v4tov4 listenaddress=<new-WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
+```
+
+In the output of `show all`, the stale Lemonade rule is the entry whose connect address is `127.0.0.1` on port `13305`; its listen address is your `<old-WSL-Gateway-IP>`. Deleting by that address removes only this rule and leaves any other port-proxy rules on your machine untouched.
+
+The firewall rule you added during setup is bound to port `13305` (not the IP), so it keeps working and does not need to be recreated.
+
+> **Recommendation:** To avoid gateway issues, we strongly suggest the following shell configuration:
+> - **Windows commands** should be executed in **PowerShell**
+> - **WSL distro commands** should be executed in a **Command Prompt** (run as **Administrator**)
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -894,7 +925,160 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Start the OpenClaw Gateway
+<!-- @os:linux -->
+## (Recommended) OpenClaw Integration with Firecrawl Services
+
+[Firecrawl](https://docs.firecrawl.dev/introduction) provides a self-hosted web crawling and content extraction service that can bypass these challenges and unlock the full potential of OpenClaw automation. 
+
+In this setup, OpenClaw runs as a set of Docker containers managed with Podman. To simplify lifecycle management and automatic startup, we register Firecrawl as a user-level `systemd` service that orchestrates the underlying Podman Compose stack. This allows OpenClaw to start the gateway, stop, and verify the Firecrawl service using standard `systemctl --user` commands instead of interacting with containers directly. 
+
+To keep things simple, we've broken the whole process into four steps:
+
+---
+
+### 1. Register the system service
+Navigate to the systemd user configuration directory:
+```bash
+cd ~/.config/systemd/user
+```
+Create and open a new file called `firecrawl.service`.
+```bash
+nano firecrawl.service
+```
+Copy and paste the following configuration:
+```bash
+[Unit]
+Description=OpenClaw Firecrawl Service
+After=podman.service
+Requires=podman.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=%h/firecrawl
+
+# Optional: Validate config before starting
+ExecStartPre=/usr/bin/podman compose -f openclaw-compose.yaml config --quiet
+
+# Generate token and write to .env file
+ExecStartPre=/bin/bash -c 'chmod 644 %h/firecrawl/.env && echo "OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)" > %h/firecrawl/.env'
+
+# Step 1: Start containers in detached mode
+ExecStart=/usr/bin/podman compose -f openclaw-compose.yaml up -d --remove-orphans
+
+# Step 2: Wait for container to be healthy/ready
+ExecStartPost=/bin/sleep 5
+
+# Step 3: Run onboarding inside container in detached mode
+ExecStartPost=/usr/bin/podman exec -d openclaw_gateway /bin/bash -c "openclaw onboard \
+    --non-interactive \
+    --accept-risk \
+    --mode local \
+    --auth-choice skip \
+    --gateway-auth token \
+    --gateway-token "$OPENCLAW_GATEWAY_TOKEN" "
+
+# Stop containers when the service stops
+ExecStop=/usr/bin/podman compose -f openclaw-compose.yaml down
+
+[Install]
+WantedBy=default.target
+```
+At this point, the service has been defined but not yet registered with `systemd`. 
+Make sure the filename matches exactly what you created above, then run:
+```bash
+systemctl --user daemon-reload
+systemctl --user enable firecrawl.service
+```
+If successful, you should see the following output:
+
+> **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
+
+ `default.target.wants/` contains symbolic links to services that are configured to start automatically.
+
+### 2. Configure Firecrawl
+
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) is ideal for those who need full control over their scraping and data processing environments but comes with the trade-off of additional maintenance and configuration efforts.
+
+Start by cloning the repository:
+```bash
+git clone https://github.com/firecrawl/firecrawl.git
+```
+Create `.env` in the root `/firecrawl` directory: 
+```bash
+# ===== Required ENVS ======
+PORT=3002
+HOST=0.0.0.0
+
+# ===== Firecrawl =====
+# FIRECRAWL_API_KEY="" # optional
+```
+### 3. Deploy OpenClaw with Podman Compose
+
+Before moving on, make sure you have pulled the latest OpenClaw Docker image:
+```bash
+podman pull ghcr.io/openclaw/openclaw:latest
+```
+Once that is done, download the OpenClaw Compose file [openclaw-compose.yaml](assets/openclaw-compose.yaml) and place it in the root `/firecrawl` directory:
+
+> This convention is required for `systemd` to locate and start the service correctly as specified in `WorkingDirectory=${HOME}/firecrawl`.
+
+> You can always expand the stack by adding additional Firecrawl services as needed. The full list of available services can be found in the official [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+
+### 4. Launch OpenClaw service through Firecrawl 
+
+Before handing control over to `systemd`, validate that everything works correctly by running the stack manually:
+```bash
+podman compose -f openclaw-compose.yaml up -d
+```
+If everything is configured correctly, you should see the OpenClaw container come up and your command line output should look similar to this:
+<p align="center">
+  <img src="assets/openclaw_health_verification.png" width="500" height="400" />
+</p>
+
+Once verified, bring the stack back down before proceeding:
+```bash
+podman compose -f openclaw-compose.yaml down
+```
+Before starting the service, you must ensure the correct ownership and permissions are set on the `firecrawl` directory and its `.env` file. 
+This is essential for the service to write your credentials at startup.
+```bash
+sudo chown ${USER}:${USER} ~/firecrawl/.env
+chmod 644 ~/firecrawl/.env
+```
+Now that everything is validated, start the service through `systemd`:
+```bash
+systemctl --user start firecrawl.service
+```
+[The OpenClaw Actions](https://docs.openclaw.ai/) are  accessible from within the interactive container, and the Web Dashboard is available on same host and port at http://127.0.0.1:18789.
+<p align="center">
+  <img src="assets/OpenClawWebUI-PodmanLaunch.png" width="500" height="500" />
+</p>
+
+### Obtaining Your `OPENCLAW_GATEWAY_TOKEN`
+
+Once the service is up and running, you will notice a new `.openclaw` directory created in your home folder (~/.openclaw). This directory is locked by default, so you'll need to unlock it to retrieve your gateway token.
+
+1. Grant access to the directory:
+```bash
+sudo chmod 777 ~/.openclaw/
+```
+2. Read your gateway token:
+```bash
+grep '"token"' ~/.openclaw/openclaw.json
+```
+Locate the `OPENCLAW_GATEWAY_TOKEN` value in the output.
+
+3. Open the gateway dashboard in your browser http://127.0.0.1:18789. Paste your token when prompted to authenticate.
+
+To stop the service, run:
+```bash
+systemctl --user stop firecrawl.service
+```
+<!-- @os:end -->
+---
+
+## Start the OpenClaw Gateway
 
 The gateway is the OpenClaw process that manages the agent loop and serves the dashboard:
 
@@ -1040,12 +1224,44 @@ Because the gateway binds to loopback, the dashboard auto-authenticates when ope
 **Congratulations, you've built a fully local AI agent stack from scratch.**
 
 > **Need the gateway token?** Run `openclaw dashboard --no-open` to print the dashboard URL with the token embedded (it also attempts to copy it to your clipboard). Alternatively, the token is at `gateway.auth.token` in `~/.openclaw/openclaw.json`.
->
-> **Approving a remote device:** When you open the dashboard from a second machine or phone, the browser displays a request ID. Back on the machine running the gateway, run:
+
+**Accessing the Dashboard from Another Device (via SSH Tunnel)**
+
+If OpenClaw runs on a remote machine, you can reach its dashboard from your local machine through an SSH tunnel. The tunnel forwards the gateway port (`18789`) so your local browser can talk to the remote gateway over `127.0.0.1`.
+
+1. From your **local machine**, connect to the remote machine once and accept the fingerprint prompt so the host is added to your known hosts:
+
+   ```bash
+   ssh user@<host-ip>
+   ```
+
+2. Still on your **local machine**, open the SSH tunnel:
+
+   ```bash
+   ssh -N -L 18789:127.0.0.1:18789 user@<host-ip>
+   ```
+
+   > **Note:** After you enter your password, the terminal shows no output and appears to hang. This is expected: the `-N` flag tells SSH not to run any remote command, so it simply holds the tunnel open. Leave this terminal running.
+
+3. On your **local machine**, open a browser and go to `http://127.0.0.1:18789`.
+
+4. On the **remote machine**, print the gateway token and paste it into the browser to log in:
+
+   ```bash
+   openclaw dashboard --no-open
+   ```
+
+   This prints the dashboard URL with the token embedded; copy the token to log in. (The token is also stored at `gateway.auth.token` in `~/.openclaw/openclaw.json`.)
+
+> **Approving a remote device:** When you open the dashboard from another machine or phone, the browser may display a request ID. On the **remote machine**, list the pending requests:
+> ```bash
+> openclaw devices list
+> ```
+> Then approve the matching request:
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> This is only needed for remote or secondary devices, loopback access from the same machine auto-authenticates.
+> This is only needed for remote or secondary devices; loopback access from the same machine authenticates automatically. See the [Remote Access](https://docs.openclaw.ai/gateway/remote) documentation for details.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1205,3 +1421,22 @@ Now that your agent can receive commands from your phone and act on your local m
 2. **Fine-tuning monitor**: Kick off a training job remotely via Telegram or Discord, then have the agent tail the training log and report periodic loss values, GPU utilization, and disk usage back to your phone. If the run stalls or VRAM spikes, you find out immediately without needing to be at the machine.
 
 3. **IOT with a local VLM**: Point a camera at your front door, run a vision model on Lemonade, and have OpenClaw analyze frames on demand or on a trigger. Ask "did any packages arrive today?" from your phone and get a straight answer from your own hardware.
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->

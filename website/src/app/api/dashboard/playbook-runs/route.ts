@@ -1,3 +1,7 @@
+// Copyright Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: MIT
+
 import { NextResponse } from "next/server";
 import { listRecentRuns } from "@/lib/github-test-results";
 

@@ -1,0 +1,6 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Spúšťanie a poskytovanie LLM pomocou LM Studio",
+  "description": "Nastavte LM Studio a LM Studio Server na lokálne spúšťanie a poskytovanie veľkých jazykových modelov.",
+  "auto_translated": true
+}
