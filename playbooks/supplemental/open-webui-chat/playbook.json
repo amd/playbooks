@@ -114,7 +114,7 @@
       "linux",
       "windows"
     ]
-  },  
+  },
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
@@ -128,5 +128,19 @@
     "vlm",
     "stable-diffusion"
   ],
-  "coverImage": "assets/open-webui_chat_interface.png"
+  "coverImage": "assets/open-webui_chat_interface.png",
+  "minMemoryGB": {
+    "linux": 32,
+    "windows": 32
+  },
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "Open WebUI": ""
+      },
+      "windows": {
+        "Open WebUI": ""
+      }
+    }
+  }
 }

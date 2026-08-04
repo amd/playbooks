@@ -1,32 +1,68 @@
 {
   "id": "amd-sync",
   "title": "Remote Development with AMD Sync",
-  "description": "Install AMD Sync on your laptop and get one-click remote VS Code, Terminal, JupyterLab, and Live Metrics on your AMD Ryzen\u2122 AI Halo.",
+  "description": "Install AMD Sync on your laptop and get one-click remote VS Code, Terminal, JupyterLab, and Live Metrics on your AMD Ryzen™ AI Halo.",
   "time": 15,
   "unsupported_platforms": {
     "halo": [
-      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" },
-      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" }
+      {
+        "platform": "windows",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      },
+      {
+        "platform": "linux",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      }
     ],
     "stx": [
-      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" },
-      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" }
+      {
+        "platform": "windows",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      },
+      {
+        "platform": "linux",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      }
     ],
     "krk": [
-      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" },
-      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" }
+      {
+        "platform": "windows",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      },
+      {
+        "platform": "linux",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      }
     ],
     "rx7900xt": [
-      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" },
-      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" }
+      {
+        "platform": "windows",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      },
+      {
+        "platform": "linux",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      }
     ],
     "rx9070xt": [
-      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" },
-      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" }
+      {
+        "platform": "windows",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      },
+      {
+        "platform": "linux",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      }
     ],
     "r9700": [
-      { "platform": "windows", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" },
-      { "platform": "linux", "reason": "AMD Sync is only supported on the AMD Ryzen\u2122 AI Halo Developer Platform" }
+      {
+        "platform": "windows",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      },
+      {
+        "platform": "linux",
+        "reason": "AMD Sync is only supported on the AMD Ryzen™ AI Halo Developer Platform"
+      }
     ]
   },
   "supported_platforms": {
@@ -53,5 +89,19 @@
     "vscode",
     "jupyterlab",
     "halo_box"
-  ]
+  ],
+  "minMemoryGB": {
+    "linux": 16,
+    "windows": 16
+  },
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "AMD Sync": ""
+      },
+      "windows": {
+        "AMD Sync": ""
+      }
+    }
+  }
 }

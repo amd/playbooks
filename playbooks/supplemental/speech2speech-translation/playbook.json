@@ -126,5 +126,14 @@
     "audio",
     "real-time"
   ],
-  "coverImage": "assets/gradio.png"
+  "coverImage": "assets/gradio.png",
+  "minMemoryGB": {
+    "linux": 16,
+    "windows": 16
+  },
+  "validatedVersions": {
+    "reference": {
+      "linux": {}
+    }
+  }
 }

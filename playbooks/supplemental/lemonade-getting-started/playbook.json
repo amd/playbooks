@@ -127,5 +127,19 @@
     "npu",
     "inference"
   ],
-  "coverImage": "../../dependencies/assets/multi_modality.png"
+  "coverImage": "../../dependencies/assets/multi_modality.png",
+  "minMemoryGB": {
+    "linux": 16,
+    "windows": 16
+  },
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "Lemonade": ""
+      },
+      "windows": {
+        "Lemonade": ""
+      }
+    }
+  }
 }

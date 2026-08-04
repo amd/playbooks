@@ -196,6 +196,16 @@ export interface PlaybookMeta {
   coverImage?: string;
 
   /**
+   * Minimum GPU memory (in GB) recommended to run this playbook, per OS.
+   * The value is the same number for both, but the meaning differs by platform:
+   * on Linux it is the shared GPU memory pool; on Windows it is the dedicated
+   * GPU memory. Based on the smallest model the playbook uses; users with less
+   * memory should pick a smaller model where the playbook supports it.
+   * Example: "minMemoryGB": { "linux": 16, "windows": 16 }
+   */
+  minMemoryGB?: Partial<Record<Platform, number>>;
+
+  /**
    * App-specific software versions this playbook was validated with, keyed by
    * device CATEGORY (reference / apu / gpu) then OS. Only list what's unique to
    * this playbook (e.g. ComfyUI, PyTorch) — shared platform versions (ROCm,

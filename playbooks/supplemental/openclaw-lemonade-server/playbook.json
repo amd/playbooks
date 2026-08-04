@@ -126,5 +126,16 @@
     "agent",
     "local-ai",
     "linux"
-  ]
+  ],
+  "minMemoryGB": {
+    "linux": 16,
+    "windows": 16
+  },
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "OpenClaw": ""
+      }
+    }
+  }
 }

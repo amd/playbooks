@@ -40,5 +40,16 @@
     "rocm",
     "llm",
     "inference"
-  ]
+  ],
+  "minMemoryGB": {
+    "linux": 128,
+    "windows": 128
+  },
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "ds4": ""
+      }
+    }
+  }
 }

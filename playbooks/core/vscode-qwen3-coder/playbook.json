@@ -126,5 +126,21 @@
     "qwen",
     "llm"
   ],
-  "coverImage": "assets/open-cline-test.png"
+  "coverImage": "assets/open-cline-test.png",
+  "minMemoryGB": {
+    "linux": 32,
+    "windows": 32
+  },
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "VS Code": "",
+        "Continue": ""
+      },
+      "windows": {
+        "VS Code": "",
+        "Continue": ""
+      }
+    }
+  }
 }

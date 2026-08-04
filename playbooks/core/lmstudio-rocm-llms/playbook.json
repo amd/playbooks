@@ -127,5 +127,19 @@
     "llm",
     "inference"
   ],
-  "coverImage": "assets/cover_image.avif"
+  "coverImage": "assets/cover_image.avif",
+  "minMemoryGB": {
+    "linux": 16,
+    "windows": 16
+  },
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "LM Studio": ""
+      },
+      "windows": {
+        "LM Studio": ""
+      }
+    }
+  }
 }

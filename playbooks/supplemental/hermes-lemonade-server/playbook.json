@@ -127,5 +127,19 @@
     "local-ai",
     "docker",
     "linux"
-  ]
+  ],
+  "minMemoryGB": {
+    "linux": 32,
+    "windows": 32
+  },
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "Hermes": ""
+      },
+      "windows": {
+        "Hermes": ""
+      }
+    }
+  }
 }

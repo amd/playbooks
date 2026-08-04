@@ -123,5 +123,9 @@
         "PyTorch": "2.10"
       }
     }
+  },
+  "minMemoryGB": {
+    "linux": 32,
+    "windows": 32
   }
 }
