@@ -182,11 +182,10 @@ compatible LLM API you run.
 5. Second `POST` to the **judge model** with the source + translation to get the
    0-100 quality score, recorded in `translation_accuracy.json`.
 
-**Where it runs:** in production the script runs on a self-hosted runner via
-[`translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml), which
-reads the `LLM_*` values from repository **secrets** - fully automated, with no
-manual translation step. (The translations in this PR were produced by the same
-script ahead of the runner being provisioned.) See the next section.
+**Where it runs:** the script runs on a dedicated self-hosted runner (labeled
+`translation`) via [`translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml),
+which reads the `LLM_*` values from repository **secrets** - fully automated, with
+no manual translation step. See the next section.
 
 ---
 
@@ -203,14 +202,13 @@ script ahead of the runner being provisioned.) See the next section.
 | `localized-playbooks/` override + region-only playbooks | Implemented |
 | GitHub Actions workflow: triggers, detect-changed, direct-push, all 29 locales | Implemented |
 | Provider-agnostic client (Anthropic-style / OpenAI-compatible APIs) | Implemented |
-| **Dedicated self-hosted runner labeled `translation`** | Coming soon |
-| **`LLM_*` repository secrets set** | Coming soon |
+| **Dedicated self-hosted runner labeled `translation`** | Implemented |
+| **`LLM_*` repository secrets set** | Implemented |
 | Website language selector for end users | Out of scope (website team) |
 
-Until the runner + secrets exist, the workflow does not run on `main`; the
-translations already in this PR were generated ahead of that. Once the runner and
-secrets are in place the workflow runs on its own - no code changes and no manual
-step.
+The runner and secrets are now in place, so the workflow runs automatically: a
+push to `main` touching `playbooks/**` translates the changed playbook(s) into all
+locales and direct-pushes the results - no code changes and no manual step.
 
 > [!NOTE]
 > Everything below refers to one workflow file,

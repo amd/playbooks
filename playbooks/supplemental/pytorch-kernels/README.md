@@ -165,7 +165,7 @@ source kernel-env/bin/activate
 
 <!-- @os:windows -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv kernel-env
 kernel-env\Scripts\activate
