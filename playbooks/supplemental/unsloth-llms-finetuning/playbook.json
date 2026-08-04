@@ -125,15 +125,13 @@
     "optimization"
   ],
   "coverImage": "assets/unsloth.png",
-  "minMemoryGB": {
-    "linux": 32,
-    "windows": 32
-  },
+  "minMemoryGB": 16,
   "validatedVersions": {
     "reference": {
       "linux": {
         "Unsloth": ""
       }
     }
-  }
+  },
+  "primaryModel": "Gemma-4-E4B-it"
 }

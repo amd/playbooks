@@ -128,10 +128,6 @@
     "optimization"
   ],
   "coverImage": "assets/cover.png",
-  "minMemoryGB": {
-    "linux": 16,
-    "windows": 16
-  },
   "validatedVersions": {
     "reference": {
       "linux": {},

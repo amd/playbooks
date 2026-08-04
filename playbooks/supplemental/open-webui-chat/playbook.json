@@ -129,10 +129,7 @@
     "stable-diffusion"
   ],
   "coverImage": "assets/open-webui_chat_interface.png",
-  "minMemoryGB": {
-    "linux": 32,
-    "windows": 32
-  },
+  "minMemoryGB": 8,
   "validatedVersions": {
     "reference": {
       "linux": {
@@ -142,5 +139,6 @@
         "Open WebUI": ""
       }
     }
-  }
+  },
+  "primaryModel": "Qwen3-4B"
 }

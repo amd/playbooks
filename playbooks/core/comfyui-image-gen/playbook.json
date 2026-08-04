@@ -124,8 +124,6 @@
       }
     }
   },
-  "minMemoryGB": {
-    "linux": 32,
-    "windows": 32
-  }
+  "minMemoryGB": 16,
+  "primaryModel": "Z-Image Turbo"
 }

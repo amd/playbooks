@@ -95,15 +95,13 @@
     "rccl",
     "vllm"
   ],
-  "minMemoryGB": {
-    "linux": 128,
-    "windows": 128
-  },
+  "minMemoryGB": 128,
   "validatedVersions": {
     "reference": {
       "linux": {
         "vLLM": ""
       }
     }
-  }
+  },
+  "primaryModel": "Qwen3.5-397B-A17B"
 }

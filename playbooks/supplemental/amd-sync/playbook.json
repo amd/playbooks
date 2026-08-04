@@ -90,10 +90,6 @@
     "jupyterlab",
     "halo_box"
   ],
-  "minMemoryGB": {
-    "linux": 16,
-    "windows": 16
-  },
   "validatedVersions": {
     "reference": {
       "linux": {

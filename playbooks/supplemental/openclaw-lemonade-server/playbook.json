@@ -127,15 +127,13 @@
     "local-ai",
     "linux"
   ],
-  "minMemoryGB": {
-    "linux": 16,
-    "windows": 16
-  },
+  "minMemoryGB": 32,
   "validatedVersions": {
     "reference": {
       "linux": {
         "OpenClaw": ""
       }
     }
-  }
+  },
+  "primaryModel": "Qwen3.6-35B-A3B"
 }

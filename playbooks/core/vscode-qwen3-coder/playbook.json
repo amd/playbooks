@@ -127,10 +127,7 @@
     "llm"
   ],
   "coverImage": "assets/open-cline-test.png",
-  "minMemoryGB": {
-    "linux": 32,
-    "windows": 32
-  },
+  "minMemoryGB": 24,
   "validatedVersions": {
     "reference": {
       "linux": {
@@ -142,5 +139,6 @@
         "Continue": ""
       }
     }
-  }
+  },
+  "primaryModel": "Qwen3-Coder-30B-A3B"
 }

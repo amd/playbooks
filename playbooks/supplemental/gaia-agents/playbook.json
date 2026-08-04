@@ -128,10 +128,7 @@
     "lemonade"
   ],
   "coverImage": "assets/gaia.jpg",
-  "minMemoryGB": {
-    "linux": 32,
-    "windows": 32
-  },
+  "minMemoryGB": 8,
   "validatedVersions": {
     "reference": {
       "linux": {
@@ -141,5 +138,6 @@
         "GAIA": ""
       }
     }
-  }
+  },
+  "primaryModel": "Qwen3-0.6B"
 }

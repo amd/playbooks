@@ -130,15 +130,13 @@
     "fine-tuning"
   ],
   "coverImage": "assets/cover.png",
-  "minMemoryGB": {
-    "linux": 32,
-    "windows": 32
-  },
+  "minMemoryGB": 16,
   "validatedVersions": {
     "reference": {
       "linux": {
         "LLaMA-Factory": ""
       }
     }
-  }
+  },
+  "primaryModel": "Qwen3-4B-Instruct"
 }

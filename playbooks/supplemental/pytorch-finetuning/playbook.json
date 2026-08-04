@@ -127,14 +127,12 @@
     "rocm"
   ],
   "coverImage": "assets/cover_image.jpg",
-  "minMemoryGB": {
-    "linux": 32,
-    "windows": 32
-  },
+  "minMemoryGB": 16,
   "validatedVersions": {
     "reference": {
       "linux": {},
       "windows": {}
     }
-  }
+  },
+  "primaryModel": "Gemma-3-4B"
 }

@@ -196,14 +196,22 @@ export interface PlaybookMeta {
   coverImage?: string;
 
   /**
-   * Minimum GPU memory (in GB) recommended to run this playbook, per OS.
-   * The value is the same number for both, but the meaning differs by platform:
-   * on Linux it is the shared GPU memory pool; on Windows it is the dedicated
-   * GPU memory. Based on the smallest model the playbook uses; users with less
-   * memory should pick a smaller model where the playbook supports it.
-   * Example: "minMemoryGB": { "linux": 16, "windows": 16 }
+   * The main / default model this playbook runs, for at-a-glance user clarity.
+   * A single representative name even when the playbook mentions several
+   * (show the recommended/default one). Omitted for playbooks with no model
+   * (e.g. dev tools like AMD Sync, CVML, the kernel tutorial).
+   * Example: "primaryModel": "Qwen3.6-35B-A3B"
    */
-  minMemoryGB?: Partial<Record<Platform, number>>;
+  primaryModel?: string;
+
+  /**
+   * Minimum GPU memory (in GB) recommended to run this playbook, based on the
+   * smallest model it uses. A single number; the frontend adds any OS-specific
+   * wording (e.g. shared GPU memory pool on Linux vs. dedicated GPU memory on
+   * Windows). Users with less memory should pick a smaller model where the
+   * playbook supports it. Example: "minMemoryGB": 16
+   */
+  minMemoryGB?: number;
 
   /**
    * App-specific software versions this playbook was validated with, keyed by

@@ -14,7 +14,7 @@
   "supported_platforms": {
     "halo_box": [
       "windows"
-    ],  
+    ],
     "halo": [
       "linux",
       "windows"
@@ -86,10 +86,6 @@
     "npu",
     "inference"
   ],
-  "minMemoryGB": {
-    "linux": 16,
-    "windows": 16
-  },
   "validatedVersions": {
     "reference": {
       "linux": {

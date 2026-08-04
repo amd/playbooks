@@ -128,10 +128,7 @@
     "inference"
   ],
   "coverImage": "../../dependencies/assets/multi_modality.png",
-  "minMemoryGB": {
-    "linux": 16,
-    "windows": 16
-  },
+  "minMemoryGB": 8,
   "validatedVersions": {
     "reference": {
       "linux": {
@@ -141,5 +138,6 @@
         "Lemonade": ""
       }
     }
-  }
+  },
+  "primaryModel": "Gemma-4-E2B-it"
 }

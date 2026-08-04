@@ -46,10 +46,7 @@
     "llm"
   ],
   "coverImage": "assets/02-agent-canvas-home.png",
-  "minMemoryGB": {
-    "linux": 32,
-    "windows": 32
-  },
+  "minMemoryGB": 32,
   "validatedVersions": {
     "reference": {
       "linux": {
@@ -59,5 +56,6 @@
         "Agent Canvas": ""
       }
     }
-  }
+  },
+  "primaryModel": "Qwen3.6-35B-A3B"
 }

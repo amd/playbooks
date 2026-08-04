@@ -68,15 +68,13 @@
     "llm",
     "quickstart"
   ],
-  "minMemoryGB": {
-    "linux": 16,
-    "windows": 16
-  },
+  "minMemoryGB": 8,
   "validatedVersions": {
     "reference": {
       "linux": {
         "vLLM": ""
       }
     }
-  }
+  },
+  "primaryModel": "Qwen3-1.7B"
 }

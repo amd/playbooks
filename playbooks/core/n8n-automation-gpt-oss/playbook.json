@@ -128,10 +128,7 @@
     "lemonade"
   ],
   "coverImage": "assets/workflow-overview.png",
-  "minMemoryGB": {
-    "linux": 32,
-    "windows": 32
-  },
+  "minMemoryGB": 16,
   "validatedVersions": {
     "reference": {
       "linux": {
@@ -141,5 +138,6 @@
         "n8n": ""
       }
     }
-  }
+  },
+  "primaryModel": "GPT-OSS-120B"
 }

@@ -88,15 +88,13 @@
     "inference",
     "rocm"
   ],
-  "minMemoryGB": {
-    "linux": 128,
-    "windows": 128
-  },
+  "minMemoryGB": 128,
   "validatedVersions": {
     "reference": {
       "linux": {
         "llama.cpp": ""
       }
     }
-  }
+  },
+  "primaryModel": "GLM-4.7"
 }

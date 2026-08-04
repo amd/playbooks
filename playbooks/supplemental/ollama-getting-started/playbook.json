@@ -128,10 +128,7 @@
     "api"
   ],
   "coverImage": "assets/ollama_app.png",
-  "minMemoryGB": {
-    "linux": 16,
-    "windows": 16
-  },
+  "minMemoryGB": 16,
   "validatedVersions": {
     "reference": {
       "linux": {
@@ -141,5 +138,6 @@
         "Ollama": ""
       }
     }
-  }
+  },
+  "primaryModel": "GPT-OSS-20B"
 }

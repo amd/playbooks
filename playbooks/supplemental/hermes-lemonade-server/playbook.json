@@ -128,10 +128,7 @@
     "docker",
     "linux"
   ],
-  "minMemoryGB": {
-    "linux": 32,
-    "windows": 32
-  },
+  "minMemoryGB": 32,
   "validatedVersions": {
     "reference": {
       "linux": {
@@ -141,5 +138,6 @@
         "Hermes": ""
       }
     }
-  }
+  },
+  "primaryModel": "Qwen3.6-35B-A3B"
 }

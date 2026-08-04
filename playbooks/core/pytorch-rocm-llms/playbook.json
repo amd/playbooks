@@ -128,14 +128,12 @@
     "summarization"
   ],
   "coverImage": "assets/cover.png",
-  "minMemoryGB": {
-    "linux": 16,
-    "windows": 16
-  },
+  "minMemoryGB": 8,
   "validatedVersions": {
     "reference": {
       "linux": {},
       "windows": {}
     }
-  }
+  },
+  "primaryModel": "Qwen3.5-4B"
 }
