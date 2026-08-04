@@ -90,6 +90,7 @@ LOCALE_NAMES = {
     "nb-NO": "Norwegian Bokmal (nb-NO)",
     "pl-PL": "Polish (pl-PL)",
     "pt-BR": "Brazilian Portuguese (pt-BR)",
+    "pt-PT": "European Portuguese (pt-PT)",
     "ru-RU": "Russian (ru-RU)",
     "sv-SE": "Swedish (sv-SE)",
     "th-TH": "Thai (th-TH)",
@@ -293,7 +294,7 @@ def call_model(system_prompt, user_text, cfg, temperature=0, max_retries=6):
     for attempt in range(max_retries):
         try:
             return fn(system_prompt, user_text, cfg, temperature)
-        except (urllib.error.URLError, urllib.error.HTTPError, KeyError, TimeoutError, IndexError) as e:
+        except (urllib.error.URLError, urllib.error.HTTPError, ConnectionError, TimeoutError, KeyError, IndexError) as e:
             last_err = e
             # Rate limiting (429) / overload (503): back off harder and honor
             # Retry-After when the server provides it.
