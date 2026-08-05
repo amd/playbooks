@@ -96,11 +96,14 @@ body:
     id: os
     attributes:
       label: Operating system
-      description: Select all that apply.
+      description: |
+        Select all that apply. Pick WSL2 only if you are following the
+        playbook's WSL steps, not just running Windows.
       multiple: true
       options:
         - Windows
         - Linux
+        - WSL2 on Windows
     validations:
       required: true
 
