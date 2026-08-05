@@ -4,7 +4,7 @@
 name: Playbook proposal
 description: Pitch a new playbook as a short abstract, before writing any of it.
 title: "[Playbook]: <proposed title>"
-labels: ["playbook-proposal", "triage"]
+labels: ["new_playbook", "status::triage"]
 body:
   - type: markdown
     attributes:
@@ -29,7 +29,7 @@ body:
         quality. See [CONTRIBUTING.md](https://github.com/amd/playbooks/blob/main/CONTRIBUTING.md)
         for what reviewers look for.
 
-        Please check the [open proposals](https://github.com/amd/playbooks/issues?q=is%3Aissue+is%3Aopen+label%3Aplaybook-proposal)
+        Please check the [open proposals](https://github.com/amd/playbooks/issues?q=is%3Aissue+is%3Aopen+label%3Anew_playbook)
         and the [published playbooks](https://github.com/amd/playbooks#available-playbooks)
         first, so we are not reviewing the same idea twice.
 

@@ -4,7 +4,7 @@
 name: Bug report
 description: Report a problem with a specific playbook in this repository.
 title: "[Bug]: <short description>"
-labels: ["bug", "triage"]
+labels: ["bug", "status::triage"]
 body:
   - type: markdown
     attributes:
