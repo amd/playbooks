@@ -148,7 +148,7 @@ jobs:
           # Optional HF token so live HuggingFace pulls (dep cache misses,
           # uncached datasets) are authenticated and avoid the shared-IP 429.
           ORCHESTRAI_HF_TOKEN: ${{ secrets.ORCHESTRAI_HF_TOKEN }}
-          ORCHESTRAI_PIPELINE_URL: ${{ secrets.ORCHESTRAI_PIPELINE_URL }}
+          ORCHESTRAI_PIPELINE_URL: ${{ vars.ORCHESTRAI_PIPELINE_URL }}
           ORCHESTRAI_PIPELINE_JOB: ${{ vars.ORCHESTRAI_PIPELINE_JOB }}
           ORCHESTRAI_THEROCK_URL: ${{ vars.ORCHESTRAI_THEROCK_URL }}
           ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL: ${{ vars.ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL }}

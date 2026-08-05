@@ -436,7 +436,7 @@ def main():
             need.append("ORCHESTRAI_PIPELINE_TOKEN")
         if need:
             print(f"::error::OrchestrAI not configured — missing: {', '.join(need)} "
-                  f"(set the ORCHESTRAI_PIPELINE_JOB var and the ORCHESTRAI_PIPELINE_URL/USER/TOKEN secrets)",
+                  f"(set ORCHESTRAI_PIPELINE_URL/JOB vars and ORCHESTRAI_PIPELINE_* secrets)",
                   file=sys.stderr)
             sys.exit(1)
 

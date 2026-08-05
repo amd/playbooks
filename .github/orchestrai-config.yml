@@ -9,19 +9,20 @@
 # workflow YAML and the .github/scripts/orchestrai_*.py helpers stay generic.
 #
 # Secrets (OrchestrAI pipeline credentials) are NOT here — they come from repo secrets
-# ORCHESTRAI_PIPELINE_URL / ORCHESTRAI_PIPELINE_USER / ORCHESTRAI_PIPELINE_TOKEN.
-# Only non-secret coordinates live in this file.
+# ORCHESTRAI_PIPELINE_USER / ORCHESTRAI_PIPELINE_TOKEN. Only non-secret coordinates live in this file.
 
 # ---------------------------------------------------------------------------
 # OrchestrAI pipeline entry point
 # ---------------------------------------------------------------------------
 # NOTE: this repo is public, so the internal OrchestrAI pipeline coordinates are NOT
-# committed here. Set the pipeline URL as a repo secret and the job name as a
-# repo variable (Settings -> Secrets and variables -> Actions):
-#   ORCHESTRAI_PIPELINE_URL   (secret)   e.g. https://<your-pipeline-host>
-#   ORCHESTRAI_PIPELINE_JOB   (variable) e.g. <your-pipeline-job>
+# committed here. Set them as repo variables (Settings -> Variables):
+#   ORCHESTRAI_PIPELINE_URL   e.g. https://<your-pipeline-host>
+#   ORCHESTRAI_PIPELINE_JOB   e.g. <your-pipeline-job>
+# The pipeline URL must be a variable, not a secret: the build URL derived from
+# it is passed between jobs as a job output, and GitHub redacts secret values
+# from job outputs, which would blank the build_urls handed to the test jobs.
 # The values below are only fallbacks for local runs; the workflow passes the
-# repo secret/variable through and they take precedence.
+# repo variables through and they take precedence.
 pipeline:
   url: ""
   job: ""
