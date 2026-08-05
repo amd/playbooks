@@ -104,14 +104,15 @@ The website resolves each file per locale in this order:
 ## Machine-translation disclaimer
 
 Every translated `README.md` / `platform.md` gets a localized caution at the very
-top - machine-translated, may contain mistakes, and some steps/commands/downloads
-or product availability may differ by language or region. It is inserted right
+top - machine-translated, may contain mistakes, some instructions/commands/downloads
+or product availability may differ by language or region, and the original English
+version of the playbook controls in the event of any discrepancy. It is inserted right
 after the license header (outside `@github-only`, so it renders on **both** GitHub
 and the website, which already renders `> [!WARNING]` alerts), wrapped in a marker
 for idempotent insert/refresh:
 
 ```
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
 > <localized text>
 <!-- auto-translated-disclaimer:end -->
