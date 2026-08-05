@@ -74,12 +74,12 @@ body:
       required: true
 
   - type: dropdown
-    id: device
+    id: devices
     attributes:
       label: AMD hardware
       description: |
-        Which device are you following the playbook on? These are the device IDs
-        the playbooks use. Select every one you have reproduced the problem on.
+        Which devices have you reproduced the problem on? These are the device
+        IDs used in `playbook.json`. Select all that apply.
       multiple: true
       options:
         - halo_box - AMD Ryzen AI Halo Developer Platform
@@ -89,31 +89,18 @@ body:
         - rx7900xt - AMD Radeon RX 7900 XT
         - rx9070xt - AMD Radeon RX 9070 XT
         - r9700 - AMD Radeon AI PRO R9700
-        - Other AMD hardware (describe below)
     validations:
       required: true
-
-  - type: input
-    id: hardware-details
-    attributes:
-      label: Hardware details
-      description: |
-        Exact product name, and system model if relevant. Required if you
-        selected "Other AMD hardware" above.
-      placeholder: e.g. Ryzen AI Max+ 395, 128 GB, HP ZBook Ultra G1a
-    validations:
-      required: false
 
   - type: dropdown
     id: os
     attributes:
       label: Operating system
-      description: Select every OS you have reproduced the problem on.
+      description: Select all that apply.
       multiple: true
       options:
         - Windows
         - Linux
-        - WSL2 on Windows
     validations:
       required: true
 
@@ -128,43 +115,19 @@ body:
     validations:
       required: true
 
-  - type: input
-    id: driver-runtime
-    attributes:
-      label: Driver / runtime versions
-      description: |
-        Versions of whatever the playbook depends on, so we can match your
-        environment. Include the GPU or NPU driver, plus the runtime the
-        playbook installs (ROCm, Ryzen AI, Lemonade, PyTorch, and so on).
-      placeholder: e.g. Adrenalin 25.6.3, ROCm 6.4.0, torch 2.8.0
-    validations:
-      required: false
-
   - type: textarea
     id: what-happened
     attributes:
       label: What happened?
-      description: A clear and concise description of the bug.
-      placeholder: Describe the actual behavior you observed.
-    validations:
-      required: true
-
-  - type: textarea
-    id: expected
-    attributes:
-      label: What did you expect to happen?
-      placeholder: Describe what you expected the playbook step to do.
-    validations:
-      required: true
-
-  - type: textarea
-    id: repro
-    attributes:
-      label: Steps to reproduce
       description: |
-        List the exact steps from the playbook that lead to the bug, starting
-        from a clean environment where you can.
+        Cover three things: what you saw, what you expected the playbook step to
+        do instead, and the steps that lead to it from a clean environment.
       placeholder: |
+        What happened:
+
+        What I expected:
+
+        Steps to reproduce:
         1. Go to step '...' of the playbook
         2. Run command '...'
         3. See error
@@ -174,18 +137,10 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Relevant logs, error messages, or screenshots
+      label: Logs, screenshots, and anything else
       description: |
-        Paste any relevant terminal output, stack traces, or screenshots.
-        Logs will be automatically formatted as code, no need for backticks.
-      render: shell
-    validations:
-      required: false
-
-  - type: textarea
-    id: additional
-    attributes:
-      label: Additional context
-      description: Anything else that might help us reproduce or diagnose the issue.
+        Terminal output, stack traces, screenshots, driver or runtime versions,
+        and anything else that helps us diagnose it. You can drag files in here.
+        Wrap long output in triple backticks so it stays readable.
     validations:
       required: false
