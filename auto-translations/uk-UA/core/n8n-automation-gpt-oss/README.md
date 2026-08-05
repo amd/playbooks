@@ -17,7 +17,7 @@ This playbook teaches you how to set up an AI-powered financial news summarizer 
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Цей посібник використовує спеціальні теги, які GitHub не може відображати. Будь ласка, відвідайте [amd.com/playbooks](https://amd.com/playbooks) для коректного перегляду цього вмісту.
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## Огляд

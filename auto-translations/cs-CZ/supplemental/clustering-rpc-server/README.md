@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Tato příručka používá speciální značky, které GitHub neumí zobrazit. Chcete-li si tento obsah správně prohlédnout, navštivte prosím [amd.com/playbooks](https://amd.com/playbooks).
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 # Clustrování dvou systémů Ryzen™ AI Halo pomocí RPC

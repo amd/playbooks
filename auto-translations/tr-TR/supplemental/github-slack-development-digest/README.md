@@ -9,12 +9,11 @@ SPDX-License-Identifier: MIT
 > **Makine çevirisi.** Bu sayfa İngilizce dilinden otomatik olarak çevrilmiştir ve bir kişi tarafından incelenmemiştir. Sayfa hatalar içerebilir ve belirli talimatlar, komutlar, indirmeler, ürün kullanılabilirliği veya diğer içerikler dile veya bölgeye göre farklılık gösterebilir. Herhangi bir tutarsızlık veya farklılık olması durumunda, playbook'un orijinal İngilizce sürümü geçerli ve bağlayıcı olacaktır.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
-
+<!-- @github-only -->
 > [!IMPORTANT]
-> Bu playbook, AMD Playbooks sitesi tarafından yorumlanan AMD Playbooks yorum
-> etiketlerini kullanır. GitHub, Markdown içeriğini işler ancak cihaz, işletim
-> sistemi, değişken veya gizli test yönergelerini işlemez.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Genel Bakış

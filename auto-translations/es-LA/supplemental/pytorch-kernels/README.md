@@ -10,9 +10,8 @@ SPDX-License-Identifier: MIT
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
-
 > [!IMPORTANT]
-> Este playbook usa etiquetas especiales que GitHub no puede renderizar. Por favor visita [amd.com/playbooks](https://amd.com/playbooks) para previsualizar correctamente este contenido.
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## Descripción general

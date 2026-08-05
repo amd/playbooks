@@ -13,9 +13,9 @@ Voici la traduction du document :
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ce playbook utilise des balises de commentaire AMD Playbooks qui sont interprétées par le
-> site AMD Playbooks. GitHub affiche le contenu Markdown, mais pas les directives relatives à l'appareil,
-> au système d'exploitation, aux variables ou aux tests masqués.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Aperçu

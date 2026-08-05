@@ -9,10 +9,9 @@ SPDX-License-Identifier: MIT
 > **Makine çevirisi.** Bu sayfa İngilizce dilinden otomatik olarak çevrilmiştir ve bir kişi tarafından incelenmemiştir. Sayfa hatalar içerebilir ve belirli talimatlar, komutlar, indirmeler, ürün kullanılabilirliği veya diğer içerikler dile veya bölgeye göre farklılık gösterebilir. Herhangi bir tutarsızlık veya farklılık olması durumunda, playbook'un orijinal İngilizce sürümü geçerli ve bağlayıcı olacaktır.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
-
+<!-- @github-only -->
 > [!IMPORTANT]
-> Bu kılavuz, GitHub'ın oluşturamadığı özel etiketler kullanmaktadır. Bu içeriği doğru şekilde önizlemek için lütfen [amd.com/playbooks](https://amd.com/playbooks) adresini ziyaret edin.
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 # RCCL ile İki Ryzen™ AI Halo'nun Kümelenmesi

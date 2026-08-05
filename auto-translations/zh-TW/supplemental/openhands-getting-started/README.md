@@ -11,7 +11,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> 此手冊使用由 AMD Playbooks 網站解讀的 AMD Playbooks 註解標籤。GitHub 會轉譯 Markdown 內容，但不會轉譯裝置、作業系統、變數或隱藏測試指令。
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## 概觀

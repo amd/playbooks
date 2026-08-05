@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> מדריך זה משתמש בתגיות מיוחדות ש-GitHub אינו יכול לרנדר. יש לבקר בכתובת [amd.com/playbooks](https://amd.com/playbooks) כדי להציג את התוכן כראוי.
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 # צירוף שני מחשבי Ryzen™ AI Halo לאשכול (Cluster) באמצעות RPC

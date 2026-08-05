@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ez a útmutató olyan speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. Kérjük, látogasson el a [amd.com/playbooks](https://amd.com/playbooks) oldalra a tartalom megfelelő megtekintéséhez.
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->

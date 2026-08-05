@@ -10,9 +10,8 @@ SPDX-License-Identifier: MIT
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
-
 > [!IMPORTANT]
-> Ez a útmutató speciális címkéket használ, amelyeket a GitHub nem tud megjeleníteni. Kérjük, látogasson el a [amd.com/playbooks](https://amd.com/playbooks) oldalra a tartalom megfelelő megtekintéséhez.
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## Áttekintés

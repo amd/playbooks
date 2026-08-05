@@ -10,9 +10,10 @@ SPDX-License-Identifier: MIT
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
-
 > [!IMPORTANT]
-> מדריך זה משתמש בתגי הערות של AMD Playbooks המתפרשים על ידי אתר AMD Playbooks. GitHub מרנדר את תוכן ה-Markdown, אך לא את הוראות המכשיר, מערכת ההפעלה, המשתנים או הוראות הבדיקה הנסתרות.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## סקירה כללית

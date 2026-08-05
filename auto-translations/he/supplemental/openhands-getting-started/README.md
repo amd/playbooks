@@ -9,11 +9,11 @@ SPDX-License-Identifier: MIT
 > **תרגום מכונה.** דף זה תורגם באופן אוטומטי מאנגלית ולא נבדק על ידי אדם. ייתכן שהוא מכיל שגיאות, וייתכן שהוראות, פקודות, הורדות, זמינות מוצרים, או תוכן אחר מסוימים ישתנו בהתאם לשפה או לאזור. בכל מקרה של אי-התאמה או סתירה, הגרסה המקורית באנגלית של ה-playbook היא הקובעת והמחייבת.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
+<!-- @github-only -->
 > [!IMPORTANT]
-> ספר משחקים זה משתמש בתגי הערות של AMD Playbooks המפורשים על ידי אתר
-> AMD Playbooks. GitHub מציג את תוכן ה-Markdown, אך לא את הנחיות המכשיר,
-> מערכת ההפעלה, המשתנה, או הבדיקות הנסתרות.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## סקירה כללית

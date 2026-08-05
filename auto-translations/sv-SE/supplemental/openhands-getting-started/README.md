@@ -10,11 +10,10 @@ SPDX-License-Identifier: MIT
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
-
 > [!IMPORTANT]
-> Denna spelbok använder AMD Playbooks-kommentartaggar som tolkas av
-> AMD Playbooks-webbplatsen. GitHub renderar Markdown-innehållet, men inte
-> enhets-, OS-, variabel- eller dolda testdirektiv.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Översikt

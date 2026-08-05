@@ -11,9 +11,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Цей посібник використовує теги коментарів AMD Playbooks, які інтерпретуються
-> сайтом AMD Playbooks. GitHub відображає вміст Markdown, але не директиви
-> щодо пристрою, ОС, змінних або прихованого тестування.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Огляд

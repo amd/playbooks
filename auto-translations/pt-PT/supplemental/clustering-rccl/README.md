@@ -9,10 +9,9 @@ SPDX-License-Identifier: MIT
 > **Tradução automática.** Esta página foi traduzida automaticamente a partir do inglês e não foi revista por um humano. Pode conter erros, e determinadas instruções, comandos, transferências, disponibilidade de produtos ou outro conteúdo podem variar consoante o idioma ou a região. Em caso de qualquer inconsistência ou discrepância, prevalece a versão original em inglês do playbook.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
-
+<!-- @github-only -->
 > [!IMPORTANT]
-> Este manual utiliza tags especiais que o GitHub não consegue processar. Visite [amd.com/playbooks](https://amd.com/playbooks) para pré-visualizar corretamente este conteúdo.
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 # Configurar um cluster com dois Ryzen™ AI Halo com RCCL

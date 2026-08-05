@@ -10,10 +10,10 @@ SPDX-License-Identifier: MIT
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
-
 > [!IMPORTANT]
-> 本手册使用由 AMD Playbooks 网站解析的 AMD Playbooks 注释标签。GitHub 会渲染 Markdown 内容，但不会渲染设备、
-> 操作系统、变量或隐藏测试指令。
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## 概述

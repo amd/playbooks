@@ -11,8 +11,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Tämä ohjekirja käyttää AMD Playbooks -kommenttitunnisteita, jotka AMD Playbooks -sivusto tulkitsee.
-> GitHub renderöi Markdown-sisällön, mutta ei laite-, käyttöjärjestelmä-, muuttuja- tai piilotettu-testi-direktiivejä.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Yleiskatsaus

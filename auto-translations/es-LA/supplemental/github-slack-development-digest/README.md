@@ -11,9 +11,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Este playbook utiliza etiquetas de comentario de AMD Playbooks que son interpretadas por el
-> sitio de AMD Playbooks. GitHub renderiza el contenido de Markdown, pero no las directivas
-> de dispositivo, sistema operativo, variable, o prueba oculta.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Descripción general

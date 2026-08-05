@@ -11,8 +11,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ez a playbook az AMD Playbooks megjegyzés-címkéit (comment tags) használja, amelyeket az AMD Playbooks oldal értelmez.
-> A GitHub megjeleníti a Markdown-tartalmat, de nem az eszköz-, OS-, változó- vagy rejtett teszt-direktívákat.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Áttekintés

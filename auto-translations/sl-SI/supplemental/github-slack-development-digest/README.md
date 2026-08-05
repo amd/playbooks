@@ -11,9 +11,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ta priročnik uporablja komentarske oznake AMD Playbooks, ki jih interpretira
-> spletno mesto AMD Playbooks. GitHub prikaže vsebino Markdown, ne pa direktiv
-> za naprave, operacijski sistem, spremenljivke ali skrite teste.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Pregled

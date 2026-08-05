@@ -11,10 +11,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Αυτό το playbook χρησιμοποιεί ετικέτες σχολίων AMD Playbooks που ερμηνεύονται
-> από τον ιστότοπο AMD Playbooks. Το GitHub αποδίδει το περιεχόμενο Markdown,
-> αλλά όχι τις οδηγίες συσκευής, λειτουργικού συστήματος, μεταβλητών ή κρυφών
-> δοκιμών.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Επισκόπηση

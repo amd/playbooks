@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Ovaj vodič koristi posebne oznake koje GitHub ne može da renderuje. Posetite [amd.com/playbooks](https://amd.com/playbooks) da biste pravilno pregledali ovaj sadržaj.
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## Pregled

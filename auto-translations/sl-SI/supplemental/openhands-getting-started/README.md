@@ -9,11 +9,11 @@ SPDX-License-Identifier: MIT
 > **Strojni prevod.** Ta stran je bila samodejno prevedena iz angleščine in je ni pregledal človek. Lahko vsebuje napake, določena navodila, ukazi, prenosi, razpoložljivost izdelkov ali druga vsebina pa se lahko razlikujejo glede na jezik ali regijo. V primeru kakršnega koli neskladja ali razhajanja je merodajna in prevladujoča izvirna angleška različica playbook.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
-
+<!-- @github-only -->
 > [!IMPORTANT]
-> Ta priročnik uporablja komentarske oznake AMD Playbooks, ki jih tolmači spletno mesto AMD Playbooks. GitHub upodobi vsebino Markdown, ne pa direktiv za napravo, operacijski sistem, spremenljivke ali skrite teste.
-
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Pregled

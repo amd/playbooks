@@ -11,7 +11,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> このプレイブックでは、AMD Playbooks サイトによって解釈される AMD Playbooks コメントタグを使用しています。GitHub は Markdown コンテンツをレンダリングしますが、デバイス、OS、変数、または非表示テストのディレクティブはレンダリングしません。
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## 概要

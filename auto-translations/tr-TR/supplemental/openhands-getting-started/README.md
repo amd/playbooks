@@ -11,9 +11,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Bu kılavuz, AMD Playbooks sitesi tarafından yorumlanan AMD Playbooks yorum
-> etiketlerini kullanır. GitHub, Markdown içeriğini işler, ancak cihaz, işletim
-> sistemi, değişken veya gizli test yönergelerini işlemez.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Genel Bakış
