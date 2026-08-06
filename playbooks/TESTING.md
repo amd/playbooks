@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # Playbook Testing Guide
 
-> **Note:** The testing infrastructure is still being developed. Playbook creators are not expected to add tests to their playbooks yet.
+> **Note:** The author of a playbook is expected to add its tests, in the same pull request as the playbook. Tests are not a separate suite: you wrap the playbook's own commands in the `@test` tags below, and list the device and OS combinations CI should run in `playbook.json`.
 
 ---
 

@@ -47,6 +47,15 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 | **Quick Start on vLLM** | Run inference and serving using vLLM |
 | **Clustering with RCCL** | Multi-node cluster using two AMD devices with RCCL |
 
+## Contributing
+
+We accept playbook proposals from the community, from AMD partners and ISVs, and from AMD employees, and every proposal goes through AMD review before any code is written.
+
+- **Found a problem in a playbook?** [Open a bug report](https://github.com/amd/playbooks/issues/new?template=bug_report.yml).
+- **Have an idea for a new playbook?** [Submit a proposal](https://github.com/amd/playbooks/issues/new?template=playbook_proposal.yml) — a short abstract, not a pull request. AMD maintainers review it and approve or decline it on the issue. Only approved proposals move on to a pull request.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full process and what reviewers look for, and the [Playbook Creation Guide](playbooks/README.md) for how to write one once it is approved.
+
 ## AMD AI Developer Program
 
 > **[Join the AMD AI Developer Program →](https://www.amd.com/en/developer/ai-dev-program.html)**
@@ -59,7 +68,8 @@ This is AMD's official repository of playbooks for AMD developer platforms. Each
 - **AMD Developer Hub**: [developer.amd.com](https://developer.amd.com)
 - **ROCm Documentation**: [rocm.docs.amd.com](https://rocm.docs.amd.com)
 - **AMD AI Developer Program**: [amd.com/ai-dev-program](https://www.amd.com/en/developer/ai-dev-program.html)
-- **Community Forum**: [community.amd.com](https://community.amd.com)
+- **AMD Developer Discord**: [discord.com/invite/amd-dev](https://discord.com/invite/amd-dev)
+- **AMD Community Updates**: [community.amd.com](https://community.amd.com)
 
 ## License
 
