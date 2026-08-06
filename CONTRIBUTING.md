@@ -45,13 +45,27 @@ its maintainers see it.
    | `status::needs-info` | We have questions. Answer in a comment and we will look again. |
    | `status::declined` | Not one we will publish. The issue is closed with a reason. |
 
-3. **Write it.** Follow the [Playbook Creation Guide](playbooks/README.md) for
-   structure, metadata, platform tags, and the
-   [AMD Branding Guide](playbooks/AMD_BRANDING_GUIDE.md) for product naming.
-   Link the pull request to the approved proposal issue.
-4. **We test it.** CI validates the structure and runs the playbook on the AMD
-   self-hosted runners for the devices it targets. Expect review comments, and
-   expect to iterate on the hardware combinations you could not test yourself.
+3. **Write it, tests included.** Follow the
+   [Playbook Creation Guide](playbooks/README.md) for structure, metadata, and
+   platform tags, and the [AMD Branding Guide](playbooks/AMD_BRANDING_GUIDE.md)
+   for product naming. Link the pull request to the approved proposal issue.
+
+   **The author writes the tests**, in the same pull request. See the
+   [Playbook Testing Guide](playbooks/TESTING.md): wrap the commands in `@test`
+   tags, and list the device and OS combinations CI should run under
+   `tested_platforms` in `playbook.json`. There is no separate test suite to
+   write, because the tests are the playbook's own steps. Run them locally
+   before you push:
+
+   ```bash
+   python .github/scripts/run_playbook_tests.py --playbook <your-playbook-id> --platform linux
+   ```
+
+   If you cannot test on a device you want to target, say so in the pull request
+   rather than leaving the device out.
+4. **We test it.** CI runs your tests on the AMD self-hosted runners for the
+   devices the playbook targets. Expect review comments, and expect to iterate
+   on the hardware combinations you could not test yourself.
 
 A pull request that adds a playbook without an approved proposal will be closed
 with a pointer back to this page.

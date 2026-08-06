@@ -23,6 +23,15 @@ body:
            and link it back to this issue. Pull requests without an approved
            proposal will be closed.
 
+        **You write the tests.** The author of a playbook is expected to add the
+        CI tests for it in the same pull request, following the
+        [Playbook Testing Guide](https://github.com/amd/playbooks/blob/main/playbooks/TESTING.md):
+        wrap the commands in `@test` tags and declare the device and OS
+        combinations to run in `playbook.json`. Nothing extra to write, since the
+        tests are the playbook's own steps. Do not let this stop you proposing:
+        say so in the issue if you need help, and we will work through it in
+        review.
+
         AMD decides what gets published. A proposal can be turned down because
         it overlaps an existing playbook, does not fit the roadmap, or cannot be
         tested on our hardware, and none of those are a judgment of the idea's
@@ -88,14 +97,28 @@ body:
         - rx7900xt - AMD Radeon RX 7900 XT
         - rx9070xt - AMD Radeon RX 9070 XT
         - r9700 - AMD Radeon AI PRO R9700
+        - Other AMD hardware (name it below)
     validations:
       required: true
+
+  - type: input
+    id: other-device
+    attributes:
+      label: Other AMD hardware
+      description: |
+        Only if you selected "Other AMD hardware" above. Which device, and do you
+        have one to test on? We may not have it on the runners.
+      placeholder: e.g. AMD Instinct MI300X
+    validations:
+      required: false
 
   - type: dropdown
     id: os
     attributes:
       label: Target operating systems
-      description: Select all that apply. Playbooks may cover one or both.
+      description: |
+        Preferably both. Most playbooks should run on Windows and Linux, so pick
+        a single OS only when the tooling genuinely does not exist on the other.
       multiple: true
       options:
         - Windows

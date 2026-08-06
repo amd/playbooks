@@ -216,6 +216,12 @@ To edit an existing playbook:
 
 ---
 
+## Testing
+
+You are expected to add tests for your playbook in the same pull request. Wrap the playbook's own commands in `@test` tags and fill in `tested_platforms`, as described in the [Playbook Testing Guide](TESTING.md).
+
+---
+
 ## Previewing
 
 First, install [Node.js 20.19.6](http://nodejs.org/pt/blog/release/v20.19.6) version 
