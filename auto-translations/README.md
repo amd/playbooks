@@ -68,6 +68,12 @@ configured LLM API endpoint while the repository stays public. For each file,
 Only `README.md`, `platform.md`, the shared `dependencies/*.md`, and the
 `title`/`description` from `playbook.json` are translated.
 
+`@github-only` blocks are masked **whole**, so their body stays in English rather
+than being translated. The website strips these blocks outright, so GitHub is the
+only place they render, and letting the model rewrite one risks corrupting the
+markers the strip keys on. To restore the English block in translations produced
+before this rule, run `--sync-github-only` (below).
+
 ### 4. Automatic quality gate (no human review)
 - **Structural gate:** the number and order of code fences and `@`-tags in the
   output must match the English source, and every placeholder must be restored.
@@ -104,14 +110,15 @@ The website resolves each file per locale in this order:
 ## Machine-translation disclaimer
 
 Every translated `README.md` / `platform.md` gets a localized caution at the very
-top - machine-translated, may contain mistakes, and some steps/commands/downloads
-or product availability may differ by language or region. It is inserted right
+top - machine-translated, may contain mistakes, some instructions/commands/downloads
+or product availability may differ by language or region, and the original English
+version of the playbook controls in the event of any discrepancy. It is inserted right
 after the license header (outside `@github-only`, so it renders on **both** GitHub
 and the website, which already renders `> [!WARNING]` alerts), wrapped in a marker
 for idempotent insert/refresh:
 
 ```
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
 > <localized text>
 <!-- auto-translated-disclaimer:end -->
@@ -133,7 +140,10 @@ for idempotent insert/refresh:
   so the website / other consumers can detect machine-translated content.
 - **Backfill / refresh:** `python .github/scripts/translate_playbook.py --apply-disclaimers`
   inserts or refreshes the disclaimer and sets the flag across existing translations
-  without re-translating. It is idempotent (defaults to all present locales).
+  without re-translating. It is idempotent (defaults to all present locales). The
+  sibling `--sync-github-only` does the same for `@github-only` blocks, restoring the
+  verbatim English block (and dropping any stray prefix a model left on the opening
+  marker, which would otherwise survive the website's strip and render on the page).
 
 ---
 

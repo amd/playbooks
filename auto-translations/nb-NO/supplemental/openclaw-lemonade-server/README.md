@@ -3,9 +3,9 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
-> **Maskinoversettelse.** Denne siden er automatisk oversatt fra engelsk og har ikke blitt gjennomgått av et menneske. Den kan inneholde feil, og enkelte trinn, kommandoer, nedlastinger eller produkttilgjengelighet kan variere i ditt språk eller din region. Hvis noe ser feil ut, bør du behandle den originale engelske veiledningen som den korrekte kilden.
+> **Maskinoversettelse.** Denne siden ble automatisk oversatt fra engelsk og har ikke blitt gjennomgått av et menneske. Den kan inneholde feil, og enkelte instruksjoner, kommandoer, nedlastinger, produkttilgjengelighet eller annet innhold kan variere etter språk eller region. Ved eventuelle uoverensstemmelser eller avvik er den opprinnelige engelske versjonen av playbook-en gjeldende.
 <!-- auto-translated-disclaimer:end -->
 
 # Kjør OpenClaw med Lemonade Server som backend

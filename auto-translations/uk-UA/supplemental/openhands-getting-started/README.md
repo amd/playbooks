@@ -4,16 +4,16 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
-> **Машинний переклад.** Цю сторінку автоматично перекладено з англійської мови, і вона не була перевірена людиною. Вона може містити помилки, а деякі кроки, команди, завантаження або доступність продуктів можуть відрізнятися у вашій мові чи регіоні. Якщо щось виглядає неправильно, вважайте оригінальний англомовний playbook джерелом достовірної інформації.
+> **Машинний переклад.** Цю сторінку було автоматично перекладено з англійської мови, і вона не була перевірена людиною. Вона може містити помилки, а певні інструкції, команди, завантаження, доступність продукту чи інший вміст можуть відрізнятися залежно від мови чи регіону. У разі будь-яких невідповідностей чи розбіжностей переважну силу має оригінальна англомовна версія playbook.
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Цей посібник використовує теги коментарів AMD Playbooks, які інтерпретуються
-> сайтом AMD Playbooks. GitHub відображає вміст Markdown, але не директиви
-> щодо пристрою, ОС, змінних або прихованого тестування.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Огляд
