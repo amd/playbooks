@@ -4,17 +4,16 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
-> **Gépi fordítás.** Ez az oldal automatikusan lett lefordítva angolról, és emberi lektorálás nem történt. Hibákat tartalmazhat, és egyes lépések, parancsok, letöltések vagy termékelérhetőségek eltérhetnek az Ön nyelvében vagy régiójában. Ha bármi hibásnak tűnik, tekintse az eredeti angol nyelvű playbookot mérvadó forrásnak.
+> **Gépi fordítás.** Ez az oldal automatikusan lett lefordítva angol nyelvről, és emberi ellenőrzésen nem esett át. Hibákat tartalmazhat, és bizonyos utasítások, parancsok, letöltések, termékelérhetőség vagy egyéb tartalmak nyelvenként vagy régiónként eltérhetnek. Bármilyen eltérés vagy ellentmondás esetén a playbook eredeti angol nyelvű változata az irányadó.
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
-
 > [!IMPORTANT]
-> Ez a leírás olyan AMD Playbooks megjegyzés-címkéket használ, amelyeket az
-> AMD Playbooks oldal értelmez. A GitHub megjeleníti a Markdown tartalmat, de
-> az eszköz-, OS-, változó- vagy rejtett teszt-direktívákat nem.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Áttekintés

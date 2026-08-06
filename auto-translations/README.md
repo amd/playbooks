@@ -68,6 +68,12 @@ configured LLM API endpoint while the repository stays public. For each file,
 Only `README.md`, `platform.md`, the shared `dependencies/*.md`, and the
 `title`/`description` from `playbook.json` are translated.
 
+`@github-only` blocks are masked **whole**, so their body stays in English rather
+than being translated. The website strips these blocks outright, so GitHub is the
+only place they render, and letting the model rewrite one risks corrupting the
+markers the strip keys on. To restore the English block in translations produced
+before this rule, run `--sync-github-only` (below).
+
 ### 4. Automatic quality gate (no human review)
 - **Structural gate:** the number and order of code fences and `@`-tags in the
   output must match the English source, and every placeholder must be restored.
@@ -104,14 +110,15 @@ The website resolves each file per locale in this order:
 ## Machine-translation disclaimer
 
 Every translated `README.md` / `platform.md` gets a localized caution at the very
-top - machine-translated, may contain mistakes, and some steps/commands/downloads
-or product availability may differ by language or region. It is inserted right
+top - machine-translated, may contain mistakes, some instructions/commands/downloads
+or product availability may differ by language or region, and the original English
+version of the playbook controls in the event of any discrepancy. It is inserted right
 after the license header (outside `@github-only`, so it renders on **both** GitHub
 and the website, which already renders `> [!WARNING]` alerts), wrapped in a marker
 for idempotent insert/refresh:
 
 ```
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
 > <localized text>
 <!-- auto-translated-disclaimer:end -->
@@ -133,7 +140,10 @@ for idempotent insert/refresh:
   so the website / other consumers can detect machine-translated content.
 - **Backfill / refresh:** `python .github/scripts/translate_playbook.py --apply-disclaimers`
   inserts or refreshes the disclaimer and sets the flag across existing translations
-  without re-translating. It is idempotent (defaults to all present locales).
+  without re-translating. It is idempotent (defaults to all present locales). The
+  sibling `--sync-github-only` does the same for `@github-only` blocks, restoring the
+  verbatim English block (and dropping any stray prefix a model left on the opening
+  marker, which would otherwise survive the website's strip and render on the page).
 
 ---
 
@@ -182,11 +192,10 @@ compatible LLM API you run.
 5. Second `POST` to the **judge model** with the source + translation to get the
    0-100 quality score, recorded in `translation_accuracy.json`.
 
-**Where it runs:** in production the script runs on a self-hosted runner via
-[`translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml), which
-reads the `LLM_*` values from repository **secrets** - fully automated, with no
-manual translation step. (The translations in this PR were produced by the same
-script ahead of the runner being provisioned.) See the next section.
+**Where it runs:** the script runs on a dedicated self-hosted runner (labeled
+`translation`) via [`translate-playbooks.yml`](../.github/workflows/translate-playbooks.yml),
+which reads the `LLM_*` values from repository **secrets** - fully automated, with
+no manual translation step. See the next section.
 
 ---
 
@@ -203,14 +212,13 @@ script ahead of the runner being provisioned.) See the next section.
 | `localized-playbooks/` override + region-only playbooks | Implemented |
 | GitHub Actions workflow: triggers, detect-changed, direct-push, all 29 locales | Implemented |
 | Provider-agnostic client (Anthropic-style / OpenAI-compatible APIs) | Implemented |
-| **Dedicated self-hosted runner labeled `translation`** | Coming soon |
-| **`LLM_*` repository secrets set** | Coming soon |
+| **Dedicated self-hosted runner labeled `translation`** | Implemented |
+| **`LLM_*` repository secrets set** | Implemented |
 | Website language selector for end users | Out of scope (website team) |
 
-Until the runner + secrets exist, the workflow does not run on `main`; the
-translations already in this PR were generated ahead of that. Once the runner and
-secrets are in place the workflow runs on its own - no code changes and no manual
-step.
+The runner and secrets are now in place, so the workflow runs automatically: a
+push to `main` touching `playbooks/**` translates the changed playbook(s) into all
+locales and direct-pushes the results - no code changes and no manual step.
 
 > [!NOTE]
 > Everything below refers to one workflow file,
