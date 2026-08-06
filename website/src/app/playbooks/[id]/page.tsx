@@ -544,30 +544,46 @@ function TableOfContents({
             >
               {item.text}
             </a>
-            {item.children && item.children.length > 0 && (
-              <ul className="space-y-1 mt-1">
-                {item.children.map((child) => (
-                  <li key={child.id}>
-                    <a
-                      href={`#${child.id}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onLinkClick(child.id);
-                      }}
-                      className={`
-                        block text-sm py-1 pl-6 transition-colors duration-150 border-l-2
-                        ${activeId === child.id
-                          ? "text-[#D4915D] border-[#D4915D] font-medium"
-                          : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
-                        }
-                      `}
-                    >
-                      {child.text}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
+            {item.children && item.children.length > 0 && (() => {
+              // Scroll-following auto-expand: a section's sub-items are shown only
+              // while that section is the active one (the active heading is the
+              // parent H2 itself or one of its H3 children). This keeps the TOC
+              // short without hiding any jump target from the reader who needs it.
+              const sectionActive =
+                activeId === item.id ||
+                item.children!.some((c) => c.id === activeId);
+              return (
+                <ul
+                  className={`
+                    space-y-1 overflow-hidden transition-all duration-200 ease-in-out
+                    ${sectionActive ? "mt-1 max-h-96 opacity-100" : "max-h-0 opacity-0"}
+                  `}
+                  aria-hidden={!sectionActive}
+                >
+                  {item.children!.map((child) => (
+                    <li key={child.id}>
+                      <a
+                        href={`#${child.id}`}
+                        tabIndex={sectionActive ? 0 : -1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onLinkClick(child.id);
+                        }}
+                        className={`
+                          block text-sm py-1 pl-6 transition-colors duration-150 border-l-2
+                          ${activeId === child.id
+                            ? "text-[#D4915D] border-[#D4915D] font-medium"
+                            : "text-[#888] border-transparent hover:text-[#ccc] hover:border-[#555]"
+                          }
+                        `}
+                      >
+                        {child.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              );
+            })()}
           </li>
         ))}
       </ul>

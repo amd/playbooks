@@ -4,14 +4,14 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
-> **ترجمة آلية.** تمت ترجمة هذه الصفحة تلقائيًا من اللغة الإنجليزية ولم تتم مراجعتها من قبل مختص بشري. قد تحتوي على أخطاء، وقد تختلف بعض الخطوات أو الأوامر أو الروابط أو مدى توفر المنتج في لغتك أو منطقتك. إذا لاحظت وجود أي خطأ، يُرجى اعتماد نسخة الدليل الإرشادي (playbook) الأصلية باللغة الإنجليزية كمصدر موثوق.
+> **الترجمة الآلية.** تمت ترجمة هذه الصفحة تلقائيًا من اللغة الإنجليزية ولم تتم مراجعتها من قِبل مترجم بشري. قد تحتوي على أخطاء، وقد تختلف بعض التعليمات أو الأوامر أو خيارات التنزيل أو مدى توفر المنتج أو أي محتوى آخر باختلاف اللغة أو المنطقة. في حال وجود أي تعارض أو تباين، تكون النسخة الإنجليزية الأصلية من الـ playbook هي النسخة المعتمدة والمرجعية، ويُعمل بها في هذه الحالة.
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> يستخدم دليل التشغيل هذا علامات خاصة لا يستطيع GitHub عرضها. يُرجى زيارة [amd.com/playbooks](https://amd.com/playbooks) لمعاينة هذا المحتوى بشكل صحيح.
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 # تجميع نظامي Ryzen™ AI Halo باستخدام RPC

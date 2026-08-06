@@ -4,9 +4,9 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
-> **Traducción automática.** Esta página fue traducida automáticamente del inglés y no ha sido revisada por un humano. Puede contener errores, y algunos pasos, comandos, descargas o disponibilidad de productos pueden variar según su idioma o región. Si algo no parece correcto, considere el playbook original en inglés como la fuente de verdad.
+> **Traducción automática.** Esta página fue traducida automáticamente del inglés y no ha sido revisada por un humano. Puede contener errores, y ciertas instrucciones, comandos, descargas, disponibilidad de productos u otro contenido pueden variar según el idioma o la región. En caso de cualquier incoherencia o discrepancia, la versión original en inglés del playbook prevalecerá y será la que rija.
 <!-- auto-translated-disclaimer:end -->
 
 # Configuración de la plataforma
