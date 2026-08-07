@@ -1,6 +1,6 @@
 {
   "$schema": "./registry.schema.json",
-  "description": "Central registry of shared require-able blocks (install dependencies, setup steps, and runtime checks) for AMD Halo Developer Platform",
+  "description": "Central registry of shared require-able blocks (install dependencies, models, setup steps, and runtime checks) for AMD developer platforms",
   "dependencies": {
     "comfyui": {
       "name": "ComfyUI",
