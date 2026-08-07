@@ -287,8 +287,9 @@ def make_builds(batch, cfg):
                 missing.append("ORCHESTRAI_RYZENAI_NPU_XRT_URL")
             build_vars["RAI_NPU_XRT_URL"] = npu_xrt_url
 
-    # Per-playbook extra provisioning scripts (e.g. enabling WSL for
-    # openclaw-lemonade-server). Appended only to batches that actually contain
+    # Per-playbook extra provisioning scripts (e.g. enabling WSL for playbooks
+    # whose Windows flow runs tools inside Ubuntu). Appended only to batches that
+    # actually contain
     # the playbook, so the cost (an extra feature install + reboot) is scoped to
     # batches with that playbook instead of every run on the platform. This is
     # batch-level, not group-level: any other playbook co-scheduled in the same

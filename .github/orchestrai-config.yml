@@ -76,23 +76,49 @@ device_families:
 # Scheduling policy
 # ---------------------------------------------------------------------------
 
-# Extra broker tags required by specific playbooks (e.g. large models need RAM).
-extra_tags:
-  vscode-qwen3-coder:        ["ram_128gb"]
-  lmstudio-rocm-llms:        ["ram_128gb"]
-  n8n-automation-gpt-oss:    ["ram_128gb"]
-  gaia-agents:               ["ram_128gb"]
-  pytorch-rocm-llms:         ["ram_128gb"]
-  openclaw-lemonade-server:  ["ram_128gb"]
+# Extra broker tags that apply to EVERY device a playbook runs on. Empty for now:
+# the model playbooks that need 128 GB only need it for their big Halo run, which
+# is expressed per-device in device_extra_tags below.
+extra_tags: {}
 
 # Device-specific overrides for playbooks whose hardware requirement differs by
-# SKU. Unsloth stays on the existing 128 GB Halo systems, while STX currently
-# has no RAM constraint because the OrchestrAI fleet has no 64 GB STX system.
+# SKU. The playbooks below pick a device-appropriate model in their README
+# (gpt-oss-120b on Halo, a small model on the smaller devices — qwen3.5-9b for
+# lmstudio, Qwen3.5-4B for pytorch-rocm, gpt-oss-20b for n8n), so they only need
+# 128 GB for the big Halo run — the small-device runs fit in normal RAM. Tagging
+# ram_128gb ONLY on halo/halo_box lets them run on every device (no tag elsewhere
+# → tags_for() falls back to the empty extra_tags entry) instead of being dropped
+# from the non-128 GB devices by extra_tag_devices. Unsloth follows the same
+# pattern. vscode-qwen3-coder and gaia-agents also belong here: they run a fixed
+# Qwen3-Coder-30B-A3B (MoE, ~18.5 GB weights, only 3B active), which lemonade
+# runs on the smaller RDNA cards via GPU+CPU offload — confirmed passing on all
+# devices incl. 16 GB rx9070xt in the legacy workflow — so they only need the
+# 128 GB tag for the Halo run. openclaw-lemonade-server is the same case: a fixed
+# Qwen3.6-35B-A3B (MoE, 3B active) that the legacy workflow schedules and runs on
+# every device via lemonade offload, so it also gets the 128 GB tag on Halo only.
 device_extra_tags:
   unsloth-llms-finetuning:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
     stx:      []
+  lmstudio-rocm-llms:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  pytorch-rocm-llms:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  n8n-automation-gpt-oss:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  vscode-qwen3-coder:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  gaia-agents:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  openclaw-lemonade-server:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
 
 # Devices that actually satisfy a given extra tag. A batch requesting an extra
 # tag on a device NOT listed here is dropped (the broker could never satisfy it).
@@ -131,6 +157,14 @@ extra_install_scripts:
   # phase can't reboot). The app.wsl dependency then installs the Ubuntu distro
   # once the features are active. Windows-only.
   openclaw-lemonade-server:
+    - script: "InstallationScripts/gfx/windows-wsl.ps1"
+      reboot_after: true
+      platforms: ["windows"]
+
+  # hermes-lemonade-server runs Hermes and Podman inside Ubuntu on WSL. Enable
+  # the WSL core/features and reboot before app.wsl installs the distro during
+  # dependency setup. Windows-only.
+  hermes-lemonade-server:
     - script: "InstallationScripts/gfx/windows-wsl.ps1"
       reboot_after: true
       platforms: ["windows"]
