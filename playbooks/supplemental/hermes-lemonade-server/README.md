@@ -85,6 +85,7 @@ lemonade pull Qwen3.6-35B-A3B-GGUF
 
 Then load it with a large context window and save that setting for future runs:
 
+<!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
 lemonade unload
