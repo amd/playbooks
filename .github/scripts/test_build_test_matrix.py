@@ -196,6 +196,20 @@ class FixtureCase(unittest.TestCase):
         self.assertTrue(got, "entries with an unresolvable @var must be queued")
         self.assertTrue(all(e["playbook"] == pb for e in got))
 
+    def test_oversized_matrix_fails_loudly(self):
+        """More than 256 jobs must fail in the builder, not at Actions expansion."""
+        pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
+        meta = json.loads(pj.read_text())
+        meta["tested_platforms"] = {f"dev{i}": ["linux", "windows"] for i in range(200)}
+        pj.write_text(json.dumps(meta, indent=2))
+        proc = subprocess.run(
+            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
+             "--github-output", os.devnull],
+            cwd=self.fx, capture_output=True, text=True,
+        )
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("256", proc.stderr)
+
     def test_new_device_is_selected_even_though_signature_matches(self):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
         meta = json.loads(pj.read_text())

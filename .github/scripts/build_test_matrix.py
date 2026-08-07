@@ -47,6 +47,10 @@ import run_playbook_tests as R  # noqa: E402
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ARCHIVE_TIMEOUT = 120
 
+# GitHub Actions refuses a matrix above 256 jobs; fail here with a clear message
+# rather than at workflow-expansion time
+MATRIX_JOB_LIMIT = 256
+
 # Files that govern how tests execute. Deny-by-default: anything added under
 # these prefixes is covered without anyone remembering. Editing any of them
 # forces the full matrix, so signatures never have to model harness behaviour.
@@ -200,6 +204,12 @@ def main() -> None:
                 entries = select_changed(base_tree)
             else:
                 annotate("warning", f"No trustworthy base {args.base}; running the full matrix")
+
+    # Fail here rather than let Actions reject the oversized matrix with a vague error
+    if len(entries) > MATRIX_JOB_LIMIT:
+        print(f"FATAL: {len(entries)} entries exceeds the GitHub Actions matrix cap "
+              f"of {MATRIX_JOB_LIMIT}; split the workflow", file=sys.stderr)
+        sys.exit(1)
 
     matrix = json.dumps(entries)
     output_path = args.github_output or (

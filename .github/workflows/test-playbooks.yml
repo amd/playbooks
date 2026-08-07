@@ -37,6 +37,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Pin Python so the builder's tarfile filter="data" (3.12+) is always
+      # available; matches the selector-tests job.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
       # On a PR, only entries whose extracted @test blocks (or assets) actually
       # changed are queued; prose-only edits queue nothing. The nightly cron
       # still runs the full matrix, so a wrongly-skipped entry surfaces in <24h.
