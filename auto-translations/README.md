@@ -43,7 +43,7 @@ workflow runs when:
 - **A PR merges to `main`** touching `playbooks/**` (a new or edited playbook, or
   a changed shared dependency file). This is the maintenance path.
 - **On-demand backfill** via *Run workflow* (`workflow_dispatch`) - optionally
-  for one playbook, otherwise **all** playbooks; defaults to all 29 languages.
+  for one playbook, otherwise **all** playbooks; defaults to all 30 languages.
   This fires the same automated pipeline (used to re-translate everything after a
   model change or when adding a language).
 
@@ -210,7 +210,7 @@ no manual translation step. See the next section.
 | Independent quality score per file (`translation_accuracy.json`) | Implemented |
 | Idempotent + resumable (source-hash manifest) | Implemented |
 | `localized-playbooks/` override + region-only playbooks | Implemented |
-| GitHub Actions workflow: triggers, detect-changed, direct-push, all 29 locales | Implemented |
+| GitHub Actions workflow: triggers, detect-changed, direct-push, all 30 locales | Implemented |
 | Provider-agnostic client (Anthropic-style / OpenAI-compatible APIs) | Implemented |
 | **Dedicated self-hosted runner labeled `translation`** | Implemented |
 | **`LLM_*` repository secrets set** | Implemented |
@@ -288,7 +288,7 @@ locales and direct-pushes the results - no code changes and no manual step.
 ### The result
 Once the runner + secrets are in place, no code changes are needed: a PR that
 merges to `main` touching `playbooks/**` automatically translates the changed
-playbook(s) into all 29 languages on the dedicated runner and direct-pushes the
+playbook(s) into all 30 languages on the dedicated runner and direct-pushes the
 results here. In production this is entirely automated - there is no manual
 translation step.
 
