@@ -1,0 +1,6 @@
+{
+  "id": "vscode-qwen3-coder",
+  "title": "Codage avec un LLM local à l'aide de VS Code et de Qwen3-Coder",
+  "description": "Utilisez VS Code avec Qwen3-Coder exécuté localement pour une assistance de codage privée.",
+  "auto_translated": true
+}

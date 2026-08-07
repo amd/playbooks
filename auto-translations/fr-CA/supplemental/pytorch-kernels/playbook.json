@@ -1,0 +1,6 @@
+{
+  "id": "pytorch-kernels",
+  "title": "Création de noyaux GPU personnalisés avec PyTorch et AMD ROCm™",
+  "description": "Rédigez et optimisez des noyaux GPU personnalisés à l'aide de PyTorch et du logiciel AMD ROCm™",
+  "auto_translated": true
+}
