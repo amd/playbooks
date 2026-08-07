@@ -150,6 +150,10 @@ Usage:
 """
 
 import argparse
+import contextlib
+import dataclasses
+import hashlib
+import io
 import json
 import os
 import re
@@ -159,6 +163,9 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
+
+# TestBlock fields that do not affect execution, so they stay out of signatures
+SIGNATURE_EXCLUDED = frozenset({"line_number", "hidden"})
 
 
 VALID_DEVICES = {"halo", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"}
@@ -204,9 +211,10 @@ class PlaybookTestSuite:
     results: list[TestResult] = field(default_factory=list)
 
 
-def find_playbook_path(playbook_id: str) -> Optional[Path]:
+def find_playbook_path(playbook_id: str, repo_root: Optional[Path] = None) -> Optional[Path]:
     """Find the playbook directory by ID."""
-    repo_root = Path(__file__).parent.parent.parent
+    # repo_root is injectable so the selector can read a base checkout too
+    repo_root = repo_root or Path(__file__).parent.parent.parent
 
     # Check core and supplemental directories
     for category in ["core", "supplemental"]:
@@ -472,7 +480,7 @@ def substitute_vars(
     return placeholder_pattern.sub(_replace, code)
 
 
-def resolve_require_tags(content: str) -> str:
+def resolve_require_tags(content: str, repo_root: Optional[Path] = None) -> str:
     """Resolve @require tags by inlining dependency content.
 
     Finds ``<!-- @require:dep-id -->`` tags in the README content and replaces
@@ -480,7 +488,7 @@ def resolve_require_tags(content: str) -> str:
     ``playbooks/dependencies/`` folder.  This allows the test extractor to
     discover @test blocks that live inside shared dependency files.
     """
-    repo_root = Path(__file__).parent.parent.parent
+    repo_root = repo_root or Path(__file__).parent.parent.parent
     dependencies_root = repo_root / "playbooks" / "dependencies"
     registry_path = dependencies_root / "registry.json"
 
@@ -591,12 +599,13 @@ def _infer_device(content: str, position: int) -> str:
     return "all"
 
 
-def extract_tests(readme_path: Path, target_platform: str, target_device: Optional[str] = None) -> list[TestBlock]:
+def extract_tests(readme_path: Path, target_platform: str, target_device: Optional[str] = None,
+                  repo_root: Optional[Path] = None) -> list[TestBlock]:
     """Extract test blocks from a README.md file."""
     content = readme_path.read_text(encoding="utf-8")
 
     # Resolve @require tags so tests inside dependencies are discovered
-    content = resolve_require_tags(content)
+    content = resolve_require_tags(content, repo_root)
 
     tests = []
 
@@ -1071,6 +1080,107 @@ def run_playbook_tests(playbook_id: str, platform: str, device: Optional[str] = 
             print(f"         {result.error_message}")
 
     return all_passed
+
+
+# --- Test selection support -------------------------------------------------
+# The matrix builder (build_test_matrix.py) imports these to compute, for one
+# checkout, what each (playbook, platform, device) entry would execute. It runs
+# them against both the head tree and a materialised base tree using THIS
+# extractor, so only content differs between the two sides. A separate harness
+# path check forces the full matrix whenever the extractor itself changed, which
+# is what makes applying one extractor to both trees safe.
+
+def list_playbook_ids(repo_root: Path) -> list[str]:
+    ids = set()
+    for category in ("core", "supplemental"):
+        base = repo_root / "playbooks" / category
+        if base.is_dir():
+            ids.update(p.name for p in base.iterdir() if (p / "playbook.json").exists())
+    return sorted(ids)
+
+
+def build_matrix_entries(repo_root: Path) -> list[dict]:
+    """Expand every playbook.json into CI matrix entries."""
+    entries = []
+    for playbook_id in list_playbook_ids(repo_root):
+        for category in ("core", "supplemental"):
+            meta_file = repo_root / "playbooks" / category / playbook_id / "playbook.json"
+            if not meta_file.exists():
+                continue
+            try:
+                meta = json.loads(meta_file.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                print(f"Warning: cannot read {meta_file}: {exc}", file=sys.stderr)
+                break
+            required = meta.get("required_platforms", {})
+            for device, platforms in meta.get("tested_platforms", {}).items():
+                for platform in platforms:
+                    os_label = "Windows" if platform == "windows" else "Linux"
+                    entries.append({
+                        "playbook": playbook_id,
+                        "platform": platform,
+                        "arch": device,
+                        "runner": json.dumps(["self-hosted", os_label, device]),
+                        "required": platform in set(required.get(device, [])),
+                    })
+            break
+    return entries
+
+
+def assets_digest(assets_dir: Path) -> Optional[str]:
+    """Digest an assets tree. None means "cannot be signed", which forces a run.
+
+    A symlink escaping the tree is unsignable: its target content is not covered
+    here, so a change to that target would otherwise be invisible.
+    """
+    if not assets_dir.is_dir():
+        return ""
+    root = assets_dir.resolve()
+    digest = hashlib.sha256()
+    for path in sorted(assets_dir.rglob("*")):
+        rel = str(path.relative_to(assets_dir)).replace(os.sep, "/")
+        if path.is_symlink():
+            try:
+                target = path.resolve()
+            except OSError:
+                return None
+            if not target.is_relative_to(root):
+                return None
+            digest.update(rel.encode("utf-8") + b"\x02" + os.readlink(path).encode("utf-8"))
+        elif path.is_file():
+            digest.update(rel.encode("utf-8"))
+            digest.update(b"\x01" if os.access(path, os.X_OK) else b"\x00")
+            digest.update(hashlib.sha256(path.read_bytes()).digest())
+    return digest.hexdigest()
+
+
+def entry_signature(repo_root: Path, playbook_id: str, platform: str,
+                    device: str) -> Optional[str]:
+    """Signature of what a checkout would execute for one entry, or None.
+
+    None means the signature could not be computed (missing playbook, extraction
+    error); the caller must then treat the entry as not-provably-equal and run it.
+    """
+    playbook_path = find_playbook_path(playbook_id, repo_root=repo_root)
+    if playbook_path is None:
+        return None
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            tests = extract_tests(playbook_path / "README.md", platform, device,
+                                  repo_root=repo_root)
+    except Exception:
+        return None
+    # @require inlines shared dependency markdown, so its assets are in scope too
+    own = assets_digest(playbook_path / "assets")
+    shared = assets_digest(repo_root / "playbooks" / "dependencies" / "assets")
+    if own is None or shared is None:
+        return None
+    payload = [
+        {k: v for k, v in dataclasses.asdict(t).items() if k not in SIGNATURE_EXCLUDED}
+        for t in tests
+    ]
+    blob = json.dumps([payload, own, shared], sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
 def main():

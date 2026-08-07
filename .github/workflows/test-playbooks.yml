@@ -26,95 +26,60 @@ jobs:
   detect-changes:
     name: Detect Changed Playbooks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
       has_entries: ${{ steps.build-matrix.outputs.has_entries }}
+      detection_ok: ${{ steps.build-matrix.outputs.detection_ok }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Detect changed playbooks
-        id: detect
-        run: |
-          if [ -n "${{ github.event.inputs.playbook_id }}" ]; then
-            echo "playbooks=[\"${{ github.event.inputs.playbook_id }}\"]" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event_name }}" = "pull_request" ]; then
-            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} -- 'playbooks/core/*' 'playbooks/supplemental/*' 2>/dev/null || echo "")
-            
-            PLAYBOOK_IDS=$(echo "$CHANGED_FILES" | grep -E '^playbooks/(core|supplemental)/[^/]+/' | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            
-            if [ "$PLAYBOOK_IDS" = "[]" ] || [ -z "$PLAYBOOK_IDS" ]; then
-              echo "playbooks=[]" >> $GITHUB_OUTPUT
-            else
-              echo "playbooks=$PLAYBOOK_IDS" >> $GITHUB_OUTPUT
-            fi
-          else
-            ALL_PLAYBOOKS=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            
-            if [ "$ALL_PLAYBOOKS" = "[]" ] || [ -z "$ALL_PLAYBOOKS" ]; then
-              echo "playbooks=[]" >> $GITHUB_OUTPUT
-            else
-              echo "playbooks=$ALL_PLAYBOOKS" >> $GITHUB_OUTPUT
-            fi
-          fi
-
-      - name: Build test matrix from playbook metadata
+      # On a PR, only entries whose extracted @test blocks (or assets) actually
+      # changed are queued; prose-only edits queue nothing. The nightly cron
+      # still runs the full matrix, so a wrongly-skipped entry surfaces in <24h.
+      # Event data goes through env, never inline, so PR-controlled strings
+      # (playbook ids, device names) cannot reach the shell directly.
+      - name: Build test matrix
         id: build-matrix
         env:
-          PLAYBOOKS: ${{ steps.detect.outputs.playbooks }}
+          PLAYBOOK_INPUT: ${{ github.event.inputs.playbook_id }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          if [ "$PLAYBOOKS" = "[]" ] || [ -z "$PLAYBOOKS" ]; then
-            echo "matrix=[]" >> $GITHUB_OUTPUT
-            echo "has_entries=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          MATRIX=$(python3 << 'PYEOF'
-          import json, os
-          from pathlib import Path
-
-          playbooks = json.loads(os.environ["PLAYBOOKS"])
-          matrix = []
-
-          for pb_id in playbooks:
-              for cat in ["core", "supplemental"]:
-                  pb_file = Path(f"playbooks/{cat}/{pb_id}/playbook.json")
-                  if pb_file.exists():
-                      meta = json.loads(pb_file.read_text())
-                      tested = meta.get("tested_platforms", {})
-                      if not tested:
-                          continue
-                      required = meta.get("required_platforms", {})
-                      for device, platform_list in tested.items():
-                          required_platforms = set(required.get(device, []))
-                          for platform in platform_list:
-                              os_label = "Windows" if platform == "windows" else "Linux"
-                              matrix.append({
-                                  "playbook": pb_id,
-                                  "platform": platform,
-                                  "arch": device,
-                                  "runner": json.dumps(["self-hosted", os_label, device]),
-                                  "required": platform in required_platforms,
-                              })
-                      break
-
-          print(json.dumps(matrix))
-          PYEOF
-          )
-
-          if [ "$MATRIX" = "[]" ] || [ -z "$MATRIX" ]; then
-            echo "matrix=[]" >> $GITHUB_OUTPUT
-            echo "has_entries=false" >> $GITHUB_OUTPUT
+          if [ -n "$PLAYBOOK_INPUT" ]; then
+            python3 .github/scripts/build_test_matrix.py --mode playbook \
+              --playbook-id "$PLAYBOOK_INPUT"
+          elif [ "$EVENT_NAME" = "pull_request" ]; then
+            python3 .github/scripts/build_test_matrix.py --mode changed \
+              --base "$PR_BASE_SHA"
           else
-            echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
-            echo "has_entries=true" >> $GITHUB_OUTPUT
+            python3 .github/scripts/build_test_matrix.py --mode all
           fi
 
       - name: Display test matrix
+        env:
+          MATRIX: ${{ steps.build-matrix.outputs.matrix }}
         run: |
-          echo "Test matrix: ${{ steps.build-matrix.outputs.matrix }}"
+          echo "Test matrix: $MATRIX"
+
+  # Guards the selector itself: a false negative here silently stops testing
+  # playbooks, so these run on every PR before anything is skipped.
+  selector-tests:
+    name: Test Selection Regression Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # real-commit replay needs history
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Run selection regression tests
+        run: python3 .github/scripts/test_build_test_matrix.py
 
   test-playbooks:
     name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
@@ -271,15 +236,29 @@ jobs:
 
   test-gate:
     name: Test Gate (Required Tests)
-    needs: [detect-changes, test-playbooks]
+    needs: [detect-changes, selector-tests, test-playbooks]
     if: always()
     runs-on: ubuntu-latest
     steps:
+      # An empty matrix and a crashed matrix builder both leave test-playbooks
+      # 'skipped', so the gate must check detection succeeded before treating
+      # "nothing ran" as success.
       - name: Check required tests
         run: |
+          echo "detect-changes result: ${{ needs.detect-changes.result }} (detection_ok=${{ needs.detect-changes.outputs.detection_ok }})"
+          echo "selector-tests result: ${{ needs.selector-tests.result }}"
           echo "test-playbooks result: ${{ needs.test-playbooks.result }}"
-          if [ "${{ needs.test-playbooks.result }}" = "failure" ]; then
-            echo "::error::One or more required tests failed"
+          if [ "${{ needs.selector-tests.result }}" != "success" ]; then
+            echo "::error::Test-selection regression tests failed; skip decisions cannot be trusted"
             exit 1
           fi
+          if [ "${{ needs.detect-changes.result }}" != "success" ] || [ "${{ needs.detect-changes.outputs.detection_ok }}" != "true" ]; then
+            echo "::error::Could not determine which tests to run; refusing to pass"
+            exit 1
+          fi
+          case "${{ needs.test-playbooks.result }}" in
+            failure|cancelled)
+              echo "::error::One or more required tests failed"
+              exit 1 ;;
+          esac
           echo "All required tests passed (or no tests were needed)"
