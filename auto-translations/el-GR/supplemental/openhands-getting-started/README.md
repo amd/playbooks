@@ -4,18 +4,18 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
-> **Αυτόματη μετάφραση.** Αυτή η σελίδα μεταφράστηκε αυτόματα από τα Αγγλικά και δεν έχει επανεξεταστεί από άνθρωπο. Ενδέχεται να περιέχει σφάλματα, και ορισμένα βήματα, εντολές, λήψεις ή η διαθεσιμότητα προϊόντων μπορεί να διαφέρουν στη γλώσσα ή την περιοχή σας. Εάν κάτι φαίνεται λανθασμένο, θεωρήστε το πρωτότυπο αγγλικό playbook ως την πηγή αλήθειας.
+> **Μηχανική μετάφραση.** Αυτή η σελίδα μεταφράστηκε αυτόματα από τα Αγγλικά και δεν έχει ελεγχθεί από άνθρωπο. Ενδέχεται να περιέχει σφάλματα, και ορισμένες οδηγίες, εντολές, στοιχεία λήψης, διαθεσιμότητα προϊόντων ή άλλο περιεχόμενο ενδέχεται να διαφέρουν ανάλογα με τη γλώσσα ή την περιοχή. Σε περίπτωση οποιασδήποτε ασυμφωνίας ή απόκλισης, υπερισχύει η πρωτότυπη αγγλική έκδοση του playbook.
 <!-- auto-translated-disclaimer:end -->
 
 # Lemonade Server: Χρήση OpenHands σε Agent Canvas
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Αυτό το playbook χρησιμοποιεί ετικέτες σχολίων AMD Playbooks που ερμηνεύονται από
-> τον ιστότοπο AMD Playbooks. Το GitHub αποδίδει το περιεχόμενο Markdown, αλλά όχι τις
-> οδηγίες συσκευής, λειτουργικού συστήματος, μεταβλητής ή απόκρυψης δοκιμών.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Επισκόπηση
