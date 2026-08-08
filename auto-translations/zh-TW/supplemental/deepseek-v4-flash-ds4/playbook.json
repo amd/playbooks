@@ -1,0 +1,6 @@
+{
+  "id": "deepseek-v4-flash-ds4",
+  "title": "使用 ds4 執行 DeepSeek V4 Flash",
+  "description": "使用 ds4 推理引擎在本機部署 DeepSeek V4 Flash，並透過 ds4-cockpit 以互動方式管理模型。",
+  "auto_translated": true
+}

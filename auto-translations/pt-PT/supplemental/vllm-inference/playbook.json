@@ -1,0 +1,6 @@
+{
+  "id": "vllm-inference",
+  "title": "Introdução ao vLLM",
+  "description": "Aprenda a executar inferência e disponibilização (serving) utilizando vLLM em contentores na GPU integrada",
+  "auto_translated": true
+}

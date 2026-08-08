@@ -1,0 +1,6 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "Rularea și servirea modelelor LLM cu LM Studio",
+  "description": "Configurați LM Studio și LM Studio Server pentru a rula și distribui local modele lingvistice mari.",
+  "auto_translated": true
+}

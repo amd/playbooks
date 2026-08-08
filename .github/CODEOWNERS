@@ -3,3 +3,10 @@
 /.github/ @danielholanda
 test_*.py @sreeram-11
 *test*.py @sreeram-11
+
+# auto-translations/ is generated automatically by translate-playbooks.yml.
+# localized-playbooks/ holds human-uploaded translations (e.g. the China team).
+# NOTE: test-playbooks.yml only triggers on 'playbooks/**', so changes under
+# the translation trees never run playbook CI (translations are not tested).
+/auto-translations/ @bconsolvo
+/localized-playbooks/ @bconsolvo

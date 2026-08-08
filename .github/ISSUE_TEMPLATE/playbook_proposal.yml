@@ -1,0 +1,168 @@
+# Copyright Advanced Micro Devices, Inc.
+# SPDX-License-Identifier: MIT
+
+name: Playbook proposal
+description: Pitch a new playbook as a short abstract, before writing any of it.
+title: "[Playbook]: <proposed title>"
+labels: ["new_playbook", "status::triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to pitch a playbook idea. **Do not open a pull request
+        yet.** The point of this form is to get a decision on the idea before
+        anyone spends time writing it.
+
+        **How this works**
+
+        1. You submit this abstract.
+        2. AMD playbook maintainers review it and label the issue
+           `status::approved`, `status::needs-info`, or `status::declined`.
+        3. If it is approved, you open a pull request following the
+           [Playbook Creation Guide](https://github.com/amd/playbooks/blob/main/playbooks/README.md)
+           and link it back to this issue. Pull requests without an approved
+           proposal will be closed.
+
+        **You write the tests.** The author of a playbook is expected to add the
+        CI tests for it in the same pull request, following the
+        [Playbook Testing Guide](https://github.com/amd/playbooks/blob/main/playbooks/TESTING.md):
+        wrap the commands in `@test` tags and declare the device and OS
+        combinations to run in `playbook.json`. Nothing extra to write, since the
+        tests are the playbook's own steps. Do not let this stop you proposing:
+        say so in the issue if you need help, and we will work through it in
+        review.
+
+        AMD decides what gets published. A proposal can be turned down because
+        it overlaps an existing playbook, does not fit the roadmap, or cannot be
+        tested on our hardware, and none of those are a judgment of the idea's
+        quality. See [CONTRIBUTING.md](https://github.com/amd/playbooks/blob/main/CONTRIBUTING.md)
+        for what reviewers look for.
+
+        Please check the [open proposals](https://github.com/amd/playbooks/issues?q=is%3Aissue+is%3Aopen+label%3Anew_playbook)
+        and the [published playbooks](https://github.com/amd/playbooks#available-playbooks)
+        first, so we are not reviewing the same idea twice.
+
+        It also helps to read one end to end, for example
+        [`comfyui-image-gen`](https://github.com/amd/playbooks/blob/main/playbooks/core/comfyui-image-gen/README.md),
+        so your proposal matches the shape of the collection. A playbook is not
+        a setup guide: the reader should build something real and see it work.
+
+  - type: input
+    id: title
+    attributes:
+      label: Proposed title
+      description: "How this would appear on the playbook card. Maximum 90 characters."
+      placeholder: e.g. Fine-tuning Image Models with Diffusers on AMD Radeon Graphics
+    validations:
+      required: true
+
+  - type: textarea
+    id: abstract
+    attributes:
+      label: Abstract
+      description: |
+        Three to five sentences covering what the reader builds, which tools and
+        models they use, and what they see working at the end. Write it for a
+        developer deciding whether to click, not for a spec document.
+      placeholder: |
+        In this playbook you will ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcomes
+    attributes:
+      label: What will the reader learn?
+      description: Three to five concrete skills or takeaways, one per line.
+      placeholder: |
+        - How LoRA adapters change a diffusion model without retraining it
+        - How to prepare a small training set that actually converges
+        - How to serve the result locally
+    validations:
+      required: true
+
+  - type: dropdown
+    id: devices
+    attributes:
+      label: Target AMD hardware
+      description: |
+        Which devices would the playbook support? These are the device IDs used
+        in `playbook.json`. Select all that apply.
+      multiple: true
+      options:
+        - halo_box - AMD Ryzen AI Halo Developer Platform
+        - halo - AMD Ryzen AI Max+
+        - stx - AMD Ryzen AI 300 HX
+        - krk - AMD Ryzen AI 300
+        - rx7900xt - AMD Radeon RX 7900 XT
+        - rx9070xt - AMD Radeon RX 9070 XT
+        - r9700 - AMD Radeon AI PRO R9700
+        - Other AMD hardware (name it below)
+    validations:
+      required: true
+
+  - type: input
+    id: other-device
+    attributes:
+      label: Other AMD hardware
+      description: |
+        Only if you selected "Other AMD hardware" above. Which device, and do you
+        have one to test on? We may not have it on the runners.
+      placeholder: e.g. AMD Instinct MI300X
+    validations:
+      required: false
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Target operating systems
+      description: |
+        Preferably both. Most playbooks should run on Windows and Linux, so pick
+        a single OS only when the tooling genuinely does not exist on the other.
+      multiple: true
+      options:
+        - Windows
+        - Linux
+    validations:
+      required: true
+
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Difficulty
+      description: |
+        Beginner assumes no prior experience with the tools. Advanced assumes
+        the reader is comfortable with the stack and wants depth.
+      options:
+        - beginner
+        - intermediate
+        - advanced
+    validations:
+      required: true
+
+  - type: dropdown
+    id: time
+    attributes:
+      label: Estimated time to complete
+      description: How long the reader needs, start to finish.
+      options:
+        - 15 minutes
+        - 20 minutes
+        - 30 minutes
+        - 45 minutes
+        - 60 minutes
+        - 90 minutes
+    validations:
+      required: true
+
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: |
+        Comma-separated keywords for filtering, reusing existing tags where you
+        can (`llm`, `inference`, `fine-tuning`, `rocm`, `lemonade`, `agents`, ...).
+        Maximum 120 characters.
+      placeholder: e.g. fine-tuning, lora, image-generation, rocm
+    validations:
+      required: false

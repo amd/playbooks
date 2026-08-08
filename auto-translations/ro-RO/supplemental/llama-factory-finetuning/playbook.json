@@ -1,0 +1,6 @@
+{
+  "id": "llama-factory-finetuning",
+  "title": "Ajustare fină a LLM-urilor cu LLaMA Factory",
+  "description": "Reglați fin modele lingvistice mari (LLM) folosind tehnicile LLaMA Factory și LoRA.",
+  "auto_translated": true
+}

@@ -97,7 +97,7 @@ This playbook requires two Ryzen AI Halo units and one Ethernet switch, connecte
 Please install:
 - [Git](https://git-scm.com/downloads/win)
 - [Python](https://www.python.org/downloads/)
-- [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with the **Desktop Development with C++** workload
+- [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe) with the **Desktop Development with C++** workload
 - [AMD HIP SDK](https://www.amd.com/en/developer/resources/rocm-hub/hip-sdk.html)
 <!-- @os:end -->
 
@@ -320,7 +320,7 @@ cd llama.cpp
 Build with ROCm and RPC support:
 
 ```bash
-cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DGGML_HIP_ROCWMMA_FATTN=ON -DAMDGPU_TARGETS="gfx1151"
+cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DAMDGPU_TARGETS="gfx1151"
 cmake --build rocm --config Release -j$(nproc)
 ```
 
@@ -328,7 +328,6 @@ cmake --build rocm --config Release -j$(nproc)
 |-----------|---------|
 | `-DGGML_HIP=ON` | Enables the ROCm software stack |
 | `-DGGML_RPC=ON` | Enables RPC for distributed inference |
-| `-DGGML_HIP_ROCWMMA_FATTN=ON` | Enables rocWMMA for enhanced Flash Attention on AMD GPUs |
 | `-DAMDGPU_TARGETS="gfx1151"` | Targets the Ryzen AI Halo GPU (Radeon 8060s) |
 
 For more build options, refer to the [llama.cpp build documentation](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
@@ -389,13 +388,13 @@ At load time, llama.cpp shards the model across both nodes. Once loaded, inferen
 On Machine 2, start the RPC server to expose its GPU resources to the controller:
 <!-- @os:linux -->
 ```bash
-./rpc-server -p 50053 -c --host 0.0.0.0
+./ggml-rpc-server -p 50053 -c --host 0.0.0.0
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
 ```powershell
-.\rpc-server.exe -p 50053 -c --host 0.0.0.0
+.\ggml-rpc-server.exe -p 50053 -c --host 0.0.0.0
 ```
 <!-- @os:end -->
 

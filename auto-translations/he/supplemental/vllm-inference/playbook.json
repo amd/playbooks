@@ -1,0 +1,6 @@
+{
+  "id": "vllm-inference",
+  "title": "התחלת העבודה עם vLLM",
+  "description": "למד כיצד להריץ הסקה והגשה באמצעות vLLM מוכל (containerized) על ה-GPU המשולב",
+  "auto_translated": true
+}

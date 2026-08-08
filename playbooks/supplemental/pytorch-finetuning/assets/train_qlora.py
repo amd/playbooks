@@ -24,8 +24,15 @@ Note on MXFP4 base models (e.g. openai/gpt-oss-20b):
 """
 
 import gc
+import logging
 import os
 import torch
+
+# bitsandbytes logs a harmless "ROCm binary not found" error at import when its
+# prebuilt library does not match the runtime ROCm version. This script does not
+# use bitsandbytes for training (the MXFP4 model is pre-quantized), so silence
+# its logger to avoid masking real errors (e.g. OOM) in logs.
+logging.getLogger("bitsandbytes").setLevel(logging.CRITICAL)
 
 # Use bitsandbytes (bnb) for quantization on Linux, but skip it on Windows (or if bnb is incomplete).
 # This patch avoids errors during LoRA adapter injection on platforms where bnb is unavailable or unsupported.

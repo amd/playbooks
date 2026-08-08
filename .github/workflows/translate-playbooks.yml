@@ -1,0 +1,158 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Translate Playbooks
+
+# Automatically translates a playbook's prose into the target locales and
+# direct-pushes the results under auto-translations/<locale>/. English under
+# playbooks/ stays the single canonical, executable source and is never
+# modified here. Translations are never tested by CI.
+#
+# Runs on a self-hosted runner so the translation step can reach the configured
+# LLM API endpoint while the repository itself stays public.
+
+on:
+  # Maintenance mode: retranslate a playbook once its English source lands on main.
+  push:
+    branches: [main]
+    paths:
+      - 'playbooks/**'
+  # On-demand backfill: translate a specific playbook (or all) into chosen locales.
+  workflow_dispatch:
+    inputs:
+      playbook_id:
+        description: 'Playbook id to translate (leave empty to translate all)'
+        required: false
+        type: string
+      locales:
+        description: 'Comma-separated target locales (defaults to all 30)'
+        required: false
+        default: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,fr-CA,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,pt-PT,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: translate-playbooks-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  translate:
+    name: Translate playbooks
+    runs-on: translation
+    env:
+      # The 29 Lenovo languages (Portuguese ships as both pt-BR Brazilian and pt-PT
+      # European) plus fr-CA for the Canada launch, so French ships as both fr-FR and fr-CA.
+      DEFAULT_LOCALES: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,fr-CA,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,pt-PT,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
+      # LLM API endpoint config, read from repository secrets. For exactly what
+      # each secret should contain (with examples), see the "What the repository
+      # maintainers need to do" table in auto-translations/README.md.
+      # LLM_PROVIDER is 'anthropic' (Messages API) or 'openai' (chat/completions).
+      # LLM_EXTRA_HEADERS is a JSON object of extra request headers (e.g. an API-
+      # management key). LLM_JUDGE_MODEL is an independent (ideally stronger) model
+      # used to score each translation 0-100; recorded in translation_accuracy.json.
+      LLM_PROVIDER: ${{ secrets.LLM_PROVIDER }}
+      LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+      LLM_MODEL: ${{ secrets.LLM_MODEL }}
+      LLM_JUDGE_MODEL: ${{ secrets.LLM_JUDGE_MODEL }}
+      LLM_EXTRA_HEADERS: ${{ secrets.LLM_EXTRA_HEADERS }}
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: 'utf-8'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Determine locales
+        id: locales
+        shell: bash
+        run: |
+          LOCALES="${{ github.event.inputs.locales }}"
+          if [ -z "$LOCALES" ]; then LOCALES="$DEFAULT_LOCALES"; fi
+          echo "locales=$LOCALES" >> "$GITHUB_OUTPUT"
+          echo "Target locales: $LOCALES"
+
+      - name: Determine playbooks to translate
+        id: detect
+        shell: bash
+        run: |
+          DEPS=false
+          if [ -n "${{ github.event.inputs.playbook_id }}" ]; then
+            # On-demand backfill for one playbook.
+            PLAYBOOKS="${{ github.event.inputs.playbook_id }}"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # On-demand backfill with no id = ALL published playbooks + shared dependencies.
+            PLAYBOOKS=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null \
+              | sed 's|playbooks/[^/]*/||' | sort -u | tr '\n' ' ')
+            DEPS=true
+          else
+            # push to main: only the playbooks whose files changed...
+            CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- 'playbooks/**' 2>/dev/null || echo "")
+            PLAYBOOKS=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' \
+              | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | tr '\n' ' ')
+            # ...and the shared dependency files if any of them changed.
+            if echo "$CHANGED" | grep -qE '^playbooks/dependencies/.+\.md$'; then DEPS=true; fi
+          fi
+          echo "playbooks=$PLAYBOOKS" >> "$GITHUB_OUTPUT"
+          echo "deps=$DEPS" >> "$GITHUB_OUTPUT"
+          echo "Playbooks to translate: '$PLAYBOOKS'  (dependencies: $DEPS)"
+
+      - name: Translate
+        id: translate
+        if: steps.detect.outputs.playbooks != '' || steps.detect.outputs.deps == 'true'
+        shell: bash
+        run: |
+          set -uo pipefail
+          rc=0
+          L="${{ steps.locales.outputs.locales }}"
+          # Shared dependency content (translated once; playbooks reference it).
+          if [ "${{ steps.detect.outputs.deps }}" = "true" ]; then
+            echo "::group::Translating shared dependencies"
+            python .github/scripts/translate_playbook.py --dependencies --locales "$L" || rc=1
+            echo "::endgroup::"
+          fi
+          for pb in ${{ steps.detect.outputs.playbooks }}; do
+            echo "::group::Translating $pb"
+            python .github/scripts/translate_playbook.py --playbook "$pb" --locales "$L" || rc=1
+            echo "::endgroup::"
+          done
+          exit $rc
+
+      - name: Commit and push translations
+        if: always() && steps.detect.outputs.playbooks != ''
+        shell: bash
+        run: |
+          git config user.name "amd-playbooks-l10n-bot"
+          git config user.email "amd-playbooks-l10n-bot@users.noreply.github.com"
+          if [ -z "$(git status --porcelain auto-translations)" ]; then
+            echo "No translation changes to commit."
+            exit 0
+          fi
+          git add auto-translations
+          git commit -m "l10n: update translations [skip ci]"
+          # Push back to the ref that triggered the run.
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Open issue on translation failure
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          TITLE="Automated translation failed on $(date -u +%Y-%m-%d)"
+          # Leading @-mention notifies @bconsolvo even if the assignee/label steps fail.
+          BODY="@bconsolvo the Translate Playbooks workflow failed: a playbook translation errored or did not pass the structural validation gate (code fences or @-tags did not match the English source). Run: $RUN_URL"
+          # Fall back progressively so a missing label or a non-assignable user never swallows the alert.
+          gh issue create --title "$TITLE" --body "$BODY" --assignee bconsolvo --label "translation" \
+            || gh issue create --title "$TITLE" --body "$BODY" --assignee bconsolvo \
+            || gh issue create --title "$TITLE" --body "$BODY"

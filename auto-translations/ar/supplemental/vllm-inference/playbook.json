@@ -1,0 +1,6 @@
+{
+  "id": "vllm-inference",
+  "title": "البدء مع vLLM",
+  "description": "تعرّف على كيفية تشغيل الاستدلال (inference) والخدمة (serving) باستخدام vLLM المُحوسَق (containerized) على وحدة معالجة الرسومات المدمجة (integrated GPU)",
+  "auto_translated": true
+}

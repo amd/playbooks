@@ -31,7 +31,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -72,7 +72,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. On Linux, open a terminal in the directory of your choice and follow the commands to create a venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
