@@ -11,6 +11,7 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | el-GR | 78 | 92.6 | 78 | Claude-Opus-4.8 |
 | es-LA | 78 | 93.6 | 84 | Claude-Opus-4.8 |
 | fi-FI | 78 | 92.1 | 88 | Claude-Opus-4.8 |
+| fr-CA | 78 | 91.3 | 78 | Claude-Opus-4.8 |
 | fr-FR | 78 | 93.1 | 78 | Claude-Opus-4.8 |
 | he | 78 | 92.9 | 88 | Claude-Opus-4.8 |
 | hu-HU | 78 | 92.3 | 88 | Claude-Opus-4.8 |
@@ -34,7 +35,7 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | zh-CN | 78 | 93.3 | 78 | Claude-Opus-4.8 |
 | zh-TW | 78 | 93.5 | 82 | Claude-Opus-4.8 |
 
-## Files below 85 (39)
+## Files below 85 (41)
 
 | Locale | File | Score | Issues |
 |--------|------|-------|--------|
@@ -44,6 +45,7 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | cs-CZ | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should be on Unsloth/product name); slight redundancy 'jemné doladění' vs 'doladění'. |
 | el-GR | playbooks/supplemental/llama-factory-finetuning/playbook.json | 78 | "Λεπτομερής Συντονισμός" awkward for fine-tuning; "LLaMA-Factory" hyphenation inconsistent with brand; LoRA intact. |
 | el-GR | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should follow Unsloth, not LLM); 'Fine-Tuning' terminology inconsistent between title and body. |
+| fr-CA | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark misplaced: ™ belongs after 'fine-tuned LLMs' concept; awkward placement on 'LLM™'. Otherwise accurate, fluent. |
 | fr-FR | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should follow LLMs, not the phrase); terminology inconsistency (Ajustement fin vs affinés). |
 | ja-JP | playbooks/supplemental/speech2speech-translation/playbook.json | 78 | "音声対音声" is awkward; "音声から音声への" or "スピーチ・トゥ・スピーチ" more natural. Otherwise accurate. |
 | ja-JP | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced; source has 'fine-tuned LLMs™' but translation attaches ™ to Unsloth. |
@@ -57,6 +59,7 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | tr-TR | playbooks/supplemental/speech2speech-translation/platform.md | 80 | Headings left untranslated (Platform Configuration, Prerequisites, Required Models, Network Requirements); table headers untranslated. Body translation accurate and fluent. |
 | cs-CZ | playbooks/supplemental/clustering-rccl/playbook.json | 82 | "Clustrování" awkward neologism; "vícenodový" non-standard (better: víceuzlový). Terminology intact, otherwise fluent and accurate. |
 | de-DE | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Inconsistent terminology (Feinabstimmung vs Fine-Tuning); trademark symbol misplaced from original 'fine-tuned LLMs™'. |
+| fr-CA | playbooks/supplemental/speech2speech-translation/playbook.json | 82 | Inconsistent term: 'voix-voix' vs 'voix-à-voix'; 'voix-à-voix' is anglicized calque, 'parole à parole' preferable. |
 | it-IT | playbooks/supplemental/speech2speech-translation/playbook.json | 82 | Title omits 'speech-to-speech' nuance; 'voce a voce' slightly awkward but acceptable; overall accurate and fluent. |
 | pl-PL | playbooks/supplemental/github-slack-development-digest/playbook.json | 82 | Title adds 'codzienny' (daily) not in source; 'from development' loosely rendered. Otherwise accurate, fluent, terms intact. |
 | pt-PT | playbooks/core/pytorch-rocm-llms/playbook.json | 82 | Brazilian-style gerund 'Executando' unnatural for pt-PT; prefer 'Executar/A executar'. Otherwise accurate and fluent. |
