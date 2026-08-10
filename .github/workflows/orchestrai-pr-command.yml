@@ -25,8 +25,13 @@ permissions:
   issues: write
 
 concurrency:
-  group: orchestrai-orc-${{ github.event.issue.number }}
-  cancel-in-progress: true
+  # Only real `!orc` runs share the per-PR group so a newer `!orc` supersedes an
+  # older one. Every OTHER issue_comment on the PR (a human reply, the bot's own
+  # status comment, an unauthorized commenter) gets its own throwaway group and
+  # cannot cancel an in-flight `!orc` — previously they all shared this group with
+  # cancel-in-progress:true, so any stray comment killed a running `!orc`.
+  group: ${{ startsWith(github.event.comment.body, '!orc') && format('orchestrai-orc-{0}', github.event.issue.number) || format('orchestrai-orc-other-{0}', github.event.comment.id) }}
+  cancel-in-progress: ${{ startsWith(github.event.comment.body, '!orc') }}
 
 jobs:
   command:
