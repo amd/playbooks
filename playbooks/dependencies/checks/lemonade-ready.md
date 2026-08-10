@@ -4,11 +4,8 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 <!--
-Shared Lemonade server readiness gate. Adopt it with an "@require:lemonade-ready" tag placed
-immediately before any step that talks to the Lemonade server, so the step waits for the
-server instead of failing with "Could not connect to Lemonade server". Waits only; the
-server is expected to auto-start. This file intentionally renders nothing on the website
-(only hidden test blocks below), so adopters need no github-only wrapper.
+Shared Lemonade server readiness gate. Add "@require:lemonade-ready" before a step that
+talks to the Lemonade server so it waits for the server to be ready.
 -->
 
 <!-- @os:windows -->
