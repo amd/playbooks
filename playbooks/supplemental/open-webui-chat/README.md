@@ -196,7 +196,7 @@ try {
       )
     })
     temperature = 0
-    max_tokens = 512
+    max_tokens = 1024
   } | ConvertTo-Json -Depth 10
   $tmpVision = Join-Path $env:TEMP "vision-body.json"
   [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
@@ -308,7 +308,7 @@ try {
       )
     })
     temperature = 0
-    max_tokens = 512
+    max_tokens = 1024
   } | ConvertTo-Json -Depth 10
   $tmpVision = Join-Path $env:TEMP "vision-body.json"
   [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
@@ -437,7 +437,7 @@ vision = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
     ],
   }],
   "temperature": 0,
-  "max_tokens": 512,
+  "max_tokens": 1024,
 }, timeout=300)
 if not vision.get("choices"):
   raise SystemExit(f"Unexpected vision response (no choices). Raw response:\n{json.dumps(vision, indent=2)}")
