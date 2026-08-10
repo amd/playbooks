@@ -1,0 +1,293 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Test Human Localized Playbooks
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+
+  pull_request:
+    paths:
+      - "localized-playbooks/**"
+      - ".github/scripts/build_localized_test_matrix.py"
+      - ".github/scripts/run_localized_playbook_tests.py"
+      - ".github/scripts/run_playbook_tests.py"
+      - ".github/workflows/test-localized-playbooks.yml"
+
+  workflow_dispatch:
+    inputs:
+      locale:
+        description: "Locale under localized-playbooks, for example zh-CN"
+        required: true
+        default: "zh-CN"
+        type: string
+
+      playbook_id:
+        description: "Specific playbook ID; leave empty to test all playbooks in the locale"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  TARGET_LOCALE: ${{ inputs.locale || 'zh-CN' }}
+
+jobs:
+  detect-changes:
+    name: Detect Changed Localized Playbooks
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+      has_entries: ${{ steps.build-matrix.outputs.has_entries }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed localized playbooks
+        id: detect
+        env:
+          LOCALE: ${{ env.TARGET_LOCALE }}
+          PLAYBOOK_ID: ${{ inputs.playbook_id || '' }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+        run: |
+          if [ -n "$PLAYBOOK_ID" ]; then
+            jq -cn --arg playbook "$PLAYBOOK_ID" '[ $playbook ]' |
+              sed 's/^/playbooks=/' >> "$GITHUB_OUTPUT"
+          else
+            ALL_PLAYBOOKS=$(find \
+              "localized-playbooks/$LOCALE/core" \
+              "localized-playbooks/$LOCALE/supplemental" \
+              -mindepth 1 -maxdepth 1 -type d 2>/dev/null |
+              sed "s|localized-playbooks/$LOCALE/[^/]*/||" |
+              sort -u |
+              jq -R -s -c 'split("\n") | map(select(length > 0))')
+
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "${{ github.sha }}" 2>/dev/null || echo "")
+
+              if printf '%s\n' "$CHANGED_FILES" | grep -Eq \
+                "^(localized-playbooks/$LOCALE/dependencies/|\.github/scripts/(build_localized_test_matrix|run_localized_playbook_tests|run_playbook_tests)\.py$|\.github/workflows/test-localized-playbooks\.yml$)"; then
+                PLAYBOOK_IDS="$ALL_PLAYBOOKS"
+              else
+                PLAYBOOK_IDS=$(printf '%s\n' "$CHANGED_FILES" |
+                  grep -E "^localized-playbooks/$LOCALE/(core|supplemental)/[^/]+/" |
+                  sed "s|localized-playbooks/$LOCALE/[^/]*/\([^/]*\)/.*|\1|" |
+                  sort -u |
+                  jq -R -s -c 'split("\n") | map(select(length > 0))')
+              fi
+            else
+              PLAYBOOK_IDS="$ALL_PLAYBOOKS"
+            fi
+
+            echo "playbooks=${PLAYBOOK_IDS:-[]}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build localized test matrix
+        id: build-matrix
+        env:
+          LOCALE: ${{ env.TARGET_LOCALE }}
+          PLAYBOOKS: ${{ steps.detect.outputs.playbooks }}
+        run: |
+          set -euo pipefail
+
+          if [ "$PLAYBOOKS" = "[]" ] || [ -z "$PLAYBOOKS" ]; then
+            echo "matrix=[]" >> "$GITHUB_OUTPUT"
+            echo "has_entries=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          args=(--locale "$LOCALE")
+
+          while IFS= read -r playbook; do
+            args+=(--playbook "$playbook")
+          done < <(echo "$PLAYBOOKS" | jq -r '.[]')
+
+          MATRIX=$(python3 .github/scripts/build_localized_test_matrix.py "${args[@]}")
+
+          if [ "$MATRIX" = "[]" ] || [ -z "$MATRIX" ]; then
+            echo "matrix=[]" >> "$GITHUB_OUTPUT"
+            echo "has_entries=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+            echo "has_entries=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Display localized test matrix
+        run: |
+          echo 'Test matrix: ${{ steps.build-matrix.outputs.matrix }}'
+
+  test-localized-playbooks:
+    name: >-
+      ${{ matrix.locale }}
+      ${{ matrix.playbook }}
+      (${{ matrix.platform }}/${{ matrix.arch }})
+
+    needs:
+      - detect-changes
+
+    if: needs.detect-changes.outputs.has_entries == 'true'
+
+    continue-on-error: ${{ !matrix.required }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
+
+    runs-on:
+      - self-hosted
+      - ${{ matrix.runner_label }}
+
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: >-
+            ${{
+              (
+                matrix.playbook == 'open-webui-chat' ||
+                matrix.playbook == 'vllm-inference'
+              ) && '3.12' || '3.13'
+            }}
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      # A previous job may leave a model loaded in GPU memory.
+      # Cleanup is best-effort and must not block the actual test.
+      - name: Free GPU before tests on Linux
+        if: matrix.platform == 'linux'
+        shell: bash
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          lemonade unload || true
+          lms unload --all || true
+
+          if pgrep -x ollama >/dev/null 2>&1; then
+            ollama ps 2>/dev/null |
+              awk 'NR > 1 { print $1 }' |
+              while read -r model; do
+                if [ -n "$model" ]; then
+                  ollama stop "$model" 2>/dev/null || true
+                fi
+              done
+          fi
+
+      - name: Free GPU before tests on Windows
+        if: matrix.platform == 'windows'
+        shell: powershell
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          try {
+            lemonade unload
+          } catch {}
+
+          try {
+            lms unload --all
+          } catch {}
+
+          if (Get-Process ollama -ErrorAction SilentlyContinue) {
+            try {
+              $models = & ollama ps 2>$null |
+                Select-Object -Skip 1 |
+                ForEach-Object {
+                  ($_ -split '\s+')[0]
+                } |
+                Where-Object {
+                  $_
+                }
+
+              foreach ($model in $models) {
+                & ollama stop $model 2>$null | Out-Null
+              }
+            } catch {}
+          }
+
+          exit 0
+
+      - name: Extract and run localized tests on Windows
+        if: matrix.platform == 'windows'
+        shell: powershell
+        run: |
+          python .github/scripts/run_localized_playbook_tests.py `
+            --locale "${{ matrix.locale }}" `
+            --playbook "${{ matrix.playbook }}" `
+            --platform windows `
+            --device "${{ matrix.arch }}"
+
+      - name: Extract and run localized tests on Linux
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          python .github/scripts/run_localized_playbook_tests.py \
+            --locale "${{ matrix.locale }}" \
+            --playbook "${{ matrix.playbook }}" \
+            --platform linux \
+            --device "${{ matrix.arch }}"
+
+      - name: Upload localized test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: localized-${{ matrix.locale }}-${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          path: test-results/
+          if-no-files-found: ignore
+
+      - name: Test summary on Windows
+        if: always() && matrix.platform == 'windows'
+        shell: powershell
+        run: |
+          $summary = @"
+          ### Test Results for ``${{ matrix.locale }}/${{ matrix.playbook }}`` (${{ matrix.platform }}/${{ matrix.arch }})
+
+          See the test artifacts for detailed logs.
+          "@
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+
+      - name: Test summary on Linux
+        if: always() && matrix.platform == 'linux'
+        shell: bash
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" << 'EOF'
+          ### Test Results for `${{ matrix.locale }}/${{ matrix.playbook }}` (${{ matrix.platform }}/${{ matrix.arch }})
+
+          See the test artifacts for detailed logs.
+          EOF
+
+  localized-test-gate:
+    name: Localized Playbook Test Gate
+
+    needs:
+      - detect-changes
+      - test-localized-playbooks
+
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check required localized tests
+        run: |
+          echo "test-localized-playbooks result: ${{ needs.test-localized-playbooks.result }}"
+          if [ "${{ needs.test-localized-playbooks.result }}" = "failure" ]; then
+            echo "::error::One or more required localized tests failed"
+            exit 1
+          fi
+          echo "All required localized tests passed (or no tests were needed)"
