@@ -1,6 +1,6 @@
 {
   "$schema": "./registry.schema.json",
-  "description": "Central registry of shared require-able blocks (install dependencies, models, setup steps, and runtime checks) for AMD developer platforms",
+  "description": "Central registry of shared require-able blocks (install dependencies, models, setup steps, and runtime checks)",
   "dependencies": {
     "comfyui": {
       "name": "ComfyUI",
