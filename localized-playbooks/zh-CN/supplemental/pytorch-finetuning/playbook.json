@@ -3,9 +3,15 @@
   "title": "使用 PyTorch 和 AMD ROCm™ 软件微调大语言模型",
   "description": "使用 PyTorch 和 ROCm 微调大语言模型(LLM)。",
   "tested_platforms": {
-    "halo": ["linux"]
+    "halo": [
+      "windows",
+      "linux"
+    ]
   },
   "required_platforms": {
-    "halo": ["linux"]
+    "halo": [
+      "windows",
+      "linux"
+    ]
   }
 }
