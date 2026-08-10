@@ -157,8 +157,11 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```powershell
+$ErrorActionPreference = "Stop"
 pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
+if ($LASTEXITCODE -ne 0) { throw "unsloth install failed" }
 pip install triton-windows
+if ($LASTEXITCODE -ne 0) { throw "triton-windows install failed" }
 ```
 <!-- @test:end -->
 <!-- @os:end -->
