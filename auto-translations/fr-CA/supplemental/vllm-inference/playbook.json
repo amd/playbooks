@@ -1,0 +1,6 @@
+{
+  "id": "vllm-inference",
+  "title": "Prise en main de vLLM",
+  "description": "Découvrez comment exécuter l'inférence et le service à l'aide de vLLM en conteneur sur le GPU intégré",
+  "auto_translated": true
+}
