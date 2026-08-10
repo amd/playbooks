@@ -56,7 +56,8 @@ def main():
         passed = int(d.get("passed", 0) or 0)
         failed = int(d.get("failed", 0) or 0)
         ok = failed == 0 and passed > 0
-        rows.append((pb, platform, arch, ok))
+        rp = d.get("rp_launch_url", "") or ""
+        rows.append((pb, platform, arch, ok, rp))
 
     rows.sort(key=lambda r: (r[0], r[1], r[2]))
     n_pass = sum(1 for r in rows if r[3])
@@ -66,9 +67,10 @@ def main():
 
     lines = [MARKER, f"### OrchestrAI results — {overall} ({n_pass} passed, {n_fail} failed)", ""]
     if rows:
-        lines += ["| Playbook | Platform | Device | Result |", "|---|---|---|---|"]
-        for pb, platform, arch, ok in rows:
-            lines.append(f"| `{pb}` | {platform} | {arch} | {'✅ pass' if ok else '❌ fail'} |")
+        lines += ["| Playbook | Platform | Device | Result | Results |", "|---|---|---|---|---|"]
+        for pb, platform, arch, ok, rp in rows:
+            report = f"[ReportPortal]({rp})" if rp else "—"
+            lines.append(f"| `{pb}` | {platform} | {arch} | {'✅ pass' if ok else '❌ fail'} | {report} |")
     else:
         lines.append("_No playbooks were scheduled (nothing matched, or all devices were skipped)._")
     lines.append("")
@@ -76,7 +78,7 @@ def main():
     if args.sha:
         foot.append(f"tested `{args.sha[:8]}`" + (f" ({args.ref})" if args.ref else ""))
     if args.run_url:
-        foot.append(f"[workflow run]({args.run_url}) — per-playbook ReportPortal links are in each job summary")
+        foot.append(f"[workflow run]({args.run_url})")
     if foot:
         lines.append(" · ".join(foot))
 

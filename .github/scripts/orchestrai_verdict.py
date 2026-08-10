@@ -107,11 +107,14 @@ def main():
     group_key = f"playbook-{playbook}"
     os.makedirs("test-results", exist_ok=True)
 
-    def write_summary(ok):
+    def write_summary(ok, rp_url=""):
+        # rp_launch_url is carried in the uploaded artifact so the PR-comment
+        # report (orchestrai_report.py) can render a per-playbook ReportPortal
+        # link — the only place a !orc user can reach the results.
         json.dump(
             {"playbook_id": playbook, "platform": platform, "total_tests": 1,
              "passed": 1 if ok else 0, "failed": 0 if ok else 1,
-             "skipped": 0, "results": []},
+             "skipped": 0, "results": [], "rp_launch_url": rp_url},
             open("test-results/summary.json", "w"), indent=2)
 
     if not build_url:
@@ -125,10 +128,11 @@ def main():
     except Exception:
         summary = {}
 
+    rp_url = summary.get("rp_launch_url", "")
     out = os.environ.get("GITHUB_OUTPUT")
     if out:
         with open(out, "a") as f:
-            f.write(f"rp_url={summary.get('rp_launch_url', '')}\n")
+            f.write(f"rp_url={rp_url}\n")
 
     # Primary: per-group rollup in summary.json.
     status, how = None, ""
@@ -146,7 +150,7 @@ def main():
             how = "console suite lifecycle"
 
     if status is None:
-        write_summary(False)
+        write_summary(False, rp_url)
         groups_present = list((summary.get("groups") or {}).keys())
         print(f"::error::No verdict for {playbook} ({platform}): "
               f"no groups['{group_key}'] in summary.json and no suite result in the "
@@ -154,7 +158,7 @@ def main():
         sys.exit(1)
 
     ok = (status == "PASSED")
-    write_summary(ok)
+    write_summary(ok, rp_url)
     counts = {k: grp.get(k) for k in COUNT_KEYS} if isinstance(grp, dict) else {}
     print(f"{playbook} ({platform}): {'PASS' if ok else 'FAIL'} "
           f"(status={status}, via {how}, counts={counts})")
