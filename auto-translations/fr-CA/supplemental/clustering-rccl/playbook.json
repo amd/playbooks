@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rccl",
+  "title": "Regroupement en grappe (clustering) de deux Ryzen™ AI Halo avec RCCL",
+  "description": "Configurez une grappe multinœud à l'aide de deux appareils AMD Ryzen™ AI Halo avec RCCL pour les charges de travail distribuées",
+  "auto_translated": true
+}

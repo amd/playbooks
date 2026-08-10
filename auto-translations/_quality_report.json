@@ -42,6 +42,12 @@
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
+    "fr-CA": {
+      "files_scored": 78,
+      "mean": 91.3,
+      "min": 78,
+      "judge_model": "Claude-Opus-4.8"
+    },
     "fr-FR": {
       "files_scored": 78,
       "mean": 93.1,
@@ -213,6 +219,12 @@
       "issues": "Trademark symbol misplaced (should follow Unsloth, not LLM); 'Fine-Tuning' terminology inconsistent between title and body."
     },
     {
+      "locale": "fr-CA",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 78,
+      "issues": "Trademark misplaced: ™ belongs after 'fine-tuned LLMs' concept; awkward placement on 'LLM™'. Otherwise accurate, fluent."
+    },
+    {
       "locale": "fr-FR",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
@@ -289,6 +301,12 @@
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 82,
       "issues": "Inconsistent terminology (Feinabstimmung vs Fine-Tuning); trademark symbol misplaced from original 'fine-tuned LLMs™'."
+    },
+    {
+      "locale": "fr-CA",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent term: 'voix-voix' vs 'voix-à-voix'; 'voix-à-voix' is anglicized calque, 'parole à parole' preferable."
     },
     {
       "locale": "it-IT",

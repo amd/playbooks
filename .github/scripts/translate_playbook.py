@@ -71,7 +71,8 @@ CATEGORIES = ["core", "supplemental"]
 # Files whose prose is translated (kept in the mirrored tree).
 PROSE_FILES = ["README.md", "platform.md"]
 
-# Human-readable language names for the prompt - all 29 Lenovo languages.
+# Human-readable language names for the prompt - the 29 Lenovo languages plus
+# fr-CA, added for the Canada launch (Quebec Bill 96 locale alignment).
 LOCALE_NAMES = {
     "zh-CN": "Simplified Chinese (zh-CN)",
     "zh-TW": "Traditional Chinese (zh-TW)",
@@ -82,6 +83,9 @@ LOCALE_NAMES = {
     "es-LA": "Latin American Spanish (es-LA)",
     "fi-FI": "Finnish (fi-FI)",
     "fr-FR": "French (fr-FR)",
+    # Spelled out so the model produces genuinely Canadian French rather than a
+    # near-copy of fr-FR - these two are the closest pair in the locale set.
+    "fr-CA": "Canadian French (fr-CA, Quebec/OQLF conventions)",
     "hu-HU": "Hungarian (hu-HU)",
     "it-IT": "Italian (it-IT)",
     "ja-JP": "Japanese (ja-JP)",
@@ -138,6 +142,13 @@ HTML_TAG_RE = re.compile(
 # Leading license/copyright HTML comment - stripped before translation and
 # re-attached verbatim, so the model can never drop or alter it.
 LICENSE_HEADER_RE = re.compile(r"^\ufeff?\s*<!--.*?SPDX-License-Identifier.*?-->\s*", re.DOTALL)
+# Runs of non-BMP characters (emoji, U+10000 and above). These are literal UI
+# glyphs rather than translatable prose, so masking them costs nothing and
+# guarantees they survive byte-for-byte. It is also required: the LLM gateway
+# returns HTTP 500 whenever the model's *response* contains a non-BMP character
+# (a request carrying one is fine), which otherwise makes any playbook with an
+# emoji impossible to translate.
+NON_BMP_RE = re.compile(r"[^\u0000-\uffff]+")
 
 SENTINEL = "\u2402L10N{}\u2403"  # unlikely to appear in prose or be altered
 SENTINEL_FIND = re.compile(r"\u2402L10N(\d+)\u2403")
@@ -163,11 +174,13 @@ def mask_protected(text):
         return SENTINEL.format(idx)
 
     # Order matters: whole github-only blocks, then comments (may contain '<'),
-    # then fences, then HTML tags.
+    # then fences, then HTML tags. Emoji last, so ones already inside a masked
+    # span are not masked twice.
     masked = GITHUB_ONLY_RE.sub(_sub, text)
     masked = HTML_COMMENT_RE.sub(_sub, masked)
     masked = FENCE_RE.sub(_sub, masked)
     masked = HTML_TAG_RE.sub(_sub, masked)
+    masked = NON_BMP_RE.sub(_sub, masked)
     return masked, mapping
 
 
