@@ -6,3 +6,4 @@
 .github/workflows/*.yml text eol=lf
 auto-translations/**    text eol=lf
 localized-playbooks/**  text eol=lf
+localized-playbooks/**/*.png binary
