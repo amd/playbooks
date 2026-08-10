@@ -71,7 +71,8 @@ CATEGORIES = ["core", "supplemental"]
 # Files whose prose is translated (kept in the mirrored tree).
 PROSE_FILES = ["README.md", "platform.md"]
 
-# Human-readable language names for the prompt - all 29 Lenovo languages.
+# Human-readable language names for the prompt - the 29 Lenovo languages plus
+# fr-CA, added for the Canada launch (Quebec Bill 96 locale alignment).
 LOCALE_NAMES = {
     "zh-CN": "Simplified Chinese (zh-CN)",
     "zh-TW": "Traditional Chinese (zh-TW)",
@@ -82,6 +83,9 @@ LOCALE_NAMES = {
     "es-LA": "Latin American Spanish (es-LA)",
     "fi-FI": "Finnish (fi-FI)",
     "fr-FR": "French (fr-FR)",
+    # Spelled out so the model produces genuinely Canadian French rather than a
+    # near-copy of fr-FR - these two are the closest pair in the locale set.
+    "fr-CA": "Canadian French (fr-CA, Quebec/OQLF conventions)",
     "hu-HU": "Hungarian (hu-HU)",
     "it-IT": "Italian (it-IT)",
     "ja-JP": "Japanese (ja-JP)",
@@ -90,6 +94,7 @@ LOCALE_NAMES = {
     "nb-NO": "Norwegian Bokmal (nb-NO)",
     "pl-PL": "Polish (pl-PL)",
     "pt-BR": "Brazilian Portuguese (pt-BR)",
+    "pt-PT": "European Portuguese (pt-PT)",
     "ru-RU": "Russian (ru-RU)",
     "sv-SE": "Swedish (sv-SE)",
     "th-TH": "Thai (th-TH)",
@@ -112,6 +117,19 @@ LOCALE_NAMES = {
 # closing-fence line (common in ja/ko/fi/tr where the verb follows the code
 # reference), the fence stops closing and re-masking merges it with the next block.
 FENCE_RE = re.compile(r"(^|\n)(```|~~~).*?\n\2[ \t]*(?:\n|$)", re.DOTALL)
+# GitHub-only notices, masked as a single span so the block passes through in
+# English. The website strips these blocks outright, so GitHub is the only place
+# they ever render and there is nothing to gain from translating them - while a
+# model rewrite risks corrupting the very markers the website's strip keys on.
+# Must run before HTML_COMMENT_RE, which would otherwise protect only the two
+# marker comments and leave the prose between them translatable.
+GITHUB_ONLY_RE = re.compile(r"<!-- @github-only -->.*?<!-- @github-only:end -->", re.DOTALL)
+# Same block, but anchored to the start of the marker's line so that repairing an
+# existing translation also removes any stray prefix a model prepended to it.
+GITHUB_ONLY_LINE_RE = re.compile(
+    r"^[^\n]*?<!-- @github-only -->.*?<!-- @github-only:end -->",
+    re.DOTALL | re.MULTILINE,
+)
 # HTML comments (covers copyright header + every @tag such as <!-- @os:windows -->)
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 # Individual raw HTML tags (opening, closing, or self-closing). Masking each tag
@@ -124,6 +142,13 @@ HTML_TAG_RE = re.compile(
 # Leading license/copyright HTML comment - stripped before translation and
 # re-attached verbatim, so the model can never drop or alter it.
 LICENSE_HEADER_RE = re.compile(r"^\ufeff?\s*<!--.*?SPDX-License-Identifier.*?-->\s*", re.DOTALL)
+# Runs of non-BMP characters (emoji, U+10000 and above). These are literal UI
+# glyphs rather than translatable prose, so masking them costs nothing and
+# guarantees they survive byte-for-byte. It is also required: the LLM gateway
+# returns HTTP 500 whenever the model's *response* contains a non-BMP character
+# (a request carrying one is fine), which otherwise makes any playbook with an
+# emoji impossible to translate.
+NON_BMP_RE = re.compile(r"[^\u0000-\uffff]+")
 
 SENTINEL = "\u2402L10N{}\u2403"  # unlikely to appear in prose or be altered
 SENTINEL_FIND = re.compile(r"\u2402L10N(\d+)\u2403")
@@ -148,10 +173,14 @@ def mask_protected(text):
         mapping.append(m.group(0))
         return SENTINEL.format(idx)
 
-    # Order matters: comments first (may contain '<'), then fences, then HTML tags.
-    masked = HTML_COMMENT_RE.sub(_sub, text)
+    # Order matters: whole github-only blocks, then comments (may contain '<'),
+    # then fences, then HTML tags. Emoji last, so ones already inside a masked
+    # span are not masked twice.
+    masked = GITHUB_ONLY_RE.sub(_sub, text)
+    masked = HTML_COMMENT_RE.sub(_sub, masked)
     masked = FENCE_RE.sub(_sub, masked)
     masked = HTML_TAG_RE.sub(_sub, masked)
+    masked = NON_BMP_RE.sub(_sub, masked)
     return masked, mapping
 
 
@@ -293,7 +322,7 @@ def call_model(system_prompt, user_text, cfg, temperature=0, max_retries=6):
     for attempt in range(max_retries):
         try:
             return fn(system_prompt, user_text, cfg, temperature)
-        except (urllib.error.URLError, urllib.error.HTTPError, KeyError, TimeoutError, IndexError) as e:
+        except (urllib.error.URLError, urllib.error.HTTPError, ConnectionError, TimeoutError, KeyError, IndexError) as e:
             last_err = e
             # Rate limiting (429) / overload (503): back off harder and honor
             # Retry-After when the server provides it.
@@ -811,6 +840,51 @@ def apply_disclaimers(locales):
     return changed
 
 
+def sync_github_only(locales):
+    """Restore the verbatim English @github-only block in existing translations,
+    dropping any stray prefix a model prepended to the opening marker. Brings
+    files translated before these blocks were masked into the same state a fresh
+    run now produces, without re-translating. Returns the number of files changed.
+
+    A stray prefix is not cosmetic: the website strips from '<!--' to the end
+    marker, so anything the model put ahead of the marker survives the strip and
+    renders on the page (a lone '#' becomes an empty heading)."""
+    if not TRANSLATIONS_ROOT.exists():
+        print("No auto-translations/ tree found; nothing to do.", flush=True)
+        return 0
+    changed = 0
+    for locale in locales:
+        loc_dir = TRANSLATIONS_ROOT / locale
+        if not loc_dir.is_dir():
+            continue
+        for fname in PROSE_FILES:
+            for f in sorted(loc_dir.rglob(fname)):
+                src = PLAYBOOKS_ROOT / f.relative_to(loc_dir)
+                if not src.exists():
+                    continue
+                src_blocks = GITHUB_ONLY_RE.findall(src.read_text(encoding="utf-8"))
+                original = f.read_text(encoding="utf-8")
+                matches = list(GITHUB_ONLY_LINE_RE.finditer(original))
+                if not matches:
+                    continue
+                if len(matches) != len(src_blocks):
+                    print(f"  [warn] {f.relative_to(TRANSLATIONS_ROOT)}: "
+                          f"{len(matches)} block(s) vs {len(src_blocks)} in source; skipped", flush=True)
+                    continue
+                parts, last = [], 0
+                for m, block in zip(matches, src_blocks):
+                    parts.append(original[last:m.start()])
+                    parts.append(block)
+                    last = m.end()
+                parts.append(original[last:])
+                updated = "".join(parts)
+                if updated != original:
+                    f.write_text(updated, encoding="utf-8")
+                    changed += 1
+    print(f"\nDone. GitHub-only blocks synced: {changed} file(s) updated across {len(locales)} locale(s).", flush=True)
+    return changed
+
+
 def write_quality_report():
     """Aggregate quality_score across all locale manifests into a single report
     at translations/_quality_report.json (+ .md) - the defensible accuracy record."""
@@ -931,6 +1005,7 @@ def main():
     ap.add_argument("--dependencies", action="store_true", help="Translate the shared playbooks/dependencies/*.md files")
     ap.add_argument("--remediate", action="store_true", help="Re-score judge errors and re-translate sub-threshold files, then exit")
     ap.add_argument("--apply-disclaimers", action="store_true", help="Insert/refresh the machine-translation disclaimer on existing translated README/platform files and set auto_translated in playbook.json, without re-translating. Idempotent. Defaults to all present locales when --locales is omitted.")
+    ap.add_argument("--sync-github-only", action="store_true", help="Restore the verbatim English @github-only block (which the website strips and never shows) in existing translations, without re-translating. Idempotent. Defaults to all present locales when --locales is omitted.")
     ap.add_argument("--min-score", type=int, default=None, help="Remediation threshold (default: LLM_QUALITY_THRESHOLD or 85)")
     ap.add_argument("--locales", help="Comma-separated locale codes, e.g. zh-CN,es-LA,fr-FR (required except for --apply-disclaimers)")
     ap.add_argument("--jobs", type=int, default=1, help="Parallel workers across locales (each locale owns its own manifest, so this is race-free)")
@@ -939,19 +1014,22 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="Mask/round-trip only; do not call the model")
     args = ap.parse_args()
 
-    if not args.playbook and not args.all_playbooks and not args.dependencies and not args.remediate and not args.apply_disclaimers:
-        print("ERROR: specify --playbook <id>, --all-playbooks, --dependencies, --remediate, and/or --apply-disclaimers.", file=sys.stderr)
+    if not args.playbook and not args.all_playbooks and not args.dependencies and not args.remediate and not args.apply_disclaimers and not args.sync_github_only:
+        print("ERROR: specify --playbook <id>, --all-playbooks, --dependencies, --remediate, --apply-disclaimers, and/or --sync-github-only.", file=sys.stderr)
         sys.exit(2)
 
-    # Disclaimer backfill needs no model/secrets - handle it up front and exit.
-    if args.apply_disclaimers:
+    # These backfills need no model/secrets - handle them up front and exit.
+    if args.apply_disclaimers or args.sync_github_only:
         if args.locales:
             apply_locales = [x.strip() for x in args.locales.split(",") if x.strip()]
         elif TRANSLATIONS_ROOT.exists():
             apply_locales = sorted(d.name for d in TRANSLATIONS_ROOT.iterdir() if d.is_dir())
         else:
             apply_locales = []
-        apply_disclaimers(apply_locales)
+        if args.apply_disclaimers:
+            apply_disclaimers(apply_locales)
+        if args.sync_github_only:
+            sync_github_only(apply_locales)
         return
 
     cat, pb_dir = (None, None)

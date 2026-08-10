@@ -26,9 +26,9 @@ on:
         required: false
         type: string
       locales:
-        description: 'Comma-separated target locales (defaults to all 29)'
+        description: 'Comma-separated target locales (defaults to all 30)'
         required: false
-        default: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
+        default: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,fr-CA,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,pt-PT,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
         type: string
 
 permissions:
@@ -44,8 +44,9 @@ jobs:
     name: Translate playbooks
     runs-on: translation
     env:
-      # All 29 Lenovo languages (pt-BR covers both Brazilian Portuguese entries).
-      DEFAULT_LOCALES: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
+      # The 29 Lenovo languages (Portuguese ships as both pt-BR Brazilian and pt-PT
+      # European) plus fr-CA for the Canada launch, so French ships as both fr-FR and fr-CA.
+      DEFAULT_LOCALES: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,fr-CA,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,pt-PT,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
       # LLM API endpoint config, read from repository secrets. For exactly what
       # each secret should contain (with examples), see the "What the repository
       # maintainers need to do" table in auto-translations/README.md.

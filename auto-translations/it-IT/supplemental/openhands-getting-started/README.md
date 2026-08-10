@@ -4,16 +4,16 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
-> **Traduzione automatica.** Questa pagina è stata tradotta automaticamente dall'inglese e non è stata revisionata da un traduttore umano. Potrebbe contenere errori e alcuni passaggi, comandi, download o la disponibilità dei prodotti potrebbero variare in base alla lingua o alla regione. Se qualcosa non sembra corretto, fare riferimento al playbook originale in inglese come fonte autorevole.
+> **Traduzione automatica.** Questa pagina è stata tradotta automaticamente dall'inglese e non è stata revisionata da una persona. Potrebbe contenere errori e alcune istruzioni, comandi, download, disponibilità dei prodotti o altri contenuti potrebbero variare in base alla lingua o alla regione. In caso di incongruenza o discrepanza, prevale la versione originale in lingua inglese del playbook.
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> Questo playbook utilizza i tag di commento AMD Playbooks che vengono interpretati dal
-> sito AMD Playbooks. GitHub esegue il rendering del contenuto Markdown, ma non delle direttive
-> relative a dispositivo, sistema operativo, variabile o test nascosto.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Panoramica

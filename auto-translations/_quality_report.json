@@ -1,169 +1,181 @@
 {
   "per_locale": {
     "ar": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.3,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "cs-CZ": {
-      "files_scored": 80,
-      "mean": 92.8,
+      "files_scored": 78,
+      "mean": 92.9,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "da-DK": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.2,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "de-DE": {
-      "files_scored": 80,
-      "mean": 93.5,
+      "files_scored": 78,
+      "mean": 93.6,
       "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "el-GR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "es-LA": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.6,
       "min": 84,
       "judge_model": "Claude-Opus-4.8"
     },
     "fi-FI": {
-      "files_scored": 80,
-      "mean": 92.2,
+      "files_scored": 78,
+      "mean": 92.1,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
+    "fr-CA": {
+      "files_scored": 78,
+      "mean": 91.3,
+      "min": 78,
+      "judge_model": "Claude-Opus-4.8"
+    },
     "fr-FR": {
-      "files_scored": 80,
-      "mean": 93.2,
+      "files_scored": 78,
+      "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "he": {
-      "files_scored": 80,
-      "mean": 92.8,
+      "files_scored": 78,
+      "mean": 92.9,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "hu-HU": {
-      "files_scored": 80,
-      "mean": 92.2,
-      "min": 82,
+      "files_scored": 78,
+      "mean": 92.3,
+      "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "it-IT": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 94.2,
       "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "ja-JP": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 94.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ko-KR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 94.0,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "nb-NO": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.0,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "nl-NL": {
-      "files_scored": 80,
-      "mean": 92.3,
+      "files_scored": 78,
+      "mean": 92.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pl-PL": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-BR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 94.0,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
+    "pt-PT": {
+      "files_scored": 78,
+      "mean": 91.9,
+      "min": 78,
+      "judge_model": "Claude-Opus-4.8"
+    },
     "ro-RO": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.5,
       "min": 84,
       "judge_model": "Claude-Opus-4.8"
     },
     "ru-RU": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.9,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "sk-SK": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.2,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sl-SI": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 91.2,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "sr-Latn": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 91.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sv-SE": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.6,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "th-TH": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.2,
       "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "tr-TR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.7,
       "min": 80,
       "judge_model": "Claude-Opus-4.8"
     },
     "uk-UA": {
-      "files_scored": 80,
-      "mean": 92.9,
+      "files_scored": 78,
+      "mean": 93.0,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
-      "mean": 93.4,
+      "files_scored": 78,
+      "mean": 93.3,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-TW": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
@@ -207,6 +219,12 @@
       "issues": "Trademark symbol misplaced (should follow Unsloth, not LLM); 'Fine-Tuning' terminology inconsistent between title and body."
     },
     {
+      "locale": "fr-CA",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 78,
+      "issues": "Trademark misplaced: ™ belongs after 'fine-tuned LLMs' concept; awkward placement on 'LLM™'. Otherwise accurate, fluent."
+    },
+    {
       "locale": "fr-FR",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
@@ -226,12 +244,6 @@
     },
     {
       "locale": "nl-NL",
-      "file": "playbooks/core/deepseek-v4-flash-ds4/playbook.json",
-      "score": 78,
-      "issues": "Title 'Running' left untranslated; should be 'DeepSeek V4 Flash draaien' or similar."
-    },
-    {
-      "locale": "nl-NL",
       "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
       "score": 78,
       "issues": "Untranslated 'Running' in title heading; otherwise accurate and fluent."
@@ -247,6 +259,12 @@
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 78,
       "issues": "Title translated 'AMD Sync' as 'sincronização AMD' but kept brand elsewhere; inconsistent brand handling."
+    },
+    {
+      "locale": "pt-PT",
+      "file": "playbooks/supplemental/hermes-lemonade-server/playbook.json",
+      "score": 78,
+      "issues": "Awkward 'A Executar' title; 'backend' untranslated (acceptable); inconsistent Agent/Agente handling."
     },
     {
       "locale": "sl-SI",
@@ -285,10 +303,10 @@
       "issues": "Inconsistent terminology (Feinabstimmung vs Fine-Tuning); trademark symbol misplaced from original 'fine-tuned LLMs™'."
     },
     {
-      "locale": "hu-HU",
-      "file": "playbooks/core/deepseek-v4-flash-ds4/playbook.json",
+      "locale": "fr-CA",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
       "score": 82,
-      "issues": "Title phrasing awkward ('Futtatás:' colon-style); otherwise accurate, terms intact, fluent."
+      "issues": "Inconsistent term: 'voix-voix' vs 'voix-à-voix'; 'voix-à-voix' is anglicized calque, 'parole à parole' preferable."
     },
     {
       "locale": "it-IT",
@@ -301,6 +319,36 @@
       "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
       "score": 82,
       "issues": "Title adds 'codzienny' (daily) not in source; 'from development' loosely rendered. Otherwise accurate, fluent, terms intact."
+    },
+    {
+      "locale": "pt-PT",
+      "file": "playbooks/core/pytorch-rocm-llms/playbook.json",
+      "score": 82,
+      "issues": "Brazilian-style gerund 'Executando' unnatural for pt-PT; prefer 'Executar/A executar'. Otherwise accurate and fluent."
+    },
+    {
+      "locale": "pt-PT",
+      "file": "playbooks/supplemental/clustering-rccl/playbook.json",
+      "score": 82,
+      "issues": "'Clustering' left untranslated; 'usando' less formal than 'utilizando' for pt-PT; otherwise accurate."
+    },
+    {
+      "locale": "pt-PT",
+      "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
+      "score": 82,
+      "issues": "'Clustering' left untranslated (agrupamento); otherwise accurate, fluent, terminology and brands intact."
+    },
+    {
+      "locale": "pt-PT",
+      "file": "playbooks/supplemental/lemonade-getting-started/playbook.json",
+      "score": 82,
+      "issues": "\"IA Gen\" awkward; should be \"IA generativa\" or \"Gen AI\" kept intact."
+    },
+    {
+      "locale": "pt-PT",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Trademark symbol misplaced (should follow Unsloth); 'eficiência de memória' slightly literal but acceptable."
     },
     {
       "locale": "sk-SK",
@@ -361,6 +409,12 @@
       "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
       "score": 84,
       "issues": "Redundant '(fine-tune)' gloss awkward; 'LLMs' plural anglicized; otherwise accurate and fluent."
+    },
+    {
+      "locale": "pt-PT",
+      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
+      "score": 84,
+      "issues": "Inconsistent handling of 'digest' (kept English in title, glossed later); 'GitHub-to-Slack' untranslated may be intentional."
     },
     {
       "locale": "ro-RO",

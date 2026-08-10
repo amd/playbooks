@@ -4,17 +4,16 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
-> **Strojový překlad.** Tato stránka byla automaticky přeložena z angličtiny a nebyla zkontrolována člověkem. Může obsahovat chyby a některé kroky, příkazy, soubory ke stažení nebo dostupnost produktů se mohou lišit ve vašem jazyce či regionu. Pokud vám cokoli připadá nesprávné, považujte za zdroj pravdivých informací původní anglický playbook.
+> **Strojový překlad.** Tato stránka byla automaticky přeložena z angličtiny a nebyla zkontrolována člověkem. Může obsahovat chyby a určité pokyny, příkazy, soubory ke stažení, dostupnost produktů nebo jiný obsah se může lišit podle jazyka nebo regionu. V případě jakéhokoli nesouladu nebo rozporu je rozhodující původní anglická verze playbooku.
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
-
 > [!IMPORTANT]
-> Tento playbook používá komentářové značky AMD Playbooks, které interpretuje
-> web AMD Playbooks. GitHub vykreslí obsah Markdownu, ale ne direktivy pro
-> zařízení, OS, proměnné nebo skryté testy.
+> This playbook uses AMD Playbooks comment tags that are interpreted by the
+> AMD Playbooks site. GitHub renders the Markdown content, but not the device,
+> OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
 ## Přehled

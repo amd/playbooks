@@ -394,6 +394,13 @@ if (Select-String -Path $filePath -Pattern '^save_total_limit:' -Quiet) {
     Add-Content -Path $filePath -Value "save_total_limit: 1"
 }
 
+# Single-process dataset preprocessing to avoid Windows multiprocessing errors.
+if (Select-String -Path $filePath -Pattern '^preprocessing_num_workers:' -Quiet) {
+    (Get-Content -Path $filePath) -replace '^preprocessing_num_workers:.*', 'preprocessing_num_workers: 1' | Set-Content -Path $filePath
+} else {
+    Add-Content -Path $filePath -Value "preprocessing_num_workers: 1"
+}
+
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
 <!-- @test:end --> 
