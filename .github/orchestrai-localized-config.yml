@@ -1,0 +1,7 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+base_config: ".github/orchestrai-config.yml"
+
+test_path_template: "L4-sys/playbooks/{platform}/sys_func-localized-playbook_runner"
