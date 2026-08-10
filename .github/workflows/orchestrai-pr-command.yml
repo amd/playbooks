@@ -25,13 +25,8 @@ permissions:
   issues: write
 
 concurrency:
-  # Only real `!orc` runs share the per-PR group so a newer `!orc` supersedes an
-  # older one. Every OTHER issue_comment on the PR (a human reply, the bot's own
-  # status comment, an unauthorized commenter) gets its own throwaway group and
-  # cannot cancel an in-flight `!orc` — previously they all shared this group with
-  # cancel-in-progress:true, so any stray comment killed a running `!orc`.
-  group: ${{ startsWith(github.event.comment.body, '!orc') && format('orchestrai-orc-{0}', github.event.issue.number) || format('orchestrai-orc-other-{0}', github.event.comment.id) }}
-  cancel-in-progress: ${{ startsWith(github.event.comment.body, '!orc') }}
+  group: orchestrai-orc-${{ github.event.issue.number }}
+  cancel-in-progress: true
 
 jobs:
   command:
@@ -211,6 +206,7 @@ jobs:
 
       - name: Resolve per-playbook verdict
         if: always()
+        id: results
         env:
           BUILD_URL: ${{ steps.wait.outputs.build_url }}
           PLAYBOOK_ID: ${{ matrix.playbook }}
@@ -226,6 +222,22 @@ jobs:
           name: test-results-${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
+
+      - name: Test summary
+        if: always()
+        env:
+          RP_URL: ${{ steps.results.outputs.rp_url }}
+        run: |
+          {
+            echo "### \`${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
+            echo ""
+            # ReportPortal (test results) link only; the pipeline build URL is
+            # intentionally not shown. Populated even when the verdict fails.
+            if [ -n "${RP_URL}" ]; then
+              echo "| | |"; echo "|---|---|"
+              echo "| ReportPortal | [View Results](${RP_URL}) |"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
   report:
     needs: [command, test-playbooks]
