@@ -1,0 +1,246 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+#
+# Configuration for the OrchestrAI playbook CI (test-playbooks-orchestrai.yml).
+#
+# This is the ONE place that holds environment-specific values. Everything the
+# OrchestrAI workflow needs to know about the test fleet lives here, so the
+# workflow YAML and the .github/scripts/orchestrai_*.py helpers stay generic.
+#
+# Secrets (OrchestrAI pipeline credentials) are NOT here — they come from repo secrets
+# ORCHESTRAI_PIPELINE_USER / ORCHESTRAI_PIPELINE_TOKEN. Only non-secret coordinates live in this file.
+
+# ---------------------------------------------------------------------------
+# OrchestrAI pipeline entry point
+# ---------------------------------------------------------------------------
+# NOTE: this repo is public, so the internal OrchestrAI pipeline coordinates are NOT
+# committed here. Set them as repo variables (Settings -> Variables):
+#   ORCHESTRAI_PIPELINE_URL   e.g. https://<your-pipeline-host>
+#   ORCHESTRAI_PIPELINE_JOB   e.g. <your-pipeline-job>
+# The pipeline URL must be a variable, not a secret: the build URL derived from
+# it is passed between jobs as a job output, and GitHub redacts secret values
+# from job outputs, which would blank the build_urls handed to the test jobs.
+# The values below are only fallbacks for local runs; the workflow passes the
+# repo variables through and they take precedence.
+pipeline:
+  url: ""
+  job: ""
+
+# The playbook repo the pipeline clones on the test machine.
+playbook_repo: "https://github.com/amd/playbooks"
+
+# Test that the pipeline runs for every playbook group. {platform} is filled in
+# (linux|windows). This single adapter test clones the repo and runs the playbook.
+test_path_template: "L4-sys/playbooks/{platform}/sys_func-playbook_runner"
+
+# ---------------------------------------------------------------------------
+# Device -> MAAS broker tags. A playbook's `arch` (device) from playbook.json's
+# tested_platforms is translated to the broker tag(s) used to acquire hardware.
+# ---------------------------------------------------------------------------
+# Device -> MAAS broker tags. These are internal fleet tag names, so they are
+# NOT committed to this public repo — set them via the ORCHESTRAI_DEVICE_TAGS
+# repo variable as a JSON map, e.g.:
+#   {"halo":["<tag>"],"stx":["<tag>"],"rx7900xt":["<tag>"]}
+# Every device a playbook.json declares must appear in that map, or the matrix
+# builder skips it with a warning. Keep the device set in sync with the native
+# runner's VALID_DEVICES in .github/scripts/run_playbook_tests.py.
+device_to_tags: {}
+
+# Device -> gfx target. The TheRock tarball is multi-arch, so this is only used
+# for the optional per-device pip path (torch[device-<gfx>]).
+device_to_gfx:
+  halo:     "gfx1151"
+  halo_box: "gfx1151"
+  stx:      "gfx1150"
+  krk:      "gfx1103"
+  rx7900xt: "gfx110X"
+  rx9070xt: "gfx120X"
+  r9700:    "gfx120X"
+
+# Device family controls Linux kernel-driver policy. Radeon devices use AMD's
+# packaged amdgpu/DKMS driver; Ryzen APUs use Ubuntu's inbox amdgpu module.
+# Every supported SKU must be classified here. An unclassified Linux device is
+# rejected before hardware is acquired rather than silently using the wrong
+# driver policy.
+device_families:
+  halo:     "ryzen_apu"
+  halo_box: "ryzen_apu"
+  stx:      "ryzen_apu"
+  krk:      "ryzen_apu"
+  rx7900xt: "radeon"
+  rx9070xt: "radeon"
+  r9700:    "radeon"
+
+# ---------------------------------------------------------------------------
+# Scheduling policy
+# ---------------------------------------------------------------------------
+
+# Extra broker tags that apply to EVERY device a playbook runs on. Empty for now:
+# the model playbooks that need 128 GB only need it for their big Halo run, which
+# is expressed per-device in device_extra_tags below.
+extra_tags: {}
+
+# Device-specific overrides for playbooks whose hardware requirement differs by
+# SKU. The playbooks below pick a device-appropriate model in their README
+# (gpt-oss-120b on Halo, a small model on the smaller devices — qwen3.5-9b for
+# lmstudio, Qwen3.5-4B for pytorch-rocm, gpt-oss-20b for n8n), so they only need
+# 128 GB for the big Halo run — the small-device runs fit in normal RAM. Tagging
+# ram_128gb ONLY on halo/halo_box lets them run on every device (no tag elsewhere
+# → tags_for() falls back to the empty extra_tags entry) instead of being dropped
+# from the non-128 GB devices by extra_tag_devices. Unsloth follows the same
+# pattern. vscode-qwen3-coder and gaia-agents also belong here: they run a fixed
+# Qwen3-Coder-30B-A3B (MoE, ~18.5 GB weights, only 3B active), which lemonade
+# runs on the smaller RDNA cards via GPU+CPU offload — confirmed passing on all
+# devices incl. 16 GB rx9070xt in the legacy workflow — so they only need the
+# 128 GB tag for the Halo run. openclaw-lemonade-server is the same case: a fixed
+# Qwen3.6-35B-A3B (MoE, 3B active) that the legacy workflow schedules and runs on
+# every device via lemonade offload, so it also gets the 128 GB tag on Halo only.
+device_extra_tags:
+  unsloth-llms-finetuning:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+    stx:      []
+  lmstudio-rocm-llms:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  pytorch-rocm-llms:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  n8n-automation-gpt-oss:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  vscode-qwen3-coder:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  gaia-agents:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  openclaw-lemonade-server:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+
+# Devices that actually satisfy a given extra tag. A batch requesting an extra
+# tag on a device NOT listed here is dropped (the broker could never satisfy it).
+extra_tag_devices:
+  ram_128gb: ["halo", "halo_box"]
+
+# Additional (device, platforms) entries to test for a playbook, beyond what its
+# playbook.json tested_platforms declares. Always treated as non-required.
+# Empty by default; example (commented) showing the format:
+#   ollama-getting-started:
+#     - device: rx7900xt
+#       platforms: ["linux", "windows"]
+extra_devices: {}
+
+# Extra provisioning install scripts attached to specific playbooks, on top of
+# the platform-wide provisioning.*_install_scripts below. Applied ONLY to
+# batches that contain the named playbook -- so a costly, playbook-specific setup
+# (e.g. enabling WSL, which needs a reboot) runs only on batches that include it,
+# not on every machine on the platform. NOTE: install_scripts are batch-level, so
+# any OTHER playbook co-scheduled in the same batch (e.g. same device + extra
+# tags) also runs these scripts. Keep them idempotent and side-effect-safe.
+# Each entry: {script, reboot_after, platforms?}. "platforms" is an optional
+# filter; omit it to apply on all platforms. Paths resolve in ucicd-provisioning.
+extra_install_scripts:
+  # CVML validates inference on the Ryzen AI NPU. Install the matched XRT and
+  # amdxdna package before the test phase; the driver needs a reboot to become
+  # active. RAI_NPU_XRT_URL is supplied separately as a repository variable.
+  cvml:
+    - script: "InstallationScripts/ryzenai/linux-npu-xrt.sh"
+      reboot_after: true
+      platforms: ["linux"]
+
+  # openclaw-lemonade-server bridges into WSL (wsl-lemonade-bridge-windows test).
+  # Enabling the WSL + VirtualMachinePlatform features needs a reboot BEFORE the
+  # deps/test phase; reboot_after lets provisioning reboot-and-continue (the deps
+  # phase can't reboot). The app.wsl dependency then installs the Ubuntu distro
+  # once the features are active. Windows-only.
+  openclaw-lemonade-server:
+    - script: "InstallationScripts/gfx/windows-wsl.ps1"
+      reboot_after: true
+      platforms: ["windows"]
+
+  # hermes-lemonade-server runs Hermes and Podman inside Ubuntu on WSL. Enable
+  # the WSL core/features and reboot before app.wsl installs the distro during
+  # dependency setup. Windows-only.
+  hermes-lemonade-server:
+    - script: "InstallationScripts/gfx/windows-wsl.ps1"
+      reboot_after: true
+      platforms: ["windows"]
+
+# Devices to skip entirely (e.g. temporarily offline hardware).
+skip_devices: ["krk"]
+
+# ---------------------------------------------------------------------------
+# Per-run pipeline settings
+# ---------------------------------------------------------------------------
+run_settings:
+  max_duration: 240            # minutes, whole batch
+  max_test_case_duration: 90   # minutes, single playbook
+  acquire_timeout: 30          # minutes, machine acquire
+  # Machines to acquire per hardware group. 1 = all same-HW playbooks share one
+  # machine and run sequentially (saves scarce hardware). Overridable per run via
+  # the machines_per_hw_group workflow_dispatch input.
+  default_machines_per_hw_group: 1
+
+# ---------------------------------------------------------------------------
+# Provisioning: GPU stack installed on the acquired machine before the playbook.
+# App-level tools are installed by the lib.amd.playbook-runner dependency, not here.
+# ---------------------------------------------------------------------------
+provisioning:
+  # TheRock ROCm dist tarball (Linux) — a single multi-arch tarball covering all
+  # GPU targets (no per-gfx build). Set the full URL (host + version) as a repo
+  # variable so the internal URL is not committed to this public repo:
+  #   ORCHESTRAI_THEROCK_URL
+  #     e.g. https://<host>/tarball-multi-arch/therock-dist-linux-multiarch-7.14.0rc3.tar.gz
+  therock_url: ""
+
+  # Account-gated Ryzen AI Linux NPU/XRT bundle mirrored internally. The URL is
+  # supplied by ORCHESTRAI_RYZENAI_NPU_XRT_URL and is never committed here.
+  ryzenai_npu_xrt_url: ""
+
+  linux_install_scripts:
+    - script: "InstallationScripts/gfx/linux-therock-tarball.sh"
+      reboot_after: false
+
+  # Radeon discrete GPUs require AMD's packaged amdgpu kernel driver instead of
+  # the Ubuntu inbox module used by Ryzen APUs. Selection is driven by the
+  # device_families map above. The package URL is intentionally kept out of
+  # source control and supplied by the ORCHESTRAI_LINUX_DRIVER_SOURCE repository
+  # variable so driver updates do not require a code change.
+  # Two ways to supply the amdgpu package, both injected from repo variables:
+  #   ORCHESTRAI_LINUX_DRIVER_SOURCE        a single URL (all Radeon hosts)
+  #   ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON  a per-release map, e.g.
+  #     {"ubuntu:24.04":"https://.../ubuntu/noble/amdgpu-install_X_all.deb",
+  #      "ubuntu:26.04":"https://.../ubuntu/resolute/amdgpu-install_Y_all.deb"}
+  # The map is resolved ON each machine from /etc/os-release, so an allocation
+  # that returns different Ubuntu releases still installs the right package on
+  # each host. When both are set the map wins for releases it lists.
+  linux_kernel_driver:
+    source: ""
+    sources_json: ""
+    install_scripts:
+      - script: "InstallationScripts/common/install-kernel-headers.sh"
+        reboot_after: false
+      - script: "InstallationScripts/gfx/linux.sh"
+        reboot_after: true
+
+  # NOTE: no TheRock step here. windows-therock-tarball.ps1 requires a TheRock
+  # *Windows* tarball via THEROCK_URL, but the only TheRock variable
+  # (ORCHESTRAI_THEROCK_URL) is the Linux multiarch tarball, so the step could
+  # never be satisfied -- it failed with "THEROCK_URL is required" on every
+  # Windows batch. Nothing on Windows consumes the resulting ROCm userspace
+  # (C:\TheRock\build): Windows gets its GPU runtime from the AMD driver
+  # (windows.ps1) and PyTorch from the ROCm wheel index. Re-add this only
+  # alongside a real Windows tarball URL.
+  windows_install_scripts:
+    - script: "InstallationScripts/gfx/windows.ps1"
+      reboot_after: true
+
+  # Windows AMD GPU driver source (UNC path) copied onto the machine.
+  # The UNC path is internal — set it as a repo variable, not in this public file:
+  #   ORCHESTRAI_WINDOWS_DRIVER_SOURCE   e.g. \\<host>\<share>\...\ATI
+  windows_driver:
+    source: ""
+    copy: "direct"

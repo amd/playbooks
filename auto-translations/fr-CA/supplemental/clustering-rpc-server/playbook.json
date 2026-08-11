@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server",
+  "title": "Regroupement en grappe de deux Ryzen™ AI Halo avec RPC",
+  "description": "Configurer l'inférence distribuée à l'aide d'un serveur RPC sur deux appareils Ryzen™ AI Halo avec llama.cpp pour exécuter des modèles de 350 milliards de paramètres et plus",
+  "auto_translated": true
+}

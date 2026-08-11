@@ -96,10 +96,11 @@ print(f"\nLoading {MODEL}...")
 print("Note: Model is stored as MXFP4 on Hugging Face but will be loaded as BF16 for training")
 print("(This is expected - the warning about MXFP4 is informational)\n")
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
 model = AutoModelForCausalLM.from_pretrained(
     MODEL,
     dtype=torch.bfloat16,             # Use BF16 for better stability and ROCm support (dtype not torch_dtype)
-    device_map="auto",                # Automatically distribute across available GPUs
+    device_map=device,
     trust_remote_code=True,
     low_cpu_mem_usage=True            # Reduce CPU memory during loading
 )

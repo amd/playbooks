@@ -3,9 +3,9 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-<!-- auto-translated-disclaimer v1 -->
+<!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
-> **Tradução automática.** Esta página foi traduzida automaticamente do inglês e não foi revisada por um humano. Ela pode conter erros, e algumas etapas, comandos, downloads ou a disponibilidade do produto podem variar de acordo com seu idioma ou região. Caso algo pareça incorreto, considere o playbook original em inglês como a fonte oficial.
+> **Tradução automática.** Esta página foi traduzida automaticamente do inglês e não foi revisada por um ser humano. Ela pode conter erros, e determinadas instruções, comandos, downloads, disponibilidade de produtos ou outros conteúdos podem variar de acordo com o idioma ou a região. Em caso de qualquer inconsistência ou divergência, a versão original em inglês do playbook prevalecerá.
 <!-- auto-translated-disclaimer:end -->
 
 # Executando o OpenClaw com o Lemonade Server como backend

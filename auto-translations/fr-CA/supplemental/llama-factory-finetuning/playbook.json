@@ -1,0 +1,6 @@
+{
+  "id": "llama-factory-finetuning",
+  "title": "Réglage fin des LLM avec LLaMA Factory",
+  "description": "Effectuez un réglage fin (fine-tuning) de grands modèles de langage (LLM) à l'aide de LLaMA Factory et des techniques LoRA.",
+  "auto_translated": true
+}
