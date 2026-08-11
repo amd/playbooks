@@ -48,6 +48,7 @@ def load_model(model_name):
             model_name,
             torch_dtype=torch.bfloat16,
             device_map="auto",
+            disable_mmap=True,
         )
     except (ValueError, KeyError):
         # Vision-language checkpoints (e.g. Qwen3.5) are not registered under
@@ -57,6 +58,7 @@ def load_model(model_name):
             model_name,
             torch_dtype=torch.bfloat16,
             device_map="auto",
+            disable_mmap=True,
         )
     return tokenizer, model
 
