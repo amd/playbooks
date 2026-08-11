@@ -13,8 +13,8 @@
       "gpu": { "linux": "2.12", "windows": "2.12" }
     },
     "driver": {
-      "reference": { "linux": "Latest", "windows": "Adrenalin 26.1.1" },
-      "apu": { "linux": "Latest", "windows": "Adrenalin 26.6.4" },
+      "reference": { "linux": "Latest through Ryzen AI Developer Center", "windows": "Latest through Ryzen AI Developer Center" },
+      "apu": { "linux": "Latest inbox driver", "windows": "Adrenalin 26.6.4" },
       "gpu": { "linux": "RSL 31.3.1", "windows": "Adrenalin 26.6.4" }
     },
     "lemonade": { "reference": "10.5.1", "default": "Latest" },

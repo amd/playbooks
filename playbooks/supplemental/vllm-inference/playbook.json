@@ -72,7 +72,7 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "vLLM": "0.21"
+        "vLLM": "Latest from Ryzen AI Developer Center"
       }
     }
   },
