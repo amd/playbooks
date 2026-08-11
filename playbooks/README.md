@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 # Playbook Creation Guide
 > [!IMPORTANT]
-> We are **not currently accepting new playbook proposals** from the community at this stage. However, we welcome collaborations, idea exchanges, and contributions that help advance this space. If you encounter issues or have feedback that can help us identify and diagnose problems, please [open an issue](https://github.com/amd/playbooks/issues).
+> This guide covers **how to write a playbook**. Before you write one, the idea has to be approved: open a [playbook proposal](https://github.com/amd/playbooks/issues/new?template=playbook_proposal.yml) with a short abstract and wait for AMD maintainers to label it `status::approved`. Pull requests that add a playbook without an approved proposal will be closed. See [CONTRIBUTING.md](../CONTRIBUTING.md) for the full process and what reviewers look for.
 
 ## Design Principles
 
@@ -152,11 +152,11 @@ Content displays directly since these are required steps, not optional reference
 - List prerequisites upfront. Don't surprise users mid-playbook
 - Include expected output so users know what success looks like
 - Keep code blocks copy-friendly (avoid `$` or `>` prompts)
-- Follow the [AMD Branding Guide](../AMD_BRANDING_GUIDE.md) for correct product naming and trademark usage
+- Follow the [AMD Branding Guide](AMD_BRANDING_GUIDE.md) for correct product naming and trademark usage
 
 ### AMD Product Branding
 
-When referencing AMD products in your playbooks, follow the [AMD Branding Guide](../AMD_BRANDING_GUIDE.md) to ensure consistent and correct usage:
+When referencing AMD products in your playbooks, follow the [AMD Branding Guide](AMD_BRANDING_GUIDE.md) to ensure consistent and correct usage:
 
 - **First mention**: Use the full product name with trademark symbol (™)
 - **Subsequent mentions**: Use the approved shortened form
@@ -174,13 +174,13 @@ See `playbooks/core/comfyui-image-gen/platform.md` for an example.
 
 ## Editing a Playbook
 
-All playbook folders have already been created. To edit a playbook:
+To edit an existing playbook:
 
 1. Navigate to the appropriate folder (e.g., `playbooks/core/lmstudio-rocm-llms/`)
 2. Edit the `playbook.json` file to update metadata
 3. Edit the `README.md` file to update content
 
-> **Note:** Do not create new folders. All playbook folders are pre-created and managed centrally.
+> **Note:** Only create a new playbook folder if your [proposal](https://github.com/amd/playbooks/issues/new?template=playbook_proposal.yml) has been labeled `status::approved`. Name it after the `id` you agreed on in the proposal, and place it under `core/` or `supplemental/` as directed in the review.
 
 ---
 
@@ -213,6 +213,12 @@ All playbook folders have already been created. To edit a playbook:
 | `isNew` | No | Shows "New" badge |
 | `isFeatured` | No | Displays prominently at top |
 | `tags` | No | Keywords for filtering |
+
+---
+
+## Testing
+
+You are expected to add tests for your playbook in the same pull request. Wrap the playbook's own commands in `@test` tags and fill in `tested_platforms`, as described in the [Playbook Testing Guide](TESTING.md).
 
 ---
 
