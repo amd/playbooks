@@ -129,7 +129,23 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "Unsloth": ""
+        "Unsloth": "0.1.524"
+      }
+    },
+    "apu": {
+      "linux": {
+        "Unsloth": "Latest"
+      },
+      "windows": {
+        "Unsloth": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "Unsloth": "Latest"
+      },
+      "windows": {
+        "Unsloth": "Latest"
       }
     }
   },

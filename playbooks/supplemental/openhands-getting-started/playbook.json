@@ -50,10 +50,26 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "Agent Canvas": ""
+        "Agent Canvas": "1.10.0"
       },
       "windows": {
-        "Agent Canvas": ""
+        "Agent Canvas": "1.10.0"
+      }
+    },
+    "apu": {
+      "linux": {
+        "Agent Canvas": "Latest"
+      },
+      "windows": {
+        "Agent Canvas": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "Agent Canvas": "Latest"
+      },
+      "windows": {
+        "Agent Canvas": "Latest"
       }
     }
   },

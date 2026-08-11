@@ -116,14 +116,12 @@
     "z-image-turbo"
   ],
   "coverImage": "assets/cover.jpeg",
+  "minMemoryGB": 16,
+  "primaryModel": "Z-Image Turbo",
   "validatedVersions": {
     "reference": {
-      "windows": {
-        "ComfyUI": "0.5.4",
-        "PyTorch": "2.10"
-      }
+      "windows": { "ComfyUI Desktop": "Latest" },
+      "linux": { "ComfyUI": "Latest from Ryzen AI Developer Center" }
     }
-  },
-  "minMemoryGB": 16,
-  "primaryModel": "Z-Image Turbo"
+  }
 }

@@ -72,7 +72,7 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "vLLM": ""
+        "vLLM": "0.21"
       }
     }
   },

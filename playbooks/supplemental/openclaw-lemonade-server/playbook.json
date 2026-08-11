@@ -131,7 +131,23 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "OpenClaw": ""
+        "OpenClaw": "2026.7.1-2"
+      }
+    },
+    "apu": {
+      "linux": {
+        "OpenClaw": "Latest"
+      },
+      "windows": {
+        "OpenClaw": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "OpenClaw": "Latest"
+      },
+      "windows": {
+        "OpenClaw": "Latest"
       }
     }
   },

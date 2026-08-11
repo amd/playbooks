@@ -133,10 +133,26 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "Open WebUI": ""
+        "Open WebUI": "0.11"
       },
       "windows": {
-        "Open WebUI": ""
+        "Open WebUI": "0.11"
+      }
+    },
+    "apu": {
+      "linux": {
+        "Open WebUI": "Latest"
+      },
+      "windows": {
+        "Open WebUI": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "Open WebUI": "Latest"
+      },
+      "windows": {
+        "Open WebUI": "Latest"
       }
     }
   },

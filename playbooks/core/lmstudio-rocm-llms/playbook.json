@@ -129,15 +129,5 @@
   ],
   "coverImage": "assets/cover_image.avif",
   "minMemoryGB": 8,
-  "validatedVersions": {
-    "reference": {
-      "linux": {
-        "LM Studio": ""
-      },
-      "windows": {
-        "LM Studio": ""
-      }
-    }
-  },
   "primaryModel": "Qwen3.5-9B"
 }

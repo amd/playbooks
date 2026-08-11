@@ -93,10 +93,10 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "AMD Sync": ""
+        "AMD Sync": "1.0"
       },
       "windows": {
-        "AMD Sync": ""
+        "AMD Sync": "1.0"
       }
     }
   }

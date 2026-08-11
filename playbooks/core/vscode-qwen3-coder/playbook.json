@@ -128,17 +128,5 @@
   ],
   "coverImage": "assets/open-cline-test.png",
   "minMemoryGB": 24,
-  "validatedVersions": {
-    "reference": {
-      "linux": {
-        "VS Code": "",
-        "Continue": ""
-      },
-      "windows": {
-        "VS Code": "",
-        "Continue": ""
-      }
-    }
-  },
   "primaryModel": "Qwen3-Coder-30B-A3B"
 }

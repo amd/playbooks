@@ -214,19 +214,19 @@ export interface PlaybookMeta {
   minMemoryGB?: number;
 
   /**
-   * App-specific software versions this playbook was validated with, keyed by
-   * device CATEGORY (reference / apu / gpu) then OS. Only list what's unique to
-   * this playbook (e.g. ComfyUI, PyTorch) — shared platform versions (ROCm,
-   * drivers) come from the central baseline in playbooks/validation.json.
-   * Presence of this field is what turns the Validation section on.
-   * Example:
+   * Per-playbook software-version overrides, keyed by device CATEGORY
+   * (reference / apu / gpu) then OS. Use for the playbook's hero app that isn't
+   * captured by an @require tag (e.g. ds4, llama.cpp, the model) or to pin a
+   * version different from the central value. Required, versionable deps
+   * (@require tags) get their versions from playbooks/dependency-versions.json;
+   * these overrides win on same-named keys. Example:
    *   "validatedVersions": {
    *     "reference": { "windows": { "ComfyUI": "0.5.4", "PyTorch": "2.10" } }
    *   }
    */
   validatedVersions?: Partial<Record<DeviceCategory, Partial<Record<Platform, Record<string, string>>>>>;
 
-  /** Month/year this playbook was validated, e.g. "2026-07". Falls back to the baseline defaultDate. */
+  /** Month/year this playbook was validated, e.g. "2026-07". Falls back to dependency-versions.json defaultDate. */
   validatedDate?: string;
 
   /**

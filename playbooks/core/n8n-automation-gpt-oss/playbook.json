@@ -132,10 +132,10 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "n8n": ""
+        "n8n": "2.33.5"
       },
       "windows": {
-        "n8n": ""
+        "n8n": "2.33.5"
       }
     }
   },

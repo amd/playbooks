@@ -89,10 +89,18 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "CVML": ""
+        "CVML": "Latest"
       },
       "windows": {
-        "CVML": ""
+        "CVML": "Latest"
+      }
+    },
+    "apu": {
+      "linux": {
+        "CVML": "Latest"
+      },
+      "windows": {
+        "CVML": "Latest"
       }
     }
   }

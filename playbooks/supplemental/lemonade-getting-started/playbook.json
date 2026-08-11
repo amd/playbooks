@@ -129,15 +129,5 @@
   ],
   "coverImage": "../../dependencies/assets/multi_modality.png",
   "minMemoryGB": 8,
-  "validatedVersions": {
-    "reference": {
-      "linux": {
-        "Lemonade": ""
-      },
-      "windows": {
-        "Lemonade": ""
-      }
-    }
-  },
   "primaryModel": "Gemma-4-E2B-it"
 }

@@ -40,7 +40,15 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "Agent Canvas": ""
+        "Agent Canvas": "1.10.0"
+      }
+    },
+    "apu": {
+      "linux": {
+        "Agent Canvas": "Latest"
+      },
+      "windows": {
+        "Agent Canvas": "Latest"
       }
     }
   },

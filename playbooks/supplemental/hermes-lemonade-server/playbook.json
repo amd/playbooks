@@ -132,10 +132,26 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "Hermes": ""
+        "Hermes": "0.20.0"
       },
       "windows": {
-        "Hermes": ""
+        "Hermes": "0.20.0"
+      }
+    },
+    "apu": {
+      "linux": {
+        "Hermes": "Latest"
+      },
+      "windows": {
+        "Hermes": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "Hermes": "Latest"
+      },
+      "windows": {
+        "Hermes": "Latest"
       }
     }
   },

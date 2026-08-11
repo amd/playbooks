@@ -134,7 +134,23 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "LLaMA-Factory": ""
+        "LLaMA-Factory": "0.9.5"
+      }
+    },
+    "apu": {
+      "linux": {
+        "LLaMA-Factory": "Latest"
+      },
+      "windows": {
+        "LLaMA-Factory": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "LLaMA-Factory": "Latest"
+      },
+      "windows": {
+        "LLaMA-Factory": "Latest"
       }
     }
   },

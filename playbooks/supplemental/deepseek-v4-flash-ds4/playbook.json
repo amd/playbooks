@@ -45,7 +45,12 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "ds4": ""
+        "ds4": "Latest"
+      }
+    },
+    "apu": {
+      "linux": {
+        "ds4": "Latest"
       }
     }
   },

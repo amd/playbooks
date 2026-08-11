@@ -132,10 +132,26 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "Ollama": ""
+        "Ollama": "0.32.6"
       },
       "windows": {
-        "Ollama": ""
+        "Ollama": "0.32.6"
+      }
+    },
+    "apu": {
+      "linux": {
+        "Ollama": "Latest"
+      },
+      "windows": {
+        "Ollama": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "Ollama": "Latest"
+      },
+      "windows": {
+        "Ollama": "Latest"
       }
     }
   },

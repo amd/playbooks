@@ -129,15 +129,5 @@
   ],
   "coverImage": "assets/gaia.jpg",
   "minMemoryGB": 8,
-  "validatedVersions": {
-    "reference": {
-      "linux": {
-        "GAIA": ""
-      },
-      "windows": {
-        "GAIA": ""
-      }
-    }
-  },
   "primaryModel": "Qwen3-0.6B"
 }
