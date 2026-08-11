@@ -65,6 +65,7 @@ class DocumentSummarizer:
                 self.model_name,
                 torch_dtype=torch.bfloat16,
                 device_map=device,  # whole model on one device; no CPU/meta offload
+                disable_mmap=True,
             )
         except (ValueError, KeyError):
             # Vision-language checkpoints (e.g. Qwen3.5) are not registered
@@ -74,6 +75,7 @@ class DocumentSummarizer:
                 self.model_name,
                 torch_dtype=torch.bfloat16,
                 device_map=device,  # whole model on one device; no CPU/meta offload
+                disable_mmap=True,
             )
         print("[OK] Model ready!\n")
     
