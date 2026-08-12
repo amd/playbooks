@@ -132,10 +132,32 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "n8n": "2.33.5"
+        "n8n": "2.33.5",
+        "Node.js": "22.22.1"
       },
       "windows": {
-        "n8n": "2.33.5"
+        "n8n": "2.33.5",
+        "Node.js": "22.22.1"
+      }
+    },
+    "apu": {
+      "linux": {
+        "n8n": "Latest",
+        "Node.js": "22.22.1"
+      },
+      "windows": {
+        "n8n": "Latest",
+        "Node.js": "22.22.1"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "n8n": "Latest",
+        "Node.js": "22.22.1"
+      },
+      "windows": {
+        "n8n": "Latest",
+        "Node.js": "22.22.1"
       }
     }
   },

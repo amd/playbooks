@@ -101,6 +101,11 @@
       "linux": {
         "vLLM": "Latest from Ryzen AI Developer Center"
       }
+    },
+    "apu": {
+      "linux": {
+        "vLLM": "Latest"
+      }
     }
   },
   "primaryModel": "Qwen3.5-397B-A17B"
