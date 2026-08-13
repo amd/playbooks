@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-name: Test Human Localized Playbooks
+name: Test Localized Playbooks
 
 on:
   schedule:

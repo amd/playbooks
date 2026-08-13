@@ -51,7 +51,7 @@ def main() -> int:
 
         body = body.replace(
             "**Test Playbooks** workflow",
-            "**Test Human Localized Playbooks** workflow",
+            "**Test Localized Playbooks** workflow",
             1,
         )
         body = body.replace(
