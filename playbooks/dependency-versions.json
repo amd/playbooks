@@ -13,18 +13,18 @@
       "gpu": { "linux": "2.12", "windows": "2.12" }
     },
     "driver": {
-      "reference": { "linux": "Latest through Ryzen AI Developer Center", "windows": "Latest through Ryzen AI Developer Center" },
+      "reference": { "linux": "Latest from Ryzen AI Developer Center", "windows": "26.5.1 (from Ryzen AI Developer Center)" },
       "apu": { "linux": "Latest inbox driver", "windows": "Adrenalin 26.6.4" },
       "gpu": { "linux": "RSL 31.3.1", "windows": "Adrenalin 26.6.4" }
     },
     "lemonade": { "reference": "10.5.1", "default": "Latest" },
-    "lmstudio": { "reference": "0.4.20", "default": "Latest" },
-    "n8n": { "reference": "2.33.5", "default": "Latest" },
+    "lmstudio": { "reference": "Latest", "default": "Latest" },
+    "n8n": { "reference": "Latest", "default": "Latest" },
     "vscode": { "reference": "1.130.0", "default": "Latest" },
     "gaia": { "reference": "0.22.0", "default": "Latest" },
     "comfyui": { "reference": "", "default": "Latest" },
     "vllm": { "reference": "0.21", "default": "Latest" },
-    "nodejs": { "reference": "22.22.1", "default": "Latest" },
+    "nodejs": { "reference": "Latest", "default": "Latest" },
     "podman": { "reference": "", "default": "Latest" }
   }
 }

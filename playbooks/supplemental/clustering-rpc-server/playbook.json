@@ -92,7 +92,7 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "llama.cpp": "b10297"
+        "llama.cpp": "Latest"
       }
     },
     "apu": {

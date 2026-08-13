@@ -120,7 +120,7 @@
   "primaryModel": "Z-Image Turbo",
   "validatedVersions": {
     "reference": {
-      "windows": { "ComfyUI Desktop": "Latest" },
+      "windows": { "ComfyUI Desktop": "Latest from Ryzen AI Developer Center" },
       "linux": { "ComfyUI": "Latest from Ryzen AI Developer Center" }
     }
   }

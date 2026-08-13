@@ -134,7 +134,7 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "LLaMA-Factory": "0.9.5"
+        "LLaMA-Factory": "Latest"
       }
     },
     "apu": {
