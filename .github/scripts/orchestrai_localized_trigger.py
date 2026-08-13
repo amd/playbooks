@@ -7,7 +7,8 @@
 
 The canonical module owns validation, provisioning, authentication, retries,
 submission, and queue polling. This adapter only merges the localized config
-overlay and adds ``PLAYBOOK_LOCALE`` to each generated test group.
+overlay and adds ``PLAYBOOK_LOCALE`` plus ``PLAYBOOK_LOCALIZED_ONLY`` to each
+generated test group.
 """
 
 from __future__ import annotations
@@ -39,8 +40,14 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
     locale = batch.get("locale")
     if not locale:
         raise ValueError("Localized OrchestrAI batch is missing locale")
+    localized_only_by_playbook = batch.get("localized_only", {})
     for group in plan["groups"]:
+        playbook_id = group["variables"]["PLAYBOOK_ID"]
+        localized_only = localized_only_by_playbook.get(playbook_id, True)
+        if not isinstance(localized_only, bool):
+            raise ValueError(f"Localized OrchestrAI batch has non-boolean localized_only for {playbook_id!r}")
         group["variables"]["PLAYBOOK_LOCALE"] = locale
+        group["variables"]["PLAYBOOK_LOCALIZED_ONLY"] = str(localized_only).lower()
     return plan
 
 

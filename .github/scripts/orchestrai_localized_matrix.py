@@ -17,7 +17,7 @@ Turns a list of localized playbook IDs into:
 Device/platform come from the effective metadata merged from
 playbooks/<cat>/<id>/playbook.json and
 localized-playbooks/<locale>/<cat>/<id>/playbook.json
-(tested_platforms / required_platforms). All environment-specific policy
+(tested_platforms / required_platforms / localized_only). All environment-specific policy
 (device -> broker tags, extra tags, extra devices, skips) is read from
 .github/orchestrai-config.yml so this script stays generic.
 
@@ -55,6 +55,7 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="zh-CN"):
     skip_devices = set(cfg.get("skip_devices", []))
 
     matrix = []
+    localized_only_by_playbook = {}
 
     def tags_for(playbook, device):
         """Return device-specific tags when configured, else playbook defaults."""
@@ -68,6 +69,8 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="zh-CN"):
             if not pb_dir.is_dir():
                 continue
             meta = load_merged_metadata(locale, cat, pb_id)
+            localized_only = meta.get("localized_only", True)
+            localized_only_by_playbook[pb_id] = localized_only
             tested = meta.get("tested_platforms", {})
             if not tested:
                 break
@@ -86,6 +89,7 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="zh-CN"):
                         "arch": device,
                         "batch_id": batch_id,
                         "required": platform in required_platforms,
+                        "localized_only": localized_only,
                     })
             break
 
@@ -104,6 +108,7 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="zh-CN"):
                         f"+{'_'.join(extra)}" if extra else ""
                     ),
                     "required": False,
+                    "localized_only": localized_only_by_playbook.get(pb_id, True),
                 }
                 if entry not in matrix:
                     matrix.append(entry)
@@ -157,9 +162,11 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="zh-CN"):
                 "gfx": device_to_gfx.get(e["arch"], e["arch"]),
                 "tags": tags,
                 "playbooks": [],
+                "localized_only": {},
             }
         if e["playbook"] not in batches[bid]["playbooks"]:
             batches[bid]["playbooks"].append(e["playbook"])
+        batches[bid]["localized_only"][e["playbook"]] = e["localized_only"]
 
     return matrix, batches
 
