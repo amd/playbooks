@@ -27,21 +27,32 @@ def locale_to_slug(locale: str) -> str:
 
 
 def load_merged_metadata(locale: str, category: str, playbook_id: str) -> dict[str, Any]:
-    """Merge canonical English and human-localized metadata."""
+    """Load localized metadata, optionally inheriting canonical English fields."""
     repo_root = Path(__file__).parent.parent.parent
 
     localized_file = repo_root / "localized-playbooks" / locale / category / playbook_id / "playbook.json"
     english_file = repo_root / "playbooks" / category / playbook_id / "playbook.json"
 
+    localized_metadata: dict[str, Any] = {}
+    if localized_file.is_file():
+        localized_metadata = json.loads(localized_file.read_text(encoding="utf-8"))
+
+    localized_only = localized_metadata.get("localized_only", True)
+    if not isinstance(localized_only, bool):
+        raise ValueError(f"'localized_only' in {localized_file} must be a boolean")
+
     metadata: dict[str, Any] = {}
 
-    # Same-ID localized playbooks inherit English metadata.
-    if english_file.is_file():
+    # Same-ID localized playbooks inherit English metadata unless strict
+    # localized-only resolution was requested.
+    if not localized_only and english_file.is_file():
         metadata.update(json.loads(english_file.read_text(encoding="utf-8")))
 
     # Human-authored localized metadata has the highest precedence.
-    if localized_file.is_file():
-        metadata.update(json.loads(localized_file.read_text(encoding="utf-8")))
+    metadata.update(localized_metadata)
+    # Keep the policy derived from localized metadata (including its default)
+    # instead of ever inheriting this CI-only field from canonical metadata.
+    metadata["localized_only"] = localized_only
 
     if not metadata:
         raise ValueError(f"Playbook '{playbook_id}' has no effective playbook.json metadata")
@@ -51,8 +62,9 @@ def load_merged_metadata(locale: str, category: str, playbook_id: str) -> dict[s
     if metadata_id != playbook_id:
         raise ValueError(f"Metadata ID mismatch for '{playbook_id}': found {metadata_id!r}")
 
-    # A locale-only playbook has no English metadata to inherit from.
-    if not english_file.is_file():
+    # A locale-only or strict localized playbook has no English metadata to
+    # inherit from, so its local metadata must be complete.
+    if localized_only or not english_file.is_file():
         required_fields = {
             "id",
             "title",
@@ -63,13 +75,14 @@ def load_merged_metadata(locale: str, category: str, playbook_id: str) -> dict[s
         missing = sorted(required_fields - metadata.keys())
 
         if missing:
-            raise ValueError(f"Localized-only playbook '{playbook_id}' is missing: {', '.join(missing)}")
+            playbook_kind = "Strict localized" if localized_only else "Localized-only"
+            raise ValueError(f"{playbook_kind} playbook '{playbook_id}' is missing: {', '.join(missing)}")
 
     return metadata
 
 
 def discover_playbooks(locale: str, selected_playbooks: Optional[set[str]] = None) -> list[tuple[str, str]]:
-    """Return localized directories that resolve to an effective README."""
+    """Return localized playbook directories."""
     repo_root = Path(__file__).parent.parent.parent
     localized_root = repo_root / "localized-playbooks" / locale
 
@@ -93,12 +106,6 @@ def discover_playbooks(locale: str, selected_playbooks: Optional[set[str]] = Non
             if selected_playbooks is not None and playbook_id not in selected_playbooks:
                 continue
 
-            localized_readme = playbook_dir / "README.md"
-            english_readme = repo_root / "playbooks" / category / playbook_id / "README.md"
-
-            if not localized_readme.is_file() and not english_readme.is_file():
-                raise ValueError(f"No effective README.md found for localized playbook '{locale}/{category}/{playbook_id}'")
-
             discovered.append((category, playbook_id))
 
     return discovered
@@ -113,6 +120,16 @@ def build_matrix(locale: str, selected_playbooks: Optional[set[str]] = None) -> 
 
     for category, playbook_id in discovered:
         metadata = load_merged_metadata(locale, category, playbook_id)
+        localized_only = metadata.get("localized_only", True)
+        repo_root = Path(__file__).parent.parent.parent
+        localized_readme = repo_root / "localized-playbooks" / locale / category / playbook_id / "README.md"
+        english_readme = repo_root / "playbooks" / category / playbook_id / "README.md"
+
+        if localized_only and not localized_readme.is_file():
+            raise ValueError(f"Localized README.md not found for strict localized playbook '{locale}/{category}/{playbook_id}'")
+
+        if not localized_only and not localized_readme.is_file() and not english_readme.is_file():
+            raise ValueError(f"No effective README.md found for localized playbook '{locale}/{category}/{playbook_id}'")
 
         tested_platforms = metadata.get("tested_platforms", {})
 
@@ -156,6 +173,7 @@ def build_matrix(locale: str, selected_playbooks: Optional[set[str]] = None) -> 
                         "arch": device,
                         "runner_label": runner_label,
                         "required": platform in required_for_device_set,
+                        "localized_only": localized_only,
                     }
                 )
 
