@@ -59,8 +59,9 @@ on:
         default: '1'
   # No pull_request trigger: PR runs are opt-in, not automatic on every push, to
   # keep the shared hardware fleet from being flooded. To test a PR, comment
-  # `!orc` on it (see orchestrai-pr-command.yml) — that runs the PR's own head
-  # commit on demand. Re-enable auto-runs by adding a `pull_request:` block here;
+  # `!localized-orc` on it (see orchestrai-localized-pr-command.yml) — that runs
+  # the PR's own head and infers the locale from changed localized playbooks.
+  # Re-enable auto-runs by adding a `pull_request:` block here;
   # the detect step already handles the pull_request event (changed-playbooks
   # diff) and the trigger step already sets PLAYBOOK_REPO/SHA from the PR head.
 
@@ -165,7 +166,7 @@ jobs:
           ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON: ${{ vars.ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON }}
           ORCHESTRAI_RYZENAI_NPU_XRT_URL: ${{ secrets.ORCHESTRAI_RYZENAI_NPU_XRT_URL }}
           ORCHESTRAI_WINDOWS_DRIVER_SOURCE: ${{ secrets.ORCHESTRAI_WINDOWS_DRIVER_SOURCE }}
-          # On a pull_request, test the PR's OWN code (same as the !orc path),
+          # On a pull_request, test the PR's OWN code (same as the !localized-orc path),
           # not the configured repo@main. These are empty on schedule/dispatch, so
           # orchestrai_trigger.py falls back to playbook_repo@main there. Fork PRs
           # never reach this step: the secret gate above is false without secrets.
