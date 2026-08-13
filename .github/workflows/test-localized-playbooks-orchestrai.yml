@@ -23,7 +23,7 @@
 # points to the approved multi-architecture wheel index.
 # All other settings live in .github/orchestrai-config.yml.
 
-name: Test Human Localized Playbooks (OrchestrAI)
+name: Test Localized Playbooks (OrchestrAI)
 
 on:
   schedule:
