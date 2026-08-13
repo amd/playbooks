@@ -12,10 +12,12 @@ the canonical English CI behavior. It only replaces:
 1. playbook directory resolution;
 2. @require dependency resolution.
 
-Resolution order for dependency files:
+When ``localized_only`` is false, dependency files use this resolution order:
 
     localized-playbooks/<locale>/dependencies/
     playbooks/dependencies/
+
+The field defaults to true, in which case only the first location is searched.
 """
 
 from __future__ import annotations
@@ -32,8 +34,8 @@ from typing import Optional
 import run_playbook_tests as base
 
 
-def materialize_playbook(locale: str, playbook_id: str, destination: Path) -> Path:
-    """Build a per-file localized overlay in a temporary directory."""
+def materialize_playbook(locale: str, playbook_id: str, destination: Path, localized_only: bool = True) -> Path:
+    """Build a localized playbook tree in a temporary directory."""
     repo_root = Path(__file__).parent.parent.parent
 
     localized_candidates = [
@@ -57,10 +59,9 @@ def materialize_playbook(locale: str, playbook_id: str, destination: Path) -> Pa
 
     # Copy from lowest to highest precedence. copytree(..., dirs_exist_ok=True)
     # replaces individual files while preserving files missing from an overlay.
-    layers = [
-        repo_root / "playbooks" / category / playbook_id,
-        localized_source,
-    ]
+    layers = [localized_source]
+    if not localized_only:
+        layers.insert(0, repo_root / "playbooks" / category / playbook_id)
 
     for layer in layers:
         if layer.is_dir():
@@ -72,8 +73,8 @@ def materialize_playbook(locale: str, playbook_id: str, destination: Path) -> Pa
     return destination
 
 
-def load_dependency_registry(locale: str) -> dict:
-    """Load English registry and apply an optional human-localized override."""
+def load_dependency_registry(locale: str, localized_only: bool = True) -> dict:
+    """Load dependency metadata using the selected fallback policy."""
     repo_root = Path(__file__).parent.parent.parent
 
     merged_dependencies: dict = {}
@@ -82,7 +83,13 @@ def load_dependency_registry(locale: str) -> dict:
 
     localized_registry = repo_root / "localized-playbooks" / locale / "dependencies" / "registry.json"
 
-    for registry_path in (english_registry, localized_registry):
+    registry_paths = (
+        (localized_registry,)
+        if localized_only
+        else (english_registry, localized_registry)
+    )
+
+    for registry_path in registry_paths:
         if not registry_path.is_file():
             continue
 
@@ -101,22 +108,26 @@ def load_dependency_registry(locale: str) -> dict:
     return merged_dependencies
 
 
-def find_localized_dependency(locale: str, relative_file: str) -> Optional[Path]:
+def find_localized_dependency(locale: str, relative_file: str, localized_only: bool = True) -> Optional[Path]:
     """Resolve one dependency file using the repository overlay order."""
     repo_root = Path(__file__).parent.parent.parent
+    localized_root = repo_root / "localized-playbooks" / locale / "dependencies"
+    localized_candidate = localized_root / relative_file
 
-    candidates = [
-        repo_root / "localized-playbooks" / locale / "dependencies" / relative_file,
-        repo_root / "playbooks" / "dependencies" / relative_file,
-    ]
+    if localized_only and not localized_candidate.resolve().is_relative_to(localized_root.resolve()):
+        raise ValueError(f"Localized dependency path escapes its dependency directory: {relative_file!r}")
+
+    candidates = [localized_candidate]
+    if not localized_only:
+        candidates.append(repo_root / "playbooks" / "dependencies" / relative_file)
 
     return next((candidate for candidate in candidates if candidate.is_file()), None)
 
 
-def resolve_localized_require_tags(locale: str, content: str) -> str:
+def resolve_localized_require_tags(locale: str, content: str, localized_only: bool = True) -> str:
     """Expand @require tags using localized dependency overlays."""
 
-    deps_map = load_dependency_registry(locale)
+    deps_map = load_dependency_registry(locale, localized_only)
 
     require_pattern = r"<!-- @require:([a-z0-9-,]+) -->"
 
@@ -126,17 +137,25 @@ def resolve_localized_require_tags(locale: str, content: str) -> str:
         for dep_id in dep_ids:
             dep_info = deps_map.get(dep_id)
             if not dep_info:
+                if localized_only:
+                    raise ValueError(f"@require dependency '{dep_id}' not found in localized registry")
                 print(f"Warning: @require dependency '{dep_id}' not found in registry")
                 continue
             if not isinstance(dep_info, dict):
+                if localized_only:
+                    raise ValueError(f"Dependency '{dep_id}' has invalid localized registry metadata")
                 print(f"Warning: dependency '{dep_id}' has invalid registry metadata")
                 continue
             rel_file = dep_info.get("file")
             if not rel_file:
+                if localized_only:
+                    raise ValueError(f"Dependency '{dep_id}' does not define a file in localized registry")
                 print(f"Warning: dependency '{dep_id}' does not define a file")
                 continue
-            dep_file = find_localized_dependency(locale, rel_file)
+            dep_file = find_localized_dependency(locale, rel_file, localized_only)
             if dep_file is None:
+                if localized_only:
+                    raise ValueError(f"Localized dependency file for '{dep_id}' was not found")
                 print(f"Warning: dependency file for '{dep_id}' was not found")
                 continue
             print(f"Resolved dependency '{dep_id}' from {dep_file}")
@@ -170,7 +189,15 @@ def main() -> int:
         default="zh-CN",
         help="Human-authored locale to test; default: zh-CN",
     )
+    parser.add_argument(
+        "--localized-only",
+        required=True,
+        type=str.lower,
+        choices=["true", "false"],
+        help="Whether canonical playbook and dependency fallback is disabled",
+    )
     args = parser.parse_args()
+    localized_only = args.localized_only == "true"
 
     temp_parent = Path(os.environ.get("RUNNER_TEMP") or tempfile.gettempdir())
 
@@ -178,7 +205,7 @@ def main() -> int:
         temp_parent.mkdir(parents=True, exist_ok=True)
 
         with tempfile.TemporaryDirectory(prefix="localized-playbook-", dir=temp_parent) as temp_dir:
-            merged_playbook = materialize_playbook(args.locale, args.playbook, Path(temp_dir))
+            merged_playbook = materialize_playbook(args.locale, args.playbook, Path(temp_dir), localized_only)
 
             # The canonical engine resolves these names from its own module
             # globals. Replacing them here leaves the original file unchanged
@@ -188,7 +215,7 @@ def main() -> int:
                 if playbook_id == args.playbook
                 else None
             )
-            base.resolve_require_tags = lambda content: resolve_localized_require_tags(args.locale, content)
+            base.resolve_require_tags = lambda content: resolve_localized_require_tags(args.locale, content, localized_only)
 
             success = base.run_playbook_tests(args.playbook, args.platform, args.device)
     except (OSError, RuntimeError, ValueError) as error:
