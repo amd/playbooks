@@ -4,4 +4,5 @@
 
 base_config: ".github/orchestrai-config.yml"
 
-test_path_template: "L4-sys/playbooks/{platform}/sys_func-localized-playbook_runner"
+# Reuse the canonical sys_func-playbook_runner. The localized adapter adds the
+# locale-specific variables to each generated test group.
