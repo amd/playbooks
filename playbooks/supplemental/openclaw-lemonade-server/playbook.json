@@ -132,6 +132,9 @@
     "reference": {
       "linux": {
         "OpenClaw": "2026.7.1-2"
+      },
+      "windows": {
+        "OpenClaw": "2026.7.1-2"
       }
     },
     "apu": {

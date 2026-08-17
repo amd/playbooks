@@ -93,6 +93,9 @@
     "reference": {
       "linux": {
         "llama.cpp": "Latest"
+      },
+      "windows": {
+        "llama.cpp": "Latest"
       }
     },
     "apu": {

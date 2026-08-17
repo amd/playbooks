@@ -130,6 +130,9 @@
     "reference": {
       "linux": {
         "Unsloth": "0.1.524"
+      },
+      "windows": {
+        "Unsloth": "0.1.524"
       }
     },
     "apu": {

@@ -135,6 +135,9 @@
     "reference": {
       "linux": {
         "LLaMA-Factory": "Latest"
+      },
+      "windows": {
+        "LLaMA-Factory": "Latest"
       }
     },
     "apu": {
