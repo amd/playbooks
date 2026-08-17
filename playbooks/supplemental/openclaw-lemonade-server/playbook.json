@@ -127,7 +127,7 @@
     "local-ai",
     "linux"
   ],
-  "minMemoryGB": 32,
+  "minMemoryGB": 64,
   "validatedVersions": {
     "reference": {
       "linux": {

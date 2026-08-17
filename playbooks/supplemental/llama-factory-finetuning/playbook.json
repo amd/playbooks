@@ -130,7 +130,7 @@
     "fine-tuning"
   ],
   "coverImage": "assets/cover.png",
-  "minMemoryGB": 16,
+  "minMemoryGB": 24,
   "validatedVersions": {
     "reference": {
       "linux": {

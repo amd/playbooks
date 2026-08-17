@@ -46,7 +46,7 @@
     "llm"
   ],
   "coverImage": "assets/02-agent-canvas-home.png",
-  "minMemoryGB": 32,
+  "minMemoryGB": 64,
   "validatedVersions": {
     "reference": {
       "linux": {

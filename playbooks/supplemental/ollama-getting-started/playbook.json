@@ -128,7 +128,7 @@
     "api"
   ],
   "coverImage": "assets/ollama_app.png",
-  "minMemoryGB": 16,
+  "minMemoryGB": 32,
   "validatedVersions": {
     "reference": {
       "linux": {

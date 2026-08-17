@@ -128,7 +128,7 @@
     "lemonade"
   ],
   "coverImage": "assets/workflow-overview.png",
-  "minMemoryGB": 16,
+  "minMemoryGB": 64,
   "validatedVersions": {
     "reference": {
       "linux": {

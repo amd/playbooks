@@ -127,7 +127,7 @@
     "real-time"
   ],
   "coverImage": "assets/gradio.png",
-  "minMemoryGB": 8,
+  "minMemoryGB": 16,
   "validatedVersions": {
     "reference": {
       "linux": {}

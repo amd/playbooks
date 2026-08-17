@@ -36,7 +36,7 @@
     "llm"
   ],
   "coverImage": "assets/00-architecture-overview.png",
-  "minMemoryGB": 32,
+  "minMemoryGB": 64,
   "validatedVersions": {
     "reference": {
       "linux": {
