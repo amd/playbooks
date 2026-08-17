@@ -127,6 +127,6 @@
     "llm"
   ],
   "coverImage": "assets/open-cline-test.png",
-  "minMemoryGB": 32,
+  "recommendedSystemMemory": 32,
   "primaryModel": "Qwen3-Coder-30B-A3B"
 }

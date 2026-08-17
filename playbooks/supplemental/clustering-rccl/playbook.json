@@ -95,7 +95,7 @@
     "rccl",
     "vllm"
   ],
-  "minMemoryGB": 128,
+  "recommendedSystemMemory": 128,
   "validatedVersions": {
     "reference": {
       "linux": {

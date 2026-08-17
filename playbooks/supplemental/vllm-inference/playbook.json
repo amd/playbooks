@@ -68,7 +68,7 @@
     "llm",
     "quickstart"
   ],
-  "minMemoryGB": 8,
+  "recommendedSystemMemory": 8,
   "validatedVersions": {
     "reference": {
       "linux": {

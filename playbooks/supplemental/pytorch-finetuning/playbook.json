@@ -127,7 +127,7 @@
     "rocm"
   ],
   "coverImage": "assets/cover_image.jpg",
-  "minMemoryGB": 24,
+  "recommendedSystemMemory": 24,
   "validatedVersions": {
     "reference": {
       "linux": {},

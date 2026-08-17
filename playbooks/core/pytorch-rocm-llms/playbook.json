@@ -128,7 +128,7 @@
     "summarization"
   ],
   "coverImage": "assets/cover.png",
-  "minMemoryGB": 8,
+  "recommendedSystemMemory": 8,
   "validatedVersions": {
     "reference": {
       "linux": {},

@@ -128,7 +128,7 @@
     "docker",
     "linux"
   ],
-  "minMemoryGB": 64,
+  "recommendedSystemMemory": 64,
   "validatedVersions": {
     "reference": {
       "linux": {

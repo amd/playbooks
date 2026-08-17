@@ -205,13 +205,12 @@ export interface PlaybookMeta {
   primaryModel?: string;
 
   /**
-   * Minimum GPU memory (in GB) recommended to run this playbook, based on the
-   * smallest model it uses. A single number; the frontend adds any OS-specific
-   * wording (e.g. shared GPU memory pool on Linux vs. dedicated GPU memory on
-   * Windows). Users with less memory should pick a smaller model where the
-   * playbook supports it. Example: "minMemoryGB": 16
+   * Recommended system memory (in GB) to run this playbook's primary model,
+   * as a coarse tier (8/16/24/32/64/128). Omitted for playbooks with no model
+   * (dev tools). Users with less memory should pick a smaller model where the
+   * playbook supports it. Example: "recommendedSystemMemory": 16
    */
-  minMemoryGB?: number;
+  recommendedSystemMemory?: number;
 
   /**
    * Per-playbook software-version overrides, keyed by device CATEGORY

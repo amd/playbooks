@@ -129,7 +129,7 @@
     "stable-diffusion"
   ],
   "coverImage": "assets/open-webui_chat_interface.png",
-  "minMemoryGB": 8,
+  "recommendedSystemMemory": 8,
   "validatedVersions": {
     "reference": {
       "linux": {

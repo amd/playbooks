@@ -116,7 +116,7 @@
     "z-image-turbo"
   ],
   "coverImage": "assets/cover.jpeg",
-  "minMemoryGB": 32,
+  "recommendedSystemMemory": 32,
   "primaryModel": "Z-Image Turbo",
   "validatedVersions": {
     "reference": {

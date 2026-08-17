@@ -125,7 +125,7 @@
     "optimization"
   ],
   "coverImage": "assets/unsloth.png",
-  "minMemoryGB": 24,
+  "recommendedSystemMemory": 24,
   "validatedVersions": {
     "reference": {
       "linux": {

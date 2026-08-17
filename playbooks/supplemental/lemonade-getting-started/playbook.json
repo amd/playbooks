@@ -128,6 +128,6 @@
     "inference"
   ],
   "coverImage": "../../dependencies/assets/multi_modality.png",
-  "minMemoryGB": 8,
+  "recommendedSystemMemory": 8,
   "primaryModel": "Gemma-4-E2B-it"
 }
