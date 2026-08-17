@@ -1,6 +1,6 @@
 {
   "_comment": "Central version source for versionable dependencies (see 'versionable' flag in dependencies/registry.json). A playbook's shown software = its @require'd versionable deps (versions resolved here) + its own validatedVersions overrides in playbook.json (hero apps / pins). Structure per dep: a single string (same everywhere), OR an object with category keys (reference/apu/gpu) and/or 'default'. A category value is a string, or per-OS {linux,windows}. Resolution: category+OS -> category string -> 'default'. Apps installed from vendor/GitHub are pinned on reference (pre-installed, validated) and 'Latest' elsewhere (CI tests the current release). Empty string hides a row.",
-  "defaultDate": "2026-07",
+  "defaultDate": "2026-08",
   "deps": {
     "rocm": {
       "reference": { "linux": "7.13.0", "windows": "7.13.0" },
