@@ -127,5 +127,7 @@
     "npu",
     "inference"
   ],
-  "coverImage": "../../dependencies/assets/multi_modality.png"
+  "coverImage": "../../dependencies/assets/multi_modality.png",
+  "recommendedSystemMemory": 8,
+  "primaryModel": "Gemma-4-E2B-it"
 }

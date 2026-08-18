@@ -194,6 +194,52 @@ export interface PlaybookMeta {
   
   /** Cover image path relative to the playbook folder (e.g., "assets/cover.png") */
   coverImage?: string;
+
+  /**
+   * The main / default model this playbook runs, for at-a-glance user clarity.
+   * A single representative name even when the playbook mentions several
+   * (show the recommended/default one). Omitted for playbooks with no model
+   * (e.g. dev tools like AMD Sync, CVML, the kernel tutorial).
+   * Example: "primaryModel": "Qwen3.6-35B-A3B"
+   */
+  primaryModel?: string;
+
+  /**
+   * Recommended system memory (in GB) to run this playbook's primary model,
+   * as a coarse tier (8/16/24/32/64/128). Omitted for playbooks with no model
+   * (dev tools). Users with less memory should pick a smaller model where the
+   * playbook supports it. Example: "recommendedSystemMemory": 16
+   */
+  recommendedSystemMemory?: number;
+
+  /**
+   * Per-playbook software-version overrides, keyed by device CATEGORY
+   * (reference / apu / gpu) then OS. Use for the playbook's hero app that isn't
+   * captured by an @require tag (e.g. ds4, llama.cpp, the model) or to pin a
+   * version different from the central value. Required, versionable deps
+   * (@require tags) get their versions from playbooks/dependency-versions.json;
+   * these overrides win on same-named keys. Example:
+   *   "validatedVersions": {
+   *     "reference": { "windows": { "ComfyUI": "0.5.4", "PyTorch": "2.10" } }
+   *   }
+   */
+  validatedVersions?: Partial<Record<DeviceCategory, Partial<Record<Platform, Record<string, string>>>>>;
+
+  /** Month/year this playbook was validated, e.g. "2026-07". Falls back to dependency-versions.json defaultDate. */
+  validatedDate?: string;
+
+  /**
+   * Resolved per-device, per-OS validation shown at the bottom of the playbook.
+   * Populated server-side (baseline + validatedVersions merged); not authored by hand.
+   */
+  validation?: Partial<Record<Device, Partial<Record<Platform, ValidationInfo>>>>;
+}
+
+export interface ValidationInfo {
+  /** Month/year the playbook was last validated, e.g. "2026-07" (rendered as "July 2026") */
+  lastValidated?: string;
+  /** Key/value pairs of software validated for this device+OS, e.g. { "ROCm": "7.13.0" } */
+  versions?: Record<string, string>;
 }
 
 export interface TestResultInfo {
@@ -258,6 +304,24 @@ export interface Playbook extends PlaybookMeta {
 
   /** Test coverage data — only present when running in coverage mode */
   testCoverage?: TestCoverageInfo;
+}
+
+/**
+ * Formats a "YYYY-MM" or "YYYY-MM-DD" validation date into a human-readable
+ * string like "July 2026". Falls back to the raw string if it can't be parsed.
+ */
+export function formatValidationDate(value?: string): string {
+  if (!value) return "";
+  const match = /^(\d{4})-(\d{2})/.exec(value.trim());
+  if (!match) return value;
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+  if (monthIndex < 0 || monthIndex > 11) return value;
+  return `${months[monthIndex]} ${year}`;
 }
 
 /**

@@ -118,6 +118,39 @@
   "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": ["unsloth", "sft", "fine-tuning", "optimization"],
-  "coverImage": "assets/unsloth.png"
+  "tags": [
+    "unsloth",
+    "sft",
+    "fine-tuning",
+    "optimization"
+  ],
+  "coverImage": "assets/unsloth.png",
+  "recommendedSystemMemory": 24,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "Unsloth": "0.1.524"
+      },
+      "windows": {
+        "Unsloth": "0.1.524"
+      }
+    },
+    "apu": {
+      "linux": {
+        "Unsloth": "Latest"
+      },
+      "windows": {
+        "Unsloth": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "Unsloth": "Latest"
+      },
+      "windows": {
+        "Unsloth": "Latest"
+      }
+    }
+  },
+  "primaryModel": "Gemma-4-E4B-it"
 }
