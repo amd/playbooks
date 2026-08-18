@@ -27,9 +27,11 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 - Conveys tone, emotion, and intent without awkward pauses
 - Enables global collaboration and faster decision-making
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
