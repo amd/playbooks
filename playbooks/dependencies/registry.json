@@ -267,8 +267,8 @@
       "versionable": true
     },
     "podman": {
-      "name": "Podman",
-      "description": "Container management tool for running OCI containers",
+      "name": "Container Engine (Docker/Podman)",
+      "description": "Container engine for running OCI containers; use the docker command (Docker or podman-docker)",
       "category": "framework",
       "platforms": [
         "linux"

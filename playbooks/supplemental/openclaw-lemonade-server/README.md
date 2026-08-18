@@ -958,19 +958,19 @@ RemainAfterExit=yes
 WorkingDirectory=%h/firecrawl
 
 # Optional: Validate config before starting
-ExecStartPre=/usr/bin/podman compose -f openclaw-compose.yaml config --quiet
+ExecStartPre=/usr/bin/docker compose -f openclaw-compose.yaml config --quiet
 
 # Generate token and write to .env file
 ExecStartPre=/bin/bash -c 'chmod 644 %h/firecrawl/.env && echo "OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)" > %h/firecrawl/.env'
 
 # Step 1: Start containers in detached mode
-ExecStart=/usr/bin/podman compose -f openclaw-compose.yaml up -d --remove-orphans
+ExecStart=/usr/bin/docker compose -f openclaw-compose.yaml up -d --remove-orphans
 
 # Step 2: Wait for container to be healthy/ready
 ExecStartPost=/bin/sleep 5
 
 # Step 3: Run onboarding inside container in detached mode
-ExecStartPost=/usr/bin/podman exec -d openclaw_gateway /bin/bash -c "openclaw onboard \
+ExecStartPost=/usr/bin/docker exec -d openclaw_gateway /bin/bash -c "openclaw onboard \
     --non-interactive \
     --accept-risk \
     --mode local \
@@ -979,7 +979,7 @@ ExecStartPost=/usr/bin/podman exec -d openclaw_gateway /bin/bash -c "openclaw on
     --gateway-token "$OPENCLAW_GATEWAY_TOKEN" "
 
 # Stop containers when the service stops
-ExecStop=/usr/bin/podman compose -f openclaw-compose.yaml down
+ExecStop=/usr/bin/docker compose -f openclaw-compose.yaml down
 
 [Install]
 WantedBy=default.target
@@ -1017,7 +1017,7 @@ HOST=0.0.0.0
 
 Before moving on, make sure you have pulled the latest OpenClaw Docker image:
 ```bash
-podman pull ghcr.io/openclaw/openclaw:latest
+docker pull ghcr.io/openclaw/openclaw:latest
 ```
 Once that is done, download the OpenClaw Compose file [openclaw-compose.yaml](assets/openclaw-compose.yaml) and place it in the root `/firecrawl` directory:
 
@@ -1029,7 +1029,7 @@ Once that is done, download the OpenClaw Compose file [openclaw-compose.yaml](as
 
 Before handing control over to `systemd`, validate that everything works correctly by running the stack manually:
 ```bash
-podman compose -f openclaw-compose.yaml up -d
+docker compose -f openclaw-compose.yaml up -d
 ```
 If everything is configured correctly, you should see the OpenClaw container come up and your command line output should look similar to this:
 <p align="center">
@@ -1038,7 +1038,7 @@ If everything is configured correctly, you should see the OpenClaw container com
 
 Once verified, bring the stack back down before proceeding:
 ```bash
-podman compose -f openclaw-compose.yaml down
+docker compose -f openclaw-compose.yaml down
 ```
 Before starting the service, you must ensure the correct ownership and permissions are set on the `firecrawl` directory and its `.env` file. 
 This is essential for the service to write your credentials at startup.

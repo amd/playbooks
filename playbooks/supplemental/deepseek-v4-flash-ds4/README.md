@@ -38,21 +38,21 @@ This tutorial shows how to use `ds4-cockpit`, a terminal UI, to set up ds4, down
 >
 > **Note:** Try setting the **GPU shared-memory pool** to **110 GB** as a starting point. If you hit out-of-memory errors, raise the shared-memory pool or lower the context size.
 
-ds4-cockpit uses container toolboxes to run the ds4 engine. Install `podman`, `distrobox`, and `pipx`:
+ds4-cockpit uses container toolboxes to run the ds4 engine. Install `podman-docker`, `distrobox`, and `pipx`:
 
 ```bash
 sudo apt update
-sudo apt install -y podman distrobox pipx
+sudo apt install -y podman-docker distrobox pipx
 ```
 
 <!-- @test:id=ds4-prereqs-linux timeout=60 hidden=True -->
 ```bash
 set -euo pipefail
 export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
-podman --version
+docker --version
 distrobox version 2>/dev/null || distrobox --version
 pipx --version
-echo "OK: podman, distrobox, and pipx are installed"
+echo "OK: docker, distrobox, and pipx are installed"
 ```
 <!-- @test:end -->
 
@@ -107,7 +107,7 @@ set -euo pipefail
 export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
 # The toolbox version changes over time, so match the image family, not a fixed tag.
-if ! podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'; then
+if ! docker images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'; then
   echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit (Interactive Toolboxes tab) first."
   exit 1
 fi
@@ -200,7 +200,7 @@ fi
 model_name="$(basename "$model_file")"
 
 # Pick the toolbox image (version-agnostic).
-image="$(podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox' | head -1)"
+image="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox' | head -1)"
 if [ -z "$image" ]; then
   echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit first."
   exit 1
@@ -208,14 +208,14 @@ fi
 
 # Always stop/remove the server on exit so it never holds GPU memory afterwards.
 cleanup() {
-  podman stop -t 10 "$CONTAINER" >/dev/null 2>&1 || true
-  podman rm -f "$CONTAINER" >/dev/null 2>&1 || true
+  docker stop -t 10 "$CONTAINER" >/dev/null 2>&1 || true
+  docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
 # Remove any stale instance, then start ds4-server detached (same flags ds4-cockpit uses, with -d instead of -it).
-podman rm -f "$CONTAINER" >/dev/null 2>&1 || true
-podman run -d --name "$CONTAINER" \
+docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+docker run -d --name "$CONTAINER" \
   --device /dev/dri --device /dev/kfd \
   --group-add keep-groups \
   --security-opt seccomp=unconfined \
@@ -236,9 +236,9 @@ for i in $(seq 1 240); do
     up=true
     break
   fi
-  if ! podman inspect -f '{{.State.Running}}' "$CONTAINER" 2>/dev/null | grep -q true; then
+  if ! docker inspect -f '{{.State.Running}}' "$CONTAINER" 2>/dev/null | grep -q true; then
     echo "ds4-server container exited during startup:"
-    podman logs "$CONTAINER" 2>&1 | tail -40 || true
+    docker logs "$CONTAINER" 2>&1 | tail -40 || true
     exit 1
   fi
   sleep 2
@@ -246,7 +246,7 @@ done
 
 if [ "$up" != "true" ]; then
   echo "ds4 server did not become ready on http://127.0.0.1:8000"
-  podman logs "$CONTAINER" 2>&1 | tail -40 || true
+  docker logs "$CONTAINER" 2>&1 | tail -40 || true
   exit 1
 fi
 echo "OK: ds4 server is responding on :8000"

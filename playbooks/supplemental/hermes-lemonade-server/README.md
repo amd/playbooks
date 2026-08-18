@@ -43,9 +43,9 @@ By the end of this playbook you will be able to:
 - A PC running **Ubuntu 24.04+** or a compatible Debian-based Linux distribution with `apt-get`
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
-- [Podman](https://podman.io/docs/installation) (Optional, for sandboxing Hermes Agent)
-  ```bash 
-  sudo apt-get install -y podman`
+- A container engine (Optional, for sandboxing Hermes Agent). If you don't already have Docker, install `podman-docker`, which provides the `docker` command:
+  ```bash
+  sudo apt-get install -y podman-docker
   ```
 <!-- @os:end -->
 
@@ -53,14 +53,14 @@ By the end of this playbook you will be able to:
 - A PC running **Windows 10/11**
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
-- Podman (Optional, for sandboxing Hermes Agent). Install inside WSL:
-  ```bash 
-  sudo apt-get install -y podman
+- A container engine (Optional, for sandboxing Hermes Agent). If you don't already have Docker, install `podman-docker` inside WSL, which provides the `docker` command:
+  ```bash
+  sudo apt-get install -y podman-docker
   ```
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
-> Podman is pre-installed on Halo Box and no setup is required
+> A container engine is pre-installed on Halo Box and no setup is required
 <!-- @device:end -->
 
 <!-- @require:lemonade -->
@@ -679,7 +679,7 @@ Build a lightweight sandbox image:
 
 <!-- @os:linux -->
 ```bash
-podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
+docker build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
 FROM debian:bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -696,9 +696,9 @@ DOCKERFILE
 ```bash
 set -euo pipefail
 
-podman version
+docker version
 
-podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
+docker build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
 FROM debian:bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -710,7 +710,7 @@ WORKDIR /home/sandbox
 CMD ["sleep", "infinity"]
 DOCKERFILE
 
-podman image inspect hermes-sandbox:bookworm-slim >/dev/null
+docker image inspect hermes-sandbox:bookworm-slim >/dev/null
 
 echo "OK: Hermes sandbox Podman image is available"
 ```
@@ -727,7 +727,7 @@ wsl -d Ubuntu-24.04
 Then, build a lightweight sandbox image:
 
 ```bash
-podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
+docker build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
 FROM debian:bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -747,9 +747,9 @@ $ErrorActionPreference = "Stop"
 $script = @'
 set -euo pipefail
 
-podman version
+docker version
 
-podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
+docker build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
 FROM debian:bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -761,7 +761,7 @@ WORKDIR /home/sandbox
 CMD ["sleep", "infinity"]
 DOCKERFILE
 
-podman image inspect hermes-sandbox:bookworm-slim >/dev/null
+docker image inspect hermes-sandbox:bookworm-slim >/dev/null
 
 echo "OK: Hermes sandbox Podman image is available inside WSL"
 '@
@@ -790,7 +790,7 @@ finally {
 Then configure Hermes to use Podman as the container runtime and set the terminal backend:
 
 ```bash
-echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
+echo "HERMES_DOCKER_BINARY=/usr/bin/docker" >> ~/.hermes/.env
 
 cat >> ~/.hermes/config.yaml <<'EOF'
 terminal:
@@ -800,7 +800,7 @@ EOF
 ```
 
 > The `terminal.backend` is still `docker`.
-> `HERMES_DOCKER_BINARY` is what tells Hermes to use Podman as the runtime instead.
+> `HERMES_DOCKER_BINARY` points Hermes at the `docker` command (Docker or podman-docker).
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -815,14 +815,14 @@ if [ ! -f "$config" ]; then
 fi
 
 # The sandbox image must exist before Hermes can use it as the terminal backend.
-podman image inspect hermes-sandbox:bookworm-slim >/dev/null
+docker image inspect hermes-sandbox:bookworm-slim >/dev/null
 
 # Point Hermes at Podman as the container runtime (idempotent: drop any prior line first).
 mkdir -p "$HOME/.hermes"
 touch "$HOME/.hermes/.env"
 grep -v '^HERMES_DOCKER_BINARY=' "$HOME/.hermes/.env" > "$HOME/.hermes/.env.tmp" || true
 mv "$HOME/.hermes/.env.tmp" "$HOME/.hermes/.env"
-echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> "$HOME/.hermes/.env"
+echo "HERMES_DOCKER_BINARY=/usr/bin/docker" >> "$HOME/.hermes/.env"
 
 # Append the terminal backend block (config.yaml is rewritten fresh by the model-config test each run, so this appends exactly once per run).
 cat >> "$config" <<'EOF'
@@ -831,7 +831,7 @@ terminal:
   docker_image: hermes-sandbox:bookworm-slim
 EOF
 
-grep -q "HERMES_DOCKER_BINARY=/usr/bin/podman" "$HOME/.hermes/.env"
+grep -q "HERMES_DOCKER_BINARY=/usr/bin/docker" "$HOME/.hermes/.env"
 grep -q "backend: docker" "$config"
 grep -q "docker_image: hermes-sandbox:bookworm-slim" "$config"
 
@@ -855,13 +855,13 @@ if [ ! -f "$config" ]; then
   exit 1
 fi
 
-podman image inspect hermes-sandbox:bookworm-slim >/dev/null
+docker image inspect hermes-sandbox:bookworm-slim >/dev/null
 
 mkdir -p "$HOME/.hermes"
 touch "$HOME/.hermes/.env"
 grep -v '^HERMES_DOCKER_BINARY=' "$HOME/.hermes/.env" > "$HOME/.hermes/.env.tmp" || true
 mv "$HOME/.hermes/.env.tmp" "$HOME/.hermes/.env"
-echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> "$HOME/.hermes/.env"
+echo "HERMES_DOCKER_BINARY=/usr/bin/docker" >> "$HOME/.hermes/.env"
 
 cat >> "$config" <<'EOF'
 terminal:
@@ -869,7 +869,7 @@ terminal:
   docker_image: hermes-sandbox:bookworm-slim
 EOF
 
-grep -q "HERMES_DOCKER_BINARY=/usr/bin/podman" "$HOME/.hermes/.env"
+grep -q "HERMES_DOCKER_BINARY=/usr/bin/docker" "$HOME/.hermes/.env"
 grep -q "backend: docker" "$config"
 grep -q "docker_image: hermes-sandbox:bookworm-slim" "$config"
 
@@ -940,13 +940,13 @@ RemainAfterExit=yes
 WorkingDirectory=${HOME}/firecrawl
 
 # Optional: Validate config before starting
-ExecStartPre=/usr/bin/podman -f hermes-compose.yaml config --quiet
+ExecStartPre=/usr/bin/docker compose -f hermes-compose.yaml config --quiet
 
 # Start containers in detached mode
-ExecStart=/usr/bin/podman compose -f hermes-compose.yaml up -d --remove-orphans
+ExecStart=/usr/bin/docker compose -f hermes-compose.yaml up -d --remove-orphans
 
 # Stop containers when the service stops
-ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
+ExecStop=/usr/bin/docker compose -f hermes-compose.yaml down
 
 [Install]
 WantedBy=default.target
@@ -1006,7 +1006,7 @@ BULL_AUTH_KEY=CHANGEME
 
 Before moving on, make sure you have pulled the latest Hermes Docker image:
 ```bash
-podman pull docker.io/nousresearch/hermes-agent:latest
+docker pull docker.io/nousresearch/hermes-agent:latest
 ```
 Once that is done, download the Hermes Compose file [hermes-compose.yaml](assets/hermes-compose.yaml) and place it in the root `/firecrawl` directory:
 
@@ -1018,7 +1018,7 @@ Once that is done, download the Hermes Compose file [hermes-compose.yaml](assets
 
 Before handing control over to `systemd`, validate that everything works correctly by running the stack manually:
 ```bash
-podman compose -f hermes-compose.yaml up -d
+docker compose -f hermes-compose.yaml up -d
 ```
 If everything is configured correctly, you should see the Hermes container come up and your command line output should look similar to this:
 <p align="center">
@@ -1027,7 +1027,7 @@ If everything is configured correctly, you should see the Hermes container come 
 
 Once verified, bring the stack back down before proceeding:
 ```bash
-podman compose -f hermes-compose.yaml down
+docker compose -f hermes-compose.yaml down
 ```
 Now that everything is validated, start the service through `systemd`:
 ```bash

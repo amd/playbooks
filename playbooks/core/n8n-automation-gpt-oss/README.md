@@ -235,7 +235,7 @@ Please download the following into a directory of your choice: [compose.yml](ass
 
 In that directory, run the following command:
 ```bash
-podman compose up -d
+docker compose up -d
 ```
 
 This should install n8n and write to a persistent storage.
