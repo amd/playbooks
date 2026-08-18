@@ -5,12 +5,24 @@
   "time": 15,
   "unsupported_platforms": {
     "stx": [
-      { "platform": "windows", "reason": "Z Image Turbo is too large for this device" },
-      { "platform": "linux", "reason": "Z Image Turbo is too large for this device" }
+      {
+        "platform": "windows",
+        "reason": "Z Image Turbo is too large for this device"
+      },
+      {
+        "platform": "linux",
+        "reason": "Z Image Turbo is too large for this device"
+      }
     ],
     "krk": [
-      { "platform": "windows", "reason": "Z Image Turbo is too large for this device" },
-      { "platform": "linux", "reason": "Z Image Turbo is too large for this device" }
+      {
+        "platform": "windows",
+        "reason": "Z Image Turbo is too large for this device"
+      },
+      {
+        "platform": "linux",
+        "reason": "Z Image Turbo is too large for this device"
+      }
     ]
   },
   "supported_platforms": {
@@ -103,5 +115,17 @@
     "comfyui",
     "z-image-turbo"
   ],
-  "coverImage": "assets/cover.jpeg" 
+  "coverImage": "assets/cover.jpeg",
+  "recommendedSystemMemory": 32,
+  "primaryModel": "Z-Image Turbo",
+  "validatedVersions": {
+    "reference": {
+      "windows": {
+        "ComfyUI Desktop": "Latest from Ryzen AI Developer Center"
+      },
+      "linux": {
+        "ComfyUI": "Latest from Ryzen AI Developer Center"
+      }
+    }
+  }
 }

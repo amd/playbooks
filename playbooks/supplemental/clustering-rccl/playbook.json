@@ -1,34 +1,70 @@
 {
   "id": "clustering-rccl",
   "title": "Clustering Two Ryzen™ AI Halos with RCCL",
-  "description": "Set up a multi-node cluster using two Ryzen\u2122 AI Halo devices with RCCL for distributed workloads",
+  "description": "Set up a multi-node cluster using two Ryzen™ AI Halo devices with RCCL for distributed workloads",
   "time": 90,
   "unsupported_platforms": {
     "halo_box": [
-      { "platform": "windows", "reason": "RCCL clustering relies on vLLM which is only supported on Linux" }
+      {
+        "platform": "windows",
+        "reason": "RCCL clustering relies on vLLM which is only supported on Linux"
+      }
     ],
     "halo": [
-      { "platform": "windows", "reason": "RCCL clustering relies on vLLM which is only supported on Linux" }
+      {
+        "platform": "windows",
+        "reason": "RCCL clustering relies on vLLM which is only supported on Linux"
+      }
     ],
     "stx": [
-      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
-      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      }
     ],
     "krk": [
-      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
-      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      }
     ],
     "rx7900xt": [
-      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
-      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      }
     ],
     "rx9070xt": [
-      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
-      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      }
     ],
     "r9700": [
-      { "platform": "windows", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" },
-      { "platform": "linux", "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity" }
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      }
     ]
   },
   "supported_platforms": {
@@ -41,7 +77,7 @@
   },
   "published_platforms": {
     "halo_box": [
-      "linux"    
+      "linux"
     ],
     "halo": [
       "linux"
@@ -58,5 +94,19 @@
     "multi-gpu",
     "rccl",
     "vllm"
-  ]
+  ],
+  "recommendedSystemMemory": 128,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "vLLM": "Latest from Ryzen AI Developer Center"
+      }
+    },
+    "apu": {
+      "linux": {
+        "vLLM": "Latest"
+      }
+    }
+  },
+  "primaryModel": "Qwen3.5-397B-A17B"
 }

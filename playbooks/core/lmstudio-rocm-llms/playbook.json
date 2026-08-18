@@ -127,5 +127,7 @@
     "llm",
     "inference"
   ],
-  "coverImage": "assets/cover_image.avif"
+  "coverImage": "assets/cover_image.avif",
+  "recommendedSystemMemory": 8,
+  "primaryModel": "Qwen3.5-9B"
 }

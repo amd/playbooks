@@ -1,7 +1,7 @@
 {
   "id": "gaia-agents",
   "title": "Building Your First Agent with GAIA",
-  "description": "Build a 100% local AI agent \u2014 no cloud APIs needed. Use the GAIA SDK to create a hardware advisor.",
+  "description": "Build a 100% local AI agent — no cloud APIs needed. Use the GAIA SDK to create a hardware advisor.",
   "time": 15,
   "supported_platforms": {
     "halo_box": [
@@ -127,5 +127,7 @@
     "hardware",
     "lemonade"
   ],
-  "coverImage": "assets/gaia.jpg"
+  "coverImage": "assets/gaia.jpg",
+  "recommendedSystemMemory": 8,
+  "primaryModel": "Qwen3-0.6B"
 }
