@@ -40,5 +40,19 @@
     "rocm",
     "llm",
     "inference"
-  ]
+  ],
+  "recommendedSystemMemory": 128,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "ds4": "Latest"
+      }
+    },
+    "apu": {
+      "linux": {
+        "ds4": "Latest"
+      }
+    }
+  },
+  "primaryModel": "DeepSeek V4 Flash (IQ2_XXS)"
 }

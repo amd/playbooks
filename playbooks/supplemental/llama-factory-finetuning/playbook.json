@@ -115,12 +115,47 @@
       "windows"
     ]
   },
-  "platforms": ["linux", "windows"],
+  "platforms": [
+    "linux",
+    "windows"
+  ],
   "difficulty": "intermediate",
   "isNew": false,
   "isFeatured": false,
   "developed": true,
   "published": true,
-  "tags": ["Llama Factory", "lora", "fine-tuning"],
-  "coverImage": "assets/cover.png"
+  "tags": [
+    "Llama Factory",
+    "lora",
+    "fine-tuning"
+  ],
+  "coverImage": "assets/cover.png",
+  "recommendedSystemMemory": 24,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "LLaMA-Factory": "Latest"
+      },
+      "windows": {
+        "LLaMA-Factory": "Latest"
+      }
+    },
+    "apu": {
+      "linux": {
+        "LLaMA-Factory": "Latest"
+      },
+      "windows": {
+        "LLaMA-Factory": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "LLaMA-Factory": "Latest"
+      },
+      "windows": {
+        "LLaMA-Factory": "Latest"
+      }
+    }
+  },
+  "primaryModel": "Qwen3-4B-Instruct"
 }

@@ -127,5 +127,13 @@
     "inference",
     "summarization"
   ],
-  "coverImage": "assets/cover.png"
+  "coverImage": "assets/cover.png",
+  "recommendedSystemMemory": 8,
+  "validatedVersions": {
+    "reference": {
+      "linux": {},
+      "windows": {}
+    }
+  },
+  "primaryModel": "Qwen3.5-4B"
 }
