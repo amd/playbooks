@@ -126,5 +126,33 @@
     "agent",
     "local-ai",
     "linux"
-  ]
+  ],
+  "recommendedSystemMemory": 64,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "OpenClaw": "2026.7.1-2"
+      },
+      "windows": {
+        "OpenClaw": "2026.7.1-2"
+      }
+    },
+    "apu": {
+      "linux": {
+        "OpenClaw": "Latest"
+      },
+      "windows": {
+        "OpenClaw": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "OpenClaw": "Latest"
+      },
+      "windows": {
+        "OpenClaw": "Latest"
+      }
+    }
+  },
+  "primaryModel": "Qwen3.6-35B-A3B"
 }

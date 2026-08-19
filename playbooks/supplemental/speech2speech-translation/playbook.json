@@ -126,5 +126,12 @@
     "audio",
     "real-time"
   ],
-  "coverImage": "assets/gradio.png"
+  "coverImage": "assets/gradio.png",
+  "recommendedSystemMemory": 16,
+  "validatedVersions": {
+    "reference": {
+      "linux": {}
+    }
+  },
+  "primaryModel": "SeamlessM4T v2 Large"
 }

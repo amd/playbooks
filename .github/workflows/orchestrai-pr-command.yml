@@ -206,6 +206,7 @@ jobs:
 
       - name: Resolve per-playbook verdict
         if: always()
+        id: results
         env:
           BUILD_URL: ${{ steps.wait.outputs.build_url }}
           PLAYBOOK_ID: ${{ matrix.playbook }}
@@ -221,6 +222,22 @@ jobs:
           name: test-results-${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
+
+      - name: Test summary
+        if: always()
+        env:
+          RP_URL: ${{ steps.results.outputs.rp_url }}
+        run: |
+          {
+            echo "### \`${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
+            echo ""
+            # ReportPortal (test results) link only; the pipeline build URL is
+            # intentionally not shown. Populated even when the verdict fails.
+            if [ -n "${RP_URL}" ]; then
+              echo "| | |"; echo "|---|---|"
+              echo "| ReportPortal | [View Results](${RP_URL}) |"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
   report:
     needs: [command, test-playbooks]

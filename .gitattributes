@@ -6,11 +6,3 @@
 .github/workflows/*.yml text eol=lf
 auto-translations/**    text eol=lf
 localized-playbooks/**  text eol=lf
-
-# Keep binary image assets out of the translation trees' text normalization.
-*.png  binary
-*.jpg  binary
-*.jpeg binary
-*.gif  binary
-*.webp binary
-*.ico  binary
