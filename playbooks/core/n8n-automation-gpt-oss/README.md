@@ -229,7 +229,7 @@ n8n --version
 <!-- @os:end -->
 
 <!-- @os:linux -->
-We are now going to use Podman service to containerize our n8n installation.
+We are now going to use a container engine to containerize our n8n installation.
 
 Please download the following into a directory of your choice: [compose.yml](assets/compose.yml)
 

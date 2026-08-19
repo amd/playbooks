@@ -121,7 +121,7 @@ This amount can be increased by changing the kernel's Translation Table Manager 
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-Your Ryzen AI Halo ships with vLLM packaged inside a prebuilt container image, which you run using Podman, a free and open source container tool.
+Your Ryzen AI Halo ships with vLLM packaged inside a prebuilt container image, which you run using the `docker` command (backed by Docker or podman-docker).
 
 ### 1. Create the Model Download Directory
 
@@ -147,7 +147,7 @@ docker run -it --name vllm_cluster --replace --pull missing --network=host --dev
 
 vLLM uses Ray to orchestrate the cluster and RCCL to handle GPU-to-GPU communication across nodes. One machine acts as the **head node** (Machine 1), coordinating inference. The other joins as a **worker node** (Machine 2), contributing its GPU memory and compute.
 
-> **Note**: Ray is an optional dependency for vLLM and is only available from within the preconfigured Podman container.
+> **Note**: Ray is an optional dependency for vLLM and is only available from within the preconfigured container.
 
 At launch, vLLM shards the model across both nodes using tensor parallelism. Once loaded, inference proceeds as if running on a single accelerator.
 

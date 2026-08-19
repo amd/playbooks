@@ -87,7 +87,7 @@ Lemonade runs the models; Open WebUI is the interface you interact with. Use the
 
 ## One-Time Setup
 
-This playbook needs Lemonade running as the backend and, on Linux, a container engine (Podman) to run Open WebUI. Set these up before installing Open WebUI.
+This playbook needs Lemonade running as the backend and, on Linux, a container engine (Docker or podman-docker) to run Open WebUI. Set these up before installing Open WebUI.
 
 <!-- @os:windows -->
 <!-- @device:halo_box,halo,stx,krk -->
@@ -101,10 +101,10 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
-<!-- @require:lemonade,docker -->
+<!-- @require:lemonade,podman -->
 <!-- @device:end -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-<!-- @require:driver,lemonade,docker -->
+<!-- @require:driver,lemonade,podman -->
 <!-- @device:end -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ---
@@ -566,7 +566,7 @@ Write-Host "OK: open-webui CLI is available"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-We are now going to use Podman service to containerize our Open WebUI installation.
+We are now going to use a container engine to containerize our Open WebUI installation.
 
 Please download the following into a directory of your choice: [compose.yml](assets/compose.yml)
 
@@ -593,7 +593,7 @@ if [ ! -f compose.yml ]; then
   exit 1
 fi
 
-echo "OK: Podman, Podman Compose, and compose.yml are available"
+echo "OK: container engine, Compose, and compose.yml are available"
 ```
 <!-- @test:end -->
 
@@ -632,7 +632,7 @@ if "open_webui_data:/app/backend/data" not in volumes:
 if "open_webui_data" not in data.get("volumes", {}):
     raise SystemExit("Expected top-level open_webui_data volume")
 
-print("OK: compose.yml matches the Open WebUI Podman setup")
+print("OK: compose.yml matches the Open WebUI container setup")
 PY
 
 docker compose -f compose.yml config >/dev/null
