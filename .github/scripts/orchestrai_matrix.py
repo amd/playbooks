@@ -49,6 +49,7 @@ def build(playbooks, cfg, devices=None, platforms=None):
     extra_tag_devices = cfg.get("extra_tag_devices", {})
     extra_devices = cfg.get("extra_devices", {})
     skip_devices = set(cfg.get("skip_devices", []))
+    skip_playbook_devices = cfg.get("skip_playbook_devices", {}) or {}
 
     matrix = []
 
@@ -111,6 +112,25 @@ def build(playbooks, cfg, devices=None, platforms=None):
 
     # 3) Skip offline/unsupported devices
     matrix = [e for e in matrix if e["arch"] not in skip_devices]
+
+    # 3b) Skip a specific playbook on a specific device. Unlike skip_devices
+    #     (the device is unusable for everything), this is for a device that is
+    #     fine in general but cannot run one playbook -- e.g. a playbook pinned
+    #     to a model too large for that SKU's memory. Announce each drop: a
+    #     silently missing combination is indistinguishable from one that was
+    #     never declared.
+    dropped = [
+        (e["playbook"], e["arch"])
+        for e in matrix
+        if e["arch"] in skip_playbook_devices.get(e["playbook"], [])
+    ]
+    for pb_id, device in sorted(set(dropped)):
+        print(f"::notice::skipping playbook '{pb_id}' on device '{device}' "
+              f"(skip_playbook_devices in orchestrai-config.yml)", file=sys.stderr)
+    matrix = [
+        e for e in matrix
+        if e["arch"] not in skip_playbook_devices.get(e["playbook"], [])
+    ]
 
     # 4) Drop batches that request an extra tag the device can't satisfy
     #    (e.g. ram_128gb on a non-128GB device — broker could never match it).
