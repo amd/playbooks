@@ -172,6 +172,26 @@ extra_install_scripts:
 # Devices to skip entirely (e.g. temporarily offline hardware).
 skip_devices: ["krk"]
 
+# Skip ONE playbook on ONE device, where skip_devices would be too broad: the
+# device works fine for everything else. Keyed by playbook id -> device list.
+#
+# hermes-lemonade-server and openclaw-lemonade-server both pin a fixed
+# Qwen3.6-35B-A3B-GGUF. Lemonade refuses any model above 80% of system RAM, so on
+# a 32 GB stx (29 GB usable) the ceiling is 23.2 GB and the model needs 23.3 GB:
+#   "Model 'Qwen3.6-35B-A3B-GGUF' is not available on this system. This model
+#    requires approximately 23.3 GB of memory, but your system only has 29.0 GB
+#    of RAM. Models larger than 23.2 GB (80% of system RAM) are filtered out."
+# `lemonade load` fails before GPU+CPU offload is ever considered. It misses by
+# 0.1 GB, so it presents as flaky rather than broken -- an stx reporting 30 GB
+# gets a 24.0 GB ceiling and passes.
+#
+# Every stx in the farm is currently 32 GB. REMOVE these entries when either
+# lands: 64 GB stx machines, or a device-scoped @var model for stx (note the
+# tests also require ctx_size=262144, so a smaller model alone may not suffice).
+skip_playbook_devices:
+  hermes-lemonade-server:  ["stx"]
+  openclaw-lemonade-server: ["stx"]
+
 # ---------------------------------------------------------------------------
 # Per-run pipeline settings
 # ---------------------------------------------------------------------------
