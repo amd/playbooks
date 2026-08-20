@@ -134,7 +134,23 @@ llamafactory-env\Scripts\activate
 ### Installing Basic Dependencies
 
 <!-- @require:pytorch,driver -->
- 
+
+<!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
+```python
+import sys
+import torch
+
+print(f"Python executable: {sys.executable}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
+
+if not torch.cuda.is_available():
+    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
+
+print("PASS: ROCm-enabled PyTorch is visible")
+```
+<!-- @test:end -->
+
 ### Installing Additional Dependencies
 
 > **Note**: Ensure Python version is 3.11, 3.12, or 3.13
