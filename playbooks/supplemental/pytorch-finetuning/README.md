@@ -56,9 +56,11 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 - How to save and deploy your fine-tuned model
 - How to monitor training and debug common issues
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates

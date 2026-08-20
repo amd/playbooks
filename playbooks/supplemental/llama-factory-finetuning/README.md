@@ -43,9 +43,11 @@ This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your loca
 - Duration: It will take about 60 minutes to run this playbook (depending on your model/dataset size and network speed).
 - View the [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for more information.
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
