@@ -87,6 +87,8 @@ jobs:
           python-version: '3.13'
       - name: Run selection regression tests
         run: python3 .github/scripts/test_build_test_matrix.py
+      - name: Run playbook-test extractor tests
+        run: python3 .github/scripts/test_run_playbook_tests.py
 
   test-playbooks:
     name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
