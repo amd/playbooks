@@ -20,9 +20,11 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 - Serve models via OpenAI Compatible API to power custom workflows and apps
 
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
