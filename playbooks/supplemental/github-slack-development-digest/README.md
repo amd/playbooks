@@ -85,12 +85,20 @@ test the automation, and Lemonade to run the LLM locally.
 
 ## Prerequisites
 
+<!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @require:lemonade -->
+<!-- @os:end -->
 
 You need:
 
 - Lemonade Server installed by following the standard
   [Lemonade installation guide](https://lemonade-server.ai/docs/guide/install/).
+
+<!-- @os:linux -->
 - Node.js 22.12 or later and `npm`, used to install the published Agent Canvas
   CLI and run MCP servers with `npx`.
 - `uv`, the Python package manager Agent Canvas uses to build the Agent
@@ -102,6 +110,15 @@ You need:
 - The Python `transformers` package available in the Agent Server environment.
   It is required for chat-template token counting when `custom_tokenizer` is
   set.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/),
+  installed and running. On Windows, the Agent Canvas stack runs from the
+  published Docker image, which bundles Node.js, `uv`, `transformers`, and the
+  `@openhands/agent-canvas` package, so you do not install those on the host.
+<!-- @os:end -->
+
 - A GitHub token with read access to the repository you want summarized.
 - A Slack bot token (`xoxb-...`) with `chat:write` and channel read access.
 - A Slack team ID (`T...`).
@@ -113,10 +130,19 @@ Invite the Slack app to the target channel before testing the automation.
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
+<!-- @os:linux -->
 ```bash
 export LEMONADE_BASE_URL="http://127.0.0.1:13305/api/v1"
 export LEMONADE_MODEL="Qwen3.6-35B-A3B-GGUF"
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+$env:LEMONADE_BASE_URL = "http://127.0.0.1:13305/api/v1"
+$env:LEMONADE_MODEL = "Qwen3.6-35B-A3B-GGUF"
+```
+<!-- @os:end -->
 
 These two variables are used by the verification commands below. The model,
 tokenizer, and other LLM settings are entered directly in the Agent Canvas UI
@@ -125,11 +151,21 @@ in later steps, so their literal values are shown inline where you need them.
 The following values are entered into the Agent Canvas UI in later steps. Set
 them here so you can copy them in:
 
+<!-- @os:linux -->
 ```bash
 export GITHUB_REPO_FILTER="your-org/your-repo"
 export SLACK_DIGEST_CHANNEL="C0123456789"
 export DIGEST_TIMEZONE="America/New_York"
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+$env:GITHUB_REPO_FILTER = "your-org/your-repo"
+$env:SLACK_DIGEST_CHANNEL = "C0123456789"
+$env:DIGEST_TIMEZONE = "America/New_York"
+```
+<!-- @os:end -->
 
 Use an explicit `owner/repo` value for `GITHUB_REPO_FILTER`. Broad organization
 wildcards can return too much MCP context for local models.
@@ -144,11 +180,21 @@ lemonade --version
 
 Start the model from the Lemonade CLI:
 
+<!-- @os:linux -->
 ```bash
 lemonade config set llamacpp.backend=vulkan
 lemonade config set ctx_size=65536
 lemonade run "${LEMONADE_MODEL}"
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+lemonade config set llamacpp.backend=vulkan
+lemonade config set ctx_size=65536
+lemonade run "$env:LEMONADE_MODEL"
+```
+<!-- @os:end -->
 
 > **Choose a model that fits your hardware.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) is a strong model for this workflow but needs a large memory pool. If your device has limited memory or GPU VRAM, pick a smaller GGUF model from the Lemonade model library and use that model ID (and its matching tokenizer) throughout this playbook.
 
@@ -176,6 +222,7 @@ ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
 
 Confirm Lemonade can serve the selected model:
 
+<!-- @os:linux -->
 ```bash
 curl -s "${LEMONADE_BASE_URL}/models" | python3 -m json.tool
 ```
@@ -194,9 +241,29 @@ curl -sS "${LEMONADE_BASE_URL}/chat/completions" \
     "max_tokens": 64
   }' | python3 -m json.tool
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+curl.exe -s "$env:LEMONADE_BASE_URL/models"
+```
+
+Then send a small chat request:
+
+```powershell
+$body = @{
+  model    = "$env:LEMONADE_MODEL"
+  messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+  temperature = 0
+  max_tokens  = 64
+} | ConvertTo-Json -Depth 5
+curl.exe -sS "$env:LEMONADE_BASE_URL/chat/completions" -H "Content-Type: application/json" -d $body
+```
+<!-- @os:end -->
 
 If this returns a `choices` array, Lemonade is ready for Agent Canvas.
 
+<!-- @os:linux -->
 <!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
@@ -257,16 +324,66 @@ if [ -z "$out" ]; then
 fi
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
+<!-- @os:windows -->
+<!-- @test:id=lemonade-chat-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$modelsJson = $null
+for ($i = 0; $i -lt 120; $i++) {
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
+  if ($modelsJson) { break }
+  Start-Sleep -Seconds 1
+}
+
+if (-not $modelsJson) { throw "Lemonade server not ready on http://127.0.0.1:13305" }
+Write-Host "OK: Lemonade server is responding"
+
+$parsed = $modelsJson | ConvertFrom-Json
+$entry = $parsed.data | Where-Object { $_.id -eq "${lemonade_model}" } | Select-Object -First 1
+
+if (-not $entry) { throw "Model ${lemonade_model} is not present in Lemonade /api/v1/models." }
+if (-not $entry.downloaded) { throw "Model ${lemonade_model} is present but not downloaded in Lemonade. Please download it." }
+Write-Host "OK: ${lemonade_model} model is downloaded in Lemonade"
+
+$body = @{
+  model    = "${lemonade_model}"
+  messages = @(@{ role = "user"; content = "Reply with exactly: OK" })
+  temperature = 0
+  max_tokens  = 64
+} | ConvertTo-Json -Depth 5
+
+$tmpBody = Join-Path $env:TEMP "digest-lemonade-chat-body.json"
+[System.IO.File]::WriteAllText($tmpBody, $body, [System.Text.UTF8Encoding]::new($false))
+
+try {
+  $out = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
+    -H "Content-Type: application/json" `
+    --data-binary "@$tmpBody"
+  if (-not $out) { throw "Empty response from Lemonade chat/completions" }
+  Write-Host "OK: Lemonade chat/completions returned a response"
+}
+finally {
+  Remove-Item $tmpBody -Force -ErrorAction SilentlyContinue
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:linux -->
 <!-- @test:id=node-npm-version timeout=60 hidden=True -->
 ```bash
 node -v
 npm -v
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 ## 3. Start Agent Canvas
 
+<!-- @os:linux -->
 Install the published Agent Canvas package and start the full stack:
 
 ```bash
@@ -289,7 +406,49 @@ The `agent-canvas` command starts the agent server, the automation backend, and
 the web frontend together. You only need this one command to run OpenHands
 locally. The rest of this playbook configures everything through the Agent
 Canvas UI in your browser.
+<!-- @os:end -->
 
+<!-- @os:windows -->
+On Windows, run the published Agent Canvas container image with Docker Desktop.
+The image bundles the Agent Server, automation backend, and web frontend, so
+you do not install Node.js, `uv`, or the CLI on the host.
+
+First, create the config and workspace folders the container mounts:
+
+```powershell
+$env:PROJECTS_PATH = Join-Path $HOME "projects"
+New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
+```
+
+Pull the published image (about 6 GB; it is public, so no login is required):
+
+```powershell
+docker pull ghcr.io/openhands/agent-canvas:1.14.0
+```
+
+Then start the stack:
+
+```powershell
+docker run -it --rm `
+  -p 8000:8000 `
+  -v "$($env:USERPROFILE)\.openhands:/home/openhands/.openhands" `
+  -v "$($env:PROJECTS_PATH):/projects" `
+  ghcr.io/openhands/agent-canvas:1.14.0
+```
+
+Open `http://localhost:8000/canvas` in your browser. If port 8000 is already in
+use, map a different host port, for example `-p 8080:8000`, and open
+`http://localhost:8080/canvas` instead.
+
+> **Note:** The first launch builds the Agent Server environment inside the
+> container, so it can take a few minutes before the backend reports healthy.
+
+The `.openhands` mount persists your LLM profile, MCP servers, and automations
+across container restarts. The rest of this playbook configures everything
+through the Agent Canvas UI in your browser at `http://localhost:8000/canvas`.
+<!-- @os:end -->
+
+<!-- @os:linux -->
 <!-- @test:id=uv-version timeout=60 hidden=True -->
 ```bash
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
@@ -358,6 +517,56 @@ fi
 echo "OK: agent-canvas agent-server is responding"
 ```
 <!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$image    = "ghcr.io/openhands/agent-canvas:1.14.0"
+$name     = "digest-agent-canvas-ci"
+$hostPort = 18080
+
+# Verify the image is present (pre-provisioned on the runner). Pulling over a
+# non-interactive CI session fails on the Docker credential helper, so CI does
+# not pull; provision the image on the runner beforehand with:
+#   docker pull ghcr.io/openhands/agent-canvas:1.14.0
+$imgId = docker images -q $image
+if (-not $imgId) { throw "Image $image is not present. Pre-provision it on this runner: docker pull $image" }
+Write-Host "OK: $image is present"
+
+if (docker ps -aq -f "name=$name") { docker rm -f $name | Out-Null }
+
+try {
+  docker run -d --name $name -p "${hostPort}:8000" $image | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw "docker run failed for $image" }
+
+  # Probe the agent-server backend health through the container proxy
+  # (/server_info -> agent-server on 18000 inside the container), not just the
+  # /canvas static UI, which can return 200 while the backend is still down.
+  $ok = $false
+  for ($i = 0; $i -lt 300; $i++) {
+    $canvas = try { (Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 "http://localhost:${hostPort}/canvas").StatusCode } catch { 0 }
+    $info   = try { (Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 "http://localhost:${hostPort}/server_info").StatusCode } catch { 0 }
+    if ($canvas -eq 200 -and $info -eq 200) { $ok = $true; break }
+    $state = docker inspect -f "{{.State.Status}}" $name 2>$null
+    if ($state -ne "running") { throw "Container $name exited before it finished starting" }
+    Start-Sleep -Seconds 2
+  }
+
+  if (-not $ok) {
+    docker logs --tail 40 $name
+    throw "agent-canvas backend not healthy on http://localhost:${hostPort}/server_info"
+  }
+  Write-Host "OK: agent-canvas Docker stack is healthy (/canvas and /server_info return 200)"
+}
+finally {
+  if (docker ps -aq -f "name=$name") { docker rm -f $name | Out-Null }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 ## 4. Configure the Local LLM in the UI
 
@@ -371,6 +580,14 @@ On first launch, Agent Canvas opens an onboarding flow. In that flow:
 6. For **API Key**, enter any non-empty placeholder such as `lemonade-local`.
    Lemonade does not require a real key, but the OpenHands client needs a value
    to send.
+
+<!-- @os:windows -->
+> **Windows (Docker):** the Agent Server runs inside the container, so set
+> **Base URL** to `http://host.docker.internal:13305/api/v1` instead of
+> `http://127.0.0.1:13305/api/v1`. From inside the container, `127.0.0.1` is the
+> container itself; `host.docker.internal` reaches Lemonade running on the
+> Windows host, and Docker Desktop provides that hostname automatically.
+<!-- @os:end -->
 
 The connection fields should look like this. The API key field is masked by
 the UI.
@@ -410,6 +627,13 @@ set max tokens below the Lemonade context window, such as `56000`.
 In the Agent Canvas UI, open **Customize** (or **Settings > MCP**) to add the
 MCP servers that give the agent tools for GitHub and Slack. Token values are
 sent only to your local Agent Server and are persisted as encrypted settings.
+
+<!-- @os:windows -->
+> **Windows (Docker):** the `npx` MCP server commands below run inside the
+> container, which already includes Node.js, so nothing extra is installed on
+> the host. Because `.openhands` is mounted, the MCP servers and their tokens
+> persist across container restarts.
+<!-- @os:end -->
 
 ### GitHub MCP server
 
@@ -510,6 +734,21 @@ all work before relying on the schedule.
 ![Slack channel showing the generated OpenHands digest](assets/07-slackbot-message.png)
 
 ## Troubleshooting
+
+<!-- @os:windows -->
+- **Docker port 8000 is already in use:** map a different host port, for example
+  `docker run ... -p 8080:8000 ...`, and open `http://localhost:8080/canvas`.
+- **`docker pull` fails with a credential error** (for example, "A specified
+  logon session does not exist"): run the pull from an interactive Windows
+  session, or pre-pull the image. The image is public, so no `docker login` is
+  required.
+- **The UI loads but the backend is unhealthy:** the first launch builds the
+  Agent Server environment inside the container. Wait a minute and refresh, then
+  check `docker logs <container>` for progress.
+- **Agent Canvas cannot reach Lemonade from the container:** set the LLM
+  **Base URL** to `http://host.docker.internal:13305/api/v1` (not `127.0.0.1`),
+  and confirm Lemonade is running on the Windows host.
+<!-- @os:end -->
 
 - **Lemonade is down:** restart it with the
   `lemonade run "${LEMONADE_MODEL}"` command in step 1, then re-run the health
