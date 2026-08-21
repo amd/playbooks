@@ -1,8 +1,0 @@
-# Copyright Advanced Micro Devices, Inc.
-#
-# SPDX-License-Identifier: MIT
-
-base_config: ".github/orchestrai-config.yml"
-
-# Reuse the canonical sys_func-playbook_runner. The localized adapter adds the
-# locale-specific variables to each generated test group.
