@@ -111,6 +111,14 @@ export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/b
 lemonade --version
 node -v
 npm -v
+
+# uv is a required prerequisite (agent-canvas uses it to build its Python env).
+# Install it only if the runner doesn't already have it.
+# TODO: remove this self-provisioning once the runners ship uv by default.
+if ! command -v uv >/dev/null 2>&1; then
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+export PATH="$HOME/.local/bin:$PATH"
 uv --version
 
 echo "OK: lemonade, node, npm, and uv are all available"
@@ -309,10 +317,21 @@ Install the published Agent Canvas package globally:
 npm install -g @openhands/agent-canvas
 ```
 
-<!-- @test:id=agent-canvas-version-linux timeout=120 hidden=True -->
+<!-- @test:id=agent-canvas-version-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
+
+# Use a user-owned global npm prefix so the install needs no root (matches the
+# Troubleshooting section of this playbook).
+mkdir -p "$HOME/.npm-global"
+npm config set prefix "$HOME/.npm-global"
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+# Install agent-canvas only if the runner doesn't already have it.
+# TODO: remove this self-provisioning once the runners ship agent-canvas by default.
+if ! command -v agent-canvas >/dev/null 2>&1; then
+  npm install -g @openhands/agent-canvas
+fi
 
 # Prefer --version; fall back to --help if this build has no --version flag.
 agent-canvas --version || agent-canvas --help
@@ -440,12 +459,20 @@ $image    = "ghcr.io/openhands/agent-canvas:1.14.0"
 $name     = "openhands-agent-canvas-ci"
 $hostPort = 18080
 
-# Verify the image is present (pre-provisioned on the runner). Pulling over a
-# non-interactive CI session fails on the Docker credential helper, so CI does
-# not pull; provision the image on the runner beforehand with:
-#   docker pull ghcr.io/openhands/agent-canvas:1.14.0
+# Pull the image if the runner doesn't already have it. The published image is
+# public, so no login is needed. A non-interactive session can trip over a
+# configured Docker credential helper (ghcr is unauthenticated here), so pull
+# with an isolated, empty Docker config that has no credsStore/credHelpers.
+# TODO: remove this self-provisioning once the runners ship the image by default.
 $imgId = docker images -q $image
-if (-not $imgId) { throw "Image $image is not present. Pre-provision it on this runner: docker pull $image" }
+if (-not $imgId) {
+  Write-Host "Image $image not present; pulling..."
+  $dockerCfg = Join-Path $env:TEMP "oh-docker-cfg"
+  New-Item -ItemType Directory -Force -Path $dockerCfg | Out-Null
+  '{}' | Set-Content -Path (Join-Path $dockerCfg "config.json") -Encoding ascii
+  docker --config $dockerCfg pull $image
+  if ($LASTEXITCODE -ne 0) { throw "docker pull failed for $image" }
+}
 Write-Host "OK: $image is present"
 
 if (docker ps -aq -f "name=$name") { docker rm -f $name | Out-Null }
