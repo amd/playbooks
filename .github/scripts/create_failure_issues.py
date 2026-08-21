@@ -471,7 +471,16 @@ def main() -> int:
     )
     parser.add_argument("--run-url", default="")
     parser.add_argument("--sha", default="")
-    parser.add_argument("--locale", default="", help="Localized content locale")
+    parser.add_argument(
+        "--locale",
+        nargs="?",
+        const="",
+        default="",
+        help=(
+            "Localized content locale; an omitted value selects English "
+            "(supports PowerShell, which drops explicit empty arguments)"
+        ),
+    )
     parser.add_argument(
         "--localized-only",
         type=str.lower,
