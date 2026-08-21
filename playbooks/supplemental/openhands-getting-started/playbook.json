@@ -1,92 +1,118 @@
 {
   "id": "openhands-getting-started",
   "title": "Getting Started with OpenHands and a Local LLM",
-  "description": "Install Agent Canvas, connect a local Lemonade model, and run your first OpenHands coding agent on your AMD Ryzen\u2122 AI.",
+  "description": "Install Agent Canvas, connect a local Lemonade model, and run your first OpenHands coding agent on your AMD Ryzen™ AI.",
   "time": 20,
   "supported_platforms": {
     "halo_box": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "halo": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "krk": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx7900xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx9070xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "r9700": [
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "tested_platforms": {
     "halo": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "krk": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx7900xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx9070xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "r9700": [
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "required_platforms": {
     "halo": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "krk": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx7900xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx9070xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "r9700": [
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {
     "halo_box": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "halo": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "krk": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx7900xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx9070xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "r9700": [
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "difficulty": "beginner",

@@ -70,16 +70,33 @@ at that model, and run your first coding task against a real project folder.
 ## Prerequisites
 
 
+<!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @require:lemonade -->
+<!-- @os:end -->
 
 You need:
 
 - Lemonade Server installed and able to serve the model below.
+
+<!-- @os:linux -->
 - Node.js 22.12 or later and `npm` (used by the `agent-canvas` CLI).
 - `uv`, the Python package manager that Agent Canvas uses to manage the agent
   server environment. If your system does not already have it, install it from
   the [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/)
   before launching Agent Canvas.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/),
+  installed and running. On Windows, the Agent Canvas stack runs from the
+  published Docker image, which bundles Node.js, `uv`, and the
+  `@openhands/agent-canvas` package, so you do not install those on the host.
+<!-- @os:end -->
+
 - A project folder to work in. This can be any local git repository or code
   directory you want the agent to work on.
 
@@ -94,13 +111,6 @@ export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/b
 lemonade --version
 node -v
 npm -v
-
-# uv is a required prerequisite (agent-canvas uses it to build its Python env).
-# Install it if missing, exactly as this playbook's prerequisites instruct.
-if ! command -v uv >/dev/null 2>&1; then
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-fi
-export PATH="$HOME/.local/bin:$PATH"
 uv --version
 
 echo "OK: lemonade, node, npm, and uv are all available"
@@ -113,19 +123,13 @@ echo "OK: lemonade, node, npm, and uv are all available"
 ```powershell
 $ErrorActionPreference = "Stop"
 
+# On Windows the Agent Canvas stack runs from the published Docker image, so the
+# only host prerequisites are Lemonade and a running Docker engine. Node.js, uv,
+# and agent-canvas are bundled inside the container.
 lemonade --version
-node -v
-npm -v
+docker version --format "{{.Server.Version}}"
 
-# uv is a required prerequisite (agent-canvas uses it to build its Python env).
-# Install it if missing, exactly as this playbook's prerequisites instruct.
-if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
-  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-  $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
-}
-uv --version
-
-Write-Host "OK: lemonade, node, npm, and uv are all available"
+Write-Host "OK: lemonade and docker are available"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -298,27 +302,17 @@ finally {
 
 ## 3. Install and Launch Agent Canvas
 
+<!-- @os:linux -->
 Install the published Agent Canvas package globally:
 
 ```bash
 npm install -g @openhands/agent-canvas
 ```
 
-<!-- @os:linux -->
-<!-- @test:id=agent-canvas-version-linux timeout=1200 hidden=True -->
+<!-- @test:id=agent-canvas-version-linux timeout=120 hidden=True -->
 ```bash
 set -euo pipefail
-
-# Use a user-owned global npm prefix so the install needs no root (matches the
-# Troubleshooting section of this playbook).
-mkdir -p "$HOME/.npm-global"
-npm config set prefix "$HOME/.npm-global"
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
-
-# Install agent-canvas only if the runner doesn't already have it.
-if ! command -v agent-canvas >/dev/null 2>&1; then
-  npm install -g @openhands/agent-canvas
-fi
 
 # Prefer --version; fall back to --help if this build has no --version flag.
 agent-canvas --version || agent-canvas --help
@@ -326,25 +320,6 @@ agent-canvas --version || agent-canvas --help
 echo "OK: agent-canvas CLI is on PATH"
 ```
 <!-- @test:end -->
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=agent-canvas-version-windows timeout=1200 hidden=True -->
-```powershell
-$ErrorActionPreference = "Stop"
-
-# Install agent-canvas only if the runner doesn't already have it.
-if (-not (Get-Command agent-canvas -ErrorAction SilentlyContinue)) {
-  npm install -g @openhands/agent-canvas
-}
-
-# Prefer --version; fall back to --help if this build has no --version flag.
-try { agent-canvas --version } catch { agent-canvas --help }
-
-Write-Host "OK: agent-canvas CLI is on PATH"
-```
-<!-- @test:end -->
-<!-- @os:end -->
 
 Then start the full stack from a terminal:
 
@@ -360,15 +335,13 @@ free port with `--port` (or `-p`) when you launch Agent Canvas:
 agent-canvas --port 3000
 ```
 
-Then open
-`http://localhost:3000` instead. The default local backend should show as
-healthy on the home screen.
+Then open `http://localhost:3000` instead. The default local backend should show
+as healthy on the home screen.
 
 The `agent-canvas` command starts the agent server, the automation backend, and
 the web frontend together. You only need this one command to run OpenHands
 locally.
 
-<!-- @os:linux -->
 <!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
@@ -391,9 +364,12 @@ rm -f "$log"
 agent-canvas >"$log" 2>&1 &
 p=$!
 
+# Probe the agent-server backend health (18000/server_info), NOT just the 8000
+# ingress root: the ingress serves the static frontend and returns 200 for /
+# even when the agent-server is down.
 ok=false
 for i in $(seq 1 300); do
-  code="$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:8000/ || true)"
+  code="$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:18000/server_info || true)"
   if [ "$code" = "200" ]; then
     ok=true
     break
@@ -406,57 +382,99 @@ for i in $(seq 1 300); do
 done
 
 if [ "$ok" != "true" ]; then
-  echo "agent-canvas not ready on http://127.0.0.1:8000/"
+  echo "agent-server not ready on http://127.0.0.1:18000/server_info"
   echo "---- agent-canvas log ----"
   cat "$log" || true
   exit 1
 fi
 
-echo "OK: agent-canvas server is responding"
+echo "OK: agent-canvas agent-server is responding"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=agent-canvas-server-windows timeout=1200 hidden=True -->
+On Windows, run the published Agent Canvas container image with Docker Desktop.
+The image bundles the Agent Server, automation backend, and web frontend, so you
+do not install Node.js, `uv`, or the CLI on the host.
+
+First, create the config and workspace folders the container mounts:
+
+```powershell
+$env:PROJECTS_PATH = Join-Path $HOME "projects"
+New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
+```
+
+Pull the published image (it is public, so no login is required):
+
+```powershell
+docker pull ghcr.io/openhands/agent-canvas:1.14.0
+```
+
+Then start the stack:
+
+```powershell
+docker run -it --rm `
+  -p 8000:8000 `
+  -v "$($env:USERPROFILE)\.openhands:/home/openhands/.openhands" `
+  -v "$($env:PROJECTS_PATH):/projects" `
+  ghcr.io/openhands/agent-canvas:1.14.0
+```
+
+Open `http://localhost:8000/canvas` in your browser. If port 8000 is already in
+use, map a different host port, for example `-p 8080:8000`, and open
+`http://localhost:8080/canvas` instead.
+
+> **Note:** The first launch initializes the Agent Server inside the container,
+> so it can take a minute or two before the backend reports healthy.
+
+The `.openhands` mount persists your LLM profile and settings across container
+restarts. The rest of this playbook configures everything through the Agent
+Canvas UI in your browser.
+
+<!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
 
-# Ensure npm-global and uv (installed to ~\.local\bin) are visible to the launched process.
-$env:Path = "$env:APPDATA\npm;$env:USERPROFILE\.local\bin;$env:Path"
+$image    = "ghcr.io/openhands/agent-canvas:1.14.0"
+$name     = "openhands-agent-canvas-ci"
+$hostPort = 18080
 
-$log = Join-Path $env:TEMP "agent-canvas-ci.log"
-if (Test-Path $log) { Remove-Item $log -Force }
+# Verify the image is present (pre-provisioned on the runner). Pulling over a
+# non-interactive CI session fails on the Docker credential helper, so CI does
+# not pull; provision the image on the runner beforehand with:
+#   docker pull ghcr.io/openhands/agent-canvas:1.14.0
+$imgId = docker images -q $image
+if (-not $imgId) { throw "Image $image is not present. Pre-provision it on this runner: docker pull $image" }
+Write-Host "OK: $image is present"
 
-# agent-canvas installs as a .cmd shim (npm global), which Start-Process cannot
-# launch directly ("%1 is not a valid Win32 application"). Run it through cmd.exe,
-# same pattern as the n8n playbook.
-$AGENT_CANVAS_CMD = "$env:APPDATA\npm\agent-canvas.cmd"
-if (-not (Test-Path $AGENT_CANVAS_CMD)) { throw "agent-canvas.cmd not found at $AGENT_CANVAS_CMD" }
+if (docker ps -aq -f "name=$name") { docker rm -f $name | Out-Null }
 
-# First launch builds the agent server's uv-managed Python env, so allow a generous startup window.
-$p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$AGENT_CANVAS_CMD`"" -NoNewWindow -PassThru -RedirectStandardOutput $log -RedirectStandardError "$log.err"
 try {
+  docker run -d --name $name -p "${hostPort}:8000" $image | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw "docker run failed for $image" }
+
+  # Probe the agent-server backend health through the container proxy
+  # (/server_info -> agent-server on 18000 inside the container), not just the
+  # /canvas static UI, which can return 200 while the backend is still down.
   $ok = $false
   for ($i = 0; $i -lt 300; $i++) {
-    $code = curl.exe -s -o NUL -w "%{http_code}" --max-time 2 http://127.0.0.1:8000/
-    if ($LASTEXITCODE -eq 0 -and $code -eq "200") { $ok = $true; break }
-    if ($p.HasExited) { Write-Host "agent-canvas process exited before it finished starting"; break }
-    Start-Sleep -Seconds 1
+    $canvas = try { (Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 "http://localhost:${hostPort}/canvas").StatusCode } catch { 0 }
+    $info   = try { (Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 "http://localhost:${hostPort}/server_info").StatusCode } catch { 0 }
+    if ($canvas -eq 200 -and $info -eq 200) { $ok = $true; break }
+    $state = docker inspect -f "{{.State.Status}}" $name 2>$null
+    if ($state -ne "running") { throw "Container $name exited before it finished starting" }
+    Start-Sleep -Seconds 2
   }
+
   if (-not $ok) {
-    Write-Host "agent-canvas not ready on http://127.0.0.1:8000/"
-    Write-Host "---- agent-canvas log ----"
-    if (Test-Path $log) { Get-Content $log }
-    throw "agent-canvas not ready on http://127.0.0.1:8000/"
+    docker logs --tail 40 $name
+    throw "agent-canvas backend not healthy on http://localhost:${hostPort}/server_info"
   }
-  Write-Host "OK: agent-canvas server is responding"
+  Write-Host "OK: agent-canvas Docker stack is healthy (/canvas and /server_info return 200)"
 }
 finally {
-  # Kill whatever is listening on 8000, then the wrapper process.
-  $conn = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
-  if ($conn) { Stop-Process -Id $conn.OwningProcess -Force -ErrorAction SilentlyContinue }
-  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+  if (docker ps -aq -f "name=$name") { docker rm -f $name | Out-Null }
 }
 ```
 <!-- @test:end -->
@@ -471,6 +489,11 @@ On first launch, Agent Canvas opens an onboarding flow. In that flow:
 3. Keep **Authentication** set to **API key**.
 4. Set **Custom Model** to `openai/Qwen3.6-35B-A3B-GGUF`.
 5. Set **Base URL** to `http://127.0.0.1:13305/api/v1`.
+   <!-- @os:windows -->
+   > On Windows the stack runs in a container, which cannot reach the host at
+   > `127.0.0.1`. Use `http://host.docker.internal:13305/api/v1` instead so the
+   > containerized agent can reach Lemonade running on the Windows host.
+   <!-- @os:end -->
 6. For **API Key**, enter any non-empty placeholder such as `lemonade-local`.
    Lemonade does not require a real key, but the OpenHands client needs a value
    to send.
@@ -547,16 +570,14 @@ the file again—all in the same conversation.
 
 ## Troubleshooting
 
+<!-- @os:linux -->
 - **`agent-canvas` is not on PATH:** reinstall with
   `npm install -g @openhands/agent-canvas` and confirm the npm global binary
-  directory is on your PATH. On Windows, run `npm config get prefix`; the
-  returned directory, often `%APPDATA%\npm` or `%USERPROFILE%\.npm-global`,
-  must be on your user PATH before `agent-canvas` can be launched from a new
+  directory is on your PATH before `agent-canvas` can be launched from a new
   terminal.
 - **`npm install -g` fails with a permissions error:** configure a user-owned
   global npm directory, then reopen the terminal and install Agent Canvas again.
 
-  <!-- @os:linux -->
   ```bash
   mkdir -p ~/.npm-global
   npm config set prefix ~/.npm-global
@@ -564,23 +585,28 @@ the file again—all in the same conversation.
   . ~/.profile
   npm install -g @openhands/agent-canvas
   ```
-  <!-- @os:end -->
+- **`uv` is missing:** install it from
+  [the uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+  Agent Canvas uses `uv` to manage the agent server Python environment.
+<!-- @os:end -->
 
-  <!-- @os:windows -->
-  ```powershell
-  New-Item -ItemType Directory -Force "$env:USERPROFILE\.npm-global"
-  npm config set prefix "$env:USERPROFILE\.npm-global"
-  $env:Path = "$env:USERPROFILE\.npm-global;$env:Path"
-  npm install -g @openhands/agent-canvas
-  ```
+<!-- @os:windows -->
+- **`docker pull` or `docker run` fails to connect:** make sure Docker Desktop
+  is running (its whale icon is in the system tray) and that the engine has
+  finished starting. `docker version` should print both a Client and a Server
+  section.
+- **The container starts but the backend never becomes healthy:** the first
+  launch initializes the Agent Server inside the container; give it a minute or
+  two, then check `docker logs <container>` for errors.
+- **The container cannot reach Lemonade:** the container reaches the host via
+  `host.docker.internal`. Confirm Lemonade is serving on the Windows host with
+  `lemonade status`, and use `http://host.docker.internal:13305/api/v1` as the
+  Base URL when configuring the LLM.
+<!-- @os:end -->
 
-  To make the Windows PATH change permanent, add `%USERPROFILE%\.npm-global` to
-  your user PATH from **Settings > System > About > Advanced system settings >
-  Environment Variables**, and open a new terminal.
-  <!-- @os:end -->
-- **The UI loads but the backend shows unhealthy:** wait a few seconds for the
+- **The UI loads but the backend shows unhealthy:** wait a minute or two for the
   agent server to finish starting, then refresh. If it stays unhealthy, restart
-  `agent-canvas` and check the terminal output for errors.
+  the stack and check the logs for errors.
 - **Lemonade chat requests fail with a connection error:** confirm
   `curl -fsS "http://127.0.0.1:13305/api/v1/health"` succeeds and that
   Lemonade is still serving the model with `lemonade status`.
@@ -591,9 +617,6 @@ the file again—all in the same conversation.
 - **The agent produces low-quality or incomplete edits:** switch to a larger
   model in Lemonade, or give the agent a smaller, more concrete task and let it
   finish before asking for the next change.
-- **`uv` is missing:** install it from
-  [the uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
-  Agent Canvas uses `uv` to manage the agent server Python environment.
 
 ## Next Steps
 
