@@ -96,6 +96,12 @@ extra_tags: {}
 # 128 GB tag for the Halo run. openclaw-lemonade-server is the same case: a fixed
 # Qwen3.6-35B-A3B (MoE, 3B active) that the legacy workflow schedules and runs on
 # every device via lemonade offload, so it also gets the 128 GB tag on Halo only.
+# hermes-lemonade-server pins the SAME Qwen3.6-35B-A3B at the same 262144 ctx and
+# belongs in the same bucket — it was simply missed. Without the tag it stayed in
+# the ordinary 64 GB Halo batch and never finished: Jenkins #40973 failed no
+# assertion, it just held its session until the 90-minute per-playbook ceiling and
+# was marked timed out, while openclaw passed on the 128 GB batch the same night.
+# The two are already treated as a pair in skip_playbook_devices below.
 device_extra_tags:
   unsloth-llms-finetuning:
     halo:     ["ram_128gb"]
@@ -117,6 +123,9 @@ device_extra_tags:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
   openclaw-lemonade-server:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  hermes-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
 
