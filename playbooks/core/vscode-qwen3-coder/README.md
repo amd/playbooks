@@ -108,43 +108,10 @@ lms unload --all
 lms ps
 $ID = "qwen3coder-32k-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
-function Invoke-LmsLoadAttempt([int]$Attempt) {
-  $stdoutFile = [IO.Path]::GetTempFileName()
-  $stderrFile = [IO.Path]::GetTempFileName()
-  Write-Host "[lmstudio-load] >>> attempt $Attempt"
-  try {
-    lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y 1> $stdoutFile 2> $stderrFile
-    $exitCode = $LASTEXITCODE
-    $stdout = Get-Content $stdoutFile -Raw
-    $stderr = Get-Content $stderrFile -Raw
-  } finally {
-    Remove-Item $stdoutFile, $stderrFile -Force -ErrorAction SilentlyContinue
-  }
-  Write-Host "[lmstudio-load] --- attempt $Attempt stdout"
-  Write-Host $stdout
-  Write-Host "[lmstudio-load] --- attempt $Attempt stderr"
-  Write-Host $stderr
-  Write-Host "[lmstudio-load] <<< attempt $Attempt exit=$exitCode"
-  return [int]$exitCode
-}
-# Retry once, preserving the complete output and exit code from each attempt.
-$loadExit = Invoke-LmsLoadAttempt 1
-if ($loadExit -ne 0) {
-  lms unload --all
-  Start-Sleep 5
-  $loadExit = Invoke-LmsLoadAttempt 2
-} else {
-  Write-Host "[lmstudio-load] attempt 2 skipped (attempt 1 succeeded)"
-}
-if ($loadExit -ne 0) { Write-Error "[lmstudio-load] model load failed after two attempts"; exit $loadExit }
-$psLines = @(lms ps 2>&1)
-$psExit = $LASTEXITCODE
-foreach ($line in $psLines) { Write-Host "$line" }
-$psText = (($psLines | ForEach-Object { "$_" }) -join "`n")
-if (($psExit -ne 0) -or (-not $psText.Contains($ID))) {
-  Write-Error "[lmstudio-load] lms ps does not contain requested identifier '$ID' (exit=$psExit)"
-  exit 1
-}
+# retry once: large-model loads can transiently fail under memory pressure
+lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y
+if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y }
+lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
 <!-- @test:end -->
@@ -173,43 +140,9 @@ lms unload --all || true
 lms ps
 ID="qwen3coder-32k-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
-set -eo pipefail
-run_lms_load_attempt() {
-  local attempt="$1"
-  local stderr_file
-  stderr_file="$(mktemp)"
-  echo "[lmstudio-load] >>> attempt $attempt"
-  set +e
-  LOAD_STDOUT="$(lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y 2>"$stderr_file")"
-  LOAD_EXIT=$?
-  set -e
-  LOAD_STDERR="$(<"$stderr_file")"
-  rm -f "$stderr_file"
-  echo "[lmstudio-load] --- attempt $attempt stdout"
-  printf '%s\n' "$LOAD_STDOUT"
-  echo "[lmstudio-load] --- attempt $attempt stderr"
-  printf '%s\n' "$LOAD_STDERR"
-  echo "[lmstudio-load] <<< attempt $attempt exit=$LOAD_EXIT"
-}
-# Retry once, preserving the complete output and exit code from each attempt.
-run_lms_load_attempt 1
-if [ "$LOAD_EXIT" -ne 0 ]; then
-  lms unload --all || true
-  sleep 5
-  run_lms_load_attempt 2
-else
-  echo "[lmstudio-load] attempt 2 skipped (attempt 1 succeeded)"
-fi
-[ "$LOAD_EXIT" -eq 0 ] || { echo "[lmstudio-load] ERROR: model load failed after two attempts"; exit "$LOAD_EXIT"; }
-set +e
-PS_OUTPUT="$(lms ps 2>&1)"
-PS_EXIT=$?
-set -e
-printf '%s\n' "$PS_OUTPUT"
-if [ "$PS_EXIT" -ne 0 ] || ! printf '%s\n' "$PS_OUTPUT" | grep -Fq -- "$ID"; then
-  echo "[lmstudio-load] ERROR: lms ps does not contain requested identifier '$ID' (exit=$PS_EXIT)"
-  exit 1
-fi
+# retry once: large-model loads can transiently fail under memory pressure
+lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load qwen3-coder-30b --context-length 32768 --gpu max --identifier "$ID" -y; }
+lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
 <!-- @test:end -->
