@@ -20,9 +20,11 @@ This tutorial uses PyTorch powered by AMD ROCm™ software to run models that ca
 - Run LLMs like gpt-oss-20b and qwen3.5-4B locally using PyTorch and ROCm
 - Create a document summarization tool using LLMs
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates

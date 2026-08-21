@@ -197,5 +197,6 @@ The **Settings** menu has three tabs:
 - **VS Code button does nothing** — Install VS Code on your client machine from [code.visualstudio.com](https://code.visualstudio.com).
 - **AMD Sync tray icon missing (Linux/GNOME)** — Install and enable the AppIndicator extension.
 - **`.deb` won't open from the file manager** — Use `sudo apt install ./AMDSyncInstaller.deb` from a terminal.
+- **Setup reappears on every launch (Linux)**: unlock your login keyring, or launch with `--password-store=gnome-libsecret`, then redo setup once.
 
 ---

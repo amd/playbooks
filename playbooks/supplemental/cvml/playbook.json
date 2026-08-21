@@ -1,17 +1,20 @@
 {
   "id": "cvml",
-  "title": "Local Computer Vision with AMD Ryzen\u2122 AI NPU",
-  "description": "Build local perception capabilities using the CVML SDK on top of Ryzen AI and AMD ROCm\u2122 software",
+  "title": "Local Computer Vision with AMD Ryzen™ AI NPU",
+  "description": "Build local perception capabilities using the CVML SDK on top of Ryzen AI and AMD ROCm™ software",
   "time": 45,
   "unsupported_platforms": {
     "halo_box": [
-      { "platform": "linux", "reason": "CVML support on Debian OS is planned for the ROCm 7.14 release" }
+      {
+        "platform": "linux",
+        "reason": "CVML support on Debian OS is planned for the ROCm 7.14 release"
+      }
     ]
   },
   "supported_platforms": {
     "halo_box": [
       "windows"
-    ],  
+    ],
     "halo": [
       "linux",
       "windows"
@@ -82,5 +85,23 @@
     "gpu",
     "npu",
     "inference"
-  ]
+  ],
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "CVML": "Latest"
+      },
+      "windows": {
+        "CVML": "Latest"
+      }
+    },
+    "apu": {
+      "linux": {
+        "CVML": "Latest"
+      },
+      "windows": {
+        "CVML": "Latest"
+      }
+    }
+  }
 }

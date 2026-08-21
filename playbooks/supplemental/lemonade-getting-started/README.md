@@ -26,9 +26,11 @@ By the end of this playbook you will be able to:
 * **Run models on the AMD Neural Processing Unit (NPU)** using Hybrid and FLM execution modes on AMD Ryzen™ AI hardware.
 <!-- @device:end -->
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
