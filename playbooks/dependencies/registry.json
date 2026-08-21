@@ -1,6 +1,6 @@
 {
   "$schema": "./registry.schema.json",
-  "description": "Central registry of pre-installed software dependencies and setup steps for AMD Halo Developer Platform",
+  "description": "Central registry of shared require-able blocks (install dependencies, models, setup steps, and runtime checks)",
   "dependencies": {
     "comfyui": {
       "name": "ComfyUI",
@@ -125,6 +125,17 @@
         ]
       },
       "versionable": true
+    },
+    "lemonade-ready": {
+      "name": "Lemonade Readiness Check",
+      "description": "Waits for the Lemonade server to be reachable before dependent steps run",
+      "category": "check",
+      "platforms": ["windows", "linux"],
+      "file": "checks/lemonade-ready.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      }
     },
     "gaia": {
       "name": "GAIA",
