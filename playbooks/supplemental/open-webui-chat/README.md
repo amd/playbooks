@@ -89,7 +89,7 @@ Lemonade runs the models; Open WebUI is the interface you interact with. Use the
 
 ## One-Time Setup
 
-This playbook needs Lemonade running as the backend and, on Linux, a container engine (Podman) to run Open WebUI. Set these up before installing Open WebUI.
+This playbook needs Lemonade running as the backend and, on Linux, a container engine (Docker or podman-docker) to run Open WebUI. Set these up before installing Open WebUI.
 
 <!-- @os:windows -->
 <!-- @device:halo_box,halo,stx,krk -->
@@ -568,14 +568,14 @@ Write-Host "OK: open-webui CLI is available"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-We are now going to use Podman service to containerize our Open WebUI installation.
+We are now going to use a container engine to containerize our Open WebUI installation.
 
 Please download the following into a directory of your choice: [compose.yml](assets/compose.yml)
 
 In that directory, run the following command:
 
 ```bash
-podman compose up -d
+docker compose up -d
 ```
 
 This pulls the Open WebUI image and writes to persistent storage.
@@ -586,19 +586,16 @@ Launch Open WebUI by typing `localhost:8080` into your browser address bar.
 ```bash
 set -euo pipefail
 
-export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
-export PODMAN_COMPOSE_WARNING_LOGS=false
-
-podman --version
-podman compose version
-podman info >/dev/null
+docker --version
+docker compose version
+docker info >/dev/null
 
 if [ ! -f compose.yml ]; then
   echo "compose.yml not found in current working directory (playbooks/supplemental/open-webui-chat/assets)"
   exit 1
 fi
 
-echo "OK: Podman, Podman Compose, and compose.yml are available"
+echo "OK: container engine, Compose, and compose.yml are available"
 ```
 <!-- @test:end -->
 
@@ -637,12 +634,12 @@ if "open_webui_data:/app/backend/data" not in volumes:
 if "open_webui_data" not in data.get("volumes", {}):
     raise SystemExit("Expected top-level open_webui_data volume")
 
-print("OK: compose.yml matches the Open WebUI Podman setup")
+print("OK: compose.yml matches the Open WebUI container setup")
 PY
 
-podman compose -f compose.yml config >/dev/null
+docker compose -f compose.yml config >/dev/null
 
-echo "OK: podman compose can parse compose.yml"
+echo "OK: docker compose can parse compose.yml"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -670,7 +667,7 @@ open-webui serve
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> The container runs in the background. From the directory containing `compose.yml`, manage it with `podman compose down` (stop) and `podman compose up -d` (start). Your accounts and settings persist in the `open_webui_data` volume.
+> The container runs in the background. From the directory containing `compose.yml`, manage it with `docker compose down` (stop) and `docker compose up -d` (start). Your accounts and settings persist in the `open_webui_data` volume.
 <!-- @os:end -->
 
 
@@ -718,18 +715,15 @@ finally {
 ```bash
 set -euo pipefail
 
-export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
-export PODMAN_COMPOSE_WARNING_LOGS=false
-
 cleanup() {
-  podman compose -f compose.yml down >/dev/null 2>&1 || true
+  docker compose -f compose.yml down >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
 # Clean up a stale container from a previous failed run.
-podman rm -f open-webui >/dev/null 2>&1 || true
+docker rm -f open-webui >/dev/null 2>&1 || true
 
-podman compose -f compose.yml up -d
+docker compose -f compose.yml up -d
 
 health=""
 for i in $(seq 1 180); do
@@ -743,16 +737,16 @@ done
 if [ -z "$health" ]; then
   echo "Open WebUI did not become ready on http://127.0.0.1:8080/health"
   echo "Container status:"
-  podman ps -a || true
+  docker ps -a || true
   echo "Open WebUI logs:"
-  podman logs --tail 200 open-webui || true
+  docker logs --tail 200 open-webui || true
   exit 1
 fi
 
 echo "OK: Open WebUI container is responding on /health"
 
 # Verify that the Open WebUI container can reach Lemonade through host networking.
-podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json.load(urllib.request.urlopen(\"http://127.0.0.1:13305/api/v1/models\", timeout=10)); assert \"data\" in data; print(\"OK: Open WebUI container can reach Lemonade models endpoint\")"'
+docker exec open-webui sh -lc 'python -c "import json, urllib.request; data=json.load(urllib.request.urlopen(\"http://127.0.0.1:13305/api/v1/models\", timeout=10)); assert \"data\" in data; print(\"OK: Open WebUI container can reach Lemonade models endpoint\")"'
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 

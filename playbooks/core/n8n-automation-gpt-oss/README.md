@@ -231,13 +231,13 @@ n8n --version
 <!-- @os:end -->
 
 <!-- @os:linux -->
-We are now going to use Podman service to containerize our n8n installation.
+We are now going to use a container engine to containerize our n8n installation.
 
 Please download the following into a directory of your choice: [compose.yml](assets/compose.yml)
 
 In that directory, run the following command:
 ```bash
-podman compose up -d
+docker compose up -d
 ```
 
 This should install n8n and write to a persistent storage.

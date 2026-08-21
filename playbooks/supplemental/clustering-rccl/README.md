@@ -121,7 +121,7 @@ This amount can be increased by changing the kernel's Translation Table Manager 
 
 > **Note**: Complete this step on both Machine 1 and Machine 2.
 
-Your Ryzen AI Halo ships with vLLM packaged inside a prebuilt container image, which you run using Podman, a free and open source container tool.
+Your Ryzen AI Halo ships with vLLM packaged inside a prebuilt container image, which you run using the `docker` command (backed by Docker or podman-docker).
 
 ### 1. Create the Model Download Directory
 
@@ -138,7 +138,7 @@ The command below launches the container and drops you into an interactive shell
 Start the container with:
 
 ```bash
-sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g --pids-limit=-1 -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
+docker run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g --pids-limit=-1 -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
 ```
 
 > **Note**: Replace `<IFNAME>` with the output interface name from [1. Determine Network Interfaces](#1-determine-network-interfaces)
@@ -147,7 +147,7 @@ sudo podman run -it --name vllm_cluster --replace --pull missing --network=host 
 
 vLLM uses Ray to orchestrate the cluster and RCCL to handle GPU-to-GPU communication across nodes. One machine acts as the **head node** (Machine 1), coordinating inference. The other joins as a **worker node** (Machine 2), contributing its GPU memory and compute.
 
-> **Note**: Ray is an optional dependency for vLLM and is only available from within the preconfigured Podman container.
+> **Note**: Ray is an optional dependency for vLLM and is only available from within the preconfigured container.
 
 At launch, vLLM shards the model across both nodes using tensor parallelism. Once loaded, inference proceeds as if running on a single accelerator.
 
