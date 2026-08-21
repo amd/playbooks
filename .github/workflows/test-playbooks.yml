@@ -109,7 +109,7 @@ jobs:
         run: python3 .github/scripts/test_build_test_matrix.py
 
   test-playbooks:
-    name: "Test ${{ matrix.locale && format('{0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
+    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
     needs: detect-changes
     if: needs.detect-changes.outputs.has_entries == 'true'
     runs-on: ${{ fromJson(matrix.runner) }}
@@ -249,7 +249,7 @@ jobs:
         shell: powershell
         run: |
           $summary = @"
-          ### Test Results for ``${{ matrix.locale && format('{0}/', matrix.locale) || '' }}${{ matrix.playbook }}`` (${{ matrix.platform }}/${{ matrix.arch }})
+          ### Test Results for ``${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}`` (${{ matrix.platform }}/${{ matrix.arch }})
           
           See the test artifacts for detailed logs.
           "@
@@ -260,7 +260,7 @@ jobs:
         shell: bash
         run: |
           cat >> $GITHUB_STEP_SUMMARY << 'EOF'
-          ### Test Results for `${{ matrix.locale && format('{0}/', matrix.locale) || '' }}${{ matrix.playbook }}` (${{ matrix.platform }}/${{ matrix.arch }})
+          ### Test Results for `${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}` (${{ matrix.platform }}/${{ matrix.arch }})
 
           See the test artifacts for detailed logs.
           EOF

@@ -194,7 +194,7 @@ jobs:
         run: python3 .github/scripts/orchestrai_trigger.py
 
   test-playbooks:
-    name: "Test ${{ matrix.locale && format('{0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})"
+    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})"
     needs: command
     if: needs.command.outputs.has_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
@@ -277,7 +277,7 @@ jobs:
           RP_URL: ${{ steps.results.outputs.rp_url }}
         run: |
           {
-            echo "### \`${{ matrix.locale && format('{0}/', matrix.locale) || '' }}${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
+            echo "### \`${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
             echo ""
             # ReportPortal (test results) link only; the pipeline build URL is
             # intentionally not shown. Populated even when the verdict fails.

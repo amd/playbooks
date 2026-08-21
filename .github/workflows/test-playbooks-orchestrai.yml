@@ -212,7 +212,7 @@ jobs:
         run: python3 .github/scripts/orchestrai_trigger.py
 
   test-playbooks:
-    name: "Test ${{ matrix.locale && format('{0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
+    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
     needs: detect-and-trigger
     if: needs.detect-and-trigger.outputs.has_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
@@ -302,7 +302,7 @@ jobs:
           RP_URL: ${{ steps.results.outputs.rp_url }}
         run: |
           {
-            echo "### \`${{ matrix.locale && format('{0}/', matrix.locale) || '' }}${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
+            echo "### \`${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
             echo ""
             # Link to ReportPortal (test results) only. The pipeline build URL is
             # intentionally not shown here.
