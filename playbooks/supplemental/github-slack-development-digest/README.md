@@ -528,12 +528,20 @@ $image    = "ghcr.io/openhands/agent-canvas:1.14.0"
 $name     = "digest-agent-canvas-ci"
 $hostPort = 18080
 
-# Verify the image is present (pre-provisioned on the runner). Pulling over a
-# non-interactive CI session fails on the Docker credential helper, so CI does
-# not pull; provision the image on the runner beforehand with:
-#   docker pull ghcr.io/openhands/agent-canvas:1.14.0
+# Pull the image if the runner doesn't already have it. The published image is
+# public, so no login is needed. A non-interactive session can trip over a
+# configured Docker credential helper (ghcr is unauthenticated here), so pull
+# with an isolated, empty Docker config that has no credsStore/credHelpers.
+# TODO: remove this self-provisioning once the runners ship the image by default.
 $imgId = docker images -q $image
-if (-not $imgId) { throw "Image $image is not present. Pre-provision it on this runner: docker pull $image" }
+if (-not $imgId) {
+  Write-Host "Image $image not present; pulling..."
+  $dockerCfg = Join-Path $env:TEMP "digest-docker-cfg"
+  New-Item -ItemType Directory -Force -Path $dockerCfg | Out-Null
+  '{}' | Set-Content -Path (Join-Path $dockerCfg "config.json") -Encoding ascii
+  docker --config $dockerCfg pull $image
+  if ($LASTEXITCODE -ne 0) { throw "docker pull failed for $image" }
+}
 Write-Host "OK: $image is present"
 
 if (docker ps -aq -f "name=$name") { docker rm -f $name | Out-Null }
