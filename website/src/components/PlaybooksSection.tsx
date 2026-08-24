@@ -102,8 +102,8 @@ export default function PlaybooksSection({ activeDevice, selectedDevice, onSelec
   }, [playbooks, searchQuery]);
 
   const isSearching = searchQuery.trim().length > 0;
-  const featuredPlaybook = isSearching ? undefined : filteredPlaybooks.find((p) => p.isFeatured);
-  const regularPlaybooks = filteredPlaybooks.filter((p) => !p.isFeatured || isSearching);
+  const newPlaybooks = isSearching ? [] : filteredPlaybooks.filter((p) => p.isNew);
+  const regularPlaybooks = filteredPlaybooks;
   const displayedPlaybooks = (showAll || isSearching) ? regularPlaybooks : regularPlaybooks.slice(0, 6);
 
   const isHaloSelected = activeDevice === "reference";
@@ -114,6 +114,58 @@ export default function PlaybooksSection({ activeDevice, selectedDevice, onSelec
     const qs = params.toString();
     return `/playbooks/${id}${qs ? `?${qs}` : ""}`;
   };
+
+  const renderPlaybookCard = (playbook: Playbook) => (
+    <Link key={playbook.id} href={playbookHref(playbook.id)} className="block group">
+      <div className="relative h-full bg-[#1e1e1e] border border-[#333333] rounded-lg p-4 hover:border-[#D4915D]/50 hover:bg-[#242424] transition-all duration-300 overflow-hidden">
+        <div className="flex items-start justify-between mb-3">
+          <div className="p-1.5 rounded-md bg-[#D4915D]/10 border border-[#D4915D]/20">
+            <svg className="w-4 h-4 text-[#D4915D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {isHaloSelected && playbook.category === "core" && !(platformFilter === "linux" && (playbook.id === "lmstudio-rocm-llms" || playbook.id === "vscode-qwen3-coder")) && (
+              <PreinstalledBadge />
+            )}
+            {playbook.isNew && (
+              <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold rounded border border-emerald-500/30">
+                New
+              </span>
+            )}
+            <div className="flex gap-1">
+              {extractPlatforms(playbook.supported_platforms ?? {}).map((p) => (
+                <PlatformBadge key={p} platform={p} />
+              ))}
+            </div>
+          </div>
+        </div>
+        <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-[#D4915D] transition-colors line-clamp-2">
+          {playbook.title}
+        </h3>
+        <p className="text-xs text-[#a0a0a0] line-clamp-2 mb-3">
+          {playbook.description}
+        </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-[#6b6b6b] text-[10px] flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {formatTime(playbook.time)}
+            </span>
+            <DifficultyBadge difficulty={playbook.difficulty} />
+          </div>
+          <div className="flex items-center text-xs text-[#D4915D] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+            <span>View</span>
+            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
 
   return (
     <section className="py-12 px-6 relative overflow-hidden" id="playbooks">
@@ -244,65 +296,6 @@ export default function PlaybooksSection({ activeDevice, selectedDevice, onSelec
           </div>
         ) : (
           <>
-            {/* Featured Playbook - Hero Style */}
-            {featuredPlaybook && (
-              <Link href={playbookHref(featuredPlaybook.id)} className="block mb-6">
-                <div className="group relative bg-gradient-to-r from-[#1e1e1e] to-[#242424] border border-[#D4915D]/30 rounded-xl overflow-hidden hover:border-[#D4915D]/60 transition-all duration-300">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#D4915D]/5 to-transparent" />
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-[#D4915D]/5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
-                  
-                  <div className="relative p-5 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="px-2 py-0.5 bg-[#D4915D] text-black text-[10px] font-bold rounded-full uppercase tracking-wide">
-                          Featured
-                        </span>
-                        {featuredPlaybook.isNew && (
-                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold rounded-full border border-emerald-500/30">
-                            New
-                          </span>
-                        )}
-                        {isHaloSelected && featuredPlaybook.category === "core" && (
-                          <PreinstalledBadge />
-                        )}
-                        <DifficultyBadge difficulty={featuredPlaybook.difficulty} />
-                        <div className="flex gap-1">
-                          {extractPlatforms(featuredPlaybook.supported_platforms ?? {}).map((p) => (
-                            <PlatformBadge key={p} platform={p} />
-                          ))}
-                        </div>
-                      </div>
-                      <h3 className="text-base md:text-lg font-bold text-white mb-2 group-hover:text-[#D4915D] transition-colors">
-                        {featuredPlaybook.title}
-                      </h3>
-                      <p className="text-[#a0a0a0] text-sm mb-4 max-w-xl">
-                        {featuredPlaybook.description}
-                      </p>
-                      <div className="flex items-center gap-4">
-                        <span className="text-[#6b6b6b] text-xs flex items-center gap-1.5">
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          {formatTime(featuredPlaybook.time)}
-                        </span>
-                        <span className="text-[#D4915D] text-sm font-medium flex items-center gap-2 group-hover:gap-3 transition-all">
-                          Start Learning
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                          </svg>
-                        </span>
-                      </div>
-                    </div>
-                    <div className="hidden md:flex items-center justify-center w-16 h-16 rounded-xl bg-[#D4915D]/10 border border-[#D4915D]/20 group-hover:border-[#D4915D]/40 transition-colors">
-                      <svg className="w-8 h-8 text-[#D4915D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L4.2 15.3m15.6 0l.3 1.524A3.002 3.002 0 0117.83 19.5H6.17a3.002 3.002 0 01-2.27-2.676l.3-1.524" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            )}
-
             {/* Search Results Info */}
             {isSearching && (
               <div className="mb-4 text-center">
@@ -314,59 +307,33 @@ export default function PlaybooksSection({ activeDevice, selectedDevice, onSelec
               </div>
             )}
 
-            {/* Playbook Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-              {displayedPlaybooks.map((playbook) => (
-                <Link key={playbook.id} href={playbookHref(playbook.id)} className="block group">
-                  <div className="relative h-full bg-[#1e1e1e] border border-[#333333] rounded-lg p-4 hover:border-[#D4915D]/50 hover:bg-[#242424] transition-all duration-300 overflow-hidden">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="p-1.5 rounded-md bg-[#D4915D]/10 border border-[#D4915D]/20">
-                        <svg className="w-4 h-4 text-[#D4915D]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                        </svg>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        {isHaloSelected && playbook.category === "core" && !(platformFilter === "linux" && (playbook.id === "lmstudio-rocm-llms" || playbook.id === "vscode-qwen3-coder")) && (
-                          <PreinstalledBadge />
-                        )}
-                        {playbook.isNew && (
-                          <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold rounded border border-emerald-500/30">
-                            New
-                          </span>
-                        )}
-                        <div className="flex gap-1">
-                          {extractPlatforms(playbook.supported_platforms ?? {}).map((p) => (
-                            <PlatformBadge key={p} platform={p} />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-[#D4915D] transition-colors line-clamp-2">
-                      {playbook.title}
-                    </h3>
-                    <p className="text-xs text-[#a0a0a0] line-clamp-2 mb-3">
-                      {playbook.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#6b6b6b] text-[10px] flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          {formatTime(playbook.time)}
-                        </span>
-                        <DifficultyBadge difficulty={playbook.difficulty} />
-                      </div>
-                      <div className="flex items-center text-xs text-[#D4915D] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span>View</span>
-                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
+            {/* What's New Section */}
+            {newPlaybooks.length > 0 && (
+              <div className="mb-8">
+                <div className="mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold rounded-full border border-emerald-500/30 uppercase tracking-wide">
+                      New
+                    </span>
+                    <h3 className="text-lg font-bold text-white">What&apos;s New</h3>
                   </div>
-                </Link>
-              ))}
+                  <p className="text-sm text-[#a0a0a0] mt-1">Newly added and popular modern workflows</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {newPlaybooks.map((playbook) => renderPlaybookCard(playbook))}
+                </div>
+              </div>
+            )}
+
+            {/* All Playbooks */}
+            {!isSearching && (
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-white">All Playbooks</h3>
+                <p className="text-sm text-[#a0a0a0] mt-1">Detailed instructions on how to run various AI workflows for your AMD hardware</p>
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+              {displayedPlaybooks.map((playbook) => renderPlaybookCard(playbook))}
             </div>
 
             {/* Show More Button */}

@@ -20,9 +20,11 @@ This tutorial uses PyTorch powered by AMD ROCm™ software to run models that ca
 - Run LLMs like gpt-oss-20b and qwen3.5-4B locally using PyTorch and ROCm
 - Create a document summarization tool using LLMs
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
@@ -110,7 +112,7 @@ pytorch-env\Scripts\activate
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -118,7 +120,7 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece pro
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -136,7 +138,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -208,7 +210,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    disable_mmap=True
 )
 ```
 <!-- @test:end -->

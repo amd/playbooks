@@ -117,5 +117,25 @@
     "lemonade",
     "llm"
   ],
-  "coverImage": "assets/00-architecture-overview.png"
+  "coverImage": "assets/00-architecture-overview.png",
+  "recommendedSystemMemory": 64,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "Agent Canvas": "1.10.0"
+      },
+      "windows": {
+        "Agent Canvas": "1.10.0"
+      }
+    },
+    "apu": {
+      "linux": {
+        "Agent Canvas": "Latest"
+      },
+      "windows": {
+        "Agent Canvas": "Latest"
+      }
+    }
+  },
+  "primaryModel": "Qwen3.6-35B-A3B"
 }

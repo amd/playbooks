@@ -114,7 +114,7 @@
       "linux",
       "windows"
     ]
-  },  
+  },
   "difficulty": "beginner",
   "isNew": false,
   "isFeatured": false,
@@ -128,5 +128,33 @@
     "vlm",
     "stable-diffusion"
   ],
-  "coverImage": "assets/open-webui_chat_interface.png"
+  "coverImage": "assets/open-webui_chat_interface.png",
+  "recommendedSystemMemory": 8,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "Open WebUI": "0.11"
+      },
+      "windows": {
+        "Open WebUI": "0.11"
+      }
+    },
+    "apu": {
+      "linux": {
+        "Open WebUI": "Latest"
+      },
+      "windows": {
+        "Open WebUI": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "Open WebUI": "Latest"
+      },
+      "windows": {
+        "Open WebUI": "Latest"
+      }
+    }
+  },
+  "primaryModel": "Qwen3-4B"
 }

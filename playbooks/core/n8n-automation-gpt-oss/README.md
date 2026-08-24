@@ -35,9 +35,11 @@ In this playbook, we use Lemonade to serve a local LLM that n8n connects to for 
 
 n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a first-class integration - no need for manual configuration. This makes connecting your local LLM to automation workflows straightforward.
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates

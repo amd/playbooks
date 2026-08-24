@@ -27,9 +27,11 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 - Conveys tone, emotion, and intent without awkward pauses
 - Enables global collaboration and faster decision-making
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
@@ -125,7 +127,7 @@ s2st-env\Scripts\activate
 Install m4t dependencies using pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
 ```
 <!-- @test:end -->
 

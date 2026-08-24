@@ -56,9 +56,11 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 - How to save and deploy your fine-tuned model
 - How to monitor training and debug common issues
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Check for Software Updates
@@ -133,7 +135,7 @@ finetune-venv\Scripts\activate
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -142,7 +144,7 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandb
 **Windows:** Only core packages are tested and supported here. **bitsandbytes is not well supported on Windows**, so the Windows install omits it; use LoRA or full fine-tuning on Windows (QLoRA requires bitsandbytes and is intended for Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -463,16 +465,18 @@ required = [
     "config.json",
     "tokenizer_config.json",
     "tokenizer.json",
-    "model.safetensors.index.json",
 ]
 missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
 if missing:
     print(f"FAIL: Missing required files: {missing}")
     sys.exit(1)
 
+# Weights may be saved as a single model.safetensors or, when the model
+# exceeds max_shard_size, as model-*.safetensors shards plus an index.
+single = os.path.exists(os.path.join(out_dir, "model.safetensors"))
 shards = glob.glob(os.path.join(out_dir, "model-*.safetensors"))
-if not shards:
-    print("FAIL: No sharded model safetensors files found")
+if not single and not shards:
+    print("FAIL: No model safetensors weights found")
     sys.exit(1)
 
 print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")

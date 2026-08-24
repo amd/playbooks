@@ -5,25 +5,46 @@
   "time": 30,
   "unsupported_platforms": {
     "halo_box": [
-      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+      {
+        "platform": "windows",
+        "reason": "vLLM is not supported on Windows"
+      }
     ],
     "halo": [
-      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+      {
+        "platform": "windows",
+        "reason": "vLLM is not supported on Windows"
+      }
     ],
     "stx": [
-      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+      {
+        "platform": "windows",
+        "reason": "vLLM is not supported on Windows"
+      }
     ],
     "krk": [
-      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+      {
+        "platform": "windows",
+        "reason": "vLLM is not supported on Windows"
+      }
     ],
     "rx7900xt": [
-      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+      {
+        "platform": "windows",
+        "reason": "vLLM is not supported on Windows"
+      }
     ],
     "rx9070xt": [
-      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+      {
+        "platform": "windows",
+        "reason": "vLLM is not supported on Windows"
+      }
     ],
     "r9700": [
-      { "platform": "windows", "reason": "vLLM is not supported on Windows" }
+      {
+        "platform": "windows",
+        "reason": "vLLM is not supported on Windows"
+      }
     ]
   },
   "supported_platforms": {
@@ -46,5 +67,14 @@
     "inference",
     "llm",
     "quickstart"
-  ]
+  ],
+  "recommendedSystemMemory": 8,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "vLLM": "Latest from Ryzen AI Developer Center"
+      }
+    }
+  },
+  "primaryModel": "Qwen3-1.7B"
 }
