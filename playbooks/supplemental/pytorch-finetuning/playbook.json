@@ -126,5 +126,13 @@
     "llm",
     "rocm"
   ],
-  "coverImage": "assets/cover_image.jpg"
+  "coverImage": "assets/cover_image.jpg",
+  "recommendedSystemMemory": 24,
+  "validatedVersions": {
+    "reference": {
+      "linux": {},
+      "windows": {}
+    }
+  },
+  "primaryModel": "Gemma-3-4B"
 }

@@ -21,7 +21,7 @@ import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
 import PlaybookHelpBox from "@/components/PlaybookHelpBox";
 import type { Playbook, Platform, Device, DeviceCategory, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
-import { formatTime, DEVICE_IDS, deviceNames, extractPlatforms, extractDevices, extractCategories, extractCategoryDevices, DEVICE_CATEGORY_MAP, categoryForDevice } from "@/types/playbook";
+import { formatTime, formatValidationDate, DEVICE_IDS, deviceNames, extractPlatforms, extractDevices, extractCategories, extractCategoryDevices, DEVICE_CATEGORY_MAP, categoryForDevice } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
 const dropdownStateStore: Record<string, boolean> = {};
@@ -2187,6 +2187,69 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                       </div>
                     )}
                   </div>
+
+                  {/* Validation info — versions/date this playbook was last validated with.
+                      Kept separate from the README content; changes with the device/OS toggle. */}
+                  {filteredContent && !coverageViewActive && (() => {
+                    const info =
+                      selectedDevice
+                        ? playbook.validation?.[selectedDevice]?.[selectedPlatform]
+                        : undefined;
+                    const versionEntries = info?.versions
+                      ? Object.entries(info.versions).filter(([, v]) => v && v.trim() !== "")
+                      : [];
+                    const validatedDate = formatValidationDate(info?.lastValidated);
+                    if (versionEntries.length === 0 && !validatedDate) return null;
+                    const deviceLabel = selectedDevice ? deviceNames[selectedDevice] : "";
+                    const osLabel = selectedPlatform === "windows" ? "Windows" : "Linux";
+                    return (
+                      <section className="mt-6 bg-[#1a1a1a] border border-[#333] rounded-xl p-6 md:p-8">
+                        <div className="flex items-start justify-between gap-4 flex-wrap">
+                          <div className="flex items-center gap-2">
+                            <svg className="w-5 h-5 text-[#67b26f]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h2 className="text-base font-semibold text-white m-0">Validation</h2>
+                          </div>
+                          {validatedDate && (
+                            <span className="text-xs text-[#a0a0a0]">
+                              Last validated <span className="text-white font-medium">{validatedDate}</span>
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-[#8a8a8a] mt-2 mb-4">
+                          Software versions this playbook was verified with on{" "}
+                          <span className="text-[#c0c0c0]">{deviceLabel} ({osLabel})</span>.
+                        </p>
+                        {versionEntries.length > 0 ? (
+                          <div className="overflow-hidden rounded-lg border border-[#2a2a2a]">
+                            <table className="w-full text-sm border-collapse">
+                              <tbody>
+                                {versionEntries.map(([key, value], idx) => (
+                                  <tr
+                                    key={key}
+                                    className={idx % 2 === 0 ? "bg-[#141414]" : "bg-[#181818]"}
+                                  >
+                                    <td className="px-4 py-2.5 text-[#a0a0a0] whitespace-nowrap w-1/2 border-b border-[#2a2a2a]">
+                                      {key}
+                                    </td>
+                                    <td className="px-4 py-2.5 text-white font-mono text-[13px] border-b border-[#2a2a2a]">
+                                      {value}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-[#6b6b6b] italic">
+                            Version details for this configuration are being finalized.
+                          </p>
+                        )}
+                      </section>
+                    );
+                  })()}
+
 
                   {/* Need help? — links to GitHub issues */}
                   {filteredContent && (

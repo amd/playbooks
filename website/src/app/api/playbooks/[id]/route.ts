@@ -5,7 +5,8 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import type { Playbook, PlaybookMeta, Category, TestInfo, TestCoverageInfo } from "@/types/playbook";
+import type { Playbook, PlaybookMeta, Category, TestInfo, TestCoverageInfo, Device, Platform, ValidationInfo, DeviceCategory } from "@/types/playbook";
+import { categoryForDevice } from "@/types/playbook";
 import { loadAllGitHubTestResults } from "@/lib/github-test-results";
 import type { DeviceTestResult } from "@/lib/github-test-results";
 
@@ -22,6 +23,7 @@ interface DependencyRegistry {
     platforms: string[];
     file: string;
     preinstalled?: Record<string, string[]>;
+    versionable?: boolean;
   }>;
   setup?: Record<string, {
     name: string;
@@ -46,6 +48,130 @@ function loadDependencyRegistry(): DependencyRegistry | null {
     console.error("Error loading dependency registry:", error);
     return null;
   }
+}
+
+type VersionMap = Record<string, string>;
+
+// A dependency version entry is either a single string (same everywhere) or
+// keyed by device category (reference/apu/gpu) then OS.
+type DepVersionEntry =
+  | string
+  | ({ default?: string } & Partial<Record<DeviceCategory, string | Partial<Record<Platform, string>>>>);
+
+interface DepVersionsFile {
+  defaultDate?: string;
+  deps?: Record<string, DepVersionEntry>;
+}
+
+/**
+ * Loads the central dependency-version file (playbooks/dependency-versions.json).
+ */
+function loadDepVersions(): DepVersionsFile | null {
+  const p = path.join(PLAYBOOKS_ROOT, "dependency-versions.json");
+  if (!fs.existsSync(p)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(p, "utf-8"));
+  } catch (error) {
+    console.error("Error loading dependency-versions.json:", error);
+    return null;
+  }
+}
+
+function resolveDepVersion(entry: DepVersionEntry | undefined, cat: DeviceCategory, os: Platform): string | undefined {
+  if (entry == null) return undefined;
+  if (typeof entry === "string") return entry;
+  // A category value may be a plain string (same for both OSes) or per-OS.
+  // Falls back to the entry's "default" (e.g. "Latest" for non-reference devices
+  // where CI tests the current release rather than a pinned pre-installed version).
+  const catVal = entry[cat];
+  if (typeof catVal === "string") return catVal;
+  if (catVal && catVal[os] != null) return catVal[os];
+  return typeof entry.default === "string" ? entry.default : undefined;
+}
+
+/**
+ * Builds the resolved per-device, per-OS "validated versions" map for a playbook.
+ *
+ * The software shown for a device+OS is the union of:
+ *   1. the playbook's @require'd dependencies that are marked versionable in
+ *      dependencies/registry.json, with versions resolved from the central
+ *      dependency-versions.json for that device category + OS; and
+ *   2. the playbook's own validatedVersions overrides in playbook.json (hero
+ *      apps not captured by @require, or version pins) which win on same-named keys.
+ *
+ * This means a playbook only lists software it actually uses — e.g. a Lemonade
+ * playbook shows Lemonade + driver, not ROCm/PyTorch, unless it @requires them.
+ * Empty-string versions hide that row. Returns undefined if there is nothing to show.
+ */
+// Strips the OS blocks that don't match `platform`, so @require tags can be
+// read per-OS (e.g. ComfyUI requires pytorch on Linux but not Windows, where it
+// ships bundled). Mirrors the content OS-filter used for rendering.
+function requiresForOS(readmeRaw: string, platform: Platform, registry: DependencyRegistry | null): string[] {
+  const other: Platform = platform === "windows" ? "linux" : "windows";
+  // Remove blocks scoped to the other OS; keep @os:all and unscoped content.
+  const scoped = readmeRaw.replace(
+    new RegExp(`<!-- @os:${other} -->[\\s\\S]*?<!-- @os:end -->`, "g"),
+    "",
+  );
+  const ids = new Set<string>();
+  const reqRe = /<!-- @require:([a-z0-9,-]+) -->/g;
+  let m: RegExpExecArray | null;
+  while ((m = reqRe.exec(scoped)) !== null) {
+    for (const id of m[1].split(",").map(s => s.trim()).filter(Boolean)) ids.add(id);
+  }
+  return [...ids].filter(id => registry?.dependencies[id]?.versionable);
+}
+
+function buildValidation(meta: PlaybookMeta, readmeRaw: string): PlaybookMeta["validation"] | undefined {
+  const overrides = meta.validatedVersions;
+  const registry = loadDependencyRegistry();
+
+  // Quick opt-in check: any versionable require anywhere, or any override.
+  const anyReq = /<!-- @require:([a-z0-9,-]+) -->/g;
+  let hasVersionableReq = false;
+  let mm: RegExpExecArray | null;
+  while ((mm = anyReq.exec(readmeRaw)) !== null) {
+    if (mm[1].split(",").some(id => registry?.dependencies[id.trim()]?.versionable)) { hasVersionableReq = true; break; }
+  }
+  if (!hasVersionableReq && !overrides) return undefined;
+
+  const depFile = loadDepVersions();
+  const deps = depFile?.deps ?? {};
+  const date = meta.validatedDate ?? depFile?.defaultDate;
+
+  const result: Partial<Record<Device, Partial<Record<Platform, ValidationInfo>>>> = {};
+
+  for (const [device, platforms] of Object.entries(meta.supported_platforms) as [Device, Platform[]][]) {
+    if (!platforms) continue;
+    const category = categoryForDevice(device);
+
+    const perPlatform: Partial<Record<Platform, ValidationInfo>> = {};
+    for (const platform of platforms) {
+      const versions: VersionMap = {};
+      // 1. required versionable deps for THIS OS, versions from the central file
+      for (const id of requiresForOS(readmeRaw, platform, registry)) {
+        const name = registry?.dependencies[id]?.name ?? id;
+        const v = resolveDepVersion(deps[id], category, platform);
+        if (v !== undefined) versions[name] = v;
+      }
+      // 2. playbook overrides (hero apps / pins) win on same-named keys
+      Object.assign(versions, overrides?.[category]?.[platform] ?? {});
+      // hide blank rows
+      const filtered: VersionMap = {};
+      for (const [k, v] of Object.entries(versions)) {
+        if (v && v.trim() !== "") filtered[k] = v;
+      }
+      if (Object.keys(filtered).length > 0) {
+        perPlatform[platform] = { lastValidated: date, versions: filtered };
+      }
+    }
+
+    if (Object.keys(perPlatform).length > 0) {
+      result[device] = perPlatform;
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 /**
@@ -456,9 +582,11 @@ function findPlaybook(
         
         if (meta.id === id) {
           let content = "";
+          let readmeRaw = "";
           let testCoverage: TestCoverageInfo | undefined;
           if (fs.existsSync(readmePath)) {
             content = fs.readFileSync(readmePath, "utf-8");
+            readmeRaw = content;
             content = stripGitHubOnlyBlocks(content);
             const testResult = processTestTags(content, showCoverage, resultsMap, resultsSummary, deviceResultsList, deviceSummaries);
             content = testResult.content;
@@ -477,14 +605,20 @@ function findPlaybook(
             content = processSetupTags(content);
           }
 
+          // Validated versions are resolved at request time: the playbook's
+          // @require'd versionable deps (versions from playbooks/dependency-versions.json)
+          // plus the playbook's own validatedVersions overrides.
+          const validation = buildValidation(meta, readmeRaw);
+
           const playbook: Playbook = {
             ...meta,
             category: getCategory(category),
             path: `${category}/${folder.name}`,
             content,
+            ...(validation ? { validation } : {}),
             ...(testCoverage ? { testCoverage } : {}),
           };
-          
+
           return playbook;
         }
       } catch (error) {

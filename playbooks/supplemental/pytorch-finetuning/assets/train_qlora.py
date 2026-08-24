@@ -254,7 +254,6 @@ args = SFTConfig(
     logging_steps=5,
     save_strategy="epoch",
     eval_strategy="epoch",
-    save_safetensors=True,
     save_total_limit=2,
     
     # Other
