@@ -9,8 +9,13 @@ on:
     - cron: '0 8 * * *'    # 01:00 PDT (UTC-7); 02:00 PST (UTC-8)
   workflow_dispatch:
     inputs:
+      locale:
+        description: 'Localized locale to test alongside English'
+        required: true
+        default: 'zh-CN'
+        type: string
       playbook_id:
-        description: 'Specific playbook ID to test (leave empty to test all playbooks)'
+        description: 'Specific English/localized playbook ID (leave empty to test all)'
         required: false
         type: string
   pull_request:
@@ -44,27 +49,42 @@ jobs:
         with:
           python-version: '3.13'
 
-      # On a PR, only entries whose extracted @test blocks (or assets) actually
-      # changed are queued; prose-only edits queue nothing. The nightly cron
-      # still runs the full matrix, so a wrongly-skipped entry surfaces in <24h.
+      # Build one matrix containing canonical English and localized entries.
+      # English selection uses extracted test signatures; localized selection
+      # conservatively tracks the effective overlay and dependency trees.
       # Event data goes through env, never inline, so PR-controlled strings
       # (playbook ids, device names) cannot reach the shell directly.
       - name: Build test matrix
         id: build-matrix
         env:
           PLAYBOOK_INPUT: ${{ github.event.inputs.playbook_id }}
+          LOCALE: ${{ inputs.locale || 'zh-CN' }}
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
+          set -euo pipefail
           if [ -n "$PLAYBOOK_INPUT" ]; then
-            python3 .github/scripts/build_test_matrix.py --mode playbook \
-              --playbook-id "$PLAYBOOK_INPUT"
+            args=(--mode playbook --playbook-id "$PLAYBOOK_INPUT")
           elif [ "$EVENT_NAME" = "pull_request" ]; then
-            python3 .github/scripts/build_test_matrix.py --mode changed \
-              --base "$PR_BASE_SHA"
+            args=(--mode changed --base "$PR_BASE_SHA")
           else
-            python3 .github/scripts/build_test_matrix.py --mode all
+            args=(--mode all)
           fi
+          ENGLISH=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" --allow-empty)
+          LOCALIZED=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" --locale "$LOCALE" --allow-empty)
+          MATRIX=$(jq -cn --argjson english "$ENGLISH" --argjson localized "$LOCALIZED" '$english + $localized')
+          COUNT=$(jq 'length' <<< "$MATRIX")
+          if [ "$COUNT" -gt 256 ]; then
+            echo "::error::Combined English/localized matrix has $COUNT entries; GitHub Actions allows 256"
+            exit 1
+          fi
+          if [ -n "$PLAYBOOK_INPUT" ] && [ "$MATRIX" = "[]" ]; then
+            echo "::error::No English or $LOCALE matrix entries for '$PLAYBOOK_INPUT'"
+            exit 1
+          fi
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "has_entries=$([ "$MATRIX" != "[]" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "detection_ok=true" >> "$GITHUB_OUTPUT"
 
       - name: Display test matrix
         env:
@@ -89,7 +109,7 @@ jobs:
         run: python3 .github/scripts/test_build_test_matrix.py
 
   test-playbooks:
-    name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
+    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
     needs: detect-changes
     if: needs.detect-changes.outputs.has_entries == 'true'
     runs-on: ${{ fromJson(matrix.runner) }}
@@ -163,20 +183,20 @@ jobs:
         id: run_tests_windows
         shell: powershell
         run: |
-          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform windows --device "${{ matrix.arch }}"
+          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform windows --device "${{ matrix.arch }}" --locale "${{ matrix.locale }}" --localized-only "${{ matrix.localized_only || 'false' }}"
 
       - name: Extract and run tests (Linux)
         if: matrix.platform == 'linux'
         id: run_tests_linux
         shell: bash
         run: |
-          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}"
+          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}" --locale "${{ matrix.locale }}" --localized-only "${{ matrix.localized_only || 'false' }}"
 
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          name: test-results-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
 
@@ -199,7 +219,9 @@ jobs:
             --repo "${{ github.repository }}" \
             --playbook "${{ matrix.playbook }}" \
             --workflow-file "test-playbooks.yml" \
-            --runner-labels "self-hosted,Linux,${{ matrix.arch }}" \
+            --locale "${{ matrix.locale }}" \
+            --localized-only "${{ matrix.localized_only || 'false' }}" \
+            --runner-labels "${{ matrix.runner_labels }}" \
             --runner-name "${{ runner.name }}" \
             --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             --sha "${{ github.sha }}"
@@ -215,7 +237,9 @@ jobs:
             --repo "${{ github.repository }}" `
             --playbook "${{ matrix.playbook }}" `
             --workflow-file "test-playbooks.yml" `
-            --runner-labels "self-hosted,Windows,${{ matrix.arch }}" `
+            --locale "${{ matrix.locale }}" `
+            --localized-only "${{ matrix.localized_only || 'false' }}" `
+            --runner-labels "${{ matrix.runner_labels }}" `
             --runner-name "${{ runner.name }}" `
             --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" `
             --sha "${{ github.sha }}"
@@ -225,7 +249,7 @@ jobs:
         shell: powershell
         run: |
           $summary = @"
-          ### Test Results for ``${{ matrix.playbook }}`` (${{ matrix.platform }}/${{ matrix.arch }})
+          ### Test Results for ``${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}`` (${{ matrix.platform }}/${{ matrix.arch }})
           
           See the test artifacts for detailed logs.
           "@
@@ -236,7 +260,7 @@ jobs:
         shell: bash
         run: |
           cat >> $GITHUB_STEP_SUMMARY << 'EOF'
-          ### Test Results for `${{ matrix.playbook }}` (${{ matrix.platform }}/${{ matrix.arch }})
+          ### Test Results for `${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}` (${{ matrix.platform }}/${{ matrix.arch }})
 
           See the test artifacts for detailed logs.
           EOF
