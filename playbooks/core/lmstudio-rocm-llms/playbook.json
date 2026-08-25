@@ -128,6 +128,22 @@
     "inference"
   ],
   "coverImage": "assets/cover_image.avif",
-  "recommendedSystemMemory": 8,
-  "primaryModel": "Qwen3.5-9B"
+  "recommendedSystemMemory": {
+    "halo_box": 128,
+    "halo": 128,
+    "stx": 8,
+    "krk": 8,
+    "rx7900xt": 8,
+    "rx9070xt": 8,
+    "r9700": 8
+  },
+  "primaryModel": {
+    "halo_box": "GPT-OSS-120B",
+    "halo": "GPT-OSS-120B",
+    "stx": "Qwen3.5-9B",
+    "krk": "Qwen3.5-9B",
+    "rx7900xt": "Qwen3.5-9B",
+    "rx9070xt": "Qwen3.5-9B",
+    "r9700": "Qwen3.5-9B"
+  }
 }
