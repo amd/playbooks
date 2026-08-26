@@ -1,0 +1,146 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Collect Runner Specs
+
+# One-off / on-demand hardware inventory of the self-hosted fleet.
+#
+# Fans out over every machine in .github/runners.json (via select_runners.py,
+# the same single-source-of-truth used by Runner Heartbeat) and dumps CPU,
+# memory, and GPU/VRAM info per runner as an artifact. Read-only: it only
+# queries hardware, never changes anything.
+#
+# Run it from the Actions tab (workflow_dispatch). Download the
+# "runner-specs-<name>" artifacts afterwards, or read the combined summary in
+# the "Combine specs" job's step summary.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write   # upload artifacts
+  contents: read   # checkout to run select_runners.py
+
+jobs:
+  list-runners:
+    name: List runners
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build runner matrix from runners.json
+        id: list
+        run: |
+          python3 .github/scripts/select_runners.py --name "" --os any --group any
+
+  collect:
+    needs: list-runners
+    strategy:
+      fail-fast: false   # one unreachable runner must not abort the sweep
+      matrix:
+        include: ${{ fromJson(needs.list-runners.outputs.matrix) }}
+
+    runs-on: [self-hosted, "${{ matrix.runner }}"]
+    steps:
+      - name: Collect specs (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          out="specs-${{ runner.name }}.txt"
+          {
+            echo "===== ${{ runner.name }} (Linux) ====="
+            echo "collected: $(date -Iseconds)"
+            echo
+            echo "----- CPU (lscpu) -----"
+            lscpu 2>/dev/null || echo "lscpu unavailable"
+            echo
+            echo "----- Memory (free -h) -----"
+            free -h 2>/dev/null || echo "free unavailable"
+            echo
+            echo "----- DIMMs (dmidecode) -----"
+            # dmidecode needs root; best-effort, never fail the step
+            sudo -n dmidecode -t memory 2>/dev/null | grep -E "Size|Type:|Speed" | grep -v "No Module" || echo "dmidecode unavailable (needs root)"
+            echo
+            echo "----- GPU (rocm-smi) -----"
+            rocm-smi --showproductname --showmeminfo vram 2>/dev/null || echo "rocm-smi unavailable"
+            echo
+            echo "----- GPU (lspci) -----"
+            lspci 2>/dev/null | grep -iE "vga|display|3d" || echo "lspci unavailable"
+          } > "$out"
+          cat "$out"
+
+      - name: Collect specs (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $out = "specs-${{ runner.name }}.txt"
+          $lines = @()
+          $lines += "===== ${{ runner.name }} (Windows) ====="
+          $lines += "collected: $(Get-Date -Format o)"
+          $lines += ""
+          $lines += "----- CPU -----"
+          $lines += (Get-CimInstance Win32_Processor |
+            Select-Object Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed |
+            Format-List | Out-String).Trim()
+          $lines += ""
+          $lines += "----- Memory (total) -----"
+          $totalGB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)
+          $lines += "TotalPhysicalMemory: $totalGB GB"
+          $lines += ""
+          $lines += "----- DIMMs -----"
+          $lines += (Get-CimInstance Win32_PhysicalMemory |
+            Select-Object @{n='SizeGB';e={[math]::Round($_.Capacity/1GB,1)}}, Speed, Manufacturer, PartNumber |
+            Format-Table -AutoSize | Out-String).Trim()
+          $lines += ""
+          $lines += "----- GPU (Win32_VideoController) -----"
+          $lines += (Get-CimInstance Win32_VideoController |
+            Select-Object Name, @{n='VRAM_GB';e={[math]::Round($_.AdapterRAM/1GB,1)}}, DriverVersion |
+            Format-List | Out-String).Trim()
+          $lines += ""
+          $lines += "----- GPU (rocm-smi, if present) -----"
+          if (Get-Command rocm-smi -ErrorAction SilentlyContinue) {
+            $lines += (rocm-smi --showproductname --showmeminfo vram 2>$null | Out-String).Trim()
+          } else {
+            $lines += "rocm-smi unavailable"
+          }
+          $lines -join "`r`n" | Out-File -FilePath $out -Encoding utf8
+          Get-Content $out
+
+      - name: Upload specs artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-specs-${{ runner.name }}
+          path: specs-${{ runner.name }}.txt
+          retention-days: 14
+
+  combine:
+    name: Combine specs
+    needs: collect
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all spec artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: runner-specs-*
+          path: specs
+          merge-multiple: true
+
+      - name: Write combined summary
+        run: |
+          {
+            echo "# Runner fleet specs"
+            echo
+            for f in specs/specs-*.txt; do
+              [ -f "$f" ] || continue
+              echo '```'
+              cat "$f"
+              echo '```'
+              echo
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
