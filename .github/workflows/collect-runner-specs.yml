@@ -33,12 +33,34 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build runner matrix from runners.json
-        id: list
+        id: fleet
         run: |
           python3 .github/scripts/select_runners.py --name "" --os any --group any
 
+      # select_runners.py only covers the device fleet in runners.json (18
+      # machines). Append the standalone self-hosted boxes that are registered
+      # to the repo but intentionally left out of the CI matrix, so the
+      # inventory is complete. Keep this list in sync with the repo's
+      # Settings -> Actions -> Runners page.
+      - name: Append non-fleet machines
+        id: list
+        env:
+          FLEET_MATRIX: ${{ steps.fleet.outputs.matrix }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          fleet = json.loads(os.environ["FLEET_MATRIX"])
+          extras = [
+              {"runner": "CS-UCICD-DT208"},   # generic Windows, no device label
+              {"runner": "MNB-DGPU-DT3410"},  # Linux, translation workflow
+              {"runner": "x-ultra"},          # Linux, experimental one-off
+          ]
+          print("matrix=" + json.dumps(fleet + extras))
+          PY
+
   collect:
     needs: list-runners
+    timeout-minutes: 10   # an offline box must not pin a job for hours
     strategy:
       fail-fast: false   # one unreachable runner must not abort the sweep
       matrix:
@@ -118,9 +140,50 @@ jobs:
           path: specs-${{ runner.name }}.txt
           retention-days: 14
 
+  # The arc-lnx-pub scale set is ephemeral Kubernetes pods (org-level, shared
+  # into this repo), not a fixed machine. Profiling one pod reports the
+  # container's cgroup-granted CPU/memory, not physical hardware -- captured
+  # here for completeness and labeled as such. No GPU is expected.
+  collect-arc:
+    name: Collect specs (ARC pod)
+    timeout-minutes: 10
+    runs-on: arc-lnx-pub
+    steps:
+      - name: Collect specs (ARC ephemeral pod)
+        shell: bash
+        run: |
+          out="specs-arc-lnx-pub.txt"
+          {
+            echo "===== arc-lnx-pub (ARC ephemeral Kubernetes pod) ====="
+            echo "NOTE: figures below are the container's cgroup limits, not a physical machine."
+            echo "collected: $(date -Iseconds)"
+            echo "pod host: $(hostname 2>/dev/null || echo unknown)"
+            echo
+            echo "----- CPU (lscpu) -----"
+            lscpu 2>/dev/null || echo "lscpu unavailable"
+            echo
+            echo "----- cgroup CPU quota -----"
+            cat /sys/fs/cgroup/cpu.max 2>/dev/null || echo "cpu.max unavailable"
+            echo
+            echo "----- Memory (free -h) -----"
+            free -h 2>/dev/null || echo "free unavailable"
+            echo
+            echo "----- cgroup memory limit -----"
+            cat /sys/fs/cgroup/memory.max 2>/dev/null || echo "memory.max unavailable"
+          } > "$out"
+          cat "$out"
+
+      - name: Upload ARC specs artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-specs-arc-lnx-pub
+          path: specs-arc-lnx-pub.txt
+          retention-days: 14
+
   combine:
     name: Combine specs
-    needs: collect
+    needs: [collect, collect-arc]
     if: always()
     runs-on: ubuntu-latest
     steps:
