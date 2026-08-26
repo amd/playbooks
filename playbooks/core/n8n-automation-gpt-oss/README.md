@@ -257,16 +257,20 @@ n8n start
 <!-- @test:id=n8n-start-windows timeout=300 hidden=True -->
 ```powershell
 $N8N_CMD = "$env:APPDATA\npm\n8n.cmd"
-$p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$N8N_CMD`" start" -NoNewWindow -PassThru
+$outLog = Join-Path $env:TEMP "n8n-start-out.log"
+$errLog = Join-Path $env:TEMP "n8n-start-err.log"
+$p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$N8N_CMD`" start" -RedirectStandardOutput $outLog -RedirectStandardError $errLog -PassThru
 try {
   $ok = $false
-  for ($i=0; $i -lt 120; $i++) {
+  # Stopwatch-bounded so the poll cannot outlast the block timeout.
+  $sw = [System.Diagnostics.Stopwatch]::StartNew()
+  while ($sw.Elapsed.TotalSeconds -lt 240) {
     # Check HTTP status code only (body may be empty)
     $code = curl.exe -s -o NUL -w "%{http_code}" --max-time 2 http://127.0.0.1:5678/healthz
     if ($LASTEXITCODE -eq 0 -and $code -eq "200") { $ok = $true; break }
-    Start-Sleep -Seconds 1
+    Start-Sleep -Seconds 2
   }
-  if (-not $ok) { throw "n8n not ready on http://127.0.0.1:5678/healthz" }
+  if (-not $ok) { throw "n8n not ready on http://127.0.0.1:5678/healthz after $([int]$sw.Elapsed.TotalSeconds)s" }
   Write-Host "OK: n8n server is responding"
 } finally {
   # Kill the process actually listening on 5678
@@ -274,6 +278,7 @@ try {
   if ($conn) { Stop-Process -Id $conn.OwningProcess -Force -ErrorAction SilentlyContinue }
   # Also kill wrapper pid just in case
   if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+  Remove-Item $outLog, $errLog -Force -ErrorAction SilentlyContinue
 }
 ```
 <!-- @test:end -->
