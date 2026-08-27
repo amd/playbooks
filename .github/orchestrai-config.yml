@@ -52,7 +52,7 @@ device_to_tags: {}
 device_to_gfx:
   halo:     "gfx1151"
   halo_box: "gfx1151"
-  grgh:     "gfx1151"
+  grgh:     "gfx1151"   # Gorgon Halo reports gfx1151 (same ISA as halo), confirmed via rocminfo on x-ultra
   stx:      "gfx1150"
   krk:      "gfx1103"
   rx7900xt: "gfx110X"
