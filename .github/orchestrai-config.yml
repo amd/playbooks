@@ -53,11 +53,16 @@ device_to_gfx:
   halo:     "gfx1151"
   halo_box: "gfx1151"
   grgh:     "gfx1151"
+  grgh_box: "gfx1151"   # Gorgon Halo Box: same silicon as grgh
   stx:      "gfx1150"
   krk:      "gfx1103"
   rx7900xt: "gfx110X"
   rx9070xt: "gfx120X"
   r9700:    "gfx120X"
+  # TODO: gfx targets for unreleased SKUs unknown until hardware is available.
+  # grgp, mdsh, mdsh_box, mdsp are omitted on purpose -- an absent entry falls
+  # back to the generic multi-arch tarball, so this is safe. Fill in once a
+  # runner exists and rocminfo can be read off it (as was done for grgh).
 
 # Device family controls Linux kernel-driver policy. Radeon devices use AMD's
 # packaged amdgpu/DKMS driver; Ryzen APUs use Ubuntu's inbox amdgpu module.
@@ -68,6 +73,11 @@ device_families:
   halo:     "ryzen_apu"
   halo_box: "ryzen_apu"
   grgh:     "ryzen_apu"
+  grgh_box: "ryzen_apu"
+  grgp:     "ryzen_apu"
+  mdsh:     "ryzen_apu"
+  mdsh_box: "ryzen_apu"
+  mdsp:     "ryzen_apu"
   stx:      "ryzen_apu"
   krk:      "ryzen_apu"
   rx7900xt: "radeon"

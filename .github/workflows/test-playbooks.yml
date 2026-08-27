@@ -31,8 +31,11 @@ on:
           - all
           - halo
           - grgh
+          - mdsh
           - stx
           - krk
+          - grgp
+          - mdsp
           - r9700
           - rx7900xt
           - rx9070xt

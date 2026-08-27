@@ -113,8 +113,14 @@ Instructions for discrete Radeon GPUs
 |-----------|----------|--------------|
 | `halo_box` | STX Halo | AMD Ryzen™ AI Halo Developer Platform |
 | `halo` | STX Halo | AMD Ryzen™ AI Max+ |
+| `grgh_box` | Gorgon Halo | AMD Ryzen™ AI Max+ 400 Series (Gorgon Halo Box) |
+| `grgh` | Gorgon Halo | AMD Ryzen™ AI Max+ 400 Series |
+| `mdsh_box` | Medusa Halo | AMD Ryzen™ AI Max+ 500 Series (Medusa Halo Box) |
+| `mdsh` | Medusa Halo | AMD Ryzen™ AI Max+ 500 Series |
 | `stx` | STX Point | AMD Ryzen™ AI 300 HX |
 | `krk` | Krackan Point | AMD Ryzen™ AI 300 |
+| `grgp` | Gorgon Point | AMD Ryzen™ AI 400 HX |
+| `mdsp` | Medusa Point | AMD Ryzen™ AI 500 HX |
 | `rx7900xt` | Radeon RX 7900 XT | AMD Radeon™ 7000 Series Graphics |
 | `rx9070xt` | Radeon RX 9070 XT | AMD Radeon™ 9000 Series Graphics |
 | `r9700` | Radeon AI Pro R9700 | AMD Radeon™ 9000 Series Graphics |
