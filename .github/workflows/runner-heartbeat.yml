@@ -3,200 +3,58 @@
 # SPDX-License-Identifier: MIT
 
 # TEMPORARY / DO NOT MERGE.
-# This branch repurposes the existing "Runner Heartbeat" workflow_dispatch
-# entry to run a one-off, read-only hardware inventory of the fleet. The name
-# is kept as "Runner Heartbeat" so it maps to the existing Actions list entry;
-# select this branch when dispatching. main's real Runner Heartbeat is
-# unaffected because this branch is never merged.
+# Repurposes the existing "Runner Heartbeat" workflow_dispatch entry to read
+# the exact gfx (LLVM ISA) target off the x-ultra (Gorgon Halo) runner, so the
+# device_to_gfx value in orchestrai-config.yml can be set correctly. Read-only.
+# Select this branch when dispatching. main's real heartbeat is unaffected.
 name: Runner Heartbeat
 
 on:
   workflow_dispatch:
 
 permissions:
-  actions: write   # upload artifacts
-  contents: read   # checkout to run select_runners.py
+  contents: read
 
 jobs:
-  list-runners:
-    name: List runners
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.list.outputs.matrix }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build runner matrix from runners.json
-        id: fleet
-        run: |
-          python3 .github/scripts/select_runners.py --name "" --os any --group any
-
-      # select_runners.py only covers the device fleet in runners.json (18
-      # machines). Append the standalone self-hosted boxes registered to the
-      # repo but left out of the CI matrix, so the inventory is complete.
-      - name: Append non-fleet machines
-        id: list
-        env:
-          FLEET_MATRIX: ${{ steps.fleet.outputs.matrix }}
-        run: |
-          python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import json, os
-          fleet = json.loads(os.environ["FLEET_MATRIX"])
-          extras = [
-              {"runner": "CS-UCICD-DT208"},   # generic Windows, no device label
-              {"runner": "MNB-DGPU-DT3410"},  # Linux, translation workflow
-              {"runner": "x-ultra"},          # Linux, experimental one-off
-          ]
-          print("matrix=" + json.dumps(fleet + extras))
-          PY
-
-  collect:
-    needs: list-runners
-    timeout-minutes: 10   # an offline box must not pin a job for hours
-    strategy:
-      fail-fast: false   # one unreachable runner must not abort the sweep
-      matrix:
-        include: ${{ fromJson(needs.list-runners.outputs.matrix) }}
-
-    runs-on: [self-hosted, "${{ matrix.runner }}"]
-    steps:
-      - name: Collect specs (Linux)
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          out="specs-${{ runner.name }}.txt"
-          {
-            echo "===== ${{ runner.name }} (Linux) ====="
-            echo "collected: $(date -Iseconds)"
-            echo
-            echo "----- CPU (lscpu) -----"
-            lscpu 2>/dev/null || echo "lscpu unavailable"
-            echo
-            echo "----- Memory (free -h) -----"
-            free -h 2>/dev/null || echo "free unavailable"
-            echo
-            echo "----- DIMMs (dmidecode) -----"
-            # dmidecode needs root; best-effort, never fail the step
-            sudo -n dmidecode -t memory 2>/dev/null | grep -E "Size|Type:|Speed" | grep -v "No Module" || echo "dmidecode unavailable (needs root)"
-            echo
-            echo "----- GPU (rocm-smi) -----"
-            rocm-smi --showproductname --showmeminfo vram 2>/dev/null || echo "rocm-smi unavailable"
-            echo
-            echo "----- GPU (lspci) -----"
-            lspci 2>/dev/null | grep -iE "vga|display|3d" || echo "lspci unavailable"
-          } > "$out"
-          cat "$out"
-
-      - name: Collect specs (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          $out = "specs-${{ runner.name }}.txt"
-          $lines = @()
-          $lines += "===== ${{ runner.name }} (Windows) ====="
-          $lines += "collected: $(Get-Date -Format o)"
-          $lines += ""
-          $lines += "----- CPU -----"
-          $lines += (Get-CimInstance Win32_Processor |
-            Select-Object Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed |
-            Format-List | Out-String).Trim()
-          $lines += ""
-          $lines += "----- Memory (total) -----"
-          $totalGB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)
-          $lines += "TotalPhysicalMemory: $totalGB GB"
-          $lines += ""
-          $lines += "----- DIMMs -----"
-          $lines += (Get-CimInstance Win32_PhysicalMemory |
-            Select-Object @{n='SizeGB';e={[math]::Round($_.Capacity/1GB,1)}}, Speed, Manufacturer, PartNumber |
-            Format-Table -AutoSize | Out-String).Trim()
-          $lines += ""
-          $lines += "----- GPU (Win32_VideoController) -----"
-          $lines += (Get-CimInstance Win32_VideoController |
-            Select-Object Name, @{n='VRAM_GB';e={[math]::Round($_.AdapterRAM/1GB,1)}}, DriverVersion |
-            Format-List | Out-String).Trim()
-          $lines += ""
-          $lines += "----- GPU (rocm-smi, if present) -----"
-          if (Get-Command rocm-smi -ErrorAction SilentlyContinue) {
-            $lines += (rocm-smi --showproductname --showmeminfo vram 2>$null | Out-String).Trim()
-          } else {
-            $lines += "rocm-smi unavailable"
-          }
-          $lines -join "`r`n" | Out-File -FilePath $out -Encoding utf8
-          Get-Content $out
-
-      - name: Upload specs artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: runner-specs-${{ runner.name }}
-          path: specs-${{ runner.name }}.txt
-          retention-days: 14
-
-  # The arc-lnx-pub scale set is ephemeral Kubernetes pods (org-level, shared
-  # into this repo), not a fixed machine. Profiling one pod reports the
-  # container's cgroup-granted CPU/memory, not physical hardware -- captured
-  # here for completeness and labeled as such. No GPU is expected.
-  collect-arc:
-    name: Collect specs (ARC pod)
+  gfx:
+    name: Detect gfx target on x-ultra
     timeout-minutes: 10
-    runs-on: arc-lnx-pub
+    runs-on: [self-hosted, x-ultra]
     steps:
-      - name: Collect specs (ARC ephemeral pod)
+      - name: Read gfx target
         shell: bash
         run: |
-          out="specs-arc-lnx-pub.txt"
-          {
-            echo "===== arc-lnx-pub (ARC ephemeral Kubernetes pod) ====="
-            echo "NOTE: figures below are the container's cgroup limits, not a physical machine."
-            echo "collected: $(date -Iseconds)"
-            echo "pod host: $(hostname 2>/dev/null || echo unknown)"
-            echo
-            echo "----- CPU (lscpu) -----"
-            lscpu 2>/dev/null || echo "lscpu unavailable"
-            echo
-            echo "----- cgroup CPU quota -----"
-            cat /sys/fs/cgroup/cpu.max 2>/dev/null || echo "cpu.max unavailable"
-            echo
-            echo "----- Memory (free -h) -----"
-            free -h 2>/dev/null || echo "free unavailable"
-            echo
-            echo "----- cgroup memory limit -----"
-            cat /sys/fs/cgroup/memory.max 2>/dev/null || echo "memory.max unavailable"
-          } > "$out"
-          cat "$out"
+          echo "===== x-ultra gfx detection ====="
+          echo "host: $(hostname 2>/dev/null || echo unknown)"
+          echo
 
-      - name: Upload ARC specs artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: runner-specs-arc-lnx-pub
-          path: specs-arc-lnx-pub.txt
-          retention-days: 14
+          echo "----- rocminfo (gfx nodes) -----"
+          if command -v rocminfo >/dev/null 2>&1; then
+            rocminfo 2>/dev/null | grep -iE "Name:.*gfx|Marketing Name|gfx[0-9]" || echo "no gfx line in rocminfo"
+          else
+            echo "rocminfo not found"
+          fi
+          echo
 
-  combine:
-    name: Combine specs
-    needs: [collect, collect-arc]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download all spec artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: runner-specs-*
-          path: specs
-          merge-multiple: true
+          echo "----- rocm-smi product/gfx -----"
+          if command -v rocm-smi >/dev/null 2>&1; then
+            rocm-smi --showproductname 2>/dev/null || echo "rocm-smi --showproductname failed"
+          else
+            echo "rocm-smi not found"
+          fi
+          echo
 
-      - name: Write combined summary
-        run: |
-          {
-            echo "# Runner fleet specs"
-            echo
-            for f in specs/specs-*.txt; do
-              [ -f "$f" ] || continue
-              echo '```'
-              cat "$f"
-              echo '```'
-              echo
-            done
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo "----- amdgpu sysfs isa nodes -----"
+          # The kernel exposes the ISA per node here; most reliable when rocminfo is absent.
+          for f in /sys/class/kfd/kfd/topology/nodes/*/properties; do
+            [ -f "$f" ] && grep -iH "gfx_target_version\|simd_count" "$f" 2>/dev/null || true
+          done
+          echo
+
+          echo "----- clinfo fallback -----"
+          if command -v clinfo >/dev/null 2>&1; then
+            clinfo 2>/dev/null | grep -iE "gfx[0-9]|Board name|Device Name" | head || echo "no gfx in clinfo"
+          else
+            echo "clinfo not found"
+          fi
+          echo "===== end ====="
