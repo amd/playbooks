@@ -35,6 +35,7 @@ on:
         options:
           - any
           - halo         # Ryzen AI Max
+          - grgh         # Gorgon Halo
           - stx          # Ryzen AI 300 HX
           - krk          # Ryzen AI 300
           - r9700        # Radeon AI Pro R9700

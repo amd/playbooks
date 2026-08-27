@@ -52,6 +52,7 @@ device_to_tags: {}
 device_to_gfx:
   halo:     "gfx1151"
   halo_box: "gfx1151"
+  grgh:     "gfx1151"
   stx:      "gfx1150"
   krk:      "gfx1103"
   rx7900xt: "gfx110X"
@@ -66,6 +67,7 @@ device_to_gfx:
 device_families:
   halo:     "ryzen_apu"
   halo_box: "ryzen_apu"
+  grgh:     "ryzen_apu"
   stx:      "ryzen_apu"
   krk:      "ryzen_apu"
   rx7900xt: "radeon"

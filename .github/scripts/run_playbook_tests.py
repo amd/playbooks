@@ -35,7 +35,7 @@ Device inference:
     Tests outside any @device: block run on all devices. When --device is
     passed on the CLI, tests whose inferred device list doesn't include that
     device are skipped.
-    Valid devices: halo, stx, krk, rx7900xt, rx9070xt.
+    Valid devices: halo, grgh, stx, krk, rx7900xt, rx9070xt, r9700.
 
 Supported test attributes:
     - id: Unique identifier for the test (required)
@@ -168,7 +168,7 @@ from typing import Optional
 SIGNATURE_EXCLUDED = frozenset({"line_number", "hidden"})
 
 
-VALID_DEVICES = {"halo", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"}
+VALID_DEVICES = {"halo", "grgh", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"}
 
 
 @dataclass

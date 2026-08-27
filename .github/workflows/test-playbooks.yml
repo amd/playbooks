@@ -30,6 +30,7 @@ on:
         options:
           - all
           - halo
+          - grgh
           - stx
           - krk
           - r9700

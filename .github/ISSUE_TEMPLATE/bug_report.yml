@@ -84,6 +84,7 @@ body:
       options:
         - halo_box - AMD Ryzen AI Halo Developer Platform
         - halo - AMD Ryzen AI Max+
+        - grgh - AMD Gorgon Halo
         - stx - AMD Ryzen AI 300 HX
         - krk - AMD Ryzen AI 300
         - rx7900xt - AMD Radeon RX 7900 XT
