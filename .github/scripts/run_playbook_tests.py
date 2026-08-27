@@ -659,7 +659,7 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
             workdir=attrs.get("workdir"),
             continue_on_error=attrs.get("continue_on_error", False),
             hidden=attrs.get("hidden", False),
-            setup=resolve_setup(attrs.get("setup"), setup_defs, target_platform),
+            setup=None,  # resolved after platform/device filtering (see below)
             language=language,
             code=code,
             line_number=line_number,
@@ -686,6 +686,11 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
         # are preserved. Unresolved declared references raise loudly.
         if var_defs:
             test.code = substitute_vars(test.code, var_defs, target_device, test.id)
+
+        # Resolve setup only for surviving tests, so we don't warn about setups
+        # for tests that are filtered out on this platform (e.g. a Linux-only
+        # setup referenced by a Linux test while building the Windows view).
+        test.setup = resolve_setup(attrs.get("setup"), setup_defs, target_platform)
 
         tests.append(test)
 
