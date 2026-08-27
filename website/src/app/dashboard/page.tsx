@@ -26,6 +26,7 @@ type MatrixData = Record<string, Record<string, CellData>>;
 
 const HARDWARE_LABELS: Record<string, string> = {
   halo: "Ryzen™ AI Max",
+  grgh: "Gorgon Halo",
   stx: "Ryzen™ AI 300 HX",
   krk: "Ryzen™ AI 300",
   rx7900xt: "Radeon™ RX 7900 XT",

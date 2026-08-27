@@ -11,6 +11,7 @@ const CATEGORY_ORDER: Record<string, number> = { core: 0, supplemental: 1, backu
 const HARDWARE_LABELS: Record<string, string> = {
   halo: "STX Halo",
   halo_box: "Halo Box",
+  grgh: "Gorgon Halo",
   stx: "STX Point",
   krk: "Krackan Point",
   rx7900xt: "Radeon RX 7900 XT",

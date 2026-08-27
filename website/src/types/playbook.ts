@@ -51,7 +51,7 @@
  * <!-- @device:end -->
  * ```
  * 
- * Valid device IDs: halo, stx, krk, rx7900xt, rx9070xt, r9700.
+ * Valid device IDs: halo, grgh, stx, krk, rx7900xt, rx9070xt, r9700.
  * Content outside of `@device` tags is shown on all devices.
  * 
  * ## Pre-installed Software Dropdowns
@@ -76,16 +76,17 @@
 
 export type Platform = "windows" | "linux";
 export type Architecture = "halo" | "krk";
-export type Device = "halo" | "halo_box" | "stx" | "krk" | "rx7900xt" | "rx9070xt" | "r9700";
+export type Device = "halo" | "halo_box" | "grgh" | "stx" | "krk" | "rx7900xt" | "rx9070xt" | "r9700";
 export type Category = "core" | "supplemental" | "backup";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 export type DeviceCategory = "reference" | "apu" | "gpu";
 
-export const DEVICE_IDS: Device[] = ["halo", "halo_box", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"];
+export const DEVICE_IDS: Device[] = ["halo", "halo_box", "grgh", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"];
 
 export const deviceNames: Record<Device, string> = {
   halo: "Ryzen™ AI Max",
   halo_box: "AMD Ryzen™ AI Halo",
+  grgh: "Gorgon Halo",
   stx: "Ryzen™ AI 300 HX",
   krk: "Ryzen™ AI 300",
   rx7900xt: "Radeon™ RX 7900 XT",
@@ -103,7 +104,7 @@ export interface DeviceCategoryInfo {
 
 export const DEVICE_CATEGORIES: DeviceCategoryInfo[] = [
   { id: "reference", name: "Reference Platforms", devices: ["halo_box"], deviceDisplayNames: { halo_box: "AMD Ryzen\u2122 AI Halo" } },
-  { id: "apu", name: "Ryzen\u2122 AI APUs", devices: ["halo", "stx", "krk"] },
+  { id: "apu", name: "Ryzen\u2122 AI APUs", devices: ["halo", "grgh", "stx", "krk"] },
   { id: "gpu", name: "Radeon\u2122 GPUs", devices: ["rx7900xt", "rx9070xt", "r9700"] },
 ];
 
@@ -145,7 +146,7 @@ export function extractCategoryDevices(
  */
 export function categoryForDevice(device: Device): DeviceCategory {
   if (device === "halo_box") return "reference";
-  if (device === "halo" || device === "stx" || device === "krk") return "apu";
+  if (device === "halo" || device === "grgh" || device === "stx" || device === "krk") return "apu";
   return "gpu";
 }
 
