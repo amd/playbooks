@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Clustering Two Ryzen™ AI Halos with RPC
+# Clustering Two Ryzen™ AI Halos with RPC (2-Node)
 
 ## Overview
 

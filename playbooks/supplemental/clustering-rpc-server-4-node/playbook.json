@@ -1,0 +1,101 @@
+{
+  "id": "clustering-rpc-server-4-node",
+  "title": "Clustering Four Ryzen™ AI Halos with RPC",
+  "description": "Set up distributed inference using RPC server across four Ryzen™ AI Halo devices with llama.cpp to run 350B+ models",
+  "time": 120,
+  "unsupported_platforms": {
+    "stx": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
+    ],
+    "krk": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
+    ],
+    "rx7900xt": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
+    ],
+    "rx9070xt": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
+    ]
+  },
+  "supported_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ]
+  },
+  "published_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "halo_box": [
+      "linux",
+      "windows"
+    ]
+  },
+  "difficulty": "advanced",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "clustering",
+    "rpc",
+    "distributed",
+    "llm",
+    "inference",
+    "rocm"
+  ],
+  "primaryModel": "Kimi K2.6",
+  "recommendedSystemMemory": 128,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "llama.cpp": "Latest"
+      },
+      "windows": {
+        "llama.cpp": "Latest"
+      }
+    },
+    "apu": {
+      "linux": {
+        "llama.cpp": "Latest"
+      },
+      "windows": {
+        "llama.cpp": "Latest"
+      }
+    }
+  }
+}
