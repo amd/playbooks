@@ -162,8 +162,6 @@ Lemonade exposes an OpenAI-compatible API at:
 http://127.0.0.1:13305/api/v1
 ```
 
-
-
 ## 2. Verify the Local Model
 
 Confirm Lemonade can serve the selected model:
@@ -320,17 +318,13 @@ npm install -g @openhands/agent-canvas
 <!-- @test:id=agent-canvas-version-linux timeout=1200 hidden=True -->
 ```bash
 set -euo pipefail
-
-# Use a user-owned global npm prefix so the install needs no root (matches the
-# Troubleshooting section of this playbook).
-mkdir -p "$HOME/.npm-global"
-npm config set prefix "$HOME/.npm-global"
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
-# Install agent-canvas only if the runner doesn't already have it.
-# TODO: remove this self-provisioning once the runners ship agent-canvas by default.
+# agent-canvas is expected to be provisioned on the runner. Fail loudly if it
+# isn't, rather than installing it here.
 if ! command -v agent-canvas >/dev/null 2>&1; then
-  npm install -g @openhands/agent-canvas
+  echo "agent-canvas is not on PATH; the runner must provision it before CI runs"
+  exit 1
 fi
 
 # Prefer --version; fall back to --help if this build has no --version flag.
@@ -459,19 +453,11 @@ $image    = "ghcr.io/openhands/agent-canvas:1.14.0"
 $name     = "openhands-agent-canvas-ci"
 $hostPort = 18080
 
-# Pull the image if the runner doesn't already have it. The published image is
-# public, so no login is needed. A non-interactive session can trip over a
-# configured Docker credential helper (ghcr is unauthenticated here), so pull
-# with an isolated, empty Docker config that has no credsStore/credHelpers.
-# TODO: remove this self-provisioning once the runners ship the image by default.
+# The image is expected to be provisioned on the runner. Fail loudly if it
+# isn't, rather than pulling it here.
 $imgId = docker images -q $image
 if (-not $imgId) {
-  Write-Host "Image $image not present; pulling..."
-  $dockerCfg = Join-Path $env:TEMP "oh-docker-cfg"
-  New-Item -ItemType Directory -Force -Path $dockerCfg | Out-Null
-  '{}' | Set-Content -Path (Join-Path $dockerCfg "config.json") -Encoding ascii
-  docker --config $dockerCfg pull $image
-  if ($LASTEXITCODE -ne 0) { throw "docker pull failed for $image" }
+  throw "Image $image is not present; the runner must provision it before CI runs"
 }
 Write-Host "OK: $image is present"
 
