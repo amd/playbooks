@@ -9,34 +9,34 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Clustering Two Ryzen™ AI Halos with RCCL
+# Clustering Four Ryzen™ AI Halos with RCCL
 
 ## Overview
 
 Your Ryzen™ AI Halo is already capable of running large language models locally. Clustering takes this further by combining the GPU memory of multiple systems over a local network, giving you access to even larger models with stronger reasoning, better code generation, and deeper multilingual understanding, all entirely on your own hardware.
 
-This playbook teaches you how to cluster two Ryzen AI Halo systems using RCCL (ROCm Communication Collectives Library) with vLLM and run Qwen3.5-397B, a 397B parameter model, across both machines with ROCm acceleration.
+This playbook teaches you how to cluster four Ryzen AI Halo systems using RCCL (ROCm Communication Collectives Library) with vLLM and run MiniMax M2.7, a 230B parameter model, across all four machines with ROCm acceleration.
 
 ## What You'll Learn
 
 - How to extend VRAM allocation on Ryzen AI Halo systems
 - Launching vLLM with ROCm support
-- Configuring RCCL for multi-node tensor-parallel inference across two Ryzen AI Halo systems
-- Running a 397B parameter model across two networked Ryzen AI Halo systems
+- Configuring RCCL for multi-node tensor-parallel inference across four Ryzen AI Halo systems
+- Running a 230B parameter model across four networked Ryzen AI Halo systems
 
 ## Prerequisites
 
 ### Hardware
 
-This playbook requires two Ryzen AI Halo units and one Ethernet switch, connected in a star topology with each unit wired directly to the switch.
+This playbook requires four Ryzen AI Halo units and one Ethernet switch, connected in a star topology with each unit wired directly to the switch.
 
 | Component | Quantity | Description |
 |-----------|----------|-------------|
-| Ryzen AI Halo | 2 | Compute nodes that form the cluster |
-| 10Gbps Ethernet switch | 1 | Central switch to allow multi node Ryzen AI Halo communication (at least 2 ports) |
-| Ethernet cable | 2 | Connects each Halo unit to the switch (Cat 7 or higher recommended) |
+| Ryzen AI Halo | 4 | Compute nodes that form the cluster |
+| 10Gbps Ethernet switch | 1 | Central switch to allow multi node Ryzen AI Halo communication (at least 4 ports) |
+| Ethernet cable | 4 | Connects each Halo unit to the switch (Cat 7 or higher recommended) |
 
-> **Note**: Two Ethernet switch ports are required to connect the two Ryzen AI Halo units. A third port is required if you access the model from a separate client machine instead of from one of the Halo units.
+> **Note**: Four Ethernet switch ports are required to connect the four Ryzen AI Halo units. A fifth port is required if you access the model from a separate client machine instead of from one of the Halo units.
 
 ### Software
 <!-- @os:linux -->
@@ -47,13 +47,13 @@ sudo apt install curl
 
 ## Physical Hardware Setup
 
-> **Note**: Complete this step on both Machine 1 and Machine 2.
+> **Note**: Complete this step on all four machines (Machine 1 through Machine 4).
 
 Connect each Ryzen AI Halo unit to the Ethernet switch using a Cat 7 (or higher) cable. This establishes the 10Gbps link used for high-speed communication between the nodes.
-
+<!-- @os:linux -->
 ### 1. Determine Network Interfaces
 
-On each machine, find the name of its network interface and note it down (it will be referred to in the rest of the instructions as `IFNAME`). Run:
+On each machine, find the name of its network interface and note it down (it will be referred to below as `IFNAME`). Run:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
@@ -83,9 +83,12 @@ You should see a speed of `10000Mb/s`:
 
 > **Note**: If the speed is lower than `10000Mb/s` or the link does not come up, check the cable connection and confirm the switch port is set to 10Gbps. Some switches require auto-negotiation to be disabled and the link speed set manually; refer to your switch's documentation.
 
+<!-- @os:end -->
+
+
 ## Extending VRAM Allocation
 
-> **Note**: Complete this step on both Machine 1 and Machine 2.
+> **Note**: Complete this step on all four machines (Machine 1 through Machine 4).
 
 ### Memory Configuration for Running Large Models
 
@@ -119,13 +122,13 @@ This amount can be increased by changing the kernel's Translation Table Manager 
 
 ## vLLM Container Initialization
 
-> **Note**: Complete this step on both Machine 1 and Machine 2.
+> **Note**: Complete this step on all four machines (Machine 1 through Machine 4).
 
 Your Ryzen AI Halo ships with vLLM packaged inside a prebuilt container image, which you run using Podman, a free and open source container tool.
 
 ### 1. Create the Model Download Directory
 
-When you serve the Qwen3.5-397B model in this playbook, vLLM will automatically download the model weights to your system. To make sure those weights are accessible from inside the container, first create a models directory that the container can mount:
+When you serve the MiniMax M2.7 model in this playbook, vLLM will automatically download the model weights to your system. To make sure those weights are accessible from inside the container, first create a models directory that the container can mount:
 
 ```bash
 mkdir -p ~/.local/share/vLLM/models
@@ -145,11 +148,11 @@ sudo podman run -it --name vllm_cluster --replace --pull missing --network=host 
 
 ## Running the Model on the Cluster
 
-vLLM uses Ray to orchestrate the cluster and RCCL to handle GPU-to-GPU communication across nodes. One machine acts as the **head node** (Machine 1), coordinating inference. The other joins as a **worker node** (Machine 2), contributing its GPU memory and compute.
+vLLM uses Ray to orchestrate the cluster and RCCL to handle GPU-to-GPU communication across nodes. One machine acts as the **head node** (Machine 1), coordinating inference. The other three join as **worker nodes** (Machines 2, 3, and 4), contributing their GPU memory and compute.
 
 > **Note**: Ray is an optional dependency for vLLM and is only available from within the preconfigured Podman container.
 
-At launch, vLLM shards the model across both nodes using tensor parallelism. Once loaded, inference proceeds as if running on a single accelerator.
+At launch, vLLM shards the model across all four nodes using tensor parallelism. Once loaded, inference proceeds as if running on a single accelerator.
 
 ### Step 1: Start the Ray Head Node (Machine 1)
 
@@ -161,32 +164,30 @@ ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1
 
 > **Finding `<MACHINE_1_IP>`**: On Machine 1, run `hostname -I | awk '{print $1}'` to find its local IP address.
 
-### Step 2: Join the Cluster (Machine 2)
+### Step 2: Join the Cluster (Machines 2, 3, and 4)
 
-On Machine 2, connect to the head node to form the cluster:
+On each of Machines 2, 3, and 4, connect to the head node to form the cluster:
 
 ```bash
-ray start --address=<MACHINE_1_IP>:6379 --node-ip-address=<MACHINE_2_IP> --num-gpus=1
+ray start --address=<MACHINE_1_IP>:6379 --node-ip-address=<MACHINE_N_IP> --num-gpus=1
 ```
 
-> **Finding `<MACHINE_2_IP>`**: On Machine 2, run `hostname -I | awk '{print $1}'` to find its local IP address.
+> **Finding `<MACHINE_N_IP>`**: On each worker machine, run `hostname -I | awk '{print $1}'` to find its local IP address.
 
 ### Step 3: Serve the Model (Machine 1)
 
-On Machine 1, launch the vLLM server. This will automatically download the model and begin serving it across both nodes:
+On Machine 1, launch the vLLM server. This will automatically download the model and begin serving it across all four nodes:
 
 ```bash
-vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
+vllm serve cyankiwi/MiniMax-M2.7-AWQ-4bit \
   --port 7000 \
   --host 0.0.0.0 \
   --max-model-len 32768 \
-  --gpu-memory-utilization 0.9 \
-  --dtype float16 \
-  --tensor-parallel-size 2 \
+  --gpu-memory-utilization 0.7 \
+  --tensor-parallel-size 4 \
   --distributed-executor-backend ray \
   --enforce-eager \
-  --language-model-only \
-  --reasoning-parser qwen3
+  --reasoning-parser minimax_m2_append_think
 ```
 
 #### Parameter Reference
@@ -221,14 +222,10 @@ To connect Open WebUI to your vLLM endpoint:
 
 > **Finding `<MACHINE_1_IP>`**: On Machine 1, run `hostname -I | awk '{print $1}'` to find its local IP address. If accessing Open WebUI from Machine 1 itself, you can use `http://localhost:7000/v1`.
 
-![Open WebUI connection settings for the vLLM endpoint](assets/openwebui-connection.png)
-
-Once connected, select the model from the model dropdown in Open WebUI and start chatting. The model is now running across both of your Ryzen AI Halo nodes:
-
-![Chatting with Qwen3.5-397B in Open WebUI](assets/openwebui-chat.png)
+Once connected, select the model from the model dropdown in Open WebUI and start chatting. The model is now running across all four of your Ryzen AI Halo nodes.
 
 ## Next Steps
 
 - **Explore other models**: Discover new models on [Hugging Face](https://huggingface.co/models?&sort=trending) that fit within your cluster's combined GPU memory
-- **Scale to four nodes**: Add two more Ryzen AI Halo systems as additional Ray workers to shard models across even more GPUs. This requires an Ethernet switch with at least four ports, one for each node. Follow [Step 2: Join the Cluster](#step-2-join-the-cluster-machine-2) on each additional worker and increase `--tensor-parallel-size` accordingly
+- **Scale beyond four nodes**: Add further Ryzen AI Halo systems as additional Ray workers to shard models across even more GPUs. Follow [Step 2: Join the Cluster](#step-2-join-the-cluster-machines-2-3-and-4) on each additional worker and increase `--tensor-parallel-size` accordingly
 - **Try other parallelism strategies**: vLLM supports [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) for mixture-of-experts models and [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) for higher throughput. Experiment with `--enable-expert-parallel` and `--data-parallel-size` to find the best configuration for your workload

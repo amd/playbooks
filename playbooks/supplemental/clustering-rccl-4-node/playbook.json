@@ -1,0 +1,102 @@
+{
+  "id": "clustering-rccl-4-node",
+  "title": "Clustering Four Ryzen™ AI Halos with RCCL",
+  "description": "Set up a multi-node cluster using four Ryzen™ AI Halo devices with RCCL for distributed workloads",
+  "time": 120,
+  "unsupported_platforms": {
+    "halo": [
+      {
+        "platform": "windows",
+        "reason": "RCCL clustering relies on vLLM which is only supported on Linux"
+      }
+    ],
+    "halo_box": [
+      {
+        "platform": "windows",
+        "reason": "RCCL clustering relies on vLLM which is only supported on Linux"
+      }
+    ],
+    "stx": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
+    ],
+    "krk": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
+    ],
+    "rx7900xt": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
+    ],
+    "rx9070xt": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
+    ]
+  },
+  "supported_platforms": {
+    "halo": [
+      "linux"
+    ],
+    "halo_box": [
+      "linux"
+    ]
+  },
+  "published_platforms": {
+    "halo": [
+      "linux"
+    ],
+    "halo_box": [
+      "linux"
+    ]
+  },
+  "difficulty": "advanced",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "clustering",
+    "distributed",
+    "multi-gpu",
+    "rccl",
+    "vllm"
+  ],
+  "primaryModel": "MiniMax M2.7",
+  "recommendedSystemMemory": 128,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "vLLM": "Latest from Ryzen AI Developer Center"
+      }
+    },
+    "apu": {
+      "linux": {
+        "vLLM": "Latest"
+      }
+    }
+  }
+}
