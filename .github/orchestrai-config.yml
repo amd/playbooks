@@ -89,11 +89,11 @@ extra_tags: {}
 # ram_128gb ONLY on halo/halo_box lets them run on every device (no tag elsewhere
 # → tags_for() falls back to the empty extra_tags entry) instead of being dropped
 # from the non-128 GB devices by extra_tag_devices. Unsloth follows the same
-# pattern. vscode-qwen3-coder and gaia-agents also belong here: they run a fixed
-# Qwen3-Coder-30B-A3B (MoE, ~18.5 GB weights, only 3B active), which lemonade
-# runs on the smaller RDNA cards via GPU+CPU offload — confirmed passing on all
-# devices incl. 16 GB rx9070xt in the legacy workflow — so they only need the
-# 128 GB tag for the Halo run. openclaw-lemonade-server is the same case: a fixed
+# pattern. gaia-agents also belongs here. vscode-qwen3-coder keeps the Halo tag
+# here, but unlike the Lemonade playbooks it loads Qwen3-Coder-30B-A3B through
+# LM Studio with full Vulkan offload (`--gpu max`) and a 32K context; current
+# 32 GB STX systems cannot satisfy that allocation and are skipped below.
+# openclaw-lemonade-server is the same case as gaia: a fixed
 # Qwen3.6-35B-A3B (MoE, 3B active) that the legacy workflow schedules and runs on
 # every device via lemonade offload, so it also gets the 128 GB tag on Halo only.
 # hermes-lemonade-server pins the SAME Qwen3.6-35B-A3B at the same 262144 ctx and
@@ -200,6 +200,12 @@ skip_devices: ["krk"]
 skip_playbook_devices:
   hermes-lemonade-server:  ["stx"]
   openclaw-lemonade-server: ["stx"]
+  # LM Studio's survey exposed 10.71 GiB to Vulkan on Windows STX for an
+  # 18.63 GB model; Windows failed with "unable to allocate Vulkan0 buffer".
+  # Linux aborted at 91% while amdgpu reported insufficient submission memory.
+  # Keep the fixed model/context/GPU policy and restore STX coverage when the
+  # farm has a machine with enough shared memory.
+  vscode-qwen3-coder:       ["stx"]
 
 # ---------------------------------------------------------------------------
 # Per-run pipeline settings
