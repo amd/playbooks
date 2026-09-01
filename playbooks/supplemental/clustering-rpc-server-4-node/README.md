@@ -198,7 +198,7 @@ Unzip the downloaded archive:
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-This directory now contains ROCm-enabled builds of `llama-cli.exe`, `llama-server.exe`, and `rpc-server.exe`, precompiled for your Ryzen AI Halo system.
+This directory now contains ROCm-enabled builds of `llama-cli.exe`, `llama-server.exe`, and `ggml-rpc-server.exe`, precompiled for your Ryzen AI Halo system.
 
 #### Step 3: Verify GPU Detection
 
