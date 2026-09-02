@@ -47,7 +47,7 @@ By the end of this playbook you will be able to:
 - **~10–30 GB of free disk space** for model weights
 - [Podman](https://podman.io/docs/installation) (Optional, for sandboxing Hermes Agent)
   ```bash 
-  sudo apt-get install -y podman`
+  sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
