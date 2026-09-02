@@ -89,13 +89,19 @@ extra_tags: {}
 # ram_128gb ONLY on halo/halo_box lets them run on every device (no tag elsewhere
 # → tags_for() falls back to the empty extra_tags entry) instead of being dropped
 # from the non-128 GB devices by extra_tag_devices. Unsloth follows the same
-# pattern. vscode-qwen3-coder and gaia-agents also belong here: they run a fixed
-# Qwen3-Coder-30B-A3B (MoE, ~18.5 GB weights, only 3B active), which lemonade
-# runs on the smaller RDNA cards via GPU+CPU offload — confirmed passing on all
-# devices incl. 16 GB rx9070xt in the legacy workflow — so they only need the
-# 128 GB tag for the Halo run. openclaw-lemonade-server is the same case: a fixed
+# pattern. gaia-agents also belongs here. vscode-qwen3-coder keeps the Halo tag
+# here, but unlike the Lemonade playbooks it loads Qwen3-Coder-30B-A3B through
+# LM Studio with full Vulkan offload (`--gpu max`) and a 32K context; current
+# 32 GB STX systems cannot satisfy that allocation and are skipped below.
+# openclaw-lemonade-server is the same case as gaia: a fixed
 # Qwen3.6-35B-A3B (MoE, 3B active) that the legacy workflow schedules and runs on
 # every device via lemonade offload, so it also gets the 128 GB tag on Halo only.
+# hermes-lemonade-server pins the SAME Qwen3.6-35B-A3B at the same 262144 ctx and
+# belongs in the same bucket — it was simply missed. Without the tag it stayed in
+# the ordinary 64 GB Halo batch and never finished: Jenkins #40973 failed no
+# assertion, it just held its session until the 90-minute per-playbook ceiling and
+# was marked timed out, while openclaw passed on the 128 GB batch the same night.
+# The two are already treated as a pair in skip_playbook_devices below.
 device_extra_tags:
   unsloth-llms-finetuning:
     halo:     ["ram_128gb"]
@@ -117,6 +123,9 @@ device_extra_tags:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
   openclaw-lemonade-server:
+    halo:     ["ram_128gb"]
+    halo_box: ["ram_128gb"]
+  hermes-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
 
@@ -170,7 +179,12 @@ extra_install_scripts:
       platforms: ["windows"]
 
 # Devices to skip entirely (e.g. temporarily offline hardware).
-skip_devices: ["krk"]
+# krk was listed here only because there was no Kraken hardware in the farm.
+# There is now (apu_krk), so it is enabled. NOTE: enabling a device here is
+# necessary but NOT sufficient -- the matrix drops any device missing from the
+# ORCHESTRAI_DEVICE_TAGS repo variable, with a ::warning::, so that variable
+# needs a "krk" entry pointing at the fleet tag before this has any effect.
+skip_devices: []
 
 # Skip ONE playbook on ONE device, where skip_devices would be too broad: the
 # device works fine for everything else. Keyed by playbook id -> device list.
@@ -188,9 +202,24 @@ skip_devices: ["krk"]
 # Every stx in the farm is currently 32 GB. REMOVE these entries when either
 # lands: 64 GB stx machines, or a device-scoped @var model for stx (note the
 # tests also require ctx_size=262144, so a smaller model alone may not suffice).
+#
+# krk is skipped for the same two playbooks, for a slightly different reason:
+# the Kraken fleet is MIXED (one 32 GB machine and four 64 GB ones). The model
+# fits on the 64 GB hosts and misses the 80% ceiling on the 32 GB one, so which
+# result you get depends on which machine the broker hands out -- a coin flip
+# reported as a playbook failure. Skipping is deterministic. The alternative, if
+# these two should run on Kraken, is to give them a ram_64gb extra tag on krk
+# (device_extra_tags) and add krk to extra_tag_devices[ram_64gb); that pins them
+# to the four large hosts instead of excluding them.
 skip_playbook_devices:
-  hermes-lemonade-server:  ["stx"]
-  openclaw-lemonade-server: ["stx"]
+  hermes-lemonade-server:  ["stx", "krk"]
+  openclaw-lemonade-server: ["stx", "krk"]
+  # LM Studio's survey exposed 10.71 GiB to Vulkan on Windows STX for an
+  # 18.63 GB model; Windows failed with "unable to allocate Vulkan0 buffer".
+  # Linux aborted at 91% while amdgpu reported insufficient submission memory.
+  # Keep the fixed model/context/GPU policy and restore STX coverage when the
+  # farm has a machine with enough shared memory.
+  vscode-qwen3-coder:       ["stx"]
 
 # ---------------------------------------------------------------------------
 # Per-run pipeline settings

@@ -13,6 +13,32 @@ on:
         description: 'Specific playbook ID to test (leave empty to test all playbooks)'
         required: false
         type: string
+      platform:
+        description: 'Restrict to one OS (leave "all" for every OS the playbook supports)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - linux
+          - windows
+      device:
+        description: 'Restrict to one device (leave "all" for every device the playbook supports)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - halo
+          - stx
+          - krk
+          - r9700
+          - rx7900xt
+          - rx9070xt
+      runner_label:
+        description: 'Extra runner label to target one specific self-hosted runner (e.g. its hostname/IP/alias label). Use ONLY when platform ≠ all && device ≠ all. Leave empty to let GitHub pick any matching runner.'
+        required: false
+        type: string
   pull_request:
 
 permissions:
@@ -53,17 +79,34 @@ jobs:
         id: build-matrix
         env:
           PLAYBOOK_INPUT: ${{ github.event.inputs.playbook_id }}
+          PLATFORM_INPUT: ${{ github.event.inputs.platform }}
+          DEVICE_INPUT: ${{ github.event.inputs.device }}
+          RUNNER_LABEL_INPUT: ${{ github.event.inputs.runner_label }}
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
+          # workflow_dispatch filters. These inputs only exist on manual runs;
+          # on pull_request / cron they are empty and no filter is applied.
+          # Assembled into an array so PR-safe env values are never re-split.
+          filters=()
+          if [ -n "$PLATFORM_INPUT" ] && [ "$PLATFORM_INPUT" != "all" ]; then
+            filters+=(--platform "$PLATFORM_INPUT")
+          fi
+          if [ -n "$DEVICE_INPUT" ] && [ "$DEVICE_INPUT" != "all" ]; then
+            filters+=(--device "$DEVICE_INPUT")
+          fi
+          if [ -n "$RUNNER_LABEL_INPUT" ]; then
+            filters+=(--runner-label "$RUNNER_LABEL_INPUT")
+          fi
+
           if [ -n "$PLAYBOOK_INPUT" ]; then
             python3 .github/scripts/build_test_matrix.py --mode playbook \
-              --playbook-id "$PLAYBOOK_INPUT"
+              --playbook-id "$PLAYBOOK_INPUT" "${filters[@]}"
           elif [ "$EVENT_NAME" = "pull_request" ]; then
             python3 .github/scripts/build_test_matrix.py --mode changed \
               --base "$PR_BASE_SHA"
           else
-            python3 .github/scripts/build_test_matrix.py --mode all
+            python3 .github/scripts/build_test_matrix.py --mode all "${filters[@]}"
           fi
 
       - name: Display test matrix
@@ -87,9 +130,11 @@ jobs:
           python-version: '3.13'
       - name: Run selection regression tests
         run: python3 .github/scripts/test_build_test_matrix.py
+      - name: Run playbook-test extractor tests
+        run: python3 .github/scripts/test_run_playbook_tests.py
 
   test-playbooks:
-    name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
+    name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.runner_label != '' && format(' @{0}', matrix.runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
     needs: detect-changes
     if: needs.detect-changes.outputs.has_entries == 'true'
     runs-on: ${{ fromJson(matrix.runner) }}
@@ -226,7 +271,9 @@ jobs:
         run: |
           $summary = @"
           ### Test Results for ``${{ matrix.playbook }}`` (${{ matrix.platform }}/${{ matrix.arch }})
-          
+
+          Requested runner label: ``${{ matrix.runner_label || 'any matching runner' }}``
+
           See the test artifacts for detailed logs.
           "@
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
@@ -237,6 +284,8 @@ jobs:
         run: |
           cat >> $GITHUB_STEP_SUMMARY << 'EOF'
           ### Test Results for `${{ matrix.playbook }}` (${{ matrix.platform }}/${{ matrix.arch }})
+
+          Requested runner label: `${{ matrix.runner_label || 'any matching runner' }}`
 
           See the test artifacts for detailed logs.
           EOF

@@ -76,10 +76,75 @@ HARNESS_EXCLUDED = frozenset({
     ".github/scripts/orchestrai_verdict.py",       # OrchestrAI workflows
 })
 
+RUNNERS_JSON = REPO_ROOT / ".github" / "runners.json"
+
+
 def annotate(level: str, message: str) -> None:
     """Report on stderr only; stdout is reserved for the matrix JSON."""
     prefix = f"::{level}::" if os.environ.get("GITHUB_ACTIONS") else ""
     print(f"{prefix}{message}", file=sys.stderr)
+
+
+def _load_runner_catalog() -> list[dict]:
+    """Load runners.json as [{name, os, group, labels}], labels a set per runner.
+
+    ``labels`` is every label unique to a single machine — its hostname (the
+    ``name`` field, always included) plus any extra unique labels declared in
+    runners.json (e.g. IP, alias). Non-unique labels (the device group, gfx/arch
+    tags, lease tags) are deliberately excluded there: a shared label cannot pin
+    a job to one runner, so allowing it as a target would be misleading.
+    """
+    try:
+        data = json.loads(RUNNERS_JSON.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"FATAL: cannot read {RUNNERS_JSON} to validate --runner-label: {exc}",
+              file=sys.stderr)
+        sys.exit(1)
+    catalog: list[dict] = []
+    for runner in data:
+        name = runner.get("name")
+        if not name:
+            continue
+        labels = {str(lbl) for lbl in runner.get("labels", [])}
+        labels.add(name)
+        catalog.append({
+            "name": name,
+            "os": str(runner.get("os", "")),
+            "group": str(runner.get("group", "")),
+            "labels": labels,
+        })
+    return catalog
+
+
+def validate_runner_label(label: str, platform: str, device: str) -> None:
+    """Fail fast unless *label* names a runner matching *platform* and *device*.
+
+    Validation is authoritative against runners.json: a label absent from every
+    matching runner's label set is treated as a typo and rejected, rather than
+    silently producing a runs-on that no runner satisfies.
+    """
+    os_label = "Windows" if platform == "windows" else "Linux"
+    catalog = _load_runner_catalog()
+    pool = [r for r in catalog
+            if r["os"].lower() == os_label.lower()
+            and r["group"].lower() == device.lower()]
+    valid = sorted({lbl for r in pool for lbl in r["labels"]})
+    if label in valid:
+        return
+
+    owner = next((r for r in catalog if label in r["labels"]), None)
+    if owner is not None:
+        print(f"FATAL: runner label '{label}' belongs to runner '{owner['name']}' "
+              f"({owner['os']}/{owner['group']}), which does not match the selected "
+              f"{os_label}/{device}. Choose a label for a {os_label}/{device} runner.",
+              file=sys.stderr)
+    else:
+        pretty = ", ".join(valid) if valid else "<none configured>"
+        print(f"FATAL: runner label '{label}' is not a known label for any "
+              f"{os_label}/{device} runner. Valid labels: {pretty}. If a runner was "
+              f"recently added or relabeled, update .github/runners.json.",
+              file=sys.stderr)
+    sys.exit(1)
 
 
 def harness_files(root: Path) -> dict[str, bytes]:
@@ -180,6 +245,15 @@ def main() -> None:
     parser.add_argument("--mode", required=True, choices=["all", "playbook", "changed"])
     parser.add_argument("--playbook-id", help="Playbook id for --mode playbook")
     parser.add_argument("--base", help="Base revision for --mode changed")
+    # workflow_dispatch filters. These narrow an already-built matrix, so they
+    # compose with any --mode: e.g. "every playbook, but only on Linux halo".
+    parser.add_argument("--platform", choices=["windows", "linux"],
+                        help="Keep only entries for this OS")
+    parser.add_argument("--device", choices=sorted(R.VALID_DEVICES),
+                        help="Keep only entries for this device")
+    parser.add_argument("--runner-label",
+                        help="Append this label to every entry's runner selection "
+                             "so a specific self-hosted runner can be targeted")
     parser.add_argument("--github-output", type=Path)
     args = parser.parse_args()
 
@@ -204,6 +278,49 @@ def main() -> None:
                 entries = select_changed(base_tree)
             else:
                 annotate("warning", f"No trustworthy base {args.base}; running the full matrix")
+
+    # Apply workflow_dispatch filters (platform / device) to whatever the mode
+    # produced. An empty result after filtering is a user error (e.g. asking for
+    # a device the selected playbook doesn't support), so fail loudly.
+    if args.platform:
+        entries = [e for e in entries if e["platform"] == args.platform]
+    if args.device:
+        entries = [e for e in entries if e["arch"] == args.device]
+    if (args.platform or args.device) and not entries:
+        filt = ", ".join(
+            f"{k}={v}" for k, v in (("platform", args.platform), ("device", args.device)) if v
+        )
+        print(f"FATAL: no matrix entries match the requested filter(s): {filt}", file=sys.stderr)
+        sys.exit(1)
+
+    # Targeting a single runner only makes sense once the OS and device are
+    # pinned, because the label is ANDed with them: a halo hostname on an stx
+    # entry matches no runner and the job would queue forever. Require both.
+    if args.runner_label:
+        if not args.platform or not args.device:
+            print("FATAL: --runner-label requires both --platform and --device "
+                  "(a specific OS and device, not 'all') so the label resolves to "
+                  "exactly one runner", file=sys.stderr)
+            sys.exit(1)
+        # Validate the label against the maintained fleet so a typo fails fast
+        # here instead of leaving a job queued for a runner that never appears.
+        validate_runner_label(args.runner_label, args.platform, args.device)
+
+    # Stamp runner_label on every entry (empty string when not targeting) so the
+    # job-name template can surface it without leaving a dangling '@'. Done after
+    # select_changed(), so change detection never sees this field.
+    for entry in entries:
+        entry["runner_label"] = args.runner_label or ""
+
+    # Append the extra label to runs-on. GitHub schedules a job on a runner only
+    # if the runner carries every label in runs-on, so a label unique to one
+    # machine pins the job to it.
+    if args.runner_label:
+        for entry in entries:
+            labels = json.loads(entry["runner"])
+            if args.runner_label not in labels:
+                labels.append(args.runner_label)
+            entry["runner"] = json.dumps(labels)
 
     # Fail here rather than let Actions reject the oversized matrix with a vague error
     if len(entries) > MATRIX_JOB_LIMIT:
