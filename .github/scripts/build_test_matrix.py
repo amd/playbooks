@@ -396,11 +396,13 @@ def main() -> None:
         # here instead of leaving a job queued for a runner that never appears.
         validate_runner_label(args.runner_label, args.platform, args.device)
 
-    # Stamp runner_label on every entry (empty string when not targeting) so the
-    # job-name template can surface it without leaving a dangling '@'. Done after
-    # select_changed(), so change detection never sees this field.
+    # Keep a localized entry's pool label separate from a manually requested
+    # machine label. English entries retain runner_label for compatibility with
+    # the upstream matrix schema, while the workflow uses target_runner_label
+    # when it needs to display the explicitly selected machine.
     for entry in entries:
-        entry["runner_label"] = args.runner_label or ""
+        entry["runner_label"] = entry.get("runner_label") or args.runner_label or ""
+        entry["target_runner_label"] = args.runner_label or ""
 
     # Append the extra label to runs-on. GitHub schedules a job on a runner only
     # if the runner carries every label in runs-on, so a label unique to one
