@@ -206,20 +206,34 @@ export interface PlaybookMeta {
 
   /**
    * The main / default model this playbook runs, for at-a-glance user clarity.
-   * A single representative name even when the playbook mentions several
-   * (show the recommended/default one). Omitted for playbooks with no model
-   * (e.g. dev tools like AMD Sync, CVML, the kernel tutorial).
-   * Example: "primaryModel": "Qwen3.6-35B-A3B"
+   * Either a single string (same model on every device) OR an object keyed by
+   * Device, for playbooks that run a different model per device (e.g. a larger
+   * model on Halo/HaloBox and a smaller one on Strix/Krackan and dGPUs). The
+   * frontend shows the entry matching the selected device (falling back to any
+   * single value). Omitted for playbooks with no model (e.g. AMD Sync, CVML,
+   * the kernel tutorial).
+   * Examples:
+   *   "primaryModel": "Qwen3.6-35B-A3B"
+   *   "primaryModel": { "halo_box": "GPT-OSS-120B", "halo": "GPT-OSS-120B",
+   *                      "stx": "GPT-OSS-20B", "krk": "GPT-OSS-20B" }
    */
-  primaryModel?: string;
+  primaryModel?: string | Partial<Record<Device, string>>;
 
   /**
    * Recommended system memory (in GB) to run this playbook's primary model,
-   * as a coarse tier (8/16/24/32/64/128). Omitted for playbooks with no model
-   * (dev tools). Users with less memory should pick a smaller model where the
-   * playbook supports it. Example: "recommendedSystemMemory": 16
+   * as a coarse tier (8/16/24/32/64/128). Either a single number (same on every
+   * device) OR an object keyed by Device, for playbooks that run a different
+   * model per device (so the memory need differs — e.g. 128 GB where a large
+   * model runs on Halo, less on Strix/Krackan/dGPUs running a smaller model).
+   * The frontend shows the entry matching the selected device (falling back to
+   * any single value). Omitted for playbooks with no model (dev tools). Users
+   * with less memory should pick a smaller model where the playbook supports it.
+   * Examples:
+   *   "recommendedSystemMemory": 16
+   *   "recommendedSystemMemory": { "halo_box": 128, "halo": 128,
+   *                                 "stx": 32, "krk": 32 }
    */
-  recommendedSystemMemory?: number;
+  recommendedSystemMemory?: number | Partial<Record<Device, number>>;
 
   /**
    * Per-playbook software-version overrides, keyed by device CATEGORY
