@@ -148,6 +148,7 @@ sudo podman run -it --name vllm_cluster --replace --pull missing --network=host 
 vLLM uses Ray to orchestrate the cluster and RCCL to handle GPU-to-GPU communication across nodes. One machine acts as the **head node** (Machine 1), coordinating inference. The other joins as a **worker node** (Machine 2), contributing its GPU memory and compute.
 
 > **Note**: Ray is an optional dependency for vLLM and is only available from within the preconfigured Podman container.
+<p> In configurations where the system RAM is low, there is a risk that Ray's memory guard will kill the Ray workers because they are allocating memory higher than the threshold allowed by Ray, and the logs will output ```ray.exceptions.OutOfMemoryError: 1 worker(s) were killed due to the node running low on memory.``` To prevent the Ray workers from being killed, export ```RAY_memory_monitor_refresh_ms=0``` on each of the machines before starting and joining the Ray cluster.
 
 At launch, vLLM shards the model across both nodes using tensor parallelism. Once loaded, inference proceeds as if running on a single accelerator.
 
