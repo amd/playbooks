@@ -10,3 +10,16 @@ test_*.py @sreeram-11
 # the translation trees never run playbook CI (translations are not tested).
 /auto-translations/ @bconsolvo
 /localized-playbooks/ @bconsolvo
+
+# OrchestrAI CI integration. CODEOWNERS is last-match-wins, so these lines would
+# REPLACE the owner from `/.github/` above rather than add to it -- @danielholanda
+# is repeated on each so ownership of these files is widened, not narrowed.
+/.github/orchestrai-config.yml                          @danielholanda @saman-amd
+/.github/scripts/orchestrai_matrix.py                   @danielholanda @saman-amd
+/.github/scripts/orchestrai_trigger.py                  @danielholanda @saman-amd
+/.github/scripts/orchestrai_verdict.py                  @danielholanda @saman-amd
+/.github/scripts/orchestrai_report.py                   @danielholanda @saman-amd
+/.github/workflows/test-playbooks-orchestrai.yml        @danielholanda @saman-amd
+/.github/workflows/orchestrai-pr-command.yml            @danielholanda @saman-amd
+/.github/workflows/test-localized-playbooks-orchestrai.yml @danielholanda @saman-amd
+/.github/workflows/orchestrai-localized-pr-command.yml  @danielholanda @saman-amd
