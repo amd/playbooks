@@ -365,6 +365,57 @@ class FixtureCase(unittest.TestCase):
         self.assertEqual({e["playbook"] for e in got}, consumers)
 
 
+class LocalizedRunnerLabelCase(unittest.TestCase):
+    """The locale, platform/device, and optional host labels must stay distinct."""
+
+    @staticmethod
+    def build(*args) -> list[dict]:
+        proc = subprocess.run(
+            [sys.executable, ".github/scripts/build_test_matrix.py", *args],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return json.loads(proc.stdout)
+
+    def test_localized_entries_use_standard_dimensions_plus_locale(self):
+        entries = self.build("--mode", "all", "--locale", "zh-CN")
+        self.assertTrue(entries)
+        for entry in entries:
+            os_label = "Windows" if entry["platform"] == "windows" else "Linux"
+            expected = ["self-hosted", os_label, entry["arch"], "localized-zh-cn"]
+            self.assertEqual(json.loads(entry["runner"]), expected)
+            self.assertEqual(entry["runner_label"], "localized-zh-cn")
+            self.assertEqual(entry["target_runner_label"], "")
+            self.assertEqual(entry["runner_labels"], ",".join(expected))
+
+    def test_manual_target_does_not_replace_locale_label(self):
+        entries = self.build("--mode", "all", "--locale", "zh-CN")
+        candidate = entries[0]
+        os_label = "Windows" if candidate["platform"] == "windows" else "Linux"
+        catalog = json.loads((REPO_ROOT / ".github/runners.json").read_text(encoding="utf-8"))
+        runner = next(
+            item for item in catalog
+            if item["os"] == os_label and item["group"] == candidate["arch"]
+        )
+        targeted = self.build(
+            "--mode", "playbook",
+            "--playbook-id", candidate["playbook"],
+            "--locale", "zh-CN",
+            "--platform", candidate["platform"],
+            "--device", candidate["arch"],
+            "--runner-label", runner["name"],
+        )
+        self.assertTrue(targeted)
+        for entry in targeted:
+            labels = json.loads(entry["runner"])
+            self.assertEqual(entry["runner_label"], "localized-zh-cn")
+            self.assertEqual(entry["target_runner_label"], runner["name"])
+            self.assertIn("localized-zh-cn", labels)
+            self.assertIn(runner["name"], labels)
+
+
 class UnreachableBaseCase(unittest.TestCase):
     def test_missing_base_falls_back_to_full(self):
         """An unresolvable base sha must run everything, not nothing."""
@@ -518,6 +569,7 @@ if __name__ == "__main__":
     args, rest = ap.parse_known_args()
     loader = unittest.TestLoader()
     suite = unittest.TestSuite([loader.loadTestsFromTestCase(FixtureCase),
+                                loader.loadTestsFromTestCase(LocalizedRunnerLabelCase),
                                 loader.loadTestsFromTestCase(UnreachableBaseCase)])
     if not args.quick:
         suite.addTests(loader.loadTestsFromTestCase(ReplayCase))

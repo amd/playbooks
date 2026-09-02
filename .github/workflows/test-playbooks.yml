@@ -154,7 +154,7 @@ jobs:
         run: python3 .github/scripts/test_run_playbook_tests.py
 
   test-playbooks:
-    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.runner_label != '' && format(' @{0}', matrix.runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
+    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.target_runner_label != '' && format(' @{0}', matrix.target_runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
     needs: detect-changes
     if: needs.detect-changes.outputs.has_entries == 'true'
     runs-on: ${{ fromJson(matrix.runner) }}
@@ -296,7 +296,7 @@ jobs:
           $summary = @"
           ### Test Results for ``${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}`` (${{ matrix.platform }}/${{ matrix.arch }})
 
-          Requested runner label: ``${{ matrix.runner_label || 'any matching runner' }}``
+          Requested runner label: ``${{ matrix.target_runner_label || 'any matching runner' }}``
 
           See the test artifacts for detailed logs.
           "@
@@ -309,7 +309,7 @@ jobs:
           cat >> $GITHUB_STEP_SUMMARY << 'EOF'
           ### Test Results for `${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}` (${{ matrix.platform }}/${{ matrix.arch }})
 
-          Requested runner label: `${{ matrix.runner_label || 'any matching runner' }}`
+          Requested runner label: `${{ matrix.target_runner_label || 'any matching runner' }}`
 
           See the test artifacts for detailed logs.
           EOF

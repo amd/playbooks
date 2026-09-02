@@ -1352,6 +1352,7 @@ def build_localized_matrix_entries(repo_root: Path, locale: str) -> list[dict]:
     slug = re.sub(r"[^a-z0-9]+", "-", locale.lower()).strip("-")
     if not slug:
         raise ValueError(f"Unable to generate a runner label from locale {locale!r}")
+    locale_label = f"localized-{slug}"
     if not (repo_root / "localized-playbooks" / locale).is_dir():
         raise ValueError(
             f"Localized content directory does not exist: localized-playbooks/{locale}"
@@ -1413,15 +1414,17 @@ def build_localized_matrix_entries(repo_root: Path, locale: str) -> list[dict]:
                         raise ValueError(
                             f"Unsupported platform '{platform}' for '{playbook_id}'"
                         )
-                    label = f"localized-{slug}-{device}-{platform}"
+                    os_label = "Windows" if platform == "windows" else "Linux"
                     entries.append({
                         "locale": locale,
                         "playbook": playbook_id,
                         "platform": platform,
                         "arch": device,
-                        "runner": json.dumps(["self-hosted", label]),
-                        "runner_label": label,
-                        "runner_labels": f"self-hosted,{label}",
+                        "runner": json.dumps(
+                            ["self-hosted", os_label, device, locale_label]
+                        ),
+                        "runner_label": locale_label,
+                        "runner_labels": f"self-hosted,{os_label},{device},{locale_label}",
                         "required": platform in set(required_for_device),
                         "localized_only": localized_only,
                     })
