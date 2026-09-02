@@ -131,11 +131,11 @@
   "recommendedSystemMemory": {
     "halo_box": 128,
     "halo": 128,
-    "stx": 8,
-    "krk": 8,
-    "rx7900xt": 8,
-    "rx9070xt": 8,
-    "r9700": 8
+    "stx": 16,
+    "krk": 16,
+    "rx7900xt": 16,
+    "rx9070xt": 16,
+    "r9700": 16
   },
   "primaryModel": {
     "halo_box": "GPT-OSS-120B",
