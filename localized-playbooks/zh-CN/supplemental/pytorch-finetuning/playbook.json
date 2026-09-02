@@ -1,0 +1,90 @@
+{
+  "id": "pytorch-finetuning",
+  "title": "使用 PyTorch 和 AMD ROCm™ 软件微调大语言模型",
+  "description": "使用 PyTorch 和 ROCm 微调大语言模型(LLM)。",
+  "time": 45,
+  "supported_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "tested_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "difficulty": "intermediate",
+  "isNew": false,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "pytorch",
+    "fine-tuning",
+    "llm",
+    "rocm"
+  ],
+  "coverImage": "assets/cover_image.jpg"
+}
