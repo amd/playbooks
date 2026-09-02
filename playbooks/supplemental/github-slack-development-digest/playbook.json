@@ -2,7 +2,7 @@
   "id": "github-slack-development-digest",
   "title": "Build a GitHub-to-Slack Development Digest with Agent Canvas",
   "description": "Configure Agent Canvas, GitHub MCP, Slack MCP, and a scheduled OpenHands automation that posts a local-LLM digest.",
-  "time": 45,
+  "time": 60,
   "supported_platforms": {
     "halo_box": [
       "linux",
@@ -19,9 +19,91 @@
     "krk": [
       "linux",
       "windows"
+    ],
+    "rx7900xt": [
+      "linux"
+    ],
+    "rx9070xt": [
+      "linux"
+    ],
+    "r9700": [
+      "linux"
     ]
   },
-  "difficulty": "intermediate",
+  "tested_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux"
+    ],
+    "rx9070xt": [
+      "linux"
+    ],
+    "r9700": [
+      "linux"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux"
+    ],
+    "rx9070xt": [
+      "linux"
+    ],
+    "r9700": [
+      "linux"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux"
+    ],
+    "rx9070xt": [
+      "linux"
+    ],
+    "r9700": [
+      "linux"
+    ]
+  },
+  "difficulty": "advanced",
   "isNew": true,
   "isFeatured": false,
   "developed": true,
