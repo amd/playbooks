@@ -241,7 +241,24 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-        run: python3 .github/scripts/orchestrai_verdict.py
+        # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
+        # ("Resolve per-playbook verdict"), which is where the user-facing !orc
+        # sticky comment comes from. Deliberately duplicated rather than
+        # factored into .github/actions/ — see the rationale on that copy.
+        #
+        # Exit codes: 0 PASSED, 1 FAILED (real test failure), 2 NOT_RUN/
+        # INTERRUPTED (the batch never produced results for this playbook).
+        # GitHub has no neutral step result, so 2 still fails the job — but it is
+        # annotated as infrastructure and the artifact records outcome=NOT_RUN,
+        # so the aggregated PR report counts it separately from test failures.
+        run: |
+          rc=0
+          python3 .github/scripts/orchestrai_verdict.py || rc=$?
+          echo "verdict_rc=${rc}" >> "$GITHUB_OUTPUT"
+          if [ "$rc" = "2" ]; then
+            echo "::warning::${PLAYBOOK_ID} (${PLATFORM}) did not run — OrchestrAI infrastructure issue, not a test failure"
+          fi
+          exit "$rc"
 
       - name: Upload test artifacts
         if: always()
@@ -255,10 +272,31 @@ jobs:
         if: always()
         env:
           RP_URL: ${{ steps.results.outputs.rp_url }}
+        # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
+        # ("Test summary"). See the sync note on the verdict step above.
         run: |
+          # NOT_RUN/INTERRUPTED is infrastructure, not a test failure — say so in
+          # the job summary instead of letting it read as a failed playbook.
+          INFRA_NOTE=$(python3 - <<'PY'
+          import json
+          try:
+              d = json.load(open("test-results/summary.json"))
+          except Exception:
+              d = {}
+          outcome = (d.get("outcome") or "").upper()
+          if outcome in ("NOT_RUN", "INTERRUPTED"):
+              reason = d.get("infrastructure_reason") or "reason not reported by the pipeline"
+              print(f"> ⚠️ **{outcome}** — this playbook produced no test results. "
+                    f"Infrastructure: {reason}")
+          PY
+          )
           {
             echo "### \`${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
             echo ""
+            if [ -n "${INFRA_NOTE}" ]; then
+              echo "${INFRA_NOTE}"
+              echo ""
+            fi
             # Link to ReportPortal (test results) only. The pipeline build URL is
             # intentionally not shown here.
             if [ -n "${RP_URL}" ]; then
