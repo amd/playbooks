@@ -60,11 +60,11 @@ at that model, and run your first coding task against a real project folder.
 ## Prerequisites
 
 <!-- @os:linux -->
-<!-- @require:lemonade,nodejs -->
+<!-- @require:lemonade,nodejs,lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @require:lemonade,nodejs -->
+<!-- @require:lemonade,nodejs,lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 You need:

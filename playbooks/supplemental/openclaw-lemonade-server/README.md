@@ -56,6 +56,9 @@ By the end of this playbook you will be able to:
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
+<!-- @require:nodejs -->
+<!-- @require:openclaw -->
+<!-- @require:lemonade-models-qwen3-35b-a3b -->
 
 <!-- @var:id=openclaw_model value="Qwen3.6-35B-A3B-GGUF" -->
 

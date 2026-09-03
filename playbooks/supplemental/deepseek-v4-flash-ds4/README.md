@@ -31,6 +31,10 @@ This tutorial shows how to use `ds4-cockpit`, a terminal UI, to set up ds4, down
 
 ## Installing Software Prerequisites
 
+<!-- @require:distrobox -->
+<!-- @require:ds4-cockpit -->
+<!-- @require:ds4-toolbox-image -->
+
 > **System requirements for this configuration (single-node IQ2_XXS at 126k context):**
 > - A Strix Halo system with **at least 128 GB of unified memory**.
 > - **BIOS dedicated VRAM (UMA frame buffer) set to the minimum**, so the shared memory pool can be as large as possible.

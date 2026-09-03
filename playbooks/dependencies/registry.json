@@ -53,6 +53,16 @@
         "linux": [],
         "windows": []
       },
+      "validate": {
+        "linux": {
+          "cmd": "lms --help",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "lms --help",
+          "expect_rc": 0
+        }
+      },
       "versionable": true
     },
     "vllm": {
@@ -90,6 +100,26 @@
           "halo_box"
         ]
       },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.npm-global/bin:$HOME/.local/bin:$PATH\"; n8n --version",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "n8n --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "npm config set prefix \"$HOME/.npm-global\" && npm install -g n8n",
+          "timeout": 1200
+        },
+        "windows": {
+          "cmd": "npm install -g n8n",
+          "timeout": 1200
+        }
+      },
       "versionable": true
     },
     "vscode": {
@@ -124,6 +154,22 @@
           "halo_box"
         ]
       },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 2 http://127.0.0.1:13305/api/v1/health",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 2 http://127.0.0.1:13305/api/v1/health",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "sudo add-apt-repository -y ppa:lemonade-team/stable && sudo apt update && sudo apt install -y lemonade-server",
+          "timeout": 900
+        }
+      },
       "versionable": true
     },
     "lemonade-ready": {
@@ -136,6 +182,487 @@
         "linux": [],
         "windows": []
       }
+    },
+    "lemonade-models-gpt-oss-120b": {
+      "name": "GPT-OSS 120B Model (Lemonade)",
+      "description": "OpenAI GPT-OSS 120B MXFP4 GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_gpt_oss_120b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q gpt-oss-120b-mxfp-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:gpt-oss-120b-mxfp-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "lemonade pull gpt-oss-120b-mxfp-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "cmd": "lemonade pull gpt-oss-120b-mxfp-GGUF",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-gpt-oss-20b": {
+      "name": "GPT-OSS 20B Model (Lemonade)",
+      "description": "OpenAI GPT-OSS 20B MXFP4 GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_gpt_oss_20b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q gpt-oss-20b-mxfp4-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:gpt-oss-20b-mxfp4-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "lemonade pull gpt-oss-20b-mxfp4-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "cmd": "lemonade pull gpt-oss-20b-mxfp4-GGUF",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-qwen3-35b-a3b": {
+      "name": "Qwen3.6 35B A3B Model (Lemonade)",
+      "description": "Qwen3.6-35B-A3B GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_qwen3_35b_a3b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q Qwen3.6-35B-A3B-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Qwen3.6-35B-A3B-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "lemonade pull Qwen3.6-35B-A3B-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "cmd": "lemonade pull Qwen3.6-35B-A3B-GGUF",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-qwen3-coder-30b": {
+      "name": "Qwen3-Coder 30B A3B Model (Lemonade)",
+      "description": "Qwen3-Coder-30B-A3B-Instruct GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_qwen3_coder_30b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q Qwen3-Coder-30B-A3B-Instruct-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Qwen3-Coder-30B-A3B-Instruct-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "lemonade pull Qwen3-Coder-30B-A3B-Instruct-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "cmd": "lemonade pull Qwen3-Coder-30B-A3B-Instruct-GGUF",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-gemma-4-e2b": {
+      "name": "Gemma-4 E2B Model (Lemonade)",
+      "description": "Gemma-4-E2B-it GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_gemma_4_e2b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q Gemma-4-E2B-it-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Gemma-4-E2B-it-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "lemonade pull Gemma-4-E2B-it-GGUF",
+          "timeout": 1800
+        },
+        "windows": {
+          "cmd": "lemonade pull Gemma-4-E2B-it-GGUF",
+          "timeout": 1800
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-qwen3-4b": {
+      "name": "Qwen3.5 4B Model (Lemonade)",
+      "description": "Qwen3.5-4B GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_qwen3_4b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q Qwen3.5-4B-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Qwen3.5-4B-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "lemonade pull Qwen3.5-4B-GGUF",
+          "timeout": 1800
+        },
+        "windows": {
+          "cmd": "lemonade pull Qwen3.5-4B-GGUF",
+          "timeout": 1800
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-sdxl-turbo": {
+      "name": "SDXL-Turbo Model (Lemonade)",
+      "description": "SDXL-Turbo image-generation model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_sdxl_turbo.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q SDXL-Turbo",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:SDXL-Turbo",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "lemonade pull SDXL-Turbo",
+          "timeout": 1800
+        },
+        "windows": {
+          "cmd": "lemonade pull SDXL-Turbo",
+          "timeout": 1800
+        }
+      },
+      "versionable": false
+    },
+    "ollama": {
+      "name": "Ollama",
+      "description": "Local LLM runner with a simple CLI and model library",
+      "category": "app",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "ollama.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "ollama --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "curl -fsSL https://ollama.com/install.sh | sh",
+          "timeout": 900
+        }
+      },
+      "versionable": true
+    },
+    "ollama-models-gpt-oss-20b": {
+      "name": "GPT-OSS 20B Model (Ollama)",
+      "description": "OpenAI GPT-OSS 20B model pulled into Ollama",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "ollama_models_gpt_oss_20b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "ollama list | grep -q 'gpt-oss:20b'",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "(curl -sf --max-time 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 || (nohup ollama serve >/tmp/ollama-serve.log 2>&1 & for i in $(seq 1 30); do curl -sf --max-time 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 && break; sleep 1; done)); ollama pull gpt-oss:20b && ollama list | grep -q 'gpt-oss:20b'",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hermes": {
+      "name": "Hermes",
+      "description": "Nous Research Hermes agent CLI",
+      "category": "app",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hermes.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.local/bin:$PATH\"; hermes --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup",
+          "timeout": 900
+        }
+      },
+      "versionable": true
+    },
+    "distrobox": {
+      "name": "Distrobox toolchain",
+      "description": "podman, distrobox, and pipx used to run containerized toolboxes",
+      "category": "framework",
+      "platforms": [
+        "linux"
+      ],
+      "file": "distrobox.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.local/bin:$PATH\"; podman --version && (distrobox version 2>/dev/null || distrobox --version) && pipx --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "sudo apt-get update && sudo apt-get install -y podman distrobox pipx",
+          "timeout": 900
+        }
+      },
+      "versionable": true
+    },
+    "ds4-toolbox-image": {
+      "name": "ds4 toolbox container image",
+      "description": "Container image used by ds4-cockpit to run the ds4 inference engine",
+      "category": "model",
+      "platforms": [
+        "linux"
+      ],
+      "file": "ds4_toolbox_image.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "podman pull docker.io/kyuz0/strix-halo-ds4-toolbox:rocm-7.2.4 && podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "ds4-cockpit": {
+      "name": "ds4-cockpit",
+      "description": "Terminal UI for running DeepSeek V4 Flash toolboxes on Strix Halo",
+      "category": "app",
+      "platforms": [
+        "linux"
+      ],
+      "file": "ds4_cockpit.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.local/bin:$PATH\"; command -v ds4-cockpit",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.local/bin:$PATH\"; pipx install \"git+https://github.com/kyuz0/strix-halo-ds4-toolbox.git#subdirectory=ds4-strix-halo-cockpit\" && pipx ensurepath >/dev/null 2>&1; command -v ds4-cockpit || ls \"$HOME/.local/bin/ds4-cockpit\"",
+          "timeout": 900
+        }
+      },
+      "versionable": true
+    },
+    "openclaw": {
+      "name": "OpenClaw",
+      "description": "Agentic coding assistant that connects to a local Lemonade server",
+      "category": "app",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "openclaw.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.npm-global/bin:$HOME/.local/bin:$PATH\"; openclaw --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard",
+          "timeout": 900
+        }
+      },
+      "versionable": true
     },
     "gaia": {
       "name": "GAIA",
@@ -188,6 +715,26 @@
           "halo_box"
         ]
       },
+      "validate": {
+        "linux": {
+          "cmd": "lms ls --llm | grep -i gpt-oss-120b",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "lms ls --llm | findstr /I gpt-oss-120b",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "lms get ggml-org/gpt-oss-120b-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "cmd": "lms get ggml-org/gpt-oss-120b-GGUF",
+          "timeout": 3600
+        }
+      },
       "versionable": false
     },
     "lmstudio-models-qwen3-9b": {
@@ -202,6 +749,45 @@
       "preinstalled": {
         "linux": [],
         "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "lms ls --llm | grep -i qwen3.5-9b",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "lms ls --llm | findstr /I qwen3.5-9b",
+          "expect_rc": 0
+        }
+      },
+      "versionable": false
+    },
+    "lmstudio-models-qwen3-coder-30b": {
+      "name": "Qwen3-Coder 30B Model",
+      "description": "Qwen3-Coder-30B-A3B model for LM Studio",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lmstudio_models_qwen3_coder_30b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "lms ls --llm | grep -i qwen3-coder-30b",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "lms ls --llm | findstr /I qwen3-coder-30b",
+          "expect_rc": 0
+        }
       },
       "versionable": false
     },
@@ -241,6 +827,18 @@
         "windows": [
           "halo_box"
         ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "hash -r 2>/dev/null; NODEBIN=\"$(command -v node || echo none)\"; echo \"node=$NODEBIN npm=$(command -v npm || echo none)\"; node --version && npm --version && { case \"$NODEBIN\" in */linuxbrew/*) echo 'homebrew node accepted'; exit 0;; esac; node -e 'process.exit(parseInt(process.versions.node.split(\".\")[0],10) >= 24 ? 0 : 1)'; }",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "sudo apt-get remove -y --purge nodejs npm libnode-dev libnode72 node-corepack 2>/dev/null; sudo apt-get autoremove -y 2>/dev/null; curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - && sudo apt-get install -y --allow-downgrades --allow-change-held-packages nodejs && node --version && npm --version",
+          "timeout": 900
+        }
       },
       "versionable": true
     },
@@ -290,6 +888,18 @@
           "halo_box"
         ],
         "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "podman --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "sudo apt update && sudo apt install -y podman docker-compose-plugin podman-compose",
+          "timeout": 600
+        }
       },
       "versionable": true
     },

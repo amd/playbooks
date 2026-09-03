@@ -41,7 +41,7 @@ This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a cod
 
 ## Installing Software Prerequisites
 
-<!-- @require:lmstudio,vscode -->
+<!-- @require:lmstudio,vscode,lmstudio-models-qwen3-coder-30b -->
 
 ## Launch and Configure LM Studio
 
