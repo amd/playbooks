@@ -53,18 +53,20 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 <!-- @device:end -->
 
 <!-- @os:windows -->
-<!-- @require:lemonade,nodejs -->
+<!-- @require:lemonade,nodejs,n8n -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @require:lemonade,podman -->
+<!-- @require:lemonade,podman,nodejs,n8n -->
 <!-- @os:end -->
 
 <!-- @device:halo,halo_box -->
+<!-- @require:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @require:lemonade-models-gpt-oss-20b -->
 <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 

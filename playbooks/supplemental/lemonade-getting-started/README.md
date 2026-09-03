@@ -56,6 +56,7 @@ Before you begin, make sure you have:
 <!-- @device:end -->
 
 <!-- @require:lemonade -->
+<!-- @require:lemonade-models-gemma-4-e2b -->
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
