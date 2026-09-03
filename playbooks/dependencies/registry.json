@@ -750,7 +750,6 @@
         "linux": [],
         "windows": []
       },
-      "optional": true,
       "validate": {
         "linux": {
           "cmd": "lms ls --llm | grep -i qwen3.5-9b",
@@ -780,7 +779,6 @@
           "halo_box"
         ]
       },
-      "optional": true,
       "validate": {
         "linux": {
           "cmd": "lms ls --llm | grep -i qwen3-coder-30b",
