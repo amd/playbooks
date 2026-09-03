@@ -153,9 +153,9 @@ At launch, vLLM shards the model across both nodes using tensor parallelism. Onc
 
 #### Preventing Ray OOM errors
 
-By default, Ray monitors host memory on each node and kills the largest process when usage crosses 95%. On your Ryzen™ AI Halo, the GPU and the host share one pool of memory, so loading the model can trigger a `ray.exceptions.OutOfMemoryError` and kill the worker process.
+By default, Ray monitors host memory on each node and kills the largest process when memory usage crosses 95%. On your Ryzen™ AI Halo, the GPU and the host share one pool of memory, so loading a model can trigger a `ray.exceptions.OutOfMemoryError` and kill the worker process.
 
-To prevent this, export `RAY_memory_monitor_refresh_ms=0` on each machine before starting and joining the cluster. 
+To prevent this, we will export `RAY_memory_monitor_refresh_ms=0` on each machine before starting and joining the cluster. 
 
 ### Step 1: Start the Ray Head Node (Machine 1)
 
