@@ -75,8 +75,10 @@ class LoopTests(unittest.TestCase):
         self.assertFalse(r["install_ran"])
 
     def test_installed_when_install_heals(self):
-        flag = tempfile.mktemp()
-        try:
+        # Use a private temp dir and a not-yet-created path inside it, so the
+        # first validate fails and the install `touch` is what makes it pass.
+        with tempfile.TemporaryDirectory() as tmp:
+            flag = os.path.join(tmp, "heal-flag")
             spec = {
                 "validate": {"linux": {"cmd": f"test -f {flag}", "expect_rc": 0}},
                 "install": {"linux": {"cmd": f"touch {flag}", "timeout": 5}},
@@ -84,9 +86,6 @@ class LoopTests(unittest.TestCase):
             r = pv.check_dependency("d", spec, "linux")
             self.assertEqual(r["status"], "INSTALLED")
             self.assertTrue(r["install_ran"])
-        finally:
-            if os.path.exists(flag):
-                os.remove(flag)
 
     def test_failed_when_install_does_not_heal(self):
         spec = {
