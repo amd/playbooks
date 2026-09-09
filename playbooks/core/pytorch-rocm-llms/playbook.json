@@ -128,12 +128,28 @@
     "summarization"
   ],
   "coverImage": "assets/cover.png",
-  "recommendedSystemMemory": 8,
+  "recommendedSystemMemory": {
+    "halo_box": 32,
+    "halo": 32,
+    "stx": 8,
+    "krk": 8,
+    "rx7900xt": 8,
+    "rx9070xt": 8,
+    "r9700": 8
+  },
   "validatedVersions": {
     "reference": {
       "linux": {},
       "windows": {}
     }
   },
-  "primaryModel": "Qwen3.5-4B"
+  "primaryModel": {
+    "halo_box": "GPT-OSS-20B",
+    "halo": "GPT-OSS-20B",
+    "stx": "Qwen3.5-4B",
+    "krk": "Qwen3.5-4B",
+    "rx7900xt": "Qwen3.5-4B",
+    "rx9070xt": "Qwen3.5-4B",
+    "r9700": "Qwen3.5-4B"
+  }
 }

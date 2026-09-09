@@ -128,7 +128,15 @@
     "lemonade"
   ],
   "coverImage": "assets/workflow-overview.png",
-  "recommendedSystemMemory": 64,
+  "recommendedSystemMemory": {
+    "halo_box": 128,
+    "halo": 128,
+    "stx": 32,
+    "krk": 32,
+    "rx7900xt": 32,
+    "rx9070xt": 32,
+    "r9700": 32
+  },
   "validatedVersions": {
     "reference": {
       "linux": {
@@ -161,5 +169,13 @@
       }
     }
   },
-  "primaryModel": "GPT-OSS-120B"
+  "primaryModel": {
+    "halo_box": "GPT-OSS-120B",
+    "halo": "GPT-OSS-120B",
+    "stx": "GPT-OSS-20B",
+    "krk": "GPT-OSS-20B",
+    "rx7900xt": "GPT-OSS-20B",
+    "rx9070xt": "GPT-OSS-20B",
+    "r9700": "GPT-OSS-20B"
+  }
 }
