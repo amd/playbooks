@@ -195,15 +195,10 @@ npm -v
 <!-- @test:end -->
 
 ## Installing n8n
+
+n8n is installed as part of the [prerequisites](#installing-software-prerequisites) above. Confirm it is available:
+
 <!-- @os:windows -->
-Install n8n globally using npm.
-
-> **Note**: You may see some npm warnings. This is expected.
-
-```bash
-npm install -g n8n
-```
-
 <!-- @test:id=n8n-version timeout=60 hidden=True -->
 ```bash
 n8n --version
