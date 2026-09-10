@@ -456,6 +456,62 @@
       },
       "versionable": false
     },
+    "uv": {
+      "name": "uv",
+      "description": "Fast Python package/environment manager used by Agent Canvas",
+      "category": "runtime",
+      "platforms": [
+        "linux"
+      ],
+      "file": "uv.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.local/bin:$PATH\"; uv --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "curl -LsSf https://astral.sh/uv/install.sh | sh",
+          "timeout": 300
+        }
+      },
+      "versionable": true
+    },
+    "agent-canvas": {
+      "name": "Agent Canvas",
+      "description": "OpenHands browser UI / CLI (npm @openhands/agent-canvas); requires Node.js >= 24",
+      "category": "app",
+      "platforms": [
+        "linux"
+      ],
+      "file": "agent_canvas.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.npm-global/bin:$HOME/.local/bin:$PATH\"; agent-canvas --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "npm config set prefix \"$HOME/.npm-global\" && npm install -g @openhands/agent-canvas",
+          "timeout": 900
+        }
+      },
+      "versionable": true
+    },
     "ollama": {
       "name": "Ollama",
       "description": "Local LLM runner with a simple CLI and model library",
