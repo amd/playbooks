@@ -100,8 +100,9 @@ extra_tags: {}
 # 128 GB for the big Halo run — the small-device runs fit in normal RAM. Tagging
 # ram_128gb ONLY on halo/halo_box lets them run on every device (no tag elsewhere
 # → tags_for() falls back to the empty extra_tags entry) instead of being dropped
-# from the non-128 GB devices by extra_tag_devices. Unsloth follows the same
-# pattern. gaia-agents also belongs here. vscode-qwen3-coder keeps the Halo tag
+# from the non-128 GB devices by extra_tag_devices. Unsloth uses the same Halo
+# tagging, while its known-OOM STX combination is excluded explicitly below.
+# gaia-agents also belongs here. vscode-qwen3-coder keeps the Halo tag
 # here, but unlike the Lemonade playbooks it loads Qwen3-Coder-30B-A3B through
 # LM Studio with full Vulkan offload (`--gpu max`) and a 32K context; current
 # 32 GB STX systems cannot satisfy that allocation and are skipped below.
@@ -118,7 +119,6 @@ device_extra_tags:
   unsloth-llms-finetuning:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    stx:      []
   lmstudio-rocm-llms:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
@@ -224,6 +224,10 @@ skip_devices: []
 # (device_extra_tags) and add krk to extra_tag_devices[ram_64gb); that pins them
 # to the four large hosts instead of excluding them.
 skip_playbook_devices:
+  # Current 32 GB STX machines expose insufficient usable GPU/UMA memory for
+  # this fixed model on both Linux and Windows. Re-enable when eligible STX
+  # hardware is available.
+  unsloth-llms-finetuning:  ["stx"]
   hermes-lemonade-server:  ["stx", "krk"]
   openclaw-lemonade-server: ["stx", "krk"]
   # LM Studio's survey exposed 10.71 GiB to Vulkan on Windows STX for an
