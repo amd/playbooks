@@ -16,5 +16,6 @@
   { "name": "CS-RORDMZ-DT134",    "os": "Windows", "group": "rx9070xt", "labels": [] },
   { "name": "CS-RORDMZ-DT72",     "os": "Linux",   "group": "rx9070xt", "labels": [] },
   { "name": "MNB-UCICD-DT337",    "os": "Windows", "group": "r9700",    "labels": [] },
-  { "name": "MNB-UCICD-DT457",    "os": "Linux",   "group": "r9700",    "labels": [] }
+  { "name": "MNB-UCICD-DT457",    "os": "Linux",   "group": "r9700",    "labels": [] },
+  { "name": "x-ultra",            "os": "Linux",   "group": "grgh",     "labels": [] }
 ]
