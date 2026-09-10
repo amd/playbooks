@@ -147,15 +147,22 @@ sudo podman run -it --name vllm_cluster --replace --pull missing --network=host 
 
 vLLM uses Ray to orchestrate the cluster and RCCL to handle GPU-to-GPU communication across nodes. One machine acts as the **head node** (Machine 1), coordinating inference. The other joins as a **worker node** (Machine 2), contributing its GPU memory and compute.
 
-> **Note**: Ray is an optional dependency for vLLM and is only available from within the preconfigured Podman container.
+> **Note**: Ray is an optional dependency for vLLM and is only available from within the preconfigured Podman container. 
 
 At launch, vLLM shards the model across both nodes using tensor parallelism. Once loaded, inference proceeds as if running on a single accelerator.
+
+#### Preventing Ray OOM errors
+
+By default, Ray monitors host memory on each node and kills the largest process when memory usage crosses 95%. On your Ryzen™ AI Halo, the GPU and the host share one pool of memory, so loading a model can trigger a `ray.exceptions.OutOfMemoryError` and kill the worker process.
+
+To prevent this, we will export `RAY_memory_monitor_refresh_ms=0` on each machine before starting and joining the cluster. 
 
 ### Step 1: Start the Ray Head Node (Machine 1)
 
 On Machine 1, start the Ray head node to initialize the cluster:
 
 ```bash
+export RAY_memory_monitor_refresh_ms=0
 ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1
 ```
 
@@ -166,6 +173,7 @@ ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1
 On Machine 2, connect to the head node to form the cluster:
 
 ```bash
+export RAY_memory_monitor_refresh_ms=0
 ray start --address=<MACHINE_1_IP>:6379 --node-ip-address=<MACHINE_2_IP> --num-gpus=1
 ```
 
