@@ -62,6 +62,7 @@ which python3
 <!-- @device:end -->
 
 <!-- @require:lemonade -->
+<!-- @require:lemonade-models-qwen3-coder-30b -->
 <!-- @require:gaia -->
 
 ## Getting Started

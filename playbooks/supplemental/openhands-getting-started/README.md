@@ -71,7 +71,7 @@ at that model, and run your first coding task against a real project folder.
 
 
 <!-- @os:linux -->
-<!-- @require:lemonade,nodejs -->
+<!-- @require:lemonade,nodejs,uv,agent-canvas,lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 <!-- @os:windows -->

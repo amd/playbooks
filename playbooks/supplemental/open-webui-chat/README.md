@@ -113,6 +113,9 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 <!-- @device:end -->
 <!-- @os:end -->
 
+<!-- @require:lemonade-models-qwen3-4b -->
+<!-- @require:lemonade-models-sdxl-turbo -->
+
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash
 lemonade --version

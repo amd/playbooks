@@ -203,6 +203,25 @@ jobs:
           }
           exit 0
 
+      # Validate the runner has this playbook's prerequisites, and self-heal by
+      # installing anything missing, BEFORE running the tests. A missing model
+      # or dependency that can't be resolved fails here as a clearly-labelled
+      # provisioning issue instead of surfacing as a confusing test failure.
+      # Allow ample time: a first-time cold model pull can be slow.
+      - name: Validate & provision prerequisites (Windows)
+        if: matrix.platform == 'windows'
+        shell: powershell
+        timeout-minutes: 90
+        run: |
+          python .github/scripts/prereq_validate.py --playbook "${{ matrix.playbook }}" --platform windows --device "${{ matrix.arch }}"
+
+      - name: Validate & provision prerequisites (Linux)
+        if: matrix.platform == 'linux'
+        shell: bash
+        timeout-minutes: 90
+        run: |
+          python .github/scripts/prereq_validate.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}"
+
       - name: Extract and run tests (Windows)
         if: matrix.platform == 'windows'
         id: run_tests_windows

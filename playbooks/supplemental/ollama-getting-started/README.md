@@ -38,6 +38,8 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 ## Installing Software Prerequisites
 
 <!-- @require:driver -->
+<!-- @require:ollama -->
+<!-- @require:ollama-models-gpt-oss-20b -->
 
 ### Installing Ollama
 

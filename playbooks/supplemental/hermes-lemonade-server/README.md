@@ -66,6 +66,8 @@ By the end of this playbook you will be able to:
 <!-- @device:end -->
 
 <!-- @require:lemonade -->
+<!-- @require:hermes -->
+<!-- @require:lemonade-models-qwen3-35b-a3b -->
 
 <!-- @var:id=hermes_model value="Qwen3.6-35B-A3B-GGUF" -->
 
