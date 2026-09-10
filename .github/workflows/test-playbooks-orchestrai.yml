@@ -30,8 +30,13 @@ on:
     - cron: '0 1 * * *'
   workflow_dispatch:
     inputs:
+      locale:
+        description: 'Localized locale to test alongside English'
+        required: true
+        default: 'zh-CN'
+        type: string
       playbook_id:
-        description: 'Playbook ID(s) to test, comma-separated (empty = all)'
+        description: 'English/localized playbook ID(s), comma-separated (empty = all)'
         required: false
         type: string
       device:
@@ -54,8 +59,9 @@ on:
         default: '1'
   # No pull_request trigger: PR runs are opt-in, not automatic on every push, to
   # keep the shared hardware fleet from being flooded. To test a PR, comment
-  # `!orc` on it (see orchestrai-pr-command.yml) — that runs the PR's own head
-  # commit on demand. Re-enable auto-runs by adding a `pull_request:` block here;
+  # `!orc` or `!localized-orc` on it (see orchestrai-pr-command.yml) — that runs
+  # the PR's own head commit on demand. Re-enable auto-runs by adding a
+  # `pull_request:` block here;
   # the detect step already handles the pull_request event (changed-playbooks
   # diff) and the trigger step already sets PLAYBOOK_REPO/SHA from the PR head.
 
@@ -103,38 +109,77 @@ jobs:
             echo "::notice::OrchestrAI secrets (ORCHESTRAI_PIPELINE_USER/ORCHESTRAI_PIPELINE_TOKEN) not set — skipping OrchestrAI run."
           fi
 
-      - name: Detect playbooks
+      - name: Detect English and localized playbooks
         id: detect
         if: steps.gate.outputs.enabled == 'true'
         # Pass event data via env (not inline ${{ }}) so untrusted strings never
         # reach the shell directly.
         env:
           PLAYBOOK_INPUT: ${{ github.event.inputs.playbook_id }}
+          LOCALE: ${{ inputs.locale || 'zh-CN' }}
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.sha }}
         run: |
           if [ -n "$PLAYBOOK_INPUT" ]; then
-            PB=$(echo "$PLAYBOOK_INPUT" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            ENGLISH=$(echo "$PLAYBOOK_INPUT" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            LOCALIZED=$ENGLISH
           elif [ "$EVENT_NAME" = "pull_request" ]; then
             if ! CHANGED=$(git diff --name-only "$PR_BASE_SHA" "$HEAD_SHA" -- 'playbooks/core/*' 'playbooks/supplemental/*'); then
               echo "::error::git diff failed (base $PR_BASE_SHA not in history?) — cannot determine changed playbooks"; exit 1
             fi
-            PB=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            ENGLISH=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            if ! LOCALIZED_CHANGED=$(git diff --name-only "$PR_BASE_SHA" "$HEAD_SHA" -- "localized-playbooks/$LOCALE/core/*" "localized-playbooks/$LOCALE/supplemental/*"); then
+              echo "::error::git diff failed for localized playbooks"; exit 1
+            fi
+            LOCALIZED=$(echo "$LOCALIZED_CHANGED" | grep -E "^localized-playbooks/$LOCALE/(core|supplemental)/[^/]+/" | sed "s|localized-playbooks/$LOCALE/[^/]*/\([^/]*\)/.*|\1|" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
           else
-            PB=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            ENGLISH=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            LOCALIZED=$(find "localized-playbooks/$LOCALE/core" "localized-playbooks/$LOCALE/supplemental" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed "s|localized-playbooks/$LOCALE/[^/]*/||" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
           fi
-          echo "playbooks=${PB:-[]}" >> "$GITHUB_OUTPUT"
+          echo "english=${ENGLISH:-[]}" >> "$GITHUB_OUTPUT"
+          echo "localized=${LOCALIZED:-[]}" >> "$GITHUB_OUTPUT"
 
-      - name: Build matrix and batches
-        id: build-matrix
+      - name: Build English matrix and batches
+        id: build-english
         if: steps.gate.outputs.enabled == 'true'
         env:
-          PLAYBOOKS: ${{ steps.detect.outputs.playbooks }}
+          PLAYBOOKS: ${{ steps.detect.outputs.english }}
           ORCHESTRAI_DEVICE_TAGS: ${{ vars.ORCHESTRAI_DEVICE_TAGS }}
           DEVICES: ${{ inputs.device }}
           PLATFORMS: ${{ inputs.platform }}
         run: python3 .github/scripts/orchestrai_matrix.py
+
+      - name: Build localized matrix and batches
+        id: build-localized
+        if: steps.gate.outputs.enabled == 'true'
+        env:
+          LOCALE: ${{ inputs.locale || 'zh-CN' }}
+          PLAYBOOKS: ${{ steps.detect.outputs.localized }}
+          ORCHESTRAI_DEVICE_TAGS: ${{ vars.ORCHESTRAI_DEVICE_TAGS }}
+          DEVICES: ${{ inputs.device }}
+          PLATFORMS: ${{ inputs.platform }}
+        run: python3 .github/scripts/orchestrai_matrix.py
+
+      - name: Combine English and localized matrices
+        id: build-matrix
+        if: steps.gate.outputs.enabled == 'true'
+        env:
+          ENGLISH_MATRIX: ${{ steps.build-english.outputs.matrix }}
+          ENGLISH_BATCHES: ${{ steps.build-english.outputs.batches }}
+          LOCALIZED_MATRIX: ${{ steps.build-localized.outputs.matrix }}
+          LOCALIZED_BATCHES: ${{ steps.build-localized.outputs.batches }}
+        run: |
+          MATRIX=$(jq -cn --argjson a "$ENGLISH_MATRIX" --argjson b "$LOCALIZED_MATRIX" '$a + $b')
+          BATCHES=$(jq -cn --argjson a "$ENGLISH_BATCHES" --argjson b "$LOCALIZED_BATCHES" '$a + $b')
+          COUNT=$(jq 'length' <<< "$MATRIX")
+          if [ "$COUNT" -gt 256 ]; then
+            echo "::error::Combined English/localized matrix has $COUNT entries; GitHub Actions allows 256"
+            exit 1
+          fi
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "batches=$BATCHES" >> "$GITHUB_OUTPUT"
+          echo "has_entries=$([ "$MATRIX" != "[]" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: Trigger OrchestrAI pipeline builds
         id: trigger
@@ -167,7 +212,7 @@ jobs:
         run: python3 .github/scripts/orchestrai_trigger.py
 
   test-playbooks:
-    name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
+    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
     needs: detect-and-trigger
     if: needs.detect-and-trigger.outputs.has_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
@@ -247,7 +292,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: test-results-${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          name: test-results-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
 
@@ -257,7 +302,7 @@ jobs:
           RP_URL: ${{ steps.results.outputs.rp_url }}
         run: |
           {
-            echo "### \`${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
+            echo "### \`${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
             echo ""
             # Link to ReportPortal (test results) only. The pipeline build URL is
             # intentionally not shown here.

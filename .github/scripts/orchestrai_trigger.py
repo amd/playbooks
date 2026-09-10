@@ -133,6 +133,16 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
             "PLAYBOOK_DEVICE": device,
             "ROCM_MULTI_ARCH_INDEX_URL": rocm_index_url,
         }
+        locale = batch.get("locale", "")
+        if locale:
+            localized_only = batch.get("localized_only", {}).get(pb_id, True)
+            if not isinstance(localized_only, bool):
+                raise ValueError(
+                    f"Localized OrchestrAI batch has non-boolean localized_only "
+                    f"for {pb_id!r}"
+                )
+            variables["PLAYBOOK_LOCALE"] = locale
+            variables["PLAYBOOK_LOCALIZED_ONLY"] = str(localized_only).lower()
         # Authenticate HuggingFace traffic (models/datasets primed by deps fall
         # back to a live HF pull on a mirror miss; unauthenticated calls from the
         # shared egress IP hit HF's per-IP rate limit). Optional: omitted when the
