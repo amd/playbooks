@@ -73,6 +73,18 @@ test the automation, and Lemonade to run the LLM locally.
 > least 32 GB of system memory, and prefer 64 GB or more for larger GGUF models.
 <!-- @device:end -->
 
+<!-- @device:halo_box,halo,stx,krk -->
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+<!-- @device:end -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
 ## Prerequisites
 
 <!-- @os:linux -->
