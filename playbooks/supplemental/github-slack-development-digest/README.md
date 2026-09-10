@@ -814,9 +814,20 @@ all work before relying on the schedule.
 - [Model Context Protocol servers](https://github.com/modelcontextprotocol/servers)
 - [Slack MCP package](https://www.npmjs.com/package/@modelcontextprotocol/server-slack)
 
-<!-- @test:id=lemonade-unload timeout=60 hidden=True -->
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
 ```bash
 # CI cleanup: unload the model so the GPU pool is free
 lemonade unload || true
 ```
 <!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+try { lemonade unload } catch {}
+```
+<!-- @test:end -->
+<!-- @os:end -->
