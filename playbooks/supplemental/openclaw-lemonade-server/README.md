@@ -620,6 +620,11 @@ trap cleanup EXIT
 export DOCKER_CONFIG="$docker_config"
 printf '{ "auths": {} }\n' > "$DOCKER_CONFIG/config.json"
 
+# Docker Desktop injects its WSL cli-tools a few seconds after the distro boots.
+for i in $(seq 1 30); do
+  docker version >/dev/null 2>&1 && break
+  sleep 2
+done
 docker version
 
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
