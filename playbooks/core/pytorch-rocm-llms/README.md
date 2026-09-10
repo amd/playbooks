@@ -124,6 +124,13 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+> **Note:** If the model fails to load or runs out of memory, try installing the `kernels` package to load the model with optimized quantization.
+>
+> ```bash
+> # Use this version which is compatible with the Transformers version
+> pip install "kernels==0.14.1" 
+> ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
