@@ -21,13 +21,16 @@
       "windows"
     ],
     "rx7900xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx9070xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "r9700": [
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "tested_platforms": {
@@ -94,13 +97,16 @@
       "windows"
     ],
     "rx7900xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx9070xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "r9700": [
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "difficulty": "advanced",
