@@ -47,13 +47,16 @@
       "windows"
     ],
     "rx7900xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx9070xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "r9700": [
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "required_platforms": {
@@ -70,13 +73,16 @@
       "windows"
     ],
     "rx7900xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "rx9070xt": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "r9700": [
-      "linux"
+      "linux",
+      "windows"
     ]
   },
   "published_platforms": {
