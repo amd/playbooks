@@ -19,8 +19,17 @@ When machines are added or removed, edit ``.github/runners.json`` ONLY -- both w
 ``runners.json`` is a JSON array of objects, one per runner::
     [
       { "name": "xsj-aimlab-halo-0", "os": "Windows", "group": "halo" },
+      { "name": "xsj-aimlab-krk-03", "os": "Linux", "group": "krk",
+        "enabled": false, "disabled_reason": "unreachable, see issue #NNN" },
       ...
     ]
+
+Set ``"enabled": false`` on a machine that is known to be down. Both workflows
+fan out one job per selected runner, routed by that runner's name label, so a
+job created for an offline machine can never be picked up: it sits queued until
+GitHub cancels it after 24 hours, and the whole workflow run stays queued behind
+it. Excluding the machine here means no job is created for it in the first
+place. Omitted or ``true`` means enabled, so existing entries need no change.
 
 Filtering ANDs three optional criteria:
 * ``--name``   exact runner name (e.g. ``xsj-aimlab-halo-0``). Restarts one box.
@@ -75,13 +84,25 @@ def load_runners() -> list[dict]:
     return data
 
 
+def is_enabled(runner: dict) -> bool:
+    """Return True unless the entry is explicitly disabled.
+
+    Missing key means enabled, so existing runners.json entries are unaffected.
+    """
+    return runner.get("enabled", True) is not False
+
+
 def matches(
     runner: dict,
     name: Optional[str],
     os_filter: Optional[str],
     group: Optional[str],
+    include_disabled: bool = False,
 ) -> bool:
     """Return True if ``runner`` satisfies all active filters."""
+    if not include_disabled and not is_enabled(runner):
+        return False
+
     if name:
         if runner.get("name") != name:
             return False
@@ -102,6 +123,11 @@ def main() -> int:
     parser.add_argument("--name", default="", help="Exact runner name, or empty")
     parser.add_argument("--os", dest="os_filter", default="any", help="Windows|Linux|any")
     parser.add_argument("--group", default="any", help="Hardware group, or any")
+    parser.add_argument(
+        "--include-disabled",
+        action="store_true",
+        help='Also select runners marked "enabled": false in runners.json',
+    )
     args = parser.parse_args()
 
     runners = load_runners()
@@ -109,8 +135,18 @@ def main() -> int:
     selected = [
         r
         for r in runners
-        if matches(r, args.name.strip() or None, args.os_filter, args.group)
+        if matches(
+            r,
+            args.name.strip() or None,
+            args.os_filter,
+            args.group,
+            include_disabled=args.include_disabled,
+        )
     ]
+
+    # Report what was held back, so a skipped machine is visible in the log
+    # rather than silently missing from the matrix.
+    skipped = [r for r in runners if not is_enabled(r)]
 
     # Human-readable summary in the step log.
     print(f"Loaded {len(runners)} runner(s) from {RUNNERS_FILE}.")
@@ -118,6 +154,11 @@ def main() -> int:
         f"Filters -> name={args.name or 'any'}, os={args.os_filter}, "
         f"group={args.group}"
     )
+    if skipped and not args.include_disabled:
+        print(f"Skipping {len(skipped)} disabled runner(s):")
+        for r in skipped:
+            reason = r.get("disabled_reason", "no reason given")
+            print(f"  - {r['name']} ({reason})")
     if args.name.strip() and not selected:
         print(
             f"WARNING: no runner named '{args.name.strip()}' in "
