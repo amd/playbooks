@@ -309,19 +309,21 @@ def main():
     print("  - 'Can I run a 30B model?'")
     print("\nType 'quit', 'exit', or 'q' to stop.\n")
 
-    # Create agent (uses local Lemonade server by default)
-    try:
-        agent = HardwareAdvisorAgent()
-        print("Agent ready! (Ctrl+C to exit)\n")
-    except Exception as e:
-        print(f"Error initializing agent: {e}")
-        print("\nMake sure Lemonade Server is running before using GAIA.")
-        return
+    # The agent is created LAZILY, on the first real request.
+    #
+    # Constructing it eagerly means GAIA's LemonadeManager preloads the default
+    # model (Gemma-4-E4B-it-GGUF at ctx_size=32768, downloading it on a cold
+    # cache) before this loop ever looks at stdin. A caller that immediately
+    # asks to quit -- including `printf quit | python3 hardware_advisor_agent.py`
+    # -- then waits on a model load it never uses. Deferring the construction
+    # keeps startup instant and costs an interactive user nothing but moving
+    # that same wait to their first question.
+    agent = None
 
     # Interactive loop
     while True:
         try:
-            user_input = input("You: ").strip() 
+            user_input = input("You: ").strip()
 
             if not user_input:
                 continue
@@ -330,11 +332,25 @@ def main():
                 print("Goodbye!")
                 break
 
+            if agent is None:
+                try:
+                    agent = HardwareAdvisorAgent()
+                    print("Agent ready!\n")
+                except Exception as e:
+                    print(f"Error initializing agent: {e}")
+                    print("\nMake sure Lemonade Server is running before using GAIA.")
+                    return
+
             # Process the query (agent prints the output)
             agent.process_query(user_input)
             print()  # Add spacing
 
         except KeyboardInterrupt:
+            print("\nGoodbye!")
+            break
+        except EOFError:
+            # stdin closed (piped input exhausted). Without this the generic
+            # handler below would swallow it and spin the loop forever.
             print("\nGoodbye!")
             break
         except Exception as e:
