@@ -132,6 +132,10 @@ jobs:
         run: python3 .github/scripts/test_build_test_matrix.py
       - name: Run playbook-test extractor tests
         run: python3 .github/scripts/test_run_playbook_tests.py
+      - name: Run OrchestrAI verdict tests
+        run: python3 .github/scripts/test_orchestrai_verdict.py
+      - name: Run OrchestrAI report tests
+        run: python3 .github/scripts/test_orchestrai_report.py
 
   test-playbooks:
     name: "Test ${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.runner_label != '' && format(' @{0}', matrix.runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
