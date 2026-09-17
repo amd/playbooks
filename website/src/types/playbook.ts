@@ -51,7 +51,7 @@
  * <!-- @device:end -->
  * ```
  * 
- * Valid device IDs: halo, stx, krk, rx7900xt, rx9070xt, r9700.
+ * Valid device IDs: halo, grgh, mdsh, stx, krk, grgp, mdsp, rx7900xt, rx9070xt, r9700.
  * Content outside of `@device` tags is shown on all devices.
  * 
  * ## Pre-installed Software Dropdowns
@@ -76,18 +76,24 @@
 
 export type Platform = "windows" | "linux";
 export type Architecture = "halo" | "krk";
-export type Device = "halo" | "halo_box" | "stx" | "krk" | "rx7900xt" | "rx9070xt" | "r9700";
+export type Device = "halo" | "halo_box" | "grgh" | "grgh_box" | "mdsh" | "mdsh_box" | "stx" | "krk" | "grgp" | "mdsp" | "rx7900xt" | "rx9070xt" | "r9700";
 export type Category = "core" | "supplemental" | "backup";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 export type DeviceCategory = "reference" | "apu" | "gpu";
 
-export const DEVICE_IDS: Device[] = ["halo", "halo_box", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"];
+export const DEVICE_IDS: Device[] = ["halo", "halo_box", "grgh", "grgh_box", "mdsh", "mdsh_box", "stx", "krk", "grgp", "mdsp", "rx7900xt", "rx9070xt", "r9700"];
 
 export const deviceNames: Record<Device, string> = {
   halo: "Ryzen™ AI Max",
   halo_box: "AMD Ryzen™ AI Halo",
+  grgh: "Gorgon Halo",
+  grgh_box: "Gorgon Halo Box",
+  mdsh: "Medusa Halo",
+  mdsh_box: "Medusa Halo Box",
   stx: "Ryzen™ AI 300 HX",
   krk: "Ryzen™ AI 300",
+  grgp: "Gorgon Point",
+  mdsp: "Medusa Point",
   rx7900xt: "Radeon™ RX 7900 XT",
   rx9070xt: "Radeon™ RX 9070 XT",
   r9700: "Radeon™ AI Pro R9700",
@@ -102,8 +108,8 @@ export interface DeviceCategoryInfo {
 }
 
 export const DEVICE_CATEGORIES: DeviceCategoryInfo[] = [
-  { id: "reference", name: "Reference Platforms", devices: ["halo_box"], deviceDisplayNames: { halo_box: "AMD Ryzen\u2122 AI Halo" } },
-  { id: "apu", name: "Ryzen\u2122 AI APUs", devices: ["halo", "stx", "krk"] },
+  { id: "reference", name: "Reference Platforms", devices: ["halo_box", "grgh_box", "mdsh_box"], deviceDisplayNames: { halo_box: "AMD Ryzen\u2122 AI Halo" } },
+  { id: "apu", name: "Ryzen\u2122 AI APUs", devices: ["halo", "grgh", "mdsh", "stx", "krk", "grgp", "mdsp"] },
   { id: "gpu", name: "Radeon\u2122 GPUs", devices: ["rx7900xt", "rx9070xt", "r9700"] },
 ];
 
@@ -144,8 +150,11 @@ export function extractCategoryDevices(
  * Prefers "reference" for halo, otherwise matches to apu/gpu.
  */
 export function categoryForDevice(device: Device): DeviceCategory {
-  if (device === "halo_box") return "reference";
-  if (device === "halo" || device === "stx" || device === "krk") return "apu";
+  if (device === "halo_box" || device === "grgh_box" || device === "mdsh_box") return "reference";
+  if (
+    device === "halo" || device === "grgh" || device === "mdsh" ||
+    device === "stx" || device === "krk" || device === "grgp" || device === "mdsp"
+  ) return "apu";
   return "gpu";
 }
 

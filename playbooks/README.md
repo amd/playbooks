@@ -113,13 +113,41 @@ Instructions for discrete Radeon GPUs
 |-----------|----------|--------------|
 | `halo_box` | STX Halo | AMD Ryzen™ AI Halo Developer Platform |
 | `halo` | STX Halo | AMD Ryzen™ AI Max+ |
+| `grgh_box` | Gorgon Halo | AMD Ryzen™ AI Max+ 400 Series (Gorgon Halo Box) |
+| `grgh` | Gorgon Halo | AMD Ryzen™ AI Max+ 400 Series |
+| `mdsh_box` | Medusa Halo | AMD Ryzen™ AI Max+ 500 Series (Medusa Halo Box) |
+| `mdsh` | Medusa Halo | AMD Ryzen™ AI Max+ 500 Series |
 | `stx` | STX Point | AMD Ryzen™ AI 300 HX |
 | `krk` | Krackan Point | AMD Ryzen™ AI 300 |
+| `grgp` | Gorgon Point | AMD Ryzen™ AI 400 HX |
+| `mdsp` | Medusa Point | AMD Ryzen™ AI 500 HX |
 | `rx7900xt` | Radeon RX 7900 XT | AMD Radeon™ 7000 Series Graphics |
 | `rx9070xt` | Radeon RX 9070 XT | AMD Radeon™ 9000 Series Graphics |
 | `r9700` | Radeon AI Pro R9700 | AMD Radeon™ 9000 Series Graphics |
 
 Content outside `@device` tags is always shown. Use `<!-- @device:all -->` to explicitly mark content for all devices. A device selector appears on the playbook page when `@device` tags are detected.
+
+> **Note — device tags vs. actual runners.** Some device IDs above are declared
+> for upcoming hardware (e.g. the Gorgon `grgh_box`/`grgp` and Medusa
+> `mdsh_box`/`mdsh`/`mdsp` tags) but do **not** yet have physical CI runners. A
+> tag can be *recognized* everywhere without being *tested*, so these are wired
+> only in the declarative places and deliberately left out of the two files that
+> actually schedule jobs. When the hardware arrives, wire a new tag up in this
+> order:
+>
+> 1. **Recognition / display (already done for the tags above):**
+>    - `playbooks/README.md` — this device table
+>    - `.github/scripts/run_playbook_tests.py` — `VALID_DEVICES`
+>    - `.github/workflows/test-playbooks.yml` and `restart-runners.yml` — the `device` / `group` dropdown choices
+>    - `.github/orchestrai-config.yml` — `device_families` (and `device_to_gfx` once the gfx target is known)
+>    - `.github/ISSUE_TEMPLATE/*.yml` — the hardware dropdowns
+>    - `website/src/types/playbook.ts` and the dashboard route/label files — internal preview only
+> 2. **Only once a real runner exists — this is what schedules CI jobs:**
+>    - `.github/runners.json` — register the machine (name, os, group = the device tag)
+>    - each playbook's `playbook.json` — add the tag under `tested_platforms` (and `required_platforms` if it should gate merges)
+>
+> Adding a tag to step 2 before a runner is registered queues jobs that never
+> run, so hold those two edits until the hardware is online.
 
 ### Shared Content Tags
 
