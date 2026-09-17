@@ -25,7 +25,7 @@ jobs:
       - name: Validate playbooks
         run: python .github/scripts/validate_playbooks.py
 
-      - name: Check bug report playbook list is up to date
+      - name: Check issue-form playbook and hardware dropdowns are up to date
         run: python .github/scripts/gen_issue_template_playbooks.py --check
 
       - name: Display summary

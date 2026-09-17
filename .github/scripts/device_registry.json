@@ -1,0 +1,12 @@
+{
+  "_comment": "Single source of truth for AMD hardware options in the issue templates. The device dropdowns in .github/ISSUE_TEMPLATE/bug_report.yml and playbook_proposal.yml are generated from this file by gen_issue_template_playbooks.py and verified in CI. Add a new device here (in display order) when new hardware ships; do not hand-edit the dropdowns.",
+  "devices": [
+    { "tag": "halo_box",  "name": "AMD Ryzen AI Halo Developer Platform" },
+    { "tag": "halo",      "name": "AMD Ryzen AI Max+" },
+    { "tag": "stx",       "name": "AMD Ryzen AI 300 HX" },
+    { "tag": "krk",       "name": "AMD Ryzen AI 300" },
+    { "tag": "rx7900xt",  "name": "AMD Radeon RX 7900 XT" },
+    { "tag": "rx9070xt",  "name": "AMD Radeon RX 9070 XT" },
+    { "tag": "r9700",     "name": "AMD Radeon AI PRO R9700" }
+  ]
+}
