@@ -26,50 +26,15 @@ This playbook teaches you how to cluster two Ryzen AI Halo systems using llama.c
 
 ## Setting the Memory Configuration
 
-> **Note**: Complete this step on both Machine 1 and Machine 2.
+> **Note**: Complete this step on **both Machine 1 and Machine 2**.
 
-<!-- @os:windows -->
-On Windows, to run larger models that require higher memory, we need to use the AMD Variable Graphics Memory (iGPU VRAM) allocation.
+Running a 358B-parameter model across the cluster requires a large GPU memory
+allocation, so this step is required here (not optional). Follow the memory
+configuration below, and set the allocation on each machine to at least
+**96 GB** (Windows: UMA Frame Buffer Size in the BIOS; Linux: `amd-ttm --set 120`).
 
-This can be done by opening AMD Software: Adrenalin Edition control panel and navigating to: `Performance > Tuning > AMD Variable Graphics Memory`. Set the value to **96 GB**. Please reboot the system for the changes to take effect.
+<!-- @require:memory-config -->
 
-<p align="center">
-  <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
-</p>
-
-<!-- @os:end -->
-
-<!-- @os:linux -->
-On Linux, ROCm utilizes a shared system memory pool, and this pool is configured by default to half the system memory.
-
-This amount can be increased by changing the kernel's Translation Table Manager (TTM) page setting, with the following instructions. AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5 GB).
-
-* Install the pipx utility and add the path for pipx installed wheels into the system search path.
-
-  ```bash
-  sudo apt install pipx
-  pipx ensurepath
-  ```
-
-* Install the amd-debug-tools wheel from PyPI.
-  ```bash
-  pipx install amd-debug-tools
-  ```
-
-* Run the amd-ttm tool to query the current settings for shared memory.
-  ```bash
-  amd-ttm
-  ```
-
-* Reconfigure shared memory settings to **120 GB**:
-  ```bash
-  amd-ttm --set 120
-  ```
-
-* Reboot the system for changes to take effect.
-
-
-<!-- @os:end -->
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
