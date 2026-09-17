@@ -35,6 +35,7 @@ def main():
     ap.add_argument("--run-url", default="")
     ap.add_argument("--sha", default="")
     ap.add_argument("--ref", default="")
+    ap.add_argument("--locale", default="")
     args = ap.parse_args()
 
     rows = []
@@ -64,7 +65,13 @@ def main():
     overall = "✅ all passed" if rows and n_fail == 0 else (
         "❌ failures" if rows else "⚠️ no results")
 
-    lines = [MARKER, f"### OrchestrAI results — {overall} ({n_pass} passed, {n_fail} failed)", ""]
+    marker = (
+        "<!-- orchestrai-localized-orc-report -->"
+        if args.locale
+        else MARKER
+    )
+    label = f"Localized OrchestrAI results ({args.locale})" if args.locale else "OrchestrAI results"
+    lines = [marker, f"### {label} — {overall} ({n_pass} passed, {n_fail} failed)", ""]
     if rows:
         lines += ["| Playbook | Platform | Device | Result |", "|---|---|---|---|"]
         for pb, platform, arch, ok in rows:
