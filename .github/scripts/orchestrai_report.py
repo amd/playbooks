@@ -23,7 +23,8 @@ Artifacts written by an older verdict script carry no `outcome`; those fall back
 to the previous pass/fail derivation.
 
 Usage:
-    orchestrai_report.py --artifacts <dir> [--run-url URL] [--sha SHA] [--ref REF]
+    orchestrai_report.py --artifacts <dir> [--run-url URL] [--sha SHA]
+        [--ref REF] [--locale LOCALE]
 
 Exit code is always 0 — it only renders; the gate job decides pass/fail.
 """
@@ -130,12 +131,18 @@ def _infra_notes(rows):
     return lines
 
 
-def render(rows, run_url="", sha="", ref=""):
+def render(rows, run_url="", sha="", ref="", locale=""):
     n_pass = sum(1 for r in rows if r[3] == PASS)
     n_fail = sum(1 for r in rows if r[3] == FAIL)
     n_infra = sum(1 for r in rows if r[3] == INFRA)
 
-    lines = [MARKER, f"### OrchestrAI results — {_headline(n_pass, n_fail, n_infra)}", ""]
+    marker = (
+        "<!-- orchestrai-localized-orc-report -->"
+        if locale
+        else MARKER
+    )
+    label = f"Localized OrchestrAI results ({locale})" if locale else "OrchestrAI results"
+    lines = [marker, f"### {label} — {_headline(n_pass, n_fail, n_infra)}", ""]
     if rows:
         lines += ["| Playbook | Platform | Device | Result |", "|---|---|---|---|"]
         for pb, platform, arch, category, _ in rows:
@@ -163,10 +170,11 @@ def main():
     ap.add_argument("--run-url", default="")
     ap.add_argument("--sha", default="")
     ap.add_argument("--ref", default="")
+    ap.add_argument("--locale", default="")
     args = ap.parse_args()
 
     print(render(collect(args.artifacts), run_url=args.run_url, sha=args.sha,
-                 ref=args.ref))
+                 ref=args.ref, locale=args.locale))
 
 
 if __name__ == "__main__":

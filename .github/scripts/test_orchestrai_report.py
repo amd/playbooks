@@ -39,6 +39,7 @@ report = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(report)
 
 MARKER = "<!-- orchestrai-orc-report -->"
+LOCALIZED_MARKER = "<!-- orchestrai-localized-orc-report -->"
 REASON = "host did not return from reboot"
 
 
@@ -173,6 +174,14 @@ class TestOtherShapes(unittest.TestCase):
         self.assertTrue(body.startswith(MARKER))
         self.assertIn("tested `01234567` (my-branch)", body)
         self.assertIn("https://example.invalid/run/1", body)
+
+    def test_localized_report_preserves_infrastructure_categories(self):
+        body = render({("a", "linux", "stx"): not_run("a")}, locale="zh-CN")
+        self.assertTrue(body.startswith(LOCALIZED_MARKER))
+        self.assertIn("Localized OrchestrAI results (zh-CN)", body)
+        self.assertIn("⚠️ 1 not run (infrastructure)", body)
+        self.assertIn("| `a` | linux | stx | ⚠️ not run |", body)
+        self.assertNotIn(MARKER, body)
 
     def test_unreadable_artifact_is_skipped_not_fatal(self):
         tmp = artifacts({("a", "linux", "stx"): passed("a")})
