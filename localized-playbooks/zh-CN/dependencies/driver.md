@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 ### AMD GPU 驱动程序
 
-使用 [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html) 更新到最新的 AMD GPU 驱动程序。
+使用 [`AMD Software: Adrenalin Edition™`](https://www.amd.com/zh-cn/products/software/adrenalin.html) 更新到最新的 AMD GPU 驱动程序。
 
 1. 从开始菜单或系统托盘打开 `AMD Software: Adrenalin Edition`。
 2. 导航到**驱动程序和软件**，点击**管理更新**。

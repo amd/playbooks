@@ -1,0 +1,107 @@
+{
+  "id": "comfyui-image-gen",
+  "title": "使用 ComfyUI 和 Z Image Turbo 生成图像",
+  "description": "使用 ComfyUI 结合 Z Image Turbo 创建令人惊艳的 AI 生成图像。",
+  "time": 15,
+  "unsupported_platforms": {
+    "stx": [
+      { "platform": "windows", "reason": "Z Image Turbo is too large for this device" },
+      { "platform": "linux", "reason": "Z Image Turbo is too large for this device" }
+    ],
+    "krk": [
+      { "platform": "windows", "reason": "Z Image Turbo is too large for this device" },
+      { "platform": "linux", "reason": "Z Image Turbo is too large for this device" }
+    ]
+  },
+  "supported_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "tested_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "difficulty": "beginner",
+  "isNew": false,
+  "isFeatured": true,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "image-generation",
+    "comfyui",
+    "z-image-turbo"
+  ],
+  "coverImage": "assets/cover.jpeg"
+}

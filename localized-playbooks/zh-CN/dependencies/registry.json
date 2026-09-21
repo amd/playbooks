@@ -2,15 +2,15 @@
   "$schema": "./registry.schema.json",
   "description": "中文本地化 playbook 所需的软件依赖和设置步骤",
   "dependencies": {
-    "pytorch": {
-      "name": "PyTorch",
-      "description": "深度学习框架",
-      "category": "framework",
+    "comfyui": {
+      "name": "ComfyUI",
+      "description": "基于节点的 Stable Diffusion 界面",
+      "category": "app",
       "platforms": [
         "windows",
         "linux"
       ],
-      "file": "pytorch.md",
+      "file": "comfyui.md",
       "preinstalled": {
         "linux": [
           "halo_box"
@@ -21,45 +21,15 @@
       },
       "versionable": true
     },
-    "memory-config": {
-      "name": "内存配置",
-      "description": "配置用于运行大型模型的 GPU 内存分配",
+    "pytorch": {
+      "name": "PyTorch",
+      "description": "深度学习框架",
       "category": "framework",
       "platforms": [
         "windows",
         "linux"
       ],
-      "file": "memoryconfig.md",
-      "preinstalled": {
-        "linux": [],
-        "windows": []
-      },
-      "versionable": false
-    },
-    "software-update": {
-      "name": "软件更新",
-      "description": "检查并安装 AMD Ryzen AI Halo 的软件更新",
-      "category": "framework",
-      "platforms": [
-        "windows",
-        "linux"
-      ],
-      "file": "softwareupdate.md",
-      "preinstalled": {
-        "linux": [],
-        "windows": []
-      },
-      "versionable": false
-    },
-    "driver": {
-      "name": "AMD GPU Driver",
-      "description": "用于获得最佳性能的最新 AMD GPU driver",
-      "category": "driver",
-      "platforms": [
-        "windows",
-        "linux"
-      ],
-      "file": "driver.md",
+      "file": "pytorch.md",
       "preinstalled": {
         "linux": [
           "halo_box"
@@ -84,6 +54,44 @@
         "windows": []
       },
       "versionable": true
+    },
+    "lemonade": {
+      "name": "Lemonade",
+      "description": "提供兼容 OpenAI API 的本地 LLM server",
+      "category": "framework",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "versionable": true
+    },
+    "comfyui-models": {
+      "name": "ComfyUI Models",
+      "description": "用于图像生成的 ComfyUI 模型",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "comfyui_models.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "versionable": false
     },
     "lmstudio-models-qwen3-35b-a3b": {
       "name": "Qwen3.5-35B-A3B Model",
@@ -115,15 +123,15 @@
       },
       "versionable": false
     },
-    "lemonade": {
-      "name": "Lemonade",
-      "description": "提供兼容 OpenAI API 的本地 LLM server",
-      "category": "framework",
+    "driver": {
+      "name": "AMD GPU Driver",
+      "description": "适配最优性能的最新版AMD显卡驱动",
+      "category": "driver",
       "platforms": [
         "windows",
         "linux"
       ],
-      "file": "lemonade.md",
+      "file": "driver.md",
       "preinstalled": {
         "linux": [
           "halo_box"
@@ -154,6 +162,21 @@
       },
       "versionable": true
     },
+    "memory-config": {
+      "name": "内存配置",
+      "description": "配置用于运行大型模型的 GPU 内存分配",
+      "category": "framework",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "memoryconfig.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "versionable": false
+    },
     "podman": {
       "name": "Podman",
       "description": "用于运行 OCI 容器的容器管理工具",
@@ -169,6 +192,21 @@
         "windows": []
       },
       "versionable": true
+    },
+    "software-update": {
+      "name": "软件更新",
+      "description": "检查并安装 AMD Ryzen AI Halo 的软件更新",
+      "category": "framework",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "softwareupdate.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "versionable": false
     }
   }
 }
