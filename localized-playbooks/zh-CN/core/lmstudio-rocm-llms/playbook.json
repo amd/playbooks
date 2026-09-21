@@ -1,0 +1,131 @@
+{
+  "id": "lmstudio-rocm-llms",
+  "title": "使用 LM Studio 运行并提供 LLM 服务",
+  "description": "设置 LM Studio 和 LM Studio Server，在本地运行并提供大语言模型服务。",
+  "time": 30,
+  "supported_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "tested_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "required_platforms": {
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "difficulty": "beginner",
+  "isNew": false,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "lm-studio",
+    "rocm",
+    "vulkan",
+    "llm",
+    "inference"
+  ],
+  "coverImage": "assets/cover_image.avif"
+}

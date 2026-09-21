@@ -1,4 +1,5 @@
 {
+  "$schema": "./registry.schema.json",
   "description": "中文本地化 playbook 所需的软件依赖和设置步骤",
   "dependencies": {
     "pytorch": {
@@ -17,7 +18,8 @@
         "windows": [
           "halo_box"
         ]
-      }
+      },
+      "versionable": true
     },
     "memory-config": {
       "name": "内存配置",
@@ -31,7 +33,8 @@
       "preinstalled": {
         "linux": [],
         "windows": []
-      }
+      },
+      "versionable": false
     },
     "software-update": {
       "name": "软件更新",
@@ -45,7 +48,8 @@
       "preinstalled": {
         "linux": [],
         "windows": []
-      }
+      },
+      "versionable": false
     },
     "driver": {
       "name": "AMD GPU Driver",
@@ -63,7 +67,108 @@
         "windows": [
           "halo_box"
         ]
-      }
+      },
+      "versionable": true
+    },
+    "lmstudio": {
+      "name": "LM Studio",
+      "description": "用于运行本地 LLM 的桌面应用",
+      "category": "app",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lmstudio.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "versionable": true
+    },
+    "lmstudio-models-qwen3-35b-a3b": {
+      "name": "Qwen3.5-35B-A3B Model",
+      "description": "用于 LM Studio 的 Qwen3.5-35B-A3B 模型",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lmstudio_models_qwen3_35b_a3b.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "versionable": false
+    },
+    "lmstudio-models-qwen3-9b": {
+      "name": "Qwen3.5 9B Model",
+      "description": "用于 LM Studio 的 Qwen3.5 9B 模型",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lmstudio_models_qwen3_9b.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "versionable": false
+    },
+    "lemonade": {
+      "name": "Lemonade",
+      "description": "提供兼容 OpenAI API 的本地 LLM server",
+      "category": "framework",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "versionable": true
+    },
+    "nodejs": {
+      "name": "Node.js",
+      "version": "22.22.1",
+      "description": "用于服务端应用的 JavaScript runtime",
+      "category": "runtime",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "nodejs.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "versionable": true
+    },
+    "podman": {
+      "name": "Podman",
+      "description": "用于运行 OCI 容器的容器管理工具",
+      "category": "framework",
+      "platforms": [
+        "linux"
+      ],
+      "file": "podman.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": []
+      },
+      "versionable": true
     }
   }
 }
