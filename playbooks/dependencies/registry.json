@@ -101,20 +101,12 @@
         ]
       },
       "validate": {
-        "linux": {
-          "cmd": "export PATH=\"$HOME/.npm-global/bin:$HOME/.local/bin:$PATH\"; n8n --version",
-          "expect_rc": 0
-        },
         "windows": {
           "cmd": "n8n --version",
           "expect_rc": 0
         }
       },
       "install": {
-        "linux": {
-          "cmd": "npm config set prefix \"$HOME/.npm-global\" && npm install -g n8n",
-          "timeout": 1200
-        },
         "windows": {
           "cmd": "npm install -g n8n",
           "timeout": 1200
@@ -193,8 +185,12 @@
       ],
       "file": "lemonade_models_gpt_oss_120b.md",
       "preinstalled": {
-        "linux": [],
-        "windows": []
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
       },
       "validate": {
         "linux": {
@@ -228,8 +224,12 @@
       ],
       "file": "lemonade_models_gpt_oss_20b.md",
       "preinstalled": {
-        "linux": [],
-        "windows": []
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
       },
       "validate": {
         "linux": {
@@ -298,8 +298,12 @@
       ],
       "file": "lemonade_models_qwen3_coder_30b.md",
       "preinstalled": {
-        "linux": [],
-        "windows": []
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
       },
       "validate": {
         "linux": {
@@ -774,8 +778,12 @@
       ],
       "file": "lmstudio_models_qwen3_coder_30b.md",
       "preinstalled": {
-        "linux": [],
-        "windows": []
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
       },
       "validate": {
         "linux": {
