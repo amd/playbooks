@@ -46,6 +46,24 @@
         "linux": [],
         "windows": []
       }
+    },
+    "driver": {
+      "name": "AMD GPU Driver",
+      "description": "用于获得最佳性能的最新 AMD GPU driver",
+      "category": "driver",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "driver.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      }
     }
   }
 }
