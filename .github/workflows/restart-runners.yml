@@ -144,14 +144,14 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          echo "Restarting $(hostname) (runner ${{ matrix.runner }}) now..."
-          # `sudo reboot` restarts the machine (NOT shutdown).
-          # It's backgrounded with a short delay so this step exits cleanly before the runner process is killed.
-          # Otherwise the reboot terminates the job mid-run and it reports a false failure. Requires passwordless sudo (or root).
-          # --force is the Linux equivalent of the Windows `/f` above: it skips unit teardown,
-          # so a unit that hangs mid-shutdown (plymouth-reboot.service) cannot wedge the box.
-          # Processes are still killed and filesystems unmounted or remounted read-only.
-          # A graceful reboot followed by a delayed force does NOT work: the backgrounded
-          # shell is killed at shutdown.target before the delay elapses.
-          ( sleep 5 ; sudo --non-interactive systemctl reboot --force ) &
+          echo "Restarting $(hostname) (runner ${{ matrix.runner }}) in 60s..."
+          # Same shape as the Windows `shutdown /r /t 60 /f` above: 60s delay, forced.
+          # systemd-run hands the reboot to a transient timer owned by PID 1, so it outlives
+          # this job; a backgrounded `( sleep N ; reboot ) &` stays a child of the step and dies with it.
+          # --force is the `/f` equivalent: skipping unit teardown stops a hung unit
+          # (plymouth-reboot.service) from wedging the box. Requires passwordless sudo (or root).
+          sudo --non-interactive systemd-run \
+            --on-active=60 --timer-property=AccuracySec=1s \
+            --unit=ci-scheduled-reboot \
+            systemctl reboot --force
           echo "Reboot scheduled."
