@@ -2,7 +2,6 @@
   { "name": "xsj-aimlab-halo-0",  "os": "Windows", "group": "halo",     "labels": ["10.23.80.221"] },
   { "name": "xsj-aimlab-halo-1",  "os": "Windows", "group": "halo",     "labels": ["10.23.80.222"] },
   { "name": "xsj-aimlab-halo-02", "os": "Linux",   "group": "halo",     "labels": ["10.23.81.242", "xsj-aimlab-halo-2"] },
-  { "name": "xsj-aimlab-halo-03", "os": "Linux",   "group": "halo",     "labels": ["10.23.81.228", "xsj-aimlab-halo-3"] },
   { "name": "xsj-aimlab-stxp-03", "os": "Windows", "group": "stx",      "labels": ["10.23.81.212"] },
   { "name": "xsj-aimlab-stxp-05", "os": "Windows", "group": "stx",      "labels": ["10.23.81.227"] },
   { "name": "xsj-aimlab-stxp-01", "os": "Linux",   "group": "stx",      "labels": ["10.23.81.237"] },
