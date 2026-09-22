@@ -2,12 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 #
-# ChatOps: comment `!orc` on a PR to run that PR's playbooks via OrchestrAI and
-# get a sticky pass/fail comment back.
+# ChatOps: run canonical or localized PR playbooks via OrchestrAI and post a
+# sticky pass/fail comment.
 #
 #   !orc            -> the playbooks changed in the PR
 #   !orc all        -> every playbook
 #   !orc a,b,c      -> the named playbooks
+#   !localized-orc                     -> changed localized playbooks
+#   !localized-orc <locale> all|a,b,c  -> localized playbooks for one locale
 #
 # Only users with write access (OWNER/MEMBER/COLLABORATOR) can trigger it, since
 # it runs internal hardware with the OrchestrAI pipeline secrets. issue_comment runs from the
@@ -25,13 +27,13 @@ permissions:
   issues: write
 
 concurrency:
-  group: orchestrai-orc-${{ github.event.issue.number }}
+  group: orchestrai-orc-${{ startsWith(github.event.comment.body, '!localized-orc') && 'localized' || 'english' }}-${{ github.event.issue.number }}
   cancel-in-progress: true
 
 jobs:
   command:
-    name: "!orc"
-    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '!orc') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    name: OrchestrAI PR command
+    if: github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
@@ -39,6 +41,7 @@ jobs:
       build_urls: ${{ steps.trigger.outputs.build_urls }}
       head_sha: ${{ steps.pr.outputs.head_sha }}
       head_ref: ${{ steps.pr.outputs.head_ref }}
+      locale: ${{ steps.detect.outputs.locale }}
     steps:
       - name: Resolve PR + acknowledge
         id: pr
@@ -59,10 +62,10 @@ jobs:
           HEAD_REPO_FULL=$(py "['head']['repo']['full_name']")
           if [ "$HEAD_REPO_FULL" != "$REPO" ]; then
             echo "fork=true" >> "$GITHUB_OUTPUT"
-            echo "::warning::!orc refused: PR head '$HEAD_REPO_FULL' is a fork of '$REPO'"
+            echo "::warning::OrchestrAI command refused: PR head '$HEAD_REPO_FULL' is a fork of '$REPO'"
             curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
               "$API/repos/$REPO/issues/$PR/comments" \
-              -d '{"body":"🔒 `!orc` is only available for pull requests from branches in this repository, not forks."}' >/dev/null || true
+              -d '{"body":"🔒 `!orc` and `!localized-orc` are only available for pull requests from branches in this repository, not forks."}' >/dev/null || true
             exit 0
           fi
           {
@@ -104,23 +107,67 @@ jobs:
           BASE_SHA: ${{ steps.pr.outputs.base_sha }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
         run: |
-          arg=$(printf '%s' "$BODY" | head -n1 | sed -E 's/^!orc[[:space:]]*//')
-          if [ "$arg" = "all" ]; then
-            PB=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          elif [ -n "$arg" ]; then
-            PB=$(printf '%s' "$arg" | tr ', ' '\n\n' | sed 's/^ *//;s/ *$//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          else
-            if ! CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- 'playbooks/core/*' 'playbooks/supplemental/*'); then
-              echo "::error::git diff failed (base $BASE_SHA not in history?)"; exit 1
+          if printf '%s' "$BODY" | head -n1 | grep -q '^!localized-orc\([[:space:]]\|$\)'; then
+            arg=$(printf '%s' "$BODY" | head -n1 | sed -E 's/^!localized-orc[[:space:]]*//')
+            first=$(printf '%s' "$arg" | awk '{print $1}')
+            rest=$(printf '%s' "$arg" | sed -E 's/^[^[:space:]]+[[:space:]]*//')
+            if [ -n "$rest" ]; then
+              LOCALE=$first
+              selection=$rest
+              if [ ! -d "localized-playbooks/$LOCALE" ]; then
+                echo "::error::Localized content directory does not exist: localized-playbooks/$LOCALE"; exit 1
+              fi
+            elif [ -n "$first" ] && [ -d "localized-playbooks/$first" ]; then
+              LOCALE=$first
+              selection=
+            else
+              selection=$arg
+              if [ -z "$selection" ]; then
+                if ! CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- 'localized-playbooks/*/core/*' 'localized-playbooks/*/supplemental/*'); then
+                  echo "::error::git diff failed (base $BASE_SHA not in history?)"; exit 1
+                fi
+                LOCALES=$(printf '%s\n' "$CHANGED" | sed -nE 's#^localized-playbooks/([^/]+)/(core|supplemental)/[^/]+/.*#\1#p' | sort -u)
+              else
+                LOCALES=$(find localized-playbooks -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|localized-playbooks/||' | sort -u)
+              fi
+              LOCALE_COUNT=$(printf '%s\n' "$LOCALES" | sed '/^$/d' | wc -l | tr -d ' ')
+              if [ "$LOCALE_COUNT" -ne 1 ]; then
+                echo "::error::Could not select one locale automatically; use !localized-orc <locale> [all|playbook IDs]"; exit 1
+              fi
+              LOCALE=$(printf '%s\n' "$LOCALES" | sed '/^$/d')
             fi
-            PB=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            if [ "$selection" = "all" ]; then
+              PB=$(find "localized-playbooks/$LOCALE/core" "localized-playbooks/$LOCALE/supplemental" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed "s|localized-playbooks/$LOCALE/[^/]*/||" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            elif [ -n "$selection" ]; then
+              PB=$(printf '%s' "$selection" | tr ', ' '\n\n' | sed 's/^ *//;s/ *$//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            else
+              if [ -z "${CHANGED+x}" ] && ! CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- "localized-playbooks/$LOCALE/core/*" "localized-playbooks/$LOCALE/supplemental/*"); then
+                echo "::error::git diff failed (base $BASE_SHA not in history?)"; exit 1
+              fi
+              PB=$(printf '%s\n' "$CHANGED" | sed -nE "s#^localized-playbooks/$LOCALE/(core|supplemental)/([^/]+)/.*#\2#p" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            fi
+          else
+            LOCALE=
+            arg=$(printf '%s' "$BODY" | head -n1 | sed -E 's/^!orc[[:space:]]*//')
+            if [ "$arg" = "all" ]; then
+              PB=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            elif [ -n "$arg" ]; then
+              PB=$(printf '%s' "$arg" | tr ', ' '\n\n' | sed 's/^ *//;s/ *$//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            else
+              if ! CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- 'playbooks/core/*' 'playbooks/supplemental/*'); then
+                echo "::error::git diff failed (base $BASE_SHA not in history?)"; exit 1
+              fi
+              PB=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            fi
           fi
+          echo "locale=$LOCALE" >> "$GITHUB_OUTPUT"
           echo "playbooks=${PB:-[]}" >> "$GITHUB_OUTPUT"
 
       - name: Build matrix and batches
         id: build-matrix
         if: steps.pr.outputs.fork == 'false'
         env:
+          LOCALE: ${{ steps.detect.outputs.locale }}
           PLAYBOOKS: ${{ steps.detect.outputs.playbooks }}
           ORCHESTRAI_DEVICE_TAGS: ${{ vars.ORCHESTRAI_DEVICE_TAGS }}
         run: python3 .github/scripts/orchestrai_matrix.py
@@ -147,6 +194,7 @@ jobs:
         run: python3 .github/scripts/orchestrai_trigger.py
 
   test-playbooks:
+    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})"
     needs: command
     if: needs.command.outputs.has_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
@@ -219,7 +267,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: test-results-${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          name: test-results-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
 
@@ -229,7 +277,7 @@ jobs:
           RP_URL: ${{ steps.results.outputs.rp_url }}
         run: |
           {
-            echo "### \`${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
+            echo "### \`${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
             echo ""
             # ReportPortal (test results) link only; the pipeline build URL is
             # intentionally not shown. Populated even when the verdict fails.
@@ -263,12 +311,18 @@ jobs:
           PR: ${{ github.event.issue.number }}
           HEAD_SHA: ${{ needs.command.outputs.head_sha }}
           HEAD_REF: ${{ needs.command.outputs.head_ref }}
+          LOCALE: ${{ needs.command.outputs.locale }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          python3 .github/scripts/orchestrai_report.py \
+          REPORT_ARGS=()
+          MARKER='<!-- orchestrai-orc-report -->'
+          if [ -n "$LOCALE" ]; then
+            REPORT_ARGS+=(--locale "$LOCALE")
+            MARKER='<!-- orchestrai-localized-orc-report -->'
+          fi
+          python3 .github/scripts/orchestrai_report.py "${REPORT_ARGS[@]}" \
             --artifacts artifacts --run-url "$RUN_URL" --sha "$HEAD_SHA" --ref "$HEAD_REF" > /tmp/body.md
           python3 -c "import json;print(json.dumps({'body':open('/tmp/body.md').read()}))" > /tmp/payload.json
-          MARKER='<!-- orchestrai-orc-report -->'
           existing=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "$API/repos/$REPO/issues/$PR/comments?per_page=100" \
             | python3 -c "import sys,json;c=[x for x in json.load(sys.stdin) if str(x.get('body','')).startswith('$MARKER')];print(c[0]['id'] if c else '')")
           if [ -n "$existing" ]; then
