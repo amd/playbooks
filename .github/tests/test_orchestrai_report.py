@@ -21,7 +21,7 @@ renders (13 never-run playbooks shown as `❌ fail`, no infrastructure section).
 The one structural class is marked as such.
 
 Usage:
-    python3 .github/scripts/test_orchestrai_report.py
+    python3 .github/tests/test_orchestrai_report.py
 """
 
 import importlib.util
@@ -32,7 +32,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-SCRIPT = Path(__file__).with_name("orchestrai_report.py")
+SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "orchestrai_report.py"
 
 _SPEC = importlib.util.spec_from_file_location("orchestrai_report", SCRIPT)
 report = importlib.util.module_from_spec(_SPEC)

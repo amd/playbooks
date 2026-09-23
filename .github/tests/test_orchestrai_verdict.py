@@ -21,7 +21,7 @@ Every case drives main() with a fixture summary.json; fetch() is stubbed, so
 nothing here touches the network or the OrchestrAI pipeline.
 
 Usage:
-    python3 .github/scripts/test_orchestrai_verdict.py
+    python3 .github/tests/test_orchestrai_verdict.py
 """
 
 import contextlib
@@ -34,7 +34,7 @@ import unittest
 from pathlib import Path
 
 _SPEC = importlib.util.spec_from_file_location(
-    "orchestrai_verdict", Path(__file__).with_name("orchestrai_verdict.py")
+    "orchestrai_verdict", Path(__file__).resolve().parents[1] / "scripts" / "orchestrai_verdict.py"
 )
 verdict = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(verdict)
