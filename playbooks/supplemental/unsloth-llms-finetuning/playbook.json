@@ -129,25 +129,34 @@
   "validatedVersions": {
     "reference": {
       "linux": {
+        "ROCm": "7.14",
+        "PyTorch": "2.12",
         "Unsloth": "0.1.524"
       },
       "windows": {
+        "PyTorch": "2.12",
         "Unsloth": "0.1.524"
       }
     },
     "apu": {
       "linux": {
+        "ROCm": "7.14",
+        "PyTorch": "2.12",
         "Unsloth": "Latest"
       },
       "windows": {
+        "PyTorch": "2.12",
         "Unsloth": "Latest"
       }
     },
     "gpu": {
       "linux": {
+        "ROCm": "7.14",
+        "PyTorch": "2.12",
         "Unsloth": "Latest"
       },
       "windows": {
+        "PyTorch": "2.12",
         "Unsloth": "Latest"
       }
     }
