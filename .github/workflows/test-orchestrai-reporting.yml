@@ -1,0 +1,33 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Test OrchestrAI Reporting
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reporting-tests:
+    name: Reporting Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install test dependencies
+        run: python3 -m pip install --quiet pyyaml
+      - name: Run OrchestrAI verdict tests
+        run: python3 .github/tests/test_orchestrai_verdict.py
+      - name: Run OrchestrAI report tests
+        run: python3 .github/tests/test_orchestrai_report.py
+      - name: Run OrchestrAI trigger tests
+        run: python3 .github/tests/test_orchestrai_trigger.py
+      - name: Run OrchestrAI acquire-retry tests
+        run: python3 .github/tests/test_orchestrai_acquire_retry.py

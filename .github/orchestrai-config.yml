@@ -243,7 +243,17 @@ skip_playbook_devices:
 run_settings:
   max_duration: 240            # minutes, whole batch
   max_test_case_duration: 90   # minutes, single playbook
-  acquire_timeout: 30          # minutes, machine acquire
+  # Minutes to wait for the broker to supply machines before the build gives
+  # up. Sent to the pipeline as its ACQUIRE_TIMEOUT build parameter (before
+  # that, this value was ignored and every run waited the pipeline's 40-minute
+  # default). The wait counts against the build's overall time limit, so a
+  # longer wait leaves less time for the batch's playbooks.
+  acquire_timeout: 60
+  # Resubmit a batch whose build timed out waiting for machines before anything
+  # ran, up to this many times (0 disables, max 3). Each attempt waits the
+  # pipeline's full acquire timeout and re-enters the broker queue. Details in
+  # .github/orchestrai/acquire_retry.py.
+  acquire_retries: 3
   # Machines to acquire per hardware group. 1 = all same-HW playbooks share one
   # machine and run sequentially (saves scarce hardware). Overridable per run via
   # the machines_per_hw_group workflow_dispatch input.
