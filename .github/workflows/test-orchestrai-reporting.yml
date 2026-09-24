@@ -21,7 +21,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+      - name: Install test dependencies
+        run: python3 -m pip install --quiet pyyaml
       - name: Run OrchestrAI verdict tests
         run: python3 .github/tests/test_orchestrai_verdict.py
       - name: Run OrchestrAI report tests
         run: python3 .github/tests/test_orchestrai_report.py
+      - name: Run OrchestrAI trigger tests
+        run: python3 .github/tests/test_orchestrai_trigger.py

@@ -13,7 +13,7 @@ These tests pin that the value in orchestrai-config.yml is what the pipeline
 actually receives.
 
 Usage:
-    python3 .github/scripts/test_orchestrai_trigger.py
+    python3 .github/tests/test_orchestrai_trigger.py
 """
 
 import os
@@ -25,8 +25,10 @@ from unittest import mock
 import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CONFIG = os.path.join(os.path.dirname(HERE), "orchestrai-config.yml")
-sys.path.insert(0, HERE)
+GITHUB_DIR = os.path.dirname(HERE)
+SCRIPTS_DIR = os.path.join(GITHUB_DIR, "scripts")
+CONFIG = os.path.join(GITHUB_DIR, "orchestrai-config.yml")
+sys.path.insert(0, SCRIPTS_DIR)
 
 import orchestrai_trigger as trigger  # noqa: E402
 

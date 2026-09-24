@@ -156,10 +156,6 @@ jobs:
         run: python3 .github/scripts/test_build_test_matrix.py
       - name: Run playbook-test extractor tests
         run: python3 .github/scripts/test_run_playbook_tests.py
-      - name: Run OrchestrAI trigger tests
-        run: |
-          pip install --quiet pyyaml
-          python3 .github/scripts/test_orchestrai_trigger.py
 
   test-playbooks:
     name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.target_runner_label != '' && format(' @{0}', matrix.target_runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
