@@ -371,11 +371,11 @@ def submit(plan, builds, platform, pipeline, user, token):
         "PLAN_JSON": json.dumps(plan),
         "BUILDS_JSON": json.dumps(builds),
         "OS_IMAGE": os_image,
-        # The pipeline takes its machine-acquire timeout ONLY from this build
+        # The pipeline takes its machine-acquire timeout ONLY from this
         # parameter (seconds); the acquire_timeout inside PLAN_JSON is never
-        # read. Without it every run silently used the Jenkins default (2400 s)
-        # whatever orchestrai-config.yml said. Derived from the plan being
-        # submitted, so the two can never disagree.
+        # read. Without it every run silently used the pipeline's default
+        # (2400 s) whatever orchestrai-config.yml said. Derived from the plan
+        # being submitted, so the two can never disagree.
         "ACQUIRE_TIMEOUT": str(plan["run_settings"]["acquire_timeout"] * 60),
     }).encode()
 

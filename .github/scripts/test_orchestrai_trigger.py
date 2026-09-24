@@ -40,11 +40,11 @@ def load_config():
 
 
 def submitted_params(plan, platform="linux"):
-    """Run submit() against a fake Jenkins and return the form it posted."""
+    """Run submit() against a fake pipeline server and return the form it posted."""
     captured = {}
 
     class Response:
-        headers = {"Location": "https://jenkins.example/queue/item/1/"}
+        headers = {"Location": "https://pipeline.example/queue/item/1/"}
 
         def __enter__(self):
             return self
@@ -59,9 +59,9 @@ def submitted_params(plan, platform="linux"):
 
     with mock.patch.object(trigger.urllib.request, "build_opener", lambda *a: Opener()):
         queue = trigger.submit(plan, {"builds": []}, platform,
-                               {"url": "https://jenkins.example", "job": "pipeline"},
+                               {"url": "https://pipeline.example", "job": "pipeline"},
                                "user", "token")
-    assert queue == "https://jenkins.example/queue/item/1/"
+    assert queue == "https://pipeline.example/queue/item/1/"
     return {k: v[0] for k, v in urllib.parse.parse_qs(captured["body"].decode()).items()}
 
 
