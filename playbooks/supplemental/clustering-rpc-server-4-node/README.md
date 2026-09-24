@@ -421,7 +421,7 @@ With the RPC servers running on Machines 2, 3, and 4, launch inference from Mach
   -c 32768 \
   -fa on \
   -ngl 999 \
-  --no-mmap \
+  -lm none \
   -b 4096 \
   -ub 4096 \
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
@@ -439,7 +439,7 @@ With the RPC servers running on Machines 2, 3, and 4, launch inference from Mach
   -c 32768 `
   -fa on `
   -ngl 999 `
-  --no-mmap `
+  -lm none `
   -b 4096 `
   -ub 4096 `
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
@@ -464,7 +464,7 @@ Once running, `llama-cli` displays model loading progress and enters an interact
   -c 32768 \
   -fa on \
   -ngl 999 \
-  --no-mmap \
+  -lm none \
   -b 4096 \
   -ub 4096 \
   --host 0.0.0.0 \
@@ -484,7 +484,7 @@ Once running, `llama-cli` displays model loading progress and enters an interact
   -c 32768 `
   -fa on `
   -ngl 999 `
-  --no-mmap `
+  -lm none `
   -b 4096 `
   -ub 4096 `
   --host 0.0.0.0 `
@@ -515,7 +515,7 @@ Once started, open `http://<HOST_IP>:8081` in your browser to access the built-i
 | `-c` | Context size in tokens. Larger values use more memory |
 | `-fa on` | Enables rocWMMA Flash Attention for improved performance on AMD GPUs |
 | `-ngl 999` | Offloads all model layers to the GPU |
-| `--no-mmap` | Disables memory-mapping, reducing load times when model size exceeds system RAM but fits in VRAM |
+| `-lm none` | Sets the model load mode to `none`, disabling memory-mapping to reduce load times when model size exceeds system RAM but fits in VRAM |
 | `-b` | Logical batch size in tokens. Setting to 4096 balances throughput and memory usage across nodes |
 | `-ub` | Physical (micro) batch size for prompt processing. Matching `-b` avoids unnecessary chunking overhead |
 | `--host` | IP to bind `llama-server` to (`llama-server` only) |
