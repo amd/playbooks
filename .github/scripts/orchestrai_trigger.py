@@ -12,6 +12,10 @@ one group per playbook, sharing the batch's hardware — and POSTs it to the
 OrchestrAI pipeline job (buildWithParameters). Polls the queue item until the
 build starts and records its URL so the matrix job can wait on it.
 
+Then watches each build until it has acquired machines, and resubmits a batch
+whose build timed out waiting for machines before anything ran, up to
+run_settings.acquire_retries times (see .github/orchestrai/acquire_retry.py).
+
 Environment-specific values (OrchestrAI pipeline URL/job, provisioning scripts, TheRock
 URLs, Linux/Windows driver sources, run settings) come from
 .github/orchestrai-config.yml. Credentials come from env
@@ -48,6 +52,12 @@ import urllib.parse
 import urllib.request
 
 import yaml
+
+ORCHESTRAI_LIB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                              "orchestrai")
+sys.path.insert(0, ORCHESTRAI_LIB)
+
+import acquire_retry  # noqa: E402
 
 # Request timeouts so a stalled OrchestrAI pipeline can never hang the job (vs the
 # default: wait forever). Values are generous; the point is a finite ceiling, not
@@ -115,6 +125,9 @@ def validate_config(cfg, batches):
         # timeout this long would leave no time to run anything.
         errs.append(f"run_settings.acquire_timeout ({acquire}m) must be shorter than "
                     f"run_settings.max_duration ({rs['max_duration']}m)")
+    bad_retries = acquire_retry.check_retries(rs.get("acquire_retries", 0))
+    if bad_retries:
+        errs.append(bad_retries)
     prov = cfg.get("provisioning") or {}
     platforms = {b.get("platform") for b in batches.values()}
     if "linux" in platforms and not prov.get("linux_install_scripts"):
@@ -437,6 +450,44 @@ def trigger(plan, builds, platform, pipeline, user, token):
     return await_build(queue_url, user, token)
 
 
+def retry_acquire_timeouts(build_urls, prepared, cfg, retries, user, token):
+    """Resubmit batches whose build timed out acquiring machines before anything
+    ran; return the build URL each batch's playbook jobs should wait on.
+
+    See .github/orchestrai/acquire_retry.py for how a timeout is recognised and
+    why the retry lives here rather than in the per-playbook wait jobs. The
+    retry is best-effort: if watching fails for any reason, the original builds
+    stand.
+    """
+    by_bid = {bid: (batch, plan, builds) for bid, batch, plan, builds in prepared}
+    auth = auth_header(user, token)
+
+    def resubmit(bid):
+        batch, plan, builds = by_bid[bid]
+        return trigger(plan, builds, batch["platform"], cfg["pipeline"], user, token)
+
+    print(f"\nWatching {len(build_urls)} build(s) through machine acquisition "
+          f"(up to {retries} retries per batch on acquire timeout)", file=sys.stderr)
+    try:
+        watches = acquire_retry.watch_acquisition(
+            build_urls, resubmit, retries=retries,
+            fetch_building=lambda url: acquire_retry.fetch_building(url, auth),
+            fetch_console=lambda url, start: acquire_retry.fetch_console(url, start, auth))
+    except Exception as exc:
+        print(f"::warning::Acquire-retry watch failed ({exc}); the playbook jobs will "
+              f"wait on the original builds", file=sys.stderr)
+        return build_urls
+
+    annotations, summary = acquire_retry.report(watches, retries)
+    for line in annotations:
+        print(line, file=sys.stderr)
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary and summary_path:
+        with open(summary_path, "a") as f:
+            f.write(summary)
+    return {bid: w.url for bid, w in watches.items()}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=".github/orchestrai-config.yml")
@@ -532,6 +583,10 @@ def main():
             print(f"  WARNING: trigger failed / timed out for {bid}", file=sys.stderr)
 
     print(f"\nTriggered {len(build_urls)} OrchestrAI pipeline build(s)", file=sys.stderr)
+
+    retries = rs.get("acquire_retries", 0)
+    if build_urls and retries and not args.dry_run:
+        build_urls = retry_acquire_timeouts(build_urls, prepared, cfg, retries, user, token)
 
     # Emit the URLs FIRST so the batches that did trigger still run downstream,
     # even if we exit non-zero for an empty result below.

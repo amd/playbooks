@@ -29,3 +29,5 @@ jobs:
         run: python3 .github/tests/test_orchestrai_report.py
       - name: Run OrchestrAI trigger tests
         run: python3 .github/tests/test_orchestrai_trigger.py
+      - name: Run OrchestrAI acquire-retry tests
+        run: python3 .github/tests/test_orchestrai_acquire_retry.py

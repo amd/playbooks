@@ -249,6 +249,11 @@ run_settings:
   # default). The wait counts against the build's overall time limit, so a
   # longer wait leaves less time for the batch's playbooks.
   acquire_timeout: 60
+  # Resubmit a batch whose build timed out waiting for machines before anything
+  # ran, up to this many times (0 disables, max 3). Each attempt waits the
+  # pipeline's full acquire timeout and re-enters the broker queue. Details in
+  # .github/orchestrai/acquire_retry.py.
+  acquire_retries: 3
   # Machines to acquire per hardware group. 1 = all same-HW playbooks share one
   # machine and run sequentially (saves scarce hardware). Overridable per run via
   # the machines_per_hw_group workflow_dispatch input.
