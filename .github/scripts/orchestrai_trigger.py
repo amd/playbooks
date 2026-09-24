@@ -105,6 +105,16 @@ def validate_config(cfg, batches):
     for k in ("max_duration", "max_test_case_duration", "acquire_timeout"):
         if k not in rs:
             errs.append(f"run_settings.{k}")
+    acquire = rs.get("acquire_timeout")
+    if "acquire_timeout" in rs and (
+            isinstance(acquire, bool) or not isinstance(acquire, int) or acquire <= 0):
+        errs.append(f"run_settings.acquire_timeout must be a positive number of "
+                    f"minutes, got {acquire!r}")
+    elif isinstance(rs.get("max_duration"), int) and 0 < rs["max_duration"] <= (acquire or 0):
+        # The acquire wait counts against the build's overall time limit, so a
+        # timeout this long would leave no time to run anything.
+        errs.append(f"run_settings.acquire_timeout ({acquire}m) must be shorter than "
+                    f"run_settings.max_duration ({rs['max_duration']}m)")
     prov = cfg.get("provisioning") or {}
     platforms = {b.get("platform") for b in batches.values()}
     if "linux" in platforms and not prov.get("linux_install_scripts"):
@@ -361,6 +371,12 @@ def submit(plan, builds, platform, pipeline, user, token):
         "PLAN_JSON": json.dumps(plan),
         "BUILDS_JSON": json.dumps(builds),
         "OS_IMAGE": os_image,
+        # The pipeline takes its machine-acquire timeout ONLY from this build
+        # parameter (seconds); the acquire_timeout inside PLAN_JSON is never
+        # read. Without it every run silently used the Jenkins default (2400 s)
+        # whatever orchestrai-config.yml said. Derived from the plan being
+        # submitted, so the two can never disagree.
+        "ACQUIRE_TIMEOUT": str(plan["run_settings"]["acquire_timeout"] * 60),
     }).encode()
 
     req = urllib.request.Request(
@@ -435,7 +451,7 @@ def main():
 
     cfg_errs = validate_config(cfg, batches)
     if cfg_errs:
-        print(f"::error::orchestrai-config.yml missing required keys: {', '.join(cfg_errs)}",
+        print(f"::error::orchestrai-config.yml has missing or invalid keys: {', '.join(cfg_errs)}",
               file=sys.stderr)
         sys.exit(1)
 
