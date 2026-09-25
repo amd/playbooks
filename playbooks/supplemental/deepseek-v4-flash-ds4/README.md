@@ -15,11 +15,11 @@ SPDX-License-Identifier: MIT
 
 [ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) is a dedicated inference engine built specifically for this model architecture. Rather than a general-purpose runtime, ds4 targets the DeepSeek V4 family directly with architecture-specific kernel optimizations for AMD ROCm™ software. It is currently one of the best-performing implementations of DeepSeek V4 Flash on Strix Halo.
 
-This tutorial shows how to use `ds4-cockpit`, a terminal UI, to set up ds4, download model weights, and start serving DeepSeek V4 Flash locally on the AMD Ryzen™ AI Halo Developer Platform.
+This tutorial shows how to use `ai-toolbox-cockpit`, a terminal UI, to set up ds4, download model weights, and start serving DeepSeek V4 Flash locally on the AMD Ryzen™ AI Halo Developer Platform.
 
 ## What You'll Learn
 
-- How to install and launch the `ds4-cockpit` terminal UI
+- How to install and launch the `ai-toolbox-cockpit` terminal UI
 - How to create the ds4 ROCm toolbox container
 - Downloading the recommended quantization for a single Halo node
 - Starting the ds4 inference server and exposing an OpenAI-compatible endpoint
@@ -38,7 +38,7 @@ This tutorial shows how to use `ds4-cockpit`, a terminal UI, to set up ds4, down
 >
 > **Note:** Try setting the **GPU shared-memory pool** to **110 GB** as a starting point. If you hit out-of-memory errors, raise the shared-memory pool or lower the context size.
 
-ds4-cockpit uses container toolboxes to run the ds4 engine. Install `podman`, `distrobox`, and `pipx`:
+ai-toolbox-cockpit uses container toolboxes to run the ds4 engine. Install `podman`, `distrobox`, and `pipx`:
 
 ```bash
 sudo apt update
@@ -69,17 +69,17 @@ The ds4 author provides several quantized versions of DeepSeek V4 Flash in GGUF 
 
 The **IQ2_XXS imatrix** model is a good starting point. It fits comfortably on a single node and leaves enough memory for a reasonable context window.
 
-## Installing ds4-cockpit
+## Installing ai-toolbox-cockpit
 
-[ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox) is a light terminal UI to make getting up and running with ds4 on Strix Halo easy. It handles creating toolbox containers, downloading model weights, and starting servers. Install it with `pipx`:
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) is a light terminal UI to make installing various AI backends easy. We will use it to handle creating our ds4 container, downloading model weights, and starting servers. Install it with `pipx`:
 
 ```bash
-pipx install "git+https://github.com/kyuz0/strix-halo-ds4-toolbox.git#subdirectory=ds4-strix-halo-cockpit"
+pipx install git+https://github.com/kyuz0/ai-toolbox-cockpit.git
 ```
 
 Launch the cockpit:
 ```bash
-ds4-cockpit
+ai-toolbox-cockpit
 ```
 
 <!-- @test:id=ds4-cockpit-linux timeout=60 hidden=True -->
@@ -92,9 +92,9 @@ echo "OK: ds4-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
-## Creating the Toolbox
+## Step 1: Creating the Toolbox
 
-In the **Interactive Toolboxes** tab, select the latest available/stable toolbox (e.g. `ds4-rocm-7.2.4`) and click **Create/Update**. This pulls the container image and creates the toolbox environment.
+In the **Interactive Toolboxes** tab, select the latest available/stable toolbox for ds4 (e.g. `ds4-rocm-10.0`) and click **Create/Update**. This pulls the container image and creates the toolbox environment.
 
 
 <p align="center">
@@ -115,9 +115,9 @@ echo "OK: ds4 toolbox container image is present"
 ```
 <!-- @test:end -->
 
-## Downloading the Model
+## Step 2: Downloading the Model
 
-Go to the **Model Manager** tab. Select **IQ2_XXS imatrix (~80.8 GB)** from the dropdown and click **Download**. The model files will be saved to `~/ds4` by default (you can change the storage path).
+Go to the **Models** tab. First, select the backend (ds4). Then, select the **IQ2_XXS imatrix (~80.8 GB)** from the dropdown and click **Download**. The model files will be saved to `~/ds4` by default (you can change the storage path).
 
 > **Note:** The IQ2_XXS model is roughly 80 GB, so the download can take a while depending on your connection. You can continue once it finishes.
 
@@ -151,7 +151,7 @@ fi
 ```
 <!-- @test:end -->
 
-## Starting the Server
+## Step 3: Starting the Server
 
 Go to the **Server Mode** tab. Select the downloaded model and the toolbox, then configure the context size, host, and port. When ready, click **Start ds4-server**.
 
