@@ -141,31 +141,31 @@
     "reference": {
       "linux": {
         "n8n": "Latest",
-        "Node.js": "24.2"
+        "Podman": "Latest"
       },
       "windows": {
         "n8n": "Latest",
-        "Node.js": "24.2"
+        "Node.js": "24.21"
       }
     },
     "apu": {
       "linux": {
         "n8n": "Latest",
-        "Node.js": "24.2"
+        "Podman": "Latest"
       },
       "windows": {
         "n8n": "Latest",
-        "Node.js": "24.2"
+        "Node.js": "20.19"
       }
     },
     "gpu": {
       "linux": {
         "n8n": "Latest",
-        "Node.js": "24.2"
+        "Podman": "Latest"
       },
       "windows": {
         "n8n": "Latest",
-        "Node.js": "24.2"
+        "Node.js": "20.19"
       }
     }
   },
