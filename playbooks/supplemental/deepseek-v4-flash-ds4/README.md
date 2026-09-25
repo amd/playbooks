@@ -98,7 +98,7 @@ In the **Interactive Toolboxes** tab, select the latest available/stable toolbox
 
 
 <p align="center">
-  <img src="assets/ds4-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ds4-cockpit" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ds4-cockpit" width="800"/>
 </p>
 
 <!-- @test:id=ds4-toolbox-image-linux timeout=120 hidden=True -->
@@ -122,7 +122,7 @@ Go to the **Models** tab. First, select the backend (ds4). Then, select the **IQ
 > **Note:** The IQ2_XXS model is roughly 80 GB, so the download can take a while depending on your connection. You can continue once it finishes.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-model-manager.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
 </p>
 
 <!-- @test:id=ds4-model-downloaded-linux timeout=60 hidden=True -->
@@ -160,7 +160,7 @@ Go to the **Server Mode** tab. Select the downloaded model and the toolbox, then
 > **KV Disk Cache (optional).** Turning on **KV Disk Cache** offloads the KV cache to disk (at **Host Cache Dir**, default `~/.cache/ds4-kv`) so repeated system prompts are restored from SSD instead of being recomputed. It's a performance optimization for coding-agent workflows with long, repeated prompts, and is **not required** to run the server.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-server-mode.png" alt="Configuring and starting the ds4 server" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
 </p>
 
 The server will start and listen on port 8000, exposing an OpenAI-compatible API endpoint at `http://localhost:8000/v1`.
@@ -298,15 +298,19 @@ echo "OK: ds4 server test complete; server stopped and GPU memory released"
 You can connect any chat interface that supports the OpenAI API format. For example, to use HuggingFace ChatUI:
 
 ```bash
-docker run -p 3000:3000 \
-  --add-host=host.docker.internal:host-gateway \
-  -e OPENAI_BASE_URL=http://host.docker.internal:8000/v1 \
+docker run --network=host \
+  -e PORT=3000 \
+  -e OPENAI_BASE_URL=http://localhost:8000/v1 \
   -e OPENAI_API_KEY=dummy \
   -v chat-ui-data:/data \
   ghcr.io/huggingface/chat-ui-db
 ```
 
 Open `http://localhost:3000` in your browser to start chatting.
+
+> **Note:** `--network=host` puts the Web UI on the host's network so it can reach the ds4 server on `localhost` directly. This keeps the ds4 server bound to loopback (it doesn't have to be exposed on other interfaces).
+
+> **Tip:** The Web UI port (`3000` here, set via `PORT`) is arbitrary — pick any free port if `3000` is already in use, and open that port in your browser instead. Make sure the port in `OPENAI_BASE_URL` matches the port your ds4 server is running on.
 
 ## Connecting a Coding Agent
 
@@ -350,9 +354,9 @@ The ds4 server exposes both OpenAI and Anthropic-compatible endpoints, so most c
 }
 ```
 
-> **Tip**: If your coding agent or Web UI is running on a different machine than the Halo platform, you will need to forward port 8000 via SSH:
+> **Tip**: If your coding agent or Web UI is running on a different machine than the Halo platform, you will need to forward the server port (`8000` here) via SSH:
 > ```bash
-> ssh -L 0.0.0.0:8000:localhost:8000 <halo-host-ip>
+> ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## Next Steps
