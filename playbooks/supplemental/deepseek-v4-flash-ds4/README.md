@@ -87,8 +87,8 @@ ai-toolbox-cockpit
 set -euo pipefail
 export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 # Verify the pipx-installed cockpit entry point is on PATH (do NOT launch the TUI).
-command -v ds4-cockpit
-echo "OK: ds4-cockpit is installed and on PATH"
+command -v ai-toolbox-cockpit
+echo "OK: ai-toolbox-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
@@ -98,7 +98,7 @@ In the **Interactive Toolboxes** tab, select the latest available/stable toolbox
 
 
 <p align="center">
-  <img src="assets/ai-toolbox-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ds4-cockpit" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ai-toolbox-cockpit" width="800"/>
 </p>
 
 <!-- @test:id=ds4-toolbox-image-linux timeout=120 hidden=True -->
@@ -108,7 +108,7 @@ export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
 
 # The toolbox version changes over time, so match the image family, not a fixed tag.
 if ! podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit (Interactive Toolboxes tab) first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit (Interactive Toolboxes tab) first."
   exit 1
 fi
 echo "OK: ds4 toolbox container image is present"
@@ -129,16 +129,16 @@ Go to the **Models** tab. First, select the backend (ds4). Then, select the **IQ
 ```bash
 set -euo pipefail
 
-# ds4-cockpit saves model weights to ~/ds4 by default
+# ai-toolbox-cockpit saves model weights to ~/ds4 by default
 model_dir="$HOME/ds4"
 
 if [ ! -d "$model_dir" ]; then
-  echo "Model directory $model_dir does not exist. Download the model in ds4-cockpit (Model Manager tab) first."
+  echo "Model directory $model_dir does not exist. Download the model in ai-toolbox-cockpit (Model Manager tab) first."
   exit 1
 fi
 
 if ! find "$model_dir" -maxdepth 2 -iname '*.gguf' | grep -q .; then
-  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ds4-cockpit first."
+  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -194,7 +194,7 @@ if [ -z "$model_file" ]; then
   model_file="$(find "$MODEL_DIR" -maxdepth 2 -iname '*.gguf' 2>/dev/null | head -1)"
 fi
 if [ -z "$model_file" ]; then
-  echo "No .gguf model found under $MODEL_DIR. Download it in ds4-cockpit first."
+  echo "No .gguf model found under $MODEL_DIR. Download it in ai-toolbox-cockpit first."
   exit 1
 fi
 model_name="$(basename "$model_file")"
@@ -202,7 +202,7 @@ model_name="$(basename "$model_file")"
 # Pick the toolbox image (version-agnostic).
 image="$(podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox' | head -1)"
 if [ -z "$image" ]; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -213,7 +213,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Remove any stale instance, then start ds4-server detached (same flags ds4-cockpit uses, with -d instead of -it).
+# Remove any stale instance, then start ds4-server detached (same flags ai-toolbox-cockpit uses, with -d instead of -it).
 podman rm -f "$CONTAINER" >/dev/null 2>&1 || true
 podman run -d --name "$CONTAINER" \
   --device /dev/dri --device /dev/kfd \
