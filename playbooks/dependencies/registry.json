@@ -152,7 +152,7 @@
           "expect_rc": 0
         },
         "windows": {
-          "cmd": "curl.exe -sf --max-time 2 http://127.0.0.1:13305/api/v1/health",
+          "cmd": "where.exe lemonade",
           "expect_rc": 0
         }
       },
