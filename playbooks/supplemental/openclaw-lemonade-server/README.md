@@ -1012,7 +1012,7 @@ Start by cloning the repository:
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-Create `.env` in the root `/firecrawl` directory: 
+Create a `.env` file, in the `/firecrawl` directory: 
 ```bash
 # ===== Required ENVS ======
 PORT=3002
