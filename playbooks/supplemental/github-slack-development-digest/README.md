@@ -63,6 +63,19 @@ It uses GitHub to inspect recent repository activity, Slack to post the digest, 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
+<!-- @device:halo_box,halo,stx,krk -->
+## Setting the Memory Configuration
+
+<!-- @require:memory-config -->
+<!-- @device:end -->
+
+<!-- @device:halo_box -->
+## Check for Software Updates
+
+<!-- @require:software-update -->
+<!-- @device:end -->
+
+
 ## Prerequisites
 
 <!-- @os:linux -->

@@ -6,3 +6,19 @@
 .github/workflows/*.yml text eol=lf
 auto-translations/**    text eol=lf
 localized-playbooks/**  text eol=lf
+
+# The `text eol=lf` rules above match ALL files under those folders, including
+# binary assets. Without the rules below, git treats images as text and runs
+# CRLF->LF normalization on them, stripping stray 0x0D bytes from the binary
+# data. That corrupts the file and makes it show as permanently "modified" in
+# every diff. Force-mark binary assets as binary so no line-ending filter runs.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.mp4  binary
+*.mov  binary
+*.zip  binary
