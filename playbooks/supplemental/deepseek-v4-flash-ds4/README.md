@@ -73,9 +73,11 @@ The **IQ2_XXS imatrix** model is a good starting point. It fits comfortably on a
 
 [ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) is a light terminal UI to make installing various AI backends easy. We will use it to handle creating our ds4 container, downloading model weights, and starting servers. Install it with `pipx`:
 
+<!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
 pipx install git+https://github.com/kyuz0/ai-toolbox-cockpit.git
 ```
+<!-- @test:end -->
 
 Launch the cockpit:
 ```bash
