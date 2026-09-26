@@ -1,5 +1,4 @@
 {
-  "$schema": "./registry.schema.json",
   "description": "中文本地化 playbook 所需的软件依赖和设置步骤",
   "dependencies": {
     "comfyui": {
