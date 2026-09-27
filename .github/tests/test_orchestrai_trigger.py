@@ -118,5 +118,35 @@ class AcquireTimeoutValidation(unittest.TestCase):
         self.assertEqual(self.errors_for(acquire_timeout=600, max_duration=0), [])
 
 
+class PlaybookMirrorReachesTheMachines(unittest.TestCase):
+    """PLAYBOOK_MIRROR_BASE tells dependencies where large artifacts are mirrored."""
+
+    BATCH = dict(BATCH, playbooks=["gaia-agents", "deepseek-v4-flash-ds4"])
+
+    def plan(self, mirror_base):
+        return trigger.make_plan(self.BATCH, "refs/heads/main", load_config(), 1,
+                                 "https://github.com/amd/playbooks", "main",
+                                 "https://index.example", mirror_base=mirror_base)
+
+    def test_every_playbook_in_the_batch_receives_it(self):
+        groups = self.plan("https://mirror.example/Playbooks")["groups"]
+        self.assertEqual(len(groups), 2)
+        for g in groups:
+            self.assertEqual(g["variables"]["PLAYBOOK_MIRROR_BASE"],
+                             "https://mirror.example/Playbooks", g["id"])
+
+    def test_it_is_omitted_when_not_configured(self):
+        for g in self.plan("")["groups"]:
+            self.assertNotIn("PLAYBOOK_MIRROR_BASE", g["variables"], g["id"])
+
+    def test_main_reads_it_from_the_repository_variable(self):
+        with open(os.path.join(SCRIPTS_DIR, "orchestrai_trigger.py")) as f:
+            self.assertIn('os.environ.get("ORCHESTRAI_PLAYBOOK_MIRROR_BASE", "")', f.read())
+        for wf in ("test-playbooks-orchestrai.yml", "orchestrai-pr-command.yml"):
+            with open(os.path.join(GITHUB_DIR, "workflows", wf)) as f:
+                self.assertIn("ORCHESTRAI_PLAYBOOK_MIRROR_BASE: "
+                              "${{ vars.ORCHESTRAI_PLAYBOOK_MIRROR_BASE }}", f.read(), wf)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

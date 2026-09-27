@@ -21,6 +21,9 @@
 # the approved amdgpu-install package held in repository configuration.
 # Required for ROCm Python dependencies: ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL
 # points to the approved multi-architecture wheel index.
+# Optional: ORCHESTRAI_PLAYBOOK_MIRROR_BASE points to where large playbook
+# artifacts (container images, model files) are mirrored, so dependencies
+# fetch them from there instead of the public internet.
 # All other settings live in .github/orchestrai-config.yml.
 
 name: Test Playbooks (OrchestrAI)
@@ -197,6 +200,7 @@ jobs:
           ORCHESTRAI_PIPELINE_JOB: ${{ vars.ORCHESTRAI_PIPELINE_JOB }}
           ORCHESTRAI_THEROCK_URL: ${{ vars.ORCHESTRAI_THEROCK_URL }}
           ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL: ${{ vars.ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL }}
+          ORCHESTRAI_PLAYBOOK_MIRROR_BASE: ${{ vars.ORCHESTRAI_PLAYBOOK_MIRROR_BASE }}
           ORCHESTRAI_LINUX_DRIVER_SOURCE: ${{ vars.ORCHESTRAI_LINUX_DRIVER_SOURCE }}
           # Optional per-release amdgpu map; overrides the single URL above on
           # hosts whose release has an entry.

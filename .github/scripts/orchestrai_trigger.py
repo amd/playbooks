@@ -138,7 +138,7 @@ def validate_config(cfg, batches):
 
 
 def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_url,
-              hf_token=""):
+              hf_token="", mirror_base=""):
     platform = batch["platform"]
     device = batch["arch"]
     tags = batch["tags"]
@@ -172,6 +172,12 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
         # secret is unset so runs still work (just unauthenticated).
         if hf_token:
             variables["HF_TOKEN"] = hf_token
+        # Where playbook dependencies find large artifacts mirrored internally
+        # (container image tarballs, model files) instead of fetching them from
+        # the public internet inside the batch's time. Optional: omitted when
+        # unset, and each dependency decides what to do without it.
+        if mirror_base:
+            variables["PLAYBOOK_MIRROR_BASE"] = mirror_base
         groups.append({
             "id": f"playbook-{pb_id}",
             "level": "L4-sys",
@@ -539,6 +545,7 @@ def main():
     # Optional: HuggingFace token so live HF pulls (dep cache misses, uncached
     # datasets) are authenticated and avoid the shared-IP rate limit. Not
     # required -- runs still work unauthenticated, just exposed to 429s.
+    mirror_base = os.environ.get("ORCHESTRAI_PLAYBOOK_MIRROR_BASE", "")
     hf_token = os.environ.get("ORCHESTRAI_HF_TOKEN", "")
     if not hf_token:
         print("::warning::ORCHESTRAI_HF_TOKEN not set — HuggingFace traffic will be "
@@ -555,7 +562,7 @@ def main():
             prov_missing[bid] = missing
         prepared.append((bid, batch,
                          make_plan(batch, git_ref, cfg, mphg, repo, sha,
-                                   rocm_index_url, hf_token),
+                                   rocm_index_url, hf_token, mirror_base),
                          builds))
 
     if not args.dry_run and prov_missing:
