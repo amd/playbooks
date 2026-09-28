@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 
 n8n is a workflow automation platform that lets you connect apps and services using a visual node-based editor.
 
-This playbook teaches you how to set up an AI-powered financial news summarizer that scrapes the AP News business section, extracts key headlines, and uses a local LLM running on your system to generate an investor-focused summary.
+This playbook teaches you how to set up an AI-powered financial news summarizer that pulls the latest business headlines from a news RSS feed and uses a local LLM running on your system to generate an investor-focused summary.
 
 ## What You'll Learn
 
@@ -393,7 +393,7 @@ We've provided a pre-built workflow that you can import directly:
 
 ### Step 3: Understanding the Workflow
 
-The imported workflow contains 9 connected nodes:
+The imported workflow contains 8 connected nodes:
 
 <p align="center">
   <img src="assets/workflow-overview.png" alt="n8n Financial News Workflow" width="800"/>
@@ -402,14 +402,15 @@ The imported workflow contains 9 connected nodes:
 | Node | Purpose |
 |------|---------|
 | **When clicking 'Execute workflow'** | Manual trigger to start the workflow |
-| **Fetch Financial News Webpage** | HTTP GET request to `https://apnews.com/business` |
-| **Delay to Ensure Page Load** | Wait node to ensure page content is fully loaded |
-| **Extract News Headlines & Text** | HTML node that extracts headlines, editor's picks, top stories, and regional news using CSS selectors |
-| **Clean Extracted News Data** | Set node that combines all extracted data into a single text field |
+| **Fetch Financial News Feed** | RSS Read node that pulls the latest business headlines from an RSS feed (defaults to the NYT Business feed, no API key required) |
+| **Aggregate Headlines** | Aggregate node that collects the headline titles and summaries from every feed item into a single list |
+| **Clean Extracted News Data** | Set node that combines all the headlines into a single text field |
 | **AI Financial News Summarizer** | AI Agent that processes the news with a financial analyst system prompt |
 | **Lemonade Chat Model** | Connects to your local Lemonade server running the LLM |
 | **Structured Output Parser** | Formats the AI output as structured JSON |
 | **Convert to File** | Converts the summary to a downloadable file |
+
+> **Tip**: To use a different news source, double-click the **Fetch Financial News Feed** node and replace the URL with any business or markets RSS feed you prefer.
 
 ### Step 4: Configure Lemonade Credentials
 
@@ -463,7 +464,7 @@ Click the workflow name at the top and rename it if desired. Workflows auto-save
 - **Schedule automation**: Replace Manual Trigger with a **Schedule Trigger** to run daily
 - **Send notifications**: Add a **Discord**, **Slack**, or **Email** node to receive summaries
 - **Try different models**: Change the model in the Lemonade Chat Model node to experiment with different LLMs
-- **Customize extraction**: Modify the HTML Extract node's CSS selectors to target different news sections
+- **Change the news source**: Point the **Fetch Financial News Feed** node at a different RSS feed to follow other sections or publications
 - **Try different backends**: n8n also supports [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio, and other local LLM backends
 
 ### Explore n8n Templates
