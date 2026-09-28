@@ -14,83 +14,42 @@
     },
     {
       "parameters": {
-        "url": "https://apnews.com/business",
-        "options": {
-          "timeout": 10000
-        }
+        "url": "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+        "options": {}
       },
       "id": "87c304c3-b21f-4b92-9e7c-c422bd587e1c",
-      "name": "Fetch Financial News Webpage\t1",
-      "type": "n8n-nodes-base.httpRequest",
+      "name": "Fetch Financial News Feed\t1",
+      "type": "n8n-nodes-base.rssFeedRead",
       "position": [
-        544,
+        560,
         328
       ],
       "notesInFlow": true,
-      "typeVersion": 4.2,
-      "notes": "Url : https://apnews.com/business"
-    },
-    {
-      "parameters": {},
-      "id": "baa5bf14-3521-48f5-b3e2-4a72c2165332",
-      "name": "Delay to Ensure Page Load\t1",
-      "type": "n8n-nodes-base.wait",
-      "position": [
-        768,
-        328
-      ],
-      "webhookId": "adff7750-f9b0-4796-915d-9c28dcc878b0",
-      "typeVersion": 1.1
+      "typeVersion": 1.1,
+      "notes": "NYT Business RSS feed (no API key). Swap the URL for any business/markets RSS feed you prefer."
     },
     {
       "parameters": {
-        "operation": "extractHtmlContent",
-        "extractionValues": {
-          "values": [
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
             {
-              "key": "Top Headline",
-              "cssSelector": ".PageListStandardH .PageList-items-item:first-child .PagePromo-title"
+              "fieldToAggregate": "title"
             },
             {
-              "key": "Second Headline",
-              "cssSelector": ".PageListStandardH .PageList-items-item:nth-child(2) .PagePromo-title"
-            },
-            {
-              "key": "Top Stories",
-              "cssSelector": ".PageListStandardH .PageList-items .PagePromo-title"
-            },
-            {
-              "key": "Most Read",
-              "cssSelector": "#most-read ~ .PageListRightRailA-content .PagePromo-title"
-            },
-            {
-              "key": "Financial Markets",
-              "cssSelector": "#financial-markets ~ .PageListRightRailA-content .PagePromo-title"
-            },
-            {
-              "key": "Economy",
-              "cssSelector": "#economy ~ .PageListRightRailA-content .PagePromo-title"
-            },
-            {
-              "key": "Tech",
-              "cssSelector": "#tech ~ .PageListRightRailA-content .PagePromo-title"
+              "fieldToAggregate": "contentSnippet"
             }
           ]
         },
-        "options": {
-          "cleanUpText": true
-        }
+        "options": {}
       },
-      "id": "d6f85a25-fc4a-46bb-a73f-4868828ddd90",
-      "name": "Extract News Headlines & Text\t1",
-      "type": "n8n-nodes-base.html",
+      "id": "baa5bf14-3521-48f5-b3e2-4a72c2165332",
+      "name": "Aggregate Headlines\t1",
+      "type": "n8n-nodes-base.aggregate",
       "position": [
-        992,
+        832,
         328
       ],
-      "notesInFlow": true,
-      "typeVersion": 1.2,
-      "notes": "Extract selected headlines, editor's picks, spotlight etc."
+      "typeVersion": 1
     },
     {
       "parameters": {
@@ -100,7 +59,7 @@
               "id": "5412a5ee-dbbe-4fcc-98a5-6fafc37b94d1",
               "name": "All data",
               "type": "string",
-              "value": "=News :\n{{ $json['Top Headline'] }}\n\n\n\nFinancial news :\n\n{{ $('Extract News Headlines & Text\t1').item.json['Top Headline'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Second Headline'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Top Stories'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Most Read'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json['Financial Markets'] }};\n\n{{ $('Extract News Headlines & Text\t1').item.json.Economy }};\n\n{{ $('Extract News Headlines & Text\t1').item.json.Tech }};\n\n"
+              "value": "=Financial news headlines:\n\n{{ $json.title.map((t, i) => '- ' + t + ($json.contentSnippet && $json.contentSnippet[i] ? ': ' + $json.contentSnippet[i] : '')).join('\\n') }}\n"
             }
           ]
         },
@@ -110,7 +69,7 @@
       "name": "Clean Extracted News Data\t1",
       "type": "n8n-nodes-base.set",
       "position": [
-        1216,
+        1104,
         328
       ],
       "typeVersion": 3.4
@@ -128,7 +87,7 @@
       "name": "AI Financial News Summarizer\t1",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "position": [
-        1440,
+        1376,
         328
       ],
       "typeVersion": 1.6
@@ -143,7 +102,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatLemonade",
       "typeVersion": 1,
       "position": [
-        1456,
+        1392,
         560
       ],
       "id": "f70c3f05-cf68-4906-9635-f1787074746a",
@@ -164,7 +123,7 @@
       "name": "Structured Output Parser1",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "position": [
-        1576,
+        1512,
         552
       ],
       "typeVersion": 1.2
@@ -181,7 +140,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        1792,
+        1728,
         328
       ],
       "id": "01244f07-05ed-4f20-a94c-27f6594e7281",
@@ -194,36 +153,25 @@
       "main": [
         [
           {
-            "node": "Fetch Financial News Webpage\t1",
+            "node": "Fetch Financial News Feed\t1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Fetch Financial News Webpage\t1": {
+    "Fetch Financial News Feed\t1": {
       "main": [
         [
           {
-            "node": "Delay to Ensure Page Load\t1",
+            "node": "Aggregate Headlines\t1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Delay to Ensure Page Load\t1": {
-      "main": [
-        [
-          {
-            "node": "Extract News Headlines & Text\t1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract News Headlines & Text\t1": {
+    "Aggregate Headlines\t1": {
       "main": [
         [
           {
@@ -288,7 +236,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "04da34b4-9a64-496b-852a-3f1bde16a878",
+  "versionId": "04da34b4-9a64-496b-852a-3f1bde16a879",
   "meta": {
     "templateId": "5405",
     "templateCredsSetupCompleted": true,

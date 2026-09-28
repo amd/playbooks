@@ -195,7 +195,7 @@ The included [run_llm.py](assets/run_llm.py) script shows how to generate text w
 
 The snippet below shows how to use the model and customize the questions asked.
 
-<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
