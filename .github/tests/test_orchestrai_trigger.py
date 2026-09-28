@@ -118,5 +118,49 @@ class AcquireTimeoutValidation(unittest.TestCase):
         self.assertEqual(self.errors_for(acquire_timeout=600, max_duration=0), [])
 
 
+class OpenHandsProvisioning(unittest.TestCase):
+
+    def test_windows_openhands_enables_wsl_and_reboots(self):
+        cfg = {
+            "provisioning": {
+                "windows_install_scripts": [],
+                "windows_driver": {"source": "driver", "copy": "direct"},
+            },
+            "extra_install_scripts": load_config()["extra_install_scripts"],
+        }
+        batch = {
+            "platform": "windows",
+            "arch": "halo",
+            "playbooks": ["openhands-getting-started"],
+        }
+        builds, missing = trigger.make_builds(batch, cfg)
+        self.assertEqual(missing, [])
+        self.assertEqual(
+            builds["install_scripts"],
+            [{
+                "script": "InstallationScripts/gfx/windows-wsl.ps1",
+                "reboot_after": True,
+            }],
+        )
+
+    def test_linux_openhands_does_not_run_windows_wsl_provisioning(self):
+        cfg = {
+            "device_families": {"stx": "ryzen_apu"},
+            "provisioning": {
+                "linux_install_scripts": [],
+                "therock_url": "https://example.invalid/therock.tar.gz",
+            },
+            "extra_install_scripts": load_config()["extra_install_scripts"],
+        }
+        batch = {
+            "platform": "linux",
+            "arch": "stx",
+            "playbooks": ["openhands-getting-started"],
+        }
+        builds, missing = trigger.make_builds(batch, cfg)
+        self.assertEqual(missing, [])
+        self.assertEqual(builds["install_scripts"], [])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
