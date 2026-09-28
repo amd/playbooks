@@ -88,10 +88,13 @@ device_families:
 # Scheduling policy
 # ---------------------------------------------------------------------------
 
-# Extra broker tags that apply to EVERY device a playbook runs on. Empty for now:
-# the model playbooks that need 128 GB only need it for their big Halo run, which
-# is expressed per-device in device_extra_tags below.
-extra_tags: {}
+# Extra broker tags that apply to EVERY device a playbook runs on. The model
+# playbooks that need 128 GB only for their big Halo run express it per-device
+# in device_extra_tags below. deepseek-v4-flash-ds4 runs only on Halo and always
+# needs 128 GB: its ~80 GB model plus a 126k context needs the 110 GB GPU memory
+# pool its README asks for (see extra_install_scripts).
+extra_tags:
+  deepseek-v4-flash-ds4: ["ram_128gb"]
 
 # Device-specific overrides for playbooks whose hardware requirement differs by
 # SKU. The playbooks below pick a device-appropriate model in their README
@@ -189,6 +192,15 @@ extra_install_scripts:
     - script: "InstallationScripts/gfx/windows-wsl.ps1"
       reboot_after: true
       platforms: ["windows"]
+
+  # deepseek-v4-flash-ds4 requires the GPU shared-memory pool raised to 110 GB
+  # (its README's `amd-ttm --set 110`). With the default of half of memory the
+  # ds4 server runs out of GPU memory while loading the model. The pool size
+  # applies at boot, so it is set here, before the reboot, not in a dependency.
+  deepseek-v4-flash-ds4:
+    - script: "InstallationScripts/gfx/linux-ttm-pool.sh"
+      reboot_after: true
+      platforms: ["linux"]
 
 # Devices to skip entirely (e.g. temporarily offline hardware).
 # krk was listed here only because there was no Kraken hardware in the farm.
