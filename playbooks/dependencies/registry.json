@@ -152,7 +152,7 @@
           "expect_rc": 0
         },
         "windows": {
-          "cmd": "where.exe lemonade",
+          "cmd": "curl.exe -sf --max-time 2 http://127.0.0.1:13305/api/v1/health",
           "expect_rc": 0
         }
       },
@@ -160,6 +160,10 @@
         "linux": {
           "cmd": "sudo add-apt-repository -y ppa:lemonade-team/stable && sudo apt update && sudo apt install -y lemonade-server",
           "timeout": 900
+        },
+        "windows": {
+          "cmd": "if (-not (Get-Process LemonadeServer -ErrorAction SilentlyContinue)) { Start-Process \"$env:LOCALAPPDATA\\lemonade_server\\bin\\LemonadeServer.exe\" }; for ($i=0; $i -lt 45; $i++) { if ((curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/health) -match 'ok') { exit 0 }; Start-Sleep -Seconds 2 }; exit 1",
+          "timeout": 180
         }
       },
       "versionable": true
