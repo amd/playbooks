@@ -94,6 +94,10 @@ jobs:
           LOCALE: ${{ inputs.locale || 'zh-CN' }}
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          # Optional: a token with actions-runner read access lets the matrix
+          # drop device groups whose runners are all offline. Absent -> no-op.
+          RUNNER_STATUS_TOKEN: ${{ secrets.RUNNER_STATUS_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
           # workflow_dispatch filters. These inputs only exist on manual runs;
@@ -120,6 +124,11 @@ jobs:
           ENGLISH=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --allow-empty)
           LOCALIZED=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --locale "$LOCALE" --allow-empty)
           MATRIX=$(jq -cn --argjson english "$ENGLISH" --argjson localized "$LOCALIZED" '$english + $localized')
+          # Drop entries whose device group has no online runner, so a required
+          # test cannot sit 'queued' forever and wedge the merge gate. Fail-open:
+          # without RUNNER_STATUS_TOKEN (or on any API error) the matrix is kept
+          # unchanged. The job-level timeout on test-playbooks is the backstop.
+          MATRIX=$(echo "$MATRIX" | python3 .github/scripts/filter_offline_runners.py)
           COUNT=$(jq 'length' <<< "$MATRIX")
           if [ "$COUNT" -gt 256 ]; then
             echo "::error::Combined English/localized matrix has $COUNT entries; GitHub Actions allows 256"
@@ -163,6 +172,14 @@ jobs:
     if: needs.detect-changes.outputs.has_entries == 'true'
     runs-on: ${{ fromJson(matrix.runner) }}
     continue-on-error: ${{ !matrix.required }}
+    # Bound the whole job (queue + run) so an entry targeting an OFFLINE
+    # self-hosted runner cannot sit 'queued' indefinitely and wedge the merge
+    # gate. A job that never gets a runner within this window is cancelled,
+    # giving the gate a terminal result to act on instead of pending forever.
+    # The test steps themselves also carry per-step timeouts, so this ceiling
+    # is generous enough for a real run yet short enough to fail fast on an
+    # unavailable runner.
+    timeout-minutes: 60
     env:
       PYTHONUTF8: 1
       PYTHONIOENCODING: utf-8
