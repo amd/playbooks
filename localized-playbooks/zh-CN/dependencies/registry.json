@@ -1,0 +1,51 @@
+{
+  "description": "中文本地化 playbook 所需的软件依赖和设置步骤",
+  "dependencies": {
+    "pytorch": {
+      "name": "PyTorch",
+      "description": "深度学习框架",
+      "category": "framework",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "pytorch.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      }
+    },
+    "memory-config": {
+      "name": "内存配置",
+      "description": "配置用于运行大型模型的 GPU 内存分配",
+      "category": "framework",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "memoryconfig.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      }
+    },
+    "software-update": {
+      "name": "软件更新",
+      "description": "检查并安装 AMD Ryzen AI Halo 的软件更新",
+      "category": "framework",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "softwareupdate.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      }
+    }
+  }
+}

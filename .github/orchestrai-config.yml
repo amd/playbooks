@@ -52,11 +52,17 @@ device_to_tags: {}
 device_to_gfx:
   halo:     "gfx1151"
   halo_box: "gfx1151"
+  grgh:     "gfx1151"
+  grgh_box: "gfx1151"   # Gorgon Halo Box: same silicon as grgh
   stx:      "gfx1150"
   krk:      "gfx1103"
   rx7900xt: "gfx110X"
   rx9070xt: "gfx120X"
   r9700:    "gfx120X"
+  # TODO: gfx targets for unreleased SKUs unknown until hardware is available.
+  # grgp, mdsh, mdsh_box, mdsp are omitted on purpose -- an absent entry falls
+  # back to the generic multi-arch tarball, so this is safe. Fill in once a
+  # runner exists and rocminfo can be read off it (as was done for grgh).
 
 # Device family controls Linux kernel-driver policy. Radeon devices use AMD's
 # packaged amdgpu/DKMS driver; Ryzen APUs use Ubuntu's inbox amdgpu module.
@@ -66,6 +72,12 @@ device_to_gfx:
 device_families:
   halo:     "ryzen_apu"
   halo_box: "ryzen_apu"
+  grgh:     "ryzen_apu"
+  grgh_box: "ryzen_apu"
+  grgp:     "ryzen_apu"
+  mdsh:     "ryzen_apu"
+  mdsh_box: "ryzen_apu"
+  mdsp:     "ryzen_apu"
   stx:      "ryzen_apu"
   krk:      "ryzen_apu"
   rx7900xt: "radeon"
@@ -231,7 +243,17 @@ skip_playbook_devices:
 run_settings:
   max_duration: 240            # minutes, whole batch
   max_test_case_duration: 90   # minutes, single playbook
-  acquire_timeout: 30          # minutes, machine acquire
+  # Minutes to wait for the broker to supply machines before the build gives
+  # up. Sent to the pipeline as its ACQUIRE_TIMEOUT build parameter (before
+  # that, this value was ignored and every run waited the pipeline's 40-minute
+  # default). The wait counts against the build's overall time limit, so a
+  # longer wait leaves less time for the batch's playbooks.
+  acquire_timeout: 60
+  # Resubmit a batch whose build timed out waiting for machines before anything
+  # ran, up to this many times (0 disables, max 3). Each attempt waits the
+  # pipeline's full acquire timeout and re-enters the broker queue. Details in
+  # .github/orchestrai/acquire_retry.py.
+  acquire_retries: 3
   # Machines to acquire per hardware group. 1 = all same-HW playbooks share one
   # machine and run sequentially (saves scarce hardware). Overridable per run via
   # the machines_per_hw_group workflow_dispatch input.

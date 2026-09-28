@@ -421,7 +421,7 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
   -c 32768 \
   -fa on \
   -ngl 999 \
-  --no-mmap \
+  -lm none \
   --rpc <RPC_WORKER_IP>:50053
 ```
 
@@ -437,7 +437,7 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
   -c 32768 `
   -fa on `
   -ngl 999 `
-  --no-mmap `
+  -lm none `
   --rpc <RPC_WORKER_IP>:50053
 ```
 
@@ -460,7 +460,7 @@ Once running, `llama-cli` displays model loading progress and enters an interact
   -c 32768 \
   -fa on \
   -ngl 999 \
-  --no-mmap \
+  -lm none \
   --host 0.0.0.0 \
   --port 8081 \
   --rpc <RPC_WORKER_IP>:50053
@@ -478,7 +478,7 @@ Once running, `llama-cli` displays model loading progress and enters an interact
   -c 32768 `
   -fa on `
   -ngl 999 `
-  --no-mmap `
+  -lm none `
   --host 0.0.0.0 `
   --port 8081 `
   --rpc <RPC_WORKER_IP>:50053
@@ -507,7 +507,7 @@ Once started, open `http://<HOST_IP>:8081` in your browser to access the built-i
 | `-c` | Context size in tokens. Larger values use more memory |
 | `-fa on` | Enables rocWMMA Flash Attention for improved performance on AMD GPUs |
 | `-ngl 999` | Offloads all model layers to the GPU |
-| `--no-mmap` | Disables memory-mapping, reducing load times when model size exceeds system RAM but fits in VRAM |
+| `-lm none` | Sets the model load mode to `none`, disabling memory-mapping to reduce load times when model size exceeds system RAM but fits in VRAM |
 | `--host` | IP to bind `llama-server` to (`llama-server` only) |
 | `--port` | Port to serve the HTTP API on (`llama-server` only) |
 | `--rpc` | Comma-separated list of RPC worker endpoints (`IP:port`) |
