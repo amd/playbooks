@@ -54,5 +54,14 @@
       }
     }
   },
-  "primaryModel": "DeepSeek V4 Flash (IQ2_XXS)"
+  "primaryModel": "DeepSeek V4 Flash (IQ2_XXS)",
+  "authors": [
+    {
+      "name": "Adam Lam",
+      "github": "adamlam2-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-07-22",
+  "updated_date": "2026-09-25"
 }

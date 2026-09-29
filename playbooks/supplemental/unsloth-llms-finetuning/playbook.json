@@ -161,5 +161,14 @@
       }
     }
   },
-  "primaryModel": "Gemma-4-E4B-it"
+  "primaryModel": "Gemma-4-E4B-it",
+  "authors": [
+    {
+      "name": "Charles Yang",
+      "github": "charyang-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-03-24",
+  "updated_date": "2026-09-27"
 }

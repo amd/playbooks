@@ -133,5 +133,14 @@
       "linux": {}
     }
   },
-  "primaryModel": "SeamlessM4T v2 Large"
+  "primaryModel": "SeamlessM4T v2 Large",
+  "authors": [
+    {
+      "name": "Daniel Holanda",
+      "github": "danielholanda",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2025-12-29",
+  "updated_date": "2026-08-21"
 }

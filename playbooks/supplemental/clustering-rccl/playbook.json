@@ -108,5 +108,14 @@
       }
     }
   },
-  "primaryModel": "Qwen3.5-397B-A17B"
+  "primaryModel": "Qwen3.5-397B-A17B",
+  "authors": [
+    {
+      "name": "Daniel Holanda",
+      "github": "danielholanda",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-02-03",
+  "updated_date": "2026-09-08"
 }

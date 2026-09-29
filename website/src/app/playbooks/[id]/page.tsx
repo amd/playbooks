@@ -1962,6 +1962,50 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                   {playbook.description}
                 </p>
 
+                {/* Authors + publication dates */}
+                {(playbook.authors?.length || playbook.published_date) && (
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6 text-sm text-[#a0a0a0]">
+                    {playbook.authors?.length > 0 && (
+                      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="text-[#808080]">By</span>
+                        {playbook.authors.map((author, i) => (
+                          <span key={i} className="flex items-center gap-1">
+                            {author.github ? (
+                              <a
+                                href={`https://github.com/${author.github}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-white hover:underline"
+                              >
+                                {author.name}
+                              </a>
+                            ) : (
+                              <span className="text-white">{author.name}</span>
+                            )}
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-xs ${
+                                author.type === "amd"
+                                  ? "bg-[#ed1c24]/15 text-[#ed1c24]"
+                                  : "bg-[#4a4a4a] text-[#c0c0c0]"
+                              }`}
+                            >
+                              {author.type === "amd" ? "AMD" : "Community"}
+                            </span>
+                            {i < playbook.authors.length - 1 && <span>,</span>}
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                    {playbook.published_date && (
+                      <span>Published {formatValidationDate(playbook.published_date)}</span>
+                    )}
+                    {playbook.updated_date &&
+                      playbook.updated_date !== playbook.published_date && (
+                        <span>Updated {formatValidationDate(playbook.updated_date)}</span>
+                      )}
+                  </div>
+                )}
+
                 {/* Cover Image */}
                 {playbook.coverImage && (
                   <div className="mb-6">

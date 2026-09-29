@@ -103,5 +103,14 @@
         "CVML": "Latest"
       }
     }
-  }
+  },
+  "authors": [
+    {
+      "name": "Daniel Holanda",
+      "github": "danielholanda",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-02-03",
+  "updated_date": "2026-08-18"
 }

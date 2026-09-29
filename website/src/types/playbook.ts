@@ -158,12 +158,31 @@ export function categoryForDevice(device: Device): DeviceCategory {
   return "gpu";
 }
 
+/** One credited author of a playbook. */
+export interface Author {
+  /** Display name, e.g. "Daniel Holanda". "Anonymous" for the placeholder. */
+  name: string;
+  /** GitHub handle (profile link built from it), or null when unknown. */
+  github: string | null;
+  /** Whether this author is AMD or an external community contributor. */
+  type: "amd" | "community";
+}
+
 export interface PlaybookMeta {
   /** Unique identifier matching the folder name */
   id: string;
-  
+
   /** Display title */
   title: string;
+
+  /** Credited author(s). Required; may be the anonymous placeholder. */
+  authors: Author[];
+
+  /** Publication date (YYYY-MM-DD), CI-managed from git history. */
+  published_date?: string;
+
+  /** Last-updated date (YYYY-MM-DD), CI-managed from git history. */
+  updated_date?: string;
   
   /** Short description (shown in cards) */
   description: string;

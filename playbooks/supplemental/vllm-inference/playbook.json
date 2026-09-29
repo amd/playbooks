@@ -76,5 +76,14 @@
       }
     }
   },
-  "primaryModel": "Qwen3-1.7B"
+  "primaryModel": "Qwen3-1.7B",
+  "authors": [
+    {
+      "name": "Daniel Holanda",
+      "github": "danielholanda",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-02-11",
+  "updated_date": "2026-08-18"
 }

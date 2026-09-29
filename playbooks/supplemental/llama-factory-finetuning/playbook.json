@@ -157,5 +157,14 @@
       }
     }
   },
-  "primaryModel": "Qwen3-4B-Instruct"
+  "primaryModel": "Qwen3-4B-Instruct",
+  "authors": [
+    {
+      "name": "Ning Zhang",
+      "github": "ningzhang-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-03-21",
+  "updated_date": "2026-08-21"
 }

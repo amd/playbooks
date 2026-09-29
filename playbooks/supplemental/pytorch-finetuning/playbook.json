@@ -134,5 +134,14 @@
       "windows": {}
     }
   },
-  "primaryModel": "Gemma-3-4B"
+  "primaryModel": "Gemma-3-4B",
+  "authors": [
+    {
+      "name": "Daniel Holanda",
+      "github": "danielholanda",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-01-11",
+  "updated_date": "2026-08-21"
 }

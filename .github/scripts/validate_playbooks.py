@@ -16,6 +16,7 @@ This script validates that all playbooks:
 
 import json
 import os
+import re
 import sys
 import io
 from pathlib import Path
@@ -46,7 +47,11 @@ REQUIRED_FIELDS = [
     "supported_platforms",
     "developed",
     "published",
+    "authors",
 ]
+
+VALID_AUTHOR_TYPES = ["amd", "community"]
+DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 # Valid values for enum fields
 VALID_PLATFORMS = ["windows", "linux"]
@@ -227,14 +232,60 @@ def validate_playbook_json(
         )
         return
 
-    # Check required fields
+    # Check required fields. `authors` is only required for reachable playbooks
+    # (core / supplemental); backup/ holds unpublished drafts that readers cannot
+    # see, so they are exempt from the authorship requirement.
+    is_backup = playbook_name.startswith("backup/")
     for field_name in REQUIRED_FIELDS:
+        if field_name == "authors" and is_backup:
+            continue
         if field_name not in meta:
             result.add_error(
                 playbook_name,
                 f'Missing required field in playbook.json: "{field_name}"\n'
                 f"       Required fields: {', '.join(REQUIRED_FIELDS)}",
             )
+
+    # Validate authors: a non-empty list of {name, github, type}. The anonymous
+    # placeholder ({"name": "Anonymous", "github": null, "type": "community"})
+    # is a valid entry. github may be null only; every author needs a name and a
+    # type of amd/community so the site can render the credit and AMD badge.
+    if "authors" in meta:
+        authors = meta["authors"]
+        if not isinstance(authors, list) or not authors:
+            result.add_error(
+                playbook_name,
+                'Field "authors" must be a non-empty list. Use the anonymous '
+                'placeholder if unknown: '
+                '[{"name": "Anonymous", "github": null, "type": "community"}]',
+            )
+        else:
+            for i, a in enumerate(authors):
+                if not isinstance(a, dict):
+                    result.add_error(playbook_name, f"authors[{i}] must be an object")
+                    continue
+                if not isinstance(a.get("name"), str) or not a["name"].strip():
+                    result.add_error(playbook_name, f'authors[{i}] needs a non-empty "name"')
+                gh = a.get("github", "MISSING")
+                if not (gh is None or isinstance(gh, str)):
+                    result.add_error(playbook_name, f'authors[{i}] "github" must be a string or null')
+                if a.get("type") not in VALID_AUTHOR_TYPES:
+                    result.add_error(
+                        playbook_name,
+                        f'authors[{i}] "type" must be one of {VALID_AUTHOR_TYPES}, '
+                        f'got: {a.get("type")!r}',
+                    )
+
+    # published_date / updated_date are CI-managed (do not hand-edit), but if
+    # present must be YYYY-MM-DD so the website can parse them.
+    for date_field in ("published_date", "updated_date"):
+        if date_field in meta and meta[date_field]:
+            if not (isinstance(meta[date_field], str) and DATE_RE.match(meta[date_field])):
+                result.add_error(
+                    playbook_name,
+                    f'Field "{date_field}" must be a YYYY-MM-DD string, '
+                    f"got: {meta[date_field]!r}",
+                )
 
     # Validate ID matches folder name
     if "id" in meta and meta["id"] != folder_name:

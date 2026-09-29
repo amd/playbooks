@@ -154,5 +154,14 @@
       }
     }
   },
-  "primaryModel": "Qwen3.6-35B-A3B"
+  "primaryModel": "Qwen3.6-35B-A3B",
+  "authors": [
+    {
+      "name": "Satya Devineni",
+      "github": "sdevineni-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-05-07",
+  "updated_date": "2026-09-27"
 }
