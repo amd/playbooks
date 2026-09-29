@@ -37,12 +37,21 @@ permissions:
 
 concurrency:
   group: translate-playbooks-${{ github.ref }}
-  cancel-in-progress: false
+  # Newest-wins: a fresh push supersedes an older, still-running translation
+  # instead of queuing behind it. Combined with the job timeout below, this
+  # stops one hung run from holding the single concurrency slot and silently
+  # backlogging every later push (which is what stalled translations for weeks).
+  cancel-in-progress: true
 
 jobs:
   translate:
     name: Translate playbooks
     runs-on: translation
+    # Bound the job so a hung translate step (e.g. an unresponsive LLM endpoint)
+    # cannot run for hours holding the concurrency slot. On timeout the job
+    # fails, which fires the "Open issue on translation failure" step below so
+    # the breakage is visible instead of silent.
+    timeout-minutes: 120
     env:
       # The 29 Lenovo languages (Portuguese ships as both pt-BR Brazilian and pt-PT
       # European) plus fr-CA for the Canada launch, so French ships as both fr-FR and fr-CA.
@@ -114,15 +123,22 @@ jobs:
           set -uo pipefail
           rc=0
           L="${{ steps.locales.outputs.locales }}"
+          # Fan out over ALL locales at once. Each locale owns its own manifest,
+          # so locale-level parallelism is race-free (see translate_playbook.py).
+          # The endpoint handles every language concurrently, so --jobs is set to
+          # the full locale count rather than a fixed cap; serial runs otherwise
+          # take many hours and hit the job timeout.
+          JOBS=$(echo "$L" | tr ',' '\n' | grep -c .)
+          echo "Parallelizing across $JOBS locales."
           # Shared dependency content (translated once; playbooks reference it).
           if [ "${{ steps.detect.outputs.deps }}" = "true" ]; then
             echo "::group::Translating shared dependencies"
-            python .github/scripts/translate_playbook.py --dependencies --locales "$L" || rc=1
+            python .github/scripts/translate_playbook.py --dependencies --locales "$L" --jobs "$JOBS" || rc=1
             echo "::endgroup::"
           fi
           for pb in ${{ steps.detect.outputs.playbooks }}; do
             echo "::group::Translating $pb"
-            python .github/scripts/translate_playbook.py --playbook "$pb" --locales "$L" || rc=1
+            python .github/scripts/translate_playbook.py --playbook "$pb" --locales "$L" --jobs "$JOBS" || rc=1
             echo "::endgroup::"
           done
           exit $rc
