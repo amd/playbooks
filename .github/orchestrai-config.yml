@@ -183,15 +183,11 @@ extra_install_scripts:
       platforms: ["windows"]
 
   # OpenHands runs the published Linux Agent Canvas image on Windows. Enable
-  # the WSL2 platform, then install Docker Desktop machine-wide from the
-  # configured mirror. Reboot after WSL setup before installing Docker Desktop,
-  # then reboot once more so dependency setup starts from the installed product
-  # under the actor account and health-gates the Linux engine.
+  # WSL2 and reboot before dependency setup. The test-library dependency then
+  # installs Docker Desktop per-user (no second reboot), starts it under the
+  # actor account and health-gates the Linux engine.
   openhands-getting-started:
     - script: "InstallationScripts/gfx/windows-wsl.ps1"
-      reboot_after: true
-      platforms: ["windows"]
-    - script: "InstallationScripts/container/windows-docker-desktop.ps1"
       reboot_after: true
       platforms: ["windows"]
 
@@ -288,8 +284,8 @@ provisioning:
   # supplied by ORCHESTRAI_RYZENAI_NPU_XRT_URL and is never committed here.
   ryzenai_npu_xrt_url: ""
 
-  # Machine-wide Docker Desktop installer used only by Windows OpenHands
-  # batches. Both values come from repository variables; no internal mirror
+  # Docker Desktop installer coordinates forwarded only to Windows OpenHands
+  # dependency setup. Both come from repository variables; no internal mirror
   # coordinate is committed to this public repository.
   docker_desktop_installer_url: ""
   docker_desktop_installer_sha256: ""
