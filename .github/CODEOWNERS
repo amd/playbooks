@@ -18,18 +18,15 @@
 /auto-translations/ @bconsolvo
 /localized-playbooks/ @bconsolvo
 
-# OrchestrAI CI integration. These come after /.github/ so they override it
-# (last-match-wins) — OrchestrAI files are reviewed by @saman-amd only.
-/.github/orchestrai-config.yml                             @saman-amd
-/.github/scripts/orchestrai_matrix.py                      @saman-amd
-/.github/scripts/orchestrai_trigger.py                     @saman-amd
-/.github/scripts/orchestrai_verdict.py                     @saman-amd
-/.github/scripts/orchestrai_report.py                      @saman-amd
-/.github/workflows/test-playbooks-orchestrai.yml           @saman-amd
-/.github/workflows/orchestrai-pr-command.yml               @saman-amd
-/.github/workflows/test-localized-playbooks-orchestrai.yml @saman-amd
-/.github/workflows/orchestrai-localized-pr-command.yml     @saman-amd
-
-# Test scripts — placed last so they win over /.github/ for any test_*.py file.
+# Test scripts — placed after /.github/ so they win for any test_*.py file.
 test_*.py @sreeram-11 @harkgill-amd @adamlam2-amd
 *test*.py @sreeram-11 @harkgill-amd @adamlam2-amd
+
+# OrchestrAI catch-all, LAST so it wins over everything above: every OrchestrAI
+# file — source, workflows, AND its tests under .github/tests/ — is @saman-amd.
+# This is placed after the test*.py patterns on purpose, so OrchestrAI test
+# files (e.g. .github/tests/test_orchestrai_*.py) go to Saman, not the test owners.
+# The directory rule also catches files whose basename lacks "orchestrai"
+# (e.g. .github/orchestrai/acquire_retry.py).
+/.github/orchestrai/ @saman-amd
+*orchestrai* @saman-amd
