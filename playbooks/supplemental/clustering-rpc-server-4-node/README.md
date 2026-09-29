@@ -31,7 +31,7 @@ This playbook teaches you how to cluster four Ryzen AI Halo systems using llama.
 Running a 1T-parameter model across the cluster requires a large GPU memory
 allocation, so this step is required here (not optional). Follow the memory
 configuration below, and set the allocation on each machine to at least
-**96 GB** (Windows: UMA Frame Buffer Size in the BIOS; Linux: `amd-ttm --set 120`).
+**96 GB** (Windows: AMD Variable Graphics Memory in Adrenalin; Linux: `amd-ttm --set 120`).
 
 <!-- @require:memory-config -->
 

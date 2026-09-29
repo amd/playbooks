@@ -53,33 +53,42 @@ system RAM — so this means letting the GPU claim more of that shared pool. Lea
 roughly 20% of system RAM for the operating system. This step is optional; the
 default allocation is enough for most workloads.
 
-> **Note:** This is configured in the system BIOS/UEFI. Some system vendors lock
-> the memory configuration, so the setting may not be available on every machine.
-
 <!-- @os:windows -->
-On Windows, set the **UMA Frame Buffer Size** (dedicated graphics memory) in the
-system BIOS/UEFI:
+On Windows, adjust the memory in **AMD Software: Adrenalin Edition**: open it and
+navigate to **Performance → Tuning → AMD Variable Graphics Memory**. Set the value
+you need and reboot for the change to take effect.
 
-1. Reboot and enter setup (usually **Del**, **F2**, or **Esc** during startup).
-2. Find **UMA Frame Buffer Size** — also labeled *Integrated Graphics* or
-   *dedicated GPU memory*, often under **Advanced** or **AMD CBS → NBIO Common
-   Options**. Menu names vary by system vendor.
-3. Set it to the size you need (for large models, the maximum available, e.g. 96 GB).
-4. Save and reboot.
+<p align="center">
+  <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
+</p>
+
+> **Backup method (BIOS).** If your system does not show the Variable Graphics
+> Memory option in Adrenalin (some OEM systems hide it), set the **UMA Frame
+> Buffer Size** in the system BIOS/UEFI instead: reboot, enter setup (usually
+> **Del**, **F2**, or **Esc**), find **UMA Frame Buffer Size** — also labeled
+> *Integrated Graphics* or *dedicated GPU memory*, often under **Advanced** or
+> **AMD CBS → NBIO Common Options** — set it to the size you need, save, and
+> reboot. Menu names vary by vendor, and some BIOS do not expose it either.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-On Linux, keep the BIOS carve-out small and raise the shared **GTT/TTM** pool
-instead — the GPU maps system RAM dynamically, so a large fixed BIOS reservation
-just wastes memory.
+<!-- @device:halo_box -->
+On the AMD Ryzen™ AI Halo, adjust the shared memory in the pre-installed
+**AMD Ryzen™ AI Developer Center**: open it, go to the **Settings** tab, and under
+**Graphics Performance Settings** increase the **Shared Video Memory** slider.
+Click **Apply Changes** and reboot for the change to take effect.
 
-1. **BIOS/UEFI:** reboot, enter setup (**Del**, **F2**, or **Esc**), find **UMA
-   Frame Buffer Size** (*Integrated Graphics* / dedicated VRAM; often under
-   **Advanced** or **AMD CBS → NBIO Common Options**), and set it to the **minimum**
-   (512 MB if offered, otherwise the lowest value such as 2 GB). Save and reboot.
-   Menu names vary by vendor.
+<p align="center">
+  <img src="/api/dependencies/assets/memory-config/linux_mem_new.png" alt="AMD Ryzen AI Developer Center — Graphics Performance Settings with Shared Video Memory slider" width="600"/>
+</p>
+<!-- @device:end -->
 
-2. Install the `amd-debug-tools` helper:
+<!-- @device:halo,stx,krk -->
+On Linux, raise the shared **GTT/TTM** pool so the GPU can map more system memory.
+AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5 GB) so the
+maximum is available as shared memory.
+
+1. Install the `amd-debug-tools` helper:
 
    ```bash
    sudo apt install pipx
@@ -87,22 +96,23 @@ just wastes memory.
    pipx install amd-debug-tools
    ```
 
-3. Query the current shared-memory limit:
+2. Query the current shared-memory limit:
 
    ```bash
    amd-ttm
    ```
 
-4. Raise it (value in GB — pick a size that leaves headroom for the OS):
+3. Raise it (value in GB — pick a size that leaves headroom for the OS):
 
    ```bash
    amd-ttm --set <NUM>
    ```
 
-5. Reboot for the change to take effect.
+4. Reboot for the change to take effect.
 
-> **Note:** Requires kernel **6.16.9 or newer**. Older kernels cap GPU-visible
-> memory at about 15.5 GB regardless of this setting.
+> **Note:** `amd-ttm` is the current tool; this will eventually be ported to
+> `amd-smi`.
+<!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @device:end -->
