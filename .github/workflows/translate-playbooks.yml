@@ -123,15 +123,22 @@ jobs:
           set -uo pipefail
           rc=0
           L="${{ steps.locales.outputs.locales }}"
+          # Fan out over ALL locales at once. Each locale owns its own manifest,
+          # so locale-level parallelism is race-free (see translate_playbook.py).
+          # The endpoint handles every language concurrently, so --jobs is set to
+          # the full locale count rather than a fixed cap; serial runs otherwise
+          # take many hours and hit the job timeout.
+          JOBS=$(echo "$L" | tr ',' '\n' | grep -c .)
+          echo "Parallelizing across $JOBS locales."
           # Shared dependency content (translated once; playbooks reference it).
           if [ "${{ steps.detect.outputs.deps }}" = "true" ]; then
             echo "::group::Translating shared dependencies"
-            python .github/scripts/translate_playbook.py --dependencies --locales "$L" || rc=1
+            python .github/scripts/translate_playbook.py --dependencies --locales "$L" --jobs "$JOBS" || rc=1
             echo "::endgroup::"
           fi
           for pb in ${{ steps.detect.outputs.playbooks }}; do
             echo "::group::Translating $pb"
-            python .github/scripts/translate_playbook.py --playbook "$pb" --locales "$L" || rc=1
+            python .github/scripts/translate_playbook.py --playbook "$pb" --locales "$L" --jobs "$JOBS" || rc=1
             echo "::endgroup::"
           done
           exit $rc
