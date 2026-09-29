@@ -183,11 +183,15 @@ extra_install_scripts:
       platforms: ["windows"]
 
   # OpenHands runs the published Linux Agent Canvas image on Windows. Enable
-  # WSL and reboot before dependency setup so app.wsl can install Ubuntu and
-  # app.openhands.container-runtime can provide a WSL-backed Docker engine.
-  # This avoids Docker Desktop's interactive first-run dependency on CI hosts.
+  # the WSL2 platform, then install Docker Desktop machine-wide from the
+  # configured mirror. Reboot after WSL setup before installing Docker Desktop,
+  # then reboot once more so dependency setup starts from the installed product
+  # under the actor account and health-gates the Linux engine.
   openhands-getting-started:
     - script: "InstallationScripts/gfx/windows-wsl.ps1"
+      reboot_after: true
+      platforms: ["windows"]
+    - script: "InstallationScripts/container/windows-docker-desktop.ps1"
       reboot_after: true
       platforms: ["windows"]
 
@@ -283,6 +287,12 @@ provisioning:
   # Account-gated Ryzen AI Linux NPU/XRT bundle mirrored internally. The URL is
   # supplied by ORCHESTRAI_RYZENAI_NPU_XRT_URL and is never committed here.
   ryzenai_npu_xrt_url: ""
+
+  # Machine-wide Docker Desktop installer used only by Windows OpenHands
+  # batches. Both values come from repository variables; no internal mirror
+  # coordinate is committed to this public repository.
+  docker_desktop_installer_url: ""
+  docker_desktop_installer_sha256: ""
 
   linux_install_scripts:
     - script: "InstallationScripts/gfx/linux-therock-tarball.sh"
