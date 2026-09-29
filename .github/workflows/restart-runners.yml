@@ -35,8 +35,12 @@ on:
         options:
           - any
           - halo         # Ryzen AI Max
+          - grgh         # Gorgon Halo
+          - mdsh         # Medusa Halo
           - stx          # Ryzen AI 300 HX
           - krk          # Ryzen AI 300
+          - grgp         # Gorgon Point
+          - mdsp         # Medusa Point
           - r9700        # Radeon AI Pro R9700
           - rx9070xt     # Radeon RX 9070 XT
           - rx7900xt     # Radeon RX 7900 XT
@@ -140,9 +144,14 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          echo "Restarting $(hostname) (runner ${{ matrix.runner }}) now..."
-          # `sudo reboot` restarts the machine (NOT shutdown).
-          # It's backgrounded with a short delay so this step exits cleanly before the runner process is killed.
-          # Otherwise the reboot terminates the job mid-run and it reports a false failure. Requires passwordless sudo (or root).
-          ( sleep 5 ; sudo --non-interactive reboot ) &
+          echo "Restarting $(hostname) (runner ${{ matrix.runner }}) in 60s..."
+          # Same shape as the Windows `shutdown /r /t 60 /f` above: 60s delay, forced.
+          # systemd-run hands the reboot to a transient timer owned by PID 1, so it outlives
+          # this job; a backgrounded `( sleep N ; reboot ) &` stays a child of the step and dies with it.
+          # --force is the `/f` equivalent: skipping unit teardown stops a hung unit
+          # (plymouth-reboot.service) from wedging the box. Requires passwordless sudo (or root).
+          sudo --non-interactive systemd-run \
+            --on-active=60 --timer-property=AccuracySec=1s \
+            --unit=ci-scheduled-reboot \
+            systemctl reboot --force
           echo "Reboot scheduled."

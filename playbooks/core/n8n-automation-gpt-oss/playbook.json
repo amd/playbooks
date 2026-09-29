@@ -140,32 +140,32 @@
   "validatedVersions": {
     "reference": {
       "linux": {
-        "n8n": "2.33.5",
-        "Node.js": "22.22.1"
+        "n8n": "Latest",
+        "Podman": "Latest"
       },
       "windows": {
-        "n8n": "2.33.5",
-        "Node.js": "22.22.1"
+        "n8n": "Latest",
+        "Node.js": "24.21"
       }
     },
     "apu": {
       "linux": {
         "n8n": "Latest",
-        "Node.js": "22.22.1"
+        "Podman": "Latest"
       },
       "windows": {
         "n8n": "Latest",
-        "Node.js": "22.22.1"
+        "Node.js": "20.19"
       }
     },
     "gpu": {
       "linux": {
         "n8n": "Latest",
-        "Node.js": "22.22.1"
+        "Podman": "Latest"
       },
       "windows": {
         "n8n": "Latest",
-        "Node.js": "22.22.1"
+        "Node.js": "20.19"
       }
     }
   },

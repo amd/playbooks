@@ -168,16 +168,19 @@ def comment_on_issue(
     return True
 
 
-def render_dispatch_command(repo: str, workflow_file: str, playbook: str) -> str:
+def render_dispatch_command(repo: str, workflow_file: str, playbook: str, locale: str = "") -> str:
     """Show maintainers how to re-run just this matrix entry via ``gh``.
 
     The Test Playbooks workflow already accepts a ``playbook_id`` input, so
     the simplest reproduction is a single ``gh workflow run``.
     """
-    return (
+    command = (
         f"gh workflow run {workflow_file} --repo {repo} "
         f"-f playbook_id={playbook}"
     )
+    if locale:
+        command += f" -f locale={locale}"
+    return command
 
 
 def render_body(
@@ -188,6 +191,8 @@ def render_body(
     runner_name: str,
     run_url: str,
     sha: str,
+    locale: str = "",
+    localized_only: bool = True,
 ) -> str:
     """Assemble the markdown body for a new failure issue."""
     playbook = failure["playbook_id"]
@@ -209,20 +214,23 @@ def render_body(
     error_message = result.get("error_message") or ""
     exit_code = result.get("exit_code")
 
-    repro_command = render_dispatch_command(repo, workflow_file, playbook)
+    repro_command = render_dispatch_command(repo, workflow_file, playbook, locale)
     runner_label_str = (
         ", ".join(f"`{lbl}`" for lbl in runner_labels) if runner_labels else "n/a"
     )
 
     parts: list[str] = []
     parts.append(
-        f"This issue was opened automatically by the **Test Playbooks** workflow "
+        f"This issue was opened automatically by the "
+        f"**{'Test Localized Playbooks' if locale else 'Test Playbooks'}** workflow "
         f"after the test `{test_id}` failed on the `main` branch."
     )
     parts.append("")
     parts.append("## Failure scope")
     parts.append("")
     parts.append(f"- **Playbook:** `{playbook}`")
+    if locale:
+        parts.append(f"- **Locale:** `{locale}`")
     parts.append(f"- **Test id:** `{test_id}`")
     parts.append(f"- **Device:** `{device}`")
     parts.append(f"- **Operating system:** `{platform}`")
@@ -263,15 +271,21 @@ def render_body(
     parts.append("## How to run just this test locally")
     parts.append("")
     parts.append("```bash")
-    parts.append(
+    local_command = (
         f"python .github/scripts/run_playbook_tests.py "
         f"--playbook {playbook} --platform {platform} --device {device}"
     )
+    if locale:
+        local_command += (
+            f" --locale {locale} --localized-only {str(localized_only).lower()}"
+        )
+    parts.append(local_command)
     parts.append("```")
     parts.append("")
     parts.append(
         f"The runner extracts test blocks from "
-        f"`playbooks/*/{playbook}/README.md` (the failing block starts around "
+        f"`{'localized-playbooks/' + locale if locale else 'playbooks'}/*/{playbook}/README.md` "
+        f"(the failing block starts around "
         f"line {line_number})."
     )
     parts.append("")
@@ -352,6 +366,8 @@ def process_failures(
     run_url: str,
     sha: str,
     dry_run: bool,
+    locale: str = "",
+    localized_only: bool = True,
 ) -> int:
     """Create (or skip) issues for every recorded failure. Returns count created."""
     failure_files = collect_failure_files(results_root, playbook)
@@ -379,7 +395,8 @@ def process_failures(
         device = failure.get("device") or "all"
         test_id = failure.get("test", {}).get("id", "unknown")
 
-        title = build_title(playbook_id, test_id, device, platform)
+        title_playbook = f"{locale}/{playbook_id}" if locale else playbook_id
+        title = build_title(title_playbook, test_id, device, platform)
         body = render_body(
             failure=failure,
             repo=repo,
@@ -388,6 +405,8 @@ def process_failures(
             runner_name=runner_name,
             run_url=run_url,
             sha=sha,
+            locale=locale,
+            localized_only=localized_only,
         )
 
         print(f"\n--- Failure: {title} ---")
@@ -453,6 +472,23 @@ def main() -> int:
     parser.add_argument("--run-url", default="")
     parser.add_argument("--sha", default="")
     parser.add_argument(
+        "--locale",
+        nargs="?",
+        const="",
+        default="",
+        help=(
+            "Localized content locale; an omitted value selects English "
+            "(supports PowerShell, which drops explicit empty arguments)"
+        ),
+    )
+    parser.add_argument(
+        "--localized-only",
+        type=str.lower,
+        choices=["true", "false"],
+        default="true",
+        help="Whether canonical fallback was disabled for localized content",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print the issue body instead of calling the GitHub API",
@@ -473,6 +509,8 @@ def main() -> int:
         run_url=args.run_url,
         sha=args.sha,
         dry_run=args.dry_run,
+        locale=args.locale,
+        localized_only=args.localized_only == "true",
     )
 
     print(f"\nDone. Issues created: {created}")
