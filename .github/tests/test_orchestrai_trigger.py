@@ -120,6 +120,23 @@ class AcquireTimeoutValidation(unittest.TestCase):
 
 class OpenHandsProvisioning(unittest.TestCase):
 
+    def test_repository_variables_override_docker_desktop_coordinates(self):
+        cfg = {"pipeline": {}, "provisioning": {}}
+        env = {
+            "ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_URL": "https://example.invalid/docker.exe",
+            "ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_SHA256": "b" * 64,
+        }
+        with mock.patch.dict(os.environ, env, clear=False):
+            trigger.apply_env_overrides(cfg)
+        self.assertEqual(
+            cfg["provisioning"]["docker_desktop_installer_url"],
+            env["ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_URL"],
+        )
+        self.assertEqual(
+            cfg["provisioning"]["docker_desktop_installer_sha256"],
+            env["ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_SHA256"],
+        )
+
     def test_windows_openhands_installs_docker_desktop_then_reboots(self):
         cfg = {
             "provisioning": {
