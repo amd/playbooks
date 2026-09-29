@@ -37,12 +37,21 @@ permissions:
 
 concurrency:
   group: translate-playbooks-${{ github.ref }}
-  cancel-in-progress: false
+  # Newest-wins: a fresh push supersedes an older, still-running translation
+  # instead of queuing behind it. Combined with the job timeout below, this
+  # stops one hung run from holding the single concurrency slot and silently
+  # backlogging every later push (which is what stalled translations for weeks).
+  cancel-in-progress: true
 
 jobs:
   translate:
     name: Translate playbooks
     runs-on: translation
+    # Bound the job so a hung translate step (e.g. an unresponsive LLM endpoint)
+    # cannot run for hours holding the concurrency slot. On timeout the job
+    # fails, which fires the "Open issue on translation failure" step below so
+    # the breakage is visible instead of silent.
+    timeout-minutes: 120
     env:
       # The 29 Lenovo languages (Portuguese ships as both pt-BR Brazilian and pt-PT
       # European) plus fr-CA for the Canada launch, so French ships as both fr-FR and fr-CA.
