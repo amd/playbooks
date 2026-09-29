@@ -160,7 +160,7 @@
   "primaryModel": "Qwen3-4B-Instruct",
   "authors": [
     {
-      "name": "Ning Zhang",
+      "name": "Jason Zhang",
       "github": "ningzhang-amd",
       "github_url": "https://github.com/ningzhang-amd",
       "type": "amd"

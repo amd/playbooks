@@ -132,9 +132,9 @@
   "primaryModel": "Gemma-4-E2B-it",
   "authors": [
     {
-      "name": "Daniel Holanda",
-      "github": "danielholanda",
-      "github_url": "https://github.com/danielholanda",
+      "name": "Victoria Godsoe",
+      "github": "vgodsoe",
+      "github_url": "https://github.com/vgodsoe",
       "type": "amd"
     }
   ],

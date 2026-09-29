@@ -136,9 +136,9 @@
   "primaryModel": "SeamlessM4T v2 Large",
   "authors": [
     {
-      "name": "Daniel Holanda",
-      "github": "danielholanda",
-      "github_url": "https://github.com/danielholanda",
+      "name": "Charles Yang",
+      "github": "charyang-ai",
+      "github_url": "https://github.com/charyang-ai",
       "type": "amd"
     }
   ],
