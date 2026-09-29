@@ -146,9 +146,8 @@ jobs:
 
       - name: Open a PR with the translations
         # main is a protected branch (changes must go through a PR), so the bot
-        # cannot push directly. Instead push a branch and open an auto-merging
-        # PR. A translations-only change touches auto-translations/** and runs
-        # no playbook tests, so the required checks pass and it merges itself.
+        # cannot push directly. Instead push a branch and open a PR that
+        # @-mentions the maintainer for manual review and merge.
         if: always() && steps.detect.outputs.playbooks != ''
         shell: bash
         env:
@@ -165,14 +164,16 @@ jobs:
           git add auto-translations
           git commit -m "l10n: update translations"
           git push origin "$BRANCH"
-          # Open the PR and enable auto-merge so it lands once checks pass.
+          # Open a PR for manual review. The @-mention notifies the maintainer.
           PR_URL=$(gh pr create --base "${{ github.ref_name }}" --head "$BRANCH" \
             --title "l10n: update translations" \
-            --body "Automated translation update from the Translate Playbooks workflow (run ${{ github.run_id }}). Touches auto-translations/ only." \
+            --body "@bconsolvo automated translation update from the Translate Playbooks workflow (run ${{ github.run_id }}). Touches \`auto-translations/\` only — please review and merge." \
             --label "translation")
-          echo "Opened $PR_URL"
-          gh pr merge "$PR_URL" --auto --squash || \
-            echo "::warning::Auto-merge could not be enabled; the PR $PR_URL is open for manual merge."
+          echo "Opened $PR_URL for manual review."
+          # Request review so it surfaces in the maintainer's review queue,
+          # not just as an @-mention. Best-effort — never fail the run over it.
+          gh pr edit "$PR_URL" --add-reviewer bconsolvo \
+            || echo "::warning::Could not add reviewer; PR $PR_URL is open with an @-mention."
 
       - name: Open issue on translation failure
         if: failure()
