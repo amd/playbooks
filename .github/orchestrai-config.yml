@@ -296,12 +296,6 @@ provisioning:
   # supplied by ORCHESTRAI_RYZENAI_NPU_XRT_URL and is never committed here.
   ryzenai_npu_xrt_url: ""
 
-  # Docker Desktop installer coordinates forwarded only to Windows OpenHands
-  # dependency setup. Both come from repository variables; no internal mirror
-  # coordinate is committed to this public repository.
-  docker_desktop_installer_url: ""
-  docker_desktop_installer_sha256: ""
-
   linux_install_scripts:
     - script: "InstallationScripts/gfx/linux-therock-tarball.sh"
       reboot_after: false
