@@ -16,54 +16,56 @@ SPDX-License-Identifier: MIT
 
 ## Oversikt
 
-Denne veiledningen gir trinnvise eksempler for finjustering av en stor språkmodell (LLM) med PyTorch og ROCm. Den dekker flere teknikker, fra standard finjustering til minneeffektive Parameter-Efficient Fine-Tuning (PEFT)-strategier, slik at du enkelt kan tilpasse modeller til dine behov.
+Denne veiledningen gir trinnvise eksempler for finjustering av en stor språkmodell (LLM) med PyTorch og ROCm. Den dekker flere teknikker, fra standard finjustering til minneeffektive Parameter-Efficient Fine-Tuning (PEFT)-strategier, slik at du enkelt kan tilpasse modeller for dine behov.
 
-**Brukt modell**: google/gemma-3-4b-it  *(se [Aktiver HF-autentisering](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) hvis den er sperret)*  
+**Modell brukt**: google/gemma-3-4b-it  *(se [Aktiver HF-autentisering](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) hvis den er sperret)*  
 **Maskinvare**: AMD Radeon™ GPU med ROCm-støtte  
 **Rammeverk**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
 > **Merk:** 
-> - Full finjustering krever minst **64 GB systemminne**, hvorav minst **32 GB må være tilgjengelig for GPU-en** (de 32 GB-ene er en del av de 64 GB-ene, ikke i tillegg til dem).
-> - Du kan også prøve andre modellarkitekturer, inkludert **GPT-OSS-20B**, ved å bytte ut modellen i de medfølgende treningsskriptene.
+> - Full finjustering krever minst **64 GB systemminne (RAM)**, hvorav minst **32 GB må være tilgjengelig for GPU-en** (32 GB-en er en del av de 64 GB-en, ikke i tillegg til den).
+> - Du kan også prøve andre modellarkitekturer, inkludert **GPT-OSS-20B**, ved å bytte ut modellen i de medfølgende opplæringsskriptene.
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **Merk:** LoRA- og QLoRA-finjustering krever minst **32 GB systemminne**, hvorav minst **16 GB må være tilgjengelig for GPU-en** (de 16 GB-ene er en del av de 32 GB-ene, ikke i tillegg til dem).
+> **Merk:** LoRA- og QLoRA-finjustering krever minst **32 GB systemminne (RAM)**, hvorav minst **16 GB må være tilgjengelig for GPU-en** (16 GB-en er en del av de 32 GB-en, ikke i tillegg til den).
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Merk:** LoRA-finjustering krever minst **32 GB systemminne**, hvorav minst **16 GB må være tilgjengelig for GPU-en** (de 16 GB-ene er en del av de 32 GB-ene, ikke i tillegg til dem).
+> **Merk:** LoRA-finjustering krever minst **32 GB systemminne (RAM)**, hvorav minst **16 GB må være tilgjengelig for GPU-en** (16 GB-en er en del av de 32 GB-en, ikke i tillegg til den).
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Merk:** LoRA- og QLoRA-finjustering krever et grafikkort med minst **16 GB dedikert GPU-minne** og **32 GB systemminne**.
-> - På Linux kjører treningen utelukkende i grafikkortets dedikerte VRAM.
-> - Den faller ikke tilbake til delt GPU-minne (systemminne) når VRAM går tom.
-> - Kort med mindre enn 16 GB dedikert VRAM vil gå tom for minne under trening på Linux, selv om systemet har rikelig med RAM.
+> **Merk:** LoRA- og QLoRA-finjustering krever et grafikkort med minst **16 GB dedikert GPU-minne** og **32 GB systemminne (RAM)**.
+> - På Linux kjøres opplæringen utelukkende i grafikkortets dedikerte VRAM.
+> - Den faller ikke tilbake til delt GPU-minne (systemminne) når VRAM-en går tom.
+> - Kort med mindre enn 16 GB dedikert VRAM vil gå tomme for minne under opplæring på Linux, selv om systemet har rikelig med RAM.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Merk:** LoRA-finjustering krever minst **16 GB totalt GPU-minne** og **32 GB systemminne**.
-> - På Windows kombineres grafikkortets dedikerte VRAM med delt GPU-minne (lånt fra systemminnet) til totalt GPU-minne.
-> - Derfor kan kort med mindre enn 16 GB dedikert VRAM likevel kjøre denne oppskriften ved å bruke delt GPU-minne til å dekke differansen.
+> **Merk:** LoRA-finjustering krever minst **16 GB total GPU-minne** og **32 GB systemminne (RAM)**.
+> - På Windows kombinerer det totale GPU-minnet grafikkortets dedikerte VRAM med delt GPU-minne (lånt fra systemminnet).
+> - Derfor kan kort med mindre enn 16 GB dedikert VRAM likevel kjøre denne veiledningen ved å bruke delt GPU-minne for å dekke differansen.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Hva du vil lære
 
-- Hvordan finjustere en LLM ved bruk av LoRA, QLoRA og full finjustering med PyTorch og ROCm
-- Hvordan lagre og distribuere den finjusterte modellen din
-- Hvordan overvåke trening og feilsøke vanlige problemer
+- Hvordan finjustere en LLM ved hjelp av LoRA, QLoRA og full finjustering med PyTorch og ROCm
+- Hvordan lagre og distribuere din finjusterte modell
+- Hvordan overvåke opplæring og feilsøke vanlige problemer
 
-## Konfigurere minneinnstillinger
+<!-- @device:halo_box,halo,stx,krk -->
+## Angi minnekonfigurasjonen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Sjekk etter programvareoppdateringer
@@ -78,7 +80,7 @@ Denne veiledningen gir trinnvise eksempler for finjustering av en stor språkmod
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update 
 sudo apt install -y python3-venv 
@@ -96,7 +98,7 @@ source finetune-venv/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -110,7 +112,7 @@ source finetune-venv/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv --system-site-packages
 finetune-venv\Scripts\activate
@@ -120,7 +122,7 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv
 finetune-venv\Scripts\activate
@@ -138,7 +140,7 @@ finetune-venv\Scripts\activate
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -147,14 +149,14 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandb
 **Windows:** Kun kjernepakker er testet og støttet her. **bitsandbytes er ikke godt støttet på Windows**, så Windows-installasjonen utelater den; bruk LoRA eller full finjustering på Windows (QLoRA krever bitsandbytes og er beregnet for Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 #### Aktiver HF-autentisering (sperrede eller egendefinerte / ikke-forhåndsinstallerte modeller)
 
-I dette eksemplet bruker vi **google/gemma-3-4b-it**, som er en **sperret** modell. Du må godta modellens vilkår på Hugging Face og deretter autentisere deg slik at treningsskriptene kan laste den ned.
+I dette eksempelet bruker vi **google/gemma-3-4b-it**, som er en **sperret** modell. Du må godta modellens vilkår på Hugging Face og deretter autentisere deg slik at opplæringsskriptene kan laste den ned.
 
 1. **Godta lisensen:** Åpne [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), logg inn (eller opprett en konto), og godta lisensen/vilkårene på modellsiden (f.eks. «Agree and access repository»).
 2. **Installer og logg inn:** Installer Hugging Face CLI, og kjør deretter standard innlogging:
@@ -265,9 +267,9 @@ sys.exit(r.returncode)
 
 ### Hva er LoRA?
 
-**LoRA (Low-Rank Adaptation)** holder grunnmodellen frosset og trener kun små «adapter»-matriser som legges til bestemte lag. 
+**LoRA (Low-Rank Adaptation)** holder basismodellen fastfrosset og trener kun små «adapter»-matriser som legges til bestemte lag. 
 
-- **Nøkkelideen**: i stedet for å oppdatere en enorm vektmatrise med millioner av parametere, lærer vi en lavrangs-oppdatering (to små matriser der produktet har langt færre parametere). Dette gir en stor reduksjon i antall trenbare parametere og VRAM-bruk, samtidig som mesteparten av kvaliteten fra full finjustering beholdes.
+- **Kjerneideen**: i stedet for å oppdatere en enorm vektmatrise med millioner av parametere, lærer vi en lav-rang-oppdatering (to små matriser hvis produkt har langt færre parametere). Dette gir en stor reduksjon i antall trenbare parametere og VRAM-bruk, samtidig som mesteparten av kvaliteten fra full finjustering beholdes.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -282,7 +284,7 @@ W_updated = W + B × A
 
 ### Hva er QLoRA?
 
-**QLoRA** kombinerer **4-bits kvantisering** med **LoRA**. Grunnmodellen lastes inn i 4-bit (store minnebesparelser), og kun LoRA-adapterne trenes med høyere presisjon. Dermed får du parametereffektiviteten til LoRA pluss mye lavere VRAM-bruk, med et lite kvalitetstap sammenlignet med LoRA med full presisjon. Merk at 4-bits kvantisering kan forårsake numerisk ustabilitet (tapstopper eller NaN-verdier), så brukere foretrekker ofte **LoRA** hvis nok VRAM er tilgjengelig.
+**QLoRA** kombinerer **4-bits kvantisering** med **LoRA**. Basismodellen lastes inn i 4-bits format (store minnebesparelser), og kun LoRA-adapterne trenes med høyere presisjon. Dermed får du parametereffektiviteten fra LoRA i tillegg til mye lavere VRAM-bruk, med et lite kvalitetstap sammenlignet med LoRA i full presisjon. Merk at 4-bits kvantisering kan forårsake numerisk ustabilitet (tapsspisser eller NaN-verdier), så brukere foretrekker ofte **LoRA** hvis nok VRAM er tilgjengelig.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -290,52 +292,52 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **Merk**: For MXFP4-grunnmodeller som `openai/gpt-oss-20b` anbefaler vi å bruke **LoRA** (`train_lora.py`) i stedet for QLoRA. QLoRA-skriptets 4-bits-bane i `bitsandbytes` dekvantiserer vanligvis MXFP4-vektene til BF16, slik at kjøringen oppfører seg som vanlig LoRA. Nativ MXFP4 krever `bitsandbytes` bygget fra kildekode, i tillegg til en matchende Transformers/Triton/kernels-stakk. Se [Transformers MXFP4-dokumentasjonen](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Merk**: For MXFP4-basismodeller som `openai/gpt-oss-20b` anbefaler vi å bruke **LoRA** (`train_lora.py`) i stedet for QLoRA. QLoRA-skriptets 4-bits `bitsandbytes`-metode dekvantiserer vanligvis MXFP4-vekter til BF16, slik at kjøringen oppfører seg som standard LoRA. Nativ MXFP4 krever `bitsandbytes` bygget fra kildekode i tillegg til en tilpasset Transformers/Triton/kernels-stakk. Se [Transformers MXFP4-dokumentasjonen](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
 ### 2. Velg metode
 
 | Metode | Minne | Hastighet | Kvalitet | Best egnet for |
 |--------|--------|-------|---------|----------|
-| **QLoRA** (kun Linux) | 12-16GB | Raskest | 90-95% | Lavt minnebruk |
+| **QLoRA** (kun Linux) | 12-16GB | Raskest | 90-95% | Lavt minneforbruk |
 | **LoRA** | 24-32GB | Rask | 95-98% | Balansert tilnærming |
 | **Full** | 80GB+ | Tregest | 100% | Maksimal kvalitet |
 
 ### 3. Kjør trening
 
 **Datasett og hva modellen lærer**  
-Skriptene gjør datasettet om til chat-eksempler. QLoRA-skriptet bruker for eksempel **Abirate/english_quotes**: hvert eksempel blir et bruker–assistent-par som:
+Skriptene gjør om datasettet til chat-eksempler. QLoRA-skriptet bruker for eksempel **Abirate/english_quotes**: hvert eksempel blir et par bestående av bruker og assistent, som:
 
 - **Bruker:** «Gi meg et sitat om: &lt;tag&gt;»
 - **Assistent:** «&lt;sitat&gt; – &lt;forfatter&gt;»
 
-Finjustering lærer modellen å svare på forespørsler om sitater om et emne, og å returnere dem i formatet `<sitattekst> - <forfatter>`. LoRA- og full finjusteringsskriptene bruker **databricks/databricks-dolly-15k** (generelle instruksjon/svar-par), så den eksakte oppgaven varierer fra skript til skript; ideen er den samme - tilpass modellen til datasettet og formatet du har valgt.
+Finjustering lærer modellen å svare på forespørsler om sitater om et emne og returnere dem i formatet `<quote text> - <author>`. LoRA- og full finjustering-skriptene bruker **databricks/databricks-dolly-15k** (generelle instruksjon/svar-par), så selve oppgaven varierer fra skript til skript; ideen er den samme - tilpasse modellen til datasettet og formatet du velger.
 
-Nedenfor er en oversikt over tilgjengelige treningsmetoder. Hver metode lenker til sitt skript og gir en kort beskrivelse for å velge riktig tilnærming.
+Nedenfor er en oversikt over tilgjengelige treningsmetoder. Hver metode lenker til sitt eget skript og gir en kort beskrivelse for å hjelpe deg med å velge riktig tilnærming.
 
 | Skript                           | Metode            | Beskrivelse                                                                                                         | Typisk VRAM | Anbefalt for                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trener små adaptermatriser mens basemodellen fryses. 3–5x raskere; ~95–98% av full kvalitet.                         | 24–32GB      | Avanserte brukere; flere adaptere; mer VRAM    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(kun Linux)*             | **QLoRA**       | 4-bit kvantisering + LoRA-adaptere. Lavest minnebruk, raskest, liten kvalitetsavveining. Krever `bitsandbytes` (kun Linux).                            | 12–16GB      | De fleste brukere; raske eksperimenter; begrenset VRAM      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full finjustering** | Oppdaterer alle modellparametere. Maksimal kvalitet; høyest minne- og beregningsbruk.                                    | 40GB+      | Maksimal kvalitet; forskning; stort VRAM           |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Trener små adaptermatriser mens grunnmodellen fryses. 3–5x raskere; ~95–98% av full kvalitet.                         | 24–32GB      | Avanserte brukere; flere adaptere; mer VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(kun Linux)*             | **QLoRA**       | 4-bits kvantisering + LoRA-adaptere. Lavest minneforbruk, raskest, liten kvalitetskompromiss. Krever `bitsandbytes` (kun Linux).                            | 12–16GB      | De fleste brukere; raske eksperimenter; begrenset VRAM      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full finjustering** | Oppdaterer alle modellparametere. Maksimal kvalitet; høyest minne- og beregningsforbruk.                                    | 40GB+        | Maksimal kvalitet; forskning; mye VRAM           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Merk:** Full finjustering (`train_full_finetuning.py`) kan kreve mer enn 64GB systemminne (RAM), og kan være uegnet for denne enheten. Vurder å bruke LoRA eller QLoRA i stedet.
+> **Merk:** Full finjustering (`train_full_finetuning.py`) kan kreve mer enn 64GB systemminne og er kanskje ikke gjennomførbart på denne enheten. Vurder å bruke LoRA eller QLoRA i stedet.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Merk:** Full finjustering (`train_full_finetuning.py`) kan kreve mer enn 64GB systemminne (RAM), og kan være uegnet for denne enheten. Vurder å bruke LoRA i stedet.
+> **Merk:** Full finjustering (`train_full_finetuning.py`) kan kreve mer enn 64GB systemminne og er kanskje ikke gjennomførbart på denne enheten. Vurder å bruke LoRA i stedet.
 <!-- @os:end -->
 <!-- @device:end -->
 
-Velg ønsket `Training method`, last ned det tilhørende skriptet, og kjør det med kommandoen mens det virtuelle miljøet er aktivert: 
+Velg ganske enkelt ønsket `Training method`, last ned det tilhørende skriptet og kjør det med kommandoen mens du holder det virtuelle miljøet aktivert: 
 
 ```python
 python3 train_<method_name>.py.
 ```
 
-## Bruke din finjusterte modell
+## Bruk av din finjusterte modell
 
 ### Etter full finjustering
 
@@ -377,7 +379,7 @@ outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-### Slå sammen LoRA-adapter med basemodellen
+### Slå sammen LoRA-adapter med grunnmodellen
 
 ```python
 # Merge LoRA/QLoRA adapter weights into the base model for standalone inference
@@ -388,10 +390,10 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 
 **Merk:**  
 - Sørg for at navnet på modellmappen (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) samsvarer med den faktiske utdatamappen fra treningen.  
-- Hvis du brukte LoRA i stedet for QLoRA, erstatter du bare stien tilsvarende.  
-- Enkelte Gemma-modeller krever at du angir `trust_remote_code=True` i `from_pretrained`; legg til dette hvis du ser en relatert advarsel.
+- Hvis du brukte LoRA i stedet for QLoRA, bytt bare ut stien tilsvarende.  
+- Enkelte Gemma-modeller krever at du spesifiserer `trust_remote_code=True` i `from_pretrained`; legg dette til hvis du ser en relatert advarsel.
 
-For flere tilpassede innstillinger (padding-tokens, enhet osv.), se skriptet du brukte til trening.
+For flere tilpassede innstillinger (padding-tokener, enhet osv.), se skriptet du brukte til trening.
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -467,16 +469,18 @@ required = [
     "config.json",
     "tokenizer_config.json",
     "tokenizer.json",
-    "model.safetensors.index.json",
 ]
 missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
 if missing:
     print(f"FAIL: Missing required files: {missing}")
     sys.exit(1)
 
+# Weights may be saved as a single model.safetensors or, when the model
+# exceeds max_shard_size, as model-*.safetensors shards plus an index.
+single = os.path.exists(os.path.join(out_dir, "model.safetensors"))
 shards = glob.glob(os.path.join(out_dir, "model-*.safetensors"))
-if not shards:
-    print("FAIL: No sharded model safetensors files found")
+if not single and not shards:
+    print("FAIL: No model safetensors weights found")
     sys.exit(1)
 
 print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
@@ -485,7 +489,7 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 <!-- @device:end -->
 ---
 
-## Tilpasningsveiledning
+## Tilpasningsguide
 
 ### Bruk ditt eget datasett
 
@@ -517,11 +521,11 @@ dataset = dataset.map(format_instruction)
 
 **Datasettformat for lokal JSON/JSONL-fil:**
 
-Når du bruker denne metoden, må du sørge for at JSON-filene dine er riktig strukturert for å unngå tolkningsfeil. 
+Når du bruker denne metoden, må du sørge for at JSON-filene dine er riktig strukturert for å unngå analysefeil. 
 
-Følgende retningslinjer må følges:
+Følgende retningslinjer må overholdes:
 * **Filformatering:** JSON-filer bør formateres i et integrert utviklingsmiljø (IDE) for å sikre riktig struktur og syntaks.
-* **Nødvendige nøkler:** Den tilpassede JSON-filen må inneholde nøklene `instruction` og `response`. Disse nøklene er essensielle for at metoden skal fungere korrekt.
+* **Påkrevde nøkler:** Den tilpassede JSON-filen må inneholde nøklene `instruction` og `response`. Disse nøklene er avgjørende for at metoden skal fungere riktig.
 ```json
 [
   {
@@ -539,10 +543,10 @@ Følgende retningslinjer må følges:
 Når du bruker datasett fra Hugging Face, må du sørge for at datasettene dine er riktig strukturert for å muliggjøre sømløs integrasjon. 
 
 Følgende retningslinjer bør følges:
-* **Instruksjon-svar-par:** Fokuser på datasett som inkluderer et `instruction-response`-par. Denne strukturen er essensiell for den tiltenkte funksjonaliteten.
-* **Tilpasset nøkkelendring:** Hvis datasettet ditt ikke samsvarer med `instruction-response`-strukturen, har du muligheten til å endre `format_instruction()`-funksjonen. Dette lar deg tilpasse for spesifikke nøkler ved behov.
+* **Instruksjon-svar-par:** Fokuser på datasett som inneholder et `instruction-response`-par. Denne strukturen er avgjørende for at funksjonaliteten skal fungere som tiltenkt.
+* **Tilpasset nøkkelendring:** Hvis datasettet ditt ikke følger `instruction-response`-strukturen, har du mulighet til å endre funksjonen `format_instruction()`. Dette lar deg tilpasse spesifikke nøkler etter behov.
 
-Eksempel på justering: I tilfeller der datasettets output må justeres, kan du endre svar-delen i format_instruction()-funksjonen for å tilpasse den til dine behov.
+Eksempel på justering: Hvis datasettets utdata må justeres, kan du endre svar-delen i funksjonen format_instruction() slik at den passer dine behov.
 ```python
 def format_instruction(example):
     return {
@@ -554,7 +558,7 @@ def format_instruction(example):
 ```
 **Datasettformat for CSV-fil**
 
-For å tilpasse skriptet til bruk av CSV-filformat, må du sørge for at CSV-filen inneholder kolonner kalt `instruction` og `response`. 
+For at skriptet skal fungere med et CSV-filformat, må du sørge for at CSV-filen inneholder kolonner med navnene `instruction` og `response`. 
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
@@ -563,10 +567,10 @@ instruction,response
 
 ### Juster treningsparametere
 
-Rediger treningsskriptet og endre variablene for å matche dine mål: **læringsrate** (`LR`), **epoker** (`EPOCHS`), **batchstørrelse** (`BATCH_SIZE`), **gradientakkumulering** (`GRAD_ACCUM_STEPS`), og for LoRA/QLoRA **rank** (`LORA_R`). For raskere kjøringer, bruk færre epoker og en høyere læringsrate (LR); for bedre kvalitet, bruk flere epoker og en lavere LR. Reduser batchstørrelse eller sekvenslengde hvis du får feil på grunn av manglende minne.
+Rediger treningsskriptet og endre variablene slik at de samsvarer med målene dine: **læringsrate** (`LR`), **epoker** (`EPOCHS`), **batch-størrelse** (`BATCH_SIZE`), **gradientakkumulering** (`GRAD_ACCUM_STEPS`), og for LoRA/QLoRA **rang** (`LORA_R`). For raskere kjøringer, bruk færre epoker og en høyere læringsrate (LR); for bedre kvalitet, bruk flere epoker og en lavere LR. Reduser batch-størrelse eller sekvenslengde hvis du støter på minnemangelfeil.
 ### Tips for minneoptimalisering
 
-Hvis du støter på feil relatert til at minnet er fullt (out-of-memory):
+Hvis du støter på feil knyttet til at minnet er fullt (out-of-memory):
 
 **1. Reduser batch-størrelse:**
 ```python
@@ -593,7 +597,7 @@ model.gradient_checkpointing_enable()
 
 ## Overvåking og feilsøking
 
-### Følg med på GPU-minne
+### Overvåk GPU-minne
 
 ```bash
 # Check ROCm GPU status
@@ -605,20 +609,20 @@ rocm-smi --showmeminfo vram
 
 ### (Valgfritt) Spor eksperimenter med Weights & Biases
 
-For å logge kjøringer og metrikker til [Weights & Biases](https://wandb.ai):
+For å logge kjøringer og målinger til [Weights & Biases](https://wandb.ai):
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-I opplæringsskriptet setter du `report_to="wandb"` og eventuelt `run_name="your-experiment-name"` i trainer-konfigurasjonen. Hvis du foretrekker å ikke bruke Wandb, lar du `report_to` stå på standardverdien eller setter den til `"none"`.
+I treningsskriptet setter du `report_to="wandb"` og eventuelt `run_name="your-experiment-name"` i trainer-konfigurasjonen. Hvis du foretrekker å ikke bruke Wandb, kan du la `report_to` stå på standardverdien eller sette den til `"none"`.
 
 ### Vanlige problemer
 
 #### Fullt minne (OOM)
 
-**Løsning:** Reduser batch-størrelse og/eller bruk QLoRA
+**Løsning:** Reduser batch-størrelsen og/eller bruk QLoRA
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16
@@ -634,7 +638,7 @@ LR = 1e-4  # Try lower
 LR = 5e-4  # Try higher
 ```
 
-#### Treg opplæring
+#### Treg trening
 
 **Løsning:** Øk batch-størrelsen hvis minnet tillater det
 ```python
@@ -642,11 +646,11 @@ BATCH_SIZE = 8
 ```
 ## Neste steg
 
-Etter at du har fullført vellykket finjustering, kan du vurdere følgende neste steg for å få mer ut av modellen din:
+Når du har fullført en vellykket finjustering, kan du vurdere følgende neste steg for å få mer ut av modellen din:
 
 1. **Evaluer** grundig på tilbakeholdte testdata for å måle generalisering og unngå overtilpasning.
-2. **Eksperimenter** ved å prøve ulike verdier for hyperparametere for bedre nøyaktighet, hastighet og minnebruk.
-3. **Spor** alle eksperimentene dine (og tilhørende metrikker) med Weights & Biases for reproduserbar forskning.
+2. **Eksperimenter** ved å prøve ulike hyperparameterverdier for bedre avveininger mellom nøyaktighet, hastighet og minnebruk.
+3. **Spor** alle eksperimentene dine (og tilhørende målinger) med Weights & Biases for reproduserbar forskning.
 4. **Prøv** å trene på dine egne tilpassede datasett for å tilpasse modellen spesifikt til ditt bruksområde.
 5. **Distribuer** den finjusterte modellen din for rask inferens ved hjelp av effektive backend-løsninger som vLLM på kompatibel maskinvare.
 6. **Utforsk** avanserte teknikker, inkludert prompt engineering, blandet presisjon og lengre sekvenslengder.

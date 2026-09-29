@@ -12,11 +12,11 @@ SPDX-License-Identifier: MIT
 
 ## Oversikt
 
-[**Hermes Agent**](https://hermes-agent.nousresearch.com/) er en selvforbedrende AI-agent bygget av Nous Research. Den har en innebygd læringsløkke, den skaper ferdigheter fra erfaring, bygger et vedvarende minne om hvem du er på tvers av økter, og kan kjøre planlagte automatiseringer på dine vegne. I motsetning til en enkel chat-assistent, utfører Hermes reelle handlinger: kjører shell-kommandoer, skriver filer, surfer på nettet, og delegerer parallelle arbeidsflyter til underagenter.
+[**Hermes Agent**](https://hermes-agent.nousresearch.com/) er en selvforbedrende AI-agent bygget av Nous Research. Den har en innebygd læringssløyfe, den skaper ferdigheter fra erfaring, bygger opp et vedvarende minne om hvem du er på tvers av økter, og kan kjøre planlagte automatiseringer på dine vegne. I motsetning til en enkel chat-assistent utfører Hermes reelle handlinger: kjører shell-kommandoer, skriver filer, surfer på nettet og delegerer parallelle arbeidsflyter til underagenter.
 
-[**Lemonade Server**](https://lemonade-server.ai/) er den lokale inferens-backenden som driver den. Det er en åpen kildekode-server som kjører GenAI-modeller direkte på din AMD-maskinvare og eksponerer dem gjennom det bransjestandardiserte OpenAI API-et.
+[**Lemonade Server**](https://lemonade-server.ai/) er den lokale inferens-backenden som driver den. Det er en open source-server som kjører GenAI-modeller direkte på din AMD-maskinvare og eksponerer dem gjennom det bransjestandardiserte OpenAI API.
 
-Sammen utgjør de en fullstendig lokal AI-agent-stakk: Lemonade håndterer modellinferens på GPU-en din, og Hermes tilbyr agentløkken, minne, ferdigheter og meldingsgateway.
+Sammen utgjør de en fullstendig lokal AI-agent-stakk: Lemonade håndterer modellinferens på GPU-en din, og Hermes tilbyr agentsløyfen, minne, ferdigheter og meldingsgateway.
 
 > **Før du fortsetter:** Hermes Agent er en svært autonom AI-agent. Å gi en AI-agent tilgang til systemet ditt kan føre til uforutsigbare eller utilsiktede utfall. Fortsett kun hvis du forstår risikoen og er komfortabel med at autonom programvare handler på dine vegne.
 
@@ -26,16 +26,18 @@ Sammen utgjør de en fullstendig lokal AI-agent-stakk: Lemonade håndterer model
 
 Ved slutten av denne oppskriften vil du kunne:
 
-- **Installere Hermes Agent** og peke den mot **Lemonade Server** som AI-backend.
+- **Installere Hermes Agent** og peke den mot **Lemonade Server** som sin AI-backend.
 - **(Anbefalt) Aktivere Docker/Podman-sandboxing** for å isolere agentens handlinger fra vertsmaskinen din.
 - **Starte Hermes-gatewayen** og bekrefte at agenten din er klar.
 - **Koble til en kommunikasjonskanal** (Discord eller Telegram) slik at du kan chatte med agenten din fra hvilken som helst enhet.
 
 ---
 
-## Angi minnekonfigurasjonen
+<!-- @device:halo_box,halo,stx,krk -->
+## Sette minnekonfigurasjonen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Sjekk etter programvareoppdateringer
@@ -43,30 +45,30 @@ Ved slutten av denne oppskriften vil du kunne:
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Installere programvareforutsetninger
+## Installere forutsetninger for programvare
 
 <!-- @os:linux -->
 - En PC som kjører **Ubuntu 24.04+** eller en kompatibel Debian-basert Linux-distribusjon med `apt-get`
-- Minst **12 GB RAM** (64 GB+ anbefales for større modeller)
-- **~10–30 GB ledig diskplass** til modellvekter
-- [Podman](https://podman.io/docs/installation) (valgfritt, for sandboxing av Hermes Agent)
+- Minst **12 GB RAM** (64 GB+ anbefalt for større modeller)
+- **~10–30 GB ledig diskplass** for modellvekter
+- [Podman](https://podman.io/docs/installation) (Valgfritt, for sandboxing av Hermes Agent)
   ```bash 
-  sudo apt-get install -y podman`
+  sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - En PC som kjører **Windows 10/11**
-- Minst **12 GB RAM** (64 GB+ anbefales for større modeller)
-- **~10–30 GB ledig diskplass** til modellvekter
-- Podman (valgfritt, for sandboxing av Hermes Agent). Installer inne i WSL:
+- Minst **12 GB RAM** (64 GB+ anbefalt for større modeller)
+- **~10–30 GB ledig diskplass** for modellvekter
+- Podman (Valgfritt, for sandboxing av Hermes Agent). Installer inne i WSL:
   ```bash 
   sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
-> Podman er forhåndsinstallert på Halo Box, og ingen oppsett er nødvendig
+> Podman er forhåndsinstallert på Halo Box og krever ingen oppsett
 <!-- @device:end -->
 
 <!-- @require:lemonade -->
@@ -81,9 +83,9 @@ lemonade --version
 
 ---
 
-## Hent og last inn den anbefalte modellen
+## Hente og laste inn den anbefalte modellen
 
-Den anbefalte modellen for denne oppskriften er **Qwen3.6-35B-A3B-GGUF** fra Unsloth, en sterk MoE-modell med et kontekstvindu på 263k tokens som er godt egnet for agentarbeidsbelastninger. Denne modellen bruker UD-Q4_K_XL-kvantisering. Hent den nå:
+Den anbefalte modellen for denne oppskriften er **Qwen3.6-35B-A3B-GGUF** fra Unsloth, en sterk MoE-modell med et 263k-token kontekstvindu som passer godt til agentarbeidsbelastninger. Denne modellen bruker UD-Q4_K_XL-kvantisering. Hent den nå:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
@@ -91,6 +93,7 @@ lemonade pull Qwen3.6-35B-A3B-GGUF
 
 Last den deretter inn med et stort kontekstvindu og lagre denne innstillingen for fremtidige kjøringer:
 
+<!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
 lemonade unload
@@ -98,9 +101,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end -->
 
-Modellen har en standard kontekstlengde på 262 144 tokens. Hvis du støter på feil relatert til tomt minne (OOM), bør du vurdere å redusere kontekstvinduet.
+Modellen har en standard kontekstlengde på 262 144 tokener. Hvis du støter på minneproblemer (OOM-feil), bør du vurdere å redusere kontekstvinduet.
 
-> **Tips: Deaktiver «thinking» for raskere agentresponser:** Qwen3.6-35B-A3B kjører i thinking-modus som standard, noe som tilfører latens før hver respons. For agentløkker akkumuleres denne overheaden raskt. Repoet [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) tilbyr en ferdig konfigurasjon som deaktiverer thinking. For å bruke den, last ned filen og importer den:
+> **Tips: Deaktiver tenkning for raskere agentresponser:** Qwen3.6-35B-A3B kjører i tenkemodus som standard, noe som legger til ventetid før hver respons. For agentsløyfer akkumuleres denne overheaden raskt. Repoet [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) tilbyr en ferdig konfigurasjon som deaktiverer tenkning. For å bruke den, last ned filen og importer den:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -241,9 +244,9 @@ echo "OK: Lemonade chat/completions returned a response"
 
 <!-- @os:windows -->
 
-## Sett opp WSL
+## Sette opp WSL
 
-Vi kjører Hermes Agent inne i WSL og kobler den til Lemonade som kjører nativt på Windows. Dette gir deg et Linux-skallmiljø for Hermes samtidig som Lemonades GPU-akselerasjon beholdes på Windows-siden.
+Vi kjører Hermes Agent inne i WSL og kobler den til Lemonade som kjører nativt på Windows. Dette gir deg et Linux-skallmiljø for Hermes, samtidig som Lemonades GPU-akselerasjon beholdes på Windows-siden.
 
 ### Installer WSL og Ubuntu
 
@@ -277,11 +280,11 @@ wsl --shutdown
 wsl
 ```
 
-### Bygg bro mellom Lemonade fra Windows og WSL
+### Bro Lemonade fra Windows inn i WSL
 
-WSL2 kjører i et virtuelt nettverk. Lemonade på Windows binder seg til `127.0.0.1`, som WSL ikke kan nå direkte. En Windows-portproxy videresender trafikk fra WSL-gateway-IP-en til Windows localhost.
+WSL2 kjører i et virtuelt nettverk. Lemonade på Windows binder seg til `127.0.0.1`, noe WSL ikke kan nå direkte. En Windows-portproxy videresender trafikk fra WSL-gatewayens IP til Windows localhost.
 
-**Finn WSL-gateway-IP-en din** (kjør inne i WSL):
+**Finn WSL-gatewayens IP** (kjør inne i WSL):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
@@ -293,7 +296,7 @@ ip route show default | awk '{print $3}' | head -1
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Legg til en brannmurregel** (samme heve PowerShell):
+**Legg til en brannmurregel** (samme forhøyede PowerShell):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
@@ -306,7 +309,7 @@ WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Hvis du allerede har lastet inn Qwen3.6-35B-A3B-GGUF-modellen i det forrige trinnet, bør du se JSON-utdata som lister opp den innlastede modellen din.
+Hvis du allerede har lastet inn Qwen3.6-35B-A3B-GGUF-modellen i det forrige trinnet, bør du se JSON-utdata som viser den innlastede modellen din.
 
 ```json
 {
@@ -324,7 +327,7 @@ Hvis du allerede har lastet inn Qwen3.6-35B-A3B-GGUF-modellen i det forrige trin
 }
 ```
 
-> `netsh portproxy`-regelen overlever omstarter, men WSL-gateway-IP-en kan endre seg etter `wsl --shutdown`. Hvis Lemonade blir utilgjengelig fra WSL etter en omstart, hent den oppdaterte gateway-IP-en og oppdater proxyen med denne nye IP-en.
+> Regelen `netsh portproxy` overlever omstarter, men WSL-gatewayens IP kan endres etter `wsl --shutdown`. Hvis Lemonade blir utilgjengelig fra WSL etter en omstart, hent den oppdaterte gateway-IP-en og oppdater proxyen med denne nye IP-en.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -383,14 +386,14 @@ finally {
 ## Installer Hermes Agent
 
 <!-- @os:windows -->
-> Kjør kommandoene i denne seksjonen inne i **WSL-terminalen** din med mindre annet er angitt.
+> Kjør kommandoene i denne delen inne i **WSL-terminalen** din, med mindre annet er angitt.
 <!-- @os:end -->
 
 ```bash
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 ```
 
-Flagget `--skip-setup` hopper over den interaktive oppsettsveiviseren slik at du kan konfigurere modellbackenden manuelt i neste trinn.
+Flagget `--skip-setup` hopper over den interaktive oppsettsveiviseren slik at du kan konfigurere modellbackenden manuelt i neste steg.
 
 Last inn skallet ditt på nytt:
 
@@ -404,17 +407,17 @@ Bekreft installasjonen:
 hermes --version
 ```
 
-Kjør en selvdiagnose for å sjekke alle avhengigheter:
+Kjør en selvdiagnostikk for å sjekke alle avhengigheter:
 
 ```bash
 hermes doctor
 ```
 
-> **Tips:** Hvis du ser `command not found` etter installasjonen, legg Hermes til i PATH-en din:
+> **Tips:** Hvis du ser `command not found` etter installasjonen, legg til Hermes i PATH-en din:
 > ```bash
 > export PATH="$HOME/.local/bin:$PATH"
 > ```
-> For å gjøre dette permanent, legg linjen over til i `~/.bashrc` eller `~/.zshrc`.
+> For å gjøre dette permanent, legg til linjen over i din `~/.bashrc` eller `~/.zshrc`.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-version-linux timeout=120 hidden=True -->
@@ -488,20 +491,20 @@ hermes model
 ```
 <!-- @os:end -->
 
-Når du blir bedt om det:
+Når du blir spurt om det:
 
 1. Velg **Custom endpoint (enter URL manually)**
 <!-- @os:linux -->
 2. **API base URL:** `http://127.0.0.1:13305/api/v1`
 <!-- @os:end -->
 <!-- @os:windows -->
-2. **API base URL:** bruk WSL-gateway-IP-en: kjør `ip route show default | awk '{print $3}' | head -1` inne i WSL for å få den, og skriv deretter inn `http://<WSL-Gateway-IP>:13305/api/v1`
+2. **API base URL:** bruk WSL-gateway-IP-en: kjør `ip route show default | awk '{print $3}' | head -1` inne i WSL for å hente den, og oppgi deretter `http://<WSL-Gateway-IP>:13305/api/v1`
 <!-- @os:end -->
 3. **API key:** `lemonade`
 4. **API compatibility mode:** `1` (Auto-detect)
 5. **Select model:** velg `Qwen3.6-35B-A3B-GGUF` fra listen
 6. **Context length in tokens:** `262144`
-7. **Display name:** `local-lemonade` (eller et navn du foretrekker)
+7. **Display name:** `local-lemonade` (eller et hvilket som helst navn du foretrekker)
 
 `hermes model` lagrer både det aktive modellvalget og en navngitt `custom_providers`-oppføring som lagrer kontekstlengden sammen med endepunktet. Resultatet i `~/.hermes/config.yaml` ser slik ut:
 
@@ -676,9 +679,9 @@ finally {
 
 ---
 
-## (Anbefalt) Aktiver Podman-sandkassing
+## (Anbefalt) Aktiver Podman-sandkasse
 
-Hermes Agent kan rute alle agentens skall- og filoperasjoner gjennom en isolert container i stedet for å kjøre dem direkte på verten din. Dette begrenser skadeomfanget av eventuelle utilsiktede handlinger til sandkassen, og lar filsystemet og nettverket på verten din være urørt.
+Hermes Agent kan rute alle agentens shell- og filoperasjoner gjennom en isolert container i stedet for å kjøre dem direkte på verten din. Dette begrenser konsekvensene av enhver utilsiktet handling til sandkassen, og lar filsystemet og nettverket på verten være urørt.
 
 Bygg et lettvekts sandkasse-image:
 
@@ -792,7 +795,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Konfigurer deretter Hermes til å bruke Podman som container-runtime og angi terminal-backend:
+Konfigurer deretter Hermes til å bruke Podman som containerkjøretid og angi terminal-backend:
 
 ```bash
 echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
@@ -805,7 +808,7 @@ EOF
 ```
 
 > `terminal.backend` er fortsatt `docker`.
-> `HERMES_DOCKER_BINARY` er det som forteller Hermes å bruke Podman som runtime i stedet.
+> `HERMES_DOCKER_BINARY` er det som forteller Hermes å bruke Podman som kjøretid i stedet.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -902,22 +905,22 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Hermes vil nå starte en vedvarende sandkasse-container og rute alle `terminal`- og filverktøykall gjennom den. Containeren deler levetid med Hermes-prosessen, gjenbrukes på tvers av alle verktøykall, og blir ødelagt når Hermes avsluttes.
+Hermes vil nå starte en vedvarende sandkasse-container og rute alle `terminal`- og filverktøykall gjennom den. Containeren deler levetiden med Hermes-prosessen, gjenbrukes på tvers av alle verktøykall, og blir ødelagt når Hermes avsluttes.
 
-> **Verifiser at sandkassen fungerer:** Start Hermes (`hermes`) og be den om å `run hostname` - du bør se en kort container-ID i stedet for maskinens vertsnavn. Du kan også be den om å `rm -rf <path-to-a-dummy-file/folder>`: Hermes vil bekrefte slettingen, men mappen vil fortsatt være på verten din. Kommandoen kjørte inne i containerens isolerte `$HOME`, ikke din.
+> **Bekreft at sandkassen fungerer:** Start Hermes (`hermes`) og be den `run hostname` - du bør se en kort container-ID i stedet for maskinens vertsnavn. Du kan også be den om å `rm -rf <path-to-a-dummy-file/folder>`: Hermes vil bekrefte slettingen, men mappen vil fortsatt være på verten din. Kommandoen ble kjørt inne i containerens isolerte `$HOME`, ikke din.
 
-> **Trenger du sterkere isolasjon?** Hermes tilbyr også et offisielt Docker-image (`nousresearch/hermes-agent`) som kjører hele agentprosessen inne i en container - gateway, verktøy og alt. Se [Hermes Docker-dokumentasjonen](https://hermes-agent.nousresearch.com/docs/user-guide/docker) for oppsettdetaljer.
+> **Trenger du sterkere isolasjon?** Hermes tilbyr også et offisielt Docker-image (`nousresearch/hermes-agent`) som kjører hele agentprosessen inne i en container - gateway, verktøy og alt. Se [Hermes Docker-dokumentasjonen](https://hermes-agent.nousresearch.com/docs/user-guide/docker) for oppsettsdetaljer.
 
 ---
 
 <!-- @os:linux -->
 ## (Anbefalt) Hermes-integrasjon med Firecrawl-tjenester
 
-Hermes kan bla gjennom og hente ut innhold fra nettsteder ved hjelp av sine innebygde nettverktøy. Mange moderne nettsteder bruker imidlertid bot-deteksjonssystemer, som blokkerer enkle HTTP-forespørsler og returnerer utfordringssider i stedet for det faktiske innholdet. Som et resultat kan Hermes være ute av stand til å pålitelig hente ut informasjon fra disse nettstedene.
+Hermes kan bla gjennom og hente ut innhold fra nettsteder ved hjelp av sine innebygde nettverktøy. Mange moderne nettsteder bruker imidlertid bot-deteksjonssystemer, som blokkerer enkle HTTP-forespørsler og returnerer utfordringssider i stedet for det faktiske innholdet. Som et resultat kan Hermes være ute av stand til å hente ut informasjon fra disse nettstedene på en pålitelig måte.
 
-For å overkomme denne begrensningen tilbyr [Firecrawl](https://docs.firecrawl.dev/introduction) en selvhostet nettcrawling- og innholdsuthentingstjeneste som kan omgå disse utfordringene og låse opp det fulle potensialet til Hermes-automatisering.
+For å overkomme denne begrensningen tilbyr [Firecrawl](https://docs.firecrawl.dev/introduction) en selvhostet tjeneste for nettcrawling og innholdsuttrekk som kan omgå disse utfordringene og frigjøre det fulle potensialet til Hermes-automatisering.
 
-I dette oppsettet kjører Firecrawl som et sett med Docker-containere administrert med Podman. For å forenkle livssyklusadministrasjonen og automatisk oppstart registrerer vi Firecrawl som en brukernivå `systemd`-tjeneste som orkestrerer den underliggende Podman Compose-stakken. Dette lar Hermes starte, stoppe og verifisere Firecrawl-tjenesten ved hjelp av standard `systemctl --user`-kommandoer i stedet for å samhandle direkte med containere.
+I dette oppsettet kjører Firecrawl som et sett med Docker-containere administrert med Podman. For å forenkle livssyklushåndtering og automatisk oppstart, registrerer vi Firecrawl som en brukernivå `systemd`-tjeneste som orkestrerer den underliggende Podman Compose-stakken. Dette lar Hermes starte, stoppe og verifisere Firecrawl-tjenesten ved hjelp av standard `systemctl --user`-kommandoer i stedet for å interagere direkte med containerne.
 
 For å holde ting enkelt har vi delt opp hele prosessen i fire trinn:
 
@@ -957,13 +960,13 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
-På dette tidspunktet er tjenesten definert, men ikke ennå registrert hos `systemd`.
+På dette tidspunktet er tjenesten definert, men ennå ikke registrert med `systemd`.
 Sørg for at filnavnet stemmer nøyaktig overens med det du opprettet ovenfor, og kjør deretter:
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
 ```
-Hvis det lykkes, bør du se følgende output:
+Hvis det lykkes, bør du se følgende utdata:
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
@@ -971,7 +974,7 @@ Hvis det lykkes, bør du se følgende output:
 
 ### 2. Konfigurer Firecrawl for tjenesten din
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) er ideelt for dem som trenger full kontroll over sine skraping- og databehandlingsmiljøer, men kommer med avveiningen av ekstra vedlikeholds- og konfigurasjonsarbeid.
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) er ideelt for de som trenger full kontroll over sine skraping- og databehandlingsmiljøer, men medfører kostnaden av ekstra vedlikeholds- og konfigurasjonsarbeid.
 
 Start med å klone repositoriet:
 ```bash
@@ -1005,44 +1008,44 @@ BULL_AUTH_KEY=CHANGEME
 # Default: 0.8 (80%)
 # MAX_RAM=0.8
 ```
-> Sett `BULL_AUTH_KEY` til en sterk hemmelighet, spesielt på enhver distribusjon som er tilgjengelig fra usikrede nettverk.
+> Sett `BULL_AUTH_KEY` til en sterk hemmelighet, spesielt for enhver distribusjon som er tilgjengelig fra ikke-klarerte nettverk.
 ### 3. Distribuere Hermes via Compose
 
 Før du går videre, sørg for at du har hentet det nyeste Hermes Docker-bildet:
 ```bash
 podman pull docker.io/nousresearch/hermes-agent:latest
 ```
-Når det er gjort, laster du ned Hermes Compose-filen [hermes-compose.yaml](assets/hermes-compose.yaml) og plasserer den i rotkatalogen `/firecrawl`:
+Når det er gjort, last ned Hermes Compose-filen [hermes-compose.yaml](assets/hermes-compose.yaml) og plasser den i rotmappen `/firecrawl`:
 
 > Denne konvensjonen er nødvendig for at `systemd` skal kunne finne og starte tjenesten riktig, slik det er angitt i `WorkingDirectory=${HOME}/firecrawl`.
 
-> Du kan alltid utvide stakken ved å legge til flere Firecrawl-tjenester etter behov. Den fullstendige listen over tilgjengelige tjenester finner du i den offisielle [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+> Du kan alltid utvide stacken ved å legge til flere Firecrawl-tjenester etter behov. Den fullstendige listen over tilgjengelige tjenester finner du i den offisielle [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
 
 ### 4. Start Hermes-tjenesten gjennom Firecrawl 
 
-Før du overlater kontrollen til `systemd`, bør du validere at alt fungerer riktig ved å kjøre stakken manuelt:
+Før du overlater kontrollen til `systemd`, bør du bekrefte at alt fungerer som det skal ved å kjøre stacken manuelt:
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-Hvis alt er riktig konfigurert, skal du se Hermes-containeren komme opp, og kommandolinjeutskriften din skal ligne på dette:
+Hvis alt er riktig konfigurert, skal du se Hermes-containeren komme opp, og kommandolinjeutskriften din bør se omtrent slik ut:
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
 
-Når det er bekreftet, tar du stakken ned igjen før du fortsetter:
+Når dette er bekreftet, ta stacken ned igjen før du fortsetter:
 ```bash
 podman compose -f hermes-compose.yaml down
 ```
-Nå som alt er validert, starter du tjenesten gjennom `systemd`:
+Nå som alt er bekreftet, start tjenesten gjennom `systemd`:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[Hermes API-et](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) er tilgjengelig fra innsiden av den interaktive containeren, og webdashbordet er tilgjengelig på samme vert og port på http://127.0.0.1:9119.
+[Hermes API-et](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) er tilgjengelig fra innsiden av den interaktive containeren, og Web Dashboard er tilgjengelig på samme vert og port på http://127.0.0.1:9119.
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
 
-For å stoppe tjenesten kjører du:
+For å stoppe tjenesten, kjør:
 ```bash
 systemctl --user stop firecrawl.service
 ```
@@ -1206,17 +1209,17 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-**Gratulerer, du har bygget en fullstendig lokal AI-agentstakk.**
+**Gratulerer, du har bygget en fullstendig lokal AI-agent-stack.**
 
 ### Web Dashboard
 
-Hermes inkluderer et nettleserbasert brukergrensesnitt for å administrere konfigurasjon, API-nøkler, modeller, økter, minne og cron-jobber. Åpne en ny terminal mens gatewayen eller CLI-en kjører, og start det med:
+Hermes inkluderer et nettleserbasert brukergrensesnitt for å administrere konfigurasjon, API-nøkler, modeller, økter, minne og cron-jobber. Åpne en andre terminal mens gatewayen eller CLI-en kjører, og start det med:
 
 ```bash
 hermes dashboard
 ```
 
-Dette starter en lokal server og åpner `http://127.0.0.1:9119` i nettleseren din. Se [dokumentasjonen for dashbordet](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) for den fullstendige funksjonsreferansen.
+Dette starter en lokal server og åpner `http://127.0.0.1:9119` i nettleseren din. Se [dashboard-dokumentasjonen](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) for den fullstendige funksjonsreferansen.
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
@@ -1231,31 +1234,31 @@ Når gatewayen kjører, kan du nå din lokale agent fra hvilken som helst enhet.
 
 ### Discord
 
-Discord krever en server der **du har administratortilgang** for å legge til en bot. Hvis du deler servere, men ikke eier en, bruker du Telegram i stedet.
+Discord krever en server der **du har administratortilgang** for å legge til en bot. Hvis du deler servere, men ikke eier en, bruk Telegram i stedet.
 
 #### Opprett en Discord-applikasjon og bot
 
-1. Gå til [Discord Developer Portal](https://discord.com/developers/applications) og klikk på **New Application**. Gi den et navn (f.eks. «hermes-bot»).
-2. Klikk på **Bot** i sidepanelet. Angi et brukernavn for boten.
+1. Gå til [Discord Developer Portal](https://discord.com/developers/applications) og klikk **New Application**. Gi den et navn (f.eks. «hermes-bot»).
+2. I sidepanelet, klikk **Bot**. Angi et brukernavn for boten.
 3. Fortsatt på Bot-siden, bla ned til **Privileged Gateway Intents** og aktiver:
    - **Message Content Intent** (påkrevd)
    - **Server Members Intent** (anbefalt)
-4. Bla opp igjen og klikk på **Reset Token** for å generere bot-tokenet ditt. Kopier det.
+4. Bla tilbake opp og klikk **Reset Token** for å generere bot-tokenet ditt. Kopier det.
 
-#### Legg boten til på serveren din
+#### Legg til boten på serveren din
 
-1. Klikk på **OAuth2 / URL Generator** i sidepanelet.
-2. Under **Scopes** aktiverer du `bot` og `applications.commands`.
-3. Under **Bot Permissions** aktiverer du: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Kopier den genererte URL-en, lim den inn i nettleseren din, velg serveren din og bekreft.
+1. I sidepanelet, klikk **OAuth2 / URL Generator**.
+2. Under **Scopes**, aktiver `bot` og `applications.commands`.
+3. Under **Bot Permissions**, aktiver: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
+4. Kopier den genererte URL-en, lim den inn i nettleseren din, velg serveren din, og bekreft.
 
 #### Samle inn ID-ene dine og tillat DM-er
 
 Aktiver utviklermodus i Discord (**User Settings / Advanced / Developer Mode**), og deretter:
-- Høyreklikk på serverikonet ditt: **Copy Server ID**
-- Høyreklikk på ditt eget avatarbilde: **Copy User ID**
+- Høyreklikk serverikonet ditt: **Copy Server ID**
+- Høyreklikk din egen avatar: **Copy User ID**
 
-Høyreklikk på serverikonet ditt / **Privacy Settings** / slå på **Direct Messages**. Dette er nødvendig for paringstrinnet.
+Høyreklikk serverikonet ditt / **Privacy Settings** / slå på **Direct Messages**. Dette er nødvendig for paringstrinnet.
 
 #### Konfigurer Hermes for Discord
 
@@ -1273,7 +1276,7 @@ Start deretter gatewayen:
 hermes gateway
 ```
 
-Boten skal komme på nett i Discord i løpet av noen sekunder. Send den en melding, enten en DM eller i en kanal den kan se.
+Boten skal komme på nett i Discord i løpet av noen få sekunder. Send den en melding, enten en DM eller i en kanal den kan se.
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1287,7 +1290,7 @@ Boten skal komme på nett i Discord i løpet av noen sekunder. Send den en meldi
 #### Opprett en Telegram-bot
 
 1. Åpne Telegram og send en melding til **@BotFather**.
-2. Send `/newbot` og følg instruksjonene. Lagre bot-tokenet du får.
+2. Send `/newbot` og følg instruksjonene. Lagre bot-tokenet det gir deg.
 
 #### Konfigurer Hermes for Telegram
 
@@ -1298,7 +1301,7 @@ TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_ALLOWED_USERS=your-telegram-user-id   # comma-separated for multiple users
 ```
 
-> **Vet du ikke din Telegram-bruker-ID?** Send en melding til [@userinfobot](https://t.me/userinfobot) i Telegram, den vil svare med din numeriske ID.
+> **Kjenner du ikke Telegram-bruker-ID-en din?** Send en melding til [@userinfobot](https://t.me/userinfobot) på Telegram, det vil svare med ditt numeriske ID.
 
 Start deretter gatewayen:
 
@@ -1306,16 +1309,16 @@ Start deretter gatewayen:
 hermes gateway
 ```
 
-Send boten din en melding i Telegram for å teste. Du kan nå chatte med agenten din via Telegram-DM. Se [den fullstendige oppsettsguiden for Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) for webhook-modus og avanserte alternativer.
+Send boten din en hvilken som helst melding på Telegram for å teste. Du kan nå chatte med agenten din via Telegram DM. Se [den fullstendige Telegram-oppsettsguiden](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) for webhook-modus og avanserte alternativer.
 
 ---
 
 ## Neste steg
 
-Nå som agenten din kan motta kommandoer fra telefonen din og utføre handlinger på din lokale maskin, er her tre retninger verdt å utforske:
+Nå som agenten din kan motta kommandoer fra telefonen din og handle på den lokale maskinen din, er her tre retninger verdt å utforske:
 
-1. **Automatisert forskningssammendrag**: Planlegg at Hermes skal søke på nettet etter emner du bryr deg om hver morgen, oppsummere funnene med din lokale modell, og sende et sammendrag til telefonen din via Telegram eller Discord, alt kjørende på din egen maskinvare uten skykostnader.
+1. **Automatisert forskningsoppsummering**: Planlegg Hermes til å søke på nettet etter emner du bryr deg om hver morgen, oppsummere funnene med den lokale modellen din, og sende en oppsummering til telefonen din via Telegram eller Discord, alt kjørende på din egen maskinvare uten skykostnader.
 
-2. **Kodegjennomgang på forespørsel**: Pek Hermes mot et GitHub-repositorium, be den om å gjennomgå åpne pull requests, og la den legge inn kommentarer eller et sammendrag tilbake i chatten din. Med Docker-terminalbackenden kjører alle git-operasjoner inne i sandkassen, noe som holder verten din ren.
+2. **Kodegjennomgang på forespørsel**: Pek Hermes mot et GitHub-repositorium, be den gjennomgå åpne pull requests, og la den legge ut kommentarer eller en oppsummering tilbake i chatten din. Med Docker-terminal-backenden kjører alle git-operasjoner inne i sandkassen, som holder verten din ren.
 
-3. **Lokal filassistent**: Gi Hermes tilgang til en arbeidskatalog og be den om å organisere, gi nytt navn til, oppsummere eller transformere filer på forespørsel fra telefonen din. Fordi Docker-terminalbackenden begrenser alle skriveoperasjoner til sandkasse-arbeidsområdet, holdes utilsiktede destruktive operasjoner under kontroll.
+3. **Lokal filassistent**: Gi Hermes tilgang til en arbeidsmappe og be den om å organisere, gi nytt navn til, oppsummere eller transformere filer på forespørsel fra telefonen din. Fordi Docker-terminal-backenden begrenser alle skriveoperasjoner til sandkasse-arbeidsområdet, holdes utilsiktede destruktive operasjoner innenfor kontroll.

@@ -16,7 +16,7 @@ SPDX-License-Identifier: MIT
 
 ## סקירה כללית
 
-Ollama הוא כלי קליל ופופולרי להרצת מודלי שפה גדולים באופן מקומי. הוא מטפל בהורדת מודלים, כימות (quantization) והגשה (serving) מאחורי ממשק שורת פקודה פשוט ואפליקציית שולחן עבודה, כך שתוכלו לעבור מאפס לשיחה עם LLM תוך דקות.
+Ollama הוא כלי קליל ופופולרי להרצת מודלי שפה גדולים באופן מקומי. הוא מטפל בהורדת מודלים, בכימות (quantization) ובהגשה (serving) מאחורי ממשק שורת פקודה פשוט ואפליקציית שולחן עבודה, כך שתוכלו לעבור מאפס לשיחה עם LLM תוך דקות.
 
 מדריך זה ילווה אתכם בהתקנת Ollama, במשיכת מודל GPT-OSS 20B, ובניהול שיחה איתו, הן דרך הטרמינל והן דרך אפליקציית שולחן העבודה.
 
@@ -24,12 +24,14 @@ Ollama הוא כלי קליל ופופולרי להרצת מודלי שפה גד
 
 - כיצד להתקין ולהפעיל את Ollama במערכת שלכם
 - למשוך ולהריץ את מודל GPT-OSS 20B באופן מקומי
-- לנהל שיחה עם מודלים באמצעות ה-CLI
-- לשאול מודלים בצורה תכנותית דרך REST API
+- לשוחח עם מודלים באמצעות ה-CLI
+- לשאול מודלים באופן פרוגרמטי דרך ה-REST API
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## הגדרת תצורת הזיכרון
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## בדיקת עדכוני תוכנה
@@ -38,7 +40,7 @@ Ollama הוא כלי קליל ופופולרי להרצת מודלי שפה גד
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות תוכנה מוקדמות
+## התקנת דרישות תוכנה מקדימות
 
 <!-- @require:driver -->
 
@@ -46,9 +48,9 @@ Ollama הוא כלי קליל ופופולרי להרצת מודלי שפה גד
 
 <!-- @os:windows -->
 
-1. הורידו את קובץ ההתקנה מהכתובת [ollama.com/download](https://ollama.com/download).
-2. הריצו את קובץ ה-`.exe` ועקבו אחר ההנחיות.
-3. לאחר ההתקנה, Ollama רץ כשירות רקע וניתן לגשת אליו מהטרמינל, מאפליקציית שולחן העבודה ומסרגל המשימות במערכת.
+1. הורידו את קובץ ההתקנה מ-[ollama.com/download](https://ollama.com/download).
+2. הריצו את קובץ ההתקנה מסוג `.exe` ופעלו לפי ההנחיות.
+3. לאחר ההתקנה, Ollama פועל כשירות רקע ונגיש מהטרמינל, מאפליקציית שולחן העבודה, ומאזור המגש של המערכת.
 
 ודאו את ההתקנה על ידי פתיחת טרמינל והרצת:
 
@@ -62,7 +64,7 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-אמורה להופיע גרסת ההתקנה המודפסת למסוף.
+אמורים להופיע מספר הגרסה המותקנת על המסך.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -85,7 +87,7 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-אמורה להופיע גרסת ההתקנה המודפסת למסוף.
+אמורים להופיע מספר הגרסה המותקנת על המסך.
 <!-- @os:end -->
 
 ## משיכת המודל הראשון שלכם
@@ -96,24 +98,53 @@ Ollama מנהל מודלים דרך רישום (registry) בדומה לתמונ�
 ollama pull gpt-oss:20b
 ```
 
-פעולה זו מורידה את משקלי המודל למחשב המקומי שלכם (כ-12GB). ההורדה מתבצעת רק פעם אחת, והרצות עוקבות טוענות את המודל מהדיסק.
+פעולה זו מורידה את משקלי המודל למחשב המקומי שלכם (כ-12 ג'יגה-בייט). ההורדה מתבצעת פעם אחת בלבד, וההרצות הבאות טוענות את המודל מהדיסק.
 
-תוכלו לאמת שהמודל זמין באמצעות:
+ניתן לוודא שהמודל זמין באמצעות:
 
 ```bash
 ollama list
 ```
 
-אמורים לראות `gpt-oss:20b` בפלט יחד עם גודלו ותאריך העדכון האחרון שלו.
+אמור להופיע `gpt-oss:20b` בפלט יחד עם גודלו ותאריך העדכון האחרון.
 
 <!-- @os:windows -->
-<!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
+<!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=180 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
-$list = (ollama list | Out-String)
-if (-not $list) { throw "ollama list returned no output" }
-if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
-Write-Host "OK: gpt-oss:20b is present in ollama list"
+$p = $null
+$startedHere = $false
+
+function Wait-OllamaApi {
+  param( [int]$MaxAttempts = 120 )
+  for ($i = 0; $i -lt $MaxAttempts; $i++) {
+    $resp = curl.exe -s --max-time 2 http://127.0.0.1:11434/api/tags
+    if ($LASTEXITCODE -eq 0 -and $resp) { return $resp }
+    Start-Sleep -Seconds 1
+  }
+  return $null
+}
+
+try {
+  # Start the Ollama server if the API is not already up.
+  $tagsJson = Wait-OllamaApi -MaxAttempts 5
+  if (-not $tagsJson) {
+    $p = Start-Process -FilePath "ollama" -ArgumentList "serve" -NoNewWindow -PassThru
+    $startedHere = $true
+    $tagsJson = Wait-OllamaApi -MaxAttempts 120
+  }
+  if (-not $tagsJson) { throw "Ollama API not ready on http://127.0.0.1:11434" }
+
+  $list = (ollama list | Out-String)
+  if (-not $list) { throw "ollama list returned no output" }
+  if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
+  Write-Host "OK: gpt-oss:20b is present in ollama list"
+}
+finally {
+  if ($startedHere -and $p -and -not $p.HasExited) {
+    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+  }
+}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -175,18 +206,18 @@ echo "OK: gpt-oss:20b is present in ollama list"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### שמות מודלים
+### מתן שמות למודלים
 
-שמות המודלים ב-Ollama עוקבים אחר הפורמט `name:tag`. התג בדרך כלל מציין את מספר הפרמטרים או את גרסת הכימות. כמה פקודות שימושיות לניהול מודלים:
+שמות המודלים ב-Ollama עוקבים אחר הפורמט `name:tag`. התג בדרך כלל מציין את כמות הפרמטרים או את גרסת הכימות (quantization). כמה פקודות שימושיות לניהול מודלים:
 
 | פקודה | תיאור |
 |---------|-------------|
 | `ollama list` | הצגת כל המודלים שהורדו |
 | `ollama pull <model>` | הורדת מודל מבלי להריץ אותו |
-| `ollama rm <model>` | הסרת מודל לפינוי מקום בדיסק |
-| `ollama show <model>` | הצגת מטא-נתונים ופרמטרים של המודל |
+| `ollama rm <model>` | הסרת מודל כדי לפנות שטח דיסק |
+| `ollama show <model>` | הצגת נתוני מטא ופרמטרים של המודל |
 
-## ניהול שיחה מהטרמינל
+## שיחה מהטרמינל
 
 הפעילו הפעלת שיחה אינטראקטיבית ישירות משורת הפקודה:
 
@@ -194,39 +225,39 @@ echo "OK: gpt-oss:20b is present in ollama list"
 ollama run gpt-oss:20b
 ```
 
-Ollama טוען את המודל לזיכרון ומעביר אתכם לתצוגת שורת פקודה. נסו לשאול אותו משהו:
+Ollama טוען את המודל לזיכרון ומעביר אתכם לשורת הזנה. נסו לשאול אותו משהו:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-המודל מזרים את התשובה שלו טוקן-אחר-טוקן ישירות בטרמינל. הקלידו `/bye` או לחצו `Ctrl+D` כדי לצאת מההפעלה.
+המודל משדר את תשובתו טוקן-אחר-טוקן ישירות בטרמינל. הקלידו `/bye` או הקישו `Ctrl+D` כדי לצאת מהפעלת השיחה.
 
-> **טיפ**: הריצה הראשונה לוקחת כמה שניות לטעינת המודל לזיכרון. הנחיות (prompts) נוספות באותה הפעלה יגיבו הרבה יותר מהר מכיוון שהמודל נשאר טעון.
+> **טיפ**: ההרצה הראשונה אורכת מספר שניות לטעינת המודל לזיכרון. שאלות נוספות באותה הפעלה יקבלו מענה מהיר בהרבה מכיוון שהמודל נשאר טעון.
 
 <!-- @os:windows -->
-## ניהול שיחה מאפליקציית שולחן העבודה
+## שיחה מאפליקציית שולחן העבודה
 
-Ollama מגיע גם עם אפליקציית שולחן עבודה המספקת ממשק צ'אט נקי לאינטראקציה עם המודלים שלכם.
+Ollama מגיע גם עם אפליקציית שולחן עבודה המספקת ממשק שיחה נקי לאינטראקציה עם המודלים שלכם.
 
-פתחו את **Ollama** מתפריט ההתחלה או לחצו על סמל Ollama בסרגל המשימות במערכת ובחרו **Open Ollama**.
+פתחו את **Ollama** מתפריט ה-Start או לחצו על סמל Ollama במגש המערכת ובחרו **Open Ollama**.
 
 לאחר פתיחת האפליקציה:
 
 1. לחצו על **New Chat** בסרגל הצד.
-2. בחרו את **gpt-oss:20b** מתפריט המודלים הנפתח בפינה הימנית-תחתונה של אזור קלט הצ'אט.
-3. הקלידו הודעה ולחצו Enter כדי להתחיל בשיחה.
+2. בחרו **gpt-oss:20b** מתפריט המודלים הנפתח בפינה הימנית התחתונה של אזור הזנת השיחה.
+3. הקלידו הודעה והקישו Enter כדי להתחיל לשוחח.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-אפליקציית שולחן העבודה שומרת היסטוריה של השיחות שלכם בסרגל הצד, מה שמקל על חזרה לשיחות קודמות.
+אפליקציית שולחן העבודה שומרת היסטוריית שיחות בסרגל הצד, מה שמקל על חזרה לשיחות קודמות.
 <!-- @os:end -->
 
 ## שימוש ב-REST API
 
-לאחר ההתקנה, Ollama רץ כשירות רקע וחושף REST API בכתובת `http://localhost:11434` שניתן להשתמש בו כדי לשלב מודלים באפליקציות ובסקריפטים שלכם.
+לאחר ההתקנה, Ollama פועל כשירות רקע וחושף REST API בכתובת `http://localhost:11434` שניתן להשתמש בו כדי לשלב מודלים באפליקציות ובסקריפטים משלכם.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -556,7 +587,7 @@ curl.exe http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "promp
 
 
 ### דוגמת Python
-כעת, כשאנו יכולים לפנות ל-API של Ollama בצורה תכנותית, בואו נקרא לו מ-Python.
+כעת, לאחר שאנחנו יכולים לגשת ל-API של Ollama באופן פרוגרמטי, בואו נקרא לו מ-Python.
 
 #### יצירת סביבה וירטואלית בטרמינל
 
@@ -577,7 +608,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### יצירת קובץ Python
-באותה ספרייה, השתמשו ב-VS Code או בעורך אחר כדי ליצור קובץ .py והעתיקו לתוכו את הקוד הבא. לאחר מכן, הריצו את הקובץ בסביבה המופעלת שלכם באמצעות `python your_file_name.py`
+באותה תיקייה, השתמשו ב-VS Code או בעורך אחר כדי ליצור קובץ .py והעתיקו לתוכו את הקוד הבא. לאחר מכן, הריצו את הקובץ בסביבה המופעלת שלכם באמצעות `python your_file_name.py`
 
 ```python
 import requests
@@ -598,18 +629,19 @@ print(response.json()["response"])
 
 | נקודת קצה | שיטה | מטרה |
 |----------|--------|---------|
-| `/api/generate` | POST | יצירת טקסט חד-פעמית |
-| `/api/chat` | POST | שיחה רב-שלבית עם היסטוריית הודעות |
-| `/api/tags` | GET | הצגת רשימת מודלים זמינים |
-| `/api/show` | POST | הצגת פרטי מודל |
-| `/api/pull` | POST | משיכת מודל מהרישום (registry) |
+| `/api/generate` | POST | יצירת טקסט בפנייה בודדת |
+| `/api/chat` | POST | שיחה רב-תורית עם היסטוריית הודעות |
+| `/api/tags` | GET | רשימת המודלים הזמינים |
+| `/api/show` | POST | הצגת פרטי המודל |
+| `/api/pull` | POST | משיכת מודל מהרישום |
 
 לעיון מלא ב-API, ראו את [תיעוד ה-API של Ollama](https://github.com/ollama/ollama/blob/main/docs/api.md).
+
 ## הצעדים הבאים
 
-- **נסו מודלים שונים**: עיינו ב[ספריית המודלים של Ollama](https://ollama.com/library) כדי לגלות מאות מודלים זמינים, החל מעוזרי קידוד קטנים ועד מודלי חשיבה גדולים.
+- **נסו מודלים שונים**: עיינו ב-[ספריית המודלים של Ollama](https://ollama.com/library) כדי לחקור מאות מודלים זמינים, החל מעוזרי קידוד קטנים ועד מודלי היגיון גדולים.
 - **צרו מודלים מותאמים אישית**: השתמשו ב-[Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) כדי להגדיר הנחיות מערכת מותאמות אישית, טמפרטורה ופרמטרים נוספים לחוויה מותאמת.
-- **פתחו באמצעות ה-API**: השתמשו בספריות הלקוח של [Python](https://github.com/ollama/ollama-python) או [JavaScript](https://github.com/ollama/ollama-js) כדי לשלב את Ollama ביישומים שלכם.
-- **התחברו לממשקי חזית**: שלבו את Ollama עם כלים כמו [Open WebUI](https://github.com/open-webui/open-webui) לקבלת ממשק צ'אט עשיר בתכונות עם חיפוש, פרסונות והעלאת מסמכים.
+- **פתחו עם ה-API**: השתמשו בספריות הלקוח [Python](https://github.com/ollama/ollama-python) או [JavaScript](https://github.com/ollama/ollama-js) כדי לשלב את Ollama באפליקציות שלכם.
+- **התחברו לממשקי משתמש**: שלבו את Ollama עם כלים כמו [Open WebUI](https://github.com/open-webui/open-webui) לקבלת ממשק שיחה עשיר בתכונות עם חיפוש, פרסונות והעלאת מסמכים.
 
 למידע נוסף, עיינו ב[תיעוד של Ollama](https://github.com/ollama/ollama/blob/main/README.md).

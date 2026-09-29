@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server-4-node",
+  "title": "Zoskupovanie štyroch AI Halos Ryzen™ pomocou RPC",
+  "description": "Nastavenie distribuovanej inferencie pomocou servera RPC naprieč štyrmi zariadeniami Ryzen™ AI Halo s llama.cpp na spúšťanie modelov s viac ako 1T parametrami",
+  "auto_translated": true
+}

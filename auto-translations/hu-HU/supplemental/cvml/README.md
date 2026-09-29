@@ -16,17 +16,17 @@ SPDX-License-Identifier: MIT
 
 ## Áttekintés
 
-A [Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) egy AMD C++ számítógépes látás és gépi tanulási eszközkészlet, amely nagy teljesítményű, eszközön futó észlelési képességeket biztosít — beleértve a mélységbecslést, arcfelismerést és archáló-követést. A Ryzen AI illesztőprogramokra épülve a könyvtár automatikusan kiválasztja a következtetéshez rendelkezésre álló legjobb hardvert (GPU vagy NPU), így AI-funkciókat adhatsz C++ alkalmazásaidhoz anélkül, hogy modellbetanítással vagy keretrendszer-integrációval kellene foglalkoznod. Minden feldolgozás helyben, a rendszereden történik, így ideális választás adatvédelem szempontjából érzékeny, alacsony késleltetést igénylő alkalmazásokhoz.
+A [Ryzen AI CVML Library](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) egy AMD C++ számítógépes látás és gépi tanulás eszközkészlet, amely nagy teljesítményű, eszközön futó észlelési képességeket biztosít — beleértve a mélységbecslést, arcfelismerést és archálós követést. A Ryzen AI illesztőprogramokra épülve a könyvtár automatikusan kiválasztja a legjobb elérhető hardvert (GPU vagy NPU) a következtetéshez, lehetővé téve, hogy AI funkciókat adjon C++ alkalmazásaihoz anélkül, hogy a modellbetanítással vagy a keretrendszer-integrációval kellene foglalkoznia. Minden feldolgozás helyben, a rendszerén történik, így ideális választás az adatvédelem-érzékeny, alacsony késleltetést igénylő alkalmazásokhoz.
 
-Ez a playbook megtanítja, hogyan állítsd be a Ryzen AI CVML Library-t, hogyan fordítsd le a mellékelt mintaalkalmazásokat, és hogyan futtass arcfelismerést egy mintaképen.
+Ez a útmutató megtanítja Önt a Ryzen AI CVML Library beállítására, a mellékelt mintaalkalmazások lefordítására, és arcfelismerés futtatására egy mintaképen.
 
-## Amit tanulni fogsz
+## Amit meg fog tanulni
 
-- Hogyan telepítsd az előfeltételeket, és hogyan állítsd be a Ryzen AI CVML Library-t a rendszereden
+- Hogyan telepítse az előfeltételeket, és állítsa be a Ryzen AI CVML Library-t a rendszerén
 - Hogyan működik a CVML C++ API: kontextusok, funkcióobjektumok és képpufferek
-- Hogyan fordítsd le és futtasd a mellékelt mintaalkalmazásokat CMake és OpenCV segítségével
-- Hogyan futtass arcfelismerést egy képen, körülhatároló dobozokkal és jellemzőpontokkal
-- Hogyan integráld a CVML funkciókat saját C++ alkalmazásaidba
+- Hogyan fordítsa le és futtassa a mellékelt mintaalkalmazásokat CMake és OpenCV használatával
+- Hogyan futtasson arcfelismerést egy képen, határolókeretekkel és jellemzőpontokkal
+- Hogyan integrálja a CVML funkciókat saját C++ alkalmazásaiba
 
 <!-- @device:halo_box -->
 ## Szoftverfrissítések ellenőrzése
@@ -39,18 +39,18 @@ Ez a playbook megtanítja, hogyan állítsd be a Ryzen AI CVML Library-t, hogyan
 
 ## További függőségek
 
-Mielőtt elkezdenéd, győződj meg róla, hogy rendelkezésedre áll a következő:
+Mielőtt elkezdené, győződjön meg arról, hogy rendelkezik a következőkkel:
 
 <!-- @os:windows -->
-- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — töltsd le az `opencv-4.11.0-windows.exe` fájlt, futtasd, és csomagold ki egy helyi mappába (pl. `C:\opencv`)
-- [CMake](https://cmake.org/download/) — töltsd le a Windows x86-64 MSI telepítőt, és a telepítés során válaszd az **"Add CMake to the system PATH for all users"** opciót
-- [Ryzen AI NPU illesztőprogram](https://ryzenai.docs.amd.com/en/latest/inst.html) — telepítsd a legújabb elérhető verziót
-- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) a "Desktop development with C++" munkaterhelés-csomaggal (tartalmazza az MSVC fordítót, a Windows SDK-t és a C++ build eszközöket)
+- [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — töltse le az `opencv-4.11.0-windows.exe` fájlt, futtassa, és csomagolja ki egy helyi mappába (pl. `C:\opencv`)
+- [CMake](https://cmake.org/download/) — töltse le a Windows x86-64 MSI telepítőt, és a telepítés során válassza az **"Add CMake to the system PATH for all users"** opciót
+- [Ryzen AI NPU illesztőprogram](https://ryzenai.docs.amd.com/en/latest/inst.html) — telepítse a legújabb elérhető verziót
+- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) a "Desktop development with C++" munkaterhelés kiválasztásával (tartalmazza az MSVC fordítót, a Windows SDK-t és a C++ build eszközöket)
 <!-- @os:end -->
 
 <!-- @os:linux -->
-- OpenCV 4.11 — forrásból kell lefordítani (az Ubuntu 22.04 és 24.04 apt csomagjai nem tartalmazzák a 4.11-es verziót). Lásd az alábbi [OpenCV fordítása forrásból](#building-opencv-from-source) szakaszt.
-- CMake — telepítsd apt segítségével:
+- OpenCV 4.11 — forrásból kell lefordítani (az apt csomagok Ubuntu 22.04 és 24.04 rendszereken nem tartalmazzák a 4.11-es verziót). Lásd az alábbi [OpenCV fordítása forrásból](#building-opencv-from-source) szakaszt.
+- CMake — telepítse apt segítségével:
   ```bash
   sudo apt install cmake
   ```
@@ -157,13 +157,13 @@ fi
 
 ## A CVML Library beállítása
 
-Hozz létre egy AMD fiókot az [account.amd.com](https://account.amd.com) oldalon, ha még nincs, majd jelentkezz be, hogy letöltsd a Ryzen AI CVML Library-t az alábbi portál linkről:
+Hozzon létre egy AMD fiókot az [account.amd.com](https://account.amd.com) oldalon, ha még nincs, majd jelentkezzen be, hogy letöltse a Ryzen AI CVML Library-t az alábbi portál hivatkozásról:
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
 ```
 
-A letöltés után csomagold ki a csomagot egy helyi könyvtárba (pl. `C:\RyzenAI-Library` Windows alatt vagy `~/RyzenAI-Library` Linux alatt), és állítsd be az `AMD_CVML_SDK_ROOT` környezeti változót a kicsomagolt helyre:
+A letöltés után csomagolja ki a csomagot egy helyi könyvtárba (pl. `C:\RyzenAI-Library` Windows rendszeren vagy `~/RyzenAI-Library` Linux rendszeren), majd állítsa be az `AMD_CVML_SDK_ROOT` környezeti változót a kicsomagolt helyre:
 
 <!-- @os:windows -->
 ```cmd
@@ -181,10 +181,10 @@ A könyvtárcsomag a következő struktúrát tartalmazza:
 
 | Mappa | Tartalom |
 |--------|----------|
-| `cmake/` | Csomagolási információk a CMake `find_package` függvényéhez |
-| `include/` | C++ fejlécfájlok (`cvml-depth-estimation.h`, `cvml-face-detector.h`, `cvml-face-mesh.h` stb.) |
-| `windows/` | Windows bináris fájlok (fordítási idejű `.LIB` és futásidejű `.DLL`/`.GRAPHLIB`/`.AMODEL` fájlok) |
-| `linux/` | Linux bináris fájlok (fordítási és futásidejű `.SO` fájlok) |
+| `cmake/` | Csomagolási információ a CMake `find_package` funkciójához |
+| `include/` | C++ header fájlok (`cvml-depth-estimation.h`, `cvml-face-detector.h`, `cvml-face-mesh.h`, stb.) |
+| `windows/` | Bináris fájlok Windows rendszerhez (fordítási időben szükséges `.LIB` és futásidejű `.DLL`/`.GRAPHLIB`/`.AMODEL` fájlok) |
+| `linux/` | Bináris fájlok Linux rendszerhez (fordítási és futásidejű `.SO` fájlok) |
 | `samples/` | Egyedi mintaalkalmazások forráskóddal |
 
 <!-- @os:linux -->
@@ -193,13 +193,13 @@ A könyvtárcsomag a következő struktúrát tartalmazza:
 
 #### OpenCV fordítása forrásból
 
-Telepítsd az OpenCV build-függőségeit:
+Telepítse az OpenCV fordítási függőségeit:
 
 ```bash
 sudo apt install unzip wget ubuntu-restricted-extras libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev libgtk-3-dev pkg-config ffmpeg
 ```
 
-Töltsd le, konfiguráld és fordítsd le az OpenCV 4.11.0-t a contrib modulokkal együtt (hivatkozás: [OpenCV Linux telepítési útmutató](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
+Töltse le, konfigurálja és fordítsa le az OpenCV 4.11.0-t a contrib modulokkal (referencia: [OpenCV Linux telepítési útmutató](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
 
 ```bash
 wget -O opencv-4.11.0.zip https://github.com/opencv/opencv/archive/4.11.0.zip
@@ -218,11 +218,11 @@ cmake -DBUILD_opencv_world=ON \
 cmake --build . --target install
 ```
 
-A megosztott könyvtárak a `<build>/install/lib/` alatt kerülnek telepítésre. Használd az `install` könyvtárat `OPENCV_INSTALL_ROOT`-ként a további lépésekben.
+A megosztott könyvtárak a `<build>/install/lib/` alá kerülnek telepítésre. A későbbi lépésekben az `install` könyvtárat használja `OPENCV_INSTALL_ROOT` néven.
 
 #### Vulkan SDK
 
-Telepítsd a Vulkan SDK-t:
+Telepítse a Vulkan SDK-t:
 
 ```bash
 UBUNTU_CODENAME=$(. /etc/os-release; echo "$UBUNTU_CODENAME")
@@ -232,7 +232,7 @@ sudo apt update
 sudo apt install vulkan-sdk
 ```
 
-Ha Ubuntu 22.04-et használsz, frissítsd a MESA Vulkan illesztőprogramokat is:
+Ha Ubuntu 22.04 rendszert használ, frissítse a MESA Vulkan illesztőprogramokat is:
 
 ```bash
 sudo apt update && sudo apt upgrade
@@ -243,7 +243,7 @@ sudo apt upgrade
 
 #### További Ubuntu 24.04 függőségek
 
-Ha Ubuntu 24.04-et használsz, telepítsd a további szükséges csomagokat:
+Ha Ubuntu 24.04 rendszert használ, telepítse a további szükséges csomagokat:
 
 ```bash
 sudo apt install libavcodec-dev libavformat-dev libswscale-dev libnsl2 gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly -y
@@ -271,14 +271,14 @@ done
 
 ## Alapfogalmak
 
-A CVML Library egy egyszerű C++ API-t biztosít, amelyben minden észlelési funkciónak (mélységbecslés, arcfelismerés, archáló) saját fejlécfájlja és funkcióobjektuma van. Nem nyers modellekkel dolgozol — a könyvtár automatikusan kezeli a modellbetöltést, előfeldolgozást és következtetést.
+A CVML Library egy egyszerű C++ API-t biztosít, amelyben minden érzékelési funkciónak (mélységbecslés, arcfelismerés, archáló) saját header fájlja és funkcióobjektuma van. Nem közvetlenül nyers modellekkel dolgozik — a könyvtár automatikusan kezeli a modellbetöltést, az előfeldolgozást és a következtetést.
 
 ### Elérhető funkciók
 
-| Funkció | Fejlécfájl | Leírás |
+| Funkció | Header fájl | Leírás |
 |---------|------------|-------------|
 | **Mélységbecslés** | `cvml-depth-estimation.h` | Pixelenkénti mélységtérképeket generál RGB képekből |
-| **Arcfelismerés** | `cvml-face-detector.h` | Arcokat detektál körülhatároló dobozokkal, jellemzőpontokkal (szemek, orr, száj) és megbízhatósági pontszámokkal |
+| **Arcfelismerés** | `cvml-face-detector.h` | Arcokat észlel határolókeretekkel, jellemzőpontokkal (szem, orr, száj) és megbízhatósági pontszámokkal |
 | **Archáló** | `cvml-face-mesh.h` | Részletes arcgeometriát követ sűrű hálópontokkal |
 
 ### Programozási modell
@@ -286,9 +286,9 @@ A CVML Library egy egyszerű C++ API-t biztosít, amelyben minden észlelési fu
 Minden CVML alkalmazás ugyanazt a négylépéses mintát követi:
 
 1. **Kontextus létrehozása** — Az `amd::cvml::Context` kezeli a megosztott erőforrásokat, például a naplózást és a következtetési háttérrendszer kiválasztását.
-2. **Funkcióobjektum létrehozása** — Példányosítsd a kívánt funkciót (pl. `amd::cvml::DepthEstimation`) a kontextushoz kapcsolva.
-3. **Bemeneti adatok becsomagolása** — Használd az `amd::cvml::Image`-et az RGB képpuffer becsomagolásához, adatmásolás nélkül.
-4. **Végrehajtás** — Hívd meg a funkció feldolgozó metódusát, és olvasd ki az eredményeket.
+2. **Funkcióobjektum létrehozása** — Példányosítsa a kívánt funkciót (pl. `amd::cvml::DepthEstimation`) a kontextushoz kapcsolva.
+3. **Bemeneti adatok becsomagolása** — Használja az `amd::cvml::Image` osztályt az RGB képpuffer becsomagolására, adatmásolás nélkül.
+4. **Végrehajtás** — Hívja meg a funkció feldolgozó metódusát, és olvassa be az eredményeket.
 
 ```cpp
 // Step 1: Create context
@@ -312,24 +312,24 @@ depth_estimation.GenerateDepthMap(input, &output);
 context->Release();
 ```
 
-### Következtetési háttérrendszer
+### Következtetési háttérrendszer (Inference Backend)
 
-A könyvtár automatikusan kiválasztja az egyes műveletekhez a legjobb hardvert (GPU vagy NPU). A háttérrendszert explicit módon is beállíthatja:
+A könyvtár automatikusan kiválasztja az adott művelethez legmegfelelőbb hardvert (GPU vagy NPU). A háttérrendszert explicit módon is beállíthatja:
 
 ```cpp
 // Let the library choose the best hardware (default)
 context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 ```
 
-> **Megjegyzés:** Előfordulhat, hogy az NPU-műveletekhez ONNX háttérrendszert használó funkciók az első futtatáskor hosszabb indítási késleltetést tapasztalnak. A további futtatások gyorsabbak lesznek.
+> **Megjegyzés:** Az NPU-műveletekhez ONNX háttérrendszert használó funkciók az első futtatáskor hosszabb indítási késleltetést tapasztalhatnak. A későbbi futtatások gyorsabbak lesznek.
 
-> **Megjegyzés:** Ha az NPU-illesztőprogram nincs telepítve a célrendszeren, a Ryzen AI CVML könyvtár automatikusan visszavált a GPU háttérrendszerre a következtetési műveletekhez.
+> **Megjegyzés:** Ha az NPU illesztőprogram nincs telepítve a célrendszeren, a Ryzen AI CVML könyvtár automatikusan visszavált a GPU háttérrendszerre a következtetési műveletekhez.
 
 ## A mintaalkalmazások összeállítása
 
-A CVML Library minden funkcióhoz tartalmaz azonnal összeállítható mintaalkalmazásokat. Állítsuk össze ezeket egyszerre.
+A CVML Library minden funkcióhoz tartalmaz azonnal összeállítható mintaalkalmazásokat. Állítsuk össze mindegyiket egyszerre.
 
-1. Állítsa be az `OPENCV_INSTALL_ROOT` környezeti változót úgy, hogy az OpenCV-telepítésére mutasson:
+1. Állítsa be az `OPENCV_INSTALL_ROOT` környezeti változót, hogy az az OpenCV-telepítésére mutasson:
 
    <!-- @os:windows -->
    ```cmd
@@ -348,7 +348,7 @@ A CVML Library minden funkcióhoz tartalmaz azonnal összeállítható mintaalka
    ```
    <!-- @os:end -->
 
-2. Állítsa össze a mintákat a CMake segítségével:
+2. Állítsa össze a mintaalkalmazásokat CMake segítségével:
 
    <!-- @os:windows -->
    ```cmd
@@ -370,7 +370,7 @@ A CVML Library minden funkcióhoz tartalmaz azonnal összeállítható mintaalka
    ```
    <!-- @os:end -->
 
-   A sikeres összeállítás után a futtatható fájlok itt találhatók:
+   A sikeres összeállítás után a futtatható fájlok a következő helyen találhatók:
 
    <!-- @os:windows -->
    ```
@@ -388,7 +388,7 @@ A CVML Library minden funkcióhoz tartalmaz azonnal összeállítható mintaalka
    ```
    <!-- @os:end -->
 
-3. Bármely minta futtatása előtt győződjön meg arról, hogy a CVML futásidejű fájlok elérhetők:
+3. Mielőtt bármelyik mintaalkalmazást futtatná, győződjön meg róla, hogy a CVML futásidejű fájlok elérhetők:
 
    <!-- @os:windows -->
    ```cmd
@@ -411,7 +411,7 @@ A CVML Library minden funkcióhoz tartalmaz azonnal összeállítható mintaalka
 
 ## Arcfelismerés futtatása
 
-Az arcfelismerési minta arcokat érzékel egy képen, videóban vagy élő kamerás forrásban. Minden érzékelt archoz kirajzol egy határolókeretet, egy megbízhatósági pontszámot, valamint öt arc-jellemzőpontot (két szem, orr és a száj két sarka).
+Az arcfelismerési mintaalkalmazás arcokat érzékel egy képen, videón vagy élő kamerafolyamban. Minden érzékelt arc esetében megjelenít egy határolókeretet, egy megbízhatósági pontszámot, valamint öt arcjellemzőt (két szem, orr és két szájszél).
 
 Először navigáljon az arcfelismerés futtatható fájljának mappájába:
 
@@ -427,13 +427,13 @@ cd build/cvml-sample-face-detection
 ```
 <!-- @os:end -->
 
-Ezután töltsön le egy mintaképet bemenetként (fotó: [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), szabadon felhasználható a Pexels-en keresztül):
+Ezután töltsön le egy mintaképet bemenetként (fotó: [Jopwell](https://www.pexels.com/photo/man-in-gray-crew-neck-shirt-smiling-on-focus-photo-895863/), szabadon felhasználható a Pexels jóvoltából):
 
 ```bash
 curl -L -o sample_face.jpg "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
 ```
 
-**Arcfelismerés futtatása a mintaképen:**
+**Az arcfelismerés futtatása a mintaképen:**
 
 <!-- @os:windows -->
 ```cmd
@@ -447,13 +447,13 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-Megjelenik egy ablak, amely a képet mutatja az érzékelt arcok körüli határolókeretekkel, megbízhatósági pontszámokkal és arc-jellemzőpontokkal (szemek, orr, száj sarkai).
+Megjelenik egy ablak, amely mutatja a képet az érzékelt arcok körüli határolókeretekkel, megbízhatósági pontszámokkal és arcjellemző pontokkal (szemek, orr, szájszélek).
 
 <p align="center">
   <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
 </p>
 
-**Az annotált kimenet mentése fájlba:**
+**A megjegyzésekkel ellátott kimenet mentése fájlba:**
 
 <!-- @os:windows -->
 ```cmd
@@ -467,7 +467,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg -o output_face.jpg
 ```
 <!-- @os:end -->
 
-**A precíz modell használata** nagyobb pontosság érdekében (a sebesség rovására):
+**A precíz modell használata** nagyobb pontossághoz (a sebesség rovására):
 
 <!-- @os:windows -->
 ```cmd
@@ -483,10 +483,10 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 
 Az arcfelismerési funkció két modellváltozatot kínál:
 
-| Modell | Sebesség | Pontosság | Legalkalmasabb |
+| Modell | Sebesség | Pontosság | Legjobb felhasználási terület |
 |-------|-------|----------|----------|
-| `fast` (alapértelmezett) | Magasabb képkockasebesség | Jó | Valós idejű kamerás alkalmazások |
-| `precise` | Alacsonyabb képkockasebesség | Legjobb | Fényképelemzés, nagy pontosságot igénylő igények |
+| `fast` (alapértelmezett) | Magasabb FPS | Jó | Valós idejű kameraalkalmazások |
+| `precise` | Alacsonyabb FPS | Legjobb | Fotóelemzés, magas pontosságot igénylő esetek |
 
 
 <!-- @os:windows -->
@@ -494,92 +494,117 @@ Az arcfelismerési funkció két modellváltozatot kínál:
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$env:AMD_CVML_SDK_ROOT = "C:\RyzenAI-Library"
-$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv\build"
+# Build and run the samples inside a passwordless S4U scheduled task.
 
-if (-not (Test-Path $env:AMD_CVML_SDK_ROOT)) {throw "AMD_CVML_SDK_ROOT does not exist: $env:AMD_CVML_SDK_ROOT"}
-if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
+$ci = Join-Path $env:USERPROFILE "cvml-ci"
+if (Test-Path $ci) {Remove-Item -Recurse -Force $ci}
+New-Item -ItemType Directory -Force -Path $ci | Out-Null
+$innerPs = Join-Path $ci "run_cvml.ps1"
+$log = Join-Path $ci "cvml.log"
 
-$work = Join-Path (Get-Location) "cvml-test"
-if (Test-Path $work) {Remove-Item -Recurse -Force $work}
-New-Item -ItemType Directory -Force -Path $work | Out-Null
-Copy-Item -Recurse -Force -Path (Join-Path $env:AMD_CVML_SDK_ROOT "*") -Destination $work
-
-$samplesDir = Join-Path $work "samples"
-$buildDir = Join-Path $samplesDir "build"
-
-Push-Location $samplesDir
-
+# Inner script (single-quoted here-string: not expanded here). It builds the
+# samples and runs them (face detection twice, depth, and mesh), exiting
+# non-zero on any failure. Its combined stdout+stderr is redirected to cvml.log
+# by the task action below.
+$inner = @'
+$ErrorActionPreference = "Stop"
+$ci = $PSScriptRoot
+$code = 0
 try {
+  $env:AMD_CVML_SDK_ROOT = "C:\RyzenAI-Library"
+  $env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv\build"
+  if (-not (Test-Path $env:AMD_CVML_SDK_ROOT)) {throw "AMD_CVML_SDK_ROOT does not exist: $env:AMD_CVML_SDK_ROOT"}
+  if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
+  $work = Join-Path $ci "work"
+  if (Test-Path $work) {Remove-Item -Recurse -Force $work}
+  New-Item -ItemType Directory -Force -Path $work | Out-Null
+  Copy-Item -Recurse -Force -Path (Join-Path $env:AMD_CVML_SDK_ROOT "*") -Destination $work
+  $samplesDir = Join-Path $work "samples"
+  $buildDir = Join-Path $samplesDir "build"
+  Push-Location $samplesDir
   New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
   foreach ($sample in @("cvml-sample-face-detection", "cvml-sample-depth-estimation", "cvml-sample-face-mesh")) {
     $mainFile = Join-Path $samplesDir "$sample\main.cpp"
     $source = Get-Content -Path $mainFile -Raw
-
     $createContextLine = "auto context = amd::cvml::CreateContext();"
     $setBackendLine = "  context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);"
-
     if ($source -notmatch "SetInferenceBackend") {
-      if (-not $source.Contains($createContextLine)) {
-        throw "Could not find CreateContext line in: $mainFile"
-      }
-
+      if (-not $source.Contains($createContextLine)) {throw "Could not find CreateContext line in: $mainFile"}
       $source = $source.Replace($createContextLine, "$createContextLine`r`n$setBackendLine")
       Set-Content -Path $mainFile -Value $source -NoNewline
     }
   }
-
   cmake -S (Get-Location).Path -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT" -DCMAKE_PREFIX_PATH="$env:OPENCV_INSTALL_ROOT"
   cmake --build $buildDir --config Release --parallel
-
   $faceExe = Join-Path $buildDir "cvml-sample-face-detection\Release\cvml-sample-face-detection.exe"
   $depthExe = Join-Path $buildDir "cvml-sample-depth-estimation\Release\cvml-sample-depth-estimation.exe"
   $meshExe = Join-Path $buildDir "cvml-sample-face-mesh\Release\cvml-sample-face-mesh.exe"
-
-  foreach ($exe in @($faceExe, $depthExe, $meshExe)) {
-    if (-not (Test-Path $exe)) {throw "Expected executable was not found: $exe"}
-  }
-
+  foreach ($exe in @($faceExe, $depthExe, $meshExe)) {if (-not (Test-Path $exe)) {throw "Expected executable was not found: $exe"}}
   $env:PATH = "$(Join-Path $samplesDir "..\windows");$env:PATH"
-
   $opencvRuntime = Join-Path $env:OPENCV_INSTALL_ROOT "x64\vc16\bin"
   if (-not (Test-Path $opencvRuntime)) {throw "OpenCV runtime DLL folder was not found: $opencvRuntime"}
   $env:PATH = "$opencvRuntime;$env:PATH"
-
   $inputImage = Join-Path $samplesDir "sample_face.jpg"
   curl.exe -L -o $inputImage "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
-
   $outputFaceFast = Join-Path $samplesDir "output_face_fast.jpg"
   $outputFacePrecise = Join-Path $samplesDir "output_face_precise.jpg"
   $outputDepth = Join-Path $samplesDir "output_depth.jpg"
   $outputMesh = Join-Path $samplesDir "output_mesh.jpg"
-
   Push-Location (Split-Path $faceExe)
   & $faceExe -i $inputImage -o $outputFaceFast
   if ($LASTEXITCODE -ne 0) {throw "Face detection default model failed with exit code $LASTEXITCODE."}
-
   & $faceExe -i $inputImage -o $outputFacePrecise -m precise
   if ($LASTEXITCODE -ne 0) {throw "Face detection precise model failed with exit code $LASTEXITCODE."}
   Pop-Location
-
   Push-Location (Split-Path $depthExe)
   & $depthExe -i $inputImage -o $outputDepth
   if ($LASTEXITCODE -ne 0) {throw "Depth estimation failed with exit code $LASTEXITCODE."}
   Pop-Location
-
   Push-Location (Split-Path $meshExe)
   & $meshExe -i $inputImage -o $outputMesh
   if ($LASTEXITCODE -ne 0) {throw "Face mesh failed with exit code $LASTEXITCODE."}
   Pop-Location
-
   foreach ($output in @($outputFaceFast, $outputFacePrecise, $outputDepth, $outputMesh)) {
     if (-not (Test-Path $output)) {throw "Expected output image was not created: $output"}
     if ((Get-Item $output).Length -le 0) {throw "Output image is empty: $output"}
   }
+  Write-Output "CVML_ALL_SAMPLES_PASSED"
+} catch {
+  Write-Output ("CVML_ERROR: " + $_.Exception.Message)
+  $code = 1
+} finally {
+  Pop-Location -ErrorAction SilentlyContinue
+  if ($work -and (Test-Path $work)) {Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue}
+}
+exit $code
+'@
+Set-Content -Path $innerPs -Value $inner -Encoding UTF8
+
+# Run via cmd so the inner script's full stdout+stderr (cmake, curl, and every
+# sample executable, including any error text) is captured to cvml.log.
+$taskName = "cvml_ci_run"
+$action = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$innerPs`" > `"$log`" 2>&1"
+$principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType S4U -RunLevel Highest
+Register-ScheduledTask -TaskName $taskName -Action $action -Principal $principal -Force | Out-Null
+
+try {
+  Start-ScheduledTask -TaskName $taskName
+  $deadline = (Get-Date).AddSeconds(1500)
+  do {
+    Start-Sleep -Seconds 5
+    $state = (Get-ScheduledTask -TaskName $taskName).State
+  } while ($state -eq "Running" -and (Get-Date) -lt $deadline)
+
+  if (Test-Path $log) {Get-Content $log}
+
+  if ($state -eq "Running") {throw "cvml S4U task did not finish within the time limit"}
+  $result = (Get-ScheduledTaskInfo -TaskName $taskName).LastTaskResult
+  if ($result -ne 0) {throw "cvml samples failed under S4U task (exit code $result)"}
 }
 finally {
-  Pop-Location -ErrorAction SilentlyContinue
-  Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue
+  Stop-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+  Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+  Remove-Item -Recurse -Force $ci -ErrorAction SilentlyContinue
 }
 ```
 <!-- @test:end --> 
@@ -724,7 +749,7 @@ done
 
 ## A CVML integrálása saját alkalmazásába
 
-Ahhoz, hogy a CVML Library-t saját C++ projektjében használja, adja hozzá a CMake `find_package` parancsával:
+Ahhoz, hogy a CVML Library-t saját C++ projektjében használhassa, adja hozzá a CMake `find_package` parancsával:
 
 ```cmake
 # Find the Ryzen AI CVML Library
@@ -734,7 +759,7 @@ find_package(RyzenAILibrary REQUIRED PATHS ${AMD_CVML_SDK_ROOT})
 target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 ```
 
-Ahol az `AMD_CVML_SDK_ROOT` a Ryzen AI CVML Library mappa gyökerére mutat. Ezután illessze be a megfelelő fejlécfájlt a kívánt funkcióhoz:
+Ahol az `AMD_CVML_SDK_ROOT` a Ryzen AI CVML Library mappájának gyökerére mutat. Ezután illessze be a kívánt funkcióhoz tartozó megfelelő fejlécfájlt:
 
 ```cpp
 #include <cvml-face-detector.h>   // for face detection
@@ -744,12 +769,12 @@ Ahol az `AMD_CVML_SDK_ROOT` a Ryzen AI CVML Library mappa gyökerére mutat. Ezu
 
 ## Következő lépések
 
-Az alábbi mintapéldák mindegyikéhez először navigálj a hozzá tartozó futtatható mappába, a fent található [Arcfelismerés futtatása](#running-face-detection) szakaszban bemutatott mintát követve (pl. `cd build\cvml-sample-depth-estimation\Release` Windows rendszeren, vagy `cd build/cvml-sample-depth-estimation` Linux rendszeren). Windows esetén minden parancshoz fűzd hozzá a `.exe` kiterjesztést (pl. `cvml-sample-depth-estimation.exe`).
+Az alábbi minták mindegyikéhez először navigálj a hozzá tartozó futtatható mappába, ugyanazt a mintát követve, mint a fenti [Arcfelismerés futtatása](#running-face-detection) szakaszban (pl. `cd build\cvml-sample-depth-estimation\Release` Windows esetén, vagy `cd build/cvml-sample-depth-estimation` Linux esetén). Windows alatt minden parancshoz fűzd hozzá a `.exe` kiterjesztést (pl. `cvml-sample-depth-estimation.exe`).
 
-- **Próbáld ki a mélységbecslést**: Futtasd a `cvml-sample-depth-estimation -i sample_face.jpg` parancsot egy színezett mélységtérkép előállításához — a közelebbi objektumok meleg színekkel, a távolabbiak hideg színekkel jelennek meg
-- **Fedezd fel az Archáló funkciót**: Futtasd a `cvml-sample-face-mesh -i sample_face.jpg` parancsot, hogy sűrű arcgeometriai követést láss részletes hálópontokkal
-- **Videófájlok feldolgozása**: Használd a `-i` és `-o` kapcsolókat bármelyik mintán videók feldolgozásához (pl. `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
-- **Modellváltozatok összehasonlítása**: Próbáld ki a `-m precise` kapcsolót az alapértelmezett `-m fast` helyett az arcfelismerésnél, hogy saját tapasztalatból lásd a pontosság és sebesség közti kompromisszumot
-- **Építs saját alkalmazást**: Használd a CMake integrációt és a C++ API-t, hogy CVML funkciókat adj hozzá saját C++ alkalmazásaidhoz
+- **Próbáld ki a mélységbecslést**: Futtasd a `cvml-sample-depth-estimation -i sample_face.jpg` parancsot egy színkódolt mélységtérkép előállításához — a közelebbi objektumok meleg színekkel, a távolabbiak hideg színekkel jelennek meg
+- **Fedezd fel az archáló funkciót**: Futtasd a `cvml-sample-face-mesh -i sample_face.jpg` parancsot, hogy megtekintsd a sűrű arcgeometria-követést részletes hálópontokkal
+- **Videofájlok feldolgozása**: Használd a `-i` és `-o` kapcsolókat bármelyik mintán videók feldolgozásához (pl. `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
+- **Hasonlítsd össze a modellváltozatokat**: Próbáld ki a `-m precise` beállítást az alapértelmezett `-m fast` mellett az arcfelismerésnél, hogy saját szemeddel lásd a pontosság és a sebesség közötti kompromisszumot
+- **Építsd fel saját alkalmazásodat**: Használd a CMake integrációt és a C++ API-t, hogy CVML funkciókat adj hozzá saját C++ alkalmazásaidhoz
 - **Kombináld a funkciókat**: Kapcsold össze az arcfelismerést a mélységbecsléssel ugyanabban az alkalmazásban a gazdagabb jelenetértelmezés érdekében
-- **Böngészd a forráskódot**: Olvasd el a [Ryzen AI CVML Library a GitHubon](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) oldalt a fejlécdokumentációért, további mintákért és API-részletekért
+- **Böngészd a forráskódot**: Olvasd el a [Ryzen AI CVML Library on GitHub](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) oldalt a fejléc-dokumentációért, további mintákért és API-részletekért

@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
-  "title": "Lokalno pokretanje Hermes agenta pomoću Lemonade Server-a",
-  "description": "Instalirajte i konfigurišite autonomnog AI agenta Hermes Agent sa Lemonade Server kao njegovim lokalnim AI pozadinskim sistemom (backend).",
+  "title": "Pokretanje Hermes agenta lokalno pomoću Lemonade Server-a",
+  "description": "Instalirajte i konfigurišite Hermes Agent autonomnog AI agenta sa Lemonade Server kao njegovim lokalnim AI bekendom.",
   "auto_translated": true
 }

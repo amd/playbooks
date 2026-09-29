@@ -1,6 +1,6 @@
 {
   "id": "pytorch-rocm-llms",
-  "title": "PyTorch ile AMD ROCm™ Yazılımı Üzerinde LLM Çalıştırma",
-  "description": "PC'nizde PyTorch ve AMD ROCm™ yazılımıyla güçlü dil modellerini çalıştırmayı öğrenin ve belgeleri hızlı ve kolay bir şekilde özetleyin.",
+  "title": "PyTorch üzerinde AMD ROCm™ Yazılımı ile LLM Çalıştırma",
+  "description": "Belgeleri hızlı ve kolay bir şekilde özetlemek için PyTorch ve AMD ROCm™ yazılımını kullanarak bilgisayarınızda güçlü dil modelleri çalıştırmayı öğrenin.",
   "auto_translated": true
 }

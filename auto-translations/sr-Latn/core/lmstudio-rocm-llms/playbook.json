@@ -1,6 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "Pokretanje i servisiranje LLM-ova pomoću LM Studio",
-  "description": "Podesite LM Studio i LM Studio Server za lokalno pokretanje i servisiranje velikih jezičkih modela.",
+  "title": "Pokretanje i pružanje LLM-ova pomoću LM Studio-a",
+  "description": "Podesite LM Studio i LM Studio Server za pokretanje i posluživanje velikih jezičkih modela lokalno.",
   "auto_translated": true
 }

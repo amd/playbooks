@@ -1,6 +1,6 @@
 {
   "id": "cvml",
-  "title": "Lokalno računalniško videnje z AMD Ryzen™ AI NPU",
-  "description": "Zgradite lokalne zmogljivosti zaznavanja z uporabo CVML SDK na osnovi Ryzen AI in programske opreme AMD ROCm™",
+  "title": "Lokalno računalniško vid z NPU v AMD Ryzen™ AI",
+  "description": "Zgradite lokalne zmogljivosti zaznavanja s pomočjo SDK-ja CVML na podlagi Ryzen AI in programske opreme AMD ROCm™",
   "auto_translated": true
 }

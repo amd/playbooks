@@ -16,34 +16,34 @@ SPDX-License-Identifier: MIT
 
 ## Overzicht
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) is de op efficiëntie gerichte variant van de DeepSeek V4-familie — een Mixture of Experts-model met 284 miljard parameters en 13 miljard actieve parameters. Volgens [het technische rapport van DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) scoort het 79% op SWE-bench Verified en 91,6% op LiveCodeBench.
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) is de op efficiëntie gerichte variant van de DeepSeek V4-familie — een Mixture of Experts-model met 284 miljard parameters en 13 miljard actieve parameters. Volgens [het technisch rapport van DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) scoort het 79% op SWE-bench Verified en 91,6% op LiveCodeBench.
 
-[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) is een specifieke inference-engine die speciaal voor deze modelarchitectuur is gebouwd. In plaats van een algemene runtime richt ds4 zich rechtstreeks op de DeepSeek V4-familie, met architectuurspecifieke kernel-optimalisaties voor AMD ROCm™-software. Het is momenteel een van de best presterende implementaties van DeepSeek V4 Flash op Strix Halo.
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) is een speciale inference-engine die specifiek is gebouwd voor deze modelarchitectuur. In plaats van een algemene runtime richt ds4 zich rechtstreeks op de DeepSeek V4-familie, met architectuurspecifieke kernel-optimalisaties voor AMD ROCm™ software. Het is momenteel een van de best presterende implementaties van DeepSeek V4 Flash op Strix Halo.
 
-Deze tutorial laat zien hoe je `ds4-cockpit`, een terminal-UI, gebruikt om ds4 in te stellen, modelgewichten te downloaden en DeepSeek V4 Flash lokaal te serveren op het AMD Ryzen™ AI Halo Developer Platform.
+Deze tutorial laat zien hoe je `ai-toolbox-cockpit`, een terminal-UI, gebruikt om ds4 in te stellen, modelgewichten te downloaden en DeepSeek V4 Flash lokaal te serveren op het AMD Ryzen™ AI Halo Developer Platform.
 
-## Wat je leert
+## Wat je gaat leren
 
-- Hoe je de `ds4-cockpit` terminal-UI installeert en start
-- Hoe je de ds4 ROCm toolbox-container aanmaakt
-- Het downloaden van de aanbevolen kwantisering voor één enkele Halo-node
-- Het starten van de ds4 inference-server en het blootstellen van een OpenAI-compatibel eindpunt
-- Het verbinden van een Web UI of coding agent met de lokale server
+- Hoe je de `ai-toolbox-cockpit` terminal-UI installeert en start
+- Hoe je de ds4 ROCm toolbox-container maakt
+- Het downloaden van de aanbevolen kwantisatie voor een enkele Halo-node
+- Het starten van de ds4-inferenceserver en het beschikbaar maken van een OpenAI-compatibel eindpunt
+- Het verbinden van een Web-UI of coding agent met de lokale server
 
 ## De geheugenconfiguratie instellen
 
 <!-- @require:memory-config -->
 
-## Softwarevereisten installeren
+## Software-vereisten installeren
 
 > **Systeemvereisten voor deze configuratie (single-node IQ2_XXS met 126k context):**
-> - Een Strix Halo-systeem met **minstens 128 GB unified memory**.
-> - **BIOS toegewezen VRAM (UMA frame buffer) ingesteld op het minimum**, zodat de shared memory pool zo groot mogelijk kan zijn.
-> - De GPU **shared-memory pool ingesteld op minstens 110 GB**: voer `amd-ttm --set 110` uit (zie de bovenstaande stap voor geheugenconfiguratie) en herstart. Lagere waarden kunnen leiden tot out-of-memory-fouten wanneer het model wordt geladen met een context van 126k. Als je systeem minder geheugen beschikbaar heeft, verlaag dan in plaats daarvan de waarde van **Context** in Server Mode.
+> - Een Strix Halo-systeem met **minimaal 128 GB gedeeld geheugen (unified memory)**.
+> - **BIOS-toegewezen VRAM (UMA-framebuffer) ingesteld op het minimum**, zodat de gedeelde geheugenpool zo groot mogelijk kan zijn.
+> - De **shared-memory pool** van de GPU ingesteld op **ten minste 110 GB**: voer `amd-ttm --set 110` uit (zie de bovenstaande stap voor geheugenconfiguratie) en start opnieuw op. Lagere waarden kunnen mislukken met een out-of-memory-fout wanneer het model wordt geladen met een context van 126k. Als je systeem minder geheugen beschikbaar heeft, verlaag dan in plaats daarvan de **Context**-waarde in Server Mode.
 >
-> **Opmerking:** Probeer de **GPU shared-memory pool** eerst in te stellen op **110 GB**. Als je out-of-memory-fouten tegenkomt, verhoog dan de shared-memory pool of verlaag de contextgrootte.
+> **Opmerking:** Probeer de **shared-memory pool** van de GPU eerst in te stellen op **110 GB**. Als je out-of-memory-fouten krijgt, verhoog dan de shared-memory pool of verlaag de contextgrootte.
 
-ds4-cockpit gebruikt container-toolboxes om de ds4-engine uit te voeren. Installeer `podman`, `distrobox` en `pipx`:
+ai-toolbox-cockpit gebruikt container-toolboxes om de ds4-engine uit te voeren. Installeer `podman`, `distrobox` en `pipx`:
 
 ```bash
 sudo apt update
@@ -61,30 +61,32 @@ echo "OK: podman, distrobox, and pipx are installed"
 ```
 <!-- @test:end -->
 
-## Beschikbare kwantiseringen
+## Beschikbare kwantisaties
 
-De auteur van ds4 biedt meerdere gekwantiseerde versies van DeepSeek V4 Flash in GGUF-formaat. Alle onderstaande modellen gebruiken importance matrix (imatrix)-kalibratie, waarbij een hogere precisie behouden blijft voor de onderdelen van het model die het belangrijkst zijn voor codeer- en redeneertaken.
+De ontwikkelaar van ds4 biedt verschillende gekwantiseerde versies van DeepSeek V4 Flash aan in GGUF-formaat. Alle onderstaande modellen gebruiken importance matrix (imatrix)-kalibratie, waarbij een hogere precisie behouden blijft voor de onderdelen van het model die het belangrijkst zijn voor codeer- en redeneertaken.
 
-| Kwantisering | Grootte | Beschrijving |
+| Kwantisatie | Grootte | Beschrijving |
 |-------------|------|-------------|
-| [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 GB | Aanbevolen voor één enkele node van 128 GB |
+| [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 GB | Aanbevolen voor een enkele node met 128 GB |
 | [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | Houdt lagen 37–42 op Q4-precisie voor betere nauwkeurigheid. Past binnen 128 GB, maar laat minder ruimte over voor context |
 | [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Hogere kwaliteit. Vereist twee Halo-nodes via multi-node clustering |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Optionele toevoeging voor speculative decoding om de generatiesnelheid te verbeteren |
+| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Optionele add-on voor speculative decoding om de generatiesnelheid te verbeteren |
 
-Het **IQ2_XXS imatrix**-model is een goed startpunt. Het past probleemloos op één enkele node en laat voldoende geheugen over voor een redelijk contextvenster.
+Het **IQ2_XXS imatrix**-model is een goed startpunt. Het past comfortabel op een enkele node en laat voldoende geheugen over voor een redelijk contextvenster.
 
-## ds4-cockpit installeren
+## ai-toolbox-cockpit installeren
 
-[ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox) is een lichte terminal-UI die het eenvoudig maakt om aan de slag te gaan met ds4 op Strix Halo. Het regelt het aanmaken van toolbox-containers, het downloaden van modelgewichten en het starten van servers. Installeer het met `pipx`:
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) is een lichte terminal-UI om het installeren van verschillende AI-backends eenvoudig te maken. We gebruiken het om onze ds4-container aan te maken, modelgewichten te downloaden en servers te starten. Installeer het met `pipx`:
 
+<!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
-pipx install "git+https://github.com/kyuz0/strix-halo-ds4-toolbox.git#subdirectory=ds4-strix-halo-cockpit"
+pipx install git+https://github.com/kyuz0/ai-toolbox-cockpit.git
 ```
+<!-- @test:end -->
 
 Start de cockpit:
 ```bash
-ds4-cockpit
+ai-toolbox-cockpit
 ```
 
 <!-- @test:id=ds4-cockpit-linux timeout=60 hidden=True -->
@@ -92,18 +94,18 @@ ds4-cockpit
 set -euo pipefail
 export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 # Verify the pipx-installed cockpit entry point is on PATH (do NOT launch the TUI).
-command -v ds4-cockpit
-echo "OK: ds4-cockpit is installed and on PATH"
+command -v ai-toolbox-cockpit
+echo "OK: ai-toolbox-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
-## De toolbox aanmaken
+## Stap 1: De toolbox aanmaken
 
-Selecteer in het tabblad **Interactive Toolboxes** de nieuwste beschikbare/stabiele toolbox (bijv. `ds4-rocm-7.2.4`) en klik op **Create/Update**. Hiermee wordt de container-image opgehaald en de toolbox-omgeving aangemaakt.
+Selecteer in het tabblad **Interactive Toolboxes** de nieuwste beschikbare/stabiele toolbox voor ds4 (bijv. `ds4-rocm-10.0`) en klik op **Create/Update**. Hiermee wordt de container-image opgehaald en de toolbox-omgeving aangemaakt.
 
 
 <p align="center">
-  <img src="assets/ds4-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ds4-cockpit" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ai-toolbox-cockpit" width="800"/>
 </p>
 
 <!-- @test:id=ds4-toolbox-image-linux timeout=120 hidden=True -->
@@ -113,37 +115,37 @@ export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
 
 # The toolbox version changes over time, so match the image family, not a fixed tag.
 if ! podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit (Interactive Toolboxes tab) first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit (Interactive Toolboxes tab) first."
   exit 1
 fi
 echo "OK: ds4 toolbox container image is present"
 ```
 <!-- @test:end -->
 
-## Het model downloaden
+## Stap 2: Het model downloaden
 
-Ga naar het tabblad **Model Manager**. Selecteer **IQ2_XXS imatrix (~80,8 GB)** in de vervolgkeuzelijst en klik op **Download**. De modelbestanden worden standaard opgeslagen in `~/ds4` (je kunt het opslagpad wijzigen).
+Ga naar het tabblad **Models**. Selecteer eerst de backend (ds4). Selecteer vervolgens **IQ2_XXS imatrix (~80,8 GB)** in de vervolgkeuzelijst en klik op **Download**. De modelbestanden worden standaard opgeslagen in `~/ds4` (je kunt het opslagpad wijzigen).
 
-> **Opmerking:** Het IQ2_XXS-model is ongeveer 80 GB groot, dus de download kan afhankelijk van je verbinding even duren. Je kunt verdergaan zodra deze is voltooid.
+> **Opmerking:** Het IQ2_XXS-model is ongeveer 80 GB, dus het downloaden kan even duren, afhankelijk van je internetverbinding. Je kunt verdergaan zodra het klaar is.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-model-manager.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
 </p>
 
 <!-- @test:id=ds4-model-downloaded-linux timeout=60 hidden=True -->
 ```bash
 set -euo pipefail
 
-# ds4-cockpit saves model weights to ~/ds4 by default
+# ai-toolbox-cockpit saves model weights to ~/ds4 by default
 model_dir="$HOME/ds4"
 
 if [ ! -d "$model_dir" ]; then
-  echo "Model directory $model_dir does not exist. Download the model in ds4-cockpit (Model Manager tab) first."
+  echo "Model directory $model_dir does not exist. Download the model in ai-toolbox-cockpit (Model Manager tab) first."
   exit 1
 fi
 
 if ! find "$model_dir" -maxdepth 2 -iname '*.gguf' | grep -q .; then
-  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ds4-cockpit first."
+  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -156,19 +158,19 @@ fi
 ```
 <!-- @test:end -->
 
-## De server starten
+## Stap 3: De server starten
 
 Ga naar het tabblad **Server Mode**. Selecteer het gedownloade model en de toolbox, en configureer vervolgens de contextgrootte, host en poort. Klik wanneer je klaar bent op **Start ds4-server**.
 
-> **Tip** Een contextgrootte van `126000` is een redelijke startwaarde die op één enkele node zou moeten passen — je kunt deze hoger instellen als je geheugen over hebt, of lager als je out-of-memory-fouten tegenkomt. De poort (`8000` in deze handleiding) is willekeurig; kies elke vrije poort.
+> **Tip** Een contextgrootte van `126000` is een redelijke startwaarde die op een enkele node zou moeten passen — je kunt deze hoger instellen als je genoeg geheugen over hebt, of lager als je out-of-memory-fouten tegenkomt. De poort (`8000` in deze handleiding) is willekeurig gekozen; kies elke vrije poort.
 
-> **KV Disk Cache (optioneel).** Als je **KV Disk Cache** inschakelt, wordt de KV-cache uitbesteed aan schijf (in **Host Cache Dir**, standaard `~/.cache/ds4-kv`), zodat herhaalde systeemprompts vanaf SSD worden hersteld in plaats van opnieuw te worden berekend. Dit is een prestatie-optimalisatie voor workflows met coding agents met lange, herhaalde prompts, en is **niet vereist** om de server te draaien.
+> **KV Disk Cache (optioneel).** Het inschakelen van **KV Disk Cache** verplaatst de KV-cache naar schijf (in de **Host Cache Dir**, standaard `~/.cache/ds4-kv`), zodat herhaalde systeemprompts worden hersteld vanaf SSD in plaats van opnieuw berekend te worden. Dit is een prestatie-optimalisatie voor coding-agent-workflows met lange, herhaalde prompts en is **niet vereist** om de server uit te voeren.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-server-mode.png" alt="Configuring and starting the ds4 server" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
 </p>
 
-De server start en luistert op poort 8000, waarbij een OpenAI-compatibel API-eindpunt beschikbaar wordt gesteld op `http://localhost:8000/v1`.
+De server zal starten en luisteren op poort 8000, waarbij een OpenAI-compatibel API-eindpunt beschikbaar wordt gesteld op `http://localhost:8000/v1`.
 
 **Snelle test:**
 ```bash
@@ -199,7 +201,7 @@ if [ -z "$model_file" ]; then
   model_file="$(find "$MODEL_DIR" -maxdepth 2 -iname '*.gguf' 2>/dev/null | head -1)"
 fi
 if [ -z "$model_file" ]; then
-  echo "No .gguf model found under $MODEL_DIR. Download it in ds4-cockpit first."
+  echo "No .gguf model found under $MODEL_DIR. Download it in ai-toolbox-cockpit first."
   exit 1
 fi
 model_name="$(basename "$model_file")"
@@ -207,7 +209,7 @@ model_name="$(basename "$model_file")"
 # Pick the toolbox image (version-agnostic).
 image="$(podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox' | head -1)"
 if [ -z "$image" ]; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -218,7 +220,14 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Remove any stale instance, then start ds4-server detached (same flags ds4-cockpit uses, with -d instead of -it).
+# keep-id maps the calling user into the container. Root does not need it, and as root it cannot
+# be combined with --ipc=host (crun fails to mount /dev/mqueue), so root keeps the host user namespace.
+userns=keep-id
+if [ "$(id -u)" -eq 0 ]; then
+  userns=host
+fi
+
+# Remove any stale instance, then start ds4-server detached (same flags ai-toolbox-cockpit uses, with -d instead of -it).
 podman rm -f "$CONTAINER" >/dev/null 2>&1 || true
 podman run -d --name "$CONTAINER" \
   --device /dev/dri --device /dev/kfd \
@@ -227,7 +236,7 @@ podman run -d --name "$CONTAINER" \
   --ipc=host \
   --cap-add=SYS_PTRACE \
   --security-opt label=disable \
-  --userns=keep-id \
+  --userns="$userns" \
   -p 127.0.0.1:8000:8000 \
   -v "$MODEL_DIR":/models:ro \
   "$image" \
@@ -297,24 +306,28 @@ PY
 echo "OK: ds4 server test complete; server stopped and GPU memory released"
 ```
 <!-- @test:end -->
-
-## Een Web UI verbinden
+## Een Web-UI verbinden
 
 Je kunt elke chatinterface verbinden die het OpenAI API-formaat ondersteunt. Om bijvoorbeeld HuggingFace ChatUI te gebruiken:
 
 ```bash
-docker run -p 3000:3000 \
-  --add-host=host.docker.internal:host-gateway \
-  -e OPENAI_BASE_URL=http://host.docker.internal:8000/v1 \
+docker run --network=host \
+  -e PORT=3000 \
+  -e OPENAI_BASE_URL=http://localhost:8000/v1 \
   -e OPENAI_API_KEY=dummy \
   -v chat-ui-data:/data \
   ghcr.io/huggingface/chat-ui-db
 ```
 
-Open `http://localhost:3000` in je browser om te beginnen chatten.
-## Een coding agent verbinden
+Open `http://localhost:3000` in je browser om te beginnen met chatten.
 
-De ds4-server biedt zowel OpenAI- als Anthropic-compatibele endpoints, dus de meeste coding agents kunnen er rechtstreeks verbinding mee maken. Om het bijvoorbeeld toe te voegen aan de `pi` coding agent, voegt u het volgende blok toe aan `~/.pi/agent/models.json`:
+> **Opmerking:** `--network=host` plaatst de Web-UI op het netwerk van de host, zodat deze de ds4-server op `localhost` rechtstreeks kan bereiken. Hierdoor blijft de ds4-server gebonden aan loopback (het hoeft niet op andere interfaces te worden blootgesteld).
+
+> **Tip:** De poort van de Web-UI (hier `3000`, ingesteld via `PORT`) is willekeurig — kies een willekeurige vrije poort als `3000` al in gebruik is, en open die poort in je browser in plaats daarvan. Zorg ervoor dat de poort in `OPENAI_BASE_URL` overeenkomt met de poort waarop je ds4-server draait.
+
+## Een codeeragent verbinden
+
+De ds4-server biedt zowel OpenAI- als Anthropic-compatibele eindpunten, dus de meeste codeeragents kunnen er rechtstreeks verbinding mee maken. Om het bijvoorbeeld toe te voegen aan de `pi`-codeeragent, voeg je het volgende blok toe aan `~/.pi/agent/models.json`:
 
 ```json
 "ds4": {
@@ -354,15 +367,15 @@ De ds4-server biedt zowel OpenAI- als Anthropic-compatibele endpoints, dus de me
 }
 ```
 
-> **Tip**: Als uw coding agent of Web UI op een andere machine draait dan het Halo-platform, moet u poort 8000 doorsturen via SSH:
+> **Tip**: Als je codeeragent of Web-UI op een andere machine draait dan het Halo-platform, moet je de serverpoort (hier `8000`) via SSH doorsturen:
 > ```bash
-> ssh -L 0.0.0.0:8000:localhost:8000 <halo-host-ip>
+> ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## Volgende stappen
 
-- **Multi-node clustering**: Als u twee Halo-apparaten heeft, ondersteunt ds4 het verdelen van het Q4-model (~153 GB) over beide machines via pipeline parallelism. Raadpleeg de [ds4-toolbox-documentatie](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) voor installatie-instructies.
+- **Multi-node clustering**: Als je twee Halo-apparaten hebt, ondersteunt ds4 het verdelen van het Q4-model (~153 GB) over beide machines via pipeline parallelism. Zie de [ds4-toolbox-documentatie](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) voor installatie-instructies.
 - **Speculative decoding (MTP)**: Download de MTP-gewichten (~3,6 GB) en geef `--mtp` mee aan de server voor snellere generatiesnelheid.
-- **KV-cache disk offloading**: Voor coding agent-workflows schakelt u `--kv-disk-dir` in, zodat herhaalde systeemprompts worden hersteld vanaf SSD in plaats van elke keer opnieuw te worden berekend.
+- **KV-cache disk offloading**: Voor werkstromen met codeeragents schakel je `--kv-disk-dir` in, zodat herhaalde systeemprompts vanaf de SSD worden hersteld in plaats van elke keer opnieuw te worden berekend.
 
-Raadpleeg voor meer informatie de [ds4-repository](https://github.com/antirez/ds4) en de [ds4-cockpit-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox).
+Zie voor meer informatie de [ds4-repository](https://github.com/antirez/ds4) en de [ds4-cockpit-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox).

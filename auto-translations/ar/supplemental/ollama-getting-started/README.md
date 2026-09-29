@@ -16,24 +16,26 @@ SPDX-License-Identifier: MIT
 
 ## نظرة عامة
 
-Ollama هي أداة خفيفة الوزن وشائعة الاستخدام لتشغيل نماذج اللغة الكبيرة محليًا. تتولى تنزيل النماذج، وتحويلها إلى صيغة الكم (quantization)، وتقديمها من خلال واجهة سطر أوامر بسيطة وتطبيق سطح مكتب، بحيث يمكنك الانتقال من الصفر إلى الدردشة مع نموذج لغوي كبير في دقائق معدودة.
+Ollama هي أداة خفيفة الوزن وشائعة الاستخدام لتشغيل نماذج اللغة الكبيرة محليًا. تتولى تنزيل النماذج، والتكميم (quantization)، والخدمة عبر واجهة سطر أوامر بسيطة وتطبيق سطح مكتب، بحيث يمكنك الانتقال من الصفر إلى الدردشة مع نموذج LLM في دقائق.
 
-يرشدك هذا الدليل التعليمي خلال عملية تثبيت Ollama، وسحب نموذج GPT-OSS 20B، وإجراء محادثة معه، سواء عبر الطرفية أو تطبيق سطح المكتب.
+يرشدك هذا الدليل خطوة بخطوة عبر تثبيت Ollama، وسحب نموذج GPT-OSS 20B، وإجراء محادثة معه، عبر كل من الطرفية (terminal) وتطبيق سطح المكتب.
 
 ## ما ستتعلمه
 
 - كيفية تثبيت وتشغيل Ollama على نظامك
 - سحب وتشغيل نموذج GPT-OSS 20B محليًا
 - الدردشة مع النماذج باستخدام واجهة سطر الأوامر (CLI)
-- الاستعلام من النماذج برمجيًا عبر واجهة REST API
+- استعلام النماذج برمجيًا عبر REST API
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## ضبط إعدادات الذاكرة
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## التحقق من تحديثات البرامج
-> **ملاحظة**: إذا لم يكن VS Code مثبتًا، يمكنك تثبيته باستخدام Ryzen AI Developer Center.
+> **ملاحظة**: إذا لم يكن VS Code مثبتًا، يمكنك تثبيته من خلال Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -47,8 +49,8 @@ Ollama هي أداة خفيفة الوزن وشائعة الاستخدام لت�
 <!-- @os:windows -->
 
 1. قم بتنزيل برنامج التثبيت من [ollama.com/download](https://ollama.com/download).
-2. شغّل برنامج التثبيت `.exe` واتبع التعليمات.
-3. بمجرد التثبيت، يعمل Ollama كخدمة في الخلفية ويمكن الوصول إليه من الطرفية وتطبيق سطح المكتب وعلبة النظام.
+2. شغّل ملف `.exe` واتبع التعليمات.
+3. بعد التثبيت، يعمل Ollama كخدمة في الخلفية ويمكن الوصول إليه من الطرفية، وتطبيق سطح المكتب، وشريط النظام.
 
 تحقق من التثبيت بفتح طرفية وتشغيل:
 
@@ -90,13 +92,13 @@ ollama --version
 
 ## سحب أول نموذج لك
 
-يدير Ollama النماذج من خلال سجل مشابه لصور الحاويات. لتنزيل GPT-OSS 20B:
+تدير Ollama النماذج من خلال سجل مشابه لصور الحاويات (container images). لتنزيل GPT-OSS 20B:
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-يقوم هذا بتنزيل أوزان النموذج إلى جهازك المحلي (حوالي 12 جيجابايت). يحدث التنزيل مرة واحدة فقط، وتُحمَّل عمليات التشغيل اللاحقة النموذج من القرص.
+يؤدي هذا إلى تنزيل أوزان النموذج إلى جهازك المحلي (حوالي 12 جيجابايت). يحدث التنزيل مرة واحدة فقط، وتُحمَّل عمليات التشغيل اللاحقة النموذج من القرص.
 
 يمكنك التأكد من توفر النموذج باستخدام:
 
@@ -104,16 +106,45 @@ ollama pull gpt-oss:20b
 ollama list
 ```
 
-يجب أن ترى `gpt-oss:20b` في الناتج مع حجمه وتاريخ آخر تعديل له.
+يجب أن ترى `gpt-oss:20b` في الناتج مع حجمه وتاريخ آخر تعديل.
 
 <!-- @os:windows -->
-<!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
+<!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=180 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
-$list = (ollama list | Out-String)
-if (-not $list) { throw "ollama list returned no output" }
-if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
-Write-Host "OK: gpt-oss:20b is present in ollama list"
+$p = $null
+$startedHere = $false
+
+function Wait-OllamaApi {
+  param( [int]$MaxAttempts = 120 )
+  for ($i = 0; $i -lt $MaxAttempts; $i++) {
+    $resp = curl.exe -s --max-time 2 http://127.0.0.1:11434/api/tags
+    if ($LASTEXITCODE -eq 0 -and $resp) { return $resp }
+    Start-Sleep -Seconds 1
+  }
+  return $null
+}
+
+try {
+  # Start the Ollama server if the API is not already up.
+  $tagsJson = Wait-OllamaApi -MaxAttempts 5
+  if (-not $tagsJson) {
+    $p = Start-Process -FilePath "ollama" -ArgumentList "serve" -NoNewWindow -PassThru
+    $startedHere = $true
+    $tagsJson = Wait-OllamaApi -MaxAttempts 120
+  }
+  if (-not $tagsJson) { throw "Ollama API not ready on http://127.0.0.1:11434" }
+
+  $list = (ollama list | Out-String)
+  if (-not $list) { throw "ollama list returned no output" }
+  if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
+  Write-Host "OK: gpt-oss:20b is present in ollama list"
+}
+finally {
+  if ($startedHere -and $p -and -not $p.HasExited) {
+    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+  }
+}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -177,14 +208,14 @@ echo "OK: gpt-oss:20b is present in ollama list"
 
 ### تسمية النماذج
 
-تتبع أسماء نماذج Ollama التنسيق `name:tag`. تشير الوسمة (tag) عادةً إلى عدد المعلمات أو نوع التحويل إلى صيغة الكم. فيما يلي بعض الأوامر المفيدة لإدارة النماذج:
+تتبع أسماء نماذج Ollama التنسيق `name:tag`. تشير العلامة (tag) عادةً إلى عدد المعاملات (parameters) أو نوع التكميم (quantization). فيما يلي بعض الأوامر المفيدة لإدارة النماذج:
 
 | الأمر | الوصف |
 |---------|-------------|
 | `ollama list` | عرض جميع النماذج التي تم تنزيلها |
 | `ollama pull <model>` | تنزيل نموذج دون تشغيله |
 | `ollama rm <model>` | إزالة نموذج لتحرير مساحة القرص |
-| `ollama show <model>` | عرض بيانات النموذج الوصفية ومعلماته |
+| `ollama show <model>` | عرض بيانات وصفية ومعلمات النموذج |
 
 ## الدردشة من الطرفية
 
@@ -194,39 +225,39 @@ echo "OK: gpt-oss:20b is present in ollama list"
 ollama run gpt-oss:20b
 ```
 
-يقوم Ollama بتحميل النموذج في الذاكرة وينقلك إلى موجّه الأوامر. جرّب سؤاله عن شيء ما:
+يقوم Ollama بتحميل النموذج في الذاكرة وينقلك إلى موجه (prompt). جرّب أن تسأله شيئًا:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-يقوم النموذج ببث استجابته رمزًا تلو الآخر (token-by-token) مباشرة في الطرفية. اكتب `/bye` أو اضغط `Ctrl+D` للخروج من الجلسة.
+يقوم النموذج ببث استجابته رمزًا تلو الآخر (token-by-token) مباشرة في الطرفية. اكتب `/bye` أو اضغط على `Ctrl+D` للخروج من الجلسة.
 
-> **نصيحة**: يستغرق التشغيل الأول بضع ثوانٍ لتحميل النموذج في الذاكرة. تستجيب المطالبات اللاحقة ضمن الجلسة نفسها بشكل أسرع بكثير لأن النموذج يظل محمّلًا.
+> **نصيحة**: يستغرق التشغيل الأول بضع ثوانٍ لتحميل النموذج في الذاكرة. تستجيب المطالبات اللاحقة ضمن نفس الجلسة بشكل أسرع بكثير لأن النموذج يبقى محملاً.
 
 <!-- @os:windows -->
 ## الدردشة من تطبيق سطح المكتب
 
-يأتي Ollama أيضًا مزودًا بتطبيق سطح مكتب يوفر واجهة دردشة نظيفة للتفاعل مع نماذجك.
+يأتي Ollama أيضًا مع تطبيق سطح مكتب يوفر واجهة دردشة نظيفة للتفاعل مع نماذجك.
 
-افتح **Ollama** من قائمة ابدأ أو انقر على أيقونة Ollama في علبة النظام واختر **Open Ollama**.
+افتح **Ollama** من قائمة ابدأ أو انقر على أيقونة Ollama في شريط النظام واختر **Open Ollama**.
 
 بمجرد فتح التطبيق:
 
 1. انقر على **New Chat** في الشريط الجانبي.
-2. اختر **gpt-oss:20b** من القائمة المنسدلة للنماذج في الزاوية السفلية اليمنى من منطقة إدخال الدردشة.
-3. اكتب رسالة واضغط Enter لبدء الدردشة.
+2. اختر **gpt-oss:20b** من القائمة المنسدلة للنموذج في الزاوية اليمنى السفلية من منطقة إدخال الدردشة.
+3. اكتب رسالة واضغط على Enter لبدء الدردشة.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-يحتفظ تطبيق سطح المكتب بسجل محادثاتك في الشريط الجانبي، مما يسهّل الرجوع إلى المحادثات السابقة.
+يحتفظ تطبيق سطح المكتب بسجل محادثاتك في الشريط الجانبي، مما يسهل الرجوع إلى المحادثات السابقة.
 <!-- @os:end -->
 
-## استخدام واجهة REST API
+## استخدام REST API
 
-بعد التثبيت، يعمل Ollama كخدمة في الخلفية ويعرض واجهة REST API على العنوان `http://localhost:11434` يمكنك استخدامها لدمج النماذج في تطبيقاتك ونصوصك البرمجية الخاصة.
+بعد التثبيت، يعمل Ollama كخدمة في الخلفية ويعرض REST API على `http://localhost:11434` يمكنك استخدامه لدمج النماذج في تطبيقاتك ونصوصك البرمجية الخاصة.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -538,7 +569,7 @@ PY
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### توليد استجابة في الطرفية
+### إنشاء استجابة في الطرفية
 
 <!-- @os:linux -->
 ```bash
@@ -552,11 +583,11 @@ curl.exe http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "promp
 ```
 <!-- @os:end -->
 
-الاستجابة عبارة عن كائن JSON يحتوي على ناتج النموذج في الحقل `response`.
+الاستجابة عبارة عن كائن JSON يحتوي على مخرجات النموذج في الحقل `response`.
 
 
 ### مثال بلغة Python
-الآن بعد أن أصبح بإمكاننا استدعاء واجهة Ollama API برمجيًا، لنستدعيها من Python.
+الآن بعد أن أصبح بإمكاننا الوصول إلى واجهة برمجة تطبيقات Ollama برمجيًا، لنستدعيها من Python.
 
 #### إنشاء بيئة افتراضية في الطرفية
 
@@ -577,7 +608,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### إنشاء ملف Python
-في نفس الدليل، استخدم VS Code أو محررًا آخر لإنشاء ملف .py وانسخ الكود التالي فيه. بعد ذلك، شغّل الملف في بيئتك المفعّلة باستخدام `python your_file_name.py`
+في نفس المجلد، استخدم VS Code أو محررًا آخر لإنشاء ملف .py وانسخ الكود التالي إليه. ثم شغّل الملف في بيئتك المُفعّلة باستخدام `python your_file_name.py`
 
 ```python
 import requests
@@ -594,22 +625,23 @@ response = requests.post(
 print(response.json()["response"])
 ```
 
-### نقاط نهاية API الرئيسية
+### نقاط النهاية الرئيسية لواجهة برمجة التطبيقات (API)
 
 | نقطة النهاية | الطريقة | الغرض |
 |----------|--------|---------|
-| `/api/generate` | POST | توليد نص بدورة واحدة |
+| `/api/generate` | POST | إنشاء نص من دورة واحدة |
 | `/api/chat` | POST | محادثة متعددة الأدوار مع سجل الرسائل |
-| `/api/tags` | GET | عرض قائمة النماذج المتاحة |
+| `/api/tags` | GET | عرض النماذج المتاحة |
 | `/api/show` | POST | عرض تفاصيل النموذج |
 | `/api/pull` | POST | سحب نموذج من السجل |
 
-للاطلاع على مرجع API الكامل، راجع [وثائق Ollama API](https://github.com/ollama/ollama/blob/main/docs/api.md).
+للحصول على مرجع كامل لواجهة برمجة التطبيقات، راجع [وثائق Ollama API](https://github.com/ollama/ollama/blob/main/docs/api.md).
+
 ## الخطوات التالية
 
 - **جرّب نماذج مختلفة**: تصفح [مكتبة نماذج Ollama](https://ollama.com/library) لاستكشاف مئات النماذج المتاحة، من مساعدي البرمجة الصغيرة إلى نماذج الاستدلال الكبيرة.
-- **أنشئ نماذج مخصصة**: استخدم [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) لضبط موجّهات النظام المخصصة، ودرجة الحرارة، وغيرها من المعلمات للحصول على تجربة مخصصة.
-- **ابنِ باستخدام الواجهة البرمجية (API)**: استخدم مكتبات العميل [Python](https://github.com/ollama/ollama-python) أو [JavaScript](https://github.com/ollama/ollama-js) لدمج Ollama في تطبيقاتك.
-- **اتصل بالواجهات الأمامية**: اقرن Ollama مع أدوات مثل [Open WebUI](https://github.com/open-webui/open-webui) للحصول على واجهة محادثة غنية بالميزات تتضمن البحث والشخصيات ورفع المستندات.
+- **إنشاء نماذج مخصصة**: استخدم [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) لضبط موجهات النظام المخصصة، ودرجة الحرارة (temperature)، ومعلمات أخرى لتجربة مصممة خصيصًا.
+- **البناء باستخدام API**: استخدم مكتبات العميل [Python](https://github.com/ollama/ollama-python) أو [JavaScript](https://github.com/ollama/ollama-js) لدمج Ollama في تطبيقاتك.
+- **الاتصال بالواجهات الأمامية**: اقرن Ollama مع أدوات مثل [Open WebUI](https://github.com/open-webui/open-webui) للحصول على واجهة دردشة غنية بالميزات مع البحث، والشخصيات (personas)، وتحميل المستندات.
 
-لمزيد من المعلومات، اطّلع على [توثيق Ollama](https://github.com/ollama/ollama/blob/main/README.md).
+لمزيد من المعلومات، راجع [وثائق Ollama](https://github.com/ollama/ollama/blob/main/README.md).

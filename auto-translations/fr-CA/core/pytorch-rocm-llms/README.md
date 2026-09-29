@@ -17,17 +17,19 @@ SPDX-License-Identifier: MIT
 ## Aperçu
 
 
-Vous voulez exécuter de puissants modèles de langage IA sur votre propre matériel? Ce guide vous montre comment faire.
-Ce tutoriel utilise PyTorch alimenté par le logiciel AMD ROCm™ pour exécuter des modèles capables de résumer des documents, de répondre à des questions, de générer du texte, et bien plus encore, le tout en local.
+Vous souhaitez exécuter de puissants modèles de langage IA sur votre propre matériel? Ce guide vous montre comment faire.
+Ce tutoriel utilise PyTorch propulsé par le logiciel AMD ROCm™ pour exécuter des modèles capables de résumer des documents, répondre à des questions, générer du texte, et bien plus encore, le tout en fonctionnement local.
 
 ## Ce que vous apprendrez
 
-- Exécuter des LLM comme gpt-oss-20b et qwen3.5-4B en local à l'aide de PyTorch et de ROCm
+- Exécuter des LLM comme gpt-oss-20b et qwen3.5-4B localement à l'aide de PyTorch et de ROCm
 - Créer un outil de résumé de documents à l'aide de LLM
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Configuration de la mémoire
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Vérifier les mises à jour logicielles
@@ -42,7 +44,7 @@ Ce tutoriel utilise PyTorch alimenté par le logiciel AMD ROCm™ pour exécuter
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Sous Linux, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv avec ROCm+PyTorch déjà installés.
+Sous Linux, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv avec ROCm+Pytorch déjà installé.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -77,7 +79,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Sous Windows, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv avec ROCm+PyTorch déjà installés.
+Sous Windows, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv avec ROCm+Pytorch déjà installé.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -98,8 +100,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Astuce** : Les utilisateurs de Windows pourraient devoir modifier leur politique d'exécution PowerShell (par exemple,
-> en la définissant sur RemoteSigned ou Unrestricted) avant d'exécuter certaines commandes PowerShell.
+> **Astuce** : Les utilisateurs de Windows devront peut-être modifier leur politique d'exécution PowerShell (par exemple,
+> en la définissant sur RemoteSigned ou Unrestricted) avant d'exécuter certaines commandes Powershell.
 
 <!-- @os:end -->
 
@@ -115,7 +117,7 @@ pytorch-env\Scripts\activate
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -123,10 +125,17 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece pro
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+> **Remarque :** Si le modèle ne se charge pas ou manque de mémoire, essayez d'installer le paquet `kernels` pour charger le modèle avec une quantification optimisée.
+>
+> ```bash
+> # Use this version which is compatible with the Transformers version
+> pip install "kernels==0.14.1" 
+> ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -141,13 +150,13 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Démarrage rapide avec les scripts d'exemple
+## Démarrage rapide avec des scripts d'exemple
 
 Ce guide pratique inclut des scripts prêts à l'emploi. Cliquez dessus pour les prévisualiser et les télécharger dans le même répertoire que l'environnement que vous avez créé.
 
@@ -181,17 +190,17 @@ for script in ['run_llm.py', 'summarizer.py']:
 
 Les deux scripts prennent en charge :
 - La sélection du modèle via l'indicateur `--model`
-- Le formatage des modèles de discussion pour un bon guidage des invites du modèle, particulièrement utile pour le résumé de documents
+- Le formatage de modèle de discussion pour une invite appropriée du modèle, particulièrement utile pour le résumé de documents
 
-## Chargement et exécution de votre premier LLM
+## Charger et exécuter votre premier LLM
 
-Le script inclus [run_llm.py](assets/run_llm.py) montre comment générer du texte avec des LLM en utilisant PyTorch et AMD ROCm.
+Le script inclus [run_llm.py](assets/run_llm.py) montre comment générer du texte avec des LLM à l'aide de PyTorch et d'AMD ROCm.
 
-> **Remarque :** Lorsque vous chargez un modèle, Hugging Face Transformers vérifie d'abord son cache local (`~/.cache/huggingface/hub` sous Linux, `C:\Users\<user>\.cache\huggingface\hub` sous Windows). Si le modèle n'est pas mis en cache, il est téléchargé automatiquement depuis huggingface.co. La première exécution peut prendre quelques minutes selon la taille du modèle et la vitesse du réseau.
+> **Remarque :** Lorsque vous chargez un modèle, Hugging Face Transformers vérifie d'abord son cache local (`~/.cache/huggingface/hub` sous Linux, `C:\Users\<user>\.cache\huggingface\hub` sous Windows). Si le modèle n'est pas mis en cache, il est téléchargé automatiquement à partir de huggingface.co. La première exécution peut prendre quelques minutes selon la taille du modèle et la vitesse du réseau.
 
 L'extrait ci-dessous montre comment utiliser le modèle et personnaliser les questions posées.
 
-<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -213,7 +222,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    disable_mmap=True
 )
 ```
 <!-- @test:end -->
@@ -266,7 +276,7 @@ python run_llm.py --model ${hf_model}
 
 ## Créer un résumeur de documents
 
-Maintenant que vous avez généré une sortie de LLM en local, vous pouvez aller plus loin en créant un résumeur de documents pratique. Dans cette section, vous utiliserez le script [summarizer.py](assets/summarizer.py) pour fournir un fichier .txt et générer automatiquement un résumé concis, le tout en s'exécutant en local sur votre GPU.
+Maintenant que vous avez généré une sortie LLM locale, vous pouvez aller plus loin en créant un résumeur de documents pratique. Dans cette section, vous utiliserez le script [summarizer.py](assets/summarizer.py) pour fournir un fichier .txt et générer automatiquement un résumé concis, le tout en fonctionnement local sur votre GPU.
 
 Le script est conçu pour fonctionner immédiatement. Ouvrez le script dans un éditeur pour explorer le code, personnaliser les invites et ajuster des paramètres comme la longueur et la température.
 
@@ -296,24 +306,23 @@ python summarizer.py --file document.txt --max-length 400
 
 | Paramètre | Ce qu'il contrôle | Valeurs typiques |
 |-----------|------------------|----------------|
-| `max_new_tokens` | La longueur maximale de la sortie du LLM | Utilisez de 50 à 500 jetons pour les résumés. (1 jeton équivaut à environ 0,75 mot en anglais) |
-| `temperature` | Créativité. Les valeurs faibles la rendent plus ciblée, tandis que les valeurs élevées apportent plus d'imprévisibilité | - **0,1–0,3** : Ciblé, déterministe (bon pour les résumés) <br> **0,5–0,7** : Équilibré (usage général) <br> **0,8–1,0** : Créatif, varié (remue-méninges) |
-| `top_p` | Échantillonnage par noyau (Nucleus Sampling) - Les valeurs faibles limitent le modèle à des sorties plus restreintes | **0,1-0,5** : Strict, prévisible <br> **0,9-0,95** : (standard, naturel, conversationnel) |
+| `max_new_tokens` | La longueur maximale de la sortie du LLM | Utilisez de 50 à 500 jetons pour les résumés. (1 jeton correspond à environ 0,75 mot anglais) |
+| `temperature` | La créativité. Des valeurs faibles rendent le résultat concentré, tandis que des valeurs élevées apportent plus d'imprévisibilité | - **0,1–0,3** : Concentré, déterministe (bon pour les résumés) <br> **0,5–0,7** : Équilibré (usage général) <br> **0,8–1,0** : Créatif, varié (remue-méninges) |
+| `top_p` | Échantillonnage par noyau (Nucleus Sampling) - Des valeurs faibles limitent le modèle à des sorties plus restreintes | **0,1-0,5** : Strict, prévisible <br> **0,9-0,95** : (standard, naturel, conversationnel) |
 
 
 ## Applications concrètes
 
 - **Analyse d'articles de recherche** : Extraire les conclusions clés de publications complexes pour un examen rapide
-- **Agrégation de nouvelles** : Résumer des articles de presse en brefs bulletins ou points saillants quotidiens
-- **Notes de réunion** : Condenser les transcriptions en éléments d'action et résumés concis
+- **Agrégation de nouvelles** : Résumer des articles d'actualité en brefs résumés quotidiens ou en faits saillants
+- **Notes de réunion** : Condenser des transcriptions en éléments d'action et en résumés concis
 - **Révision de documents juridiques** : Extraire rapidement les clauses ou obligations pertinentes de longs textes juridiques
-- **Documentation de code** : Générer des aperçus de dépôts concis et des explications de fonctions
-
+- **Documentation du code** : Générer des aperçus concis de dépôts et des explications de fonctions
 ## Prochaines étapes
 
-- **Réglage fin (fine-tuning)** : Adaptez les modèles à votre domaine ou jargon spécifique pour une meilleure précision (voir les guides pratiques de réglage fin)
-- **Systèmes RAG** : Combinez les LLM avec la récupération de documents pour des réponses et des recherches contextuelles
-- **Exploration de modèles** : Expérimentez avec de nouveaux modèles comme Llama 3, Phi-3 ou Qwen pour de meilleurs résultats
+- **Ajustement fin (fine-tuning)** : Adaptez les modèles à votre domaine ou à votre jargon spécifique pour améliorer la précision (voir les guides pratiques d'ajustement fin)
+- **Systèmes RAG** : Combinez les LLM avec la récupération de documents pour obtenir des réponses et une recherche tenant compte du contexte
+- **Exploration de modèles** : Expérimentez avec de nouveaux modèles comme Llama 3, Phi-3 ou Qwen pour obtenir de meilleurs résultats
 - **Déploiement en production** : Utilisez des outils comme vLLM pour un service de LLM évolutif au sein des organisations
 
-Votre système vous donne le pouvoir d'exécuter des modèles de langage sophistiqués en local. Expérimentez avec différents modèles, invites et paramètres pour découvrir ce qui convient le mieux à vos applications.
+Votre système vous donne le pouvoir d'exécuter des modèles de langage sophistiqués localement. Expérimentez avec différents modèles, invites et paramètres pour découvrir ce qui fonctionne le mieux pour vos applications.

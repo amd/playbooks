@@ -12,33 +12,35 @@ SPDX-License-Identifier: MIT
 
 ## 概要
 
-[**Hermes Agent**](https://hermes-agent.nousresearch.com/) は、Nous Research が開発した自己改善型 AI エージェントです。組み込みの学習ループを備えており、経験からスキルを構築し、セッションをまたいでユーザーに関する永続的なメモリを構築し、ユーザーに代わってスケジュールされた自動化を実行できます。単純なチャットアシスタントとは異なり、Hermes はシェルコマンドの実行、ファイルの書き込み、Web の閲覧、並列ワークストリームのサブエージェントへの委任など、実際のアクションを実行します。
+[**Hermes Agent**](https://hermes-agent.nousresearch.com/) は、Nous Research によって構築された自己改善型 AI エージェントです。組み込みの学習ループを持ち、経験からスキルを構築し、セッションをまたいであなたに関する永続的な記憶を構築し、あなたに代わってスケジュールされた自動化を実行できます。単純なチャットアシスタントとは異なり、Hermes はシェルコマンドの実行、ファイルの書き込み、Web の閲覧、並列作業の subagent への委任といった実際のアクションを行います。
 
-[**Lemonade Server**](https://lemonade-server.ai/) は、それを支えるローカル推論バックエンドです。これは、AMD ハードウェア上で直接 GenAI モデルを実行し、業界標準の OpenAI API を通じてそれらを公開するオープンソースのサーバーです。
+[**Lemonade Server**](https://lemonade-server.ai/) は、それを支えるローカル推論バックエンドです。これは、GenAI モデルをお使いの AMD ハードウェア上で直接実行し、業界標準の OpenAI API を通じてそれらを公開するオープンソースサーバーです。
 
-これらを組み合わせることで、完全にローカルな AI エージェントスタックが構成されます。Lemonade は GPU 上でのモデル推論を担当し、Hermes はエージェントループ、メモリ、スキル、メッセージングゲートウェイを提供します。
+これらを組み合わせることで、完全にローカルな AI エージェントスタックが形成されます。Lemonade は GPU 上でのモデル推論を処理し、Hermes はエージェントループ、メモリ、スキル、メッセージングゲートウェイを提供します。
 
-> **続行する前に:** Hermes Agent は高度に自律的な AI エージェントです。AI エージェントにシステムへのアクセスを許可すると、予測不可能または意図しない結果が生じる可能性があります。リスクを理解し、自律的なソフトウェアがユーザーに代わって動作することに問題がないと確信できる場合にのみ、続行してください。
+> **続ける前に:** Hermes Agent は高度な自律性を持つ AI エージェントです。AI エージェントにシステムへのアクセスを許可すると、予測できない、または意図しない結果を招く可能性があります。リスクを理解し、あなたに代わって自律的に動作するソフトウェアに納得できる場合にのみ、先へ進んでください。
 
 ---
 
 ## このプレイブックで学べること
 
-このプレイブックを終える頃には、以下ができるようになります。
+このプレイブックを終える頃には、次のことができるようになります。
 
-- **Hermes Agent をインストール**し、その AI バックエンドとして **Lemonade Server** を指定する。
-- **(推奨) Docker/Podman サンドボックス化を有効化**し、エージェントのアクションをホストから分離する。
-- **Hermes ゲートウェイを起動**し、エージェントが準備完了であることを確認する。
-- **通信チャネル (Discord または Telegram) を接続**し、任意のデバイスからエージェントとチャットできるようにする。
+- **Hermes Agent をインストール**し、**Lemonade Server** をその AI バックエンドとして指定する。
+- **（推奨）Docker/Podman サンドボックスを有効化**し、エージェントのアクションをホストから隔離する。
+- **Hermes ゲートウェイを起動**し、エージェントが準備できたことを確認する。
+- **通信チャネル（Discord または Telegram）を接続**し、どのデバイスからでもエージェントとチャットできるようにする。
 
 ---
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## メモリ設定を行う
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## ソフトウェアの更新を確認する
+## ソフトウェアアップデートを確認する
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -46,20 +48,20 @@ SPDX-License-Identifier: MIT
 ## ソフトウェアの前提条件をインストールする
 
 <!-- @os:linux -->
-- **Ubuntu 24.04+** または `apt-get` を利用できる互換性のある Debian ベースの Linux ディストリビューションを実行している PC
-- 少なくとも **12 GB の RAM** (より大きなモデルには 64 GB 以上を推奨)
-- モデルの重み用に **約 10〜30 GB の空きディスク容量**
-- [Podman](https://podman.io/docs/installation) (オプション、Hermes Agent のサンドボックス化用)
+- **Ubuntu 24.04+**、または `apt-get` を利用できる互換性のある Debian ベースの Linux ディストリビューションを実行している PC
+- 少なくとも **12 GB の RAM**（より大きなモデルには 64 GB 以上を推奨）
+- モデルの重みのために **約 10～30 GB の空きディスク容量**
+- [Podman](https://podman.io/docs/installation)（Hermes Agent をサンドボックス化する場合、任意）
   ```bash 
-  sudo apt-get install -y podman`
+  sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - **Windows 10/11** を実行している PC
-- 少なくとも **12 GB の RAM** (より大きなモデルには 64 GB 以上を推奨)
-- モデルの重み用に **約 10〜30 GB の空きディスク容量**
-- Podman (オプション、Hermes Agent のサンドボックス化用)。WSL 内にインストールします。
+- 少なくとも **12 GB の RAM**（より大きなモデルには 64 GB 以上を推奨）
+- モデルの重みのために **約 10～30 GB の空きディスク容量**
+- Podman（Hermes Agent をサンドボックス化する場合、任意）。WSL 内にインストールしてください。
   ```bash 
   sudo apt-get install -y podman
   ```
@@ -81,16 +83,17 @@ lemonade --version
 
 ---
 
-## 推奨モデルをプルしてロードする
+## 推奨モデルを取得してロードする
 
-このプレイブックの推奨モデルは、Unsloth の **Qwen3.6-35B-A3B-GGUF** です。これは 263,000 トークンのコンテキストウィンドウを持つ強力な MoE モデルで、エージェントワークロードに適しています。このモデルは UD-Q4_K_XL 量子化を使用しています。今すぐプルしてください。
+このプレイブックで推奨するモデルは、Unsloth 提供の **Qwen3.6-35B-A3B-GGUF** です。これは 263k トークンのコンテキストウィンドウを持つ強力な MoE モデルで、エージェントのワークロードに適しています。このモデルは UD-Q4_K_XL 量子化を使用しています。今すぐ取得してください。
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-次に、大きなコンテキストウィンドウでロードし、今後の実行のためにその設定を保存します。
+続けて、大きなコンテキストウィンドウでロードし、その設定を今後の実行のために保存します。
 
+<!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
 lemonade unload
@@ -98,9 +101,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end -->
 
-このモデルのデフォルトのコンテキスト長は 262,144 トークンです。メモリ不足 (OOM) エラーが発生した場合は、コンテキストウィンドウを小さくすることを検討してください。
+このモデルのデフォルトのコンテキスト長は 262,144 トークンです。メモリ不足（OOM）エラーが発生する場合は、コンテキストウィンドウを縮小することを検討してください。
 
-> **ヒント: エージェントの応答を高速化するために思考モードを無効にする:** Qwen3.6-35B-A3B はデフォルトで思考モードで動作するため、各応答の前にレイテンシが追加されます。エージェントループではこのオーバーヘッドがすぐに蓄積します。[lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) リポジトリには、思考モードを無効にする設定済みの構成が用意されています。使用するには、ファイルをダウンロードしてインポートしてください。
+> **ヒント: より高速なエージェント応答のために思考モードを無効化する:** Qwen3.6-35B-A3B はデフォルトで思考モードで動作し、各応答の前にレイテンシが追加されます。エージェントループではこのオーバーヘッドがすぐに蓄積します。[lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) リポジトリには、思考を無効化する設定済みの構成がすぐに使える形で用意されています。使用するには、ファイルをダウンロードしてインポートしてください。
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -241,9 +244,9 @@ echo "OK: Lemonade chat/completions returned a response"
 
 <!-- @os:windows -->
 
-## WSL をセットアップする
+## WSL のセットアップ
 
-Hermes Agent は WSL 内で実行し、Windows 上でネイティブに実行されている Lemonade に接続します。これにより、Windows 側で Lemonade の GPU アクセラレーションを維持しながら、Hermes 用の Linux シェル環境を利用できます。
+Hermes Agent は WSL 内で実行し、Windows 上でネイティブに実行されている Lemonade に接続します。これにより、Windows 側で Lemonade の GPU アクセラレーションを維持しつつ、Hermes 用の Linux シェル環境を得ることができます。
 
 ### WSL と Ubuntu をインストールする
 
@@ -253,15 +256,15 @@ PowerShell を管理者として開き、WSL カーネルをインストール�
 wsl --install --no-distribution
 ```
 
-次に Ubuntu をインストールします。
+続けて Ubuntu をインストールします。
 
 ```powershell
 wsl --install -d Ubuntu-24.04
 ```
 
-### WSL で systemd を有効にする
+### WSL で systemd を有効化する
 
-Ubuntu ターミナル内で以下を実行します。
+Ubuntu ターミナル内で次を実行します。
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -279,34 +282,34 @@ wsl
 
 ### Windows から WSL へ Lemonade をブリッジする
 
-WSL2 は仮想ネットワーク内で実行されます。Windows 上の Lemonade は `127.0.0.1` にバインドされますが、WSL は直接これに到達できません。Windows のポートプロキシを使用して、WSL ゲートウェイ IP から Windows のローカルホストへトラフィックを転送します。
+WSL2 は仮想ネットワーク内で動作します。Windows 上の Lemonade は `127.0.0.1` にバインドされるため、WSL から直接アクセスすることはできません。Windows のポートプロキシは、WSL のゲートウェイ IP からのトラフィックを Windows のローカルホストへ転送します。
 
-**WSL ゲートウェイ IP を確認します** (WSL 内で実行):
+**WSL のゲートウェイ IP を確認します**（WSL 内で実行）。
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**ポートプロキシを追加します** (PowerShell を管理者として実行し、`<WSL-Gateway-IP>` を実際の WSL ゲートウェイ IP に置き換えてください):
+**ポートプロキシを追加します**（PowerShell を管理者として実行し、`<WSL-Gateway-IP>` をご使用の WSL ゲートウェイ IP に置き換えてください）。
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**ファイアウォールルールを追加します** (同じ管理者権限の PowerShell):
+**ファイアウォールルールを追加します**（同じ管理者権限の PowerShell で実行）。
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**WSL から確認します**:
+**WSL から確認します**。
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-前のステップで Qwen3.6-35B-A3B-GGUF モデルを既にロードしている場合、ロード済みモデルを一覧表示する JSON 出力が表示されるはずです。
+前の手順で Qwen3.6-35B-A3B-GGUF モデルを既にロードしている場合、ロード済みモデルを一覧表示する JSON 出力が表示されるはずです。
 
 ```json
 {
@@ -324,7 +327,7 @@ curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 }
 ```
 
-> `netsh portproxy` ルールは再起動後も保持されますが、`wsl --shutdown` の後に WSL ゲートウェイ IP が変わる場合があります。再起動後に WSL から Lemonade に到達できなくなった場合は、更新されたゲートウェイ IP を取得し、その新しい IP でプロキシを更新してください。
+> `netsh portproxy` ルールは再起動後も維持されますが、WSL のゲートウェイ IP は `wsl --shutdown` の後に変わることがあります。再起動後に WSL から Lemonade に到達できなくなった場合は、更新されたゲートウェイ IP を取得し、この新しい IP でプロキシを更新してください。
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -383,14 +386,14 @@ finally {
 ## Hermes Agent をインストールする
 
 <!-- @os:windows -->
-> 特に断りのない限り、このセクションのコマンドは **WSL ターミナル**内で実行してください。
+> このセクションのコマンドは、特に断りのない限り **WSL ターミナル**内で実行してください。
 <!-- @os:end -->
 
 ```bash
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 ```
 
-`--skip-setup` フラグは対話型のセットアップウィザードをスキップするため、次のステップでモデルバックエンドを手動で設定できます。
+`--skip-setup` フラグは対話型セットアップウィザードをスキップするため、次のステップでモデルバックエンドを手動で設定できます。
 
 シェルを再読み込みします。
 
@@ -404,7 +407,7 @@ source ~/.bashrc
 hermes --version
 ```
 
-自己診断を実行してすべての依存関係を確認します。
+自己診断を実行して、すべての依存関係を確認します。
 
 ```bash
 hermes doctor
@@ -466,14 +469,14 @@ finally {
 <!-- @os:end -->
 
 ---
-## Hermes を Lemonade を使用するように設定する
+## HermesがLemonadeを使用するように設定する
 
-Hermes はモデル設定を `~/.hermes/config.yaml` に保存します。対話形式の `hermes model` ピッカーを使用するか、設定を直接記述することができます。
+Hermesはモデル設定を`~/.hermes/config.yaml`に保存します。インタラクティブな`hermes model`ピッカーを使用するか、直接設定ファイルを記述することができます。
 
-### オプション1：対話形式のピッカー
+### オプション1：インタラクティブピッカー
 
 <!-- @os:windows -->
-> 次のコマンドは **WSL ターミナル** 内で実行してください。
+> 以下のコマンドは**WSLターミナル**内で実行してください。
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -488,22 +491,22 @@ hermes model
 ```
 <!-- @os:end -->
 
-以下のプロンプトが表示されたら:
+プロンプトが表示されたら：
 
-1. **Custom endpoint (enter URL manually)** を選択します
+1. **Custom endpoint (enter URL manually)**を選択
 <!-- @os:linux -->
 2. **API base URL:** `http://127.0.0.1:13305/api/v1`
 <!-- @os:end -->
 <!-- @os:windows -->
-2. **API base URL:** WSL のゲートウェイ IP を使用します。WSL 内で `ip route show default | awk '{print $3}' | head -1` を実行して取得し、`http://<WSL-Gateway-IP>:13305/api/v1` と入力します
+2. **API base URL:** WSLゲートウェイIPを使用します。WSL内で`ip route show default | awk '{print $3}' | head -1`を実行して取得し、`http://<WSL-Gateway-IP>:13305/api/v1`を入力してください
 <!-- @os:end -->
 3. **API key:** `lemonade`
 4. **API compatibility mode:** `1`（自動検出）
-5. **Select model:** 一覧から `Qwen3.6-35B-A3B-GGUF` を選択します
+5. **Select model:** リストから`Qwen3.6-35B-A3B-GGUF`を選択
 6. **Context length in tokens:** `262144`
 7. **Display name:** `local-lemonade`（またはお好みの名前）
 
-`hermes model` は、アクティブなモデルの選択と、コンテキスト長をエンドポイントとともに保存する名前付きの `custom_providers` エントリの両方を保存します。`~/.hermes/config.yaml` の結果は次のようになります:
+`hermes model`は、アクティブなモデルの選択と、エンドポイントとともにコンテキスト長を保存する名前付きの`custom_providers`エントリの両方を保存します。`~/.hermes/config.yaml`内の結果は次のようになります：
 
 ```yaml
 model:
@@ -521,7 +524,7 @@ custom_providers:
         context_length: 262144
 ```
 
-### オプション2：設定を直接記述する
+### オプション2：直接設定を記述する
 
 <!-- @os:linux -->
 
@@ -583,7 +586,7 @@ echo "OK: Hermes config.yaml contains Lemonade model configuration"
 
 <!-- @os:windows -->
 
-WSL ターミナル内で、Windows ホストの IP を取得し、設定を記述します:
+WSLターミナル内で、Windowsホストのipを取得し、設定を記述します：
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
@@ -676,11 +679,11 @@ finally {
 
 ---
 
-## (推奨) Podman サンドボックスを有効にする
+## （推奨）Podmanサンドボックスを有効にする
 
-Hermes Agent は、すべてのエージェントのシェル操作やファイル操作を、ホスト上で直接実行するのではなく、分離されたコンテナ経由でルーティングできます。これにより、意図しない操作の影響範囲がサンドボックス内に限定され、ホストのファイルシステムやネットワークは影響を受けません。
+Hermes Agentは、すべてのエージェントのシェル操作とファイル操作を、ホスト上で直接実行するのではなく、分離されたコンテナ経由でルーティングできます。これにより、意図しない操作の影響範囲がサンドボックスに限定され、ホストのファイルシステムとネットワークは影響を受けません。
 
-軽量なサンドボックスイメージをビルドします:
+軽量なサンドボックスイメージをビルドします：
 
 <!-- @os:linux -->
 ```bash
@@ -723,13 +726,13 @@ echo "OK: Hermes sandbox Podman image is available"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-WSL ターミナルに入ります:
+WSLターミナルに入ります：
 
 ```powershell
 wsl -d Ubuntu-24.04
 ```
 
-次に、軽量なサンドボックスイメージをビルドします:
+次に、軽量なサンドボックスイメージをビルドします：
 
 ```bash
 podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -792,7 +795,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-次に、Hermes がコンテナランタイムとして Podman を使用するように設定し、ターミナルバックエンドを設定します:
+次に、Podmanをコンテナランタイムとして使用するようにHermesを設定し、ターミナルバックエンドを設定します：
 
 ```bash
 echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
@@ -804,8 +807,8 @@ terminal:
 EOF
 ```
 
-> `terminal.backend` は引き続き `docker` のままです。
-> `HERMES_DOCKER_BINARY` は、Hermes にランタイムとして Podman を使用するよう指示するものです。
+> `terminal.backend`は引き続き`docker`のままです。
+> `HERMES_DOCKER_BINARY`は、Hermesにランタイムとして代わりにPodmanを使用するよう指示するものです。
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -902,37 +905,37 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-これで Hermes は永続的なサンドボックスコンテナを起動し、すべての `terminal` およびファイルツールの呼び出しをそのコンテナ経由でルーティングするようになります。このコンテナは Hermes プロセスと生存期間を共有し、すべてのツール呼び出しで再利用され、Hermes が終了すると破棄されます。
+これにより、Hermesは永続的なサンドボックスコンテナを起動し、すべての`terminal`ツールおよびファイルツールの呼び出しをそのコンテナ経由でルーティングします。このコンテナはHermesプロセスと生存期間を共有し、すべてのツール呼び出しで再利用され、Hermesが終了すると破棄されます。
 
-> **サンドボックスが機能していることを確認する:** Hermes（`hermes`）を起動し、`run hostname` を実行するよう依頼してください。マシンのホスト名の代わりに、短いコンテナ ID が表示されるはずです。また、`rm -rf <path-to-a-dummy-file/folder>` を実行するよう依頼することもできます。Hermes は削除を確認しますが、フォルダはホスト上にそのまま残ります。このコマンドはコンテナの分離された `$HOME` 内で実行されたのであって、あなたの `$HOME` 内ではありません。
+> **サンドボックスが機能していることを確認する：** Hermes（`hermes`）を起動し、`run hostname`を実行するよう依頼してください。マシンのホスト名ではなく、短いコンテナIDが表示されるはずです。また、`rm -rf <path-to-a-dummy-file/folder>`を実行するよう依頼することもできます。Hermesは削除を確認しますが、フォルダはホスト上にそのまま残っています。このコマンドはコンテナの分離された`$HOME`内で実行されたのであり、あなたの`$HOME`ではありません。
 
-> **より強力な分離が必要ですか？** Hermes は、ゲートウェイ、ツールなどエージェントプロセス全体をコンテナ内で実行する公式の Docker イメージ（`nousresearch/hermes-agent`）も提供しています。設定の詳細については、[Hermes Docker ドキュメント](https://hermes-agent.nousresearch.com/docs/user-guide/docker) を参照してください。
+> **より強力な分離が必要ですか？** Hermesは、ゲートウェイ、ツールなど、エージェントプロセス全体をコンテナ内で実行する公式のDockerイメージ（`nousresearch/hermes-agent`）も提供しています。セットアップの詳細については、[Hermes Dockerドキュメント](https://hermes-agent.nousresearch.com/docs/user-guide/docker)を参照してください。
 
 ---
 
 <!-- @os:linux -->
-## (推奨) Firecrawl サービスと Hermes の統合
+## （推奨）HermesとFirecrawlサービスの統合
 
-Hermes は、組み込みの Web ツールを使用して Web サイトを閲覧し、コンテンツを抽出できます。しかし、多くの最新の Web サイトはボット検出システムを使用しており、単純な HTTP リクエストをブロックし、実際のコンテンツの代わりにチャレンジページを返します。その結果、Hermes はこれらのサイトから確実に情報を抽出できない場合があります。
+Hermesは、組み込みのWebツールを使用してウェブサイトを閲覧し、コンテンツを抽出できます。しかし、多くの最新のウェブサイトはボット検出システムを使用しており、単純なHTTPリクエストをブロックして、実際のコンテンツの代わりにチャレンジページを返します。その結果、Hermesはこれらのサイトから確実に情報を抽出できない場合があります。
 
-この制限を克服するために、[Firecrawl](https://docs.firecrawl.dev/introduction) は、これらのチャレンジを回避し、Hermes の自動化の可能性を最大限に引き出すことができる、セルフホスト型の Web クローリングおよびコンテンツ抽出サービスを提供します。
+この制限を克服するため、[Firecrawl](https://docs.firecrawl.dev/introduction)は、これらのチャレンジを回避し、Hermes自動化の可能性を最大限に引き出すことができる、セルフホスト型のウェブクローリングおよびコンテンツ抽出サービスを提供します。
 
-このセットアップでは、Firecrawl は Podman で管理される一連の Docker コンテナとして実行されます。ライフサイクル管理と自動起動を簡素化するために、Firecrawl をユーザーレベルの `systemd` サービスとして登録し、基盤となる Podman Compose スタックをオーケストレーションします。これにより、Hermes はコンテナと直接やり取りする代わりに、標準の `systemctl --user` コマンドを使用して Firecrawl サービスを開始、停止、確認できるようになります。
+このセットアップでは、Firecrawlは、Podmanで管理される一連のDockerコンテナとして実行されます。ライフサイクル管理と自動起動を簡素化するため、基盤となるPodman Composeスタックをオーケストレーションするユーザーレベルの`systemd`サービスとしてFirecrawlを登録します。これにより、Hermesは、コンテナと直接やり取りする代わりに、標準の`systemctl --user`コマンドを使用してFirecrawlサービスを開始、停止、確認できるようになります。
 
-わかりやすくするために、プロセス全体を4つのステップに分けています:
+わかりやすくするため、全体のプロセスを4つのステップに分けています：
 
 ---
 
 ### 1. システムサービスを登録する
-systemd のユーザー設定ディレクトリに移動します:
+systemdユーザー設定ディレクトリに移動します：
 ```bash
 cd ~/.config/systemd/user
 ```
-`firecrawl.service` という名前の新しいファイルを作成して開きます。
+`firecrawl.service`という新しいファイルを作成して開きます。
 ```bash
 nano firecrawl.service
 ```
-以下の設定をコピーして貼り付けます:
+以下の設定をコピーして貼り付けます：
 ```bash
 [Unit]
 Description=Firecrawl
@@ -957,27 +960,27 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
-この時点で、サービスは定義されていますが、まだ `systemd` に登録されていません。
-上記で作成したファイル名と完全に一致していることを確認してから、次を実行します:
+この時点では、サービスは定義されていますが、まだ`systemd`には登録されていません。
+上記で作成したファイル名と完全に一致していることを確認してから、以下を実行します：
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
 ```
-成功すると、以下の出力が表示されます:
+成功すると、次のような出力が表示されるはずです：
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
- `default.target.wants/` には、自動的に起動するように設定されたサービスへのシンボリックリンクが含まれています。
+`default.target.wants/`には、自動起動するよう設定されたサービスへのシンボリックリンクが含まれています。
 
-### 2. サービス用に Firecrawl を設定する
+### 2. サービス用にFirecrawlを設定する
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) は、スクレイピングとデータ処理環境を完全に制御する必要があるユーザーに最適ですが、その代わりに追加のメンテナンスと設定の手間が発生します。
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md)は、スクレイピングおよびデータ処理環境を完全に制御する必要があるユーザーに最適ですが、その代償として、追加のメンテナンスと設定作業が必要になります。
 
-まず、リポジトリをクローンします:
+まず、リポジトリをクローンします：
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-ルートの `/firecrawl` ディレクトリに `.env` を作成します:
+ルートの`/firecrawl`ディレクトリに`.env`を作成します：
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1005,44 +1008,44 @@ BULL_AUTH_KEY=CHANGEME
 # Default: 0.8 (80%)
 # MAX_RAM=0.8
 ```
-> 信頼できないネットワークからアクセス可能なデプロイメントの場合は特に、`BULL_AUTH_KEY` には強力なシークレットを設定してください。
-### 3. Hermesの Composeによるデプロイ
+> 特に信頼されていないネットワークからアクセス可能なデプロイメントでは、`BULL_AUTH_KEY`を強力なシークレットに設定してください。
+### 3. Compose 経由での Hermes のデプロイ
 
-先に進む前に、最新のHermes Dockerイメージをプルしていることを確認してください。
+先に進む前に、最新の Hermes Docker イメージをプルしていることを確認してください:
 ```bash
 podman pull docker.io/nousresearch/hermes-agent:latest
 ```
-完了したら、Hermes Composeファイル[hermes-compose.yaml](assets/hermes-compose.yaml)をダウンロードし、`/firecrawl`のルートディレクトリに配置してください。
+完了したら、Hermes の Compose ファイル [hermes-compose.yaml](assets/hermes-compose.yaml) をダウンロードし、`/firecrawl` ディレクトリの直下に配置してください:
 
-> `WorkingDirectory=${HOME}/firecrawl`で指定されている通り、`systemd`がサービスを正しく検出して起動するためには、この規則に従う必要があります。
+> この規則は、`WorkingDirectory=${HOME}/firecrawl` で指定されているとおりに `systemd` がサービスを正しく見つけて起動するために必要です。
 
-> 必要に応じて、追加のFirecrawlサービスを組み込むことでスタックを拡張できます。利用可能なサービスの全一覧は、公式の[Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml)で確認できます。
+> 必要に応じて、Firecrawl のサービスを追加することでスタックを拡張できます。利用可能なサービスの全一覧は、公式の [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) で確認できます。
 
-### 4. Firecrawl経由でHermesサービスを起動する
+### 4. Firecrawl 経由で Hermes サービスを起動する
 
-`systemd`に制御を委ねる前に、スタックを手動で実行してすべてが正しく動作することを確認してください。
+制御を `systemd` に渡す前に、スタックを手動で実行してすべてが正しく動作することを確認してください:
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-すべてが正しく設定されていれば、Hermesコンテナが立ち上がるのが確認でき、コマンドラインの出力は以下のようになるはずです。
+正しく設定されていれば、Hermes コンテナが立ち上がるのが確認でき、コマンドラインの出力は次のような内容になるはずです:
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
 
-確認が済んだら、次に進む前にスタックを停止してください。
+確認が済んだら、先に進む前にスタックを停止してください:
 ```bash
 podman compose -f hermes-compose.yaml down
 ```
-検証がすべて完了したので、`systemd`経由でサービスを起動します。
+すべての確認が済んだら、`systemd` 経由でサービスを起動します:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints)はインタラクティブコンテナ内からアクセス可能で、Webダッシュボードも同じホスト上のhttp://127.0.0.1:9119で利用できます。
+[Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) はインタラクティブコンテナ内からアクセスでき、Web ダッシュボードは同じホストとポートの http://127.0.0.1:9119 で利用できます。
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
 
-サービスを停止するには、以下を実行してください。
+サービスを停止するには、次を実行します:
 ```bash
 systemctl --user stop firecrawl.service
 ```
@@ -1051,7 +1054,7 @@ systemctl --user stop firecrawl.service
 
 ## Hermes Native
 
-インタラクティブなCLIセッションを直接起動します。
+インタラクティブな CLI セッションを直接開始します:
 
 ```bash
 hermes
@@ -1206,60 +1209,60 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-**おめでとうございます。完全にローカルで動作するAIエージェントスタックを構築できました。**
+**おめでとうございます。完全にローカルで動作する AI エージェントスタックが構築できました。**
 
-### Webダッシュボード
+### Web ダッシュボード
 
-Hermesには、設定、APIキー、モデル、セッション、メモリ、cronジョブを管理するためのブラウザベースのUIが含まれています。ゲートウェイまたはCLIが実行されている状態で、2つ目のターミナルを開き、以下のコマンドで起動してください。
+Hermes には、設定、API キー、モデル、セッション、メモリ、cron ジョブを管理するためのブラウザベースの UI が含まれています。ゲートウェイまたは CLI を実行したまま、2 つ目のターミナルを開いて次のコマンドで起動します:
 
 ```bash
 hermes dashboard
 ```
 
-これによりローカルサーバーが起動し、ブラウザで`http://127.0.0.1:9119`が開きます。全機能のリファレンスについては、[ダッシュボードのドキュメント](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard)を参照してください。
+これによりローカルサーバーが起動し、ブラウザで `http://127.0.0.1:9119` が開きます。全機能のリファレンスについては、[ダッシュボードのドキュメント](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) を参照してください。
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
 
 ---
 
-## オプション:通信チャネルの接続
+## オプション: コミュニケーションチャネルの接続
 
-ゲートウェイが動作していれば、どのデバイスからでもローカルエージェントにアクセスできます。Hermesは[Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord)、[Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram)などをサポートしています。
+ゲートウェイが稼働していれば、任意のデバイスからローカルエージェントにアクセスできます。Hermes は [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord)、[Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) などをサポートしています。
 
 ---
 
 ### Discord
 
-Discordでは、ボットを追加するために**管理者権限を持つ**サーバーが必要です。サーバーを共有していても所有していない場合は、代わりにTelegramを使用してください。
+Discord では、ボットを追加するために**管理者権限を持つ**サーバーが必要です。サーバーを共有していても所有していない場合は、代わりに Telegram を使用してください。
 
-#### Discordアプリケーションとボットの作成
+#### Discord アプリケーションとボットの作成
 
-1. [Discord Developer Portal](https://discord.com/developers/applications)にアクセスし、**New Application**をクリックします。名前を付けます(例: "hermes-bot")。
-2. サイドバーで**Bot**をクリックします。ボットのユーザー名を設定します。
-3. Botページのまま、**Privileged Gateway Intents**までスクロールし、以下を有効にします。
-   - **Message Content Intent**(必須)
-   - **Server Members Intent**(推奨)
-4. 上にスクロールして戻り、**Reset Token**をクリックしてボットトークンを生成します。コピーしてください。
+1. [Discord Developer Portal](https://discord.com/developers/applications) にアクセスし、**New Application** をクリックします。名前を付けます（例: "hermes-bot"）。
+2. サイドバーで **Bot** をクリックします。ボットのユーザー名を設定します。
+3. Bot ページのまま、**Privileged Gateway Intents** までスクロールし、以下を有効にします:
+   - **Message Content Intent**（必須）
+   - **Server Members Intent**（推奨）
+4. 上にスクロールして戻り、**Reset Token** をクリックしてボットトークンを生成します。これをコピーしてください。
 
 #### ボットをサーバーに追加する
 
-1. サイドバーで**OAuth2 / URL Generator**をクリックします。
-2. **Scopes**の下で`bot`と`applications.commands`を有効にします。
-3. **Bot Permissions**の下で、View Channels、Send Messages、Read Message History、Embed Links、Attach Filesを有効にします。
-4. 生成されたURLをコピーしてブラウザに貼り付け、サーバーを選択して確定します。
+1. サイドバーで **OAuth2 / URL Generator** をクリックします。
+2. **Scopes** の下で、`bot` と `applications.commands` を有効にします。
+3. **Bot Permissions** の下で、以下を有効にします: View Channels、Send Messages、Read Message History、Embed Links、Attach Files。
+4. 生成された URL をコピーし、ブラウザに貼り付けて、サーバーを選択し、確定します。
 
-#### IDの取得とDMの許可
+#### ID を取得し、DM を許可する
 
-Discordで開発者モードを有効にし(**User Settings / Advanced / Developer Mode**)、以下を行います。
+Discord で開発者モードを有効にし（**User Settings / Advanced / Developer Mode**）、その後:
 - サーバーアイコンを右クリック: **Copy Server ID**
 - 自分のアバターを右クリック: **Copy User ID**
 
-サーバーアイコンを右クリック / **Privacy Settings** / **Direct Messages**を有効にします。これはペアリングの手順に必要です。
+サーバーアイコンを右クリック / **Privacy Settings** / **Direct Messages** をオンに切り替えます。これはペアリング手順に必要です。
 
-#### DiscordのためのHermesの設定
+#### Discord 用に Hermes を設定する
 
-`~/.hermes/.env`に以下を追加してください。
+`~/.hermes/.env` に以下を追加します:
 
 ```bash
 # Required
@@ -1267,13 +1270,13 @@ DISCORD_BOT_TOKEN=your-bot-token
 DISCORD_ALLOWED_USERS=your-discord-user-id
 ```
 
-次に、ゲートウェイを起動します。
+次に、ゲートウェイを起動します:
 
 ```bash
 hermes gateway
 ```
 
-数秒以内にボットがDiscord上でオンラインになるはずです。DMまたはボットが見えるチャンネルでメッセージを送信してください。
+数秒以内にボットが Discord 上でオンラインになるはずです。DM またはボットが見えるチャンネルでメッセージを送信してください。
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1284,38 +1287,38 @@ hermes gateway
 
 ### Telegram
 
-#### Telegramボットの作成
+#### Telegram ボットの作成
 
-1. Telegramを開き、**@BotFather**にメッセージを送ります。
-2. `/newbot`を送信し、指示に従います。表示されるボットトークンを保存してください。
+1. Telegram を開き、**@BotFather** にメッセージを送信します。
+2. `/newbot` を送信し、案内に従います。表示されるボットトークンを保存してください。
 
-#### TelegramのためのHermesの設定
+#### Telegram 用に Hermes を設定する
 
-`~/.hermes/.env`に以下を追加してください。
+`~/.hermes/.env` に以下を追加します:
 
 ```bash
 TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_ALLOWED_USERS=your-telegram-user-id   # comma-separated for multiple users
 ```
 
-> **Telegramのユーザー IDが分かりませんか?** Telegramで[@userinfobot](https://t.me/userinfobot)にメッセージを送ると、数値IDが返信されます。
+> **Telegram のユーザー ID が分からない場合は？** Telegram で [@userinfobot](https://t.me/userinfobot) にメッセージを送ると、あなたの数値 ID が返信されます。
 
-次に、ゲートウェイを起動します。
+次に、ゲートウェイを起動します:
 
 ```bash
 hermes gateway
 ```
 
-テストのため、Telegramでボットに何かメッセージを送ってください。これでTelegramのDMを通じてエージェントとチャットできるようになりました。Webhookモードや高度なオプションについては、[Telegramの完全なセットアップガイド](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram)を参照してください。
+テストのため、Telegram でボットに何かメッセージを送信してください。これで Telegram の DM 経由でエージェントとチャットできるようになりました。webhook モードや高度なオプションについては、[Telegram の詳細セットアップガイド](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) を参照してください。
 
 ---
 
 ## 次のステップ
 
-これでエージェントがスマートフォンからコマンドを受け取り、ローカルマシン上で動作できるようになったので、以下の3つの方向性を検討する価値があります。
+エージェントがスマートフォンからコマンドを受け取り、ローカルマシン上で動作するようになった今、さらに探求する価値のある 3 つの方向性を紹介します:
 
-1. **自動化されたリサーチダイジェスト**: 毎朝、気になるトピックについてHermesにWeb検索をスケジュールさせ、ローカルモデルで結果を要約し、Telegramまたは Discord経由でダイジェストをスマートフォンにプッシュします。すべて自分のハードウェア上で動作し、クラウドコストは一切かかりません。
+1. **自動リサーチダイジェスト**: 毎朝、関心のあるトピックについて Hermes に Web 検索をさせ、ローカルモデルで調査結果を要約し、Telegram や Discord 経由でスマートフォンにダイジェストを送信するようスケジュールします。すべて自分のハードウェア上で実行され、クラウドコストは一切かかりません。
 
-2. **オンデマンドのコードレビュー**: HermesにGitHubリポジトリを指定し、オープンなプルリクエストをレビューさせて、コメントや要約をチャットに投稿させます。Dockerターミナルバックエンドを使用することで、すべてのgit操作はサンドボックス内で実行されるため、ホスト環境をクリーンに保てます。
+2. **オンデマンドのコードレビュー**: Hermes に GitHub リポジトリを指定し、オープンなプルリクエストをレビューさせ、コメントや要約をチャットに投稿させます。Docker ターミナルバックエンドを使用することで、すべての git 操作はサンドボックス内で実行され、ホスト環境をクリーンに保てます。
 
-3. **ローカルファイルアシスタント**: Hermesに作業ディレクトリへのアクセス権を与え、スマートフォンからオンデマンドでファイルの整理、リネーム、要約、変換を指示できます。Dockerターミナルバックエンドがすべての書き込みをサンドボックスのワークスペース内に限定するため、誤った破壊的操作による被害を防げます。
+3. **ローカルファイルアシスタント**: Hermes に作業ディレクトリへのアクセス権を与え、スマートフォンからオンデマンドでファイルの整理、リネーム、要約、変換をさせます。Docker ターミナルバックエンドがすべての書き込みをサンドボックスのワークスペース内に制限するため、誤って破壊的な操作を行っても被害は限定されます。

@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA je AMD-ov open-source okvir za izgradnju AI agenata koji se izvršavaju lokalno na AMD hardveru uz Ryzen AI akceleraciju.
+GAIA je AMD-ov open-source okvir za izgradnju AI agenata koji rade lokalno na AMD hardveru uz Ryzen AI akceleraciju.
 
 #### Instaliranje GAIA-e
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Na sistemu Windows otvorite terminal u direktorijumu po izboru i pratite komande za kreiranje venv-a.
+1. Na Windows-u otvorite terminal u direktorijumu po izboru i pratite komande da biste kreirali venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Zatim koristite `pip` da instalirate **Gaia**
+2. Zatim, koristite `pip` da instalirate **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Na sistemu Linux otvorite terminal u direktorijumu po izboru i pratite komande za kreiranje venv-a.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. Na Linux-u otvorite terminal u direktorijumu po izboru i pratite komande da biste kreirali venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Zatim koristite `pip` da instalirate **Gaia**
+2. Zatim, koristite `pip` da instalirate **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Na sistemu Windows otvorite terminal u direktorijumu po izboru i pratite komande za kreiranje venv-a.
+1. Na Windows-u otvorite terminal u direktorijumu po izboru i pratite komande da biste kreirali venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Zatim koristite `pip` da instalirate **Gaia**
+2. Zatim, koristite `pip` da instalirate **Gaia**
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Na sistemu Linux otvorite terminal u direktorijumu po izboru i pratite komande za kreiranje venv-a.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. Na Linux-u otvorite terminal u direktorijumu po izboru i pratite komande da biste kreirali venv.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Zatim koristite `pip` da instalirate **Gaia**
+2. Zatim, koristite `pip` da instalirate **Gaia**
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -281,12 +281,12 @@ fi
 
 #### Provera instalacije
 
-Proverite da li je GAIA v0.16.2 ili novija instalirana:
+Proverite da li je instalirana GAIA v0.16.2 ili novija verzija:
 
 ```bash
 gaia --version
 ```
 
-> **Važno**: Uverite se da je Lemonade Server pokrenut pre korišćenja GAIA-e. GAIA zahteva da se Lemonade Server pokrene ručno.
+> **Važno**: Proverite da li je Lemonade Server pokrenut pre korišćenja GAIA-e. GAIA zahteva da Lemonade Server bude pokrenut ručno.
 
 Za više informacija, pogledajte [GAIA dokumentaciju](https://amd-gaia.ai).

@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA, Ryzen AI hızlandırmasıyla AMD donanımında yerel olarak çalışan AI aracıları oluşturmak için AMD'nin açık kaynaklı çerçevesidir.
+GAIA, AMD'nin Ryzen AI hızlandırmasıyla AMD donanımı üzerinde yerel olarak çalışan AI ajanları oluşturmak için geliştirdiği açık kaynaklı bir çerçevedir.
 
 #### GAIA'nın Kurulumu
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Windows'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
+1. Windows'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için aşağıdaki komutları izleyin.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. Linux'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için aşağıdaki komutları izleyin.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Windows'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
+1. Windows'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için aşağıdaki komutları izleyin.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. Linux'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için aşağıdaki komutları izleyin.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -91,7 +91,7 @@ pip install amd-gaia
 <!-- @os:end -->
 <!-- @device:end -->
 
-3. GAIA'nın Başlatılması
+3. GAIA'yı Başlatma
 
 Kurulumdan sonra, Lemonade Server'ı ayarlamak ve modelleri indirmek için `gaia init` komutunu çalıştırın:
 
@@ -99,7 +99,7 @@ Kurulumdan sonra, Lemonade Server'ı ayarlamak ve modelleri indirmek için `gaia
 gaia init
 ```
 
-Bu, Lemonade Server'ı kurar, varsayılan modelleri indirir ve kurulumu doğrular.
+Bu işlem Lemonade Server'ı kurar, varsayılan modelleri indirir ve kurulumu doğrular.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,7 +281,7 @@ fi
 
 #### Kurulumun Doğrulanması
 
-GAIA v0.16.2 veya sonrasının kurulu olduğunu doğrulayın:
+GAIA v0.16.2 veya sonraki bir sürümünün kurulu olduğunu doğrulayın:
 
 ```bash
 gaia --version
@@ -289,4 +289,4 @@ gaia --version
 
 > **Önemli**: GAIA'yı kullanmadan önce Lemonade Server'ın çalıştığından emin olun. GAIA, Lemonade Server'ın manuel olarak başlatılmasını gerektirir.
 
-Daha fazla bilgi için [GAIA belgelerine](https://amd-gaia.ai) bakın.
+Daha fazla bilgi için [GAIA dokümantasyonuna](https://amd-gaia.ai) bakın.

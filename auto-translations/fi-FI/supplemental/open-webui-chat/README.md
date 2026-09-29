@@ -16,42 +16,42 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Tämä opaskirja edellyttää vähintään **32 Gt** järjestelmämuistia.
+> Tämä ohjekirja vaatii vähintään **32 Gt** järjestelmämuistia.
 <!-- @device:end -->
 
 ## Yleiskatsaus
 
-[Open WebUI](https://docs.openwebui.com) on itse isännöity, selainpohjainen käyttöliittymä, joka tarjoaa tutun chatbot-kokemuksen toimien samalla yhden tai useamman tekoälymallipalvelimen etupäänä. Sen sijaan, että se olisi sidottu yhteen palveluntarjoajaan, Open WebUI voi yhdistää **mihin tahansa taustajärjestelmään, joka tarjoaa OpenAI-yhteensopivan API:n**, joten voit vaihtaa malleja ja ominaisuuksia vaihtamatta käyttöliittymää.
+[Open WebUI](https://docs.openwebui.com) on itse isännöity, selainpohjainen käyttöliittymä, joka tarjoaa tutun chatbot-kokemuksen ja toimii samalla yhden tai useamman AI-mallipalvelimen käyttöliittymänä. Sen sijaan, että se olisi sidottu yhteen palveluntarjoajaan, Open WebUI voi yhdistää **mihin tahansa taustajärjestelmään, joka tarjoaa OpenAI-yhteensopivan API:n**, jolloin voit vaihtaa malleja ja ominaisuuksia ilman käyttöliittymän vaihtamista.
 
-Tässä opaskirjassa käytämme taustajärjestelmänä [**Lemonadea**](https://lemonade-server.ai), koska se tarjoaa **yhtenäisen OpenAI-yhteensopivan päätepisteen**, joka tukee useita eri modaliteetteja:
+Tässä ohjekirjassa käytämme taustajärjestelmänä [**Lemonadea**](https://lemonade-server.ai), koska se tarjoaa **yhtenäisen OpenAI-yhteensopivan päätepisteen**, joka tukee useita eri modaliteetteja:
 - **Suuret kielimallit (LLM:t)** tekstin generointiin
 - **Näkömallit** kuvien ymmärtämiseen
 - **Stable Diffusion** kuvien generointiin
-- **Äänen litterointimallit** puheen muuntamiseen tekstiksi
+- **Äänen transkriptiomallit** puheen muuntamiseen tekstiksi
 
-Tämän asennuksen avulla voit tutustua **koko multimodaaliseen työnkulkuun päästä päähän**.
+Tämän asetuksen avulla voit tutustua **täydelliseen multimodaaliseen työnkulkuun alusta loppuun**.
 
 ---
 
 ## Mitä opit
 
-Tämän opaskirjan lopuksi osaat:
+Tämän ohjekirjan lopuksi osaat:
 
 - Yhdistää Open WebUI:n paikalliseen OpenAI-yhteensopivaan taustajärjestelmään (Lemonade)
 - Keskustella paikallisen LLM:n kanssa selaimestasi
 - Ladata kuvan ja esittää näkömallille siihen liittyviä kysymyksiä
 - Generoida kuvia tekstikehotteista Stable Diffusion -mallien avulla (SDXL-Turbo / SDXL)
-- Ymmärtää toimintaperiaatteen, jotta voit käyttää muitakin taustajärjestelmiä (Ollama, vLLM, llama.cpp server jne.)
+- Ymmärtää ajattelumallin, jotta voit käyttää muitakin taustajärjestelmiä (Ollama, vLLM, llama.cpp server jne.)
 
 ---
 
-## Peruskäsitteet (toimintaperiaate)
+## Peruskäsitteet (ajattelumalli)
 
-### Kolme osaa
+### Kolme komponenttia
 
 | Osa | Mitä se tekee | Esimerkkejä |
 |---|---|---|
-| Etupää (käyttöliittymä) | Verkkosovellus, jonka kanssa olet vuorovaikutuksessa | Open WebUI |
+| Käyttöliittymä (UI) | Verkkosovellus, jonka kanssa olet vuorovaikutuksessa | Open WebUI |
 | Taustajärjestelmä (mallipalvelin) | Isännöi malleja ja tarjoaa HTTP-päätepisteitä | Lemonade, Ollama, vLLM, llama.cpp server, OpenAI-yhteensopivat palvelimet |
 | Mallit | Varsinaiset LLM-, näkö-, diffuusio- tai äänimallit | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
 
@@ -59,30 +59,32 @@ Tämän opaskirjan lopuksi osaat:
 
 Open WebUI on rakennettu standardien OpenAI-tyylisten päätepisteiden ympärille, kuten:
   - Chat: `/chat/completions`
-  - Mallilista: `/models`
-  - Kuvan generointi: `/images/generations`
-  - Äänen litterointi: `/audio/transcriptions`
+  - Mallien luettelo: `/models`
+  - Kuvien generointi: `/images/generations`
+  - Äänen transkriptio: `/audio/transcriptions`
 
 Lemonade tarjoaa nämä osoitteessa `http://localhost:13305/api/v1/...`
 
-Jos taustajärjestelmä tukee näitä päätepisteitä, Open WebUI voi kommunikoida sen kanssa minimaalisella määrityksellä. Tämän ansiosta voimme vaihtaa taustajärjestelmää muuttamatta työnkulkuamme.
+Jos taustajärjestelmä tukee näitä päätepisteitä, Open WebUI voi kommunikoida sen kanssa minimaalisella asetuksella. Tästä syystä voimme vaihtaa taustajärjestelmää muuttamatta työnkulkuamme.
 
 #### Kaksi palvelua, kaksi porttia
 
-Tässä opaskirjassa työskentelet kahden erillisen palvelun kanssa:
+Tässä ohjekirjassa työskentelet kahden erillisen palvelun kanssa:
 
 | Palvelu | URL | Mitä siellä tehdään |
 |---|---|---|
 | **Lemonade** (GUI) | `http://localhost:13305` | Selaa, lataa ja hallitse malleja |
 | **Open WebUI** | `http://localhost:8080` | Keskustele, lataa kuvia, generoi kuvia — käyttäjälle näkyvä käyttöliittymä |
 
-Lemonade suorittaa mallit; Open WebUI on käyttöliittymä, jonka kanssa olet vuorovaikutuksessa. Käytä ensin Lemonaden käyttöliittymää mallien lataamiseen ja käytä niitä sitten Open WebUI:sta.
+Lemonade ajaa mallit; Open WebUI on käyttöliittymä, jonka kanssa olet vuorovaikutuksessa. Käytä ensin Lemonaden GUI:ta mallien lataamiseen ja käytä niitä sitten Open WebUI:sta.
 
 ---
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Muistiasetuksen määrittäminen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
@@ -92,7 +94,7 @@ Lemonade suorittaa mallit; Open WebUI on käyttöliittymä, jonka kanssa olet vu
 
 ## Kertaluonteinen asennus
 
-Tämä opaskirja tarvitsee Lemonaden käynnissä taustajärjestelmänä ja Linuxilla säilöntämoottorin (Podman) Open WebUI:n suorittamiseen. Määritä nämä ennen Open WebUI:n asentamista.
+Tämä ohjekirja edellyttää, että Lemonade toimii taustajärjestelmänä, ja Linuxissa lisäksi konttimoottoria (Podman) Open WebUI:n ajamiseen. Määritä nämä ennen Open WebUI:n asentamista.
 
 <!-- @os:windows -->
 <!-- @device:halo_box,halo,stx,krk -->
@@ -124,13 +126,13 @@ lemonade --version
 
 ## Mallien lataaminen Lemonadessa
 
-Ennen kuin asennat Open WebUI:n, varmista, että haluamasi mallit on ladattu ja valmiina Lemonadessa.
+Ennen Open WebUI:n asentamista varmista, että haluamasi mallit on ladattu ja valmiina Lemonadessa.
 
-1. Avaa Lemonaden käyttöliittymä osoitteessa `http://localhost:13305`.
-2. Selaa saatavilla olevia malleja ja lataa haluamasi (esim. LLM keskustelua varten, näkömalli ja/tai Stable Diffusion -malli kuvien generointia varten).
-3. Varmista, että API on tavoitettavissa käymällä osoitteessa `http://localhost:13305/api/v1/models` selaimessasi — sinun pitäisi nähdä ladatut mallisi listattuna.
+1. Avaa Lemonaden GUI osoitteessa `http://localhost:13305`.
+2. Selaa saatavilla olevia malleja ja lataa haluamasi mallit (esim. LLM keskustelua varten, näkömalli sekä/tai Stable Diffusion -malli kuvien generointiin).
+3. Varmista, että API on tavoitettavissa käymällä osoitteessa `http://localhost:13305/api/v1/models` selaimessasi — sinun pitäisi nähdä ladatut mallisi luettelossa.
 
-> Mallit on ladattava **Lemonadessa** (`localhost:13305`), ennen kuin ne voivat näkyä **Open WebUI:ssa** (`localhost:8080`). Jos malli ei myöhemmin näy Open WebUI:ssa, palaa tänne ja tarkista ensin Lemonade.
+> Mallit on ladattava **Lemonadessa** (`localhost:13305`) ennen kuin ne voivat näkyä **Open WebUI:ssa** (`localhost:8080`). Jos malli ei myöhemmin näy Open WebUI:ssa, palaa tänne ja tarkista ensin Lemonade.
 
 
 <!-- @os:windows -->
@@ -189,19 +191,19 @@ try {
   Write-Host "OK: LLM chat works"
 
   # Vision smoke test (OpenAI-style image_url)
-  $png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
-  $dataUrl = "data:image/png;base64,$png1x1"
+  $pngImg = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR42mP4z8CAFTEMLQkAKP8/wc53yE8AAAAASUVORK5CYII="
+  $dataUrl = "data:image/png;base64,$pngImg"
   $visionBody = @{
     model = "Qwen3.5-4B-GGUF"
     messages = @(@{
       role = "user"
       content = @(
-        @{ type = "text"; text = "If you can see an image input, reply with exactly: OK" },
+        @{ type = "text"; text = "What color is this image? Reply with only the color name." },
         @{ type = "image_url"; image_url = @{ url = $dataUrl } }
       )
     })
     temperature = 0
-    max_tokens = 256
+    max_tokens = 512
   } | ConvertTo-Json -Depth 10
   $tmpVision = Join-Path $env:TEMP "vision-body.json"
   [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
@@ -214,7 +216,7 @@ try {
   if (-not $visionParsed.choices -or $visionParsed.choices.Count -lt 1) { throw "Unexpected vision response (no choices). Raw response: $visionOut" }
   $visionText = $visionParsed.choices[0].message.content
   if ([string]::IsNullOrWhiteSpace($visionText)) { throw "Vision returned empty content. Raw response: $visionOut" }
-  if ($visionText -notmatch "\bOK\b") { throw "Vision test failed. Got: $visionText. Raw response: $visionOut" }
+  if ($visionText -notmatch "(?i)red") { throw "Vision test failed. Got: $visionText. Raw response: $visionOut" }
   Write-Host "OK: Vision chat works"
 
   # Image generation smoke test
@@ -301,19 +303,19 @@ try {
   Write-Host "OK: LLM chat works"
 
   # Vision smoke test (OpenAI-style image_url)
-  $png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
-  $dataUrl = "data:image/png;base64,$png1x1"
+  $pngImg = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR42mP4z8CAFTEMLQkAKP8/wc53yE8AAAAASUVORK5CYII="
+  $dataUrl = "data:image/png;base64,$pngImg"
   $visionBody = @{
     model = "Qwen3.5-4B-GGUF"
     messages = @(@{
       role = "user"
       content = @(
-        @{ type = "text"; text = "If you can see an image input, reply with exactly: OK" },
+        @{ type = "text"; text = "What color is this image? Reply with only the color name." },
         @{ type = "image_url"; image_url = @{ url = $dataUrl } }
       )
     })
     temperature = 0
-    max_tokens = 256
+    max_tokens = 512
   } | ConvertTo-Json -Depth 10
   $tmpVision = Join-Path $env:TEMP "vision-body.json"
   [System.IO.File]::WriteAllText($tmpVision, $visionBody, [System.Text.UTF8Encoding]::new($false))
@@ -326,7 +328,7 @@ try {
   if (-not $visionParsed.choices -or $visionParsed.choices.Count -lt 1) { throw "Unexpected vision response (no choices). Raw response: $visionOut" }
   $visionText = $visionParsed.choices[0].message.content
   if ([string]::IsNullOrWhiteSpace($visionText)) { throw "Vision returned empty content. Raw response: $visionOut" }
-  if ($visionText -notmatch "\bOK\b") { throw "Vision test failed. Got: $visionText. Raw response: $visionOut" }
+  if ($visionText -notmatch "(?i)red") { throw "Vision test failed. Got: $visionText. Raw response: $visionOut" }
   Write-Host "OK: Vision chat works"
 
   # Image generation smoke test
@@ -430,26 +432,26 @@ if "OK" not in text:
 print("OK: LLM chat works")
 
 # Vision smoke test (OpenAI image_url format)
-png1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO8p+S4AAAAASUVORK5CYII="
-data_url = "data:image/png;base64," + png1x1
+png_img = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR42mP4z8CAFTEMLQkAKP8/wc53yE8AAAAASUVORK5CYII="
+data_url = "data:image/png;base64," + png_img
 vision = post_json("http://127.0.0.1:13305/api/v1/chat/completions", {
   "model": "Qwen3.5-4B-GGUF",
   "messages": [{
     "role": "user",
     "content": [
-      {"type": "text", "text": "If you can see an image input, reply with exactly: OK"},
+      {"type": "text", "text": "What color is this image? Reply with only the color name."},
       {"type": "image_url", "image_url": {"url": data_url}},
     ],
   }],
   "temperature": 0,
-  "max_tokens": 256,
+  "max_tokens": 512,
 }, timeout=300)
 if not vision.get("choices"):
   raise SystemExit(f"Unexpected vision response (no choices). Raw response:\n{json.dumps(vision, indent=2)}")
 vtext = vision["choices"][0]["message"].get("content", "")
 if not vtext.strip():
   raise SystemExit(f"Vision returned empty content. Raw response:\n{json.dumps(vision, indent=2)}")
-if "OK" not in vtext:
+if "red" not in vtext.lower():
   raise SystemExit(f"Vision test failed. Got: {vtext}\nRaw response:\n{json.dumps(vision, indent=2)}")
 print("OK: Vision chat works")
 
@@ -475,13 +477,13 @@ PY
 <!-- @os:windows -->
 ### 1. Asenna Python 3.12
 
-Open WebUI vaatii **Pythonin version 3.12** — se ei asennu Python 3.13:lle tai uudemmalle. Windowsin Python-käynnistin (`py`) mahdollistaa version 3.12 asentamisen rinnakkain minkä tahansa olemassa olevan Python-version kanssa ilman ristiriitoja.
+Open WebUI vaatii **Python 3.12** -version — se ei asennu Python 3.13+ -versioihin. Windowsin Python-käynnistin (`py`) mahdollistaa version 3.12 asentamisen rinnakkain minkä tahansa olemassa olevan Python-version kanssa ilman ristiriitoja.
 
 ```powershell
 winget install Python.Python.3.12
 ```
 
-Sulje ja avaa terminaali uudelleen asennuksen jälkeen ja tarkista sitten:
+Sulje ja avaa terminaali uudelleen asennuksen jälkeen ja vahvista sitten:
 
 ```powershell
 py -3.12 --version
@@ -489,7 +491,7 @@ py -3.12 --version
 ```
 
 <!-- @device:halo_box -->
-> **Huomautus:** Järjestelmässäsi on valmiiksi asennettuna Python 3.13. Version 3.12 asentaminen ei vaikuta siihen — `python` käyttää edelleen versiota 3.13, ja `py -3.12` kohdistuu versioon 3.12 vain silloin, kun tarvitset sitä.
+> **Huomautus:** Järjestelmässäsi on valmiiksi asennettuna Python 3.13. Version 3.12 asentaminen ei vaikuta siihen — `python` käyttää edelleen versiota 3.13, ja `py -3.12` kohdistuu versioon 3.12 vain silloin, kun sitä tarvitset.
 <!-- @device:end -->
 
 <!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
@@ -571,9 +573,9 @@ Write-Host "OK: open-webui CLI is available"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Käytämme nyt Podman-palvelua Open WebUI -asennuksemme säilöimiseen.
+Käytämme nyt Podman-palvelua kontittamaan Open WebUI -asennuksemme.
 
-Lataa seuraava tiedosto valitsemaasi hakemistoon: [compose.yml](assets/compose.yml)
+Lataa seuraava tiedosto haluamaasi hakemistoon: [compose.yml](assets/compose.yml)
 
 Suorita kyseisessä hakemistossa seuraava komento:
 
@@ -581,7 +583,7 @@ Suorita kyseisessä hakemistossa seuraava komento:
 podman compose up -d
 ```
 
-Tämä lataa Open WebUI -levykuvan ja kirjoittaa pysyvään tallennustilaan.
+Tämä hakee Open WebUI -imagen ja kirjoittaa pysyvään tallennustilaan.
 
 Käynnistä Open WebUI kirjoittamalla `localhost:8080` selaimesi osoiteriville.
 
@@ -650,7 +652,7 @@ echo "OK: podman compose can parse compose.yml"
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Vinkki**: Open WebUI tarjoaa myös muita asennusvaihtoehtoja heidän [GitHubissaan](https://github.com/open-webui/open-webui).
+> **Vinkki**: Open WebUI tarjoaa myös muita asennusvaihtoehtoja [GitHubissaan](https://github.com/open-webui/open-webui).
 ## Open WebUI -palvelimen käynnistäminen
 
 <!-- @os:windows -->
@@ -661,18 +663,18 @@ open-webui serve
 <!-- @os:end -->
 
 - Siirry selaimessa osoitteeseen `http://localhost:8080`.
-- Open WebUI pyytää sinua luomaan paikallisen järjestelmänvalvojan tilin. Kun olet kirjautunut sisään, näet keskustelukäyttöliittymän.
+- Open WebUI pyytää sinua luomaan paikallisen järjestelmänvalvojan tilin. Kun olet kirjautunut sisään, näet keskusteluliittymän.
 
 <p align="center">
   <img src="assets/open-webui_chat_interface.png" alt="Open WebUI Chat Interface" width="600"/>
 </p>
 
 <!-- @os:windows -->
-> Pidä pääteikkuna auki. Sen sulkeminen pysäyttää Open WebUI:n.
+> Pidä pääteikkuna avoinna. Sen sulkeminen pysäyttää Open WebUI:n.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Kontti toimii taustalla. Hakemistosta, joka sisältää tiedoston `compose.yml`, voit hallita sitä komennoilla `podman compose down` (pysäytys) ja `podman compose up -d` (käynnistys). Tilisi ja asetuksesi säilyvät `open_webui_data`-taltiossa.
+> Kontti toimii taustalla. Hallinnoi sitä `compose.yml`-tiedoston sisältävästä hakemistosta komennoilla `podman compose down` (pysäytys) ja `podman compose up -d` (käynnistys). Tilisi ja asetuksesi säilyvät `open_webui_data`-taltiossa.
 <!-- @os:end -->
 
 
@@ -761,7 +763,7 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 ## Open WebUI:n yhdistäminen Lemonadeen
 
-Nyt kun molemmat palvelut ovat käynnissä — Lemonade osoitteessa `localhost:13305` ja Open WebUI osoitteessa `localhost:8080` — yhdistä ne, jotta Open WebUI voi käyttää Lemonaden malleja.
+Nyt kun molemmat palvelut ovat käynnissä — Lemonade osoitteessa `localhost:13305` ja Open WebUI osoitteessa `localhost:8080` — yhdistä ne toisiinsa, jotta Open WebUI voi käyttää Lemonaden malleja.
 
 Open WebUI:ssa:
 
@@ -771,27 +773,27 @@ Open WebUI:ssa:
      <img src="assets/open_settings.png" alt="Click the user profile icon" width="300"/>
    </p>
 
-2. Napsauta asetuspaneelissa vasemmassa alakulmassa olevaa **Admin Settings** -painiketta.
+2. Napsauta Settings-paneelissa **Admin Settings** -kohtaa vasemmassa alakulmassa.
 
    <p align="center">
      <img src="assets/click_admin_settings.png" alt="Select Admin Settings" width="450"/>
    </p>
 
-3. Napsauta Admin Settings -sivupalkissa **Connections**-kohtaa (tai siirry suoraan osoitteeseen `http://localhost:8080/admin/settings/connections`).
+3. Napsauta Admin Settings -sivupalkissa **Connections** (tai siirry suoraan osoitteeseen `http://localhost:8080/admin/settings/connections`).
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Admin Settings Connections page" width="600"/>
    </p>
 
-4. Lisää uusi yhteys kohdassa **OpenAI API**:
+4. Lisää **OpenAI API** -kohdan alle uusi yhteys:
    - **Base URL:** `http://localhost:13305/api/v1`
-   - **API Key:** `-` (pelkkä väliviiva toimii paikallisesti)
+   - **API Key:** `-` (yksittäinen viiva toimii paikallisesti)
 
    <p align="center">
      <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
    </p>
 
-5. Varmista, että kohdassa **"Manage OpenAI API Connections"** vain `http://localhost:13305/api/v1` on käytössä. Poista muut yhteydet käytöstä (esim. oletusarvoinen OpenAI-yhteys).
+5. Varmista, että kohdassa **"Manage OpenAI API Connections"** ainoastaan `http://localhost:13305/api/v1` on käytössä. Poista käytöstä kaikki muut yhteydet (esim. oletusarvoinen OpenAI-yhteys).
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Manage OpenAI API Connections with only Lemonade enabled" width="600"/>
@@ -799,7 +801,7 @@ Open WebUI:ssa:
 
 6. Napsauta **Save**.
 
-7. **(Suositeltu)** Poista automaattiset generointitoiminnot käytöstä, jotta Open WebUI pysyy reagoivana paikallisten LLM-mallien kanssa. Siirry kohtaan **Admin Settings → Settings → Interface** ja poista käytöstä:
+7. **(Suositeltu)** Poista käytöstä automaattiset generointiominaisuudet, jotta Open WebUI pysyy responsiivisena paikallisten LLM:ien kanssa. Siirry kohtaan **Admin Settings → Settings → Interface** ja poista käytöstä:
    - Title Generation
    - Follow Up Generation
    - Tags Generation
@@ -808,27 +810,27 @@ Open WebUI:ssa:
      <img src="assets/admin_settings.png" alt="Admin Settings Interface — disable Title, Follow Up, and Tags Generation" width="600"/>
    </p>
 
-8. Napsauta **Save** ja palaa osoitteeseen `http://localhost:8080`.
-9. Napsauta mallin pudotusvalikkoa — sinun pitäisi nähdä Lemonadesta lataamasi mallit.
+8. Napsauta **Save** ja palaa sitten osoitteeseen `http://localhost:8080`.
+9. Napsauta malliluetteloa — sinun pitäisi nähdä Lemonadesta lataamasi mallit.
 
 ---
 
 ## Pääasialliset toiminnot
 
-Nyt kaikki on valmiina. Tutustutaanpa kolmeen mielenkiintoiseen asiaan, joita voit tehdä.
+Nyt kaikki on valmiina. Katsotaanpa kolmea mielenkiintoista asiaa, joita voit tehdä.
 
 ---
 
 ### Toiminto 1: Keskustele paikallisen LLM:n kanssa
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk -->
-1. Napsauta käyttöliittymän vasemmassa yläkulmassa olevaa pudotusvalikkoa. Tämä näyttää asentamasi Lemonade-mallit. Valitse yksi jatkaaksesi. (esimerkki: `Qwen3-4B-Hybrid`).
+1. Napsauta käyttöliittymän vasemmassa yläkulmassa olevaa pudotusvalikkoa. Se näyttää asentamasi Lemonade-mallit. Valitse yksi jatkaaksesi (esimerkki: `Qwen3-4B-Hybrid`).
 
     <p align="center">
       <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
     </p>
 
-2. Kirjoita viesti LLM:lle ja napsauta lähetä (tai paina Enter). LLM:n lataaminen muistiin kestää muutaman sekunnin, jonka jälkeen näet vastauksen virtaavan sisään.
+2. Kirjoita viesti LLM:lle ja napsauta lähetä (tai paina Enter). LLM:n lataaminen muistiin kestää muutaman sekunnin, minkä jälkeen näet vastauksen tulevan näkyviin virtana.
 
     <p align="center">
       <img src="assets/sending_a_message.png" alt="Sending a message" width="37.5%"/>
@@ -837,13 +839,13 @@ Nyt kaikki on valmiina. Tutustutaanpa kolmeen mielenkiintoiseen asiaan, joita vo
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-1. Napsauta käyttöliittymän vasemmassa yläkulmassa olevaa pudotusvalikkoa. Tämä näyttää asentamasi Lemonade-mallit. Valitse yksi jatkaaksesi. (esimerkki: `Qwen3.5-4B-GGUF`).
+1. Napsauta käyttöliittymän vasemmassa yläkulmassa olevaa pudotusvalikkoa. Se näyttää asentamasi Lemonade-mallit. Valitse yksi jatkaaksesi (esimerkki: `Qwen3.5-4B-GGUF`).
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. Kirjoita viesti LLM:lle ja napsauta lähetä (tai paina Enter). LLM:n lataaminen muistiin kestää muutaman sekunnin, jonka jälkeen näet vastauksen virtaavan sisään.
+2. Kirjoita viesti LLM:lle ja napsauta lähetä (tai paina Enter). LLM:n lataaminen muistiin kestää muutaman sekunnin, minkä jälkeen näet vastauksen tulevan näkyviin virtana.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -853,7 +855,7 @@ Nyt kaikki on valmiina. Tutustutaanpa kolmeen mielenkiintoiseen asiaan, joita vo
 
 3. Malli vastaa keskustelussa.
 
-4. Avaa tässä vaiheessa `Task Manager` järjestelmässäsi. Näet **korkean GPU- tai NPU-käyttöasteen** riippuen siitä, onko valitsemasi malli **Hybrid**- vai **NPU**-tyyppinen. Tehtävienhallinnan avulla voit vahvistaa, että ajat mallia paikallisesti.
+4. Avaa tässä vaiheessa järjestelmäsi `Task Manager`. Näet **korkean GPU- tai NPU-käytön** sen mukaan, oliko valitsemasi malli **Hybrid**- vai **NPU**-malli. Task Managerin avulla voit vahvistaa, että ajat mallia paikallisesti.
 
     <p align="center">
       <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
@@ -861,13 +863,13 @@ Nyt kaikki on valmiina. Tutustutaanpa kolmeen mielenkiintoiseen asiaan, joita vo
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Napsauta käyttöliittymän vasemmassa yläkulmassa olevaa pudotusvalikkoa. Tämä näyttää asentamasi Lemonade-mallit. Valitse yksi jatkaaksesi. (esimerkki: `Qwen3.5-4B-GGUF`).
+1. Napsauta käyttöliittymän vasemmassa yläkulmassa olevaa pudotusvalikkoa. Se näyttää asentamasi Lemonade-mallit. Valitse yksi jatkaaksesi (esimerkki: `Qwen3.5-4B-GGUF`).
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. Kirjoita viesti LLM:lle ja napsauta lähetä (tai paina Enter). LLM:n lataaminen muistiin kestää muutaman sekunnin, jonka jälkeen näet vastauksen virtaavan sisään.
+2. Kirjoita viesti LLM:lle ja napsauta lähetä (tai paina Enter). LLM:n lataaminen muistiin kestää muutaman sekunnin, minkä jälkeen näet vastauksen tulevan näkyviin virtana.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -877,13 +879,13 @@ Nyt kaikki on valmiina. Tutustutaanpa kolmeen mielenkiintoiseen asiaan, joita vo
 3. Malli vastaa keskustelussa.
 <!-- @os:end -->
 
-Tämä vahvistaa, että Open WebUI voi lähettää pyyntöjä Lemonadelle OpenAI-yhteensopivan chat-päätepisteen kautta.
+Tämä vahvistaa, että Open WebUI voi lähettää pyyntöjä Lemonadelle käyttäen OpenAI-yhteensopivaa keskusteluliittymän päätepistettä.
 
 ---
 
-### Toiminto 2: Lataa kuva ja esitä kysymyksiä (näkö)
+### Toiminto 2: Lataa kuva ja esitä kysymyksiä (Vision)
 
-Tämä edellyttää mallia, joka tukee kuvasyötettä (näkö- tai multimodaalinen malli).
+Tämä edellyttää mallia, joka tukee kuvasyötettä (Vision- tai monimodaalinen malli).
 
 1. Napsauta suodatinkuvaketta, valitse "By Category" ja valitse sitten malli **Vision**-osiosta (esim. `Qwen3.5-4B-GGUF`)
 
@@ -891,28 +893,28 @@ Tämä edellyttää mallia, joka tukee kuvasyötettä (näkö- tai multimodaalin
      <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
    </p>
 
-2. Napsauta **`+`**-painiketta viestikentässä ja lataa kuva
-3. Kysy jotain, joka edellyttää todellista kuvan ymmärtämistä: `Do you think this is a well-designed GUI?`
+2. Napsauta viestikentän **`+`**-painiketta ja lataa kuva
+3. Kysy jotain, joka pakottaa aidon kuvanymmärryksen: `Do you think this is a well-designed GUI?`
 
    <p align="center">
      <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="43%"/>
      <img src="assets/vlm_response.png" alt="VLM Response" width="40%"/>
    </p>
 
-4. Malli vastaa kuvan sisällön perusteella, ei yleisluontoisen tekstin perusteella.
+4. Malli vastaa kuvan sisällön perusteella, ei geneerisen tekstin perusteella.
 
-Tämä osoittaa, että Open WebUI voi lähettää multimodaalisia pyyntöjä (tekstiä ja kuvaa) taustajärjestelmän (Lemonade) kautta näkömallille.
+Tämä osoittaa, että Open WebUI voi lähettää monimodaalisia pyyntöjä (tekstiä + kuva) taustajärjestelmän (Lemonade) kautta visiomallille.
 
 ---
 
 <!-- @os:windows -->
 ### Toiminto 3: Luo kuva tekstikehotteesta (Stable Diffusion)
 
-Stable Diffusion -mallit eivät tue tekstin generointia, ne tuottavat kuvia ainoastaan Images API:n kautta. 
+Stable Diffusion -mallit eivät tue tekstin generointia, ne generoivat kuvia ainoastaan Images API:n kautta.
 
-#### Vaihe 1: Määritä kuvan generointi Open WebUI:ssa
+#### Vaihe 1: Kuvan generoinnin määrittäminen Open WebUI:ssa
 
-1. Etsi Lemonade-käyttöliittymässä (`http://localhost:13305`) mallia `SDXL-Turbo` (nopea) tai `SDXL-Base-1.0` (parempi laatu) ja lataa se.
+1. Etsi Lemonade-käyttöliittymässä (`http://localhost:13305`) `SDXL-Turbo` (nopea) tai `SDXL-Base-1.0` (korkeampi laatu) ja lataa se.
 2. Siirry kohtaan **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
 3. Aseta:
    - **Image Generation:** ON
@@ -920,7 +922,7 @@ Stable Diffusion -mallit eivät tue tekstin generointia, ne tuottavat kuvia aino
    - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` tai `SDXL-Base-1.0`
-4. Jos haluat lisätä lisää parametreja, lisää ne tekstikenttään JSON-muodossa. Esimerkiksi: `{ "steps": 4, "cfg_scale": 1 }`. Käytettävissä olevat parametrit löydät osoitteesta [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+4. Jos haluat lisätä lisää parametreja, lisää ne tekstikenttään JSON-muodossa. Esimerkiksi: `{ "steps": 4, "cfg_scale": 1 }`. Katso saatavilla olevat parametrit osoitteesta [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
@@ -928,9 +930,9 @@ Stable Diffusion -mallit eivät tue tekstin generointia, ne tuottavat kuvia aino
 
 5. Tallenna
 #### Vaihe 2: Salli kuvien luonti mallille
-Tämä vaihe varmistaa, että otat kuvien luonnin (Image Generation) käyttöön mallisi ominaisuutena.
+Tämä vaihe varmistaa, että otat kuvien luonnin käyttöön mallisi ominaisuutena.
 1. Siirry kohtaan **Admin Settings → Models** (http://localhost:8080/admin/settings/models) ja valitse mallisi
-2. Ota käyttöön `Image Generation`
+2. Kytke `Image Generation` päälle
 
    <p align="center">
      <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
@@ -940,9 +942,9 @@ Tämä vaihe varmistaa, että otat kuvien luonnin (Image Generation) käyttöön
 #### Vaihe 3: Luo kuva chat-näytöltä
 
 1. Palaa chattiin osoitteessa `http://localhost:8080`.
-2. Valitse mallin pudotusvalikosta **tekstiä tuottava kielimalli (LLM)** (esimerkiksi Qwen, Llama). **Älä valitse Stable Diffusion -mallia**, sillä tämä on chat-mallin valitsin.
-3. Napsauta viestialueella **Integrations**-kohtaa ja kytke **Image**-vaihtokytkin päälle.
-4. Käytä esimerkiksi tällaista kehotetta: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
+2. Valitse mallin pudotusvalikosta **tekstintuottamis-LLM** (esimerkiksi Qwen, Llama). **Älä valitse Stable Diffusion -mallia**, sillä tämä on chat-mallin valitsin.
+3. Napsauta viestialueella **Integrations**-kohtaa ja kytke **Image** PÄÄLLE.
+4. Käytä esimerkiksi seuraavanlaista kehotetta: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. Kuva luodaan ja näkyy chatissa.
 
    <p align="center">
@@ -950,20 +952,20 @@ Tämä vaihe varmistaa, että otat kuvien luonnin (Image Generation) käyttöön
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-Tämä osoittaa, että Open WebUI pystyy koordinoimaan kaksiosaisen työnkulun:
-  - LLM auttaa hiomaan kehotetta
-  - Kuva luodaan Lemonaden Images-päätepisteen kautta Stable Diffusionia käyttäen
+Tämä osoittaa, että Open WebUI pystyy koordinoimaan "kaksiosaisen" työnkulun:
+  - LLM auttaa hiomaan kehotteen
+  - Kuva luodaan Lemonaden Images-päätepisteen kautta käyttäen Stable Diffusionia
 <!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Aktiviteetti 3: Luo kuva tekstikehotteesta (Stable Diffusion)
 
-Stable Diffusion -mallit eivät tue tekstin luontia, ne luovat kuvia ainoastaan Images-rajapinnan kautta.
+Stable Diffusion -mallit eivät tue tekstintuottoa, ne luovat kuvia ainoastaan Images-rajapinnan kautta. 
 
 #### Vaihe 1: Määritä kuvien luonti Open WebUI:ssa
 
-1. Etsi Lemonaden käyttöliittymässä (`http://localhost:13305`) `SDXL-Turbo` (nopea) tai `SDXL-Base-1.0` (parempi laatu) ja lataa se.
+1. Etsi Lemonade-GUI:ssa (`http://localhost:13305`) mallia `SDXL-Turbo` (nopea) tai `SDXL-Base-1.0` (parempi laatu) ja lataa se.
 2. Siirry kohtaan **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
 3. Aseta:
    - **Image Generation:** ON
@@ -971,7 +973,7 @@ Stable Diffusion -mallit eivät tue tekstin luontia, ne luovat kuvia ainoastaan 
    - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` tai `SDXL-Base-1.0`
-4. Jos haluat lisätä lisää parametreja, lisää ne tekstikenttään JSON-muodossa. Esimerkiksi: `{ "steps": 4, "cfg_scale": 1 }`. Katso saatavilla olevat parametrit kohdasta [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+4. Jos haluat lisätä lisää parametreja, lisää ne tekstikenttään JSON-muodossa. Esimerkiksi: `{ "steps": 4, "cfg_scale": 1 }`. Katso käytettävissä olevat parametrit osoitteesta [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
@@ -981,9 +983,9 @@ Stable Diffusion -mallit eivät tue tekstin luontia, ne luovat kuvia ainoastaan 
 
 
 #### Vaihe 2: Salli kuvien luonti mallille
-Tämä vaihe varmistaa, että otat kuvien luonnin (Image Generation) käyttöön mallisi ominaisuutena.
+Tämä vaihe varmistaa, että otat kuvien luonnin käyttöön mallisi ominaisuutena.
 1. Siirry kohtaan **Admin Settings → Models** (http://localhost:8080/admin/settings/models) ja valitse mallisi
-2. Ota käyttöön `Image Generation`
+2. Kytke `Image Generation` päälle
 
    <p align="center">
      <img src="assets/model_settings.png" alt="Model Settings" width="45%"/>
@@ -993,9 +995,9 @@ Tämä vaihe varmistaa, että otat kuvien luonnin (Image Generation) käyttöön
 #### Vaihe 3: Luo kuva chat-näytöltä
 
 1. Palaa chattiin osoitteessa `http://localhost:8080`.
-2. Valitse mallin pudotusvalikosta **tekstiä tuottava kielimalli (LLM)** (esimerkiksi Qwen, Llama). **Älä valitse Stable Diffusion -mallia**, sillä tämä on chat-mallin valitsin.
-3. Napsauta viestialueella **Integrations**-kohtaa ja kytke **Image**-vaihtokytkin päälle.
-4. Käytä esimerkiksi tällaista kehotetta: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
+2. Valitse mallin pudotusvalikosta **tekstintuottamis-LLM** (esimerkiksi Qwen, Llama). **Älä valitse Stable Diffusion -mallia**, sillä tämä on chat-mallin valitsin.
+3. Napsauta viestialueella **Integrations**-kohtaa ja kytke **Image** PÄÄLLE.
+4. Käytä esimerkiksi seuraavanlaista kehotetta: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. Kuva luodaan ja näkyy chatissa.
 
    <p align="center">
@@ -1003,9 +1005,9 @@ Tämä vaihe varmistaa, että otat kuvien luonnin (Image Generation) käyttöön
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-Tämä osoittaa, että Open WebUI pystyy koordinoimaan kaksiosaisen työnkulun:
-  - LLM auttaa hiomaan kehotetta
-  - Kuva luodaan Lemonaden Images-päätepisteen kautta Stable Diffusionia käyttäen
+Tämä osoittaa, että Open WebUI pystyy koordinoimaan "kaksiosaisen" työnkulun:
+  - LLM auttaa hiomaan kehotteen
+  - Kuva luodaan Lemonaden Images-päätepisteen kautta käyttäen Stable Diffusionia
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -1015,11 +1017,11 @@ Tämä osoittaa, että Open WebUI pystyy koordinoimaan kaksiosaisen työnkulun:
 
 ### "No models show up in Open WebUI"
 - Tarkista ensin Lemonade: avaa selaimessa `http://localhost:13305/api/v1/models` ja varmista, että mallisi näkyvät listalla ja on ladattu
-- Tarkista sitten Open WebUI -yhteys: siirry kohtaan **Admin Settings → Connections** osoitteessa `http://localhost:8080/admin/settings/connections` ja varmista, että Base URL on `http://localhost:13305/api/v1`
+- Tarkista sitten Open WebUI:n yhteys: siirry kohtaan **Admin Settings → Connections** osoitteessa `http://localhost:8080/admin/settings/connections` ja varmista, että Base URL on `http://localhost:13305/api/v1`
 
 ### "This model does not support chat completion" -virheilmoitus
-- Valitsit chat-mallin pudotusvalikosta kuvamallin (SDXL-Turbo / SDXL-Base-1.0).
-- **Korjaus**: valitse chattia varten LLM, ja käytä kuvan luontiin Image-vaihtokytkintä ja Images-asetuksia.
+- Valitsit kuvamallin (SDXL-Turbo / SDXL-Base-1.0) chat-mallin pudotusvalikosta.
+- **Korjaus**: valitse chattia varten LLM ja käytä Image-kytkintä sekä Images-asetuksia kuvien luontiin.
 <p align="center">
   <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
 </p>
@@ -1032,25 +1034,25 @@ Tämä osoittaa, että Open WebUI pystyy koordinoimaan kaksiosaisen työnkulun:
 
 ## Seuraavat vaiheet
 
-Sinulla on nyt toimiva **"paikallinen tekoälypino"**, yksi käyttöliittymä, joka ohjaa useita mallityyppejä standardin API:n kautta.
+Sinulla on nyt toimiva **paikallinen tekoälypino**, yksi käyttöliittymä, joka ohjaa useita mallityyppejä standardin API:n kautta.
 
-Tässä on kolme laajennusta, jotka avaavat kokonaan uusia työnkulkuja:
+Tässä on kolme laajennusta, jotka avaavat aivan uusia työnkulkuja:
 
-### 1. Puheesta tekstiksi Whisperillä
+### 1. Puheentunnistus Whisperillä
 
-Kokeile muuntaa ääntä tekstiksi Whisper-mallilla ja syötä se sitten LLM:lle yhteenvedon tekemistä, toimenpiteiden listaamista tai uudelleenkirjoittamista varten. Tämä on perusta kokousmuistiinpanoille ja ääniohjatuille avustajille.
+Kokeile muuntaa ääntä tekstiksi käyttäen Whisper-mallia ja syötä se sitten LLM:lle tiivistelmien, toimenpidelistojen tai uudelleenkirjoituksen tekemistä varten. Tämä on perusta kokousmuistiinpanoille ja äänellä ohjattaville avustajille.
 
 ### 2. Python-koodaus Open WebUI:n sisällä
 
-Käytä Open WebUI:n sisäänrakennettua koodin suorituskokemusta Python-koodinpätkien ajamiseen, tulosteiden tarkasteluun ja nopeampaan iterointiin – poistumatta käyttöliittymästä. [Viite](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
+Käytä Open WebUI:n sisäänrakennettua koodin suorituskokemusta Python-koodinpätkien ajamiseen, tulosteiden tarkasteluun ja nopeampaan iterointiin — ilman että poistut käyttöliittymästä. [Viite](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
 
 ### 3. HTML-renderöinti Open WebUI:n sisällä
 
-Renderöi HTML-tulosteet suoraan käyttöliittymässä. Tämä on yllättävän tehokasta nopeiden prototyyppien, muotoiltujen raporttien ja interaktiivisten koodinpätkien rakentamiseen. [Viite](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
+Renderöi HTML-tulosteet suoraan käyttöliittymässä. Tämä on yllättävän tehokasta nopeiden prototyyppien, muotoiltujen raporttien ja interaktiivisten katkelmien rakentamiseen. [Viite](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
 
 ---
 
-## Viitteet
+## Lähteet
 
 - [Open WebUI (GitHub)](https://github.com/open-webui/open-webui)
 - [Lemonade (GitHub)](https://github.com/lemonade-sdk/lemonade)

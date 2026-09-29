@@ -12,13 +12,13 @@ SPDX-License-Identifier: MIT
 
 ## Prezentare generală
 
-[**Hermes Agent**](https://hermes-agent.nousresearch.com/) este un agent AI care se auto-îmbunătățește, dezvoltat de Nous Research. Are o buclă de învățare integrată, creează abilități din experiență, construiește o memorie persistentă despre cine sunteți între sesiuni și poate rula automatizări programate în numele dumneavoastră. Spre deosebire de un simplu asistent de chat, Hermes întreprinde acțiuni reale: rulează comenzi shell, scrie fișiere, navighează pe web și delegă fluxuri de lucru paralele către subagenți.
+[**Hermes Agent**](https://hermes-agent.nousresearch.com/) este un agent AI auto-îmbunătățitor construit de Nous Research. Are o buclă de învățare integrată, creează abilități din experiență, construiește o memorie persistentă despre cine sunteți de-a lungul sesiunilor și poate rula automatizări programate în numele dumneavoastră. Spre deosebire de un simplu asistent de chat, Hermes întreprinde acțiuni reale: rulează comenzi shell, scrie fișiere, navighează pe web și delegă fluxuri de lucru paralele către subagenți.
 
-[**Lemonade Server**](https://lemonade-server.ai/) este backend-ul de inferență local care îl alimentează. Este un server open-source care rulează modele GenAI direct pe hardware-ul dumneavoastră AMD și le expune prin API-ul standard din industrie OpenAI.
+[**Lemonade Server**](https://lemonade-server.ai/) este backend-ul local de inferență care îl alimentează. Este un server open-source care rulează modele GenAI direct pe hardware-ul dumneavoastră AMD și le expune printr-un API standard în industrie, compatibil cu OpenAI.
 
-Împreună, formează un stack complet local de AI agentic: Lemonade se ocupă de inferența modelului pe GPU, iar Hermes furnizează bucla agentului, memoria, abilitățile și gateway-ul de mesagerie.
+Împreună, formează un stack complet local de AI agent: Lemonade gestionează inferența modelelor pe GPU-ul dumneavoastră, iar Hermes oferă bucla agentului, memoria, abilitățile și gateway-ul de mesagerie.
 
-> **Înainte de a continua:** Hermes Agent este un agent AI extrem de autonom. Acordarea accesului oricărui agent AI la sistemul dumneavoastră poate duce la rezultate imprevizibile sau neintenționate. Continuați doar dacă înțelegeți riscurile și vă simțiți confortabil cu software autonom care acționează în numele dumneavoastră.
+> **Înainte de a continua:** Hermes Agent este un agent AI extrem de autonom. Acordarea accesului oricărui agent AI la sistemul dumneavoastră poate duce la rezultate imprevizibile sau neintenționate. Continuați doar dacă înțelegeți riscurile și sunteți confortabil cu software autonom care acționează în numele dumneavoastră.
 
 ---
 
@@ -26,40 +26,42 @@ SPDX-License-Identifier: MIT
 
 Până la finalul acestui ghid veți putea:
 
-- **Instala Hermes Agent** și îl configura să folosească **Lemonade Server** ca backend AI.
-- **(Recomandat) Activa sandboxing-ul Docker/Podman** pentru a izola acțiunile agentului de sistemul gazdă.
+- **Instala Hermes Agent** și îl veți direcționa către **Lemonade Server** ca backend AI.
+- **(Recomandat) Activa izolarea Docker/Podman** pentru a izola acțiunile agentului de sistemul gazdă.
 - **Porni gateway-ul Hermes** și confirma că agentul dumneavoastră este pregătit.
-- **Conecta un canal de comunicare** (Discord sau Telegram) pentru a putea discuta cu agentul dumneavoastră de pe orice dispozitiv.
+- **Conecta un canal de comunicare** (Discord sau Telegram) astfel încât să puteți discuta cu agentul dumneavoastră de pe orice dispozitiv.
 
 ---
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Configurarea memoriei
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Verificați actualizările software-ului
+## Verificați actualizările de software
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalarea condițiilor prealabile software
+## Instalarea cerințelor preliminare de software
 
 <!-- @os:linux -->
-- Un PC cu **Ubuntu 24.04+** sau o distribuție Linux compatibilă bazată pe Debian cu `apt-get`
+- Un PC care rulează **Ubuntu 24.04+** sau o distribuție Linux compatibilă bazată pe Debian, cu `apt-get`
 - Cel puțin **12 GB de RAM** (64 GB+ recomandat pentru modele mai mari)
-- **~10–30 GB spațiu liber pe disc** pentru ponderile modelului
-- [Podman](https://podman.io/docs/installation) (Opțional, pentru sandboxing-ul Hermes Agent)
+- **~10–30 GB de spațiu liber pe disc** pentru ponderile modelului
+- [Podman](https://podman.io/docs/installation) (Opțional, pentru izolarea Hermes Agent)
   ```bash 
-  sudo apt-get install -y podman`
+  sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- Un PC cu **Windows 10/11**
+- Un PC care rulează **Windows 10/11**
 - Cel puțin **12 GB de RAM** (64 GB+ recomandat pentru modele mai mari)
-- **~10–30 GB spațiu liber pe disc** pentru ponderile modelului
-- Podman (Opțional, pentru sandboxing-ul Hermes Agent). Instalați în WSL:
+- **~10–30 GB de spațiu liber pe disc** pentru ponderile modelului
+- Podman (Opțional, pentru izolarea Hermes Agent). Instalați în interiorul WSL:
   ```bash 
   sudo apt-get install -y podman
   ```
@@ -83,7 +85,7 @@ lemonade --version
 
 ## Descărcați și încărcați modelul recomandat
 
-Modelul recomandat pentru acest ghid este **Qwen3.6-35B-A3B-GGUF** de la Unsloth, un model MoE puternic cu o fereastră de context de 263k token-uri, potrivit pentru sarcinile agentice. Acest model folosește cuantizarea UD-Q4_K_XL. Descărcați-l acum:
+Modelul recomandat pentru acest ghid este **Qwen3.6-35B-A3B-GGUF** de la Unsloth, un model MoE puternic cu o fereastră de context de 263k tokeni, foarte potrivit pentru sarcini de tip agent. Acest model utilizează cuantizare UD-Q4_K_XL. Descărcați-l acum:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
@@ -91,6 +93,7 @@ lemonade pull Qwen3.6-35B-A3B-GGUF
 
 Apoi încărcați-l cu o fereastră de context mare și salvați această setare pentru rulările viitoare:
 
+<!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
 lemonade unload
@@ -98,9 +101,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end -->
 
-Modelul are o lungime de context implicită de 262.144 token-uri. Dacă întâmpinați erori de lipsă de memorie (OOM), luați în considerare reducerea ferestrei de context.
+Modelul are o lungime de context implicită de 262.144 de tokeni. Dacă întâmpinați erori de tip out-of-memory (OOM), luați în considerare reducerea ferestrei de context.
 
-> **Sfat: Dezactivați modul de gândire pentru răspunsuri mai rapide ale agentului:** Qwen3.6-35B-A3B rulează implicit în modul de gândire, ceea ce adaugă latență înainte de fiecare răspuns. Pentru buclele agentice, acest overhead se acumulează rapid. Depozitul [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) oferă o configurație gata făcută care dezactivează modul de gândire. Pentru a o folosi, descărcați fișierul și importați-l:
+> **Sfat: Dezactivați modul de gândire pentru răspunsuri mai rapide ale agentului:** Qwen3.6-35B-A3B rulează implicit în modul de gândire, ceea ce adaugă latență înainte de fiecare răspuns. Pentru buclele de agent, această supraîncărcare se acumulează rapid. Depozitul [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) oferă o configurație gata pregătită care dezactivează modul de gândire. Pentru a o utiliza, descărcați fișierul și importați-l:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -243,7 +246,7 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## Configurați WSL
 
-Rulăm Hermes Agent în interiorul WSL și îl conectăm la Lemonade, care rulează nativ pe Windows. Astfel obțineți un mediu shell Linux pentru Hermes, păstrând în același timp accelerarea GPU a Lemonade pe partea Windows.
+Rulăm Hermes Agent în interiorul WSL și îl conectăm la Lemonade care rulează nativ pe Windows. Acest lucru vă oferă un mediu shell Linux pentru Hermes, păstrând în același timp accelerarea GPU a Lemonade pe partea Windows.
 
 ### Instalați WSL și Ubuntu
 
@@ -261,7 +264,7 @@ wsl --install -d Ubuntu-24.04
 
 ### Activați systemd în WSL
 
-Rulați aceasta în terminalul Ubuntu:
+Rulați acest lucru în terminalul Ubuntu:
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -277,9 +280,9 @@ wsl --shutdown
 wsl
 ```
 
-### Conectați Lemonade de pe Windows în WSL
+### Conectați Lemonade din Windows în WSL
 
-WSL2 rulează într-o rețea virtuală. Lemonade pe Windows se leagă la `127.0.0.1`, la care WSL nu poate ajunge direct. Un proxy de port Windows redirecționează traficul de la IP-ul gateway-ului WSL către localhost-ul Windows.
+WSL2 rulează într-o rețea virtuală. Lemonade pe Windows se leagă de `127.0.0.1`, la care WSL nu poate ajunge direct. Un proxy de port Windows redirecționează traficul de la IP-ul gateway-ului WSL către localhost pe Windows.
 
 **Găsiți IP-ul gateway-ului WSL** (rulați în interiorul WSL):
 
@@ -287,13 +290,13 @@ WSL2 rulează într-o rețea virtuală. Lemonade pe Windows se leagă la `127.0.
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Adăugați proxy-ul de port** (rulați în PowerShell ca Administrator, înlocuind `<WSL-Gateway-IP>` cu IP-ul gateway-ului dumneavoastră WSL):
+**Adăugați proxy-ul de port** (rulați în PowerShell ca Administrator, înlocuind `<WSL-Gateway-IP>` cu IP-ul gateway-ului WSL):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Adăugați o regulă de firewall** (același PowerShell cu drepturi de administrator):
+**Adăugați o regulă de firewall** (același PowerShell cu privilegii elevate):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
@@ -306,7 +309,7 @@ WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Dacă ați încărcat deja modelul Qwen3.6-35B-A3B-GGUF în pasul anterior, ar trebui să vedeți un rezultat JSON care listează modelul încărcat.
+Dacă ați încărcat deja modelul Qwen3.6-35B-A3B-GGUF în pasul anterior, ar trebui să vedeți o ieșire JSON care listează modelul dumneavoastră încărcat.
 
 ```json
 {
@@ -324,7 +327,7 @@ Dacă ați încărcat deja modelul Qwen3.6-35B-A3B-GGUF în pasul anterior, ar t
 }
 ```
 
-> Regula `netsh portproxy` supraviețuiește repornirilor, dar IP-ul gateway-ului WSL se poate schimba după `wsl --shutdown`. Dacă Lemonade devine inaccesibil din WSL după o repornire, obțineți noul IP al gateway-ului și actualizați proxy-ul cu acest IP nou.
+> Regula `netsh portproxy` supraviețuiește repornirilor, dar IP-ul gateway-ului WSL se poate schimba după `wsl --shutdown`. Dacă Lemonade devine inaccesibil din WSL după o repornire, obțineți IP-ul gateway-ului actualizat și actualizați proxy-ul cu acest nou IP.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -383,16 +386,16 @@ finally {
 ## Instalați Hermes Agent
 
 <!-- @os:windows -->
-> Rulați comenzile din această secțiune în interiorul terminalului **WSL**, cu excepția cazului în care se specifică altfel.
+> Rulați comenzile din această secțiune în interiorul terminalului **WSL**, dacă nu se specifică altfel.
 <!-- @os:end -->
 
 ```bash
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 ```
 
-Flag-ul `--skip-setup` omite asistentul de configurare interactiv, astfel încât să puteți configura manual backend-ul modelului în pasul următor.
+Flag-ul `--skip-setup` omite asistentul de configurare interactiv, astfel încât să puteți configura manual backend-ul modelului la pasul următor.
 
-Reîncărcați shell-ul:
+Reîncărcați shell-ul dumneavoastră:
 
 ```bash
 source ~/.bashrc
@@ -414,7 +417,7 @@ hermes doctor
 > ```bash
 > export PATH="$HOME/.local/bin:$PATH"
 > ```
-> Pentru a face aceasta permanentă, adăugați linia de mai sus în fișierul dumneavoastră `~/.bashrc` sau `~/.zshrc`.
+> Pentru a face acest lucru permanent, adăugați linia de mai sus în fișierul dumneavoastră `~/.bashrc` sau `~/.zshrc`.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-version-linux timeout=120 hidden=True -->
@@ -466,14 +469,14 @@ finally {
 <!-- @os:end -->
 
 ---
-## Configurați Hermes să folosească Lemonade
+## Configurați Hermes pentru a utiliza Lemonade
 
-Hermes își stochează configurația modelului în `~/.hermes/config.yaml`. Puteți fie să folosiți selectorul interactiv `hermes model`, fie să scrieți configurația direct.
+Hermes stochează configurația modelului în `~/.hermes/config.yaml`. Puteți fie să utilizați selectorul interactiv `hermes model`, fie să scrieți configurația direct.
 
 ### Opțiunea 1: Selector interactiv
 
 <!-- @os:windows -->
-> Rulați următoarea comandă în **terminalul WSL**.
+> Rulați următoarele în interiorul **terminalului WSL**.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -495,7 +498,7 @@ Când vi se solicită:
 2. **API base URL:** `http://127.0.0.1:13305/api/v1`
 <!-- @os:end -->
 <!-- @os:windows -->
-2. **API base URL:** folosiți IP-ul gateway-ului WSL: rulați `ip route show default | awk '{print $3}' | head -1` în WSL pentru a-l obține, apoi introduceți `http://<WSL-Gateway-IP>:13305/api/v1`
+2. **API base URL:** utilizați adresa IP a gateway-ului WSL: rulați `ip route show default | awk '{print $3}' | head -1` în WSL pentru a o obține, apoi introduceți `http://<WSL-Gateway-IP>:13305/api/v1`
 <!-- @os:end -->
 3. **API key:** `lemonade`
 4. **API compatibility mode:** `1` (Auto-detect)
@@ -503,7 +506,7 @@ Când vi se solicită:
 6. **Context length in tokens:** `262144`
 7. **Display name:** `local-lemonade` (sau orice nume preferați)
 
-`hermes model` salvează atât selecția modelului activ, cât și o intrare `custom_providers` denumită, care stochează lungimea contextului împreună cu endpoint-ul. Rezultatul în `~/.hermes/config.yaml` arată astfel:
+`hermes model` salvează atât selecția modelului activ, cât și o intrare denumită `custom_providers` care stochează lungimea contextului împreună cu endpoint-ul. Rezultatul din `~/.hermes/config.yaml` arată astfel:
 
 ```yaml
 model:
@@ -521,7 +524,7 @@ custom_providers:
         context_length: 262144
 ```
 
-### Opțiunea 2: Scrierea directă a configurației
+### Opțiunea 2: Scrieți configurația direct
 
 <!-- @os:linux -->
 
@@ -583,7 +586,7 @@ echo "OK: Hermes config.yaml contains Lemonade model configuration"
 
 <!-- @os:windows -->
 
-În terminalul WSL, obțineți IP-ul gazdei Windows și scrieți configurația:
+În interiorul terminalului WSL, obțineți adresa IP a gazdei Windows și scrieți configurația:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
@@ -676,9 +679,9 @@ finally {
 
 ---
 
-## (Recomandat) Activați izolarea Podman (sandboxing)
+## (Recomandat) Activați izolarea (sandboxing) Podman
 
-Hermes Agent poate direcționa toate operațiunile agentului legate de shell și fișiere printr-un container izolat, în loc să le execute direct pe gazda dvs. Acest lucru limitează raza de impact a oricărei acțiuni neintenționate la sandbox, lăsând sistemul de fișiere și rețeaua gazdei dvs. neatinse.
+Hermes Agent poate direcționa toate operațiunile agentului de tip shell și fișiere printr-un container izolat, în loc să le ruleze direct pe gazda dumneavoastră. Acest lucru limitează raza de acțiune a oricărei acțiuni neintenționate la sandbox, lăsând sistemul de fișiere și rețeaua gazdei neatinse.
 
 Construiți o imagine sandbox ușoară:
 
@@ -723,7 +726,7 @@ echo "OK: Hermes sandbox Podman image is available"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Intrați în terminalul WSL:
+Intrați în terminalul dumneavoastră WSL:
 
 ```powershell
 wsl -d Ubuntu-24.04
@@ -792,7 +795,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Apoi configurați Hermes să folosească Podman ca runtime pentru containere și setați backend-ul terminalului:
+Apoi configurați Hermes să utilizeze Podman ca runtime pentru containere și setați backend-ul terminalului:
 
 ```bash
 echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
@@ -805,7 +808,7 @@ EOF
 ```
 
 > `terminal.backend` rămâne `docker`.
-> `HERMES_DOCKER_BINARY` este cel care indică lui Hermes să folosească Podman ca runtime în locul acestuia.
+> `HERMES_DOCKER_BINARY` este cel care îi spune lui Hermes să utilizeze Podman ca runtime în locul acestuia.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -902,29 +905,29 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Hermes va porni acum un container sandbox persistent și va direcționa toate apelurile `terminal` și cele ale instrumentelor pentru fișiere prin acesta. Containerul are aceeași durată de viață ca procesul Hermes, este reutilizat pentru toate apelurile instrumentelor și este distrus la închiderea Hermes.
+Hermes va porni acum un container sandbox persistent și va direcționa toate apelurile de tip `terminal` și instrumente pentru fișiere prin acesta. Containerul are aceeași durată de viață ca procesul Hermes, este reutilizat pentru toate apelurile de instrumente și este distrus la închiderea Hermes.
 
-> **Verificați dacă sandbox-ul funcționează:** Porniți Hermes (`hermes`) și cereți-i să `run hostname` - ar trebui să vedeți un ID scurt de container în loc de numele de gazdă al mașinii dvs. Puteți, de asemenea, să îi cereți să `rm -rf <path-to-a-dummy-file/folder>`: Hermes va confirma ștergerea, dar folderul va rămâne pe gazda dvs. Comanda a rulat în interiorul `$HOME`-ului izolat al containerului, nu al dvs.
+> **Verificați dacă sandbox-ul funcționează:** Porniți Hermes (`hermes`) și cereți-i să `run hostname` - ar trebui să vedeți un ID scurt de container în loc de numele de gazdă al mașinii dumneavoastră. De asemenea, puteți să-i cereți `rm -rf <path-to-a-dummy-file/folder>`: Hermes va confirma ștergerea, dar folderul va rămâne în continuare pe gazda dumneavoastră. Comanda a rulat în interiorul directorului `$HOME` izolat al containerului, nu al dumneavoastră.
 
-> **Aveți nevoie de o izolare mai puternică?** Hermes oferă de asemenea o imagine Docker oficială (`nousresearch/hermes-agent`) care rulează întregul proces al agentului în interiorul unui container - gateway, instrumente și tot restul. Consultați [documentația Docker pentru Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/docker) pentru detalii de configurare.
+> **Aveți nevoie de o izolare mai puternică?** Hermes oferă, de asemenea, o imagine Docker oficială (`nousresearch/hermes-agent`) care rulează întregul proces al agentului în interiorul unui container - gateway, instrumente și tot restul. Consultați [documentația Hermes Docker](https://hermes-agent.nousresearch.com/docs/user-guide/docker) pentru detalii de configurare.
 
 ---
 
 <!-- @os:linux -->
 ## (Recomandat) Integrarea Hermes cu serviciile Firecrawl
 
-Hermes poate naviga și extrage conținut de pe site-uri web folosind instrumentele sale web integrate. Totuși, multe site-uri web moderne folosesc sisteme de detectare a boților, care blochează cererile HTTP simple și returnează pagini de provocare (challenge pages) în locul conținutului real. Ca urmare, Hermes ar putea să nu poată extrage informații în mod fiabil de pe aceste site-uri.
+Hermes poate naviga și extrage conținut din site-uri web folosind instrumentele sale web integrate. Cu toate acestea, multe site-uri web moderne utilizează sisteme de detectare a boților, care blochează cererile HTTP simple și returnează pagini de provocare (challenge pages) în loc de conținutul real. Ca urmare, Hermes poate să nu fie capabil să extragă informații în mod fiabil de pe aceste site-uri.
 
-Pentru a depăși această limitare, [Firecrawl](https://docs.firecrawl.dev/introduction) oferă un serviciu de crawling web și extragere a conținutului găzduit local, care poate ocoli aceste provocări și poate debloca întregul potențial al automatizării Hermes.
+Pentru a depăși această limitare, [Firecrawl](https://docs.firecrawl.dev/introduction) oferă un serviciu de crawling și extragere de conținut web auto-găzduit, care poate ocoli aceste provocări și poate debloca întregul potențial al automatizării Hermes.
 
-În această configurație, Firecrawl rulează ca un set de containere Docker gestionate cu Podman. Pentru a simplifica gestionarea ciclului de viață și pornirea automată, înregistrăm Firecrawl ca un serviciu `systemd` la nivel de utilizator, care orchestrează stiva Podman Compose subiacentă. Acest lucru permite Hermes să pornească, să oprească și să verifice serviciul Firecrawl folosind comenzi standard `systemctl --user`, în loc să interacționeze direct cu containerele.
+În această configurație, Firecrawl rulează ca un set de containere Docker gestionate cu Podman. Pentru a simplifica gestionarea ciclului de viață și pornirea automată, înregistrăm Firecrawl ca serviciu `systemd` la nivel de utilizator, care orchestrează stiva Podman Compose subiacentă. Acest lucru permite Hermes să pornească, să oprească și să verifice serviciul Firecrawl folosind comenzi standard `systemctl --user`, în loc să interacționeze direct cu containerele.
 
 Pentru a păstra lucrurile simple, am împărțit întregul proces în patru pași:
 
 ---
 
 ### 1. Înregistrați serviciul de sistem
-Navigați la directorul de configurare systemd al utilizatorului:
+Navigați la directorul de configurare a utilizatorului systemd:
 ```bash
 cd ~/.config/systemd/user
 ```
@@ -957,23 +960,23 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
-În acest moment, serviciul a fost definit, dar nu a fost încă înregistrat cu `systemd`. 
+În acest moment, serviciul a fost definit, dar nu a fost încă înregistrat la `systemd`. 
 Asigurați-vă că numele fișierului corespunde exact cu cel creat mai sus, apoi rulați:
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
 ```
-Dacă are succes, ar trebui să vedeți următorul rezultat:
+Dacă operațiunea a reușit, ar trebui să vedeți următorul rezultat:
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
- `default.target.wants/` conține linkuri simbolice către serviciile configurate să pornească automat.
+ `default.target.wants/` conține legături simbolice către serviciile configurate să pornească automat.
 
-### 2. Configurați Firecrawl pentru serviciul dvs.
+### 2. Configurați Firecrawl pentru serviciul dumneavoastră
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) este ideal pentru cei care au nevoie de control total asupra mediilor lor de scraping și procesare a datelor, dar vine cu costul unor eforturi suplimentare de întreținere și configurare.
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) este ideal pentru cei care au nevoie de control complet asupra mediilor lor de scraping și procesare a datelor, dar vine cu costul unui efort suplimentar de întreținere și configurare.
 
-Începeți prin a clona repository-ul:
+Începeți prin clonarea repository-ului:
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
@@ -1014,9 +1017,9 @@ podman pull docker.io/nousresearch/hermes-agent:latest
 ```
 După ce ați terminat, descărcați fișierul Compose Hermes [hermes-compose.yaml](assets/hermes-compose.yaml) și plasați-l în directorul rădăcină `/firecrawl`:
 
-> Această convenție este necesară pentru ca `systemd` să localizeze și să pornească serviciul corect, conform specificațiilor din `WorkingDirectory=${HOME}/firecrawl`.
+> Această convenție este necesară pentru ca `systemd` să localizeze și să pornească serviciul corect, așa cum este specificat în `WorkingDirectory=${HOME}/firecrawl`.
 
-> Puteți extinde oricând stiva adăugând servicii Firecrawl suplimentare, după cum este necesar. Lista completă a serviciilor disponibile poate fi găsită în [docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) oficial al Firecrawl.
+> Puteți extinde oricând stiva adăugând servicii Firecrawl suplimentare, după cum este necesar. Lista completă a serviciilor disponibile poate fi găsită în fișierul oficial [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
 
 ### 4. Lansați serviciul Hermes prin Firecrawl 
 
@@ -1024,20 +1027,20 @@ După ce ați terminat, descărcați fișierul Compose Hermes [hermes-compose.ya
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-Dacă totul este configurat corect, ar trebui să vedeți containerul Hermes pornind, iar rezultatul din linia de comandă ar trebui să arate similar cu acesta:
+Dacă totul este configurat corect, ar trebui să vedeți containerul Hermes pornind, iar rezultatul liniei de comandă ar trebui să arate similar cu acesta:
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
 
-Odată verificat, opriți stiva înainte de a continua:
+Odată validat, opriți stiva înainte de a continua:
 ```bash
 podman compose -f hermes-compose.yaml down
 ```
-Acum că totul a fost validat, porniți serviciul prin `systemd`:
+Acum că totul este validat, porniți serviciul prin `systemd`:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[API-ul Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) este accesibil din interiorul containerului interactiv, iar Panoul de bord Web este disponibil pe același host și port la http://127.0.0.1:9119.
+[API-ul Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) este accesibil din interiorul containerului interactiv, iar Tabloul de bord Web este disponibil pe aceeași gazdă și port la http://127.0.0.1:9119.
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
@@ -1208,7 +1211,7 @@ finally {
 
 **Felicitări, ați construit o stivă de agent AI complet locală.**
 
-### Panoul de bord Web
+### Tabloul de bord Web
 
 Hermes include o interfață bazată pe browser pentru gestionarea configurației, cheilor API, modelelor, sesiunilor, memoriei și sarcinilor cron. Deschideți un al doilea terminal în timp ce gateway-ul sau CLI-ul rulează și lansați-l cu:
 
@@ -1216,46 +1219,46 @@ Hermes include o interfață bazată pe browser pentru gestionarea configurație
 hermes dashboard
 ```
 
-Aceasta pornește un server local și deschide `http://127.0.0.1:9119` în browserul dumneavoastră. Consultați [documentația panoului de bord](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) pentru referința completă a funcționalităților.
+Aceasta pornește un server local și deschide `http://127.0.0.1:9119` în browserul dvs. Consultați [documentația tabloului de bord](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) pentru referința completă a funcționalităților.
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
 
 ---
 
-## Opțional: Conectarea unui canal de comunicare
+## Opțional: Conectați un canal de comunicare
 
-Odată ce gateway-ul rulează, puteți accesa agentul local de pe orice dispozitiv. Hermes acceptă [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) și altele
+Odată ce gateway-ul rulează, puteți accesa agentul local de pe orice dispozitiv. Hermes suportă [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) și altele
 
 ---
 
 ### Discord
 
-Discord necesită un server unde **aveți acces de administrator** pentru a adăuga un bot. Dacă partajați servere, dar nu dețineți niciunul, folosiți Telegram în schimb.
+Discord necesită un server pe care **aveți acces de administrator** pentru a adăuga un bot. Dacă partajați servere, dar nu dețineți unul, folosiți în schimb Telegram.
 
-#### Creați o aplicație Discord și un bot
+#### Creați o aplicație și un bot Discord
 
 1. Accesați [Discord Developer Portal](https://discord.com/developers/applications) și faceți clic pe **New Application**. Dați-i un nume (de exemplu, „hermes-bot”).
 2. În bara laterală, faceți clic pe **Bot**. Setați un nume de utilizator pentru bot.
 3. Rămânând pe pagina Bot, derulați până la **Privileged Gateway Intents** și activați:
-   - **Message Content Intent** (obligatoriu)
+   - **Message Content Intent** (necesar)
    - **Server Members Intent** (recomandat)
-4. Derulați înapoi în sus și faceți clic pe **Reset Token** pentru a genera token-ul botului dumneavoastră. Copiați-l.
+4. Derulați înapoi în sus și faceți clic pe **Reset Token** pentru a genera tokenul botului dvs. Copiați-l.
 
-#### Adăugați botul pe serverul dumneavoastră
+#### Adăugați botul pe serverul dvs.
 
 1. În bara laterală, faceți clic pe **OAuth2 / URL Generator**.
-2. La secțiunea **Scopes**, activați `bot` și `applications.commands`.
-3. La secțiunea **Bot Permissions**, activați: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Copiați URL-ul generat, lipiți-l în browserul dumneavoastră, selectați serverul și confirmați.
+2. Sub **Scopes**, activați `bot` și `applications.commands`.
+3. Sub **Bot Permissions**, activați: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
+4. Copiați URL-ul generat, lipiți-l în browser, selectați serverul dvs. și confirmați.
 
-#### Colectați ID-urile și permiteți mesajele directe
+#### Colectați ID-urile dvs. și permiteți mesajele directe
 
-Activați Developer Mode în Discord (**User Settings / Advanced / Developer Mode**), apoi:
-- Faceți clic dreapta pe pictograma serverului dumneavoastră: **Copy Server ID**
+Activați Modul dezvoltator în Discord (**User Settings / Advanced / Developer Mode**), apoi:
+- Faceți clic dreapta pe pictograma serverului dvs.: **Copy Server ID**
 - Faceți clic dreapta pe propriul avatar: **Copy User ID**
 
-Faceți clic dreapta pe pictograma serverului dumneavoastră / **Privacy Settings** / activați **Direct Messages**. Acest lucru este necesar pentru pasul de asociere.
+Faceți clic dreapta pe pictograma serverului dvs. / **Privacy Settings** / activați **Direct Messages**. Acest lucru este necesar pentru etapa de asociere.
 
 #### Configurați Hermes pentru Discord
 
@@ -1273,7 +1276,7 @@ Apoi porniți gateway-ul:
 hermes gateway
 ```
 
-Botul ar trebui să apară online în Discord în câteva secunde. Trimiteți-i un mesaj, fie un mesaj direct, fie într-un canal pe care îl poate vedea.
+Botul ar trebui să apară online în Discord în câteva secunde. Trimiteți-i un mesaj, fie un DM, fie într-un canal pe care îl poate vedea.
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1287,7 +1290,7 @@ Botul ar trebui să apară online în Discord în câteva secunde. Trimiteți-i 
 #### Creați un bot Telegram
 
 1. Deschideți Telegram și trimiteți un mesaj către **@BotFather**.
-2. Trimiteți `/newbot` și urmați instrucțiunile. Salvați token-ul botului pe care vi-l oferă.
+2. Trimiteți `/newbot` și urmați instrucțiunile. Salvați tokenul botului pe care vi-l oferă.
 
 #### Configurați Hermes pentru Telegram
 
@@ -1298,7 +1301,7 @@ TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_ALLOWED_USERS=your-telegram-user-id   # comma-separated for multiple users
 ```
 
-> **Nu vă cunoașteți ID-ul de utilizator Telegram?** Trimiteți un mesaj către [@userinfobot](https://t.me/userinfobot) în Telegram, vă va răspunde cu ID-ul dumneavoastră numeric.
+> **Nu vă cunoașteți ID-ul de utilizator Telegram?** Trimiteți un mesaj către [@userinfobot](https://t.me/userinfobot) în Telegram, vă va răspunde cu ID-ul dvs. numeric.
 
 Apoi porniți gateway-ul:
 
@@ -1306,16 +1309,16 @@ Apoi porniți gateway-ul:
 hermes gateway
 ```
 
-Trimiteți botului dumneavoastră orice mesaj în Telegram pentru testare. Acum puteți discuta cu agentul dumneavoastră prin mesaje directe pe Telegram. Consultați [ghidul complet de configurare Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) pentru modul webhook și opțiuni avansate.
+Trimiteți botului dvs. orice mesaj în Telegram pentru a testa. Acum puteți discuta cu agentul dvs. prin DM pe Telegram. Consultați [ghidul complet de configurare Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) pentru modul webhook și opțiuni avansate.
 
 ---
 
 ## Pașii următori
 
-Acum că agentul dumneavoastră poate primi comenzi de pe telefon și poate acționa pe mașina locală, iată trei direcții care merită explorate:
+Acum că agentul dvs. poate primi comenzi de pe telefonul dvs. și poate acționa pe mașina dvs. locală, iată trei direcții demne de explorat:
 
-1. **Rezumat automat de cercetare**: Programați Hermes să caute pe web subiecte care vă interesează în fiecare dimineață, să rezume rezultatele cu modelul dumneavoastră local și să trimită un rezumat pe telefon prin Telegram sau Discord, totul rulând pe propriul hardware, fără costuri în cloud.
+1. **Rezumat automat de cercetare**: Programați Hermes să caute pe web subiecte care vă interesează în fiecare dimineață, să rezume descoperirile cu modelul dvs. local și să trimită un rezumat pe telefonul dvs. prin Telegram sau Discord, totul rulând pe propriul hardware, fără costuri în cloud.
 
-2. **Revizuire de cod la cerere**: Îndreptați Hermes către un repository GitHub, cereți-i să revizuiască pull request-urile deschise și să posteze comentarii sau un rezumat înapoi în chat-ul dumneavoastră. Cu backend-ul de terminal Docker, toate operațiunile git rulează în interiorul sandbox-ului, păstrând sistemul gazdă curat.
+2. **Revizuire de cod la cerere**: Îndreptați Hermes către un repository GitHub, cereți-i să revizuiască pull request-urile deschise și puneți-l să posteze comentarii sau un rezumat înapoi în chatul dvs. Cu backend-ul de terminal Docker, toate operațiunile git rulează în interiorul sandbox-ului, păstrând gazda dvs. curată.
 
-3. **Asistent de fișiere local**: Oferiți Hermes acces la un director de lucru și cereți-i să organizeze, redenumească, rezume sau transforme fișiere la cerere de pe telefon. Deoarece backend-ul de terminal Docker restricționează toate operațiunile de scriere la spațiul de lucru sandbox, operațiunile accidentale distructive sunt izolate.
+3. **Asistent local de fișiere**: Oferiți Hermes acces la un director de lucru și cereți-i să organizeze, redenumească, rezume sau transforme fișiere la cerere, de pe telefonul dvs. Deoarece backend-ul de terminal Docker limitează toate scrierile la spațiul de lucru sandbox, operațiunile distructive accidentale sunt izolate.

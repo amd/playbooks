@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA est le framework open source d'AMD pour créer des agents d'IA fonctionnant localement sur du matériel AMD avec l'accélération Ryzen AI.
+GAIA est le framework open-source d'AMD pour créer des agents IA fonctionnant localement sur du matériel AMD avec l'accélération Ryzen AI.
 
 #### Installation de GAIA
 
@@ -31,7 +31,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. Sous Linux, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -72,7 +72,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. Sous Linux, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv

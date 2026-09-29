@@ -9,42 +9,50 @@ SPDX-License-Identifier: MIT
 > **機械翻訳。** このページは英語から自動的に翻訳されたものであり、人による確認は行われていません。誤りが含まれている場合や、特定の手順、コマンド、ダウンロード、製品の提供状況、その他のコンテンツが言語や地域によって異なる場合があります。内容に矛盾または相違がある場合は、playbookの原文である英語版が優先されるものとします。
 <!-- auto-translated-disclaimer:end -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
+
 ## 概要
+
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> このプレイブックには、最低でも **32GB** のシステムメモリが必要です。
+> このプレイブックには最低 **32GB** のシステムメモリが必要です。
 <!-- @device:end -->
-n8nは、ビジュアルなノードベースのエディターを使ってアプリやサービスを接続できるワークフロー自動化プラットフォームです。
 
-このプレイブックでは、AP Newsのビジネスセクションをスクレイピングし、主要な見出しを抽出して、システム上で動作するローカルLLMを使って投資家向けのサマリーを生成する、AI駆動の金融ニュース要約ツールのセットアップ方法を学びます。
+n8n は、視覚的なノードベースのエディタを使ってアプリやサービスを連携させることができるワークフロー自動化プラットフォームです。
 
-## 学べること
+このプレイブックでは、ニュース RSS フィードから最新のビジネスヘッドラインを取得し、システム上で動作するローカル LLM を使って投資家向けの要約を生成する、AI 搭載の金融ニュースサマライザーのセットアップ方法を学びます。
 
-- n8nのインストールと起動方法
-- 事前構築済みワークフローのインポートと設定
-- ネイティブのn8n統合を使ったLemonadeへの接続
-- ワークフローのノードとデータフローの理解
+## このプレイブックで学べること
 
-## Lemonadeとは？
+- n8n のインストールと起動方法
+- 事前に構築されたワークフローのインポートと設定
+- ネイティブの n8n 連携機能を使った Lemonade への接続
+- ワークフローノードとデータフローの理解
 
-[Lemonade](https://lemonade-server.ai)は、AMDハードウェア向けに構築されたローカルLLM提供プラットフォームです。OpenAI互換のAPIを提供し、完全にお使いのマシン上で動作するため、データが端末の外に出ることはありません。
+## Lemonade とは？
 
-このプレイブックでは、Lemonadeを使ってローカルLLMを提供し、n8nがAI駆動タスクのためにそれに接続します。
+[Lemonade](https://lemonade-server.ai) は、AMD ハードウェア向けに構築されたローカル LLM サービングプラットフォームです。OpenAI 互換の API を提供し、すべてお使いのマシン上で完結して動作します。データが外部に送信されることはありません。
 
-n8nには**ネイティブのLemonadeノード**（`Lemonade Chat Model`）が含まれており、手動設定不要でファーストクラスの統合を提供します。これにより、ローカルLLMを自動化ワークフローに簡単に接続できます。
+このプレイブックでは、Lemonade を使ってローカル LLM をサーブし、n8n がそれに接続して AI を活用したタスクを実行します。
 
-## メモリ設定の構成
+n8n には **ネイティブの Lemonade ノード**（`Lemonade Chat Model`）が含まれており、手動設定の必要なく第一級の連携機能を提供します。これにより、ローカル LLM を自動化ワークフローに簡単に接続できます。
+
+<!-- @device:halo_box,halo,stx,krk -->
+## メモリ設定
+
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## ソフトウェアの更新を確認する
+
 <!-- @require:software-update -->
 <!-- @device:end -->
-## ソフトウェアの前提条件のインストール
+
+## ソフトウェアの前提条件をインストールする
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
@@ -188,11 +196,12 @@ node -v
 npm -v
 ```
 <!-- @test:end -->
-## n8nのインストール
-<!-- @os:windows -->
-> **注**: いくつかの npm 警告が表示される場合がありますが、これは想定内です。
 
-npm を使用して n8n をグローバルにインストールしてください。
+## n8n のインストール
+<!-- @os:windows -->
+npm を使って n8n をグローバルにインストールします。
+
+> **注**: いくつかの npm 警告が表示される場合がありますが、これは想定内です。
 
 ```bash
 npm install -g n8n
@@ -215,34 +224,35 @@ n8n --version
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **ヒント**: Windows ユーザーは、一部の PowerShell コマンドを実行する前に、PowerShell の実行ポリシーを変更する必要がある場合があります(例: RemoteSigned または Unrestricted に設定する)。
+> **ヒント**: Windows ユーザーは、一部の PowerShell コマンドを実行する前に、PowerShell の実行ポリシーを変更する必要がある場合があります（例：RemoteSigned または Unrestricted に設定するなど）。
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **PATHの問題**:`n8n --version` を実行してコマンドが見つからないと表示される場合は、npmのグローバルbinディレクトリがユーザーの `PATH` に含まれていることを確認してください。通常のインストールパスは `C:\Users\<username>\AppData\Roaming\npm` です。
-> これをユーザーパスに追加し(「システム環境変数の編集」>「環境変数」>「ユーザー環境変数を編集」)、ターミナルを再起動してください。
+> **PATH の問題**: `n8n --version` で command not found と表示される場合は、npm のグローバル bin ディレクトリがユーザーの `PATH` に含まれていることを確認してください。通常のインストールパスは `C:\Users\<username>\AppData\Roaming\npm` です。
+> これをユーザーパスに追加し（システム環境変数の編集 > 環境変数 > ユーザー環境変数の編集）、ターミナルを再読み込みしてください。
+
 <!-- @os:end -->
 
 <!-- @os:linux -->
-これから、Podman サービスを使用して n8n のインストールをコンテナ化していきます。
+ここでは、Podman サービスを使って n8n インストールをコンテナ化します。
 
-任意のディレクトリに以下をダウンロードしてください: [compose.yml](assets/compose.yml)
+以下のファイルをお好みのディレクトリにダウンロードしてください：[compose.yml](assets/compose.yml)
 
-そのディレクトリで、次のコマンドを実行します:
+そのディレクトリで、次のコマンドを実行します：
 ```bash
 podman compose up -d
 ```
 
-これにより n8n がインストールされ、永続ストレージに書き込みが行われます。
+これにより n8n がインストールされ、永続ストレージに書き込まれます。
 
 ブラウザのアドレスバーに `localhost:5678` と入力して n8n を起動してください。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-## n8nの起動
+## n8n の起動
 
-ターミナルからn8nを起動します:
+ターミナルから n8n を起動します：
 
 ```bash
 n8n start
@@ -313,23 +323,28 @@ echo "OK: n8n server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-n8nはローカルWebサーバーを起動します。`'o'`を押すか、ブラウザで`http://localhost:5678`を開いてエディタにアクセスしてください。
+n8n はローカル Web サーバーを起動します。`'o'` を押すか、ブラウザで `http://localhost:5678` を開いてエディタにアクセスしてください。
 <!-- @os:end -->
-> **ヒント**: n8nを使用している間は、ターミナルウィンドウを開いたままにしておいてください。閉じるとサーバーが停止する場合があります。
 
-## Lemonadeの起動
 
-Lemonadeは、モデルを実行しn8nと接続するローカルサーバーです。
+> **ヒント**: n8n を使用している間はターミナルウィンドウを開いたままにしてください。閉じるとサーバーが停止する場合があります。
+
+## Lemonade の起動
+
+Lemonade は、モデルを実行して n8n に接続するローカルサーバーです。
+
 <!-- @os:linux -->
-タスクバーの Lemonade アイコンをクリックして、Lemonade GUI を開きます。ここからモデルやバックエンドを閲覧したり、プリインストール済みのモデルを読み込んだりできます。
+タスクバーの Lemonade アイコンをクリックして Lemonade GUI を開きます。ここからモデルやバックエンドを閲覧したり、あらかじめインストールされたモデルをロードしたりできます。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Lemonade アイコンをクリックして Lemonade GUI を開きます。トレイアイコンを右クリックしてアプリを開きます。そこから、モデルやバックエンドを追加したり、プリインストール済みのモデルをロードしたりできます。
+Lemonade アイコンをクリックして Lemonade GUI を開きます。トレイアイコンを右クリックしてアプリを開いてください。その後、モデルやバックエンドを追加したり、あらかじめインストールされたモデルをロードしたりできます。
 <!-- @os:end -->
->**ヒント**: 起動すると、Lemonade GUIは http://localhost:13305 でもアクセスできます
 
-または、ターミナルを開いて `lemonade list` を実行し、インストール済みのモデルを確認することもできます。その後、以下を実行します。
+>**ヒント**: 実行中は、Lemonade GUI に http://localhost:13305 からもアクセスできます。
+
+または、ターミナルを開いて `lemonade list` を実行し、インストール済みのモデルを確認することもできます。その後、次を実行します：
+
 <!-- @device:halo_box -->
 <!-- @os:linux -->
 ```bash
@@ -355,30 +370,32 @@ lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 ```
 <!-- @device:end -->
+
+
 ## ワークフローのセットアップ
 
-### ステップ1: n8n にサインアップまたはログインする
+### ステップ 1: n8n にサインアップまたはログインする
 
-n8n を初めて開くと、アカウントの作成またはログインを求められます。
+初めて n8n を開くと、アカウントの作成またはログインを求められます：
 
-1. ブラウザで `http://localhost:5678` を開きます
-2. メールアドレスで新しいローカルアカウントを作成するか、既にアカウントをお持ちの場合はログインします
+1. ブラウザで `http://localhost:5678` を開く
+2. メールアドレスで新しいローカルアカウントを作成するか、既にアカウントをお持ちの場合はログインする
 3. ログインすると、n8n のダッシュボードが表示されます
 
 > **ヒント**: アカウントからロックアウトされた場合は、`n8n user-management:reset` を試してください
 
-### ステップ2: ワークフローをインポートする
+### ステップ 2: ワークフローをインポートする
 
-直接インポートできる、あらかじめ用意されたワークフローを提供しています。
+すぐにインポートできる、事前に構築されたワークフローを用意しています：
 
-1. 次のワークフローファイルをダウンロードします: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. **Start from Scratch** をクリックしてワークフローエディタを開きます。または、左上の + ボタンをクリックしてから **Add workflow** をクリックします。
-3. 右上のバーにある **...** メニュー(3つの点)をクリックし、**Import from file** を選択します
+1. 次のワークフローファイルをダウンロードします：[financial-news-workflow.json](assets/financial-news-workflow.json)
+2. **Start from Scratch** をクリックしてワークフローエディタを開きます。または、左上の + ボタンをクリックし、**Add workflow** をクリックします。
+3. 右上バーの **...** メニュー（縦の3点）をクリックし、**Import from file** を選択します
 4. ダウンロードした `financial-news-workflow.json` ファイルを選択します
 5. ワークフローがキャンバス上に表示されます
-### ステップ3：ワークフローを理解する
+### ステップ3:ワークフローを理解する
 
-インポートされたワークフローには、9つの接続されたノードが含まれています。
+インポートされたワークフローには、接続された8つのノードが含まれています。
 
 <p align="center">
   <img src="assets/workflow-overview.png" alt="n8n Financial News Workflow" width="800"/>
@@ -387,45 +404,46 @@ n8n を初めて開くと、アカウントの作成またはログインを求�
 | ノード | 目的 |
 |------|---------|
 | **When clicking 'Execute workflow'** | ワークフローを開始するための手動トリガー |
-| **Fetch Financial News Webpage** | `https://apnews.com/business` へのHTTP GETリクエスト |
-| **Delay to Ensure Page Load** | ページコンテンツが完全に読み込まれるようにするためのWaitノード |
-| **Extract News Headlines & Text** | CSSセレクターを使用して見出し、編集者のピック、トップニュース、地域ニュースを抽出するHTMLノード |
-| **Clean Extracted News Data** | 抽出されたすべてのデータを1つのテキストフィールドに結合するSetノード |
-| **AI Financial News Summarizer** | 金融アナリストのシステムプロンプトでニュースを処理するAI Agent |
+| **Fetch Financial News Feed** | RSSフィードから最新のビジネス見出しを取得するRSS Readノード(デフォルトではNYT Businessフィードを使用し、APIキーは不要) |
+| **Aggregate Headlines** | すべてのフィードアイテムから見出しのタイトルと要約を収集し、1つのリストにまとめるAggregateノード |
+| **Clean Extracted News Data** | すべての見出しを1つのテキストフィールドに結合するSetノード |
+| **AI Financial News Summarizer** | 金融アナリストのシステムプロンプトを使用してニュースを処理するAI Agent |
 | **Lemonade Chat Model** | LLMを実行しているローカルのLemonadeサーバーに接続 |
 | **Structured Output Parser** | AIの出力を構造化されたJSONとしてフォーマット |
-| **Convert to File** | サマリーをダウンロード可能なファイルに変換 |
+| **Convert to File** | 要約をダウンロード可能なファイルに変換 |
 
-### ステップ4：Lemonadeの認証情報を設定する
+> **ヒント**: 別のニュースソースを使用するには、**Fetch Financial News Feed** ノードをダブルクリックし、URLを任意のビジネスまたはマーケット系のRSSフィードに置き換えてください。
+
+### ステップ4:Lemonadeの認証情報を設定する
 
 ワークフローを実行する前に、ローカルのLemonadeサーバーに接続する必要があります。
 
-1. n8nで **Lemonade Chat Model** ノードをダブルクリックします
-2. **Credential to connect with** のドロップダウンメニューから **Create New Credential** を選択します
+1. n8nで**Lemonade Chat Model**ノードをダブルクリックします
+2. ドロップダウンメニューの**Credential to connect with**で**Create New Credential**を選択します
 3. 下の表の値を入力し、保存をクリックします。
-4. Lemonade Serverにロードしている関連モデルを選択します。
+4. Lemonade Serverにロードされている該当のモデルを選択します。
 
   | フィールド | 値 |
   |-------|-------|
   | **Base URL** | `http://localhost:13305/api/v1` |
   | **API Key** | `lemonade` |
 
-> **注**：テストする前に、ターミナルで `lemonade status` を実行して、Lemonadeサーバーが動作していることを確認してください。
+> **注**: テストを行う前に、ターミナルで`lemonade status`を実行し、Lemonadeサーバーが起動していることを確認してください。
 <!-- @device:halo_box -->
-> このワークフローはGPT-OSS-120Bを使用しており、Lemonadeにあらかじめインストールされています。Lemonade Chat Modelノードの設定で、他のロード済みモデルに変更できます。
+> このワークフローはGPT-OSS-120Bを使用しており、Lemonadeにあらかじめインストールされています。Lemonade Chat Modelノードの設定で、他のロード済みモデルに変更することもできます。
 <!-- @device:end -->
 
-### ステップ5：ワークフローをテストする
+### ステップ5:ワークフローをテストする
 
-1. モデルがロードされた状態でLemonadeが動作していることを確認します
-2. キャンバスの下部中央にある **Execute workflow** をクリックします
-3. 各ノードが左から右へ実行される様子を確認します—完了すると緑色になります
-4. **AI Financial News Summarizer** ノードをダブルクリックして、下部ペインに生成されたサマリーを表示します。
-5. **Convert to File** ノードをダブルクリックして、下部ペインで対応するテキストファイルをダウンロードします。
+1. Lemonadeがモデルをロードした状態で実行されていることを確認します
+2. キャンバス下部中央にある**Execute workflow**をクリックします
+3. 各ノードが左から右へ実行される様子を確認します。完了すると緑色になります
+4. **AI Financial News Summarizer**ノードをダブルクリックし、下部ペインで生成された要約を確認します。
+5. **Convert to File**ノードをダブルクリックし、下部ペインで対応するテキストファイルをダウンロードします。
 
 ## AI Agentを理解する
 
-AI Financial News Summarizerは、金融分析のために設計されたシステムプロンプトを使用しています。
+AI Financial News Summarizerは、金融分析用に設計されたシステムプロンプトを使用します。
 
 ```
 You are an AI financial analyst. Your role is to read, understand, and
@@ -437,29 +455,29 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-このエージェントは、クリーンアップされたニュースデータを受け取り、市場センチメントを含む構造化されたサマリーを出力します。
+このエージェントは整形済みのニュースデータを受け取り、市場センチメントを含む構造化された要約を出力します。
 
-### ワークフローを保存する
+### ワークフローの保存
 
-上部のワークフロー名をクリックして、必要に応じて名前を変更します。ワークフローは作業中に自動保存されます。
+上部にあるワークフロー名をクリックし、必要に応じて名前を変更します。ワークフローは作業中に自動保存されます。
 
 ## 次のステップ
 
-- **自動化のスケジュール設定**：手動トリガーを **Schedule Trigger** に置き換えて、毎日実行するようにします
-- **通知の送信**：**Discord**、**Slack**、または **Email** ノードを追加して、サマリーを受信します
-- **異なるモデルを試す**：Lemonade Chat Modelノードのモデルを変更して、さまざまなLLMを試します
-- **抽出のカスタマイズ**：HTML Extractノードの CSSセレクターを変更して、異なるニュースセクションを対象にします
-- **異なるバックエンドを試す**：n8nは[Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model)、LM Studio、その他のローカルLLMバックエンドもサポートしています
+- **自動化のスケジュール設定**:手動トリガーを**Schedule Trigger**に置き換え、毎日実行するようにします
+- **通知の送信**:**Discord**、**Slack**、または**Email**ノードを追加して要約を受け取ります
+- **異なるモデルを試す**:Lemonade Chat Modelノードのモデルを変更し、さまざまなLLMを試してみます
+- **ニュースソースの変更**:**Fetch Financial News Feed**ノードを別のRSSフィードに設定し、他のセクションや媒体をフォローします
+- **異なるバックエンドを試す**:n8nは[Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model)、LM Studio、その他のローカルLLMバックエンドにも対応しています
 
-### n8nテンプレートを探索する
+### n8nテンプレートを見る
 
-n8nには数百のプリビルドワークフローテンプレートがあります。公式テンプレートライブラリを以下で閲覧できます。
+n8nには何百もの事前構築済みワークフローテンプレートがあります。公式テンプレートライブラリは以下から閲覧できます:
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
-「AI」、「LLM」、または「automation」を検索して、インポートしてカスタマイズできるワークフローを見つけてください。
+「AI」、「LLM」、または「automation」で検索し、インポートしてカスタマイズできるワークフローを見つけてください。
 
-詳細については、[n8n Documentation](https://docs.n8n.io/)をご確認ください。
+詳細については、[n8n Documentation](https://docs.n8n.io/)をご覧ください。
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

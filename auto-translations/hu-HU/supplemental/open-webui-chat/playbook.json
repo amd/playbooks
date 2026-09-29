@@ -1,6 +1,6 @@
 {
   "id": "open-webui-chat",
-  "title": "Csevegés LLM-ekkel az Open WebUI alkalmazásban",
-  "description": "Használja az Open WebUI-t LLM-ekkel való helyi csevegéshez.",
+  "title": "LLM-ekkel való csevegés az Open WebUI-ban",
+  "description": "Használja az Open WebUI-t az LLM-ekkel való helyi csevegéshez.",
   "auto_translated": true
 }

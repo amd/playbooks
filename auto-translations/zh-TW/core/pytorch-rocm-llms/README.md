@@ -17,33 +17,35 @@ SPDX-License-Identifier: MIT
 ## 概觀
 
 
-想要在自己的硬體上執行強大的 AI 語言模型嗎？本指南將向您展示如何做到這一點。
-本教學使用由 AMD ROCm™ 軟體驅動的 PyTorch 來執行可以摘要文件、回答問題、產生文字等功能的模型，全部都在本機執行。
+想在自己的硬體上執行強大的 AI 語言模型嗎?本指南將展示如何實現這一點。
+本教學使用由 AMD ROCm™ 軟體驅動的 PyTorch，來執行能夠摘要文件、回答問題、生成文字等功能的模型,而且全部都在本地端執行。
 
-## 您將學到什麼
+## 你將學到什麼
 
-- 使用 PyTorch 和 ROCm 在本機執行如 gpt-oss-20b 和 qwen3.5-4B 等 LLM
-- 建立一個文件摘要工具，使用 LLM
+- 使用 PyTorch 和 ROCm 在本地端執行 LLM，例如 gpt-oss-20b 和 qwen3.5-4B
+- 建立一個使用 LLM 的文件摘要工具
 
-## 設定記憶體組態
+<!-- @device:halo_box,halo,stx,krk -->
+## 設定記憶體配置
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## 檢查軟體更新
-> **注意**：如果尚未安裝 VS Code，您可以透過 Ryzen AI Developer Center 進行安裝。
+> **注意**:如果尚未安裝 VS Code,可以透過 Ryzen AI Developer Center 進行安裝。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 安裝軟體先決條件
+## 安裝軟體必要條件
 
 ### 建立虛擬環境
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-在 Linux 上，於您選擇的目錄中開啟終端機，並依照以下指令建立一個已預先安裝 ROCm+Pytorch 的 venv。
-<!-- @test:id=create-venv timeout=120 -->
+在 Linux 上，在您選擇的目錄中開啟終端機，並依照指令建立一個已預先安裝 ROCm+Pytorch 的 venv。
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -55,14 +57,14 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**授予您的使用者存取 GPU 裝置的權限**（登出並重新登入以使其生效）：
+**授予您的使用者存取 GPU 裝置的權限**(登出並重新登入後才會生效):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-在 Linux 上，於您選擇的目錄中開啟終端機，並依照以下指令建立一個 venv。
-<!-- @test:id=create-venv timeout=120 -->
+在 Linux 上，在您選擇的目錄中開啟終端機，並依照指令建立一個 venv。
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -77,8 +79,8 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-在 Windows 上，於您選擇的目錄中開啟終端機，並依照以下指令建立一個已預先安裝 ROCm+Pytorch 的 venv。
-<!-- @test:id=create-venv timeout=60 -->
+在 Windows 上，在您選擇的目錄中開啟終端機，並依照指令建立一個已預先安裝 ROCm+Pytorch 的 venv。
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
 pytorch-env\Scripts\activate
@@ -88,8 +90,8 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-在 Windows 上，於您選擇的目錄中開啟終端機，並依照以下指令建立一個 venv。
-<!-- @test:id=create-venv timeout=60 -->
+在 Windows 上，在您選擇的目錄中開啟終端機，並依照指令建立一個 venv。
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
 pytorch-env\Scripts\activate
@@ -98,15 +100,14 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **提示**：Windows 使用者在執行某些 PowerShell 指令之前，可能需要修改其 PowerShell 執行原則
-> （例如，將其設定為 RemoteSigned 或 Unrestricted）。
+> **提示**:Windows 使用者在執行某些 Powershell 指令之前，可能需要修改其 PowerShell 執行原則(例如,設定為 RemoteSigned 或 Unrestricted)。
 
 <!-- @os:end -->
 
 ### 安裝基本相依套件
 <!-- @require:driver,pytorch -->
 
-### 安裝額外相依套件
+### 安裝其他相依套件
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
@@ -115,7 +116,7 @@ pytorch-env\Scripts\activate
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -123,10 +124,17 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece pro
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+> **注意:** 如果模型載入失敗或發生記憶體不足的情況，請嘗試安裝 `kernels` 套件，以使用最佳化的量化方式來載入模型。
+>
+> ```bash
+> # Use this version which is compatible with the Transformers version
+> pip install "kernels==0.14.1" 
+> ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -141,19 +149,19 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 <!-- @device:end -->
 
-## 快速上手範例腳本
+## 使用範例指令碼快速上手
 
-此手冊包含可立即使用的腳本。點選它們以預覽並下載到您所建立環境的相同目錄中。
+此手冊包含可立即使用的指令碼。點擊它們即可預覽並下載到您所建立環境的相同目錄中。
 
-| 腳本 | 說明 | 使用方式 |
+| 指令碼 | 說明 | 使用方式 |
 |--------|-------------|-------|
-| [run_llm.py](assets/run_llm.py) | 基本 LLM 文字產生 | `python run_llm.py` |
+| [run_llm.py](assets/run_llm.py) | 基本 LLM 文字生成 | `python run_llm.py` |
 | [summarizer.py](assets/summarizer.py) | 支援 Harmony 的文件摘要工具 | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
@@ -179,19 +187,19 @@ for script in ['run_llm.py', 'summarizer.py']:
 ```
 <!-- @test:end -->
 
-兩個腳本都支援：
+這兩個指令碼都支援:
 - 透過 `--model` 旗標選擇模型
-- 聊天範本格式化，以進行正確的模型提示，這對文件摘要特別有用
+- 聊天範本格式化，以便正確地提示模型，這對於文件摘要特別有用
 
-## 載入並執行您的第一個 LLM
+## 載入並執行你的第一個 LLM
 
-隨附的 [run_llm.py](assets/run_llm.py) 腳本展示了如何使用 PyTorch 和 AMD ROCm 來產生文字。
+隨附的 [run_llm.py](assets/run_llm.py) 指令碼展示了如何使用 PyTorch 和 AMD ROCm 生成文字。
 
-> **注意：** 載入模型時，Hugging Face Transformers 會先檢查其本機快取（Linux 上為 `~/.cache/huggingface/hub`，Windows 上為 `C:\Users\<user>\.cache\huggingface\hub`）。如果模型尚未被快取，它會自動從 huggingface.co 下載。首次執行可能需要幾分鐘，具體取決於模型大小和網路速度。
+> **注意:** 當你載入模型時，Hugging Face Transformers 會先檢查其本地快取(Linux 上為 `~/.cache/huggingface/hub`，Windows 上為 `C:\Users\<user>\.cache\huggingface\hub`)。如果模型尚未被快取，它會自動從 huggingface.co 下載。第一次執行可能需要幾分鐘,具體取決於模型大小和網路速度。
 
-以下程式碼片段展示了如何使用該模型並自訂所提出的問題。
+以下程式碼片段展示了如何使用模型並自訂所詢問的問題。
 
-<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -213,7 +221,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    disable_mmap=True
 )
 ```
 <!-- @test:end -->
@@ -255,7 +264,7 @@ messages = [
 ]
 ```
 
-試試下載的腳本：
+試試下載的指令碼:
 
 <!-- @test:id=run-llm-simple timeout=600 setup=activate-venv -->
 ```bash
@@ -266,9 +275,9 @@ python run_llm.py --model ${hf_model}
 
 ## 建立文件摘要工具
 
-現在您已經產生了本機 LLM 輸出，可以進一步建立一個實用的文件摘要工具。在本節中，您將使用 [summarizer.py](assets/summarizer.py) 腳本輸入一個 .txt 檔案，並自動產生簡潔的摘要，全部在您的 GPU 上本機執行。
+現在您已經產生了本地端 LLM 輸出，可以進一步建立一個實用的文件摘要工具。在本節中，您將使用 [summarizer.py](assets/summarizer.py) 指令碼輸入一個 .txt 檔案，並自動產生簡潔的摘要，整個過程都在您的 GPU 上本地端執行。
 
-該腳本設計為可直接使用。在編輯器中開啟該腳本以探索程式碼、自訂提示，並調整長度和溫度等參數。
+此指令碼設計為開箱即用。在編輯器中開啟指令碼，即可探索程式碼、自訂提示，並調整長度和溫度等參數。
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -292,28 +301,27 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## 了解產生參數
+## 了解生成參數
 
-| 參數 | 控制內容 | 典型值 |
+| 參數 | 控制內容 | 常見值 |
 |-----------|------------------|----------------|
-| `max_new_tokens` | LLM 輸出的最大長度 | 摘要建議使用 50–500 個 tokens。（1 個 token 約等於 0.75 個英文單字） |
-| `temperature` | 創造力。低值使其更專注，而高值則帶來更多不可預測性 | - **0.1–0.3**：專注、確定性（適合摘要） <br> **0.5–0.7**：平衡（一般用途） <br> **0.8–1.0**：創意、多變（腦力激盪） |
-| `top_p` | 核採樣（Nucleus Sampling）- 低值會限制模型產生更狹窄的輸出 | **0.1-0.5**：嚴格、可預測 <br> **0.9-0.95**：（標準、自然、對話式） |
+| `max_new_tokens` | LLM 輸出的最大長度 | 摘要使用 50–500 個 token。(1 個 token 大約是 0.75 個英文單字) |
+| `temperature` | 創造力。數值低會使輸出更集中，數值高則會帶來更多不可預測性 | - **0.1–0.3**:集中、確定性(適合摘要) <br> **0.5–0.7**:均衡(一般用途) <br> **0.8–1.0**:富有創意、多變(腦力激盪) |
+| `top_p` | 核採樣 - 數值低會限制模型輸出更狹窄的範圍 | **0.1-0.5**:嚴格、可預測 <br> **0.9-0.95**:(標準、自然、對話式) |
 
 
 ## 實際應用場景
 
-- **研究論文分析**：從複雜的出版物中提取關鍵發現，以便快速檢閱
-- **新聞彙整**：將新聞文章摘要成簡短的每日摘要或重點
-- **會議記錄**：將逐字稿濃縮成可執行的項目和簡潔的摘要
-- **法律文件審查**：從冗長的法律文本中快速提取相關條款或義務
-- **程式碼文件**：產生簡潔的儲存庫概述和函式說明
-
+- **研究論文分析**:從複雜的出版物中萃取關鍵發現，以便快速檢閱
+- **新聞彙整**:將新聞文章摘要為每日簡報或重點摘錄
+- **會議記錄**:將逐字稿濃縮為可行動項目和簡潔摘要
+- **法律文件審閱**:快速從冗長的法律文本中萃取相關條款或義務
+- **程式碼文件**:產生簡潔的儲存庫概觀和函式說明
 ## 後續步驟
 
-- **微調（Fine-tuning）**：針對您特定的領域或術語調整模型以提高準確性（請參閱微調相關手冊）
-- **RAG 系統**：將 LLM 與文件檢索結合，實現具上下文感知的答案與搜尋
-- **模型探索**：嘗試使用 Llama 3、Phi-3 或 Qwen 等新模型以獲得更好的結果
-- **正式部署**：使用像 vLLM 這樣的工具，在組織中實現可擴展的 LLM 服務
+- **微調（Fine-tuning）**：針對您特定的領域或術語調整模型，以獲得更好的準確度（請參閱 Fine-tuning Playbooks）
+- **RAG 系統**：將 LLM 與文件檢索結合，以提供具備上下文感知能力的答案與搜尋功能
+- **模型探索**：嘗試 Llama 3、Phi-3 或 Qwen 等新模型，以獲得更好的結果
+- **正式部署**：使用 vLLM 等工具，在組織中提供可擴展的 LLM 服務
 
-您的系統賦予您在本機執行複雜語言模型的能力。請嘗試不同的模型、提示和參數，以探索最適合您應用場景的方式。
+您的系統賦予您在本機執行複雜語言模型的能力。請嘗試不同的模型、提示詞與參數，找出最適合您應用程式的組合。

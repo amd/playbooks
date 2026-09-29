@@ -16,69 +16,71 @@ SPDX-License-Identifier: MIT
 
 ## Yleiskatsaus
 
-Tämä opas tarjoaa vaiheittaisia esimerkkejä suuren kielimallin (LLM) hienosäätämisestä PyTorchilla ja ROCmilla. Se kattaa useita tekniikoita tavanomaisesta hienosäädöstä muistitehokkaisiin PEFT-strategioihin (Parameter-Efficient Fine-Tuning), jotta voit mukauttaa malleja helposti omiin tarpeisiisi.
+Tämä opas tarjoaa vaiheittaisia esimerkkejä suuren kielimallin (LLM) hienosäätämiseen PyTorchin ja ROCmin avulla. Se kattaa useita tekniikoita, tavallisesta hienosäädöstä muistitehokkaisiin Parameter-Efficient Fine-Tuning (PEFT) -strategioihin, jotta voit helposti mukauttaa malleja tarpeisiisi.
 
 **Käytetty malli**: google/gemma-3-4b-it  *(katso [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models), jos malli on rajoitettu)*  
-**Laitteisto**: AMD Radeon™ -näytönohjain, jossa on ROCm-tuki  
+**Laitteisto**: AMD Radeon™ GPU, jossa on ROCm-tuki  
 **Kehys**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
 > **Huomautus:** 
-> - Täysi hienosäätö vaatii vähintään **64 Gt järjestelmämuistia**, josta vähintään **32 Gt tulee olla GPU:n käytettävissä** (32 Gt on osa 64 Gt:sta, ei sen lisäksi).
-> - Voit myös kokeilla muita mallien arkkitehtuureja, mukaan lukien **GPT-OSS-20B**, korvaamalla mallin annetuissa koulutusskripteissä.
+> - Täysi hienosäätö vaatii vähintään **64 Gt järjestelmämuistia**, josta vähintään **32 Gt on oltava käytettävissä näytönohjaimelle** (32 Gt on osa 64 Gt:sta, ei sen lisäksi).
+> - Voit myös kokeilla muita mallirakenteita, mukaan lukien **GPT-OSS-20B**, korvaamalla mallin annetuissa harjoitusskripteissä.
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **Huomautus:** LoRA- ja QLoRA-hienosäätö vaativat vähintään **32 Gt järjestelmämuistia**, josta vähintään **16 Gt tulee olla GPU:n käytettävissä** (16 Gt on osa 32 Gt:sta, ei sen lisäksi).
+> **Huomautus:** LoRA- ja QLoRA-hienosäätö vaativat vähintään **32 Gt järjestelmämuistia**, josta vähintään **16 Gt on oltava käytettävissä näytönohjaimelle** (16 Gt on osa 32 Gt:sta, ei sen lisäksi).
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Huomautus:** LoRA-hienosäätö vaatii vähintään **32 Gt järjestelmämuistia**, josta vähintään **16 Gt tulee olla GPU:n käytettävissä** (16 Gt on osa 32 Gt:sta, ei sen lisäksi).
+> **Huomautus:** LoRA-hienosäätö vaatii vähintään **32 Gt järjestelmämuistia**, josta vähintään **16 Gt on oltava käytettävissä näytönohjaimelle** (16 Gt on osa 32 Gt:sta, ei sen lisäksi).
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Huomautus:** LoRA- ja QLoRA-hienosäätö vaativat näytönohjaimen, jossa on vähintään **16 Gt omistettua GPU-muistia**, sekä **32 Gt järjestelmämuistia**.
-> - Linuxissa koulutus toimii kokonaan näytönohjaimen omistetussa VRAM-muistissa.
-> - Se ei siirry jaettuun GPU-muistiin (järjestelmämuistiin), kun VRAM loppuu kesken.
-> - Näytönohjaimet, joissa on alle 16 Gt omistettua VRAM-muistia, jäävät ilman muistia koulutuksen aikana Linuxissa, vaikka järjestelmässä olisi paljon RAM-muistia.
+> **Huomautus:** LoRA- ja QLoRA-hienosäätö vaativat näytönohjaimen, jossa on vähintään **16 Gt omistettua GPU-muistia** sekä **32 Gt järjestelmämuistia**.
+> - Linuxissa harjoittelu tapahtuu kokonaan näytönohjaimen omistetussa VRAM-muistissa.
+> - Se ei siirry käyttämään jaettua GPU-muistia (järjestelmämuistia), kun VRAM loppuu.
+> - Näytönohjaimet, joissa on alle 16 Gt omistettua VRAM-muistia, jäävät ilman muistia harjoittelun aikana Linuxissa, vaikka järjestelmässä olisi runsaasti RAM-muistia.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Huomautus:** LoRA-hienosäätö vaatii vähintään **16 Gt GPU-muistia yhteensä** ja **32 Gt järjestelmämuistia**.
-> - Windowsissa GPU-muisti yhteensä koostuu näytönohjaimen omistetusta VRAM-muistista ja jaetusta GPU-muistista (lainattu järjestelmämuistista).
-> - Tämän vuoksi näytönohjaimet, joissa on alle 16 Gt omistettua VRAM-muistia, voivat silti käyttää tätä ohjekirjaa hyödyntämällä jaettua GPU-muistia erotuksen kattamiseen.
+> **Huomautus:** LoRA-hienosäätö vaatii vähintään **16 Gt GPU-muistia yhteensä** sekä **32 Gt järjestelmämuistia**.
+> - Windowsissa GPU-muistin kokonaismäärä yhdistää näytönohjaimen omistetun VRAM-muistin jaettuun GPU-muistiin (lainattu järjestelmämuistista).
+> - Näin ollen näytönohjaimet, joissa on alle 16 Gt omistettua VRAM-muistia, voivat silti suorittaa tämän oppaan käyttämällä jaettua GPU-muistia erotuksen kattamiseen.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Mitä opit
 
-- Miten hienosäätää LLM:ää käyttäen LoRA:aa, QLoRA:aa ja täyttä hienosäätöä PyTorchilla ja ROCmilla
-- Miten tallentaa ja ottaa käyttöön hienosäädetty mallisi
-- Miten seurata koulutusta ja vianmäärittää yleisiä ongelmia
+- Kuinka hienosäätää LLM:ää käyttäen LoRA:a, QLoRA:a ja täyttä hienosäätöä PyTorchin ja ROCmin avulla
+- Kuinka tallentaa ja ottaa käyttöön hienosäädetty mallisi
+- Kuinka seurata harjoittelua ja korjata yleisiä ongelmia
 
-## Muistiasetusten määrittäminen
+<!-- @device:halo_box,halo,stx,krk -->
+## Muistiasetuksen määrittäminen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
-> **Huomautus**: Jos VS Code ei ole asennettu, voit asentaa sen Ryzen AI Developer Centerillä.
+> **Huomautus**: Jos VS Code ei ole asennettu, voit asentaa sen Ryzen AI Developer Centerin avulla.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmiston edellytysten asentaminen
+## Ohjelmistovaatimusten asentaminen
 
 #### Luo virtuaaliympäristö
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update 
 sudo apt install -y python3-venv 
@@ -90,13 +92,13 @@ source finetune-venv/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta tämä tulee voimaan):
+**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -110,7 +112,7 @@ source finetune-venv/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv --system-site-packages
 finetune-venv\Scripts\activate
@@ -120,7 +122,7 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv
 finetune-venv\Scripts\activate
@@ -138,26 +140,26 @@ finetune-venv\Scripts\activate
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** Vain ydinpaketit on testattu ja tuettu tässä. **bitsandbytes ei ole hyvin tuettu Windowsissa**, joten Windows-asennus jättää sen pois; käytä Windowsissa LoRA:aa tai täyttä hienosäätöä (QLoRA vaatii bitsandbytes-kirjaston ja on tarkoitettu Linuxille).
+**Windows:** Tässä testataan ja tuetaan vain ydinpaketteja. **bitsandbytes ei tue Windowsia hyvin**, joten Windows-asennuksesta on jätetty se pois; käytä LoRA:a tai täyttä hienosäätöä Windowsissa (QLoRA vaatii bitsandbytes-kirjaston ja on tarkoitettu Linuxille).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### HF-todennuksen käyttöönotto (rajoitetut tai mukautetut / ei-esiasennetut mallit)
+#### Ota käyttöön HF-todennus (rajoitetut tai mukautetut / ei-esiasennetut mallit)
 
-Tässä esimerkissä käytämme mallia **google/gemma-3-4b-it**, joka on **rajoitettu (gated)** malli. Sinun on hyväksyttävä mallin käyttöehdot Hugging Facessa ja sen jälkeen todennettava itsesi, jotta koulutusskriptit voivat ladata sen.
+Tässä esimerkissä käytämme mallia **google/gemma-3-4b-it**, joka on **rajoitettu** malli. Sinun on hyväksyttävä mallin ehdot Hugging Facessa ja sen jälkeen todennettava itsesi, jotta harjoitusskriptit voivat ladata sen.
 
-1. **Hyväksy lisenssi:** Avaa [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), kirjaudu sisään (tai luo tili) ja hyväksy lisenssi/ehdot mallin sivulla (esim. "Agree and access repository").
-2. **Asenna ja kirjaudu sisään:** Asenna Hugging Face CLI ja suorita sitten tavanomainen kirjautuminen:
+1. **Hyväksy lisenssi:** Avaa [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), kirjaudu sisään (tai luo tili) ja hyväksy lisenssi/ehdot mallin sivulla (esim. ”Agree and access repository”).
+2. **Asenna ja kirjaudu sisään:** Asenna Hugging Face CLI ja suorita sitten normaali kirjautuminen:
 
 ```bash
 pip install huggingface_hub
@@ -265,9 +267,9 @@ sys.exit(r.returncode)
 
 ### Mikä on LoRA?
 
-**LoRA (Low-Rank Adaptation)** pitää perusmallin jäädytettynä ja kouluttaa vain pieniä "sovitin"-matriiseja, jotka lisätään tiettyihin kerroksiin. 
+**LoRA (Low-Rank Adaptation)** pitää perusmallin jäädytettynä ja harjoittaa vain pieniä "adapteri"-matriiseja, jotka lisätään tiettyihin kerroksiin. 
 
-- **Keskeinen idea**: sen sijaan, että päivitettäisiin valtava painomatriisi, jossa on miljoonia parametreja, opimme matalan rangin päivityksen (kaksi pientä matriisia, joiden tulossa on huomattavasti vähemmän parametreja). Tämä antaa suuren vähennyksen koulutettavissa parametreissa ja VRAM-muistin käytössä säilyttäen samalla suurimman osan täyden hienosäädön laadusta.
+- **Keskeinen ajatus**: sen sijaan, että päivitettäisiin valtava painomatriisi, jossa on miljoonia parametreja, opimme matala-asteisen päivityksen (kaksi pientä matriisia, joiden tulossa on huomattavasti vähemmän parametreja). Tämä tuottaa suuren vähennyksen harjoitettavien parametrien määrässä ja VRAM-käytössä, säilyttäen samalla suurimman osan täyden hienosäädön laadusta.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -282,7 +284,7 @@ W_updated = W + B × A
 
 ### Mikä on QLoRA?
 
-**QLoRA** yhdistää **4-bittisen kvantisoinnin** ja **LoRA:n**. Perusmalli ladataan 4-bittisenä (suuret muistisäästöt), ja vain LoRA-sovittimet koulutetaan korkeammalla tarkkuudella. Näin saat LoRA:n parametritehokkuuden lisäksi paljon matalamman VRAM-muistin käytön, pienellä laatukompromissilla verrattuna täyden tarkkuuden LoRA:aan. Huomaa, että 4-bittinen kvantisointi voi aiheuttaa numeerista epävakautta (häviöpiikkejä tai NaN-arvoja), joten käyttäjät saattavat usein suosia **LoRA:aa**, jos VRAM-muistia on riittävästi käytettävissä.
+**QLoRA** yhdistää **4-bittisen kvantisoinnin** ja **LoRA:n**. Perusmalli ladataan 4-bittisenä (suuret muistisäästöt), ja vain LoRA-adapterit harjoitetaan suuremmalla tarkkuudella. Näin saat LoRA:n parametritehokkuuden sekä huomattavasti pienemmän VRAM-käytön, pienellä laatukompromissilla verrattuna täyden tarkkuuden LoRA:han. Huomaa, että 4-bittinen kvantisointi voi aiheuttaa numeerista epävakautta (häviöpiikkejä tai NaN-arvoja), joten käyttäjät saattavat usein suosia **LoRA:a**, jos VRAM-muistia on riittävästi käytettävissä.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -290,52 +292,52 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **Huomautus**: MXFP4-perusmalleille, kuten `openai/gpt-oss-20b`, suosittelemme käyttämään **LoRA:aa** (`train_lora.py`) QLoRA:n sijaan. QLoRA-skriptin `bitsandbytes`-kirjaston 4-bittinen polku yleensä dekvantisoi MXFP4-painot BF16-muotoon, jolloin ajo käyttäytyy kuten tavanomainen LoRA. Natiivi MXFP4 vaatii lähdekoodista käännetyn `bitsandbytes`-kirjaston sekä vastaavan Transformers/Triton/kernels-pinon. Katso [Transformers MXFP4 -dokumentaatio](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Huomautus**: MXFP4-perusmalleille, kuten `openai/gpt-oss-20b`, suosittelemme käyttämään **LoRA:a** (`train_lora.py`) QLoRA:n sijaan. QLoRA-skriptin `bitsandbytes`-kirjaston 4-bittinen polku yleensä dekvantisoi MXFP4-painot BF16-muotoon, jolloin ajo käyttäytyy kuin tavallinen LoRA. Natiivi MXFP4 vaatii lähdekoodista käännetyn `bitsandbytes`-kirjaston sekä yhteensopivan Transformers/Triton/kernels-pinon. Katso [Transformers MXFP4 -dokumentaatio](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
 ### 2. Valitse menetelmäsi
 
 | Menetelmä | Muisti | Nopeus | Laatu | Sopii parhaiten |
 |--------|--------|-------|---------|----------|
-| **QLoRA** (vain Linux) | 12-16GB | Nopein | 90-95% | Alhainen muistinkäyttö |
-| **LoRA** | 24-32GB | Nopea | 95-98% | Tasapainoinen lähestymistapa |
-| **Full** | 80GB+ | Hitain | 100% | Maksimaalinen laatu |
+| **QLoRA** (vain Linux) | 12–16 Gt | Nopein | 90–95 % | Vähäiseen muistinkäyttöön |
+| **LoRA** | 24–32 Gt | Nopea | 95–98 % | Tasapainoiseen lähestymistapaan |
+| **Full** | 80 Gt+ | Hitain | 100 % | Parhaaseen laatuun |
 
 ### 3. Suorita koulutus
 
 **Tietoaineisto ja mitä malli oppii**  
-Skriptit muuntavat tietoaineiston keskusteluesimerkeiksi. Esimerkiksi QLoRA-skripti käyttää tietoaineistoa **Abirate/english_quotes**: jokaisesta esimerkistä tulee käyttäjä–assistentti-pari, kuten:
+Skriptit muuttavat tietoaineiston keskusteluesimerkeiksi. Esimerkiksi QLoRA-skripti käyttää tietoaineistoa **Abirate/english_quotes**: jokaisesta esimerkistä tulee käyttäjä–avustaja-pari, esimerkiksi:
 
-- **Käyttäjä:** ”Anna minulle sitaatti aiheesta: &lt;tag&gt;”
-- **Assistentti:** ”&lt;quote&gt; – &lt;author&gt;”
+- **Käyttäjä:** ”Anna minulle lainaus aiheesta: &lt;tag&gt;”
+- **Avustaja:** ”&lt;lainaus&gt; – &lt;kirjoittaja&gt;”
 
-Hienosäätö opettaa mallia vastaamaan kehotteisiin, joissa pyydetään sitaatteja tietystä aiheesta, ja palauttamaan ne muodossa `<quote text> - <author>`. LoRA- ja täyden hienosäädön skriptit käyttävät tietoaineistoa **databricks/databricks-dolly-15k** (yleiset ohje/vastaus-parit), joten tarkka tehtävä vaihtelee skriptin mukaan; idea on sama - mukauta malli valitsemasi tietoaineiston ja muodon mukaan.
+Hienosäätö opettaa mallille, miten se vastaa kehotteisiin, joissa pyydetään lainauksia tietystä aiheesta, ja miten se palauttaa ne muodossa `<quote text> - <author>`. LoRA- ja täyden hienosäädön skriptit käyttävät tietoaineistoa **databricks/databricks-dolly-15k** (yleisiä ohje/vastaus-pareja), joten tarkka tehtävä vaihtelee skriptin mukaan; ajatus on kuitenkin sama - mukauttaa malli valitsemaasi tietoaineistoon ja muotoon.
 
-Alla on yhteenveto käytettävissä olevista koulutusmenetelmistä. Jokainen menetelmä linkittää skriptiinsä ja tarjoaa lyhyen kuvauksen oikean lähestymistavan valitsemiseksi.
+Alla on yhteenveto käytettävissä olevista koulutusmenetelmistä. Jokainen menetelmä linkittää omaan skriptiinsä ja sisältää lyhyen kuvauksen oikean lähestymistavan valitsemiseksi.
 
 | Skripti                           | Menetelmä            | Kuvaus                                                                                                         | Tyypillinen VRAM | Suositellaan                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Kouluttaa pieniä adapterimatriiseja jäädyttäen peruskielimallin. 3–5x nopeampi; ~95–98% täydestä laadusta.                         | 24–32GB      | Kokeneille käyttäjille; useita adaptereita; enemmän VRAM-muistia    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(vain Linux)*             | **QLoRA**       | 4-bittinen kvantisointi + LoRA-adapterit. Pienin muistinkäyttö, nopein, pieni laatukompromissi. Vaatii pakettia `bitsandbytes` (vain Linux).                            | 12–16GB      | Useimmille käyttäjille; nopeisiin kokeiluihin; rajalliseen VRAM-muistiin      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Täysi hienosäätö** | Päivittää kaikki mallin parametrit. Maksimaalinen laatu; suurin muistin- ja laskentatehon käyttö.                                    | 40GB+      | Maksimaalinen laatu; tutkimus; suuri VRAM           |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Kouluttaa pieniä sovitinmatriiseja pitäen peruskehyksen mallin jäädytettynä. 3–5x nopeampi; noin 95–98 % täydestä laadusta.                         | 24–32 Gt      | Kokeneille käyttäjille; useille sovittimille; enemmän VRAM-muistia    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(vain Linux)*             | **QLoRA**       | 4-bittinen kvantisointi + LoRA-sovittimet. Pienin muistinkäyttö, nopein, pieni laatukompromissi. Vaatii `bitsandbytes`-kirjaston (vain Linux).                            | 12–16 Gt      | Useimmille käyttäjille; nopeisiin kokeiluihin; rajalliseen VRAM-muistiin      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Täysi hienosäätö** | Päivittää kaikki mallin parametrit. Paras mahdollinen laatu; suurin muistin- ja laskentatehon käyttö.                                    | 40 Gt+        | Parhaaseen laatuun; tutkimuskäyttöön; runsaaseen VRAM-muistiin           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Huomautus:** Täysi hienosäätö (`train_full_finetuning.py`) saattaa vaatia yli 64 Gt järjestelmämuistia, eikä se välttämättä ole toteutettavissa tällä laitteella. Harkitse sen sijaan LoRA:n tai QLoRA:n käyttöä.
+> **Huomautus:** Täysi hienosäätö (`train_full_finetuning.py`) saattaa vaatia yli 64 Gt järjestelmämuistia, eikä se välttämättä ole mahdollista tällä laitteella. Harkitse sen sijaan LoRA- tai QLoRA-menetelmän käyttöä.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Huomautus:** Täysi hienosäätö (`train_full_finetuning.py`) saattaa vaatia yli 64 Gt järjestelmämuistia, eikä se välttämättä ole toteutettavissa tällä laitteella. Harkitse sen sijaan LoRA:n käyttöä.
+> **Huomautus:** Täysi hienosäätö (`train_full_finetuning.py`) saattaa vaatia yli 64 Gt järjestelmämuistia, eikä se välttämättä ole mahdollista tällä laitteella. Harkitse sen sijaan LoRA-menetelmän käyttöä.
 <!-- @os:end -->
 <!-- @device:end -->
 
-Valitse haluamasi `Training method`, lataa vastaava skripti ja suorita se komennolla pitäen virtuaaliympäristösi aktivoituna: 
+Valitse haluamasi `Training method`, lataa vastaava skripti ja suorita se seuraavalla komennolla pitäen virtuaaliympäristösi aktivoituna: 
 
 ```python
 python3 train_<method_name>.py.
 ```
 
-## Hienosäädetyn mallisi käyttäminen
+## Hienosäädetyn mallin käyttäminen
 
 ### Täyden hienosäädön jälkeen
 
@@ -377,7 +379,7 @@ outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-### Yhdistä LoRA-adapteri peruskielimalliin
+### Yhdistä LoRA-sovitin peruskehyksen malliin
 
 ```python
 # Merge LoRA/QLoRA adapter weights into the base model for standalone inference
@@ -387,11 +389,11 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **Huomautus:**  
-- Varmista, että mallihakemiston nimi (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) vastaa koulutuksesta saatua todellista tuloskansiotasi.  
-- Jos käytit LoRA:a QLoRA:n sijaan, korvaa polku vastaavasti.  
-- Jotkin Gemma-mallit vaativat parametrin `trust_remote_code=True` määrittämisen kohdassa `from_pretrained`; lisää se, jos näet siihen liittyvän varoituksen.
+- Varmista, että mallin hakemiston nimi (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) vastaa koulutuksesta saatua todellista tuloshakemistoasi.  
+- Jos käytit QLoRA:n sijaan LoRA:a, korvaa polku vastaavasti.  
+- Jotkin Gemma-mallit vaativat `trust_remote_code=True`-määrityksen kohdassa `from_pretrained`; lisää se, jos näet siihen liittyvän varoituksen.
 
-Lisää mukautettuja asetuksia varten (täyttötunnukset, laite jne.) katso käyttämääsi koulutusskriptiä.
+Lisää mukautettuja asetuksia varten (täytemerkit, laite jne.) katso käyttämääsi koulutusskriptiä.
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -467,16 +469,18 @@ required = [
     "config.json",
     "tokenizer_config.json",
     "tokenizer.json",
-    "model.safetensors.index.json",
 ]
 missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
 if missing:
     print(f"FAIL: Missing required files: {missing}")
     sys.exit(1)
 
+# Weights may be saved as a single model.safetensors or, when the model
+# exceeds max_shard_size, as model-*.safetensors shards plus an index.
+single = os.path.exists(os.path.join(out_dir, "model.safetensors"))
 shards = glob.glob(os.path.join(out_dir, "model-*.safetensors"))
-if not shards:
-    print("FAIL: No sharded model safetensors files found")
+if not single and not shards:
+    print("FAIL: No model safetensors weights found")
     sys.exit(1)
 
 print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
@@ -489,7 +493,7 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ### Käytä omaa tietoaineistoasi
 
-Kaikki skriptit käyttävät samaa tietoaineistomuotoa. Korvaa lataus-osio:
+Kaikki skriptit käyttävät samaa tietoaineistomuotoa. Korvaa lataamisosio:
 
 ```python
 from datasets import load_dataset
@@ -515,13 +519,13 @@ def format_instruction(example):
 dataset = dataset.map(format_instruction)
 ```
 
-**Tietoaineistomuoto paikalliselle JSON/JSONL-tiedostolle:**
+**Tietoaineiston muoto paikalliselle JSON/JSONL-tiedostolle:**
 
-Kun käytät tätä menetelmää, varmista, että JSON-tiedostosi on jäsennelty oikein jäsennysvirheiden välttämiseksi. 
+Kun käytät tätä menetelmää, varmista, että JSON-tiedostosi ovat oikein muotoiltuja jäsennysvirheiden välttämiseksi. 
 
 Seuraavia ohjeita on noudatettava:
-* **Tiedoston muotoilu:** JSON-tiedostot tulee muotoilla integroidussa kehitysympäristössä (IDE) oikean rakenteen ja syntaksin varmistamiseksi.
-* **Vaaditut avaimet:** Mukautetun JSON-tiedoston on sisällettävä avaimet `instruction` ja `response`. Nämä avaimet ovat välttämättömiä menetelmän oikean toiminnan kannalta.
+* **Tiedoston muotoilu:** JSON-tiedostot tulisi muotoilla integroidussa kehitysympäristössä (IDE), jotta rakenne ja syntaksi ovat oikein.
+* **Vaaditut avaimet:** Mukautetun JSON-tiedoston tulee sisältää avaimet `instruction` ja `response`. Nämä avaimet ovat välttämättömiä menetelmän toimimiseksi oikein.
 ```json
 [
   {
@@ -534,15 +538,15 @@ Seuraavia ohjeita on noudatettava:
   }
 ]
 ```
-**Tietoaineistomuoto Hugging Face Hub -tietoaineistolle**
+**Tietoaineiston muoto Hugging Face Hub -tietoaineistolle**
 
-Kun käytät Hugging Face -tietoaineistoja, varmista, että tietoaineistosi on jäsennelty oikein saumattoman integroinnin mahdollistamiseksi. 
+Kun käytät Hugging Face -tietoaineistoja, varmista, että tietoaineistosi on rakenteeltaan oikea saumattoman integroinnin varmistamiseksi. 
 
-Seuraavia ohjeita tulee noudattaa:
-* **Ohje-vastaus-pari:** Keskity tietoaineistoihin, jotka sisältävät `instruction-response`-parin. Tämä rakenne on välttämätön aiotun toiminnallisuuden kannalta.
-* **Mukautetun avaimen muokkaus:** Jos tietoaineistosi ei noudata `instruction-response`-rakennetta, voit muokata `format_instruction()`-funktiota. Näin voit mukauttaa tarvittavat avaimet.
+Seuraavia ohjeita tulisi noudattaa:
+* **Ohje-vastaus-pari:** Keskity tietoaineistoihin, jotka sisältävät `instruction-response`-parin. Tämä rakenne on välttämätön toiminnan kannalta.
+* **Mukautettujen avainten muokkaus:** Jos tietoaineistosi ei noudata `instruction-response`-rakennetta, voit muokata `format_instruction()`-funktiota. Näin voit mukauttaa tarvittavia avaimia.
 
-Esimerkkimukautus: Tapauksissa, joissa tietoaineiston tulostetta on säädettävä, voit muokata vastausosaa format_instruction()-funktiossa tarpeidesi mukaan.
+Esimerkki mukautuksesta: Jos tietoaineiston tulostetta on tarpeen muuttaa, voit muokata format_instruction()-funktion vastausosaa tarpeidesi mukaan.
 ```python
 def format_instruction(example):
     return {
@@ -552,9 +556,9 @@ def format_instruction(example):
         ]
     }
 ```
-**Tietoaineistomuoto CSV-tiedostolle**
+**Tietoaineiston muoto CSV-tiedostolle**
 
-Jotta skripti voisi käyttää CSV-tiedostomuotoa, sinun on varmistettava, että CSV-tiedosto sisältää sarakkeet nimeltä `instruction` ja `response`. 
+Jotta skripti toimisi CSV-tiedostomuodon kanssa, varmista, että CSV-tiedosto sisältää sarakkeet `instruction` ja `response`. 
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
@@ -563,12 +567,12 @@ instruction,response
 
 ### Säädä koulutusparametreja
 
-Muokkaa koulutusskriptiä ja muuta muuttujia tavoitteidesi mukaan: **oppimisnopeus** (`LR`), **epookit** (`EPOCHS`), **eräkoko** (`BATCH_SIZE`), **gradienttien kertyminen** (`GRAD_ACCUM_STEPS`) ja LoRA/QLoRA:lle **rank** (`LORA_R`). Nopeampia ajoja varten käytä vähemmän epookkeja ja suurempaa oppimisnopeutta (LR); parempaa laatua varten käytä enemmän epookkeja ja pienempää LR-arvoa. Vähennä eräkokoa tai sekvenssin pituutta, jos muisti loppuu kesken.
+Muokkaa koulutusskriptiä ja muuta muuttujia tavoitteidesi mukaan: **oppimisnopeus** (`LR`), **koulutuskierrokset** (`EPOCHS`), **eräkoko** (`BATCH_SIZE`), **gradienttien kertymä** (`GRAD_ACCUM_STEPS`) ja LoRA/QLoRA-menetelmille **rank**-arvo (`LORA_R`). Nopeampiin ajoihin käytä vähemmän koulutuskierroksia ja korkeampaa oppimisnopeutta (LR); parempaan laatuun käytä enemmän koulutuskierroksia ja matalampaa LR-arvoa. Pienennä eräkokoa tai sekvenssin pituutta, jos kohtaat muistin loppumiseen liittyviä virheitä.
 ### Muistin optimointivinkit
 
 Jos kohtaat muistin loppumiseen liittyviä virheitä:
 
-**1. Pienennä eräkokoa (Batch Size):**
+**1. Pienennä eräkokoa:**
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
@@ -579,21 +583,21 @@ GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
 max_seq_length=256  # Instead of 512
 ```
 
-**3. Käytä voimakkaampaa kvantisointia:**
+**3. Käytä aggressiivisempaa kvantisointia:**
 ```
 Full → LoRA → QLoRA
 ```
 
-**4. Ota käyttöön gradienttien tarkistuspisteet (Gradient Checkpointing) (vain täydellisessä hienosäädössä):**
+**4. Ota käyttöön gradientin tarkistuspisteet (vain täydellisessä hienosäädössä):**
 ```python
 model.gradient_checkpointing_enable()
 ```
 
 ---
 
-## Seuranta ja virheenkorjaus
+## Seuranta ja virheenjäljitys
 
-### Seuraa GPU-muistia
+### Tarkkaile GPU-muistia
 
 ```bash
 # Check ROCm GPU status
@@ -603,22 +607,22 @@ watch -n 1 amd-smi
 rocm-smi --showmeminfo vram
 ```
 
-### (Valinnainen) Seuraa kokeiluja Weights & Biases -palvelulla
+### (Valinnainen) Seuraa kokeiluja Weights & Biasesin avulla
 
-Kirjaa ajot ja mittarit [Weights & Biases](https://wandb.ai) -palveluun:
+Jos haluat kirjata ajot ja mittarit palveluun [Weights & Biases](https://wandb.ai):
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-Aseta koulutusskriptissä `report_to="wandb"` ja valinnaisesti `run_name="your-experiment-name"` trainer-asetuksissa. Jos et halua käyttää Wandbia, jätä `report_to` oletusarvoonsa tai aseta se arvoon `"none"`.
+Aseta koulutusskriptissä `report_to="wandb"` ja tarvittaessa `run_name="your-experiment-name"` trainer-konfiguraatiossa. Jos et halua käyttää Wandbia, jätä `report_to` oletusarvoonsa tai aseta se arvoon `"none"`.
 
-### Yleiset ongelmat
+### Yleisiä ongelmia
 
 #### Muisti loppuu (OOM)
 
-**Ratkaisu:** Pienennä eräkokoa ja/tai käytä QLoRA-menetelmää
+**Ratkaisu:** Pienennä eräkokoa ja/tai käytä QLoRA:ta
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16
@@ -642,14 +646,14 @@ BATCH_SIZE = 8
 ```
 ## Seuraavat vaiheet
 
-Kun olet onnistuneesti suorittanut hienosäädön, harkitse seuraavia vaiheita saadaksesi mallistasi enemmän irti:
+Kun olet suorittanut hienosäädön onnistuneesti, harkitse seuraavia vaiheita saadaksesi mallistasi enemmän irti:
 
-1. **Arvioi** malli perusteellisesti erillisellä testidatalla yleistettävyyden mittaamiseksi ja ylisovittamisen välttämiseksi.
-2. **Kokeile** erilaisia hyperparametrien arvoja paremman tarkkuuden, nopeuden ja muistinkäytön tasapainon saavuttamiseksi.
-3. **Seuraa** kaikkia kokeilujasi (ja niihin liittyviä mittareita) Weights & Biases -palvelulla toistettavaa tutkimusta varten.
-4. **Kokeile** koulutusta omilla mukautetuilla datajoukoillasi mukauttaaksesi mallin juuri sinun käyttötapaukseesi sopivaksi.
-5. **Ota käyttöön** hienosäädetty mallisi nopeaa päättelyä varten käyttämällä tehokkaita taustajärjestelmiä, kuten vLLM, yhteensopivalla laitteistolla.
-6. **Tutustu** edistyneempiin tekniikoihin, kuten kehotesuunnitteluun (prompt engineering), sekatarkkuuslaskentaan ja pidempiin sekvenssin pituuksiin.
-7. **Kouluta** useita LoRA-adaptereita eri tehtäviä tai osa-alueita varten ja vaihda niitä tarpeen mukaan.
+1. **Arvioi** malli perusteellisesti erillisellä testidatalla, jotta voit mitata yleistyskykyä ja välttää ylisovittamisen.
+2. **Kokeile** eri hyperparametriarvoja saavuttaaksesi paremman tasapainon tarkkuuden, nopeuden ja muistinkäytön välillä.
+3. **Seuraa** kaikkia kokeilujasi (ja niihin liittyviä mittareita) Weights & Biasesin avulla toistettavaa tutkimusta varten.
+4. **Kokeile** koulutusta omilla mukautetuilla datajoukoillasi mukauttaaksesi mallin juuri omaan käyttötarkoitukseesi.
+5. **Ota käyttöön** hienosäädetty mallisi nopeaa päättelyä varten käyttämällä tehokkaita taustajärjestelmiä, kuten vLLM:ää yhteensopivalla laitteistolla.
+6. **Tutustu** edistyneisiin tekniikoihin, kuten kehotesuunnitteluun (prompt engineering), sekatarkkuuteen ja pidempiin sekvenssin pituuksiin.
+7. **Kouluta** useita LoRA-sovittimia eri tehtäviä tai osa-alueita varten ja vaihda niitä tarpeen mukaan.
 
 ---

@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server-4-node",
+  "title": "**Ryzen™ AI Halo** ile Dört Sistemi Kümeleme (RPC)",
+  "description": "Dört Ryzen™ AI Halo cihazında llama.cpp ile RPC sunucusu kullanarak 1T+ modelleri çalıştırmak için dağıtık çıkarım kurun",
+  "auto_translated": true
+}

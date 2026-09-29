@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA je AMD-jevo odprtokodno ogrodje za izdelavo agentov umetne inteligence, ki se izvajajo lokalno na strojni opremi AMD s pospeševanjem Ryzen AI.
+GAIA je AMD-jevo odprtokodno ogrodje za gradnjo agentov umetne inteligence, ki se izvajajo lokalno na strojni opremi AMD s pospeševanjem Ryzen AI.
 
 #### Namestitev GAIA
 
@@ -31,7 +31,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -72,7 +72,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -99,7 +99,7 @@ Po namestitvi zaženite `gaia init`, da nastavite Lemonade Server in prenesete m
 gaia init
 ```
 
-S tem se namesti Lemonade Server, prenesejo privzeti modeli in preveri nastavitev.
+S tem namestite Lemonade Server, prenesete privzete modele in preverite nastavitev.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,12 +281,12 @@ fi
 
 #### Preverjanje namestitve
 
-Preverite, ali je nameščena GAIA različica 0.16.2 ali novejša:
+Preverite, ali je nameščena različica GAIA v0.16.2 ali novejša:
 
 ```bash
 gaia --version
 ```
 
-> **Pomembno**: Pred uporabo GAIA se prepričajte, da je Lemonade Server zagnan. GAIA zahteva, da je Lemonade Server zagnan ročno.
+> **Pomembno**: Pred uporabo GAIA se prepričajte, da je Lemonade Server zagnan. GAIA zahteva, da Lemonade Server zaženete ročno.
 
-Za več informacij glejte [dokumentacijo GAIA](https://amd-gaia.ai).
+Za več informacij si oglejte [dokumentacijo GAIA](https://amd-gaia.ai).

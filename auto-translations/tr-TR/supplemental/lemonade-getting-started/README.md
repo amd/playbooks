@@ -13,45 +13,43 @@ SPDX-License-Identifier: MIT
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
-
 ## Genel Bakış
 
-🍋 **Lemonade**, büyük dil modellerini (LLM'ler), görüntü üreticileri ve ses modellerini doğrudan kendi donanımınızda çalıştırmanızı sağlayan açık kaynaklı bir yerel yapay zeka sunucusudur. Modelleri endüstri standardı **OpenAI API** üzerinden sunar, böylece OpenAI ile çalışan herhangi bir uygulama anında Lemonade ile de çalışabilir. Bu kılavuzun sonunda, kendi makinenizde yerel olarak model çalıştırmak için Lemonade kullanıyor olacaksınız.
+🍋 **Lemonade**, büyük dil modellerini (LLM'ler), görüntü üreticileri ve ses modellerini doğrudan kendi donanımınızda çalıştırmanıza olanak tanıyan açık kaynaklı, yerel bir yapay zeka sunucusudur. Modelleri, sektör standardı **OpenAI API** üzerinden sunar; bu sayede OpenAI ile çalışan herhangi bir uygulama anında Lemonade ile de çalışabilir. Bu kılavuzun sonunda, makinenizde yerel olarak modeller çalıştırmak için Lemonade'i kullanıyor olacaksınız.
 
-## Bu Kılavuzda Öğrenecekleriniz
+## Neler Öğreneceksiniz
 
-Bu kılavuzun sonunda şunları yapabilir hale geleceksiniz:
+Bu kılavuzun sonunda şunları yapabileceksiniz:
 
 * **Lemonade Server'ı kurmak** ve çalıştığını doğrulamak.
-* Tek bir komutla **bir LLM indirmek ve onunla sohbet etmek**.
-* **Web arayüzünü keşfetmek** ve görüntü işleme, konuşmadan metne dönüştürme ve görüntü oluşturma gibi farklı modaliteleri denemek.
-* Vulkan ve AMD ROCm™ yazılımı arasında **GPU arka uçlarını değiştirmek**.
-* OpenAI uyumlu API'yi kullanarak yerel bir LLM ile çalışan **bir Python uygulaması geliştirmek**.
+* Tek bir komutla **bir LLM indirip onunla sohbet etmek**.
+* **Web arayüzünü keşfetmek** ve görme, konuşmadan metne dönüştürme ve görüntü üretimi gibi farklı modaliteleri denemek.
+* GPU arka uçlarını Vulkan ile AMD ROCm™ yazılımı arasında **değiştirmek**.
+* OpenAI uyumlu API'yi kullanarak yerel bir LLM tarafından desteklenen **bir Python uygulaması geliştirmek**.
 <!-- @device:halo_box,halo,stx,krk -->
-* AMD Ryzen™ AI donanımında Hybrid ve FLM çalıştırma modlarını kullanarak **AMD Sinirsel İşlem Birimi (NPU) üzerinde model çalıştırmak**.
+* **AMD Ryzen™ AI donanımında Hybrid ve FLM çalıştırma modlarını kullanarak modelleri AMD Neural Processing Unit (NPU) üzerinde çalıştırın**.
 <!-- @device:end -->
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Bellek Yapılandırmasını Ayarlama
-
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Yazılım Güncellemelerini Kontrol Etme
-
+## Yazılım Güncellemelerini Kontrol Edin
 <!-- @require:software-update -->
 <!-- @device:end -->
-
-## Yazılım Ön Koşullarını Kurma
+## Yazılım Ön Koşullarının Kurulumu
 
 Başlamadan önce şunlara sahip olduğunuzdan emin olun:
 
-- **Windows 11** veya desteklenen bir **Linux** dağıtımı (Ubuntu 24.04+, Fedora, Debian) çalıştıran bir PC
-- Adım 1–7'de kullanılan çalışma zamanı modeli (`Gemma-4-E2B-it-GGUF`, ~3 GB) için **16 GB RAM** önerilir. Adım 6'daki daha büyük kod oluşturma modelini (`Qwen3.5-35B-A3B-GGUF`, ~20 GB) kullanmak istiyorsanız **32 GB+** önerilir.
-- İndirdiğiniz modellere bağlı olarak **~4–30 GB boş disk alanı**. Bu kılavuzdaki en büyük model yaklaşık 20 GB'dır.
+- **Windows 11** çalıştıran bir PC veya desteklenen bir **Linux** dağıtımı (Ubuntu 24.04+, Fedora, Debian)
+- Adım 1–7'de kullanılan çalışma zamanı modeli (`Gemma-4-E2B-it-GGUF`, ~3 GB) için **16 GB RAM** önerilir. Adım 6'daki daha büyük kod üretme modelini (`Qwen3.5-35B-A3B-GGUF`, ~20 GB) kullanmak isterseniz **32 GB+** önerilir.
+- İndirdiğiniz modellere bağlı olarak **~4–30 GB boş disk alanı**. Bu kılavuzdaki en büyük model yaklaşık 20 GB'dir.
 - **Python 3.10–3.13** (Python uygulaması bölümünde kullanılır)
 - Bir internet bağlantısı (kablolu veya kablosuz)
 <!-- @device:halo_box,halo,stx,krk -->
-- [İsteğe bağlı] Modeli NPU üzerinde çalıştırmak istiyorsanız, en güncel sürücüsü [Ryzen AI Yazılımı Kurulum Talimatları](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) üzerinden kurulmuş bir AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 serisi veya Z2 Extreme)
+- [Opsiyonel] NPU'da bir model çalıştırmak istiyorsanız, [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) adresinden yüklenmiş en güncel sürücüye sahip bir AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 serisi veya Z2 Extreme).
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
@@ -68,9 +66,16 @@ lemonade --version
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-update-windows timeout=120 hidden=True -->
-```bash
+```powershell
 winget upgrade -e --id AMD.LemonadeServer
 lemonade --version
+
+# Upgrading runs the Lemonade Server installer, which stops the running server
+# to replace its files and does not start it again. Relaunch it so the local API
+# on port 13305 is available for the next steps.
+if (-not (Get-Process LemonadeServer -ErrorAction SilentlyContinue)) {
+  Start-Process "$env:LOCALAPPDATA\lemonade_server\bin\LemonadeServer.exe"
+}
 ```
 <!-- @test:end -->
 
@@ -180,21 +185,20 @@ echo "OK: Model Gemma-4-E2B-it-GGUF responded"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
-
 ---
 
 ## Temel Kavramlar — Yerel Yapay Zeka Sunucuları Nasıl Çalışır
 
-Bir model çalıştırmadan önce, işlerin *neden* bu şekilde kurgulandığını anlamakta fayda var. Lemonade, yapay zeka modellerini belleğe yükleyip bunları tıpkı bir bulut yapay zeka hizmetinde olduğu gibi HTTP üzerinden uygulamalara sunan bir işlem olan bir **yerel model sunucusudur**.
+Bir modeli çalıştırmadan önce, işlerin *neden* bu şekilde kurulduğunu anlamakta fayda var. Lemonade bir **yerel model sunucusudur**, yani bir bulut yapay zeka hizmetinde olduğu gibi yapay zeka modellerini belleğe yükleyen ve bunları HTTP üzerinden uygulamalara sunan bir süreçtir.
 
 ### Neden Bir Sunucu?
 
 | Fayda | Sizin İçin Anlamı |
 |---------|----------------------|
-| **Basitleştirilmiş entegrasyon** | Uygulamalar, donanıma özgü C++ veya Python kütüphaneleriyle uğraşmak yerine tek bir HTTP API ile iletişim kurar. |
-| **Paylaşılan modeller** | Yüklenmiş tek bir model aynı anda birden fazla uygulamaya hizmet verebilir; RAM'inizi tüketen yinelenen kopyalar oluşmaz. |
-| **Buluttan yerele taşınabilirlik** | OpenAI'ın bulut API'si için yazılmış kod, tek bir URL'yi değiştirerek Lemonade ile çalışır. |
-| **Sorumlulukların ayrılması** | Model yönetimi, akış (streaming) ve hata toleransı sunucu tarafından yönetilir, böylece geliştiriciler uygulamalarına odaklanabilir. |
+| **Basitleştirilmiş entegrasyon** | Uygulamalar, donanıma özgü C++ veya Python kitaplıklarıyla uğraşmak yerine tek bir HTTP API'siyle konuşur. |
+| **Paylaşılan modeller** | Tek bir yüklenmiş model aynı anda birden fazla uygulamaya hizmet verebilir, RAM'inizi tüketen yinelenen kopyalar olmaz. |
+| **Buluttan yerele taşınabilirlik** | OpenAI'nin bulut API'si için yazılan kod, tek bir URL değiştirilerek Lemonade ile çalışır. |
+| **Sorumlulukların ayrılması** | Model yönetimi, akış (streaming) ve hata toleransı sunucu tarafından ele alınır, böylece geliştiriciler uygulamalarına odaklanabilir. |
 
 ### OpenAI API Standardı
 
@@ -204,48 +208,45 @@ Lemonade, ChatGPT, Azure OpenAI ve düzinelerce başka hizmet tarafından kullan
 |------|---------------|
 | **system** | Modele verilen talimatlar (kişilik, kısıtlamalar, kullanılabilir araçlar) |
 | **user** | İnsandan (veya uygulamadan) modele gönderilen mesajlar |
-| **assistant** | Model tarafından oluşturulan yanıtlar |
+| **assistant** | Model tarafından üretilen yanıtlar |
 
-Bu, OpenAI'ı destekleyen herhangi bir kütüphane veya uygulamanın, Lemonade Server çalışırken onu `http://localhost:13305/api/v1` adresine yönlendirerek Lemonade ile konuşabileceği anlamına gelir.
+Bu, OpenAI'yi destekleyen herhangi bir kitaplığın veya uygulamanın, Lemonade Server çalışırken `http://localhost:13305/api/v1` adresine yönlendirilerek Lemonade ile konuşabileceği anlamına gelir.
 
 ## Ana Etkinlik — İlk Yerel Yapay Zeka Sohbetiniz
 
-Bir LLM indirelim ve yapay zekayı tamamen kendi makinenizde çalıştırarak onunla bir sohbet yapalım.
+Bir LLM indirelim ve yapay zekayı tamamen kendi makinenizde çalıştırarak onunla bir sohbet gerçekleştirelim.
 
-### Adım 1: Bir Model İndirme ve Çalıştırma
+### Adım 1: Bir Modeli İndirin ve Çalıştırın
 
-Lemonade, özenle seçilmiş bir model kütüphanesiyle birlikte gelir. Görüntü işleme desteği içeren, yetenekli ve kompakt bir model olan **Gemma-4-E2B-it** ile başlayalım. Bir terminal açın ve şunu çalıştırın:
+Lemonade, özenle seçilmiş bir model kütüphanesiyle birlikte gelir. Görüntü desteği de içeren, yetenekli ve kompakt bir model olan **Gemma-4-E2B-it** ile başlayalım. Bir terminal açın ve şunu çalıştırın:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF
 ```
 
-Bu tek komut üç şeyi gerçekleştirir:
+Bu tek komut üç şey yapar:
 
-1. Model henüz indirilmemişse, Hugging Face'ten modeli (~3 GB) **indirir**. (Bir süre alabilir)
+1. Model henüz indirilmemişse Hugging Face'ten (~3 GB) **indirir**. (Biraz zaman alabilir)
 2. Lemonade Server sürecini 13305 portunda **başlatır**.
 3. Modelle sohbet etmeye başlayabilmeniz için Lemonade App'i **açar**.
-
-
 <!-- @os:windows -->
-Windows'ta, Lemonade App otomatik olarak başlatılır ve hemen sohbet etmeye başlayabilirsiniz. `minimal.msi` paketini kurduysanız, uygulama dahil değildir. Sohbete başlamak için web tarayıcınızı açın ve `http://localhost:13305` adresine gidin.
+Windows'ta Lemonade Uygulaması otomatik olarak başlatılır ve hemen sohbet etmeye başlayabilirsiniz. `minimal.msi` paketini yüklediyseniz, uygulama dahil değildir. Sohbete başlamak için web tarayıcınızı açın ve `http://localhost:13305` adresine gidin.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Linux'ta, web uygulamasına erişmek için tarayıcınızı açın ve `http://localhost:13305` adresine gidin.
+Linux'ta, tarayıcınızı açın ve web uygulamasına erişmek için `http://localhost:13305` adresine gidin.
 <!-- @os:end -->
-
 Bir soru yazmayı deneyin:
 
 ```
 What are three fun facts about lemons?
 ```
 
-Model, sohbet penceresinde doğrudan yanıt verecektir. **Tebrikler! Bir büyük dil modelini yerel olarak çalıştırıyorsunuz.**
+Model, sohbet penceresinde doğrudan yanıt verecektir. **Tebrikler! Artık büyük bir dil modelini yerel olarak çalıştırıyorsunuz.**
 
-![Günlükleri gösteren Lemonade App](../../dependencies/assets/ChatwithLogs.png)
+![Günlüklerin görüntülendiği Lemonade App](../../dependencies/assets/ChatwithLogs.png)
 
-Lemonade App'teki Sunucu Günlükleri panelinde, her yanıttan sonra modelin performansına ilişkin telemetri verilerini bulabilirsiniz. Örneğin:
+Lemonade App'teki Server Logs (Sunucu Günlükleri) panelinde, her yanıttan sonra modelin performansına ilişkin telemetri verilerini bulabilirsiniz. Örneğin:
 
 ```
  === Telemetry ===
@@ -260,27 +261,27 @@ TPS:           95.99
 
 Lemonade, aşağıdakileri yapabileceğiniz yerleşik bir web arayüzü içerir:
 
-- Tanıdık bir sohbet penceresinde yüklenen modelle **etkileşim kurma**
+- Tanıdık bir sohbet penceresinde yüklü modelle **etkileşim kurma**
 - Model Yöneticisi sekmesinde **modellere göz atma**
 - Tek tıklamayla **yeni modeller indirme**
 
-Web arayüzündeki **Model Yöneticisi** sekmesini kullanarak modelleri Tarife (Recipe) veya Kategoriye göre gözden geçirebileceğiniz farklı modaliteler arasında geçiş yapmayı deneyin:
+Web arayüzündeki **Model Yöneticisi** sekmesini kullanarak modellere Tarife veya Kategoriye göre göz atabildiğiniz farklı modaliteler arasında geçiş yapmayı deneyin:
 
-1. **Görü:** Zaten yüklü olan `Gemma-4-E2B-it-GGUF` modeli görü desteği sunar. Sohbet kutusuna bir görsel yapıştırın ve modelden bunu tanımlamasını isteyin.
-2. **Görsel üretimi:** Görsel kategorisinde, Model Yöneticisi'nden `SDXL-Turbo` gibi bir görsel modeli indirin, ardından Lemonade Görsel Üretici'yi kullanarak bir istem yazın ve yerel olarak bir görsel üretin.
-3. **Ses:** Ses kategorisinde, konuşmadan metne dönüştürme yapabilen `Whisper-Tiny` gibi bir ses modeli indirin. Bir ses kaydı sağlayarak bunu yerel olarak yazıya dökün. Metinden konuşmaya için, Konuşma kategorisindeki `kokoro-v1` gibi modellerden birini deneyin.
+1. **Görme (Vision):** Zaten yüklü olan `Gemma-4-E2B-it-GGUF` modeli görsel desteğine sahiptir. Sohbet kutusuna bir görsel yapıştırın ve modelden onu tanımlamasını isteyin.
+2. **Görsel üretimi:** Görsel kategorisinde, Model Yöneticisi'nden `SDXL-Turbo` gibi bir görsel modeli indirin, ardından Lemonade Görsel Üretici'yi kullanarak bir istem yazın ve yerel olarak bir görsel oluşturun.
+3. **Ses:** Ses kategorisinde, konuşmadan metne dönüştürme yapabilen `Whisper-Tiny` gibi bir ses modeli indirin. Yerel olarak transkript oluşturmak için bir ses kaydı sağlayın. Metinden konuşmaya dönüştürme için Konuşma kategorisindeki `kokoro-v1` gibi modellerden birini deneyin.
 
 ![Lemonade ile Çoklu Modalite](../../dependencies/assets/multi_modality.png)
 
-### Adım 3: Farklı Bir Arka Uçla Bir Modeli Deneyin
+### Adım 3: Farklı Bir Arka Uç ile Bir Model Deneyin
 
-Lemonade Uygulamasında bir modelin üzerine geldiğinizde bir dişli simgesi görürsünüz. Buna tıklamak, istediğiniz arka ucu seçmek de dahil olmak üzere model için seçenekler belirlemenizi sağlar.
+Lemonade Uygulaması'nda bir modelin üzerine gelirseniz bir dişli simgesi görürsünüz. Bu simgeye tıklamak, istediğiniz arka ucu seçmek de dahil olmak üzere model için seçenekler belirlemenizi sağlar.
 
-Varsayılan olarak, Lemonade GPU hızlandırma için Vulkan kullanır. Desteklenen bir AMD ayrık GPU'nuz varsa ROCm'a geçiş yapabilirsiniz.
+Lemonade, varsayılan olarak GPU hızlandırması için Vulkan kullanır. Desteklenen bir AMD ayrık GPU'nuz varsa ROCm'e geçebilirsiniz.
 
 ![Lemonade Arka Uç Seçimi](../../dependencies/assets/lemonademodeloptions.png)
 
-Yüklü arka uçlarınızı yönetmek için en soldaki sütundaki arka uç düğmesine tıklayın.
+Kurulu arka uçlarınızı yönetmek için en soldaki sütundaki arka uç düğmesine tıklayın.
 
 Alternatif olarak, arka ucu aşağıdaki komutu kullanarak belirtebilirsiniz:
 
@@ -288,13 +289,13 @@ Alternatif olarak, arka ucu aşağıdaki komutu kullanarak belirtebilirsiniz:
 lemonade run Gemma-4-E2B-it-GGUF --llamacpp rocm
 ```
 
-Ayrıca varsayılan arka ucunuzu `LEMONADE_LLAMACPP` ortam değişkenini şu değerlerle ayarlayarak belirleyebilirsiniz: `vulkan`, `rocm` veya `cpu`.
+Varsayılan arka ucunuzu `vulkan`, `rocm` veya `cpu` değerleriyle `LEMONADE_LLAMACPP` ortam değişkenini kullanarak da ayarlayabilirsiniz.
 
 ---
 
-## Daha Derine İnmek — Python ile Yapay Zeka Destekli Bir Uygulama Oluşturma
+## Daha Derine İnmek — Python ile Yapay Zeka Destekli Bir Uygulama Oluşturun
 
-Yerel bir yapay zeka sunucusunun gerçek gücü, herhangi bir uygulamanın sadece birkaç satır kodla ona bağlanabilmesidir. Bunu kanıtlamak için, bir konu verdiğinizde kartlar oluşturan ve kendinizi interaktif olarak sınayabileceğiniz küçük ama işlevsel bir **çalışma kartı oluşturucu** yapalım.
+Yerel bir yapay zeka sunucusunun gerçek gücü, herhangi bir uygulamanın yalnızca birkaç satır kodla ona bağlanabilmesidir. Bunu kanıtlamak için küçük ama işlevsel bir **çalışma flash kartı üreteci** oluşturalım; burada ona bir konu verirsiniz, o flash kartlar üretir ve kendinizi etkileşimli olarak sınayabilirsiniz.
 
 ### Adım 4: Sunucuyu Başlatın
 
@@ -304,13 +305,13 @@ Lemonade sunucusunun çalıştığını doğrulayın. Kurulumdan sonra genellikl
 lemonade status
 ```
 
-`Server is running on port 13305` gibi bir mesaj görmelisiniz.
+Şuna benzer bir mesaj görmelisiniz: `Server is running on port 13305`.
 
-Sunucu çalışmıyorsa, Lemonade uygulamasını açarak başlatın. Varsayılan bağlantı noktası olan **13305**'i kullanın (bunu tepsi simgesinden onaylayabilir veya seçebilirsiniz).
+Sunucu çalışmıyorsa, Lemonade uygulamasını açarak başlatın. Varsayılan bağlantı noktası olan **13305**'i kullanın (bunu görev çubuğu simgesinden onaylayabilir veya seçebilirsiniz).
 
-### Adım 5: OpenAI Python İstemcisini Yükleyin
+### Adım 5: OpenAI Python İstemcisini Kurun
 
-Bir terminalde, bir venv oluşturun ve aşağıdaki komutları kullanarak OpenAI Python İstemcisini yükleyin:
+Bir terminalde, aşağıdaki komutları kullanarak bir venv oluşturun ve OpenAI Python İstemcisini kurun:
 <!-- @os:linux -->
 ```bash
 # Your specific version of Linux may have different commands
@@ -388,18 +389,18 @@ python3 -c "from openai import OpenAI; print('OK')"
 <!-- @test:end -->
 <!-- @os:end -->
 
-### Adım 6: Çalışma Kartı Uygulamasını Oluşturun
+### Adım 6: Flash Kartı Uygulamasını Oluşturun
 
-Kod üretmek için farklı bir model indirelim: `Qwen3.5-35B-A3B-GGUF`. Bu, 32 GB+ RAM'e sahip sistemler için en uygun, büyük (~20 GB) ve performanslı bir modeldir. Daha az RAM'iniz varsa, bunun yerine `Qwen3.5-9B-GGUF` (~6 GB) deneyin.
+Kod üretmek için farklı bir model indirelim: `Qwen3.5-35B-A3B-GGUF`. Bu büyük (~20 GB) ve performanslı bir model olup 32 GB+ RAM'e sahip sistemler için en uygun olanıdır. Daha az RAM'iniz varsa bunun yerine `Qwen3.5-9B-GGUF` (~6 GB) modelini deneyin.
 
-Bunu arayüzden indirebilir veya aşağıdakini çalıştırabilirsiniz:
+Bunu arayüzden indirebilir veya şunu çalıştırabilirsiniz:
 ```
 lemonade run Qwen3.5-35B-A3B-GGUF
 ```
 
-Basit bir Flashcard uygulaması için kod oluşturmak amacıyla aşağıdaki istemi Lemonade Sohbet Arayüzüne verin.
+Basit bir Flash Kartı uygulaması için kod üretmek üzere aşağıdaki istemi Lemonade Sohbet Arayüzüne besleyin.
 
-Python uygulamamızı oluşturmak için Qwen3.5-35B-A3B-GGUF'u (kod yazmada daha iyi olan daha büyük bir model) kullanacağız ve uygulamanın kendisi çalışma zamanında Gemma-4-E2B-it-GGUF'u (zaten indirdiğiniz daha küçük model) çağıracak. Kod daha sonra Python'da çalıştırılmak üzere seçtiğiniz bir dosyaya kopyalanabilir.
+Python uygulamamızı üretmek için Qwen3.5-35B-A3B-GGUF'u (kod yazmada daha iyi olan daha büyük bir model) kullanacağız ve uygulamanın kendisi çalışma zamanında Gemma-4-E2B-it-GGUF'u (zaten indirdiğiniz daha küçük modeli) çağıracak. Kod daha sonra Python'da çalıştırılmak üzere seçtiğiniz bir dosyaya kopyalanabilir.
 
 ```
 Generate a Python script that uses the OpenAI Python library to call a local LLM and create an interactive flashcard study tool.
@@ -432,9 +433,9 @@ Structure:
    - Offers to start the quiz.
 ```
 
-> **İpucu**: Kaynakları ve hızı optimize etmek için kapsamlı istem oluşturma ve iki model sistemi kullanarak standart mühendislik uygulamalarını takip ettik.
+> **İpucu**: Kapsamlı istem oluşturma ve kaynakları ve hızı optimize etmek için iki model kullanan bir sistem kullanarak standart mühendislik uygulamalarını takip ettik.
 
-Kolaylığınız için [`flashcards.py`](assets/flashcards.py) dosyasında örnek bir çıktı sağladık. Kendi dizininize indirmekten çekinmeyin. Her iki durumda da, artık çalıştırılabilecek bir Python dosyanız olmalı.
+Kolaylığınız için örnek çıktıyı [`flashcards.py`](assets/flashcards.py) içinde sağladık. Dizininize indirmekten çekinmeyin. Her iki durumda da artık çalıştırılabilecek bir Python dosyanız olmalı.
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=900 hidden=True -->
@@ -483,7 +484,7 @@ python3 lemonade_python_smoke.py
 <!-- @os:end -->
 
 
-### Adım 7: Oluşturulan Kodu Çalıştırın
+### Adım 7: Üretilen Kodu Çalıştırın
 
 ```bash
 # Ensure the virtual environment is running
@@ -524,49 +525,49 @@ Did you get it right? (y/n): y
 🏆 Score: 4/5
 ```
 
-Yaklaşık 150 satır kodla, yerel bir LLM tarafından desteklenen tamamen işlevsel bir çalışma aracı oluşturmuş oldunuz. Yönetilecek bir API anahtarı yok, kullanım maliyeti yok ve hiçbir veri makinenizden ayrılmıyor.
+Yaklaşık 150 satır kodla yerel bir LLM tarafından desteklenen tamamen işlevsel bir çalışma aracı oluşturmuş oldunuz. Yönetilecek bir API anahtarı yok, kullanım maliyeti yok ve hiçbir veri makinenizden dışarı çıkmıyor.
 
-> **Önemli içgörü:** `client = OpenAI(base_url=...)` satırının bu uygulamayı OpenAI'nin bulutu yerine Lemonade'e bağlayan *tek* şey olduğuna dikkat edin. Kodun geri kalanı, OpenAI uyumlu herhangi bir hizmete karşı yazacağınız kodla aynıdır. OpenAI Python kitaplığını daha önce kullandıysanız, Lemonade ile nasıl uygulama oluşturacağınızı zaten biliyorsunuz demektir.
+> **Temel içgörü:** `client = OpenAI(base_url=...) ` satırının bu uygulamayı OpenAI'nin bulutu yerine Lemonade'e bağlayan *tek* şey olduğuna dikkat edin. Kodun geri kalanı, herhangi bir OpenAI uyumlu hizmete karşı yazacağınız kodla aynıdır. Daha önce OpenAI Python kütüphanesini kullandıysanız, Lemonade ile uygulama oluşturmayı zaten biliyorsunuz demektir.
 
-### Bu Neyi Gösteriyor
+### Bunun Gösterdiği Şeyler
 
-Bu küçük uygulama birkaç gerçek dünya entegrasyon kalıbını sergiler:
+Bu küçük uygulama birkaç gerçek dünya entegrasyon örüntüsünü kullanır:
 
-| Kalıp | Nerede Görülür |
+| Örüntü | Nerede Görülür |
 |---------|-----------------|
-| **Sistem istemleri** | `"system"` mesajı, LLM'e yapılandırılmış JSON çıktısı vermesini söyler |
-| **Yapılandırılmış çıktı** | Uygulama, kartları oluşturmak için LLM'in yanıtını JSON olarak ayrıştırır |
+| **Sistem istemleri** | `"system"` mesajı LLM'e yapılandırılmış JSON çıktısı vermesini söyler |
+| **Yapılandırılmış çıktı** | Uygulama, flash kartlar oluşturmak için LLM'in yanıtını JSON olarak ayrıştırır |
 | **Durumsuz istekler** | Her `generate_flashcards()` çağrısı bağımsızdır |
-| **Hata yönetimi** | `try/except`, LLM'in çıktısının geçerli JSON olmadığı durumları zarif bir şekilde ele alır |
+| **Hata işleme** | `try/except`, LLM'in çıktısının geçerli JSON olmadığı durumları zarif bir şekilde ele alır |
 
-Bu aynı kalıplar, sohbet botları, kod asistanları, içerik üreticileri, otomasyon araçları gibi her türlü uygulamaya ölçeklenir.
+Bu aynı örüntüler sohbet botları, kod asistanları, içerik üreticileri, otomasyon araçları gibi herhangi bir uygulamaya ölçeklenir.
 
-#### Bonus Görev
+#### Bonus Meydan Okuma
 
-* Ekstra bir zorluk için, [burada](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py) verilen örneğe başvurarak uygulamayı, kartları kullanıcıya sesli okutacak şekilde güncellemeyi deneyin.
+* Ekstra bir meydan okuma için, [burada](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py) verilen örneğe başvurarak uygulamayı flash kartların kullanıcıya sesli okunmasını sağlayacak şekilde güncellemeyi deneyin.
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## NPU Üzerinde Model Çalıştırma (İsteğe Bağlı)
 
-Ryzen AI 300/400/Max 300 serisi veya Z2 Extreme'e sahipseniz, cihazınızda özellikle AI iş yükleri için tasarlanmış özel bir çip olan yerleşik bir **Sinirsel İşlem Birimi (NPU)** bulunur. Modelleri NPU üzerinde çalıştırmak, GPU kullanmaktan daha güç verimlidir, bu da onu arka plan AI görevleri, daha uzun oturumlar ve pil ile çalışan kullanım için ideal hale getirir.
+Bir Ryzen AI 300/400/Max 300 serisi veya Z2 Extreme cihazınız varsa, cihazınızda özellikle yapay zeka iş yükleri için tasarlanmış özel bir çip olan yerleşik bir **Neural Processing Unit (NPU)** bulunur. Modelleri NPU üzerinde çalıştırmak, GPU kullanmaya göre daha güç verimlidir ve bu da onu arka planda çalışan yapay zeka görevleri, uzun süreli oturumlar ve pil ile çalışan kullanım için ideal hale getirir.
 
-Lemonade, hepsi aynı OpenAI API'sinin arkasında şeffaf olan üç NPU çalıştırma modunu destekler:
+Lemonade, hepsi aynı OpenAI API'sinin arkasında şeffaf şekilde çalışan üç NPU çalıştırma modunu destekler:
 
 | Mod | Nasıl Çalışır | Tarif | Örnek Modeller |
 |------|-------------|--------|----------------|
 | **Hybrid (NPU + iGPU)** | NPU istemi işler, iGPU token üretir | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
-| **Yalnızca NPU** | Çıkarımın tamamı NPU üzerinde çalışır | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
-| **FLM** | NPU üzerinde, AMD XDNA2 için optimize edilmiş FastFlowLM motorunu kullanır | FLM (`flm`) | qwen3.5-4b-FLM |
+| **Yalnızca NPU** | Tüm çıkarım NPU üzerinde çalışır | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
+| **FLM** | NPU üzerinde AMD XDNA2 için optimize edilmiş FastFlowLM motorunu kullanır | FLM (`flm`) | qwen3.5-4b-FLM |
 
 ### Gereksinimler
 
 - **AMD Ryzen AI 300/400 serisi veya Z2 serisi** işlemci
-- **FLM** modelleri için: FLM çalışma zamanı Lemonade uygulaması içinden kurulabilir veya Lemonade bir FLM modeli çalıştırırken FLM çalışma zamanını otomatik olarak kuracaktır. FastFlowLM hakkında daha fazla bilgi edinmek için [buraya](https://fastflowlm.com/docs/) bakın.
+- **FLM** modelleri için: FLM çalışma zamanı Lemonade uygulaması içinden kurulabilir veya bir FLM modeli çalıştırıldığında Lemonade FLM çalışma zamanını otomatik olarak kuracaktır. FastFlowLM hakkında daha fazla bilgi edinmek için [buraya](https://fastflowlm.com/docs/) bakın.
 
 
-### Adım 8: Bir Hybrid Model Çalıştırın
+### Adım 8: Bir Hybrid Model Çalıştırma
 
 Hybrid modeller, hız ve verimlilik arasında iyi bir denge için işi NPU ve iGPU arasında böler. Lemonade Uygulamasında, `Ryzen AI LLM` listesinden bir model seçin, örneğin `Qwen3-4B-Hybrid`, veya aşağıdaki komutu kullanarak çalıştırın:
 
@@ -576,11 +577,11 @@ lemonade run Qwen3-4B-Hybrid
 
 Lemonade, NPU'nuzu otomatik olarak algılar ve **Ryzen AI LLM** arka ucunu kurar.
 
-> **Perde arkasında ne oluyor?** Bir mesaj gönderdiğinizde, NPU tüm isteminizi paralel olarak işler (buna "prefill" denir). Ardından, iGPU devralarak yanıtı bir seferde bir token üretir (buna "decode" denir). Bu hibrit yaklaşım, her bir çipin güçlü yönlerinden yararlanır.
+> **Perde arkasında neler oluyor?** Bir mesaj gönderdiğinizde, NPU tüm isteminizi paralel olarak işler (buna "prefill" denir). Ardından iGPU devreye girer ve yanıtı bir seferde bir token üreterek oluşturur (buna "decode" denir). Bu hybrid yaklaşım, her bir çipin güçlü yönlerinden yararlanır.
 
-### Adım 9: Bir FLM Modeli Çalıştırın
+### Adım 9: Bir FLM Modeli Çalıştırma
 
-FastFlowLM (FLM) modelleri, özellikle AMD'nin XDNA2 NPU mimarisi için optimize edilmiştir ve boyutlarına göre çok hızlı olabilirler. Örneğin, `FastFlowLM NPU` listesinden `qwen3.5-4b-FLM` seçin veya aşağıdaki komutu kullanın:
+FastFlowLM (FLM) modelleri özellikle AMD'nin XDNA2 NPU mimarisi için optimize edilmiştir ve boyutlarına göre oldukça hızlı olabilir. Örneğin, `FastFlowLM NPU` listesinden `qwen3.5-4b-FLM` modelini seçin veya aşağıdaki komutu kullanın:
 
 <!-- @os:windows -->
 Windows'ta `FastFlowLM`'i etkinleştirmek için:
@@ -588,21 +589,21 @@ Windows'ta `FastFlowLM`'i etkinleştirmek için:
 * `Backends Manager` menüsünü açın.
 * `FastFlowLM NPU` arka uç kategorisini bulun.
 * Install NPU'ya tıklayın.
-* Kurulum tamamlandığında, FFLM açılır menüsü altında ~36 varsayılan model kullanılabilir olacaktır.
+* Kurulum tamamlandıktan sonra, FFLM açılır menüsü altında ~36 varsayılan model kullanılabilir olacaktır.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
 `Lemonade` Uygulaması ilk kez başlatıldığında, `FastFlowNPU` arka ucu varsayılan olarak etkin değildir.
-Yerel uygulama, kurulum boyunca size rehberlik etmek için kurulum sayfasını açacaktır.
+Yerel uygulama, sizi kurulum sürecinde yönlendirmek için kurulum sayfasını açacaktır.
 
 Linux'ta `FastFlowLM`'i etkinleştirmek için:
 
 * `Lemonade` Uygulamasını açın.
 * [Resmi FLM](https://lemonade-server.ai/flm_npu_linux.html) belgelerini ziyaret edin ve Linux dağıtımınızı seçerek FLM için kurulum adımlarını izleyin.
 * Kurulum sayfasında belirtildiği gibi backports'u etkinleştirin.
-* [Etiketler sayfasından](https://github.com/FastFlowLM/FastFlowLM/tags) en son `v0.9.x` sürümünü indirin.'
+* [tags sayfasından](https://github.com/FastFlowLM/FastFlowLM/tags) en son `v0.9.x` sürümünü indirin.'
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
@@ -620,7 +621,7 @@ fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 <!-- @device:end -->
 * İndirilen `.deb` paketini kurun.
 * Önerilen: `Lemonade App`'ten çıkın ve değişikliklerin algılanması için tekrar açın.
-* Önerilen: `Backends Manager`'ı açın ve `FastFlowNPU` Arka Ucunu Kur'a tıklayın.
+* Önerilen: `Backends Manager`'ı açın ve `FastFlowNPU` Backend'i Install'a tıklayın.
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -629,9 +630,9 @@ Başarılı bir kurulumdan sonra, **Lemonade Desktop App** içindeki **Download 
 <p align="center">
   <img width="400" height="400" src="assets/FFLM-installationWizard.png" />
 </p>
-Ardından mevcut FFLM modellerinden herhangi birini seçebilir ve NPU arka ucunu kullanmaya başlayabilirsiniz.
+Ardından mevcut FFLM modellerinden herhangi birini seçip NPU arka ucunu kullanmaya başlayabilirsiniz.
 
-Belirli bir model için, istenen modeli [modeller sayfasından](https://fastflowlm.com/docs/models/qwen/) indirin ve belgelerde sağlanan Shell komutunu kullanarak doğrulayın.
+Belirli bir model için, istediğiniz modeli [models sayfasından](https://fastflowlm.com/docs/models/qwen/) indirin ve belgelerde verilen Shell komutunu kullanarak doğrulayın.
 ```
 flm run qwen3.5-4b-FLM
 ```
@@ -640,7 +641,7 @@ veya
 lemonade run qwen3.5-4b-FLM
 ```
  üzerinden
-FLM modelleri en popüler mimarilerden bazılarını içerir (Gemma 3, Qwen 3, Llama 3 ve DeepSeek R1) ve 1 GB'nin altından 13 GB'nin üzerine kadar değişir.
+FLM modelleri en popüler mimarilerin bazılarını içerir (Gemma 3, Qwen 3, Llama 3 ve DeepSeek R1) ve 1 GB'ın altından 13 GB'ın üzerine kadar değişen boyutlardadır.
 Lemonade, NPU'nuzu otomatik olarak algılar ve **FastFlowLM NPU** arka ucunu kurar.
 
 <!-- @os:windows -->
@@ -651,9 +652,9 @@ Lemonade, NPU'nuzu otomatik olarak algılar ve **FastFlowLM NPU** arka ucunu kur
 > ```
 <!-- @os:end -->
 
-### Model Değiştirme
+### Modelleri Değiştirme
 
-Adım 6'daki flashcard uygulaması NPU modellerinde de çalışır, sadece model adını değiştirin:
+Adım 6'daki flashcard uygulaması NPU modelleri için de çalışır, sadece model adını değiştirin:
 
 ```python
 # In flashcards.py, swap the model to run on NPU instead of GPU
@@ -666,17 +667,17 @@ response = client.chat.completions.create(
 
 ## Sonraki Adımlar
 
-Kendi donanımınızda çalışan yerel bir AI sunucunuz var, işte bundan sonra nereye gidebileceğiniz:
+Kendi donanımınızda yerel bir yapay zeka sunucusu çalıştırıyorsunuz, işte sırada bakmanız gerekenler:
 
-1. **En sevdiğiniz uygulamaları bağlayın**: Lemonade, [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/) ve [daha birçok](https://lemonade-server.ai/marketplace) uygulama ile kutudan çıktığı gibi çalışır.
+1. **Favori uygulamalarınızı bağlayın**: Lemonade, [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/) ve [daha birçoğuyla](https://lemonade-server.ai/marketplace) kutudan çıktığı gibi çalışır.
 
-2. **Daha fazla model keşfedin**: Kodlama, akıl yürütme, görme ve daha fazlası için optimize edilmiş modelleri bulmak amacıyla tam [model kütüphanesini](https://lemonade-server.ai/docs/server/server_models/) inceleyin. Nelerin mevcut olduğunu görmek için Lemonade Uygulamasını veya `lemonade list` komutunu kullanın.
+2. **Daha fazla model keşfedin**: Kodlama, akıl yürütme, görüntü işleme ve daha fazlası için optimize edilmiş modelleri bulmak üzere tam [model kitaplığını](https://lemonade-server.ai/docs/server/server_models/) inceleyin. Nelerin mevcut olduğunu görmek için Lemonade Uygulamasını veya `lemonade list` komutunu kullanın.
 
 3. **ROCm GPU hızlandırmasının kilidini açın**: Desteklenen bir AMD GPU'nuz varsa, ROCm arka ucuna geçin: `lemonade config set llamacpp.backend=rocm`. [Desteklenen AMD GPU'lara](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations) bakın.
 
-4. **Tam API spesifikasyonunu okuyun**: Lemonade; sohbet tamamlamalarını, gömme (embedding) işlemlerini, ses transkripsiyonunu, görüntü üretimini, metinden sese dönüşümü ve daha fazlasını destekler. Her uç nokta için [Sunucu Spesifikasyonuna](https://lemonade-server.ai/docs/server/server_spec/) bakın.
+4. **Tam API spesifikasyonunu okuyun**: Lemonade, chat completion, embedding, ses transkripsiyonu, görüntü oluşturma, metinden konuşmaya ve daha fazlasını destekler. Her uç nokta için [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) belgesine bakın.
 
-5. **Katkıda bulunun**: Lemonade açık kaynaklıdır. [Katkı kılavuzuna](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) göz atın ve [İlk Katkı için Uygun Konulara](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) bakın.
+5. **Katkıda bulunun**: Lemonade açık kaynaklıdır. [Katkı kılavuzuna](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) göz atın ve [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) etiketini arayın.
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

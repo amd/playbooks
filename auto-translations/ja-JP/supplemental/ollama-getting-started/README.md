@@ -16,29 +16,31 @@ SPDX-License-Identifier: MIT
 
 ## 概要
 
-Ollamaは、ローカルで大規模言語モデルを実行するための人気の軽量ツールです。モデルのダウンロード、量子化、シンプルなコマンドラインインターフェースとデスクトップアプリの背後でのサービングを処理するため、数分でLLMとのチャットを開始できます。
+Ollamaは、大規模言語モデルをローカルで実行するための人気の軽量ツールです。モデルのダウンロード、量子化、提供をシンプルなコマンドラインインターフェースとデスクトップアプリの背後で処理するため、数分でLLMとのチャットを開始できます。
 
 このプレイブックでは、Ollamaのインストール、GPT-OSS 20Bモデルのプル、そしてターミナルとデスクトップアプリの両方を通じてモデルと会話する方法を説明します。
 
-## 学習内容
+## このプレイブックで学べること
 
-- システムへのOllamaのインストールと起動方法
-- GPT-OSS 20Bモデルのプルとローカルでの実行
-- CLIを使用したモデルとのチャット
-- REST APIを通じたモデルへのプログラムによるクエリ
+- お使いのシステムにOllamaをインストールして起動する方法
+- GPT-OSS 20Bモデルをローカルでプルして実行する
+- CLIを使用してモデルとチャットする
+- REST APIを通じてプログラムからモデルにクエリを送る
 
-## メモリ設定の構成
+<!-- @device:halo_box,halo,stx,krk -->
+## メモリ設定
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## ソフトウェアアップデートの確認
-> **注**: VS Codeがインストールされていない場合は、Ryzen AI Developer Centerでインストールできます。
+> **注**: VS Codeがインストールされていない場合は、Ryzen AI Developer Centerからインストールできます。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 前提ソフトウェアのインストール
+## ソフトウェア前提条件のインストール
 
 <!-- @require:driver -->
 
@@ -47,10 +49,10 @@ Ollamaは、ローカルで大規模言語モデルを実行するための人�
 <!-- @os:windows -->
 
 1. [ollama.com/download](https://ollama.com/download)からインストーラーをダウンロードします。
-2. `.exe`インストーラーを実行し、プロンプトに従います。
+2. `.exe`インストーラーを実行し、指示に従います。
 3. インストールが完了すると、Ollamaはバックグラウンドサービスとして実行され、ターミナル、デスクトップアプリ、システムトレイからアクセスできます。
 
-ターミナルを開いて以下を実行し、インストールを確認します。
+ターミナルを開いて次を実行し、インストールを確認します。
 
 ```powershell
 ollama --version
@@ -62,7 +64,7 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-コンソールにインストールされたバージョン番号が表示されるはずです。
+コンソールにインストールされたバージョン番号が表示されます。
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -85,35 +87,64 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-コンソールにインストールされたバージョン番号が表示されるはずです。
+コンソールにインストールされたバージョン番号が表示されます。
 <!-- @os:end -->
 
 ## 最初のモデルをプルする
 
-Ollamaはコンテナイメージに似たレジストリを通じてモデルを管理します。GPT-OSS 20Bをダウンロードするには次のようにします。
+Ollamaは、コンテナイメージに似たレジストリを通じてモデルを管理します。GPT-OSS 20Bをダウンロードするには次のようにします。
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-これにより、モデルの重みがローカルマシンにダウンロードされます(約12GB)。ダウンロードは1回だけ行われ、以降の実行ではディスクからモデルが読み込まれます。
+これにより、モデルの重みがローカルマシンにダウンロードされます（約12GB）。ダウンロードは一度だけ行われ、以降の実行ではディスクからモデルが読み込まれます。
 
-モデルが利用可能であることは、以下で確認できます。
+モデルが利用可能であることは、次のコマンドで確認できます。
 
 ```bash
 ollama list
 ```
 
-出力に`gpt-oss:20b`がそのサイズと最終更新日とともに表示されるはずです。
+出力に、サイズと最終更新日とともに`gpt-oss:20b`が表示されるはずです。
 
 <!-- @os:windows -->
-<!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
+<!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=180 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
-$list = (ollama list | Out-String)
-if (-not $list) { throw "ollama list returned no output" }
-if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
-Write-Host "OK: gpt-oss:20b is present in ollama list"
+$p = $null
+$startedHere = $false
+
+function Wait-OllamaApi {
+  param( [int]$MaxAttempts = 120 )
+  for ($i = 0; $i -lt $MaxAttempts; $i++) {
+    $resp = curl.exe -s --max-time 2 http://127.0.0.1:11434/api/tags
+    if ($LASTEXITCODE -eq 0 -and $resp) { return $resp }
+    Start-Sleep -Seconds 1
+  }
+  return $null
+}
+
+try {
+  # Start the Ollama server if the API is not already up.
+  $tagsJson = Wait-OllamaApi -MaxAttempts 5
+  if (-not $tagsJson) {
+    $p = Start-Process -FilePath "ollama" -ArgumentList "serve" -NoNewWindow -PassThru
+    $startedHere = $true
+    $tagsJson = Wait-OllamaApi -MaxAttempts 120
+  }
+  if (-not $tagsJson) { throw "Ollama API not ready on http://127.0.0.1:11434" }
+
+  $list = (ollama list | Out-String)
+  if (-not $list) { throw "ollama list returned no output" }
+  if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
+  Write-Host "OK: gpt-oss:20b is present in ollama list"
+}
+finally {
+  if ($startedHere -and $p -and -not $p.HasExited) {
+    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+  }
+}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -177,56 +208,56 @@ echo "OK: gpt-oss:20b is present in ollama list"
 
 ### モデルの命名
 
-Ollamaのモデル名は`name:tag`という形式に従います。タグは通常、パラメータ数または量子化バリアントを示します。モデルを管理するための便利なコマンドをいくつか紹介します。
+Ollamaのモデル名は`name:tag`という形式に従います。タグは通常、パラメーター数または量子化バリアントを示します。モデル管理に役立つコマンドをいくつか紹介します。
 
 | コマンド | 説明 |
 |---------|-------------|
-| `ollama list` | ダウンロード済みのすべてのモデルを表示 |
-| `ollama pull <model>` | モデルを実行せずにダウンロード |
-| `ollama rm <model>` | モデルを削除してディスク容量を解放 |
-| `ollama show <model>` | モデルのメタデータとパラメータを表示 |
+| `ollama list` | ダウンロード済みのすべてのモデルを表示する |
+| `ollama pull <model>` | モデルを実行せずにダウンロードする |
+| `ollama rm <model>` | モデルを削除してディスク領域を解放する |
+| `ollama show <model>` | モデルのメタデータとパラメーターを表示する |
 
 ## ターミナルからチャットする
 
-コマンドラインから直接、インタラクティブなチャットセッションを起動します。
+コマンドラインから直接、対話型のチャットセッションを起動します。
 
 ```bash
 ollama run gpt-oss:20b
 ```
 
-Ollamaはモデルをメモリに読み込み、プロンプトを表示します。何か質問してみましょう。
+Ollamaはモデルをメモリに読み込み、プロンプトに入ります。何か質問してみましょう。
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-モデルはターミナルに直接、トークンごとにストリーミングで応答を返します。セッションを終了するには`/bye`と入力するか、`Ctrl+D`を押します。
+モデルはターミナルに直接、応答をトークンごとにストリーミングします。セッションを終了するには`/bye`と入力するか、`Ctrl+D`を押します。
 
-> **ヒント**: 初回実行時は、モデルをメモリに読み込むのに数秒かかります。同じセッション内でのその後のプロンプトは、モデルが読み込まれたままになるため、はるかに高速に応答します。
+> **ヒント**: 初回実行時は、モデルをメモリに読み込むのに数秒かかります。同じセッション内での以降のプロンプトは、モデルが読み込まれたままになるため、応答がはるかに速くなります。
 
 <!-- @os:windows -->
 ## デスクトップアプリからチャットする
 
-Ollamaには、モデルとやり取りするためのクリーンなチャットインターフェースを提供するデスクトップアプリケーションも付属しています。
+Ollamaには、モデルとやり取りするための洗練されたチャットインターフェースを提供するデスクトップアプリケーションも同梱されています。
 
 スタートメニューから**Ollama**を開くか、システムトレイのOllamaアイコンをクリックして**Open Ollama**を選択します。
 
-アプリが開いたら、以下の手順に従います。
+アプリが開いたら:
 
 1. サイドバーの**New Chat**をクリックします。
-2. チャット入力エリアの右下にあるモデルのドロップダウンから**gpt-oss:20b**を選択します。
+2. チャット入力欄の右下隅にあるモデルのドロップダウンから**gpt-oss:20b**を選択します。
 3. メッセージを入力し、Enterキーを押してチャットを開始します。
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-デスクトップアプリはサイドバーに会話履歴を保持するため、過去のチャットを簡単に振り返ることができます。
+デスクトップアプリはサイドバーに会話履歴を保持するため、以前のチャットに簡単に戻ることができます。
 <!-- @os:end -->
 
 ## REST APIの使用
 
-インストール後、Ollamaはバックグラウンドサービスとして実行され、`http://localhost:11434`でREST APIを公開します。これを使用して、モデルを独自のアプリケーションやスクリプトに統合できます。
+インストール後、Ollamaはバックグラウンドサービスとして実行され、`http://localhost:11434`でREST APIを公開します。これを使用して、独自のアプリケーションやスクリプトにモデルを組み込むことができます。
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -552,11 +583,11 @@ curl.exe http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "promp
 ```
 <!-- @os:end -->
 
-応答は、モデルの出力が`response`フィールドに含まれるJSONオブジェクトです。
+応答は、モデルの出力を`response`フィールドに含むJSONオブジェクトです。
 
 
 ### Pythonの例
-これでOllama APIをプログラムから呼び出せるようになったので、Pythonから呼び出してみましょう。
+これでプログラムからOllama APIを呼び出せるようになったので、次はPythonから呼び出してみましょう。
 
 #### ターミナルで仮想環境を作成する
 
@@ -577,7 +608,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### Pythonファイルを作成する
-同じディレクトリで、VS Codeまたは他のエディタを使用して.pyファイルを作成し、以下のコードをコピーします。その後、アクティブ化した環境で`python your_file_name.py`を実行してファイルを実行します。
+同じディレクトリで、VS Codeまたは他のエディターを使用して.pyファイルを作成し、次のコードをコピーして貼り付けます。その後、アクティブ化した環境で`python your_file_name.py`を実行してファイルを実行します。
 
 ```python
 import requests
@@ -594,22 +625,23 @@ response = requests.post(
 print(response.json()["response"])
 ```
 
-### 主要なAPIエンドポイント
+### 主なAPIエンドポイント
 
-| エンドポイント | メソッド | 目的 |
+| エンドポイント | メソッド | 用途 |
 |----------|--------|---------|
 | `/api/generate` | POST | シングルターンのテキスト生成 |
 | `/api/chat` | POST | メッセージ履歴を伴うマルチターンの会話 |
 | `/api/tags` | GET | 利用可能なモデルの一覧表示 |
-| `/api/show` | POST | モデルの詳細を表示 |
-| `/api/pull` | POST | レジストリからモデルをプル |
+| `/api/show` | POST | モデルの詳細表示 |
+| `/api/pull` | POST | レジストリからモデルをプルする |
 
-完全なAPIリファレンスについては、[Ollama APIドキュメント](https://github.com/ollama/ollama/blob/main/docs/api.md)を参照してください。
+完全なAPIリファレンスについては、[Ollama API documentation](https://github.com/ollama/ollama/blob/main/docs/api.md)を参照してください。
+
 ## 次のステップ
 
-- **さまざまなモデルを試す**: [Ollama model library](https://ollama.com/library) を参照して、小規模なコーディングアシスタントから大規模な推論モデルまで、数百種類の利用可能なモデルを探索してください。
-- **カスタムモデルを作成する**: [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) を使用して、カスタムのシステムプロンプト、temperature、その他のパラメータを設定し、用途に合わせた体験を実現できます。
-- **API を使って構築する**: [Python](https://github.com/ollama/ollama-python) または [JavaScript](https://github.com/ollama/ollama-js) のクライアントライブラリを使用して、Ollama をアプリケーションに統合できます。
-- **フロントエンドと連携する**: Ollama を [Open WebUI](https://github.com/open-webui/open-webui) のようなツールと組み合わせることで、検索、ペルソナ、ドキュメントアップロードなどの機能が充実したチャットインターフェースを利用できます。
+- **さまざまなモデルを試す**: [Ollama model library](https://ollama.com/library)を閲覧して、小規模なコーディングアシスタントから大規模な推論モデルまで、数百種類の利用可能なモデルを探索してください。
+- **カスタムモデルを作成する**: [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md)を使用して、カスタムのシステムプロンプト、temperature、その他のパラメーターを設定し、独自の体験を作り上げてください。
+- **APIで開発する**: [Python](https://github.com/ollama/ollama-python)または[JavaScript](https://github.com/ollama/ollama-js)のクライアントライブラリを使用して、Ollamaをアプリケーションに組み込んでください。
+- **フロントエンドと連携する**: [Open WebUI](https://github.com/open-webui/open-webui)のようなツールとOllamaを組み合わせることで、検索、ペルソナ、ドキュメントアップロードなどの機能が充実したチャットインターフェースを利用できます。
 
-詳細については、[Ollama documentation](https://github.com/ollama/ollama/blob/main/README.md) をご覧ください。
+詳細については、[Ollama documentation](https://github.com/ollama/ollama/blob/main/README.md)をご覧ください。

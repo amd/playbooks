@@ -1,6 +1,6 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "Ajuste fino de LLMs com LLaMA Factory",
-  "description": "Ajuste fino de grandes modelos de linguagem (LLMs) usando as técnicas LLaMA Factory e LoRA.",
+  "title": "Ajuste Fino de LLMs com LLaMA Factory",
+  "description": "Ajuste fino de large language models (LLMs) usando LLaMA Factory e técnicas de LoRA.",
   "auto_translated": true
 }

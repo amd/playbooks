@@ -11,46 +11,48 @@ SPDX-License-Identifier: MIT
 
 ## Pregled
 
-Učinkovito fino prilagajanje je ključnega pomena za prilagajanje velikih jezikovnih modelov (LLM) nalogam nižje v verigi. LLaMA Factory je odprtokodna in uporabniku prijazna platforma, ki poenostavi učenje in fino prilagajanje velikih jezikovnih modelov ter multimodalnih modelov. Uporabnikom omogoča, da lokalno prilagodijo na stotine vnaprej naučenih modelov z minimalnim programiranjem.
+Učinkovito fino nastavljanje je ključnega pomena za prilagajanje velikih jezikovnih modelov (LLM) nižje ležečim opravilom. LLaMA Factory je odprtokodna in uporabniku prijazna platforma, ki poenostavlja učenje in fino nastavljanje velikih jezikovnih modelov ter multimodalnih modelov. Uporabnikom omogoča prilagajanje na stotine vnaprej naučenih modelov lokalno, z minimalnim programiranjem.
 
-Ta priročnik vas nauči, kako fino prilagoditi LLM-je z uporabo LLaMA Factory na lokalni strojni opremi AMD.
+Ta priročnik vas uči, kako fino nastaviti LLM z uporabo LLaMA Factory na vaši lokalni strojni opremi AMD.
 
 <!-- @device:stx,krk -->
-> **Opomba:** Tehnike finega prilagajanja v tem priročniku zahtevajo vsaj **32 GB sistemskega pomnilnika RAM**, od tega vsaj **16 GB na voljo GPU-ju** (16 GB je del 32 GB, ne dodatno k njim).
+> **Opomba:** Tehnike finega nastavljanja v tem priročniku zahtevajo vsaj **32 GB sistemskega pomnilnika RAM**, od tega mora biti vsaj **16 GB na voljo GPE-ju** (teh 16 GB je del skupnih 32 GB, ne dodatnih).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Opomba:** Tehnike finega prilagajanja v tem priročniku zahtevajo vsaj **16 GB skupnega pomnilnika GPU** in **32 GB sistemskega pomnilnika RAM**.
-> - V sistemu Windows skupni pomnilnik GPU združuje namenski VRAM grafične kartice s skupno rabo pomnilnika GPU (izposojenega iz sistemskega RAM-a).
-> - Zato lahko kartice z manj kot 16 GB namenskega VRAM-a še vedno izvajajo ta priročnik z uporabo skupne rabe pomnilnika GPU za nadomestitev razlike.
+> **Opomba:** Tehnike finega nastavljanja v tem priročniku zahtevajo vsaj **16 GB skupnega pomnilnika GPE** in **32 GB sistemskega pomnilnika RAM**.
+> - V sistemu Windows skupni pomnilnik GPE združuje namenski VRAM grafične kartice s skupno rabo pomnilnika GPE (izposojenega iz sistemskega RAM-a).
+> - Zato lahko kartice z manj kot 16 GB namenskega VRAM-a še vedno poganjajo ta priročnik z uporabo skupne rabe pomnilnika GPE za nadomestitev razlike.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Opomba:** Tehnike finega prilagajanja v tem priročniku zahtevajo grafično kartico z vsaj **16 GB namenskega pomnilnika GPU** in **32 GB sistemskega pomnilnika RAM**.
-> - V sistemu Linux se učenje v celoti izvaja v namenskem VRAM-u grafične kartice.
-> - Ne pade nazaj na skupno rabo pomnilnika GPU (sistemski RAM), ko VRAM zmanjka.
-> - Kartice z manj kot 16 GB namenskega VRAM-a bodo med učenjem v sistemu Linux zmanjkale pomnilnika, tudi če ima sistem obilo RAM-a.
+> **Opomba:** Tehnike finega nastavljanja v tem priročniku zahtevajo grafično kartico z vsaj **16 GB namenskega pomnilnika GPE** in **32 GB sistemskega pomnilnika RAM**.
+> - V sistemu Linux učenje poteka izključno v namenskem VRAM-u grafične kartice.
+> - Ne preklopi na skupno rabo pomnilnika GPE (sistemski RAM), ko VRAM zmanjka.
+> - Kartice z manj kot 16 GB namenskega VRAM-a bodo med učenjem v sistemu Linux zmanjkale pomnilnika, tudi če ima sistem veliko RAM-a.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Kaj se boste naučili
 
 - Kako nastaviti LLaMA Factory s programsko opremo AMD ROCm™
-- Kako konfigurirati parametre finega prilagajanja LLM (na primeru Qwen/Qwen3-4B-Instruct-2507)
-- Kako izvesti fino prilagajanje z LLaMA Factory
-- Kako izvesti sklepanje s fino prilagojenim modelom
-- Kako izvoziti fino prilagojeni model 
+- Kako konfigurirati parametre finega nastavljanja LLM (na primeru Qwen/Qwen3-4B-Instruct-2507)
+- Kako zagnati fino nastavljanje z LLaMA Factory
+- Kako izvesti sklepanje s fino nastavljenim modelom
+- Kako izvoziti fino nastavljeni model 
 
-## Ocenjeni čas
+## Ocenjen čas
 
 - Trajanje: Izvedba tega priročnika bo trajala približno 60 minut (odvisno od velikosti vašega modela/nabora podatkov in hitrosti omrežja).
 - Za več informacij si oglejte [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory).
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Nastavitev konfiguracije pomnilnika
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Preverjanje posodobitev programske opreme
@@ -58,7 +60,7 @@ Ta priročnik vas nauči, kako fino prilagoditi LLM-je z uporabo LLaMA Factory n
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Namestitev predpogojev programske opreme
+## Namestitev programskih predpogojev
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -78,11 +80,11 @@ pip --version
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Ustvarite virtualno okolje
+#### Ustvarjanje virtualnega okolja
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -94,13 +96,13 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Podelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev se odjavite in ponovno prijavite):
+**Podelite svojemu uporabniku dostop do naprav GPE** (za uveljavitev se odjavite in ponovno prijavite):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -137,10 +139,26 @@ llamafactory-env\Scripts\activate
 ### Namestitev osnovnih odvisnosti
 
 <!-- @require:pytorch,driver -->
- 
+
+<!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
+```python
+import sys
+import torch
+
+print(f"Python executable: {sys.executable}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
+
+if not torch.cuda.is_available():
+    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
+
+print("PASS: ROCm-enabled PyTorch is visible")
+```
+<!-- @test:end -->
+
 ### Namestitev dodatnih odvisnosti
 
-> **Opomba**: Prepričajte se, da je različica Pythona 3.11, 3.12 ali 3.13
+> **Opomba**: Prepričajte se, da je različica Python 3.11, 3.12 ali 3.13
 
 ```bash
 pip install huggingface_hub
@@ -164,11 +182,11 @@ python -m pip install huggingface_hub
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Namestite LLaMA Factory
+### Namestitev LLaMA Factory
 
 LLaMA Factory je odvisen od PyTorch. Ta bi moral biti že nameščen v skladu z zgornjimi zahtevami.
 
-Prenesite izvorno kodo iz [uradnega GitHub repozitorija LLaMA Factory](https://github.com/hiyouga/LlamaFactory) in namestite njegove odvisnosti.
+Prenesite izvorno kodo iz [uradnega repozitorija LLaMA Factory na GitHubu](https://github.com/hiyouga/LlamaFactory) in namestite njegove odvisnosti.
 
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
@@ -226,26 +244,26 @@ Primer izpisa:
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-Ko ste uspešno namestili LLaMA Factory, izvedimo fino prilagajanje z njim.
+Ko ste uspešno namestili LLaMA Factory, zaženimo na njem fino nastavljanje.
 
-## Uporaba vmesnika LLaMA Factory CLI za fino prilagajanje 
+## Uporaba LLaMA Factory CLI za fino nastavljanje 
 
-Ta razdelek obravnava, kako pripraviti nabore podatkov za fino prilagajanje, konfigurirati parametre LoRA/QLoRA in izvesti fino prilagajanje LoRA.
+Ta razdelek zajema, kako pripraviti nabore podatkov za fino nastavljanje, konfigurirati parametre LoRA/QLoRA in zagnati fino nastavljanje LoRA.
 
 ### Priprava nabora podatkov
 
-LLaMA Factory podpira nabore podatkov za fino prilagajanje v obliki Alpaca in obliki ShareGPT. Vsi razpoložljivi nabori podatkov so definirani v [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Če uporabljate nabor podatkov po meri, poskrbite, da dodate opis nabora podatkov v `dataset_info.json` in pred učenjem določite ime nabora podatkov. Podrobnosti najdete v njihovi dokumentaciji [tukaj](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
+LLaMA Factory podpira nabore podatkov za fino nastavljanje v obliki Alpaca in ShareGPT. Vsi razpoložljivi nabori podatkov so opredeljeni v datoteki [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Če uporabljate nabor podatkov po meri, se prepričajte, da v `dataset_info.json` dodate opis nabora podatkov in pred učenjem navedete ime nabora podatkov. Podrobnosti najdete v njihovi dokumentaciji [tukaj](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
-V tem priročniku bomo kot primer uporabili nabora podatkov identity in alpaca_en_demo ter v naslednjem koraku konfigurirali informacije o naboru podatkov.
-### Konfiguracija parametrov fino uravnavanja
+V tem priročniku bomo za primer uporabili nabora podatkov identity in alpaca_en_demo ter podatke o naboru podatkov konfigurirali v naslednjem koraku.
+### Konfiguracija parametrov fine-tuninga
 
-LLaMA Factory podpira več shem fino uravnavanja.
+LLaMA Factory podpira več shem fine-tuninga.
 
-| Sheme fino uravnavanja | Primeri LLaMA Factory |
+| Shema fine-tuninga | Primeri iz LLaMA Factory |
 |-----------|------|
-| Polni parametri (Full-Parameter)    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
-| Fino uravnavanje LoRA  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
-| Fino uravnavanje QLoRA | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
+| Fine-tuning vseh parametrov (Full-Parameter)    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
+| Fine-tuning LoRA  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
+| Fine-tuning QLoRA | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
 <!-- @test:id=verify-llamafactory-files timeout=60 hidden=True setup=activate-venv -->
 ```python
@@ -268,39 +286,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-Te primerne konfiguracijske datoteke imajo določene parametre modela, parametre metode fino uravnavanja, parametre nabora podatkov, parametre vrednotenja in druge. Konfigurirate jih lahko glede na svoje potrebe. V tem vodniku bomo uporabili [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
+Te vzorčne konfiguracijske datoteke imajo določene parametre modela, parametre metode fine-tuninga, parametre nabora podatkov, parametre za vrednotenje in drugo. Konfigurirate jih lahko glede na svoje potrebe. V tem vodniku bomo uporabili [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
 **Razlaga ključnih parametrov:**
-- `model_name_or_path` – ime modela na Hugging Face ali pot do lokalne datoteke modela.
-- `stage` – faza treniranja. Možnosti: rm (modeliranje nagrajevanja), pt (predtreniranje), sft (nadzorovano fino uravnavanje), PPO, DPO, KTO, ORPO.
-- `do_train` – true za treniranje, false za vrednotenje
-- `finetuning_type` – metoda fino uravnavanja. Možnosti: freeze, lora, full
-- `lora_rank` – dimenzionalnost matrike nizkega ranga, uporabljene pri metodi LoRA, tipične vrednosti: 4, 6, 8, 16 (manjše vrednosti = manj parametrov = hitrejše fino uravnavanje; večje vrednosti = boljša prilagoditev nalogi, vendar večja poraba virov).
-- `lora_target` – ciljni moduli za metodo LoRA. Privzeto: all.
-- `dataset` – nabor(i) podatkov, ki naj se uporabijo. Za ločevanje več naborov podatkov uporabite »,«
-- `output_dir` – izhodna pot fino uravnavanja
-- `logging_steps` – interval beleženja v korakih
-- `save_steps` – interval shranjevanja kontrolnih točk modela.
-- `overwrite_output_dir` – ali naj bo dovoljeno prepisovanje izhodnega imenika.
-- `per_device_train_batch_size` – velikost paketa za treniranje na napravo.
-- `gradient_accumulation_steps` – število korakov akumulacije gradienta.
-- `learning_rate` – stopnja učenja
-- `num_train_epochs` – število epoh treniranja
-- `lr_scheduler_type` – razporejanje stopnje učenja. Možnosti: linear, cosine, polynomial, constant itd.
-- `warmup_ratio` – razmerje ogrevanja stopnje učenja
+- `model_name_or_path` - Ime modela na Hugging Face ali pot do lokalne datoteke modela.
+- `stage` - Faza treninga. Možnosti: rm (modeliranje nagrade), pt (predtreniranje), sft (nadzorovani fine-tuning), PPO, DPO, KTO, ORPO.
+- `do_train` - true za treniranje, false za vrednotenje
+- `finetuning_type` - Metoda fine-tuninga. Možnosti: freeze, lora, full
+- `lora_rank` - Dimenzionalnost nizko-rangovne matrike, uporabljene pri metodi LoRA, tipične vrednosti: 4, 6, 8, 16 (manjše vrednosti = manj parametrov = hitrejši fine-tuning; večje vrednosti = boljša prilagoditev nalogi, a večja poraba virov).
+- `lora_target` - Ciljni moduli za metodo LoRA. Privzeto: all.
+- `dataset` - Nabor(i) podatkov za uporabo. Za ločevanje več naborov podatkov uporabite “,”
+- `output_dir` - Izhodna pot za fine-tuning
+- `logging_steps` - Interval beleženja v korakih
+- `save_steps` - Interval shranjevanja kontrolne točke modela.
+- `overwrite_output_dir` - Ali je dovoljeno prepisovanje izhodnega imenika.
+- `per_device_train_batch_size` - Velikost paketa (batch) za treniranje na napravo.
+- `gradient_accumulation_steps` - Število korakov kopičenja gradientov.
+- `learning_rate` - Stopnja učenja
+- `num_train_epochs` - Število epoh treninga
+- `lr_scheduler_type` - Razpored stopnje učenja. Možnosti: linear, cosine, polynomial, constant itd.
+- `warmup_ratio` - Razmerje ogrevanja (warmup) stopnje učenja
 
 <!-- @os:linux -->
-Privzeto vrednost `lora_rank` bomo spremenili, da bomo lahko zagnali fino uravnavanje na grafičnih procesorjih AMD Ryzen™ in AMD Radeon™.
+Spremenili bomo privzeto vrednost `lora_rank`, da bomo zagnali fine-tuning na GPE-jih AMD Ryzen™ in AMD Radeon™.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Posodobili bomo privzeto konfiguracijo fino uravnavanja LoRA za boljšo združljivost z grafičnimi procesorji AMD Ryzen™ in AMD Radeon™:
-- Nastavite `lora_rank` iz `8` na `6`, da zmanjšate porabo pomnilnika med fino uravnavanjem.
-- Uporabite `fp16` namesto `bf16` za širšo združljivost z grafičnimi procesorji AMD in nižjo porabo pomnilnika.
-- Na sistemu Windows nastavite `dataloader_num_workers` na `0`, da se izognete napakam vrste `"Can't pickle local object<>"`, ki jih povzroča večprocesno nalaganje podatkov.
+Posodobili bomo privzeto konfiguracijo fine-tuninga LoRA za boljšo združljivost z GPE-ji AMD Ryzen™ in AMD Radeon™:
+- Nastavimo `lora_rank` iz `8` na `6`, da zmanjšamo porabo pomnilnika med fine-tuningom.
+- Uporabimo `fp16` namesto `bf16` za širšo združljivost z GPE-ji AMD in nižjo porabo pomnilnika.
+- Nastavimo `dataloader_num_workers` na `0` v okolju Windows, da se izognemo napakam `"Can't pickle local object<>"`, ki jih povzroča nalaganje podatkov z večprocesnostjo.
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -320,13 +338,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### Zagon fino uravnavanja z orodjem LLaMA Factory 
+### Zagon fine-tuninga z LLaMA Factory 
 
-**llamafactory-cli** je uradno orodje za ukazno vrstico (CLI) za LLaMA Factory, razvito za poenostavitev celotnega poteka dela z velikimi jezikovnimi modeli (priprava podatkov → fino uravnavanje → vrednotenje → uvajanje), brez pisanja zapletene kode.
+**llamafactory-cli** je uradno orodje za ukazno vrstico (CLI) za LLaMA Factory, razvito za poenostavitev celotnega poteka dela z velikimi jezikovnimi modeli (priprava podatkov → fine-tuning → vrednotenje → uvajanje) brez pisanja zapletene kode.
 
-Za treniranje/fino uravnavanje je **llamafactory-cli train** osrednji podukaz orodja LLaMA Factory CLI. Abstrahira poteke dela fino uravnavanja (predobdelava podatkov, prilagajanje hiperparametrov, optimizacija strojne opreme) v en sam ukaz CLI, podpira več paradigem fino uravnavanja (LoRA/QLoRA/polno fino uravnavanje) in je optimiziran za grafične procesorje z omejenimi viri (npr. QLoRA na 16 GB VRAM).
+Za treniranje/fine-tuning je **llamafactory-cli train** osrednji podukaz CLI-ja LLaMA Factory. Abstrahira poteke fine-tuninga (predobdelava podatkov, prilagajanje hiperparametrov, optimizacija strojne opreme) v en sam ukaz CLI, podpira več paradigem fine-tuninga (LoRA/QLoRA/Fine-tuning vseh parametrov) in je optimiziran za GPE-je z omejenimi viri (npr. QLoRA na 16 GB VRAM-a).
 
-Fino uravnavanje z orodjem LLaMA Factory lahko zaženete z naslednjim ukazom, ki temelji na spremenjeni konfiguracijski datoteki za fino uravnavanje Qwen3 LoRA.
+Fine-tuning LLaMA Factory lahko zaženete z naslednjim ukazom, ki temelji na spremenjeni konfiguracijski datoteki za fine-tuning Qwen3 LoRA.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -397,12 +415,19 @@ if (Select-String -Path $filePath -Pattern '^save_total_limit:' -Quiet) {
     Add-Content -Path $filePath -Value "save_total_limit: 1"
 }
 
+# Single-process dataset preprocessing to avoid Windows multiprocessing errors.
+if (Select-String -Path $filePath -Pattern '^preprocessing_num_workers:' -Quiet) {
+    (Get-Content -Path $filePath) -replace '^preprocessing_num_workers:.*', 'preprocessing_num_workers: 1' | Set-Content -Path $filePath
+} else {
+    Add-Content -Path $filePath -Value "preprocessing_num_workers: 1"
+}
+
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
-Po zagonu fino uravnavanja LLM so vsi ustvarjeni izhodi shranjeni v »output_dir«, vključno z datotekami kontrolnih točk modela, konfiguracijskimi datotekami in metrikami treniranja.
+Po zagonu fine-tuninga LLM-ja so vsi ustvarjeni izhodi shranjeni v "output_dir", vključno z datotekami kontrolnih točk modela, konfiguracijskimi datotekami in metrikami treninga.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -439,32 +464,32 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end --> 
 
-### Preizkus fino uravnanega modela 
+### Preizkus modela po fine-tuningu 
 
-**llamafactory-cli chat** je namenjen interaktivnemu klepetu/sklepanju z velikimi jezikovnimi modeli (tako z osnovnimi modeli kot z modeli, fino uravnanimi z LoRA). LLaMA Factory zagotavlja vzorčno konfiguracijo za zagon sklepanja fino uravnanih modelov v [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). To vzorčno konfiguracijo lahko tudi spremenite, da spremenite nastavitve, na primer zaledje za sklepanje.
+**llamafactory-cli chat** je zasnovan za interaktiven pogovor/sklepanje z LLM-ji (tako z osnovnimi modeli kot z modeli, fine-tuniranimi z LoRA). LLaMA Factory zagotavlja vzorčno konfiguracijo za zagon sklepanja s fine-tuniranimi modeli v [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). To vzorčno konfiguracijo lahko tudi spremenite, da spremenite nastavitve, kot je zaledje za sklepanje (inference backend).
 
-Za preizkus fino uravnanega modela Qwen3 uporabite naslednji ukaz:
+Za preizkus fine-tuniranega modela Qwen3 uporabite naslednji ukaz:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
-Spodaj je prikazan primer klepeta z uporabo fino uravnanega modela:
+Spodaj je prikazan primer pogovora z uporabo fine-tuniranega modela:
 
 <p align="center">
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Fine-Tuned model" width="600"/>
 </p>
 
 
-### Izvoz fino uravnanega modela
+### Izvoz fine-tuniranega modela
 
-Za produkcijske primere uporabe je treba vnaprej treniran model in prilagojevalnik LoRA združiti in izvoziti v en sam model. Ta združeni model se lahko uporablja kot običajna datoteka modela Hugging Face. LLaMA Factory zagotavlja vzorčne konfiguracije v [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
+Za produkcijske primere uporabe je treba predtrenirani model in prilagoditveni modul LoRA (adapter) združiti in izvoziti v en sam model. Ta združeni model se lahko uporablja kot običajna datoteka modela Hugging Face. LLaMA Factory zagotavlja vzorčne konfiguracije v [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
-Za izvoz fino uravnanega modela Qwen3 uporabite naslednji ukaz:
+Za izvoz fine-tuniranega modela Qwen3 uporabite naslednji ukaz:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
-Spodaj je prikazan rezultat izvoza fino uravnanega modela.
+Spodaj je prikazan rezultat izvoza fine-tuniranega modela.
 
 <p align="center">
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Fine-Tuned model " width="600"/>
@@ -565,27 +590,27 @@ if not model_files:
 
 print("PASS: Exported merged model output looks correct")
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 ## Uporaba grafičnega vmesnika LLaMA Factory
 
-`LLaMA-Factory` prav tako omogoča brezkodno fino nastavljanje LLM prek spletnega uporabniškega vmesnika v brskalniku.
+`LLaMA-Factory` prav tako podpira brezkodno fino nastavljanje LLM-jev prek spletnega vmesnika v brskalniku.
 
-Za odpiranje uporabite naslednji ukaz:
+Za odprtje uporabite naslednji ukaz:
 
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI` ponuja poenostavljen vmesnik za upravljanje delovnih tokov strojnega učenja, vključno z učenjem, vrednotenjem, napovedovanjem, klepetom in izvozom modelov. Tukaj je kratek uvod v posamezne zavihke:
+`LlamaFactory Web UI` ponuja poenostavljen vmesnik za upravljanje delovnih tokov strojnega učenja, vključno z učenjem, ocenjevanjem, napovedovanjem, klepetom in izvozom modelov. Sledi kratek uvod v posamezne zavihke:
 
-* **Train (Učenje)**: Ta zavihek omogoča izbiro modela in nabora podatkov, konfiguracijo parametrov učenja ter zagon postopka učenja. Bistveno je razumeti obvezne in izbirne parametre za optimizacijo nastavitve učenja.
-* **Evaluate & Predict (Vrednotenje in napovedovanje)**: Po učenju lahko z uporabo tega zavihka ovrednotite delovanje modela in izdelate napovedi. Zagotavlja vpogled v natančnost in učinkovitost modela na novih podatkih.
-* **Chat (Klepet)**: Ko je učenje zaključeno, naložite model v zavihek Chat, da z njim komunicirate in si ogledate rezultate svojega dela. Ta funkcija omogoča komunikacijo z naučenim modelom v realnem času.
-* **Export (Izvoz)**: Ta zavihek omogoča izvoz naučenih modelov za uvajanje ali nadaljnjo uporabo. Modele lahko shranite v različnih oblikah, primernih za različne aplikacije.
+* **Train**: Ta zavihek omogoča izbiro modela in nabora podatkov, konfiguracijo parametrov učenja ter začetek postopka učenja. Pomembno je razumeti obvezne in izbirne parametre za optimizacijo nastavitve učenja.
+* **Evaluate & Predict**: Po učenju lahko v tem zavihku ocenite delovanje modela in izdelate napovedi. Zagotavlja vpogled v natančnost in učinkovitost modela na novih podatkih.
+* **Chat**: Ko je učenje zaključeno, naložite model v zavihku Chat, da lahko z njim komunicirate in vidite rezultate svojega dela. Ta funkcija omogoča komunikacijo z naučenim modelom v realnem času.
+* **Export**: Ta zavihek omogoča izvoz naučenih modelov za uporabo v produkciji ali nadaljnjo uporabo. Modele lahko shranite v različnih formatih, primernih za različne aplikacije.
 
-Za podrobna navodila vas vabimo, da si ogledate uradno dokumentacijo v [repozitoriju LlamaFactory na GitHub](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) in [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). Poleg tega [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) ponuja koristne vpoglede v vmesnik in njegove funkcionalnosti.
+Za podrobnejša navodila vas vabimo, da si ogledate uradno dokumentacijo v [repozitoriju LlamaFactory na GitHub](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) in na [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). Poleg tega [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) ponuja koristne vpoglede v vmesnik in njegove funkcionalnosti.
 
 ## Naslednji koraki
 - Preizkusite različne modele, kot je `gpt-oss`, in druge najsodobnejše modele.
-- Eksperimentirajte z različnimi zaledji (backends) na fino nastavljenem modelu
- 
-Za več dokumentacije obiščite: https://llamafactory.readthedocs.io/en/latest/
+- Preizkusite različne zaledne sisteme (backends) na fino nastavljenem modelu
+
+Za dodatno dokumentacijo obiščite: https://llamafactory.readthedocs.io/en/latest/

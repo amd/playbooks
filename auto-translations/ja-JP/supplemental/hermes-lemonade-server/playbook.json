@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
-  "title": "Lemonade Serverでローカルに実行するHermes Agent",
-  "description": "Hermes Agentの自律型AIエージェントをインストールおよび設定し、Lemonade Serverをそのローカルバックエンドとして使用します。",
+  "title": "LemonadeサーバーでHermesエージェントをローカル実行",
+  "description": "Hermes Agent自律型AIエージェントをインストールし、Lemonade Serverをローカルバックエンドとして設定します。",
   "auto_translated": true
 }

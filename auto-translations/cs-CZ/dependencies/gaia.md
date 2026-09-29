@@ -12,7 +12,7 @@ GAIA je open-source framework společnosti AMD pro vytváření AI agentů, kte�
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Ve Windows otevřete terminál v adresáři podle vlastního výběru a spusťte příkazy pro vytvoření venv.
+1. Ve Windows otevřete terminál v adresáři podle vlastního výběru a podle pokynů vytvořte venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. V Linuxu otevřete terminál v adresáři podle vlastního výběru a spusťte příkazy pro vytvoření venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. V Linuxu otevřete terminál v adresáři podle vlastního výběru a podle pokynů vytvořte venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Ve Windows otevřete terminál v adresáři podle vlastního výběru a spusťte příkazy pro vytvoření venv.
+1. Ve Windows otevřete terminál v adresáři podle vlastního výběru a podle pokynů vytvořte venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. V Linuxu otevřete terminál v adresáři podle vlastního výběru a spusťte příkazy pro vytvoření venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. V Linuxu otevřete terminál v adresáři podle vlastního výběru a podle pokynů vytvořte venv.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -93,7 +93,7 @@ pip install amd-gaia
 
 3. Inicializace GAIA
 
-Po instalaci spusťte `gaia init` pro nastavení Lemonade Server a stažení modelů:
+Po instalaci spusťte `gaia init`, čímž nastavíte Lemonade Server a stáhnete modely:
 
 ```bash
 gaia init
@@ -281,12 +281,12 @@ fi
 
 #### Ověření instalace
 
-Ověřte, že je nainstalována GAIA verze 0.16.2 nebo novější:
+Ověřte, že je nainstalována GAIA verze v0.16.2 nebo novější:
 
 ```bash
 gaia --version
 ```
 
-> **Důležité**: Před používáním GAIA se ujistěte, že běží Lemonade Server. GAIA vyžaduje, aby byl Lemonade Server spuštěn ručně.
+> **Důležité**: Před použitím GAIA se ujistěte, že běží Lemonade Server. GAIA vyžaduje ruční spuštění Lemonade Server.
 
 Další informace naleznete v [dokumentaci GAIA](https://amd-gaia.ai).

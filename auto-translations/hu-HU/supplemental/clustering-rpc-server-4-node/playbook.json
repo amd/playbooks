@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server-4-node",
+  "title": "Négy Ryzen™ AI Halo klaszterezése RPC-vel",
+  "description": "Elosztott következtetés beállítása RPC kiszolgálón keresztül négy Ryzen™ AI Halo eszközön a llama.cpp segítségével, 1T+ méretű modellek futtatásához",
+  "auto_translated": true
+}

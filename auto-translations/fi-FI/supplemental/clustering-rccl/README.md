@@ -18,30 +18,30 @@ SPDX-License-Identifier: MIT
 
 ## Yleiskatsaus
 
-Ryzen™ AI Halo -järjestelmäsi pystyy jo nyt ajamaan suuria kielimalleja paikallisesti. Klusterointi vie tämän vielä pidemmälle yhdistämällä useiden järjestelmien GPU-muistin paikallisverkon yli, jolloin käytettävissäsi on entistä suurempia malleja vahvemmalla päättelykyvyllä, paremmalla koodin generoinnilla ja syvemmällä monikielisellä ymmärryksellä – täysin omalla laitteistollasi.
+Ryzen™ AI Halo -järjestelmäsi pystyy jo suorittamaan suuria kielimalleja paikallisesti. Klusterointi vie tämän askeleen pidemmälle yhdistämällä useiden järjestelmien GPU-muistin paikallisverkon yli, jolloin pääset käsiksi vieläkin suurempiin malleihin, joilla on vahvempi päättelykyky, parempi koodin generointi ja syvempi monikielinen ymmärrys – täysin omalla laitteistollasi.
 
-Tämä ohjekirja opastaa sinua klusteroimaan kaksi Ryzen AI Halo -järjestelmää RCCL:n (ROCm Communication Collectives Library) avulla käyttäen vLLM:ää, ja ajamaan Qwen3.5-397B-mallia, jossa on 397 miljardia parametria, molemmilla koneilla ROCm-kiihdytyksen avulla.
+Tämä opas opastaa, miten klusteroit kaksi Ryzen AI Halo -järjestelmää käyttäen RCCL:ää (ROCm Communication Collectives Library) yhdessä vLLM:n kanssa ja suoritat Qwen3.5-397B-mallin, joka on 397 miljardin parametrin malli, molemmilla koneilla ROCm-kiihdytyksellä.
 
 ## Mitä opit
 
-- Kuinka laajentaa VRAM-varausta Ryzen AI Halo -järjestelmissä
+- Kuinka laajentaa VRAM-muistin allokointia Ryzen AI Halo -järjestelmissä
 - vLLM:n käynnistäminen ROCm-tuella
-- RCCL:n määrittäminen usean solmun tensori-rinnakkaista päättelyä varten kahden Ryzen AI Halo -järjestelmän välillä
-- 397 miljardin parametrin mallin ajaminen kahdella verkotetulla Ryzen AI Halo -järjestelmällä
+- RCCL:n konfigurointi monisolmuiseen tensori-rinnakkaiseen päättelyyn kahden Ryzen AI Halo -järjestelmän välillä
+- 397 miljardin parametrin mallin suorittaminen kahdella verkotetulla Ryzen AI Halo -järjestelmällä
 
-## Esivaatimukset
+## Edellytykset
 
 ### Laitteisto
 
-Tämä ohjekirja vaatii kaksi Ryzen AI Halo -yksikköä ja yhden Ethernet-kytkimen, jotka on kytketty tähtitopologiaan siten, että kumpikin yksikkö on kytketty suoraan kytkimeen.
+Tämä opas vaatii kaksi Ryzen AI Halo -yksikköä ja yhden Ethernet-kytkimen, jotka on kytketty tähtitopologiaan siten, että kumpikin yksikkö on kytketty suoraan kytkimeen.
 
 | Komponentti | Määrä | Kuvaus |
 |-----------|----------|-------------|
 | Ryzen AI Halo | 2 | Klusterin muodostavat laskentasolmut |
-| 10 Gbps:n Ethernet-kytkin | 1 | Keskuskytkin, joka mahdollistaa usean Ryzen AI Halo -solmun välisen viestinnän (vähintään 2 porttia) |
+| 10 Gbps:n Ethernet-kytkin | 1 | Keskuskytkin, joka mahdollistaa Ryzen AI Halo -yksiköiden välisen monisolmuisen viestinnän (vähintään 2 porttia) |
 | Ethernet-kaapeli | 2 | Yhdistää kunkin Halo-yksikön kytkimeen (suositellaan Cat 7 -kaapelia tai parempaa) |
 
-> **Huomautus**: Kahden Ryzen AI Halo -yksikön yhdistämiseen tarvitaan kaksi Ethernet-kytkimen porttia. Kolmas portti tarvitaan, jos käytät mallia erillisestä asiakaskoneesta yhden Halo-yksikön sijaan.
+> **Huomautus**: Kahden Ethernet-kytkimen portin yhdistäminen vaatii kaksi Ryzen AI Halo -yksikköä. Kolmas portti vaaditaan, jos käytät mallia erillisestä asiakaskoneesta yhden Halo-yksikön sijaan.
 
 ### Ohjelmisto
 <!-- @os:linux -->
@@ -50,15 +50,15 @@ sudo apt install curl
 ```
 <!-- @os:end -->
 
-## Fyysisen laitteiston käyttöönotto
+## Laitteiston fyysinen asennus
 
 > **Huomautus**: Suorita tämä vaihe sekä Koneella 1 että Koneella 2.
 
-Yhdistä kukin Ryzen AI Halo -yksikkö Ethernet-kytkimeen Cat 7 -kaapelilla (tai paremmalla). Tämä muodostaa 10 Gbps:n yhteyden, jota käytetään solmujen väliseen nopeaan tiedonsiirtoon.
+Yhdistä kumpikin Ryzen AI Halo -yksikkö Ethernet-kytkimeen Cat 7 (tai parempi) -kaapelilla. Tämä muodostaa 10 Gbps:n yhteyden, jota käytetään solmujen väliseen nopeaan tiedonsiirtoon.
 
 ### 1. Verkkoliitäntöjen määrittäminen
 
-Selvitä kummankin koneen verkkoliitännän nimi ja kirjaa se ylös (siihen viitataan jäljempänä ohjeissa nimellä `IFNAME`). Suorita:
+Selvitä kummankin koneen verkkoliitännän nimi ja kirjoita se muistiin (siihen viitataan ohjeiden lopussa nimellä `IFNAME`). Suorita:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
@@ -78,27 +78,27 @@ Varmista, että yhteys on aktiivinen ja toimii täydellä nopeudella tarkistamal
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **Huomautus**: Korvaa `<IFNAME>` liitännän nimellä, joka saatiin kohdasta [1. Verkkoliitäntöjen määrittäminen](#1-determine-network-interfaces)
+> **Huomautus**: Korvaa `<IFNAME>` liitännän nimellä kohdasta [1. Verkkoliitäntöjen määrittäminen](#1-determine-network-interfaces)
 
-Nopeuden pitäisi näkyä muodossa `10000Mb/s`:
+Näet nopeuden `10000Mb/s`:
 
 ```bash
 	Speed: 10000Mb/s
 ```
 
-> **Huomautus**: Jos nopeus on alle `10000Mb/s` tai yhteys ei muodostu, tarkista kaapelin liitäntä ja varmista, että kytkimen portti on asetettu 10 Gbps:iin. Jotkin kytkimet vaativat automaattisen neuvottelun poistamista käytöstä ja yhteysnopeuden asettamista manuaalisesti; katso lisätietoja kytkimesi dokumentaatiosta.
+> **Huomautus**: Jos nopeus on pienempi kuin `10000Mb/s` tai yhteys ei muodostu, tarkista kaapelointi ja varmista, että kytkimen portti on asetettu 10 Gbps:iin. Joissakin kytkimissä automaattinen neuvottelu on poistettava käytöstä ja yhteysnopeus asetettava manuaalisesti; katso tarkemmat ohjeet kytkimesi dokumentaatiosta.
 
-## VRAM-varauksen laajentaminen
+## VRAM-muistin allokoinnin laajentaminen
 
 > **Huomautus**: Suorita tämä vaihe sekä Koneella 1 että Koneella 2.
 
-### Muistiasetukset suurten mallien ajamista varten
+### Muistin konfigurointi suurten mallien suorittamista varten
 
-Linuxissa ROCm käyttää jaettua järjestelmämuistin poolia, ja tämä pooli on oletusarvoisesti asetettu puoleen järjestelmämuistista.
+Linuxissa ROCm käyttää jaettua järjestelmämuistin poolia, ja tämä pooli on oletuksena määritetty puoleen järjestelmämuistista.
 
-Tätä määrää voidaan kasvattaa muuttamalla ytimen Translation Table Manager (TTM) -sivuasetusta seuraavien ohjeiden mukaisesti. AMD suosittelee asettamaan BIOSissa vähimmäismäärän varattua VRAM-muistia (0,5 Gt).
+Tätä määrää voidaan kasvattaa muuttamalla ytimen Translation Table Manager (TTM) -sivuasetusta seuraavien ohjeiden mukaisesti. AMD suosittelee asettamaan vähimmäismäärän omistettua VRAM-muistia BIOSissa (0.5 GB).
 
-* Asenna pipx-työkalu ja lisää pipx:n asentamien wheel-pakettien polku järjestelmän hakupolkuun.
+* Asenna pipx-työkalu ja lisää pipx:llä asennettujen wheel-pakettien polku järjestelmän hakupolkuun.
 
   ```bash
   sudo apt install pipx
@@ -110,12 +110,12 @@ Tätä määrää voidaan kasvattaa muuttamalla ytimen Translation Table Manager
   pipx install amd-debug-tools
   ```
 
-* Suorita amd-ttm-työkalu tarkistaaksesi jaetun muistin nykyiset asetukset.
+* Suorita amd-ttm-työkalu kysyäksesi jaetun muistin nykyiset asetukset.
   ```bash
   amd-ttm
   ```
 
-* Määritä jaetun muistin asetukset uudelleen arvoon **120 Gt**:
+* Määritä jaetun muistin asetukset uudelleen arvoon **120 GB**:
   ```bash
   amd-ttm --set 120
   ```
@@ -126,11 +126,11 @@ Tätä määrää voidaan kasvattaa muuttamalla ytimen Translation Table Manager
 
 > **Huomautus**: Suorita tämä vaihe sekä Koneella 1 että Koneella 2.
 
-Ryzen AI Halo -järjestelmäsi tulee mukana valmiiksi rakennetun säiliökuvan sisällä olevan vLLM:n kanssa, jota ajetaan Podmanilla, ilmaisella ja avoimen lähdekoodin säiliötyökalulla.
+Ryzen AI Halo -järjestelmäsi sisältää vLLM:n valmiiksi paketoituna säiliökuvana, jota ajetaan Podmanilla, ilmaisella ja avoimen lähdekoodin säiliötyökalulla.
 
 ### 1. Mallin latauskansion luominen
 
-Kun palvelet Qwen3.5-397B-mallia tässä ohjekirjassa, vLLM lataa mallin painot automaattisesti järjestelmääsi. Jotta nämä painot olisivat käytettävissä säiliön sisältä, luo ensin mallikansio, jonka säiliö voi liittää:
+Kun tarjoat Qwen3.5-397B-mallia tässä oppaassa, vLLM lataa mallin painot automaattisesti järjestelmääsi. Jotta nämä painot ovat käytettävissä säiliön sisältä, luo ensin models-kansio, jonka säiliö voi liittää:
 
 ```bash
 mkdir -p ~/.local/share/vLLM/models
@@ -138,7 +138,7 @@ mkdir -p ~/.local/share/vLLM/models
 
 ### 2. vLLM-säiliön käynnistäminen
 
-Alla oleva komento käynnistää säiliön ja vie sinut interaktiiviseen komentotulkkiin. Se liittää juuri luomasi mallikansion ja välittää `IFNAME`-arvosi muuttujille `NCCL_SOCKET_IFNAME` ja `GLOO_SOCKET_IFNAME`, jotka kertovat RCCL:lle (kirjastolle, jota vLLM käyttää GPU:iden koordinointiin klusterin yli), mitä liitäntää käytetään.
+Alla oleva komento käynnistää säiliön ja vie sinut interaktiiviseen komentotulkkiin. Se liittää juuri luomasi models-kansion ja välittää `IFNAME`-arvosi muuttujiin `NCCL_SOCKET_IFNAME` ja `GLOO_SOCKET_IFNAME`, jotka kertovat RCCL:lle (kirjasto, jota vLLM käyttää GPU:iden koordinointiin klusterin yli), mitä liitäntää käyttää.
 
 Käynnistä säiliö komennolla:
 
@@ -146,38 +146,46 @@ Käynnistä säiliö komennolla:
 sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g --pids-limit=-1 -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
 ```
 
-> **Huomautus**: Korvaa `<IFNAME>` liitännän nimellä, joka saatiin kohdasta [1. Verkkoliitäntöjen määrittäminen](#1-determine-network-interfaces)
+> **Huomautus**: Korvaa `<IFNAME>` liitännän nimellä kohdasta [1. Verkkoliitäntöjen määrittäminen](#1-determine-network-interfaces)
 
-## Mallin ajaminen klusterissa
+## Mallin suorittaminen klusterissa
 
-vLLM käyttää Ray-kirjastoa klusterin orkestrointiin ja RCCL:ää GPU-laitteiden väliseen viestintään solmujen välillä. Yksi kone toimii **pääsolmuna** (Kone 1) ja koordinoi päättelyä. Toinen liittyy mukaan **työntekijäsolmuna** (Kone 2), tuoden mukanaan oman GPU-muistinsa ja laskentatehonsa.
+vLLM käyttää Rayta klusterin orkestrointiin ja RCCL:ää GPU-solmujen välisen viestinnän hoitamiseen. Yksi kone toimii **päänsolmuna** (Kone 1) ja koordinoi päättelyä. Toinen liittyy **työntekijäsolmuna** (Kone 2) tarjoten oman GPU-muistinsa ja laskentatehonsa.
 
-> **Huomautus**: Ray on vLLM:n valinnainen riippuvuus, ja se on saatavilla vain esikonfiguroidun Podman-säiliön sisältä.
+> **Huomautus**: Ray on vLLM:n valinnainen riippuvuus ja on saatavilla ainoastaan esikonfiguroidun Podman-säiliön sisältä.
 
-Käynnistyksen yhteydessä vLLM jakaa mallin kummallekin solmulle tensori-rinnakkaisuutta käyttäen. Kun malli on ladattu, päättely etenee ikään kuin se ajettaisiin yhdellä kiihdyttimellä.
+Käynnistyksessä vLLM jakaa mallin molempien solmujen kesken tensori-rinnakkaisuutta käyttäen. Latauksen jälkeen päättely etenee ikään kuin se ajettaisiin yhdellä kiihdyttimellä.
 
-### Vaihe 1: Ray-pääsolmun käynnistäminen (Kone 1)
+#### Ray OOM -virheiden estäminen
 
-Käynnistä Koneella 1 Ray-pääsolmu klusterin alustamiseksi:
+Oletusarvoisesti Ray valvoo kunkin solmun isäntämuistia ja sulkee suurimman prosessin, kun muistinkäyttö ylittää 95 %. Ryzen™ AI Halo -järjestelmässäsi GPU ja isäntä jakavat saman muistipoolin, joten mallin lataaminen voi laukaista `ray.exceptions.OutOfMemoryError`-virheen ja sulkea työntekijäprosessin.
+
+Tämän estämiseksi asetamme `RAY_memory_monitor_refresh_ms=0`-ympäristömuuttujan kummallakin koneella ennen klusterin käynnistämistä ja siihen liittymistä.
+### Vaihe 1: Käynnistä Ray-päänoodi (Kone 1)
+
+Käynnistä Koneella 1 Ray-päänoodi klusterin alustamiseksi:
 
 ```bash
+export RAY_memory_monitor_refresh_ms=0
 ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1
 ```
 
-> **`<MACHINE_1_IP>`:n löytäminen**: Suorita Koneella 1 komento `hostname -I | awk '{print $1}'` selvittääksesi sen paikallisen IP-osoitteen.
-### Vaihe 2: Liity klusteriin (kone 2)
+> **`<MACHINE_1_IP>`:n selvittäminen**: Suorita Koneella 1 komento `hostname -I | awk '{print $1}'` sen paikallisen IP-osoitteen selvittämiseksi.
 
-Muodosta koneella 2 yhteys päänoodiin klusterin muodostamiseksi:
+### Vaihe 2: Liity klusteriin (Kone 2)
+
+Muodosta Koneella 2 yhteys päänoodiin klusterin luomiseksi:
 
 ```bash
+export RAY_memory_monitor_refresh_ms=0
 ray start --address=<MACHINE_1_IP>:6379 --node-ip-address=<MACHINE_2_IP> --num-gpus=1
 ```
 
-> **Kohteen `<MACHINE_2_IP>` löytäminen**: Aja koneella 2 komento `hostname -I | awk '{print $1}'` sen paikallisen IP-osoitteen selvittämiseksi.
+> **`<MACHINE_2_IP>`:n selvittäminen**: Suorita Koneella 2 komento `hostname -I | awk '{print $1}'` sen paikallisen IP-osoitteen selvittämiseksi.
 
-### Vaihe 3: Tarjoa mallia (kone 1)
+### Vaihe 3: Palvele mallia (Kone 1)
 
-Käynnistä koneella 1 vLLM-palvelin. Tämä lataa mallin automaattisesti ja alkaa tarjota sitä molempien noodien kesken:
+Käynnistä Koneella 1 vLLM-palvelin. Tämä lataa automaattisesti mallin ja alkaa palvella sitä molempien noodien kautta:
 
 ```bash
 vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
@@ -193,37 +201,37 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
   --reasoning-parser qwen3
 ```
 
-#### Parametriviite
+#### Parametriviittaus
 
 | Lippu | Tarkoitus |
 |------|---------|
 | `--port` | Portti, jossa HTTP-rajapintaa tarjotaan |
-| `--host` | IP-osoite, johon palvelin sidotaan (`0.0.0.0` kaikille rajapinnoille) |
-| `--max-model-len` | Suurin kontekstipituus tokeneina |
-| `--gpu-memory-utilization` | Osuus GPU-muistista, joka varataan (0.0–1.0) |
-| `--dtype` | Mallin painojen tietotyyppi |
-| `--tensor-parallel-size` | GPU:iden määrä, joiden kesken malli jaetaan (aseta klusterin GPU:iden kokonaismäärään) |
-| `--distributed-executor-backend` | Taustajärjestelmä usean noodin suoritukseen (`ray` klusteripohjaisiin käyttöönottoihin) |
-| `--enforce-eager` | Poistaa CUDA-graafien kääntämisen käytöstä yhteensopivuuden vuoksi |
+| `--host` | IP-osoite, johon palvelin sidotaan (`0.0.0.0` kaikille verkkoliitännöille) |
+| `--max-model-len` | Enimmäiskontekstipituus tokeneina |
+| `--gpu-memory-utilization` | GPU-muistin osuus, joka varataan (0,0–1,0) |
+| `--dtype` | Mallin painojen datatyyppi |
+| `--tensor-parallel-size` | GPU:iden lukumäärä, joiden kesken malli jaetaan (aseta klusterin GPU:iden kokonaismäärään) |
+| `--distributed-executor-backend` | Taustajärjestelmä usean noodin suoritukseen (`ray` klusterikäyttöönotoille) |
+| `--enforce-eager` | Poistaa CUDA-graafien käännön käytöstä yhteensopivuuden vuoksi |
 | `--language-model-only` | Ohittaa apumallikomponenttien (esim. näköenkooderin) lataamisen |
-| `--reasoning-parser` | Ottaa käyttöön mallin jäsennellyn päättelytulosteen |
+| `--reasoning-parser` | Ottaa käyttöön mallin jäsennellyn päättelytuloksen jäsentämisen |
 
-Katso täydelliset parametrien käyttöohjeet [vLLM-dokumentaatiosta](https://docs.vllm.ai/en/latest/configuration/engine_args/).
+Täydelliset parametrien käyttöohjeet löytyvät [vLLM-dokumentaatiosta](https://docs.vllm.ai/en/latest/configuration/engine_args/).
 
 ## Mallin käyttäminen
 
-vLLM tarjoaa OpenAI-yhteensopivan rajapinnan, joten voit yhdistää minkä tahansa yhteensopivan asiakasohjelman tai käyttöliittymän klusteriisi. Yksi suosittu vaihtoehto on [Open WebUI](https://github.com/open-webui/open-webui), joka tarjoaa selainpohjaisen keskusteluliittymän.
+vLLM tarjoaa OpenAI-yhteensopivan rajapinnan, joten voit yhdistää minkä tahansa yhteensopivan asiakasohjelman tai käyttöliittymän klusteriisi. Yksi suosittu vaihtoehto on [Open WebUI](https://github.com/open-webui/open-webui), joka tarjoaa selainpohjaisen keskustelukäyttöliittymän.
 
 Yhdistä Open WebUI vLLM-päätepisteeseesi seuraavasti:
 
 1. Avaa **Settings** > **Admin Panel** > **Connections**
-2. Napsauta kohdan **Manage OpenAI API Connections** kohtaa **+**
-3. Aseta **Connection Type** -asetukseksi **External**
-4. Aseta **URL**-kentäksi `http://<MACHINE_1_IP>:7000/v1`
-5. Valitse kohdassa **Auth** pudotusvalikosta **None**
-6. Jätä **Model IDs** tyhjäksi, jotta kaikki päätepisteen mallit tunnistetaan automaattisesti
+2. Napsauta **+**-painiketta kohdassa **Manage OpenAI API Connections**
+3. Aseta **Connection Type** arvoon **External**
+4. Aseta **URL** arvoon `http://<MACHINE_1_IP>:7000/v1`
+5. Valitse kohdassa **Auth** avattavasta valikosta **None**
+6. Jätä **Model IDs** tyhjäksi, jotta kaikki mallit löytyvät automaattisesti päätepisteestä
 
-> **Kohteen `<MACHINE_1_IP>` löytäminen**: Aja koneella 1 komento `hostname -I | awk '{print $1}'` sen paikallisen IP-osoitteen selvittämiseksi. Jos käytät Open WebUI:ta koneelta 1 itseltään, voit käyttää osoitetta `http://localhost:7000/v1`.
+> **`<MACHINE_1_IP>`:n selvittäminen**: Suorita Koneella 1 komento `hostname -I | awk '{print $1}'` sen paikallisen IP-osoitteen selvittämiseksi. Jos käytät Open WebUI:ta Koneelta 1 itseltään, voit käyttää osoitetta `http://localhost:7000/v1`.
 
 ![Open WebUI -yhteysasetukset vLLM-päätepisteelle](assets/openwebui-connection.png)
 
@@ -234,5 +242,5 @@ Kun yhteys on muodostettu, valitse malli Open WebUI:n mallien pudotusvalikosta j
 ## Seuraavat vaiheet
 
 - **Tutustu muihin malleihin**: Löydä uusia malleja [Hugging Facesta](https://huggingface.co/models?&sort=trending), jotka mahtuvat klusterisi yhdistettyyn GPU-muistiin
-- **Skaalaa neljään noodiin**: Lisää kaksi uutta Ryzen AI Halo -järjestelmää lisä-Ray-työntekijöiksi, jotta mallit voidaan jakaa yhä useamman GPU:n kesken. Tämä edellyttää Ethernet-kytkintä, jossa on vähintään neljä porttia, yksi kutakin noodia kohden. Seuraa kohtaa [Vaihe 2: Liity klusteriin](#step-2-join-the-cluster-machine-2) jokaisella lisätyöntekijällä ja kasvata `--tensor-parallel-size`-arvoa vastaavasti
-- **Kokeile muita rinnakkaisuusstrategioita**: vLLM tukee [asiantuntijarinnakkaisuutta](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) (expert parallel) mixture-of-experts-malleille ja [datarinnakkaisuutta](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) (data parallel) suuremman läpisyötön saavuttamiseksi. Kokeile `--enable-expert-parallel`- ja `--data-parallel-size`-asetuksia löytääksesi työkuormallesi parhaan konfiguraation
+- **Laajenna neljään noodiin**: Lisää kaksi Ryzen AI Halo -järjestelmää lisää Ray-työntekijöiksi, jotta mallit voidaan jakaa vieläkin useamman GPU:n kesken. Tämä vaatii Ethernet-kytkimen, jossa on vähintään neljä porttia, yksi jokaista noodia varten. Seuraa [Vaihetta 2: Liity klusteriin](#step-2-join-the-cluster-machine-2) jokaisella lisätyöntekijällä ja kasvata `--tensor-parallel-size`-arvoa vastaavasti
+- **Kokeile muita rinnakkaisuusstrategioita**: vLLM tukee [asiantuntijarinnakkaisuutta](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) mixture-of-experts-malleille ja [datarinnakkaisuutta](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) suuremman läpisyötön saavuttamiseksi. Kokeile `--enable-expert-parallel`- ja `--data-parallel-size`-parametreja löytääksesi parhaan kokoonpanon työkuormallesi

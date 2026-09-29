@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-A GAIA az AMD nyílt forráskódú keretrendszere olyan AI-ügynökök készítéséhez, amelyek helyben, AMD hardveren futnak Ryzen AI gyorsítással.
+GAIA az AMD nyílt forráskódú keretrendszere olyan AI-ügynökök készítéséhez, amelyek helyben, AMD hardveren, Ryzen AI gyorsítással futnak.
 
 #### A GAIA telepítése
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
+1. Windows rendszeren nyiss meg egy terminált a kiválasztott könyvtárban, és a következő parancsokkal hozz létre egy venv-et.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Ezután a `pip` segítségével telepítse a **Gaia**-t
+2. Ezután a `pip` segítségével telepítsd a **Gaia**-t
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. Linux rendszeren nyiss meg egy terminált a kiválasztott könyvtárban, és a következő parancsokkal hozz létre egy venv-et.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Ezután a `pip` segítségével telepítse a **Gaia**-t
+2. Ezután a `pip` segítségével telepítsd a **Gaia**-t
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
+1. Windows rendszeren nyiss meg egy terminált a kiválasztott könyvtárban, és a következő parancsokkal hozz létre egy venv-et.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Ezután a `pip` segítségével telepítse a **Gaia**-t
+2. Ezután a `pip` segítségével telepítsd a **Gaia**-t
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. Linux rendszeren nyiss meg egy terminált a kiválasztott könyvtárban, és a következő parancsokkal hozz létre egy venv-et.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Ezután a `pip` segítségével telepítse a **Gaia**-t
+2. Ezután a `pip` segítségével telepítsd a **Gaia**-t
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -93,13 +93,13 @@ pip install amd-gaia
 
 3. A GAIA inicializálása
 
-A telepítés után futtassa a `gaia init` parancsot a Lemonade Server beállításához és a modellek letöltéséhez:
+A telepítés után futtasd a `gaia init` parancsot a Lemonade Server beállításához és a modellek letöltéséhez:
 
 ```bash
 gaia init
 ```
 
-Ez telepíti a Lemonade Servert, letölti az alapértelmezett modelleket, és ellenőrzi a beállítást.
+Ez telepíti a Lemonade Server-t, letölti az alapértelmezett modelleket, és ellenőrzi a beállítást.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,12 +281,12 @@ fi
 
 #### A telepítés ellenőrzése
 
-Ellenőrizze, hogy a GAIA v0.16.2 vagy újabb verziója van-e telepítve:
+Ellenőrizd, hogy a GAIA v0.16.2 vagy újabb verziója van-e telepítve:
 
 ```bash
 gaia --version
 ```
 
-> **Fontos**: A GAIA használata előtt győződjön meg róla, hogy a Lemonade Server fut. A GAIA-nak manuálisan elindított Lemonade Serverre van szüksége.
+> **Fontos**: Győződj meg róla, hogy a Lemonade Server fut, mielőtt a GAIA-t használnád. A GAIA-nak szüksége van rá, hogy a Lemonade Server-t manuálisan elindítsd.
 
 További információért lásd a [GAIA dokumentációját](https://amd-gaia.ai).

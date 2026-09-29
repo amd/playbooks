@@ -16,21 +16,23 @@ SPDX-License-Identifier: MIT
 
 ## Visão Geral
 
-Os agentes GAIA são assistentes de IA que utilizam um LLM local para raciocinar e chamar ferramentas que definir — como chatbots que conseguem executar ações. Funcionam **100% localmente**, sem APIs na cloud, sem dados a sair da sua máquina e sem necessidade de chaves de API.
+Os agentes GAIA são assistentes de IA que utilizam um LLM local para raciocinar e invocar ferramentas que você define — como chatbots que conseguem executar ações. Funcionam **100% localmente**, sem APIs na cloud, sem dados a saírem da sua máquina e sem necessidade de chaves de API.
 
 Neste manual, irá construir um Agente Consultor de Hardware que deteta a RAM, GPU e NPU do seu sistema, consulta o catálogo de modelos local e recomenda quais os LLMs que a sua máquina consegue executar. É uma introdução prática ao GAIA Agent SDK que produz algo imediatamente útil.
 
 ## O Que Vai Aprender
 
 - Como criar um agente GAIA com ferramentas personalizadas
-- Utilizar o SDK LemonadeClient para consultar informações do sistema e catálogos de modelos
-- Deteção de GPU/NPU específica da plataforma (Windows PowerShell e Linux lspci)
-- Dimensionamento de modelos baseado na memória, utilizando a regra dos 70%
-- Construir uma CLI interativa para consultas de hardware em linguagem natural
+- Utilizar o LemonadeClient SDK para consultar informações do sistema e catálogos de modelos
+- Deteção específica de plataforma para GPU/NPU (PowerShell no Windows e lspci no Linux)
+- Dimensionamento de modelos baseado em memória utilizando a regra dos 70%
+- Construção de uma CLI interativa para consultas de hardware em linguagem natural
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Definir a Configuração de Memória
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Verificar Atualizações de Software
@@ -69,11 +71,11 @@ which python3
 
 ## Como Começar
 
-Primeiro, execute o agente concluído para ver o que vai construir. Depois, iremos analisar o código passo a passo.
+Primeiro, execute o agente já finalizado para ver aquilo que vai construir. Depois, vamos analisar o código passo a passo.
 
 ### Executar o Exemplo Pré-Construído
 
-Este manual inclui o agente completo [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Transfira-o para um diretório à sua escolha e execute-o para ver o agente concluído em ação:
+Este manual inclui o agente completo [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Transfira-o para uma diretoria à sua escolha e execute-o para ver o agente finalizado em ação:
 
 ```bash
 python hardware_advisor_agent.py
@@ -101,7 +103,7 @@ print("PASS: hardware_advisor_agent.py has valid syntax")
 ```
 <!-- @test:end --> 
 
-**Experimente perguntar:** "What size LLM can I run?"
+**Experimente perguntar:** "Que tamanho de LLM consigo executar?"
 
 **Resultado esperado:**
 
@@ -124,7 +126,7 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 
 **Parabéns** - construiu um agente! 
 
-O resto do manual explicará como cada parte do script funciona, para que o possa compreender desde o início.
+O resto do manual irá explicar como funciona cada parte do script, para que o possa compreender desde a base.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -268,13 +270,13 @@ echo "OK: hardware_advisor_agent.py started successfully"
 
 O Agente Consultor de Hardware combina três componentes:
 
-- **SDK LemonadeClient** — APIs de informação do sistema e catálogo de modelos
-- **Deteção específica da plataforma** — Windows PowerShell / Linux lspci para informações de GPU
-- **Cálculos de memória** — Regra dos 70% para dimensionamento seguro de modelos
+- **LemonadeClient SDK** — APIs de informação do sistema e catálogo de modelos
+- **Deteção específica de plataforma** — Windows PowerShell / Linux lspci para informação de GPU
+- **Cálculos de memória** — regra dos 70% para dimensionamento seguro de modelos
 
-Os dados fluem por estas etapas em sequência: consulta do utilizador → o agente seleciona uma ferramenta → a ferramenta chama o LemonadeClient + deteção do SO → o agente sintetiza os resultados numa recomendação.
+Os dados fluem através destes componentes em sequência: consulta do utilizador → o agente seleciona uma ferramenta → a ferramenta invoca o LemonadeClient + deteção do SO → o agente sintetiza os resultados numa recomendação.
 
-### SDK LemonadeClient
+### LemonadeClient SDK
 
 O LemonadeClient fornece uma API unificada para deteção do sistema, disponibilidade de NPU/GPU e consultas ao catálogo de modelos.
 
@@ -328,7 +330,7 @@ info = client.get_system_info()
 
 <!-- @os:end -->
 
-**`list_models(show_all=True)`** — Devolve o catálogo de modelos completo:
+**`list_models(show_all=True)`** — Devolve o catálogo completo de modelos:
 
 ```python
 response = client.list_models(show_all=True)
@@ -360,13 +362,13 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 }
 ```
 
-### Deteção de GPU Específica da Plataforma
+### Deteção de GPU Específica de Plataforma
 
-O agente utiliza comandos nativos do SO em vez do PyTorch para a deteção de GPU. Isto funciona sem controladores de GPU instalados, deteta todas as GPUs (não apenas as compatíveis com CUDA) e evita importações pesadas de bibliotecas.
+O agente utiliza comandos nativos do SO em vez do PyTorch para a deteção de GPU. Isto funciona sem controladores de GPU instalados, deteta todas as GPUs (não apenas as compatíveis com CUDA) e evita importações de bibliotecas pesadas.
 
 <!-- @os:windows -->
 
-No Windows, o agente utiliza o PowerShell para consultar a WMI:
+No Windows, o agente utiliza o PowerShell para consultar o WMI:
 
 ```python
 ps_command = (
@@ -399,7 +401,7 @@ result = subprocess.run(
 
 ### A Regra dos 70% de Memória
 
-> **Regra:** O tamanho do modelo deve ser inferior a 70% da RAM disponível, deixando 30% de margem para operações de inferência (cache KV, buffers de processamento em lote, picos de memória em tempo de execução).
+> **Regra:** O tamanho do modelo deve ser inferior a 70% da RAM disponível, de forma a deixar 30% de margem para operações de inferência (cache KV, buffers de processamento em lote, picos de memória em tempo de execução).
 
 ```
 System: 32 GB RAM
@@ -410,11 +412,11 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 
 ## Programar o Agente Passo a Passo (Opcional)
 
-Irá criar **um ficheiro** chamado `hardware_advisor_agent.py` e adicionar funcionalidades progressivamente. Cada etapa baseia-se na anterior.
+Vai criar **um único ficheiro** chamado `hardware_advisor_agent.py` e adicionar funcionalidades progressivamente. Cada passo constrói sobre o anterior.
 
-### Etapa 1: Esqueleto do Agente
+### Passo 1: Esqueleto do Agente
 
-Comece com uma estrutura mínima do agente — apenas a classe e um prompt de sistema básico. O agente ainda não tem ferramentas.
+Comece com uma estrutura mínima de agente — apenas a classe e uma prompt de sistema básica. O agente ainda não tem ferramentas.
 
 ```python
 from gaia import Agent
@@ -455,11 +457,11 @@ Agent created successfully!
 
 ---
 
-### Etapa 2: Deteção de GPU e Hardware
+### Passo 2: Deteção de GPU e Hardware
 
-Adicione o método auxiliar `_get_gpu_info()` e a ferramenta `get_hardware_info()`. Isto torna o agente interativo — pode agora consultá-lo sobre as especificações do sistema.
+Adicione o método auxiliar `_get_gpu_info()` e a ferramenta `get_hardware_info()`. Isto torna o agente interativo — agora pode consultá-lo sobre as especificações do sistema.
 
-**Atualize as importações** no topo do ficheiro:
+**Atualize as importações** no início do ficheiro:
 
 ```python
 from typing import Any, Dict
@@ -468,7 +470,7 @@ from gaia import Agent, tool
 from gaia.llm.lemonade_client import LemonadeClient
 ```
 
-**Adicione o auxiliar `_get_gpu_info()`** após o método `_get_system_prompt()`:
+**Adicione o auxiliar `_get_gpu_info()`** depois do método `_get_system_prompt()`:
 
 ```python
 def _get_gpu_info(self) -> Dict[str, Any]:
@@ -612,7 +614,7 @@ def _register_tools(self):
             }
 ```
 
-**Atualize o bloco `__main__`** para ativar o teste interativo:
+**Atualize o bloco `__main__`** para ativar testes interativos:
 
 ```python
 if __name__ == "__main__":
@@ -631,7 +633,7 @@ if __name__ == "__main__":
             break
 ```
 
-Execute e experimente perguntar "Show me my system specs":
+Execute e experimente perguntar "Mostra-me as especificações do meu sistema":
 
 ```bash
 python hardware_advisor_agent.py
@@ -650,9 +652,9 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ---
 
-### Etapa 3: Catálogo de Modelos
+### Passo 3: Catálogo de Modelos
 
-Adicione a ferramenta `list_available_models()` dentro de `_register_tools()`, após a função `get_hardware_info`. Agora o agente consegue indicar-lhe quais os modelos disponíveis.
+Adicione a ferramenta `list_available_models()` dentro de `_register_tools()`, depois da função `get_hardware_info`. Agora o agente consegue indicar-lhe quais os modelos disponíveis.
 
 ```python
     @tool(atomic=True)
@@ -694,7 +696,7 @@ Adicione a ferramenta `list_available_models()` dentro de `_register_tools()`, a
             }
 ```
 
-Execute e experimente perguntar "What models are available?":
+Execute e experimente perguntar "Que modelos estão disponíveis?":
 
 ```bash
 python hardware_advisor_agent.py
@@ -713,9 +715,9 @@ Agent: I found 15 models in the catalog:
 
 ---
 
-### Etapa 4: Recomendações Inteligentes
+### Passo 4: Recomendações Inteligentes
 
-Adicione a ferramenta `recommend_models()` dentro de `_register_tools()`, após `list_available_models`. O agente consegue agora calcular quais os modelos que cabem na memória do seu sistema, utilizando a regra dos 70%.
+Adicione a ferramenta `recommend_models()` dentro de `_register_tools()`, depois de `list_available_models`. O agente consegue agora calcular quais os modelos que cabem na memória do seu sistema utilizando a regra dos 70%.
 
 ```python
     @tool(atomic=True)
@@ -774,7 +776,7 @@ Adicione a ferramenta `recommend_models()` dentro de `_register_tools()`, após 
             }
 ```
 
-Execute e experimente perguntar "What size LLM can I run?":
+Execute e experimente perguntar "Que tamanho de LLM consigo executar?":
 
 ```bash
 python hardware_advisor_agent.py
@@ -794,9 +796,9 @@ Top recommendations:
 
 ---
 
-### Etapa 5: CLI de Produção
+### Passo 5: CLI de Produção
 
-Substitua o bloco `__main__` simples por uma CLI interativa aprimorada. Isto adiciona um banner, comandos de saída e um melhor tratamento de erros.
+Substitua o bloco simples `__main__` por uma CLI interativa mais elaborada. Isto adiciona um banner, comandos para sair e um melhor tratamento de erros.
 
 **Substitua todo o bloco `if __name__ == "__main__":`** por:
 
@@ -853,26 +855,26 @@ if __name__ == "__main__":
 O seu `hardware_advisor_agent.py` deve agora ter todos estes componentes:
 
 - [x] Imports: `from typing import Any, Dict` e `from gaia import Agent, tool`
-- [x] Classe `HardwareAdvisorAgent` com `__init__` e prompt de sistema
+- [x] Classe `HardwareAdvisorAgent` com `__init__` e system prompt
 - [x] Auxiliar `_get_gpu_info()` (Windows PowerShell + Linux lspci)
 - [x] Ferramenta `get_hardware_info()` com campos de GPU, NPU e SO
-- [x] Ferramenta `list_available_models()` com etiquetas e enriquecimento de tamanho
-- [x] Ferramenta `recommend_models()` com a regra dos 70%, fits_in_ram, fits_in_gpu
+- [x] Ferramenta `list_available_models()` com rótulos e enriquecimento de tamanho
+- [x] Ferramenta `recommend_models()` com a regra dos 70%, fits_in_ram e fits_in_gpu
 - [x] Função `main()` com CLI interativa
 
 **Teste estas consultas para confirmar que tudo funciona:**
 
-- "Que tamanho de LLM posso executar?"
-- "Mostra-me as especificações do meu sistema"
-- "Que modelos estão disponíveis?"
-- "Posso executar um modelo de 30B?"
+- "What size LLM can I run?"
+- "Show me my system specs"
+- "What models are available?"
+- "Can I run a 30B model?"
 
 > **Sugestão**: A implementação completa está disponível em [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
 
 ## Próximos Passos
 
-- **Explore as APIs do LemonadeClient** — Descubra mais funcionalidades de gestão de sistema e modelos na [documentação do SDK LemonadeClient](https://amd-gaia.ai/sdk/lemonade-client)
-- **Adicione interação por voz** — Integre o Whisper ASR e o Kokoro TTS para permitir que os utilizadores façam perguntas sobre hardware através da fala. Consulte o [guia Talk](https://amd-gaia.ai/guides/talk)
-- **Adicione suporte MCP** — Exponha o consultor de hardware como um servidor MCP para que outras ferramentas o possam consultar. Consulte o [guia MCP](https://amd-gaia.ai/sdk/infrastructure/mcp)
-- **Amplie o motor de recomendação** — Considere a VRAM da GPU para descarregamento de camadas, ou adicione benchmarking para estimar tokens por segundo
-- **Construa um sistema multi-agente** — Combine o consultor de hardware com um agente de código ou de conversação através do [Routing Agent](https://amd-gaia.ai/guides/routing)
+- **Explore as APIs do LemonadeClient** — Descubra mais capacidades de gestão de sistema e de modelos na [documentação do SDK LemonadeClient](https://amd-gaia.ai/sdk/lemonade-client)
+- **Adicione interação por voz** — Integre o Whisper ASR e o Kokoro TTS para permitir que os utilizadores façam perguntas sobre hardware falando. Consulte o [guia Talk](https://amd-gaia.ai/guides/talk)
+- **Adicione suporte para MCP** — Exponha o consultor de hardware como um servidor MCP para que outras ferramentas o possam consultar. Consulte o [guia MCP](https://amd-gaia.ai/sdk/infrastructure/mcp)
+- **Estenda o motor de recomendação** — Tenha em conta a VRAM da GPU para descarregar camadas, ou adicione benchmarking para estimar tokens por segundo
+- **Construa um sistema multiagente** — Combine o consultor de hardware com um agente de código ou um agente de chat usando o [Routing Agent](https://amd-gaia.ai/guides/routing)

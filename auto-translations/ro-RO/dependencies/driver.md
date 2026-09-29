@@ -6,9 +6,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-### Driver AMD GPU
+### Driver GPU AMD
 
-Actualizați la cel mai recent driver AMD GPU folosind [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
+Actualizați la cel mai recent driver GPU AMD folosind [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
 
 1. Deschideți `AMD Software: Adrenalin Edition` din meniul Start sau din bara de sistem.
 2. Navigați la **Driver and Software**, faceți clic pe **Manage Updates**.
@@ -24,9 +24,11 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 
 <!-- @os:linux -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-### Driver AMD GPU
+### Driver GPU AMD
 
-Instalați driverul AMD GPU (amdgpu) folosind fluxul Radeon Software for Linux (RSL). Pentru instrucțiuni specifice distribuției dvs., consultați [Install the kernel driver](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Instalați Driverul GPU AMD (amdgpu) folosind fluxul Radeon Software for Linux (RSL). Pentru instrucțiuni specifice distribuției dumneavoastră, consultați instalarea ROCm la: [Install the kernel driver](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install).
+
+Pentru driverul propriu-zis, consultați [Linux® Drivers for AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

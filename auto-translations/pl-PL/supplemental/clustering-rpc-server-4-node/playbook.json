@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server-4-node",
+  "title": "Klastrowanie czterech Ryzen™ AI Halo za pomocą RPC",
+  "description": "Skonfiguruj wnioskowanie rozproszone przy użyciu serwera RPC na czterech urządzeniach Ryzen™ AI Halo z użyciem llama.cpp, aby uruchamiać modele o rozmiarze 1T+ parametrów",
+  "auto_translated": true
+}

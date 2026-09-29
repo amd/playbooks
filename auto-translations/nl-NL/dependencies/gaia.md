@@ -12,7 +12,7 @@ GAIA is AMD's open-source framework for building AI agents that run locally on A
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Open op Windows een terminal in de map naar keuze en volg de opdrachten om een venv aan te maken.
+1. Open op Windows een terminal in de map van uw keuze en volg de commando's om een venv aan te maken.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Open op Linux een terminal in de map naar keuze en volg de opdrachten om een venv aan te maken.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. Open op Linux een terminal in de map van uw keuze en volg de commando's om een venv aan te maken.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Open op Windows een terminal in de map naar keuze en volg de opdrachten om een venv aan te maken.
+1. Open op Windows een terminal in de map van uw keuze en volg de commando's om een venv aan te maken.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Open op Linux een terminal in de map naar keuze en volg de opdrachten om een venv aan te maken.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. Open op Linux een terminal in de map van uw keuze en volg de commando's om een venv aan te maken.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -99,7 +99,7 @@ Voer na de installatie `gaia init` uit om Lemonade Server in te stellen en model
 gaia init
 ```
 
-Dit installeert Lemonade Server, downloadt de standaardmodellen en controleert de installatie.
+Dit installeert Lemonade Server, downloadt de standaardmodellen en verifieert de installatie.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,7 +281,7 @@ fi
 
 #### Installatie verifiëren
 
-Controleer of GAIA v0.16.2 of later is geïnstalleerd:
+Controleer of GAIA v0.16.2 of hoger is geïnstalleerd:
 
 ```bash
 gaia --version

@@ -10,9 +10,9 @@ SPDX-License-Identifier: MIT
 
 Uppdatera till den senaste AMD GPU-drivrutinen med [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
 
-1. Öppna `AMD Software: Adrenalin Edition` från Start-menyn eller systemfältet.
+1. Öppna `AMD Software: Adrenalin Edition` från startmenyn eller aktivitetsfältet.
 2. Navigera till **Driver and Software** och klicka på **Manage Updates**.
-3. Om en uppdatering finns tillgänglig, följ instruktionerna för att ladda ner och installera den.
+3. Om en uppdatering finns tillgänglig, följ anvisningarna för att ladda ned och installera.
 
 <!-- @test:id=amd-gpu-visible-windows timeout=60 hidden=True -->
 ```powershell
@@ -26,7 +26,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 ### AMD GPU-drivrutin
 
-Installera AMD GPU-drivrutinen (amdgpu) med hjälp av flödet Radeon Software for Linux (RSL). För instruktioner för din distribution, se [Installera kärndrivrutinen](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Installera AMD GPU-drivrutinen (amdgpu) med flödet för Radeon Software for Linux (RSL). För instruktioner som gäller din distribution, se ROCm-installationen på: [Install the kernel driver](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install).
+
+För själva drivrutinen, se [Linux® Drivers for AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

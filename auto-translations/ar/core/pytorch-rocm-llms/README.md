@@ -17,17 +17,19 @@ SPDX-License-Identifier: MIT
 ## نظرة عامة
 
 
-هل تريد تشغيل نماذج لغوية قوية تعمل بالذكاء الاصطناعي على جهازك الخاص؟ يوضح لك هذا الدليل كيفية القيام بذلك.
-يستخدم هذا الدرس التعليمي PyTorch مدعومًا ببرنامج AMD ROCm™ لتشغيل نماذج قادرة على تلخيص المستندات، والإجابة عن الأسئلة، وتوليد النصوص، والمزيد، وكل ذلك يعمل محليًا.
+هل تريد تشغيل نماذج لغوية قوية للذكاء الاصطناعي على أجهزتك الخاصة؟ يوضح لك هذا الدليل كيفية القيام بذلك.
+يستخدم هذا البرنامج التعليمي PyTorch المدعوم بواسطة برنامج AMD ROCm™ لتشغيل النماذج التي يمكنها تلخيص المستندات، والإجابة عن الأسئلة، وتوليد النصوص، والمزيد، كل ذلك يعمل محليًا.
 
 ## ما ستتعلمه
 
 - تشغيل نماذج اللغة الكبيرة مثل gpt-oss-20b وqwen3.5-4B محليًا باستخدام PyTorch وROCm
 - إنشاء أداة تلخيص مستندات باستخدام نماذج اللغة الكبيرة
 
-## تهيئة إعدادات الذاكرة
+<!-- @device:halo_box,halo,stx,krk -->
+## ضبط إعدادات الذاكرة
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## التحقق من تحديثات البرامج
@@ -42,8 +44,8 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-على نظام Linux، افتح نافذة طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة venv مع تثبيت ROCm+Pytorch مسبقًا.
-<!-- @test:id=create-venv timeout=120 -->
+على Linux، افتح طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء venv مع تثبيت ROCm+Pytorch مسبقًا.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -55,14 +57,14 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**امنح مستخدمك إذن الوصول إلى أجهزة GPU** (يجب تسجيل الخروج ثم الدخول مجددًا ليصبح هذا فعّالًا):
+**امنح مستخدمك إمكانية الوصول إلى أجهزة GPU** (سجّل الخروج ثم أعد تسجيل الدخول لتفعيل ذلك):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-على نظام Linux، افتح نافذة طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة venv.
-<!-- @test:id=create-venv timeout=120 -->
+على Linux، افتح طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء venv.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -77,8 +79,8 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-على نظام Windows، افتح نافذة طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة venv مع تثبيت ROCm+Pytorch مسبقًا.
-<!-- @test:id=create-venv timeout=60 -->
+على Windows، افتح طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء venv مع تثبيت ROCm+Pytorch مسبقًا.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
 pytorch-env\Scripts\activate
@@ -88,8 +90,8 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-على نظام Windows، افتح نافذة طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة venv.
-<!-- @test:id=create-venv timeout=60 -->
+على Windows، افتح طرفية في الدليل الذي تختاره واتبع الأوامر لإنشاء venv.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
 pytorch-env\Scripts\activate
@@ -98,8 +100,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **نصيحة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell الخاصة بهم (على سبيل المثال،
-> بضبطها على RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
+> **تلميح**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell الخاصة بهم (على سبيل المثال،
+> ضبطها على RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
 
 <!-- @os:end -->
 
@@ -115,7 +117,7 @@ pytorch-env\Scripts\activate
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -123,10 +125,17 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece pro
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+> **ملاحظة:** إذا فشل تحميل النموذج أو نفدت الذاكرة، فحاول تثبيت حزمة `kernels` لتحميل النموذج باستخدام تكميم محسّن.
+>
+> ```bash
+> # استخدم هذا الإصدار المتوافق مع إصدار Transformers
+> pip install "kernels==0.14.1" 
+> ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -141,20 +150,20 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 <!-- @device:end -->
 
-## البدء السريع باستخدام نصوص برمجية نموذجية
+## بداية سريعة باستخدام نصوص برمجية للأمثلة
 
-يتضمن هذا الدليل الإرشادي نصوصًا برمجية جاهزة للاستخدام. انقر عليها لمعاينتها وتنزيلها إلى نفس الدليل الذي أنشأت فيه البيئة.
+يتضمن هذا الدليل نصوصًا برمجية جاهزة للاستخدام. انقر عليها لمعاينتها وتنزيلها إلى نفس دليل البيئة التي أنشأتها.
 
-| النص البرمجي | الوصف | طريقة الاستخدام |
+| النص البرمجي | الوصف | الاستخدام |
 |--------|-------------|-------|
-| [run_llm.py](assets/run_llm.py) | توليد نص أساسي باستخدام نموذج لغوي كبير | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | أداة تلخيص مستندات مع دعم Harmony | `python summarizer.py --file document.txt` |
+| [run_llm.py](assets/run_llm.py) | توليد نص أساسي بواسطة نموذج لغوي كبير | `python run_llm.py` |
+| [summarizer.py](assets/summarizer.py) | ملخّص مستندات مع دعم Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -180,18 +189,18 @@ for script in ['run_llm.py', 'summarizer.py']:
 <!-- @test:end -->
 
 يدعم كلا النصين البرمجيين:
-- اختيار النموذج عبر العلامة `--model`
-- تنسيق قالب المحادثة للحصول على توجيه دقيق للنموذج، وهو مفيد بشكل خاص لتلخيص المستندات
+- اختيار النموذج عبر علامة `--model`
+- تنسيق قالب المحادثة لتوجيه النموذج بشكل صحيح، وهو مفيد بشكل خاص لتلخيص المستندات
 
 ## تحميل وتشغيل أول نموذج لغوي كبير خاص بك
 
 يوضح النص البرمجي المرفق [run_llm.py](assets/run_llm.py) كيفية توليد النصوص باستخدام نماذج اللغة الكبيرة عبر PyTorch وAMD ROCm.
 
-> **ملاحظة:** عند تحميل نموذج، يتحقق Hugging Face Transformers أولًا من ذاكرته المخبأة المحلية (`~/.cache/huggingface/hub` على نظام Linux، و`C:\Users\<user>\.cache\huggingface\hub` على نظام Windows). إذا لم يكن النموذج مخزنًا مؤقتًا، فسيتم تنزيله تلقائيًا من huggingface.co. قد يستغرق التشغيل الأول بضع دقائق حسب حجم النموذج وسرعة الشبكة.
+> **ملاحظة:** عند تحميل نموذج، يتحقق Hugging Face Transformers أولاً من ذاكرته المؤقتة المحلية (`~/.cache/huggingface/hub` على Linux، و`C:\Users\<user>\.cache\huggingface\hub` على Windows). إذا لم يكن النموذج مخزنًا مؤقتًا، فسيتم تنزيله تلقائيًا من huggingface.co. قد يستغرق التشغيل الأول بضع دقائق حسب حجم النموذج وسرعة الشبكة.
 
 يوضح المقتطف أدناه كيفية استخدام النموذج وتخصيص الأسئلة المطروحة.
 
-<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -213,7 +222,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    disable_mmap=True
 )
 ```
 <!-- @test:end -->
@@ -264,11 +274,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## بناء أداة تلخيص مستندات
+## بناء ملخّص مستندات
 
-بعد أن قمت بتوليد مخرجات من نموذج لغوي كبير محلي، يمكنك البناء على ذلك من خلال إنشاء أداة عملية لتلخيص المستندات. في هذا القسم، ستستخدم النص البرمجي [summarizer.py](assets/summarizer.py) لتغذيته بملف .txt وتوليد ملخص موجز تلقائيًا، وكل ذلك يعمل محليًا على وحدة معالجة الرسومات (GPU) الخاصة بك.
+بعد أن قمت الآن بتوليد ناتج من نموذج لغوي كبير محليًا، يمكنك البناء على ذلك من خلال إنشاء ملخّص مستندات عملي. في هذا القسم، ستستخدم النص البرمجي [summarizer.py](assets/summarizer.py) لتغذية ملف .txt وتوليد ملخص موجز تلقائيًا، كل ذلك يعمل محليًا على وحدة معالجة الرسوميات (GPU) الخاصة بك.
 
-تم تصميم النص البرمجي ليعمل مباشرةً دون تعديل. افتح النص البرمجي في محرر لاستكشاف الكود، وتخصيص التوجيهات، وضبط المعلمات مثل الطول ودرجة الحرارة.
+تم تصميم هذا النص البرمجي ليعمل مباشرة دون إعدادات إضافية. افتح النص البرمجي في محرر لاستكشاف الكود، وتخصيص الطلبات (prompts)، وضبط المعاملات مثل الطول ودرجة الحرارة (temperature).
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -292,28 +302,27 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## التعرف على معلمات التوليد
+## تعرّف على معاملات التوليد
 
-| المعلمة | ما الذي تتحكم فيه | القيم النموذجية |
+| المعامل | ما الذي يتحكم فيه | القيم النموذجية |
 |-----------|------------------|----------------|
-| `max_new_tokens` | الحد الأقصى لطول مخرجات النموذج اللغوي الكبير | استخدم من 50 إلى 500 رمز (توكن) للملخصات. (الرمز الواحد يعادل تقريبًا 0.75 كلمة إنجليزية) |
-| `temperature` | الإبداع. تجعل القيم المنخفضة الناتج مركزًا، بينما تأتي القيم المرتفعة مع مزيد من عدم القابلية للتنبؤ | - **0.1–0.3**: مركّز وحتمي (جيد للملخصات) <br> **0.5–0.7**: متوازن (للاستخدام العام) <br> **0.8–1.0**: إبداعي ومتنوع (للعصف الذهني) |
-| `top_p` | أخذ العينات النووية (Nucleus Sampling) - تحد القيم المنخفضة من مخرجات النموذج لتكون أضيق نطاقًا | **0.1-0.5**: صارم وقابل للتنبؤ <br> **0.9-0.95**: (قياسي، طبيعي، حواري) |
+| `max_new_tokens` | الحد الأقصى لطول ناتج النموذج اللغوي الكبير | استخدم 50–500 رمز (token) للملخصات. (الرمز الواحد يعادل حوالي 0.75 كلمة إنجليزية) |
+| `temperature` | الإبداع. القيم المنخفضة تجعله مركّزًا، بينما القيم المرتفعة تأتي مع قدر أكبر من عدم القابلية للتنبؤ | - **0.1–0.3**: مركّز، حتمي (جيد للملخصات) <br> **0.5–0.7**: متوازن (استخدام عام) <br> **0.8–1.0**: إبداعي، متنوع (لطرح الأفكار) |
+| `top_p` | أخذ العينات النووي (Nucleus Sampling) - القيم المنخفضة تحد من مخرجات النموذج لتصبح أكثر تحديدًا | **0.1-0.5**: صارم، قابل للتنبؤ <br> **0.9-0.95**: (معياري، طبيعي، حواري) |
 
 
-## تطبيقات واقعية
+## تطبيقات من واقع الحياة
 
-- **تحليل الأوراق البحثية**: استخراج النتائج الرئيسية من المنشورات المعقدة للمراجعة السريعة
+- **تحليل الأوراق البحثية**: استخراج النتائج الرئيسية من المنشورات المعقدة لمراجعتها بسرعة
 - **تجميع الأخبار**: تلخيص المقالات الإخبارية في ملخصات أو أبرز النقاط اليومية الموجزة
 - **ملاحظات الاجتماعات**: تكثيف النصوص المكتوبة إلى بنود قابلة للتنفيذ وملخصات موجزة
-- **مراجعة الوثائق القانونية**: استخراج البنود أو الالتزامات ذات الصلة من النصوص القانونية الطويلة بسرعة
-- **توثيق الكود**: توليد نظرة عامة موجزة عن المستودعات وشروحات للدوال
-
+- **مراجعة المستندات القانونية**: استخراج البنود أو الالتزامات ذات الصلة من النصوص القانونية الطويلة بسرعة
+- **توثيق الكود**: توليد نظرات عامة موجزة عن المستودعات وشروحات للدوال
 ## الخطوات التالية
 
-- **الضبط الدقيق (Fine-tuning)**: تكييف النماذج مع مجالك أو مصطلحاتك الخاصة لتحسين الدقة (راجع أدلة الضبط الدقيق الإرشادية)
-- **أنظمة RAG**: الجمع بين نماذج اللغة الكبيرة واسترجاع المستندات للحصول على إجابات وعمليات بحث تراعي السياق
-- **استكشاف النماذج**: جرّب نماذج جديدة مثل Llama 3 وPhi-3 أو Qwen للحصول على نتائج أفضل
-- **النشر في بيئة الإنتاج**: استخدم أدوات مثل vLLM لتقديم خدمة نماذج اللغة الكبيرة بشكل قابل للتوسع في المؤسسات
+- **الضبط الدقيق (Fine-tuning)**: عدّل النماذج لتلائم مجالك أو مصطلحاتك الخاصة لتحقيق دقة أفضل (راجع Fine-tuning Playbooks)
+- **أنظمة RAG**: ادمج نماذج اللغة الكبيرة مع استرجاع المستندات للحصول على إجابات وبحث واعيين بالسياق
+- **استكشاف النماذج**: جرّب نماذج جديدة مثل Llama 3 أو Phi-3 أو Qwen للحصول على نتائج أفضل
+- **النشر في الإنتاج**: استخدم أدوات مثل vLLM لتقديم خدمة نماذج اللغة الكبيرة بشكل قابل للتوسع داخل المؤسسات
 
-يمنحك نظامك القدرة على تشغيل نماذج لغوية متطورة محليًا. جرّب نماذج وتوجيهات ومعلمات مختلفة لاكتشاف ما يناسب تطبيقاتك بشكل أفضل.
+يمنحك نظامك القدرة على تشغيل نماذج لغوية متطورة محليًا. جرّب نماذج ومحفزات (prompts) وإعدادات مختلفة لاكتشاف ما يناسب تطبيقاتك بشكل أفضل.

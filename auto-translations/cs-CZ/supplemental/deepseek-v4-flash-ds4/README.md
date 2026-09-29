@@ -16,19 +16,19 @@ SPDX-License-Identifier: MIT
 
 ## Přehled
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) je varianta rodiny DeepSeek V4 zaměřená na efektivitu — model typu Mixture of Experts s 284 miliardami parametrů, z nichž 13 miliard je aktivních. Podle [technické zprávy společnosti DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) dosahuje 79 % na SWE-bench Verified a 91,6 % na LiveCodeBench.
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) je varianta rodiny DeepSeek V4 zaměřená na efektivitu — model typu Mixture of Experts se 284 miliardami parametrů a 13 miliardami aktivních parametrů. Podle [technické zprávy DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) dosahuje 79 % na SWE-bench Verified a 91,6 % na LiveCodeBench.
 
-[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) je specializovaný inferenční engine vytvořený přímo pro tuto architekturu modelu. Namísto univerzálního runtime cílí ds4 přímo na rodinu DeepSeek V4 pomocí optimalizací jader specifických pro danou architekturu pro software AMD ROCm™. V současnosti se jedná o jednu z nejvýkonnějších implementací modelu DeepSeek V4 Flash na platformě Strix Halo.
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) je specializovaný inferenční engine vytvořený přímo pro tuto architekturu modelu. Namísto obecného runtime cílí ds4 přímo na rodinu DeepSeek V4 pomocí optimalizací jader specifických pro architekturu pro software AMD ROCm™. V současnosti se jedná o jednu z nejvýkonnějších implementací DeepSeek V4 Flash na platformě Strix Halo.
 
-Tento tutoriál ukazuje, jak pomocí terminálového uživatelského rozhraní `ds4-cockpit` nastavit ds4, stáhnout váhy modelu a spustit lokální poskytování modelu DeepSeek V4 Flash na vývojářské platformě AMD Ryzen™ AI Halo.
+Tento tutoriál ukazuje, jak pomocí `ai-toolbox-cockpit`, terminálového uživatelského rozhraní, nastavit ds4, stáhnout váhy modelu a spustit lokální poskytování modelu DeepSeek V4 Flash na vývojářské platformě AMD Ryzen™ AI Halo Developer Platform.
 
 ## Co se naučíte
 
-- Jak nainstalovat a spustit terminálové uživatelské rozhraní `ds4-cockpit`
+- Jak nainstalovat a spustit terminálové uživatelské rozhraní `ai-toolbox-cockpit`
 - Jak vytvořit ROCm toolbox kontejner pro ds4
 - Stažení doporučené kvantizace pro jeden uzel Halo
 - Spuštění inferenčního serveru ds4 a zpřístupnění koncového bodu kompatibilního s OpenAI
-- Připojení webového rozhraní nebo kódovacího agenta k lokálnímu serveru
+- Připojení Web UI nebo kódovacího agenta k lokálnímu serveru
 
 ## Nastavení konfigurace paměti
 
@@ -36,14 +36,14 @@ Tento tutoriál ukazuje, jak pomocí terminálového uživatelského rozhraní `
 
 ## Instalace softwarových předpokladů
 
-> **Systémové požadavky pro tuto konfiguraci (jednouzlová konfigurace IQ2_XXS s kontextem 126k):**
-> - Systém Strix Halo s **alespoň 128 GB sdílené paměti**.
-> - **Vyhrazená paměť VRAM v BIOSu (UMA frame buffer) nastavená na minimum**, aby sdílený paměťový fond mohl být co největší.
-> - **Sdílený paměťový fond GPU nastavený na alespoň 110 GB**: spusťte `amd-ttm --set 110` (viz výše uvedený krok konfigurace paměti) a restartujte systém. Nižší hodnoty mohou při načítání modelu s kontextem 126k selhat kvůli nedostatku paměti. Pokud máte k dispozici méně paměti, snižte místo toho hodnotu **Context** v režimu Server Mode.
+> **Systémové požadavky pro tuto konfiguraci (jeden uzel, IQ2_XXS, kontext 126k):**
+> - Systém Strix Halo s **alespoň 128 GB sjednocené paměti**.
+> - **Vyhrazená VRAM v BIOSu (rámec UMA) nastavená na minimum**, aby sdílená paměťová oblast mohla být co největší.
+> - **Sdílená paměťová oblast GPU nastavená na alespoň 110 GB**: spusťte `amd-ttm --set 110` (viz krok konfigurace paměti výše) a restartujte. Nižší hodnoty mohou způsobit nedostatek paměti při načítání modelu s kontextem 126k. Pokud má váš systém méně dostupné paměti, snižte místo toho hodnotu **Context** v režimu serveru.
 >
-> **Poznámka:** Jako výchozí bod zkuste nastavit **sdílený paměťový fond GPU** na **110 GB**. Pokud narazíte na chyby způsobené nedostatkem paměti, zvyšte sdílený paměťový fond nebo snižte velikost kontextu.
+> **Poznámka:** Zkuste jako výchozí bod nastavit **sdílenou paměťovou oblast GPU** na **110 GB**. Pokud narazíte na chyby způsobené nedostatkem paměti, zvyšte sdílenou paměťovou oblast nebo snižte velikost kontextu.
 
-ds4-cockpit využívá kontejnerové toolboxy ke spuštění enginu ds4. Nainstalujte `podman`, `distrobox` a `pipx`:
+ai-toolbox-cockpit používá kontejnerové toolboxy ke spuštění enginu ds4. Nainstalujte `podman`, `distrobox` a `pipx`:
 
 ```bash
 sudo apt update
@@ -63,28 +63,30 @@ echo "OK: podman, distrobox, and pipx are installed"
 
 ## Dostupné kvantizace
 
-Autor ds4 poskytuje několik kvantizovaných verzí modelu DeepSeek V4 Flash ve formátu GGUF. Všechny níže uvedené modely využívají kalibraci pomocí matice důležitosti (imatrix), která zachovává vyšší přesnost v těch částech modelu, jež jsou nejdůležitější pro úlohy spojené s programováním a uvažováním.
+Autor ds4 poskytuje několik kvantizovaných verzí modelu DeepSeek V4 Flash ve formátu GGUF. Všechny níže uvedené modely používají kalibraci pomocí matice důležitosti (imatrix), která zachovává vyšší přesnost pro ty části modelu, na kterých nejvíce záleží při úlohách souvisejících s kódováním a uvažováním.
 
 | Kvantizace | Velikost | Popis |
 |-------------|------|-------------|
 | [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 GB | Doporučeno pro jeden uzel se 128 GB |
-| [Hybridní Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | Zachovává vrstvy 37–42 v přesnosti Q4 pro lepší přesnost. Vejde se do 128 GB, ale ponechává méně prostoru pro kontext |
-| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Vyšší kvalita. Vyžaduje dva uzly Halo pomocí vícemodulárního clusteringu |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Volitelný doplněk pro spekulativní dekódování za účelem zvýšení rychlosti generování |
+| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | Zachovává vrstvy 37–42 v přesnosti Q4 pro lepší přesnost. Vejde se do 128 GB, ale ponechává méně prostoru pro kontext |
+| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Vyšší kvalita. Vyžaduje dva uzly Halo prostřednictvím vícenodového clusteringu |
+| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Volitelný doplněk pro spekulativní dekódování ke zlepšení rychlosti generování |
 
 Model **IQ2_XXS imatrix** je dobrým výchozím bodem. Pohodlně se vejde na jeden uzel a ponechává dostatek paměti pro rozumně velké kontextové okno.
 
-## Instalace ds4-cockpit
+## Instalace ai-toolbox-cockpit
 
-[ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox) je odlehčené terminálové uživatelské rozhraní, které usnadňuje rozjezd a provoz ds4 na platformě Strix Halo. Stará se o vytváření kontejnerů toolboxů, stahování vah modelu a spouštění serverů. Nainstalujte jej pomocí `pipx`:
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) je odlehčené terminálové uživatelské rozhraní, které usnadňuje instalaci různých AI backendů. Použijeme ho k vytvoření našeho kontejneru ds4, stažení vah modelu a spouštění serverů. Nainstalujte ho pomocí `pipx`:
 
+<!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
-pipx install "git+https://github.com/kyuz0/strix-halo-ds4-toolbox.git#subdirectory=ds4-strix-halo-cockpit"
+pipx install git+https://github.com/kyuz0/ai-toolbox-cockpit.git
 ```
+<!-- @test:end -->
 
 Spusťte cockpit:
 ```bash
-ds4-cockpit
+ai-toolbox-cockpit
 ```
 
 <!-- @test:id=ds4-cockpit-linux timeout=60 hidden=True -->
@@ -92,18 +94,18 @@ ds4-cockpit
 set -euo pipefail
 export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 # Verify the pipx-installed cockpit entry point is on PATH (do NOT launch the TUI).
-command -v ds4-cockpit
-echo "OK: ds4-cockpit is installed and on PATH"
+command -v ai-toolbox-cockpit
+echo "OK: ai-toolbox-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
-## Vytvoření toolboxu
+## Krok 1: Vytvoření toolboxu
 
-Na kartě **Interactive Toolboxes** vyberte nejnovější dostupný/stabilní toolbox (např. `ds4-rocm-7.2.4`) a klikněte na **Create/Update**. Tím se stáhne obraz kontejneru a vytvoří se prostředí toolboxu.
+Na kartě **Interactive Toolboxes** vyberte nejnovější dostupný/stabilní toolbox pro ds4 (např. `ds4-rocm-10.0`) a klikněte na **Create/Update**. Tím se stáhne image kontejneru a vytvoří se prostředí toolboxu.
 
 
 <p align="center">
-  <img src="assets/ds4-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ds4-cockpit" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ai-toolbox-cockpit" width="800"/>
 </p>
 
 <!-- @test:id=ds4-toolbox-image-linux timeout=120 hidden=True -->
@@ -113,37 +115,37 @@ export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
 
 # The toolbox version changes over time, so match the image family, not a fixed tag.
 if ! podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit (Interactive Toolboxes tab) first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit (Interactive Toolboxes tab) first."
   exit 1
 fi
 echo "OK: ds4 toolbox container image is present"
 ```
 <!-- @test:end -->
 
-## Stažení modelu
+## Krok 2: Stažení modelu
 
-Přejděte na kartu **Model Manager**. V rozbalovací nabídce vyberte **IQ2_XXS imatrix (~80,8 GB)** a klikněte na **Download**. Soubory modelu se ve výchozím nastavení uloží do `~/ds4` (cestu k úložišti lze změnit).
+Přejděte na kartu **Models**. Nejprve vyberte backend (ds4). Poté vyberte z rozbalovací nabídky **IQ2_XXS imatrix (~80,8 GB)** a klikněte na **Download**. Soubory modelu se ve výchozím nastavení uloží do `~/ds4` (cestu úložiště můžete změnit).
 
-> **Poznámka:** Model IQ2_XXS má přibližně 80 GB, takže stahování může v závislosti na rychlosti připojení nějakou dobu trvat. Po dokončení můžete pokračovat.
+> **Poznámka:** Model IQ2_XXS má zhruba 80 GB, takže stahování může v závislosti na vašem připojení nějakou dobu trvat. Po jeho dokončení můžete pokračovat.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-model-manager.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
 </p>
 
 <!-- @test:id=ds4-model-downloaded-linux timeout=60 hidden=True -->
 ```bash
 set -euo pipefail
 
-# ds4-cockpit saves model weights to ~/ds4 by default
+# ai-toolbox-cockpit saves model weights to ~/ds4 by default
 model_dir="$HOME/ds4"
 
 if [ ! -d "$model_dir" ]; then
-  echo "Model directory $model_dir does not exist. Download the model in ds4-cockpit (Model Manager tab) first."
+  echo "Model directory $model_dir does not exist. Download the model in ai-toolbox-cockpit (Model Manager tab) first."
   exit 1
 fi
 
 if ! find "$model_dir" -maxdepth 2 -iname '*.gguf' | grep -q .; then
-  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ds4-cockpit first."
+  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -156,16 +158,16 @@ fi
 ```
 <!-- @test:end -->
 
-## Spuštění serveru
+## Krok 3: Spuštění serveru
 
 Přejděte na kartu **Server Mode**. Vyberte stažený model a toolbox, poté nastavte velikost kontextu, hostitele a port. Až budete připraveni, klikněte na **Start ds4-server**.
 
-> **Tip** Velikost kontextu `126000` je rozumná výchozí hodnota, která by se měla vejít na jeden uzel — pokud máte paměti nazbyt, můžete ji nastavit vyšší, nebo ji snižte, pokud narazíte na chyby způsobené nedostatkem paměti. Port (`8000` v tomto návodu) je libovolný — vyberte jakýkoli volný port.
+> **Tip:** Velikost kontextu `126000` je rozumná výchozí hodnota, která by se měla vejít na jeden uzel — pokud máte paměti dostatek, můžete ji nastavit vyšší, nebo ji snižte, pokud narazíte na chyby způsobené nedostatkem paměti. Port (`8000` v tomto návodu) je libovolný — vyberte jakýkoli volný port.
 
-> **KV Disk Cache (volitelné).** Zapnutím **KV Disk Cache** se KV cache odloží na disk (do **Host Cache Dir**, výchozí `~/.cache/ds4-kv`), takže opakované systémové promptové zprávy se obnoví z SSD disku místo opětovného přepočítávání. Jde o optimalizaci výkonu pro pracovní postupy kódovacích agentů s dlouhými, opakujícími se prompty a **není nutná** pro spuštění serveru.
+> **KV Disk Cache (volitelné).** Zapnutí volby **KV Disk Cache** přesune KV cache na disk (do **Host Cache Dir**, výchozí hodnota `~/.cache/ds4-kv`), takže se opakující se systémové prompty obnovují z SSD namísto opětovného výpočtu. Jde o optimalizaci výkonu pro pracovní postupy kódovacích agentů s dlouhými, opakujícími se prompty a **není nutná** ke spuštění serveru.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-server-mode.png" alt="Configuring and starting the ds4 server" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
 </p>
 
 Server se spustí a bude naslouchat na portu 8000, čímž zpřístupní koncový bod API kompatibilní s OpenAI na adrese `http://localhost:8000/v1`.
@@ -199,7 +201,7 @@ if [ -z "$model_file" ]; then
   model_file="$(find "$MODEL_DIR" -maxdepth 2 -iname '*.gguf' 2>/dev/null | head -1)"
 fi
 if [ -z "$model_file" ]; then
-  echo "No .gguf model found under $MODEL_DIR. Download it in ds4-cockpit first."
+  echo "No .gguf model found under $MODEL_DIR. Download it in ai-toolbox-cockpit first."
   exit 1
 fi
 model_name="$(basename "$model_file")"
@@ -207,7 +209,7 @@ model_name="$(basename "$model_file")"
 # Pick the toolbox image (version-agnostic).
 image="$(podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox' | head -1)"
 if [ -z "$image" ]; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -218,7 +220,14 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Remove any stale instance, then start ds4-server detached (same flags ds4-cockpit uses, with -d instead of -it).
+# keep-id maps the calling user into the container. Root does not need it, and as root it cannot
+# be combined with --ipc=host (crun fails to mount /dev/mqueue), so root keeps the host user namespace.
+userns=keep-id
+if [ "$(id -u)" -eq 0 ]; then
+  userns=host
+fi
+
+# Remove any stale instance, then start ds4-server detached (same flags ai-toolbox-cockpit uses, with -d instead of -it).
 podman rm -f "$CONTAINER" >/dev/null 2>&1 || true
 podman run -d --name "$CONTAINER" \
   --device /dev/dri --device /dev/kfd \
@@ -227,7 +236,7 @@ podman run -d --name "$CONTAINER" \
   --ipc=host \
   --cap-add=SYS_PTRACE \
   --security-opt label=disable \
-  --userns=keep-id \
+  --userns="$userns" \
   -p 127.0.0.1:8000:8000 \
   -v "$MODEL_DIR":/models:ro \
   "$image" \
@@ -297,24 +306,28 @@ PY
 echo "OK: ds4 server test complete; server stopped and GPU memory released"
 ```
 <!-- @test:end -->
+## Připojení webového uživatelského rozhraní
 
-## Připojení webového rozhraní
-
-Můžete připojit libovolné chatovací rozhraní, které podporuje formát OpenAI API. Například pro použití HuggingFace ChatUI:
+Můžete připojit jakékoli chatovací rozhraní, které podporuje formát OpenAI API. Pokud chcete například použít HuggingFace ChatUI:
 
 ```bash
-docker run -p 3000:3000 \
-  --add-host=host.docker.internal:host-gateway \
-  -e OPENAI_BASE_URL=http://host.docker.internal:8000/v1 \
+docker run --network=host \
+  -e PORT=3000 \
+  -e OPENAI_BASE_URL=http://localhost:8000/v1 \
   -e OPENAI_API_KEY=dummy \
   -v chat-ui-data:/data \
   ghcr.io/huggingface/chat-ui-db
 ```
 
 Otevřete `http://localhost:3000` ve svém prohlížeči a začněte chatovat.
-## Připojení kódovacího agenta
 
-Server ds4 poskytuje koncové body kompatibilní s OpenAI i Anthropic, takže se k němu dá připojit přímo z většiny kódovacích agentů. Pokud jej chcete například přidat do kódovacího agenta `pi`, přidejte následující blok do souboru `~/.pi/agent/models.json`:
+> **Poznámka:** `--network=host` umístí webové uživatelské rozhraní do sítě hostitele, takže může přímo přistupovat k serveru ds4 na adrese `localhost`. Server ds4 tak zůstává vázán na loopback (nemusí být zpřístupněn na jiných rozhraních).
+
+> **Tip:** Port webového uživatelského rozhraní (zde `3000`, nastavený pomocí `PORT`) je libovolný — pokud je port `3000` již obsazený, zvolte jiný volný port a v prohlížeči otevřete tento port. Ujistěte se, že port v `OPENAI_BASE_URL` odpovídá portu, na kterém běží váš server ds4.
+
+## Připojení agenta pro programování
+
+Server ds4 poskytuje koncové body kompatibilní jak s OpenAI, tak s Anthropic, takže se k němu může přímo připojit většina agentů pro programování. Pokud jej chcete například přidat k agentovi pro programování `pi`, přidejte do souboru `~/.pi/agent/models.json` následující blok:
 
 ```json
 "ds4": {
@@ -354,15 +367,15 @@ Server ds4 poskytuje koncové body kompatibilní s OpenAI i Anthropic, takže se
 }
 ```
 
-> **Tip**: Pokud váš kódovací agent nebo webové uživatelské rozhraní běží na jiném počítači než platforma Halo, budete muset port 8000 přesměrovat pomocí SSH:
+> **Tip**: Pokud váš agent pro programování nebo webové uživatelské rozhraní běží na jiném zařízení než platforma Halo, budete muset přesměrovat port serveru (zde `8000`) pomocí SSH:
 > ```bash
-> ssh -L 0.0.0.0:8000:localhost:8000 <halo-host-ip>
+> ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## Další kroky
 
-- **Vícenodové clustery**: Pokud máte dvě zařízení Halo, ds4 podporuje distribuci modelu Q4 (~153 GB) mezi oba počítače pomocí pipeline paralelismu. Pokyny k nastavení najdete v [dokumentaci ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism).
-- **Spekulativní dekódování (MTP)**: Stáhněte si váhy MTP (~3,6 GB) a pro rychlejší generování předejte serveru parametr `--mtp`.
-- **Odkládání KV cache na disk**: Pro pracovní postupy kódovacích agentů povolte `--kv-disk-dir`, aby se opakující se systémové výzvy obnovovaly z SSD místo toho, aby se pokaždé znovu počítaly.
+- **Vícenodové sdružování do clusteru**: Pokud máte dvě zařízení Halo, ds4 podporuje distribuci modelu Q4 (~153 GB) mezi obě zařízení pomocí paralelismu potrubí (pipeline parallelism). Pokyny k nastavení najdete v [dokumentaci ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism).
+- **Spekulativní dekódování (MTP)**: Stáhněte si váhy MTP (~3,6 GB) a předejte serveru parametr `--mtp` pro vyšší rychlost generování.
+- **Odkládání mezipaměti KV na disk**: U pracovních postupů agentů pro programování povolte `--kv-disk-dir`, aby se opakující se systémové výzvy obnovovaly z SSD disku místo jejich opakovaného přepočítávání pokaždé znovu.
 
-Další informace najdete v [repozitáři ds4](https://github.com/antirez/ds4) a v nástroji [ds4-cockpit toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox).
+Další informace naleznete v [repozitáři ds4](https://github.com/antirez/ds4) a v sadě nástrojů [ds4-cockpit toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox).

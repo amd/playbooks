@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server-4-node",
+  "title": "RPCで実現する4台のRyzen™ AI Haloクラスタリング",
+  "description": "RPC serverを使用して4台のRyzen™ AI Haloデバイス間でllama.cppによる分散推論を設定し、1T以上のモデルを実行する",
+  "auto_translated": true
+}

@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 
-Az Ryzen AI Halo esetében a dedikált GPU memória alapértelmezés szerint 64 GB, ami a legtöbb munkaterheléshez elegendő. Nagyobb modellek vagy hosszabb kontextusok esetén érdemes lehet ezt 96 GB-ra növelni. A módosításhoz nyisd meg az **AMD Software: Adrenalin Edition™** alkalmazást, és navigálj a **Performance → Tuning → AMD Variable Graphics Memory** menüponthoz. A változtatások érvénybe lépéséhez indítsd újra a rendszert.
+A Ryzen AI Halo esetében a dedikált GPU memória alapértelmezés szerint 64GB, ami a legtöbb munkaterheléshez elegendő. Nagyobb modellek vagy hosszabb kontextusok esetén ennek növelése segíthet. A módosításhoz nyisd meg az **AMD Software: Adrenalin Edition™** alkalmazást, és navigálj a **Performance → Tuning → AMD Variable Graphics Memory** menüpontra. A módosítások érvénybe lépéséhez indítsd újra a gépet.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -18,7 +18,7 @@ Az Ryzen AI Halo esetében a dedikált GPU memória alapértelmezés szerint 64 
 
 <!-- @device:halo,stx,krk -->
 
-A dedikált GPU memória értékének módosításához nyisd meg az **AMD Software: Adrenalin Edition™** alkalmazást, és navigálj a **Performance → Tuning → AMD Variable Graphics Memory** menüponthoz. A változtatások érvénybe lépéséhez indítsd újra a rendszert.
+A dedikált GPU memória értékének módosításához nyisd meg az **AMD Software: Adrenalin Edition™** alkalmazást, és navigálj a **Performance → Tuning → AMD Variable Graphics Memory** menüpontra. A módosítások érvénybe lépéséhez indítsd újra a gépet.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -30,11 +30,11 @@ A dedikált GPU memória értékének módosításához nyisd meg az **AMD Softw
 
 <!-- @os:linux -->
 
-Linuxon a nagyobb modellek futtatásához növeld a GPU számára elérhető **megosztott memória** készletet. Ehhez szükséges lehet a BIOS-ban a dedikált GPU memóriát a minimumra állítani, hogy a megosztott memória készlet maximalizálható legyen.
+Linuxon, nagyobb modellek futtatásához növeld a GPU számára elérhető **megosztott memória** (shared memory) készletet. Ehhez esetleg szükséges lehet a BIOS-ban a dedikált GPU memóriát a minimumra állítani, hogy a megosztott memória készlete maximálisra növelhető legyen.
 
 <!-- @device:halo_box -->
 
-Az AMD Ryzen™ AI Halo esetében az alapértelmezett érték 96 GB megosztott memória. Ennek módosításához nyisd meg az **AMD Ryzen™ AI Developer Center** alkalmazást, és lépj a **Settings** fülre. A **Graphics Performance Settings** alatt növeld a **Shared Video Memory** csúszkát, majd kattints az **Apply Changes** gombra, és a változtatások érvénybe lépéséhez indítsd újra a rendszert.
+Az AMD Ryzen™ AI Halo esetében az alapértelmezett beállítás módosításához nyisd meg az **AMD Ryzen™ AI Developer Center** alkalmazást, és lépj a **Settings** fülre. A **Graphics Performance Settings** alatt növeld a **Shared Video Memory** csúszkát, majd kattints az **Apply Changes** gombra, és indítsd újra a gépet a módosítások érvénybe lépéséhez.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/linux_mem_new.png" alt="AMD Ryzen AI Developer Center — Graphics Performance Settings with Shared Video Memory slider" width="600"/>
@@ -59,7 +59,7 @@ Növeld a megosztott memória készletet a kernel Translation Table Manager (TTM
    pipx install amd-debug-tools
    ```
 
-3. Kérdezd le az aktuális megosztott memória beállításokat:
+3. Kérdezd le a jelenlegi megosztott memória beállításokat:
 
    ```bash
    amd-ttm
@@ -71,7 +71,7 @@ Növeld a megosztott memória készletet a kernel Translation Table Manager (TTM
    amd-ttm --set <NUM>
    ```
 
-5. A változtatások érvénybe lépéséhez indítsd újra a rendszert.
+5. A módosítások érvénybe lépéséhez indítsd újra a gépet.
 
 <!-- @device:end -->
 

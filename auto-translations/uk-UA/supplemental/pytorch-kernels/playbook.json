@@ -1,6 +1,6 @@
 {
   "id": "pytorch-kernels",
-  "title": "Створення користувацьких ядер GPU за допомогою PyTorch і AMD ROCm™",
-  "description": "Пишіть та оптимізуйте власні GPU-ядра за допомогою PyTorch і AMD ROCm™",
+  "title": "Створення користувацьких ядер GPU за допомогою PyTorch та AMD ROCm™",
+  "description": "Пишіть і оптимізуйте власні GPU-ядра за допомогою PyTorch і програмного забезпечення AMD ROCm™",
   "auto_translated": true
 }

@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 > **Strojový preklad.** Táto stránka bola automaticky preložená z angličtiny a nebola skontrolovaná človekom. Môže obsahovať chyby a niektoré pokyny, príkazy, súbory na stiahnutie, dostupnosť produktov alebo iný obsah sa môžu líšiť v závislosti od jazyka alebo regiónu. V prípade akéhokoľvek nesúladu alebo rozdielu je rozhodujúca a záväzná pôvodná anglická verzia playbook.
 <!-- auto-translated-disclaimer:end -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
@@ -18,11 +18,11 @@ SPDX-License-Identifier: MIT
 
 ## Prehľad
 
-**AMD Sync** premení váš notebook na vzdialenú riadiacu jednotku pre AMD Ryzen™ AI Halo. Preskočte manuálne nastavovanie SSH, kľúčov a IDE — nainštalujte AMD Sync a získajte jedným kliknutím prístup k vzdialenému terminálu, VS Code, JupyterLab a živému prehľadu GPU/CPU/pamäte na Ryzen AI Halo.
+**AMD Sync** premení váš notebook na vzdialený kokpit pre AMD Ryzen™ AI Halo. Preskočte manuálne nastavovanie SSH, kľúčov a IDE — nainštalujte AMD Sync a získajte prístup na jedno kliknutie k vzdialenému terminálu, VS Code, JupyterLab a živému dashboardu GPU/CPU/pamäte na Ryzen AI Halo.
 
-Váš lokálny počítač zostáva vám dobre známy; každý príkaz, notebook a model sa spúšťa na Ryzen AI Halo.
+Váš lokálny počítač zostáva známy; každý príkaz, notebook a model beží na Ryzen AI Halo.
 
-> **Tip**: Táto stránka bude obsahovať akékoľvek nové aktualizácie AMDSync.
+> **Tip**: Táto stránka bude obsahovať všetky nové aktualizácie AMDSync. 
 
 ## Čo sa naučíte
 
@@ -34,7 +34,7 @@ Váš lokálny počítač zostáva vám dobre známy; každý príkaz, notebook 
 
 ## Základné koncepty
 
-AMD Sync má dve strany: **klienta** (váš notebook, na ktorom beží aplikácia AMD Sync) a **server** (Ryzen AI Halo, na ktorom beží SSH server, do ktorého sa AMD Sync tuneluje). Všetko, čo spustíte z AMD Sync — VS Code, terminál, notebook — sa otvára lokálne, ale vykonáva sa na Ryzen AI Halo.
+AMD Sync má dve strany: **klienta** (váš notebook, na ktorom beží aplikácia AMD Sync) a **server** (Ryzen AI Halo, na ktorom beží SSH server, do ktorého sa AMD Sync tuneluje). Všetko, čo spustíte z AMD Sync — VS Code, terminál, notebook — sa otvorí lokálne, ale vykonáva sa na Ryzen AI Halo.
 
 > **Podporovaní klienti:** Windows 11 a Linux. macOS nie je podporovaný.
 
@@ -43,26 +43,26 @@ AMD Sync má dve strany: **klienta** (váš notebook, na ktorom beží aplikáci
 ## Krok 1 — Povoľte SSH na Ryzen AI Halo
 
 
-> **Poznámka:** Na Windows sa Ryzen AI Halo dodáva s SSH serverom *predvolene vypnutým*. Na Linuxe sa dodáva s SSH serverom *predvolene zapnutým*.
+> **Poznámka:** Vo Windows sa Ryzen AI Halo dodáva so SSH serverom *predvolene vypnutým*. V Linuxe sa dodáva so SSH serverom *predvolene zapnutým*.
 
 1. Na Ryzen AI Halo otvorte **AMD Ryzen™ AI Developer Center**.
 2. Prejdite na kartu **Remote**.
-3. Zapnite prepínač **SSH Server**.
-4. Poznačte si **IP Address**, **Port** a **Username** zobrazené v časti **Server Information** — tieto hodnoty vložíte do AMD Sync.
+3. Zapnite **SSH Server**.
+4. Poznamenajte si **IP Address**, **Port** a **Username** zobrazené pod **Server Information** — vložíte ich do AMD Sync.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/halobox_remote_tab.png" alt="AMD Ryzen AI Developer Center Remote tab showing SSH Server toggle and Server Information"/>
 </div>
 
-> **Poznámka:** Toto je AMD Developer Center pre Windows. Verzia pre Linux môže mať iné používateľské rozhranie, no podobnú funkcionalitu vzdialeného prístupu.
+> **Poznámka:** Toto je AMD Developer Center pre Windows. Ten pre Linux môže mať odlišné rozhranie, ale podobnú funkčnosť vzdialeného prístupu.
 
-> **Tip:** AMD Sync sa pýta na **prihlasovacie heslo do OS** daného používateľa, nie na heslo z Developer Center.
+> **Tip:** AMD Sync vyžaduje **heslo na prihlásenie do OS** daného používateľa, nie heslo z Developer Center.
 
 ---
 
-## Krok 2 — Nainštalujte AMD Sync na svojom klientovi
+## Krok 2 — Nainštalujte AMD Sync na svojho klienta
 
-AMD Sync beží na Windows 11 a Linuxe. Stiahnite si inštalátor pre svoj operačný systém a postupujte podľa nasledujúcich krokov. Po inštalácii kliknite na **Accept & Install** na obrazovke **Get Started** — AMD Sync sa po dokončení spustí automaticky.
+AMD Sync beží na Windows 11 a Linuxe. Stiahnite si inštalátor pre svoj operačný systém a postupujte podľa krokov nižšie. Po inštalácii kliknite na **Accept & Install** na obrazovke **Get Started** — AMD Sync sa po dokončení spustí automaticky.
 
 ### Windows
 
@@ -71,19 +71,19 @@ AMD Sync beží na Windows 11 a Linuxe. Stiahnite si inštalátor pre svoj opera
 1. Dvakrát kliknite na `AMDSyncInstaller.exe`.
 2. Kliknite na **Accept & Install**.
 
-> Ak vás vyzve Windows Firewall, povoľte AMD Sync prístup k sieti, aby sa mohol pripojiť k Ryzen AI Halo cez SSH.
+> Ak sa zobrazí výzva Windows Firewall, povoľte AMD Sync prístup k sieti, aby sa mohol dostať k Ryzen AI Halo cez SSH.
 
 ### Linux
 
-Kliknite na odkaz a stiahnite si preferovaný formát:
+Kliknite na odkaz na stiahnutie preferovaného formátu:
 
-| Formát | Stiahnutie | Inštalačný príkaz |
+| Formát | Stiahnuť | Inštalačný príkaz |
 |--------|----------|-----------------|
 | `.deb` | [AMDSyncInstaller.deb](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.deb) | `sudo apt install ./amdsyncinstaller.deb` |
 | `.rpm` | [AMDSyncInstaller.rpm](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.rpm) | `sudo rpm -i ./amdsyncinstaller.rpm` |
 | `.AppImage` | [AMDSyncInstaller.AppImage](https://drivers.amd.com/drivers/amd-sync/linux/amdsyncinstaller.AppImage) | `chmod +x ./amdsyncinstaller.AppImage && ./amdsyncinstaller.AppImage` |
 
-> **Poznámka:** Ubuntu App Center môže lokálne otvorený súbor `.deb` označiť ako *„Potenciálne nebezpečný."* Ide o štandardné upozornenie pri akomkoľvek lokálne spustenom inštalátore od tretej strany. Ak dvojklik na `.deb` zlyhá, použite vyššie uvedený príkaz v termináli.
+> **Poznámka:** Ubuntu App Center môže lokálne otvorený súbor `.deb` označiť ako *"Potenciálne nebezpečný."* Ide o štandardné upozornenie pri akomkoľvek lokálnom inštalátore od tretej strany. Ak dvojklik na `.deb` zlyhá, použite vyššie uvedený príkaz v termináli.
 
 ---
 
@@ -97,21 +97,21 @@ Pri prvom spustení zobrazí AMD Sync formulár **Add a Remote Device**. Vyplňt
 
 | Pole | Poznámky |
 |-------|-------|
-| **Device Name** *(voliteľné)* | Vlastný popisný názov, napríklad `Ryzen AI Halo`. Predvolene sa nastaví na `Device 1`, `Device 2`, … |
+| **Device Name** *(voliteľné)* | Priateľský názov, napríklad `Ryzen AI Halo`. Predvolene `Device 1`, `Device 2`, … |
 | **Hostname or IP** | Z karty Remote |
 | **SSH Port** | Z karty Remote (iba čísla) |
 | **Username** | Názov vášho účtu OS na Ryzen AI Halo |
-| **Password** | Vaše prihlasovacie heslo do OS — pri písaní zamaskované |
+| **Password** | Vaše prihlasovacie heslo do OS — počas písania skryté |
 
-Kliknite na **Add Device**. Po krátkom načítaní sa zobrazí hlásenie **„Connection Successful"** a prejdete na domovské zobrazenie, ktoré sa nachádza v systémovej lište. Kliknutím mimo okna ho zavriete; AMD Sync zostáva spustený a je vzdialený len jedno kliknutie.
+Kliknite na **Add Device**. Po krátkom načítaní sa zobrazí **"Connection Successful"** a dostanete sa na domovské zobrazenie, ktoré sa nachádza v systémovej lište. Kliknutím mimo okna ho zatvoríte; AMD Sync beží naďalej a je vzdialený na jedno kliknutie.
 
-> **Ak sa pripojenie nepodarí,** AMD Sync sa vráti na formulár so zachovanými zadanými hodnotami. Bežnými príčinami sú vypnuté SSH na Ryzen AI Halo, nesprávne heslo alebo skutočnosť, že sa oba zariadenia nachádzajú v odlišných sieťach.
+> **Ak pripojenie zlyhá,** AMD Sync sa vráti na formulár so zachovanými hodnotami. Bežnými príčinami sú vypnuté SSH na Ryzen AI Halo, nesprávne heslo alebo to, že sa obe zariadenia nachádzajú v odlišných sieťach.
 
 ---
 
 ## Krok 4 — Spustite svoj prvý vzdialený nástroj
 
-Domovské zobrazenie vám ponúka päť komponentov spustiteľných jedným kliknutím — všetky dostupné bez ohľadu na to, aký operačný systém beží na klientovi a na Ryzen AI Halo.
+Domovské zobrazenie ponúka päť komponentov na jedno kliknutie — všetky dostupné bez ohľadu na to, na akom OS beží klient a Ryzen AI Halo.
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/homepage_after_connect.png" alt="AMD Sync home view with Directory dropdown and launchers"/>
@@ -119,7 +119,7 @@ Domovské zobrazenie vám ponúka päť komponentov spustiteľných jedným klik
 
 | Komponent | Čo robí |
 |-----------|--------------|
-| **Directory** | Vyberá priečinok na Ryzen AI Halo, v ktorom sa otvorí VS Code, Terminal a JupyterLab. Predvolene ide o spravovaný pracovný priestor `Documents/AMD_Sync`. |
+| **Directory** | Vyberie priečinok na Ryzen AI Halo, v ktorom sa otvorí VS Code, Terminal a JupyterLab. Predvolene je nastavený na spravovaný pracovný priestor `Documents/AMD_Sync`. |
 | **VS Code** | Otvorí VS Code lokálne s SSH tunelom do vybraného priečinka. |
 | **Terminal** | Otvorí lokálny terminál pripojený cez SSH k Ryzen AI Halo, vo vybranom priečinku. |
 | **JupyterLab** | Spustí projekt s notebookom pripojený cez SSH k Ryzen AI Halo, obmedzený na vybraný priečinok. |
@@ -131,7 +131,7 @@ Pri prvom spustení vyskúšajte **VS Code**.
 
 1. Ponechajte **Directory** na predvolenej hodnote `~/Documents/AMD_Sync`.
 2. Kliknite na **VS Code**.
-3. AMD Sync vytvorí `Documents/AMD_Sync/Project_1` na Ryzen AI Halo a otvorí VS Code lokálne, tunelovaný do tohto priečinka.
+3. AMD Sync vytvorí `Documents/AMD_Sync/Project_1` na Ryzen AI Halo a otvorí VS Code lokálne, tunelovaný do neho.
 
 Teraz upravujete súbory, ktoré sa nachádzajú na Ryzen AI Halo, pomocou svojho lokálneho nastavenia VS Code. Vytvorte `helloworld.py`, pridajte `print("hello world")`, otvorte integrovaný terminál (`` Ctrl + ` ``) a spustite ho:
 
@@ -140,46 +140,46 @@ Teraz upravujete súbory, ktoré sa nachádzajú na Ryzen AI Halo, pomocou svojh
 </div>
 
 Stavový riadok zobrazuje **SSH: Linux** — dôkaz, že váš kód beží na Ryzen AI Halo, nie na vašom notebooku.
-### Vyskúšajte Terminál
+### Vyskúšajte terminál
 
-Kliknite na tlačidlo **Terminál**, aby ste sa cez SSH dostali do rovnakého priečinka bez toho, aby ste museli opustiť klávesnicu.
+Kliknite na **Terminál**, aby ste sa cez SSH ocitli v rovnakom priečinku bez toho, aby ste opustili klávesnicu.
 
 <div align="center" style="max-width: 620px; margin: 1.5rem auto;">
   <img src="assets/terminal.png" alt="Local terminal SSH-connected to the Ryzen AI Halo in ~/Documents/AMD_Sync"/>
 </div>
 
-Vo Windows je predvoleným terminálom **PowerShell** — ak preferujete iný, prepnite na **Windows Command Prompt** v ponuke Settings. V systéme Linux používa AMD Sync váš predvolený systémový terminál.
+Vo Windows je predvoleným terminálom **PowerShell** — ak preferujete iný, prepnite na **Windows Command Prompt** v ponuke Nastavenia. V Linuxe AMD Sync používa váš predvolený systémový terminál.
 
 ---
 
-## Ako funguje priečinok Directory
+## Ako funguje priečinok
 
-Rozbaľovacia ponuka **Directory** je jediný najdôležitejší ovládací prvok v aplikácii AMD Sync — určuje, kam sa umiestni každý nástroj, ktorý spustíte na zariadení Ryzen AI Halo.
+Rozbaľovací zoznam **Priečinok** je najdôležitejší ovládací prvok v AMD Sync — určuje, kam sa umiestni každý nástroj, ktorý spustíte na Ryzen AI Halo.
 
-- **`~/Documents/AMD_Sync` (predvolené)** — Spustenie VS Code alebo JupyterLab odtiaľto automaticky vytvorí nový priečinok projektu (`Project_1`, `Project_2`, … pre VS Code; `Notebook_Project_1`, `Notebook_Project_2`, … pre JupyterLab).
-- **Existujúce priečinky projektov** — V rozbaľovacej ponuke sa zobrazí každý priamy podpriečinok `AMD_Sync` (vrátane priečinkov, ktoré manuálne vytvoríte na zariadení Ryzen AI Halo). Naposledy použitý priečinok sa nastaví ako predvolený pri ďalšom spustení.
-- **Vlastné cesty** — Zadaním ľubovoľnej absolútnej cesty otvoríte priečinok kdekoľvek inde na zariadení Ryzen AI Halo. AMD Sync ho iba *otvorí* — nevytvára priečinky mimo `AMD_Sync` a vlastné cesty sa medzi jednotlivými reláciami neukladajú.
+- **`~/Documents/AMD_Sync` (predvolené)** — Spustenie VS Code alebo JupyterLab odtiaľto automaticky vytvorí nový projektový priečinok (`Project_1`, `Project_2`, … pre VS Code; `Notebook_Project_1`, `Notebook_Project_2`, … pre JupyterLab).
+- **Existujúce projektové priečinky** — Ktorýkoľvek priamy podpriečinok `AMD_Sync` (vrátane priečinkov, ktoré vytvoríte manuálne na Ryzen AI Halo) sa zobrazí v rozbaľovacom zozname. Naposledy použitý priečinok sa stane predvoleným nabudúce.
+- **Vlastné cesty** — Zadajte akúkoľvek absolútnu cestu na otvorenie priečinka inde na Ryzen AI Halo. AMD Sync ho iba *otvorí* — nevytvára priečinky mimo `AMD_Sync` a vlastné cesty sa neukladajú medzi reláciami.
 
-Ak vlastná cesta nefunguje, AMD Sync vám oznámi prečo: neplatná syntax, priečinok neexistuje alebo cesta smeruje na súbor.
+Ak vlastná cesta nefunguje, AMD Sync vám povie prečo: neplatná syntax, priečinok neexistuje, alebo cesta smeruje na súbor.
 
 ---
 
-## Live Metrics a JupyterLab
+## Živé metriky a JupyterLab
 
-- **Live Metrics** — Živý prehľad zobrazujúci využitie GPU, pamäte a CPU. Najrýchlejší spôsob, ako potvrdiť, že vzdialený tréningový beh skutočne zaťažuje hardvér.
-- **JupyterLab** — Plnohodnotný notebookový projekt pripojený cez SSH k zariadeniu Ryzen AI Halo, s vlastným integrovaným terminálom na kombinovanie buniek notebooku a príkazov shellu bez opustenia používateľského rozhrania.
+- **Živé metriky** — Živý dashboard využitia GPU, pamäte a CPU. Najrýchlejší spôsob, ako potvrdiť, že vzdialené trénovanie skutočne zaťažuje hardvér.
+- **JupyterLab** — Plnohodnotný notebookový projekt pripojený cez SSH k Ryzen AI Halo, s vlastným integrovaným terminálom na kombinovanie buniek notebooku a príkazov shellu bez opustenia rozhrania.
 
 ---
 
 ## Nastavenia a viacero zariadení
 
-Ponuka **Settings** má tri karty:
+Ponuka **Nastavenia** má tri karty:
 
 | Karta | Čo pokrýva |
 |-----|----------------|
-| **Devices** | Zoznam všetkých zariadení Ryzen AI Halo, ku ktorým ste sa úspešne pripojili. Opätovné pripojenie, úprava prihlasovacích údajov alebo pridanie nového zariadenia. |
-| **Information** | Odkazy na dokumentáciu a podporu na fóre. |
-| **Customize** | Zmena umiestnenia aplikácie na ploche, prepnutie typu terminálu (iba Windows) a kontrola aktualizácií AMD Sync. |
+| **Zariadenia** | Zoznam všetkých Ryzen AI Halo, s ktorými ste sa úspešne pripojili. Znova sa pripojte, upravte prihlasovacie údaje alebo pridajte nové zariadenie. |
+| **Informácie** | Odkazy na dokumentáciu a podporu na fóre. |
+| **Prispôsobiť** | Presunutie aplikácie na pracovnej ploche, prepnutie typu terminálu (iba Windows) a kontrola aktualizácií AMD Sync. |
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/customize_tab.png" alt="AMD Sync Settings menu Customize tab"/>
@@ -188,18 +188,19 @@ Ponuka **Settings** má tri karty:
 
 - **Typ terminálu (Windows)** — Vyberte medzi **PowerShell** (predvolené) a **Windows Command Prompt**.
 - **Typ terminálu (Linux)** — K dispozícii je iba predvolený systémový terminál.
-- **Aktualizácie aplikácie** — Táto karta je správnym miestom na kontrolu a inštaláciu nových verzií AMD Sync priamo z používateľského rozhrania; samostatný aktualizačný nástroj nie je potrebný.
+- **Aktualizácie aplikácie** — Táto karta je správne miesto na kontrolu a inštaláciu nových verzií AMD Sync priamo z rozhrania; samostatný aktualizátor nie je potrebný.
 
-> Zariadenie sa v sekcii **Devices** zobrazí až po úspešnom prvom pripojení, takže neúspešné pokusy zoznam nezaneprazdnia.
+> Zariadenie sa v sekcii **Zariadenia** zobrazí až po úspešnom prvom pripojení, takže neúspešné pokusy nezaplnia zoznam.
 
 ---
 
 ## Riešenie problémov
 
-- **Pripojenie okamžite zlyhá** — Skontrolujte, či je SSH server povolený na karte **Remote** v Developer Center zariadenia Ryzen AI Halo.
-- **Chyba nesprávneho hesla** — Použite svoje **prihlasovacie heslo operačného systému** na zariadení Ryzen AI Halo, nie heslá prevzaté z Developer Center.
-- **Tlačidlo VS Code nič nerobí** — Nainštalujte si VS Code na svoj klientský počítač zo stránky [code.visualstudio.com](https://code.visualstudio.com).
+- **Pripojenie okamžite zlyhá** — Overte, či je na Ryzen AI Halo v karte **Remote** v Developer Center povolený SSH server.
+- **Chyba nesprávneho hesla** — Použite svoje **prihlasovacie heslo OS** na Ryzen AI Halo, nie heslá prevzaté z Developer Center.
+- **Tlačidlo VS Code nič nerobí** — Nainštalujte VS Code na svoj klientsky počítač z [code.visualstudio.com](https://code.visualstudio.com).
 - **Chýbajúca ikona AMD Sync v systémovej lište (Linux/GNOME)** — Nainštalujte a povoľte rozšírenie AppIndicator.
-- **Súbor `.deb` sa neotvorí zo správcu súborov** — Použite príkaz `sudo apt install ./AMDSyncInstaller.deb` v termináli.
+- **Súbor `.deb` sa neotvorí zo správcu súborov** — Použite `sudo apt install ./AMDSyncInstaller.deb` v termináli.
+- **Nastavenie sa objaví pri každom spustení (Linux)**: odomknite svoju prihlasovaciu kľúčenku, alebo spustite s `--password-store=gnome-libsecret` a potom nastavenie ešte raz dokončite.
 
 ---

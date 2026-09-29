@@ -6,12 +6,10 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Node.js 22.22.1 LTS เป็นเวอร์ชันที่แนะนำสำหรับแพลตฟอร์มนี้
-
 <!-- @os:windows -->
 
-1. ดาวน์โหลดตัวติดตั้ง Windows 64-bit จาก [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
-2. เรียกใช้งานตัวติดตั้งและทำตามคำแนะนำ
+1. ดาวน์โหลดตัวติดตั้งสำหรับ Windows 64-bit จาก [nodejs.org](https://nodejs.org/en/download/)
+2. เรียกใช้ตัวติดตั้งและทำตามขั้นตอนที่แนะนำ
 3. ตรวจสอบการติดตั้ง:
 ```cmd
 node --version

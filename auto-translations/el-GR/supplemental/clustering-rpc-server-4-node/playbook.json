@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server-4-node",
+  "title": "Δικτύωση σε Cluster Τεσσάρων Ryzen™ AI Halo με RPC",
+  "description": "Ρύθμιση κατανεμημένου συμπερασμού χρησιμοποιώντας διακομιστή RPC σε τέσσερις συσκευές Ryzen™ AI Halo με llama.cpp για την εκτέλεση μοντέλων 1T+",
+  "auto_translated": true
+}

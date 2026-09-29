@@ -17,17 +17,19 @@ SPDX-License-Identifier: MIT
 ## Pregled
 
 
-Želite poganjati zmogljive jezikovne modele umetne inteligence na svoji strojni opremi? Ta vodnik vam pokaže, kako.
-Ta vadnica uporablja PyTorch, ki ga poganja programska oprema AMD ROCm™, za zagon modelov, ki lahko povzemajo dokumente, odgovarjajo na vprašanja, generirajo besedilo in še več – vse to poteka lokalno.
+Želite zagnati zmogljive jezikovne modele umetne inteligence na lastni strojni opremi? Ta vodnik vam pokaže, kako.
+Ta vadnica uporablja PyTorch, ki ga poganja programska oprema AMD ROCm™, za zagon modelov, ki lahko povzemajo dokumente, odgovarjajo na vprašanja, ustvarjajo besedilo in še več, vse lokalno.
 
 ## Kaj se boste naučili
 
-- Zaganjanje jezikovnih modelov, kot sta gpt-oss-20b in qwen3.5-4B, lokalno z uporabo PyTorch in ROCm
-- Ustvarjanje orodja za povzemanje dokumentov z uporabo jezikovnih modelov
+- Zagon LLM-jev, kot sta gpt-oss-20b in qwen3.5-4B, lokalno z uporabo PyTorch in ROCm
+- Ustvarjanje orodja za povzemanje dokumentov z uporabo LLM-jev
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Nastavitev konfiguracije pomnilnika
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Preverjanje posodobitev programske opreme
@@ -36,14 +38,14 @@ Ta vadnica uporablja PyTorch, ki ga poganja programska oprema AMD ROCm™, za za
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Namestitev zahtevane programske opreme
+## Nameščanje predpogojev programske opreme
 
 ### Ustvarjanje navideznega okolja
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje navideznega okolja (venv), v katerem sta že nameščena ROCm in Pytorch.
-<!-- @test:id=create-venv timeout=120 -->
+V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv z že nameščenim ROCm+Pytorch.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -55,14 +57,14 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Dodelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev spremembe se odjavite in znova prijavite):
+**Dodelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev se odjavite in ponovno prijavite):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje navideznega okolja (venv).
-<!-- @test:id=create-venv timeout=120 -->
+V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -77,8 +79,8 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje navideznega okolja (venv), v katerem sta že nameščena ROCm in Pytorch.
-<!-- @test:id=create-venv timeout=60 -->
+V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv z že nameščenim ROCm+Pytorch.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
 pytorch-env\Scripts\activate
@@ -88,8 +90,8 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje navideznega okolja (venv).
-<!-- @test:id=create-venv timeout=60 -->
+V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
 pytorch-env\Scripts\activate
@@ -98,15 +100,15 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Nasvet**: Uporabniki sistema Windows bodo morda morali pred izvajanjem nekaterih ukazov Powershell spremeniti svojo izvedbeno politiko (Execution Policy) (npr.
-> jo nastaviti na RemoteSigned ali Unrestricted).
+> **Nasvet**: Uporabniki sistema Windows bodo morda morali spremeniti svoje pravilnik izvajanja PowerShell (npr.
+> nastaviti ga na RemoteSigned ali Unrestricted), preden zaženejo nekatere ukaze Powershell.
 
 <!-- @os:end -->
 
-### Namestitev osnovnih odvisnosti
+### Nameščanje osnovnih odvisnosti
 <!-- @require:driver,pytorch -->
 
-### Namestitev dodatnih odvisnosti
+### Nameščanje dodatnih odvisnosti
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
@@ -115,7 +117,7 @@ pytorch-env\Scripts\activate
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -123,10 +125,17 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece pro
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+> **Opomba:** Če se model ne naloži ali zmanjka pomnilnika, poskusite namestiti paket `kernels`, da naložite model z optimizirano kvantizacijo.
+>
+> ```bash
+> # Use this version which is compatible with the Transformers version
+> pip install "kernels==0.14.1" 
+> ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -141,7 +150,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -153,8 +162,8 @@ Ta priročnik vključuje pripravljene skripte za takojšnjo uporabo. Kliknite na
 
 | Skripta | Opis | Uporaba |
 |--------|-------------|-------|
-| [run_llm.py](assets/run_llm.py) | Osnovno generiranje besedila z jezikovnim modelom | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Povzemalnik dokumentov s podporo za Harmony | `python summarizer.py --file document.txt` |
+| [run_llm.py](assets/run_llm.py) | Osnovno ustvarjanje besedila z LLM | `python run_llm.py` |
+| [summarizer.py](assets/summarizer.py) | Povzemalec dokumentov s podporo za Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -180,18 +189,18 @@ for script in ['run_llm.py', 'summarizer.py']:
 <!-- @test:end -->
 
 Obe skripti podpirata:
-- Izbiro modela prek zastavice `--model`
-- Oblikovanje predloge klepeta za ustrezno pozivanje modela, kar je še posebej uporabno za povzemanje dokumentov
+- Izbiro modela s pomočjo zastavice `--model`
+- Oblikovanje predloge klepeta za pravilno pozivanje modela, kar je še posebej uporabno za povzemanje dokumentov
 
-## Nalaganje in zagon vašega prvega jezikovnega modela
+## Nalaganje in zagon vašega prvega LLM
 
-Priložena skripta [run_llm.py](assets/run_llm.py) prikazuje, kako generirati besedilo z jezikovnimi modeli z uporabo PyTorch in AMD ROCm.
+Priložena skripta [run_llm.py](assets/run_llm.py) prikazuje, kako ustvariti besedilo z LLM-ji z uporabo PyTorch in AMD ROCm.
 
-> **Opomba:** Ko naložite model, Hugging Face Transformers najprej preveri lokalni predpomnilnik (`~/.cache/huggingface/hub` v sistemu Linux, `C:\Users\<user>\.cache\huggingface\hub` v sistemu Windows). Če model ni predpomnjen, se samodejno prenese s huggingface.co. Prvi zagon lahko traja nekaj minut, odvisno od velikosti modela in hitrosti omrežja.
+> **Opomba:** Ko naložite model, Hugging Face Transformers najprej preveri svoj lokalni predpomnilnik (`~/.cache/huggingface/hub` v sistemu Linux, `C:\Users\<user>\.cache\huggingface\hub` v sistemu Windows). Če model ni predpomnjen, se samodejno prenese s huggingface.co. Prvi zagon lahko traja nekaj minut, odvisno od velikosti modela in hitrosti omrežja.
 
 Spodnji izsek prikazuje, kako uporabiti model in prilagoditi zastavljena vprašanja.
 
-<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -213,7 +222,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    disable_mmap=True
 )
 ```
 <!-- @test:end -->
@@ -264,11 +274,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Izdelava povzemalnika dokumentov
+## Izdelava povzemalca dokumentov
 
-Zdaj, ko ste generirali izhod lokalnega jezikovnega modela, lahko na tem gradite naprej z izdelavo praktičnega povzemalnika dokumentov. V tem razdelku boste uporabili skripto [summarizer.py](assets/summarizer.py) za vnos datoteke .txt in samodejno generiranje jedrnatega povzetka, vse to bo potekalo lokalno na vašem GPU-ju.
+Zdaj, ko ste ustvarili lokalni izpis LLM, lahko na tem gradite tako, da izdelate praktičen povzemalec dokumentov. V tem razdelku boste uporabili skripto [summarizer.py](assets/summarizer.py), da vnesete datoteko .txt in samodejno ustvarite jedrnat povzetek, vse pa se izvaja lokalno na vašem GPU.
 
-Skripta je zasnovana tako, da deluje takoj po namestitvi. Odprite skripto v urejevalniku, da raziščete kodo, prilagodite pozive in nastavite parametre, kot sta dolžina in temperatura.
+Skripta je zasnovana tako, da deluje takoj po namestitvi. Odprite skripto v urejevalniku, da raziščete kodo, prilagodite pozive in spremenite parametre, kot sta dolžina in temperatura.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -292,28 +302,27 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## Spoznajte parametre generiranja
+## Spoznajte parametre ustvarjanja
 
 | Parameter | Kaj nadzoruje | Tipične vrednosti |
 |-----------|------------------|----------------|
-| `max_new_tokens` | Največja dolžina izhoda jezikovnega modela | Za povzetke uporabite 50–500 žetonov. (1 žeton je približno 0,75 angleške besede) |
-| `temperature` | Ustvarjalnost. Nizke vrednosti pomenijo osredotočenost, visoke pa večjo nepredvidljivost | - **0,1–0,3**: Osredotočeno, deterministično (dobro za povzetke) <br> **0,5–0,7**: Uravnoteženo (splošna uporaba) <br> **0,8–1,0**: Ustvarjalno, raznoliko (nastajanje idej) |
-| `top_p` | Nucleus Sampling – nizke vrednosti omejijo model na ožje izhode | **0,1-0,5**: Strogo, predvidljivo <br> **0,9-0,95**: (standardno, naravno, pogovorno) |
+| `max_new_tokens` | Največjo dolžino izpisa LLM | Uporabite 50–500 žetonov za povzetke. (1 žeton je približno 0,75 angleške besede) |
+| `temperature` | Ustvarjalnost. Nizke vrednosti jo naredijo osredotočeno, visoke pa prinesejo več nepredvidljivosti | - **0,1–0,3**: Osredotočeno, deterministično (dobro za povzetke) <br> **0,5–0,7**: Uravnoteženo (splošna uporaba) <br> **0,8–1,0**: Ustvarjalno, raznoliko (viharjenje idej) |
+| `top_p` | Nucleus Sampling - nizke vrednosti omejijo model na ožje izpise | **0,1–0,5**: Strogo, predvidljivo <br> **0,9–0,95**: (standardno, naravno, pogovorno) |
 
 
-## Uporaba v resničnem svetu
+## Primeri uporabe v resničnem svetu
 
-- **Analiza raziskovalnih člankov**: Izluščite ključne ugotovitve iz zapletenih publikacij za hiter pregled
-- **Zbiranje novic**: Povzemite novičarske članke v kratke dnevne izvlečke ali poudarke
-- **Zapiski sestankov**: Strnite transkripte v konkretne naloge in jedrnate povzetke
+- **Analiza raziskovalnih člankov**: Izluščite ključne ugotovitve iz kompleksnih publikacij za hiter pregled
+- **Zbiranje novic**: Povzemite novičarske članke v kratke dnevne povzetke ali izpostavljene vsebine
+- **Zapiski sestankov**: Strnite prepise v izvedljive naloge in jedrnate povzetke
 - **Pregled pravnih dokumentov**: Hitro izluščite ustrezne klavzule ali obveznosti iz dolgih pravnih besedil
-- **Dokumentacija kode**: Generirajte jedrnate preglede repozitorijev in razlage funkcij
-
+- **Dokumentacija kode**: Ustvarite jedrnate preglede repozitorijev in razlage funkcij
 ## Naslednji koraki
 
-- **Fino uravnavanje**: Prilagodite modele svojemu specifičnemu področju ali žargonu za boljšo natančnost (glejte priročnike za fino uravnavanje)
-- **Sistemi RAG**: Združite jezikovne modele s pridobivanjem dokumentov za kontekstualno ozaveščene odgovore in iskanje
+- **Fino prilagajanje**: Prilagodite modele svojemu specifičnemu področju ali žargonu za boljšo natančnost (glejte Fine-tuning Playbooks)
+- **RAG sistemi**: Kombinirajte LLM-je s pridobivanjem dokumentov za kontekstualno ozaveščene odgovore in iskanje
 - **Raziskovanje modelov**: Eksperimentirajte z novimi modeli, kot so Llama 3, Phi-3 ali Qwen, za boljše rezultate
-- **Produkcijska uvedba**: Uporabite orodja, kot je vLLM, za skalabilno strežbo jezikovnih modelov v organizacijah
+- **Produkcijska uvedba**: Uporabite orodja, kot je vLLM, za skalabilno serviranje LLM-jev v organizacijah
 
-Vaš sistem vam omogoča moč za lokalno poganjanje sofisticiranih jezikovnih modelov. Eksperimentirajte z različnimi modeli, pozivi in parametri, da odkrijete, kaj najbolje deluje za vaše aplikacije.
+Vaš sistem vam omogoča moč za lokalno zagon dovršenih jezikovnih modelov. Eksperimentirajte z različnimi modeli, pozivi in parametri, da odkrijete, kaj najbolje deluje za vaše aplikacije.

@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA είναι το framework ανοιχτού κώδικα της AMD για τη δημιουργία AI agents που εκτελούνται τοπικά σε υλικό AMD με επιτάχυνση Ryzen AI.
+GAIA είναι το ανοιχτού κώδικα πλαίσιο εργασίας της AMD για τη δημιουργία AI agents που εκτελούνται τοπικά σε υλικό AMD με επιτάχυνση Ryzen AI.
 
 #### Εγκατάσταση του GAIA
 
@@ -31,7 +31,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. Στο Linux, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -72,7 +72,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. Στο Linux, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -93,7 +93,7 @@ pip install amd-gaia
 
 3. Αρχικοποίηση του GAIA
 
-Μετά την εγκατάσταση, εκτελέστε το `gaia init` για να ρυθμίσετε τον Lemonade Server και να κατεβάσετε μοντέλα:
+Μετά την εγκατάσταση, εκτελέστε την εντολή `gaia init` για να ρυθμίσετε τον Lemonade Server και να κατεβάσετε μοντέλα:
 
 ```bash
 gaia init
@@ -279,9 +279,9 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Επαλήθευση της εγκατάστασης
+#### Επαλήθευση Εγκατάστασης
 
-Επαληθεύστε ότι είναι εγκατεστημένο το GAIA v0.16.2 ή νεότερη έκδοση:
+Επαληθεύστε ότι έχει εγκατασταθεί το GAIA v0.16.2 ή νεότερη έκδοση:
 
 ```bash
 gaia --version
@@ -289,4 +289,4 @@ gaia --version
 
 > **Σημαντικό**: Βεβαιωθείτε ότι ο Lemonade Server εκτελείται πριν χρησιμοποιήσετε το GAIA. Το GAIA απαιτεί να έχει εκκινηθεί χειροκίνητα ο Lemonade Server.
 
-Για περισσότερες πληροφορίες, δείτε την [τεκμηρίωση του GAIA](https://amd-gaia.ai).
+Για περισσότερες πληροφορίες, δείτε την [τεκμηρίωση GAIA](https://amd-gaia.ai).

@@ -16,29 +16,31 @@ SPDX-License-Identifier: MIT
 
 ## Översikt
 
-Ollama är ett populärt lättviktsverktyg för att köra stora språkmodeller lokalt. Det hanterar modellnedladdning, kvantisering och servering bakom ett enkelt kommandoradsgränssnitt och en skrivbordsapp, så att du kan gå från noll till att chatta med en LLM på några minuter.
+Ollama är ett populärt lättviktsverktyg för att köra stora språkmodeller lokalt. Det hanterar nedladdning av modeller, kvantisering och servering bakom ett enkelt kommandoradsgränssnitt och en skrivbordsapp, så att du kan gå från noll till att chatta med en LLM på några minuter.
 
-Denna spelbok guidar dig genom installation av Ollama, hämtning av modellen GPT-OSS 20B och att föra en konversation med den, både via terminalen och skrivbordsappen.
+Den här handledningen guidar dig genom installationen av Ollama, hämtningen av modellen GPT-OSS 20B och hur du för en konversation med den, både via terminalen och skrivbordsappen.
 
 ## Vad du kommer att lära dig
 
 - Hur du installerar och startar Ollama på ditt system
 - Hämta och kör modellen GPT-OSS 20B lokalt
-- Chatta med modeller via CLI:t
+- Chatta med modeller med hjälp av CLI
 - Fråga modeller programmatiskt via REST-API:et
 
-## Ställa in minneskonfigurationen
+<!-- @device:halo_box,halo,stx,krk -->
+## Ange minneskonfigurationen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Kontrollera efter programuppdateringar
+## Kontrollera om det finns programvaruuppdateringar
 > **Obs**: Om VS Code inte är installerat kan du installera det med Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Installera förutsättningar för programvara
+## Installera nödvändig programvara
 
 <!-- @require:driver -->
 
@@ -48,7 +50,7 @@ Denna spelbok guidar dig genom installation av Ollama, hämtning av modellen GPT
 
 1. Ladda ner installationsprogrammet från [ollama.com/download](https://ollama.com/download).
 2. Kör `.exe`-installationsprogrammet och följ anvisningarna.
-3. När det är installerat körs Ollama som en bakgrundstjänst och är tillgängligt från terminalen, skrivbordsappen och systemfältet.
+3. Efter installationen körs Ollama som en bakgrundstjänst och är tillgängligt via terminalen, skrivbordsappen och systemfältet.
 
 Verifiera installationen genom att öppna en terminal och köra:
 
@@ -90,13 +92,13 @@ Du bör se det installerade versionsnumret skrivas ut i konsolen.
 
 ## Hämta din första modell
 
-Ollama hanterar modeller via ett register som liknar containeravbildningar. För att ladda ner GPT-OSS 20B:
+Ollama hanterar modeller via ett register som liknar container-avbildningar. För att ladda ner GPT-OSS 20B:
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-Detta laddar ner modellvikterna till din lokala maskin (cirka 12 GB). Nedladdningen sker bara en gång, och efterföljande körningar laddar modellen från disk.
+Detta laddar ner modellvikterna till din lokala dator (cirka 12 GB). Nedladdningen sker bara en gång, och efterföljande körningar laddar modellen från disken.
 
 Du kan bekräfta att modellen är tillgänglig med:
 
@@ -107,13 +109,42 @@ ollama list
 Du bör se `gpt-oss:20b` i utdata tillsammans med dess storlek och senaste ändringsdatum.
 
 <!-- @os:windows -->
-<!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
+<!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=180 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
-$list = (ollama list | Out-String)
-if (-not $list) { throw "ollama list returned no output" }
-if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
-Write-Host "OK: gpt-oss:20b is present in ollama list"
+$p = $null
+$startedHere = $false
+
+function Wait-OllamaApi {
+  param( [int]$MaxAttempts = 120 )
+  for ($i = 0; $i -lt $MaxAttempts; $i++) {
+    $resp = curl.exe -s --max-time 2 http://127.0.0.1:11434/api/tags
+    if ($LASTEXITCODE -eq 0 -and $resp) { return $resp }
+    Start-Sleep -Seconds 1
+  }
+  return $null
+}
+
+try {
+  # Start the Ollama server if the API is not already up.
+  $tagsJson = Wait-OllamaApi -MaxAttempts 5
+  if (-not $tagsJson) {
+    $p = Start-Process -FilePath "ollama" -ArgumentList "serve" -NoNewWindow -PassThru
+    $startedHere = $true
+    $tagsJson = Wait-OllamaApi -MaxAttempts 120
+  }
+  if (-not $tagsJson) { throw "Ollama API not ready on http://127.0.0.1:11434" }
+
+  $list = (ollama list | Out-String)
+  if (-not $list) { throw "ollama list returned no output" }
+  if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
+  Write-Host "OK: gpt-oss:20b is present in ollama list"
+}
+finally {
+  if ($startedHere -and $p -and -not $p.HasExited) {
+    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+  }
+}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -175,9 +206,9 @@ echo "OK: gpt-oss:20b is present in ollama list"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Modellbenämning
+### Namngivning av modeller
 
-Ollamas modellnamn följer formatet `name:tag`. Taggen anger vanligtvis parameterantalet eller kvantiseringsvarianten. Några användbara kommandon för att hantera modeller:
+Ollamas modellnamn följer formatet `name:tag`. Taggen anger vanligtvis antalet parametrar eller kvantiseringsvarianten. Här är några användbara kommandon för att hantera modeller:
 
 | Kommando | Beskrivning |
 |---------|-------------|
@@ -200,28 +231,28 @@ Ollama laddar modellen i minnet och tar dig till en prompt. Prova att fråga den
 >>> What is the capital of France and why is it historically significant?
 ```
 
-Modellen strömmar sitt svar token för token direkt i terminalen. Skriv `/bye` eller tryck `Ctrl+D` för att avsluta sessionen.
+Modellen strömmar sitt svar token för token direkt i terminalen. Skriv `/bye` eller tryck på `Ctrl+D` för att avsluta sessionen.
 
-> **Tips**: Den första körningen tar några sekunder att ladda modellen i minnet. Efterföljande frågor inom samma session svarar mycket snabbare eftersom modellen förblir laddad.
+> **Tips**: Den första körningen tar några sekunder att ladda modellen i minnet. Efterföljande prompter inom samma session svarar mycket snabbare eftersom modellen förblir laddad.
 
 <!-- @os:windows -->
 ## Chatta från skrivbordsappen
 
-Ollama levereras även med en skrivbordsapplikation som ger ett rent chattgränssnitt för interaktion med dina modeller.
+Ollama levereras även med en skrivbordsapplikation som ger ett rent chattgränssnitt för att interagera med dina modeller.
 
-Öppna **Ollama** från Start-menyn eller klicka på Ollama-ikonen i systemfältet och välj **Open Ollama**.
+Öppna **Ollama** från startmenyn eller klicka på Ollama-ikonen i systemfältet och välj **Open Ollama**.
 
 När appen är öppen:
 
 1. Klicka på **New Chat** i sidofältet.
-2. Välj **gpt-oss:20b** från modellrullgardinsmenyn i det nedre högra hörnet av chattinmatningsområdet.
+2. Välj **gpt-oss:20b** i modellrullgardinsmenyn längst ner till höger i chattinmatningsområdet.
 3. Skriv ett meddelande och tryck på Enter för att börja chatta.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-Skrivbordsappen håller en historik över dina konversationer i sidofältet, vilket gör det enkelt att återgå till tidigare chattar.
+Skrivbordsappen håller en historik över dina konversationer i sidofältet, vilket gör det enkelt att gå tillbaka till tidigare chattar.
 <!-- @os:end -->
 
 ## Använda REST-API:et
@@ -556,7 +587,7 @@ Svaret är ett JSON-objekt som innehåller modellens utdata i fältet `response`
 
 
 ### Python-exempel
-Nu när vi kan anropa Ollama-API:et programmatiskt, låt oss anropa det från Python.
+Nu när vi kan anropa Ollama-API:et programmatiskt, låt oss kalla på det från Python.
 
 #### Skapa en virtuell miljö i terminalen
 
@@ -577,7 +608,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### Skapa en Python-fil
-I samma katalog, använd VS Code eller en annan redigerare för att skapa en .py-fil och kopiera följande kod till den. Kör sedan filen i din aktiverade miljö med `python your_file_name.py`
+I samma katalog använder du VS Code eller en annan redigerare för att skapa en .py-fil och kopiera följande kod till den. Kör sedan filen i din aktiverade miljö med `python your_file_name.py`
 
 ```python
 import requests
@@ -598,17 +629,18 @@ print(response.json()["response"])
 
 | Slutpunkt | Metod | Syfte |
 |----------|--------|---------|
-| `/api/generate` | POST | Textgenerering i en tur |
-| `/api/chat` | POST | Flerturskonversation med meddelandehistorik |
+| `/api/generate` | POST | Textgenerering i ett steg |
+| `/api/chat` | POST | Flerstegskonversation med meddelandehistorik |
 | `/api/tags` | GET | Lista tillgängliga modeller |
 | `/api/show` | POST | Visa modelldetaljer |
 | `/api/pull` | POST | Hämta en modell från registret |
 
-För fullständig API-referens, se [Ollamas API-dokumentation](https://github.com/ollama/ollama/blob/main/docs/api.md).
+För den fullständiga API-referensen, se [Ollama API-dokumentationen](https://github.com/ollama/ollama/blob/main/docs/api.md).
+
 ## Nästa steg
 
-- **Prova olika modeller**: Bläddra i [Ollama-modellbiblioteket](https://ollama.com/library) för att utforska hundratals tillgängliga modeller, från små kodningsassistenter till stora resonemangsmodeller.
-- **Skapa anpassade modeller**: Använd en [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) för att ställa in anpassade systemprompter, temperatur och andra parametrar för en skräddarsydd upplevelse.
+- **Prova olika modeller**: Bläddra i [Ollamas modellbibliotek](https://ollama.com/library) för att utforska hundratals tillgängliga modeller, från små kodningsassistenter till stora resonemangsmodeller.
+- **Skapa anpassade modeller**: Använd en [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) för att ange anpassade systemprompter, temperatur och andra parametrar för en skräddarsydd upplevelse.
 - **Bygg med API:et**: Använd klientbiblioteken för [Python](https://github.com/ollama/ollama-python) eller [JavaScript](https://github.com/ollama/ollama-js) för att integrera Ollama i dina applikationer.
 - **Anslut till gränssnitt**: Kombinera Ollama med verktyg som [Open WebUI](https://github.com/open-webui/open-webui) för ett funktionsrikt chattgränssnitt med sökning, personas och dokumentuppladdning.
 

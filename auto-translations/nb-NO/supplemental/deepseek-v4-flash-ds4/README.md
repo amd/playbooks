@@ -16,21 +16,21 @@ SPDX-License-Identifier: MIT
 
 ## Oversikt
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) er den effektivitetsfokuserte varianten av DeepSeek V4-familien — en Mixture of Experts-modell med 284 milliarder parametere og 13 milliarder aktive parametere. Ifølge [DeepSeeks tekniske rapport](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) oppnår den 79 % på SWE-bench Verified og 91,6 % på LiveCodeBench.
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) er den effektivitetsfokuserte varianten av DeepSeek V4-familien — en Mixture of Experts-modell med 284 milliarder parametere og 13 milliarder aktive parametere. Ifølge [DeepSeeks tekniske rapport](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) scorer den 79 % på SWE-bench Verified og 91,6 % på LiveCodeBench.
 
-[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) er en dedikert inferensmotor bygget spesifikt for denne modellarkitekturen. I stedet for et generelt kjøremiljø retter ds4 seg direkte mot DeepSeek V4-familien med arkitekturspesifikke kjerneoptimaliseringer for AMD ROCm™-programvare. Det er for øyeblikket en av implementasjonene med best ytelse for DeepSeek V4 Flash på Strix Halo.
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) er en dedikert inferensmotor bygget spesifikt for denne modellarkitekturen. I stedet for et generelt kjøretidsmiljø, retter ds4 seg direkte mot DeepSeek V4-familien med arkitekturspesifikke kjerneoptimaliseringer for AMD ROCm™-programvare. Det er for øyeblikket en av de best presterende implementasjonene av DeepSeek V4 Flash på Strix Halo.
 
-Denne veiledningen viser hvordan du bruker `ds4-cockpit`, et terminal-brukergrensesnitt, til å sette opp ds4, laste ned modellvekter og starte servering av DeepSeek V4 Flash lokalt på AMD Ryzen™ AI Halo Developer Platform.
+Denne veiledningen viser hvordan du bruker `ai-toolbox-cockpit`, et terminalgrensesnitt, for å sette opp ds4, laste ned modellvekter, og starte lokal servering av DeepSeek V4 Flash på AMD Ryzen™ AI Halo Developer Platform.
 
 ## Hva du vil lære
 
-- Hvordan installere og starte terminal-brukergrensesnittet `ds4-cockpit`
-- Hvordan opprette ds4 ROCm-verktøykassecontaineren
+- Hvordan installere og starte terminalgrensesnittet `ai-toolbox-cockpit`
+- Hvordan opprette ds4 ROCm-toolbox-containeren
 - Nedlasting av den anbefalte kvantiseringen for en enkelt Halo-node
 - Starte ds4-inferensserveren og eksponere et OpenAI-kompatibelt endepunkt
-- Koble et web-brukergrensesnitt eller en kodeagent til den lokale serveren
+- Koble en Web UI eller kodeagent til den lokale serveren
 
-## Konfigurere minneoppsettet
+## Angi minnekonfigurasjon
 
 <!-- @require:memory-config -->
 
@@ -38,12 +38,12 @@ Denne veiledningen viser hvordan du bruker `ds4-cockpit`, et terminal-brukergren
 
 > **Systemkrav for denne konfigurasjonen (enkelt-node IQ2_XXS med 126k kontekst):**
 > - Et Strix Halo-system med **minst 128 GB delt minne**.
-> - **BIOS-dedikert VRAM (UMA-bildebuffer) satt til minimum**, slik at det delte minnebassenget kan være så stort som mulig.
-> - GPU-ens **delte minnebasseng satt til minst 110 GB**: kjør `amd-ttm --set 110` (se minnekonfigurasjonssteget ovenfor) og start på nytt. Lavere verdier kan mislykkes med tomt-for-minne når modellen lastes med 126k kontekst. Hvis systemet ditt har mindre tilgjengelig minne, senk **Context**-verdien i servermodus i stedet.
+> - **BIOS-dedikert VRAM (UMA-rammebuffer) satt til minimum**, slik at den delte minnepoolen kan være så stor som mulig.
+> - GPU-ens **delte minnepool satt til minst 110 GB**: kjør `amd-ttm --set 110` (se trinnet for minnekonfigurasjon ovenfor) og start på nytt. Lavere verdier kan feile med minnemangel når modellen lastes med en 126k kontekst. Hvis systemet ditt har mindre tilgjengelig minne, senk i stedet **Context**-verdien i Server Mode.
 >
-> **Merk:** Prøv å sette **GPU-ens delte minnebasseng** til **110 GB** som et utgangspunkt. Hvis du støter på tomt-for-minne-feil, øk det delte minnebassenget eller senk kontekststørrelsen.
+> **Merk:** Prøv å sette **GPU-delt minnepool** til **110 GB** som et utgangspunkt. Hvis du støter på minnemangelfeil, øk den delte minnepoolen eller senk kontekststørrelsen.
 
-ds4-cockpit bruker container-verktøykasser for å kjøre ds4-motoren. Installer `podman`, `distrobox` og `pipx`:
+ai-toolbox-cockpit bruker container-toolbokser for å kjøre ds4-motoren. Installer `podman`, `distrobox`, og `pipx`:
 
 ```bash
 sudo apt update
@@ -63,28 +63,30 @@ echo "OK: podman, distrobox, and pipx are installed"
 
 ## Tilgjengelige kvantiseringer
 
-Forfatteren av ds4 tilbyr flere kvantiserte versjoner av DeepSeek V4 Flash i GGUF-format. Alle modellene nedenfor bruker kalibrering med viktighetsmatrise (imatrix), som bevarer høyere presisjon for de delene av modellen som betyr mest for koding og resonneringsoppgaver.
+ds4-forfatteren tilbyr flere kvantiserte versjoner av DeepSeek V4 Flash i GGUF-format. Alle modellene nedenfor bruker importance matrix (imatrix)-kalibrering, som bevarer høyere presisjon for de delene av modellen som betyr mest for koding og resonneringsoppgaver.
 
 | Kvantisering | Størrelse | Beskrivelse |
 |-------------|------|-------------|
 | [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 GB | Anbefalt for en enkelt 128 GB-node |
-| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | Beholder lag 37–42 med Q4-presisjon for bedre nøyaktighet. Får plass i 128 GB, men gir mindre rom for kontekst |
+| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | Beholder lag 37–42 i Q4-presisjon for bedre nøyaktighet. Passer i 128 GB, men gir mindre plass til kontekst |
 | [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Høyere kvalitet. Krever to Halo-noder via multi-node-klynging |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Valgfri tilleggsmodul for spekulativ dekoding for å forbedre genereringshastigheten |
+| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Valgfritt tillegg for spekulativ dekoding for å forbedre genereringshastigheten |
 
 **IQ2_XXS imatrix**-modellen er et godt utgangspunkt. Den passer komfortabelt på en enkelt node og etterlater nok minne til et rimelig kontekstvindu.
 
-## Installere ds4-cockpit
+## Installere ai-toolbox-cockpit
 
-[ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox) er et lett terminal-brukergrensesnitt som gjør det enkelt å komme i gang med ds4 på Strix Halo. Det håndterer opprettelse av verktøykassecontainere, nedlasting av modellvekter og oppstart av servere. Installer det med `pipx`:
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) er et lett terminalgrensesnitt som gjør det enkelt å installere ulike AI-backends. Vi bruker det til å håndtere opprettelsen av ds4-containeren vår, laste ned modellvekter, og starte servere. Installer det med `pipx`:
 
+<!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
-pipx install "git+https://github.com/kyuz0/strix-halo-ds4-toolbox.git#subdirectory=ds4-strix-halo-cockpit"
+pipx install git+https://github.com/kyuz0/ai-toolbox-cockpit.git
 ```
+<!-- @test:end -->
 
-Start cockpit:
+Start cockpiten:
 ```bash
-ds4-cockpit
+ai-toolbox-cockpit
 ```
 
 <!-- @test:id=ds4-cockpit-linux timeout=60 hidden=True -->
@@ -92,18 +94,18 @@ ds4-cockpit
 set -euo pipefail
 export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 # Verify the pipx-installed cockpit entry point is on PATH (do NOT launch the TUI).
-command -v ds4-cockpit
-echo "OK: ds4-cockpit is installed and on PATH"
+command -v ai-toolbox-cockpit
+echo "OK: ai-toolbox-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
-## Opprette verktøykassen
+## Trinn 1: Opprette toolboxen
 
-I fanen **Interactive Toolboxes** velger du den nyeste tilgjengelige/stabile verktøykassen (f.eks. `ds4-rocm-7.2.4`) og klikker **Create/Update**. Dette henter containeravbildet og oppretter verktøykassemiljøet.
+I fanen **Interactive Toolboxes** velger du den nyeste tilgjengelige/stabile toolboxen for ds4 (f.eks. `ds4-rocm-10.0`) og klikker **Create/Update**. Dette henter containerbildet og oppretter toolbox-miljøet.
 
 
 <p align="center">
-  <img src="assets/ds4-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ds4-cockpit" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ai-toolbox-cockpit" width="800"/>
 </p>
 
 <!-- @test:id=ds4-toolbox-image-linux timeout=120 hidden=True -->
@@ -113,37 +115,37 @@ export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
 
 # The toolbox version changes over time, so match the image family, not a fixed tag.
 if ! podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit (Interactive Toolboxes tab) first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit (Interactive Toolboxes tab) first."
   exit 1
 fi
 echo "OK: ds4 toolbox container image is present"
 ```
 <!-- @test:end -->
 
-## Laste ned modellen
+## Trinn 2: Laste ned modellen
 
-Gå til fanen **Model Manager**. Velg **IQ2_XXS imatrix (~80.8 GB)** fra nedtrekksmenyen og klikk **Download**. Modellfilene lagres til `~/ds4` som standard (du kan endre lagringsbanen).
+Gå til fanen **Models**. Velg først backend (ds4). Velg deretter **IQ2_XXS imatrix (~80,8 GB)** fra nedtrekksmenyen og klikk **Download**. Modellfilene lagres til `~/ds4` som standard (du kan endre lagringsstien).
 
 > **Merk:** IQ2_XXS-modellen er omtrent 80 GB, så nedlastingen kan ta en stund avhengig av tilkoblingen din. Du kan fortsette når den er ferdig.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-model-manager.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
 </p>
 
 <!-- @test:id=ds4-model-downloaded-linux timeout=60 hidden=True -->
 ```bash
 set -euo pipefail
 
-# ds4-cockpit saves model weights to ~/ds4 by default
+# ai-toolbox-cockpit saves model weights to ~/ds4 by default
 model_dir="$HOME/ds4"
 
 if [ ! -d "$model_dir" ]; then
-  echo "Model directory $model_dir does not exist. Download the model in ds4-cockpit (Model Manager tab) first."
+  echo "Model directory $model_dir does not exist. Download the model in ai-toolbox-cockpit (Model Manager tab) first."
   exit 1
 fi
 
 if ! find "$model_dir" -maxdepth 2 -iname '*.gguf' | grep -q .; then
-  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ds4-cockpit first."
+  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -156,16 +158,16 @@ fi
 ```
 <!-- @test:end -->
 
-## Starte serveren
+## Trinn 3: Starte serveren
 
-Gå til fanen **Server Mode**. Velg den nedlastede modellen og verktøykassen, og konfigurer deretter kontekststørrelse, vert og port. Når du er klar, klikk **Start ds4-server**.
+Gå til fanen **Server Mode**. Velg den nedlastede modellen og toolboxen, og konfigurer deretter kontekststørrelse, vert og port. Når du er klar, klikk **Start ds4-server**.
 
-> **Tips** En kontekststørrelse på `126000` er en fornuftig startverdi som bør passe på en enkelt node — du kan sette den høyere hvis du har minne til overs, eller lavere hvis du støter på tomt-for-minne-feil. Porten (`8000` i denne veiledningen) er vilkårlig; velg en hvilken som helst ledig port.
+> **Tips** En kontekststørrelse på `126000` er en fornuftig startverdi som bør passe på en enkelt node — du kan sette den høyere hvis du har minne til overs, eller lavere hvis du støter på minnemangelfeil. Porten (`8000` i denne veiledningen) er vilkårlig; velg hvilken som helst ledig port.
 
-> **KV Disk Cache (valgfritt).** Å slå på **KV Disk Cache** avlaster KV-mellomlageret til disk (ved **Host Cache Dir**, standard `~/.cache/ds4-kv`) slik at gjentatte systeminstruksjoner gjenopprettes fra SSD i stedet for å bli beregnet på nytt. Dette er en ytelsesoptimalisering for kodeagent-arbeidsflyter med lange, gjentatte instruksjoner, og er **ikke nødvendig** for å kjøre serveren.
+> **KV Disk Cache (valgfritt).** Å slå på **KV Disk Cache** avlaster KV-cachen til disk (i **Host Cache Dir**, standard `~/.cache/ds4-kv`) slik at gjentatte systemprompter gjenopprettes fra SSD i stedet for å bli beregnet på nytt. Dette er en ytelsesoptimalisering for kodeagent-arbeidsflyter med lange, gjentatte prompter, og er **ikke påkrevd** for å kjøre serveren.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-server-mode.png" alt="Configuring and starting the ds4 server" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
 </p>
 
 Serveren starter og lytter på port 8000, og eksponerer et OpenAI-kompatibelt API-endepunkt på `http://localhost:8000/v1`.
@@ -199,7 +201,7 @@ if [ -z "$model_file" ]; then
   model_file="$(find "$MODEL_DIR" -maxdepth 2 -iname '*.gguf' 2>/dev/null | head -1)"
 fi
 if [ -z "$model_file" ]; then
-  echo "No .gguf model found under $MODEL_DIR. Download it in ds4-cockpit first."
+  echo "No .gguf model found under $MODEL_DIR. Download it in ai-toolbox-cockpit first."
   exit 1
 fi
 model_name="$(basename "$model_file")"
@@ -207,7 +209,7 @@ model_name="$(basename "$model_file")"
 # Pick the toolbox image (version-agnostic).
 image="$(podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox' | head -1)"
 if [ -z "$image" ]; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -218,7 +220,14 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Remove any stale instance, then start ds4-server detached (same flags ds4-cockpit uses, with -d instead of -it).
+# keep-id maps the calling user into the container. Root does not need it, and as root it cannot
+# be combined with --ipc=host (crun fails to mount /dev/mqueue), so root keeps the host user namespace.
+userns=keep-id
+if [ "$(id -u)" -eq 0 ]; then
+  userns=host
+fi
+
+# Remove any stale instance, then start ds4-server detached (same flags ai-toolbox-cockpit uses, with -d instead of -it).
 podman rm -f "$CONTAINER" >/dev/null 2>&1 || true
 podman run -d --name "$CONTAINER" \
   --device /dev/dri --device /dev/kfd \
@@ -227,7 +236,7 @@ podman run -d --name "$CONTAINER" \
   --ipc=host \
   --cap-add=SYS_PTRACE \
   --security-opt label=disable \
-  --userns=keep-id \
+  --userns="$userns" \
   -p 127.0.0.1:8000:8000 \
   -v "$MODEL_DIR":/models:ro \
   "$image" \
@@ -297,24 +306,28 @@ PY
 echo "OK: ds4 server test complete; server stopped and GPU memory released"
 ```
 <!-- @test:end -->
+## Koble til et Web UI
 
-## Koble til et web-brukergrensesnitt
-
-Du kan koble til et hvilket som helst chat-grensesnitt som støtter OpenAI API-formatet. For eksempel, for å bruke HuggingFace ChatUI:
+Du kan koble til hvilket som helst chat-grensesnitt som støtter OpenAI API-formatet. For eksempel, for å bruke HuggingFace ChatUI:
 
 ```bash
-docker run -p 3000:3000 \
-  --add-host=host.docker.internal:host-gateway \
-  -e OPENAI_BASE_URL=http://host.docker.internal:8000/v1 \
+docker run --network=host \
+  -e PORT=3000 \
+  -e OPENAI_BASE_URL=http://localhost:8000/v1 \
   -e OPENAI_API_KEY=dummy \
   -v chat-ui-data:/data \
   ghcr.io/huggingface/chat-ui-db
 ```
 
-Åpne `http://localhost:3000` i nettleseren din for å begynne å chatte.
-## Koble til en kodingsagent
+Åpne `http://localhost:3000` i nettleseren din for å starte chatting.
 
-ds4-serveren eksponerer både OpenAI- og Anthropic-kompatible endepunkter, så de fleste kodingsagenter kan koble seg direkte til den. For å legge den til i kodingsagenten `pi`, kan du for eksempel legge til følgende blokk i `~/.pi/agent/models.json`:
+> **Merk:** `--network=host` setter Web UI-et på vertens nettverk slik at det kan nå ds4-serveren på `localhost` direkte. Dette holder ds4-serveren bundet til loopback (den trenger ikke å eksponeres på andre grensesnitt).
+
+> **Tips:** Web UI-porten (`3000` her, satt via `PORT`) er vilkårlig — velg en hvilken som helst ledig port hvis `3000` allerede er i bruk, og åpne den porten i nettleseren din i stedet. Sørg for at porten i `OPENAI_BASE_URL` samsvarer med porten ds4-serveren din kjører på.
+
+## Koble til en kodeagent
+
+ds4-serveren eksponerer både OpenAI- og Anthropic-kompatible endepunkter, så de fleste kodeagenter kan koble til den direkte. For eksempel, for å legge den til i `pi`-kodeagenten, legg til følgende blokk i `~/.pi/agent/models.json`:
 
 ```json
 "ds4": {
@@ -354,15 +367,15 @@ ds4-serveren eksponerer både OpenAI- og Anthropic-kompatible endepunkter, så d
 }
 ```
 
-> **Tips**: Hvis kodingsagenten eller Web UI-en din kjører på en annen maskin enn Halo-plattformen, må du videresende port 8000 via SSH:
+> **Tips**: Hvis kodeagenten eller Web UI-et ditt kjører på en annen maskin enn Halo-plattformen, må du videresende serverporten (`8000` her) via SSH:
 > ```bash
-> ssh -L 0.0.0.0:8000:localhost:8000 <halo-host-ip>
+> ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## Neste steg
 
-- **Klynging med flere noder**: Hvis du har to Halo-enheter, støtter ds4 distribusjon av Q4-modellen (~153 GB) over begge maskinene via pipeline-parallellisme. Se [ds4-toolbox-dokumentasjonen](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) for oppsettinstruksjoner.
+- **Klynging med flere noder**: Hvis du har to Halo-enheter, støtter ds4 distribuering av Q4-modellen (~153 GB) på tvers av begge maskinene via pipeline-parallellisme. Se [ds4-toolbox-dokumentasjonen](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) for oppsettsinstruksjoner.
 - **Spekulativ dekoding (MTP)**: Last ned MTP-vektene (~3,6 GB) og send `--mtp` til serveren for raskere genereringshastighet.
-- **Diskavlasting av KV-buffer**: For arbeidsflyter med kodingsagenter kan du aktivere `--kv-disk-dir` slik at gjentatte systemforespørsler gjenopprettes fra SSD i stedet for å bli beregnet på nytt hver gang.
+- **KV-cache-avlastning til disk**: For kodeagent-arbeidsflyter, aktiver `--kv-disk-dir` slik at gjentatte systemprompter gjenopprettes fra SSD i stedet for å bli beregnet på nytt hver gang.
 
 For mer informasjon, se [ds4-repositoriet](https://github.com/antirez/ds4) og [ds4-cockpit-verktøykassen](https://github.com/kyuz0/strix-halo-ds4-toolbox).

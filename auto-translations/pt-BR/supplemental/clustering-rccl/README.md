@@ -14,34 +14,34 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Clusterizando dois Ryzen™ AI Halo com RCCL
+# Clusterização de Dois Ryzen™ AI Halo com RCCL
 
 ## Visão Geral
 
-Seu Ryzen™ AI Halo já é capaz de executar modelos de linguagem de grande porte localmente. A clusterização leva isso ainda mais longe, combinando a memória de GPU de múltiplos sistemas em uma rede local, dando a você acesso a modelos ainda maiores, com raciocínio mais forte, melhor geração de código e compreensão multilíngue mais profunda, tudo inteiramente em seu próprio hardware.
+Seu Ryzen™ AI Halo já é capaz de executar modelos de linguagem de grande porte localmente. A clusterização leva isso além, combinando a memória da GPU de múltiplos sistemas em uma rede local, dando a você acesso a modelos ainda maiores, com raciocínio mais forte, melhor geração de código e compreensão multilíngue mais profunda, tudo inteiramente em seu próprio hardware.
 
-Este playbook ensina como clusterizar dois sistemas Ryzen AI Halo usando RCCL (ROCm Communication Collectives Library) com vLLM e executar o Qwen3.5-397B, um modelo com 397B de parâmetros, em ambas as máquinas com aceleração ROCm.
+Este playbook ensina como clusterizar dois sistemas Ryzen AI Halo usando o RCCL (ROCm Communication Collectives Library) com vLLM e executar o Qwen3.5-397B, um modelo com 397 bilhões de parâmetros, entre as duas máquinas com aceleração ROCm.
 
-## O Que Você Vai Aprender
+## O que Você Vai Aprender
 
 - Como estender a alocação de VRAM em sistemas Ryzen AI Halo
 - Como iniciar o vLLM com suporte a ROCm
-- Como configurar o RCCL para inferência tensor-paralela multi-nó em dois sistemas Ryzen AI Halo
-- Como executar um modelo de 397B de parâmetros em dois sistemas Ryzen AI Halo conectados em rede
+- Como configurar o RCCL para inferência tensor-paralela multi-nó entre dois sistemas Ryzen AI Halo
+- Como executar um modelo com 397 bilhões de parâmetros entre dois sistemas Ryzen AI Halo conectados em rede
 
 ## Pré-requisitos
 
 ### Hardware
 
-Este playbook requer duas unidades Ryzen AI Halo e um switch Ethernet, conectados em uma topologia estrela, com cada unidade conectada diretamente ao switch.
+Este playbook requer duas unidades Ryzen AI Halo e um switch Ethernet, conectados em uma topologia em estrela, com cada unidade ligada diretamente ao switch.
 
 | Componente | Quantidade | Descrição |
 |-----------|----------|-------------|
 | Ryzen AI Halo | 2 | Nós de computação que formam o cluster |
 | Switch Ethernet de 10Gbps | 1 | Switch central para permitir a comunicação multi-nó do Ryzen AI Halo (pelo menos 2 portas) |
-| Cabo Ethernet | 2 | Conecta cada unidade Halo ao switch (recomenda-se Cat 7 ou superior) |
+| Cabo Ethernet | 2 | Conecta cada unidade Halo ao switch (recomendado Cat 7 ou superior) |
 
-> **Nota**: São necessárias duas portas do switch Ethernet para conectar as duas unidades Ryzen AI Halo. Uma terceira porta é necessária se você acessar o modelo a partir de uma máquina cliente separada, em vez de uma das unidades Halo.
+> **Nota**: São necessárias duas portas do switch Ethernet para conectar as duas unidades Ryzen AI Halo. Uma terceira porta é necessária se você acessar o modelo a partir de uma máquina cliente separada, em vez de a partir de uma das unidades Halo.
 
 ### Software
 <!-- @os:linux -->
@@ -52,27 +52,27 @@ sudo apt install curl
 
 ## Configuração Física do Hardware
 
-> **Nota**: Realize esta etapa tanto na Máquina 1 quanto na Máquina 2.
+> **Nota**: Complete esta etapa tanto na Máquina 1 quanto na Máquina 2.
 
-Conecte cada unidade Ryzen AI Halo ao switch Ethernet usando um cabo Cat 7 (ou superior). Isso estabelece o link de 10Gbps usado para comunicação de alta velocidade entre os nós.
+Conecte cada unidade Ryzen AI Halo ao switch Ethernet usando um cabo Cat 7 (ou superior). Isso estabelece o enlace de 10Gbps usado para a comunicação de alta velocidade entre os nós.
 
 ### 1. Determinar as Interfaces de Rede
 
-Em cada máquina, encontre o nome de sua interface de rede e anote-o (ele será referido no restante das instruções como `IFNAME`). Execute:
+Em cada máquina, encontre o nome da sua interface de rede e anote-o (ele será referido no restante das instruções como `IFNAME`). Execute:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
 ```
 
-Isso exibe o nome da interface diretamente, por exemplo:
+Isso imprime o nome da interface diretamente, por exemplo:
 
 ```bash
 enp191s0
 ```
 
-### 2. Verificar as Velocidades do Link de Rede
+### 2. Verificar as Velocidades do Enlace de Rede
 
-Confirme que o link está ativo e operando na velocidade máxima verificando a velocidade da sua interface:
+Confirme que o enlace está ativo e operando na velocidade máxima verificando a velocidade da sua interface:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
@@ -86,26 +86,26 @@ Você deve ver uma velocidade de `10000Mb/s`:
 	Speed: 10000Mb/s
 ```
 
-> **Nota**: Se a velocidade for inferior a `10000Mb/s` ou o link não subir, verifique a conexão do cabo e confirme se a porta do switch está configurada para 10Gbps. Alguns switches exigem que a auto-negociação seja desabilitada e a velocidade do link definida manualmente; consulte a documentação do seu switch.
+> **Nota**: Se a velocidade for inferior a `10000Mb/s` ou o enlace não subir, verifique a conexão do cabo e confirme que a porta do switch está configurada para 10Gbps. Alguns switches exigem que a auto-negociação seja desativada e a velocidade do enlace definida manualmente; consulte a documentação do seu switch.
 
 ## Estendendo a Alocação de VRAM
 
-> **Nota**: Realize esta etapa tanto na Máquina 1 quanto na Máquina 2.
+> **Nota**: Complete esta etapa tanto na Máquina 1 quanto na Máquina 2.
 
-### Configuração de Memória para Execução de Modelos Grandes
+### Configuração de Memória para Executar Modelos Grandes
 
 No Linux, o ROCm utiliza um pool de memória compartilhada do sistema, e esse pool é configurado por padrão para metade da memória do sistema.
 
-Essa quantidade pode ser aumentada alterando a configuração de páginas do Translation Table Manager (TTM) do kernel, seguindo as instruções abaixo. A AMD recomenda definir a VRAM dedicada mínima na BIOS (0,5 GB).
+Essa quantidade pode ser aumentada alterando a configuração de páginas do Translation Table Manager (TTM) do kernel, com as instruções a seguir. A AMD recomenda definir a VRAM dedicada mínima na BIOS (0,5 GB).
 
-* Instale o utilitário pipx e adicione o caminho para os wheels instalados pelo pipx ao caminho de busca do sistema.
+* Instale o utilitário pipx e adicione o caminho dos pacotes wheel instalados pelo pipx ao caminho de busca do sistema.
 
   ```bash
   sudo apt install pipx
   pipx ensurepath
   ```
 
-* Instale o wheel amd-debug-tools a partir do PyPI.
+* Instale o pacote wheel amd-debug-tools a partir do PyPI.
   ```bash
   pipx install amd-debug-tools
   ```
@@ -120,27 +120,27 @@ Essa quantidade pode ser aumentada alterando a configuração de páginas do Tra
   amd-ttm --set 120
   ```
 
-* Reinicie o sistema para que as alterações tenham efeito.
+* Reinicie o sistema para que as alterações entrem em vigor.
 
-## Inicialização do Contêiner vLLM
+## Inicialização do Container vLLM
 
-> **Nota**: Realize esta etapa tanto na Máquina 1 quanto na Máquina 2.
+> **Nota**: Complete esta etapa tanto na Máquina 1 quanto na Máquina 2.
 
-Seu Ryzen AI Halo é fornecido com o vLLM empacotado dentro de uma imagem de contêiner pré-construída, que você executa usando o Podman, uma ferramenta de contêiner gratuita e de código aberto.
+Seu Ryzen AI Halo é fornecido com o vLLM empacotado dentro de uma imagem de container pré-construída, que você executa usando o Podman, uma ferramenta de containers gratuita e de código aberto.
 
 ### 1. Criar o Diretório de Download do Modelo
 
-Quando você servir o modelo Qwen3.5-397B neste playbook, o vLLM baixará automaticamente os pesos do modelo para o seu sistema. Para garantir que esses pesos sejam acessíveis de dentro do contêiner, primeiro crie um diretório de modelos que o contêiner possa montar:
+Ao servir o modelo Qwen3.5-397B neste playbook, o vLLM fará automaticamente o download dos pesos do modelo para o seu sistema. Para garantir que esses pesos fiquem acessíveis a partir de dentro do container, primeiro crie um diretório de modelos que o container possa montar:
 
 ```bash
 mkdir -p ~/.local/share/vLLM/models
 ```
 
-### 2. Iniciar o Contêiner vLLM
+### 2. Iniciar o Container vLLM
 
-O comando abaixo inicia o contêiner e o coloca em um shell interativo. Ele monta o diretório de modelos que você acabou de criar e passa seu `IFNAME` para `NCCL_SOCKET_IFNAME` e `GLOO_SOCKET_IFNAME`, informando ao RCCL (a biblioteca que o vLLM usa para coordenar GPUs em todo o cluster) qual interface usar.
+O comando abaixo inicia o container e o coloca em um shell interativo. Ele monta o diretório de modelos que você acabou de criar e passa o seu `IFNAME` para `NCCL_SOCKET_IFNAME` e `GLOO_SOCKET_IFNAME`, informando ao RCCL (a biblioteca que o vLLM usa para coordenar as GPUs no cluster) qual interface usar.
 
-Inicie o contêiner com:
+Inicie o container com:
 
 ```bash
 sudo podman run -it --name vllm_cluster --replace --pull missing --network=host --device /dev/kfd --device /dev/dri -v ~/.local/share/vLLM/models:/opt/vLLM/models --env HF_HOME=/opt/vLLM/models --entrypoint="bin/bash" --shm-size=64g --pids-limit=-1 -e NCCL_SOCKET_IFNAME=<IFNAME> -e GLOO_SOCKET_IFNAME=<IFNAME> oci-registry.ryai.dev/ryai-vllm:latest
@@ -150,34 +150,42 @@ sudo podman run -it --name vllm_cluster --replace --pull missing --network=host 
 
 ## Executando o Modelo no Cluster
 
-O vLLM usa o Ray para orquestrar o cluster e o RCCL para gerenciar a comunicação GPU a GPU entre os nós. Uma máquina atua como o **nó principal (head node)** (Máquina 1), coordenando a inferência. A outra se junta como um **nó de trabalho (worker node)** (Máquina 2), contribuindo com sua memória de GPU e capacidade de processamento.
+O vLLM usa o Ray para orquestrar o cluster e o RCCL para lidar com a comunicação GPU-a-GPU entre os nós. Uma máquina atua como o **nó principal** (Máquina 1), coordenando a inferência. A outra se junta como um **nó de trabalho** (Máquina 2), contribuindo com sua memória de GPU e capacidade de computação.
 
-> **Nota**: O Ray é uma dependência opcional do vLLM e só está disponível a partir do contêiner Podman pré-configurado.
+> **Nota**: O Ray é uma dependência opcional do vLLM e está disponível apenas a partir do container Podman pré-configurado.
 
-Na inicialização, o vLLM particiona o modelo entre os dois nós usando paralelismo de tensor. Uma vez carregado, a inferência prossegue como se estivesse sendo executada em um único acelerador.
+No início da execução, o vLLM fragmenta o modelo entre os dois nós usando paralelismo tensorial. Uma vez carregado, a inferência prossegue como se estivesse sendo executada em um único acelerador.
 
-### Etapa 1: Iniciar o Nó Principal do Ray (Máquina 1)
+#### Prevenindo Erros de OOM do Ray
 
-Na Máquina 1, inicie o nó principal do Ray para inicializar o cluster:
+Por padrão, o Ray monitora a memória do host em cada nó e encerra o maior processo quando o uso de memória ultrapassa 95%. No seu Ryzen™ AI Halo, a GPU e o host compartilham um único pool de memória, então carregar um modelo pode disparar um `ray.exceptions.OutOfMemoryError` e encerrar o processo de trabalho.
+
+Para evitar isso, exportaremos `RAY_memory_monitor_refresh_ms=0` em cada máquina antes de iniciar e ingressar no cluster.
+### Etapa 1: Iniciar o Ray Head Node (Máquina 1)
+
+Na Máquina 1, inicie o Ray head node para inicializar o cluster:
 
 ```bash
+export RAY_memory_monitor_refresh_ms=0
 ray start --head --port=6379 --node-ip-address=<MACHINE_1_IP> --num-gpus=1
 ```
 
-> **Encontrando `<MACHINE_1_IP>`**: Na Máquina 1, execute `hostname -I | awk '{print $1}'` para encontrar seu endereço IP local.
-### Etapa 2: Junte-se ao Cluster (Máquina 2)
+> **Localizando `<MACHINE_1_IP>`**: Na Máquina 1, execute `hostname -I | awk '{print $1}'` para encontrar seu endereço IP local.
 
-Na Máquina 2, conecte-se ao nó principal para formar o cluster:
+### Etapa 2: Ingressar no Cluster (Máquina 2)
+
+Na Máquina 2, conecte-se ao head node para formar o cluster:
 
 ```bash
+export RAY_memory_monitor_refresh_ms=0
 ray start --address=<MACHINE_1_IP>:6379 --node-ip-address=<MACHINE_2_IP> --num-gpus=1
 ```
 
-> **Encontrando `<MACHINE_2_IP>`**: Na Máquina 2, execute `hostname -I | awk '{print $1}'` para encontrar seu endereço IP local.
+> **Localizando `<MACHINE_2_IP>`**: Na Máquina 2, execute `hostname -I | awk '{print $1}'` para encontrar seu endereço IP local.
 
-### Etapa 3: Sirva o Modelo (Máquina 1)
+### Etapa 3: Servir o Modelo (Máquina 1)
 
-Na Máquina 1, inicie o servidor vLLM. Isso fará o download automático do modelo e começará a servi-lo em ambos os nós:
+Na Máquina 1, inicie o servidor vLLM. Isso fará automaticamente o download do modelo e começará a servi-lo em ambos os nós:
 
 ```bash
 vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
@@ -196,17 +204,17 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
 #### Referência de Parâmetros
 
 | Flag | Finalidade |
-|------|-----------|
-| `--port` | Porta na qual servir a API HTTP |
-| `--host` | Endereço IP ao qual vincular o servidor (`0.0.0.0` para todas as interfaces) |
+|------|---------|
+| `--port` | Porta para servir a API HTTP |
+| `--host` | Endereço IP para vincular o servidor (`0.0.0.0` para todas as interfaces) |
 | `--max-model-len` | Comprimento máximo de contexto em tokens |
 | `--gpu-memory-utilization` | Fração da memória da GPU a ser alocada (0.0–1.0) |
 | `--dtype` | Tipo de dado para os pesos do modelo |
 | `--tensor-parallel-size` | Número de GPUs para fragmentar o modelo (defina como o total de GPUs no cluster) |
 | `--distributed-executor-backend` | Backend para execução multi-nó (`ray` para implantações em cluster) |
-| `--enforce-eager` | Desabilita a compilação de CUDA graph para compatibilidade |
-| `--language-model-only` | Ignora o carregamento de componentes auxiliares do modelo (por exemplo, codificador de visão) |
-| `--reasoning-parser` | Habilita o parsing estruturado de saída de raciocínio para o modelo |
+| `--enforce-eager` | Desativa a compilação de grafos CUDA para compatibilidade |
+| `--language-model-only` | Ignora o carregamento de componentes auxiliares do modelo (por exemplo, o codificador de visão) |
+| `--reasoning-parser` | Habilita a análise estruturada de saída de raciocínio para o modelo |
 
 Para o uso completo dos parâmetros, consulte a [documentação do vLLM](https://docs.vllm.ai/en/latest/configuration/engine_args/).
 
@@ -223,16 +231,16 @@ Para conectar o Open WebUI ao seu endpoint vLLM:
 5. Em **Auth**, selecione **None** no menu suspenso
 6. Deixe **Model IDs** vazio para descobrir automaticamente todos os modelos do endpoint
 
-> **Encontrando `<MACHINE_1_IP>`**: Na Máquina 1, execute `hostname -I | awk '{print $1}'` para encontrar seu endereço IP local. Se estiver acessando o Open WebUI a partir da própria Máquina 1, você pode usar `http://localhost:7000/v1`.
+> **Localizando `<MACHINE_1_IP>`**: Na Máquina 1, execute `hostname -I | awk '{print $1}'` para encontrar seu endereço IP local. Se estiver acessando o Open WebUI a partir da própria Máquina 1, você pode usar `http://localhost:7000/v1`.
 
 ![Configurações de conexão do Open WebUI para o endpoint vLLM](assets/openwebui-connection.png)
 
-Uma vez conectado, selecione o modelo no menu suspenso de modelos do Open WebUI e comece a conversar. O modelo agora está sendo executado em ambos os seus nós Ryzen AI Halo:
+Uma vez conectado, selecione o modelo no menu suspenso de modelos no Open WebUI e comece a conversar. O modelo agora está sendo executado em ambos os seus nós Ryzen AI Halo:
 
 ![Conversando com o Qwen3.5-397B no Open WebUI](assets/openwebui-chat.png)
 
 ## Próximos Passos
 
 - **Explore outros modelos**: Descubra novos modelos no [Hugging Face](https://huggingface.co/models?&sort=trending) que se encaixem na memória de GPU combinada do seu cluster
-- **Escale para quatro nós**: Adicione mais dois sistemas Ryzen AI Halo como workers Ray adicionais para fragmentar modelos entre ainda mais GPUs. Isso requer um switch Ethernet com pelo menos quatro portas, uma para cada nó. Siga a [Etapa 2: Junte-se ao Cluster](#step-2-join-the-cluster-machine-2) em cada worker adicional e aumente `--tensor-parallel-size` de acordo
-- **Experimente outras estratégias de paralelismo**: O vLLM suporta [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) para modelos mixture-of-experts e [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) para maior throughput. Experimente `--enable-expert-parallel` e `--data-parallel-size` para encontrar a melhor configuração para sua carga de trabalho
+- **Escale para quatro nós**: Adicione mais dois sistemas Ryzen AI Halo como workers adicionais do Ray para fragmentar modelos entre ainda mais GPUs. Isso requer um switch Ethernet com pelo menos quatro portas, uma para cada nó. Siga a [Etapa 2: Ingressar no Cluster](#step-2-join-the-cluster-machine-2) em cada worker adicional e aumente o `--tensor-parallel-size` de acordo
+- **Experimente outras estratégias de paralelismo**: o vLLM oferece suporte a [expert parallel](https://docs.vllm.ai/en/latest/serving/expert_parallel_deployment/) para modelos mixture-of-experts e [data parallel](https://docs.vllm.ai/en/latest/serving/data_parallel_deployment/) para maior taxa de transferência. Experimente `--enable-expert-parallel` e `--data-parallel-size` para encontrar a melhor configuração para sua carga de trabalho

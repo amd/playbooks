@@ -1,6 +1,6 @@
 {
   "id": "pytorch-finetuning",
   "title": "Ajustement fin des LLM avec PyTorch et le logiciel AMD ROCm™",
-  "description": "Effectuer un ajustement fin (fine-tuning) de grands modèles de langage (LLM) à l'aide de PyTorch et de ROCm.",
+  "description": "Optimisez de manière fine (« fine-tune ») les grands modèles de langage (LLM) en utilisant PyTorch et ROCm.",
   "auto_translated": true
 }

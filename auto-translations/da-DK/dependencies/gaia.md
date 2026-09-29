@@ -31,7 +31,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. På Linux skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -72,7 +72,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. På Linux skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -279,7 +279,7 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Bekræftelse af installation
+#### Verificering af installationen
 
 Bekræft, at GAIA v0.16.2 eller nyere er installeret:
 

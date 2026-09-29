@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA je open-source rámec spoločnosti AMD na vytváranie AI agentov, ktoré bežia lokálne na hardvéri AMD s akceleráciou Ryzen AI.
+GAIA je open-source framework spoločnosti AMD na vytváranie AI agentov, ktorí bežia lokálne na hardvéri AMD s akceleráciou Ryzen AI.
 
 #### Inštalácia GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. V systéme Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie virtuálneho prostredia (venv).
+1. V systéme Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. V systéme Linux otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie virtuálneho prostredia (venv).
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. V systéme Linux otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. V systéme Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie virtuálneho prostredia (venv).
+1. V systéme Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. V systéme Linux otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie virtuálneho prostredia (venv).
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. V systéme Linux otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -93,7 +93,7 @@ pip install amd-gaia
 
 3. Inicializácia GAIA
 
-Po inštalácii spustite príkaz `gaia init`, ktorý nastaví Lemonade Server a stiahne modely:
+Po inštalácii spustite `gaia init`, aby ste nastavili Lemonade Server a stiahli modely:
 
 ```bash
 gaia init
@@ -281,12 +281,12 @@ fi
 
 #### Overenie inštalácie
 
-Overte, či je nainštalovaná GAIA v0.16.2 alebo novšia:
+Overte, že je nainštalovaná GAIA v0.16.2 alebo novšia:
 
 ```bash
 gaia --version
 ```
 
-> **Dôležité**: Pred použitím GAIA sa uistite, že je spustený Lemonade Server. GAIA vyžaduje, aby bol Lemonade Server spustený manuálne.
+> **Dôležité**: Pred použitím GAIA sa uistite, že beží Lemonade Server. GAIA vyžaduje, aby bol Lemonade Server spustený manuálne.
 
 Ďalšie informácie nájdete v [dokumentácii GAIA](https://amd-gaia.ai).

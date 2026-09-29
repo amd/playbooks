@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA 是 AMD 的開源框架，用於建立在 AMD 硬體上以 Ryzen AI 加速本機執行的 AI 代理程式。
+GAIA 是 AMD 的開源框架，用於建置在具備 Ryzen AI 加速功能的 AMD 硬體上本機執行的 AI 代理程式。
 
 #### 安裝 GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. 在 Windows 上，於您選擇的目錄中開啟終端機，並依照指令建立虛擬環境（venv）。
+1. 在 Windows 上，於您選擇的目錄中開啟終端機，並依照下列指令建立 venv。
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. 在 Linux 上，於您選擇的目錄中開啟終端機，並依照指令建立虛擬環境（venv）。
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. 在 Linux 上，於您選擇的目錄中開啟終端機，並依照下列指令建立 venv。
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. 在 Windows 上，於您選擇的目錄中開啟終端機，並依照指令建立虛擬環境（venv）。
+1. 在 Windows 上，於您選擇的目錄中開啟終端機，並依照下列指令建立 venv。
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. 在 Linux 上，於您選擇的目錄中開啟終端機，並依照指令建立虛擬環境（venv）。
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. 在 Linux 上，於您選擇的目錄中開啟終端機，並依照下列指令建立 venv。
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -99,7 +99,7 @@ pip install amd-gaia
 gaia init
 ```
 
-此步驟會安裝 Lemonade Server、下載預設模型，並驗證設定。
+這將安裝 Lemonade Server、下載預設模型，並驗證設定。
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,12 +281,12 @@ fi
 
 #### 驗證安裝
 
-驗證是否已安裝 GAIA v0.16.2 或更新版本：
+確認已安裝 GAIA v0.16.2 或更新版本：
 
 ```bash
 gaia --version
 ```
 
-> **重要事項**：請確保在使用 GAIA 之前已啟動 Lemonade Server。GAIA 需要手動啟動 Lemonade Server。
+> **重要事項**：在使用 GAIA 之前，請確保 Lemonade Server 正在執行中。GAIA 需要手動啟動 Lemonade Server。
 
-如需更多資訊，請參閱 [GAIA 文件](https://amd-gaia.ai)。
+如需更多資訊，請參閱[GAIA 文件](https://amd-gaia.ai)。

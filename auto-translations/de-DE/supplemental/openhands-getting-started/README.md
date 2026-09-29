@@ -16,82 +16,147 @@ SPDX-License-Identifier: MIT
 > OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
-## Überblick
+## Übersicht
 
-[OpenHands](https://github.com/All-Hands-AI/OpenHands) ist ein KI-Softwareagent,
-der Code schreiben, Befehle ausführen, im Web browsen und Dateien in einem echten
-Arbeitsbereich bearbeiten kann. Anstatt Vorschläge aus einem Chatfenster zu kopieren,
-verweisen Sie den Agenten auf einen Projektordner und lassen ihn die Arbeit erledigen:
-eine Funktion implementieren, einen Fehler beheben, Tests schreiben oder eine
-Codebasis erklären.
+[OpenHands](https://github.com/All-Hands-AI/OpenHands) ist ein KI-Software-Agent,
+der Code schreiben, Befehle ausführen, im Web browsen und Dateien in einem
+realen Arbeitsbereich bearbeiten kann. Anstatt Vorschläge aus einem Chatfenster
+zu kopieren, verweisen Sie den Agenten auf einen Projektordner und lassen ihn
+die Arbeit erledigen: eine Funktion implementieren, einen Fehler beheben,
+Tests schreiben oder eine Codebasis erklären.
 
 [Agent Canvas](https://github.com/OpenHands/agent-canvas) ist die empfohlene
-Browser-UI zum Ausführen von OpenHands. Ein einzelner `agent-canvas`-Befehl startet
-den Agent-Server, das Automatisierungs-Backend und das Web-Frontend zusammen,
-sodass Sie eine Konversation mit dem Agenten aus Ihrem Browser führen können.
+Browser-Oberfläche zum Ausführen von OpenHands. Ein einzelner Befehl `agent-canvas`
+startet den Agent-Server, das Automatisierungs-Backend und das Web-Frontend
+gemeinsam, sodass Sie eine Konversation mit dem Agenten über Ihren Browser
+führen können.
 
-Damit alles auf Ihrem AMD-System bleibt, kommuniziert der Agent mit einem lokalen
-Modell, das von Lemonade Server bereitgestellt wird. Lemonade stellt dieses Modell
-über eine OpenAI-kompatible API zur Verfügung, sodass Agent Canvas es wie jeden
-anderen OpenAI-artigen Endpunkt konfigurieren kann, während das Modell, Ihr Code
-und der Konversationskontext alle auf Ihrem Rechner verbleiben.
+Damit alles auf Ihrem AMD-System bleibt, kommuniziert der Agent mit einem
+lokalen Modell, das von Lemonade Server bereitgestellt wird. Lemonade stellt
+dieses Modell über eine OpenAI-kompatible API bereit, sodass Agent Canvas es
+wie jeden anderen OpenAI-artigen Endpunkt konfigurieren kann, während das
+Modell, Ihr Code und der Konversationskontext alle auf Ihrem Rechner bleiben.
 
-In diesem Playbook starten Sie ein lokales Modell, starten Agent Canvas, richten
-es auf dieses Modell aus und führen Ihre erste Coding-Aufgabe an einem echten
-Projektordner aus.
+In diesem Playbook starten Sie ein lokales Modell, starten Agent Canvas,
+verweisen es auf dieses Modell und führen Ihre erste Coding-Aufgabe an einem
+echten Projektordner aus.
 
 ## Was Sie lernen werden
 
 - Wie Sie Lemonade Server starten und bestätigen, dass ein lokales Modell auf
   Chat-Anfragen antwortet
 - Wie Sie Agent Canvas aus dem npm-Paket installieren und starten
-- Wie Sie Agent Canvas so konfigurieren, dass es ein lokales Lemonade-Modell als
-  LLM verwendet
+- Wie Sie Agent Canvas so konfigurieren, dass es ein lokales Lemonade-Modell
+  als LLM verwendet
 - Wie Sie eine OpenHands-Konversation starten und beobachten, wie der Agent
   Dateien bearbeitet und Befehle in einem Arbeitsbereich ausführt
-- Wie Sie überprüfen, was der Agent geändert hat, und ihn mit Folgenachrichten
-  steuern
+- Wie Sie überprüfen, was der Agent geändert hat, und ihn mit
+  Folgenachrichten steuern
 
-## Kernkonzepte
+## Grundlegende Konzepte
 
-| Konzept | Was es ist | Wo es in diesem Playbook einzuordnen ist |
+| Konzept | Was es ist | Wo es in diesem Playbook eingesetzt wird |
 | --- | --- | --- |
-| Lemonade Server | Eine lokale LLM-Serving-Plattform, die für AMD-Hardware entwickelt wurde und eine OpenAI-kompatible API bereitstellt. Ihre Daten verlassen niemals Ihren Rechner. | Führt das Modell aus, das den Agenten antreibt. |
-| OpenHands | Ein KI-Softwareagent, der Dateien liest und bearbeitet, Shell-Befehle ausführt und innerhalb eines Arbeitsbereichs im Web browst. | Der Agent, den Sie über den Chat steuern. |
-| Agent Canvas | Die Browser-UI und das Backend, die OpenHands-Konversationen ausführen und Tool-Aufrufe sowie Dateiänderungen anzeigen. | Startet den Stack und hostet Ihre Konversation. |
-| Arbeitsbereich | Der Projektordner, den der Agent lesen und ändern darf. | Das Ziel der Änderungen und Befehle des Agenten. |
+| Lemonade Server | Eine lokale LLM-Serving-Plattform für AMD-Hardware, die eine OpenAI-kompatible API bereitstellt. Ihre Daten verlassen niemals Ihren Rechner. | Führt das Modell aus, das den Agenten antreibt. |
+| OpenHands | Ein KI-Software-Agent, der Dateien liest und bearbeitet, Shell-Befehle ausführt und im Web browst, innerhalb eines Arbeitsbereichs. | Der Agent, den Sie über den Chat steuern. |
+| Agent Canvas | Die Browser-Oberfläche und das Backend, das OpenHands-Konversationen ausführt und Tool-Aufrufe sowie Dateiänderungen anzeigt. | Startet den Stack und hostet Ihre Konversation. |
+| Arbeitsbereich | Der Projektordner, den der Agent lesen und ändern darf. | Das Ziel der Bearbeitungen und Befehle des Agenten. |
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Coding-Agent-Workflows profitieren von einem größeren Modell und Kontextfenster.
-> Verwenden Sie mindestens 32 GB Systemspeicher und bevorzugen Sie 64 GB oder mehr
-> für größere GGUF-Modelle.
+> Coding-Agent-Workflows profitieren von einem größeren Modell und
+> Kontextfenster. Verwenden Sie mindestens 32 GB Systemspeicher und bevorzugen
+> Sie 64 GB oder mehr für größere GGUF-Modelle.
+<!-- @device:end -->
+
+## Festlegen der Speicherkonfiguration
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## Nach Software-Updates suchen
+
+<!-- @require:software-update -->
 <!-- @device:end -->
 
 ## Voraussetzungen
+
 
 <!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @require:lemonade,nodejs -->
+<!-- @require:lemonade -->
 <!-- @os:end -->
 
 Sie benötigen:
 
-- Lemonade Server installiert und in der Lage, das unten genannte Modell bereitzustellen.
-- Node.js 22.12 oder höher und `npm` (wird von der `agent-canvas`-CLI verwendet).
-- `uv`, den Python-Paketmanager, den Agent Canvas zur Verwaltung der Agent-Server-Umgebung
-  verwendet. Falls Ihr System dies noch nicht hat, installieren Sie es über den
+- Lemonade Server installiert und in der Lage, das unten stehende Modell
+  bereitzustellen.
+
+<!-- @os:linux -->
+- Node.js 22.12 oder höher und `npm` (wird von der `agent-canvas`-CLI
+  verwendet).
+- `uv`, der Python-Paketmanager, den Agent Canvas zur Verwaltung der
+  Agent-Server-Umgebung verwendet. Falls Ihr System dies noch nicht
+  installiert hat, installieren Sie es über den
   [uv-Installationsleitfaden](https://docs.astral.sh/uv/getting-started/installation/),
   bevor Sie Agent Canvas starten.
-- Einen Projektordner, in dem gearbeitet werden soll. Dies kann jedes lokale
+<!-- @os:end -->
+
+<!-- @os:windows -->
+- [Docker Desktop für Windows](https://docs.docker.com/desktop/setup/install/windows-install/),
+  installiert und ausgeführt. Unter Windows läuft der Agent-Canvas-Stack aus
+  dem veröffentlichten Docker-Image, das Node.js, `uv` und das Paket
+  `@openhands/agent-canvas` bündelt, sodass Sie diese nicht auf dem Host
+  installieren müssen.
+<!-- @os:end -->
+
+- Ein Projektordner, in dem Sie arbeiten möchten. Dies kann jedes lokale
   Git-Repository oder Code-Verzeichnis sein, an dem der Agent arbeiten soll.
 
-<!-- @device:halo,halo_box,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
-<!-- @device:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=prereq-clis-linux timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+lemonade --version
+node -v
+npm -v
+
+# uv is a required prerequisite (agent-canvas uses it to build its Python env).
+# Install it only if the runner doesn't already have it.
+# TODO: remove this self-provisioning once the runners ship uv by default.
+if ! command -v uv >/dev/null 2>&1; then
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+export PATH="$HOME/.local/bin:$PATH"
+uv --version
+
+echo "OK: lemonade, node, npm, and uv are all available"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=prereq-clis-windows timeout=120 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+# On Windows the Agent Canvas stack runs from the published Docker image, so the
+# only host prerequisites are Lemonade and a running Docker engine. Node.js, uv,
+# and agent-canvas are bundled inside the container.
+lemonade --version
+docker version --format "{{.Server.Version}}"
+
+Write-Host "OK: lemonade and docker are available"
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 ## 1. Lemonade Server starten
 
@@ -103,13 +168,15 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
+> **Wählen Sie ein Modell, das zu Ihrer Hardware passt.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) ist ein starkes Coding-Modell, benötigt jedoch einen großen Speicherpool. Wenn Ihr Gerät über begrenzten Speicher oder GPU-VRAM verfügt, wählen Sie stattdessen ein kleineres GGUF-Modell aus der Lemonade-Modellbibliothek und verwenden Sie diese Modell-ID durchgängig in diesem Playbook.
+
+> **Hinweis:** Der erste `lemonade run` lädt das Modell herunter, falls es noch nicht vorhanden ist, was je nach Modellgröße und Ihrer Verbindung eine Weile dauern kann.
+
 Lemonade stellt eine OpenAI-kompatible API bereit unter:
 
 ```text
 http://127.0.0.1:13305/api/v1
 ```
-
-
 
 ## 2. Das lokale Modell überprüfen
 
@@ -136,79 +203,360 @@ curl -sS "http://127.0.0.1:13305/api/v1/chat/completions" \
 
 Wenn dies ein `choices`-Array zurückgibt, ist Lemonade bereit für Agent Canvas.
 
+<!-- @os:linux -->
+<!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+
+models_json=""
+for i in $(seq 1 120); do
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/models || true)"
+  if [ -n "$models_json" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$models_json" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:13305"
+  exit 1
+fi
+echo "OK: Lemonade server is responding"
+
+export MODELS_JSON="$models_json"
+
+python3 - <<'PY'
+import json
+import os
+import sys
+
+data = json.loads(os.environ["MODELS_JSON"])
+model_id = "${lemonade_model}"
+
+entry = None
+for item in data.get("data", []):
+    if item.get("id") == model_id:
+        entry = item
+        break
+
+if entry is None:
+    print(f"Model {model_id} is not present in Lemonade /api/v1/models.")
+    sys.exit(1)
+
+if not entry.get("downloaded", False):
+    print(f"Model {model_id} is present but not downloaded in Lemonade. Please download it before running CI.")
+    sys.exit(1)
+
+print(f"OK: {model_id} model is downloaded in Lemonade")
+PY
+
+body='{
+  "model": "${lemonade_model}",
+  "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
+  "temperature": 0,
+  "max_tokens": 32
+}'
+
+out="$(curl -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d "$body")"
+
+if [ -z "$out" ]; then
+  echo "Empty response from Lemonade chat/completions"
+  exit 1
+fi
+
+echo "OK: Lemonade chat/completions returned a response"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-chat-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$modelsJson = $null
+for ($i = 0; $i -lt 120; $i++) {
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
+  if ($modelsJson) { break }
+  Start-Sleep -Seconds 1
+}
+
+if (-not $modelsJson) {throw "Lemonade server not ready on http://127.0.0.1:13305"}
+Write-Host "OK: Lemonade server is responding"
+
+$parsed = $modelsJson | ConvertFrom-Json
+$entry = $parsed.data | Where-Object { $_.id -eq "${lemonade_model}" } | Select-Object -First 1
+
+if (-not $entry) {throw "Model ${lemonade_model} is not present in Lemonade /api/v1/models."}
+if (-not $entry.downloaded) {throw "Model ${lemonade_model} is present but not downloaded in Lemonade. Please download it before running CI."}
+Write-Host "OK: ${lemonade_model} model is downloaded in Lemonade"
+
+$body = @{
+  model = "${lemonade_model}"
+  messages = @(
+    @{
+      role = "user"
+      content = "Reply with exactly: OK"
+    }
+  )
+  temperature = 0
+  max_tokens = 32
+} | ConvertTo-Json -Depth 5
+
+$tmpBody = Join-Path $env:TEMP "openhands-lemonade-chat-body.json"
+[System.IO.File]::WriteAllText($tmpBody, $body, [System.Text.UTF8Encoding]::new($false))
+
+try {
+  $out = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
+    -H "Content-Type: application/json" `
+    --data-binary "@$tmpBody"
+  if (-not $out) {throw "Empty response from Lemonade chat/completions"}
+  Write-Host "OK: Lemonade chat/completions returned a response"
+}
+finally {
+  Remove-Item $tmpBody -Force -ErrorAction SilentlyContinue
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
 ## 3. Agent Canvas installieren und starten
 
+<!-- @os:linux -->
 Installieren Sie das veröffentlichte Agent Canvas-Paket global:
 
 ```bash
 npm install -g @openhands/agent-canvas
 ```
 
-Starten Sie anschließend den vollständigen Stack von einem Terminal aus:
+<!-- @test:id=agent-canvas-version-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+# agent-canvas is expected to be provisioned on the runner. Fail loudly if it
+# isn't, rather than installing it here.
+if ! command -v agent-canvas >/dev/null 2>&1; then
+  echo "agent-canvas is not on PATH; the runner must provision it before CI runs"
+  exit 1
+fi
+
+# Prefer --version; fall back to --help if this build has no --version flag.
+agent-canvas --version || agent-canvas --help
+
+echo "OK: agent-canvas CLI is on PATH"
+```
+<!-- @test:end -->
+
+Starten Sie dann den vollständigen Stack über ein Terminal:
 
 ```bash
 agent-canvas
 ```
 
-Standardmäßig startet Agent Canvas unter `http://localhost:8000`. Öffnen Sie
-diese URL in Ihrem Browser. Falls Port 8000 bereits belegt ist, übergeben Sie
-`--port` (oder `-p`), wenn Sie Agent Canvas starten:
+Standardmäßig startet Agent Canvas unter `http://localhost:8000`. Öffnen Sie diese URL
+in Ihrem Browser. Der Port ist nicht besonders — falls 8000 bereits belegt ist, geben Sie
+beim Starten von Agent Canvas einen freien Port mit `--port` (oder `-p`) an:
 
 ```bash
 agent-canvas --port 3000
 ```
 
-Derselbe Befehl funktioniert auch in PowerShell unter Windows. Öffnen Sie dann
-stattdessen `http://localhost:3000`. Das Standard-Local-Backend sollte auf dem
-Startbildschirm als „healthy“ angezeigt werden.
+Öffnen Sie dann stattdessen `http://localhost:3000`. Das lokale Standard-Backend sollte
+auf dem Startbildschirm als „healthy“ angezeigt werden.
 
-Der Befehl `agent-canvas` startet den Agent-Server, das Automatisierungs-Backend
-und das Web-Frontend zusammen. Sie benötigen nur diesen einen Befehl, um
-OpenHands lokal auszuführen.
+Der Befehl `agent-canvas` startet den Agent-Server, das Automatisierungs-Backend und
+das Web-Frontend gemeinsam. Sie benötigen nur diesen einen Befehl, um OpenHands
+lokal auszuführen.
+
+<!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+log="/tmp/agent-canvas-ci.log"
+p=""
+cleanup() {
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+rm -f "$log"
+
+# First launch builds the agent server's uv-managed Python env, so allow a generous startup window.
+agent-canvas >"$log" 2>&1 &
+p=$!
+
+# Probe the agent-server backend health (18000/server_info), NOT just the 8000
+# ingress root: the ingress serves the static frontend and returns 200 for /
+# even when the agent-server is down.
+ok=false
+for i in $(seq 1 300); do
+  code="$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:18000/server_info || true)"
+  if [ "$code" = "200" ]; then
+    ok=true
+    break
+  fi
+  if ! kill -0 "$p" 2>/dev/null; then
+    echo "agent-canvas process exited before it finished starting"
+    break
+  fi
+  sleep 1
+done
+
+if [ "$ok" != "true" ]; then
+  echo "agent-server not ready on http://127.0.0.1:18000/server_info"
+  echo "---- agent-canvas log ----"
+  cat "$log" || true
+  exit 1
+fi
+
+echo "OK: agent-canvas agent-server is responding"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+Führen Sie unter Windows das veröffentlichte Agent Canvas-Container-Image mit Docker Desktop aus.
+Das Image bündelt den Agent-Server, das Automatisierungs-Backend und das Web-Frontend, sodass Sie
+Node.js, `uv` oder die CLI nicht auf dem Host installieren müssen.
+
+Erstellen Sie zunächst die Konfigurations- und Workspace-Ordner, die der Container einbindet:
+
+```powershell
+$env:PROJECTS_PATH = Join-Path $HOME "projects"
+New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
+```
+
+Laden Sie das veröffentlichte Image herunter (es ist öffentlich, daher ist kein Login erforderlich):
+
+```powershell
+docker pull ghcr.io/openhands/agent-canvas:1.14.0
+```
+
+Starten Sie dann den Stack:
+
+```powershell
+docker run -it --rm `
+  -p 8000:8000 `
+  -v "$($env:USERPROFILE)\.openhands:/home/openhands/.openhands" `
+  -v "$($env:PROJECTS_PATH):/projects" `
+  ghcr.io/openhands/agent-canvas:1.14.0
+```
+
+Öffnen Sie `http://localhost:8000/canvas` in Ihrem Browser. Falls Port 8000 bereits
+belegt ist, ordnen Sie einen anderen Host-Port zu, zum Beispiel `-p 8080:8000`, und öffnen Sie
+stattdessen `http://localhost:8080/canvas`.
+
+> **Hinweis:** Beim ersten Start wird der Agent-Server innerhalb des Containers initialisiert,
+> sodass es eine Minute oder zwei dauern kann, bis das Backend als „healthy“ gemeldet wird.
+
+Der `.openhands`-Mount speichert Ihr LLM-Profil und Ihre Einstellungen dauerhaft über
+Container-Neustarts hinweg. Der Rest dieses Leitfadens konfiguriert alles über die Agent
+Canvas-Benutzeroberfläche in Ihrem Browser.
+
+<!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$image    = "ghcr.io/openhands/agent-canvas:1.14.0"
+$name     = "openhands-agent-canvas-ci"
+$hostPort = 18080
+
+# The image is expected to be provisioned on the runner. Fail loudly if it
+# isn't, rather than pulling it here.
+$imgId = docker images -q $image
+if (-not $imgId) {
+  throw "Image $image is not present; the runner must provision it before CI runs"
+}
+Write-Host "OK: $image is present"
+
+if (docker ps -aq -f "name=$name") { docker rm -f $name | Out-Null }
+
+try {
+  docker run -d --name $name -p "${hostPort}:8000" $image | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw "docker run failed for $image" }
+
+  # Probe the agent-server backend health through the container proxy
+  # (/server_info -> agent-server on 18000 inside the container), not just the
+  # /canvas static UI, which can return 200 while the backend is still down.
+  $ok = $false
+  for ($i = 0; $i -lt 300; $i++) {
+    $canvas = try { (Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 "http://localhost:${hostPort}/canvas").StatusCode } catch { 0 }
+    $info   = try { (Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 "http://localhost:${hostPort}/server_info").StatusCode } catch { 0 }
+    if ($canvas -eq 200 -and $info -eq 200) { $ok = $true; break }
+    $state = docker inspect -f "{{.State.Status}}" $name 2>$null
+    if ($state -ne "running") { throw "Container $name exited before it finished starting" }
+    Start-Sleep -Seconds 2
+  }
+
+  if (-not $ok) {
+    docker logs --tail 40 $name
+    throw "agent-canvas backend not healthy on http://localhost:${hostPort}/server_info"
+  }
+  Write-Host "OK: agent-canvas Docker stack is healthy (/canvas and /server_info return 200)"
+}
+finally {
+  if (docker ps -aq -f "name=$name") { docker rm -f $name | Out-Null }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 ## 4. Das lokale LLM konfigurieren
 
 Beim ersten Start öffnet Agent Canvas einen Onboarding-Ablauf. In diesem Ablauf:
 
-1. Belassen Sie **OpenHands** als ausgewählten Agenten und klicken Sie auf **Next**.
+1. Behalten Sie **OpenHands** als ausgewählten Agenten bei und klicken Sie auf **Next**.
 2. Wählen Sie unter **Set up your LLM** die Option **Advanced**.
 3. Belassen Sie **Authentication** auf **API key**.
 4. Setzen Sie **Custom Model** auf `openai/Qwen3.6-35B-A3B-GGUF`.
 5. Setzen Sie **Base URL** auf `http://127.0.0.1:13305/api/v1`.
-6. Geben Sie bei **API Key** einen beliebigen nicht leeren Platzhalter ein, z. B.
-   `lemonade-local`. Lemonade benötigt keinen echten Schlüssel, aber der
-   OpenHands-Client benötigt einen Wert zum Senden.
+   <!-- @os:windows -->
+   > Unter Windows läuft der Stack in einem Container, der den Host unter
+   > `127.0.0.1` nicht erreichen kann. Verwenden Sie stattdessen
+   > `http://host.docker.internal:13305/api/v1`, damit der containerisierte Agent
+   > die auf dem Windows-Host laufende Lemonade-Instanz erreichen kann.
+   <!-- @os:end -->
+6. Geben Sie bei **API Key** einen beliebigen, nicht leeren Platzhalter ein, zum Beispiel `lemonade-local`.
+   Lemonade benötigt keinen echten Schlüssel, aber der OpenHands-Client benötigt
+   einen Wert zum Senden.
 7. Klicken Sie auf **Next**.
 
-Die abgeschlossenen Advanced-Einstellungen sollten wie folgt aussehen. Das
-API-Key-Feld wird von der UI maskiert.
+Die vollständig ausgefüllten Advanced-Einstellungen sollten wie folgt aussehen. Das Feld für den API-Schlüssel
+wird von der Benutzeroberfläche maskiert dargestellt.
 
-![Agent Canvas Erstnutzungs-LLM-Advanced-Einstellungen mit dem Lemonade-Modell und der lokalen Base-URL](assets/01-llm-advanced-settings.png)
+![Agent Canvas Erstnutzungs-LLM-Advanced-Einstellungen mit dem Lemonade-Modell und der lokalen Basis-URL](assets/01-llm-advanced-settings.png)
 
-Agent Canvas speichert diese Werte als LLM-Profil. Falls Ihre Version Sie
-auffordert, dieses Profil zu benennen, verwenden Sie einen Namen ohne
-Leerzeichen wie `lemonade-local`. Wenn Sie später Modelle wechseln, öffnen Sie
-**Settings > LLM** und aktualisieren Sie dieselben Advanced-Felder. Sie können
-gespeicherte Profile über die Chat-Eingabe mit dem Befehl `/model` wechseln.
+Agent Canvas speichert diese Werte als LLM-Profil. Falls Sie in Ihrer Version aufgefordert werden, dieses
+Profil zu benennen, verwenden Sie einen Namen ohne Leerzeichen wie `lemonade-local`. Wenn Sie später
+das Modell ändern, öffnen Sie **Settings > LLM** und aktualisieren Sie dieselben Advanced-Felder. Sie
+können mit dem Befehl `/model` in der Chat-Eingabe zwischen gespeicherten Profilen wechseln.
 
-## 5. Einen Arbeitsbereich öffnen
+## 5. Einen Workspace öffnen
 
-Der Agent kann nur Dateien innerhalb eines von Ihnen ausgewählten Arbeitsbereichs
-lesen und ändern. Bevor Sie eine Aufgabe starten, richten Sie Agent Canvas auf
-Ihren Projektordner aus:
+Der Agent kann nur Dateien innerhalb eines von Ihnen ausgewählten Workspace lesen und ändern. Bevor Sie
+eine Aufgabe starten, weisen Sie Agent Canvas auf Ihren Projektordner hin:
 
 1. Wählen Sie auf dem Startbildschirm **Open Workspace**.
-2. Wählen Sie den Ordner aus, der Ihr Projekt enthält (zum Beispiel ein
-   Git-Repository, an dem der Agent arbeiten soll).
-3. Starten Sie eine neue Konversation in diesem Arbeitsbereich.
+2. Wählen Sie den Ordner aus, der Ihr Projekt enthält (zum Beispiel ein Git-Repository,
+   an dem der Agent arbeiten soll).
+3. Starten Sie eine neue Unterhaltung in diesem Workspace.
 
-Alles, was der Agent tut – Dateien lesen, Befehle ausführen, Code bearbeiten –
-ist auf diesen Arbeitsbereich beschränkt.
+Alles, was der Agent tut — Dateien lesen, Befehle ausführen, Code bearbeiten — ist
+auf diesen Workspace beschränkt.
 
 ![Agent Canvas Startbildschirm nach dem Onboarding](assets/02-agent-canvas-home.png)
-## 6. Führen Sie Ihre erste Coding-Aufgabe aus
 
-Öffnen Sie den Workspace, wählen Sie das lokale LLM aus und geben Sie dann eine konkrete Aufgabe in den Chat ein. Eine gute erste Aufgabe ist klein und überprüfbar, zum Beispiel:
+## 6. Ihre erste Coding-Aufgabe ausführen
+
+Geben Sie bei geöffnetem Workspace und ausgewähltem lokalem LLM eine konkrete Aufgabe in den
+Chat ein. Eine gute erste Aufgabe ist klein und überprüfbar, zum Beispiel:
 
 ```text
 Create a new file called hello.py that defines a function greet(name) that
@@ -216,44 +564,48 @@ returns "Hello, {name}!", and add a small test that prints greet("World")
 when run as a script.
 ```
 
-Verfolgen Sie den Ablauf der Unterhaltung. OpenHands wird:
+Beobachten Sie die Zeitleiste der Unterhaltung. OpenHands wird:
 
-- den Workspace lesen, um die Struktur zu verstehen.
-- `hello.py` mit der angeforderten Funktion und einem Testblock erstellen.
-- optional `python3 hello.py` ausführen, um die Ausgabe zu überprüfen.
-- im Chat berichten, was es getan hat, sowie eventuelle Befehlsausgaben.
+- Den Workspace lesen, um die Struktur zu verstehen.
+- `hello.py` mit der angeforderten Funktion und dem Testblock erstellen.
+- Optional `python3 hello.py` ausführen, um die Ausgabe zu überprüfen.
+- Im Chat mitteilen, was getan wurde, sowie jegliche Befehlsausgabe.
 
-Sie sollten sehen, wie die neue Datei im Workspace erscheint, und die abschließende Nachricht des Agenten sollte die vorgenommene Änderung beschreiben. Dies ist der entscheidende Moment: Der Agent hat echten Code in Ihrem Projektordner geschrieben und ausgeführt.
+Sie sollten sehen, wie die neue Datei im Workspace erscheint, und die abschließende Nachricht
+des Agenten sollte die vorgenommene Änderung beschreiben. Dies ist der entscheidende Moment: Der
+Agent hat echten Code in Ihrem Projektordner geschrieben und ausgeführt.
 
-## 7. Überprüfen und steuern Sie den Agenten
+## 7. Den Agenten überprüfen und steuern
 
 Nachdem der Agent einen Schritt abgeschlossen hat, überprüfen Sie seine Arbeit, bevor Sie den nächsten akzeptieren:
 
-- **Dateiänderungen**: Verwenden Sie den Datei-Browser des Workspace oder die Diff-Ansicht des Agenten, um genau zu sehen, was hinzugefügt, geändert oder gelöscht wurde.
-- **Befehlsausgabe**: Erweitern Sie einen vom Agenten ausgeführten Befehl, um stdout, stderr und den Exit-Code zu sehen.
-- **Rückmeldungen**: Falls das Ergebnis nicht Ihren Erwartungen entspricht, antworten Sie in derselben Unterhaltung mit einer Korrektur. Der Agent behält den bisherigen Kontext bei und arbeitet an denselben Dateien weiter.
+- **Dateiänderungen**: Verwenden Sie den Workspace-Datei-Browser oder die Diff-Ansicht des Agenten,
+  um genau zu sehen, was hinzugefügt, geändert oder gelöscht wurde.
+- **Befehlsausgabe**: Erweitern Sie einen beliebigen vom Agenten ausgeführten Befehl, um stdout, stderr
+  und den Exit-Code zu sehen.
+- **Nachfragen**: Falls das Ergebnis nicht Ihren Erwartungen entspricht, antworten Sie in derselben
+  Unterhaltung mit einer Korrektur. Der Agent behält den bisherigen Kontext bei und
+  arbeitet an denselben Dateien weiter.
 
-Wenn der Test beispielsweise nicht die erwartete Begrüßung ausgibt, antworten Sie:
+Falls der Test beispielsweise nicht die erwartete Begrüßung ausgibt, antworten Sie:
 
 ```text
 The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-Der Agent wird die Datei erneut lesen, den Befehl ausführen, das Problem diagnostizieren und die Datei erneut bearbeiten – alles innerhalb derselben Unterhaltung.
-
+Der Agent wird die Datei erneut lesen, den Befehl ausführen, das Problem diagnostizieren und
+die Datei erneut bearbeiten — alles in derselben Unterhaltung.
 ## Fehlerbehebung
 
+<!-- @os:linux -->
 - **`agent-canvas` ist nicht im PATH:** Installieren Sie es erneut mit
   `npm install -g @openhands/agent-canvas` und stellen Sie sicher, dass das globale npm-Binärverzeichnis
-  im PATH enthalten ist. Führen Sie unter Windows `npm config get prefix` aus; das
-  zurückgegebene Verzeichnis, häufig `%APPDATA%\npm` oder `%USERPROFILE%\.npm-global`,
-  muss im Benutzer-PATH enthalten sein, bevor `agent-canvas` aus einem neuen
-  Terminal gestartet werden kann.
-- **`npm install -g` schlägt mit einem Berechtigungsfehler fehl:** Richten Sie ein benutzereigenes
-  globales npm-Verzeichnis ein, öffnen Sie das Terminal dann erneut und installieren Sie Agent Canvas erneut.
+  im PATH enthalten ist, bevor `agent-canvas` von einem neuen
+  Terminal aus gestartet werden kann.
+- **`npm install -g` schlägt mit einem Berechtigungsfehler fehl:** Konfigurieren Sie ein benutzereigenes
+  globales npm-Verzeichnis, öffnen Sie dann das Terminal erneut und installieren Sie Agent Canvas noch einmal.
 
-  <!-- @os:linux -->
   ```bash
   mkdir -p ~/.npm-global
   npm config set prefix ~/.npm-global
@@ -261,51 +613,73 @@ Der Agent wird die Datei erneut lesen, den Befehl ausführen, das Problem diagno
   . ~/.profile
   npm install -g @openhands/agent-canvas
   ```
-  <!-- @os:end -->
-
-  <!-- @os:windows -->
-  ```powershell
-  New-Item -ItemType Directory -Force "$env:USERPROFILE\.npm-global"
-  npm config set prefix "$env:USERPROFILE\.npm-global"
-  $env:Path = "$env:USERPROFILE\.npm-global;$env:Path"
-  npm install -g @openhands/agent-canvas
-  ```
-
-  Um die Windows-PATH-Änderung dauerhaft zu machen, fügen Sie `%USERPROFILE%\.npm-global` zu
-  Ihrem Benutzer-PATH unter **Einstellungen > System > Info > Erweiterte Systemeinstellungen >
-  Umgebungsvariablen** hinzu und öffnen Sie ein neues Terminal.
-  <!-- @os:end -->
-- **Die Benutzeroberfläche lädt, aber das Backend zeigt „unhealthy“ an:** Warten Sie einige Sekunden, bis der
-  Agent-Server den Startvorgang abgeschlossen hat, und aktualisieren Sie dann die Seite. Bleibt der Status weiterhin „unhealthy“, starten Sie
-  `agent-canvas` neu und überprüfen Sie die Terminal-Ausgabe auf Fehler.
-- **Lemonade-Chat-Anfragen schlagen mit einem Verbindungsfehler fehl:** Stellen Sie sicher, dass
-  `curl -fsS "http://127.0.0.1:13305/api/v1/health"` erfolgreich ausgeführt wird und dass
-  Lemonade das Modell weiterhin bereitstellt, mit `lemonade status`.
-- **Der Agent meldet einen Fehler zur Kontextlänge oder zum Token-Limit:** Starten Sie
-  Lemonade mit einem größeren `ctx_size` neu (zum Beispiel `ctx_size=65536`), und beginnen Sie eine
-  neue Unterhaltung, damit der Agent keinen übermäßig großen Verlauf mitführt.
-- **Der Agent liefert minderwertige oder unvollständige Bearbeitungen:** Wechseln Sie zu einem größeren
-  Modell in Lemonade oder geben Sie dem Agenten eine kleinere, konkretere Aufgabe und lassen Sie ihn diese
-  abschließen, bevor Sie die nächste Änderung anfordern.
 - **`uv` fehlt:** Installieren Sie es über
   [den uv-Installationsleitfaden](https://docs.astral.sh/uv/getting-started/installation/).
   Agent Canvas verwendet `uv`, um die Python-Umgebung des Agent-Servers zu verwalten.
+<!-- @os:end -->
+
+<!-- @os:windows -->
+- **`docker pull` oder `docker run` kann keine Verbindung herstellen:** Stellen Sie sicher, dass Docker Desktop
+  läuft (das Wal-Symbol befindet sich in der Taskleiste) und dass die Engine
+  vollständig gestartet ist. `docker version` sollte sowohl einen Client- als auch einen Server-
+  Abschnitt anzeigen.
+- **Der Container startet, aber das Backend wird nie fehlerfrei:** Beim ersten
+  Start wird der Agent Server im Container initialisiert; geben Sie ihm ein bis
+  zwei Minuten Zeit und prüfen Sie dann `docker logs <container>` auf Fehler.
+- **Der Container kann Lemonade nicht erreichen:** Der Container erreicht den Host über
+  `host.docker.internal`. Stellen Sie sicher, dass Lemonade auf dem Windows-Host bereitgestellt wird, mit
+  `lemonade status`, und verwenden Sie `http://host.docker.internal:13305/api/v1` als
+  Basis-URL bei der Konfiguration des LLM.
+<!-- @os:end -->
+
+- **Die Benutzeroberfläche lädt, aber das Backend zeigt „nicht fehlerfrei“ an:** Warten Sie ein bis zwei Minuten, bis der
+  Agent Server den Startvorgang abgeschlossen hat, und aktualisieren Sie dann. Bleibt es nicht fehlerfrei, starten Sie
+  den Stack neu und prüfen Sie die Protokolle auf Fehler.
+- **Lemonade-Chatanfragen schlagen mit einem Verbindungsfehler fehl:** Stellen Sie sicher, dass
+  `curl -fsS "http://127.0.0.1:13305/api/v1/health"` erfolgreich ist und dass
+  Lemonade das Modell weiterhin bereitstellt, mit `lemonade status`.
+- **Der Agent gibt einen Fehler bezüglich Kontextlänge oder Token-Limit aus:** Starten Sie ein
+  neues Gespräch, damit der Agent keinen übergroßen Verlauf mitführt. Tritt dies weiterhin auf, starten Sie
+  Lemonade mit einer größeren `ctx_size` als dem Standardwert
+  65536 neu (zum Beispiel `ctx_size=131072`), sofern der Arbeitsspeicher dies zulässt.
+- **Der Agent erzeugt minderwertige oder unvollständige Bearbeitungen:** Wechseln Sie zu einem größeren
+  Modell in Lemonade oder geben Sie dem Agenten eine kleinere, konkretere Aufgabe und lassen Sie ihn diese
+  abschließen, bevor Sie die nächste Änderung anfordern.
 
 ## Nächste Schritte
 
-- Probieren Sie eine größere Aufgabe im selben Workspace aus, etwa das Hinzufügen einer Unit-Test-Datei oder
-  das Beheben eines bekannten Fehlers, und überprüfen Sie die Diff-Ansicht des Agenten, bevor Sie die Änderung übernehmen.
-- Verbinden Sie unter **Customize** einen MCP-Server wie GitHub oder Slack, damit
-  der Agent während der Arbeit Issues lesen oder Updates posten kann.
-- Speichern Sie mehrere LLM-Profile (ein schnelles, kleines Modell und ein leistungsstärkeres, großes Modell) und
-  wechseln Sie mit `/model` mitten in der Unterhaltung zwischen ihnen.
-- Fahren Sie fort mit [OpenHands-Automatisierungen](https://docs.openhands.dev/openhands/usage/automations/overview), um
-  wiederkehrende Entwicklungsabläufe in geplante oder ereignisgesteuerte Agent-Ausführungen umzuwandeln.
+- Probieren Sie eine größere Aufgabe im selben Arbeitsbereich aus, wie z. B. das Hinzufügen einer Unit-Test-Datei oder
+  das Beheben eines bekannten Fehlers, und überprüfen Sie den Diff des Agenten, bevor Sie die Änderung übernehmen.
+- Verbinden Sie einen MCP-Server wie GitHub oder Slack unter **Customize**, damit
+  der Agent Issues lesen oder Updates posten kann, während er arbeitet.
+- Speichern Sie mehrere LLM-Profile (ein schnelles kleines Modell und ein leistungsstärkeres großes Modell) und
+  wechseln Sie mit `/model` mitten im Gespräch zwischen ihnen.
+- Fahren Sie mit [OpenHands-Automatisierungen](https://docs.openhands.dev/openhands/usage/automations/overview) fort, um
+  wiederkehrende Entwicklungsabläufe in geplante oder ereignisgesteuerte Agentenläufe zu verwandeln.
 
 ## Ressourcen
 
 - [OpenHands-Dokumentation](https://docs.openhands.dev/)
-- [Agent Canvas – Überblick](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
+- [Agent Canvas – Übersicht](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
 - [Agent Canvas – Einrichtung](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
 - [LLM-Profile und Modellkonfiguration](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
 - [Lemonade Server-Dokumentation](https://lemonade-server.ai/docs)
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->

@@ -16,47 +16,47 @@ SPDX-License-Identifier: MIT
 
 ## סקירה כללית
 
-[ספריית Ryzen AI CVML](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) היא ערכת כלים של AMD ב-++C לראייה ממוחשבת ולמידת מכונה, המספקת יכולות תפיסה עוצמתיות במכשיר עצמו — כולל הערכת עומק, זיהוי פנים, ומעקב אחר רשת פנים (face mesh). הספרייה בנויה מעל מנהלי ההתקן של Ryzen AI, ובוחרת אוטומטית בחומרה הטובה ביותר הזמינה (GPU או NPU) להסקה (inference), ומאפשרת לכם להוסיף יכולות בינה מלאכותית לאפליקציות ++C מבלי לדאוג לאימון מודלים או לשילוב עם מסגרות עבודה (frameworks). כל העיבוד מתבצע באופן מקומי על המערכת שלכם, מה שהופך אותה לאידיאלית עבור אפליקציות רגישות לפרטיות ובעלות זמן השהיה נמוך.
+[ספריית Ryzen AI CVML](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) היא ערכת כלים ל-++C של AMD לראייה ממוחשבת ולמידת מכונה, המספקת יכולות תפיסה עוצמתיות במכשיר עצמו — כולל הערכת עומק, זיהוי פנים ומעקב אחר רשת פנים. הספרייה בנויה על גבי מנהלי ההתקן של Ryzen AI, ובוחרת אוטומטית את החומרה הזמינה הטובה ביותר (GPU או NPU) להסקה, ומאפשרת לכם להוסיף תכונות בינה מלאכותית ליישומי ++C מבלי לדאוג לאימון מודלים או לשילוב מסגרות עבודה. כל העיבוד מתבצע באופן מקומי במערכת שלכם, מה שהופך אותה לאידיאלית ליישומים רגישי פרטיות ובעלי זמן השהיה נמוך.
 
-מדריך זה ילמד אתכם כיצד להגדיר את ספריית Ryzen AI CVML, לבנות את אפליקציות הדוגמה הכלולות בה, ולהריץ זיהוי פנים על תמונת דוגמה.
+מדריך זה ילמד אתכם כיצד להגדיר את ספריית Ryzen AI CVML, לבנות את יישומי הדוגמה הכלולים, ולהריץ זיהוי פנים על תמונת דוגמה.
 
 ## מה תלמדו
 
-- כיצד להתקין דרישות קדם ולהגדיר את ספריית Ryzen AI CVML על המערכת שלכם
-- כיצד עובד ה-API של CVML ב-++C: הקשרים (contexts), אובייקטי תכונה (feature objects), ומאגרי תמונות (image buffers)
-- כיצד לבנות ולהריץ את אפליקציות הדוגמה הכלולות באמצעות CMake ו-OpenCV
+- כיצד להתקין דרישות קדם ולהגדיר את ספריית Ryzen AI CVML במערכת שלכם
+- כיצד ה-API של ++CVML C עובד: הקשרים (contexts), אובייקטי תכונות (feature objects), ומאגרי תמונות (image buffers)
+- כיצד לבנות ולהריץ את יישומי הדוגמה הכלולים באמצעות CMake ו-OpenCV
 - כיצד להריץ זיהוי פנים על תמונה עם תיבות תוחמות (bounding boxes) וציוני דרך (landmarks)
-- כיצד לשלב תכונות CVML באפליקציות ++C משלכם
+- כיצד לשלב תכונות CVML ביישומי ++C משלכם
 
 <!-- @device:halo_box -->
-## בדיקת עדכוני תוכנה
+## בדיקה לעדכוני תוכנה
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות תוכנה מוקדמות
+## התקנת דרישות קדם של תוכנה
 <!-- @require:driver -->
 
 ## תלויות נוספות
 
-לפני שתתחילו, ודאו שיש לכם את הדברים הבאים:
+לפני שתתחילו, ודאו שיש לכם את הבאים:
 
 <!-- @os:windows -->
 - [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — הורידו את `opencv-4.11.0-windows.exe`, הריצו אותו, וחלצו לתיקייה מקומית (למשל `C:\opencv`)
-- [CMake](https://cmake.org/download/) — הורידו את מתקין ה-MSI עבור Windows x86-64, ובמהלך ההתקנה בחרו ב-**"Add CMake to the system PATH for all users"**
-- [מנהל התקן Ryzen AI NPU](https://ryzenai.docs.amd.com/en/latest/inst.html) — התקינו את הגרסה העדכנית ביותר הזמינה
-- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) עם עומס העבודה "Desktop development with C++" (כולל מהדר MSVC, Windows SDK, וכלי בנייה ל-++C)
+- [CMake](https://cmake.org/download/) — הורידו את תוכנית ההתקנה MSI ל-Windows x86-64 ובמהלך ההתקנה בחרו ב-**"Add CMake to the system PATH for all users"**
+- [מנהל ההתקן NPU של Ryzen AI](https://ryzenai.docs.amd.com/en/latest/inst.html) — התקינו את הגרסה הזמינה העדכנית ביותר
+- [Visual Studio 2022 Community](https://aka.ms/vs/17/release/vs_community.exe) עם עומס העבודה "Desktop development with C++" (כולל מהדר MSVC, ערכת פיתוח Windows SDK, וכלי בנייה ל-++C)
 <!-- @os:end -->
 
 <!-- @os:linux -->
-- OpenCV 4.11 — יש לבנות מהמקור (חבילות apt ב-Ubuntu 22.04 ו-24.04 אינן מספקות גרסה 4.11). ראו [בניית OpenCV מהמקור](#building-opencv-from-source) בהמשך.
+- OpenCV 4.11 — יש לבנות מהמקור (חבילות apt ב-Ubuntu 22.04 ו-24.04 אינן מספקות את גרסה 4.11). ראו [בניית OpenCV מהמקור](#building-opencv-from-source) בהמשך.
 - CMake — התקינו באמצעות apt:
   ```bash
   sudo apt install cmake
   ```
 - Ubuntu 22.04 או 24.04 (kernel >= 6.11.0-21-generic)
-- [מנהל התקן Ryzen AI NPU](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (מתקין עבור Linux — נדרש להסקת NPU)
-- Vulkan SDK (מותקן בקטע [Vulkan SDK](#vulkan-sdk) בהמשך)
+- [מנהל ההתקן NPU של Ryzen AI](https://ryzenai.docs.amd.com/en/latest/linux.html#install-npu-drivers) (תוכנית התקנה ל-Linux — נדרש להסקה ב-NPU)
+- Vulkan SDK (מותקן בסעיף [Vulkan SDK](#vulkan-sdk) בהמשך)
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -157,13 +157,13 @@ fi
 
 ## הגדרת ספריית CVML
 
-צרו חשבון AMD בכתובת [account.amd.com](https://account.amd.com) אם אין לכם עדיין, ולאחר מכן היכנסו כדי להוריד את ספריית Ryzen AI CVML מקישור הפורטל שלהלן:
+צרו חשבון AMD בכתובת [account.amd.com](https://account.amd.com) אם עדיין אין לכם, ולאחר מכן היכנסו כדי להוריד את ספריית Ryzen AI CVML מהקישור לפורטל שלהלן:
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
 ```
 
-לאחר ההורדה, חלצו את החבילה לתיקייה מקומית (למשל, `C:\RyzenAI-Library` ב-Windows או `~/RyzenAI-Library` ב-Linux) והגדירו את משתנה הסביבה `AMD_CVML_SDK_ROOT` למיקום שאליו חילצתם:
+לאחר ההורדה, חלצו את החבילה לספרייה מקומית (למשל, `C:\RyzenAI-Library` ב-Windows או `~/RyzenAI-Library` ב-Linux) והגדירו את משתנה הסביבה `AMD_CVML_SDK_ROOT` למיקום שחולץ:
 
 <!-- @os:windows -->
 ```cmd
@@ -182,14 +182,14 @@ export AMD_CVML_SDK_ROOT=~/RyzenAI-Library
 | תיקייה | תוכן |
 |--------|----------|
 | `cmake/` | מידע אריזה עבור פונקציית `find_package` של CMake |
-| `include/` | קובצי כותרת (header files) ב-++C (`cvml-depth-estimation.h`, `cvml-face-detector.h`, `cvml-face-mesh.h`, וכו') |
-| `windows/` | קבצים בינאריים עבור Windows (קבצי `.LIB` בזמן קומפילציה ו-`.DLL`/`.GRAPHLIB`/`.AMODEL` בזמן ריצה) |
-| `linux/` | קבצים בינאריים עבור Linux (קבצי `.SO` לקומפילציה ולזמן ריצה) |
-| `samples/` | אפליקציות דוגמה נפרדות עם קוד מקור |
+| `include/` | קובצי כותרת ++C (`cvml-depth-estimation.h`, `cvml-face-detector.h`, `cvml-face-mesh.h` וכו') |
+| `windows/` | קבצים בינאריים עבור Windows (קובצי `.LIB` בזמן קומפילציה וקובצי `.DLL`/`.GRAPHLIB`/`.AMODEL` בזמן ריצה) |
+| `linux/` | קבצים בינאריים עבור Linux (קובצי `.SO` בזמן קומפילציה וריצה) |
+| `samples/` | יישומי דוגמה בודדים עם קוד מקור |
 
 <!-- @os:linux -->
 
-### הגדרה ייעודית ל-Linux
+### הגדרה ספציפית ל-Linux
 
 #### בניית OpenCV מהמקור
 
@@ -199,7 +199,7 @@ export AMD_CVML_SDK_ROOT=~/RyzenAI-Library
 sudo apt install unzip wget ubuntu-restricted-extras libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev libgtk-3-dev pkg-config ffmpeg
 ```
 
-הורידו, הגדירו ובנו את OpenCV 4.11.0 עם מודולי contrib (מקור: [מדריך התקנת OpenCV עבור Linux](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
+הורידו, הגדירו, ובנו את OpenCV 4.11.0 עם מודולי contrib (הפניה: [מדריך התקנת OpenCV ל-Linux](https://docs.opencv.org/4.11.0/d7/d9f/tutorial_linux_install.html#tutorial_linux_install_quick_build_contrib)):
 
 ```bash
 wget -O opencv-4.11.0.zip https://github.com/opencv/opencv/archive/4.11.0.zip
@@ -218,7 +218,7 @@ cmake -DBUILD_opencv_world=ON \
 cmake --build . --target install
 ```
 
-ספריות משותפות (shared libraries) מותקנות תחת `<build>/install/lib/`. השתמשו בתיקיית `install` בתור `OPENCV_INSTALL_ROOT` בשלבים הבאים.
+ספריות משותפות מותקנות תחת `<build>/install/lib/`. השתמשו בתיקיית ה-`install` בתור `OPENCV_INSTALL_ROOT` בשלבים הבאים.
 
 #### Vulkan SDK
 
@@ -271,24 +271,24 @@ done
 
 ## מושגי יסוד
 
-ספריית CVML מספקת API פשוט ב-++C שבו לכל תכונת תפיסה (הערכת עומק, זיהוי פנים, רשת פנים) יש קובץ כותרת ואובייקט תכונה משלה. אין צורך לעבוד עם מודלים גולמיים — הספרייה מטפלת בטעינת מודלים, בעיבוד מקדים, ובהסקה באופן אוטומטי.
+ספריית CVML מספקת API פשוט ב-++C שבו לכל תכונת תפיסה (הערכת עומק, זיהוי פנים, רשת פנים) יש קובץ כותרת ואובייקט תכונה משלה. אין צורך לעבוד עם מודלים גולמיים — הספרייה מטפלת אוטומטית בטעינת מודלים, עיבוד מקדים, והסקה.
 
 ### תכונות זמינות
 
 | תכונה | קובץ כותרת | תיאור |
 |---------|------------|-------------|
-| **הערכת עומק** | `cvml-depth-estimation.h` | יוצר מפות עומק לכל פיקסל מתמונות RGB |
+| **הערכת עומק** | `cvml-depth-estimation.h` | מייצר מפות עומק לכל פיקסל מתמונות RGB |
 | **זיהוי פנים** | `cvml-face-detector.h` | מזהה פנים עם תיבות תוחמות, ציוני דרך (עיניים, אף, פה), וציוני ביטחון |
-| **רשת פנים** | `cvml-face-mesh.h` | עוקב אחר גיאומטריית פנים מפורטת עם נקודות רשת צפופות |
+| **רשת פנים** | `cvml-face-mesh.h` | עוקב אחר גיאומטריה מפורטת של הפנים עם נקודות רשת צפופות |
 
 ### מודל תכנות
 
-כל אפליקציית CVML פועלת לפי אותו תבנית בת ארבעה שלבים:
+כל יישום CVML פועל לפי אותו דפוס בן ארבעה שלבים:
 
-1. **יצירת הקשר (Context)** — ה-`amd::cvml::Context` מנהל משאבים משותפים כמו רישום (logging) ובחירת מנוע הסקה (inference backend).
-2. **יצירת אובייקט תכונה** — יצירת מופע של התכונה הספציפית (למשל, `amd::cvml::DepthEstimation`) כנגד ההקשר.
+1. **יצירת הקשר (Context)** — ה-`amd::cvml::Context` מנהל משאבים משותפים כגון רישום יומן (logging) ובחירת מנוע הסקה.
+2. **יצירת אובייקט תכונה** — יצרו מופע של התכונה הספציפית (למשל, `amd::cvml::DepthEstimation`) כנגד ההקשר.
 3. **עטיפת נתוני קלט** — השתמשו ב-`amd::cvml::Image` כדי לעטוף את מאגר תמונת ה-RGB שלכם ללא העתקת נתונים.
-4. **ביצוע** — קראו לשיטת העיבוד של התכונה וקראו את התוצאות.
+4. **הפעלה** — קראו לשיטת העיבוד של התכונה וקראו את התוצאות.
 
 ```cpp
 // Step 1: Create context
@@ -312,24 +312,24 @@ depth_estimation.GenerateDepthMap(input, &output);
 context->Release();
 ```
 
-### Backend היסק
+### מנוע הסקה (Inference Backend)
 
-הספרייה בוחרת אוטומטית את החומרה הטובה ביותר (GPU או NPU) עבור כל פעולה. ניתן גם להגדיר את ה-backend באופן מפורש:
+הספרייה בוחרת אוטומטית את החומרה הטובה ביותר (GPU או NPU) עבור כל פעולה. ניתן גם להגדיר את מנוע ההסקה באופן מפורש:
 
 ```cpp
 // Let the library choose the best hardware (default)
 context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 ```
 
-> **הערה:** תכונות המשתמשות ב-backend של ONNX עבור פעולות NPU עשויות לחוות זמן אחזור (latency) ארוך יותר בעת ההפעלה הראשונה. הפעלות עוקבות יהיו מהירות יותר.
+> **הערה:** תכונות המשתמשות במנוע ONNX עבור פעולות NPU עשויות לחוות זמן אתחול ארוך יותר בהרצה הראשונה. הרצות עוקבות יהיו מהירות יותר.
 
-> **הערה:** אם מנהל ההתקן (driver) של ה-NPU אינו מותקן על המערכת היעד, ספריית Ryzen AI CVML תחזור אוטומטית לשימוש ב-backend של ה-GPU עבור פעולות ההיסק.
+> **הערה:** אם מנהל ההתקן של ה-NPU אינו מותקן במערכת היעד, ספריית Ryzen AI CVML תחזור אוטומטית לשימוש במנוע ה-GPU עבור פעולות ההסקה.
 
 ## בניית אפליקציות הדוגמה
 
-ספריית CVML כוללת אפליקציות דוגמה מוכנות לבנייה עבור כל תכונה. בואו נבנה את כולן בבת אחת.
+ספריית ה-CVML כוללת אפליקציות דוגמה מוכנות לבנייה עבור כל תכונה. הבה נבנה את כולן בבת אחת.
 
-1. הגדירו את משתנה הסביבה `OPENCV_INSTALL_ROOT` כך שיצביע על התקנת OpenCV שלכם:
+1. הגדירו את משתנה הסביבה `OPENCV_INSTALL_ROOT` כך שיצביע להתקנת OpenCV שלכם:
 
    <!-- @os:windows -->
    ```cmd
@@ -348,7 +348,7 @@ context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
    ```
    <!-- @os:end -->
 
-2. בנו את הדוגמאות באמצעות CMake:
+2. בנו את הדוגמאות בעזרת CMake:
 
    <!-- @os:windows -->
    ```cmd
@@ -370,7 +370,7 @@ context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
    ```
    <!-- @os:end -->
 
-   לאחר בנייה מוצלחת, קובצי ההרצה (executables) ממוקמים ב:
+   לאחר בנייה מוצלחת, קובצי ההרצה נמצאים במיקום הבא:
 
    <!-- @os:windows -->
    ```
@@ -388,7 +388,7 @@ context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
    ```
    <!-- @os:end -->
 
-3. לפני הרצת כל דוגמה, ודאו שקבצי זמן הריצה (runtime) של CVML נגישים:
+3. לפני הרצת כל דוגמה, ודאו שקובצי זמן הריצה של CVML נגישים:
 
    <!-- @os:windows -->
    ```cmd
@@ -411,9 +411,9 @@ context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 
 ## הרצת זיהוי פנים
 
-דוגמת זיהוי הפנים מזהה פנים בתמונה, בווידאו, או בהזנת מצלמה חיה (live camera feed). היא מציירת תיבות תוחמות (bounding boxes), ציוני ביטחון (confidence scores), וחמישה ציוני דרך (landmarks) של הפנים (שתי עיניים, אף, ושני קצוות פה) על כל פנים שזוהו.
+דוגמת זיהוי הפנים מזהה פנים בתמונה, בווידאו או בשידור חי ממצלמה. היא מציירת תיבות תוחמות, ציוני ביטחון וחמישה נקודות ציון פנים (שתי עיניים, אף ושני קצוות פה) על כל פנים שזוהו.
 
-תחילה, נווטו לתיקיית קובץ ההרצה של זיהוי הפנים:
+ראשית, נווטו לתיקיית קובץ ההרצה של זיהוי הפנים:
 
 <!-- @os:windows -->
 ```cmd
@@ -447,13 +447,13 @@ cvml-sample-face-detection.exe -i sample_face.jpg
 ```
 <!-- @os:end -->
 
-יופיע חלון שמציג את התמונה עם תיבות תוחמות סביב הפנים שזוהו, ציוני ביטחון, ונקודות ציון פנים (עיניים, אף, קצוות פה).
+יופיע חלון המציג את התמונה עם תיבות תוחמות סביב הפנים שזוהו, ציוני ביטחון, ונקודות ציון פנים (עיניים, אף, קצוות פה).
 
 <p align="center">
   <img src="assets/human_face_output.png" alt="Face detection output showing bounding box, confidence score, and facial landmarks" width="600"/>
 </p>
 
-**שמרו את הפלט המסומן (annotated) לקובץ:**
+**שמרו את הפלט המסומן לקובץ:**
 
 <!-- @os:windows -->
 ```cmd
@@ -467,7 +467,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg -o output_face.jpg
 ```
 <!-- @os:end -->
 
-**השתמשו במודל המדויק (precise)** לדיוק גבוה יותר (על חשבון המהירות):
+**השתמשו במודל המדויק** לדיוק גבוה יותר (על חשבון מהירות):
 
 <!-- @os:windows -->
 ```cmd
@@ -483,10 +483,10 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 
 תכונת זיהוי הפנים מציעה שני וריאנטים של מודל:
 
-| מודל | מהירות | דיוק | מתאים ביותר עבור |
+| מודל | מהירות | דיוק | מתאים במיוחד עבור |
 |-------|-------|----------|----------|
 | `fast` (ברירת מחדל) | FPS גבוה יותר | טוב | אפליקציות מצלמה בזמן אמת |
-| `precise` | FPS נמוך יותר | הטוב ביותר | ניתוח תמונות, צרכי דיוק גבוה |
+| `precise` | FPS נמוך יותר | מיטבי | ניתוח תמונות, צרכי דיוק גבוה |
 
 
 <!-- @os:windows -->
@@ -494,92 +494,117 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 ```powershell
 $ErrorActionPreference = "Stop"
 
-$env:AMD_CVML_SDK_ROOT = "C:\RyzenAI-Library"
-$env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv\build"
+# Build and run the samples inside a passwordless S4U scheduled task.
 
-if (-not (Test-Path $env:AMD_CVML_SDK_ROOT)) {throw "AMD_CVML_SDK_ROOT does not exist: $env:AMD_CVML_SDK_ROOT"}
-if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
+$ci = Join-Path $env:USERPROFILE "cvml-ci"
+if (Test-Path $ci) {Remove-Item -Recurse -Force $ci}
+New-Item -ItemType Directory -Force -Path $ci | Out-Null
+$innerPs = Join-Path $ci "run_cvml.ps1"
+$log = Join-Path $ci "cvml.log"
 
-$work = Join-Path (Get-Location) "cvml-test"
-if (Test-Path $work) {Remove-Item -Recurse -Force $work}
-New-Item -ItemType Directory -Force -Path $work | Out-Null
-Copy-Item -Recurse -Force -Path (Join-Path $env:AMD_CVML_SDK_ROOT "*") -Destination $work
-
-$samplesDir = Join-Path $work "samples"
-$buildDir = Join-Path $samplesDir "build"
-
-Push-Location $samplesDir
-
+# Inner script (single-quoted here-string: not expanded here). It builds the
+# samples and runs them (face detection twice, depth, and mesh), exiting
+# non-zero on any failure. Its combined stdout+stderr is redirected to cvml.log
+# by the task action below.
+$inner = @'
+$ErrorActionPreference = "Stop"
+$ci = $PSScriptRoot
+$code = 0
 try {
+  $env:AMD_CVML_SDK_ROOT = "C:\RyzenAI-Library"
+  $env:OPENCV_INSTALL_ROOT = "C:\Users\user\opencv\build"
+  if (-not (Test-Path $env:AMD_CVML_SDK_ROOT)) {throw "AMD_CVML_SDK_ROOT does not exist: $env:AMD_CVML_SDK_ROOT"}
+  if (-not (Test-Path $env:OPENCV_INSTALL_ROOT)) {throw "OPENCV_INSTALL_ROOT does not exist: $env:OPENCV_INSTALL_ROOT"}
+  $work = Join-Path $ci "work"
+  if (Test-Path $work) {Remove-Item -Recurse -Force $work}
+  New-Item -ItemType Directory -Force -Path $work | Out-Null
+  Copy-Item -Recurse -Force -Path (Join-Path $env:AMD_CVML_SDK_ROOT "*") -Destination $work
+  $samplesDir = Join-Path $work "samples"
+  $buildDir = Join-Path $samplesDir "build"
+  Push-Location $samplesDir
   New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
   foreach ($sample in @("cvml-sample-face-detection", "cvml-sample-depth-estimation", "cvml-sample-face-mesh")) {
     $mainFile = Join-Path $samplesDir "$sample\main.cpp"
     $source = Get-Content -Path $mainFile -Raw
-
     $createContextLine = "auto context = amd::cvml::CreateContext();"
     $setBackendLine = "  context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);"
-
     if ($source -notmatch "SetInferenceBackend") {
-      if (-not $source.Contains($createContextLine)) {
-        throw "Could not find CreateContext line in: $mainFile"
-      }
-
+      if (-not $source.Contains($createContextLine)) {throw "Could not find CreateContext line in: $mainFile"}
       $source = $source.Replace($createContextLine, "$createContextLine`r`n$setBackendLine")
       Set-Content -Path $mainFile -Value $source -NoNewline
     }
   }
-
   cmake -S (Get-Location).Path -B $buildDir -DOPENCV_INSTALL_ROOT="$env:OPENCV_INSTALL_ROOT" -DCMAKE_PREFIX_PATH="$env:OPENCV_INSTALL_ROOT"
   cmake --build $buildDir --config Release --parallel
-
   $faceExe = Join-Path $buildDir "cvml-sample-face-detection\Release\cvml-sample-face-detection.exe"
   $depthExe = Join-Path $buildDir "cvml-sample-depth-estimation\Release\cvml-sample-depth-estimation.exe"
   $meshExe = Join-Path $buildDir "cvml-sample-face-mesh\Release\cvml-sample-face-mesh.exe"
-
-  foreach ($exe in @($faceExe, $depthExe, $meshExe)) {
-    if (-not (Test-Path $exe)) {throw "Expected executable was not found: $exe"}
-  }
-
+  foreach ($exe in @($faceExe, $depthExe, $meshExe)) {if (-not (Test-Path $exe)) {throw "Expected executable was not found: $exe"}}
   $env:PATH = "$(Join-Path $samplesDir "..\windows");$env:PATH"
-
   $opencvRuntime = Join-Path $env:OPENCV_INSTALL_ROOT "x64\vc16\bin"
   if (-not (Test-Path $opencvRuntime)) {throw "OpenCV runtime DLL folder was not found: $opencvRuntime"}
   $env:PATH = "$opencvRuntime;$env:PATH"
-
   $inputImage = Join-Path $samplesDir "sample_face.jpg"
   curl.exe -L -o $inputImage "https://images.pexels.com/photos/895863/pexels-photo-895863.jpeg?cs=srgb&dl=pexels-jopwell-895863.jpg&fm=jpg"
-
   $outputFaceFast = Join-Path $samplesDir "output_face_fast.jpg"
   $outputFacePrecise = Join-Path $samplesDir "output_face_precise.jpg"
   $outputDepth = Join-Path $samplesDir "output_depth.jpg"
   $outputMesh = Join-Path $samplesDir "output_mesh.jpg"
-
   Push-Location (Split-Path $faceExe)
   & $faceExe -i $inputImage -o $outputFaceFast
   if ($LASTEXITCODE -ne 0) {throw "Face detection default model failed with exit code $LASTEXITCODE."}
-
   & $faceExe -i $inputImage -o $outputFacePrecise -m precise
   if ($LASTEXITCODE -ne 0) {throw "Face detection precise model failed with exit code $LASTEXITCODE."}
   Pop-Location
-
   Push-Location (Split-Path $depthExe)
   & $depthExe -i $inputImage -o $outputDepth
   if ($LASTEXITCODE -ne 0) {throw "Depth estimation failed with exit code $LASTEXITCODE."}
   Pop-Location
-
   Push-Location (Split-Path $meshExe)
   & $meshExe -i $inputImage -o $outputMesh
   if ($LASTEXITCODE -ne 0) {throw "Face mesh failed with exit code $LASTEXITCODE."}
   Pop-Location
-
   foreach ($output in @($outputFaceFast, $outputFacePrecise, $outputDepth, $outputMesh)) {
     if (-not (Test-Path $output)) {throw "Expected output image was not created: $output"}
     if ((Get-Item $output).Length -le 0) {throw "Output image is empty: $output"}
   }
+  Write-Output "CVML_ALL_SAMPLES_PASSED"
+} catch {
+  Write-Output ("CVML_ERROR: " + $_.Exception.Message)
+  $code = 1
+} finally {
+  Pop-Location -ErrorAction SilentlyContinue
+  if ($work -and (Test-Path $work)) {Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue}
+}
+exit $code
+'@
+Set-Content -Path $innerPs -Value $inner -Encoding UTF8
+
+# Run via cmd so the inner script's full stdout+stderr (cmake, curl, and every
+# sample executable, including any error text) is captured to cvml.log.
+$taskName = "cvml_ci_run"
+$action = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$innerPs`" > `"$log`" 2>&1"
+$principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType S4U -RunLevel Highest
+Register-ScheduledTask -TaskName $taskName -Action $action -Principal $principal -Force | Out-Null
+
+try {
+  Start-ScheduledTask -TaskName $taskName
+  $deadline = (Get-Date).AddSeconds(1500)
+  do {
+    Start-Sleep -Seconds 5
+    $state = (Get-ScheduledTask -TaskName $taskName).State
+  } while ($state -eq "Running" -and (Get-Date) -lt $deadline)
+
+  if (Test-Path $log) {Get-Content $log}
+
+  if ($state -eq "Running") {throw "cvml S4U task did not finish within the time limit"}
+  $result = (Get-ScheduledTaskInfo -TaskName $taskName).LastTaskResult
+  if ($result -ne 0) {throw "cvml samples failed under S4U task (exit code $result)"}
 }
 finally {
-  Pop-Location -ErrorAction SilentlyContinue
-  Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue
+  Stop-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+  Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+  Remove-Item -Recurse -Force $ci -ErrorAction SilentlyContinue
 }
 ```
 <!-- @test:end --> 
@@ -724,7 +749,7 @@ done
 
 ## שילוב CVML באפליקציה שלכם
 
-כדי להשתמש בספריית CVML בפרויקט C++ שלכם, הוסיפו אותה באמצעות `find_package` של CMake:
+כדי להשתמש בספריית CVML בפרויקט C++‎ משלכם, הוסיפו אותה באמצעות `find_package` של CMake:
 
 ```cmake
 # Find the Ryzen AI CVML Library
@@ -734,7 +759,7 @@ find_package(RyzenAILibrary REQUIRED PATHS ${AMD_CVML_SDK_ROOT})
 target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 ```
 
-כאשר `AMD_CVML_SDK_ROOT` מצביע על השורש של תיקיית ספריית Ryzen AI CVML. לאחר מכן כללו את הכותרת המתאימה עבור התכונה שברצונכם להשתמש בה:
+כאשר `AMD_CVML_SDK_ROOT` מצביע לשורש תיקיית ספריית Ryzen AI CVML. לאחר מכן כללו את קובץ הכותרת המתאים לתכונה שברצונכם להשתמש בה:
 
 ```cpp
 #include <cvml-face-detector.h>   // for face detection
@@ -742,14 +767,14 @@ target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 #include <cvml-face-mesh.h>        // for face mesh
 ```
 
-## הצעדים הבאים
+## השלבים הבאים
 
-עבור כל דוגמה למטה, נווטו תחילה לתיקיית ההרצה שלה, לפי אותו דפוס שהוצג בסעיף [Running Face Detection](#running-face-detection) למעלה (למשל `cd build\cvml-sample-depth-estimation\Release` ב-Windows או `cd build/cvml-sample-depth-estimation` ב-Linux). ב-Windows, הוסיפו `.exe` לכל פקודה (למשל `cvml-sample-depth-estimation.exe`).
+עבור כל אחת מהדוגמאות שלהלן, נווטו תחילה לתיקיית הקובץ ההרצה שלה, לפי אותו דפוס שהוצג בסעיף [הרצת זיהוי פנים](#running-face-detection) לעיל (למשל `cd build\cvml-sample-depth-estimation\Release` ב-Windows או `cd build/cvml-sample-depth-estimation` ב-Linux). ב-Windows, הוסיפו `.exe` לכל פקודה (למשל `cvml-sample-depth-estimation.exe`).
 
-- **נסו הערכת עומק (Depth Estimation)**: הריצו `cvml-sample-depth-estimation -i sample_face.jpg` כדי ליצור מפת עומק צבעונית — עצמים קרובים יותר יופיעו בצבעים חמים, ורחוקים יותר בצבעים קרים
-- **גלו רשת פנים (Face Mesh)**: הריצו `cvml-sample-face-mesh -i sample_face.jpg` כדי לראות מעקב גיאומטרי צפוף אחר הפנים עם נקודות רשת מפורטות
-- **עבדו על קובצי וידאו**: השתמשו בדגלים `-i` ו-`-o` בכל דוגמה כדי לעבד קובצי וידאו (למשל, `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
-- **השוו בין וריאנטים של מודלים**: נסו `-m precise` לעומת ברירת המחדל `-m fast` בזיהוי פנים כדי לראות במו עיניכם את הפשרה בין דיוק למהירות
+- **נסו הערכת עומק**: הריצו את `cvml-sample-depth-estimation -i sample_face.jpg` כדי ליצור מפת עומק צבעונית — עצמים קרובים יופיעו בגוונים חמים, ורחוקים יותר בגוונים קרים
+- **חקרו את Face Mesh**: הריצו את `cvml-sample-face-mesh -i sample_face.jpg` כדי לראות מעקב גיאומטרי צפוף של פנים עם נקודות רשת מפורטות
+- **עבדו על קובצי וידאו**: השתמשו בדגלים `-i` וגם `-o` בכל דוגמה כדי לעבד קובצי וידאו (למשל, `cvml-sample-face-detection -i video.mp4 -o output.mp4`)
+- **השוו בין גרסאות המודל**: נסו את `-m precise` לעומת ברירת המחדל `-m fast` בזיהוי פנים כדי לראות באופן ישיר את הפשרה בין דיוק למהירות
 - **בנו אפליקציה משלכם**: השתמשו באינטגרציית CMake וב-API של C++ כדי להוסיף יכולות CVML לאפליקציות C++ משלכם
-- **שלבו יכולות**: חברו זיהוי פנים עם הערכת עומק באותה אפליקציה להבנת סצנה עשירה יותר
-- **עיינו בקוד המקור**: קראו את [Ryzen AI CVML Library on GitHub](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) לתיעוד הכותרות, דוגמאות נוספות ופרטי API
+- **שלבו יכולות**: חברו זיהוי פנים עם הערכת עומק באותה אפליקציה לקבלת הבנה עשירה יותר של הסצנה
+- **עיינו בקוד המקור**: קראו את [ספריית Ryzen AI CVML ב-GitHub](https://github.com/amd/RyzenAI-SW/tree/main/Ryzen-AI-CVML-Library) לתיעוד הכותרות, דוגמאות נוספות ופרטי API

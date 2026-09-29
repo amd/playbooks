@@ -6,11 +6,9 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Node.js 22.22.1 LTS on suositeltu versio tälle alustalle.
-
 <!-- @os:windows -->
 
-1. Lataa Windows 64-bit -asennusohjelma osoitteesta [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+1. Lataa Windows 64-bit -asennusohjelma osoitteesta [nodejs.org](https://nodejs.org/en/download/)
 2. Suorita asennusohjelma ja seuraa ohjeita
 3. Vahvista asennus:
 ```cmd
@@ -38,4 +36,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **Huomautus**: Katso [Node.js-lataukset](https://nodejs.org/en/download/) saadaksesi lisää asennusvaihtoehtoja ja alustoja.
+> **Huomautus**: Katso lisätietoja muista asennusvaihtoehdoista ja alustoista osoitteesta [Node.js Downloads](https://nodejs.org/en/download/).

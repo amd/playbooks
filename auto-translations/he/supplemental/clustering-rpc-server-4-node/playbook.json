@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server-4-node",
+  "title": "ריכוב (Clustering) של ארבעה Ryzen AI Max באמצעות RPC",
+  "description": "הגדרת הסקה מבוזרת באמצעות שרת RPC בארבעה מכשירי Ryzen™ AI Halo עם llama.cpp להרצת מודלים בגודל 1T+",
+  "auto_translated": true
+}

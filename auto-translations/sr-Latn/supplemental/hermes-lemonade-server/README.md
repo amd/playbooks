@@ -8,65 +8,67 @@ SPDX-License-Identifier: MIT
 > **Mašinski prevod.** Ova stranica je automatski prevedena sa engleskog jezika i nije proveravana od strane čoveka. Može sadržati greške, a određena uputstva, komande, preuzimanja, dostupnost proizvoda ili drugi sadržaj mogu se razlikovati u zavisnosti od jezika ili regiona. U slučaju bilo kakve nedoslednosti ili neslaganja, merodavna je originalna verzija playbook-a na engleskom jeziku.
 <!-- auto-translated-disclaimer:end -->
 
-# Pokretanje Hermes Agent-a lokalno pomoću Lemonade Server-a
+# Pokretanje Hermes Agenta lokalno pomoću Lemonade Server-a
 
 ## Pregled
 
-[**Hermes Agent**](https://hermes-agent.nousresearch.com/) je AI agent koji se samostalno usavršava, izgrađen od strane Nous Research. Ima ugrađenu petlju učenja, kreira veštine na osnovu iskustva, gradi trajnu memoriju o tome ko ste vi kroz sesije, i može da pokreće zakazane automatizacije u vaše ime. Za razliku od jednostavnog chat asistenta, Hermes preduzima stvarne akcije: pokreće shell komande, piše fajlove, pretražuje veb i delegira paralelne radne tokove pomoćnim agentima.
+[**Hermes Agent**](https://hermes-agent.nousresearch.com/) je AI agent koji se sam usavršava, razvijen od strane Nous Research. Poseduje ugrađenu petlju učenja, kreira veštine na osnovu iskustva, gradi trajnu memoriju o tome ko ste vi kroz sesije, i može da pokreće zakazane automatizacije u vaše ime. Za razliku od jednostavnog chat asistenta, Hermes preduzima stvarne akcije: pokreće shell komande, piše fajlove, pretražuje veb i delegira paralelne radne tokove pod-agentima.
 
-[**Lemonade Server**](https://lemonade-server.ai/) je lokalni inferencijalni backend koji ga pokreće. To je open-source server koji pokreće GenAI modele direktno na vašem AMD hardveru i izlaže ih putem industrijskog standarda OpenAI API-ja.
+[**Lemonade Server**](https://lemonade-server.ai/) je lokalni backend za inferencu koji ga pokreće. To je open-source server koji pokreće GenAI modele direktno na vašem AMD hardveru i izlaže ih putem industrijskog standarda OpenAI API-ja.
 
-Zajedno formiraju potpuno lokalan AI agent stek: Lemonade upravlja inferencijom modela na vašem GPU-u, a Hermes pruža petlju agenta, memoriju, veštine i gateway za razmenu poruka.
+Zajedno formiraju potpuno lokalni AI agent stack: Lemonade upravlja inferencom modela na vašem GPU-u, dok Hermes obezbeđuje petlju agenta, memoriju, veštine i messaging gateway.
 
-> **Pre nego što nastavite:** Hermes Agent je visoko autonoman AI agent. Davanje bilo kom AI agentu pristupa vašem sistemu može rezultovati nepredvidivim ili nenamernim ishodima. Nastavite samo ako razumete rizike i osećate se prijatno sa autonomnim softverom koji deluje u vaše ime.
+> **Pre nego što nastavite:** Hermes Agent je izuzetno autonoman AI agent. Davanje bilo kom AI agentu pristupa vašem sistemu može rezultirati nepredvidivim ili neželjenim ishodima. Nastavite samo ako razumete rizike i osećate se prijatno sa autonomnim softverom koji deluje u vaše ime.
 
 ---
 
 ## Šta ćete naučiti
 
-Do kraja ovog priručnika bićete u mogućnosti da:
+Do kraja ovog vodiča bićete u mogućnosti da:
 
 - **Instalirate Hermes Agent** i usmerite ga na **Lemonade Server** kao njegov AI backend.
-- **(Preporučeno) Omogućite Docker/Podman sandboxing** kako biste izolovali akcije agenta od vašeg host sistema.
+- **(Preporučeno) Omogućite Docker/Podman sandboxing** kako biste izolovali akcije agenta od vašeg hosta.
 - **Pokrenete Hermes gateway** i potvrdite da je vaš agent spreman.
 - **Povežete komunikacioni kanal** (Discord ili Telegram) kako biste mogli da ćaskate sa svojim agentom sa bilo kog uređaja.
 
 ---
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Podešavanje konfiguracije memorije
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Proverite ažuriranja softvera
+## Provera ažuriranja softvera
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instaliranje softverskih preduslova
+## Instaliranje neophodnog softvera
 
 <!-- @os:linux -->
-- PC koji koristi **Ubuntu 24.04+** ili kompatibilnu Debian-baziranu Linux distribuciju sa `apt-get`
+- Računar sa operativnim sistemom **Ubuntu 24.04+** ili kompatibilnom Debian-based Linux distribucijom sa `apt-get`
 - Najmanje **12 GB RAM-a** (64 GB+ preporučeno za veće modele)
 - **~10–30 GB slobodnog prostora na disku** za težine modela
-- [Podman](https://podman.io/docs/installation) (opciono, za sandboxing Hermes Agent-a)
+- [Podman](https://podman.io/docs/installation) (opciono, za sandboxing Hermes Agenta)
   ```bash 
-  sudo apt-get install -y podman`
+  sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- PC koji koristi **Windows 10/11**
+- Računar sa operativnim sistemom **Windows 10/11**
 - Najmanje **12 GB RAM-a** (64 GB+ preporučeno za veće modele)
 - **~10–30 GB slobodnog prostora na disku** za težine modela
-- Podman (opciono, za sandboxing Hermes Agent-a). Instalirajte unutar WSL-a:
+- Podman (opciono, za sandboxing Hermes Agenta). Instalirajte unutar WSL-a:
   ```bash 
   sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
-> Podman je unapred instaliran na Halo Box-u i nije potrebno dodatno podešavanje
+> Podman je unapred instaliran na Halo Box uređaju i nije potrebno dodatno podešavanje
 <!-- @device:end -->
 
 <!-- @require:lemonade -->
@@ -83,14 +85,15 @@ lemonade --version
 
 ## Preuzmite i učitajte preporučeni model
 
-Preporučeni model za ovaj priručnik je **Qwen3.6-35B-A3B-GGUF** od Unsloth-a, snažan MoE model sa kontekstnim prozorom od 263k tokena koji je dobro prilagođen za radne tokove agenata. Ovaj model koristi UD-Q4_K_XL kvantizaciju. Preuzmite ga sada:
+Preporučeni model za ovaj vodič je **Qwen3.6-35B-A3B-GGUF** od Unsloth-a, snažan MoE model sa prozorom konteksta od 263k tokena koji je dobro prilagođen za radna opterećenja agenata. Ovaj model koristi UD-Q4_K_XL kvantizaciju. Preuzmite ga sada:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-Zatim ga učitajte sa velikim kontekstnim prozorom i sačuvajte to podešavanje za buduća pokretanja:
+Zatim ga učitajte sa velikim prozorom konteksta i sačuvajte to podešavanje za buduća pokretanja:
 
+<!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
 lemonade unload
@@ -98,9 +101,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end -->
 
-Model ima podrazumevanu dužinu konteksta od 262.144 tokena. Ako naiđete na greške zbog nedostatka memorije (OOM), razmotrite smanjenje kontekstnog prozora.
+Model ima podrazumevanu dužinu konteksta od 262.144 tokena. Ako naiđete na greške zbog nedostatka memorije (OOM), razmotrite smanjenje prozora konteksta.
 
-> **Savet: Onemogućite razmišljanje za brže odgovore agenta:** Qwen3.6-35B-A3B se podrazumevano pokreće u režimu razmišljanja, što dodaje kašnjenje pre svakog odgovora. Za petlje agenata ovo opterećenje se brzo gomila. Repozitorijum [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) pruža gotovu konfiguraciju koja onemogućava razmišljanje. Da biste je koristili, preuzmite fajl i uvezite ga:
+> **Savet: Onemogućite razmišljanje za brže odgovore agenta:** Qwen3.6-35B-A3B podrazumevano radi u režimu razmišljanja, što dodaje kašnjenje pre svakog odgovora. Za petlje agenata ovo opterećenje se brzo nagomilava. Repozitorijum [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) pruža gotovu konfiguraciju koja onemogućava razmišljanje. Da biste je koristili, preuzmite fajl i uvezite ga:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -241,9 +244,9 @@ echo "OK: Lemonade chat/completions returned a response"
 
 <!-- @os:windows -->
 
-## Podesite WSL
+## Podešavanje WSL-a
 
-Hermes Agent pokrećemo unutar WSL-a i povezujemo ga sa Lemonade-om koji radi nativno na Windows-u. Ovo vam pruža Linux shell okruženje za Hermes uz istovremeno zadržavanje GPU akceleracije Lemonade-a na Windows strani.
+Hermes Agent pokrećemo unutar WSL-a i povezujemo ga sa Lemonade-om koji radi nativno na Windows-u. Ovo vam pruža Linux shell okruženje za Hermes, dok se GPU akceleracija Lemonade-a zadržava na Windows strani.
 
 ### Instalirajte WSL i Ubuntu
 
@@ -279,9 +282,9 @@ wsl
 
 ### Premostite Lemonade sa Windows-a u WSL
 
-WSL2 radi u virtuelnoj mreži. Lemonade na Windows-u se vezuje za `127.0.0.1`, do čega WSL ne može direktno da dopre. Windows port proxy prosleđuje saobraćaj sa WSL gateway IP adrese ka Windows localhost-u.
+WSL2 radi u virtuelnoj mreži. Lemonade na Windows-u vezuje se za `127.0.0.1`, koji WSL ne može direktno da dosegne. Windows port proxy prosleđuje saobraćaj sa WSL gateway IP adrese ka Windows localhost-u.
 
-**Pronađite vašu WSL gateway IP adresu** (pokrenite unutar WSL-a):
+**Pronađite svoju WSL gateway IP adresu** (pokrenite unutar WSL-a):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
@@ -293,7 +296,7 @@ ip route show default | awk '{print $3}' | head -1
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Dodajte pravilo firewall-a** (isti podignuti PowerShell):
+**Dodajte pravilo firewall-a** (isti PowerShell sa administratorskim pravima):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
@@ -324,7 +327,7 @@ Ako ste već učitali model Qwen3.6-35B-A3B-GGUF u prethodnom koraku, trebalo bi
 }
 ```
 
-> Pravilo `netsh portproxy` opstaje nakon ponovnog pokretanja, ali WSL gateway IP adresa se može promeniti nakon `wsl --shutdown`. Ako Lemonade postane nedostupan iz WSL-a nakon ponovnog pokretanja, dobavite ažuriranu gateway IP adresu i ažurirajte proxy sa ovom novom IP adresom.
+> Pravilo `netsh portproxy` opstaje nakon ponovnog pokretanja, ali WSL gateway IP adresa se može promeniti nakon `wsl --shutdown`. Ako Lemonade postane nedostupan iz WSL-a nakon restarta, dobijte ažuriranu gateway IP adresu i ažurirajte proxy sa ovom novom adresom.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -383,16 +386,16 @@ finally {
 ## Instalirajte Hermes Agent
 
 <!-- @os:windows -->
-> Pokrenite komande u ovom odeljku unutar vašeg **WSL terminala** osim ako nije drugačije naznačeno.
+> Pokrenite komande u ovoj sekciji unutar vašeg **WSL terminala**, osim ako nije drugačije naznačeno.
 <!-- @os:end -->
 
 ```bash
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 ```
 
-Oznaka `--skip-setup` preskače interaktivni čarobnjak za podešavanje kako biste mogli ručno da konfigurišete backend modela u sledećem koraku.
+Fleg `--skip-setup` preskače interaktivnog čarobnjaka za podešavanje kako biste mogli ručno da konfigurišete backend modela u sledećem koraku.
 
-Ponovo učitajte vaš shell:
+Ponovo učitajte svoj shell:
 
 ```bash
 source ~/.bashrc
@@ -404,17 +407,17 @@ Potvrdite instalaciju:
 hermes --version
 ```
 
-Pokrenite samostalnu dijagnostiku da proverite sve zavisnosti:
+Pokrenite samodijagnostiku da biste proverili sve zavisnosti:
 
 ```bash
 hermes doctor
 ```
 
-> **Savet:** Ako vidite `command not found` nakon instalacije, dodajte Hermes u vaš PATH:
+> **Savet:** Ako se nakon instalacije prikaže `command not found`, dodajte Hermes u vašu PATH promenljivu:
 > ```bash
 > export PATH="$HOME/.local/bin:$PATH"
 > ```
-> Da biste ovo učinili trajnim, dodajte gornju liniju u vaš `~/.bashrc` ili `~/.zshrc`.
+> Da bi ovo bilo trajno, dodajte gornju liniju u vaš `~/.bashrc` ili `~/.zshrc`.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-version-linux timeout=120 hidden=True -->
@@ -466,7 +469,7 @@ finally {
 <!-- @os:end -->
 
 ---
-## Konfigurisanje Hermes-a za korišćenje Lemonade-a
+## Konfigurisanje Hermesa da koristi Lemonade
 
 Hermes čuva konfiguraciju modela u `~/.hermes/config.yaml`. Možete koristiti ili interaktivni birač `hermes model` ili direktno napisati konfiguraciju.
 
@@ -495,7 +498,7 @@ Kada budete upitani:
 2. **API base URL:** `http://127.0.0.1:13305/api/v1`
 <!-- @os:end -->
 <!-- @os:windows -->
-2. **API base URL:** koristite WSL gateway IP: pokrenite `ip route show default | awk '{print $3}' | head -1` unutar WSL-a da ga dobijete, a zatim unesite `http://<WSL-Gateway-IP>:13305/api/v1`
+2. **API base URL:** koristite WSL gateway IP: pokrenite `ip route show default | awk '{print $3}' | head -1` unutar WSL-a da biste ga dobili, zatim unesite `http://<WSL-Gateway-IP>:13305/api/v1`
 <!-- @os:end -->
 3. **API key:** `lemonade`
 4. **API compatibility mode:** `1` (Auto-detect)
@@ -503,7 +506,7 @@ Kada budete upitani:
 6. **Context length in tokens:** `262144`
 7. **Display name:** `local-lemonade` (ili bilo koje ime po vašem izboru)
 
-`hermes model` čuva i aktivni izbor modela i imenovani unos u `custom_providers` koji čuva dužinu konteksta zajedno sa endpoint-om. Rezultat u `~/.hermes/config.yaml` izgleda ovako:
+`hermes model` čuva i aktivan izbor modela i imenovani unos `custom_providers` koji čuva dužinu konteksta zajedno sa endpoint-om. Rezultat u `~/.hermes/config.yaml` izgleda ovako:
 
 ```yaml
 model:
@@ -583,7 +586,7 @@ echo "OK: Hermes config.yaml contains Lemonade model configuration"
 
 <!-- @os:windows -->
 
-Unutar vašeg WSL terminala, dobijte IP adresu Windows hosta i upišite konfiguraciju:
+Unutar vašeg WSL terminala, dobavite IP adresu Windows host-a i napišite konfiguraciju:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
@@ -676,9 +679,9 @@ finally {
 
 ---
 
-## (Preporučeno) Omogućavanje Podman izolacije (sandboxing)
+## (Preporučeno) Omogućavanje Podman sandbox-ovanja
 
-Hermes Agent može usmeriti sve operacije agenta nad shell-om i fajlovima kroz izolovan kontejner umesto da ih pokreće direktno na vašem hostu. Ovo ograničava domet svake neželjene akcije na sandbox, ostavljajući fajl sistem i mrežu vašeg hosta netaknutim.
+Hermes Agent može da usmeri sve operacije agenta nad shell-om i fajlovima kroz izolovan kontejner umesto da ih pokreće direktno na vašem host-u. Ovo ograničava domet svake nenamerne akcije na sandbox, ostavljajući fajl sistem i mrežu vašeg host-a netaknutim.
 
 Izgradite lagani sandbox image:
 
@@ -729,7 +732,7 @@ Uđite u vaš WSL terminal:
 wsl -d Ubuntu-24.04
 ```
 
-Zatim izgradite lagani sandbox image:
+Zatim, izgradite lagani sandbox image:
 
 ```bash
 podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -805,7 +808,7 @@ EOF
 ```
 
 > `terminal.backend` je i dalje `docker`.
-> `HERMES_DOCKER_BINARY` je ono što govori Hermes-u da koristi Podman kao runtime umesto toga.
+> `HERMES_DOCKER_BINARY` je ono što govori Hermesu da koristi Podman kao runtime umesto toga.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -902,33 +905,33 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Hermes će sada pokrenuti trajni sandbox kontejner i usmeriti sve pozive `terminal` alata i alata za rad sa fajlovima kroz njega. Kontejner deli životni vek sa Hermes procesom, ponovo se koristi za sve pozive alata i uništava se kada se Hermes ugasi.
+Hermes će sada pokrenuti trajni sandbox kontejner i usmeriti sve pozive `terminal` i alata za fajlove kroz njega. Kontejner deli životni vek sa Hermes procesom, ponovo se koristi za sve pozive alata, i uništava se kada se Hermes zatvori.
 
-> **Proverite da li sandbox radi:** Pokrenite Hermes (`hermes`) i zatražite od njega da izvrši `run hostname` - trebalo bi da vidite kratak ID kontejnera umesto imena vaše mašine (hostname). Takođe možete tražiti da izvrši `rm -rf <path-to-a-dummy-file/folder>`: Hermes će potvrditi brisanje, ali fascikla će i dalje biti prisutna na vašem hostu. Komanda je izvršena unutar izolovanog `$HOME` kontejnera, a ne vašeg.
+> **Proverite da li sandbox radi:** Pokrenite Hermes (`hermes`) i zamolite ga da `run hostname` - trebalo bi da vidite kratak ID kontejnera umesto hostname-a vaše mašine. Takođe možete da ga zamolite da `rm -rf <path-to-a-dummy-file/folder>`: Hermes će potvrditi brisanje, ali će folder i dalje biti na vašem host-u. Komanda je izvršena unutar izolovanog `$HOME` kontejnera, ne vašeg.
 
-> **Potrebna vam je jača izolacija?** Hermes takođe pruža zvaničnu Docker sliku (`nousresearch/hermes-agent`) koja pokreće ceo proces agenta unutar kontejnera - gateway, alate i sve ostalo. Pogledajte [Hermes Docker dokumentaciju](https://hermes-agent.nousresearch.com/docs/user-guide/docker) za detalje podešavanja.
+> **Potrebna vam je jača izolacija?** Hermes takođe pruža zvaničnu Docker sliku (`nousresearch/hermes-agent`) koja pokreće ceo proces agenta unutar kontejnera - gateway, alate, sve. Pogledajte [Hermes Docker dokumentaciju](https://hermes-agent.nousresearch.com/docs/user-guide/docker) za detalje o podešavanju.
 
 ---
 
 <!-- @os:linux -->
-## (Preporučeno) Integracija Hermes-a sa Firecrawl uslugama
+## (Preporučeno) Integracija Hermesa sa Firecrawl servisima
 
-Hermes može da pretražuje i izdvaja sadržaj sa veb sajtova koristeći svoje ugrađene veb alate. Međutim, mnogi moderni veb sajtovi koriste sisteme za detekciju botova, koji blokiraju jednostavne HTTP zahteve i vraćaju stranice sa izazovima (challenge pages) umesto stvarnog sadržaja. Kao rezultat toga, Hermes možda neće moći pouzdano da izvuče informacije sa ovih sajtova.
+Hermes može da pregleda i izvlači sadržaj sa veb-sajtova koristeći svoje ugrađene veb alate. Međutim, mnogi moderni veb-sajtovi koriste sisteme za detekciju botova, koji blokiraju jednostavne HTTP zahteve i vraćaju stranice sa izazovima umesto stvarnog sadržaja. Kao rezultat, Hermes možda neće moći pouzdano da izvuče informacije sa ovih sajtova.
 
-Da bi se prevazišlo ovo ograničenje, [Firecrawl](https://docs.firecrawl.dev/introduction) pruža samostalno hostovanu (self-hosted) uslugu za pretraživanje veba i izdvajanje sadržaja koja može da zaobiđe ove izazove i otključa pun potencijal Hermes automatizacije.
+Da bi prevazišao ovo ograničenje, [Firecrawl](https://docs.firecrawl.dev/introduction) pruža samostalno hostovan servis za veb crawling i izvlačenje sadržaja koji može da zaobiđe ove izazove i otključa pun potencijal Hermes automatizacije.
 
-U ovom podešavanju, Firecrawl radi kao skup Docker kontejnera kojima upravlja Podman. Da bismo pojednostavili upravljanje životnim ciklusom i automatsko pokretanje, registrujemo Firecrawl kao `systemd` uslugu na nivou korisnika koja orkestrira osnovni Podman Compose stack. Ovo omogućava Hermes-u da pokreće, zaustavlja i proverava Firecrawl uslugu koristeći standardne `systemctl --user` komande umesto direktne interakcije sa kontejnerima.
+U ovom podešavanju, Firecrawl radi kao skup Docker kontejnera kojima se upravlja pomoću Podman-a. Da bi se pojednostavilo upravljanje životnim ciklusom i automatsko pokretanje, registrujemo Firecrawl kao `systemd` servis na nivou korisnika koji orkestrira osnovni Podman Compose stek. Ovo omogućava Hermesu da pokrene, zaustavi i proveri Firecrawl servis koristeći standardne `systemctl --user` komande umesto da direktno komunicira sa kontejnerima.
 
-Da bismo pojednostavili stvari, podelili smo ceo proces na četiri koraka:
+Da bismo održali jednostavnost, podelili smo ceo proces u četiri koraka:
 
 ---
 
-### 1. Registrovanje sistemske usluge
-Navigirajte do direktorijuma za korisničku konfiguraciju systemd-a:
+### 1. Registrujte sistemski servis
+Navigirajte do direktorijuma sa systemd konfiguracijom na nivou korisnika:
 ```bash
 cd ~/.config/systemd/user
 ```
-Napravite i otvorite novi fajl pod nazivom `firecrawl.service`.
+Kreirajte i otvorite novi fajl pod nazivom `firecrawl.service`.
 ```bash
 nano firecrawl.service
 ```
@@ -957,8 +960,8 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
-U ovom trenutku, usluga je definisana ali još nije registrovana kod `systemd`-a.
-Uverite se da naziv fajla tačno odgovara onom koji ste napravili gore, a zatim pokrenite:
+U ovom trenutku, servis je definisan, ali još uvek nije registrovan kod `systemd`.
+Uverite se da naziv fajla tačno odgovara onome što ste kreirali iznad, zatim pokrenite:
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
@@ -967,17 +970,17 @@ Ako je uspešno, trebalo bi da vidite sledeći izlaz:
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
- `default.target.wants/` sadrži simboličke linkove ka uslugama koje su konfigurisane da se pokreću automatski.
+ `default.target.wants/` sadrži simboličke linkove ka servisima koji su podešeni da se automatski pokreću.
 
-### 2. Konfigurisanje Firecrawl-a za vašu uslugu
+### 2. Konfigurišite Firecrawl za vaš servis
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) je idealan za one kojima je potrebna potpuna kontrola nad okruženjima za scraping i obradu podataka, ali dolazi sa kompromisom dodatnog održavanja i napora oko konfiguracije.
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) je idealan za one kojima je potrebna potpuna kontrola nad njihovim okruženjima za scraping i obradu podataka, ali dolazi sa kompromisom dodatnih napora oko održavanja i konfiguracije.
 
 Počnite kloniranjem repozitorijuma:
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-Napravite `.env` u korenskom `/firecrawl` direktorijumu:
+Kreirajte `.env` u korenskom `/firecrawl` direktorijumu:
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1005,31 +1008,31 @@ BULL_AUTH_KEY=CHANGEME
 # Default: 0.8 (80%)
 # MAX_RAM=0.8
 ```
-> Podesite `BULL_AUTH_KEY` na jaku tajnu vrednost, posebno na svakom razvojnom okruženju dostupnom iz nepoverljivih mreža.
-### 3. Postavljanje Hermesa putem Compose-a
+> Podesite `BULL_AUTH_KEY` na jaku tajnu vrednost, posebno na bilo kom deployment-u dostupnom iz nepouzdanih mreža.
+### 3. Postavljanje Hermes-a putem Compose-a
 
-Pre nego što nastavite, proverite da li ste povukli najnoviju Docker sliku Hermesa:
+Pre nego što nastavite, proverite da ste povukli najnoviju Hermes Docker sliku:
 ```bash
 podman pull docker.io/nousresearch/hermes-agent:latest
 ```
-Nakon što to uradite, preuzmite Compose fajl za Hermes [hermes-compose.yaml](assets/hermes-compose.yaml) i postavite ga u koreni direktorijum `/firecrawl`:
+Kada to uradite, preuzmite Hermes Compose fajl [hermes-compose.yaml](assets/hermes-compose.yaml) i smestite ga u koreni direktorijum `/firecrawl`:
 
-> Ova konvencija je neophodna da bi `systemd` mogao da pronađe i pokrene servis ispravno, kao što je definisano u `WorkingDirectory=${HOME}/firecrawl`.
+> Ova konvencija je neophodna kako bi `systemd` mogao da pronađe i pokrene servis ispravno, kako je navedeno u `WorkingDirectory=${HOME}/firecrawl`.
 
-> Uvek možete proširiti stack dodavanjem dodatnih Firecrawl servisa po potrebi. Kompletna lista dostupnih servisa nalazi se u zvaničnom [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) fajlu.
+> Uvek možete proširiti stek dodavanjem dodatnih Firecrawl servisa po potrebi. Kompletna lista dostupnih servisa može se pronaći u zvaničnom [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
 
-### 4. Pokretanje Hermes servisa putem Firecrawl-a
+### 4. Pokretanje Hermes servisa putem Firecrawl-a 
 
-Pre nego što prepustite kontrolu `systemd`-u, proverite da li sve radi ispravno tako što ćete ručno pokrenuti stack:
+Pre nego što prepustite kontrolu `systemd`-u, proverite da li sve ispravno radi tako što ćete ručno pokrenuti stek:
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-Ako je sve ispravno podešeno, trebalo bi da vidite da se Hermes kontejner pokreće, a izlaz u komandnoj liniji trebalo bi da izgleda otprilike ovako:
+Ako je sve ispravno podešeno, trebalo bi da vidite da se Hermes kontejner pokreće, a izlaz komandne linije trebalo bi da izgleda slično ovome:
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
 
-Kada to potvrdite, ugasite stack pre nego što nastavite:
+Kada proverite da sve radi, ugasite stek pre nego što nastavite:
 ```bash
 podman compose -f hermes-compose.yaml down
 ```
@@ -1037,7 +1040,7 @@ Sada kada je sve provereno, pokrenite servis putem `systemd`:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) je dostupan iz interaktivnog kontejnera, a Web Dashboard je dostupan na istom hostu i portu na adresi http://127.0.0.1:9119.
+[Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) je dostupan iznutra interaktivnog kontejnera, a Web kontrolna tabla je dostupna na istom hostu i portu na http://127.0.0.1:9119.
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
@@ -1051,7 +1054,7 @@ systemctl --user stop firecrawl.service
 
 ## Hermes Native
 
-Pokrenite interaktivnu CLI sesiju direktno:
+Pokrenite interaktivnu CLI sesiju direktno: 
 
 ```bash
 hermes
@@ -1206,58 +1209,58 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-**Čestitamo, izgradili ste potpuno lokalan AI agent stack.**
+**Čestitamo, izgradili ste potpuno lokalni AI agent stek.**
 
-### Web Dashboard
+### Web kontrolna tabla
 
-Hermes uključuje korisnički interfejs zasnovan na pregledaču za upravljanje konfiguracijom, API ključevima, modelima, sesijama, memorijom i cron zadacima. Otvorite drugi terminal dok gateway ili CLI rade i pokrenite ga sa:
+Hermes uključuje korisnički interfejs zasnovan na pretraživaču za upravljanje konfiguracijom, API ključevima, modelima, sesijama, memorijom i cron poslovima. Otvorite drugi terminal dok gateway ili CLI rade i pokrenite ga sa:
 
 ```bash
 hermes dashboard
 ```
 
-Ovo pokreće lokalni server i otvara `http://127.0.0.1:9119` u vašem pregledaču. Pogledajte [dokumentaciju dashboard-a](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) za kompletan pregled funkcionalnosti.
+Ovo pokreće lokalni server i otvara `http://127.0.0.1:9119` u vašem pretraživaču. Pogledajte [dokumentaciju kontrolne table](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) za kompletan pregled funkcionalnosti.
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
 
 ---
 
-## Opciono: Povezivanje komunikacionog kanala
+## Opciono: Povezivanje kanala za komunikaciju
 
-Kada gateway radi, možete pristupiti svom lokalnom agentu sa bilo kog uređaja. Hermes podržava [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) i druge
+Kada gateway radi, možete pristupiti svom lokalnom agentu sa bilo kog uređaja. Hermes podržava [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram), i druge
 
 ---
 
 ### Discord
 
-Za Discord je potreban server na kojem **imate administratorski pristup** kako biste dodali bota. Ako delite servere ali nijedan ne posedujete, umesto toga koristite Telegram.
+Discord zahteva server na kome **imate administratorski pristup** kako biste mogli da dodate bota. Ako delite servere ali ne posedujete nijedan, koristite Telegram umesto toga.
 
 #### Kreiranje Discord aplikacije i bota
 
-1. Idite na [Discord Developer Portal](https://discord.com/developers/applications) i kliknite na **New Application**. Dajte mu naziv (npr. "hermes-bot").
+1. Idite na [Discord Developer Portal](https://discord.com/developers/applications) i kliknite na **New Application**. Dajte mu ime (npr. "hermes-bot").
 2. U bočnoj traci kliknite na **Bot**. Postavite korisničko ime za bota.
 3. Na istoj stranici Bot, skrolujte do **Privileged Gateway Intents** i omogućite:
    - **Message Content Intent** (obavezno)
    - **Server Members Intent** (preporučeno)
-4. Vratite se nazad i kliknite na **Reset Token** da biste generisali token bota. Kopirajte ga.
+4. Skrolujte nazad nagore i kliknite na **Reset Token** da biste generisali token za bota. Kopirajte ga.
 
 #### Dodavanje bota na vaš server
 
 1. U bočnoj traci kliknite na **OAuth2 / URL Generator**.
-2. Pod **Scopes**, omogućite `bot` i `applications.commands`.
-3. Pod **Bot Permissions**, omogućite: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Kopirajte generisani URL, nalepite ga u pregledač, izaberite vaš server i potvrdite.
+2. U okviru **Scopes**, omogućite `bot` i `applications.commands`.
+3. U okviru **Bot Permissions**, omogućite: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
+4. Kopirajte generisani URL, nalepite ga u pretraživač, izaberite svoj server i potvrdite.
 
 #### Prikupljanje ID-jeva i omogućavanje direktnih poruka
 
-Omogućite Developer Mode u Discord-u (**User Settings / Advanced / Developer Mode**), a zatim:
-- Kliknite desnim tasterom na ikonu vašeg servera: **Copy Server ID**
-- Kliknite desnim tasterom na svoj avatar: **Copy User ID**
+Omogućite Developer Mode u Discord-u (**User Settings / Advanced / Developer Mode**), zatim:
+- Desnim klikom na ikonicu servera: **Copy Server ID**
+- Desnim klikom na svoj avatar: **Copy User ID**
 
-Kliknite desnim tasterom na ikonu vašeg servera / **Privacy Settings** / uključite **Direct Messages**. Ovo je neophodno za korak uparivanja.
+Desnim klikom na ikonicu servera / **Privacy Settings** / uključite **Direct Messages**. Ovo je neophodno za korak uparivanja.
 
-#### Konfigurisanje Hermesa za Discord
+#### Podešavanje Hermes-a za Discord
 
 Dodajte sledeće u `~/.hermes/.env`:
 
@@ -1273,7 +1276,7 @@ Zatim pokrenite gateway:
 hermes gateway
 ```
 
-Bot bi trebalo da postane dostupan na Discord-u za nekoliko sekundi. Pošaljite mu poruku, bilo direktnu poruku ili u kanalu koji može da vidi.
+Bot bi trebalo da postane dostupan na Discord-u u roku od nekoliko sekundi. Pošaljite mu poruku, bilo direktnu ili u kanalu koji može da vidi.
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1289,7 +1292,7 @@ Bot bi trebalo da postane dostupan na Discord-u za nekoliko sekundi. Pošaljite 
 1. Otvorite Telegram i pošaljite poruku **@BotFather**.
 2. Pošaljite `/newbot` i pratite uputstva. Sačuvajte token bota koji dobijete.
 
-#### Konfigurisanje Hermesa za Telegram
+#### Podešavanje Hermes-a za Telegram
 
 Dodajte sledeće u `~/.hermes/.env`:
 
@@ -1298,7 +1301,7 @@ TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_ALLOWED_USERS=your-telegram-user-id   # comma-separated for multiple users
 ```
 
-> **Ne znate svoj Telegram korisnički ID?** Pošaljite poruku [@userinfobot](https://t.me/userinfobot) na Telegramu, odgovoriće vam sa vašim numeričkim ID-jem.
+> **Ne znate svoj Telegram korisnički ID?** Pošaljite poruku [@userinfobot](https://t.me/userinfobot) na Telegramu, on će vam odgovoriti sa vašim numeričkim ID-jem.
 
 Zatim pokrenite gateway:
 
@@ -1306,16 +1309,16 @@ Zatim pokrenite gateway:
 hermes gateway
 ```
 
-Pošaljite botu bilo koju poruku na Telegramu da biste testirali. Sada možete da razgovarate sa svojim agentom putem Telegram direktnih poruka. Pogledajte [kompletan vodič za podešavanje Telegrama](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) za webhook režim i napredne opcije.
+Pošaljite svom botu bilo koju poruku na Telegramu da biste testirali. Sada možete da ćaskate sa svojim agentom putem Telegram direktnih poruka. Pogledajte [kompletan vodič za podešavanje Telegrama](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) za režim webhook-a i napredne opcije.
 
 ---
 
 ## Sledeći koraci
 
-Sada kada vaš agent može da prima komande sa vašeg telefona i deluje na vašem lokalnom računaru, evo tri pravca koje vredi istražiti:
+Sada kada vaš agent može da prima komande sa vašeg telefona i deluje na vašem lokalnom računaru, evo tri pravca koja vredi istražiti:
 
-1. **Automatizovani izveštaj istraživanja**: Zakažite Hermes da svakog jutra pretražuje web za teme koje vas zanimaju, sumira nalaze pomoću vašeg lokalnog modela i pošalje izveštaj na vaš telefon putem Telegrama ili Discord-a, sve pokrenuto na vašem sopstvenom hardveru bez troškova za cloud.
+1. **Automatizovan pregled istraživanja**: Zakažite Hermes da svakog jutra pretražuje veb za teme koje vas zanimaju, sažme nalaze pomoću vašeg lokalnog modela, i pošalje pregled na vaš telefon putem Telegrama ili Discord-a, sve to radeći na vašem sopstvenom hardveru bez troškova za cloud.
 
-2. **Pregled koda na zahtev**: Usmerite Hermes na GitHub repozitorijum, zamolite ga da pregleda otvorene pull request-ove i da objavi komentare ili sažetak nazad u vaš chat. Sa Docker terminal backend-om, sve git operacije se izvršavaju unutar sandbox-a, čime se vaš host čuva čistim.
+2. **Pregled koda na zahtev**: Usmerite Hermes na GitHub repozitorijum, zamolite ga da pregleda otvorene pull zahteve i neka objavi komentare ili sažetak nazad u vaš čet. Sa Docker terminal pozadinskim sistemom, sve git operacije se izvršavaju unutar sandbox okruženja, čuvajući vaš host čistim.
 
-3. **Lokalni asistent za fajlove**: Dajte Hermesu pristup radnom direktorijumu i zamolite ga da organizuje, preimenuje, sumira ili transformiše fajlove na zahtev sa vašeg telefona. Zbog toga što Docker terminal backend ograničava sva upisivanja na sandbox radni prostor, slučajne destruktivne operacije su ograničene.
+3. **Lokalni asistent za fajlove**: Dajte Hermes-u pristup radnom direktorijumu i zamolite ga da organizuje, preimenuje, sažme ili transformiše fajlove na zahtev sa vašeg telefona. Pošto Docker terminal pozadinski sistem ograničava sva upisivanja na sandbox radni prostor, slučajne destruktivne operacije su ograničene.

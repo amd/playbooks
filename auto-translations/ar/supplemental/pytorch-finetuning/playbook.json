@@ -1,6 +1,6 @@
 {
   "id": "pytorch-finetuning",
-  "title": "ضبط دقيق للنماذج اللغوية الكبيرة (LLMs) باستخدام PyTorch وبرمجيات AMD ROCm™",
-  "description": "ضبط النماذج اللغوية الكبيرة (LLMs) باستخدام PyTorch وROCm بدقة.",
+  "title": "ضبط دقيق للنماذج اللغوية الكبيرة باستخدام PyTorch وبرنامج AMD ROCm™",
+  "description": "قم بضبط نماذج اللغة الكبيرة (LLMs) بدقة باستخدام PyTorch وROCm.",
   "auto_translated": true
 }

@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA är AMD:s open source-ramverk för att bygga AI-agenter som körs lokalt på AMD-hårdvara med Ryzen AI-acceleration.
+GAIA är AMD:s öppen källkod-ramverk för att bygga AI-agenter som körs lokalt på AMD-hårdvara med Ryzen AI-acceleration.
 
 #### Installera GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. På Windows öppnar du en terminal i katalogen du väljer och följer kommandona för att skapa en venv.
+1. På Windows, öppna en terminal i katalogen efter eget val och följ kommandona för att skapa en venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. På Linux öppnar du en terminal i katalogen du väljer och följer kommandona för att skapa en venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. På Linux, öppna en terminal i katalogen efter eget val och följ kommandona för att skapa en venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. På Windows öppnar du en terminal i katalogen du väljer och följer kommandona för att skapa en venv.
+1. På Windows, öppna en terminal i katalogen efter eget val och följ kommandona för att skapa en venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. På Linux öppnar du en terminal i katalogen du väljer och följer kommandona för att skapa en venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. På Linux, öppna en terminal i katalogen efter eget val och följ kommandona för att skapa en venv.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -93,7 +93,7 @@ pip install amd-gaia
 
 3. Initiera GAIA
 
-Efter installationen kör du `gaia init` för att konfigurera Lemonade Server och ladda ner modeller:
+Efter installationen, kör `gaia init` för att konfigurera Lemonade Server och ladda ner modeller:
 
 ```bash
 gaia init
@@ -281,7 +281,7 @@ fi
 
 #### Verifiera installationen
 
-Kontrollera att GAIA v0.16.2 eller senare är installerat:
+Verifiera att GAIA v0.16.2 eller senare är installerat:
 
 ```bash
 gaia --version

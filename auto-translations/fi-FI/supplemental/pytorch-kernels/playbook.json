@@ -1,6 +1,6 @@
 {
   "id": "pytorch-kernels",
-  "title": "Mukautettujen GPU-ytimien rakentaminen PyTorch- ja AMD ROCm™ -ympäristöllä",
-  "description": "Kirjoita ja optimoi mukautettuja GPU-ytimiä käyttäen PyTorchia ja AMD ROCm™ -ohjelmistoa",
+  "title": "Mukautettujen GPU-ytimien rakentaminen PyTorchilla ja AMD ROCm™:lla",
+  "description": "Kirjoita ja optimoi mukautettuja GPU-kerneleitä käyttämällä PyTorch- ja AMD ROCm™ -ohjelmistoa",
   "auto_translated": true
 }

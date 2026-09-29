@@ -17,33 +17,35 @@ SPDX-License-Identifier: MIT
 ## Prehľad
 
 
-Chcete spúšťať výkonné jazykové modely AI na vlastnom hardvéri? Táto príručka vám ukáže, ako na to.
-Tento návod používa PyTorch podporovaný softvérom AMD ROCm™ na spúšťanie modelov, ktoré dokážu sumarizovať dokumenty, odpovedať na otázky, generovať text a ďalšie, a to všetko lokálne.
+Chcete spúšťať výkonné jazykové modely AI na vlastnom hardvéri? Táto príručka vám ukáže ako na to.
+Tento návod používa PyTorch poháňaný softvérom AMD ROCm™ na spúšťanie modelov, ktoré dokážu sumarizovať dokumenty, odpovedať na otázky, generovať text a ďalšie, pričom všetko beží lokálne.
 
 ## Čo sa naučíte
 
-- Spúšťať LLM ako gpt-oss-20b a qwen3.5-4B lokálne pomocou PyTorch a ROCm
+- Spustiť LLM ako gpt-oss-20b a qwen3.5-4B lokálne pomocou PyTorch a ROCm
 - Vytvoriť nástroj na sumarizáciu dokumentov pomocou LLM
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Nastavenie konfigurácie pamäte
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Kontrola aktualizácií softvéru
-> **Poznámka**: Ak VS Code nie je nainštalovaný, môžete ho nainštalovať pomocou Ryzen AI Developer Center.
+## Skontrolujte aktualizácie softvéru
+> **Poznámka**: Ak nemáte nainštalovaný VS Code, môžete si ho nainštalovať pomocou Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Inštalácia požadovaného softvéru
+## Inštalácia softvérových predpokladov
 
 ### Vytvorenie virtuálneho prostredia
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
 V systéme Linux otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv s už nainštalovaným ROCm+Pytorch.
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -55,14 +57,14 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Udeľte svojmu používateľovi prístup k zariadeniam GPU** (pre uplatnenie zmeny sa odhláste a znova prihláste):
+**Udeľte svojmu používateľovi prístup k GPU zariadeniam** (na aby sa to prejavilo, odhláste sa a znova prihláste):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
 V systéme Linux otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv.
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -78,7 +80,7 @@ source pytorch-env/bin/activate
 <!-- @os:windows -->
 <!-- @device:halo_box -->
 V systéme Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv s už nainštalovaným ROCm+Pytorch.
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
 pytorch-env\Scripts\activate
@@ -89,7 +91,7 @@ pytorch-env\Scripts\activate
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 V systéme Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv.
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
 pytorch-env\Scripts\activate
@@ -98,8 +100,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Tip**: Používatelia systému Windows možno budú musieť upraviť svoje pravidlá vykonávania PowerShell (napr.
-> nastaviť ho na RemoteSigned alebo Unrestricted) pred spustením niektorých príkazov PowerShell.
+> **Tip**: Používatelia systému Windows možno budú musieť pred spustením niektorých príkazov Powershell upraviť svoju politiku spúšťania PowerShell (napr.
+> nastaviť ju na RemoteSigned alebo Unrestricted).
 
 <!-- @os:end -->
 
@@ -115,7 +117,7 @@ pytorch-env\Scripts\activate
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -123,10 +125,17 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece pro
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+> **Poznámka:** Ak sa modelu nepodarí načítať alebo dôjde pamäť, skúste nainštalovať balík `kernels`, aby ste model načítali s optimalizovanou kvantizáciou.
+>
+> ```bash
+> # Use this version which is compatible with the Transformers version
+> pip install "kernels==0.14.1" 
+> ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -141,7 +150,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -149,7 +158,7 @@ pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
 
 ## Rýchly štart s ukážkovými skriptami
 
-Táto príručka obsahuje pripravené skripty na okamžité použitie. Kliknutím na ne ich zobrazíte a stiahnete do rovnakého adresára ako prostredie, ktoré ste vytvorili.
+Táto príručka obsahuje pripravené skripty na okamžité použitie. Kliknutím na ne si ich môžete prezrieť a stiahnuť do rovnakého adresára ako prostredie, ktoré ste vytvorili.
 
 | Skript | Popis | Použitie |
 |--------|-------------|-------|
@@ -181,17 +190,17 @@ for script in ['run_llm.py', 'summarizer.py']:
 
 Oba skripty podporujú:
 - Výber modelu pomocou príznaku `--model`
-- Formátovanie šablóny chatu pre správne formulovanie výziev pre model, čo je obzvlášť užitočné pri sumarizácii dokumentov
+- Formátovanie chat šablóny pre správne formulovanie výziev pre model, čo je obzvlášť užitočné pri sumarizácii dokumentov
 
 ## Načítanie a spustenie vášho prvého LLM
 
 Priložený skript [run_llm.py](assets/run_llm.py) ukazuje, ako generovať text pomocou LLM s využitím PyTorch a AMD ROCm.
 
-> **Poznámka:** Pri načítaní modelu Hugging Face Transformers najprv skontroluje svoju lokálnu vyrovnávaciu pamäť (`~/.cache/huggingface/hub` v systéme Linux, `C:\Users\<user>\.cache\huggingface\hub` v systéme Windows). Ak model nie je uložený vo vyrovnávacej pamäti, automaticky sa stiahne z huggingface.co. Prvé spustenie môže trvať niekoľko minút v závislosti od veľkosti modelu a rýchlosti siete.
+> **Poznámka:** Pri načítaní modelu Hugging Face Transformers najprv skontroluje lokálnu vyrovnávaciu pamäť (`~/.cache/huggingface/hub` v systéme Linux, `C:\Users\<user>\.cache\huggingface\hub` v systéme Windows). Ak model nie je uložený vo vyrovnávacej pamäti, automaticky sa stiahne z huggingface.co. Prvé spustenie môže trvať niekoľko minút v závislosti od veľkosti modelu a rýchlosti siete.
 
-Nižšie uvedený úryvok ukazuje, ako model použiť a prispôsobiť kladené otázky.
+Nasledujúci úryvok ukazuje, ako model použiť a prispôsobiť kladené otázky.
 
-<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -213,7 +222,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    disable_mmap=True
 )
 ```
 <!-- @test:end -->
@@ -266,9 +276,9 @@ python run_llm.py --model ${hf_model}
 
 ## Vytvorenie sumarizátora dokumentov
 
-Teraz, keď ste vygenerovali výstup z lokálneho LLM, môžete na tom stavať a vytvoriť praktický sumarizátor dokumentov. V tejto časti použijete skript [summarizer.py](assets/summarizer.py) na vloženie súboru .txt a automatické vygenerovanie stručného zhrnutia, a to všetko bežiace lokálne na vašom GPU.
+Teraz, keď ste vygenerovali výstup z lokálneho LLM, môžete na tom stavať vytvorením praktického sumarizátora dokumentov. V tejto časti použijete skript [summarizer.py](assets/summarizer.py) na vloženie súboru .txt a automatické vygenerovanie stručného zhrnutia, pričom všetko beží lokálne na vašom GPU.
 
-Skript je navrhnutý tak, aby fungoval hneď po spustení. Otvorte skript v editore, preskúmajte kód, prispôsobte výzvy a upravte parametre, ako je dĺžka a teplota.
+Skript je navrhnutý tak, aby fungoval hneď po vybalení. Otvorte skript v editore, preskúmajte kód, prispôsobte si výzvy a upravte parametre ako dĺžka a teplota.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -292,28 +302,27 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## Informácie o parametroch generovania
+## Zoznámte sa s parametrami generovania
 
-| Parameter | Čo riadi | Typické hodnoty |
+| Parameter | Čo ovplyvňuje | Typické hodnoty |
 |-----------|------------------|----------------|
-| `max_new_tokens` | Maximálnu dĺžku výstupu LLM | Pre zhrnutia použite 50 – 500 tokenov. (1 token predstavuje približne 0,75 anglického slova) |
-| `temperature` | Kreativitu. Nízke hodnoty ju robia sústredenou, vysoké hodnoty prinášajú väčšiu nepredvídateľnosť | - **0,1 – 0,3**: Sústredené, deterministické (vhodné pre zhrnutia) <br> **0,5 – 0,7**: Vyvážené (všeobecné použitie) <br> **0,8 – 1,0**: Kreatívne, rôznorodé (brainstorming) |
-| `top_p` | Nucleus sampling – nízke hodnoty obmedzujú model na užší rozsah výstupov | **0,1 – 0,5**: Prísne, predvídateľné <br> **0,9 – 0,95**: (štandardné, prirodzené, konverzačné) |
+| `max_new_tokens` | Maximálna dĺžka výstupu LLM | Pre zhrnutia použite 50 – 500 tokenov. (1 token predstavuje približne 0,75 anglického slova) |
+| `temperature` | Kreativita. Nízke hodnoty ju robia zamerané, vysoké hodnoty prinášajú väčšiu nepredvídateľnosť | - **0.1–0.3**: Zamerané, deterministické (vhodné na zhrnutia) <br> **0.5–0.7**: Vyvážené (bežné použitie) <br> **0.8–1.0**: Kreatívne, rôznorodé (brainstorming) |
+| `top_p` | Nucleus Sampling – nízke hodnoty obmedzujú model na užšie výstupy | **0.1-0.5**: Prísne, predvídateľné <br> **0.9-0.95**: (štandardné, prirodzené, konverzačné) |
 
 
-## Praktické aplikácie
+## Praktické využitie
 
-- **Analýza výskumných prác**: Rýchle extrahovanie kľúčových zistení zo zložitých publikácií na účely rýchleho preskúmania
-- **Agregácia správ**: Sumarizácia spravodajských článkov do stručných denných prehľadov alebo súhrnov
-- **Zápisnice zo stretnutí**: Zredukovanie prepisov na akčné body a stručné zhrnutia
-- **Kontrola právnych dokumentov**: Rýchle extrahovanie relevantných klauzúl alebo povinností z dlhých právnych textov
+- **Analýza výskumných článkov**: Extrakcia kľúčových zistení z komplexných publikácií na rýchle preštudovanie
+- **Agregácia noviniek**: Sumarizácia spravodajských článkov do stručných denných prehľadov alebo najdôležitejších bodov
+- **Poznámky zo stretnutí**: Zhutnenie prepisov do konkrétnych úloh a stručných zhrnutí
+- **Kontrola právnych dokumentov**: Rýchla extrakcia relevantných klauzúl alebo záväzkov z dlhých právnych textov
 - **Dokumentácia kódu**: Generovanie stručných prehľadov repozitárov a vysvetlení funkcií
-
 ## Ďalšie kroky
 
-- **Doladenie (fine-tuning)**: Prispôsobte modely vašej konkrétnej oblasti alebo terminológii pre lepšiu presnosť (pozrite si príručky na doladenie)
-- **Systémy RAG**: Kombinujte LLM s vyhľadávaním v dokumentoch pre kontextovo relevantné odpovede a vyhľadávanie
+- **Fine-tuning**: Prispôsobte modely vašej konkrétnej oblasti alebo terminológii pre lepšiu presnosť (pozrite si Fine-tuning Playbooks)
+- **RAG systémy**: Kombinujte LLM s vyhľadávaním v dokumentoch pre kontextovo relevantné odpovede a vyhľadávanie
 - **Skúmanie modelov**: Experimentujte s novými modelmi ako Llama 3, Phi-3 alebo Qwen pre lepšie výsledky
-- **Nasadenie do produkcie**: Používajte nástroje ako vLLM na škálovateľné poskytovanie LLM v organizáciách
+- **Nasadenie do produkcie**: Použite nástroje ako vLLM na škálovateľné poskytovanie LLM v organizáciách
 
-Váš systém vám dáva možnosť spúšťať sofistikované jazykové modely lokálne. Experimentujte s rôznymi modelmi, výzvami a parametrami, aby ste zistili, čo najlepšie funguje pre vaše aplikácie.
+Váš systém vám dáva možnosť lokálne spúšťať sofistikované jazykové modely. Experimentujte s rôznymi modelmi, promptmi a parametrami, aby ste zistili, čo najlepšie vyhovuje vašim aplikáciám.

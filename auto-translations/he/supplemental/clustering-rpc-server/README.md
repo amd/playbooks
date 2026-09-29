@@ -14,29 +14,29 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# צירוף שני מחשבי Ryzen™ AI Halo לאשכול (Cluster) באמצעות RPC
+# אשכול (Clustering) של שני מכשירי Ryzen™ AI Halo באמצעות RPC
 
 ## סקירה כללית
 
-מחשב ה-Ryzen™ AI Halo שברשותך כבר מסוגל להריץ מודלי שפה גדולים באופן מקומי. צירוף לאשכול (Clustering) לוקח זאת צעד קדימה על ידי שילוב זיכרון ה-GPU של מספר מערכות דרך רשת מקומית, ומעניק לך גישה למודלים גדולים אף יותר עם יכולות היגיון חזקות יותר, יצירת קוד טובה יותר והבנה רב-לשונית עמוקה יותר, הכל על גבי החומרה שלך בלבד.
+מכשיר ה-Ryzen™ AI Halo שברשותכם כבר מסוגל להריץ מודלים גדולים של שפה (LLM) באופן מקומי. אשכול (Clustering) לוקח את זה צעד קדימה, על ידי שילוב זיכרון ה-GPU של מספר מערכות דרך רשת מקומית, ומעניק לכם גישה למודלים גדולים אף יותר, עם יכולות הנמקה חזקות יותר, יצירת קוד טובה יותר, והבנה רב-לשונית מעמיקה יותר - הכול לחלוטין על החומרה שלכם.
 
-מדריך זה מלמד אותך כיצד לצרף שתי מערכות Ryzen AI Halo לאשכול באמצעות מנוע ה-RPC של llama.cpp ולהריץ את GLM 4.7, מודל בעל 358 מיליארד פרמטרים, על פני שתי המכונות עם האצת AMD ROCm™.
+מדריך זה מלמד אתכם כיצד לבצע אשכול (clustering) של שתי מערכות Ryzen AI Halo באמצעות מנוע ה-RPC של llama.cpp, ולהריץ את GLM 4.7, מודל בעל 358 מיליארד פרמטרים, על פני שתי המכונות עם האצת AMD ROCm™.
 
 ## מה תלמדו
 
 - כיצד להרחיב את הקצאת ה-VRAM במערכות Ryzen AI Halo
 - התקנת llama.cpp עם תמיכת ROCm ו-RPC
-- הגדרת עובד RPC (RPC worker) והפעלת הסקה מבוזרת (distributed inference) בין שני צמתים
-- הרצת מודל בעל 358 מיליארד פרמטרים על פני שתי מערכות Ryzen AI Halo מחוברות רשת
+- הגדרת עובד RPC (RPC worker) והפעלת הסקה מבוזרת (distributed inference) על פני שני צמתים
+- הרצת מודל בעל 358 מיליארד פרמטרים על פני שתי מערכות Ryzen AI Halo מחוברות ברשת
 
 ## הגדרת תצורת הזיכרון
 
-> **הערה**: יש להשלים שלב זה גם במכונה 1 וגם במכונה 2.
+> **הערה**: השלימו שלב זה הן במכונה 1 והן במכונה 2.
 
 <!-- @os:windows -->
-ב-Windows, כדי להריץ מודלים גדולים יותר הדורשים זיכרון גבוה יותר, עלינו להשתמש בהקצאת AMD Variable Graphics Memory (VRAM עבור ה-iGPU).
+במערכת Windows, כדי להריץ מודלים גדולים יותר הדורשים זיכרון רב יותר, עלינו להשתמש בהקצאת AMD Variable Graphics Memory (iGPU VRAM).
 
-ניתן לעשות זאת על ידי פתיחת לוח הבקרה AMD Software: Adrenalin Edition וניווט אל: `Performance > Tuning > AMD Variable Graphics Memory`. הגדירו את הערך ל-**96 GB**. יש לאתחל את המערכת כדי שהשינויים ייכנסו לתוקף.
+ניתן לעשות זאת על ידי פתיחת פאנל הבקרה AMD Software: Adrenalin Edition וניווט אל: `Performance > Tuning > AMD Variable Graphics Memory`. הגדירו את הערך ל-**96 GB**. יש לאתחל את המערכת כדי שהשינויים ייכנסו לתוקף.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -45,28 +45,28 @@ SPDX-License-Identifier: MIT
 <!-- @os:end -->
 
 <!-- @os:linux -->
-ב-Linux, ROCm משתמש במאגר זיכרון מערכת משותף, ומאגר זה מוגדר כברירת מחדל למחצית מזיכרון המערכת.
+במערכת Linux, ROCm משתמש במאגר זיכרון משותף של המערכת, ומאגר זה מוגדר כברירת מחדל לחצי מזיכרון המערכת.
 
-ניתן להגדיל כמות זו על ידי שינוי הגדרת דפי ה-Translation Table Manager (TTM) של הקרנל, לפי ההוראות הבאות. AMD ממליצה להגדיר בביוס (BIOS) מינימום VRAM ייעודי (0.5 GB).
+ניתן להגדיל כמות זו על ידי שינוי הגדרת דפי ה-Translation Table Manager (TTM) של הליבה (kernel), בהתאם להוראות הבאות. AMD ממליצה להגדיר את ה-VRAM המוקדש המינימלי ב-BIOS (0.5 GB).
 
-* התקינו את כלי ה-pipx והוסיפו את הנתיב עבור חבילות wheel שהותקנו על ידי pipx לנתיב החיפוש של המערכת.
+* התקינו את כלי השירות pipx והוסיפו את הנתיב עבור wheels המותקנים על ידי pipx לנתיב החיפוש של המערכת.
 
   ```bash
   sudo apt install pipx
   pipx ensurepath
   ```
 
-* התקינו את חבילת ה-wheel amd-debug-tools מ-PyPI.
+* התקינו את ה-wheel של amd-debug-tools מ-PyPI.
   ```bash
   pipx install amd-debug-tools
   ```
 
-* הריצו את הכלי amd-ttm כדי לבדוק את ההגדרות הנוכחיות עבור זיכרון משותף.
+* הריצו את הכלי amd-ttm כדי לשלוח שאילתה לגבי ההגדרות הנוכחיות של הזיכרון המשותף.
   ```bash
   amd-ttm
   ```
 
-* שנו את הגדרות הזיכרון המשותף ל-**120 GB**:
+* קבעו מחדש את הגדרות הזיכרון המשותף ל-**120 GB**:
   ```bash
   amd-ttm --set 120
   ```
@@ -84,22 +84,22 @@ SPDX-License-Identifier: MIT
 
 ### חומרה
 
-מדריך זה דורש שני מחשבי Ryzen AI Halo ומתג Ethernet אחד, מחוברים בטופולוגיית כוכב כאשר כל יחידה מחוברת ישירות למתג.
+מדריך זה דורש שני מכשירי Ryzen AI Halo ומתג Ethernet אחד, המחוברים בטופולוגיית כוכב (star topology) כאשר כל מכשיר מחובר ישירות למתג.
 
 | רכיב | כמות | תיאור |
 |-----------|----------|-------------|
-| Ryzen AI Halo | 2 | צמתי חישוב (Compute nodes) המרכיבים את האשכול |
-| מתג Ethernet בקצב 10Gbps | 1 | מתג מרכזי המאפשר תקשורת בין מספר צמתי Ryzen AI Halo (לפחות 2 יציאות) |
-| כבל Ethernet | 2 | מחבר כל יחידת Halo למתג (מומלץ כבל Cat 7 ומעלה) |
+| Ryzen AI Halo | 2 | צמתי חישוב המרכיבים את האשכול |
+| מתג Ethernet במהירות 10Gbps | 1 | מתג מרכזי המאפשר תקשורת Ryzen AI Halo מרובת צמתים (לפחות 2 יציאות) |
+| כבל Ethernet | 2 | מחבר כל מכשיר Halo למתג (מומלץ Cat 7 ומעלה) |
 
-> **הערה**: נדרשות שתי יציאות במתג ה-Ethernet כדי לחבר את שתי יחידות Ryzen AI Halo. נדרשת יציאה שלישית אם אתם ניגשים למודל ממחשב לקוח נפרד ולא מאחת מיחידות ה-Halo.
+> **הערה**: נדרשות שתי יציאות מתג Ethernet כדי לחבר את שני מכשירי Ryzen AI Halo. נדרשת יציאה שלישית אם אתם ניגשים למודל ממכונת לקוח נפרדת במקום מאחד ממכשירי ה-Halo.
 
 ### תוכנה
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @require:driver -->
 <!-- @device:end -->
-נא להתקין את:
+אנא התקינו:
 - [Git](https://git-scm.com/downloads/win)
 - [Python](https://www.python.org/downloads/)
 - [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe) עם עומס העבודה **Desktop Development with C++**
@@ -112,21 +112,21 @@ sudo apt install git cmake python3 python3-pip
 ```
 <!-- @os:end -->
 
-## הגדרת חומרה פיזית
+## הגדרת החומרה הפיזית
 
-> **הערה**: יש להשלים שלב זה גם במכונה 1 וגם במכונה 2.
+> **הערה**: השלימו שלב זה הן במכונה 1 והן במכונה 2.
 
-חברו כל יחידת Ryzen AI Halo למתג ה-Ethernet באמצעות כבל Cat 7 (או גבוה יותר). פעולה זו מקימה את הקישור בקצב 10Gbps המשמש לתקשורת מהירה בין הצמתים.
+חברו כל מכשיר Ryzen AI Halo למתג ה-Ethernet באמצעות כבל Cat 7 (או גבוה יותר). פעולה זו יוצרת את הקישור בקצב 10Gbps המשמש לתקשורת מהירה בין הצמתים.
 <!-- @os:linux -->
 ### 1. קביעת ממשקי הרשת
 
-בכל מכונה, מצאו את שם ממשק הרשת שלה ורשמו אותו (יכונה בהמשך `IFNAME`). הריצו:
+בכל מכונה, מצאו את שם ממשק הרשת שלה ורשמו אותו (הוא ייקרא להלן `IFNAME`). הריצו:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
 ```
 
-פקודה זו מדפיסה ישירות את שם הממשק, לדוגמה:
+פקודה זו מציגה את שם הממשק ישירות, לדוגמה:
 
 ```bash
 enp191s0
@@ -134,13 +134,13 @@ enp191s0
 
 ### 2. אימות מהירויות קישור הרשת
 
-ודאו שהקישור פעיל ורץ במהירות המלאה על ידי בדיקת מהירות הממשק שלכם:
+ודאו שהקישור פעיל ופועל במהירות מלאה על ידי בדיקת מהירות הממשק שלכם:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **הערה**: החליפו את `<IFNAME>` בשם ממשק הפלט מהשלב [1. קביעת ממשקי הרשת](#1-determine-network-interfaces)
+> **הערה**: החליפו את `<IFNAME>` בשם ממשק הפלט מ-[1. קביעת ממשקי הרשת](#1-determine-network-interfaces)
 
 אתם אמורים לראות מהירות של `10000Mb/s`:
 
@@ -148,7 +148,7 @@ sudo ethtool <IFNAME> | grep Speed
 	Speed: 10000Mb/s
 ```
 
-> **הערה**: אם המהירות נמוכה מ-`10000Mb/s` או שהקישור אינו עולה, בדקו את חיבור הכבל וודאו שיציאת המתג מוגדרת ל-10Gbps. מתגים מסוימים דורשים ביטול של auto-negotiation והגדרת מהירות הקישור באופן ידני; עיינו בתיעוד המתג שלכם.
+> **הערה**: אם המהירות נמוכה מ-`10000Mb/s` או שהקישור אינו עולה, בדקו את חיבור הכבל וודאו שיציאת המתג מוגדרת ל-10Gbps. חלק מהמתגים דורשים ביטול של auto-negotiation והגדרת מהירות הקישור באופן ידני; עיינו בתיעוד המתג שלכם.
 
 <!-- @os:end -->
 
@@ -161,7 +161,7 @@ sudo ethtool <IFNAME> | grep Speed
 Get-NetAdapter | Select-Object Name, Status, LinkSpeed
 ```
 
-ממשק ה-Ethernet שלכם אמור להיות `Up` ולרוץ במהירות `10 Gbps`:
+ממשק ה-Ethernet שלכם אמור להיות `Up` ופועל במהירות `10 Gbps`:
 
 ```powershell
 Name      Status  LinkSpeed
@@ -169,33 +169,33 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **הערה**: אם המהירות נמוכה מ-`10 Gbps` או שהקישור אינו עולה, בדקו את חיבור הכבל וודאו שיציאת המתג מוגדרת ל-10Gbps. מתגים מסוימים דורשים ביטול של auto-negotiation והגדרת מהירות הקישור באופן ידני; עיינו בתיעוד המתג שלכם.
+> **הערה**: אם המהירות נמוכה מ-`10 Gbps` או שהקישור אינו עולה, בדקו את חיבור הכבל וודאו שיציאת המתג מוגדרת ל-10Gbps. חלק מהמתגים דורשים ביטול של auto-negotiation והגדרת מהירות הקישור באופן ידני; עיינו בתיעוד המתג שלכם.
 
 <!-- @os:end -->
 
 ## התקנת llama.cpp
 
-> **הערה**: יש להשלים שלב זה גם במכונה 1 וגם במכונה 2.
+> **הערה**: השלימו שלב זה הן במכונה 1 והן במכונה 2.
 
 זמינות שתי אפשרויות התקנה:
 
-- [אפשרות 1: Lemonade SDK (מומלץ)](#option-1-lemonade-sdk-recommended) - קבצים בינאריים בנויים מראש, ההגדרה המהירה ביותר
-- [אפשרות 2: בנייה ידנית מקוד המקור](#option-2-manual-source-build) - בנייה מקוד המקור עם שליטה מלאה על דגלי הבנייה
+- [אפשרות 1: Lemonade SDK (מומלץ)](#option-1-lemonade-sdk-recommended) - קבצים בינאריים בנויים מראש, ההתקנה המהירה ביותר
+- [אפשרות 2: בנייה ידנית מהמקור](#option-2-manual-source-build) - בנייה מהמקור עם שליטה מלאה על דגלי הבנייה
 
 ### אפשרות 1: Lemonade SDK (מומלץ)
 
-ה-Lemonade SDK מספק בניות לילה (nightly builds) של llama.cpp עם האצת AMD ROCm 7, המיועדות ל-GPU כגון gfx1151 (Strix Halo / Ryzen AI Max+ 395) וארכיטקטורות Radeon עדכניות נוספות.
+Lemonade SDK מספק גרסאות בנייה לילית (nightly builds) של llama.cpp עם האצת AMD ROCm 7, המיועדות ל-GPU כגון gfx1151 (Strix Halo / Ryzen AI Max+ 395) וארכיטקטורות Radeon עדכניות אחרות.
 
 <!-- @os:windows -->
-#### שלב 1: הורדת הקבצים הבינאריים המוכנים מראש
+#### שלב 1: הורדת הבינארים המוכנים מראש
 
-עברו לדף המהדורה האחרונה והורידו את הארכיון המתאים לפלטפורמה וליעד ה-GPU שלכם:
+נווטו לדף הגרסה האחרונה והורידו את הארכיון התואם לפלטפורמה וליעד ה-GPU שלכם:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
 הורידו את הקובץ בשם `llama-bxxxx-windows-rocm-gfx1151-x64.zip` (כאשר `xxxx` הוא מספר הבנייה).
 
-#### שלב 2: חילוץ הקבצים הבינאריים
+#### שלב 2: חילוץ הבינארים
 
 חלצו את הארכיון שהורדתם:
 
@@ -203,7 +203,7 @@ Ethernet  Up      10 Gbps
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-תיקייה זו מכילה כעת בניות מבוססות ROCm של `llama-cli.exe`, `llama-server.exe`, ו-`rpc-server.exe`, שמורכבות מראש עבור מערכת Ryzen AI Halo שלכם.
+תיקייה זו מכילה כעת בניות תומכות-ROCm של `llama-cli.exe`, `llama-server.exe`, ו-`rpc-server.exe`, מהודרות מראש עבור מערכת ה-Ryzen AI Halo שלכם.
 
 #### שלב 3: אימות זיהוי ה-GPU
 
@@ -222,15 +222,15 @@ Available devices:
 <!-- @os:end -->
 
 <!-- @os:linux -->
-#### שלב 1: הורדת הקבצים הבינאריים המוכנים מראש
+#### שלב 1: הורדת הבינארים המוכנים מראש
 
-עברו לדף המהדורה האחרונה והורידו את הארכיון המתאים לפלטפורמה וליעד ה-GPU שלכם:
+נווטו לדף הגרסה האחרונה והורידו את הארכיון התואם לפלטפורמה וליעד ה-GPU שלכם:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
 הורידו את הקובץ בשם `llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip` (כאשר `xxxx` הוא מספר הבנייה).
 
-#### שלב 2: חילוץ והכנת הקבצים הבינאריים
+#### שלב 2: חילוץ והכנת הבינארים
 
 ```bash
 unzip llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip
@@ -238,7 +238,7 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-תיקייה זו מכילה כעת בניות מבוססות ROCm של `llama-cli`, `llama-server`, ו-`rpc-server`, שמורכבות מראש עבור מערכת Ryzen AI Halo שלכם.
+תיקייה זו מכילה כעת בניות תומכות-ROCm של `llama-cli`, `llama-server`, ו-`rpc-server`, מהודרות מראש עבור מערכת ה-Ryzen AI Halo שלכם.
 
 #### שלב 3: אימות זיהוי ה-GPU
 
@@ -263,14 +263,14 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
 <!-- @os:windows -->
 #### שלב 1: בניית llama.cpp
 
-פתחו את **x64 Native Tools Command Prompt** (המותקן יחד עם Visual Studio Build Tools) ושכפלו את המאגר:
+פתחו את **x64 Native Tools Command Prompt** (מותקן יחד עם Visual Studio Build Tools) ושכפלו את המאגר:
 
 ```cmd
 git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-הוסיפו את HIP לנתיב שלכם ובצעו בנייה עם תמיכה ב-ROCm ו-RPC:
+הוסיפו את HIP לנתיב שלכם ובנו עם תמיכה ב-ROCm וב-RPC:
 
 ```cmd
 set PATH=%HIP_PATH%\bin;%PATH%
@@ -280,9 +280,9 @@ cmake --build rocm --config Release
 
 | דגל בנייה | מטרה |
 |-----------|---------|
-| `-DGGML_HIP=ON` | מאפשר את מחסנית התוכנה ROCm/HIP |
-| `-DGGML_RPC=ON` | מאפשר RPC להסקה מבוזרת |
-| `-DGPU_TARGETS=gfx1151` | מכוון ל-GPU של Ryzen AI Halo (Radeon 8060s) |
+| `-DGGML_HIP=ON` | מפעיל את מחסנית התוכנה ROCm/HIP |
+| `-DGGML_RPC=ON` | מפעיל RPC להסקה מבוזרת |
+| `-DGPU_TARGETS=gfx1151` | מיועד ל-GPU של Ryzen AI Halo‏ (Radeon 8060s) |
 | `-G Ninja` | משתמש במערכת הבנייה Ninja |
 
 #### שלב 2: אימות זיהוי ה-GPU
@@ -322,21 +322,20 @@ git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-בצעו בנייה עם תמיכה ב-ROCm ו-RPC:
+בנו עם תמיכה ב-ROCm וב-RPC:
 
 ```bash
-cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DGGML_HIP_ROCWMMA_FATTN=ON -DAMDGPU_TARGETS="gfx1151"
+cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DAMDGPU_TARGETS="gfx1151"
 cmake --build rocm --config Release -j$(nproc)
 ```
 
 | דגל בנייה | מטרה |
 |-----------|---------|
-| `-DGGML_HIP=ON` | מאפשר את מחסנית התוכנה ROCm |
-| `-DGGML_RPC=ON` | מאפשר RPC להסקה מבוזרת |
-| `-DGGML_HIP_ROCWMMA_FATTN=ON` | מאפשר rocWMMA לשיפור Flash Attention בכרטיסי AMD GPU |
-| `-DAMDGPU_TARGETS="gfx1151"` | מכוון ל-GPU של Ryzen AI Halo (Radeon 8060s) |
+| `-DGGML_HIP=ON` | מפעיל את מחסנית התוכנה ROCm |
+| `-DGGML_RPC=ON` | מפעיל RPC להסקה מבוזרת |
+| `-DAMDGPU_TARGETS="gfx1151"` | מיועד ל-GPU של Ryzen AI Halo‏ (Radeon 8060s) |
 
-למידע נוסף על אפשרויות בנייה, עיינו ב[תיעוד הבנייה של llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
+לאפשרויות בנייה נוספות, עיינו ב[תיעוד הבנייה של llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
 
 #### שלב 2: אימות זיהוי ה-GPU
 
@@ -360,9 +359,9 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
 
 ## הורדת המודל
 
-מדריך זה משתמש ב-[GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), מודל בעל 358B פרמטרים בכימות `Q4_K_XL` מ-[Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). בכימות זה המודל דורש כ-205GB אחסון ומתאים בתוך זיכרון ה-GPU המשולב של שני צמתי Ryzen AI Halo.
+מדריך זה משתמש ב[GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), מודל בעל 358 מיליארד פרמטרים בקוונטיזציית `Q4_K_XL` מבית [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). בקוונטיזציה זו המודל דורש כ-205GB של אחסון ומתאים לזיכרון ה-GPU המשולב של שני צמתי Ryzen AI Halo.
 
-הורידו את קובצי ה-GGUF באמצעות ה-Hugging Face CLI:
+הורידו את קבצי ה-GGUF באמצעות ה-Hugging Face CLI:
 <!-- @os:linux -->
 ```bash
 pip install huggingface-hub
@@ -381,17 +380,17 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
 ```
 <!-- @os:end -->
 
-> **הערה**: הורדת המודל חייבת להתבצע במחשב 1 (הבקר). צמתי ה-worker של RPC אינם זקוקים לעותק מקומי של קובצי המודל.
+> **הערה**: הורדת המודל חייבת להתבצע על מכונה 1 (הבקר). צמתי עובד ה-RPC אינם זקוקים לעותק מקומי של קבצי המודל.
 
-## הפעלת המודל על האשכול
+## הפעלת המודל על גבי האשכול
 
-מנוע ה-RPC (Remote Procedure Call) של llama.cpp מאפשר למופע יחיד של llama.cpp להעביר שכבות מודל ל-workers מרוחקים דרך הרשת. מחשב אחד משמש **בקר** (מחשב 1), ומטפל בטוקניזציה, תזמון ותיאום. המחשב השני מריץ **שרת RPC** קליל (מחשב 2) שחושף את זיכרון ה-GPU שלו ואת כוח החישוב שלו לבקר.
+מנוע ה-RPC (Remote Procedure Call) של llama.cpp מאפשר למופע יחיד של llama.cpp להעביר שכבות של המודל לעובדים מרוחקים דרך הרשת. מכונה אחת פועלת בתור **הבקר** (מכונה 1), ומטפלת בטוקניזציה, בתזמון ובתיאום. המכונה השנייה מריצה **שרת RPC** קליל (מכונה 2) שחושף את זיכרון ה-GPU ואת כוח החישוב שלה לבקר.
 
-בזמן הטעינה, llama.cpp מפצל את המודל בין שני הצמתים. לאחר הטעינה, ההסקה מתבצעת כאילו רצה על מאיץ יחיד. RPC מטפל בהעברות טנסורים ובסנכרון מאחורי הקלעים.
+בזמן הטעינה, llama.cpp מפצל את המודל בין שני הצמתים. לאחר הטעינה, ההסקה ממשיכה כאילו היא רצה על מאיץ יחיד. RPC מטפל בהעברות הטנסורים ובסנכרון מאחורי הקלעים.
 
-### שלב 1: הפעלת שרת ה-RPC (מחשב 2)
+### שלב 1: הפעלת שרת ה-RPC (מכונה 2)
 
-במחשב 2, הפעילו את שרת ה-RPC כדי לחשוף את משאבי ה-GPU שלו לבקר:
+על מכונה 2, הפעילו את שרת ה-RPC כדי לחשוף את משאבי ה-GPU שלה לבקר:
 <!-- @os:linux -->
 ```bash
 ./ggml-rpc-server -p 50053 -c --host 0.0.0.0
@@ -406,19 +405,19 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
 
 | דגל | מטרה |
 |------|---------|
-| `-p` | פורט לשידור שרת ה-RPC עליו |
-| `-c` | מאפשר מטמון מקומי לטנסורים גדולים, כדי למנוע העברות רשת חוזרות במהלך טעינת המודל |
-| `--host` | כתובת IP לקישור שרת ה-RPC אליה (`0.0.0.0` עבור כל הממשקים) |
+| `-p` | הפורט לשידור שרת ה-RPC |
+| `-c` | מאפשר מטמון מקומי עבור טנסורים גדולים, תוך הימנעות מהעברות רשת חוזרות במהלך טעינת המודל |
+| `--host` | כתובת ה-IP לקישור שרת ה-RPC אליה (`0.0.0.0` עבור כל הממשקים) |
 
 לאפשרויות נוספות, עיינו ב[תיעוד ה-RPC של llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
-### שלב 2: הפעלת המודל (מחשב 1)
+### שלב 2: הפעלת המודל (מכונה 1)
 
-כאשר שרת ה-RPC פועל במחשב 2, הפעילו את ההסקה ממחשב 1 באמצעות `llama-cli` או `llama-server`.
+כאשר שרת ה-RPC פועל על מכונה 2, הפעילו את ההסקה ממכונה 1 באמצעות `llama-cli` או `llama-server`.
 
 #### llama-cli
 
-`llama-cli` מספק ממשק מבוסס-מסוף לאינטראקציה ישירה עם המודל. הוא אידיאלי לבדיקות ביצועים, ניפוי שגיאות וניסויים ברמה נמוכה.
+`llama-cli` מספק ממשק מבוסס-מסוף לאינטראקציה ישירה עם המודל. הוא אידיאלי לבנצ'מרקינג, לניפוי שגיאות ולניסויים ברמה נמוכה.
 
 <!-- @os:linux -->
 ```bash
@@ -427,15 +426,15 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
   -c 32768 \
   -fa on \
   -ngl 999 \
-  --no-mmap \
+  -lm none \
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **מציאת `<RPC_WORKER_IP>`**: במחשב 2, הריצו `hostname -I | awk '{print $1}'` כדי למצוא את כתובת ה-IP המקומית שלו.
+> **מציאת `<RPC_WORKER_IP>`**: על מכונה 2, הריצו `hostname -I | awk '{print $1}'` כדי למצוא את כתובת ה-IP המקומית שלה.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **הערה**: הריצו פקודה זו ב-Terminal (Powershell).
+> **הערה**: הריצו פקודה זו במסוף (Powershell).
 
 ```powershell
 .\llama-cli.exe `
@@ -443,20 +442,20 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
   -c 32768 `
   -fa on `
   -ngl 999 `
-  --no-mmap `
+  -lm none `
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **מציאת `<RPC_WORKER_IP>`**: במחשב 2, הריצו `ipconfig | findstr /C:"IPv4"` ב-Terminal (Powershell) כדי למצוא את כתובת ה-IP המקומית שלו.
+> **מציאת `<RPC_WORKER_IP>`**: על מכונה 2, הריצו `ipconfig | findstr /C:"IPv4"` במסוף (Powershell) כדי למצוא את כתובת ה-IP המקומית שלה.
 
 <!-- @os:end -->
 
 לאחר ההפעלה, `llama-cli` מציג את התקדמות טעינת המודל ונכנס לשורת פקודה אינטראקטיבית שבה תוכלו לשוחח ישירות עם המודל:
 
-![llama-cli מריץ את GLM 4.7 על פני שני צמתים](assets/llama-cli-example.png)
+![llama-cli מריץ את GLM 4.7 בפריסה על שני צמתים](assets/llama-cli-example.png)
 #### llama-server
 
-`llama-server` חושף את אותו מנוע היסק דרך תהליך שרת מתמשך עם ממשק משתמש אינטרנטי משולב ו-API מסוג HTTP תואם OpenAI. זהו הממשק המועדף לפריסות ארוכות טווח, גישה מרובת משתמשים, ואינטגרציה עם כלים חיצוניים.
+`llama-server` חושף את אותו מנוע הסקה דרך תהליך שרת מתמשך עם ממשק משתמש רשתי משולב וממשק API מבוסס HTTP תואם-OpenAI. זהו הממשק המועדף לפריסות ארוכות טווח, גישה של משתמשים מרובים, ואינטגרציה עם כלים חיצוניים.
 
 <!-- @os:linux -->
 ```bash
@@ -465,17 +464,17 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
   -c 32768 \
   -fa on \
   -ngl 999 \
-  --no-mmap \
+  -lm none \
   --host 0.0.0.0 \
   --port 8081 \
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **איתור `<RPC_WORKER_IP>`**: על גבי מחשב 2, הריצו `hostname -I | awk '{print $1}'` כדי למצוא את כתובת ה-IP המקומית שלו.
+> **איתור `<RPC_WORKER_IP>`**: במחשב 2, הריצו `hostname -I | awk '{print $1}'` כדי למצוא את כתובת ה-IP המקומית שלו.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **הערה**: הריצו פקודה זו ב-Terminal (Powershell).
+> **הערה**: הריצו פקודה זו במסוף (Powershell).
 
 ```powershell
 .\llama-server.exe `
@@ -483,44 +482,44 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
   -c 32768 `
   -fa on `
   -ngl 999 `
-  --no-mmap `
+  -lm none `
   --host 0.0.0.0 `
   --port 8081 `
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **איתור `<RPC_WORKER_IP>`**: על גבי מחשב 2, הריצו `ipconfig | findstr /C:"IPv4"` ב-Terminal (Powershell) כדי למצוא את כתובת ה-IP המקומית שלו.
+> **איתור `<RPC_WORKER_IP>`**: במחשב 2, הריצו `ipconfig | findstr /C:"IPv4"` במסוף (Powershell) כדי למצוא את כתובת ה-IP המקומית שלו.
 <!-- @os:end -->
 
-לאחר ההפעלה, פתחו את `http://<HOST_IP>:8081` בדפדפן שלכם כדי לגשת לממשק המשתמש האינטרנטי המובנה. זה מספק ממשק צ'אט מבוסס דפדפן לאינטראקציה עם המודל:
+לאחר ההפעלה, פתחו את `http://<HOST_IP>:8081` בדפדפן כדי לגשת לממשק המשתמש הרשתי המובנה. הוא מספק ממשק צ'אט מבוסס דפדפן לאינטראקציה עם המודל:
 
-![ממשק המשתמש האינטרנטי של llama-server פועל עם GLM 4.7 על פני שני צמתים](assets/llama-server-example.png)
+![ממשק משתמש רשתי של llama-server מריץ GLM 4.7 על פני שני צמתים](assets/llama-server-example.png)
 
 <!-- @os:linux -->
-> **איתור `<HOST_IP>`**: על גבי מחשב 1, הריצו `hostname -I | awk '{print $1}'` כדי למצוא את כתובת ה-IP המקומית שלו.
+> **איתור `<HOST_IP>`**: במחשב 1, הריצו `hostname -I | awk '{print $1}'` כדי למצוא את כתובת ה-IP המקומית שלו.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **איתור `<HOST_IP>`**: על גבי מחשב 1, הריצו `ipconfig | findstr /C:"IPv4"` ב-Terminal (Powershell) כדי למצוא את כתובת ה-IP המקומית שלו.
+> **איתור `<HOST_IP>`**: במחשב 1, הריצו `ipconfig | findstr /C:"IPv4"` במסוף (Powershell) כדי למצוא את כתובת ה-IP המקומית שלו.
 <!-- @os:end -->
 
 #### מדריך פרמטרים
 
 | דגל | מטרה |
 |------|---------|
-| `-m` | נתיב לקובץ מודל GGUF (השתמשו בשארד הראשון, `00001-of-00005`) |
-| `-c` | גודל הקשר בטוקנים. ערכים גדולים יותר משתמשים ביותר זיכרון |
-| `-fa on` | מפעיל rocWMMA Flash Attention לשיפור ביצועים על GPU של AMD |
-| `-ngl 999` | מעביר את כל שכבות המודל אל ה-GPU |
-| `--no-mmap` | מבטל מיפוי זיכרון, ומקטין את זמני הטעינה כאשר גודל המודל חורג מזיכרון ה-RAM של המערכת אך מתאים ל-VRAM |
-| `--host` | כתובת ה-IP לקישור `llama-server` אליה (`llama-server` בלבד) |
-| `--port` | הפורט להגשת ה-API של HTTP (`llama-server` בלבד) |
-| `--rpc` | רשימת נקודות קצה של עובדי RPC מופרדות בפסיקים (`IP:port`) |
+| `-m` | נתיב לקובץ מודל ה-GGUF (השתמשו במקטע הראשון, `00001-of-00005`) |
+| `-c` | גודל ההקשר בטוקנים. ערכים גדולים יותר משתמשים בזיכרון רב יותר |
+| `-fa on` | מפעיל את rocWMMA Flash Attention לביצועים משופרים ב-GPU-ים של AMD |
+| `-ngl 999` | מעביר את כל שכבות המודל ל-GPU |
+| `-lm none` | מגדיר את מצב טעינת המודל ל-`none`, ומבטל מיפוי זיכרון כדי לצמצם זמני טעינה כאשר גודל המודל חורג מזיכרון ה-RAM של המערכת אך מתאים ל-VRAM |
+| `--host` | כתובת ה-IP שאליה יש לקשר את `llama-server` (רק ב-`llama-server`) |
+| `--port` | הפורט שדרכו יסופק ממשק ה-API של HTTP (רק ב-`llama-server`) |
+| `--rpc` | רשימה מופרדת בפסיקים של נקודות קצה של עובדי RPC (`IP:port`) |
 
 לשימוש מלא בפרמטרים, עיינו ב[תיעוד llama-cli](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) וב[תיעוד llama-server](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
 
 ## הצעדים הבאים
 
-- **חיבור אפליקציות צד שלישי**: `llama-server` חושף API תואם OpenAI. הפנו כל אפליקציה תואמת OpenAI (כגון Open WebUI) אל `http://<HOST_IP>:8081` עם מפתח API כלשהו כתחליף (לדוגמה, `none`) כדי להתחבר לצביר שלכם
-- **חקרו מודלים נוספים**: עיינו ב-GGUF-ים מכומתים ב[Hugging Face](https://huggingface.co/models?search=gguf) כדי למצוא מודלים המתאימים לזיכרון ה-GPU המשולב של הצביר שלכם
-- **הרחבה לארבעה צמתים**: הוסיפו שתי מערכות Ryzen AI Halo נוספות כעובדי RPC נוספים כדי לגשת למודלים בסדר גודל של טריליון פרמטרים. העבירו נקודות קצה נוספות אל `--rpc` כרשימה מופרדת בפסיקים (לדוגמה, `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)
+- **חיבור אפליקציות צד שלישי**: `llama-server` חושף API תואם-OpenAI. הפנו כל אפליקציה תואמת-OpenAI (כגון Open WebUI) אל `http://<HOST_IP>:8081` עם מפתח API כלשהו כמציין מקום (למשל, `none`) כדי להתחבר לאשכול שלכם
+- **חקירת מודלים נוספים**: עיינו ב-GGUF-ים מכומתים ב-[Hugging Face](https://huggingface.co/models?search=gguf) כדי למצוא מודלים המתאימים לזיכרון ה-GPU המשולב של האשכול שלכם
+- **התרחבות לארבעה צמתים**: הוסיפו שתי מערכות Ryzen AI Halo נוספות כעובדי RPC נוספים כדי לגשת למודלים בקנה מידה של טריליון פרמטרים. העבירו נקודות קצה נוספות ל-`--rpc` כרשימה מופרדת בפסיקים (למשל, `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)

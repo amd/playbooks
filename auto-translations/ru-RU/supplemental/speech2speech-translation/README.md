@@ -18,23 +18,25 @@ SPDX-License-Identifier: MIT
 
 Программный стек AMD ROCm™ и PyTorch создают единую экосистему для ИИ на устройстве. Он работает как в Windows, так и в Linux с официальной поддержкой широкого спектра устройств, включая APU Ryzen™ AI и GPU Radeon™.
 
-Этот плейбук научит вас запускать низколатентный, выразительный и приватный перевод речи в речь полностью на периферийном устройстве.
+Этот playbook научит вас запускать низколатентный, выразительный и приватный перевод речи в речь полностью на edge-устройстве.
 
 ## Чему вы научитесь
 
 - Как настроить среду для перевода речи в речь
-- Как писать код на Python для загрузки и использования моделей преобразования речи в речь
-- Как запускать интерфейс Gradio UI и экспериментировать с ним
+- Как писать код на Python для загрузки и использования моделей речь-в-речь
+- Как запускать и экспериментировать с интерфейсом Gradio UI
 
 ## Зачем использовать перевод речи в речь в реальном времени?
 
-- Устраняет трение между переводом и языковыми барьерами
-- Передаёт тон, эмоции и намерения без неловких пауз
-- Обеспечивает глобальное сотрудничество и более быстрое принятие решений
+- Устраняет трудности между переводом и языковыми барьерами
+- Передаёт тон, эмоции и намерение без неловких пауз
+- Позволяет наладить глобальное сотрудничество и ускорить принятие решений
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Настройка конфигурации памяти
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Проверка обновлений программного обеспечения
@@ -51,7 +53,7 @@ SPDX-License-Identifier: MIT
 <!-- @device:halo_box -->
 В Linux откройте терминал и выполните следующую команду, чтобы создать venv с уже установленными ROCm+Pytorch:
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -71,7 +73,7 @@ sudo usermod -aG render,video $LOGNAME
 
 В Linux откройте терминал и выполните следующую команду, чтобы создать venv:
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -87,7 +89,7 @@ source s2st-env/bin/activate
 <!-- @device:halo_box -->
 В Windows откройте терминал в выбранном вами каталоге и выполните команды, чтобы создать venv с уже установленными ROCm+Pytorch:
 
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv s2st-env --system-site-packages
 s2st-env\Scripts\activate
@@ -95,15 +97,15 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Совет**: Пользователям Windows может потребоваться изменить политику выполнения PowerShell (например,
-> установив её на RemoteSigned или Unrestricted) перед выполнением некоторых команд Powershell.
+> **Совет**: пользователям Windows может потребоваться изменить политику выполнения PowerShell (Execution Policy) (например,
+> установить её в RemoteSigned или Unrestricted) перед запуском некоторых команд PowerShell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 В Windows откройте терминал в выбранном вами каталоге и выполните команды, чтобы создать venv:
 
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv s2st-env
 s2st-env\Scripts\activate
@@ -111,13 +113,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Совет**: Пользователям Windows может потребоваться изменить политику выполнения PowerShell (например,
-> установив её на RemoteSigned или Unrestricted) перед выполнением некоторых команд Powershell.
+> **Совет**: пользователям Windows может потребоваться изменить политику выполнения PowerShell (Execution Policy) (например,
+> установить её в RemoteSigned или Unrestricted) перед запуском некоторых команд PowerShell.
 
 <!-- @device:end -->
 <!-- @os:end -->
 
-### Установка базовых зависимостей
+### Установка основных зависимостей
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -130,7 +132,7 @@ s2st-env\Scripts\activate
 Установите зависимости m4t с помощью pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
 ```
 <!-- @test:end -->
 
@@ -202,24 +204,24 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 
 ## Настройка демонстрации перевода речи в речь
 
-#### Узнайте о seamless-m4t-v2
+#### Знакомство с seamless-m4t-v2
 
-Ознакомьтесь с [карточкой модели](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) на Hugging Face, чтобы узнать больше.
-Это техническая архитектура моделей преобразования речи в речь:
+Изучите [карточку модели](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) на Hugging Face, чтобы узнать больше.
+Вот техническая архитектура моделей речь-в-речь:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### Скачивание скриптов
 
-Этот плейбук включает готовые к использованию скрипты. Пожалуйста, загрузите их все в тот же каталог, что и созданная вами среда.
+Этот playbook включает готовые к использованию скрипты. Пожалуйста, скачайте их все в тот же каталог, что и созданное вами окружение.
 
 | Скрипт | Описание | Использование |
 |--------|-------------|-------|
 | [infer.py](assets/infer.py) | Базовая генерация текста LLM | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Пример аудиофайла | Н/Д |
 | [lang_list.py](assets/lang_list.py) | Файл поддержки языков | Н/Д |
-| [gradio_demo.py](assets/gradio_demo.py) | Интуитивно понятный интерфейс для перевода речи | `python gradio_demo.py --no-share` |
+| [gradio_demo.py](assets/gradio_demo.py) | Интуитивно понятный UI для перевода речи | `python gradio_demo.py --no-share` |
 
 
 ### Начало работы с infer.py
@@ -228,7 +230,7 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 ```bash
 python infer.py
 ```
-> **Примечание**: Вы можете увидеть некоторые предупреждения. Это ожидаемо.
+> **Примечание**: вы можете увидеть некоторые предупреждения. Это ожидаемо.
  
   
 #### Объяснение кода
@@ -261,7 +263,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **Фрагмент 2: Загрузка моделей из HuggingFace**
 
-Эта функция принимает идентификатор модели и загружает модель, если она ещё не загружена. Затем она возвращает процессор и модель для использования следующей функцией.
+Эта функция принимает идентификатор модели и загружает модель, если она ещё не была загружена. Затем она возвращает процессор и модель для использования в следующей функции.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -280,7 +282,7 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Фрагмент 3: Ввод аудиоклипа в формате .wav и его предобработка**
+**Фрагмент 3: Ввод аудиоклипа в файле .wav и его предварительная обработка**
 
 Эта функция загружает аудиоклип и передискретизирует его до целевой частоты.
 ```python
@@ -304,7 +306,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
 
 **Фрагмент 4: Запуск инференса**
 
-Эта функция запускает инференс модели и возвращает сгенерированный результат.
+Эта функция запускает инференс с моделью и возвращает сгенерированный результат.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -397,9 +399,9 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Запуск демонстрации интерфейса Gradio UI:
+### Запуск демонстрации Gradio UI:
 
-Теперь, когда вы запустили базовый пример скрипта, следующие инструкции предоставляют удобный интерфейс, который основывается на написанном нами коде и упрощает перевод речи в речь в реальном времени.
+Теперь, когда вы запустили базовый пример скрипта, следующие инструкции содержат удобный интерфейс, который строится на написанном нами коде и упрощает перевод речи в речь в реальном времени.
 
 #### Запуск Gradio локально
 
@@ -528,12 +530,12 @@ PY
 
 ## Дальнейшие шаги
 
-- Комбинируйте десятки языков для быстрого перевода. 
-- Поделитесь своей демонстрацией с другими: добавьте --share, чтобы создать публичную ссылку, доступную удалённо всем желающим, или разверните её постоянно с помощью Hugging Face Spaces
+- Смешивайте и сочетайте десятки языков для быстрого перевода. 
+- Поделитесь своей демонстрацией с другими: добавьте --share, чтобы создать публичную ссылку, доступную любому удалённо, или разверните её на постоянной основе с помощью Hugging Face Spaces
 
 ## Ресурсы
 
 Ниже приведены дополнительные ресурсы, чтобы узнать больше о переводе речи в речь:  
-* Репозиторий находится здесь https://huggingface.co/facebook/seamless-m4t-v2-large 
+* Репозиторий доступен здесь: https://huggingface.co/facebook/seamless-m4t-v2-large 
 * Научные исследования, связанные с "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Совместное использование и развёртывание Gradio: [Руководство по совместному использованию вашего приложения](https://www.gradio.app/guides/sharing-your-app) и [Развёртывание в Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Совместное использование и развёртывание Gradio: [Руководство по совместному использованию приложения](https://www.gradio.app/guides/sharing-your-app) и [Развёртывание в Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

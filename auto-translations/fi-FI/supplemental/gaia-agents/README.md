@@ -16,30 +16,32 @@ SPDX-License-Identifier: MIT
 
 ## Yleiskatsaus
 
-GAIA-agentit ovat tekoälyavustajia, jotka käyttävät paikallista LLM-mallia päättelyyn ja määrittelemiesi työkalujen kutsumiseen — kuten chatboteja, jotka pystyvät ryhtymään toimiin. Ne toimivat **100 % paikallisesti** ilman pilvi-API:ta, ilman että dataa poistuu koneeltasi, eikä API-avaimia tarvita.
+GAIA-agentit ovat tekoälyavustajia, jotka käyttävät paikallista LLM:ää päättelyyn ja määrittelemiesi työkalujen kutsumiseen — kuten chatboteja, jotka pystyvät toimimaan. Ne toimivat **100-prosenttisesti paikallisesti** ilman pilvi-API:ta, ilman että dataa poistuu koneeltasi, eikä API-avaimia tarvita.
 
-Tässä ohjekirjassa rakennat laitteistoneuvoja-agentin (Hardware Advisor Agent), joka tunnistaa järjestelmäsi RAM-muistin, GPU:n ja NPU:n, kyselee paikallista mallikatalogia ja suosittelee, mitkä LLM-mallit koneesi pystyy ajamaan. Se on käytännönläheinen johdatus GAIA Agent SDK:hon, jonka lopputulos on välittömästi hyödyllinen.
+Tässä oppaassa rakennat Hardware Advisor Agent -agentin, joka tunnistaa järjestelmäsi RAM-muistin, GPU:n ja NPU:n, kyselee paikallista mallikatalogia ja suosittelee, mitä LLM-malleja koneesi pystyy ajamaan. Tämä on käytännönläheinen johdatus GAIA Agent SDK:hon, jonka tuloksena syntyy jotain heti hyödyllistä.
 
 ## Mitä opit
 
 - Miten luoda GAIA-agentti mukautetuilla työkaluilla
 - LemonadeClient SDK:n käyttö järjestelmätietojen ja mallikatalogien kyselyyn
 - Alustakohtainen GPU/NPU-tunnistus (Windows PowerShell ja Linux lspci)
-- Muistiin perustuva mallien koon määrittely 70 %:n säännöllä
+- Muistiin perustuva mallin koon määrittäminen 70 %:n säännöllä
 - Interaktiivisen komentorivikäyttöliittymän rakentaminen luonnollisen kielen laitteistokyselyihin
 
-## Muistiasetuksen määrittäminen
+<!-- @device:halo_box,halo,stx,krk -->
+## Muistikonfiguraation asettaminen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
-> **Huomautus**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centeristä.
+> **Huomautus**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centerin kautta.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmiston esivaatimusten asentaminen
+## Ohjelmisto-riippuvuuksien asentaminen
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
@@ -69,11 +71,11 @@ which python3
 
 ## Aloittaminen
 
-Käynnistä ensin valmis agentti, jotta näet mitä olet rakentamassa. Sen jälkeen käymme koodin läpi vaihe vaiheelta.
+Saa ensin valmis agentti toimimaan, jotta näet, mitä olet rakentamassa. Sen jälkeen käymme koodin läpi vaihe vaiheelta.
 
 ### Suorita valmiiksi rakennettu esimerkki
 
-Tämä ohjekirja sisältää täydellisen [hardware_advisor_agent.py](assets/hardware_advisor_agent.py)-tiedoston. Lataa se valitsemaasi hakemistoon ja suorita se nähdäksesi valmiin agentin toiminnassa:
+Tämä opas sisältää täydellisen tiedoston [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Lataa se haluamaasi hakemistoon ja suorita se nähdäksesi valmiin agentin toiminnassa:
 
 ```bash
 python hardware_advisor_agent.py
@@ -124,7 +126,7 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 
 **Onnittelut** – olet rakentanut agentin!
 
-Loppuosa ohjekirjasta selittää, miten skriptin jokainen osa toimii, jotta ymmärrät sen alusta alkaen.
+Loppuosa oppaasta selittää, miten kukin skriptin osa toimii, jotta ymmärrät sen alusta lähtien.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -266,13 +268,13 @@ echo "OK: hardware_advisor_agent.py started successfully"
 
 ## Ymmärrä arkkitehtuuri
 
-Laitteistoneuvoja-agentti yhdistää kolme komponenttia:
+Hardware Advisor Agent yhdistää kolme komponenttia:
 
 - **LemonadeClient SDK** — Järjestelmätiedot ja mallikatalogin API:t
 - **Alustakohtainen tunnistus** — Windows PowerShell / Linux lspci GPU-tietoja varten
-- **Muistilaskelmat** — 70 %:n sääntö turvallista mallien koon määrittelyä varten
+- **Muistilaskelmat** — 70 %:n sääntö turvallista mallin mitoitusta varten
 
-Data kulkee seuraavassa järjestyksessä: käyttäjän kysely → agentti valitsee työkalun → työkalu kutsuu LemonadeClientiä + käyttöjärjestelmän tunnistusta → agentti kokoaa tulokset suositukseksi.
+Data kulkee näiden läpi järjestyksessä: käyttäjän kysely → agentti valitsee työkalun → työkalu kutsuu LemonadeClientiä + käyttöjärjestelmän tunnistusta → agentti kokoaa tulokset suositukseksi.
 
 ### LemonadeClient SDK
 
@@ -346,7 +348,7 @@ response = client.list_models(show_all=True)
 }
 ```
 
-**`get_model_info(model_id)`** — Palauttaa koon arviot tietylle mallille:
+**`get_model_info(model_id)`** — Palauttaa kokoarviot tietylle mallille:
 
 ```python
 model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
@@ -362,7 +364,7 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 
 ### Alustakohtainen GPU-tunnistus
 
-Agentti käyttää käyttöjärjestelmän omia komentoja PyTorchin sijaan GPU:n tunnistukseen. Tämä toimii ilman asennettuja GPU-ajureita, tunnistaa kaikki GPU:t (ei vain CUDA-yhteensopivat) ja välttää raskaiden kirjastojen tuonnin.
+Agentti käyttää käyttöjärjestelmän natiiveja komentoja PyTorchin sijaan GPU-tunnistukseen. Tämä toimii ilman asennettuja GPU-ajureita, tunnistaa kaikki GPU:t (ei vain CUDA-yhteensopivia) ja välttää raskaiden kirjastojen tuonnin.
 
 <!-- @os:windows -->
 
@@ -399,7 +401,7 @@ result = subprocess.run(
 
 ### 70 %:n muistisääntö
 
-> **Sääntö:** Mallin koon tulisi olla alle 70 % käytettävissä olevasta RAM-muistista, jotta 30 % jää varakapasiteetiksi päättelytoiminnoille (KV-välimuisti, eräkäsittelyn puskurit, ajonaikaiset muistipiikit).
+> **Sääntö:** Mallin koon tulisi olla alle 70 % käytettävissä olevasta RAM-muistista, jotta jää 30 % ylimääräistä tilaa päättelytoimintoja varten (KV-välimuisti, eräkäsittelypuskurit, ajonaikaiset muistipiikit).
 
 ```
 System: 32 GB RAM
@@ -414,7 +416,7 @@ Luot **yhden tiedoston** nimeltä `hardware_advisor_agent.py` ja lisäät ominai
 
 ### Vaihe 1: Agentin runko
 
-Aloita minimaalisella agenttirakenteella — pelkkä luokka ja perus järjestelmäkehote. Agentilla ei ole vielä työkaluja.
+Aloita minimaalisella agenttirakenteella — vain luokka ja perus järjestelmäprompti. Agentilla ei vielä ole työkaluja.
 
 ```python
 from gaia import Agent
@@ -457,9 +459,9 @@ Agent created successfully!
 
 ### Vaihe 2: GPU- ja laitteistotunnistus
 
-Lisää `_get_gpu_info()`-apumetodi ja `get_hardware_info()`-työkalu. Tämä tekee agentista interaktiivisen — voit nyt kysyä siltä järjestelmän teknisistä tiedoista.
+Lisää `_get_gpu_info()`-apumetodi ja `get_hardware_info()`-työkalu. Tämä tekee agentista interaktiivisen — voit nyt kysellä siltä järjestelmän teknisistä tiedoista.
 
-**Päivitä tuonnit (imports)** tiedoston alussa:
+**Päivitä importit** tiedoston alussa:
 
 ```python
 from typing import Any, Dict
@@ -652,7 +654,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ### Vaihe 3: Mallikatalogi
 
-Lisää `list_available_models()`-työkalu `_register_tools()`-metodin sisään, `get_hardware_info`-funktion jälkeen. Nyt agentti pystyy kertomaan, mitkä mallit ovat saatavilla.
+Lisää `list_available_models()`-työkalu `_register_tools()`-metodin sisään, `get_hardware_info`-funktion jälkeen. Nyt agentti pystyy kertomaan, mitä malleja on saatavilla.
 
 ```python
     @tool(atomic=True)
@@ -796,7 +798,7 @@ Top recommendations:
 
 ### Vaihe 5: Tuotantovalmis komentorivikäyttöliittymä
 
-Korvaa yksinkertainen `__main__`-lohko viimeistellyllä interaktiivisella komentorivikäyttöliittymällä. Tämä lisää bannerin, lopetuskomennot ja paremman virheenkäsittelyn.
+Korvaa yksinkertainen `__main__`-lohko hiotulla interaktiivisella komentorivikäyttöliittymällä. Tämä lisää bannerin, lopetuskomennot ja paremman virheenkäsittelyn.
 
 **Korvaa koko `if __name__ == "__main__":`-lohko** seuraavalla:
 
@@ -850,15 +852,15 @@ if __name__ == "__main__":
 ---
 ### Lopullinen tarkistus
 
-`hardware_advisor_agent.py`-tiedostossasi pitäisi nyt olla kaikki nämä osat:
+`hardware_advisor_agent.py`-tiedostossasi tulisi nyt olla kaikki nämä osat:
 
 - [x] Tuonnit: `from typing import Any, Dict` ja `from gaia import Agent, tool`
 - [x] `HardwareAdvisorAgent`-luokka, jossa on `__init__` ja järjestelmäkehote
 - [x] `_get_gpu_info()`-apufunktio (Windows PowerShell + Linux lspci)
 - [x] `get_hardware_info()`-työkalu, jossa on GPU-, NPU- ja käyttöjärjestelmäkentät
-- [x] `list_available_models()`-työkalu, jossa on nimikkeet ja kokorikastus
+- [x] `list_available_models()`-työkalu, jossa on nimikkeet ja koon rikastaminen
 - [x] `recommend_models()`-työkalu, jossa on 70 %:n sääntö, fits_in_ram ja fits_in_gpu
-- [x] `main()`-funktio, jossa on interaktiivinen komentorivikäyttöliittymä
+- [x] `main()`-funktio interaktiivisella komentorivikäyttöliittymällä
 
 **Testaa nämä kyselyt varmistaaksesi, että kaikki toimii:**
 
@@ -867,12 +869,12 @@ if __name__ == "__main__":
 - "What models are available?"
 - "Can I run a 30B model?"
 
-> **Vinkki**: Täydellinen toteutus on saatavilla osoitteessa [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
+> **Vihje**: Täydellinen toteutus löytyy osoitteesta [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
 
 ## Seuraavat vaiheet
 
-- **Tutustu LemonadeClient-rajapintoihin** — Löydä lisää järjestelmän ja mallien hallintaominaisuuksia [LemonadeClient SDK -dokumentaatiosta](https://amd-gaia.ai/sdk/lemonade-client)
-- **Lisää äänivuorovaikutus** — Integroi Whisper ASR ja Kokoro TTS, jotta käyttäjät voivat kysyä laitteistoon liittyviä kysymyksiä puhumalla. Katso [Talk-opas](https://amd-gaia.ai/guides/talk)
-- **Lisää MCP-tuki** — Julkaise laitteistoneuvoja MCP-palvelimena, jotta muut työkalut voivat kysyä siltä tietoja. Katso [MCP-opas](https://amd-gaia.ai/sdk/infrastructure/mcp)
-- **Laajenna suositusmoottoria** — Ota huomioon GPU:n VRAM kerrosten ulkoistamista varten tai lisää suorituskykytestaus token-per-sekunti-arvion laskemiseksi
-- **Rakenna monen agentin järjestelmä** — Yhdistä laitteistoneuvoja koodiagenttiin tai keskusteluagenttiin käyttämällä [Routing Agent](https://amd-gaia.ai/guides/routing) -toimintoa
+- **Tutustu LemonadeClient-rajapintoihin** — Löydä lisää järjestelmän ja mallien hallintaan liittyviä ominaisuuksia [LemonadeClient SDK -dokumentaatiosta](https://amd-gaia.ai/sdk/lemonade-client)
+- **Lisää äänivuorovaikutus** — Integroi Whisper ASR ja Kokoro TTS, jotta käyttäjät voivat kysyä laitteistoa koskevia kysymyksiä puhumalla. Katso [Talk-opas](https://amd-gaia.ai/guides/talk)
+- **Lisää MCP-tuki** — Tarjoa laitteistoneuvoja MCP-palvelimena, jotta muut työkalut voivat kysyä siltä tietoja. Katso [MCP-opas](https://amd-gaia.ai/sdk/infrastructure/mcp)
+- **Laajenna suositusmoottoria** — Ota huomioon GPU:n VRAM-muisti kerrosten siirtämistä varten, tai lisää suorituskykytestaus arvioidaksesi tokeneita sekunnissa
+- **Rakenna moniagenttijärjestelmä** — Yhdistä laitteistoneuvoja koodiagenttiin tai keskusteluagenttiin käyttäen [Routing Agent](https://amd-gaia.ai/guides/routing) -ohjetta

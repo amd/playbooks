@@ -10,9 +10,9 @@ SPDX-License-Identifier: MIT
 
 [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html) kullanarak en son AMD GPU sürücüsüne güncelleyin.
 
-1. Başlat menünüzden veya sistem tepsisinden `AMD Software: Adrenalin Edition` uygulamasını açın.
-2. **Driver and Software** bölümüne gidin, **Manage Updates** düğmesine tıklayın.
-3. Bir güncelleme mevcutsa, indirmek ve yüklemek için istemleri takip edin.
+1. Başlat menüsünden veya sistem tepsisinden `AMD Software: Adrenalin Edition`'ı açın.
+2. **Driver and Software** bölümüne gidin, **Manage Updates** öğesine tıklayın.
+3. Bir güncelleme mevcutsa, indirmek ve yüklemek için ekrandaki yönergeleri izleyin.
 
 <!-- @test:id=amd-gpu-visible-windows timeout=60 hidden=True -->
 ```powershell
@@ -26,7 +26,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 ### AMD GPU Sürücüsü
 
-Radeon Software for Linux (RSL) akışını kullanarak AMD GPU Sürücüsünü (amdgpu) yükleyin. Dağıtımınıza yönelik talimatlar için bkz. [Çekirdek sürücüyü yükleyin](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+AMD GPU Sürücüsünü (amdgpu) Radeon Software for Linux (RSL) akışını kullanarak yükleyin. Dağıtımınıza özel talimatlar için ROCm kurulumuna bakın: [Çekirdek sürücüsünü yükleyin](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install).
+
+Sürücünün kendisi için bkz. [Linux® Drivers for AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

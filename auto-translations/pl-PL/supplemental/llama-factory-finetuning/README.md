@@ -11,27 +11,27 @@ SPDX-License-Identifier: MIT
 
 ## Przegląd
 
-Efektywne dostrajanie ma kluczowe znaczenie dla adaptacji dużych modeli językowych (LLM) do zadań końcowych. LLaMA Factory to otwarta i przyjazna dla użytkownika platforma, która usprawnia trenowanie i dostrajanie dużych modeli językowych oraz modeli multimodalnych. Umożliwia użytkownikom lokalne dostosowywanie setek wstępnie wytrenowanych modeli przy minimalnej ilości kodowania.
+Efektywne dostrajanie jest kluczowe dla dostosowania dużych modeli językowych (LLM) do zadań końcowych. LLaMA Factory to otwarta i przyjazna użytkownikowi platforma, która usprawnia trening i dostrajanie dużych modeli językowych oraz modeli multimodalnych. Umożliwia ona użytkownikom lokalne dostosowywanie setek wstępnie wytrenowanych modeli przy minimalnej ilości kodu.
 
-Ten przewodnik nauczy Cię, jak dostrajać modele LLM przy użyciu LLaMA Factory na lokalnym sprzęcie AMD.
+Ten poradnik nauczy Cię, jak dostrajać modele LLM przy użyciu LLaMA Factory na lokalnym sprzęcie AMD.
 
 <!-- @device:stx,krk -->
-> **Uwaga:** Techniki dostrajania opisane w tym przewodniku wymagają co najmniej **32 GB pamięci RAM systemu**, przy czym co najmniej **16 GB z tego musi być dostępne dla GPU** (owe 16 GB stanowi część 32 GB, a nie dodatkową wartość).
+> **Uwaga:** Techniki dostrajania opisane w tym poradniku wymagają co najmniej **32 GB pamięci RAM systemu**, z czego co najmniej **16 GB musi być dostępne dla GPU** (te 16 GB stanowi część 32 GB, a nie dodatek do nich).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Uwaga:** Techniki dostrajania opisane w tym przewodniku wymagają co najmniej **16 GB łącznej pamięci GPU** oraz **32 GB pamięci RAM systemu**.
-> - W systemie Windows łączna pamięć GPU obejmuje dedykowaną pamięć VRAM karty graficznej oraz współdzieloną pamięć GPU (pożyczoną z pamięci RAM systemu).
-> - Dlatego karty z mniej niż 16 GB dedykowanej pamięci VRAM mogą nadal obsługiwać ten przewodnik, wykorzystując współdzieloną pamięć GPU w celu uzupełnienia różnicy.
+> **Uwaga:** Techniki dostrajania opisane w tym poradniku wymagają co najmniej **16 GB całkowitej pamięci GPU** oraz **32 GB pamięci RAM systemu**.
+> - W systemie Windows całkowita pamięć GPU łączy dedykowaną pamięć VRAM karty graficznej ze współdzieloną pamięcią GPU (pożyczaną z pamięci RAM systemu).
+> - Dlatego karty z mniej niż 16 GB dedykowanej pamięci VRAM nadal mogą uruchomić ten poradnik, korzystając ze współdzielonej pamięci GPU, aby uzupełnić różnicę.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Uwaga:** Techniki dostrajania opisane w tym przewodniku wymagają karty graficznej z co najmniej **16 GB dedykowanej pamięci GPU** oraz **32 GB pamięci RAM systemu**.
-> - W systemie Linux trenowanie odbywa się w całości w dedykowanej pamięci VRAM karty graficznej.
-> - Nie następuje przełączenie na współdzieloną pamięć GPU (pamięć RAM systemu), gdy zabraknie pamięci VRAM.
-> - Karty z mniej niż 16 GB dedykowanej pamięci VRAM wyczerpią dostępną pamięć podczas trenowania w systemie Linux, nawet jeśli system dysponuje dużą ilością pamięci RAM.
+> **Uwaga:** Techniki dostrajania opisane w tym poradniku wymagają karty graficznej z co najmniej **16 GB dedykowanej pamięci GPU** oraz **32 GB pamięci RAM systemu**.
+> - W systemie Linux trening odbywa się wyłącznie w dedykowanej pamięci VRAM karty graficznej.
+> - Nie ma przełączania na współdzieloną pamięć GPU (RAM systemu), gdy zabraknie VRAM.
+> - Karty z mniej niż 16 GB dedykowanej pamięci VRAM zabraknie pamięci podczas treningu w systemie Linux, nawet jeśli system posiada dużo pamięci RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -40,17 +40,19 @@ Ten przewodnik nauczy Cię, jak dostrajać modele LLM przy użyciu LLaMA Factory
 - Jak skonfigurować LLaMA Factory z oprogramowaniem AMD ROCm™
 - Jak skonfigurować parametry dostrajania LLM (na przykładzie Qwen/Qwen3-4B-Instruct-2507)
 - Jak uruchomić dostrajanie w LLaMA Factory
-- Jak przeprowadzić wnioskowanie przy użyciu dostrojonego modelu
-- Jak wyeksportować dostrojony model
+- Jak przeprowadzić wnioskowanie z dostrojonym modelem
+- Jak wyeksportować dostrojony model 
 
 ## Szacowany czas
 
-- Czas trwania: Uruchomienie tego przewodnika zajmie około 60 minut (w zależności od rozmiaru modelu/zbioru danych oraz prędkości sieci).
+- Czas trwania: Wykonanie tego poradnika zajmie około 60 minut (w zależności od rozmiaru modelu/zbioru danych oraz szybkości sieci).
 - Więcej informacji znajdziesz na stronie [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory).
 
-## Konfiguracja pamięci
+<!-- @device:halo_box,halo,stx,krk -->
+## Ustawianie konfiguracji pamięci
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Sprawdzanie aktualizacji oprogramowania
@@ -58,7 +60,7 @@ Ten przewodnik nauczy Cię, jak dostrajać modele LLM przy użyciu LLaMA Factory
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalowanie wymaganego oprogramowania
+## Instalacja wymaganego oprogramowania
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -82,7 +84,7 @@ pip --version
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -94,13 +96,13 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Nadaj swojemu użytkownikowi dostęp do urządzeń GPU** (wyloguj się i zaloguj ponownie, aby zmiana zaczęła obowiązywać):
+**Przyznaj swojemu użytkownikowi dostęp do urządzeń GPU** (wyloguj się i zaloguj ponownie, aby zmiana zaczęła obowiązywać):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -134,11 +136,27 @@ llamafactory-env\Scripts\activate
 <!-- @device:end -->
 <!-- @os:end -->
 
-### Instalowanie podstawowych zależności
+### Instalacja podstawowych zależności
 
 <!-- @require:pytorch,driver -->
- 
-### Instalowanie dodatkowych zależności
+
+<!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
+```python
+import sys
+import torch
+
+print(f"Python executable: {sys.executable}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
+
+if not torch.cuda.is_available():
+    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
+
+print("PASS: ROCm-enabled PyTorch is visible")
+```
+<!-- @test:end -->
+
+### Instalacja dodatkowych zależności
 
 > **Uwaga**: Upewnij się, że wersja Pythona to 3.11, 3.12 lub 3.13
 
@@ -164,9 +182,9 @@ python -m pip install huggingface_hub
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Instalowanie LLaMA Factory
+### Instalacja LLaMA Factory
 
-LLaMA Factory zależy od PyTorch. Zgodnie z powyższymi wymaganiami powinieneś go już mieć zainstalowanego.
+LLaMA Factory zależy od PyTorch. Powinieneś już mieć go zainstalowanego zgodnie z powyższymi wymaganiami.
 
 Pobierz kod źródłowy z [oficjalnego repozytorium GitHub LLaMA Factory](https://github.com/hiyouga/LlamaFactory) i zainstaluj jego zależności.
 
@@ -220,30 +238,30 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-Przykładowe dane wyjściowe:
+Przykładowy wynik:
 
 <p align="center">
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-Po pomyślnym zainstalowaniu LLaMA Factory, uruchommy na nim dostrajanie.
+Po pomyślnej instalacji LLaMA Factory, przejdźmy do uruchomienia na niej dostrajania.
 
-## Korzystanie z interfejsu wiersza poleceń LLaMA Factory do dostrajania
+## Korzystanie z interfejsu wiersza poleceń LLaMA Factory do dostrajania 
 
-Ta sekcja obejmuje przygotowanie zbiorów danych do dostrajania, konfigurację parametrów LoRA/QLoRA oraz uruchamianie dostrajania LoRA.
+Ta sekcja obejmie przygotowanie zbiorów danych do dostrajania, konfigurację parametrów LoRA/QLoRA oraz uruchomienie dostrajania LoRA.
 
 ### Przygotowanie zbioru danych
 
-LLaMA Factory obsługuje zbiory danych do dostrajania w formacie Alpaca oraz formacie ShareGPT. Wszystkie dostępne zbiory danych zostały zdefiniowane w pliku [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Jeśli korzystasz z niestandardowego zbioru danych, upewnij się, że dodałeś jego opis w pliku `dataset_info.json` oraz określ nazwę zbioru danych przed rozpoczęciem trenowania. Szczegóły znajdziesz w ich dokumentacji [tutaj](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
+LLaMA Factory obsługuje zbiory danych do dostrajania w formacie Alpaca oraz formacie ShareGPT. Wszystkie dostępne zbiory danych zostały zdefiniowane w pliku [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Jeśli używasz niestandardowego zbioru danych, upewnij się, że dodałeś jego opis w pliku `dataset_info.json` i określiłeś nazwę zbioru danych przed rozpoczęciem treningu. Szczegóły znajdziesz w dokumentacji [tutaj](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
-W tym przewodniku, jako przykład, wykorzystamy zbiory danych identity oraz alpaca_en_demo, a informacje o zbiorze danych skonfigurujemy w następnym kroku.
+W tym poradniku jako przykład wykorzystamy zbiory danych identity oraz alpaca_en_demo, a informacje o zbiorze danych skonfigurujemy w kolejnym kroku.
 ### Konfiguracja parametrów dostrajania
 
 LLaMA Factory obsługuje wiele schematów dostrajania.
 
-| Schematy dostrajania | Przykłady LLaMA Factory |
+| Schemat dostrajania | Przykłady LLaMA Factory |
 |-----------|------|
-| Pełnoparametrowe    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
+| Pełne dostrajanie parametrów    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
 | Dostrajanie LoRA  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
 | Dostrajanie QLoRA | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
@@ -268,39 +286,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-Te przykładowe pliki konfiguracyjne określają parametry modelu, parametry metody dostrajania, parametry zbioru danych, parametry ewaluacji i inne. Możesz je skonfigurować zgodnie z własnymi potrzebami. W tym przewodniku użyjemy pliku [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
+Te przykładowe pliki konfiguracyjne zawierają określone parametry modelu, parametry metody dostrajania, parametry zbioru danych, parametry ewaluacji i inne. Możesz skonfigurować je zgodnie z własnymi potrzebami. W tym przewodniku użyjemy pliku [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
 **Wyjaśnienie kluczowych parametrów:**
-- `model_name_or_path` - Nazwa modelu Hugging Face lub lokalna ścieżka do pliku modelu.
-- `stage` - Etap treningu. Opcje: rm (modelowanie nagrody), pt (pretrening), sft (nadzorowane dostrajanie), PPO, DPO, KTO, ORPO.
+- `model_name_or_path` - Nazwa modelu Hugging Face lub ścieżka do lokalnego pliku modelu.
+- `stage` - Etap treningu. Opcje: rm (modelowanie nagrody), pt (wstępny trening), sft (nadzorowane dostrajanie), PPO, DPO, KTO, ORPO.
 - `do_train` - true dla treningu, false dla ewaluacji
 - `finetuning_type` - Metoda dostrajania. Opcje: freeze, lora, full
-- `lora_rank` - Wymiarowość macierzy niskiego rzędu używanej w LoRA, typowe wartości: 4, 6, 8, 16 (mniejsze wartości = mniej parametrów = szybsze dostrajanie; większe wartości = lepsze dopasowanie do zadania, ale wyższe zużycie zasobów).
-- `lora_target` - Moduły docelowe dla metody LoRA. Domyślnie: all.
-- `dataset` - Zbiór(y) danych do użycia. Użyj „,” aby oddzielić wiele zbiorów danych
+- `lora_rank` - Wymiarowość macierzy niskiego rzędu (low-rank) używanej w LoRA, typowe wartości: 4, 6, 8, 16 (mniejsze wartości = mniej parametrów = szybsze dostrajanie; większe wartości = lepsze dopasowanie do zadania, ale wyższe zużycie zasobów).
+- `lora_target` - Docelowe moduły dla metody LoRA. Domyślnie: all.
+- `dataset` - Zbiór(y) danych do użycia. Użyj „,” do rozdzielenia wielu zbiorów danych
 - `output_dir` - Ścieżka wyjściowa dostrajania
 - `logging_steps` - Interwał logowania w krokach
 - `save_steps` - Interwał zapisywania punktów kontrolnych modelu.
-- `overwrite_output_dir` - Czy zezwolić na nadpisywanie katalogu wyjściowego.
-- `per_device_train_batch_size` - Rozmiar wsadu treningowego na urządzenie.
+- `overwrite_output_dir` - Czy zezwolić na nadpisanie katalogu wyjściowego.
+- `per_device_train_batch_size` - Rozmiar partii treningowej na urządzenie.
 - `gradient_accumulation_steps` - Liczba kroków akumulacji gradientu.
 - `learning_rate` - Współczynnik uczenia
 - `num_train_epochs` - Liczba epok treningowych
-- `lr_scheduler_type` - Harmonogram współczynnika uczenia. Opcje: linear, cosine, polynomial, constant, itd.
-- `warmup_ratio` - Współczynnik rozgrzewki współczynnika uczenia
+- `lr_scheduler_type` - Harmonogram współczynnika uczenia. Opcje: linear, cosine, polynomial, constant itd.
+- `warmup_ratio` - Współczynnik rozgrzewki (warmup) współczynnika uczenia
 
 <!-- @os:linux -->
-Zmienimy domyślną wartość `lora_rank`, aby uruchomić dostrajanie na AMD Ryzen™ i AMD Radeon™ GPU.
+Zmodyfikujemy domyślną wartość `lora_rank`, aby uruchomić dostrajanie na kartach graficznych AMD Ryzen™ i AMD Radeon™.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Zaktualizujemy domyślną konfigurację dostrajania LoRA w celu lepszej kompatybilności z AMD Ryzen™ i AMD Radeon™ GPU:
-- Zmień `lora_rank` z `8` na `6`, aby zmniejszyć zużycie pamięci podczas dostrajania.
-- Użyj `fp16` zamiast `bf16` dla szerszej kompatybilności z AMD GPU i niższego zużycia pamięci.
-- Ustaw `dataloader_num_workers` na `0` w systemie Windows, aby uniknąć błędów `"Can't pickle local object<>"` spowodowanych wieloprocesowym ładowaniem danych.
+Zaktualizujemy domyślną konfigurację dostrajania LoRA, aby zapewnić lepszą zgodność z kartami graficznymi AMD Ryzen™ i AMD Radeon™:
+- Zmienimy `lora_rank` z `8` na `6`, aby zmniejszyć zużycie pamięci podczas dostrajania.
+- Użyjemy `fp16` zamiast `bf16` dla szerszej zgodności z kartami graficznymi AMD i niższego zużycia pamięci.
+- Ustawimy `dataloader_num_workers` na `0` w systemie Windows, aby uniknąć błędów `"Can't pickle local object<>"` spowodowanych ładowaniem danych z wykorzystaniem wieloprocesowości.
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -322,11 +340,11 @@ Set-Content -Path $filePath -Value $newContent
 
 ### Uruchamianie dostrajania LLaMA Factory 
 
-**llamafactory-cli** to oficjalne narzędzie interfejsu wiersza poleceń (CLI) dla LLaMA Factory, opracowane w celu uproszczenia kompleksowych przepływów pracy LLM (przygotowanie danych → dostrajanie → ewaluacja → wdrożenie) bez konieczności pisania złożonego kodu.
+**llamafactory-cli** to oficjalne narzędzie wiersza poleceń (CLI) dla LLaMA Factory, opracowane w celu uproszczenia kompleksowych przepływów pracy LLM (przygotowanie danych → dostrajanie → ewaluacja → wdrożenie) bez konieczności pisania złożonego kodu.
 
-Do treningu/dostrajania **llamafactory-cli train** jest podstawowym podpoleceniem CLI LLaMA Factory. Abstrahuje ono przepływy pracy dostrajania (przetwarzanie wstępne danych, dostrajanie hiperparametrów, optymalizacja sprzętowa) do jednego polecenia CLI, obsługując wiele paradygmatów dostrajania (LoRA/QLoRA/pełne dostrajanie) i jest zoptymalizowane pod kątem GPU o niskich zasobach (np. QLoRA na 16 GB VRAM).
+Do treningu/dostrajania **llamafactory-cli train** jest podstawową podkomendą CLI LLaMA Factory. Abstrahuje ona przepływy pracy dostrajania (wstępne przetwarzanie danych, dostrajanie hiperparametrów, optymalizacja sprzętowa) do jednej komendy CLI, obsługując wiele paradygmatów dostrajania (LoRA/QLoRA/pełne dostrajanie) i jest zoptymalizowana pod kątem kart graficznych o niskich zasobach (np. QLoRA na 16 GB VRAM).
 
-Możesz uruchomić dostrajanie LLaMA Factory za pomocą następującego polecenia, opartego na zmodyfikowanym pliku konfiguracyjnym dostrajania Qwen3 LoRA.
+Możesz uruchomić dostrajanie LLaMA Factory za pomocą poniższej komendy, opartej na zmodyfikowanym pliku konfiguracyjnym dostrajania Qwen3 LoRA.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -397,12 +415,19 @@ if (Select-String -Path $filePath -Pattern '^save_total_limit:' -Quiet) {
     Add-Content -Path $filePath -Value "save_total_limit: 1"
 }
 
+# Single-process dataset preprocessing to avoid Windows multiprocessing errors.
+if (Select-String -Path $filePath -Pattern '^preprocessing_num_workers:' -Quiet) {
+    (Get-Content -Path $filePath) -replace '^preprocessing_num_workers:.*', 'preprocessing_num_workers: 1' | Set-Content -Path $filePath
+} else {
+    Add-Content -Path $filePath -Value "preprocessing_num_workers: 1"
+}
+
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
-Po uruchomieniu dostrajania LLM wszystkie wygenerowane dane wyjściowe są przechowywane w katalogu „output_dir”, w tym pliki punktów kontrolnych modelu, pliki konfiguracyjne i metryki treningowe.
+Po uruchomieniu dostrajania LLM wszystkie wygenerowane wyniki są przechowywane w katalogu "output_dir", w tym pliki punktów kontrolnych modelu, pliki konfiguracyjne i metryki treningowe.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -441,9 +466,9 @@ print(f"Found adapter weights: {adapter_weights}")
 
 ### Testowanie dostrojonego modelu 
 
-**llamafactory-cli chat** jest przeznaczone do interaktywnego czatu/wnioskowania z LLM (zarówno modelami bazowymi, jak i modelami dostrojonymi za pomocą LoRA). LLaMA Factory udostępnia przykładową konfigurację do uruchamiania wnioskowania dostrojonych modeli w [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). Możesz również zmodyfikować tę przykładową konfigurację, aby zmienić ustawienia, takie jak backend wnioskowania.
+**llamafactory-cli chat** jest przeznaczony do interaktywnego czatu/wnioskowania z modelami LLM (zarówno modelami bazowymi, jak i dostrojonymi za pomocą LoRA). LLaMA Factory udostępnia przykładową konfigurację do uruchamiania wnioskowania dostrojonych modeli w [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). Możesz również zmodyfikować tę przykładową konfigurację, aby zmienić ustawienia, takie jak backend wnioskowania.
 
-Użyj następującego polecenia, aby przetestować dostrojony model Qwen3:
+Użyj poniższej komendy, aby przetestować dostrojony model Qwen3:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
@@ -457,14 +482,14 @@ Poniżej przedstawiono przykładowy czat z użyciem dostrojonego modelu:
 
 ### Eksportowanie dostrojonego modelu
 
-W przypadku zastosowań produkcyjnych, wstępnie wytrenowany model i adapter LoRA muszą zostać scalone i wyeksportowane do pojedynczego modelu. Ten scalony model może być używany jako zwykły plik modelu Hugging Face. LLaMA Factory udostępnia przykładowe konfiguracje w [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
+W przypadku zastosowań produkcyjnych wstępnie wytrenowany model i adapter LoRA muszą zostać scaleni i wyeksportowani do pojedynczego modelu. Ten scalony model może być używany jako zwykły plik modelu Hugging Face. LLaMA Factory udostępnia przykładowe konfiguracje w [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
-Użyj następującego polecenia, aby wyeksportować dostrojony model Qwen3:
+Użyj poniższej komendy, aby wyeksportować dostrojony model Qwen3:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
-Poniżej przedstawiono wynik eksportowania dostrojonego modelu.
+Poniżej przedstawiono wynik eksportu dostrojonego modelu.
 
 <p align="center">
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Fine-Tuned model " width="600"/>
@@ -566,26 +591,26 @@ if not model_files:
 print("PASS: Exported merged model output looks correct")
 ```
 <!-- @test:end --> 
-## Korzystanie z GUI LLaMA Factory
+## Korzystanie z interfejsu graficznego LLaMA Factory
 
-`LLaMA-Factory` obsługuje również bezkodowe dostrajanie LLM-ów za pomocą interfejsu webowego w przeglądarce.
+`LLaMA-Factory` obsługuje również bezkodowe dostrajanie modeli LLM za pomocą interfejsu webowego w przeglądarce.
 
-Aby go otworzyć, użyj następującego polecenia:
+Użyj poniższego polecenia, aby go otworzyć:
 
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI` oferuje uproszczony interfejs do zarządzania przepływami pracy w uczeniu maszynowym, obejmującymi trenowanie, ocenę, przewidywanie, czat oraz eksportowanie modeli. Poniżej znajduje się krótkie wprowadzenie do każdej z zakładek:
+Interfejs `LlamaFactory Web UI` oferuje uproszczony sposób zarządzania przepływami pracy uczenia maszynowego, obejmującymi trenowanie, ewaluację, przewidywanie, czatowanie oraz eksportowanie modeli. Oto krótkie wprowadzenie do każdej z zakładek:
 
-* **Train**: Ta zakładka umożliwia wybór modelu i zbioru danych, konfigurację parametrów trenowania oraz uruchomienie procesu trenowania. Istotne jest zrozumienie parametrów obowiązkowych i opcjonalnych w celu optymalizacji konfiguracji trenowania.
-* **Evaluate & Predict**: Po zakończeniu trenowania możesz ocenić wydajność modelu i dokonywać przewidywań za pomocą tej zakładki. Dostarcza ona informacji na temat dokładności i skuteczności modelu na nowych danych.
+* **Train**: Ta zakładka umożliwia wybór modelu i zbioru danych, konfigurację parametrów trenowania oraz uruchomienie procesu trenowania. Istotne jest zrozumienie obowiązkowych i opcjonalnych parametrów, aby zoptymalizować konfigurację trenowania.
+* **Evaluate & Predict**: Po zakończeniu trenowania możesz ocenić wydajność modelu i wykonywać przewidywania za pomocą tej zakładki. Dostarcza ona informacji na temat dokładności i skuteczności modelu w odniesieniu do nowych danych.
 * **Chat**: Po zakończeniu trenowania załaduj model w zakładce Chat, aby wejść z nim w interakcję i zobaczyć efekty swojej pracy. Ta funkcja umożliwia komunikację z wytrenowanym modelem w czasie rzeczywistym.
-* **Export**: Ta zakładka ułatwia eksport wytrenowanych modeli w celu wdrożenia lub dalszego wykorzystania. Możesz zapisywać swoje modele w różnych formatach odpowiednich do różnych zastosowań.
+* **Export**: Ta zakładka ułatwia eksport wytrenowanych modeli w celu wdrożenia lub dalszego wykorzystania. Możesz zapisywać modele w różnych formatach odpowiednich dla różnych zastosowań.
 
-Aby uzyskać szczegółowe wskazówki, zachęcamy do zapoznania się z oficjalną dokumentacją w [repozytorium GitHub LlamaFactory](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) oraz na stronie [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). Dodatkowo, [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) zawiera cenne informacje na temat interfejsu i jego funkcjonalności.
+Aby uzyskać szczegółowe wskazówki, zachęcamy do zapoznania się z oficjalną dokumentacją w [repozytorium LlamaFactory na GitHub](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) oraz w [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). Dodatkowo [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) zawiera cenne informacje na temat interfejsu i jego funkcjonalności.
 
 ## Kolejne kroki
-- Wypróbuj różne modele, takie jak `gpt-oss` i inne najnowocześniejsze modele.
-- Poeksperymentuj z różnymi backendami na dostrojonym modelu
+- Wypróbuj różne modele, takie jak `gpt-oss` oraz inne nowoczesne modele.
+- Eksperymentuj z różnymi backendami na dostrojonym modelu
  
-Więcej dokumentacji znajdziesz na stronie: https://llamafactory.readthedocs.io/en/latest/ 
+Więcej dokumentacji znajdziesz na stronie: https://llamafactory.readthedocs.io/en/latest/

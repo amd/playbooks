@@ -12,7 +12,7 @@ GAIA היא מסגרת קוד פתוח של AMD לבניית סוכני AI הפ�
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. ב-Windows, פתחו טרמינל בתיקייה הרצויה ובצעו את הפקודות ליצירת venv.
+1. ב-Windows, פתחו טרמינל בתיקייה לבחירתכם ופעלו לפי הפקודות ליצירת venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. ב-Linux, פתחו טרמינל בתיקייה הרצויה ובצעו את הפקודות ליצירת venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. ב-Linux, פתחו טרמינל בתיקייה לבחירתכם ופעלו לפי הפקודות ליצירת venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. ב-Windows, פתחו טרמינל בתיקייה הרצויה ובצעו את הפקודות ליצירת venv.
+1. ב-Windows, פתחו טרמינל בתיקייה לבחירתכם ופעלו לפי הפקודות ליצירת venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. ב-Linux, פתחו טרמינל בתיקייה הרצויה ובצעו את הפקודות ליצירת venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. ב-Linux, פתחו טרמינל בתיקייה לבחירתכם ופעלו לפי הפקודות ליצירת venv.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -99,7 +99,7 @@ pip install amd-gaia
 gaia init
 ```
 
-פעולה זו מתקינה את Lemonade Server, מורידה את המודלים המוגדרים כברירת מחדל, ומוודאת שההגדרה תקינה.
+פעולה זו מתקינה את Lemonade Server, מורידה את המודלים המוגדרים כברירת מחדל, ומאמתת את ההגדרה.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,7 +281,7 @@ fi
 
 #### אימות ההתקנה
 
-ודאו כי GAIA בגרסה 0.16.2 ומעלה מותקנת:
+ודאו שגרסת GAIA v0.16.2 ואילך מותקנת:
 
 ```bash
 gaia --version

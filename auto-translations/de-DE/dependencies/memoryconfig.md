@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 
-Für den Ryzen AI Halo beträgt der dedizierte GPU-Speicher standardmäßig 64 GB, was für die meisten Workloads ausreichend ist. Bei größeren Modellen oder längeren Kontexten kann eine Erhöhung auf 96 GB hilfreich sein. Öffnen Sie zum Anpassen **AMD Software: Adrenalin Edition™** und navigieren Sie zu **Performance → Tuning → AMD Variable Graphics Memory**. Starten Sie den Computer neu, damit die Änderungen wirksam werden.
+Bei Ryzen AI Halo beträgt der dedizierte GPU-Speicher standardmäßig 64 GB, was für die meisten Workloads ausreichend ist. Bei größeren Modellen oder längeren Kontexten kann eine Erhöhung hilfreich sein. Öffnen Sie zum Anpassen **AMD Software: Adrenalin Edition™** und navigieren Sie zu **Performance → Tuning → AMD Variable Graphics Memory**. Starten Sie den Computer neu, damit die Änderungen wirksam werden.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -30,11 +30,11 @@ Um den Wert für den dedizierten GPU-Speicher zu ändern, öffnen Sie **AMD Soft
 
 <!-- @os:linux -->
 
-Um unter Linux größere Modelle auszuführen, vergrößern Sie den **Shared-Memory**-Pool, der der GPU zur Verfügung steht. Dies kann erfordern, den dedizierten GPU-Speicher im BIOS auf das Minimum zu setzen, damit der Shared-Memory-Pool maximiert werden kann.
+Um unter Linux größere Modelle auszuführen, vergrößern Sie den der GPU zur Verfügung stehenden **Shared-Memory**-Pool. Dies kann erfordern, dass Sie den dedizierten GPU-Speicher im BIOS auf das Minimum setzen, damit der Shared-Memory-Pool maximiert werden kann.
 
 <!-- @device:halo_box -->
 
-Für den AMD Ryzen™ AI Halo beträgt der Standardwert 96 GB Shared Memory. Um dies zu ändern, öffnen Sie das **AMD Ryzen™ AI Developer Center** und wechseln Sie zur Registerkarte **Settings**. Erhöhen Sie unter **Graphics Performance Settings** den Schieberegler **Shared Video Memory**, klicken Sie dann auf **Apply Changes**, und starten Sie den Computer neu, damit die Änderungen wirksam werden.
+Öffnen Sie bei AMD Ryzen™ AI Halo zum Ändern der Standardeinstellung das **AMD Ryzen™ AI Developer Center** und wechseln Sie zur Registerkarte **Settings**. Erhöhen Sie unter **Graphics Performance Settings** den Schieberegler **Shared Video Memory**, klicken Sie dann auf **Apply Changes** und starten Sie den Computer neu, damit die Änderungen wirksam werden.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/linux_mem_new.png" alt="AMD Ryzen AI Developer Center — Graphics Performance Settings with Shared Video Memory slider" width="600"/>
@@ -44,7 +44,7 @@ Für den AMD Ryzen™ AI Halo beträgt der Standardwert 96 GB Shared Memory. Um 
 
 <!-- @device:halo,stx,krk -->
 
-Vergrößern Sie den Shared-Memory-Pool, indem Sie die Seiteneinstellung des Translation Table Manager (TTM) des Kernels ändern. AMD empfiehlt, im BIOS den minimalen dedizierten VRAM (0,5 GB) einzustellen, damit die maximale Menge als Shared Memory zur Verfügung steht.
+Erhöhen Sie den Shared-Memory-Pool, indem Sie die Seiteneinstellung des Translation Table Manager (TTM) des Kernels ändern. AMD empfiehlt, im BIOS den minimalen dedizierten VRAM (0,5 GB) einzustellen, damit die maximale Menge als Shared Memory zur Verfügung steht.
 
 1. Installieren Sie das Dienstprogramm `pipx` und fügen Sie den Pfad für mit pipx installierte Wheels dem System-Suchpfad hinzu:
 

@@ -17,33 +17,35 @@ SPDX-License-Identifier: MIT
 ## Overzicht
 
 
-Wilt u krachtige AI-taalmodellen op uw eigen hardware uitvoeren? Deze handleiding laat zien hoe.
-Deze tutorial gebruikt PyTorch, aangedreven door AMD ROCm™-software, om modellen uit te voeren die documenten kunnen samenvatten, vragen kunnen beantwoorden, tekst kunnen genereren, en meer, allemaal lokaal draaiend.
+Wil je krachtige AI-taalmodellen op je eigen hardware draaien? Deze gids laat zien hoe je dat doet.
+Deze tutorial gebruikt PyTorch aangedreven door AMD ROCm™ software om modellen te draaien die documenten kunnen samenvatten, vragen kunnen beantwoorden, tekst kunnen genereren en meer, allemaal lokaal uitgevoerd.
 
-## Wat u leert
+## Wat je zult leren
 
-- Voer LLM's zoals gpt-oss-20b en qwen3.5-4B lokaal uit met PyTorch en ROCm
-- Maak een hulpmiddel voor documentsamenvatting met LLM's
+- LLM's zoals gpt-oss-20b en qwen3.5-4B lokaal draaien met PyTorch en ROCm
+- Een tool voor documentsamenvatting maken met LLM's
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## De geheugenconfiguratie instellen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Controleren op software-updates
-> **Opmerking**: Als VS Code niet is geïnstalleerd, kunt u het installeren via Ryzen AI Developer Center.
+> **Opmerking**: Als VS Code niet is geïnstalleerd, kun je het installeren met Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Software-vereisten installeren
+## De vereiste software installeren
 
 ### Een virtuele omgeving maken
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Open op Linux een terminal in de map van uw keuze en volg de commando's om een venv te maken met ROCm+PyTorch al geïnstalleerd.
-<!-- @test:id=create-venv timeout=120 -->
+Open op Linux een terminal in de map van je keuze en volg de commando's om een venv te maken met ROCm+Pytorch al geïnstalleerd.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -55,14 +57,14 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Geef uw gebruiker toegang tot GPU-apparaten** (log uit en opnieuw in om dit van kracht te laten worden):
+**Geef je gebruiker toegang tot GPU-apparaten** (log uit en weer in om dit van kracht te laten worden):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Open op Linux een terminal in de map van uw keuze en volg de commando's om een venv te maken.
-<!-- @test:id=create-venv timeout=120 -->
+Open op Linux een terminal in de map van je keuze en volg de commando's om een venv te maken.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -77,8 +79,8 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Open op Windows een terminal in de map van uw keuze en volg de commando's om een venv te maken met ROCm+PyTorch al geïnstalleerd.
-<!-- @test:id=create-venv timeout=60 -->
+Open op Windows een terminal in de map van je keuze en volg de commando's om een venv te maken met ROCm+Pytorch al geïnstalleerd.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
 pytorch-env\Scripts\activate
@@ -88,8 +90,8 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Open op Windows een terminal in de map van uw keuze en volg de commando's om een venv te maken.
-<!-- @test:id=create-venv timeout=60 -->
+Open op Windows een terminal in de map van je keuze en volg de commando's om een venv te maken.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
 pytorch-env\Scripts\activate
@@ -99,7 +101,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 > **Tip**: Windows-gebruikers moeten mogelijk hun PowerShell Execution Policy aanpassen (bijvoorbeeld
-> door deze in te stellen op RemoteSigned of Unrestricted) voordat ze sommige PowerShell-commando's uitvoeren.
+> door deze in te stellen op RemoteSigned of Unrestricted) voordat ze bepaalde Powershell-commando's uitvoeren.
 
 <!-- @os:end -->
 
@@ -115,7 +117,7 @@ pytorch-env\Scripts\activate
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -123,10 +125,17 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece pro
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+> **Opmerking:** Als het model niet laadt of het geheugen op raakt, probeer dan het `kernels`-pakket te installeren om het model te laden met geoptimaliseerde kwantisering.
+>
+> ```bash
+> # Gebruik deze versie, die compatibel is met de Transformers-versie
+> pip install "kernels==0.14.1" 
+> ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -141,20 +150,20 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Snelle start met voorbeeldscripts
+## Snel starten met voorbeeldscripts
 
-Deze playbook bevat kant-en-klare scripts. Klik erop om ze te bekijken en te downloaden naar dezelfde map als de omgeving die u hebt gemaakt.
+Deze playbook bevat kant-en-klare scripts. Klik erop om ze te bekijken en te downloaden naar dezelfde map als de omgeving die je hebt gemaakt.
 
 | Script | Beschrijving | Gebruik |
 |--------|-------------|-------|
 | [run_llm.py](assets/run_llm.py) | Basis LLM-tekstgeneratie | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Documentsamenvatter met Harmony-ondersteuning | `python summarizer.py --file document.txt` |
+| [summarizer.py](assets/summarizer.py) | Documentsamenvatter met ondersteuning voor Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -180,18 +189,18 @@ for script in ['run_llm.py', 'summarizer.py']:
 <!-- @test:end -->
 
 Beide scripts ondersteunen:
-- Modelselectie via de `--model`-vlag
-- Chatsjabloonformattering voor correcte modelprompting, vooral nuttig voor documentsamenvatting
+- Modelselectie via de vlag `--model`
+- Chatsjabloonopmaak voor correcte modelprompting, vooral nuttig voor het samenvatten van documenten
 
-## Uw eerste LLM laden en uitvoeren
+## Je eerste LLM laden en uitvoeren
 
-Het meegeleverde script [run_llm.py](assets/run_llm.py) laat zien hoe u tekst genereert met LLM's met behulp van PyTorch en AMD ROCm.
+Het bijgevoegde [run_llm.py](assets/run_llm.py)-script laat zien hoe je tekst genereert met LLM's met behulp van PyTorch en AMD ROCm.
 
-> **Opmerking:** Wanneer u een model laadt, controleert Hugging Face Transformers eerst de lokale cache (`~/.cache/huggingface/hub` op Linux, `C:\Users\<user>\.cache\huggingface\hub` op Windows). Als het model niet in de cache staat, wordt het automatisch gedownload van huggingface.co. De eerste uitvoering kan enkele minuten duren, afhankelijk van de modelgrootte en netwerksnelheid.
+> **Opmerking:** Wanneer je een model laadt, controleert Hugging Face Transformers eerst de lokale cache (`~/.cache/huggingface/hub` op Linux, `C:\Users\<user>\.cache\huggingface\hub` op Windows). Als het model niet in de cache staat, wordt het automatisch gedownload van huggingface.co. De eerste keer kan het enkele minuten duren, afhankelijk van de modelgrootte en netwerksnelheid.
 
-Het onderstaande fragment laat zien hoe u het model gebruikt en de gestelde vragen aanpast.
+Het onderstaande fragment laat zien hoe je het model gebruikt en de gestelde vragen aanpast.
 
-<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -213,7 +222,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    disable_mmap=True
 )
 ```
 <!-- @test:end -->
@@ -266,7 +276,7 @@ python run_llm.py --model ${hf_model}
 
 ## Een documentsamenvatter bouwen
 
-Nu u lokale LLM-output hebt gegenereerd, kunt u hierop voortbouwen door een praktische documentsamenvatter te maken. In dit gedeelte gebruikt u het script [summarizer.py](assets/summarizer.py) om een .txt-bestand in te voeren en automatisch een beknopte samenvatting te genereren, allemaal lokaal draaiend op uw GPU.
+Nu je lokale LLM-uitvoer hebt gegenereerd, kun je hierop voortbouwen door een praktische documentsamenvatter te maken. In dit gedeelte gebruik je het [summarizer.py](assets/summarizer.py)-script om een .txt-bestand in te voeren en automatisch een beknopte samenvatting te genereren, allemaal lokaal uitgevoerd op je GPU.
 
 Het script is ontworpen om direct te werken. Open het script in een editor om de code te verkennen, prompts aan te passen en parameters zoals lengte en temperatuur bij te stellen.
 
@@ -296,24 +306,23 @@ python summarizer.py --file document.txt --max-length 400
 
 | Parameter | Wat het regelt | Typische waarden |
 |-----------|------------------|----------------|
-| `max_new_tokens` | De maximale lengte van de output van de LLM | Gebruik 50–500 tokens voor samenvattingen. (1 token is ongeveer 0,75 Engelse woorden) |
-| `temperature` | Creativiteit. Lage waarden maken het gefocust, terwijl hoge waarden meer onvoorspelbaarheid met zich meebrengen | - **0.1–0.3**: Gefocust, deterministisch (goed voor samenvattingen) <br> **0.5–0.7**: Uitgebalanceerd (algemeen gebruik) <br> **0.8–1.0**: Creatief, gevarieerd (brainstormen) |
-| `top_p` | Nucleus Sampling - Lage waarden beperken het model tot smallere uitvoer | **0.1-0.5**: Strikt, voorspelbaar <br> **0.9-0.95**: (standaard, natuurlijk, conversationeel) |
+| `max_new_tokens` | De maximale lengte van de uitvoer van de LLM | Gebruik 50–500 tokens voor samenvattingen. (1 token komt overeen met ongeveer 0,75 Engelse woorden) |
+| `temperature` | Creativiteit. Lage waarden maken het gerichter, hoge waarden zorgen voor meer onvoorspelbaarheid | - **0,1–0,3**: Gericht, deterministisch (goed voor samenvattingen) <br> **0,5–0,7**: Uitgebalanceerd (algemeen gebruik) <br> **0,8–1,0**: Creatief, gevarieerd (brainstormen) |
+| `top_p` | Nucleus Sampling - Lage waarden beperken het model tot nauwere uitvoer | **0,1-0,5**: Strikt, voorspelbaar <br> **0,9-0,95**: (standaard, natuurlijk, conversationeel) |
 
 
 ## Praktijktoepassingen
 
 - **Analyse van onderzoekspapers**: Haal belangrijke bevindingen uit complexe publicaties voor snelle beoordeling
-- **Nieuwsaggregatie**: Vat nieuwsartikelen samen tot beknopte dagelijkse overzichten of hoogtepunten
-- **Vergadernotities**: Comprimeer transcripties tot actiepunten en beknopte samenvattingen
+- **Nieuwsaggregatie**: Vat nieuwsartikelen samen tot korte dagelijkse overzichten of hoogtepunten
+- **Vergadernotities**: Comprimeer transcripten tot actiepunten en beknopte samenvattingen
 - **Beoordeling van juridische documenten**: Haal snel relevante clausules of verplichtingen uit lange juridische teksten
-- **Codedocumentatie**: Genereer beknopte repository-overzichten en functieomschrijvingen
-
+- **Codedocumentatie**: Genereer beknopte overzichten van repositories en uitleg van functies
 ## Volgende stappen
 
-- **Fine-tuning**: Pas modellen aan uw specifieke vakgebied of jargon aan voor betere nauwkeurigheid (zie de Fine-tuning Playbooks)
+- **Fine-tuning**: Pas modellen aan uw specifieke vakgebied of jargon aan voor betere nauwkeurigheid (zie Fine-tuning Playbooks)
 - **RAG-systemen**: Combineer LLM's met documentretrieval voor contextbewuste antwoorden en zoekopdrachten
 - **Modelverkenning**: Experimenteer met nieuwe modellen zoals Llama 3, Phi-3 of Qwen voor betere resultaten
-- **Productie-implementatie**: Gebruik tools zoals vLLM voor schaalbare LLM-serving in organisaties
+- **Productie-implementatie**: Gebruik tools zoals vLLM voor schaalbare LLM-serving binnen organisaties
 
 Uw systeem geeft u de kracht om geavanceerde taalmodellen lokaal uit te voeren. Experimenteer met verschillende modellen, prompts en parameters om te ontdekken wat het beste werkt voor uw toepassingen.

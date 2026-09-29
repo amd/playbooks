@@ -16,17 +16,20 @@ SPDX-License-Identifier: MIT
 
 ## ภาพรวม
 
-ต้องการรันโมเดลภาษา AI ที่ทรงพลังบนฮาร์ดแวร์ของคุณเองหรือไม่? คู่มือนี้จะแสดงวิธีการให้คุณ
-บทช่วยสอนนี้ใช้ PyTorch ที่ขับเคลื่อนด้วยซอฟต์แวร์ AMD ROCm™ เพื่อรันโมเดลที่สามารถสรุปเอกสาร ตอบคำถาม สร้างข้อความ และอื่น ๆ โดยทำงานทั้งหมดในเครื่องของคุณเอง
+
+ต้องการรันโมเดลภาษา AI ที่ทรงพลังบนฮาร์ดแวร์ของคุณเองหรือไม่? คู่มือนี้จะแสดงวิธีการทำเช่นนั้น
+บทช่วยสอนนี้ใช้ PyTorch ที่ขับเคลื่อนด้วยซอฟต์แวร์ AMD ROCm™ เพื่อรันโมเดลที่สามารถสรุปเอกสาร ตอบคำถาม สร้างข้อความ และอื่นๆ โดยทำงานในเครื่องทั้งหมด
 
 ## สิ่งที่คุณจะได้เรียนรู้
 
-- รัน LLM เช่น gpt-oss-20b และ qwen3.5-4B ในเครื่องของคุณโดยใช้ PyTorch และ ROCm
+- รัน LLM อย่าง gpt-oss-20b และ qwen3.5-4B ในเครื่องโดยใช้ PyTorch และ ROCm
 - สร้างเครื่องมือสรุปเอกสารโดยใช้ LLM
 
-## การตั้งค่าหน่วยความจำ
+<!-- @device:halo_box,halo,stx,krk -->
+## การตั้งค่าคอนฟิกหน่วยความจำ
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## ตรวจสอบการอัปเดตซอฟต์แวร์
@@ -41,8 +44,8 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-บน Linux ให้เปิดเทอร์มินัลในไดเรกทอรีที่คุณเลือก แล้วทำตามคำสั่งเพื่อสร้าง venv ที่ติดตั้ง ROCm+Pytorch ไว้เรียบร้อยแล้ว
-<!-- @test:id=create-venv timeout=120 -->
+บน Linux ให้เปิดเทอร์มินัลในไดเรกทอรีที่คุณเลือก แล้วทำตามคำสั่งเพื่อสร้าง venv ที่มี ROCm+Pytorch ติดตั้งไว้แล้ว
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -54,14 +57,14 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**ให้สิทธิ์ผู้ใช้ของคุณเข้าถึงอุปกรณ์ GPU** (ออกจากระบบและเข้าสู่ระบบใหม่เพื่อให้มีผล):
+**ให้สิทธิ์ผู้ใช้ของคุณเข้าถึงอุปกรณ์ GPU** (ออกจากระบบแล้วเข้าสู่ระบบใหม่เพื่อให้มีผล):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
 บน Linux ให้เปิดเทอร์มินัลในไดเรกทอรีที่คุณเลือก แล้วทำตามคำสั่งเพื่อสร้าง venv
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -76,8 +79,8 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-บน Windows ให้เปิดเทอร์มินัลในไดเรกทอรีที่คุณเลือก แล้วทำตามคำสั่งเพื่อสร้าง venv ที่ติดตั้ง ROCm+Pytorch ไว้เรียบร้อยแล้ว
-<!-- @test:id=create-venv timeout=60 -->
+บน Windows ให้เปิดเทอร์มินัลในไดเรกทอรีที่คุณเลือก แล้วทำตามคำสั่งเพื่อสร้าง venv ที่มี ROCm+Pytorch ติดตั้งไว้แล้ว
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
 pytorch-env\Scripts\activate
@@ -88,7 +91,7 @@ pytorch-env\Scripts\activate
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 บน Windows ให้เปิดเทอร์มินัลในไดเรกทอรีที่คุณเลือก แล้วทำตามคำสั่งเพื่อสร้าง venv
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
 pytorch-env\Scripts\activate
@@ -97,15 +100,15 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **เคล็ดลับ**: ผู้ใช้ Windows อาจต้องแก้ไข PowerShell Execution Policy (เช่น
+> **เคล็ดลับ**: ผู้ใช้ Windows อาจต้องปรับเปลี่ยน PowerShell Execution Policy ของตน (เช่น
 > ตั้งค่าเป็น RemoteSigned หรือ Unrestricted) ก่อนที่จะรันคำสั่ง Powershell บางคำสั่ง
 
 <!-- @os:end -->
 
-### การติดตั้ง Dependencies พื้นฐาน
+### การติดตั้งการพึ่งพาพื้นฐาน (Dependencies)
 <!-- @require:driver,pytorch -->
 
-### การติดตั้ง Dependencies เพิ่มเติม
+### การติดตั้งการพึ่งพาเพิ่มเติม
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
@@ -114,7 +117,7 @@ pytorch-env\Scripts\activate
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -122,10 +125,17 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece pro
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+> **หมายเหตุ:** หากโมเดลไม่สามารถโหลดได้หรือหน่วยความจำไม่พอ ให้ลองติดตั้งแพ็กเกจ `kernels` เพื่อโหลดโมเดลด้วยการ quantization ที่ปรับให้เหมาะสมแล้ว
+>
+> ```bash
+> # Use this version which is compatible with the Transformers version
+> pip install "kernels==0.14.1" 
+> ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -140,7 +150,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -148,12 +158,12 @@ pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
 
 ## เริ่มต้นอย่างรวดเร็วด้วยสคริปต์ตัวอย่าง
 
-คู่มือนี้มีสคริปต์ที่พร้อมใช้งาน คลิกเพื่อดูตัวอย่างและดาวน์โหลดไปยังไดเรกทอรีเดียวกับสภาพแวดล้อมที่คุณสร้างขึ้น
+คู่มือนี้มีสคริปต์ที่พร้อมใช้งานมาให้ คลิกเพื่อดูตัวอย่างและดาวน์โหลดไปยังไดเรกทอรีเดียวกับสภาพแวดล้อมที่คุณสร้างขึ้น
 
-| สคริปต์ | คำอธิบาย | การใช้งาน |
+| Script | คำอธิบาย | การใช้งาน |
 |--------|-------------|-------|
 | [run_llm.py](assets/run_llm.py) | การสร้างข้อความ LLM พื้นฐาน | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | เครื่องมือสรุปเอกสารที่รองรับ Harmony | `python summarizer.py --file document.txt` |
+| [summarizer.py](assets/summarizer.py) | เครื่องมือสรุปเอกสารพร้อมรองรับ Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -180,17 +190,17 @@ for script in ['run_llm.py', 'summarizer.py']:
 
 สคริปต์ทั้งสองรองรับ:
 - การเลือกโมเดลผ่านแฟล็ก `--model`
-- การจัดรูปแบบเทมเพลตการแชทเพื่อการป้อนคำสั่งที่ถูกต้องให้กับโมเดล ซึ่งมีประโยชน์อย่างยิ่งสำหรับการสรุปเอกสาร
+- การจัดรูปแบบเทมเพลตแชท (Chat template) สำหรับการทำพรอมต์โมเดลที่เหมาะสม โดยเฉพาะสำหรับการสรุปเอกสาร
 
 ## การโหลดและรัน LLM ตัวแรกของคุณ
 
-สคริปต์ [run_llm.py](assets/run_llm.py) ที่รวมมาให้แสดงวิธีการสร้างข้อความด้วย LLM โดยใช้ PyTorch และ AMD ROCm
+สคริปต์ [run_llm.py](assets/run_llm.py) ที่มีมาให้แสดงวิธีการสร้างข้อความด้วย LLM โดยใช้ PyTorch และ AMD ROCm
 
-> **หมายเหตุ:** เมื่อคุณโหลดโมเดล Hugging Face Transformers จะตรวจสอบแคชในเครื่องก่อน (`~/.cache/huggingface/hub` บน Linux, `C:\Users\<user>\.cache\huggingface\hub` บน Windows) หากยังไม่มีโมเดลอยู่ในแคช ระบบจะดาวน์โหลดโดยอัตโนมัติจาก huggingface.co การรันครั้งแรกอาจใช้เวลาสักครู่ ขึ้นอยู่กับขนาดโมเดลและความเร็วเครือข่าย
+> **หมายเหตุ:** เมื่อคุณโหลดโมเดล Hugging Face Transformers จะตรวจสอบแคชในเครื่องก่อน (`~/.cache/huggingface/hub` บน Linux, `C:\Users\<user>\.cache\huggingface\hub` บน Windows) หากโมเดลไม่ได้ถูกแคชไว้ ระบบจะดาวน์โหลดโดยอัตโนมัติจาก huggingface.co การรันครั้งแรกอาจใช้เวลาสองสามนาทีขึ้นอยู่กับขนาดโมเดลและความเร็วเครือข่าย
 
-ตัวอย่างโค้ดด้านล่างแสดงวิธีใช้โมเดลและปรับแต่งคำถามที่ถาม
+ตัวอย่างโค้ดด้านล่างแสดงวิธีการใช้โมเดลและปรับแต่งคำถามที่ถาม
 
-<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -212,7 +222,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    disable_mmap=True
 )
 ```
 <!-- @test:end -->
@@ -265,9 +276,9 @@ python run_llm.py --model ${hf_model}
 
 ## การสร้างเครื่องมือสรุปเอกสาร
 
-หลังจากที่คุณได้สร้างผลลัพธ์จาก LLM ในเครื่องแล้ว คุณสามารถต่อยอดโดยการสร้างเครื่องมือสรุปเอกสารที่ใช้งานได้จริง ในส่วนนี้ คุณจะใช้สคริปต์ [summarizer.py](assets/summarizer.py) เพื่อป้อนไฟล์ .txt และสร้างบทสรุปแบบกระชับโดยอัตโนมัติ โดยทำงานทั้งหมดในเครื่องบน GPU ของคุณ
+ตอนนี้คุณได้สร้างผลลัพธ์ LLM ในเครื่องแล้ว คุณสามารถต่อยอดสิ่งนั้นได้โดยการสร้างเครื่องมือสรุปเอกสารที่ใช้งานได้จริง ในส่วนนี้ คุณจะใช้สคริปต์ [summarizer.py](assets/summarizer.py) เพื่อป้อนไฟล์ .txt และสร้างบทสรุปที่กระชับโดยอัตโนมัติ ซึ่งทำงานบน GPU ของคุณในเครื่องทั้งหมด
 
-สคริปต์นี้ถูกออกแบบมาให้ใช้งานได้ทันที เปิดสคริปต์ในเครื่องมือแก้ไขเพื่อสำรวจโค้ด ปรับแต่งพรอมป์ และปรับพารามิเตอร์ต่าง ๆ เช่น ความยาวและอุณหภูมิ
+สคริปต์นี้ถูกออกแบบมาให้ใช้งานได้ทันที เปิดสคริปต์ในโปรแกรมแก้ไขเพื่อสำรวจโค้ด ปรับแต่งพรอมต์ และปรับพารามิเตอร์ต่างๆ เช่น ความยาวและ temperature
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -291,28 +302,27 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## เรียนรู้เกี่ยวกับพารามิเตอร์การสร้าง
+## เรียนรู้เกี่ยวกับพารามิเตอร์การสร้างข้อความ
 
 | พารามิเตอร์ | สิ่งที่ควบคุม | ค่าทั่วไป |
 |-----------|------------------|----------------|
-| `max_new_tokens` | ความยาวสูงสุดของผลลัพธ์จาก LLM | ใช้ 50–500 โทเคนสำหรับบทสรุป (1 โทเคนมีค่าประมาณ 0.75 คำภาษาอังกฤษ) |
-| `temperature` | ความคิดสร้างสรรค์ ค่าต่ำทำให้เน้นความแม่นยำ ในขณะที่ค่าสูงทำให้คาดเดาไม่ได้มากขึ้น | - **0.1–0.3**: มุ่งเน้น แน่นอน (เหมาะสำหรับบทสรุป) <br> **0.5–0.7**: สมดุล (ใช้งานทั่วไป) <br> **0.8–1.0**: สร้างสรรค์ หลากหลาย (การระดมความคิด) |
+| `max_new_tokens` | ความยาวสูงสุดของผลลัพธ์ของ LLM | ใช้ 50–500 tokens สำหรับบทสรุป (1 token มีค่าประมาณ 0.75 คำในภาษาอังกฤษ) |
+| `temperature` | ความคิดสร้างสรรค์ ค่าต่ำจะทำให้เน้นความแม่นยำ ในขณะที่ค่าสูงจะมีความไม่แน่นอนมากขึ้น | - **0.1–0.3**: เน้นความแม่นยำ (deterministic) (เหมาะสำหรับบทสรุป) <br> **0.5–0.7**: สมดุล (การใช้งานทั่วไป) <br> **0.8–1.0**: สร้างสรรค์ หลากหลาย (การระดมความคิด) |
 | `top_p` | Nucleus Sampling - ค่าต่ำจะจำกัดให้โมเดลสร้างผลลัพธ์ที่แคบลง | **0.1-0.5**: เข้มงวด คาดเดาได้ <br> **0.9-0.95**: (มาตรฐาน เป็นธรรมชาติ สนทนาได้) |
 
 
-## การใช้งานจริง
+## การประยุกต์ใช้งานจริง
 
-- **การวิเคราะห์เอกสารวิจัย**: สกัดผลการค้นพบสำคัญจากสิ่งพิมพ์ที่ซับซ้อนเพื่อทบทวนอย่างรวดเร็ว
-- **การรวบรวมข่าว**: สรุปบทความข่าวเป็นบทสรุปประจำวันหรือไฮไลต์แบบสั้น
-- **บันทึกการประชุม**: ย่อบทถอดเสียงให้เป็นรายการที่สามารถนำไปปฏิบัติได้และบทสรุปแบบกระชับ
-- **การตรวจสอบเอกสารกฎหมาย**: สกัดข้อกำหนดหรือข้อผูกพันที่เกี่ยวข้องจากเอกสารกฎหมายที่ยาวได้อย่างรวดเร็ว
-- **เอกสารประกอบโค้ด**: สร้างภาพรวมของ repository และคำอธิบายฟังก์ชันแบบกระชับ
-
+- **การวิเคราะห์บทความวิจัย**: สกัดผลการค้นพบสำคัญจากสิ่งพิมพ์ที่ซับซ้อนเพื่อการทบทวนอย่างรวดเร็ว
+- **การรวบรวมข่าวสาร**: สรุปบทความข่าวเป็นบทสรุปประจำวันหรือไฮไลต์สั้นๆ
+- **บันทึกการประชุม**: ย่อบทสรุปการประชุมให้เป็นรายการดำเนินการและบทสรุปที่กระชับ
+- **การตรวจทานเอกสารกฎหมาย**: สกัดข้อกำหนดหรือภาระผูกพันที่เกี่ยวข้องจากเอกสารกฎหมายยาวๆ อย่างรวดเร็ว
+- **เอกสารประกอบโค้ด**: สร้างภาพรวมของ repository และคำอธิบายฟังก์ชันที่กระชับ
 ## ขั้นตอนถัดไป
 
-- **การปรับแต่งโมเดล (Fine-tuning)**: ปรับโมเดลให้เข้ากับสาขาหรือศัพท์เฉพาะของคุณเพื่อความแม่นยำที่ดีขึ้น (ดูคู่มือการทำ Fine-tuning)
-- **ระบบ RAG**: ผสาน LLM เข้ากับการค้นคืนเอกสารเพื่อให้ได้คำตอบและการค้นหาที่คำนึงถึงบริบท
-- **การสำรวจโมเดล**: ทดลองกับโมเดลใหม่ ๆ เช่น Llama 3, Phi-3 หรือ Qwen เพื่อผลลัพธ์ที่ดียิ่งขึ้น
-- **การนำไปใช้งานจริงในระดับ Production**: ใช้เครื่องมือเช่น vLLM สำหรับการให้บริการ LLM ที่ขยายขนาดได้ในองค์กร
+- **การไฟน์จูน (Fine-tuning)**: ปรับแต่งโมเดลให้เข้ากับสาขาหรือศัพท์เฉพาะของคุณเพื่อความแม่นยำที่ดียิ่งขึ้น (ดู Fine-tuning Playbooks)
+- **ระบบ RAG**: ผสานรวม LLM เข้ากับการดึงข้อมูลจากเอกสารเพื่อให้ได้คำตอบและการค้นหาที่เข้าใจบริบท
+- **การสำรวจโมเดล**: ทดลองใช้โมเดลใหม่ ๆ เช่น Llama 3, Phi-3 หรือ Qwen เพื่อผลลัพธ์ที่ดียิ่งขึ้น
+- **การนำไปใช้งานจริง (Production Deployment)**: ใช้เครื่องมืออย่าง vLLM สำหรับการให้บริการ LLM แบบขยายขนาดได้ในองค์กร
 
-ระบบของคุณมอบพลังในการรันโมเดลภาษาที่ซับซ้อนได้ในเครื่องของคุณเอง ลองทดลองกับโมเดล พรอมป์ และพารามิเตอร์ที่แตกต่างกันเพื่อค้นหาสิ่งที่เหมาะสมที่สุดสำหรับแอปพลิเคชันของคุณ
+ระบบของคุณช่วยให้คุณมีศักยภาพในการรันโมเดลภาษาที่ซับซ้อนได้ในเครื่องของคุณเอง ลองทดลองใช้โมเดล พรอมต์ และพารามิเตอร์ต่าง ๆ เพื่อค้นหาสิ่งที่เหมาะสมที่สุดสำหรับแอปพลิเคชันของคุณ

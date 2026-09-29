@@ -11,8 +11,8 @@ SPDX-License-Identifier: MIT
 Ažurirajte na najnoviji AMD GPU drajver koristeći [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
 
 1. Otvorite `AMD Software: Adrenalin Edition` iz Start menija ili sistemske trake.
-2. Idite na **Driver and Software**, kliknite **Manage Updates**.
-3. Ako je dostupno ažuriranje, pratite uputstva za preuzimanje i instalaciju.
+2. Idite na **Driver and Software**, kliknite na **Manage Updates**.
+3. Ako je dostupno ažuriranje, pratite uputstva da ga preuzmete i instalirate.
 
 <!-- @test:id=amd-gpu-visible-windows timeout=60 hidden=True -->
 ```powershell
@@ -26,7 +26,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 ### AMD GPU drajver
 
-Instalirajte AMD GPU drajver (amdgpu) koristeći Radeon Software for Linux (RSL) tok. Za uputstva za vašu distribuciju, pogledajte [Install the kernel driver](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Instalirajte AMD GPU drajver (amdgpu) koristeći Radeon Software for Linux (RSL) proces. Za uputstva za vašu distribuciju, pogledajte instalaciju ROCm-a na: [Instalirajte kernel drajver](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install).
+
+Za sam drajver, pogledajte [Linux® drajvere za AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

@@ -10,8 +10,8 @@ SPDX-License-Identifier: MIT
 
 Aktualisieren Sie auf den neuesten AMD GPU-Treiber mit [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
 
-1. Öffnen Sie `AMD Software: Adrenalin Edition` über Ihr Startmenü oder die Systemablage.
-2. Navigieren Sie zu **Driver and Software** und klicken Sie auf **Manage Updates**.
+1. Öffnen Sie `AMD Software: Adrenalin Edition` über das Startmenü oder das Infobereich-Symbol.
+2. Navigieren Sie zu **Driver and Software**, klicken Sie auf **Manage Updates**.
 3. Falls ein Update verfügbar ist, folgen Sie den Anweisungen zum Herunterladen und Installieren.
 
 <!-- @test:id=amd-gpu-visible-windows timeout=60 hidden=True -->
@@ -24,9 +24,11 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 
 <!-- @os:linux -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-### AMD-GPU-Treiber
+### AMD GPU-Treiber
 
-Installieren Sie den AMD-GPU-Treiber (amdgpu) über den Radeon Software for Linux (RSL)-Ablauf. Anweisungen für Ihre Distribution finden Sie unter [Kernel-Treiber installieren](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Installieren Sie den AMD GPU-Treiber (amdgpu) mithilfe des Radeon Software for Linux (RSL)-Ablaufs. Anweisungen für Ihre Distribution finden Sie in der ROCm-Installation unter: [Install the kernel driver](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install). 
+
+Den Treiber selbst finden Sie unter [Linux® Drivers for AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

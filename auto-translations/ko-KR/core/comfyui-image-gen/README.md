@@ -16,28 +16,30 @@ SPDX-License-Identifier: MIT
 
 ## 개요
 
-ComfyUI는 Stable Diffusion 및 기타 diffusion 모델을 위한 강력한 노드 기반 인터페이스입니다. 간단한 프롬프트 상자가 있는 기존의 텍스트-이미지 인터페이스와 달리, ComfyUI는 전체 이미지 생성 파이프라인을 시각적 그래프로 노출하여 텍스트 인코딩부터 잠재 공간 조작, 최종 디코딩에 이르기까지 모든 단계를 세밀하게 제어할 수 있게 해줍니다.
+ComfyUI는 Stable Diffusion 및 기타 확산 모델을 위한 강력한 노드 기반 인터페이스입니다. 간단한 프롬프트 상자를 사용하는 기존의 텍스트-이미지 인터페이스와 달리, ComfyUI는 전체 이미지 생성 파이프라인을 시각적 그래프로 노출하여 텍스트 인코딩부터 잠재 공간(latent space) 조작, 최종 디코딩에 이르는 모든 단계를 세밀하게 제어할 수 있게 해줍니다.
 
 이 튜토리얼에서는 GPU에서 Z Image Turbo 모델과 함께 ComfyUI를 사용하여 고품질 AI 이미지를 생성하는 방법을 배웁니다.
 
 ## 배우게 될 내용
 
-- ComfyUI를 실행하고 Z-Image Turbo 템플릿을 로드하는 방법
-- Diffusion 파이프라인 구성 요소 이해하기
+- ComfyUI를 실행하고 Z-Image Turbo 템플릿을 불러오는 방법
+- 확산 파이프라인 구성 요소 이해하기
 - 이미지 생성 및 생성 매개변수 조정하기
-- 워크플로 저장 및 공유하기
+- 워크플로우 저장 및 공유하기
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## 메모리 구성 설정하기
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## 소프트웨어 업데이트 확인하기
+## 소프트웨어 업데이트 확인
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 소프트웨어 필수 구성 요소 설치하기
+## 소프트웨어 필수 구성 요소 설치
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -46,7 +48,7 @@ ComfyUI는 Stable Diffusion 및 기타 diffusion 모델을 위한 강력한 노�
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**사용자에게 GPU 장치 액세스 권한을 부여합니다** (적용되려면 로그아웃 후 다시 로그인해야 합니다):
+**사용자에게 GPU 장치에 대한 접근 권한을 부여합니다** (적용하려면 로그아웃 후 다시 로그인해야 합니다):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -292,13 +294,13 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-Windows에서 ComfyUI를 실행하려면 바탕화면에 있는 ComfyUI Desktop Launcher를 클릭하세요. 단계에 따라 AMD용 로컬 버전을 설치하세요.
+Windows에서 ComfyUI를 실행하려면 바탕화면에 있는 ComfyUI Desktop Launcher를 클릭합니다. 안내에 따라 AMD용 로컬 버전을 설치합니다.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-그런 다음 앱 상단 중앙에 있는 ComfyUI 버튼을 클릭합니다. 설정 탭이 열립니다. Storage 탭을 열고 사전 설치된 모델에 액세스할 수 있도록 경로가 다음과 같이 설정되어 있는지 확인하세요.
+그런 다음 앱 상단 중앙에 있는 ComfyUI 버튼을 클릭합니다. 그러면 설정 탭이 열립니다. Storage 탭을 열고 사전 설치된 모델에 접근할 수 있도록 경로가 다음과 같이 설정되어 있는지 확인합니다.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
@@ -308,10 +310,10 @@ Windows에서 ComfyUI를 실행하려면 바탕화면에 있는 ComfyUI Desktop 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-AMD Ryzen™ AI Halo에서는 ComfyUI가 추가적인 Python 설정이 필요 없는 사전 빌드된 컨테이너에서 실행됩니다.
+AMD Ryzen™ AI Halo에서는 ComfyUI가 추가 Python 설정이 필요 없는 사전 빌드된 컨테이너에서 실행됩니다.
 
-Linux에서 ComfyUI를 실행하려면 작업 표시줄에 있는 ComfyUI 바로 가기를 클릭하세요. 브라우저 창에서 자동으로 열립니다.
->**팁**: ComfyUI와 모델은 `~/.local/share/ComfyUI/models`에 저장됩니다. 여기서 워크플로나 새 모델을 수동으로 추가할 수 있습니다.
+Linux에서 ComfyUI를 실행하려면 작업 표시줄에 있는 ComfyUI 바로 가기를 클릭합니다. 브라우저 창에서 자동으로 열립니다.
+>**팁**: ComfyUI와 해당 모델은 `~/.local/share/ComfyUI/models`에 저장됩니다. 이 위치에서 워크플로우나 새 모델을 수동으로 추가할 수 있습니다.
 
 
 <!-- @os:end -->
@@ -326,10 +328,10 @@ Windows에서 ComfyUI를 실행하려면 바탕화면에 있는 ComfyUI 바로 �
 
 ComfyUI를 실행하려면:
 
-1. ComfyUI 디렉터리 내에 있는지 확인합니다. 
+1. ComfyUI 디렉터리 내에 있는지 확인합니다.
 2. `python3 main.py --use-pytorch-cross-attention`을 실행합니다
 
-ComfyUI는 로컬 웹 서버를 시작합니다. 인터페이스에 접속하려면 브라우저에서 `http://127.0.0.1:8188`을 여세요.
+ComfyUI는 로컬 웹 서버를 시작합니다. 브라우저에서 `http://127.0.0.1:8188`을 열어 인터페이스에 접근합니다.
 
 > **팁**: ComfyUI를 사용하는 동안 터미널 창을 열어 두세요. 창을 닫으면 서버가 중지됩니다.
 <!-- @os:end -->
@@ -338,19 +340,19 @@ ComfyUI는 로컬 웹 서버를 시작합니다. 인터페이스에 접속하려
 
 ## Z-Image Turbo 템플릿 찾기
 
-이미지를 생성하기 전에 Z-Image Turbo 템플릿을 로드해야 합니다. 찾는 방법은 다음과 같습니다:
+이미지를 생성하기 전에 Z-Image Turbo 템플릿을 불러와야 합니다. 찾는 방법은 다음과 같습니다:
 
-1. **화면 맨 왼쪽 가장자리를 확인하세요**—앱의 가장 왼쪽에 위에서 아래로 이어지는 세로 도구 모음이 있습니다.
+1. **화면 왼쪽 가장자리를 확인합니다**—앱의 가장 왼쪽에 위에서 아래로 이어지는 세로 툴바가 있습니다.
 
-2. **폴더 아이콘을 찾으세요**—해당 왼쪽 도구 모음에서 폴더처럼 생긴 아이콘을 찾습니다. 마우스를 올리면 "Templates"라는 레이블이 표시됩니다.
+2. **폴더 아이콘을 찾습니다**—왼쪽 툴바에서 폴더처럼 생긴 아이콘을 찾습니다. 마우스를 올리면 "Templates"라는 레이블이 표시됩니다.
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
 </p>
 
-3. **폴더 아이콘을 클릭하세요**—Templates 패널이 열립니다.
+3. **폴더 아이콘을 클릭합니다**—Templates 패널이 열립니다.
 
-4. **"Z-Image Turbo"를 검색하세요**—검색창을 사용하거나 사용 가능한 템플릿을 스크롤하여 Z-Image Turbo Text To Image 워크플로를 찾은 다음 클릭하여 로드합니다.
+4. **"Z-Image Turbo"를 검색합니다**—검색창을 사용하거나 사용 가능한 템플릿 목록을 스크롤하여 Z-Image Turbo Text To Image 워크플로우를 찾은 다음 클릭하여 불러옵니다.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -362,14 +364,14 @@ ComfyUI는 로컬 웹 서버를 시작합니다. 인터페이스에 접속하려
 
 ## 인터페이스 이해하기
 
-Z-Image Turbo 템플릿이 로드되면 2개의 주요 노드가 있는 캔버스가 표시됩니다. 첫 번째 노드는 'Text to Image (Z-Image-Turbo)'이며, 두 번째 노드는 이미지를 확인하기 위한 것입니다. 
+Z-Image Turbo 템플릿을 불러오면 2개의 주요 노드가 있는 캔버스가 표시됩니다. 첫 번째 노드는 'Text to Image (Z-Image-Turbo)'이고, 두 번째 노드는 이미지를 보기 위한 것입니다.
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
 </p>
 
 
-Z-Image 노드에서 오른쪽 상단 버튼을 클릭하여 노드를 확장하고 서브그래프를 확인하세요.
+Z-Image 노드에서 오른쪽 상단 버튼을 클릭하여 노드를 확장하고 서브그래프를 확인합니다.
 
 <p align="center">
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
@@ -377,29 +379,30 @@ Z-Image 노드에서 오른쪽 상단 버튼을 클릭하여 노드를 확장하
 
 ### 파이프라인 구성 요소
 
-Z-Image Turbo 워크플로는 함께 작동하는 4가지 핵심 모델 구성 요소를 사용합니다:
+Z-Image Turbo 워크플로우는 함께 작동하는 네 가지 핵심 모델 구성 요소를 사용합니다:
 
 | 구성 요소 | 역할 |
 |-----------|------|
-| **텍스트 인코더** (Qwen 3 4B) | 텍스트 프롬프트를 diffusion 모델이 이해하는 임베딩으로 변환합니다 |
-| **Diffusion 모델** (Z-Image Turbo) | 잠재 표현을 반복적으로 노이즈 제거하여 이미지로 만드는 핵심 신경망입니다 |
-| **VAE** (Variational Autoencoder) | 이미지를 잠재 공간과의 사이에서 인코딩/디코딩합니다 (최종 잠재값을 픽셀로 디코딩) |
-| **LoRA** (선택 사항) | 기본 모델을 재학습하지 않고도 스타일이나 대상을 수정하는 경량 어댑터입니다 |
+| **텍스트 인코더** (Qwen 3 4B) | 텍스트 프롬프트를 확산 모델이 이해할 수 있는 임베딩으로 변환합니다 |
+| **확산 모델** (Z-Image Turbo) | 잠재 표현을 반복적으로 노이즈 제거하여 이미지로 만드는 핵심 신경망입니다 |
+| **VAE** (Variational Autoencoder) | 이미지를 잠재 공간으로 인코딩하거나 잠재 공간에서 디코딩합니다 (최종 잠재값을 픽셀로 디코딩) |
+| **LoRA** (선택 사항) | 기본 모델을 재훈련하지 않고 스타일이나 대상을 수정하는 경량 어댑터입니다 |
 
-워크플로의 각 노드는 이러한 구성 요소 중 하나에 해당합니다. 데이터는 왼쪽에서 오른쪽으로 흐릅니다: 텍스트 → 임베딩 → 가이드 노이즈 제거 → 잠재값 → 최종 이미지.
-## 첫 이미지 생성하기
+워크플로우의 각 노드는 이러한 구성 요소 중 하나에 해당합니다. 데이터는 왼쪽에서 오른쪽으로 흐릅니다: 텍스트 → 임베딩 → 유도 노이즈 제거 → 잠재값 → 최종 이미지.
+
+## 첫 번째 이미지 생성하기
 
 Z-Image Turbo 모델이 이미 로드되어 있습니다. 이미지를 생성하려면:
 
-1. 메인 Z-Image 노드에 **프롬프트를 입력**하세요. 최대한 구체적으로 작성하세요. 예시는 다음과 같습니다:
+1. 메인 Z-Image 노드에 **프롬프트를 입력합니다**. 구체적으로 작성하세요. 예시는 다음과 같습니다:
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-2. **(선택 사항)**: 서브그래프 내의 다른 특정 설정을 확인하거나 조정하세요.
-3. 오른쪽 상단의 파란색 **"Run Workflow"**를 클릭합니다(또는 `Ctrl+Enter`를 누릅니다).
-4. 각 단계가 실행되면서 노드가 강조 표시되는 것을 확인하세요
+2. **(선택 사항)**: 서브그래프 내의 다른 특정 설정을 확인하거나 조정합니다.
+3. 오른쪽 모서리의 **파란색 "Run Workflow"를 클릭합니다** (또는 `Ctrl+Enter`를 누릅니다)
+4. 각 단계가 실행될 때 노드가 강조 표시되는 것을 확인합니다
 
 전체 워크플로우 실행은 30초 이내에 완료됩니다. 생성된 이미지는 **Save Image** 노드에 표시되며 `output/` 폴더에 저장됩니다.
 
@@ -462,6 +465,7 @@ for _ in range(600):
  time.sleep(1)
 
 print("No outputs after waiting.")
+print("history status:", json.dumps(entry.get("status", {})))  # surfaces the ComfyUI node/execution error
 sys.exit(1)
 '@ | & $py -
  if ($LASTEXITCODE -ne 0) { throw "Workflow submit/generation failed" }
@@ -540,6 +544,7 @@ for _ in range(600):
  time.sleep(1)
 
 print("No outputs after waiting.")
+print("history status:", json.dumps(entry.get("status", {})))  # surfaces the ComfyUI node/execution error
 sys.exit(1)
 PY
 ```
@@ -574,18 +579,17 @@ ls -1t ComfyUI/output/*.png | head -n 5
 
 
 ## 생성 매개변수 조정하기
-
 ### KSampler 설정
 
-KSampler 노드는 핵심 확산(diffusion) 프로세스를 제어합니다:
+KSampler 노드는 핵심 확산 프로세스를 제어합니다:
 
-| 매개변수 | 제어 대상 | Z-Image Turbo 권장값 |
+| 매개변수 | 제어 내용 | Z-Image Turbo 권장값 |
 |-----------|------------------|-------------------------------|
-| **steps** | 노이즈 제거 반복 횟수 | 4–10 (turbo 모델은 더 적은 단계를 위해 증류됨) |
-| **cfg** | 분류기 없는 가이던스 스케일—프롬프트를 얼마나 밀접하게 따를지 | 1.0–2.0 (turbo 모델은 매우 낮은 가이던스를 사용) |
-| **sampler_name** | 노이즈 제거 알고리즘 | `euler`와 `res_multistep`이 turbo 모델에 적합함 |
+| **steps** | 디노이징 반복 횟수 | 4–10 (turbo 모델은 더 적은 단계로도 동작하도록 증류됨) |
+| **cfg** | 분류기 없는 안내 스케일—프롬프트를 얼마나 충실히 따를지 | 1.0–2.0 (turbo 모델은 매우 낮은 안내 값을 사용) |
+| **sampler_name** | 디노이징 알고리즘 | `euler` 및 `res_multistep`가 turbo 모델에 적합 |
 | **scheduler** | 노이즈 스케줄 곡선 | `normal` 또는 `simple` |
-| **seed** | 재현성을 위한 랜덤 시드 | 구성을 반복 작업하려면 고정값을 설정 |
+| **seed** | 재현성을 위한 랜덤 시드 | 구도를 반복 작업하려면 고정값을 설정 |
 
 ### 이미지 크기
 
@@ -593,24 +597,24 @@ KSampler 노드는 핵심 확산(diffusion) 프로세스를 제어합니다:
 
 ### ModelSamplingAuraFlow
 
-**ModelSamplingAuraFlow** 노드는 확산 프로세스가 노이즈 스케줄링을 처리하는 방식을 조정하는 전용 샘플링 수정자입니다. Z-Image Turbo 워크플로우에서 이 노드가 모델 출력에 연결되어 있는 것을 확인할 수 있습니다.
+**ModelSamplingAuraFlow** 노드는 확산 프로세스가 노이즈 스케줄링을 처리하는 방식을 조정하는 특수한 샘플링 수정자입니다. Z-Image Turbo 워크플로우에서 이 노드가 모델 출력에 연결되어 있는 것을 볼 수 있습니다.
 
-| 매개변수 | 제어 대상 | 권장값 |
+| 매개변수 | 제어 내용 | 권장 값 |
 |-----------|------------------|-------------------|
-| **shift** | 노이즈 스케줄 타이밍을 조정—값이 높을수록 더 많은 디테일 정제 작업이 후반 단계로 밀림 | 1.0–4.0 (기본값은 3.0) |
+| **shift** | 노이즈 스케줄 타이밍을 조정—값이 높을수록 세부 디테일 정제가 이후 단계로 더 많이 밀립니다 | 1.0–4.0 (기본값은 3.0) |
 
 **shift**를 조정해야 할 때:
 
-- **낮은 값(1.0–2.0)**: 더 빠른 수렴, 단순한 구성에 적합
-- **높은 값(3.0–4.0)**: 더 점진적인 정제, 복잡한 장면에서 세부 디테일을 개선할 수 있음
+- **낮은 값 (1.0–2.0)**: 더 빠른 수렴, 단순한 구도에 적합
+- **높은 값 (3.0–4.0)**: 더 점진적인 정제, 복잡한 장면에서 세밀한 디테일을 향상시킬 수 있음
 
-AuraFlow 샘플링 방식은 Z-Image Turbo와 같은 흐름 매칭(flow-matching) 모델을 위해 특별히 설계되어, 생성 프로세스 전반에 걸쳐 적절한 노이즈 분포를 보장합니다.
+AuraFlow 샘플링 방식은 Z-Image Turbo와 같은 흐름 매칭(flow-matching) 모델을 위해 특별히 설계되어, 생성 과정 전반에 걸쳐 적절한 노이즈 분포를 보장합니다.
 
-## 워크플로우 다루기
+## 워크플로우 작업하기
 
-### 워크플로우 저장하기
+### 워크플로우 저장
 
-메뉴의 **Save** 버튼을 클릭하여 워크플로우를 JSON 파일로 내보냅니다. 여기에는 다음이 포함됩니다:
+메뉴에서 **Save** 버튼을 클릭하여 워크플로우를 JSON 파일로 내보냅니다. 여기에는 다음이 포함됩니다:
 
 - 모든 노드와 해당 매개변수
 - 노드 간의 모든 연결
@@ -618,19 +622,19 @@ AuraFlow 샘플링 방식은 Z-Image Turbo와 같은 흐름 매칭(flow-matching
 
 ### 워크플로우 불러오기
 
-워크플로우 JSON 파일을 캔버스로 드래그하거나 메뉴의 **Load**를 사용하세요. 기본적으로 표시되는 Z-Image Turbo 워크플로우는 저장된 워크플로우 파일에서 로드된 것입니다.
+워크플로우 JSON 파일을 캔버스에 드래그하거나 메뉴에서 **Load**를 사용하세요. 기본으로 표시되는 Z-Image Turbo 워크플로우는 저장된 워크플로우 파일에서 불러온 것입니다.
 
-### 워크플로우 공유하기
+### 워크플로우 공유
 
-워크플로우는 자체적으로 완결되어 있습니다—JSON 파일을 동료와 공유하면 정확히 동일한 설정을 재현할 수 있습니다. 이 때문에 ComfyUI는 협업 실험에 매우 적합합니다.
+워크플로우는 자체 완결적이므로—JSON 파일을 동료와 공유하면 정확히 동일한 설정을 재현할 수 있습니다. 이는 ComfyUI를 협업 실험에 매우 유용하게 만듭니다.
 
 ## 다음 단계
 
-- **LoRA 노드 살펴보기**: 재학습 없이 스타일 또는 대상 어댑터를 적용해보세요
-- **네거티브 프롬프트 추가하기**: 두 번째 CLIP Text Encode 노드를 KSampler의 **negative** 컨디셔닝 입력에 연결하여 흐림, 아티팩트, 워터마크 등 원치 않는 요소를 피하도록 모델을 유도하세요
-- **커스텀 워크플로우 구축하기**: 여러 생성 작업을 연결하거나, 업스케일링을 추가하거나, 이미지 변형을 만들어보세요
-- **커뮤니티 워크플로우 둘러보기**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples)에는 바로 사용할 수 있는 다양한 워크플로우가 있습니다
+- **LoRA 노드 살펴보기**: 재학습 없이 스타일 또는 대상 어댑터를 적용해 보세요
+- **네거티브 프롬프트 추가하기**: 두 번째 CLIP Text Encode 노드를 KSampler의 **negative** 컨디셔닝 입력에 연결하여 흐릿함, 아티팩트, 워터마크와 같은 원치 않는 특징을 모델이 피하도록 안내하세요
+- **커스텀 워크플로우 구축하기**: 여러 생성을 연결하거나, 업스케일링을 추가하거나, 이미지 변형을 만들어 보세요
+- **커뮤니티 워크플로우 둘러보기**: [ComfyUI 예제](https://github.com/comfyanonymous/ComfyUI_examples)에서 바로 사용할 수 있는 다양한 워크플로우를 확인할 수 있습니다
 
-ComfyUI의 강점은 실험입니다: 노드를 다르게 연결하고, 매개변수를 조정하고, 각 변경 사항이 결과물에 어떤 영향을 미치는지 관찰해보세요. 이러한 직접적인 탐구 과정을 통해 확산 모델의 작동 방식에 대한 직관을 기를 수 있습니다.
+ComfyUI의 강점은 실험입니다: 노드를 다르게 연결하고, 매개변수를 조정하고, 각 변경이 출력에 어떤 영향을 미치는지 관찰해 보세요. 이러한 실습 기반 탐구는 확산 모델의 작동 방식에 대한 직관을 키워줍니다.
 
-자세한 내용은 [ComfyUI Documentation](https://docs.comfy.org/)을 확인하세요.
+자세한 내용은 [ComfyUI 문서](https://docs.comfy.org/)를 참고하세요.

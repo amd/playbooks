@@ -16,23 +16,25 @@ SPDX-License-Identifier: MIT
 
 ## Genel Bakış
 
-Ollama, büyük dil modellerini yerel olarak çalıştırmak için popüler ve hafif bir araçtır. Model indirme, nicemleme ve sunma işlemlerini basit bir komut satırı arayüzü ve masaüstü uygulaması arkasında yönetir; böylece dakikalar içinde bir LLM ile sohbet etmeye başlayabilirsiniz.
+Ollama, büyük dil modellerini yerel olarak çalıştırmak için popüler, hafif bir araçtır. Model indirme, nicemleme (quantization) ve sunma işlemlerini basit bir komut satırı arayüzü ve masaüstü uygulaması arkasında yönetir, böylece dakikalar içinde bir LLM ile sohbet etmeye başlayabilirsiniz.
 
-Bu kılavuz, Ollama'nın kurulumundan GPT-OSS 20B modelinin indirilmesine ve hem terminal hem de masaüstü uygulaması aracılığıyla onunla sohbet etmeye kadar sizi adım adım yönlendirir.
+Bu kılavuz, Ollama'yı kurma, GPT-OSS 20B modelini indirme ve hem terminal hem de masaüstü uygulaması üzerinden onunla sohbet etme adımlarında size yol gösterir.
 
-## Öğrenecekleriniz
+## Neler Öğreneceksiniz
 
-- Sisteminizde Ollama'yı nasıl kuracağınızı ve başlatacağınızı
+- Sisteminizde Ollama'yı nasıl kurup başlatacağınızı
 - GPT-OSS 20B modelini yerel olarak nasıl indirip çalıştıracağınızı
 - CLI kullanarak modellerle nasıl sohbet edeceğinizi
 - REST API üzerinden modelleri programatik olarak nasıl sorgulayacağınızı
 
-## Bellek Yapılandırmasını Ayarlama
+<!-- @device:halo_box,halo,stx,krk -->
+## Bellek Yapılandırmasının Ayarlanması
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Yazılım Güncellemelerini Kontrol Etme
+## Yazılım Güncellemelerini Kontrol Edin
 > **Not**: VS Code kurulu değilse, Ryzen AI Developer Center ile kurabilirsiniz.
 
 <!-- @require:software-update -->
@@ -42,15 +44,15 @@ Bu kılavuz, Ollama'nın kurulumundan GPT-OSS 20B modelinin indirilmesine ve hem
 
 <!-- @require:driver -->
 
-### Ollama Kurulumu
+### Ollama'nın Kurulumu
 
 <!-- @os:windows -->
 
 1. Yükleyiciyi [ollama.com/download](https://ollama.com/download) adresinden indirin.
 2. `.exe` yükleyicisini çalıştırın ve yönergeleri izleyin.
-3. Kurulum tamamlandıktan sonra Ollama arka planda bir hizmet olarak çalışır ve terminal, masaüstü uygulaması ile sistem tepsisinden erişilebilir.
+3. Kurulum tamamlandıktan sonra Ollama, arka planda bir hizmet olarak çalışır ve terminal, masaüstü uygulaması ile sistem tepsisinden erişilebilir.
 
-Bir terminal açıp aşağıdakini çalıştırarak kurulumu doğrulayın:
+Kurulumu doğrulamak için bir terminal açın ve şunu çalıştırın:
 
 ```powershell
 ollama --version
@@ -62,7 +64,7 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-Konsola yazdırılan yüklü sürüm numarasını görmelisiniz.
+Konsola yazdırılan kurulu sürüm numarasını görmelisiniz.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -85,18 +87,18 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-Konsola yazdırılan yüklü sürüm numarasını görmelisiniz.
+Konsola yazdırılan kurulu sürüm numarasını görmelisiniz.
 <!-- @os:end -->
 
 ## İlk Modelinizi İndirme
 
-Ollama, konteyner imgelerine benzer bir kayıt defteri (registry) aracılığıyla modelleri yönetir. GPT-OSS 20B'yi indirmek için:
+Ollama, modelleri konteyner imajlarına benzer bir kayıt sistemi (registry) üzerinden yönetir. GPT-OSS 20B'yi indirmek için:
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-Bu işlem, model ağırlıklarını yerel makinenize indirir (yaklaşık 12 GB). İndirme yalnızca bir kez gerçekleşir; sonraki çalıştırmalarda model diskten yüklenir.
+Bu işlem, model ağırlıklarını yerel makinenize indirir (yaklaşık 12 GB). İndirme yalnızca bir kez gerçekleşir ve sonraki çalıştırmalar modeli diskten yükler.
 
 Modelin kullanılabilir olduğunu şu şekilde doğrulayabilirsiniz:
 
@@ -104,16 +106,45 @@ Modelin kullanılabilir olduğunu şu şekilde doğrulayabilirsiniz:
 ollama list
 ```
 
-Çıktıda `gpt-oss:20b` modelini, boyutu ve son değiştirilme tarihiyle birlikte görmelisiniz.
+Çıktıda, boyutu ve son değiştirilme tarihiyle birlikte `gpt-oss:20b` ifadesini görmelisiniz.
 
 <!-- @os:windows -->
-<!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=120 hidden=True -->
+<!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=180 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
-$list = (ollama list | Out-String)
-if (-not $list) { throw "ollama list returned no output" }
-if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
-Write-Host "OK: gpt-oss:20b is present in ollama list"
+$p = $null
+$startedHere = $false
+
+function Wait-OllamaApi {
+  param( [int]$MaxAttempts = 120 )
+  for ($i = 0; $i -lt $MaxAttempts; $i++) {
+    $resp = curl.exe -s --max-time 2 http://127.0.0.1:11434/api/tags
+    if ($LASTEXITCODE -eq 0 -and $resp) { return $resp }
+    Start-Sleep -Seconds 1
+  }
+  return $null
+}
+
+try {
+  # Start the Ollama server if the API is not already up.
+  $tagsJson = Wait-OllamaApi -MaxAttempts 5
+  if (-not $tagsJson) {
+    $p = Start-Process -FilePath "ollama" -ArgumentList "serve" -NoNewWindow -PassThru
+    $startedHere = $true
+    $tagsJson = Wait-OllamaApi -MaxAttempts 120
+  }
+  if (-not $tagsJson) { throw "Ollama API not ready on http://127.0.0.1:11434" }
+
+  $list = (ollama list | Out-String)
+  if (-not $list) { throw "ollama list returned no output" }
+  if ($list -notmatch 'gpt-oss:20b') { throw "Model gpt-oss:20b is not present in ollama list. Please download it before running this test." }
+  Write-Host "OK: gpt-oss:20b is present in ollama list"
+}
+finally {
+  if ($startedHere -and $p -and -not $p.HasExited) {
+    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+  }
+}
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
@@ -175,9 +206,9 @@ echo "OK: gpt-oss:20b is present in ollama list"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Model Adlandırması
+### Model Adlandırma
 
-Ollama model adları `ad:etiket` biçimini izler. Etiket genellikle parametre sayısını veya nicemleme çeşidini belirtir. Modelleri yönetmek için bazı yararlı komutlar:
+Ollama model adları `name:tag` biçimini izler. Etiket genellikle parametre sayısını veya nicemleme (quantization) varyantını belirtir. Modelleri yönetmek için bazı yararlı komutlar:
 
 | Komut | Açıklama |
 |---------|-------------|
@@ -200,20 +231,20 @@ Ollama, modeli belleğe yükler ve sizi bir istem ekranına yönlendirir. Bir ş
 >>> What is the capital of France and why is it historically significant?
 ```
 
-Model, yanıtını terminalde doğrudan belirteç belirteç (token-by-token) akış olarak verir. Oturumdan çıkmak için `/bye` yazın veya `Ctrl+D` tuşlarına basın.
+Model, yanıtını doğrudan terminalde jeton jeton (token-by-token) akış olarak verir. Oturumdan çıkmak için `/bye` yazın veya `Ctrl+D` tuşlarına basın.
 
-> **İpucu**: İlk çalıştırma, modeli belleğe yüklemek için birkaç saniye sürer. Model bellekte kaldığı için aynı oturum içindeki sonraki istemler çok daha hızlı yanıt verir.
+> **İpucu**: İlk çalıştırma, modeli belleğe yüklemek birkaç saniye sürer. Aynı oturum içindeki sonraki istemler, model belleğe yüklü kaldığı için çok daha hızlı yanıt verir.
 
 <!-- @os:windows -->
 ## Masaüstü Uygulamasından Sohbet Etme
 
-Ollama ayrıca modellerinizle etkileşim kurmak için temiz bir sohbet arayüzü sunan bir masaüstü uygulamasıyla birlikte gelir.
+Ollama, modellerinizle etkileşim kurmak için sade bir sohbet arayüzü sunan bir masaüstü uygulamasıyla da birlikte gelir.
 
 Başlat menüsünden **Ollama**'yı açın veya sistem tepsisindeki Ollama simgesine tıklayıp **Open Ollama**'yı seçin.
 
 Uygulama açıldıktan sonra:
 
-1. Kenar çubuğundan **New Chat**'e tıklayın.
+1. Kenar çubuğunda **New Chat**'e tıklayın.
 2. Sohbet giriş alanının sağ alt köşesindeki model açılır menüsünden **gpt-oss:20b**'yi seçin.
 3. Bir mesaj yazın ve sohbete başlamak için Enter'a basın.
 
@@ -221,12 +252,12 @@ Uygulama açıldıktan sonra:
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-Masaüstü uygulaması, önceki sohbetlerinize kolayca dönebilmeniz için konuşma geçmişinizi kenar çubuğunda tutar.
+Masaüstü uygulaması, önceki sohbetlere kolayca geri dönebilmeniz için konuşmalarınızın geçmişini kenar çubuğunda tutar.
 <!-- @os:end -->
 
-## REST API Kullanımı
+## REST API'yi Kullanma
 
-Kurulumdan sonra Ollama arka planda bir hizmet olarak çalışır ve modelleri kendi uygulamalarınıza ve betiklerinize entegre etmek için `http://localhost:11434` adresinde bir REST API sunar.
+Kurulumdan sonra Ollama, arka planda bir hizmet olarak çalışır ve modelleri kendi uygulamalarınıza ve betiklerinize entegre etmek için kullanabileceğiniz bir REST API'yi `http://localhost:11434` adresinde sunar.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -577,7 +608,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### Python Dosyası Oluşturma
-Aynı dizinde, VS Code veya başka bir düzenleyici kullanarak bir .py dosyası oluşturun ve aşağıdaki kodu içine kopyalayın. Ardından, etkinleştirdiğiniz ortamda `python your_file_name.py` komutuyla dosyayı çalıştırın
+Aynı dizinde, VS Code veya başka bir düzenleyici kullanarak bir .py dosyası oluşturun ve aşağıdaki kodu bu dosyaya kopyalayın. Ardından, dosyayı etkinleştirilmiş ortamınızda `python your_file_name.py` komutuyla çalıştırın
 
 ```python
 import requests
@@ -602,14 +633,15 @@ print(response.json()["response"])
 | `/api/chat` | POST | Mesaj geçmişiyle çok turlu konuşma |
 | `/api/tags` | GET | Kullanılabilir modelleri listeler |
 | `/api/show` | POST | Model ayrıntılarını gösterir |
-| `/api/pull` | POST | Kayıt defterinden bir model indirir |
+| `/api/pull` | POST | Kayıt sisteminden (registry) bir model indirir |
 
 Tam API referansı için [Ollama API belgelerine](https://github.com/ollama/ollama/blob/main/docs/api.md) bakın.
+
 ## Sonraki Adımlar
 
-- **Farklı modeller deneyin**: Küçük kodlama asistanlarından büyük akıl yürütme modellerine kadar yüzlerce mevcut modeli keşfetmek için [Ollama model kütüphanesine](https://ollama.com/library) göz atın.
-- **Özel modeller oluşturun**: Özelleştirilmiş bir deneyim için özel sistem istemleri, sıcaklık ve diğer parametreleri ayarlamak üzere bir [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) kullanın.
-- **API ile geliştirme yapın**: Ollama'yı uygulamalarınıza entegre etmek için [Python](https://github.com/ollama/ollama-python) veya [JavaScript](https://github.com/ollama/ollama-js) istemci kütüphanelerini kullanın.
-- **Ön uçlara bağlanın**: Arama, kişilikler ve belge yükleme özellikleriyle zengin bir sohbet arayüzü için Ollama'yı [Open WebUI](https://github.com/open-webui/open-webui) gibi araçlarla birleştirin.
+- **Farklı modelleri deneyin**: Küçük kodlama asistanlarından büyük akıl yürütme modellerine kadar yüzlerce mevcut modeli keşfetmek için [Ollama model kütüphanesine](https://ollama.com/library) göz atın.
+- **Özel modeller oluşturun**: Özel sistem istemleri, sıcaklık (temperature) ve kişiselleştirilmiş bir deneyim için diğer parametreleri ayarlamak amacıyla bir [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) kullanın.
+- **API ile geliştirin**: Ollama'yı uygulamalarınıza entegre etmek için [Python](https://github.com/ollama/ollama-python) veya [JavaScript](https://github.com/ollama/ollama-js) istemci kütüphanelerini kullanın.
+- **Ön yüzlerle bağlanın**: Arama, kişilikler (personas) ve belge yükleme gibi özelliklerle zengin bir sohbet arayüzü için Ollama'yı [Open WebUI](https://github.com/open-webui/open-webui) gibi araçlarla eşleştirin.
 
 Daha fazla bilgi için [Ollama belgelerine](https://github.com/ollama/ollama/blob/main/README.md) göz atın.

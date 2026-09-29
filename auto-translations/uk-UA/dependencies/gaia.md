@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA — це фреймворк AMD з відкритим кодом для створення AI-агентів, які працюють локально на обладнанні AMD з прискоренням Ryzen AI.
+GAIA — це фреймворк з відкритим кодом від AMD для створення AI-агентів, які працюють локально на апаратному забезпеченні AMD із прискоренням Ryzen AI.
 
 #### Встановлення GAIA
 
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Потім за допомогою `pip` встановіть **Gaia**
+2. Потім використайте `pip` для встановлення **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -31,7 +31,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. У Linux відкрийте термінал у потрібному каталозі та виконайте команди для створення venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Потім за допомогою `pip` встановіть **Gaia**
+2. Потім використайте `pip` для встановлення **Gaia**
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. Потім за допомогою `pip` встановіть **Gaia**
+2. Потім використайте `pip` для встановлення **Gaia**
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -72,7 +72,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. У Linux відкрийте термінал у потрібному каталозі та виконайте команди для створення venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. Потім за допомогою `pip` встановіть **Gaia**
+2. Потім використайте `pip` для встановлення **Gaia**
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -281,12 +281,12 @@ fi
 
 #### Перевірка встановлення
 
-Перевірте, що встановлено GAIA версії v0.16.2 або новішої:
+Перевірте, що встановлено GAIA версії 0.16.2 або новішої:
 
 ```bash
 gaia --version
 ```
 
-> **Важливо**: перед використанням GAIA переконайтеся, що Lemonade Server запущено. GAIA вимагає, щоб Lemonade Server було запущено вручну.
+> **Важливо**: переконайтеся, що Lemonade Server запущено, перш ніж використовувати GAIA. GAIA вимагає, щоб Lemonade Server було запущено вручну.
 
-Додаткову інформацію див. у [документації GAIA](https://amd-gaia.ai).
+Для отримання додаткової інформації див. [документацію GAIA](https://amd-gaia.ai).

@@ -11,8 +11,8 @@ SPDX-License-Identifier: MIT
 [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html)을 사용하여 최신 AMD GPU 드라이버로 업데이트하세요.
 
 1. 시작 메뉴 또는 시스템 트레이에서 `AMD Software: Adrenalin Edition`을 엽니다.
-2. **드라이버 및 소프트웨어**로 이동한 다음 **업데이트 관리**를 클릭합니다.
-3. 업데이트가 있는 경우 프롬프트에 따라 다운로드하고 설치합니다.
+2. **Driver and Software**로 이동한 후 **Manage Updates**를 클릭합니다.
+3. 업데이트가 있는 경우 안내에 따라 다운로드 및 설치를 진행합니다.
 
 <!-- @test:id=amd-gpu-visible-windows timeout=60 hidden=True -->
 ```powershell
@@ -26,7 +26,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 ### AMD GPU 드라이버
 
-Radeon Software for Linux(RSL) 방식을 사용하여 AMD GPU 드라이버(amdgpu)를 설치하세요. 배포판별 지침은 [커널 드라이버 설치](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html)를 참조하세요.
+Radeon Software for Linux (RSL) 절차를 사용하여 AMD GPU 드라이버(amdgpu)를 설치하세요. 사용 중인 배포판에 대한 지침은 다음 ROCm 설치 문서를 참고하세요: [커널 드라이버 설치](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install).
+
+드라이버 자체는 [Linux® Drivers for AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)을 참고하세요
 
 <!-- @device:end -->
 <!-- @os:end -->

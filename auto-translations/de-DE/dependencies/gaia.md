@@ -12,7 +12,7 @@ GAIA ist AMDs Open-Source-Framework zum Erstellen von KI-Agenten, die lokal auf 
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Öffnen Sie unter Windows ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
+1. Öffnen Sie unter Windows ein Terminal in einem Verzeichnis Ihrer Wahl und führen Sie die folgenden Befehle aus, um eine venv zu erstellen.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Öffnen Sie unter Linux ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. Öffnen Sie unter Linux ein Terminal in einem Verzeichnis Ihrer Wahl und führen Sie die folgenden Befehle aus, um eine venv zu erstellen.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Öffnen Sie unter Windows ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
+1. Öffnen Sie unter Windows ein Terminal in einem Verzeichnis Ihrer Wahl und führen Sie die folgenden Befehle aus, um eine venv zu erstellen.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Öffnen Sie unter Linux ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. Öffnen Sie unter Linux ein Terminal in einem Verzeichnis Ihrer Wahl und führen Sie die folgenden Befehle aus, um eine venv zu erstellen.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -93,13 +93,13 @@ pip install amd-gaia
 
 3. GAIA initialisieren
 
-Führen Sie nach der Installation `gaia init` aus, um den Lemonade Server einzurichten und Modelle herunterzuladen:
+Führen Sie nach der Installation `gaia init` aus, um Lemonade Server einzurichten und Modelle herunterzuladen:
 
 ```bash
 gaia init
 ```
 
-Dies installiert den Lemonade Server, lädt die Standardmodelle herunter und überprüft die Einrichtung.
+Dadurch wird Lemonade Server installiert, werden die Standardmodelle heruntergeladen und die Einrichtung überprüft.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -287,6 +287,6 @@ fi
 gaia --version
 ```
 
-> **Wichtig**: Stellen Sie sicher, dass der Lemonade Server läuft, bevor Sie GAIA verwenden. GAIA erfordert, dass der Lemonade Server manuell gestartet wird.
+> **Wichtig**: Stellen Sie sicher, dass Lemonade Server läuft, bevor Sie GAIA verwenden. GAIA erfordert, dass Lemonade Server manuell gestartet wird.
 
 Weitere Informationen finden Sie in der [GAIA-Dokumentation](https://amd-gaia.ai).

@@ -6,11 +6,9 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Node.js 22.22.1 LTS este versiunea recomandată pentru această platformă.
-
 <!-- @os:windows -->
 
-1. Descărcați programul de instalare Windows pe 64 de biți de la [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+1. Descărcați programul de instalare Windows pe 64 de biți de la [nodejs.org](https://nodejs.org/en/download/)
 2. Rulați programul de instalare și urmați instrucțiunile
 3. Verificați instalarea:
 ```cmd

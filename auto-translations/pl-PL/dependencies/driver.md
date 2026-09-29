@@ -26,7 +26,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 ### Sterownik AMD GPU
 
-Zainstaluj sterownik AMD GPU (amdgpu), korzystając z procesu Radeon Software for Linux (RSL). Instrukcje dla swojej dystrybucji znajdziesz w sekcji [Install the kernel driver](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Zainstaluj sterownik AMD GPU (amdgpu), korzystając z procesu Radeon Software for Linux (RSL). Instrukcje dla swojej dystrybucji znajdziesz w instalacji ROCm pod adresem: [Zainstaluj sterownik jądra](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install). 
+
+Sam sterownik znajdziesz tutaj: [Sterowniki Linux® dla AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

@@ -1,6 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "Zaganjanje in strežba LLM-jev z LM Studio",
-  "description": "Namestite LM Studio in LM Studio Server za lokalno zaganjanje in strežbo velikih jezikovnih modelov.",
+  "title": "Zagon in strežba LLM-jev s programom LM Studio",
+  "description": "Nastavite LM Studio in LM Studio Server za lokalno zagon in strežbo velikih jezikovnih modelov.",
   "auto_translated": true
 }

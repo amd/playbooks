@@ -16,69 +16,71 @@ SPDX-License-Identifier: MIT
 
 ## 概要
 
-このチュートリアルでは、PyTorchとROCmを使用して大規模言語モデル（LLM）をファインチューニングするためのステップバイステップの例を提供します。標準的なファインチューニングから、メモリ効率の良いパラメータ効率的ファインチューニング（PEFT）戦略まで、いくつかの手法をカバーしており、ニーズに合わせてモデルを簡単に適応させることができます。
+このチュートリアルでは、PyTorch と ROCm を使用して大規模言語モデル(LLM)をファインチューニングするための、ステップバイステップの例を提供します。標準的なファインチューニングから、メモリ効率の高い Parameter-Efficient Fine-Tuning(PEFT)戦略まで、いくつかの手法を取り上げているため、ニーズに合わせて簡単にモデルを調整できます。
 
-**使用モデル**: google/gemma-3-4b-it  *(ゲート付きの場合は[HF認証の有効化](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models)を参照)*  
-**ハードウェア**: ROCm対応のAMD Radeon™ GPU  
-**フレームワーク**: PyTorch + Hugging Face（Transformers、PEFT、Transformer Reinforcement Learning（TRL））
+**使用モデル**: google/gemma-3-4b-it  *(ゲート付きの場合は [HF 認証の有効化](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) を参照)*  
+**ハードウェア**: ROCm 対応の AMD Radeon™ GPU  
+**フレームワーク**: PyTorch + Hugging Face(Transformers、PEFT、Transformer Reinforcement Learning(TRL))
 
 <!-- @device:halo,halo_box -->
 > **注:** 
-> - フル ファインチューニングには、少なくとも**64 GBのシステムRAM**が必要で、そのうち少なくとも**32 GBがGPUで使用可能**である必要があります（この32 GBは64 GBの一部であり、追加で必要になるわけではありません）。
-> - 提供されているトレーニングスクリプト内のモデルを置き換えることで、**GPT-OSS-20B**を含む他のモデルアーキテクチャを試すこともできます。
+> - フル ファインチューニングには、少なくとも **64 GB のシステム RAM** が必要であり、そのうち少なくとも **32 GB は GPU が使用できる状態** である必要があります(この 32 GB は 64 GB の一部であり、追加分ではありません)。
+> - 提供されているトレーニング スクリプト内のモデルを置き換えることで、**GPT-OSS-20B** を含む他のモデル アーキテクチャを試すこともできます。
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **注:** LoRAおよびQLoRAファインチューニングには、少なくとも**32 GBのシステムRAM**が必要で、そのうち少なくとも**16 GBがGPUで使用可能**である必要があります（この16 GBは32 GBの一部であり、追加で必要になるわけではありません）。
+> **注:** LoRA および QLoRA のファインチューニングには、少なくとも **32 GB のシステム RAM** が必要であり、そのうち少なくとも **16 GB は GPU が使用できる状態** である必要があります(この 16 GB は 32 GB の一部であり、追加分ではありません)。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **注:** LoRAファインチューニングには、少なくとも**32 GBのシステムRAM**が必要で、そのうち少なくとも**16 GBがGPUで使用可能**である必要があります（この16 GBは32 GBの一部であり、追加で必要になるわけではありません）。
+> **注:** LoRA のファインチューニングには、少なくとも **32 GB のシステム RAM** が必要であり、そのうち少なくとも **16 GB は GPU が使用できる状態** である必要があります(この 16 GB は 32 GB の一部であり、追加分ではありません)。
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **注:** LoRAおよびQLoRAファインチューニングには、少なくとも**16 GBの専用GPUメモリ**と**32 GBのシステムRAM**を搭載したグラフィックカードが必要です。
-> - Linuxでは、トレーニングはグラフィックカードの専用VRAM内で完全に実行されます。
-> - VRAMが不足しても、共有GPUメモリ（システムRAM）にフォールバックすることはありません。
-> - 専用VRAMが16 GB未満のカードは、システムに十分なRAMがあっても、Linuxでのトレーニング中にメモリ不足になります。
+> **注:** LoRA および QLoRA のファインチューニングには、少なくとも **16 GB の専用 GPU メモリ** と **32 GB のシステム RAM** を搭載したグラフィックス カードが必要です。
+> - Linux では、トレーニングはグラフィックス カードの専用 VRAM 内で完全に実行されます。
+> - VRAM が不足しても、共有 GPU メモリ(システム RAM)にフォールバックすることはありません。
+> - 専用 VRAM が 16 GB 未満のカードは、システムに十分な RAM があっても、Linux 上でのトレーニング中にメモリ不足になります。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **注:** LoRAファインチューニングには、少なくとも**16 GBの合計GPUメモリ**と**32 GBのシステムRAM**が必要です。
-> - Windowsでは、合計GPUメモリはグラフィックカードの専用VRAMと共有GPUメモリ（システムRAMから借用）を組み合わせたものです。
-> - そのため、専用VRAMが16 GB未満のカードでも、共有GPUメモリを使用して不足分を補うことで、このプレイブックを実行できます。
+> **注:** LoRA のファインチューニングには、少なくとも **16 GB の合計 GPU メモリ** と **32 GB のシステム RAM** が必要です。
+> - Windows では、合計 GPU メモリは、グラフィックス カードの専用 VRAM と(システム RAM から借用される)共有 GPU メモリを合算したものです。
+> - そのため、専用 VRAM が 16 GB 未満のカードでも、共有 GPU メモリで不足分を補うことで、このプレイブックを実行できます。
 <!-- @os:end -->
 <!-- @device:end -->
 
-## 学習内容
+## このチュートリアルで学べること
 
-- PyTorchとROCmを使用して、LoRA、QLoRA、フル ファインチューニングによりLLMをファインチューニングする方法
-- ファインチューニングしたモデルを保存およびデプロイする方法
+- PyTorch と ROCm を使用して、LoRA、QLoRA、フル ファインチューニングで LLM をファインチューニングする方法
+- ファインチューニング済みモデルを保存してデプロイする方法
 - トレーニングを監視し、一般的な問題をデバッグする方法
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## メモリ構成の設定
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## ソフトウェアの更新を確認する
-> **注**: VS Codeがインストールされていない場合は、Ryzen AI Developer Centerからインストールできます。
+> **注**: VS Code がインストールされていない場合は、Ryzen AI Developer Center からインストールできます。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
 ## ソフトウェアの前提条件をインストールする
 
-#### 仮想環境の作成
+#### 仮想環境を作成する
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update 
 sudo apt install -y python3-venv 
@@ -90,13 +92,13 @@ source finetune-venv/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**ユーザーにGPUデバイスへのアクセス権を付与します**（これを有効にするには、ログアウトして再度ログインしてください）:
+**ユーザーに GPU デバイスへのアクセス権を付与する**(有効にするには、一度ログアウトして再度ログインしてください):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -110,7 +112,7 @@ source finetune-venv/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv --system-site-packages
 finetune-venv\Scripts\activate
@@ -120,7 +122,7 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv
 finetune-venv\Scripts\activate
@@ -138,26 +140,26 @@ finetune-venv\Scripts\activate
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** ここではコアパッケージのみがテストおよびサポートされています。**bitsandbytesはWindowsでは十分にサポートされていない**ため、Windows版のインストールには含まれていません。Windowsでは、LoRAまたはフル ファインチューニングを使用してください（QLoRAはbitsandbytesを必要とし、Linux向けです）。
+**Windows:** ここではコア パッケージのみがテストおよびサポートされています。**bitsandbytes は Windows で十分にサポートされていない** ため、Windows 版のインストールでは bitsandbytes を省略しています。Windows では LoRA またはフル ファインチューニングを使用してください(QLoRA は bitsandbytes を必要とするため、Linux 向けです)。
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### HF認証を有効にする（ゲート付きまたはカスタム／非プリインストールモデル）
+#### HF 認証を有効にする(ゲート付き / カスタム / 事前インストールされていないモデル)
 
-この例では、**ゲート付き**モデルである**google/gemma-3-4b-it**を使用します。トレーニングスクリプトがこのモデルをダウンロードできるようにするには、Hugging Face上でモデルの利用規約に同意した上で認証を行う必要があります。
+この例では、**ゲート付き** モデルである **google/gemma-3-4b-it** を使用します。トレーニング スクリプトがこのモデルをダウンロードできるようにするには、Hugging Face 上でモデルの利用規約に同意した上で、認証を行う必要があります。
 
-1. **ライセンスへの同意:** [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it)を開き、サインイン（またはアカウントを作成）した後、モデルページでライセンス／利用規約に同意します（例:「Agree and access repository」）。
-2. **インストールとログイン:** Hugging Face CLIをインストールし、標準のログインを実行します:
+1. **ライセンスに同意する:** [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it) を開き、サインイン(またはアカウントを作成)し、モデル ページで利用規約(例:「Agree and access repository」)に同意します。
+2. **インストールしてログインする:** Hugging Face CLI をインストールし、標準的なログインを実行します:
 
 ```bash
 pip install huggingface_hub
@@ -261,13 +263,13 @@ sys.exit(r.returncode)
 <!-- @device:end -->
 ---
 
-## 各手法について理解する
+## 各手法の理解
 
-### LoRAとは？
+### LoRA とは?
 
-**LoRA（Low-Rank Adaptation）**は、ベースモデルを凍結したまま、特定のレイヤーに追加される小さな「アダプター」行列のみを学習します。
+**LoRA(Low-Rank Adaptation)** は、ベース モデルを凍結したまま、特定の層に追加される小さな「アダプター」行列のみをトレーニングします。
 
-- **重要な考え方**: 数百万のパラメータを持つ巨大な重み行列を更新する代わりに、低ランクの更新（積がはるかに少ないパラメータを持つ2つの小さな行列）を学習します。これにより、フル ファインチューニングの品質のほとんどを維持しながら、学習可能なパラメータとVRAMを大幅に削減できます。
+- **主な考え方**: 数百万のパラメータを持つ巨大な重み行列を更新する代わりに、低ランクの更新(積が非常に少ないパラメータ数になる 2 つの小さな行列)を学習します。これにより、トレーニング対象パラメータ数と VRAM を大幅に削減しながら、フル ファインチューニングの品質の大部分を維持できます。
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -280,9 +282,9 @@ W_updated = W + B × A
 # Total: 262K params (98% reduction!)
 ```
 
-### QLoRAとは？
+### QLoRA とは?
 
-**QLoRA**は、**4ビット量子化**と**LoRA**を組み合わせたものです。ベースモデルは4ビットで読み込まれ（メモリを大幅に節約）、LoRAアダプターのみがより高い精度でトレーニングされます。そのため、LoRAのパラメータ効率に加えて、はるかに低いVRAM使用量を実現できますが、フル精度のLoRAと比較すると品質面で若干のトレードオフがあります。4ビット量子化は数値的な不安定性（損失のスパイクやNaN）を引き起こす可能性があるため、VRAMが十分にある場合はユーザーが**LoRA**を選択することも多いことに注意してください。
+**QLoRA** は **4 ビット量子化** と **LoRA** を組み合わせた手法です。ベース モデルは 4 ビットでロードされ(大幅なメモリ節約)、LoRA アダプターのみがより高い精度でトレーニングされます。これにより、LoRA のパラメータ効率に加えて大幅に低い VRAM 使用量が得られますが、フル精度の LoRA と比較すると品質面でわずかなトレードオフがあります。4 ビット量子化は数値的な不安定性(損失のスパイクや NaN)を引き起こすことがあるため、十分な VRAM がある場合はユーザーが **LoRA** を好むことが多い点に注意してください。
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -290,18 +292,18 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **注**: `openai/gpt-oss-20b`のようなMXFP4ベースモデルの場合、QLoRAではなく**LoRA**（`train_lora.py`）を使用することをお勧めします。QLoRAスクリプトの`bitsandbytes` 4ビットパスは、通常MXFP4の重みをBF16に逆量子化するため、実行時の動作は標準的なLoRAと同様になります。ネイティブのMXFP4を使用するには、ソースからビルドした`bitsandbytes`に加えて、対応するTransformers/Triton/kernelsスタックが必要です。詳細は[Transformers MXFP4ドキュメント](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4)を参照してください。
+> **注**: `openai/gpt-oss-20b` のような MXFP4 ベース モデルの場合、QLoRA ではなく **LoRA**(`train_lora.py`)を使用することを推奨します。QLoRA スクリプトの `bitsandbytes` 4 ビット パスは通常、MXFP4 の重みを BF16 に逆量子化するため、実行内容は標準的な LoRA と同様になります。ネイティブの MXFP4 を使用するには、ソースからビルドした `bitsandbytes` と、対応する Transformers/Triton/kernels スタックが必要です。詳細は [Transformers の MXFP4 ドキュメント](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4) を参照してください。
 
 ---
-### 2. トレーニング方法を選択する
+### 2. トレーニング方法の選択
 
 | 方法 | メモリ | 速度 | 品質 | 最適な用途 |
 |--------|--------|-------|---------|----------|
-| **QLoRA**（Linuxのみ） | 12-16GB | 最速 | 90-95% | 低メモリ使用量 |
+| **QLoRA**（Linuxのみ） | 12-16GB | 最速 | 90-95% | メモリ使用量を抑えたい場合 |
 | **LoRA** | 24-32GB | 高速 | 95-98% | バランスの取れたアプローチ |
-| **Full** | 80GB+ | 最も遅い | 100% | 最大限の品質 |
+| **Full** | 80GB以上 | 最も遅い | 100% | 最高品質 |
 
-### 3. トレーニングを実行する
+### 3. トレーニングの実行
 
 **データセットとモデルが学習する内容**  
 これらのスクリプトは、データセットをチャット形式の例に変換します。例えば、QLoRAスクリプトは**Abirate/english_quotes**を使用しており、各例は次のようなユーザー・アシスタントのペアになります。
@@ -309,33 +311,33 @@ Total: 12GB (vs 40GB full precision)
 - **User:** 「Give me a quote about: &lt;tag&gt;」
 - **Assistant:** 「&lt;quote&gt; – &lt;author&gt;」
 
-ファインチューニングにより、モデルはトピックに関する名言を求めるプロンプトに応答し、`<quote text> - <author>`という形式でそれらを返すことを学習します。LoRAおよびフルファインチューニングのスクリプトでは、**databricks/databricks-dolly-15k**（一般的な指示・応答のペア）を使用しているため、正確なタスクはスクリプトによって異なりますが、考え方は同じです。選択したデータセットと形式にモデルを適応させます。
+ファインチューニングによって、モデルはトピックに関する引用を求めるプロンプトに応答し、`<quote text> - <author>` という形式で返すことを学習します。LoRAおよびフルファインチューニングのスクリプトでは、**databricks/databricks-dolly-15k**（汎用的な指示・応答のペア）が使用されているため、正確なタスクはスクリプトによって異なります。ただし、基本的な考え方は同じで、選択したデータセットと形式にモデルを適応させることです。
 
-以下は、利用可能なトレーニング方法の概要です。それぞれの方法はスクリプトへのリンクと、適切なアプローチを選ぶための簡単な説明を提供しています。
+以下は、利用可能なトレーニング方法の概要です。各方法はそれぞれのスクリプトへのリンクと、適切なアプローチを選ぶための簡単な説明を提供しています。
 
-| スクリプト                           | 方法            | 説明                                                                                                         | 一般的なVRAM | 推奨用途                                 |
+| スクリプト                           | 方法            | 説明                                                                                                         | 一般的なVRAM | 推奨対象                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | ベースモデルを凍結したまま小さなアダプター行列をトレーニングします。3～5倍高速で、フル品質の約95～98%を実現します。                         | 24–32GB      | 上級ユーザー向け。複数のアダプター使用時、より多くのVRAMがある場合    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(Linuxのみ)*             | **QLoRA**       | 4ビット量子化＋LoRAアダプター。最も少ないメモリ使用量で最速。わずかな品質のトレードオフがあります。`bitsandbytes`が必要です（Linuxのみ）。                            | 12–16GB      | ほとんどのユーザー向け。高速な実験、限られたVRAMの場合      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **フルファインチューニング** | すべてのモデルパラメータを更新します。最大限の品質を提供しますが、メモリと計算量の使用量が最も高くなります。                                    | 40GB+        | 最大限の品質が必要な場合。研究用途、大容量のVRAMがある場合           |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | ベースモデルを固定した状態で小さなアダプター行列をトレーニングします。3～5倍高速で、フル品質の約95～98%を実現します。                         | 24–32GB      | 上級ユーザー、複数のアダプター、より多くのVRAMが必要な場合    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(Linuxのみ)*             | **QLoRA**       | 4ビット量子化＋LoRAアダプターを使用します。メモリ使用量が最も少なく、最速で、品質のトレードオフはわずかです。`bitsandbytes`（Linuxのみ）が必要です。                            | 12–16GB      | ほとんどのユーザー、迅速な実験、限られたVRAMの場合      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **フルファインチューニング** | すべてのモデルパラメータを更新します。最高品質ですが、メモリと計算量の使用量が最も多くなります。                                    | 40GB以上        | 最高品質、研究用途、大容量VRAMを持つ場合           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **注:** フルファインチューニング（`train_full_finetuning.py`）には64GBを超えるシステムRAMが必要になる場合があり、このデバイスでは実行できない可能性があります。代わりにLoRAまたはQLoRAの使用を検討してください。
+> **注:** フルファインチューニング（`train_full_finetuning.py`）は、64GBを超えるシステムRAMを必要とする場合があり、このデバイスでは実行できない可能性があります。代わりにLoRAまたはQLoRAの使用をご検討ください。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **注:** フルファインチューニング（`train_full_finetuning.py`）には64GBを超えるシステムRAMが必要になる場合があり、このデバイスでは実行できない可能性があります。代わりにLoRAの使用を検討してください。
+> **注:** フルファインチューニング（`train_full_finetuning.py`）は、64GBを超えるシステムRAMを必要とする場合があり、このデバイスでは実行できない可能性があります。代わりにLoRAの使用をご検討ください。
 <!-- @os:end -->
 <!-- @device:end -->
 
-希望する`Training method`を選択し、対応するスクリプトをダウンロードして、仮想環境をアクティブにしたまま以下のコマンドを使用して実行します。
+好みの`Training method`を選択し、対応するスクリプトをダウンロードして、仮想環境を有効にした状態でコマンドを使用して実行してください。
 
 ```python
 python3 train_<method_name>.py.
 ```
 
-## ファインチューニングしたモデルを使用する
+## ファインチューニング済みモデルの使用
 
 ### フルファインチューニング後
 
@@ -387,11 +389,11 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **注:**  
-- モデルディレクトリ名（`output-gemma-3-4b-full`、`output-gemma-3-4b-qlora`）が、トレーニングによって実際に出力されたフォルダと一致していることを確認してください。  
+- モデルディレクトリ名（`output-gemma-3-4b-full`、`output-gemma-3-4b-qlora`）が、トレーニングで実際に出力されたフォルダと一致していることを確認してください。  
 - QLoRAではなくLoRAを使用した場合は、パスを適宜置き換えてください。  
 - 一部のGemmaモデルでは、`from_pretrained`に`trust_remote_code=True`を指定する必要があります。関連する警告が表示された場合は追加してください。
 
-その他のカスタム設定（パディングトークン、デバイスなど）については、トレーニングに使用したスクリプトを参照してください。
+パディングトークンやデバイスなど、その他のカスタム設定については、トレーニングに使用したスクリプトを参照してください。
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -467,16 +469,18 @@ required = [
     "config.json",
     "tokenizer_config.json",
     "tokenizer.json",
-    "model.safetensors.index.json",
 ]
 missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
 if missing:
     print(f"FAIL: Missing required files: {missing}")
     sys.exit(1)
 
+# Weights may be saved as a single model.safetensors or, when the model
+# exceeds max_shard_size, as model-*.safetensors shards plus an index.
+single = os.path.exists(os.path.join(out_dir, "model.safetensors"))
 shards = glob.glob(os.path.join(out_dir, "model-*.safetensors"))
-if not shards:
-    print("FAIL: No sharded model safetensors files found")
+if not single and not shards:
+    print("FAIL: No model safetensors weights found")
     sys.exit(1)
 
 print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
@@ -487,7 +491,7 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ## カスタマイズガイド
 
-### 独自のデータセットを使用する
+### 独自のデータセットの使用
 
 すべてのスクリプトは同じデータセット形式を使用します。読み込みセクションを置き換えてください。
 
@@ -517,11 +521,11 @@ dataset = dataset.map(format_instruction)
 
 **ローカルJSON/JSONLファイルのデータセット形式:**
 
-この方法を使用する場合、解析エラーを避けるためにJSONファイルが正しく構造化されていることを確認してください。 
+この方法を使用する場合、解析エラーを避けるために、JSONファイルが正しく構造化されていることを確認してください。
 
 以下のガイドラインに従う必要があります。
-* **ファイル形式:** JSONファイルは、適切な構造と構文を確保するために、統合開発環境（IDE）内でフォーマットする必要があります。
-* **必須キー:** カスタムJSONファイルには`instruction`および`response`キーが含まれている必要があります。これらのキーは、この方法が正しく機能するために不可欠です。
+* **ファイルの形式:** JSONファイルは、適切な構造と構文を確保するために、統合開発環境（IDE）内でフォーマットする必要があります。
+* **必須キー:** カスタムJSONファイルには、`instruction`および`response`のキーが含まれている必要があります。これらのキーは、メソッドが正しく機能するために不可欠です。
 ```json
 [
   {
@@ -534,15 +538,15 @@ dataset = dataset.map(format_instruction)
   }
 ]
 ```
-**Hugging Face Hubデータセットのデータセット形式**
+**Hugging Faceハブデータセットのデータセット形式**
 
-Hugging Faceのデータセットを利用する場合、シームレスな統合を促進するために、データセットが正しく構造化されていることを確認してください。 
+Hugging Faceのデータセットを利用する場合、シームレスな統合を実現するために、データセットが正しく構造化されていることを確認してください。
 
-以下のガイドラインに従う必要があります。
-* **指示・応答ペア:** `instruction-response`ペアを含むデータセットに焦点を当ててください。この構造は、意図した機能にとって不可欠です。
-* **カスタムキーの変更:** データセットが`instruction-response`構造に準拠していない場合、`format_instruction()`関数を変更するオプションがあります。これにより、必要に応じて特定のキーに対応できます。
+以下のガイドラインに従ってください。
+* **Instruction-Responseペア:** `instruction-response`のペアを含むデータセットに焦点を当ててください。この構造は、意図した機能を実現するために不可欠です。
+* **カスタムキーの変更:** データセットが`instruction-response`の構造に準拠していない場合、`format_instruction()`関数を変更するオプションがあります。これにより、必要に応じて特定のキーに対応させることができます。
 
-調整例: データセットの出力を調整する必要がある場合は、要件に合わせて`format_instruction()`関数内の応答セクションを変更できます。
+調整例: データセットの出力を調整する必要がある場合は、format_instruction()関数内のレスポンス部分を、要件に合わせて変更できます。
 ```python
 def format_instruction(example):
     return {
@@ -554,16 +558,16 @@ def format_instruction(example):
 ```
 **CSVファイルのデータセット形式**
 
-CSVファイル形式を使用するスクリプトに対応させるには、CSVファイルに`instruction`および`response`という名前の列が含まれていることを確認する必要があります。 
+CSVファイル形式を使用するスクリプトに対応するには、CSVファイルに`instruction`および`response`という名前の列が含まれていることを確認する必要があります。
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
 "Your second instruction here","Expected response here"
 ```
 
-### トレーニングパラメータを調整する
+### トレーニングパラメータの調整
 
-トレーニングスクリプトを編集し、目的に合わせて変数を変更します。**学習率**（`LR`）、**エポック数**（`EPOCHS`）、**バッチサイズ**（`BATCH_SIZE`）、**勾配累積**（`GRAD_ACCUM_STEPS`）、そしてLoRA/QLoRAの場合は**ランク**（`LORA_R`）です。より高速な実行には、エポック数を少なく、学習率（LR）を高く設定してください。より高い品質を得るには、エポック数を多く、LRを低く設定してください。メモリ不足エラーが発生した場合は、バッチサイズまたはシーケンス長を減らしてください。
+トレーニングスクリプトを編集し、目的に合わせて変数を変更してください: **学習率**（`LR`）、**エポック数**（`EPOCHS`）、**バッチサイズ**（`BATCH_SIZE`）、**勾配累積**（`GRAD_ACCUM_STEPS`）、およびLoRA/QLoRAの**ランク**（`LORA_R`）。より高速な実行にはエポック数を減らし、学習率（LR）を高く設定してください。より高品質な結果を得るには、エポック数を増やし、LRを低く設定してください。メモリ不足エラーが発生した場合は、バッチサイズまたはシーケンス長を減らしてください。
 ### メモリ最適化のヒント
 
 メモリ不足エラーが発生した場合:
@@ -574,7 +578,7 @@ BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
 ```
 
-**2. シーケンス長を短くする:**
+**2. シーケンス長を減らす:**
 ```python
 max_seq_length=256  # Instead of 512
 ```
@@ -593,7 +597,7 @@ model.gradient_checkpointing_enable()
 
 ## モニタリングとデバッグ
 
-### GPU メモリの監視
+### GPU メモリを監視する
 
 ```bash
 # Check ROCm GPU status
@@ -603,22 +607,22 @@ watch -n 1 amd-smi
 rocm-smi --showmeminfo vram
 ```
 
-### (オプション) Weights & Biases による実験の追跡
+### (オプション) Weights & Biases で実験を追跡する
 
-[Weights & Biases](https://wandb.ai) にランとメトリクスをログするには:
+実行結果とメトリクスを [Weights & Biases](https://wandb.ai) にログ記録するには:
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-トレーニングスクリプトでは、トレーナー設定内で `report_to="wandb"` を設定し、必要に応じて `run_name="your-experiment-name"` も設定してください。Wandb を使用したくない場合は、`report_to` をデフォルトのままにするか `"none"` に設定してください。
+トレーニング スクリプトでは、トレーナーの設定で `report_to="wandb"` を設定し、必要に応じて `run_name="your-experiment-name"` も設定します。Wandb を使用しない場合は、`report_to` をデフォルトのままにするか、`"none"` に設定してください。
 
 ### よくある問題
 
 #### メモリ不足 (OOM)
 
-**解決策:** バッチサイズを減らす、または QLoRA を使用する
+**解決策:** バッチサイズを減らす、および/または QLoRA を使用する
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16
@@ -636,20 +640,20 @@ LR = 5e-4  # Try higher
 
 #### トレーニングが遅い
 
-**解決策:** メモリに余裕がある場合はバッチサイズを増やす
+**解決策:** メモリに余裕があればバッチサイズを増やす
 ```python
 BATCH_SIZE = 8
 ```
 ## 次のステップ
 
-ファインチューニングに成功したら、モデルをさらに活用するために以下の次のステップを検討してください:
+ファインチューニングに成功したら、モデルをさらに活用するために、以下の次のステップを検討してください。
 
-1. ホールドアウトのテストデータで十分に**評価**を行い、汎化性能を測定し、過学習を回避します。
-2. 精度、速度、メモリのトレードオフを改善するために、さまざまなハイパーパラメータ値を試して**実験**します。
-3. 再現可能な研究のために、Weights & Biases ですべての実験(および対応するメトリクス)を**追跡**します。
-4. 独自のカスタムデータセットでトレーニングを**試し**、ユースケースに合わせてモデルを特化させます。
-5. vLLM などの効率的なバックエンドを使用して、互換性のあるハードウェア上で高速な推論のためにファインチューニング済みモデルを**デプロイ**します。
-6. プロンプトエンジニアリング、混合精度、より長いシーケンス長などの高度な技術を**探求**します。
-7. 異なるタスクやドメイン向けに複数の LoRA アダプターを**トレーニング**し、必要に応じて切り替えます。
+1. **評価**: 保留しておいたテストデータで十分に評価し、汎化性能を測定し、過学習を防ぎます。
+2. **実験**: さまざまなハイパーパラメータの値を試し、精度、速度、メモリのトレードオフを最適化します。
+3. **追跡**: 再現性のある研究のために、Weights & Biases であらゆる実験(および対応するメトリクス)を記録します。
+4. **試行**: 独自のカスタム データセットでトレーニングを行い、ユース ケースに合わせてモデルを適応させます。
+5. **デプロイ**: 互換性のあるハードウェア上で vLLM などの効率的なバックエンドを使用し、高速な推論のためにファインチューニング済みモデルをデプロイします。
+6. **探求**: プロンプト エンジニアリング、混合精度、より長いシーケンス長などの高度な技術を試します。
+7. **トレーニング**: 異なるタスクやドメイン向けに複数の LoRA アダプターをトレーニングし、必要に応じて切り替えます。
 
 ---

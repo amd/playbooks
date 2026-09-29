@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA هو إطار عمل مفتوح المصدر من AMD لبناء وكلاء الذكاء الاصطناعي الذين يعملون محليًا على أجهزة AMD بتسريع Ryzen AI.
+GAIA هو إطار عمل مفتوح المصدر من AMD لبناء وكلاء الذكاء الاصطناعي الذين يعملون محليًا على أجهزة AMD مع تسريع Ryzen AI.
 
 #### تثبيت GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. على نظام Windows، افتح موجّه أوامر في الدليل الذي تختاره واتّبع الأوامر لإنشاء venv.
+1. على Windows، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر لإنشاء venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. على نظام Linux، افتح موجّه أوامر في الدليل الذي تختاره واتّبع الأوامر لإنشاء venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. على Linux، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر لإنشاء venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. على نظام Windows، افتح موجّه أوامر في الدليل الذي تختاره واتّبع الأوامر لإنشاء venv.
+1. على Windows، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر لإنشاء venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. على نظام Linux، افتح موجّه أوامر في الدليل الذي تختاره واتّبع الأوامر لإنشاء venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. على Linux، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر لإنشاء venv.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -99,7 +99,7 @@ pip install amd-gaia
 gaia init
 ```
 
-يقوم هذا بتثبيت Lemonade Server، وتنزيل النماذج الافتراضية، والتحقق من صحة الإعداد.
+هذا يقوم بتثبيت Lemonade Server، وتنزيل النماذج الافتراضية، والتحقق من صحة الإعداد.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,12 +281,12 @@ fi
 
 #### التحقق من التثبيت
 
-تحقق من أن الإصدار GAIA v0.16.2 أو أحدث مثبّت:
+تحقق من تثبيت GAIA v0.16.2 أو أحدث:
 
 ```bash
 gaia --version
 ```
 
-> **مهم**: تأكد من تشغيل Lemonade Server قبل استخدام GAIA. يتطلب GAIA تشغيل Lemonade Server يدويًا.
+> **مهم**: تأكد من أن Lemonade Server قيد التشغيل قبل استخدام GAIA. يتطلب GAIA بدء تشغيل Lemonade Server يدويًا.
 
 لمزيد من المعلومات، راجع [وثائق GAIA](https://amd-gaia.ai).

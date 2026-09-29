@@ -12,11 +12,11 @@ SPDX-License-Identifier: MIT
 
 ## Oversigt
 
-[**OpenClaw**](https://openclaw.ai/) er en autonom AI-agent, der kan skrive og køre kode, administrere filer og arbejde sig igennem komplekse opgaver med flere trin på dine vegne. I modsætning til en chatassistent, der blot besvarer spørgsmål, udfører OpenClaw reelle handlinger på dit system, hvilket betyder, at den har brug for en hurtig og kompetent AI-backend, der kan følge med i en krævende agentloop.
+[**OpenClaw**](https://openclaw.ai/) er en autonom AI-agent, der kan skrive og køre kode, administrere filer og udføre komplekse flertrinsopgaver på dine vegne. I modsætning til en chatassistent, der blot besvarer spørgsmål, udfører OpenClaw reelle handlinger på dit system, hvilket betyder, at den har brug for en hurtig, kapabel AI-backend, der kan følge med i en krævende agent-loop.
 
-[**Lemonade Server**](https://lemonade-server.ai/) er den backend. Det er en open source lokal inferensserver, der kører GenAI-modeller direkte på din hardware og gør dem tilgængelige gennem den branchestandard OpenAI API.
+[**Lemonade Server**](https://lemonade-server.ai/) er den backend. Det er en open source lokal inferensserver, der kører GenAI-modeller direkte på din hardware og eksponerer dem gennem branchestandarden OpenAI API.
 
-Sammen udgør de en fuldt lokal AI-agentstack: Lemonade håndterer modelinferens, og OpenClaw leverer agentloopet, der omdanner modeloutput til reelle handlinger.
+Sammen udgør de en fuldstændig lokal AI-agentstack: Lemonade håndterer modelinferens, og OpenClaw leverer agent-loopet, der omsætter modeloutput til reelle handlinger.
 
 > **Før du fortsætter:** OpenClaw er en meget autonom AI-agent. At give en AI-agent adgang til dit system kan resultere i uforudsigelige eller utilsigtede resultater. Fortsæt kun, hvis du forstår risiciene og er tryg ved, at autonom software handler på dine vegne.
 
@@ -24,7 +24,7 @@ Sammen udgør de en fuldt lokal AI-agentstack: Lemonade håndterer modelinferens
 
 ## Hvad du vil lære
 
-Når du er færdig med denne playbook, vil du kunne:
+Ved afslutningen af denne playbook vil du kunne:
 
 - Lære om **Lemonade Server**
 - **Installere OpenClaw** og **pege den mod Lemonade Server** som dens AI-backend.
@@ -33,9 +33,11 @@ Når du er færdig med denne playbook, vil du kunne:
 
 ---
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Indstilling af hukommelseskonfigurationen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Tjek for softwareopdateringer
@@ -46,14 +48,14 @@ Når du er færdig med denne playbook, vil du kunne:
 ## Installation af softwareforudsætninger
 
 <!-- @os:linux -->
-- En pc, der kører **Ubuntu 24.04+** eller en kompatibel Debian-baseret Linux-distribution med `apt-get`
+- En PC med **Ubuntu 24.04+** eller en kompatibel Debian-baseret Linux-distribution med `apt-get`
 - Mindst **12 GB RAM** (64 GB+ anbefales til større modeller)
 - [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Valgfrit, til sandboxing af OpenClaw)
 - **~10–30 GB ledig diskplads** til modelvægte
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- En pc, der kører **Windows 10/11**
+- En PC med **Windows 10/11**
 - Mindst **12 GB RAM** (64 GB+ anbefales til større modeller)
 - **~10–30 GB ledig diskplads** til modelvægte
 - [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Valgfrit, til sandboxing af OpenClaw)
@@ -73,7 +75,7 @@ lemonade --version
 
 ## Hent og indlæs den anbefalede model
 
-Den anbefalede model til denne playbook er **Qwen3.6-35B-A3B-GGUF** fra Unsloth, en stærk MoE-model med et kontekstvindue på 263k tokens, som passer godt til agentopgaver. Denne model bruger UD-Q4_K_XL-kvantisering. Hent den nu:
+Den anbefalede model til denne playbook er **Qwen3.6-35B-A3B-GGUF** fra Unsloth, en stærk MoE-model med et 263k-token kontekstvindue, der er velegnet til agentarbejdsbelastninger. Denne model bruger UD-Q4_K_XL-kvantisering. Hent den nu:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
@@ -81,6 +83,7 @@ lemonade pull Qwen3.6-35B-A3B-GGUF
 
 Indlæs den derefter med et stort kontekstvindue, og gem denne indstilling til fremtidige kørsler:
 
+<!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
 lemonade unload
@@ -88,9 +91,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end --> 
 
-Modellen har som standard en kontekstlængde på 262.144 tokens. Hvis du støder på fejl med manglende hukommelse (OOM), kan du overveje at reducere kontekstvinduet. Da Qwen3.6 dog udnytter udvidet kontekst til komplekse opgaver, anbefaler vi at bevare en kontekstlængde på mindst 128K tokens for at bevare tænkeevnen.
+Modellen har som standard en kontekstlængde på 262.144 tokens. Hvis du støder på out-of-memory (OOM)-fejl, kan du overveje at reducere kontekstvinduet. Da Qwen3.6 dog udnytter udvidet kontekst til komplekse opgaver, anbefaler vi at bevare en kontekstlængde på mindst 128K tokens for at bevare tænkefunktionerne.
 
-> **Tip: Deaktiver tænkning for hurtigere agentsvar:** Qwen3.6-35B-A3B kører som standard i tænketilstand, hvilket tilføjer latenstid før hvert svar. For agentloops akkumuleres denne overhead hurtigt. Repositoriet [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) indeholder en færdiglavet konfiguration, der deaktiverer tænkning. For at bruge den, download filen og importer den:
+> **Tip: Deaktiver tænkning for hurtigere agentsvar:** Qwen3.6-35B-A3B kører som standard i tænketilstand, hvilket tilføjer ventetid før hvert svar. For agent-loops ophober denne overhead sig hurtigt. Repoet [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) tilbyder en færdiglavet konfiguration, der deaktiverer tænkning. For at bruge den skal du downloade filen og importere den:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -233,7 +236,7 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## Opsætning af WSL
 
-Vi kører OpenClaw inde i WSL (anbefales) og forbinder den til Lemonade, som kører nativt på Windows. Dette giver dig et Linux-shellmiljø til OpenClaw, samtidig med at Lemonades GPU-acceleration bevares på Windows-siden.
+Vi kører OpenClaw inde i WSL (Anbefalet) og forbinder den til Lemonade, der kører nativt på Windows. Dette giver dig et Linux-shell-miljø til OpenClaw, mens Lemonades GPU-acceleration bevares på Windows-siden.
 
 ### Installer WSL og Ubuntu
 
@@ -249,7 +252,7 @@ Installer derefter Ubuntu:
 wsl --install -d Ubuntu-24.04
 ```
 
-### Aktivér systemd i WSL
+### Aktiver systemd i WSL
 
 Kør dette inde i Ubuntu-terminalen:
 
@@ -270,7 +273,7 @@ wsl
 
 ### Bro Lemonade fra Windows ind i WSL
 
-WSL2 kører i et virtuelt netværk. Lemonade på Windows binder til `127.0.0.1`, som WSL ikke kan nå direkte. En Windows-portproxy videresender trafik fra WSL-gatewayens IP til Windows-localhost.
+WSL2 kører i et virtuelt netværk. Lemonade på Windows binder til `127.0.0.1`, som WSL ikke kan nå direkte. En Windows-portproxy videresender trafik fra WSL-gateway-IP'en til Windows localhost.
 
 **Find din WSL-gateway-IP** (kør inde i WSL):
 
@@ -291,7 +294,7 @@ netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=1
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**Bekræft fra WSL**:
+**Verificer fra WSL**:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
@@ -316,22 +319,22 @@ Hvis du allerede har indlæst Qwen3.6-35B-A3B-GGUF-modellen i det foregående tr
 }
 ```
 
-#### Sådan holdes broen kørende efter en genstart
+#### Sådan holder du broen kørende efter en genstart
 
-Reglen for `netsh portproxy` overlever genstarter, men WSL-gateway-IP'en kan ændre sig efter `wsl --shutdown` eller en genstart. Når det sker, peger proxyen stadig på den gamle IP, og Lemonade bliver utilgængelig fra WSL. Hvis det sker, kan du bruge en af mulighederne nedenfor.
+Reglen for `netsh portproxy` overlever genstarter, men WSL-gateway-IP'en kan ændre sig efter `wsl --shutdown` eller en genstart. Når det sker, peger proxyen stadig på den gamle IP, og Lemonade bliver utilgængelig fra WSL. Hvis det sker, skal du bruge en af mulighederne nedenfor.
 
-**Mulighed 1 (anbefalet) — Reparér broen automatisk.** For at undgå at gøre dette manuelt hver gang kan du bruge en planlagt opgave, der tjekker broen ved hver opstart og login og kun genopbygger den, når gateway-IP'en er ændret. Se [guiden til automatisk reparation af Lemonade WSL-broen](assets/RepairLemonadeWslBridge.md).
+**Mulighed 1 (anbefalet) — Reparer broen automatisk.** For at undgå at gøre dette manuelt hver gang, kan du bruge en planlagt opgave, der tjekker broen ved hver opstart og login og kun genopbygger den, når gateway-IP'en er ændret. Se [vejledningen til automatisk reparation af Lemonade WSL-broen](assets/RepairLemonadeWslBridge.md).
 
 
-**Mulighed 2 — Reparér broen manuelt.** Først skal du hente den aktuelle WSL-gateway-IP ved at køre dette inde i WSL:
+**Mulighed 2 — Reparer broen manuelt.** Først skal du hente den aktuelle WSL-gateway-IP ved at køre dette inde i WSL:
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-Kopiér denne værdi; du vil bruge den i stedet for `<new-WSL-Gateway-IP>` nedenfor.
+Kopiér denne værdi; du skal bruge den i stedet for `<new-WSL-Gateway-IP>` nedenfor.
 
-Åbn derefter en **forhøjet PowerShell** (Kør som administrator), vis de eksisterende regler, slet kun den forældede Lemonade-regel, og tilføj en ny med den aktuelle IP:
+Åbn derefter en **forhøjet PowerShell** (Kør som administrator), list de eksisterende regler, slet kun den forældede Lemonade-regel, og tilføj en ny med den aktuelle IP:
 
 ```powershell
 netsh interface portproxy show all
@@ -339,13 +342,13 @@ netsh interface portproxy delete v4tov4 listenaddress=<old-WSL-Gateway-IP> liste
 netsh interface portproxy add v4tov4 listenaddress=<new-WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-I outputtet fra `show all` er den forældede Lemonade-regel den post, hvis connect-adresse er `127.0.0.1` på port `13305`; dens listen-adresse er din `<old-WSL-Gateway-IP>`. Ved at slette efter den adresse fjernes kun denne regel, mens eventuelle andre port-proxy-regler på din maskine forbliver urørte.
+I outputtet fra `show all` er den forældede Lemonade-regel den post, hvis connect-adresse er `127.0.0.1` på port `13305`; dens listen-adresse er din `<old-WSL-Gateway-IP>`. Ved at slette efter denne adresse fjerner du kun denne regel og lader alle andre portproxy-regler på din maskine være urørte.
 
-Firewall-reglen, du tilføjede under opsætningen, er bundet til port `13305` (ikke IP'en), så den bliver ved med at virke og skal ikke genoprettes.
+Den firewallregel, du tilføjede under opsætningen, er bundet til port `13305` (ikke IP'en), så den fortsætter med at fungere og skal ikke genskabes.
 
 > **Anbefaling:** For at undgå gateway-problemer anbefaler vi kraftigt følgende shell-konfiguration:
 > - **Windows-kommandoer** bør udføres i **PowerShell**
-> - **WSL-distro-kommandoer** bør udføres i en **kommandoprompt** (kørt som **administrator**)
+> - **WSL-distro-kommandoer** bør udføres i en **Kommandoprompt** (kørt som **Administrator**)
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -401,11 +404,11 @@ finally {
 ---
 <!-- @os:end -->
 
-## Installér og konfigurér OpenClaw
+## Installer og Konfigurer OpenClaw
 
-### Installér OpenClaw
+### Installer OpenClaw
 <!-- @os:windows -->
-> Kør kommandoerne i dette afsnit inde i din **WSL-terminal**.
+> Kør kommandoerne i denne sektion inde i din **WSL-terminal**.
 <!-- @os:end -->
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
@@ -479,9 +482,9 @@ finally {
 <!-- @os:end -->
 
 
-### Konfigurér OpenClaw til at bruge Lemonade
+### Konfigurer OpenClaw til at bruge Lemonade
 
-Kør OpenClaws ikke-interaktive onboarding.
+Kør OpenClaw's ikke-interaktive onboarding.
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -521,9 +524,9 @@ openclaw onboard \
 ```
 <!-- @os:end -->
 
-Denne kommando skriver OpenClaws konfiguration til `~/.openclaw/openclaw.json`.
+Denne kommando skriver OpenClaw's konfiguration til `~/.openclaw/openclaw.json`.
 
-> **Størrelse af OpenClaws context window:** OpenClaws komprimering udløses, når `contextTokens > contextWindow − reserveTokens`. Standardværdien for `reserveTokensFloor` er 20.000 tokens, en bundgrænse, der tilsidesætter `reserveTokens`, når den er lavere, så enhver modelkontekst under ~37k vil udløse en uendelig komprimeringssløjfe. Sæt en lav reserve og deaktivér bundgrænsen én gang i din konfiguration, så gælder det for hver model, ingen behov for indstilling pr. model:
+> **OpenClaw context window-størrelse:** OpenClaw's compaction udløses, når `contextTokens > contextWindow − reserveTokens`. Standardværdien for `reserveTokensFloor` er 20.000 tokens, et gulv, der tilsidesætter `reserveTokens`, når denne er lavere, så enhver model-context under ~37k vil udløse en uendelig compaction-loop. Angiv en lav reserve og deaktiver gulvet én gang i din konfiguration, så gælder det for alle modeller, ingen tuning pr. model er nødvendig:
 >
 > ```json
 > "compaction": {
@@ -532,13 +535,13 @@ Denne kommando skriver OpenClaws konfiguration til `~/.openclaw/openclaw.json`.
 > }
 > ```
 >
-> `reserveTokensFloor` er en *bundgrænse* (minimumsbeskyttelse), ikke selve reserven, så det at sætte kun bundgrænsen har ingen effekt. `reserveTokensFloor: 0` deaktiverer beskyttelsen, så den lavere `reserveTokens` accepteres.
+> `reserveTokensFloor` er et *gulv* (minimumsgrænse), ikke reserven selv, at angive kun gulvet har ingen effekt. `reserveTokensFloor: 0` deaktiverer grænsen, så den lavere `reserveTokens` accepteres.
 >
-> **Hvornår denne konfiguration skal anvendes:** Brug denne konfiguration, hvis din models effektive context window er under ~37k, enten fordi modellen er lille (f.eks. 8k, 16k, 32k), eller fordi du med vilje har begrænset den til en lavere værdi (f.eks. indlæser en 128k-model, men sætter konteksten til 16k i Lemonade). Uden det går OpenClaw ind i en uendelig komprimeringssløjfe ved opstart.
+> **Hvornår skal dette anvendes:** Brug denne konfiguration, hvis din models effektive context window er under ~37k, enten fordi modellen er lille (f.eks. 8k, 16k, 32k), eller fordi du bevidst har begrænset den til en lavere værdi (f.eks. indlæser en 128k-model, men sætter context til 16k i Lemonade). Uden dette går OpenClaw ind i en uendelig compaction-loop ved opstart.
 >
-> **Modeller med stor kontekst ved fuld kontekst:** Du kan springe dette helt over. Standardværdierne fungerer fint, komprimering vil ske godt før vinduet fyldes op, og modellen har rigelig plads til at generere lange svar. Hvis du alligevel anvender det, skal du være opmærksom på, at `reserveTokens: 4096` begrænser svarlængden til ~4k tokens, hvilket kan afskære lang filgenerering eller detaljerede planer.
+> **Store context-modeller ved fuld context:** Du kan springe dette helt over. Standardværdierne fungerer fint, compaction træder i kraft godt før vinduet fyldes, og modellen har rigelig plads til at generere lange svar. Hvis du alligevel anvender det, skal du være opmærksom på, at `reserveTokens: 4096` begrænser svarlængden til ~4k tokens, hvilket kan afkorte lange filgenereringer eller detaljerede planer.
 >
-> **Hvor dette skal tilføjes:** Placér blokken `compaction` inde i `agents.defaults` i din `openclaw.json` (normalt i `~/.openclaw/openclaw.json`):
+> **Hvor skal dette tilføjes:** Placér `compaction`-blokken inde i `agents.defaults` i din `openclaw.json` (normalt på `~/.openclaw/openclaw.json`):
 >
 > ```json
 > {
@@ -558,9 +561,9 @@ Denne kommando skriver OpenClaws konfiguration til `~/.openclaw/openclaw.json`.
 > ```
 >
 > Resten af din konfiguration (gateway, channels, models osv.) forbliver uændret, kun nøglen `compaction` skal tilføjes.
-### (Anbefalet) Aktiver Docker Sandboxing
+### (Anbefalet) Aktivér Docker Sandboxing
 
-OpenClaw kan dirigere alle agentens fil- og kodeoperationer gennem en isoleret Docker-container i stedet for at køre dem direkte på din host. Dette begrænser konsekvenserne af enhver utilsigtet handling til sandkassen og efterlader din værtsmaskines filsystem og netværk urørt.
+OpenClaw kan dirigere alle agent-fil- og kodeoperationer gennem en isoleret Docker-container i stedet for at køre dem direkte på din host. Dette begrænser konsekvenserne af en utilsigtet handling til sandboxen, så din hosts filsystem og netværk forbliver upåvirket.
 
 Byg sandbox-imaget én gang (Docker skal være installeret):
 
@@ -622,6 +625,11 @@ trap cleanup EXIT
 export DOCKER_CONFIG="$docker_config"
 printf '{ "auths": {} }\n' > "$DOCKER_CONFIG/config.json"
 
+# Docker Desktop injects its WSL cli-tools a few seconds after the distro boots.
+for i in $(seq 1 30); do
+  docker version >/dev/null 2>&1 && break
+  sleep 2
+done
 docker version
 
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -662,7 +670,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Kør dette for at tilføje nøglen `sandbox` inde i den eksisterende `agents.defaults`-blok i `~/.openclaw/openclaw.json`:
+Kør dette for at tilføje `sandbox`-nøglen inde i den eksisterende `agents.defaults`-blok i `~/.openclaw/openclaw.json`:
 
 ```bash
 cat > sandbox.patch.json5 <<JSON5
@@ -681,9 +689,9 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-Sandbox-containere har som standard **ingen netværksadgang**. Se [sandboxing-referencen](https://docs.openclaw.ai/gateway/sandboxing) for bind mounts og netværksoverstyringer.
+Sandbox-containere har som udgangspunkt **ingen netværksadgang**. Se [sandboxing-referencen](https://docs.openclaw.ai/gateway/sandboxing) for bind mounts og netværksoverstyringer.
 
-> #### Fejlfinding: Docker-tilladelse nægtet
+> #### Fejlfinding: Docker Permission Denied
 > 
 > Hvis du får "permission denied", når du kører Docker-kommandoer:
 > 
@@ -933,16 +941,16 @@ finally {
 <!-- @os:linux -->
 ## (Anbefalet) OpenClaw-integration med Firecrawl-tjenester
 
-[Firecrawl](https://docs.firecrawl.dev/introduction) leverer en selv-hostet web crawling- og indholdsudtrækningstjeneste, der kan omgå disse udfordringer og frigøre det fulde potentiale af OpenClaw-automatisering. 
+[Firecrawl](https://docs.firecrawl.dev/introduction) leverer en selv-hostet webcrawling- og indholdsudtrækningstjeneste, der kan omgå disse udfordringer og frigøre det fulde potentiale i OpenClaw-automatisering. 
 
-I denne opsætning kører OpenClaw som et sæt Docker-containere administreret med Podman. For at forenkle livscyklusstyring og automatisk opstart registrerer vi Firecrawl som en brugerniveau-`systemd`-tjeneste, der orkestrerer den underliggende Podman Compose-stak. Dette gør det muligt for OpenClaw at starte gateway'en, stoppe og verificere Firecrawl-tjenesten ved hjælp af standard `systemctl --user`-kommandoer i stedet for at interagere direkte med containerne. 
+I denne opsætning kører OpenClaw som et sæt Docker-containere, der administreres med Podman. For at forenkle livscyklushåndteringen og automatisk opstart registrerer vi Firecrawl som en brugerniveau `systemd`-tjeneste, der orkestrerer den underliggende Podman Compose-stak. Dette gør det muligt for OpenClaw at starte gatewayen, stoppe og verificere Firecrawl-tjenesten ved hjælp af standard `systemctl --user`-kommandoer i stedet for at interagere direkte med containerne. 
 
 For at holde det enkelt har vi opdelt hele processen i fire trin:
 
 ---
 
-### 1. Registrer systemtjenesten
-Naviger til systemd's brugerkonfigurationsmappe:
+### 1. Registrér systemtjenesten
+Naviger til systemd-brugerkonfigurationsmappen:
 ```bash
 cd ~/.config/systemd/user
 ```
@@ -989,7 +997,7 @@ ExecStop=/usr/bin/podman compose -f openclaw-compose.yaml down
 [Install]
 WantedBy=default.target
 ```
-På dette tidspunkt er tjenesten blevet defineret, men endnu ikke registreret hos `systemd`. 
+På dette tidspunkt er tjenesten defineret, men endnu ikke registreret hos `systemd`. 
 Sørg for, at filnavnet nøjagtigt matcher det, du oprettede ovenfor, og kør derefter:
 ```bash
 systemctl --user daemon-reload
@@ -1001,15 +1009,15 @@ Hvis det lykkes, bør du se følgende output:
 
  `default.target.wants/` indeholder symbolske links til tjenester, der er konfigureret til at starte automatisk.
 
-### 2. Konfigurer Firecrawl
+### 2. Konfigurér Firecrawl
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) er ideel for dem, der har brug for fuld kontrol over deres scraping- og databehandlingsmiljøer, men medfører til gengæld ekstra vedligeholdelse og konfigurationsarbejde.
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) er ideel for dem, der har brug for fuld kontrol over deres scraping- og databehandlingsmiljøer, men kommer med den ulempe, at det kræver ekstra vedligeholdelse og konfiguration.
 
-Start med at klone repositoriet:
+Start med at klone repositoryet:
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-Opret `.env` i rodmappen `/firecrawl`: 
+Opret en `.env`-fil i mappen `/firecrawl`: 
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1018,9 +1026,9 @@ HOST=0.0.0.0
 # ===== Firecrawl =====
 # FIRECRAWL_API_KEY="" # optional
 ```
-### 3. Implementer OpenClaw med Podman Compose
+### 3. Implementér OpenClaw med Podman Compose
 
-Før du fortsætter, skal du sikre dig, at du har hentet det nyeste OpenClaw Docker-image:
+Inden du fortsætter, skal du sikre dig, at du har hentet det seneste OpenClaw Docker-image:
 ```bash
 podman pull ghcr.io/openclaw/openclaw:latest
 ```
@@ -1030,39 +1038,39 @@ Når det er gjort, skal du downloade OpenClaw Compose-filen [openclaw-compose.ya
 
 > Du kan altid udvide stakken ved at tilføje yderligere Firecrawl-tjenester efter behov. Den fulde liste over tilgængelige tjenester findes i den officielle [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
 
-### 4. Start OpenClaw-tjenesten via Firecrawl 
+### 4. Start OpenClaw-tjenesten gennem Firecrawl 
 
-Før du overdrager kontrollen til `systemd`, skal du validere, at alt fungerer korrekt ved at køre stakken manuelt:
+Inden du overdrager kontrollen til `systemd`, skal du validere, at alt fungerer korrekt ved at køre stakken manuelt:
 ```bash
 podman compose -f openclaw-compose.yaml up -d
 ```
-Hvis alt er konfigureret korrekt, bør du se OpenClaw-containeren starte op, og dit kommandolinjeoutput bør ligne dette:
+Hvis alt er konfigureret korrekt, bør du se OpenClaw-containeren starte op, og dit kommandolinje-output bør se nogenlunde sådan ud:
 <p align="center">
   <img src="assets/openclaw_health_verification.png" width="500" height="400" />
 </p>
 
-Når du har verificeret dette, skal du lukke stakken ned igen, før du fortsætter:
+Når det er verificeret, skal du lukke stakken ned igen, før du fortsætter:
 ```bash
 podman compose -f openclaw-compose.yaml down
 ```
-Før du starter tjenesten, skal du sikre dig, at der er sat korrekt ejerskab og rettigheder på mappen `firecrawl` og dens `.env`-fil. 
+Inden du starter tjenesten, skal du sikre dig, at det korrekte ejerskab og de korrekte rettigheder er sat på mappen `firecrawl` og dens `.env`-fil. 
 Dette er afgørende for, at tjenesten kan skrive dine legitimationsoplysninger ved opstart.
 ```bash
 sudo chown ${USER}:${USER} ~/firecrawl/.env
 chmod 644 ~/firecrawl/.env
 ```
-Nu hvor alt er valideret, skal du starte tjenesten via `systemd`:
+Nu hvor alt er valideret, kan du starte tjenesten gennem `systemd`:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[OpenClaw-handlingerne](https://docs.openclaw.ai/) er tilgængelige fra den interaktive container, og webdashboardet er tilgængeligt på samme host og port på http://127.0.0.1:18789.
+[OpenClaw-handlingerne](https://docs.openclaw.ai/) er tilgængelige inde fra den interaktive container, og Web Dashboard er tilgængeligt på samme host og port på http://127.0.0.1:18789.
 <p align="center">
   <img src="assets/OpenClawWebUI-PodmanLaunch.png" width="500" height="500" />
 </p>
 
-### Sådan får du din `OPENCLAW_GATEWAY_TOKEN`
+### Sådan får du dit `OPENCLAW_GATEWAY_TOKEN`
 
-Når tjenesten er oppe at køre, vil du bemærke, at der er oprettet en ny `.openclaw`-mappe i din hjemmemappe (~/.openclaw). Denne mappe er som standard låst, så du skal låse den op for at hente din gateway-token.
+Når tjenesten er oppe at køre, vil du bemærke en ny `.openclaw`-mappe oprettet i din hjemmemappe (~/.openclaw). Denne mappe er som udgangspunkt låst, så du skal låse den op for at hente din gateway-token.
 
 1. Giv adgang til mappen:
 ```bash
@@ -1076,13 +1084,13 @@ Find værdien for `OPENCLAW_GATEWAY_TOKEN` i outputtet.
 
 3. Åbn gateway-dashboardet i din browser på http://127.0.0.1:18789. Indsæt din token, når du bliver bedt om at autentificere.
 
-For at stoppe tjenesten skal du køre:
+For at stoppe tjenesten, kør:
 ```bash
 systemctl --user stop firecrawl.service
 ```
 <!-- @os:end -->
 ---
-## Start OpenClaw Gateway
+## Start OpenClaw Gateway'en
 
 Gatewayen er den OpenClaw-proces, der styrer agent-loopet og betjener dashboardet:
 
@@ -1215,25 +1223,25 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-For at åbne dashboardet skal du køre dette i en anden terminal, mens gatewayen stadig kører:
+Kør følgende i en anden terminal, mens gatewayen stadig kører, for at åbne dashboardet:
 
 ```bash
 openclaw dashboard
 ```
 
-Fordi gatewayen binder til loopback, autentificerer dashboardet automatisk, når det åbnes fra den samme maskine, og der kræves ingen tokenindtastning eller enhedsgodkendelse for lokal adgang. Du bør se OpenClaw-dashboardet med din Lemonade-model opført som den aktive backend.
+Fordi gatewayen binder til loopback, godkendes dashboardet automatisk, når det åbnes fra samme maskine, der kræves ingen token-indtastning eller enhedsgodkendelse for lokal adgang. Du bør se OpenClaw-dashboardet med din Lemonade-model angivet som den aktive backend.
 
-> Hvis du har aktiveret sandboxing, kan du bekræfte det ved at bede agenten om at `run hostname` fra dashboardet. Hvis du ser et kort container-id i stedet for din maskines værtsnavn, virker sandboxen.
+> Hvis du har aktiveret sandboxing, kan du bekræfte det ved at bede agenten om at `run hostname` fra dashboardet. Hvis du ser et kort container-ID i stedet for maskinens hostnavn, fungerer sandboxen korrekt.
 
-**Tillykke, du har bygget en fuldt lokal AI-agentstak fra bunden.**
+**Tillykke, du har bygget en fuldt ud lokal AI-agentstack fra bunden.**
 
-> **Har du brug for gateway-tokenet?** Kør `openclaw dashboard --no-open` for at udskrive dashboard-URL'en med tokenet indlejret (det forsøger også at kopiere det til din udklipsholder). Alternativt findes tokenet under `gateway.auth.token` i `~/.openclaw/openclaw.json`.
+> **Mangler du gateway-tokenet?** Kør `openclaw dashboard --no-open` for at udskrive dashboard-URL'en med tokenet indlejret (den forsøger også at kopiere det til udklipsholderen). Alternativt findes tokenet under `gateway.auth.token` i `~/.openclaw/openclaw.json`.
 
 **Adgang til dashboardet fra en anden enhed (via SSH-tunnel)**
 
-Hvis OpenClaw kører på en fjernmaskine, kan du tilgå dashboardet fra din lokale maskine gennem en SSH-tunnel. Tunnelen videresender gateway-porten (`18789`), så din lokale browser kan kommunikere med den fjerne gateway over `127.0.0.1`.
+Hvis OpenClaw kører på en fjernmaskine, kan du tilgå dets dashboard fra din lokale maskine gennem en SSH-tunnel. Tunnelen videresender gateway-porten (`18789`), så din lokale browser kan kommunikere med den fjerne gateway over `127.0.0.1`.
 
-1. Fra din **lokale maskine** skal du oprette forbindelse til fjernmaskinen én gang og acceptere fingeraftryksprompten, så værten tilføjes til dine kendte værter:
+1. Fra din **lokale maskine** skal du oprette forbindelse til fjernmaskinen én gang og acceptere fingerprint-prompten, så værten tilføjes til dine kendte hosts:
 
    ```bash
    ssh user@<host-ip>
@@ -1255,9 +1263,9 @@ Hvis OpenClaw kører på en fjernmaskine, kan du tilgå dashboardet fra din loka
    openclaw dashboard --no-open
    ```
 
-   Dette udskriver dashboard-URL'en med tokenet indlejret; kopiér tokenet for at logge ind. (Tokenet gemmes også under `gateway.auth.token` i `~/.openclaw/openclaw.json`.)
+   Dette udskriver dashboard-URL'en med tokenet indlejret; kopier tokenet for at logge ind. (Tokenet er også gemt under `gateway.auth.token` i `~/.openclaw/openclaw.json`.)
 
-> **Godkendelse af en fjernenhed:** Når du åbner dashboardet fra en anden maskine eller telefon, kan browseren vise et anmodnings-id. På **fjernmaskinen** skal du liste de afventende anmodninger:
+> **Godkendelse af en fjernenhed:** Når du åbner dashboardet fra en anden maskine eller telefon, viser browseren muligvis et anmodnings-ID. På **fjernmaskinen** skal du liste de afventende anmodninger:
 > ```bash
 > openclaw devices list
 > ```
@@ -1265,7 +1273,7 @@ Hvis OpenClaw kører på en fjernmaskine, kan du tilgå dashboardet fra din loka
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> Dette er kun nødvendigt for fjern- eller sekundære enheder; loopback-adgang fra den samme maskine autentificerer automatisk. Se dokumentationen [Remote Access](https://docs.openclaw.ai/gateway/remote) for flere detaljer.
+> Dette er kun nødvendigt for fjern- eller sekundære enheder, loopback-adgang fra samme maskine godkendes automatisk. Se dokumentationen om [Fjernadgang](https://docs.openclaw.ai/gateway/remote) for flere detaljer.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1275,47 +1283,47 @@ Hvis OpenClaw kører på en fjernmaskine, kan du tilgå dashboardet fra din loka
 
 ## Valgfrit: Tilslut en kommunikationskanal
 
-Når gatewayen kører, kan du tilgå din lokale agent fra enhver enhed. Vælg den mulighed, der passer til din opsætning. OpenClaw understøtter [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) og andre kanaler, se den fulde liste på [docs.openclaw.ai](https://docs.openclaw.ai).
+Når gatewayen kører, kan du tilgå din lokale agent fra enhver enhed. Vælg den løsning, der passer til din opsætning. OpenClaw understøtter [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) og andre kanaler, se den fulde liste på [docs.openclaw.ai](https://docs.openclaw.ai).
 
 ---
 
 ### Mulighed A: Discord
 
-Discord kræver en server, hvor **du har administratoradgang** for at tilføje en bot. Hvis du deler servere, men ikke ejer en, kan du bruge mulighed B (Telegram) i stedet.
+Discord kræver en server, hvor **du har administratoradgang** for at tilføje en bot. Hvis du deler servere, men ikke ejer en, skal du bruge Mulighed B (Telegram) i stedet.
 
 #### Opret en Discord-konto og -server
 
-Hvis du ikke har en Discord-konto, kan du tilmelde dig på [discord.com](https://discord.com). Du skal også bruge en server, hvor du er administrator; opret én ved at klikke på **+**-ikonet i Discord-sidebaren og vælge **Create My Own**. En privat server er fint.
+Hvis du ikke har en Discord-konto, kan du oprette dig på [discord.com](https://discord.com). Du skal også bruge en server, hvor du er administrator, opret én ved at klikke på **+**-ikonet i Discord-sidepanelet og vælge **Create My Own**. En privat server er fint.
 
-#### Opret en Discord-applikation og bot
+#### Opret en Discord-applikation og -bot
 
 1. Gå til [Discord Developer Portal](https://discord.com/developers/applications), og klik på **New Application**. Giv den et navn (f.eks. "openclaw-bot").
-2. Klik på **Bot** i sidebaren. Angiv et brugernavn til botten.
-3. Stadig på Bot-siden skal du rulle ned til **Privileged Gateway Intents** og aktivere:
+2. Klik på **Bot** i sidepanelet. Angiv et brugernavn for botten.
+3. Bliv på Bot-siden, og rul ned til **Privileged Gateway Intents**, og aktiver:
    - **Message Content Intent** (påkrævet)
    - **Server Members Intent** (anbefalet)
-4. Rul tilbage op, og klik på **Reset Token** for at generere dit bot-token. Kopiér det.
+4. Rul tilbage op, og klik på **Reset Token** for at generere din bot-token. Kopiér den.
 
 #### Tilføj botten til din server
 
-1. Klik på **OAuth2/ URL Generator** i sidebaren.
+1. Klik på **OAuth2/ URL Generator** i sidepanelet.
 2. Under **Scopes** skal du aktivere `bot` og `applications.commands`.
 3. Under **Bot Permissions** skal du aktivere: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Kopiér den genererede URL, indsæt den i din browser, vælg din server, og bekræft. Botten bør nu vises i din servers medlemsliste.
+4. Kopiér den genererede URL, indsæt den i din browser, vælg din server, og bekræft. Botten bør nu vises på serverens medlemsliste.
 
 #### Indsaml dine ID'er
 
-Aktivér udviklertilstand i Discord (**User Settings/ Advanced/ Developer Mode**), og gør derefter følgende:
-- Højreklik på dit server-ikon: **Copy Server ID**
-- Højreklik på dit eget avatar: **Copy User ID**
+Aktivér Developer Mode i Discord (**User Settings/ Advanced/ Developer Mode**), og gør derefter følgende:
+- Højreklik på dit serverikon: **Copy Server ID**
+- Højreklik på din egen avatar: **Copy User ID**
 
 #### Tillad DM'er fra servermedlemmer
 
-Højreklik på dit server-ikon/ **Privacy Settings**/ slå **Direct Messages** til. Dette gør det muligt for botten at sende dig en DM, hvilket er påkrævet i parringstrinnet.
+Højreklik på dit serverikon/ **Privacy Settings**/ slå **Direct Messages** til. Dette gør det muligt for botten at sende dig en DM, hvilket er nødvendigt for parringstrinnet.
 
 #### Konfigurer OpenClaw til Discord
 
-Gem dit bot-token som en miljøvariabel, og opret derefter en enkelt patch-fil, der aktiverer Discord, refererer til tokenet og tilføjer din server til allowlisten. Erstat `<server_id>` og `<user_id>` med de ID'er, du indsamlede ovenfor.
+Gem din bot-token som en miljøvariabel, og opret derefter en enkelt patchfil, der aktiverer Discord, refererer til tokenet, og allowlister din server. Erstat `<server_id>` og `<user_id>` med de ID'er, du indsamlede ovenfor.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1343,7 +1351,7 @@ openclaw config patch --file ./discord.patch.json5
 
 > **Stol ikke på at bede agenten om at konfigurere dette.** Når sandboxing er aktiveret, kan agenten ikke skrive til `~/.openclaw/openclaw.json` inde fra sandboxen, brug i stedet CLI-kommandoerne ovenfor på værten.
 
-Genstart gatewayen, så den registrerer den nye kanalkonfiguration:
+Genstart gatewayen, så den indlæser den nye kanalkonfiguration:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -1352,20 +1360,20 @@ openclaw gateway run --bind loopback --port 18789
 Du bør se `logged in to discord as <bot-name>` i gateway-outputtet inden for få sekunder.
 #### Par din Discord-konto
 
-Send bottet en DM på Discord. Det svarer med en kort parringskode.
+Send en DM til botten på Discord. Den vil svare med en kort parringskode.
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-Godkend den på maskinen, der kører OpenClaw:
+Godkend den på den maskine, der kører OpenClaw:
 ```bash
 openclaw pairing approve discord <CODE>
 ```
 
 > Parringskoder udløber efter en time.
 
-Du kan nu chatte med din agent direkte fra Discord og lade opgaver blive udført af din lokale hardware.
+Du kan nu chatte med din agent direkte fra Discord og uddelegere opgaver til din lokale hardware.
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1375,12 +1383,12 @@ Du kan nu chatte med din agent direkte fra Discord og lade opgaver blive udført
 
 ### Mulighed B: Telegram
 
-Telegram er enklere end Discord for de fleste brugere, det kræver ingen server og ingen admin-adgang.
+Telegram er enklere end Discord for de fleste brugere, det kræver hverken server eller administratoradgang.
 
 #### Opret en Telegram-bot
 
-1. Åbn Telegram og send en besked til **@BotFather**.
-2. Send `/newbot` og følg vejledningen. Gem den bot-token, du får.
+1. Åbn Telegram og skriv til **@BotFather**.
+2. Send `/newbot` og følg vejledningen. Gem den bot-token, du modtager.
 
 #### Konfigurer OpenClaw til Telegram
 
@@ -1404,7 +1412,7 @@ Tilføj kanalkonfigurationen til `~/.openclaw/openclaw.json` (eller ret den via 
 }
 ```
 
-Genstart gatewayen, og send derefter din bot en besked på Telegram. Godkend parringen:
+Genstart gatewayen, og send derefter en besked til din bot i Telegram. Godkend parringen:
 
 ```bash
 openclaw pairing list telegram
@@ -1417,13 +1425,13 @@ Parringskoder udløber efter en time. Du kan nu chatte med din agent via Telegra
 
 ## Næste skridt
 
-Nu hvor din agent kan modtage kommandoer fra din telefon og handle på din lokale maskine, er her tre retninger, det er værd at udforske:
+Nu hvor din agent kan modtage kommandoer fra din telefon og udføre handlinger på din lokale maskine, er her tre retninger, det kan være værd at udforske:
 
-1. **Aktiemarkedsopsummering**: Planlæg OpenClaw til at hente data fra finansielle API'er med faste intervaller, opsummere dagens bevægelser med din lokale model, og send et sammendrag til din telefon hver morgen via din valgte kanal.
+1. **Aktiemarked-opsummering**: Planlæg OpenClaw til at hente data fra finansielle API'er med faste intervaller, opsummer dagens bevægelser med din lokale model, og send et sammendrag til din telefon hver morgen via din valgte kanal.
 
-2. **Overvågning af fine-tuning**: Start et træningsjob eksternt via Telegram eller Discord, og lad derefter agenten følge træningsloggen og rapportere periodiske tabsværdier, GPU-udnyttelse og diskforbrug tilbage til din telefon. Hvis kørslen går i stå, eller VRAM-forbruget stiger pludseligt, får du besked med det samme uden at skulle være ved maskinen.
+2. **Overvågning af finjustering**: Start et træningsjob eksternt via Telegram eller Discord, og lad derefter agenten følge træningsloggen og rapportere periodiske tabsværdier, GPU-udnyttelse og diskforbrug tilbage til din telefon. Hvis kørslen går i stå, eller VRAM-forbruget stiger kraftigt, får du besked med det samme uden at skulle være ved maskinen.
 
-3. **IoT med en lokal VLM**: Ret et kamera mod din hoveddør, kør en visionsmodel på Lemonade, og lad OpenClaw analysere billeder efter behov eller ved en udløser. Spørg "kom der nogen pakker i dag?" fra din telefon og få et direkte svar fra din egen hardware.
+3. **IOT med en lokal VLM**: Ret et kamera mod din hoveddør, kør en vision-model på Lemonade, og lad OpenClaw analysere billeder efter behov eller ved en udløser. Spørg "er der kommet nogen pakker i dag?" fra din telefon og få et direkte svar fra din egen hardware.
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

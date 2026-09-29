@@ -9,6 +9,8 @@ SPDX-License-Identifier: MIT
 > **Konekäännös.** Tämä sivu on käännetty automaattisesti englannista, eikä sitä ole tarkistanut ihminen. Se voi sisältää virheitä, ja tietyt ohjeet, komennot, lataukset, tuotteiden saatavuus tai muu sisältö voivat vaihdella kielen tai alueen mukaan. Mahdollisten ristiriitaisuuksien tai epäjohdonmukaisuuksien ilmetessä alkuperäinen englanninkielinen playbook on ratkaiseva ja ensisijainen versio.
 <!-- auto-translated-disclaimer:end -->
 
+## Yleiskatsaus
+
 <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
@@ -16,24 +18,26 @@ SPDX-License-Identifier: MIT
 
 ## Yleiskatsaus
 
-🍋 **Lemonade** on avoimen lähdekoodin paikallinen tekoälypalvelin, jonka avulla voit ajaa suuria kielimalleja (LLM), kuvageneraattoreita ja äänimalleja suoraan omalla laitteistollasi. Se tarjoaa mallit alan standardin mukaisen **OpenAI API:n** kautta, joten mikä tahansa OpenAI:n kanssa toimiva sovellus toimii heti myös Lemonaden kanssa. Tämän käsikirjan lopussa käytät Lemonadea mallien ajamiseen paikallisesti omalla koneellasi.
+🍋 **Lemonade** on avoimen lähdekoodin paikallinen tekoälypalvelin, jonka avulla voit ajaa suuria kielimalleja (LLM), kuvageneraattoreita ja äänimalleja suoraan omalla laitteistollasi. Se tarjoaa mallit käyttöön alan standardin mukaisen **OpenAI API:n** kautta, joten mikä tahansa OpenAI:n kanssa toimiva sovellus toimii heti myös Lemonaden kanssa. Tämän oppaan lopussa käytät Lemonadea mallien ajamiseen paikallisesti omalla koneellasi.
 
 ## Mitä opit
 
-Tämän käsikirjan lopussa osaat:
+Tämän oppaan lopussa osaat:
 
-* **Asentaa Lemonade Serverin** ja varmistaa, että se on käynnissä.
-* **Ladata LLM-mallin ja keskustella sen kanssa** yhdellä komennolla.
-* **Tutkia web-käyttöliittymää** ja kokeilla eri modaliteetteja, kuten näköä, puheentunnistusta ja kuvan generointia.
+* **Asentaa Lemonade Serverin** ja varmistaa, että se toimii.
+* **Ladata kielimallin ja keskustella sen kanssa** yhdellä komennolla.
+* **Tutustua verkkokäyttöliittymään** ja kokeilla eri toimintatapoja, kuten näkökykyä, puheentunnistusta ja kuvantuotantoa.
 * **Vaihtaa GPU-taustajärjestelmää** Vulkanin ja AMD ROCm™ -ohjelmiston välillä.
-* **Rakentaa Python-sovelluksen**, jota käyttää paikallinen LLM OpenAI-yhteensopivan API:n avulla.
+* **Rakentaa Python-sovelluksen**, jota käyttää paikallinen kielimalli OpenAI-yhteensopivan API:n avulla.
 <!-- @device:halo_box,halo,stx,krk -->
-* **Ajaa malleja AMD Neural Processing Unitilla (NPU)** käyttäen Hybrid- ja FLM-suoritustiloja AMD Ryzen™ AI -laitteistolla.
+* **Ajaa malleja AMD:n neuroverkkoyksikössä (NPU)** käyttämällä Hybrid- ja FLM-suoritustiloja AMD Ryzen™ AI -laitteistolla.
 <!-- @device:end -->
 
-## Muistikonfiguraation asettaminen
+<!-- @device:halo_box,halo,stx,krk -->
+## Muistiasetusten määrittäminen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
@@ -41,17 +45,17 @@ Tämän käsikirjan lopussa osaat:
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmistovaatimusten asentaminen
 
-Ennen kuin aloitat, varmista, että sinulla on:
+Ennen kuin aloitat, varmista että sinulla on:
 
 - Tietokone, jossa on **Windows 11** tai tuettu **Linux**-jakelu (Ubuntu 24.04+, Fedora, Debian)
-- **16 Gt RAM-muistia** suositellaan vaiheissa 1–7 käytettävälle ajonaikaiselle mallille (`Gemma-4-E2B-it-GGUF`, ~3 Gt). **32 Gt+** suositellaan, jos haluat käyttää suurempaa koodinluontimallia vaiheessa 6 (`Qwen3.5-35B-A3B-GGUF`, ~20 Gt).
-- **~4–30 Gt vapaata levytilaa** riippuen ladattavista malleista. Tämän oppaan suurin malli on noin 20 Gt.
+- **16 Gt RAM-muistia** suositellaan vaiheissa 1–7 käytettävälle ajonaikaiselle mallille (`Gemma-4-E2B-it-GGUF`, ~3 Gt). **32 Gt+** suositellaan, jos haluat käyttää suurempaa koodintuotantomallia vaiheessa 6 (`Qwen3.5-35B-A3B-GGUF`, ~20 Gt).
+- **~4–30 Gt vapaata levytilaa**, riippuen ladattavista malleista. Tämän oppaan suurin malli on noin 20 Gt.
 - **Python 3.10–3.13** (käytetään Python-sovellusosiossa)
 - Internet-yhteys (langallinen tai langaton)
 <!-- @device:halo_box,halo,stx,krk -->
-- [Valinnainen] AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 -sarja tai Z2 Extreme), jossa on asennettuna uusin ajuri osoitteesta [Ryzen AI Software -asennusohjeet](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers), jos haluat ajaa mallin NPU:lla.
+- [Valinnainen] AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 -sarja tai Z2 Extreme), johon on asennettu uusin ajuri osoitteesta [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers), jos haluat ajaa mallin NPU:lla.
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
@@ -68,9 +72,16 @@ lemonade --version
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-update-windows timeout=120 hidden=True -->
-```bash
+```powershell
 winget upgrade -e --id AMD.LemonadeServer
 lemonade --version
+
+# Upgrading runs the Lemonade Server installer, which stops the running server
+# to replace its files and does not start it again. Relaunch it so the local API
+# on port 13305 is available for the next steps.
+if (-not (Get-Process LemonadeServer -ErrorAction SilentlyContinue)) {
+  Start-Process "$env:LOCALAPPDATA\lemonade_server\bin\LemonadeServer.exe"
+}
 ```
 <!-- @test:end -->
 
@@ -183,56 +194,56 @@ echo "OK: Model Gemma-4-E2B-it-GGUF responded"
 
 ---
 
-## Ydinkäsitteet — Miten paikalliset tekoälypalvelimet toimivat
+## Peruskäsitteet — Miten paikalliset tekoälypalvelimet toimivat
 
-Ennen kuin ajamme mallin, kannattaa ymmärtää, *miksi* asiat on järjestetty näin. Lemonade on **paikallinen mallipalvelin**, eli prosessi, joka lataa tekoälymallit muistiin ja tarjoaa ne sovelluksille HTTP:n kautta, aivan kuten pilvipohjainen tekoälypalvelu tekisi.
+Ennen kuin ajamme mallin, kannattaa ymmärtää *miksi* asiat on järjestetty tällä tavalla. Lemonade on **paikallinen mallipalvelin** — prosessi, joka lataa tekoälymallit muistiin ja tarjoaa ne sovellusten käyttöön HTTP:n kautta, aivan kuten pilvipohjainen tekoälypalvelu tekisi.
 
 ### Miksi palvelin?
 
 | Hyöty | Mitä se tarkoittaa sinulle |
 |---------|----------------------|
-| **Yksinkertaistettu integraatio** | Sovellukset kommunikoivat yhden HTTP API:n kanssa sen sijaan, että käsittelisivät laitteistokohtaisia C++- tai Python-kirjastoja. |
-| **Jaetut mallit** | Yksi ladattu malli voi palvella useita sovelluksia yhtä aikaa – ei päällekkäisiä kopioita syömässä RAM-muistiasi. |
+| **Yksinkertaistettu integraatio** | Sovellukset kommunikoivat yhden HTTP-API:n kautta sen sijaan, että käsittelisivät laitteistokohtaisia C++- tai Python-kirjastoja. |
+| **Jaetut mallit** | Yksi ladattu malli voi palvella useita sovelluksia samanaikaisesti, eikä muistiisi mene päällekkäisiä kopioita. |
 | **Siirrettävyys pilvestä paikalliseen** | OpenAI:n pilvi-API:lle kirjoitettu koodi toimii Lemonaden kanssa vaihtamalla vain yhden URL-osoitteen. |
-| **Vastuiden erottelu** | Mallien hallinta, striimaus ja vikasietoisuus hoidetaan palvelimen puolella, jotta kehittäjät voivat keskittyä omaan sovellukseensa. |
+| **Vastuiden erottelu** | Mallien hallinta, striimaus ja vikasietoisuus hoidetaan palvelimen puolella, jotta kehittäjät voivat keskittyä sovellukseensa. |
 
 ### OpenAI API -standardi
 
-Lemonade toteuttaa **OpenAI API:n**, saman rajapinnan, jota käyttävät ChatGPT, Azure OpenAI ja kymmenet muut palvelut. Keskustelumalli on yksinkertainen:
+Lemonade toteuttaa **OpenAI API:n**, saman rajapinnan, jota käyttävät ChatGPT, Azure OpenAI ja lukuisat muut palvelut. Keskustelumalli on yksinkertainen:
 
 | Rooli | Kuka puhuu |
 |------|---------------|
-| **system** | Mallille annetut ohjeet (persoona, rajoitukset, käytettävissä olevat työkalut) |
-| **user** | Ihmiseltä (tai sovellukselta) mallille lähetetyt viestit |
-| **assistant** | Mallin generoimat vastaukset |
+| **system** | Ohjeet mallille (persoona, rajoitukset, käytettävissä olevat työkalut) |
+| **user** | Viestit ihmiseltä (tai sovellukselta) mallille |
+| **assistant** | Mallin tuottamat vastaukset |
 
-Tämä tarkoittaa, että mikä tahansa OpenAI:ta tukeva kirjasto tai sovellus voi kommunikoida Lemonaden kanssa osoittamalla sen osoitteeseen `http://localhost:13305/api/v1` Lemonade Serverin ollessa käynnissä.
+Tämä tarkoittaa, että mikä tahansa OpenAI:ta tukeva kirjasto tai sovellus voi kommunikoida Lemonaden kanssa osoittamalla osoitteeseen `http://localhost:13305/api/v1`, kun Lemonade Server on käynnissä.
 
 ## Pääharjoitus — Ensimmäinen paikallinen tekoälykeskustelusi
 
-Ladataan LLM ja käydään sen kanssa keskustelu, jossa tekoäly toimii kokonaan omalla koneellasi.
+Ladataan kielimalli ja käydään sen kanssa keskustelu, jossa tekoäly toimii kokonaan omalla koneellasi.
 
 ### Vaihe 1: Lataa ja aja malli
 
-Lemonade sisältää valikoidun mallikirjaston. Aloitetaan **Gemma-4-E2B-it**-mallilla, joka on kyvykäs ja kompakti ja sisältää näköominaisuuden tuen. Avaa terminaali ja aja:
+Lemonade sisältää kuratoidun mallikirjaston. Aloitetaan mallilla **Gemma-4-E2B-it**, joka on tehokas ja kompakti malli sisältäen näkökykytuen. Avaa pääte ja suorita:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF
 ```
 
-Tämä yksittäinen komento tekee kolme asiaa:
+Tämä yksi komento tekee kolme asiaa:
 
-1. **Lataa** mallin (~3 Gt) Hugging Facesta, jos sitä ei ole vielä ladattu. (Voi kestää jonkin aikaa)
-2. **Käynnistää** Lemonade Server -prosessin portissa 13305.
+1. **Lataa** mallin (~3 Gt) Hugging Facesta, jos sitä ei ole vielä ladattu. (Voi kestää hetken)
+2. **Käynnistää** Lemonade Server -prosessin porttiin 13305.
 3. **Avaa Lemonade Appin**, jotta voit aloittaa keskustelun mallin kanssa.
 
 
 <!-- @os:windows -->
-Windowsissa Lemonade App käynnistyy automaattisesti ja voit aloittaa keskustelun heti. Jos asensit `minimal.msi`-paketin, sovellus ei sisälly siihen. Aloittaaksesi keskustelun, avaa verkkoselaimesi ja mene osoitteeseen `http://localhost:13305`.
+Windowsissa Lemonade App käynnistyy automaattisesti, ja voit aloittaa keskustelun heti. Jos asensit `minimal.msi`-paketin, sovellus ei sisälly siihen. Aloita keskustelu avaamalla verkkoselain ja siirtymällä osoitteeseen `http://localhost:13305`.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Linuxissa avaa selaimesi ja siirry osoitteeseen `http://localhost:13305` päästäksesi web-sovellukseen.
+Linuxissa avaa selain ja siirry osoitteeseen `http://localhost:13305` päästäksesi verkkosovellukseen.
 <!-- @os:end -->
 
 Kokeile kirjoittaa kysymys:
@@ -264,23 +275,23 @@ Lemonade sisältää sisäänrakennetun verkkokäyttöliittymän, jonka avulla v
 - **Selata malleja** Model Manager -välilehdellä
 - **Ladata uusia malleja** yhdellä napsautuksella
 
-Kokeile eri modaliteettien vaihtamista verkkokäyttöliittymän **Model Manager** -välilehdellä, jossa voit selata malleja Recipen tai Categoryn mukaan:
+Kokeile siirtymistä eri modaliteettien välillä käyttämällä verkkokäyttöliittymän **Model Manager**-välilehteä, jossa voit selata malleja Recipe- tai Category-luokittelun mukaan:
 
-1. **Vision:** Jo lataamasi `Gemma-4-E2B-it-GGUF`-malli tukee visuaalista sisältöä. Liitä kuva chat-ikkunaan ja pyydä mallia kuvailemaan sitä.
-2. **Kuvien generointi:** Lataa Image-kategoriasta Model Managerista kuvamalli, kuten `SDXL-Turbo`, ja käytä sitten Lemonade Image Generatoria kirjoittaaksesi kehotteen ja luodaksesi kuvan paikallisesti.
-3. **Ääni:** Lataa Audio-kategoriasta äänimalli, kuten `Whisper-Tiny`, joka pystyy muuntamaan puheen tekstiksi. Anna äänitallenne, jonka mallilla voi litteroida paikallisesti. Tekstistä puheeksi -toimintoa varten kokeile jotakin Speech-kategorian malleista, kuten `kokoro-v1`.
+1. **Näkö:** Jo lataamasi `Gemma-4-E2B-it-GGUF`-malli tukee kuvien tulkintaa. Liitä kuva chat-ruutuun ja pyydä mallia kuvailemaan sitä.
+2. **Kuvien luonti:** Lataa Image-kategoriasta kuvamalli, kuten `SDXL-Turbo`, Model Managerista ja käytä sitten Lemonade Image Generatoria kirjoittaaksesi kehotteen ja luodaksesi kuvan paikallisesti.
+3. **Ääni:** Lataa Audio-kategoriasta äänimalli, kuten `Whisper-Tiny`, joka pystyy muuntamaan puheen tekstiksi. Anna äänitallenne litteroitavaksi paikallisesti. Puheen luontia varten kokeile jotain Speech-kategorian malleista, kuten `kokoro-v1`.
 
-![Multi-Modality with Lemonade](../../dependencies/assets/multi_modality.png)
+![Multimodaalisuus Lemonaden kanssa](../../dependencies/assets/multi_modality.png)
 
 ### Vaihe 3: Kokeile mallia eri taustajärjestelmällä
 
-Kun viet hiiren mallin päälle Lemonade-sovelluksessa, näet hammasratas-kuvakkeen. Napsauttamalla sitä voit valita mallille asetuksia, mukaan lukien halutun taustajärjestelmän.
+Kun viet hiiren Lemonade-sovelluksessa mallin päälle, näet hammasrataskuvakkeen. Napsauttamalla sitä voit valita mallin asetuksia, mukaan lukien halutun taustajärjestelmän valinnan.
 
-Oletusarvoisesti Lemonade käyttää Vulkania GPU-kiihdytykseen. Jos sinulla on tuettu AMD-erillinen GPU, voit vaihtaa ROCm-järjestelmään.
+Oletusarvoisesti Lemonade käyttää Vulkania GPU-kiihdytykseen. Jos sinulla on tuettu AMD-erillisnäytönohjain, voit vaihtaa ROCm:ään.
 
-![Lemonade Select Backend](../../dependencies/assets/lemonademodeloptions.png)
+![Lemonaden taustajärjestelmän valinta](../../dependencies/assets/lemonademodeloptions.png)
 
-Voit hallita asennettuja taustajärjestelmiä napsauttamalla taustajärjestelmäpainiketta vasemmanpuoleisimmassa sarakkeessa.
+Voit hallita asennettuja taustajärjestelmiä napsauttamalla vasemmanpuoleisen sarakkeen taustajärjestelmäpainiketta.
 
 Vaihtoehtoisesti voit määrittää taustajärjestelmän seuraavalla komennolla:
 
@@ -288,25 +299,25 @@ Vaihtoehtoisesti voit määrittää taustajärjestelmän seuraavalla komennolla:
 lemonade run Gemma-4-E2B-it-GGUF --llamacpp rocm
 ```
 
-Voit myös asettaa oletustaustajärjestelmän ympäristömuuttujalla `LEMONADE_LLAMACPP`, jonka arvot ovat: `vulkan`, `rocm` tai `cpu`.
+Voit myös asettaa oletustaustajärjestelmän ympäristömuuttujalla `LEMONADE_LLAMACPP`, jonka arvot voivat olla: `vulkan`, `rocm` tai `cpu`.
 
 ---
 
-## Syvemmälle — Rakenna Python-sovellus tekoälyn avulla
+## Syvemmälle — Rakenna Python-pohjainen tekoälysovellus
 
-Paikallisen tekoälypalvelimen todellinen vahvuus on siinä, että mikä tahansa sovellus voi muodostaa siihen yhteyden vain muutamalla koodirivillä. Todistaaksemme tämän rakennamme pienen mutta toimivan **opiskelun muistikorttigeneraattorin**, jolle annat aiheen, jonka jälkeen se luo muistikortteja ja voit testata itseäsi interaktiivisesti.
+Paikallisen tekoälypalvelimen todellinen voima on siinä, että mikä tahansa sovellus voi muodostaa siihen yhteyden vain muutamalla koodirivillä. Todistaaksemme tämän rakennetaan pieni mutta toimiva **opiskelukorttien generaattori**, jolle annat aiheen, jonka jälkeen se luo opiskelukortit ja voit testata itseäsi interaktiivisesti.
 
 ### Vaihe 4: Käynnistä palvelin
 
-Varmista, että Lemonade-palvelin on käynnissä. Se käynnistyy tyypillisesti automaattisesti taustalla asennuksen jälkeen. Varmista tämä suorittamalla:
+Varmista, että Lemonade-palvelin on käynnissä. Se käynnistyy tyypillisesti automaattisesti taustalla asennuksen jälkeen. Voit varmistaa tämän suorittamalla:
 
 ```
 lemonade status
 ```
 
-Näet viestin, kuten: `Server is running on port 13305`.
+Sinun pitäisi nähdä viesti, kuten: `Server is running on port 13305`.
 
-Jos palvelin ei ole käynnissä, käynnistä se avaamalla Lemonade-sovellus. Käytä oletusporttia **13305** (voit vahvistaa tai valita tämän ilmoitusalueen kuvakkeesta).
+Jos palvelin ei ole käynnissä, käynnistä se avaamalla Lemonade-sovellus. Käytä oletusporttia **13305** (voit vahvistaa tai valita tämän tehtäväpalkin kuvakkeesta).
 
 ### Vaihe 5: Asenna OpenAI Python -asiakasohjelma
 
@@ -388,18 +399,18 @@ python3 -c "from openai import OpenAI; print('OK')"
 <!-- @test:end -->
 <!-- @os:end -->
 
-### Vaihe 6: Rakenna muistikorttisovellus
+### Vaihe 6: Rakenna opiskelukorttisovellus
 
-Ladataan eri malli koodin generointia varten: `Qwen3.5-35B-A3B-GGUF`. Tämä on suuri (~20 Gt) ja tehokas malli, joka sopii parhaiten järjestelmiin, joissa on 32 Gt+ RAM-muistia. Jos käytettävissäsi on vähemmän RAM-muistia, kokeile sen sijaan mallia `Qwen3.5-9B-GGUF` (~6 Gt).
+Ladataan koodin luontia varten eri malli: `Qwen3.5-35B-A3B-GGUF`. Tämä on suuri (~20 Gt) ja tehokas malli, joka sopii parhaiten järjestelmiin, joissa on vähintään 32 Gt RAM-muistia. Jos käytettävissä on vähemmän RAM-muistia, kokeile sen sijaan mallia `Qwen3.5-9B-GGUF` (~6 Gt).
 
-Voit ladata sen käyttöliittymästä tai suorittamalla seuraavan:
+Voit ladata sen käyttöliittymästä tai suorittaa seuraavan:
 ```
 lemonade run Qwen3.5-35B-A3B-GGUF
 ```
 
-Syötä seuraava kehote Lemonade Chat -käyttöliittymään, jotta se luo koodin yksinkertaiselle muistikorttisovellukselle.
+Syötä seuraava kehote Lemonade Chat UI:hin luodaksesi koodin yksinkertaiselle opiskelukorttisovellukselle.
 
-Käytämme mallia Qwen3.5-35B-A3B-GGUF (suurempi malli, joka on parempi koodin kirjoittamisessa) Python-sovelluksemme luomiseen, ja itse sovellus kutsuu ajon aikana mallia Gemma-4-E2B-it-GGUF (pienempi malli, jonka olet jo ladannut). Koodi voidaan sen jälkeen kopioida haluamaasi tiedostoon suoritettavaksi Pythonissa.
+Käytämme mallia Qwen3.5-35B-A3B-GGUF (suurempi malli, joka on parempi koodin kirjoittamisessa) Python-sovelluksemme luomiseen, ja itse sovellus kutsuu ajon aikana mallia Gemma-4-E2B-it-GGUF (pienempi malli, jonka olet jo ladannut). Koodi voidaan sen jälkeen kopioida valitsemaasi tiedostoon suoritettavaksi Pythonilla.
 
 ```
 Generate a Python script that uses the OpenAI Python library to call a local LLM and create an interactive flashcard study tool.
@@ -432,9 +443,9 @@ Structure:
    - Offers to start the quiz.
 ```
 
-> **Vinkki**: Olemme noudattaneet standardeja suunnittelukäytäntöjä huolellisen kehotteiden laadinnan ja kahden mallin järjestelmän käytön avulla resurssien ja nopeuden optimoimiseksi.
+> **Vihje**: Olemme noudattaneet vakiintuneita insinöörikäytäntöjä huolellisen kehotteen laadinnan sekä kahden mallin järjestelmän avulla, jotta resurssit ja nopeus saadaan optimoitua.
 
-Mukavuutesi vuoksi olemme tarjonneet esimerkkitulosteen tiedostossa [`flashcards.py`](assets/flashcards.py). Voit vapaasti ladata sen omaan hakemistoosi. Joka tapauksessa sinulla pitäisi nyt olla Python-tiedosto, joka voidaan suorittaa.
+Käyttömukavuuden vuoksi olemme tarjonneet esimerkkitulosteen tiedostossa [`flashcards.py`](assets/flashcards.py). Voit vapaasti ladata sen omaan hakemistoosi. Joka tapauksessa sinulla pitäisi nyt olla Python-tiedosto, joka voidaan suorittaa.
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=900 hidden=True -->
@@ -490,7 +501,7 @@ python3 lemonade_python_smoke.py
 python flashcards.py # replace with your file name
 ```
 
-**Näin sen pitäisi näyttää:**
+**Tältä lopputulos näyttää:**
 
 ```
 🍋 Lemonade Flashcard Generator
@@ -524,90 +535,90 @@ Did you get it right? (y/n): y
 🏆 Score: 4/5
 ```
 
-Noin 150 koodirivillä olet rakentanut täysin toimivan opiskelutyökalun, jota käyttää paikallinen LLM. API-avainta ei tarvitse hallita, käyttökustannuksia ei synny, eikä mitään dataa poistu koskaan koneeltasi.
+Noin 150 koodirivillä olet rakentanut täysin toimivan opiskelutyökalun, jota paikallinen LLM tehostaa. Ei ole API-avainta hallittavana, ei käyttökustannuksia, eikä yksikään tieto poistu koneeltasi.
 
-> **Keskeinen oivallus:** Huomaa, että rivi `client = OpenAI(base_url=...) ` on *ainoa* asia, joka sitoo tämän sovelluksen Lemonadeen OpenAI:n pilvipalvelun sijaan. Loput koodista ovat identtisiä sen kanssa, mitä kirjoittaisit mitä tahansa OpenAI-yhteensopivaa palvelua vastaan. Jos olet joskus käyttänyt OpenAI Python -kirjastoa, osaat jo rakentaa sovelluksia Lemonaden avulla.
+> **Keskeinen oivallus:** Huomaa, että rivi `client = OpenAI(base_url=...) ` on *ainoa* asia, joka sitoo tämän sovelluksen Lemonadeen OpenAI:n pilven sijaan. Loput koodista on identtistä sen kanssa, mitä kirjoittaisit mitä tahansa OpenAI-yhteensopivaa palvelua vasten. Jos olet joskus käyttänyt OpenAI Python -kirjastoa, osaat jo rakentaa sovelluksia Lemonadella.
 
 ### Mitä tämä osoittaa
 
-Tämä pieni sovellus harjoittaa useita todellisen maailman integraatiomalleja:
+Tämä pieni sovellus havainnollistaa useita todellisen maailman integraatiomalleja:
 
 | Malli | Missä se esiintyy |
 |---------|-----------------|
 | **Järjestelmäkehotteet** | `"system"`-viesti kertoo LLM:lle, että sen tulee tuottaa jäsennelty JSON |
-| **Jäsennelty tuloste** | Sovellus jäsentää LLM:n vastauksen JSON-muodossa muistikorttien rakentamiseksi |
+| **Jäsennelty tuloste** | Sovellus jäsentää LLM:n vastauksen JSON-muodossa opiskelukorttien rakentamiseksi |
 | **Tilattomat pyynnöt** | Jokainen `generate_flashcards()`-kutsu on itsenäinen |
-| **Virheenkäsittely** | `try/except` käsittelee sulavasti tapaukset, joissa LLM:n tuloste ei ole kelvollista JSONia |
+| **Virheenkäsittely** | `try/except` käsittelee sulavasti tilanteet, joissa LLM:n tuloste ei ole kelvollista JSONia |
 
-Nämä samat mallit skaalautuvat mihin tahansa sovellukseen, kuten chatbotteihin, koodiavustajiin, sisällöntuottajiin ja automaatiotyökaluihin.
+Samat mallit skaalautuvat mihin tahansa sovellukseen, kuten chatboteihin, koodiavustajiin, sisällöntuottajiin ja automaatiotyökaluihin.
 
 #### Lisähaaste
 
-* Jos haluat lisähaastetta, kokeile päivittää sovellusta niin, että muistikortit luetaan käyttäjälle viittaamalla [tässä](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py) annettuun esimerkkiin.
+* Lisähaasteena voit kokeilla päivittää sovellusta niin, että opiskelukortit luetaan käyttäjälle ääneen viittaamalla [tähän](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py) tarjottuun esimerkkiin.
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Mallien ajaminen NPU:lla (valinnainen)
+## Mallien suorittaminen NPU:lla (valinnainen)
 
-Jos sinulla on Ryzen AI 300/400/Max 300 -sarjan tai Z2 Extreme -laite, laitteessasi on sisäänrakennettu **Neural Processing Unit (NPU)**, erityisesti tekoälykuormille suunniteltu erillinen piiri. Mallien ajaminen NPU:lla on virrankäytöltään tehokkaampaa kuin GPU:n käyttö, mikä tekee siitä ihanteellisen taustalla toimiville tekoälytehtäville, pidemmille istunnoille ja akkukäyttöön.
+Jos sinulla on Ryzen AI 300/400/Max 300 -sarjan tai Z2 Extreme -laite, laitteessasi on sisäänrakennettu **Neural Processing Unit (NPU)**, eli erityisesti tekoälytyökuormia varten suunniteltu piiri. Mallien suorittaminen NPU:lla on virrankulutukseltaan tehokkaampaa kuin GPU:n käyttäminen, mikä tekee siitä ihanteellisen taustalla suoritettaville tekoälytehtäville, pidemmille istunnoille ja akkukäyttöiselle käytölle.
 
 Lemonade tukee kolmea NPU-suoritustilaa, jotka kaikki toimivat läpinäkyvästi saman OpenAI API:n takana:
 
 | Tila | Toimintaperiaate | Resepti | Esimerkkimallit |
 |------|-------------|--------|----------------|
-| **Hybrid (NPU + iGPU)** | NPU käsittelee kehotteen, iGPU generoi tokenit | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
-| **Vain NPU** | Koko päättely ajetaan NPU:lla | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
+| **Hybridi (NPU + iGPU)** | NPU käsittelee kehotteen, iGPU generoi tokenit | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
+| **Pelkkä NPU** | Koko päättely suoritetaan NPU:lla | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
 | **FLM** | Käyttää FastFlowLM-moottoria NPU:lla, optimoitu AMD XDNA2:lle | FLM (`flm`) | qwen3.5-4b-FLM |
 
 ### Vaatimukset
 
 - **AMD Ryzen AI 300/400 -sarjan tai Z2-sarjan** suoritin
-- **FLM**-malleja varten: FLM-ajoympäristön voi asentaa Lemonade-sovelluksen sisältä, tai Lemonade asentaa FLM-ajoympäristön automaattisesti FLM-mallia ajettaessa. Lisätietoja FastFlowLM:stä saat [täältä](https://fastflowlm.com/docs/).
+- **FLM**-malleja varten: FLM-ajoympäristön voi asentaa suoraan Lemonade-sovelluksesta, tai Lemonade asentaa FLM-ajoympäristön automaattisesti, kun FLM-mallia suoritetaan. Lisätietoja FastFlowLM:stä löydät [täältä](https://fastflowlm.com/docs/).
 
 
-### Vaihe 8: Hybridimallin ajaminen
+### Vaihe 8: Hybridimallin suorittaminen
 
-Hybridimallit jakavat työn NPU:n ja iGPU:n kesken hyvän nopeuden ja tehokkuuden tasapainon saavuttamiseksi. Valitse Lemonade-sovelluksessa malli `Ryzen AI LLM` -listalta, esimerkiksi `Qwen3-4B-Hybrid`, tai aja se seuraavalla komennolla:
+Hybridimallit jakavat työn NPU:n ja iGPU:n kesken, mikä tarjoaa hyvän tasapainon nopeuden ja tehokkuuden välillä. Valitse Lemonade-sovelluksessa malli `Ryzen AI LLM` -listalta, esimerkiksi `Qwen3-4B-Hybrid`, tai suorita se seuraavalla komennolla:
 
 ```
 lemonade run Qwen3-4B-Hybrid
 ```
 
-Lemonade tunnistaa NPU:n automaattisesti ja asentaa **Ryzen AI LLM** -taustajärjestelmän.
+Lemonade tunnistaa NPU:si automaattisesti ja asentaa **Ryzen AI LLM** -taustajärjestelmän.
 
-> **Mitä pinnan alla tapahtuu?** Kun lähetät viestin, NPU käsittelee koko kehotteesi rinnakkaisesti (tätä kutsutaan "esitäytöksi"). Sen jälkeen iGPU ottaa vastuun ja generoi vastauksen yksi token kerrallaan (tätä kutsutaan "dekoodaukseksi"). Tämä hybridilähestymistapa hyödyntää kummankin piirin vahvuuksia.
+> **Mitä konepellin alla tapahtuu?** Kun lähetät viestin, NPU käsittelee koko kehotteesi rinnakkain (tätä kutsutaan "prefill"-vaiheeksi). Sen jälkeen iGPU ottaa vastuun vastauksen generoinnista yksi token kerrallaan (tätä kutsutaan "decode"-vaiheeksi). Tämä hybridilähestymistapa hyödyntää kummankin piirin vahvuuksia.
 
-### Vaihe 9: FLM-mallin ajaminen
+### Vaihe 9: FLM-mallin suorittaminen
 
-FastFlowLM (FLM) -mallit on optimoitu erityisesti AMD:n XDNA2 NPU -arkkitehtuurille, ja ne voivat olla erittäin nopeita kokoonsa nähden. Valitse esimerkiksi `qwen3.5-4b-FLM` `FastFlowLM NPU` -listalta tai käytä seuraavaa komentoa:
+FastFlowLM (FLM) -mallit on optimoitu erityisesti AMD:n XDNA2 NPU -arkkitehtuurille, ja ne voivat olla kokoonsa nähden erittäin nopeita. Valitse esimerkiksi `qwen3.5-4b-FLM` `FastFlowLM NPU` -listalta tai käytä seuraavaa komentoa:
 
 <!-- @os:windows -->
-`FastFlowLM`-taustajärjestelmän ottaminen käyttöön Windowsissa:
+`FastFlowLM`-ominaisuuden käyttöönotto Windowsissa:
 
 * Avaa `Backends Manager` -valikko.
 * Etsi `FastFlowLM NPU` -taustajärjestelmäkategoria.
 * Napsauta Install NPU.
-* Kun asennus on valmis, noin 36 oletusmallia on saatavilla FFLM-pudotusvalikossa.
+* Kun asennus on valmis, noin 36 oletusmallia tulee saataville FFLM-pudotusvalikkoon.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
-Kun `Lemonade`-sovellus käynnistetään ensimmäistä kertaa, `FastFlowNPU`-taustajärjestelmä ei ole oletuksena käytössä.
+Kun `Lemonade`-sovellus käynnistetään ensimmäistä kertaa, `FastFlowNPU`-taustajärjestelmä ei ole oletuksena käytössä. 
 Paikallinen sovellus avaa asennussivun, joka opastaa sinut asennuksen läpi.
 
-`FastFlowLM`-taustajärjestelmän ottaminen käyttöön Linuxissa:
+`FastFlowLM`-ominaisuuden käyttöönotto Linuxissa:
 
 * Avaa `Lemonade`-sovellus.
-* Käy [virallisessa FLM](https://lemonade-server.ai/flm_npu_linux.html)-dokumentaatiossa ja seuraa FLM:n asennusohjeita valitsemalla oma Linux-jakelusi.
-* Ota käyttöön backports-arkistot asennussivun ohjeiden mukaisesti.
-* Lataa uusin `v0.9.x`-julkaisu [tunnisteet-sivulta](https://github.com/FastFlowLM/FastFlowLM/tags).'
+* Käy [virallisessa FLM-dokumentaatiossa](https://lemonade-server.ai/flm_npu_linux.html) ja noudata FLM:n asennusohjeita valitsemalla oma Linux-jakelusi.
+* Ota backports-tuki käyttöön asennussivun ohjeiden mukaisesti.
+* Lataa uusin `v0.9.x`-julkaisu [tags-sivulta](https://github.com/FastFlowLM/FastFlowLM/tags).'
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
 >[!Note]
-Jos käytössäsi on AMD Halo Developer Platform, valitse Debian 13.
+AMD Halo Developer Platform -alustalla valitse ehdottomasti Debian 13.
 ```
 fastflowlm_0.9.X_debian13_amd64.deb
 ```
@@ -619,13 +630,13 @@ fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 ```
 <!-- @device:end -->
 * Asenna ladattu `.deb`-paketti.
-* Suositus: Sulje `Lemonade App` ja avaa se uudelleen, jotta muutokset tunnistetaan.
+* Suositus: Sulje `Lemonade App` ja avaa se uudelleen, jotta muutokset havaitaan.
 * Suositus: Avaa `Backends Manager` ja napsauta Install `FastFlowNPU` Backend.
 <!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @device:halo_box,halo,stx,krk -->
-Onnistuneen asennuksen jälkeen näet, että `flm:npu` on valmistunut **Download Manager** -osiossa **Lemonade Desktop App** -sovelluksessa.
+Onnistuneen asennuksen jälkeen sinun pitäisi nähdä, että `flm:npu` on valmis **Lemonade Desktop App** -sovelluksen **Download Manager** -osiossa.
 <p align="center">
   <img width="400" height="400" src="assets/FFLM-installationWizard.png" />
 </p>
@@ -639,12 +650,12 @@ tai
 ```
 lemonade run qwen3.5-4b-FLM
 ```
-kautta
-FLM-mallit sisältävät joitakin suosituimmista arkkitehtuureista (Gemma 3, Qwen 3, Llama 3 ja DeepSeek R1), ja niiden koko vaihtelee alle 1 GB:sta yli 13 GB:aan.
-Lemonade tunnistaa NPU:n automaattisesti ja asentaa **FastFlowLM NPU** -taustajärjestelmän.
+:n kautta
+FLM-mallit sisältävät joitakin suosituimmista arkkitehtuureista (Gemma 3, Qwen 3, Llama 3 ja DeepSeek R1) ja vaihtelevat kooltaan alle 1 Gt:sta yli 13 Gt:aan.
+Lemonade tunnistaa NPU:si automaattisesti ja asentaa **FastFlowLM NPU** -taustajärjestelmän.
 
 <!-- @os:windows -->
-> **Vinkki:** Parhaan NPU-suorituskyvyn saavuttamiseksi ota käyttöön turbo-tila:
+> **Vinkki:** Parhaan NPU-suorituskyvyn saavuttamiseksi ota turbotila käyttöön:
 > ```
 > cd C:\Windows\System32\AMD
 > .\xrt-smi configure --pmode turbo
@@ -653,7 +664,7 @@ Lemonade tunnistaa NPU:n automaattisesti ja asentaa **FastFlowLM NPU** -taustaj�
 
 ### Mallien vaihtaminen
 
-Vaiheen 6 flashcard-sovellus toimii myös NPU-malleilla, vaihda vain mallin nimi:
+Vaiheen 6 muistikorttisovellus toimii myös NPU-malleilla, vaihda vain mallin nimi:
 
 ```python
 # In flashcards.py, swap the model to run on NPU instead of GPU
@@ -666,17 +677,17 @@ response = client.chat.completions.create(
 
 ## Seuraavat vaiheet
 
-Sinulla on nyt paikallinen tekoälypalvelin käynnissä omalla laitteistollasi, tässä on seuraavat askeleet:
+Sinulla on nyt käynnissä paikallinen tekoälypalvelin omalla laitteistollasi. Tässä on seuraavat askeleet:
 
-1. **Yhdistä suosikkisovelluksesi**: Lemonade toimii suoraan pakkauksesta [VS Code Copilotin](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI:n](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continuen](https://lemonade-server.ai/docs/server/apps/continue/), [n8n:n](https://n8n.io/integrations/lemonade-model/) ja [monien muiden](https://lemonade-server.ai/marketplace) kanssa.
+1. **Yhdistä suosikkisovelluksesi**: Lemonade toimii suoraan käyttöönotettuna [VS Code Copilotin](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI:n](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continuen](https://lemonade-server.ai/docs/server/apps/continue/), [n8n:n](https://n8n.io/integrations/lemonade-model/) ja [monien muiden](https://lemonade-server.ai/marketplace) kanssa.
 
-2. **Selaa lisää malleja**: Tutustu koko [mallikirjastoon](https://lemonade-server.ai/docs/server/server_models/) löytääksesi koodaukseen, päättelyyn, näköön ja muuhun optimoituja malleja. Käytä Lemonade-sovellusta tai komentoa `lemonade list` nähdäksesi saatavilla olevat vaihtoehdot.
+2. **Selaa lisää malleja**: Tutustu koko [mallikirjastoon](https://lemonade-server.ai/docs/server/server_models/) ja löydä koodaukseen, päättelyyn, näkötehtäviin ja muuhun optimoituja malleja. Käytä Lemonade-sovellusta tai `lemonade list` -komentoa nähdäksesi saatavilla olevat mallit.
 
-3. **Ota käyttöön ROCm GPU -kiihdytys**: Jos sinulla on tuettu AMD GPU, vaihda ROCm-taustajärjestelmään: `lemonade config set llamacpp.backend=rocm`. Katso [tuetut AMD GPU:t](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
+3. **Ota käyttöön ROCm GPU-kiihdytys**: Jos sinulla on tuettu AMD GPU, vaihda ROCm-taustajärjestelmään: `lemonade config set llamacpp.backend=rocm`. Katso [tuetut AMD GPU:t](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
 
-4. **Lue koko API-spesifikaatio**: Lemonade tukee chat-täydennyksiä, upotuksia, äänen litterointia, kuvien generointia, tekstistä puheeksi -muunnosta ja paljon muuta. Katso [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) kaikkien päätepisteiden osalta.
+4. **Lue koko API-määrittely**: Lemonade tukee keskustelutäydennyksiä, upotuksia, äänen transkriptiota, kuvien generointia, tekstistä puheeksi -muunnosta ja muuta. Katso [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) kaikkien päätepisteiden osalta.
 
-5. **Osallistu**: Lemonade on avoimen lähdekoodin projekti. Tutustu [osallistumisoppaaseen](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) ja etsi [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) -merkittyjä tehtäviä.
+5. **Osallistu kehitykseen**: Lemonade on avoimen lähdekoodin projekti. Tutustu [osallistumisoppaaseen](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) ja etsi [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) -merkittyjä tehtäviä.
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

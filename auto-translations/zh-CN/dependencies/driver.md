@@ -26,7 +26,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 ### AMD GPU 驱动程序
 
-使用适用于 Linux 的 Radeon 软件（RSL）流程安装 AMD GPU 驱动程序（amdgpu）。有关适用于您所使用发行版的说明，请参阅[安装内核驱动程序](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html)。
+使用 Radeon Software for Linux (RSL) 流程安装 AMD GPU 驱动程序 (amdgpu)。有关适用于您所用发行版的说明，请参阅 ROCm 安装：[安装内核驱动程序](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install)。
+
+有关驱动程序本身，请参阅 [Linux® Drivers for AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

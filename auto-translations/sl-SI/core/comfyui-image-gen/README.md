@@ -16,20 +16,22 @@ SPDX-License-Identifier: MIT
 
 ## Pregled
 
-ComfyUI je zmogljiv, na vozliščih temelječ vmesnik za Stable Diffusion in druge difuzijske modele. Za razliko od tradicionalnih vmesnikov za pretvorbo besedila v sliko z enostavnimi poljI za vnos poziva, ComfyUI prikaže celoten cevovod za generiranje slik kot vizualni graf, kar vam omogoča natančen nadzor nad vsakim korakom, od kodiranja besedila do manipulacije latentnega prostora do končnega dekodiranja.
+ComfyUI je zmogljiv, na vozliščih temelječ vmesnik za Stable Diffusion in druge difuzijske modele. Za razliko od tradicionalnih vmesnikov za pretvorbo besedila v sliko z enostavnimi polji za vnos poziva, ComfyUI prikaže celoten cevovod za generiranje slik kot vizualni graf, kar vam omogoča natančen nadzor nad vsakim korakom, od kodiranja besedila do manipulacije latentnega prostora do končnega dekodiranja.
 
-Ta vadnica vas nauči, kako uporabljati ComfyUI z modelom Z Image Turbo na svojem GPU-ju za generiranje visokokakovostnih slik z umetno inteligenco.
+Ta vadnica vas nauči, kako uporabljati ComfyUI z modelom Z Image Turbo na vašem GPU-ju za generiranje visokokakovostnih slik z umetno inteligenco.
 
 ## Kaj se boste naučili
 
 - Kako zagnati ComfyUI in naložiti predlogo Z-Image Turbo
 - Razumevanje komponent difuzijskega cevovoda
-- Generiranje slik in prilagajanje parametrov generiranja
+- Generiranje slik in nastavljanje parametrov generiranja
 - Shranjevanje in deljenje delovnih tokov
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Nastavitev konfiguracije pomnilnika
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Preverjanje posodobitev programske opreme
@@ -37,7 +39,7 @@ Ta vadnica vas nauči, kako uporabljati ComfyUI z modelom Z Image Turbo na svoje
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Nameščanje potrebne programske opreme
+## Namestitev potrebne programske opreme
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -46,13 +48,13 @@ Ta vadnica vas nauči, kako uporabljati ComfyUI z modelom Z Image Turbo na svoje
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Dodelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev se odjavite in ponovno prijavite):
+**Dodelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev se morate odjaviti in ponovno prijaviti):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-#### Ustvarite virtualno okolje
+#### Ustvarjanje navideznega okolja
 V sistemu Linux odprite terminal v mapi po vaši izbiri in zaženite naslednji ukaz za ustvarjanje venv:
 
 <!-- @test:id=create-venv-linux timeout=300 -->
@@ -292,13 +294,13 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-Za zagon ComfyUI v sistemu Windows kliknite zaganjalnik ComfyUI Desktop, ki ga najdete na namizju. Sledite korakom za namestitev lokalne različice z AMD.
+Za zagon ComfyUI v sistemu Windows kliknite zaganjalnik ComfyUI Desktop na namizju. Sledite korakom za namestitev lokalne različice z AMD.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Nato kliknite gumb ComfyUI na sredini vrha aplikacije. S tem se odpre zavihek z nastavitvami. Odprite zavihek Storage in preverite, ali so poti nastavljene, kot sledi, da boste lahko dostopali do vnaprej nameščenih modelov.
+Nato kliknite gumb ComfyUI na sredini vrha aplikacije. To odpre zavihek z nastavitvami. Odprite zavihek Storage in preverite, da so poti nastavljene, kot sledi, za dostop do vnaprej nameščenih modelov.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
@@ -308,10 +310,10 @@ Nato kliknite gumb ComfyUI na sredini vrha aplikacije. S tem se odpre zavihek z 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Na AMD Ryzen™ AI Halo se ComfyUI izvaja v vnaprej pripravljenem vsebniku, ki ne zahteva dodatne nastavitve Python.
+Na AMD Ryzen™ AI Halo se ComfyUI zažene v vnaprej pripravljenem vsebniku, ki ne zahteva dodatne nastavitve Python.
 
-Za zagon ComfyUI v sistemu Linux kliknite bližnjico ComfyUI v opravilni vrstici. Odpreti bi se moralo samodejno v oknu brskalnika.
->**Nasvet**: ComfyUI in njegovi modeli so shranjeni na `~/.local/share/ComfyUI/models`. Tu lahko ročno dodate delovne tokove ali nove modele.
+Za zagon ComfyUI v sistemu Linux kliknite bližnjico ComfyUI v opravilni vrstici. Sam po sebi se mora odpreti v oknu brskalnika.
+>**Nasvet**: ComfyUI in njegovi modeli so shranjeni v `~/.local/share/ComfyUI/models`. Tukaj lahko ročno dodate delovne tokove ali nove modele.
 
 
 <!-- @os:end -->
@@ -326,12 +328,12 @@ Za zagon ComfyUI v sistemu Windows preprosto kliknite bližnjico ComfyUI na nami
 
 Za zagon ComfyUI:
 
-1. Prepričajte se, da ste v mapi ComfyUI. 
+1. Prepričajte se, da ste v imeniku ComfyUI. 
 2. Zaženite `python3 main.py --use-pytorch-cross-attention`
 
-ComfyUI zažene lokalni spletni strežnik. Odprite brskalnik na `http://127.0.0.1:8188` za dostop do vmesnika.
+ComfyUI zažene lokalni spletni strežnik. Odprite brskalnik na naslovu `http://127.0.0.1:8188`, da dostopite do vmesnika.
 
-> **Nasvet**: Med uporabo ComfyUI naj bo terminalsko okno odprto. Če ga zaprete, se strežnik ustavi.
+> **Nasvet**: Med uporabo ComfyUI pustite okno terminala odprto. Če ga zaprete, se strežnik ustavi.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -340,17 +342,17 @@ ComfyUI zažene lokalni spletni strežnik. Odprite brskalnik na `http://127.0.0.
 
 Preden začnete generirati slike, morate naložiti predlogo Z-Image Turbo. Tukaj je opisano, kako jo najdete:
 
-1. **Poglejte na skrajni levi rob zaslona** — tam je navpična orodna vrstica, ki poteka od vrha do dna na skrajno levi strani aplikacije.
+1. **Poglejte na skrajni levi rob zaslona**—tam je navpična orodna vrstica, ki poteka od vrha do dna na skrajno levi strani aplikacije.
 
-2. **Poiščite ikono mape** — v tej levi orodni vrstici poiščite ikono, ki je videti kot mapa. Ko nanjo pomaknete kazalec, je označena z "Templates".
+2. **Poiščite ikono mape**—v tej levi orodni vrstici poiščite ikono, ki je videti kot mapa. Ko se z miško postavite nanjo, je označena z "Templates".
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
 </p>
 
-3. **Kliknite ikono mape** — s tem se odpre podokno s predlogami (Templates).
+3. **Kliknite ikono mape**—to odpre podokno Templates.
 
-4. **Poiščite "Z-Image Turbo"** — uporabite iskalno vrstico ali se pomikajte po razpoložljivih predlogah, da najdete delovni tok Z-Image Turbo Text To Image, nato pa kliknite, da ga naložite.
+4. **Poiščite "Z-Image Turbo"**—uporabite iskalno vrstico ali preglejte razpoložljive predloge, da najdete delovni tok Z-Image Turbo Text To Image, nato pa kliknite, da ga naložite.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -362,14 +364,14 @@ Preden začnete generirati slike, morate naložiti predlogo Z-Image Turbo. Tukaj
 
 ## Razumevanje vmesnika
 
-Ko se naloži predloga Z-Image Turbo, boste videli platno z 2 glavnima vozliščema. Prvo vozlišče se imenuje 'Text to Image (Z-Image-Turbo)', drugo vozlišče pa je namenjeno ogledu slike. 
+Ko se predloga Z-Image Turbo naloži, boste videli platno z 2 glavnima vozliščema. Prvo vozlišče se imenuje 'Text to Image (Z-Image-Turbo)', drugo pa je namenjeno ogledu slike. 
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
 </p>
 
 
-V vozlišču Z-Image kliknite gumb zgoraj desno, da razširite vozlišče in vidite podgraf.
+Na vozlišču Z-Image kliknite gumb v zgornjem desnem kotu, da razširite vozlišče in si ogledate podgraf.
 
 <p align="center">
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
@@ -382,14 +384,15 @@ Delovni tok Z-Image Turbo uporablja štiri ključne komponente modela, ki deluje
 | Komponenta | Vloga |
 |-----------|------|
 | **Kodirnik besedila** (Qwen 3 4B) | Pretvori vaš besedilni poziv v vdelave (embeddings), ki jih razume difuzijski model |
-| **Difuzijski model** (Z-Image Turbo) | Osrednja nevronska mreža, ki iterativno odstranjuje šum iz latentnih predstavitev in jih spreminja v slike |
-| **VAE** (Variacijski avtokoder) | Kodira slike v latentni prostor in iz njega (dekodira končne latente v piksle) |
-| **LoRA** (neobvezno) | Lahki adapterji, ki spremenijo slog ali motiv brez ponovnega učenja osnovnega modela |
+| **Difuzijski model** (Z-Image Turbo) | Osrednja nevronska mreža, ki iterativno odstranjuje šum iz latentnih predstavitev v slike |
+| **VAE** (Variacijski avtokoder) | Kodira slike v/iz latentnega prostora (dekodira končne latente v piksle) |
+| **LoRA** (izbirno) | Lahki prilagoditveni moduli, ki spremenijo slog ali predmet brez ponovnega učenja osnovnega modela |
 
-Vsako vozlišče v delovnem toku ustreza eni od teh komponent. Podatki potekajo od leve proti desni: besedilo → vdelave → vodeno odstranjevanje šuma → latenti → končna slika.
-## Ustvarjanje prve slike
+Vsako vozlišče v delovnem toku ustreza eni od teh komponent. Podatki tečejo od leve proti desni: besedilo → vdelave → vodeno odstranjevanje šuma → latenti → končna slika.
 
-Model Z-Image Turbo je že naložen. Za ustvarjanje slike:
+## Generiranje vaše prve slike
+
+Model Z-Image Turbo je že naložen. Za generiranje slike:
 
 1. **Vnesite svoj poziv** v glavno vozlišče Z-Image. Bodite opisni. Tukaj je primer:
    ```
@@ -397,11 +400,11 @@ Model Z-Image Turbo je že naložen. Za ustvarjanje slike:
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-2. **(Neobvezno)**: Potrdite ali prilagodite katere koli druge specifične nastavitve znotraj podgrafa.
-3. **Kliknite modri gumb »Run Workflow«** v desnem kotu (ali pritisnite `Ctrl+Enter`)
+2. **(Izbirno)**: Potrdite ali prilagodite katere koli druge posebne nastavitve znotraj podgrafa.
+3. **Kliknite modri gumb "Run Workflow"** v desnem kotu (ali pritisnite `Ctrl+Enter`)
 4. Opazujte, kako se vozlišča osvetlijo ob izvajanju vsakega koraka
 
-Celotno izvajanje poteka opravila naj bi bilo zaključeno v manj kot 30 sekundah. Vaša ustvarjena slika se prikaže v vozlišču **Save Image** in se shrani v mapo `output/`.
+Celotno izvajanje delovnega toka naj bi bilo končano v manj kot 30 sekundah. Vaša ustvarjena slika se prikaže v vozlišču **Save Image** in se shrani v mapo `output/`.
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -462,6 +465,7 @@ for _ in range(600):
  time.sleep(1)
 
 print("No outputs after waiting.")
+print("history status:", json.dumps(entry.get("status", {})))  # surfaces the ComfyUI node/execution error
 sys.exit(1)
 '@ | & $py -
  if ($LASTEXITCODE -ne 0) { throw "Workflow submit/generation failed" }
@@ -540,6 +544,7 @@ for _ in range(600):
  time.sleep(1)
 
 print("No outputs after waiting.")
+print("history status:", json.dumps(entry.get("status", {})))  # surfaces the ComfyUI node/execution error
 sys.exit(1)
 PY
 ```
@@ -573,44 +578,43 @@ ls -1t ComfyUI/output/*.png | head -n 5
 <!-- @os:end -->
 
 
-## Prilagajanje parametrov ustvarjanja
-
+## Prilagajanje parametrov generiranja
 ### Nastavitve KSampler
 
-Vozlišče KSampler nadzoruje osrednji postopek difuzije:
+Vozlišče KSampler nadzoruje osnovni proces difuzije:
 
 | Parameter | Kaj nadzoruje | Priporočeno za Z-Image Turbo |
 |-----------|------------------|-------------------------------|
-| **steps** | Število iteracij odstranjevanja šuma | 4–10 (turbo modeli so destilirani za manjše število korakov) |
-| **cfg** | Lestvica vodenja brez klasifikatorja (classifier-free guidance) – kako natančno slediti pozivu | 1,0–2,0 (turbo modeli uporabljajo zelo nizko vodenje) |
+| **steps** | Število iteracij odstranjevanja šuma | 4–10 (turbo modeli so destilirani za manj korakov) |
+| **cfg** | Lestvica vodenja brez klasifikatorja – kako natančno slediti pozivu | 1,0–2,0 (turbo modeli uporabljajo zelo nizko vodenje) |
 | **sampler_name** | Algoritem odstranjevanja šuma | `euler` in `res_multistep` dobro delujeta za turbo modele |
-| **scheduler** | Krivulja razporeda šuma | `normal` ali `simple` |
-| **seed** | Naključno seme za ponovljivost | Nastavite fiksne vrednosti za ponavljanje kompozicije |
+| **scheduler** | Krivulja urnika šuma | `normal` ali `simple` |
+| **seed** | Naključno seme za ponovljivost | Nastavite fiksne vrednosti za iteriranje kompozicije |
 
 ### Velikost slike
 
-Za prilagoditev izhodnih dimenzij poiščite vozlišče **Empty Latent Image** in spremenite **width** in **height**. Za optimalno kakovost naj bodo dimenzije na daljši strani enake ali manjše od 1024 slikovnih pik.
+Za prilagoditev dimenzij izhoda poiščite vozlišče **Empty Latent Image** in spremenite **width** in **height**. Dimenzije naj bodo enake ali manjše od 1024 slikovnih pik na najdaljši stranici za optimalno kakovost.
 
 ### ModelSamplingAuraFlow
 
-Vozlišče **ModelSamplingAuraFlow** je specializiran modifikator vzorčenja, ki prilagaja, kako postopek difuzije obravnava razporejanje šuma. To vozlišče boste videli povezano z izhodom modela v poteku dela Z-Image Turbo.
+Vozlišče **ModelSamplingAuraFlow** je specializiran modifikator vzorčenja, ki prilagaja, kako proces difuzije obravnava urnik šuma. To vozlišče boste videli povezano z izhodom modela v poteku dela Z-Image Turbo.
 
 | Parameter | Kaj nadzoruje | Priporočene vrednosti |
 |-----------|------------------|-------------------|
-| **shift** | Prilagaja časovno razporeditev šuma – višje vrednosti premaknejo več izpopolnjevanja podrobnosti na kasnejše korake | 1,0–4,0 (privzeta vrednost je 3,0) |
+| **shift** | Prilagaja časovno usklajenost urnika šuma – višje vrednosti prenesejo večino izpopolnjevanja podrobnosti v poznejše korake | 1,0–4,0 (privzeta vrednost je 3,0) |
 
 Kdaj prilagoditi **shift**:
 
-- **Nižje vrednosti (1,0–2,0)**: Hitrejša konvergenca, primerno za preproste kompozicije
-- **Višje vrednosti (3,0–4,0)**: Postopnejše izpopolnjevanje, lahko izboljša drobne podrobnosti pri kompleksnih prizorih
+- **Nižje vrednosti (1,0–2,0)**: Hitrejša konvergenca, dobra za enostavne kompozicije
+- **Višje vrednosti (3,0–4,0)**: Bolj postopno izpopolnjevanje, lahko izboljša fine podrobnosti v kompleksnih prizorih
 
-Metoda vzorčenja AuraFlow je posebej zasnovana za modele z ujemanjem toka (flow-matching), kot je Z-Image Turbo, kar zagotavlja pravilno porazdelitev šuma skozi celoten postopek ustvarjanja.
+Metoda vzorčenja AuraFlow je posebej zasnovana za modele z ujemanjem toka (flow-matching), kot je Z-Image Turbo, kar zagotavlja ustrezno porazdelitev šuma skozi celoten proces generiranja.
 
 ## Delo s poteki dela
 
 ### Shranjevanje potekov dela
 
-Kliknite gumb **Save** v meniju, da izvozite potek dela kot datoteko JSON. To zajame:
+Kliknite gumb **Save** v meniju za izvoz poteka dela kot datoteko JSON. To zajame:
 
 - Vsa vozlišča in njihove parametre
 - Vse povezave med vozlišči
@@ -618,19 +622,19 @@ Kliknite gumb **Save** v meniju, da izvozite potek dela kot datoteko JSON. To za
 
 ### Nalaganje potekov dela
 
-Povlecite datoteko JSON s potekom dela na platno ali uporabite **Load** iz menija. Potek dela Z-Image Turbo, ki ga vidite privzeto, je naložen iz shranjene datoteke poteka dela.
+Povlecite datoteko JSON poteka dela na platno ali uporabite **Load** iz menija. Potek dela Z-Image Turbo, ki ga vidite privzeto, je naložen iz shranjene datoteke poteka dela.
 
 ### Deljenje potekov dela
 
-Poteki dela so samostojni – delite datoteko JSON s sodelavci in ti bodo lahko ponovili vašo natančno nastavitev. To naredi ComfyUI odlično orodje za skupno eksperimentiranje.
+Poteki dela so samostojni – delite datoteko JSON s sodelavci, ki bodo lahko natančno ponovili vašo nastavitev. Zaradi tega je ComfyUI odličen za sodelovalno eksperimentiranje.
 
 ## Naslednji koraki
 
-- **Raziščite vozlišča LoRA**: Uporabite prilagojevalnike sloga ali predmeta brez ponovnega učenja
+- **Raziščite vozlišča LoRA**: Uporabite prilagoditve sloga ali motiva brez ponovnega učenja
 - **Dodajte negativne pozive**: Povežite drugo vozlišče CLIP Text Encode z vhodom pogojevanja **negative** vozlišča KSampler, da model usmerite stran od nezaželenih lastnosti, kot so zamegljenost, artefakti ali vodni žigi
-- **Zgradite prilagojene poteke dela**: Povežite več ustvarjanj v verigo, dodajte povečanje ločljivosti ali ustvarite variacije slik
-- **Prebrskajte poteke dela skupnosti**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) vsebuje veliko pripravljenih potekov dela za takojšnjo uporabo
+- **Ustvarjajte lastne poteke dela**: Verižite več generiranj, dodajte povečanje ločljivosti ali ustvarite variacije slik
+- **Prebrskajte poteke dela skupnosti**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) vsebuje veliko takoj uporabnih potekov dela
 
-Moč ComfyUI je v eksperimentiranju: povežite vozlišča na drugačne načine, prilagajajte parametre in opazujte, kako vsaka sprememba vpliva na izhod. To praktično raziskovanje gradi intuicijo o delovanju difuzijskih modelov.
+Moč ComfyUI je v eksperimentiranju: povezujte vozlišča na različne načine, prilagajajte parametre in opazujte, kako vsaka sprememba vpliva na izhod. To praktično raziskovanje gradi intuicijo o delovanju difuzijskih modelov.
 
 Za več informacij si oglejte [ComfyUI Documentation](https://docs.comfy.org/).
