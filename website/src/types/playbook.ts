@@ -162,8 +162,10 @@ export function categoryForDevice(device: Device): DeviceCategory {
 export interface Author {
   /** Display name, e.g. "Daniel Holanda". "Anonymous" for the placeholder. */
   name: string;
-  /** GitHub handle (profile link built from it), or null when unknown. */
+  /** GitHub handle, or null when unknown. */
   github: string | null;
+  /** Full GitHub profile URL (e.g. "https://github.com/handle"), or null. */
+  github_url: string | null;
   /** Whether this author is AMD or an external community contributor. */
   type: "amd" | "community";
 }

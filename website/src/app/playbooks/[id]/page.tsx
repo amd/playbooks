@@ -1970,9 +1970,9 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                         <span className="text-[#808080]">By</span>
                         {playbook.authors.map((author, i) => (
                           <span key={i} className="flex items-center gap-1">
-                            {author.github ? (
+                            {author.github_url ? (
                               <a
-                                href={`https://github.com/${author.github}`}
+                                href={author.github_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-white hover:underline"

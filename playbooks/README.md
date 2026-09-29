@@ -221,7 +221,12 @@ To edit an existing playbook:
   "description": "Brief description for the card (100-150 chars)",
   "time": 45,
   "authors": [
-    { "name": "First Last", "github": "your-handle", "type": "amd" }
+    {
+      "name": "First Last",
+      "github": "your-handle",
+      "github_url": "https://github.com/your-handle",
+      "type": "amd"
+    }
   ],
   "supported_platforms": { "halo": ["windows", "linux"] },
   "difficulty": "intermediate",
@@ -255,13 +260,14 @@ To edit an existing playbook:
 | Key | Description |
 |-----|-------------|
 | `name` | Author's display name, e.g. `"Daniel Holanda"` |
-| `github` | GitHub handle (the site links to the profile), or `null` if unknown |
+| `github` | GitHub handle, or `null` if unknown |
+| `github_url` | Full profile URL, e.g. `"https://github.com/your-handle"`, or `null`. Must match `github` (both set or both null) |
 | `type` | `"amd"` for AMD authors, `"community"` for external contributors |
 
 If you don't know the author, use the anonymous placeholder:
 
 ```json
-"authors": [{ "name": "Anonymous", "github": null, "type": "community" }]
+"authors": [{ "name": "Anonymous", "github": null, "github_url": null, "type": "community" }]
 ```
 
 **Dates are automatic.** `published_date` and `updated_date` are stamped by the

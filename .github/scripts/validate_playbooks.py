@@ -269,6 +269,18 @@ def validate_playbook_json(
                 gh = a.get("github", "MISSING")
                 if not (gh is None or isinstance(gh, str)):
                     result.add_error(playbook_name, f'authors[{i}] "github" must be a string or null')
+                url = a.get("github_url", "MISSING")
+                if url == "MISSING" or not (url is None or isinstance(url, str)):
+                    result.add_error(
+                        playbook_name,
+                        f'authors[{i}] needs "github_url" (a profile URL string, or null)',
+                    )
+                # github and github_url must agree: both set or both null.
+                elif (gh is None) != (url is None):
+                    result.add_error(
+                        playbook_name,
+                        f'authors[{i}] "github" and "github_url" must both be set or both null',
+                    )
                 if a.get("type") not in VALID_AUTHOR_TYPES:
                     result.add_error(
                         playbook_name,
