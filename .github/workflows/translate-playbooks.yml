@@ -34,15 +34,25 @@ on:
 permissions:
   contents: write
   issues: write
+  pull-requests: write
 
 concurrency:
   group: translate-playbooks-${{ github.ref }}
-  cancel-in-progress: false
+  # Newest-wins: a fresh push supersedes an older, still-running translation
+  # instead of queuing behind it. Combined with the job timeout below, this
+  # stops one hung run from holding the single concurrency slot and silently
+  # backlogging every later push (which is what stalled translations for weeks).
+  cancel-in-progress: true
 
 jobs:
   translate:
     name: Translate playbooks
     runs-on: translation
+    # Bound the job so a hung translate step (e.g. an unresponsive LLM endpoint)
+    # cannot run for hours holding the concurrency slot. On timeout the job
+    # fails, which fires the "Open issue on translation failure" step below so
+    # the breakage is visible instead of silent.
+    timeout-minutes: 120
     env:
       # The 29 Lenovo languages (Portuguese ships as both pt-BR Brazilian and pt-PT
       # European) plus fr-CA for the Canada launch, so French ships as both fr-FR and fr-CA.
@@ -114,22 +124,34 @@ jobs:
           set -uo pipefail
           rc=0
           L="${{ steps.locales.outputs.locales }}"
+          # Fan out over ALL locales at once. Each locale owns its own manifest,
+          # so locale-level parallelism is race-free (see translate_playbook.py).
+          # The endpoint handles every language concurrently, so --jobs is set to
+          # the full locale count rather than a fixed cap; serial runs otherwise
+          # take many hours and hit the job timeout.
+          JOBS=$(echo "$L" | tr ',' '\n' | grep -c .)
+          echo "Parallelizing across $JOBS locales."
           # Shared dependency content (translated once; playbooks reference it).
           if [ "${{ steps.detect.outputs.deps }}" = "true" ]; then
             echo "::group::Translating shared dependencies"
-            python .github/scripts/translate_playbook.py --dependencies --locales "$L" || rc=1
+            python .github/scripts/translate_playbook.py --dependencies --locales "$L" --jobs "$JOBS" || rc=1
             echo "::endgroup::"
           fi
           for pb in ${{ steps.detect.outputs.playbooks }}; do
             echo "::group::Translating $pb"
-            python .github/scripts/translate_playbook.py --playbook "$pb" --locales "$L" || rc=1
+            python .github/scripts/translate_playbook.py --playbook "$pb" --locales "$L" --jobs "$JOBS" || rc=1
             echo "::endgroup::"
           done
           exit $rc
 
-      - name: Commit and push translations
+      - name: Open a PR with the translations
+        # main is a protected branch (changes must go through a PR), so the bot
+        # cannot push directly. Instead push a branch and open a PR that
+        # @-mentions the maintainer for manual review and merge.
         if: always() && steps.detect.outputs.playbooks != ''
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "amd-playbooks-l10n-bot"
           git config user.email "amd-playbooks-l10n-bot@users.noreply.github.com"
@@ -137,10 +159,21 @@ jobs:
             echo "No translation changes to commit."
             exit 0
           fi
+          BRANCH="l10n/update-${{ github.run_id }}"
+          git checkout -b "$BRANCH"
           git add auto-translations
-          git commit -m "l10n: update translations [skip ci]"
-          # Push back to the ref that triggered the run.
-          git push origin HEAD:${{ github.ref_name }}
+          git commit -m "l10n: update translations"
+          git push origin "$BRANCH"
+          # Open a PR for manual review. The @-mention notifies the maintainer.
+          PR_URL=$(gh pr create --base "${{ github.ref_name }}" --head "$BRANCH" \
+            --title "l10n: update translations" \
+            --body "@bconsolvo automated translation update from the Translate Playbooks workflow (run ${{ github.run_id }}). Touches \`auto-translations/\` only — please review and merge." \
+            --label "translation")
+          echo "Opened $PR_URL for manual review."
+          # Request review so it surfaces in the maintainer's review queue,
+          # not just as an @-mention. Best-effort — never fail the run over it.
+          gh pr edit "$PR_URL" --add-reviewer bconsolvo \
+            || echo "::warning::Could not add reviewer; PR $PR_URL is open with an @-mention."
 
       - name: Open issue on translation failure
         if: failure()
