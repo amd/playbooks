@@ -6,3 +6,16 @@
 .github/workflows/*.yml text eol=lf
 auto-translations/**    text eol=lf
 localized-playbooks/**  text eol=lf
+
+# The `**  text eol=lf` rules above match every file, including images and
+# other binaries under those trees. Line-ending normalization corrupts binary
+# files, so re-assert these extensions as binary (git leaves them byte-exact).
+# These come last so they win over the broader text rules above.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.pdf  binary
+*.wav  binary
+*.zip  binary
