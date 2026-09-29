@@ -38,10 +38,50 @@
     "halo": [
       "linux",
       "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
     ]
   },
   "required_platforms": {
     "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
       "linux",
       "windows"
     ]
@@ -87,5 +127,13 @@
     "llm",
     "rocm"
   ],
-  "coverImage": "assets/cover_image.jpg"
+  "coverImage": "assets/cover_image.jpg",
+  "recommendedSystemMemory": 24,
+  "validatedVersions": {
+    "reference": {
+      "linux": {},
+      "windows": {}
+    }
+  },
+  "primaryModel": "Gemma-3-4B"
 }
