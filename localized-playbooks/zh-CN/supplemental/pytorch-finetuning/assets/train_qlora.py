@@ -14,7 +14,7 @@ Memory Requirements: ~12-16GB VRAM
 Training Speed: Fast
 Quality: Excellent with pre-quantized model
 
-Note on MXFP4 base models (e.g. openai/gpt-oss-20b):
+Note on MXFP4 base models (e.g. openai-mirror/gpt-oss-20b (openai/gpt-oss-20b)):
     For MXFP4 bases, prefer LoRA (train_lora.py) over QLoRA. The bitsandbytes
     4-bit path here typically dequantizes MXFP4 weights to BF16, so the run
     behaves like standard LoRA anyway. A successful run does not mean true
