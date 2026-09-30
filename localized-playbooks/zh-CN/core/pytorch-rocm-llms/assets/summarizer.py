@@ -54,7 +54,7 @@ class DocumentSummarizer:
         Initialize the summarizer with the specified model.
 
         Args:
-            model: A Hugging Face model id (e.g. "openai-mirror/gpt-oss-20b" or
+            model: A ModelScope model ID (e.g. "openai-mirror/gpt-oss-20b" or
                    "Qwen/Qwen3.5-4B"), or a short alias from MODEL_ALIASES.
         """
         self.model_name = MODEL_ALIASES.get(model, model)
@@ -219,7 +219,7 @@ class DocumentSummarizer:
 def main():
     parser = argparse.ArgumentParser(description="Summarize documents using LLMs")
     parser.add_argument("--model", default=DEFAULT_MODEL,
-                        help="Hugging Face model id or alias (gptoss, qwen). "
+                        help="ModelScope model ID or alias (gptoss, qwen). "
                              f"Default: {DEFAULT_MODEL}")
     parser.add_argument("--file", default=None, help="Path to .txt file to summarize")
     parser.add_argument("--max-length", type=int, default=1024,

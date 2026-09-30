@@ -83,7 +83,7 @@ def main():
     parser.add_argument(
         "--model",
         default=DEFAULT_MODEL,
-        help=f"Hugging Face model id (default: {DEFAULT_MODEL})",
+        help=f"ModelScope model ID (default: {DEFAULT_MODEL})",
     )
     args = parser.parse_args()
 
