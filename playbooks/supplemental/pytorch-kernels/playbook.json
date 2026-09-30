@@ -136,9 +136,15 @@
   },
   "authors": [
     {
-      "name": "Aaryaman Vasishta",
-      "github": "jammm",
-      "github_url": "https://github.com/jammm",
+      "name": "Satya Devineni",
+      "github": "sdevinenamd",
+      "github_url": "https://github.com/sdevinenamd",
+      "type": "amd"
+    },
+    {
+      "name": "Adam Lam",
+      "github": "adamlam2-amd",
+      "github_url": "https://github.com/adamlam2-amd",
       "type": "amd"
     }
   ],
