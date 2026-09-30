@@ -50,9 +50,14 @@ jobs:
     runs-on: translation
     # Bound the job so a hung translate step (e.g. an unresponsive LLM endpoint)
     # cannot run for hours holding the concurrency slot. On timeout the job
-    # fails, which fires the "Open issue on translation failure" step below so
-    # the breakage is visible instead of silent.
+    # fails, which fires the "Open issue on translation failure" step in the
+    # open-pr job below so the breakage is visible instead of silent.
     timeout-minutes: 120
+    # Consumed by the open-pr job (which runs on a GitHub-hosted runner that
+    # actually has `gh`). branch/changed tell it whether — and what — to PR.
+    outputs:
+      changed: ${{ steps.push.outputs.changed }}
+      branch: ${{ steps.push.outputs.branch }}
     env:
       # The 29 Lenovo languages (Portuguese ships as both pt-BR Brazilian and pt-PT
       # European) plus fr-CA for the Canada launch, so French ships as both fr-FR and fr-CA.
@@ -149,19 +154,22 @@ jobs:
             python .github/scripts/translate_playbook.py $DEPS_FLAG --locales "$L" --jobs "$JOBS"
           fi
 
-      - name: Open a PR with the translations
+      - name: Commit and push the translation branch
         # main is a protected branch (changes must go through a PR), so the bot
-        # cannot push directly. Instead push a branch and open a PR that
-        # @-mentions the maintainer for manual review and merge.
+        # cannot push to main directly. Push the results to a side branch here
+        # using git (which IS installed on the self-hosted runner); the separate
+        # open-pr job opens the PR with `gh` on a GitHub-hosted runner, because
+        # `gh` is NOT installed on the self-hosted `translation` runner (that
+        # missing binary is what failed run 36627775056 with exit code 127).
+        id: push
         if: always() && steps.detect.outputs.playbooks != ''
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "amd-playbooks-l10n-bot"
           git config user.email "amd-playbooks-l10n-bot@users.noreply.github.com"
           if [ -z "$(git status --porcelain auto-translations)" ]; then
             echo "No translation changes to commit."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           BRANCH="l10n/update-${{ github.run_id }}"
@@ -169,8 +177,35 @@ jobs:
           git add auto-translations
           git commit -m "l10n: update translations"
           git push origin "$BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  # PR/issue creation runs on a GitHub-hosted runner: `gh` is preinstalled and
+  # api.github.com is reachable. The self-hosted `translation` runner has neither
+  # guaranteed, so keeping any `gh` call there is what broke the previous run.
+  open-pr:
+    name: Open translation PR
+    needs: translate
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Open a PR with the translations
+        # Open a PR whenever a branch was actually pushed, even if the translate
+        # job then failed the structural gate: the files that DID translate are
+        # worth reviewing, and the failure issue below flags what broke.
+        if: needs.translate.outputs.changed == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ needs.translate.outputs.branch }}
+        run: |
           # Open a PR for manual review. The @-mention notifies the maintainer.
-          PR_URL=$(gh pr create --base "${{ github.ref_name }}" --head "$BRANCH" \
+          PR_URL=$(gh pr create --repo "${{ github.repository }}" \
+            --base "${{ github.ref_name }}" --head "$BRANCH" \
             --title "l10n: update translations" \
             --body "@bconsolvo automated translation update from the Translate Playbooks workflow (run ${{ github.run_id }}). Touches \`auto-translations/\` only — please review and merge." \
             --label "translation")
@@ -181,7 +216,7 @@ jobs:
             || echo "::warning::Could not add reviewer; PR $PR_URL is open with an @-mention."
 
       - name: Open issue on translation failure
-        if: failure()
+        if: needs.translate.result == 'failure'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -191,6 +226,6 @@ jobs:
           # Leading @-mention notifies @bconsolvo even if the assignee/label steps fail.
           BODY="@bconsolvo the Translate Playbooks workflow failed: a playbook translation errored or did not pass the structural validation gate (code fences or @-tags did not match the English source). Run: $RUN_URL"
           # Fall back progressively so a missing label or a non-assignable user never swallows the alert.
-          gh issue create --title "$TITLE" --body "$BODY" --assignee bconsolvo --label "translation" \
-            || gh issue create --title "$TITLE" --body "$BODY" --assignee bconsolvo \
-            || gh issue create --title "$TITLE" --body "$BODY"
+          gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body "$BODY" --assignee bconsolvo --label "translation" \
+            || gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body "$BODY" --assignee bconsolvo \
+            || gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body "$BODY"
