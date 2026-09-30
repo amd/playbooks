@@ -218,6 +218,13 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# keep-id maps the calling user into the container. Root does not need it, and as root it cannot
+# be combined with --ipc=host (crun fails to mount /dev/mqueue), so root keeps the host user namespace.
+userns=keep-id
+if [ "$(id -u)" -eq 0 ]; then
+  userns=host
+fi
+
 # Remove any stale instance, then start ds4-server detached (same flags ai-toolbox-cockpit uses, with -d instead of -it).
 podman rm -f "$CONTAINER" >/dev/null 2>&1 || true
 podman run -d --name "$CONTAINER" \
@@ -227,7 +234,7 @@ podman run -d --name "$CONTAINER" \
   --ipc=host \
   --cap-add=SYS_PTRACE \
   --security-opt label=disable \
-  --userns=keep-id \
+  --userns="$userns" \
   -p 127.0.0.1:8000:8000 \
   -v "$MODEL_DIR":/models:ro \
   "$image" \

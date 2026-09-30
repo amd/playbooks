@@ -31,7 +31,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. En Linux, abre una terminal en el directorio de tu elección y sigue los comandos para crear un venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -72,7 +72,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. En Linux, abre una terminal en el directorio de tu elección y sigue los comandos para crear un venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -91,9 +91,9 @@ pip install amd-gaia
 <!-- @os:end -->
 <!-- @device:end -->
 
-3. Inicialización de GAIA
+3. Inicializando GAIA
 
-Después de la instalación, ejecuta `gaia init` para configurar Lemonade Server y descargar los modelos:
+Después de la instalación, ejecuta `gaia init` para configurar Lemonade Server y descargar modelos:
 
 ```bash
 gaia init
@@ -287,6 +287,6 @@ Verifica que GAIA v0.16.2 o posterior esté instalado:
 gaia --version
 ```
 
-> **Importante**: Asegúrate de que Lemonade Server esté ejecutándose antes de usar GAIA. GAIA requiere que Lemonade Server se inicie manualmente.
+> **Importante**: Asegúrate de que Lemonade Server esté en ejecución antes de usar GAIA. GAIA requiere que Lemonade Server se inicie manualmente.
 
 Para obtener más información, consulta la [documentación de GAIA](https://amd-gaia.ai).

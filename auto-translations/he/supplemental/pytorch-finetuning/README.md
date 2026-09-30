@@ -16,69 +16,71 @@ SPDX-License-Identifier: MIT
 
 ## סקירה כללית
 
-מדריך זה מספק דוגמאות שלב-אחר-שלב לכוונון עדין (fine-tuning) של מודל שפה גדול (LLM) באמצעות PyTorch ו-ROCm. הוא מכסה מספר טכניקות, החל מכוונון עדין רגיל ועד לאסטרטגיות כוונון עדין יעיל בזיכרון (Parameter-Efficient Fine-Tuning - PEFT), כך שתוכלו להתאים בקלות מודלים לצרכים שלכם.
+מדריך זה מספק דוגמאות שלב-אחר-שלב לכוונון עדין (fine-tuning) של מודל שפה גדול (LLM) באמצעות PyTorch ו-ROCm. הוא מכסה מספר טכניקות, מכוונון עדין רגיל ועד לאסטרטגיות כוונון עדין יעיל בזיכרון (Parameter-Efficient Fine-Tuning - PEFT), כך שתוכלו להתאים מודלים בקלות לצרכים שלכם.
 
-**המודל בשימוש**: google/gemma-3-4b-it  *(ראו [הפעלת אימות HF](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) אם המודל נעול)*  
-**חומרה**: מעבד גרפי AMD Radeon™ עם תמיכת ROCm  
-**מסגרת עבודה**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
+**המודל בו נעשה שימוש**: google/gemma-3-4b-it  *(ראו [הפעלת אימות HF](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) אם המודל נעול)*  
+**חומרה**: מעבד גרפי (GPU) של ‎AMD Radeon™‎ עם תמיכת ROCm  
+**מסגרת עבודה**: PyTorch ‎+‎ Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
 > **הערה:** 
-> - כוונון עדין מלא דורש לפחות **64 GB של זיכרון מערכת**, מתוכם לפחות **32 GB זמינים ל-GPU** (32 ה-GB הם חלק מ-64 ה-GB, ולא בנוסף אליהם).
-> - ניתן גם לנסות ארכיטקטורות מודל אחרות, כולל **GPT-OSS-20B**, על ידי החלפת המודל בסקריפטי האימון המסופקים.
+> - כוונון עדין מלא (Full fine-tuning) דורש לפחות **64 GB של זיכרון RAM במערכת**, כאשר לפחות **32 GB מתוכם זמינים ל-GPU** (32 ה-GB הם חלק מ-64 ה-GB, ולא בנוסף להם).
+> - ניתן גם לנסות ארכיטקטורות מודלים אחרות, כולל **GPT-OSS-20B**, על ידי החלפת המודל בסקריפטים המסופקים לאימון.
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **הערה:** כוונון עדין מסוג LoRA ו-QLoRA דורש לפחות **32 GB של זיכרון מערכת**, מתוכם לפחות **16 GB זמינים ל-GPU** (16 ה-GB הם חלק מ-32 ה-GB, ולא בנוסף אליהם).
+> **הערה:** כוונון עדין באמצעות LoRA ו-QLoRA דורש לפחות **32 GB של זיכרון RAM במערכת**, כאשר לפחות **16 GB מתוכם זמינים ל-GPU** (16 ה-GB הם חלק מ-32 ה-GB, ולא בנוסף להם).
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **הערה:** כוונון עדין מסוג LoRA דורש לפחות **32 GB של זיכרון מערכת**, מתוכם לפחות **16 GB זמינים ל-GPU** (16 ה-GB הם חלק מ-32 ה-GB, ולא בנוסף אליהם).
+> **הערה:** כוונון עדין באמצעות LoRA דורש לפחות **32 GB של זיכרון RAM במערכת**, כאשר לפחות **16 GB מתוכם זמינים ל-GPU** (16 ה-GB הם חלק מ-32 ה-GB, ולא בנוסף להם).
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **הערה:** כוונון עדין מסוג LoRA ו-QLoRA דורש כרטיס מסך עם לפחות **16 GB זיכרון GPU ייעודי** ו-**32 GB זיכרון מערכת**.
-> - ב-Linux, האימון פועל כולו בזיכרון ה-VRAM הייעודי של כרטיס המסך.
-> - הוא אינו חוזר לזיכרון GPU משותף (זיכרון מערכת) כאשר ה-VRAM אוזל.
-> - כרטיסים עם פחות מ-16 GB VRAM ייעודי ייגמר להם הזיכרון במהלך האימון ב-Linux, גם אם למערכת יש הרבה RAM.
+> **הערה:** כוונון עדין באמצעות LoRA ו-QLoRA דורש כרטיס מסך עם לפחות **16 GB של זיכרון GPU ייעודי** ו-**32 GB של זיכרון RAM במערכת**.
+> - בלינוקס, האימון פועל כולו בזיכרון ה-VRAM הייעודי של כרטיס המסך.
+> - הוא אינו עובר לזיכרון GPU משותף (RAM של המערכת) כאשר ה-VRAM נגמר.
+> - כרטיסים עם פחות מ-16 GB של VRAM ייעודי ייגמר להם הזיכרון במהלך האימון בלינוקס, גם אם למערכת יש הרבה RAM.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **הערה:** כוונון עדין מסוג LoRA דורש לפחות **16 GB של זיכרון GPU כולל** ו-**32 GB זיכרון מערכת**.
-> - ב-Windows, זיכרון GPU כולל משלב את ה-VRAM הייעודי של כרטיס המסך עם זיכרון GPU משותף (מושאל מזיכרון המערכת).
-> - לכן, כרטיסים עם פחות מ-16 GB VRAM ייעודי עדיין יכולים להריץ מדריך זה על ידי שימוש בזיכרון GPU משותף כדי להשלים את ההפרש.
+> **הערה:** כוונון עדין באמצעות LoRA דורש לפחות **16 GB של זיכרון GPU כולל** ו-**32 GB של זיכרון RAM במערכת**.
+> - בחלונות, זיכרון ה-GPU הכולל משלב את ה-VRAM הייעודי של כרטיס המסך עם זיכרון GPU משותף (שנשאל מזיכרון ה-RAM של המערכת).
+> - לכן, כרטיסים עם פחות מ-16 GB של VRAM ייעודי עדיין יכולים להריץ את המדריך הזה באמצעות שימוש בזיכרון GPU משותף כדי להשלים את ההפרש.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## מה תלמדו
 
-- כיצד לכוונן עדין LLM באמצעות LoRA, QLoRA וכוונון עדין מלא עם PyTorch ו-ROCm
+- כיצד לבצע כוונון עדין למודל שפה גדול באמצעות LoRA, QLoRA וכוונון עדין מלא (full fine-tuning) עם PyTorch ו-ROCm
 - כיצד לשמור ולפרוס את המודל המכוונן שלכם
-- כיצד לנטר אימון ולנפות תקלות נפוצות
+- כיצד לנטר את האימון ולבצע איתור באגים לבעיות נפוצות
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## הגדרת תצורת הזיכרון
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## בדיקת עדכוני תוכנה
-> **הערה**: אם VS Code אינו מותקן, ניתן להתקין אותו עם Ryzen AI Developer Center.
+> **הערה**: אם VS Code אינו מותקן, ניתן להתקין אותו באמצעות Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות תוכנה מקדימות
+## התקנת דרישות תוכנה מוקדמות
 
 #### יצירת סביבה וירטואלית
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update 
 sudo apt install -y python3-venv 
@@ -96,7 +98,7 @@ source finetune-venv/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -110,7 +112,7 @@ source finetune-venv/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv --system-site-packages
 finetune-venv\Scripts\activate
@@ -120,7 +122,7 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv
 finetune-venv\Scripts\activate
@@ -138,25 +140,25 @@ finetune-venv\Scripts\activate
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** רק חבילות ליבה נבדקות ונתמכות כאן. **bitsandbytes אינו נתמך היטב ב-Windows**, ולכן ההתקנה ב-Windows משמיטה אותו; יש להשתמש ב-LoRA או בכוונון עדין מלא ב-Windows (QLoRA דורש bitsandbytes ומיועד ל-Linux).
+**חלונות:** רק חבילות הליבה נבדקו ונתמכות כאן. **bitsandbytes אינו נתמך היטב בחלונות**, לכן ההתקנה עבור חלונות משמיטה אותה; השתמשו ב-LoRA או בכוונון עדין מלא בחלונות (QLoRA דורש bitsandbytes ומיועד ללינוקס).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 #### הפעלת אימות HF (מודלים נעולים או מותאמים אישית / שאינם מותקנים מראש)
 
-בדוגמה זו אנו משתמשים ב-**google/gemma-3-4b-it**, שהוא מודל **נעול (gated)**. עליכם לקבל את תנאי השימוש של המודל ב-Hugging Face ולאחר מכן להתאמת עצמכם (authenticate) כך שסקריפטי האימון יוכלו להוריד אותו.
+בדוגמה זו אנו משתמשים ב-**google/gemma-3-4b-it**, שהוא מודל **נעול**. עליכם לאשר את התנאים של המודל ב-Hugging Face ולאחר מכן לבצע אימות כך שסקריפטי האימון יוכלו להוריד אותו.
 
-1. **קבלת הרישיון:** פתחו את [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), התחברו (או צרו חשבון), וקבלו את הרישיון/תנאים בדף המודל (לדוגמה, "Agree and access repository").
+1. **קבלת הרישיון:** פתחו את [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), התחברו (או צרו חשבון), וקבלו את הרישיון/התנאים בדף המודל (למשל, "Agree and access repository").
 2. **התקנה והתחברות:** התקינו את ה-Hugging Face CLI, ולאחר מכן הריצו את ההתחברות הרגילה:
 
 ```bash
@@ -265,9 +267,9 @@ sys.exit(r.returncode)
 
 ### מהו LoRA?
 
-**LoRA (Low-Rank Adaptation)** משאיר את המודל הבסיסי קפוא ומאמן רק מטריצות "מתאם" (adapter) קטנות שמתווספות לשכבות מסוימות. 
+**LoRA ‏(Low-Rank Adaptation)** משאיר את המודל הבסיסי קפוא ומאמן רק מטריצות "מתאם" (adapter) קטנות שמתווספות לשכבות מסוימות. 
 
-- **הרעיון המרכזי**: במקום לעדכן מטריצת משקלים ענקית עם מיליוני פרמטרים, אנו לומדים עדכון בדרגה נמוכה (rank נמוך) (שתי מטריצות קטנות שהמכפלה שלהן מכילה הרבה פחות פרמטרים). כך מתקבל צמצום משמעותי במספר הפרמטרים הניתנים לאימון ובזיכרון ה-VRAM, תוך שמירה על רוב איכות הכוונון העדין המלא.
+- **הרעיון המרכזי**: במקום לעדכן מטריצת משקלים ענקית עם מיליוני פרמטרים, אנו לומדים עדכון בדרגה נמוכה (rank נמוך) - שתי מטריצות קטנות שהמכפלה שלהן מכילה הרבה פחות פרמטרים. כך מתקבלת הפחתה גדולה במספר הפרמטרים הניתנים לאימון ובזיכרון ה-VRAM, תוך שמירה על רוב האיכות של כוונון עדין מלא.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -282,7 +284,7 @@ W_updated = W + B × A
 
 ### מהו QLoRA?
 
-**QLoRA** משלב **קוונטיזציה של 4-סיביות** עם **LoRA**. המודל הבסיסי נטען ב-4 סיביות (חיסכון גדול בזיכרון), ורק מתאמי ה-LoRA מאומנים בדיוק גבוה יותר. כך מקבלים את היעילות הפרמטרית של LoRA בתוספת VRAM נמוך בהרבה, עם פשרת איכות קטנה בהשוואה ל-LoRA בדיוק מלא. שימו לב שקוונטיזציה של 4-סיביות עלולה לגרום לחוסר יציבות מספרית (קפיצות הפסד או NaN), ולכן משתמשים רבים מעדיפים לעיתים **LoRA** אם יש מספיק VRAM זמין.
+**QLoRA** משלב **קוונטיזציה ל-4 סיביות** עם **LoRA**. המודל הבסיסי נטען ב-4 סיביות (חיסכון גדול בזיכרון), ורק מתאמי ה-LoRA מאומנים בדיוק גבוה יותר. כך מתקבלת יעילות הפרמטרים של LoRA בתוספת VRAM נמוך בהרבה, עם פשרה קטנה באיכות בהשוואה ל-LoRA בדיוק מלא. שימו לב שקוונטיזציה ל-4 סיביות עלולה לגרום לחוסר יציבות מספרית (קפיצות בפונקציית האובדן או ערכי NaN), ולכן משתמשים לרוב עשויים להעדיף **LoRA** אם יש מספיק VRAM זמין.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -290,38 +292,38 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **הערה**: עבור מודלי בסיס מסוג MXFP4 כמו `openai/gpt-oss-20b`, אנו ממליצים להשתמש ב-**LoRA** (`train_lora.py`) במקום ב-QLoRA. הנתיב של 4-סיביות בסקריפט QLoRA באמצעות `bitsandbytes` בדרך כלל מבצע דה-קוונטיזציה למשקלי MXFP4 ל-BF16, כך שההרצה מתנהגת כמו LoRA רגיל. MXFP4 מקורי דורש `bitsandbytes` בנוי מהמקור בתוספת מחסנית Transformers/Triton/kernels תואמת. ראו [תיעוד MXFP4 של Transformers](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **הערה**: עבור מודלים בסיסיים מסוג MXFP4 כגון `openai/gpt-oss-20b`, אנו ממליצים להשתמש ב-**LoRA** (`train_lora.py`) במקום ב-QLoRA. הנתיב ל-4 סיביות של `bitsandbytes` בסקריפט ה-QLoRA בדרך כלל מבצע דה-קוונטיזציה (dequantize) למשקלי MXFP4 חזרה ל-BF16, כך שההרצה מתנהגת כמו LoRA רגיל. MXFP4 מקורי (native) דורש `bitsandbytes` שנבנה מקוד המקור בתוספת ערימת Transformers/Triton/kernels תואמת. ראו [תיעוד MXFP4 של Transformers](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
 ### 2. בחר את השיטה שלך
 
-| שיטה | זיכרון | מהירות | איכות | הכי מתאים ל |
+| שיטה | זיכרון | מהירות | איכות | הכי מתאים עבור |
 |--------|--------|-------|---------|----------|
-| **QLoRA** (בלינוקס בלבד) | 12-16GB | הכי מהיר | 90-95% | שימוש נמוך בזיכרון |
+| **QLoRA** (Linux בלבד) | 12-16GB | הכי מהיר | 90-95% | שימוש נמוך בזיכרון |
 | **LoRA** | 24-32GB | מהיר | 95-98% | גישה מאוזנת |
 | **Full** | 80GB+ | הכי איטי | 100% | איכות מקסימלית |
 
-### 3. הרץ אימון
+### 3. הרצת אימון
 
 **מערך הנתונים ומה המודל לומד**  
-הסקריפטים הופכים את מערך הנתונים לדוגמאות צ'אט. לדוגמה, סקריפט ה-QLoRA משתמש ב-**Abirate/english_quotes**: כל דוגמה הופכת לזוג משתמש-עוזר כמו:
+הסקריפטים הופכים את מערך הנתונים לדוגמאות שיחה. לדוגמה, סקריפט ה-QLoRA משתמש ב-**Abirate/english_quotes**: כל דוגמה הופכת לזוג משתמש-עוזר כמו:
 
-- **משתמש:** "תן לי ציטוט על: &lt;tag&gt;"
-- **עוזר:** "&lt;quote&gt; – &lt;author&gt;"
+- **משתמש:** "תן לי ציטוט על: &lt;תג&gt;"
+- **עוזר:** "&lt;ציטוט&gt; – &lt;מחבר&gt;"
 
-כוונון עדין מלמד את המודל להגיב להנחיות המבקשות ציטוטים על נושא מסוים ולהחזיר אותם בפורמט `<quote text> - <author>`. סקריפטי ה-LoRA והכוונון העדין המלא משתמשים ב-**databricks/databricks-dolly-15k** (זוגות הנחיה/תגובה כלליים), כך שהמשימה המדויקת משתנה לפי הסקריפט; הרעיון זהה - להתאים את המודל למערך הנתונים ולפורמט שבחרת.
+כוונון עדין מלמד את המודל להגיב לבקשות המבקשות ציטוטים על נושא מסוים ולהחזיר אותם בפורמט `<quote text> - <author>`. סקריפטי ה-LoRA וכוונון עדין מלא משתמשים ב-**databricks/databricks-dolly-15k** (זוגות הוראה/תגובה כלליים), כך שהמשימה המדויקת משתנה לפי הסקריפט; הרעיון זהה - להתאים את המודל למערך הנתונים ולפורמט שבחרת.
 
 להלן סיכום של שיטות האימון הזמינות. כל שיטה מקושרת לסקריפט שלה ומספקת תיאור קצר לבחירת הגישה הנכונה.
 
 | סקריפט                           | שיטה            | תיאור                                                                                                         | VRAM טיפוסי | מומלץ עבור                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | מאמן מטריצות מתאם קטנות תוך הקפאת המודל הבסיסי. מהיר פי 3-5; ~95-98% מהאיכות המלאה.                         | 24–32GB      | משתמשים מתקדמים; מספר מתאמים; יותר VRAM    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(בלינוקס בלבד)*             | **QLoRA**       | קוונטיזציה ל-4-ביט + מתאמי LoRA. שימוש הנמוך ביותר בזיכרון, הכי מהיר, פשרת איכות קטנה. דורש `bitsandbytes` (בלינוקס בלבד).                            | 12–16GB      | רוב המשתמשים; ניסויים מהירים; VRAM מוגבל      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **כוונון עדין מלא** | מעדכן את כל פרמטרי המודל. איכות מקסימלית; שימוש הגבוה ביותר בזיכרון ובחישוב.                                    | 40GB+        | איכות מקסימלית; מחקר; VRAM גדול           |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | מאמן מטריצות מתאם קטנות תוך הקפאת המודל הבסיסי. מהיר פי 3–5; ~95–98% מהאיכות המלאה.                         | 24–32GB      | משתמשים מתקדמים; מתאמים מרובים; יותר VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(Linux בלבד)*             | **QLoRA**       | קוונטיזציה ב-4 ביט + מתאמי LoRA. שימוש נמוך ביותר בזיכרון, הכי מהיר, פשרה קטנה באיכות. דורש `bitsandbytes` (Linux בלבד).                            | 12–16GB      | רוב המשתמשים; ניסויים מהירים; VRAM מוגבל      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **כוונון עדין מלא** | מעדכן את כל פרמטרי המודל. איכות מקסימלית; השימוש הגבוה ביותר בזיכרון ובחישוב.                                    | 40GB+        | איכות מקסימלית; מחקר; VRAM גדול           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **הערה:** כוונון עדין מלא (`train_full_finetuning.py`) עשוי לדרוש יותר מ-64GB של זיכרון מערכת (RAM) וייתכן שלא יהיה ישים במכשיר זה. שקול להשתמש ב-LoRA או ב-QLoRA במקום זאת.
+> **הערה:** כוונון עדין מלא (`train_full_finetuning.py`) עשוי לדרוש יותר מ-64GB של זיכרון מערכת (RAM) וייתכן שלא יהיה ישים במכשיר זה. שקול להשתמש ב-LoRA או QLoRA במקום זאת.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -329,13 +331,13 @@ Total: 12GB (vs 40GB full precision)
 <!-- @os:end -->
 <!-- @device:end -->
 
-פשוט בחר את `Training method` המועדפת עליך, הורד את הסקריפט המתאים והפעל אותו באמצעות הפקודה תוך שמירה על הסביבה הווירטואלית שלך פעילה: 
+פשוט בחר את `Training method` המועדפת עליך, הורד את הסקריפט המתאים והרץ אותו באמצעות הפקודה תוך שמירה על סביבה וירטואלית פעילה: 
 
 ```python
 python3 train_<method_name>.py.
 ```
 
-## שימוש במודל שכוונן עדין שלך
+## שימוש במודל המכוונן שלך
 
 ### לאחר כוונון עדין מלא
 
@@ -377,7 +379,7 @@ outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-### מיזוג מתאם LoRA למודל הבסיסי
+### מיזוג מתאם LoRA למודל הבסיס
 
 ```python
 # Merge LoRA/QLoRA adapter weights into the base model for standalone inference
@@ -387,11 +389,11 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **הערה:**  
-- ודא ששם ספריית המודל (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) תואם לתיקיית הפלט בפועל שלך מהאימון.  
+- ודא ששם ספריית המודל (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) תואם לתיקיית הפלט בפועל מהאימון שלך.  
 - אם השתמשת ב-LoRA במקום QLoRA, פשוט החלף את הנתיב בהתאם.  
 - חלק ממודלי Gemma דורשים ציון `trust_remote_code=True` ב-`from_pretrained`; הוסף אם אתה רואה אזהרה קשורה.
 
-עבור הגדרות מותאמות אישית נוספות (טוקני ריפוד, מכשיר וכו'), עיין בסקריפט שבו השתמשת לאימון.
+לקבלת הגדרות מותאמות אישית נוספות (אסימוני ריפוד, מכשיר וכו'), עיין בסקריפט שבו השתמשת לאימון.
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -467,16 +469,18 @@ required = [
     "config.json",
     "tokenizer_config.json",
     "tokenizer.json",
-    "model.safetensors.index.json",
 ]
 missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
 if missing:
     print(f"FAIL: Missing required files: {missing}")
     sys.exit(1)
 
+# Weights may be saved as a single model.safetensors or, when the model
+# exceeds max_shard_size, as model-*.safetensors shards plus an index.
+single = os.path.exists(os.path.join(out_dir, "model.safetensors"))
 shards = glob.glob(os.path.join(out_dir, "model-*.safetensors"))
-if not shards:
-    print("FAIL: No sharded model safetensors files found")
+if not single and not shards:
+    print("FAIL: No model safetensors weights found")
     sys.exit(1)
 
 print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
@@ -487,9 +491,9 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ## מדריך התאמה אישית
 
-### השתמש במערך הנתונים שלך
+### שימוש במערך הנתונים שלך
 
-כל הסקריפטים משתמשים באותו פורמט מערך נתונים. החלף את קטע הטעינה:
+כל הסקריפטים משתמשים באותו פורמט מערך נתונים. החלף את חלק הטעינה:
 
 ```python
 from datasets import load_dataset
@@ -515,12 +519,12 @@ def format_instruction(example):
 dataset = dataset.map(format_instruction)
 ```
 
-**פורמט מערך הנתונים לקובץ JSON/JSONL מקומי:**
+**פורמט מערך נתונים עבור קובץ JSON/JSONL מקומי:**
 
-בעת שימוש בשיטה זו, אנא ודא שקובצי ה-JSON שלך בנויים כראוי כדי למנוע שגיאות ניתוח. 
+בעת שימוש בשיטה זו, ודא שקבצי ה-JSON שלך מובנים כראוי כדי למנוע שגיאות ניתוח (parsing).
 
 יש להקפיד על ההנחיות הבאות:
-* **עיצוב קובץ:** יש לעצב קובצי JSON בתוך סביבת פיתוח משולבת (IDE) כדי להבטיח מבנה ותחביר נכונים.
+* **עיצוב קובץ:** קבצי JSON צריכים להיות מעוצבים בתוך סביבת פיתוח משולבת (IDE) כדי להבטיח מבנה ותחביר תקינים.
 * **מפתחות נדרשים:** קובץ ה-JSON המותאם אישית חייב להכיל את המפתחות `instruction` ו-`response`. מפתחות אלה חיוניים לתפקוד תקין של השיטה.
 ```json
 [
@@ -534,15 +538,15 @@ dataset = dataset.map(format_instruction)
   }
 ]
 ```
-**פורמט מערך הנתונים למערך נתונים מ-Hugging Face Hub**
+**פורמט מערך נתונים עבור מערך נתונים מ-Hugging Face Hub**
 
-בעת שימוש במערכי נתונים מ-Hugging Face, אנא ודא שמערכי הנתונים שלך בנויים כראוי כדי לאפשר אינטגרציה חלקה. 
+בעת שימוש במערכי נתונים מ-Hugging Face, ודא שמערכי הנתונים שלך מובנים כראוי כדי לאפשר שילוב חלק.
 
 יש לפעול לפי ההנחיות הבאות:
-* **זוג הנחיה-תגובה:** התמקד במערכי נתונים הכוללים זוג `instruction-response`. מבנה זה חיוני לפונקציונליות המיועדת.
-* **שינוי מפתח מותאם אישית:** אם מערך הנתונים שלך אינו תואם למבנה `instruction-response`, יש לך אפשרות לשנות את הפונקציה `format_instruction()`. הדבר מאפשר לך להתאים מפתחות ספציפיים לפי הצורך.
+* **זוג הוראה-תגובה:** התמקד במערכי נתונים הכוללים זוג `instruction-response`. מבנה זה חיוני לתפקוד המיועד.
+* **שינוי מפתח מותאם אישית:** אם מערך הנתונים שלך אינו תואם למבנה `instruction-response`, יש לך אפשרות לשנות את הפונקציה `format_instruction()`. הדבר מאפשר לך להתאים למפתחות ספציפיים לפי הצורך.
 
-דוגמה להתאמה: במקרים שבהם יש לכוונן את הפלט של מערך הנתונים, ניתן לשנות את קטע התגובה בתוך הפונקציה format_instruction() כדי להתאים לדרישות שלך.
+דוגמה להתאמה: במקרים שבהם יש להתאים את הפלט של מערך הנתונים, ניתן לשנות את חלק התגובה בתוך הפונקציה format_instruction() כדי להתאים לדרישות שלך.
 ```python
 def format_instruction(example):
     return {
@@ -552,7 +556,7 @@ def format_instruction(example):
         ]
     }
 ```
-**פורמט מערך הנתונים לקובץ CSV**
+**פורמט מערך נתונים עבור קובץ CSV**
 
 כדי להתאים את הסקריפט לשימוש בפורמט קובץ CSV, עליך לוודא שקובץ ה-CSV מכיל עמודות בשם `instruction` ו-`response`. 
 ```csv
@@ -561,30 +565,30 @@ instruction,response
 "Your second instruction here","Expected response here"
 ```
 
-### התאם פרמטרי אימון
+### התאמת פרמטרי אימון
 
-ערוך את סקריפט האימון ושנה את המשתנים כך שיתאימו למטרות שלך: **קצב למידה** (`LR`), **אפוקים** (`EPOCHS`), **גודל אצווה** (`BATCH_SIZE`), **צבירת גרדיאנטים** (`GRAD_ACCUM_STEPS`), ועבור LoRA/QLoRA **דרגה** (`LORA_R`). לריצות מהירות יותר השתמש בפחות אפוקים ובקצב למידה (LR) גבוה יותר; לאיכות טובה יותר השתמש ביותר אפוקים ובקצב למידה נמוך יותר. הפחת את גודל האצווה או אורך הרצף אם אתה נתקל בשגיאות חוסר זיכרון.
+ערוך את סקריפט האימון ושנה את המשתנים כך שיתאימו למטרות שלך: **קצב למידה** (`LR`), **אפוקים** (`EPOCHS`), **גודל אצווה** (`BATCH_SIZE`), **צבירת גרדיאנטים** (`GRAD_ACCUM_STEPS`), ועבור LoRA/QLoRA **דרגה** (`LORA_R`). להרצות מהירות יותר, השתמש בפחות אפוקים וקצב למידה (LR) גבוה יותר; לאיכות טובה יותר, השתמש ביותר אפוקים ו-LR נמוך יותר. הקטן את גודל האצווה או אורך הרצף אם אתה נתקל בשגיאות זיכרון חסר (out-of-memory).
 ### טיפים לאופטימיזציית זיכרון
 
-אם נתקלים בשגיאות של חוסר זיכרון:
+אם אתם נתקלים בשגיאות של חוסר זיכרון:
 
-**1. הקטנת גודל האצווה (Batch Size):**
+**1. הקטינו את גודל האצווה (Batch Size):**
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
 ```
 
-**2. הקטנת אורך הרצף (Sequence Length):**
+**2. הקטינו את אורך הרצף (Sequence Length):**
 ```python
 max_seq_length=256  # Instead of 512
 ```
 
-**3. שימוש בקוונטיזציה אגרסיבית יותר:**
+**3. השתמשו בקוונטיזציה אגרסיבית יותר:**
 ```
 Full → LoRA → QLoRA
 ```
 
-**4. הפעלת Gradient Checkpointing (עבור כוונון עדין מלא בלבד):**
+**4. הפעילו Gradient Checkpointing (רק לכוונון מלא - Full fine-tuning):**
 ```python
 model.gradient_checkpointing_enable()
 ```
@@ -603,16 +607,16 @@ watch -n 1 amd-smi
 rocm-smi --showmeminfo vram
 ```
 
-### (אופציונלי) מעקב אחר ניסויים באמצעות Weights & Biases
+### (אופציונלי) מעקב אחר ניסויים עם Weights & Biases
 
-כדי לתעד ריצות ומדדים ב-[Weights & Biases](https://wandb.ai):
+כדי לרשום ריצות ומדדים אל [Weights & Biases](https://wandb.ai):
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-בסקריפט האימון, יש להגדיר `report_to="wandb"` ובאופן אופציונלי `run_name="your-experiment-name"` בתצורת ה-trainer. אם אינכם מעוניינים להשתמש ב-Wandb, השאירו את `report_to` בערך ברירת המחדל שלו או הגדירו אותו כ-`"none"`.
+בסקריפט האימון, הגדירו `report_to="wandb"` ובאופן אופציונלי `run_name="your-experiment-name"` בתצורת ה-trainer. אם אתם מעדיפים לא להשתמש ב-Wandb, השאירו את `report_to` בערך ברירת המחדל שלו או הגדירו אותו כ-`"none"`.
 
 ### בעיות נפוצות
 
@@ -625,9 +629,9 @@ GRAD_ACCUM_STEPS = 16
 # Or: python train_qlora.py
 ```
 
-#### ה-Loss אינו יורד
+#### ההפסד (Loss) לא יורד
 
-**פתרון:** התאימו את קצב הלמידה (learning rate)
+**פתרון:** התאימו את קצב הלמידה (Learning Rate)
 ```python
 LR = 1e-4  # Try lower
 # or
@@ -644,12 +648,12 @@ BATCH_SIZE = 8
 
 לאחר שהשלמתם בהצלחה את תהליך הכוונון העדין, שקלו את הצעדים הבאים כדי להפיק את המרב מהמודל שלכם:
 
-1. **הערכה** יסודית על נתוני בדיקה שלא נחשפו למודל, כדי למדוד את יכולת ההכללה שלו ולמנוע התאמת יתר (overfitting).
-2. **ניסוי** בערכים שונים של היפרפרמטרים כדי לשפר את הדיוק, המהירות ואיזון הזיכרון.
-3. **מעקב** אחר כל הניסויים (והמדדים המתאימים) באמצעות Weights & Biases, לצורך מחקר ניתן לשחזור.
-4. **ניסיון** אימון על מערכי נתונים מותאמים אישית משלכם, כדי להתאים את המודל במיוחד לצורך השימוש שלכם.
-5. **פריסה** של המודל המכוונן שלכם להסקה מהירה באמצעות backends יעילים כגון vLLM על חומרה תואמת.
-6. **חקירה** של טכניקות מתקדמות, כולל הנדסת פרומפטים (prompt engineering), דיוק מעורב (mixed precision), ואורכי רצף ארוכים יותר.
-7. **אימון** של מספר מתאמי LoRA למשימות או תחומים שונים, והחלפתם בהתאם לצורך.
+1. **הערכה** יסודית על נתוני בדיקה מוחזקים (held-out) כדי למדוד הכללה ולהימנע מהתאמת יתר (overfitting).
+2. **ניסוי** בערכים שונים של היפרפרמטרים כדי לקבל פשרות טובות יותר בין דיוק, מהירות וזיכרון.
+3. **מעקב** אחר כל הניסויים שלכם (והמדדים המתאימים) עם Weights & Biases למחקר בר-שחזור.
+4. **ניסיון** אימון על מערכי נתונים מותאמים אישית משלכם כדי להתאים את המודל במיוחד למקרה השימוש שלכם.
+5. **פריסה** של המודל המכוונן שלכם להסקה מהירה באמצעות backends יעילים כמו vLLM על חומרה תואמת.
+6. **חקירה** של טכניקות מתקדמות כולל הנדסת פרומפטים, דיוק מעורב (mixed precision), ואורכי רצפים ארוכים יותר.
+7. **אימון** מספר מתאמי LoRA עבור משימות או תחומים שונים והחלפתם לפי הצורך.
 
 ---

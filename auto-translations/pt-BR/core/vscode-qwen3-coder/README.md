@@ -16,24 +16,26 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Este playbook requer no mínimo **32GB** de memória do sistema.
+> Este guia requer no mínimo **32GB** de memória do sistema.
 <!-- @device:end -->
 
 ## Visão Geral
 
-Os agentes de codificação são ferramentas poderosas que capacitam desenvolvedores por meio da colaboração com agentes de IA baseados em Large Language Models (LLMs). Eles podem ser incorporados ao ambiente de desenvolvimento, como o terminal ou o VS Code, permitindo uma integração perfeita ao fluxo de trabalho de um desenvolvedor.
+Agentes de codificação são ferramentas poderosas que capacitam desenvolvedores por meio da colaboração com agentes de IA baseados em Large Language Models (LLMs). Eles podem ser incorporados ao ambiente de desenvolvimento, como o terminal ou o VS Code, permitindo uma integração perfeita ao fluxo de trabalho do desenvolvedor.
 
-Este tutorial demonstra como usar o Cline, o VS Code e o LM Studio para executar um agente de codificação totalmente na sua máquina local.
+Este tutorial demonstra como usar o Cline, o VS Code e o LM Studio para executar um agente de codificação inteiramente na sua máquina local.
 
-## O que você vai aprender
+## O que Você Vai Aprender
 
 * Como executar o VS Code com o agente de codificação Cline para auxiliar em tarefas de engenharia de software.
 * Como configurar o Cline para se comunicar com o LM Studio para inferência local de agentes de codificação.
-* Como usar agentes de codificação locais para resolver tarefas reais de engenharia de software. 
+* Como usar agentes de codificação locais para resolver tarefas reais de engenharia de software.
 
-## Definindo a Configuração de Memória
+<!-- @device:halo_box,halo,stx,krk -->
+## Configurando a Memória
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Verificar Atualizações de Software
@@ -50,13 +52,13 @@ Este tutorial demonstra como usar o Cline, o VS Code e o LM Studio para executar
 
 Usaremos o LM Studio para servir o LLM que alimenta o agente de codificação.
 
-- Na barra de pesquisa, procure por `LM Studio` e inicie a aplicação. Você será recebido pela seguinte página.
+- Na barra de pesquisa, procure por `LM Studio` e inicie a aplicação. Você será recebido pela seguinte tela.
 
 ![Tela Inicial do LM Studio](assets/initial-lm-studio.png)
 
-Em seguida, precisamos carregar o LLM no sistema. Vamos usar o modelo `Qwen3-Coder-30B-A3B` com um comprimento de contexto grande. (Use a aba Model para instalá-lo caso ainda não tenha feito isso).
+Em seguida, precisamos carregar o LLM no sistema. Vamos usar o modelo `Qwen3-Coder-30B-A3B` com um comprimento de contexto grande. (Use a aba Model para instalá-lo, caso ainda não tenha feito isso).
 - Clique na barra de pesquisa na parte superior da janela do LM Studio ou pressione `CTRL+L`. Clique no botão `Manually choose model load parameters` e, em seguida, clique no modelo Qwen3-Coder-30B-A3B.
-- Altere o comprimento do contexto de `4096` para `32768` e certifique-se de que o `GPU Offload` esteja no máximo. Em seguida, clique em `Load Model`
+- Altere o comprimento de contexto de `4096` para `32768` e certifique-se de que `GPU Offload` esteja no máximo. Em seguida, clique em `Load Model`
 
 ![Selecionando o Modelo](assets/model-list-zoomed.png)
 
@@ -64,9 +66,9 @@ Usamos um comprimento de contexto grande para que o agente possa processar bases
 
 ![Configurando o Modelo](assets/selecting-model-zoomed.png)
 
-Em seguida, precisamos habilitar o Servidor do LM Studio. 
-- Clique na aba Developer ou pressione `CTRL+2` no LM Studio à esquerda.
-- Verifique o botão de status e certifique-se de que esteja definido como `Running`.
+Em seguida, precisamos ativar o LM Studio Server.
+- Clique na aba Developer ou pressione `CTRL+2` no LM Studio, à esquerda.
+- Verifique o alternador de status e certifique-se de que esteja definido como `Running`.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -153,13 +155,13 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ## Iniciar e Configurar o VS Code
 
-Vamos instalar a Extensão Cline no VS Code e conectá-la ao servidor do LM Studio que acabamos de criar.
+Vamos instalar a extensão Cline no VS Code e conectá-la ao servidor do LM Studio que acabamos de criar.
 - Na barra de pesquisa, procure por `VS Code` e inicie a aplicação.
-- Clique no ícone `Extensions` na coluna esquerda do VS Code e procure por `Cline`. Em seguida, clique no botão `Install`. 
+- Clique no ícone `Extensions` na coluna esquerda do VS Code e procure por `Cline`. Em seguida, clique no botão `Install`.
 
 ![Instalando a Extensão Cline](assets/installing-cline-vscode-extension.png)
 
-- Um ícone do Cline deve aparecer à esquerda. Clique nele para abrir o Cline. Aparecerá uma janela perguntando `How will you use Cline?` Como vamos usar um LLM local em execução via LM Studio, selecione `Bring my own API Key` e clique em `Continue`. 
+- Um ícone do Cline deve aparecer à esquerda. Clique nele para abrir o Cline. Uma janela perguntará `How will you use Cline?` Como vamos usar um LLM local executado via LM Studio, selecione `Bring my own API Key` e clique em `Continue`.
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -181,32 +183,32 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 
 ![Criação de Conta](assets/cline-how-will-you-use-cline-zoomed.png)
 
-Em seguida, precisamos configurar o Cline para se comunicar com o servidor do LM Studio que configuramos. 
-- Defina o API Provider como `LM Studio` e o modelo como `Qwen3-Coder-30B-A3B-GGUF`. 
+Em seguida, precisamos configurar o Cline para se comunicar com o servidor do LM Studio que configuramos.
+- Defina o API Provider como `LM Studio` e o modelo como `Qwen3-Coder-30B-A3B-GGUF`.
 
->**Dica**: Modelos mais novos podem estar disponíveis. Considere baixar e alternar para os modelos Qwen3.6, se desejar.
+>**Dica**: Modelos mais recentes podem estar disponíveis. Considere baixar e mudar para os modelos Qwen3.6, se desejar.
 
 
 ![Configuração do Modelo](assets/cline-model-configuration-zoomed.png)
 
 ## Criando seu primeiro projeto
 
-Vamos usar nosso agente local para criar um site! Abra o VSCode em um diretório de sua escolha onde o Cline criará os arquivos.
+Vamos usar nosso agente local para criar um site! Abra o VS Code em um diretório de sua escolha onde o Cline criará os arquivos.
 - Para fazer isso, vá em `File -> Open Folder` no canto superior esquerdo do VS Code e escolha uma pasta como `Documents`.
 
 ![Pasta Vazia no VS Code](assets/open-cline-test.png)
 
-Agora estamos prontos para dar instruções ao agente de codificação local. 
-- Clique na extensão Cline na coluna esquerda e digite um prompt para iniciar o agente. Como exemplo, vamos usar o seguinte prompt:
+Agora estamos prontos para dar um prompt ao agente de codificação local.
+- Clique na extensão Cline na coluna esquerda e insira um prompt para iniciar o agente. Como exemplo, vamos usar o seguinte prompt:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-O agente então começará a criar arquivos de acordo com o prompt. Como usuário, você pode acompanhar o código sendo gerado no VS Code, conforme mostrado abaixo. Talvez seja necessário clicar em `Save` toda vez que o Cline quiser criar um arquivo. 
+O agente então começará a criar arquivos de acordo com o prompt. Como usuário, você pode observar o código sendo gerado no VS Code, conforme mostrado abaixo. Talvez seja necessário clicar em `Save` toda vez que o Cline quiser criar um arquivo.
 
 ![Geração de Código pelo Cline](assets/cline-code-generation.png)
 
-Após gerar o software, o agente conclui a tarefa e você pode executar a aplicação. Neste caso, o agente escreveu em três arquivos: `index.html`, `script.js` e `styles.css`. Basta clicar duas vezes no arquivo HTML para carregar e interagir com o site gerado.
+Após gerar o software, o agente termina e você pode executar a aplicação. Neste caso, o agente escreveu em três arquivos: `index.html`, `script.js` e `styles.css`. Basta clicar duas vezes no arquivo HTML para carregar e interagir com o site gerado.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -279,22 +281,23 @@ lms server stop
 ```
 <!-- @test:end -->
 <!-- @os:end -->
-## Próximos passos
 
-Depois de gerar o site, você pode continuar trabalhando com o Cline para aprimorá-lo. Duas melhorias possíveis são:
+## Próximos Passos
 
-- **Documentação**: Basta solicitar ao agente `Add a README` para que ele gere um arquivo `README.md` que documenta o site.
-- **Animação**: Solicite ao modelo `Add an animation that visually represents a large language model running on a laptop.` para gerar uma animação para o site.
+Depois de gerar o site, você pode continuar trabalhando com o Cline para melhorá-lo. Duas melhorias possíveis são:
 
-Incentivamos o leitor a tentar gerar outras aplicações usando essa configuração. Abaixo estão alguns exemplos divertidos que testamos:
+- **Documentação**: Dar ao agente o prompt `Add a README` é tudo o que é necessário para que ele gere um arquivo `README.md` que documenta o site.
+- **Animação**: Dê ao modelo o prompt `Add an animation that visually represents a large language model running on a laptop.` para gerar uma animação para o site.
 
-- **Jogos de Arcade Retrô**: Experimente outros prompts. Também pode ser divertido pedir ao agente para criar jogos em estilo retrô em Python usando o pacote `PyGame` com o seguinte prompt:
+Encorajamos o leitor a tentar gerar outras aplicações usando essa configuração. Abaixo estão alguns exemplos divertidos que já testamos:
+
+- **Jogos de Arcade Retrô**: Experimente outros prompts. Também pode ser divertido fazer o agente criar jogos em estilo retrô em Python usando o pacote `PyGame` com o seguinte prompt:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **Análise de Dados**: Uma área em que os agentes de codificação são particularmente úteis é a de scripts e análise de dados. Este é um prompt para demonstrar a capacidade do modelo local de gerar software de análise de dados para visualização de preços de ações:
+- **Análise de Dados**: Uma área em que os agentes de codificação são particularmente úteis é a de scripting e análise de dados. Este é um prompt para demonstrar a capacidade do modelo local de gerar software de análise de dados para visualização de preços de ações:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -302,8 +305,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## Recursos
 
-Abaixo estão alguns recursos adicionais para saber mais sobre Agentes de Codificação, Cline e execução de cargas de trabalho em 
+Abaixo estão alguns recursos adicionais para saber mais sobre Coding Agents, Cline, e executando workloads em
 
-* Mais informações sobre a parceria e integração entre AMD e LM Studio: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* Blog da AMD apresentando como executar o Cline em placas gráficas AMD Ryzen™ AI e Radeon™: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
-* Blog da Cline sobre como executar agentes de codificação localmente em PCs com IA: https://cline.bot/blog/local-models-amd
+* Mais informações sobre a parceria e integração da AMD com o LM Studio: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
+* Blog da AMD explicando como executar o Cline em placas gráficas AMD Ryzen™ AI e Radeon™: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* Blog do Cline sobre como executar agentes de codificação localmente em AI PCs: https://cline.bot/blog/local-models-amd

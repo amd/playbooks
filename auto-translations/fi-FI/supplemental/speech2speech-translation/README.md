@@ -16,15 +16,15 @@ SPDX-License-Identifier: MIT
 
 ## Yleiskatsaus
 
-AMD ROCm™ -ohjelmisto ja PyTorch-pino muodostavat yhtenäisen ekosysteemin laitteessa tapahtuvaa tekoälyä varten. Se toimii sekä Windowsissa että Linuxissa, ja sillä on virallinen tuki laajalle joukolle laitteita, mukaan lukien Ryzen™ AI -APU:t ja Radeon™-näytönohjaimet.
+AMD ROCm™ -ohjelmisto ja PyTorch-pino muodostavat yhtenäisen ekosysteemin laitteella tapahtuvaan tekoälyyn. Se toimii sekä Windowsissa että Linuxissa ja sillä on virallinen tuki laajalle joukolle laitteita, mukaan lukien Ryzen™ AI -APU:t ja Radeon™-näytönohjaimet.
 
-Tämä ohje opettaa, kuinka voit ajaa vähäviiveistä, ilmaisuvoimaista ja yksityistä puheesta puheeksi -käännöstä kokonaan reunalaitteella.
+Tämä opas opettaa, miten voit ajaa vähäviiveistä, ilmaisuvoimaista ja yksityistä puheesta puheeksi -käännöstä kokonaan reunalaitteella.
 
 ## Mitä opit
 
-- Kuinka puheesta puheeksi -ympäristö otetaan käyttöön
-- Kuinka kirjoitetaan Python-koodia puhe-puhe-mallien lataamiseen ja käyttöön
-- Kuinka Gradio-käyttöliittymää ajetaan ja kokeillaan
+- Miten puheesta puheeksi -ympäristö asennetaan
+- Miten kirjoitetaan Python-koodia puheesta puheeksi -mallien lataamiseen ja käyttöön
+- Miten Gradio-käyttöliittymää ajetaan ja kokeillaan
 
 ## Miksi käyttää reaaliaikaista puheesta puheeksi -käännöstä?
 
@@ -32,26 +32,28 @@ Tämä ohje opettaa, kuinka voit ajaa vähäviiveistä, ilmaisuvoimaista ja yksi
 - Välittää sävyn, tunteen ja tarkoituksen ilman kiusallisia taukoja
 - Mahdollistaa globaalin yhteistyön ja nopeamman päätöksenteon
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Muistiasetuksen määrittäminen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
-> **Huomautus**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centerin avulla.
+> **Huomautus**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centerin kautta.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmiston esivaatimusten asentaminen
+## Ohjelmiston edellytysten asentaminen
 
 ### Virtuaaliympäristön luominen
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Avaa Linuxissa pääte ja suorita seuraava komento luodaksesi venv-ympäristön, johon ROCm+PyTorch on jo asennettu:
+Avaa Linuxissa pääte ja aja seuraava komento luodaksesi venv-ympäristön, johon ROCm+PyTorch on jo asennettu:
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -63,15 +65,15 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Myönnä käyttäjällesi käyttöoikeus GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
+**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta tämä astuu voimaan):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Avaa Linuxissa pääte ja suorita seuraava komento luodaksesi venv-ympäristön:
+Avaa Linuxissa pääte ja aja seuraava komento luodaksesi venv-ympäristön:
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -85,9 +87,9 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Avaa Windowsissa pääte haluamaasi hakemistoon ja seuraa komentoja luodaksesi venv-ympäristön, johon ROCm+PyTorch on jo asennettu:
+Avaa Windowsissa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv-ympäristön, johon ROCm+PyTorch on jo asennettu:
 
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv s2st-env --system-site-packages
 s2st-env\Scripts\activate
@@ -95,15 +97,14 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Vinkki**: Windows-käyttäjien on ehkä muutettava PowerShellin suorituskäytäntöä (esim.
-> asetettava se arvoon RemoteSigned tai Unrestricted) ennen kuin osa PowerShell-komennoista voidaan suorittaa.
+> **Vinkki**: Windows-käyttäjien on ehkä muutettava PowerShellin suorituskäytäntöä (Execution Policy) (esim. asettamalla se arvoon RemoteSigned tai Unrestricted) ennen kuin ajaa joitakin PowerShell-komentoja.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Avaa Windowsissa pääte haluamaasi hakemistoon ja seuraa komentoja luodaksesi venv-ympäristön:
+Avaa Windowsissa pääte haluamassasi hakemistossa ja seuraa komentoja luodaksesi venv-ympäristön:
 
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv s2st-env
 s2st-env\Scripts\activate
@@ -111,8 +112,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Vinkki**: Windows-käyttäjien on ehkä muutettava PowerShellin suorituskäytäntöä (esim.
-> asetettava se arvoon RemoteSigned tai Unrestricted) ennen kuin osa PowerShell-komennoista voidaan suorittaa.
+> **Vinkki**: Windows-käyttäjien on ehkä muutettava PowerShellin suorituskäytäntöä (Execution Policy) (esim. asettamalla se arvoon RemoteSigned tai Unrestricted) ennen kuin ajaa joitakin PowerShell-komentoja.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -127,10 +127,10 @@ s2st-env\Scripts\activate
 
 ### Lisäriippuvuudet
 
-Asenna m4t-riippuvuudet pip:n avulla:
+Asenna m4t-riippuvuudet pip:illä:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
 ```
 <!-- @test:end -->
 
@@ -200,26 +200,26 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Puheesta puheeksi -esittelyn käyttöönotto
+## Puheesta puheeksi -demon käyttöönotto
 
-#### Tietoa mallista seamless-m4t-v2
+#### Tietoa seamless-m4t-v2:sta
 
-Lisätietoja saat [mallikortista](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) Hugging Facessa.
+Katso [malliesittely](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) Hugging Facessa saadaksesi lisätietoja.
 Tämä on puhe-puhe-mallien tekninen arkkitehtuuri:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
-#### Skriptien lataaminen
+#### Lataa skriptit
 
-Tämä ohje sisältää valmiiksi käytettävissä olevia skriptejä. Lataa ne kaikki samaan hakemistoon, johon loit ympäristön.
+Tämä opas sisältää valmiit skriptit. Lataa kaikki ne samaan hakemistoon kuin luomasi ympäristö.
 
 | Skripti | Kuvaus | Käyttö |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | Perus-LLM-tekstin generointi | `python infer.py` |
+| [infer.py](assets/infer.py) | Peruskielimallin tekstin generointi | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Esimerkkiäänitiedosto | Ei sovellu |
-| [lang_list.py](assets/lang_list.py) | Kielituen tiedosto | Ei sovellu |
-| [gradio_demo.py](assets/gradio_demo.py) | Intuitiivinen käyttöliittymä puheen kääntämiseen | `python gradio_demo.py --no-share` |
+| [lang_list.py](assets/lang_list.py) | Kielitukitiedosto | Ei sovellu |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuitiivinen käyttöliittymä puheenkäännökseen | `python gradio_demo.py --no-share` |
 
 
 ### Aloitus infer.py:llä
@@ -232,7 +232,7 @@ python infer.py
  
   
 #### Koodin selitys
-**Katkelma 1: Tarvittavien riippuvuuksien tuonti**
+**Katkelma 1: Tarvittavien riippuvuuksien tuominen**
 
 ```python 
 import os
@@ -259,7 +259,7 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**Katkelma 2: Mallien lataaminen HuggingFacesta**
+**Katkelma 2: Mallien lataaminen Hugging Facesta**
 
 Tämä funktio ottaa vastaan mallin tunnisteen ja lataa mallin, jos sitä ei ole vielä ladattu. Se palauttaa sitten prosessorin ja mallin seuraavan funktion käyttöön.
 ```python
@@ -280,9 +280,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Katkelma 3: Syöteäänileikkeen .wav-tiedoston lataus ja esikäsittely**
+**Katkelma 3: Syötteenä käytettävän .wav-äänitiedoston esikäsittely**
 
-Tämä funktio lataa äänileikkeen ja näytteistää sen uudelleen tavoitetaajuudelle.
+Tämä funktio lataa äänitiedoston ja näytteistää sen uudelleen kohdetaajuudelle.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -334,7 +334,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **Katkelma 5: Käännetyn tiedoston tallentaminen**
 
-Tämä funktio tallentaa äänitaulukon .WAV-tiedostoon. 
+Tämä funktio tallentaa äänitaulukon .WAV-tiedostoksi. 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -397,19 +397,19 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Gradio-käyttöliittymäesittelyn ajaminen:
+### Gradio-käyttöliittymädemon käynnistäminen
 
-Nyt kun olet ajanut perusesimerkkiskriptin, seuraavat ohjeet tarjoavat hyödyllisen käyttöliittymän, joka rakentuu kirjoittamamme koodin päälle ja tekee reaaliaikaisesta puhe-puhe-käännöksestä helppoa.
+Nyt kun olet ajanut peruskoodiesimerkin, seuraavat ohjeet tarjoavat hyödyllisen käyttöliittymän, joka rakentuu kirjoittamamme koodin päälle ja tekee reaaliaikaisesta puheesta puheeksi -käännöksestä helppoa.
 
 #### Aja Gradio paikallisesti
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Avaa sitten verkkoselaimesi osoitteessa `http://127.0.0.1:7860` päästäksesi käyttöliittymään.
+Avaa sitten selaimessasi osoite `http://127.0.0.1:7860` käyttöliittymän käyttämiseksi.
 
 
-### Esimerkki Gradio-käyttöliittymästä:
+### Gradio-käyttöliittymän esimerkki:
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
@@ -528,12 +528,12 @@ PY
 
 ## Seuraavat vaiheet
 
-- Yhdistele ja vertaile kymmeniä kieliä nopeaa kääntämistä varten. 
-- Jaa esittelysi muille: Lisää --share luodaksesi julkisen linkin, johon kuka tahansa pääsee käsiksi etäältä, tai ota se pysyvästi käyttöön Hugging Face Spacesin avulla
+- Sekoita ja yhdistele kymmeniä kieliä nopeaa käännöstä varten. 
+- Jaa demosi muiden kanssa: Lisää --share luodaksesi julkisen linkin, johon kuka tahansa pääsee etänä, tai ota käyttöön pysyvästi käyttämällä Hugging Face Spacesia
 
 ## Resurssit
 
-Alla on lisää resursseja puheesta puheeksi -kääntämisestä oppimiseen:  
+Alla on lisää resursseja puheesta puheeksi -käännöksestä oppimiseen:  
 * Repositorio löytyy osoitteesta https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Akateeminen tutkimus aiheesta "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Gradion jakaminen ja käyttöönotto: [Sovelluksesi jakamisopas](https://www.gradio.app/guides/sharing-your-app) ja [Käyttöönotto Hugging Face Spacesiin](https://shafiqulai.github.io/blogs/blog_5.html)
+* Aiheeseen liittyvä akateeminen tutkimus: "Seamless: Multilingual Expressive and Streaming Speech Translation"
+* Gradion jakaminen ja käyttöönotto: [Sovelluksen jakamisopas](https://www.gradio.app/guides/sharing-your-app) ja [Käyttöönotto Hugging Face Spacesiin](https://shafiqulai.github.io/blogs/blog_5.html)

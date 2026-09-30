@@ -1,6 +1,6 @@
 {
   "id": "clustering-rccl",
-  "title": "Clustering em dois Ryzen™ AI Halo com RCCL",
-  "description": "Configure um cluster multi-nó usando dois dispositivos Ryzen™ AI Halo com RCCL para cargas de trabalho distribuídas",
+  "title": "Clusterização de Duas Ryzen™ AI Halo com RCCL",
+  "description": "Configure um cluster multi-node usando dois dispositivos Ryzen™ AI Halo com RCCL para cargas de trabalho distribuídas",
   "auto_translated": true
 }
