@@ -8,11 +8,11 @@ SPDX-License-Identifier: MIT
 
 GAIA is AMD's open-source framework for building AI agents that run locally on AMD hardware with Ryzen AI acceleration.
 
-#### Installing GAIA
+#### GAIA installeren
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Open op Windows een terminal in de map naar keuze en volg de opdrachten om een venv aan te maken.
+1. Open in Windows een terminal in de map van je keuze en volg de commando's om een venv aan te maken.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Open op Linux een terminal in de map naar keuze en volg de opdrachten om een venv aan te maken.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. Open in Linux een terminal in de map van je keuze en volg de commando's om een venv aan te maken.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Open op Windows een terminal in de map naar keuze en volg de opdrachten om een venv aan te maken.
+1. Open in Windows een terminal in de map van je keuze en volg de commando's om een venv aan te maken.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Open op Linux een terminal in de map naar keuze en volg de opdrachten om een venv aan te maken.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. Open in Linux een terminal in de map van je keuze en volg de commando's om een venv aan te maken.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -99,7 +99,7 @@ Voer na de installatie `gaia init` uit om Lemonade Server in te stellen en model
 gaia init
 ```
 
-Dit installeert Lemonade Server, downloadt de standaardmodellen en controleert de installatie.
+Hiermee wordt Lemonade Server geïnstalleerd, worden de standaardmodellen gedownload en wordt de installatie geverifieerd.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -287,6 +287,6 @@ Controleer of GAIA v0.16.2 of later is geïnstalleerd:
 gaia --version
 ```
 
-> **Belangrijk**: Zorg ervoor dat Lemonade Server actief is voordat u GAIA gebruikt. GAIA vereist dat Lemonade Server handmatig wordt gestart.
+> **Belangrijk**: Zorg ervoor dat Lemonade Server actief is voordat je GAIA gebruikt. GAIA vereist dat Lemonade Server handmatig wordt gestart.
 
 Zie voor meer informatie de [GAIA-documentatie](https://amd-gaia.ai).

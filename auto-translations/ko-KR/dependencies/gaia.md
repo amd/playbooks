@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA는 AMD가 개발한 오픈소스 프레임워크로, Ryzen AI 가속을 사용하여 AMD 하드웨어에서 로컬로 실행되는 AI 에이전트를 구축할 수 있습니다.
+GAIA는 Ryzen AI 가속을 통해 AMD 하드웨어에서 로컬로 실행되는 AI 에이전트를 구축하기 위한 AMD의 오픈소스 프레임워크입니다.
 
 #### GAIA 설치하기
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Windows에서는 원하는 디렉터리에서 터미널을 열고 다음 명령을 따라 venv를 생성합니다.
+1. Windows에서 원하는 디렉터리로 터미널을 열고 다음 명령을 따라 venv를 생성합니다.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -21,7 +21,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. 그런 다음 `pip`를 사용하여 **Gaia**를 설치합니다.
+2. 그런 다음 `pip`를 사용하여 **Gaia**를 설치합니다
 <!-- @test:id=pip-install-amd-gaia-halo-box-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux에서는 원하는 디렉터리에서 터미널을 열고 다음 명령을 따라 venv를 생성합니다.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. Linux에서 원하는 디렉터리로 터미널을 열고 다음 명령을 따라 venv를 생성합니다.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -41,7 +41,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. 그런 다음 `pip`를 사용하여 **Gaia**를 설치합니다.
+2. 그런 다음 `pip`를 사용하여 **Gaia**를 설치합니다
 <!-- @test:id=pip-install-amd-gaia-halo-box-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Windows에서는 원하는 디렉터리에서 터미널을 열고 다음 명령을 따라 venv를 생성합니다.
+1. Windows에서 원하는 디렉터리로 터미널을 열고 다음 명령을 따라 venv를 생성합니다.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -62,7 +62,7 @@ gaia-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="gaia-env\Scripts\activate" -->
 
-2. 그런 다음 `pip`를 사용하여 **Gaia**를 설치합니다.
+2. 그런 다음 `pip`를 사용하여 **Gaia**를 설치합니다
 <!-- @test:id=pip-install-amd-gaia-windows timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux에서는 원하는 디렉터리에서 터미널을 열고 다음 명령을 따라 venv를 생성합니다.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. Linux에서 원하는 디렉터리로 터미널을 열고 다음 명령을 따라 venv를 생성합니다.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -82,7 +82,7 @@ source gaia-env/bin/activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="source gaia-env/bin/activate" -->
 
-2. 그런 다음 `pip`를 사용하여 **Gaia**를 설치합니다.
+2. 그런 다음 `pip`를 사용하여 **Gaia**를 설치합니다
 <!-- @test:id=pip-install-amd-gaia-linux timeout=300 setup=activate-venv -->
 ```bash
 pip install amd-gaia
@@ -93,13 +93,13 @@ pip install amd-gaia
 
 3. GAIA 초기화하기
 
-설치가 끝나면 `gaia init`를 실행하여 Lemonade Server를 설정하고 모델을 다운로드합니다.
+설치가 완료되면 `gaia init`을 실행하여 Lemonade Server를 설정하고 모델을 다운로드합니다:
 
 ```bash
 gaia init
 ```
 
-이 명령은 Lemonade Server를 설치하고, 기본 모델을 다운로드하며, 설정을 검증합니다.
+이 과정을 통해 Lemonade Server가 설치되고, 기본 모델이 다운로드되며, 설정이 검증됩니다.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -281,7 +281,7 @@ fi
 
 #### 설치 확인하기
 
-GAIA v0.16.2 이상이 설치되었는지 확인합니다.
+GAIA v0.16.2 이상이 설치되었는지 확인합니다:
 
 ```bash
 gaia --version

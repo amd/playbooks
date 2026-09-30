@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
-  "title": "Noțiuni introductive despre vLLM",
-  "description": "Aflați cum să rulați inferența și servirea folosind vLLM containerizat pe GPU-ul integrat",
+  "title": "Primii pași cu vLLM",
+  "description": "Aflați cum să rulați inferența și serverea folosind vLLM containerizat pe GPU-ul integrat",
   "auto_translated": true
 }

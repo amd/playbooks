@@ -1,6 +1,6 @@
 {
   "id": "amd-sync",
-  "title": "AMD Sync によるリモート開発",
-  "description": "AMD Syncをノートパソコンにインストールして、AMD Ryzen™ AI Halo上でVS Code、Terminal、JupyterLab、Live Metricsへのワンクリックリモート接続を実現しましょう。",
+  "title": "AMDシンクによるリモート開発",
+  "description": "AMD SyncをノートPCにインストールすると、AMD Ryzen™ AI Halo上のVS Code、Terminal、JupyterLab、Live Metricsにワンクリックでリモート接続できます。",
   "auto_translated": true
 }

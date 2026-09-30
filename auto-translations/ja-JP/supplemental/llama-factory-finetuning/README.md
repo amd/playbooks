@@ -11,54 +11,56 @@ SPDX-License-Identifier: MIT
 
 ## 概要
 
-効率的なファインチューニングは、大規模言語モデル（LLM）を下流タスクに適応させるために不可欠です。LLaMA Factoryは、大規模言語モデルやマルチモーダルモデルのトレーニングとファインチューニングを効率化する、オープンソースで使いやすいプラットフォームです。ユーザーは、最小限のコーディングでローカルに数百の事前学習済みモデルをカスタマイズできます。
+効率的なファインチューニングは、大規模言語モデル(LLM)を下流タスクに適応させる上で非常に重要です。LLaMA Factory は、大規模言語モデルおよびマルチモーダルモデルのトレーニングとファインチューニングを効率化する、オープンソースで使いやすいプラットフォームです。ユーザーは、最小限のコーディングでローカル上の数百種類の事前学習済みモデルをカスタマイズできます。
 
-このプレイブックでは、ローカルのAMDハードウェア上でLLaMA Factoryを使用してLLMをファインチューニングする方法を説明します。
+このプレイブックでは、ローカルの AMD ハードウェア上で LLaMA Factory を使用して LLM をファインチューニングする方法を説明します。
 
 <!-- @device:stx,krk -->
-> **注：** このプレイブックのファインチューニング手法には、少なくとも**32 GBのシステムRAM**が必要で、そのうち少なくとも**16 GBがGPUで利用可能**である必要があります（この16 GBは32 GBの一部であり、追加ではありません）。
+> **注記:** このプレイブックのファインチューニング手法を実行するには、少なくとも **32 GB のシステム RAM** が必要であり、そのうち少なくとも **16 GB を GPU が利用可能** である必要があります(この 16 GB は 32 GB の一部であり、32 GB に追加されるものではありません)。
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **注：** このプレイブックのファインチューニング手法には、少なくとも**16 GBの合計GPUメモリ**と**32 GBのシステムRAM**が必要です。
-> - Windowsでは、合計GPUメモリはグラフィックカードの専用VRAMとシステムRAMから借用される共有GPUメモリを組み合わせたものです。
-> - そのため、専用VRAMが16 GB未満のカードでも、共有GPUメモリで差分を補うことでこのプレイブックを実行できます。
+> **注記:** このプレイブックのファインチューニング手法を実行するには、少なくとも **16 GB の合計 GPU メモリ** と **32 GB のシステム RAM** が必要です。
+> - Windows では、合計 GPU メモリは、グラフィックカード専用の VRAM と、共有 GPU メモリ(システム RAM から借用)を組み合わせたものです。
+> - そのため、専用 VRAM が 16 GB 未満のカードでも、共有 GPU メモリを利用して不足分を補うことで、このプレイブックを実行できます。
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **注：** このプレイブックのファインチューニング手法には、少なくとも**16 GBの専用GPUメモリ**を持つグラフィックカードと**32 GBのシステムRAM**が必要です。
-> - Linuxでは、トレーニングはグラフィックカードの専用VRAM内で完全に実行されます。
-> - VRAMが不足しても、共有GPUメモリ（システムRAM）にフォールバックすることはありません。
-> - 専用VRAMが16 GB未満のカードは、システムに十分なRAMがあっても、Linux上でのトレーニング中にメモリ不足になります。
+> **注記:** このプレイブックのファインチューニング手法を実行するには、少なくとも **16 GB の専用 GPU メモリ** を搭載したグラフィックカードと **32 GB のシステム RAM** が必要です。
+> - Linux では、トレーニングはすべてグラフィックカードの専用 VRAM 上で実行されます。
+> - VRAM が不足しても、共有 GPU メモリ(システム RAM)にフォールバックすることはありません。
+> - 専用 VRAM が 16 GB 未満のカードは、システムに十分な RAM があっても、Linux 上でのトレーニング中にメモリ不足になります。
 <!-- @os:end -->
 <!-- @device:end -->
 
-## 学べること
+## 学習内容
 
-- AMD ROCm™ ソフトウェアを使用したLLaMA Factoryのセットアップ方法
-- LLMファインチューニングパラメータの構成方法（Qwen/Qwen3-4B-Instruct-2507を例として使用）
-- LLaMA Factoryファインチューニングの実行方法
-- ファインチューニング済みモデルでの推論の実行方法
+- AMD ROCm™ ソフトウェアを使用した LLaMA Factory のセットアップ方法
+- LLM ファインチューニングパラメーターの設定方法(Qwen/Qwen3-4B-Instruct-2507 を例として使用)
+- LLaMA Factory によるファインチューニングの実行方法
+- ファインチューニング済みモデルを使用した推論の実行方法
 - ファインチューニング済みモデルのエクスポート方法
 
-## 所要時間
+## 想定所要時間
 
-- 所要時間：このプレイブックの実行には約60分かかります（モデル/データセットのサイズやネットワーク速度によって異なります）。
-- 詳細については、[LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory)をご覧ください。
+- 所要時間: このプレイブックの実行には約 60 分かかります(モデル/データセットのサイズやネットワーク速度により異なります)。
+- 詳細については、[LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) をご覧ください。
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## メモリ構成の設定
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## ソフトウェアの更新を確認する
+## ソフトウェアの更新の確認
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## ソフトウェアの前提条件のインストール
+## ソフトウェア前提条件のインストール
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -82,7 +84,7 @@ pip --version
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -94,13 +96,13 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**ユーザーにGPUデバイスへのアクセス権を付与する**（これを有効にするにはログアウトして再度ログインしてください）：
+**ユーザーに GPU デバイスへのアクセス権を付与します**(反映させるには一度ログアウトして再度ログインしてください):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -137,10 +139,26 @@ llamafactory-env\Scripts\activate
 ### 基本的な依存関係のインストール
 
 <!-- @require:pytorch,driver -->
- 
+
+<!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
+```python
+import sys
+import torch
+
+print(f"Python executable: {sys.executable}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
+
+if not torch.cuda.is_available():
+    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
+
+print("PASS: ROCm-enabled PyTorch is visible")
+```
+<!-- @test:end -->
+
 ### 追加の依存関係のインストール
 
-> **注**：Pythonのバージョンが3.11、3.12、または3.13であることを確認してください
+> **注記**: Python のバージョンが 3.11、3.12、または 3.13 であることを確認してください
 
 ```bash
 pip install huggingface_hub
@@ -164,11 +182,11 @@ python -m pip install huggingface_hub
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### LLaMA Factoryのインストール
+### LLaMA Factory のインストール
 
-LLaMA FactoryはPyTorchに依存しています。上記の要件に従って、すでにインストール済みのはずです。
+LLaMA Factory は PyTorch に依存しています。上記の要件に従ってすでにインストールされているはずです。
 
-[LLaMA Factory公式GitHubリポジトリ](https://github.com/hiyouga/LlamaFactory)からソースコードをダウンロードし、その依存関係をインストールします。
+[LLaMA Factory 公式 GitHub リポジトリ](https://github.com/hiyouga/LlamaFactory)からソースコードをダウンロードし、その依存関係をインストールします。
 
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
@@ -193,7 +211,7 @@ pip install -r requirements/metrics.txt
 <!-- @test:end --> 
 <!-- @device:end -->
 
-`llamafactory-cli`が実行可能かどうかを確認します。
+`llamafactory-cli` が実行可能かどうかを確認します。
 
 <!-- @os:linux -->
 <!-- @test:id=verify-llamafactory-cli timeout=60 hidden=False setup=activate-venv -->
@@ -220,32 +238,32 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-出力例：
+出力例:
 
 <p align="center">
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-LLaMA Factoryのインストールに成功したので、次にファインチューニングを実行してみましょう。
+LLaMA Factory のインストールが正常に完了しましたので、次はファインチューニングを実行してみましょう。
 
-## LLaMA Factory CLIを使用したファインチューニング
+## LLaMA Factory CLI を使用したファインチューニング
 
-このセクションでは、ファインチューニング用データセットの準備方法、LoRA/QLoRAパラメータの構成方法、およびLoRAファインチューニングの実行方法について説明します。
+このセクションでは、ファインチューニング用データセットの準備方法、LoRA/QLoRA パラメーターの設定方法、および LoRA ファインチューニングの実行方法について説明します。
 
 ### データセットの準備
 
-LLaMA Factoryは、Alpaca形式とShareGPT形式のファインチューニングデータセットをサポートしています。利用可能なすべてのデータセットは[dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json)で定義されています。カスタムデータセットを使用する場合は、`dataset_info.json`にデータセットの説明を追加し、トレーニング前にデータセット名を指定してください。詳細は[こちら](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html)のドキュメントをご覧ください。
+LLaMA Factory は、Alpaca 形式および ShareGPT 形式のファインチューニングデータセットをサポートしています。利用可能なすべてのデータセットは [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) で定義されています。カスタムデータセットを使用する場合は、`dataset_info.json` にデータセットの説明を追加し、トレーニング前にデータセット名を指定するようにしてください。詳細については、[こちら](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html)のドキュメントを参照してください。
 
-このプレイブックでは、identityおよびalpaca_en_demoデータセットを例として使用し、次のステップでデータセット情報を構成します。
+このプレイブックでは、例として identity データセットと alpaca_en_demo データセットを使用し、次のステップでデータセット情報を設定します。
 ### ファインチューニングパラメータの設定
 
-LLaMA Factoryは複数のファインチューニング手法をサポートしています。
+LLaMA Factory は複数のファインチューニング方式をサポートしています。
 
-| ファインチューニング手法 | LLaMA Factoryの例 |
+| ファインチューニング方式 | LLaMA Factory の例 |
 |-----------|------|
 | フルパラメータ    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
-| LoRAファインチューニング  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
-| QLoRAファインチューニング | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
+| LoRA ファインチューニング  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
+| QLoRA ファインチューニング | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
 <!-- @test:id=verify-llamafactory-files timeout=60 hidden=True setup=activate-venv -->
 ```python
@@ -268,39 +286,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-これらのサンプル設定ファイルには、モデルパラメータ、ファインチューニング手法のパラメータ、データセットパラメータ、評価パラメータなどが指定されています。ご自身のニーズに応じて設定することができます。このプレイブックでは、[qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml)を使用します。
+これらのサンプル設定ファイルには、モデルパラメータ、ファインチューニング手法のパラメータ、データセットパラメータ、評価パラメータなどが指定されています。ご自身のニーズに応じて設定を変更できます。本プレイブックでは、[qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml) を使用します。
 
-**主要なパラメータの説明:**
-- `model_name_or_path` - Hugging Faceのモデル名、またはローカルのモデルファイルパス。
-- `stage` - トレーニングステージ。オプション: rm（報酬モデリング）、pt（事前学習）、sft（教師ありファインチューニング）、PPO、DPO、KTO、ORPO。
-- `do_train` - トレーニングの場合はtrue、評価の場合はfalse
-- `finetuning_type` - ファインチューニング手法。オプション: freeze、lora、full
-- `lora_rank` - LoRAで使用される低ランク行列の次元数。一般的な値: 4、6、8、16（値が小さいほどパラメータ数が少なくファインチューニングが高速になり、値が大きいほどタスクへの適応性は向上しますがリソース使用量が増加します）。
-- `lora_target` - LoRA手法の対象モジュール。デフォルト: all。
-- `dataset` - 使用するデータセット。複数のデータセットを指定する場合は「,」で区切ります
+**主要パラメータの説明:**
+- `model_name_or_path` - Hugging Face のモデル名、またはローカルのモデルファイルパス。
+- `stage` - トレーニングステージ。選択肢: rm (報酬モデリング)、pt (事前学習)、sft (教師ありファインチューニング)、PPO、DPO、KTO、ORPO。
+- `do_train` - トレーニングの場合は true、評価の場合は false
+- `finetuning_type` - ファインチューニング手法。選択肢: freeze、lora、full
+- `lora_rank` - LoRA で使用する低ランク行列の次元数。一般的な値: 4、6、8、16 (値が小さいほどパラメータ数が少なく、ファインチューニングが高速になる。値が大きいほどタスクへの適応性が向上するが、リソース使用量も増加する)。
+- `lora_target` - LoRA 手法の対象モジュール。デフォルト: all。
+- `dataset` - 使用するデータセット。複数のデータセットを指定する場合は「,」で区切る
 - `output_dir` - ファインチューニングの出力パス
-- `logging_steps` - ロギング間隔（ステップ数）
+- `logging_steps` - ログ出力の間隔 (ステップ数)
 - `save_steps` - モデルチェックポイントの保存間隔。
 - `overwrite_output_dir` - 出力ディレクトリの上書きを許可するかどうか。
 - `per_device_train_batch_size` - デバイスごとのトレーニングバッチサイズ。
 - `gradient_accumulation_steps` - 勾配累積のステップ数。
 - `learning_rate` - 学習率
 - `num_train_epochs` - トレーニングエポック数
-- `lr_scheduler_type` - 学習率スケジュール。オプション: linear、cosine、polynomial、constantなど。
-- `warmup_ratio` - 学習率ウォームアップ比率
+- `lr_scheduler_type` - 学習率スケジュール。選択肢: linear、cosine、polynomial、constant など。
+- `warmup_ratio` - 学習率のウォームアップ比率
 
 <!-- @os:linux -->
-AMD Ryzen™およびAMD Radeon™ GPUでファインチューニングを実行するために、`lora_rank`のデフォルト値を変更します。
+AMD Ryzen™ および AMD Radeon™ GPU でファインチューニングを実行するために、`lora_rank` のデフォルト値を変更します。
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-AMD Ryzen™およびAMD Radeon™ GPUとの互換性を高めるため、デフォルトのLoRAファインチューニング設定を以下のように更新します：
-- ファインチューニング時のメモリ使用量を削減するため、`lora_rank`を`8`から`6`に設定します。
-- AMD GPUとの互換性を高めメモリ使用量を抑えるため、`bf16`の代わりに`fp16`を使用します。
-- Windowsではマルチプロセスによるデータ読み込みが原因の`"Can't pickle local object<>"`エラーを回避するため、`dataloader_num_workers`を`0`に設定します。
+AMD Ryzen™ および AMD Radeon™ GPU との互換性を高めるため、デフォルトの LoRA ファインチューニング設定を以下のように更新します。
+- `lora_rank` を `8` から `6` に設定し、ファインチューニング時のメモリ使用量を削減します。
+- より幅広い AMD GPU 互換性とメモリ使用量の低減のため、`bf16` の代わりに `fp16` を使用します。
+- マルチプロセスによるデータ読み込みが原因で発生する `"Can't pickle local object<>"` エラーを回避するため、Windows では `dataloader_num_workers` を `0` に設定します。
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -320,13 +338,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### LLaMA Factoryファインチューニングの実行
+### LLaMA Factory ファインチューニングの実行
 
-**llamafactory-cli**は、複雑なコードを書くことなくLLMのエンドツーエンドのワークフロー（データ準備 → ファインチューニング → 評価 → デプロイ）を簡素化するために開発された、LLaMA Factory公式のコマンドラインインターフェース（CLI）ツールです。
+**llamafactory-cli** は LLaMA Factory の公式コマンドラインインターフェース (CLI) ツールであり、複雑なコードを書くことなく、エンドツーエンドの LLM ワークフロー (データ準備 → ファインチューニング → 評価 → デプロイ) を簡素化するために開発されました。
 
-トレーニング／ファインチューニング用に、**llamafactory-cli train**はLLaMA Factory CLIの中核となるサブコマンドです。ファインチューニングのワークフロー（データの前処理、ハイパーパラメータの調整、ハードウェアの最適化）を単一のCLIコマンドに抽象化し、複数のファインチューニング手法（LoRA／QLoRA／フルファインチューニング）をサポートしており、低リソースのGPU（例：16GB VRAMでのQLoRA）向けに最適化されています。
+トレーニング/ファインチューニングにおいて、**llamafactory-cli train** は LLaMA Factory CLI の中核となるサブコマンドです。ファインチューニングのワークフロー (データの前処理、ハイパーパラメータのチューニング、ハードウェアの最適化) を単一の CLI コマンドに抽象化しており、複数のファインチューニングパラダイム (LoRA/QLoRA/フルファインチューニング) をサポートし、低リソースの GPU (例: 16GB VRAM での QLoRA) 向けに最適化されています。
 
-以下のコマンドを使用して、Qwen3 LoRAファインチューニング用に変更した設定ファイルに基づいてLLaMA Factoryのファインチューニングを実行できます。
+Qwen3 LoRA ファインチューニング用の変更済み設定ファイルに基づいて、以下のコマンドで LLaMA Factory のファインチューニングを実行できます。
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -362,7 +380,7 @@ fi
 
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -397,12 +415,19 @@ if (Select-String -Path $filePath -Pattern '^save_total_limit:' -Quiet) {
     Add-Content -Path $filePath -Value "save_total_limit: 1"
 }
 
+# Single-process dataset preprocessing to avoid Windows multiprocessing errors.
+if (Select-String -Path $filePath -Pattern '^preprocessing_num_workers:' -Quiet) {
+    (Get-Content -Path $filePath) -replace '^preprocessing_num_workers:.*', 'preprocessing_num_workers: 1' | Set-Content -Path $filePath
+} else {
+    Add-Content -Path $filePath -Value "preprocessing_num_workers: 1"
+}
+
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
-LLMのファインチューニングを実行すると、生成されたすべての出力は「output_dir」に保存されます。これには、モデルチェックポイントファイル、設定ファイル、トレーニングメトリクスが含まれます。
+LLM のファインチューニングを実行すると、モデルチェックポイントファイル、設定ファイル、トレーニングメトリクスを含む、生成されたすべての出力が「output_dir」に保存されます。
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -437,18 +462,18 @@ if not adapter_weights:
 print("PASS: LLaMA Factory training output looks correct")
 print(f"Found adapter weights: {adapter_weights}")
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 
 ### ファインチューニング済みモデルのテスト
 
-**llamafactory-cli chat**は、LLM（ベースモデルとLoRAファインチューニング済みモデルの両方）とのインタラクティブなチャット／推論のために設計されています。LLaMA Factoryは、[examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference)でファインチューニング済みモデルの推論を実行するためのサンプル設定を提供しています。このサンプル設定を変更して、推論バックエンドなどの設定を変更することもできます。
+**llamafactory-cli chat** は、LLM (ベースモデルと LoRA でファインチューニングされたモデルの両方) との対話型チャット/推論のために設計されています。LLaMA Factory は、ファインチューニング済みモデルの推論を実行するためのサンプル設定を [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) で提供しています。推論バックエンドの変更など、このサンプル設定を変更して設定を変更することもできます。
 
-以下のコマンドを使用して、Qwen3ファインチューニング済みモデルをテストします：
+Qwen3 のファインチューニング済みモデルをテストするには、以下のコマンドを使用します。
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
-ファインチューニング済みモデルを使用したチャットの例を以下に示します：
+ファインチューニング済みモデルを使用したチャットの例を以下に示します。
 
 <p align="center">
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Fine-Tuned model" width="600"/>
@@ -457,9 +482,9 @@ llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 
 ### ファインチューニング済みモデルのエクスポート
 
-本番環境での使用ケースでは、事前学習済みモデルとLoRAアダプタをマージし、単一のモデルとしてエクスポートする必要があります。このマージされたモデルは、通常のHugging Faceモデルファイルとして使用できます。LLaMA Factoryは、[examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora)にサンプル設定を提供しています。
+本番環境での利用ケースでは、事前学習済みモデルと LoRA アダプタを統合し、単一のモデルとしてエクスポートする必要があります。この統合されたモデルは、通常の Hugging Face モデルファイルとして使用できます。LLaMA Factory は [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora) にサンプル設定を提供しています。
 
-以下のコマンドを使用して、Qwen3ファインチューニング済みモデルをエクスポートします：
+Qwen3 のファインチューニング済みモデルをエクスポートするには、以下のコマンドを使用します。
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
@@ -494,7 +519,7 @@ PY
 
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 
@@ -535,7 +560,7 @@ if (-not (Test-Path "examples/merge_lora/qwen3_lora_sft_ci.yaml")) {throw "FAIL:
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 if ($LASTEXITCODE -ne 0) {throw "FAIL: llamafactory-cli export failed"}
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @test:id=verify-llamafactory-export-output timeout=120 hidden=True setup=activate-venv -->
@@ -565,27 +590,27 @@ if not model_files:
 
 print("PASS: Exported merged model output looks correct")
 ```
-<!-- @test:end --> 
-## LLaMA Factory GUI の使用
+<!-- @test:end -->
+## LLaMA Factory GUIの使用
 
-`LLaMA-Factory` は、ブラウザ上のウェブ UI を通じて LLM のゼロコードファインチューニングもサポートしています。
+`LLaMA-Factory`は、ブラウザ上のWeb UIを通じたLLMのゼロコードファインチューニングもサポートしています。
 
-以下のコマンドを使用して開きます:
+以下のコマンドを使用して開いてください：
 
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI` は、トレーニング、評価、予測、チャット、モデルのエクスポートなど、機械学習ワークフローを管理するための合理化されたインターフェースを提供します。各タブについて簡単に紹介します:
+`LlamaFactory Web UI`は、トレーニング、評価、予測、チャット、モデルのエクスポートなど、機械学習ワークフローを管理するための合理化されたインターフェースを提供します。各タブの概要は以下の通りです：
 
-* **Train**: このタブでは、モデルとデータセットを選択し、トレーニングパラメータを設定して、トレーニングプロセスを開始できます。トレーニング設定を最適化するには、必須パラメータとオプションパラメータを理解することが重要です。
-* **Evaluate & Predict**: トレーニング後、このタブを使用してモデルのパフォーマンスを評価し、予測を行うことができます。新しいデータに対するモデルの精度と有効性についての洞察が得られます。
-* **Chat**: トレーニングが完了したら、Chat タブでモデルを読み込み、対話して作業の結果を確認します。この機能により、トレーニング済みモデルとのリアルタイムなコミュニケーションが可能になります。
-* **Export**: このタブでは、デプロイやさらなる利用のためにトレーニング済みモデルをエクスポートできます。さまざまなアプリケーションに適した形式でモデルを保存できます。
+* **Train（トレーニング）**：このタブでは、モデルとデータセットを選択し、トレーニングパラメータを設定して、トレーニングプロセスを開始できます。トレーニングセットアップを最適化するためには、必須パラメータとオプションパラメータを理解することが重要です。
+* **Evaluate & Predict（評価と予測）**：トレーニング後、このタブを使用してモデルのパフォーマンスを評価し、予測を行うことができます。新しいデータに対するモデルの精度と有効性についての洞察を提供します。
+* **Chat（チャット）**：トレーニングが完了したら、Chatタブでモデルをロードして対話し、作業の結果を確認できます。この機能により、トレーニング済みモデルとのリアルタイムなコミュニケーションが可能になります。
+* **Export（エクスポート）**：このタブでは、デプロイやさらなる使用のためにトレーニング済みモデルをエクスポートできます。さまざまなアプリケーションに適した形式でモデルを保存できます。
 
-詳細なガイダンスについては、[LlamaFactory GitHub repository](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) および [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) の公式ドキュメントを参照することをお勧めします。さらに、[Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) では、インターフェースとその機能について貴重な洞察が得られます。
+詳細なガイダンスについては、[LlamaFactory GitHubリポジトリ](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio)と[LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest)の公式ドキュメントを参照することをお勧めします。さらに、[Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui)は、インターフェースとその機能について貴重な洞察を提供しています。
 
 ## 次のステップ
-- `gpt-oss` などの最先端のさまざまなモデルを試してみてください。
+- `gpt-oss`など、さまざまなモデルや他の最先端モデルを試してみてください。
 - ファインチューニングされたモデルでさまざまなバックエンドを試してみてください
-
-詳細なドキュメントについては、以下をご覧ください: https://llamafactory.readthedocs.io/en/latest/
+ 
+詳細なドキュメントについては、こちらをご覧ください：https://llamafactory.readthedocs.io/en/latest/
