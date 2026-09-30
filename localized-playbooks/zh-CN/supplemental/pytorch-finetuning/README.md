@@ -219,7 +219,7 @@ import subprocess
 import sys
 
 os.environ["QUICK_TRAIN"] = "1"
-os.environ["QUICK_TRAIN_MODEL"] = "google/gemma-3-4b-it"
+os.environ["QUICK_TRAIN_MODEL"] = "LLM-Research/gemma-3-4b-it"
 r = subprocess.run([sys.executable, "train_lora.py"], timeout=600)
 sys.exit(r.returncode)
 ```
@@ -233,7 +233,7 @@ import subprocess
 import sys
 
 os.environ["QUICK_TRAIN"] = "1"
-os.environ["QUICK_TRAIN_MODEL"] = "google/gemma-3-4b-it"
+os.environ["QUICK_TRAIN_MODEL"] = "LLM-Research/gemma-3-4b-it"
 r = subprocess.run([sys.executable, "train_qlora.py"], timeout=600)
 sys.exit(r.returncode)
 ```
@@ -248,7 +248,7 @@ import subprocess
 import sys
 
 os.environ["QUICK_TRAIN"] = "1"
-os.environ["QUICK_TRAIN_MODEL"] = "google/gemma-3-4b-it"
+os.environ["QUICK_TRAIN_MODEL"] = "LLM-Research/gemma-3-4b-it"
 r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```

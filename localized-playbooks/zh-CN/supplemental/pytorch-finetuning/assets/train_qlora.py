@@ -82,7 +82,7 @@ def cleanup_gpu_memory():
 # -----------------------
 # Model Configuration
 # -----------------------
-MODEL = "openai/gpt-oss-20b" # pre-quantized 4-bit (Mxfp4) model
+MODEL = "openai-mirror/gpt-oss-20b" # pre-quantized 4-bit (Mxfp4) model
 model_name = MODEL.split("/")[-1]
 
 # -----------------------

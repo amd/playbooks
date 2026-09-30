@@ -72,7 +72,7 @@ def cleanup_gpu_memory():
 # -----------------------
 # Model Configuration
 # -----------------------
-MODEL = "google/gemma-3-4b-it"
+MODEL = "LLM-Research/gemma-3-4b-it"
 model_name = MODEL.split("/")[-1]
 
 # -----------------------
