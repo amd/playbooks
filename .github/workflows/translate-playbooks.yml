@@ -50,9 +50,14 @@ jobs:
     runs-on: translation
     # Bound the job so a hung translate step (e.g. an unresponsive LLM endpoint)
     # cannot run for hours holding the concurrency slot. On timeout the job
-    # fails, which fires the "Open issue on translation failure" step below so
-    # the breakage is visible instead of silent.
+    # fails, which fires the "Open issue on translation failure" step in the
+    # open-pr job below so the breakage is visible instead of silent.
     timeout-minutes: 120
+    # Consumed by the open-pr job (which runs on a GitHub-hosted runner that
+    # actually has `gh`). branch/changed tell it whether — and what — to PR.
+    outputs:
+      changed: ${{ steps.push.outputs.changed }}
+      branch: ${{ steps.push.outputs.branch }}
     env:
       # The 29 Lenovo languages (Portuguese ships as both pt-BR Brazilian and pt-PT
       # European) plus fr-CA for the Canada launch, so French ships as both fr-FR and fr-CA.
@@ -122,41 +127,49 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          rc=0
           L="${{ steps.locales.outputs.locales }}"
-          # Fan out over ALL locales at once. Each locale owns its own manifest,
-          # so locale-level parallelism is race-free (see translate_playbook.py).
-          # The endpoint handles every language concurrently, so --jobs is set to
-          # the full locale count rather than a fixed cap; serial runs otherwise
-          # take many hours and hit the job timeout.
-          JOBS=$(echo "$L" | tr ',' '\n' | grep -c .)
-          echo "Parallelizing across $JOBS locales."
-          # Shared dependency content (translated once; playbooks reference it).
-          if [ "${{ steps.detect.outputs.deps }}" = "true" ]; then
-            echo "::group::Translating shared dependencies"
-            python .github/scripts/translate_playbook.py --dependencies --locales "$L" --jobs "$JOBS" || rc=1
-            echo "::endgroup::"
-          fi
-          for pb in ${{ steps.detect.outputs.playbooks }}; do
-            echo "::group::Translating $pb"
-            python .github/scripts/translate_playbook.py --playbook "$pb" --locales "$L" --jobs "$JOBS" || rc=1
-            echo "::endgroup::"
-          done
-          exit $rc
+          PB_LIST="${{ steps.detect.outputs.playbooks }}"
+          # Space-separated playbook ids from the detect step -> comma-separated CSV.
+          PLAYBOOKS_CSV=$(echo "$PB_LIST" | tr -s ' ' '\n' | grep . | paste -sd, -)
+          NLOC=$(echo "$L" | tr ',' '\n' | grep -c . || true)
+          NPB=$(echo "$PB_LIST" | tr -s ' ' '\n' | grep -c . || true)
 
-      - name: Open a PR with the translations
+          # ONE invocation fans out over EVERY (playbook x locale) pair at once
+          # (plus one dependencies task per locale). The script shares each locale's
+          # manifest in-memory under a lock, so cross-playbook concurrency in the
+          # same locale is race-free (see translate_playbook.py). Total wall time is
+          # ~the slowest single file, not the sum over playbooks -- the per-playbook
+          # serial loop is what pushed earlier runs past the 2h job timeout.
+          JOBS=$(( NPB * NLOC + NLOC ))
+          if [ "$JOBS" -lt 1 ]; then JOBS=$NLOC; fi
+          echo "Playbooks: $NPB  Locales: $NLOC  ->  up to $JOBS concurrent tasks."
+
+          DEPS_FLAG=""
+          if [ "${{ steps.detect.outputs.deps }}" = "true" ]; then DEPS_FLAG="--dependencies"; fi
+
+          if [ -n "$PLAYBOOKS_CSV" ]; then
+            python .github/scripts/translate_playbook.py --playbooks "$PLAYBOOKS_CSV" $DEPS_FLAG --locales "$L" --jobs "$JOBS"
+          else
+            # deps-only change (no playbook dirs touched).
+            python .github/scripts/translate_playbook.py $DEPS_FLAG --locales "$L" --jobs "$JOBS"
+          fi
+
+      - name: Commit and push the translation branch
         # main is a protected branch (changes must go through a PR), so the bot
-        # cannot push directly. Instead push a branch and open a PR that
-        # @-mentions the maintainer for manual review and merge.
+        # cannot push to main directly. Push the results to a side branch here
+        # using git (which IS installed on the self-hosted runner); the separate
+        # open-pr job opens the PR with `gh` on a GitHub-hosted runner, because
+        # `gh` is NOT installed on the self-hosted `translation` runner (that
+        # missing binary is what failed run 36627775056 with exit code 127).
+        id: push
         if: always() && steps.detect.outputs.playbooks != ''
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "amd-playbooks-l10n-bot"
           git config user.email "amd-playbooks-l10n-bot@users.noreply.github.com"
           if [ -z "$(git status --porcelain auto-translations)" ]; then
             echo "No translation changes to commit."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           BRANCH="l10n/update-${{ github.run_id }}"
@@ -164,8 +177,35 @@ jobs:
           git add auto-translations
           git commit -m "l10n: update translations"
           git push origin "$BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  # PR/issue creation runs on a GitHub-hosted runner: `gh` is preinstalled and
+  # api.github.com is reachable. The self-hosted `translation` runner has neither
+  # guaranteed, so keeping any `gh` call there is what broke the previous run.
+  open-pr:
+    name: Open translation PR
+    needs: translate
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Open a PR with the translations
+        # Open a PR whenever a branch was actually pushed, even if the translate
+        # job then failed the structural gate: the files that DID translate are
+        # worth reviewing, and the failure issue below flags what broke.
+        if: needs.translate.outputs.changed == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ needs.translate.outputs.branch }}
+        run: |
           # Open a PR for manual review. The @-mention notifies the maintainer.
-          PR_URL=$(gh pr create --base "${{ github.ref_name }}" --head "$BRANCH" \
+          PR_URL=$(gh pr create --repo "${{ github.repository }}" \
+            --base "${{ github.ref_name }}" --head "$BRANCH" \
             --title "l10n: update translations" \
             --body "@bconsolvo automated translation update from the Translate Playbooks workflow (run ${{ github.run_id }}). Touches \`auto-translations/\` only — please review and merge." \
             --label "translation")
@@ -176,7 +216,7 @@ jobs:
             || echo "::warning::Could not add reviewer; PR $PR_URL is open with an @-mention."
 
       - name: Open issue on translation failure
-        if: failure()
+        if: needs.translate.result == 'failure'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -186,6 +226,6 @@ jobs:
           # Leading @-mention notifies @bconsolvo even if the assignee/label steps fail.
           BODY="@bconsolvo the Translate Playbooks workflow failed: a playbook translation errored or did not pass the structural validation gate (code fences or @-tags did not match the English source). Run: $RUN_URL"
           # Fall back progressively so a missing label or a non-assignable user never swallows the alert.
-          gh issue create --title "$TITLE" --body "$BODY" --assignee bconsolvo --label "translation" \
-            || gh issue create --title "$TITLE" --body "$BODY" --assignee bconsolvo \
-            || gh issue create --title "$TITLE" --body "$BODY"
+          gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body "$BODY" --assignee bconsolvo --label "translation" \
+            || gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body "$BODY" --assignee bconsolvo \
+            || gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body "$BODY"

@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-### AMD GPU ovládač
+### Ovládač AMD GPU
 
 Aktualizujte na najnovší ovládač AMD GPU pomocou nástroja [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html).
 
@@ -24,9 +24,11 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 
 <!-- @os:linux -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-### AMD GPU ovládač
+### Ovládač AMD GPU
 
-Nainštalujte AMD GPU ovládač (amdgpu) pomocou postupu Radeon Software for Linux (RSL). Pokyny pre vašu distribúciu nájdete v časti [Install the kernel driver](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Nainštalujte ovládač AMD GPU (amdgpu) pomocou postupu Radeon Software for Linux (RSL). Pokyny pre vašu distribúciu nájdete v návode na inštaláciu ROCm na: [Install the kernel driver](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install). 
+
+Samotný ovládač nájdete tu: [Linux® Drivers for AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

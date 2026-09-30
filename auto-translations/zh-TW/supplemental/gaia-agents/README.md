@@ -14,32 +14,34 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-## 概觀
+## 概述
 
-GAIA 代理程式是使用本地 LLM 進行推理並呼叫您定義的工具的 AI 助理，就像可以採取行動的聊天機器人。它們**完全在本地端**運行，無需雲端 API、無資料離開您的機器，也不需要 API 金鑰。
+GAIA 代理程式是使用本機 LLM 進行推理並呼叫您定義的工具的 AI 助理 — 就像能夠採取行動的聊天機器人一樣。它們**100% 本機執行**，無需雲端 API、無資料離開您的機器，也不需要 API 金鑰。
 
-在本手冊中，您將建構一個硬體顧問代理程式（Hardware Advisor Agent），它會偵測您系統的 RAM、GPU 和 NPU，查詢本地模型目錄，並推薦您的機器可以執行哪些 LLM。這是 GAIA Agent SDK 的實用入門，可產生立即有用的成果。
+在此手冊中，您將建置一個硬體顧問代理程式 (Hardware Advisor Agent)，它能偵測您系統的 RAM、GPU 和 NPU，查詢本機模型目錄，並推薦您的機器可以執行哪些 LLM。這是對 GAIA Agent SDK 的實用入門介紹，能立即產生實用的成果。
 
 ## 您將學到什麼
 
 - 如何建立具有自訂工具的 GAIA 代理程式
 - 使用 LemonadeClient SDK 查詢系統資訊和模型目錄
-- 特定平台的 GPU/NPU 偵測（Windows PowerShell 和 Linux lspci）
-- 基於記憶體的模型大小計算，採用 70% 規則
-- 建構用於自然語言硬體查詢的互動式 CLI
+- 平台特定的 GPU/NPU 偵測（Windows PowerShell 和 Linux lspci）
+- 使用 70% 規則進行基於記憶體的模型大小估算
+- 建置用於自然語言硬體查詢的互動式 CLI
 
-## 設定記憶體配置
+<!-- @device:halo_box,halo,stx,krk -->
+## 設定記憶體設定
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## 檢查軟體更新
-> **注意**：如果尚未安裝 VS Code，您可以透過 Ryzen AI Developer Center 安裝它。
+> **注意**：如果尚未安裝 VS Code，您可以透過 Ryzen AI Developer Center 進行安裝。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 安裝軟體先決條件
+## 安裝軟體必要條件
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
@@ -69,11 +71,11 @@ which python3
 
 ## 開始使用
 
-先讓完成版的代理程式運行起來，這樣您就能看到您正在建構的內容。接著，我們將逐步說明程式碼。
+先讓完成的代理程式執行起來，這樣您就能看到您正在建置的內容。然後，我們會逐步說明程式碼的運作方式。
 
-### 執行預先建構的範例
+### 執行預先建置的範例
 
-本手冊包含完整的 [hardware_advisor_agent.py](assets/hardware_advisor_agent.py)。將其下載到您選擇的目錄，並執行它以查看完成版代理程式的運作情況：
+此手冊包含完整的 [hardware_advisor_agent.py](assets/hardware_advisor_agent.py)。將其下載到您選擇的目錄，並執行以查看完成的代理程式運作情形：
 
 ```bash
 python hardware_advisor_agent.py
@@ -122,9 +124,9 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 - NPU acceleration available for smaller models
 ```
 
-**恭喜** - 您已經建構了一個代理程式！
+**恭喜** — 您已建置了一個代理程式！
 
-本手冊的其餘部分將說明腳本各部分的運作方式，讓您能夠從頭開始理解它。
+手冊的其餘部分將說明腳本每個部分的運作方式，讓您能從頭開始理解它。
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -269,14 +271,14 @@ echo "OK: hardware_advisor_agent.py started successfully"
 硬體顧問代理程式結合了三個元件：
 
 - **LemonadeClient SDK** — 系統資訊和模型目錄 API
-- **特定平台偵測** — Windows PowerShell / Linux lspci 用於 GPU 資訊
-- **記憶體計算** — 用於安全模型大小計算的 70% 規則
+- **平台特定偵測** — Windows PowerShell / Linux lspci 用於取得 GPU 資訊
+- **記憶體計算** — 用於安全模型大小估算的 70% 規則
 
-資料依序流經這些元件：使用者查詢 → 代理程式選擇工具 → 工具呼叫 LemonadeClient + OS 偵測 → 代理程式將結果綜合為推薦建議。
+資料依序流經這些元件：使用者查詢 → 代理程式選擇工具 → 工具呼叫 LemonadeClient + 作業系統偵測 → 代理程式將結果整合成建議。
 
 ### LemonadeClient SDK
 
-LemonadeClient 提供了統一的 API，用於系統偵測、NPU/GPU 可用性以及模型目錄查詢。
+LemonadeClient 提供統一的 API，用於系統偵測、NPU/GPU 可用性以及模型目錄查詢。
 
 **匯入並初始化：**
 
@@ -346,7 +348,7 @@ response = client.list_models(show_all=True)
 }
 ```
 
-**`get_model_info(model_id)`** — 傳回特定模型的大小估計：
+**`get_model_info(model_id)`** — 傳回特定模型的大小估算值：
 
 ```python
 model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
@@ -360,9 +362,9 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 }
 ```
 
-### 特定平台的 GPU 偵測
+### 平台特定 GPU 偵測
 
-代理程式使用作業系統原生指令而非 PyTorch 進行 GPU 偵測。這在未安裝 GPU 驅動程式的情況下也能運作，可偵測所有 GPU（不僅限於支援 CUDA 的 GPU），並避免匯入大型函式庫。
+代理程式使用作業系統原生指令而非 PyTorch 來進行 GPU 偵測。這樣即使未安裝 GPU 驅動程式也能運作，可偵測所有 GPU（不僅限於支援 CUDA 的 GPU），並避免匯入龐大的程式庫。
 
 <!-- @os:windows -->
 
@@ -399,7 +401,7 @@ result = subprocess.run(
 
 ### 70% 記憶體規則
 
-> **規則：** 模型大小應小於可用 RAM 的 70%，以保留 30% 的額外空間用於推理作業（KV 快取、批次處理緩衝區、執行階段記憶體高峰）。
+> **規則：**模型大小應小於可用 RAM 的 70%，以留出 30% 的額外空間供推理作業使用（KV 快取、批次處理緩衝區、執行階段記憶體尖峰）。
 
 ```
 System: 32 GB RAM
@@ -408,13 +410,13 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 70B model (~42 GB):   Too large
 ```
 
-## 逐步為代理程式編寫程式碼（選用）
+## 逐步編寫代理程式（選用）
 
-您將建立**一個檔案**，名為 `hardware_advisor_agent.py`，並逐步新增功能。每個步驟都建立在前一個步驟的基礎上。
+您將建立**一個檔案**，名為 `hardware_advisor_agent.py`，並逐步新增功能。每個步驟都是在前一個步驟的基礎上進行的。
 
 ### 步驟 1：代理程式骨架
 
-從最基本的代理程式結構開始 — 僅包含類別和基本的系統提示。此時代理程式尚無任何工具。
+從最簡單的代理程式結構開始 — 僅包含類別和基本的系統提示。此時代理程式尚無任何工具。
 
 ```python
 from gaia import Agent
@@ -441,7 +443,7 @@ if __name__ == "__main__":
     print("Agent created successfully!")
 ```
 
-執行它以進行驗證：
+執行以進行驗證：
 
 ```bash
 python hardware_advisor_agent.py
@@ -455,9 +457,9 @@ Agent created successfully!
 
 ---
 
-### 步驟 2：GPU 和硬體偵測
+### 步驟 2：GPU 與硬體偵測
 
-新增 `_get_gpu_info()` 輔助方法和 `get_hardware_info()` 工具。這使代理程式具有互動性 — 您現在可以查詢有關系統規格的資訊。
+新增 `_get_gpu_info()` 輔助方法和 `get_hardware_info()` 工具。這使代理程式具有互動性 — 您現在可以查詢系統規格。
 
 **更新檔案頂部的匯入項目：**
 
@@ -468,7 +470,7 @@ from gaia import Agent, tool
 from gaia.llm.lemonade_client import LemonadeClient
 ```
 
-**在 `_get_system_prompt()` 方法之後新增 `_get_gpu_info()` 輔助函式：**
+**在 `_get_system_prompt()` 方法之後新增 `_get_gpu_info()` 輔助方法：**
 
 ```python
 def _get_gpu_info(self) -> Dict[str, Any]:
@@ -555,7 +557,7 @@ def _get_gpu_info(self) -> Dict[str, Any]:
     return {"name": "Not detected", "memory_mb": 0}
 ```
 
-**將 `_register_tools()` 方法替換為** `get_hardware_info` 工具：
+**將 `_register_tools()` 方法替換為包含 `get_hardware_info` 工具的版本：**
 
 ```python
 def _register_tools(self):
@@ -612,7 +614,7 @@ def _register_tools(self):
             }
 ```
 
-**更新 `__main__` 區塊** 以啟用互動式測試：
+**更新 `__main__` 區塊以啟用互動式測試：**
 
 ```python
 if __name__ == "__main__":
@@ -637,7 +639,7 @@ if __name__ == "__main__":
 python hardware_advisor_agent.py
 ```
 
-**範例輸出：**
+**輸出範例：**
 
 ```
 You: Show me my system specs
@@ -652,7 +654,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ### 步驟 3：模型目錄
 
-在 `_register_tools()` 中的 `get_hardware_info` 函式之後，新增 `list_available_models()` 工具。現在代理程式可以告訴您有哪些可用的模型。
+在 `_register_tools()` 內，於 `get_hardware_info` 函式之後新增 `list_available_models()` 工具。現在代理程式可以告訴您有哪些模型可用。
 
 ```python
     @tool(atomic=True)
@@ -694,13 +696,13 @@ Agent: Your system has excellent specs for running LLMs locally!
             }
 ```
 
-執行並試著詢問「有哪些可用的模型？」：
+執行並試著詢問「有哪些模型可用？」：
 
 ```bash
 python hardware_advisor_agent.py
 ```
 
-**範例輸出：**
+**輸出範例：**
 
 ```
 You: What models are available?
@@ -715,7 +717,7 @@ Agent: I found 15 models in the catalog:
 
 ### 步驟 4：智慧推薦
 
-在 `_register_tools()` 中的 `list_available_models` 之後，新增 `recommend_models()` 工具。代理程式現在可以使用 70% 規則計算哪些模型適合您系統的記憶體。
+在 `_register_tools()` 內，於 `list_available_models` 之後新增 `recommend_models()` 工具。代理程式現在可以使用 70% 規則計算哪些模型適合您系統的記憶體。
 
 ```python
     @tool(atomic=True)
@@ -780,7 +782,7 @@ Agent: I found 15 models in the catalog:
 python hardware_advisor_agent.py
 ```
 
-**範例輸出：**
+**輸出範例：**
 
 ```
 You: What size LLM can I run?
@@ -796,7 +798,7 @@ Top recommendations:
 
 ### 步驟 5：正式版 CLI
 
-將簡單的 `__main__` 區塊替換為精美的互動式 CLI。這會新增橫幅、退出指令以及更好的錯誤處理。
+將簡單的 `__main__` 區塊替換為精緻的互動式 CLI。這會新增橫幅、結束指令，以及更完善的錯誤處理。
 
 **將整個 `if __name__ == "__main__":` 區塊替換為：**
 
@@ -853,26 +855,26 @@ if __name__ == "__main__":
 您的 `hardware_advisor_agent.py` 現在應該具備以下所有元件：
 
 - [x] 匯入項目：`from typing import Any, Dict` 和 `from gaia import Agent, tool`
-- [x] `HardwareAdvisorAgent` 類別，包含 `__init__` 與系統提示詞
+- [x] `HardwareAdvisorAgent` 類別，包含 `__init__` 和系統提示
 - [x] `_get_gpu_info()` 輔助函式（Windows PowerShell + Linux lspci）
-- [x] `get_hardware_info()` 工具，包含 GPU、NPU 與 OS 欄位
-- [x] `list_available_models()` 工具，包含標籤與大小資訊擴充
+- [x] `get_hardware_info()` 工具，包含 GPU、NPU 和 OS 欄位
+- [x] `list_available_models()` 工具，包含標籤和大小資訊
 - [x] `recommend_models()` 工具，包含 70% 規則、fits_in_ram、fits_in_gpu
-- [x] `main()` 函式，具備互動式 CLI
+- [x] `main()` 函式，包含互動式 CLI
 
-**請測試以下查詢以確認一切運作正常：**
+**測試以下查詢以確認一切正常運作：**
 
-- 「我可以運行多大的 LLM？」
+- 「我可以執行多大的 LLM？」
 - 「顯示我的系統規格」
 - 「有哪些可用的模型？」
-- 「我可以運行 30B 模型嗎？」
+- 「我可以執行 30B 模型嗎？」
 
-> **提示**：完整實作可在 [hardware_advisor_agent.py](assets/hardware_advisor_agent.py) 中取得。
+> **提示**：完整的實作可在 [hardware_advisor_agent.py](assets/hardware_advisor_agent.py) 中找到。
 
 ## 後續步驟
 
 - **探索 LemonadeClient API** — 在 [LemonadeClient SDK 文件](https://amd-gaia.ai/sdk/lemonade-client)中發掘更多系統與模型管理功能
-- **加入語音互動功能** — 整合 Whisper ASR 與 Kokoro TTS，讓使用者能以語音詢問硬體相關問題。請參閱 [Talk 指南](https://amd-gaia.ai/guides/talk)
+- **加入語音互動功能** — 整合 Whisper ASR 和 Kokoro TTS，讓使用者能夠透過語音詢問硬體相關問題。請參閱 [Talk 指南](https://amd-gaia.ai/guides/talk)
 - **加入 MCP 支援** — 將硬體顧問公開為 MCP 伺服器，讓其他工具能夠查詢它。請參閱 [MCP 指南](https://amd-gaia.ai/sdk/infrastructure/mcp)
-- **擴充推薦引擎** — 考量 GPU VRAM 用於層卸載，或加入基準測試以估算每秒權杖數（tokens-per-second）
+- **擴充推薦引擎** — 納入 GPU VRAM 以考量層卸載，或加入基準測試以估算每秒 token 數
 - **建構多代理系統** — 使用 [Routing Agent](https://amd-gaia.ai/guides/routing) 將硬體顧問與程式碼代理或聊天代理結合

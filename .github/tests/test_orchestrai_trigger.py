@@ -120,30 +120,13 @@ class AcquireTimeoutValidation(unittest.TestCase):
 
 class OpenHandsProvisioning(unittest.TestCase):
 
-    def test_repository_variables_override_docker_desktop_coordinates(self):
-        cfg = {"pipeline": {}, "provisioning": {}}
-        env = {
-            "ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_URL": "https://example.invalid/docker.exe",
-            "ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_SHA256": "b" * 64,
-        }
-        with mock.patch.dict(os.environ, env, clear=False):
-            trigger.apply_env_overrides(cfg)
-        self.assertEqual(
-            cfg["provisioning"]["docker_desktop_installer_url"],
-            env["ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_URL"],
-        )
-        self.assertEqual(
-            cfg["provisioning"]["docker_desktop_installer_sha256"],
-            env["ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_SHA256"],
-        )
-
-    def test_windows_openhands_enables_wsl_then_forwards_docker_installer(self):
+    def test_windows_openhands_enables_wsl_without_installer_coordinates(self):
+        """The Docker Desktop installer is the dependency's own business: this
+        repository neither requires nor forwards its location."""
         cfg = {
             "provisioning": {
                 "windows_install_scripts": [],
                 "windows_driver": {"source": "driver", "copy": "direct"},
-                "docker_desktop_installer_url": "https://example.invalid/docker-desktop.exe",
-                "docker_desktop_installer_sha256": "a" * 64,
             },
             "extra_install_scripts": load_config()["extra_install_scripts"],
         }
@@ -161,37 +144,17 @@ class OpenHandsProvisioning(unittest.TestCase):
                 "reboot_after": True,
             }],
         )
-        self.assertEqual(
-            builds["vars"],
-            {
-                "driver_source": "driver",
-                "driver_copy": "direct",
-                "docker_desktop_installer_url": "https://example.invalid/docker-desktop.exe",
-                "docker_desktop_installer_sha256": "a" * 64,
-            },
-        )
+        self.assertEqual(builds["vars"], {"driver_source": "driver", "driver_copy": "direct"})
 
-    def test_windows_openhands_requires_external_installer_coordinates(self):
-        cfg = {
-            "provisioning": {
-                "windows_install_scripts": [],
-                "windows_driver": {"source": "driver", "copy": "direct"},
-            },
-            "extra_install_scripts": load_config()["extra_install_scripts"],
+    def test_installer_repository_variables_are_not_read(self):
+        cfg = {"pipeline": {}, "provisioning": {}}
+        env = {
+            "ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_URL": "https://example.invalid/docker.exe",
+            "ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_SHA256": "b" * 64,
         }
-        batch = {
-            "platform": "windows",
-            "arch": "halo",
-            "playbooks": ["openhands-getting-started"],
-        }
-        _, missing = trigger.make_builds(batch, cfg)
-        self.assertEqual(
-            missing,
-            [
-                "ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_URL",
-                "ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_SHA256",
-            ],
-        )
+        with mock.patch.dict(os.environ, env, clear=False):
+            trigger.apply_env_overrides(cfg)
+        self.assertFalse([k for k in cfg["provisioning"] if "docker" in k])
 
     def test_linux_openhands_does_not_run_windows_wsl_provisioning(self):
         cfg = {

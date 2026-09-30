@@ -16,52 +16,52 @@ SPDX-License-Identifier: MIT
 
 ## Prehľad
 
-Napíšte jadro GPU (kernel) od základu, skompilujte ho, spustite na AMD GPU a sledujte, ako stúpa vyťaženie. Táto príručka ukazuje, ako výpočty na GPU skutočne fungujú: napíšete kód jadra a spustíte ho paralelne naprieč tisíckami vlákien.
+Napíšte GPU kernel od základov, skompilujte ho, spustite na AMD GPU a sledujte, ako narastá vyťaženie. Táto príručka ukazuje, ako výpočty na GPU skutočne fungujú: napíšete kód kernela a spustíte ho paralelne naprieč tisíckami vlákien.
 
-> **Poznámka**: Toto je pomerne zložitá príručka, ktorá si môže vyžadovať ďalšie ladenie a úpravy.
+> **Poznámka**: Toto je pomerne komplexná príručka, ktorá si môže vyžadovať dodatočné ladenie a úpravy.
 
 ## Čo sa naučíte
 
 <!-- @os:windows -->
-- Ako fungujú jadrá GPU: mriežky, bloky, vlákna a model indexovania, ktorý ich mapuje na dáta
-- Ako softvérový balík AMD ROCm/HIP umožňuje písať kód v štýle CUDA, ktorý beží na AMD GPU bez úprav
-- Ako skompilovať jadro za behu pomocou `torch.cuda._compile_kernel`
-- Ako vytvoriť natívne rozšírenie jadra v C++ pomocou `CUDAExtension` + pybind11, ktoré je možné importovať z Pythonu
+- Ako fungujú GPU kernely: mriežky, bloky, vlákna a model indexovania, ktorý ich mapuje na dáta
+- Ako vám zásobník AMD ROCm/HIP umožňuje písať kód v štýle CUDA, ktorý beží na AMD GPU bez akýchkoľvek úprav
+- Ako skompilovať kernel za behu pomocou `torch.cuda._compile_kernel`
+- Ako vytvoriť natívne rozšírenie kernela v C++ pomocou `CUDAExtension` + pybind11, importovateľné z Pythonu
 <!-- @os:end -->
 <!-- @os:linux -->
-- Ako fungujú jadrá GPU: mriežky, bloky, vlákna a model indexovania, ktorý ich mapuje na dáta
-- Ako softvérový balík AMD ROCm/HIP umožňuje písať kód v štýle CUDA, ktorý beží na AMD GPU bez úprav
-- Ako skompilovať jadro za behu pomocou `torch.cuda._compile_kernel`
-- Ako vytvoriť natívne rozšírenie jadra v C++ pomocou `CUDAExtension` + pybind11, ktoré je možné importovať z Pythonu
-- Ako merať čas vykonávania jadra a sledovať vyťaženie GPU v reálnom čase pomocou `amd-smi`
+- Ako fungujú GPU kernely: mriežky, bloky, vlákna a model indexovania, ktorý ich mapuje na dáta
+- Ako vám zásobník AMD ROCm/HIP umožňuje písať kód v štýle CUDA, ktorý beží na AMD GPU bez akýchkoľvek úprav
+- Ako skompilovať kernel za behu pomocou `torch.cuda._compile_kernel`
+- Ako vytvoriť natívne rozšírenie kernela v C++ pomocou `CUDAExtension` + pybind11, importovateľné z Pythonu
+- Ako merať čas vykonávania kernela a sledovať vyťaženie GPU v reálnom čase pomocou `amd-smi`
 <!-- @os:end -->
 
 ---
 
-Táto príručka zahŕňa dva prístupy k vývoju jadier:
+Táto príručka pokrýva dva prístupy k vývoju kernelov:
 
 <!-- @os:windows -->
 | Prístup | Vstupný bod |
 |---|---|
-| **JIT kompilácia** | `torch.cuda._compile_kernel`, napíšte jadro ako reťazec Python, bez kroku zostavovania |
-| **Rozšírenie C++** | `CUDAExtension` + pybind11: skompilujte súbor `.cu` do natívneho `.pyd` a importujte ho |
+| **JIT kompilácia** | `torch.cuda._compile_kernel`, kernel napíšete ako reťazec v Pythone, bez potreby zostavovania |
+| **Rozšírenie v C++** | `CUDAExtension` + pybind11: skompilujte súbor `.cu` do natívneho `.pyd` a importujte ho |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Prístup | Vstupný bod |
 |---|---|
-| **JIT kompilácia** | `torch.cuda._compile_kernel`, napíšte jadro ako reťazec Python, bez kroku zostavovania |
-| **Rozšírenie C++** | `CUDAExtension` + pybind11: skompilujte súbor `.cu` do natívneho `.so` a importujte ho |
+| **JIT kompilácia** | `torch.cuda._compile_kernel`, kernel napíšete ako reťazec v Pythone, bez potreby zostavovania |
+| **Rozšírenie v C++** | `CUDAExtension` + pybind11: skompilujte súbor `.cu` do natívneho `.so` a importujte ho |
 <!-- @os:end -->
 
-Oba prístupy fungujú na AMD GPU. Je to možné vďaka tomu, že zostava PyTorch pre ROCm mapuje celý povrch API CUDA na HIP. To znamená, že `torch.cuda`, `CUDAExtension` a syntax jadier CUDA fungujú na hardvéri AMD transparentne.
+Oba prístupy fungujú na AMD GPU. Je to možné vďaka tomu, že zostavenie PyTorch pre ROCm mapuje celý rozsah rozhrania CUDA API na HIP. To znamená, že `torch.cuda`, `CUDAExtension` a syntax kernelov CUDA fungujú na hardvéri AMD transparentne.
 
 ---
 
-## Pozadie
+## Súvislosti
 
-### Čo je jadro GPU (GPU Kernel)?
+### Čo je GPU kernel?
 
-Jadro GPU je funkcia, ktorá beží paralelne naprieč tisíckami vlákien GPU súčasne. Na rozdiel od funkcie CPU, ktorá sa vykoná raz pri každom volaní, jadro sa spúšťa s **mriežkou** (grid) **blokov** (blocks), z ktorých každý obsahuje mnoho **vlákien** (threads), pričom všetky vykonávajú rovnaký kód na rôznych dátach.
+GPU kernel je funkcia, ktorá beží paralelne naprieč tisíckami vlákien GPU súčasne. Na rozdiel od funkcie CPU, ktorá sa vykoná raz na jedno volanie, sa kernel spúšťa s **mriežkou** (grid) **blokov** (blocks), pričom každý obsahuje množstvo **vlákien** (threads), ktoré všetky vykonávajú rovnaký kód na rôznych dátach.
 
 <p align="center">
   <img src="assets/grid_threads.png" width="900"/>
@@ -69,22 +69,22 @@ Jadro GPU je funkcia, ktorá beží paralelne naprieč tisíckami vlákien GPU s
 
 ### Model indexovania vlákien
 
-Pri spúšťaní jadra zadávate dve rozmery:
+Pri spúšťaní kernela zadávate dve dimenzie:
 
 | Premenná | Význam |
 |---|---|
 | `gridDim` | Počet blokov v mriežke |
 | `blockDim` | Počet vlákien na blok |
 
-Každé vlákno má prístup k trom zabudovaným premenným určeným len na čítanie:
+Každé vlákno má prístup k trom vstavaným premenným len na čítanie:
 
 | Premenná | Význam |
 |---|---|
-| `blockIdx.x` | Do ktorého bloku toto vlákno patrí |
+| `blockIdx.x` | Ktorému bloku toto vlákno patrí |
 | `blockDim.x` | Počet vlákien v jednom bloku |
 | `threadIdx.x` | Index vlákna v rámci jeho bloku |
 
-### Globálne ID vlákna
+### Globálny identifikátor vlákna
 
 Tieto premenné sa kombinujú na výpočet globálne jedinečného indexu vlákna:
 
@@ -92,29 +92,29 @@ Tieto premenné sa kombinujú na výpočet globálne jedinečného indexu vlákn
 int idx = blockIdx.x * blockDim.x + threadIdx.x;
 ```
 
-Celkový počet vlákien = `gridDim.x * blockDim.x`. Každé vlákno spracúva jeden prvok nezávisle. Toto je základ **dátovej paralelnosti**. Rovnaká operácia sa vykonáva na mnohých prvkoch naraz, bez závislosti medzi vláknami.
+Celkový počet vlákien = `gridDim.x * blockDim.x`. Každé vlákno spracúva jeden prvok nezávisle. Toto je základ **dátovej paralelizmu**. Rovnaká operácia beží na mnohých prvkoch naraz, bez akejkoľvek závislosti medzi vláknami.
 
 ---
 
-### Model vykonávania GPU: Wavefronty
+### Model vykonávania na GPU: Wavefronty
 
-GPU AMD vykonávajú vlákna v skupinách po **32** nazývaných **wavefronty**. Všetky vlákna vo wavefronte vykonávajú rovnakú inštrukciu súčasne. Toto ovplyvňuje optimálnu voľbu veľkosti bloku (256 vlákien = 8 wavefrontov = dobrá efektivita plánovania).
+AMD GPU vykonávajú vlákna v skupinách po **32**, nazývaných **wavefronty**. Všetky vlákna vo wavefronte vykonávajú tú istú inštrukciu súčasne. Toto ovplyvňuje optimálnu voľbu veľkosti bloku (256 vlákien = 8 wavefrontov = dobrá efektivita plánovania).
 
-### Programovanie GPU AMD: HIP + ROCm
+### Programovanie AMD GPU: HIP + ROCm
 
-**ROCm** je open-source softvérový balík AMD pre výpočty na GPU (ovládače, kompilátory, knižnice, runtime). **HIP** stojí nad ním a je navrhnutý tak, aby bol syntakticky identický s CUDA. Zostava PyTorch pre ROCm transparentne mapuje `torch.cuda.*` na HIP, takže rovnaký kód funguje na AMD GPU.
+**ROCm** je open-source výpočtový zásobník AMD pre GPU (ovládače, kompilátory, knižnice, runtime). **HIP** stojí nad ním a je navrhnutý tak, aby bol syntakticky identický s CUDA. Zostavenie PyTorch pre ROCm transparentne mapuje `torch.cuda.*` na HIP, takže rovnaký kód funguje na AMD GPU.
 
 ---
 
 ### PyTorch + AMD/HIP
 
-PyTorch poskytuje zostavu pre ROCm, v ktorej je povrch API CUDA (`torch.cuda.*`) transparentne podporovaný cez HIP. To znamená:
+PyTorch ponúka zostavenie pre ROCm, v ktorom je rozsah rozhrania CUDA API (`torch.cuda.*`) transparentne podporovaný pomocou HIP. To znamená, že:
 
 - `torch.cuda.is_available()` funguje na AMD GPU s ROCm
 - `tensor.to("cuda")` alokuje pamäť na AMD GPU
-- `torch.version.hip` zobrazuje verziu HIP
+- `torch.version.hip` sprístupňuje verziu HIP
 
-PyTorch tiež poskytuje `torch.cuda._compile_kernel()`, praktickú skratku na JIT kompiláciu reťazca surového jadra a získanie volateľného objektu bez potreby samostatného kroku zostavovania.
+PyTorch tiež sprístupňuje `torch.cuda._compile_kernel()`, vysokoúrovňovú skratku na JIT kompiláciu reťazca so surovým kernelom a získanie volateľnej funkcie bez potreby samostatného kroku zostavovania.
 
 ---
 
@@ -124,10 +124,10 @@ PyTorch tiež poskytuje `torch.cuda._compile_kernel()`, praktickú skratku na JI
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Inštalácia softvérových požiadaviek
+## Inštalácia potrebného softvéru
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-### Požiadavky – Windows
+### Predpoklady – Windows
 - Nainštalujte najnovšiu verziu: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
 <!-- @os:end -->
@@ -136,8 +136,8 @@ PyTorch tiež poskytuje `torch.cuda._compile_kernel()`, praktickú skratku na JI
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-V systéme Linux otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv s už nainštalovaným ROCm+PyTorch.
-<!-- @test:id=create-venv timeout=60 -->
+Na Linuxe otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv s už nainštalovaným ROCm+Pytorch.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -149,14 +149,14 @@ source kernel-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Udeľte svojmu používateľovi prístup k zariadeniam GPU** (odhláste sa a znova prihláste, aby sa táto zmena prejavila):
+**Udeľte svojmu používateľovi prístup k zariadeniam GPU** (aby sa to prejavilo, odhláste sa a znova prihláste):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-V systéme Linux otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv.
-<!-- @test:id=create-venv timeout=60 -->
+Na Linuxe otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -169,8 +169,8 @@ source kernel-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-V systéme Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv.
-<!-- @test:id=create-venv timeout=60 -->
+Na Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv kernel-env
 kernel-env\Scripts\activate
@@ -178,10 +178,12 @@ kernel-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
-> **Tip**: Používatelia systému Windows možno budú musieť pred spustením niektorých príkazov PowerShell upraviť svoju politiku spúšťania PowerShell (napr.
-> nastaviť ju na RemoteSigned alebo Unrestricted).
+> **Tip**: Používatelia Windows možno budú musieť upraviť svoju politiku spúšťania PowerShell (napr.
+> nastaviť ju na RemoteSigned alebo Unrestricted) pred spustením niektorých príkazov PowerShell.
 
 <!-- @os:end -->
+
+
 ### Inštalácia základných závislostí
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
@@ -198,14 +200,14 @@ kernel-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-> **Poznámka:** Pre tento playbook je potrebné nainštalovať ROCm a PyTorch do virtuálneho prostredia aj na Ryzen AI Halo, keďže kompilácia vlastných jadier (kernelov) vyžaduje kompletné vývojové hlavičky.
+> **Poznámka:** Pre túto príručku je potrebné nainštalovať ROCm a PyTorch do virtuálneho prostredia aj na Ryzen AI Halo, keďže kompilácia vlastných kernelov vyžaduje kompletné vývojové hlavičkové súbory.
 
-Nainštalujte ROCm:
+Inštalácia ROCm:
 ```powershell
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[libraries,devel]"
 ```
 
-Nainštalujte PyTorch:
+Inštalácia PyTorch:
 ```powershell
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
 ```
@@ -228,11 +230,10 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 <!-- @test:end -->
 <!-- @os:end -->
 ---
-
 ### Inštalácia ďalších závislostí
 
 <!-- @os:linux -->
-Nainštalujte reťazec nástrojov na zostavovanie C/C++ pre Linux. Ide o systémovú závislosť, ktorá je potrebná pre postupy s rozšíreniami v C++, pretože `CUDAExtension` zostavuje natívne moduly `.so` zo súborov `.cu`.
+Nainštalujte nástroje na zostavovanie jazyka C/C++ pre Linux. Ide o závislosť na úrovni systému a je potrebná pre návody s C++ rozšíreniami, pretože `CUDAExtension` zostavuje natívne moduly `.so` zo súborov `.cu`.
 
 Spustite toto raz na počítači s Linuxom, mimo vytvoreného virtuálneho prostredia Python:
 
@@ -242,7 +243,7 @@ sudo apt install -y build-essential gcc g++
 ```
 <!-- @os:end -->
 
-Po aktivácii virtuálneho prostredia `kernel-env` nainštalujte závislosti na zostavovanie Python:
+Po aktivovaní virtuálneho prostredia `kernel-env` nainštalujte závislosti na zostavovanie Python:
 <!-- @test:id=install-deps timeout=60 setup=activate-venv -->
 ```bash
 python -m pip install "setuptools<82" wheel ninja
@@ -267,20 +268,20 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:windows -->
 Uistite sa, že máte nainštalované [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) alebo [novšie](https://visualstudio.microsoft.com/vs/community/) s pracovným zaťažením **Desktop development with C++**.
 
-> **Poznámka**: Toto nastavenie prostredia Visual Studio C++ je potrebné iba pre prístup s **C++ rozšírením**. Pre prístup s JIT kompiláciou nie je potrebné.
+> **Poznámka**: Toto nastavenie prostredia Visual Studio C++ je potrebné iba pre postup **C++ Extension**. Pre postup JIT Compilation nie je potrebné.
 
 Otvorte terminál PowerShell a pred zostavením C++ rozšírenia spustite nasledujúce príkazy.
 
 **Krok 1: Nájdite nainštalované prostredie Visual Studio C++**
 
-**(A) Nájdite `vswhere.exe`, ktorý sa inštaluje spolu s inštalátorom Visual Studio**
+**(A) Vyhľadajte `vswhere.exe`, ktorý sa inštaluje spolu s Visual Studio Installer**
 ```powershell
 $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 
 if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(B) Nájdite `vcvars64.bat` z Visual Studio 2022 alebo novšieho s nástrojmi na zostavovanie v C++**
+**(B) Nájdite `vcvars64.bat` z Visual Studio 2022 alebo novšieho s nástrojmi na zostavovanie C++**
 
 ```powershell
 $Vcvars = & $VsWhere `
@@ -301,9 +302,9 @@ Write-Host "Using Visual Studio C++ environment: $Vcvars"
 
 **Krok 2: Aktivujte prostredie na zostavovanie Visual Studio C++**
 
-**(A) Spustite `vcvars64.bat` a zachyťte prostredie, ktoré nastaví**
+**(A) Spustite `vcvars64.bat` a zachyťte prostredie, ktoré nastavuje**
 
-Tým sa sprístupnia `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` a cesty k sadám Windows SDK.
+Týmto sa sprístupnia `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` a cesty k Windows SDK.
 
 ```powershell
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
@@ -422,7 +423,7 @@ $env:DISTUTILS_USE_SDK = "1"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Overte, že je GPU od AMD viditeľné pomocou:
+Overte, že je GPU AMD viditeľné pomocou:
 <!-- @test:id=amd-smi-linux timeout=60 setup=activate-venv -->
 ```bash
 amd-smi
@@ -555,23 +556,21 @@ $code | python -
 
 ---
 
-## Stiahnutie potrebných súborov
+## Stiahnutie požadovaných súborov
 
-Vytvorte nasledujúcu adresárovú štruktúru vytvorením **2 nových priečinkov** a stiahnutím príslušných súborov:
+Vytvorte nasledujúcu adresárovú štruktúru vytvorením **2 nových priečinkov** a stiahnutím zodpovedajúcich súborov:
 
 | Adresár | Súbory na stiahnutie | Popis |
 |-----------|-------------------|-------------|
-| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| Súbory pre JIT a C++ rozšírenie pre jadro sčítania vektorov |
-| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Súbory pre JIT a C++ rozšírenie pre jadro násobenia matíc |
+| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| Súbory JIT a C++ rozšírenia pre kernel sčítania vektorov |
+| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Súbory JIT a C++ rozšírenia pre kernel násobenia matíc |
 
 
-## Postupy
+## Návod 1: Sčítanie vektorov
 
-### Postup 1: Sčítanie vektorov
+#### Postup A: Kompilácia JIT
 
-#### Prístup A: JIT kompilácia
-
-JIT (Just-In-Time) kompilácia znamená, že jadro je napísané ako reťazec surového kódu C++ vnútri Pythonu a kompiluje sa za behu, bez potreby ďalších krokov zostavovania.
+Kompilácia JIT (Just-In-Time) znamená, že kernel je napísaný ako reťazec surového jazyka C++ vo vnútri Pythonu a je skompilovaný za behu, bez potreby ďalších krokov zostavovania.
 
 Ak chcete použiť [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py), uistite sa, že je stiahnutý, a spustite:
 ```bash
@@ -619,28 +618,28 @@ print("First 5 elements:", x[:5].cpu())
 #Expected output: tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @os:linux -->
-> **Tip**: Skript tiež spustí vlákno na pozadí, ktoré každých 100 ms dopytuje `amd-smi`, aby zaznamenávalo maximálne a priemerné využitie GPU počas behu jadra.
+> **Tip**: Skript tiež spúšťa vlákno na pozadí, ktoré každých 100 ms dopytuje `amd-smi`, aby zaznamenávalo maximálne a priemerné využitie GPU počas behu kernelu.
 <!-- @os:end -->
 
 > **Poznámka**: **Prečo je veľkosť bloku 256?** <br>
-> - Jadro používa **256 vlákien na blok**, pretože to dobre zodpovedá **modelu vykonávania vo wavefrontoch na GPU od AMD**.
+> - Kernel používa **256 vlákien na blok**, pretože sa to dobre zhoduje s **modelom vykonávania wavefrontov na GPU AMD**.
 > - Pripomeňme, že hardvér AMD vykonáva vlákna v skupinách po 32 vláknach, čo vedie k 8 wavefrontom na blok. (8 wavefrontov x 32 vlákien = 1 blok)
 
 
-**Čo daná záťaž robí:**
+**Čo pracovná záťaž robí:**
 
-Jadro umelo pridáva ďalšiu prácu, aby demonštrovalo využitie GPU:
+Kernel umelo pridáva ďalšiu prácu, aby demonštroval využitie GPU:
 
 - **100 000 000 prvkov** v tenzore
-- **Vnútorný cyklus sa vykoná 1 000-krát** na prvok pri každom spustení jadra  
-- **200 spustení jadra** celkovo
+- **Vnútorný cyklus sa spustí 1 000-krát** na prvok pri každom spustení kernelu  
+- **200 spustení kernelu** celkovo
 
-**Výpočet:**  
-- Každý prvok: sa zvýši o 1 × 1 000 iterácií × 200 spustení = 200 000  
+**Matematika:**  
+- Každý prvok: je zvýšený o 1 × 1 000 iterácií × 200 spustení = 200 000  
 - Konečný výsledok: 1,0 (počiatočná hodnota) + 200 000 (sčítania) = 200 001,0
 
 **Prečo vnútorný cyklus?**  
-- Bez cyklu `for (int i = 0; i < 1000; i++)` by sa 200 spustení dokončilo okamžite a nástroje na monitorovanie by nezachytili zmysluplné využitie GPU. Umelá práca zabezpečí, že každé spustenie jadra trvá dostatočne dlho na to, aby ho nástroje na monitorovanie dokázali odmerať.
+- Bez cyklu `for (int i = 0; i < 1000; i++)` by 200 spustení skončilo okamžite a nástroje na monitorovanie by nezachytili zmysluplné využitie GPU. Umelá práca zabezpečuje, že každé spustenie kernelu trvá dostatočne dlho na to, aby ho nástroje na monitorovanie dokázali zmerať.
 
 <!-- @os:linux -->
 **Očakávaný výstup:**[Výkonnostné čísla sa budú líšiť]
@@ -653,7 +652,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Poznámka**: Vo Windows nie je `amd-smi` podporované. Na sledovanie využitia GPU môžete použiť Správcu úloh, kde by ste mali vidieť krátky nárast využitia pri spustení programu.
+> **Poznámka**: V systéme Windows nie je `amd-smi` podporovaný. Na sledovanie využitia GPU môžete použiť Správcu úloh, kde by ste mali vidieť krátky nárast využitia pri spustení programu.
 
 **Očakávaný výstup:**
 ```
@@ -662,7 +661,7 @@ Elapsed time: 2.753s
 No GPU Usage captured.
 ```
 <!-- @os:end -->
-**Skvelá práca! Práve ste spustili svoje prvé jadro na GPU.**
+**Skvelá práca! Práve ste spustili svoj prvý GPU kernel.**
 
 <!-- @os:linux -->
 <!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
@@ -803,32 +802,32 @@ $code | python -
 <!-- @os:end -->
 
 ---
-#### Prístup B: Rozšírenie v C++
+#### Prístup B: Rozšírenie C++
 
-Druhý prístup je viac manuálny: napíšete kernel a Python binding do jedného súboru `.cu`, natívne ho skompilujete pomocou build systému PyTorch a importujete ho do Pythonu.
+Druhý prístup je viac manuálny: napíšte kernel a Python väzbu do jedného súboru `.cu`, skompilujte ho natívne pomocou build systému PyTorch a importujte ho do Pythonu.
 
 <!-- @os:windows -->
-> **Poznámka**: Prístup s rozšírením v C++ vyžaduje build prostredie Visual Studio C++, pretože PyTorch kompiluje zdrojový súbor `.cu` do natívneho rozšírujúceho modulu `.pyd`. Zostavenie tohto natívneho rozšírenia závisí od nástrojového reťazca Microsoft C++ (kompilátor, linker a build nástroje) poskytovaného Visual Studio. Pred zostavením rozšírenia spustite aktivačné príkazy pre Visual Studio zo sekcie nastavenia.
+> **Poznámka**: Prístup s rozšírením C++ vyžaduje build prostredie Visual Studio C++, pretože PyTorch kompiluje zdrojový súbor `.cu` do natívneho modulu rozšírenia `.pyd`. Zostavenie tohto natívneho rozšírenia závisí od reťazca nástrojov Microsoft C++ (kompilátor, linker a build nástroje) poskytovaného Visual Studio. Pred zostavením rozšírenia spustite aktivačné príkazy Visual Studio zo sekcie nastavenia.
 <!-- @os:end -->
 
-Ak ste to ešte neurobili, stiahnite si nasledujúce súbory:
+Ak ste tak ešte neurobili, stiahnite si nasledujúce súbory:
 <!-- @os:windows -->
 | Súbor | Úloha |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + spúšťač + pybind11 binding, všetko v jednom súbore |
-| [setup.py](assets/Vector_Addition/setup.py) | Build skript, používa `CUDAExtension` na skompilovanie `.cu` do `.pyd` |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + launcher + väzba pybind11, všetko v jednom súbore |
+| [setup.py](assets/Vector_Addition/setup.py) | Build skript, používa `CUDAExtension` na kompiláciu `.cu` do `.pyd` |
 | [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Python skript, ktorý spúšťa zostavené artefakty |
 <!-- @os:end -->
 
 <!-- @os:linux -->
 | Súbor | Úloha |
 |---|---|
-| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + spúšťač + pybind11 binding, všetko v jednom súbore |
-| [setup.py](assets/Vector_Addition/setup.py) | Build skript, používa `CUDAExtension` na skompilovanie `.cu` do `.so` |
+| [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + launcher + väzba pybind11, všetko v jednom súbore |
+| [setup.py](assets/Vector_Addition/setup.py) | Build skript, používa `CUDAExtension` na kompiláciu `.cu` do `.so` |
 | [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Python skript, ktorý spúšťa zostavené artefakty |
 <!-- @os:end -->
 
-#### **Krok 1: Kernel, spúšťač a binding** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
+#### **Krok 1: Kernel, launcher a väzba** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -854,27 +853,26 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
->**Tip**: Prečo použiť `hipDeviceSynchronize()`? <br>
-> - Spúšťanie kernelov na GPU je asynchrónne. Keď CPU spustí `add_one<<<grid_size, block_size>>>(data, n);`, okamžite pokračuje ďalšou inštrukciou bez čakania na GPU. `hipDeviceSynchronize()` prinúti CPU čakať, kým sa kernel na GPU nedokončí.
+>**Tip**: Prečo používať `hipDeviceSynchronize()`? <br>
+> - Spustenia kernelov GPU sú asynchrónne. Keď CPU spustí `add_one<<<grid_size, block_size>>>(data, n);`, okamžite vykoná ďalšiu inštrukciu bez čakania na GPU. `hipDeviceSynchronize()` prinúti CPU čakať, kým sa dokončí GPU kernel.
 
 #### **Krok 2: Zostavenie**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**Poznámka**: Tento príkaz hľadá `setup.py` v aktuálnom adresári, aby zostavil vytvorený súbor .cu.
+>**Poznámka**: Tento príkaz hľadá `setup.py` v aktuálnom adresári, aby zostavil súbor .cu, ktorý sme vytvorili.
 
 
-`CUDAExtension` je pomocník na zostavovanie CUDA z `torch.utils.cpp_extension`. S ROCm PyTorch **premapuje `CUDAExtension` tak, aby používal `hipcc`** namiesto `nvcc`. ROCm zachytí proces zostavovania a presmeruje ho cez HIP kompilátor, čím prenesie kód CUDA na AMD.
+`CUDAExtension` je pomocník na zostavovanie CUDA z `torch.utils.cpp_extension`. S ROCm PyTorch **premapuje `CUDAExtension` na použitie `hipcc`** namiesto `nvcc`. ROCm zachytáva build cestu a smeruje ju cez kompilátor HIP, čím prenáša kód CUDA na AMD.
 
-Toto vytvorí nasledujúce súbory:
+Týmto vzniknú nasledujúce súbory:
 <!-- @os:windows -->
 - `build/`:  adresár so súbormi `.pyd`
-- `add_one_kernel.hip`:  HIP zdrojový kód vygenerovaný „hipifikáciou“ súboru `.cu`; toto je to, čo skutočne skompiloval `hipcc`
+- `add_one_kernel.hip`:  zdrojový kód HIP vygenerovaný „hipifikáciou“ súboru `.cu`; toto je to, čo `hipcc` skutočne skompiloval
 <!-- @os:end -->
-
 <!-- @os:linux -->
 - `build/`:  adresár so súbormi `.so`
-- `add_one_kernel.hip`:  HIP zdrojový kód vygenerovaný „hipifikáciou“ súboru `.cu`; toto je to, čo skutočne skompiloval `hipcc`
+- `add_one_kernel.hip`:  zdrojový kód HIP vygenerovaný „hipifikáciou“ súboru `.cu`; toto je to, čo `hipcc` skutočne skompiloval
 <!-- @os:end -->
 
 #### **Krok 3: Použitie z Pythonu** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)):
@@ -1028,7 +1026,7 @@ finally {
 
 ---
 
-### Návod 2: Násobenie matíc
+## Návod 2: Násobenie matíc
 
 Násobenie matíc počíta **C = A × B**, kde:
 - **A** má rozmer M×N (riadky × stĺpce)
@@ -1038,7 +1036,7 @@ Násobenie matíc počíta **C = A × B**, kde:
 Každý výstupný prvok je definovaný ako:
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-Každý prvok matice C sa počíta nezávisle, čo je ideálne pre paralelizmus na GPU.
+Každý prvok matice C sa počíta nezávisle, čo je ideálne pre paralelizmus GPU.
 
 #### Ako sa to mapuje na vlákna GPU
 
@@ -1053,15 +1051,15 @@ Na rozdiel od sčítania vektorov (1D) produkuje násobenie matíc **2D výstup*
 
 Každé vlákno počíta jeden prvok výstupnej matice C. Vlákno na pozícii `(row, col)` počíta `C[row][col]` vynásobením zodpovedajúceho riadku A so zodpovedajúcim stĺpcom B.
 
-**Rozloženie pamäte**: Pamäť GPU je plochá (1D), ale matice sú uložené po riadkoch. Na prístup k `A[row][col]` kernel používa `A[row * N + col]`.
+**Rozloženie pamäte**: Pamäť GPU je plochá (1D), ale matice sú uložené riadok po riadku. Na prístup k `A[row][col]` kernel používa `A[row * N + col]`.
 
 
-#### Prístup A: JIT kompilácia:
+#### Prístup A: Kompilácia JIT:
 
-Podobne ako v Návode 1, kernel je napísaný ako reťazec v surovom C++ vnútri Pythonu a skompilovaný za behu pomocou zabudovaného JIT v PyTorch.
+Podobne ako v návode 1, kernel je napísaný ako reťazec surového kódu C++ vnútri Pythonu a skompilovaný za behu prostredníctvom vstavaného JIT PyTorch.
 
 
-Ak chcete použiť [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py), uistite sa, že je stiahnutý, a spustite:
+Aby ste mohli použiť [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py), uistite sa, že je stiahnutý, a spustite:
 ```bash
 cd Matrix_Multiplication # if not already inside the directory
 python matmul_kernel.py
@@ -1121,7 +1119,7 @@ print(f"Max error vs torch.mm: {max_err:.6f}")
 Skript overuje výsledok voči `torch.mm` s malou toleranciou. Aritmetika s pohyblivou rádovou čiarkou na GPU môže produkovať malé číselné rozdiely v porovnaní s implementáciami na CPU kvôli poradiu paralelnej redukcie.
 
 <!-- @os:linux -->
-**Očakávaný výstup:**[Hodnoty výkonu sa budú líšiť]
+**Očakávaný výstup:**[Výkonnostné čísla sa budú líšiť]
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -1131,7 +1129,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Poznámka**: Vo Windows nie je `amd-smi` podporovaný. Na sledovanie využitia GPU môžete použiť Správcu úloh, kde by ste mali vidieť krátky nárast využitia počas behu programu.
+> **Poznámka**: V systéme Windows nie je `amd-smi` podporovaný. Na sledovanie využitia GPU môžete použiť Správcu úloh, kde by ste mali vidieť krátky nárast využitia pri spustení programu.
 
 **Očakávaný výstup:**
 ```
@@ -1308,25 +1306,25 @@ $code | python -
 ---
 #### Prístup B: Rozšírenie C++
 
-Druhý prístup je manuálnejší: napíšte kernel a Python binding do jedného súboru `.cu`, skompilujte ho natívne pomocou build systému PyTorch a importujte ho do Pythonu.
+Druhý prístup je manuálnejší: napísať kernel a Python binding do jedného súboru `.cu`, natívne ho skompilovať pomocou build systému PyTorch a importovať ho do Pythonu.
 
 <!-- @os:windows -->
-> **Poznámka**: Prístup C++ Extension vyžaduje build prostredie Visual Studio C++, pretože PyTorch kompiluje zdrojový súbor `.cu` do natívneho rozširujúceho modulu `.pyd`. Zostavenie tohto natívneho rozšírenia závisí od reťazca nástrojov Microsoft C++ (kompilátor, linker a build nástroje) poskytovaného Visual Studiom. Pred zostavením rozšírenia spustite aktivačné príkazy Visual Studio zo sekcie nastavenia.
+> **Poznámka**: Prístup pomocou rozšírenia C++ vyžaduje build prostredie Visual Studio C++, pretože PyTorch kompiluje zdrojový súbor `.cu` do natívneho modulu rozšírenia `.pyd`. Vytvorenie tohto natívneho rozšírenia závisí od nástrojov Microsoft C++ toolchain (kompilátor, linker a build nástroje) poskytovaných Visual Studio. Pred zostavením rozšírenia spustite príkazy na aktiváciu Visual Studio zo sekcie nastavenia.
 <!-- @os:end -->
 
-Stiahnite si nasledujúce súbory, ak ste tak ešte neurobili:
+Ak ste tak ešte neurobili, stiahnite si nasledujúce súbory:
 <!-- @os:windows -->
 | Súbor | Úloha |
 |---|---|
 | [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + spúšťač + pybind11 binding |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | Build skript, používa `CUDAExtension` na kompiláciu `.cu` do `.pyd` |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Build skript, používa `CUDAExtension` na skompilovanie `.cu` do `.pyd` |
 | [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python skript, ktorý spúšťa zostavené artefakty |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Súbor | Úloha |
 |---|---|
 | [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + spúšťač + pybind11 binding |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | Build skript, používa `CUDAExtension` na kompiláciu `.cu` do `.so` |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | Build skript, používa `CUDAExtension` na skompilovanie `.cu` do `.so` |
 | [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Python skript, ktorý spúšťa zostavené artefakty |
 <!-- @os:end -->
 
@@ -1370,27 +1368,27 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
-V porovnaní s `add_one_launcher` z Postupu 1 tento spúšťač:
+V porovnaní s `add_one_launcher` z Prechodu 1 spúšťač tu:
 - Prijíma dva vstupné tenzory namiesto jedného
-- Odvodzuje všetky tri rozmery (M, N, K) z tvarov tenzorov, bez manuálneho odovzdávania veľkostí z Pythonu
-- Alokuje a vracia výstupný tenzor C, namiesto úpravy na mieste
+- Odvodzuje všetky tri rozmery (M, N, K) z tvarov tenzorov, bez manuálneho odovzdávania veľkosti z Pythonu
+- Alokuje a vracia výstupný tenzor C, namiesto mutácie na mieste
 - Používa `dim3` pre grid aj block na vyjadrenie 2D tvaru spustenia
 
 #### **Krok 2: Zostavenie**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**Poznámka**: Tento príkaz hľadá `setup.py` v aktuálnom adresári, aby zostavil súbor .cu, ktorý sme vytvorili.
+>**Poznámka**: Tento príkaz hľadá `setup.py` v aktuálnom adresári na zostavenie súboru .cu, ktorý sme vytvorili.
 
 
-Toto vytvorí nasledujúce súbory:
+Tým vzniknú nasledujúce súbory:
 <!-- @os:windows -->
-- `build/`:  adresár so súbormi `.pyd`
-- `matmul_kernel.hip`:  HIP zdrojový kód vygenerovaný hipifikáciou súboru `.cu`; toto je to, čo skutočne skompiloval `hipcc`
+- `build/`: adresár so súbormi `.pyd`
+- `matmul_kernel.hip`: HIP zdrojový kód vygenerovaný hipifikáciou súboru `.cu`; toto je to, čo `hipcc` v skutočnosti skompiloval
 <!-- @os:end -->
 <!-- @os:linux -->
-- `build/`:  adresár so súbormi `.so`
-- `matmul_kernel.hip`:  HIP zdrojový kód vygenerovaný hipifikáciou súboru `.cu`; toto je to, čo skutočne skompiloval `hipcc`
+- `build/`: adresár so súbormi `.so`
+- `matmul_kernel.hip`: HIP zdrojový kód vygenerovaný hipifikáciou súboru `.cu`; toto je to, čo `hipcc` v skutočnosti skompiloval
 <!-- @os:end -->
 
 #### **Krok 3: Použitie z Pythonu** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)):
@@ -1408,8 +1406,8 @@ Result: tensor([[19., 22.],
 
 **Skvelé! Práve ste implementovali násobenie matíc na GPU.** Toto je významný míľnik, pretože násobenie matíc je základom moderných operácií strojového učenia, ako sú:
 - Vrstvy neurónových sietí
-- Mechanizmy attention
-- Embeddings
+- Mechanizmy pozornosti (attention)
+- Vkladania (embeddings)
 - Transformery
 
 <!-- @os:linux -->
@@ -1563,13 +1561,13 @@ finally {
 Naučili ste sa písať, kompilovať a spúšťať GPU kernely pomocou JIT kompilácie aj rozšírení C++ pre základné paralelné operácie.
 
 **Optimalizácie výkonu:**
-- **Dláždenie so zdieľanou pamäťou (shared memory tiling)** - Ukladanie blokov dát do vyrovnávacej pamäte na zníženie prístupu ku globálnej pamäti
-- **Zlučovanie prístupov do pamäte (memory coalescing)** - Optimalizácia vzorov prístupu do pamäte pre priepustnosť
+- **Dláždenie zdieľanej pamäte (shared memory tiling)** – Ukladanie blokov dát do vyrovnávacej pamäte na zníženie prístupu ku globálnej pamäti
+- **Zlučovanie pamäťových prístupov (memory coalescing)** – Optimalizácia vzorov prístupu do pamäte pre šírku pásma
 
 **Reálne algoritmy:**
-- **2D konvolúcia** - Malý filter (kernel) sa posúva cez obrázok a počíta každý výstupný pixel ako vážený súčet susedných pixelov. Toto zavádza stencil výpočty a dláždenie so zdieľanou pamäťou, kde vlákna opätovne využívajú prekrývajúce sa oblasti obrázka na zníženie prístupu ku globálnej pamäti.
-- **Funkcia Softmax**: Softmax konvertuje vektor čísel na pravdepodobnosti, ktoré sa sčítajú na 1, bežne používané vo výstupoch neurónových sietí. Efektívna implementácia na GPU zavádza paralelné redukcie a techniky numerickej stability pri spracovaní veľkých vektorov.
+- **2D konvolúcia** – Malý filter (kernel) prechádza cez obrázok a počíta každý výstupný pixel ako vážený súčet susedných pixelov. Toto zavádza stencil výpočty a dláždenie zdieľanej pamäte, kde vlákna opätovne využívajú prekrývajúce sa oblasti obrázka na zníženie prístupu ku globálnej pamäti.
+- **Funkcia Softmax**: Softmax prevádza vektor čísel na pravdepodobnosti, ktoré sa sčítajú na 1, bežne používané vo výstupoch neurónových sietí. Efektívna implementácia na GPU zavádza paralelné redukcie a techniky numerickej stability pri spracovaní veľkých vektorov.
 
-**Úvahy pre produkčné nasadenie:**
-- **Spracovanie chýb** - Kontrola hraníc a správa zariadení
-- **Integrácia s PyTorch** - Vlastné operátory s podporou autograd
+**Produkčné aspekty:**
+- **Spracovanie chýb** – Kontrola hraníc a správa zariadení
+- **Integrácia s PyTorch** – Vlastné operátory s podporou autograd
