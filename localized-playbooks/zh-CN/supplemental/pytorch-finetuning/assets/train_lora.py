@@ -134,7 +134,7 @@ print(f"Total selected samples: {n_samples}")
 # -----------------------
 print(f"\nLoading {MODEL}...")
 if "gemma" in MODEL.lower():
-    print("Note: Model is stored as MXFP4 on Hugging Face but will be loaded as BF16 for training")
+    print("Note: Model is stored as MXFP4 but will be loaded as BF16 for training")
     print("(This is expected - the warning about MXFP4 is informational)\n")
 
 # Download the model from ModelScope
