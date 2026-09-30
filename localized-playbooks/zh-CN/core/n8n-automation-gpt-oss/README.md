@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> 此 playbook 使用了 GitHub 无法渲染的特殊标签。请访问 [amd.com/playbooks](https://amd.com/playbooks) 正确预览此内容。
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## 概述
