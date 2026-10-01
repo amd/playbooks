@@ -18,12 +18,12 @@
       "quality_issues": "Untranslated table headers 'Text Encoder', 'Diffusion Model'; otherwise accurate and fluent."
     },
     "playbooks/core/comfyui-image-gen/playbook.json": {
-      "source_sha256": "09b9cb70967e72f2d8b3fc33ef4e53389489b271a2629f2c571207300fe0f477",
+      "source_sha256": "ccb4606a473b5459d626656fc47592e0f24b3d3f5ab605b5f789cf76bb3099d6",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Suffix hyphenation on brand names (ComfyUI-val, Turbo-val) slightly non-standard but acceptable."
+      "quality_score": 93,
+      "quality_issues": "Accurate, fluent; minor phrasing shift ('Z Image Turbo modellel' vs 'with') but natural and clear."
     },
     "playbooks/dependencies/comfyui.md": {
       "source_sha256": "1364f858fb8176db125d258fd392b33e0c2ec1d9f50983f5648926384717a436",
@@ -178,12 +178,12 @@
       "quality_issues": "Heading 'Platform Configuration' left untranslated; otherwise accurate, fluent, all code/URLs intact."
     },
     "playbooks/core/lmstudio-rocm-llms/playbook.json": {
-      "source_sha256": "a63a9e649fc4c346593b47b1a3fe9b4f68abb9f41046456d0d5317cec87f3e7c",
+      "source_sha256": "392a94f2d8b433a807d02b90e2f61bf94ee3740073023e2d4792485499524e14",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "\"A LM Studio\" should be \"Az LM Studio\" (article agreement error), appears twice."
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, terminology and brand terms intact."
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
       "source_sha256": "9bc128f29f40f1a7b56da55d7c22d3520c4a232d990259f020928394eb7b517e",
@@ -202,12 +202,12 @@
       "quality_issues": "Minor: 'az README' should be 'a README'; 'forgatókönyv' slightly off for playbook. Otherwise accurate."
     },
     "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
-      "source_sha256": "004e579ddcaf166de5205c73c05d8b368f701c20fdd5a1dd77be591927f0f441",
+      "source_sha256": "372c4eb8b001a840b352e06ed93f77d07e9600ebe70db869eb2c3fd830c480f8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent, terms and brands intact; minor informal 'építs' style choice."
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent; minor: 'Építsen' formal but fine, terms intact"
     },
     "playbooks/core/pytorch-rocm-llms/README.md": {
       "source_sha256": "c21d88a2b435760acf276582d292917abd1501bae2ab0343d07a71ee3e1970cd",
@@ -226,12 +226,12 @@
       "quality_issues": "Heading 'Platform Configuration' left untranslated; otherwise accurate and fluent, code/numbers intact."
     },
     "playbooks/core/pytorch-rocm-llms/playbook.json": {
-      "source_sha256": "08e31959e54626c95d635fa0a470aced52bac36b3d03f8d30650729f0f3ad2a2",
+      "source_sha256": "146cd1d8f52094ad12f4e0472d6ba1b9c77b6cd5464ccbb494d9ab7395a32eeb",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
-      "quality_issues": "Accurate, fluent; brand terms intact. Minor: 'summarize' as 'összegezhessen' acceptable but 'összefoglalhasson' slightly better."
+      "quality_issues": "Accurate, fluent; brand terms intact. Minor: 'PyTorch alatt' slightly informal, 'on PyTorch' better as 'PyTorch-csal'."
     },
     "playbooks/core/vscode-qwen3-coder/README.md": {
       "source_sha256": "f6f05e2203068ca1b78936cdf2d50d572800f3dc5b647dcc89159488fcbb87f1",
@@ -250,12 +250,12 @@
       "quality_issues": "Fluent, accurate; minor: 'Platform konfiguráció' could be 'Platformkonfiguráció', slight article/heading style nits."
     },
     "playbooks/core/vscode-qwen3-coder/playbook.json": {
-      "source_sha256": "f65c00f0dd3f6e2a6db533fa4200c7295957e0e11baa55e2ce275de20177e5ec",
+      "source_sha256": "e8f317617d4a5d8c6f9b52e396a505884edccb5038e4345cb4635a557b512f32",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Slightly wordy ending 'kódolási segítségnyújtáshoz'; otherwise accurate, fluent, terms intact."
+      "quality_score": 93,
+      "quality_issues": "Natural and accurate; minor hyphenation on brand names, 'kódsegítséghez' slightly awkward."
     },
     "playbooks/supplemental/amd-sync/README.md": {
       "source_sha256": "e777827fbe0b543b84f58e3a9d7c7a9761fd640f37682499e9ea8ee5acc1478e",
@@ -266,12 +266,12 @@
       "quality_issues": "Minor inconsistency: 'Terminal' vs 'Terminál', 'Directory' vs 'Könyvtár' translated inconsistently. Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/amd-sync/playbook.json": {
-      "source_sha256": "47606bc42545735813bef4b9e13b9ee635149ffaca933e30ebc8720a90ff1b5d",
+      "source_sha256": "8afc8a9aca238750b97aba38623575f840c952f1265c783f57efa74ae5bfefc9",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'Live Metrics' partially translated ('Élő metrikák') while other tool names kept English—slight inconsistency."
+      "quality_score": 78,
+      "quality_issues": "Inconsistent brand term: 'AMD Sync' translated as 'AMD szinkronizálással' in title, untranslated in body."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
       "source_sha256": "85a37042eb3d930429c1e0c2ee36edfdc0cfb70f995f814cf6a9f47060af3763",
@@ -282,12 +282,12 @@
       "quality_issues": "Inconsistent register (te/ön mixing), 'Ray-munkavállaló' awkward for worker node, 'switchcsel' typo. Otherwise accurate, code intact."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
-      "source_sha256": "e55853ecbe0d357ac4550eb56b9c3bec4cc5c7ea6ea0fcc981ee71ec2cb6392d",
+      "source_sha256": "8f0c7a393a415677746bfaae802781f1caed37bf0e166cc83fb1d27f4aff9247",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "\"Multi-node\" left untranslated; minor inconsistency with \"klaszter\"/\"fürt\" terminology otherwise good."
+      "quality_score": 90,
+      "quality_issues": "Accurate; minor inconsistency between 'klaszterezés' and 'fürt', but both acceptable and clear."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
       "source_sha256": "40eca53770d0d4011db1b668485ba06d457963222df9179f1ba501c32c6087fa",
@@ -298,12 +298,12 @@
       "quality_issues": "Minor: 'Ez a útmutató' (should be 'Ez az'), typo 'paraszterhasználatért', 'csevegheti a modellel' grammar. Otherwise accurate, code/URLs intact."
     },
     "playbooks/supplemental/clustering-rpc-server/playbook.json": {
-      "source_sha256": "7a11fc3c510b7f33187b6f7c05f06305cc55fd22ac3b145067b28a7821bd46a8",
+      "source_sha256": "999f53f983c4afc14afb255466992afaa969d04dddacd78be84d372d47908492",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Good; 'következtetés' slightly off for inference (should be 'inferencia'), otherwise accurate and fluent."
+      "quality_issues": "Accurate, fluent; 'következtetés' slightly off for 'inference' in ML context, 'inferencia' preferred."
     },
     "playbooks/supplemental/ollama-getting-started/README.md": {
       "source_sha256": "e1ab69d0945f9405017df20a2e24df068deee9f55583f7cbacdb441f449b6ef5",
@@ -314,7 +314,7 @@
       "quality_issues": "Accurate, fluent translation; code, URLs, brand terms intact. Minor: 'könnyűsúlyú' slightly literal for lightweight."
     },
     "playbooks/supplemental/ollama-getting-started/playbook.json": {
-      "source_sha256": "905b67d40670290336fc0e26480d5c67493bda592fa6ee57e872d39788d2a473",
+      "source_sha256": "2851032a9f1f4f2a40c656c7a379c447724405ab0bcd2305bd0070c84291d4ba",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
@@ -338,12 +338,12 @@
       "quality_issues": "Excellent translation; all code, URLs, brands intact. Minor: 'kódoláshoz' slightly ambiguous but acceptable for coding."
     },
     "playbooks/supplemental/open-webui-chat/playbook.json": {
-      "source_sha256": "37ea833e031babe935474b1da111c8b67bb05d395c178a8212108e261231c41b",
+      "source_sha256": "9b0838aaa07bb3c3ffc02152f8468a5c6604e473163be447c039ef3ae81f553c",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Accurate, fluent; minor expansion of LLM abbreviation acceptable, no errors."
+      "quality_score": 92,
+      "quality_issues": "Accurate and fluent; brand terms and LLM intact. Minor stylistic nits only."
     },
     "playbooks/supplemental/cvml/README.md": {
       "source_sha256": "31c69cc98e43387d9e01f96afdae1c5a2378af9f9f0e773d4e9febc2d84e0bdb",
@@ -354,12 +354,12 @@
       "quality_issues": "Good translation; minor inconsistency: formal (ön) in body vs informal (te) in Next Steps section; 'archáló'/'arcvázlat' inconsistent for face mesh."
     },
     "playbooks/supplemental/cvml/playbook.json": {
-      "source_sha256": "93d2282150e0b76f0e38d0eba819cf03e3f97c4c296ddcc86fbe70f133060377",
+      "source_sha256": "25728ebdf67d697269b6b43475d1d73c4e36270c3ca533011cea51e78b20da54",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate, fluent; 'kiépítése' slightly formal but acceptable; brands and terms intact."
+      "quality_score": 90,
+      "quality_issues": "Accurate; brand terms intact. 'alapjain' slightly awkward for 'on top of'."
     },
     "playbooks/supplemental/gaia-agents/README.md": {
       "source_sha256": "6cbf3ce0b81a61b7d64d1fe010172f17d87e0f316ee49171e93f1c9c6ae73a30",
@@ -378,12 +378,12 @@
       "quality_issues": "Heading 'Platform Configuration' left untranslated; otherwise accurate and fluent, code/URLs intact."
     },
     "playbooks/supplemental/gaia-agents/playbook.json": {
-      "source_sha256": "9183d4ec9b26b7e92b69539a446e28d8d962c49be223d2c878a7417805021e48",
+      "source_sha256": "29012f7a1d1d47dd7cb598acc1fd177c20e1082b776c29ebfb6473a4d2018dde",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 82,
-      "quality_issues": "Title mistranslates 'first agent with GAIA' as 'GAIA's first agent'; otherwise accurate and fluent."
+      "quality_score": 85,
+      "quality_issues": "Title mistranslates 'Your First Agent with GAIA' as 'GAIA's first agent'; slight ambiguity."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
       "source_sha256": "9352db15e96748d77bd1db916212ae60537bccec11f553ef9addc748715d5f22",
@@ -402,12 +402,12 @@
       "quality_issues": "Accurate, fluent, terminology consistent; code/numbers/URLs intact. Minor: 'Python kliens' could be hyphenated."
     },
     "playbooks/supplemental/lemonade-getting-started/playbook.json": {
-      "source_sha256": "b6d4d92098822e89fb92aa2ed859b47a98a331cd123fb8bd07fe1b5f7e6139a1",
+      "source_sha256": "90bb203097574c26290ad289627338f05c7f175c2eaf46f3db0e5cb92bbc3af8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
-      "quality_issues": "Accurate and fluent; 'Gen AI' kept as-is, acceptable but slightly informal terminology."
+      "quality_issues": "Natural, accurate. 'AI szerver' could be hyphenated 'AI-szerver'; minor style nits only."
     },
     "playbooks/supplemental/llama-factory-finetuning/README.md": {
       "source_sha256": "7ff1d8bf4e3a0e54af3a8c90e2ffc62350c8ba5c1e49d4e5ffbce3fe10fe78cb",
@@ -418,12 +418,12 @@
       "quality_issues": "Minor register inconsistency (informal 'te' early, formal 'Ön' later); 'downstream' left untranslated. Code, URLs, terminology intact."
     },
     "playbooks/supplemental/llama-factory-finetuning/playbook.json": {
-      "source_sha256": "fc97277aa570c606aa51b019017436f187310aebb9e41145d658f5f92d23a2c9",
+      "source_sha256": "1d53edef30a541aceaded8f2ab96d5a269b97d92bb877f8da37bda166fe906a5",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Accurate, fluent; brand and terms intact. Minor stylistic naturalness only."
+      "quality_score": 93,
+      "quality_issues": "Accurate and fluent; minor stylistic nuance in 'technikák' phrasing, brand terms preserved correctly."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
       "source_sha256": "131a8dbe90f9ed5638e7e2a33ad5701c678f3ab1348210a2badc3b8f5bcf9346",
@@ -434,12 +434,12 @@
       "quality_issues": "Accurate, fluent; minor awkward calques ('verempakot', 'képes AI háttérrendszerre'). Inconsistent ügynök/ágens. Code, URLs, numbers intact."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
-      "source_sha256": "ad63f56e43c6be51b65de3beac6917a2aed27360cca004d45cbe20e24ce068d8",
+      "source_sha256": "62685cb80287a1e69dbb678a48a134667bda2aed7ececa77dfa18b67859d93bb",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Accurate, fluent, brand terms intact; minor stylistic naturalness only."
+      "quality_score": 88,
+      "quality_issues": "'A OpenClaw' should be 'Az OpenClaw' (article error); otherwise accurate and fluent."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
       "source_sha256": "d6b66b52107f19e10f53a4dbac24c90a47ac5723bee591cd7e6ed4bf3026676d",
@@ -450,12 +450,12 @@
       "quality_issues": "Accurate, fluent, terminology consistent; code/URLs/brands intact. Minor: 'zárolt' for gated slightly loose but clarified with (gated)."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
-      "source_sha256": "b6e938616f1c620508e5b8a50e4e07008ab3d1ce6398cb45acbd373a74b316c7",
+      "source_sha256": "704b2500368941fb15fadad5a1e2538c7cd47621204aa2b2030cb675275b8479",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent, terminology and brand terms intact."
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent; brand terms and abbreviations intact."
     },
     "playbooks/supplemental/pytorch-kernels/platform.md": {
       "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",
@@ -466,12 +466,12 @@
       "quality_issues": "Minor: 'Platform konfiguráció' slightly inconsistent capitalization; otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/pytorch-kernels/playbook.json": {
-      "source_sha256": "a5cc1e33f28df3145b83eb09ee932d34235126157c38f05fe7f3fe9aa69f08d6",
+      "source_sha256": "070ce49c5e759de95947d98a8803d83976eba384f7a46d4f4d245f7444a8c987",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate, fluent; 'building' rendered as 'készítése' slightly less precise than 'építése', minor."
+      "quality_score": 78,
+      "quality_issues": "First line 'PyTorch-pal' awkward, inconsistent kernel hyphenation between lines; otherwise accurate, terms intact."
     },
     "playbooks/supplemental/speech2speech-translation/README.md": {
       "source_sha256": "30451d6a37e2c41dfe741c16d8e2ee3ff5ad1100f306755dffb3ec10b08e0653",
@@ -490,12 +490,12 @@
       "quality_issues": "Untranslated heading 'Platform Configuration'; otherwise accurate, fluent, formatting/code/numbers intact."
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
-      "source_sha256": "606fd50baf712296dcb61bcd481471fd4f05a48809890d72ebff15a0e099d7ec",
+      "source_sha256": "1316db6d40d2f0ec6dd828a0fd54ad1d21626353257b402b4bb3af41877e164b",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Slightly awkward 'beszéd-beszéd'; 'beszédről beszédre' more natural. Otherwise accurate and fluent."
+      "quality_score": 82,
+      "quality_issues": "Second sentence slightly awkward word order; 'beszédfordítás...beszédről beszédre' redundant but acceptable, meaning preserved."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
       "source_sha256": "fc3d6e51b607ba3be6e2ea1d8102db4a2034600ffd52d4ab07d4632aadb31257",
@@ -514,12 +514,12 @@
       "quality_issues": "Title 'Platform Configuration' left untranslated; otherwise accurate and fluent."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/playbook.json": {
-      "source_sha256": "91767c3909c198a7baa72e7bceb90465893e20e3336d712867aa08aba0f3bdbe",
+      "source_sha256": "717946561c8d0f925c24bc509d66e8c1e7c8a25afaf4c71841eb81bcef92dd95",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 78,
-      "quality_issues": "\"Nagynyelvi modellek\" awkward for LLMs; trademark symbol placement shifted; otherwise accurate and fluent."
+      "quality_score": 82,
+      "quality_issues": "Title slightly awkward phrasing; trademark symbol placement; otherwise accurate and fluent."
     },
     "playbooks/supplemental/vllm-inference/README.md": {
       "source_sha256": "2c7c430c6bd3a17f01f85f6d212bc2f41134c5fccba880eaaa5c884374f75ed7",
@@ -530,12 +530,12 @@
       "quality_issues": "Minor: missing blank line before 'További források' heading. Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/vllm-inference/playbook.json": {
-      "source_sha256": "8337b7e3e229f047e7bdad287599bb06a268a800b8524e6165ebf1ce15ca06db",
+      "source_sha256": "7748991100bb4d2c3ebf2c0946491c0ea75521d856d6fdc47b1d05dd17b99410",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Accurate and fluent; parenthetical English glosses slightly redundant but acceptable clarification."
+      "quality_issues": "Accurate and fluent; 'következtetés' for inference is acceptable but 'inferencia' more standard in context."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "521f29360e9bba4b8a19cf40efb40f83eecdb87412a0d3ca176e5317203998a4",
@@ -562,12 +562,12 @@
       "quality_issues": "Accurate, fluent, code/URLs/brands intact. Minor stylistic nits only."
     },
     "playbooks/supplemental/github-slack-development-digest/playbook.json": {
-      "source_sha256": "d2ff6ac44cef585a1a6560b96ab98a921cc1163e326bd89a607aa95610739ed6",
+      "source_sha256": "96436de1f73aa169f6885e647004a70659b50c22f38e184ed2ea75e015affc40",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Minor: 'Digest' rendered as 'napi összesítő' (adds 'daily'); slight structural awkwardness but accurate."
+      "quality_issues": "Accurate, fluent; 'napi összefoglaló' adds 'daily' not in source but minor."
     },
     "playbooks/supplemental/hermes-lemonade-server/README.md": {
       "source_sha256": "b6f8a16d96872f88fd63899f80b8835ac47e2958ae65debeb5865828b5a57883",
@@ -578,12 +578,12 @@
       "quality_issues": "Inconsistent register: shifts between informal 'te' and formal 'Ön' forms mid-document; minor 'A egyszerű' article error."
     },
     "playbooks/supplemental/hermes-lemonade-server/playbook.json": {
-      "source_sha256": "2acd207ea87f2406f1a2cb6eab280828860d7d7ee97d2dd4b6f510638822d4ee",
+      "source_sha256": "b94d2ab28e4f5c2a63b43ba2809adc66f6e193fd94f47fd38a9f12a0cac18568",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate and fluent; 'háttérszolgáltatás' slightly interprets 'backend' but acceptable."
+      "quality_score": 94,
+      "quality_issues": "Accurate, fluent; brand terms intact. Minor: 'mint' phrasing slightly awkward but acceptable."
     },
     "playbooks/supplemental/openhands-getting-started/README.md": {
       "source_sha256": "92eb485ae459e0eab1d6b1565e3eb002f8f8ad8448e85c922c731b5cf202387a",
@@ -602,12 +602,12 @@
       "quality_issues": "Accurate, fluent translation; code, URLs, numbers intact. Minor stylistic nits only."
     },
     "playbooks/supplemental/openhands-getting-started/playbook.json": {
-      "source_sha256": "f42b6d2d4883a35e3aeeb5b926fc4da3d1f8de4a58427bf731bfd9afdf9e409b",
+      "source_sha256": "edb0f61634d2a34ad21634a1963b312e8ef7a1d424c04f73195e903d93e2e52f",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
-      "quality_issues": "Minor: 'kódoló ügynök' slightly awkward for coding agent; otherwise accurate and fluent."
+      "quality_issues": "Accurate, fluent; 'eszközén' slightly adds 'device' not in source, minor."
     },
     "playbooks/supplemental/deepseek-v4-flash-ds4/README.md": {
       "source_sha256": "15ee3cd6d7b0c7a10364f71c65caa460de3e0c0c5e754b335a133f60fc87fca0",
@@ -618,12 +618,12 @@
       "quality_issues": "Fluent, accurate, code/URLs intact. Minor terminology inconsistencies (szerver/kiszolgáló mix), otherwise publishable quality."
     },
     "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json": {
-      "source_sha256": "c4623077b5c02c1c3e7d9065d73c39bbc2e4798b5cfc00c7425f3be200d0b2fc",
+      "source_sha256": "0e0d5d1198caa94cb363716ac427316a8923eebec567a323db0de7a90b5b5dcf",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate, fluent; 'következtetési motor' slightly literal for inference engine but acceptable."
+      "quality_score": 82,
+      "quality_issues": "Title phrasing awkward/unnatural word order; otherwise accurate, terms intact."
     },
     "playbooks/supplemental/clustering-rpc-server-4-node/README.md": {
       "source_sha256": "d78cef1e7ac2d7a71eb0a8e35e706ec82afcafb8f8d321aa9256b139a44522e9",
@@ -634,12 +634,12 @@
       "quality_issues": "Minor: 'Ez a útmutató' article error; inconsistent playbook/útmutató; anchor links kept English but functional. Otherwise fluent, accurate, code intact."
     },
     "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json": {
-      "source_sha256": "2a16327c2890bd9de25a1257a0ea82e6afa54f216828ddf4fba25642f04dbd42",
+      "source_sha256": "ad3cce4c05e73a87357123c7b7965cc3b21da1c46f75d50180acc3dca982fa1d",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Accurate and fluent; 'következtetés' slightly less idiomatic than 'inferencia' for inference in ML context."
+      "quality_issues": "Accurate, fluent; 'inference' gloss slightly redundant but acceptable; terms and brands intact."
     }
   }
 }

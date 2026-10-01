@@ -1,6 +1,6 @@
 {
   "id": "ollama-getting-started",
-  "title": "Pierwsze kroki z Ollama",
+  "title": "Rozpoczynanie pracy z Ollama",
   "description": "Zainstaluj Ollama i uruchamiaj modele LLM lokalnie — czatuj z poziomu terminala, aplikacji desktopowej lub REST API.",
   "auto_translated": true
 }

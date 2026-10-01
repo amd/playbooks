@@ -1,6 +1,6 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "Fijnafstemmen van LLM's met LLaMA Factory",
-  "description": "Verfijn grote taalmodellen (LLM's) met behulp van LLaMA-Factory- en LoRA-technieken.",
+  "title": "Fijn afstemmen van LLM's met LLaMA Factory",
+  "description": "Finetune grote taalmodellen (LLM's) met behulp van LLaMA Factory en LoRA-technieken.",
   "auto_translated": true
 }

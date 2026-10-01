@@ -1,6 +1,6 @@
 {
   "id": "clustering-rpc-server",
-  "title": "RPC ile İki Ryzen™ AI Halo'yu Kümeleme",
-  "description": "İki Ryzen™ AI Halo cihazı arasında RPC server kullanarak dağıtık çıkarım ayarı yapın ve llama.cpp ile 350B+ modelleri çalıştırın",
+  "title": "İki Ryzen™ AI Halo'nun RPC ile Kümelenmesi",
+  "description": "İki Ryzen™ AI Halo cihazında RPC sunucusu kullanarak 350B+ modelleri çalıştırmak için llama.cpp ile dağıtık çıkarım kurulumu yapın",
   "auto_translated": true
 }

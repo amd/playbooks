@@ -1,6 +1,6 @@
 {
   "id": "speech2speech-translation",
-  "title": "Traducere vocală în timp real (voce-la-voce)",
-  "description": "Construiți o traducere vorbire-în-vorbire în timp real pe hardware-ul dvs. local.",
+  "title": "Traducere vorbire-în-vorbire în timp real",
+  "description": "Construiți o soluție de traducere vorbire-în-vorbire în timp real pe hardware-ul dvs. local.",
   "auto_translated": true
 }

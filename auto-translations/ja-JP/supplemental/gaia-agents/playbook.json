@@ -1,6 +1,6 @@
 {
   "id": "gaia-agents",
-  "title": "GAIAで最初のエージェントを構築する",
-  "description": "100%ローカルで動作するAIエージェントを構築 — クラウドAPIは一切不要です。GAIA SDKを使用してハードウェアアドバイザーを作成します。",
+  "title": "GAIAで初めてのエージェントを構築する",
+  "description": "100%ローカルで動作するAIエージェントを構築 — クラウドAPIは一切不要です。GAIA SDKを使用してハードウェアアドバイザーを作成しましょう。",
   "auto_translated": true
 }

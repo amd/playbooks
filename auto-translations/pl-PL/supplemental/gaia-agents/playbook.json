@@ -1,6 +1,6 @@
 {
   "id": "gaia-agents",
   "title": "Tworzenie pierwszego agenta z GAIA",
-  "description": "Zbuduj w 100% lokalnego agenta AI — bez potrzeby korzystania z interfejsów API w chmurze. Użyj GAIA SDK, aby stworzyć doradcę sprzętowego.",
+  "description": "Zbuduj w 100% lokalnego agenta AI — bez konieczności korzystania z interfejsów API w chmurze. Użyj GAIA SDK, aby stworzyć doradcę sprzętowego.",
   "auto_translated": true
 }

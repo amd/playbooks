@@ -1,6 +1,6 @@
 {
   "id": "vscode-qwen3-coder",
   "title": "VS Code와 Qwen3-Coder를 활용한 로컬 LLM 코딩",
-  "description": "VS Code와 로컬에서 실행 중인 Qwen3-Coder를 사용하여 비공개 코드 지원을 받으세요.",
+  "description": "로컬에서 실행되는 Qwen3-Coder를 VS Code와 함께 사용하여 비공개 코드 지원을 받으세요.",
   "auto_translated": true
 }

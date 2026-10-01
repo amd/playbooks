@@ -1,6 +1,6 @@
 {
   "id": "speech2speech-translation",
-  "title": "Překlad řeči na řeč v reálném čase",
-  "description": "Vytvořte překlad řeči na řeč v reálném čase na svém lokálním hardwaru.",
+  "title": "Simultánní překlad řeči v reálném čase",
+  "description": "Vytvořte si na svém lokálním hardwaru překladač řeči v reálném čase.",
   "auto_translated": true
 }

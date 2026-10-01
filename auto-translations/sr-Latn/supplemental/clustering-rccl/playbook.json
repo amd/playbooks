@@ -1,6 +1,6 @@
 {
   "id": "clustering-rccl",
   "title": "Klasterovanje dva Ryzen™ AI Halo uređaja pomoću RCCL",
-  "description": "Podesite višečvorni (multi-node) klaster koristeći dva Ryzen™ AI Halo uređaja sa RCCL za distribuirana radna opterećenja",
+  "description": "Postavite višečvorni (multi-node) klaster koristeći dva Ryzen™ AI Halo uređaja sa RCCL-om za distribuirana opterećenja",
   "auto_translated": true
 }

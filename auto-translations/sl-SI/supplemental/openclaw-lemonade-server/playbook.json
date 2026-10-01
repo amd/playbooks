@@ -1,6 +1,6 @@
 {
   "id": "openclaw-lemonade-server",
-  "title": "Zagon OpenClaw lokalno s strežnikom Lemonade",
+  "title": "Lokalni zagon OpenClaw z Lemonade Server",
   "description": "Namestite in konfigurirajte avtonomnega AI agenta OpenClaw s strežnikom Lemonade Server.",
   "auto_translated": true
 }

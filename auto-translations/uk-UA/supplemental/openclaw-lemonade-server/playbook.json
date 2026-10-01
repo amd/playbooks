@@ -1,6 +1,6 @@
 {
   "id": "openclaw-lemonade-server",
-  "title": "Локальний запуск OpenClaw за допомогою Lemonade Server",
-  "description": "Встановлення та налаштування автономного ШІ-агента OpenClaw за допомогою Lemonade Server.",
+  "title": "Локальний запуск OpenClaw із сервером Lemonade",
+  "description": "Установіть і налаштуйте автономний ШІ-агент OpenClaw із Lemonade Server.",
   "auto_translated": true
 }

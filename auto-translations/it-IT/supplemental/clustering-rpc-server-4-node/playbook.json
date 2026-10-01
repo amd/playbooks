@@ -1,6 +1,6 @@
 {
   "id": "clustering-rpc-server-4-node",
   "title": "Clustering di quattro Ryzen™ AI Halo con RPC",
-  "description": "Configura l'inferenza distribuita utilizzando il server RPC su quattro dispositivi Ryzen™ AI Halo con llama.cpp per eseguire modelli 1T+",
+  "description": "Configura l'inferenza distribuita utilizzando il server RPC su quattro dispositivi Ryzen™ AI Halo con llama.cpp per eseguire modelli da oltre 1T",
   "auto_translated": true
 }

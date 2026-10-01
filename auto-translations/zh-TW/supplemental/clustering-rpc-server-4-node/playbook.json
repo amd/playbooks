@@ -1,6 +1,6 @@
 {
   "id": "clustering-rpc-server-4-node",
-  "title": "Ryzen™ AI Halo 四機叢集運算（使用 RPC）",
-  "description": "使用 llama.cpp 在四台 Ryzen™ AI Halo 裝置上透過 RPC server 設定分散式推理，以執行 1T+ 模型",
+  "title": "使用 RPC 叢集化四台 Ryzen™ AI Halo",
+  "description": "使用 llama.cpp 跨四台 Ryzen™ AI Halo 裝置透過 RPC 伺服器設定分散式推論,以執行 1T+ 模型",
   "auto_translated": true
 }

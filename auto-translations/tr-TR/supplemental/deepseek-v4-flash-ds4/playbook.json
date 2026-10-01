@@ -1,6 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
   "title": "ds4 ile DeepSeek V4 Flash çalıştırma",
-  "description": "DeepSeek V4 Flash'i ds4 çıkarım motorunu kullanarak yerel olarak dağıtın ve modelleri ds4-cockpit ile etkileşimli olarak yönetin.",
+  "description": "ds4 çıkarım motorunu kullanarak DeepSeek V4 Flash'i yerel olarak dağıtın ve modelleri ds4-cockpit ile etkileşimli olarak yönetin.",
   "auto_translated": true
 }

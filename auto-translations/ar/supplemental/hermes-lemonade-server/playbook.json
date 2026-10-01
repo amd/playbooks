@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
-  "title": "تشغيل وكيل Hermes محليًا باستخدام خادم Lemonade",
-  "description": "قم بتثبيت وتكوين وكيل الذكاء الاصطناعي المستقل Hermes Agent مع Lemonade Server كخلفية ذكاء اصطناعي محلية له.",
+  "title": "تشغيل وكيل Hermes محليًا باستخدام Lemonade Server",
+  "description": "قم بتثبيت وتهيئة وكيل الذكاء الاصطناعي المستقل Hermes Agent مع Lemonade Server كخلفية الذكاء الاصطناعي المحلية الخاصة به.",
   "auto_translated": true
 }

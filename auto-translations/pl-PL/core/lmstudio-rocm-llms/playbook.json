@@ -1,6 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
   "title": "Uruchamianie i udostępnianie modeli LLM za pomocą LM Studio",
-  "description": "Skonfiguruj LM Studio i LM Studio Server, aby uruchamiać i udostępniać duże modele językowe lokalnie.",
+  "description": "Skonfiguruj LM Studio oraz LM Studio Server, aby uruchamiać i udostępniać lokalnie duże modele językowe.",
   "auto_translated": true
 }

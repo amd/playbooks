@@ -1,6 +1,6 @@
 {
   "id": "github-slack-development-digest",
-  "title": "בניית סיכום פיתוח יומי מ-GitHub ל-Slack עם Agent Canvas",
-  "description": "הגדירו את Agent Canvas, GitHub MCP, Slack MCP, ואוטומציה מתוזמנת של OpenHands שמפרסמת תקציר local-LLM.",
+  "title": "בניית תקציר פיתוח מ-GitHub ל-Slack באמצעות Agent Canvas",
+  "description": "הגדירו את Agent Canvas,‏ GitHub MCP,‏ Slack MCP, ואוטומציית OpenHands מתוזמנת שמפרסמת תקציר LLM מקומי.",
   "auto_translated": true
 }

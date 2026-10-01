@@ -1,6 +1,6 @@
 {
   "id": "open-webui-chat",
-  "title": "Rozhovor s LLM v aplikácii Open WebUI",
-  "description": "Používajte Open WebUI na lokálny chat s LLM.",
+  "title": "Rozhovor s LLM v Open WebUI",
+  "description": "Používajte Open WebUI na lokálnu komunikáciu s LLM.",
   "auto_translated": true
 }

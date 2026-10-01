@@ -1,6 +1,6 @@
 {
   "id": "clustering-rpc-server",
-  "title": "Klasterovanje dva Ryzen™ AI Halo uređaja pomoću RPC",
-  "description": "Podesite distribuiranu inferenciju pomoću RPC servera na dva Ryzen™ AI Halo uređaja sa llama.cpp radi pokretanja modela sa preko 350 milijardi parametara",
+  "title": "Klasterovanje dva Ryzen™ AI Halo uređaja pomoću RPC-a",
+  "description": "Podesite distribuiranu inferenciju pomoću RPC servera na dva Ryzen™ AI Halo uređaja sa llama.cpp za pokretanje modela sa preko 350 milijardi parametara",
   "auto_translated": true
 }

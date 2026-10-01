@@ -1,6 +1,6 @@
 {
   "id": "pytorch-kernels",
-  "title": "PyTorch와 AMD ROCm™를 활용한 커스텀 GPU 커널 구축",
-  "description": "PyTorch 및 AMD ROCm™ 소프트웨어를 사용하여 커스텀 GPU 커널 작성 및 최적화",
+  "title": "PyTorch와 AMD ROCm™을 활용한 커스텀 GPU 커널 구축",
+  "description": "PyTorch 및 AMD ROCm™ 소프트웨어를 사용하여 사용자 지정 GPU 커널 작성 및 최적화",
   "auto_translated": true
 }

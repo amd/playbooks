@@ -1,6 +1,6 @@
 {
   "id": "ollama-getting-started",
-  "title": "התחלת העבודה עם Ollama",
-  "description": "התקינו את Ollama והריצו מודלי שפה גדולים (LLMs) באופן מקומי — שוחחו מהטרמינל, מאפליקציית שולחן העבודה או מממשק ה-REST API.",
+  "title": "התחלת עבודה עם Ollama",
+  "description": "התקינו את Ollama והריצו מודלי שפה (LLM) באופן מקומי — שוחחו מהטרמינל, מאפליקציית שולחן העבודה או מממשק ה-REST API.",
   "auto_translated": true
 }

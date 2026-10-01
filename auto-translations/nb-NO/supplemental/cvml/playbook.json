@@ -1,6 +1,6 @@
 {
   "id": "cvml",
   "title": "Lokal datasyn med AMD Ryzen™ AI NPU",
-  "description": "Bygg lokale persepsjonsfunksjoner ved hjelp av CVML SDK på toppen av Ryzen AI og AMD ROCm™-programvare",
+  "description": "Bygg lokale persepsjonsfunksjoner ved bruk av CVML SDK på toppen av Ryzen AI og AMD ROCm™-programvare",
   "auto_translated": true
 }

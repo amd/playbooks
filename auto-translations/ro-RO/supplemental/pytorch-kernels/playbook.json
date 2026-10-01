@@ -1,6 +1,6 @@
 {
   "id": "pytorch-kernels",
-  "title": "Crearea de kernele GPU personalizate cu PyTorch și AMD ROCm™",
+  "title": "Crearea de kernel-uri GPU personalizate cu PyTorch și AMD ROCm™",
   "description": "Scrieți și optimizați kernel-uri GPU personalizate utilizând PyTorch și software-ul AMD ROCm™",
   "auto_translated": true
 }

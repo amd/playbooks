@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
-  "title": "Hermes-agentin suorittaminen paikallisesti Lemonade Server -palvelimella",
-  "description": "Asenna ja määritä Hermes Agent -autonominen tekoälyagentti käyttäen Lemonade Server -palvelinta paikallisena tekoälytaustajärjestelmänä.",
+  "title": "Hermes-agentin suorittaminen paikallisesti Lemonade Serverin avulla",
+  "description": "Asenna ja määritä Hermes Agent -autonomisen tekoälyagentin käyttöön Lemonade Server paikallisena tekoälytaustajärjestelmänä.",
   "auto_translated": true
 }

@@ -1,6 +1,6 @@
 {
   "id": "amd-sync",
-  "title": "AMD Sync 远程开发",
-  "description": "在您的笔记本电脑上安装 AMD Sync，即可一键在 AMD Ryzen™ AI Halo 上远程访问 VS Code、终端、JupyterLab 和实时指标。",
+  "title": "使用 AMD 同步进行远程开发",
+  "description": "在您的笔记本电脑上安装 AMD Sync，即可一键在您的 AMD Ryzen™ AI Halo 上远程使用 VS Code、Terminal、JupyterLab 和 Live Metrics。",
   "auto_translated": true
 }

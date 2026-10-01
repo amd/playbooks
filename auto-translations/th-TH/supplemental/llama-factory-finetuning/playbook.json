@@ -1,6 +1,6 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "การปรับแต่งโมเดล LLM อย่างละเอียดด้วย LLaMA Factory",
-  "description": "ปรับแต่งโมเดลภาษาขนาดใหญ่ (LLMs) โดยใช้เทคนิค LLaMA-Factory และ LoRA",
+  "title": "การปรับแต่งโมเดล LLM ด้วย LLaMA Factory",
+  "description": "ปรับแต่งโมเดลภาษาขนาดใหญ่ (LLM) อย่างละเอียดโดยใช้ LLaMA-Factory และเทคนิค LoRA",
   "auto_translated": true
 }

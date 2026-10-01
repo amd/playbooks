@@ -1,6 +1,6 @@
 {
   "id": "clustering-rpc-server-4-node",
-  "title": "AiCluster בין ארבעה Ryzen™ AI Halo באמצעות RPC",
-  "description": "התקינו הסקה מבוזרת באמצעות שרת RPC בארבעה מכשירי Ryzen™ AI Halo עם llama.cpp כדי להריץ מודלים בגודל 1T ומעלה",
+  "title": "ריכוב (Clustering) של ארבעה Ryzen™ AI Halo באמצעות RPC",
+  "description": "הגדרת הסקה מבוזרת באמצעות שרת RPC בארבעה מכשירי Ryzen™ AI Halo עם llama.cpp כדי להריץ מודלים בגודל T1+",
   "auto_translated": true
 }

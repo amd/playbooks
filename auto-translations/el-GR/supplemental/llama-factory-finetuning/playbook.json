@@ -1,6 +1,6 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "Βελτιστοποίηση (Fine-Tuning) Μεγάλων Γλωσσικών Μοντέλων (LLM) με το LLaMA Factory",
-  "description": "Συντονίστε (fine-tune) μεγάλα γλωσσικά μοντέλα (LLMs) χρησιμοποιώντας τις τεχνικές LLaMA Factory και LoRA.",
+  "title": "Βελτιστοποίηση (Fine-Tuning) Μεγάλων Γλωσσικών Μοντέλων (LLMs) με LLaMA Factory",
+  "description": "Μικρορύθμιση μεγάλων γλωσσικών μοντέλων (LLMs) χρησιμοποιώντας τις τεχνικές LLaMA Factory και LoRA.",
   "auto_translated": true
 }

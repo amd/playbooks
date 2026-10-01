@@ -1,6 +1,6 @@
 {
   "id": "unsloth-llms-finetuning",
-  "title": "使用 Unsloth 微调 LLM",
-  "description": "使用 Unsloth 高效微调 LLM™（节省显存）",
+  "title": "使用 Unsloth 微调大语言模型",
+  "description": "使用 Unsloth 实现内存高效的微调 LLM™",
   "auto_translated": true
 }

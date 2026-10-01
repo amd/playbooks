@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
-  "title": "Hermes Agent'ı Lemonade Server ile Yerel Olarak Çalıştırma",
+  "title": "Lemonade Server ile Hermes Agent'ı Yerel Olarak Çalıştırma",
   "description": "Hermes Agent otonom yapay zeka ajanını, yerel yapay zeka arka ucu olarak Lemonade Server ile kurun ve yapılandırın.",
   "auto_translated": true
 }

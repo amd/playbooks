@@ -1,6 +1,6 @@
 {
   "id": "vscode-qwen3-coder",
-  "title": "การเขียนโค้ดด้วย LLM ในเครื่องกับ VSCode และ Qwen3-Coder",
-  "description": "ใช้ VS Code ร่วมกับ Qwen3-Coder ที่รันในเครื่องเพื่อการช่วยเหลือด้านโค้ดแบบส่วนตัว",
+  "title": "AMD Local LLM สำหรับการเขียนโค้ดด้วย VS Code และ Qwen3-Coder",
+  "description": "使用 VS Code ร่วมกับ Qwen3-Coder ที่รันในเครื่องเพื่อรับความช่วยเหลือด้านโค้ดแบบส่วนตัว",
   "auto_translated": true
 }
