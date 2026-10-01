@@ -1,7 +1,7 @@
 {
-  "id": "pytorch-finetuning",
-  "title": "使用 PyTorch 和 AMD ROCm™ 软件微调大语言模型",
-  "description": "使用 PyTorch 和 ROCm 微调大语言模型(LLM)。",
+  "id": "n8n-automation-gpt-oss",
+  "title": "使用 n8n 和本地 LLM 自动化工作流",
+  "description": "使用 n8n 和 Lemonade 构建一个由 AI 驱动的新闻摘要器。",
   "localized_only": true,
   "time": 45,
   "supported_platforms": {
@@ -38,10 +38,50 @@
     "halo": [
       "linux",
       "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
     ]
   },
   "required_platforms": {
     "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
       "linux",
       "windows"
     ]
@@ -82,10 +122,11 @@
   "developed": true,
   "published": true,
   "tags": [
-    "pytorch",
-    "fine-tuning",
+    "automation",
+    "n8n",
+    "workflows",
     "llm",
-    "rocm"
+    "lemonade"
   ],
-  "coverImage": "assets/cover_image.jpg"
+  "coverImage": "assets/workflow-overview.png"
 }
