@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA, Ryzen AI hızlandırmasıyla AMD donanımında yerel olarak çalışan AI aracıları oluşturmak için AMD'nin açık kaynaklı çerçevesidir.
+GAIA, AMD'nin Ryzen AI hızlandırmasıyla AMD donanımında yerel olarak çalışan AI aracıları oluşturmaya yönelik açık kaynaklı çerçevesidir.
 
 #### GAIA'nın Kurulumu
 
@@ -31,7 +31,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. Linux'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -72,7 +72,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. Linux'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
-<!-- @test:id=create-venv-linux timeout=60 -->
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -91,15 +91,15 @@ pip install amd-gaia
 <!-- @os:end -->
 <!-- @device:end -->
 
-3. GAIA'nın Başlatılması
+3. GAIA'yı Başlatma
 
-Kurulumdan sonra, Lemonade Server'ı ayarlamak ve modelleri indirmek için `gaia init` komutunu çalıştırın:
+Kurulumdan sonra, Lemonade Server'ı kurmak ve modelleri indirmek için `gaia init` komutunu çalıştırın:
 
 ```bash
 gaia init
 ```
 
-Bu, Lemonade Server'ı kurar, varsayılan modelleri indirir ve kurulumu doğrular.
+Bu işlem Lemonade Server'ı kurar, varsayılan modelleri indirir ve kurulumu doğrular.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -279,7 +279,7 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Kurulumun Doğrulanması
+#### Kurulumu Doğrulama
 
 GAIA v0.16.2 veya sonrasının kurulu olduğunu doğrulayın:
 

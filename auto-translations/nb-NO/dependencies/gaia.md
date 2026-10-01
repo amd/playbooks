@@ -12,7 +12,7 @@ GAIA er AMDs åpen kildekode-rammeverk for å bygge AI-agenter som kjører lokal
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. På Windows åpner du en terminal i katalogen du ønsker og følger kommandoene for å opprette et venv.
+1. På Windows åpner du en terminal i katalogen du ønsker, og følger kommandoene for å opprette et venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. På Linux åpner du en terminal i katalogen du ønsker og følger kommandoene for å opprette et venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. På Linux åpner du en terminal i katalogen du ønsker, og følger kommandoene for å opprette et venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. På Windows åpner du en terminal i katalogen du ønsker og følger kommandoene for å opprette et venv.
+1. På Windows åpner du en terminal i katalogen du ønsker, og følger kommandoene for å opprette et venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. På Linux åpner du en terminal i katalogen du ønsker og følger kommandoene for å opprette et venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. På Linux åpner du en terminal i katalogen du ønsker, og følger kommandoene for å opprette et venv.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv

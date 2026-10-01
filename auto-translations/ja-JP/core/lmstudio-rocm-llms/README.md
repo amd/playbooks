@@ -16,18 +16,20 @@ SPDX-License-Identifier: MIT
 
 ## 概要
 
-LM Studioは、[llama.cpp](https://github.com/ggml-org/llama.cpp)向けの強力なGUIベースのラッパーであり、ローカルモデルサービング用の[OpenAI準拠エンドポイント](https://lmstudio.ai/docs/developer/openai-compat)も提供します。LM Studioは、モデルを簡単にダウンロードしてデプロイできる、シンプルかつ強力なインターフェースを提供します。LM Studioは、AMDユーザー向けにVulkanとAMD ROCm™ソフトウェアの両方のバックエンド(ランタイムと呼ばれる)を提供します。
+LM Studioは、[llama.cpp](https://github.com/ggml-org/llama.cpp)を強力なGUIベースでラップし、ローカルモデルサービングのために[OpenAI準拠のエンドポイント](https://lmstudio.ai/docs/developer/openai-compat)も提供します。LM Studioは、モデルを簡単にダウンロードしてデプロイできる、シンプルながら強力なインターフェースを提供します。LM Studioは、AMDユーザー向けにVulkanとAMD ROCm™ソフトウェアの両方のバックエンド(ランタイムと呼ばれる)を提供しています。
 
 
-## このプレイブックで学べること
-- LM Studioを設定し、ローカルハードウェアを活用する方法
-- 完全にオフラインの環境でLLMをテストおよび管理する方法
-- カスタムワークフローやアプリを実現するために、OpenAI互換APIを通じてモデルを配信する方法
+## このガイドで学べること
+- ローカルハードウェアを活用するためにLM Studioを設定・使用する方法
+- 完全にオフラインの環境でLLMをテスト・管理する方法
+- カスタムワークフローやアプリを動かすために、OpenAI互換APIを介してモデルを提供する方法
 
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## メモリ設定
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## ソフトウェアアップデートの確認
@@ -66,16 +68,16 @@ LM Studioは、[llama.cpp](https://github.com/ggml-org/llama.cpp)向けの強力
 <!-- @require:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
-## LLMとチャットする
-ChatGPT級のLLMと完全にローカルでチャットを開始する方法を学びます。
+## LLMとのチャット
+完全にローカルでChatGPT級のLLMとチャットを開始する方法を学びましょう。
 
 1. LMStudioを開きます。
-2. `Ctrl + L`を押してModel Loaderを開き、`Manually choose model load parameters`を選択して、`${model_name}`をクリックします
-3. "show advanced settings"がチェックされていることを確認してください。
-4. `Context Length`を任意に変更します。コンテキスト長が長いほど、モデルのメモリ使用量は増えますが、より多くのシステムメモリが使用されます。このプレイブックでは4096を推奨します。
-5. `GPU Offload`が最大に設定されており、`Flash Attention`がオンになっていることを確認してください(Cache Quantizationsはオフのままで構いません)。
-6. `Remember settings`をチェックし、`Load Model`をクリックします。
-7. チャットウィンドウが表示されていない場合は、`Ctrl + 1`を押すか、画面左上の👾ボタンをクリックします。
+2. `Ctrl + L`を押してモデルローダーを開き、`Manually choose model load parameters`を選択して、`${model_name}`をクリックします。
+3. "show advanced settings"にチェックが入っていることを確認します。
+4. 必要に応じて`Context Length`を変更します。コンテキスト長が大きいほどモデルのメモリ使用量は増えますが、使用するシステムメモリも増加します。このプレイブックでは4096を推奨します。
+5. `GPU Offload`が最大に設定されており、`Flash Attention`がOnになっていることを確認してください(Cache Quantizationsはオフのままで構いません)。
+6. `Remember settings`にチェックを入れ、`Load Model`をクリックします。
+7. チャットウィンドウにいない場合は、`Ctrl + 1`を押すか、画面左上の👾ボタンをクリックします。
 8. メッセージを送信して、モデルとの対話を開始しましょう!
 
 <!-- @os:windows -->
@@ -153,19 +155,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **ヒント**: コンテキスト長とは、モデルのメモリのことです。Flash attentionはメモリ使用量を抑えながら処理速度を向上させます。GPU Offloadは、より高速な応答のために計算処理をグラフィックカードにシフトします。
+> **ヒント**: コンテキスト長とはモデルの記憶容量のことです。Flash Attentionはメモリ使用量を抑えつつ処理速度を向上させます。GPU Offloadは計算処理をグラフィックカードに移すことで、より高速な応答を可能にします。
 
-## OpenAI互換エンドポイントを通じてLLMを配信する
+## OpenAI互換エンドポイントを通じてLLMを提供する
 
-LM Studioは、LM Studio Serverという形でOpenAI準拠のエンドポイントも提供しています。これについては、[こちら](../playbooks/vscode-qwen3-coder)のClineを使ったエージェント型コーディングワークフローですでに紹介されています。もう一つの一般的なユースケースは、標準的なHTTPリクエストを推論エンドポイントに送信することで、LM Studio Serverを任意のWebアプリケーション(React、Node.js、Python)に接続することです。
+LM Studioは、LM Studio Serverという形でOpenAI準拠のエンドポイントも提供しています。これについては、Clineを用いたエージェント型コーディングワークフローの中で[こちら](../playbooks/vscode-qwen3-coder)で既に紹介されています。もう一つの一般的な使用例は、標準的なHTTPリクエストを推論エンドポイントに送信することで、LM Studio Serverを任意のWebアプリケーション(React、Node.js、Python)に接続することです。
 
 LM Studio Serverをセットアップするには、以下の手順に従ってください。
 
-1. 左側にある`Developer`タブ(コマンドラインアイコン)をクリックするか`Ctrl + 2`を押し、次に`Server Settings`をクリックします。
-2. (任意): モデルをLAN経由で配信したい場合は、`Serve on Local Network`をチェックします。Webサイトで使用したり、VS Code内で頻繁に呼び出したりしたい場合は、`Enable CORS`をチェックします。
-3. 左上隅にある`Status`の前のトグルボタンをクリックして、サーバーが稼働していることを確認します。
-4. これでOpenAI準拠のエンドポイントが稼働します。アドレスは通常http://127.0.0.1:1234です。
-5. モデルがまだロードされていない場合は、`Load Model`をクリックし、前述の手順に従ってロードできます。
+1. 左側にある`Developer`タブ(コマンドラインアイコン)をクリックするか、`Ctrl + 2`を押し、次に`Server Settings`をクリックします。
+2. (任意): モデルをLAN経由で提供したい場合は、`Serve on Local Network`にチェックを入れます。Webサイトで使用したり、VS Code内から頻繁に呼び出したりする場合は、`Enable CORS`にチェックを入れます。
+3. 左上隅にある`Status`前のトグルボタンをクリックし、サーバーが実行中であることを確認します。
+4. これで、OpenAI準拠のエンドポイントが実行されるようになります。アドレスは通常http://127.0.0.1:1234 です。
+5. モデルがまだロードされていない場合は、`Load Model`をクリックし、前述の手順に従ってロードすることができます。
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -186,7 +188,7 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @os:end -->
 
 
-このモデルは、LM Studio Serverエンドポイントを通じてアクセス可能になり、以下を含むOpenAIエンドポイントをサポートします。
+これで、このモデルはLM Studio Serverのエンドポイントを通じてアクセス可能になり、以下を含むOpenAIエンドポイントをサポートするようになります。
 
 | エンドポイント | メソッド | ドキュメント |
 |------------|----------|----------|
@@ -196,13 +198,13 @@ curl -s http://127.0.0.1:1234/v1/models
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
 #### 例: エンドポイントへの疎通確認
-OpenAI 互換エンドポイントを作成したところで、これを Python 開発環境（VSCode など）に統合し、システムをローカル API プロバイダーとして使用する方法を見ていきましょう。
+OpenAI互換エンドポイントを作成したので、次はこれをPython開発環境(VSCodeなど)に統合し、システムをローカルAPIプロバイダーとして使用する方法を見ていきましょう。
 
-1. Python 仮想環境を作成します:
+1. Python仮想環境を作成します:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    Linux では、任意のディレクトリでターミナルを開き、以下のコマンドに従って venv を作成します。
+    Linuxでは、任意のディレクトリでターミナルを開き、以下のコマンドに従ってvenvを作成します。
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -212,13 +214,13 @@ OpenAI 互換エンドポイントを作成したところで、これを Python
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**ユーザーに GPU デバイスへのアクセス権を付与します**（反映させるにはログアウトして再度ログインしてください）:
+**ユーザーにGPUデバイスへのアクセス権を付与します**(反映させるにはログアウトして再度ログインしてください):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    Linux では、任意のディレクトリでターミナルを開き、以下のコマンドに従って venv を作成します。
+    Linuxでは、任意のディレクトリでターミナルを開き、以下のコマンドに従ってvenvを作成します。
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -230,34 +232,34 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    Windows では、任意のディレクトリでターミナルを開き、以下のコマンドに従って venv を作成します。
+    Windowsでは、任意のディレクトリでターミナルを開き、以下のコマンドに従ってvenvを作成します。
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **ヒント**: Windows ユーザーは、一部の Powershell コマンドを実行する前に、PowerShell の実行ポリシーを変更する必要がある場合があります（例: RemoteSigned または Unrestricted に設定）。
+    > **ヒント**: Windowsユーザーは、一部のPowerShellコマンドを実行する前に、PowerShellの実行ポリシーを変更する必要がある場合があります(例: RemoteSignedまたはUnrestrictedに設定する)。
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    Windows では、任意のディレクトリでターミナルを開き、以下のコマンドに従って venv を作成します。
+    Windowsでは、任意のディレクトリでターミナルを開き、以下のコマンドに従ってvenvを作成します。
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **ヒント**: Windows ユーザーは、一部の Powershell コマンドを実行する前に、PowerShell の実行ポリシーを変更する必要がある場合があります（例: RemoteSigned または Unrestricted に設定）。
+    > **ヒント**: Windowsユーザーは、一部のPowerShellコマンドを実行する前に、PowerShellの実行ポリシーを変更する必要がある場合があります(例: RemoteSignedまたはUnrestrictedに設定する)。
 
 <!-- @device:end -->
 <!-- @os:end -->
 
-2. OpenAI パッケージをインストールします
+2. OpenAIパッケージをインストールします
     ```bash
     pip install openai
     ```
 
-3. 以下のスクリプトを実行して、先ほど作成したエンドポイントに疎通確認を行います。
+3. 以下のスクリプトを実行して、先ほど作成したエンドポイントへの疎通確認を行います。
     ```python
     from openai import OpenAI
 
@@ -360,15 +362,15 @@ lms server stop
 <!-- @test:end --> 
 <!-- @os:end -->
 
-#### （オプション）: ランタイムの切り替え
+#### (オプション): ランタイムの切り替え
 
-1. キーボードで `Ctrl + Shift + R` を押します。または、左側の `Discover` タブ（虫眼鏡アイコン）をクリックし、ポップアップ内の `Runtime` をクリックします。
-2. `Runtime Selections` が表示されるので、ドロップダウンメニューを使用してランタイムを変更できます。
+1. キーボードで`Ctrl + Shift + R`を押します。または、左側の`Discover`タブ(虫眼鏡アイコン)をクリックし、ポップアップ内の`Runtime`をクリックします。
+2. `Runtime Selections`が表示されるので、ドロップダウンメニューを使用してランタイムを変更できます。
 
 
 ## 次のステップ
 
-- **カスタムアプリの統合**: ローカルの OpenAI 互換 API を使用して、独自の Python スクリプトやアプリケーションを統合します。
-- **高度なフロントエンド**: Open WebUI のような強力なインターフェイスをサーバーに接続し、チャット履歴やペルソナ管理を行います。
+- **カスタムアプリの統合**: ローカルのOpenAI互換APIを使用して、独自のPythonスクリプトやアプリケーションを統合します。
+- **高度なフロントエンド**: Open WebUIのような強力なインターフェースをサーバーに接続し、チャット履歴やペルソナ管理を行います。
 
 詳細なドキュメントについては、以下をご覧ください: https://lmstudio.ai/docs/developer
