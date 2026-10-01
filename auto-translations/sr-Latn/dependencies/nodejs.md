@@ -6,11 +6,9 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Node.js 22.22.1 LTS je preporučena verzija za ovu platformu.
-
 <!-- @os:windows -->
 
-1. Preuzmite Windows 64-bit Installer sa [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+1. Preuzmite Windows 64-bit instalater sa [nodejs.org](https://nodejs.org/en/download/)
 2. Pokrenite instalater i pratite uputstva
 3. Proverite instalaciju:
 ```cmd

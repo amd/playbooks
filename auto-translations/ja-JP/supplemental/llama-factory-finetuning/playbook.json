@@ -1,6 +1,6 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "LLaMA FactoryによるLLMのファインチューニング",
+  "title": "LLaMA Factoryを使用したLLMのファインチューニング",
   "description": "LLaMA FactoryとLoRA技術を使用して大規模言語モデル(LLM)をファインチューニングします。",
   "auto_translated": true
 }

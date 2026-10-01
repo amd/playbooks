@@ -99,12 +99,6 @@ def apply_env_overrides(cfg):
     npu_xrt = os.environ.get("ORCHESTRAI_RYZENAI_NPU_XRT_URL")
     if npu_xrt:
         prov["ryzenai_npu_xrt_url"] = npu_xrt
-    docker_desktop_url = os.environ.get("ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_URL")
-    if docker_desktop_url:
-        prov["docker_desktop_installer_url"] = docker_desktop_url
-    docker_desktop_sha256 = os.environ.get("ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_SHA256")
-    if docker_desktop_sha256:
-        prov["docker_desktop_installer_sha256"] = docker_desktop_sha256
     driver = os.environ.get("ORCHESTRAI_WINDOWS_DRIVER_SOURCE")
     if driver:
         prov.setdefault("windows_driver", {})["source"] = driver
@@ -212,15 +206,6 @@ def make_builds(batch, cfg):
         if not source:
             missing.append("ORCHESTRAI_WINDOWS_DRIVER_SOURCE")
         build_vars = {"driver_source": source, "driver_copy": drv.get("copy", "direct")}
-        if "openhands-getting-started" in batch.get("playbooks", []):
-            docker_desktop_url = prov.get("docker_desktop_installer_url", "")
-            docker_desktop_sha256 = prov.get("docker_desktop_installer_sha256", "")
-            if not docker_desktop_url:
-                missing.append("ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_URL")
-            if not docker_desktop_sha256:
-                missing.append("ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_SHA256")
-            build_vars["docker_desktop_installer_url"] = docker_desktop_url
-            build_vars["docker_desktop_installer_sha256"] = docker_desktop_sha256
     else:
         scripts = list(prov.get("linux_install_scripts", []))
         device = batch.get("arch", "")

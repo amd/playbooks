@@ -11,26 +11,26 @@ SPDX-License-Identifier: MIT
 
 ## Oversikt
 
-Effektiv finjustering er avgjørende for å tilpasse store språkmodeller (LLM-er) til nedstrømsoppgaver. LLaMA Factory er en åpen kildekode-plattform som er brukervennlig og som forenkler trening og finjustering av store språkmodeller og multimodale modeller. Den lar brukere tilpasse hundrevis av forhåndstrente modeller lokalt med minimal koding.
+Effektiv finjustering er avgjørende for å tilpasse store språkmodeller (LLM-er) til nedstrømsoppgaver. LLaMA Factory er en åpen kildekode-plattform som er brukervennlig og forenkler trening og finjustering av store språkmodeller og multimodale modeller. Den lar brukere tilpasse hundrevis av forhåndstrente modeller lokalt med minimal koding.
 
 Denne oppskriften lærer deg hvordan du finjusterer LLM-er ved hjelp av LLaMA Factory på din lokale AMD-maskinvare.
 
 <!-- @device:stx,krk -->
-> **Merk:** Finjusteringsteknikkene i denne oppskriften krever minst **32 GB systemminne (RAM)**, hvorav minst **16 GB må være tilgjengelig for GPU-en** (16 GB-en er en del av de 32 GB, ikke i tillegg til dem).
+> **Merk:** Finjusteringsteknikkene i denne oppskriften krever minst **32 GB systemminne (RAM)**, hvorav minst **16 GB må være tilgjengelig for GPU-en** (de 16 GB-ene er en del av de 32 GB-ene, ikke i tillegg til dem).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 > **Merk:** Finjusteringsteknikkene i denne oppskriften krever minst **16 GB totalt GPU-minne** og **32 GB systemminne (RAM)**.
-> - På Windows kombineres grafikkortets dedikerte VRAM med delt GPU-minne (lånt fra systemminnet) for å utgjøre det totale GPU-minnet.
-> - Derfor kan kort med mindre enn 16 GB dedikert VRAM likevel kjøre denne oppskriften ved å bruke delt GPU-minne til å dekke differansen.
+> - På Windows kombinerer totalt GPU-minne skjermkortets dedikerte VRAM med delt GPU-minne (lånt fra systemminnet).
+> - Derfor kan kort med mindre enn 16 GB dedikert VRAM likevel kjøre denne oppskriften ved å bruke delt GPU-minne for å kompensere for differansen.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Merk:** Finjusteringsteknikkene i denne oppskriften krever et grafikkort med minst **16 GB dedikert GPU-minne** og **32 GB systemminne (RAM)**.
-> - På Linux foregår treningen utelukkende i grafikkortets dedikerte VRAM.
-> - Det faller ikke tilbake til delt GPU-minne (systemminne) når VRAM-en går tom.
+> **Merk:** Finjusteringsteknikkene i denne oppskriften krever et skjermkort med minst **16 GB dedikert GPU-minne** og **32 GB systemminne (RAM)**.
+> - På Linux kjører treningen utelukkende i skjermkortets dedikerte VRAM.
+> - Den faller ikke tilbake på delt GPU-minne (systemminne) når VRAM-en er brukt opp.
 > - Kort med mindre enn 16 GB dedikert VRAM vil gå tom for minne under trening på Linux, selv om systemet har rikelig med RAM.
 <!-- @os:end -->
 <!-- @device:end -->
@@ -38,19 +38,21 @@ Denne oppskriften lærer deg hvordan du finjusterer LLM-er ved hjelp av LLaMA Fa
 ## Hva du vil lære
 
 - Hvordan sette opp LLaMA Factory med AMD ROCm™-programvare
-- Hvordan konfigurere parametere for finjustering av LLM (ved bruk av Qwen/Qwen3-4B-Instruct-2507 som eksempel)
-- Hvordan kjøre finjustering med LLaMA Factory
+- Hvordan konfigurere parametere for LLM-finjustering (med Qwen/Qwen3-4B-Instruct-2507 som eksempel)
+- Hvordan kjøre LLaMA Factory-finjustering
 - Hvordan kjøre inferens med den finjusterte modellen
 - Hvordan eksportere den finjusterte modellen 
 
 ## Estimert tid
 
-- Varighet: Det vil ta omtrent 60 minutter å kjøre denne oppskriften (avhengig av modell-/datasettstørrelse og nettverkshastighet).
+- Varighet: Det vil ta omtrent 60 minutter å gjennomføre denne oppskriften (avhengig av størrelsen på modellen/datasettet ditt og nettverkshastigheten).
 - Se [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for mer informasjon.
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Angi minnekonfigurasjonen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Sjekk etter programvareoppdateringer
@@ -82,7 +84,7 @@ pip --version
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -100,7 +102,7 @@ source llamafactory-env/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -137,10 +139,26 @@ llamafactory-env\Scripts\activate
 ### Installere grunnleggende avhengigheter
 
 <!-- @require:pytorch,driver -->
- 
-### Installere ytterligere avhengigheter
 
-> **Merk**: Kontroller at Python-versjonen er 3.11, 3.12 eller 3.13
+<!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
+```python
+import sys
+import torch
+
+print(f"Python executable: {sys.executable}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
+
+if not torch.cuda.is_available():
+    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
+
+print("PASS: ROCm-enabled PyTorch is visible")
+```
+<!-- @test:end -->
+
+### Installere tilleggsavhengigheter
+
+> **Merk**: Sørg for at Python-versjonen er 3.11, 3.12 eller 3.13
 
 ```bash
 pip install huggingface_hub
@@ -166,7 +184,7 @@ python -m pip install huggingface_hub
 
 ### Installer LLaMA Factory
 
-LLaMA Factory er avhengig av PyTorch. Du bør allerede ha dette installert i henhold til kravene ovenfor.
+LLaMA Factory er avhengig av PyTorch. Du bør allerede ha den installert i henhold til kravene ovenfor.
 
 Last ned kildekoden fra [LLaMA Factorys offisielle GitHub-repositorium](https://github.com/hiyouga/LlamaFactory), og installer avhengighetene.
 
@@ -193,7 +211,7 @@ pip install -r requirements/metrics.txt
 <!-- @test:end --> 
 <!-- @device:end -->
 
-Kontroller om `llamafactory-cli` er kjørbar.
+Bekreft om `llamafactory-cli` er kjørbar.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-llamafactory-cli timeout=60 hidden=False setup=activate-venv -->
@@ -226,22 +244,22 @@ Eksempel på utdata:
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-Etter å ha installert LLaMA Factory, la oss kjøre finjustering med den.
+Etter å ha installert LLaMA Factory, la oss kjøre finjustering på den.
 
 ## Bruke LLaMA Factory CLI for finjustering 
 
-Denne delen dekker hvordan du forbereder datasett for finjustering, konfigurerer LoRA/QLoRA-parametere og kjører LoRA-finjustering.
+Denne delen vil dekke hvordan du forbereder finjusteringsdatasett, konfigurerer LoRA/QLoRA-parametere, og kjører LoRA-finjustering.
 
 ### Klargjøring av datasett
 
-LLaMA Factory støtter finjusteringsdatasett i Alpaca-format og ShareGPT-format. Alle tilgjengelige datasett er definert i [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Hvis du bruker et tilpasset datasett, må du sørge for å legge til en datasettbeskrivelse i `dataset_info.json` og angi datasettnavnet før trening. Detaljer finner du i dokumentasjonen deres [her](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
+LLaMA Factory støtter finjusteringsdatasett i Alpaca-format og ShareGPT-format. Alle tilgjengelige datasett er definert i [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Hvis du bruker et tilpasset datasett, sørg for å legge til en datasettbeskrivelse i `dataset_info.json` og angi datasettnavnet før trening. Detaljer finner du i dokumentasjonen deres [her](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
-I denne oppskriften bruker vi datasettene identity og alpaca_en_demo som eksempel, og konfigurerer datasettinformasjonen i neste trinn.
-### Konfigurasjon av parametere for finjustering
+I denne oppskriften vil vi bruke datasettene identity og alpaca_en_demo som eksempel, og konfigurere datasettinformasjonen i neste steg.
+### Konfigurasjon av finjusteringsparametere
 
-LLaMA Factory støtter flere finjusteringsmetoder.
+LLaMA Factory støtter flere finjusteringsordninger.
 
-| Finjusteringsmetoder | LLaMA Factory-eksempler |
+| Finjusteringsordninger | LLaMA Factory-eksempler |
 |-----------|------|
 | Full-Parameter    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
 | LoRA-finjustering  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
@@ -268,39 +286,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-Disse eksempelkonfigurasjonsfilene har spesifisert modellparametere, parametere for finjusteringsmetode, datasettparametere, evalueringsparametere og mer. Du kan konfigurere dem etter eget behov. I denne veiledningen bruker vi [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
+Disse eksempelkonfigurasjonsfilene har spesifisert modellparametere, parametere for finjusteringsmetode, datasettparametere, evalueringsparametere og mer. Du kan konfigurere dem etter dine egne behov. I denne veiledningen bruker vi [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
-**Forklaring av sentrale parametere:**
+**Viktige parametere forklart:**
 - `model_name_or_path` - Hugging Face-modellnavn eller lokal filbane til modellen.
-- `stage` - Treningsfase. Alternativer: rm (belønningsmodellering), pt (forhåndstrening), sft (Supervised Fine-Tuning), PPO, DPO, KTO, ORPO.
+- `stage` - Treningsfase. Alternativer: rm (reward modeling), pt (pretrain), sft (Supervised Fine-Tuning), PPO, DPO, KTO, ORPO.
 - `do_train` - true for trening, false for evaluering
 - `finetuning_type` - Finjusteringsmetode. Alternativer: freeze, lora, full
-- `lora_rank` - Dimensjonaliteten til lavrangsmatrisen som brukes i LoRA, typiske verdier: 4, 6, 8, 16 (mindre verdier = færre parametere = raskere finjustering; større verdier = bedre tilpasning til oppgaven, men høyere ressursbruk).
+- `lora_rank` - Dimensjonaliteten til den lavrangerte matrisen som brukes i LoRA, typiske verdier: 4, 6, 8, 16 (mindre verdier = færre parametere = raskere finjustering; større verdier = bedre oppgavetilpasning, men høyere ressursbruk).
 - `lora_target` - Målmoduler for LoRA-metoden. Standard: all.
 - `dataset` - Datasett som skal brukes. Bruk «,» for å skille flere datasett
-- `output_dir` - Utdatabane for finjustering
-- `logging_steps` - Intervall for logging, i steg
-- `save_steps` - Intervall for lagring av modell-sjekkpunkt.
-- `overwrite_output_dir` - Om det skal tillates å overskrive utdatamappen.
+- `output_dir` - Utdatasti for finjustering
+- `logging_steps` - Loggingsintervall i steg
+- `save_steps` - Intervall for lagring av modellkontrollpunkt.
+- `overwrite_output_dir` - Om overskriving av utdatamappen skal tillates.
 - `per_device_train_batch_size` - Treningsbatchstørrelse per enhet.
-- `gradient_accumulation_steps` - Antall steg for gradientakkumulering.
+- `gradient_accumulation_steps` - Antall gradientakkumuleringssteg.
 - `learning_rate` - Læringsrate
 - `num_train_epochs` - Antall treningsepoker
-- `lr_scheduler_type` - Plan for læringsrate. Alternativer: linear, cosine, polynomial, constant, osv.
-- `warmup_ratio` - Andel for oppvarming av læringsrate
+- `lr_scheduler_type` - Læringsrateplan. Alternativer: linear, cosine, polynomial, constant, osv.
+- `warmup_ratio` - Oppvarmingsforhold for læringsrate
 
 <!-- @os:linux -->
-Vi vil endre standardverdien for `lora_rank` for å kjøre finjustering på AMD Ryzen™- og AMD Radeon™-GPUer.
+Vi vil endre standardverdien for `lora_rank` for å kjøre finjustering på AMD Ryzen™- og AMD Radeon™-GPU-er.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Vi vil oppdatere standardkonfigurasjonen for LoRA-finjustering for bedre kompatibilitet med AMD Ryzen™- og AMD Radeon™-GPUer:
-- Sett `lora_rank` fra `8` til `6` for å redusere minnebruken under finjustering.
-- Bruk `fp16` i stedet for `bf16` for bredere kompatibilitet med AMD-GPUer og lavere minnebruk.
-- Sett `dataloader_num_workers` til `0` på Windows for å unngå `"Can't pickle local object<>"`-feil forårsaket av flerprosessdatalasting.
+Vi vil oppdatere standardkonfigurasjonen for LoRA-finjustering for bedre kompatibilitet med AMD Ryzen™- og AMD Radeon™-GPU-er:
+- Sett `lora_rank` fra `8` til `6` for å redusere minnebruk under finjustering.
+- Bruk `fp16` i stedet for `bf16` for bredere AMD GPU-kompatibilitet og lavere minnebruk.
+- Sett `dataloader_num_workers` til `0` på Windows for å unngå `"Can't pickle local object<>"`-feil forårsaket av datainnlasting med flere prosesser.
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -320,13 +338,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### Kjør LLaMA Factory-finjustering 
+### Kjøre LLaMA Factory-finjustering 
 
-**llamafactory-cli** er det offisielle kommandolinjeverktøyet (CLI) for LLaMA Factory, utviklet for å forenkle hele arbeidsflyten for LLM-er (klargjøring av data → finjustering → evaluering → distribusjon) uten å skrive kompleks kode.
+**llamafactory-cli** er det offisielle kommandolinjeverktøyet (CLI) for LLaMA Factory, utviklet for å forenkle ende-til-ende-arbeidsflyter for LLM-er (dataforberedelse → finjustering → evaluering → distribusjon) uten å skrive kompleks kode.
 
-For trening/finjustering er **llamafactory-cli train** hovedunderkommandoen i LLaMA Factory CLI. Den abstraherer arbeidsflyter for finjustering (databehandling, hyperparameterjustering, maskinvareoptimalisering) til én enkelt CLI-kommando, og støtter flere finjusteringsparadigmer (LoRA/QLoRA/full finjustering), og er optimalisert for GPUer med begrensede ressurser (f.eks. QLoRA på 16 GB VRAM).
+For trening/finjustering er **llamafactory-cli train** kjernedelkommandoen i LLaMA Factory CLI-en. Den abstraherer finjusteringsarbeidsflyter (databehandling, hyperparameterjustering, maskinvareoptimalisering) til en enkelt CLI-kommando, støtter flere finjusteringsparadigmer (LoRA/QLoRA/Full Fine-Tuning) og er optimalisert for GPU-er med begrenset ressurser (f.eks. QLoRA på 16 GB VRAM).
 
-Du kan kjøre LLaMA Factory-finjustering ved å bruke følgende kommando, som er basert på den endrede konfigurasjonsfilen for Qwen3 LoRA-finjustering.
+Du kan kjøre LLaMA Factory-finjustering med følgende kommando, som er basert på den endrede konfigurasjonsfilen for Qwen3 LoRA-finjustering.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -397,12 +415,19 @@ if (Select-String -Path $filePath -Pattern '^save_total_limit:' -Quiet) {
     Add-Content -Path $filePath -Value "save_total_limit: 1"
 }
 
+# Single-process dataset preprocessing to avoid Windows multiprocessing errors.
+if (Select-String -Path $filePath -Pattern '^preprocessing_num_workers:' -Quiet) {
+    (Get-Content -Path $filePath) -replace '^preprocessing_num_workers:.*', 'preprocessing_num_workers: 1' | Set-Content -Path $filePath
+} else {
+    Add-Content -Path $filePath -Value "preprocessing_num_workers: 1"
+}
+
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
-Etter at LLM-finjusteringen er kjørt, lagres alle genererte utdata i «output_dir», inkludert modellsjekkpunktfiler, konfigurasjonsfiler og treningsmetrikker.
+Etter at LLM-finjustering er kjørt, blir alle genererte utdata lagret i «output_dir», inkludert modellkontrollpunktfiler, konfigurasjonsfiler og treningsmetrikker.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -439,9 +464,9 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end --> 
 
-### Test den finjusterte modellen 
+### Teste den finjusterte modellen 
 
-**llamafactory-cli chat** er utviklet for interaktiv chat/inferens med LLM-er (både grunnmodeller og LoRA-finjusterte modeller). LLaMA Factory tilbyr en eksempelkonfigurasjon for å kjøre inferens med finjusterte modeller i [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). Du kan også endre denne eksempelkonfigurasjonen for å tilpasse innstillingene, for eksempel inferensbackend.
+**llamafactory-cli chat** er utviklet for interaktiv chat/inferens med LLM-er (både basismodeller og LoRA-finjusterte modeller). LLaMA Factory tilbyr eksempelkonfigurasjonen for å kjøre inferens av finjusterte modeller i [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). Du kan også endre denne eksempelkonfigurasjonen for å endre innstillingene, som f.eks. inferensbakenden.
 
 Bruk følgende kommando for å teste den finjusterte Qwen3-modellen:
 
@@ -455,9 +480,9 @@ Et eksempel på en chat med den finjusterte modellen vises nedenfor:
 </p>
 
 
-### Eksporter den finjusterte modellen
+### Eksportere den finjusterte modellen
 
-For produksjonsbruk må den forhåndstrente modellen og LoRA-adapteren slås sammen og eksporteres til én enkelt modell. Denne sammenslåtte modellen kan brukes som en vanlig Hugging Face-modellfil. LLaMA Factory tilbyr eksempelkonfigurasjoner i [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
+For produksjonsbruk må den forhåndstrente modellen og LoRA-adapteren slås sammen og eksporteres til én enkelt modell. Denne sammenslåtte modellen kan brukes som en vanlig Hugging Face-modellfil. LLaMA Factory tilbyr eksempelkonfigurasjonene i [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
 Bruk følgende kommando for å eksportere den finjusterte Qwen3-modellen:
 
@@ -565,10 +590,10 @@ if not model_files:
 
 print("PASS: Exported merged model output looks correct")
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 ## Bruke LLaMA Factory GUI
 
-`LLaMA-Factory` støtter også kodefri finjustering av LLM-er via et web-grensesnitt i nettleseren.
+`LLaMA-Factory` støtter også kodefri finjustering av LLM-er gjennom et web-UI i nettleseren.
 
 Bruk følgende kommando for å åpne det:
 
@@ -577,15 +602,15 @@ llamafactory-cli webui
 ```
 `LlamaFactory Web UI` tilbyr et strømlinjeformet grensesnitt for å administrere maskinlæringsarbeidsflyter, inkludert trening, evaluering, prediksjon, chatting og eksportering av modeller. Her er en kort introduksjon til hver fane:
 
-* **Train**: Denne fanen lar deg velge en modell og et datasett, konfigurere treningsparametere, og starte treningsprosessen. Det er viktig å forstå de obligatoriske og valgfrie parameterne for å optimalisere treningsoppsettet.
+* **Train**: Denne fanen lar deg velge en modell og et datasett, konfigurere treningsparametere og starte treningsprosessen. Det er viktig å forstå de obligatoriske og valgfrie parameterne for å optimalisere treningsoppsettet.
 * **Evaluate & Predict**: Etter trening kan du evaluere modellens ytelse og gjøre prediksjoner ved hjelp av denne fanen. Den gir innsikt i modellens nøyaktighet og effektivitet på nye data.
-* **Chat**: Når treningen er fullført, laster du inn modellen i Chat-fanen for å interagere med den og se resultatene av arbeidet ditt. Denne funksjonen muliggjør kommunikasjon med den trente modellen i sanntid.
-* **Export**: Denne fanen forenkler eksport av trente modeller for distribusjon eller videre bruk. Du kan lagre modellene dine i ulike formater som passer for forskjellige applikasjoner.
+* **Chat**: Når treningen er fullført, kan du laste modellen i Chat-fanen for å samhandle med den og se resultatene av arbeidet ditt. Denne funksjonen muliggjør kommunikasjon med den trente modellen i sanntid.
+* **Export**: Denne fanen forenkler eksporten av trente modeller for distribusjon eller videre bruk. Du kan lagre modellene dine i ulike formater som passer for forskjellige bruksområder.
 
 For detaljert veiledning oppfordrer vi deg til å se den offisielle dokumentasjonen på [LlamaFactory GitHub-repositoriet](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) og [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). I tillegg gir [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) verdifull innsikt i grensesnittet og funksjonaliteten.
 
 ## Neste steg
-- Prøv forskjellige modeller som `gpt-oss` og andre toppmoderne modeller.
+- Prøv forskjellige modeller som `gpt-oss` og andre banebrytende modeller.
 - Eksperimenter med forskjellige backends på den finjusterte modellen
  
 For mer dokumentasjon, besøk: https://llamafactory.readthedocs.io/en/latest/

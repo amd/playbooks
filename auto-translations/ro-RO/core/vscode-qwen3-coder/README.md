@@ -21,46 +21,48 @@ SPDX-License-Identifier: MIT
 
 ## Prezentare generală
 
-Agenții de codare sunt instrumente puternice care oferă dezvoltatorilor posibilitatea de a colabora cu agenți AI susținuți de Large Language Models (LLM-uri). Aceștia pot fi integrați în mediul de dezvoltare, cum ar fi terminalul sau VS Code, permițând o integrare fără probleme în fluxul de lucru al unui dezvoltator.
+Agenții de coding sunt instrumente puternice care oferă dezvoltatorilor posibilitatea de a colabora cu agenți AI susținuți de modele de limbaj de mari dimensiuni (LLM). Aceștia pot fi integrați în mediul de dezvoltare, precum terminalul sau VS Code, permițând o integrare fără efort în fluxul de lucru al unui dezvoltator.
 
-Acest tutorial demonstrează cum să folosiți Cline, VS Code și LM Studio pentru a rula un agent de codare complet local pe mașina dvs.
+Acest tutorial demonstrează cum se utilizează Cline, VS Code și LM Studio pentru a rula un agent de coding în întregime pe mașina locală.
 
 ## Ce veți învăța
 
-* Cum să rulați VS Code cu agentul de codare Cline pentru a ajuta la sarcinile de inginerie software.
-* Cum să configurați Cline pentru a comunica cu LM Studio pentru inferența locală a agenților de codare.
-* Cum să utilizați agenți de codare locali pentru a rezolva sarcini reale de inginerie software.
+* Cum să rulați VS Code cu agentul de coding Cline pentru a ajuta la sarcini de inginerie software.
+* Cum să configurați Cline pentru a comunica cu LM Studio în vederea inferenței locale a agenților de coding.
+* Cum să utilizați agenți de coding locali pentru a rezolva sarcini reale de inginerie software.
 
-## Setarea configurației de memorie
+<!-- @device:halo_box,halo,stx,krk -->
+## Configurarea memoriei
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Verificați actualizările software
+## Verificați actualizările de software
 > **Notă**: Dacă VS Code nu este instalat, îl puteți instala cu Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalarea cerințelor prealabile software
+## Instalarea cerințelor prealabile de software
 
 <!-- @require:lmstudio,vscode -->
 
 ## Lansarea și configurarea LM Studio
 
-Vom folosi LM Studio pentru a servi LLM-ul care alimentează agentul de codare.
+Vom utiliza LM Studio pentru a servi LLM-ul care alimentează agentul de coding.
 
 - În bara de căutare, căutați `LM Studio` și lansați aplicația. Veți fi întâmpinat de următoarea pagină.
 
 ![Ecranul inițial LM Studio](assets/initial-lm-studio.png)
 
-În continuare, trebuie să încărcăm LLM-ul pe sistem. Vom folosi modelul `Qwen3-Coder-30B-A3B` cu o lungime mare a contextului. (Folosiți fila Model pentru a-l instala dacă nu ați făcut-o deja).
-- Faceți clic pe bara de căutare din partea de sus a ferestrei LM Studio sau apăsați `CTRL+L`. Faceți clic pe comutatorul `Manually choose model load parameters` și apoi faceți clic pe modelul Qwen3-Coder-30B-A3B.
-- Schimbați lungimea contextului de la `4096` la `32768` și asigurați-vă că `GPU Offload` este la maxim. Apoi, faceți clic pe `Load Model`
+În continuare, trebuie să încărcăm LLM-ul pe sistem. Vom utiliza modelul `Qwen3-Coder-30B-A3B` cu o lungime de context mare. (Utilizați fila Model pentru a-l instala dacă nu ați făcut-o deja).
+- Faceți clic pe bara de căutare din partea de sus a ferestrei LM Studio sau apăsați `CTRL+L`. Activați comutatorul `Manually choose model load parameters`, apoi faceți clic pe modelul Qwen3-Coder-30B-A3B.
+- Schimbați lungimea contextului de la `4096` la `32768` și asigurați-vă că `GPU Offload` este la maximum. Apoi, faceți clic pe `Load Model`
 
 ![Selectarea modelului](assets/model-list-zoomed.png)
 
-Folosim o lungime mare a contextului pentru ca agentul să poată procesa baze de cod mari și să rețină modificările efectuate.
+Utilizăm o lungime de context mare astfel încât agentul să poată procesa baze de cod mari și să rețină modificările efectuate.
 
 ![Configurarea modelului](assets/selecting-model-zoomed.png)
 
@@ -159,7 +161,7 @@ Vom instala extensia Cline în VS Code și o vom conecta la serverul LM Studio p
 
 ![Instalarea extensiei Cline](assets/installing-cline-vscode-extension.png)
 
-- O pictogramă Cline ar trebui să fie prezentă în stânga. Faceți clic pe aceasta pentru a deschide Cline. Va apărea o fereastră care întreabă `How will you use Cline?` Deoarece vom folosi un LLM local rulat prin LM Studio, selectați `Bring my own API Key` și apăsați `Continue`.
+- Ar trebui să apară o pictogramă Cline în stânga. Faceți clic pe aceasta pentru a deschide Cline. Va apărea o fereastră care întreabă `How will you use Cline?` Deoarece vom utiliza un LLM local rulat prin LM Studio, selectați `Bring my own API Key` și apăsați `Continue`.
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -184,29 +186,29 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 În continuare, trebuie să configurăm Cline pentru a comunica cu serverul LM Studio pe care l-am configurat.
 - Setați API Provider la `LM Studio` și modelul la `Qwen3-Coder-30B-A3B-GGUF`.
 
->**Sfat**: Este posibil să fie disponibile modele mai noi. Luați în considerare descărcarea și trecerea la modelele Qwen3.6, dacă doriți.
+>**Sfat**: Este posibil să fie disponibile modele mai noi. Luați în considerare descărcarea și trecerea la modelele Qwen3.6 dacă doriți.
 
 
 ![Configurarea modelului](assets/cline-model-configuration-zoomed.png)
 
 ## Crearea primului dvs. proiect
 
-Să folosim agentul nostru local pentru a crea un site web! Deschideți VS Code într-un director la alegere, unde Cline va crea fișierele.
-- Pentru a face acest lucru, mergeți la `File -> Open Folder` în partea din stânga sus a VS Code și alegeți un folder precum `Documents`.
+Să folosim agentul nostru local pentru a crea un site web! Deschideți VSCode într-un director la alegere, unde Cline va crea fișierele.
+- Pentru a face acest lucru, mergeți la `File -> Open Folder` din colțul din stânga sus al VS Code și alegeți un folder precum `Documents`.
 
 ![Folder gol în VS Code](assets/open-cline-test.png)
 
-Acum suntem gata să transmitem un prompt agentului de codare local.
-- Faceți clic pe extensia Cline din coloana din stânga și introduceți un prompt pentru a porni agentul. De exemplu, să folosim următorul prompt:
+Acum suntem pregătiți să oferim un prompt agentului de coding local.
+- Faceți clic pe extensia Cline din coloana din stânga și introduceți un prompt pentru a porni agentul. Ca exemplu, să folosim următorul prompt:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-Agentul va începe apoi să creeze fișiere conform promptului. Ca utilizator, puteți urmări cum este generat codul în VS Code, așa cum se arată mai jos. Este posibil să fie nevoie să faceți clic pe `Save` de fiecare dată când Cline dorește să creeze un fișier.
+Agentul va începe apoi să creeze fișiere conform promptului. Ca utilizator, puteți urmări codul generat în VS Code, așa cum se arată mai jos. Este posibil să trebuiască să faceți clic pe `Save` de fiecare dată când Cline dorește să creeze un fișier.
 
 ![Generarea codului de către Cline](assets/cline-code-generation.png)
 
-După generarea software-ului, agentul a terminat și puteți rula aplicația. În acest caz, agentul a scris în trei fișiere: `index.html`, `script.js` și `styles.css`. Făcând simplu dublu clic pe fișierul HTML, putem încărca și interacționa cu site-ul web generat.
+După generarea software-ului, agentul a terminat și puteți rula aplicația. În acest caz, agentul a scris în trei fișiere: `index.html`, `script.js` și `styles.css`. Prin simpla dublă apăsare pe fișierul HTML putem încărca și interacționa cu site-ul web generat.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -279,22 +281,23 @@ lms server stop
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
 ## Pașii următori
 
 După generarea site-ului web, puteți continua să lucrați cu Cline pentru a-l îmbunătăți. Două posibile îmbunătățiri sunt:
 
-- **Documentație**: Este suficient să solicitați agentului `Add a README` pentru ca acesta să genereze un fișier `README.md` care documentează site-ul web.
-- **Animație**: Solicitați modelului `Add an animation that visually represents a large language model running on a laptop.` pentru a genera o animație pentru site-ul web.
+- **Documentație**: Este suficient să oferiți agentului promptul `Add a README` pentru ca acesta să genereze un fișier `README.md` care documentează site-ul web.
+- **Animație**: Oferiți modelului promptul `Add an animation that visually represents a large language model running on a laptop.` pentru a genera o animație pentru site-ul web.
 
-Îl încurajăm pe cititor să încerce să genereze alte aplicații folosind această configurare. Mai jos sunt câteva exemple interesante pe care le-am testat:
+Îl încurajăm pe cititor să încerce să genereze alte aplicații folosind această configurație. Mai jos sunt câteva exemple distractive pe care le-am încercat:
 
-- **Jocuri retro de arcade**: Încercați și alte prompturi. Poate fi, de asemenea, distractiv ca agentul să creeze jocuri în stil retro în Python folosind pachetul `PyGame`, cu următorul prompt:
+- **Jocuri retro arcade**: Încercați și alte prompturi. Poate fi de asemenea distractiv ca agentul să creeze jocuri în stil retro în Python folosind pachetul `PyGame`, cu următorul prompt:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **Analiza datelor**: Un domeniu în care agenții de codare sunt deosebit de utili este cel al scriptării și analizei datelor. Acesta este un prompt pentru a evidenția capacitatea modelului local de a genera software de analiză a datelor pentru vizualizarea prețurilor acțiunilor:
+- **Analiză de date**: Una dintre zonele în care agenții de coding sunt deosebit de utili este cea a scriptării și analizei de date. Acesta este un prompt care evidențiază capacitatea modelului local de a genera software de analiză de date pentru vizualizarea prețurilor acțiunilor:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -302,8 +305,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## Resurse
 
-Mai jos sunt câteva resurse suplimentare pentru a afla mai multe despre agenții de codare, Cline și rularea sarcinilor de lucru pe 
+Mai jos sunt câteva resurse suplimentare pentru a afla mai multe despre Coding Agents, Cline și rularea sarcinilor de lucru pe 
 
 * Mai multe informații despre parteneriatul și integrarea AMD LM Studio: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* Blogul AMD care prezintă rularea Cline pe plăci grafice AMD Ryzen™ AI și Radeon™: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
-* Blogul Cline despre rularea agenților de codare local pe AI PC-uri: https://cline.bot/blog/local-models-amd
+* Blog AMD care prezintă rularea Cline pe plăci AMD Ryzen™ AI și Radeon™ Graphics: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* Blog Cline despre rularea agenților de programare local pe AI PC-uri: https://cline.bot/blog/local-models-amd

@@ -16,19 +16,19 @@ SPDX-License-Identifier: MIT
 
 ## Genel Bakış
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash), DeepSeek V4 ailesinin verimlilik odaklı varyantıdır — 13 milyar aktif parametreye sahip 284 milyar parametrelik bir Mixture of Experts modelidir. [DeepSeek'in teknik raporuna](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) göre, SWE-bench Verified'da %79 ve LiveCodeBench'te %91,6 puan almaktadır.
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash), DeepSeek V4 ailesinin verimliliğe odaklanmış varyantıdır — 13 milyar aktif parametreye sahip, 284 milyar parametrelik bir Karma Uzmanlar (Mixture of Experts) modelidir. [DeepSeek'in teknik raporuna](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) göre, SWE-bench Verified testinde %79, LiveCodeBench testinde ise %91,6 puan almaktadır.
 
-[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4), özellikle bu model mimarisi için oluşturulmuş özel bir çıkarım motorudur. Genel amaçlı bir çalışma zamanı yerine ds4, AMD ROCm™ yazılımı için mimariye özgü çekirdek optimizasyonlarıyla doğrudan DeepSeek V4 ailesini hedefler. Şu anda Strix Halo üzerinde DeepSeek V4 Flash'ın en iyi performans gösteren uygulamalarından biridir.
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4), özellikle bu model mimarisi için oluşturulmuş özel bir çıkarım (inference) motorudur. Genel amaçlı bir çalışma zamanı yerine ds4, AMD ROCm™ yazılımı için mimariye özgü çekirdek optimizasyonlarıyla doğrudan DeepSeek V4 ailesini hedefler. Şu anda Strix Halo üzerinde DeepSeek V4 Flash'in en iyi performans gösteren uygulamalarından biridir.
 
-Bu eğitim, ds4'ü kurmak, model ağırlıklarını indirmek ve AMD Ryzen™ AI Halo Developer Platform üzerinde DeepSeek V4 Flash'ı yerel olarak sunmaya başlamak için bir terminal kullanıcı arayüzü olan `ds4-cockpit`'in nasıl kullanılacağını gösterir.
+Bu eğitim, ds4'ü kurmak, model ağırlıklarını indirmek ve DeepSeek V4 Flash'i AMD Ryzen™ AI Halo Geliştirici Platformu'nda yerel olarak sunmaya başlamak için bir terminal arayüzü olan `ai-toolbox-cockpit`'in nasıl kullanılacağını gösterir.
 
 ## Neler Öğreneceksiniz
 
-- `ds4-cockpit` terminal kullanıcı arayüzünün nasıl kurulup başlatılacağı
+- `ai-toolbox-cockpit` terminal arayüzünün nasıl kurulacağı ve başlatılacağı
 - ds4 ROCm toolbox konteynerinin nasıl oluşturulacağı
-- Tek bir Halo düğümü için önerilen kuantizasyonun indirilmesi
+- Tek bir Halo düğümü için önerilen niceleme (quantization) türünün indirilmesi
 - ds4 çıkarım sunucusunun başlatılması ve OpenAI uyumlu bir uç noktanın açığa çıkarılması
-- Bir Web UI veya kodlama ajanının yerel sunucuya bağlanması
+- Yerel sunucuya bir Web UI veya kodlama asistanının (coding agent) bağlanması
 
 ## Bellek Yapılandırmasının Ayarlanması
 
@@ -36,14 +36,14 @@ Bu eğitim, ds4'ü kurmak, model ağırlıklarını indirmek ve AMD Ryzen™ AI 
 
 ## Yazılım Ön Koşullarının Kurulması
 
-> **Bu yapılandırma için sistem gereksinimleri (tek düğümde 126k bağlam ile IQ2_XXS):**
+> **Bu yapılandırma için sistem gereksinimleri (126k bağlam ile tek düğümlü IQ2_XXS):**
 > - **En az 128 GB birleşik belleğe** sahip bir Strix Halo sistemi.
 > - Paylaşılan bellek havuzunun mümkün olduğunca büyük olabilmesi için **BIOS'ta ayrılmış VRAM'in (UMA çerçeve arabelleği) minimuma ayarlanması**.
-> - GPU **paylaşılan bellek havuzunun en az 110 GB'a ayarlanması**: `amd-ttm --set 110` komutunu çalıştırın (yukarıdaki bellek yapılandırma adımına bakın) ve yeniden başlatın. Daha düşük değerler, model 126k bağlamda yüklenirken bellek yetersizliği hatasına neden olabilir. Sisteminizde daha az bellek varsa, bunun yerine Server Mode'daki **Context** değerini düşürün.
+> - GPU **paylaşımlı bellek havuzunun en az 110 GB'a ayarlanması**: `amd-ttm --set 110` komutunu çalıştırın (yukarıdaki bellek yapılandırma adımına bakın) ve yeniden başlatın. Daha düşük değerler, model 126k bağlamda yüklenirken bellek yetersizliği hatasına neden olabilir. Sisteminizde daha az bellek varsa, bunun yerine Sunucu Modu'ndaki **Context** değerini düşürün.
 >
-> **Not:** Başlangıç noktası olarak **GPU paylaşılan bellek havuzunu** **110 GB**'a ayarlamayı deneyin. Bellek yetersizliği hatalarıyla karşılaşırsanız, paylaşılan bellek havuzunu artırın veya bağlam boyutunu düşürün.
+> **Not:** Başlangıç noktası olarak **GPU paylaşımlı bellek havuzunu** **110 GB**'a ayarlamayı deneyin. Bellek yetersizliği hatalarıyla karşılaşırsanız, paylaşımlı bellek havuzunu artırın veya bağlam boyutunu düşürün.
 
-ds4-cockpit, ds4 motorunu çalıştırmak için konteyner toolbox'ları kullanır. `podman`, `distrobox` ve `pipx` yazılımlarını kurun:
+ai-toolbox-cockpit, ds4 motorunu çalıştırmak için konteyner toolbox'ları kullanır. `podman`, `distrobox` ve `pipx`'i kurun:
 
 ```bash
 sudo apt update
@@ -61,30 +61,32 @@ echo "OK: podman, distrobox, and pipx are installed"
 ```
 <!-- @test:end -->
 
-## Kullanılabilir Kuantizasyonlar
+## Mevcut Nicelemeler
 
-ds4 yazarı, DeepSeek V4 Flash'ın GGUF formatında birkaç kuantize edilmiş sürümünü sunmaktadır. Aşağıdaki modellerin tümü, kodlama ve akıl yürütme görevleri için en önemli model bölümlerinde daha yüksek hassasiyeti koruyan önem matrisi (imatrix) kalibrasyonu kullanır.
+ds4 yazarı, DeepSeek V4 Flash'in GGUF formatında birkaç nicelenmiş sürümünü sunmaktadır. Aşağıdaki modellerin tümü, kodlama ve akıl yürütme görevleri için en önemli olan model bölümlerinde daha yüksek hassasiyeti koruyan önem matrisi (imatrix) kalibrasyonunu kullanır.
 
-| Kuantizasyon | Boyut | Açıklama |
+| Niceleme | Boyut | Açıklama |
 |-------------|------|-------------|
 | [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 GB | Tek bir 128 GB düğüm için önerilir |
-| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | Daha iyi doğruluk için 37–42 katmanlarını Q4 hassasiyetinde tutar. 128 GB'a sığar ancak bağlam için daha az yer bırakır |
-| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Daha yüksek kalite. Çok düğümlü kümeleme yoluyla iki Halo düğümü gerektirir |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Üretim hızını artırmak için spekülatif çözümleme için isteğe bağlı bir eklenti |
+| [Hibrit Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | 37–42 katmanlarını daha iyi doğruluk için Q4 hassasiyetinde tutar. 128 GB'a sığar ancak bağlam için daha az yer bırakır |
+| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Daha yüksek kalite. Çoklu düğüm kümeleme (multi-node clustering) yoluyla iki Halo düğümü gerektirir |
+| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Üretim hızını artırmak için spekülatif kod çözme (speculative decoding) amaçlı isteğe bağlı bir ek |
 
 **IQ2_XXS imatrix** modeli iyi bir başlangıç noktasıdır. Tek bir düğüme rahatlıkla sığar ve makul bir bağlam penceresi için yeterli bellek bırakır.
 
-## ds4-cockpit'in Kurulması
+## ai-toolbox-cockpit'in Kurulması
 
-[ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox), Strix Halo üzerinde ds4 ile çalışmaya başlamayı kolaylaştıran hafif bir terminal kullanıcı arayüzüdür. Toolbox konteynerlerinin oluşturulmasını, model ağırlıklarının indirilmesini ve sunucuların başlatılmasını yönetir. `pipx` ile kurun:
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit), çeşitli AI arka uçlarının kurulumunu kolaylaştıran hafif bir terminal arayüzüdür. Bunu, ds4 konteynerimizi oluşturmak, model ağırlıklarını indirmek ve sunucuları başlatmak için kullanacağız. `pipx` ile kurun:
 
+<!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
-pipx install "git+https://github.com/kyuz0/strix-halo-ds4-toolbox.git#subdirectory=ds4-strix-halo-cockpit"
+pipx install git+https://github.com/kyuz0/ai-toolbox-cockpit.git
 ```
+<!-- @test:end -->
 
-Cockpit'i başlatın:
+Kokpiti başlatın:
 ```bash
-ds4-cockpit
+ai-toolbox-cockpit
 ```
 
 <!-- @test:id=ds4-cockpit-linux timeout=60 hidden=True -->
@@ -92,18 +94,18 @@ ds4-cockpit
 set -euo pipefail
 export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 # Verify the pipx-installed cockpit entry point is on PATH (do NOT launch the TUI).
-command -v ds4-cockpit
-echo "OK: ds4-cockpit is installed and on PATH"
+command -v ai-toolbox-cockpit
+echo "OK: ai-toolbox-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
-## Toolbox'ın Oluşturulması
+## Adım 1: Toolbox'ın Oluşturulması
 
-**Interactive Toolboxes** sekmesinde, kullanılabilir en son kararlı toolbox'ı seçin (ör. `ds4-rocm-7.2.4`) ve **Create/Update**'e tıklayın. Bu, konteyner imajını çeker ve toolbox ortamını oluşturur.
+**Interactive Toolboxes** sekmesinde, ds4 için mevcut en son kararlı toolbox'ı (ör. `ds4-rocm-10.0`) seçin ve **Create/Update**'e tıklayın. Bu işlem, konteyner görüntüsünü çeker ve toolbox ortamını oluşturur.
 
 
 <p align="center">
-  <img src="assets/ds4-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ds4-cockpit" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ai-toolbox-cockpit" width="800"/>
 </p>
 
 <!-- @test:id=ds4-toolbox-image-linux timeout=120 hidden=True -->
@@ -113,37 +115,37 @@ export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
 
 # The toolbox version changes over time, so match the image family, not a fixed tag.
 if ! podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit (Interactive Toolboxes tab) first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit (Interactive Toolboxes tab) first."
   exit 1
 fi
 echo "OK: ds4 toolbox container image is present"
 ```
 <!-- @test:end -->
 
-## Modelin İndirilmesi
+## Adım 2: Modelin İndirilmesi
 
-**Model Manager** sekmesine gidin. Açılır menüden **IQ2_XXS imatrix (~80,8 GB)** öğesini seçin ve **Download**'a tıklayın. Model dosyaları varsayılan olarak `~/ds4` konumuna kaydedilecektir (depolama yolunu değiştirebilirsiniz).
+**Models** sekmesine gidin. Önce arka ucu (ds4) seçin. Ardından, açılır menüden **IQ2_XXS imatrix (~80,8 GB)**'ı seçin ve **Download**'a tıklayın. Model dosyaları varsayılan olarak `~/ds4` konumuna kaydedilir (depolama yolunu değiştirebilirsiniz).
 
-> **Not:** IQ2_XXS modeli yaklaşık 80 GB'dır, bu nedenle indirme işlemi bağlantınıza bağlı olarak biraz zaman alabilir. İşlem tamamlandığında devam edebilirsiniz.
+> **Not:** IQ2_XXS modeli yaklaşık 80 GB olduğundan, indirme işlemi bağlantınıza bağlı olarak biraz zaman alabilir. Tamamlandıktan sonra devam edebilirsiniz.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-model-manager.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
 </p>
 
 <!-- @test:id=ds4-model-downloaded-linux timeout=60 hidden=True -->
 ```bash
 set -euo pipefail
 
-# ds4-cockpit saves model weights to ~/ds4 by default
+# ai-toolbox-cockpit saves model weights to ~/ds4 by default
 model_dir="$HOME/ds4"
 
 if [ ! -d "$model_dir" ]; then
-  echo "Model directory $model_dir does not exist. Download the model in ds4-cockpit (Model Manager tab) first."
+  echo "Model directory $model_dir does not exist. Download the model in ai-toolbox-cockpit (Model Manager tab) first."
   exit 1
 fi
 
 if ! find "$model_dir" -maxdepth 2 -iname '*.gguf' | grep -q .; then
-  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ds4-cockpit first."
+  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -156,19 +158,19 @@ fi
 ```
 <!-- @test:end -->
 
-## Sunucunun Başlatılması
+## Adım 3: Sunucunun Başlatılması
 
-**Server Mode** sekmesine gidin. İndirilen modeli ve toolbox'ı seçin, ardından bağlam boyutunu, ana bilgisayarı ve bağlantı noktasını yapılandırın. Hazır olduğunuzda **Start ds4-server**'a tıklayın.
+**Server Mode** sekmesine gidin. İndirilen modeli ve toolbox'ı seçin, ardından bağlam boyutunu, ana bilgisayarı (host) ve portu yapılandırın. Hazır olduğunuzda **Start ds4-server**'a tıklayın.
 
-> **İpucu** `126000` bağlam boyutu, tek bir düğüme sığması gereken makul bir başlangıç değeridir — bellek payınız varsa daha yüksek ayarlayabilir veya bellek yetersizliği hatalarıyla karşılaşırsanız düşürebilirsiniz. Bağlantı noktası (bu kılavuzda `8000`) rastgele seçilmiştir; herhangi bir boş bağlantı noktasını seçebilirsiniz.
+> **İpucu:** `126000` bağlam boyutu, tek bir düğüme sığması gereken makul bir başlangıç değeridir — yedek belleğiniz varsa daha yüksek ayarlayabilir veya bellek yetersizliği hatalarıyla karşılaşırsanız düşürebilirsiniz. Bu kılavuzda kullanılan port (`8000`) rastgeledir; herhangi bir boş portu seçebilirsiniz.
 
-> **KV Disk Cache (isteğe bağlı).** **KV Disk Cache**'i etkinleştirmek, KV önbelleğini diske (**Host Cache Dir** üzerinde, varsayılan `~/.cache/ds4-kv`) aktarır, böylece tekrarlanan sistem istemleri yeniden hesaplanmak yerine SSD'den geri yüklenir. Bu, uzun ve tekrarlanan istemlere sahip kodlama ajanı iş akışları için bir performans optimizasyonudur ve sunucuyu çalıştırmak için **gerekli değildir**.
+> **KV Disk Önbelleği (isteğe bağlı).** **KV Disk Cache**'i etkinleştirmek, KV önbelleğini diske (varsayılan olarak **Host Cache Dir** konumunda, `~/.cache/ds4-kv`) aktararak tekrarlanan sistem istemlerinin yeniden hesaplanmak yerine SSD'den geri yüklenmesini sağlar. Bu, uzun ve tekrarlanan istemlere sahip kodlama asistanı iş akışları için bir performans optimizasyonudur ve sunucuyu çalıştırmak için **gerekli değildir**.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-server-mode.png" alt="Configuring and starting the ds4 server" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
 </p>
 
-Sunucu başlayacak ve 8000 numaralı bağlantı noktasını dinleyecek, `http://localhost:8000/v1` adresinde OpenAI uyumlu bir API uç noktasını açığa çıkaracaktır.
+Sunucu başlayacak ve 8000 numaralı portu dinleyecek, `http://localhost:8000/v1` adresinde OpenAI uyumlu bir API uç noktası sunacaktır.
 
 **Hızlı test:**
 ```bash
@@ -199,7 +201,7 @@ if [ -z "$model_file" ]; then
   model_file="$(find "$MODEL_DIR" -maxdepth 2 -iname '*.gguf' 2>/dev/null | head -1)"
 fi
 if [ -z "$model_file" ]; then
-  echo "No .gguf model found under $MODEL_DIR. Download it in ds4-cockpit first."
+  echo "No .gguf model found under $MODEL_DIR. Download it in ai-toolbox-cockpit first."
   exit 1
 fi
 model_name="$(basename "$model_file")"
@@ -207,7 +209,7 @@ model_name="$(basename "$model_file")"
 # Pick the toolbox image (version-agnostic).
 image="$(podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox' | head -1)"
 if [ -z "$image" ]; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -218,7 +220,14 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Remove any stale instance, then start ds4-server detached (same flags ds4-cockpit uses, with -d instead of -it).
+# keep-id maps the calling user into the container. Root does not need it, and as root it cannot
+# be combined with --ipc=host (crun fails to mount /dev/mqueue), so root keeps the host user namespace.
+userns=keep-id
+if [ "$(id -u)" -eq 0 ]; then
+  userns=host
+fi
+
+# Remove any stale instance, then start ds4-server detached (same flags ai-toolbox-cockpit uses, with -d instead of -it).
 podman rm -f "$CONTAINER" >/dev/null 2>&1 || true
 podman run -d --name "$CONTAINER" \
   --device /dev/dri --device /dev/kfd \
@@ -227,7 +236,7 @@ podman run -d --name "$CONTAINER" \
   --ipc=host \
   --cap-add=SYS_PTRACE \
   --security-opt label=disable \
-  --userns=keep-id \
+  --userns="$userns" \
   -p 127.0.0.1:8000:8000 \
   -v "$MODEL_DIR":/models:ro \
   "$image" \
@@ -297,24 +306,28 @@ PY
 echo "OK: ds4 server test complete; server stopped and GPU memory released"
 ```
 <!-- @test:end -->
+## Web Arayüzü Bağlama
 
-## Bir Web UI'nin Bağlanması
-
-OpenAI API biçimini destekleyen herhangi bir sohbet arayüzüne bağlanabilirsiniz. Örneğin, HuggingFace ChatUI'yi kullanmak için:
+OpenAI API biçimini destekleyen herhangi bir sohbet arayüzünü bağlayabilirsiniz. Örneğin, HuggingFace ChatUI kullanmak için:
 
 ```bash
-docker run -p 3000:3000 \
-  --add-host=host.docker.internal:host-gateway \
-  -e OPENAI_BASE_URL=http://host.docker.internal:8000/v1 \
+docker run --network=host \
+  -e PORT=3000 \
+  -e OPENAI_BASE_URL=http://localhost:8000/v1 \
   -e OPENAI_API_KEY=dummy \
   -v chat-ui-data:/data \
   ghcr.io/huggingface/chat-ui-db
 ```
 
-Sohbet etmeye başlamak için tarayıcınızda `http://localhost:3000` adresini açın.
-## Kodlama Aracısını Bağlama
+Sohbete başlamak için tarayıcınızda `http://localhost:3000` adresini açın.
 
-ds4 sunucusu hem OpenAI hem de Anthropic uyumlu uç noktaları sunar, bu nedenle çoğu kodlama aracısı doğrudan ona bağlanabilir. Örneğin, bunu `pi` kodlama aracısına eklemek için `~/.pi/agent/models.json` dosyasına aşağıdaki bloğu ekleyin:
+> **Not:** `--network=host` seçeneği, Web Arayüzünü ana makinenin ağına yerleştirerek ds4 sunucusuna doğrudan `localhost` üzerinden ulaşabilmesini sağlar. Bu sayede ds4 sunucusu loopback'e bağlı kalır (diğer arayüzlerde açığa çıkarılması gerekmez).
+
+> **İpucu:** Web Arayüzü portu (burada `3000`, `PORT` ile ayarlanır) rastgele seçilmiştir — `3000` zaten kullanımdaysa boş herhangi bir port seçebilir ve tarayıcınızda o portu açabilirsiniz. `OPENAI_BASE_URL` içindeki portun, ds4 sunucunuzun çalıştığı port ile eşleştiğinden emin olun.
+
+## Bir Kodlama Aracısı Bağlama
+
+ds4 sunucusu hem OpenAI hem de Anthropic uyumlu uç noktaları sunar, bu nedenle çoğu kodlama aracısı ona doğrudan bağlanabilir. Örneğin, bunu `pi` kodlama aracısına eklemek için `~/.pi/agent/models.json` dosyasına aşağıdaki bloğu ekleyin:
 
 ```json
 "ds4": {
@@ -354,15 +367,15 @@ ds4 sunucusu hem OpenAI hem de Anthropic uyumlu uç noktaları sunar, bu nedenle
 }
 ```
 
-> **İpucu**: Kodlama aracınız veya Web UI'niz Halo platformundan farklı bir makinede çalışıyorsa, 8000 portunu SSH üzerinden yönlendirmeniz gerekir:
+> **İpucu**: Kodlama aracınız veya Web Arayüzünüz Halo platformundan farklı bir makinede çalışıyorsa, sunucu portunu (burada `8000`) SSH üzerinden yönlendirmeniz gerekir:
 > ```bash
-> ssh -L 0.0.0.0:8000:localhost:8000 <halo-host-ip>
+> ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## Sonraki Adımlar
 
-- **Çok düğümlü kümeleme**: İki Halo cihazınız varsa, ds4, boru hattı paralelliği (pipeline parallelism) aracılığıyla Q4 modelini (~153 GB) her iki makineye dağıtmayı destekler. Kurulum talimatları için [ds4-toolbox belgelerine](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) bakın.
-- **Spekülatif kod çözme (MTP)**: MTP ağırlıklarını (~3.6 GB) indirin ve daha hızlı üretim hızı için sunucuya `--mtp` parametresini geçirin.
-- **KV önbelleği disk aktarımı**: Kodlama aracısı iş akışları için, tekrar eden sistem istemlerinin her seferinde yeniden hesaplanmak yerine SSD'den geri yüklenmesi için `--kv-disk-dir` seçeneğini etkinleştirin.
+- **Çoklu düğüm kümeleme**: İki Halo cihazınız varsa, ds4 hattı paralelliği (pipeline parallelism) aracılığıyla Q4 modelini (~153 GB) her iki makineye dağıtmayı destekler. Kurulum talimatları için [ds4-toolbox belgelerine](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) bakın.
+- **Spekülatif kod çözme (MTP)**: MTP ağırlıklarını (~3.6 GB) indirin ve daha hızlı üretim hızı için sunucuya `--mtp` parametresini iletin.
+- **KV önbelleği disk aktarımı**: Kodlama aracısı iş akışları için, tekrarlanan sistem komutlarının her seferinde yeniden hesaplanmak yerine SSD'den geri yüklenmesi için `--kv-disk-dir` seçeneğini etkinleştirin.
 
-Daha fazla bilgi için [ds4 deposuna](https://github.com/antirez/ds4) ve [ds4-cockpit araç setine](https://github.com/kyuz0/strix-halo-ds4-toolbox) bakın.
+Daha fazla bilgi için [ds4 deposuna](https://github.com/antirez/ds4) ve [ds4-cockpit araç kutusuna](https://github.com/kyuz0/strix-halo-ds4-toolbox) bakın.

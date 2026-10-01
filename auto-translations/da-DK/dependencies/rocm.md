@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 #### ROCm
 
-**Tilføj den nuværende bruger til render- og video-grupperne.** 
+**Tilføj den nuværende bruger til grupperne render og video.** 
 ```bash
 sudo usermod -a -G render,video $LOGNAME
 ```
@@ -22,7 +22,7 @@ sudo reboot
 <!-- @device:halo_box,halo -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1151]==7.14.0"
+python -m pip install --index-url https://stable.repo.amd.com/rocm/whl-next/ "rocm[libraries,devel,device-gfx1151]==10.0.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -30,7 +30,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "roc
 <!-- @device:stx -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1150]==7.14.0"
+python -m pip install --index-url https://stable.repo.amd.com/rocm/whl-next/ "rocm[libraries,devel,device-gfx1150]==10.0.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -38,7 +38,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "roc
 <!-- @device:krk -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1152]==7.14.0"
+python -m pip install --index-url https://stable.repo.amd.com/rocm/whl-next/ "rocm[libraries,devel,device-gfx1152]==10.0.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -46,7 +46,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "roc
 <!-- @device:rx7900xt -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1100]==7.14.0"
+python -m pip install --index-url https://stable.repo.amd.com/rocm/whl-next/ "rocm[libraries,devel,device-gfx1100]==10.0.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
@@ -54,9 +54,9 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "roc
 <!-- @device:rx9070xt,r9700 -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
-python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "rocm[libraries,devel,device-gfx1201]==7.14.0"
+python -m pip install --index-url https://stable.repo.amd.com/rocm/whl-next/ "rocm[libraries,devel,device-gfx1201]==10.0.0"
 ```
 <!-- @test:end -->
 <!-- @device:end -->
 
-For yderligere installationshjælp, se venligst [ROCm 7.14-dokumentationen](https://rocm.docs.amd.com/en/latest/install/rocm.html).
+For yderligere installationshjælp, se venligst [ROCm 10.0.0 Documentation](https://rocm.docs.amd.com/en/latest/install/rocm.html).

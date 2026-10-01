@@ -1,8 +1,15 @@
-/playbooks/ @lucbruni-amd @harkgill-amd @adamlam2-amd
-/website/ @danielholanda
-/.github/ @danielholanda
-test_*.py @sreeram-11
-*test*.py @sreeram-11
+# CODEOWNERS is LAST-MATCH-WINS: for any file, the last matching line decides
+# the reviewers. Order matters — broad rules first, more specific overrides after.
+
+# New / changed playbooks.
+/playbooks/ @adamlam2-amd @bconsolvo
+
+# Website is intentionally unowned (no auto-requested reviewer).
+/website/
+
+# CI, workflows, scripts, and repo config. Any one of these can approve; the
+# required-approval count is set in branch protection, not here.
+/.github/ @harkgill-amd @sreeram-11 @lucbruni-amd
 
 # auto-translations/ is generated automatically by translate-playbooks.yml.
 # localized-playbooks/ holds human-uploaded translations (e.g. the China team).
@@ -11,15 +18,15 @@ test_*.py @sreeram-11
 /auto-translations/ @bconsolvo
 /localized-playbooks/ @bconsolvo
 
-# OrchestrAI CI integration. CODEOWNERS is last-match-wins, so these lines would
-# REPLACE the owner from `/.github/` above rather than add to it -- @danielholanda
-# is repeated on each so ownership of these files is widened, not narrowed.
-/.github/orchestrai-config.yml                          @danielholanda @saman-amd
-/.github/scripts/orchestrai_matrix.py                   @danielholanda @saman-amd
-/.github/scripts/orchestrai_trigger.py                  @danielholanda @saman-amd
-/.github/scripts/orchestrai_verdict.py                  @danielholanda @saman-amd
-/.github/scripts/orchestrai_report.py                   @danielholanda @saman-amd
-/.github/workflows/test-playbooks-orchestrai.yml        @danielholanda @saman-amd
-/.github/workflows/orchestrai-pr-command.yml            @danielholanda @saman-amd
-/.github/workflows/test-localized-playbooks-orchestrai.yml @danielholanda @saman-amd
-/.github/workflows/orchestrai-localized-pr-command.yml  @danielholanda @saman-amd
+# Test scripts — placed after /.github/ so they win for any test_*.py file.
+test_*.py @sreeram-11 @harkgill-amd @adamlam2-amd
+*test*.py @sreeram-11 @harkgill-amd @adamlam2-amd
+
+# OrchestrAI catch-all, LAST so it wins over everything above: every OrchestrAI
+# file — source, workflows, AND its tests under .github/tests/ — is @saman-amd.
+# This is placed after the test*.py patterns on purpose, so OrchestrAI test
+# files (e.g. .github/tests/test_orchestrai_*.py) go to Saman, not the test owners.
+# The directory rule also catches files whose basename lacks "orchestrai"
+# (e.g. .github/orchestrai/acquire_retry.py).
+/.github/orchestrai/ @saman-amd
+*orchestrai* @saman-amd

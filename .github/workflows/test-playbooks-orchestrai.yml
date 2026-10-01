@@ -203,8 +203,6 @@ jobs:
           ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON: ${{ vars.ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON }}
           ORCHESTRAI_RYZENAI_NPU_XRT_URL: ${{ secrets.ORCHESTRAI_RYZENAI_NPU_XRT_URL }}
           ORCHESTRAI_WINDOWS_DRIVER_SOURCE: ${{ secrets.ORCHESTRAI_WINDOWS_DRIVER_SOURCE }}
-          ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_URL: ${{ vars.ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_URL }}
-          ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_SHA256: ${{ vars.ORCHESTRAI_DOCKER_DESKTOP_INSTALLER_SHA256 }}
           # On a pull_request, test the PR's OWN code (same as the !orc path),
           # not the configured repo@main. These are empty on schedule/dispatch, so
           # orchestrai_trigger.py falls back to playbook_repo@main there. Fork PRs

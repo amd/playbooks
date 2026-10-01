@@ -1,6 +1,6 @@
 {
   "id": "pytorch-rocm-llms",
   "title": "Poganjanje LLM-jev na PyTorch s programsko opremo AMD ROCm™",
-  "description": "Naučite se zagnati zmogljive jezikovne modele na svojem računalniku s programsko opremo PyTorch in AMD ROCm™ za hitro in preprosto povzemanje dokumentov.",
+  "description": "Naučite se poganjati zmogljive jezikovne modele na svojem računalniku s PyTorch in programsko opremo AMD ROCm™ za hitro in enostavno povzemanje dokumentov.",
   "auto_translated": true
 }
