@@ -203,15 +203,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ needs.translate.outputs.branch }}
         run: |
-          # Open a PR for manual review. The @-mention notifies the maintainer.
+          # Open the PR WITHOUT --label first: `gh pr create --label X` fails
+          # atomically if label X doesn't exist, which would abort PR creation
+          # entirely (this is what happened when the repo had no 'translation'
+          # label). The @-mention in the body is what actually notifies the
+          # maintainer, so the PR must open regardless of label/reviewer state.
           PR_URL=$(gh pr create --repo "${{ github.repository }}" \
             --base "${{ github.ref_name }}" --head "$BRANCH" \
             --title "l10n: update translations" \
-            --body "@bconsolvo automated translation update from the Translate Playbooks workflow (run ${{ github.run_id }}). Touches \`auto-translations/\` only — please review and merge." \
-            --label "translation")
+            --body "@bconsolvo automated translation update from the Translate Playbooks workflow (run ${{ github.run_id }}). Touches \`auto-translations/\` only — please review and merge.")
           echo "Opened $PR_URL for manual review."
-          # Request review so it surfaces in the maintainer's review queue,
-          # not just as an @-mention. Best-effort — never fail the run over it.
+          # Label + reviewer are both best-effort: never fail the run over them.
+          gh pr edit "$PR_URL" --add-label "translation" \
+            || echo "::warning::Could not add 'translation' label (does it exist?); PR $PR_URL is still open."
           gh pr edit "$PR_URL" --add-reviewer bconsolvo \
             || echo "::warning::Could not add reviewer; PR $PR_URL is open with an @-mention."
 
