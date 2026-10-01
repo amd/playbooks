@@ -1,6 +1,6 @@
 {
   "id": "clustering-rpc-server-4-node",
-  "title": "Gručenje štirih AMD Ryzen™ AI Halo z RPC",
-  "description": "Nastavitev porazdeljenega sklepanja z uporabo strežnika RPC na štirih napravah Ryzen™ AI Halo z llama.cpp za zagon modelov z več kot 1 bilijonom parametrov",
+  "title": "Povezovanje štirih Ryzen™ AI Halo v grozd z RPC",
+  "description": "Vzpostavite porazdeljeno sklepanje s strežnikom RPC v štirih napravah Ryzen™ AI Halo z orodjem llama.cpp za zagon modelov z 1T+ parametri",
   "auto_translated": true
 }

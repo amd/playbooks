@@ -1,6 +1,6 @@
 {
   "id": "ollama-getting-started",
-  "title": "Ollamaを使ってみる",
-  "description": "Ollamaをインストールし、LLMをローカルで実行 — ターミナル、デスクトップアプリ、またはREST APIからチャットできます。",
+  "title": "Ollama を使ってみよう",
+  "description": "Ollamaをインストールしてローカルでllmを実行 — ターミナル、デスクトップアプリ、またはREST APIからチャットできます。",
   "auto_translated": true
 }

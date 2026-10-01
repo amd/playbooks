@@ -1,6 +1,6 @@
 {
   "id": "pytorch-kernels",
   "title": "Δημιουργία προσαρμοσμένων πυρήνων GPU με PyTorch και AMD ROCm™",
-  "description": "Δημιουργήστε και βελτιστοποιήστε προσαρμοσμένους πυρήνες GPU χρησιμοποιώντας το PyTorch και το λογισμικό AMD ROCm™",
+  "description": "Συγγραφή και βελτιστοποίηση προσαρμοσμένων GPU kernels με χρήση PyTorch και λογισμικού AMD ROCm™",
   "auto_translated": true
 }

@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "Začíname s vLLM",
-  "description": "Naučte sa, ako spúšťať odvodzovanie (inference) a poskytovanie (serving) pomocou kontajnerizovaného vLLM na integrovanej GPU",
+  "description": "Naučte sa, ako spúšťať inferenciu a servovanie pomocou kontajnerizovaného vLLM na integrovanom GPU",
   "auto_translated": true
 }

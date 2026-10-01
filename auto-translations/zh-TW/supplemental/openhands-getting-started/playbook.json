@@ -1,6 +1,6 @@
 {
   "id": "openhands-getting-started",
-  "title": "使用 OpenHands 與本機 LLM 入門",
-  "description": "安裝 Agent Canvas,連接本機 Lemonade 模型,並在您的 AMD Ryzen™ AI 上執行您的第一個 OpenHands 程式碼代理程式。",
+  "title": "使用 OpenHands 與本地 LLM 入門",
+  "description": "安裝 Agent Canvas，連接本機 Lemonade 模型，並在您的 AMD Ryzen™ AI 上執行您的第一個 OpenHands 編碼代理程式。",
   "auto_translated": true
 }

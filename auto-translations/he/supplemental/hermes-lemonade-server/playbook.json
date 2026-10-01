@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
-  "title": "הפעלת סוכן Hermes באופן מקומי עם שרת Lemonade",
-  "description": "התקינו והגדירו את סוכן ה-AI האוטונומי Hermes Agent עם Lemonade Server כשירות ה-AI המקומי שלו (backend).",
+  "title": "הפעלת Hermes Agent מקומית עם Lemonade Server",
+  "description": "התקינו והגדירו את סוכן ה-AI האוטונומי Hermes Agent עם Lemonade Server כ-backend מקומי של AI.",
   "auto_translated": true
 }

@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "Aan de slag met vLLM",
-  "description": "Leer hoe je inference en serving uitvoert met gecontaineriseerde vLLM op de geïntegreerde GPU",
+  "description": "Leer hoe u inferentie en serving kunt uitvoeren met gecontaineriseerde vLLM op de geïntegreerde GPU",
   "auto_translated": true
 }

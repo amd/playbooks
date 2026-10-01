@@ -1,6 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "הרצה ושירות של מודלי LLM עם LM Studio",
-  "description": "הגדר את LM Studio ואת LM Studio Server להרצה ולהגשה של מודלי שפה גדולים באופן מקומי.",
+  "title": "הרצה ושירות של LLM באמצעות LM Studio",
+  "description": "הגדירו את LM Studio ואת LM Studio Server כדי להריץ ולהגיש מודלי שפה גדולים (LLM) באופן מקומי.",
   "auto_translated": true
 }

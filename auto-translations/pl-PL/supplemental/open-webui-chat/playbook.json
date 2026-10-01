@@ -1,6 +1,6 @@
 {
   "id": "open-webui-chat",
-  "title": "Rozmowa z modelami LLM w Open WebUI",
-  "description": "Użyj Open WebUI, aby czatować z modelami LLM lokalnie.",
+  "title": "Czatowanie z LLM-ami w Open WebUI",
+  "description": "Użyj Open WebUI, aby czatować z LLM lokalnie.",
   "auto_translated": true
 }

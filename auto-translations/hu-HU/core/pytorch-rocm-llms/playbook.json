@@ -1,6 +1,6 @@
 {
   "id": "pytorch-rocm-llms",
-  "title": "Nagy nyelvi modellek (LLM-ek) futtatása PyTorch alatt AMD ROCm™ szoftverrel",
-  "description": "Tanulja meg, hogyan futtathat hatékony nyelvi modelleket a PC-jén PyTorch és AMD ROCm™ szoftverrel, hogy gyorsan és egyszerűen összegezhessen dokumentumokat.",
+  "title": "Nagy nyelvi modellek (LLM) futtatása PyTorch alatt AMD ROCm™ szoftverrel",
+  "description": "Tanulja meg, hogyan futtathat hatékony nyelvi modelleket a PC-jén PyTorch és AMD ROCm™ szoftver segítségével, hogy dokumentumokat gyorsan és egyszerűen foglalhasson össze.",
   "auto_translated": true
 }

@@ -1,6 +1,6 @@
 {
   "id": "llama-factory-finetuning",
   "title": "LLaMA Factory ile LLM'leri İnce Ayarlama",
-  "description": "LLaMA Factory ve LoRA tekniklerini kullanarak büyük dil modellerini (LLM'ler) ince ayar yapın.",
+  "description": "Büyük dil modellerini (LLM'ler) LLaMA Factory ve LoRA teknikleriyle ince ayar yapın.",
   "auto_translated": true
 }

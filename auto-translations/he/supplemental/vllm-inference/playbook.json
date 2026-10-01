@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "תחילת העבודה עם vLLM",
-  "description": "למד כיצד להריץ הסקה (inference) ושירות (serving) באמצעות vLLM בקונטיינרים על ה-GPU המשולב",
+  "description": "למד כיצד להריץ הסקה (inference) ושירות (serving) באמצעות vLLM מוכל (containerized) על ה-GPU המשולב",
   "auto_translated": true
 }

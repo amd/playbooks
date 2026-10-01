@@ -1,6 +1,6 @@
 {
   "id": "clustering-rpc-server-4-node",
-  "title": "تجميع أربعة معالجات Ryzen™ AI Halo باستخدام RPC",
-  "description": "إعداد الاستدلال الموزّع باستخدام خادم RPC عبر أربعة أجهزة Ryzen™ AI Halo مع llama.cpp لتشغيل نماذج بحجم 1T+",
+  "title": "تجميع أربعة من Ryzen™ AI Halo باستخدام RPC",
+  "description": "إعداد الاستدلال الموزّع باستخدام خادم RPC عبر أربعة أجهزة ‎Ryzen™ AI Halo‎ مع ‎llama.cpp‎ لتشغيل نماذج ‎1T+‎",
   "auto_translated": true
 }

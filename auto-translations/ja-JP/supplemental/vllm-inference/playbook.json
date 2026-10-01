@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
-  "title": "vLLMを使ってみる",
-  "description": "Ryzen AI Max+のiGPUを使用してコンテナ化されたvLLMで推論とサービングを実行する方法を学びます",
+  "title": "vLLM を使ってみる",
+  "description": "AMD iGPU上でコンテナ化されたvLLMを使用して推論とサービングを実行する方法を学びます",
   "auto_translated": true
 }

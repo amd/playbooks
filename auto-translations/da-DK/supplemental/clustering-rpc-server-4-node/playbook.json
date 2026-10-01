@@ -1,6 +1,6 @@
 {
   "id": "clustering-rpc-server-4-node",
-  "title": "Klyngedannelse af fire Ryzen™ AI Halo-enheder med RPC",
-  "description": "Opsæt distribueret inferens ved hjælp af RPC-server på tværs af fire Ryzen™ AI Halo-enheder med llama.cpp til at køre modeller på 1T+",
+  "title": "Clustering af fire Ryzen™ AI Halo-enheder med RPC",
+  "description": "Opsæt distribueret inferens ved hjælp af RPC-server på tværs af fire Ryzen™ AI Halo-enheder med llama.cpp for at køre 1T+ modeller",
   "auto_translated": true
 }

@@ -1,6 +1,6 @@
 {
   "id": "github-slack-development-digest",
-  "title": "Creează un rezumat de dezvoltare de la GitHub la Slack cu Agent Canvas",
-  "description": "Configurați Agent Canvas, GitHub MCP, Slack MCP și o automatizare OpenHands programată care postează un rezumat (digest) generat de un LLM local.",
+  "title": "Creați un digest de dezvoltare de la GitHub la Slack cu Agent Canvas",
+  "description": "Configurați Agent Canvas, GitHub MCP, Slack MCP și o automatizare OpenHands programată care publică un rezumat (digest) generat de un LLM local.",
   "auto_translated": true
 }

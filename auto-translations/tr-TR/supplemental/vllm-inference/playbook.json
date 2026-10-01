@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "vLLM ile Başlarken",
-  "description": "AMD tümleşik GPU üzerinde konteynerleştirilmiş vLLM kullanarak çıkarım ve sunum işlemlerinin nasıl çalıştırılacağını öğrenin",
+  "description": "AMD Radeon tümleşik GPU'da konteynerleştirilmiş vLLM kullanarak çıkarım ve sunum nasıl yapılır öğrenin",
   "auto_translated": true
 }

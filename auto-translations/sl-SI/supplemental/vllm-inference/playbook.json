@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "Prvi koraki z vLLM",
-  "description": "Naučite se, kako izvajati sklepanje (inference) in strežbo (serving) z uporabo kontejneriziranega vLLM na integriranem GPE",
+  "description": "Naučite se, kako zagnati sklepanje in strežbo z uporabo kontejneriziranega orodja vLLM na integrirani GPU.",
   "auto_translated": true
 }

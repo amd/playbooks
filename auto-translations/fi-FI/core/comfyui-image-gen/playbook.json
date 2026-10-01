@@ -1,6 +1,6 @@
 {
   "id": "comfyui-image-gen",
-  "title": "Kuvien luominen ComfyUI:llä ja Z Image Turbolla",
-  "description": "Luo upeita tekoälyllä luotuja kuvia käyttämällä ComfyUI:ta ja Z Image Turbo -mallia.",
+  "title": "Kuvien luominen ComfyUI:lla ja Z Image Turbolla",
+  "description": "Luo upeita tekoälyllä luotuja kuvia ComfyUI:lla käyttäen Z Image Turboa.",
   "auto_translated": true
 }

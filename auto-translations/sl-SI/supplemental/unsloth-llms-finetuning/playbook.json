@@ -1,6 +1,6 @@
 {
   "id": "unsloth-llms-finetuning",
-  "title": "Fino prilagajanje (fine-tuning) velikih jezikovnih modelov (LLM) z Unsloth",
-  "description": "Uporabite Unsloth za pomnilniško učinkovito fino nastavljanje LLM-jev™",
+  "title": "Fino prilagajanje (fine-tuning) LLM-jev z Unsloth",
+  "description": "Uporabite Unsloth za pomnilniško učinkovito fino nastavljanje (fine-tuning) jezikovnih modelov LLM™",
   "auto_translated": true
 }

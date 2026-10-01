@@ -1,6 +1,6 @@
 {
   "id": "comfyui-image-gen",
   "title": "توليد الصور باستخدام ComfyUI و Z Image Turbo",
-  "description": "أنشئ صورًا مذهلة تم إنشاؤها بالذكاء الاصطناعي باستخدام ComfyUI مع Z Image Turbo.",
+  "description": "أنشئ صورًا مذهلة مولّدة بالذكاء الاصطناعي باستخدام ComfyUI مع Z Image Turbo.",
   "auto_translated": true
 }

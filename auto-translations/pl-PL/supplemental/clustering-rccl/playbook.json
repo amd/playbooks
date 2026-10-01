@@ -1,6 +1,6 @@
 {
   "id": "clustering-rccl",
-  "title": "Klastrowanie dwóch układów Ryzen™ AI Halo za pomocą RCCL",
-  "description": "Skonfiguruj klaster wieloweęzłowy przy użyciu dwóch urządzeń Ryzen™ AI Halo z RCCL do obciążeń rozproszonych",
+  "title": "Klasteryzacja dwóch Ryzen™ AI Halo za pomocą RCCL",
+  "description": "Skonfiguruj klaster wielowęzłowy przy użyciu dwóch urządzeń Ryzen™ AI Halo z RCCL do obciążeń rozproszonych",
   "auto_translated": true
 }

@@ -1,6 +1,6 @@
 {
   "id": "clustering-rpc-server",
-  "title": "Gručenje dveh procesorjev Ryzen™ AI Halo z uporabo RPC",
-  "description": "Nastavitev porazdeljenega sklepanja z uporabo strežnika RPC med dvema napravama Ryzen™ AI Halo z orodjem llama.cpp za zagon modelov s 350+ milijardami parametrov",
+  "title": "Povezovanje dveh platform Ryzen™ AI Halo v gruče z RPC",
+  "description": "Vzpostavite porazdeljeno sklepanje z uporabo RPC strežnika na dveh napravah Ryzen™ AI Halo z orodjem llama.cpp za zagon modelov s 350+ milijardami parametrov",
   "auto_translated": true
 }

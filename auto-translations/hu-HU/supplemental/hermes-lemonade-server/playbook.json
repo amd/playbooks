@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
-  "title": "Hermes Agent futtatása helyben a Lemonade Server segítségével",
-  "description": "Telepítse és konfigurálja a Hermes Agent autonóm AI-ügynököt a Lemonade Server helyi AI-háttérszolgáltatásával.",
+  "title": "Hermes Agent helyi futtatása a Lemonade Server segítségével",
+  "description": "A Hermes Agent autonóm AI-ügynök telepítése és konfigurálása a Lemonade Server mint helyi AI-háttérrendszer használatával.",
   "auto_translated": true
 }

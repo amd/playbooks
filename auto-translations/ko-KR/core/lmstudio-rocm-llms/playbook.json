@@ -1,6 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
   "title": "LM Studio로 LLM 실행 및 서빙하기",
-  "description": "LM Studio 및 LM Studio Server를 설정하여 대규모 언어 모델을 로컬에서 실행하고 제공하세요.",
+  "description": "LM Studio 및 LM Studio Server를 설정하여 대규모 언어 모델을 로컬에서 실행하고 서비스합니다.",
   "auto_translated": true
 }
