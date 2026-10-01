@@ -6,14 +6,14 @@ SPDX-License-Identifier: MIT
 
 <!-- @github-only -->
 > [!IMPORTANT]
-> 本手册使用了 GitHub 无法渲染的特殊标签。请访问 [amd.com/playbooks](https://amd.com/playbooks) 以正确预览此内容。
+> This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## 概述
 
 本教程提供了使用 PyTorch 和 ROCm 对大语言模型（LLM）进行微调的分步示例。内容涵盖了从标准微调到内存高效的参数高效微调（PEFT）策略等多种技术，方便您根据自身需求轻松调整模型。
 
-**使用的模型**：google/gemma-3-4b-it  *（如为受限模型，请参阅 [启用 ModelScope 认证](#启用-modelscope-身份验证受限模型或未预安装的自定义模型)）*  
+**使用的模型**：LLM-Research/gemma-3-4b-it（google/gemma-3-4b-it）  *（如为受限模型，请参阅 [启用 ModelScope 认证](#启用-modelscope-身份验证受限模型或未预安装的自定义模型)）*<br>
 **硬件**：支持 ROCm 的 AMD Radeon™ GPU  
 **框架**：PyTorch + ModelScope（Transformers、PEFT、Transformer Reinforcement Learning（TRL））
 
@@ -149,7 +149,7 @@ pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate p
 
 #### 启用 ModelScope 身份验证（受限模型或未预安装的自定义模型）
 
-在本示例中，我们使用 **google/gemma-3-4b-it**，这是一个**公开（public）** 模型。对于**受限（gated）** 模型，您必须先在 ModelScope 上接受该模型的使用条款，然后进行身份验证，训练脚本才能下载该模型。
+在本示例中，我们使用 **LLM-Research/gemma-3-4b-it**（`google/gemma-3-4b-it`），这是一个**公开（public）** 模型。对于**受限（gated）** 模型，您必须先在 ModelScope 上接受该模型的使用条款，然后进行身份验证，训练脚本才能下载该模型。
 
 1. **接受许可协议：** 打开模型页面，登录（或创建账户），并在模型页面上申请模型下载和使用（例如点击“接受协议内容”和“申请下载和使用”）。
 2. **安装并登录：** 安装 ModelScope，然后运行标准登录命令：
@@ -219,7 +219,7 @@ import subprocess
 import sys
 
 os.environ["QUICK_TRAIN"] = "1"
-os.environ["QUICK_TRAIN_MODEL"] = "google/gemma-3-4b-it"
+os.environ["QUICK_TRAIN_MODEL"] = "LLM-Research/gemma-3-4b-it"
 r = subprocess.run([sys.executable, "train_lora.py"], timeout=600)
 sys.exit(r.returncode)
 ```
@@ -233,7 +233,7 @@ import subprocess
 import sys
 
 os.environ["QUICK_TRAIN"] = "1"
-os.environ["QUICK_TRAIN_MODEL"] = "google/gemma-3-4b-it"
+os.environ["QUICK_TRAIN_MODEL"] = "LLM-Research/gemma-3-4b-it"
 r = subprocess.run([sys.executable, "train_qlora.py"], timeout=600)
 sys.exit(r.returncode)
 ```
@@ -248,7 +248,7 @@ import subprocess
 import sys
 
 os.environ["QUICK_TRAIN"] = "1"
-os.environ["QUICK_TRAIN_MODEL"] = "google/gemma-3-4b-it"
+os.environ["QUICK_TRAIN_MODEL"] = "LLM-Research/gemma-3-4b-it"
 r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```
@@ -285,7 +285,7 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **注意**：对于像 `openai/gpt-oss-20b` 这样的 MXFP4 基础模型，我们建议使用 **LoRA**（`train_lora.py`）而非 QLoRA。QLoRA 脚本中 `bitsandbytes` 的 4 位路径通常会将 MXFP4 权重反量化为 BF16，因此其运行方式与标准 LoRA 相同。若要使用原生 MXFP4，需要从源代码构建 `bitsandbytes`，并搭配相匹配的 Transformers/Triton/kernels 组件栈。详情请参阅 [Transformers MXFP4 文档](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4)。
+> **注意**：对于像 `openai-mirror/gpt-oss-20b`（`openai/gpt-oss-20b`）这样的 MXFP4 基础模型，我们建议使用 **LoRA**（`train_lora.py`）而非 QLoRA。QLoRA 脚本中 `bitsandbytes` 的 4 位路径通常会将 MXFP4 权重反量化为 BF16，因此其运行方式与标准 LoRA 相同。若要使用原生 MXFP4，需要从源代码构建 `bitsandbytes`，并搭配相匹配的 Transformers/Triton/kernels 组件栈。详情请参阅 [Transformers MXFP4 文档](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4)。
 
 ---
 ### 2. 选择您的方法

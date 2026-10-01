@@ -107,5 +107,15 @@
       }
     }
   },
-  "primaryModel": "GLM-4.7"
+  "primaryModel": "GLM-4.7",
+  "authors": [
+    {
+      "name": "Abdullah Malik",
+      "github": "abdmalik-amd",
+      "github_url": "https://github.com/abdmalik-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-02-03",
+  "updated_date": "2026-10-01"
 }
