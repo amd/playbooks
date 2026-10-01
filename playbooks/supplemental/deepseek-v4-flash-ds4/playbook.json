@@ -54,5 +54,15 @@
       }
     }
   },
-  "primaryModel": "DeepSeek V4 Flash (IQ2_XXS)"
+  "primaryModel": "DeepSeek V4 Flash (IQ2_XXS)",
+  "authors": [
+    {
+      "name": "Donato Capitella",
+      "github": "kyuz0",
+      "github_url": "https://github.com/kyuz0",
+      "type": "community"
+    }
+  ],
+  "published_date": "2026-07-22",
+  "updated_date": "2026-09-25"
 }

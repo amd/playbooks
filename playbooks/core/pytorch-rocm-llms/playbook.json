@@ -151,5 +151,21 @@
     "rx7900xt": "Qwen3.5-4B",
     "rx9070xt": "Qwen3.5-4B",
     "r9700": "Qwen3.5-4B"
-  }
+  },
+  "authors": [
+    {
+      "name": "Iswarya Alex",
+      "github": "iswaryaalex",
+      "github_url": "https://github.com/iswaryaalex",
+      "type": "amd"
+    },
+    {
+      "name": "Adam Lam",
+      "github": "adamlam2-amd",
+      "github_url": "https://github.com/adamlam2-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2025-12-29",
+  "updated_date": "2026-09-28"
 }

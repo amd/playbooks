@@ -155,5 +155,15 @@
       }
     }
   },
-  "primaryModel": "GPT-OSS-20B"
+  "primaryModel": "GPT-OSS-20B",
+  "authors": [
+    {
+      "name": "Daniel Holanda",
+      "github": "danielholanda",
+      "github_url": "https://github.com/danielholanda",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-03-17",
+  "updated_date": "2026-08-20"
 }

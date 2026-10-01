@@ -1,29 +1,59 @@
 {
   "id": "clustering-rpc-server-4-node",
   "title": "Clustering Four Ryzen™ AI Halos with RPC",
-  "description": "Set up distributed inference using RPC server across four Ryzen\u2122 AI Halo devices with llama.cpp to run 1T+ models",
+  "description": "Set up distributed inference using RPC server across four Ryzen™ AI Halo devices with llama.cpp to run 1T+ models",
   "time": 120,
   "unsupported_platforms": {
     "stx": [
-      { "platform": "windows", "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity" },
-      { "platform": "linux", "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity" }
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
     ],
     "krk": [
-      { "platform": "windows", "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity" },
-      { "platform": "linux", "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity" }
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
     ],
     "rx7900xt": [
-      { "platform": "windows", "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity" },
-      { "platform": "linux", "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity" }
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
     ],
     "rx9070xt": [
-      { "platform": "windows", "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity" },
-      { "platform": "linux", "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity" }
-    ], 
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
+    ],
     "r9700": [
-      { "platform": "windows", "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity" },
-      { "platform": "linux", "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity" }
-    ] 
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 4+ Strix Halo systems with large memory capacity"
+      }
+    ]
   },
   "supported_platforms": {
     "halo": [
@@ -57,5 +87,15 @@
     "llm",
     "inference",
     "rocm"
-  ]
+  ],
+  "authors": [
+    {
+      "name": "Abdullah Malik",
+      "github": "abdmalik-amd",
+      "github_url": "https://github.com/abdmalik-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-09-01",
+  "updated_date": "2026-09-25"
 }

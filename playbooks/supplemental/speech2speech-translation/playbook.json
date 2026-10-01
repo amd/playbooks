@@ -133,5 +133,15 @@
       "linux": {}
     }
   },
-  "primaryModel": "SeamlessM4T v2 Large"
+  "primaryModel": "SeamlessM4T v2 Large",
+  "authors": [
+    {
+      "name": "Charles Yang",
+      "github": "charyang-ai",
+      "github_url": "https://github.com/charyang-ai",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2025-12-29",
+  "updated_date": "2026-08-21"
 }

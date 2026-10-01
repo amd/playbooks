@@ -103,5 +103,15 @@
         "CVML": "Latest"
       }
     }
-  }
+  },
+  "authors": [
+    {
+      "name": "John Hoy",
+      "github": "jhoyamd",
+      "github_url": "https://github.com/jhoyamd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-02-03",
+  "updated_date": "2026-08-18"
 }

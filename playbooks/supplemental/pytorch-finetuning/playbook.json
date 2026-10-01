@@ -134,5 +134,15 @@
       "windows": {}
     }
   },
-  "primaryModel": "Gemma-3-4B"
+  "primaryModel": "Gemma-3-4B",
+  "authors": [
+    {
+      "name": "Iswarya Alex",
+      "github": "iswaryaalex",
+      "github_url": "https://github.com/iswaryaalex",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-01-11",
+  "updated_date": "2026-08-21"
 }

@@ -220,6 +220,14 @@ To edit an existing playbook:
   "title": "My Playbook Title",
   "description": "Brief description for the card (100-150 chars)",
   "time": 45,
+  "authors": [
+    {
+      "name": "First Last",
+      "github": "your-handle",
+      "github_url": "https://github.com/your-handle",
+      "type": "amd"
+    }
+  ],
   "supported_platforms": { "halo": ["windows", "linux"] },
   "difficulty": "intermediate",
   "published": true,
@@ -233,14 +241,39 @@ To edit an existing playbook:
 | `title` | Yes | Display title |
 | `description` | Yes | Card description (100–150 characters) |
 | `time` | Yes | Completion time in minutes |
+| `authors` | Yes | List of credited authors (see below). Use the anonymous placeholder if unknown |
 | `supported_platforms` | Yes | Device → OS map controlling which platforms/devices appear in the UI, e.g. `{ "halo": ["windows", "linux"] }` |
 | `tested_platforms` | No | Device → OS map of CI-tested combinations, e.g. `{ "halo": ["windows", "linux"], "krk": ["linux"] }` |
 | `required_platforms` | No | Subset of `tested_platforms` where CI failure blocks merges |
 | `published` | Yes | Set `true` to show on website |
+| `published_date` | Auto | `YYYY-MM-DD`, stamped by CI from git history. **Do not hand-edit** |
+| `updated_date` | Auto | `YYYY-MM-DD`, refreshed by CI on each change. **Do not hand-edit** |
 | `difficulty` | No | `"beginner"`, `"intermediate"`, or `"advanced"` |
 | `isNew` | No | Shows "New" badge |
 | `isFeatured` | No | Displays prominently at top |
 | `tags` | No | Keywords for filtering |
+
+### Authors
+
+`authors` is a list so a playbook can credit co-authors. Each entry has:
+
+| Key | Description |
+|-----|-------------|
+| `name` | Author's display name, e.g. `"Daniel Holanda"` |
+| `github` | GitHub handle, or `null` if unknown |
+| `github_url` | Full profile URL, e.g. `"https://github.com/your-handle"`, or `null`. Must match `github` (both set or both null) |
+| `type` | `"amd"` for AMD authors, `"community"` for external contributors |
+
+If you don't know the author, use the anonymous placeholder:
+
+```json
+"authors": [{ "name": "Anonymous", "github": null, "github_url": null, "type": "community" }]
+```
+
+**Dates are automatic.** `published_date` and `updated_date` are stamped by the
+Stamp Playbook Dates workflow from git history (`published_date` is set once from
+the first commit and never changed; `updated_date` tracks the latest change).
+Leave them out of new playbooks — CI fills them in after merge.
 
 ---
 

@@ -177,5 +177,21 @@
     "rx7900xt": "GPT-OSS-20B",
     "rx9070xt": "GPT-OSS-20B",
     "r9700": "GPT-OSS-20B"
-  }
+  },
+  "authors": [
+    {
+      "name": "Krishna Sivakumar",
+      "github": "ramkrishna2910",
+      "github_url": "https://github.com/ramkrishna2910",
+      "type": "amd"
+    },
+    {
+      "name": "Adam Lam",
+      "github": "adamlam2-amd",
+      "github_url": "https://github.com/adamlam2-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2025-12-29",
+  "updated_date": "2026-09-27"
 }
