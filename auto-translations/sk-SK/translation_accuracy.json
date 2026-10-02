@@ -640,6 +640,22 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
       "quality_issues": "Accurate, fluent; minor addition 'parametrami' not in source but improves clarity."
+    },
+    "playbooks/supplemental/clustering-rccl-4-node/README.md": {
+      "source_sha256": "67de1b0f0078102642521f350f4562fd21199a4645c7a2c97e99d942fd42ad41",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Inconsistent terminology: 'cluster/clustrovanie' vs 'klaster'; neologism 'naklastrovať'. Otherwise accurate, fluent, code/URLs intact."
+    },
+    "playbooks/supplemental/clustering-rccl-4-node/playbook.json": {
+      "source_sha256": "8e581f4823c55440cfb855126504e47aa5e134b27bbfc7d0de7e5200af26c3b3",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 82,
+      "quality_issues": "'Zhlukovanie' is machine-learning clustering, not infrastructure; 'Klastrovanie' better fits here."
     }
   }
 }

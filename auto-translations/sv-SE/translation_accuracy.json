@@ -640,6 +640,22 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
       "quality_issues": "Added 'parametrar' (parameters) not in source; otherwise accurate and fluent."
+    },
+    "playbooks/supplemental/clustering-rccl-4-node/README.md": {
+      "source_sha256": "67de1b0f0078102642521f350f4562fd21199a4645c7a2c97e99d942fd42ad41",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Minor: 'monteras mot' slightly awkward for mount; otherwise fluent, accurate, code/URLs intact."
+    },
+    "playbooks/supplemental/clustering-rccl-4-node/playbook.json": {
+      "source_sha256": "8e581f4823c55440cfb855126504e47aa5e134b27bbfc7d0de7e5200af26c3b3",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Repetitive 'med' usage slightly awkward; otherwise accurate, terminology and brands intact."
     }
   }
 }

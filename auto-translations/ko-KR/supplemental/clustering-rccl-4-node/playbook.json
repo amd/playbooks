@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rccl-4-node",
+  "title": "RCCL을 사용한 4개의 Ryzen™ AI Halo 클러스터링",
+  "description": "RCCL을 사용하여 Ryzen™ AI Halo 디바이스 4대로 분산 워크로드용 다중 노드 클러스터 구성하기",
+  "auto_translated": true
+}
