@@ -4,51 +4,54 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 
 | Locale | Files | Mean | Min | Judge |
 |--------|-------|------|-----|-------|
-| ar | 80 | 93.0 | 82 | Claude-Opus-4.8 |
-| cs-CZ | 80 | 92.3 | 78 | Claude-Opus-4.8 |
-| da-DK | 80 | 92.5 | 78 | Claude-Opus-4.8 |
-| de-DE | 80 | 93.1 | 78 | Claude-Opus-4.8 |
-| el-GR | 80 | 92.3 | 78 | Claude-Opus-4.8 |
-| es-LA | 80 | 92.8 | 78 | Claude-Opus-4.8 |
-| fi-FI | 80 | 91.9 | 82 | Claude-Opus-4.8 |
-| fr-CA | 80 | 90.7 | 72 | Claude-Opus-4.8 |
-| fr-FR | 80 | 93.2 | 78 | Claude-Opus-4.8 |
-| he | 80 | 92.2 | 60 | Claude-Opus-4.8 |
-| hu-HU | 80 | 92.1 | 78 | Claude-Opus-4.8 |
-| it-IT | 80 | 93.9 | 78 | Claude-Opus-4.8 |
-| ja-JP | 80 | 92.4 | 20 | Claude-Opus-4.8 |
-| ko-KR | 80 | 93.5 | 82 | Claude-Opus-4.8 |
-| nb-NO | 80 | 91.9 | 82 | Claude-Opus-4.8 |
-| nl-NL | 80 | 92.6 | 78 | Claude-Opus-4.8 |
-| pl-PL | 80 | 93.2 | 78 | Claude-Opus-4.8 |
-| pt-BR | 80 | 93.7 | 82 | Claude-Opus-4.8 |
-| pt-PT | 80 | 92.9 | 82 | Claude-Opus-4.8 |
-| ro-RO | 80 | 92.5 | 78 | Claude-Opus-4.8 |
-| ru-RU | 80 | 92.9 | 88 | Claude-Opus-4.8 |
-| sk-SK | 80 | 91.6 | 82 | Claude-Opus-4.8 |
-| sl-SI | 80 | 90.5 | 68 | Claude-Opus-4.8 |
-| sr-Latn | 80 | 91.1 | 78 | Claude-Opus-4.8 |
-| sv-SE | 80 | 93.0 | 88 | Claude-Opus-4.8 |
-| th-TH | 80 | 92.7 | 70 | Claude-Opus-4.8 |
-| tr-TR | 80 | 92.4 | 80 | Claude-Opus-4.8 |
-| uk-UA | 80 | 92.6 | 78 | Claude-Opus-4.8 |
-| zh-CN | 80 | 93.5 | 78 | Claude-Opus-4.8 |
-| zh-TW | 80 | 93.2 | 78 | Claude-Opus-4.8 |
+| ar | 82 | 93.0 | 82 | Claude-Opus-4.8 |
+| cs-CZ | 82 | 92.1 | 72 | Claude-Opus-4.8 |
+| da-DK | 82 | 92.5 | 78 | Claude-Opus-4.8 |
+| de-DE | 82 | 93.1 | 78 | Claude-Opus-4.8 |
+| el-GR | 82 | 92.3 | 78 | Claude-Opus-4.8 |
+| es-LA | 82 | 92.8 | 78 | Claude-Opus-4.8 |
+| fi-FI | 82 | 91.8 | 82 | Claude-Opus-4.8 |
+| fr-CA | 82 | 90.7 | 72 | Claude-Opus-4.8 |
+| fr-FR | 82 | 93.2 | 78 | Claude-Opus-4.8 |
+| he | 82 | 92.1 | 60 | Claude-Opus-4.8 |
+| hu-HU | 82 | 92.1 | 78 | Claude-Opus-4.8 |
+| it-IT | 82 | 93.9 | 78 | Claude-Opus-4.8 |
+| ja-JP | 82 | 92.3 | 20 | Claude-Opus-4.8 |
+| ko-KR | 82 | 93.5 | 82 | Claude-Opus-4.8 |
+| nb-NO | 82 | 91.8 | 82 | Claude-Opus-4.8 |
+| nl-NL | 82 | 92.5 | 78 | Claude-Opus-4.8 |
+| pl-PL | 82 | 93.1 | 78 | Claude-Opus-4.8 |
+| pt-BR | 82 | 93.7 | 82 | Claude-Opus-4.8 |
+| pt-PT | 82 | 92.9 | 82 | Claude-Opus-4.8 |
+| ro-RO | 82 | 92.4 | 78 | Claude-Opus-4.8 |
+| ru-RU | 82 | 92.9 | 88 | Claude-Opus-4.8 |
+| sk-SK | 82 | 91.5 | 82 | Claude-Opus-4.8 |
+| sl-SI | 82 | 90.5 | 68 | Claude-Opus-4.8 |
+| sr-Latn | 82 | 91.0 | 78 | Claude-Opus-4.8 |
+| sv-SE | 82 | 93.0 | 88 | Claude-Opus-4.8 |
+| th-TH | 82 | 92.6 | 70 | Claude-Opus-4.8 |
+| tr-TR | 82 | 92.0 | 55 | Claude-Opus-4.8 |
+| uk-UA | 82 | 92.6 | 78 | Claude-Opus-4.8 |
+| zh-CN | 82 | 93.5 | 78 | Claude-Opus-4.8 |
+| zh-TW | 82 | 92.9 | 72 | Claude-Opus-4.8 |
 
-## Files below 85 (92)
+## Files below 85 (96)
 
 | Locale | File | Score | Issues |
 |--------|------|-------|--------|
 | ja-JP | playbooks/core/vscode-qwen3-coder/playbook.json | 20 | Contains garbled text 'للで', meta-commentary 'Wait, let me reconsider', and duplicated title lines; unprofessional output. |
+| tr-TR | playbooks/supplemental/clustering-rccl-4-node/playbook.json | 55 | Title mistranslated/garbled: 'AI Halo' misplaced, 'Clustering Four Ryzen AI Halos' rendered incorrectly, awkward phrasing. |
 | he | playbooks/supplemental/clustering-rpc-server/playbook.json | 60 | Title left mostly untranslated ('Clustering Two Ryzen AI Halos'); rest is accurate and fluent. |
 | ja-JP | playbooks/supplemental/openhands-getting-started/playbook.json | 68 | OpenHands mistranslated as OpenHats; inconsistent spacing around terms |
 | sl-SI | playbooks/supplemental/llama-factory-finetuning/playbook.json | 68 | Redundant English parentheticals; inconsistent 'fino prilagajanje' vs 'fino nastavite'; awkward 'LLaMA-Factory' hyphenation differs from title. |
 | th-TH | playbooks/supplemental/cvml/playbook.json | 70 | Left 'Local Computer Vision' and 'perception' untranslated; inconsistent localization reduces fluency. |
+| cs-CZ | playbooks/supplemental/clustering-rccl-4-node/playbook.json | 72 | 'Clustering' untranslated (anglicism); 'clustr' misspelled (should be 'cluster'); otherwise accurate, brands intact. |
 | fr-CA | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 72 | Trademark symbol misplaced (belongs to Unsloth, not LLM); 'affinés' vs 'réglage fin' terminology inconsistency; awkward phrasing. |
 | he | playbooks/supplemental/clustering-rpc-server-4-node/playbook.json | 72 | Title 'AiCluster' is mistranslation/garbled; 'Clustering' not properly rendered. Rest accurate and fluent. |
 | ja-JP | playbooks/supplemental/vllm-inference/playbook.json | 72 | Added 'Ryzen AI Max+' not in source; 'integrated GPU' loosely rendered as iGPU. |
 | sl-SI | playbooks/supplemental/pytorch-finetuning/playbook.json | 72 | Inconsistent terminology (fino uravnavanje vs fino prilagodite); 'Software' untranslated; awkward phrasing 'Fino'. |
 | sl-SI | playbooks/supplemental/pytorch-kernels/playbook.json | 72 | Inconsistent terminology: 'jeder' vs 'kernele' for same term; 'GPU jeder po meri' awkward word order. |
+| zh-TW | playbooks/supplemental/clustering-rccl-4-node/playbook.json | 72 | Title untranslated 'Clustering', omits 'with RCCL'; otherwise accurate and fluent. |
 | cs-CZ | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should follow Unsloth); slight inconsistency in fine-tuning terminology; otherwise accurate. |
 | da-DK | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | Inconsistent term: 'Finjustering' vs 'Fine-tun'; latter is anglicism, should be 'Finjuster'. |
 | de-DE | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | Fine-tuning translated as 'optimieren' loses precision; 'Feinabstimmung' inconsistent with body verb. |
@@ -114,6 +117,7 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | ro-RO | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Trademark symbol misplaced; slightly awkward phrasing; overall accurate and fluent. |
 | ro-RO | playbooks/supplemental/clustering-rpc-server-4-node/playbook.json | 82 | "Clustering" left untranslated (anglicism); "unități" odd for "Halos"; otherwise accurate, terms/code intact. |
 | sk-SK | playbooks/supplemental/amd-sync/playbook.json | 82 | Title translates 'AMD Sync' as 'synchronizáciou AMD', inconsistent with brand name kept later; otherwise accurate. |
+| sk-SK | playbooks/supplemental/clustering-rccl-4-node/playbook.json | 82 | 'Zhlukovanie' is machine-learning clustering, not infrastructure; 'Klastrovanie' better fits here. |
 | sl-SI | playbooks/supplemental/openclaw-lemonade-server/playbook.json | 82 | Inconsistent 'Lemonade Server' rendering: translated once, kept once; minor terminology inconsistency. |
 | sr-Latn | playbooks/core/lmstudio-rocm-llms/playbook.json | 82 | Inconsistent terminology: 'posluživanje' vs 'servisiranje' for 'serving'; minor fluency issues. |
 | sr-Latn | playbooks/supplemental/openclaw-lemonade-server/playbook.json | 82 | Minor: 'OpenClaw autonomni AI agent' should be 'autonomnog AI agenta' (case agreement). |

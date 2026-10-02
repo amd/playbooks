@@ -1,183 +1,183 @@
 {
   "per_locale": {
     "ar": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 93.0,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "cs-CZ": {
-      "files_scored": 80,
-      "mean": 92.3,
-      "min": 78,
+      "files_scored": 82,
+      "mean": 92.1,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "da-DK": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 92.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "de-DE": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "el-GR": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 92.3,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "es-LA": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 92.8,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "fi-FI": {
-      "files_scored": 80,
-      "mean": 91.9,
+      "files_scored": 82,
+      "mean": 91.8,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-CA": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 90.7,
       "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-FR": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 93.2,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "he": {
-      "files_scored": 80,
-      "mean": 92.2,
+      "files_scored": 82,
+      "mean": 92.1,
       "min": 60,
       "judge_model": "Claude-Opus-4.8"
     },
     "hu-HU": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 92.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "it-IT": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 93.9,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ja-JP": {
-      "files_scored": 80,
-      "mean": 92.4,
+      "files_scored": 82,
+      "mean": 92.3,
       "min": 20,
       "judge_model": "Claude-Opus-4.8"
     },
     "ko-KR": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 93.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "nb-NO": {
-      "files_scored": 80,
-      "mean": 91.9,
+      "files_scored": 82,
+      "mean": 91.8,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "nl-NL": {
-      "files_scored": 80,
-      "mean": 92.6,
+      "files_scored": 82,
+      "mean": 92.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pl-PL": {
-      "files_scored": 80,
-      "mean": 93.2,
+      "files_scored": 82,
+      "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-BR": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 93.7,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-PT": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 92.9,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "ro-RO": {
-      "files_scored": 80,
-      "mean": 92.5,
+      "files_scored": 82,
+      "mean": 92.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ru-RU": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 92.9,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "sk-SK": {
-      "files_scored": 80,
-      "mean": 91.6,
+      "files_scored": 82,
+      "mean": 91.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sl-SI": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 90.5,
       "min": 68,
       "judge_model": "Claude-Opus-4.8"
     },
     "sr-Latn": {
-      "files_scored": 80,
-      "mean": 91.1,
+      "files_scored": 82,
+      "mean": 91.0,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "sv-SE": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 93.0,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "th-TH": {
-      "files_scored": 80,
-      "mean": 92.7,
+      "files_scored": 82,
+      "mean": 92.6,
       "min": 70,
       "judge_model": "Claude-Opus-4.8"
     },
     "tr-TR": {
-      "files_scored": 80,
-      "mean": 92.4,
-      "min": 80,
+      "files_scored": 82,
+      "mean": 92.0,
+      "min": 55,
       "judge_model": "Claude-Opus-4.8"
     },
     "uk-UA": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 92.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
+      "files_scored": 82,
       "mean": 93.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-TW": {
-      "files_scored": 80,
-      "mean": 93.2,
-      "min": 78,
+      "files_scored": 82,
+      "mean": 92.9,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     }
   },
@@ -187,6 +187,12 @@
       "file": "playbooks/core/vscode-qwen3-coder/playbook.json",
       "score": 20,
       "issues": "Contains garbled text 'للで', meta-commentary 'Wait, let me reconsider', and duplicated title lines; unprofessional output."
+    },
+    {
+      "locale": "tr-TR",
+      "file": "playbooks/supplemental/clustering-rccl-4-node/playbook.json",
+      "score": 55,
+      "issues": "Title mistranslated/garbled: 'AI Halo' misplaced, 'Clustering Four Ryzen AI Halos' rendered incorrectly, awkward phrasing."
     },
     {
       "locale": "he",
@@ -211,6 +217,12 @@
       "file": "playbooks/supplemental/cvml/playbook.json",
       "score": 70,
       "issues": "Left 'Local Computer Vision' and 'perception' untranslated; inconsistent localization reduces fluency."
+    },
+    {
+      "locale": "cs-CZ",
+      "file": "playbooks/supplemental/clustering-rccl-4-node/playbook.json",
+      "score": 72,
+      "issues": "'Clustering' untranslated (anglicism); 'clustr' misspelled (should be 'cluster'); otherwise accurate, brands intact."
     },
     {
       "locale": "fr-CA",
@@ -241,6 +253,12 @@
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 72,
       "issues": "Inconsistent terminology: 'jeder' vs 'kernele' for same term; 'GPU jeder po meri' awkward word order."
+    },
+    {
+      "locale": "zh-TW",
+      "file": "playbooks/supplemental/clustering-rccl-4-node/playbook.json",
+      "score": 72,
+      "issues": "Title untranslated 'Clustering', omits 'with RCCL'; otherwise accurate and fluent."
     },
     {
       "locale": "cs-CZ",
@@ -631,6 +649,12 @@
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 82,
       "issues": "Title translates 'AMD Sync' as 'synchronizáciou AMD', inconsistent with brand name kept later; otherwise accurate."
+    },
+    {
+      "locale": "sk-SK",
+      "file": "playbooks/supplemental/clustering-rccl-4-node/playbook.json",
+      "score": 82,
+      "issues": "'Zhlukovanie' is machine-learning clustering, not infrastructure; 'Klastrovanie' better fits here."
     },
     {
       "locale": "sl-SI",

@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rccl-4-node",
+  "title": "Ομαδοποίηση Τεσσάρων Ryzen™ AI Halo με RCCL",
+  "description": "Δημιουργία συστάδας (cluster) πολλαπλών κόμβων χρησιμοποιώντας τέσσερις συσκευές Ryzen™ AI Halo με RCCL για κατανεμημένους φόρτους εργασίας",
+  "auto_translated": true
+}

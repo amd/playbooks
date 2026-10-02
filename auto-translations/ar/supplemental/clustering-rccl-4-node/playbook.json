@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rccl-4-node",
+  "title": "تجميع أربعة أجهزة Ryzen™ AI Halo باستخدام RCCL",
+  "description": "قم بإعداد مجموعة متعددة العُقد (multi-node cluster) باستخدام أربعة أجهزة Ryzen™ AI Halo مع RCCL لأحمال العمل الموزعة",
+  "auto_translated": true
+}

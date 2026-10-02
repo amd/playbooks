@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rccl-4-node",
+  "title": "Кластеризація чотирьох Ryzen™ AI Halo за допомогою RCCL",
+  "description": "Налаштування багатовузлового кластера з використанням чотирьох пристроїв Ryzen™ AI Halo за допомогою RCCL для розподілених робочих навантажень",
+  "auto_translated": true
+}
