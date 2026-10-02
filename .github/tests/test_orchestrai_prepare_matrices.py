@@ -32,6 +32,16 @@ class PrepareMatricesTests(unittest.TestCase):
         )
         self.assertTrue(result["has_entries"])
 
+    def test_native_matrices_may_also_exceed_limit_in_total(self):
+        result = prepare([{}] * 218, {}, [{}] * 56, {})
+
+        self.assertEqual(len(result["english_matrix"]), 218)
+        self.assertEqual(len(result["localized_matrix"]), 56)
+        self.assertEqual(
+            len(result["english_matrix"]) + len(result["localized_matrix"]),
+            274,
+        )
+
     def test_english_matrix_still_has_an_independent_limit(self):
         with self.assertRaisesRegex(MatrixLimitError, "English matrix has 257"):
             prepare([{}] * 257, {}, [], {})

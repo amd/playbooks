@@ -1,0 +1,157 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Native Test Matrix
+
+on:
+  workflow_call:
+    inputs:
+      matrix_json:
+        description: Native playbook test entries for one GitHub job matrix
+        required: true
+        type: string
+
+jobs:
+  test-playbooks:
+    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.target_runner_label != '' && format(' @{0}', matrix.target_runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
+    runs-on: ${{ fromJson(matrix.runner) }}
+    continue-on-error: ${{ !matrix.required }}
+    env:
+      PYTHONUTF8: 1
+      PYTHONIOENCODING: utf-8
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(inputs.matrix_json) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ (matrix.playbook == 'open-webui-chat' || matrix.playbook == 'vllm-inference') && '3.12' || '3.13' }}
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      # Free the GPU before every job. A prior lemonade/LM Studio playbook can
+      # strand a model on the shared runner (its unload teardown is skipped when
+      # an earlier test in that playbook fails), which OOMs the next job. This
+      # runs regardless of what ran before, so it also protects non-lemonade jobs.
+      # Best-effort and time-bounded: a stuck unload must never wedge the job.
+      - name: Free GPU before tests (Linux)
+        if: matrix.platform == 'linux'
+        shell: bash
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          lemonade unload || true
+          lms unload --all || true
+          if pgrep -x ollama >/dev/null 2>&1; then
+            ollama ps 2>/dev/null | awk 'NR>1{print $1}' | while read -r m; do [ -n "$m" ] && ollama stop "$m" 2>/dev/null || true; done || true
+          fi
+
+      - name: Free GPU before tests (Windows)
+        if: matrix.platform == 'windows'
+        shell: powershell
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          try { lemonade unload } catch {}
+          try { lms unload --all } catch {}
+          if (Get-Process ollama -ErrorAction SilentlyContinue) {
+            try {
+              $models = & ollama ps 2>$null | Select-Object -Skip 1 | ForEach-Object { ($_ -split '\s+')[0] } | Where-Object { $_ }
+              foreach ($m in $models) { & ollama stop $m 2>$null | Out-Null }
+            } catch {}
+          }
+          exit 0
+
+      - name: Extract and run tests (Windows)
+        if: matrix.platform == 'windows'
+        id: run_tests_windows
+        shell: powershell
+        run: |
+          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform windows --device "${{ matrix.arch }}" --locale "${{ matrix.locale }}" --localized-only "${{ matrix.localized_only || 'false' }}"
+
+      - name: Extract and run tests (Linux)
+        if: matrix.platform == 'linux'
+        id: run_tests_linux
+        shell: bash
+        run: |
+          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}" --locale "${{ matrix.locale }}" --localized-only "${{ matrix.localized_only || 'false' }}"
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          path: test-results/
+          if-no-files-found: ignore
+
+      # Open / update tracking issues only for failures on the main branch.
+      - name: Create failure issues (Linux)
+        if: failure() && matrix.platform == 'linux' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUNNER_NAME: ${{ runner.name }}
+        run: |
+          python .github/scripts/create_failure_issues.py \
+            --repo "${{ github.repository }}" \
+            --playbook "${{ matrix.playbook }}" \
+            --workflow-file "test-playbooks.yml" \
+            --locale "${{ matrix.locale }}" \
+            --localized-only "${{ matrix.localized_only || 'false' }}" \
+            --runner-labels "${{ matrix.runner_labels }}" \
+            --runner-name "${{ runner.name }}" \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --sha "${{ github.sha }}"
+
+      - name: Create failure issues (Windows)
+        if: failure() && matrix.platform == 'windows' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: powershell
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUNNER_NAME: ${{ runner.name }}
+        run: |
+          python .github/scripts/create_failure_issues.py `
+            --repo "${{ github.repository }}" `
+            --playbook "${{ matrix.playbook }}" `
+            --workflow-file "test-playbooks.yml" `
+            --locale "${{ matrix.locale }}" `
+            --localized-only "${{ matrix.localized_only || 'false' }}" `
+            --runner-labels "${{ matrix.runner_labels }}" `
+            --runner-name "${{ runner.name }}" `
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" `
+            --sha "${{ github.sha }}"
+
+      - name: Test Summary (Windows)
+        if: always() && matrix.platform == 'windows'
+        shell: powershell
+        run: |
+          $summary = @"
+          ### Test Results for ``${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}`` (${{ matrix.platform }}/${{ matrix.arch }})
+
+          Requested runner label: ``${{ matrix.target_runner_label || 'any matching runner' }}``
+
+          See the test artifacts for detailed logs.
+          "@
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
+
+      - name: Test Summary (Linux)
+        if: always() && matrix.platform == 'linux'
+        shell: bash
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ### Test Results for `${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}` (${{ matrix.platform }}/${{ matrix.arch }})
+
+          Requested runner label: `${{ matrix.target_runner_label || 'any matching runner' }}`
+
+          See the test artifacts for detailed logs.
+          EOF
