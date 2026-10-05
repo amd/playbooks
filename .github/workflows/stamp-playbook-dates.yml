@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: stamp-playbook-dates-${{ github.ref }}
@@ -47,15 +48,26 @@ jobs:
       - name: Stamp dates from git history
         run: python .github/scripts/stamp_playbook_dates.py
 
-      - name: Commit and push if changed
+      - name: Open a PR if dates changed
+        # main is a protected branch (changes must go through a PR), so the bot
+        # cannot push to main directly. Push the stamped files to a side branch
+        # and open a PR, matching translate-playbooks.yml.
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -z "$(git status --porcelain playbooks)" ]; then
             echo "No date changes to commit."
             exit 0
           fi
+          BRANCH="chore/stamp-playbook-dates-${{ github.run_id }}"
           git config user.name "amd-playbooks-bot"
           git config user.email "amd-playbooks-bot@users.noreply.github.com"
+          git checkout -b "$BRANCH"
           git add playbooks/**/playbook.json
-          git commit -m "chore: stamp playbook published/updated dates [skip ci]"
-          git push origin HEAD:${{ github.ref_name }}
+          git commit -m "chore: stamp playbook published/updated dates"
+          git push origin "$BRANCH"
+          gh pr create --repo "${{ github.repository }}" \
+            --base "${{ github.ref_name }}" --head "$BRANCH" \
+            --title "chore: stamp playbook published/updated dates" \
+            --body "Automated: published_date / updated_date in playbook.json were out of sync with git history. Stamped by the Stamp Playbook Dates workflow (run ${{ github.run_id }})."
