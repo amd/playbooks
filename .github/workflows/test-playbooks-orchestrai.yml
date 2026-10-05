@@ -31,12 +31,11 @@ on:
   workflow_dispatch:
     inputs:
       locale:
-        description: 'Localized locale to test alongside English'
-        required: true
-        default: 'zh-CN'
+        description: 'Locale to test (leave empty for canonical English)'
+        required: false
         type: string
       playbook_id:
-        description: 'English/localized playbook ID(s), comma-separated (empty = all)'
+        description: 'Playbook ID(s), comma-separated (empty = all)'
         required: false
         type: string
       device:
@@ -116,14 +115,36 @@ jobs:
         # reach the shell directly.
         env:
           PLAYBOOK_INPUT: ${{ github.event.inputs.playbook_id }}
-          LOCALE: ${{ inputs.locale || 'zh-CN' }}
+          LOCALE_INPUT: ${{ inputs.locale }}
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.sha }}
         run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            LOCALE="$LOCALE_INPUT"
+            if [ -n "$LOCALE" ] && { [[ ! "$LOCALE" =~ ^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$ ]] || [ ! -d "localized-playbooks/$LOCALE" ]; }; then
+              echo "::error::Localized content directory does not exist: localized-playbooks/$LOCALE"
+              exit 1
+            fi
+          else
+            # Automated runs preserve the existing combined English + zh-CN coverage.
+            LOCALE="zh-CN"
+          fi
+
           if [ -n "$PLAYBOOK_INPUT" ]; then
-            ENGLISH=$(echo "$PLAYBOOK_INPUT" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            LOCALIZED=$ENGLISH
+            SELECTED=$(echo "$PLAYBOOK_INPUT" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+              if [ -n "$LOCALE" ]; then
+                ENGLISH=[]
+                LOCALIZED=$SELECTED
+              else
+                ENGLISH=$SELECTED
+                LOCALIZED=[]
+              fi
+            else
+              ENGLISH=$SELECTED
+              LOCALIZED=$SELECTED
+            fi
           elif [ "$EVENT_NAME" = "pull_request" ]; then
             if ! CHANGED=$(git diff --name-only "$PR_BASE_SHA" "$HEAD_SHA" -- 'playbooks/core/*' 'playbooks/supplemental/*'); then
               echo "::error::git diff failed (base $PR_BASE_SHA not in history?) — cannot determine changed playbooks"; exit 1
@@ -134,11 +155,20 @@ jobs:
             fi
             LOCALIZED=$(echo "$LOCALIZED_CHANGED" | grep -E "^localized-playbooks/$LOCALE/(core|supplemental)/[^/]+/" | sed "s|localized-playbooks/$LOCALE/[^/]*/\([^/]*\)/.*|\1|" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
           else
-            ENGLISH=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            LOCALIZED=$(find "localized-playbooks/$LOCALE/core" "localized-playbooks/$LOCALE/supplemental" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed "s|localized-playbooks/$LOCALE/[^/]*/||" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -z "$LOCALE" ]; then
+              ENGLISH=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+              LOCALIZED=[]
+            elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+              ENGLISH=[]
+              LOCALIZED=$(find "localized-playbooks/$LOCALE/core" "localized-playbooks/$LOCALE/supplemental" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed "s|localized-playbooks/$LOCALE/[^/]*/||" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            else
+              ENGLISH=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+              LOCALIZED=$(find "localized-playbooks/$LOCALE/core" "localized-playbooks/$LOCALE/supplemental" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed "s|localized-playbooks/$LOCALE/[^/]*/||" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            fi
           fi
           echo "english=${ENGLISH:-[]}" >> "$GITHUB_OUTPUT"
           echo "localized=${LOCALIZED:-[]}" >> "$GITHUB_OUTPUT"
+          echo "locale=$LOCALE" >> "$GITHUB_OUTPUT"
 
       - name: Build English matrix and batches
         id: build-english
@@ -154,7 +184,7 @@ jobs:
         id: build-localized
         if: steps.gate.outputs.enabled == 'true'
         env:
-          LOCALE: ${{ inputs.locale || 'zh-CN' }}
+          LOCALE: ${{ steps.detect.outputs.locale }}
           PLAYBOOKS: ${{ steps.detect.outputs.localized }}
           ORCHESTRAI_DEVICE_TAGS: ${{ vars.ORCHESTRAI_DEVICE_TAGS }}
           DEVICES: ${{ inputs.device }}

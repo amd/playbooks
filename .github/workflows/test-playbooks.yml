@@ -10,12 +10,11 @@ on:
   workflow_dispatch:
     inputs:
       locale:
-        description: 'Localized locale to test alongside English'
-        required: true
-        default: 'zh-CN'
+        description: 'Locale to test (leave empty for canonical English)'
+        required: false
         type: string
       playbook_id:
-        description: 'Specific English/localized playbook ID (leave empty to test all)'
+        description: 'Specific playbook ID (leave empty to test all)'
         required: false
         type: string
       platform:
@@ -79,9 +78,10 @@ jobs:
         with:
           python-version: '3.13'
 
-      # Build one matrix containing canonical English and localized entries.
-      # English selection uses extracted test signatures; localized selection
-      # conservatively tracks the effective overlay and dependency trees.
+      # Manual runs select exactly one content tree: an empty locale means
+      # canonical English, while a non-empty locale selects that localized tree.
+      # Automatic PR and scheduled runs retain the combined English + zh-CN
+      # coverage that predates the manual single-locale selector.
       # Event data goes through env, never inline, so PR-controlled strings
       # (playbook ids, device names) cannot reach the shell directly.
       - name: Build test matrix
@@ -91,7 +91,7 @@ jobs:
           PLATFORM_INPUT: ${{ github.event.inputs.platform }}
           DEVICE_INPUT: ${{ github.event.inputs.device }}
           RUNNER_LABEL_INPUT: ${{ github.event.inputs.runner_label }}
-          LOCALE: ${{ inputs.locale || 'zh-CN' }}
+          LOCALE_INPUT: ${{ inputs.locale }}
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
@@ -117,16 +117,33 @@ jobs:
           else
             args=(--mode all)
           fi
-          ENGLISH=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --allow-empty)
-          LOCALIZED=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --locale "$LOCALE" --allow-empty)
-          MATRIX=$(jq -cn --argjson english "$ENGLISH" --argjson localized "$LOCALIZED" '$english + $localized')
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ -z "$LOCALE_INPUT" ]; then
+              MATRIX=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --allow-empty)
+              TARGET_DESCRIPTION="canonical English"
+            else
+              if [[ ! "$LOCALE_INPUT" =~ ^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$ ]] || [ ! -d "localized-playbooks/$LOCALE_INPUT" ]; then
+                echo "::error::Localized content directory does not exist: localized-playbooks/$LOCALE_INPUT"
+                exit 1
+              fi
+              MATRIX=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --locale "$LOCALE_INPUT" --allow-empty)
+              TARGET_DESCRIPTION="$LOCALE_INPUT localized"
+            fi
+          else
+            # Automated runs preserve the existing combined coverage.
+            AUTO_LOCALE="zh-CN"
+            ENGLISH=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --allow-empty)
+            LOCALIZED=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --locale "$AUTO_LOCALE" --allow-empty)
+            MATRIX=$(jq -cn --argjson english "$ENGLISH" --argjson localized "$LOCALIZED" '$english + $localized')
+            TARGET_DESCRIPTION="English or $AUTO_LOCALE localized"
+          fi
           COUNT=$(jq 'length' <<< "$MATRIX")
           if [ "$COUNT" -gt 256 ]; then
-            echo "::error::Combined English/localized matrix has $COUNT entries; GitHub Actions allows 256"
+            echo "::error::Test matrix has $COUNT entries; GitHub Actions allows 256"
             exit 1
           fi
           if [ "$MATRIX" = "[]" ] && { [ -n "$PLAYBOOK_INPUT" ] || [ "$EVENT_NAME" = "workflow_dispatch" ]; }; then
-            echo "::error::No English or $LOCALE matrix entries match the requested playbook/filter combination"
+            echo "::error::No $TARGET_DESCRIPTION matrix entries match the requested playbook/filter combination"
             exit 1
           fi
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
