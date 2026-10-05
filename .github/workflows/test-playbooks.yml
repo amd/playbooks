@@ -63,8 +63,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
-      matrix: ${{ steps.build-matrix.outputs.matrix }}
-      has_entries: ${{ steps.build-matrix.outputs.has_entries }}
+      english_matrix: ${{ steps.build-matrix.outputs.english_matrix }}
+      localized_matrix: ${{ steps.build-matrix.outputs.localized_matrix }}
+      has_english_entries: ${{ steps.build-matrix.outputs.has_english_entries }}
+      has_localized_entries: ${{ steps.build-matrix.outputs.has_localized_entries }}
       detection_ok: ${{ steps.build-matrix.outputs.detection_ok }}
     steps:
       - name: Checkout repository
@@ -79,7 +81,7 @@ jobs:
         with:
           python-version: '3.13'
 
-      # Build one matrix containing canonical English and localized entries.
+      # Build independently bounded canonical English and localized matrices.
       # English selection uses extracted test signatures; localized selection
       # conservatively tracks the effective overlay and dependency trees.
       # Event data goes through env, never inline, so PR-controlled strings
@@ -119,25 +121,24 @@ jobs:
           fi
           ENGLISH=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --allow-empty)
           LOCALIZED=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --locale "$LOCALE" --allow-empty)
-          MATRIX=$(jq -cn --argjson english "$ENGLISH" --argjson localized "$LOCALIZED" '$english + $localized')
-          COUNT=$(jq 'length' <<< "$MATRIX")
-          if [ "$COUNT" -gt 256 ]; then
-            echo "::error::Combined English/localized matrix has $COUNT entries; GitHub Actions allows 256"
-            exit 1
-          fi
-          if [ "$MATRIX" = "[]" ] && { [ -n "$PLAYBOOK_INPUT" ] || [ "$EVENT_NAME" = "workflow_dispatch" ]; }; then
+          if [ "$ENGLISH" = "[]" ] && [ "$LOCALIZED" = "[]" ] && { [ -n "$PLAYBOOK_INPUT" ] || [ "$EVENT_NAME" = "workflow_dispatch" ]; }; then
             echo "::error::No English or $LOCALE matrix entries match the requested playbook/filter combination"
             exit 1
           fi
-          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
-          echo "has_entries=$([ "$MATRIX" != "[]" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          ENGLISH_MATRIX="$ENGLISH" \
+          ENGLISH_BATCHES='{}' \
+          LOCALIZED_MATRIX="$LOCALIZED" \
+          LOCALIZED_BATCHES='{}' \
+          python3 .github/scripts/orchestrai_prepare_matrices.py
           echo "detection_ok=true" >> "$GITHUB_OUTPUT"
 
-      - name: Display test matrix
+      - name: Display test matrices
         env:
-          MATRIX: ${{ steps.build-matrix.outputs.matrix }}
+          ENGLISH_MATRIX: ${{ steps.build-matrix.outputs.english_matrix }}
+          LOCALIZED_MATRIX: ${{ steps.build-matrix.outputs.localized_matrix }}
         run: |
-          echo "Test matrix: $MATRIX"
+          echo "English test matrix: $ENGLISH_MATRIX"
+          echo "Localized test matrix: $LOCALIZED_MATRIX"
 
   # Guards the selector itself: a false negative here silently stops testing
   # playbooks, so these run on every PR before anything is skipped.
@@ -160,7 +161,7 @@ jobs:
   test-playbooks:
     name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.target_runner_label != '' && format(' @{0}', matrix.target_runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
     needs: detect-changes
-    if: needs.detect-changes.outputs.has_entries == 'true'
+    if: needs.detect-changes.outputs.has_english_entries == 'true'
     runs-on: ${{ fromJson(matrix.runner) }}
     continue-on-error: ${{ !matrix.required }}
     env:
@@ -169,7 +170,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+        include: ${{ fromJson(needs.detect-changes.outputs.english_matrix) }}
 
     steps:
       - name: Checkout repository
@@ -337,9 +338,18 @@ jobs:
           See the test artifacts for detailed logs.
           EOF
 
+  test-localized-playbooks:
+    name: Localized Playbooks
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_localized_entries == 'true'
+    uses: ./.github/workflows/native-test-matrix.yml
+    with:
+      matrix_json: ${{ needs.detect-changes.outputs.localized_matrix }}
+    secrets: inherit
+
   test-gate:
     name: Test Gate (Required Tests)
-    needs: [detect-changes, selector-tests, test-playbooks]
+    needs: [detect-changes, selector-tests, test-playbooks, test-localized-playbooks]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -350,7 +360,8 @@ jobs:
         run: |
           echo "detect-changes result: ${{ needs.detect-changes.result }} (detection_ok=${{ needs.detect-changes.outputs.detection_ok }})"
           echo "selector-tests result: ${{ needs.selector-tests.result }}"
-          echo "test-playbooks result: ${{ needs.test-playbooks.result }}"
+          echo "English playbooks result: ${{ needs.test-playbooks.result }}"
+          echo "Localized playbooks result: ${{ needs.test-localized-playbooks.result }}"
           if [ "${{ needs.selector-tests.result }}" != "success" ]; then
             echo "::error::Test-selection regression tests failed; skip decisions cannot be trusted"
             exit 1
@@ -359,9 +370,14 @@ jobs:
             echo "::error::Could not determine which tests to run; refusing to pass"
             exit 1
           fi
-          case "${{ needs.test-playbooks.result }}" in
-            failure|cancelled)
-              echo "::error::One or more required tests failed"
-              exit 1 ;;
-          esac
+          if [ "${{ needs.detect-changes.outputs.has_english_entries }}" = "true" ] \
+             && [ "${{ needs.test-playbooks.result }}" != "success" ]; then
+            echo "::error::Required English tests did not complete successfully"
+            exit 1
+          fi
+          if [ "${{ needs.detect-changes.outputs.has_localized_entries }}" = "true" ] \
+             && [ "${{ needs.test-localized-playbooks.result }}" != "success" ]; then
+            echo "::error::Required localized tests did not complete successfully"
+            exit 1
+          fi
           echo "All required tests passed (or no tests were needed)"
