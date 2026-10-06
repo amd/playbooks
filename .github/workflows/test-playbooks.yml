@@ -239,6 +239,9 @@ jobs:
         if: matrix.platform == 'windows'
         shell: powershell
         timeout-minutes: 90
+        env:
+          # Internal model mirror; unset on forks, where prereqs fall back to upstream.
+          ARTIFACTORY_BASE: ${{ secrets.ARTIFACTORY_BASE }}
         run: |
           python .github/scripts/prereq_validate.py --playbook "${{ matrix.playbook }}" --platform windows --device "${{ matrix.arch }}"
 
@@ -246,6 +249,9 @@ jobs:
         if: matrix.platform == 'linux'
         shell: bash
         timeout-minutes: 90
+        env:
+          # Internal model mirror; unset on forks, where prereqs fall back to upstream.
+          ARTIFACTORY_BASE: ${{ secrets.ARTIFACTORY_BASE }}
         run: |
           python .github/scripts/prereq_validate.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}"
 

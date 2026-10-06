@@ -767,6 +767,26 @@
           "halo_box"
         ]
       },
+      "validate": {
+        "linux": {
+          "cmd": "test -f /opt/model_cache/ComfyUI/models/diffusion_models/z_image_turbo_bf16.safetensors && test -f /opt/model_cache/ComfyUI/models/text_encoders/qwen_3_4b.safetensors && test -f /opt/model_cache/ComfyUI/models/vae/ae.safetensors",
+          "expect_rc": 0
+        },
+        "windows": {
+          "script": "comfyui-models.validate.ps1",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "script": "comfyui-models.install.sh",
+          "timeout": 3600
+        },
+        "windows": {
+          "script": "comfyui-models.install.ps1",
+          "timeout": 3600
+        }
+      },
       "versionable": false
     },
     "lmstudio-models-gpt-oss-120b": {

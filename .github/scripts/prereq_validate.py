@@ -35,6 +35,7 @@ Usage:
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -150,6 +151,8 @@ def _run(step: dict, platform: str, timeout: int) -> int:
         print(f"  (prereq script not found: {step['script']})")
         return 127
     args = _step_args(step, platform)
+    # Scripts that call helpers (e.g. mirror/get.py) use this interpreter, not whatever `python` resolves to.
+    env = dict(os.environ, PREREQ_PYTHON=sys.executable)
     try:
         proc = subprocess.run(
             args,
@@ -157,6 +160,7 @@ def _run(step: dict, platform: str, timeout: int) -> int:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
+            env=env,
         )
         if proc.stdout:
             # Surface command output for CI logs, but keep it bounded.

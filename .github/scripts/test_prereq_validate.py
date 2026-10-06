@@ -18,6 +18,8 @@ import importlib.util
 import json
 import os
 import re
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -201,6 +203,92 @@ class ScriptStepTests(unittest.TestCase):
         args = pv._step_args({"script": "d.install.ps1"}, "windows")
         self.assertEqual(args[:6], ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", args[5]])
         self.assertTrue(args[5].endswith("d.install.ps1"))
+
+
+class MirrorGetTests(unittest.TestCase):
+    """mirror/get.py: mirror first, verified, with an upstream fallback; exit 0 iff the file is in place."""
+
+    GET = Path(__file__).with_name("mirror") / "get.py"
+
+    @classmethod
+    def setUpClass(cls):
+        import functools, http.server, threading
+        cls._root = tempfile.TemporaryDirectory()
+        root = Path(cls._root.name)
+        (root / "mirror/models").mkdir(parents=True)
+        (root / "upstream").mkdir()
+        cls.good = b"model-bytes"
+        (root / "mirror/models/served.bin").write_bytes(cls.good)
+        (root / "mirror/models/corrupt.bin").write_bytes(b"tampered")
+        (root / "upstream/served.bin").write_bytes(cls.good)
+        handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(root))
+        handler.log_message = lambda *a: None
+        cls._srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        threading.Thread(target=cls._srv.serve_forever, daemon=True).start()
+        port = cls._srv.server_address[1]
+        cls.base = f"http://127.0.0.1:{port}/mirror"
+        cls.upstream = f"http://127.0.0.1:{port}/upstream/served.bin"
+        sha = __import__("hashlib").sha256(cls.good).hexdigest()
+        cls.manifest = root / "artifacts.json"
+        cls.manifest.write_text(json.dumps([
+            {"dest": d, "url": cls.upstream, "size": len(cls.good), "sha256": sha}
+            for d in ("models/served.bin", "models/corrupt.bin", "models/absent.bin")
+        ]))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._srv.shutdown()
+        cls._root.cleanup()
+
+    def _get(self, path, upstream=False, base=None):
+        out = tempfile.TemporaryDirectory()
+        self.addCleanup(out.cleanup)
+        dest = Path(out.name) / "sub" / "file.bin"
+        ledger = Path(out.name) / "ledger.jsonl"
+        env = dict(os.environ, PLAYBOOKS_MIRROR_LEDGER=str(ledger))
+        env.pop("ARTIFACTORY_BASE", None)
+        if base is not None:
+            env["ARTIFACTORY_BASE"] = base
+        cmd = [sys.executable, str(self.GET), "--manifest", str(self.manifest), "fetch", path, "--to", str(dest)]
+        rc = subprocess.run(cmd + (["--upstream"] if upstream else []), env=env,
+                            capture_output=True, text=True).returncode
+        outcomes = [json.loads(l)["outcome"] for l in ledger.read_text().splitlines()] if ledger.exists() else []
+        return rc, dest, outcomes
+
+    def test_served_by_mirror(self):
+        rc, dest, outcomes = self._get("models/served.bin", base=self.base)
+        self.assertEqual((rc, dest.read_bytes(), outcomes), (0, self.good, ["downloaded"]))
+
+    def test_no_secret_falls_back_to_upstream(self):
+        rc, dest, outcomes = self._get("models/served.bin", upstream=True)
+        self.assertEqual((rc, dest.read_bytes(), outcomes), (0, self.good, ["no-secret", "upstream"]))
+
+    def test_mirror_miss_falls_back_to_upstream(self):
+        rc, dest, outcomes = self._get("models/absent.bin", upstream=True, base=self.base)
+        self.assertEqual((rc, dest.read_bytes(), outcomes), (0, self.good, ["absent", "upstream"]))
+
+    def test_corrupt_mirror_copy_is_rejected(self):
+        rc, dest, outcomes = self._get("models/corrupt.bin", base=self.base)
+        self.assertEqual((rc, dest.exists(), outcomes), (1, False, ["failed"]))
+        self.assertFalse(dest.with_name(dest.name + ".part").exists())
+
+    def test_present_file_is_left_alone(self):
+        out = tempfile.TemporaryDirectory()
+        self.addCleanup(out.cleanup)
+        dest = Path(out.name) / "file.bin"
+        dest.write_bytes(b"already here")
+        env = dict(os.environ, ARTIFACTORY_BASE="http://127.0.0.1:9")  # nothing listens here
+        rc = subprocess.run([sys.executable, str(self.GET), "--manifest", str(self.manifest), "fetch",
+                             "models/served.bin", "--to", str(dest)], env=env, capture_output=True).returncode
+        self.assertEqual((rc, dest.read_bytes()), (0, b"already here"))
+
+    def test_manifest_entries_are_well_formed(self):
+        entries = json.loads((self.GET.parent / "artifacts.json").read_text(encoding="utf-8"))
+        bad = [e.get("dest") for e in entries
+               if not (e.get("dest") and not e["dest"].startswith("/") and e.get("url", "").startswith("https://")
+                       and isinstance(e.get("size"), int) and re.fullmatch(r"[0-9a-f]{64}", e.get("sha256", "")))]
+        self.assertEqual(bad, [])
+        self.assertEqual(len({e["dest"] for e in entries}), len(entries))
 
 
 class RegistryIntegrityTests(unittest.TestCase):
