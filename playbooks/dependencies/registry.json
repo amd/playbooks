@@ -833,11 +833,11 @@
       },
       "install": {
         "linux": {
-          "cmd": "lms get qwen/qwen3.5-9b --yes",
+          "cmd": "lms get qwen3.5-9b --yes",
           "timeout": 3600
         },
         "windows": {
-          "cmd": "lms get qwen/qwen3.5-9b --yes",
+          "cmd": "lms get qwen3.5-9b --yes",
           "timeout": 3600
         }
       },
@@ -872,11 +872,11 @@
       },
       "install": {
         "linux": {
-          "cmd": "lms get qwen/qwen3-coder-30b --yes",
+          "cmd": "lms get qwen3-coder-30b --yes",
           "timeout": 3600
         },
         "windows": {
-          "cmd": "lms get qwen/qwen3-coder-30b --yes",
+          "cmd": "lms get qwen3-coder-30b --yes",
           "timeout": 3600
         }
       },
