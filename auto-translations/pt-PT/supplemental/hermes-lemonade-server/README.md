@@ -10,25 +10,25 @@ SPDX-License-Identifier: MIT
 
 # Executar o Hermes Agent Localmente com o Lemonade Server
 
-## Visão Geral
+## Visão geral
 
-[**Hermes Agent**](https://hermes-agent.nousresearch.com/) é um agente de IA autoaperfeiçoável criado pela Nous Research. Possui um ciclo de aprendizagem integrado, cria competências a partir da experiência, constrói uma memória persistente sobre quem é o utilizador ao longo das sessões e pode executar automações agendadas em seu nome. Ao contrário de um simples assistente de conversação, o Hermes realiza ações reais: executa comandos de shell, escreve ficheiros, navega na web e delega fluxos de trabalho paralelos a subagentes.
+[**Hermes Agent**](https://hermes-agent.nousresearch.com/) é um agente de IA auto-aperfeiçoável criado pela Nous Research. Tem um ciclo de aprendizagem incorporado, cria competências a partir da experiência, constrói uma memória persistente sobre quem é o utilizador ao longo de várias sessões e pode executar automações agendadas em seu nome. Ao contrário de um simples assistente de conversação, o Hermes executa ações reais: corre comandos de shell, escreve ficheiros, navega na web e delega fluxos de trabalho paralelos a subagentes.
 
-[**Lemonade Server**](https://lemonade-server.ai/) é o motor de inferência local que o alimenta. É um servidor de código aberto que executa modelos GenAI diretamente no seu hardware AMD e os expõe através da API OpenAI, um padrão da indústria.
+[**Lemonade Server**](https://lemonade-server.ai/) é o motor de inferência local que o alimenta. É um servidor de código aberto que executa modelos de GenAI diretamente no seu hardware AMD e os disponibiliza através da API padrão da indústria, a OpenAI API.
 
-Juntos, formam uma stack de agente de IA totalmente local: o Lemonade trata da inferência de modelos na sua GPU, e o Hermes fornece o ciclo do agente, a memória, as competências e a gateway de mensagens.
+Juntos, formam uma stack de agente de IA totalmente local: o Lemonade trata da inferência do modelo na sua GPU, e o Hermes fornece o ciclo do agente, a memória, as competências e o gateway de mensagens.
 
-> **Antes de continuar:** o Hermes Agent é um agente de IA altamente autónomo. Conceder a qualquer agente de IA acesso ao seu sistema pode resultar em resultados imprevisíveis ou não intencionais. Prossiga apenas se compreender os riscos e se sentir confortável com software autónomo a agir em seu nome.
+> **Antes de continuar:** O Hermes Agent é um agente de IA altamente autónomo. Dar a qualquer agente de IA acesso ao seu sistema pode resultar em resultados imprevisíveis ou não intencionais. Prossiga apenas se compreender os riscos e se sentir confortável com software autónomo a atuar em seu nome.
 
 ---
 
 ## O Que Vai Aprender
 
-No final deste guia, será capaz de:
+No final deste manual, estará apto a:
 
-- **Instalar o Hermes Agent** e configurá-lo para usar o **Lemonade Server** como o seu motor de IA.
+- **Instalar o Hermes Agent** e configurá-lo para usar o **Lemonade Server** como o seu backend de IA.
 - **(Recomendado) Ativar o isolamento com Docker/Podman** para isolar as ações do agente do seu sistema anfitrião.
-- **Iniciar a gateway do Hermes** e confirmar que o seu agente está pronto.
+- **Iniciar o gateway do Hermes** e confirmar que o seu agente está pronto.
 - **Ligar um canal de comunicação** (Discord ou Telegram) para poder conversar com o seu agente a partir de qualquer dispositivo.
 
 ---
@@ -48,10 +48,10 @@ No final deste guia, será capaz de:
 ## Instalar os Pré-requisitos de Software
 
 <!-- @os:linux -->
-- Um PC com **Ubuntu 24.04+** ou uma distribuição Linux compatível baseada em Debian com `apt-get`
-- Pelo menos **12 GB de RAM** (recomendado 64 GB+ para modelos maiores)
+- Um PC com **Ubuntu 24.04+** ou uma distribuição Linux baseada em Debian compatível com `apt-get`
+- Pelo menos **12 GB de RAM** (recomenda-se 64 GB+ para modelos maiores)
 - **~10–30 GB de espaço livre em disco** para os pesos do modelo
-- [Podman](https://podman.io/docs/installation) (Opcional, para isolamento do Hermes Agent)
+- [Podman](https://podman.io/docs/installation) (Opcional, para isolar o Hermes Agent)
   ```bash 
   sudo apt-get install -y podman
   ```
@@ -59,9 +59,9 @@ No final deste guia, será capaz de:
 
 <!-- @os:windows -->
 - Um PC com **Windows 10/11**
-- Pelo menos **12 GB de RAM** (recomendado 64 GB+ para modelos maiores)
+- Pelo menos **12 GB de RAM** (recomenda-se 64 GB+ para modelos maiores)
 - **~10–30 GB de espaço livre em disco** para os pesos do modelo
-- Podman (Opcional, para isolamento do Hermes Agent). Instale dentro do WSL:
+- Podman (Opcional, para isolar o Hermes Agent). Instale dentro do WSL:
   ```bash 
   sudo apt-get install -y podman
   ```
@@ -71,7 +71,9 @@ No final deste guia, será capaz de:
 > O Podman já vem pré-instalado na Halo Box e não é necessária qualquer configuração
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:hermes,lemonade-models-qwen3-35b-a3b -->
 
 <!-- @var:id=hermes_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -85,13 +87,13 @@ lemonade --version
 
 ## Obter e Carregar o Modelo Recomendado
 
-O modelo recomendado para este guia é o **Qwen3.6-35B-A3B-GGUF** da Unsloth, um modelo MoE robusto com uma janela de contexto de 263 mil tokens, bem adequado para cargas de trabalho de agentes. Este modelo utiliza quantização UD-Q4_K_XL. Obtenha-o agora:
+O modelo recomendado para este manual é o **Qwen3.6-35B-A3B-GGUF** da Unsloth, um modelo MoE sólido com uma janela de contexto de 263 mil tokens, bem adequado a cargas de trabalho de agentes. Este modelo utiliza quantização UD-Q4_K_XL. Faça o download agora:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-De seguida, carregue-o com uma janela de contexto ampla e guarde essa definição para futuras execuções:
+De seguida, carregue-o com uma janela de contexto grande e guarde essa definição para futuras execuções:
 
 <!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
@@ -101,9 +103,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end -->
 
-O modelo tem um comprimento de contexto predefinido de 262 144 tokens. Se encontrar erros de falta de memória (OOM), considere reduzir a janela de contexto.
+O modelo tem um comprimento de contexto predefinido de 262.144 tokens. Se encontrar erros de falta de memória (OOM), considere reduzir a janela de contexto.
 
-> **Dica: Desative o modo de raciocínio para respostas mais rápidas do agente:** o Qwen3.6-35B-A3B executa por defeito no modo de raciocínio ("thinking mode"), o que acrescenta latência antes de cada resposta. Em ciclos de agentes, esta sobrecarga acumula-se rapidamente. O repositório [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) disponibiliza uma configuração pronta a usar que desativa o modo de raciocínio. Para a utilizar, descarregue o ficheiro e importe-o:
+> **Sugestão: Desative o modo de raciocínio para respostas mais rápidas do agente:** O Qwen3.6-35B-A3B funciona em modo de raciocínio por predefinição, o que acrescenta latência antes de cada resposta. Em ciclos de agente, esta sobrecarga acumula-se rapidamente. O repositório [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) disponibiliza uma configuração pronta a usar que desativa o modo de raciocínio. Para a utilizar, faça o download do ficheiro e importe-o:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -246,7 +248,7 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## Configurar o WSL
 
-Executamos o Hermes Agent dentro do WSL e ligamo-lo ao Lemonade em execução nativa no Windows. Isto proporciona um ambiente de shell Linux para o Hermes, mantendo a aceleração por GPU do Lemonade do lado do Windows.
+Executamos o Hermes Agent dentro do WSL e ligamo-lo ao Lemonade, que corre nativamente no Windows. Isto proporciona um ambiente de shell Linux para o Hermes, mantendo ao mesmo tempo a aceleração por GPU do Lemonade no lado do Windows.
 
 ### Instalar o WSL e o Ubuntu
 
@@ -264,7 +266,7 @@ wsl --install -d Ubuntu-24.04
 
 ### Ativar o systemd no WSL
 
-Execute o seguinte no terminal do Ubuntu:
+Execute isto dentro do terminal do Ubuntu:
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -280,23 +282,23 @@ wsl --shutdown
 wsl
 ```
 
-### Fazer a Ponte entre o Lemonade no Windows e o WSL
+### Fazer a ponte entre o Lemonade no Windows e o WSL
 
 O WSL2 é executado numa rede virtual. O Lemonade no Windows associa-se a `127.0.0.1`, ao qual o WSL não consegue aceder diretamente. Um proxy de porta do Windows encaminha o tráfego do IP de gateway do WSL para o localhost do Windows.
 
-**Encontre o seu IP de gateway do WSL** (execute dentro do WSL):
+**Encontre o IP de gateway do WSL** (execute dentro do WSL):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Adicione o proxy de porta** (execute no PowerShell como Administrador, substituindo `<WSL-Gateway-IP>` pelo seu IP de gateway do WSL):
+**Adicione o proxy de porta** (execute no PowerShell como Administrador, substituindo `<WSL-Gateway-IP>` pelo IP de gateway do seu WSL):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Adicione uma regra de firewall** (na mesma janela do PowerShell com privilégios elevados):
+**Adicione uma regra de firewall** (no mesmo PowerShell elevado):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
@@ -309,7 +311,7 @@ WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Se já carregou o modelo Qwen3.6-35B-A3B-GGUF no passo anterior, deverá ver uma saída JSON a listar o seu modelo carregado.
+Se já tiver carregado o modelo Qwen3.6-35B-A3B-GGUF no passo anterior, deverá ver a saída JSON a listar o seu modelo carregado.
 
 ```json
 {
@@ -327,7 +329,7 @@ Se já carregou o modelo Qwen3.6-35B-A3B-GGUF no passo anterior, deverá ver uma
 }
 ```
 
-> A regra `netsh portproxy` mantém-se após reinícios, mas o IP de gateway do WSL pode mudar após um `wsl --shutdown`. Se o Lemonade se tornar inacessível a partir do WSL após um reinício, obtenha o IP de gateway atualizado e atualize o proxy com este novo IP.
+> A regra `netsh portproxy` mantém-se após reinícios, mas o IP de gateway do WSL pode mudar após um `wsl --shutdown`. Se o Lemonade se tornar inacessível a partir do WSL depois de um reinício, obtenha o IP de gateway atualizado e atualize o proxy com este novo IP.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -393,7 +395,7 @@ finally {
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 ```
 
-A flag `--skip-setup` ignora o assistente de configuração interativo, para que possa configurar o motor de modelo manualmente no passo seguinte.
+A flag `--skip-setup` ignora o assistente de configuração interativo, para que possa configurar o backend do modelo manualmente no próximo passo.
 
 Recarregue o seu shell:
 
@@ -413,7 +415,7 @@ Execute um autodiagnóstico para verificar todas as dependências:
 hermes doctor
 ```
 
-> **Dica:** se vir `command not found` após a instalação, adicione o Hermes ao seu PATH:
+> **Sugestão:** Se vir `command not found` após a instalação, adicione o Hermes ao seu PATH:
 > ```bash
 > export PATH="$HOME/.local/bin:$PATH"
 > ```
@@ -471,12 +473,12 @@ finally {
 ---
 ## Configurar o Hermes para usar o Lemonade
 
-O Hermes guarda a sua configuração de modelo em `~/.hermes/config.yaml`. Pode usar o seletor interativo `hermes model` ou escrever a configuração diretamente.
+O Hermes armazena a sua configuração de modelo em `~/.hermes/config.yaml`. Pode utilizar o seletor interativo `hermes model` ou escrever a configuração diretamente.
 
 ### Opção 1: Seletor interativo
 
 <!-- @os:windows -->
-> Execute o seguinte comando dentro do seu **terminal WSL**.
+> Execute o seguinte dentro do seu **terminal WSL**.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -491,7 +493,7 @@ hermes model
 ```
 <!-- @os:end -->
 
-Quando solicitado:
+Quando for solicitado:
 
 1. Selecione **Custom endpoint (enter URL manually)**
 <!-- @os:linux -->
@@ -504,9 +506,9 @@ Quando solicitado:
 4. **API compatibility mode:** `1` (Auto-detect)
 5. **Select model:** escolha `Qwen3.6-35B-A3B-GGUF` na lista
 6. **Context length in tokens:** `262144`
-7. **Display name:** `local-lemonade` (ou qualquer nome à sua escolha)
+7. **Display name:** `local-lemonade` (ou qualquer nome que preferir)
 
-O `hermes model` guarda tanto a seleção de modelo ativo como uma entrada `custom_providers` nomeada, que armazena o comprimento de contexto juntamente com o endpoint. O resultado em `~/.hermes/config.yaml` tem o seguinte aspeto:
+`hermes model` guarda tanto a seleção de modelo ativo como uma entrada nomeada em `custom_providers` que armazena o comprimento do contexto juntamente com o endpoint. O resultado em `~/.hermes/config.yaml` tem este aspeto:
 
 ```yaml
 model:
@@ -679,11 +681,11 @@ finally {
 
 ---
 
-## (Recomendado) Ativar o Sandboxing com Podman
+## (Recomendado) Ativar o sandboxing do Podman
 
-O Hermes Agent pode encaminhar todas as operações de shell e de ficheiros do agente através de um contentor isolado, em vez de as executar diretamente no seu anfitrião. Isto limita o raio de impacto de qualquer ação não intencional à sandbox, deixando o sistema de ficheiros e a rede do seu anfitrião intocados.
+O Hermes Agent pode encaminhar todas as operações de shell e de ficheiros do agente através de um contentor isolado, em vez de as executar diretamente no seu anfitrião. Isto limita o raio de ação de qualquer ação não intencional ao sandbox, deixando o sistema de ficheiros e a rede do seu anfitrião intocados.
 
-Crie uma imagem de sandbox leve:
+Construa uma imagem de sandbox leve:
 
 <!-- @os:linux -->
 ```bash
@@ -732,7 +734,7 @@ Entre no seu terminal WSL:
 wsl -d Ubuntu-24.04
 ```
 
-Em seguida, crie uma imagem de sandbox leve:
+Em seguida, construa uma imagem de sandbox leve:
 
 ```bash
 podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -795,7 +797,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Em seguida, configure o Hermes para usar o Podman como runtime de contentores e defina o backend de terminal:
+Em seguida, configure o Hermes para usar o Podman como runtime de contentores e defina o backend do terminal:
 
 ```bash
 echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
@@ -808,7 +810,7 @@ EOF
 ```
 
 > O `terminal.backend` continua a ser `docker`.
-> `HERMES_DOCKER_BINARY` é o que indica ao Hermes para usar o Podman como runtime em vez do Docker.
+> `HERMES_DOCKER_BINARY` é o que indica ao Hermes para usar o Podman como runtime em vez disso.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -905,29 +907,29 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-O Hermes irá agora iniciar um contentor de sandbox persistente e encaminhar todas as chamadas de `terminal` e de ferramentas de ficheiros através dele. O contentor partilha o ciclo de vida do processo do Hermes, é reutilizado em todas as chamadas de ferramentas e é destruído quando o Hermes termina.
+O Hermes irá agora iniciar um contentor de sandbox persistente e encaminhar todas as chamadas de `terminal` e de ferramentas de ficheiros através dele. O contentor partilha o tempo de vida do processo Hermes, é reutilizado em todas as chamadas de ferramentas e é destruído quando o Hermes termina.
 
-> **Verificar se a sandbox está a funcionar:** Inicie o Hermes (`hermes`) e peça-lhe para `run hostname` — deverá ver um ID de contentor curto em vez do nome de anfitrião da sua máquina. Também pode pedir-lhe para `rm -rf <path-to-a-dummy-file/folder>`: o Hermes confirmará a eliminação, mas a pasta continuará no seu anfitrião. O comando foi executado dentro do `$HOME` isolado do contentor, não no seu.
+> **Verifique se o sandbox está a funcionar:** Inicie o Hermes (`hermes`) e peça-lhe para `run hostname` - deverá ver um ID de contentor curto em vez do nome de anfitrião da sua máquina. Também pode pedir-lhe para `rm -rf <path-to-a-dummy-file/folder>`: o Hermes irá confirmar a eliminação, mas a pasta continuará no seu anfitrião. O comando foi executado dentro do `$HOME` isolado do contentor, não no seu.
 
-> **Precisa de um isolamento mais forte?** O Hermes também fornece uma imagem Docker oficial (`nousresearch/hermes-agent`) que executa todo o processo do agente dentro de um contentor — gateway, ferramentas e tudo o resto. Consulte a [documentação Docker do Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/docker) para obter detalhes de configuração.
+> **Precisa de um isolamento mais forte?** O Hermes também disponibiliza uma imagem Docker oficial (`nousresearch/hermes-agent`) que executa todo o processo do agente dentro de um contentor - gateway, ferramentas e tudo o resto. Consulte a [documentação Docker do Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/docker) para mais detalhes de configuração.
 
 ---
 
 <!-- @os:linux -->
-## (Recomendado) Integração do Hermes com os Serviços Firecrawl
+## (Recomendado) Integração do Hermes com os serviços Firecrawl
 
-O Hermes pode navegar e extrair conteúdo de websites através das suas ferramentas web integradas. No entanto, muitos websites modernos utilizam sistemas de deteção de bots, que bloqueiam pedidos HTTP simples e devolvem páginas de desafio em vez do conteúdo real. Como resultado, o Hermes pode não conseguir extrair informação de forma fiável a partir destes websites.
+O Hermes pode navegar e extrair conteúdo de sites utilizando as suas ferramentas web integradas. No entanto, muitos sites modernos utilizam sistemas de deteção de bots, que bloqueiam pedidos HTTP simples e devolvem páginas de desafio em vez do conteúdo real. Como resultado, o Hermes pode não conseguir extrair informação de forma fiável a partir destes sites.
 
-Para ultrapassar esta limitação, o [Firecrawl](https://docs.firecrawl.dev/introduction) fornece um serviço de rastreio web e extração de conteúdo autoalojado (self-hosted), capaz de contornar estes desafios e libertar todo o potencial da automação do Hermes.
+Para ultrapassar esta limitação, o [Firecrawl](https://docs.firecrawl.dev/introduction) disponibiliza um serviço de rastreio web e extração de conteúdo auto-hospedado, capaz de contornar estes desafios e libertar todo o potencial da automação do Hermes.
 
-Nesta configuração, o Firecrawl é executado como um conjunto de contentores Docker geridos com o Podman. Para simplificar a gestão do ciclo de vida e o arranque automático, registamos o Firecrawl como um serviço `systemd` ao nível do utilizador, que orquestra a pilha Podman Compose subjacente. Isto permite ao Hermes iniciar, parar e verificar o serviço Firecrawl utilizando comandos padrão `systemctl --user`, em vez de interagir diretamente com os contentores.
+Nesta configuração, o Firecrawl é executado como um conjunto de contentores Docker geridos com o Podman. Para simplificar a gestão do ciclo de vida e o arranque automático, registamos o Firecrawl como um serviço `systemd` ao nível do utilizador, que orquestra a stack Podman Compose subjacente. Isto permite ao Hermes iniciar, parar e verificar o serviço Firecrawl utilizando comandos `systemctl --user` padrão, em vez de interagir diretamente com os contentores.
 
 Para manter as coisas simples, dividimos todo o processo em quatro passos:
 
 ---
 
 ### 1. Registar o serviço do sistema
-Navegue até ao diretório de configuração do utilizador do systemd:
+Navegue até ao diretório de configuração do utilizador systemd:
 ```bash
 cd ~/.config/systemd/user
 ```
@@ -960,7 +962,7 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
-Neste momento, o serviço já foi definido, mas ainda não está registado no `systemd`.
+Neste ponto, o serviço foi definido mas ainda não foi registado no `systemd`.
 Certifique-se de que o nome do ficheiro corresponde exatamente ao que criou acima e, em seguida, execute:
 ```bash
 systemctl --user daemon-reload
@@ -974,13 +976,13 @@ Se for bem-sucedido, deverá ver o seguinte resultado:
 
 ### 2. Configurar o Firecrawl para o seu serviço
 
-O [SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) é ideal para quem precisa de controlo total sobre os seus ambientes de scraping e processamento de dados, mas tem como contrapartida esforços adicionais de manutenção e configuração.
+O [SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) é ideal para quem precisa de controlo total sobre os seus ambientes de scraping e processamento de dados, mas tem a contrapartida de esforços adicionais de manutenção e configuração.
 
 Comece por clonar o repositório:
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-Crie o ficheiro `.env` no diretório raiz `/firecrawl`:
+Crie `.env` no diretório raiz `/firecrawl`:
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1011,32 +1013,32 @@ BULL_AUTH_KEY=CHANGEME
 > Defina `BULL_AUTH_KEY` com um segredo forte, especialmente em qualquer implementação acessível a partir de redes não fiáveis.
 ### 3. Implementar o Hermes através do Compose
 
-Antes de continuar, certifique-se de que já obteve a imagem Docker mais recente do Hermes:
+Antes de continuar, certifique-se de que já fez pull da imagem Docker mais recente do Hermes:
 ```bash
 podman pull docker.io/nousresearch/hermes-agent:latest
 ```
-Depois de concluir esse passo, transfira o ficheiro Compose do Hermes [hermes-compose.yaml](assets/hermes-compose.yaml) e coloque-o no diretório raiz `/firecrawl`:
+Depois disso, transfira o ficheiro Compose do Hermes [hermes-compose.yaml](assets/hermes-compose.yaml) e coloque-o no diretório raiz `/firecrawl`:
 
-> Esta convenção é necessária para que o `systemd` consiga localizar e iniciar o serviço corretamente, conforme especificado em `WorkingDirectory=${HOME}/firecrawl`.
+> Esta convenção é necessária para que o `systemd` localize e inicie o serviço corretamente, conforme especificado em `WorkingDirectory=${HOME}/firecrawl`.
 
-> Pode sempre expandir a stack adicionando serviços Firecrawl adicionais, conforme necessário. A lista completa de serviços disponíveis pode ser consultada no ficheiro oficial [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+> Pode sempre expandir a stack adicionando serviços adicionais do Firecrawl conforme necessário. A lista completa de serviços disponíveis pode ser consultada no [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) oficial.
 
 ### 4. Iniciar o serviço Hermes através do Firecrawl 
 
-Antes de entregar o controlo ao `systemd`, valide que tudo funciona corretamente executando a stack manualmente:
+Antes de passar o controlo ao `systemd`, valide que tudo funciona corretamente executando a stack manualmente:
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-Se tudo estiver configurado corretamente, deverá ver o contentor do Hermes a iniciar, e o resultado da linha de comandos deverá ser semelhante a este:
+Se tudo estiver configurado corretamente, deverá ver o contentor Hermes a arrancar e a saída da linha de comandos deverá ser semelhante a isto:
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
 
-Depois de validar, encerre a stack antes de continuar:
+Depois de validar, pare a stack novamente antes de continuar:
 ```bash
 podman compose -f hermes-compose.yaml down
 ```
-Agora que tudo foi validado, inicie o serviço através do `systemd`:
+Agora que tudo está validado, inicie o serviço através do `systemd`:
 ```bash
 systemctl --user start firecrawl.service
 ```
@@ -1054,7 +1056,7 @@ systemctl --user stop firecrawl.service
 
 ## Hermes Native
 
-Inicie uma sessão de CLI interativa diretamente: 
+Inicie uma sessão CLI interativa diretamente: 
 
 ```bash
 hermes
@@ -1213,13 +1215,13 @@ finally {
 
 ### Painel Web
 
-O Hermes inclui uma interface baseada no navegador para gerir a configuração, chaves de API, modelos, sessões, memória e tarefas cron. Abra um segundo terminal enquanto o gateway ou a CLI estiverem em execução e inicie-o com:
+O Hermes inclui uma interface baseada no browser para gerir configurações, chaves de API, modelos, sessões, memória e tarefas cron. Abra um segundo terminal enquanto o gateway ou a CLI estiverem em execução e inicie-a com:
 
 ```bash
 hermes dashboard
 ```
 
-Isto inicia um servidor local e abre `http://127.0.0.1:9119` no seu navegador. Consulte a [documentação do painel](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) para a referência completa das funcionalidades.
+Isto inicia um servidor local e abre `http://127.0.0.1:9119` no seu browser. Consulte a [documentação do painel](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) para a referência completa de funcionalidades.
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
@@ -1228,19 +1230,19 @@ Isto inicia um servidor local e abre `http://127.0.0.1:9119` no seu navegador. C
 
 ## Opcional: Ligar um Canal de Comunicação
 
-Depois de o gateway estar em execução, pode aceder ao seu agente local a partir de qualquer dispositivo. O Hermes suporta [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram), entre outros
+Depois de o gateway estar em execução, pode contactar o seu agente local a partir de qualquer dispositivo. O Hermes suporta [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram), entre outros
 
 ---
 
 ### Discord
 
-O Discord requer um servidor onde **tenha acesso de administrador** para adicionar um bot. Se partilhar servidores mas não for proprietário de nenhum, utilize o Telegram.
+O Discord requer um servidor onde **tenha acesso de administrador** para adicionar um bot. Se partilhar servidores mas não possuir nenhum, utilize o Telegram em alternativa.
 
 #### Criar uma aplicação e um bot do Discord
 
 1. Aceda ao [Discord Developer Portal](https://discord.com/developers/applications) e clique em **New Application**. Dê-lhe um nome (por exemplo, "hermes-bot").
 2. Na barra lateral, clique em **Bot**. Defina um nome de utilizador para o bot.
-3. Ainda na página do Bot, desça até **Privileged Gateway Intents** e ative:
+3. Ainda na página Bot, percorra até **Privileged Gateway Intents** e ative:
    - **Message Content Intent** (obrigatório)
    - **Server Members Intent** (recomendado)
 4. Volte ao topo e clique em **Reset Token** para gerar o token do seu bot. Copie-o.
@@ -1250,15 +1252,15 @@ O Discord requer um servidor onde **tenha acesso de administrador** para adicion
 1. Na barra lateral, clique em **OAuth2 / URL Generator**.
 2. Em **Scopes**, ative `bot` e `applications.commands`.
 3. Em **Bot Permissions**, ative: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Copie o URL gerado, cole-o no seu navegador, selecione o seu servidor e confirme.
+4. Copie o URL gerado, cole-o no seu browser, selecione o seu servidor e confirme.
 
 #### Recolher os seus IDs e permitir mensagens diretas
 
-Ative o Developer Mode no Discord (**User Settings / Advanced / Developer Mode**) e, em seguida:
+Ative o Modo de Programador no Discord (**User Settings / Advanced / Developer Mode**), depois:
 - Clique com o botão direito no ícone do seu servidor: **Copy Server ID**
 - Clique com o botão direito no seu próprio avatar: **Copy User ID**
 
-Clique com o botão direito no ícone do seu servidor / **Privacy Settings** / ative a opção **Direct Messages**. Isto é necessário para o passo de emparelhamento.
+Clique com o botão direito no ícone do seu servidor / **Privacy Settings** / ative **Direct Messages**. Isto é necessário para o passo de emparelhamento.
 
 #### Configurar o Hermes para o Discord
 
@@ -1270,13 +1272,13 @@ DISCORD_BOT_TOKEN=your-bot-token
 DISCORD_ALLOWED_USERS=your-discord-user-id
 ```
 
-Depois inicie o gateway:
+Depois, inicie o gateway:
 
 ```bash
 hermes gateway
 ```
 
-O bot deverá ficar online no Discord em poucos segundos. Envie-lhe uma mensagem, quer seja uma DM ou num canal onde ele tenha visibilidade.
+O bot deverá ficar online no Discord em poucos segundos. Envie-lhe uma mensagem, seja por DM, seja num canal que ele consiga ver.
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1301,24 +1303,24 @@ TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_ALLOWED_USERS=your-telegram-user-id   # comma-separated for multiple users
 ```
 
-> **Não sabe o seu ID de utilizador do Telegram?** Envie uma mensagem a [@userinfobot](https://t.me/userinfobot) no Telegram, este responderá com o seu ID numérico.
+> **Não sabe qual é o seu ID de utilizador no Telegram?** Envie uma mensagem a [@userinfobot](https://t.me/userinfobot) no Telegram, ele responderá com o seu ID numérico.
 
-Depois inicie o gateway:
+Depois, inicie o gateway:
 
 ```bash
 hermes gateway
 ```
 
-Envie qualquer mensagem ao seu bot no Telegram para testar. Já pode conversar com o seu agente através de DM no Telegram. Consulte o [guia completo de configuração do Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) para o modo webhook e opções avançadas.
+Envie uma mensagem qualquer ao seu bot no Telegram para testar. Agora já pode conversar com o seu agente através de DM no Telegram. Consulte o [guia completo de configuração do Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) para o modo webhook e opções avançadas.
 
 ---
 
 ## Próximos Passos
 
-Agora que o seu agente consegue receber comandos a partir do seu telemóvel e atuar na sua máquina local, aqui ficam três direções que vale a pena explorar:
+Agora que o seu agente consegue receber comandos a partir do seu telemóvel e agir na sua máquina local, aqui ficam três direções que vale a pena explorar:
 
-1. **Resumo de investigação automatizado**: Agende o Hermes para pesquisar na web tópicos do seu interesse todas as manhãs, resumir os resultados com o seu modelo local e enviar um resumo para o seu telemóvel através do Telegram ou Discord, tudo a ser executado no seu próprio hardware, sem custos de cloud.
+1. **Resumo automatizado de pesquisa**: Programe o Hermes para pesquisar na web tópicos do seu interesse todas as manhãs, resumir os resultados com o seu modelo local e enviar um resumo para o seu telemóvel via Telegram ou Discord, tudo a correr no seu próprio hardware sem custos de cloud.
 
-2. **Revisão de código sob pedido**: Aponte o Hermes para um repositório do GitHub, peça-lhe para rever pull requests abertos e faça com que publique comentários ou um resumo de volta no seu chat. Com o backend de terminal Docker, todas as operações git são executadas dentro da sandbox, mantendo o seu anfitrião limpo.
+2. **Revisão de código a pedido**: Aponte o Hermes para um repositório do GitHub, peça-lhe para rever pull requests abertos e faça-o publicar comentários ou um resumo de volta no seu chat. Com o backend de terminal Docker, todas as operações git são executadas dentro da sandbox, mantendo o seu anfitrião limpo.
 
-3. **Assistente de ficheiros local**: Dê ao Hermes acesso a um diretório de trabalho e peça-lhe para organizar, renomear, resumir ou transformar ficheiros sob pedido a partir do seu telemóvel. Como o backend de terminal Docker confina todas as escritas ao espaço de trabalho da sandbox, as operações destrutivas acidentais são contidas.
+3. **Assistente local de ficheiros**: Dê ao Hermes acesso a um diretório de trabalho e peça-lhe para organizar, renomear, resumir ou transformar ficheiros a pedido a partir do seu telemóvel. Como o backend de terminal Docker confina todas as escritas ao espaço de trabalho da sandbox, operações destrutivas acidentais ficam contidas.

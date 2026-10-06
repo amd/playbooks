@@ -1,6 +1,6 @@
 {
   "id": "openclaw-lemonade-server",
-  "title": "Lokálne spustenie OpenClaw so serverom Lemonade",
-  "description": "Nainštalujte a nakonfigurujte autonómneho AI agenta OpenClaw so serverom Lemonade Server.",
+  "title": "Lokálne spustenie OpenClaw so serverom Lemonade Server",
+  "description": "Inštalácia a konfigurácia autonómneho AI agenta OpenClaw so serverom Lemonade Server.",
   "auto_translated": true
 }

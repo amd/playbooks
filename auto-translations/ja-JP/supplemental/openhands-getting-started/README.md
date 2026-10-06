@@ -18,34 +18,34 @@ SPDX-License-Identifier: MIT
 
 ## 概要
 
-[OpenHands](https://github.com/All-Hands-AI/OpenHands) は、コードを書き、コマンドを実行し、ウェブを閲覧し、実際のワークスペース内でファイルを編集できる AI ソフトウェアエージェントです。チャットウィンドウから提案をコピーする代わりに、エージェントにプロジェクトフォルダを指定して作業を任せることができます。機能の実装、バグの修正、テストの作成、コードベースの説明などです。
+[OpenHands](https://github.com/All-Hands-AI/OpenHands) は、実際のワークスペース内でコードを書いたり、コマンドを実行したり、ウェブを閲覧したり、ファイルを編集したりできる AI ソフトウェアエージェントです。チャットウィンドウから提案をコピーする代わりに、エージェントにプロジェクトフォルダーを指し示し、機能の実装、バグ修正、テストの作成、コードベースの説明といった作業を実行させます。
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas) は、OpenHands を実行するために推奨されるブラウザ UI です。単一の `agent-canvas` コマンドで、エージェントサーバー、自動化バックエンド、Web フロントエンドがまとめて起動するため、ブラウザからエージェントとの会話を進めることができます。
+[Agent Canvas](https://github.com/OpenHands/agent-canvas) は、OpenHands を実行するために推奨されるブラウザ UI です。単一の `agent-canvas` コマンドで、エージェントサーバー、自動化バックエンド、Web フロントエンドをまとめて起動できるため、ブラウザからエージェントとの対話を進めることができます。
 
-すべてを AMD システム上に保つため、エージェントは Lemonade Server によって提供されるローカルモデルと通信します。Lemonade はそのモデルを OpenAI 互換の API として公開するため、Agent Canvas は他の OpenAI 形式のエンドポイントと同様に設定でき、モデル、コード、会話コンテキストはすべてお使いのマシン上に留まります。
+すべてを AMD システム上に留めるため、エージェントは Lemonade Server によって提供されるローカルモデルと通信します。Lemonade はそのモデルを OpenAI 互換の API として公開するため、Agent Canvas は他の OpenAI 形式のエンドポイントと同様にこれを設定でき、モデル、あなたのコード、会話のコンテキストはすべてあなたのマシン上に留まります。
 
-このプレイブックでは、ローカルモデルを起動し、Agent Canvas を起動して、そのモデルを指定し、実際のプロジェクトフォルダに対して最初のコーディングタスクを実行します。
+このプレイブックでは、ローカルモデルを起動し、Agent Canvas を立ち上げ、そのモデルを指定し、実際のプロジェクトフォルダーに対して最初のコーディングタスクを実行します。
 
-## この記事で学ぶこと
+## 学習内容
 
 - Lemonade Server を起動し、ローカルモデルがチャットリクエストに応答することを確認する方法
 - npm パッケージから Agent Canvas をインストールして起動する方法
-- ローカルの Lemonade モデルを LLM として使用するように Agent Canvas を設定する方法
-- OpenHands の会話を開始し、エージェントがワークスペース内でファイルを編集しコマンドを実行する様子を確認する方法
-- エージェントが行った変更を確認し、フォローアップメッセージで誘導する方法
+- Agent Canvas を設定して、ローカルの Lemonade モデルを LLM として使用する方法
+- OpenHands の会話を開始し、エージェントがワークスペース内でファイルを編集し、コマンドを実行する様子を確認する方法
+- エージェントが変更した内容を確認し、フォローアップメッセージで操作を誘導する方法
 
-## 主な概念
+## 主要な概念
 
-| 概念 | 概要 | このプレイブックでの位置付け |
+| 概念 | 内容 | このプレイブックでの位置づけ |
 | --- | --- | --- |
-| Lemonade Server | AMD ハードウェア向けに構築された、OpenAI 互換の API を公開するローカル LLM サービングプラットフォーム。データがお使いのマシンから外部に出ることはありません。 | エージェントを動かすモデルを実行します。 |
-| OpenHands | ワークスペース内でファイルを読み書きし、シェルコマンドを実行し、ウェブを閲覧する AI ソフトウェアエージェント。 | チャットから操作するエージェントです。 |
-| Agent Canvas | OpenHands の会話を実行し、ツール呼び出しやファイルの変更を表示するブラウザ UI とバックエンド。 | スタックを起動し、会話をホストします。 |
-| ワークスペース | エージェントが読み取りおよび変更を許可されているプロジェクトフォルダ。 | エージェントの編集やコマンドの対象です。 |
+| Lemonade Server | AMD ハードウェア向けに構築された、OpenAI 互換の API を公開するローカル LLM サービングプラットフォーム。データがあなたのマシンから外に出ることはありません。 | エージェントを動かすモデルを実行します。 |
+| OpenHands | ワークスペース内でファイルの読み書き、シェルコマンドの実行、ウェブ閲覧を行う AI ソフトウェアエージェント。 | チャットから操作するエージェントです。 |
+| Agent Canvas | OpenHands の会話を実行し、ツール呼び出しとファイルの変更を表示するブラウザ UI およびバックエンド。 | スタックを起動し、会話をホストします。 |
+| ワークスペース | エージェントが読み取りと変更を許可されたプロジェクトフォルダー。 | エージェントによる編集とコマンドの対象です。 |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> コーディングエージェントのワークフローは、より大きなモデルとコンテキストウィンドウの恩恵を受けます。少なくとも 32 GB のシステムメモリを使用し、より大きな GGUF モデルには 64 GB 以上を推奨します。
+> コーディングエージェントのワークフローは、より大きなモデルとコンテキストウィンドウの恩恵を受けます。少なくとも 32 GB のシステムメモリを使用し、より大きな GGUF モデルの場合は 64 GB 以上を推奨します。
 <!-- @device:end -->
 
 ## メモリ構成の設定
@@ -53,7 +53,7 @@ SPDX-License-Identifier: MIT
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## ソフトウェアの更新を確認する
+## ソフトウェアアップデートの確認
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -62,27 +62,33 @@ SPDX-License-Identifier: MIT
 
 
 <!-- @os:linux -->
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so only the Lemonade model is needed here.
+     lemonade-chat-windows asserts the model is already downloaded. -->
+<!-- @prereq:lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
-以下が必要です。
+次のものが必要です。
 
-- 以下のモデルを提供できる、インストール済みの Lemonade Server。
+- 以下のモデルを提供できる状態の、インストール済みの Lemonade Server。
 
 <!-- @os:linux -->
-- Node.js 22.12 以降と `npm`（`agent-canvas` CLI で使用します）。
-- Agent Canvas がエージェントサーバー環境の管理に使用する Python パッケージマネージャー `uv`。お使いのシステムにまだインストールされていない場合は、Agent Canvas を起動する前に [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/) からインストールしてください。
+- Node.js 22.12 以降と `npm`(`agent-canvas` CLI が使用します)。
+- `uv`。これは Agent Canvas がエージェントサーバー環境の管理に使用する Python パッケージマネージャーです。お使いのシステムにまだ入っていない場合は、Agent Canvas を起動する前に[uv インストールガイド](https://docs.astral.sh/uv/getting-started/installation/)からインストールしてください。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- インストール済みで実行中の [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)。Windows では、Agent Canvas スタックは公開されている Docker イメージから実行され、Node.js、`uv`、`@openhands/agent-canvas` パッケージがバンドルされているため、これらをホストにインストールする必要はありません。
+- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/) がインストールされ、実行されていること。Windows では、Agent Canvas スタックは公開済みの Docker イメージから実行されます。このイメージには Node.js、`uv`、`@openhands/agent-canvas` パッケージが同梱されているため、ホスト側にこれらをインストールする必要はありません。
 <!-- @os:end -->
 
-- 作業対象のプロジェクトフォルダ。エージェントに作業させたい任意のローカル git リポジトリまたはコードディレクトリを使用できます。
+- 作業対象のプロジェクトフォルダー。エージェントに作業させたい、任意のローカル git リポジトリまたはコードディレクトリで構いません。
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -136,11 +142,11 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
-> **お使いのハードウェアに合ったモデルを選択してください。** `Qwen3.6-35B-A3B-GGUF`（約 20 GB）は強力なコーディングモデルですが、大きなメモリプールが必要です。デバイスのメモリまたは GPU VRAM が限られている場合は、代わりに Lemonade のモデルライブラリからより小さな GGUF モデルを選択し、このプレイブック全体でそのモデル ID を使用してください。
+> **お使いのハードウェアに適したモデルを選択してください。** `Qwen3.6-35B-A3B-GGUF`(約 20 GB)は強力なコーディングモデルですが、大きなメモリプールが必要です。お使いのデバイスのメモリや GPU VRAM が限られている場合は、代わりに Lemonade モデルライブラリからより小さな GGUF モデルを選び、このプレイブック全体を通してそのモデル ID を使用してください。
 
-> **注:** 最初の `lemonade run` は、モデルがまだ存在しない場合にダウンロードを行うため、モデルのサイズと接続状況によっては時間がかかることがあります。
+> **注:** 最初の `lemonade run` では、モデルがまだ存在しない場合にダウンロードが行われます。モデルのサイズや接続状況によっては、時間がかかることがあります。
 
-Lemonade は次の場所に OpenAI 互換 API を公開します。
+Lemonade は OpenAI 互換の API を次の場所に公開します。
 
 ```text
 http://127.0.0.1:13305/api/v1
@@ -169,7 +175,7 @@ curl -sS "http://127.0.0.1:13305/api/v1/chat/completions" \
   }' | python3 -m json.tool
 ```
 
-これが `choices` 配列を返せば、Lemonade は Agent Canvas を使用する準備ができています。
+これが `choices` 配列を返せば、Lemonade は Agent Canvas の準備が整っています。
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
@@ -323,19 +329,21 @@ echo "OK: agent-canvas CLI is on PATH"
 agent-canvas
 ```
 
-デフォルトでは、Agent Canvas は `http://localhost:8000` で起動します。ブラウザでこの URL
-を開いてください。このポート番号自体に特別な意味はありません。8000 が既に使用されている場合は、
-Agent Canvas 起動時に `--port`（または `-p`）で任意の空きポートを指定できます。
+デフォルトでは、Agent Canvas は `http://localhost:8000` で起動します。ブラウザでその
+URL を開いてください。このポート番号自体に特別な意味はありません。8000 がすでに
+使用されている場合は、Agent Canvas 起動時に `--port`(または `-p`)で空いている
+任意のポートを指定できます。
 
 ```bash
 agent-canvas --port 3000
 ```
 
-その後、代わりに `http://localhost:3000` を開いてください。デフォルトのローカルバックエンドは、ホーム画面で
-正常（healthy）と表示されるはずです。
+その後、代わりに `http://localhost:3000` を開いてください。デフォルトのローカル
+バックエンドは、ホーム画面で正常(healthy)と表示されるはずです。
 
-`agent-canvas` コマンドは、エージェントサーバー、自動化バックエンド、Web フロントエンドを
-まとめて起動します。OpenHands をローカルで実行するには、このコマンド 1 つだけで済みます。
+`agent-canvas` コマンドは、エージェントサーバー、自動化バックエンド、Web フロント
+エンドをまとめて起動します。OpenHands をローカルで実行するために必要なコマンドは
+この 1 つだけです。
 
 <!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
 ```bash
@@ -389,24 +397,25 @@ echo "OK: agent-canvas agent-server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Windows では、Docker Desktop を使用して公開済みの Agent Canvas コンテナイメージを実行します。
-このイメージには Agent Server、自動化バックエンド、Web フロントエンドがバンドルされているため、
-ホスト側に Node.js、`uv`、または CLI をインストールする必要はありません。
+Windows では、Docker Desktop を使って公開済みの Agent Canvas コンテナイメージを
+実行します。このイメージには Agent Server、自動化バックエンド、Web フロントエンド
+がバンドルされているため、ホスト側に Node.js、`uv`、CLI をインストールする必要は
+ありません。
 
-まず、コンテナがマウントする設定フォルダとワークスペースフォルダを作成します。
+まず、コンテナがマウントする config フォルダと workspace フォルダを作成します。
 
 ```powershell
 $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-公開されているイメージを pull します（パブリックイメージのため、ログインは不要です）。
+公開イメージを pull します(公開イメージのためログインは不要です)。
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-続いてスタックを起動します。
+次に、スタックを起動します。
 
 ```powershell
 docker run -it --rm `
@@ -416,15 +425,17 @@ docker run -it --rm `
   ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-ブラウザで `http://localhost:8000/canvas` を開いてください。ポート 8000 が既に使用されている場合は、
-別のホストポートをマッピングしてください（例：`-p 8080:8000`）。その場合は代わりに
-`http://localhost:8080/canvas` を開いてください。
+ブラウザで `http://localhost:8000/canvas` を開いてください。ポート 8000 がすでに
+使用されている場合は、別のホストポートにマップしてください。たとえば
+`-p 8080:8000` とした場合は、代わりに `http://localhost:8080/canvas` を開いて
+ください。
 
-> **注:** 初回起動時にはコンテナ内で Agent Server の初期化が行われるため、
-> バックエンドが正常（healthy）と報告されるまでに 1～2 分かかることがあります。
+> **注:** 初回起動時にはコンテナ内で Agent Server が初期化されるため、バックエンド
+> が正常(healthy)と報告されるまで 1〜2 分かかることがあります。
 
-`.openhands` マウントにより、コンテナを再起動しても LLM プロファイルと設定が保持されます。
-このプレイブックの残りの部分では、ブラウザ上の Agent Canvas UI ですべてを設定していきます。
+`.openhands` マウントにより、LLM プロファイルと設定はコンテナの再起動後も保持
+されます。本ガイドの残りの部分では、ブラウザ上の Agent Canvas UI からすべてを
+設定していきます。
 
 <!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
 ```powershell
@@ -474,55 +485,58 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-## 4. ローカル LLM を構成する
+## 4. ローカル LLM の設定
 
-初回起動時、Agent Canvas はオンボーディングフローを開きます。このフローで以下を行います。
+初回起動時、Agent Canvas はオンボーディングフローを開きます。そのフローでは、
+以下の手順を行います。
 
-1. エージェントとして **OpenHands** が選択されたままにし、**Next** をクリックします。
-2. **Set up your LLM** で **Advanced** を選択します。
+1. エージェントとして **OpenHands** が選択されたままにして、**Next** をクリックします。
+2. **Set up your LLM** で、**Advanced** を選択します。
 3. **Authentication** は **API key** のままにします。
 4. **Custom Model** に `openai/Qwen3.6-35B-A3B-GGUF` を設定します。
 5. **Base URL** に `http://127.0.0.1:13305/api/v1` を設定します。
    <!-- @os:windows -->
-   > Windows では、スタックがコンテナ内で実行されるため、ホストの `127.0.0.1`
-   > にアクセスできません。代わりに `http://host.docker.internal:13305/api/v1` を使用することで、
-   > コンテナ化されたエージェントが Windows ホスト上で動作している Lemonade に到達できるようになります。
+   > Windows ではスタックがコンテナ内で実行されるため、`127.0.0.1` でホストに
+   > アクセスすることはできません。代わりに `http://host.docker.internal:13305/api/v1`
+   > を使用することで、コンテナ化されたエージェントが Windows ホスト上で実行されて
+   > いる Lemonade にアクセスできるようになります。
    <!-- @os:end -->
-6. **API Key** には、`lemonade-local` のような、空でない任意のプレースホルダーを入力します。
-   Lemonade は実際のキーを必要としませんが、OpenHands クライアント側では何らかの値を
-   送信する必要があります。
+6. **API Key** には、`lemonade-local` のような空でないプレースホルダーを入力します。
+   Lemonade は実際のキーを必要としませんが、OpenHands クライアント側で送信する値が
+   必要です。
 7. **Next** をクリックします。
 
-設定が完了した Advanced 設定は次のようになります。API キーのフィールドは
-UI によってマスクされています。
+設定が完了した Advanced 設定は、次のようになります。API key フィールドは UI に
+よってマスクされています。
 
-![Lemonade モデルとローカルベース URL を使用した Agent Canvas 初回利用時の LLM Advanced 設定](assets/01-llm-advanced-settings.png)
+![Agent Canvas の初回利用時の LLM Advanced 設定(Lemonade モデルとローカルベース URL を使用)](assets/01-llm-advanced-settings.png)
 
-Agent Canvas はこれらの値を LLM プロファイルとして保存します。お使いのバージョンで
-このプロファイルに名前を付けるよう求められた場合は、`lemonade-local` のようなスペースを含まない
-名前を使用してください。後でモデルを変更する場合は、**Settings > LLM** を開き、
-同じ Advanced フィールドを更新してください。保存済みのプロファイルは、チャット入力欄で
-`/model` コマンドを使って切り替えることができます。
+Agent Canvas はこれらの値を LLM プロファイルとして保存します。使用しているバージョン
+でそのプロファイルに名前を付けるよう求められた場合は、`lemonade-local` のような
+スペースを含まない名前を使用してください。後でモデルを変更する場合は、
+**Settings > LLM** を開き、同じ Advanced フィールドを更新してください。保存済みの
+プロファイルは、チャット入力欄から `/model` コマンドで切り替えることができます。
 
 ## 5. ワークスペースを開く
 
-エージェントは、選択したワークスペース内のファイルのみを読み取り・変更できます。
-タスクを開始する前に、Agent Canvas をプロジェクトフォルダに向けてください。
+エージェントは、選択したワークスペース内のファイルのみを読み書きできます。タスクを
+開始する前に、Agent Canvas にプロジェクトフォルダを指定してください。
 
 1. ホーム画面から **Open Workspace** を選択します。
-2. プロジェクトが含まれるフォルダを選択します（例：エージェントに作業させたい
-   git リポジトリなど）。
+2. プロジェクトを含むフォルダ(たとえば、エージェントに作業させたい git リポジトリ)
+   を選択します。
 3. そのワークスペースで新しい会話を開始します。
 
-エージェントが行うすべてのこと——ファイルの読み取り、コマンドの実行、コードの編集——は、
-そのワークスペースの範囲内に限定されます。
+エージェントが行うすべてのこと(ファイルの読み取り、コマンドの実行、コードの編集)
+は、そのワークスペースに限定されます。
 
 ![オンボーディング後の Agent Canvas ホーム画面](assets/02-agent-canvas-home.png)
 
 ## 6. 最初のコーディングタスクを実行する
 
-ワークスペースを開いてローカル LLM を選択したら、チャットに具体的なタスクを入力します。
-最初のタスクとしては、小規模で検証可能なものが適しています。例えば以下のようなものです。
+ワークスペースを開き、ローカル LLM を選択した状態で、具体的なタスクをチャットに
+入力します。最初のタスクとしては、小さく検証しやすいものが適しています。たとえば
+次のようなものです。
 
 ```text
 Create a new file called hello.py that defines a function greet(name) that
@@ -530,42 +544,44 @@ returns "Hello, {name}!", and add a small test that prints greet("World")
 when run as a script.
 ```
 
-会話のタイムラインを観察してください。OpenHands は次のことを行います。
+会話のタイムラインを確認してください。OpenHands は次のことを行います。
 
-- ワークスペースを読み取り、構成を理解する。
-- 要求された関数とテストブロックを含む `hello.py` を作成する。
-- 必要に応じて `python3 hello.py` を実行し、出力を検証する。
-- 実行した内容と、コマンドの出力をチャットで報告する。
+- ワークスペースを読み取り、構成を把握します。
+- 要求された関数とテストブロックを含む `hello.py` を作成します。
+- 必要に応じて `python3 hello.py` を実行し、出力を確認します。
+- 実行した内容やコマンド出力をチャットで報告します。
 
-ワークスペースに新しいファイルが表示され、エージェントの最終メッセージには
-行った変更内容が記述されているはずです。これが成果を実感できる瞬間です。
-エージェントがあなたのプロジェクトフォルダ内で実際にコードを書き、実行したのです。
+ワークスペースに新しいファイルが表示され、エージェントの最終メッセージには、行った
+変更内容が説明されているはずです。これが成果の瞬間です。エージェントが実際に
+プロジェクトフォルダ内でコードを記述し、実行したのです。
 
-## 7. エージェントの作業をレビューし、方向付けする
+## 7. エージェントの作業を確認し、方向付けする
 
-エージェントがステップを完了したら、次のステップを承認する前に、その作業内容を確認してください。
+エージェントがステップを完了したら、次のステップを承認する前にその作業内容を
+確認してください。
 
-- **ファイルの変更**: ワークスペースのファイルブラウザ、またはエージェントの diff 表示を使って、
-  何が追加・変更・削除されたかを正確に確認します。
-- **コマンドの出力**: エージェントが実行したコマンドを展開し、標準出力、標準エラー出力、
+- **ファイルの変更**: ワークスペースのファイルブラウザやエージェントの diff 表示
+  を使って、追加、変更、削除された内容を正確に確認します。
+- **コマンド出力**: エージェントが実行したコマンドを展開し、stdout、stderr、
   終了コードを確認します。
-- **フォローアップ**: 結果が期待通りでない場合は、同じ会話の中で修正内容を返信してください。
-  エージェントは以前の文脈を保持したまま、同じファイルに対して反復作業を行います。
+- **フォローアップ**: 結果が期待どおりでない場合は、同じ会話内で修正内容を返信
+  してください。エージェントは以前の文脈を保持したまま、同じファイルに対して
+  反復的に作業を行います。
 
-例えば、テストが期待した挨拶メッセージを出力しなかった場合は、次のように返信します。
+たとえば、テストが期待どおりの挨拶文を出力しなかった場合は、次のように返信します。
 
 ```text
 The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-エージェントは、同じ会話の中で、ファイルを再度読み取り、コマンドを実行し、
-問題を診断した上で、再度ファイルを編集します。
+エージェントはファイルを再読み込みし、コマンドを実行して問題を診断した上で、
+同じ会話の中でファイルを再度編集します。
 ## トラブルシューティング
 
 <!-- @os:linux -->
-- **`agent-canvas` が PATH に存在しない場合：** `npm install -g @openhands/agent-canvas` を使って再インストールし、新しいターミナルから `agent-canvas` を起動できるように、npm のグローバルバイナリディレクトリが PATH に含まれていることを確認してください。
-- **`npm install -g` が権限エラーで失敗する場合：** ユーザー所有のグローバル npm ディレクトリを設定し、ターミナルを開き直してから Agent Canvas を再度インストールしてください。
+- **`agent-canvas` が PATH 上にない場合:** `npm install -g @openhands/agent-canvas` で再インストールし、新しいターミナルから `agent-canvas` を起動できるよう、npm のグローバルバイナリディレクトリが PATH に含まれていることを確認してください。
+- **`npm install -g` が権限エラーで失敗する場合:** ユーザー所有のグローバル npm ディレクトリを設定し、ターミナルを開き直してから Agent Canvas を再度インストールしてください。
 
   ```bash
   mkdir -p ~/.npm-global
@@ -574,26 +590,26 @@ greet("World") test prints to stdout.
   . ~/.profile
   npm install -g @openhands/agent-canvas
   ```
-- **`uv` が見つからない場合：** [uv のインストールガイド](https://docs.astral.sh/uv/getting-started/installation/)からインストールしてください。Agent Canvas はエージェントサーバーの Python 環境の管理に `uv` を使用します。
+- **`uv` が見つからない場合:** [uv インストールガイド](https://docs.astral.sh/uv/getting-started/installation/)からインストールしてください。Agent Canvas はエージェントサーバーの Python 環境を管理するために `uv` を使用します。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- **`docker pull` または `docker run` が接続に失敗する場合：** Docker Desktop が実行されている（システムトレイにクジラのアイコンが表示されている）こと、およびエンジンの起動が完了していることを確認してください。`docker version` を実行すると、Client セクションと Server セクションの両方が表示されるはずです。
-- **コンテナは起動するがバックエンドが正常な状態にならない場合：** 初回起動時にはコンテナ内で Agent Server が初期化されます。1～2 分ほど待ってから、`docker logs <container>` でエラーがないか確認してください。
-- **コンテナが Lemonade に到達できない場合：** コンテナは `host.docker.internal` 経由でホストにアクセスします。`lemonade status` を使って Lemonade が Windows ホスト上で提供されていることを確認し、LLM を設定する際のベース URL として `http://host.docker.internal:13305/api/v1` を使用してください。
+- **`docker pull` または `docker run` が接続に失敗する場合:** Docker Desktop が起動していること(システムトレイにクジラのアイコンが表示されていること)、およびエンジンの起動が完了していることを確認してください。`docker version` を実行すると、Client セクションと Server セクションの両方が表示されるはずです。
+- **コンテナは起動するがバックエンドがいつまでも正常にならない場合:** 初回起動時はコンテナ内で Agent Server が初期化されます。1、2分ほど待ってから `docker logs <container>` でエラーを確認してください。
+- **コンテナが Lemonade に到達できない場合:** コンテナはホストに `host.docker.internal` 経由で到達します。`lemonade status` で Lemonade が Windows ホスト上で稼働していることを確認し、LLM を設定する際のベース URL として `http://host.docker.internal:13305/api/v1` を使用してください。
 <!-- @os:end -->
 
-- **UI は読み込まれるがバックエンドが unhealthy と表示される場合：** エージェントサーバーの起動が完了するまで1～2分ほど待ってから、再読み込みしてください。それでも unhealthy のままの場合は、スタックを再起動し、ログでエラーを確認してください。
-- **Lemonade のチャットリクエストが接続エラーで失敗する場合：** `curl -fsS "http://127.0.0.1:13305/api/v1/health"` が成功すること、および `lemonade status` で Lemonade がまだモデルを提供していることを確認してください。
-- **エージェントがコンテキスト長やトークン上限に関するエラーを出す場合：** エージェントが過大な履歴を保持しないよう、新しい会話を開始してください。これが繰り返し発生する場合は、Lemonade をデフォルトの 65536 よりも大きい `ctx_size`（例：`ctx_size=131072`）で再起動してください（メモリに余裕がある場合）。
-- **エージェントが低品質または不完全な編集を行う場合：** Lemonade でより大きなモデルに切り替えるか、エージェントにより小規模で具体的なタスクを与え、次の変更を依頼する前にそれを完了させてください。
+- **UI は読み込まれるがバックエンドが unhealthy と表示される場合:** エージェントサーバーの起動が完了するまで1、2分待ってから再読み込みしてください。それでも unhealthy のままの場合は、スタックを再起動してログでエラーを確認してください。
+- **Lemonade のチャットリクエストが接続エラーで失敗する場合:** `curl -fsS "http://127.0.0.1:13305/api/v1/health"` が成功すること、および `lemonade status` で Lemonade がまだモデルを提供していることを確認してください。
+- **エージェントがコンテキスト長やトークン数の上限に関するエラーを出す場合:** 新しい会話を開始し、エージェントが肥大化した履歴を引き継がないようにしてください。それでも頻発する場合は、デフォルトの 65536 より大きな `ctx_size`(例: `ctx_size=131072`)でメモリーが許す範囲で Lemonade を再起動してください。
+- **エージェントが低品質または不完全な編集を行う場合:** Lemonade でより大きなモデルに切り替えるか、より小さく具体的なタスクをエージェントに与え、次の変更を依頼する前に完了させてください。
 
 ## 次のステップ
 
-- 同じワークスペース内で、ユニットテストファイルの追加や既知のバグの修正など、より大きなタスクに挑戦し、変更を反映する前にエージェントの差分を確認してください。
-- GitHub や Slack といった MCP サーバーを **Customize** の下で接続すると、エージェントが作業中に issue を読んだり更新を投稿したりできるようになります。
-- 複数の LLM プロファイル（高速な小規模モデルと、より強力な大規模モデル）を保存し、会話の途中で `/model` を使って切り替えてください。
-- 反復的な開発ループをスケジュール実行やイベントトリガーによるエージェント実行に変えるために、[OpenHands automations](https://docs.openhands.dev/openhands/usage/automations/overview) に進んでください。
+- 同じワークスペースでより大きなタスク、例えばユニットテストファイルの追加や既知のバグの修正などを試し、変更を採用する前にエージェントの diff をレビューしてください。
+- **Customize** の下で GitHub や Slack などの MCP サーバーを接続すると、エージェントが作業中に issue を読んだり更新を投稿したりできるようになります。
+- 複数の LLM プロファイル(高速な小規模モデルとより強力な大規模モデル)を保存しておき、会話の途中で `/model` を使って切り替えてください。
+- [OpenHands automations](https://docs.openhands.dev/openhands/usage/automations/overview) に進み、繰り返し発生する開発ループをスケジュールまたはイベントトリガー型のエージェント実行に変えましょう。
 
 ## リソース
 

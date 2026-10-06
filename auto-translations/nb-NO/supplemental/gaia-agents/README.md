@@ -18,24 +18,24 @@ SPDX-License-Identifier: MIT
 
 GAIA-agenter er AI-assistenter som bruker en lokal LLM til å resonnere og kalle verktøy du definerer — som chatboter som kan utføre handlinger. De kjører **100 % lokalt** uten skybaserte API-er, ingen data forlater maskinen din, og ingen API-nøkler kreves.
 
-I denne oppskriftsboken skal du bygge en Hardware Advisor Agent som oppdager systemets RAM, GPU og NPU, spør den lokale modellkatalogen, og anbefaler hvilke LLM-er maskinen din kan kjøre. Det er en praktisk introduksjon til GAIA Agent SDK som gir noe umiddelbart nyttig.
+I denne oppskriften skal du bygge en Hardware Advisor Agent som oppdager systemets RAM, GPU og NPU, spør det lokale modellkatalogen, og anbefaler hvilke LLM-er maskinen din kan kjøre. Det er en praktisk introduksjon til GAIA Agent SDK som gir noe umiddelbart nyttig.
 
 ## Hva du vil lære
 
-- Hvordan opprette en GAIA-agent med tilpassede verktøy
+- Hvordan opprette en GAIA-agent med egendefinerte verktøy
 - Bruke LemonadeClient SDK til å spørre systeminformasjon og modellkataloger
 - Plattformspesifikk GPU/NPU-deteksjon (Windows PowerShell og Linux lspci)
-- Minnebasert modelldimensjonering med 70 %-regelen
-- Bygge et interaktivt CLI for naturlig-språk-spørringer om maskinvare
+- Minnebasert modellstørrelsestilpasning ved hjelp av 70 %-regelen
+- Bygge en interaktiv CLI for naturlige språkspørringer om maskinvare
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Angi minnekonfigurasjonen
+## Konfigurere minneinnstillingen
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Sjekk etter programvareoppdateringer
+## Se etter programvareoppdateringer
 > **Merk**: Hvis VS Code ikke er installert, kan du installere det med Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
@@ -66,16 +66,18 @@ which python3
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
 <!-- @require:gaia -->
+<!-- @prereq:lemonade-models-qwen3-coder-30b -->
 
 ## Komme i gang
 
-Få det ferdige agentprosjektet til å kjøre først, slik at du kan se hva du bygger. Deretter går vi gjennom koden steg for steg.
+Få den ferdige agenten til å kjøre først, slik at du kan se hva du bygger. Deretter går vi gjennom koden steg for steg.
 
-### Kjør det ferdiglagde eksempelet
+### Kjør det ferdigbygde eksempelet
 
-Denne oppskriftsboken inneholder den komplette [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Last den ned til en mappe etter eget valg og kjør den for å se den ferdige agenten i aksjon:
+Denne oppskriften inkluderer den komplette [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Last den ned til en mappe du velger, og kjør den for å se den ferdige agenten i aksjon:
 
 ```bash
 python hardware_advisor_agent.py
@@ -126,7 +128,7 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 
 **Gratulerer** - du har bygget en agent! 
 
-Resten av oppskriftsboken vil forklare hvordan hver del av skriptet fungerer, slik at du kan forstå det fra bunnen av.
+Resten av oppskriften vil forklare hvordan hver del av skriptet fungerer, slik at du kan forstå det fra bunnen av.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -272,13 +274,13 @@ Hardware Advisor Agent kombinerer tre komponenter:
 
 - **LemonadeClient SDK** — API-er for systeminformasjon og modellkatalog
 - **Plattformspesifikk deteksjon** — Windows PowerShell / Linux lspci for GPU-informasjon
-- **Minneberegninger** — 70 %-regelen for trygg modelldimensjonering
+- **Minneberegninger** — 70 %-regelen for trygg modellstørrelsestilpasning
 
-Dataflyten går gjennom disse i rekkefølge: brukerspørring → agenten velger et verktøy → verktøyet kaller LemonadeClient + OS-deteksjon → agenten syntetiserer resultatene til en anbefaling.
+Dataflyten følger denne rekkefølgen: brukerspørring → agenten velger et verktøy → verktøyet kaller LemonadeClient + OS-deteksjon → agenten setter sammen resultatene til en anbefaling.
 
 ### LemonadeClient SDK
 
-LemonadeClient gir et enhetlig API for systemdeteksjon, NPU/GPU-tilgjengelighet og spørringer mot modellkatalogen.
+LemonadeClient tilbyr et enhetlig API for systemdeteksjon, NPU/GPU-tilgjengelighet og modellkatalogspørringer.
 
 **Importer og initialiser:**
 
@@ -364,7 +366,7 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 
 ### Plattformspesifikk GPU-deteksjon
 
-Agenten bruker OS-native kommandoer i stedet for PyTorch til GPU-deteksjon. Dette fungerer uten installerte GPU-drivere, oppdager alle GPU-er (ikke bare CUDA-kompatible), og unngår tunge biblioteksimporter.
+Agenten bruker OS-innebygde kommandoer i stedet for PyTorch til GPU-deteksjon. Dette fungerer uten installerte GPU-drivere, oppdager alle GPU-er (ikke bare CUDA-kompatible), og unngår tunge biblioteksimporteringer.
 
 <!-- @os:windows -->
 
@@ -401,7 +403,7 @@ result = subprocess.run(
 
 ### 70 %-minneregelen
 
-> **Regel:** Modellstørrelsen bør være mindre enn 70 % av tilgjengelig RAM for å la 30 % være tilgjengelig overhead for inferensoperasjoner (KV-cache, batch-behandlingsbuffere, runtime-minnetopper).
+> **Regel:** Modellstørrelsen bør være mindre enn 70 % av tilgjengelig RAM for å la 30 % være tilgjengelig som overhead for inferensoperasjoner (KV-cache, batchbehandlingsbuffere, runtime-minnetopper).
 
 ```
 System: 32 GB RAM
@@ -410,13 +412,13 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 70B model (~42 GB):   Too large
 ```
 
-## Koding av agenten steg for steg (valgfritt)
+## Kode agenten steg for steg (valgfritt)
 
 Du skal opprette **én fil** kalt `hardware_advisor_agent.py` og gradvis legge til funksjoner. Hvert steg bygger videre på det forrige.
 
 ### Steg 1: Agent-skjelett
 
-Start med en minimal agentstruktur — bare klassen og en enkel systemprompt. Agenten har ingen verktøy ennå.
+Start med en minimal agentstruktur — bare klassen og en grunnleggende systemprompt. Agenten har ingen verktøy ennå.
 
 ```python
 from gaia import Agent
@@ -459,9 +461,9 @@ Agent created successfully!
 
 ### Steg 2: GPU- og maskinvaredeteksjon
 
-Legg til hjelpemetoden `_get_gpu_info()` og verktøyet `get_hardware_info()`. Dette gjør agenten interaktiv — du kan nå spørre den om systemspesifikasjoner.
+Legg til hjelpemetoden `_get_gpu_info()` og verktøyet `get_hardware_info()`. Dette gjør agenten interaktiv — nå kan du spørre den om systemspesifikasjoner.
 
-**Oppdater importene** øverst i filen:
+**Oppdater importeringene** øverst i filen:
 
 ```python
 from typing import Any, Dict
@@ -639,7 +641,7 @@ Kjør og prøv å spørre "Show me my system specs":
 python hardware_advisor_agent.py
 ```
 
-**Eksempelresultat:**
+**Eksempel på resultat:**
 
 ```
 You: Show me my system specs
@@ -702,7 +704,7 @@ Kjør og prøv å spørre "What models are available?":
 python hardware_advisor_agent.py
 ```
 
-**Eksempelresultat:**
+**Eksempel på resultat:**
 
 ```
 You: What models are available?
@@ -717,7 +719,7 @@ Agent: I found 15 models in the catalog:
 
 ### Steg 4: Smarte anbefalinger
 
-Legg til verktøyet `recommend_models()` inne i `_register_tools()`, etter `list_available_models`. Agenten kan nå beregne hvilke modeller som passer i systemets minne ved bruk av 70 %-regelen.
+Legg til verktøyet `recommend_models()` inne i `_register_tools()`, etter `list_available_models`. Agenten kan nå beregne hvilke modeller som passer i systemets minne ved hjelp av 70 %-regelen.
 
 ```python
     @tool(atomic=True)
@@ -782,7 +784,7 @@ Kjør og prøv å spørre "What size LLM can I run?":
 python hardware_advisor_agent.py
 ```
 
-**Eksempelresultat:**
+**Eksempel på resultat:**
 
 ```
 You: What size LLM can I run?
@@ -798,7 +800,7 @@ Top recommendations:
 
 ### Steg 5: Produksjons-CLI
 
-Erstatt den enkle `__main__`-blokken med et polert interaktivt CLI. Dette legger til et banner, avslutningskommandoer og bedre feilhåndtering.
+Erstatt den enkle `__main__`-blokken med en polert interaktiv CLI. Dette legger til et banner, avslutningskommandoer og bedre feilhåndtering.
 
 **Erstatt hele `if __name__ == "__main__":`-blokken** med:
 
@@ -852,29 +854,29 @@ if __name__ == "__main__":
 ---
 ### Endelig verifisering
 
-`hardware_advisor_agent.py`-filen din bør nå ha alle disse komponentene:
+`hardware_advisor_agent.py`-filen din skal nå ha alle disse komponentene:
 
 - [x] Importer: `from typing import Any, Dict` og `from gaia import Agent, tool`
 - [x] `HardwareAdvisorAgent`-klasse med `__init__` og systemprompt
 - [x] `_get_gpu_info()`-hjelpefunksjon (Windows PowerShell + Linux lspci)
-- [x] `get_hardware_info()`-verktøy med GPU-, NPU- og OS-felt
+- [x] `get_hardware_info()`-verktøy med felt for GPU, NPU og OS
 - [x] `list_available_models()`-verktøy med etiketter og størrelsesberikelse
-- [x] `recommend_models()`-verktøy med 70%-regelen, fits_in_ram, fits_in_gpu
+- [x] `recommend_models()`-verktøy med 70%-regel, fits_in_ram, fits_in_gpu
 - [x] `main()`-funksjon med interaktivt CLI
 
 **Test disse spørringene for å bekrefte at alt fungerer:**
 
-- "Hvilken størrelse LLM kan jeg kjøre?"
-- "Vis meg systemspesifikasjonene mine"
-- "Hvilke modeller er tilgjengelige?"
-- "Kan jeg kjøre en 30B-modell?"
+- "What size LLM can I run?"
+- "Show me my system specs"
+- "What models are available?"
+- "Can I run a 30B model?"
 
 > **Tips**: Den komplette implementasjonen er tilgjengelig på [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
 
 ## Neste steg
 
-- **Utforsk LemonadeClient-APIer** — Oppdag flere system- og modellhåndteringsmuligheter i [LemonadeClient SDK-dokumentasjonen](https://amd-gaia.ai/sdk/lemonade-client)
+- **Utforsk LemonadeClient-API-ene** — Oppdag flere muligheter for system- og modellhåndtering i [LemonadeClient SDK-dokumentasjonen](https://amd-gaia.ai/sdk/lemonade-client)
 - **Legg til taleinteraksjon** — Integrer Whisper ASR og Kokoro TTS slik at brukere kan stille maskinvarespørsmål ved å snakke. Se [Talk-guiden](https://amd-gaia.ai/guides/talk)
 - **Legg til MCP-støtte** — Eksponer maskinvarerådgiveren som en MCP-server slik at andre verktøy kan spørre den. Se [MCP-guiden](https://amd-gaia.ai/sdk/infrastructure/mcp)
-- **Utvid anbefalingsmotoren** — Ta hensyn til GPU-VRAM for avlasting av lag, eller legg til benchmarking for å estimere tokens per sekund
-- **Bygg et multi-agent-system** — Kombiner maskinvarerådgiveren med en kodeagent eller chatagent ved hjelp av [Routing Agent](https://amd-gaia.ai/guides/routing)
+- **Utvid anbefalingsmotoren** — Ta hensyn til GPU VRAM for avlastning av lag, eller legg til benchmarking for å estimere tokens per sekund
+- **Bygg et multi-agent-system** — Kombiner maskinvarerådgiveren med en kode-agent eller chat-agent ved hjelp av [Routing Agent](https://amd-gaia.ai/guides/routing)

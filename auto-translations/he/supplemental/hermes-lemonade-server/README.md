@@ -12,13 +12,13 @@ SPDX-License-Identifier: MIT
 
 ## סקירה כללית
 
-[**Hermes Agent**](https://hermes-agent.nousresearch.com/) הוא סוכן AI משתפר-עצמי שנבנה על ידי Nous Research. יש לו לולאת למידה מובנית, הוא יוצר כישורים מתוך ניסיון, בונה זיכרון מתמשך של מי אתה על פני הפעלות (sessions), ויכול להריץ אוטומציות מתוזמנות מטעמך. בניגוד לעוזר צ'אט פשוט, Hermes מבצע פעולות אמיתיות: הרצת פקודות shell, כתיבת קבצים, גלישה באינטרנט, והאצלת זרימות עבודה מקבילות לתת-סוכנים.
+[**Hermes Agent**](https://hermes-agent.nousresearch.com/) הוא סוכן AI משתפר-עצמית שנבנה על ידי Nous Research. יש לו לולאת למידה מובנית, הוא יוצר מיומנויות מתוך ניסיון, בונה זיכרון מתמשך של מי אתה על פני הפעלות שונות, ויכול להריץ אוטומציות מתוזמנות מטעמך. בניגוד לעוזר צ'אט פשוט, Hermes מבצע פעולות אמיתיות: הרצת פקודות shell, כתיבת קבצים, גלישה באינטרנט, והאצלת זרימות עבודה מקבילות לתת-סוכנים.
 
-[**Lemonade Server**](https://lemonade-server.ai/) הוא מנוע ההסקה המקומי שמניע אותו. זהו שרת קוד פתוח שמריץ מודלי GenAI ישירות על חומרת AMD שלך וחושף אותם דרך ה-API הסטנדרטי בתעשייה של OpenAI.
+[**Lemonade Server**](https://lemonade-server.ai/) הוא ה-backend המקומי להסקה שמניע אותו. זהו שרת קוד פתוח שמריץ מודלים של GenAI ישירות על חומרת ה-AMD שלך וחושף אותם דרך ה-API הסטנדרטי בתעשייה של OpenAI.
 
-יחד הם מהווים מחסנית סוכן AI מקומית לחלוטין: Lemonade מטפל בהסקת המודל על ה-GPU שלך, ו-Hermes מספק את לולאת הסוכן, הזיכרון, הכישורים, ושער ההודעות (messaging gateway).
+יחד הם יוצרים ערימת סוכן AI מקומית לחלוטין: Lemonade מטפל בהסקת המודל על ה-GPU שלך, ו-Hermes מספק את לולאת הסוכן, הזיכרון, המיומנויות ושער המסרים.
 
-> **לפני שתמשיך:** Hermes Agent הוא סוכן AI בעל אוטונומיה גבוהה. מתן גישה לכל סוכן AI למערכת שלך עלול לגרום לתוצאות בלתי צפויות או לא מכוונות. המשך רק אם אתה מבין את הסיכונים ומרגיש בנוח עם תוכנה אוטונומית הפועלת מטעמך.
+> **לפני שתמשיך:** Hermes Agent הוא סוכן AI אוטונומי במידה רבה. מתן גישה לכל סוכן AI למערכת שלך עלול להוביל לתוצאות בלתי צפויות או בלתי מכוונות. המשך רק אם אתה מבין את הסיכונים ומרגיש בנוח עם תוכנה אוטונומית הפועלת מטעמך.
 
 ---
 
@@ -26,9 +26,9 @@ SPDX-License-Identifier: MIT
 
 בסיום מדריך זה תוכל:
 
-- **להתקין את Hermes Agent** ולהפנות אותו אל **Lemonade Server** כמנוע ה-AI שלו.
-- **(מומלץ) להפעיל בידוד Docker/Podman** כדי לבודד את פעולות הסוכן מהמארח שלך.
-- **להפעיל את שער ה-Hermes** ולוודא שהסוכן שלך מוכן.
+- **להתקין את Hermes Agent** ולהפנות אותו אל **Lemonade Server** כ-backend של ה-AI שלו.
+- **(מומלץ) להפעיל ארגז חול (sandboxing) של Docker/Podman** כדי לבודד את פעולות הסוכן מהמארח שלך.
+- **להפעיל את שער Hermes** ולוודא שהסוכן שלך מוכן.
 - **לחבר ערוץ תקשורת** (Discord או Telegram) כדי שתוכל לשוחח עם הסוכן שלך מכל מכשיר.
 
 ---
@@ -45,13 +45,13 @@ SPDX-License-Identifier: MIT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות התוכנה המקדימות
+## התקנת דרישות קדם של תוכנה
 
 <!-- @os:linux -->
-- מחשב המריץ **Ubuntu 24.04+** או הפצת לינוקס מבוססת-Debian תואמת עם `apt-get`
-- לפחות **12 GB של RAM** (מומלץ 64 GB+ עבור מודלים גדולים יותר)
-- **~10–30 GB של שטח דיסק פנוי** עבור משקלי המודל
-- [Podman](https://podman.io/docs/installation) (אופציונלי, לבידוד Hermes Agent)
+- מחשב המריץ **Ubuntu 24.04+** או הפצת Linux מבוססת Debian תואמת עם `apt-get`
+- לפחות **12 GB של RAM** (64 GB+ מומלץ עבור מודלים גדולים יותר)
+- **כ-10–30 GB של שטח דיסק פנוי** עבור משקלי המודל
+- [Podman](https://podman.io/docs/installation) (אופציונלי, לארגז חול של Hermes Agent)
   ```bash 
   sudo apt-get install -y podman
   ```
@@ -59,9 +59,9 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:windows -->
 - מחשב המריץ **Windows 10/11**
-- לפחות **12 GB של RAM** (מומלץ 64 GB+ עבור מודלים גדולים יותר)
-- **~10–30 GB של שטח דיסק פנוי** עבור משקלי המודל
-- Podman (אופציונלי, לבידוד Hermes Agent). התקן בתוך WSL:
+- לפחות **12 GB של RAM** (64 GB+ מומלץ עבור מודלים גדולים יותר)
+- **כ-10–30 GB של שטח דיסק פנוי** עבור משקלי המודל
+- Podman (אופציונלי, לארגז חול של Hermes Agent). התקן בתוך WSL:
   ```bash 
   sudo apt-get install -y podman
   ```
@@ -71,7 +71,9 @@ SPDX-License-Identifier: MIT
 > Podman מותקן מראש ב-Halo Box ואין צורך בהגדרה
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:hermes,lemonade-models-qwen3-35b-a3b -->
 
 <!-- @var:id=hermes_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -85,13 +87,13 @@ lemonade --version
 
 ## משיכה וטעינה של המודל המומלץ
 
-המודל המומלץ עבור מדריך זה הוא **Qwen3.6-35B-A3B-GGUF** מבית Unsloth, מודל MoE חזק עם חלון הקשר (context window) של 263k טוקנים המתאים היטב לעומסי עבודה של סוכנים. מודל זה משתמש בקוונטיזציית UD-Q4_K_XL. משוך אותו כעת:
+המודל המומלץ עבור מדריך זה הוא **Qwen3.6-35B-A3B-GGUF** מבית Unsloth, מודל MoE חזק עם חלון הקשר של 263 אלף טוקנים המתאים היטב לעומסי עבודה של סוכנים. מודל זה משתמש בקוונטיזציה מסוג UD-Q4_K_XL. משוך אותו כעת:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-לאחר מכן טען אותו עם חלון הקשר גדול ושמור הגדרה זו להרצות עתידיות:
+לאחר מכן טען אותו עם חלון הקשר גדול ושמור את ההגדרה הזו להרצות עתידיות:
 
 <!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
@@ -101,9 +103,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end -->
 
-למודל יש אורך הקשר ברירת מחדל של 262,144 טוקנים. אם אתה נתקל בשגיאות חוסר זיכרון (OOM), שקול להקטין את חלון ההקשר.
+למודל אורך הקשר ברירת מחדל של 262,144 טוקנים. אם אתה נתקל בשגיאות נגמר-הזיכרון (OOM), שקול להקטין את חלון ההקשר.
 
-> **טיפ: השבת חשיבה לתגובות סוכן מהירות יותר:** Qwen3.6-35B-A3B פועל במצב חשיבה כברירת מחדל, מה שמוסיף השהיה לפני כל תגובה. עבור לולאות סוכן, תקורה זו מצטברת במהירות. המאגר [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) מספק תצורה מוכנה שמשביתה חשיבה. כדי להשתמש בה, הורד את הקובץ וייבא אותו:
+> **טיפ: השבת מצב חשיבה לתגובות סוכן מהירות יותר:** Qwen3.6-35B-A3B פועל במצב חשיבה כברירת מחדל, מה שמוסיף זמן השהיה לפני כל תגובה. עבור לולאות סוכן, עומס זה מצטבר במהירות. המאגר [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) מספק תצורה מוכנה מראש שמשביתה חשיבה. כדי להשתמש בה, הורד את הקובץ וייבא אותו:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -246,11 +248,11 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## הגדרת WSL
 
-אנו מריצים את Hermes Agent בתוך WSL ומחברים אותו ל-Lemonade הרץ באופן טבעי על Windows. זה נותן לך סביבת מעטפת לינוקס עבור Hermes תוך שמירה על האצת ה-GPU של Lemonade בצד Windows.
+אנו מריצים את Hermes Agent בתוך WSL ומחברים אותו ל-Lemonade הרץ באופן טבעי ב-Windows. כך מתקבלת סביבת מעטפת Linux עבור Hermes תוך שמירה על האצת ה-GPU של Lemonade בצד Windows.
 
 ### התקנת WSL ו-Ubuntu
 
-פתח את PowerShell כמנהל (Administrator) והתקן את גרעין ה-WSL:
+פתח את PowerShell כמנהל והתקן את ליבת ה-WSL:
 
 ```powershell
 wsl --install --no-distribution
@@ -264,7 +266,7 @@ wsl --install -d Ubuntu-24.04
 
 ### הפעלת systemd ב-WSL
 
-הרץ זאת בתוך מסוף Ubuntu:
+הרץ את הפקודה הזו בתוך מסוף Ubuntu:
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -280,36 +282,36 @@ wsl --shutdown
 wsl
 ```
 
-### גישור Lemonade מ-Windows אל WSL
+### גישור Lemonade מ-Windows אל תוך WSL
 
-WSL2 פועל ברשת וירטואלית. Lemonade ב-Windows מתחבר ל-`127.0.0.1`, ש-WSL לא יכול להגיע אליו ישירות. פרוקסי פורטים של Windows מעביר תעבורה מכתובת ה-IP של שער ה-WSL אל localhost של Windows.
+WSL2 פועל ברשת וירטואלית. Lemonade ב-Windows מתחבר ל-`127.0.0.1`, אליו WSL אינו יכול להגיע ישירות. Port proxy של Windows מעביר תעבורה מכתובת ה-gateway של WSL אל ה-localhost של Windows.
 
-**מצא את כתובת ה-IP של שער ה-WSL שלך** (הרץ בתוך WSL):
+**מצא את כתובת ה-gateway של ה-WSL שלך** (הרץ בתוך WSL):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**הוסף את פרוקסי הפורט** (הרץ ב-PowerShell כמנהל, החלף את `<WSL-Gateway-IP>` בכתובת ה-IP של שער ה-WSL שלך):
+**הוסף את ה-port proxy** (הרץ ב-PowerShell כמנהל, תוך החלפת `<WSL-Gateway-IP>` בכתובת ה-gateway של ה-WSL שלך):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**הוסף כלל חומת אש** (אותו PowerShell עם הרשאות מוגברות):
+**הוסף כלל חומת אש (firewall)** (אותו PowerShell מוגבה):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**וודא מ-WSL**:
+**אמת מתוך WSL**:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-אם כבר טענת את המודל Qwen3.6-35B-A3B-GGUF בשלב הקודם, אמור להופיע פלט JSON המפרט את המודל הטעון שלך.
+אם כבר טענת את המודל Qwen3.6-35B-A3B-GGUF בשלב הקודם, אתה אמור לראות פלט JSON המפרט את המודל הטעון שלך.
 
 ```json
 {
@@ -327,7 +329,7 @@ curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 }
 ```
 
-> כלל ה-`netsh portproxy` שורד הפעלות מחדש, אך כתובת ה-IP של שער ה-WSL עלולה להשתנות לאחר `wsl --shutdown`. אם Lemonade הופך לבלתי נגיש מ-WSL לאחר הפעלה מחדש, קבל את כתובת השער המעודכנת ועדכן את הפרוקסי עם כתובת ה-IP החדשה הזו.
+> כלל ה-`netsh portproxy` שורד הפעלות מחדש, אך כתובת ה-gateway של WSL עשויה להשתנות לאחר `wsl --shutdown`. אם Lemonade הופך לבלתי נגיש מ-WSL לאחר הפעלה מחדש, קבל את כתובת ה-gateway המעודכנת ועדכן את ה-proxy בכתובת החדשה הזו.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -393,9 +395,9 @@ finally {
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 ```
 
-הדגל `--skip-setup` מדלג על אשף ההתקנה האינטראקטיבי כך שתוכל להגדיר את מנוע המודל באופן ידני בשלב הבא.
+הדגל `--skip-setup` מדלג על אשף ההתקנה האינטראקטיבי כדי שתוכל להגדיר את ה-backend של המודל ידנית בשלב הבא.
 
-טען מחדש את המעטפת שלך:
+טען מחדש את ה-shell שלך:
 
 ```bash
 source ~/.bashrc
@@ -407,7 +409,7 @@ source ~/.bashrc
 hermes --version
 ```
 
-הרץ אבחון עצמי לבדיקת כל התלויות:
+הרץ אבחון עצמי כדי לבדוק את כל התלויות:
 
 ```bash
 hermes doctor
@@ -417,7 +419,7 @@ hermes doctor
 > ```bash
 > export PATH="$HOME/.local/bin:$PATH"
 > ```
-> כדי להפוך זאת לקבוע, הוסף את השורה למעלה לקובץ `~/.bashrc` או `~/.zshrc` שלך.
+> כדי להפוך זאת לקבוע, הוסף את השורה הנ"ל לקובץ ה-`~/.bashrc` או `~/.zshrc` שלך.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-version-linux timeout=120 hidden=True -->
@@ -471,12 +473,12 @@ finally {
 ---
 ## הגדרת Hermes לשימוש ב-Lemonade
 
-Hermes שומר את תצורת המודל שלו ב-`~/.hermes/config.yaml`. ניתן להשתמש בבורר האינטראקטיבי `hermes model` או לכתוב את התצורה ישירות.
+Hermes שומר את תצורת המודל שלו ב-`~/.hermes/config.yaml`. ניתן להשתמש בבוחר האינטראקטיבי `hermes model` או לכתוב את התצורה ישירות.
 
-### אפשרות 1: בורר אינטראקטיבי
+### אפשרות 1: בוחר אינטראקטיבי
 
 <!-- @os:windows -->
-> הריצו את הפקודה הבאה בתוך **טרמינל ה-WSL** שלכם.
+> הרץ את הפקודה הבאה בתוך **טרמינל ה-WSL** שלך.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -491,22 +493,22 @@ hermes model
 ```
 <!-- @os:end -->
 
-כאשר תתבקשו:
+כשתתבקש:
 
-1. בחרו **Custom endpoint (enter URL manually)**
+1. בחר **Custom endpoint (enter URL manually)**
 <!-- @os:linux -->
 2. **API base URL:** `http://127.0.0.1:13305/api/v1`
 <!-- @os:end -->
 <!-- @os:windows -->
-2. **API base URL:** השתמשו בכתובת ה-IP של שער ה-WSL: הריצו `ip route show default | awk '{print $3}' | head -1` בתוך WSL כדי לקבל אותה, ולאחר מכן הזינו `http://<WSL-Gateway-IP>:13305/api/v1`
+2. **API base URL:** השתמש בכתובת ה-IP של שער ה-WSL: הרץ `ip route show default | awk '{print $3}' | head -1` בתוך WSL כדי לקבל אותה, ולאחר מכן הזן `http://<WSL-Gateway-IP>:13305/api/v1`
 <!-- @os:end -->
 3. **API key:** `lemonade`
-4. **API compatibility mode:** `1` (Auto-detect)
-5. **Select model:** בחרו את `Qwen3.6-35B-A3B-GGUF` מהרשימה
+4. **API compatibility mode:** `1` (זיהוי אוטומטי)
+5. **Select model:** בחר את `Qwen3.6-35B-A3B-GGUF` מהרשימה
 6. **Context length in tokens:** `262144`
-7. **Display name:** `local-lemonade` (או כל שם אחר שתעדיפו)
+7. **Display name:** `local-lemonade` (או כל שם אחר שתעדיף)
 
-`hermes model` שומר גם את בחירת המודל הפעיל וגם רשומת `custom_providers` בעלת שם, המאחסנת את אורך ההקשר לצד נקודת הקצה. התוצאה בקובץ `~/.hermes/config.yaml` נראית כך:
+`hermes model` שומר גם את בחירת המודל הפעיל וגם רשומת `custom_providers` בעלת שם, המאחסנת את אורך ההקשר יחד עם נקודת הקצה. התוצאה ב-`~/.hermes/config.yaml` נראית כך:
 
 ```yaml
 model:
@@ -586,7 +588,7 @@ echo "OK: Hermes config.yaml contains Lemonade model configuration"
 
 <!-- @os:windows -->
 
-בתוך טרמינל ה-WSL שלכם, קבלו את כתובת ה-IP של מארח Windows וכתבו את התצורה:
+בתוך טרמינל ה-WSL שלך, קבל את כתובת ה-IP של מארח ה-Windows וכתוב את התצורה:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
@@ -679,11 +681,11 @@ finally {
 
 ---
 
-## (מומלץ) הפעלת בידוד ארגז חול (Sandboxing) עם Podman
+## (מומלץ) הפעלת ארגז חול (Sandboxing) עם Podman
 
-סוכן Hermes יכול לנתב את כל פעולות המעטפת (shell) והקבצים של הסוכן דרך מכולה מבודדת, במקום להריץ אותן ישירות על המארח שלכם. כך צמצם רדיוס הפגיעה של כל פעולה לא מכוונת לארגז החול בלבד, ומערכת הקבצים והרשת של המארח שלכם נשארות ללא פגיעה.
+Hermes Agent יכול לנתב את כל פעולות ה-shell והקבצים של הסוכן דרך קונטיינר מבודד במקום להריץ אותן ישירות על המארח שלך. כך מצומצם רדיוס ההשפעה של כל פעולה לא מכוונת לארגז החול בלבד, מבלי לפגוע במערכת הקבצים והרשת של המארח שלך.
 
-בנו תמונת ארגז חול קלת משקל:
+בנה תמונת ארגז חול קלת משקל:
 
 <!-- @os:linux -->
 ```bash
@@ -726,13 +728,13 @@ echo "OK: Hermes sandbox Podman image is available"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-היכנסו לטרמינל ה-WSL שלכם:
+היכנס לטרמינל ה-WSL שלך:
 
 ```powershell
 wsl -d Ubuntu-24.04
 ```
 
-לאחר מכן, בנו תמונת ארגז חול קלת משקל:
+לאחר מכן, בנה תמונת ארגז חול קלת משקל:
 
 ```bash
 podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -795,7 +797,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-לאחר מכן הגדירו את Hermes להשתמש ב-Podman כזמן ריצה של המכולות והגדירו את backend הטרמינל:
+לאחר מכן הגדר את Hermes להשתמש ב-Podman כסביבת ריצה לקונטיינרים וקבע את ה-backend של הטרמינל:
 
 ```bash
 echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
@@ -807,8 +809,8 @@ terminal:
 EOF
 ```
 
-> ה-`terminal.backend` עדיין `docker`.
-> `HERMES_DOCKER_BINARY` הוא זה שמורה ל-Hermes להשתמש ב-Podman כזמן הריצה במקום זאת.
+> ה-`terminal.backend` עדיין נותר `docker`.
+> `HERMES_DOCKER_BINARY` הוא זה שמורה ל-Hermes להשתמש ב-Podman כסביבת ריצה במקום זאת.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -905,37 +907,37 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-כעת Hermes יפעיל מכולת ארגז חול קבועה וינתב את כל קריאות ה-`terminal` וכלי הקבצים דרכה. המכולה חולקת את מחזור החיים של תהליך Hermes, נעשה בה שימוש חוזר בכל קריאות הכלים, והיא נהרסת כאשר Hermes יוצא.
+כעת Hermes יפעיל קונטיינר ארגז חול מתמיד וינתב את כל קריאות ה-`terminal` וכלי הקבצים דרכו. הקונטיינר חי לאורך חיי תהליך Hermes, נעשה בו שימוש חוזר עבור כל קריאות הכלים, והוא נהרס כאשר Hermes מסתיים.
 
-> **אימות שארגז החול פועל:** הפעילו את Hermes (`hermes`) ובקשו ממנו `run hostname` - אתם אמורים לראות מזהה מכולה קצר במקום שם המארח של המחשב שלכם. תוכלו גם לבקש ממנו `rm -rf <path-to-a-dummy-file/folder>`: Hermes יאשר את המחיקה, אך התיקייה עדיין תהיה קיימת במארח שלכם. הפקודה רצה בתוך `$HOME` המבודד של המכולה, לא שלכם.
+> **אימות שארגז החול פועל:** הפעל את Hermes (`hermes`) ובקש ממנו `run hostname` - אתה אמור לראות מזהה קונטיינר קצר במקום שם המארח של המחשב שלך. אפשר גם לבקש ממנו `rm -rf <path-to-a-dummy-file/folder>`: Hermes יאשר את המחיקה, אך התיקייה עדיין תהיה קיימת במארח שלך. הפקודה רצה בתוך ה-`$HOME` המבודד של הקונטיינר, לא שלך.
 
-> **זקוקים לבידוד חזק יותר?** Hermes מספק גם תמונת Docker רשמית (`nousresearch/hermes-agent`) שמריצה את כל תהליך הסוכן בתוך מכולה - כולל השער (gateway), הכלים, והכול. ראו את [תיעוד ה-Docker של Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/docker) לפרטי ההגדרה.
+> **צריך בידוד חזק יותר?** Hermes מספק גם תמונת Docker רשמית (`nousresearch/hermes-agent`) שמריצה את כל תהליך הסוכן בתוך קונטיינר - שער (gateway), כלים, והכל. ראה את [תיעוד ה-Docker של Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/docker) לפרטי ההגדרה.
 
 ---
 
 <!-- @os:linux -->
 ## (מומלץ) שילוב Hermes עם שירותי Firecrawl
 
-Hermes יכול לגלוש ולחלץ תוכן מאתרים באמצעות כלי הרשת המובנים שלו. עם זאת, אתרים מודרניים רבים משתמשים במערכות זיהוי בוטים, החוסמות בקשות HTTP פשוטות ומחזירות דפי אתגר במקום התוכן בפועל. כתוצאה מכך, ייתכן ש-Hermes לא יוכל לחלץ מידע מאתרים אלו בצורה אמינה.
+Hermes יכול לגלוש ולחלץ תוכן מאתרי אינטרנט באמצעות כלי האינטרנט המובנים שלו. עם זאת, אתרים מודרניים רבים משתמשים במערכות זיהוי בוטים, החוסמות בקשות HTTP פשוטות ומחזירות דפי אתגר במקום התוכן בפועל. כתוצאה מכך, ייתכן ש-Hermes לא יוכל לחלץ מידע באופן אמין מאתרים אלו.
 
-כדי להתגבר על מגבלה זו, [Firecrawl](https://docs.firecrawl.dev/introduction) מספק שירות גרימה (crawling) וחילוץ תוכן מאוחסן עצמאית, שיכול לעקוף אתגרים אלו ולשחרר את הפוטנציאל המלא של אוטומציית Hermes.
+כדי להתגבר על מגבלה זו, [Firecrawl](https://docs.firecrawl.dev/introduction) מספק שירות סריקת ואיתור תוכן ברשת המתארח באופן עצמאי, המסוגל לעקוף אתגרים אלו ולשחרר את מלוא הפוטנציאל של האוטומציה של Hermes.
 
-בהגדרה זו, Firecrawl פועל כקבוצת מכולות Docker המנוהלות באמצעות Podman. כדי לפשט את ניהול מחזור החיים וההפעלה האוטומטית, אנו רושמים את Firecrawl כשירות `systemd` ברמת המשתמש, המתזמר את מחסנית ה-Podman Compose הבסיסית. כך Hermes יכול להתחיל, לעצור ולוודא את שירות Firecrawl באמצעות פקודות `systemctl --user` סטנדרטיות, במקום לתקשר עם המכולות ישירות.
+בהגדרה זו, Firecrawl פועל כסדרה של קונטיינרים של Docker המנוהלים באמצעות Podman. כדי לפשט את ניהול מחזור החיים וההפעלה האוטומטית, אנו רושמים את Firecrawl כשירות `systemd` ברמת המשתמש, אשר מתזמר את מחסנית ה-Podman Compose שבבסיסו. כך Hermes יכול להפעיל, לעצור ולאמת את שירות Firecrawl באמצעות פקודות `systemctl --user` רגילות, במקום לתקשר ישירות עם הקונטיינרים.
 
 כדי לשמור על הפשטות, פירקנו את כל התהליך לארבעה שלבים:
 
 ---
 
 ### 1. רישום שירות המערכת
-נווטו לתיקיית תצורת המשתמש של systemd:
+נווט לספריית תצורת המשתמש של systemd:
 ```bash
 cd ~/.config/systemd/user
 ```
-צרו ופתחו קובץ חדש בשם `firecrawl.service`.
+צור ופתח קובץ חדש בשם `firecrawl.service`.
 ```bash
 nano firecrawl.service
 ```
-העתיקו והדביקו את התצורה הבאה:
+העתק והדבק את התצורה הבאה:
 ```bash
 [Unit]
 Description=Firecrawl
@@ -960,27 +962,27 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
-בשלב זה, השירות הוגדר אך טרם נרשם ב-`systemd`.
-ודאו ששם הקובץ תואם במדויק למה שיצרתם למעלה, ולאחר מכן הריצו:
+בשלב זה, השירות הוגדר אך עדיין לא נרשם ב-`systemd`.
+ודא ששם הקובץ תואם בדיוק למה שיצרת למעלה, ולאחר מכן הרץ:
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
 ```
-אם ההרצה הצליחה, אמורים לראות את הפלט הבא:
+אם ההפעלה הצליחה, אמורה להופיע הפלט הבא:
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
-`default.target.wants/` מכיל קישורים סימבוליים לשירותים המוגדרים להתחיל אוטומטית.
+`default.target.wants/` מכיל קישורים סימבוליים לשירותים המוגדרים להפעלה אוטומטית.
 
-### 2. הגדרת Firecrawl עבור השירות שלכם
+### 2. הגדרת Firecrawl עבור השירות שלך
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) אידיאלי עבור מי שזקוק לשליטה מלאה בסביבות הגרימה ועיבוד הנתונים שלו, אך מגיע עם מחיר של מאמצי תחזוקה והגדרה נוספים.
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) אידיאלי עבור מי שזקוק לשליטה מלאה בסביבות הגרידה ועיבוד הנתונים שלו, אך כרוך במאמצי תחזוקה והגדרה נוספים.
 
-התחילו בשכפול המאגר:
+התחל בשכפול המאגר:
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-צרו קובץ `.env` בתיקיית השורש `/firecrawl`:
+צור קובץ `.env` בספריית השורש `/firecrawl`:
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1008,44 +1010,44 @@ BULL_AUTH_KEY=CHANGEME
 # Default: 0.8 (80%)
 # MAX_RAM=0.8
 ```
-> הגדירו את `BULL_AUTH_KEY` לסוד חזק, במיוחד בכל פריסה הנגישה מרשתות לא מהימנות.
+> הגדר את `BULL_AUTH_KEY` לסוד חזק, במיוחד בכל פריסה הנגישה מרשתות לא מהימנות.
 ### 3. פריסת Hermes באמצעות Compose
 
-לפני שממשיכים, ודאו שמשכתם את תמונת ה-Docker העדכנית ביותר של Hermes:
+לפני שממשיכים הלאה, יש לוודא שה-image של Docker האחרון של Hermes נמשך:
 ```bash
 podman pull docker.io/nousresearch/hermes-agent:latest
 ```
-לאחר מכן, הורידו את קובץ ה-Compose של Hermes [hermes-compose.yaml](assets/hermes-compose.yaml) והניחו אותו בתיקיית השורש `/firecrawl`:
+לאחר שהשלמתם זאת, יש להוריד את קובץ ה-Compose של Hermes [hermes-compose.yaml](assets/hermes-compose.yaml) ולמקם אותו בתיקיית השורש `/firecrawl`:
 
-> מוסכמה זו נדרשת כדי ש-`systemd` יוכל לאתר ולהפעיל את השירות כראוי, כפי שצוין ב-`WorkingDirectory=${HOME}/firecrawl`.
+> מוסכמה זו נדרשת כדי ש-`systemd` יוכל לאתר ולהפעיל את השירות כראוי, כפי שמוגדר ב-`WorkingDirectory=${HOME}/firecrawl`.
 
-> תמיד ניתן להרחיב את המחסנית על ידי הוספת שירותי Firecrawl נוספים לפי הצורך. הרשימה המלאה של השירותים הזמינים נמצאת בקובץ הרשמי [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+> תמיד ניתן להרחיב את המחסנית על ידי הוספת שירותי Firecrawl נוספים לפי הצורך. את הרשימה המלאה של השירותים הזמינים ניתן למצוא בקובץ הרשמי [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
 
-### 4. הפעלת שירות Hermes דרך Firecrawl 
+### 4. הפעלת שירות Hermes דרך Firecrawl
 
-לפני העברת השליטה ל-`systemd`, ודאו שהכול עובד כראוי על ידי הרצת המחסנית באופן ידני:
+לפני העברת השליטה ל-`systemd`, יש לוודא שהכול פועל כראוי על ידי הרצת המחסנית באופן ידני:
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-אם הכול מוגדר כראוי, אמור להופיע מכולת Hermes, ופלט שורת הפקודה שלכם אמור להיראות בערך כך:
+אם הכול מוגדר כראוי, אמורים לראות את מכל (container) ה-Hermes עולה, ופלט שורת הפקודה אמור להיראות דומה לכך:
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
 
-לאחר האימות, הורידו את המחסנית לפני שממשיכים:
+לאחר האימות, יש להוריד את המחסנית לפני שממשיכים:
 ```bash
 podman compose -f hermes-compose.yaml down
 ```
-כעת, לאחר שהכול אומת, הפעילו את השירות דרך `systemd`:
+כעת, לאחר שהכול אומת, יש להפעיל את השירות דרך `systemd`:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[ה-API של Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) נגיש מתוך המכולה האינטראקטיבית, ולוח הבקרה מבוסס האינטרנט (Web Dashboard) זמין באותו מארח ופורט בכתובת http://127.0.0.1:9119.
+[ה-API של Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) נגיש מתוך המכל האינטראקטיבי, ולוח הבקרה האינטרנטי זמין באותו מארח ופורט בכתובת http://127.0.0.1:9119.
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
 
-כדי לעצור את השירות, הריצו:
+כדי לעצור את השירות, יש להריץ:
 ```bash
 systemctl --user stop firecrawl.service
 ```
@@ -1054,7 +1056,7 @@ systemctl --user stop firecrawl.service
 
 ## Hermes Native
 
-התחילו הפעלת CLI אינטראקטיבית ישירות: 
+הפעלת סשן CLI אינטראקטיבי ישירות:
 
 ```bash
 hermes
@@ -1209,17 +1211,17 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-**ברכות, בניתם מחסנית סוכן AI מקומית לחלוטין.**
+**מזל טוב, בניתם מחסנית סוכן AI מקומית מלאה.**
 
-### לוח הבקרה מבוסס האינטרנט (Web Dashboard)
+### לוח הבקרה האינטרנטי
 
-Hermes כולל ממשק משתמש מבוסס דפדפן לניהול הגדרות, מפתחות API, מודלים, הפעלות, זיכרון ומשימות מתוזמנות (cron). פתחו מסוף שני בזמן שהשער (gateway) או ה-CLI פועלים, והפעילו אותו באמצעות:
+Hermes כולל ממשק משתמש מבוסס דפדפן לניהול הגדרות, מפתחות API, מודלים, סשנים, זיכרון ומשימות cron. יש לפתוח מסוף שני בזמן שהשער (gateway) או ה-CLI פועלים ולהפעיל אותו עם:
 
 ```bash
 hermes dashboard
 ```
 
-פעולה זו מפעילה שרת מקומי ופותחת את `http://127.0.0.1:9119` בדפדפן שלכם. עיינו ב[תיעוד לוח הבקרה](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) לרשימת המאפיינים המלאה.
+פעולה זו מפעילה שרת מקומי ופותחת את `http://127.0.0.1:9119` בדפדפן. למידע נוסף יש לעיין ב[תיעוד לוח הבקרה](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) המלא.
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
@@ -1228,41 +1230,41 @@ hermes dashboard
 
 ## אופציונלי: חיבור ערוץ תקשורת
 
-לאחר שהשער (gateway) פועל, ניתן לגשת לסוכן המקומי שלכם מכל מכשיר. Hermes תומך ב-[Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) ועוד
+לאחר שהשער פועל, ניתן להגיע לסוכן המקומי שלכם מכל מכשיר. Hermes תומך ב-[Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) ואחרים
 
 ---
 
 ### Discord
 
-Discord דורש שרת שבו **יש לכם הרשאות מנהל** כדי להוסיף בוט. אם אתם משתפים שרתים אך אינכם הבעלים של אף אחד מהם, השתמשו ב-Telegram במקום.
+Discord דורש שרת שבו **יש לכם הרשאות מנהל** כדי להוסיף בוט. אם אתם חולקים שרתים אך אינכם הבעלים של אף אחד מהם, השתמשו ב-Telegram במקום זאת.
 
-#### יצירת אפליקציה ובוט ב-Discord
+#### יצירת אפליקציית Discord ובוט
 
-1. עברו אל [Discord Developer Portal](https://discord.com/developers/applications) ולחצו על **New Application**. תנו לה שם (למשל, "hermes-bot").
-2. בסרגל הצד, לחצו על **Bot**. הגדירו שם משתמש עבור הבוט.
-3. בעודכם בעמוד ה-Bot, גללו אל **Privileged Gateway Intents** והפעילו:
+1. יש לעבור אל [Discord Developer Portal](https://discord.com/developers/applications) וללחוץ על **New Application**. יש לתת לה שם (לדוגמה, "hermes-bot").
+2. בסרגל הצד, יש ללחוץ על **Bot**. יש להגדיר שם משתמש לבוט.
+3. בעודכם בעמוד Bot, יש לגלול אל **Privileged Gateway Intents** ולהפעיל:
    - **Message Content Intent** (נדרש)
    - **Server Members Intent** (מומלץ)
-4. גללו חזרה למעלה ולחצו על **Reset Token** כדי ליצור את אסימון (token) הבוט שלכם. העתיקו אותו.
+4. יש לגלול חזרה למעלה וללחוץ על **Reset Token** כדי לייצר את אסימון הבוט שלכם. יש להעתיק אותו.
 
 #### הוספת הבוט לשרת שלכם
 
-1. בסרגל הצד, לחצו על **OAuth2 / URL Generator**.
-2. תחת **Scopes**, הפעילו את `bot` ואת `applications.commands`.
-3. תחת **Bot Permissions**, הפעילו: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. העתיקו את הכתובת (URL) שנוצרה, הדביקו אותה בדפדפן, בחרו את השרת שלכם ואשרו.
+1. בסרגל הצד, יש ללחוץ על **OAuth2 / URL Generator**.
+2. תחת **Scopes**, יש להפעיל את `bot` ואת `applications.commands`.
+3. תחת **Bot Permissions**, יש להפעיל: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
+4. יש להעתיק את הכתובת שנוצרה, להדביק אותה בדפדפן, לבחור את השרת שלכם ולאשר.
 
-#### איסוף המזהים (IDs) שלכם והפעלת הודעות פרטיות
+#### איסוף המזהים (IDs) שלכם ואפשור הודעות פרטיות (DM)
 
-הפעילו את מצב המפתחים (Developer Mode) ב-Discord (**User Settings / Advanced / Developer Mode**), ולאחר מכן:
-- לחצו לחיצה ימנית על סמל השרת שלכם: **Copy Server ID**
-- לחצו לחיצה ימנית על תמונת הפרופיל שלכם: **Copy User ID**
+יש להפעיל את מצב המפתחים (Developer Mode) ב-Discord (**User Settings / Advanced / Developer Mode**), ולאחר מכן:
+- יש ללחוץ לחיצה ימנית על סמל השרת: **Copy Server ID**
+- יש ללחוץ לחיצה ימנית על התמונה שלכם: **Copy User ID**
 
-לחצו לחיצה ימנית על סמל השרת שלכם / **Privacy Settings** / הפעילו את **Direct Messages**. פעולה זו נדרשת לשלב הצימוד (pairing).
+יש ללחוץ לחיצה ימנית על סמל השרת / **Privacy Settings** / להפעיל את **Direct Messages**. פעולה זו נדרשת לשלב הצימוד (pairing).
 
 #### הגדרת Hermes עבור Discord
 
-הוסיפו את השורות הבאות אל `~/.hermes/.env`:
+יש להוסיף את הבאים ל-`~/.hermes/.env`:
 
 ```bash
 # Required
@@ -1270,13 +1272,13 @@ DISCORD_BOT_TOKEN=your-bot-token
 DISCORD_ALLOWED_USERS=your-discord-user-id
 ```
 
-לאחר מכן, הפעילו את השער (gateway):
+לאחר מכן יש להפעיל את השער:
 
 ```bash
 hermes gateway
 ```
 
-הבוט אמור להופיע כמחובר (online) ב-Discord תוך מספר שניות. שלחו לו הודעה, בין אם בהודעה פרטית ובין אם בערוץ שהוא רואה.
+הבוט אמור להופיע כמקוון ב-Discord תוך מספר שניות. שלחו לו הודעה, בין אם בהודעה פרטית (DM) או בערוץ שהוא יכול לראות.
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1287,38 +1289,38 @@ hermes gateway
 
 ### Telegram
 
-#### יצירת בוט ב-Telegram
+#### יצירת בוט Telegram
 
-1. פתחו את Telegram ושלחו הודעה ל-**@BotFather**.
-2. שלחו `/newbot` ופעלו לפי ההנחיות. שמרו את אסימון (token) הבוט שהוא מספק לכם.
+1. יש לפתוח את Telegram ולשלוח הודעה ל-**@BotFather**.
+2. יש לשלוח `/newbot` ולעקוב אחר ההנחיות. יש לשמור את אסימון הבוט שהוא נותן.
 
 #### הגדרת Hermes עבור Telegram
 
-הוסיפו את השורות הבאות אל `~/.hermes/.env`:
+יש להוסיף את הבאים ל-`~/.hermes/.env`:
 
 ```bash
 TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_ALLOWED_USERS=your-telegram-user-id   # comma-separated for multiple users
 ```
 
-> **לא יודעים מהו מזהה המשתמש (user ID) שלכם ב-Telegram?** שלחו הודעה ל-[@userinfobot](https://t.me/userinfobot) ב-Telegram, הוא ישיב לכם עם המזהה המספרי שלכם.
+> **לא יודעים מהו מזהה המשתמש שלכם ב-Telegram?** שלחו הודעה ל-[@userinfobot](https://t.me/userinfobot) ב-Telegram, והוא ישיב עם המזהה המספרי שלכם.
 
-לאחר מכן, הפעילו את השער (gateway):
+לאחר מכן יש להפעיל את השער:
 
 ```bash
 hermes gateway
 ```
 
-שלחו לבוט שלכם כל הודעה ב-Telegram כדי לבדוק. כעת תוכלו לשוחח עם הסוכן שלכם דרך הודעה פרטית ב-Telegram. עיינו ב[מדריך ההגדרה המלא של Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) עבור מצב webhook ואפשרויות מתקדמות.
+שלחו לבוט שלכם הודעה כלשהי ב-Telegram כדי לבדוק. כעת תוכלו לשוחח עם הסוכן שלכם באמצעות הודעה פרטית (DM) ב-Telegram. למידע נוסף יש לעיין ב[מדריך ההגדרה המלא של Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) לגבי מצב webhook ואפשרויות מתקדמות.
 
 ---
 
 ## הצעדים הבאים
 
-כעת, כאשר הסוכן שלכם יכול לקבל פקודות מהטלפון שלכם ולפעול על המחשב המקומי שלכם, הנה שלושה כיוונים ששווה לחקור:
+כעת, כשהסוכן שלכם יכול לקבל פקודות מהטלפון שלכם ולפעול על המחשב המקומי שלכם, הנה שלושה כיוונים ששווה לבחון:
 
-1. **תקציר מחקר אוטומטי**: תזמנו את Hermes לחפש ברשת נושאים שמעניינים אתכם מדי בוקר, לסכם את הממצאים באמצעות המודל המקומי שלכם, ולשלוח תקציר לטלפון שלכם דרך Telegram או Discord, הכול פועל על החומרה שלכם ללא עלויות ענן.
+1. **תקציר מחקר אוטומטי**: תזמנו את Hermes לחפש באינטרנט נושאים שמעניינים אתכם מדי בוקר, לסכם את הממצאים באמצעות המודל המקומי שלכם, ולדחוף תקציר לטלפון שלכם דרך Telegram או Discord, כל זאת בהרצה על החומרה שלכם ללא עלויות ענן.
 
-2. **סקירת קוד לפי דרישה**: הפנו את Hermes למאגר (repository) ב-GitHub, בקשו ממנו לסקור בקשות משיכה (pull requests) פתוחות, ותנו לו לפרסם תגובות או סיכום חזרה לצ'אט שלכם. בעזרת backend של מסוף Docker, כל פעולות ה-git פועלות בתוך הסביבה המבודדת (sandbox), ובכך שומרות על ניקיון המארח שלכם.
+2. **ביקורת קוד לפי דרישה**: הכוונו את Hermes לרפוזיטורי GitHub, בקשו ממנו לבדוק בקשות משיכה (pull requests) פתוחות, ותנו לו לפרסם הערות או סיכום בחזרה לצ'אט שלכם. עם backend המסוף של Docker, כל פעולות ה-git רצות בתוך ה-sandbox, מה שמשאיר את המארח שלכם נקי.
 
-3. **עוזר קבצים מקומי**: תנו ל-Hermes גישה לתיקיית עבודה ובקשו ממנו לארגן, לשנות שם, לסכם או להמיר קבצים לפי דרישה מהטלפון שלכם. מכיוון שה-backend של מסוף Docker מגביל את כל פעולות הכתיבה לסביבת העבודה המבודדת (sandbox), פעולות הרסניות בטעות מוכלות ומוגבלות.
+3. **עוזר קבצים מקומי**: תנו ל-Hermes גישה לתיקיית עבודה ובקשו ממנו לארגן, לשנות שם, לסכם או להמיר קבצים לפי דרישה מהטלפון שלכם. מכיוון שה-backend של מסוף Docker מגביל את כל פעולות הכתיבה לסביבת ה-sandbox, פעולות הרסניות בשוגג מוכלות.

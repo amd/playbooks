@@ -1,6 +1,6 @@
 {
   "id": "github-slack-development-digest",
-  "title": "สร้างสรุปพัฒนาการจาก GitHub ไปยัง Slack ด้วย Agent Canvas",
-  "description": "ตั้งค่า Agent Canvas, GitHub MCP, Slack MCP และระบบอัตโนมัติ OpenHands ที่กำหนดเวลาไว้เพื่อโพสต์สรุปข้อมูล (digest) จาก local-LLM",
+  "title": "สร้างสรุปข่าวการพัฒนาจาก GitHub ไปยัง Slack ด้วย Agent Canvas",
+  "description": "ตั้งค่า Agent Canvas, GitHub MCP, Slack MCP และระบบอัตโนมัติ OpenHands ที่กำหนดเวลาไว้สำหรับโพสต์สรุปข้อมูล (digest) ของ LLM ภายในเครื่อง",
   "auto_translated": true
 }

@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
   "title": "Εκτέλεση του Hermes Agent τοπικά με τον Lemonade Server",
-  "description": "Εγκαταστήστε και διαμορφώστε τον αυτόνομο πράκτορα τεχνητής νοημοσύνης Hermes Agent με τον Lemonade Server ως τοπικό backend AI.",
+  "description": "Εγκαταστήστε και διαμορφώστε τον αυτόνομο πράκτορα AI Hermes Agent με το Lemonade Server ως τοπικό backend AI.",
   "auto_translated": true
 }

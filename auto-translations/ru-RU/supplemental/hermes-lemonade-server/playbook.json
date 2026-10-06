@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
-  "title": "Локальный запуск агента Hermes с Lemonade Server",
-  "description": "Установите и настройте автономного ИИ-агента Hermes Agent, используя Lemonade Server в качестве локального ИИ-бэкенда.",
+  "title": "Локальный запуск агента Hermes с сервером Lemonade",
+  "description": "Установите и настройте автономного ИИ-агента Hermes Agent с Lemonade Server в качестве локального ИИ-бэкенда.",
   "auto_translated": true
 }

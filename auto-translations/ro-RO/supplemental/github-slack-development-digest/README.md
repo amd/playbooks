@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 > **Traducere automată.** Această pagină a fost tradusă automat din limba engleză și nu a fost revizuită de o persoană. Aceasta poate conține erori, iar anumite instrucțiuni, comenzi, descărcări, disponibilitatea produselor sau alt conținut pot varia în funcție de limbă sau regiune. În cazul oricărei neconcordanțe sau discrepanțe, versiunea originală în limba engleză a playbook-ului prevalează.
 <!-- auto-translated-disclaimer:end -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses AMD Playbooks comment tags that are interpreted by the AMD Playbooks site.
 > GitHub renders the Markdown content, but not the device, OS, variable, or hidden-test directives.
@@ -17,45 +17,45 @@ SPDX-License-Identifier: MIT
 
 ## Prezentare generală
 
-Dezvoltatorii petrec mult timp pe bucle mici și recurente: revizuirea pull request-urilor etichetate, răspunsul la comentariile de pe GitHub, triajul problemelor noi, transformarea firelor de discuție Slack în note de standup sau urmăriri post-incident și monitorizarea semnalelor de lansare sau cercetare.
-Fiecare buclă este familiară, dar necesită totuși judecată: adunarea contextului potrivit, decizia asupra a ceea ce contează și postarea unei actualizări clare acolo unde echipa lucrează deja.
+Dezvoltatorii petrec mult timp pe bucle mici și recurente: revizuirea pull request-urilor etichetate, răspunsul la comentariile de pe GitHub, triajul problemelor noi și transformarea firelor de discuții din Slack în notițe de standup sau urmăriri de incidente, precum și monitorizarea semnalelor de lansare sau de cercetare.
+Fiecare buclă este familiară, dar necesită totuși discernământ: adunarea contextului potrivit, decizia asupra a ceea ce contează și postarea unei actualizări clare acolo unde echipa lucrează deja.
 
-[Automatizările OpenHands](https://docs.openhands.dev/openhands/usage/automations/overview) transformă acele bucle în conversații ale agentului declanșate programat sau de evenimente: rulări în care un agent software AI poate citi context, apela instrumente și produce o actualizare.
-Șabloanele de automatizare partajate din catalogul de extensii OpenHands urmează acest tipar pentru revizuirea pull request-urilor GitHub, monitorizarea depozitelor, triajul problemelor Linear, retrospectivele incidentelor, digestele de standup Slack și rapoartele de cercetare: o automatizare se activează, folosește integrări configurate precum GitHub sau Slack pentru a prelua context, raționează asupra acelui context cu un model de limbaj mare (LLM) și scrie înapoi un rezultat.
+[Automatizările OpenHands](https://docs.openhands.dev/openhands/usage/automations/overview) transformă aceste bucle în conversații programate sau declanșate de evenimente ale agentului: rulări în care un agent software de tip AI poate citi contextul, apela instrumente și produce o actualizare.
+Șabloanele de automatizare comune din catalogul de extensii OpenHands urmează acest tipar pentru revizuirea pull request-urilor pe GitHub, monitorizarea depozitelor, triajul problemelor Linear, retrospectivele incidentelor, rezumatele de standup pe Slack și rapoartele de cercetare: o automatizare se activează, folosește integrări configurate precum GitHub sau Slack pentru a prelua contextul, raționează asupra acelui context cu un model de limbaj de mari dimensiuni (LLM) și scrie înapoi un rezultat.
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas) este planul de control local pentru construirea și testarea acelor automatizări.
-În acest ghid, acesta rulează un OpenHands Agent Server, procesul backend care execută conversațiile agentului, și conectează agentul la servicii externe precum GitHub și Slack.
+[Agent Canvas](https://github.com/OpenHands/agent-canvas) este planul de control local pentru construirea și testarea acestor automatizări.
+În acest ghid, rulează un OpenHands Agent Server, procesul backend care execută conversațiile agentului, și conectează agentul la servicii externe precum GitHub și Slack.
 
-Pentru a menține fluxul de lucru pe sistemul dumneavoastră AMD, agentul comunică cu un model local servit de Lemonade Server.
-Lemonade expune acel model printr-un API compatibil OpenAI, astfel încât Agent Canvas îl poate configura ca pe un punct final la distanță de tip OpenAI, în timp ce modelul, promptul și contextul fluxului de lucru rămân locale.
+Pentru a păstra fluxul de lucru pe sistemul tău AMD, agentul comunică cu un model local servit de Lemonade Server.
+Lemonade expune acel model printr-un API compatibil cu OpenAI, astfel încât Agent Canvas îl poate configura precum un punct final la distanță de tip OpenAI, în timp ce modelul, promptul și contextul fluxului de lucru rămân locale.
 
-În acest ghid, veți construi o automatizare concretă: un digest programat de dezvoltare de la GitHub la Slack.
-Acesta folosește GitHub pentru a inspecta activitatea recentă a depozitului, Slack pentru a posta digestul, apeluri API Agent Canvas pentru a configura și testa automatizarea, și Lemonade pentru a rula LLM-ul local.
+În acest ghid, vei construi o automatizare concretă: un rezumat programat de dezvoltare de la GitHub la Slack.
+Acesta folosește GitHub pentru a inspecta activitatea recentă a depozitului, Slack pentru a posta rezumatul, apeluri API Agent Canvas pentru a configura și testa automatizarea, și Lemonade pentru a rula LLM-ul local.
 
-![Diagramă arhitecturală care arată GitHub MCP, automatizarea OpenHands, Lemonade Server și Slack MCP](assets/00-architecture-overview.png)
+![Diagramă de arhitectură care arată GitHub MCP, automatizarea OpenHands, Lemonade Server și Slack MCP](assets/00-architecture-overview.png)
 
-## Ce veți învăța
+## Ce vei învăța
 
-- Cum să porniți Lemonade Server și să verificați că un model local răspunde la cererile de chat
-- Cum să lansați Agent Canvas și să direcționați Agent Server-ul acestuia către un LLM local
-- Cum să instalați servere GitHub și Slack Model Context Protocol (MCP) prin API-ul Agent Server
-- Cum să creați și să declanșați o automatizare OpenHands programată care postează un digest de dezvoltare pe Slack
-- Cum să depanați cele mai comune erori legate de modelul local și de automatizare
+- Cum să pornești Lemonade Server și să verifici că un model local răspunde la cereri de chat
+- Cum să lansezi Agent Canvas și să îndrepți Agent Server-ul acestuia către un LLM local
+- Cum să instalezi servere GitHub și Slack Model Context Protocol (MCP) prin API-ul Agent Server
+- Cum să creezi și să lansezi o automatizare OpenHands programată care postează un rezumat de dezvoltare pe Slack
+- Cum să depanezi cele mai comune eșecuri legate de modelul local și de automatizare
 
 ## Concepte de bază
 
 | Concept | Ce este | Unde se încadrează în acest ghid |
 | --- | --- | --- |
-| Lemonade Server | O platformă locală de servire LLM construită pentru hardware-ul AMD care expune un API compatibil OpenAI. Datele dumneavoastră nu părăsesc niciodată mașina. | Rulează modelul care alimentează agentul. |
+| Lemonade Server | O platformă locală de servire LLM construită pentru hardware AMD, care expune un API compatibil cu OpenAI. Datele tale nu părăsesc niciodată mașina ta. | Rulează modelul care alimentează agentul. |
 | OpenHands Agent Server | Procesul backend care execută conversațiile agentului OpenHands. | Găzduiește agentul, profilul său LLM și serverele sale MCP. |
-| Agent Canvas | Planul de control local pentru OpenHands care rulează Agent Server și o interfață pentru inspectarea rulărilor agentului. | Lansează backend-urile și oferă API-ul pe care îl apelați. |
-| Server MCP | Un server Model Context Protocol care oferă unui agent instrumente pentru un serviciu extern precum GitHub sau Slack. | Permite agentului să citească de pe GitHub și să scrie pe Slack. |
-| Automatizare OpenHands | O conversație a agentului declanșată programat sau de evenimente, care preia context, raționează asupra acestuia și scrie undeva un rezultat. | Digestul de la GitHub la Slack pe care îl construiți aici. |
+| Agent Canvas | Planul de control local pentru OpenHands care rulează Agent Server și o interfață pentru inspectarea rulărilor agentului. | Lansează backend-urile și oferă API-ul pe care îl apelezi. |
+| Server MCP | Un server Model Context Protocol care oferă unui agent instrumente pentru un serviciu extern precum GitHub sau Slack. | Permite agentului să citească GitHub și să scrie pe Slack. |
+| Automatizare OpenHands | O conversație a agentului programată sau declanșată de evenimente, care preia context, raționează asupra acestuia și scrie undeva un rezultat. | Rezumatul GitHub-la-Slack pe care îl construiești aici. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Fluxurile de lucru ale agentului de codare beneficiază de un model și o fereastră de context mai mari.
-> Folosiți cel puțin 32 GB de memorie de sistem și preferați 64 GB sau mai mult pentru modele GGUF mai mari.
+> Fluxurile de lucru ale agenților de programare beneficiază de un model și o fereastră de context mai mari.
+> Folosește cel puțin 32 GB de memorie de sistem și preferă 64 GB sau mai mult pentru modele GGUF mai mari.
 <!-- @device:end -->
 
 ## Configurarea memoriei
@@ -63,43 +63,49 @@ Acesta folosește GitHub pentru a inspecta activitatea recentă a depozitului, S
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Verificarea actualizărilor software
+## Verifică actualizările de software
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
 ## Cerințe preliminare
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so only the Lemonade model is needed here. -->
+<!-- @prereq:lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
-Aveți nevoie de:
+Ai nevoie de:
 
 - Lemonade Server instalat urmând [ghidul standard de instalare Lemonade](https://lemonade-server.ai/docs/guide/install/).
 
 <!-- @os:linux -->
 - Node.js 22.12 sau o versiune ulterioară și `npm`, folosite pentru a instala CLI-ul publicat Agent Canvas și pentru a rula servere MCP cu `npx`.
-- `uv`, managerul de pachete Python pe care Agent Canvas îl folosește pentru a construi mediul Agent Server. Dacă nu este deja instalat, instalați-l din [ghidul de instalare uv](https://docs.astral.sh/uv/getting-started/installation/).
-- Un pachet `@openhands/agent-canvas` publicat recent, cu setări de agent bazate pe schemă, `LLMSummarizingCondenserSettings.max_tokens` și suport LLM pentru `custom_tokenizer`.
-- Pachetul Python `transformers` disponibil în mediul Agent Server. Este necesar pentru numărarea token-urilor șabloanelor de chat atunci când este setat `custom_tokenizer`.
+- `uv`, managerul de pachete Python pe care Agent Canvas îl folosește pentru a construi mediul Agent Server. Dacă nu este deja instalat, instalează-l din [ghidul de instalare uv](https://docs.astral.sh/uv/getting-started/installation/).
+- Un pachet `@openhands/agent-canvas` publicat recent, cu setări de agent bazate pe schemă, `LLMSummarizingCondenserSettings.max_tokens` și suport LLM `custom_tokenizer`.
+- Pachetul Python `transformers` disponibil în mediul Agent Server. Este necesar pentru numărarea tokenurilor pe baza șablonului de chat atunci când este setat `custom_tokenizer`.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- [Docker Desktop pentru Windows](https://docs.docker.com/desktop/setup/install/windows-install/), instalat și în funcțiune. Pe Windows, stiva Agent Canvas rulează din imaginea Docker publicată, care include Node.js, `uv`, `transformers` și pachetul `@openhands/agent-canvas`, astfel încât nu trebuie să le instalați pe gazdă.
+- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/), instalat și în funcțiune. Pe Windows, stiva Agent Canvas rulează din imaginea Docker publicată, care include Node.js, `uv`, `transformers` și pachetul `@openhands/agent-canvas`, astfel încât nu este nevoie să le instalezi pe gazdă.
 <!-- @os:end -->
 
-- Un token GitHub cu acces de citire la depozitul pe care doriți să-l rezumați.
-- Un token de bot Slack (`xoxb-...`) cu acces `chat:write` și acces de citire a canalelor.
+- Un token GitHub cu acces de citire la depozitul pe care dorești să îl rezumi.
+- Un token de bot Slack (`xoxb-...`) cu acces `chat:write` și de citire a canalelor.
 - Un ID de echipă Slack (`T...`).
-- Un ID de canal Slack (`C...`) unde ar trebui postat digestul.
+- Un ID de canal Slack (`C...`) unde ar trebui postat rezumatul.
 
-Invitați aplicația Slack în canalul țintă înainte de a testa automatizarea.
-## Variabile Utilizate în Acest Playbook
+Invită aplicația Slack în canalul țintă înainte de a testa automatizarea.
+## Variabile utilizate în acest playbook
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -117,11 +123,11 @@ $env:LEMONADE_MODEL = "Qwen3.6-35B-A3B-GGUF"
 ```
 <!-- @os:end -->
 
-Aceste două variabile sunt utilizate de comenzile de verificare de mai jos.
-Modelul, tokenizer-ul și celelalte setări LLM sunt introduse direct în interfața Agent Canvas UI la pașii ulteriori, astfel încât valorile lor literale sunt afișate inline acolo unde aveți nevoie de ele.
+Aceste două variabile sunt folosite de comenzile de verificare de mai jos.
+Modelul, tokenizerul și celelalte setări LLM sunt introduse direct în UI-ul Agent Canvas în pașii următori, așa că valorile lor literale sunt afișate inline unde este nevoie de ele.
 
-Următoarele valori sunt introduse în interfața Agent Canvas UI la pașii ulteriori.
-Setați-le aici astfel încât să le puteți copia:
+Următoarele valori sunt introduse în UI-ul Agent Canvas în pașii următori.
+Setați-le aici pentru a le putea copia:
 
 <!-- @os:linux -->
 ```bash
@@ -140,7 +146,7 @@ $env:DIGEST_TIMEZONE = "America/New_York"
 <!-- @os:end -->
 
 Folosiți o valoare explicită `owner/repo` pentru `GITHUB_REPO_FILTER`.
-Wildcard-urile largi la nivel de organizație pot returna prea mult context MCP pentru modelele locale.
+Caracterele wildcard largi pentru organizații pot returna prea mult context MCP pentru modelele locale.
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -168,19 +174,19 @@ lemonade run "$env:LEMONADE_MODEL"
 ```
 <!-- @os:end -->
 
-> **Alegeți un model potrivit pentru hardware-ul dumneavoastră.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) este un model puternic pentru acest flux de lucru, dar necesită un pool mare de memorie.
-> Dacă dispozitivul dumneavoastră are memorie limitată sau VRAM GPU limitat, alegeți un model GGUF mai mic din biblioteca de modele Lemonade și folosiți acel ID de model (și tokenizer-ul corespunzător) pe tot parcursul acestui playbook.
+> **Alegeți un model potrivit pentru hardware-ul dvs.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) este un model puternic pentru acest flux de lucru, dar necesită un pool mare de memorie.
+> Dacă dispozitivul dvs. are memorie sau VRAM GPU limitate, alegeți un model GGUF mai mic din biblioteca de modele Lemonade și folosiți acel ID de model (și tokenizerul corespunzător) pe parcursul acestui playbook.
 
-> **Notă:** Prima rulare `lemonade run` descarcă modelul dacă acesta nu este deja prezent, ceea ce poate dura o vreme în funcție de dimensiunea modelului și conexiunea dumneavoastră.
+> **Notă:** Prima comandă `lemonade run` descarcă modelul dacă acesta nu este deja prezent, ceea ce poate dura un timp, în funcție de dimensiunea modelului și de conexiunea dvs.
 
-Lemonade expune un API compatibil cu OpenAI la:
+Lemonade expune un API compatibil OpenAI la:
 
 ```text
 http://127.0.0.1:13305/api/v1
 ```
 
-Opțional: dacă Agent Canvas sau executorul de automatizări nu se află pe același dispozitiv, publicați endpoint-ul Lemonade printr-un tunel securizat și folosiți URL-ul HTTPS ca URL de bază pentru LLM.
-[ngrok](https://ngrok.com/) expune un port local pe internet printr-un URL HTTPS securizat; necesită un cont ngrok gratuit, iar dumneavoastră înlocuiți `YOUR_NGROK_DOMAIN.ngrok-free.dev` cu propriul domeniu rezervat:
+Opțional: dacă Agent Canvas sau automation runner nu se află pe aceeași mașină, publicați endpoint-ul Lemonade printr-un tunel securizat și folosiți URL-ul HTTPS ca URL de bază LLM.
+[ngrok](https://ngrok.com/) expune un port local pe internet printr-un URL HTTPS securizat; necesită un cont ngrok gratuit, iar dvs. înlocuiți `YOUR_NGROK_DOMAIN.ngrok-free.dev` cu propriul domeniu rezervat:
 
 ```bash
 ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
@@ -188,7 +194,7 @@ ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
 
 
 
-## 2. Verificați Modelul Local
+## 2. Verificați modelul local
 
 Confirmați că Lemonade poate servi modelul selectat:
 
@@ -354,7 +360,7 @@ npm -v
 ## 3. Porniți Agent Canvas
 
 <!-- @os:linux -->
-Instalați pachetul Agent Canvas publicat și porniți stiva completă:
+Instalați pachetul Agent Canvas publicat și porniți întregul stack:
 
 ```bash
 npm install -g @openhands/agent-canvas
@@ -363,36 +369,36 @@ agent-canvas
 
 Dacă instalarea globală npm eșuează cu o eroare de permisiuni, consultați secțiunea de depanare a permisiunilor npm de mai jos.
 
-Implicit, Agent Canvas pornește la `http://localhost:8000`.
-Deschideți acel URL în browser-ul dumneavoastră.
+În mod implicit, Agent Canvas pornește la `http://localhost:8000`.
+Deschideți acel URL în browser.
 Portul nu este special—dacă 8000 este deja utilizat, transmiteți orice port liber cu `--port` (sau `-p`).
-Backend-ul local implicit ar trebui să apară ca fiind sănătos (healthy) pe ecranul principal.
+Backend-ul local implicit ar trebui să apară ca fiind sănătos pe ecranul principal.
 
-> **Notă:** Prima lansare construiește mediul Python gestionat de `uv` al Agent Server-ului, astfel încât poate dura câteva minute înainte ca backend-ul să raporteze starea healthy.
+> **Notă:** Prima lansare construiește mediul Python gestionat de `uv` al Agent Server, așa că poate dura câteva minute înainte ca backend-ul să raporteze starea sănătoasă.
 
-Comanda `agent-canvas` pornește împreună serverul de agenți, backend-ul de automatizare și frontend-ul web.
-Aveți nevoie doar de această comandă unică pentru a rula OpenHands local.
-Restul acestui playbook configurează totul prin interfața Agent Canvas UI din browser-ul dumneavoastră.
+Comanda `agent-canvas` pornește împreună agent server-ul, backend-ul de automatizare și frontend-ul web.
+Aveți nevoie doar de această singură comandă pentru a rula OpenHands local.
+Restul acestui playbook configurează totul prin UI-ul Agent Canvas din browser.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Pe Windows, rulați imaginea container Agent Canvas publicată cu Docker Desktop.
-Imaginea include Agent Server-ul, backend-ul de automatizare și frontend-ul web, astfel încât nu trebuie să instalați Node.js, `uv` sau CLI-ul pe gazdă.
+Pe Windows, rulați imaginea de container Agent Canvas publicată cu Docker Desktop.
+Imaginea include Agent Server, backend-ul de automatizare și frontend-ul web, astfel încât nu este nevoie să instalați Node.js, `uv` sau CLI-ul pe gazdă.
 
-Mai întâi, creați folderele de configurare și de spațiu de lucru pe care le montează containerul:
+Mai întâi, creați folderele de configurare și de workspace pe care containerul le montează:
 
 ```powershell
 $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-Descărcați imaginea publicată (aproximativ 6 GB; este publică, deci nu este necesară nicio autentificare):
+Descărcați imaginea publicată (aproximativ 6 GB; este publică, deci nu este necesară autentificarea):
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-Apoi porniți stiva:
+Apoi porniți stack-ul:
 
 ```powershell
 docker run -it --rm `
@@ -402,13 +408,13 @@ docker run -it --rm `
   ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-Deschideți `http://localhost:8000/canvas` în browser-ul dumneavoastră.
+Deschideți `http://localhost:8000/canvas` în browser.
 Dacă portul 8000 este deja utilizat, mapați un port de gazdă diferit, de exemplu `-p 8080:8000`, și deschideți în schimb `http://localhost:8080/canvas`.
 
-> **Notă:** Prima lansare construiește mediul Agent Server în interiorul containerului, astfel încât poate dura câteva minute înainte ca backend-ul să raporteze starea healthy.
+> **Notă:** Prima lansare construiește mediul Agent Server în interiorul containerului, așa că poate dura câteva minute înainte ca backend-ul să raporteze starea sănătoasă.
 
-Montarea `.openhands` păstrează profilul LLM, serverele MCP și automatizările dumneavoastră între repornirile containerului.
-Restul acestui playbook configurează totul prin interfața Agent Canvas UI din browser-ul dumneavoastră la `http://localhost:8000/canvas`.
+Montarea `.openhands` păstrează profilul LLM, serverele MCP și automatizările dvs. între reporniri ale containerului.
+Restul acestui playbook configurează totul prin UI-ul Agent Canvas din browser, la `http://localhost:8000/canvas`.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -541,24 +547,24 @@ finally {
 ## 4. Configurați LLM-ul local în interfață
 
 La prima lansare, Agent Canvas deschide un flux de onboarding.
-În acest flux:
+În acel flux:
 
 1. Păstrați **OpenHands** selectat ca agent și faceți clic pe **Next**.
 2. La **Set up your LLM**, selectați **Advanced**.
 3. Păstrați **Authentication** setat la **API key**.
 4. Setați **Custom Model** la `openai/Qwen3.6-35B-A3B-GGUF`.
 5. Setați **Base URL** la `http://127.0.0.1:13305/api/v1`.
-6. Pentru **API Key**, introduceți orice substituent nenul, precum `lemonade-local`. Lemonade nu necesită o cheie reală, dar clientul OpenHands are nevoie de o valoare pentru a o trimite.
+6. Pentru **API Key**, introduceți orice valoare de rezervă non-goală, precum `lemonade-local`. Lemonade nu necesită o cheie reală, dar clientul OpenHands trebuie să trimită o valoare.
 
 <!-- @os:windows -->
-> **Windows (Docker):** Agent Server-ul rulează în interiorul containerului, așa că setați **Base URL** la `http://host.docker.internal:13305/api/v1` în loc de `http://127.0.0.1:13305/api/v1`.
-> Din interiorul containerului, `127.0.0.1` este containerul însuși; `host.docker.internal` ajunge la Lemonade care rulează pe gazda Windows, iar Docker Desktop furnizează automat acest nume de gazdă.
+> **Windows (Docker):** Agent Server rulează în interiorul containerului, așa că setați **Base URL** la `http://host.docker.internal:13305/api/v1` în loc de `http://127.0.0.1:13305/api/v1`.
+> Din interiorul containerului, `127.0.0.1` reprezintă containerul însuși; `host.docker.internal` ajunge la Lemonade care rulează pe gazda Windows, iar Docker Desktop furnizează automat acest nume de gazdă.
 <!-- @os:end -->
 
 Câmpurile de conexiune ar trebui să arate astfel.
-Câmpul cheii API este mascat de interfață.
+Câmpul pentru cheia API este mascat de interfață.
 
-![Setările avansate LLM la prima utilizare a Agent Canvas cu modelul Lemonade și URL-ul de bază local](assets/01-llm-advanced-settings.png)
+![Setările avansate pentru LLM la prima utilizare în Agent Canvas, cu modelul Lemonade și URL-ul de bază local](assets/01-llm-advanced-settings.png)
 
 Apoi selectați **All** și setați câmpurile suplimentare pentru modelul local:
 
@@ -566,9 +572,9 @@ Apoi selectați **All** și setați câmpurile suplimentare pentru modelul local
 2. Derulați până la **LiteLLM Extra Body** și setați-l la `{"enable_thinking": true}`.
 3. Faceți clic pe **Next**.
 
-![Fila All LLM la prima utilizare a Agent Canvas cu tokenizatorul personalizat Qwen](assets/02-llm-all-tokenizer-settings.png)
+![Fila All pentru LLM la prima utilizare în Agent Canvas, cu tokenizer-ul personalizat Qwen](assets/02-llm-all-tokenizer-settings.png)
 
-![Fila All LLM la prima utilizare a Agent Canvas cu corpul extra LiteLLM configurat](assets/03-llm-all-extra-body-settings.png)
+![Fila All pentru LLM la prima utilizare în Agent Canvas, cu corpul suplimentar LiteLLM configurat](assets/03-llm-all-extra-body-settings.png)
 
 Setările LLM ar trebui să arate astfel:
 
@@ -579,22 +585,22 @@ Setările LLM ar trebui să arate astfel:
 | Custom tokenizer | `Qwen/Qwen3.6-35B-A3B` |
 | LiteLLM extra body | `{"enable_thinking": true}` |
 
-Prefixul `openai/` îi spune LiteLLM să folosească formatarea cererilor compatibilă cu OpenAI față de endpoint-ul Lemonade.
-Tokenizatorul personalizat este tokenizatorul original Hugging Face pentru modelul GGUF; acesta permite OpenHands să numere aceleași token-uri de șablon de conversație pe care le vede serverul de model local.
-Formularul actual pentru LLM la prima utilizare nu afișează setări pentru condenser.
-Dacă build-ul dumneavoastră de Agent Canvas expune ulterior setări pentru condenser sub **Settings > LLM**, folosiți `llm_summarizing` și setați numărul maxim de token-uri sub fereastra de context a Lemonade, cum ar fi `56000`.
+Prefixul `openai/` indică LiteLLM să folosească formatarea cererilor compatibilă cu OpenAI pentru endpoint-ul Lemonade.
+Tokenizer-ul personalizat este tokenizer-ul original Hugging Face pentru modelul GGUF; acesta îi permite lui OpenHands să numere aceleași token-uri din șablonul de chat pe care le vede serverul local al modelului.
+Formularul actual pentru LLM la prima utilizare nu afișează setările de condenser.
+Dacă versiunea dumneavoastră de Agent Canvas expune ulterior setările de condenser sub **Settings > LLM**, folosiți `llm_summarizing` și setați numărul maxim de token-uri sub fereastra de context Lemonade, de exemplu `56000`.
 
-## 5. Instalați serverele MCP GitHub și Slack
+## 5. Instalarea serverelor MCP pentru GitHub și Slack
 
 În interfața Agent Canvas, deschideți **Customize** (sau **Settings > MCP**) pentru a adăuga serverele MCP care oferă agentului instrumente pentru GitHub și Slack.
-Valorile token-urilor sunt trimise doar către Agent Server-ul dumneavoastră local și sunt persistate ca setări criptate.
+Valorile token-urilor sunt trimise doar către Agent Server-ul local și sunt persistate ca setări criptate.
 
 <!-- @os:windows -->
-> **Windows (Docker):** comenzile serverului MCP `npx` de mai jos rulează în interiorul containerului, care include deja Node.js, deci nu se instalează nimic suplimentar pe gazdă.
-> Deoarece `.openhands` este montat, serverele MCP și token-urile lor persistă între repornirile containerului.
+> **Windows (Docker):** comenzile serverului MCP `npx` de mai jos rulează în interiorul containerului, care include deja Node.js, astfel încât nu se instalează nimic suplimentar pe gazdă.
+> Deoarece `.openhands` este montat, serverele MCP și token-urile acestora persistă între repornirile containerului.
 <!-- @os:end -->
 
-### Serverul MCP GitHub
+### Serverul MCP pentru GitHub
 
 Adăugați un nou server MCP cu aceste setări:
 
@@ -605,9 +611,9 @@ Adăugați un nou server MCP cu aceste setări:
 | Args | `-y @modelcontextprotocol/server-github` |
 | Env | `GITHUB_PERSONAL_ACCESS_TOKEN` = token-ul dumneavoastră GitHub |
 
-Folosiți un token GitHub cu acces de citire la repository-ul pe care doriți să îl rezumați.
+Folosiți un token GitHub cu acces de citire la depozitul pe care doriți să îl rezumați.
 
-### Serverul MCP Slack
+### Serverul MCP pentru Slack
 
 Adăugați un al doilea server MCP cu aceste setări:
 
@@ -618,14 +624,14 @@ Adăugați un al doilea server MCP cu aceste setări:
 | Args | `-y @modelcontextprotocol/server-slack` |
 | Env | `SLACK_BOT_TOKEN` = `xoxb-...` |
 | Env | `SLACK_TEAM_ID` = `T0123456789` |
-| Env | `SLACK_CHANNEL_IDS` = ID-ul canalului dumneavoastră de digest |
+| Env | `SLACK_CHANNEL_IDS` = ID-ul canalului dumneavoastră de rezumat |
 
-Setați `SLACK_CHANNEL_IDS` la ID-ul canalului de digest (aceeași valoare ca `SLACK_DIGEST_CHANNEL`), astfel încât agentul să nu aibă nevoie să parcurgă fiecare canal Slack.
+Setați `SLACK_CHANNEL_IDS` la ID-ul canalului de rezumat (aceeași valoare ca `SLACK_DIGEST_CHANNEL`) astfel încât agentul să nu fie nevoit să parcurgă fiecare canal Slack.
 
-După adăugarea ambelor servere, folosiți butonul **Test** pentru fiecare dintre ele pentru a confirma că se conectează și anunță instrumentele.
+După adăugarea ambelor servere, folosiți butonul **Test** pe fiecare dintre ele pentru a confirma că se conectează și anunță instrumentele.
 Serverul GitHub ar trebui să listeze instrumente GitHub, iar serverul Slack ar trebui să listeze instrumente Slack.
 
-![Pagina MCP a Agent Canvas cu serverele GitHub și Slack instalate](assets/04-mcp-servers-installed.png)
+![Pagina MCP din Agent Canvas cu serverele GitHub și Slack instalate](assets/04-mcp-servers-installed.png)
 
 <!-- @test:id=mcp-packages-resolve timeout=300 hidden=True -->
 ```bash
@@ -636,13 +642,13 @@ npm view @modelcontextprotocol/server-slack version
 ```
 <!-- @test:end -->
 
-## 6. Creați automatizarea pentru digest
+## 6. Crearea automatizării pentru rezumat
 
 În interfața Agent Canvas, deschideți pagina **Automations** și creați o nouă automatizare:
 
 1. Alegeți **Create automation** și selectați tipul **Prompt preset**.
 2. Setați **Name** la `GitHub Development Digest to Slack`.
-3. Setați **Prompt** la următorul text, înlocuind substituenții pentru repository și canal cu valorile dumneavoastră:
+3. Setați **Prompt** la următorul text, înlocuind valorile de rezervă pentru depozit și canal cu valorile dumneavoastră:
 
    ```text
    Use the GitHub MCP server for exactly one repository: your-org/your-repo.
@@ -659,37 +665,37 @@ npm view @modelcontextprotocol/server-slack version
    environment variables, or unrelated Slack messages.
    ```
 
-4. Setați **Trigger** la **Cron** cu programul `0 9 * * 1-5` (9:00 dimineața în zilele lucrătoare) și setați **Timezone** la fusul dumneavoastră orar, de exemplu `America/New_York`.
-5. Setați **Timeout** la `900` de secunde.
+4. Setați **Trigger** la **Cron** cu programul `0 9 * * 1-5` (ora 9:00 în zilele lucrătoare) și setați **Timezone** la fusul dumneavoastră orar, de exemplu `America/New_York`.
+5. Setați **Timeout** la `900` secunde.
 6. Salvați automatizarea.
 
-Pagina de detalii a automatizării afișează noua automatizare cu declanșatorul său cron și punctul de intrare generat pentru prompt preset.
+Pagina de detalii a automatizării afișează noua automatizare împreună cu declanșatorul cron și punctul de intrare generat pentru prompt preset.
 
-![Pagina de detalii a automatizării Agent Canvas după creare](assets/05-automation-created.png)
+![Pagina de detalii a automatizării din Agent Canvas după creare](assets/05-automation-created.png)
 ## 7. Testați automatizarea
 
-Din pagina de detalii a automatizării în interfața Agent Canvas UI:
+Din pagina de detalii a automatizării din interfața Agent Canvas:
 
 1. Faceți clic pe **Run now** (sau **Dispatch**) pentru a rula automatizarea o dată, imediat.
-2. Urmăriți lista de execuții din aceeași pagină. Cea mai recentă execuție ar trebui să treacă în starea `COMPLETED`.
-3. Deschideți canalul Slack țintă. Acesta ar trebui să conțină rezumatul generat.
+2. Urmăriți lista de execuții de pe aceeași pagină. Cea mai recentă execuție ar trebui să treacă în starea `COMPLETED`.
+3. Deschideți canalul Slack țintă. Acesta ar trebui să conțină digest-ul generat.
 
 Nu este necesar să așteptați declanșarea programării cron—**Run now** declanșează o execuție la cerere, astfel încât să puteți confirma că prompt-ul, conexiunile MCP și postarea pe Slack funcționează toate înainte de a vă baza pe programare.
 
 ![Execuția automatizării Agent Canvas finalizată cu succes](assets/06-automation-run-completed.png)
 
-![Canal Slack afișând rezumatul OpenHands generat](assets/07-slackbot-message.png)
+![Canal Slack care afișează digest-ul OpenHands generat](assets/07-slackbot-message.png)
 
 ## Depanare
 
 <!-- @os:windows -->
-- **Portul Docker 8000 este deja în uz:** mapați un alt port gazdă, de exemplu `docker run ... -p 8080:8000 ...`, și deschideți `http://localhost:8080/canvas`.
-- **`docker pull` eșuează cu o eroare de credențiale** (de exemplu, "A specified logon session does not exist"): rulați pull-ul dintr-o sesiune Windows interactivă sau pre-descărcați imaginea. Imaginea este publică, deci nu este necesară nicio autentificare `docker login`.
-- **Interfața se încarcă, dar backend-ul este nesănătos:** prima lansare construiește mediul Agent Server în interiorul containerului. Așteptați un minut și reîmprospătați, apoi verificați `docker logs <container>` pentru a vedea progresul.
-- **Agent Canvas nu poate contacta Lemonade din container:** setați **Base URL** al LLM-ului la `http://host.docker.internal:13305/api/v1` (nu `127.0.0.1`), și confirmați că Lemonade rulează pe gazda Windows.
+- **Portul Docker 8000 este deja utilizat:** mapați un alt port gazdă, de exemplu `docker run ... -p 8080:8000 ...`, și deschideți `http://localhost:8080/canvas`.
+- **`docker pull` eșuează cu o eroare de autentificare** (de exemplu, „A specified logon session does not exist"): rulați pull-ul dintr-o sesiune Windows interactivă, sau pre-descărcați imaginea. Imaginea este publică, deci nu este necesar `docker login`.
+- **Interfața se încarcă, dar backend-ul nu este sănătos:** prima lansare construiește mediul Agent Server în interiorul containerului. Așteptați un minut și reîmprospătați, apoi verificați `docker logs <container>` pentru progres.
+- **Agent Canvas nu poate ajunge la Lemonade din container:** setați **Base URL** pentru LLM la `http://host.docker.internal:13305/api/v1` (nu `127.0.0.1`), și confirmați că Lemonade rulează pe gazda Windows.
 <!-- @os:end -->
 
-- **Lemonade este oprit:** reporniți-l cu comanda `lemonade run "${LEMONADE_MODEL}"` din pasul 1, apoi rulați din nou verificarea de sănătate.
+- **Lemonade este oprit:** reporniți-l cu comanda `lemonade run "${LEMONADE_MODEL}"` din pasul 1, apoi re-rulați verificarea de sănătate.
 - **`npm install -g` eșuează cu o eroare de permisiuni:** pe Linux sau WSL, configurați un director global npm deținut de utilizator, adăugați-l în fișierul de pornire al shell-ului, apoi instalați din nou Agent Canvas:
 
   ```bash
@@ -701,23 +707,23 @@ Nu este necesar să așteptați declanșarea programării cron—**Run now** dec
   ```
 
 Dacă utilizați `zsh`, adăugați aceeași linie `export PATH=...` în `~/.zshrc` în loc de `~/.bashrc`.
-- **Agent Canvas respinge setările LLM după setarea `custom_tokenizer`:** instalați `transformers` în mediul Python al Agent Server, reporniți Agent Canvas dacă este necesar și încercați din nou să salvați setările LLM. OpenHands necesită Transformers pentru a încărca șablonul de chat al tokenizer-ului atunci când `custom_tokenizer` este setat.
-- **Agent Canvas nu poate contacta Lemonade:** verificați `curl -fsS "${LEMONADE_BASE_URL}/health"` și confirmați că URL-ul de bază introdus în formularul LLM de la prima utilizare sau în **Settings > LLM** corespunde punctului final local activ sau tunelului HTTPS.
+- **Agent Canvas respinge setările LLM după setarea `custom_tokenizer`:** instalați `transformers` în mediul Python al Agent Server, reporniți Agent Canvas dacă este necesar, și încercați din nou să salvați setările LLM. OpenHands necesită Transformers pentru a încărca șablonul de chat al tokenizer-ului atunci când `custom_tokenizer` este setat.
+- **Agent Canvas nu poate ajunge la Lemonade:** verificați `curl -fsS "${LEMONADE_BASE_URL}/health"` și confirmați că URL-ul de bază introdus în formularul LLM la prima utilizare sau în **Settings > LLM** corespunde endpoint-ului local activ sau tunelului HTTPS.
 - **Setările LLM nu s-au salvat:** asigurați-vă că ați făcut clic pe **Next** după introducerea valorilor. Redeschideți **Settings > LLM** pentru a confirma că valorile au fost păstrate.
-- **GitHub MCP nu poate vedea depozitele private:** confirmați că token-ul GitHub are acces de citire la depozitul țintă și că butonul **Test** al MCP din **Customize** afișează instrumentele GitHub.
-- **Slack poate citi canalele, dar nu poate posta:** invitați aplicația Slack în canalul țintă și confirmați că bot-ul are `chat:write`.
+- **GitHub MCP nu poate vedea depozitele private:** confirmați că token-ul GitHub are acces de citire la depozitul țintă și că butonul **Test** MCP din **Customize** afișează uneltele GitHub.
+- **Slack poate citi canale, dar nu poate posta:** invitați aplicația Slack în canalul țintă și confirmați că bot-ul are `chat:write`.
 - **Automatizarea listează prea multe canale Slack:** utilizați un ID de canal Slack și setați `SLACK_CHANNEL_IDS` pe serverul Slack MCP din **Customize**.
-- **Execuția automatizării eșuează sau depășește contextul:** confirmați că Lemonade a fost pornit cu `ctx_size=65536`, confirmați că LLM-ul OpenHands are `custom_tokenizer` setat și utilizați un depozit explicit cu seturile de rezultate GitHub limitate la 3-5 elemente. Dacă build-ul dvs. de Agent Canvas expune setări pentru condenser, setați numărul maxim de token-uri al condenser-ului sub fereastra de context a Lemonade.
+- **Execuția automatizării eșuează sau depășește contextul:** confirmați că Lemonade a fost pornit cu `ctx_size=65536`, confirmați că LLM-ul OpenHands are setat `custom_tokenizer`, și utilizați un depozit explicit cu seturile de rezultate GitHub limitate la 3-5 elemente. Dacă versiunea dvs. de Agent Canvas expune setări de condensare, setați numărul maxim de token-uri pentru condensare sub fereastra de context a Lemonade.
 
-## Pașii următori
+## Pași următori
 
-- Adăugați un rezumat săptămânal doar pentru lansări (release-only).
+- Adăugați un digest săptămânal doar pentru lansări.
 - Adăugați o automatizare declanșată de evenimente GitHub pentru alerte mai rapide de PR sau push.
-- Direcționați același rezumat către Notion, Linear sau alt instrument bazat pe MCP.
+- Direcționați același digest către Notion, Linear sau un alt instrument susținut de MCP.
 
 ## Resurse
 
-- [Ghidurile AMD AI Playbooks](https://developer.amd.com/playbooks/)
+- [AMD AI Playbooks](https://developer.amd.com/playbooks/)
 - [Documentația Lemonade Server](https://lemonade-server.ai/docs)
 - [Depozitul de extensii OpenHands](https://github.com/OpenHands/extensions)
 - [Servere Model Context Protocol](https://github.com/modelcontextprotocol/servers)

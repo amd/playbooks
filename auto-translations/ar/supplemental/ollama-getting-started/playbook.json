@@ -1,6 +1,6 @@
 {
   "id": "ollama-getting-started",
   "title": "البدء مع Ollama",
-  "description": "قم بتثبيت Ollama وشغّل نماذج LLM محليًا — تحدث عبر الطرفية، أو تطبيق سطح المكتب، أو واجهة REST API.",
+  "description": "ثبّت Ollama وشغّل النماذج اللغوية الكبيرة محليًا — تحدّث من الطرفية أو تطبيق سطح المكتب أو واجهة REST API.",
   "auto_translated": true
 }

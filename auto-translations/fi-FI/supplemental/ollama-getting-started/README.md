@@ -9,23 +9,23 @@ SPDX-License-Identifier: MIT
 > **Konekäännös.** Tämä sivu on käännetty automaattisesti englannista, eikä sitä ole tarkistanut ihminen. Se voi sisältää virheitä, ja tietyt ohjeet, komennot, lataukset, tuotteiden saatavuus tai muu sisältö voivat vaihdella kielen tai alueen mukaan. Mahdollisten ristiriitaisuuksien tai epäjohdonmukaisuuksien ilmetessä alkuperäinen englanninkielinen playbook on ratkaiseva ja ensisijainen versio.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
+<!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## Yleiskatsaus
 
-Ollama on suosittu kevyt työkalu suurten kielimallien ajamiseen paikallisesti. Se hoitaa mallien lataamisen, kvantisoinnin ja palvelemisen yksinkertaisen komentorivikäyttöliittymän ja työpöytäsovelluksen takana, joten pääset keskustelemaan LLM:n kanssa nollasta muutamassa minuutissa.
+Ollama on suosittu kevyt työkalu suurten kielimallien ajamiseen paikallisesti. Se huolehtii mallien lataamisesta, kvantisoinnista ja tarjoilusta yksinkertaisen komentorivikäyttöliittymän ja työpöytäsovelluksen takana, joten pääset keskustelemaan LLM:n kanssa muutamassa minuutissa.
 
-Tämä opas opastaa sinut Ollaman asentamisessa, GPT-OSS 20B -mallin lataamisessa ja sen kanssa keskustelemisessa sekä terminaalin että työpöytäsovelluksen kautta.
+Tämä ohjeisto opastaa Ollaman asentamisessa, GPT-OSS 20B -mallin hakemisessa ja sen kanssa keskustelemisessa sekä päätteen että työpöytäsovelluksen kautta.
 
 ## Mitä opit
 
-- Miten Ollama asennetaan ja käynnistetään järjestelmässäsi
-- GPT-OSS 20B -mallin lataaminen ja ajaminen paikallisesti
+- Kuinka Ollama asennetaan ja käynnistetään järjestelmässäsi
+- GPT-OSS 20B -mallin hakeminen ja ajaminen paikallisesti
 - Mallien kanssa keskusteleminen CLI:n avulla
-- Mallien ohjelmallinen kysely REST API:n kautta
+- Mallien kysely ohjelmallisesti REST-rajapinnan kautta
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Muistiasetuksen määrittäminen
@@ -35,14 +35,16 @@ Tämä opas opastaa sinut Ollaman asentamisessa, GPT-OSS 20B -mallin lataamisess
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
-> **Huomautus**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centeristä.
+> **Huomautus**: Jos VS Code ei ole asennettu, voit asentaa sen Ryzen AI Developer Centerin kautta.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmiston esivaatimusten asentaminen
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:driver -->
+<!-- @prereq:ollama,ollama-models-gpt-oss-20b -->
 
 ### Ollaman asentaminen
 
@@ -50,9 +52,9 @@ Tämä opas opastaa sinut Ollaman asentamisessa, GPT-OSS 20B -mallin lataamisess
 
 1. Lataa asennusohjelma osoitteesta [ollama.com/download](https://ollama.com/download).
 2. Suorita `.exe`-asennusohjelma ja seuraa ohjeita.
-3. Kun asennus on valmis, Ollama toimii taustapalveluna ja on käytettävissä terminaalista, työpöytäsovelluksesta ja ilmaisinalueelta.
+3. Kun asennus on valmis, Ollama toimii taustapalveluna ja on käytettävissä päätteestä, työpöytäsovelluksesta ja ilmaisinalueelta.
 
-Vahvista asennus avaamalla terminaali ja suorittamalla:
+Varmista asennus avaamalla pääte ja suorittamalla:
 
 ```powershell
 ollama --version
@@ -69,13 +71,13 @@ Konsoliin pitäisi tulostua asennetun version numero.
 
 <!-- @os:linux -->
 
-Suorita virallinen asennusskripti:
+Suorita virallinen asennuskomentosarja:
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-Vahvista asennus:
+Varmista asennus:
 
 ```bash
 ollama --version
@@ -90,9 +92,9 @@ ollama --version
 Konsoliin pitäisi tulostua asennetun version numero.
 <!-- @os:end -->
 
-## Ensimmäisen mallin lataaminen
+## Ensimmäisen mallin hakeminen
 
-Ollama hallinnoi malleja rekisterin kautta samaan tapaan kuin säilöntäkuvia (container images). GPT-OSS 20B:n lataamiseksi:
+Ollama hallinnoi malleja rekisterin kautta, joka muistuttaa konttikuvia. Lataa GPT-OSS 20B seuraavasti:
 
 ```bash
 ollama pull gpt-oss:20b
@@ -100,7 +102,7 @@ ollama pull gpt-oss:20b
 
 Tämä lataa mallin painot paikalliselle koneellesi (noin 12 Gt). Lataus tapahtuu vain kerran, ja myöhemmät ajot lataavat mallin levyltä.
 
-Voit vahvistaa mallin saatavuuden komennolla:
+Voit varmistaa mallin saatavuuden seuraavalla komennolla:
 
 ```bash
 ollama list
@@ -208,56 +210,56 @@ echo "OK: gpt-oss:20b is present in ollama list"
 
 ### Mallien nimeäminen
 
-Ollaman mallien nimet noudattavat muotoa `name:tag`. Tagi ilmaisee yleensä parametrimäärän tai kvantisointivariantin. Joitakin hyödyllisiä komentoja mallien hallintaan:
+Ollaman mallien nimet noudattavat muotoa `name:tag`. Tunniste (tag) ilmaisee yleensä parametrimäärän tai kvantisointimuunnoksen. Hyödyllisiä komentoja mallien hallintaan:
 
 | Komento | Kuvaus |
 |---------|-------------|
-| `ollama list` | Näytä kaikki ladatut mallit |
-| `ollama pull <model>` | Lataa malli ajamatta sitä |
-| `ollama rm <model>` | Poista malli levytilan vapauttamiseksi |
-| `ollama show <model>` | Näytä mallin metatiedot ja parametrit |
+| `ollama list` | Näyttää kaikki ladatut mallit |
+| `ollama pull <model>` | Lataa mallin ilman sen ajamista |
+| `ollama rm <model>` | Poistaa mallin levytilan vapauttamiseksi |
+| `ollama show <model>` | Näyttää mallin metatiedot ja parametrit |
 
-## Keskusteleminen terminaalista
+## Keskusteleminen päätteestä
 
-Käynnistä interaktiivinen keskustelusessio suoraan komentoriviltä:
+Käynnistä interaktiivinen keskusteluistunto suoraan komentoriviltä:
 
 ```bash
 ollama run gpt-oss:20b
 ```
 
-Ollama lataa mallin muistiin ja vie sinut kehotteeseen. Kokeile kysyä siltä jotain:
+Ollama lataa mallin muistiin ja siirtää sinut kehotteeseen. Kokeile kysyä jotain:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-Malli suoratoistaa vastauksensa token kerrallaan suoraan terminaaliin. Kirjoita `/bye` tai paina `Ctrl+D` poistuaksesi sessiosta.
+Malli suoratoistaa vastauksensa merkki kerrallaan suoraan päätteeseen. Kirjoita `/bye` tai paina `Ctrl+D` poistuaksesi istunnosta.
 
-> **Vinkki**: Ensimmäinen ajo kestää muutaman sekunnin mallin lataamiseksi muistiin. Myöhemmät kehotteet samassa sessiossa vastaavat paljon nopeammin, koska malli pysyy ladattuna.
+> **Vinkki**: Ensimmäinen ajo kestää muutaman sekunnin, kun malli ladataan muistiin. Samassa istunnossa seuraavat kehotteet vastaavat paljon nopeammin, koska malli pysyy ladattuna.
 
 <!-- @os:windows -->
 ## Keskusteleminen työpöytäsovelluksesta
 
 Ollama sisältää myös työpöytäsovelluksen, joka tarjoaa selkeän keskusteluliittymän mallien kanssa vuorovaikutukseen.
 
-Avaa **Ollama** käynnistysvalikosta tai napsauta Ollama-kuvaketta ilmaisinalueella ja valitse **Open Ollama**.
+Avaa **Ollama** Käynnistä-valikosta tai napsauta Ollama-kuvaketta ilmaisinalueella ja valitse **Open Ollama**.
 
 Kun sovellus on auki:
 
 1. Napsauta **New Chat** sivupalkissa.
-2. Valitse **gpt-oss:20b** malli-pudotusvalikosta keskustelun syöttökentän oikeassa alakulmassa.
+2. Valitse **gpt-oss:20b** mallin pudotusvalikosta keskustelukentän oikeassa alakulmassa.
 3. Kirjoita viesti ja paina Enter aloittaaksesi keskustelun.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-Työpöytäsovellus säilyttää keskusteluhistoriasi sivupalkissa, mikä helpottaa aiempien keskustelujen tarkastelua.
+Työpöytäsovellus tallentaa keskusteluhistoriasi sivupalkkiin, mikä helpottaa aiempien keskustelujen tarkastelua.
 <!-- @os:end -->
 
-## REST API:n käyttäminen
+## REST-rajapinnan käyttäminen
 
-Asennuksen jälkeen Ollama toimii taustapalveluna ja tarjoaa REST API:n osoitteessa `http://localhost:11434`, jota voit käyttää mallien integroimiseen omiin sovelluksiisi ja skripteihisi.
+Asennuksen jälkeen Ollama toimii taustapalveluna ja tarjoaa REST-rajapinnan osoitteessa `http://localhost:11434`, jota voit käyttää mallien integroimiseen omiin sovelluksiisi ja komentosarjoihisi.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -569,7 +571,7 @@ PY
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Vastauksen generointi terminaalissa
+### Vastauksen luominen päätteessä
 
 <!-- @os:linux -->
 ```bash
@@ -583,13 +585,13 @@ curl.exe http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "promp
 ```
 <!-- @os:end -->
 
-Vastaus on JSON-objekti, joka sisältää mallin tulosteen `response`-kentässä.
+Vastaus on JSON-objekti, joka sisältää mallin tuotoksen `response`-kentässä.
 
 
 ### Python-esimerkki
-Nyt kun voimme kutsua Ollaman API:a ohjelmallisesti, kutsutaan sitä Pythonista.
+Nyt kun voimme kutsua Ollama-rajapintaa ohjelmallisesti, kutsutaan sitä Pythonista.
 
-#### Virtuaaliympäristön luominen terminaalissa
+#### Virtuaaliympäristön luominen päätteessä
 
 <!-- @os:linux -->
 ```bash
@@ -608,7 +610,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### Python-tiedoston luominen
-Luo samaan hakemistoon .py-tiedosto VS Coden tai muun editorin avulla ja kopioi siihen seuraava koodi. Suorita sitten tiedosto aktivoidussa ympäristössäsi komennolla `python your_file_name.py`
+Käytä samassa hakemistossa VS Codea tai muuta editoria luodaksesi .py-tiedoston ja kopioi siihen seuraava koodi. Suorita sitten tiedosto aktivoidussa ympäristössäsi komennolla `python your_file_name.py`
 
 ```python
 import requests
@@ -625,23 +627,23 @@ response = requests.post(
 print(response.json()["response"])
 ```
 
-### Keskeiset API-päätepisteet
+### Keskeiset rajapinnan päätepisteet
 
 | Päätepiste | Metodi | Tarkoitus |
 |----------|--------|---------|
-| `/api/generate` | POST | Yksivaiheinen tekstin generointi |
-| `/api/chat` | POST | Monivaiheinen keskustelu viestihistorian kanssa |
-| `/api/tags` | GET | Listaa saatavilla olevat mallit |
-| `/api/show` | POST | Näytä mallin tiedot |
-| `/api/pull` | POST | Lataa malli rekisteristä |
+| `/api/generate` | POST | Yksikierroksinen tekstin generointi |
+| `/api/chat` | POST | Moniosainen keskustelu viestihistorian kanssa |
+| `/api/tags` | GET | Saatavilla olevien mallien luettelointi |
+| `/api/show` | POST | Mallin tietojen näyttäminen |
+| `/api/pull` | POST | Mallin hakeminen rekisteristä |
 
-Täydellinen API-viittaus löytyy [Ollaman API-dokumentaatiosta](https://github.com/ollama/ollama/blob/main/docs/api.md).
+Täydellinen rajapintadokumentaatio löytyy [Ollaman API-dokumentaatiosta](https://github.com/ollama/ollama/blob/main/docs/api.md).
 
 ## Seuraavat vaiheet
 
-- **Kokeile eri malleja**: Selaa [Ollaman mallikirjastoa](https://ollama.com/library) tutustuaksesi satoihin saatavilla oleviin malleihin, pienistä koodausavustajista suuriin päättelymalleihin.
-- **Luo mukautettuja malleja**: Käytä [Modelfile-tiedostoa](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) mukautettujen järjestelmäkehotteiden, lämpötilan ja muiden parametrien asettamiseen räätälöityä kokemusta varten.
-- **Rakenna API:n kanssa**: Käytä [Python](https://github.com/ollama/ollama-python)- tai [JavaScript](https://github.com/ollama/ollama-js)-asiakaskirjastoja integroidaksesi Ollaman sovelluksiisi.
-- **Yhdistä käyttöliittymiin**: Yhdistä Ollama työkalujen kuten [Open WebUI](https://github.com/open-webui/open-webui) kanssa saadaksesi monipuolisen keskusteluliittymän hauineen, persoonineen ja asiakirjojen latausominaisuuksineen.
+- **Kokeile eri malleja**: Selaa [Ollaman mallikirjastoa](https://ollama.com/library) löytääksesi satoja saatavilla olevia malleja pienistä koodausavustajista suuriin päättelymalleihin.
+- **Luo mukautettuja malleja**: Käytä [Modelfilea](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) mukautettujen järjestelmäkehotteiden, lämpötilan ja muiden parametrien asettamiseen räätälöityä kokemusta varten.
+- **Kehitä rajapinnan avulla**: Käytä [Python](https://github.com/ollama/ollama-python)- tai [JavaScript](https://github.com/ollama/ollama-js)-kirjastoja Ollaman integroimiseen sovelluksiisi.
+- **Yhdistä käyttöliittymiin**: Yhdistä Ollama työkaluihin, kuten [Open WebUI](https://github.com/open-webui/open-webui), saadaksesi monipuolisen keskusteluliittymän haku-, persoona- ja asiakirjojen latausominaisuuksilla.
 
-Lisätietoja saat [Ollaman dokumentaatiosta](https://github.com/ollama/ollama/blob/main/README.md).
+Lisätietoja löydät [Ollaman dokumentaatiosta](https://github.com/ollama/ollama/blob/main/README.md).

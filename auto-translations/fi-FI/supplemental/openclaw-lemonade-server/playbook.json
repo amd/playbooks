@@ -1,6 +1,6 @@
 {
   "id": "openclaw-lemonade-server",
-  "title": "Suoritetaan OpenClaw'ta paikallisesti Lemonade Server -palvelimen avulla",
-  "description": "Asenna ja määritä OpenClaw-autonominen tekoälyagentti Lemonade Serverin kanssa.",
+  "title": "Suorita OpenClaw paikallisesti Lemonade-palvelimella",
+  "description": "Asenna ja määritä OpenClaw-autonominen tekoälyagentti Lemonade Server -palvelimen kanssa.",
   "auto_translated": true
 }

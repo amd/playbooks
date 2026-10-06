@@ -16,39 +16,39 @@ SPDX-License-Identifier: MIT
 > OS, variable, or hidden-test directives.
 <!-- @github-only:end -->
 
-## 總覽
+## 概觀
 
-[OpenHands](https://github.com/All-Hands-AI/OpenHands) 是一個 AI 軟體代理程式，能夠撰寫程式碼、執行指令、瀏覽網頁，並在實際工作區中編輯檔案。您不再需要從聊天視窗中複製建議，而是直接將代理程式指向一個專案資料夾，讓它去完成工作：實作功能、修復錯誤、撰寫測試，或說明程式碼庫。
+[OpenHands](https://github.com/All-Hands-AI/OpenHands) 是一款 AI 軟體代理程式,能夠在真實的工作區中撰寫程式碼、執行命令、瀏覽網頁並編輯檔案。您不需要從聊天視窗中複製建議內容，而是直接讓代理程式指向專案資料夾，讓它完成工作：實作功能、修正錯誤、撰寫測試或說明程式碼庫。
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas) 是執行 OpenHands 建議使用的瀏覽器 UI。單一個 `agent-canvas` 指令即可一起啟動代理程式伺服器、自動化後端與網頁前端，讓您能透過瀏覽器與代理程式進行對話。
+[Agent Canvas](https://github.com/OpenHands/agent-canvas) 是執行 OpenHands 建議使用的瀏覽器 UI。單一 `agent-canvas` 指令即可一起啟動代理伺服器、自動化後端與網頁前端，讓您能夠從瀏覽器與代理程式進行對話。
 
-為了讓所有東西都保留在您的 AMD 系統上，代理程式會與 Lemonade Server 所提供的本機模型溝通。Lemonade 透過相容於 OpenAI 的 API 公開該模型，因此 Agent Canvas 可以像設定任何其他 OpenAI 風格的端點一樣設定它，同時模型、您的程式碼與對話上下文都會保留在您的機器上。
+為了讓一切都保留在您的 AMD 系統上，代理程式會與 Lemonade Server 提供的本地模型對話。Lemonade 透過與 OpenAI 相容的 API 公開該模型，因此 Agent Canvas 可以像設定其他 OpenAI 風格端點一樣進行設定，同時模型、您的程式碼與對話內容全部都保留在您的機器上。
 
-在此手冊中，您將啟動一個本機模型、啟動 Agent Canvas、將其指向該模型，並針對實際的專案資料夾執行您的第一個程式撰寫任務。
+在本實作手冊中，您將啟動本地模型、啟動 Agent Canvas、將其指向該模型，並針對真實的專案資料夾執行您的第一個程式撰寫任務。
 
-## 您將學到什麼
+## 您將學到的內容
 
-- 如何啟動 Lemonade Server 並確認本機模型能回應聊天請求
+- 如何啟動 Lemonade Server 並確認本地模型能夠回應聊天請求
 - 如何從 npm 套件安裝並啟動 Agent Canvas
-- 如何設定 Agent Canvas 以使用本機的 Lemonade 模型作為 LLM
-- 如何啟動 OpenHands 對話，並觀察代理程式在工作區中編輯檔案與執行指令
+- 如何設定 Agent Canvas 使用本地 Lemonade 模型作為 LLM
+- 如何開始 OpenHands 對話，並觀察代理程式在工作區中編輯檔案與執行命令
 - 如何檢視代理程式所做的變更，並透過後續訊息來引導它
 
 ## 核心概念
 
-| 概念 | 是什麼 | 在此手冊中的定位 |
+| 概念 | 說明 | 在本實作手冊中的角色 |
 | --- | --- | --- |
-| Lemonade Server | 一個專為 AMD 硬體打造的本機 LLM 服務平台，公開相容於 OpenAI 的 API。您的資料永遠不會離開您的機器。 | 執行驅動代理程式的模型。 |
-| OpenHands | 一個 AI 軟體代理程式，能在工作區內讀取與編輯檔案、執行 shell 指令並瀏覽網頁。 | 您透過聊天驅動的代理程式。 |
-| Agent Canvas | 執行 OpenHands 對話並顯示工具呼叫與檔案變更的瀏覽器 UI 與後端。 | 啟動整個堆疊並承載您的對話。 |
-| 工作區 | 允許代理程式讀取與修改的專案資料夾。 | 代理程式編輯與執行指令的目標。 |
+| Lemonade Server | 專為 AMD 硬體打造的本地 LLM 服務平台，公開與 OpenAI 相容的 API。您的資料永遠不會離開您的機器。 | 執行驅動代理程式的模型。 |
+| OpenHands | 一款 AI 軟體代理程式，能在工作區內讀取並編輯檔案、執行 shell 命令並瀏覽網頁。 | 您透過聊天驅動的代理程式。 |
+| Agent Canvas | 執行 OpenHands 對話、並顯示工具呼叫與檔案變更的瀏覽器 UI 與後端。 | 啟動整套堆疊並代管您的對話。 |
+| 工作區 | 允許代理程式讀取與修改的專案資料夾。 | 代理程式編輯與命令的目標。 |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> 程式撰寫代理程式的工作流程受益於較大的模型與內容視窗（context window）。請至少使用 32 GB 的系統記憶體，若要使用較大的 GGUF 模型，建議使用 64 GB 以上。
+> 程式撰寫代理工作流程會受益於更大的模型與更大的上下文視窗。請至少使用 32 GB 系統記憶體，較大型的 GGUF 模型則建議使用 64 GB 以上。
 <!-- @device:end -->
 
-## 設定記憶體組態
+## 設定記憶體配置
 
 <!-- @require:memory-config -->
 
@@ -62,30 +62,36 @@ SPDX-License-Identifier: MIT
 
 
 <!-- @os:linux -->
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so only the Lemonade model is needed here.
+     lemonade-chat-windows asserts the model is already downloaded. -->
+<!-- @prereq:lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 您需要：
 
-- 已安裝 Lemonade Server，並能夠提供下方的模型服務。
+- 已安裝 Lemonade Server，並能夠提供下方模型的服務。
 
 <!-- @os:linux -->
-- Node.js 22.12 或更新版本，以及 `npm`（供 `agent-canvas` CLI 使用）。
-- `uv`，這是 Agent Canvas 用來管理代理程式伺服器環境的 Python 套件管理工具。若您的系統尚未安裝，請在啟動 Agent Canvas 之前，先從
+- Node.js 22.12 或更新版本，以及 `npm`（`agent-canvas` CLI 需要使用）。
+- `uv`，Agent Canvas 用來管理代理伺服器環境的 Python 套件管理器。如果您的系統尚未安裝此工具，請在啟動 Agent Canvas 之前，依照
   [uv 安裝指南](https://docs.astral.sh/uv/getting-started/installation/) 進行安裝。
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - [適用於 Windows 的 Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)，
-  已安裝並正在執行。在 Windows 上，Agent Canvas 堆疊是從已發佈的 Docker 映像檔執行，該映像檔已包含 Node.js、`uv` 與
-  `@openhands/agent-canvas` 套件，因此您不需要在主機上另行安裝這些項目。
+  已安裝並正在執行。在 Windows 上，Agent Canvas 堆疊會從已發布的 Docker 映像檔執行，其中已包含
+  Node.js、`uv` 與 `@openhands/agent-canvas` 套件，因此您不需要在主機上安裝這些項目。
 <!-- @os:end -->
 
-- 一個供您作業的專案資料夾。這可以是任何本機 git 儲存庫，或您希望代理程式進行處理的程式碼目錄。
+- 一個可供工作的專案資料夾。這可以是任何您希望代理程式處理的本地 git 存放庫或程式碼目錄。
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -139,17 +145,17 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
-> **選擇適合您硬體的模型。**`Qwen3.6-35B-A3B-GGUF`（約 20 GB）是一個強大的程式撰寫模型，但需要大量的記憶體池。若您的裝置記憶體或 GPU VRAM 有限，請改為從 Lemonade 模型庫中選擇較小的 GGUF 模型，並在本手冊中全程使用該模型 ID。
+> **選擇適合您硬體的模型。** `Qwen3.6-35B-A3B-GGUF`（約 20 GB）是一款強大的程式撰寫模型，但需要大型記憶體池。如果您的裝置記憶體或 GPU VRAM 有限，請改從 Lemonade 模型庫中選擇較小型的 GGUF 模型，並在本實作手冊中全程使用該模型 ID。
 
-> **注意：**第一次執行 `lemonade run` 時，若模型尚未存在，就會下載該模型，視模型大小與您的網路連線速度，這可能需要一些時間。
+> **注意：** 第一次執行 `lemonade run` 時，如果模型尚未存在，系統會下載該模型，依模型大小與您的網路連線狀況，這可能需要一些時間。
 
-Lemonade 會公開一個相容於 OpenAI 的 API，位址為：
+Lemonade 會在以下位置公開與 OpenAI 相容的 API：
 
 ```text
 http://127.0.0.1:13305/api/v1
 ```
 
-## 2. 驗證本機模型
+## 2. 驗證本地模型
 
 確認 Lemonade 能夠提供所選模型的服務：
 
@@ -157,7 +163,7 @@ http://127.0.0.1:13305/api/v1
 curl -s "http://127.0.0.1:13305/api/v1/models" | python3 -m json.tool
 ```
 
-接著送出一個小型的聊天請求：
+接著傳送一個小型聊天請求：
 
 ```bash
 curl -sS "http://127.0.0.1:13305/api/v1/chat/completions" \
@@ -172,7 +178,7 @@ curl -sS "http://127.0.0.1:13305/api/v1/chat/completions" \
   }' | python3 -m json.tool
 ```
 
-若此請求回傳一個 `choices` 陣列，代表 Lemonade 已準備好供 Agent Canvas 使用。
+如果傳回 `choices` 陣列，表示 Lemonade 已準備好供 Agent Canvas 使用。
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
@@ -326,17 +332,17 @@ echo "OK: agent-canvas CLI is on PATH"
 agent-canvas
 ```
 
-預設情況下，Agent Canvas 會在 `http://localhost:8000` 啟動。請在瀏覽器中開啟該
-URL。此連接埠並無特殊意義——如果 8000 已被使用，啟動 Agent Canvas 時可透過
-`--port`（或 `-p`）傳入任何可用的連接埠：
+Agent Canvas 預設會在 `http://localhost:8000` 啟動。請在瀏覽器中開啟該網址。
+此連接埠並非固定不可變——如果 8000 已被占用，啟動 Agent Canvas 時可透過
+`--port`（或 `-p`）指定任何可用的連接埠：
 
 ```bash
 agent-canvas --port 3000
 ```
 
-接著改為開啟 `http://localhost:3000`。首頁畫面上，預設的本機後端應顯示為健康狀態。
+然後改為開啟 `http://localhost:3000`。預設的本機後端應該會在首頁顯示為健康狀態。
 
-`agent-canvas` 指令會一併啟動代理伺服器、自動化後端與網頁前端。您只需要這一個
+`agent-canvas` 指令會一起啟動代理伺服器、自動化後端與網頁前端。您只需要這一個
 指令即可在本機執行 OpenHands。
 
 <!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
@@ -391,8 +397,8 @@ echo "OK: agent-canvas agent-server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-在 Windows 上，使用 Docker Desktop 執行已發布的 Agent Canvas 容器映像檔。
-該映像檔內含 Agent Server、自動化後端與網頁前端，因此您不需要在主機上安裝
+在 Windows 上，請使用 Docker Desktop 執行已發布的 Agent Canvas 容器映像檔。
+此映像檔包含 Agent Server、自動化後端與網頁前端，因此您不需要在主機上安裝
 Node.js、`uv` 或 CLI。
 
 首先，建立容器要掛載的設定與工作區資料夾：
@@ -402,13 +408,13 @@ $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-提取已發布的映像檔（此映像檔為公開，因此不需要登入）：
+拉取已發布的映像檔（此映像檔為公開，因此不需要登入）：
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-接著啟動堆疊：
+接著啟動該堆疊：
 
 ```powershell
 docker run -it --rm `
@@ -418,15 +424,14 @@ docker run -it --rm `
   ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-在瀏覽器中開啟 `http://localhost:8000/canvas`。如果連接埠 8000 已被使用，
-請對應到不同的主機連接埠，例如 `-p 8080:8000`，並改為開啟
-`http://localhost:8080/canvas`。
+在瀏覽器中開啟 `http://localhost:8000/canvas`。如果 8000 連接埠已被占用，請對應到
+其他主機連接埠，例如 `-p 8080:8000`，然後改為開啟 `http://localhost:8080/canvas`。
 
-> **注意：** 首次啟動時會在容器內初始化 Agent Server，
-> 因此後端回報健康狀態前可能需要一兩分鐘。
+> **注意：** 首次啟動時會在容器內初始化 Agent Server，因此後端回報為健康狀態
+> 可能需要一到兩分鐘的時間。
 
-`.openhands` 掛載可讓您的 LLM 設定檔與設定值在容器重新啟動後仍保持不變。
-本操作手冊接下來的內容，都透過瀏覽器中的 Agent Canvas UI 進行設定。
+`.openhands` 掛載會在容器重新啟動後持續保留您的 LLM 設定檔與設定。本手冊的其餘
+部分都會透過瀏覽器中的 Agent Canvas 使用者介面來設定所有內容。
 
 <!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
 ```powershell
@@ -478,48 +483,48 @@ finally {
 
 ## 4. 設定本機 LLM
 
-首次啟動時，Agent Canvas 會開啟一個入門引導流程。在該流程中：
+首次啟動時，Agent Canvas 會開啟新手引導流程。在該流程中：
 
-1. 保持 **OpenHands** 為選定的代理，然後按一下 **Next**。
-2. 在 **Set up your LLM** 畫面上，選擇 **Advanced**。
+1. 保持代理選取為 **OpenHands**，然後按一下 **Next**。
+2. 在 **Set up your LLM** 畫面，選取 **Advanced**。
 3. 保持 **Authentication** 設定為 **API key**。
 4. 將 **Custom Model** 設定為 `openai/Qwen3.6-35B-A3B-GGUF`。
 5. 將 **Base URL** 設定為 `http://127.0.0.1:13305/api/v1`。
    <!-- @os:windows -->
-   > 在 Windows 上，此堆疊是在容器中執行，無法透過 `127.0.0.1` 存取主機。
-   > 請改用 `http://host.docker.internal:13305/api/v1`，讓容器化的代理
-   > 可以連線到在 Windows 主機上執行的 Lemonade。
+   > 在 Windows 上，整個堆疊是在容器中執行，無法透過 `127.0.0.1` 存取主機。
+   > 請改用 `http://host.docker.internal:13305/api/v1`，讓容器化的代理能夠
+   > 存取在 Windows 主機上執行的 Lemonade。
    <!-- @os:end -->
-6. 在 **API Key** 欄位，輸入任何非空白的預留值，例如 `lemonade-local`。
+6. 在 **API Key** 欄位中輸入任意非空白的替代值，例如 `lemonade-local`。
    Lemonade 不需要真正的金鑰，但 OpenHands 用戶端需要一個值才能傳送。
 7. 按一下 **Next**。
 
-完成後的 Advanced 設定應如下所示。API 金鑰欄位在 UI 中會被遮蔽。
+完成後的 Advanced 設定應如下所示。API key 欄位會被使用者介面遮蔽。
 
-![Agent Canvas 首次使用的 LLM Advanced 設定，包含 Lemonade 模型與本機基礎 URL](assets/01-llm-advanced-settings.png)
+![Agent Canvas 首次使用的 LLM Advanced 設定，顯示 Lemonade 模型與本機 base URL](assets/01-llm-advanced-settings.png)
 
-Agent Canvas 會將這些值儲存為 LLM 設定檔。如果您的版本要求您為該設定檔命名，
-請使用不含空格的名稱，例如 `lemonade-local`。如果之後想更換模型，請開啟
+Agent Canvas 會將這些值儲存為一個 LLM 設定檔。如果您的版本要求您為該設定檔命名，
+請使用不含空格的名稱，例如 `lemonade-local`。如果您之後想更換模型，請開啟
 **Settings > LLM** 並更新相同的 Advanced 欄位。您可以在聊天輸入框中使用
-`/model` 指令切換已儲存的設定檔。
+`/model` 指令來切換已儲存的設定檔。
 
 ## 5. 開啟工作區
 
-代理只能讀取與修改您所選工作區內的檔案。在開始工作前，請將 Agent Canvas
+代理只能讀取並修改您所選工作區內的檔案。在開始任務之前，請將 Agent Canvas
 指向您的專案資料夾：
 
-1. 在首頁畫面中，選擇 **Open Workspace**。
-2. 選取包含您專案的資料夾（例如您想讓代理處理的某個 git 儲存庫）。
+1. 從首頁選擇 **Open Workspace**。
+2. 選取包含您專案的資料夾（例如，您希望代理處理的 git 儲存庫）。
 3. 在該工作區中開始新的對話。
 
-代理所做的每一件事——讀取檔案、執行指令、編輯程式碼——都僅限於該工作區範圍內。
+代理所做的一切——讀取檔案、執行指令、編輯程式碼——都限制在該工作區範圍內。
 
-![完成引導流程後的 Agent Canvas 首頁](assets/02-agent-canvas-home.png)
+![新手引導完成後的 Agent Canvas 首頁](assets/02-agent-canvas-home.png)
 
-## 6. 執行您的第一個程式撰寫任務
+## 6. 執行您的第一個程式碼任務
 
-在工作區開啟且已選定本機 LLM 的狀態下，在聊天視窗中輸入一個具體的任務。
-一個好的第一個任務應該規模小且可驗證，例如：
+在工作區已開啟且已選取本機 LLM 的情況下，在聊天視窗中輸入一個具體的任務。
+一個好的第一個任務應該小而且可驗證，例如：
 
 ```text
 Create a new file called hello.py that defines a function greet(name) that
@@ -527,43 +532,43 @@ returns "Hello, {name}!", and add a small test that prints greet("World")
 when run as a script.
 ```
 
-觀察對話時間軸。OpenHands 會：
+觀察對話時間軸。OpenHands 將會：
 
 - 讀取工作區以了解其結構。
-- 建立包含所要求函式與測試區塊的 `hello.py`。
-- 選擇性地執行 `python3 hello.py` 以驗證輸出。
-- 在聊天中回報它所做的事以及任何指令輸出。
+- 建立 `hello.py`，內含所要求的函式與測試區塊。
+- 視需要執行 `python3 hello.py` 以驗證輸出結果。
+- 在聊天中回報其所做的事以及任何指令輸出結果。
 
-您應該會看到工作區中出現新檔案，而代理的最終訊息應該會描述它所做的變更。
-這是成果展現的時刻：代理在您的專案資料夾中撰寫並執行了真實的程式碼。
+您應該會看到新檔案出現在工作區中，而代理的最終訊息應該會描述其所做的變更。
+這是成果呈現的時刻：代理在您的專案資料夾中撰寫並執行了真正的程式碼。
 
-## 7. 檢閱並引導代理
+## 7. 檢視並引導代理
 
-代理完成一個步驟後，在接受下一步之前請先檢閱其成果：
+當代理完成一個步驟後，請先檢視其工作成果，再接受下一個步驟：
 
-- **檔案變更**：使用工作區檔案瀏覽器或代理的差異檢視畫面，查看究竟新增、
-  變更或刪除了什麼內容。
-- **指令輸出**：展開代理執行過的任何指令，查看標準輸出、標準錯誤與結束代碼。
-- **後續調整**：如果結果不符合您的期望，請在同一個對話中回覆修正內容。
-  代理會保留先前的內容脈絡，並在相同的檔案上繼續進行。
+- **檔案變更**：使用工作區檔案瀏覽器或代理的差異檢視畫面，確切查看哪些內容
+  被新增、變更或刪除。
+- **指令輸出**：展開代理所執行的任何指令，以查看 stdout、stderr 與結束代碼。
+- **後續調整**：如果結果不如您所願，請在同一個對話中回覆修正內容。代理會保留
+  先前的脈絡，並在相同的檔案上繼續調整。
 
-例如，如果測試沒有印出預期的問候語，請回覆：
+舉例來說，如果測試沒有印出預期的問候語，請回覆：
 
 ```text
 The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-代理會重新讀取檔案、執行指令、診斷問題，並再次編輯該檔案——所有動作都在
-同一個對話中完成。
+代理會重新讀取該檔案、執行指令、診斷問題，並再次編輯該檔案——這一切都在同一個
+對話中完成。
 ## 疑難排解
 
 <!-- @os:linux -->
-- **`agent-canvas` 不在 PATH 中：** 重新安裝
-  `npm install -g @openhands/agent-canvas`，並確認 npm 全域二進位檔目錄
-  已加入 PATH，之後才能從新的終端機啟動 `agent-canvas`。
-- **`npm install -g` 因權限錯誤而失敗：** 設定一個由使用者擁有的
-  npm 全域目錄，然後重新開啟終端機並再次安裝 Agent Canvas。
+- **`agent-canvas` 不在 PATH 中：** 請使用
+  `npm install -g @openhands/agent-canvas` 重新安裝，並確認 npm 全域二進位
+  目錄已加入 PATH，之後才能從新的終端機啟動 `agent-canvas`。
+- **`npm install -g` 因權限錯誤而失敗：** 請設定一個使用者擁有的全域 npm 目錄，
+  然後重新開啟終端機並再次安裝 Agent Canvas。
 
   ```bash
   mkdir -p ~/.npm-global
@@ -572,56 +577,52 @@ greet("World") test prints to stdout.
   . ~/.profile
   npm install -g @openhands/agent-canvas
   ```
-- **找不到 `uv`：** 請依照
-  [uv 安裝指南](https://docs.astral.sh/uv/getting-started/installation/) 進行安裝。
+- **缺少 `uv`：** 請從
+  [uv 安裝指南](https://docs.astral.sh/uv/getting-started/installation/)安裝。
   Agent Canvas 使用 `uv` 來管理代理伺服器的 Python 環境。
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - **`docker pull` 或 `docker run` 無法連線：** 請確認 Docker Desktop
-  正在執行（其鯨魚圖示會顯示在系統匣中），且引擎已完成啟動。
-  `docker version` 應該同時印出 Client 與 Server 兩個區段。
-- **容器已啟動但後端一直未變為健康狀態：** 首次啟動時會在容器內
-  初始化 Agent Server，請等候一到兩分鐘，然後檢查
-  `docker logs <container>` 是否有錯誤。
-- **容器無法連上 Lemonade：** 容器是透過
-  `host.docker.internal` 連到主機的。請確認 Lemonade 是否正在
-  Windows 主機上以 `lemonade status` 提供服務，並在設定 LLM 時
-  使用 `http://host.docker.internal:13305/api/v1` 作為 Base URL。
+  已在執行（其鯨魚圖示會出現在系統匣中），且引擎已完成啟動。
+  `docker version` 應該同時印出 Client 和 Server 區段。
+- **容器已啟動但後端一直無法變為正常狀態：** 第一次啟動時會在容器內初始化
+  Agent Server，請給它一兩分鐘，然後檢查 `docker logs <container>` 是否有錯誤。
+- **容器無法連線到 Lemonade：** 容器是透過
+  `host.docker.internal` 連接主機的。請使用 `lemonade status` 確認 Lemonade
+  正在 Windows 主機上提供服務，並在設定 LLM 時使用
+  `http://host.docker.internal:13305/api/v1` 作為 Base URL。
 <!-- @os:end -->
 
-- **UI 已載入但後端顯示為不健康：** 請等候一到兩分鐘讓代理伺服器
-  完成啟動，然後重新整理。若仍然不健康，請重新啟動整個服務堆疊
-  並檢查記錄檔中是否有錯誤。
+- **UI 已載入但後端顯示為不正常狀態：** 請等候一兩分鐘讓代理伺服器完成啟動，
+  然後重新整理。若仍然不正常，請重新啟動整個堆疊並檢查記錄檔是否有錯誤。
 - **Lemonade 聊天請求因連線錯誤而失敗：** 請確認
   `curl -fsS "http://127.0.0.1:13305/api/v1/health"` 執行成功，
-  且 Lemonade 仍以 `lemonade status` 提供該模型服務。
-- **代理程式回報內容長度或權杖限制錯誤：** 請開始新的對話，
-  以免代理程式攜帶過大的歷史紀錄。若情況持續發生，請以大於
-  預設值 65536 的 `ctx_size`（例如 `ctx_size=131072`）重新啟動
-  Lemonade，前提是記憶體充足。
-- **代理程式產生的編輯品質低落或不完整：** 請切換至 Lemonade 中
-  較大的模型，或給代理程式一個較小、較具體的任務，等其完成後
-  再要求下一項變更。
+  並使用 `lemonade status` 確認 Lemonade 仍在提供該模型的服務。
+- **代理出現內容長度或權杖數量上限的錯誤訊息：** 請開始一段新的對話，
+  讓代理不必承載過大的歷史紀錄。若問題持續發生，請以大於預設值 65536 的
+  `ctx_size`（例如 `ctx_size=131072`）重新啟動 Lemonade，前提是記憶體充足。
+- **代理產生的編輯品質低落或不完整：** 請在 Lemonade 中切換為較大的模型，
+  或是交給代理一個較小、較明確的任務，等它完成後再要求下一項變更。
 
 ## 後續步驟
 
-- 在相同的工作區中嘗試更大型的任務，例如新增單元測試檔案或
-  修復已知的錯誤，並在保留變更前檢視代理程式的差異內容。
-- 在 **Customize** 底下連接 MCP 伺服器（例如 GitHub 或 Slack），
-  讓代理程式在運作時能讀取議題或發佈更新。
-- 儲存多個 LLM 設定檔（一個快速的小型模型，以及一個能力更強的
-  大型模型），並在對話過程中以 `/model` 進行切換。
-- 前往 [OpenHands automations](https://docs.openhands.dev/openhands/usage/automations/overview)，
-  將重複性的開發流程轉換為排程或事件觸發的代理程式執行作業。
+- 嘗試在同一個工作區中進行較大型的任務，例如新增單元測試檔案或修正
+  已知的錯誤，並在保留變更之前先檢視代理所產生的差異。
+- 在 **Customize** 底下連接 MCP 伺服器，例如 GitHub 或 Slack，
+  讓代理在運作時能讀取問題（issue）或張貼更新內容。
+- 儲存多個 LLM 設定檔（一個速度快的小模型，以及一個效能更強的大模型），
+  並在對話過程中透過 `/model` 切換使用。
+- 接下來請參閱 [OpenHands 自動化功能](https://docs.openhands.dev/openhands/usage/automations/overview)，
+  將重複出現的開發流程轉換為排程或事件觸發的代理執行作業。
 
 ## 資源
 
-- [OpenHands 說明文件](https://docs.openhands.dev/)
-- [Agent Canvas 總覽](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
+- [OpenHands 文件](https://docs.openhands.dev/)
+- [Agent Canvas 概覽](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
 - [Agent Canvas 設定](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
 - [LLM 設定檔與模型組態](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
-- [Lemonade Server 說明文件](https://lemonade-server.ai/docs)
+- [Lemonade Server 文件](https://lemonade-server.ai/docs)
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

@@ -16,67 +16,67 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Для цього посібника потрібно щонайменше **32 ГБ** оперативної пам'яті системи.
+> Цей playbook вимагає щонайменше **32 ГБ** системної пам'яті.
 <!-- @device:end -->
 
 ## Огляд
 
-[Open WebUI](https://docs.openwebui.com) — це розміщений локально, браузерний інтерфейс, який забезпечує звичний досвід чат-бота, виступаючи фронтендом для одного або кількох серверів AI-моделей. Замість прив'язки до одного постачальника, Open WebUI може підключатися до **будь-якого бекенду, що надає API, сумісний з OpenAI**, тож ви можете змінювати моделі та можливості без перемикання інтерфейсів.
+[Open WebUI](https://docs.openwebui.com) — це самостійно розміщений, браузерний інтерфейс, який забезпечує звичний досвід чат-бота, виступаючи фронтендом для одного або кількох серверів AI-моделей. Замість прив'язки до одного провайдера, Open WebUI може підключатися до **будь-якого бекенду, що надає OpenAI-сумісний API**, тож ви можете перемикати моделі та можливості без зміни UI.
 
-У цьому посібнику ми використовуємо [**Lemonade**](https://lemonade-server.ai) як бекенд, оскільки він надає **уніфікований, сумісний з OpenAI кінцевий пункт (endpoint)**, що підтримує кілька модальностей:
+У цьому playbook ми використовуємо [**Lemonade**](https://lemonade-server.ai) як бекенд, оскільки він надає **уніфікований OpenAI-сумісний endpoint**, що підтримує кілька модальностей:
 - **Великі мовні моделі (LLM)** для генерації тексту
-- **Моделі бачення (vision)** для розуміння зображень
+- **Моделі зору (vision)** для розуміння зображень
 - **Stable Diffusion** для генерації зображень
 - **Моделі транскрипції аудіо** для перетворення мовлення в текст
 
-Це налаштування дає змогу дослідити **повний мультимодальний робочий процес наскрізно**.
+Це налаштування дозволяє дослідити **повний мультимодальний робочий процес від початку до кінця**.
 
 ---
 
-## Що ви дізнаєтеся
+## Що ви вивчите
 
 Наприкінці ви зможете:
 
-- Підключити Open WebUI до локального бекенду, сумісного з OpenAI (Lemonade)
-- Спілкуватися з локальною LLM у браузері
-- Завантажити зображення та ставити моделі бачення запитання щодо нього
-- Генерувати зображення з текстових підказок за допомогою моделей Stable Diffusion (SDXL-Turbo / SDXL)
-- Зрозуміти концептуальну модель, щоб мати змогу використовувати інші бекенди (Ollama, vLLM, llama.cpp server тощо)
+- Підключити Open WebUI до локального OpenAI-сумісного бекенду (Lemonade)
+- Спілкуватися з локальною LLM через браузер
+- Завантажувати зображення та ставити моделі зору питання про нього
+- Генерувати зображення з текстових запитів за допомогою моделей Stable Diffusion (SDXL-Turbo / SDXL)
+- Зрозуміти ментальну модель, щоб використовувати інші бекенди (Ollama, vLLM, сервер llama.cpp тощо)
 
 ---
 
-## Основні концепції (концептуальна модель)
+## Основні концепції (ментальна модель)
 
 ### Три компоненти
 
-| Компонент | Що робить | Приклади |
+| Компонент | Що він робить | Приклади |
 |---|---|---|
-| Фронтенд (інтерфейс) | Веб-застосунок, з яким ви взаємодієте | Open WebUI |
-| Бекенд (сервер моделей) | Розміщує моделі та надає HTTP-кінцеві пункти | Lemonade, Ollama, vLLM, llama.cpp server, сервери, сумісні з OpenAI |
-| Моделі | Власне моделі LLM / бачення / дифузії / аудіо | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
+| Фронтенд (UI) | Веб-застосунок, з яким ви взаємодієте | Open WebUI |
+| Бекенд (сервер моделей) | Розміщує моделі та надає HTTP-endpoint'и | Lemonade, Ollama, vLLM, сервер llama.cpp, OpenAI-сумісні сервери |
+| Моделі | Власне LLM / Vision / Diffusion / Audio моделі | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
 
-#### Чому важливий "API, сумісний з OpenAI"
+#### Чому "OpenAI-сумісний API" має значення
 
-Open WebUI побудовано навколо стандартних кінцевих пунктів у стилі OpenAI, наприклад:
-  - Чат: `/chat/completions`
+Open WebUI побудований навколо стандартних endpoint'ів у стилі OpenAI, таких як:
+  - Chat: `/chat/completions`
   - Список моделей: `/models`
   - Генерація зображень: `/images/generations`
   - Транскрипція аудіо: `/audio/transcriptions`
 
 Lemonade надає їх за адресою `http://localhost:13305/api/v1/...`
 
-Якщо бекенд підтримує ці кінцеві пункти, Open WebUI може взаємодіяти з ним з мінімальним налаштуванням. Саме тому ми можемо змінювати бекенди без зміни робочого процесу.
+Якщо бекенд підтримує ці endpoint'и, Open WebUI може взаємодіяти з ним з мінімальним налаштуванням. Саме тому ми можемо перемикати бекенди без зміни нашого робочого процесу.
 
 #### Дві служби, два порти
 
-У цьому посібнику ви працюватимете з двома окремими службами:
+Протягом цього playbook ви будете працювати з двома окремими службами:
 
 | Служба | URL | Що ви там робите |
 |---|---|---|
-| **Lemonade** (GUI) | `http://localhost:13305` | Перегляд, завантаження та керування моделями |
-| **Open WebUI** | `http://localhost:8080` | Чат, завантаження зображень, генерація зображень — інтерфейс, з яким взаємодіє користувач |
+| **Lemonade** (GUI) | `http://localhost:13305` | Переглядайте, завантажуйте та керуйте моделями |
+| **Open WebUI** | `http://localhost:8080` | Спілкування, завантаження зображень, генерація зображень — інтерфейс для користувача |
 
-Lemonade запускає моделі; Open WebUI — це інтерфейс, з яким ви взаємодієте. Спершу використовуйте GUI Lemonade для завантаження моделей, а потім використовуйте їх з Open WebUI.
+Lemonade запускає моделі; Open WebUI — це інтерфейс, з яким ви взаємодієте. Спочатку використовуйте Lemonade GUI для завантаження моделей, а потім використовуйте їх з Open WebUI.
 
 ---
 
@@ -94,7 +94,7 @@ Lemonade запускає моделі; Open WebUI — це інтерфейс, 
 
 ## Одноразове налаштування
 
-Для цього посібника потрібно, щоб Lemonade працював як бекенд, а в Linux — щоб рушій контейнерів (Podman) запускав Open WebUI. Налаштуйте це перед встановленням Open WebUI.
+Для цього playbook потрібен запущений Lemonade як бекенд, а на Linux — також рушій контейнерів (Podman) для запуску Open WebUI. Налаштуйте їх перед встановленням Open WebUI.
 
 <!-- @os:windows -->
 <!-- @device:halo_box,halo,stx,krk -->
@@ -118,6 +118,9 @@ Lemonade запускає моделі; Open WebUI — це інтерфейс, 
 <!-- @device:end -->
 <!-- @os:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:lemonade-models-qwen3-4b,lemonade-models-sdxl-turbo -->
+
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash
 lemonade --version
@@ -128,11 +131,11 @@ lemonade --version
 
 Перш ніж встановлювати Open WebUI, переконайтеся, що моделі, які ви хочете використовувати, завантажені та готові в Lemonade.
 
-1. Відкрийте GUI Lemonade за адресою `http://localhost:13305`.
-2. Перегляньте доступні моделі та завантажте ті, які хочете використовувати (наприклад, LLM для чату, модель бачення та/або модель Stable Diffusion для генерації зображень).
-3. Переконайтеся, що API доступний, відкривши `http://localhost:13305/api/v1/models` у браузері — ви маєте побачити список завантажених моделей.
+1. Відкрийте Lemonade GUI за адресою `http://localhost:13305`.
+2. Перегляньте доступні моделі та завантажте ті, які хочете використовувати (наприклад, LLM для чату, модель зору та/або модель Stable Diffusion для генерації зображень).
+3. Переконайтеся, що API доступний, відвідавши `http://localhost:13305/api/v1/models` у браузері — ви повинні побачити список завантажених моделей.
 
-> Моделі мають бути завантажені в **Lemonade** (`localhost:13305`), перш ніж вони зможуть з'явитися в **Open WebUI** (`localhost:8080`). Якщо модель не з'являється в Open WebUI пізніше, поверніться сюди та спершу перевірте Lemonade.
+> Моделі мають бути завантажені в **Lemonade** (`localhost:13305`), перш ніж вони зможуть з'явитися в **Open WebUI** (`localhost:8080`). Якщо модель пізніше не з'являється в Open WebUI, поверніться сюди та спочатку перевірте Lemonade.
 
 
 <!-- @os:windows -->
@@ -475,9 +478,9 @@ PY
 ## Встановлення Open WebUI
 
 <!-- @os:windows -->
-### 1. Встановіть Python 3.12
+### 1. Встановлення Python 3.12
 
-Open WebUI вимагає **Python 3.12** — він не встановлюється на Python 3.13+. Засіб запуску Python для Windows (`py`) дає змогу встановити 3.12 паралельно з будь-якою наявною версією Python без конфліктів.
+Open WebUI вимагає **Python 3.12** — він не встановлюється на Python 3.13+. Засіб запуску Python для Windows (`py`) дозволяє встановити 3.12 поряд з будь-якою наявною версією Python без конфліктів.
 
 ```powershell
 winget install Python.Python.3.12
@@ -491,7 +494,7 @@ py -3.12 --version
 ```
 
 <!-- @device:halo_box -->
-> **Примітка:** У вашій системі попередньо встановлено Python 3.13. Встановлення 3.12 не впливає на нього — `python` продовжує використовувати 3.13, а `py -3.12` звертається лише до 3.12, коли це потрібно.
+> **Примітка:** На вашій системі вже попередньо встановлено Python 3.13. Встановлення 3.12 не впливає на нього — `python` продовжує використовувати 3.13, а `py -3.12` звертається до 3.12 лише тоді, коли вам це потрібно.
 <!-- @device:end -->
 
 <!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
@@ -506,7 +509,7 @@ Write-Host "OK: $v"
 ```
 <!-- @test:end --> 
 
-### 2. Створіть віртуальне середовище та встановіть Open WebUI
+### 2. Створення віртуального середовища та встановлення Open WebUI
 
 ```powershell
 mkdir openwebui
@@ -573,17 +576,17 @@ Write-Host "OK: open-webui CLI is available"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Тепер ми використаємо службу Podman для контейнеризації нашого встановлення Open WebUI.
+Тепер ми будемо використовувати службу Podman для контейнеризації нашого встановлення Open WebUI.
 
-Будь ласка, завантажте наступне до обраного вами каталогу: [compose.yml](assets/compose.yml)
+Будь ласка, завантажте наступне в обраний вами каталог: [compose.yml](assets/compose.yml)
 
-У цьому каталозі виконайте таку команду:
+У цьому каталозі виконайте наступну команду:
 
 ```bash
 podman compose up -d
 ```
 
-Це завантажує образ Open WebUI та записує дані до постійного сховища.
+Це завантажить образ Open WebUI та запише дані в постійне сховище.
 
 Запустіть Open WebUI, ввівши `localhost:8080` в адресному рядку браузера.
 
@@ -652,29 +655,29 @@ echo "OK: podman compose can parse compose.yml"
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Порада**: Open WebUI також надає інші варіанти встановлення на своєму [GitHub](https://github.com/open-webui/open-webui).
+> **Порада**: Open WebUI також пропонує інші варіанти встановлення на своєму [GitHub](https://github.com/open-webui/open-webui).
 ## Запуск сервера Open WebUI
 
 <!-- @os:windows -->
-- Виконайте наступну команду, щоб запустити HTTP-сервер Open WebUI:
+- Виконайте таку команду, щоб запустити HTTP-сервер Open WebUI:
 ```bash
 open-webui serve
 ```
 <!-- @os:end -->
 
 - У браузері перейдіть за адресою `http://localhost:8080`.
-- Open WebUI попросить вас створити локальний обліковий запис адміністратора. Після входу ви побачите інтерфейс чату.
+- Open WebUI запропонує вам створити локальний обліковий запис адміністратора. Після входу ви побачите інтерфейс чату.
 
 <p align="center">
   <img src="assets/open-webui_chat_interface.png" alt="Open WebUI Chat Interface" width="600"/>
 </p>
 
 <!-- @os:windows -->
-> Не закривайте вікно терміналу. Закриття вікна зупинить Open WebUI.
+> Не закривайте вікно терміналу. Його закриття зупинить роботу Open WebUI.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Контейнер працює у фоновому режимі. З каталогу, що містить `compose.yml`, керуйте ним за допомогою `podman compose down` (зупинити) та `podman compose up -d` (запустити). Ваші облікові записи та налаштування зберігаються у томі `open_webui_data`.
+> Контейнер працює у фоновому режимі. З каталогу, що містить `compose.yml`, керуйте ним за допомогою команд `podman compose down` (зупинити) та `podman compose up -d` (запустити). Ваші облікові записи та налаштування зберігаються в томі `open_webui_data`.
 <!-- @os:end -->
 
 
@@ -763,17 +766,17 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 ## Підключення Open WebUI до Lemonade
 
-Тепер, коли обидва сервіси працюють — Lemonade на `localhost:13305` та Open WebUI на `localhost:8080`, — з'єднайте їх, щоб Open WebUI могла використовувати моделі Lemonade.
+Тепер, коли обидва сервіси запущені — Lemonade на `localhost:13305` та Open WebUI на `localhost:8080` — з'єднайте їх, щоб Open WebUI міг використовувати моделі Lemonade.
 
 В Open WebUI:
 
-1. Натисніть на **іконку профілю користувача** у верхньому правому куті, потім виберіть **Settings**.
+1. Натисніть **значок профілю користувача** у верхньому правому куті, потім виберіть **Settings**.
 
    <p align="center">
      <img src="assets/open_settings.png" alt="Click the user profile icon" width="300"/>
    </p>
 
-2. На панелі налаштувань натисніть **Admin Settings** у нижньому лівому куті.
+2. На панелі Settings натисніть **Admin Settings** у нижньому лівому куті.
 
    <p align="center">
      <img src="assets/click_admin_settings.png" alt="Select Admin Settings" width="450"/>
@@ -793,7 +796,7 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
      <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
    </p>
 
-5. Переконайтеся, що у розділі **"Manage OpenAI API Connections"** увімкнено лише `http://localhost:13305/api/v1`. Вимкніть усі інші з'єднання (наприклад, стандартне з'єднання OpenAI).
+5. Переконайтеся, що в розділі **"Manage OpenAI API Connections"** увімкнено лише `http://localhost:13305/api/v1`. Вимкніть будь-які інші з'єднання (наприклад, стандартне з'єднання OpenAI).
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Manage OpenAI API Connections with only Lemonade enabled" width="600"/>
@@ -801,7 +804,7 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 6. Натисніть **Save**.
 
-7. **(Рекомендовано)** Вимкніть функції автоматичної генерації, щоб Open WebUI залишалась швидкою при роботі з локальними LLM. Перейдіть до **Admin Settings → Settings → Interface** та вимкніть:
+7. **(Рекомендовано)** Вимкніть функції автоматичної генерації, щоб Open WebUI залишався чутливим при роботі з локальними LLM. Перейдіть до **Admin Settings → Settings → Interface** та вимкніть:
    - Title Generation
    - Follow Up Generation
    - Tags Generation
@@ -810,27 +813,27 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
      <img src="assets/admin_settings.png" alt="Admin Settings Interface — disable Title, Follow Up, and Tags Generation" width="600"/>
    </p>
 
-8. Натисніть **Save**, потім поверніться на `http://localhost:8080`.
+8. Натисніть **Save**, потім поверніться до `http://localhost:8080`.
 9. Натисніть на випадаючий список моделей — ви маєте побачити моделі, завантажені з Lemonade.
 
 ---
 
 ## Основні дії
 
-Тепер усе налаштовано. Розглянемо три цікаві приклади дій.
+Тепер усе готово. Розглянемо три цікаві сценарії використання.
 
 ---
 
 ### Дія 1: Спілкування з локальною LLM
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk -->
-1. Натисніть на випадаюче меню у верхньому лівому куті інтерфейсу. Тут відображатимуться встановлені вами моделі Lemonade. Виберіть одну з них, щоб продовжити (приклад: `Qwen3-4B-Hybrid`).
+1. Натисніть на випадаючий список у верхньому лівому куті інтерфейсу. Там відобразяться встановлені вами моделі Lemonade. Виберіть одну з них, щоб продовжити (приклад: `Qwen3-4B-Hybrid`).
 
     <p align="center">
       <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
     </p>
 
-2. Введіть повідомлення для LLM та натисніть кнопку відправлення (або клавішу Enter). LLM протягом кількох секунд завантажиться в пам'ять, після чого ви побачите потокову відповідь.
+2. Введіть повідомлення для LLM та натисніть кнопку надсилання (або Enter). Завантаження LLM у пам'ять займе кілька секунд, після чого ви побачите потокову відповідь.
 
     <p align="center">
       <img src="assets/sending_a_message.png" alt="Sending a message" width="37.5%"/>
@@ -839,13 +842,13 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-1. Натисніть на випадаюче меню у верхньому лівому куті інтерфейсу. Тут відображатимуться встановлені вами моделі Lemonade. Виберіть одну з них, щоб продовжити (приклад: `Qwen3.5-4B-GGUF`).
+1. Натисніть на випадаючий список у верхньому лівому куті інтерфейсу. Там відобразяться встановлені вами моделі Lemonade. Виберіть одну з них, щоб продовжити (приклад: `Qwen3.5-4B-GGUF`).
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. Введіть повідомлення для LLM та натисніть кнопку відправлення (або клавішу Enter). LLM протягом кількох секунд завантажиться в пам'ять, після чого ви побачите потокову відповідь.
+2. Введіть повідомлення для LLM та натисніть кнопку надсилання (або Enter). Завантаження LLM у пам'ять займе кілька секунд, після чого ви побачите потокову відповідь.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -855,7 +858,7 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 3. Модель відповість у чаті.
 
-4. Тепер відкрийте `Task Manager` (Диспетчер завдань) у своїй системі. Ви побачите **високе навантаження на GPU або NPU**, залежно від того, чи є вибрана модель **Hybrid**, чи **NPU** відповідно. За допомогою диспетчера завдань ви можете переконатися, що модель дійсно виконується локально.
+4. У цей момент відкрийте `Task Manager` у вашій системі. Ви побачите **високе використання GPU або NPU** залежно від того, чи обрана вами модель є **Hybrid**, чи **NPU** відповідно. За допомогою диспетчера завдань ви можете підтвердити, що модель виконується локально.
 
     <p align="center">
       <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
@@ -863,13 +866,13 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Натисніть на випадаюче меню у верхньому лівому куті інтерфейсу. Тут відображатимуться встановлені вами моделі Lemonade. Виберіть одну з них, щоб продовжити (приклад: `Qwen3.5-4B-GGUF`).
+1. Натисніть на випадаючий список у верхньому лівому куті інтерфейсу. Там відобразяться встановлені вами моделі Lemonade. Виберіть одну з них, щоб продовжити (приклад: `Qwen3.5-4B-GGUF`).
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. Введіть повідомлення для LLM та натисніть кнопку відправлення (або клавішу Enter). LLM протягом кількох секунд завантажиться в пам'ять, після чого ви побачите потокову відповідь.
+2. Введіть повідомлення для LLM та натисніть кнопку надсилання (або Enter). Завантаження LLM у пам'ять займе кілька секунд, після чого ви побачите потокову відповідь.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -879,22 +882,22 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 3. Модель відповість у чаті.
 <!-- @os:end -->
 
-Це підтверджує, що Open WebUI може надсилати запити до Lemonade за допомогою сумісної з OpenAI кінцевої точки чату.
+Це підтверджує, що Open WebUI може надсилати запити до Lemonade, використовуючи сумісну з OpenAI кінцеву точку чату.
 
 ---
 
 ### Дія 2: Завантаження зображення та постановка запитань (Vision)
 
-Для цього потрібна модель, що підтримує введення зображень (модель Vision або мультимодальна модель).
+Для цього потрібна модель, що підтримує введення зображень (модель Vision або Multimodal).
 
-1. Натисніть на іконку фільтра, виберіть "By Category", потім оберіть модель з розділу **Vision** (наприклад, `Qwen3.5-4B-GGUF`)
+1. Натисніть на значок фільтра, виберіть "By Category", а потім оберіть модель з розділу **Vision** (наприклад, `Qwen3.5-4B-GGUF`)
 
    <p align="center">
      <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
    </p>
 
 2. Натисніть кнопку **`+`** у полі повідомлення та завантажте зображення
-3. Задайте питання, що вимагає справжнього розуміння зображення: `Do you think this is a well-designed GUI?`
+3. Поставте запитання, яке вимагає справжнього розуміння зображення: `Do you think this is a well-designed GUI?`
 
    <p align="center">
      <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="43%"/>
@@ -908,9 +911,9 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 ---
 
 <!-- @os:windows -->
-### Дія 3: Генерація зображення з текстового запиту (Stable Diffusion)
+### Дія 3: Створення зображення з текстового запиту (Stable Diffusion)
 
-Моделі Stable Diffusion не підтримують генерацію тексту, вони лише генерують зображення через Images API.
+Моделі Stable Diffusion не підтримують генерацію тексту, вони лише створюють зображення через Images API. 
 
 #### Крок 1: Налаштування генерації зображень в Open WebUI
 
@@ -922,7 +925,7 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
    - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` або `SDXL-Base-1.0`
-4. Якщо ви хочете додати додаткові параметри, вкажіть їх у текстовому полі у форматі JSON. Наприклад: `{ "steps": 4, "cfg_scale": 1 }`. Перелік доступних параметрів наведено на сторінці [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+4. Якщо ви хочете додати більше параметрів, додайте їх у текстове поле у форматі JSON. Наприклад: `{ "steps": 4, "cfg_scale": 1 }`. Перелік доступних параметрів наведено на сторінці [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
@@ -930,8 +933,8 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 5. Збережіть
 #### Крок 2: Дозвольте генерацію зображень для моделі
-Цей крок гарантує, що ви ввімкнете генерацію зображень як можливість вашої моделі.
-1. Перейдіть до **Admin Settings → Models** (http://localhost:8080/admin/settings/models) і оберіть свою модель
+Цей крок забезпечує увімкнення Генерації зображень як можливості для вашої моделі.
+1. Перейдіть у **Admin Settings → Models** (http://localhost:8080/admin/settings/models) і виберіть вашу модель
 2. Увімкніть `Image Generation`
 
    <p align="center">
@@ -942,38 +945,38 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 #### Крок 3: Згенеруйте зображення з екрана чату
 
 1. Поверніться до чату за адресою `http://localhost:8080`.
-2. Оберіть **LLM для генерації тексту** у випадаючому списку моделей (наприклад: Qwen, Llama). **Не обирайте модель Stable Diffusion**, оскільки це селектор моделі для чату.
-3. У полі повідомлення натисніть **Integrations** і увімкніть перемикач **Image**.
+2. Виберіть **Text Generation LLM** у випадному списку моделей (наприклад: Qwen, Llama). **Не вибирайте модель Stable Diffusion**, оскільки це селектор моделі чату.
+3. В області повідомлення натисніть **Integrations** і переключіть **Image** у положення ON.
 4. Використайте підказку на кшталт: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
-5. Зображення буде згенеровано та з'явиться у чаті.
+5. Зображення генерується та з'являється в чаті.
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-Це підтверджує, що Open WebUI може координувати "двочастинний" робочий процес:
+Це підтверджує, що Open WebUI може координувати робочий процес "з двох частин":
   - LLM допомагає вдосконалити підказку
-  - Зображення генерується через кінцеву точку Images Lemonade за допомогою Stable Diffusion
+  - Зображення генерується через ендпоінт Images у Lemonade за допомогою Stable Diffusion
 <!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-### Дія 3: Згенеруйте зображення з текстової підказки (Stable Diffusion)
+### Активність 3: Згенеруйте зображення з текстової підказки (Stable Diffusion)
 
-Моделі Stable Diffusion не підтримують генерацію тексту, вони генерують лише зображення через Images API.
+Моделі Stable Diffusion не підтримують генерацію тексту, вони лише генерують зображення через API Images.
 
 #### Крок 1: Налаштуйте генерацію зображень в Open WebUI
 
-1. У графічному інтерфейсі Lemonade (`http://localhost:13305`) знайдіть `SDXL-Turbo` (швидко) або `SDXL-Base-1.0` (вища якість) і завантажте його.
-2. Перейдіть до **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
+1. У графічному інтерфейсі Lemonade (`http://localhost:13305`) знайдіть `SDXL-Turbo` (швидко) або `SDXL-Base-1.0` (вища якість) і завантажте модель.
+2. Перейдіть у **Admin Settings → Images** (http://localhost:8080/admin/settings/images)
 3. Встановіть:
    - **Image Generation:** ON
    - **Image Generation Engine:** Default (OpenAI)
    - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` або `SDXL-Base-1.0`
-4. Якщо ви хочете додати більше параметрів, додайте їх у текстове поле у форматі JSON. Наприклад: `{ "steps": 4, "cfg_scale": 1 }`. Дивіться доступні параметри в [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+4. Якщо хочете додати більше параметрів, додайте їх у текстове поле у форматі JSON. Наприклад: `{ "steps": 4, "cfg_scale": 1 }`. Дивіться доступні параметри в [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
@@ -983,8 +986,8 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 
 #### Крок 2: Дозвольте генерацію зображень для моделі
-Цей крок гарантує, що ви ввімкнете генерацію зображень як можливість вашої моделі.
-1. Перейдіть до **Admin Settings → Models** (http://localhost:8080/admin/settings/models) і оберіть свою модель
+Цей крок забезпечує увімкнення Генерації зображень як можливості для вашої моделі.
+1. Перейдіть у **Admin Settings → Models** (http://localhost:8080/admin/settings/models) і виберіть вашу модель
 2. Увімкніть `Image Generation`
 
    <p align="center">
@@ -995,19 +998,19 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 #### Крок 3: Згенеруйте зображення з екрана чату
 
 1. Поверніться до чату за адресою `http://localhost:8080`.
-2. Оберіть **LLM для генерації тексту** у випадаючому списку моделей (наприклад: Qwen, Llama). **Не обирайте модель Stable Diffusion**, оскільки це селектор моделі для чату.
-3. У полі повідомлення натисніть **Integrations** і увімкніть перемикач **Image**.
+2. Виберіть **Text Generation LLM** у випадному списку моделей (наприклад: Qwen, Llama). **Не вибирайте модель Stable Diffusion**, оскільки це селектор моделі чату.
+3. В області повідомлення натисніть **Integrations** і переключіть **Image** у положення ON.
 4. Використайте підказку на кшталт: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
-5. Зображення буде згенеровано та з'явиться у чаті.
+5. Зображення генерується та з'являється в чаті.
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-Це підтверджує, що Open WebUI може координувати "двочастинний" робочий процес:
+Це підтверджує, що Open WebUI може координувати робочий процес "з двох частин":
   - LLM допомагає вдосконалити підказку
-  - Зображення генерується через кінцеву точку Images Lemonade за допомогою Stable Diffusion
+  - Зображення генерується через ендпоінт Images у Lemonade за допомогою Stable Diffusion
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -1015,40 +1018,40 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 ## Усунення несправностей
 
-### "У Open WebUI не відображаються жодні моделі"
+### "No models show up in Open WebUI" (моделі не відображаються в Open WebUI)
 - Спочатку перевірте Lemonade: відкрийте `http://localhost:13305/api/v1/models` у браузері та переконайтеся, що ваші моделі перелічені та завантажені
-- Потім перевірте з'єднання Open WebUI: перейдіть до **Admin Settings → Connections** за адресою `http://localhost:8080/admin/settings/connections` і переконайтеся, що Base URL має значення `http://localhost:13305/api/v1`
+- Потім перевірте з'єднання Open WebUI: перейдіть у **Admin Settings → Connections** за адресою `http://localhost:8080/admin/settings/connections` і переконайтеся, що Base URL — це `http://localhost:13305/api/v1`
 
 ### Повідомлення про помилку "This model does not support chat completion"
-- Ви обрали модель зображень (SDXL-Turbo / SDXL-Base-1.0) у випадаючому списку моделей чату.
-- **Виправлення**: оберіть LLM для чату та використовуйте перемикач Image + налаштування Images для генерації.
+- Ви вибрали модель зображень (SDXL-Turbo / SDXL-Base-1.0) у випадному списку моделі чату.
+- **Виправлення**: виберіть LLM для чату та використовуйте перемикач Image + налаштування Images для генерації.
 <p align="center">
   <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
 </p>
 
 ### Помилки/тайм-аути генерації зображень
 - Спочатку почніть з `SDXL-Turbo` (швидко, менше кроків)
-- Коли все запрацює, перемкніть модель зображень на `SDXL-Base-1.0` для якості
+- Коли все запрацює, переключіть модель зображень на `SDXL-Base-1.0` для якості
 
 ---
 
 ## Наступні кроки
 
-Тепер у вас є працездатний **"локальний стек ШІ"** — єдиний інтерфейс, що керує кількома типами моделей через стандартний API.
+Тепер у вас є робочий **"локальний стек ШІ"** — єдиний інтерфейс, що керує кількома типами моделей через стандартний API.
 
-Ось три розширення, які відкривають абсолютно нові робочі процеси:
+Ось три розширення, що відкривають абсолютно нові робочі процеси:
 
-### 1. Розпізнавання мовлення у текст за допомогою Whisper
+### 1. Перетворення мовлення на текст за допомогою Whisper
 
-Спробуйте перетворити аудіо на текст за допомогою моделі Whisper, а потім передайте його в LLM для підсумовування, виявлення пунктів дій або переписування. Це основа для нотаток зі зустрічей і голосових асистентів.
+Спробуйте перетворити аудіо на текст за допомогою моделі Whisper, а потім передайте це в LLM для підсумовування, визначення пунктів дій або переписування. Це основа для нотаток зустрічей та голосових асистентів.
 
-### 2. Кодування на Python в Open WebUI
+### 2. Кодування на Python всередині Open WebUI
 
-Використовуйте вбудовану можливість виконання коду в Open WebUI, щоб запускати фрагменти Python, перевіряти результати та швидше ітерувати — не залишаючи інтерфейсу. [Посилання](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
+Використовуйте вбудовану можливість виконання коду Open WebUI для запуску фрагментів Python, перегляду результатів та швидшої ітерації — не виходячи з інтерфейсу. [Довідка](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
 
-### 3. Рендеринг HTML в Open WebUI
+### 3. Рендеринг HTML всередині Open WebUI
 
-Відображайте результати HTML безпосередньо в інтерфейсі. Це напрочуд потужна можливість для швидкого створення прототипів, форматованих звітів та інтерактивних фрагментів. [Посилання](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
+Відображайте вихідні дані HTML безпосередньо в інтерфейсі. Це напрочуд потужний інструмент для створення швидких прототипів, форматованих звітів та інтерактивних фрагментів. [Довідка](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
 
 ---
 
@@ -1059,7 +1062,7 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 - [Документація Lemonade Server](https://lemonade-server.ai/docs)
 - [Lemonade Server CLI](https://lemonade-server.ai/docs/lemonade-cli/)
 - [Посібник з інтеграції Lemonade ↔ Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui)
-- [Специфікація API Lemonade Server (кінцеві точки)](https://lemonade-server.ai/docs/server/server_spec)
+- [Специфікація API Lemonade Server (ендпоінти)](https://lemonade-server.ai/docs/server/server_spec)
 - [Відеоогляд (Lemonade)](https://www.youtube.com/watch?v=mcf7dDybUco)
 - [Відеоогляд (Open WebUI + Lemonade)](https://www.youtube.com/watch?v=yZs-Yzl736E)
 

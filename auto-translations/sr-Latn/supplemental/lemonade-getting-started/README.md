@@ -15,17 +15,17 @@ SPDX-License-Identifier: MIT
 <!-- @github-only:end -->
 ## Pregled
 
-🍋 **Lemonade** je open-source lokalni AI server koji vam omogućava da pokrećete velike jezičke modele (LLM-ove), generatore slika i audio modele direktno na sopstvenom hardveru. On izlaže modele kroz industrijski standardni **OpenAI API**, tako da svaka aplikacija koja radi sa OpenAI-em može odmah da radi i sa Lemonade-om. Do kraja ovog vodiča, koristićete Lemonade za pokretanje modela lokalno na svom računaru.
+🍋 **Lemonade** je open-source lokalni AI server koji vam omogućava da pokrećete velike jezičke modele (LLM-ove), generatore slika i audio modele direktno na sopstvenom hardveru. Modeli se izlažu kroz industrijski standardni **OpenAI API**, tako da svaka aplikacija koja radi sa OpenAI-jem može odmah da radi i sa Lemonade-om. Do kraja ovog vodiča koristićete Lemonade za pokretanje modela lokalno na vašem računaru.
 
 ## Šta ćete naučiti
 
 Do kraja ovog vodiča bićete u mogućnosti da:
 
 * **Instalirate Lemonade Server** i proverite da li radi.
-* **Preuzmete i čatujete sa LLM-om** koristeći jednu komandu.
-* **Istražite web UI** i isprobate različite modalitete kao što su vid, pretvaranje govora u tekst i generisanje slika.
-* **Prebacujete GPU backend-ove** između Vulkan-a i AMD ROCm™ softvera.
-* **Napravite Python aplikaciju** pokretanu lokalnim LLM-om koristeći OpenAI-kompatibilan API.
+* **Preuzmete i ćaskate sa LLM-om** koristeći jednu komandu.
+* **Istražite web korisnički interfejs** i isprobate različite modalitete kao što su vid, prepoznavanje govora u tekst i generisanje slika.
+* **Promenite GPU pozadinski sistem** između Vulkan-a i AMD ROCm™ softvera.
+* **Izgradite Python aplikaciju** pokretanu lokalnim LLM-om koristeći API kompatibilan sa OpenAI-jem.
 <!-- @device:halo_box,halo,stx,krk -->
 * **Pokrenite modele na AMD Neural Processing Unit (NPU)** koristeći Hybrid i FLM režime izvršavanja na AMD Ryzen™ AI hardveru.
 <!-- @device:end -->
@@ -39,24 +39,26 @@ Do kraja ovog vodiča bićete u mogućnosti da:
 ## Provera ažuriranja softvera
 <!-- @require:software-update -->
 <!-- @device:end -->
-## Instaliranje potrebnog softvera
+## Instalacija softverskih preduslova
 
 Pre nego što počnete, uverite se da imate:
 
 - Računar sa operativnim sistemom **Windows 11** ili podržanom **Linux** distribucijom (Ubuntu 24.04+, Fedora, Debian)
-- Preporučuje se **16 GB RAM-a** za runtime model koji se koristi u koracima 1–7 (`Gemma-4-E2B-it-GGUF`, ~3 GB). **32 GB+** se preporučuje ako želite da koristite veći model za generisanje koda u koraku 6 (`Qwen3.5-35B-A3B-GGUF`, ~20 GB).
+- **16 GB RAM-a** se preporučuje za runtime model koji se koristi u koracima 1–7 (`Gemma-4-E2B-it-GGUF`, ~3 GB). **32 GB+** se preporučuje ako želite da koristite veći model za generisanje koda u Koraku 6 (`Qwen3.5-35B-A3B-GGUF`, ~20 GB).
 - **~4–30 GB slobodnog prostora na disku**, u zavisnosti od modela koje preuzmete. Najveći model u ovom vodiču ima oko 20 GB.
-- **Python 3.10–3.13** (koristi se u odeljku o Python aplikaciji)
+- **Python 3.10–3.13** (koristi se u delu o Python aplikaciji)
 - Internet konekciju (žičnu ili bežičnu)
 <!-- @device:halo_box,halo,stx,krk -->
-- [Opciono] AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 serija ili Z2 Extreme) sa najnovijim upravljačkim programom instaliranim sa stranice [Uputstva za instalaciju Ryzen AI softvera](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) ako želite da pokrenete model na NPU.
+- [Opciono] AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 serija ili Z2 Extreme) sa najnovijim drajverom instaliranim sa [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) ako želite da pokrenete model na NPU-u.
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:lemonade-models-gemma-4-e2b -->
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -187,38 +189,38 @@ echo "OK: Model Gemma-4-E2B-it-GGUF responded"
 <!-- @os:end -->
 ---
 
-## Osnovni koncepti — Kako funkcionišu lokalni AI serveri
+## Osnovni koncepti — kako funkcionišu lokalni AI serveri
 
-Pre nego što pokrenemo model, vredi razumeti *zašto* su stvari postavljene na ovaj način. Lemonade je **lokalni server za modele**, proces koji učitava AI modele u memoriju i izlaže ih aplikacijama preko HTTP-a, baš kao što bi to radio i cloud AI servis.
+Pre nego što pokrenemo model, vredi razumeti *zašto* su stvari podešene na ovaj način. Lemonade je **lokalni server za modele**, proces koji učitava AI modele u memoriju i izlaže ih aplikacijama putem HTTP-a, baš kao što bi to radio neki cloud AI servis.
 
 ### Zašto server?
 
 | Prednost | Šta to znači za vas |
 |---------|----------------------|
-| **Pojednostavljena integracija** | Aplikacije komuniciraju sa jednim HTTP API-jem umesto da se bave C++ ili Python bibliotekama specifičnim za hardver. |
-| **Deljeni modeli** | Jedan učitani model može da opslužuje više aplikacija odjednom, bez duplih kopija koje troše vaš RAM. |
-| **Prenosivost sa cloud-a na lokalno** | Kod napisan za OpenAI cloud API radi sa Lemonade tako što se promeni samo jedan URL. |
-| **Razdvajanje odgovornosti** | Upravljanje modelima, striming i tolerancija na greške obrađuju se na serveru, tako da se programeri mogu fokusirati na svoju aplikaciju. |
+| **Pojednostavljena integracija** | Aplikacije komuniciraju sa jednim HTTP API-jem umesto da se bave bibliotekama specifičnim za hardver u C++ ili Python-u. |
+| **Deljeni modeli** | Jedan učitani model može da opslužuje više aplikacija istovremeno, bez duplih kopija koje troše vašu RAM memoriju. |
+| **Prenosivost sa cloud-a na lokalno** | Kod napisan za OpenAI-jev cloud API radi sa Lemonade uz izmenu samo jednog URL-a. |
+| **Razdvajanje odgovornosti** | Upravljanje modelima, strimovanje i tolerancija na greške obrađuje server, tako da programeri mogu da se fokusiraju na svoju aplikaciju. |
 
 ### OpenAI API standard
 
-Lemonade implementira **OpenAI API**, isti interfejs koji koriste ChatGPT, Azure OpenAI i desetine drugih servisa. Model razgovora je jednostavan:
+Lemonade implementira **OpenAI API**, isti interfejs koji koriste ChatGPT, Azure OpenAI i desetine drugih servisa. Model konverzacije je jednostavan:
 
 | Uloga | Ko govori |
 |------|---------------|
-| **system** | Instrukcije modelu (persona, ograničenja, dostupni alati) |
-| **user** | Poruke od čoveka (ili aplikacije) upućene modelu |
+| **system** | Instrukcije za model (persona, ograničenja, dostupni alati) |
+| **user** | Poruke od čoveka (ili aplikacije) ka modelu |
 | **assistant** | Odgovori koje generiše model |
 
-To znači da svaka biblioteka ili aplikacija koja podržava OpenAI može da komunicira sa Lemonade tako što je usmerite na `http://localhost:13305/api/v1` dok je Lemonade Server pokrenut.
+To znači da bilo koja biblioteka ili aplikacija koja podržava OpenAI može da komunicira sa Lemonade usmeravanjem na `http://localhost:13305/api/v1` dok je Lemonade Server pokrenut.
 
-## Glavna aktivnost — Vaš prvi lokalni AI razgovor
+## Glavna aktivnost — vaš prvi lokalni AI razgovor
 
-Hajde da preuzmemo LLM i porazgovaramo sa njim, dok AI radi u potpunosti na vašem sopstvenom računaru.
+Hajde da preuzmemo LLM i vodimo razgovor sa njim, pokrećući AI u potpunosti na vašem sopstvenom računaru.
 
 ### Korak 1: Preuzimanje i pokretanje modela
 
-Lemonade dolazi sa pažljivo odabranom bibliotekom modela. Počnimo sa **Gemma-4-E2B-it**, sposobnim i kompaktnim modelom koji uključuje i podršku za vizuelni unos. Otvorite terminal i pokrenite:
+Lemonade dolazi sa pažljivo odabranom bibliotekom modela. Počnimo sa **Gemma-4-E2B-it**, sposobnim i kompaktnim modelom koji uključuje podršku za vizuelni unos. Otvorite terminal i pokrenite:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF
@@ -230,23 +232,23 @@ Ova jedna komanda radi tri stvari:
 2. **Pokreće** proces Lemonade Server na portu 13305.
 3. **Otvara Lemonade App** kako biste mogli da počnete da ćaskate sa modelom.
 <!-- @os:windows -->
-Na operativnom sistemu Windows, Lemonade App se pokreće automatski i možete odmah početi da ćaskate. Ako ste instalirali paket `minimal.msi`, aplikacija nije uključena. Da biste počeli sa ćaskanjem, otvorite svoj veb pregledač i idite na `http://localhost:13305`.
+Na operativnom sistemu Windows, Lemonade App se pokreće automatski i možete odmah početi sa ćaskanjem. Ako ste instalirali paket `minimal.msi`, aplikacija nije uključena. Da biste počeli sa ćaskanjem, otvorite veb pregledač i idite na `http://localhost:13305`.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Na Linux sistemu, otvorite pregledač i idite na `http://localhost:13305` da biste pristupili veb aplikaciji.
+Na Linuxu otvorite svoj pregledač i idite na `http://localhost:13305` da biste pristupili veb aplikaciji.
 <!-- @os:end -->
-Pokušajte da otkucate pitanje:
+Probajte da otkucate pitanje:
 
 ```
 What are three fun facts about lemons?
 ```
 
-Model će odgovoriti direktno u prozoru za četovanje. **Čestitamo! Pokrenuli ste veliki jezički model lokalno.**
+Model će odgovoriti direktno u prozoru za ćaskanje. **Čestitamo! Pokrećete veliki jezički model lokalno.**
 
-![Lemonade App sa prikazanim logovima](../../dependencies/assets/ChatwithLogs.png)
+![Lemonade App sa prikazanim dnevnicima](../../dependencies/assets/ChatwithLogs.png)
 
-U panelu Server Logs u Lemonade App aplikaciji možete pronaći telemetrijske podatke o performansama modela nakon svakog odgovora. Na primer:
+U oknu Server Logs u aplikaciji Lemonade App možete pronaći telemetrijske podatke o performansama modela nakon svakog odgovora. Na primer:
 
 ```
  === Telemetry ===
@@ -257,49 +259,49 @@ TPS:           95.99
 =================
 ```
 
-### Korak 2: Istražite veb-interfejs i različite modalitete
+### Korak 2: Istražite veb interfejs i različite modalitete
 
-Lemonade uključuje ugrađeni veb-interfejs u kome možete da:
+Lemonade sadrži ugrađeni veb interfejs u kome možete:
 
-- **Komunicirate** sa učitanim modelom u poznatom prozoru za ćaskanje
-- **Pregledate modele** u kartici Model Manager
-- **Preuzimate nove modele** jednim klikom
+- **Komunicirati** sa učitanim modelom u poznatom prozoru za ćaskanje
+- **Pregledati modele** na kartici Model Manager
+- **Preuzimati nove modele** jednim klikom
 
-Probajte da se prebacujete između različitih modaliteta pomoću kartice **Model Manager** u veb-interfejsu, gde možete pregledati modele po recepturi (Recipe) ili po kategoriji (Category):
+Pokušajte da prebacujete između različitih modaliteta koristeći karticu **Model Manager** u veb UI-ju, gde možete pregledati modele po Recipe-u ili po Kategoriji:
 
-1. **Vizija:** Model `Gemma-4-E2B-it-GGUF` koji ste već učitali podržava viziju. Nalepite sliku u polje za ćaskanje i zamolite model da je opiše.
-2. **Generisanje slika:** U kategoriji Image, preuzmite model za slike kao što je `SDXL-Turbo` iz Model Manager-a, a zatim upotrebite Lemonade Image Generator da unesete upit i generišete sliku lokalno.
-3. **Audio:** U kategoriji Audio, preuzmite audio model kao što je `Whisper-Tiny`, koji može da pretvara govor u tekst. Priložite audio snimak da biste ga lokalno transkribovali. Za pretvaranje teksta u govor, isprobajte jedan od modela iz kategorije Speech, na primer `kokoro-v1`.
+1. **Vizija:** Model `Gemma-4-E2B-it-GGUF` koji već imate učitan podržava viziju. Nalepite sliku u polje za ćaskanje i zamolite model da je opiše.
+2. **Generisanje slika:** U kategoriji Image, preuzmite model za slike kao što je `SDXL-Turbo` iz Model Manager-a, a zatim upotrebite Lemonade Image Generator da ukucate upit i lokalno generišete sliku.
+3. **Audio:** U kategoriji Audio, preuzmite audio model kao što je `Whisper-Tiny`, koji može da pretvara govor u tekst. Obezbedite audio snimak da biste ga lokalno transkribovali. Za pretvaranje teksta u govor, isprobajte jedan od modela u kategoriji Speech, kao što je `kokoro-v1`.
 
-![Multimodalnost sa Lemonade](../../dependencies/assets/multi_modality.png)
+![Multimodalnost sa Lemonade-om](../../dependencies/assets/multi_modality.png)
 
-### Korak 3: Isprobajte model sa drugačijim bekendom
+### Korak 3: Isprobajte model sa drugačijim pozadinskim sistemom (backend)
 
-Ako pređete mišem preko modela u Lemonade aplikaciji, videćete ikonicu zupčanika. Klikom na nju možete da izaberete opcije za model, uključujući i željeni bekend.
+Ako pređete mišem preko modela u Lemonade aplikaciji, videćete ikonicu zupčanika. Klikom na nju možete izabrati opcije za model, uključujući i željeni backend.
 
-Podrazumevano, Lemonade koristi Vulkan za GPU akceleraciju. Ako imate podržani AMD diskretni GPU, možete da se prebacite na ROCm.
+Podrazumevano, Lemonade koristi Vulkan za GPU akceleraciju. Ako imate podržan AMD diskretni GPU, možete preći na ROCm.
 
-![Lemonade izbor bekenda](../../dependencies/assets/lemonademodeloptions.png)
+![Lemonade izbor backend-a](../../dependencies/assets/lemonademodeloptions.png)
 
-Da biste upravljali instaliranim bekendima, kliknite na dugme za bekend u krajnjoj levoj koloni.
+Da biste upravljali instaliranim backend-ima, kliknite na dugme za backend u krajnjoj levoj koloni.
 
-Alternativno, možete odrediti bekend pomoću sledeće komande:
+Alternativno, backend možete navesti pomoću sledeće komande:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF --llamacpp rocm
 ```
 
-Podrazumevani bekend takođe možete podesiti pomoću promenljive okruženja `LEMONADE_LLAMACPP`, sa vrednostima: `vulkan`, `rocm` ili `cpu`.
+Podrazumevani backend možete podesiti i pomoću promenljive okruženja `LEMONADE_LLAMACPP` sa vrednostima: `vulkan`, `rocm` ili `cpu`.
 
 ---
 
-## Idemo dublje — Izgradnja AI aplikacije pomoću Python-a
+## Idemo dublje — napravite aplikaciju pokretanu veštačkom inteligencijom u Python-u
 
-Prava snaga lokalnog AI servera leži u tome što svaka aplikacija može da se poveže na njega pomoću svega nekoliko linija koda. Da bismo to dokazali, hajde da napravimo malu, ali funkcionalnu **aplikaciju za generisanje kartica za učenje (flashcard)**, kojoj zadate temu, ona generiše kartice, a vi zatim možete interaktivno da testirate svoje znanje.
+Prava snaga lokalnog AI servera je u tome što bilo koja aplikacija može da se poveže sa njim koristeći samo nekoliko linija koda. Da bismo to dokazali, hajde da napravimo malu ali funkcionalnu **aplikaciju za generisanje kartica za učenje (flashcards)** gde zadate temu, ona generiše kartice, a vi sebe možete interaktivno testirati.
 
 ### Korak 4: Pokrenite server
 
-Proverite da li Lemonade server radi. Obično se pokreće automatski u pozadini nakon instalacije. Da biste to proverili, pokrenite:
+Proverite da li je Lemonade server pokrenut. Obično se automatski pokreće u pozadini nakon instalacije. Da biste proverili, pokrenite:
 
 ```
 lemonade status
@@ -307,7 +309,7 @@ lemonade status
 
 Trebalo bi da vidite poruku poput: `Server is running on port 13305`.
 
-Ako server ne radi, pokrenite ga otvaranjem Lemonade aplikacije. Koristite podrazumevani port **13305** (možete ga potvrditi ili izabrati iz ikonice u traci sistema).
+Ako server nije pokrenut, pokrenite ga otvaranjem Lemonade aplikacije. Koristite podrazumevani port **13305** (možete ga potvrditi ili izabrati iz ikonice u traci sistema).
 
 ### Korak 5: Instalirajte OpenAI Python klijent
 
@@ -389,18 +391,18 @@ python3 -c "from openai import OpenAI; print('OK')"
 <!-- @test:end -->
 <!-- @os:end -->
 
-### Korak 6: Napravite Flashcard aplikaciju
+### Korak 6: Napravite aplikaciju za kartice za učenje
 
-Hajde da preuzmemo drugačiji model za generisanje koda: `Qwen3.5-35B-A3B-GGUF`. Ovo je veliki (~20 GB) i moćan model, najpogodniji za sisteme sa 32 GB+ RAM-a. Ako imate manje dostupnog RAM-a, umesto njega isprobajte `Qwen3.5-9B-GGUF` (~6 GB).
+Hajde da preuzmemo drugačiji model za generisanje koda: `Qwen3.5-35B-A3B-GGUF`. Ovo je veliki (~20 GB) i moćan model koji najbolje odgovara sistemima sa 32 GB+ RAM-a. Ako imate manje dostupnog RAM-a, isprobajte umesto njega `Qwen3.5-9B-GGUF` (~6 GB).
 
-Možete ga preuzeti iz korisničkog interfejsa ili pokrenuti sledeće:
+Možete ga preuzeti iz UI-ja ili pokrenuti sledeće:
 ```
 lemonade run Qwen3.5-35B-A3B-GGUF
 ```
 
-Unesite sledeći upit u Lemonade Chat UI da biste generisali kod za jednostavnu Flashcard aplikaciju.
+Unesite sledeći upit u Lemonade Chat UI da biste generisali kod za jednostavnu aplikaciju za kartice za učenje.
 
-Koristićemo Qwen3.5-35B-A3B-GGUF (veći model, bolji u pisanju koda) za generisanje naše Python aplikacije, a sama aplikacija će tokom rada pozivati Gemma-4-E2B-it-GGUF (manji model koji ste već preuzeli). Kod se zatim može kopirati u datoteku po vašem izboru da bi se pokrenuo u Python-u.
+Koristićemo Qwen3.5-35B-A3B-GGUF (veći model, bolji u pisanju koda) da generišemo našu Python aplikaciju, a sama aplikacija će tokom izvršavanja pozivati Gemma-4-E2B-it-GGUF (manji model koji ste već preuzeli). Kod se zatim može kopirati u fajl po vašem izboru kako bi se pokrenuo u Python-u.
 
 ```
 Generate a Python script that uses the OpenAI Python library to call a local LLM and create an interactive flashcard study tool.
@@ -433,9 +435,9 @@ Structure:
    - Offers to start the quiz.
 ```
 
-> **Savet**: Primenili smo standardne inženjerske prakse kroz pažljivo kreiranje upita i korišćenje sistema sa dva modela radi optimizacije resursa i brzine.
+> **Savet**: Sledili smo standardne inženjerske prakse kroz pažljivo kreiranje upita i korišćenje sistema sa dva modela radi optimizacije resursa i brzine.
 
-Radi vaše udobnosti, obezbedili smo primer izlaza u [`flashcards.py`](assets/flashcards.py). Slobodno ga preuzmite u svoj direktorijum. U svakom slučaju, sada bi trebalo da imate Python datoteku koja se može pokrenuti.
+Radi lakšeg snalaženja, obezbedili smo primer izlaza u [`flashcards.py`](assets/flashcards.py). Slobodno ga preuzmite u svoj direktorijum. U svakom slučaju, sada biste trebali da imate Python fajl koji je moguće pokrenuti.
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=900 hidden=True -->
@@ -491,7 +493,7 @@ python3 lemonade_python_smoke.py
 python flashcards.py # replace with your file name
 ```
 
-**Evo šta bi trebalo da vidite:**
+**Evo šta biste trebalo da vidite:**
 
 ```
 🍋 Lemonade Flashcard Generator
@@ -525,51 +527,51 @@ Did you get it right? (y/n): y
 🏆 Score: 4/5
 ```
 
-U svega oko 150 linija koda izgradili ste potpuno funkcionalan alat za učenje pokretan lokalnim LLM-om. Nema API ključa za upravljanje, nema troškova korišćenja, a nijedan podatak nikada ne napušta vaš računar.
+U oko 150 linija koda napravili ste potpuno funkcionalan alat za učenje pokretan lokalnim LLM-om. Nema API ključa za upravljanje, nema troškova korišćenja, i nikakvi podaci ne napuštaju vaš računar.
 
-> **Ključni uvid:** Primetite da je linija `client = OpenAI(base_url=...) ` *jedina* stvar koja povezuje ovu aplikaciju sa Lemonade umesto sa OpenAI oblakom. Ostatak koda identičan je onome koji biste napisali za bilo koju uslugu kompatibilnu sa OpenAI. Ako ste ikada koristili OpenAI Python biblioteku, već znate kako da gradite aplikacije sa Lemonade.
+> **Ključni uvid:** Primetite da je linija `client = OpenAI(base_url=...) ` *jedina* stvar koja povezuje ovu aplikaciju sa Lemonade-om umesto sa OpenAI-jevim oblakom. Ostatak koda je identičan onome što biste napisali za bilo koju uslugu kompatibilnu sa OpenAI-jem. Ako ste ikada koristili OpenAI Python biblioteku, već znate kako da gradite aplikacije sa Lemonade-om.
 
 ### Šta ovo pokazuje
 
-Ova mala aplikacija koristi nekoliko obrazaca integracije koji se sreću u stvarnim primenama:
+Ova mala aplikacija demonstrira nekoliko šablona integracije iz stvarnog sveta:
 
-| Obrazac | Gde se pojavljuje |
+| Šablon | Gde se pojavljuje |
 |---------|-----------------|
-| **Sistemski upiti (system prompts)** | Poruka `"system"` govori LLM-u da izlaz bude u obliku strukturiranog JSON-a |
-| **Strukturirani izlaz** | Aplikacija parsira odgovor LLM-a kao JSON kako bi napravila kartice |
-| **Zahtevi bez stanja (stateless)** | Svaki poziv `generate_flashcards()` je nezavisan |
-| **Rukovanje greškama** | Blok `try/except` graciozno obrađuje slučajeve kada izlaz LLM-a nije validan JSON |
+| **Sistemski upiti (system prompts)** | Poruka `"system"` govori LLM-u da izbaci strukturirani JSON |
+| **Strukturirani izlaz** | Aplikacija parsira odgovor LLM-a kao JSON da bi izgradila kartice |
+| **Bezstatusni zahtevi (stateless)** | Svaki poziv `generate_flashcards()` je nezavisan |
+| **Rukovanje greškama** | `try/except` elegantno rukuje slučajevima kada izlaz LLM-a nije validan JSON |
 
-Isti ovi obrasci mogu se primeniti na bilo koju aplikaciju, poput četbotova, asistenata za kod, generatora sadržaja i alata za automatizaciju.
+Isti ovi šabloni se mogu primeniti na bilo koju aplikaciju, kao što su chatbotovi, asistenti za kod, generatori sadržaja, alati za automatizaciju.
 
 #### Bonus izazov
 
-* Za dodatni izazov, pokušajte da ažurirate aplikaciju tako da kartice budu pročitane korisniku naglas, koristeći se primerom dostupnim [ovde](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py).
+* Za dodatni izazov, pokušajte da ažurirate aplikaciju tako da kartice budu pročitane korisniku, pozivajući se na primer dat [ovde](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py).
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Pokretanje modela na NPU-u (opciono)
 
-Ako imate Ryzen AI 300/400/Max 300 seriju ili Z2 Extreme, vaš uređaj poseduje ugrađenu **Neuronsku procesnu jedinicu (NPU)**, namenski čip dizajniran posebno za AI radne zadatke. Pokretanje modela na NPU-u je energetski efikasnije nego korišćenje GPU-a, što ga čini idealnim za pozadinske AI zadatke, duže sesije i rad na baterijsko napajanje.
+Ako imate Ryzen AI 300/400/Max 300 seriju ili Z2 Extreme, vaš uređaj poseduje ugrađenu **Neural Processing Unit (NPU)**, namenski čip dizajniran posebno za AI radna opterećenja. Pokretanje modela na NPU-u je energetski efikasnije nego korišćenje GPU-a, što ga čini idealnim za pozadinske AI zadatke, duže sesije i rad na baterijsko napajanje.
 
-Lemonade podržava tri režima izvršavanja na NPU-u, sve transparentno kroz isti OpenAI API:
+Lemonade podržava tri režima izvršavanja na NPU-u, sve transparentno iza istog OpenAI API-ja:
 
-| Režim | Kako funkcioniše | Recept | Primeri modela |
+| Režim | Kako funkcioniše | Recept | Primer modela |
 |------|-------------|--------|----------------|
 | **Hybrid (NPU + iGPU)** | NPU obrađuje prompt, iGPU generiše tokene | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
-| **Samo NPU** | Celokupna inferencija se izvršava na NPU-u | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
-| **FLM** | Koristi FastFlowLM engine na NPU-u, optimizovan za AMD XDNA2 | FLM (`flm`) | qwen3.5-4b-FLM |
+| **Samo NPU** | Celokupno zaključivanje se izvršava na NPU-u | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
+| **FLM** | Koristi FastFlowLM mehanizam na NPU-u, optimizovan za AMD XDNA2 | FLM (`flm`) | qwen3.5-4b-FLM |
 
 ### Zahtevi
 
-- **AMD Ryzen AI 300/400 serije ili Z2 serije** procesor
-- Za **FLM** modele: FLM runtime se može instalirati direktno iz Lemonade aplikacije, ili će ga Lemonade automatski instalirati prilikom pokretanja FLM modela. Da biste saznali više o FastFlowLM-u, pogledajte [ovde](https://fastflowlm.com/docs/).
+- **AMD Ryzen AI 300/400 serija ili Z2 serija** procesor
+- Za **FLM** modele: FLM runtime se može instalirati direktno iz Lemonade aplikacije ili će ga Lemonade automatski instalirati prilikom pokretanja FLM modela. Da biste saznali više o FastFlowLM-u, pogledajte [ovde](https://fastflowlm.com/docs/).
 
 
 ### Korak 8: Pokretanje Hybrid modela
 
-Hybrid modeli dele posao između NPU-a i iGPU-a radi dobrog balansa brzine i efikasnosti. U Lemonade aplikaciji izaberite model sa liste `Ryzen AI LLM`, na primer `Qwen3-4B-Hybrid`, ili ga pokrenite pomoću sledeće komande:
+Hybrid modeli dele rad između NPU-a i iGPU-a radi dobrog balansa brzine i efikasnosti. U Lemonade aplikaciji izaberite model sa liste `Ryzen AI LLM`, na primer `Qwen3-4B-Hybrid`, ili ga pokrenite pomoću sledeće komande:
 
 ```
 lemonade run Qwen3-4B-Hybrid
@@ -577,31 +579,31 @@ lemonade run Qwen3-4B-Hybrid
 
 Lemonade automatski detektuje vaš NPU i instalira **Ryzen AI LLM** backend.
 
-> **Šta se dešava iza scene?** Kada pošaljete poruku, NPU obrađuje ceo vaš prompt paralelno (ovo se naziva „prefill"). Zatim, iGPU preuzima generisanje odgovora token po token (ovo se naziva „decode"). Ovaj hibridni pristup iskorišćava snage svakog čipa.
+> **Šta se dešava u pozadini?** Kada pošaljete poruku, NPU paralelno obrađuje ceo vaš prompt (ovo se naziva „prefill"). Zatim iGPU preuzima posao i generiše odgovor token po token (ovo se naziva „decode"). Ovaj hibridni pristup iskorišćava prednosti svakog čipa.
 
 ### Korak 9: Pokretanje FLM modela
 
-FastFlowLM (FLM) modeli su specifično optimizovani za AMD-ovu XDNA2 NPU arhitekturu i mogu biti veoma brzi za svoju veličinu. Na primer, izaberite `qwen3.5-4b-FLM` sa liste `FastFlowLM NPU` ili koristite sledeću komandu:
+FastFlowLM (FLM) modeli su posebno optimizovani za AMD-ovu XDNA2 NPU arhitekturu i mogu biti veoma brzi s obzirom na svoju veličinu. Na primer, izaberite `qwen3.5-4b-FLM` sa liste `FastFlowLM NPU` ili koristite sledeću komandu:
 
 <!-- @os:windows -->
 Da biste omogućili `FastFlowLM` na Windows-u:
 
 * Otvorite meni `Backends Manager`.
 * Pronađite kategoriju backend-a `FastFlowLM NPU`.
-* Kliknite Install NPU.
-* Kada se instalacija završi, biće dostupno oko 36 podrazumevanih modela u FFLM padajućem meniju.
+* Kliknite na Install NPU.
+* Nakon završene instalacije, biće dostupno oko 36 podrazumevanih modela u padajućem meniju FFLM.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
-Kada se aplikacija `Lemonade` pokrene po prvi put, `FastFlowNPU` backend nije podrazumevano omogućen.
-Lokalna aplikacija će otvoriti stranicu za instalaciju kako bi vas provela kroz podešavanje.
+Kada se `Lemonade` aplikacija prvi put pokrene, `FastFlowNPU` backend nije podrazumevano omogućen. 
+Lokalna aplikacija će otvoriti stranicu za instalaciju koja će vas provesti kroz podešavanje.
 
 Da biste omogućili `FastFlowLM` na Linux-u:
 
 * Otvorite `Lemonade` aplikaciju.
-* Posetite [zvaničnu FLM](https://lemonade-server.ai/flm_npu_linux.html) dokumentaciju i pratite korake instalacije za FLM tako što ćete odabrati svoju Linux distribuciju.
+* Posetite zvaničnu [FLM](https://lemonade-server.ai/flm_npu_linux.html) dokumentaciju i pratite korake instalacije za FLM tako što ćete izabrati svoju Linux distribuciju.
 * Omogućite backports kako je navedeno na stranici za instalaciju.
 * Preuzmite najnoviju `v0.9.x` verziju sa [stranice sa oznakama](https://github.com/FastFlowLM/FastFlowLM/tags).'
 <!-- @device:end -->
@@ -620,23 +622,23 @@ fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 ```
 <!-- @device:end -->
 * Instalirajte preuzeti `.deb` paket.
-* Preporučeno: Zatvorite `Lemonade App` i ponovo je otvorite kako bi se izmene detektovale.
-* Preporučeno: Otvorite `Backends Manager` i kliknite Install `FastFlowNPU` Backend.
+* Preporučeno: Zatvorite `Lemonade App` i ponovo je otvorite kako bi se promene detektovale.
+* Preporučeno: Otvorite `Backends Manager` i kliknite na Install `FastFlowNPU` Backend.
 <!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @device:halo_box,halo,stx,krk -->
-Nakon uspešne instalacije, trebalo bi da vidite da je `flm:npu` završen u **Download Manager**-u unutar **Lemonade Desktop App**.
+Nakon uspešne instalacije, trebalo bi da vidite da je `flm:npu` završen u **Download Manager**-u unutar **Lemonade Desktop** aplikacije.
 <p align="center">
   <img width="400" height="400" src="assets/FFLM-installationWizard.png" />
 </p>
 Zatim možete izabrati bilo koji od dostupnih FFLM modela i početi da koristite NPU backend.
 
-Za određeni model, preuzmite željeni model sa [stranice sa modelima](https://fastflowlm.com/docs/models/qwen/) i validirajte ga koristeći Shell komandu navedenu u dokumentaciji.
+Za specifičan model, preuzmite željeni model sa [stranice sa modelima](https://fastflowlm.com/docs/models/qwen/) i proverite ga pomoću Shell komande navedene u dokumentaciji.
 ```
 flm run qwen3.5-4b-FLM
 ```
-ili putem 
+ili preko 
 ```
 lemonade run qwen3.5-4b-FLM
 ```
@@ -652,9 +654,9 @@ Lemonade automatski detektuje vaš NPU i instalira **FastFlowLM NPU** backend.
 > ```
 <!-- @os:end -->
 
-### Menjanje modela
+### Promena modela
 
-Aplikacija sa flashcard-ovima iz Koraka 6 radi i sa NPU modelima, samo promenite naziv modela:
+Aplikacija sa flashcard-ovima iz Koraka 6 radi i sa NPU modelima, samo promenite ime modela:
 
 ```python
 # In flashcards.py, swap the model to run on NPU instead of GPU
@@ -667,7 +669,7 @@ response = client.chat.completions.create(
 
 ## Sledeći koraci
 
-Imate lokalni AI server pokrenut na sopstvenom hardveru, evo šta dalje:
+Imate lokalni AI server koji radi na sopstvenom hardveru, evo šta dalje:
 
 1. **Povežite svoje omiljene aplikacije**: Lemonade radi odmah po instalaciji sa [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), [Continue](https://lemonade-server.ai/docs/server/apps/continue/), [n8n](https://n8n.io/integrations/lemonade-model/) i [mnogim drugim](https://lemonade-server.ai/marketplace).
 
@@ -675,9 +677,9 @@ Imate lokalni AI server pokrenut na sopstvenom hardveru, evo šta dalje:
 
 3. **Otključajte ROCm GPU akceleraciju**: Ako imate podržani AMD GPU, prebacite se na ROCm backend: `lemonade config set llamacpp.backend=rocm`. Pogledajte [podržane AMD GPU-ove](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
 
-4. **Pročitajte kompletnu API specifikaciju**: Lemonade podržava chat completions, embeddings, transkripciju zvuka, generisanje slika, pretvaranje teksta u govor i drugo. Pogledajte [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) za svaki endpoint.
+4. **Pročitajte potpunu API specifikaciju**: Lemonade podržava chat completions, embeddings, transkripciju zvuka, generisanje slika, pretvaranje teksta u govor i još mnogo toga. Pogledajte [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) za svaki endpoint.
 
-5. **Doprinesite**: Lemonade je otvorenog koda. Pogledajte [vodič za doprinose](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) i potražite [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+5. **Doprinesite projektu**: Lemonade je otvorenog koda. Pogledajte [vodič za doprinos](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md) i potražite [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

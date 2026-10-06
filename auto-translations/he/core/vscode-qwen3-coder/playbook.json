@@ -1,6 +1,6 @@
 {
   "id": "vscode-qwen3-coder",
-  "title": "תכנות עם מודל שפה מקומי (Local LLM) ב-VS Code ו-Qwen3-Coder",
-  "description": "השתמש ב-VS Code עם Qwen3-Coder הפועל באופן מקומי לסיוע פרטי בכתיבת קוד.",
+  "title": "קידוד עם LLM מקומי באמצעות VS Code ו-Qwen3-Coder",
+  "description": "השתמש ב-VS Code עם Qwen3-Coder הפועל באופן מקומי לקבלת סיוע כתיבת קוד פרטי.",
   "auto_translated": true
 }

@@ -9,20 +9,20 @@ SPDX-License-Identifier: MIT
 > **Machinevertaling.** Deze pagina is automatisch vertaald vanuit het Engels en is niet door een mens gecontroleerd. Deze pagina kan fouten bevatten en bepaalde instructies, opdrachten, downloads, productbeschikbaarheid of andere inhoud kan per taal of regio verschillen. In geval van tegenstrijdigheid of discrepantie is de oorspronkelijke Engelse versie van de playbook doorslaggevend en prevaleert deze.
 <!-- auto-translated-disclaimer:end -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## Overzicht
 
-Ollama is een populaire lichtgewicht tool voor het lokaal draaien van grote taalmodellen. Het regelt het downloaden van modellen, kwantisering en het serveren ervan achter een eenvoudige command-line interface en desktop-app, zodat u binnen enkele minuten kunt chatten met een LLM.
+Ollama is een populaire, lichtgewicht tool voor het lokaal uitvoeren van grote taalmodellen. Het regelt het downloaden van modellen, kwantisatie en het serveren ervan achter een eenvoudige command-line interface en desktop-app, zodat je binnen enkele minuten kunt chatten met een LLM.
 
-Dit playbook leidt u door het installeren van Ollama, het ophalen van het GPT-OSS 20B-model en het voeren van een gesprek ermee, zowel via de terminal als via de desktop-app.
+In dit playbook doorloop je het installeren van Ollama, het ophalen van het GPT-OSS 20B-model en het voeren van een gesprek ermee, zowel via de terminal als via de desktop-app.
 
-## Wat u leert
+## Wat je leert
 
-- Hoe u Ollama installeert en start op uw systeem
+- Hoe je Ollama installeert en start op je systeem
 - Het ophalen en uitvoeren van het GPT-OSS 20B-model lokaal
 - Chatten met modellen via de CLI
 - Modellen programmatisch bevragen via de REST API
@@ -35,21 +35,23 @@ Dit playbook leidt u door het installeren van Ollama, het ophalen van het GPT-OS
 
 <!-- @device:halo_box -->
 ## Controleren op software-updates
-> **Opmerking**: Als VS Code niet is geïnstalleerd, kunt u het installeren via Ryzen AI Developer Center.
+> **Opmerking**: Als VS Code niet is geïnstalleerd, kun je het installeren via Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
 ## Software-vereisten installeren
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:driver -->
+<!-- @prereq:ollama,ollama-models-gpt-oss-20b -->
 
 ### Ollama installeren
 
 <!-- @os:windows -->
 
 1. Download het installatieprogramma van [ollama.com/download](https://ollama.com/download).
-2. Voer het `.exe`-installatieprogramma uit en volg de aanwijzingen.
+2. Voer het `.exe`-installatieprogramma uit en volg de instructies.
 3. Eenmaal geïnstalleerd, draait Ollama als achtergrondservice en is het toegankelijk vanuit de terminal, de desktop-app en het systeemvak.
 
 Controleer de installatie door een terminal te openen en het volgende uit te voeren:
@@ -64,7 +66,7 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-U zou het geïnstalleerde versienummer op de console moeten zien verschijnen.
+Je zou het geïnstalleerde versienummer op de console moeten zien verschijnen.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -87,26 +89,26 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-U zou het geïnstalleerde versienummer op de console moeten zien verschijnen.
+Je zou het geïnstalleerde versienummer op de console moeten zien verschijnen.
 <!-- @os:end -->
 
-## Uw eerste model ophalen
+## Je eerste model ophalen
 
-Ollama beheert modellen via een register, vergelijkbaar met containerimages. Om GPT-OSS 20B te downloaden:
+Ollama beheert modellen via een registry, vergelijkbaar met containerimages. Om GPT-OSS 20B te downloaden:
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-Dit downloadt de modelgewichten naar uw lokale machine (ongeveer 12 GB). Het downloaden gebeurt slechts eenmaal; volgende keren wordt het model vanaf schijf geladen.
+Hiermee worden de modelgewichten gedownload naar je lokale machine (ongeveer 12 GB). Het downloaden gebeurt slechts één keer, en volgende keren wordt het model vanaf schijf geladen.
 
-U kunt bevestigen dat het model beschikbaar is met:
+Je kunt bevestigen dat het model beschikbaar is met:
 
 ```bash
 ollama list
 ```
 
-U zou `gpt-oss:20b` in de uitvoer moeten zien, samen met de grootte en de datum van laatste wijziging.
+Je zou `gpt-oss:20b` moeten zien in de uitvoer, samen met de grootte en de datum van laatste wijziging.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=180 hidden=True -->
@@ -208,56 +210,56 @@ echo "OK: gpt-oss:20b is present in ollama list"
 
 ### Modelnaamgeving
 
-Ollama-modelnamen volgen het formaat `name:tag`. De tag geeft meestal het aantal parameters of de kwantiseringsvariant aan. Enkele nuttige commando's voor het beheren van modellen:
+Ollama-modelnamen volgen het formaat `name:tag`. De tag geeft meestal het aantal parameters of de kwantisatievariant aan. Enkele handige commando's voor het beheren van modellen:
 
 | Commando | Beschrijving |
 |---------|-------------|
-| `ollama list` | Toont alle gedownloade modellen |
+| `ollama list` | Toon alle gedownloade modellen |
 | `ollama pull <model>` | Download een model zonder het uit te voeren |
-| `ollama rm <model>` | Verwijdert een model om schijfruimte vrij te maken |
-| `ollama show <model>` | Toont modelmetadata en -parameters |
+| `ollama rm <model>` | Verwijder een model om schijfruimte vrij te maken |
+| `ollama show <model>` | Toon modelmetadata en parameters |
 
 ## Chatten vanuit de terminal
 
-Start een interactieve chatsessie direct vanaf de command line:
+Start een interactieve chatsessie rechtstreeks vanaf de command line:
 
 ```bash
 ollama run gpt-oss:20b
 ```
 
-Ollama laadt het model in het geheugen en brengt u naar een prompt. Probeer iets te vragen:
+Ollama laadt het model in het geheugen en brengt je naar een prompt. Probeer er iets aan te vragen:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-Het model streamt zijn antwoord token voor token direct in de terminal. Typ `/bye` of druk op `Ctrl+D` om de sessie te verlaten.
+Het model streamt zijn antwoord token voor token rechtstreeks in de terminal. Typ `/bye` of druk op `Ctrl+D` om de sessie te verlaten.
 
-> **Tip**: De eerste keer duurt het een paar seconden om het model in het geheugen te laden. Volgende prompts binnen dezelfde sessie reageren veel sneller omdat het model geladen blijft.
+> **Tip**: De eerste uitvoering duurt een paar seconden om het model in het geheugen te laden. Volgende prompts binnen dezelfde sessie reageren veel sneller, omdat het model geladen blijft.
 
 <!-- @os:windows -->
 ## Chatten vanuit de desktop-app
 
-Ollama wordt ook geleverd met een desktopapplicatie die een overzichtelijke chatinterface biedt voor interactie met uw modellen.
+Ollama wordt ook geleverd met een desktopapplicatie die een overzichtelijke chatinterface biedt voor interactie met je modellen.
 
-Open **Ollama** vanuit het Startmenu of klik op het Ollama-pictogram in het systeemvak en selecteer **Open Ollama**.
+Open **Ollama** vanuit het Start-menu of klik op het Ollama-pictogram in het systeemvak en selecteer **Open Ollama**.
 
 Zodra de app geopend is:
 
 1. Klik op **New Chat** in de zijbalk.
-2. Selecteer **gpt-oss:20b** in de vervolgkeuzelijst met modellen rechtsonder in het chatinvoergebied.
+2. Selecteer **gpt-oss:20b** uit de modelvervolgkeuzelijst in de rechteronderhoek van het chatinvoergebied.
 3. Typ een bericht en druk op Enter om te beginnen met chatten.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-De desktop-app houdt een geschiedenis van uw gesprekken bij in de zijbalk, zodat u eerdere chats gemakkelijk kunt terugvinden.
+De desktop-app houdt een geschiedenis van je gesprekken bij in de zijbalk, zodat je eerdere chats gemakkelijk kunt terugvinden.
 <!-- @os:end -->
 
 ## De REST API gebruiken
 
-Na de installatie draait Ollama als achtergrondservice en biedt het een REST API aan op `http://localhost:11434`, die u kunt gebruiken om modellen te integreren in uw eigen applicaties en scripts.
+Na installatie draait Ollama als achtergrondservice en biedt het een REST API aan op `http://localhost:11434` die je kunt gebruiken om modellen te integreren in je eigen applicaties en scripts.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -587,7 +589,7 @@ Het antwoord is een JSON-object dat de uitvoer van het model bevat in het veld `
 
 
 ### Python-voorbeeld
-Nu we de Ollama API programmatisch kunnen aanroepen, laten we dit doen vanuit Python.
+Nu we de Ollama API programmatisch kunnen aanroepen, laten we deze vanuit Python aanroepen.
 
 #### Een virtuele omgeving aanmaken in de terminal
 
@@ -607,8 +609,8 @@ ollama-env\Scripts\activate
 pip install requests
 ```
 <!-- @os:end -->
-#### Een Python-bestand maken
-Gebruik in dezelfde map VS Code of een andere editor om een .py-bestand aan te maken en kopieer de volgende code erin. Voer vervolgens het bestand uit in uw geactiveerde omgeving met `python your_file_name.py`
+#### Een Python-bestand aanmaken
+Gebruik in dezelfde map VS Code of een andere editor om een .py-bestand aan te maken en kopieer de volgende code erin. Voer het bestand vervolgens uit in je geactiveerde omgeving met `python your_file_name.py`
 
 ```python
 import requests
@@ -629,19 +631,19 @@ print(response.json()["response"])
 
 | Eindpunt | Methode | Doel |
 |----------|--------|---------|
-| `/api/generate` | POST | Enkelvoudige tekstgeneratie |
-| `/api/chat` | POST | Meerledig gesprek met berichtgeschiedenis |
-| `/api/tags` | GET | Toon beschikbare modellen |
-| `/api/show` | POST | Toon modeldetails |
-| `/api/pull` | POST | Haal een model op uit het register |
+| `/api/generate` | POST | Tekstgeneratie met één beurt |
+| `/api/chat` | POST | Meerdelige conversatie met berichtgeschiedenis |
+| `/api/tags` | GET | Beschikbare modellen weergeven |
+| `/api/show` | POST | Modeldetails weergeven |
+| `/api/pull` | POST | Een model ophalen uit de registry |
 
 Voor de volledige API-referentie, zie de [Ollama API-documentatie](https://github.com/ollama/ollama/blob/main/docs/api.md).
 
 ## Volgende stappen
 
-- **Probeer verschillende modellen**: Blader door de [Ollama modelbibliotheek](https://ollama.com/library) om honderden beschikbare modellen te verkennen, van kleine codeerassistenten tot grote redeneermodellen.
+- **Probeer verschillende modellen**: Blader door de [Ollama-modelbibliotheek](https://ollama.com/library) om honderden beschikbare modellen te verkennen, van kleine codeerassistenten tot grote redeneermodellen.
 - **Maak aangepaste modellen**: Gebruik een [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) om aangepaste systeemprompts, temperatuur en andere parameters in te stellen voor een op maat gemaakte ervaring.
-- **Bouw met de API**: Gebruik de [Python](https://github.com/ollama/ollama-python)- of [JavaScript](https://github.com/ollama/ollama-js)-clientbibliotheken om Ollama te integreren in uw applicaties.
-- **Verbind met frontends**: Combineer Ollama met tools zoals [Open WebUI](https://github.com/open-webui/open-webui) voor een functierijke chatinterface met zoekfunctie, persona's en documentupload.
+- **Bouw met de API**: Gebruik de [Python](https://github.com/ollama/ollama-python)- of [JavaScript](https://github.com/ollama/ollama-js)-clientbibliotheken om Ollama te integreren in je applicaties.
+- **Verbind met frontends**: Combineer Ollama met tools zoals [Open WebUI](https://github.com/open-webui/open-webui) voor een functierijke chatinterface met zoeken, persona's en documentupload.
 
-Voor meer informatie, bekijk de [Ollama-documentatie](https://github.com/ollama/ollama/blob/main/README.md).
+Raadpleeg voor meer informatie de [Ollama-documentatie](https://github.com/ollama/ollama/blob/main/README.md).

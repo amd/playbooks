@@ -9,39 +9,42 @@ SPDX-License-Identifier: MIT
 > **Traduction automatique.** Cette page a été traduite automatiquement depuis l'anglais et n'a pas été relue par un traducteur humain. Elle peut contenir des erreurs, et certaines instructions, commandes, téléchargements, disponibilités de produits ou autres contenus peuvent varier selon la langue ou la région. En cas d'incohérence ou de divergence, la version originale en anglais du playbook fait foi et prévaut.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
+<!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-## Aperçu
+## Vue d'ensemble
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) est la variante axée sur l'efficacité de la famille DeepSeek V4 — un modèle Mixture of Experts de 284 milliards de paramètres avec 13 milliards de paramètres actifs. D'après le [rapport technique de DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash), il obtient un score de 79 % sur SWE-bench Verified et de 91,6 % sur LiveCodeBench.
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) est la variante axée sur l'efficacité de la famille DeepSeek V4 — un modèle Mixture of Experts de 284 milliards de paramètres avec 13 milliards de paramètres actifs. Selon le [rapport technique de DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash), il obtient un score de 79 % sur SWE-bench Verified et de 91,6 % sur LiveCodeBench.
 
 [ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) est un moteur d'inférence dédié conçu spécifiquement pour cette architecture de modèle. Plutôt qu'un runtime généraliste, ds4 cible directement la famille DeepSeek V4 avec des optimisations de noyaux spécifiques à l'architecture pour le logiciel AMD ROCm™. C'est actuellement l'une des implémentations les plus performantes de DeepSeek V4 Flash sur Strix Halo.
 
-Ce tutoriel montre comment utiliser `ai-toolbox-cockpit`, une interface terminal, pour configurer ds4, télécharger les poids du modèle, et démarrer le service DeepSeek V4 Flash localement sur l'AMD Ryzen™ AI Halo Developer Platform.
+Ce tutoriel montre comment utiliser `ai-toolbox-cockpit`, une interface terminal, pour configurer ds4, télécharger les poids du modèle et démarrer le service de DeepSeek V4 Flash localement sur la plateforme AMD Ryzen™ AI Halo Developer Platform.
 
 ## Ce que vous allez apprendre
 
 - Comment installer et lancer l'interface terminal `ai-toolbox-cockpit`
-- Comment créer le conteneur toolbox ROCm pour ds4
-- Le téléchargement de la quantification recommandée pour un seul nœud Halo
-- Le démarrage du serveur d'inférence ds4 et l'exposition d'un point de terminaison compatible OpenAI
-- La connexion d'une interface Web ou d'un agent de codage au serveur local
+- Comment créer le conteneur toolbox ROCm ds4
+- Télécharger la quantization recommandée pour un seul nœud Halo
+- Démarrer le serveur d'inférence ds4 et exposer un point de terminaison compatible OpenAI
+- Connecter une interface Web ou un agent de codage au serveur local
 
-## Configuration de la mémoire
+## Définir la configuration de la mémoire
 
 <!-- @require:memory-config -->
 
 ## Installation des prérequis logiciels
 
-> **Configuration système requise pour cette configuration (IQ2_XXS mono-nœud à 126k de contexte) :**
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:distrobox,ds4-cockpit,ds4-toolbox-image -->
+
+> **Configuration système requise pour cette configuration (IQ2_XXS mono-nœud avec un contexte de 126k) :**
 > - Un système Strix Halo avec **au moins 128 Go de mémoire unifiée**.
-> - **La VRAM dédiée du BIOS (tampon de trame UMA) réglée au minimum**, afin que le pool de mémoire partagée puisse être aussi grand que possible.
-> - Le pool de **mémoire partagée du GPU réglé sur au moins 110 Go** : exécutez `amd-ttm --set 110` (voir l'étape de configuration de la mémoire ci-dessus) puis redémarrez. Des valeurs plus basses peuvent provoquer des erreurs de mémoire insuffisante lors du chargement du modèle avec un contexte de 126k. Si votre système dispose de moins de mémoire disponible, réduisez plutôt la valeur du **Contexte** dans le mode serveur.
+> - **La VRAM dédiée du BIOS (frame buffer UMA) réglée au minimum**, afin que le pool de mémoire partagée puisse être aussi grand que possible.
+> - Le pool de **mémoire partagée du GPU réglé sur au moins 110 Go** : exécutez `amd-ttm --set 110` (voir l'étape de configuration de la mémoire ci-dessus) et redémarrez. Des valeurs plus basses peuvent provoquer des erreurs de mémoire insuffisante lorsque le modèle se charge avec un contexte de 126k. Si votre système dispose de moins de mémoire disponible, réduisez plutôt la valeur de **Context** dans le mode serveur.
 >
-> **Remarque :** Essayez de définir le **pool de mémoire partagée du GPU** à **110 Go** comme point de départ. Si vous rencontrez des erreurs de mémoire insuffisante, augmentez le pool de mémoire partagée ou réduisez la taille du contexte.
+> **Remarque :** Essayez de régler le **pool de mémoire partagée du GPU** sur **110 Go** comme point de départ. Si vous rencontrez des erreurs de mémoire insuffisante, augmentez le pool de mémoire partagée ou réduisez la taille du contexte.
 
 ai-toolbox-cockpit utilise des conteneurs toolbox pour exécuter le moteur ds4. Installez `podman`, `distrobox` et `pipx` :
 
@@ -61,22 +64,22 @@ echo "OK: podman, distrobox, and pipx are installed"
 ```
 <!-- @test:end -->
 
-## Quantifications disponibles
+## Quantizations disponibles
 
-L'auteur de ds4 fournit plusieurs versions quantifiées de DeepSeek V4 Flash au format GGUF. Tous les modèles ci-dessous utilisent un calibrage par matrice d'importance (imatrix), qui préserve une précision plus élevée pour les parties du modèle les plus importantes pour les tâches de codage et de raisonnement.
+L'auteur de ds4 propose plusieurs versions quantifiées de DeepSeek V4 Flash au format GGUF. Tous les modèles ci-dessous utilisent un calibrage par matrice d'importance (imatrix), qui préserve une précision plus élevée pour les parties du modèle les plus importantes pour les tâches de codage et de raisonnement.
 
-| Quantification | Taille | Description |
+| Quantization | Taille | Description |
 |-------------|------|-------------|
 | [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 Go | Recommandé pour un seul nœud de 128 Go |
-| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 Go | Conserve les couches 37 à 42 en précision Q4 pour une meilleure précision. Tient dans 128 Go mais laisse moins de place pour le contexte |
-| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 Go | Qualité supérieure. Nécessite deux nœuds Halo via un clustering multi-nœuds |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 Go | Module complémentaire facultatif pour le décodage spéculatif afin d'améliorer la vitesse de génération |
+| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 Go | Conserve les couches 37–42 en précision Q4 pour une meilleure précision. Tient dans 128 Go mais laisse moins de place pour le contexte |
+| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 Go | Meilleure qualité. Nécessite deux nœuds Halo via le clustering multi-nœuds |
+| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 Go | Module complémentaire optionnel pour le décodage spéculatif afin d'améliorer la vitesse de génération |
 
-Le modèle **IQ2_XXS imatrix** constitue un bon point de départ. Il tient confortablement sur un seul nœud et laisse suffisamment de mémoire pour une fenêtre de contexte raisonnable.
+Le modèle **IQ2_XXS imatrix** est un bon point de départ. Il tient confortablement sur un seul nœud et laisse suffisamment de mémoire pour une fenêtre de contexte raisonnable.
 
-## Installation de ai-toolbox-cockpit
+## Installation d'ai-toolbox-cockpit
 
-[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) est une interface terminal légère qui facilite l'installation de divers backends d'IA. Nous l'utiliserons pour gérer la création de notre conteneur ds4, le téléchargement des poids du modèle et le démarrage des serveurs. Installez-la avec `pipx` :
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) est une interface terminal légère pour faciliter l'installation de divers backends d'IA. Nous allons l'utiliser pour gérer la création de notre conteneur ds4, le téléchargement des poids du modèle et le démarrage des serveurs. Installez-la avec `pipx` :
 
 <!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
@@ -99,7 +102,7 @@ echo "OK: ai-toolbox-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
-## Étape 1 : Création du toolbox
+## Étape 1 : Création de la toolbox
 
 Dans l'onglet **Interactive Toolboxes**, sélectionnez la dernière toolbox disponible/stable pour ds4 (par exemple `ds4-rocm-10.0`) et cliquez sur **Create/Update**. Cela récupère l'image du conteneur et crée l'environnement toolbox.
 
@@ -124,9 +127,9 @@ echo "OK: ds4 toolbox container image is present"
 
 ## Étape 2 : Téléchargement du modèle
 
-Accédez à l'onglet **Models**. Sélectionnez d'abord le backend (ds4). Ensuite, sélectionnez **IQ2_XXS imatrix (~80,8 Go)** dans la liste déroulante et cliquez sur **Download**. Les fichiers du modèle seront enregistrés dans `~/ds4` par défaut (vous pouvez modifier le chemin de stockage).
+Accédez à l'onglet **Models**. Sélectionnez d'abord le backend (ds4). Ensuite, sélectionnez **IQ2_XXS imatrix (~80,8 Go)** dans le menu déroulant et cliquez sur **Download**. Les fichiers du modèle seront enregistrés dans `~/ds4` par défaut (vous pouvez modifier le chemin de stockage).
 
-> **Remarque :** Le modèle IQ2_XXS pèse environ 80 Go, le téléchargement peut donc prendre un certain temps selon votre connexion. Vous pouvez continuer une fois qu'il est terminé.
+> **Remarque :** Le modèle IQ2_XXS fait environ 80 Go, le téléchargement peut donc prendre un certain temps selon votre connexion. Vous pouvez continuer une fois qu'il est terminé.
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
@@ -160,11 +163,11 @@ fi
 
 ## Étape 3 : Démarrage du serveur
 
-Accédez à l'onglet **Server Mode**. Sélectionnez le modèle téléchargé et le toolbox, puis configurez la taille du contexte, l'hôte et le port. Une fois prêt, cliquez sur **Start ds4-server**.
+Accédez à l'onglet **Server Mode**. Sélectionnez le modèle téléchargé et la toolbox, puis configurez la taille du contexte, l'hôte et le port. Une fois prêt, cliquez sur **Start ds4-server**.
 
 > **Astuce** Une taille de contexte de `126000` est une valeur de départ raisonnable qui devrait tenir sur un seul nœud — vous pouvez l'augmenter si vous disposez de mémoire supplémentaire, ou la réduire en cas d'erreurs de mémoire insuffisante. Le port (`8000` dans ce guide) est arbitraire ; choisissez n'importe quel port libre.
 
-> **Cache disque KV (facultatif).** L'activation du **cache disque KV** décharge le cache KV sur le disque (dans **Host Cache Dir**, par défaut `~/.cache/ds4-kv`) afin que les invites système répétées soient restaurées depuis le SSD plutôt que recalculées. Il s'agit d'une optimisation de performance pour les flux de travail d'agents de codage avec des invites longues et répétées, et elle n'est **pas requise** pour exécuter le serveur.
+> **Cache disque KV (optionnel).** Activer le **KV Disk Cache** décharge le cache KV sur le disque (dans **Host Cache Dir**, par défaut `~/.cache/ds4-kv`) afin que les invites système répétées soient restaurées depuis le SSD plutôt que recalculées. Il s'agit d'une optimisation des performances pour les flux de travail des agents de codage avec des invites longues et répétées, et ce n'est **pas requis** pour exécuter le serveur.
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
@@ -306,9 +309,9 @@ PY
 echo "OK: ds4 server test complete; server stopped and GPU memory released"
 ```
 <!-- @test:end -->
-## Connexion d'une interface web
+## Connexion d'une interface Web
 
-Vous pouvez connecter n'importe quelle interface de chat qui prend en charge le format de l'API OpenAI. Par exemple, pour utiliser HuggingFace ChatUI :
+Vous pouvez connecter n'importe quelle interface de chat prenant en charge le format de l'API OpenAI. Par exemple, pour utiliser HuggingFace ChatUI :
 
 ```bash
 docker run --network=host \
@@ -321,13 +324,13 @@ docker run --network=host \
 
 Ouvrez `http://localhost:3000` dans votre navigateur pour commencer à discuter.
 
-> **Remarque :** `--network=host` place l'interface web sur le réseau de l'hôte afin qu'elle puisse accéder directement au serveur ds4 sur `localhost`. Cela permet de garder le serveur ds4 lié à la boucle locale (il n'a pas besoin d'être exposé sur d'autres interfaces).
+> **Remarque :** `--network=host` place l'interface Web sur le réseau de l'hôte afin qu'elle puisse atteindre le serveur ds4 directement sur `localhost`. Cela permet de conserver le serveur ds4 lié à loopback (il n'a pas besoin d'être exposé sur d'autres interfaces).
 
-> **Astuce :** Le port de l'interface web (`3000` ici, défini via `PORT`) est arbitraire — choisissez n'importe quel port libre si `3000` est déjà utilisé, et ouvrez ce port dans votre navigateur à la place. Assurez-vous que le port indiqué dans `OPENAI_BASE_URL` correspond au port sur lequel votre serveur ds4 s'exécute.
+> **Astuce :** Le port de l'interface Web (`3000` ici, défini via `PORT`) est arbitraire — choisissez n'importe quel port libre si `3000` est déjà utilisé, puis ouvrez ce port dans votre navigateur. Assurez-vous que le port indiqué dans `OPENAI_BASE_URL` correspond bien au port sur lequel s'exécute votre serveur ds4.
 
 ## Connexion d'un agent de codage
 
-Le serveur ds4 expose des points de terminaison compatibles à la fois OpenAI et Anthropic, de sorte que la plupart des agents de codage peuvent s'y connecter directement. Par exemple, pour l'ajouter à l'agent de codage `pi`, ajoutez le bloc suivant à `~/.pi/agent/models.json` :
+Le serveur ds4 expose des points de terminaison compatibles à la fois avec OpenAI et Anthropic, de sorte que la plupart des agents de codage peuvent s'y connecter directement. Par exemple, pour l'ajouter à l'agent de codage `pi`, ajoutez le bloc suivant dans `~/.pi/agent/models.json` :
 
 ```json
 "ds4": {
@@ -367,15 +370,15 @@ Le serveur ds4 expose des points de terminaison compatibles à la fois OpenAI et
 }
 ```
 
-> **Astuce** : Si votre agent de codage ou votre interface web s'exécute sur une machine différente de la plateforme Halo, vous devrez transférer le port du serveur (`8000` ici) via SSH :
+> **Astuce** : Si votre agent de codage ou votre interface Web s'exécute sur une machine différente de la plateforme Halo, vous devrez transférer le port du serveur (`8000` ici) via SSH :
 > ```bash
 > ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## Étapes suivantes
 
-- **Clustering multi-nœuds** : Si vous disposez de deux appareils Halo, ds4 prend en charge la distribution du modèle Q4 (~153 Go) entre les deux machines via le parallélisme de pipeline. Consultez la [documentation ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) pour les instructions d'installation.
+- **Mise en cluster multi-nœuds** : Si vous disposez de deux appareils Halo, ds4 prend en charge la distribution du modèle Q4 (~153 Go) sur les deux machines via le parallélisme de pipeline. Consultez la [documentation de ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) pour les instructions de configuration.
 - **Décodage spéculatif (MTP)** : Téléchargez les poids MTP (~3,6 Go) et transmettez `--mtp` au serveur pour une vitesse de génération plus rapide.
-- **Déchargement du cache KV sur disque** : Pour les workflows d'agents de codage, activez `--kv-disk-dir` afin que les invites système répétées soient restaurées depuis le SSD plutôt que d'être recalculées à chaque fois.
+- **Déchargement du cache KV sur disque** : Pour les workflows d'agents de codage, activez `--kv-disk-dir` afin que les invites système répétées soient restaurées depuis le SSD plutôt que recalculées à chaque fois.
 
 Pour plus d'informations, consultez le [dépôt ds4](https://github.com/antirez/ds4) et la [boîte à outils ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox).

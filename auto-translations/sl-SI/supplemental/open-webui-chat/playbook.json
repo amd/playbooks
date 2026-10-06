@@ -1,6 +1,6 @@
 {
   "id": "open-webui-chat",
-  "title": "Klepet z LLM-ji v Open WebUI",
-  "description": "Uporabite Open WebUI za lokalno klepetanje z LLM-ji.",
+  "title": "Klepet z LLM v Open WebUI",
+  "description": "Uporabite Open WebUI za klepet z lokalnimi jeziki modeli LLM.",
   "auto_translated": true
 }

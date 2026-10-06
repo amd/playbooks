@@ -14,16 +14,16 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-## 概述
+## 概觀
 
-Ollama 是一款廣受歡迎的輕量級工具,可在本機執行大型語言模型。它會處理模型下載、量化和服務等工作,並提供簡單的命令列介面與桌面應用程式,讓您能在幾分鐘內就開始與 LLM 對話。
+Ollama 是一款廣受歡迎的輕量級工具，可用於在本機執行大型語言模型。它透過簡單的命令列介面與桌面應用程式，處理模型下載、量化與服務等作業，讓你能在幾分鐘內就開始與 LLM 對話。
 
-本手冊將引導您完成安裝 Ollama、拉取 GPT-OSS 20B 模型,並透過終端機和桌面應用程式與其進行對話。
+本教學將引導你安裝 Ollama、下載 GPT-OSS 20B 模型，並透過終端機與桌面應用程式與其進行對話。
 
-## 您將學到什麼
+## 你將學到什麼
 
-- 如何在您的系統上安裝並啟動 Ollama
-- 拉取並在本機執行 GPT-OSS 20B 模型
+- 如何在你的系統上安裝並啟動 Ollama
+- 下載並在本機執行 GPT-OSS 20B 模型
 - 使用 CLI 與模型對話
 - 透過 REST API 以程式化方式查詢模型
 
@@ -35,24 +35,26 @@ Ollama 是一款廣受歡迎的輕量級工具,可在本機執行大型語言模
 
 <!-- @device:halo_box -->
 ## 檢查軟體更新
-> **注意**:如果尚未安裝 VS Code,您可以透過 Ryzen AI Developer Center 進行安裝。
+> **注意**：如果尚未安裝 VS Code，你可以透過 Ryzen AI Developer Center 進行安裝。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
 ## 安裝軟體先決條件
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:driver -->
+<!-- @prereq:ollama,ollama-models-gpt-oss-20b -->
 
 ### 安裝 Ollama
 
 <!-- @os:windows -->
 
 1. 從 [ollama.com/download](https://ollama.com/download) 下載安裝程式。
-2. 執行 `.exe` 安裝程式並依照提示操作。
-3. 安裝完成後,Ollama 會以背景服務的形式執行,並可透過終端機、桌面應用程式和系統匣存取。
+2. 執行 `.exe` 安裝程式並依照提示進行操作。
+3. 安裝完成後，Ollama 會以背景服務的形式執行，並可從終端機、桌面應用程式及系統匣存取。
 
-開啟終端機並執行以下指令,以驗證安裝是否成功:
+開啟終端機並執行以下指令，驗證安裝是否成功：
 
 ```powershell
 ollama --version
@@ -64,18 +66,18 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-您應該會看到已安裝的版本號碼顯示在主控台中。
+你應該會在主控台看到印出的已安裝版本號。
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-執行官方安裝指令碼:
+執行官方安裝指令稿：
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-驗證安裝:
+驗證安裝：
 
 ```bash
 ollama --version
@@ -87,26 +89,26 @@ ollama --version
 ```
 <!-- @test:end --> 
 
-您應該會看到已安裝的版本號碼顯示在主控台中。
+你應該會在主控台看到印出的已安裝版本號。
 <!-- @os:end -->
 
-## 拉取您的第一個模型
+## 下載你的第一個模型
 
-Ollama 透過類似容器映像檔的登錄機制來管理模型。若要下載 GPT-OSS 20B:
+Ollama 透過類似容器映像檔的登錄系統管理模型。若要下載 GPT-OSS 20B：
 
 ```bash
 ollama pull gpt-oss:20b
 ```
 
-這會將模型權重下載到您的本機電腦(約 12 GB)。此下載動作只會執行一次,之後執行時會從磁碟載入模型。
+這會將模型權重下載至你的本機（約 12 GB）。下載只需進行一次，後續執行時將會從磁碟載入模型。
 
-您可以透過以下指令確認模型是否可用:
+你可以透過以下指令確認模型是否可用：
 
 ```bash
 ollama list
 ```
 
-您應該會在輸出中看到 `gpt-oss:20b`,並附帶其大小和最後修改日期。
+你應該會在輸出中看到 `gpt-oss:20b`，以及其大小與最後修改日期。
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=180 hidden=True -->
@@ -208,56 +210,56 @@ echo "OK: gpt-oss:20b is present in ollama list"
 
 ### 模型命名
 
-Ollama 模型名稱遵循 `name:tag` 的格式。標籤通常表示參數數量或量化變體。以下是一些管理模型的實用指令:
+Ollama 的模型名稱遵循 `name:tag` 的格式。標籤（tag）通常表示參數數量或量化變體。以下是一些用於管理模型的實用指令：
 
 | 指令 | 說明 |
 |---------|-------------|
 | `ollama list` | 顯示所有已下載的模型 |
 | `ollama pull <model>` | 下載模型但不執行 |
 | `ollama rm <model>` | 移除模型以釋放磁碟空間 |
-| `ollama show <model>` | 顯示模型中繼資料和參數 |
+| `ollama show <model>` | 顯示模型中繼資料與參數 |
 
 ## 從終端機進行對話
 
-直接從命令列啟動互動式對話工作階段:
+直接從命令列啟動互動式對話工作階段：
 
 ```bash
 ollama run gpt-oss:20b
 ```
 
-Ollama 會將模型載入記憶體,並讓您進入提示畫面。試著問它一些問題:
+Ollama 會將模型載入記憶體，並讓你進入提示介面。試著問它一些問題：
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-模型會直接在終端機中以逐一權杖(token)的方式串流輸出回應。輸入 `/bye` 或按下 `Ctrl+D` 即可結束該工作階段。
+模型會以逐字（token-by-token）方式在終端機中即時串流回應。輸入 `/bye` 或按 `Ctrl+D` 即可結束工作階段。
 
-> **提示**:第一次執行時,需要幾秒鐘的時間將模型載入記憶體。在同一個工作階段中,後續的提示回應速度會快上許多,因為模型會保持載入狀態。
+> **提示**：首次執行需要幾秒鐘的時間將模型載入記憶體。在同一個工作階段中，後續的提示回應速度會快上許多，因為模型會一直保持載入狀態。
 
 <!-- @os:windows -->
 ## 從桌面應用程式進行對話
 
-Ollama 也隨附一個桌面應用程式,提供簡潔的聊天介面,方便您與模型互動。
+Ollama 也隨附一個桌面應用程式，提供簡潔的聊天介面，供你與模型互動。
 
-從開始功能表開啟 **Ollama**,或按一下系統匣中的 Ollama 圖示,並選取 **Open Ollama**。
+從開始功能表開啟 **Ollama**，或點選系統匣中的 Ollama 圖示並選擇 **Open Ollama**。
 
-應用程式開啟後:
+應用程式開啟後：
 
-1. 在側邊欄按一下 **New Chat**。
-2. 從聊天輸入區右下角的模型下拉式選單中選取 **gpt-oss:20b**。
-3. 輸入訊息並按下 Enter 即可開始對話。
+1. 在側邊欄點選 **New Chat**。
+2. 在聊天輸入區右下角的模型下拉選單中選擇 **gpt-oss:20b**。
+3. 輸入訊息並按下 Enter 鍵即可開始對話。
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-桌面應用程式會在側邊欄保留您的對話歷史記錄,方便您重新查看先前的對話內容。
+桌面應用程式會在側邊欄保留你的對話歷史記錄，方便你隨時回顧先前的對話內容。
 <!-- @os:end -->
 
 ## 使用 REST API
 
-安裝完成後,Ollama 會以背景服務的形式執行,並在 `http://localhost:11434` 提供 REST API,您可以利用它將模型整合到您自己的應用程式和指令碼中。
+安裝完成後，Ollama 會以背景服務的形式執行，並在 `http://localhost:11434` 公開一個 REST API，你可以用它將模型整合到你自己的應用程式與指令稿中。
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -583,11 +585,11 @@ curl.exe http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "promp
 ```
 <!-- @os:end -->
 
-回應是一個 JSON 物件,其中包含模型的輸出內容,存放於 `response` 欄位中。
+回應是一個 JSON 物件，其中模型的輸出內容包含在 `response` 欄位中。
 
 
 ### Python 範例
-既然我們可以透過程式化方式呼叫 Ollama API,接下來讓我們從 Python 中呼叫它。
+既然我們可以透過程式化方式呼叫 Ollama API，接下來讓我們從 Python 呼叫它。
 
 #### 在終端機中建立虛擬環境
 
@@ -608,7 +610,7 @@ pip install requests
 ```
 <!-- @os:end -->
 #### 建立 Python 檔案
-在同一個目錄中,使用 VS Code 或其他編輯器建立一個 .py 檔案,並將以下程式碼複製到其中。接著,在您已啟動的環境中執行 `python your_file_name.py` 來執行該檔案
+在同一個目錄下，使用 VS Code 或其他編輯器建立一個 .py 檔案，並將以下程式碼複製貼上到檔案中。接著，在你啟用的環境中執行 `python your_file_name.py` 來執行該檔案
 
 ```python
 import requests
@@ -630,18 +632,18 @@ print(response.json()["response"])
 | 端點 | 方法 | 用途 |
 |----------|--------|---------|
 | `/api/generate` | POST | 單輪文字生成 |
-| `/api/chat` | POST | 帶有訊息歷史記錄的多輪對話 |
-| `/api/tags` | GET | 列出可用的模型 |
+| `/api/chat` | POST | 具備訊息歷史記錄的多輪對話 |
+| `/api/tags` | GET | 列出可用模型 |
 | `/api/show` | POST | 顯示模型詳細資訊 |
-| `/api/pull` | POST | 從登錄拉取模型 |
+| `/api/pull` | POST | 從登錄系統下載模型 |
 
-如需完整的 API 參考資料,請參閱 [Ollama API 文件](https://github.com/ollama/ollama/blob/main/docs/api.md)。
+完整的 API 參考資料，請參閱 [Ollama API 文件](https://github.com/ollama/ollama/blob/main/docs/api.md)。
 
 ## 後續步驟
 
-- **嘗試不同的模型**:瀏覽 [Ollama 模型庫](https://ollama.com/library),探索數百種可用的模型,從小型程式碼助理到大型推理模型一應俱全。
-- **建立自訂模型**:使用 [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) 設定自訂系統提示、溫度值和其他參數,打造量身訂做的體驗。
-- **使用 API 進行開發**:利用 [Python](https://github.com/ollama/ollama-python) 或 [JavaScript](https://github.com/ollama/ollama-js) 用戶端函式庫,將 Ollama 整合到您的應用程式中。
-- **連接前端介面**:將 Ollama 與 [Open WebUI](https://github.com/open-webui/open-webui) 等工具搭配使用,以獲得功能豐富的聊天介面,支援搜尋、角色設定和文件上傳等功能。
+- **嘗試不同的模型**：瀏覽 [Ollama 模型函式庫](https://ollama.com/library)，探索數百種可用模型，從小型程式設計輔助工具到大型推理模型應有盡有。
+- **建立自訂模型**：使用 [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md) 設定自訂系統提示、溫度（temperature）及其他參數，打造專屬於你的體驗。
+- **使用 API 進行開發**：使用 [Python](https://github.com/ollama/ollama-python) 或 [JavaScript](https://github.com/ollama/ollama-js) 用戶端函式庫，將 Ollama 整合到你的應用程式中。
+- **連接前端介面**：將 Ollama 與 [Open WebUI](https://github.com/open-webui/open-webui) 等工具搭配使用，享有功能豐富的聊天介面，包含搜尋、角色設定與文件上傳等功能。
 
-如需更多資訊,請參閱 [Ollama 文件](https://github.com/ollama/ollama/blob/main/README.md)。
+如需更多資訊，請參閱 [Ollama 文件](https://github.com/ollama/ollama/blob/main/README.md)。

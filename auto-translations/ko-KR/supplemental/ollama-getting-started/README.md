@@ -18,14 +18,14 @@ SPDX-License-Identifier: MIT
 
 Ollama는 대규모 언어 모델을 로컬에서 실행하기 위한 인기 있는 경량 도구입니다. 모델 다운로드, 양자화, 서빙을 간단한 명령줄 인터페이스와 데스크톱 앱 뒤에서 처리해 주므로, 몇 분 만에 LLM과 대화를 시작할 수 있습니다.
 
-이 플레이북에서는 Ollama를 설치하고 GPT-OSS 20B 모델을 받아온 후, 터미널과 데스크톱 앱 양쪽에서 모델과 대화하는 방법을 안내합니다.
+이 플레이북에서는 Ollama를 설치하고, GPT-OSS 20B 모델을 가져온 다음, 터미널과 데스크톱 앱 모두를 통해 대화를 나누는 과정을 안내합니다.
 
-## 배우게 될 내용
+## 학습 내용
 
 - 시스템에 Ollama를 설치하고 실행하는 방법
-- GPT-OSS 20B 모델을 로컬에서 받아와 실행하기
-- CLI를 사용하여 모델과 대화하기
-- REST API를 통해 프로그래밍 방식으로 모델에 질의하기
+- GPT-OSS 20B 모델을 가져와서 로컬에서 실행하기
+- CLI를 사용하여 모델과 채팅하기
+- REST API를 통해 프로그래밍 방식으로 모델 쿼리하기
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## 메모리 구성 설정
@@ -40,9 +40,11 @@ Ollama는 대규모 언어 모델을 로컬에서 실행하기 위한 인기 있
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 소프트웨어 필수 구성 요소 설치
+## 소프트웨어 사전 요구 사항 설치
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:driver -->
+<!-- @prereq:ollama,ollama-models-gpt-oss-20b -->
 
 ### Ollama 설치하기
 
@@ -90,7 +92,7 @@ ollama --version
 설치된 버전 번호가 콘솔에 출력되는 것을 확인할 수 있습니다.
 <!-- @os:end -->
 
-## 첫 번째 모델 받아오기
+## 첫 번째 모델 가져오기
 
 Ollama는 컨테이너 이미지와 유사한 레지스트리를 통해 모델을 관리합니다. GPT-OSS 20B를 다운로드하려면:
 
@@ -98,7 +100,7 @@ Ollama는 컨테이너 이미지와 유사한 레지스트리를 통해 모델�
 ollama pull gpt-oss:20b
 ```
 
-이렇게 하면 모델 가중치가 로컬 머신에 다운로드됩니다(약 12GB). 다운로드는 한 번만 수행되며, 이후 실행 시에는 디스크에서 모델을 불러옵니다.
+이렇게 하면 모델 가중치가 로컬 머신에 다운로드됩니다(약 12GB). 다운로드는 한 번만 이루어지며, 이후 실행 시에는 디스크에서 모델을 불러옵니다.
 
 다음 명령으로 모델이 사용 가능한지 확인할 수 있습니다:
 
@@ -106,7 +108,7 @@ ollama pull gpt-oss:20b
 ollama list
 ```
 
-출력에서 `gpt-oss:20b`가 크기 및 마지막 수정 날짜와 함께 표시되는 것을 확인할 수 있습니다.
+출력에서 크기와 최종 수정 날짜와 함께 `gpt-oss:20b`가 표시되는 것을 확인할 수 있습니다.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-list-gpt-oss-20b-windows timeout=180 hidden=True -->
@@ -206,18 +208,18 @@ echo "OK: gpt-oss:20b is present in ollama list"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### 모델 이름 지정 방식
+### 모델 이름 지정
 
-Ollama 모델 이름은 `name:tag` 형식을 따릅니다. 태그는 일반적으로 파라미터 수 또는 양자화 변형을 나타냅니다. 모델을 관리하는 데 유용한 몇 가지 명령은 다음과 같습니다:
+Ollama 모델 이름은 `name:tag` 형식을 따릅니다. 태그는 보통 매개변수 수 또는 양자화 변형을 나타냅니다. 모델 관리에 유용한 명령어는 다음과 같습니다:
 
-| 명령 | 설명 |
+| 명령어 | 설명 |
 |---------|-------------|
 | `ollama list` | 다운로드된 모든 모델 표시 |
 | `ollama pull <model>` | 실행하지 않고 모델만 다운로드 |
 | `ollama rm <model>` | 디스크 공간 확보를 위해 모델 제거 |
-| `ollama show <model>` | 모델 메타데이터 및 파라미터 표시 |
+| `ollama show <model>` | 모델 메타데이터 및 매개변수 표시 |
 
-## 터미널에서 대화하기
+## 터미널에서 채팅하기
 
 명령줄에서 직접 대화형 채팅 세션을 시작합니다:
 
@@ -225,39 +227,39 @@ Ollama 모델 이름은 `name:tag` 형식을 따릅니다. 태그는 일반적�
 ollama run gpt-oss:20b
 ```
 
-Ollama가 모델을 메모리에 로드하고 프롬프트로 진입합니다. 무언가를 물어보세요:
+Ollama가 모델을 메모리에 로드하고 프롬프트를 표시합니다. 질문을 해 보세요:
 
 ```
 >>> What is the capital of France and why is it historically significant?
 ```
 
-모델은 터미널에서 응답을 토큰 단위로 스트리밍합니다. 세션을 종료하려면 `/bye`를 입력하거나 `Ctrl+D`를 누릅니다.
+모델이 응답을 토큰 단위로 터미널에 직접 스트리밍합니다. 세션을 종료하려면 `/bye`를 입력하거나 `Ctrl+D`를 누릅니다.
 
-> **팁**: 처음 실행할 때는 모델을 메모리에 로드하는 데 몇 초 정도 걸립니다. 같은 세션 내에서 이후 프롬프트는 모델이 이미 로드되어 있으므로 훨씬 빠르게 응답합니다.
+> **팁**: 처음 실행할 때는 모델을 메모리에 로드하는 데 몇 초가 걸립니다. 같은 세션 내에서 이후 프롬프트는 모델이 이미 로드되어 있으므로 훨씬 빠르게 응답합니다.
 
 <!-- @os:windows -->
-## 데스크톱 앱에서 대화하기
+## 데스크톱 앱에서 채팅하기
 
-Ollama에는 모델과 상호작용할 수 있는 깔끔한 채팅 인터페이스를 제공하는 데스크톱 애플리케이션도 함께 제공됩니다.
+Ollama는 모델과 상호작용할 수 있는 깔끔한 채팅 인터페이스를 제공하는 데스크톱 애플리케이션도 함께 제공합니다.
 
-시작 메뉴에서 **Ollama**를 열거나, 시스템 트레이의 Ollama 아이콘을 클릭한 후 **Open Ollama**를 선택합니다.
+시작 메뉴에서 **Ollama**를 열거나 시스템 트레이의 Ollama 아이콘을 클릭한 다음 **Open Ollama**를 선택합니다.
 
 앱이 열리면:
 
 1. 사이드바에서 **New Chat**을 클릭합니다.
 2. 채팅 입력 영역 오른쪽 하단의 모델 드롭다운에서 **gpt-oss:20b**를 선택합니다.
-3. 메시지를 입력하고 Enter를 눌러 대화를 시작합니다.
+3. 메시지를 입력하고 Enter를 눌러 채팅을 시작합니다.
 
 <p align="center">
   <img src="assets/ollama_app.png" alt="Ollama desktop app chatting with gpt-oss:20b" width="600"/>
 </p>
 
-데스크톱 앱은 사이드바에 대화 기록을 보관하여 이전 대화를 쉽게 다시 볼 수 있게 해줍니다.
+데스크톱 앱은 사이드바에 대화 기록을 보관하여 이전 채팅을 쉽게 다시 확인할 수 있게 해 줍니다.
 <!-- @os:end -->
 
 ## REST API 사용하기
 
-설치 후 Ollama는 백그라운드 서비스로 실행되며 `http://localhost:11434`에서 REST API를 노출하여 모델을 자체 애플리케이션 및 스크립트에 통합할 수 있게 합니다.
+설치 후, Ollama는 백그라운드 서비스로 실행되며 `http://localhost:11434`에서 REST API를 노출하여 자체 애플리케이션과 스크립트에 모델을 통합할 수 있습니다.
 
 <!-- @os:windows -->
 <!-- @test:id=ollama-smoke-windows timeout=1800 hidden=True -->
@@ -587,7 +589,7 @@ curl.exe http://localhost:11434/api/generate -d '{"model": "gpt-oss:20b", "promp
 
 
 ### Python 예제
-이제 Ollama API를 프로그래밍 방식으로 호출할 수 있으므로, Python에서 이를 호출해 보겠습니다.
+이제 Ollama API를 프로그래밍 방식으로 호출할 수 있으니, Python에서 호출해 보겠습니다.
 
 #### 터미널에서 가상 환경 생성하기
 
@@ -607,8 +609,8 @@ ollama-env\Scripts\activate
 pip install requests
 ```
 <!-- @os:end -->
-#### Python 파일 만들기
-같은 디렉터리에서 VS Code나 다른 편집기를 사용하여 .py 파일을 생성하고 다음 코드를 복사해 넣습니다. 그런 다음 활성화된 환경에서 `python your_file_name.py`로 파일을 실행합니다.
+#### Python 파일 생성하기
+같은 디렉터리에서 VS Code 또는 다른 편집기를 사용하여 .py 파일을 생성하고 다음 코드를 복사해 넣습니다. 그런 다음, 활성화된 환경에서 `python your_file_name.py`로 파일을 실행합니다.
 
 ```python
 import requests
@@ -632,16 +634,16 @@ print(response.json()["response"])
 | `/api/generate` | POST | 단일 턴 텍스트 생성 |
 | `/api/chat` | POST | 메시지 기록을 포함한 다중 턴 대화 |
 | `/api/tags` | GET | 사용 가능한 모델 목록 표시 |
-| `/api/show` | POST | 모델 상세 정보 표시 |
-| `/api/pull` | POST | 레지스트리에서 모델 받아오기 |
+| `/api/show` | POST | 모델 세부 정보 표시 |
+| `/api/pull` | POST | 레지스트리에서 모델 가져오기 |
 
-전체 API 레퍼런스는 [Ollama API 문서](https://github.com/ollama/ollama/blob/main/docs/api.md)를 참조하세요.
+전체 API 참조는 [Ollama API documentation](https://github.com/ollama/ollama/blob/main/docs/api.md)을 참고하세요.
 
 ## 다음 단계
 
-- **다양한 모델 사용해보기**: [Ollama 모델 라이브러리](https://ollama.com/library)를 살펴보고 소형 코딩 어시스턴트부터 대형 추론 모델까지 수백 개의 사용 가능한 모델을 탐색해 보세요.
-- **커스텀 모델 만들기**: [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md)을 사용하여 맞춤형 시스템 프롬프트, temperature 및 기타 파라미터를 설정해 원하는 경험을 만들어 보세요.
+- **다양한 모델 시도해 보기**: [Ollama model library](https://ollama.com/library)를 둘러보며 소규모 코딩 어시스턴트부터 대규모 추론 모델까지 수백 가지의 사용 가능한 모델을 탐색해 보세요.
+- **사용자 정의 모델 만들기**: [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md)을 사용하여 사용자 정의 시스템 프롬프트, temperature 및 기타 매개변수를 설정해 맞춤형 경험을 만들어 보세요.
 - **API로 빌드하기**: [Python](https://github.com/ollama/ollama-python) 또는 [JavaScript](https://github.com/ollama/ollama-js) 클라이언트 라이브러리를 사용하여 Ollama를 애플리케이션에 통합해 보세요.
-- **프런트엔드 연결하기**: [Open WebUI](https://github.com/open-webui/open-webui)와 같은 도구와 Ollama를 연결하여 검색, 페르소나, 문서 업로드 기능을 갖춘 풍부한 채팅 인터페이스를 사용해 보세요.
+- **프런트엔드 연결하기**: 검색, 페르소나, 문서 업로드 기능을 갖춘 풍부한 채팅 인터페이스를 위해 Ollama를 [Open WebUI](https://github.com/open-webui/open-webui)와 같은 도구와 함께 사용해 보세요.
 
-자세한 내용은 [Ollama 문서](https://github.com/ollama/ollama/blob/main/README.md)를 확인하세요.
+자세한 내용은 [Ollama documentation](https://github.com/ollama/ollama/blob/main/README.md)을 참고하세요.

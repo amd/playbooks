@@ -9,67 +9,66 @@ SPDX-License-Identifier: MIT
 > **Konekäännös.** Tämä sivu on käännetty automaattisesti englannista, eikä sitä ole tarkistanut ihminen. Se voi sisältää virheitä, ja tietyt ohjeet, komennot, lataukset, tuotteiden saatavuus tai muu sisältö voivat vaihdella kielen tai alueen mukaan. Mahdollisten ristiriitaisuuksien tai epäjohdonmukaisuuksien ilmetessä alkuperäinen englanninkielinen playbook on ratkaiseva ja ensisijainen versio.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
+<!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
-
-## Yleiskatsaus
-
+# Yleiskatsaus
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
-> [!NOTE]
-> Tämä ohjekokonaisuus vaatii vähintään **32 Gt** järjestelmämuistia.
+> [!HUOMAUTUS]
+> Tämä ohjeistus vaatii vähintään **32 Gt** järjestelmämuistia.
 <!-- @device:end -->
+n8n on työnkulkujen automaatioalusta, jonka avulla voit yhdistää sovelluksia ja palveluita visuaalisen, solupohjaisen editorin avulla.
 
-n8n on työnkulkujen automatisointialusta, jonka avulla voit yhdistää sovelluksia ja palveluita visuaalisen, solmupohjaisen editorin avulla.
-
-Tämä ohjekokonaisuus opastaa sinua määrittämään tekoälypohjaisen talousuutisten koostajan, joka hakee uusimmat liiketoimintaotsikot uutisten RSS-syötteestä ja käyttää järjestelmässäsi paikallisesti toimivaa LLM-mallia sijoittajille suunnatun yhteenvedon luomiseen.
+Tämä opas opastaa sinut tekoälypohjaisen talousuutisten kokoajan käyttöönotossa. Ratkaisu hakee uusimmat talousotsikot uutisten RSS-syötteestä ja käyttää järjestelmässäsi paikallisesti ajettavaa LLM-mallia sijoittajille suunnatun yhteenvedon luomiseen.
 
 ## Mitä opit
 
 - Kuinka asentaa ja käynnistää n8n
-- Valmiiksi rakennetun työnkulun tuominen ja määrittäminen
+- Valmiiksi rakennetun työnkulun tuonti ja määrittäminen
 - Yhteyden muodostaminen Lemonadeen natiivin n8n-integraation avulla
-- Työnkulun solmujen ja tietovirran ymmärtäminen
+- Työnkulun solmujen ja datan kulun ymmärtäminen
 
 ## Mikä on Lemonade?
 
-[Lemonade](https://lemonade-server.ai) on AMD-laitteistolle rakennettu paikallinen LLM-palvelualusta. Se tarjoaa OpenAI-yhteensopivan API:n, joka toimii kokonaan omalla koneellasi – tietosi eivät koskaan poistu laitteeltasi.
+[Lemonade](https://lemonade-server.ai) on paikallinen LLM-palvelualusta, joka on rakennettu AMD-laitteistoa varten. Se tarjoaa OpenAI-yhteensopivan rajapinnan, joka toimii kokonaan omalla koneellasi – datasi ei koskaan poistu laitteeltasi.
 
-Tässä ohjekokonaisuudessa käytämme Lemonadea palvelemaan paikallista LLM-mallia, johon n8n yhdistyy tekoälypohjaisia tehtäviä varten.
+Tässä oppaassa käytämme Lemonadea paikallisen LLM-mallin tarjoamiseen, johon n8n muodostaa yhteyden tekoälypohjaisia tehtäviä varten.
 
-n8n sisältää **natiivin Lemonade-solmun** (`Lemonade Chat Model`), joka tarjoaa ensiluokkaisen integraation - manuaalista määritystä ei tarvita. Tämä tekee paikallisen LLM-mallisi yhdistämisestä automaatiotyönkulkuihin yksinkertaista.
-
+n8n sisältää **natiivin Lemonade-solmun** (`Lemonade Chat Model`), joka tarjoaa ensiluokkaisen integraation – manuaalista määritystä ei tarvita. Tämä tekee paikallisen LLM-mallisi yhdistämisestä automaatiotyönkulkuihin yksinkertaista.
 <!-- @device:halo_box,halo,stx,krk -->
 ## Muistiasetuksen määrittäminen
-
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
-
 <!-- @require:software-update -->
 <!-- @device:end -->
-
-## Ohjelmiston vaatimusten asentaminen
+## Ohjelmistovaatimusten asentaminen
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:n8n -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- Linux runs n8n as a Podman container (see compose.yml below), so Node.js and a host n8n install are not required; podman is the only extra prerequisite. -->
 <!-- @require:lemonade,podman -->
 <!-- @os:end -->
 
 <!-- @device:halo,halo_box -->
+<!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:lemonade-models-gpt-oss-20b -->
 <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 
@@ -190,16 +189,17 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:windows -->
 <!-- @test:id=node-npm-version timeout=60 hidden=True -->
 ```bash
 node -v
 npm -v
 ```
 <!-- @test:end -->
-
+<!-- @os:end -->
 ## n8n:n asentaminen
 <!-- @os:windows -->
-Asenna n8n globaalisti käyttäen npm-työkalua.
+Asenna n8n globaalisti npm:n avulla.
 
 > **Huomautus**: Saatat nähdä joitakin npm-varoituksia. Tämä on odotettua.
 
@@ -214,29 +214,19 @@ n8n --version
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @os:linux -->
-<!-- @test:id=n8n-version timeout=60 hidden=True -->
-```bash
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-n8n --version
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
 <!-- @os:windows -->
-> **Vihje**: Windows-käyttäjien on ehkä muutettava PowerShellin suorituskäytäntöä (Execution Policy) (esim.
-> asettamalla se arvoon RemoteSigned tai Unrestricted) ennen kuin ajavat joitakin Powershell-komentoja.
+> **Vihje**: Windowsin käyttäjien on ehkä muutettava PowerShellin suorituskäytäntöä (Execution Policy) (esim.
+> asettamalla se arvoon RemoteSigned tai Unrestricted) ennen joidenkin Powershell-komentojen suorittamista.
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **PATH-ongelma**: Jos `n8n --version` ilmoittaa, ettei komentoa löydy, varmista, että npm:n globaali bin-hakemisto on käyttäjän `PATH`-muuttujassa. Tavallinen asennuspolku on `C:\Users\<username>\AppData\Roaming\npm`. 
-> Lisää tämä käyttäjän polkuun (Muokkaa järjestelmän ympäristömuuttujia > Ympäristömuuttujat > Muokkaa käyttäjän polkua) ja käynnistä pääte uudelleen. 
-
+> **PATH-ongelma**: Jos `n8n --version` ilmoittaa, ettei komentoa löydy, varmista, että npm:n globaali bin-hakemisto on käyttäjän `PATH`-muuttujassa. Tavallinen asennuspolku on `C:\Users\<username>\AppData\Roaming\npm`.
+> Lisää tämä käyttäjän polkuun (Edit the system environment variables > Environment Variables > Edit User Path) ja käynnistä pääte uudelleen.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Käytämme nyt Podman-palvelua n8n-asennuksemme kontittamiseen.
+Käytämme nyt Podman-palvelua n8n-asennuksemme kontitukseen.
 
 Lataa seuraava tiedosto valitsemaasi hakemistoon: [compose.yml](assets/compose.yml)
 
@@ -245,7 +235,7 @@ Suorita kyseisessä hakemistossa seuraava komento:
 podman compose up -d
 ```
 
-Tämän pitäisi asentaa n8n ja kirjoittaa tietoja pysyvään tallennustilaan.
+Tämän pitäisi asentaa n8n ja kirjoittaa tiedot pysyvään tallennustilaan.
 
 Käynnistä n8n kirjoittamalla `localhost:5678` selaimesi osoiteriville.
 <!-- @os:end -->
@@ -289,19 +279,14 @@ try {
 ```bash
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-p=""
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
 cleanup() {
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
+  podman compose -f compose.yml down >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-n8n start >/tmp/n8n-test.log 2>&1 &
-p=$!
+podman rm -f n8n >/dev/null 2>&1 || true
+podman compose -f compose.yml up -d
 
 ok=false
 for i in $(seq 1 120); do
@@ -315,6 +300,8 @@ done
 
 if [ "$ok" != "true" ]; then
   echo "n8n not ready on http://127.0.0.1:5678/healthz"
+  podman ps -a || true
+  podman logs n8n 2>&1 | tail -30 || true
   exit 1
 fi
 
@@ -324,28 +311,23 @@ echo "OK: n8n server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-n8n käynnistää paikallisen verkkopalvelimen. Paina `'o'` tai avaa selaimesi osoitteeseen `http://localhost:5678` päästäksesi editoriin.
+n8n käynnistää paikallisen verkkopalvelimen. Paina `'o'` tai avaa selaimesi osoitteessa `http://localhost:5678` päästäksesi käyttämään editoria.
 <!-- @os:end -->
-
-
-> **Vihje**: Pidä pääteikkuna auki n8n:ää käyttäessäsi. Sen sulkeminen saattaa pysäyttää palvelimen.
+> **Vinkki**: Pidä pääteikkuna auki n8n:ää käyttäessäsi. Sen sulkeminen saattaa pysäyttää palvelimen.
 
 ## Lemonaden käynnistäminen
 
-Lemonade on paikallinen palvelin, joka suorittaa mallia ja yhdistyy n8n:ään. 
-
+Lemonade on paikallinen palvelin, joka ajaa mallia ja muodostaa yhteyden n8n:ään.
 <!-- @os:linux -->
-Avaa Lemonade-käyttöliittymä napsauttamalla Lemonade-kuvaketta tehtäväpalkissa. Voit selata malleja, taustajärjestelmiä ja ladata valmiiksi asennetut mallit täältä.
+Avaa Lemonade-käyttöliittymä napsauttamalla Lemonade-kuvaketta tehtäväpalkissa. Voit selata malleja, taustajärjestelmiä (backends) ja ladata esiasennetut mallit täältä.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Avaa Lemonade-käyttöliittymä napsauttamalla Lemonade-kuvaketta. Napsauta ilmaisinalueen kuvaketta hiiren oikealla painikkeella avataksesi sovelluksen. Sitten voit lisätä malleja, taustajärjestelmiä ja ladata valmiiksi asennetut mallit.
+Avaa Lemonade-käyttöliittymä napsauttamalla Lemonade-kuvaketta. Avaa sovellus napsauttamalla ilmaisinalueen kuvaketta hiiren oikealla painikkeella. Sen jälkeen voit lisätä malleja, taustajärjestelmiä ja ladata valmiiksi asennetut mallit.
 <!-- @os:end -->
+>**Vinkki**: Kun se on käynnissä, Lemonade-käyttöliittymä on myös käytettävissä osoitteessa http://localhost:13305
 
->**Vihje**: Kun palvelu on käynnissä, Lemonade-käyttöliittymä on saatavilla myös osoitteessa http://localhost:13305
-
-Vaihtoehtoisesti voit avata päätteen ja ajaa komennon `lemonade list` nähdäksesi, mitkä mallit on asennettu. Aja sitten:
-
+Vaihtoehtoisesti voit avata päätteen ja suorittaa komennon `lemonade list` nähdäksesi, mitkä mallit on asennettu. Suorita sitten:
 <!-- @device:halo_box -->
 <!-- @os:linux -->
 ```bash
@@ -371,32 +353,30 @@ lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 ```
 <!-- @device:end -->
-
-
 ## Työnkulun määrittäminen
 
 ### Vaihe 1: Rekisteröidy tai kirjaudu sisään n8n:ään
 
 Kun avaat n8n:n ensimmäistä kertaa, sinua pyydetään luomaan tili tai kirjautumaan sisään:
 
-1. Avaa `http://localhost:5678` selaimessasi
+1. Avaa selaimessasi `http://localhost:5678`
 2. Luo uusi paikallinen tili sähköpostiosoitteellasi tai kirjaudu sisään, jos sinulla on jo tili
 3. Kun olet kirjautunut sisään, näet n8n-hallintapaneelin
 
-> **Vihje**: Jos jäät lukkoon tilistäsi, kokeile komentoa `n8n user-management:reset`
+> **Vinkki**: Jos jäät lukkoon tilistäsi, kokeile komentoa `n8n user-management:reset`
 
 ### Vaihe 2: Tuo työnkulku
 
 Olemme tarjonneet valmiiksi rakennetun työnkulun, jonka voit tuoda suoraan:
 
 1. Lataa seuraava työnkulkutiedosto: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. Napsauta **Start from Scratch** avataksesi työnkulkueditorin. Vaihtoehtoisesti napsauta +-painiketta vasemmassa yläkulmassa ja valitse sitten **Add workflow**.
+2. Napsauta **Start from Scratch** avataksesi työnkulun muokkaimen. Vaihtoehtoisesti napsauta +-painiketta vasemmassa yläkulmassa ja valitse sitten **Add workflow**.
 3. Napsauta **...**-valikkoa (kolme pistettä) oikeassa yläpalkissa ja valitse **Import from file**
 4. Valitse ladattu `financial-news-workflow.json`-tiedosto
-5. Työnkulku ilmestyy piirtoalueelle
+5. Työnkulku ilmestyy työtasolle
 ### Vaihe 3: Työnkulun ymmärtäminen
 
-Tuotu työnkulku sisältää 8 yhdistettyä solmua:
+Tuotu työnkulku sisältää 8 toisiinsa yhdistettyä solmua:
 
 <p align="center">
   <img src="assets/workflow-overview.png" alt="n8n Financial News Workflow" width="800"/>
@@ -404,47 +384,47 @@ Tuotu työnkulku sisältää 8 yhdistettyä solmua:
 
 | Solmu | Tarkoitus |
 |------|---------|
-| **When clicking 'Execute workflow'** | Manuaalinen liipaisin työnkulun käynnistämiseen |
+| **When clicking 'Execute workflow'** | Manuaalinen käynnistin työnkulun aloittamiseksi |
 | **Fetch Financial News Feed** | RSS Read -solmu, joka hakee uusimmat talousotsikot RSS-syötteestä (oletuksena NYT Business -syöte, ei vaadi API-avainta) |
-| **Aggregate Headlines** | Aggregate-solmu, joka kerää jokaisen syötteen kohteen otsikot ja yhteenvedot yhdeksi listaksi |
+| **Aggregate Headlines** | Aggregate-solmu, joka kerää otsikot ja yhteenvedot jokaisesta syötteen kohteesta yhdeksi listaksi |
 | **Clean Extracted News Data** | Set-solmu, joka yhdistää kaikki otsikot yhdeksi tekstikentäksi |
-| **AI Financial News Summarizer** | AI-agentti, joka käsittelee uutiset talousanalyytikon järjestelmäkehotteen avulla |
-| **Lemonade Chat Model** | Yhdistää paikalliseen Lemonade-palvelimeen, jossa LLM on käynnissä |
-| **Structured Output Parser** | Muotoilee AI:n tulosteen jäsennellyksi JSON-muodoksi |
+| **AI Financial News Summarizer** | AI-agentti, joka käsittelee uutiset talousanalyytikon järjestelmäkehotteella |
+| **Lemonade Chat Model** | Yhdistää paikallisesti käynnissä olevaan Lemonade-palvelimeen, jossa LLM on käynnissä |
+| **Structured Output Parser** | Muotoilee tekoälyn tuotoksen jäsennellyksi JSON-muodoksi |
 | **Convert to File** | Muuntaa yhteenvedon ladattavaksi tiedostoksi |
 
-> **Vinkki**: Käyttääksesi eri uutislähdettä, kaksoisnapsauta **Fetch Financial News Feed** -solmua ja korvaa URL-osoite haluamallasi talous- tai markkina-RSS-syötteellä.
+> **Vinkki**: Käyttääksesi eri uutislähdettä, kaksoisnapsauta **Fetch Financial News Feed** -solmua ja korvaa URL-osoite millä tahansa haluamallasi talous- tai markkina-RSS-syötteellä.
 
-### Vaihe 4: Määritä Lemonade-tunnistetiedot
+### Vaihe 4: Lemonade-tunnistetietojen määrittäminen
 
 Ennen työnkulun suorittamista sinun täytyy yhdistää se paikalliseen Lemonade-palvelimeesi:
 
 1. Kaksoisnapsauta **Lemonade Chat Model** -solmua n8n:ssä
-2. Valitse pudotusvalikosta **Credential to connect with** -kohdassa **Create New Credential**
-3. Syötä alla olevan taulukon arvot ja napsauta save.
-4. Valitse Lemonade Serveriin ladattu asianmukainen malli.
+2. Valitse pudotusvalikosta **Credential to connect with** vaihtoehto **Create New Credential**
+3. Syötä alla olevan taulukon arvot ja napsauta tallenna.
+4. Valitse haluamasi malli, jonka olet ladannut Lemonade Serveriin.
 
   | Kenttä | Arvo |
   |-------|-------|
   | **Base URL** | `http://localhost:13305/api/v1` |
   | **API Key** | `lemonade` |
 
-> **Huomautus**: Ennen testausta suorita `lemonade status` päätteessä varmistaaksesi, että Lemonade-palvelin on käynnissä.
+> **Huomautus**: Ennen testausta, suorita `lemonade status` päätteessä varmistaaksesi, että Lemonade-palvelin on käynnissä.
 <!-- @device:halo_box -->
 > Tämä työnkulku käyttää GPT-OSS-120B-mallia, joka on esiasennettu Lemonadeen. Voit vaihtaa tämän muihin ladattuihin malleihin Lemonade Chat Model -solmun asetuksissa.
 <!-- @device:end -->
 
-### Vaihe 5: Testaa työnkulku
+### Vaihe 5: Työnkulun testaaminen
 
-1. Varmista, että Lemonade on käynnissä ja malli on ladattu
-2. Napsauta **Execute workflow** työtilan alaosan keskeltä
-3. Seuraa kunkin solmun suoritusta vasemmalta oikealle – ne muuttuvat vihreiksi valmistuttuaan
+1. Varmista, että Lemonade on käynnissä ja malli on ladattuna
+2. Napsauta **Execute workflow** työtilan alakeskellä
+3. Seuraa kunkin solmun suoritusta vasemmalta oikealle – ne muuttuvat vihreiksi, kun ne ovat valmiit
 4. Kaksoisnapsauta **AI Financial News Summarizer** -solmua nähdäksesi luodun yhteenvedon alapaneelissa.
-5. Kaksoisnapsauta **Convert to File** -solmua ladataksesi vastaavan tekstitiedoston alapaneelissa.
+5. Kaksoisnapsauta **Convert to File** -solmua ladataksesi vastaavan tekstitiedoston alapaneelista.
 
 ## AI-agentin ymmärtäminen
 
-AI Financial News Summarizer käyttää järjestelmäkehotetta, joka on suunniteltu taloudelliseen analyysiin:
+AI Financial News Summarizer käyttää talousanalyysiä varten suunniteltua järjestelmäkehotetta:
 
 ```
 You are an AI financial analyst. Your role is to read, understand, and
@@ -456,29 +436,29 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-Agentti vastaanottaa siivotut uutistiedot ja tuottaa jäsennellyn yhteenvedon markkinatunnelmasta.
+Agentti vastaanottaa siistityn uutisdatan ja tuottaa jäsennellyn yhteenvedon markkinatunnelmasta.
 
 ### Työnkulun tallentaminen
 
-Napsauta työnkulun nimeä ylhäällä ja nimeä se uudelleen halutessasi. Työnkulut tallentuvat automaattisesti työskennellessäsi.
+Napsauta työnkulun nimeä yläreunassa ja nimeä se uudelleen halutessasi. Työnkulut tallentuvat automaattisesti työskentelyn aikana.
 
 ## Seuraavat vaiheet
 
-- **Ajasta automaatio**: Korvaa Manual Trigger -solmu **Schedule Trigger** -solmulla suorittaaksesi työnkulun päivittäin
-- **Lähetä ilmoituksia**: Lisää **Discord**-, **Slack**- tai **Email**-solmu yhteenvetojen vastaanottamiseksi
-- **Kokeile eri malleja**: Vaihda mallia Lemonade Chat Model -solmussa kokeillaksesi eri LLM-malleja
-- **Vaihda uutislähdettä**: Osoita **Fetch Financial News Feed** -solmu eri RSS-syötteeseen seurataksesi muita osioita tai julkaisuja
-- **Kokeile eri taustajärjestelmiä**: n8n tukee myös [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model)-, LM Studio- ja muita paikallisia LLM-taustajärjestelmiä
+- **Automaation ajastaminen**: Korvaa Manual Trigger **Schedule Trigger** -solmulla suorittaaksesi työnkulun päivittäin
+- **Ilmoitusten lähettäminen**: Lisää **Discord**-, **Slack**- tai **Email**-solmu yhteenvetojen vastaanottamiseksi
+- **Eri mallien kokeileminen**: Vaihda mallia Lemonade Chat Model -solmussa kokeillaksesi eri LLM-malleja
+- **Uutislähteen vaihtaminen**: Ohjaa **Fetch Financial News Feed** -solmu eri RSS-syötteeseen seurataksesi muita osioita tai julkaisuja
+- **Eri taustajärjestelmien kokeileminen**: n8n tukee myös [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio ja muita paikallisia LLM-taustajärjestelmiä
 
-### Tutustu n8n-malleihin
+### n8n-mallien tutkiminen
 
 n8n:ssä on satoja valmiiksi rakennettuja työnkulkumalleja. Selaa virallista mallikirjastoa osoitteessa:
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
-Hae hakusanoilla "AI", "LLM" tai "automation" löytääksesi työnkulkuja, joita voit tuoda ja mukauttaa.
+Hae "AI", "LLM" tai "automaatio" löytääksesi työnkulkuja, joita voit tuoda ja mukauttaa.
 
-Lisätietoja löydät osoitteesta [n8n Documentation](https://docs.n8n.io/).
+Lisätietoja löydät [n8n-dokumentaatiosta](https://docs.n8n.io/).
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

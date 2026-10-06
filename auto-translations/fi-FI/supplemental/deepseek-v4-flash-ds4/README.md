@@ -16,34 +16,37 @@ SPDX-License-Identifier: MIT
 
 ## Yleiskatsaus
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) on DeepSeek V4 -perheen tehokkuuteen keskittyvä versio — 284 miljardin parametrin Mixture of Experts -malli, jossa on 13 miljardia aktiivista parametria. [DeepSeekin teknisen raportin](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) mukaan se saavuttaa 79 % tuloksen SWE-bench Verified -testissä ja 91,6 % LiveCodeBenchissä.
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) on DeepSeek V4 -perheen tehokkuuteen keskittyvä versio — 284 miljardin parametrin Mixture of Experts -malli, jossa on 13 miljardia aktiivista parametria. [DeepSeekin teknisen raportin](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) mukaan se saa 79 % pisteet SWE-bench Verifiedissä ja 91,6 % LiveCodeBenchissä.
 
-[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) on erityisesti tälle mallille suunniteltu päättelymoottori. Sen sijaan, että kyseessä olisi yleiskäyttöinen ajoympäristö, ds4 on suunniteltu suoraan DeepSeek V4 -perheelle, ja siinä on arkkitehtuurikohtaisia kerneelioptimointeja AMD ROCm™ -ohjelmistolle. Se on tällä hetkellä yksi parhaiten suoriutuvista DeepSeek V4 Flash -toteutuksista Strix Halo -alustalla.
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) on päättelymoottori, joka on rakennettu nimenomaan tätä mallien arkkitehtuuria varten. Yleiskäyttöisen ajoympäristön sijaan ds4 kohdistuu suoraan DeepSeek V4 -perheeseen arkkitehtuurikohtaisilla ydinoptimoinneilla AMD ROCm™ -ohjelmistolle. Se on tällä hetkellä yksi parhaiten suoriutuvista DeepSeek V4 Flashin toteutuksista Strix Halolla.
 
-Tässä oppaassa näytetään, miten `ai-toolbox-cockpit`-päätekäyttöliittymän avulla asennetaan ds4, ladataan mallin painot ja käynnistetään DeepSeek V4 Flash -mallin paikallinen palvelu AMD Ryzen™ AI Halo Developer Platform -alustalla.
+Tämä ohje näyttää, miten `ai-toolbox-cockpit`-pääteliittymää käytetään ds4:n asentamiseen, mallin painojen lataamiseen sekä DeepSeek V4 Flashin paikalliseen palvelemiseen AMD Ryzen™ AI Halo Developer Platform -alustalla.
 
 ## Mitä opit
 
-- Kuinka asentaa ja käynnistää `ai-toolbox-cockpit`-päätekäyttöliittymä
-- Kuinka luoda ds4-ROCm-työkalulaatikkokontti
-- Suositellun kvantisoinnin lataaminen yhtä Halo-solmua varten
-- ds4-päättelypalvelimen käynnistäminen ja OpenAI-yhteensopivan päätepisteen avaaminen
-- Web-käyttöliittymän tai koodausagentin yhdistäminen paikalliseen palvelimeen
+- Miten asennetaan ja käynnistetään `ai-toolbox-cockpit`-pääteliittymä
+- Miten luodaan ds4 ROCm -työkalulaatikkokontti
+- Suositellun kvantisoinnin lataaminen yhdelle Halo-solmulle
+- ds4-päättelypalvelimen käynnistäminen ja OpenAI-yhteensopivan rajapinnan paljastaminen
+- Verkkokäyttöliittymän tai koodausagentin yhdistäminen paikalliseen palvelimeen
 
-## Muistiasetusten määrittäminen
+## Muistiasetuksen määrittäminen
 
 <!-- @require:memory-config -->
 
 ## Ohjelmistoedellytysten asentaminen
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:distrobox,ds4-cockpit,ds4-toolbox-image -->
+
 > **Tämän kokoonpanon järjestelmävaatimukset (yksisolmuinen IQ2_XXS 126k-kontekstilla):**
 > - Strix Halo -järjestelmä, jossa on **vähintään 128 Gt yhtenäistä muistia**.
-> - **BIOS:n varattu VRAM (UMA-kehyspuskuri) asetettuna minimiin**, jotta jaettu muistipooli voi olla mahdollisimman suuri.
-> - GPU:n **jaetun muistipoolin koko vähintään 110 Gt**: aja `amd-ttm --set 110` (katso yllä oleva muistiasetusvaihe) ja käynnistä uudelleen. Pienemmät arvot voivat aiheuttaa muistin loppumisen mallin latautuessa 126k-kontekstilla. Jos järjestelmässäsi on vähemmän muistia käytettävissä, alenna sen sijaan **Context**-arvoa Server Mode -tilassa.
+> - **BIOS:n dedikoitu VRAM (UMA frame buffer) asetettu minimiin**, jotta jaetusta muistipoolista saadaan mahdollisimman suuri.
+> - GPU:n **jaetun muistin pooli asetettu vähintään 110 Gt:hen**: suorita `amd-ttm --set 110` (katso yllä oleva muistiasetusvaihe) ja käynnistä uudelleen. Pienemmät arvot voivat epäonnistua muistin loppumisen vuoksi, kun malli ladataan 126k-kontekstilla. Jos järjestelmässäsi on vähemmän muistia käytettävissä, laske sen sijaan **Context**-arvoa Server Mode -tilassa.
 >
-> **Huomio:** Kokeile asettaa **GPU:n jaettu muistipooli** arvoon **110 Gt** lähtökohtana. Jos törmäät muistin loppumista koskeviin virheisiin, kasvata jaettua muistipoolia tai pienennä kontekstin kokoa.
+> **Huomio:** Kokeile asettaa **GPU:n jaetun muistin pooli** arvoon **110 Gt** lähtökohtana. Jos törmäät muistin loppumisvirheisiin, nosta jaetun muistin poolia tai laske kontekstikokoa.
 
-ai-toolbox-cockpit käyttää konttityökalulaatikoita ds4-moottorin ajamiseen. Asenna `podman`, `distrobox` ja `pipx`:
+ai-toolbox-cockpit käyttää kontteina toimivia työkalulaatikoita ds4-moottorin ajamiseen. Asenna `podman`, `distrobox` ja `pipx`:
 
 ```bash
 sudo apt update
@@ -63,20 +66,20 @@ echo "OK: podman, distrobox, and pipx are installed"
 
 ## Saatavilla olevat kvantisoinnit
 
-ds4:n tekijä tarjoaa useita kvantisoituja versioita DeepSeek V4 Flash -mallista GGUF-muodossa. Kaikki alla olevat mallit käyttävät importance matrix (imatrix) -kalibrointia, joka säilyttää korkeamman tarkkuuden niissä mallin osissa, jotka ovat tärkeimpiä koodaus- ja päättelytehtäville.
+ds4:n tekijä tarjoaa useita kvantisoituja versioita DeepSeek V4 Flashista GGUF-muodossa. Kaikki alla olevat mallit käyttävät importance matrix (imatrix) -kalibrointia, joka säilyttää korkeamman tarkkuuden niille mallin osille, jotka ovat tärkeimpiä koodaus- ja päättelytehtävien kannalta.
 
 | Kvantisointi | Koko | Kuvaus |
 |-------------|------|-------------|
-| [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 Gt | Suositellaan yhdelle 128 Gt:n solmulle |
-| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 Gt | Säilyttää kerrokset 37–42 Q4-tarkkuudella paremman tarkkuuden saavuttamiseksi. Mahtuu 128 Gt:hen, mutta jättää vähemmän tilaa kontekstille |
-| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 Gt | Korkeampi laatu. Vaatii kaksi Halo-solmua monisolmuklusteroinnin kautta |
+| [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 Gt | Suositeltu yhdelle 128 Gt:n solmulle |
+| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 Gt | Pitää kerrokset 37–42 Q4-tarkkuudessa paremman tarkkuuden saavuttamiseksi. Mahtuu 128 Gt:hen, mutta jättää vähemmän tilaa kontekstille |
+| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 Gt | Korkeampi laatu. Vaatii kaksi Halo-solmua monisolmuisen klusteroinnin kautta |
 | [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 Gt | Valinnainen lisäosa spekulatiiviseen dekoodaukseen generointinopeuden parantamiseksi |
 
-**IQ2_XXS imatrix** -malli on hyvä lähtökohta. Se mahtuu mukavasti yhteen solmuun ja jättää riittävästi muistia kohtuulliselle kontekstiikkunalle.
+**IQ2_XXS imatrix** -malli on hyvä lähtökohta. Se mahtuu mukavasti yhdelle solmulle ja jättää riittävästi muistia kohtuulliselle kontekstiikkunalle.
 
-## ai-toolbox-cockpit-käyttöliittymän asentaminen
+## ai-toolbox-cockpit-liittymän asentaminen
 
-[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) on kevyt päätekäyttöliittymä, joka helpottaa erilaisten tekoälytaustajärjestelmien asentamista. Käytämme sitä ds4-kontin luomiseen, mallin painojen lataamiseen ja palvelinten käynnistämiseen. Asenna se `pipx`:llä:
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) on kevyt pääteliittymä, joka helpottaa erilaisten tekoälymoottoreiden asentamista. Käytämme sitä ds4-kontin luomiseen, mallin painojen lataamiseen ja palvelimien käynnistämiseen. Asenna se `pipx`:llä:
 
 <!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
@@ -84,7 +87,7 @@ pipx install git+https://github.com/kyuz0/ai-toolbox-cockpit.git
 ```
 <!-- @test:end -->
 
-Käynnistä ohjauspaneeli:
+Käynnistä cockpit:
 ```bash
 ai-toolbox-cockpit
 ```
@@ -101,7 +104,7 @@ echo "OK: ai-toolbox-cockpit is installed and on PATH"
 
 ## Vaihe 1: Työkalulaatikon luominen
 
-Valitse **Interactive Toolboxes** -välilehdellä uusin saatavilla oleva/vakaa työkalulaatikko ds4:lle (esim. `ds4-rocm-10.0`) ja napsauta **Create/Update**. Tämä hakee konttikuvan ja luo työkalulaatikkoympäristön.
+Siirry **Interactive Toolboxes** -välilehdelle, valitse uusin saatavilla oleva/vakaa työkalulaatikko ds4:lle (esim. `ds4-rocm-10.0`) ja napsauta **Create/Update**. Tämä hakee konttikuvan ja luo työkalulaatikkoympäristön.
 
 
 <p align="center">
@@ -124,9 +127,9 @@ echo "OK: ds4 toolbox container image is present"
 
 ## Vaihe 2: Mallin lataaminen
 
-Siirry **Models**-välilehdelle. Valitse ensin taustajärjestelmä (ds4). Valitse sitten avattavasta valikosta **IQ2_XXS imatrix (~80,8 Gt)** ja napsauta **Download**. Mallitiedostot tallennetaan oletuksena hakemistoon `~/ds4` (tallennuspolkua voi muuttaa).
+Siirry **Models**-välilehdelle. Valitse ensin moottori (ds4). Valitse sitten pudotusvalikosta **IQ2_XXS imatrix (~80,8 Gt)** ja napsauta **Download**. Mallitiedostot tallennetaan oletuksena polkuun `~/ds4` (voit muuttaa tallennuspolkua).
 
-> **Huomio:** IQ2_XXS-malli on noin 80 Gt, joten lataus voi kestää jonkin aikaa yhteydestäsi riippuen. Voit jatkaa, kun lataus on valmis.
+> **Huomio:** IQ2_XXS-malli on noin 80 Gt, joten lataus voi kestää yhteydestäsi riippuen jonkin aikaa. Voit jatkaa, kun se on valmis.
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
@@ -160,17 +163,17 @@ fi
 
 ## Vaihe 3: Palvelimen käynnistäminen
 
-Siirry **Server Mode** -välilehdelle. Valitse ladattu malli ja työkalulaatikko, ja määritä sitten kontekstin koko, isäntä ja portti. Kun olet valmis, napsauta **Start ds4-server**.
+Siirry **Server Mode** -välilehdelle. Valitse ladattu malli ja työkalulaatikko, ja määritä sitten kontekstikoko, isäntä ja portti. Kun olet valmis, napsauta **Start ds4-server**.
 
-> **Vinkki** Kontekstin koko `126000` on kohtuullinen lähtöarvo, jonka pitäisi mahtua yhteen solmuun — voit asettaa sen suuremmaksi, jos muistia on ylimääräisenä, tai pienemmäksi, jos törmäät muistin loppumista koskeviin virheisiin. Portti (`8000` tässä oppaassa) on mielivaltainen; valitse mikä tahansa vapaa portti.
+> **Vinkki** Kontekstikoko `126000` on kohtuullinen lähtöarvo, jonka pitäisi mahtua yhdelle solmulle — voit asettaa sen suuremmaksi, jos sinulla on ylimääräistä muistia, tai pienemmäksi, jos törmäät muistin loppumisvirheisiin. Portti (`8000` tässä ohjeessa) on mielivaltainen; valitse mikä tahansa vapaa portti.
 
-> **KV-levyvälimuisti (valinnainen).** **KV Disk Cache** -asetuksen käyttöönotto siirtää KV-välimuistin levylle (kohdassa **Host Cache Dir**, oletuksena `~/.cache/ds4-kv`), jolloin toistuvat järjestelmäkehotteet palautetaan SSD-levyltä sen sijaan, että ne laskettaisiin uudelleen. Tämä on suorituskykyoptimointi koodausagenttien työnkulkuihin, joissa on pitkiä, toistuvia kehotteita, eikä sitä **tarvita** palvelimen ajamiseen.
+> **KV-levyvälimuisti (valinnainen).** **KV Disk Cache** -asetuksen käyttöönotto siirtää KV-välimuistin levylle (kohdassa **Host Cache Dir**, oletuksena `~/.cache/ds4-kv`), jolloin toistuvat järjestelmäkehotteet palautetaan SSD-levyltä sen sijaan, että ne laskettaisiin uudelleen. Tämä on suorituskykyoptimointi koodausagenttien työnkulkuihin, joissa on pitkiä, toistuvia kehotteita, eikä sitä **vaadita** palvelimen käynnistämiseen.
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
 </p>
 
-Palvelin käynnistyy ja kuuntelee porttia 8000, ja se avaa OpenAI-yhteensopivan API-päätepisteen osoitteessa `http://localhost:8000/v1`.
+Palvelin käynnistyy ja kuuntelee porttia 8000, paljastaen OpenAI-yhteensopivan API-päätepisteen osoitteessa `http://localhost:8000/v1`.
 
 **Pikatesti:**
 ```bash
@@ -308,7 +311,7 @@ echo "OK: ds4 server test complete; server stopped and GPU memory released"
 <!-- @test:end -->
 ## Web-käyttöliittymän yhdistäminen
 
-Voit yhdistää minkä tahansa keskustelukäyttöliittymän, joka tukee OpenAI API -muotoa. Voit esimerkiksi käyttää HuggingFace ChatUI:ta:
+Voit yhdistää minkä tahansa chat-käyttöliittymän, joka tukee OpenAI API -muotoa. Esimerkiksi HuggingFace ChatUI:n käyttämiseksi:
 
 ```bash
 docker run --network=host \
@@ -321,13 +324,13 @@ docker run --network=host \
 
 Avaa `http://localhost:3000` selaimessasi aloittaaksesi keskustelun.
 
-> **Huomautus:** `--network=host` asettaa Web-käyttöliittymän isäntäkoneen verkkoon, jotta se voi tavoittaa ds4-palvelimen suoraan osoitteessa `localhost`. Tämä pitää ds4-palvelimen sidottuna loopback-osoitteeseen (sen ei tarvitse olla näkyvissä muissa liitännöissä).
+> **Huomautus:** `--network=host` asettaa Web-käyttöliittymän isäntäkoneen verkkoon, jotta se voi tavoittaa ds4-palvelimen suoraan osoitteessa `localhost`. Tämä pitää ds4-palvelimen sidottuna loopback-osoitteeseen (sitä ei tarvitse paljastaa muille verkkoliitännöille).
 
-> **Vihje:** Web-käyttöliittymän portti (tässä `3000`, asetetaan muuttujalla `PORT`) on mielivaltainen — valitse mikä tahansa vapaa portti, jos `3000` on jo käytössä, ja avaa sen sijaan tämä portti selaimessasi. Varmista, että `OPENAI_BASE_URL`-osoitteessa oleva portti vastaa porttia, jolla ds4-palvelimesi on käynnissä.
+> **Vinkki:** Web-käyttöliittymän portti (tässä `3000`, asetettu muuttujalla `PORT`) on mielivaltainen — valitse mikä tahansa vapaa portti, jos `3000` on jo käytössä, ja avaa tuo portti selaimessasi sen sijaan. Varmista, että `OPENAI_BASE_URL`-muuttujan portti vastaa porttia, jossa ds4-palvelimesi on käynnissä.
 
 ## Koodausagentin yhdistäminen
 
-ds4-palvelin tarjoaa sekä OpenAI- että Anthropic-yhteensopivat rajapinnat, joten useimmat koodausagentit voivat muodostaa siihen yhteyden suoraan. Voit esimerkiksi lisätä sen `pi`-koodausagenttiin lisäämällä seuraavan lohkon tiedostoon `~/.pi/agent/models.json`:
+ds4-palvelin tarjoaa sekä OpenAI- että Anthropic-yhteensopivat rajapinnat, joten useimmat koodausagentit voivat yhdistää siihen suoraan. Esimerkiksi lisätäksesi sen `pi`-koodausagenttiin, lisää seuraava lohko tiedostoon `~/.pi/agent/models.json`:
 
 ```json
 "ds4": {
@@ -367,15 +370,15 @@ ds4-palvelin tarjoaa sekä OpenAI- että Anthropic-yhteensopivat rajapinnat, jot
 }
 ```
 
-> **Vihje**: Jos koodausagenttisi tai Web-käyttöliittymäsi on käynnissä eri koneella kuin Halo-alusta, sinun on välitettävä palvelimen portti (tässä `8000`) SSH:n kautta:
+> **Vinkki**: Jos koodausagenttisi tai Web-käyttöliittymäsi on käynnissä eri koneella kuin Halo-alusta, sinun täytyy välittää palvelimen portti (tässä `8000`) SSH:n kautta:
 > ```bash
 > ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## Seuraavat vaiheet
 
-- **Usean solmun klusterointi**: Jos sinulla on kaksi Halo-laitetta, ds4 tukee Q4-mallin (~153 Gt) jakamista molempien koneiden kesken putkistorinnakkaisuuden (pipeline parallelism) avulla. Katso asennusohjeet [ds4-toolbox-dokumentaatiosta](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism).
-- **Spekulatiivinen dekoodaus (MTP)**: Lataa MTP-painot (~3,6 Gt) ja välitä `--mtp` palvelimelle nopeampaa generointinopeutta varten.
-- **KV-välimuistin siirto levylle**: Koodausagenttien työnkulkuja varten ota käyttöön `--kv-disk-dir`, jotta toistuvat järjestelmäkehotteet palautetaan SSD-levyltä sen sijaan, että ne laskettaisiin uudelleen joka kerta.
+- **Monisolmuinen klusterointi**: Jos sinulla on kaksi Halo-laitetta, ds4 tukee Q4-mallin (~153 GB) jakamista molempien koneiden kesken putkiliitännäisen rinnakkaisuuden (pipeline parallelism) avulla. Katso asennusohjeet [ds4-toolbox-dokumentaatiosta](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism).
+- **Spekulatiivinen dekoodaus (MTP)**: Lataa MTP-painot (~3,6 GB) ja anna palvelimelle parametri `--mtp` nopeampaa generointinopeutta varten.
+- **KV-välimuistin levylle siirtäminen**: Koodausagenttien työnkuluissa ota käyttöön `--kv-disk-dir`, jotta toistuvat järjestelmäkehotteet palautetaan SSD-levyltä sen sijaan, että ne laskettaisiin uudelleen joka kerta.
 
-Lisätietoja on [ds4-tietovarastossa](https://github.com/antirez/ds4) ja [ds4-cockpit-työkalupakissa](https://github.com/kyuz0/strix-halo-ds4-toolbox).
+Lisätietoja saat [ds4-tietovarastosta](https://github.com/antirez/ds4) ja [ds4-cockpit-työkalupakista](https://github.com/kyuz0/strix-halo-ds4-toolbox).

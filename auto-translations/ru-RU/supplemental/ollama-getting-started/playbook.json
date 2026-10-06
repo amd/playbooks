@@ -1,6 +1,6 @@
 {
   "id": "ollama-getting-started",
   "title": "Начало работы с Ollama",
-  "description": "Установите Ollama и запускайте LLM локально — общайтесь через терминал, десктопное приложение или REST API.",
+  "description": "Установите Ollama и запускайте LLM локально — общайтесь через терминал, приложение для рабочего стола или REST API.",
   "auto_translated": true
 }
