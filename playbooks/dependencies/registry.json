@@ -63,6 +63,12 @@
           "expect_rc": 0
         }
       },
+      "install": {
+        "linux": {
+          "cmd": "curl -fsSL https://lmstudio.ai/install.sh | bash && sudo ln -sf \"$HOME/.lmstudio/bin/lms\" /usr/local/bin/lms",
+          "timeout": 900
+        }
+      },
       "versionable": true
     },
     "vllm": {
@@ -127,6 +133,27 @@
         "linux": [],
         "windows": []
       },
+      "validate": {
+        "linux": {
+          "cmd": "code --version",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "code --version; if (-not $?) { exit 1 }; winget list --id Microsoft.VisualStudioCode -e --accept-source-agreements | Out-Null; exit $LASTEXITCODE",
+          "timeout": 120,
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "if ! test -f /etc/apt/sources.list.d/vscode.list && ! test -f /etc/apt/sources.list.d/vscode.sources; then sudo apt-get update && sudo apt-get install -y wget gpg && sudo install -d -m 0755 /etc/apt/keyrings && wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/keyrings/microsoft.gpg >/dev/null && sudo chmod 0644 /etc/apt/keyrings/microsoft.gpg && echo \"deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main\" | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null || exit 1; fi; sudo apt-get update && sudo apt-get install -y code",
+          "timeout": 900
+        },
+        "windows": {
+          "cmd": "winget install --id Microsoft.VisualStudioCode -e --accept-source-agreements --accept-package-agreements --silent",
+          "timeout": 900
+        }
+      },
       "versionable": true
     },
     "lemonade": {
@@ -158,7 +185,7 @@
       },
       "install": {
         "linux": {
-          "cmd": "sudo add-apt-repository -y ppa:lemonade-team/stable && sudo apt update && sudo apt install -y lemonade-server",
+          "cmd": "(command -v lemonade >/dev/null 2>&1 || command -v lemonade-server >/dev/null 2>&1 || (sudo add-apt-repository -y ppa:lemonade-team/stable && sudo apt update && sudo apt install -y lemonade-server)) && sudo systemctl enable --now lemond && for i in $(seq 1 60); do curl -sf --max-time 2 http://127.0.0.1:13305/api/v1/health >/dev/null && exit 0; sleep 2; done; exit 1",
           "timeout": 900
         },
         "windows": {
@@ -505,11 +532,19 @@
         "linux": {
           "cmd": "ollama --version",
           "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "if (Get-Command ollama -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }",
+          "expect_rc": 0
         }
       },
       "install": {
         "linux": {
           "cmd": "curl -fsSL https://ollama.com/install.sh | sh",
+          "timeout": 900
+        },
+        "windows": {
+          "cmd": "$p = Start-Process winget -ArgumentList 'install','--id','Ollama.Ollama','-e','--accept-source-agreements','--accept-package-agreements','--silent' -PassThru -WindowStyle Hidden; $p.WaitForExit(); exit $p.ExitCode",
           "timeout": 900
         }
       },
@@ -532,11 +567,19 @@
         "linux": {
           "cmd": "ollama list | grep -q 'gpt-oss:20b'",
           "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:11434/api/tags | findstr /C:gpt-oss:20b",
+          "expect_rc": 0
         }
       },
       "install": {
         "linux": {
           "cmd": "(curl -sf --max-time 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 || (nohup ollama serve >/tmp/ollama-serve.log 2>&1 & for i in $(seq 1 30); do curl -sf --max-time 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 && break; sleep 1; done)); ollama pull gpt-oss:20b && ollama list | grep -q 'gpt-oss:20b'",
+          "timeout": 3600
+        },
+        "windows": {
+          "cmd": "if (-not (Get-NetTCPConnection -LocalPort 11434 -State Listen -ErrorAction SilentlyContinue)) { Start-Process ollama -ArgumentList 'serve' -WindowStyle Hidden; for ($i=0; $i -lt 30; $i++) { Start-Sleep -Seconds 2; if (Get-NetTCPConnection -LocalPort 11434 -State Listen -ErrorAction SilentlyContinue) { break } } }; if (-not (Get-NetTCPConnection -LocalPort 11434 -State Listen -ErrorAction SilentlyContinue)) { exit 1 }; ollama pull gpt-oss:20b; exit $LASTEXITCODE",
           "timeout": 3600
         }
       },
@@ -559,11 +602,20 @@
         "linux": {
           "cmd": "export PATH=\"$HOME/.local/bin:$PATH\"; hermes --version",
           "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 --exec bash -c 'export PATH=$HOME/.local/bin:$PATH; hermes --version'; exit $LASTEXITCODE",
+          "timeout": 120,
+          "expect_rc": 0
         }
       },
       "install": {
         "linux": {
           "cmd": "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup",
+          "timeout": 900
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 --exec bash -c 'curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup'; exit $LASTEXITCODE",
           "timeout": 900
         }
       },
@@ -664,11 +716,20 @@
         "linux": {
           "cmd": "export PATH=\"$HOME/.npm-global/bin:$HOME/.local/bin:$PATH\"; openclaw --version",
           "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 --exec bash -c 'export PATH=$HOME/.npm-global/bin:$HOME/.local/bin:$PATH; openclaw --version'; exit $LASTEXITCODE",
+          "timeout": 120,
+          "expect_rc": 0
         }
       },
       "install": {
         "linux": {
           "cmd": "curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard",
+          "timeout": 900
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 --exec bash -c 'curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard'; exit $LASTEXITCODE",
           "timeout": 900
         }
       },
@@ -770,6 +831,16 @@
           "expect_rc": 0
         }
       },
+      "install": {
+        "linux": {
+          "cmd": "lms get qwen/qwen3.5-9b --yes",
+          "timeout": 3600
+        },
+        "windows": {
+          "cmd": "lms get qwen/qwen3.5-9b --yes",
+          "timeout": 3600
+        }
+      },
       "versionable": false
     },
     "lmstudio-models-qwen3-coder-30b": {
@@ -797,6 +868,16 @@
         "windows": {
           "cmd": "lms ls --llm | findstr /I qwen3-coder-30b",
           "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "lms get qwen/qwen3-coder-30b --yes",
+          "timeout": 3600
+        },
+        "windows": {
+          "cmd": "lms get qwen/qwen3-coder-30b --yes",
+          "timeout": 3600
         }
       },
       "versionable": false
@@ -901,13 +982,13 @@
       },
       "validate": {
         "linux": {
-          "cmd": "podman --version",
+          "cmd": "podman --version && podman-compose --version",
           "expect_rc": 0
         }
       },
       "install": {
         "linux": {
-          "cmd": "sudo apt update && sudo apt install -y podman docker-compose-plugin podman-compose",
+          "cmd": "sudo apt update && sudo apt install -y podman podman-compose && (sudo apt install -y docker-compose-plugin || true)",
           "timeout": 600
         }
       },
