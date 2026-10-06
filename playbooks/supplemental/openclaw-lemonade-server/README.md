@@ -55,7 +55,9 @@ By the end of this playbook you will be able to:
 - [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Optional, for sandboxing OpenClaw)
 <!-- @os:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:nodejs,openclaw,lemonade-models-qwen3-35b-a3b -->
 
 <!-- @var:id=openclaw_model value="Qwen3.6-35B-A3B-GGUF" -->
 

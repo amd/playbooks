@@ -443,6 +443,13 @@ def classify_commit(commit: str) -> Optional[str]:
     Deliberately derived from the diff rather than from the manifest, so the
     test does not simply restate the implementation.
     """
+    parents = subprocess.run(
+        ["git", "log", "-1", "--format=%p", commit],
+        cwd=REPO_ROOT, capture_output=True, text=True,
+    ).stdout.split()
+    if len(parents) > 1:
+        return None  # merge: combined diff hides what _replay's first-parent diff sees
+
     files = subprocess.run(
         ["git", "show", "--name-only", "--format=", commit],
         cwd=REPO_ROOT, capture_output=True, text=True,
