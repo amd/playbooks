@@ -251,6 +251,11 @@ skip_playbook_devices:
   unsloth-llms-finetuning:  ["stx"]
   hermes-lemonade-server:  ["stx", "krk"]
   openclaw-lemonade-server: ["stx", "krk"]
+  # These Agent Canvas playbooks use the same fixed Qwen3.6-35B-A3B-GGUF.
+  # Current STX hosts expose 29 GB RAM: Lemonade's 23.2 GB eligibility ceiling is
+  # below the model's 23.3 GB requirement. Re-enable on eligible STX hardware.
+  github-slack-development-digest: ["stx"]
+  openhands-getting-started:       ["stx"]
   # LM Studio's survey exposed 10.71 GiB to Vulkan on Windows STX for an
   # 18.63 GB model; Windows failed with "unable to allocate Vulkan0 buffer".
   # Linux aborted at 91% while amdgpu reported insufficient submission memory.

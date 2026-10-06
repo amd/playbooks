@@ -120,6 +120,38 @@ class AcquireTimeoutValidation(unittest.TestCase):
 
 class OpenHandsProvisioning(unittest.TestCase):
 
+    def test_fixed_qwen_agent_playbooks_skip_only_stx_in_shipped_policy(self):
+        from orchestrai_matrix import build
+
+        cfg = load_config()
+        cfg["device_to_tags"] = {
+            device: [f"fixture-{device}"] for device in cfg["device_to_gfx"]
+        }
+        affected = ("github-slack-development-digest", "openhands-getting-started")
+        baseline_cfg = load_config()
+        baseline_cfg["device_to_tags"] = cfg["device_to_tags"]
+        for playbook in affected:
+            baseline_cfg["skip_playbook_devices"].pop(playbook, None)
+
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(os.path.dirname(GITHUB_DIR))
+            matrix, batches = build([*affected, "ollama-getting-started"], cfg)
+            baseline, _ = build([*affected, "ollama-getting-started"], baseline_cfg)
+        finally:
+            os.chdir(old_cwd)
+
+        def combinations(entries):
+            return {(e["playbook"], e["platform"], e["arch"]) for e in entries}
+
+        excluded = {(pb, os_name, "stx") for pb in affected
+                    for os_name in ("linux", "windows")}
+        self.assertEqual(combinations(matrix), combinations(baseline) - excluded)
+        self.assertTrue(excluded <= combinations(baseline))
+        for platform in ("linux", "windows"):
+            self.assertEqual(batches[f"{platform}/stx"]["playbooks"],
+                             ["ollama-getting-started"])
+
     def test_windows_openhands_enables_wsl_without_installer_coordinates(self):
         """The Docker Desktop installer is the dependency's own business: this
         repository neither requires nor forwards its location."""
