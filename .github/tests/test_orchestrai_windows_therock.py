@@ -1,3 +1,7 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
 """Windows SDK provisioning is opt-in, scoped and platform-specific."""
 
 import copy
