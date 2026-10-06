@@ -87,6 +87,11 @@ def apply_env_overrides(cfg):
     therock = os.environ.get("ORCHESTRAI_THEROCK_URL")
     if therock:
         prov["therock_url"] = therock
+    # Windows distributions are a separate source. Never reuse the Linux URL.
+    for key in ("url", "run_id", "run_repo", "ref"):
+        value = os.environ.get(f"ORCHESTRAI_WINDOWS_THEROCK_{key.upper()}")
+        if value:
+            prov.setdefault("windows_therock", {})[key] = value
     linux_driver = os.environ.get("ORCHESTRAI_LINUX_DRIVER_SOURCE")
     if linux_driver:
         prov.setdefault("linux_kernel_driver", {})["source"] = linux_driver
@@ -192,6 +197,73 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
     }
 
 
+def windows_therock_builds(batch, cfg):
+    """Opt-in SDK provisioning for the Radeon ML batches that need hipInfo.
+
+    Keep an unset source a no-op for existing deployments. Invalid configured
+    sources fail before acquisition, rather than after a driver install/reboot.
+    Authentication for artifact fetching belongs to the pipeline's credential
+    binding; do not serialize an Actions token into BUILDS_JSON.
+    """
+    prov = cfg.get("provisioning", {})
+    source = prov.get("windows_therock") or {}
+    if (batch.get("platform") != "windows"
+            or batch.get("arch") not in source.get("devices", [])
+            or not set(batch.get("playbooks", [])) & set(source.get("playbooks", []))):
+        return [], {}, []
+    url = str(source.get("url") or "").strip()
+    run_id = str(source.get("run_id") or "").strip()
+    run_repo = str(source.get("run_repo") or "").strip()
+    installer_ref = str(source.get("ref") or "").strip()
+    if not any((url, run_id, run_repo, installer_ref)):
+        return [], {}, []
+
+    errors = []
+    variables = {}
+    if url and run_id:
+        errors.append("set ORCHESTRAI_WINDOWS_THEROCK_URL or "
+                      "ORCHESTRAI_WINDOWS_THEROCK_RUN_ID, not both")
+    elif url:
+        try:
+            parsed = urllib.parse.urlsplit(url)
+            valid_url = (parsed.scheme == "https" and bool(parsed.netloc)
+                         and not parsed.username and not parsed.password
+                         and not re.search(r"\s", url))
+        except ValueError:
+            valid_url = False
+        if not valid_url:
+            errors.append("ORCHESTRAI_WINDOWS_THEROCK_URL must be an HTTPS Windows tarball URL")
+        if url == str(prov.get("therock_url") or "").strip():
+            errors.append("ORCHESTRAI_WINDOWS_THEROCK_URL must not reuse the Linux TheRock URL")
+        if run_repo or installer_ref:
+            errors.append("ORCHESTRAI_WINDOWS_THEROCK_RUN_REPO/REF require artifact mode")
+        variables["THEROCK_URL"] = url
+    else:
+        if not re.fullmatch(r"[1-9][0-9]*", run_id):
+            errors.append("ORCHESTRAI_WINDOWS_THEROCK_RUN_ID must be a positive CI run ID")
+        if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", run_repo):
+            errors.append("ORCHESTRAI_WINDOWS_THEROCK_RUN_REPO must be owner/repository")
+        gfx = (cfg.get("device_to_gfx") or {}).get(batch.get("arch"), "")
+        if re.fullmatch(r"gfx[0-9a-f]{3}X", gfx):
+            family = gfx + "-all"
+        elif re.fullmatch(r"gfx[0-9a-f]{4}", gfx):
+            family = gfx[:-1] + "X-all"
+        else:
+            family = ""
+            errors.append(f"device_to_gfx.{batch.get('arch')} is required for Windows TheRock artifacts")
+        variables.update(THEROCK_RUN_ID=run_id, THEROCK_RUN_REPO=run_repo,
+                         THEROCK_AMDGPU_FAMILY=family)
+        if installer_ref:
+            variables["THEROCK_REF"] = installer_ref
+
+    scripts = source.get("install_scripts") or []
+    if not scripts:
+        errors.append("provisioning.windows_therock.install_scripts")
+    if errors:
+        return [], {}, errors
+    return [dict(entry) for entry in scripts], variables, []
+
+
 def make_builds(batch, cfg):
     """Return (builds, missing) — missing names required provisioning vars left empty."""
     platform = batch["platform"]
@@ -206,6 +278,10 @@ def make_builds(batch, cfg):
         if not source:
             missing.append("ORCHESTRAI_WINDOWS_DRIVER_SOURCE")
         build_vars = {"driver_source": source, "driver_copy": drv.get("copy", "direct")}
+        sdk_scripts, sdk_vars, sdk_errors = windows_therock_builds(batch, cfg)
+        scripts.extend(sdk_scripts)
+        build_vars.update(sdk_vars)
+        missing.extend(sdk_errors)
     else:
         scripts = list(prov.get("linux_install_scripts", []))
         device = batch.get("arch", "")

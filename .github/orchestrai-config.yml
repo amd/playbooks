@@ -47,8 +47,8 @@ test_path_template: "L4-sys/playbooks/{platform}/sys_func-playbook_runner"
 # runner's VALID_DEVICES in .github/scripts/run_playbook_tests.py.
 device_to_tags: {}
 
-# Device -> gfx target. The TheRock tarball is multi-arch, so this is only used
-# for the optional per-device pip path (torch[device-<gfx>]).
+# Device -> gfx target. Used by the optional per-device pip path and by Windows
+# TheRock artifact provisioning to select the corresponding gfx family.
 device_to_gfx:
   halo:     "gfx1151"
   halo_box: "gfx1151"
@@ -322,17 +322,36 @@ provisioning:
       - script: "InstallationScripts/gfx/linux.sh"
         reboot_after: true
 
-  # NOTE: no TheRock step here. windows-therock-tarball.ps1 requires a TheRock
-  # *Windows* tarball via THEROCK_URL, but the only TheRock variable
-  # (ORCHESTRAI_THEROCK_URL) is the Linux multiarch tarball, so the step could
-  # never be satisfied -- it failed with "THEROCK_URL is required" on every
-  # Windows batch. Nothing on Windows consumes the resulting ROCm userspace
-  # (C:\TheRock\build): Windows gets its GPU runtime from the AMD driver
-  # (windows.ps1) and PyTorch from the ROCm wheel index. Re-add this only
-  # alongside a real Windows tarball URL.
+  # Driver first, including its reboot. The optional SDK step below follows it
+  # before actor deployment; it does not replace the driver or install Torch.
   windows_install_scripts:
     - script: "InstallationScripts/gfx/windows.ps1"
       reboot_after: true
+
+  # Opt-in Windows SDK for single-GPU ML execution (test-library PR #4492).
+  # Without a source, existing provisioning is unchanged. Configure ONE mode:
+  #   ORCHESTRAI_WINDOWS_THEROCK_URL: a Windows distribution tarball (HTTPS)
+  #   ORCHESTRAI_WINDOWS_THEROCK_RUN_ID + ORCHESTRAI_WINDOWS_THEROCK_RUN_REPO:
+  #     a pinned Windows CI artifact run (e.g. repository ROCm/rocm-systems)
+  #   ORCHESTRAI_WINDOWS_THEROCK_REF: optional artifact-installer branch
+  # Never use ORCHESTRAI_THEROCK_URL here: that distribution is Linux-only.
+  # Artifact mode should use the pipeline's securely bound GITHUB_TOKEN; the
+  # controller deliberately does not copy an Actions token into BUILDS_JSON.
+  # Validate one Windows Radeon batch before enabling single-GPU enforcement.
+  windows_therock:
+    url: ""
+    run_id: ""
+    run_repo: ""
+    ref: ""
+    devices: ["rx7900xt", "rx9070xt", "r9700"]
+    playbooks:
+      - "llama-factory-finetuning"
+      - "pytorch-finetuning"
+      - "pytorch-rocm-llms"
+      - "unsloth-llms-finetuning"
+    install_scripts:
+      - script: "InstallationScripts/gfx/windows-therock-tarball.ps1"
+        reboot_after: false
 
   # Windows AMD GPU driver source (UNC path) copied onto the machine.
   # The UNC path is internal — set it as a repo variable, not in this public file:
