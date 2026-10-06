@@ -15,6 +15,7 @@ Covers:
 """
 
 import importlib.util
+import json
 import os
 import re
 import tempfile
@@ -160,6 +161,81 @@ class LoopTests(unittest.TestCase):
     def test_unchecked_when_no_validate_for_platform(self):
         spec = {"validate": {"windows": {"cmd": "true", "expect_rc": 0}}}
         self.assertEqual(pv.check_dependency("d", spec, "linux")["status"], "unchecked")
+
+
+class ScriptStepTests(unittest.TestCase):
+    """A step may name a script under prereqs/ instead of an inline cmd."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self._saved = pv.PREREQ_SCRIPTS_DIR
+        pv.PREREQ_SCRIPTS_DIR = Path(self._tmp.name)
+
+    def tearDown(self):
+        pv.PREREQ_SCRIPTS_DIR = self._saved
+        self._tmp.cleanup()
+
+    def _script(self, name, body):
+        (Path(self._tmp.name) / name).write_text(body, encoding="utf-8")
+
+    def test_script_validate_ok(self):
+        self._script("d.validate.sh", "exit 0\n")
+        spec = {"validate": {"linux": {"script": "d.validate.sh", "expect_rc": 0}}}
+        self.assertEqual(pv.check_dependency("d", spec, "linux")["status"], "OK")
+
+    def test_script_install_heals(self):
+        flag = Path(self._tmp.name) / "installed"
+        self._script("d.validate.sh", f'test -f "{flag}"\n')
+        self._script("d.install.sh", f'touch "{flag}"\n')
+        spec = {
+            "validate": {"linux": {"script": "d.validate.sh", "expect_rc": 0}},
+            "install": {"linux": {"script": "d.install.sh", "timeout": 5}},
+        }
+        self.assertEqual(pv.check_dependency("d", spec, "linux")["status"], "INSTALLED")
+
+    def test_missing_script_fails_the_check_without_crashing(self):
+        spec = {"validate": {"linux": {"script": "absent.validate.sh", "expect_rc": 0}}}
+        self.assertEqual(pv.check_dependency("d", spec, "linux")["status"], "MISSING_NO_INSTALL")
+
+    def test_windows_script_uses_powershell_file(self):
+        args = pv._step_args({"script": "d.install.ps1"}, "windows")
+        self.assertEqual(args[:6], ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", args[5]])
+        self.assertTrue(args[5].endswith("d.install.ps1"))
+
+
+class RegistryIntegrityTests(unittest.TestCase):
+    """Catch a broken step reference here, before it breaks prereq validation on every runner."""
+
+    REGISTRY = Path(__file__).resolve().parents[2] / "playbooks" / "dependencies" / "registry.json"
+    EXT = {"linux": ".sh", "windows": ".ps1"}
+
+    def _steps(self):
+        deps = json.loads(self.REGISTRY.read_text(encoding="utf-8"))["dependencies"]
+        for dep_id, spec in deps.items():
+            for kind in ("validate", "install"):
+                for platform, step in (spec.get(kind) or {}).items():
+                    yield dep_id, kind, platform, step
+
+    def test_each_step_is_exactly_one_of_cmd_or_script(self):
+        bad = [f"{d}.{k}.{p}" for d, k, p, s in self._steps() if ("cmd" in s) == ("script" in s)]
+        self.assertEqual(bad, [])
+
+    def test_scripts_exist_and_follow_naming(self):
+        bad = []
+        for d, k, p, s in self._steps():
+            if "script" in s:
+                expected = f"{d}.{k}{self.EXT[p]}"
+                if s["script"] != expected or not (pv.PREREQ_SCRIPTS_DIR / expected).is_file():
+                    bad.append(f"{d}.{k}.{p} -> {s['script']} (expected {expected}, present)")
+        self.assertEqual(bad, [])
+
+    def test_no_orphan_scripts(self):
+        referenced = {s["script"] for _, _, _, s in self._steps() if "script" in s}
+        on_disk = {
+            f.name for f in pv.PREREQ_SCRIPTS_DIR.iterdir()
+            if re.search(r"\.(validate|install)\.(sh|ps1)$", f.name)
+        }
+        self.assertEqual(sorted(on_disk - referenced), [])
 
 
 if __name__ == "__main__":

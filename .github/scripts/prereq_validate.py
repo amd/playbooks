@@ -13,8 +13,9 @@ prerequisites a playbook needs are actually present on the machine -- and to
 
 For each ``@require:<dep>`` or ``@prereq:<dep>`` a playbook declares (scoped to the active
 ``@os:``/``@device:`` blocks), this reads a ``validate`` and optional
-``install`` command from ``playbooks/dependencies/registry.json`` and runs a
-validate -> (if missing) install -> re-validate loop:
+``install`` step from ``playbooks/dependencies/registry.json`` and runs a
+validate -> (if missing) install -> re-validate loop. A step is either an
+inline ``cmd`` or a ``script`` file under ``.github/scripts/prereqs/``:
 
     validate passes                -> OK                 (provisioned; no install)
     validate fails, install fixes  -> INSTALLED          (self-healed; job continues)
@@ -44,6 +45,8 @@ VALID_DEVICES = {"halo", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"}
 # halo_box is a valid @device: scope in READMEs even though it is not a CI
 # --device value, so accept it when matching require scopes.
 KNOWN_DEVICE_SCOPES = VALID_DEVICES | {"halo_box"}
+# Multi-step recipes live here as files; registry steps reference them via "script".
+PREREQ_SCRIPTS_DIR = Path(__file__).parent / "prereqs"
 
 
 def find_playbook_path(playbook_id: str, repo_root: Path) -> Optional[Path]:
@@ -127,14 +130,26 @@ def extract_scoped_requires(
     return ordered
 
 
-def _run(cmd: str, platform: str, timeout: int) -> int:
-    """Run a shell command and return its exit code (best-effort)."""
-    shell_exe = None
+def _step_args(step: dict, platform: str) -> list[str]:
+    """Build argv for a registry step: an inline ``cmd``, or a ``script`` under prereqs/."""
+    script = step.get("script")
+    if script:
+        path = str(PREREQ_SCRIPTS_DIR / script)
+        if platform == "windows":
+            return ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path]
+        return ["bash", path]
     if platform == "windows":
         # Use PowerShell so validate/install strings match the doc conventions.
-        args = ["powershell", "-NoProfile", "-Command", cmd]
-    else:
-        args = ["bash", "-c", cmd]
+        return ["powershell", "-NoProfile", "-Command", step["cmd"]]
+    return ["bash", "-c", step["cmd"]]
+
+
+def _run(step: dict, platform: str, timeout: int) -> int:
+    """Run a registry step and return its exit code (best-effort)."""
+    if step.get("script") and not (PREREQ_SCRIPTS_DIR / step["script"]).is_file():
+        print(f"  (prereq script not found: {step['script']})")
+        return 127
+    args = _step_args(step, platform)
     try:
         proc = subprocess.run(
             args,
@@ -160,7 +175,7 @@ def _validate(spec: dict, platform: str) -> bool:
     v = (spec.get("validate") or {}).get(platform)
     if not v:
         return False
-    rc = _run(v["cmd"], platform, v.get("timeout", 60))
+    rc = _run(v, platform, v.get("timeout", 60))
     return rc == v.get("expect_rc", 0)
 
 
@@ -196,7 +211,7 @@ def check_dependency(dep_id: str, spec: dict, platform: str) -> dict:
 
     print(f"  MISSING: {dep_id} -> installing (this may take a while) ...")
     result["install_ran"] = True
-    install_rc = _run(install["cmd"], platform, install.get("timeout", 1800))
+    install_rc = _run(install, platform, install.get("timeout", 1800))
     result["install_rc"] = install_rc
 
     print(f"  re-validating {dep_id} ...")
