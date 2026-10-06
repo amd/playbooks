@@ -1,0 +1,90 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Playbook Metadata
+
+# Keeps CI-managed playbook.json metadata in sync after a playbook lands on main:
+#   1. published_date / updated_date stamped from git history
+#      (published_date is set once; updated_date tracks the latest change).
+#   2. isNew set on exactly the 3 most recently published playbooks, cleared on
+#      the rest — so the website's "What's New" never shows more than 3.
+#
+# Order matters: dates are stamped FIRST so a just-merged playbook has its
+# published_date before ranking. A playbook with no date yet still ranks newest
+# (see mark_new_playbooks.py), so a brand-new playbook is marked New immediately.
+#
+# main is a protected branch (changes must go through a PR, so a bot cannot push
+# to it directly — a prior direct-push version of this workflow failed every run
+# with GH006). Instead we push a branch and open a PR that @-mentions the
+# maintainer for review and merge. Pure git + JSON on ubuntu-latest, where `gh`
+# is preinstalled.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'playbooks/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: playbook-metadata-${{ github.ref }}
+  # Newest-wins: a fresh push supersedes an older still-running job instead of
+  # queuing behind it, so one slow run can't backlog the pipeline.
+  cancel-in-progress: true
+
+jobs:
+  metadata:
+    name: Update playbook metadata
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # full history: first/last commit dates per playbook
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Stamp published/updated dates from git history
+        run: python .github/scripts/stamp_playbook_dates.py
+
+      - name: Mark the latest 3 playbooks as New
+        run: python .github/scripts/mark_new_playbooks.py
+
+      - name: Open a PR if metadata changed
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$(git status --porcelain playbooks)" ]; then
+            echo "No metadata changes."
+            exit 0
+          fi
+          git config user.name "amd-playbooks-bot"
+          git config user.email "amd-playbooks-bot@users.noreply.github.com"
+          BRANCH="chore/playbook-metadata-${{ github.run_id }}"
+          git checkout -b "$BRANCH"
+          git add playbooks/**/playbook.json
+          git commit -m "chore: update playbook metadata (dates + New tags)"
+          git push origin "$BRANCH"
+          # Open the PR WITHOUT --label first: `gh pr create --label X` fails
+          # atomically if the label doesn't exist, which would abort PR creation.
+          # The @-mention in the body is what notifies the maintainer, so the PR
+          # must open regardless of label/reviewer state.
+          PR_URL=$(gh pr create --repo "${{ github.repository }}" \
+            --base "${{ github.ref_name }}" --head "$BRANCH" \
+            --title "chore: update playbook metadata (dates + New tags)" \
+            --body "@bconsolvo automated update from the Playbook Metadata workflow (run ${{ github.run_id }}). Stamps published/updated dates and marks the 3 most recently published playbooks as New (clears the rest). Touches \`playbook.json\` metadata only — please review and merge.")
+          echo "Opened $PR_URL for review."
+          # Reviewer is best-effort: never fail the run over it (the @-mention in
+          # the body already notifies the maintainer).
+          gh pr edit "$PR_URL" --add-reviewer bconsolvo \
+            || echo "::warning::Could not add reviewer; PR $PR_URL is open with an @-mention."
