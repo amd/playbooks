@@ -71,19 +71,29 @@ jobs:
           git config user.name "amd-playbooks-bot"
           git config user.email "amd-playbooks-bot@users.noreply.github.com"
           BRANCH="chore/playbook-metadata-${{ github.run_id }}"
-          git checkout -b "$BRANCH"
+          # -B (not -b): on a re-run of the same run, github.run_id is unchanged,
+          # so the local branch may already exist — -B resets it instead of failing.
+          git checkout -B "$BRANCH"
           git add playbooks/**/playbook.json
           git commit -m "chore: update playbook metadata (dates + New tags)"
-          git push origin "$BRANCH"
-          # Open the PR WITHOUT --label first: `gh pr create --label X` fails
-          # atomically if the label doesn't exist, which would abort PR creation.
-          # The @-mention in the body is what notifies the maintainer, so the PR
-          # must open regardless of label/reviewer state.
-          PR_URL=$(gh pr create --repo "${{ github.repository }}" \
-            --base "${{ github.ref_name }}" --head "$BRANCH" \
-            --title "chore: update playbook metadata (dates + New tags)" \
-            --body "@bconsolvo automated update from the Playbook Metadata workflow (run ${{ github.run_id }}). Stamps published/updated dates and marks the 3 most recently published playbooks as New (clears the rest). Touches \`playbook.json\` metadata only — please review and merge.")
-          echo "Opened $PR_URL for review."
+          git push --force-with-lease origin "$BRANCH"
+          # Idempotent: a re-run (or a prior attempt) may already have opened a PR
+          # for this head branch, and `gh pr create` errors if one exists. Reuse it.
+          PR_URL=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" \
+            --state open --json url --jq '.[0].url')
+          if [ -z "$PR_URL" ]; then
+            # Open the PR WITHOUT --label first: `gh pr create --label X` fails
+            # atomically if the label doesn't exist, which would abort PR creation.
+            # The @-mention in the body is what notifies the maintainer, so the PR
+            # must open regardless of label/reviewer state.
+            PR_URL=$(gh pr create --repo "${{ github.repository }}" \
+              --base "${{ github.ref_name }}" --head "$BRANCH" \
+              --title "chore: update playbook metadata (dates + New tags)" \
+              --body "@bconsolvo automated update from the Playbook Metadata workflow (run ${{ github.run_id }}). Stamps published/updated dates and marks the 3 most recently published playbooks as New (clears the rest). Touches \`playbook.json\` metadata only — please review and merge.")
+            echo "Opened $PR_URL for review."
+          else
+            echo "PR already open for $BRANCH ($PR_URL); branch updated."
+          fi
           # Reviewer is best-effort: never fail the run over it (the @-mention in
           # the body already notifies the maintainer).
           gh pr edit "$PR_URL" --add-reviewer bconsolvo \
