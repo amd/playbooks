@@ -12,8 +12,13 @@ Covers:
   end tag).
 - The validate -> install -> re-validate loop's five outcomes: OK, INSTALLED,
   FAILED, MISSING_NO_INSTALL, unchecked.
+- mirror/get.py: verified fetches with an upstream fallback, and seeding a
+  dependency's mirrored files into Lemonade, LM Studio and Ollama stores.
 """
 
+import functools
+import hashlib
+import http.server
 import importlib.util
 import json
 import os
@@ -21,6 +26,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 
@@ -29,6 +35,9 @@ _SPEC = importlib.util.spec_from_file_location(
 )
 pv = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(pv)
+_GET_SPEC = importlib.util.spec_from_file_location("mirror_get", pv.MIRROR_GET)
+mirror_get = importlib.util.module_from_spec(_GET_SPEC)
+_GET_SPEC.loader.exec_module(mirror_get)
 
 # Mirrors the shape of n8n-automation-gpt-oss: an @os-scoped require, a
 # device-scoped model declared with the CI-only @prereq tag, and tags that
@@ -52,6 +61,17 @@ FIXTURE = """\
 <!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @device:end -->
 """
+
+def _sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+class _QuietHandler(http.server.SimpleHTTPRequestHandler):
+    """Static files for the mirror fakes, without a log line per request."""
+
+    def log_message(self, *args):
+        pass
+
 
 # The regex the website uses to find @require tags (route.ts). @prereq must be
 # invisible to it, otherwise this PR would change rendered output.
@@ -164,6 +184,49 @@ class LoopTests(unittest.TestCase):
         spec = {"validate": {"windows": {"cmd": "true", "expect_rc": 0}}}
         self.assertEqual(pv.check_dependency("d", spec, "linux")["status"], "unchecked")
 
+    def _fake_seeder(self, tmp, body):
+        fake = Path(tmp) / "get.py"
+        fake.write_text(body, encoding="utf-8")
+        saved = pv.MIRROR_GET
+        pv.MIRROR_GET = fake
+        self.addCleanup(setattr, pv, "MIRROR_GET", saved)
+
+    def test_mirror_seed_heals_without_running_the_install(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            flag = Path(tmp) / "seeded"
+            self._fake_seeder(tmp, f"import pathlib; pathlib.Path({str(flag)!r}).touch()\n")
+            spec = {
+                "validate": {"linux": {"cmd": f"test -f {flag}", "expect_rc": 0}},
+                "install": {"linux": {"mirror": "g", "cmd": "false", "timeout": 5}},
+            }
+            r = pv.check_dependency("d", spec, "linux")
+            self.assertEqual((r["status"], r["mirror_rc"], "install_rc" in r), ("INSTALLED", 0, False))
+
+    def test_a_full_seed_waits_for_the_tool_to_notice_its_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._fake_seeder(tmp, "")
+            self.addCleanup(setattr, pv, "SEED_SETTLE_SECONDS", pv.SEED_SETTLE_SECONDS)
+            pv.SEED_SETTLE_SECONDS = 0
+            calls = Path(tmp) / "calls"  # validate passes on its third check after the seed
+            check = f'n=$(cat {calls} 2>/dev/null || echo 0); echo $((n+1)) > {calls}; [ "$n" -ge 3 ]'
+            spec = {
+                "validate": {"linux": {"cmd": check, "expect_rc": 0}},
+                "install": {"linux": {"mirror": "g", "cmd": "false", "timeout": 5}},
+            }
+            r = pv.check_dependency("d", spec, "linux")
+            self.assertEqual((r["status"], "install_rc" in r), ("INSTALLED", False))
+
+    def test_install_still_runs_when_seeding_falls_short(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            flag = Path(tmp) / "installed"
+            self._fake_seeder(tmp, "raise SystemExit(1)\n")
+            spec = {
+                "validate": {"linux": {"cmd": f"test -f {flag}", "expect_rc": 0}},
+                "install": {"linux": {"mirror": "g", "cmd": f"touch {flag}", "timeout": 5}},
+            }
+            r = pv.check_dependency("d", spec, "linux")
+            self.assertEqual((r["status"], r["mirror_rc"], r["install_rc"]), ("INSTALLED", 1, 0))
+
 
 class ScriptStepTests(unittest.TestCase):
     """A step may name a script under prereqs/ instead of an inline cmd."""
@@ -212,7 +275,6 @@ class MirrorGetTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        import functools, http.server, threading
         cls._root = tempfile.TemporaryDirectory()
         root = Path(cls._root.name)
         (root / "mirror/models").mkdir(parents=True)
@@ -221,14 +283,13 @@ class MirrorGetTests(unittest.TestCase):
         (root / "mirror/models/served.bin").write_bytes(cls.good)
         (root / "mirror/models/corrupt.bin").write_bytes(b"tampered")
         (root / "upstream/served.bin").write_bytes(cls.good)
-        handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(root))
-        handler.log_message = lambda *a: None
+        handler = functools.partial(_QuietHandler, directory=str(root))
         cls._srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
         threading.Thread(target=cls._srv.serve_forever, daemon=True).start()
         port = cls._srv.server_address[1]
         cls.base = f"http://127.0.0.1:{port}/mirror"
         cls.upstream = f"http://127.0.0.1:{port}/upstream/served.bin"
-        sha = __import__("hashlib").sha256(cls.good).hexdigest()
+        sha = _sha256(cls.good)
         cls.manifest = root / "artifacts.json"
         cls.manifest.write_text(json.dumps([
             {"dest": d, "url": cls.upstream, "size": len(cls.good), "sha256": sha}
@@ -252,7 +313,7 @@ class MirrorGetTests(unittest.TestCase):
         cmd = [sys.executable, str(self.GET), "--manifest", str(self.manifest), "fetch", path, "--to", str(dest)]
         rc = subprocess.run(cmd + (["--upstream"] if upstream else []), env=env,
                             capture_output=True, text=True).returncode
-        outcomes = [json.loads(l)["outcome"] for l in ledger.read_text().splitlines()] if ledger.exists() else []
+        outcomes = [json.loads(line)["outcome"] for line in ledger.read_text().splitlines()] if ledger.exists() else []
         return rc, dest, outcomes
 
     def test_served_by_mirror(self):
@@ -285,10 +346,106 @@ class MirrorGetTests(unittest.TestCase):
     def test_manifest_entries_are_well_formed(self):
         entries = json.loads((self.GET.parent / "artifacts.json").read_text(encoding="utf-8"))
         bad = [e.get("dest") for e in entries
-               if not (e.get("dest") and not e["dest"].startswith("/") and e.get("url", "").startswith("https://")
+               if not (e.get("group") and e.get("dest") and not e["dest"].startswith("/")
+                       and e.get("url", "").startswith("https://")
                        and isinstance(e.get("size"), int) and re.fullmatch(r"[0-9a-f]{64}", e.get("sha256", "")))]
         self.assertEqual(bad, [])
         self.assertEqual(len({e["dest"] for e in entries}), len(entries))
+
+
+class MirrorSeedTests(unittest.TestCase):
+    """mirror/get.py seed: a dependency's mirrored files land where its tool's own install looks."""
+
+    GET = MirrorGetTests.GET
+    FILES = {  # Ollama's manifest is listed before its blob on purpose: seed must reorder them.
+        "models/lemonade/org/repo/model.gguf": b"gguf-bytes",
+        "models/lemonade/org/repo/stale.gguf": b"old-bytes",
+        "models/lmstudio/user/repo/model.gguf": b"lms-bytes",
+        "models/Ollama/m/manifests/registry.ollama.ai/library/m/tag": b"{}",
+        "models/Ollama/m/blobs/sha256-0a": b"blob",
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        cls._root = tempfile.TemporaryDirectory()
+        root = Path(cls._root.name)
+        for rel, data in cls.FILES.items():
+            (root / "mirror" / rel).parent.mkdir(parents=True, exist_ok=True)
+            (root / "mirror" / rel).write_bytes(data)
+        # A fake Hugging Face API: org/repo is at commit c0ffee, where stale.gguf has since changed.
+        api = root / "hf/api/models/org/repo"
+        (api / "revision").mkdir(parents=True)
+        (api / "revision/main").write_text(json.dumps({"sha": "c0ffee"}))
+        (api / "tree").mkdir()
+        (api / "tree/c0ffee").write_text(json.dumps([
+            {"path": "model.gguf", "lfs": {"oid": _sha256(b"gguf-bytes")}},
+            {"path": "stale.gguf", "lfs": {"oid": _sha256(b"new-bytes")}},
+        ]))
+        handler = functools.partial(_QuietHandler, directory=str(root))
+        cls._srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        threading.Thread(target=cls._srv.serve_forever, daemon=True).start()
+        port = cls._srv.server_address[1]
+        cls.base, cls.hf = f"http://127.0.0.1:{port}/mirror", f"http://127.0.0.1:{port}/hf"
+        tool = {"lemonade": "lemonade", "lmstudio": "lmstudio", "Ollama": "ollama"}
+        cls.manifest = root / "artifacts.json"
+        cls.manifest.write_text(json.dumps([
+            {"group": f"{tool[rel.split('/')[1]]}-models-x", "dest": rel, "url": "https://example.invalid/",
+             "size": len(data), "sha256": _sha256(data)} for rel, data in cls.FILES.items()
+        ]))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._srv.shutdown()
+        cls._root.cleanup()
+
+    def _seed(self, group, secret=True):
+        out = tempfile.TemporaryDirectory()
+        self.addCleanup(out.cleanup)
+        store, ledger = Path(out.name) / "store", Path(out.name) / "ledger.jsonl"
+        env = dict(os.environ, PLAYBOOKS_MIRROR_LEDGER=str(ledger), PLAYBOOKS_MIRROR_STORE=str(store),
+                   HF_ENDPOINT=self.hf)
+        for var in ("ARTIFACTORY_BASE", "HF_TOKEN"):
+            env.pop(var, None)
+        if secret:
+            env["ARTIFACTORY_BASE"] = self.base
+        rc = subprocess.run([sys.executable, str(self.GET), "--manifest", str(self.manifest), "seed", group],
+                            env=env, capture_output=True, text=True).returncode
+        lines = ledger.read_text().splitlines() if ledger.exists() else []
+        return rc, store, [(json.loads(line)["artifact"], json.loads(line)["outcome"]) for line in lines]
+
+    def test_lemonade_seeds_the_current_snapshot_and_leaves_changed_files_to_the_pull(self):
+        rc, store, ledger = self._seed("lemonade-models-x")
+        snapshot = store / "models--org--repo" / "snapshots" / "c0ffee"
+        self.assertEqual((snapshot / "model.gguf").read_bytes(), b"gguf-bytes")
+        self.assertFalse((snapshot / "stale.gguf").exists())
+        self.assertEqual((rc, [o for _, o in ledger]), (1, ["stale", "downloaded"]))
+
+    def test_lmstudio_seeds_the_user_repo_folder(self):
+        rc, store, ledger = self._seed("lmstudio-models-x")
+        self.assertEqual((rc, (store / "user/repo/model.gguf").read_bytes()), (0, b"lms-bytes"))
+
+    def test_ollama_places_the_manifest_after_its_blobs(self):
+        rc, store, ledger = self._seed("ollama-models-x")
+        self.assertEqual(rc, 0)
+        self.assertEqual((store / "blobs/sha256-0a").read_bytes(), b"blob")
+        self.assertTrue((store / "manifests/registry.ollama.ai/library/m/tag").is_file())
+        self.assertEqual([a.split("/")[3] for a, _ in ledger], ["blobs", "manifests"])
+
+    def test_unreachable_mirror_is_tried_once_per_group(self):
+        saved = self.base
+        self.base = "http://127.0.0.1:9"  # nothing listens here
+        try:
+            rc, store, ledger = self._seed("ollama-models-x")
+        finally:
+            self.base = saved
+        self.assertEqual((rc, [o for _, o in ledger]), (1, ["unreachable", "skipped"]))
+
+    def test_no_secret_leaves_the_store_untouched(self):
+        rc, store, ledger = self._seed("lmstudio-models-x", secret=False)
+        self.assertEqual((rc, store.exists(), ledger), (1, False, []))
+
+    def test_unknown_group_fails(self):
+        self.assertEqual(self._seed("comfyui")[0], 1)
 
 
 class RegistryIntegrityTests(unittest.TestCase):
@@ -324,6 +481,20 @@ class RegistryIntegrityTests(unittest.TestCase):
             if re.search(r"\.(validate|install)\.(sh|ps1)$", f.name)
         }
         self.assertEqual(sorted(on_disk - referenced), [])
+
+    def _groups(self):
+        return {e["group"] for e in json.loads(mirror_get.MANIFEST.read_text(encoding="utf-8"))}
+
+    def test_mirror_groups_are_named_after_their_install(self):
+        groups = self._groups()
+        bad = [f"{d}.{k}.{p}" for d, k, p, s in self._steps()
+               if "mirror" in s and (k != "install" or s["mirror"] != d or s["mirror"] not in groups)]
+        self.assertEqual(bad, [])
+
+    def test_every_seedable_group_is_used(self):
+        used = {s["mirror"] for _, _, _, s in self._steps() if "mirror" in s}
+        seedable = {g for g in self._groups() if g.split("-models", 1)[0] in mirror_get.TOOLS}
+        self.assertEqual(sorted(seedable - used), [])
 
 
 if __name__ == "__main__":

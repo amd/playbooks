@@ -19,5 +19,159 @@
     "url": "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors",
     "size": 335304388,
     "sha256": "afc8e28272cd15db3919bacdb6918ce9c1ed22e96cb12c4d5ed0fba823529e38"
+  },
+  {
+    "group": "lemonade-models-gpt-oss-120b",
+    "dest": "models/lemonade/ggml-org/gpt-oss-120b-GGUF/gpt-oss-120b-MXFP4.gguf",
+    "url": "https://huggingface.co/ggml-org/gpt-oss-120b-GGUF/resolve/main/gpt-oss-120b-MXFP4.gguf",
+    "size": 63387346208,
+    "sha256": "582bd40f6886200101f4c4ed9f25f3fe80cc14c86e9e2b37746cd8904a0c622d"
+  },
+  {
+    "group": "lemonade-models-gpt-oss-20b",
+    "dest": "models/lemonade/ggml-org/gpt-oss-20b-GGUF/gpt-oss-20b-MXFP4.gguf",
+    "url": "https://huggingface.co/ggml-org/gpt-oss-20b-GGUF/resolve/main/gpt-oss-20b-MXFP4.gguf",
+    "size": 12109566624,
+    "sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901"
+  },
+  {
+    "group": "lemonade-models-qwen3-35b-a3b",
+    "dest": "models/lemonade/unsloth/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf",
+    "url": "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf",
+    "size": 22360456160,
+    "sha256": "707a55a8a4397ecde44de0c499d3e68c1ad1d240d1da65826b4949d1043f4450"
+  },
+  {
+    "group": "lemonade-models-qwen3-35b-a3b",
+    "dest": "models/lemonade/unsloth/Qwen3.6-35B-A3B-GGUF/mmproj-F16.gguf",
+    "url": "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/mmproj-F16.gguf",
+    "size": 899283680,
+    "sha256": "8971ee4f331ff0a4c609374f32984b3d4e6dc086c0aa35f1d637fad1829e887f"
+  },
+  {
+    "group": "lemonade-models-qwen3-coder-30b",
+    "dest": "models/lemonade/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+    "url": "https://huggingface.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/resolve/main/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+    "size": 18556689568,
+    "sha256": "fadc3e5f8d42bf7e894a785b05082e47daee4df26680389817e2093056f088ad"
+  },
+  {
+    "group": "lemonade-models-gemma-4-e2b",
+    "dest": "models/lemonade/unsloth/gemma-4-E2B-it-GGUF/gemma-4-E2B-it-Q4_K_M.gguf",
+    "url": "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_K_M.gguf",
+    "size": 3106736256,
+    "sha256": "9378bc471710229ef165709b62e34bfb62231420ddaf6d729e727305b5b8672d"
+  },
+  {
+    "group": "lemonade-models-gemma-4-e2b",
+    "dest": "models/lemonade/unsloth/gemma-4-E2B-it-GGUF/mmproj-F16.gguf",
+    "url": "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/mmproj-F16.gguf",
+    "size": 985654080,
+    "sha256": "140be8d7849741f88c50757d529b84373ee8e27052cc2236855b537f4a8215fa"
+  },
+  {
+    "group": "lemonade-models-qwen3-4b",
+    "dest": "models/lemonade/unsloth/Qwen3.5-4B-GGUF/Qwen3.5-4B-UD-Q4_K_XL.gguf",
+    "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-UD-Q4_K_XL.gguf",
+    "size": 2912109728,
+    "sha256": "b252c5610a42ca82d20fe2a12813e9d069eed89292907e26c783eeb0bc961bc7"
+  },
+  {
+    "group": "lemonade-models-qwen3-4b",
+    "dest": "models/lemonade/unsloth/Qwen3.5-4B-GGUF/mmproj-F16.gguf",
+    "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
+    "size": 672423616,
+    "sha256": "cd88edcf8d031894960bb0c9c5b9b7e1fea6ebee02b9f7ce925a00d12891f864"
+  },
+  {
+    "group": "lemonade-models-sdxl-turbo",
+    "dest": "models/lemonade/stabilityai/sdxl-turbo/sd_xl_turbo_1.0_fp16.safetensors",
+    "url": "https://huggingface.co/stabilityai/sdxl-turbo/resolve/main/sd_xl_turbo_1.0_fp16.safetensors",
+    "size": 6938081905,
+    "sha256": "e869ac7d6942cb327d68d5ed83a40447aadf20e0c3358d98b2cc9e270db0da26"
+  },
+  {
+    "group": "lmstudio-models-gpt-oss-120b",
+    "dest": "models/lemonade/ggml-org/gpt-oss-120b-GGUF/gpt-oss-120b-mxfp4-00001-of-00003.gguf",
+    "url": "https://huggingface.co/ggml-org/gpt-oss-120b-GGUF/resolve/3d7350377faa21d0dabec097ac8bf7b8801e2279/gpt-oss-120b-mxfp4-00001-of-00003.gguf",
+    "size": 12980384,
+    "sha256": "e2865eb6c1df7b2ffbebf305cd5d9074d5ccc0fe3b862f98d343a46dad1606f9"
+  },
+  {
+    "group": "lmstudio-models-gpt-oss-120b",
+    "dest": "models/lemonade/ggml-org/gpt-oss-120b-GGUF/gpt-oss-120b-mxfp4-00002-of-00003.gguf",
+    "url": "https://huggingface.co/ggml-org/gpt-oss-120b-GGUF/resolve/f12263658980f0bbc8e9df8d29d72bb6ed909914/gpt-oss-120b-mxfp4-00002-of-00003.gguf",
+    "size": 31738487200,
+    "sha256": "346492f65891fb27cac5c74a8c07626cbfeb4211cd391ec4de37dbbe3109a93b"
+  },
+  {
+    "group": "lmstudio-models-gpt-oss-120b",
+    "dest": "models/lemonade/ggml-org/gpt-oss-120b-GGUF/gpt-oss-120b-mxfp4-00003-of-00003.gguf",
+    "url": "https://huggingface.co/ggml-org/gpt-oss-120b-GGUF/resolve/aa66f9fbee9e393b1a654ac3a34b7a14cd357574/gpt-oss-120b-mxfp4-00003-of-00003.gguf",
+    "size": 31635878880,
+    "sha256": "66dca81040933f5a49177e82c479c51319cefb83bd22dad9f06dad45e25f1463"
+  },
+  {
+    "group": "lmstudio-models-qwen3-9b",
+    "dest": "models/lmstudio/lmstudio-community/Qwen3.5-9B-GGUF/Qwen3.5-9B-Q4_K_M.gguf",
+    "url": "https://huggingface.co/lmstudio-community/Qwen3.5-9B-GGUF/resolve/main/Qwen3.5-9B-Q4_K_M.gguf",
+    "size": 5627044256,
+    "sha256": "cd76ec205963b3b33350093e6904d9de16c4e666fd104e1f632d25c7f15f2a13"
+  },
+  {
+    "group": "lmstudio-models-qwen3-9b",
+    "dest": "models/lmstudio/lmstudio-community/Qwen3.5-9B-GGUF/mmproj-Qwen3.5-9B-BF16.gguf",
+    "url": "https://huggingface.co/lmstudio-community/Qwen3.5-9B-GGUF/resolve/main/mmproj-Qwen3.5-9B-BF16.gguf",
+    "size": 921704480,
+    "sha256": "330d17547bfdbcd0e7a0cb3f4b06b4ceeac0aaa1e449122d9d66ef957aeb74b3"
+  },
+  {
+    "group": "lmstudio-models-qwen3-coder-30b",
+    "dest": "models/lmstudio/lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-GGUF/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+    "url": "https://huggingface.co/lmstudio-community/Qwen3-Coder-30B-A3B-Instruct-GGUF/resolve/main/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf",
+    "size": 18632186176,
+    "sha256": "79ad15a5ee3caddc3f4ff0db33a14454a5a3eb503d7fa1c1e35feafc579de486"
+  },
+  {
+    "group": "ollama-models-gpt-oss-20b",
+    "dest": "models/Ollama/gpt-oss-20b/blobs/sha256-776beb3adb235076157cfea408b8ea2a2d25eae99d7f5da997f607f6b69fa0fa",
+    "url": "https://registry.ollama.ai/v2/library/gpt-oss/blobs/sha256:776beb3adb235076157cfea408b8ea2a2d25eae99d7f5da997f607f6b69fa0fa",
+    "size": 489,
+    "sha256": "776beb3adb235076157cfea408b8ea2a2d25eae99d7f5da997f607f6b69fa0fa"
+  },
+  {
+    "group": "ollama-models-gpt-oss-20b",
+    "dest": "models/Ollama/gpt-oss-20b/blobs/sha256-d8ba2f9a17b3bbdeb5690efaa409b3fcb0b56296a777c7a69c78aa33bbddf182",
+    "url": "https://registry.ollama.ai/v2/library/gpt-oss/blobs/sha256:d8ba2f9a17b3bbdeb5690efaa409b3fcb0b56296a777c7a69c78aa33bbddf182",
+    "size": 18,
+    "sha256": "d8ba2f9a17b3bbdeb5690efaa409b3fcb0b56296a777c7a69c78aa33bbddf182"
+  },
+  {
+    "group": "ollama-models-gpt-oss-20b",
+    "dest": "models/Ollama/gpt-oss-20b/blobs/sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb",
+    "url": "https://registry.ollama.ai/v2/library/gpt-oss/blobs/sha256:e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb",
+    "size": 13793422144,
+    "sha256": "e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb"
+  },
+  {
+    "group": "ollama-models-gpt-oss-20b",
+    "dest": "models/Ollama/gpt-oss-20b/blobs/sha256-f60356777647e927149cbd4c0ec1314a90caba9400ad205ddc4ce47ed001c2d6",
+    "url": "https://registry.ollama.ai/v2/library/gpt-oss/blobs/sha256:f60356777647e927149cbd4c0ec1314a90caba9400ad205ddc4ce47ed001c2d6",
+    "size": 11353,
+    "sha256": "f60356777647e927149cbd4c0ec1314a90caba9400ad205ddc4ce47ed001c2d6"
+  },
+  {
+    "group": "ollama-models-gpt-oss-20b",
+    "dest": "models/Ollama/gpt-oss-20b/blobs/sha256-fa6710a93d78da62641e192361344be7a8c0a1c3737f139cf89f20ce1626b99c",
+    "url": "https://registry.ollama.ai/v2/library/gpt-oss/blobs/sha256:fa6710a93d78da62641e192361344be7a8c0a1c3737f139cf89f20ce1626b99c",
+    "size": 7240,
+    "sha256": "fa6710a93d78da62641e192361344be7a8c0a1c3737f139cf89f20ce1626b99c"
+  },
+  {
+    "group": "ollama-models-gpt-oss-20b",
+    "dest": "models/Ollama/gpt-oss-20b/manifests/registry.ollama.ai/library/gpt-oss/20b",
+    "url": "https://registry.ollama.ai/v2/library/gpt-oss/manifests/20b",
+    "size": 859,
+    "sha256": "17052f91a42e97930aa6e28a6c6c06a983e6a58dbb00434885a0cf5313e376f7"
   }
 ]

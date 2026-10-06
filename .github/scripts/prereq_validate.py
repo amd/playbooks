@@ -15,7 +15,10 @@ For each ``@require:<dep>`` or ``@prereq:<dep>`` a playbook declares (scoped to 
 ``@os:``/``@device:`` blocks), this reads a ``validate`` and optional
 ``install`` step from ``playbooks/dependencies/registry.json`` and runs a
 validate -> (if missing) install -> re-validate loop. A step is either an
-inline ``cmd`` or a ``script`` file under ``.github/scripts/prereqs/``:
+inline ``cmd`` or a ``script`` file under ``.github/scripts/prereqs/``. An
+install step may also name a ``mirror`` group: its files are first seeded from
+the internal mirror (``mirror/get.py seed``), and the install only runs if the
+dependency is still missing after that.
 
     validate passes                -> OK                 (provisioned; no install)
     validate fails, install fixes  -> INSTALLED          (self-healed; job continues)
@@ -39,6 +42,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -48,6 +52,10 @@ VALID_DEVICES = {"halo", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"}
 KNOWN_DEVICE_SCOPES = VALID_DEVICES | {"halo_box"}
 # Multi-step recipes live here as files; registry steps reference them via "script".
 PREREQ_SCRIPTS_DIR = Path(__file__).parent / "prereqs"
+# Seeds an install step's "mirror" group into its tool's store before the install runs.
+MIRROR_GET = Path(__file__).parent / "mirror" / "get.py"
+# A fully seeded tool may notice its new files a few seconds later (LM Studio's folder watcher).
+SEED_SETTLE_TRIES, SEED_SETTLE_SECONDS = 4, 5
 
 
 def find_playbook_path(playbook_id: str, repo_root: Path) -> Optional[Path]:
@@ -150,7 +158,16 @@ def _run(step: dict, platform: str, timeout: int) -> int:
     if step.get("script") and not (PREREQ_SCRIPTS_DIR / step["script"]).is_file():
         print(f"  (prereq script not found: {step['script']})")
         return 127
-    args = _step_args(step, platform)
+    return _run_args(_step_args(step, platform), timeout)
+
+
+def _seed(group: str, timeout: int) -> int:
+    """Put a mirror group's files in place before the install runs (best-effort)."""
+    return _run_args([sys.executable, str(MIRROR_GET), "seed", group], timeout)
+
+
+def _run_args(args: list[str], timeout: int) -> int:
+    """Run a command with bounded, surfaced output and return its exit code."""
     # Scripts that call helpers (e.g. mirror/get.py) use this interpreter, not whatever `python` resolves to.
     env = dict(os.environ, PREREQ_PYTHON=sys.executable)
     try:
@@ -215,7 +232,17 @@ def check_dependency(dep_id: str, spec: dict, platform: str) -> dict:
 
     print(f"  MISSING: {dep_id} -> installing (this may take a while) ...")
     result["install_ran"] = True
-    install_rc = _run(install, platform, install.get("timeout", 1800))
+    timeout = install.get("timeout", 1800)
+    if install.get("mirror"):
+        result["mirror_rc"] = _seed(install["mirror"], timeout)
+        for attempt in range(SEED_SETTLE_TRIES if result["mirror_rc"] == 0 else 1):
+            if attempt:
+                time.sleep(SEED_SETTLE_SECONDS)
+            if _validate(spec, platform):
+                result["status"] = "INSTALLED"
+                print(f"  INSTALLED: {dep_id} now present (from the internal mirror)")
+                return result
+    install_rc = _run(install, platform, timeout)
     result["install_rc"] = install_rc
 
     print(f"  re-validating {dep_id} ...")

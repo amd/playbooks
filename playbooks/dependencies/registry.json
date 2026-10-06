@@ -235,10 +235,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "lemonade-models-gpt-oss-120b",
           "cmd": "lemonade pull gpt-oss-120b-mxfp-GGUF",
           "timeout": 3600
         },
         "windows": {
+          "mirror": "lemonade-models-gpt-oss-120b",
           "cmd": "lemonade pull gpt-oss-120b-mxfp-GGUF",
           "timeout": 3600
         }
@@ -274,10 +276,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "lemonade-models-gpt-oss-20b",
           "cmd": "lemonade pull gpt-oss-20b-mxfp4-GGUF",
           "timeout": 3600
         },
         "windows": {
+          "mirror": "lemonade-models-gpt-oss-20b",
           "cmd": "lemonade pull gpt-oss-20b-mxfp4-GGUF",
           "timeout": 3600
         }
@@ -309,10 +313,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "lemonade-models-qwen3-35b-a3b",
           "cmd": "lemonade pull Qwen3.6-35B-A3B-GGUF",
           "timeout": 3600
         },
         "windows": {
+          "mirror": "lemonade-models-qwen3-35b-a3b",
           "cmd": "lemonade pull Qwen3.6-35B-A3B-GGUF",
           "timeout": 3600
         }
@@ -348,10 +354,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "lemonade-models-qwen3-coder-30b",
           "cmd": "lemonade pull Qwen3-Coder-30B-A3B-Instruct-GGUF",
           "timeout": 3600
         },
         "windows": {
+          "mirror": "lemonade-models-qwen3-coder-30b",
           "cmd": "lemonade pull Qwen3-Coder-30B-A3B-Instruct-GGUF",
           "timeout": 3600
         }
@@ -383,10 +391,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "lemonade-models-gemma-4-e2b",
           "cmd": "lemonade pull Gemma-4-E2B-it-GGUF",
           "timeout": 1800
         },
         "windows": {
+          "mirror": "lemonade-models-gemma-4-e2b",
           "cmd": "lemonade pull Gemma-4-E2B-it-GGUF",
           "timeout": 1800
         }
@@ -418,10 +428,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "lemonade-models-qwen3-4b",
           "cmd": "lemonade pull Qwen3.5-4B-GGUF",
           "timeout": 1800
         },
         "windows": {
+          "mirror": "lemonade-models-qwen3-4b",
           "cmd": "lemonade pull Qwen3.5-4B-GGUF",
           "timeout": 1800
         }
@@ -453,10 +465,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "lemonade-models-sdxl-turbo",
           "cmd": "lemonade pull SDXL-Turbo",
           "timeout": 1800
         },
         "windows": {
+          "mirror": "lemonade-models-sdxl-turbo",
           "cmd": "lemonade pull SDXL-Turbo",
           "timeout": 1800
         }
@@ -575,10 +589,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "ollama-models-gpt-oss-20b",
           "script": "ollama-models-gpt-oss-20b.install.sh",
           "timeout": 3600
         },
         "windows": {
+          "mirror": "ollama-models-gpt-oss-20b",
           "script": "ollama-models-gpt-oss-20b.install.ps1",
           "timeout": 3600
         }
@@ -818,10 +834,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "lmstudio-models-gpt-oss-120b",
           "cmd": "lms get ggml-org/gpt-oss-120b-GGUF",
           "timeout": 3600
         },
         "windows": {
+          "mirror": "lmstudio-models-gpt-oss-120b",
           "cmd": "lms get ggml-org/gpt-oss-120b-GGUF",
           "timeout": 3600
         }
@@ -853,10 +871,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "lmstudio-models-qwen3-9b",
           "cmd": "lms get qwen3.5-9b --yes",
           "timeout": 3600
         },
         "windows": {
+          "mirror": "lmstudio-models-qwen3-9b",
           "cmd": "lms get qwen3.5-9b --yes",
           "timeout": 3600
         }
@@ -892,10 +912,12 @@
       },
       "install": {
         "linux": {
+          "mirror": "lmstudio-models-qwen3-coder-30b",
           "cmd": "lms get qwen3-coder-30b --yes",
           "timeout": 3600
         },
         "windows": {
+          "mirror": "lmstudio-models-qwen3-coder-30b",
           "cmd": "lms get qwen3-coder-30b --yes",
           "timeout": 3600
         }
