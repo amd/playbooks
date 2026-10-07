@@ -33,7 +33,7 @@ visible in the uploaded CI artifacts and is clearly distinct from an ordinary
 test failure.
 
 Usage:
-    python prereq_validate.py --playbook <id> --platform linux|windows [--device <device>]
+    python prereq_validate.py --playbook <id> --platform linux|windows [--device <device>] [--locale <locale>]
 """
 
 import argparse
@@ -58,13 +58,29 @@ MIRROR_GET = Path(__file__).parent / "mirror" / "get.py"
 SEED_SETTLE_TRIES, SEED_SETTLE_SECONDS = 4, 5
 
 
-def find_playbook_path(playbook_id: str, repo_root: Path) -> Optional[Path]:
-    """Find the playbook directory by ID (mirrors run_playbook_tests.py)."""
+def find_playbook_path(playbook_id: str, repo_root: Path, locale: str = "") -> Optional[Path]:
+    """Find the playbook directory by ID (mirrors run_playbook_tests.py); a locale's own README replaces English."""
+    base = repo_root / "localized-playbooks" / locale if locale else repo_root / "playbooks"
     for category in ["core", "supplemental"]:
-        playbook_path = repo_root / "playbooks" / category / playbook_id
+        playbook_path = base / category / playbook_id
         if playbook_path.exists() and (playbook_path / "README.md").exists():
             return playbook_path
     return None
+
+
+def load_registry(repo_root: Path, locale: str = "") -> dict:
+    """English dependencies, overlaid field by field with a locale's own.
+
+    A locale's entry localizes the docs and may add its own steps; steps it leaves
+    out come from English, so a shared dependency is checked the same way everywhere.
+    """
+    deps = json.loads((repo_root / "playbooks" / "dependencies" / "registry.json").read_text(encoding="utf-8"))
+    deps = deps.get("dependencies", {})
+    localized = repo_root / "localized-playbooks" / locale / "dependencies" / "registry.json"
+    if locale and localized.is_file():
+        for dep_id, spec in json.loads(localized.read_text(encoding="utf-8")).get("dependencies", {}).items():
+            deps[dep_id] = {**deps.get(dep_id, {}), **spec}
+    return deps
 
 
 def extract_scoped_requires(
@@ -285,28 +301,26 @@ def check_dependency(dep_id: str, spec: dict, platform: str) -> dict:
     return result
 
 
-def validate_prereqs(playbook_id: str, platform: str, device: Optional[str]) -> bool:
+def validate_prereqs(playbook_id: str, platform: str, device: Optional[str], locale: str = "") -> bool:
     repo_root = Path(__file__).parent.parent.parent
-    dependencies_root = repo_root / "playbooks" / "dependencies"
-    registry_path = dependencies_root / "registry.json"
+    label = f"{locale}/{playbook_id}" if locale else playbook_id
 
-    playbook_path = find_playbook_path(playbook_id, repo_root)
+    playbook_path = find_playbook_path(playbook_id, repo_root, locale)
     if not playbook_path:
-        print(f"Error: playbook '{playbook_id}' not found")
+        print(f"Error: playbook '{label}' not found")
         return False
 
     try:
-        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        deps_map = load_registry(repo_root, locale)
     except Exception as exc:
         print(f"Error: could not read registry.json: {exc}")
         return False
-    deps_map = registry.get("dependencies", {})
 
     content = (playbook_path / "README.md").read_text(encoding="utf-8")
     required = extract_scoped_requires(content, platform, device)
 
     scope = f"{platform}/{device}" if device else platform
-    print(f"Prerequisite validation for {playbook_id} ({scope})")
+    print(f"Prerequisite validation for {label} ({scope})")
     if not required:
         print("No @require/@prereq dependencies in scope; nothing to validate.")
     print(f"In-scope dependencies: {', '.join(required) if required else '(none)'}\n")
@@ -342,7 +356,7 @@ def validate_prereqs(playbook_id: str, platform: str, device: Optional[str]) -> 
 
     if unresolved:
         print("=" * 60)
-        print(f"PREREQ UNRESOLVED - {playbook_id} ({scope})")
+        print(f"PREREQ UNRESOLVED - {label} ({scope})")
         for r in unresolved:
             why = (
                 "auto-install did not resolve it"
@@ -354,7 +368,7 @@ def validate_prereqs(playbook_id: str, platform: str, device: Optional[str]) -> 
         print("=" * 60)
         return False
 
-    print(f"All prerequisites satisfied for {playbook_id} ({scope}).")
+    print(f"All prerequisites satisfied for {label} ({scope}).")
     return True
 
 
@@ -370,9 +384,10 @@ def main():
         default=None,
         help="Target device (filters @device: blocks)",
     )
+    parser.add_argument("--locale", default="", help="Check a localized playbook, e.g. zh-CN")
     args = parser.parse_args()
 
-    ok = validate_prereqs(args.playbook, args.platform, args.device)
+    ok = validate_prereqs(args.playbook, args.platform, args.device, args.locale)
     sys.exit(0 if ok else 1)
 
 

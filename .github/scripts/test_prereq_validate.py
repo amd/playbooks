@@ -594,15 +594,21 @@ class MirrorToolTests(unittest.TestCase):
 class RegistryIntegrityTests(unittest.TestCase):
     """Catch a broken step reference here, before it breaks prereq validation on every runner."""
 
-    REGISTRY = Path(__file__).resolve().parents[2] / "playbooks" / "dependencies" / "registry.json"
+    ROOT = Path(__file__).resolve().parents[2]
     EXT = {"linux": ".sh", "windows": ".ps1"}
 
+    def _registries(self):
+        """English as "", then each locale's own registry under its locale name."""
+        yield "", self.ROOT / "playbooks" / "dependencies" / "registry.json"
+        for path in sorted(self.ROOT.glob("localized-playbooks/*/dependencies/registry.json")):
+            yield path.parts[-3], path
+
     def _steps(self):
-        deps = json.loads(self.REGISTRY.read_text(encoding="utf-8"))["dependencies"]
-        for dep_id, spec in deps.items():
-            for kind in ("validate", "install"):
-                for platform, step in (spec.get(kind) or {}).items():
-                    yield dep_id, kind, platform, step
+        for locale, path in self._registries():
+            for dep_id, spec in json.loads(path.read_text(encoding="utf-8"))["dependencies"].items():
+                for kind in ("validate", "install"):
+                    for platform, step in (spec.get(kind) or {}).items():
+                        yield (f"{locale}/{dep_id}" if locale else dep_id), kind, platform, step
 
     def test_each_step_is_exactly_one_of_cmd_or_script(self):
         bad = [f"{d}.{k}.{p}" for d, k, p, s in self._steps() if ("cmd" in s) == ("script" in s)]
@@ -612,7 +618,7 @@ class RegistryIntegrityTests(unittest.TestCase):
         bad = []
         for d, k, p, s in self._steps():
             if "script" in s:
-                expected = f"{d}.{k}{self.EXT[p]}"
+                expected = f"{d.rsplit('/', 1)[-1]}.{k}{self.EXT[p]}"
                 if s["script"] != expected or not (pv.PREREQ_SCRIPTS_DIR / expected).is_file():
                     bad.append(f"{d}.{k}.{p} -> {s['script']} (expected {expected}, present)")
         self.assertEqual(bad, [])
@@ -636,8 +642,45 @@ class RegistryIntegrityTests(unittest.TestCase):
 
     def test_every_seedable_group_is_used(self):
         used = {s["mirror"] for _, _, _, s in self._steps() if "mirror" in s}
-        seedable = {g for g in self._groups() if g.split("-models", 1)[0] in mirror_get.TOOLS}
+        seedable = {g for g in self._groups() if mirror_get.tool_of(g)}
         self.assertEqual(sorted(seedable - used), [])
+
+
+class LocaleTests(unittest.TestCase):
+    """A localized run checks the localized README against English steps plus the locale's own."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name)
+        def write(rel, data):
+            (self.root / rel).parent.mkdir(parents=True, exist_ok=True)
+            (self.root / rel).write_text(data if isinstance(data, str) else json.dumps(data), encoding="utf-8")
+        write("playbooks/dependencies/registry.json", {"dependencies": {
+            "lemonade": {"name": "Lemonade", "validate": {"linux": {"cmd": "en-check"}}, "install": {"linux": {"cmd": "en-install"}}}}})
+        write("localized-playbooks/xx-YY/dependencies/registry.json", {"dependencies": {
+            "lemonade": {"name": "Lemonade (xx)", "file": "lemonade.md"},
+            "local-model": {"name": "Local", "validate": {"linux": {"cmd": "xx-check"}}}}})
+        write("playbooks/core/demo/README.md", "<!-- @require:lemonade -->\n")
+        write("localized-playbooks/xx-YY/core/demo/README.md", "<!-- @require:lemonade -->\n<!-- @prereq:local-model -->\n")
+
+    def test_a_locale_keeps_english_steps_and_adds_its_own(self):
+        deps = pv.load_registry(self.root, "xx-YY")
+        self.assertEqual(deps["lemonade"]["name"], "Lemonade (xx)")
+        self.assertEqual(deps["lemonade"]["validate"]["linux"]["cmd"], "en-check")
+        self.assertEqual(deps["lemonade"]["install"]["linux"]["cmd"], "en-install")
+        self.assertEqual(deps["local-model"]["validate"]["linux"]["cmd"], "xx-check")
+        self.assertNotIn("local-model", pv.load_registry(self.root))
+
+    def test_a_locale_reads_its_own_readme(self):
+        readme = pv.find_playbook_path("demo", self.root, "xx-YY") / "README.md"
+        self.assertEqual(pv.extract_scoped_requires(readme.read_text(), "linux", None), ["lemonade", "local-model"])
+        self.assertEqual(pv.find_playbook_path("demo", self.root), self.root / "playbooks/core/demo")
+
+    def test_a_locale_prefixed_group_seeds_into_its_tool(self):
+        self.assertIs(mirror_get.tool_of("zh-CN/lemonade-models-x"), mirror_get.TOOLS["lemonade"])
+        self.assertIs(mirror_get.tool_of("lmstudio-models-x"), mirror_get.TOOLS["lmstudio"])
+        self.assertIsNone(mirror_get.tool_of("hf:Qwen/Qwen3.5-4B"))
 
 
 if __name__ == "__main__":

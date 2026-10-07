@@ -72,6 +72,27 @@ jobs:
           }
           exit 0
 
+      # Same prerequisite check and self-heal as the English job, against the localized README.
+      - name: Validate & provision prerequisites (Windows)
+        if: matrix.platform == 'windows'
+        shell: powershell
+        timeout-minutes: 90
+        env:
+          # Internal model mirror; unset on forks, where prereqs fall back to upstream.
+          ARTIFACTORY_BASE: ${{ secrets.ARTIFACTORY_BASE }}
+        run: |
+          python .github/scripts/prereq_validate.py --playbook "${{ matrix.playbook }}" --platform windows --device "${{ matrix.arch }}" --locale "${{ matrix.locale }}"
+
+      - name: Validate & provision prerequisites (Linux)
+        if: matrix.platform == 'linux'
+        shell: bash
+        timeout-minutes: 90
+        env:
+          # Internal model mirror; unset on forks, where prereqs fall back to upstream.
+          ARTIFACTORY_BASE: ${{ secrets.ARTIFACTORY_BASE }}
+        run: |
+          python .github/scripts/prereq_validate.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}" --locale "${{ matrix.locale }}"
+
       - name: Extract and run tests (Windows)
         if: matrix.platform == 'windows'
         id: run_tests_windows

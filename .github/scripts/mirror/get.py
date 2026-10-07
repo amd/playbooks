@@ -31,6 +31,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.request
@@ -255,6 +256,11 @@ TOOLS = {"lemonade": (lemonade_store, plan_lemonade, False),
          "ollama": (ollama_store, plan_ollama, False)}
 
 
+def tool_of(group: str):
+    """The tool a group seeds into, from its name: lemonade-models-x, or zh-CN/lemonade-models-x for a locale's own."""
+    return TOOLS.get(re.sub(r"^[a-z]{2}-[A-Z]{2}/", "", group).split("-models", 1)[0])
+
+
 def existing_ancestor(path: Path) -> Path:
     while not os.path.exists(path):  # also False where a parent is unreadable to us
         path = path.parent
@@ -285,7 +291,7 @@ def adopt(path: Path, anchor: Path) -> None:
 
 def cmd_seed(args) -> int:
     entries = [e for e in load_manifest(Path(args.manifest)).values() if e.get("group") == args.group]
-    tool = TOOLS.get(args.group.split("-models", 1)[0])
+    tool = tool_of(args.group)
     if not entries or not tool:
         print(f"nothing is mirrored for {args.group}")
         return 1

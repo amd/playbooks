@@ -353,7 +353,7 @@ ComfyUI 会启动一个本地网络服务器。打开浏览器并访问 `http://
 
 ## 下载模型
 
-<!-- @require:comfyui_models -->
+<!-- @require:comfyui-models -->
 
 ## 理解界面
 
