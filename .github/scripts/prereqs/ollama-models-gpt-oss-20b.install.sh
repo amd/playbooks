@@ -10,4 +10,6 @@ if ! curl -sf --max-time 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
     sleep 1
   done
 fi
-ollama pull gpt-oss:20b && ollama list | grep -q 'gpt-oss:20b'
+# Hugging Face fallback when the Ollama registry fails: the same MXFP4 GGUF, named as CI expects.
+ollama pull gpt-oss:20b || { ollama pull hf.co/ggml-org/gpt-oss-20b-GGUF:MXFP4 && ollama cp hf.co/ggml-org/gpt-oss-20b-GGUF:MXFP4 gpt-oss:20b; }
+ollama list | grep -q 'gpt-oss:20b'

@@ -2,6 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
+. "$PSScriptRoot\common.ps1"
+if (-not (Test-Path "$env:LOCALAPPDATA\lemonade_server\bin\LemonadeServer.exe")) {
+  # As the provisioning scripts do; the package installs per user, where the runners have it.
+  $p = Start-Detached winget @('install', '-e', '--id', 'AMD.LemonadeServer', '--accept-package-agreements', '--accept-source-agreements', '--silent')
+  $p.WaitForExit()
+}
 if (-not (Get-Process LemonadeServer -ErrorAction SilentlyContinue)) {
   Start-Process "$env:LOCALAPPDATA\lemonade_server\bin\LemonadeServer.exe"
 }

@@ -967,6 +967,12 @@
           "halo_box"
         ]
       },
+      "validate": {
+        "windows": {
+          "cmd": "exit [int](-not (Test-Path 'C:\\Program Files\\AMD\\CNext\\CNext\\RadeonSoftware.exe'))",
+          "expect_rc": 0
+        }
+      },
       "versionable": true
     },
     "nodejs": {
@@ -1060,12 +1066,20 @@
         "linux": {
           "cmd": "podman --version && podman-compose --version",
           "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 --exec bash -c 'command -v podman'; exit $LASTEXITCODE",
+          "expect_rc": 0
         }
       },
       "install": {
         "linux": {
           "script": "podman.install.sh",
           "timeout": 600
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 -u root --exec bash -c 'apt-get update && apt-get install -y podman'; exit $LASTEXITCODE",
+          "timeout": 900
         }
       },
       "versionable": true
