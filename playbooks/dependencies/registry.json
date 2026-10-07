@@ -1061,6 +1061,7 @@
       "description": "Container management tool for running OCI containers",
       "category": "framework",
       "platforms": [
+        "windows",
         "linux"
       ],
       "file": "podman.md",

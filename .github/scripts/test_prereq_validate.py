@@ -745,6 +745,11 @@ class RegistryIntegrityTests(unittest.TestCase):
                if k == "validate" and pv._mirror_only(s) and not checkable(s["mirror"])]
         self.assertEqual(bad, [])
 
+    def test_steps_only_on_declared_platforms(self):
+        bad = [d for d, spec in self._specs() if spec.get("platforms")
+               and {p for k in ("validate", "install") for p in (spec.get(k) or {})} - set(spec["platforms"])]
+        self.assertEqual(bad, [])
+
     def test_a_seed_only_install_is_optional(self):
         # With nothing to fall back to, an unreachable mirror must warn, not fail the job.
         bad = [d for d, spec in self._specs()
