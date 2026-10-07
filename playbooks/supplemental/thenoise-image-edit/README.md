@@ -17,12 +17,12 @@ Screenshots to capture before publishing (place the files in assets/ and keep ea
 3. assets/city.jpg                    - The input image used in the editing example.
 4. assets/city2.jpg                   - The second reference image used in the Multiple Reference Images example.
 5. assets/multi_image_editing.jpg     - The result of the Multiple Reference Images edit.
-6. assets/cover.jpeg                  - The playbook cover. It is also referenced as the "edit result" in the Browser UI section; if you want those to differ, use a dedicated edit-result image there.
+6. assets/cover.jpeg                  - The playbook cover. It is also referenced as the "edit result" in the Web UI section; if you want those to differ, use a dedicated edit-result image there.
 -->
 
 ## Overview
 
-TheNoise is a focused, open-source image generation and **editing** engine built for AMD ROCm GPUs. It loads one model at a time and gives you a clean command line, a small browser UI, and an HTTP API that other software can call. It is tuned to run fast on AMD GPUs — including the Ryzen™ AI Halo and Radeon™ discrete GPUs.
+TheNoise is a focused, open-source image generation and **editing** engine built for AMD ROCm GPUs. It is tuned to run fast on AMD GPUs — including the Ryzen™ AI Halo and Radeon™ discrete GPUs.
 
 This tutorial shows you how to edit images with TheNoise using the **Flux.2 Klein 4B** model — a distilled flow-matching model that generates in only **4 steps** and can also **edit** an existing image from a text instruction. You will generate a picture, then instruct the model to change it, all on your GPU.
 
@@ -31,7 +31,7 @@ This tutorial shows you how to edit images with TheNoise using the **Flux.2 Klei
 - How to install TheNoise and download the Flux.2 Klein 4B model
 - The difference between image generation and image editing in a diffusion model
 - How to edit an image from a text instruction with the `edit` command
-- How to use the browser UI to edit interactively
+- How to use the Web UI to edit interactively
 
 <!-- @device:halo_box,halo -->
 ## Setting the Memory Configuration
@@ -201,7 +201,7 @@ Let's start with a clean image to edit. First generate one, then instruct the mo
 ```
 <!-- @os:end -->
 
-> **Note**: The first generation is slower — the DiT is compiled with `torch.compile` on load. Expect a few extra seconds of compilation (and some warnings); every generation after that runs at full speed.
+> **Note**: In this guide we will use the `generate`, `edit` and `serve` commands. Note that the first two come with the cost of loading the model in VRAM and performing some initialization steps on each launch. Using the `serve` command instead keeps the model resident and avoids the extra overhead after the first image is generated.
 
 Now edit that image. Compared to generation, you switch the command from `generate` to `edit`, add `--image` with the photo to change, and write the prompt as the instruction for the change you want:
 
@@ -310,9 +310,9 @@ Write-Host "OK: city_edited.png created"
 <!-- @test:end -->
 <!-- @os:end -->
 
-## Editing in the Browser UI
+## Editing in the Web UI
 
-The CLI is great for reproducible, scripted edits, but TheNoise also has a small browser UI for exploring. Start the server with the same three checkpoints:
+The CLI is great for reproducible, scripted edits, but TheNoise also has a simple Web UI for quicker iteration. Start the server with the same three checkpoints:
 
 <!-- @os:linux -->
 ```bash
@@ -353,35 +353,21 @@ Open `http://localhost:8000/`. Because Flux.2 Klein supports editing, the interf
   <img src="assets/cover.jpeg" alt="TheNoise web UI Edit result showing the edited image" width="80%"/>
 </p>
 
-## Adjusting Editing Parameters
+### Using Multiple Reference Images
 
-The `edit` command shares most flags with `generate`. These are the ones that matter most for editing:
+You can use multiple images when editing. The **first** image is resized to 1024 on its largest side (aspect preserved) and sets the output size; the rest are used as additional references. Below is an example of how you tell a model to blend two subjects.
 
-| Flag | What It Controls | Recommended for Flux.2 Klein 4B |
-|------|------------------|---------------------------------|
-| `--steps` | Number of denoising iterations | 4 (the distilled default — more steps rarely help) |
-| `--guidance-scale` | CFG scale; how closely to follow the instruction | 1.0 (≤ 1.0 disables CFG; the model is distilled for low guidance) |
-| `--sampler` | Denoising solver | `euler` (default) or `er_sde` |
-| `--seed` | Random seed for reproducibility | Set a fixed value to iterate on a composition |
-| `--image` | Reference image(s); repeatable for multiple references | The first image sets the output size |
-| `--width` / `--height` | Output size (omit for auto, derived from the first reference) | 1024 on the largest side for best quality |
+`Prompt`: Take the cityscape from image 2 and place it in the foreground of image 1. Preserve the mood and colors of image 2.
 
-### Multiple Reference Images
+`Image 1`:
 
-`--image` is repeatable. The **first** image is resized to 1024 on its largest side (aspect preserved) and sets the output size; the rest are used as additional references. This is how you tell a model to blend two subjects, or to keep consistency across a scene:
+<p align="center">
+  <img src="assets/city.jpg" alt="City" height="320"/>
+</p>
 
-```bash
-./thenoise.sh edit \
-  --dit ./models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors \
-  --vae ./models/klein/split_files/vae/flux2-vae.safetensors \
-  --text-encoder ./models/klein/split_files/text_encoders/qwen_3_4b.safetensors \
-  --image city.png \
-  --image city2.png \
-  --prompt "Take the cityscape from image 2 and place it in the foreground of image 1. Preserve the mood and colors of image 2." \
-  --out edited_city.png
-```
-<p align="left">
-  <img src="assets/city.jpg" alt="City" height="320"/><img src="assets/city2.jpg" alt="City 2" height="320"/>
+`Image 2`:
+<p align="center">
+  <img src="assets/city2.jpg" alt="City 2" height="320"/>
 </p>
 
 Combining the two images with that prompt gives this result:
@@ -390,6 +376,14 @@ Combining the two images with that prompt gives this result:
   <img src="assets/multi_image_editing.jpg" alt="Multi-image editing" width="80%"/>
 </p>
 
+### Adjusting Generation/Editing Parameters
+
+| Parameter | What It Controls |
+|------|------------------|
+| Steps | Number of denoising iterations. Increasing this produces cleaner images. Distilled models are trained for a specific step count, but allowing 1 or 2 extra steps can help in some situations. |
+| Guidance Scale | How closely to follow the instruction. A value ≤ 1.0 disables CFG, cutting generation time. Distilled models need guidance to be disabled or will produce "overcooked" images. |
+| Sampler | Can change the overall look of the image. Euler is the simplest and most universal option. |
+| Seed | Affects the noise latent initialization. Changing this will produce a different image even if all other parameters are equal. |
 
 ## Calling TheNoise from Other Software
 
