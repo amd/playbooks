@@ -173,5 +173,40 @@
     "url": "https://registry.ollama.ai/v2/library/gpt-oss/manifests/20b",
     "size": 859,
     "sha256": "17052f91a42e97930aa6e28a6c6c06a983e6a58dbb00434885a0cf5313e376f7"
+  },
+  {
+    "group": "lemonade-models-qwen3-4b-hybrid",
+    "dest": "models/lemonade/amd/Qwen3-4B-awq-quant-onnx-ryzenai-1.7-hybrid/model_jit.bin",
+    "url": "https://huggingface.co/amd/Qwen3-4B-awq-quant-onnx-ryzenai-1.7-hybrid/resolve/main/model_jit.bin",
+    "size": 2254576640,
+    "sha256": "9dbd608a4f2407ba9967a03a7b65b37c899fdb99147886ca1fdbf012690a629c"
+  },
+  {
+    "group": "lemonade-models-qwen3-4b-hybrid",
+    "dest": "models/lemonade/amd/Qwen3-4B-awq-quant-onnx-ryzenai-1.7-hybrid/model_jit.onnx",
+    "url": "https://huggingface.co/amd/Qwen3-4B-awq-quant-onnx-ryzenai-1.7-hybrid/resolve/main/model_jit.onnx",
+    "size": 511286,
+    "sha256": "9d7f10e1a239360d9cd5aaf0c4339c5b5f49e67a1eb25f36c2ed2ec9713b2f16"
+  },
+  {
+    "group": "lemonade-models-qwen3-4b-hybrid",
+    "dest": "models/lemonade/amd/Qwen3-4B-awq-quant-onnx-ryzenai-1.7-hybrid/model_jit.onnx.data",
+    "url": "https://huggingface.co/amd/Qwen3-4B-awq-quant-onnx-ryzenai-1.7-hybrid/resolve/main/model_jit.onnx.data",
+    "size": 2902207232,
+    "sha256": "cd9f3dfce2dc5bd9603b8f0df68ede33bbbff206a7c150ed0941804c2ce31c38"
+  },
+  {
+    "group": "lemonade-models-qwen3-4b-hybrid",
+    "dest": "models/lemonade/amd/Qwen3-4B-awq-quant-onnx-ryzenai-1.7-hybrid/model_jit.pb.bin",
+    "url": "https://huggingface.co/amd/Qwen3-4B-awq-quant-onnx-ryzenai-1.7-hybrid/resolve/main/model_jit.pb.bin",
+    "size": 23634,
+    "sha256": "00c0a610998396628adcc0ff00cd8ca599aaab9a7aaf49138863a8140f78ea21"
+  },
+  {
+    "group": "lemonade-models-qwen3-4b-hybrid",
+    "dest": "models/lemonade/amd/Qwen3-4B-awq-quant-onnx-ryzenai-1.7-hybrid/tokenizer.json",
+    "url": "https://huggingface.co/amd/Qwen3-4B-awq-quant-onnx-ryzenai-1.7-hybrid/resolve/main/tokenizer.json",
+    "size": 11422648,
+    "sha256": "3c3dfe474a8bbe89b0e83627fd9ff784ad71027f12fd8c618708c818e808789d"
   }
 ]

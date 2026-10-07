@@ -440,6 +440,32 @@
       },
       "versionable": false
     },
+    "lemonade-models-qwen3-4b-hybrid": {
+      "name": "Qwen3 4B Hybrid Model (Lemonade)",
+      "description": "Qwen3-4B NPU+GPU hybrid model served by Lemonade (Ryzen AI)",
+      "category": "model",
+      "platforms": [
+        "windows"
+      ],
+      "file": "lemonade_models_qwen3_4b_hybrid.md",
+      "preinstalled": {
+        "windows": []
+      },
+      "validate": {
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Qwen3-4B-Hybrid",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "windows": {
+          "mirror": "lemonade-models-qwen3-4b-hybrid",
+          "cmd": "lemonade pull Qwen3-4B-Hybrid",
+          "timeout": 1800
+        }
+      },
+      "versionable": false
+    },
     "lemonade-models-sdxl-turbo": {
       "name": "SDXL-Turbo Model (Lemonade)",
       "description": "SDXL-Turbo image-generation model served by Lemonade",

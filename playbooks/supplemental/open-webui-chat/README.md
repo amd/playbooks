@@ -135,6 +135,7 @@ Before installing Open WebUI, make sure the models you want to use are downloade
 
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk -->
+<!-- @prereq:lemonade-models-qwen3-4b-hybrid -->
 <!-- @test:id=openwebui-lemonade-multimodal-smoke-windows timeout=1800 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
