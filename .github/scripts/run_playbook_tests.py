@@ -1035,16 +1035,24 @@ def run_test(
             duration=duration,
         )
 
-    except subprocess.TimeoutExpired:
+    except subprocess.TimeoutExpired as e:
         duration = time.time() - start_time
         error_msg = f"Test timed out after {test.timeout} seconds"
         print(f"TIMEOUT: {error_msg}")
+        # What it printed before it was killed (e.g. apt waiting for a lock); bytes despite text=True.
+        stdout, stderr = (o.decode("utf-8", "replace") if isinstance(o, bytes) else o or "" for o in (e.stdout, e.stderr))
+        (results_dir / f"{test.id}_stdout.txt").write_text(stdout, encoding="utf-8")
+        (results_dir / f"{test.id}_stderr.txt").write_text(stderr, encoding="utf-8")
+        if stdout:
+            print(f"STDOUT before the timeout (last 10000 chars):\n{stdout[-10000:]}")
+        if stderr:
+            print(f"STDERR before the timeout (last 10000 chars):\n{stderr[-10000:]}")
         return TestResult(
             test_id=test.id,
             success=False,
             exit_code=-1,
-            stdout="",
-            stderr="",
+            stdout=stdout,
+            stderr=stderr,
             duration=duration,
             error_message=error_msg,
         )
