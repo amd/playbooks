@@ -114,7 +114,7 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 <!-- @os:end -->
 
 <!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
-<!-- @prereq:lemonade-models-qwen3-4b,lemonade-models-sdxl-turbo -->
+<!-- @prereq:lemonade-models-qwen3-5-4b,lemonade-models-sdxl-turbo -->
 
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash

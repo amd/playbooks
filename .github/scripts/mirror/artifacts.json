@@ -35,14 +35,14 @@
     "sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901"
   },
   {
-    "group": "lemonade-models-qwen3-35b-a3b",
+    "group": "lemonade-models-qwen3-6-35b-a3b",
     "dest": "models/lemonade/unsloth/Qwen3.6-35B-A3B-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf",
     "url": "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf",
     "size": 22360456160,
     "sha256": "707a55a8a4397ecde44de0c499d3e68c1ad1d240d1da65826b4949d1043f4450"
   },
   {
-    "group": "lemonade-models-qwen3-35b-a3b",
+    "group": "lemonade-models-qwen3-6-35b-a3b",
     "dest": "models/lemonade/unsloth/Qwen3.6-35B-A3B-GGUF/mmproj-F16.gguf",
     "url": "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/main/mmproj-F16.gguf",
     "size": 899283680,
@@ -70,14 +70,14 @@
     "sha256": "140be8d7849741f88c50757d529b84373ee8e27052cc2236855b537f4a8215fa"
   },
   {
-    "group": "lemonade-models-qwen3-4b",
+    "group": "lemonade-models-qwen3-5-4b",
     "dest": "models/lemonade/unsloth/Qwen3.5-4B-GGUF/Qwen3.5-4B-UD-Q4_K_XL.gguf",
     "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-UD-Q4_K_XL.gguf",
     "size": 2912109728,
     "sha256": "b252c5610a42ca82d20fe2a12813e9d069eed89292907e26c783eeb0bc961bc7"
   },
   {
-    "group": "lemonade-models-qwen3-4b",
+    "group": "lemonade-models-qwen3-5-4b",
     "dest": "models/lemonade/unsloth/Qwen3.5-4B-GGUF/mmproj-F16.gguf",
     "url": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/mmproj-F16.gguf",
     "size": 672423616,

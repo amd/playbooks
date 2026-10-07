@@ -288,7 +288,7 @@
       },
       "versionable": false
     },
-    "lemonade-models-qwen3-35b-a3b": {
+    "lemonade-models-qwen3-6-35b-a3b": {
       "name": "Qwen3.6 35B A3B Model (Lemonade)",
       "description": "Qwen3.6-35B-A3B GGUF model served by Lemonade",
       "category": "model",
@@ -296,7 +296,7 @@
         "windows",
         "linux"
       ],
-      "file": "lemonade_models_qwen3_35b_a3b.md",
+      "file": "lemonade_models_qwen3_6_35b_a3b.md",
       "preinstalled": {
         "linux": [],
         "windows": []
@@ -313,12 +313,12 @@
       },
       "install": {
         "linux": {
-          "mirror": "lemonade-models-qwen3-35b-a3b",
+          "mirror": "lemonade-models-qwen3-6-35b-a3b",
           "cmd": "lemonade pull Qwen3.6-35B-A3B-GGUF",
           "timeout": 3600
         },
         "windows": {
-          "mirror": "lemonade-models-qwen3-35b-a3b",
+          "mirror": "lemonade-models-qwen3-6-35b-a3b",
           "cmd": "lemonade pull Qwen3.6-35B-A3B-GGUF",
           "timeout": 3600
         }
@@ -403,7 +403,7 @@
       },
       "versionable": false
     },
-    "lemonade-models-qwen3-4b": {
+    "lemonade-models-qwen3-5-4b": {
       "name": "Qwen3.5 4B Model (Lemonade)",
       "description": "Qwen3.5-4B GGUF model served by Lemonade",
       "category": "model",
@@ -411,7 +411,7 @@
         "windows",
         "linux"
       ],
-      "file": "lemonade_models_qwen3_4b.md",
+      "file": "lemonade_models_qwen3_5_4b.md",
       "preinstalled": {
         "linux": [],
         "windows": []
@@ -428,12 +428,12 @@
       },
       "install": {
         "linux": {
-          "mirror": "lemonade-models-qwen3-4b",
+          "mirror": "lemonade-models-qwen3-5-4b",
           "cmd": "lemonade pull Qwen3.5-4B-GGUF",
           "timeout": 1800
         },
         "windows": {
-          "mirror": "lemonade-models-qwen3-4b",
+          "mirror": "lemonade-models-qwen3-5-4b",
           "cmd": "lemonade pull Qwen3.5-4B-GGUF",
           "timeout": 1800
         }
@@ -991,11 +991,19 @@
         "linux": {
           "script": "nodejs.validate.sh",
           "expect_rc": 0
+        },
+        "windows": {
+          "script": "nodejs.validate.ps1",
+          "expect_rc": 0
         }
       },
       "install": {
         "linux": {
           "script": "nodejs.install.sh",
+          "timeout": 900
+        },
+        "windows": {
+          "script": "nodejs.install.ps1",
           "timeout": 900
         }
       },
@@ -1061,6 +1069,37 @@
         }
       },
       "versionable": true
+    },
+    "docker": {
+      "name": "Docker",
+      "description": "Container engine: Docker Desktop on Windows, Docker Engine on Linux",
+      "category": "framework",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "docker.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "docker version --format '{{.Server.Version}}'",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "docker version --format '{{.Server.Version}}'",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "windows": {
+          "script": "docker.install.ps1",
+          "timeout": 420
+        }
+      },
+      "versionable": false
     },
     "software-update": {
       "name": "Software Updates",
