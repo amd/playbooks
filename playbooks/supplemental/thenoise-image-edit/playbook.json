@@ -1,0 +1,68 @@
+{
+  "id": "thenoise-image-edit",
+  "title": "Editing Images with TheNoise and Flux.2 Klein",
+  "description": "Edit images with text instructions using TheNoise and the Flux.2 Klein 4B model on AMD ROCm GPUs.",
+  "time": 20,
+  "supported_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ],
+    "rx7900xt": [
+      "linux",
+      "windows"
+    ],
+    "rx9070xt": [
+      "linux",
+      "windows"
+    ],
+    "r9700": [
+      "linux",
+      "windows"
+    ]
+  },
+  "difficulty": "beginner",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "image-generation",
+    "image-editing",
+    "thenoise",
+    "flux-2-klein"
+  ],
+  "coverImage": "assets/cover.jpeg",
+  "recommendedSystemMemory": 64,
+  "primaryModel": "Flux.2 Klein 4B",
+  "validatedVersions": {
+    "reference": {
+      "windows": {
+        "TheNoise": "Latest release from lemonade-sdk/thenoise"
+      },
+      "linux": {
+        "TheNoise": "Latest release from lemonade-sdk/thenoise"
+      }
+    }
+  },
+  "authors": [
+    {
+      "name": "Michele Balistreri",
+      "github": "bitgamma",
+      "github_url": "https://github.com/bitgamma",
+      "type": "community"
+    }
+  ]
+}
