@@ -98,6 +98,7 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver,lemonade -->
 <!-- @device:end -->
+<!-- @prereq:hf-models-all-minilm-l6-v2 -->
 ---
 <!-- @os:end -->
 

@@ -210,1071 +210,1029 @@
     "sha256": "3c3dfe474a8bbe89b0e83627fd9ff784ad71027f12fd8c618708c818e808789d"
   },
   {
-    "group": "hf-dataset:Abirate/english_quotes",
+    "group": "hf-datasets-english-quotes",
     "dest": "models/datasets/Abirate/english_quotes/README.md",
     "url": "https://huggingface.co/datasets/Abirate/english_quotes/resolve/7b544c4920a8be268b48b403c188acf0a462051b/README.md",
     "size": 5554,
     "sha256": "afee31d17458a67322aeafb652681efba7c3ca487cfada0b7560752c575ad5ff"
   },
   {
-    "group": "hf-dataset:Abirate/english_quotes",
+    "group": "hf-datasets-english-quotes",
     "dest": "models/datasets/Abirate/english_quotes/quotes.jsonl",
     "url": "https://huggingface.co/datasets/Abirate/english_quotes/resolve/7b544c4920a8be268b48b403c188acf0a462051b/quotes.jsonl",
     "size": 646739,
     "sha256": "efd879f9583253782a4c424e001b870c1ed698b37e73d80e26d6e7dc3e25935d"
   },
   {
-    "group": "hf-dataset:databricks/databricks-dolly-15k",
+    "group": "hf-datasets-databricks-dolly-15k",
     "dest": "models/datasets/databricks/databricks-dolly-15k/README.md",
     "url": "https://huggingface.co/datasets/databricks/databricks-dolly-15k/resolve/bdd27f4d94b9c1f951818a7da7fd7aeea5dbff1a/README.md",
     "size": 8199,
     "sha256": "db06c60090a11b20e79d1933b2f316f781605f07761ff2ae2795d6523e3e960b"
   },
   {
-    "group": "hf-dataset:databricks/databricks-dolly-15k",
+    "group": "hf-datasets-databricks-dolly-15k",
     "dest": "models/datasets/databricks/databricks-dolly-15k/databricks-dolly-15k.jsonl",
     "url": "https://huggingface.co/datasets/databricks/databricks-dolly-15k/resolve/bdd27f4d94b9c1f951818a7da7fd7aeea5dbff1a/databricks-dolly-15k.jsonl",
     "size": 13085339,
     "sha256": "2df9083338b4abd6bceb5635764dab5d833b393b55759dffb0959b6fcbf794ec"
   },
   {
-    "group": "hf-dataset:mlabonne/FineTome-100k",
+    "group": "hf-datasets-finetome-100k",
     "dest": "models/datasets/mlabonne/FineTome-100k/README.md",
     "url": "https://huggingface.co/datasets/mlabonne/FineTome-100k/resolve/c2343c1372ff31f51aa21248db18bffa3193efdb/README.md",
     "size": 982,
     "sha256": "053a0054723e310dbf45b274eba324be37db90d42a589c9ce889d3dfced4ef84"
   },
   {
-    "group": "hf-dataset:mlabonne/FineTome-100k",
+    "group": "hf-datasets-finetome-100k",
     "dest": "models/datasets/mlabonne/FineTome-100k/data/train-00000-of-00001.parquet",
     "url": "https://huggingface.co/datasets/mlabonne/FineTome-100k/resolve/c2343c1372ff31f51aa21248db18bffa3193efdb/data/train-00000-of-00001.parquet",
     "size": 116531415,
     "sha256": "acb31708ae4b3c24beb681645e751e0215b729e7fed556be54f1e487f89cacf6"
   },
   {
-    "group": "modelscope-dataset:AI-ModelScope/databricks-dolly-15k",
+    "group": "zh-CN/modelscope-datasets-databricks-dolly-15k",
     "dest": "models/datasets/modelscope/AI-ModelScope/databricks-dolly-15k/README.md",
     "url": "https://modelscope.cn/datasets/AI-ModelScope/databricks-dolly-15k/resolve/master/README.md",
     "size": 8199,
     "sha256": "db06c60090a11b20e79d1933b2f316f781605f07761ff2ae2795d6523e3e960b"
   },
   {
-    "group": "modelscope-dataset:AI-ModelScope/databricks-dolly-15k",
+    "group": "zh-CN/modelscope-datasets-databricks-dolly-15k",
     "dest": "models/datasets/modelscope/AI-ModelScope/databricks-dolly-15k/databricks-dolly-15k.jsonl",
     "url": "https://modelscope.cn/datasets/AI-ModelScope/databricks-dolly-15k/resolve/master/databricks-dolly-15k.jsonl",
     "size": 13085339,
     "sha256": "2df9083338b4abd6bceb5635764dab5d833b393b55759dffb0959b6fcbf794ec"
   },
   {
-    "group": "hf:Qwen/Qwen3-4B-Instruct-2507",
+    "group": "hf-models-qwen3-4b-instruct-2507",
     "dest": "models/Qwen/Qwen3-4B-Instruct-2507/config.json",
     "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/resolve/cdbee75f17c01a7cc42f958dc650907174af0554/config.json",
     "size": 727,
     "sha256": "5beea1a4a34c62782bfb2f911c606741a3bab8f92d80a118fa053c28af12e8ba"
   },
   {
-    "group": "hf:Qwen/Qwen3-4B-Instruct-2507",
+    "group": "hf-models-qwen3-4b-instruct-2507",
     "dest": "models/Qwen/Qwen3-4B-Instruct-2507/generation_config.json",
     "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/resolve/cdbee75f17c01a7cc42f958dc650907174af0554/generation_config.json",
     "size": 238,
     "sha256": "835fffe355c9438e7a25be099b3fccaa98350b83451f9fd2d99512e74f1ade48"
   },
   {
-    "group": "hf:Qwen/Qwen3-4B-Instruct-2507",
+    "group": "hf-models-qwen3-4b-instruct-2507",
     "dest": "models/Qwen/Qwen3-4B-Instruct-2507/merges.txt",
     "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/resolve/cdbee75f17c01a7cc42f958dc650907174af0554/merges.txt",
     "size": 1671839,
     "sha256": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3"
   },
   {
-    "group": "hf:Qwen/Qwen3-4B-Instruct-2507",
+    "group": "hf-models-qwen3-4b-instruct-2507",
     "dest": "models/Qwen/Qwen3-4B-Instruct-2507/model-00001-of-00003.safetensors",
     "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/resolve/cdbee75f17c01a7cc42f958dc650907174af0554/model-00001-of-00003.safetensors",
     "size": 3957900840,
     "sha256": "75311d91bb08cf0b882913da464a1e722a31fb44db35208663487efb7a3d8ed6"
   },
   {
-    "group": "hf:Qwen/Qwen3-4B-Instruct-2507",
+    "group": "hf-models-qwen3-4b-instruct-2507",
     "dest": "models/Qwen/Qwen3-4B-Instruct-2507/model-00002-of-00003.safetensors",
     "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/resolve/cdbee75f17c01a7cc42f958dc650907174af0554/model-00002-of-00003.safetensors",
     "size": 3987450520,
     "sha256": "0b48adbb1f60e901153d91907ba11ce63bd4b8b584482e730f48808d055dfba1"
   },
   {
-    "group": "hf:Qwen/Qwen3-4B-Instruct-2507",
+    "group": "hf-models-qwen3-4b-instruct-2507",
     "dest": "models/Qwen/Qwen3-4B-Instruct-2507/model-00003-of-00003.safetensors",
     "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/resolve/cdbee75f17c01a7cc42f958dc650907174af0554/model-00003-of-00003.safetensors",
     "size": 99630640,
     "sha256": "7dd39ccca5e4de123c74c14af44c9bf2eb75df33b4614382af0134528e060d5d"
   },
   {
-    "group": "hf:Qwen/Qwen3-4B-Instruct-2507",
+    "group": "hf-models-qwen3-4b-instruct-2507",
     "dest": "models/Qwen/Qwen3-4B-Instruct-2507/model.safetensors.index.json",
     "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/resolve/cdbee75f17c01a7cc42f958dc650907174af0554/model.safetensors.index.json",
     "size": 32819,
     "sha256": "d6c42883a895dfef5b0080ed2116a1bcd764f558406b98923d675978a1abf29c"
   },
   {
-    "group": "hf:Qwen/Qwen3-4B-Instruct-2507",
+    "group": "hf-models-qwen3-4b-instruct-2507",
     "dest": "models/Qwen/Qwen3-4B-Instruct-2507/tokenizer.json",
     "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/resolve/cdbee75f17c01a7cc42f958dc650907174af0554/tokenizer.json",
     "size": 11422654,
     "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
   },
   {
-    "group": "hf:Qwen/Qwen3-4B-Instruct-2507",
+    "group": "hf-models-qwen3-4b-instruct-2507",
     "dest": "models/Qwen/Qwen3-4B-Instruct-2507/tokenizer_config.json",
     "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/resolve/cdbee75f17c01a7cc42f958dc650907174af0554/tokenizer_config.json",
     "size": 9377,
     "sha256": "a62ff0a2472a0fa1b8eaabcb57c59b58afa42a22831dc141400b6e0cf2b65ce3"
   },
   {
-    "group": "hf:Qwen/Qwen3-4B-Instruct-2507",
+    "group": "hf-models-qwen3-4b-instruct-2507",
     "dest": "models/Qwen/Qwen3-4B-Instruct-2507/vocab.json",
     "url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/resolve/cdbee75f17c01a7cc42f958dc650907174af0554/vocab.json",
     "size": 2776833,
     "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
   },
   {
-    "group": "hf:Qwen/Qwen3.5-4B",
+    "group": "hf-models-qwen3-5-4b",
     "dest": "models/Qwen/Qwen3.5-4B/chat_template.jinja",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/chat_template.jinja",
     "size": 7756,
     "sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
   },
   {
-    "group": "hf:Qwen/Qwen3.5-4B",
+    "group": "hf-models-qwen3-5-4b",
     "dest": "models/Qwen/Qwen3.5-4B/config.json",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/config.json",
     "size": 3161,
     "sha256": "ddc63e1c717afa86c865bb5e01313d89d72bb53b97ad4a8a03ba8510c0621670"
   },
   {
-    "group": "hf:Qwen/Qwen3.5-4B",
+    "group": "hf-models-qwen3-5-4b",
     "dest": "models/Qwen/Qwen3.5-4B/merges.txt",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/merges.txt",
     "size": 3353259,
     "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d"
   },
   {
-    "group": "hf:Qwen/Qwen3.5-4B",
+    "group": "hf-models-qwen3-5-4b",
     "dest": "models/Qwen/Qwen3.5-4B/model.safetensors-00001-of-00002.safetensors",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/model.safetensors-00001-of-00002.safetensors",
     "size": 5329398688,
     "sha256": "26a93f066e1916adb13453dae5a0c707c0fbc71299ed98779571a907b8e74c61"
   },
   {
-    "group": "hf:Qwen/Qwen3.5-4B",
+    "group": "hf-models-qwen3-5-4b",
     "dest": "models/Qwen/Qwen3.5-4B/model.safetensors-00002-of-00002.safetensors",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/model.safetensors-00002-of-00002.safetensors",
     "size": 3990429408,
     "sha256": "cb544bd9bfae93dc59b0f22b292f5933573854a7f9b97835c67060d7d910e188"
   },
   {
-    "group": "hf:Qwen/Qwen3.5-4B",
+    "group": "hf-models-qwen3-5-4b",
     "dest": "models/Qwen/Qwen3.5-4B/model.safetensors.index.json",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/model.safetensors.index.json",
     "size": 76196,
     "sha256": "cf3f798ee02ba45f9622aa8892a47369ab667d0afbf154ee7c2212de42e6302d"
   },
   {
-    "group": "hf:Qwen/Qwen3.5-4B",
-    "dest": "models/Qwen/Qwen3.5-4B/preprocessor_config.json",
-    "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/preprocessor_config.json",
-    "size": 390,
-    "sha256": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516"
-  },
-  {
-    "group": "hf:Qwen/Qwen3.5-4B",
+    "group": "hf-models-qwen3-5-4b",
     "dest": "models/Qwen/Qwen3.5-4B/tokenizer.json",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/tokenizer.json",
     "size": 12807982,
     "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42"
   },
   {
-    "group": "hf:Qwen/Qwen3.5-4B",
+    "group": "hf-models-qwen3-5-4b",
     "dest": "models/Qwen/Qwen3.5-4B/tokenizer_config.json",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/tokenizer_config.json",
     "size": 16710,
     "sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8"
   },
   {
-    "group": "hf:Qwen/Qwen3.5-4B",
-    "dest": "models/Qwen/Qwen3.5-4B/video_preprocessor_config.json",
-    "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/video_preprocessor_config.json",
-    "size": 385,
-    "sha256": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13"
-  },
-  {
-    "group": "hf:Qwen/Qwen3.5-4B",
+    "group": "hf-models-qwen3-5-4b",
     "dest": "models/Qwen/Qwen3.5-4B/vocab.json",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a/vocab.json",
     "size": 6722759,
     "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
   },
   {
-    "group": "hf:antirez/deepseek-v4-gguf",
+    "group": "ds4-models-deepseek-v4-flash",
     "dest": "models/ds4/antirez/deepseek-v4-gguf/f71f23d552d664e523b422157b2befbf74040380/DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf",
     "url": "https://huggingface.co/antirez/deepseek-v4-gguf/resolve/f71f23d552d664e523b422157b2befbf74040380/DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix-0731.gguf",
     "size": 86720111488,
     "sha256": "ca22ae2f838e14077c22bc1c1417b71b45b5e5a3687bd96c2ac6e17fdb6261c0"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/added_tokens.json",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/added_tokens.json",
     "size": 2066,
     "sha256": "9ac8a85d4e97d27fad026a813d52a069680e4e0cae701ef145b204bd533251b2"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/config.json",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/config.json",
     "size": 2716,
     "sha256": "4b2fa9d863cc3033adaf261e6c3e32ad90347ee2f199a349ba1c77d5e26a605f"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/generation_config.json",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/generation_config.json",
     "size": 9906948,
     "sha256": "febbbbac4f0b122473a0125165c9291add850956315e35a025e16474cc0da5f4"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/model-00001-of-00002.safetensors",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/model-00001-of-00002.safetensors",
     "size": 4999163080,
     "sha256": "85cab984fbc111f8713827c440499453b9e66f262862866eeed8725c302ba2ac"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/model-00002-of-00002.safetensors",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/model-00002-of-00002.safetensors",
     "size": 4238114628,
     "sha256": "9536dc05892a6ca8410bcfea763dde422e2430c3cc1f3acd26c55182c8989017"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/model.safetensors.index.json",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/model.safetensors.index.json",
     "size": 210713,
     "sha256": "79d33aa045308d1a93b11952f2a3e6a647c107b688e5fdf1124c4601626dcdb2"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/preprocessor_config.json",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/preprocessor_config.json",
     "size": 1776,
     "sha256": "59294da7ee216cf80f8083180cdb0ace7efabbe35a8b9009c5cab341af2bd1c7"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/sentencepiece.bpe.model",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/sentencepiece.bpe.model",
     "size": 5165809,
     "sha256": "026a76827537db9f1348e4d5aaa127bb10a2f2ff633243f3a52d16be82d73f9d"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/special_tokens_map.json",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/special_tokens_map.json",
     "size": 2337,
     "sha256": "36ba9ab56ea9a4d0182ae18aed1ff16a15bf91b8aa544722c686744d5972b522"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
-    "dest": "models/facebook/seamless-m4t-v2-large/spm_char_lang38_tc.model",
-    "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/spm_char_lang38_tc.model",
-    "size": 368901,
-    "sha256": "9e7f2075dbc38dbe11d2414bfa4fb8e900022e87bbff4f74c97817e32a7ab493"
-  },
-  {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/tokenizer.model",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/tokenizer.model",
     "size": 5165809,
     "sha256": "026a76827537db9f1348e4d5aaa127bb10a2f2ff633243f3a52d16be82d73f9d"
   },
   {
-    "group": "hf:facebook/seamless-m4t-v2-large",
+    "group": "hf-models-seamless-m4t-v2-large",
     "dest": "models/facebook/seamless-m4t-v2-large/tokenizer_config.json",
     "url": "https://huggingface.co/facebook/seamless-m4t-v2-large/resolve/5f8cc790b19fc3f67a61c105133b20b34e3dcb76/tokenizer_config.json",
     "size": 19667,
     "sha256": "0a184dd2f5b9ee02ddfa7fc2110b7e919c471f29e2e771d8c18b22b7758827c8"
   },
   {
-    "group": "hf:openai/gpt-oss-20b",
+    "group": "hf-models-gpt-oss-20b",
     "dest": "models/openai/gpt-oss-20b/chat_template.jinja",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/chat_template.jinja",
     "size": 16738,
     "sha256": "a4c9919cbbd4acdd51ccffe22da049264b1b73e59055fa58811a99efbd7c8146"
   },
   {
-    "group": "hf:openai/gpt-oss-20b",
+    "group": "hf-models-gpt-oss-20b",
     "dest": "models/openai/gpt-oss-20b/config.json",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/config.json",
     "size": 1806,
     "sha256": "3a2a26ded679375b7928ddeca59764df7cea83220c1961035f6d6e232659e9ce"
   },
   {
-    "group": "hf:openai/gpt-oss-20b",
+    "group": "hf-models-gpt-oss-20b",
     "dest": "models/openai/gpt-oss-20b/generation_config.json",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/generation_config.json",
     "size": 177,
     "sha256": "f9970ada892d2d1f72e3ed0a6535ccebadd11897318794ca671d8c7014c957da"
   },
   {
-    "group": "hf:openai/gpt-oss-20b",
+    "group": "hf-models-gpt-oss-20b",
     "dest": "models/openai/gpt-oss-20b/model-00000-of-00002.safetensors",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/model-00000-of-00002.safetensors",
     "size": 4792272488,
     "sha256": "16d0f997dcfc4462089d536bffe51b4bcea2f872f5c430be09ef8ed392312427"
   },
   {
-    "group": "hf:openai/gpt-oss-20b",
+    "group": "hf-models-gpt-oss-20b",
     "dest": "models/openai/gpt-oss-20b/model-00001-of-00002.safetensors",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/model-00001-of-00002.safetensors",
     "size": 4798702184,
     "sha256": "4fbe328ab445455d6f58dc73852b85873bd626986310abd91cd4d2ce3245eaea"
   },
   {
-    "group": "hf:openai/gpt-oss-20b",
+    "group": "hf-models-gpt-oss-20b",
     "dest": "models/openai/gpt-oss-20b/model-00002-of-00002.safetensors",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/model-00002-of-00002.safetensors",
     "size": 4170342232,
     "sha256": "a18106b209e9ab35c3406db4f6f12a927364a058b21e9d1373d682e20674b303"
   },
   {
-    "group": "hf:openai/gpt-oss-20b",
+    "group": "hf-models-gpt-oss-20b",
     "dest": "models/openai/gpt-oss-20b/model.safetensors.index.json",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/model.safetensors.index.json",
     "size": 36355,
     "sha256": "0e085b977c4c9942f85938828e8c989ed7d5cdabf852e4da6a67c116cd502cd1"
   },
   {
-    "group": "hf:openai/gpt-oss-20b",
+    "group": "hf-models-gpt-oss-20b",
     "dest": "models/openai/gpt-oss-20b/special_tokens_map.json",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/special_tokens_map.json",
     "size": 98,
     "sha256": "dd5e191d20c12d2fee1da5bae14ca1db0f5f4215300af691f23cdee97120a293"
   },
   {
-    "group": "hf:openai/gpt-oss-20b",
+    "group": "hf-models-gpt-oss-20b",
     "dest": "models/openai/gpt-oss-20b/tokenizer.json",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/tokenizer.json",
     "size": 27868174,
     "sha256": "0614fe83cadab421296e664e1f48f4261fa8fef6e03e63bb75c20f38e37d07d3"
   },
   {
-    "group": "hf:openai/gpt-oss-20b",
+    "group": "hf-models-gpt-oss-20b",
     "dest": "models/openai/gpt-oss-20b/tokenizer_config.json",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/tokenizer_config.json",
     "size": 4200,
     "sha256": "9279e942392b742d633c7adbb89ebe002c98399db8926a7af5125c726f404070"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/1_Pooling/config.json",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/1_Pooling/config.json",
     "size": 190,
     "sha256": "4be450dde3b0273bb9787637cfbd28fe04a7ba6ab9d36ac48e92b11e350ffc23"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/README.md",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/README.md",
     "size": 10502,
     "sha256": "dcd602d2fd35c203a247304a06fec6654a12f7941b739f9221a064fe8dc3b7f0"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/config.json",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config.json",
     "size": 612,
     "sha256": "953f9c0d463486b10a6871cc2fd59f223b2c70184f49815e7efbcab5d8908b41"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/config_sentence_transformers.json",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config_sentence_transformers.json",
     "size": 116,
     "sha256": "061ca9d39661d6c6d6de5ba27f79a1cd5770ea247f8d46412a68a498dc5ac9f3"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/data_config.json",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/data_config.json",
     "size": 39265,
     "sha256": "32edcb108fc2516b920734a862ae0692bcae1c5d45d5f8d972cb0d53434a4c54"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/gitattributes",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/.gitattributes",
     "size": 1229,
     "sha256": "98ccb431c012ebfe976280fbd45aea4cec7409935868ccecf3954370f96732a1"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/model.safetensors",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/model.safetensors",
     "size": 90868376,
     "sha256": "53aa51172d142c89d9012cce15ae4d6cc0ca6895895114379cacb4fab128d9db"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/modules.json",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/modules.json",
     "size": 349,
     "sha256": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/onnx/model.onnx",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/onnx/model.onnx",
     "size": 90405214,
     "sha256": "6fd5d72fe4589f189f8ebc006442dbb529bb7ce38f8082112682524616046452"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/onnx/model_O1.onnx",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/onnx/model_O1.onnx",
     "size": 90360328,
     "sha256": "1391c6fc20b5530250bc15cbe1f47578ffeca55ab0551d335cc668b6299a88ec"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/onnx/model_O2.onnx",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/onnx/model_O2.onnx",
     "size": 90326566,
     "sha256": "1de3905029190b398c7d300b530e320cf4b5e7d3dfb9af1429ebd73fd9a16faf"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/onnx/model_O3.onnx",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/onnx/model_O3.onnx",
     "size": 90326497,
     "sha256": "a44f671e364dddbac31f203f07b91be6b0a35e51936e5ebfab65b6d9538b83ff"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/onnx/model_O4.onnx",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/onnx/model_O4.onnx",
     "size": 45212349,
     "sha256": "1667d7f3ba669048b13a96ee3a44456d5e42c8f44588ae8b603430e16160c485"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/onnx/model_qint8_arm64.onnx",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/onnx/model_qint8_arm64.onnx",
     "size": 23026053,
     "sha256": "4278337fd0ff3c68bfb6291042cad8ab363e1d9fbc43dcb499fe91c871902474"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/onnx/model_qint8_avx512.onnx",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/onnx/model_qint8_avx512.onnx",
     "size": 23026053,
     "sha256": "4278337fd0ff3c68bfb6291042cad8ab363e1d9fbc43dcb499fe91c871902474"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/onnx/model_qint8_avx512_vnni.onnx",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/onnx/model_qint8_avx512_vnni.onnx",
     "size": 23026053,
     "sha256": "4278337fd0ff3c68bfb6291042cad8ab363e1d9fbc43dcb499fe91c871902474"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/onnx/model_quint8_avx2.onnx",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/onnx/model_quint8_avx2.onnx",
     "size": 23046789,
     "sha256": "b941bf19f1f1283680f449fa6a7336bb5600bdcd5f84d10ddc5cd72218a0fd21"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/openvino/openvino_model.bin",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/openvino/openvino_model.bin",
     "size": 90265744,
     "sha256": "8b86cab4722e2aefab310cf96d4d5a9eb3b187f7d9670a082afc55c7fa0d392a"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/openvino/openvino_model.xml",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/openvino/openvino_model.xml",
     "size": 211315,
     "sha256": "f87dd1482b2a745f8c699b81ddd9cbcad666a193be4693abcea44b7ac8c67c1e"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/openvino/openvino_model_qint8_quantized.bin",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/openvino/openvino_model_qint8_quantized.bin",
     "size": 22933664,
     "sha256": "c92ea4af3c6bc7b4a0f3b3d61b147c850f4dbdd7c9e7beee0c0c70dc12da289b"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/openvino/openvino_model_qint8_quantized.xml",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/openvino/openvino_model_qint8_quantized.xml",
     "size": 368006,
     "sha256": "a19425e3f56f7736f752923f0a0b5a8d61c7878017f02e1fc9086615391105dd"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/pytorch_model.bin",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/pytorch_model.bin",
     "size": 90888945,
     "sha256": "c3a85f238711653950f6a79ece63eb0ea93d76f6a6284be04019c53733baf256"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/rust_model.ot",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/rust_model.ot",
     "size": 90887379,
     "sha256": "2d98d96d278348988f2744e6445b8bc16d921c3f6e17c667362f3cb353007aea"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/sentence_bert_config.json",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/sentence_bert_config.json",
     "size": 53,
     "sha256": "fc1993fde0a95c24ec6c022539d41cf6e2f7c9721e5415d6fb6897472a9cd4b7"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/special_tokens_map.json",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/special_tokens_map.json",
     "size": 112,
     "sha256": "303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/tf_model.h5",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/tf_model.h5",
     "size": 91005696,
     "sha256": "24c06a7429b843d46e40c6b167122053921bf94dce2e5550ea5c07fabc597646"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/tokenizer.json",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/tokenizer.json",
     "size": 466247,
     "sha256": "be50c3628f2bf5bb5e3a7f17b1f74611b2561a3a27eeab05e5aa30f411572037"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/tokenizer_config.json",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/tokenizer_config.json",
     "size": 350,
     "sha256": "acb92769e8195aabd29b7b2137a9e6d6e25c476a4f15aa4355c233426c61576b"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/train_script.py",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/train_script.py",
     "size": 13156,
     "sha256": "f9b98b9d203d728cbf93ccdbae84131ab926541b56196f11d1385fed0b4d1a07"
   },
   {
-    "group": "hf:sentence-transformers/all-MiniLM-L6-v2",
+    "group": "hf-models-all-minilm-l6-v2",
     "dest": "models/sentence-transformers/all-MiniLM-L6-v2/vocab.txt",
     "url": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/vocab.txt",
     "size": 231508,
     "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/added_tokens.json",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/added_tokens.json",
     "size": 35,
     "sha256": "50b2f405ba56a26d4913fd772089992252d7f942123cc0a034d96424221ba946"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/chat_template.jinja",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/chat_template.jinja",
     "size": 1532,
     "sha256": "7de1c58e208eda46e9c7f86397df37ec49883aeece39fb961e0a6b24088dd3c4"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
-    "dest": "models/unsloth/gemma-3-4b-it/chat_template.json",
-    "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/chat_template.json",
-    "size": 1615,
-    "sha256": "fe16baf728db49457cde32802cd7efc0ac8a7a9877dbe22fe3322b2d9dc6ccd9"
-  },
-  {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/config.json",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/config.json",
     "size": 1659,
     "sha256": "6bed1ab02267c629a6937cf021c0c7bee97b5e2131d5c262e338aeac794db4df"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/generation_config.json",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/generation_config.json",
     "size": 210,
     "sha256": "031fdd1faee68cf7e0cafd12203a08f51f86abd82877a401fc8dafad7b2f7b5c"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/model-00001-of-00002.safetensors",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/model-00001-of-00002.safetensors",
     "size": 4961251752,
     "sha256": "eb5fd5e97ddd07b56778733e9653c07312529cb00980a318fc3e1c4e3b5a8f1f"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/model-00002-of-00002.safetensors",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/model-00002-of-00002.safetensors",
     "size": 3639026128,
     "sha256": "fdde0e5aa5ced0fa203b3d50f4ab78168b7e3a3e08c6349f5cc9326666e1bb13"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/model.safetensors.index.json",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/model.safetensors.index.json",
     "size": 90558,
     "sha256": "77f4b67de084c31c7bcd373b039908108eee6c6181607e6d53da730e5f0bc659"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
-    "dest": "models/unsloth/gemma-3-4b-it/preprocessor_config.json",
-    "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/preprocessor_config.json",
-    "size": 570,
-    "sha256": "f688d6bb20c5017601c4011de7ca656da8485b540b05013efdaf986c0fcc918d"
-  },
-  {
-    "group": "hf:unsloth/gemma-3-4b-it",
-    "dest": "models/unsloth/gemma-3-4b-it/processor_config.json",
-    "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/processor_config.json",
-    "size": 70,
-    "sha256": "3ffd5f11778dc73e2b69b3c00535e4121e1badf7018136263cd17b5b34fbaa53"
-  },
-  {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/special_tokens_map.json",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/special_tokens_map.json",
     "size": 670,
     "sha256": "45a857d8a2495d0be30a5d2d6de03278195eb028b6e0b8efc248bfa697d65f05"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/tokenizer.json",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/tokenizer.json",
     "size": 33384568,
     "sha256": "4667f2089529e8e7657cfb6d1c19910ae71ff5f28aa7ab2ff2763330affad795"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/tokenizer.model",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/tokenizer.model",
     "size": 4689074,
     "sha256": "1299c11d7cf632ef3b4e11937501358ada021bbdf7c47638d13c0ee982f2e79c"
   },
   {
-    "group": "hf:unsloth/gemma-3-4b-it",
+    "group": "hf-models-gemma-3-4b-it",
     "dest": "models/unsloth/gemma-3-4b-it/tokenizer_config.json",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/bf46152c47f5dd20b896357cb51abc4c03b8ee8c/tokenizer_config.json",
     "size": 1158492,
     "sha256": "8925eabb556c1897ca1bed405f0612e735a56afcd4d77e76eb90fd771e706f9c"
   },
   {
-    "group": "hf:unsloth/gemma-4-E4B-it",
+    "group": "hf-models-gemma-4-e4b-it",
     "dest": "models/unsloth/gemma-4-E4B-it/chat_template.jinja",
     "url": "https://huggingface.co/unsloth/gemma-4-E4B-it/resolve/4e22d7e59e078e63a14f351efdc5232ed366b621/chat_template.jinja",
     "size": 18810,
     "sha256": "241c50d86bdfe5e43307da87f559cd2416aacd67a8de46c15acc0105ef2200b7"
   },
   {
-    "group": "hf:unsloth/gemma-4-E4B-it",
+    "group": "hf-models-gemma-4-e4b-it",
     "dest": "models/unsloth/gemma-4-E4B-it/config.json",
     "url": "https://huggingface.co/unsloth/gemma-4-E4B-it/resolve/4e22d7e59e078e63a14f351efdc5232ed366b621/config.json",
     "size": 5227,
     "sha256": "9b5d5627f891bcaeac2405a2d0b09b082cff85edfecc4163a5780d924cf35e0b"
   },
   {
-    "group": "hf:unsloth/gemma-4-E4B-it",
+    "group": "hf-models-gemma-4-e4b-it",
     "dest": "models/unsloth/gemma-4-E4B-it/generation_config.json",
     "url": "https://huggingface.co/unsloth/gemma-4-E4B-it/resolve/4e22d7e59e078e63a14f351efdc5232ed366b621/generation_config.json",
     "size": 208,
     "sha256": "d4226bbe3117d2d253ba4609720ba82c6c4ce4627a9a6ae05387c78983ac03de"
   },
   {
-    "group": "hf:unsloth/gemma-4-E4B-it",
+    "group": "hf-models-gemma-4-e4b-it",
     "dest": "models/unsloth/gemma-4-E4B-it/model.safetensors",
     "url": "https://huggingface.co/unsloth/gemma-4-E4B-it/resolve/4e22d7e59e078e63a14f351efdc5232ed366b621/model.safetensors",
     "size": 15992595884,
     "sha256": "cfbd3d2f1cd71bd471c37fe2bf8546d5028d41e5736f64e1ca6c6b8893125503"
   },
   {
-    "group": "hf:unsloth/gemma-4-E4B-it",
+    "group": "hf-models-gemma-4-e4b-it",
     "dest": "models/unsloth/gemma-4-E4B-it/processor_config.json",
     "url": "https://huggingface.co/unsloth/gemma-4-E4B-it/resolve/4e22d7e59e078e63a14f351efdc5232ed366b621/processor_config.json",
     "size": 1689,
     "sha256": "32bdf45d2ad4cc29a0822ddd157a182de76644f0419a6228d151495256e9813c"
   },
   {
-    "group": "hf:unsloth/gemma-4-E4B-it",
+    "group": "hf-models-gemma-4-e4b-it",
     "dest": "models/unsloth/gemma-4-E4B-it/tokenizer.json",
     "url": "https://huggingface.co/unsloth/gemma-4-E4B-it/resolve/4e22d7e59e078e63a14f351efdc5232ed366b621/tokenizer.json",
     "size": 32169626,
     "sha256": "cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f"
   },
   {
-    "group": "hf:unsloth/gemma-4-E4B-it",
+    "group": "hf-models-gemma-4-e4b-it",
     "dest": "models/unsloth/gemma-4-E4B-it/tokenizer_config.json",
     "url": "https://huggingface.co/unsloth/gemma-4-E4B-it/resolve/4e22d7e59e078e63a14f351efdc5232ed366b621/tokenizer_config.json",
     "size": 21937,
     "sha256": "950772223ebcf6247759538794ee2909b7335733c04a3466d25f0e4fc808a467"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/README.md",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/README.md",
     "size": 25122,
     "sha256": "eb6df732fd79f239d46a2bbc75302795cf293acd5b75fcc01995344da02aa0bf"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/added_tokens.json",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/added_tokens.json",
     "size": 35,
     "sha256": "50b2f405ba56a26d4913fd772089992252d7f942123cc0a034d96424221ba946"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/chat_template.json",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/chat_template.json",
     "size": 1615,
     "sha256": "fe16baf728db49457cde32802cd7efc0ac8a7a9877dbe22fe3322b2d9dc6ccd9"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/config.json",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/config.json",
     "size": 855,
     "sha256": "9059f680f4dbd1957f35cb44b9fdd6948f4792db7a7a35ee353ea42e68adf7ff"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/configuration.json",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/configuration.json",
     "size": 73,
     "sha256": "f888421726665e8a84b738eed42a64875aed79de8be7daade851ac8bf4c0cef9"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/generation_config.json",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/generation_config.json",
     "size": 215,
     "sha256": "fd9324becc53c4be610db39e13a613006f09fd6ef71a95fb6320dc33157490a3"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/gitattributes",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/.gitattributes",
     "size": 2265,
     "sha256": "f34c674a700b21d4381692daa6279df3b694132d9ce36f9ac1a7e354e47d1b28"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/model-00001-of-00002.safetensors",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/main/model-00001-of-00002.safetensors",
     "size": 4961251752,
     "sha256": "eb5fd5e97ddd07b56778733e9653c07312529cb00980a318fc3e1c4e3b5a8f1f"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/model-00002-of-00002.safetensors",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/main/model-00002-of-00002.safetensors",
     "size": 3639026128,
     "sha256": "fdde0e5aa5ced0fa203b3d50f4ab78168b7e3a3e08c6349f5cc9326666e1bb13"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/model.safetensors.index.json",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/model.safetensors.index.json",
     "size": 90558,
     "sha256": "77f4b67de084c31c7bcd373b039908108eee6c6181607e6d53da730e5f0bc659"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/preprocessor_config.json",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/preprocessor_config.json",
     "size": 570,
     "sha256": "f688d6bb20c5017601c4011de7ca656da8485b540b05013efdaf986c0fcc918d"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/processor_config.json",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/processor_config.json",
     "size": 70,
     "sha256": "3ffd5f11778dc73e2b69b3c00535e4121e1badf7018136263cd17b5b34fbaa53"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/special_tokens_map.json",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/special_tokens_map.json",
     "size": 662,
     "sha256": "2f7b0adf4fb469770bb1490e3e35df87b1dc578246c5e7e6fc76ecf33213a397"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/tokenizer.json",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/main/tokenizer.json",
     "size": 33384568,
     "sha256": "4667f2089529e8e7657cfb6d1c19910ae71ff5f28aa7ab2ff2763330affad795"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/tokenizer.model",
     "url": "https://huggingface.co/unsloth/gemma-3-4b-it/resolve/main/tokenizer.model",
     "size": 4689074,
     "sha256": "1299c11d7cf632ef3b4e11937501358ada021bbdf7c47638d13c0ee982f2e79c"
   },
   {
-    "group": "modelscope:LLM-Research/gemma-3-4b-it",
+    "group": "zh-CN/modelscope-models-gemma-3-4b-it",
     "dest": "models/modelscope/LLM-Research/gemma-3-4b-it/tokenizer_config.json",
     "url": "https://modelscope.cn/models/LLM-Research/gemma-3-4b-it/resolve/master/tokenizer_config.json",
     "size": 1156999,
     "sha256": "bfe25c2735e395407beb78456ea9a6984a1f00d8c16fa04a8b75f2a614cf53e1"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/LICENSE",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/LICENSE",
     "size": 11343,
     "sha256": "50cbab8a892c5f2993b8c7351a99182507472def3b1374558308605d99b86b32"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/README.md",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/README.md",
     "size": 77661,
     "sha256": "1406be1b6b8fd8a6545870da516912804756593628a1d0fb0a7965211e82a7bb"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/chat_template.jinja",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/chat_template.jinja",
     "size": 7756,
     "sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/config.json",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/config.json",
     "size": 3161,
     "sha256": "ddc63e1c717afa86c865bb5e01313d89d72bb53b97ad4a8a03ba8510c0621670"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/configuration.json",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/configuration.json",
     "size": 73,
     "sha256": "f888421726665e8a84b738eed42a64875aed79de8be7daade851ac8bf4c0cef9"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/gitattributes",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/.gitattributes",
     "size": 2335,
     "sha256": "418b1b910fd07a0c2c79d39905797206bfbc2e386e91e2376c04661709e661bc"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/merges.txt",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/merges.txt",
     "size": 3353259,
     "sha256": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/model.safetensors-00001-of-00002.safetensors",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/main/model.safetensors-00001-of-00002.safetensors",
     "size": 5329398688,
     "sha256": "26a93f066e1916adb13453dae5a0c707c0fbc71299ed98779571a907b8e74c61"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/model.safetensors-00002-of-00002.safetensors",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/main/model.safetensors-00002-of-00002.safetensors",
     "size": 3990429408,
     "sha256": "cb544bd9bfae93dc59b0f22b292f5933573854a7f9b97835c67060d7d910e188"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/model.safetensors.index.json",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/model.safetensors.index.json",
     "size": 76196,
     "sha256": "cf3f798ee02ba45f9622aa8892a47369ab667d0afbf154ee7c2212de42e6302d"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/preprocessor_config.json",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/preprocessor_config.json",
     "size": 390,
     "sha256": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/tokenizer.json",
     "url": "https://huggingface.co/Qwen/Qwen3.5-4B/resolve/main/tokenizer.json",
     "size": 12807982,
     "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/tokenizer_config.json",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/tokenizer_config.json",
     "size": 16710,
     "sha256": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/video_preprocessor_config.json",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/video_preprocessor_config.json",
     "size": 385,
     "sha256": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13"
   },
   {
-    "group": "modelscope:Qwen/Qwen3.5-4B",
+    "group": "zh-CN/modelscope-models-qwen3-5-4b",
     "dest": "models/modelscope/Qwen/Qwen3.5-4B/vocab.json",
     "url": "https://modelscope.cn/models/Qwen/Qwen3.5-4B/resolve/master/vocab.json",
     "size": 6722759,
     "sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/LICENSE",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/LICENSE",
     "size": 11357,
     "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/README.md",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/README.md",
     "size": 7095,
     "sha256": "03c2fcf292549176757b85c911e7dcf527aef3e4241d64b6caec94af3ecf3ac2"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/USAGE_POLICY",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/USAGE_POLICY",
     "size": 200,
     "sha256": "d6387ef7985019c45db8d9801e6ac5fd9f98f02b9f1c56f8c5af80c3e8f385d0"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/chat_template.jinja",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/chat_template.jinja",
     "size": 16738,
     "sha256": "a4c9919cbbd4acdd51ccffe22da049264b1b73e59055fa58811a99efbd7c8146"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/config.json",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/config.json",
     "size": 1806,
     "sha256": "3a2a26ded679375b7928ddeca59764df7cea83220c1961035f6d6e232659e9ce"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/configuration.json",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/configuration.json",
     "size": 73,
     "sha256": "f888421726665e8a84b738eed42a64875aed79de8be7daade851ac8bf4c0cef9"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/generation_config.json",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/generation_config.json",
     "size": 177,
     "sha256": "f9970ada892d2d1f72e3ed0a6535ccebadd11897318794ca671d8c7014c957da"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/gitattributes",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/.gitattributes",
     "size": 2127,
     "sha256": "088e25d6bceaa8943f4f292006210358292349cc36e7578f80c62fce75535f46"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/metal/model.bin",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/main/metal/model.bin",
     "size": 13750886400,
     "sha256": "725b7f996b5a226d922f034a731aefc398652f670dcafc2efd78620509a0fef1"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/model-00000-of-00002.safetensors",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/main/model-00000-of-00002.safetensors",
     "size": 4792272488,
     "sha256": "16d0f997dcfc4462089d536bffe51b4bcea2f872f5c430be09ef8ed392312427"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/model-00001-of-00002.safetensors",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/main/model-00001-of-00002.safetensors",
     "size": 4798702184,
     "sha256": "4fbe328ab445455d6f58dc73852b85873bd626986310abd91cd4d2ce3245eaea"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/model-00002-of-00002.safetensors",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/main/model-00002-of-00002.safetensors",
     "size": 4170342232,
     "sha256": "a18106b209e9ab35c3406db4f6f12a927364a058b21e9d1373d682e20674b303"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/model.safetensors.index.json",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/model.safetensors.index.json",
     "size": 36355,
     "sha256": "0e085b977c4c9942f85938828e8c989ed7d5cdabf852e4da6a67c116cd502cd1"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/original/config.json",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/original/config.json",
     "size": 376,
     "sha256": "317522155fc243327ee341857d0c752d0094a0817e0e9aee2890d5ad8e009e04"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/original/dtypes.json",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/original/dtypes.json",
     "size": 13082,
     "sha256": "566c9e6aded8957f41f1589cabaf73e39f2d1fcda3351d63efdfb7e9e78d376b"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/original/model.safetensors",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/main/original/model.safetensors",
     "size": 13761300984,
     "sha256": "3340a61d1a0391e8c5b5d3463d18d4c48129a84bbc04a554c762c99020aa06ed"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/special_tokens_map.json",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/special_tokens_map.json",
     "size": 98,
     "sha256": "dd5e191d20c12d2fee1da5bae14ca1db0f5f4215300af691f23cdee97120a293"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/tokenizer.json",
     "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/main/tokenizer.json",
     "size": 27868174,
     "sha256": "0614fe83cadab421296e664e1f48f4261fa8fef6e03e63bb75c20f38e37d07d3"
   },
   {
-    "group": "modelscope:openai-mirror/gpt-oss-20b",
+    "group": "zh-CN/modelscope-models-gpt-oss-20b",
     "dest": "models/modelscope/openai-mirror/gpt-oss-20b/tokenizer_config.json",
     "url": "https://modelscope.cn/models/openai-mirror/gpt-oss-20b/resolve/master/tokenizer_config.json",
     "size": 4200,

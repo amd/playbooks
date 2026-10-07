@@ -241,6 +241,22 @@ class LoopTests(unittest.TestCase):
         self.assertEqual(pv.check_dependency("d", spec, "windows")["status"], "INSTALLED")
         self.assertEqual(calls, ["validate", "install", "refresh", "validate"])
 
+    def test_a_mirror_only_dependency_warns_instead_of_failing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._fake_seeder(tmp, "import sys; sys.exit(1)\n")  # present and seed both report a miss
+            spec = {"optional": True, "validate": {"linux": {"mirror": "g"}}, "install": {"linux": {"mirror": "g"}}}
+            r = pv.check_dependency("d", spec, "linux")
+            self.assertEqual((r["status"], "install_rc" in r), ("MISSING_OPTIONAL", False))
+
+    def test_a_mirror_only_dependency_is_installed_once_seeded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            flag = Path(tmp) / "seeded"
+            # get.py stand-in: `seed` creates the flag, `present` reports it.
+            self._fake_seeder(tmp, f"import pathlib, sys\nf = pathlib.Path({str(flag)!r})\n"
+                                   "sys.exit(f.touch() if sys.argv[1] == 'seed' else 0 if f.exists() else 1)\n")
+            spec = {"optional": True, "validate": {"linux": {"mirror": "g"}}, "install": {"linux": {"mirror": "g"}}}
+            self.assertEqual(pv.check_dependency("d", spec, "linux")["status"], "INSTALLED")
+
     def test_install_still_runs_when_seeding_falls_short(self):
         with tempfile.TemporaryDirectory() as tmp:
             flag = Path(tmp) / "installed"
@@ -414,11 +430,35 @@ class MirrorSeedTests(unittest.TestCase):
         tool = {"lemonade": "lemonade", "lmstudio": "lmstudio", "Ollama": "ollama"}
         cls.manifest = root / "artifacts.json"
         # Only LM Studio falls back upstream; its fixture upstream serves the same bytes.
-        cls.manifest.write_text(json.dumps([
+        entries = [
             {"group": f"{tool[rel.split('/')[1]]}-models-x", "dest": rel,
              "url": f"{cls.base}/{rel}" if "/lmstudio/" in rel else "https://example.invalid/",
              "size": len(data), "sha256": _sha256(data)} for rel, data in cls.FILES.items()
-        ]))
+        ]
+        # Hugging Face groups: (group, kind, repo, current commit, {path: (mirror bytes, upstream bytes, lfs)}).
+        # stalerepo's tokenizer.json changed upstream since it was mirrored; README.md is never pinned.
+        for group, kind, repo, commit, files in (
+            ("hf-models-ok", "models", "org/okrepo", "c1",
+             {"model.safetensors": (b"weights", b"weights", True), "sub/config.json": (b"{}", b"{}", False)}),
+            ("hf-datasets-ds", "datasets", "org/ds", "d1", {"data.jsonl": (b"row", b"row", False)}),
+            ("hf-models-stale", "models", "org/stalerepo", "s1",
+             {"config.json": (b"{}", b"{}", False), "tokenizer.json": (b"old", b"new", False)}),
+        ):
+            api = root / "hf/api" / kind / repo
+            (api / "revision").mkdir(parents=True)
+            (api / "revision/main").write_text(json.dumps({"sha": commit}))
+            (api / "tree").mkdir()
+            tree = [{"type": "file", "path": "README.md", "oid": "0" * 40}]
+            for path, (mirrored, upstream, lfs) in files.items():
+                dest = ("models/datasets/" if kind == "datasets" else "models/") + f"{repo}/{path}"
+                (root / "mirror" / dest).parent.mkdir(parents=True, exist_ok=True)
+                (root / "mirror" / dest).write_bytes(mirrored)
+                url = "https://huggingface.co/" + ("datasets/" if kind == "datasets" else "") + f"{repo}/resolve/{'0' * 40}/{path}"
+                entries.append({"group": group, "dest": dest, "url": url, "size": len(mirrored), "sha256": _sha256(mirrored)})
+                tree.append({"type": "file", "path": path, **({"lfs": {"oid": _sha256(upstream)}} if lfs
+                             else {"oid": hashlib.sha1(b"blob %d\0" % len(upstream) + upstream).hexdigest()})})
+            (api / "tree" / commit).write_text(json.dumps(tree))
+        cls.manifest.write_text(json.dumps(entries))
 
     @classmethod
     def tearDownClass(cls):
@@ -457,6 +497,36 @@ class MirrorSeedTests(unittest.TestCase):
         self.assertEqual((store / "blobs/sha256-0a").read_bytes(), b"blob")
         self.assertTrue((store / "manifests/registry.ollama.ai/library/m/tag").is_file())
         self.assertEqual([a.split("/")[3] for a, _ in ledger], ["blobs", "manifests"])
+
+    def _present(self, group, store):
+        env = dict(os.environ, PLAYBOOKS_MIRROR_STORE=str(store))
+        return subprocess.run([sys.executable, str(self.GET), "--manifest", str(self.manifest), "present", group],
+                              env=env, capture_output=True, text=True).returncode
+
+    def test_hugging_face_files_land_in_the_current_snapshot_and_refs_main_moves(self):
+        rc, store, _ = self._seed("hf-models-ok")
+        cache = store / "models--org--okrepo"
+        self.assertEqual(rc, 0)
+        self.assertEqual((cache / "snapshots/c1/model.safetensors").read_bytes(), b"weights")
+        self.assertTrue((cache / "snapshots/c1/sub/config.json").is_file())
+        self.assertEqual((cache / "refs/main").read_text(), "c1")
+        self.assertEqual(self._present("hf-models-ok", store), 0)
+        (cache / "snapshots/c1/sub/config.json").unlink()   # refs/main stays, a pinned file goes
+        self.assertEqual(self._present("hf-models-ok", store), 1)
+
+    def test_hugging_face_datasets_use_the_datasets_cache_layout(self):
+        rc, store, _ = self._seed("hf-datasets-ds")
+        self.assertEqual((rc, (store / "datasets--org--ds/snapshots/d1/data.jsonl").read_bytes()), (0, b"row"))
+
+    def test_a_small_file_changed_upstream_is_dropped_and_refs_main_left_alone(self):
+        rc, store, ledger = self._seed("hf-models-stale")
+        cache = store / "models--org--stalerepo"
+        self.assertEqual(rc, 1)
+        self.assertTrue((cache / "snapshots/s1/config.json").is_file())
+        self.assertFalse((cache / "snapshots/s1/tokenizer.json").exists())
+        self.assertFalse((cache / "refs/main").exists())
+        self.assertIn(("models/org/stalerepo/tokenizer.json", "stale"), ledger)
+        self.assertEqual(self._present("hf-models-stale", store), 1)
 
     def test_unreachable_mirror_is_tried_once_per_group(self):
         saved = self.base
@@ -610,8 +680,25 @@ class RegistryIntegrityTests(unittest.TestCase):
                     for platform, step in (spec.get(kind) or {}).items():
                         yield (f"{locale}/{dep_id}" if locale else dep_id), kind, platform, step
 
-    def test_each_step_is_exactly_one_of_cmd_or_script(self):
-        bad = [f"{d}.{k}.{p}" for d, k, p, s in self._steps() if ("cmd" in s) == ("script" in s)]
+    def _specs(self):
+        for locale, path in self._registries():
+            for dep_id, spec in json.loads(path.read_text(encoding="utf-8"))["dependencies"].items():
+                yield (f"{locale}/{dep_id}" if locale else dep_id), spec
+
+    def test_each_step_is_a_cmd_a_script_or_a_mirror_group(self):
+        bad = [f"{d}.{k}.{p}" for d, k, p, s in self._steps()
+               if ("cmd" in s) + ("script" in s) != 1 and not pv._mirror_only(s)]
+        self.assertEqual(bad, [])
+
+    def test_only_hugging_face_groups_are_checked_by_presence(self):
+        bad = [f"{d}.{k}.{p}" for d, k, p, s in self._steps()
+               if k == "validate" and pv._mirror_only(s) and mirror_get.tool_of(s["mirror"]) is not mirror_get.TOOLS["hf"]]
+        self.assertEqual(bad, [])
+
+    def test_a_seed_only_install_is_optional(self):
+        # With nothing to fall back to, an unreachable mirror must warn, not fail the job.
+        bad = [d for d, spec in self._specs()
+               if any(pv._mirror_only(s) for s in (spec.get("install") or {}).values()) and not spec.get("optional")]
         self.assertEqual(bad, [])
 
     def test_scripts_exist_and_follow_naming(self):
@@ -634,10 +721,11 @@ class RegistryIntegrityTests(unittest.TestCase):
     def _groups(self):
         return {e["group"] for e in json.loads(mirror_get.MANIFEST.read_text(encoding="utf-8"))}
 
-    def test_mirror_groups_are_named_after_their_install(self):
+    def test_mirror_groups_are_named_after_their_dependency(self):
         groups = self._groups()
         bad = [f"{d}.{k}.{p}" for d, k, p, s in self._steps()
-               if "mirror" in s and (k != "install" or s["mirror"] != d or s["mirror"] not in groups)]
+               if "mirror" in s and (s["mirror"] != d or s["mirror"] not in groups
+                                     or (k == "validate" and not pv._mirror_only(s)))]
         self.assertEqual(bad, [])
 
     def test_every_seedable_group_is_used(self):

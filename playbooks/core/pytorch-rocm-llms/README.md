@@ -107,6 +107,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:hf-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:hf-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->

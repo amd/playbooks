@@ -1141,6 +1141,330 @@
         "windows": []
       },
       "versionable": false
+    },
+    "hf-models-gpt-oss-20b": {
+      "name": "GPT-OSS 20B (Hugging Face)",
+      "description": "openai/gpt-oss-20b, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-gpt-oss-20b"
+        },
+        "windows": {
+          "mirror": "hf-models-gpt-oss-20b"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-gpt-oss-20b",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-gpt-oss-20b",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-qwen3-5-4b": {
+      "name": "Qwen3.5 4B (Hugging Face)",
+      "description": "Qwen/Qwen3.5-4B, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-qwen3-5-4b"
+        },
+        "windows": {
+          "mirror": "hf-models-qwen3-5-4b"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-qwen3-5-4b",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-qwen3-5-4b",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-qwen3-4b-instruct-2507": {
+      "name": "Qwen3 4B Instruct 2507 (Hugging Face)",
+      "description": "Qwen/Qwen3-4B-Instruct-2507, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-qwen3-4b-instruct-2507"
+        },
+        "windows": {
+          "mirror": "hf-models-qwen3-4b-instruct-2507"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-qwen3-4b-instruct-2507",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-qwen3-4b-instruct-2507",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-gemma-3-4b-it": {
+      "name": "Gemma 3 4B IT (Hugging Face)",
+      "description": "unsloth/gemma-3-4b-it, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-gemma-3-4b-it"
+        },
+        "windows": {
+          "mirror": "hf-models-gemma-3-4b-it"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-gemma-3-4b-it",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-gemma-3-4b-it",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-gemma-4-e4b-it": {
+      "name": "Gemma 4 E4B IT (Hugging Face)",
+      "description": "unsloth/gemma-4-E4B-it, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-gemma-4-e4b-it"
+        },
+        "windows": {
+          "mirror": "hf-models-gemma-4-e4b-it"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-gemma-4-e4b-it",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-gemma-4-e4b-it",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-seamless-m4t-v2-large": {
+      "name": "SeamlessM4T v2 Large (Hugging Face)",
+      "description": "facebook/seamless-m4t-v2-large, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-seamless-m4t-v2-large"
+        },
+        "windows": {
+          "mirror": "hf-models-seamless-m4t-v2-large"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-seamless-m4t-v2-large",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-seamless-m4t-v2-large",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-all-minilm-l6-v2": {
+      "name": "all-MiniLM-L6-v2 (Hugging Face)",
+      "description": "sentence-transformers/all-MiniLM-L6-v2, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "windows": {
+          "mirror": "hf-models-all-minilm-l6-v2"
+        }
+      },
+      "install": {
+        "windows": {
+          "mirror": "hf-models-all-minilm-l6-v2",
+          "timeout": 1200
+        }
+      },
+      "versionable": false
+    },
+    "hf-datasets-databricks-dolly-15k": {
+      "name": "databricks-dolly-15k dataset (Hugging Face)",
+      "description": "databricks/databricks-dolly-15k, which the tests otherwise download from Hugging Face on first use",
+      "category": "dataset",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-datasets-databricks-dolly-15k"
+        },
+        "windows": {
+          "mirror": "hf-datasets-databricks-dolly-15k"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-datasets-databricks-dolly-15k",
+          "timeout": 600
+        },
+        "windows": {
+          "mirror": "hf-datasets-databricks-dolly-15k",
+          "timeout": 600
+        }
+      },
+      "versionable": false
+    },
+    "hf-datasets-english-quotes": {
+      "name": "english_quotes dataset (Hugging Face)",
+      "description": "Abirate/english_quotes, which the tests otherwise download from Hugging Face on first use",
+      "category": "dataset",
+      "platforms": [
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-datasets-english-quotes"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-datasets-english-quotes",
+          "timeout": 600
+        }
+      },
+      "versionable": false
+    },
+    "hf-datasets-finetome-100k": {
+      "name": "FineTome-100k dataset (Hugging Face)",
+      "description": "mlabonne/FineTome-100k, which the tests otherwise download from Hugging Face on first use",
+      "category": "dataset",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-datasets-finetome-100k"
+        },
+        "windows": {
+          "mirror": "hf-datasets-finetome-100k"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-datasets-finetome-100k",
+          "timeout": 600
+        },
+        "windows": {
+          "mirror": "hf-datasets-finetome-100k",
+          "timeout": 600
+        }
+      },
+      "versionable": false
     }
   }
 }

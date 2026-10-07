@@ -18,7 +18,9 @@ validate -> (if missing) install -> re-validate loop. A step is either an
 inline ``cmd`` or a ``script`` file under ``.github/scripts/prereqs/``. An
 install step may also name a ``mirror`` group: its files are first seeded from
 the internal mirror (``mirror/get.py seed``), and the install only runs if the
-dependency is still missing after that.
+dependency is still missing after that. A step that is only a ``mirror`` group
+checks (validate) or seeds (install) a Hugging Face cache group, for models the
+tests download themselves; those dependencies are ``optional``, so a miss warns.
 
     validate passes                -> OK                 (provisioned; no install)
     validate fails, install fixes  -> INSTALLED          (self-healed; job continues)
@@ -240,8 +242,16 @@ def _validate(spec: dict, platform: str) -> bool:
     v = (spec.get("validate") or {}).get(platform)
     if not v:
         return False
-    rc = _run(v, platform, v.get("timeout", 60))
+    if _mirror_only(v):
+        # A Hugging Face group: present when its files are in the user's Hugging Face cache.
+        rc = _run_args([sys.executable, str(MIRROR_GET), "present", v["mirror"]], v.get("timeout", 60))
+    else:
+        rc = _run(v, platform, v.get("timeout", 60))
     return rc == v.get("expect_rc", 0)
+
+
+def _mirror_only(step: dict) -> bool:
+    return bool(step.get("mirror")) and not (step.get("cmd") or step.get("script"))
 
 
 def check_dependency(dep_id: str, spec: dict, platform: str) -> dict:
@@ -286,15 +296,19 @@ def check_dependency(dep_id: str, spec: dict, platform: str) -> dict:
                 result["status"] = "INSTALLED"
                 print(f"  INSTALLED: {dep_id} now present (from the internal mirror)")
                 return result
-    install_rc = _run(install, platform, timeout)
-    result["install_rc"] = install_rc
-    if platform == "windows":
-        _refresh_windows_path()
+    if not _mirror_only(install):
+        result["install_rc"] = _run(install, platform, timeout)
+        if platform == "windows":
+            _refresh_windows_path()
 
     print(f"  re-validating {dep_id} ...")
     if _validate(spec, platform):
         result["status"] = "INSTALLED"
         print(f"  INSTALLED: {dep_id} now present")
+    elif spec.get("optional"):
+        # Optional means the tests can get it themselves; the prereq only gets it ahead of them.
+        result["status"] = "MISSING_OPTIONAL"
+        print(f"  WARN: {dep_id} still missing after install; continuing (optional)")
     else:
         result["status"] = "FAILED"
         print(f"  FAILED: {dep_id} still missing after install")

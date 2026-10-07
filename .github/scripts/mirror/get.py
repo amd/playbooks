@@ -13,6 +13,7 @@ transfer fails, the prerequisite's normal download still runs.
 
     get.py fetch <mirror path> --to <file> [--upstream]
     get.py seed <group>
+    get.py present <group>
 
 fetch exits 0 iff <file> is in place afterwards, so a caller can chain a fallback;
 with --upstream it falls back to the artifacts.json url itself.
@@ -21,7 +22,10 @@ seed places every file of one artifacts.json group, named after the registry
 dependency that uses it, in the store of that group's tool: Lemonade's Hugging
 Face cache, LM Studio's models folder or Ollama's model store. The tool's own
 install then finds the files and skips the download. LM Studio files fall back to
-their pinned Hugging Face url. Exits 0 iff all are in place.
+their pinned Hugging Face url. Hugging Face groups go into the cache of the user
+running this, where transformers and datasets look first. Exits 0 iff all are in place.
+
+present exits 0 iff a Hugging Face group's files are all in that cache already.
 
 Every download is checked against the SHA-256 pinned in artifacts.json.
 """
@@ -203,24 +207,26 @@ def hf_api(path: str):
     """JSON from the Hugging Face API, at HF_ENDPOINT when set (Lemonade honours it too)."""
     base = os.environ.get("HF_ENDPOINT", "https://huggingface.co").rstrip("/")
     token = os.environ.get("HF_TOKEN")
-    req = urllib.request.Request(f"{base}/api/models/{path}",
+    req = urllib.request.Request(f"{base}/api/{path}",
                                  headers={"Authorization": f"Bearer {token}"} if token else {})
     with urllib.request.urlopen(req, timeout=60) as resp:
         return json.load(resp)
 
 
-def plan_lmstudio(entries: list, store: Path) -> tuple[list, list]:
+# A plan lists (entry, destination, git blob id to check after download or None), the entries
+# it leaves to the tool's own download, and a step to run once the files are placed, or None.
+def plan_lmstudio(entries: list, store: Path):
     # models/<tool>/<user>/<repo>/<file> -> <store>/<user>/<repo>/<file>
-    return [(e, store.joinpath(*e["dest"].split("/")[2:])) for e in entries], []
+    return [(e, store.joinpath(*e["dest"].split("/")[2:]), None) for e in entries], [], None
 
 
-def plan_ollama(entries: list, store: Path) -> tuple[list, list]:
+def plan_ollama(entries: list, store: Path):
     # models/Ollama/<model>/<path in the store>; manifests last, so a half-seeded model never lists.
     ordered = sorted(entries, key=lambda e: "/manifests/" in e["dest"])
-    return [(e, store.joinpath(*e["dest"].split("/")[3:])) for e in ordered], []
+    return [(e, store.joinpath(*e["dest"].split("/")[3:]), None) for e in ordered], [], None
 
 
-def plan_lemonade(entries: list, store: Path) -> tuple[list, list]:
+def plan_lemonade(entries: list, store: Path):
     """Into the snapshot of the repo's current commit, where `lemonade pull` downloads to and skips
     files already present. A file that changed upstream since it was mirrored is left for the pull."""
     plan, skipped, repos = [], [], {}
@@ -228,10 +234,10 @@ def plan_lemonade(entries: list, store: Path) -> tuple[list, list]:
         repos.setdefault("/".join(e["dest"].split("/")[2:4]), []).append(e)
     for repo, group in repos.items():
         try:
-            commit = hf_api(f"{repo}/revision/main")["sha"]
+            commit = hf_api(f"models/{repo}/revision/main")["sha"]
             listing = {}
             for folder in {e["dest"].split("/", 4)[4].rpartition("/")[0] for e in group}:
-                for item in hf_api(f"{repo}/tree/{commit}" + (f"/{folder}" if folder else "")):
+                for item in hf_api(f"models/{repo}/tree/{commit}" + (f"/{folder}" if folder else "")):
                     listing[item["path"]] = item
         except (OSError, ValueError, KeyError, TypeError) as exc:
             print(f"cannot read {repo} on Hugging Face ({exc}); lemonade pull will fetch it")
@@ -245,20 +251,90 @@ def plan_lemonade(entries: list, store: Path) -> tuple[list, list]:
                 print(f"{name} changed upstream since it was mirrored; lemonade pull will fetch it")
                 skipped.append(e)
             else:
-                plan.append((e, snapshot.joinpath(*name.split("/"))))
-    return plan, skipped
+                plan.append((e, snapshot.joinpath(*name.split("/")), None))
+    return plan, skipped, None
+
+
+def hf_store() -> Path:
+    """The Hugging Face cache of the user running this, resolved the way huggingface_hub does."""
+    if os.environ.get("HF_HUB_CACHE"):
+        return Path(os.environ["HF_HUB_CACHE"])
+    if os.environ.get("HF_HOME"):
+        return Path(os.environ["HF_HOME"]) / "hub"
+    xdg = os.environ.get("XDG_CACHE_HOME")
+    return (Path(xdg) if xdg else invoking_home() / ".cache") / "huggingface" / "hub"
+
+
+def hf_repo_file(url: str):
+    """(models or datasets, repo, path in the repo) of a Hugging Face resolve URL."""
+    m = re.match(r"https://huggingface\.co/(datasets/)?([^/]+/[^/]+)/resolve/[^/]+/(.+)$", url)
+    return ("datasets" if m.group(1) else "models", m.group(2), m.group(3)) if m else None
+
+
+def git_blob_sha1(path: Path) -> str:
+    """Git's id for a file's bytes, which the Hugging Face tree gives for files outside LFS."""
+    data = path.read_bytes()
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def plan_hf(entries: list, store: Path):
+    """Into the snapshot of each repo's current commit, where the Hugging Face libraries look before
+    downloading. An LFS file must match that commit's SHA-256; a small file is checked after download.
+    refs/main moves only once every pinned file of the repo is placed, so a snapshot missing one is
+    never trusted offline."""
+    plan, skipped, repos, snapshots = [], [], {}, []
+    for e in entries:
+        where = hf_repo_file(e.get("url", ""))
+        if where:
+            repos.setdefault(where[:2], []).append((e, where[2]))
+        else:
+            skipped.append(e)
+    for (kind, repo), group in repos.items():
+        try:
+            commit = hf_api(f"{kind}/{repo}/revision/main")["sha"]
+            files = {i["path"]: i for i in hf_api(f"{kind}/{repo}/tree/{commit}?recursive=true") if i.get("type") == "file"}
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            print(f"cannot read {repo} on Hugging Face ({exc}); the test will download it")
+            skipped += [e for e, _ in group]
+            continue
+        cache = store / f"{kind}--{repo.replace('/', '--')}"
+        snapshot = cache / "snapshots" / commit
+        wanted = set()
+        for e, path in group:
+            item = files.get(path) or {}
+            lfs = item.get("lfs")
+            if not item or (lfs and lfs.get("oid") != e["sha256"]):
+                record(e["dest"], "stale")
+                print(f"{repo}/{path} changed upstream since it was mirrored; the test will download it")
+                skipped.append(e)
+                wanted.add(None)
+            else:
+                dest = snapshot.joinpath(*path.split("/"))
+                plan.append((e, dest, None if lfs else item.get("oid")))
+                wanted.add(dest)
+        snapshots.append((cache, commit, wanted))
+
+    def finish(placed: set):
+        for cache, commit, wanted in snapshots:
+            if wanted <= placed:
+                (cache / "refs").mkdir(parents=True, exist_ok=True)
+                (cache / "refs" / "main").write_text(commit)
+    return plan, skipped, finish
 
 
 # Store, plan, and whether to fall back to each file's pinned url. LM Studio's own downloads
 # go through its proxy, so its fallback here is the direct Hugging Face file instead.
 TOOLS = {"lemonade": (lemonade_store, plan_lemonade, False),
          "lmstudio": (lmstudio_store, plan_lmstudio, True),
-         "ollama": (ollama_store, plan_ollama, False)}
+         "ollama": (ollama_store, plan_ollama, False),
+         "hf": (hf_store, plan_hf, False)}
 
 
 def tool_of(group: str):
-    """The tool a group seeds into, from its name: lemonade-models-x, or zh-CN/lemonade-models-x for a locale's own."""
-    return TOOLS.get(re.sub(r"^[a-z]{2}-[A-Z]{2}/", "", group).split("-models", 1)[0])
+    """The tool a group seeds into, from its name, <tool>-models-x or <tool>-datasets-x, optionally
+    prefixed by a locale for that locale's own (zh-CN/lemonade-models-x)."""
+    m = re.match(r"^(?:[a-z]{2}-[A-Z]{2}/)?([a-z0-9]+)-(?:models|datasets)-", group)
+    return TOOLS.get(m.group(1)) if m else None
 
 
 def existing_ancestor(path: Path) -> Path:
@@ -302,14 +378,44 @@ def cmd_seed(args) -> int:
     store = Path(os.environ[STORE_OVERRIDE]) if os.environ.get(STORE_OVERRIDE) else store_of()
     elevate_for(store)
     anchor = existing_ancestor(store)
-    plan, skipped = plan_of(entries, store)
-    placed = 0
-    for entry, dest in plan:
-        if fetch(entry["dest"], dest, entry["sha256"], entry.get("url", "") if upstream else ""):
-            adopt(dest, anchor)
-            placed += 1
-    print(f"{args.group}: {placed} of {len(entries)} mirrored files in place under {store}")
-    return 0 if placed == len(entries) else 1
+    plan, _, finish = plan_of(entries, store)
+    placed = set()
+    for entry, dest, git_oid in plan:
+        if not fetch(entry["dest"], dest, entry["sha256"], entry.get("url", "") if upstream else ""):
+            continue
+        if git_oid and git_blob_sha1(dest) != git_oid:
+            # A small file that changed upstream since it was mirrored: leave it to the download.
+            dest.unlink()
+            record(entry["dest"], "stale")
+            continue
+        adopt(dest, anchor)
+        placed.add(dest)
+    if finish:
+        finish(placed)
+    print(f"{args.group}: {len(placed)} of {len(entries)} mirrored files in place under {store}")
+    return 0 if len(placed) == len(entries) else 1
+
+
+def cmd_present(args) -> int:
+    """Exit 0 iff every file of a Hugging Face group is in the cache's current snapshot (refs/main)."""
+    entries = [e for e in load_manifest(Path(args.manifest)).values() if e.get("group") == args.group]
+    if not entries or tool_of(args.group) is not TOOLS["hf"]:
+        print(f"no Hugging Face files are mirrored for {args.group}")
+        return 2
+    store = Path(os.environ[STORE_OVERRIDE]) if os.environ.get(STORE_OVERRIDE) else hf_store()
+    for e in entries:
+        kind, repo, path = hf_repo_file(e["url"])
+        cache = store / f"{kind}--{repo.replace('/', '--')}"
+        try:
+            commit = (cache / "refs" / "main").read_text().strip()
+        except OSError:
+            print(f"{repo} is not in {store}")
+            return 1
+        if not (cache / "snapshots" / commit).joinpath(*path.split("/")).is_file():
+            print(f"{repo}/{path} is not in {store}")
+            return 1
+    print(f"{args.group}: every mirrored file is in {store}")
+    return 0
 
 
 def main() -> int:
@@ -325,6 +431,9 @@ def main() -> int:
     seed_p = sub.add_parser("seed", help="put a dependency's mirrored files in its tool's store")
     seed_p.add_argument("group", help="artifacts.json group, named after the registry dependency")
     seed_p.set_defaults(func=cmd_seed)
+    present_p = sub.add_parser("present", help="check a Hugging Face group's files are in the cache")
+    present_p.add_argument("group", help="artifacts.json group, named after the registry dependency")
+    present_p.set_defaults(func=cmd_present)
     args = parser.parse_args()
     return args.func(args)
 

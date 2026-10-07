@@ -66,6 +66,8 @@ Unsloth also supports other training approaches, including QLoRA and reinforceme
 
 ## Installing Software Prerequisites
 
+<!-- @prereq:hf-models-gemma-4-e4b-it,hf-datasets-finetome-100k -->
+
 ### Create a Virtual Environment
 
 <!-- @os:linux -->

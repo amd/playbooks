@@ -121,6 +121,7 @@ s2st-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @require:pytorch -->
+<!-- @prereq:hf-models-seamless-m4t-v2-large -->
 
 ### Additional Dependencies
 
