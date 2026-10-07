@@ -6,5 +6,5 @@
 node --version
 if (-not $?) { exit 1 }
 npm --version | Out-Null
-if (-not $?) { exit 1 }
+if (-not $? -or $LASTEXITCODE -ne 0) { exit 1 }
 exit 0
