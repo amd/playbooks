@@ -14,9 +14,10 @@ ARTIFACTORY_BASE, as for get.py.
     mirror.py push [--group G] [--dest PATH]
 
 check compares each pinned file with the mirror, and with Hugging Face when asked.
-push uploads the entries the mirror lacks: each is downloaded from its url, checked
-against its pinned SHA-256, and deployed with that checksum so Artifactory checks it
-again. A file already on the mirror is never replaced.
+push uploads the entries the mirror lacks. A file Artifactory already stores under
+another path is linked by checksum, with no transfer; anything else is downloaded from
+its url, checked against its pinned SHA-256, and deployed with that checksum so
+Artifactory checks it again. A file already on the mirror is never replaced.
 """
 from __future__ import annotations
 
@@ -57,9 +58,11 @@ def remote_sha256(dest: str) -> str | None:
 
 
 def upstream_sha256(url: str) -> str | None:
-    """SHA-256 Hugging Face reports for a resolve URL's LFS file, without downloading it."""
+    """SHA-256 Hugging Face reports today for a resolve URL's LFS file, without downloading it."""
     if "huggingface.co/" not in url:
         return None
+    # Pins download from a fixed commit; drift is a question about the current main.
+    url = re.sub(r"/resolve/[0-9a-f]{40}/", "/resolve/main/", url)
     r = subprocess.run([CURL, "-sSI", "--connect-timeout", "10", url], capture_output=True, text=True)
     m = re.search(r'^x-linked-etag:\s*"?([0-9a-f]{64})"?', r.stdout, re.I | re.M)
     return m.group(1) if m else None
@@ -85,13 +88,19 @@ def cmd_check(args) -> int:
     return 1 if problems else 0
 
 
-def deploy(path: Path, dest: str, sha256: str, token: str) -> bool:
-    """PUT a file; Artifactory rejects it unless it matches the declared SHA-256."""
-    r = subprocess.run([CURL, "-sS", "-o", os.devnull, "-w", "%{http_code}", "-T", str(path),
+def deploy(path: Path | None, dest: str, sha256: str, token: str) -> bool:
+    """PUT a file; Artifactory rejects it unless it matches the declared SHA-256.
+
+    Without a path, deploy by checksum: Artifactory links dest to a binary it already
+    stores under another path, so nothing is transferred.
+    """
+    body = ["-T", str(path)] if path else ["-X", "PUT", "-H", "X-Checksum-Deploy: true"]
+    r = subprocess.run([CURL, "-sS", "-o", os.devnull, "-w", "%{http_code}", *body,
                         "-H", f"X-Checksum-Sha256: {sha256}", "-H", "@-", f"{BASE}/{dest}"],
                        input=f"Authorization: Bearer {token}\n", capture_output=True, text=True)
     if not r.stdout.startswith("2"):
-        print(f"deploying {dest} failed: HTTP {r.stdout} {mask(r.stderr.strip())}")
+        if path:
+            print(f"deploying {dest} failed: HTTP {r.stdout} {mask(r.stderr.strip())}")
         return False
     return True
 
@@ -106,6 +115,9 @@ def cmd_push(args) -> int:
         have = remote_sha256(e["dest"])
         if have is not None:
             print(f"{'already there' if have == e['sha256'] else 'left as is (different file)'}: {e['dest']}")
+            continue
+        if deploy(None, e["dest"], e["sha256"], token) and remote_sha256(e["dest"]) == e["sha256"]:
+            print(f"linked to the copy the mirror already stores: {e['dest']}", flush=True)
             continue
         staged = STAGING / e["dest"]
         print(f"downloading {e['dest']} ({e['size'] / 2**30:.1f} GiB)", flush=True)

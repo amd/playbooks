@@ -20,7 +20,8 @@ with --upstream it falls back to the artifacts.json url itself.
 seed places every file of one artifacts.json group, named after the registry
 dependency that uses it, in the store of that group's tool: Lemonade's Hugging
 Face cache, LM Studio's models folder or Ollama's model store. The tool's own
-install then finds the files and skips the download. Exits 0 iff all are in place.
+install then finds the files and skips the download. LM Studio files fall back to
+their pinned Hugging Face url. Exits 0 iff all are in place.
 
 Every download is checked against the SHA-256 pinned in artifacts.json.
 """
@@ -247,9 +248,11 @@ def plan_lemonade(entries: list, store: Path) -> tuple[list, list]:
     return plan, skipped
 
 
-TOOLS = {"lemonade": (lemonade_store, plan_lemonade),
-         "lmstudio": (lmstudio_store, plan_lmstudio),
-         "ollama": (ollama_store, plan_ollama)}
+# Store, plan, and whether to fall back to each file's pinned url. LM Studio's own downloads
+# go through its proxy, so its fallback here is the direct Hugging Face file instead.
+TOOLS = {"lemonade": (lemonade_store, plan_lemonade, False),
+         "lmstudio": (lmstudio_store, plan_lmstudio, True),
+         "ollama": (ollama_store, plan_ollama, False)}
 
 
 def existing_ancestor(path: Path) -> Path:
@@ -286,17 +289,17 @@ def cmd_seed(args) -> int:
     if not entries or not tool:
         print(f"nothing is mirrored for {args.group}")
         return 1
-    if not os.environ.get("ARTIFACTORY_BASE"):
+    store_of, plan_of, upstream = tool
+    if not os.environ.get("ARTIFACTORY_BASE") and not upstream:
         print("ARTIFACTORY_BASE is not set, so the mirror is unreachable")
         return 1
-    store_of, plan_of = tool
     store = Path(os.environ[STORE_OVERRIDE]) if os.environ.get(STORE_OVERRIDE) else store_of()
     elevate_for(store)
     anchor = existing_ancestor(store)
     plan, skipped = plan_of(entries, store)
     placed = 0
     for entry, dest in plan:
-        if fetch(entry["dest"], dest, entry["sha256"]):
+        if fetch(entry["dest"], dest, entry["sha256"], entry.get("url", "") if upstream else ""):
             adopt(dest, anchor)
             placed += 1
     print(f"{args.group}: {placed} of {len(entries)} mirrored files in place under {store}")

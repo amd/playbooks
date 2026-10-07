@@ -28,6 +28,7 @@ import sys
 import tempfile
 import threading
 import unittest
+import unittest.mock
 from pathlib import Path
 
 _SPEC = importlib.util.spec_from_file_location(
@@ -216,6 +217,30 @@ class LoopTests(unittest.TestCase):
             r = pv.check_dependency("d", spec, "linux")
             self.assertEqual((r["status"], "install_rc" in r), ("INSTALLED", False))
 
+    def test_windows_install_picks_up_path_entries_the_installer_added(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            gh_path = Path(tmp) / "github_path"
+            saved = pv._registry_path_entries
+            pv._registry_path_entries = lambda: [r"C:\old", r"C:\new\bin", r"C:\new\bin"]
+            self.addCleanup(setattr, pv, "_registry_path_entries", saved)
+            with unittest.mock.patch.dict(os.environ, {"PATH": r"C:\old", "GITHUB_PATH": str(gh_path)}), \
+                    unittest.mock.patch.object(os, "pathsep", ";"):
+                pv._refresh_windows_path()
+                self.assertEqual(os.environ["PATH"].split(";"), [r"C:\new\bin", r"C:\old"])
+            self.assertEqual(gh_path.read_text().splitlines(), [r"C:\new\bin"])
+
+    def test_path_is_refreshed_between_a_windows_install_and_its_revalidate(self):
+        calls = []
+        patches = {"_run": lambda step, platform, timeout: calls.append("install") or 0,
+                   "_validate": lambda spec, platform: calls.append("validate") or len(calls) > 2,
+                   "_refresh_windows_path": lambda: calls.append("refresh")}
+        for name, fake in patches.items():
+            self.addCleanup(setattr, pv, name, getattr(pv, name))
+            setattr(pv, name, fake)
+        spec = {"validate": {"windows": {"cmd": "x"}}, "install": {"windows": {"cmd": "y"}}}
+        self.assertEqual(pv.check_dependency("d", spec, "windows")["status"], "INSTALLED")
+        self.assertEqual(calls, ["validate", "install", "refresh", "validate"])
+
     def test_install_still_runs_when_seeding_falls_short(self):
         with tempfile.TemporaryDirectory() as tmp:
             flag = Path(tmp) / "installed"
@@ -388,8 +413,10 @@ class MirrorSeedTests(unittest.TestCase):
         cls.base, cls.hf = f"http://127.0.0.1:{port}/mirror", f"http://127.0.0.1:{port}/hf"
         tool = {"lemonade": "lemonade", "lmstudio": "lmstudio", "Ollama": "ollama"}
         cls.manifest = root / "artifacts.json"
+        # Only LM Studio falls back upstream; its fixture upstream serves the same bytes.
         cls.manifest.write_text(json.dumps([
-            {"group": f"{tool[rel.split('/')[1]]}-models-x", "dest": rel, "url": "https://example.invalid/",
+            {"group": f"{tool[rel.split('/')[1]]}-models-x", "dest": rel,
+             "url": f"{cls.base}/{rel}" if "/lmstudio/" in rel else "https://example.invalid/",
              "size": len(data), "sha256": _sha256(data)} for rel, data in cls.FILES.items()
         ]))
 
@@ -441,8 +468,13 @@ class MirrorSeedTests(unittest.TestCase):
         self.assertEqual((rc, [o for _, o in ledger]), (1, ["unreachable", "skipped"]))
 
     def test_no_secret_leaves_the_store_untouched(self):
-        rc, store, ledger = self._seed("lmstudio-models-x", secret=False)
+        rc, store, ledger = self._seed("ollama-models-x", secret=False)
         self.assertEqual((rc, store.exists(), ledger), (1, False, []))
+
+    def test_lmstudio_falls_back_to_the_pinned_upstream_without_the_mirror(self):
+        rc, store, ledger = self._seed("lmstudio-models-x", secret=False)
+        self.assertEqual((rc, (store / "user/repo/model.gguf").read_bytes()), (0, b"lms-bytes"))
+        self.assertEqual([o for _, o in ledger], ["no-secret", "upstream"])
 
     def test_unknown_group_fails(self):
         self.assertEqual(self._seed("comfyui")[0], 1)
@@ -478,9 +510,13 @@ class _FakeArtifactory(http.server.BaseHTTPRequestHandler):
         self._reply(404)
 
     def do_PUT(self):
-        body = self.rfile.read(int(self.headers["Content-Length"]))
+        body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
         if self.headers.get("Authorization") != f"Bearer {self.token}":
             return self._reply(401)
+        if self.headers.get("X-Checksum-Deploy") == "true":
+            body = next((b for b in self.store.values() if _sha256(b) == self.headers.get("X-Checksum-Sha256")), None)
+            if body is None:
+                return self._reply(404)
         if self.headers.get("X-Checksum-Sha256") != _sha256(body):
             return self._reply(409)
         self.store[self.path[len("/artifactory/repo/"):]] = body
@@ -508,6 +544,8 @@ class MirrorToolTests(unittest.TestCase):
              "size": 9, "sha256": _sha256(b"new-bytes")},
             {"group": "bad", "dest": "models/bad.bin", "url": f"http://127.0.0.1:{port}/up/bad.bin",
              "size": 9, "sha256": _sha256(b"good-bytes")},
+            {"group": "link", "dest": "models/link.bin", "url": f"http://127.0.0.1:{port}/up/absent.bin",
+             "size": 19, "sha256": _sha256(b"someone else's file")},
         ]))
 
     @classmethod
@@ -537,6 +575,10 @@ class MirrorToolTests(unittest.TestCase):
     def test_push_refuses_an_upstream_copy_that_does_not_match_the_pin(self):
         rc, _ = self._run("push", "--group", "bad")
         self.assertEqual((rc, "models/bad.bin" in _FakeArtifactory.store), (1, False))
+
+    def test_push_links_a_file_the_mirror_already_stores_without_downloading_it(self):
+        rc, out = self._run("push", "--group", "link")  # its url 404s, so only a link can succeed
+        self.assertEqual((rc, _FakeArtifactory.store.get("models/link.bin")), (0, b"someone else's file"), out)
 
     def test_push_needs_a_token(self):
         self.assertEqual(self._run("push", "--group", "g", token=False)[0], 1)

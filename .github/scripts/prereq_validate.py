@@ -192,6 +192,34 @@ def _run_args(args: list[str], timeout: int) -> int:
         return 1
 
 
+def _registry_path_entries() -> list[str]:
+    """Machine then user PATH as the Windows registry holds it now (installers write there)."""
+    import winreg
+    entries = []
+    for root, key in ((winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
+                      (winreg.HKEY_CURRENT_USER, "Environment")):
+        try:
+            with winreg.OpenKey(root, key) as handle:
+                value = winreg.QueryValueEx(handle, "Path")[0]
+        except OSError:
+            continue
+        entries += [winreg.ExpandEnvironmentStrings(p) for p in value.split(";") if p]
+    return entries
+
+
+def _refresh_windows_path() -> None:
+    """Pick up PATH entries an install just added, for the re-validate and, via GITHUB_PATH, the tests."""
+    have = {p.rstrip("\\").lower() for p in os.environ.get("PATH", "").split(os.pathsep) if p}
+    new = [p for p in dict.fromkeys(_registry_path_entries()) if p.rstrip("\\").lower() not in have]
+    if not new:
+        return
+    os.environ["PATH"] = os.pathsep.join(new + [os.environ.get("PATH", "")])
+    if os.environ.get("GITHUB_PATH"):
+        with open(os.environ["GITHUB_PATH"], "a", encoding="utf-8") as fh:
+            fh.writelines(p + "\n" for p in new)
+    print(f"  (PATH now also has: {'; '.join(new)})")
+
+
 def _validate(spec: dict, platform: str) -> bool:
     v = (spec.get("validate") or {}).get(platform)
     if not v:
@@ -244,6 +272,8 @@ def check_dependency(dep_id: str, spec: dict, platform: str) -> dict:
                 return result
     install_rc = _run(install, platform, timeout)
     result["install_rc"] = install_rc
+    if platform == "windows":
+        _refresh_windows_path()
 
     print(f"  re-validating {dep_id} ...")
     if _validate(spec, platform):

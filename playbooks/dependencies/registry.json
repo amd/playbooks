@@ -55,18 +55,22 @@
       },
       "validate": {
         "linux": {
-          "cmd": "lms --help",
+          "cmd": "lms --help >/dev/null && systemctl is-active --quiet lmstudio",
           "expect_rc": 0
         },
         "windows": {
-          "cmd": "lms --help",
+          "script": "lmstudio.validate.ps1",
           "expect_rc": 0
         }
       },
       "install": {
         "linux": {
-          "cmd": "curl -fsSL https://lmstudio.ai/install.sh | bash && sudo ln -sf \"$HOME/.lmstudio/bin/lms\" /usr/local/bin/lms",
+          "script": "lmstudio.install.sh",
           "timeout": 900
+        },
+        "windows": {
+          "script": "lmstudio.install.ps1",
+          "timeout": 1200
         }
       },
       "versionable": true
@@ -968,6 +972,10 @@
         ]
       },
       "validate": {
+        "linux": {
+          "cmd": "test -d /sys/module/amdgpu && test -r /dev/kfd && test -w /dev/kfd && ls /dev/dri/renderD* >/dev/null",
+          "expect_rc": 0
+        },
         "windows": {
           "cmd": "exit [int](-not (Test-Path 'C:\\Program Files\\AMD\\CNext\\CNext\\RadeonSoftware.exe'))",
           "expect_rc": 0
