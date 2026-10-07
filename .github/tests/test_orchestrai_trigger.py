@@ -118,9 +118,9 @@ class AcquireTimeoutValidation(unittest.TestCase):
         self.assertEqual(self.errors_for(acquire_timeout=600, max_duration=0), [])
 
 
-class OpenHandsProvisioning(unittest.TestCase):
+class SchedulingPolicy(unittest.TestCase):
 
-    def test_fixed_qwen_agent_playbooks_skip_only_stx_in_shipped_policy(self):
+    def test_fixed_qwen_agent_playbooks_skip_stx_and_pin_krk_to_64gb(self):
         from orchestrai_matrix import build
 
         cfg = load_config()
@@ -153,6 +153,9 @@ class OpenHandsProvisioning(unittest.TestCase):
                              ["ollama-getting-started"])
             self.assertEqual(batches[f"{platform}/krk+ram_64gb"]["playbooks"],
                              list(affected))
+
+
+class OpenHandsProvisioning(unittest.TestCase):
 
     def test_windows_openhands_enables_wsl_without_installer_coordinates(self):
         """The Docker Desktop installer is the dependency's own business: this
