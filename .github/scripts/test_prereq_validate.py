@@ -465,16 +465,17 @@ class MirrorSeedTests(unittest.TestCase):
         cls._srv.shutdown()
         cls._root.cleanup()
 
-    def _seed(self, group, secret=True):
+    def _seed(self, group, secret=True, **extra_env):
         out = tempfile.TemporaryDirectory()
         self.addCleanup(out.cleanup)
         store, ledger = Path(out.name) / "store", Path(out.name) / "ledger.jsonl"
         env = dict(os.environ, PLAYBOOKS_MIRROR_LEDGER=str(ledger), PLAYBOOKS_MIRROR_STORE=str(store),
                    HF_ENDPOINT=self.hf)
-        for var in ("ARTIFACTORY_BASE", "HF_TOKEN"):
+        for var in ("ARTIFACTORY_BASE", "HF_TOKEN", "HF_HUB_OFFLINE"):
             env.pop(var, None)
         if secret:
             env["ARTIFACTORY_BASE"] = self.base
+        env.update(extra_env)
         rc = subprocess.run([sys.executable, str(self.GET), "--manifest", str(self.manifest), "seed", group],
                             env=env, capture_output=True, text=True).returncode
         lines = ledger.read_text().splitlines() if ledger.exists() else []
@@ -527,6 +528,20 @@ class MirrorSeedTests(unittest.TestCase):
         self.assertFalse((cache / "refs/main").exists())
         self.assertIn(("models/org/stalerepo/tokenizer.json", "stale"), ledger)
         self.assertEqual(self._present("hf-models-stale", store), 1)
+
+    def test_offline_runners_seed_the_pinned_commit_without_asking_hugging_face(self):
+        # Asking would have dropped tokenizer.json, which changed upstream.
+        rc, store, _ = self._seed("hf-models-stale", HF_HUB_OFFLINE="1")
+        cache = store / "models--org--stalerepo"
+        self.assertEqual((rc, (cache / "snapshots" / ("0" * 40) / "tokenizer.json").read_bytes()), (0, b"old"))
+        self.assertEqual((cache / "refs/main").read_text(), "0" * 40)
+        self.assertEqual(self._present("hf-models-stale", store), 0)
+
+    def test_unreadable_hugging_face_falls_back_to_the_pinned_commit(self):
+        rc, store, _ = self._seed("hf-models-ok", HF_ENDPOINT="http://127.0.0.1:9")  # nothing listens here
+        cache = store / "models--org--okrepo"
+        self.assertEqual((rc, (cache / "refs/main").read_text()), (0, "0" * 40))
+        self.assertEqual((cache / "snapshots" / ("0" * 40) / "model.safetensors").read_bytes(), b"weights")
 
     def test_unreachable_mirror_is_tried_once_per_group(self):
         saved = self.base
@@ -732,6 +747,16 @@ class RegistryIntegrityTests(unittest.TestCase):
         used = {s["mirror"] for _, _, _, s in self._steps() if "mirror" in s}
         seedable = {g for g in self._groups() if mirror_get.tool_of(g)}
         self.assertEqual(sorted(seedable - used), [])
+
+    def test_each_hugging_face_repo_is_pinned_at_one_commit(self):
+        # Offline seeding fills that commit's snapshot.
+        revisions = {}
+        for e in json.loads(mirror_get.MANIFEST.read_text(encoding="utf-8")):
+            if mirror_get.tool_of(e["group"]) is mirror_get.TOOLS["hf"]:
+                _, repo, rev, _ = mirror_get.hf_repo_file(e["url"])
+                revisions.setdefault(repo, set()).add(rev)
+        bad = {r: v for r, v in revisions.items() if len(v) != 1 or not re.fullmatch(r"[0-9a-f]{40}", next(iter(v)))}
+        self.assertEqual(bad, {})
 
 
 class LocaleTests(unittest.TestCase):

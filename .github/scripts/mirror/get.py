@@ -23,7 +23,9 @@ dependency that uses it, in the store of that group's tool: Lemonade's Hugging
 Face cache, LM Studio's models folder or Ollama's model store. The tool's own
 install then finds the files and skips the download. LM Studio files fall back to
 their pinned Hugging Face url. Hugging Face groups go into the cache of the user
-running this, where transformers and datasets look first. Exits 0 iff all are in place.
+running this, where transformers and datasets look first, at the repo's current
+commit, or at the pinned one when HF_HUB_OFFLINE is set or Hugging Face can't be
+read. Exits 0 iff all are in place.
 
 present exits 0 iff a Hugging Face group's files are all in that cache already.
 
@@ -266,9 +268,14 @@ def hf_store() -> Path:
 
 
 def hf_repo_file(url: str):
-    """(models or datasets, repo, path in the repo) of a Hugging Face resolve URL."""
-    m = re.match(r"https://huggingface\.co/(datasets/)?([^/]+/[^/]+)/resolve/[^/]+/(.+)$", url)
-    return ("datasets" if m.group(1) else "models", m.group(2), m.group(3)) if m else None
+    """(models or datasets, repo, pinned revision, path in the repo) of a Hugging Face resolve URL."""
+    m = re.match(r"https://huggingface\.co/(datasets/)?([^/]+/[^/]+)/resolve/([^/]+)/(.+)$", url)
+    return ("datasets" if m.group(1) else "models", m.group(2), m.group(3), m.group(4)) if m else None
+
+
+def hf_offline() -> bool:
+    """HF_HUB_OFFLINE as huggingface_hub reads it: the runner wants no Hugging Face traffic."""
+    return os.environ.get("HF_HUB_OFFLINE", "").strip().upper() in ("1", "ON", "YES", "TRUE")
 
 
 def git_blob_sha1(path: Path) -> str:
@@ -280,27 +287,40 @@ def git_blob_sha1(path: Path) -> str:
 def plan_hf(entries: list, store: Path):
     """Into the snapshot of each repo's current commit, where the Hugging Face libraries look before
     downloading. An LFS file must match that commit's SHA-256; a small file is checked after download.
-    refs/main moves only once every pinned file of the repo is placed, so a snapshot missing one is
-    never trusted offline."""
+    Offline (HF_HUB_OFFLINE), or when Hugging Face can't be read, into the commit the files were pinned
+    at instead, checked by their SHA-256 alone. refs/main moves only once every pinned file of the repo
+    is placed, so a snapshot missing one is never trusted offline."""
     plan, skipped, repos, snapshots = [], [], {}, []
     for e in entries:
         where = hf_repo_file(e.get("url", ""))
         if where:
-            repos.setdefault(where[:2], []).append((e, where[2]))
+            repos.setdefault(where[:2], []).append((e, where[2], where[3]))
         else:
             skipped.append(e)
     for (kind, repo), group in repos.items():
-        try:
-            commit = hf_api(f"{kind}/{repo}/revision/main")["sha"]
-            files = {i["path"]: i for i in hf_api(f"{kind}/{repo}/tree/{commit}?recursive=true") if i.get("type") == "file"}
-        except (OSError, ValueError, KeyError, TypeError) as exc:
-            print(f"cannot read {repo} on Hugging Face ({exc}); the test will download it")
-            skipped += [e for e, _ in group]
-            continue
+        files = None
+        if not hf_offline():
+            try:
+                commit = hf_api(f"{kind}/{repo}/revision/main")["sha"]
+                files = {i["path"]: i for i in hf_api(f"{kind}/{repo}/tree/{commit}?recursive=true") if i.get("type") == "file"}
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                print(f"cannot read {repo} on Hugging Face ({exc}); seeding the commit it was pinned at")
+        if files is None:
+            pins = {rev for _, rev, _ in group}
+            commit = pins.pop()
+            if pins or not re.fullmatch(r"[0-9a-f]{40}", commit):
+                print(f"{repo} is not pinned at a single commit; the test will download it")
+                skipped += [e for e, _, _ in group]
+                continue
         cache = store / f"{kind}--{repo.replace('/', '--')}"
         snapshot = cache / "snapshots" / commit
         wanted = set()
-        for e, path in group:
+        for e, _, path in group:
+            if files is None:
+                dest = snapshot.joinpath(*path.split("/"))
+                plan.append((e, dest, None))
+                wanted.add(dest)
+                continue
             item = files.get(path) or {}
             lfs = item.get("lfs")
             if not item or (lfs and lfs.get("oid") != e["sha256"]):
@@ -404,7 +424,7 @@ def cmd_present(args) -> int:
         return 2
     store = Path(os.environ[STORE_OVERRIDE]) if os.environ.get(STORE_OVERRIDE) else hf_store()
     for e in entries:
-        kind, repo, path = hf_repo_file(e["url"])
+        kind, repo, _, path = hf_repo_file(e["url"])
         cache = store / f"{kind}--{repo.replace('/', '--')}"
         try:
             commit = (cache / "refs" / "main").read_text().strip()
