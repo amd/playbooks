@@ -438,9 +438,10 @@
     },
     "uv": {
       "name": "uv",
-      "description": "Fast Python package/environment manager used by Agent Canvas",
+      "description": "Fast Python package/environment manager",
       "category": "runtime",
       "platforms": [
+        "windows",
         "linux"
       ],
       "file": "uv.md",
@@ -452,11 +453,19 @@
         "linux": {
           "cmd": "export PATH=\"$HOME/.local/bin:$PATH\"; uv --version",
           "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "uv --version",
+          "expect_rc": 0
         }
       },
       "install": {
         "linux": {
           "cmd": "curl -LsSf https://astral.sh/uv/install.sh | sh",
+          "timeout": 300
+        },
+        "windows": {
+          "cmd": "irm https://astral.sh/uv/install.ps1 | iex",
           "timeout": 300
         }
       },
