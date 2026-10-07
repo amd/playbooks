@@ -237,7 +237,6 @@
         "windows",
         "linux"
       ],
-      "file": "lemonade_models_qwen3_5_35b_a3b.md",
       "preinstalled": {
         "linux": [],
         "windows": []
@@ -274,7 +273,6 @@
         "windows",
         "linux"
       ],
-      "file": "lemonade_models_qwen3_5_9b.md",
       "preinstalled": {
         "linux": [],
         "windows": []
@@ -311,7 +309,6 @@
         "windows",
         "linux"
       ],
-      "file": "modelscope_models.md",
       "preinstalled": {
         "linux": [],
         "windows": []
@@ -345,7 +342,6 @@
         "windows",
         "linux"
       ],
-      "file": "modelscope_models.md",
       "preinstalled": {
         "linux": [],
         "windows": []
@@ -379,7 +375,6 @@
         "windows",
         "linux"
       ],
-      "file": "modelscope_models.md",
       "preinstalled": {
         "linux": [],
         "windows": []
