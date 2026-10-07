@@ -14,13 +14,11 @@ prerequisites a playbook needs are actually present on the machine -- and to
 For each ``@require:<dep>`` or ``@prereq:<dep>`` a playbook declares (scoped to the active
 ``@os:``/``@device:`` blocks), this reads a ``validate`` and optional
 ``install`` step from ``playbooks/dependencies/registry.json`` and runs a
-validate -> (if missing) install -> re-validate loop. A step is either an
-inline ``cmd`` or a ``script`` file under ``.github/scripts/prereqs/``. An
-install step may also name a ``mirror`` group: its files are first seeded from
-the internal mirror (``mirror/get.py seed``), and the install only runs if the
-dependency is still missing after that. A step that is only a ``mirror`` group
-checks (validate) or seeds (install) a Hugging Face or ModelScope cache group, for
-models the tests download themselves; those dependencies are ``optional``, so a
+validate -> (if missing) install -> re-validate loop. A step is an inline ``cmd``
+or a ``script`` under ``.github/scripts/prereqs/``. An install step may also name
+a ``mirror`` group, seeded first (``mirror/get.py seed``) so the install runs only
+if still needed. A step that is only a ``mirror`` group checks or seeds the cache
+of models the tests download themselves; such dependencies are ``optional``, so a
 miss warns.
 
     validate passes                -> OK                 (provisioned; no install)
@@ -180,14 +178,14 @@ def _run(step: dict, platform: str, timeout: int) -> int:
     return _run_args(_step_args(step, platform), timeout)
 
 
-def _seed(group: str, timeout: int) -> int:
-    """Put a mirror group's files in place before the install runs (best-effort)."""
-    return _run_args([sys.executable, str(MIRROR_GET), "seed", group], timeout)
+def _mirror(command: str, group: str, timeout: int) -> int:
+    """mirror/get.py seed or present, for one artifacts.json group."""
+    return _run_args([sys.executable, str(MIRROR_GET), command, group], timeout)
 
 
 def _run_args(args: list[str], timeout: int) -> int:
     """Run a command with bounded, surfaced output and return its exit code."""
-    # Scripts that call helpers (e.g. mirror/get.py) use this interpreter, not whatever `python` resolves to.
+    # Scripts run mirror/get.py with this interpreter, not whatever `python` resolves to.
     env = dict(os.environ, PREREQ_PYTHON=sys.executable)
     try:
         proc = subprocess.run(
@@ -243,11 +241,8 @@ def _validate(spec: dict, platform: str) -> bool:
     v = (spec.get("validate") or {}).get(platform)
     if not v:
         return False
-    if _mirror_only(v):
-        # A Hugging Face or ModelScope group: present when its files are in the user's cache.
-        rc = _run_args([sys.executable, str(MIRROR_GET), "present", v["mirror"]], v.get("timeout", 60))
-    else:
-        rc = _run(v, platform, v.get("timeout", 60))
+    timeout = v.get("timeout", 60)
+    rc = _mirror("present", v["mirror"], timeout) if _mirror_only(v) else _run(v, platform, timeout)
     return rc == v.get("expect_rc", 0)
 
 
@@ -289,7 +284,7 @@ def check_dependency(dep_id: str, spec: dict, platform: str) -> dict:
     result["install_ran"] = True
     timeout = install.get("timeout", 1800)
     if install.get("mirror"):
-        result["mirror_rc"] = _seed(install["mirror"], timeout)
+        result["mirror_rc"] = _mirror("seed", install["mirror"], timeout)
         for attempt in range(SEED_SETTLE_TRIES if result["mirror_rc"] == 0 else 1):
             if attempt:
                 time.sleep(SEED_SETTLE_SECONDS)

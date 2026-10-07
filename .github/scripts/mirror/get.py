@@ -19,17 +19,11 @@ fetch exits 0 iff <file> is in place afterwards, so a caller can chain a fallbac
 with --upstream it falls back to the artifacts.json url itself.
 
 seed places every file of one artifacts.json group, named after the registry
-dependency that uses it, in the store of that group's tool: Lemonade's Hugging
-Face cache, LM Studio's models folder or Ollama's model store. The tool's own
-install then finds the files and skips the download. LM Studio files fall back to
-their pinned Hugging Face url. Hugging Face groups go into the cache of the user
-running this, where transformers and datasets look first, at the repo's current
-commit, or at the pinned one when HF_HUB_OFFLINE is set or Hugging Face can't be
-read. ModelScope groups go where its snapshot_download keeps that model. Exits 0
-iff all are in place.
-
-present exits 0 iff a Hugging Face or ModelScope group's files are all in that
-cache already.
+dependency that uses it, where that group's tool looks before downloading:
+Lemonade's or the user's Hugging Face cache, LM Studio's models folder, Ollama's
+store, or ModelScope's cache. LM Studio files fall back to their pinned url.
+Exits 0 iff all are in place. present exits 0 iff a Hugging Face or ModelScope
+group is already in its cache.
 
 Every download is checked against the SHA-256 pinned in artifacts.json.
 """
@@ -43,6 +37,7 @@ import re
 import subprocess
 import sys
 import urllib.request
+from collections import namedtuple
 from pathlib import Path
 
 MANIFEST = Path(__file__).with_name("artifacts.json")
@@ -217,23 +212,23 @@ def hf_api(path: str):
         return json.load(resp)
 
 
-# A plan lists (entry, destination, git blob id to check after download or None), the entries
-# it leaves to the tool's own download, and a step to run once the files are placed, or None.
+# A plan lists (entry, destination, git blob id to check after download or None) for the files
+# to place, leaving the rest to the tool's own download, and a step to run afterwards, or None.
 def plan_lmstudio(entries: list, store: Path):
     # models/<tool>/<user>/<repo>/<file> -> <store>/<user>/<repo>/<file>
-    return [(e, store.joinpath(*e["dest"].split("/")[2:]), None) for e in entries], [], None
+    return [(e, store.joinpath(*e["dest"].split("/")[2:]), None) for e in entries], None
 
 
 def plan_ollama(entries: list, store: Path):
     # models/Ollama/<model>/<path in the store>; manifests last, so a half-seeded model never lists.
     ordered = sorted(entries, key=lambda e: "/manifests/" in e["dest"])
-    return [(e, store.joinpath(*e["dest"].split("/")[3:]), None) for e in ordered], [], None
+    return [(e, store.joinpath(*e["dest"].split("/")[3:]), None) for e in ordered], None
 
 
 def plan_lemonade(entries: list, store: Path):
     """Into the snapshot of the repo's current commit, where `lemonade pull` downloads to and skips
     files already present. A file that changed upstream since it was mirrored is left for the pull."""
-    plan, skipped, repos = [], [], {}
+    plan, repos = [], {}
     for e in entries:
         repos.setdefault("/".join(e["dest"].split("/")[2:4]), []).append(e)
     for repo, group in repos.items():
@@ -245,7 +240,6 @@ def plan_lemonade(entries: list, store: Path):
                     listing[item["path"]] = item
         except (OSError, ValueError, KeyError, TypeError) as exc:
             print(f"cannot read {repo} on Hugging Face ({exc}); lemonade pull will fetch it")
-            skipped += group
             continue
         snapshot = store / f"models--{repo.replace('/', '--')}" / "snapshots" / commit
         for e in group:
@@ -253,10 +247,9 @@ def plan_lemonade(entries: list, store: Path):
             if ((listing.get(name) or {}).get("lfs") or {}).get("oid") != e["sha256"]:
                 record(e["dest"], "stale")
                 print(f"{name} changed upstream since it was mirrored; lemonade pull will fetch it")
-                skipped.append(e)
             else:
                 plan.append((e, snapshot.joinpath(*name.split("/")), None))
-    return plan, skipped, None
+    return plan, None
 
 
 def hf_store() -> Path:
@@ -292,13 +285,11 @@ def plan_hf(entries: list, store: Path):
     Offline (HF_HUB_OFFLINE), or when Hugging Face can't be read, into the commit the files were pinned
     at instead, checked by their SHA-256 alone. refs/main moves only once every pinned file of the repo
     is placed, so a snapshot missing one is never trusted offline."""
-    plan, skipped, repos, snapshots = [], [], {}, []
+    plan, repos, snapshots = [], {}, []
     for e in entries:
         where = hf_repo_file(e.get("url", ""))
         if where:
             repos.setdefault(where[:2], []).append((e, where[2], where[3]))
-        else:
-            skipped.append(e)
     for (kind, repo), group in repos.items():
         files = None
         if not hf_offline():
@@ -312,7 +303,6 @@ def plan_hf(entries: list, store: Path):
             commit = pins.pop()
             if pins or not re.fullmatch(r"[0-9a-f]{40}", commit):
                 print(f"{repo} is not pinned at a single commit; the test will download it")
-                skipped += [e for e, _, _ in group]
                 continue
         cache = store / f"{kind}--{repo.replace('/', '--')}"
         snapshot = cache / "snapshots" / commit
@@ -328,7 +318,6 @@ def plan_hf(entries: list, store: Path):
             if not item or (lfs and lfs.get("oid") != e["sha256"]):
                 record(e["dest"], "stale")
                 print(f"{repo}/{path} changed upstream since it was mirrored; the test will download it")
-                skipped.append(e)
                 wanted.add(None)
             else:
                 dest = snapshot.joinpath(*path.split("/"))
@@ -341,7 +330,7 @@ def plan_hf(entries: list, store: Path):
             if wanted <= placed:
                 (cache / "refs").mkdir(parents=True, exist_ok=True)
                 (cache / "refs" / "main").write_text(commit)
-    return plan, skipped, finish
+    return plan, finish
 
 
 def present_hf(entries: list, store: Path):
@@ -396,14 +385,7 @@ def modelscope_file(store: Path, owner: str, name: str, path: str) -> Path:
 def plan_modelscope(entries: list, store: Path):
     """snapshot_download lists the repo and skips a file already there whose SHA-256 matches,
     so a file changed upstream since it was mirrored is simply downloaded again."""
-    plan, skipped = [], []
-    for e in entries:
-        where = modelscope_repo_file(e)
-        if where:
-            plan.append((e, modelscope_file(store, *where), None))
-        else:
-            skipped.append(e)
-    return plan, skipped, None
+    return [(e, modelscope_file(store, *where), None) for e in entries if (where := modelscope_repo_file(e))], None
 
 
 def present_modelscope(entries: list, store: Path):
@@ -415,14 +397,14 @@ def present_modelscope(entries: list, store: Path):
     return None
 
 
-# Store, plan, whether to fall back to each file's pinned url, and for models the tests fetch
-# themselves, how to tell they are in place. LM Studio's own downloads go through its proxy,
-# so its fallback here is the direct Hugging Face file instead.
-TOOLS = {"lemonade": (lemonade_store, plan_lemonade, False, None),
-         "lmstudio": (lmstudio_store, plan_lmstudio, True, None),
-         "ollama": (ollama_store, plan_ollama, False, None),
-         "hf": (hf_store, plan_hf, False, present_hf),
-         "modelscope": (modelscope_store, plan_modelscope, False, present_modelscope)}
+# upstream: fall back to each file's pinned url (LM Studio's own downloads go through its proxy).
+# present: how to tell the files are in place, for models the tests download themselves.
+Tool = namedtuple("Tool", "store plan upstream present")
+TOOLS = {"lemonade": Tool(lemonade_store, plan_lemonade, False, None),
+         "lmstudio": Tool(lmstudio_store, plan_lmstudio, True, None),
+         "ollama": Tool(ollama_store, plan_ollama, False, None),
+         "hf": Tool(hf_store, plan_hf, False, present_hf),
+         "modelscope": Tool(modelscope_store, plan_modelscope, False, present_modelscope)}
 
 
 def tool_of(group: str):
@@ -467,17 +449,16 @@ def cmd_seed(args) -> int:
     if not entries or not tool:
         print(f"nothing is mirrored for {args.group}")
         return 1
-    store_of, plan_of, upstream, _ = tool
-    if not os.environ.get("ARTIFACTORY_BASE") and not upstream:
+    if not os.environ.get("ARTIFACTORY_BASE") and not tool.upstream:
         print("ARTIFACTORY_BASE is not set, so the mirror is unreachable")
         return 1
-    store = Path(os.environ[STORE_OVERRIDE]) if os.environ.get(STORE_OVERRIDE) else store_of()
+    store = Path(os.environ[STORE_OVERRIDE]) if os.environ.get(STORE_OVERRIDE) else tool.store()
     elevate_for(store)
     anchor = existing_ancestor(store)
-    plan, _, finish = plan_of(entries, store)
+    plan, finish = tool.plan(entries, store)
     placed = set()
     for entry, dest, git_oid in plan:
-        if not fetch(entry["dest"], dest, entry["sha256"], entry.get("url", "") if upstream else ""):
+        if not fetch(entry["dest"], dest, entry["sha256"], entry.get("url", "") if tool.upstream else ""):
             continue
         if git_oid and git_blob_sha1(dest) != git_oid:
             # A small file that changed upstream since it was mirrored: leave it to the download.
@@ -496,11 +477,11 @@ def cmd_present(args) -> int:
     """Exit 0 iff every file of a Hugging Face or ModelScope group is where its library reads it."""
     entries = [e for e in load_manifest(Path(args.manifest)).values() if e.get("group") == args.group]
     tool = tool_of(args.group)
-    if not entries or not tool or not tool[3]:
+    if not entries or not tool or not tool.present:
         print(f"{args.group} has no cache to check")
         return 2
-    store = Path(os.environ[STORE_OVERRIDE]) if os.environ.get(STORE_OVERRIDE) else tool[0]()
-    missing = tool[3](entries, store)
+    store = Path(os.environ[STORE_OVERRIDE]) if os.environ.get(STORE_OVERRIDE) else tool.store()
+    missing = tool.present(entries, store)
     if missing:
         print(f"{missing} is not in {store}")
         return 1

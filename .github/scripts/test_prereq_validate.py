@@ -721,17 +721,16 @@ class RegistryIntegrityTests(unittest.TestCase):
         for path in sorted(self.ROOT.glob("localized-playbooks/*/dependencies/registry.json")):
             yield path.parts[-3], path
 
-    def _steps(self):
-        for locale, path in self._registries():
-            for dep_id, spec in json.loads(path.read_text(encoding="utf-8"))["dependencies"].items():
-                for kind in ("validate", "install"):
-                    for platform, step in (spec.get(kind) or {}).items():
-                        yield (f"{locale}/{dep_id}" if locale else dep_id), kind, platform, step
-
     def _specs(self):
         for locale, path in self._registries():
             for dep_id, spec in json.loads(path.read_text(encoding="utf-8"))["dependencies"].items():
                 yield (f"{locale}/{dep_id}" if locale else dep_id), spec
+
+    def _steps(self):
+        for dep, spec in self._specs():
+            for kind in ("validate", "install"):
+                for platform, step in (spec.get(kind) or {}).items():
+                    yield dep, kind, platform, step
 
     def test_each_step_is_a_cmd_a_script_or_a_mirror_group(self):
         bad = [f"{d}.{k}.{p}" for d, k, p, s in self._steps()
@@ -741,7 +740,7 @@ class RegistryIntegrityTests(unittest.TestCase):
     def test_only_hugging_face_and_modelscope_groups_are_checked_by_presence(self):
         def checkable(group):
             tool = mirror_get.tool_of(group)
-            return bool(tool and tool[3])
+            return bool(tool and tool.present)
         bad = [f"{d}.{k}.{p}" for d, k, p, s in self._steps()
                if k == "validate" and pv._mirror_only(s) and not checkable(s["mirror"])]
         self.assertEqual(bad, [])
@@ -829,7 +828,7 @@ class LocaleTests(unittest.TestCase):
     def test_a_locale_prefixed_group_seeds_into_its_tool(self):
         self.assertIs(mirror_get.tool_of("zh-CN/lemonade-models-x"), mirror_get.TOOLS["lemonade"])
         self.assertIs(mirror_get.tool_of("lmstudio-models-x"), mirror_get.TOOLS["lmstudio"])
-        self.assertIsNone(mirror_get.tool_of("hf:Qwen/Qwen3.5-4B"))
+        self.assertIsNone(mirror_get.tool_of("zh-CN/msdataset-databricks-dolly-15k"))
 
 
 if __name__ == "__main__":
