@@ -549,7 +549,7 @@
       },
       "install": {
         "linux": {
-          "cmd": "npm config set prefix \"$HOME/.npm-global\" && npm install -g @openhands/agent-canvas",
+          "cmd": "npm config set prefix \"$HOME/.npm-global\" && npm install -g @openhands/agent-canvas@1.5.2",
           "timeout": 900
         }
       },
@@ -989,7 +989,7 @@
       },
       "validate": {
         "linux": {
-          "script": "nodejs.validate.sh",
+          "cmd": "node --version && npm --version",
           "expect_rc": 0
         },
         "windows": {
@@ -1094,9 +1094,13 @@
         }
       },
       "install": {
+        "linux": {
+          "script": "docker.install.sh",
+          "timeout": 900
+        },
         "windows": {
           "script": "docker.install.ps1",
-          "timeout": 420
+          "timeout": 1800
         }
       },
       "versionable": false

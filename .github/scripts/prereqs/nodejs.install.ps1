@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 . "$PSScriptRoot\common.ps1"
-# Installs the current LTS, or upgrades an older Node.js in place; the runner task is elevated.
-$p = Start-Detached winget @('install', '--id', 'OpenJS.NodeJS.LTS', '-e', '--accept-source-agreements', '--accept-package-agreements', '--silent')
+# As the provisioning scripts do; only reached when Node.js is absent.
+$p = Start-Detached winget @('install', '-e', '--id', 'OpenJS.NodeJS', '--accept-package-agreements', '--accept-source-agreements', '--silent')
 $p.WaitForExit()
 exit $p.ExitCode
