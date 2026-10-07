@@ -73,7 +73,7 @@ Unsloth also supports other training approaches, including QLoRA and reinforceme
 <!-- @os:linux -->
 <!-- @device:halo_box -->
 Open a terminal and create a venv with AMD ROCm™ software and PyTorch already installed:
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 python3 -m venv unsloth-env --system-site-packages

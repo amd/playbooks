@@ -38,7 +38,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:linux -->
 <!-- @device:halo_box -->
 在 Linux 上，在您选择的目录中打开终端，并按照以下命令创建一个已预装 ROCm+Pytorch 的 venv。
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -57,7 +57,7 @@ sudo usermod -aG render,video $LOGNAME
 ```
 
 在 Linux 上，在您选择的目录中打开终端，并按照以下命令创建一个 venv。
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
