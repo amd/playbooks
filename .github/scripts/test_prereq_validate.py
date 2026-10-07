@@ -448,6 +448,107 @@ class MirrorSeedTests(unittest.TestCase):
         self.assertEqual(self._seed("comfyui")[0], 1)
 
 
+class _FakeArtifactory(http.server.BaseHTTPRequestHandler):
+    """Storage API reads, token-gated PUTs that verify X-Checksum-Sha256, and an upstream file."""
+
+    store: dict = {}
+    upstream: dict = {}
+    token = "t0ken"
+
+    def log_message(self, *args):
+        pass
+
+    def _reply(self, code, body=b""):
+        self.send_response(code)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        if self.path.startswith("/artifactory/api/storage/repo/"):
+            key = self.path[len("/artifactory/api/storage/repo/"):]
+            if key in self.store:
+                return self._reply(200, json.dumps({"checksums": {"sha256": _sha256(self.store[key])}}).encode())
+            return self._reply(404)
+        if self.path in self.upstream:
+            return self._reply(200, self.upstream[self.path])
+        self._reply(404)
+
+    def do_HEAD(self):
+        self._reply(404)
+
+    def do_PUT(self):
+        body = self.rfile.read(int(self.headers["Content-Length"]))
+        if self.headers.get("Authorization") != f"Bearer {self.token}":
+            return self._reply(401)
+        if self.headers.get("X-Checksum-Sha256") != _sha256(body):
+            return self._reply(409)
+        self.store[self.path[len("/artifactory/repo/"):]] = body
+        self._reply(201)
+
+
+class MirrorToolTests(unittest.TestCase):
+    """mirror/mirror.py: push uploads only what the mirror lacks, verified twice; check reports drift."""
+
+    TOOL = Path(__file__).with_name("mirror") / "mirror.py"
+
+    @classmethod
+    def setUpClass(cls):
+        cls._srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), _FakeArtifactory)
+        threading.Thread(target=cls._srv.serve_forever, daemon=True).start()
+        port = cls._srv.server_address[1]
+        cls.base = f"http://127.0.0.1:{port}/artifactory/repo"
+        _FakeArtifactory.upstream.update({"/up/new.bin": b"new-bytes", "/up/bad.bin": b"tampered"})
+        cls._tmp = tempfile.TemporaryDirectory()
+        cls.manifest = Path(cls._tmp.name) / "artifacts.json"
+        cls.manifest.write_text(json.dumps([
+            {"group": "g", "dest": "models/new.bin", "url": f"http://127.0.0.1:{port}/up/new.bin",
+             "size": 9, "sha256": _sha256(b"new-bytes")},
+            {"group": "g", "dest": "models/kept.bin", "url": f"http://127.0.0.1:{port}/up/new.bin",
+             "size": 9, "sha256": _sha256(b"new-bytes")},
+            {"group": "bad", "dest": "models/bad.bin", "url": f"http://127.0.0.1:{port}/up/bad.bin",
+             "size": 9, "sha256": _sha256(b"good-bytes")},
+        ]))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._srv.shutdown()
+        cls._tmp.cleanup()
+
+    def setUp(self):
+        _FakeArtifactory.store.clear()
+        _FakeArtifactory.store["models/kept.bin"] = b"someone else's file"
+
+    def _run(self, *args, token=True):
+        env = dict(os.environ, ARTIFACTORY_BASE=self.base, MIRROR_STAGING=str(Path(self._tmp.name) / "staging"))
+        env.pop("ARTIFACTORY_TOKEN", None)
+        if token:
+            env["ARTIFACTORY_TOKEN"] = _FakeArtifactory.token
+        r = subprocess.run([sys.executable, str(self.TOOL), "--manifest", str(self.manifest), *args],
+                           env=env, capture_output=True, text=True)
+        return r.returncode, r.stdout
+
+    def test_push_uploads_what_is_missing_and_never_replaces(self):
+        rc, out = self._run("push", "--group", "g")
+        self.assertEqual(rc, 0, out)
+        self.assertEqual(_FakeArtifactory.store["models/new.bin"], b"new-bytes")
+        self.assertEqual(_FakeArtifactory.store["models/kept.bin"], b"someone else's file")
+
+    def test_push_refuses_an_upstream_copy_that_does_not_match_the_pin(self):
+        rc, _ = self._run("push", "--group", "bad")
+        self.assertEqual((rc, "models/bad.bin" in _FakeArtifactory.store), (1, False))
+
+    def test_push_needs_a_token(self):
+        self.assertEqual(self._run("push", "--group", "g", token=False)[0], 1)
+        self.assertNotIn("models/new.bin", _FakeArtifactory.store)
+
+    def test_check_reports_missing_and_different_files(self):
+        rc, out = self._run("check", "--group", "g")
+        self.assertEqual(rc, 1)
+        self.assertRegex(out, r"missing\s+models/new\.bin")
+        self.assertRegex(out, r"DIFFERENT\s+models/kept\.bin")
+
+
 class RegistryIntegrityTests(unittest.TestCase):
     """Catch a broken step reference here, before it breaks prereq validation on every runner."""
 
