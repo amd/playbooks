@@ -220,6 +220,7 @@ import sys
 
 os.environ["QUICK_TRAIN"] = "1"
 os.environ["QUICK_TRAIN_MODEL"] = "LLM-Research/gemma-3-4b-it"
+os.environ["HF_HUB_OFFLINE"] = "0"  # some runners set HF offline mode; MsDataset needs it off and only contacts ModelScope
 r = subprocess.run([sys.executable, "train_lora.py"], timeout=600)
 sys.exit(r.returncode)
 ```
@@ -249,6 +250,7 @@ import sys
 
 os.environ["QUICK_TRAIN"] = "1"
 os.environ["QUICK_TRAIN_MODEL"] = "LLM-Research/gemma-3-4b-it"
+os.environ["HF_HUB_OFFLINE"] = "0"  # some runners set HF offline mode; MsDataset needs it off and only contacts ModelScope
 r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```
