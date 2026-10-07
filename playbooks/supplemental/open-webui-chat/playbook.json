@@ -156,5 +156,15 @@
       }
     }
   },
-  "primaryModel": "Qwen3-4B"
+  "primaryModel": "Qwen3-4B",
+  "authors": [
+    {
+      "name": "Sreeram Sivasubramony",
+      "github": "sreeram-11",
+      "github_url": "https://github.com/sreeram-11",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2025-12-29",
+  "updated_date": "2026-10-01"
 }

@@ -81,8 +81,11 @@ jobs:
     name: Detect & Trigger
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     outputs:
-      matrix: ${{ steps.build-matrix.outputs.matrix }}
-      has_entries: ${{ steps.build-matrix.outputs.has_entries }}
+      english_matrix: ${{ steps.prepare-matrices.outputs.english_matrix }}
+      localized_matrix: ${{ steps.prepare-matrices.outputs.localized_matrix }}
+      has_english_entries: ${{ steps.prepare-matrices.outputs.has_english_entries }}
+      has_localized_entries: ${{ steps.prepare-matrices.outputs.has_localized_entries }}
+      has_entries: ${{ steps.prepare-matrices.outputs.has_entries }}
       build_urls: ${{ steps.trigger.outputs.build_urls }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -161,31 +164,21 @@ jobs:
           PLATFORMS: ${{ inputs.platform }}
         run: python3 .github/scripts/orchestrai_matrix.py
 
-      - name: Combine English and localized matrices
-        id: build-matrix
+      - name: Prepare English and localized matrices
+        id: prepare-matrices
         if: steps.gate.outputs.enabled == 'true'
         env:
           ENGLISH_MATRIX: ${{ steps.build-english.outputs.matrix }}
           ENGLISH_BATCHES: ${{ steps.build-english.outputs.batches }}
           LOCALIZED_MATRIX: ${{ steps.build-localized.outputs.matrix }}
           LOCALIZED_BATCHES: ${{ steps.build-localized.outputs.batches }}
-        run: |
-          MATRIX=$(jq -cn --argjson a "$ENGLISH_MATRIX" --argjson b "$LOCALIZED_MATRIX" '$a + $b')
-          BATCHES=$(jq -cn --argjson a "$ENGLISH_BATCHES" --argjson b "$LOCALIZED_BATCHES" '$a + $b')
-          COUNT=$(jq 'length' <<< "$MATRIX")
-          if [ "$COUNT" -gt 256 ]; then
-            echo "::error::Combined English/localized matrix has $COUNT entries; GitHub Actions allows 256"
-            exit 1
-          fi
-          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
-          echo "batches=$BATCHES" >> "$GITHUB_OUTPUT"
-          echo "has_entries=$([ "$MATRIX" != "[]" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+        run: python3 .github/scripts/orchestrai_prepare_matrices.py
 
       - name: Trigger OrchestrAI pipeline builds
         id: trigger
-        if: steps.gate.outputs.enabled == 'true' && steps.build-matrix.outputs.has_entries == 'true'
+        if: steps.gate.outputs.enabled == 'true' && steps.prepare-matrices.outputs.has_entries == 'true'
         env:
-          BATCHES_JSON: ${{ steps.build-matrix.outputs.batches }}
+          BATCHES_JSON: ${{ steps.prepare-matrices.outputs.batches }}
           GIT_REF: ${{ github.ref }}
           MACHINES_PER_HW_GROUP: ${{ github.event.inputs.machines_per_hw_group || '' }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
@@ -214,14 +207,14 @@ jobs:
   test-playbooks:
     name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
     needs: detect-and-trigger
-    if: needs.detect-and-trigger.outputs.has_entries == 'true'
+    if: needs.detect-and-trigger.outputs.has_english_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
     continue-on-error: ${{ !matrix.required }}
     strategy:
       fail-fast: false
       max-parallel: 16
       matrix:
-        include: ${{ fromJson(needs.detect-and-trigger.outputs.matrix) }}
+        include: ${{ fromJson(needs.detect-and-trigger.outputs.english_matrix) }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
@@ -350,22 +343,38 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
+  test-localized-playbooks:
+    name: Localized Playbooks
+    needs: detect-and-trigger
+    if: needs.detect-and-trigger.outputs.has_localized_entries == 'true'
+    uses: ./.github/workflows/orchestrai-test-matrix.yml
+    with:
+      matrix_json: ${{ needs.detect-and-trigger.outputs.localized_matrix }}
+      build_urls: ${{ needs.detect-and-trigger.outputs.build_urls }}
+    secrets: inherit
+
   test-gate:
     name: Test Gate (Required)
-    needs: [detect-and-trigger, test-playbooks]
+    needs: [detect-and-trigger, test-playbooks, test-localized-playbooks]
     if: always()
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Check required tests
         run: |
           echo "detect-and-trigger: ${{ needs.detect-and-trigger.result }}"
-          echo "test-playbooks:     ${{ needs.test-playbooks.result }}"
-          # A failure in detect/matrix/trigger skips test-playbooks, so gate on it
-          # too — otherwise a trigger failure would leave this required check green.
-          if [ "${{ needs.detect-and-trigger.result }}" = "failure" ]; then
-            echo "::error::Detect/trigger failed — the pipeline did not run"; exit 1
+          echo "English playbooks:  ${{ needs.test-playbooks.result }}"
+          echo "Localized playbooks:${{ needs.test-localized-playbooks.result }}"
+          # A failure or cancellation in detect/matrix/trigger skips both test
+          # jobs, so require success here rather than checking only "failure".
+          if [ "${{ needs.detect-and-trigger.result }}" != "success" ]; then
+            echo "::error::Detect/trigger did not succeed — the pipeline did not run"; exit 1
           fi
-          if [ "${{ needs.test-playbooks.result }}" = "failure" ]; then
-            echo "::error::One or more required tests failed"; exit 1
+          if [ "${{ needs.detect-and-trigger.outputs.has_english_entries }}" = "true" ] \
+             && [ "${{ needs.test-playbooks.result }}" != "success" ]; then
+            echo "::error::Required English tests did not complete successfully"; exit 1
+          fi
+          if [ "${{ needs.detect-and-trigger.outputs.has_localized_entries }}" = "true" ] \
+             && [ "${{ needs.test-localized-playbooks.result }}" != "success" ]; then
+            echo "::error::Required localized tests did not complete successfully"; exit 1
           fi
           echo "All required tests passed (or none were needed)"

@@ -72,7 +72,7 @@ def cleanup_gpu_memory():
 # -----------------------
 # Model Configuration
 # -----------------------
-MODEL = "google/gemma-3-4b-it"
+MODEL = "LLM-Research/gemma-3-4b-it"
 model_name = MODEL.split("/")[-1]
 
 # -----------------------
@@ -134,7 +134,7 @@ print(f"Total selected samples: {n_samples}")
 # -----------------------
 print(f"\nLoading {MODEL}...")
 if "gemma" in MODEL.lower():
-    print("Note: Model is stored as MXFP4 on Hugging Face but will be loaded as BF16 for training")
+    print("Note: Model is stored as MXFP4 but will be loaded as BF16 for training")
     print("(This is expected - the warning about MXFP4 is informational)\n")
 
 # Download the model from ModelScope
@@ -238,7 +238,6 @@ args = SFTConfig(
     logging_steps=5,
     save_strategy="epoch",
     eval_strategy="epoch",
-    save_safetensors=True,
     save_total_limit=2,
     
     # Other
