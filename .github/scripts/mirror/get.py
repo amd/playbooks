@@ -25,9 +25,11 @@ install then finds the files and skips the download. LM Studio files fall back t
 their pinned Hugging Face url. Hugging Face groups go into the cache of the user
 running this, where transformers and datasets look first, at the repo's current
 commit, or at the pinned one when HF_HUB_OFFLINE is set or Hugging Face can't be
-read. Exits 0 iff all are in place.
+read. ModelScope groups go where its snapshot_download keeps that model. Exits 0
+iff all are in place.
 
-present exits 0 iff a Hugging Face group's files are all in that cache already.
+present exits 0 iff a Hugging Face or ModelScope group's files are all in that
+cache already.
 
 Every download is checked against the SHA-256 pinned in artifacts.json.
 """
@@ -342,17 +344,91 @@ def plan_hf(entries: list, store: Path):
     return plan, skipped, finish
 
 
-# Store, plan, and whether to fall back to each file's pinned url. LM Studio's own downloads
-# go through its proxy, so its fallback here is the direct Hugging Face file instead.
-TOOLS = {"lemonade": (lemonade_store, plan_lemonade, False),
-         "lmstudio": (lmstudio_store, plan_lmstudio, True),
-         "ollama": (ollama_store, plan_ollama, False),
-         "hf": (hf_store, plan_hf, False)}
+def present_hf(entries: list, store: Path):
+    """The first pinned file missing from the cache's current snapshot (refs/main), or None."""
+    for e in entries:
+        kind, repo, _, path = hf_repo_file(e["url"])
+        cache = store / f"{kind}--{repo.replace('/', '--')}"
+        try:
+            commit = (cache / "refs" / "main").read_text().strip()
+        except OSError:
+            return repo
+        if not (cache / "snapshots" / commit).joinpath(*path.split("/")).is_file():
+            return f"{repo}/{path}"
+    return None
+
+
+def modelscope_store() -> Path:
+    """ModelScope's cache of the user running this, resolved the way its client does."""
+    if os.environ.get("MODELSCOPE_CACHE"):
+        return Path(os.environ["MODELSCOPE_CACHE"])
+    return invoking_home() / ".cache" / "modelscope"
+
+
+def modelscope_repo_file(entry: dict):
+    """(owner, name, path in the repo) of a mirrored ModelScope model file, from its mirror path
+    models/modelscope/<owner>/<name>/<path>. The mirror drops a leading dot, which a ModelScope url
+    keeps; files linked to identical Hugging Face ones have no dot to restore."""
+    parts = entry["dest"].split("/", 4)
+    if len(parts) != 5 or parts[:2] != ["models", "modelscope"]:
+        return None
+    _, _, owner, name, path = parts
+    m = re.match(rf"https://(?:www\.)?modelscope\.cn/models/{re.escape(owner)}/{re.escape(name)}/resolve/[^/]+/(.+)$",
+                 entry.get("url", ""))
+    return owner, name, m.group(1) if m else path
+
+
+def modelscope_file(store: Path, owner: str, name: str, path: str) -> Path:
+    """Where ModelScope's snapshot_download keeps a model file: a non-empty pre-1.38 folder if
+    the repo has one, else the snapshot of master."""
+    repo = store / "models" / f"{owner}--{name}" / "snapshots" / "master"
+    for legacy in (store / "models" / owner / name.replace(".", "___"),
+                   store / "hub" / "models" / owner / name.replace(".", "___")):
+        try:
+            if legacy.is_dir() and any(legacy.iterdir()):
+                repo = legacy
+                break
+        except OSError:
+            pass
+    return repo.joinpath(*path.split("/"))
+
+
+def plan_modelscope(entries: list, store: Path):
+    """snapshot_download lists the repo and skips a file already there whose SHA-256 matches,
+    so a file changed upstream since it was mirrored is simply downloaded again."""
+    plan, skipped = [], []
+    for e in entries:
+        where = modelscope_repo_file(e)
+        if where:
+            plan.append((e, modelscope_file(store, *where), None))
+        else:
+            skipped.append(e)
+    return plan, skipped, None
+
+
+def present_modelscope(entries: list, store: Path):
+    """The first pinned file missing from where ModelScope's client reads the model, or None."""
+    for e in entries:
+        where = modelscope_repo_file(e)
+        if not where or not modelscope_file(store, *where).is_file():
+            return "/".join(where) if where else e["dest"]
+    return None
+
+
+# Store, plan, whether to fall back to each file's pinned url, and for models the tests fetch
+# themselves, how to tell they are in place. LM Studio's own downloads go through its proxy,
+# so its fallback here is the direct Hugging Face file instead.
+TOOLS = {"lemonade": (lemonade_store, plan_lemonade, False, None),
+         "lmstudio": (lmstudio_store, plan_lmstudio, True, None),
+         "ollama": (ollama_store, plan_ollama, False, None),
+         "hf": (hf_store, plan_hf, False, present_hf),
+         "modelscope": (modelscope_store, plan_modelscope, False, present_modelscope)}
 
 
 def tool_of(group: str):
     """The tool a group seeds into, from its name, <tool>-models-x or <tool>-datasets-x, optionally
-    prefixed by a locale for that locale's own (zh-CN/lemonade-models-x)."""
+    prefixed by a locale for that locale's own (zh-CN/lemonade-models-x). Other groups (comfyui,
+    ds4-models-x, zh-CN/msdataset-x) only label files for mirror.py."""
     m = re.match(r"^(?:[a-z]{2}-[A-Z]{2}/)?([a-z0-9]+)-(?:models|datasets)-", group)
     return TOOLS.get(m.group(1)) if m else None
 
@@ -391,7 +467,7 @@ def cmd_seed(args) -> int:
     if not entries or not tool:
         print(f"nothing is mirrored for {args.group}")
         return 1
-    store_of, plan_of, upstream = tool
+    store_of, plan_of, upstream, _ = tool
     if not os.environ.get("ARTIFACTORY_BASE") and not upstream:
         print("ARTIFACTORY_BASE is not set, so the mirror is unreachable")
         return 1
@@ -417,23 +493,17 @@ def cmd_seed(args) -> int:
 
 
 def cmd_present(args) -> int:
-    """Exit 0 iff every file of a Hugging Face group is in the cache's current snapshot (refs/main)."""
+    """Exit 0 iff every file of a Hugging Face or ModelScope group is where its library reads it."""
     entries = [e for e in load_manifest(Path(args.manifest)).values() if e.get("group") == args.group]
-    if not entries or tool_of(args.group) is not TOOLS["hf"]:
-        print(f"no Hugging Face files are mirrored for {args.group}")
+    tool = tool_of(args.group)
+    if not entries or not tool or not tool[3]:
+        print(f"{args.group} has no cache to check")
         return 2
-    store = Path(os.environ[STORE_OVERRIDE]) if os.environ.get(STORE_OVERRIDE) else hf_store()
-    for e in entries:
-        kind, repo, _, path = hf_repo_file(e["url"])
-        cache = store / f"{kind}--{repo.replace('/', '--')}"
-        try:
-            commit = (cache / "refs" / "main").read_text().strip()
-        except OSError:
-            print(f"{repo} is not in {store}")
-            return 1
-        if not (cache / "snapshots" / commit).joinpath(*path.split("/")).is_file():
-            print(f"{repo}/{path} is not in {store}")
-            return 1
+    store = Path(os.environ[STORE_OVERRIDE]) if os.environ.get(STORE_OVERRIDE) else tool[0]()
+    missing = tool[3](entries, store)
+    if missing:
+        print(f"{missing} is not in {store}")
+        return 1
     print(f"{args.group}: every mirrored file is in {store}")
     return 0
 
@@ -451,7 +521,7 @@ def main() -> int:
     seed_p = sub.add_parser("seed", help="put a dependency's mirrored files in its tool's store")
     seed_p.add_argument("group", help="artifacts.json group, named after the registry dependency")
     seed_p.set_defaults(func=cmd_seed)
-    present_p = sub.add_parser("present", help="check a Hugging Face group's files are in the cache")
+    present_p = sub.add_parser("present", help="check a Hugging Face or ModelScope group's files are in the cache")
     present_p.add_argument("group", help="artifacts.json group, named after the registry dependency")
     present_p.set_defaults(func=cmd_present)
     args = parser.parse_args()

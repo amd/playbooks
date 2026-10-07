@@ -69,6 +69,11 @@ SPDX-License-Identifier: MIT
 
 ## 安装软件先决条件
 
+<!-- @prereq:modelscope-models-gemma-3-4b-it -->
+<!-- @os:linux -->
+<!-- @prereq:hf-datasets-english-quotes -->
+<!-- @os:end -->
+
 #### 创建虚拟环境
 
 <!-- @os:linux -->

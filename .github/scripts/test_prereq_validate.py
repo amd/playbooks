@@ -458,6 +458,16 @@ class MirrorSeedTests(unittest.TestCase):
                 tree.append({"type": "file", "path": path, **({"lfs": {"oid": _sha256(upstream)}} if lfs
                              else {"oid": hashlib.sha1(b"blob %d\0" % len(upstream) + upstream).hexdigest()})})
             (api / "tree" / commit).write_text(json.dumps(tree))
+        # A ModelScope repo with a dot in its name, which pre-1.38 folders spell ___. The mirror stores
+        # .gitattributes without its dot, and the weights are pinned to the identical Hugging Face file.
+        for path, data in {"config.json": b"{}", "sub/w.safetensors": b"ms-weights", ".gitattributes": b"*"}.items():
+            dest = f"models/modelscope/org/my.model/{path.lstrip('.')}"
+            (root / "mirror" / dest).parent.mkdir(parents=True, exist_ok=True)
+            (root / "mirror" / dest).write_bytes(data)
+            url = (f"https://huggingface.co/org/upstream/resolve/{'0' * 40}/{path}" if path.endswith(".safetensors")
+                   else f"https://modelscope.cn/models/org/my.model/resolve/master/{path}")
+            entries.append({"group": "modelscope-models-ms", "dest": dest, "url": url, "size": len(data),
+                            "sha256": _sha256(data)})
         cls.manifest.write_text(json.dumps(entries))
 
     @classmethod
@@ -465,10 +475,10 @@ class MirrorSeedTests(unittest.TestCase):
         cls._srv.shutdown()
         cls._root.cleanup()
 
-    def _seed(self, group, secret=True, **extra_env):
+    def _seed(self, group, secret=True, store=None, **extra_env):
         out = tempfile.TemporaryDirectory()
         self.addCleanup(out.cleanup)
-        store, ledger = Path(out.name) / "store", Path(out.name) / "ledger.jsonl"
+        store, ledger = store or Path(out.name) / "store", Path(out.name) / "ledger.jsonl"
         env = dict(os.environ, PLAYBOOKS_MIRROR_LEDGER=str(ledger), PLAYBOOKS_MIRROR_STORE=str(store),
                    HF_ENDPOINT=self.hf)
         for var in ("ARTIFACTORY_BASE", "HF_TOKEN", "HF_HUB_OFFLINE"):
@@ -536,6 +546,29 @@ class MirrorSeedTests(unittest.TestCase):
         self.assertEqual((rc, (cache / "snapshots" / ("0" * 40) / "tokenizer.json").read_bytes()), (0, b"old"))
         self.assertEqual((cache / "refs/main").read_text(), "0" * 40)
         self.assertEqual(self._present("hf-models-stale", store), 0)
+
+    def test_modelscope_files_land_in_the_master_snapshot(self):
+        rc, store, _ = self._seed("modelscope-models-ms")
+        snapshot = store / "models/org--my.model/snapshots/master"
+        self.assertEqual((rc, (snapshot / "sub/w.safetensors").read_bytes()), (0, b"ms-weights"))
+        self.assertEqual((snapshot / ".gitattributes").read_bytes(), b"*")
+        self.assertEqual(self._present("modelscope-models-ms", store), 0)
+        (snapshot / "config.json").unlink()
+        self.assertEqual(self._present("modelscope-models-ms", store), 1)
+
+    def test_presence_is_only_checked_for_caches_the_tests_fill(self):
+        self.assertEqual(self._present("lemonade-models-x", Path(self._root.name)), 2)
+
+    def test_modelscope_reuses_a_pre_1_38_folder(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        legacy = Path(tmp.name) / "hub/models/org/my___model"
+        legacy.mkdir(parents=True)
+        (legacy / "README.md").write_text("cached by an older client")
+        rc, store, _ = self._seed("modelscope-models-ms", store=Path(tmp.name))
+        self.assertEqual((rc, (legacy / "sub/w.safetensors").read_bytes()), (0, b"ms-weights"))
+        self.assertFalse((store / "models").exists())
+        self.assertEqual(self._present("modelscope-models-ms", store), 0)
 
     def test_unreadable_hugging_face_falls_back_to_the_pinned_commit(self):
         rc, store, _ = self._seed("hf-models-ok", HF_ENDPOINT="http://127.0.0.1:9")  # nothing listens here
@@ -705,9 +738,12 @@ class RegistryIntegrityTests(unittest.TestCase):
                if ("cmd" in s) + ("script" in s) != 1 and not pv._mirror_only(s)]
         self.assertEqual(bad, [])
 
-    def test_only_hugging_face_groups_are_checked_by_presence(self):
+    def test_only_hugging_face_and_modelscope_groups_are_checked_by_presence(self):
+        def checkable(group):
+            tool = mirror_get.tool_of(group)
+            return bool(tool and tool[3])
         bad = [f"{d}.{k}.{p}" for d, k, p, s in self._steps()
-               if k == "validate" and pv._mirror_only(s) and mirror_get.tool_of(s["mirror"]) is not mirror_get.TOOLS["hf"]]
+               if k == "validate" and pv._mirror_only(s) and not checkable(s["mirror"])]
         self.assertEqual(bad, [])
 
     def test_a_seed_only_install_is_optional(self):

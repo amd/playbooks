@@ -19,8 +19,9 @@ inline ``cmd`` or a ``script`` file under ``.github/scripts/prereqs/``. An
 install step may also name a ``mirror`` group: its files are first seeded from
 the internal mirror (``mirror/get.py seed``), and the install only runs if the
 dependency is still missing after that. A step that is only a ``mirror`` group
-checks (validate) or seeds (install) a Hugging Face cache group, for models the
-tests download themselves; those dependencies are ``optional``, so a miss warns.
+checks (validate) or seeds (install) a Hugging Face or ModelScope cache group, for
+models the tests download themselves; those dependencies are ``optional``, so a
+miss warns.
 
     validate passes                -> OK                 (provisioned; no install)
     validate fails, install fixes  -> INSTALLED          (self-healed; job continues)
@@ -243,7 +244,7 @@ def _validate(spec: dict, platform: str) -> bool:
     if not v:
         return False
     if _mirror_only(v):
-        # A Hugging Face group: present when its files are in the user's Hugging Face cache.
+        # A Hugging Face or ModelScope group: present when its files are in the user's cache.
         rc = _run_args([sys.executable, str(MIRROR_GET), "present", v["mirror"]], v.get("timeout", 60))
     else:
         rc = _run(v, platform, v.get("timeout", 60))

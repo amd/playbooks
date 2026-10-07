@@ -104,6 +104,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=ms_model device=halo,halo_box value="openai-mirror/gpt-oss-20b" -->
 <!-- @var:id=ms_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:modelscope-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:modelscope-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->

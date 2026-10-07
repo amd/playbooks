@@ -252,14 +252,14 @@
     "sha256": "acb31708ae4b3c24beb681645e751e0215b729e7fed556be54f1e487f89cacf6"
   },
   {
-    "group": "zh-CN/modelscope-datasets-databricks-dolly-15k",
+    "group": "zh-CN/msdataset-databricks-dolly-15k",
     "dest": "models/datasets/modelscope/AI-ModelScope/databricks-dolly-15k/README.md",
     "url": "https://modelscope.cn/datasets/AI-ModelScope/databricks-dolly-15k/resolve/master/README.md",
     "size": 8199,
     "sha256": "db06c60090a11b20e79d1933b2f316f781605f07761ff2ae2795d6523e3e960b"
   },
   {
-    "group": "zh-CN/modelscope-datasets-databricks-dolly-15k",
+    "group": "zh-CN/msdataset-databricks-dolly-15k",
     "dest": "models/datasets/modelscope/AI-ModelScope/databricks-dolly-15k/databricks-dolly-15k.jsonl",
     "url": "https://modelscope.cn/datasets/AI-ModelScope/databricks-dolly-15k/resolve/master/databricks-dolly-15k.jsonl",
     "size": 13085339,

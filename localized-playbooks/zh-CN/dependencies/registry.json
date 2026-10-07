@@ -302,6 +302,108 @@
         }
       },
       "versionable": false
+    },
+    "modelscope-models-gpt-oss-20b": {
+      "name": "GPT-OSS 20B (ModelScope)",
+      "description": "openai-mirror/gpt-oss-20b，否则测试会在首次使用时从 ModelScope 下载",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "modelscope_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-gpt-oss-20b"
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-gpt-oss-20b"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-gpt-oss-20b",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-gpt-oss-20b",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "modelscope-models-qwen3-5-4b": {
+      "name": "Qwen3.5 4B (ModelScope)",
+      "description": "Qwen/Qwen3.5-4B，否则测试会在首次使用时从 ModelScope 下载",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "modelscope_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-qwen3-5-4b"
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-qwen3-5-4b"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-qwen3-5-4b",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-qwen3-5-4b",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "modelscope-models-gemma-3-4b-it": {
+      "name": "Gemma 3 4B IT (ModelScope)",
+      "description": "LLM-Research/gemma-3-4b-it，否则测试会在首次使用时从 ModelScope 下载",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "modelscope_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-gemma-3-4b-it"
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-gemma-3-4b-it"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-gemma-3-4b-it",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-gemma-3-4b-it",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
     }
   }
 }
