@@ -151,6 +151,8 @@ class OpenHandsProvisioning(unittest.TestCase):
         for platform in ("linux", "windows"):
             self.assertEqual(batches[f"{platform}/stx"]["playbooks"],
                              ["ollama-getting-started"])
+            self.assertEqual(batches[f"{platform}/krk+ram_64gb"]["playbooks"],
+                             list(affected))
 
     def test_windows_openhands_enables_wsl_without_installer_coordinates(self):
         """The Docker Desktop installer is the dependency's own business: this
