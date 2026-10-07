@@ -99,5 +99,15 @@
         "AMD Sync": "1.7.3"
       }
     }
-  }
+  },
+  "authors": [
+    {
+      "name": "Adam Lam",
+      "github": "adamlam2-amd",
+      "github_url": "https://github.com/adamlam2-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-06-05",
+  "updated_date": "2026-10-01"
 }
