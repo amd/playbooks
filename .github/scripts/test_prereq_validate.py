@@ -257,6 +257,18 @@ class LoopTests(unittest.TestCase):
             spec = {"optional": True, "validate": {"linux": {"mirror": "g"}}, "install": {"linux": {"mirror": "g"}}}
             self.assertEqual(pv.check_dependency("d", spec, "linux")["status"], "INSTALLED")
 
+    def test_a_partial_seed_never_stands_in_for_the_install(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            listed, installed = Path(tmp) / "listed", Path(tmp) / "installed"
+            # The tool lists the model after a failed seed (say, one split part missing).
+            self._fake_seeder(tmp, f"import pathlib, sys; pathlib.Path({str(listed)!r}).touch(); sys.exit(1)\n")
+            spec = {
+                "validate": {"linux": {"cmd": f"test -f {listed}", "expect_rc": 0}},
+                "install": {"linux": {"mirror": "g", "cmd": f"touch {installed}", "timeout": 5}},
+            }
+            r = pv.check_dependency("d", spec, "linux")
+            self.assertEqual((r["status"], r.get("install_rc"), installed.exists()), ("INSTALLED", 0, True))
+
     def test_install_still_runs_when_seeding_falls_short(self):
         with tempfile.TemporaryDirectory() as tmp:
             flag = Path(tmp) / "installed"
@@ -458,6 +470,11 @@ class MirrorSeedTests(unittest.TestCase):
                 tree.append({"type": "file", "path": path, **({"lfs": {"oid": _sha256(upstream)}} if lfs
                              else {"oid": hashlib.sha1(b"blob %d\0" % len(upstream) + upstream).hexdigest()})})
             (api / "tree" / commit).write_text(json.dumps(tree))
+        # An Ollama model whose blob the mirror lacks: its manifest must not be placed.
+        (root / "mirror/models/Ollama/n/manifests/registry.ollama.ai/library/n/tag").parent.mkdir(parents=True)
+        (root / "mirror/models/Ollama/n/manifests/registry.ollama.ai/library/n/tag").write_bytes(b"{}")
+        for rel, data in (("models/Ollama/n/blobs/sha256-0b", b"absent"), ("models/Ollama/n/manifests/registry.ollama.ai/library/n/tag", b"{}")):
+            entries.append({"group": "ollama-models-y", "dest": rel, "url": "https://example.invalid/", "size": len(data), "sha256": _sha256(data)})
         # A ModelScope repo with a dot in its name, which pre-1.38 folders spell ___. The mirror stores
         # .gitattributes without its dot, and the weights are pinned to the identical Hugging Face file.
         for path, data in {"config.json": b"{}", "sub/w.safetensors": b"ms-weights", ".gitattributes": b"*"}.items():
@@ -575,6 +592,12 @@ class MirrorSeedTests(unittest.TestCase):
         cache = store / "models--org--okrepo"
         self.assertEqual((rc, (cache / "refs/main").read_text()), (0, "0" * 40))
         self.assertEqual((cache / "snapshots" / ("0" * 40) / "model.safetensors").read_bytes(), b"weights")
+
+    def test_ollama_manifest_waits_for_every_blob(self):
+        rc, store, ledger = self._seed("ollama-models-y")
+        self.assertEqual(rc, 1)
+        self.assertFalse((store / "manifests/registry.ollama.ai/library/n/tag").exists())
+        self.assertEqual([o for _, o in ledger], ["absent", "skipped"])
 
     def test_unreachable_mirror_is_tried_once_per_group(self):
         saved = self.base

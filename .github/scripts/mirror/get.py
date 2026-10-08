@@ -456,9 +456,13 @@ def cmd_seed(args) -> int:
     elevate_for(store)
     anchor = existing_ancestor(store)
     plan, finish = tool.plan(entries, store)
-    placed = set()
+    placed, missed = set(), False
     for entry, dest, git_oid in plan:
+        if missed and "/manifests/" in entry["dest"]:
+            record(entry["dest"], "skipped")  # Ollama lists a model by its manifest; never over a missing blob.
+            continue
         if not fetch(entry["dest"], dest, entry["sha256"], entry.get("url", "") if tool.upstream else ""):
+            missed = True
             continue
         if git_oid and git_blob_sha1(dest) != git_oid:
             # A small file that changed upstream since it was mirrored: leave it to the download.

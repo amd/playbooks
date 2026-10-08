@@ -12,8 +12,10 @@ else
   command -v dockerd >/dev/null 2>&1 || { curl -fsSL https://get.docker.com | sh || exit 1; }
   sudo usermod -aG docker "$(id -un)" || exit 1
   sudo systemctl enable --now docker || exit 1
-  # The docker group reaches the runner only after its service restarts.
-  engine() { sudo docker version --format '{{.Server.Version}}'; }
+  # The group reaches the runner only after it restarts; until then, an ACL lets this job use the socket.
+  command -v setfacl >/dev/null 2>&1 || sudo apt-get install -y acl || exit 1
+  sudo setfacl -m "u:$(id -un):rw" /var/run/docker.sock || exit 1
+  engine() { docker version --format '{{.Server.Version}}'; }
 fi
 for _ in $(seq 1 60); do
   engine >/dev/null 2>&1 && exit 0

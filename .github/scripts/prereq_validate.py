@@ -285,7 +285,8 @@ def check_dependency(dep_id: str, spec: dict, platform: str) -> dict:
     timeout = install.get("timeout", 1800)
     if install.get("mirror"):
         result["mirror_rc"] = _mirror("seed", install["mirror"], timeout)
-        for attempt in range(SEED_SETTLE_TRIES if result["mirror_rc"] == 0 else 1):
+        # Only a complete seed may stand in for the install: a tool can list a model with a part missing.
+        for attempt in range(SEED_SETTLE_TRIES if result["mirror_rc"] == 0 else 0):
             if attempt:
                 time.sleep(SEED_SETTLE_SECONDS)
             if _validate(spec, platform):
