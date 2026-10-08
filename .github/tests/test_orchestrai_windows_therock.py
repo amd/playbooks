@@ -43,6 +43,7 @@ class WindowsTheRockProvisioning(unittest.TestCase):
         builds, missing = self.builds()
         self.assertEqual(missing, [])
         self.assertEqual(builds["vars"]["THEROCK_URL"], self.source["url"])
+        self.assertEqual(builds["vars"]["THEROCK_PUBLISH_ENV"], "0")
         self.assertEqual(builds["install_scripts"], [
             {"script": "InstallationScripts/gfx/windows.ps1", "reboot_after": True},
             {"script": "InstallationScripts/gfx/windows-therock-tarball.ps1", "reboot_after": False},
@@ -62,6 +63,7 @@ class WindowsTheRockProvisioning(unittest.TestCase):
                 self.assertEqual(builds["vars"]["THEROCK_RUN_REPO"], "ROCm/rocm-systems")
                 self.assertEqual(builds["vars"]["THEROCK_REF"], "pinned-installer")
                 self.assertNotIn("THEROCK_URL", builds["vars"])
+                self.assertEqual(builds["vars"]["THEROCK_PUBLISH_ENV"], "0")
 
     def test_other_playbooks_and_apus_are_unchanged(self):
         self.source["url"] = "https://example.invalid/windows.tar.gz"
@@ -74,6 +76,7 @@ class WindowsTheRockProvisioning(unittest.TestCase):
                 builds, missing = self.builds()
                 self.assertEqual(missing, [])
                 self.assertNotIn("THEROCK_URL", builds["vars"])
+                self.assertNotIn("THEROCK_PUBLISH_ENV", builds["vars"])
 
     def test_mixed_batch_installs_sdk_only_once(self):
         self.source["url"] = "https://example.invalid/windows.tar.gz"

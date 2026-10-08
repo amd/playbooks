@@ -337,6 +337,8 @@ provisioning:
   # Never use ORCHESTRAI_THEROCK_URL here: that distribution is Linux-only.
   # Artifact mode should use the pipeline's securely bound GITHUB_TOKEN; the
   # controller deliberately does not copy an Actions token into BUILDS_JSON.
+  # The controller always sends THEROCK_PUBLISH_ENV=0: TheRock is installed but
+  # kept off the machine env/PATH; GPU isolation calls its hipInfo by full path.
   # Validate one Windows Radeon batch before enabling single-GPU enforcement.
   windows_therock:
     url: ""

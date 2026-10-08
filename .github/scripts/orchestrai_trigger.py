@@ -261,6 +261,9 @@ def windows_therock_builds(batch, cfg):
         errors.append("provisioning.windows_therock.install_scripts")
     if errors:
         return [], {}, errors
+    # GPU isolation runs hipInfo by absolute path; keep TheRock off the machine
+    # env/PATH so it can't leak into co-scheduled playbooks or later batches.
+    variables["THEROCK_PUBLISH_ENV"] = "0"
     return [dict(entry) for entry in scripts], variables, []
 
 
