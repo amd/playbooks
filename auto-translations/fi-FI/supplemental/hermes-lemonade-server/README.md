@@ -8,33 +8,33 @@ SPDX-License-Identifier: MIT
 > **Konekäännös.** Tämä sivu on käännetty automaattisesti englannista, eikä sitä ole tarkistanut ihminen. Se voi sisältää virheitä, ja tietyt ohjeet, komennot, lataukset, tuotteiden saatavuus tai muu sisältö voivat vaihdella kielen tai alueen mukaan. Mahdollisten ristiriitaisuuksien tai epäjohdonmukaisuuksien ilmetessä alkuperäinen englanninkielinen playbook on ratkaiseva ja ensisijainen versio.
 <!-- auto-translated-disclaimer:end -->
 
-# Hermes Agentin ajaminen paikallisesti Lemonade Serverin kanssa
+# Hermes Agentin ajaminen paikallisesti Lemonade Serverin avulla
 
 ## Yleiskatsaus
 
-[**Hermes Agent**](https://hermes-agent.nousresearch.com/) on Nous Researchin rakentama itseään parantava tekoälyagentti. Siinä on sisäänrakennettu oppimissilmukka, se luo taitoja kokemuksesta, rakentaa pysyvän muistin siitä, kuka olet istuntojen välillä, ja voi ajaa puolestasi ajastettuja automaatioita. Toisin kuin yksinkertainen keskusteluavustaja, Hermes suorittaa todellisia toimintoja: ajaa komentotulkin komentoja, kirjoittaa tiedostoja, selaa verkkoa ja delegoi rinnakkaisia työkulkuja alaagenteille.
+[**Hermes Agent**](https://hermes-agent.nousresearch.com/) on Nous Researchin rakentama itseään kehittävä tekoälyagentti. Siinä on sisäänrakennettu oppimissilmukka, se luo taitoja kokemuksesta, rakentaa pysyvän muistin siitä, kuka olet istuntojen välillä, ja voi ajaa puolestasi ajastettuja automaatioita. Toisin kuin yksinkertainen keskusteluavustaja, Hermes tekee todellisia toimia: se ajaa komentorivikomentoja, kirjoittaa tiedostoja, selaa verkkoa ja delegoi rinnakkaisia työnkulkuja alaagenteille.
 
-[**Lemonade Server**](https://lemonade-server.ai/) on paikallinen päättelytaustajärjestelmä, joka toimii sen voimanlähteenä. Se on avoimen lähdekoodin palvelin, joka ajaa GenAI-malleja suoraan AMD-laitteistollasi ja tarjoaa ne käyttöön alan standardin mukaisen OpenAI-rajapinnan kautta.
+[**Lemonade Server**](https://lemonade-server.ai/) on tätä toimintaa tukeva paikallinen päättelytausta. Se on avoimen lähdekoodin palvelin, joka ajaa GenAI-malleja suoraan AMD-laitteistollasi ja tarjoaa ne alan standardin mukaisen OpenAI API:n kautta.
 
-Yhdessä ne muodostavat täysin paikallisen tekoälyagenttipinon: Lemonade huolehtii mallin päättelystä GPU:llasi, ja Hermes tarjoaa agenttisilmukan, muistin, taidot ja viestintäyhdyskäytävän.
+Yhdessä ne muodostavat täysin paikallisen tekoälyagenttipinon: Lemonade hoitaa mallin päättelyn GPU:llasi, ja Hermes tarjoaa agenttisilmukan, muistin, taidot ja viestintäyhdyskäytävän.
 
-> **Ennen kuin jatkat:** Hermes Agent on erittäin autonominen tekoälyagentti. Minkä tahansa tekoälyagentin päästäminen käsiksi järjestelmääsi voi johtaa ennalta-arvaamattomiin tai tahattomiin lopputuloksiin. Jatka vain, jos ymmärrät riskit ja hyväksyt sen, että autonominen ohjelmisto toimii puolestasi.
+> **Ennen kuin jatkat:** Hermes Agent on erittäin autonominen tekoälyagentti. Minkä tahansa tekoälyagentin päästäminen käsiksi järjestelmääsi voi johtaa arvaamattomiin tai tahattomiin lopputuloksiin. Jatka vain, jos ymmärrät riskit ja olet valmis hyväksymään, että autonominen ohjelmisto toimii puolestasi.
 
 ---
 
 ## Mitä opit
 
-Tämän oppaan lopussa osaat:
+Tämän ohjekirjan lopussa osaat:
 
-- **Asentaa Hermes Agentin** ja osoittaa sen käyttämään **Lemonade Serveriä** tekoälytaustajärjestelmänään.
-- **(Suositeltu) Ottaa käyttöön Docker/Podman-hiekkalaatikoinnin** eristääksesi agentin toiminnot isäntäjärjestelmästäsi.
+- **Asentaa Hermes Agentin** ja ohjata sen käyttämään tekoälytaustana **Lemonade Serveriä**.
+- **(Suositeltu) Ottaa käyttöön Docker-/Podman-hiekkalaatikoinnin**, jotta agentin toimet eristetään isäntäkoneesta.
 - **Käynnistää Hermes-yhdyskäytävän** ja varmistaa, että agenttisi on valmis.
 - **Yhdistää viestintäkanavan** (Discord tai Telegram), jotta voit keskustella agenttisi kanssa mistä tahansa laitteesta.
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Muistiasetusten määrittäminen
+## Muistiasetuksen määrittäminen
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
@@ -45,12 +45,12 @@ Tämän oppaan lopussa osaat:
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmiston esivaatimusten asentaminen
+## Ohjelmistovaatimusten asentaminen
 
 <!-- @os:linux -->
-- PC-tietokone, jossa on käytössä **Ubuntu 24.04+** tai yhteensopiva Debian-pohjainen Linux-jakelu, jossa on `apt-get`
+- Tietokone, jossa on **Ubuntu 24.04+** tai yhteensopiva Debian-pohjainen Linux-jakelu, jossa on `apt-get`
 - Vähintään **12 Gt RAM-muistia** (64 Gt+ suositellaan suuremmille malleille)
-- **Noin 10–30 Gt vapaata levytilaa** mallipainoille
+- **noin 10–30 Gt vapaata levytilaa** mallin painoille
 - [Podman](https://podman.io/docs/installation) (valinnainen, Hermes Agentin hiekkalaatikointiin)
   ```bash 
   sudo apt-get install -y podman
@@ -58,9 +58,9 @@ Tämän oppaan lopussa osaat:
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- PC-tietokone, jossa on käytössä **Windows 10/11**
+- Tietokone, jossa on **Windows 10/11**
 - Vähintään **12 Gt RAM-muistia** (64 Gt+ suositellaan suuremmille malleille)
-- **Noin 10–30 Gt vapaata levytilaa** mallipainoille
+- **noin 10–30 Gt vapaata levytilaa** mallin painoille
 - Podman (valinnainen, Hermes Agentin hiekkalaatikointiin). Asenna WSL:n sisällä:
   ```bash 
   sudo apt-get install -y podman
@@ -68,10 +68,12 @@ Tämän oppaan lopussa osaat:
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
-> Podman on esiasennettu Halo Boxiin, eikä sitä tarvitse asentaa erikseen
+> Podman on esiasennettu Halo Boxiin, eikä sitä tarvitse määrittää erikseen
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:hermes,lemonade-models-qwen3-35b-a3b,lemonade -->
 
 <!-- @var:id=hermes_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -85,7 +87,7 @@ lemonade --version
 
 ## Hae ja lataa suositeltu malli
 
-Tämän oppaan suositeltu malli on **Qwen3.6-35B-A3B-GGUF** Unslothilta, vahva MoE-malli, jossa on 263k tokenin kontekstiikkuna ja joka soveltuu hyvin agenttikuormituksiin. Tämä malli käyttää UD-Q4_K_XL-kvantisointia. Hae se nyt:
+Tämän ohjekirjan suositeltu malli on Unslothin **Qwen3.6-35B-A3B-GGUF**, vahva MoE-malli, jossa on 263 000 tokenin konteksti-ikkuna ja joka sopii hyvin agenttikuormille. Tämä malli käyttää UD-Q4_K_XL-kvantisointia. Hae se nyt:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
@@ -103,7 +105,7 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 
 Mallin oletuskontekstipituus on 262 144 tokenia. Jos kohtaat muistin loppumiseen liittyviä (OOM) virheitä, harkitse kontekstiikkunan pienentämistä.
 
-> **Vinkki: Poista ajattelu käytöstä nopeampien agenttivastausten saamiseksi:** Qwen3.6-35B-A3B toimii oletuksena ajattelutilassa, mikä lisää viivettä ennen jokaista vastausta. Agenttisilmukoissa tämä ylimääräinen kuormitus kertyy nopeasti. [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) -tietovarasto tarjoaa valmiin määrityksen, joka poistaa ajattelun käytöstä. Käytä sitä lataamalla tiedosto ja tuomalla se:
+> **Vinkki: Poista ajattelu käytöstä nopeampia agenttivastauksia varten:** Qwen3.6-35B-A3B toimii oletusarvoisesti ajattelutilassa, mikä lisää viivettä ennen jokaista vastausta. Agenttisilmukoissa tämä kuormitus kasvaa nopeasti. [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) -arkisto tarjoaa valmiin asetustiedoston, joka poistaa ajattelun käytöstä. Käytä sitä lataamalla tiedosto ja tuomalla se:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -246,7 +248,7 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## WSL:n määrittäminen
 
-Ajamme Hermes Agentin WSL:n sisällä ja yhdistämme sen Windowsissa natiivisti ajettavaan Lemonadeen. Tämä antaa sinulle Linux-komentotulkkiympäristön Hermesille, samalla kun Lemonaden GPU-kiihdytys pysyy Windows-puolella.
+Ajamme Hermes Agentin WSL:n sisällä ja yhdistämme sen Windowsissa natiivisti ajettavaan Lemonadeen. Näin saat Linux-komentorivikäyttöympäristön Hermesille, samalla kun Lemonaden GPU-kiihdytys pysyy Windows-puolella.
 
 ### Asenna WSL ja Ubuntu
 
@@ -280,17 +282,17 @@ wsl --shutdown
 wsl
 ```
 
-### Sillan luominen Lemonadesta Windowsista WSL:ään
+### Yhdistä Lemonade Windowsista WSL:ään
 
-WSL2 toimii virtuaaliverkossa. Lemonade Windowsissa sitoutuu osoitteeseen `127.0.0.1`, johon WSL ei pääse suoraan käsiksi. Windowsin porttivälityssääntö (port proxy) ohjaa liikenteen WSL-yhdyskäytävän IP-osoitteesta Windowsin localhostiin.
+WSL2 toimii virtuaaliverkossa. Lemonade Windowsissa sitoutuu osoitteeseen `127.0.0.1`, johon WSL ei pääse suoraan käsiksi. Windowsin porttiedustusvälitys (port proxy) ohjaa liikenteen WSL-yhdyskäytävän IP-osoitteesta Windowsin localhostiin.
 
-**Etsi WSL-yhdyskäytäväsi IP-osoite** (suorita WSL:n sisällä):
+**Etsi WSL-yhdyskäytävän IP-osoite** (suorita WSL:n sisällä):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Lisää porttivälityssääntö** (suorita PowerShellissä järjestelmänvalvojana, korvaa `<WSL-Gateway-IP>` WSL-yhdyskäytäväsi IP-osoitteella):
+**Lisää porttiedustusvälitys** (suorita PowerShellissä järjestelmänvalvojana korvaten `<WSL-Gateway-IP>` omalla WSL-yhdyskäytävän IP-osoitteellasi):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
@@ -302,14 +304,14 @@ netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=1
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**Vahvista WSL:stä**:
+**Varmista WSL:stä**:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Jos olet jo ladannut Qwen3.6-35B-A3B-GGUF-mallin edellisessä vaiheessa, näet JSON-tulosteen, jossa listataan ladattu mallisi.
+Jos olet jo ladannut Qwen3.6-35B-A3B-GGUF-mallin edellisessä vaiheessa, näet JSON-tulosteen, joka listaa ladatun mallisi.
 
 ```json
 {
@@ -327,7 +329,7 @@ Jos olet jo ladannut Qwen3.6-35B-A3B-GGUF-mallin edellisessä vaiheessa, näet J
 }
 ```
 
-> `netsh portproxy` -sääntö säilyy uudelleenkäynnistysten yli, mutta WSL-yhdyskäytävän IP-osoite voi muuttua komennon `wsl --shutdown` jälkeen. Jos Lemonade ei ole enää tavoitettavissa WSL:stä uudelleenkäynnistyksen jälkeen, hae päivitetty yhdyskäytävän IP-osoite ja päivitä välityssääntö tällä uudella osoitteella.
+> `netsh portproxy` -sääntö säilyy uudelleenkäynnistysten yli, mutta WSL-yhdyskäytävän IP-osoite voi muuttua `wsl --shutdown`-komennon jälkeen. Jos Lemonade ei ole enää tavoitettavissa WSL:stä uudelleenkäynnistyksen jälkeen, hae päivitetty yhdyskäytävän IP-osoite ja päivitä välitys uudella osoitteella.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -386,22 +388,22 @@ finally {
 ## Asenna Hermes Agent
 
 <!-- @os:windows -->
-> Suorita tämän osion komennot **WSL-päätteessäsi**, ellei toisin mainita.
+> Suorita tämän osion komennot **WSL-päätteessä**, ellei toisin mainita.
 <!-- @os:end -->
 
 ```bash
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 ```
 
-Lippu `--skip-setup` ohittaa interaktiivisen asennusvelhon, jotta voit määrittää mallitaustajärjestelmän manuaalisesti seuraavassa vaiheessa.
+`--skip-setup`-lippu ohittaa vuorovaikutteisen asennusvelhon, jotta voit määrittää mallitaustan manuaalisesti seuraavassa vaiheessa.
 
-Lataa komentotulkkisi uudelleen:
+Lataa komentotulkki uudelleen:
 
 ```bash
 source ~/.bashrc
 ```
 
-Vahvista asennus:
+Varmista asennus:
 
 ```bash
 hermes --version
@@ -413,7 +415,7 @@ Suorita itsediagnostiikka tarkistaaksesi kaikki riippuvuudet:
 hermes doctor
 ```
 
-> **Vinkki:** Jos näet viestin `command not found` asennuksen jälkeen, lisää Hermes PATH-muuttujaasi:
+> **Vinkki:** Jos näet asennuksen jälkeen viestin `command not found`, lisää Hermes PATH-muuttujaan:
 > ```bash
 > export PATH="$HOME/.local/bin:$PATH"
 > ```
@@ -469,14 +471,14 @@ finally {
 <!-- @os:end -->
 
 ---
-## Määritä Hermes käyttämään Lemongatea
+## Määritä Hermes käyttämään Lemonadea
 
 Hermes tallentaa mallikonfiguraationsa tiedostoon `~/.hermes/config.yaml`. Voit joko käyttää interaktiivista `hermes model`-valitsinta tai kirjoittaa konfiguraation suoraan.
 
 ### Vaihtoehto 1: Interaktiivinen valitsin
 
 <!-- @os:windows -->
-> Suorita seuraava **WSL-terminaalissasi**.
+> Suorita seuraava **WSL-päätteessä**.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -498,7 +500,7 @@ Kun sinulta kysytään:
 2. **API base URL:** `http://127.0.0.1:13305/api/v1`
 <!-- @os:end -->
 <!-- @os:windows -->
-2. **API base URL:** käytä WSL-yhdyskäytävän IP-osoitetta: suorita `ip route show default | awk '{print $3}' | head -1` WSL:n sisällä saadaksesi sen, ja syötä sitten `http://<WSL-Gateway-IP>:13305/api/v1`
+2. **API base URL:** käytä WSL-yhdyskäytävän IP-osoitetta: suorita `ip route show default | awk '{print $3}' | head -1` WSL:ssä saadaksesi sen, ja syötä sitten `http://<WSL-Gateway-IP>:13305/api/v1`
 <!-- @os:end -->
 3. **API key:** `lemonade`
 4. **API compatibility mode:** `1` (Auto-detect)
@@ -506,7 +508,7 @@ Kun sinulta kysytään:
 6. **Context length in tokens:** `262144`
 7. **Display name:** `local-lemonade` (tai mikä tahansa haluamasi nimi)
 
-`hermes model` tallentaa sekä aktiivisen mallivalinnan että nimetyn `custom_providers`-merkinnän, joka tallentaa kontekstin pituuden yhdessä päätepisteen kanssa. Tulos tiedostossa `~/.hermes/config.yaml` näyttää tältä:
+`hermes model` tallentaa sekä aktiivisen mallin valinnan että nimetyn `custom_providers`-merkinnän, joka säilyttää kontekstipituuden yhdessä päätepisteen kanssa. Tulos tiedostossa `~/.hermes/config.yaml` näyttää tältä:
 
 ```yaml
 model:
@@ -586,7 +588,7 @@ echo "OK: Hermes config.yaml contains Lemonade model configuration"
 
 <!-- @os:windows -->
 
-Hae WSL-terminaalisi sisällä Windows-isäntäkoneen IP-osoite ja kirjoita konfiguraatio:
+Hae Windows-isäntäkoneen IP-osoite WSL-päätteessä ja kirjoita konfiguraatio:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
@@ -679,11 +681,11 @@ finally {
 
 ---
 
-## (Suositeltu) Ota Podman-hiekkalaatikko käyttöön
+## (Suositeltu) Ota käyttöön Podman-hiekkalaatikointi
 
-Hermes Agent voi ohjata kaikki agentin komentotulkki- ja tiedostotoiminnot eristetyn säilön kautta sen sijaan, että ne suoritettaisiin suoraan isäntäkoneellasi. Tämä rajoittaa minkä tahansa tahattoman toiminnon vaikutusalueen hiekkalaatikkoon, jättäen isäntäkoneesi tiedostojärjestelmän ja verkon koskemattomiksi.
+Hermes Agent voi ohjata kaikki agentin komentotulkki- ja tiedostotoiminnot eristetyn kontin kautta sen sijaan, että ne suoritettaisiin suoraan isäntäkoneella. Tämä rajoittaa minkä tahansa tahattoman toiminnon vaikutuksen hiekkalaatikkoon, jolloin isäntäkoneen tiedostojärjestelmä ja verkko pysyvät koskemattomina.
 
-Rakenna kevyt hiekkalaatikkoimage:
+Rakenna kevyt hiekkalaatikkokuva:
 
 <!-- @os:linux -->
 ```bash
@@ -726,13 +728,13 @@ echo "OK: Hermes sandbox Podman image is available"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Siirry WSL-terminaaliisi:
+Siirry WSL-päätteeseen:
 
 ```powershell
 wsl -d Ubuntu-24.04
 ```
 
-Rakenna sitten kevyt hiekkalaatikkoimage:
+Rakenna sitten kevyt hiekkalaatikkokuva:
 
 ```bash
 podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -795,7 +797,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Määritä sitten Hermes käyttämään Podmania säilöjen suoritusympäristönä ja aseta terminaalin taustajärjestelmä:
+Määritä sitten Hermes käyttämään Podmania kontin suoritusympäristönä ja aseta päätteen taustajärjestelmä:
 
 ```bash
 echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
@@ -808,7 +810,7 @@ EOF
 ```
 
 > `terminal.backend` on edelleen `docker`.
-> `HERMES_DOCKER_BINARY` on se, joka kertoo Hermesille, että sen tulee käyttää Podmania suoritusympäristönä Dockerin sijaan.
+> `HERMES_DOCKER_BINARY` kertoo Hermesille, että sen tulee käyttää Podmania suoritusympäristönä Dockerin sijaan.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -905,24 +907,24 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Hermes käynnistää nyt pysyvän hiekkalaatikkosäilön ja ohjaa kaikki `terminal`- ja tiedostotyökalukutsut sen kautta. Säilö jakaa elinkaarensa Hermes-prosessin kanssa, sitä käytetään uudelleen kaikissa työkalukutsuissa, ja se tuhotaan, kun Hermes sulkeutuu.
+Hermes käynnistää nyt pysyvän hiekkalaatikkokontin ja ohjaa kaikki `terminal`- ja tiedostotyökalukutsut sen kautta. Kontti elää Hermes-prosessin mukana, sitä käytetään uudelleen kaikissa työkalukutsuissa, ja se tuhotaan, kun Hermes sulkeutuu.
 
-> **Varmista, että hiekkalaatikko toimii:** Käynnistä Hermes (`hermes`) ja pyydä sitä suorittamaan `run hostname` - näet lyhyen säilön tunnisteen koneesi isäntänimen sijaan. Voit myös pyytää sitä suorittamaan `rm -rf <path-to-a-dummy-file/folder>`: Hermes vahvistaa poiston, mutta kansio on edelleen isäntäkoneellasi. Komento suoritettiin säilön eristetyssä `$HOME`-hakemistossa, ei sinun omassasi.
+> **Varmista, että hiekkalaatikko toimii:** Käynnistä Hermes (`hermes`) ja pyydä sitä suorittamaan `run hostname` – sinun pitäisi nähdä lyhyt kontin tunniste koneesi isäntänimen sijaan. Voit myös pyytää sitä suorittamaan `rm -rf <path-to-a-dummy-file/folder>`: Hermes vahvistaa poiston, mutta kansio säilyy isäntäkoneellasi. Komento suoritettiin kontin eristetyssä `$HOME`-hakemistossa, ei sinun.
 
-> **Tarvitsetko vahvempaa eristystä?** Hermes tarjoaa myös virallisen Docker-imagen (`nousresearch/hermes-agent`), joka suorittaa koko agenttiprosessin säilön sisällä - yhdyskäytävän, työkalut ja kaiken. Katso lisätietoja asennuksesta [Hermes Docker -dokumentaatiosta](https://hermes-agent.nousresearch.com/docs/user-guide/docker).
+> **Tarvitsetko vahvempaa eristystä?** Hermes tarjoaa myös virallisen Docker-levykuvan (`nousresearch/hermes-agent`), joka suorittaa koko agenttiprosessin kontin sisällä – yhdyskäytävän, työkalut ja kaiken. Katso asennustiedot [Hermesin Docker-dokumentaatiosta](https://hermes-agent.nousresearch.com/docs/user-guide/docker).
 
 ---
 
 <!-- @os:linux -->
-## (Suositeltu) Hermes-integraatio Firecrawl-palveluiden kanssa
+## (Suositeltu) Hermesin integraatio Firecrawl-palveluiden kanssa
 
-Hermes voi selata ja poimia sisältöä verkkosivustoilta sisäänrakennettujen verkkotyökalujensa avulla. Monet nykyaikaiset verkkosivustot käyttävät kuitenkin bottien tunnistusjärjestelmiä, jotka estävät yksinkertaiset HTTP-pyynnöt ja palauttavat varsinaisen sisällön sijaan haastesivuja. Tämän seurauksena Hermes ei välttämättä pysty luotettavasti poimimaan tietoa näiltä sivustoilta.
+Hermes voi selata ja poimia sisältöä verkkosivuilta sisäänrakennettujen verkkotyökalujensa avulla. Monet nykyaikaiset verkkosivustot käyttävät kuitenkin botintunnistusjärjestelmiä, jotka estävät yksinkertaiset HTTP-pyynnöt ja palauttavat haastesivuja varsinaisen sisällön sijaan. Tämän seurauksena Hermes ei välttämättä pysty luotettavasti poimimaan tietoa näiltä sivustoilta.
 
-Tämän rajoituksen voittamiseksi [Firecrawl](https://docs.firecrawl.dev/introduction) tarjoaa itseisännöidyn verkkoindeksointi- ja sisällönpoimintapalvelun, joka voi ohittaa nämä haasteet ja vapauttaa Hermes-automaation koko potentiaalin.
+Tämän rajoituksen voittamiseksi [Firecrawl](https://docs.firecrawl.dev/introduction) tarjoaa itse isännöidyn verkkoindeksointi- ja sisällönpoimintapalvelun, joka voi ohittaa nämä haasteet ja vapauttaa Hermes-automaation täyden potentiaalin.
 
-Tässä asennuksessa Firecrawl toimii Podmanilla hallittujen Docker-säilöjen joukkona. Elinkaaren hallinnan ja automaattisen käynnistyksen yksinkertaistamiseksi rekisteröimme Firecrawlin käyttäjätason `systemd`-palveluksi, joka orkestroi taustalla olevaa Podman Compose -pinoa. Tämä mahdollistaa sen, että Hermes voi käynnistää, pysäyttää ja tarkistaa Firecrawl-palvelun tavallisilla `systemctl --user`-komennoilla ilman suoraa vuorovaikutusta säilöjen kanssa.
+Tässä asennuksessa Firecrawl toimii joukkona Docker-kontteja, joita hallitaan Podmanilla. Elinkaaren hallinnan ja automaattisen käynnistyksen yksinkertaistamiseksi rekisteröimme Firecrawlin käyttäjätason `systemd`-palveluksi, joka orkestroi taustalla olevaa Podman Compose -pinoa. Tämä mahdollistaa sen, että Hermes voi käynnistää, pysäyttää ja tarkistaa Firecrawl-palvelun tavallisilla `systemctl --user`-komennoilla sen sijaan, että se olisi suoraan vuorovaikutuksessa konttien kanssa.
 
-Yksinkertaisuuden vuoksi olemme jakaneet koko prosessin neljään vaiheeseen:
+Asioiden pitämiseksi yksinkertaisina olemme jakaneet koko prosessin neljään vaiheeseen:
 
 ---
 
@@ -961,26 +963,26 @@ WantedBy=default.target
 
 ```
 Tässä vaiheessa palvelu on määritelty, mutta sitä ei ole vielä rekisteröity `systemd`:lle.
-Varmista, että tiedostonimi vastaa tarkalleen yllä luomaasi, ja suorita sitten:
+Varmista, että tiedostonimi vastaa tarkalleen edellä luomaasi, ja suorita sitten:
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
 ```
-Jos onnistui, näet seuraavan tulosteen:
+Jos onnistuu, sinun pitäisi nähdä seuraava tuloste:
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
-`default.target.wants/` sisältää symbolisia linkkejä palveluihin, jotka on määritetty käynnistymään automaattisesti.
+ `default.target.wants/` sisältää symbolisia linkkejä palveluihin, jotka on määritetty käynnistymään automaattisesti.
 
 ### 2. Määritä Firecrawl palveluasi varten
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) sopii ihanteellisesti niille, jotka tarvitsevat täyden hallinnan skrappaus- ja tiedonkäsittely-ympäristöistään, mutta se vaatii vastineeksi lisää ylläpito- ja konfigurointityötä.
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) sopii ihanteellisesti niille, jotka tarvitsevat täyden hallinnan keräys- ja tietojenkäsittelyympäristöistään, mutta se vaatii vastineeksi lisäylläpitoa ja -konfigurointia.
 
 Aloita kloonaamalla repositorio:
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-Luo `.env`-tiedosto `/firecrawl`-juurihakemistoon:
+Luo `.env` juurihakemistoon `/firecrawl`:
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1008,26 +1010,26 @@ BULL_AUTH_KEY=CHANGEME
 # Default: 0.8 (80%)
 # MAX_RAM=0.8
 ```
-> Aseta `BULL_AUTH_KEY` vahvaksi salaisuudeksi, erityisesti jos käyttöönotto on tavoitettavissa epäluotettavista verkoista.
-### 3. Hermeksen käyttöönotto Composen avulla
+> Aseta `BULL_AUTH_KEY` vahvaksi salaisuudeksi, erityisesti jos käyttöönotto on saavutettavissa luotettavien verkkojen ulkopuolelta.
+### 3. Hermesin käyttöönotto Composen avulla
 
-Ennen kuin jatkat, varmista, että olet ladannut uusimman Hermes Docker -imagen:
+Ennen kuin jatkat, varmista, että olet hakenut uusimman Hermes Docker -image:n:
 ```bash
 podman pull docker.io/nousresearch/hermes-agent:latest
 ```
-Kun tämä on tehty, lataa Hermes Compose -tiedosto [hermes-compose.yaml](assets/hermes-compose.yaml) ja sijoita se `/firecrawl`-juurikansioon:
+Kun tämä on tehty, lataa Hermes Compose -tiedosto [hermes-compose.yaml](assets/hermes-compose.yaml) ja sijoita se juurihakemistoon `/firecrawl`:
 
-> Tätä käytäntöä vaaditaan, jotta `systemd` löytää palvelun ja voi käynnistää sen oikein, kuten `WorkingDirectory=${HOME}/firecrawl` -määrityksessä on määritelty.
+> Tämä käytäntö on välttämätön, jotta `systemd` löytää ja käynnistää palvelun oikein, kuten on määritetty kohdassa `WorkingDirectory=${HOME}/firecrawl`.
 
-> Voit aina laajentaa pinoa lisäämällä tarvittaessa muita Firecrawl-palveluita. Täydellinen luettelo saatavilla olevista palveluista löytyy virallisesta [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) -tiedostosta.
+> Voit aina laajentaa pinoa lisäämällä tarvittaessa muita Firecrawl-palveluita. Täydellinen luettelo saatavilla olevista palveluista löytyy virallisesta [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml)-tiedostosta.
 
 ### 4. Käynnistä Hermes-palvelu Firecrawlin kautta 
 
-Ennen kuin annat hallinnan `systemd`:lle, varmista, että kaikki toimii oikein, käynnistämällä pino manuaalisesti:
+Ennen kuin annat hallinnan `systemd`:lle, varmista manuaalisesti ajamalla pino, että kaikki toimii oikein:
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-Jos kaikki on määritetty oikein, näet Hermes-säiliön käynnistyvän, ja komentorivin tulosteen pitäisi näyttää tältä:
+Jos kaikki on määritetty oikein, näet Hermes-säilön käynnistyvän ja komentorivin tulosteen pitäisi näyttää suunnilleen tältä:
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
@@ -1040,12 +1042,12 @@ Nyt kun kaikki on varmistettu, käynnistä palvelu `systemd`:n kautta:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) on käytettävissä interaktiivisen säiliön sisältä, ja verkkohallintapaneeli on saatavilla samassa isännässä ja portissa osoitteessa http://127.0.0.1:9119.
+[Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) on käytettävissä interaktiivisen säilön sisältä, ja Web-kojelauta on saatavilla samassa isännässä ja portissa osoitteessa http://127.0.0.1:9119.
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
 
-Palvelun pysäyttämiseksi suorita:
+Pysäytä palvelu suorittamalla:
 ```bash
 systemctl --user stop firecrawl.service
 ```
@@ -1209,17 +1211,17 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-**Onnittelut, olet rakentanut täysin paikallisen tekoälyagenttipinon.**
+**Onnittelut, olet rakentanut täysin paikallisen tekoälyagentti-pinon.**
 
-### Verkkohallintapaneeli
+### Web-kojelauta
 
-Hermes sisältää selainpohjaisen käyttöliittymän asetusten, API-avainten, mallien, istuntojen, muistin ja ajastettujen tehtävien (cron jobs) hallintaan. Avaa toinen pääte, kun yhdyskäytävä tai CLI on käynnissä, ja käynnistä se komennolla:
+Hermes sisältää selainpohjaisen käyttöliittymän asetusten, API-avainten, mallien, istuntojen, muistin ja cron-tehtävien hallintaan. Avaa toinen pääte, kun yhdyskäytävä tai CLI on käynnissä, ja käynnistä se komennolla:
 
 ```bash
 hermes dashboard
 ```
 
-Tämä käynnistää paikallisen palvelimen ja avaa osoitteen `http://127.0.0.1:9119` selaimessasi. Katso [hallintapaneelin dokumentaatio](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard), josta löydät täydellisen ominaisuusviitteen.
+Tämä käynnistää paikallisen palvelimen ja avaa osoitteen `http://127.0.0.1:9119` selaimessasi. Katso [kojelaudan dokumentaatio](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) täydellistä ominaisuusviitettä varten.
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
@@ -1228,37 +1230,37 @@ Tämä käynnistää paikallisen palvelimen ja avaa osoitteen `http://127.0.0.1:
 
 ## Valinnainen: Yhdistä viestintäkanava
 
-Kun yhdyskäytävä on käynnissä, voit tavoittaa paikallisen agenttisi mistä tahansa laitteesta. Hermes tukee [Discordia](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegramia](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) ja muita
+Kun yhdyskäytävä on käynnissä, voit tavoittaa paikallisen agenttisi miltä tahansa laitteelta. Hermes tukee [Discordia](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegramia](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) ja muita
 
 ---
 
 ### Discord
 
-Discord vaatii palvelimen, jolla **sinulla on järjestelmänvalvojan oikeudet** botin lisäämiseksi. Jos jaat palvelimia, mutta et omista yhtään, käytä sen sijaan Telegramia.
+Discord vaatii palvelimen, jossa **sinulla on ylläpitäjän oikeudet** botin lisäämiseksi. Jos jaat palvelimia, mutta et omista yhtään, käytä sen sijaan Telegramia.
 
 #### Luo Discord-sovellus ja botti
 
-1. Siirry [Discord Developer Portal](https://discord.com/developers/applications) -sivulle ja napsauta **New Application**. Anna sille nimi (esim. "hermes-bot").
-2. Napsauta sivupalkissa **Bot**. Aseta botille käyttäjätunnus.
-3. Vieritä edelleen Bot-sivulla kohtaan **Privileged Gateway Intents** ja ota käyttöön:
-   - **Message Content Intent** (vaaditaan)
-   - **Server Members Intent** (suositellaan)
+1. Siirry [Discord-kehittäjäportaaliin](https://discord.com/developers/applications) ja napsauta **New Application**. Anna sille nimi (esim. "hermes-bot").
+2. Napsauta sivupalkista **Bot**. Aseta botille käyttäjänimi.
+3. Vieritä Bot-sivulla kohtaan **Privileged Gateway Intents** ja ota käyttöön:
+   - **Message Content Intent** (pakollinen)
+   - **Server Members Intent** (suositeltu)
 4. Vieritä takaisin ylös ja napsauta **Reset Token** luodaksesi bottisi tunnuksen (token). Kopioi se.
 
 #### Lisää botti palvelimellesi
 
-1. Napsauta sivupalkissa **OAuth2 / URL Generator**.
-2. Ota **Scopes**-kohdassa käyttöön `bot` ja `applications.commands`.
-3. Ota **Bot Permissions** -kohdassa käyttöön: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
+1. Napsauta sivupalkista **OAuth2 / URL Generator**.
+2. Ota kohdassa **Scopes** käyttöön `bot` ja `applications.commands`.
+3. Ota kohdassa **Bot Permissions** käyttöön: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
 4. Kopioi luotu URL-osoite, liitä se selaimeesi, valitse palvelimesi ja vahvista.
 
 #### Kerää tunnuksesi ja salli yksityisviestit
 
-Ota Discordissa käyttöön kehittäjätila (**User Settings / Advanced / Developer Mode**) ja tee sen jälkeen seuraavat:
-- Napsauta hiiren oikealla painikkeella palvelimesi kuvaketta: **Copy Server ID**
-- Napsauta hiiren oikealla painikkeella omaa avatariasi: **Copy User ID**
+Ota kehittäjätila käyttöön Discordissa (**User Settings / Advanced / Developer Mode**) ja tee sitten seuraavaa:
+- Napsauta hiiren oikealla palvelimesi kuvaketta: **Copy Server ID**
+- Napsauta hiiren oikealla omaa profiilikuvaasi: **Copy User ID**
 
-Napsauta hiiren oikealla painikkeella palvelimesi kuvaketta / **Privacy Settings** / kytke päälle **Direct Messages**. Tämä vaaditaan pariutusvaihetta varten.
+Napsauta hiiren oikealla palvelimesi kuvaketta / **Privacy Settings** / kytke päälle **Direct Messages**. Tämä vaaditaan pariutumisvaihetta varten.
 
 #### Määritä Hermes Discordia varten
 
@@ -1276,7 +1278,7 @@ Käynnistä sitten yhdyskäytävä:
 hermes gateway
 ```
 
-Botin pitäisi tulla verkkoon Discordissa muutamassa sekunnissa. Lähetä sille viesti joko yksityisviestinä tai kanavalla, jonka se näkee.
+Botin pitäisi tulla verkkoon Discordissa muutamassa sekunnissa. Lähetä sille viesti, joko yksityisviestinä tai kanavalla, jonka se näkee.
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1289,8 +1291,8 @@ Botin pitäisi tulla verkkoon Discordissa muutamassa sekunnissa. Lähetä sille 
 
 #### Luo Telegram-botti
 
-1. Avaa Telegram ja lähetä viesti **@BotFatherille**.
-2. Lähetä `/newbot` ja seuraa ohjeita. Tallenna botin tunnus (token), jonka se antaa.
+1. Avaa Telegram ja lähetä viesti käyttäjälle **@BotFather**.
+2. Lähetä `/newbot` ja seuraa ohjeita. Tallenna botin tunnus (token), jonka saat.
 
 #### Määritä Hermes Telegramia varten
 
@@ -1301,7 +1303,7 @@ TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_ALLOWED_USERS=your-telegram-user-id   # comma-separated for multiple users
 ```
 
-> **Etkö tiedä Telegram-käyttäjätunnustasi?** Lähetä viesti käyttäjälle [@userinfobot](https://t.me/userinfobot) Telegramissa, se vastaa sinulle numeerisella tunnuksellasi.
+> **Etkö tiedä Telegram-käyttäjätunnustasi?** Lähetä viesti käyttäjälle [@userinfobot](https://t.me/userinfobot) Telegramissa, se vastaa numeerisella tunnuksellasi.
 
 Käynnistä sitten yhdyskäytävä:
 
@@ -1309,7 +1311,7 @@ Käynnistä sitten yhdyskäytävä:
 hermes gateway
 ```
 
-Lähetä botillesi mikä tahansa viesti Telegramissa testataksesi toimintaa. Voit nyt keskustella agenttisi kanssa Telegram-yksityisviesteillä. Katso [täydellinen Telegram-asennusopas](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram), josta löydät webhook-tilan ja lisäasetukset.
+Lähetä botillesi mikä tahansa viesti Telegramissa testiä varten. Voit nyt keskustella agenttisi kanssa Telegram-yksityisviestien kautta. Katso [täydellinen Telegram-asennusopas](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) webhook-tilaa ja lisäasetuksia varten.
 
 ---
 
@@ -1317,8 +1319,8 @@ Lähetä botillesi mikä tahansa viesti Telegramissa testataksesi toimintaa. Voi
 
 Nyt kun agenttisi voi vastaanottaa komentoja puhelimestasi ja toimia paikallisella koneellasi, tässä on kolme suuntaa, joita kannattaa tutkia:
 
-1. **Automaattinen tutkimuskooste**: Ajasta Hermes hakemaan verkosta tietoa sinua kiinnostavista aiheista joka aamu, tiivistämään löydökset paikallisella mallillasi ja lähettämään koosteen puhelimeesi Telegramin tai Discordin kautta – kaikki toimii omalla laitteistollasi ilman pilvikustannuksia.
+1. **Automatisoitu tutkimuskoonti**: Ajasta Hermes etsimään verkosta sinua kiinnostavia aiheita joka aamu, tiivistämään löydökset paikallisen mallisi avulla ja lähettämään koonnin puhelimeesi Telegramin tai Discordin kautta, kaikki omalla laitteistollasi ilman pilvikustannuksia.
 
-2. **Koodikatselmus tarpeen mukaan**: Osoita Hermes GitHub-tietovarastoon, pyydä sitä tarkastelemaan avoimia pull requesteja ja anna sen julkaista kommentteja tai yhteenveto takaisin keskusteluusi. Docker-pääteympäristön ansiosta kaikki git-toiminnot suoritetaan hiekkalaatikossa, mikä pitää isäntäkoneesi puhtaana.
+2. **Koodikatselmointi tarvittaessa**: Osoita Hermes GitHub-repositorioon, pyydä sitä tarkastelemaan avoimia pull requesteja ja saat sen julkaisemaan kommentteja tai yhteenvedon takaisin keskusteluusi. Docker-pääteohjelmistoalustan ansiosta kaikki git-toiminnot suoritetaan hiekkalaatikon sisällä, mikä pitää isäntäjärjestelmäsi puhtaana.
 
-3. **Paikallinen tiedostoavustaja**: Anna Hermekselle pääsy työhakemistoon ja pyydä sitä järjestämään, nimeämään uudelleen, tiivistämään tai muuntamaan tiedostoja tarpeen mukaan puhelimestasi käsin. Koska Docker-pääteympäristö rajoittaa kaiken kirjoittamisen hiekkalaatikon työtilaan, vahingossa tapahtuvat tuhoisat toiminnot pysyvät hallinnassa.
+3. **Paikallinen tiedostoavustaja**: Anna Hermesille pääsy työhakemistoon ja pyydä sitä järjestämään, nimeämään uudelleen, tiivistämään tai muuntamaan tiedostoja pyynnöstä puhelimestasi. Koska Docker-pääteohjelmistoalusta rajoittaa kaikki kirjoitusoperaatiot hiekkalaatikon työtilaan, vahingossa tapahtuvat tuhoisat toiminnot pysyvät hallinnassa.

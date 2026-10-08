@@ -12,11 +12,11 @@ SPDX-License-Identifier: MIT
 
 ## סקירה כללית
 
-[**OpenClaw**](https://openclaw.ai/) הוא סוכן AI אוטונומי שיכול לכתוב ולהריץ קוד, לנהל קבצים ולבצע משימות מורכבות מרובות שלבים מטעמכם. בניגוד לעוזר צ'אט שרק עונה על שאלות, OpenClaw מבצע פעולות ממשיות במערכת שלכם, ולכן הוא זקוק ל-backend מהיר ומסוגל שיכול לעמוד בקצב של לולאת סוכן תובענית.
+[**OpenClaw**](https://openclaw.ai/) הוא סוכן AI אוטונומי שיכול לכתוב ולהריץ קוד, לנהל קבצים ולבצע משימות מורכבות מרובות שלבים עבורכם. בניגוד לעוזר צ'אט שרק עונה על שאלות, OpenClaw מבצע פעולות אמיתיות במערכת שלכם, מה שאומר שהוא זקוק ל-backend AI מהיר ומסוגל שיכול לעמוד בקצב של לולאת סוכן תובענית.
 
-[**Lemonade Server**](https://lemonade-server.ai/) הוא בדיוק ה-backend הזה. זהו שרת הסקה מקומי בקוד פתוח שמריץ מודלי GenAI ישירות על החומרה שלכם וחושף אותם באמצעות ה-API הסטנדרטי בתעשייה, OpenAI API.
+[**Lemonade Server**](https://lemonade-server.ai/) הוא ה-backend הזה. זהו שרת הסקה (inference) מקומי בקוד פתוח שמריץ מודלים של GenAI ישירות על החומרה שלכם וחושף אותם דרך ה-API הסטנדרטי בתעשייה של OpenAI.
 
-יחד, הם יוצרים מחסנית סוכן AI מקומית לחלוטין: Lemonade מטפל בהסקת המודל, ו-OpenClaw מספק את לולאת הסוכן שהופכת את פלטי המודל לפעולות ממשיות.
+יחד, הם מהווים מחסנית סוכן AI מקומית לחלוטין: Lemonade מטפל בהסקת המודל, ו-OpenClaw מספק את לולאת הסוכן שהופכת את פלטי המודל לפעולות אמיתיות.
 
 > **לפני שתמשיכו:** OpenClaw הוא סוכן AI אוטונומי מאוד. מתן גישה לכל סוכן AI למערכת שלכם עלול לגרום לתוצאות בלתי צפויות או בלתי מכוונות. המשיכו רק אם אתם מבינים את הסיכונים ומרגישים בנוח עם תוכנה אוטונומית הפועלת מטעמכם.
 
@@ -24,11 +24,11 @@ SPDX-License-Identifier: MIT
 
 ## מה תלמדו
 
-עד סוף מדריך זה תוכלו:
+בסיום מדריך זה תוכלו:
 
 - ללמוד על **Lemonade Server**
-- **להתקין את OpenClaw** ו**להצביע אותו על Lemonade Server** כ-backend של ה-AI שלו.
-- **להפעיל את שער ה-OpenClaw (gateway)** ולוודא שהסוכן שלכם מוכן לעבודה.
+- **להתקין את OpenClaw** ו**להפנות אותו אל Lemonade Server** כ-AI backend שלו.
+- **להפעיל את שער ה-OpenClaw (gateway)** ולאשר שהסוכן שלכם מוכן לעבודה.
 - **לחבר ערוץ תקשורת** (Discord או Telegram) כדי שתוכלו לשוחח עם הסוכן שלכם מכל מכשיר.
 
 ---
@@ -45,23 +45,25 @@ SPDX-License-Identifier: MIT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות תוכנה מוקדמות
+## התקנת דרישות קדם של תוכנה
 
 <!-- @os:linux -->
-- מחשב המריץ **Ubuntu 24.04+** או הפצת Linux מבוססת Debian תואמת עם `apt-get`
-- לפחות **12 GB של RAM** (מומלץ 64 GB+ עבור מודלים גדולים יותר)
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (אופציונלי, ל-sandboxing של OpenClaw)
-- **~10–30 GB של שטח דיסק פנוי** עבור משקלי המודל
+- מחשב המריץ **Ubuntu 24.04+** או הפצת לינוקס מבוססת Debian תואמת עם `apt-get`
+- לפחות **12 GB של זיכרון RAM** (מומלץ 64 GB+ עבור מודלים גדולים יותר)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (אופציונלי, לארגז חול של OpenClaw)
+- **כ-10–30 GB של שטח דיסק פנוי** עבור משקלי המודל
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - מחשב המריץ **Windows 10/11**
-- לפחות **12 GB של RAM** (מומלץ 64 GB+ עבור מודלים גדולים יותר)
-- **~10–30 GB של שטח דיסק פנוי** עבור משקלי המודל
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (אופציונלי, ל-sandboxing של OpenClaw)
+- לפחות **12 GB של זיכרון RAM** (מומלץ 64 GB+ עבור מודלים גדולים יותר)
+- **כ-10–30 GB של שטח דיסק פנוי** עבור משקלי המודל
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (אופציונלי, לארגז חול של OpenClaw)
 <!-- @os:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:nodejs,openclaw,lemonade-models-qwen3-35b-a3b,lemonade -->
 
 <!-- @var:id=openclaw_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -73,9 +75,9 @@ lemonade --version
 
 ---
 
-## משיכה וטעינה של המודל המומלץ
+## משיכה (Pull) וטעינה של המודל המומלץ
 
-המודל המומלץ למדריך זה הוא **Qwen3.6-35B-A3B-GGUF** מבית Unsloth, מודל MoE חזק עם חלון הקשר (context window) של 263,000 טוקנים, המתאים היטב לעומסי עבודה של סוכנים. מודל זה משתמש בקוונטיזציית UD-Q4_K_XL. משכו אותו כעת:
+המודל המומלץ עבור מדריך זה הוא **Qwen3.6-35B-A3B-GGUF** מבית Unsloth, מודל MoE חזק עם חלון הקשר (context window) של 263k טוקנים, המתאים היטב לעומסי עבודה של סוכנים. מודל זה משתמש בקוונטיזציה מסוג UD-Q4_K_XL. משכו אותו כעת:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
@@ -91,9 +93,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end --> 
 
-למודל אורך הקשר ברירת מחדל של 262,144 טוקנים. אם אתם נתקלים בשגיאות זיכרון חסר (OOM), שקלו להקטין את חלון ההקשר. עם זאת, מכיוון ש-Qwen3.6 מנצל הקשר מורחב עבור משימות מורכבות, אנו ממליצים לשמור על אורך הקשר של לפחות 128K טוקנים כדי לשמר את יכולות החשיבה.
+למודל יש אורך הקשר ברירת מחדל של 262,144 טוקנים. אם אתם נתקלים בשגיאות חוסר זיכרון (OOM), שקלו להקטין את חלון ההקשר. עם זאת, מכיוון ש-Qwen3.6 מנצל הקשר מורחב עבור משימות מורכבות, אנו ממליצים לשמור על אורך הקשר של לפחות 128K טוקנים כדי לשמר את יכולות החשיבה.
 
-> **טיפ: השביתו חשיבה לתגובות סוכן מהירות יותר:** Qwen3.6-35B-A3B פועל במצב חשיבה כברירת מחדל, מה שמוסיף השהיה לפני כל תגובה. בלולאות סוכן, השהיה זו מצטברת במהירות. המאגר [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) מספק תצורה מוכנה מראש שמשביתה את החשיבה. כדי להשתמש בה, הורידו את הקובץ ויבאו אותו:
+> **טיפ: השביתו חשיבה (thinking) לתגובות סוכן מהירות יותר:** Qwen3.6-35B-A3B פועל במצב חשיבה (thinking mode) כברירת מחדל, מה שמוסיף זמן השהיה לפני כל תגובה. עבור לולאות סוכן, זמן ההשהיה הזה מצטבר במהירות. המאגר [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) מספק תצורה מוכנה מראש שמשביתה את מצב החשיבה. כדי להשתמש בה, הורידו את הקובץ וייבאו אותו:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -236,11 +238,11 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## הגדרת WSL
 
-אנו מריצים את OpenClaw בתוך WSL (מומלץ) ומחברים אותו ל-Lemonade הרץ באופן טבעי על Windows. כך תקבלו סביבת מעטפת Linux עבור OpenClaw תוך שמירה על האצת ה-GPU של Lemonade בצד Windows.
+אנו מריצים את OpenClaw בתוך WSL (מומלץ) ומחברים אותו ל-Lemonade שרץ באופן טבעי על Windows. זה מעניק לכם סביבת מעטפת לינוקס עבור OpenClaw תוך שמירה על האצת ה-GPU של Lemonade בצד Windows.
 
 ### התקנת WSL ו-Ubuntu
 
-פתחו את PowerShell כמנהל (Administrator) והתקינו את גרעין WSL:
+פתחו את PowerShell כמנהל (Administrator) והתקינו את ליבת ה-WSL:
 
 ```powershell
 wsl --install --no-distribution
@@ -271,37 +273,37 @@ wsl --shutdown
 wsl
 ```
 
-### גישור Lemonade מ-Windows אל WSL
+### גישור Lemonade מ-Windows אל תוך WSL
 
-WSL2 פועל ברשת וירטואלית. Lemonade על Windows נקשר ל-`127.0.0.1`, אליו WSL לא יכול להגיע ישירות. פרוקסי פורט של Windows מעביר תעבורה מכתובת ה-gateway של WSL אל localhost של Windows.
+WSL2 פועל ברשת וירטואלית. Lemonade ב-Windows נקשר אל `127.0.0.1`, שאליו WSL לא יכול לגשת ישירות. Windows port proxy מעביר תעבורה מכתובת ה-IP של שער ה-WSL (gateway) אל localhost של Windows.
 
-**מצאו את כתובת ה-gateway של WSL** (הריצו בתוך WSL):
+**מצאו את כתובת ה-IP של שער ה-WSL שלכם** (הריצו בתוך WSL):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**הוסיפו את פרוקסי הפורט** (הריצו ב-PowerShell כמנהל, החליפו את `<WSL-Gateway-IP>` בכתובת ה-gateway של WSL שלכם):
+**הוסיפו את ה-port proxy** (הריצו ב-PowerShell כמנהל, תוך החלפת `<WSL-Gateway-IP>` בכתובת ה-IP של שער ה-WSL שלכם):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
-> הערה: אם אתם נתקלים בשגיאת `netsh: command not found`, נסו להשתמש בשם הקובץ המפורש במקום - `netsh.exe`
+> הערה: אם אתם נתקלים בשגיאה `netsh: command not found`, נסו להשתמש בשם הקובץ ההרצה המפורש במקום זאת - `netsh.exe`
 
-**הוסיפו כלל חומת אש (firewall)** (אותו PowerShell מוגבה):
+**הוסיפו כלל חומת אש (firewall)** (באותו PowerShell מוגבה):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**וודאו מ-WSL**:
+**אמתו מתוך WSL**:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-אם כבר טענתם את המודל Qwen3.6-35B-A3B-GGUF בשלב הקודם, אמורים לראות פלט JSON כמו זה:
+אם כבר טענתם את המודל Qwen3.6-35B-A3B-GGUF בשלב הקודם, אתם אמורים לראות פלט JSON כמו זה:
 
 ```json
 {
@@ -321,20 +323,20 @@ curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 
 #### שמירה על תקינות הגשר לאחר הפעלה מחדש
 
-הכלל של `netsh portproxy` שורד הפעלות מחדש, אך כתובת ה-IP של שער ה-WSL עשויה להשתנות לאחר `wsl --shutdown` או הפעלה מחדש. כאשר זה קורה, ה-proxy עדיין מצביע על הכתובת הישנה ו-Lemonade הופך לבלתי נגיש מ-WSL. אם זה קורה, השתמש באחת מהאפשרויות שלהלן.
+כלל `netsh portproxy` שורד הפעלות מחדש, אך כתובת ה-IP של שער ה-WSL עשויה להשתנות לאחר `wsl --shutdown` או הפעלה מחדש. כאשר זה קורה, הפרוקסי עדיין מצביע על כתובת ה-IP הישנה ו-Lemonade הופך לבלתי נגיש מ-WSL. אם זה קורה, השתמשו באחת מהאפשרויות שלהלן.
 
-**אפשרות 1 (מומלצת) — תיקון הגשר באופן אוטומטי.** כדי להימנע מביצוע פעולה זו ידנית בכל פעם, השתמש במשימה מתוזמנת שבודקת את הגשר בכל הפעלה וכניסה ובונה אותו מחדש רק כאשר כתובת ה-IP של השער השתנתה. ראה את [מדריך התיקון האוטומטי של גשר Lemonade WSL](assets/RepairLemonadeWslBridge.md).
+**אפשרות 1 (מומלצת) — תיקון הגשר באופן אוטומטי.** כדי להימנע מביצוע פעולה זו ידנית בכל פעם, השתמשו במשימה מתוזמנת הבודקת את הגשר בכל הפעלה והתחברות ובונה אותו מחדש רק כאשר כתובת ה-IP של השער השתנתה. ראו [מדריך התיקון האוטומטי של גשר Lemonade WSL](assets/RepairLemonadeWslBridge.md).
 
 
-**אפשרות 2 — תיקון הגשר באופן ידני.** ראשית, קבל את כתובת ה-IP הנוכחית של שער ה-WSL על ידי הרצת הפקודה הבאה בתוך WSL:
+**אפשרות 2 — תיקון הגשר באופן ידני.** ראשית, קבלו את כתובת ה-IP הנוכחית של שער ה-WSL על ידי הרצת הפקודה הבאה בתוך WSL:
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-העתק ערך זה; תשתמש בו במקום `<new-WSL-Gateway-IP>` בהמשך.
+העתיקו ערך זה; תשתמשו בו במקום `<new-WSL-Gateway-IP>` בהמשך.
 
-לאחר מכן, ב-**PowerShell מוגבה** (הפעל כמנהל), הצג את הכללים הקיימים, מחק רק את כלל ה-Lemonade הישן, והוסף כלל חדש עם ה-IP הנוכחי:
+לאחר מכן, ב-**PowerShell מורם** (הרצה כמנהל מערכת), הציגו את הכללים הקיימים, מחקו רק את כלל ה-Lemonade הישן, והוסיפו כלל חדש עם כתובת ה-IP הנוכחית:
 
 ```powershell
 netsh interface portproxy show all
@@ -342,13 +344,13 @@ netsh interface portproxy delete v4tov4 listenaddress=<old-WSL-Gateway-IP> liste
 netsh interface portproxy add v4tov4 listenaddress=<new-WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-בפלט של `show all`, כלל ה-Lemonade הישן הוא הרשומה שכתובת החיבור (connect address) שלה היא `127.0.0.1` בפורט `13305`; כתובת ההאזנה (listen address) שלה היא ה-`<old-WSL-Gateway-IP>` שלך. מחיקה לפי כתובת זו מסירה רק כלל זה ואינה פוגעת בכללי port-proxy אחרים במחשב שלך.
+בפלט של `show all`, כלל ה-Lemonade הישן הוא הרשומה שכתובת החיבור שלה היא `127.0.0.1` בפורט `13305`; כתובת ההאזנה שלה היא `<old-WSL-Gateway-IP>` שלכם. מחיקה לפי כתובת זו מסירה רק את הכלל הזה ומשאירה כל כללי port-proxy אחרים במחשב שלכם ללא שינוי.
 
-כלל חומת האש שהוספת במהלך ההגדרה קשור לפורט `13305` (ולא לכתובת ה-IP), כך שהוא ממשיך לפעול ואינו זקוק ליצירה מחדש.
+כלל חומת האש שהוספתם בעת ההגדרה קשור לפורט `13305` (לא לכתובת ה-IP), כך שהוא ממשיך לעבוד ואינו צריך להיווצר מחדש.
 
-> **המלצה:** כדי להימנע מבעיות שער, אנו ממליצים בחום על תצורת המעטפת (shell) הבאה:
+> **המלצה:** כדי להימנע מבעיות שער, אנו ממליצים בחום על הגדרת המעטפת הבאה:
 > - **פקודות Windows** יש להריץ ב-**PowerShell**
-> - **פקודות הפצת WSL (WSL distro)** יש להריץ ב-**Command Prompt** (הפעל כ-**מנהל**)
+> - **פקודות הפצת WSL** יש להריץ ב-**Command Prompt** (הרצה כ-**מנהל מערכת**)
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -408,25 +410,25 @@ finally {
 
 ### התקנת OpenClaw
 <!-- @os:windows -->
-> הרץ את הפקודות בסעיף זה בתוך **מסוף ה-WSL** שלך.
+> הריצו את הפקודות בסעיף זה בתוך **מסוף ה-WSL** שלכם.
 <!-- @os:end -->
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-הדגל `--no-onboard` מדלג על אשף ההגדרה האינטראקטיבי, תגדיר את מנוע המודל באופן ידני בשלב הבא, מה שמעניק לך שליטה מדויקת על המודל והשרת שבהם נעשה שימוש.
+הדגל `--no-onboard` מדלג על אשף ההגדרה האינטראקטיבי, תגדירו את backend המודל באופן ידני בשלב הבא, מה שמעניק לכם שליטה מדויקת על המודל והשרת שבהם נעשה שימוש.
 
-פתח מסוף חדש ואשר את ההתקנה:
+פתחו מסוף חדש ואשרו את ההתקנה:
 
 ```bash
 openclaw --version
 ```
 
-> **טיפ:** אם אתה רואה `command not found` לאחר ההתקנה, הוסף את תיקיית ה-bin הגלובלית של npm ל-PATH שלך:
+> **טיפ:** אם אתם רואים `command not found` לאחר ההתקנה, הוסיפו את תיקיית ה-bin הגלובלית של npm ל-PATH:
 > ```bash
 > export PATH="$HOME/.npm-global/bin:$PATH"
 > ```
-> כדי להפוך זאת לקבוע, הוסף את השורה שלמעלה לקובץ `~/.bashrc` או `~/.zshrc` שלך.
+> כדי להפוך זאת לקבוע, הוסיפו את השורה למעלה לקובץ `~/.bashrc` או `~/.zshrc` שלכם.
 
 <!-- @os:linux -->
 <!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
@@ -484,7 +486,7 @@ finally {
 
 ### הגדרת OpenClaw לשימוש ב-Lemonade
 
-הרץ את תהליך ההגדרה הראשוני הלא-אינטראקטיבי של OpenClaw.
+הריצו את תהליך ההטמעה הלא-אינטראקטיבי של OpenClaw.
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -524,9 +526,9 @@ openclaw onboard \
 ```
 <!-- @os:end -->
 
-פקודה זו כותבת את תצורת OpenClaw לקובץ `~/.openclaw/openclaw.json`.
+פקודה זו כותבת את ההגדרה של OpenClaw לקובץ `~/.openclaw/openclaw.json`.
 
-> **גודל חלון ההקשר של OpenClaw:** הכיווץ (compaction) של OpenClaw מופעל כאשר `contextTokens > contextWindow − reserveTokens`. ברירת המחדל של `reserveTokensFloor` היא 20,000 טוקנים, רצפה (floor) שדורסת את `reserveTokens` כאשר הוא נמוך יותר, כך שכל חלון הקשר של מודל שנמוך מ-~37k יגרום ללולאת כיווץ אינסופית. הגדר רזרבה נמוכה ובטל את הרצפה פעם אחת בתצורה שלך והיא תחול על כל מודל, ללא צורך בכוונון פר-מודל:
+> **קביעת גודל חלון ההקשר של OpenClaw:** הדחיסה של OpenClaw מופעלת כאשר `contextTokens > contextWindow − reserveTokens`. ברירת המחדל של `reserveTokensFloor` היא 20,000 טוקנים, רצפה שמבטלת את `reserveTokens` כאשר הוא נמוך יותר, כך שכל חלון הקשר של מודל מתחת ל-כ-37 אלף יגרום ללולאת דחיסה אינסופית. הגדירו רזרבה נמוכה ובטלו את הרצפה פעם אחת בהגדרה שלכם וזה יחול על כל מודל, ללא צורך בכוונון לפי מודל:
 >
 > ```json
 > "compaction": {
@@ -535,13 +537,13 @@ openclaw onboard \
 > }
 > ```
 >
-> `reserveTokensFloor` הוא *רצפה* (הגנה מינימלית), לא הרזרבה עצמה, הגדרת הרצפה בלבד אינה משפיעה. `reserveTokensFloor: 0` מבטלת את ההגנה כך שהערך הנמוך יותר של `reserveTokens` מתקבל.
+> `reserveTokensFloor` הוא *רצפה* (שמירה מינימלית), לא הרזרבה עצמה, הגדרת הרצפה בלבד אינה משפיעה. `reserveTokensFloor: 0` מבטל את השמירה כך שה-`reserveTokens` הנמוך יותר יתקבל.
 >
-> **מתי להחיל זאת:** השתמש בתצורה זו אם חלון ההקשר האפקטיבי של המודל שלך נמוך מ-~37k, בין אם המודל קטן (למשל 8k, 16k, 32k) או משום שהגבלת אותו בכוונה לערך נמוך יותר (למשל טעינת מודל של 128k אך הגדרת ההקשר ל-16k ב-Lemonade). ללא זה, OpenClaw נכנס ללולאת כיווץ אינסופית בעת ההפעלה.
+> **מתי להחיל זאת:** השתמשו בהגדרה זו אם חלון ההקשר האפקטיבי של המודל שלכם נמוך מ-כ-37 אלף, בין אם המודל קטן (למשל 8K, 16K, 32K) ובין אם הגבלתם אותו בכוונה לערך נמוך יותר (למשל טעינת מודל של 128K אך הגדרת הקשר ל-16K ב-Lemonade). בלי זה, OpenClaw נכנס ללולאת דחיסה אינסופית בהפעלה.
 >
-> **מודלים עם הקשר גדול בהקשר מלא:** ניתן לדלג על כך לחלוטין. ברירות המחדל עובדות היטב, הכיווץ יופעל הרבה לפני שהחלון מתמלא ולמודל יש מקום רב ליצירת תגובות ארוכות. אם בכל זאת תחיל זאת, שים לב ש-`reserveTokens: 4096` מגביל את אורך התגובה לכ-4k טוקנים, מה שעלול לקטוע יצירת קבצים ארוכה או תוכניות מפורטות.
+> **מודלים עם הקשר גדול בהקשר מלא:** תוכלו לדלג על זה לחלוטין. ברירות המחדל עובדות היטב, הדחיסה תופעל הרבה לפני שהחלון מתמלא והמודל נהנה ממרחב רב ליצירת תגובות ארוכות. אם בכל זאת תחילו זאת, שימו לב כי `reserveTokens: 4096` מגביל את אורך התגובה לכ-4K טוקנים, מה שעלול לקצץ יצירת קבצים ארוכים או תוכניות מפורטות.
 >
-> **היכן להוסיף זאת:** מקם את הבלוק `compaction` בתוך `agents.defaults` בקובץ `openclaw.json` שלך (בדרך כלל תחת `~/.openclaw/openclaw.json`):
+> **היכן להוסיף זאת:** מקמו את בלוק ה-`compaction` בתוך `agents.defaults` בקובץ ה-`openclaw.json` שלכם (בדרך כלל ב-`~/.openclaw/openclaw.json`):
 >
 > ```json
 > {
@@ -560,12 +562,12 @@ openclaw onboard \
 > }
 > ```
 >
-> שאר התצורה שלך (gateway, channels, models וכו') נשארת ללא שינוי, יש להוסיף רק את המפתח `compaction`.
-### (מומלץ) הפעלת ארגז חול (Sandboxing) באמצעות Docker
+> שאר ההגדרה שלכם (gateway, channels, models וכו') נשארת ללא שינוי, רק מפתח ה-`compaction` צריך להתווסף.
+### (מומלץ) הפעלת בידוד Docker (Sandboxing)
 
-OpenClaw יכולה לנתב את כל פעולות הקבצים והקוד של הסוכן דרך קונטיינר Docker מבודד במקום להריץ אותן ישירות על המחשב המארח שלכם. כך רדיוס הפגיעה של כל פעולה לא מכוונת מוגבל לארגז החול, בעוד מערכת הקבצים והרשת של המחשב המארח נותרות ללא פגע.
+OpenClaw יכול לנתב את כל פעולות הקבצים והקוד של הסוכן דרך מכולת Docker מבודדת במקום להריץ אותן ישירות על המארח שלך. פעולה זו מגבילה את טווח ההשפעה של כל פעולה לא מכוונת לסביבת ה-sandbox, ומשאירה את מערכת הקבצים והרשת של המארח שלך ללא פגיעה.
 
-בנו את תמונת ארגז החול פעם אחת (יש להתקין Docker):
+בנו את תמונת ה-sandbox פעם אחת (יש להתקין את Docker):
 
 ```bash
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -670,7 +672,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-הריצו את הפקודה הבאה כדי להוסיף את המפתח `sandbox` בתוך הבלוק הקיים `agents.defaults` בקובץ `~/.openclaw/openclaw.json`:
+הריצו זאת כדי להוסיף את המפתח `sandbox` בתוך הבלוק הקיים `agents.defaults` בקובץ `~/.openclaw/openclaw.json`:
 
 ```bash
 cat > sandbox.patch.json5 <<JSON5
@@ -689,13 +691,13 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-לקונטיינרים בארגז החול **אין גישה לרשת** כברירת מחדל. עיינו ב[מסמך העזר לארגז חול](https://docs.openclaw.ai/gateway/sandboxing) לגבי bind mounts ודריסות רשת.
+למכולות ה-sandbox **אין גישה לרשת** כברירת מחדל. ראו את [מסמך הייחוס לבידוד](https://docs.openclaw.ai/gateway/sandboxing) לקבלת מידע על bind mounts ועקיפות רשת.
 
-> #### פתרון בעיות: Docker Permission Denied
+> #### פתרון בעיות: Docker דחה הרשאה (Permission Denied)
 > 
-> אם מתקבלת שגיאת "permission denied" בעת הרצת פקודות Docker:
+> אם אתם מקבלים "permission denied" בעת הרצת פקודות Docker:
 > 
-> **שלב 1: הוספת המשתמש שלכם לקבוצת docker**
+> **שלב 1: הוסיפו את המשתמש שלכם לקבוצת docker**
 > 
 > ```bash
 > sudo groupadd docker                    # Create group if needed
@@ -941,11 +943,11 @@ finally {
 <!-- @os:linux -->
 ## (מומלץ) שילוב OpenClaw עם שירותי Firecrawl
 
-[Firecrawl](https://docs.firecrawl.dev/introduction) מספקת שירות זחילת אתרים וחילוץ תוכן בארחון עצמי (self-hosted) שיכול לעקוף את האתגרים הללו ולשחרר את מלוא הפוטנציאל של אוטומציית OpenClaw. 
+[Firecrawl](https://docs.firecrawl.dev/introduction) מספק שירות סריקת רשת ואיתור תוכן שרץ באירוח עצמי, אשר יכול לעקוף את האתגרים הללו ולשחרר את הפוטנציאל המלא של אוטומציית OpenClaw.
 
-בהגדרה זו, OpenClaw פועלת כקבוצה של קונטיינרי Docker המנוהלים באמצעות Podman. כדי לפשט את ניהול מחזור החיים ואת ההפעלה האוטומטית, אנו רושמים את Firecrawl כשירות `systemd` ברמת המשתמש, המתאם את ערימת Podman Compose הבסיסית. כך ניתן להפעיל את השער (gateway), לעצור ולוודא את שירות Firecrawl באמצעות פקודות `systemctl --user` סטנדרטיות, במקום לתקשר ישירות עם הקונטיינרים. 
+בתצורה זו, OpenClaw פועל כקבוצה של מכולות Docker המנוהלות באמצעות Podman. כדי לפשט את ניהול מחזור החיים ואת ההפעלה האוטומטית, אנו רושמים את Firecrawl כשירות `systemd` ברמת המשתמש אשר מתזמר את מחסנית ה-Podman Compose הבסיסית. כך ניתן להפעיל, לעצור ולאמת את שירות Firecrawl באמצעות פקודות `systemctl --user` רגילות, במקום לעבוד ישירות מול המכולות.
 
-כדי לשמור על הפשטות, פירקנו את התהליך כולו לארבעה שלבים:
+כדי לשמור על הפשטות, פירקנו את כל התהליך לארבעה שלבים:
 
 ---
 
@@ -997,21 +999,21 @@ ExecStop=/usr/bin/podman compose -f openclaw-compose.yaml down
 [Install]
 WantedBy=default.target
 ```
-בשלב זה, השירות הוגדר אך עדיין לא נרשם ב-`systemd`. 
+בשלב זה, השירות הוגדר אך עדיין לא נרשם ב-`systemd`.
 ודאו ששם הקובץ תואם בדיוק למה שיצרתם למעלה, ולאחר מכן הריצו:
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
 ```
-אם הפעולה הצליחה, אמורה להופיע הפלט הבא:
+אם ההרצה הצליחה, אמורה להופיע הפלט הבא:
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
- `default.target.wants/` מכיל קישורים סימבוליים לשירותים המוגדרים להפעלה אוטומטית.
+התיקייה `default.target.wants/` מכילה קישורים סימבוליים לשירותים שהוגדרו להפעלה אוטומטית.
 
 ### 2. הגדרת Firecrawl
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) אידיאלי עבור מי שזקוק לשליטה מלאה בסביבת הסריקה ועיבוד הנתונים שלו, אך כרוך במאמצי תחזוקה והגדרה נוספים.
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) מתאים למי שזקוק לשליטה מלאה בסביבת הסריקה ועיבוד הנתונים שלו, אך דורש מאמצי תחזוקה והגדרה נוספים.
 
 התחילו בשכפול המאגר:
 ```bash
@@ -1028,49 +1030,49 @@ HOST=0.0.0.0
 ```
 ### 3. פריסת OpenClaw עם Podman Compose
 
-לפני שממשיכים, ודאו שמשכתם את תמונת ה-Docker העדכנית ביותר של OpenClaw:
+לפני שתמשיכו הלאה, ודאו שמשכתם את תמונת ה-Docker העדכנית ביותר של OpenClaw:
 ```bash
 podman pull ghcr.io/openclaw/openclaw:latest
 ```
-לאחר שביצעתם זאת, הורידו את קובץ ה-Compose של OpenClaw [openclaw-compose.yaml](assets/openclaw-compose.yaml) ומקמו אותו בתיקיית השורש `/firecrawl`:
+לאחר שזה הושלם, הורידו את קובץ ה-Compose של OpenClaw [openclaw-compose.yaml](assets/openclaw-compose.yaml) ומקמו אותו בתיקיית השורש `/firecrawl`:
 
-> מוסכמה זו נדרשת כדי ש-`systemd` יאתר ויפעיל את השירות כראוי, כפי שצוין ב-`WorkingDirectory=${HOME}/firecrawl`.
+> הקונבנציה הזו נדרשת כדי ש-`systemd` יוכל לאתר ולהפעיל את השירות כראוי, כפי שמוגדר ב-`WorkingDirectory=${HOME}/firecrawl`.
 
-> תמיד אפשר להרחיב את הערימה על ידי הוספת שירותי Firecrawl נוספים לפי הצורך. הרשימה המלאה של השירותים הזמינים נמצאת בקובץ הרשמי [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+> תמיד ניתן להרחיב את המחסנית על ידי הוספת שירותי Firecrawl נוספים לפי הצורך. את הרשימה המלאה של השירותים הזמינים ניתן למצוא בקובץ הרשמי [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
 
-### 4. הפעלת שירות OpenClaw דרך Firecrawl 
+### 4. הפעלת שירות OpenClaw דרך Firecrawl
 
-לפני העברת השליטה ל-`systemd`, ודאו שהכול פועל כראוי על ידי הרצת הערימה באופן ידני:
+לפני העברת השליטה ל-`systemd`, ודאו שהכל עובד כראוי על ידי הרצת המחסנית ידנית:
 ```bash
 podman compose -f openclaw-compose.yaml up -d
 ```
-אם הכול מוגדר כראוי, אמור להופיע קונטיינר OpenClaw עולה, ופלט שורת הפקודה שלכם אמור להיראות בדומה לזה:
+אם הכל מוגדר כראוי, אמורה לעלות מכולת OpenClaw ופלט שורת הפקודה שלכם אמור להיראות בדומה לזה:
 <p align="center">
   <img src="assets/openclaw_health_verification.png" width="500" height="400" />
 </p>
 
-לאחר האימות, החזירו את הערימה למצב כבוי לפני שממשיכים:
+לאחר האימות, הורידו את המחסנית בחזרה לפני ההמשך:
 ```bash
 podman compose -f openclaw-compose.yaml down
 ```
-לפני הפעלת השירות, עליכם לוודא שהבעלות וההרשאות הנכונות מוגדרות עבור תיקיית `firecrawl` וקובץ ה-`.env` שלה. 
-זה חיוני כדי שהשירות יוכל לכתוב את פרטי הכניסה שלכם בעת ההפעלה.
+לפני הפעלת השירות, עליכם לוודא שההבעלות וההרשאות הנכונות מוגדרות עבור התיקייה `firecrawl` וקובץ ה-`.env` שלה.
+הדבר חיוני כדי שהשירות יוכל לכתוב את הנתונים שלכם בעת ההפעלה.
 ```bash
 sudo chown ${USER}:${USER} ~/firecrawl/.env
 chmod 644 ~/firecrawl/.env
 ```
-כעת, לאחר שהכול אומת, הפעילו את השירות דרך `systemd`:
+כעת, לאחר שהכל אומת, הפעילו את השירות דרך `systemd`:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[פעולות OpenClaw](https://docs.openclaw.ai/) נגישות מתוך הקונטיינר האינטראקטיבי, ולוח הבקרה (Web Dashboard) זמין באותו מארח ופורט בכתובת http://127.0.0.1:18789.
+[הפעולות של OpenClaw](https://docs.openclaw.ai/) נגישות מתוך המכולה האינטראקטיבית, ולוח הבקרה (Web Dashboard) זמין באותו מארח ופורט בכתובת http://127.0.0.1:18789.
 <p align="center">
   <img src="assets/OpenClawWebUI-PodmanLaunch.png" width="500" height="500" />
 </p>
 
-### קבלת ה-`OPENCLAW_GATEWAY_TOKEN` שלכם
+### השגת `OPENCLAW_GATEWAY_TOKEN` שלכם
 
-לאחר שהשירות פועל, תבחינו בתיקייה חדשה בשם `.openclaw` שנוצרה בתיקיית הבית שלכם (~/.openclaw). תיקייה זו נעולה כברירת מחדל, לכן תצטרכו לבטל את הנעילה כדי לאחזר את אסימון השער (gateway token) שלכם.
+לאחר שהשירות פועל, תבחינו שנוצרה תיקייה חדשה בשם `.openclaw` בתיקיית הבית שלכם (~/.openclaw). תיקייה זו נעולה כברירת מחדל, ולכן תצטרכו לפתוח אותה כדי לאחזר את אסימון השער (gateway token) שלכם.
 
 1. הענקת גישה לתיקייה:
 ```bash
@@ -1082,7 +1084,7 @@ grep '"token"' ~/.openclaw/openclaw.json
 ```
 אתרו את הערך `OPENCLAW_GATEWAY_TOKEN` בפלט.
 
-3. פתחו את לוח הבקרה של השער בדפדפן שלכם בכתובת http://127.0.0.1:18789. הדביקו את האסימון שלכם כשתתבקשו לאמת זהות.
+3. פתחו את לוח הבקרה של השער בדפדפן שלכם בכתובת http://127.0.0.1:18789. הדביקו את האסימון שלכם כשתתבקשו לאמת.
 
 כדי לעצור את השירות, הריצו:
 ```bash
@@ -1090,9 +1092,9 @@ systemctl --user stop firecrawl.service
 ```
 <!-- @os:end -->
 ---
-## הפעלת שער הגישה (Gateway) של OpenClaw
+# הפעלת OpenClaw Gateway
 
-שער הגישה הוא התהליך של OpenClaw שמנהל את לולאת הסוכן ומגיש את לוח הבקרה:
+ה-gateway הוא תהליך ה-OpenClaw שמנהל את לולאת הסוכן (agent loop) ומגיש את לוח הבקרה (dashboard):
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -1223,49 +1225,49 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-כדי לפתוח את לוח הבקרה, הריצו זאת בטרמינל שני בזמן ששער הגישה עדיין פועל:
+כדי לפתוח את לוח הבקרה, הריצו את זה בטרמינל שני בזמן שה-gateway עדיין פועל:
 
 ```bash
 openclaw dashboard
 ```
 
-מכיוון ששער הגישה מתחבר ל-loopback, לוח הבקרה מתאמת אוטומטית כאשר הוא נפתח מאותו המחשב, אין צורך בהזנת אסימון (token) או באישור מכשיר עבור גישה מקומית. אמורים לראות את לוח הבקרה של OpenClaw עם מודל Lemonade שלכם רשום כ-backend הפעיל.
+מכיוון שה-gateway נקשר ל-loopback, לוח הבקרה מאמת אוטומטית כאשר הוא נפתח מאותה מכונה, ואין צורך בהזנת טוקן או באישור מכשיר עבור גישה מקומית. אתם אמורים לראות את לוח הבקרה של OpenClaw עם מודל ה-Lemonade שלכם מופיע כ-backend הפעיל.
 
-> אם הפעלתם sandboxing, ניתן לוודא זאת על ידי בקשה מהסוכן להריץ `run hostname` מתוך לוח הבקרה. אם אתם רואים מזהה container קצר במקום שם המארח (hostname) של המחשב שלכם, ה-sandbox עובד כראוי.
+> אם הפעלתם sandboxing, תוכלו לוודא זאת על ידי בקשה מהסוכן להריץ `run hostname` מתוך לוח הבקרה. אם אתם רואים מזהה container קצר במקום שם המארח (hostname) של המכונה שלכם, ה-sandbox עובד.
 
-**מזל טוב, בניתם ערימת סוכן AI מקומית לחלוטין מאפס.**
+**ברכותינו, בניתם מערכת סוכן AI מקומית לחלוטין מהיסוד.**
 
-> **צריכים את אסימון שער הגישה?** הריצו `openclaw dashboard --no-open` כדי להדפיס את כתובת ה-URL של לוח הבקרה עם האסימון משולב בה (הוא גם מנסה להעתיק אותו ללוח (clipboard) שלכם). לחלופין, האסימון נמצא ב-`gateway.auth.token` בקובץ `~/.openclaw/openclaw.json`.
+> **צריכים את טוקן ה-gateway?** הריצו `openclaw dashboard --no-open` כדי להדפיס את כתובת ה-URL של לוח הבקרה עם הטוקן משובץ בתוכה (הפקודה גם מנסה להעתיק אותו ללוח (clipboard) שלכם). לחלופין, הטוקן נמצא תחת `gateway.auth.token` בקובץ `~/.openclaw/openclaw.json`.
 
 **גישה ללוח הבקרה ממכשיר אחר (דרך מנהרת SSH)**
 
-אם OpenClaw פועל על מחשב מרוחק, ניתן להגיע ללוח הבקרה שלו מהמחשב המקומי שלכם דרך מנהרת SSH. המנהרה מעבירה את פורט שער הגישה (`18789`) כך שהדפדפן המקומי שלכם יוכל לתקשר עם שער הגישה המרוחק דרך `127.0.0.1`.
+אם OpenClaw פועל על מכונה מרוחקת, תוכלו להגיע ללוח הבקרה שלו מהמכונה המקומית שלכם דרך מנהרת SSH. המנהרה מעבירה את פורט ה-gateway (`18789`) כך שהדפדפן המקומי שלכם יוכל לתקשר עם ה-gateway המרוחק דרך `127.0.0.1`.
 
-1. מ**המחשב המקומי** שלכם, התחברו למחשב המרוחק פעם אחת ואשרו את בקשת ה-fingerprint כך שהמארח יתווסף ל-known hosts שלכם:
+1. מה**מכונה המקומית** שלכם, התחברו למכונה המרוחקת פעם אחת וקבלו את הודעת ה-fingerprint כדי שהמארח יתווסף לרשימת המארחים הידועים שלכם (known hosts):
 
    ```bash
    ssh user@<host-ip>
    ```
 
-2. עדיין ב**מחשב המקומי** שלכם, פתחו את מנהרת ה-SSH:
+2. עדיין במ**כונה המקומית** שלכם, פתחו את מנהרת ה-SSH:
 
    ```bash
    ssh -N -L 18789:127.0.0.1:18789 user@<host-ip>
    ```
 
-   > **הערה:** לאחר הזנת הסיסמה שלכם, הטרמינל לא מציג פלט ונראה כאילו הוא תקוע. זה צפוי: הדגל `-N` אומר ל-SSH שלא להריץ פקודה מרוחקת כלשהי, כך שהוא פשוט משאיר את המנהרה פתוחה. השאירו טרמינל זה פועל.
+   > **הערה:** אחרי שתזינו את הסיסמה שלכם, הטרמינל לא מציג פלט ונראה כאילו הוא תקוע. זה צפוי: הדגל `-N` אומר ל-SSH לא להריץ אף פקודה מרוחקת, ולכן הוא פשוט משאיר את המנהרה פתוחה. השאירו את הטרמינל הזה פועל.
 
-3. ב**מחשב המקומי** שלכם, פתחו דפדפן ועברו לכתובת `http://127.0.0.1:18789`.
+3. במ**כונה המקומית** שלכם, פתחו דפדפן ועברו אל `http://127.0.0.1:18789`.
 
-4. ב**מחשב המרוחק**, הדפיסו את אסימון שער הגישה והדביקו אותו בדפדפן כדי להתחבר:
+4. במ**כונה המרוחקת**, הדפיסו את טוקן ה-gateway והדביקו אותו בדפדפן כדי להתחבר:
 
    ```bash
    openclaw dashboard --no-open
    ```
 
-   פעולה זו מדפיסה את כתובת ה-URL של לוח הבקרה עם האסימון משולב בה; העתיקו את האסימון כדי להתחבר. (האסימון מאוחסן גם ב-`gateway.auth.token` בקובץ `~/.openclaw/openclaw.json`.)
+   פקודה זו מדפיסה את כתובת ה-URL של לוח הבקרה עם הטוקן משובץ בה; העתיקו את הטוקן כדי להתחבר. (הטוקן גם נשמר תחת `gateway.auth.token` בקובץ `~/.openclaw/openclaw.json`.)
 
-> **אישור מכשיר מרוחק:** כאשר פותחים את לוח הבקרה ממחשב אחר או מטלפון, הדפדפן עשוי להציג מזהה בקשה (request ID). ב**מחשב המרוחק**, הציגו את רשימת הבקשות הממתינות:
+> **אישור מכשיר מרוחק:** כאשר אתם פותחים את לוח הבקרה ממכונה אחרת או מטלפון, הדפדפן עשוי להציג מזהה בקשה (request ID). ב**מכונה המרוחקת**, הציגו את רשימת הבקשות הממתינות:
 > ```bash
 > openclaw devices list
 > ```
@@ -1273,7 +1275,7 @@ openclaw dashboard
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> זה נדרש רק עבור מכשירים מרוחקים או משניים; גישת loopback מאותו מחשב מתאמתת אוטומטית. לפרטים נוספים ראו את התיעוד [גישה מרחוק](https://docs.openclaw.ai/gateway/remote).
+> זה נדרש רק עבור מכשירים מרוחקים או משניים; גישת loopback מאותה מכונה מאומתת אוטומטית. ראו את התיעוד של [Remote Access](https://docs.openclaw.ai/gateway/remote) לפרטים נוספים.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1283,47 +1285,47 @@ openclaw dashboard
 
 ## אופציונלי: חיבור ערוץ תקשורת
 
-לאחר ששער הגישה פועל, ניתן להגיע לסוכן המקומי שלכם מכל מכשיר. בחרו את האפשרות המתאימה להגדרה שלכם. OpenClaw תומך ב-[Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram), וערוצים נוספים, ראו את הרשימה המלאה ב-[docs.openclaw.ai](https://docs.openclaw.ai).
+ברגע שה-gateway פועל, תוכלו להגיע לסוכן המקומי שלכם מכל מכשיר. בחרו באפשרות המתאימה להגדרה שלכם. OpenClaw תומך ב-[Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram), ובערוצים נוספים, ראו את הרשימה המלאה ב-[docs.openclaw.ai](https://docs.openclaw.ai).
 
 ---
 
-### אפשרות א׳: Discord
+### אפשרות א': Discord
 
-Discord דורש שרת שבו **יש לכם גישת מנהל (administrator)** כדי להוסיף בוט. אם אתם משתפים שרתים אך אינכם הבעלים של אף אחד מהם, השתמשו באפשרות ב׳ (Telegram) במקום זאת.
+Discord דורש שרת שבו **יש לכם הרשאות מנהל (administrator)** כדי להוסיף בוט. אם אתם חולקים שרתים אך לא בבעלותכם אף אחד מהם, השתמשו באפשרות ב' (Telegram) במקום זאת.
 
 #### יצירת חשבון ושרת Discord
 
-אם אין לכם חשבון Discord, הירשמו בכתובת [discord.com](https://discord.com). אתם גם זקוקים לשרת שבו אתם מנהלים, צרו אחד על ידי לחיצה על סמל ה-**+** בסרגל הצד של Discord ובחירת **Create My Own**. שרת פרטי מתאים גם כן.
+אם אין לכם חשבון Discord, הירשמו ב-[discord.com](https://discord.com). אתם גם זקוקים לשרת שבו אתם מנהלים, צרו אחד על ידי לחיצה על סמל ה-**+** בסרגל הצד של Discord ובחירה ב-**Create My Own**. שרת פרטי מתאים לצורך זה.
 
-#### יצירת אפליקציית ובוט Discord
+#### יצירת אפליקציה ובוט ב-Discord
 
-1. עברו אל [Discord Developer Portal](https://discord.com/developers/applications) ולחצו על **New Application**. תנו לה שם (למשל, "openclaw-bot").
+1. עברו אל [Discord Developer Portal](https://discord.com/developers/applications) ולחצו על **New Application**. תנו לו שם (לדוגמה: "openclaw-bot").
 2. בסרגל הצד, לחצו על **Bot**. הגדירו שם משתמש לבוט.
 3. עדיין בעמוד ה-Bot, גללו אל **Privileged Gateway Intents** והפעילו:
    - **Message Content Intent** (נדרש)
    - **Server Members Intent** (מומלץ)
-4. גללו חזרה למעלה ולחצו על **Reset Token** כדי ליצור את אסימון הבוט שלכם. העתיקו אותו.
+4. גללו חזרה למעלה ולחצו על **Reset Token** כדי ליצור את טוקן הבוט שלכם. העתיקו אותו.
 
 #### הוספת הבוט לשרת שלכם
 
 1. בסרגל הצד, לחצו על **OAuth2/ URL Generator**.
 2. תחת **Scopes**, הפעילו את `bot` ו-`applications.commands`.
 3. תחת **Bot Permissions**, הפעילו: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. העתיקו את כתובת ה-URL שנוצרה, הדביקו אותה בדפדפן שלכם, בחרו את השרת שלכם, ואשרו. הבוט אמור כעת להופיע ברשימת החברים של השרת שלכם.
+4. העתיקו את כתובת ה-URL שנוצרה, הדביקו אותה בדפדפן שלכם, בחרו את השרת שלכם, ואשרו. הבוט אמור כעת להופיע ברשימת החברים בשרת שלכם.
 
-#### איסוף המזהים (IDs) שלכם
+#### איסוף המזהים שלכם
 
-הפעילו מצב מפתח (Developer Mode) ב-Discord (**User Settings/ Advanced/ Developer Mode**), ולאחר מכן:
-- לחצו קליק ימני על סמל השרת שלכם: **Copy Server ID**
-- לחצו קליק ימני על התמונה שלכם: **Copy User ID**
+הפעילו מצב מפתחים (Developer Mode) ב-Discord (**User Settings/ Advanced/ Developer Mode**), ואז:
+- לחיצה ימנית על סמל השרת שלכם: **Copy Server ID**
+- לחיצה ימנית על האווטאר שלכם: **Copy User ID**
 
-#### אפשרו הודעות פרטיות מחברי השרת
+#### אפשרו הודעות פרטיות (DM) מחברי שרת
 
-לחצו קליק ימני על סמל השרת שלכם/ **Privacy Settings**/ הפעילו את **Direct Messages**. פעולה זו מאפשרת לבוט לשלוח לכם הודעה פרטית (DM), מה שנדרש לצורך שלב הצימוד (pairing).
+לחיצה ימנית על סמל השרת שלכם/ **Privacy Settings**/ הפעילו את **Direct Messages**. זה מאפשר לבוט לשלוח לכם הודעה פרטית (DM), מה שנדרש לשלב ההתאמה (pairing).
 
 #### הגדרת OpenClaw עבור Discord
 
-שמרו את אסימון הבוט שלכם כמשתנה סביבה, ולאחר מכן צרו קובץ תיקון (patch) אחד שמפעיל את Discord, מפנה לאסימון, ומוסיף את השרת שלכם לרשימה המורשית. החליפו את `<server_id>` ואת `<user_id>` במזהים שנאספו לעיל.
+שמרו את טוקן הבוט שלכם כמשתנה סביבה, ולאחר מכן צרו קובץ patch יחיד שמפעיל את Discord, מפנה אל הטוקן, ומוסיף את השרת שלכם לרשימת ההיתרים (allowlist). החליפו את `<server_id>` ו-`<user_id>` במזהים שנאספו לעיל.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1349,31 +1351,31 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **אל תסתמכו על בקשה מהסוכן להגדיר זאת.** כאשר sandboxing מופעל, הסוכן אינו יכול לכתוב ל-`~/.openclaw/openclaw.json` מתוך ה-sandbox, השתמשו בפקודות ה-CLI שלעיל על המארח (host) במקום זאת.
+> **אל תסתמכו על בקשה מהסוכן להגדיר את זה.** כאשר sandboxing מופעל, הסוכן אינו יכול לכתוב אל `~/.openclaw/openclaw.json` מתוך ה-sandbox, השתמשו בפקודות ה-CLI שלמעלה במארח (host) במקום זאת.
 
-הפעילו מחדש את שער הגישה כדי שיטען את תצורת הערוץ החדשה:
+הפעילו מחדש את ה-gateway כדי שישקף את הגדרות הערוץ החדשות:
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
 ```
 
-אמורים לראות `logged in to discord as <bot-name>` בפלט שער הגישה תוך מספר שניות.
-#### קשר את חשבון ה-Discord שלך
+אתם אמורים לראות `logged in to discord as <bot-name>` בפלט ה-gateway תוך מספר שניות.
+#### התאמת חשבון ה-Discord שלך
 
-שלח הודעה פרטית לבוט ב-Discord. הוא ישיב עם קוד צימוד קצר.
+שלחו הודעה פרטית לבוט ב-Discord. הוא ישיב עם קוד התאמה קצר.
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-אשר אותו במחשב שמריץ את OpenClaw:
+אשרו אותו במכונה שמריצה את OpenClaw:
 ```bash
 openclaw pairing approve discord <CODE>
 ```
 
-> קודי צימוד פגים לאחר שעה אחת.
+> קודי ההתאמה פגים לאחר שעה.
 
-כעת תוכל לשוחח עם הסוכן שלך ישירות מ-Discord ולהעביר משימות לחומרה המקומית שלך.
+כעת תוכלו לשוחח עם הסוכן שלכם ישירות מתוך Discord ולהעביר משימות לחומרה המקומית שלכם.
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1383,22 +1385,22 @@ openclaw pairing approve discord <CODE>
 
 ### אפשרות ב': Telegram
 
-Telegram פשוט יותר מ-Discord עבור רוב המשתמשים, הוא לא דורש שרת ולא דורש הרשאות מנהל.
+Telegram פשוט יותר מ-Discord עבור רוב המשתמשים, הוא אינו דורש שרת ואינו דורש הרשאות ניהול.
 
 #### יצירת בוט Telegram
 
-1. פתח את Telegram ושלח הודעה ל-**@BotFather**.
-2. שלח `/newbot` ופעל לפי ההנחיות. שמור את אסימון הבוט שהוא נותן לך.
+1. פתחו את Telegram ושלחו הודעה ל-**@BotFather**.
+2. שלחו `/newbot` ועקבו אחר ההנחיות. שמרו את אסימון הבוט (token) שתקבלו.
 
 #### הגדרת OpenClaw עבור Telegram
 
-שמור את האסימון כמשתנה סביבה:
+שמרו את האסימון כמשתנה סביבה:
 
 ```bash
 export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 ```
 
-הוסף את תצורת הערוץ אל `~/.openclaw/openclaw.json` (או תקן אותה דרך לוח הבקרה):
+הוסיפו את תצורת הערוץ אל `~/.openclaw/openclaw.json` (או עדכנו אותה דרך לוח הבקרה):
 
 ```json
 {
@@ -1412,26 +1414,26 @@ export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 }
 ```
 
-הפעל מחדש את השער, ולאחר מכן שלח לבוט שלך הודעה כלשהי ב-Telegram. אשר את הצימוד:
+הפעילו מחדש את השער (gateway), ואז שלחו לבוט שלכם הודעה כלשהי ב-Telegram. אשרו את ההתאמה:
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-קודי צימוד פגים לאחר שעה אחת. כעת תוכל לשוחח עם הסוכן שלך דרך הודעה פרטית ב-Telegram.
+קודי ההתאמה פגים לאחר שעה. כעת תוכלו לשוחח עם הסוכן שלכם דרך הודעה פרטית ב-Telegram.
 
 ---
 
 ## הצעדים הבאים
 
-כעת שהסוכן שלך יכול לקבל פקודות מהטלפון שלך ולפעול על המחשב המקומי שלך, הנה שלושה כיוונים ששווה לחקור:
+כעת כשהסוכן שלכם יכול לקבל פקודות מהטלפון שלכם ולפעול על המכונה המקומית שלכם, הנה שלושה כיוונים ששווה לחקור:
 
-1. **מסכם שוק המניות**: תזמן את OpenClaw לשלוף נתונים מ-API-ים פיננסיים במרווח קבוע, לסכם את תנועות היום עם המודל המקומי שלך, ולדחוף תקציר לטלפון שלך כל בוקר דרך הערוץ שבחרת.
+1. **מסכם שוק המניות**: תזמנו את OpenClaw כך שישלוף נתונים מממשקי API פיננסיים במרווחי זמן קבועים, יסכם את תנודות היום בעזרת המודל המקומי שלכם, וישלח תקציר לטלפון שלכם מדי בוקר דרך הערוץ שבחרתם.
 
-2. **מוניטור כוונון עדין**: הפעל עבודת אימון מרחוק דרך Telegram או Discord, ולאחר מכן גרום לסוכן לעקוב אחר יומן האימון ולדווח בחזרה לטלפון שלך על ערכי אובדן תקופתיים, ניצול ה-GPU ושימוש בדיסק. אם הריצה נתקעת או שה-VRAM קופץ, תדע על כך מיד מבלי להזדקק להיות ליד המחשב.
+2. **מעקב אחר כוונון עדין (fine-tuning)**: הפעילו עבודת אימון מרחוק דרך Telegram או Discord, ואז תנו לסוכן לעקוב אחר יומן האימון (log) ולדווח באופן תקופתי על ערכי loss, ניצול ה-GPU, ושימוש בדיסק חזרה לטלפון שלכם. אם הריצה נתקעת או שה-VRAM קופץ, תדעו על כך מיד מבלי שתצטרכו להיות ליד המכונה.
 
-3. **IOT עם VLM מקומי**: כוון מצלמה לדלת הכניסה שלך, הרץ מודל ראייה על Lemonade, וגרום ל-OpenClaw לנתח פריימים לפי דרישה או לפי טריגר. שאל "האם הגיעו חבילות היום?" מהטלפון שלך וקבל תשובה ישירה מהחומרה שלך.
+3. **IOT עם VLM מקומי**: כוונו מצלמה לדלת הכניסה שלכם, הריצו מודל ראייה על Lemonade, ותנו ל-OpenClaw לנתח פריימים לפי דרישה או בעקבות טריגר. שאלו "האם הגיעו חבילות היום?" מהטלפון שלכם וקבלו תשובה ישירה מהחומרה שלכם.
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

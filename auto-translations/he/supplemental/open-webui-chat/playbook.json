@@ -1,6 +1,6 @@
 {
   "id": "open-webui-chat",
-  "title": "שיחה עם מודלי שפה (LLMs) ב-Open WebUI",
-  "description": "השתמשו ב-Open WebUI כדי לשוחח עם מודלי שפה (LLMs) באופן מקומי.",
+  "title": "שיחה עם מודלי LLM ב-Open WebUI",
+  "description": "השתמשו ב-Open WebUI כדי לשוחח עם מודלי שפה (LLMs) מקומית.",
   "auto_translated": true
 }

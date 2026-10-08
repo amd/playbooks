@@ -16,30 +16,30 @@ SPDX-License-Identifier: MIT
 
 ## Prezentare generală
 
-ComfyUI este o interfață puternică, bazată pe noduri, pentru Stable Diffusion și alte modele de difuzie. Spre deosebire de interfețele tradiționale de tip text-to-image cu casete simple pentru prompturi, ComfyUI expune întregul pipeline de generare a imaginilor sub forma unui grafic vizual, oferindu-vă control detaliat asupra fiecărui pas, de la codificarea textului la manipularea spațiului latent și până la decodarea finală.
+ComfyUI este o interfață puternică, bazată pe noduri, pentru Stable Diffusion și alte modele de difuzie. Spre deosebire de interfețele tradiționale text-to-image cu casete simple pentru prompturi, ComfyUI expune întregul pipeline de generare a imaginilor sub forma unui grafic vizual, oferindu-vă control detaliat asupra fiecărui pas, de la codificarea textului până la manipularea spațiului latent și decodificarea finală.
 
-Acest tutorial vă învață cum să utilizați ComfyUI cu modelul Z Image Turbo pe GPU pentru a genera imagini AI de înaltă calitate.
+Acest tutorial vă învață cum să utilizați ComfyUI cu modelul Z Image Turbo pe GPU-ul dumneavoastră pentru a genera imagini AI de înaltă calitate.
 
 ## Ce veți învăța
 
 - Cum să lansați ComfyUI și să încărcați șablonul Z-Image Turbo
 - Înțelegerea componentelor pipeline-ului de difuzie
-- Generarea de imagini și ajustarea parametrilor de generare
+- Generarea imaginilor și ajustarea parametrilor de generare
 - Salvarea și partajarea fluxurilor de lucru
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Configurarea memoriei
+## Setarea configurației memoriei
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Verificarea actualizărilor de software
+## Verificarea actualizărilor software
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalarea cerințelor preliminare de software
+## Instalarea cerințelor preliminare software
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -48,14 +48,14 @@ Acest tutorial vă învață cum să utilizați ComfyUI cu modelul Z Image Turbo
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Acordați utilizatorului dvs. acces la dispozitivele GPU** (delogați-vă și reconectați-vă pentru ca acest lucru să aibă efect):
+**Acordați-i utilizatorului dumneavoastră acces la dispozitivele GPU** (deconectați-vă și reconectați-vă pentru ca aceasta să aibă efect):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-#### Crearea unui mediu virtual
-Pe Linux, deschideți un terminal în directorul ales de dvs. și rulați următoarea comandă pentru a crea un venv:
+#### Creați un mediu virtual
+Pe Linux, deschideți un terminal în directorul la alegere și rulați următoarea comandă pentru a crea un venv:
 
 <!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
@@ -294,13 +294,13 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-Pentru a lansa ComfyUI pe Windows, faceți clic pe Launcher-ul ComfyUI Desktop, care se găsește pe Desktop. Urmați pașii pentru a instala versiunea locală cu AMD.
+Pentru a lansa ComfyUI pe Windows, faceți clic pe lansatorul ComfyUI Desktop aflat pe desktopul dumneavoastră. Urmați pașii pentru a instala versiunea locală cu AMD.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Apoi, faceți clic pe butonul ComfyUI din partea de sus, în mijloc, a aplicației. Aceasta va deschide o filă de setări. Deschideți fila Storage și asigurați-vă că traseele sunt setate după cum urmează pentru a accesa modelele preinstalate.
+Apoi, faceți clic pe butonul ComfyUI din partea de sus-mijloc a aplicației. Aceasta va deschide o filă de setări. Deschideți fila Storage și asigurați-vă că traseele sunt setate conform celor de mai jos pentru a accesa modelele preinstalate.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
@@ -310,10 +310,10 @@ Apoi, faceți clic pe butonul ComfyUI din partea de sus, în mijloc, a aplicați
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Pe AMD Ryzen™ AI Halo, ComfyUI rulează într-un container preconstruit care nu necesită nicio configurare suplimentară Python.
+Pe AMD Ryzen™ AI Halo, ComfyUI rulează într-un container preconstruit care nu necesită nicio configurare suplimentară de Python.
 
-Pentru a lansa ComfyUI pe Linux, faceți clic pe comanda rapidă ComfyUI din bara de sarcini. Aceasta ar trebui să se deschidă singură într-o fereastră de browser.
->**Sfat**: ComfyUI și modelele sale sunt stocate în `~/.local/share/ComfyUI/models`. Aici puteți adăuga manual fluxuri de lucru sau modele noi.
+Pentru a lansa ComfyUI pe Linux, faceți clic pe comanda rapidă ComfyUI din bara de activități. Aceasta ar trebui să se deschidă automat într-o fereastră de browser.
+>**Sfat**: ComfyUI și modelele sale sunt stocate în `~/.local/share/ComfyUI/models`. Acolo puteți adăuga manual fluxuri de lucru sau modele noi.
 
 
 <!-- @os:end -->
@@ -321,7 +321,7 @@ Pentru a lansa ComfyUI pe Linux, faceți clic pe comanda rapidă ComfyUI din bar
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-Pentru a lansa ComfyUI pe Windows, faceți pur și simplu clic pe comanda rapidă ComfyUI de pe Desktop.
+Pentru a lansa ComfyUI pe Windows, pur și simplu faceți clic pe comanda rapidă ComfyUI de pe desktopul dumneavoastră.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -333,26 +333,26 @@ Pentru a lansa ComfyUI:
 
 ComfyUI pornește un server web local. Deschideți browserul la adresa `http://127.0.0.1:8188` pentru a accesa interfața.
 
-> **Sfat**: Păstrați fereastra terminalului deschisă în timp ce folosiți ComfyUI. Dacă o închideți, serverul se va opri.
+> **Sfat**: Păstrați fereastra de terminal deschisă în timp ce utilizați ComfyUI. Închiderea acesteia va opri serverul.
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 ## Găsirea șablonului Z-Image Turbo
 
-Înainte de a genera imagini, trebuie să încărcați șablonul Z-Image Turbo. Iată cum să-l găsiți:
+Înainte de a genera imagini, trebuie să încărcați șablonul Z-Image Turbo. Iată cum îl puteți găsi:
 
-1. **Priviți spre marginea din extrema stângă a ecranului**—există o bară de instrumente verticală care se întinde de sus până jos, pe latura cea mai din stânga a aplicației.
+1. **Priviți la marginea din extrema stângă a ecranului** — există o bară de instrumente verticală care rulează de sus până jos pe partea cea mai din stânga a aplicației.
 
-2. **Găsiți pictograma de folder**—în bara de instrumente din stânga, căutați o pictogramă care arată ca un folder. Când treceți cu mouse-ul peste ea, este etichetată „Templates.”
+2. **Găsiți pictograma în formă de folder** — în acea bară de instrumente din stânga, căutați o pictogramă care arată ca un folder. Când treceți cu mouse-ul peste ea, aceasta este etichetată „Templates”.
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
 </p>
 
-3. **Faceți clic pe pictograma de folder**—aceasta deschide panoul Templates.
+3. **Faceți clic pe pictograma în formă de folder** — aceasta deschide panoul Templates.
 
-4. **Căutați „Z-Image Turbo”**—folosiți bara de căutare sau derulați prin șabloanele disponibile pentru a găsi fluxul de lucru Z-Image Turbo Text To Image, apoi faceți clic pentru a-l încărca.
+4. **Căutați „Z-Image Turbo”** — folosiți bara de căutare sau derulați prin șabloanele disponibile pentru a găsi fluxul de lucru Z-Image Turbo Text To Image, apoi faceți clic pentru a-l încărca.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -361,17 +361,18 @@ ComfyUI pornește un server web local. Deschideți browserul la adresa `http://1
 ## Descărcarea modelelor
 
 <!-- @require:comfyui-models -->
+<!-- @prereq:comfyui-models -->
 
 ## Înțelegerea interfeței
 
-Când se încarcă șablonul Z-Image Turbo, veți vedea o zonă de lucru (canvas) cu 2 noduri principale. Primul nod se numește „Text to Image (Z-Image-Turbo)”, iar al doilea nod este pentru vizualizarea imaginii. 
+Când șablonul Z-Image Turbo se încarcă, veți vedea o pânză cu 2 noduri principale. Primul nod se numește „Text to Image (Z-Image-Turbo)”, iar al doilea nod este pentru vizualizarea imaginii. 
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
 </p>
 
 
-Pe nodul Z-Image, faceți clic pe butonul din colțul din dreapta sus pentru a extinde nodul și a vedea subgraful.
+Pe nodul Z-Image, faceți clic pe butonul din dreapta sus pentru a extinde nodul și a vedea subgraful.
 
 <p align="center">
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
@@ -379,22 +380,22 @@ Pe nodul Z-Image, faceți clic pe butonul din colțul din dreapta sus pentru a e
 
 ### Componentele pipeline-ului
 
-Fluxul de lucru Z-Image Turbo utilizează patru componente esențiale de model care lucrează împreună:
+Fluxul de lucru Z-Image Turbo folosește patru componente cheie ale modelului care lucrează împreună:
 
 | Componentă | Rol |
 |-----------|------|
-| **Codificator de text** (Qwen 3 4B) | Convertește promptul dvs. text în embeddings pe care modelul de difuzie le înțelege |
-| **Model de difuzie** (Z-Image Turbo) | Rețeaua neuronală centrală care denoisează iterativ reprezentările latente pentru a obține imagini |
-| **VAE** (Autoencoder variațional) | Codifică imaginile către/din spațiul latent (decodifică latenții finali în pixeli) |
+| **Codificator de text** (Qwen 3 4B) | Convertește promptul dumneavoastră text în embeddings pe care modelul de difuzie le înțelege |
+| **Model de difuzie** (Z-Image Turbo) | Rețeaua neuronală principală care denoizează iterativ reprezentările latente în imagini |
+| **VAE** (Variational Autoencoder) | Codifică imaginile către/din spațiul latent (decodifică latentele finale în pixeli) |
 | **LoRA** (opțional) | Adaptoare ușoare care modifică stilul sau subiectul fără a reantrena modelul de bază |
 
-Fiecare nod din flux corespunde uneia dintre aceste componente. Datele circulă de la stânga la dreapta: text → embeddings → denoising ghidat → latenți → imagine finală.
+Fiecare nod din fluxul de lucru corespunde uneia dintre aceste componente. Datele circulă de la stânga la dreapta: text → embeddings → denoizare ghidată → latente → imagine finală.
 
-## Generarea primei imagini
+## Generarea primei dumneavoastră imagini
 
 Modelul Z-Image Turbo este deja încărcat. Pentru a genera o imagine:
 
-1. **Introduceți promptul** în nodul principal Z-Image. Fiți descriptiv. Iată un exemplu:
+1. **Introduceți promptul dumneavoastră** în nodul principal Z-Image. Fiți descriptivi. Iată un exemplu:
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
@@ -402,9 +403,9 @@ Modelul Z-Image Turbo este deja încărcat. Pentru a genera o imagine:
    ```
 2. **(Opțional)**: Confirmați sau ajustați orice alte setări specifice din subgraf.
 3. **Faceți clic pe butonul albastru „Run Workflow”** din colțul din dreapta (sau apăsați `Ctrl+Enter`)
-4. Urmăriți nodurile evidențiindu-se pe măsură ce fiecare pas este executat
+4. Urmăriți cum nodurile se evidențiază pe măsură ce fiecare pas este executat
 
-Execuția întregului flux de lucru ar trebui să se finalizeze în mai puțin de 30 de secunde. Imaginea generată apare în nodul **Save Image** și este salvată în folderul `output/`.
+Întreaga execuție a fluxului de lucru ar trebui să se finalizeze în mai puțin de 30 de secunde. Imaginea generată apare în nodul **Save Image** și este salvată în folderul `output/`.
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -581,15 +582,15 @@ ls -1t ComfyUI/output/*.png | head -n 5
 ## Ajustarea parametrilor de generare
 ### Setările KSampler
 
-Nodul KSampler controlează procesul central de difuzie:
+Nodul KSampler controlează procesul principal de difuzie:
 
 | Parametru | Ce controlează | Recomandat pentru Z-Image Turbo |
 |-----------|------------------|-------------------------------|
-| **steps** | Numărul de iterații de denoising | 4–10 (modelele turbo sunt distilate pentru mai puține pași) |
-| **cfg** | Scara de ghidare fără clasificator (classifier-free guidance)—cât de strict se urmează promptul | 1.0–2.0 (modelele turbo folosesc o ghidare foarte redusă) |
-| **sampler_name** | Algoritmul de denoising | `euler` și `res_multistep` funcționează bine pentru modelele turbo |
+| **steps** | Numărul de iterații de eliminare a zgomotului | 4–10 (modelele turbo sunt distilate pentru mai puțini pași) |
+| **cfg** | Scara de ghidare fără clasificator—cât de strict se urmează promptul | 1.0–2.0 (modelele turbo folosesc o ghidare foarte redusă) |
+| **sampler_name** | Algoritmul de eliminare a zgomotului | `euler` și `res_multistep` funcționează bine pentru modelele turbo |
 | **scheduler** | Curba programului de zgomot | `normal` sau `simple` |
-| **seed** | Sămânța aleatorie pentru reproducibilitate | Setați valori fixe pentru a itera pe o compoziție |
+| **seed** | Sămânța aleatorie pentru reproductibilitate | Setați valori fixe pentru a itera pe o compoziție |
 
 ### Dimensiunea imaginii
 
@@ -597,26 +598,26 @@ Pentru a ajusta dimensiunile de ieșire, găsiți nodul **Empty Latent Image** �
 
 ### ModelSamplingAuraFlow
 
-Nodul **ModelSamplingAuraFlow** este un modificator specializat de eșantionare care ajustează modul în care procesul de difuzie gestionează programarea zgomotului. Veți vedea acest nod conectat la ieșirea modelului în fluxul de lucru Z-Image Turbo.
+Nodul **ModelSamplingAuraFlow** este un modificator de eșantionare specializat care ajustează modul în care procesul de difuzie gestionează programul de zgomot. Veți vedea acest nod conectat la ieșirea modelului în fluxul de lucru Z-Image Turbo.
 
 | Parametru | Ce controlează | Valori recomandate |
 |-----------|------------------|-------------------|
-| **shift** | Ajustează sincronizarea programului de zgomot—valorile mai mari împing mai mult din rafinarea detaliilor către pașii ulteriori | 1.0–4.0 (valoarea implicită este 3.0) |
+| **shift** | Ajustează momentul programului de zgomot—valorile mai mari împing mai multă rafinare a detaliilor către pașii ulteriori | 1.0–4.0 (valoarea implicită este 3.0) |
 
 Când să ajustați **shift**:
 
 - **Valori mai mici (1.0–2.0)**: Convergență mai rapidă, bună pentru compoziții simple
-- **Valori mai mari (3.0–4.0)**: Rafinare mai treptată, poate îmbunătăți detaliile fine în scene complexe
+- **Valori mai mari (3.0–4.0)**: Rafinare mai graduală, poate îmbunătăți detaliile fine în scene complexe
 
-Metoda de eșantionare AuraFlow este concepută special pentru modelele bazate pe potrivirea fluxului (flow-matching), precum Z-Image Turbo, asigurând o distribuție corectă a zgomotului pe tot parcursul procesului de generare.
+Metoda de eșantionare AuraFlow este concepută special pentru modelele de potrivire a fluxului precum Z-Image Turbo, asigurând o distribuție corectă a zgomotului pe tot parcursul procesului de generare.
 
 ## Lucrul cu fluxuri de lucru
 
 ### Salvarea fluxurilor de lucru
 
-Faceți clic pe butonul **Save** din meniu pentru a exporta fluxul de lucru sub forma unui fișier JSON. Acesta captează:
+Faceți clic pe butonul **Save** din meniu pentru a exporta fluxul de lucru ca fișier JSON. Acesta captează:
 
-- Toate nodurile și parametrii acestora
+- Toate nodurile și parametrii lor
 - Toate conexiunile dintre noduri
 - Textul curent al promptului
 
@@ -626,15 +627,15 @@ Trageți un fișier JSON de flux de lucru pe canvas sau folosiți **Load** din m
 
 ### Partajarea fluxurilor de lucru
 
-Fluxurile de lucru sunt de sine stătătoare—partajați fișierul JSON cu colegii, iar aceștia pot reproduce exact configurația dumneavoastră. Acest lucru face din ComfyUI un instrument excelent pentru experimentarea colaborativă.
+Fluxurile de lucru sunt autonome—partajați fișierul JSON cu colegii, iar aceștia pot reproduce exact configurația dvs. Acest lucru face din ComfyUI un instrument excelent pentru experimentarea colaborativă.
 
 ## Pașii următori
 
 - **Explorați nodurile LoRA**: Aplicați adaptoare de stil sau subiect fără reantrenare
 - **Adăugați prompturi negative**: Conectați un al doilea nod CLIP Text Encode la intrarea de condiționare **negative** a KSampler pentru a ghida modelul departe de caracteristici nedorite precum neclaritatea, artefactele sau filigranele
-- **Construiți fluxuri de lucru personalizate**: Înlănțuiți mai multe generări, adăugați upscaling sau creați variații de imagini
-- **Explorați fluxuri de lucru din comunitate**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) are numeroase fluxuri de lucru gata de utilizare
+- **Construiți fluxuri de lucru personalizate**: Înlănțuiți mai multe generări, adăugați upscaling sau creați variații de imagine
+- **Răsfoiți fluxurile de lucru ale comunității**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) are multe fluxuri de lucru gata de utilizat
 
-Punctul forte al ComfyUI este experimentarea: conectați nodurile în mod diferit, ajustați parametrii și observați modul în care fiecare schimbare afectează rezultatul. Această explorare practică construiește intuiția despre modul în care funcționează modelele de difuzie.
+Punctul forte al ComfyUI este experimentarea: conectați nodurile diferit, ajustați parametrii și observați cum fiecare modificare afectează rezultatul. Această explorare practică construiește intuiția despre modul în care funcționează modelele de difuzie.
 
 Pentru mai multe informații, consultați [ComfyUI Documentation](https://docs.comfy.org/).

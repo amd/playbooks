@@ -18,48 +18,34 @@ SPDX-License-Identifier: MIT
 
 ## 개요
 
-[OpenHands](https://github.com/All-Hands-AI/OpenHands)는 코드를 작성하고, 명령을
-실행하고, 웹을 탐색하고, 실제 워크스페이스에서 파일을 편집할 수 있는 AI 소프트웨어
-에이전트입니다. 채팅 창에서 제안을 복사하는 대신, 프로젝트 폴더를 에이전트에
-지정하면 기능 구현, 버그 수정, 테스트 작성, 코드베이스 설명 등의 작업을 에이전트가
-직접 수행하게 할 수 있습니다.
+[OpenHands](https://github.com/All-Hands-AI/OpenHands)는 코드를 작성하고, 명령을 실행하고, 웹을 탐색하고, 실제 작업 공간에서 파일을 편집할 수 있는 AI 소프트웨어 에이전트입니다. 채팅 창에서 제안을 복사하는 대신, 에이전트를 프로젝트 폴더로 지정하면 기능 구현, 버그 수정, 테스트 작성, 코드베이스 설명 등의 작업을 직접 수행하게 할 수 있습니다.
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas)는 OpenHands를 실행하는
-데 권장되는 브라우저 UI입니다. 단일 `agent-canvas` 명령으로 에이전트 서버, 자동화
-백엔드, 웹 프런트엔드를 함께 시작하므로 브라우저에서 에이전트와 대화를 진행할 수
-있습니다.
+[Agent Canvas](https://github.com/OpenHands/agent-canvas)는 OpenHands를 실행하기 위해 권장되는 브라우저 UI입니다. 단일 `agent-canvas` 명령으로 에이전트 서버, 자동화 백엔드, 웹 프런트엔드를 함께 시작하므로 브라우저에서 에이전트와 대화를 진행할 수 있습니다.
 
-모든 작업을 AMD 시스템 내에서 유지하기 위해, 에이전트는 Lemonade Server가 제공하는
-로컬 모델과 통신합니다. Lemonade는 해당 모델을 OpenAI 호환 API로 노출하므로,
-Agent Canvas는 이를 다른 OpenAI 방식 엔드포인트와 동일하게 구성할 수 있으며, 모델과
-코드, 대화 컨텍스트는 모두 사용자의 컴퓨터에 남아 있습니다.
+모든 것을 AMD 시스템 내에 유지하기 위해, 에이전트는 Lemonade Server가 제공하는 로컬 모델과 통신합니다. Lemonade는 해당 모델을 OpenAI 호환 API를 통해 노출하므로, Agent Canvas는 이를 다른 OpenAI 스타일 엔드포인트와 동일하게 구성할 수 있으며, 모델과 코드, 대화 컨텍스트는 모두 사용자의 컴퓨터 내에 유지됩니다.
 
-이 플레이북에서는 로컬 모델을 시작하고, Agent Canvas를 실행하고, 해당 모델을
-가리키도록 설정한 다음, 실제 프로젝트 폴더를 대상으로 첫 번째 코딩 작업을
-실행해 봅니다.
+이 플레이북에서는 로컬 모델을 시작하고, Agent Canvas를 실행하고, 해당 모델을 가리키도록 설정한 뒤 실제 프로젝트 폴더를 대상으로 첫 코딩 작업을 실행합니다.
 
 ## 배울 내용
 
 - Lemonade Server를 시작하고 로컬 모델이 채팅 요청에 응답하는지 확인하는 방법
 - npm 패키지에서 Agent Canvas를 설치하고 실행하는 방법
-- 로컬 Lemonade 모델을 LLM으로 사용하도록 Agent Canvas를 구성하는 방법
-- OpenHands 대화를 시작하고 에이전트가 워크스페이스에서 파일을 편집하고 명령을
-  실행하는 과정을 지켜보는 방법
-- 에이전트가 변경한 내용을 검토하고 후속 메시지로 에이전트를 조정하는 방법
+- Agent Canvas가 로컬 Lemonade 모델을 LLM으로 사용하도록 구성하는 방법
+- OpenHands 대화를 시작하고 에이전트가 작업 공간에서 파일을 편집하고 명령을 실행하는 과정을 지켜보는 방법
+- 에이전트가 변경한 내용을 검토하고 후속 메시지로 방향을 조정하는 방법
 
 ## 핵심 개념
 
 | 개념 | 설명 | 이 플레이북에서의 역할 |
 | --- | --- | --- |
-| Lemonade Server | AMD 하드웨어용으로 만들어진 로컬 LLM 서빙 플랫폼으로, OpenAI 호환 API를 노출합니다. 데이터가 컴퓨터 밖으로 나가지 않습니다. | 에이전트를 구동하는 모델을 실행합니다. |
-| OpenHands | 워크스페이스 내에서 파일을 읽고 편집하며, 셸 명령을 실행하고, 웹을 탐색하는 AI 소프트웨어 에이전트입니다. | 채팅에서 조작하는 에이전트입니다. |
+| Lemonade Server | AMD 하드웨어를 위해 구축된 로컬 LLM 서빙 플랫폼으로, OpenAI 호환 API를 노출합니다. 데이터는 절대 사용자의 컴퓨터를 벗어나지 않습니다. | 에이전트를 구동하는 모델을 실행합니다. |
+| OpenHands | 작업 공간 내에서 파일을 읽고 편집하며, 셸 명령을 실행하고, 웹을 탐색하는 AI 소프트웨어 에이전트입니다. | 채팅에서 직접 조작하는 에이전트입니다. |
 | Agent Canvas | OpenHands 대화를 실행하고 도구 호출 및 파일 변경 사항을 보여주는 브라우저 UI 및 백엔드입니다. | 스택을 실행하고 대화를 호스팅합니다. |
-| 워크스페이스 | 에이전트가 읽고 수정할 수 있도록 허용된 프로젝트 폴더입니다. | 에이전트의 편집 및 명령 대상입니다. |
+| Workspace | 에이전트가 읽고 수정할 수 있도록 허용된 프로젝트 폴더입니다. | 에이전트의 편집과 명령의 대상입니다. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> 코딩 에이전트 워크플로는 더 큰 모델과 컨텍스트 창의 혜택을 받습니다. 최소 32GB
-> 의 시스템 메모리를 사용하고, 더 큰 GGUF 모델의 경우 64GB 이상을 권장합니다.
+> 코딩 에이전트 워크플로는 더 큰 모델과 컨텍스트 창의 이점을 누릴 수 있습니다. 최소 32GB의 시스템 메모리를 사용하고, 더 큰 GGUF 모델의 경우 64GB 이상을 권장합니다.
 <!-- @device:end -->
 
 ## 메모리 구성 설정
@@ -76,34 +62,33 @@ Agent Canvas는 이를 다른 OpenAI 방식 엔드포인트와 동일하게 구�
 
 
 <!-- @os:linux -->
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so only the Lemonade model is needed here.
+     lemonade-chat-windows asserts the model is already downloaded. -->
+<!-- @prereq:lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 다음이 필요합니다:
 
-- Lemonade Server가 설치되어 있고 아래 모델을 서빙할 수 있어야 합니다.
+- 아래 모델을 제공할 수 있도록 설치된 Lemonade Server.
 
 <!-- @os:linux -->
-- Node.js 22.12 이상과 `npm`(이는 `agent-canvas` CLI에서 사용됩니다).
-- Agent Canvas가 에이전트 서버 환경을 관리하는 데 사용하는 Python 패키지 관리자인
-  `uv`. 시스템에 아직 설치되어 있지 않다면 Agent Canvas를 실행하기 전에
-  [uv 설치 가이드](https://docs.astral.sh/uv/getting-started/installation/)를
-  참고하여 설치하세요.
+- Node.js 22.12 이상 및 `npm`(`agent-canvas` CLI에서 사용).
+- Agent Canvas가 에이전트 서버 환경을 관리하는 데 사용하는 Python 패키지 관리자인 `uv`. 시스템에 아직 설치되어 있지 않다면 Agent Canvas를 실행하기 전에 [uv 설치 가이드](https://docs.astral.sh/uv/getting-started/installation/)에서 설치하세요.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
-  가 설치되어 실행 중이어야 합니다. Windows에서 Agent Canvas 스택은 게시된 Docker
-  이미지에서 실행되며, 이 이미지에는 Node.js, `uv`, `@openhands/agent-canvas`
-  패키지가 포함되어 있으므로 호스트에 별도로 설치할 필요가 없습니다.
+- 설치되어 실행 중인 [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/). Windows에서는 Agent Canvas 스택이 게시된 Docker 이미지에서 실행되며, 여기에는 Node.js, `uv`, `@openhands/agent-canvas` 패키지가 번들로 포함되어 있으므로 호스트에 이를 별도로 설치할 필요가 없습니다.
 <!-- @os:end -->
 
-- 작업할 프로젝트 폴더. 에이전트가 작업할 로컬 git 저장소나 코드 디렉터리라면
-  무엇이든 가능합니다.
+- 작업할 프로젝트 폴더. 에이전트가 작업하기를 원하는 임의의 로컬 git 저장소나 코드 디렉터리가 될 수 있습니다.
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -147,7 +132,7 @@ Write-Host "OK: lemonade and docker are available"
 <!-- @test:end -->
 <!-- @os:end -->
 
-## 1. Lemonade Server 시작
+## 1. Lemonade Server 시작하기
 
 Lemonade CLI에서 모델을 시작합니다:
 
@@ -157,13 +142,9 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
-> **사용자의 하드웨어에 맞는 모델을 선택하세요.** `Qwen3.6-35B-A3B-GGUF`(약 20GB)
-> 는 강력한 코딩 모델이지만 큰 메모리 풀이 필요합니다. 장치의 메모리나 GPU VRAM이
-> 제한적이라면 대신 Lemonade 모델 라이브러리에서 더 작은 GGUF 모델을 선택하고 이
-> 플레이북 전체에서 해당 모델 ID를 사용하세요.
+> **하드웨어에 맞는 모델을 선택하세요.** `Qwen3.6-35B-A3B-GGUF`(약 20GB)는 강력한 코딩 모델이지만 큰 메모리 풀이 필요합니다. 장치의 메모리나 GPU VRAM이 제한적인 경우, 대신 Lemonade 모델 라이브러리에서 더 작은 GGUF 모델을 선택하고 이 플레이북 전체에서 해당 모델 ID를 사용하세요.
 
-> **참고:** 최초 `lemonade run` 실행 시 모델이 아직 없다면 다운로드가 진행되며,
-> 모델 크기와 인터넷 연결 속도에 따라 시간이 걸릴 수 있습니다.
+> **참고:** 첫 번째 `lemonade run` 실행 시 모델이 아직 없는 경우 모델을 다운로드하므로, 모델 크기와 연결 상태에 따라 시간이 걸릴 수 있습니다.
 
 Lemonade는 다음 위치에서 OpenAI 호환 API를 노출합니다:
 
@@ -171,7 +152,7 @@ Lemonade는 다음 위치에서 OpenAI 호환 API를 노출합니다:
 http://127.0.0.1:13305/api/v1
 ```
 
-## 2. 로컬 모델 확인
+## 2. 로컬 모델 확인하기
 
 Lemonade가 선택한 모델을 제공할 수 있는지 확인합니다:
 
@@ -194,7 +175,7 @@ curl -sS "http://127.0.0.1:13305/api/v1/chat/completions" \
   }' | python3 -m json.tool
 ```
 
-`choices` 배열이 반환되면 Lemonade가 Agent Canvas를 위한 준비가 된 것입니다.
+이 요청이 `choices` 배열을 반환하면 Lemonade는 Agent Canvas와 연동할 준비가 된 것입니다.
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
@@ -314,7 +295,7 @@ finally {
 ```
 <!-- @test:end -->
 <!-- @os:end -->
-# 3. Agent Canvas 설치 및 실행
+## 3. Agent Canvas 설치 및 실행
 
 <!-- @os:linux -->
 게시된 Agent Canvas 패키지를 전역으로 설치합니다:
@@ -348,20 +329,19 @@ echo "OK: agent-canvas CLI is on PATH"
 agent-canvas
 ```
 
-기본적으로 Agent Canvas는 `http://localhost:8000`에서 시작됩니다. 브라우저에서
-해당 URL을 여세요. 이 포트 번호에 특별한 의미는 없습니다 — 8000번 포트가 이미
-사용 중이라면 Agent Canvas를 실행할 때 `--port`(또는 `-p`)로 사용 가능한 포트를
-지정하면 됩니다:
+기본적으로 Agent Canvas는 `http://localhost:8000`에서 시작됩니다. 해당 URL을
+브라우저에서 엽니다. 이 포트는 특별한 것이 아니므로, 8000번 포트가 이미 사용 중이라면
+Agent Canvas를 실행할 때 `--port`(또는 `-p`)로 사용 가능한 다른 포트를 지정하세요:
 
 ```bash
 agent-canvas --port 3000
 ```
 
-그런 다음 대신 `http://localhost:3000`을 여세요. 기본 로컬 백엔드는 홈 화면에서
+그런 다음 대신 `http://localhost:3000`을 엽니다. 기본 로컬 백엔드는 홈 화면에서
 정상(healthy) 상태로 표시되어야 합니다.
 
-`agent-canvas` 명령은 에이전트 서버, 자동화 백엔드, 웹 프론트엔드를 함께
-시작합니다. OpenHands를 로컬에서 실행하는 데는 이 명령 하나만 있으면 됩니다.
+`agent-canvas` 명령어는 에이전트 서버, 자동화 백엔드, 웹 프런트엔드를 함께 시작합니다.
+OpenHands를 로컬에서 실행하려면 이 하나의 명령어만 있으면 됩니다.
 
 <!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
 ```bash
@@ -415,11 +395,11 @@ echo "OK: agent-canvas agent-server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Windows에서는 Docker Desktop으로 게시된 Agent Canvas 컨테이너 이미지를
-실행하세요. 이 이미지에는 Agent Server, 자동화 백엔드, 웹 프론트엔드가 모두
-포함되어 있으므로 호스트에 Node.js, `uv`, CLI를 설치할 필요가 없습니다.
+Windows에서는 Docker Desktop을 사용하여 게시된 Agent Canvas 컨테이너 이미지를 실행합니다.
+이 이미지에는 Agent Server, 자동화 백엔드, 웹 프런트엔드가 모두 포함되어 있으므로
+호스트에 Node.js, `uv`, 또는 CLI를 설치할 필요가 없습니다.
 
-먼저 컨테이너가 마운트할 config 및 workspace 폴더를 생성합니다:
+먼저, 컨테이너가 마운트할 설정 및 워크스페이스 폴더를 생성합니다:
 
 ```powershell
 $env:PROJECTS_PATH = Join-Path $HOME "projects"
@@ -442,16 +422,15 @@ docker run -it --rm `
   ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-브라우저에서 `http://localhost:8000/canvas`를 여세요. 8000번 포트가 이미
-사용 중이라면 다른 호스트 포트를 매핑하세요. 예를 들어 `-p 8080:8000`으로
-매핑한 다음 `http://localhost:8080/canvas`를 대신 여세요.
+브라우저에서 `http://localhost:8000/canvas`를 엽니다. 8000번 포트가 이미 사용 중이라면
+예를 들어 `-p 8080:8000`과 같이 다른 호스트 포트를 매핑하고 대신
+`http://localhost:8080/canvas`를 엽니다.
 
-> **참고:** 처음 실행할 때는 컨테이너 내부에서 Agent Server를 초기화하므로
-> 백엔드가 정상(healthy) 상태로 보고되기까지 1~2분 정도 걸릴 수 있습니다.
+> **참고:** 최초 실행 시 컨테이너 내부에서 Agent Server를 초기화하므로,
+> 백엔드가 정상(healthy) 상태로 표시되기까지 1~2분 정도 걸릴 수 있습니다.
 
-`.openhands` 마운트는 컨테이너를 재시작해도 LLM 프로필과 설정을 유지합니다.
-이 플레이북의 나머지 부분에서는 브라우저의 Agent Canvas UI를 통해 모든 것을
-구성합니다.
+`.openhands` 마운트는 컨테이너를 재시작해도 LLM 프로필과 설정을 유지합니다. 이 플레이북의
+나머지 부분에서는 브라우저의 Agent Canvas UI를 통해 모든 것을 설정합니다.
 
 <!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
 ```powershell
@@ -503,7 +482,7 @@ finally {
 
 ## 4. 로컬 LLM 구성
 
-처음 실행하면 Agent Canvas가 온보딩 흐름을 시작합니다. 해당 흐름에서:
+처음 실행하면 Agent Canvas는 온보딩 흐름을 시작합니다. 해당 흐름에서:
 
 1. 에이전트로 **OpenHands**가 선택된 상태를 유지하고 **Next**를 클릭합니다.
 2. **Set up your LLM**에서 **Advanced**를 선택합니다.
@@ -511,46 +490,45 @@ finally {
 4. **Custom Model**을 `openai/Qwen3.6-35B-A3B-GGUF`로 설정합니다.
 5. **Base URL**을 `http://127.0.0.1:13305/api/v1`로 설정합니다.
    <!-- @os:windows -->
-   > Windows에서는 스택이 컨테이너에서 실행되므로 호스트의
-   > `127.0.0.1`에 접근할 수 없습니다. 컨테이너화된 에이전트가 Windows
-   > 호스트에서 실행 중인 Lemonade에 접근할 수 있도록 대신
-   > `http://host.docker.internal:13305/api/v1`을 사용하세요.
+   > Windows에서는 스택이 컨테이너에서 실행되므로 호스트의 `127.0.0.1`에
+   > 접근할 수 없습니다. 컨테이너화된 에이전트가 Windows 호스트에서 실행 중인
+   > Lemonade에 접근할 수 있도록 대신 `http://host.docker.internal:13305/api/v1`을
+   > 사용하세요.
    <!-- @os:end -->
-6. **API Key**에는 `lemonade-local`과 같은 비어 있지 않은 임의의 값을
-   입력하세요. Lemonade는 실제 키를 요구하지 않지만, OpenHands 클라이언트는
+6. **API Key**에는 `lemonade-local`과 같이 비어 있지 않은 임의의 자리 표시자 값을
+   입력합니다. Lemonade는 실제 키를 요구하지 않지만, OpenHands 클라이언트는
    전송할 값이 필요합니다.
 7. **Next**를 클릭합니다.
 
-완료된 Advanced 설정은 다음과 같이 보여야 합니다. API 키 필드는 UI에서
-마스킹 처리됩니다.
+완료된 Advanced 설정은 다음과 같이 표시되어야 합니다. API 키 필드는 UI에서
+마스킹되어 표시됩니다.
 
-![Lemonade 모델과 로컬 기본 URL이 설정된 Agent Canvas 최초 사용 시 LLM Advanced 설정](assets/01-llm-advanced-settings.png)
+![Lemonade 모델과 로컬 Base URL이 설정된 Agent Canvas 첫 사용 LLM Advanced 설정](assets/01-llm-advanced-settings.png)
 
-Agent Canvas는 이 값들을 LLM 프로필로 저장합니다. 사용 중인 버전에서 해당
-프로필의 이름을 지정하라고 요청하면, `lemonade-local`처럼 공백이 없는 이름을
-사용하세요. 나중에 모델을 변경하려면 **Settings > LLM**을 열고 동일한
-Advanced 필드를 업데이트하세요. 채팅 입력창에서 `/model` 명령으로 저장된
-프로필을 전환할 수 있습니다.
+Agent Canvas는 이 값들을 LLM 프로필로 저장합니다. 사용 중인 버전에서 해당 프로필의
+이름을 지정하라고 하면, `lemonade-local`과 같이 공백이 없는 이름을 사용하세요.
+나중에 모델을 변경하려면 **Settings > LLM**을 열고 동일한 Advanced 필드를
+업데이트하세요. 채팅 입력창에서 `/model` 명령어를 사용해 저장된 프로필을
+전환할 수 있습니다.
 
 ## 5. 워크스페이스 열기
 
-에이전트는 사용자가 선택한 워크스페이스 내부의 파일만 읽고 수정할 수
-있습니다. 작업을 시작하기 전에 Agent Canvas가 프로젝트 폴더를 가리키도록
-설정하세요:
+에이전트는 사용자가 선택한 워크스페이스 내의 파일만 읽고 수정할 수 있습니다. 작업을
+시작하기 전에, Agent Canvas가 프로젝트 폴더를 가리키도록 설정하세요:
 
 1. 홈 화면에서 **Open Workspace**를 선택합니다.
-2. 프로젝트가 들어 있는 폴더를 선택합니다(예: 에이전트가 작업할 git 저장소).
+2. 프로젝트가 포함된 폴더를 선택합니다(예: 에이전트가 작업할 git 저장소).
 3. 해당 워크스페이스에서 새 대화를 시작합니다.
 
 에이전트가 수행하는 모든 작업—파일 읽기, 명령 실행, 코드 편집—은 해당
-워크스페이스로 범위가 한정됩니다.
+워크스페이스로 범위가 제한됩니다.
 
 ![온보딩 이후의 Agent Canvas 홈 화면](assets/02-agent-canvas-home.png)
 
-## 6. 첫 코딩 작업 실행
+## 6. 첫 번째 코딩 작업 실행
 
-워크스페이스를 열고 로컬 LLM을 선택한 상태에서, 채팅에 구체적인 작업을
-입력하세요. 좋은 첫 작업은 작고 검증 가능한 것입니다. 예를 들면:
+워크스페이스가 열려 있고 로컬 LLM이 선택된 상태에서, 채팅에 구체적인 작업을
+입력합니다. 좋은 첫 작업은 작고 검증 가능한 작업입니다. 예를 들면:
 
 ```text
 Create a new file called hello.py that defines a function greet(name) that
@@ -560,42 +538,42 @@ when run as a script.
 
 대화 타임라인을 지켜보세요. OpenHands는 다음을 수행합니다:
 
-- 워크스페이스를 읽어 레이아웃을 파악합니다.
+- 워크스페이스를 읽어 구조를 파악합니다.
 - 요청된 함수와 테스트 블록이 포함된 `hello.py`를 생성합니다.
-- 필요하다면 `python3 hello.py`를 실행해 출력을 확인합니다.
-- 수행한 작업과 명령 출력 내용을 채팅에 보고합니다.
+- 선택적으로 `python3 hello.py`를 실행하여 출력을 확인합니다.
+- 수행한 작업과 명령 출력을 채팅에 보고합니다.
 
-워크스페이스에 새 파일이 나타나는 것을 확인할 수 있으며, 에이전트의 최종
-메시지는 수행한 변경 사항을 설명해야 합니다. 이것이 바로 성과의 순간입니다:
-에이전트가 실제로 프로젝트 폴더 안에서 코드를 작성하고 실행한 것입니다.
+워크스페이스에 새 파일이 나타나는 것을 확인할 수 있으며, 에이전트의 최종 메시지는
+수행한 변경 사항을 설명해야 합니다. 이것이 바로 성과의 순간입니다: 에이전트가
+사용자의 프로젝트 폴더에서 실제 코드를 작성하고 실행했습니다.
 
-## 7. 에이전트의 작업 검토 및 방향 지시
+## 7. 에이전트 검토 및 조정
 
-에이전트가 한 단계를 마친 후, 다음 단계를 승인하기 전에 작업 내용을
+에이전트가 한 단계를 완료한 후, 다음 단계를 승인하기 전에 작업 내용을
 검토하세요:
 
-- **파일 변경 사항**: 워크스페이스 파일 브라우저나 에이전트의 diff 보기를
-  사용해 추가, 변경, 삭제된 내용을 정확히 확인하세요.
-- **명령 출력**: 에이전트가 실행한 명령을 펼쳐서 stdout, stderr, 종료
-  코드를 확인하세요.
-- **후속 조치**: 결과가 원하는 대로 나오지 않았다면 같은 대화에서 수정
-  사항을 답장으로 보내세요. 에이전트는 이전 컨텍스트를 유지하며 동일한
-  파일에 대해 반복 작업합니다.
+- **파일 변경 사항**: 워크스페이스 파일 브라우저나 에이전트의 diff 보기를 사용하여
+  추가, 변경, 삭제된 내용을 정확히 확인합니다.
+- **명령 출력**: 에이전트가 실행한 명령을 펼쳐 stdout, stderr, 종료 코드를
+  확인합니다.
+- **후속 조치**: 결과가 원하는 바와 다르다면, 같은 대화에서 수정 사항을 답변으로
+  작성합니다. 에이전트는 이전 컨텍스트를 유지한 채 동일한 파일에 대해
+  반복 작업을 수행합니다.
 
-예를 들어 테스트가 예상한 인사말을 출력하지 않았다면 다음과 같이 답장하세요:
+예를 들어, 테스트가 예상한 인사말을 출력하지 않았다면 다음과 같이 답변합니다:
 
 ```text
 The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-에이전트는 파일을 다시 읽고, 명령을 실행하고, 문제를 진단한 다음 같은
-대화 안에서 파일을 다시 편집합니다.
+에이전트는 파일을 다시 읽고, 명령을 실행하고, 문제를 진단한 후, 같은 대화 내에서
+파일을 다시 편집합니다.
 ## 문제 해결
 
 <!-- @os:linux -->
-- **`agent-canvas`가 PATH에 없는 경우:** `npm install -g @openhands/agent-canvas`로 다시 설치하고, 새 터미널에서 `agent-canvas`를 실행할 수 있도록 npm 전역 바이너리 디렉터리가 PATH에 있는지 확인하세요.
-- **`npm install -g`가 권한 오류로 실패하는 경우:** 사용자 소유의 전역 npm 디렉터리를 구성한 다음, 터미널을 다시 열고 Agent Canvas를 다시 설치하세요.
+- **`agent-canvas`가 PATH에 없는 경우:** `npm install -g @openhands/agent-canvas`로 다시 설치하고, 새 터미널에서 `agent-canvas`를 실행할 수 있으려면 npm 전역 바이너리 디렉터리가 PATH에 포함되어 있는지 확인하세요.
+- **`npm install -g`가 권한 오류로 실패하는 경우:** 사용자 소유의 전역 npm 디렉터리를 구성한 다음 터미널을 다시 열고 Agent Canvas를 다시 설치하세요.
 
   ```bash
   mkdir -p ~/.npm-global
@@ -604,26 +582,26 @@ greet("World") test prints to stdout.
   . ~/.profile
   npm install -g @openhands/agent-canvas
   ```
-- **`uv`가 없는 경우:** [uv 설치 가이드](https://docs.astral.sh/uv/getting-started/installation/)에서 설치하세요. Agent Canvas는 에이전트 서버의 Python 환경을 관리하는 데 `uv`를 사용합니다.
+- **`uv`가 없는 경우:** [uv 설치 가이드](https://docs.astral.sh/uv/getting-started/installation/)에서 설치하세요. Agent Canvas는 에이전트 서버의 Python 환경을 관리하기 위해 `uv`를 사용합니다.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- **`docker pull` 또는 `docker run`이 연결에 실패하는 경우:** Docker Desktop이 실행 중인지(시스템 트레이에 고래 아이콘이 표시됨) 그리고 엔진이 시작을 완료했는지 확인하세요. `docker version` 명령을 실행하면 Client와 Server 섹션이 모두 출력되어야 합니다.
-- **컨테이너는 시작되지만 백엔드가 계속 정상 상태(healthy)가 되지 않는 경우:** 첫 실행 시 컨테이너 내부에서 Agent Server를 초기화합니다. 1~2분 정도 기다린 다음 `docker logs <container>`로 오류를 확인하세요.
-- **컨테이너가 Lemonade에 연결할 수 없는 경우:** 컨테이너는 `host.docker.internal`을 통해 호스트에 접근합니다. `lemonade status`로 Windows 호스트에서 Lemonade가 서비스되고 있는지 확인하고, LLM을 구성할 때 Base URL로 `http://host.docker.internal:13305/api/v1`을 사용하세요.
+- **`docker pull` 또는 `docker run`이 연결에 실패하는 경우:** Docker Desktop이 실행 중인지(시스템 트레이에 고래 아이콘이 표시됨) 그리고 엔진이 시작을 완료했는지 확인하세요. `docker version`을 실행하면 Client와 Server 섹션이 모두 출력되어야 합니다.
+- **컨테이너는 시작되지만 백엔드가 정상 상태가 되지 않는 경우:** 최초 실행 시 컨테이너 내부에서 Agent Server를 초기화합니다. 1~2분 정도 기다린 다음 `docker logs <container>`로 오류를 확인하세요.
+- **컨테이너가 Lemonade에 연결하지 못하는 경우:** 컨테이너는 `host.docker.internal`을 통해 호스트에 접근합니다. `lemonade status`로 Windows 호스트에서 Lemonade가 서비스되고 있는지 확인하고, LLM을 구성할 때 Base URL로 `http://host.docker.internal:13305/api/v1`을 사용하세요.
 <!-- @os:end -->
 
-- **UI는 로드되지만 백엔드가 비정상(unhealthy) 상태로 표시되는 경우:** 에이전트 서버가 시작을 완료할 때까지 1~2분 정도 기다린 다음 새로고침하세요. 계속 비정상 상태라면 스택을 재시작하고 로그에서 오류를 확인하세요.
+- **UI는 로드되지만 백엔드가 비정상으로 표시되는 경우:** 에이전트 서버가 시작을 완료할 때까지 1~2분 정도 기다린 다음 새로고침하세요. 계속 비정상 상태로 남아 있다면 스택을 다시 시작하고 로그에서 오류를 확인하세요.
 - **Lemonade 채팅 요청이 연결 오류로 실패하는 경우:** `curl -fsS "http://127.0.0.1:13305/api/v1/health"`가 성공하는지, 그리고 `lemonade status`로 Lemonade가 여전히 모델을 서비스하고 있는지 확인하세요.
-- **에이전트가 컨텍스트 길이 또는 토큰 제한 메시지와 함께 오류를 내는 경우:** 새 대화를 시작하여 에이전트가 지나치게 큰 기록을 유지하지 않도록 하세요. 계속 발생한다면 메모리 여유가 있다면 기본값 65536보다 큰 `ctx_size`(예: `ctx_size=131072`)로 Lemonade를 재시작하세요.
-- **에이전트가 품질이 낮거나 불완전한 수정을 생성하는 경우:** Lemonade에서 더 큰 모델로 전환하거나, 에이전트에게 더 작고 구체적인 작업을 부여하여 다음 변경을 요청하기 전에 완료하도록 하세요.
+- **에이전트가 컨텍스트 길이 또는 토큰 한도 오류 메시지를 내는 경우:** 에이전트가 지나치게 큰 기록을 가지지 않도록 새 대화를 시작하세요. 계속 발생한다면 메모리 여유가 있는 한 기본값인 65536보다 큰 `ctx_size`(예: `ctx_size=131072`)로 Lemonade를 다시 시작하세요.
+- **에이전트가 품질이 낮거나 불완전한 수정을 생성하는 경우:** Lemonade에서 더 큰 모델로 전환하거나, 에이전트에 더 작고 구체적인 작업을 부여하고 다음 변경을 요청하기 전에 완료하도록 하세요.
 
 ## 다음 단계
 
-- 단위 테스트 파일 추가나 알려진 버그 수정 등 같은 작업 공간에서 더 큰 작업을 시도해 보고, 변경 사항을 유지하기 전에 에이전트의 diff를 검토하세요.
-- 에이전트가 작업 중에 이슈를 읽거나 업데이트를 게시할 수 있도록 **Customize**에서 GitHub나 Slack 같은 MCP 서버를 연결하세요.
-- 여러 LLM 프로필(빠른 소형 모델과 더 강력한 대형 모델)을 저장해두고, 대화 도중 `/model`로 전환해 보세요.
-- [OpenHands automations](https://docs.openhands.dev/openhands/usage/automations/overview)로 넘어가서 반복되는 개발 루프를 예약되거나 이벤트 기반으로 실행되는 에이전트 실행으로 전환해 보세요.
+- 단위 테스트 파일을 추가하거나 알려진 버그를 수정하는 등 같은 작업 공간에서 더 큰 작업을 시도해 보고, 변경 사항을 유지하기 전에 에이전트의 diff를 검토하세요.
+- 에이전트가 작업하는 동안 이슈를 읽거나 업데이트를 게시할 수 있도록 **Customize**에서 GitHub나 Slack 같은 MCP 서버를 연결하세요.
+- 여러 LLM 프로필(빠른 소형 모델과 더 강력한 대형 모델)을 저장하고, 대화 중에 `/model`로 전환하세요.
+- 반복되는 개발 루프를 예약되거나 이벤트로 트리거되는 에이전트 실행으로 전환하려면 [OpenHands automations](https://docs.openhands.dev/openhands/usage/automations/overview)로 이동하세요.
 
 ## 리소스
 

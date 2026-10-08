@@ -9,65 +9,67 @@ SPDX-License-Identifier: MIT
 > **الترجمة الآلية.** تمت ترجمة هذه الصفحة تلقائيًا من اللغة الإنجليزية ولم تتم مراجعتها من قِبل مترجم بشري. قد تحتوي على أخطاء، وقد تختلف بعض التعليمات أو الأوامر أو خيارات التنزيل أو مدى توفر المنتج أو أي محتوى آخر باختلاف اللغة أو المنطقة. في حال وجود أي تعارض أو تباين، تكون النسخة الإنجليزية الأصلية من الـ playbook هي النسخة المعتمدة والمرجعية، ويُعمل بها في هذه الحالة.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
+<!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> يتطلب هذا الدليل الإرشادي حدًا أدنى قدره **32 جيجابايت** من ذاكرة النظام.
+> يتطلب هذا الدليل التدريبي حدًا أدنى من ذاكرة النظام قدره **32 جيجابايت**.
 <!-- @device:end -->
 
 ## نظرة عامة
 
 تُعد وكلاء البرمجة (Coding agents) أدوات قوية تُمكّن المطورين من خلال التعاون مع وكلاء الذكاء الاصطناعي المدعومين بنماذج اللغة الكبيرة (LLMs). يمكن دمجها في بيئة التطوير، مثل الطرفية (terminal) أو VS Code، مما يتيح تكاملًا سلسًا في سير عمل المطور.
 
-يوضح هذا الدليل التعليمي كيفية استخدام Cline و VS Code و LM Studio لتشغيل وكيل برمجي بالكامل على جهازك المحلي.
+يوضح هذا الدليل التدريبي كيفية استخدام Cline وVS Code وLM Studio لتشغيل وكيل برمجة بالكامل على جهازك المحلي.
 
 ## ما ستتعلمه
 
 * كيفية تشغيل VS Code مع وكيل البرمجة Cline للمساعدة في مهام هندسة البرمجيات.
-* كيفية تكوين Cline للتواصل مع LM Studio للاستدلال المحلي لوكلاء البرمجة.
-* كيفية استخدام وكلاء البرمجة المحليين لحل مهام هندسة برمجيات حقيقية. 
+* كيفية تهيئة Cline للتواصل مع LM Studio للاستدلال المحلي لوكلاء البرمجة.
+* كيفية استخدام وكلاء البرمجة المحليين لحل مهام هندسة البرمجيات الواقعية.
 
 <!-- @device:halo_box,halo,stx,krk -->
-## تعيين تكوين الذاكرة
+## ضبط إعدادات الذاكرة
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## التحقق من تحديثات البرامج
-> **ملاحظة**: إذا لم يكن VS Code مثبتًا، يمكنك تثبيته باستخدام مركز مطوري Ryzen AI.
+> **ملاحظة**: إذا لم يكن VS Code مثبتًا، يمكنك تثبيته من خلال Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
 ## تثبيت متطلبات البرامج الأساسية
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lmstudio,vscode -->
+<!-- @prereq:lmstudio-models-qwen3-coder-30b,lmstudio,vscode -->
 
-## تشغيل وتكوين LM Studio
+## تشغيل وتهيئة LM Studio
 
-سنستخدم LM Studio لتقديم نموذج اللغة الكبير الذي يشغّل وكيل البرمجة.
+سنستخدم LM Studio لتشغيل نموذج اللغة الكبير الذي يشغّل وكيل البرمجة.
 
-- في شريط البحث، ابحث عن `LM Studio` وشغّل التطبيق. سيتم الترحيب بك بالصفحة التالية.
+- في شريط البحث، ابحث عن `LM Studio` وشغّل التطبيق. ستظهر أمامك الصفحة التالية.
 
 ![الشاشة الأولية لـ LM Studio](assets/initial-lm-studio.png)
 
-بعد ذلك، يجب علينا تحميل نموذج اللغة الكبير على النظام. سنستخدم نموذج `Qwen3-Coder-30B-A3B` بطول سياق كبير. (استخدم علامة تبويب Model لتثبيته إذا لم تكن قد فعلت ذلك بالفعل).
-- انقر على شريط البحث الموجود أعلى نافذة LM Studio أو اضغط على `CTRL+L`. انقر على المفتاح `Manually choose model load parameters` ثم انقر على نموذج Qwen3-Coder-30B-A3B.
-- غيّر طول السياق من `4096` إلى `32768`، وتأكد من أن `GPU Offload` عند الحد الأقصى. ثم انقر على `Load Model`
+بعد ذلك، يجب علينا تحميل نموذج اللغة الكبير على النظام. سنستخدم نموذج `Qwen3-Coder-30B-A3B` بطول سياق كبير. (استخدم علامة التبويب Model لتثبيته إذا لم تكن قد فعلت ذلك بعد).
+- انقر على شريط البحث في أعلى نافذة LM Studio أو اضغط على `CTRL+L`. انقر على المفتاح `Manually choose model load parameters` ثم انقر على نموذج Qwen3-Coder-30B-A3B.
+- غيّر طول السياق من `4096` إلى `32768`، وتأكد من أن `GPU Offload` في أقصى حد له. بعد ذلك، انقر على `Load Model`
 
 ![اختيار النموذج](assets/model-list-zoomed.png)
 
-نستخدم طول سياق كبير حتى يتمكن الوكيل من معالجة قواعد بيانات برمجية كبيرة وتذكر التغييرات التي تم إجراؤها.
+نستخدم طول سياق كبيرًا حتى يتمكن الوكيل من معالجة قواعد أكواد كبيرة وتذكر التغييرات التي تم إجراؤها.
 
-![تكوين النموذج](assets/selecting-model-zoomed.png)
+![تهيئة النموذج](assets/selecting-model-zoomed.png)
 
-بعد ذلك، نحتاج إلى تفعيل خادم LM Studio. 
-- انقر على علامة تبويب Developer أو اضغط على `CTRL+2` في LM Studio على اليسار.
+بعد ذلك، نحتاج إلى تفعيل خادم LM Studio.
+- انقر على علامة التبويب Developer أو اضغط على `CTRL+2` في LM Studio على اليسار.
 - تحقق من مفتاح الحالة وتأكد من أنه مضبوط على `Running`.
 
 <!-- @os:windows -->
@@ -153,15 +155,15 @@ lms chat "$ID" -p "Reply with exactly: OK"
 <!-- @test:end -->
 <!-- @os:end -->
 
-## تشغيل وتكوين VS Code
+## تشغيل وتهيئة VS Code
 
-سنقوم بتثبيت إضافة Cline في VS Code وربطها بخادم LM Studio الذي أنشأناه للتو.
+سنثبّت إضافة Cline في VS Code ونربطها بخادم LM Studio الذي أنشأناه للتو.
 - في شريط البحث، ابحث عن `VS Code` وشغّل التطبيق.
-- انقر على أيقونة `Extensions` في العمود الأيسر من VS Code وابحث عن `Cline`. ثم انقر على زر `Install`. 
+- انقر على أيقونة `Extensions` في العمود الأيسر من VS Code وابحث عن `Cline`. ثم انقر على زر `Install`.
 
 ![تثبيت إضافة Cline](assets/installing-cline-vscode-extension.png)
 
-- يجب أن تظهر أيقونة Cline على اليسار. انقر عليها لفتح Cline. ستظهر نافذة تسأل `How will you use Cline?` بما أننا سنستخدم نموذج لغة كبير محلي يعمل عبر LM Studio، اختر `Bring my own API Key` واضغط على `Continue`. 
+- يجب أن تظهر أيقونة Cline على اليسار. انقر عليها لفتح Cline. ستظهر نافذة تسأل `How will you use Cline?` حيث إننا سنستخدم نموذج لغة كبير محلي يعمل عبر LM Studio، اختر `Bring my own API Key` ثم اضغط `Continue`.
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -183,32 +185,32 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 
 ![إنشاء حساب](assets/cline-how-will-you-use-cline-zoomed.png)
 
-بعد ذلك، نحتاج إلى تكوين Cline للتواصل مع خادم LM Studio الذي أعددناه. 
-- اضبط API Provider على `LM Studio` والنموذج على `Qwen3-Coder-30B-A3B-GGUF`. 
+بعد ذلك، نحتاج إلى تهيئة Cline للتواصل مع خادم LM Studio الذي أعددناه.
+- اضبط API Provider على `LM Studio` والنموذج على `Qwen3-Coder-30B-A3B-GGUF`.
 
->**تلميح**: قد تكون هناك نماذج أحدث متاحة. فكّر في تنزيل نماذج Qwen3.6 والتبديل إليها إذا رغبت في ذلك.
+>**تلميح**: قد تتوفر نماذج أحدث. ضع في اعتبارك تنزيل والتبديل إلى نماذج Qwen3.6 إذا رغبت في ذلك.
 
 
-![تكوين النموذج](assets/cline-model-configuration-zoomed.png)
+![تهيئة النموذج](assets/cline-model-configuration-zoomed.png)
 
 ## إنشاء مشروعك الأول
 
-لنستخدم وكيلنا المحلي لإنشاء موقع ويب! افتح VSCode على دليل من اختيارك حيث سيقوم Cline بإنشاء الملفات.
-- للقيام بذلك، انتقل إلى `File -> Open Folder` في أعلى يسار VS Code واختر مجلدًا مثل `Documents`.
+دعنا نستخدم وكيلنا المحلي لإنشاء موقع إلكتروني! افتح VSCode على مجلد من اختيارك حيث سيقوم Cline بإنشاء الملفات.
+- للقيام بذلك، اذهب إلى `File -> Open Folder` في أعلى يسار VS Code واختر مجلدًا مثل `Documents`.
 
-![مجلد فارغ في VS Code](assets/open-cline-test.png)
+![مجلد VS Code فارغ](assets/open-cline-test.png)
 
-الآن نحن جاهزون لتوجيه الوكيل البرمجي المحلي. 
-- انقر على إضافة Cline في العمود الأيسر وأدخل موجّهًا (prompt) لبدء الوكيل. كمثال، لنستخدم الموجّه التالي:
+الآن نحن جاهزون لتوجيه وكيل البرمجة المحلي.
+- انقر على إضافة Cline في العمود الأيسر وأدخل توجيهًا (prompt) لبدء تشغيل الوكيل. كمثال، دعنا نستخدم التوجيه التالي:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-سيبدأ الوكيل بعد ذلك في إنشاء الملفات وفقًا للموجّه. كمستخدم، يمكنك مشاهدة توليد الكود في VS Code كما هو موضح أدناه. قد تضطر إلى النقر على `Save` في كل مرة يريد فيها Cline إنشاء ملف. 
+سيبدأ الوكيل بعد ذلك في إنشاء الملفات وفقًا للتوجيه. كمستخدم، يمكنك مشاهدة الكود وهو يُولّد في VS Code كما هو موضح أدناه. قد تضطر إلى النقر على `Save` في كل مرة يريد فيها Cline إنشاء ملف.
 
 ![توليد الكود بواسطة Cline](assets/cline-code-generation.png)
 
-بعد توليد البرنامج، يكون الوكيل قد أنجز مهمته ويمكنك تشغيل التطبيق. في هذه الحالة، كتب الوكيل ثلاثة ملفات: `index.html` و `script.js` و `styles.css`. بمجرد النقر المزدوج على ملف HTML يمكننا تحميل الموقع المُولّد والتفاعل معه.
+بعد توليد البرنامج، يكون الوكيل قد أتمّ مهمته ويمكنك تشغيل التطبيق. في هذه الحالة، كتب الوكيل إلى ثلاثة ملفات: `index.html` و`script.js` و`styles.css`. بمجرد النقر المزدوج على ملف HTML، يمكننا تحميل الموقع الإلكتروني المُولّد والتفاعل معه.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -284,20 +286,20 @@ lms server stop
 
 ## الخطوات التالية
 
-بعد توليد الموقع، يمكنك الاستمرار في العمل مع Cline لتحسين الموقع. هناك تحسينان محتملان:
+بعد توليد الموقع الإلكتروني، يمكنك الاستمرار في العمل مع Cline لتحسين الموقع. فيما يلي تحسينان محتملان:
 
-- **التوثيق**: توجيه الوكيل بـ `Add a README` هو كل ما يلزم لكي يقوم الوكيل بتوليد ملف `README.md` يوثّق الموقع.
-- **الرسوم المتحركة**: وجّه النموذج بـ `Add an animation that visually represents a large language model running on a laptop.` لتوليد رسوم متحركة تُضاف إلى الموقع.
+- **التوثيق**: توجيه الوكيل بـ `Add a README` هو كل ما يحتاجه الوكيل لإنشاء ملف `README.md` يوثّق الموقع الإلكتروني.
+- **الرسوم المتحركة**: وجّه النموذج بـ `Add an animation that visually represents a large language model running on a laptop.` لإضافة رسوم متحركة إلى الموقع.
 
 نشجع القارئ على تجربة توليد تطبيقات أخرى باستخدام هذا الإعداد. فيما يلي بعض الأمثلة الممتعة التي جربناها:
 
-- **ألعاب الأركيد الكلاسيكية**: جرّب بعض الموجّهات الأخرى. يمكن أن يكون من الممتع أيضًا أن يقوم الوكيل بإنشاء ألعاب بأسلوب كلاسيكي باستخدام Python وحزمة `PyGame` مع الموجّه التالي:
+- **ألعاب أركيد قديمة الطراز (Retro Arcade Games)**: جرّب بعض التوجيهات الأخرى. قد يكون من الممتع أيضًا أن يقوم الوكيل بإنشاء ألعاب بأسلوب قديم باستخدام Python وحزمة `PyGame` بالتوجيه التالي:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **تحليل البيانات**: أحد المجالات التي تكون فيها وكلاء البرمجة مفيدة بشكل خاص هو كتابة السكربتات وتحليل البيانات. هذا موجّه لعرض قدرة النموذج المحلي على توليد برنامج تحليل بيانات لتصور أسعار الأسهم:
+- **تحليل البيانات**: أحد المجالات التي تُعد فيها وكلاء البرمجة مفيدة بشكل خاص هو كتابة السكربتات وتحليل البيانات. هذا توجيه لعرض قدرة النموذج المحلي على توليد برامج تحليل البيانات لتصور أسعار الأسهم:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -305,8 +307,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## الموارد
 
-فيما يلي بعض الموارد الإضافية لمعرفة المزيد حول وكلاء البرمجة، وCline، وتشغيل أعباء العمل على 
+فيما يلي بعض الموارد الإضافية لمعرفة المزيد عن وكلاء البرمجة، وCline، وتشغيل أعباء العمل على
 
 * مزيد من المعلومات حول شراكة AMD مع LM Studio وتكاملها: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* مدونة AMD التي تستعرض تشغيل Cline على بطاقات AMD Ryzen™ AI وRadeon™ Graphics: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
-* مدونة Cline حول تشغيل وكلاء البرمجة محليًا على أجهزة الكمبيوتر الشخصي المزودة بالذكاء الاصطناعي: https://cline.bot/blog/local-models-amd
+* مدونة AMD التي تستعرض كيفية تشغيل Cline على بطاقات AMD Ryzen™ AI وRadeon™ الرسومية: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* مدونة Cline حول تشغيل وكلاء البرمجة محليًا على أجهزة AI PC: https://cline.bot/blog/local-models-amd

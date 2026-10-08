@@ -16,20 +16,20 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Voor dit playbook is minimaal **32GB** systeemgeheugen vereist.
+> Deze playbook vereist minimaal **32GB** aan systeemgeheugen.
 <!-- @device:end -->
 
 ## Overzicht
 
-Coding agents zijn krachtige tools die ontwikkelaars ondersteunen door samenwerking met AI-agents die worden aangedreven door Large Language Models (LLM's). Ze kunnen worden geïntegreerd in de ontwikkelomgeving, zoals de terminal of VS Code, waardoor ze naadloos in de workflow van een ontwikkelaar passen.
+Coding agents zijn krachtige tools die ontwikkelaars ondersteunen door samenwerking met AI-agents die worden aangedreven door Large Language Models (LLM's). Ze kunnen worden geïntegreerd in de ontwikkelomgeving, zoals de terminal of VS Code, waardoor ze naadloos kunnen worden opgenomen in de workflow van een ontwikkelaar.
 
-Deze tutorial laat zien hoe je Cline, VS Code en LM Studio kunt gebruiken om een coding agent volledig lokaal op je eigen machine uit te voeren.
+Deze tutorial laat zien hoe je Cline, VS Code en LM Studio kunt gebruiken om een coding agent volledig op je lokale machine te laten draaien.
 
 ## Wat je leert
 
-* Hoe je VS Code met de Cline coding agent uitvoert om softwareontwikkeltaken te ondersteunen.
+* Hoe je VS Code met de Cline coding agent uitvoert om te helpen bij software engineering-taken.
 * Hoe je Cline configureert om te communiceren met LM Studio voor lokale inferentie van coding agents.
-* Hoe je lokale coding agents gebruikt om praktijkgerichte softwareontwikkelproblemen op te lossen.
+* Hoe je lokale coding agents gebruikt om praktijkgerichte software engineering-problemen op te lossen.
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## De geheugenconfiguratie instellen
@@ -46,28 +46,30 @@ Deze tutorial laat zien hoe je Cline, VS Code en LM Studio kunt gebruiken om een
 
 ## Software-vereisten installeren
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lmstudio,vscode -->
+<!-- @prereq:lmstudio-models-qwen3-coder-30b,lmstudio,vscode -->
 
 ## LM Studio starten en configureren
 
-We gebruiken LM Studio om de LLM te serveren die de coding agent aandrijft.
+We gebruiken LM Studio om de LLM te hosten die de coding agent aandrijft.
 
-- Zoek in de zoekbalk naar `LM Studio` en start de applicatie. Je krijgt de volgende pagina te zien.
+- Zoek in de zoekbalk naar `LM Studio` en start de applicatie. Je wordt begroet met de volgende pagina.
 
-![LM Studio beginscherm](assets/initial-lm-studio.png)
+![LM Studio Initial Screen](assets/initial-lm-studio.png)
 
 Vervolgens moeten we de LLM op het systeem laden. We gaan het model `Qwen3-Coder-30B-A3B` gebruiken met een grote contextlengte. (Gebruik het tabblad Model om het te installeren als je dit nog niet hebt gedaan).
-- Klik op de zoekbalk boven in het LM Studio-venster of druk op `CTRL+L`. Klik op de schakelaar `Manually choose model load parameters` en klik vervolgens op het model Qwen3-Coder-30B-A3B.
-- Wijzig de contextlengte van `4096` naar `32768` en zorg ervoor dat `GPU Offload` op maximum staat. Klik daarna op `Load Model`
+- Klik op de zoekbalk bovenaan het LM Studio-venster of druk op `CTRL+L`. Klik op de schakelaar `Manually choose model load parameters` en klik vervolgens op het model Qwen3-Coder-30B-A3B.
+- Wijzig de contextlengte van `4096` naar `32768`, en zorg ervoor dat `GPU Offload` op maximum staat. Klik vervolgens op `Load Model`
 
-![Model selecteren](assets/model-list-zoomed.png)
+![Selecting Model](assets/model-list-zoomed.png)
 
-We gebruiken een grote contextlengte zodat de agent grote codebases kan verwerken en wijzigingen kan onthouden die zijn aangebracht.
+We gebruiken een grote contextlengte zodat de agent grote codebases kan verwerken en wijzigingen die zijn aangebracht kan onthouden.
 
-![Model configureren](assets/selecting-model-zoomed.png)
+![Configuring Model](assets/selecting-model-zoomed.png)
 
 Vervolgens moeten we de LM Studio Server inschakelen.
-- Klik links in LM Studio op het tabblad Developer of druk op `CTRL+2`.
+- Klik op het tabblad Developer of druk op `CTRL+2` links in LM Studio.
 - Controleer de statusschakelaar en zorg ervoor dat deze op `Running` staat.
 
 <!-- @os:windows -->
@@ -88,7 +90,7 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @test:end -->
 <!-- @os:end -->
 
-![Serverstatus](assets/lm-studio-server-status.png)
+![Server Status](assets/lm-studio-server-status.png)
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
@@ -155,13 +157,13 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ## VS Code starten en configureren
 
-We installeren de Cline-extensie in VS Code en verbinden deze met de LM Studio-server die we net hebben gemaakt.
+We installeren de Cline-extensie in VS Code en verbinden deze met de LM Studio-server die we zojuist hebben opgezet.
 - Zoek in de zoekbalk naar `VS Code` en start de applicatie.
 - Klik op het `Extensions`-icoon in de linkerkolom van VS Code en zoek naar `Cline`. Klik vervolgens op de knop `Install`.
 
-![Cline-extensie installeren](assets/installing-cline-vscode-extension.png)
+![Installing Cline Extension](assets/installing-cline-vscode-extension.png)
 
-- Links zou een Cline-icoon moeten verschijnen. Klik daarop om Cline te openen. Er verschijnt een venster met de vraag `How will you use Cline?` Aangezien we een lokale LLM gebruiken die via LM Studio draait, selecteer je `Bring my own API Key` en klik je op `Continue`.
+- Er zou nu een Cline-icoon links aanwezig moeten zijn. Klik hierop om Cline te openen. Er verschijnt een venster met de vraag `How will you use Cline?` Omdat we een lokale LLM gaan gebruiken die via LM Studio draait, selecteer je `Bring my own API Key` en klik je op `Continue`.
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -181,34 +183,34 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 <!-- @test:end -->
 <!-- @os:end -->
 
-![Account aanmaken](assets/cline-how-will-you-use-cline-zoomed.png)
+![Account Creation](assets/cline-how-will-you-use-cline-zoomed.png)
 
 Vervolgens moeten we Cline configureren om te communiceren met de LM Studio-server die we hebben opgezet.
 - Stel de API Provider in op `LM Studio` en het model op `Qwen3-Coder-30B-A3B-GGUF`.
 
->**Tip**: Er kunnen nieuwere modellen beschikbaar zijn. Overweeg om Qwen3.6-modellen te downloaden en ernaar over te schakelen indien gewenst.
+>**Tip**: Er zijn mogelijk nieuwere modellen beschikbaar. Overweeg om Qwen3.6-modellen te downloaden en hiernaar over te schakelen indien gewenst.
 
 
-![Modelconfiguratie](assets/cline-model-configuration-zoomed.png)
+![Model Configuration](assets/cline-model-configuration-zoomed.png)
 
 ## Je eerste project maken
 
-Laten we onze lokale agent gebruiken om een website te maken! Open VSCode in een map naar keuze waar Cline de bestanden zal aanmaken.
+Laten we onze lokale agent gebruiken om een website te maken! Open VS Code in een map naar keuze waar Cline de bestanden zal aanmaken.
 - Ga hiervoor naar `File -> Open Folder` linksboven in VS Code en kies een map zoals `Documents`.
 
-![Lege map in VS Code](assets/open-cline-test.png)
+![VS Code Empty Folder](assets/open-cline-test.png)
 
 Nu zijn we klaar om de lokale coding agent te prompten.
-- Klik op de Cline-extensie in de linkerkolom en voer een prompt in om de agent te starten. Gebruik bijvoorbeeld de volgende prompt:
+- Klik op de Cline-extensie in de linkerkolom en voer een prompt in om de agent te starten. Laten we als voorbeeld de volgende prompt gebruiken:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-De agent begint vervolgens bestanden aan te maken volgens de prompt. Als gebruiker kun je in VS Code toekijken hoe de code wordt gegenereerd, zoals hieronder wordt getoond. Mogelijk moet je elke keer op `Save` klikken wanneer Cline een bestand wil aanmaken.
+De agent begint vervolgens met het maken van bestanden volgens de prompt. Als gebruiker kun je in VS Code bekijken hoe de code wordt gegenereerd, zoals hieronder weergegeven. Mogelijk moet je `Save` klikken telkens wanneer Cline een bestand wil aanmaken.
 
-![Codegeneratie met Cline](assets/cline-code-generation.png)
+![Cline Code Generation](assets/cline-code-generation.png)
 
-Nadat de software is gegenereerd, is de agent klaar en kun je de applicatie uitvoeren. In dit geval heeft de agent naar drie bestanden geschreven: `index.html`, `script.js` en `styles.css`. Door simpelweg dubbel te klikken op het HTML-bestand kunnen we de gegenereerde website laden en ermee interacteren.
+Na het genereren van de software is de agent klaar en kun je de applicatie uitvoeren. In dit geval heeft de agent naar drie bestanden geschreven: `index.html`, `script.js` en `styles.css`. Door simpelweg dubbel te klikken op het HTML-bestand kunnen we de gegenereerde website laden en ermee interacteren.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -284,20 +286,20 @@ lms server stop
 
 ## Volgende stappen
 
-Na het genereren van de website kun je met Cline blijven werken om de website te verbeteren. Twee mogelijke verbeteringen zijn:
+Na het genereren van de website kun je met Cline blijven samenwerken om de website te verbeteren. Twee mogelijke verbeteringen zijn:
 
-- **Documentatie**: Door de agent te prompten met `Add a README` is dat voldoende om een `README.md`-bestand te genereren dat de website documenteert.
+- **Documentatie**: Door de agent te prompten met `Add a README` genereert de agent een `README.md`-bestand dat de website documenteert.
 - **Animatie**: Prompt het model met `Add an animation that visually represents a large language model running on a laptop.` om een animatie aan de website toe te voegen.
 
-We moedigen de lezer aan om te proberen andere applicaties te genereren met deze opstelling. Hieronder staan enkele leuke voorbeelden die we hebben uitgeprobeerd:
+We moedigen de lezer aan om te proberen andere applicaties te genereren met deze opzet. Hieronder volgen enkele leuke voorbeelden die we hebben uitgeprobeerd:
 
-- **Retro Arcade-games**: Probeer enkele andere prompts. Het kan ook leuk zijn als de agent retro-stijl games in Python maakt met het `PyGame`-package, met de volgende prompt:
+- **Retro Arcade Games**: Probeer enkele andere prompts. Het kan ook leuk zijn als de agent retro-stijl games in Python maakt met gebruik van het `PyGame`-pakket met de volgende prompt:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **Data-analyse**: Een gebied waarop coding agents bijzonder nuttig zijn, is scripting en data-analyse. Dit is een prompt om het vermogen van het lokale model te laten zien om data-analysesoftware voor het visualiseren van aandelenkoersen te genereren:
+- **Data-analyse**: Een gebied waarop coding agents bijzonder nuttig zijn, is scripting en data-analyse. Dit is een prompt om de mogelijkheden van het lokale model te demonstreren voor het genereren van data-analysesoftware voor het visualiseren van aandelenkoersen:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -305,8 +307,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## Bronnen
 
-Hieronder vindt u nog enkele aanvullende bronnen om meer te leren over Coding Agents, Cline en het uitvoeren van workloads op 
+Hieronder vindt u enkele aanvullende bronnen om meer te weten te komen over Coding Agents, Cline en het uitvoeren van workloads op 
 
-* Meer informatie over het partnerschap en de integratie tussen AMD en LM Studio: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* AMD-blog met een doorloop van het uitvoeren van Cline op AMD Ryzen™ AI- en Radeon™ Graphics Cards: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* Meer informatie over het AMD LM Studio-partnerschap en de integratie: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
+* AMD-blog over het uitvoeren van Cline op AMD Ryzen™ AI- en Radeon™ Graphics-kaarten: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
 * Cline-blog over het lokaal uitvoeren van coding agents op AI PC's: https://cline.bot/blog/local-models-amd

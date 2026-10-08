@@ -15,23 +15,23 @@ SPDX-License-Identifier: MIT
 <!-- @github-only:end -->
 ## Áttekintés
 
-🍋 A **Lemonade** egy nyílt forráskódú, helyi AI-kiszolgáló, amellyel nagy nyelvi modelleket (LLM-eket), képgenerátorokat és hangmodelleket futtathatsz közvetlenül a saját hardveredre. A modelleket az iparági szabványnak számító **OpenAI API**-n keresztül teszi elérhetővé, így minden olyan alkalmazás, amely az OpenAI-jal működik, azonnal együtt tud működni a Lemonade-del is. Az útmutató végére a Lemonade segítségével már helyben, a saját gépeden futtatsz majd modelleket.
+🍋 A **Lemonade** egy nyílt forráskódú, helyi AI-szerver, amellyel nagy nyelvi modelleket (LLM-eket), képgenerátorokat és hangmodelleket futtathatsz közvetlenül a saját hardveren. A modelleket az iparági szabványnak számító **OpenAI API**-n keresztül teszi elérhetővé, így bármely, OpenAI-val működő alkalmazás azonnal együtt tud működni a Lemonade-dal. A playbook végére a Lemonade segítségével már helyben, a saját gépeden futtatsz modelleket.
 
 ## Amit meg fogsz tanulni
 
-Ennek az útmutatónak a végére képes leszel:
+A playbook végére képes leszel a következőkre:
 
 * **Telepíteni a Lemonade Servert**, és ellenőrizni, hogy fut-e.
 * **Letölteni egy LLM-et, és csevegni vele** egyetlen paranccsal.
-* **Felfedezni a webes felületet**, és kipróbálni különböző modalitásokat, például a látást, a beszéd szöveggé alakítását és a képgenerálást.
-* **Váltani a GPU-háttérrendszerek** – a Vulkan és az AMD ROCm™ szoftver – között.
-* **Python-alkalmazást építeni**, amelyet egy helyi LLM hajt meg az OpenAI-kompatibilis API segítségével.
+* **Felfedezni a webes felhasználói felületet**, és kipróbálni különböző modalitásokat, például a látást, a beszéd-szöveg átalakítást és a képgenerálást.
+* **Váltani a GPU háttérrendszerek** között a Vulkan és az AMD ROCm™ szoftver között.
+* **Python alkalmazást építeni**, amelyet egy helyi LLM hajt meg az OpenAI-kompatibilis API segítségével.
 <!-- @device:halo_box,halo,stx,krk -->
 * **Modellek futtatása az AMD Neural Processing Unit (NPU) egységen** Hybrid és FLM végrehajtási módok használatával AMD Ryzen™ AI hardveren.
 <!-- @device:end -->
 
 <!-- @device:halo_box,halo,stx,krk -->
-## A memóriakonfiguráció beállítása
+## Memóriakonfiguráció beállítása
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
@@ -39,24 +39,26 @@ Ennek az útmutatónak a végére képes leszel:
 ## Szoftverfrissítések keresése
 <!-- @require:software-update -->
 <!-- @device:end -->
-## Szoftveres előfeltételek telepítése
+## Szoftver-előfeltételek telepítése
 
 Mielőtt elkezdenéd, győződj meg róla, hogy rendelkezel a következőkkel:
 
-- Egy PC, amelyen **Windows 11** vagy egy támogatott **Linux**-disztribúció (Ubuntu 24.04+, Fedora, Debian) fut
-- **16 GB RAM** ajánlott az 1–7. lépésekben használt futtatókörnyezeti modellhez (`Gemma-4-E2B-it-GGUF`, kb. 3 GB). **32 GB+** ajánlott, ha a 6. lépésben szereplő nagyobb kódgeneráló modellt (`Qwen3.5-35B-A3B-GGUF`, kb. 20 GB) szeretnéd használni.
-- **kb. 4–30 GB szabad lemezterület**, a letöltött modellektől függően. A jelen útmutatóban szereplő legnagyobb modell körülbelül 20 GB.
-- **Python 3.10–3.13** (a Python-alkalmazás szakaszban használt)
+- Egy **Windows 11** rendszert futtató számítógép, vagy egy támogatott **Linux** disztribúció (Ubuntu 24.04+, Fedora, Debian)
+- **16 GB RAM** ajánlott az 1–7. lépésekben használt futásidejű modellhez (`Gemma-4-E2B-it-GGUF`, ~3 GB). **32 GB+** ajánlott, ha a 6. lépésben szereplő nagyobb kódgeneráló modellt szeretnéd használni (`Qwen3.5-35B-A3B-GGUF`, ~20 GB).
+- **~4–30 GB szabad lemezterület**, a letöltött modellektől függően. Az ebben az útmutatóban szereplő legnagyobb modell körülbelül 20 GB.
+- **Python 3.10–3.13** (a Python alkalmazás részben használatos)
 - Internetkapcsolat (vezetékes vagy vezeték nélküli)
 <!-- @device:halo_box,halo,stx,krk -->
-- [Opcionális] Egy AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 sorozat vagy Z2 Extreme) a legújabb, a [Ryzen AI Software telepítési útmutatóból](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) telepített illesztőprogrammal, ha a modellt az NPU-n szeretné futtatni.
+- [Opcionális] Egy AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 sorozat vagy Z2 Extreme) a legújabb illesztőprogrammal telepítve a [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) oldalról, ha modellt szeretnél futtatni az NPU-n.
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:lemonade-models-gemma-4-e2b,lemonade -->
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -189,16 +191,16 @@ echo "OK: Model Gemma-4-E2B-it-GGUF responded"
 
 ## Alapfogalmak – Hogyan működnek a helyi AI-kiszolgálók
 
-Mielőtt lefuttatnánk egy modellt, érdemes megérteni, *miért* épül fel így a rendszer. A Lemonade egy **helyi modellkiszolgáló**, azaz egy olyan folyamat, amely betölti az AI-modelleket a memóriába, és HTTP-n keresztül elérhetővé teszi őket az alkalmazások számára – pontosan úgy, ahogy egy felhőalapú AI-szolgáltatás is tenné.
+Mielőtt lefuttatnánk egy modellt, érdemes megérteni, *miért* épül fel ilyen módon a rendszer. A Lemonade egy **helyi modellkiszolgáló**, azaz egy olyan folyamat, amely AI-modelleket tölt be a memóriába, és HTTP-n keresztül teszi elérhetővé őket az alkalmazások számára, pontosan úgy, ahogy azt egy felhőalapú AI-szolgáltatás is tenné.
 
 ### Miért van szükség kiszolgálóra?
 
 | Előny | Mit jelent ez a felhasználó számára |
 |---------|----------------------|
-| **Egyszerűbb integráció** | Az alkalmazások egyetlen HTTP API-val kommunikálnak ahelyett, hogy hardverspecifikus C++ vagy Python könyvtárakkal kellene foglalkozniuk. |
-| **Megosztott modellek** | Egyetlen betöltött modell egyszerre több alkalmazást is kiszolgálhat, nincs szükség duplikált másolatokra, amelyek feleslegesen foglalnák a RAM-ot. |
-| **Felhő–helyi hordozhatóság** | Az OpenAI felhőalapú API-jához írt kód egyetlen URL megváltoztatásával működik a Lemonade-dal is. |
-| **A felelősségi körök szétválasztása** | A modellkezelést, a streamelést és a hibatűrést a kiszolgáló végzi, így a fejlesztők a saját alkalmazásukra koncentrálhatnak. |
+| **Egyszerűsített integráció** | Az alkalmazások egyetlen HTTP API-val kommunikálnak, ahelyett, hogy hardverspecifikus C++ vagy Python könyvtárakkal kellene foglalkozniuk. |
+| **Megosztott modellek** | Egyetlen betöltött modell egyszerre több alkalmazást is kiszolgálhat, így nincsenek felesleges másolatok, amelyek feleslegesen foglalnák a memóriát. |
+| **Felhő és helyi környezet közötti hordozhatóság** | Az OpenAI felhőalapú API-jához írt kód egyetlen URL megváltoztatásával működik a Lemonade-dal is. |
+| **A felelősségi körök szétválasztása** | A modellkezelést, a streamelést és a hibatűrést a kiszolgáló kezeli, így a fejlesztők az alkalmazásukra koncentrálhatnak. |
 
 ### Az OpenAI API szabvány
 
@@ -207,18 +209,18 @@ A Lemonade az **OpenAI API**-t valósítja meg, ugyanazt az interfészt, amelyet
 | Szerep | Ki beszél |
 |------|---------------|
 | **system** | Utasítások a modell számára (személyiség, korlátozások, elérhető eszközök) |
-| **user** | Az embertől (vagy az alkalmazástól) a modellhez érkező üzenetek |
+| **user** | Az embertől (vagy az alkalmazástól) a modellhez küldött üzenetek |
 | **assistant** | A modell által generált válaszok |
 
-Ez azt jelenti, hogy bármely, az OpenAI-t támogató könyvtár vagy alkalmazás kommunikálhat a Lemonade-dal, ha a `http://localhost:13305/api/v1` címre mutat, miközben a Lemonade Server fut.
+Ez azt jelenti, hogy bármely könyvtár vagy alkalmazás, amely támogatja az OpenAI-t, kommunikálhat a Lemonade-dal, ha a `http://localhost:13305/api/v1` címre mutat, miközben a Lemonade Server fut.
 
-## Fő feladat – Az első helyi AI-beszélgetésed
+## Fő tevékenység – Az első helyi AI-beszélgetésed
 
-Töltsünk le egy LLM-et, és folytassunk vele egy beszélgetést úgy, hogy az AI teljes egészében a saját gépünkön fut.
+Töltsünk le egy nyelvi modellt (LLM), és folytassunk vele egy beszélgetést, miközben az AI teljes egészében a saját gépünkön fut.
 
 ### 1. lépés: Modell letöltése és futtatása
 
-A Lemonade egy válogatott modellkönyvtárral érkezik. Kezdjük a **Gemma-4-E2B-it** modellel, amely egy kompakt, ugyanakkor nagy tudású modell, és vizuális támogatást is tartalmaz. Nyiss meg egy terminált, és futtasd:
+A Lemonade egy gondosan válogatott modellkönyvtárral érkezik. Kezdjük a **Gemma-4-E2B-it** modellel, amely egy kompakt, de nagy tudású modell, és vizuális támogatást is tartalmaz. Nyiss meg egy terminált, és futtasd a következőt:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF
@@ -228,15 +230,15 @@ Ez az egyetlen parancs három dolgot végez el:
 
 1. **Letölti** a modellt (~3 GB) a Hugging Face-ről, ha még nincs letöltve. (Ez eltarthat egy ideig)
 2. **Elindítja** a Lemonade Server folyamatot a 13305-ös porton.
-3. **Megnyitja a Lemonade App-ot**, hogy azonnal cseveghess a modellel.
+3. **Megnyitja a Lemonade App-ot**, hogy azonnal elkezdhess csevegni a modellel.
 <!-- @os:windows -->
-Windowson a Lemonade App automatikusan elindul, így azonnal kezdhetsz csevegni. Ha a `minimal.msi` csomagot telepítetted, az alkalmazás nincs benne. A csevegés megkezdéséhez nyisd meg a webböngésződet, és keresd fel a `http://localhost:13305` címet.
+Windows rendszeren a Lemonade App automatikusan elindul, és azonnal elkezdhetsz csevegni. Ha a `minimal.msi` csomagot telepítetted, az alkalmazás nem része a telepítésnek. A csevegés elindításához nyisd meg a webböngésződet, és keresd fel a `http://localhost:13305` címet.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Linux rendszeren nyisd meg a böngésződet, és navigálj a `http://localhost:13305` címre a webalkalmazás eléréséhez.
+Linux rendszeren nyisd meg a böngészőt, és navigálj a `http://localhost:13305` címre, hogy elérd a webalkalmazást.
 <!-- @os:end -->
-A kérdés begépelése:
+Próbálj ki egy kérdést:
 
 ```
 What are three fun facts about lemons?
@@ -244,9 +246,9 @@ What are three fun facts about lemons?
 
 A modell közvetlenül a csevegőablakban fog válaszolni. **Gratulálunk! Egy nagy nyelvi modellt futtatsz helyben.**
 
-![Lemonade App megjelenített naplókkal](../../dependencies/assets/ChatwithLogs.png)
+![Lemonade App naplókkal megjelenítve](../../dependencies/assets/ChatwithLogs.png)
 
-A Lemonade App Server Logs paneljén megtalálhatod a modell teljesítményére vonatkozó telemetriai adatokat minden válasz után. Például:
+A Lemonade App Server Logs paneljén minden válasz után megtalálhatók a modell teljesítményére vonatkozó telemetriai adatok. Például:
 
 ```
  === Telemetry ===
@@ -257,49 +259,49 @@ TPS:           95.99
 =================
 ```
 
-### 2. lépés: Ismerkedés a webes felülettel és a különböző modalitásokkal
+### 2. lépés: Fedezd fel a webes felületet és a különböző modalitásokat
 
-A Lemonade beépített webes felülettel rendelkezik, amelyen keresztül:
+A Lemonade tartalmaz egy beépített webes felületet, amelyen keresztül:
 
-- **Kommunikálhatsz** a betöltött modellel egy ismerős chatablakban
-- **Böngészhetsz a modellek között** a Model Manager (Modellkezelő) fülön
-- **Új modelleket tölthetsz le** egyetlen kattintással
+- **Interakcióba léphetsz** a betöltött modellel egy ismerős chat ablakban
+- **Böngészheted a modelleket** a Model Manager fülön
+- **Egy kattintással letölthetsz új modelleket**
 
-Próbáld ki a különböző modalitásokat a webes felület **Model Manager** fülén, ahol a modellek között Recipe (recept) vagy Category (kategória) szerint böngészhetsz:
+Próbálj meg váltani a különböző modalitások között a webes UI **Model Manager** fülén, ahol a modelleket Recept vagy Kategória szerint böngészheted:
 
-1. **Vision (látás):** A már betöltött `Gemma-4-E2B-it-GGUF` modell támogatja a képfelismerést. Illessz be egy képet a chatablakba, és kérd meg a modellt, hogy írja le azt.
-2. **Képgenerálás:** Az Image kategóriában tölts le egy képgeneráló modellt, például az `SDXL-Turbo`-t a Model Managerből, majd használd a Lemonade Image Generator eszközt egy prompt beírásához és egy kép helyi generálásához.
-3. **Hang:** Az Audio kategóriában tölts le egy hangmodellt, például a `Whisper-Tiny`-t, amely beszédből szöveget tud készíteni. Adj meg egy hangfelvételt a helyi átiratkészítéshez. Szövegből beszéd (text-to-speech) esetén próbáld ki a Speech kategória valamelyik modelljét, például a `kokoro-v1`-et.
+1. **Vizuális felismerés:** A már betöltött `Gemma-4-E2B-it-GGUF` modell támogatja a képek feldolgozását. Illessz be egy képet a chat ablakba, és kérd meg a modellt, hogy írja le azt.
+2. **Képgenerálás:** A Kép kategóriában töltsd le a Model Managerből valamelyik képgeneráló modellt, például a `SDXL-Turbo`-t, majd a Lemonade Image Generator segítségével írj be egy promptot, és generálj helyben egy képet.
+3. **Hang:** A Hang kategóriában töltsd le valamelyik hangmodellt, például a `Whisper-Tiny`-t, amely beszédet tud szöveggé alakítani. Adj meg egy hangfelvételt, hogy helyben átírja azt. Szöveg-beszéd átalakításhoz próbáld ki a Beszéd kategória valamelyik modelljét, például a `kokoro-v1`-et.
 
-![Multi-modalitás a Lemonade-del](../../dependencies/assets/multi_modality.png)
+![Multi-Modality with Lemonade](../../dependencies/assets/multi_modality.png)
 
-### 3. lépés: Modell kipróbálása másik backenddel
+### 3. lépés: Próbálj ki egy modellt egy másik backenddel
 
-Ha az egeret egy modell fölé viszed a Lemonade alkalmazásban, megjelenik egy fogaskerék ikon. Erre kattintva kiválaszthatod a modell beállításait, beleértve a kívánt backendet is.
+Ha a Lemonade App-ban egy modell fölé viszed az egeret, megjelenik egy fogaskerék ikon. Erre kattintva kiválaszthatod a modell beállításait, beleértve a kívánt backend kiválasztását is.
 
-Alapértelmezés szerint a Lemonade a Vulkant használja a GPU-gyorsításhoz. Ha támogatott, önálló AMD GPU-val rendelkezel, átválthatsz ROCm-re.
+Alapértelmezés szerint a Lemonade a Vulkant használja a GPU-gyorsításhoz. Ha támogatott AMD diszkrét GPU-d van, átválthatsz ROCm-re.
 
-![Backend kiválasztása a Lemonade-ben](../../dependencies/assets/lemonademodeloptions.png)
+![Lemonade Select Backend](../../dependencies/assets/lemonademodeloptions.png)
 
 A telepített backendek kezeléséhez kattints a legbaloldalibb oszlopban található backend gombra.
 
-Alternatívaként a backendet a következő paranccsal is megadhatod:
+Alternatívaként a backendet a következő parancs segítségével is megadhatod:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF --llamacpp rocm
 ```
 
-Az alapértelmezett backendet a `LEMONADE_LLAMACPP` környezeti változóval is beállíthatod, a következő értékekkel: `vulkan`, `rocm`, vagy `cpu`.
+Az alapértelmezett backendet a `LEMONADE_LLAMACPP` környezeti változó segítségével is beállíthatod, a következő értékekkel: `vulkan`, `rocm` vagy `cpu`.
 
 ---
 
-## Elmélyülés – Python-alapú, AI-vezérelt alkalmazás készítése
+## Mélyebbre ásva — Készíts egy AI-alapú alkalmazást Python nyelven
 
-A helyi AI-szerver igazi ereje abban rejlik, hogy bármely alkalmazás csatlakozhat hozzá mindössze néhány sornyi kóddal. Ennek bizonyítására építsünk egy kicsi, de jól működő **tanulókártya-generátort**, amelynek megadsz egy témát, ő legenerálja a tanulókártyákat, te pedig interaktívan kikérdezheted magad velük.
+A helyi AI szerver valódi ereje abban rejlik, hogy bármely alkalmazás csatlakozhat hozzá mindössze néhány sornyi kóddal. Hogy ezt bizonyítsuk, építsünk egy kicsi, de funkcionális **tanulókártya-generátort**, ahol megadsz egy témát, az alkalmazás létrehozza a kártyákat, te pedig interaktívan kikérdezheted magad.
 
-### 4. lépés: A szerver elindítása
+### 4. lépés: Indítsd el a szervert
 
-Ellenőrizd, hogy fut-e a Lemonade szerver. Telepítés után jellemzően automatikusan elindul a háttérben. Az ellenőrzéshez futtasd:
+Ellenőrizd, hogy fut-e a Lemonade szerver. Telepítés után általában automatikusan elindul a háttérben. Az ellenőrzéshez futtasd a következőt:
 
 ```
 lemonade status
@@ -307,11 +309,11 @@ lemonade status
 
 A következőhöz hasonló üzenetet kell látnod: `Server is running on port 13305`.
 
-Ha a szerver nem fut, indítsd el a Lemonade alkalmazás megnyitásával. Használd az alapértelmezett **13305**-ös portot (ezt megerősítheted vagy kiválaszthatod a tálcaikonból).
+Ha a szerver nem fut, indítsd el a Lemonade alkalmazás megnyitásával. Használd az alapértelmezett **13305** portot (ezt megerősítheted, vagy kiválaszthatod a tálca ikonjából).
 
-### 5. lépés: Az OpenAI Python kliens telepítése
+### 5. lépés: Telepítsd az OpenAI Python klienst
 
-Egy terminálban hozz létre egy venv-et, majd telepítsd az OpenAI Python klienst a következő parancsokkal:
+Egy terminálban hozz létre egy venv-et, és telepítsd az OpenAI Python klienst a következő parancsokkal:
 <!-- @os:linux -->
 ```bash
 # Your specific version of Linux may have different commands
@@ -389,18 +391,18 @@ python3 -c "from openai import OpenAI; print('OK')"
 <!-- @test:end -->
 <!-- @os:end -->
 
-### 6. lépés: A tanulókártya-alkalmazás elkészítése
+### 6. lépés: Építsd meg a tanulókártya alkalmazást
 
-Töltsünk le egy másik modellt kódgenerálásra: a `Qwen3.5-35B-A3B-GGUF`-ot. Ez egy nagy (~20 GB) és jó teljesítményű modell, amely leginkább 32 GB+ RAM-mal rendelkező rendszerekhez ajánlott. Ha kevesebb RAM áll rendelkezésedre, próbáld inkább a `Qwen3.5-9B-GGUF`-ot (~6 GB).
+Töltsünk le egy másik modellt a kód generálásához: `Qwen3.5-35B-A3B-GGUF`. Ez egy nagy (~20 GB) és nagy teljesítményű modell, amely leginkább 32 GB+ RAM-mal rendelkező rendszereken ajánlott. Ha kevesebb RAM áll rendelkezésedre, próbáld inkább a `Qwen3.5-9B-GGUF`-ot (~6 GB).
 
-Letöltheted a felületről, vagy futtathatod a következő parancsot:
+Letöltheted a felhasználói felületről, vagy futtathatod a következőt:
 ```
 lemonade run Qwen3.5-35B-A3B-GGUF
 ```
 
-Add meg a következő promptot a Lemonade Chat felületen egy egyszerű tanulókártya-alkalmazás kódjának legenerálásához.
+Add meg a következő promptot a Lemonade Chat UI-nak, hogy kódot generáljon egy egyszerű Flashcard alkalmazáshoz.
 
-A `Qwen3.5-35B-A3B-GGUF` modellt (egy nagyobb, kódírásban jobb teljesítményű modellt) fogjuk használni a Python alkalmazás generálásához, maga az alkalmazás pedig futásidőben a `Gemma-4-E2B-it-GGUF` modellt (a már letöltött kisebb modellt) fogja meghívni. A kód ezután átmásolható egy általad választott fájlba, hogy Pythonban futtatható legyen.
+A Qwen3.5-35B-A3B-GGUF modellt (egy nagyobb modellt, amely jobban ír kódot) fogjuk használni a Python alkalmazásunk generálásához, maga az alkalmazás pedig futásidőben a Gemma-4-E2B-it-GGUF modellt (a kisebb modellt, amelyet már letöltöttél) hívja meg. A kódot ezután bemásolhatod egy tetszőleges fájlba, hogy Python-ban futtathasd.
 
 ```
 Generate a Python script that uses the OpenAI Python library to call a local LLM and create an interactive flashcard study tool.
@@ -433,9 +435,9 @@ Structure:
    - Offers to start the quiz.
 ```
 
-> **Tipp**: A szabványos mérnöki gyakorlatot követtük egy alapos prompt megszerkesztésével, valamint egy kétmodelles rendszer alkalmazásával az erőforrások és a sebesség optimalizálása érdekében.
+> **Tipp**: Alapos prompt-készítéssel és egy kétmodelles rendszer alkalmazásával az erőforrások és a sebesség optimalizálása érdekében a szokásos mérnöki gyakorlatokat követtük.
 
-Kényelmed érdekében mintakimenetet is biztosítottunk a [`flashcards.py`](assets/flashcards.py) fájlban. Nyugodtan töltsd le a saját könyvtáradba. Bármelyik megoldást is választod, most már rendelkezned kell egy futtatható Python fájllal.
+Kényelmed érdekében mellékeltünk egy minta kimenetet a [`flashcards.py`](assets/flashcards.py) fájlban. Nyugodtan töltsd le a saját könyvtáradba. Bármelyik esetben most már rendelkezned kell egy futtatható Python fájllal.
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=900 hidden=True -->
@@ -484,7 +486,7 @@ python3 lemonade_python_smoke.py
 <!-- @os:end -->
 
 
-### 7. lépés: A legenerált kód futtatása
+### 7. lépés: Futtasd a generált kódot
 
 ```bash
 # Ensure the virtual environment is running
@@ -525,90 +527,90 @@ Did you get it right? (y/n): y
 🏆 Score: 4/5
 ```
 
-Mindössze körülbelül 150 sornyi kóddal létrehoztál egy teljesen működőképes, helyi LLM által működtetett tanulóeszközt. Nincs kezelendő API-kulcs, nincsenek használati díjak, és semmilyen adat nem hagyja el a géped.
+Mindössze körülbelül 150 sornyi kóddal építettél egy teljesen működőképes, helyi LLM által működtetett tanulóeszközt. Nincs API-kulcs, amit kezelni kellene, nincsenek használati költségek, és semmilyen adat nem hagyja el a géped.
 
-> **Kulcsfontosságú felismerés:** Figyeld meg, hogy a `client = OpenAI(base_url=...) ` sor az *egyetlen*, ami ezt az alkalmazást a Lemonade-hez köti az OpenAI felhője helyett. A kód többi része megegyezik azzal, amit bármely OpenAI-kompatibilis szolgáltatás ellen írnál. Ha valaha használtad az OpenAI Python könyvtárat, már tudod, hogyan építs alkalmazásokat a Lemonade-del.
+> **Fontos felismerés:** Figyeld meg, hogy a `client = OpenAI(base_url=...) ` sor az *egyetlen* dolog, amely ezt az alkalmazást a Lemonade-hez köti az OpenAI felhője helyett. A kód többi része megegyezik azzal, amit bármely OpenAI-kompatibilis szolgáltatás esetén írnál. Ha már használtad az OpenAI Python könyvtárat, máris tudod, hogyan építs alkalmazásokat a Lemonade segítségével.
 
-### Mit demonstrál ez
+### Mit mutat be ez
 
 Ez a kis alkalmazás több valós integrációs mintát is bemutat:
 
 | Minta | Hol jelenik meg |
 |---------|-----------------|
-| **Rendszerpromptok** | A `"system"` üzenet arra utasítja az LLM-et, hogy strukturált JSON-t adjon ki |
-| **Strukturált kimenet** | Az alkalmazás JSON-ként elemzi az LLM válaszát, hogy tanulókártyákat építsen belőle |
-| **Állapotmentes kérések** | Minden `generate_flashcards()` hívás önálló |
-| **Hibakezelés** | A `try/except` szépen kezeli azokat az eseteket, amikor az LLM kimenete nem érvényes JSON |
+| **Rendszer promptok** | A `"system"` üzenet megmondja az LLM-nek, hogy strukturált JSON formátumban adjon választ |
+| **Strukturált kimenet** | Az alkalmazás JSON-ként elemzi az LLM válaszát, hogy felépítse a tanulókártyákat |
+| **Állapotmentes kérések** | Minden `generate_flashcards()` hívás független |
+| **Hibakezelés** | A `try/except` elegánsan kezeli azokat az eseteket, amikor az LLM kimenete nem érvényes JSON |
 
-Ugyanezek a minták bármely alkalmazásra kiterjeszthetők, például chatbotokra, kódasszisztensekre, tartalomgenerátorokra, automatizálási eszközökre.
+Ugyanezek a minták bármely alkalmazásra skálázhatók, például chatbotokra, kódasszisztensekre, tartalomgenerátorokra, automatizálási eszközökre.
 
 #### Bónusz kihívás
 
-* Extra kihívásként próbáld meg úgy módosítani az alkalmazást, hogy a tanulókártyákat felolvassa a felhasználónak, az [itt](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py) található példa alapján.
+* Extra kihívásként próbáld meg frissíteni az alkalmazást úgy, hogy a tanulókártyákat felolvassa a felhasználónak, az [itt](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py) megadott példa alapján.
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Modellek futtatása az NPU-n (opcionális)
+## Modellek futtatása NPU-n (opcionális)
 
-Ha Ryzen AI 300/400/Max 300 sorozatú vagy Z2 Extreme készüléked van, akkor eszközödben beépített **Neuronális Feldolgozó Egység (NPU)** található – ez egy kifejezetten AI-munkaterhelésekre tervezett dedikált chip. A modellek NPU-n történő futtatása energiahatékonyabb, mint a GPU használata, ami ideálissá teszi háttérben futó AI-feladatokhoz, hosszabb munkamenetekhez és akkumulátorról történő használathoz.
+Ha Ryzen AI 300/400/Max 300 sorozatú vagy Z2 Extreme eszközöd van, a készülékedben található egy beépített **Neurális Feldolgozó Egység (NPU)**, egy kifejezetten AI-munkaterhelésekre tervezett dedikált chip. A modellek NPU-n történő futtatása energiahatékonyabb, mint a GPU használata, ezért ideális háttérben futó AI-feladatokhoz, hosszabb munkamenetekhez és akkumulátoros használathoz.
 
-A Lemonade háromféle NPU-végrehajtási módot támogat, amelyek mindegyike átlátszó módon, ugyanazon az OpenAI API-n keresztül működik:
+A Lemonade háromféle NPU végrehajtási módot támogat, mindegyik ugyanazon OpenAI API mögött, átlátható módon:
 
 | Mód | Működés | Recept | Példamodellek |
 |------|-------------|--------|----------------|
 | **Hibrid (NPU + iGPU)** | Az NPU dolgozza fel a promptot, az iGPU generálja a tokeneket | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
 | **Csak NPU** | A teljes következtetés az NPU-n fut | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
-| **FLM** | A FastFlowLM motort használja az NPU-n, az AMD XDNA2-höz optimalizálva | FLM (`flm`) | qwen3.5-4b-FLM |
+| **FLM** | A FastFlowLM motort használja az NPU-n, az AMD XDNA2-re optimalizálva | FLM (`flm`) | qwen3.5-4b-FLM |
 
 ### Követelmények
 
 - **AMD Ryzen AI 300/400 sorozatú vagy Z2 sorozatú** processzor
-- **FLM** modellekhez: Az FLM futtatókörnyezet telepíthető a Lemonade alkalmazáson belülről, vagy a Lemonade automatikusan telepíti az FLM futtatókörnyezetet, amikor FLM-modellt futtatsz. A FastFlowLM-ről bővebben [itt](https://fastflowlm.com/docs/) olvashatsz.
+- **FLM** modellekhez: Az FLM runtime telepíthető a Lemonade alkalmazáson belülről, vagy a Lemonade automatikusan telepíti az FLM runtime-ot, amikor egy FLM modellt futtatsz. A FastFlowLM-ről bővebben [itt](https://fastflowlm.com/docs/) olvashatsz.
 
 
 ### 8. lépés: Hibrid modell futtatása
 
-A hibrid modellek megosztják a munkát az NPU és az iGPU között, így jó egyensúlyt biztosítanak a sebesség és a hatékonyság között. A Lemonade alkalmazásban válassz egy modellt a `Ryzen AI LLM` listából, például a `Qwen3-4B-Hybrid`-et, vagy futtasd a következő paranccsal:
+A hibrid modellek megosztják a munkát az NPU és az iGPU között, így jó egyensúlyt biztosítanak a sebesség és a hatékonyság között. A Lemonade alkalmazásban válassz egy modellt a `Ryzen AI LLM` listából, például a `Qwen3-4B-Hybrid` modellt, vagy futtasd a következő paranccsal:
 
 ```
 lemonade run Qwen3-4B-Hybrid
 ```
 
-A Lemonade automatikusan felismeri az NPU-t, és telepíti a **Ryzen AI LLM** háttérrendszert.
+A Lemonade automatikusan érzékeli az NPU-t, és telepíti a **Ryzen AI LLM** háttérrendszert.
 
-> **Mi történik a háttérben?** Amikor elküldesz egy üzenetet, az NPU párhuzamosan dolgozza fel a teljes promptot (ezt hívjuk „prefill”-nek). Ezután az iGPU veszi át a munkát, és tokenenként generálja a választ (ezt hívjuk „decode”-nak). Ez a hibrid megközelítés mindkét chip erősségeit kihasználja.
+> **Mi történik a háttérben?** Amikor üzenetet küldesz, az NPU párhuzamosan dolgozza fel a teljes promptot (ezt nevezik „prefill”-nek). Ezután az iGPU veszi át a vezérlést, és egyesével generálja a tokeneket a válaszhoz (ezt nevezik „decode”-nak). Ez a hibrid megközelítés mindkét chip erősségeit kihasználja.
 
 ### 9. lépés: FLM modell futtatása
 
-A FastFlowLM (FLM) modellek kifejezetten az AMD XDNA2 NPU-architektúrájára vannak optimalizálva, és méretükhöz képest nagyon gyorsak lehetnek. Például válaszd a `qwen3.5-4b-FLM` modellt a `FastFlowLM NPU` listából, vagy használd a következő parancsot:
+A FastFlowLM (FLM) modellek kifejezetten az AMD XDNA2 NPU architektúrájára vannak optimalizálva, és méretükhöz képest nagyon gyorsak lehetnek. Válaszd például a `qwen3.5-4b-FLM` modellt a `FastFlowLM NPU` listából, vagy használd az alábbi parancsot:
 
 <!-- @os:windows -->
-A `FastFlowLM` engedélyezése Windows rendszeren:
+A `FastFlowLM` engedélyezése Windows alatt:
 
 * Nyisd meg a `Backends Manager` menüt.
-* Keresd meg a `FastFlowLM NPU` háttérrendszer-kategóriát.
+* Keresd meg a `FastFlowLM NPU` háttérrendszer kategóriát.
 * Kattints az Install NPU gombra.
-* A telepítés befejezése után körülbelül 36 alapértelmezett modell lesz elérhető az FFLM legördülő menüben.
+* A telepítés befejezése után ~36 alapértelmezett modell válik elérhetővé az FFLM legördülő menüben.
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
-Amikor a `Lemonade` alkalmazást először indítod el, a `FastFlowNPU` háttérrendszer alapértelmezés szerint nincs engedélyezve.
+Amikor a `Lemonade` alkalmazást első alkalommal indítod el, a `FastFlowNPU` háttérrendszer alapértelmezés szerint nincs engedélyezve. 
 A helyi alkalmazás megnyitja a telepítési oldalt, hogy végigvezessen a beállításon.
 
-A `FastFlowLM` engedélyezése Linux rendszeren:
+A `FastFlowLM` engedélyezése Linux alatt:
 
 * Nyisd meg a `Lemonade` alkalmazást.
-* Látogass el a [hivatalos FLM](https://lemonade-server.ai/flm_npu_linux.html) dokumentációhoz, és kövesd az FLM telepítési lépéseit a Linux disztribúciód kiválasztásával.
-* Engedélyezd a backports funkciót a telepítési oldalon leírtak szerint.
+* Látogasd meg a [hivatalos FLM](https://lemonade-server.ai/flm_npu_linux.html) dokumentációt, és kövesd az FLM telepítési lépéseit a Linux disztribúciód kiválasztásával.
+* Engedélyezd a backportokat a telepítési oldalon leírtak szerint.
 * Töltsd le a legújabb `v0.9.x` kiadást a [tags oldalról](https://github.com/FastFlowLM/FastFlowLM/tags).'
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
 >[!Note]
-Az AMD Halo Developer Platform esetén győződj meg róla, hogy a Debian 13-at választod.
+Az AMD Halo Developer Platform esetén ügyelj arra, hogy Debian 13-at válassz.
 ```
 fastflowlm_0.9.X_debian13_amd64.deb
 ```
@@ -620,29 +622,29 @@ fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 ```
 <!-- @device:end -->
 * Telepítsd a letöltött `.deb` csomagot.
-* Ajánlott: Lépj ki a `Lemonade App`-ból, majd nyisd meg újra, hogy a változásokat érzékelje a rendszer.
-* Ajánlott: Nyisd meg a `Backends Manager`-t, és kattints a `FastFlowNPU` háttérrendszer telepítésére.
+* Javasolt: lépj ki a `Lemonade App`-ból, majd nyisd meg újra, hogy a változások érvénybe lépjenek.
+* Javasolt: nyisd meg a `Backends Manager`-t, és kattints a `FastFlowNPU` háttérrendszer telepítésére.
 <!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @device:halo_box,halo,stx,krk -->
-Sikeres telepítés után látnod kell, hogy a `flm:npu` befejeződött a **Lemonade Desktop App** **Download Manager** részében.
+Sikeres telepítés után a **Lemonade Desktop App**-ban a **Download Manager**-ben látnod kell, hogy a `flm:npu` elkészült.
 <p align="center">
   <img width="400" height="400" src="assets/FFLM-installationWizard.png" />
 </p>
 Ezután kiválaszthatod bármelyik elérhető FFLM modellt, és elkezdheted használni az NPU háttérrendszert.
 
-Egy adott modellhez töltsd le a kívánt modellt a [modelloldalról](https://fastflowlm.com/docs/models/qwen/), és ellenőrizd a dokumentációban megadott Shell paranccsal.
+Egy adott modellhez töltsd le a kívánt modellt a [modellek oldaláról](https://fastflowlm.com/docs/models/qwen/), és ellenőrizd a dokumentációban megadott Shell paranccsal.
 ```
 flm run qwen3.5-4b-FLM
 ```
-vagy 
+vagy a 
 ```
 lemonade run qwen3.5-4b-FLM
 ```
  segítségével
-Az FLM modellek a legnépszerűbb architektúrák közül soknak tartalmazzák a megvalósítását (Gemma 3, Qwen 3, Llama 3 és DeepSeek R1), és méretük 1 GB alatt vagy akár 13 GB felett is lehet.
-A Lemonade automatikusan felismeri az NPU-t, és telepíti a **FastFlowLM NPU** háttérrendszert.
+Az FLM modellek a legnépszerűbb architektúrák közül is tartalmaznak néhányat (Gemma 3, Qwen 3, Llama 3 és DeepSeek R1), és méretük 1 GB alattitól 13 GB fölöttiig terjed.
+A Lemonade automatikusan érzékeli az NPU-t, és telepíti a **FastFlowLM NPU** háttérrendszert.
 
 <!-- @os:windows -->
 > **Tipp:** A legjobb NPU-teljesítmény érdekében engedélyezd a turbó módot:
@@ -654,7 +656,7 @@ A Lemonade automatikusan felismeri az NPU-t, és telepíti a **FastFlowLM NPU** 
 
 ### Modellváltás
 
-A 6. lépésben létrehozott kártyázós alkalmazás NPU-modellekkel is működik, csak változtasd meg a modell nevét:
+A 6. lépésben szereplő tanulókártya-alkalmazás NPU-modellekkel is működik, csak változtasd meg a modell nevét:
 
 ```python
 # In flashcards.py, swap the model to run on NPU instead of GPU
@@ -667,17 +669,17 @@ response = client.chat.completions.create(
 
 ## Következő lépések
 
-Mostantól saját hardvereden fut egy helyi AI-szerver – íme, merre érdemes tovább haladni:
+Most már van egy saját hardvereden futó helyi AI-szervered, íme, merre érdemes továbblépned:
 
-1. **Kapcsold össze kedvenc alkalmazásaiddal**: A Lemonade dobozból is működik a [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), az [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), a [Continue](https://lemonade-server.ai/docs/server/apps/continue/), az [n8n](https://n8n.io/integrations/lemonade-model/) és [még sok más](https://lemonade-server.ai/marketplace) alkalmazással.
+1. **Csatlakoztasd kedvenc alkalmazásaidat**: A Lemonade dobozból is működik a [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk), az [Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/), a [Continue](https://lemonade-server.ai/docs/server/apps/continue/), az [n8n](https://n8n.io/integrations/lemonade-model/) és [sok más](https://lemonade-server.ai/marketplace) alkalmazással.
 
-2. **Böngéssz további modellek között**: Fedezd fel a teljes [modellkönyvtárat](https://lemonade-server.ai/docs/server/server_models/), hogy kódoláshoz, következtetéshez, látáshoz és egyebekhez optimalizált modelleket találj. Használd a Lemonade alkalmazást vagy a `lemonade list` parancsot az elérhető modellek megtekintéséhez.
+2. **Fedezz fel további modelleket**: Nézd meg a teljes [modellkönyvtárat](https://lemonade-server.ai/docs/server/server_models/), hogy megtaláld a kódoláshoz, érveléshez, látáshoz és egyéb feladatokhoz optimalizált modelleket. Használd a Lemonade alkalmazást vagy a `lemonade list` parancsot az elérhető modellek megtekintéséhez.
 
-3. **Oldd fel a ROCm GPU-gyorsítást**: Ha támogatott AMD GPU-val rendelkezel, válts a ROCm háttérrendszerre: `lemonade config set llamacpp.backend=rocm`. Lásd a [támogatott AMD GPU-kat](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
+3. **ROCm GPU-gyorsítás kibontása**: Ha támogatott AMD GPU-val rendelkezel, válts a ROCm háttérrendszerre: `lemonade config set llamacpp.backend=rocm`. Lásd a [támogatott AMD GPU-kat](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations).
 
-4. **Olvasd el a teljes API-specifikációt**: A Lemonade támogatja a chat kiegészítéseket, a beágyazásokat, a hangátiratkészítést, a képgenerálást, a szövegfelolvasást és egyebeket. Nézd meg a [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) dokumentumot az összes végponthoz.
+4. **Olvasd el a teljes API-specifikációt**: A Lemonade támogatja a chat completions, beágyazások, hangátiratok, képgenerálás, szövegfelolvasás és egyebek funkcióit. Nézd meg a [Server Spec](https://lemonade-server.ai/docs/server/server_spec/) dokumentumot minden egyes végpontért.
 
-5. **Járulj hozzá**: A Lemonade nyílt forráskódú. Nézd meg a [hozzájárulási útmutatót](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md), és keress [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) címkéjű feladatokat.
+5. **Járulj hozzá a projekthez**: A Lemonade nyílt forráskódú. Nézd meg a [közreműködési útmutatót](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md), és keress [Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) címkéjű feladatokat.
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

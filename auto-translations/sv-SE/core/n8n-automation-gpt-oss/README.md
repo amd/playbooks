@@ -18,12 +18,12 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Denna spelbok kräver minst **32 GB** systemminne.
+> Denna handbok kräver minst **32 GB** systemminne.
 <!-- @device:end -->
 
-n8n är en plattform för arbetsflödesautomatisering som låter dig koppla samman appar och tjänster med hjälp av en visuell nodbaserad editor.
+n8n är en plattform för arbetsflödesautomatisering som låter dig koppla samman appar och tjänster med hjälp av en visuell, nodbaserad editor.
 
-Denna spelbok visar hur du sätter upp en AI-driven sammanfattare av finansnyheter som hämtar de senaste affärsrubrikerna från ett nyhets-RSS-flöde och använder en lokal LLM som körs på ditt system för att generera en investerarfokuserad sammanfattning.
+Denna handbok lär dig hur du sätter upp en AI-driven sammanfattare för finansiella nyheter som hämtar de senaste affärsrubrikerna från ett RSS-flöde för nyheter och använder en lokal LLM som körs på ditt system för att generera en investerarfokuserad sammanfattning.
 
 ## Vad du kommer att lära dig
 
@@ -36,9 +36,9 @@ Denna spelbok visar hur du sätter upp en AI-driven sammanfattare av finansnyhet
 
 [Lemonade](https://lemonade-server.ai) är en plattform för lokal LLM-servering byggd för AMD-hårdvara. Den tillhandahåller ett OpenAI-kompatibelt API som körs helt på din maskin – din data lämnar aldrig din enhet.
 
-I den här spelboken använder vi Lemonade för att servera en lokal LLM som n8n ansluter till för AI-drivna uppgifter.
+I denna handbok använder vi Lemonade för att serva en lokal LLM som n8n ansluter till för AI-drivna uppgifter.
 
-n8n innehåller en **inbyggd Lemonade-nod** (`Lemonade Chat Model`) som ger en förstklassig integration – ingen manuell konfiguration behövs. Detta gör det enkelt att koppla din lokala LLM till automatiserade arbetsflöden.
+n8n innehåller en **inbyggd Lemonade-nod** (`Lemonade Chat Model`) som tillhandahåller en förstklassig integration – ingen manuell konfiguration behövs. Detta gör det enkelt att koppla din lokala LLM till automatiseringsarbetsflöden.
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Ställa in minneskonfigurationen
@@ -47,7 +47,7 @@ n8n innehåller en **inbyggd Lemonade-nod** (`Lemonade Chat Model`) som ger en f
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Kontrollera programvaruuppdateringar
+## Kontrollera om det finns programvaruuppdateringar
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -57,19 +57,26 @@ n8n innehåller en **inbyggd Lemonade-nod** (`Lemonade Chat Model`) som ger en f
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:n8n,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- Linux runs n8n as a Podman container (see compose.yml below), so Node.js and a host n8n install are not required; podman is the only extra prerequisite. -->
 <!-- @require:lemonade,podman -->
+<!-- @prereq:podman -->
 <!-- @os:end -->
 
 <!-- @device:halo,halo_box -->
+<!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:lemonade-models-gpt-oss-20b -->
 <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 
@@ -190,18 +197,20 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:windows -->
 <!-- @test:id=node-npm-version timeout=60 hidden=True -->
 ```bash
 node -v
 npm -v
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 ## Installera n8n
 <!-- @os:windows -->
 Installera n8n globalt med npm.
 
-> **Obs**: Du kan se en del npm-varningar. Detta är förväntat.
+> **Obs**: Du kan se vissa npm-varningar. Detta är förväntat.
 
 ```bash
 npm install -g n8n
@@ -214,40 +223,31 @@ n8n --version
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @os:linux -->
-<!-- @test:id=n8n-version timeout=60 hidden=True -->
-```bash
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-n8n --version
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
 <!-- @os:windows -->
 > **Tips**: Windows-användare kan behöva ändra sin PowerShell-körningspolicy (t.ex.
-> ställa in den till RemoteSigned eller Unrestricted) innan de kör vissa PowerShell-kommandon.
+> ställa in den på RemoteSigned eller Unrestricted) innan de kör vissa PowerShell-kommandon.
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **PATH-problem**: Om `n8n --version` säger command not found, se till att din npm-globala bin-katalog finns i användarens `PATH`. Den vanliga installationssökvägen är `C:\Users\<username>\AppData\Roaming\npm`. 
-> Lägg till detta i användarsökvägen (Redigera systemets miljövariabler > Miljövariabler > Redigera användarsökväg) och ladda om terminalen. 
+> **PATH-problem**: Om `n8n --version` säger command not found, se till att din npm globala bin-katalog finns i användarens `PATH`. Den vanliga installationssökvägen är `C:\Users\<username>\AppData\Roaming\npm`.
+> Lägg till detta i användarsökvägen (Redigera systemets miljövariabler > Miljövariabler > Redigera användarsökväg) och ladda om terminalen.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 Vi ska nu använda Podman-tjänsten för att containerisera vår n8n-installation.
 
-Ladda ned följande till en katalog du väljer: [compose.yml](assets/compose.yml)
+Ladda ner följande till en katalog du väljer: [compose.yml](assets/compose.yml)
 
-I den katalogen kör du följande kommando:
+I den katalogen, kör följande kommando:
 ```bash
 podman compose up -d
 ```
 
-Detta bör installera n8n och skriva till en beständig lagring.
+Detta bör installera n8n och skriva till ett beständigt lagringsutrymme.
 
-Starta n8n genom att skriva `localhost:5678` i din webbläsares adressfält.
+Starta n8n genom att skriva `localhost:5678` i webbläsarens adressfält.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -289,19 +289,14 @@ try {
 ```bash
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-p=""
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
 cleanup() {
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
+  podman compose -f compose.yml down >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-n8n start >/tmp/n8n-test.log 2>&1 &
-p=$!
+podman rm -f n8n >/dev/null 2>&1 || true
+podman compose -f compose.yml up -d
 
 ok=false
 for i in $(seq 1 120); do
@@ -315,6 +310,8 @@ done
 
 if [ "$ok" != "true" ]; then
   echo "n8n not ready on http://127.0.0.1:5678/healthz"
+  podman ps -a || true
+  podman logs n8n 2>&1 | tail -30 || true
   exit 1
 fi
 
@@ -332,17 +329,17 @@ n8n startar en lokal webbserver. Tryck på `'o'` eller öppna din webbläsare p�
 
 ## Starta Lemonade
 
-Lemonade är den lokala servern som kör en modell och ansluter till n8n. 
+Lemonade är den lokala servern som kommer att köra en modell och ansluta till n8n.
 
 <!-- @os:linux -->
-Öppna Lemonade-GUI:t genom att klicka på Lemonade-ikonen i aktivitetsfältet. Du kan bläddra bland modeller, backends och läsa in de förinstallerade modellerna härifrån.
+Öppna Lemonade-gränssnittet genom att klicka på Lemonade-ikonen i aktivitetsfältet. Härifrån kan du bläddra bland modeller, backend-system och ladda de förinstallerade modellerna.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Öppna Lemonade-GUI:t genom att klicka på Lemonade-ikonen. Högerklicka på ikonen i systemfältet för att öppna appen. Sedan kan du lägga till modeller, backends och läsa in de förinstallerade modellerna.
+Öppna Lemonade-gränssnittet genom att klicka på Lemonade-ikonen. Högerklicka på ikonen i meddelandefältet för att öppna appen. Sedan kan du lägga till modeller, backend-system och ladda de förinstallerade modellerna.
 <!-- @os:end -->
 
->**Tips**: När det körs är Lemonade-GUI:t även tillgängligt på http://localhost:13305
+>**Tips**: När den körs är Lemonade-gränssnittet också tillgängligt på http://localhost:13305
 
 Alternativt kan du öppna en terminal och köra `lemonade list` för att se vilka modeller som är installerade. Kör sedan:
 
@@ -377,23 +374,23 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 
 ### Steg 1: Registrera dig eller logga in på n8n
 
-När du öppnar n8n för första gången uppmanas du att skapa ett konto eller logga in:
+När du öppnar n8n för första gången kommer du att uppmanas att skapa ett konto eller logga in:
 
 1. Öppna `http://localhost:5678` i din webbläsare
-2. Skapa ett nytt lokalt konto med din e-post, eller logga in om du redan har ett
+2. Skapa ett nytt lokalt konto med din e-postadress, eller logga in om du redan har ett
 3. När du är inloggad ser du n8n-instrumentpanelen
 
-> **Tips**: Om du blir utlåst från ditt konto, prova `n8n user-management:reset`
+> **Tips**: Om du blir utelåst från ditt konto, prova `n8n user-management:reset`
 
 ### Steg 2: Importera arbetsflödet
 
 Vi har tillhandahållit ett färdigbyggt arbetsflöde som du kan importera direkt:
 
-1. Ladda ned följande arbetsflödesfil: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. Klicka på **Start from Scratch** för att öppna arbetsflödeseditorn. Alternativt klicka på +-knappen längst upp till vänster och sedan **Add workflow**.
-3. Klicka på menyn **...** (tre punkter) längst upp till höger och välj **Import from file**
+1. Ladda ner följande arbetsflödesfil: [financial-news-workflow.json](assets/financial-news-workflow.json)
+2. Klicka på **Start from Scratch** för att öppna arbetsflödesredigeraren. Alternativt klickar du på +-knappen längst upp till vänster och sedan på **Add workflow**.
+3. Klicka på **...**-menyn (tre punkter) i det övre högra hörnet och välj **Import from file**
 4. Välj den nedladdade filen `financial-news-workflow.json`
-5. Arbetsflödet visas på ritytan
+5. Arbetsflödet visas på arbetsytan
 ### Steg 3: Förstå arbetsflödet
 
 Det importerade arbetsflödet innehåller 8 sammankopplade noder:
@@ -405,23 +402,23 @@ Det importerade arbetsflödet innehåller 8 sammankopplade noder:
 | Nod | Syfte |
 |------|---------|
 | **When clicking 'Execute workflow'** | Manuell utlösare för att starta arbetsflödet |
-| **Fetch Financial News Feed** | RSS Read-nod som hämtar de senaste affärsrubrikerna från ett RSS-flöde (använder som standard NYT Business-flödet, ingen API-nyckel krävs) |
-| **Aggregate Headlines** | Aggregate-nod som samlar in rubriktitlar och sammanfattningar från varje flödespost till en enda lista |
+| **Fetch Financial News Feed** | RSS Read-nod som hämtar de senaste affärsnyheterna från ett RSS-flöde (standard är NYT Business-flödet, ingen API-nyckel krävs) |
+| **Aggregate Headlines** | Aggregate-nod som samlar in rubriker och sammanfattningar från varje flödesobjekt till en enda lista |
 | **Clean Extracted News Data** | Set-nod som kombinerar alla rubriker till ett enda textfält |
-| **AI Financial News Summarizer** | AI Agent som bearbetar nyheterna med en systemprompt för finansanalys |
+| **AI Financial News Summarizer** | AI Agent som bearbetar nyheterna med en systemprompt för finansanalytiker |
 | **Lemonade Chat Model** | Ansluter till din lokala Lemonade-server som kör LLM:en |
 | **Structured Output Parser** | Formaterar AI-utdata som strukturerad JSON |
 | **Convert to File** | Konverterar sammanfattningen till en nedladdningsbar fil |
 
-> **Tips**: För att använda en annan nyhetskälla, dubbelklicka på noden **Fetch Financial News Feed** och ersätt URL:en med valfritt RSS-flöde för affärer eller marknader.
+> **Tips**: För att använda en annan nyhetskälla, dubbelklicka på noden **Fetch Financial News Feed** och ersätt URL:en med valfritt RSS-flöde för affärer eller marknader som du föredrar.
 
-### Steg 4: Konfigurera Lemonade-uppgifter
+### Steg 4: Konfigurera Lemonade-autentiseringsuppgifter
 
 Innan du kör arbetsflödet behöver du ansluta det till din lokala Lemonade-server:
 
 1. Dubbelklicka på noden **Lemonade Chat Model** i n8n
 2. I rullgardinsmenyn **Credential to connect with** väljer du **Create New Credential**
-3. Ange värdena i tabellen nedan och klicka på spara.
+3. Ange värdena i tabellen nedan och klicka på save.
 4. Välj den relevanta modell som du har laddat i Lemonade Server.
 
   | Fält | Värde |
@@ -431,16 +428,16 @@ Innan du kör arbetsflödet behöver du ansluta det till din lokala Lemonade-ser
 
 > **Obs**: Innan du testar, kör `lemonade status` i en terminal för att bekräfta att Lemonade-servern körs.
 <!-- @device:halo_box -->
-> Detta arbetsflöde använder GPT-OSS-120B, som är förinstallerad i Lemonade. Du kan ändra detta till andra laddade modeller i inställningarna för noden Lemonade Chat Model.
+> Detta arbetsflöde använder GPT-OSS-120B och det är förinstallerat i Lemonade. Du kan ändra detta till andra laddade modeller i nodinställningarna för Lemonade Chat Model.
 <!-- @device:end -->
 
 ### Steg 5: Testa arbetsflödet
 
 1. Se till att Lemonade körs med en laddad modell
 2. Klicka på **Execute workflow** längst ned i mitten av arbetsytan
-3. Följ hur varje nod körs från vänster till höger – de blir gröna när de är klara
+3. Titta på hur varje nod körs från vänster till höger – de blir gröna när de är klara
 4. Dubbelklicka på noden **AI Financial News Summarizer** för att se den genererade sammanfattningen i den nedre panelen.
-5. Dubbelklicka på noden **Convert to File** för att ladda ner motsvarande textfil i den nedre panelen.
+5. Dubbelklicka på noden **Convert to File** för att ladda ned motsvarande textfil i den nedre panelen.
 
 ## Förstå AI-agenten
 
@@ -460,7 +457,7 @@ Agenten tar emot den rensade nyhetsdatan och genererar en strukturerad sammanfat
 
 ### Spara ditt arbetsflöde
 
-Klicka på arbetsflödets namn högst upp och byt namn på det om du vill. Arbetsflöden sparas automatiskt medan du arbetar.
+Klicka på arbetsflödets namn högst upp och byt namn om du vill. Arbetsflöden sparas automatiskt medan du arbetar.
 
 ## Nästa steg
 
@@ -478,7 +475,7 @@ n8n har hundratals färdiga arbetsflödesmallar. Bläddra i det officiella mallb
 
 Sök efter "AI", "LLM" eller "automation" för att hitta arbetsflöden du kan importera och anpassa.
 
-För mer information, kolla in [n8n-dokumentationen](https://docs.n8n.io/).
+För mer information, se [n8n Documentation](https://docs.n8n.io/).
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

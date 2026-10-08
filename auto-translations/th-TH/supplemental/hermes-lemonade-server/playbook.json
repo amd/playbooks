@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
-  "title": "กำลังรัน Hermes Agent ในเครื่องด้วย Lemonade Server",
-  "description": "ติดตั้งและกำหนดค่า Hermes Agent ซึ่งเป็น AI agent อัตโนมัติ โดยใช้ Lemonade Server เป็น local AI backend",
+  "title": "รัน Hermes Agent ในเครื่องด้วย Lemonade Server",
+  "description": "ติดตั้งและกำหนดค่าเอเจนต์ AI อัตโนมัติ Hermes Agent โดยใช้ Lemonade Server เป็นแบ็กเอนด์ AI ภายในเครื่อง",
   "auto_translated": true
 }

@@ -1,6 +1,6 @@
 {
   "id": "openclaw-lemonade-server",
-  "title": "Lokales Ausführen von OpenClaw mit Lemonade Server",
+  "title": "Lemonade Server lokal mit OpenClaw ausführen",
   "description": "Installieren und Konfigurieren des autonomen KI-Agenten OpenClaw mit Lemonade Server.",
   "auto_translated": true
 }

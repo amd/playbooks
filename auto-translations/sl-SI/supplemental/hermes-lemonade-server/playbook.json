@@ -1,6 +1,6 @@
 {
   "id": "hermes-lemonade-server",
-  "title": "Lokalno zaganjanje agenta Hermes s strežnikom Lemonade Server",
-  "description": "Namestite in konfigurirajte avtonomnega AI agenta Hermes Agent z Lemonade Server kot njegovim lokalnim AI zaledjem.",
+  "title": "Lokalni zagon agenta Hermes s strežnikom Lemonade Server",
+  "description": "Namestite in konfigurirajte avtonomnega agenta umetne inteligence Hermes Agent z zaledjem Lemonade Server kot lokalnim zaledjem umetne inteligence.",
   "auto_translated": true
 }

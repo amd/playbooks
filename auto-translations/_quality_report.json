@@ -2,13 +2,13 @@
   "per_locale": {
     "ar": {
       "files_scored": 80,
-      "mean": 93.0,
+      "mean": 92.8,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "cs-CZ": {
       "files_scored": 80,
-      "mean": 92.3,
+      "mean": 92.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -20,37 +20,37 @@
     },
     "de-DE": {
       "files_scored": 80,
-      "mean": 93.1,
-      "min": 78,
+      "mean": 92.6,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "el-GR": {
       "files_scored": 80,
-      "mean": 92.3,
+      "mean": 92.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "es-LA": {
       "files_scored": 80,
-      "mean": 92.8,
-      "min": 78,
+      "mean": 93.2,
+      "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "fi-FI": {
       "files_scored": 80,
-      "mean": 91.9,
+      "mean": 91.8,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-CA": {
       "files_scored": 80,
-      "mean": 90.7,
+      "mean": 90.8,
       "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-FR": {
       "files_scored": 80,
-      "mean": 93.2,
+      "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -62,25 +62,25 @@
     },
     "hu-HU": {
       "files_scored": 80,
-      "mean": 92.1,
+      "mean": 92.2,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "it-IT": {
       "files_scored": 80,
-      "mean": 93.9,
+      "mean": 94.0,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ja-JP": {
       "files_scored": 80,
-      "mean": 92.4,
-      "min": 20,
+      "mean": 93.5,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "ko-KR": {
       "files_scored": 80,
-      "mean": 93.5,
+      "mean": 93.6,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -92,31 +92,31 @@
     },
     "nl-NL": {
       "files_scored": 80,
-      "mean": 92.6,
+      "mean": 92.8,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pl-PL": {
       "files_scored": 80,
-      "mean": 93.2,
+      "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-BR": {
       "files_scored": 80,
-      "mean": 93.7,
+      "mean": 93.8,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-PT": {
       "files_scored": 80,
-      "mean": 92.9,
-      "min": 82,
+      "mean": 92.6,
+      "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ro-RO": {
       "files_scored": 80,
-      "mean": 92.5,
+      "mean": 92.3,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -128,49 +128,49 @@
     },
     "sk-SK": {
       "files_scored": 80,
-      "mean": 91.6,
+      "mean": 92.0,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sl-SI": {
       "files_scored": 80,
-      "mean": 90.5,
+      "mean": 90.4,
       "min": 68,
       "judge_model": "Claude-Opus-4.8"
     },
     "sr-Latn": {
       "files_scored": 80,
       "mean": 91.1,
-      "min": 78,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "sv-SE": {
       "files_scored": 80,
-      "mean": 93.0,
+      "mean": 93.1,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "th-TH": {
       "files_scored": 80,
-      "mean": 92.7,
+      "mean": 93.0,
       "min": 70,
       "judge_model": "Claude-Opus-4.8"
     },
     "tr-TR": {
       "files_scored": 80,
-      "mean": 92.4,
+      "mean": 92.7,
       "min": 80,
       "judge_model": "Claude-Opus-4.8"
     },
     "uk-UA": {
       "files_scored": 80,
-      "mean": 92.6,
+      "mean": 92.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
       "files_scored": 80,
-      "mean": 93.5,
+      "mean": 93.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -183,22 +183,10 @@
   },
   "below_threshold": [
     {
-      "locale": "ja-JP",
-      "file": "playbooks/core/vscode-qwen3-coder/playbook.json",
-      "score": 20,
-      "issues": "Contains garbled text 'للで', meta-commentary 'Wait, let me reconsider', and duplicated title lines; unprofessional output."
-    },
-    {
       "locale": "he",
       "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
       "score": 60,
       "issues": "Title left mostly untranslated ('Clustering Two Ryzen AI Halos'); rest is accurate and fluent."
-    },
-    {
-      "locale": "ja-JP",
-      "file": "playbooks/supplemental/openhands-getting-started/playbook.json",
-      "score": 68,
-      "issues": "OpenHands mistranslated as OpenHats; inconsistent spacing around terms"
     },
     {
       "locale": "sl-SI",
@@ -211,6 +199,12 @@
       "file": "playbooks/supplemental/cvml/playbook.json",
       "score": 70,
       "issues": "Left 'Local Computer Vision' and 'perception' untranslated; inconsistent localization reduces fluency."
+    },
+    {
+      "locale": "de-DE",
+      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
+      "score": 72,
+      "issues": "Title subject reversed: should be running OpenClaw locally, not Lemonade Server."
     },
     {
       "locale": "fr-CA",
@@ -243,6 +237,12 @@
       "issues": "Inconsistent terminology: 'jeder' vs 'kernele' for same term; 'GPU jeder po meri' awkward word order."
     },
     {
+      "locale": "sr-Latn",
+      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
+      "score": 72,
+      "issues": "Added 'servera' not in source; 'agent' should be accusative 'agenta'; brand hyphenation nonstandard but acceptable"
+    },
+    {
       "locale": "cs-CZ",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
@@ -268,21 +268,9 @@
     },
     {
       "locale": "el-GR",
-      "file": "playbooks/core/vscode-qwen3-coder/playbook.json",
-      "score": 78,
-      "issues": "\"LLM Coding\" left partly untranslated; \"Coding\" awkward in Greek title, slightly unnatural phrasing."
-    },
-    {
-      "locale": "el-GR",
       "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
       "score": 78,
       "issues": "Inconsistent terminology: 'Ρύθμιση ακριβείας' vs 'Συντονίστε' for fine-tune; parenthetical clutter but code/brands intact."
-    },
-    {
-      "locale": "es-LA",
-      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
-      "score": 78,
-      "issues": "Inconsistent formality (Cree vs Configura); 'digest' left untranslated in title while translated later as 'resumen'."
     },
     {
       "locale": "fr-CA",
@@ -316,12 +304,6 @@
     },
     {
       "locale": "ja-JP",
-      "file": "playbooks/supplemental/lemonade-getting-started/playbook.json",
-      "score": 78,
-      "issues": "Second sentence restructured awkwardly; relative clause placement makes it read as if models are the server."
-    },
-    {
-      "locale": "ja-JP",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
       "issues": "Trademark symbol misplaced: source has 'LLMs™', translation attached ™ to Unsloth instead."
@@ -345,6 +327,12 @@
       "issues": "Product name 'AMD Sync' mistranslated as 'synchronizacją AMD' in title; otherwise accurate and fluent."
     },
     {
+      "locale": "pt-PT",
+      "file": "playbooks/supplemental/hermes-lemonade-server/playbook.json",
+      "score": 78,
+      "issues": "Title 'A Executar' awkward gerund opening; 'backend' untranslated acceptable; otherwise accurate and fluent."
+    },
+    {
       "locale": "ro-RO",
       "file": "playbooks/supplemental/vllm-inference/playbook.json",
       "score": 78,
@@ -366,19 +354,13 @@
       "locale": "sr-Latn",
       "file": "playbooks/supplemental/hermes-lemonade-server/playbook.json",
       "score": 78,
-      "issues": "Awkward 'Hermes Agent autonomnog AI agenta' redundancy; inconsistent brand formatting with hyphens."
-    },
-    {
-      "locale": "th-TH",
-      "file": "playbooks/core/comfyui-image-gen/playbook.json",
-      "score": 78,
-      "issues": "Title 'กำลังสร้าง' implies ongoing action; should be 'การสร้าง'. Slightly awkward 'ภาพที่สร้างโดย AI'."
+      "issues": "Awkward 'Hermes Agent autonomnog AI agenta' redundancy; inconsistent brand casing; 'Server-a' hyphenation stylistic nit."
     },
     {
       "locale": "uk-UA",
       "file": "playbooks/core/n8n-automation-gpt-oss/playbook.json",
       "score": 78,
-      "issues": "\"саммарайзер\" is an awkward transliteration; \"засіб підсумовування новин\" preferred. Otherwise accurate."
+      "issues": "'саммарайзер' is awkward anglicism; better 'засіб підсумовування новин'. Otherwise accurate, terms intact."
     },
     {
       "locale": "uk-UA",
@@ -406,9 +388,27 @@
     },
     {
       "locale": "ar",
+      "file": "playbooks/core/comfyui-image-gen/playbook.json",
+      "score": 82,
+      "issues": "Title mistranslated as progressive 'جارٍ توليد' (generating in progress) instead of gerund heading."
+    },
+    {
+      "locale": "ar",
       "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
       "score": 82,
       "issues": "Title omits 'Fine' nuance; inconsistent LLaMA Factory vs LLaMA-Factory hyphenation; otherwise accurate and fluent."
+    },
+    {
+      "locale": "ar",
+      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
+      "score": 82,
+      "issues": "Awkward phrasing 'وكيل OpenClaw الذكاء الاصطناعي المستقل'; should be 'وكيل الذكاء الاصطناعي المستقل OpenClaw'."
+    },
+    {
+      "locale": "ar",
+      "file": "playbooks/supplemental/hermes-lemonade-server/playbook.json",
+      "score": 82,
+      "issues": "Redundant 'Hermes Agent' with 'وكيل'; inconsistent brand handling (خادم Lemonade vs Lemonade Server); slightly awkward phrasing."
     },
     {
       "locale": "cs-CZ",
@@ -441,22 +441,10 @@
       "issues": "Grammatical gender error: 'Lokal' should be 'Lokalt' for neuter 'computersyn'. Otherwise accurate, terms/brands intact."
     },
     {
-      "locale": "da-DK",
-      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
+      "locale": "el-GR",
+      "file": "playbooks/core/vscode-qwen3-coder/playbook.json",
       "score": 82,
-      "issues": "Gender agreement error: 'et...udviklingsoversigt' should be 'en'; 'udgiver' slightly off for 'posts'."
-    },
-    {
-      "locale": "de-DE",
-      "file": "playbooks/supplemental/lemonade-getting-started/playbook.json",
-      "score": 82,
-      "issues": "Omitted 'Gen AI' (Gen KI); translated as generic 'KI-Modelle', losing generative AI specificity."
-    },
-    {
-      "locale": "de-DE",
-      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
-      "score": 82,
-      "issues": "Inconsistent register (Erstelle vs Konfigurieren Sie); 'ein Digest' gender debatable, minor fluency issues"
+      "issues": "Untranslated 'Coding' in title; 'βοήθεια κώδικα' slightly awkward, better 'βοήθεια στον κώδικα'."
     },
     {
       "locale": "el-GR",
@@ -474,7 +462,7 @@
       "locale": "el-GR",
       "file": "playbooks/supplemental/openhands-getting-started/playbook.json",
       "score": 82,
-      "issues": "\"πράκτορα κωδικοποίησης\" awkward; \"coding agent\" better as \"προγραμματισμού\". Otherwise accurate, brands intact."
+      "issues": "\"agent κωδικοποίησης\" awkward; \"coding agent\" better as \"πράκτορα προγραμματισμού\". Minor fluency issues otherwise accurate."
     },
     {
       "locale": "es-LA",
@@ -484,15 +472,15 @@
     },
     {
       "locale": "fi-FI",
-      "file": "playbooks/supplemental/lemonade-getting-started/playbook.json",
-      "score": 82,
-      "issues": "Title awkward 'Aloita käytön kanssa'; otherwise accurate and fluent."
-    },
-    {
-      "locale": "fr-CA",
       "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
       "score": 82,
-      "issues": "Inconsistent 'diffusion'/'servir' for 'serving'; 'de grands modèles' preferred over 'des grands modèles'."
+      "issues": "\"palveleminen\" awkward for serving; \"tarjoamaan\" better; minor fluency issues otherwise accurate."
+    },
+    {
+      "locale": "fi-FI",
+      "file": "playbooks/supplemental/open-webui-chat/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent LLM translation (kielimallien vs LLM:ien); slightly awkward phrasing in second sentence."
     },
     {
       "locale": "fr-CA",
@@ -505,12 +493,6 @@
       "file": "playbooks/supplemental/vllm-inference/playbook.json",
       "score": 82,
       "issues": "\"le service\" ambiguous for serving; \"GPU\" acceptable but \"processeur graphique\" preferred by OQLF."
-    },
-    {
-      "locale": "fr-FR",
-      "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
-      "score": 82,
-      "issues": "'diffusion' suboptimal for 'serving'; 'de grands modèles' more correct than 'des grands modèles'"
     },
     {
       "locale": "fr-FR",
@@ -534,13 +516,19 @@
       "locale": "hu-HU",
       "file": "playbooks/supplemental/gaia-agents/playbook.json",
       "score": 82,
-      "issues": "Title mistranslates 'first agent with GAIA' as 'GAIA's first agent'; otherwise accurate and fluent."
+      "issues": "Title awkward/ungrammatical: 'GAIA első ügynöködnek létrehozása' mistranslates 'with GAIA'; rest accurate and fluent."
     },
     {
       "locale": "it-IT",
       "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
       "score": 82,
       "issues": "Title omits 'speech-to-speech' nuance; 'voce-voce' awkward, 'da voce a voce' preferred."
+    },
+    {
+      "locale": "ja-JP",
+      "file": "playbooks/core/vscode-qwen3-coder/playbook.json",
+      "score": 82,
+      "issues": "LLM lowercased as 'llm'; otherwise accurate and fluent."
     },
     {
       "locale": "ja-JP",
@@ -574,15 +562,15 @@
     },
     {
       "locale": "nb-NO",
-      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
-      "score": 82,
-      "issues": "Gender agreement error: 'en...utviklingssammendrag' should be 'et'; otherwise accurate and fluent."
-    },
-    {
-      "locale": "nb-NO",
       "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
       "score": 82,
       "issues": "Added 'AMD' not in source; 'Clustering' left untranslated; 'Halo-er' awkward pluralization."
+    },
+    {
+      "locale": "pt-BR",
+      "file": "playbooks/core/n8n-automation-gpt-oss/playbook.json",
+      "score": 82,
+      "issues": "'resumarizador' is awkward/non-standard; 'resumidor' preferred. Brand terms intact, meaning clear."
     },
     {
       "locale": "pt-BR",
@@ -592,21 +580,9 @@
     },
     {
       "locale": "pt-PT",
-      "file": "playbooks/supplemental/hermes-lemonade-server/playbook.json",
-      "score": 82,
-      "issues": "Gerund 'Executando' is Brazilian; pt-PT prefers 'A executar'. 'Agente Hermes'/'Hermes Agent' inconsistent."
-    },
-    {
-      "locale": "pt-PT",
       "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
       "score": 82,
       "issues": "Terminology inconsistency: title uses 'Fala para Fala' but body uses 'voz-a-voz'; minor fluency."
-    },
-    {
-      "locale": "ro-RO",
-      "file": "playbooks/core/vscode-qwen3-coder/playbook.json",
-      "score": 82,
-      "issues": "\"Codificare\" awkward for coding; \"asistență de cod\" slightly literal but understandable; brands intact."
     },
     {
       "locale": "ro-RO",
@@ -634,27 +610,33 @@
     },
     {
       "locale": "sl-SI",
-      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
-      "score": 82,
-      "issues": "Inconsistent 'Lemonade Server' rendering: translated once, kept once; minor terminology inconsistency."
-    },
-    {
-      "locale": "sr-Latn",
       "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
       "score": 82,
-      "issues": "Inconsistent terminology: 'posluživanje' vs 'servisiranje' for 'serving'; minor fluency issues."
+      "issues": "\"Strežba\" is awkward for serving; \"streženje\" more natural. Otherwise accurate and fluent."
     },
     {
-      "locale": "sr-Latn",
+      "locale": "sl-SI",
+      "file": "playbooks/core/n8n-automation-gpt-oss/playbook.json",
+      "score": 82,
+      "issues": "\"poganjalnik povzetkov\" awkward/invented term for summarizer; slight redundancy with \"poganja\"."
+    },
+    {
+      "locale": "sl-SI",
       "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
       "score": 82,
-      "issues": "Minor: 'OpenClaw autonomni AI agent' should be 'autonomnog AI agenta' (case agreement)."
+      "issues": "Inconsistent brand handling: 'Lemonade Server' vs 'strežnikom Lemonade Server'; 'agent' should be accusative 'agenta'."
     },
     {
       "locale": "sr-Latn",
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 82,
       "issues": "Inconsistent 'kernela' vs 'jezgra' terminology; otherwise accurate, brands intact."
+    },
+    {
+      "locale": "sr-Latn",
+      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
+      "score": 82,
+      "issues": "'digest' left untranslated (could use 'pregled'); otherwise accurate, fluent, terms intact"
     },
     {
       "locale": "sr-Latn",
@@ -705,10 +687,22 @@
       "issues": "Title mistranslates brand 'AMD Sync' as 'синхронізацією AMD'; otherwise accurate and fluent."
     },
     {
+      "locale": "uk-UA",
+      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
+      "score": 82,
+      "issues": "'Digest' rendered as 'щоденник' (diary) instead of 'дайджест'; inconsistent terminology."
+    },
+    {
       "locale": "zh-CN",
       "file": "playbooks/supplemental/clustering-rccl/playbook.json",
       "score": 82,
       "issues": "Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method."
+    },
+    {
+      "locale": "zh-CN",
+      "file": "playbooks/supplemental/gaia-agents/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent terminology: 智能体 vs 代理 for 'agent'; minor consistency issue affects fluency"
     },
     {
       "locale": "zh-TW",
@@ -717,22 +711,22 @@
       "issues": "Title omits 'with RPC'; 'RPC server' left partly untranslated but acceptable; otherwise accurate."
     },
     {
+      "locale": "zh-TW",
+      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
+      "score": 82,
+      "issues": "Title phrasing awkward; 'Build...with Agent Canvas' rendered unnaturally as '與...整合建置'."
+    },
+    {
+      "locale": "th-TH",
+      "file": "playbooks/supplemental/lemonade-getting-started/playbook.json",
+      "score": 83,
+      "issues": "\"Gen AI โมเดล\" has awkward word order; should be \"โมเดล Gen AI\". Otherwise accurate and fluent."
+    },
+    {
       "locale": "ro-RO",
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 84,
       "issues": "Inconsistent 'kernele' vs 'kernel-uri' plural; otherwise accurate, fluent, terms/brands intact."
-    },
-    {
-      "locale": "sl-SI",
-      "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
-      "score": 84,
-      "issues": "\"strežba\" is awkward for serving LLMs; \"strežnik\"/\"gostovanje\" preferred, otherwise accurate."
-    },
-    {
-      "locale": "sr-Latn",
-      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
-      "score": 84,
-      "issues": "Inconsistent term: 'sažetak' vs untranslated 'digest'; otherwise accurate and fluent."
     }
   ]
 }

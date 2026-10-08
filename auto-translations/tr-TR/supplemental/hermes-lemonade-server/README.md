@@ -8,28 +8,28 @@ SPDX-License-Identifier: MIT
 > **Makine çevirisi.** Bu sayfa İngilizce dilinden otomatik olarak çevrilmiştir ve bir kişi tarafından incelenmemiştir. Sayfa hatalar içerebilir ve belirli talimatlar, komutlar, indirmeler, ürün kullanılabilirliği veya diğer içerikler dile veya bölgeye göre farklılık gösterebilir. Herhangi bir tutarsızlık veya farklılık olması durumunda, playbook'un orijinal İngilizce sürümü geçerli ve bağlayıcı olacaktır.
 <!-- auto-translated-disclaimer:end -->
 
-# Hermes Agent'ı Lemonade Server ile Yerel Olarak Çalıştırma
+# Lemonade Server ile Hermes Agent'ı Yerel Olarak Çalıştırma
 
 ## Genel Bakış
 
-[**Hermes Agent**](https://hermes-agent.nousresearch.com/), Nous Research tarafından geliştirilen, kendi kendini geliştiren bir yapay zeka aracıdır. Yerleşik bir öğrenme döngüsüne sahiptir; deneyimlerden beceriler oluşturur, oturumlar arasında sizinle ilgili kalıcı bir bellek oluşturur ve sizin adınıza zamanlanmış otomasyonlar çalıştırabilir. Basit bir sohbet asistanının aksine Hermes gerçek eylemler gerçekleştirir: kabuk komutları çalıştırma, dosya yazma, web'de gezinme ve paralel iş akışlarını alt aracılara devretme.
+[**Hermes Agent**](https://hermes-agent.nousresearch.com/), Nous Research tarafından geliştirilen kendini geliştiren bir yapay zeka ajanıdır. Yerleşik bir öğrenme döngüsüne sahiptir, deneyimlerden beceriler oluşturur, oturumlar arasında sizinle ilgili kalıcı bir hafıza oluşturur ve sizin adınıza zamanlanmış otomasyonlar çalıştırabilir. Basit bir sohbet asistanının aksine, Hermes gerçek eylemler gerçekleştirir: kabuk komutları çalıştırır, dosya yazar, web'de gezinir ve paralel iş akışlarını alt ajanlara devreder.
 
-[**Lemonade Server**](https://lemonade-server.ai/), bu aracı destekleyen yerel çıkarım arka ucudur. GenAI modellerini doğrudan AMD donanımınızda çalıştıran ve bunları endüstri standardı OpenAI API'si üzerinden sunan açık kaynaklı bir sunucudur.
+[**Lemonade Server**](https://lemonade-server.ai/), bunu destekleyen yerel çıkarım arka ucudur. GenAI modellerini doğrudan AMD donanımınızda çalıştıran ve bunları endüstri standardı OpenAI API'si üzerinden sunan açık kaynaklı bir sunucudur.
 
-Birlikte, tamamen yerel bir yapay zeka aracı yığını oluştururlar: Lemonade, model çıkarımını GPU'nuzda gerçekleştirir; Hermes ise aracı döngüsünü, belleği, becerileri ve mesajlaşma ağ geçidini sağlar.
+Birlikte, tamamen yerel bir yapay zeka ajan yığını oluştururlar: Lemonade, GPU'nuzda model çıkarımını yönetir, Hermes ise ajan döngüsünü, hafızayı, becerileri ve mesajlaşma ağ geçidini sağlar.
 
-> **Devam etmeden önce:** Hermes Agent, oldukça özerk bir yapay zeka aracıdır. Herhangi bir yapay zeka aracına sisteminize erişim vermek, öngörülemeyen veya istenmeyen sonuçlara yol açabilir. Yalnızca riskleri anladıysanız ve sizin adınıza özerk bir şekilde hareket eden yazılımlarla rahatsanız devam edin.
+> **Devam etmeden önce:** Hermes Agent, oldukça özerk bir yapay zeka ajanıdır. Herhangi bir yapay zeka ajanına sisteminize erişim vermek, öngörülemeyen veya istenmeyen sonuçlara yol açabilir. Yalnızca riskleri anlıyorsanız ve özerk yazılımın sizin adınıza hareket etmesinden rahatsız olmuyorsanız devam edin.
 
 ---
 
-## Bu Kılavuzda Öğrenecekleriniz
+## Bu Rehberde Neler Öğreneceksiniz
 
-Bu kılavuzun sonunda şunları yapabileceksiniz:
+Bu rehberin sonunda şunları yapabileceksiniz:
 
-- **Hermes Agent'ı yükleyip** yapay zeka arka ucu olarak **Lemonade Server**'ı işaret etmesini sağlamak.
-- **(Önerilen) Docker/Podman korumalı alanını (sandboxing) etkinleştirerek** aracının eylemlerini ana makinenizden izole etmek.
-- **Hermes ağ geçidini başlatıp** aracınızın hazır olduğunu doğrulamak.
-- **Bir iletişim kanalı bağlayarak** (Discord veya Telegram) aracınızla herhangi bir cihazdan sohbet edebilmek.
+- **Hermes Agent'ı yükleyip** yapay zeka arka ucu olarak **Lemonade Server**'a yönlendirmek.
+- **(Önerilir) Docker/Podman sandbox'lamayı etkinleştirerek** ajanın eylemlerini ana bilgisayarınızdan izole etmek.
+- **Hermes ağ geçidini başlatıp** ajanınızın hazır olduğunu doğrulamak.
+- **Bir iletişim kanalı bağlayarak** (Discord veya Telegram) ajanınızla herhangi bir cihazdan sohbet etmek.
 
 ---
 
@@ -48,30 +48,32 @@ Bu kılavuzun sonunda şunları yapabileceksiniz:
 ## Yazılım Ön Koşullarını Yükleme
 
 <!-- @os:linux -->
-- **Ubuntu 24.04+** veya `apt-get` içeren uyumlu bir Debian tabanlı Linux dağıtımı çalıştıran bir bilgisayar
+- `apt-get` içeren **Ubuntu 24.04+** veya uyumlu bir Debian tabanlı Linux dağıtımı çalıştıran bir PC
 - En az **12 GB RAM** (daha büyük modeller için 64 GB+ önerilir)
 - Model ağırlıkları için **~10–30 GB boş disk alanı**
-- [Podman](https://podman.io/docs/installation) (İsteğe bağlı, Hermes Agent'ı korumalı alanda çalıştırmak için)
+- [Podman](https://podman.io/docs/installation) (İsteğe bağlı, Hermes Agent'ı sandbox'lamak için)
   ```bash 
   sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- **Windows 10/11** çalıştıran bir bilgisayar
+- **Windows 10/11** çalıştıran bir PC
 - En az **12 GB RAM** (daha büyük modeller için 64 GB+ önerilir)
 - Model ağırlıkları için **~10–30 GB boş disk alanı**
-- Podman (İsteğe bağlı, Hermes Agent'ı korumalı alanda çalıştırmak için). WSL içinde yükleyin:
+- Podman (İsteğe bağlı, Hermes Agent'ı sandbox'lamak için). WSL içinde yükleyin:
   ```bash 
   sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
-> Podman, Halo Box üzerinde önceden yüklüdür ve herhangi bir kurulum gerektirmez
+> Podman, Halo Box üzerinde önceden yüklüdür ve herhangi bir kurulum gerekmez
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:hermes,lemonade-models-qwen3-35b-a3b,lemonade -->
 
 <!-- @var:id=hermes_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -85,13 +87,13 @@ lemonade --version
 
 ## Önerilen Modeli İndirin ve Yükleyin
 
-Bu kılavuz için önerilen model, Unsloth'un **Qwen3.6-35B-A3B-GGUF** modelidir; aracı iş yükleri için oldukça uygun olan, 263k token bağlam penceresine sahip güçlü bir MoE modelidir. Bu model UD-Q4_K_XL nicemleme (quantization) kullanır. Şimdi indirin:
+Bu rehber için önerilen model, Unsloth'tan **Qwen3.6-35B-A3B-GGUF**'tur; ajan iş yüklerine oldukça uygun, 263k token'lık bağlam penceresine sahip güçlü bir MoE modelidir. Bu model UD-Q4_K_XL niceleme (quantization) kullanır. Şimdi indirin:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-Ardından büyük bir bağlam penceresiyle yükleyin ve bu ayarı sonraki çalıştırmalar için kaydedin:
+Ardından geniş bir bağlam penceresiyle yükleyin ve bu ayarı gelecekteki çalıştırmalar için kaydedin:
 
 <!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
@@ -101,9 +103,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end -->
 
-Modelin varsayılan bağlam uzunluğu 262.144 tokendir. Bellek yetersizliği (OOM) hatalarıyla karşılaşırsanız bağlam penceresini küçültmeyi düşünün.
+Model, varsayılan olarak 262.144 token'lık bir bağlam uzunluğuna sahiptir. Bellek yetersizliği (OOM) hatalarıyla karşılaşırsanız bağlam penceresini küçültmeyi düşünün.
 
-> **İpucu: Daha hızlı aracı yanıtları için düşünmeyi devre dışı bırakın:** Qwen3.6-35B-A3B varsayılan olarak düşünme modunda çalışır; bu da her yanıttan önce gecikme ekler. Aracı döngülerinde bu ek yük hızla birikir. [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) deposu, düşünmeyi devre dışı bırakan hazır bir yapılandırma sunar. Kullanmak için dosyayı indirin ve içe aktarın:
+> **İpucu: Daha hızlı ajan yanıtları için düşünmeyi devre dışı bırakın:** Qwen3.6-35B-A3B, varsayılan olarak düşünme (thinking) modunda çalışır; bu da her yanıttan önce gecikme ekler. Ajan döngüleri için bu ek yük hızla birikir. [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) deposu, düşünmeyi devre dışı bırakan hazır bir yapılandırma sunar. Kullanmak için dosyayı indirin ve içe aktarın:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -244,9 +246,9 @@ echo "OK: Lemonade chat/completions returned a response"
 
 <!-- @os:windows -->
 
-## WSL'yi Kurma
+## WSL Kurulumu
 
-Hermes Agent'ı WSL içinde çalıştırıp Windows üzerinde yerel olarak çalışan Lemonade'e bağlıyoruz. Bu, Lemonade'in GPU hızlandırmasını Windows tarafında tutarken Hermes için bir Linux kabuk ortamı sağlar.
+Hermes Agent'ı WSL içinde çalıştırıyor ve Windows üzerinde yerel olarak çalışan Lemonade'e bağlıyoruz. Bu, Lemonade'in GPU hızlandırmasını Windows tarafında tutarken Hermes için bir Linux kabuk ortamı sağlar.
 
 ### WSL ve Ubuntu'yu Yükleme
 
@@ -264,7 +266,7 @@ wsl --install -d Ubuntu-24.04
 
 ### WSL'de systemd'yi Etkinleştirme
 
-Bunu Ubuntu terminalinde çalıştırın:
+Bunu Ubuntu terminali içinde çalıştırın:
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -273,16 +275,16 @@ systemd=true
 EOF
 ```
 
-WSL'yi yeniden başlatın:
+WSL'i yeniden başlatın:
 
 ```powershell
 wsl --shutdown
 wsl
 ```
 
-### Lemonade'i Windows'tan WSL'ye Köprüleme
+### Lemonade'i Windows'tan WSL'e Köprüleme
 
-WSL2 sanal bir ağda çalışır. Windows üzerindeki Lemonade `127.0.0.1` adresine bağlanır ve WSL buraya doğrudan erişemez. Bir Windows bağlantı noktası vekili (port proxy), trafiği WSL ağ geçidi IP'sinden Windows yerel ana bilgisayarına (localhost) yönlendirir.
+WSL2, sanal bir ağda çalışır. Windows üzerindeki Lemonade, `127.0.0.1`'e bağlanır; WSL buna doğrudan erişemez. Bir Windows bağlantı noktası vekili (port proxy), WSL ağ geçidi IP'sinden Windows localhost'una trafiği yönlendirir.
 
 **WSL ağ geçidi IP'nizi bulun** (WSL içinde çalıştırın):
 
@@ -290,7 +292,7 @@ WSL2 sanal bir ağda çalışır. Windows üzerindeki Lemonade `127.0.0.1` adres
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Bağlantı noktası vekilini ekleyin** (PowerShell'de Yönetici olarak çalıştırın, `<WSL-Gateway-IP>` yerine WSL ağ geçidi IP'nizi yazın):
+**Bağlantı noktası vekilini ekleyin** (Yönetici olarak PowerShell'de çalıştırın, `<WSL-Gateway-IP>` yerine WSL ağ geçidi IP'nizi yazın):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
@@ -309,7 +311,7 @@ WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Önceki adımda Qwen3.6-35B-A3B-GGUF modelini zaten yüklediyseniz, yüklü modelinizi listeleyen bir JSON çıktısı görmelisiniz.
+Önceki adımda Qwen3.6-35B-A3B-GGUF modelini zaten yüklediyseniz, yüklü modelinizi listeleyen JSON çıktısını görmelisiniz.
 
 ```json
 {
@@ -327,7 +329,7 @@ curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 }
 ```
 
-> `netsh portproxy` kuralı yeniden başlatmalara dayanır, ancak WSL ağ geçidi IP'si `wsl --shutdown` sonrasında değişebilir. Yeniden başlatmanın ardından Lemonade WSL'den erişilemez hale gelirse, güncellenmiş ağ geçidi IP'sini alın ve vekili bu yeni IP ile güncelleyin.
+> `netsh portproxy` kuralı yeniden başlatmalarda kalıcıdır, ancak `wsl --shutdown` sonrasında WSL ağ geçidi IP'si değişebilir. Yeniden başlatmanın ardından Lemonade'e WSL'den erişilemezse, güncellenmiş ağ geçidi IP'sini alın ve vekili bu yeni IP ile güncelleyin.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -393,7 +395,7 @@ finally {
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 ```
 
-`--skip-setup` bayrağı, etkileşimli kurulum sihirbazını atlar, böylece model arka ucunu bir sonraki adımda manuel olarak yapılandırabilirsiniz.
+`--skip-setup` bayrağı, etkileşimli kurulum sihirbazını atlar; böylece model arka ucunu bir sonraki adımda manuel olarak yapılandırabilirsiniz.
 
 Kabuğunuzu yeniden yükleyin:
 
@@ -407,7 +409,7 @@ Kurulumu doğrulayın:
 hermes --version
 ```
 
-Tüm bağımlılıkları kontrol etmek için bir öz tanılama çalıştırın:
+Tüm bağımlılıkları kontrol etmek için bir kendi kendine tanılama çalıştırın:
 
 ```bash
 hermes doctor
@@ -469,9 +471,9 @@ finally {
 <!-- @os:end -->
 
 ---
-## Hermes'i Lemonade Kullanacak Şekilde Yapılandırma
+## Hermes'in Lemonade Kullanacak Şekilde Yapılandırılması
 
-Hermes, model yapılandırmasını `~/.hermes/config.yaml` dosyasında depolar. Etkileşimli `hermes model` seçicisini kullanabilir veya yapılandırmayı doğrudan yazabilirsiniz.
+Hermes, model yapılandırmasını `~/.hermes/config.yaml` dosyasında saklar. Etkileşimli `hermes model` seçicisini kullanabilir veya yapılandırmayı doğrudan yazabilirsiniz.
 
 ### Seçenek 1: Etkileşimli seçici
 
@@ -491,7 +493,7 @@ hermes model
 ```
 <!-- @os:end -->
 
-İstenildiğinde:
+Sorulduğunda:
 
 1. **Custom endpoint (enter URL manually)** seçeneğini seçin
 <!-- @os:linux -->
@@ -501,12 +503,12 @@ hermes model
 2. **API base URL:** WSL ağ geçidi IP'sini kullanın: bunu almak için WSL içinde `ip route show default | awk '{print $3}' | head -1` komutunu çalıştırın, ardından `http://<WSL-Gateway-IP>:13305/api/v1` girin
 <!-- @os:end -->
 3. **API key:** `lemonade`
-4. **API compatibility mode:** `1` (Auto-detect)
+4. **API compatibility mode:** `1` (Otomatik algıla)
 5. **Select model:** listeden `Qwen3.6-35B-A3B-GGUF` seçin
 6. **Context length in tokens:** `262144`
 7. **Display name:** `local-lemonade` (veya tercih ettiğiniz herhangi bir ad)
 
-`hermes model`, hem etkin model seçimini hem de bağlam uzunluğunu uç noktayla birlikte depolayan adlandırılmış bir `custom_providers` girdisini kaydeder. `~/.hermes/config.yaml` dosyasındaki sonuç şu şekilde görünür:
+`hermes model`, hem etkin model seçimini hem de bağlam uzunluğunu uç nokta ile birlikte saklayan adlandırılmış bir `custom_providers` girişini kaydeder. `~/.hermes/config.yaml` dosyasındaki sonuç şu şekilde görünür:
 
 ```yaml
 model:
@@ -679,11 +681,11 @@ finally {
 
 ---
 
-## (Önerilen) Podman Sandbox Özelliğini Etkinleştirme
+## (Önerilir) Podman Kum Havuzu (Sandboxing) Özelliğinin Etkinleştirilmesi
 
-Hermes Agent, tüm ajan kabuk ve dosya işlemlerini doğrudan ana bilgisayarınızda çalıştırmak yerine izole bir konteyner üzerinden yönlendirebilir. Bu, istenmeyen herhangi bir eylemin etki alanını sandbox ile sınırlayarak ana bilgisayarınızın dosya sistemini ve ağını etkilenmeden bırakır.
+Hermes Agent, tüm aracı kabuk ve dosya işlemlerini doğrudan ana bilgisayarınızda çalıştırmak yerine izole bir konteyner üzerinden yönlendirebilir. Bu, istenmeyen herhangi bir eylemin etki alanını kum havuzuyla sınırlandırır ve ana bilgisayarınızın dosya sistemini ile ağını etkilenmemiş bırakır.
 
-Hafif bir sandbox imajı oluşturun:
+Hafif bir kum havuzu imajı oluşturun:
 
 <!-- @os:linux -->
 ```bash
@@ -732,7 +734,7 @@ WSL terminalinize girin:
 wsl -d Ubuntu-24.04
 ```
 
-Ardından, hafif bir sandbox imajı oluşturun:
+Ardından, hafif bir kum havuzu imajı oluşturun:
 
 ```bash
 podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -808,7 +810,7 @@ EOF
 ```
 
 > `terminal.backend` hâlâ `docker` olarak kalır.
-> `HERMES_DOCKER_BINARY`, Hermes'e çalışma zamanı olarak bunun yerine Podman kullanmasını söyleyen ayardır.
+> `HERMES_DOCKER_BINARY`, Hermes'e çalışma zamanı olarak Podman kullanmasını söyleyen değişkendir.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -905,28 +907,28 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Hermes artık kalıcı bir sandbox konteyneri başlatacak ve tüm `terminal` ve dosya aracı çağrılarını bu konteyner üzerinden yönlendirecektir. Konteyner, Hermes sürecinin ömrünü paylaşır, tüm araç çağrıları arasında yeniden kullanılır ve Hermes kapandığında yok edilir.
+Hermes artık kalıcı bir kum havuzu konteyneri başlatacak ve tüm `terminal` ile dosya aracı çağrılarını bu konteyner üzerinden yönlendirecektir. Konteyner, Hermes sürecinin yaşam döngüsünü paylaşır, tüm araç çağrıları arasında yeniden kullanılır ve Hermes sonlandığında yok edilir.
 
-> **Sandbox'ın çalıştığını doğrulayın:** Hermes'i başlatın (`hermes`) ve ondan `run hostname` yapmasını isteyin - makinenizin ana bilgisayar adı yerine kısa bir konteyner kimliği görmelisiniz. Ayrıca ondan `rm -rf <path-to-a-dummy-file/folder>` yapmasını da isteyebilirsiniz: Hermes silme işlemini onaylayacaktır, ancak klasör ana bilgisayarınızda hâlâ duruyor olacaktır. Komut, sizin değil, konteynerin izole `$HOME` dizini içinde çalışmıştır.
+> **Kum havuzunun çalıştığını doğrulayın:** Hermes'i başlatın (`hermes`) ve ona `run hostname` çalıştırmasını isteyin - makinenizin ana bilgisayar adı yerine kısa bir konteyner kimliği görmelisiniz. Ayrıca ona `rm -rf <path-to-a-dummy-file/folder>` komutunu çalıştırmasını da isteyebilirsiniz: Hermes silme işlemini onaylayacaktır, ancak klasör ana bilgisayarınızda hâlâ duruyor olacaktır. Komut, sizin `$HOME` dizininizde değil, konteynerin izole `$HOME` dizininde çalıştırılmıştır.
 
-> **Daha güçlü izolasyona mı ihtiyacınız var?** Hermes ayrıca tüm ajan sürecini - ağ geçidi, araçlar ve her şeyi - bir konteyner içinde çalıştıran resmi bir Docker imajı (`nousresearch/hermes-agent`) sunar. Kurulum ayrıntıları için [Hermes Docker belgelerine](https://hermes-agent.nousresearch.com/docs/user-guide/docker) bakın.
+> **Daha güçlü izolasyon mu gerekiyor?** Hermes ayrıca, tüm aracı sürecini bir konteyner içinde çalıştıran resmi bir Docker imajı (`nousresearch/hermes-agent`) da sunar - ağ geçidi, araçlar ve her şey dahil. Kurulum ayrıntıları için [Hermes Docker belgelerine](https://hermes-agent.nousresearch.com/docs/user-guide/docker) bakın.
 
 ---
 
 <!-- @os:linux -->
-## (Önerilen) Hermes'in Firecrawl Hizmetleriyle Entegrasyonu
+## (Önerilir) Hermes'in Firecrawl Hizmetleriyle Entegrasyonu
 
-Hermes, yerleşik web araçlarını kullanarak web sitelerinde gezinebilir ve içerik çıkarabilir. Ancak, birçok modern web sitesi bot algılama sistemleri kullanır; bu sistemler basit HTTP isteklerini engeller ve gerçek içerik yerine sınama sayfaları döndürür. Sonuç olarak, Hermes bu sitelerden bilgi çıkarmakta güvenilir bir şekilde başarısız olabilir.
+Hermes, yerleşik web araçlarını kullanarak web sitelerine göz atabilir ve içerik çıkarabilir. Ancak, birçok modern web sitesi bot tespit sistemleri kullanır; bu sistemler basit HTTP isteklerini engeller ve gerçek içerik yerine zorlayıcı (challenge) sayfalar döndürür. Sonuç olarak, Hermes bu sitelerden bilgi çıkarmayı güvenilir bir şekilde başaramayabilir.
 
-Bu sınırlamanın üstesinden gelmek için, [Firecrawl](https://docs.firecrawl.dev/introduction) bu sınamaları aşabilen ve Hermes otomasyonunun tüm potansiyelini ortaya çıkarabilen, kendi kendine barındırılan bir web tarama ve içerik çıkarma hizmeti sunar.
+Bu sınırlamanın üstesinden gelmek için, [Firecrawl](https://docs.firecrawl.dev/introduction) bu zorlukları aşabilen ve Hermes otomasyonunun tam potansiyelini açığa çıkarabilen, kendi kendine barındırılan (self-hosted) bir web tarama ve içerik çıkarma hizmeti sunar.
 
-Bu kurulumda, Firecrawl bir dizi Docker konteyneri olarak Podman ile yönetilerek çalışır. Yaşam döngüsü yönetimini ve otomatik başlatmayı basitleştirmek için, Firecrawl'ı temeldeki Podman Compose yığınını düzenleyen kullanıcı düzeyinde bir `systemd` hizmeti olarak kaydediyoruz. Bu, Hermes'in konteynerlerle doğrudan etkileşime girmek yerine standart `systemctl --user` komutlarını kullanarak Firecrawl hizmetini başlatmasına, durdurmasına ve doğrulamasına olanak tanır.
+Bu kurulumda, Firecrawl, Podman ile yönetilen bir dizi Docker konteyneri olarak çalışır. Yaşam döngüsü yönetimini ve otomatik başlatmayı basitleştirmek için, Firecrawl'ı, alttaki Podman Compose yığınını düzenleyen kullanıcı düzeyinde bir `systemd` hizmeti olarak kaydediyoruz. Bu, Hermes'in konteynerlerle doğrudan etkileşime girmek yerine standart `systemctl --user` komutlarını kullanarak Firecrawl hizmetini başlatmasına, durdurmasına ve doğrulamasına olanak tanır.
 
-İşleri basit tutmak için, tüm süreci dört adıma böldük:
+İşleri basit tutmak için, tüm süreci dört adıma ayırdık:
 
 ---
 
-### 1. Sistem hizmetini kaydedin
+### 1. Sistem hizmetinin kaydedilmesi
 systemd kullanıcı yapılandırma dizinine gidin:
 ```bash
 cd ~/.config/systemd/user
@@ -960,7 +962,7 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
-Bu noktada, hizmet tanımlanmış ancak henüz `systemd` ile kaydedilmemiştir. 
+Bu noktada, hizmet tanımlanmış ancak henüz `systemd` ile kaydedilmemiştir.
 Dosya adının yukarıda oluşturduğunuzla tam olarak eşleştiğinden emin olun, ardından şunu çalıştırın:
 ```bash
 systemctl --user daemon-reload
@@ -970,17 +972,17 @@ Başarılı olursa, aşağıdaki çıktıyı görmelisiniz:
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
- `default.target.wants/` dizini, otomatik olarak başlayacak şekilde yapılandırılmış hizmetlere yönelik sembolik bağlantılar içerir.
+ `default.target.wants/`, otomatik olarak başlatılacak şekilde yapılandırılmış hizmetlere yönelik sembolik bağlantılar içerir.
 
-### 2. Firecrawl'ı Hizmetiniz için Yapılandırın
+### 2. Hizmetiniz İçin Firecrawl'ın Yapılandırılması
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md), kazıma ve veri işleme ortamları üzerinde tam kontrole ihtiyaç duyanlar için idealdir; ancak bu, ek bakım ve yapılandırma çabası gerektirir.
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md), kazıma (scraping) ve veri işleme ortamları üzerinde tam kontrole ihtiyaç duyanlar için idealdir, ancak bunun karşılığında ek bakım ve yapılandırma çabası gerektirir.
 
 Depoyu klonlayarak başlayın:
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-Kök `/firecrawl` dizininde `.env` oluşturun:
+Kök `/firecrawl` dizininde `.env` dosyasını oluşturun:
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1008,26 +1010,26 @@ BULL_AUTH_KEY=CHANGEME
 # Default: 0.8 (80%)
 # MAX_RAM=0.8
 ```
-> Güvenilmeyen ağlardan erişilebilen herhangi bir dağıtımda özellikle olmak üzere, `BULL_AUTH_KEY` değerini güçlü bir gizli anahtar olarak ayarlayın.
-### 3. Hermes'i Compose ile Dağıtma
+> `BULL_AUTH_KEY` değerini, özellikle güvenilir olmayan ağlardan erişilebilen herhangi bir dağıtımda, güçlü bir gizli anahtar olarak ayarlayın.
+### 3. Hermes'in Compose ile Dağıtılması
 
-Devam etmeden önce en güncel Hermes Docker imajını çektiğinizden emin olun:
+Devam etmeden önce en son Hermes Docker imajını çektiğinizden emin olun:
 ```bash
 podman pull docker.io/nousresearch/hermes-agent:latest
 ```
-Bu işlem tamamlandıktan sonra Hermes Compose dosyasını [hermes-compose.yaml](assets/hermes-compose.yaml) indirin ve kök `/firecrawl` dizinine yerleştirin:
+Bu işlem tamamlandıktan sonra Hermes Compose dosyasını [hermes-compose.yaml](assets/hermes-compose.yaml) indirin ve `/firecrawl` kök dizinine yerleştirin:
 
-> Bu kural, `systemd`'nin `WorkingDirectory=${HOME}/firecrawl` içinde belirtildiği şekilde hizmeti doğru bulup başlatabilmesi için gereklidir.
+> Bu kural, `systemd`'nin hizmeti `WorkingDirectory=${HOME}/firecrawl` içinde belirtildiği gibi bulup başlatabilmesi için gereklidir.
 
-> Yığını istediğiniz zaman ek Firecrawl hizmetleri ekleyerek genişletebilirsiniz. Kullanılabilir tüm hizmetlerin tam listesini resmi [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) dosyasında bulabilirsiniz.
+> Yığını gerektiğinde ek Firecrawl hizmetleri ekleyerek her zaman genişletebilirsiniz. Kullanılabilir hizmetlerin tam listesine resmi [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) dosyasından ulaşabilirsiniz.
 
-### 4. Firecrawl Üzerinden Hermes Hizmetini Başlatma
+### 4. Firecrawl Üzerinden Hermes Hizmetini Başlatma 
 
 Kontrolü `systemd`'ye devretmeden önce, yığını manuel olarak çalıştırarak her şeyin doğru çalıştığını doğrulayın:
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-Her şey doğru yapılandırılmışsa Hermes konteynerinin başladığını görmelisiniz ve komut satırı çıktınız aşağıdakine benzer görünmelidir:
+Her şey doğru yapılandırılmışsa, Hermes konteynerinin ayağa kalktığını görmelisiniz ve komut satırı çıktınız şuna benzer olmalıdır:
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
@@ -1040,7 +1042,7 @@ Artık her şey doğrulandığına göre, hizmeti `systemd` üzerinden başlatı
 ```bash
 systemctl --user start firecrawl.service
 ```
-[Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints)'ine etkileşimli konteyner içinden erişilebilir ve Web Panosu aynı sunucu ve bağlantı noktasında http://127.0.0.1:9119 adresinde kullanılabilir.
+[Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) etkileşimli konteyner içinden erişilebilir durumdadır ve Web Panosu aynı ana bilgisayar ve bağlantı noktasında http://127.0.0.1:9119 adresinde kullanılabilir.
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
@@ -1052,9 +1054,9 @@ systemctl --user stop firecrawl.service
 <!-- @os:end -->
 ---
 
-## Hermes Native
+## Hermes Native (Yerel)
 
-Doğrudan etkileşimli bir CLI oturumu başlatın:
+Doğrudan etkileşimli bir CLI oturumu başlatın: 
 
 ```bash
 hermes
@@ -1213,13 +1215,13 @@ finally {
 
 ### Web Panosu
 
-Hermes, yapılandırma, API anahtarları, modeller, oturumlar, bellek ve zamanlanmış görevleri (cron jobs) yönetmek için tarayıcı tabanlı bir arayüz içerir. Ağ geçidi veya CLI çalışırken ikinci bir terminal açın ve şununla başlatın:
+Hermes, yapılandırmayı, API anahtarlarını, modelleri, oturumları, belleği ve zamanlanmış görevleri yönetmek için tarayıcı tabanlı bir arayüz içerir. Ağ geçidi veya CLI çalışırken ikinci bir terminal açın ve aşağıdaki komutla başlatın:
 
 ```bash
 hermes dashboard
 ```
 
-Bu, yerel bir sunucu başlatır ve tarayıcınızda `http://127.0.0.1:9119` adresini açar. Tüm özellik referansı için [pano belgelerine](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) bakın.
+Bu komut yerel bir sunucu başlatır ve tarayıcınızda `http://127.0.0.1:9119` adresini açar. Tüm özellik referansı için [pano belgelerine](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard) bakın.
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
@@ -1228,27 +1230,27 @@ Bu, yerel bir sunucu başlatır ve tarayıcınızda `http://127.0.0.1:9119` adre
 
 ## İsteğe Bağlı: Bir İletişim Kanalı Bağlama
 
-Ağ geçidi çalıştığında yerel ajanınıza herhangi bir cihazdan ulaşabilirsiniz. Hermes, [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) ve diğerlerini destekler
+Ağ geçidi çalıştıktan sonra yerel ajanınıza herhangi bir cihazdan ulaşabilirsiniz. Hermes [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) ve diğerlerini destekler
 
 ---
 
 ### Discord
 
-Discord, bir bot eklemek için **yönetici erişiminiz olan** bir sunucu gerektirir. Sunucuları paylaşıyor ama sahibi değilseniz, bunun yerine Telegram'ı kullanın.
+Discord, bir bot eklemek için **yönetici erişiminiz olan** bir sunucu gerektirir. Sunucuları paylaşıyor ancak sahibi değilseniz, bunun yerine Telegram kullanın.
 
-#### Bir Discord uygulaması ve bot oluşturma
+#### Bir Discord uygulaması ve botu oluşturma
 
-1. [Discord Developer Portal](https://discord.com/developers/applications)'a gidin ve **New Application**'a tıklayın. Bir isim verin (örneğin "hermes-bot").
-2. Kenar çubuğunda **Bot**'a tıklayın. Bot için bir kullanıcı adı belirleyin.
-3. Hâlâ Bot sayfasındayken, **Privileged Gateway Intents** bölümüne kaydırın ve şunları etkinleştirin:
+1. [Discord Geliştirici Portalı](https://discord.com/developers/applications)'na gidin ve **New Application** öğesine tıklayın. Bir ad verin (örneğin "hermes-bot").
+2. Yan menüde **Bot** öğesine tıklayın. Bot için bir kullanıcı adı belirleyin.
+3. Hâlâ Bot sayfasındayken **Privileged Gateway Intents** bölümüne kaydırın ve şunları etkinleştirin:
    - **Message Content Intent** (gerekli)
    - **Server Members Intent** (önerilir)
-4. Yukarı kaydırın ve bot tokeninizi oluşturmak için **Reset Token**'a tıklayın. Kopyalayın.
+4. Yukarı kaydırın ve bot tokeninizi oluşturmak için **Reset Token** öğesine tıklayın. Kopyalayın.
 
 #### Botu sunucunuza ekleme
 
-1. Kenar çubuğunda **OAuth2 / URL Generator**'a tıklayın.
-2. **Scopes** altında `bot` ve `applications.commands`'ı etkinleştirin.
+1. Yan menüde **OAuth2 / URL Generator** öğesine tıklayın.
+2. **Scopes** altında `bot` ve `applications.commands` seçeneklerini etkinleştirin.
 3. **Bot Permissions** altında şunları etkinleştirin: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
 4. Oluşturulan URL'yi kopyalayın, tarayıcınıza yapıştırın, sunucunuzu seçin ve onaylayın.
 
@@ -1258,11 +1260,11 @@ Discord'da Geliştirici Modunu etkinleştirin (**User Settings / Advanced / Deve
 - Sunucu simgenize sağ tıklayın: **Copy Server ID**
 - Kendi avatarınıza sağ tıklayın: **Copy User ID**
 
-Sunucu simgenize sağ tıklayın / **Privacy Settings** / **Direct Messages**'ı açın. Bu, eşleştirme adımı için gereklidir.
+Sunucu simgenize sağ tıklayın / **Privacy Settings** / **Direct Messages** seçeneğini açık hale getirin. Bu, eşleştirme adımı için gereklidir.
 
 #### Hermes'i Discord için yapılandırma
 
-`~/.hermes/.env` dosyasına şunu ekleyin:
+Aşağıdakini `~/.hermes/.env` dosyasına ekleyin:
 
 ```bash
 # Required
@@ -1276,7 +1278,7 @@ Ardından ağ geçidini başlatın:
 hermes gateway
 ```
 
-Bot, birkaç saniye içinde Discord'da çevrimiçi olmalıdır. Ona bir mesaj gönderin, ister bir DM ister görebildiği bir kanal içinde olsun.
+Bot birkaç saniye içinde Discord'da çevrimiçi olmalıdır. Ona bir mesaj gönderin, ister bir DM ister görebildiği bir kanal üzerinden.
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1290,11 +1292,11 @@ Bot, birkaç saniye içinde Discord'da çevrimiçi olmalıdır. Ona bir mesaj g�
 #### Bir Telegram botu oluşturma
 
 1. Telegram'ı açın ve **@BotFather**'a mesaj gönderin.
-2. `/newbot` gönderin ve talimatları izleyin. Verdiği bot tokenini kaydedin.
+2. `/newbot` komutunu gönderin ve yönergeleri izleyin. Size verilen bot tokenini kaydedin.
 
 #### Hermes'i Telegram için yapılandırma
 
-`~/.hermes/.env` dosyasına şunu ekleyin:
+Aşağıdakini `~/.hermes/.env` dosyasına ekleyin:
 
 ```bash
 TELEGRAM_BOT_TOKEN=your-bot-token
@@ -1309,16 +1311,16 @@ Ardından ağ geçidini başlatın:
 hermes gateway
 ```
 
-Test etmek için botunuza Telegram'da herhangi bir mesaj gönderin. Artık ajanınızla Telegram DM üzerinden sohbet edebilirsiniz. Webhook modu ve gelişmiş seçenekler için [tam Telegram kurulum kılavuzuna](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) bakın.
+Test etmek için botunuza Telegram üzerinden herhangi bir mesaj gönderin. Artık ajanınızla Telegram DM üzerinden sohbet edebilirsiniz. Webhook modu ve gelişmiş seçenekler için [tam Telegram kurulum kılavuzuna](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) bakın.
 
 ---
 
 ## Sonraki Adımlar
 
-Ajanınız artık telefonunuzdan komut alıp yerel makinenizde işlem yapabildiğine göre, keşfetmeye değer üç yön:
+Artık ajanınız telefonunuzdan komut alıp yerel makinenizde işlem yapabildiğine göre, keşfedilmeye değer üç yön şunlardır:
 
-1. **Otomatik araştırma özeti**: Hermes'i, her sabah ilgilendiğiniz konular için web'de arama yapacak, bulguları yerel modelinizle özetleyecek ve bir özeti Telegram veya Discord üzerinden telefonunuza gönderecek şekilde zamanlayın, tamamı kendi donanımınızda, bulut maliyeti olmadan çalışır.
+1. **Otomatik araştırma özeti**: Hermes'i her sabah ilgilendiğiniz konular için webde arama yapacak, bulguları yerel modelinizle özetleyecek ve bir özeti Telegram veya Discord aracılığıyla telefonunuza gönderecek şekilde zamanlayın, tüm bunlar bulut maliyeti olmadan kendi donanımınızda çalışır.
 
-2. **Talep üzerine kod incelemesi**: Hermes'i bir GitHub deposuna yönlendirin, açık pull request'leri incelemesini isteyin ve yorumları veya bir özeti sohbetinize geri göndermesini sağlayın. Docker terminal arka ucuyla, tüm git işlemleri sandbox içinde çalışır ve ana makinenizi temiz tutar.
+2. **Talep üzerine kod incelemesi**: Hermes'i bir GitHub deposuna yönlendirin, açık pull request'leri incelemesini isteyin ve sohbetinize bir yorum veya özet göndermesini sağlayın. Docker terminal arka ucuyla, tüm git işlemleri sandbox içinde çalışır ve ana makinenizi temiz tutar.
 
 3. **Yerel dosya asistanı**: Hermes'e bir çalışma dizinine erişim verin ve telefonunuzdan talep üzerine dosyaları düzenlemesini, yeniden adlandırmasını, özetlemesini veya dönüştürmesini isteyin. Docker terminal arka ucu tüm yazma işlemlerini sandbox çalışma alanıyla sınırlandırdığından, kazara yıkıcı işlemler kontrol altında tutulur.

@@ -2,12 +2,12 @@
   "locale": "nb-NO",
   "files": {
     "playbooks/core/comfyui-image-gen/README.md": {
-      "source_sha256": "217719aad1905b6de83f8d71f5d4b9c183dd1f5b2b19cb73db5fcb51710de2f2",
+      "source_sha256": "b9178e28acd1d01ba600edecfc236efe09a7586700882fb94ea380ca3074c9c4",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Fluent, accurate, code/URLs intact. Minor: 'konditionering' slightly awkward, English UI labels retained appropriately."
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent translation; code/URLs/brands intact. Minor: 'konditionering' slightly awkward spelling, some English terms left untranslated by design."
     },
     "playbooks/core/comfyui-image-gen/platform.md": {
       "source_sha256": "e8a6884590d062f17595a57f2aadf5abe686c3169f53f3181544259336435c47",
@@ -18,12 +18,12 @@
       "quality_issues": "\"spillboken\" (playbook) is awkward/mistranslation; \"Modeltype\" missing double-l (Modelltype). Otherwise accurate, fluent, intact."
     },
     "playbooks/core/comfyui-image-gen/playbook.json": {
-      "source_sha256": "09b9cb70967e72f2d8b3fc33ef4e53389489b271a2629f2c571207300fe0f477",
+      "source_sha256": "0344d13f61c65a6b76e756cafedefcd2aaaa2a5a52ec08e0f9ad922663513cdf",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Title uses gerund 'Genererer'; 'Generer' or 'Slik genererer du' would fit better; otherwise accurate."
+      "quality_score": 88,
+      "quality_issues": "Title 'Genererer' should be 'Generere' (infinitive) for heading style; otherwise accurate and fluent."
     },
     "playbooks/dependencies/comfyui.md": {
       "source_sha256": "1364f858fb8176db125d258fd392b33e0c2ec1d9f50983f5648926384717a436",
@@ -162,12 +162,12 @@
       "quality_issues": "Accurate, fluent, code/URLs/brands intact; tab names left in English intentionally."
     },
     "playbooks/core/lmstudio-rocm-llms/README.md": {
-      "source_sha256": "27c3416225166f7dcfeec23c7e18a85a54b6df8b83df790c286a7e9fafdb5354",
+      "source_sha256": "b2a6c0c61bb6e866fb3075b4587b12d1acc7a8a369ff2a03e0814c497fc73dd1",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent, code/URLs/brands intact. Minor: missing blank line before 'Eksempel' heading; 'ChatGPT-klasse' slightly awkward but acceptable."
+      "quality_score": 90,
+      "quality_issues": "Minor: 'Tjene modeller' awkward for 'serve models'; otherwise accurate, fluent, code/tags/URLs intact."
     },
     "playbooks/core/lmstudio-rocm-llms/platform.md": {
       "source_sha256": "f731064c13c2ca273ea6bbc804e0b3309a1f4d385e3b58b35575f5e8430a3b86",
@@ -178,20 +178,20 @@
       "quality_issues": "\"denne spillebok\" wrong term (playbook) and missing definite ending; should be \"denne kjøreboken\" or keep 'playbook'."
     },
     "playbooks/core/lmstudio-rocm-llms/playbook.json": {
-      "source_sha256": "a63a9e649fc4c346593b47b1a3fe9b4f68abb9f41046456d0d5317cec87f3e7c",
+      "source_sha256": "7e39d03fdd81de9dc596f6fd2af964c357efb85649adf4b0911f282eb543aae0",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "\"betjene\" awkward for serving; otherwise accurate, fluent, terms intact."
+      "quality_issues": "'Servering' slightly awkward for software serving context; otherwise accurate and fluent."
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
-      "source_sha256": "9bc128f29f40f1a7b56da55d7c22d3520c4a232d990259f020928394eb7b517e",
+      "source_sha256": "fa7d8770c407468815e9a981c8a7349429d334b24c1002a729e277ac7f1988be",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Overskrift mangler ## markdown; inkonsistent Trinn/Steg; 'tjene en LLM' awkward for 'serve'. Otherwise accurate and fluent."
+      "quality_score": 90,
+      "quality_issues": "\"Spillbok\" is a literal, awkward rendering of playbook; \"tjene en LLM\" slightly odd. Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/core/n8n-automation-gpt-oss/platform.md": {
       "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
@@ -202,12 +202,12 @@
       "quality_issues": "Accurate, fluent, code/URLs/brands intact. Minor: 'playbooken' anglicism acceptable."
     },
     "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
-      "source_sha256": "004e579ddcaf166de5205c73c05d8b368f701c20fdd5a1dd77be591927f0f441",
+      "source_sha256": "1dc9545bd669bc210df8f6ac88f72a7148cd91578322e5d614d9476bf9741e6a",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "\"nyhetsoppsummerer\" slightly awkward but understandable; otherwise accurate and fluent."
+      "quality_issues": "\"nyhetsoppsummerer\" slightly awkward noun form; otherwise accurate and fluent."
     },
     "playbooks/core/pytorch-rocm-llms/README.md": {
       "source_sha256": "c21d88a2b435760acf276582d292917abd1501bae2ab0343d07a71ee3e1970cd",
@@ -234,12 +234,12 @@
       "quality_issues": "Accurate, fluent, terminology and trademarks intact; natural Bokmål phrasing throughout."
     },
     "playbooks/core/vscode-qwen3-coder/README.md": {
-      "source_sha256": "f6f05e2203068ca1b78936cdf2d50d572800f3dc5b647dcc89159488fcbb87f1",
+      "source_sha256": "1c9ef7b427d2466a1396e3950b63eaca6752fb08fc49a747d07f93a143e8d001",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Accurate, fluent; 'serve' left as 'serve' (anglicism), otherwise excellent; code/URLs/tags intact."
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; untranslated IMPORTANT note block intentionally preserved (github-only). Code, URLs, numbers intact."
     },
     "playbooks/core/vscode-qwen3-coder/platform.md": {
       "source_sha256": "14c7eec60b483e4bedb5e465673d89e07466088a9ed9c59d7964c3466cf89410",
@@ -250,12 +250,12 @@
       "quality_issues": "Accurate, fluent translation; code, numbers, brands intact. Minor: 'Buffer' for Cache acceptable but could stay untranslated."
     },
     "playbooks/core/vscode-qwen3-coder/playbook.json": {
-      "source_sha256": "f65c00f0dd3f6e2a6db533fa4200c7295957e0e11baa55e2ce275de20177e5ec",
+      "source_sha256": "d51dc350ad9148509a1bba649bc9777be7c2d43a170845e4775f2b3a89687e26",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Accurate and fluent; minor inconsistency VSCode vs VS Code mirrors source."
+      "quality_issues": "Minor inconsistency: VSCode vs VS Code, mirroring source; otherwise accurate and fluent."
     },
     "playbooks/supplemental/amd-sync/README.md": {
       "source_sha256": "e777827fbe0b543b84f58e3a9d7c7a9761fd640f37682499e9ea8ee5acc1478e",
@@ -322,12 +322,12 @@
       "quality_issues": "Natural, accurate; minor: 'chat' could be 'chatt', and REST API could take article, but acceptable."
     },
     "playbooks/supplemental/open-webui-chat/README.md": {
-      "source_sha256": "912f06c8f1493411e574a359dfa3159f362c2053ceb47535c2cc4198bdb996ae",
+      "source_sha256": "ffd1418792d11f784b4eefbf4e50f6e9336d055d73838ad06b9a4c83c5d98389",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Minor inconsistency: 'Trinn'/'Steg' mixed; 'et backend' gender; 'Nå er du klar' slightly off. Code/URLs intact, fluent overall."
+      "quality_score": 90,
+      "quality_issues": "Untranslated heading 'Starting Open WebUI Server'; 'spillbok' awkward for playbook; minor inconsistency steg/trinn. Code and URLs intact."
     },
     "playbooks/supplemental/open-webui-chat/platform.md": {
       "source_sha256": "1cc71fc518a4ba7e507047973d835456dc836155b3365f0e7fb64ed1f81d85cb",
@@ -338,12 +338,12 @@
       "quality_issues": "Minor redundancy 'herfra [her]'; otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/open-webui-chat/playbook.json": {
-      "source_sha256": "37ea833e031babe935474b1da111c8b67bb05d395c178a8212108e261231c41b",
+      "source_sha256": "63e56c30ab73dd3334cde5f1717c4ff22fa924a4bac13852f609de8baac411ae",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Inconsistent LLM handling: expanded in title, abbreviated in body; otherwise accurate and fluent."
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent; 'Chatter' as heading slightly informal but acceptable."
     },
     "playbooks/supplemental/cvml/README.md": {
       "source_sha256": "31c69cc98e43387d9e01f96afdae1c5a2378af9f9f0e773d4e9febc2d84e0bdb",
@@ -362,12 +362,12 @@
       "quality_issues": "Gender error: 'lokal datasyn' should be 'lokalt datasyn' (neuter). Otherwise accurate, terms/brands intact."
     },
     "playbooks/supplemental/gaia-agents/README.md": {
-      "source_sha256": "6cbf3ce0b81a61b7d64d1fe010172f17d87e0f316ee49171e93f1c9c6ae73a30",
+      "source_sha256": "f40334b89a8e3df61fe9c1284bb9959816582ca9e640078e73577db87dcbc385",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Inconsistent: final test queries translated to Norwegian but earlier identical queries left in English; otherwise accurate, code intact."
+      "quality_issues": "Final-verification test queries translated to Norwegian but code/output examples use English; minor inconsistency. Otherwise fluent, accurate, code intact."
     },
     "playbooks/supplemental/gaia-agents/platform.md": {
       "source_sha256": "0aa409f73352dbe5489bcbff783403a39bd4049ae44238f8ce107165f02cf43c",
@@ -378,20 +378,20 @@
       "quality_issues": "Fluent, accurate; code/URLs/brands intact. Minor: 'playbooken' anglicism acceptable."
     },
     "playbooks/supplemental/gaia-agents/playbook.json": {
-      "source_sha256": "9183d4ec9b26b7e92b69539a446e28d8d962c49be223d2c878a7417805021e48",
+      "source_sha256": "1d852748026cb8690fcb93a09c2f2b986e24f169a10963a424d7d43d44aa9f99",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Accurate, fluent; 'KI' for AI acceptable but slightly localized; otherwise flawless."
+      "quality_score": 94,
+      "quality_issues": "Fluent and accurate; minor nit: 'Bygge' could be 'Bygg' for consistency with heading."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
-      "source_sha256": "9352db15e96748d77bd1db916212ae60537bccec11f553ef9addc748715d5f22",
+      "source_sha256": "1ee8ab6ab9d5da54e198bb8aea1d2ae0486cc43dc1f3bf32ffee88c502a4264d",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Stray '#' added before @github-only comment; minor 'en lydopptak' gender error. Otherwise accurate, fluent, code/URLs intact."
+      "quality_score": 94,
+      "quality_issues": "Minor: inconsistent Trinn/Steg/Steg headings; 'AMD-ets XDNA2' awkward; otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/lemonade-getting-started/platform.md": {
       "source_sha256": "091ccd8efa90e078a5d740aac0e40d742ad91f5898d0de9e1574d62e6778ec17",
@@ -402,12 +402,12 @@
       "quality_issues": "Minor: 'oppskriftsboken' unusual for playbook; '300-serien prosessor' slightly awkward. Otherwise accurate and fluent."
     },
     "playbooks/supplemental/lemonade-getting-started/playbook.json": {
-      "source_sha256": "b6d4d92098822e89fb92aa2ed859b47a98a331cd123fb8bd07fe1b5f7e6139a1",
+      "source_sha256": "a3e0145b2d86aa1885a044ecbbef03e5824dfbb7ed9b219d960490517ec095ce",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "'åpen kildekode lokal AI-server' slightly awkward; better 'en lokal AI-server med åpen kildekode'"
+      "quality_score": 86,
+      "quality_issues": "Awkward 'åpen kildekode lokal AI-server' phrasing; better 'lokal AI-server med åpen kildekode'"
     },
     "playbooks/supplemental/llama-factory-finetuning/README.md": {
       "source_sha256": "7ff1d8bf4e3a0e54af3a8c90e2ffc62350c8ba5c1e49d4e5ffbce3fe10fe78cb",
@@ -426,20 +426,20 @@
       "quality_issues": "Accurate, fluent, brand terms and acronyms preserved correctly."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
-      "source_sha256": "131a8dbe90f9ed5638e7e2a33ad5701c678f3ab1348210a2badc3b8f5bcf9346",
+      "source_sha256": "52ec6dabd9b8e1babd4a62ab77ee6c76e62d0ba0b1acb867aecf8c7f412c809b",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Fluent, accurate, code intact. Minor: 'den backenden' awkward, 'bransjestandardiserte' clunky, occasional missing spacing between sections."
+      "quality_score": 91,
+      "quality_issues": "Minor typos: 'konteksvindu', '263k-tokens' hyphenation. Otherwise accurate, fluent, code/URLs/brands intact."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
-      "source_sha256": "ad63f56e43c6be51b65de3beac6917a2aed27360cca004d45cbe20e24ce068d8",
+      "source_sha256": "4df48f5b7948410bc75d43e8fe4ad385da94fde5cb7bc8905028639bd57cd006",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Slightly awkward 'OpenClaw autonom AI-agent'; missing hyphen/article, but adequate and clear."
+      "quality_issues": "Minor: 'OpenClaw autonom AI-agent' slightly awkward word order; 'Kjører' title form acceptable."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
       "source_sha256": "d6b66b52107f19e10f53a4dbac24c90a47ac5723bee591cd7e6ed4bf3026676d",
@@ -546,12 +546,12 @@
       "quality_issues": "Minor inconsistencies: 'grid/rutenett' terminology mixed, 'Fremgangsmåte/Metode/Tilnærming' varies for 'Approach'. Otherwise fluent, accurate, code intact."
     },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
-      "source_sha256": "cc00f17cba750b636c672726ed6b12738235ffe750c438db3472d11cbb1f601e",
+      "source_sha256": "648e79fe91772ffd0abcdffa934502f5155c8a443442641d594ee93807971571",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Inconsistent term for 'playbook' (veiledning vs oppskrift vs spillebøker); 'utilstrekkelig' for 'unhealthy' slightly off. Otherwise accurate, fluent, code/URLs intact."
+      "quality_issues": "Inconsistent 'playbook' translation (spillbok/oppskrift); minor 'sunn' for healthy; one awkward phrase 'Sett innenfra containeren'. Code/URLs/tags intact."
     },
     "playbooks/supplemental/github-slack-development-digest/platform.md": {
       "source_sha256": "4a8da06a7d980811c2f8aa3f14f62b49e48aff6aa7282006d5b96f0994af1cc6",
@@ -562,36 +562,36 @@
       "quality_issues": "\"spillboken\" is literal/awkward for playbook; otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/github-slack-development-digest/playbook.json": {
-      "source_sha256": "d2ff6ac44cef585a1a6560b96ab98a921cc1163e326bd89a607aa95610739ed6",
+      "source_sha256": "5e41739223a02bbdda586722fb09bbe12b4b49dfe5885a177787e18afc86d24f",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 82,
-      "quality_issues": "Gender agreement error: 'en...utviklingssammendrag' should be 'et'; otherwise accurate and fluent."
+      "quality_score": 88,
+      "quality_issues": "Inconsistent 'sammendrag' vs 'digest'; latter untranslated. Minor comma before 'og'."
     },
     "playbooks/supplemental/hermes-lemonade-server/README.md": {
-      "source_sha256": "b6f8a16d96872f88fd63899f80b8835ac47e2958ae65debeb5865828b5a57883",
+      "source_sha256": "969b4d0d48428a93e4be1f36e3e785cdd8f0482ba132d178dccb4b2f375957ff",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Minor inconsistency: sandbox rendered as both 'sandboxing/sandkasse'. Otherwise fluent, accurate, code/URLs intact."
+      "quality_score": 95,
+      "quality_issues": "Fluent, accurate; code/URLs intact. Minor: 'ute av stand til å trekke ut informasjon pålitelig' slightly awkward; 'bla gjennom' for browse acceptable."
     },
     "playbooks/supplemental/hermes-lemonade-server/playbook.json": {
-      "source_sha256": "2acd207ea87f2406f1a2cb6eab280828860d7d7ee97d2dd4b6f510638822d4ee",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate and fluent; minor: 'Kjøre' more idiomatic than 'Kjører' as heading."
-    },
-    "playbooks/supplemental/openhands-getting-started/README.md": {
-      "source_sha256": "92eb485ae459e0eab1d6b1565e3eb002f8f8ad8448e85c922c731b5cf202387a",
+      "source_sha256": "cc470f973aee6cdece4a75c13fa845fa6aad2bb1b914397a8f05c66c780c3d32",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Minor gender agreement error ('det anbefalte nettleser-brukergrensesnittet'); 'tjene modellen' awkward for serve; otherwise fluent, accurate, code/URLs intact."
+      "quality_issues": "Inconsistent agent naming (Hermes-agent vs Hermes Agent); otherwise accurate and fluent."
+    },
+    "playbooks/supplemental/openhands-getting-started/README.md": {
+      "source_sha256": "cbf00201a49c9be05f70537e04888cd016584009567988f0e10c072e127c27f6",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Fluent, accurate; minor inconsistencies (usunn/sunn calque for healthy). Code, URLs, directives intact."
     },
     "playbooks/supplemental/openhands-getting-started/platform.md": {
       "source_sha256": "ac6b6f224435cebeb5596d3e68d7235da3cf27fd91da775e28548d20fa513be2",
@@ -602,12 +602,12 @@
       "quality_issues": "\"spillboken\" (playbook) is a literal/incorrect rendering; term usually kept as 'playbook'. Otherwise accurate and fluent."
     },
     "playbooks/supplemental/openhands-getting-started/playbook.json": {
-      "source_sha256": "f42b6d2d4883a35e3aeeb5b926fc4da3d1f8de4a58427bf731bfd9afdf9e409b",
+      "source_sha256": "df33c0e42cdb0ee5b7e2827f7fd511a6c6de70002d052b559b8963a441a86654",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Accurate, fluent, terminology and brand terms intact; minor style."
+      "quality_score": 92,
+      "quality_issues": "Minor: 'OpenHands kodeagent' could use hyphen; otherwise accurate and fluent."
     },
     "playbooks/supplemental/deepseek-v4-flash-ds4/README.md": {
       "source_sha256": "15ee3cd6d7b0c7a10364f71c65caa460de3e0c0c5e754b335a133f60fc87fca0",

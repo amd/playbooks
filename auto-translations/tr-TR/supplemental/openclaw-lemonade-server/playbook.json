@@ -1,6 +1,6 @@
 {
   "id": "openclaw-lemonade-server",
-  "title": "Lemonade Server ile OpenClaw'ı Yerel Olarak Çalıştırma",
-  "description": "Lemonade Server ile OpenClaw otonom yapay zeka aracısını yükleyin ve yapılandırın.",
+  "title": "OpenClaw'ı Lemonade Server ile Yerel Olarak Çalıştırma",
+  "description": "OpenClaw otonom yapay zeka ajanını Lemonade Server ile yükleyin ve yapılandırın.",
   "auto_translated": true
 }

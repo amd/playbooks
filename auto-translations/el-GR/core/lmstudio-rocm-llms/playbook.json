@@ -1,6 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
   "title": "Εκτέλεση και Εξυπηρέτηση LLM με το LM Studio",
-  "description": "Ρύθμιση του LM Studio και του LM Studio Server για την τοπική εκτέλεση και εξυπηρέτηση μεγάλων γλωσσικών μοντέλων.",
+  "description": "Ρυθμίστε το LM Studio και το LM Studio Server για εκτέλεση και εξυπηρέτηση μεγάλων γλωσσικών μοντέλων τοπικά.",
   "auto_translated": true
 }

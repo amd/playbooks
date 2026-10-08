@@ -16,7 +16,7 @@ SPDX-License-Identifier: MIT
 
 ## Oversigt
 
-ComfyUI er en kraftfuld, node-baseret grænseflade til Stable Diffusion og andre diffusionsmodeller. I modsætning til traditionelle tekst-til-billede-grænseflader med simple promptbokse eksponerer ComfyUI hele billedgenereringspipelinen som en visuel graf, hvilket giver dig detaljeret kontrol over hvert trin fra tekstenkodning til manipulation af det latente rum til den endelige afkodning.
+ComfyUI er en kraftfuld, nodebaseret grænseflade til Stable Diffusion og andre diffusionsmodeller. I modsætning til traditionelle tekst-til-billede-grænseflader med simple promptbokse eksponerer ComfyUI hele billedgenereringspipelinen som en visuel graf, hvilket giver dig finkornet kontrol over hvert trin fra tekstkodning til manipulation af latent rum til endelig afkodning.
 
 Denne vejledning lærer dig, hvordan du bruger ComfyUI med Z Image Turbo-modellen på din GPU til at generere AI-billeder i høj kvalitet.
 
@@ -34,7 +34,7 @@ Denne vejledning lærer dig, hvordan du bruger ComfyUI med Z Image Turbo-modelle
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Tjek for softwareopdateringer
+## Kontrollér for softwareopdateringer
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -55,7 +55,7 @@ sudo usermod -aG render,video $LOGNAME
 ```
 
 #### Opret et virtuelt miljø
-På Linux skal du åbne en terminal i den mappe, du ønsker, og køre følgende prompt for at oprette et venv:
+På Linux skal du åbne en terminal i den mappe, du vælger, og køre følgende prompt for at oprette et venv:
 
 <!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
@@ -310,10 +310,10 @@ Klik derefter på ComfyUI-knappen øverst i midten af appen. Dette åbner en ind
 <!-- @os:end -->
 
 <!-- @os:linux -->
-På AMD Ryzen™ AI Halo kører ComfyUI i en forudbygget container, som ikke kræver yderligere Python-opsætning.
+På AMD Ryzen™ AI Halo kører ComfyUI i en prækonfigureret container, der ikke kræver yderligere Python-opsætning.
 
-For at starte ComfyUI på Linux skal du klikke på ComfyUI-genvejen i proceslinjen. Den bør åbne af sig selv i et browservindue.
->**Tip**: ComfyUI og dets modeller er gemt på `~/.local/share/ComfyUI/models`. Her kan du manuelt tilføje workflows eller nye modeller.
+For at starte ComfyUI på Linux skal du klikke på ComfyUI-genvejen i proceslinjen. Den burde åbne sig selv i et browservindue.
+>**Tip**: ComfyUI og dets modeller er gemt på `~/.local/share/ComfyUI/models`. Det er her, du manuelt kan tilføje workflows eller nye modeller.
 
 
 <!-- @os:end -->
@@ -326,9 +326,9 @@ For at starte ComfyUI på Windows skal du blot klikke på ComfyUI-genvejen på d
 
 <!-- @os:linux -->
 
-For at starte ComfyUI:
+Sådan starter du ComfyUI:
 
-1. Sørg for, at du befinder dig i ComfyUI-mappen. 
+1. Sørg for, at du befinder dig i ComfyUI-mappen.
 2. Kør `python3 main.py --use-pytorch-cross-attention`
 
 ComfyUI starter en lokal webserver. Åbn din browser på `http://127.0.0.1:8188` for at få adgang til grænsefladen.
@@ -342,9 +342,9 @@ ComfyUI starter en lokal webserver. Åbn din browser på `http://127.0.0.1:8188`
 
 Før du genererer billeder, skal du indlæse Z-Image Turbo-skabelonen. Sådan finder du den:
 
-1. **Kig på skærmens yderste venstre kant**—der er en lodret værktøjslinje, som løber fra top til bund på appens yderste venstre side.
+1. **Se på den yderste venstre kant af skærmen**—der løber en lodret værktøjslinje fra top til bund på den yderste venstre side af appen.
 
-2. **Find mappeikonet**—i den venstre værktøjslinje skal du kigge efter et ikon, der ligner en mappe. Når du holder musen over det, er det mærket "Templates."
+2. **Find mappeikonet**—i den venstre værktøjslinje skal du kigge efter et ikon, der ligner en mappe. Når du holder musen over det, er det mærket "Templates".
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
@@ -352,7 +352,7 @@ Før du genererer billeder, skal du indlæse Z-Image Turbo-skabelonen. Sådan fi
 
 3. **Klik på mappeikonet**—dette åbner panelet Templates.
 
-4. **Søg efter "Z-Image Turbo"**—brug søgefeltet eller rul gennem de tilgængelige skabeloner for at finde workflowet Z-Image Turbo Text To Image, og klik derefter for at indlæse det.
+4. **Søg efter "Z-Image Turbo"**—brug søgefeltet, eller rul gennem de tilgængelige skabeloner for at finde workflowet Z-Image Turbo Text To Image, og klik derefter for at indlæse det.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -361,32 +361,33 @@ Før du genererer billeder, skal du indlæse Z-Image Turbo-skabelonen. Sådan fi
 ## Download af modeller
 
 <!-- @require:comfyui-models -->
+<!-- @prereq:comfyui-models -->
 
 ## Forståelse af grænsefladen
 
-Når Z-Image Turbo-skabelonen indlæses, ser du et lærred med 2 hovednoder. Den første node hedder 'Text to Image (Z-Image-Turbo)', og den anden node bruges til at se billedet. 
+Når Z-Image Turbo-skabelonen indlæses, ser du et lærred med 2 hovednoder. Den første node hedder 'Text to Image (Z-Image-Turbo)', og den anden node bruges til at se billedet.
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
 </p>
 
 
-På Z-Image-noden skal du klikke på knappen øverst til højre for at udvide noden og se subgrafen.
+På Z-Image-noden skal du klikke på knappen øverst til højre for at udvide noden og se undergrafen.
 
 <p align="center">
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
 </p>
 
-### Pipeline-komponenter
+### Pipelinekomponenter
 
 Z-Image Turbo-workflowet bruger fire centrale modelkomponenter, der arbejder sammen:
 
 | Komponent | Rolle |
 |-----------|------|
-| **Text Encoder** (Qwen 3 4B) | Konverterer din tekstprompt til embeddings, som diffusionsmodellen forstår |
-| **Diffusion Model** (Z-Image Turbo) | Det centrale neurale netværk, der iterativt fjerner støj fra latente repræsentationer og omdanner dem til billeder |
-| **VAE** (Variational Autoencoder) | Koder billeder til/fra det latente rum (afkoder de endelige latents til pixels) |
-| **LoRA** (valgfri) | Lette adaptere, der ændrer stil eller motiv uden at gentræne basismodellen |
+| **Tekstkoder** (Qwen 3 4B) | Konverterer din tekstprompt til embeddings, som diffusionsmodellen forstår |
+| **Diffusionsmodel** (Z-Image Turbo) | Det centrale neurale netværk, der iterativt fjerner støj fra latente repræsentationer til billeder |
+| **VAE** (Variational Autoencoder) | Koder billeder til/fra latent rum (afkoder de endelige latents til pixels) |
+| **LoRA** (valgfrit) | Letvægtsadaptere, der ændrer stil eller motiv uden at genoptræne basismodellen |
 
 Hver node i workflowet svarer til én af disse komponenter. Data flyder fra venstre mod højre: tekst → embeddings → styret støjfjernelse → latents → endeligt billede.
 
@@ -400,11 +401,11 @@ Z-Image Turbo-modellen er allerede indlæst. Sådan genererer du et billede:
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-2. **(Valgfrit)**: Bekræft eller juster andre specifikke indstillinger i subgrafen.
+2. **(Valgfrit)**: Bekræft eller juster eventuelle andre specifikke indstillinger i undergrafen.
 3. **Klik på den blå "Run Workflow"** i det højre hjørne (eller tryk på `Ctrl+Enter`)
-4. Følg med, mens noderne fremhæves, efterhånden som hvert trin udføres
+4. Se nodene fremhæves, efterhånden som hvert trin udføres
 
-Hele workflow-udførelsen bør fuldføres på under 30 sekunder. Dit genererede billede vises i noden **Save Image** og gemmes i mappen `output/`.
+Hele workflowets udførelse bør fuldføres på under 30 sekunder. Dit genererede billede vises i noden **Save Image** og gemmes i mappen `output/`.
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -581,60 +582,60 @@ ls -1t ComfyUI/output/*.png | head -n 5
 ## Justering af genereringsparametre
 ### KSampler-indstillinger
 
-Noden KSampler styrer den centrale diffusionsproces:
+**KSampler**-noden styrer den centrale diffusionsproces:
 
 | Parameter | Hvad den styrer | Anbefalet til Z-Image Turbo |
 |-----------|------------------|-------------------------------|
-| **steps** | Antal denoising-iterationer | 4–10 (turbo-modeller er destilleret til færre trin) |
-| **cfg** | Classifier-free guidance-skala—hvor tæt man følger prompten | 1,0–2,0 (turbo-modeller bruger meget lav guidance) |
+| **steps** | Antallet af denoising-iterationer | 4–10 (turbo-modeller er destilleret til færre trin) |
+| **cfg** | Classifier-free guidance scale—hvor tæt processen følger prompten | 1,0–2,0 (turbo-modeller bruger meget lav guidance) |
 | **sampler_name** | Denoising-algoritme | `euler` og `res_multistep` fungerer godt til turbo-modeller |
-| **scheduler** | Kurve for støjplan | `normal` eller `simple` |
-| **seed** | Tilfældigt frø til reproducerbarhed | Angiv faste værdier for at iterere på en komposition |
+| **scheduler** | Kurve for støjskema | `normal` eller `simple` |
+| **seed** | Tilfældigt seed for reproducerbarhed | Fastsæt faste værdier for at iterere på en komposition |
 
 ### Billedstørrelse
 
-For at justere outputdimensionerne skal du finde noden **Empty Latent Image** og ændre **width** og **height**. Hold dimensionerne på eller under 1024 pixels på den længste side for optimal kvalitet.
+For at justere outputdimensionerne skal du finde **Empty Latent Image**-noden og ændre **width** og **height**. Hold dimensionerne på eller under 1024 pixels på den længste side for optimal kvalitet.
 
 ### ModelSamplingAuraFlow
 
-Noden **ModelSamplingAuraFlow** er en specialiseret sampling-modifikator, der justerer, hvordan diffusionsprocessen håndterer støjplanlægning. Du vil se denne node forbundet til modeloutputtet i Z-Image Turbo-workflowet.
+**ModelSamplingAuraFlow**-noden er en specialiseret sampling-modifikator, der justerer, hvordan diffusionsprocessen håndterer støjskemalægning. Du vil se denne node forbundet til modeludgangen i Z-Image Turbo-workflowet.
 
 | Parameter | Hvad den styrer | Anbefalede værdier |
 |-----------|------------------|-------------------|
-| **shift** | Justerer timingen for støjplanen—højere værdier flytter mere detaljeforfining til senere trin | 1,0–4,0 (standard er 3,0) |
+| **shift** | Justerer timingen for støjskemaet—højere værdier skubber mere detaljeforfining til senere trin | 1,0–4,0 (standard er 3,0) |
 
-Hvornår man skal justere **shift**:
+Hvornår du bør justere **shift**:
 
 - **Lavere værdier (1,0–2,0)**: Hurtigere konvergens, godt til simple kompositioner
 - **Højere værdier (3,0–4,0)**: Mere gradvis forfining, kan forbedre fine detaljer i komplekse scener
 
-AuraFlow-samplingmetoden er specifikt designet til flow-matching-modeller som Z-Image Turbo, hvilket sikrer korrekt støjfordeling gennem hele genereringsprocessen.
+AuraFlow-sampling-metoden er specifikt designet til flow-matching-modeller som Z-Image Turbo, hvilket sikrer korrekt støjfordeling gennem hele genereringsprocessen.
 
 ## Arbejde med workflows
 
 ### Gemme workflows
 
-Klik på knappen **Save** i menuen for at eksportere dit workflow som en JSON-fil. Dette fanger:
+Klik på knappen **Save** i menuen for at eksportere dit workflow som en JSON-fil. Dette gemmer:
 
-- Alle nodes og deres parametre
-- Alle forbindelser mellem nodes
-- Nuværende prompttekst
+- Alle noder og deres parametre
+- Alle forbindelser mellem noder
+- Den aktuelle prompttekst
 
 ### Indlæse workflows
 
-Træk en workflow-JSON-fil ind på lærredet, eller brug **Load** fra menuen. Det Z-Image Turbo-workflow, du ser som standard, indlæses fra en gemt workflow-fil.
+Træk en workflow-JSON-fil ind på lærredet, eller brug **Load** fra menuen. Z-Image Turbo-workflowet, du ser som standard, indlæses fra en gemt workflow-fil.
 
 ### Deling af workflows
 
-Workflows er selvstændige—del JSON-filen med kolleger, så kan de genskabe din nøjagtige opsætning. Dette gør ComfyUI fremragende til kollaborativ eksperimentering.
+Workflows er selvstændige—del JSON-filen med kolleger, så de kan genskabe din præcise opsætning. Dette gør ComfyUI fremragende til kollaborativ eksperimentering.
 
 ## Næste skridt
 
-- **Udforsk LoRA-noder**: Anvend stil- eller emnetilpasninger uden gentræning
-- **Tilføj negative prompts**: Forbind en anden CLIP Text Encode-node til **negative**-konditioneringsindgangen på KSampler for at guide modellen væk fra uønskede egenskaber som slør, artefakter eller vandmærker
-- **Byg brugerdefinerede workflows**: Kæd flere genereringer sammen, tilføj upscaling, eller opret billedvariationer
-- **Gennemse fællesskabets workflows**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) har mange klar-til-brug workflows
+- **Udforsk LoRA-noder**: Anvend stil- eller emnetilpassere uden at genoptræne
+- **Tilføj negative prompts**: Forbind en anden CLIP Text Encode-node til **negative**-konditioneringsindgangen på KSampler for at guide modellen væk fra uønskede træk som slør, artefakter eller vandmærker
+- **Byg brugerdefinerede workflows**: Kæd flere genereringer sammen, tilføj opskalering, eller skab billedvariationer
+- **Gennemse community-workflows**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) har mange brugsklare workflows
 
-ComfyUIs styrke er eksperimentering: forbind noder på forskellige måder, juster parametre, og observer, hvordan hver ændring påvirker outputtet. Denne praktiske udforskning opbygger intuition for, hvordan diffusionsmodeller fungerer.
+ComfyUIs styrke er eksperimentering: forbind noder på forskellige måder, juster parametre, og observer, hvordan hver ændring påvirker outputtet. Denne håndgribelige udforskning opbygger intuition for, hvordan diffusionsmodeller fungerer.
 
-For mere information, se [ComfyUI Documentation](https://docs.comfy.org/).
+For mere information, se [ComfyUI-dokumentationen](https://docs.comfy.org/).

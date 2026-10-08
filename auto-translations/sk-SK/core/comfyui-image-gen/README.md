@@ -16,14 +16,14 @@ SPDX-License-Identifier: MIT
 
 ## Prehľad
 
-ComfyUI je výkonné, uzlovo orientované rozhranie pre Stable Diffusion a ďalšie difúzne modely. Na rozdiel od tradičných rozhraní text-na-obrázok s jednoduchými poľami na zadávanie výziev ComfyUI zobrazuje celý pipeline generovania obrázkov ako vizuálny graf, čo vám poskytuje jemnú kontrolu nad každým krokom – od kódovania textu cez manipuláciu v latentnom priestore až po finálne dekódovanie.
+ComfyUI je výkonné, uzlovo orientované rozhranie pre Stable Diffusion a ďalšie difúzne modely. Na rozdiel od tradičných rozhraní na prevod textu na obrázok s jednoduchými poľami na zadanie výzvy, ComfyUI sprístupňuje celý kanál generovania obrázkov ako vizuálny graf, čo vám dáva jemnú kontrolu nad každým krokom od kódovania textu cez manipuláciu s latentným priestorom až po záverečné dekódovanie.
 
-Tento návod vás naučí, ako používať ComfyUI s modelom Z Image Turbo na vašom GPU na generovanie vysoko kvalitných AI obrázkov.
+Tento návod vás naučí, ako používať ComfyUI s modelom Z Image Turbo na vašom GPU na generovanie vysokokvalitných AI obrázkov.
 
 ## Čo sa naučíte
 
 - Ako spustiť ComfyUI a načítať šablónu Z-Image Turbo
-- Pochopenie komponentov difúzneho pipeline
+- Pochopenie komponentov difúzneho kanálu
 - Generovanie obrázkov a ladenie parametrov generovania
 - Ukladanie a zdieľanie pracovných postupov
 
@@ -34,7 +34,7 @@ Tento návod vás naučí, ako používať ComfyUI s modelom Z Image Turbo na va
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Kontrola aktualizácií softvéru
+## Kontrola softvérových aktualizácií
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -48,7 +48,7 @@ Tento návod vás naučí, ako používať ComfyUI s modelom Z Image Turbo na va
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Udeľte svojmu používateľovi prístup k zariadeniam GPU** (aby sa toto prejavilo, odhláste sa a znova prihláste):
+**Udeľte svojmu používateľovi prístup k zariadeniam GPU** (aby sa táto zmena prejavila, odhláste sa a znova prihláste):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -294,7 +294,7 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-Ak chcete spustiť ComfyUI na Windows, kliknite na spúšťač ComfyUI Desktop Launcher, ktorý nájdete na ploche. Postupujte podľa krokov na inštaláciu lokálnej verzie s AMD.
+Ak chcete spustiť ComfyUI na Windows, kliknite na spúšťač ComfyUI Desktop, ktorý nájdete na pracovnej ploche. Postupujte podľa krokov na inštaláciu lokálnej verzie s AMD.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
@@ -310,9 +310,9 @@ Potom kliknite na tlačidlo ComfyUI v hornej strednej časti aplikácie. Tým sa
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Na AMD Ryzen™ AI Halo beží ComfyUI v prednastavenom kontajneri, ktorý nevyžaduje žiadne ďalšie nastavenie Pythonu.
+Na AMD Ryzen™ AI Halo beží ComfyUI v predpripravenom kontajneri, ktorý nevyžaduje žiadne ďalšie nastavenie Python.
 
-Ak chcete spustiť ComfyUI na Linuxe, kliknite na skratku ComfyUI na paneli úloh. Malo by sa to samo otvoriť v okne prehliadača.
+Ak chcete spustiť ComfyUI na Linuxe, kliknite na skratku ComfyUI na paneli úloh. Mala by sa sama otvoriť v okne prehliadača.
 >**Tip**: ComfyUI a jeho modely sú uložené v `~/.local/share/ComfyUI/models`. Tu môžete manuálne pridávať pracovné postupy alebo nové modely.
 
 
@@ -321,38 +321,38 @@ Ak chcete spustiť ComfyUI na Linuxe, kliknite na skratku ComfyUI na paneli úlo
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-Ak chcete spustiť ComfyUI na Windows, jednoducho kliknite na skratku ComfyUI na ploche.
+Ak chcete spustiť ComfyUI na Windows, jednoducho kliknite na skratku ComfyUI na pracovnej ploche.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-Ak chcete spustiť ComfyUI:
+Spustenie ComfyUI:
 
-1. Uistite sa, že sa nachádzate v adresári ComfyUI.
+1. Uistite sa, že sa nachádzate v adresári ComfyUI. 
 2. Spustite `python3 main.py --use-pytorch-cross-attention`
 
-ComfyUI spustí lokálny webový server. Otvorte prehliadač na adrese `http://127.0.0.1:8188`, aby ste získali prístup k rozhraniu.
+ComfyUI spustí lokálny webový server. Otvorte prehliadač na adrese `http://127.0.0.1:8188` pre prístup k rozhraniu.
 
-> **Tip**: Nechajte okno terminálu otvorené počas používania ComfyUI. Jeho zatvorením sa server zastaví.
+> **Tip**: Počas používania ComfyUI nechajte okno terminálu otvorené. Jeho zatvorenie zastaví server.
 <!-- @os:end -->
 <!-- @device:end -->
 
 
-## Hľadanie šablóny Z-Image Turbo
+## Vyhľadanie šablóny Z-Image Turbo
 
-Pred generovaním obrázkov musíte načítať šablónu Z-Image Turbo. Postupujte takto:
+Pred generovaním obrázkov musíte načítať šablónu Z-Image Turbo. Postup je nasledovný:
 
-1. **Pozrite sa na úplný ľavý okraj obrazovky** – na najľavejšej strane aplikácie sa nachádza vertikálny panel nástrojov, ktorý beží zhora nadol.
+1. **Pozrite sa na úplný ľavý okraj obrazovky** – na úplne ľavej strane aplikácie beží zvislý panel nástrojov zhora nadol.
 
-2. **Nájdite ikonu priečinka** – na tomto ľavom paneli nástrojov hľadajte ikonu, ktorá vyzerá ako priečinok. Keď na ňu prejdete kurzorom, zobrazí sa popisok „Templates“.
+2. **Nájdite ikonu priečinka** – v tomto ľavom paneli nástrojov vyhľadajte ikonu, ktorá vyzerá ako priečinok. Keď na ňu prejdete kurzorom, zobrazí sa popisok „Templates“.
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
 </p>
 
-3. **Kliknite na ikonu priečinka** – týmto sa otvorí panel Templates.
+3. **Kliknite na ikonu priečinka** – tým sa otvorí panel Templates.
 
-4. **Vyhľadajte „Z-Image Turbo“** – použite vyhľadávacie pole alebo prechádzajte dostupné šablóny, kým nenájdete pracovný postup Z-Image Turbo Text To Image, potom naň kliknite a načítajte ho.
+4. **Vyhľadajte „Z-Image Turbo“** – použite vyhľadávacie pole alebo prechádzajte dostupnými šablónami, aby ste našli pracovný postup Z-Image Turbo Text To Image, a potom kliknutím ho načítajte.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -361,10 +361,11 @@ Pred generovaním obrázkov musíte načítať šablónu Z-Image Turbo. Postupuj
 ## Sťahovanie modelov
 
 <!-- @require:comfyui-models -->
+<!-- @prereq:comfyui-models -->
 
 ## Pochopenie rozhrania
 
-Keď sa načíta šablóna Z-Image Turbo, uvidíte plátno s 2 hlavnými uzlami. Prvý uzol sa volá „Text to Image (Z-Image-Turbo)“ a druhý uzol slúži na zobrazenie obrázka.
+Keď sa načíta šablóna Z-Image Turbo, uvidíte plátno s 2 hlavnými uzlami. Prvý uzol sa volá „Text to Image (Z-Image-Turbo)“ a druhý uzol slúži na zobrazenie obrázka. 
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
@@ -377,32 +378,32 @@ Na uzle Z-Image kliknite na tlačidlo vpravo hore, aby ste rozbalili uzol a vide
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
 </p>
 
-### Komponenty pipeline
+### Komponenty kanálu
 
 Pracovný postup Z-Image Turbo používa štyri kľúčové komponenty modelu, ktoré spolupracujú:
 
 | Komponent | Úloha |
 |-----------|------|
-| **Text Encoder** (Qwen 3 4B) | Prevádza váš textový prompt na embeddingy, ktorým difúzny model rozumie |
-| **Diffusion Model** (Z-Image Turbo) | Jadrová neurónová sieť, ktorá iteratívne odstraňuje šum z latentných reprezentácií a mení ich na obrázky |
-| **VAE** (Variational Autoencoder) | Koduje obrázky do/z latentného priestoru (dekóduje finálne latenty na pixely) |
-| **LoRA** (voliteľné) | Ľahké adaptéry, ktoré upravujú štýl alebo predmet bez nutnosti pretrénovania základného modelu |
+| **Textový kóder** (Qwen 3 4B) | Prevádza vašu textovú výzvu na vnorenia (embeddings), ktorým difúzny model rozumie |
+| **Difúzny model** (Z-Image Turbo) | Hlavná neurónová sieť, ktorá iteratívne odšumuje latentné reprezentácie na obrázky |
+| **VAE** (Variačný autoenkodér) | Kóduje obrázky do/z latentného priestoru (dekóduje finálne latentné hodnoty na pixely) |
+| **LoRA** (voliteľné) | Ľahké adaptéry, ktoré upravujú štýl alebo námet bez opätovného trénovania základného modelu |
 
-Každý uzol v pracovnom postupe zodpovedá jednému z týchto komponentov. Údaje prúdia zľava doprava: text → embeddingy → riadené odstraňovanie šumu → latenty → finálny obrázok.
+Každý uzol v pracovnom postupe zodpovedá jednému z týchto komponentov. Dáta prúdia zľava doprava: text → vnorenia → riadené odšumovanie → latentné hodnoty → finálny obrázok.
 
-## Generovanie vášho prvého obrázka
+## Generovanie prvého obrázka
 
 Model Z-Image Turbo je už načítaný. Ak chcete vygenerovať obrázok:
 
-1. **Zadajte svoj prompt** do hlavného uzla Z-Image. Buďte popisní. Tu je príklad:
+1. **Zadajte svoju výzvu** do hlavného uzla Z-Image. Buďte opisní. Tu je príklad:
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-2. **(Voliteľné)**: Potvrďte alebo upravte akékoľvek ďalšie špecifické nastavenia v rámci podgrafu.
-3. **Kliknite na modré „Run Workflow“** v pravom rohu (alebo stlačte `Ctrl+Enter`)
-4. Sledujte, ako sa uzly zvýrazňujú počas vykonávania jednotlivých krokov
+2. **(Voliteľné)**: Potvrďte alebo upravte akékoľvek ďalšie konkrétne nastavenia v rámci podgrafu.
+3. **Kliknite na modré tlačidlo „Run Workflow“** v pravom rohu (alebo stlačte `Ctrl+Enter`)
+4. Sledujte, ako sa uzly zvýrazňujú pri vykonávaní jednotlivých krokov
 
 Celé vykonanie pracovného postupu by malo trvať menej ako 30 sekúnd. Vygenerovaný obrázok sa zobrazí v uzle **Save Image** a uloží sa do priečinka `output/`.
 
@@ -581,60 +582,60 @@ ls -1t ComfyUI/output/*.png | head -n 5
 ## Úprava parametrov generovania
 ### Nastavenia KSampler
 
-Uzol KSampler ovládá jadro difúzneho procesu:
+Uzol KSampler ovláda samotný proces difúzie:
 
 | Parameter | Čo ovláda | Odporúčané pre Z-Image Turbo |
 |-----------|------------------|-------------------------------|
-| **steps** | Počet iterácií odšumovania | 4–10 (turbo modely sú destilované pre menší počet krokov) |
-| **cfg** | Mierka bezklasifikátorového vedenia (classifier-free guidance)—ako presne sa má postupovať podľa promptu | 1.0–2.0 (turbo modely používajú veľmi nízke vedenie) |
+| **steps** | Počet iterácií odšumovania | 4 – 10 (turbo modely sú destilované pre menší počet krokov) |
+| **cfg** | Mierka classifier-free guidance – ako presne sa riadiť zadaním | 1,0 – 2,0 (turbo modely používajú veľmi nízke vedenie) |
 | **sampler_name** | Algoritmus odšumovania | `euler` a `res_multistep` fungujú dobre pre turbo modely |
 | **scheduler** | Krivka rozvrhu šumu | `normal` alebo `simple` |
 | **seed** | Náhodné semienko pre reprodukovateľnosť | Nastavte pevné hodnoty na iterovanie kompozície |
 
 ### Veľkosť obrázka
 
-Ak chcete upraviť výstupné rozmery, nájdite uzol **Empty Latent Image** a upravte **width** a **height**. Udržujte rozmery na alebo pod 1024 pixelov na najdlhšej strane pre optimálnu kvalitu.
+Na úpravu výstupných rozmerov nájdite uzol **Empty Latent Image** a upravte **width** a **height**. Udržujte rozmery na úrovni 1024 pixelov alebo menej na dlhšej strane pre optimálnu kvalitu.
 
 ### ModelSamplingAuraFlow
 
-Uzol **ModelSamplingAuraFlow** je špecializovaný modifikátor vzorkovania, ktorý upravuje spôsob, akým difúzny proces zaobchádza s rozvrhom šumu. Tento uzol uvidíte pripojený k výstupu modelu v pracovnom postupe Z-Image Turbo.
+Uzol **ModelSamplingAuraFlow** je špecializovaný modifikátor vzorkovania, ktorý upravuje spôsob, akým proces difúzie spracúva rozvrh šumu. Tento uzol uvidíte pripojený k výstupu modelu v pracovnom postupe Z-Image Turbo.
 
 | Parameter | Čo ovláda | Odporúčané hodnoty |
 |-----------|------------------|-------------------|
-| **shift** | Upravuje časovanie rozvrhu šumu—vyššie hodnoty presúvajú viac zjemňovania detailov do neskorších krokov | 1.0–4.0 (predvolená hodnota je 3.0) |
+| **shift** | Upravuje časovanie rozvrhu šumu – vyššie hodnoty posúvajú viac zjemňovania detailov do neskorších krokov | 1,0 – 4,0 (predvolená hodnota je 3,0) |
 
 Kedy upraviť **shift**:
 
-- **Nižšie hodnoty (1.0–2.0)**: Rýchlejšia konvergencia, vhodné pre jednoduché kompozície
-- **Vyššie hodnoty (3.0–4.0)**: Postupnejšie zjemňovanie, môže zlepšiť jemné detaily v komplexných scénach
+- **Nižšie hodnoty (1,0 – 2,0)**: Rýchlejšia konvergencia, vhodné pre jednoduché kompozície
+- **Vyššie hodnoty (3,0 – 4,0)**: Postupnejšie zjemňovanie, môže zlepšiť jemné detaily v zložitých scénach
 
-Metóda vzorkovania AuraFlow je špecificky navrhnutá pre modely s priraďovaním toku (flow-matching), ako je Z-Image Turbo, čím zaisťuje správne rozloženie šumu počas celého procesu generovania.
+Metóda vzorkovania AuraFlow je špeciálne navrhnutá pre modely založené na flow-matching, akým je Z-Image Turbo, čím zaisťuje správne rozloženie šumu počas celého procesu generovania.
 
 ## Práca s pracovnými postupmi
 
 ### Ukladanie pracovných postupov
 
-Kliknite na tlačidlo **Save** v menu na export vášho pracovného postupu ako súbor JSON. Toto zachytáva:
+Kliknite na tlačidlo **Save** v menu na export vášho pracovného postupu ako súbor JSON. Tento súbor zachytáva:
 
 - Všetky uzly a ich parametre
 - Všetky prepojenia medzi uzlami
-- Aktuálny text promptu
+- Aktuálny text zadania
 
 ### Načítavanie pracovných postupov
 
-Presuňte súbor JSON pracovného postupu na plátno alebo použite **Load** z menu. Predvolený pracovný postup Z-Image Turbo, ktorý vidíte, sa načítava z uloženého súboru pracovného postupu.
+Presuňte súbor JSON s pracovným postupom na plátno alebo použite **Load** z menu. Pracovný postup Z-Image Turbo, ktorý vidíte predvolene, je načítaný zo súboru uloženého pracovného postupu.
 
 ### Zdieľanie pracovných postupov
 
-Pracovné postupy sú samostatné—zdieľajte súbor JSON s kolegami a oni dokážu presne reprodukovať vaše nastavenie. Vďaka tomu je ComfyUI vynikajúci nástroj na kolaboratívne experimentovanie.
+Pracovné postupy sú samostatné – zdieľajte súbor JSON s kolegami a oni dokážu presne reprodukovať vaše nastavenie. Vďaka tomu je ComfyUI výborný nástroj na kolaboratívne experimentovanie.
 
 ## Ďalšie kroky
 
 - **Preskúmajte uzly LoRA**: Aplikujte štýlové alebo predmetové adaptéry bez opätovného trénovania
-- **Pridajte negatívne prompty**: Pripojte druhý uzol CLIP Text Encode k vstupu **negative** conditioning uzla KSampler, aby ste model nasmerovali preč od nežiaducich vlastností, ako je rozmazanie, artefakty alebo vodoznaky
-- **Vytvárajte vlastné pracovné postupy**: Reťazte viacero generovaní, pridajte zväčšovanie (upscaling) alebo vytvárajte variácie obrázkov
-- **Prehľadávajte komunitné pracovné postupy**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) obsahuje mnoho pripravených pracovných postupov na použitie
+- **Pridajte negatívne zadania**: Pripojte druhý uzol CLIP Text Encode k vstupu **negative** podmieňovania uzla KSampler, aby ste nasmerovali model preč od nežiaducich prvkov, ako je rozmazanie, artefakty alebo vodoznaky
+- **Vytvárajte vlastné pracovné postupy**: Reťazte viacero generovaní, pridajte zväčšovanie rozlíšenia (upscaling) alebo vytvárajte variácie obrázkov
+- **Prehliadajte komunitné pracovné postupy**: [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) obsahuje mnoho pripravených pracovných postupov na použitie
 
-Silnou stránkou ComfyUI je experimentovanie: prepájajte uzly rôznymi spôsobmi, upravujte parametre a pozorujte, ako každá zmena ovplyvňuje výstup. Táto praktická exploratíva buduje intuíciu pre to, ako difúzne modely fungujú.
+Silnou stránkou ComfyUI je experimentovanie: prepájajte uzly rôznymi spôsobmi, upravujte parametre a pozorujte, ako každá zmena ovplyvňuje výstup. Táto praktická skúsenosť buduje intuíciu pre fungovanie difúznych modelov.
 
-Ďalšie informácie nájdete v [Dokumentácii ComfyUI](https://docs.comfy.org/).
+Viac informácií nájdete v [dokumentácii ComfyUI](https://docs.comfy.org/).

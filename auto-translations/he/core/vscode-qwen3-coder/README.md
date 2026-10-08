@@ -21,15 +21,15 @@ SPDX-License-Identifier: MIT
 
 ## סקירה כללית
 
-סוכני קידוד הם כלים רבי עוצמה המעצימים מפתחים באמצעות שיתוף פעולה עם סוכני AI המבוססים על מודלי שפה גדולים (LLMs). ניתן לשלב אותם בסביבת הפיתוח, כגון הטרמינל או VS Code, ובכך לאפשר אינטגרציה חלקה בתהליך העבודה של המפתח.
+סוכני קידוד הם כלים רבי עוצמה המעצימים מפתחים באמצעות שיתוף פעולה עם סוכני AI המבוססים על מודלי שפה גדולים (LLMs). ניתן להטמיע אותם בסביבת הפיתוח, כגון המסוף או VS Code, מה שמאפשר שילוב חלק בתהליך העבודה של המפתח.
 
-מדריך זה מדגים כיצד להשתמש ב-Cline, VS Code ו-LM Studio כדי להריץ סוכן קידוד באופן מלא על המחשב המקומי שלך.
+מדריך זה מדגים כיצד להשתמש ב-Cline, VS Code, ו-LM Studio כדי להריץ סוכן קידוד באופן מלא על המחשב המקומי שלך.
 
 ## מה תלמד
 
-* כיצד להריץ את VS Code עם סוכן הקידוד Cline לסיוע במשימות הנדסת תוכנה.
-* כיצד להגדיר את Cline לתקשר עם LM Studio לצורך הסקה מקומית של סוכני קידוד.
-* כיצד להשתמש בסוכני קידוד מקומיים כדי לפתור משימות הנדסת תוכנה מהעולם האמיתי. 
+* כיצד להריץ את VS Code עם סוכן הקידוד Cline כדי לסייע במשימות הנדסת תוכנה.
+* כיצד להגדיר את Cline לתקשר עם LM Studio להסקה מקומית של סוכני קידוד.
+* כיצד להשתמש בסוכני קידוד מקומיים כדי לפתור משימות הנדסת תוכנה מהעולם האמיתי.
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## הגדרת תצורת הזיכרון
@@ -39,26 +39,28 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 ## בדיקת עדכוני תוכנה
-> **הערה**: אם VS Code אינו מותקן, ניתן להתקין אותו באמצעות Ryzen AI Developer Center.
+> **הערה**: אם VS Code אינו מותקן, ניתן להתקין אותו עם Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות מוקדמות של תוכנה
+## התקנת דרישות קדם של תוכנה
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lmstudio,vscode -->
+<!-- @prereq:lmstudio-models-qwen3-coder-30b,lmstudio,vscode -->
 
 ## הפעלה והגדרת LM Studio
 
-נשתמש ב-LM Studio כדי להגיש את ה-LLM המפעיל את סוכן הקידוד.
+נשתמש ב-LM Studio כדי להגיש את ה-LLM שמפעיל את סוכן הקידוד.
 
-- בשורת החיפוש, חפש `LM Studio` והפעל את האפליקציה. תתקבל בברכה על ידי המסך הבא.
+- בשורת החיפוש, חפש את `LM Studio` והפעל את האפליקציה. תתקבל בברכה על ידי העמוד הבא.
 
 ![מסך ההתחלה של LM Studio](assets/initial-lm-studio.png)
 
-בשלב הבא, עלינו לטעון את ה-LLM על המערכת. אנו הולכים להשתמש במודל `Qwen3-Coder-30B-A3B` עם אורך הקשר (context length) גדול. (השתמש בלשונית Model כדי להתקין אותו אם עדיין לא עשית זאת).
-- לחץ על שורת החיפוש בחלק העליון של חלון LM Studio או הקש `CTRL+L`. לחץ על המתג `Manually choose model load parameters` ולאחר מכן לחץ על מודל Qwen3-Coder-30B-A3B.
-- שנה את אורך ההקשר מ-`4096` ל-`32768`, וודא ש-`GPU Offload` נמצא במקסימום. לאחר מכן, לחץ על `Load Model`
+בשלב הבא, עלינו לטעון את ה-LLM על המערכת. אנו הולכים להשתמש במודל `Qwen3-Coder-30B-A3B` עם אורך הקשר גדול. (השתמש בלשונית המודל כדי להתקין אותו אם עדיין לא עשית זאת).
+- לחץ על שורת החיפוש בחלק העליון של חלון LM Studio או לחץ `CTRL+L`. לחץ על המתג `Manually choose model load parameters` ולאחר מכן לחץ על מודל Qwen3-Coder-30B-A3B.
+- שנה את אורך ההקשר מ-`4096` ל-`32768`, וודא ש-`GPU Offload` נמצא במקסימום. לאחר מכן, לחץ `Load Model`
 
 ![בחירת מודל](assets/model-list-zoomed.png)
 
@@ -66,9 +68,9 @@ SPDX-License-Identifier: MIT
 
 ![הגדרת מודל](assets/selecting-model-zoomed.png)
 
-בשלב הבא, עלינו להפעיל את שרת LM Studio. 
-- לחץ על לשונית Developer או הקש `CTRL+2` ב-LM Studio בצד שמאל.
-- סמן את מתג הסטטוס וודא שהוא מוגדר ל-`Running`.
+בשלב הבא, עלינו להפעיל את שרת LM Studio.
+- לחץ על לשונית Developer או לחץ `CTRL+2` ב-LM Studio בצד שמאל.
+- בדוק את מתג הסטטוס וודא שהוא מוגדר ל-`Running`.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -155,13 +157,13 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ## הפעלה והגדרת VS Code
 
-נתקין את התוסף Cline ב-VS Code ונחבר אותו לשרת LM Studio שיצרנו זה עתה.
-- בשורת החיפוש, חפש `VS Code` והפעל את האפליקציה.
-- לחץ על סמל `Extensions` בעמודה השמאלית של VS Code וחפש `Cline`. לאחר מכן, לחץ על הכפתור `Install`. 
+נתקין את תוסף Cline ב-VS Code ונחבר אותו לשרת LM Studio שיצרנו זה עתה.
+- בשורת החיפוש, חפש את `VS Code` והפעל את האפליקציה.
+- לחץ על סמל `Extensions` בעמודה השמאלית של VS Code וחפש את `Cline`. לאחר מכן, לחץ על כפתור `Install`.
 
 ![התקנת תוסף Cline](assets/installing-cline-vscode-extension.png)
 
-- אמור להופיע סמל Cline בצד שמאל. לחץ עליו כדי לפתוח את Cline. יופיע חלון ששואל `How will you use Cline?` מכיוון שאנו הולכים להשתמש ב-LLM מקומי הפועל דרך LM Studio, בחר `Bring my own API Key` ולחץ על `Continue`. 
+- סמל Cline אמור להופיע בצד שמאל. לחץ עליו כדי לפתוח את Cline. יופיע חלון שישאל `How will you use Cline?` מכיוון שאנו עומדים להשתמש ב-LLM מקומי הרץ דרך LM Studio, בחר `Bring my own API Key` ולחץ `Continue`.
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -183,32 +185,32 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 
 ![יצירת חשבון](assets/cline-how-will-you-use-cline-zoomed.png)
 
-בשלב הבא, עלינו להגדיר את Cline לתקשר עם שרת LM Studio שהגדרנו. 
-- הגדר את ה-API Provider ל-`LM Studio` ואת המודל ל-`Qwen3-Coder-30B-A3B-GGUF`. 
+בשלב הבא, עלינו להגדיר את Cline לתקשר עם שרת LM Studio שהגדרנו.
+- הגדר את ה-API Provider ל-`LM Studio` ואת המודל ל-`Qwen3-Coder-30B-A3B-GGUF`.
 
->**טיפ**: ייתכן שקיימים מודלים חדשים יותר. שקול להוריד ולעבור למודלי Qwen3.6 אם תרצה בכך.
+>**טיפ**: ייתכן שמודלים חדשים יותר זמינים. שקול להוריד ולעבור למודלי Qwen3.6 אם רצוי.
 
 
 ![הגדרת מודל](assets/cline-model-configuration-zoomed.png)
 
 ## יצירת הפרויקט הראשון שלך
 
-בוא נשתמש בסוכן המקומי שלנו כדי ליצור אתר אינטרנט! פתח את VSCode לספרייה לפי בחירתך, שם Cline ייצור את הקבצים.
-- כדי לעשות זאת, עבור אל `File -> Open Folder` בחלק השמאלי-עליון של VS Code ובחר תיקייה כמו `Documents`.
+בואו נשתמש בסוכן המקומי שלנו כדי ליצור אתר אינטרנט! פתח את VSCode לתיקייה לבחירתך שבה Cline יצור את הקבצים.
+- כדי לעשות זאת, עבור ל-`File -> Open Folder` בחלק השמאלי העליון של VS Code ובחר תיקייה כגון `Documents`.
 
 ![תיקייה ריקה ב-VS Code](assets/open-cline-test.png)
 
-כעת אנחנו מוכנים להזין הנחיה (prompt) לסוכן הקידוד המקומי. 
-- לחץ על תוסף Cline בעמודה השמאלית והזן הנחיה כדי להפעיל את הסוכן. לדוגמה, נשתמש בהנחיה הבאה:
+כעת אנחנו מוכנים להנחות את סוכן הקידוד המקומי.
+- לחץ על תוסף Cline בעמודה השמאלית והזן הנחיה כדי להפעיל את הסוכן. כדוגמה, הבה נשתמש בהנחיה הבאה:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-הסוכן יתחיל אז ליצור קבצים בהתאם להנחיה. כמשתמש, תוכל לצפות כיצד הקוד נוצר ב-VS Code כפי שמוצג להלן. ייתכן שיהיה עליך ללחוץ על `Save` בכל פעם ש-Cline רוצה ליצור קובץ. 
+הסוכן יתחיל ליצור קבצים בהתאם להנחיה. כמשתמש, תוכל לצפות בקוד שנוצר ב-VS Code כפי שמוצג להלן. ייתכן שתצטרך ללחוץ `Save` בכל פעם ש-Cline רוצה ליצור קובץ.
 
 ![יצירת קוד על ידי Cline](assets/cline-code-generation.png)
 
-לאחר יצירת התוכנה, הסוכן מסיים את עבודתו ותוכל להריץ את האפליקציה. במקרה זה, הסוכן כתב לשלושה קבצים: `index.html`, `script.js`, ו-`styles.css`. פשוט על ידי לחיצה כפולה על קובץ ה-HTML נוכל לטעון ולתקשר עם האתר שנוצר.
+לאחר יצירת התוכנה, הסוכן סיים ותוכל להריץ את האפליקציה. במקרה זה, הסוכן כתב לשלושה קבצים: `index.html`, `script.js`, ו-`styles.css`. על ידי לחיצה כפולה על קובץ ה-HTML נוכל לטעון ולהתעסק עם האתר שנוצר.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -282,22 +284,22 @@ lms server stop
 <!-- @test:end -->
 <!-- @os:end -->
 
-## הצעדים הבאים
+## שלבים הבאים
 
 לאחר יצירת האתר, תוכל להמשיך לעבוד עם Cline כדי לשפר את האתר. שני שיפורים אפשריים הם:
 
-- **תיעוד**: הזנת ההנחיה `Add a README` לסוכן היא כל מה שנדרש כדי שהסוכן ייצור קובץ `README.md` המתעד את האתר.
-- **אנימציה**: הזן למודל את ההנחיה `Add an animation that visually represents a large language model running on a laptop.` כדי ליצור אנימציה שתתווסף לאתר.
+- **תיעוד**: הנחיית הסוכן עם `Add a README` היא כל מה שנדרש כדי שהסוכן ייצור קובץ `README.md` המתעד את האתר.
+- **אנימציה**: הנחה את המודל עם `Add an animation that visually represents a large language model running on a laptop.` כדי ליצור אנימציה שתתווסף לאתר.
 
-אנו מעודדים את הקורא לנסות ליצור אפליקציות נוספות באמצעות הגדרה זו. להלן כמה דוגמאות משעשעות שניסינו:
+אנו מעודדים את הקורא לנסות ליצור אפליקציות נוספות באמצעות הגדרה זו. להלן כמה דוגמאות מהנות שניסינו:
 
-- **משחקי ארקייד רטרו**: נסה הנחיות נוספות. יכול להיות מהנה גם עבור הסוכן ליצור משחקים בסגנון רטרו בשפת Python באמצעות החבילה `PyGame` עם ההנחיה הבאה:
+- **משחקי ארקייד רטרו**: נסה הנחיות נוספות. זה יכול להיות גם מהנה עבור הסוכן ליצור משחקים בסגנון רטרו ב-Python באמצעות החבילה `PyGame` עם ההנחיה הבאה:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **ניתוח נתונים**: תחום אחד שבו סוכני קידוד שימושיים במיוחד הוא כתיבת סקריפטים וניתוח נתונים. זוהי הנחיה להדגמת יכולתו של המודל המקומי ליצור תוכנת ניתוח נתונים להצגה חזותית של מחירי מניות:
+- **ניתוח נתונים**: תחום אחד שבו סוכני קידוד שימושיים במיוחד הוא כתיבת סקריפטים וניתוח נתונים. זוהי הנחיה להדגים את יכולת המודל המקומי ליצור תוכנת ניתוח נתונים להצגת מחירי מניות:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -307,6 +309,6 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 להלן כמה משאבים נוספים כדי ללמוד עוד על סוכני קידוד, Cline, והרצת עומסי עבודה על 
 
-* מידע נוסף על שותפות והשתלבות AMD LM Studio: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* בלוג של AMD המסביר כיצד להריץ את Cline על כרטיסי AMD Ryzen™ AI ו-Radeon™ Graphics: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* מידע נוסף על שותפות האינטגרציה בין AMD ל-LM Studio: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
+* בלוג של AMD שמסביר כיצד להריץ את Cline על כרטיסי AMD Ryzen™ AI ו-Radeon™ Graphics: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
 * בלוג של Cline על הרצת סוכני קידוד באופן מקומי על מחשבי AI PC: https://cline.bot/blog/local-models-amd

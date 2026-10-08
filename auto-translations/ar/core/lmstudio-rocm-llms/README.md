@@ -16,42 +16,43 @@ SPDX-License-Identifier: MIT
 
 ## نظرة عامة
 
-يُعد LM Studio غلافًا (wrapper) قويًا يعتمد على واجهة رسومية لـ[llama.cpp](https://github.com/ggml-org/llama.cpp) ويوفر أيضًا [نقطة نهاية متوافقة مع OpenAI](https://lmstudio.ai/docs/developer/openai-compat) لتقديم النماذج محليًا. يوفر LM Studio واجهة بسيطة وقوية في آن واحد لتنزيل النماذج ونشرها بسهولة. كما يقدم LM Studio كلًا من خلفيتَي Vulkan وAMD ROCm™ software (تُسمى بيئات التشغيل) لمستخدمي AMD.
+LM Studio هو غلاف قوي يعتمد على واجهة رسومية (GUI) لـ [llama.cpp](https://github.com/ggml-org/llama.cpp) ويوفر أيضًا [نقطة نهاية متوافقة مع OpenAI](https://lmstudio.ai/docs/developer/openai-compat) لخدمة النماذج محليًا. يوفر LM Studio واجهة بسيطة لكن قوية لتنزيل النماذج ونشرها بسهولة. يقدم LM Studio كلًا من محركي Vulkan وAMD ROCm™ (ما يُسمى بأوقات التشغيل runtimes) لمستخدمي AMD.
 
 
 ## ما ستتعلمه
 - كيفية تهيئة واستخدام LM Studio للاستفادة من عتادك المحلي
-- اختبار وإدارة نماذج اللغة الكبيرة (LLMs) في بيئة غير متصلة بالكامل
-- تقديم النماذج عبر واجهة برمجية متوافقة مع OpenAI لتشغيل سير عمل وتطبيقات مخصصة
+- اختبار النماذج اللغوية الكبيرة (LLMs) وإدارتها في بيئة غير متصلة بالإنترنت بالكامل
+- تقديم النماذج عبر واجهة برمجة التطبيقات المتوافقة مع OpenAI لتشغيل مهام العمل والتطبيقات المخصصة
 
 
 <!-- @device:halo_box,halo,stx,krk -->
-## ضبط إعدادات الذاكرة
+## ضبط تهيئة الذاكرة
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## التحقق من تحديثات البرمجيات
+## التحقق من تحديثات البرامج
 
 <!-- @os:linux -->
-> **ملاحظة**: يمكنك تثبيت VS Code عبر AMD Ryzen™ AI Developer Center. أما بالنسبة لـ LM Studio، فاتبع تعليمات التثبيت أدناه.
+> **ملاحظة**: يمكنك تثبيت VS Code عبر مركز مطوري AMD Ryzen™. أما بالنسبة لـ LM Studio، فاتبع تعليمات التثبيت أدناه.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **ملاحظة**: إذا لم يكن VS Code أو LM Studio مثبتين، يمكنك تثبيتهما من AMD Ryzen™ AI Developer Center. 
+> **ملاحظة**: إذا لم يكن VS Code أو LM Studio مثبتين، يمكنك تثبيتهما من مركز مطوري AMD Ryzen™.
 <!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## تثبيت متطلبات البرمجيات الأساسية
+## تثبيت متطلبات البرامج الأساسية
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
 
 <!-- @require:lmstudio -->
+<!-- @prereq:lmstudio -->
 
 ## تنزيل النماذج
 
@@ -62,22 +63,24 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo,halo_box -->
 <!-- @require:lmstudio-models-gpt-oss-120b -->
+<!-- @prereq:lmstudio-models-gpt-oss-120b -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @require:lmstudio-models-qwen3-9b -->
+<!-- @prereq:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
 ## الدردشة مع نموذج لغوي كبير
-تعرّف على كيفية بدء الدردشة مع نموذج لغوي كبير بجودة ChatGPT بشكل محلي بالكامل.  
+تعلّم كيفية بدء الدردشة مع نموذج لغوي كبير بجودة ChatGPT بشكل محلي بالكامل.
 
-1. افتح LMStudio. 
-2. اضغط على `Ctrl + L` لفتح أداة تحميل النموذج (Model Loader)، ثم اختر `Manually choose model load parameters`، وانقر على `${model_name}`
-3. تأكد من تحديد خيار "show advanced settings".  
-4. غيّر `Context Length` حسب الرغبة. يعني طول السياق الأعلى استخدام ذاكرة أكبر للنموذج، بالإضافة إلى استخدام أكبر لذاكرة النظام. القيمة الموصى بها لهذا الدليل هي 4096.
-5. تأكد من ضبط `GPU Offload` على الحد الأقصى وأن `Flash Attention` مفعّل (يمكن إبقاء Cache Quantizations معطّلة).
+1. افتح LMStudio.
+2. اضغط على `Ctrl + L` لفتح محمّل النماذج، واختر `Manually choose model load parameters`، ثم انقر على `${model_name}`
+3. تأكد من تحديد خيار "show advanced settings".
+4. غيّر `Context Length` حسب الرغبة. يعني طول السياق الأعلى ذاكرة أكبر للنموذج، لكنه يستهلك ذاكرة نظام أكثر. يُنصح باستخدام 4096 لهذا الدليل.
+5. تأكد من ضبط `GPU Offload` على الحد الأقصى وأن `Flash Attention` مفعّل (يمكن ترك Cache Quantizations معطلًا).
 6. حدد `Remember settings` وانقر على `Load Model`.
-7. إذا لم تكن في نافذة الدردشة، اضغط على `Ctrl + 1` أو انقر على زر 👾 الموجود أعلى يسار الشاشة.
+7. إذا لم تكن في نافذة الدردشة، اضغط `Ctrl + 1` أو انقر على زر 👾 الموجود أعلى يسار الشاشة.
 8. أرسل رسالة وابدأ التفاعل مع النموذج!
 
 <!-- @os:windows -->
@@ -155,19 +158,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **تلميح**: يشير طول السياق إلى ذاكرة النموذج. يعمل Flash Attention على تحسين سرعة المعالجة مع تقليل استهلاك الذاكرة. أما GPU Offload فينقل الحوسبة إلى بطاقة الرسوميات للحصول على استجابات أسرع.
+> **نصيحة**: يشير طول السياق إلى ذاكرة النموذج. يحسّن Flash Attention سرعة المعالجة مع تقليل استهلاك الذاكرة. ينقل GPU Offload الحوسبة إلى بطاقة الرسوميات للحصول على استجابات أسرع.
 
 ## تقديم النماذج اللغوية الكبيرة عبر نقطة نهاية متوافقة مع OpenAI
 
-يوفر LM Studio أيضًا نقطة نهاية متوافقة مع OpenAI على شكل LM Studio Server. وقد تم عرض ذلك بالفعل في سير عمل برمجي وكيلي (agentic) باستخدام Cline [هنا](../playbooks/vscode-qwen3-coder). ومن حالات الاستخدام الشائعة الأخرى ربط LM Studio Server بأي تطبيق ويب (React أو Node.js أو Python) عن طريق إرسال طلبات HTTP قياسية إلى نقطة نهاية الاستدلال.
+يوفر LM Studio أيضًا نقطة نهاية متوافقة مع OpenAI في شكل LM Studio Server. وقد تم عرض ذلك بالفعل في سير عمل برمجة وكيل (agentic) مع Cline [هنا](../playbooks/vscode-qwen3-coder). ومن الاستخدامات الشائعة الأخرى ربط LM Studio Server بأي تطبيق ويب (React, Node.js, Python) عن طريق إرسال طلبات HTTP قياسية إلى نقطة نهاية الاستدلال.
 
 لإعداد LM Studio Server، اتبع التعليمات التالية:
 
-1. من الجهة اليسرى، انقر على علامة التبويب `Developer` (أيقونة سطر الأوامر) أو اضغط `Ctrl + 2` ثم انقر على `Server Settings`.  
-2. (اختياري): إذا كنت تريد تقديم النموذج عبر شبكتك المحلية (LAN)، حدد `Serve on Local Network`. وإذا كنت تريد استخدامه مع موقع ويب أو مع استدعاءات موسعة داخل VS Code، حدد `Enable CORS`. 
-3. في الزاوية العلوية اليسرى، تأكد من أن الخادم يعمل بالنقر على زر التبديل بجانب `Status`.
-4. ستكون الآن نقطة نهاية متوافقة مع OpenAI قيد التشغيل. عادةً ما يكون العنوان هو http://127.0.0.1:1234  
-5. إذا لم يكن هناك نموذج محمّل بالفعل، يمكنك تحميله بالنقر على `Load Model` واتباع الخطوات المذكورة سابقًا. 
+1. من الجهة اليسرى، انقر على علامة التبويب `Developer` (أيقونة سطر الأوامر) أو اضغط `Ctrl + 2` ثم انقر على `Server Settings`.
+2. (اختياري): إذا كنت تريد تقديم النموذج عبر شبكتك المحلية (LAN)، حدد `Serve on Local Network`. وإذا كنت تريد استخدامه مع موقع ويب أو استدعاءات موسعة داخل VS Code، حدد `Enable CORS`.
+3. في الزاوية العلوية اليسرى، تأكد من تشغيل الخادم بالنقر على زر التبديل أمام `Status`.
+4. ستعمل الآن نقطة نهاية متوافقة مع OpenAI. يكون العنوان عادةً http://127.0.0.1:1234
+5. إذا لم يكن النموذج محملاً بالفعل، يمكنك تحميله بالنقر على `Load Model` واتباع الخطوات المذكورة سابقًا.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -175,7 +178,7 @@ lms chat "$ID" -p "Reply with exactly: OK"
 lms server start --port 1234
 curl.exe -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -184,13 +187,13 @@ curl.exe -s http://127.0.0.1:1234/v1/models
 lms server start --port 1234
 curl -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 
-سيصبح هذا النموذج الآن قابلاً للوصول عبر نقطة نهاية LM Studio Server وسيدعم نقاط نهاية OpenAI بما في ذلك:
+سيصبح هذا النموذج الآن متاحًا عبر نقطة نهاية LM Studio Server وسيدعم نقاط نهاية OpenAI بما في ذلك:
 
-| نقطة النهاية | الطريقة | الوثائق |
+| نقطة النهاية | الطريقة | التوثيق |
 |------------|----------|----------|
 | /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
 | /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
@@ -198,13 +201,13 @@ curl -s http://127.0.0.1:1234/v1/models
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
 #### مثال: اختبار الاتصال بنقطة النهاية (Endpoint)
-بعد أن أنشأنا للتو نقطة النهاية المتوافقة مع OpenAI، دعنا نلقي نظرة على كيفية دمج ذلك في بيئة تطوير Python (مثل VSCode) واستخدام نظامك كموفر API محلي.
+بعد أن أنشأنا للتو نقطة النهاية المتوافقة مع OpenAI، دعنا نلقي نظرة على كيفية دمج هذا في بيئة تطوير Python (مثل VSCode) واستخدام نظامك كمزوّد API محلي.
 
 1. أنشئ بيئة Python افتراضية:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    على Linux، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر التالية لإنشاء venv.
+    على Linux، افتح طرفية في المجلد الذي تختاره واتبع الأوامر التالية لإنشاء venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -214,13 +217,13 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**امنح مستخدمك صلاحية الوصول إلى أجهزة GPU** (يجب تسجيل الخروج ثم الدخول مجددًا لتفعيل ذلك):
+**امنح المستخدم الخاص بك إذن الوصول إلى أجهزة GPU** (يجب تسجيل الخروج ثم تسجيل الدخول مرة أخرى لتفعيل ذلك):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    على Linux، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر التالية لإنشاء venv.
+    على Linux، افتح طرفية في المجلد الذي تختاره واتبع الأوامر التالية لإنشاء venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -232,26 +235,26 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    على Windows، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر التالية لإنشاء venv.
+    على Windows، افتح طرفية في المجلد الذي تختاره واتبع الأوامر التالية لإنشاء venv.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **ملاحظة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell الخاصة بهم (على سبيل المثال
-    > عن طريق تعيينها إلى RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
+    > **نصيحة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell (Execution Policy) الخاصة بهم (على سبيل المثال،
+    > ضبطها على RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    على Windows، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر التالية لإنشاء venv.
+    على Windows، افتح طرفية في المجلد الذي تختاره واتبع الأوامر التالية لإنشاء venv.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **ملاحظة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell الخاصة بهم (على سبيل المثال
-    > عن طريق تعيينها إلى RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
+    > **نصيحة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell (Execution Policy) الخاصة بهم (على سبيل المثال،
+    > ضبطها على RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -261,7 +264,7 @@ sudo usermod -aG render,video $LOGNAME
     pip install openai
     ```
 
-3. شغّل السكريبت التالي لاختبار الاتصال بنقطة النهاية التي أنشأناها للتو.
+3. شغّل البرنامج النصي التالي لاختبار الاتصال بنقطة النهاية التي أنشأناها للتو.
     ```python
     from openai import OpenAI
 
@@ -366,13 +369,13 @@ lms server stop
 
 #### (اختياري): التبديل بين بيئات التشغيل (Runtimes)
 
-1. اضغط على `Ctrl + Shift + R` على لوحة المفاتيح. أو بدلًا من ذلك انقر على تبويب `Discover` (أيقونة العدسة المكبرة) على الجانب الأيسر، ثم انقر على `Runtime` في النافذة المنبثقة.
-2. ستظهر لك بعد ذلك `Runtime Selections`، حيث يمكنك استخدام القائمة المنسدلة لتغيير بيئة التشغيل.
+1. اضغط على `Ctrl + Shift + R` على لوحة المفاتيح. بدلاً من ذلك، انقر على علامة التبويب `Discover` (أيقونة العدسة المكبرة) على الجانب الأيسر، ثم انقر على `Runtime` في النافذة المنبثقة.
+2. ستظهر لك عندئذٍ `Runtime Selections`، حيث يمكن استخدام القائمة المنسدلة لتغيير بيئة التشغيل.
 
 
 ## الخطوات التالية
 
-- **دمج التطبيقات المخصصة**: ادمج سكريبتات أو تطبيقات Python الخاصة بك باستخدام واجهة API المحلية المتوافقة مع OpenAI.
-- **الواجهات الأمامية المتقدمة**: اربط واجهات قوية مثل Open WebUI بخادمك للاستفادة من سجل المحادثات وإدارة الشخصيات (persona management).
+- **دمج تطبيق مخصص**: ادمج البرامج النصية أو التطبيقات الخاصة بك المكتوبة بلغة Python باستخدام واجهة OpenAI API المحلية المتوافقة.
+- **واجهات متقدمة**: اربط واجهات قوية مثل Open WebUI بخادمك لإدارة سجل المحادثات والشخصيات (persona).
 
-لمزيد من التوثيق، يرجى زيارة: https://lmstudio.ai/docs/developer
+لمزيد من التوثيق، يُرجى زيارة: https://lmstudio.ai/docs/developer

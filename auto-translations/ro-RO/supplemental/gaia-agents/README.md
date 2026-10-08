@@ -16,17 +16,17 @@ SPDX-License-Identifier: MIT
 
 ## Prezentare generală
 
-Agenții GAIA sunt asistenți AI care folosesc un LLM local pentru a raționa și a apela instrumente pe care le definiți — precum niște chatboți care pot întreprinde acțiuni. Aceștia rulează **100% local**, fără API-uri în cloud, fără date care părăsesc mașina dumneavoastră și fără a fi necesare chei API.
+Agenții GAIA sunt asistenți AI care folosesc un LLM local pentru a raționa și a apela unelte pe care le definești — ca niște chatboți care pot întreprinde acțiuni. Aceștia rulează **100% local**, fără API-uri în cloud, fără date care părăsesc mașina ta și fără a fi nevoie de chei API.
 
-În acest playbook, veți construi un Hardware Advisor Agent care detectează RAM-ul, GPU-ul și NPU-ul sistemului dumneavoastră, interoghează catalogul local de modele și recomandă ce LLM-uri poate rula mașina dumneavoastră. Este o introducere practică în GAIA Agent SDK care produce ceva imediat util.
+În acest playbook, vei construi un Agent Consultant Hardware care detectează RAM-ul, GPU-ul și NPU-ul sistemului tău, interoghează catalogul local de modele și recomandă ce LLM-uri poate rula mașina ta. Este o introducere practică în GAIA Agent SDK care produce ceva imediat util.
 
-## Ce veți învăța
+## Ce vei învăța
 
-- Cum să creați un agent GAIA cu instrumente personalizate
-- Utilizarea LemonadeClient SDK pentru a interoga informațiile de sistem și cataloagele de modele
-- Detectarea GPU/NPU specifică platformei (Windows PowerShell și Linux lspci)
-- Dimensionarea modelelor pe baza memoriei folosind regula de 70%
-- Construirea unei interfețe CLI interactive pentru interogări în limbaj natural despre hardware
+- Cum să creezi un agent GAIA cu unelte personalizate
+- Utilizarea SDK-ului LemonadeClient pentru a interoga informațiile despre sistem și cataloagele de modele
+- Detectarea specifică platformei pentru GPU/NPU (Windows PowerShell și Linux lspci)
+- Dimensionarea modelelor pe baza memoriei, folosind regula de 70%
+- Construirea unui CLI interactiv pentru interogări hardware în limbaj natural
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Configurarea memoriei
@@ -35,8 +35,8 @@ Agenții GAIA sunt asistenți AI care folosesc un LLM local pentru a raționa ș
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Verificați actualizările software
-> **Notă**: Dacă VS Code nu este instalat, îl puteți instala cu Ryzen AI Developer Center.
+## Verifică actualizările software
+> **Notă**: Dacă VS Code nu este instalat, îl poți instala cu Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -66,16 +66,19 @@ which python3
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:lemonade -->
 <!-- @require:gaia -->
+<!-- @prereq:lemonade-models-qwen3-coder-30b -->
 
 ## Primii pași
 
-Rulați mai întâi agentul finalizat pentru a vedea ce urmează să construiți. Apoi, vom parcurge codul pas cu pas.
+Mai întâi rulează agentul finalizat ca să vezi ce construiești. Apoi, vom parcurge codul pas cu pas.
 
-### Rulați exemplul preconstruit
+### Rulează exemplul pre-construit
 
-Acest playbook include agentul complet [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Descărcați-l într-un director la alegere și rulați-l pentru a vedea agentul finalizat în acțiune:
+Acest playbook include agentul complet [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). Descarcă-l într-un director la alegere și rulează-l pentru a vedea agentul finalizat în acțiune:
 
 ```bash
 python hardware_advisor_agent.py
@@ -103,7 +106,7 @@ print("PASS: hardware_advisor_agent.py has valid syntax")
 ```
 <!-- @test:end --> 
 
-**Încercați să întrebați:** „Ce dimensiune de LLM pot rula?"
+**Încearcă să întrebi:** „Ce dimensiune de LLM pot rula?”
 
 **Rezultat așteptat:**
 
@@ -124,9 +127,9 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 - NPU acceleration available for smaller models
 ```
 
-**Felicitări** - ați construit un agent! 
+**Felicitări** - ai construit un agent! 
 
-Restul playbook-ului va explica modul în care funcționează fiecare parte a scriptului, astfel încât să îl puteți înțelege de la bază.
+Restul playbook-ului va explica modul în care funcționează fiecare parte a scriptului, astfel încât să îl poți înțelege de la bază.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -266,21 +269,21 @@ echo "OK: hardware_advisor_agent.py started successfully"
 <!-- @os:end --> 
 
 
-## Înțelegerea arhitecturii
+## Înțelege arhitectura
 
-Hardware Advisor Agent combină trei componente:
+Agentul Consultant Hardware combină trei componente:
 
-- **LemonadeClient SDK** — API-uri pentru informații de sistem și catalogul de modele
-- **Detectare specifică platformei** — Windows PowerShell / Linux lspci pentru informații GPU
+- **SDK-ul LemonadeClient** — API-uri pentru informații despre sistem și catalogul de modele
+- **Detectare specifică platformei** — Windows PowerShell / Linux lspci pentru informații despre GPU
 - **Calcule de memorie** — regula de 70% pentru dimensionarea sigură a modelelor
 
-Datele parcurg aceste componente în succesiune: interogarea utilizatorului → agentul selectează un instrument → instrumentul apelează LemonadeClient + detectarea sistemului de operare → agentul sintetizează rezultatele într-o recomandare.
+Datele circulă prin aceste componente în secvență: interogare utilizator → agentul selectează o unealtă → unealta apelează LemonadeClient + detectarea sistemului de operare → agentul sintetizează rezultatele într-o recomandare.
 
-### LemonadeClient SDK
+### SDK-ul LemonadeClient
 
 LemonadeClient oferă un API unificat pentru detectarea sistemului, disponibilitatea NPU/GPU și interogările catalogului de modele.
 
-**Import și inițializare:**
+**Importă și inițializează:**
 
 ```python
 from gaia.llm.lemonade_client import LemonadeClient
@@ -288,7 +291,7 @@ from gaia.llm.lemonade_client import LemonadeClient
 client = LemonadeClient(keep_alive=True)
 ```
 
-**`get_system_info()`** — Returnează sistemul de operare, CPU, RAM și disponibilitatea dispozitivelor:
+**`get_system_info()`** — Returnează sistemul de operare, CPU-ul, RAM-ul și disponibilitatea dispozitivelor:
 
 ```python
 info = client.get_system_info()
@@ -364,7 +367,7 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 
 ### Detectarea GPU specifică platformei
 
-Agentul folosește comenzi native ale sistemului de operare în locul PyTorch pentru detectarea GPU. Acest lucru funcționează fără drivere GPU instalate, detectează toate GPU-urile (nu doar cele compatibile CUDA) și evită importurile de biblioteci consistente.
+Agentul folosește comenzi native ale sistemului de operare în loc de PyTorch pentru detectarea GPU. Acest lucru funcționează fără drivere GPU instalate, detectează toate GPU-urile (nu doar cele compatibile CUDA) și evită importurile de biblioteci consistente.
 
 <!-- @os:windows -->
 
@@ -399,9 +402,9 @@ result = subprocess.run(
 
 <!-- @os:end -->
 
-### Regula de 70% pentru memorie
+### Regula de 70% a memoriei
 
-> **Regulă:** Dimensiunea modelului trebuie să fie mai mică de 70% din RAM-ul disponibil, pentru a lăsa 30% suprasarcină pentru operațiile de inferență (cache KV, buffere de procesare pe loturi, vârfuri de memorie la runtime).
+> **Regulă:** Dimensiunea modelului ar trebui să fie mai mică de 70% din RAM-ul disponibil, pentru a lăsa 30% rezervă pentru operațiunile de inferență (cache KV, bufferele de procesare pe loturi, vârfurile de memorie în timpul rulării).
 
 ```
 System: 32 GB RAM
@@ -410,13 +413,13 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 70B model (~42 GB):   Too large
 ```
 
-## Codificarea agentului pas cu pas (opțional)
+## Codarea agentului pas cu pas (opțional)
 
-Veți crea **un singur fișier** numit `hardware_advisor_agent.py` și veți adăuga progresiv funcționalități. Fiecare pas se bazează pe cel anterior.
+Vei crea **un singur fișier** numit `hardware_advisor_agent.py` și vei adăuga progresiv funcționalități. Fiecare pas se bazează pe cel anterior.
 
 ### Pasul 1: Scheletul agentului
 
-Începeți cu o structură minimă de agent — doar clasa și un prompt de sistem de bază. Agentul nu are încă instrumente.
+Începe cu o structură minimală a agentului — doar clasa și un prompt de sistem de bază. Agentul nu are încă unelte.
 
 ```python
 from gaia import Agent
@@ -443,7 +446,7 @@ if __name__ == "__main__":
     print("Agent created successfully!")
 ```
 
-Rulați-l pentru a verifica:
+Rulează-l pentru a verifica:
 
 ```bash
 python hardware_advisor_agent.py
@@ -459,9 +462,9 @@ Agent created successfully!
 
 ### Pasul 2: Detectarea GPU și a hardware-ului
 
-Adăugați metoda ajutătoare `_get_gpu_info()` și instrumentul `get_hardware_info()`. Aceasta face agentul interactiv — acum îl puteți interoga despre specificațiile sistemului.
+Adaugă metoda ajutătoare `_get_gpu_info()` și unealta `get_hardware_info()`. Acest lucru face agentul interactiv — acum poți să-l interoghezi despre specificațiile sistemului.
 
-**Actualizați importurile** din partea de sus a fișierului:
+**Actualizează importurile** din partea de sus a fișierului:
 
 ```python
 from typing import Any, Dict
@@ -470,7 +473,7 @@ from gaia import Agent, tool
 from gaia.llm.lemonade_client import LemonadeClient
 ```
 
-**Adăugați ajutătorul `_get_gpu_info()`** după metoda `_get_system_prompt()`:
+**Adaugă metoda ajutătoare `_get_gpu_info()`** după metoda `_get_system_prompt()`:
 
 ```python
 def _get_gpu_info(self) -> Dict[str, Any]:
@@ -557,7 +560,7 @@ def _get_gpu_info(self) -> Dict[str, Any]:
     return {"name": "Not detected", "memory_mb": 0}
 ```
 
-**Înlocuiți metoda `_register_tools()`** cu instrumentul `get_hardware_info`:
+**Înlocuiește metoda `_register_tools()`** cu unealta `get_hardware_info`:
 
 ```python
 def _register_tools(self):
@@ -614,7 +617,7 @@ def _register_tools(self):
             }
 ```
 
-**Actualizați blocul `__main__`** pentru a activa testarea interactivă:
+**Actualizează blocul `__main__`** pentru a activa testarea interactivă:
 
 ```python
 if __name__ == "__main__":
@@ -633,7 +636,7 @@ if __name__ == "__main__":
             break
 ```
 
-Rulați și încercați să întrebați "Arată-mi specificațiile sistemului meu":
+Rulează și încearcă să întrebi „Arată-mi specificațiile sistemului meu”:
 
 ```bash
 python hardware_advisor_agent.py
@@ -654,7 +657,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ### Pasul 3: Catalogul de modele
 
-Adăugați instrumentul `list_available_models()` în interiorul `_register_tools()`, după funcția `get_hardware_info`. Acum agentul poate să vă spună ce modele sunt disponibile.
+Adaugă unealta `list_available_models()` în interiorul `_register_tools()`, după funcția `get_hardware_info`. Acum agentul poate să-ți spună ce modele sunt disponibile.
 
 ```python
     @tool(atomic=True)
@@ -696,7 +699,7 @@ Adăugați instrumentul `list_available_models()` în interiorul `_register_tool
             }
 ```
 
-Rulați și încercați să întrebați "Ce modele sunt disponibile?":
+Rulează și încearcă să întrebi „Ce modele sunt disponibile?”:
 
 ```bash
 python hardware_advisor_agent.py
@@ -717,7 +720,7 @@ Agent: I found 15 models in the catalog:
 
 ### Pasul 4: Recomandări inteligente
 
-Adăugați instrumentul `recommend_models()` în interiorul `_register_tools()`, după `list_available_models`. Agentul poate acum calcula ce modele încap în memoria sistemului dumneavoastră folosind regula de 70%.
+Adaugă unealta `recommend_models()` în interiorul `_register_tools()`, după `list_available_models`. Agentul poate acum să calculeze ce modele încap în memoria sistemului tău folosind regula de 70%.
 
 ```python
     @tool(atomic=True)
@@ -776,7 +779,7 @@ Adăugați instrumentul `recommend_models()` în interiorul `_register_tools()`,
             }
 ```
 
-Rulați și încercați să întrebați "Ce dimensiune de LLM pot rula?":
+Rulează și încearcă să întrebi „Ce dimensiune de LLM pot rula?”:
 
 ```bash
 python hardware_advisor_agent.py
@@ -796,11 +799,11 @@ Top recommendations:
 
 ---
 
-### Pasul 5: CLI de producție
+### Pasul 5: CLI pentru producție
 
-Înlocuiți blocul simplu `__main__` cu o interfață CLI interactivă rafinată. Aceasta adaugă un banner, comenzi de ieșire și o gestionare mai bună a erorilor.
+Înlocuiește blocul simplu `__main__` cu un CLI interactiv perfecționat. Acesta adaugă un banner, comenzi de ieșire și o gestionare mai bună a erorilor.
 
-**Înlocuiți întregul bloc `if __name__ == "__main__":`** cu:
+**Înlocuiește întregul bloc `if __name__ == "__main__":`** cu:
 
 ```python
 def main():
@@ -852,29 +855,29 @@ if __name__ == "__main__":
 ---
 ### Verificare finală
 
-`hardware_advisor_agent.py` ar trebui să conțină acum toate aceste componente:
+Fișierul tău `hardware_advisor_agent.py` ar trebui să conțină acum toate aceste componente:
 
 - [x] Importuri: `from typing import Any, Dict` și `from gaia import Agent, tool`
-- [x] Clasa `HardwareAdvisorAgent` cu `__init__` și system prompt
+- [x] Clasa `HardwareAdvisorAgent` cu `__init__` și prompt de sistem
 - [x] Funcția ajutătoare `_get_gpu_info()` (Windows PowerShell + Linux lspci)
 - [x] Instrumentul `get_hardware_info()` cu câmpuri pentru GPU, NPU și OS
-- [x] Instrumentul `list_available_models()` cu etichete și îmbogățire de dimensiune
+- [x] Instrumentul `list_available_models()` cu etichete și îmbogățire a dimensiunii
 - [x] Instrumentul `recommend_models()` cu regula de 70%, fits_in_ram, fits_in_gpu
-- [x] Funcția `main()` cu interfață CLI interactivă
+- [x] Funcția `main()` cu CLI interactiv
 
-**Testați aceste interogări pentru a confirma că totul funcționează:**
+**Testează aceste interogări pentru a confirma că totul funcționează:**
 
-- „What size LLM can I run?”
-- „Show me my system specs”
-- „What models are available?”
-- „Can I run a 30B model?”
+- „Ce dimensiune de LLM pot rula?”
+- „Arată-mi specificațiile sistemului meu”
+- „Ce modele sunt disponibile?”
+- „Pot rula un model de 30B?”
 
 > **Sfat**: Implementarea completă este disponibilă la [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
 
-## Pași următori
+## Pașii următori
 
-- **Explorați API-urile LemonadeClient** — Descoperiți mai multe capabilități de gestionare a sistemului și a modelelor în [documentația SDK LemonadeClient](https://amd-gaia.ai/sdk/lemonade-client)
-- **Adăugați interacțiune vocală** — Integrați Whisper ASR și Kokoro TTS pentru a permite utilizatorilor să pună întrebări despre hardware vorbind. Consultați [ghidul Talk](https://amd-gaia.ai/guides/talk)
-- **Adăugați suport MCP** — Expuneți consilierul hardware ca server MCP, astfel încât alte instrumente să îl poată interoga. Consultați [ghidul MCP](https://amd-gaia.ai/sdk/infrastructure/mcp)
-- **Extindeți motorul de recomandare** — Luați în calcul VRAM-ul GPU pentru descărcarea straturilor sau adăugați benchmarking pentru a estima tokens-per-second
-- **Construiți un sistem multi-agent** — Combinați consilierul hardware cu un agent de cod sau un agent de chat folosind [Agentul de rutare](https://amd-gaia.ai/guides/routing)
+- **Explorează API-urile LemonadeClient** — Descoperă mai multe capabilități de gestionare a sistemului și a modelelor în [documentația SDK LemonadeClient](https://amd-gaia.ai/sdk/lemonade-client)
+- **Adaugă interacțiune vocală** — Integrează Whisper ASR și Kokoro TTS pentru a permite utilizatorilor să pună întrebări despre hardware prin vorbire. Consultă [ghidul Talk](https://amd-gaia.ai/guides/talk)
+- **Adaugă suport MCP** — Expune consilierul hardware ca server MCP, astfel încât alte instrumente să îl poată interoga. Consultă [ghidul MCP](https://amd-gaia.ai/sdk/infrastructure/mcp)
+- **Extinde motorul de recomandări** — Ia în considerare VRAM-ul GPU pentru descărcarea straturilor sau adaugă teste de performanță pentru a estima tokeni-pe-secundă
+- **Construiește un sistem multi-agent** — Combină consilierul hardware cu un agent de cod sau un agent de chat folosind [Routing Agent](https://amd-gaia.ai/guides/routing)

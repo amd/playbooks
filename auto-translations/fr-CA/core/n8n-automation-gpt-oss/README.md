@@ -9,7 +9,9 @@ SPDX-License-Identifier: MIT
 > **Traduction automatique.** Cette page a été traduite automatiquement de l'anglais et n'a pas été révisée par un humain. Elle peut contenir des erreurs, et certaines instructions, commandes, options de téléchargement, disponibilités de produits ou autres contenus peuvent varier selon la langue ou la région. En cas d'incompatibilité ou de divergence, la version originale anglaise du playbook fait foi.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
+# Présentation
+
+<!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
@@ -23,20 +25,20 @@ SPDX-License-Identifier: MIT
 
 n8n est une plateforme d'automatisation de flux de travail qui vous permet de connecter des applications et des services à l'aide d'un éditeur visuel basé sur des nœuds.
 
-Ce guide pratique vous apprend à configurer un résumeur d'actualités financières alimenté par l'IA qui extrait les derniers titres d'actualités économiques à partir d'un flux RSS d'actualités et utilise un LLM local exécuté sur votre système pour générer un résumé destiné aux investisseurs.
+Ce guide pratique vous apprend à configurer un résumeur de nouvelles financières alimenté par l'IA qui extrait les dernières manchettes d'affaires d'un flux RSS de nouvelles et utilise un LLM local exécuté sur votre système pour générer un résumé axé sur les investisseurs.
 
-## Ce que vous allez apprendre
+## Ce que vous apprendrez
 
 - Comment installer et lancer n8n
-- Importation et configuration d'un flux de travail préconstruit
-- Connexion à Lemonade à l'aide de l'intégration native de n8n
-- Compréhension des nœuds de flux de travail et du flux de données
+- Importer et configurer un flux de travail préétabli
+- Se connecter à Lemonade à l'aide de l'intégration native de n8n
+- Comprendre les nœuds de flux de travail et le flux de données
 
 ## Qu'est-ce que Lemonade?
 
-[Lemonade](https://lemonade-server.ai) est une plateforme de service de LLM local conçue pour le matériel AMD. Elle fournit une API compatible OpenAI qui s'exécute entièrement sur votre machine — vos données ne quittent jamais votre appareil.
+[Lemonade](https://lemonade-server.ai) est une plateforme de service de LLM local conçue pour le matériel AMD. Elle fournit une API compatible OpenAI qui s'exécute entièrement sur votre machine : vos données ne quittent jamais votre appareil.
 
-Dans ce guide pratique, nous utilisons Lemonade pour servir un LLM local auquel n8n se connecte pour les tâches alimentées par l'IA.
+Dans ce guide pratique, nous utilisons Lemonade pour servir un LLM local auquel n8n se connecte pour des tâches alimentées par l'IA.
 
 n8n comprend un **nœud Lemonade natif** (`Lemonade Chat Model`) qui offre une intégration de première classe — aucune configuration manuelle n'est nécessaire. Cela simplifie la connexion de votre LLM local aux flux de travail d'automatisation.
 
@@ -57,19 +59,26 @@ n8n comprend un **nœud Lemonade natif** (`Lemonade Chat Model`) qui offre une i
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:n8n,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- Linux runs n8n as a Podman container (see compose.yml below), so Node.js and a host n8n install are not required; podman is the only extra prerequisite. -->
 <!-- @require:lemonade,podman -->
+<!-- @prereq:podman -->
 <!-- @os:end -->
 
 <!-- @device:halo,halo_box -->
+<!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:lemonade-models-gpt-oss-20b -->
 <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 
@@ -190,18 +199,20 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:windows -->
 <!-- @test:id=node-npm-version timeout=60 hidden=True -->
 ```bash
 node -v
 npm -v
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 ## Installation de n8n
 <!-- @os:windows -->
 Installez n8n globalement à l'aide de npm.
 
-> **Remarque** : Vous pourriez voir des avertissements npm. C'est normal.
+> **Remarque** : Vous pourriez voir quelques avertissements npm. C'est normal.
 
 ```bash
 npm install -g n8n
@@ -214,38 +225,29 @@ n8n --version
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @os:linux -->
-<!-- @test:id=n8n-version timeout=60 hidden=True -->
-```bash
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-n8n --version
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
 <!-- @os:windows -->
-> **Astuce** : Les utilisateurs de Windows pourraient devoir modifier leur politique d'exécution PowerShell (par exemple,
-> en la définissant à RemoteSigned ou Unrestricted) avant d'exécuter certaines commandes Powershell.
+> **Astuce** : Les utilisateurs de Windows devront peut-être modifier leur politique d'exécution PowerShell (par exemple,
+> en la réglant à RemoteSigned ou Unrestricted) avant d'exécuter certaines commandes Powershell.
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **Problème de PATH** : Si `n8n --version` indique que la commande est introuvable, assurez-vous que le répertoire binaire global npm figure dans le `PATH` de l'utilisateur. Le chemin d'installation habituel se trouve à `C:\Users\<username>\AppData\Roaming\npm`.
-> Ajoutez ce chemin au PATH utilisateur (Modifier les variables d'environnement système > Variables d'environnement > Modifier le chemin utilisateur) et rechargez le terminal.
+> **Problème de PATH** : Si `n8n --version` indique que la commande est introuvable, assurez-vous que le répertoire binaire global de npm figure dans le `PATH` de l'utilisateur. Le chemin d'installation habituel est `C:\Users\<username>\AppData\Roaming\npm`.
+> Ajoutez ce chemin au PATH de l'utilisateur (Modifier les variables d'environnement système > Variables d'environnement > Modifier le PATH utilisateur) et rechargez le terminal.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 Nous allons maintenant utiliser le service Podman pour conteneuriser notre installation de n8n.
 
-Veuillez télécharger le fichier suivant dans un répertoire de votre choix : [compose.yml](assets/compose.yml)
+Veuillez télécharger ce qui suit dans un répertoire de votre choix : [compose.yml](assets/compose.yml)
 
 Dans ce répertoire, exécutez la commande suivante :
 ```bash
 podman compose up -d
 ```
 
-Cela devrait installer n8n et écrire dans un stockage persistant.
+Cela devrait installer n8n et écrire sur un stockage persistant.
 
 Lancez n8n en saisissant `localhost:5678` dans la barre d'adresse de votre navigateur.
 <!-- @os:end -->
@@ -289,19 +291,14 @@ try {
 ```bash
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-p=""
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
 cleanup() {
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
+  podman compose -f compose.yml down >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-n8n start >/tmp/n8n-test.log 2>&1 &
-p=$!
+podman rm -f n8n >/dev/null 2>&1 || true
+podman compose -f compose.yml up -d
 
 ok=false
 for i in $(seq 1 120); do
@@ -315,6 +312,8 @@ done
 
 if [ "$ok" != "true" ]; then
   echo "n8n not ready on http://127.0.0.1:5678/healthz"
+  podman ps -a || true
+  podman logs n8n 2>&1 | tail -30 || true
   exit 1
 fi
 
@@ -324,7 +323,7 @@ echo "OK: n8n server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-n8n démarre un serveur Web local. Appuyez sur `'o'` ou ouvrez votre navigateur à l'adresse `http://localhost:5678` pour accéder à l'éditeur.
+n8n démarre un serveur Web local. Appuyez sur `'o'` ou ouvrez votre navigateur à `http://localhost:5678` pour accéder à l'éditeur.
 <!-- @os:end -->
 
 
@@ -335,16 +334,16 @@ n8n démarre un serveur Web local. Appuyez sur `'o'` ou ouvrez votre navigateur 
 Lemonade est le serveur local qui exécutera un modèle et se connectera à n8n.
 
 <!-- @os:linux -->
-Ouvrez l'interface graphique de Lemonade en cliquant sur l'icône Lemonade dans la barre des tâches. Vous pouvez y parcourir les modèles, les moteurs d'arrière-plan, et charger les modèles préinstallés.
+Ouvrez l'interface graphique de Lemonade en cliquant sur l'icône Lemonade dans la barre des tâches. Vous pouvez parcourir les modèles, les moteurs d'exécution (backends) et charger les modèles préinstallés à partir d'ici.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Ouvrez l'interface graphique de Lemonade en cliquant sur l'icône Lemonade. Cliquez avec le bouton droit sur l'icône de la barre d'état système pour ouvrir l'application. Vous pouvez ensuite ajouter des modèles, des moteurs d'arrière-plan, et charger les modèles préinstallés.
+Ouvrez l'interface graphique de Lemonade en cliquant sur l'icône Lemonade. Cliquez avec le bouton droit sur l'icône de la zone de notification pour ouvrir l'application. Vous pouvez ensuite ajouter des modèles, des moteurs d'exécution (backends) et charger les modèles préinstallés.
 <!-- @os:end -->
 
->**Astuce** : Une fois en cours d'exécution, l'interface graphique de Lemonade est également accessible à l'adresse http://localhost:13305
+>**Astuce** : Une fois en cours d'exécution, l'interface graphique de Lemonade est également accessible à http://localhost:13305
 
-Vous pouvez aussi ouvrir un terminal et exécuter `lemonade list` pour voir quels modèles sont installés. Ensuite, exécutez :
+Autrement, vous pouvez ouvrir un terminal et exécuter `lemonade list` pour voir quels modèles sont installés. Ensuite, exécutez :
 
 <!-- @device:halo_box -->
 <!-- @os:linux -->
@@ -375,7 +374,7 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 
 ## Configuration du flux de travail
 
-### Étape 1 : Inscrivez-vous ou connectez-vous à n8n
+### Étape 1 : S'inscrire ou se connecter à n8n
 
 Lorsque vous ouvrez n8n pour la première fois, vous serez invité à créer un compte ou à vous connecter :
 
@@ -387,16 +386,16 @@ Lorsque vous ouvrez n8n pour la première fois, vous serez invité à créer un 
 
 ### Étape 2 : Importer le flux de travail
 
-Nous avons fourni un flux de travail préconstruit que vous pouvez importer directement :
+Nous avons fourni un flux de travail préétabli que vous pouvez importer directement :
 
 1. Téléchargez le fichier de flux de travail suivant : [financial-news-workflow.json](assets/financial-news-workflow.json)
 2. Cliquez sur **Start from Scratch** pour ouvrir l'éditeur de flux de travail. Vous pouvez aussi cliquer sur le bouton + en haut à gauche, puis sur **Add workflow**.
 3. Cliquez sur le menu **...** (trois points) dans la barre supérieure droite et sélectionnez **Import from file**
 4. Sélectionnez le fichier `financial-news-workflow.json` téléchargé
 5. Le flux de travail apparaîtra sur le canevas
-### Étape 3 : Comprendre le workflow
+### Étape 3 : Comprendre le flux de travail
 
-Le workflow importé contient 8 nœuds connectés :
+Le flux de travail importé contient 8 nœuds connectés :
 
 <p align="center">
   <img src="assets/workflow-overview.png" alt="n8n Financial News Workflow" width="800"/>
@@ -404,25 +403,25 @@ Le workflow importé contient 8 nœuds connectés :
 
 | Nœud | Objectif |
 |------|---------|
-| **When clicking 'Execute workflow'** | Déclencheur manuel pour démarrer le workflow |
+| **When clicking 'Execute workflow'** | Déclencheur manuel pour démarrer le flux de travail |
 | **Fetch Financial News Feed** | Nœud RSS Read qui récupère les derniers titres d'actualités économiques à partir d'un flux RSS (par défaut, le flux NYT Business, aucune clé API requise) |
-| **Aggregate Headlines** | Nœud Aggregate qui rassemble les titres et résumés de chaque élément du flux en une seule liste |
-| **Clean Extracted News Data** | Nœud Set qui combine tous les titres en un seul champ texte |
+| **Aggregate Headlines** | Nœud Aggregate qui recueille les titres et les résumés de chaque élément du flux dans une seule liste |
+| **Clean Extracted News Data** | Nœud Set qui combine tous les titres en un seul champ de texte |
 | **AI Financial News Summarizer** | Agent IA qui traite les actualités à l'aide d'une invite système d'analyste financier |
 | **Lemonade Chat Model** | Se connecte à votre serveur Lemonade local exécutant le LLM |
 | **Structured Output Parser** | Met en forme la sortie de l'IA en JSON structuré |
-| **Convert to File** | Convertit le résumé en fichier téléchargeable |
+| **Convert to File** | Convertit le résumé en un fichier téléchargeable |
 
-> **Astuce** : Pour utiliser une autre source d'actualités, double-cliquez sur le nœud **Fetch Financial News Feed** et remplacez l'URL par n'importe quel flux RSS d'actualités économiques ou financières de votre choix.
+> **Astuce** : Pour utiliser une autre source d'actualités, double-cliquez sur le nœud **Fetch Financial News Feed** et remplacez l'URL par tout flux RSS d'actualités économiques ou boursières de votre choix.
 
 ### Étape 4 : Configurer les identifiants Lemonade
 
-Avant d'exécuter le workflow, vous devez le connecter à votre serveur Lemonade local :
+Avant d'exécuter le flux de travail, vous devez le connecter à votre serveur Lemonade local :
 
 1. Double-cliquez sur le nœud **Lemonade Chat Model** dans n8n
 2. Dans le menu déroulant **Credential to connect with**, sélectionnez **Create New Credential**
-3. Saisissez les valeurs du tableau ci-dessous, puis cliquez sur Enregistrer.
-4. Choisissez le modèle pertinent que vous avez chargé dans Lemonade Server.
+3. Entrez les valeurs du tableau ci-dessous, puis cliquez sur Enregistrer.
+4. Choisissez le modèle approprié que vous avez chargé dans Lemonade Server.
 
   | Champ | Valeur |
   |-------|-------|
@@ -431,20 +430,20 @@ Avant d'exécuter le workflow, vous devez le connecter à votre serveur Lemonade
 
 > **Remarque** : Avant de tester, exécutez `lemonade status` dans un terminal pour confirmer que le serveur Lemonade est en cours d'exécution.
 <!-- @device:halo_box -->
-> Ce workflow utilise GPT-OSS-120B, déjà préinstallé dans Lemonade. Vous pouvez le remplacer par d'autres modèles chargés dans les paramètres du nœud Lemonade Chat Model.
+> Ce flux de travail utilise GPT-OSS-120B, préinstallé dans Lemonade. Vous pouvez le remplacer par d'autres modèles chargés dans les paramètres du nœud Lemonade Chat Model.
 <!-- @device:end -->
 
-### Étape 5 : Tester le workflow
+### Étape 5 : Tester le flux de travail
 
 1. Assurez-vous que Lemonade est en cours d'exécution avec un modèle chargé
-2. Cliquez sur **Execute workflow** au centre inférieur du canevas
-3. Observez chaque nœud s'exécuter de gauche à droite : ils passent au vert une fois terminés
+2. Cliquez sur **Execute workflow** au centre bas du canevas
+3. Observez chaque nœud s'exécuter de gauche à droite — ils deviennent verts une fois terminés
 4. Double-cliquez sur le nœud **AI Financial News Summarizer** pour voir le résumé généré dans le panneau inférieur.
 5. Double-cliquez sur le nœud **Convert to File** pour télécharger le fichier texte correspondant dans le panneau inférieur.
 
 ## Comprendre l'agent IA
 
-L'AI Financial News Summarizer utilise une invite système conçue pour l'analyse financière :
+L'agent AI Financial News Summarizer utilise une invite système conçue pour l'analyse financière :
 
 ```
 You are an AI financial analyst. Your role is to read, understand, and
@@ -456,29 +455,29 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-L'agent reçoit les données d'actualités nettoyées et produit un résumé structuré incluant le sentiment du marché.
+L'agent reçoit les données d'actualités nettoyées et produit un résumé structuré avec le sentiment du marché.
 
-### Enregistrer votre workflow
+### Enregistrer votre flux de travail
 
-Cliquez sur le nom du workflow en haut et renommez-le si vous le souhaitez. Les workflows s'enregistrent automatiquement au fur et à mesure.
+Cliquez sur le nom du flux de travail en haut et renommez-le si vous le souhaitez. Les flux de travail s'enregistrent automatiquement au fur et à mesure.
 
 ## Prochaines étapes
 
-- **Automatiser la planification** : Remplacez le déclencheur manuel par un **Schedule Trigger** pour une exécution quotidienne
+- **Automatiser selon un horaire** : Remplacez le déclencheur manuel par un **Schedule Trigger** pour une exécution quotidienne
 - **Envoyer des notifications** : Ajoutez un nœud **Discord**, **Slack** ou **Email** pour recevoir les résumés
-- **Essayer différents modèles** : Modifiez le modèle dans le nœud Lemonade Chat Model pour expérimenter avec différents LLM
+- **Essayer différents modèles** : Changez le modèle dans le nœud Lemonade Chat Model pour expérimenter avec différents LLM
 - **Changer la source d'actualités** : Pointez le nœud **Fetch Financial News Feed** vers un autre flux RSS pour suivre d'autres sections ou publications
-- **Essayer différents moteurs** : n8n prend également en charge [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio et d'autres moteurs LLM locaux
+- **Essayer différents moteurs** : n8n prend également en charge [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio et d'autres moteurs de LLM locaux
 
 ### Explorer les modèles n8n
 
-n8n propose des centaines de modèles de workflow préconçus. Parcourez la bibliothèque officielle de modèles à l'adresse :
+n8n propose des centaines de modèles de flux de travail préconstruits. Parcourez la bibliothèque officielle de modèles à l'adresse :
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
-Recherchez « AI », « LLM » ou « automation » pour trouver des workflows que vous pouvez importer et personnaliser.
+Recherchez « AI », « LLM » ou « automation » pour trouver des flux de travail que vous pouvez importer et personnaliser.
 
-Pour en savoir plus, consultez la [documentation n8n](https://docs.n8n.io/).
+Pour plus d'informations, consultez la [documentation n8n](https://docs.n8n.io/).
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

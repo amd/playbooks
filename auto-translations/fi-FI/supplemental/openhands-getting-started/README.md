@@ -19,51 +19,50 @@ SPDX-License-Identifier: MIT
 ## Yleiskatsaus
 
 [OpenHands](https://github.com/All-Hands-AI/OpenHands) on tekoälypohjainen ohjelmistoagentti,
-joka pystyy kirjoittamaan koodia, suorittamaan komentoja, selaamaan verkkoa ja muokkaamaan
-tiedostoja oikeassa työtilassa. Sen sijaan, että kopioisit ehdotuksia chat-ikkunasta, ohjaat
-agentin projektikansioon ja annat sen tehdä työn: toteuttaa ominaisuuden, korjata virheen,
-kirjoittaa testejä tai selittää koodikannan toimintaa.
+joka osaa kirjoittaa koodia, suorittaa komentoja, selata verkkoa ja muokata
+tiedostoja oikeassa työtilassa. Sen sijaan, että kopioisit ehdotuksia keskusteluikkunasta,
+osoitat agentin projektikansioon ja annat sen tehdä työn: toteuttaa ominaisuuden, korjata
+virheen, kirjoittaa testejä tai selittää koodikannan.
 
 [Agent Canvas](https://github.com/OpenHands/agent-canvas) on suositeltu
-selainkäyttöliittymä OpenHandsin ajamiseen. Yksi ainoa `agent-canvas`-komento
-käynnistää agenttipalvelimen, automaatiotaustajärjestelmän ja selainkäyttöliittymän
-yhdessä, joten voit käydä keskustelua agentin kanssa selaimessasi.
+selainkäyttöliittymä OpenHandsin ajamiseen. Yksittäinen `agent-canvas`-komento käynnistää
+agenttipalvelimen, automaatiotaustajärjestelmän ja verkkoselainkäyttöliittymän yhdessä, jolloin
+voit käydä keskustelua agentin kanssa selaimessasi.
 
-Jotta kaikki pysyy AMD-järjestelmässäsi, agentti keskustelee paikallisen mallin
-kanssa, jota Lemonade Server tarjoilee. Lemonade tarjoaa kyseisen mallin
-OpenAI-yhteensopivan API:n kautta, joten Agent Canvas voi määrittää sen
-kuten minkä tahansa muun OpenAI-tyylisen päätepisteen, samalla kun malli,
-koodisi ja keskustelun konteksti pysyvät koneellasi.
+Jotta kaikki pysyy omalla AMD-järjestelmälläsi, agentti keskustelee paikallisen mallin kanssa,
+jota Lemonade Server tarjoilee. Lemonade tarjoaa tämän mallin OpenAI-yhteensopivan
+API:n kautta, joten Agent Canvas voi määrittää sen kuin minkä tahansa muun OpenAI-tyylisen
+päätepisteen, samalla kun malli, koodisi ja keskustelukonteksti pysyvät kaikki
+koneellasi.
 
-Tässä ohjekirjassa käynnistät paikallisen mallin, käynnistät Agent Canvasin,
-osoitat sen kyseiseen malliin ja suoritat ensimmäisen koodaustehtäväsi
-oikeassa projektikansiossa.
+Tässä toimintaoppaassa käynnistät paikallisen mallin, käynnistät Agent Canvasin,
+osoitat sen kyseiseen malliin ja ajat ensimmäisen koodaustehtäväsi oikeaa projektikansiota vasten.
 
 ## Mitä opit
 
-- Kuinka käynnistää Lemonade Server ja varmistaa, että paikallinen malli vastaa chat-pyyntöihin
-- Kuinka asentaa ja käynnistää Agent Canvas npm-paketista
-- Kuinka määrittää Agent Canvas käyttämään paikallista Lemonade-mallia LLM:nä
-- Kuinka aloittaa OpenHands-keskustelu ja seurata, miten agentti muokkaa tiedostoja ja suorittaa
+- Miten käynnistetään Lemonade Server ja vahvistetaan, että paikallinen malli vastaa chat-pyyntöihin
+- Miten asennetaan ja käynnistetään Agent Canvas npm-paketista
+- Miten Agent Canvas määritetään käyttämään paikallista Lemonade-mallia LLM:nä
+- Miten aloitetaan OpenHands-keskustelu ja seurataan agentin muokkaavan tiedostoja ja suorittavan
   komentoja työtilassa
-- Kuinka tarkastella agentin tekemiä muutoksia ja ohjata sitä jatkoviesteillä
+- Miten tarkastellaan agentin tekemiä muutoksia ja ohjataan sitä jatkoviesteillä
 
 ## Keskeiset käsitteet
 
-| Käsite | Mikä se on | Mihin se liittyy tässä ohjekirjassa |
+| Käsite | Mikä se on | Mihin se liittyy tässä toimintaoppaassa |
 | --- | --- | --- |
-| Lemonade Server | Paikallinen LLM-tarjoilualusta, joka on rakennettu AMD-laitteistolle ja joka tarjoaa OpenAI-yhteensopivan API:n. Tietosi eivät koskaan poistu koneeltasi. | Ajaa mallia, joka toimii agentin voimanlähteenä. |
-| OpenHands | Tekoälypohjainen ohjelmistoagentti, joka lukee ja muokkaa tiedostoja, suorittaa komentotulkin komentoja ja selaa verkkoa työtilan sisällä. | Agentti, jota ohjaat chatista. |
-| Agent Canvas | Selainkäyttöliittymä ja taustajärjestelmä, joka ajaa OpenHands-keskusteluja ja näyttää työkalukutsut sekä tiedostomuutokset. | Käynnistää kokonaisuuden ja isännöi keskusteluasi. |
-| Työtila | Projektikansio, jota agentti saa lukea ja muokata. | Agentin muokkausten ja komentojen kohde. |
+| Lemonade Server | Paikallinen LLM-tarjoilualusta, joka on rakennettu AMD-laitteistolle ja joka tarjoaa OpenAI-yhteensopivan API:n. Tietosi eivät koskaan poistu koneeltasi. | Ajaa mallin, joka tehostaa agenttia. |
+| OpenHands | Tekoälypohjainen ohjelmistoagentti, joka lukee ja muokkaa tiedostoja, suorittaa komentorivikomentoja ja selaa verkkoa työtilan sisällä. | Agentti, jota ohjaat chatista. |
+| Agent Canvas | Selainkäyttöliittymä ja taustajärjestelmä, joka ajaa OpenHands-keskusteluja ja näyttää työkalukutsut ja tiedostomuutokset. | Käynnistää kokonaisuuden ja isännöi keskusteluasi. |
+| Työtila | Projektikansio, jota agentilla on lupa lukea ja muokata. | Agentin muokkausten ja komentojen kohde. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Koodausagenttien työnkulut hyötyvät suuremmasta mallista ja kontekstiikkunasta. Käytä
-> vähintään 32 Gt järjestelmämuistia, ja suosi 64 Gt:a tai enemmän suuremmille GGUF-malleille.
+> Koodausagentin työnkulut hyötyvät suuremmasta mallista ja kontekstiikkunasta. Käytä
+> vähintään 32 Gt järjestelmämuistia ja suosi 64 Gt:a tai enemmän suuremmille GGUF-malleille.
 <!-- @device:end -->
 
-## Muistiasetusten määrittäminen
+## Muistikonfiguraation asettaminen
 
 <!-- @require:memory-config -->
 
@@ -73,38 +72,43 @@ oikeassa projektikansiossa.
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Esivaatimukset
+## Edellytykset
 
 
 <!-- @os:linux -->
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so only the Lemonade model is needed here.
+     lemonade-chat-windows asserts the model is already downloaded. -->
+<!-- @prereq:lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 Tarvitset:
 
-- Lemonade Server asennettuna ja kykenevänä tarjoilemaan alla olevaa mallia.
+- Asennettu Lemonade Server, joka pystyy tarjoilemaan alla olevan mallin.
 
 <!-- @os:linux -->
-- Node.js 22.12 tai uudempi ja `npm` (jota `agent-canvas`-CLI käyttää).
-- `uv`, Python-pakettienhallinta, jota Agent Canvas käyttää agenttipalvelimen
-  ympäristön hallintaan. Jos järjestelmässäsi ei sitä vielä ole, asenna se
-  [uv:n asennusoppaasta](https://docs.astral.sh/uv/getting-started/installation/)
+- Node.js 22.12 tai uudempi ja `npm` (joita `agent-canvas`-CLI käyttää).
+- `uv`, Python-pakettienhallintaohjelma, jota Agent Canvas käyttää agenttipalvelimen
+  ympäristön hallintaan. Jos järjestelmälläsi ei vielä ole sitä, asenna se
+  [uv-asennusoppaasta](https://docs.astral.sh/uv/getting-started/installation/)
   ennen Agent Canvasin käynnistämistä.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
-  asennettuna ja käynnissä. Windowsissa Agent Canvas -kokonaisuus ajetaan
-  julkaistusta Docker-vedoksesta, joka sisältää Node.js:n, `uv`:n ja
-  `@openhands/agent-canvas`-paketin, joten sinun ei tarvitse asentaa niitä
-  isäntäjärjestelmään.
+- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/),
+  asennettuna ja käynnissä. Windowsilla Agent Canvas -kokonaisuus ajetaan
+  julkaistusta Docker-levykuvasta, joka sisältää Node.jsin, `uv`:n ja
+  `@openhands/agent-canvas`-paketin, joten sinun ei tarvitse asentaa niitä isäntäkoneelle.
 <!-- @os:end -->
 
-- Projektikansio, jossa työskennellä. Tämä voi olla mikä tahansa paikallinen git-repositorio tai
+- Projektikansio, jossa työskennellä. Tämä voi olla mikä tahansa paikallinen git-tietovarasto tai
   koodihakemisto, jonka parissa haluat agentin työskentelevän.
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
@@ -151,7 +155,7 @@ Write-Host "OK: lemonade and docker are available"
 
 ## 1. Käynnistä Lemonade Server
 
-Käynnistä malli Lemonade CLI:stä:
+Käynnistä malli Lemonade-CLI:stä:
 
 ```bash
 lemonade config set llamacpp.backend=vulkan
@@ -159,9 +163,9 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
-> **Valitse laitteistoosi sopiva malli.** `Qwen3.6-35B-A3B-GGUF` (~20 Gt) on tehokas koodausmalli, mutta se tarvitsee suuren muistivarannon. Jos laitteessasi on rajallisesti muistia tai GPU-VRAM:ia, valitse sen sijaan pienempi GGUF-malli Lemonade-mallikirjastosta ja käytä kyseistä malli-ID:tä koko tämän ohjekirjan ajan.
+> **Valitse laitteistoosi sopiva malli.** `Qwen3.6-35B-A3B-GGUF` (~20 Gt) on vahva koodausmalli, mutta se tarvitsee suuren muistialtaan. Jos laitteessasi on rajoitetusti muistia tai GPU-VRAM:ia, valitse sen sijaan pienempi GGUF-malli Lemonade-mallikirjastosta ja käytä kyseistä malli-ID:tä läpi tämän toimintaoppaan.
 
-> **Huomautus:** Ensimmäinen `lemonade run` lataa mallin, jos sitä ei jo ole olemassa, mikä voi kestää hetken mallin koosta ja verkkoyhteydestäsi riippuen.
+> **Huomautus:** Ensimmäinen `lemonade run` lataa mallin, jos sitä ei vielä ole, mikä voi kestää hetken riippuen mallin koosta ja yhteydestäsi.
 
 Lemonade tarjoaa OpenAI-yhteensopivan API:n osoitteessa:
 
@@ -171,7 +175,7 @@ http://127.0.0.1:13305/api/v1
 
 ## 2. Vahvista paikallinen malli
 
-Varmista, että Lemonade pystyy tarjoilemaan valitun mallin:
+Vahvista, että Lemonade pystyy tarjoilemaan valitun mallin:
 
 ```bash
 curl -s "http://127.0.0.1:13305/api/v1/models" | python3 -m json.tool
@@ -340,26 +344,26 @@ echo "OK: agent-canvas CLI is on PATH"
 ```
 <!-- @test:end -->
 
-Käynnistä sitten koko pino päätteestä:
+Käynnistä sitten koko pino terminaalista:
 
 ```bash
 agent-canvas
 ```
 
-Oletuksena Agent Canvas käynnistyy osoitteessa `http://localhost:8000`. Avaa tämä osoite
+Oletusarvoisesti Agent Canvas käynnistyy osoitteessa `http://localhost:8000`. Avaa kyseinen osoite
 selaimessasi. Portti ei ole erityinen — jos 8000 on jo käytössä, anna mikä tahansa
-vapaa portti valitsimella `--port` (tai `-p`), kun käynnistät Agent Canvasin:
+vapaa portti `--port`-parametrilla (tai `-p`) käynnistäessäsi Agent Canvasin:
 
 ```bash
 agent-canvas --port 3000
 ```
 
-Avaa sitten sen sijaan `http://localhost:3000`. Oletuksena paikallisen taustajärjestelmän
-tulisi näkyä terveenä aloitusnäytöllä.
+Avaa sitten sen sijaan `http://localhost:3000`. Oletusarvoisen paikallisen taustajärjestelmän tulisi näkyä
+terveenä aloitusnäytöllä.
 
 `agent-canvas`-komento käynnistää agenttipalvelimen, automaatiotaustajärjestelmän ja
-verkkokäyttöliittymän yhdessä. Tarvitset vain tämän yhden komennon OpenHandsin
-ajamiseen paikallisesti.
+web-käyttöliittymän yhdessä. Tarvitset vain tämän yhden komennon OpenHandsin ajamiseen
+paikallisesti.
 
 <!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
 ```bash
@@ -413,18 +417,18 @@ echo "OK: agent-canvas agent-server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Windowsissa aja julkaistu Agent Canvas -säilökuva Docker Desktopilla.
-Kuva sisältää Agent Serverin, automaatiotaustajärjestelmän ja verkkokäyttöliittymän, joten
+Windowsissa suorita julkaistu Agent Canvas -säilöimäkuva Docker Desktopilla.
+Imake sisältää agenttipalvelimen, automaatiotaustajärjestelmän ja web-käyttöliittymän, joten
 sinun ei tarvitse asentaa Node.js:ää, `uv`:ta tai komentorivityökalua isäntäkoneelle.
 
-Luo ensin kokoonpano- ja työtilakansiot, jotka säiliö liittää:
+Luo ensin kansiot asetuksille ja työtilalle, jotka säilö liittää:
 
 ```powershell
 $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-Nouda julkaistu kuva (se on julkinen, joten kirjautumista ei tarvita):
+Hae julkaistu imake (se on julkinen, joten kirjautumista ei vaadita):
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
@@ -441,13 +445,13 @@ docker run -it --rm `
 ```
 
 Avaa `http://localhost:8000/canvas` selaimessasi. Jos portti 8000 on jo
-käytössä, määritä eri isäntäportti, esimerkiksi `-p 8080:8000`, ja avaa sen sijaan
+käytössä, yhdistä eri isäntäportti, esimerkiksi `-p 8080:8000`, ja avaa sen sijaan
 `http://localhost:8080/canvas`.
 
-> **Huomautus:** Ensimmäinen käynnistys alustaa Agent Serverin säiliön sisällä,
-> joten se voi kestää minuutin tai kaksi ennen kuin taustajärjestelmä ilmoittaa olevansa terve.
+> **Huomio:** Ensimmäinen käynnistys alustaa agenttipalvelimen säilön sisällä,
+> joten taustajärjestelmän terveeksi ilmoittaminen voi kestää minuutin tai pari.
 
-`.openhands`-liitos säilyttää LLM-profiilisi ja asetuksesi säiliön
+`.openhands`-liitos säilyttää LLM-profiilisi ja asetuksesi säilön
 uudelleenkäynnistysten yli. Tämän oppaan loppuosa määrittää kaiken Agent
 Canvasin käyttöliittymän kautta selaimessasi.
 
@@ -501,44 +505,43 @@ finally {
 
 ## 4. Määritä paikallinen LLM
 
-Ensimmäisellä käynnistyksellä Agent Canvas avaa käyttöönottoprosessin. Kyseisessä prosessissa:
+Ensimmäisellä käynnistyskerralla Agent Canvas avaa käyttöönottoprosessin. Kyseisessä prosessissa:
 
 1. Pidä **OpenHands** valittuna agenttina ja napsauta **Next**.
 2. Kohdassa **Set up your LLM** valitse **Advanced**.
-3. Pidä **Authentication**-asetus arvossa **API key**.
+3. Pidä **Authentication**-asetuksena **API key**.
 4. Aseta **Custom Model** arvoon `openai/Qwen3.6-35B-A3B-GGUF`.
 5. Aseta **Base URL** arvoon `http://127.0.0.1:13305/api/v1`.
    <!-- @os:windows -->
    > Windowsissa pino toimii säilössä, joka ei voi tavoittaa isäntäkonetta osoitteessa
    > `127.0.0.1`. Käytä sen sijaan osoitetta `http://host.docker.internal:13305/api/v1`, jotta
-   > säilöitynyt agentti voi tavoittaa Windows-isäntäkoneella toimivan Lemonaden.
+   > säilöistetty agentti voi tavoittaa Windows-isäntäkoneella käynnissä olevan Lemonaden.
    <!-- @os:end -->
-6. Anna kohtaan **API Key** mikä tahansa tyhjästä poikkeava paikkamerkki, kuten `lemonade-local`.
-   Lemonade ei vaadi todellista avainta, mutta OpenHands-asiakas tarvitsee jonkin arvon
-   lähetettäväksi.
+6. Syötä kohtaan **API Key** mikä tahansa ei-tyhjä paikkamerkki, kuten `lemonade-local`.
+   Lemonade ei vaadi oikeaa avainta, mutta OpenHands-asiakasohjelma tarvitsee lähetettäväksi
+   jonkin arvon.
 7. Napsauta **Next**.
 
-Valmiiden Advanced-asetusten tulisi näyttää tältä. Käyttöliittymä peittää
-API-avainkentän.
+Valmiiden Advanced-asetusten pitäisi näyttää tältä. Käyttöliittymä peittää API-avainkentän.
 
-![Agent Canvasin ensikäytön LLM Advanced -asetukset Lemonade-mallilla ja paikallisella base-URL-osoitteella](assets/01-llm-advanced-settings.png)
+![Agent Canvasin ensikäytön LLM Advanced -asetukset Lemonade-mallilla ja paikallisella perusosoitteella](assets/01-llm-advanced-settings.png)
 
-Agent Canvas tallentaa nämä arvot LLM-profiiliksi. Jos versiosi pyytää sinua
-nimeämään profiilin, käytä nimeä ilman välilyöntejä, kuten `lemonade-local`. Jos vaihdat
-mallia myöhemmin, avaa **Settings > LLM** ja päivitä samat Advanced-kentät. Voit
-vaihtaa tallennettuja profiileja keskustelusyötteestä `/model`-komennolla.
+Agent Canvas tallentaa nämä arvot LLM-profiiliksi. Jos versiosi pyytää sinua nimeämään
+kyseisen profiilin, käytä nimeä, jossa ei ole välilyöntejä, kuten `lemonade-local`. Jos vaihdat
+malleja myöhemmin, avaa **Settings > LLM** ja päivitä samat Advanced-kentät. Voit
+vaihtaa tallennettuja profiileja keskustelun syöttökentästä `/model`-komennolla.
 
 ## 5. Avaa työtila
 
-Agentti voi lukea ja muokata vain tiedostoja työtilassa, jonka valitset. Ennen
-tehtävän aloittamista osoita Agent Canvasille projektikansiosi:
+Agentti voi lukea ja muokata tiedostoja ainoastaan valitsemassasi työtilassa. Ennen
+tehtävän aloittamista osoita Agent Canvas projektikansioosi:
 
 1. Valitse aloitusnäytöltä **Open Workspace**.
 2. Valitse kansio, joka sisältää projektisi (esimerkiksi git-tietovarasto,
    jonka parissa haluat agentin työskentelevän).
 3. Aloita uusi keskustelu kyseisessä työtilassa.
 
-Kaikki, mitä agentti tekee — tiedostojen lukeminen, komentojen ajaminen, koodin
+Kaikki, mitä agentti tekee — tiedostojen lukeminen, komentojen suorittaminen, koodin
 muokkaaminen — rajoittuu tähän työtilaan.
 
 ![Agent Canvasin aloitusnäyttö käyttöönoton jälkeen](assets/02-agent-canvas-home.png)
@@ -554,29 +557,28 @@ returns "Hello, {name}!", and add a small test that prints greet("World")
 when run as a script.
 ```
 
-Seuraa keskustelun aikajanaa. OpenHands tekee seuraavaa:
+Seuraa keskustelun aikajanaa. OpenHands:
 
 - Lukee työtilan ymmärtääkseen sen rakenteen.
-- Luo tiedoston `hello.py`, jossa on pyydetty funktio ja testilohko.
-- Ajaa valinnaisesti komennon `python3 hello.py` tuloksen todentamiseksi.
-- Raportoi tekemänsä ja mahdollisen komentotulosteen keskustelussa.
+- Luo tiedoston `hello.py` pyydetyllä funktiolla ja testilohkolla.
+- Suorittaa tarvittaessa komennon `python3 hello.py` tarkistaakseen tulosteen.
+- Raportoi, mitä se teki, ja mahdollisen komennon tulosteen keskustelussa.
 
-Uuden tiedoston pitäisi näkyä työtilassa, ja agentin lopullisen viestin pitäisi
-kuvata tekemänsä muutos. Tämä on lopputulos: agentti kirjoitti ja ajoi oikeaa
-koodia projektikansiossasi.
+Sinun pitäisi nähdä uuden tiedoston ilmestyvän työtilaan, ja agentin viimeisen
+viestin pitäisi kuvata tekemänsä muutoksen. Tämä on se ratkaiseva hetki: agentti
+kirjoitti ja ajoi oikeaa koodia projektikansiossasi.
 
 ## 7. Tarkista ja ohjaa agenttia
 
-Kun agentti on saanut vaiheen valmiiksi, tarkista sen työ ennen seuraavan
-hyväksymistä:
+Kun agentti on suorittanut vaiheen, tarkista sen työ ennen seuraavan hyväksymistä:
 
 - **Tiedostomuutokset**: käytä työtilan tiedostoselainta tai agentin diff-näkymää
   nähdäksesi tarkalleen, mitä lisättiin, muutettiin tai poistettiin.
-- **Komentotuloste**: laajenna mikä tahansa agentin ajama komento nähdäksesi stdoutin,
-  stderrin ja poistumiskoodin.
-- **Jatkotoimet**: jos tulos ei ole toivotunlainen, vastaa samassa
+- **Komennon tuloste**: laajenna mikä tahansa agentin suorittama komento nähdäksesi stdout-,
+  stderr- ja poistumiskoodin.
+- **Jatkotoimet**: jos lopputulos ei ole se, mitä halusit, vastaa samassa
   keskustelussa korjauksella. Agentti säilyttää aiemman kontekstin ja
-  jatkaa iterointia samojen tiedostojen parissa.
+  iteroi samojen tiedostojen parissa.
 
 Jos esimerkiksi testi ei tulostanut odotettua tervehdystä, vastaa:
 
@@ -585,18 +587,18 @@ The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-Agentti lukee tiedoston uudelleen, ajaa komennon, diagnosoi ongelman ja muokkaa
+Agentti lukee tiedoston uudelleen, suorittaa komennon, diagnosoi ongelman ja muokkaa
 tiedostoa uudelleen — kaikki samassa keskustelussa.
 ## Vianmääritys
 
 <!-- @os:linux -->
-- **`agent-canvas` ei ole PATH-muuttujassa:** asenna uudelleen komennolla
-  `npm install -g @openhands/agent-canvas` ja varmista, että npm:n
-  yleinen binäärihakemisto on PATH-muuttujassa, ennen kuin `agent-canvas`
-  voidaan käynnistää uudesta päätteestä.
+- **`agent-canvas` ei löydy PATH-muuttujasta:** asenna uudelleen komennolla
+  `npm install -g @openhands/agent-canvas` ja varmista, että npm:n globaalien
+  binäärien hakemisto on PATH-muuttujassa, ennen kuin `agent-canvas` voidaan
+  käynnistää uudesta päätteestä.
 - **`npm install -g` epäonnistuu käyttöoikeusvirheeseen:** määritä
-  käyttäjän omistama yleinen npm-hakemisto, avaa pääte uudelleen ja asenna
-  Agent Canvas sitten uudelleen.
+  käyttäjän omistama globaali npm-hakemisto, avaa pääte sitten uudelleen ja
+  asenna Agent Canvas uudelleen.
 
   ```bash
   mkdir -p ~/.npm-global
@@ -611,57 +613,58 @@ tiedostoa uudelleen — kaikki samassa keskustelussa.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- **`docker pull` tai `docker run` ei muodosta yhteyttä:** varmista, että
-  Docker Desktop on käynnissä (sen valaskuvake näkyy ilmaisinalueella) ja
-  että moottori on käynnistynyt loppuun asti. Komennon `docker version`
-  pitäisi tulostaa sekä Client- että Server-osio.
-- **Kontti käynnistyy, mutta taustajärjestelmä ei koskaan tule kunnossa
-  olevaksi:** ensimmäinen käynnistys alustaa Agent Serverin kontin sisällä;
-  anna sille minuutti tai kaksi aikaa ja tarkista sitten virheet komennolla
-  `docker logs <container>`.
-- **Kontti ei tavoita Lemonadea:** kontti tavoittaa isäntäkoneen osoitteen
-  `host.docker.internal` kautta. Varmista, että Lemonade palvelee Windows-
-  isäntäkoneella komennolla `lemonade status`, ja käytä osoitetta
-  `http://host.docker.internal:13305/api/v1` Base URL -arvona LLM:ää
-  määritettäessä.
+- **`docker pull` tai `docker run` ei saa yhteyttä:** varmista, että Docker
+  Desktop on käynnissä (sen valaskuvake näkyy ilmaisinalueella) ja että moottori
+  on käynnistynyt loppuun. Komennon `docker version` pitäisi tulostaa sekä
+  Client- että Server-osio.
+- **Säiliö käynnistyy, mutta taustajärjestelmä ei koskaan tule terveeksi:**
+  ensimmäinen käynnistys alustaa Agent Serverin säiliön sisällä; anna sille
+  minuutti tai pari, ja tarkista sitten `docker logs <container>` virheiden
+  varalta.
+- **Säiliö ei saa yhteyttä Lemonadeen:** säiliö tavoittaa isäntäkoneen
+  osoitteella `host.docker.internal`. Varmista, että Lemonade palvelee
+  Windows-isännässä komennolla `lemonade status`, ja käytä LLM:ää
+  määrittäessäsi Base URL -arvona osoitetta
+  `http://host.docker.internal:13305/api/v1`.
 <!-- @os:end -->
 
-- **Käyttöliittymä latautuu, mutta taustajärjestelmä näyttää epäkunnossa
-  olevalta:** odota minuutti tai kaksi, jotta agenttipalvelin ehtii
-  käynnistyä loppuun, ja päivitä sitten sivu. Jos se pysyy epäkunnossa,
-  käynnistä pino uudelleen ja tarkista lokit virheiden varalta.
+- **Käyttöliittymä latautuu, mutta taustajärjestelmä näyttää epäterveeltä:**
+  odota minuutti tai pari, että agenttipalvelin ehtii käynnistyä loppuun,
+  ja päivitä sitten sivu. Jos tila pysyy epäterveenä, käynnistä pino
+  uudelleen ja tarkista lokit virheiden varalta.
 - **Lemonade-keskustelupyynnöt epäonnistuvat yhteysvirheeseen:** varmista,
   että `curl -fsS "http://127.0.0.1:13305/api/v1/health"` onnistuu ja että
-  Lemonade edelleen palvelee mallia komennolla `lemonade status`.
-- **Agentti antaa virheen kontekstin pituudesta tai token-rajasta:** aloita
-  uusi keskustelu, jotta agentti ei kanna liian suurta historiaa mukanaan.
-  Jos näin tapahtuu jatkuvasti, käynnistä Lemonade uudelleen suuremmalla
+  Lemonade palvelee edelleen mallia komennolla `lemonade status`.
+- **Agentti antaa virheen kontekstin pituudesta tai token-rajasta:**
+  aloita uusi keskustelu, jotta agentilla ei ole mukana liian suurta
+  historiaa. Jos ongelma toistuu, käynnistä Lemonade uudelleen suuremmalla
   `ctx_size`-arvolla kuin oletusarvo 65536 (esimerkiksi `ctx_size=131072`),
   jos muisti riittää.
-- **Agentti tuottaa heikkolaatuisia tai keskeneräisiä muokkauksia:** vaihda
-  Lemonadessa suurempaan malliin tai anna agentille pienempi, konkreettisempi
-  tehtävä ja anna sen valmistua ennen seuraavan muutoksen pyytämistä.
+- **Agentti tuottaa laadultaan heikkoja tai keskeneräisiä muokkauksia:**
+  vaihda Lemonadessa suurempaan malliin, tai anna agentille pienempi ja
+  konkreettisempi tehtävä ja anna sen valmistua ennen seuraavan muutoksen
+  pyytämistä.
 
 ## Seuraavat vaiheet
 
 - Kokeile suurempaa tehtävää samassa työtilassa, kuten yksikkötestitiedoston
-  lisäämistä tai tunnetun virheen korjaamista, ja tarkista agentin diff ennen
-  muutoksen säilyttämistä.
-- Yhdistä MCP-palvelin, kuten GitHub tai Slack, kohdasta **Customize**, jotta
-  agentti voi lukea ongelmia tai julkaista päivityksiä työskennellessään.
+  lisäämistä tai tunnetun virheen korjaamista, ja tarkista agentin tekemä
+  diff ennen muutoksen säilyttämistä.
+- Yhdistä MCP-palvelin, kuten GitHub tai Slack, kohdassa **Customize**,
+  jotta agentti voi lukea ongelmia tai julkaista päivityksiä työskennellessään.
 - Tallenna useita LLM-profiileja (nopea pieni malli ja vahvempi suuri malli)
   ja vaihda niiden välillä komennolla `/model` kesken keskustelun.
-- Siirry seuraavaksi kohtaan [OpenHands-automaatiot](https://docs.openhands.dev/openhands/usage/automations/overview)
-  muuttaaksesi toistuvat kehityssilmukat ajastetuiksi tai tapahtumien
-  laukaisemiksi agenttiajoiksi.
+- Siirry tutustumaan [OpenHandsin automaatioihin](https://docs.openhands.dev/openhands/usage/automations/overview),
+  jotta voit muuttaa toistuvat kehityssilmukat ajastetuiksi tai
+  tapahtumapohjaisesti käynnistyviksi agenttiajoiksi.
 
 ## Resurssit
 
-- [OpenHandsin dokumentaatio](https://docs.openhands.dev/)
-- [Agent Canvasin yleiskatsaus](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
-- [Agent Canvasin käyttöönotto](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
-- [LLM-profiilit ja mallin määritykset](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
-- [Lemonade Serverin dokumentaatio](https://lemonade-server.ai/docs)
+- [OpenHands-dokumentaatio](https://docs.openhands.dev/)
+- [Agent Canvas -yleiskatsaus](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
+- [Agent Canvasin asennus](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
+- [LLM-profiilit ja mallin määritys](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
+- [Lemonade Server -dokumentaatio](https://lemonade-server.ai/docs)
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

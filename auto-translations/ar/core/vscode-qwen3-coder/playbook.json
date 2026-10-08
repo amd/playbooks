@@ -1,6 +1,6 @@
 {
   "id": "vscode-qwen3-coder",
-  "title": "البرمجة باستخدام نماذج اللغة المحلية الكبيرة مع VS Code وQwen3-Coder",
-  "description": "استخدم VS Code مع Qwen3-Coder الذي يعمل محليًا للحصول على مساعدة برمجية خاصة.",
+  "title": "البرمجة باستخدام نماذج اللغة الكبيرة المحلية مع VS Code وQwen3-Coder",
+  "description": "استخدم VS Code مع Qwen3-Coder العامل محليًا للحصول على مساعدة برمجية خاصة.",
   "auto_translated": true
 }

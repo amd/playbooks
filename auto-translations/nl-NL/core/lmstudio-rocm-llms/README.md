@@ -16,13 +16,13 @@ SPDX-License-Identifier: MIT
 
 ## Overzicht
 
-LM Studio is een krachtige GUI-gebaseerde wrapper voor [llama.cpp](https://github.com/ggml-org/llama.cpp) en biedt ook een [OpenAI-conform endpoint](https://lmstudio.ai/docs/developer/openai-compat) voor het lokaal bedienen van modellen. LM Studio biedt een eenvoudige maar krachtige interface om modellen eenvoudig te downloaden en te implementeren. LM Studio biedt zowel Vulkan- als AMD ROCm™ softwarebackends (runtimes genoemd) voor AMD-gebruikers.
+LM Studio is een krachtige, op een GUI gebaseerde wrapper voor [llama.cpp](https://github.com/ggml-org/llama.cpp) en biedt ook een [OpenAI-conform eindpunt](https://lmstudio.ai/docs/developer/openai-compat) voor lokale modelserving. LM Studio biedt een eenvoudige maar krachtige interface om modellen eenvoudig te downloaden en te implementeren. LM Studio biedt zowel Vulkan- als AMD ROCm™-softwarebackends (zogeheten runtimes) voor AMD-gebruikers.
 
 
 ## Wat je leert
 - Hoe je LM Studio configureert en gebruikt om je lokale hardware optimaal te benutten
 - LLM's testen en beheren in een volledig offline omgeving
-- Modellen bedienen via een OpenAI-compatibele API om aangepaste workflows en apps van stroom te voorzien
+- Modellen aanbieden via een OpenAI Compatible API om aangepaste workflows en apps aan te drijven
 
 
 <!-- @device:halo_box,halo,stx,krk -->
@@ -39,19 +39,20 @@ LM Studio is een krachtige GUI-gebaseerde wrapper voor [llama.cpp](https://githu
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Opmerking**: Als VS Code of LM Studio niet is geïnstalleerd, kun je deze installeren vanuit het AMD Ryzen™ AI Developer Center. 
+> **Opmerking**: Als VS Code of LM Studio niet is geïnstalleerd, kun je deze installeren via het AMD Ryzen™ AI Developer Center.
 <!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Softwarevereisten installeren
+## Software-vereisten installeren
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
 
 <!-- @require:lmstudio -->
+<!-- @prereq:lmstudio -->
 
 ## Modellen downloaden
 
@@ -62,23 +63,25 @@ LM Studio is een krachtige GUI-gebaseerde wrapper voor [llama.cpp](https://githu
 
 <!-- @device:halo,halo_box -->
 <!-- @require:lmstudio-models-gpt-oss-120b -->
+<!-- @prereq:lmstudio-models-gpt-oss-120b -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @require:lmstudio-models-qwen3-9b -->
+<!-- @prereq:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
 ## Chatten met een LLM
-Leer hoe je volledig lokaal kunt beginnen met chatten met een LLM van ChatGPT-niveau.  
+Leer hoe je volledig lokaal kunt beginnen met chatten met een LLM van ChatGPT-niveau.
 
-1. Open LMStudio. 
+1. Open LMStudio.
 2. Druk op `Ctrl + L` om de Model Loader te openen, selecteer `Manually choose model load parameters` en klik op `${model_name}`
-3. Zorg ervoor dat "show advanced settings" is aangevinkt.  
+3. Zorg ervoor dat "show advanced settings" is aangevinkt.
 4. Wijzig `Context Length` naar wens. Een hogere contextlengte betekent meer modelgeheugen, maar ook meer gebruikt systeemgeheugen. Voor dit playbook wordt 4096 aanbevolen.
-5. Zorg ervoor dat `GPU Offload` op maximum staat en dat `Flash Attention` aan staat (Cache Quantizations mogen uit blijven staan)
+5. Zorg ervoor dat `GPU Offload` op het maximum staat en dat `Flash Attention` is ingeschakeld (Cache Quantizations mogen uitgeschakeld blijven)
 6. Vink `Remember settings` aan en klik op `Load Model`.
-7. Als je niet in het chatvenster bent, druk dan op `Ctrl + 1` of klik op de 👾 knop linksboven in het scherm.
-8. Stuur een bericht en begin met de interactie met het model!
+7. Als je niet in het chatvenster bent, druk dan op `Ctrl + 1` of klik op de 👾-knop linksboven in het scherm.
+8. Verstuur een bericht en begin met interactie met het model!
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
@@ -155,19 +158,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Tip**: Contextlengte verwijst naar het geheugen van het model. Flash attention verbetert de verwerkingssnelheid en vermindert tegelijkertijd het geheugengebruik. GPU Offload verschuift de verwerking naar de grafische kaart voor snellere reacties.
+> **Tip**: Contextlengte verwijst naar het geheugen van het model. Flash attention verbetert de verwerkingssnelheid en vermindert tegelijkertijd het geheugengebruik. GPU Offload verplaatst de verwerking naar de grafische kaart voor snellere reacties.
 
-## LLM's bedienen via een OpenAI-compatibel endpoint
+## LLM's serveren via een OpenAI-conform eindpunt
 
-LM Studio biedt ook een OpenAI-conform endpoint in de vorm van LM Studio Server. Dit is al gedemonstreerd in een agentische coderingsworkflow met Cline [hier](../playbooks/vscode-qwen3-coder). Een ander veelvoorkomend gebruiksscenario is het verbinden van LM Studio Server met een willekeurige webapplicatie (React, Node.js, Python) door standaard HTTP-verzoeken naar het inference endpoint te sturen.
+LM Studio biedt ook een OpenAI-conform eindpunt in de vorm van LM Studio Server. Dit is al gedemonstreerd in een agentische codeerworkflow met Cline [hier](../playbooks/vscode-qwen3-coder). Een ander veelvoorkomend gebruiksscenario is het verbinden van LM Studio Server met een willekeurige webapplicatie (React, Node.js, Python) door standaard HTTP-verzoeken naar het inference-eindpunt te sturen.
 
 Volg deze instructies om LM Studio Server in te stellen:
 
-1. Klik aan de linkerkant op het tabblad `Developer` (commandoregelpictogram) of druk op `Ctrl + 2` en klik vervolgens op `Server Settings`.  
-2. (Optioneel): Als je het model over je LAN wilt bedienen, vink dan `Serve on Local Network` aan. Als je het wilt gebruiken met een website of uitgebreide aanroepen binnen VS Code, vink dan `Enable CORS` aan. 
-3. Zorg er in de linkerbovenhoek voor dat de server draait door op de schakelknop voor `Status` te klikken.
-4. Er draait nu een OpenAI-conform endpoint. Het adres is doorgaans http://127.0.0.1:1234  
-5. Als er nog geen model is geladen, kun je dit doen door op `Load Model` te klikken en de eerder genoemde stappen te volgen. 
+1. Klik aan de linkerkant op het tabblad `Developer` (commandline-icoon) of druk op `Ctrl + 2` en klik vervolgens op `Server Settings`.
+2. (Optioneel): Als je het model via je LAN wilt aanbieden, vink dan `Serve on Local Network` aan. Als je het wilt gebruiken met een website of uitgebreide aanroepen binnen VS Code, vink dan `Enable CORS` aan.
+3. Zorg er linksboven voor dat de server actief is door op de schakelaar voor `Status` te klikken.
+4. Er draait nu een OpenAI-conform eindpunt. Het adres is doorgaans http://127.0.0.1:1234
+5. Als er nog geen model is geladen, kun je dit doen door op `Load Model` te klikken en de eerder genoemde stappen te volgen.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -175,7 +178,7 @@ Volg deze instructies om LM Studio Server in te stellen:
 lms server start --port 1234
 curl.exe -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -184,21 +187,21 @@ curl.exe -s http://127.0.0.1:1234/v1/models
 lms server start --port 1234
 curl -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 
-Dit model is nu toegankelijk via het LM Studio Server endpoint en ondersteunt OpenAI endpoints waaronder:
+Dit model is nu toegankelijk via het LM Studio Server-eindpunt en ondersteunt OpenAI-eindpunten, waaronder:
 
-| Endpoint | Methode | Documentatie |
+| Eindpunt | Methode | Documentatie |
 |------------|----------|----------|
 | /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
 | /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
 | /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### Voorbeeld: Uw Endpoint pingen
-Nu we de OpenAI Compatible endpoint hebben aangemaakt, bekijken we hoe u dit kunt integreren in een Python-ontwikkelomgeving (zoals VSCode) en uw systeem kunt gebruiken als lokale API Provider.
+#### Voorbeeld: Uw endpoint pingen
+Nu we zojuist het OpenAI Compatible endpoint hebben aangemaakt, bekijken we hoe u dit kunt integreren in een Python-ontwikkelomgeving (zoals VSCode) en uw systeem kunt gebruiken als lokale API Provider. 
 
 1. Maak een Python virtual environment aan:
 
@@ -239,7 +242,7 @@ sudo usermod -aG render,video $LOGNAME
     ```
 
     > **Tip**: Windows-gebruikers moeten mogelijk hun PowerShell Execution Policy aanpassen (bijvoorbeeld
-    > door deze in te stellen op RemoteSigned of Unrestricted) voordat ze bepaalde Powershell-commando's uitvoeren.
+    > instellen op RemoteSigned of Unrestricted) voordat ze bepaalde Powershell-commando's uitvoeren.
 
 <!-- @device:end -->
 
@@ -251,7 +254,7 @@ sudo usermod -aG render,video $LOGNAME
     ```
 
     > **Tip**: Windows-gebruikers moeten mogelijk hun PowerShell Execution Policy aanpassen (bijvoorbeeld
-    > door deze in te stellen op RemoteSigned of Unrestricted) voordat ze bepaalde Powershell-commando's uitvoeren.
+    > instellen op RemoteSigned of Unrestricted) voordat ze bepaalde Powershell-commando's uitvoeren.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -261,7 +264,7 @@ sudo usermod -aG render,video $LOGNAME
     pip install openai
     ```
 
-3. Voer het volgende script uit om de zojuist aangemaakte endpoint te pingen.
+3. Voer het volgende script uit om het endpoint dat we zojuist hebben aangemaakt te pingen.
     ```python
     from openai import OpenAI
 
@@ -366,13 +369,13 @@ lms server stop
 
 #### (Optioneel): Wisselen tussen Runtimes
 
-1. Druk op `Ctrl + Shift + R` op uw toetsenbord. U kunt ook op het tabblad `Discover` (vergrootglas) aan de linkerkant klikken en vervolgens op `Runtime` in het pop-upvenster klikken.
-2. U ziet vervolgens `Runtime Selections`, waar u via het dropdownmenu de runtime kunt wijzigen.
+1. Druk op `Ctrl + Shift + R` op uw toetsenbord. U kunt ook op het tabblad `Discover` (vergrootglas) aan de linkerkant klikken en vervolgens op `Runtime` in het pop-upvenster klikken.   
+2. U ziet dan `Runtime Selections`, waar u via het dropdownmenu de runtime kunt wijzigen.
 
 
 ## Volgende stappen
 
-- **Integratie van eigen apps**: Integreer uw eigen Python-scripts of applicaties met behulp van de lokale OpenAI-compatibele API.
+- **Aangepaste app-integratie**: Integreer uw eigen Python-scripts of applicaties met behulp van de lokale OpenAI-compatibele API.
 - **Geavanceerde frontends**: Verbind krachtige interfaces zoals Open WebUI met uw server voor chatgeschiedenis en persona-beheer.
 
-Voor meer documentatie, ga naar: https://lmstudio.ai/docs/developer
+Ga voor meer documentatie naar: https://lmstudio.ai/docs/developer

@@ -20,46 +20,46 @@ SPDX-License-Identifier: MIT
 
 [OpenHands](https://github.com/All-Hands-AI/OpenHands) je AI softvérový agent,
 ktorý dokáže písať kód, spúšťať príkazy, prehliadať web a upravovať súbory v reálnom
-pracovnom priestore. Namiesto kopírovania návrhov z chatového okna nasmerujete
-agenta na priečinok s projektom a necháte ho vykonať prácu: implementovať funkciu, opraviť
-chybu, napísať testy alebo vysvetliť kódovú bázu.
+pracovnom priestore. Namiesto kopírovania návrhov z okna chatu nasmerujete
+agenta na priečinok projektu a necháte ho vykonať prácu: implementovať funkciu, opraviť
+chybu, napísať testy alebo vysvetliť kódovú základňu.
 
 [Agent Canvas](https://github.com/OpenHands/agent-canvas) je odporúčané
-používateľské rozhranie prehliadača na spúšťanie OpenHands. Jediný príkaz `agent-canvas`
-spustí server agenta, backend automatizácie a webový frontend spolu, takže môžete
+rozhranie prehliadača na spúšťanie OpenHands. Jediný príkaz `agent-canvas` spustí
+server agenta, automatizačný backend a webový frontend naraz, takže môžete
 viesť konverzáciu s agentom priamo z prehliadača.
 
-Aby všetko zostalo na vašom systéme AMD, agent komunikuje s lokálnym modelom obsluhovaným
-serverom Lemonade Server. Lemonade sprístupňuje tento model prostredníctvom OpenAI-kompatibilného
-API, takže Agent Canvas ho môže nakonfigurovať ako akýkoľvek iný koncový bod v štýle OpenAI,
-zatiaľ čo model, váš kód a kontext konverzácie zostávajú na vašom
-zariadení.
+Aby všetko zostalo na vašom systéme AMD, agent komunikuje s lokálnym modelom poskytovaným
+serverom Lemonade Server. Lemonade sprístupňuje tento model prostredníctvom rozhrania API
+kompatibilného s OpenAI, takže Agent Canvas ho môže nakonfigurovať ako akýkoľvek iný koncový bod
+v štýle OpenAI, pričom model, váš kód aj kontext konverzácie
+zostávajú na vašom počítači.
 
-V tomto sprievodcovi spustíte lokálny model, spustíte Agent Canvas, nasmerujete ho
-na tento model a spustíte svoju prvú programátorskú úlohu na reálnom priečinku s projektom.
+V tejto príručke spustíte lokálny model, spustíte Agent Canvas, nasmerujete ho
+na daný model a spustíte svoju prvú úlohu kódovania na reálnom priečinku projektu.
 
 ## Čo sa naučíte
 
 - Ako spustiť Lemonade Server a overiť, že lokálny model odpovedá na chatové požiadavky
 - Ako nainštalovať a spustiť Agent Canvas z balíka npm
-- Ako nakonfigurovať Agent Canvas na použitie lokálneho modelu Lemonade ako LLM
+- Ako nakonfigurovať Agent Canvas, aby používal lokálny model Lemonade ako LLM
 - Ako spustiť konverzáciu OpenHands a sledovať, ako agent upravuje súbory a spúšťa
   príkazy v pracovnom priestore
 - Ako skontrolovať, čo agent zmenil, a usmerniť ho ďalšími správami
 
-## Základné pojmy
+## Základné koncepty
 
-| Pojem | Čo to je | Kde sa hodí v tomto sprievodcovi |
+| Koncept | Čo to je | Kde zapadá do tejto príručky |
 | --- | --- | --- |
-| Lemonade Server | Lokálna platforma na obsluhu LLM postavená pre hardvér AMD, ktorá sprístupňuje OpenAI-kompatibilné API. Vaše dáta nikdy neopustia vaše zariadenie. | Spúšťa model, ktorý poháňa agenta. |
-| OpenHands | AI softvérový agent, ktorý číta a upravuje súbory, spúšťa príkazy shellu a prehliada web v rámci pracovného priestoru. | Agent, ktorého riadite z chatu. |
-| Agent Canvas | Používateľské rozhranie prehliadača a backend, ktorý spúšťa konverzácie OpenHands a zobrazuje volania nástrojov a zmeny súborov. | Spúšťa celý stack a hostuje vašu konverzáciu. |
-| Pracovný priestor | Priečinok s projektom, ktorý má agent povolené čítať a upravovať. | Cieľ úprav a príkazov agenta. |
+| Lemonade Server | Lokálna platforma na poskytovanie LLM postavená pre hardvér AMD, ktorá sprístupňuje rozhranie API kompatibilné s OpenAI. Vaše dáta nikdy neopustia váš počítač. | Spúšťa model, ktorý poháňa agenta. |
+| OpenHands | AI softvérový agent, ktorý číta a upravuje súbory, spúšťa shellové príkazy a prehliada web v rámci pracovného priestoru. | Agent, ktorého ovládate z chatu. |
+| Agent Canvas | Rozhranie prehliadača a backend, ktorý spúšťa konverzácie OpenHands a zobrazuje volania nástrojov a zmeny súborov. | Spúšťa celý balík a hostí vašu konverzáciu. |
+| Pracovný priestor | Priečinok projektu, ktorý má agent povolené čítať a upravovať. | Cieľ úprav a príkazov agenta. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Workflowy s programátorským agentom profitujú z väčšieho modelu a kontextového okna. Použite
-> aspoň 32 GB systémovej pamäte a pre väčšie GGUF modely uprednostnite 64 GB alebo viac.
+> Workflow kódovacích agentov profituje z väčšieho modelu a kontextového okna. Použite
+> aspoň 32 GB systémovej pamäte a uprednostnite 64 GB alebo viac pri väčších modeloch GGUF.
 <!-- @device:end -->
 
 ## Nastavenie konfigurácie pamäte
@@ -67,7 +67,7 @@ na tento model a spustíte svoju prvú programátorskú úlohu na reálnom prie�
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Skontrolovanie aktualizácií softvéru
+## Kontrola aktualizácií softvéru
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -76,34 +76,40 @@ na tento model a spustíte svoju prvú programátorskú úlohu na reálnom prie�
 
 
 <!-- @os:linux -->
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so only the Lemonade model is needed here.
+     lemonade-chat-windows asserts the model is already downloaded. -->
+<!-- @prereq:lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 Potrebujete:
 
-- Nainštalovaný Lemonade Server, ktorý dokáže obsluhovať model uvedený nižšie.
+- Nainštalovaný Lemonade Server, ktorý dokáže poskytovať nižšie uvedený model.
 
 <!-- @os:linux -->
 - Node.js 22.12 alebo novší a `npm` (používané CLI nástrojom `agent-canvas`).
-- `uv`, správcu balíkov Python, ktorý Agent Canvas používa na správu prostredia
-  servera agenta. Ak ho váš systém ešte nemá, nainštalujte si ho podľa
+- `uv`, správca balíkov Python, ktorý Agent Canvas používa na správu prostredia
+  servera agenta. Ak ho váš systém ešte nemá, nainštalujte ho podľa
   [sprievodcu inštaláciou uv](https://docs.astral.sh/uv/getting-started/installation/)
   pred spustením Agent Canvas.
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/),
-  nainštalovaný a spustený. V systéme Windows beží stack Agent Canvas z publikovaného
-  Docker obrazu, ktorý obsahuje Node.js, `uv` a balík
-  `@openhands/agent-canvas`, takže ich nemusíte inštalovať na hostiteľský počítač.
+  nainštalovaný a spustený. V systéme Windows beží balík Agent Canvas z
+  publikovaného obrazu Docker, ktorý obsahuje Node.js, `uv` a balík
+  `@openhands/agent-canvas`, takže ich na hostiteľskom systéme nemusíte inštalovať.
 <!-- @os:end -->
 
-- Priečinok s projektom, v ktorom sa má pracovať. Môže to byť ľubovoľné lokálne git úložisko
-  alebo priečinok s kódom, na ktorom chcete, aby agent pracoval.
+- Priečinok projektu, v ktorom sa bude pracovať. Môže to byť ľubovoľný lokálny git repozitár alebo priečinok
+  s kódom, na ktorom má agent pracovať.
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -147,7 +153,7 @@ Write-Host "OK: lemonade and docker are available"
 <!-- @test:end -->
 <!-- @os:end -->
 
-## 1. Spustenie Lemonade Server
+## 1. Spustite Lemonade Server
 
 Spustite model z CLI nástroja Lemonade:
 
@@ -157,19 +163,19 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
-> **Vyberte model, ktorý zodpovedá vášmu hardvéru.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) je silný programátorský model, no potrebuje veľký pamäťový priestor. Ak má vaše zariadenie obmedzenú pamäť alebo GPU VRAM, vyberte namiesto neho menší GGUF model z knižnice modelov Lemonade a použite ID tohto modelu v celom sprievodcovi.
+> **Vyberte model, ktorý zodpovedá vášmu hardvéru.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) je silný model na kódovanie, ale vyžaduje veľký fond pamäte. Ak má vaše zariadenie obmedzenú pamäť alebo VRAM GPU, zvoľte namiesto toho menší model GGUF z knižnice modelov Lemonade a tento identifikátor modelu používajte v celej tejto príručke.
 
-> **Poznámka:** Prvé spustenie `lemonade run` stiahne model, ak ešte nie je prítomný, čo môže chvíľu trvať v závislosti od veľkosti modelu a rýchlosti vášho pripojenia.
+> **Poznámka:** Prvé spustenie `lemonade run` stiahne model, ak ešte nie je prítomný, čo môže chvíľu trvať v závislosti od veľkosti modelu a vášho pripojenia.
 
-Lemonade sprístupňuje OpenAI-kompatibilné API na adrese:
+Lemonade sprístupňuje rozhranie API kompatibilné s OpenAI na adrese:
 
 ```text
 http://127.0.0.1:13305/api/v1
 ```
 
-## 2. Overenie lokálneho modelu
+## 2. Overte lokálny model
 
-Overte, že Lemonade dokáže obsluhovať vybraný model:
+Overte, že Lemonade dokáže poskytovať vybraný model:
 
 ```bash
 curl -s "http://127.0.0.1:13305/api/v1/models" | python3 -m json.tool
@@ -338,25 +344,25 @@ echo "OK: agent-canvas CLI is on PATH"
 ```
 <!-- @test:end -->
 
-Potom spustite celý zásobník z terminálu:
+Potom spustite celý stack z terminálu:
 
 ```bash
 agent-canvas
 ```
 
-Agent Canvas sa štandardne spúšťa na `http://localhost:8000`. Otvorte túto adresu URL
-vo svojom prehliadači. Port nie je nijako výnimočný — ak je port 8000 už používaný,
-zadajte pri spúšťaní Agent Canvas ľubovoľný voľný port pomocou `--port` (alebo `-p`):
+Agent Canvas sa predvolene spúšťa na `http://localhost:8000`. Otvorte túto adresu URL
+vo svojom prehliadači. Port nie je nijako špeciálny — ak je port 8000 už obsadený, zadajte
+ľubovoľný voľný port pomocou `--port` (alebo `-p`) pri spúšťaní Agent Canvas:
 
 ```bash
 agent-canvas --port 3000
 ```
 
 Potom namiesto toho otvorte `http://localhost:3000`. Predvolený lokálny backend by sa mal
-na domovskej obrazovke zobrazovať ako zdravý (healthy).
+na domovskej obrazovke zobraziť ako zdravý.
 
-Príkaz `agent-canvas` spustí spolu agent server, automatizačný backend a
-webový frontend. Na lokálne spustenie OpenHands potrebujete iba tento jeden príkaz.
+Príkaz `agent-canvas` spúšťa server agenta, automatizačný backend a
+webový frontend spoločne. Na lokálne spustenie OpenHands potrebujete iba tento jeden príkaz.
 
 <!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
 ```bash
@@ -410,24 +416,24 @@ echo "OK: agent-canvas agent-server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Vo Windows spustite publikovaný kontajnerový obraz Agent Canvas pomocou Docker Desktop.
+V systéme Windows spustite publikovaný kontajnerový obraz Agent Canvas pomocou Docker Desktop.
 Obraz obsahuje Agent Server, automatizačný backend a webový frontend, takže
-nemusíte na hostiteľský počítač inštalovať Node.js, `uv` ani CLI.
+na hostiteľskom počítači nemusíte inštalovať Node.js, `uv` ani CLI.
 
-Najskôr vytvorte priečinky pre konfiguráciu a pracovný priestor, ktoré kontajner pripojí:
+Najprv vytvorte priečinky pre konfiguráciu a pracovný priestor, ktoré kontajner pripája:
 
 ```powershell
 $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-Stiahnite publikovaný obraz (je verejný, takže sa netreba prihlasovať):
+Stiahnite publikovaný obraz (je verejný, takže sa nevyžaduje prihlásenie):
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-Potom spustite zásobník:
+Potom spustite stack:
 
 ```powershell
 docker run -it --rm `
@@ -438,13 +444,13 @@ docker run -it --rm `
 ```
 
 Otvorte `http://localhost:8000/canvas` vo svojom prehliadači. Ak je port 8000 už
-používaný, namapujte iný port hostiteľa, napríklad `-p 8080:8000`, a namiesto toho
-otvorte `http://localhost:8080/canvas`.
+obsadený, namapujte iný hostiteľský port, napríklad `-p 8080:8000`, a namiesto toho otvorte
+`http://localhost:8080/canvas`.
 
-> **Poznámka:** Pri prvom spustení sa inicializuje Agent Server vnútri kontajnera,
-> takže môže trvať minútu alebo dve, kým backend nahlási stav healthy.
+> **Poznámka:** Prvé spustenie inicializuje Agent Server vnútri kontajnera,
+> takže môže trvať minútu alebo dve, kým backend ohlási, že je zdravý.
 
-Pripojenie `.openhands` uchováva váš profil LLM a nastavenia medzi reštartmi
+Pripojenie `.openhands` uchováva váš profil LLM a nastavenia naprieč reštartmi
 kontajnera. Zvyšok tejto príručky konfiguruje všetko prostredníctvom rozhrania
 Agent Canvas vo vašom prehliadači.
 
@@ -498,55 +504,52 @@ finally {
 
 ## 4. Konfigurácia lokálneho LLM
 
-Pri prvom spustení Agent Canvas otvorí uvádzací (onboarding) postup. V tomto postupe:
+Pri prvom spustení Agent Canvas otvorí úvodný proces nastavenia. V tomto procese:
 
-1. Ponechajte vybraný agent **OpenHands** a kliknite na **Next**.
-2. V časti **Set up your LLM** vyberte **Advanced**.
+1. Ponechajte **OpenHands** vybrané ako agenta a kliknite na **Next**.
+2. Na obrazovke **Set up your LLM** vyberte **Advanced**.
 3. Ponechajte **Authentication** nastavené na **API key**.
 4. Nastavte **Custom Model** na `openai/Qwen3.6-35B-A3B-GGUF`.
 5. Nastavte **Base URL** na `http://127.0.0.1:13305/api/v1`.
    <!-- @os:windows -->
-   > Vo Windows beží zásobník v kontajneri, ktorý sa nemôže pripojiť k hostiteľovi na
-   > adrese `127.0.0.1`. Namiesto toho použite `http://host.docker.internal:13305/api/v1`,
-   > aby sa kontajnerizovaný agent mohol pripojiť k Lemonade bežiacemu na hostiteľskom
-   > počítači so systémom Windows.
+   > V systéme Windows beží stack v kontajneri, ktorý sa nedokáže pripojiť k hostiteľovi na
+   > `127.0.0.1`. Namiesto toho použite `http://host.docker.internal:13305/api/v1`, aby sa
+   > kontajnerizovaný agent dokázal pripojiť k Lemonade bežiacemu na hostiteľskom počítači so systémom Windows.
    <!-- @os:end -->
-6. Do poľa **API Key** zadajte ľubovoľnú neprázdnu zástupnú hodnotu, napríklad `lemonade-local`.
+6. Do poľa **API Key** zadajte ľubovoľný neprázdny zástupný text, napríklad `lemonade-local`.
    Lemonade nevyžaduje skutočný kľúč, ale klient OpenHands potrebuje nejakú hodnotu
    na odoslanie.
 7. Kliknite na **Next**.
 
-Dokončené rozšírené nastavenia by mali vyzerať takto. Pole s API kľúčom je
+Dokončené nastavenia Advanced by mali vyzerať takto. Pole API key je
 v rozhraní maskované.
 
-![Prvé použitie Agent Canvas — rozšírené nastavenia LLM s modelom Lemonade a lokálnou základnou adresou URL](assets/01-llm-advanced-settings.png)
+![Nastavenia Advanced pre LLM pri prvom použití Agent Canvas s modelom Lemonade a lokálnou základnou adresou URL](assets/01-llm-advanced-settings.png)
 
-Agent Canvas uloží tieto hodnoty ako profil LLM. Ak vás vaša verzia požiada
-o pomenovanie tohto profilu, použite názov bez medzier, napríklad `lemonade-local`.
-Ak neskôr zmeníte modely, otvorte **Settings > LLM** a aktualizujte tie isté
-rozšírené polia. Medzi uloženými profilmi môžete prepínať z poľa na písanie
-správ pomocou príkazu `/model`.
+Agent Canvas uloží tieto hodnoty ako profil LLM. Ak vás vaša verzia požiada o pomenovanie
+tohto profilu, použite názov bez medzier, napríklad `lemonade-local`. Ak neskôr zmeníte
+modely, otvorte **Settings > LLM** a aktualizujte rovnaké polia Advanced. Medzi
+uloženými profilmi môžete prepínať z poľa chatu pomocou príkazu `/model`.
 
 ## 5. Otvorenie pracovného priestoru
 
-Agent môže čítať a upravovať súbory iba v rámci pracovného priestoru, ktorý si
-vyberiete. Pred spustením úlohy nasmerujte Agent Canvas na priečinok svojho
-projektu:
+Agent môže čítať a upravovať súbory iba v rámci pracovného priestoru, ktorý zvolíte. Pred
+spustením úlohy nasmerujte Agent Canvas na priečinok svojho projektu:
 
 1. Na domovskej obrazovke vyberte **Open Workspace**.
-2. Vyberte priečinok, ktorý obsahuje váš projekt (napríklad git repozitár,
+2. Vyberte priečinok obsahujúci váš projekt (napríklad git repozitár,
    na ktorom má agent pracovať).
 3. Spustite novú konverzáciu v tomto pracovnom priestore.
 
 Všetko, čo agent robí — čítanie súborov, spúšťanie príkazov, úprava kódu — je
 obmedzené na tento pracovný priestor.
 
-![Domovská obrazovka Agent Canvas po uvádzacom postupe](assets/02-agent-canvas-home.png)
+![Domovská obrazovka Agent Canvas po úvodnom nastavení](assets/02-agent-canvas-home.png)
 
-## 6. Spustenie prvej programátorskej úlohy
+## 6. Spustenie prvej úlohy kódovania
 
-Keď máte otvorený pracovný priestor a vybraný lokálny LLM, napíšte do
-konverzácie konkrétnu úlohu. Dobrá prvá úloha je malá a overiteľná, napríklad:
+Keď je pracovný priestor otvorený a vybratý lokálny LLM, zadajte do chatu konkrétnu úlohu.
+Dobrá prvá úloha je malá a overiteľná, napríklad:
 
 ```text
 Create a new file called hello.py that defines a function greet(name) that
@@ -554,29 +557,28 @@ returns "Hello, {name}!", and add a small test that prints greet("World")
 when run as a script.
 ```
 
-Sledujte časovú os konverzácie. OpenHands vykoná nasledovné:
+Sledujte časovú os konverzácie. OpenHands:
 
 - Prečíta pracovný priestor, aby pochopil jeho štruktúru.
 - Vytvorí `hello.py` s požadovanou funkciou a testovacím blokom.
 - Voliteľne spustí `python3 hello.py`, aby overil výstup.
-- Nahlási v konverzácii, čo urobil, a prípadný výstup príkazov.
+- Nahlási v chate, čo urobil, a prípadný výstup príkazu.
 
-V pracovnom priestore by sa mal objaviť nový súbor a záverečná správa agenta
-by mala popisovať zmenu, ktorú vykonal. Toto je moment odmeny: agent napísal
-a spustil skutočný kód vo vašom projektovom priečinku.
+Mali by ste vidieť, ako sa v pracovnom priestore objaví nový súbor, a záverečná správa agenta
+by mala popisovať zmenu, ktorú vykonal. Toto je kľúčový okamih: agent
+napísal a spustil skutočný kód vo vašom projektovom priečinku.
 
 ## 7. Kontrola a usmerňovanie agenta
 
-Po dokončení kroku agentom skontrolujte jeho prácu pred prijatím ďalšieho kroku:
+Po dokončení kroku agentom skontrolujte jeho prácu pred akceptovaním ďalšieho kroku:
 
-- **Zmeny súborov**: použite prehliadač súborov pracovného priestoru alebo
-  zobrazenie rozdielov (diff) agenta, aby ste presne videli, čo bolo pridané,
-  zmenené alebo odstránené.
-- **Výstup príkazov**: rozbaľte ktorýkoľvek príkaz, ktorý agent spustil, aby ste
-  videli stdout, stderr a návratový kód.
-- **Nadväzujúce úpravy**: ak výsledok nie je taký, aký ste chceli, odpovedzte
-  v rovnakej konverzácii s opravou. Agent si zachová predchádzajúci kontext
-  a bude pokračovať na tých istých súboroch.
+- **Zmeny súborov**: na zobrazenie presne toho, čo bolo pridané, zmenené alebo odstránené,
+  použite prehliadač súborov pracovného priestoru alebo zobrazenie rozdielov (diff) agenta.
+- **Výstup príkazov**: rozbaľte ktorýkoľvek príkaz spustený agentom, aby ste videli stdout, stderr
+  a návratový kód (exit code).
+- **Nadväzujúce kroky**: ak výsledok nie je taký, aký ste chceli, odpovedzte v tej istej
+  konverzácii s opravou. Agent si zachová predchádzajúci kontext a
+  iteruje na tých istých súboroch.
 
 Ak napríklad test nevypísal očakávaný pozdrav, odpovedzte:
 
@@ -585,17 +587,18 @@ The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-Agent súbor znova prečíta, spustí príkaz, diagnostikuje problém a znova
-upraví súbor — všetko v rámci tej istej konverzácie.
+Agent súbor znova prečíta, spustí príkaz, diagnostikuje problém a upraví
+súbor znova — všetko v rámci tej istej konverzácie.
 ## Riešenie problémov
 
 <!-- @os:linux -->
-- **`agent-canvas` sa nenachádza v PATH:** preinštalujte pomocou
-  `npm install -g @openhands/agent-canvas` a uistite sa, že adresár s globálnymi binárnymi súbormi npm
-  je zahrnutý v PATH, aby ste mohli `agent-canvas` spustiť z nového
-  terminálu.
-- **`npm install -g` zlyhá s chybou oprávnení:** nastavte globálny adresár npm
-  vo vlastníctve používateľa, potom znova otvorte terminál a nainštalujte Agent Canvas znova.
+- **`agent-canvas` nie je v PATH:** preinštalujte pomocou
+  `npm install -g @openhands/agent-canvas` a overte, že adresár globálnych
+  binárnych súborov npm je zahrnutý v PATH, skôr než bude možné spustiť
+  `agent-canvas` z nového terminálu.
+- **`npm install -g` zlyhá s chybou oprávnení:** nakonfigurujte globálny
+  adresár npm vlastnený používateľom, potom znova otvorte terminál a znova
+  nainštalujte Agent Canvas.
 
   ```bash
   mkdir -p ~/.npm-global
@@ -605,54 +608,57 @@ upraví súbor — všetko v rámci tej istej konverzácie.
   npm install -g @openhands/agent-canvas
   ```
 - **Chýba `uv`:** nainštalujte ho podľa
-  [návodu na inštaláciu uv](https://docs.astral.sh/uv/getting-started/installation/).
-  Agent Canvas používa `uv` na správu prostredia Python pre agent server.
+  [sprievodcu inštaláciou uv](https://docs.astral.sh/uv/getting-started/installation/).
+  Agent Canvas používa `uv` na správu Python prostredia servera agenta.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- **`docker pull` alebo `docker run` sa nedokáže pripojiť:** uistite sa, že Docker Desktop
-  je spustený (jeho ikona veľryby je v systémovej lište) a že engine
-  dokončil spúšťanie. `docker version` by mal vypísať sekciu Client aj Server.
-- **Kontajner sa spustí, ale backend nikdy nie je zdravý:** prvé
-  spustenie inicializuje Agent Server vnútri kontajnera; dajte mu minútu alebo
-  dve, potom skontrolujte `docker logs <container>` kvôli chybám.
-- **Kontajner sa nedokáže pripojiť k Lemonade:** kontajner sa dostáva k hostiteľovi cez
-  `host.docker.internal`. Overte, že Lemonade beží na hostiteľovi Windows pomocou
-  `lemonade status`, a použite `http://host.docker.internal:13305/api/v1` ako
-  Base URL pri konfigurácii LLM.
+- **`docker pull` alebo `docker run` sa nedokáže pripojiť:** uistite sa, že
+  Docker Desktop beží (jeho ikona veľryby je v systémovej lište) a že engine
+  dokončil spúšťanie. Príkaz `docker version` by mal vypísať sekcie Client aj
+  Server.
+- **Kontajner sa spustí, no backend sa nestane zdravým:** prvé spustenie
+  inicializuje Agent Server vnútri kontajnera; dajte tomu minútu až dve, potom
+  skontrolujte `docker logs <container>` kvôli chybám.
+- **Kontajner sa nevie pripojiť k Lemonade:** kontajner sa pripája k hostiteľovi
+  prostredníctvom `host.docker.internal`. Overte, že Lemonade beží na Windows
+  hostiteľovi pomocou `lemonade status`, a ako základnú URL adresu pri
+  konfigurácii LLM použite `http://host.docker.internal:13305/api/v1`.
 <!-- @os:end -->
 
-- **UI sa načíta, ale backend zobrazuje nezdravý stav:** počkajte minútu alebo dve, kým
-  agent server dokončí spúšťanie, potom obnovte stránku. Ak zostane nezdravý, reštartujte
-  stack a skontrolujte logy kvôli chybám.
-- **Chatové požiadavky Lemonade zlyhávajú s chybou pripojenia:** overte, že
-  `curl -fsS "http://127.0.0.1:13305/api/v1/health"` je úspešný a že
-  Lemonade stále poskytuje model pomocou `lemonade status`.
-- **Agent hlási chybu s dĺžkou kontextu alebo limitom tokenov:** začnite
-  novú konverzáciu, aby agent nemal preťaženú históriu. Ak sa to
-  opakuje, reštartujte Lemonade s väčším `ctx_size` ako je predvolených
+- **UI sa načíta, ale backend sa javí ako nezdravý:** počkajte minútu až dve,
+  kým sa server agenta dokončí spúšťať, potom obnovte stránku. Ak zostane
+  nezdravý, reštartujte celý stack a skontrolujte logy kvôli chybám.
+- **Požiadavky na chat v Lemonade zlyhávajú s chybou pripojenia:** overte, že
+  `curl -fsS "http://127.0.0.1:13305/api/v1/health"` je úspešný a že Lemonade
+  stále poskytuje model podľa `lemonade status`.
+- **Agent hlási chybu dĺžky kontextu alebo limitu tokenov:** začnite novú
+  konverzáciu, aby agent nepracoval s nadmerne veľkou históriou. Ak sa to deje
+  opakovane, reštartujte Lemonade s väčším `ctx_size`, než je predvolených
   65536 (napríklad `ctx_size=131072`), ak to pamäť dovoľuje.
-- **Agent produkuje nekvalitné alebo neúplné úpravy:** prepnite na väčší
-  model v Lemonade, alebo zadajte agentovi menšiu, konkrétnejšiu úlohu a nechajte ho
-  dokončiť ju pred žiadaním o ďalšiu zmenu.
+- **Agent produkuje nekvalitné alebo neúplné úpravy:** prepnite v Lemonade na
+  väčší model, alebo zadajte agentovi menšiu, konkrétnejšiu úlohu a nechajte
+  ho dokončiť ju pred požiadaním o ďalšiu zmenu.
 
 ## Ďalšie kroky
 
-- Vyskúšajte väčšiu úlohu v rovnakom pracovnom priestore, napríklad pridanie súboru s unit testom alebo
-  opravu známej chyby, a pred ponechaním zmeny skontrolujte diff agenta.
-- Pripojte MCP server, ako je GitHub alebo Slack, v sekcii **Customize**, aby
-  agent mohol čítať issues alebo publikovať aktualizácie počas práce.
-- Uložte si niekoľko LLM profilov (rýchly malý model a silnejší veľký model) a
-  prepínajte medzi nimi pomocou `/model` počas konverzácie.
-- Pokračujte na [automatizácie OpenHands](https://docs.openhands.dev/openhands/usage/automations/overview) a
-  premeňte opakujúce sa vývojové cykly na naplánované alebo udalosťami spúšťané behy agenta.
+- Vyskúšajte v rovnakom pracovnom priestore väčšiu úlohu, napríklad pridanie
+  súboru s jednotkovým testom alebo opravu známej chyby, a pred ponechaním
+  zmeny skontrolujte diff agenta.
+- Pripojte MCP server, napríklad GitHub alebo Slack, v sekcii **Customize**,
+  aby agent mohol počas práce čítať issues alebo zverejňovať aktualizácie.
+- Uložte si viacero LLM profilov (rýchly malý model a výkonnejší veľký model)
+  a prepínajte medzi nimi pomocou `/model` priamo počas konverzácie.
+- Pokračujte na [automatizácie OpenHands](https://docs.openhands.dev/openhands/usage/automations/overview)
+  a premeňte opakujúce sa vývojové slučky na naplánované alebo udalosťami
+  spúšťané behy agenta.
 
 ## Zdroje
 
 - [Dokumentácia OpenHands](https://docs.openhands.dev/)
 - [Prehľad Agent Canvas](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
 - [Nastavenie Agent Canvas](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
-- [LLM profily a konfigurácia modelu](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
+- [Profily LLM a konfigurácia modelov](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
 - [Dokumentácia Lemonade Server](https://lemonade-server.ai/docs)
 
 <!-- @os:linux -->

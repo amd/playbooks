@@ -1,6 +1,6 @@
 {
   "id": "github-slack-development-digest",
-  "title": "使用 Agent Canvas 建立 GitHub 到 Slack 的開發摘要",
-  "description": "配置 Agent Canvas、GitHub MCP、Slack MCP，以及發佈本地 LLM 摘要的排程 OpenHands 自動化。",
+  "title": "將 GitHub 轉 Slack 開發摘要與 Agent Canvas 整合建置",
+  "description": "配置 Agent Canvas、GitHub MCP、Slack MCP，以及一個排程的 OpenHands 自動化流程，用於發佈本地 LLM 摘要。",
   "auto_translated": true
 }

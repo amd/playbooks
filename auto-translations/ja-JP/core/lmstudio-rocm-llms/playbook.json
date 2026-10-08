@@ -1,6 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
-  "title": "LM StudioでのLLMの実行とサービング",
-  "description": "LM StudioとLM Studio Serverをセットアップし、大規模言語モデルをローカルで実行・提供します。",
+  "title": "LM StudioでLLMを実行・サービングする",
+  "description": "LM StudioとLM Studio Serverをセットアップして、大規模言語モデルをローカルで実行・配信します。",
   "auto_translated": true
 }

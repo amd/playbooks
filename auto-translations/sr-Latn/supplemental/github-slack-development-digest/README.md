@@ -17,20 +17,20 @@ SPDX-License-Identifier: MIT
 
 ## Pregled
 
-Programeri provode mnogo vremena u malim ponavljajućim ciklusima: pregledanje označenih pull request-ova, odgovaranje na GitHub komentare, triažiranje novih issue-a, pretvaranje Slack niti u beleške za standup ili praćenje incidenata, i praćenje signala vezanih za izdanja ili istraživanja.
-Svaki od ovih ciklusa je poznat, ali i dalje zahteva rasuđivanje: prikupiti pravi kontekst, odlučiti šta je važno i objaviti jasan izveštaj tamo gde tim već radi.
+Programeri provode mnogo vremena na male ponavljajuće petlje: pregledanje označenih pull zahteva, odgovaranje na GitHub komentare, triažiranje novih problema (issues), pretvaranje Slack niti u beleške za standup ili praćenje incidenata, i praćenje signala izdanja ili istraživanja.
+Svaka petlja je poznata, ali ipak zahteva rasuđivanje: prikupljanje pravog konteksta, odlučivanje šta je bitno i objavljivanje jasnog ažuriranja na mestu gde tim već radi.
 
-[OpenHands automatizacije](https://docs.openhands.dev/openhands/usage/automations/overview) pretvaraju te cikluse u planirane ili događajima pokrenute razgovore agenta: pokretanja u kojima AI softverski agent može da čita kontekst, poziva alate i proizvodi izveštaj.
-Zajednički šabloni automatizacije u OpenHands katalogu ekstenzija prate ovaj obrazac za pregled GitHub pull request-ova, praćenje repozitorijuma, triažu Linear issue-a, retrospektive incidenata, Slack standup preglede i istraživačke izveštaje: automatizacija se aktivira, koristi konfigurisane integracije poput GitHub-a ili Slack-a da dohvati kontekst, razmišlja o tom kontekstu koristeći veliki jezički model (LLM) i zapisuje rezultat.
+[OpenHands automatizacije](https://docs.openhands.dev/openhands/usage/automations/overview) pretvaraju te petlje u zakazane ili događajima pokrenute razgovore agenta: pokretanja u kojima AI softverski agent može da čita kontekst, poziva alate i proizvede ažuriranje.
+Deljeni šabloni automatizacije u katalogu ekstenzija OpenHands prate ovaj obrazac za pregled GitHub pull zahteva, praćenje repozitorijuma, triažiranje Linear problema, retrospektive incidenata, Slack standup preglede i istraživačke izveštaje: automatizacija se aktivira, koristi konfigurisane integracije kao što su GitHub ili Slack da dobavi kontekst, rezonuje nad tim kontekstom pomoću velikog jezičkog modela (LLM) i upisuje rezultat nazad.
 
 [Agent Canvas](https://github.com/OpenHands/agent-canvas) je lokalna kontrolna ravan za izgradnju i testiranje tih automatizacija.
-U ovom vodiču on pokreće OpenHands Agent Server, pozadinski proces koji izvršava razgovore agenta, i povezuje agenta sa spoljnim servisima poput GitHub-a i Slack-a.
+U ovom vodiču on pokreće OpenHands Agent Server, pozadinski proces koji izvršava razgovore agenta, i povezuje agenta sa spoljnim servisima kao što su GitHub i Slack.
 
-Da bi tok rada ostao na vašem AMD sistemu, agent komunicira sa lokalnim modelom koji servira Lemonade Server.
-Lemonade izlaže taj model kroz OpenAI-kompatibilan API, tako da Agent Canvas može da ga konfiguriše kao udaljenu OpenAI-stil krajnju tačku, dok model, prompt i kontekst toka rada ostaju lokalni.
+Da bi tok rada ostao na vašem AMD sistemu, agent komunicira sa lokalnim modelom koji opslužuje Lemonade Server.
+Lemonade izlaže taj model kroz API kompatibilan sa OpenAI, tako da Agent Canvas može da ga konfiguriše kao udaljenu krajnju tačku u OpenAI stilu, dok model, upit i kontekst toka rada ostaju lokalni.
 
-U ovom vodiču izgradićete jednu konkretnu automatizaciju: planirani razvojni pregled od GitHub-a ka Slack-u.
-Ona koristi GitHub za pregled nedavne aktivnosti repozitorijuma, Slack za objavljivanje pregleda, Agent Canvas API pozive za konfigurisanje i testiranje automatizacije, i Lemonade za lokalno pokretanje LLM-a.
+U ovom vodiču izgradićete jednu konkretnu automatizaciju: zakazani razvojni pregled od GitHub-a ka Slack-u.
+Ona koristi GitHub da ispita nedavnu aktivnost repozitorijuma, Slack da objavi pregled, Agent Canvas API pozive da konfiguriše i testira automatizaciju, i Lemonade da lokalno pokreće LLM.
 
 ![Dijagram arhitekture koji prikazuje GitHub MCP, OpenHands automatizaciju, Lemonade Server i Slack MCP](assets/00-architecture-overview.png)
 
@@ -39,23 +39,23 @@ Ona koristi GitHub za pregled nedavne aktivnosti repozitorijuma, Slack za objavl
 - Kako da pokrenete Lemonade Server i proverite da li lokalni model odgovara na chat zahteve
 - Kako da pokrenete Agent Canvas i usmerite njegov Agent Server ka lokalnom LLM-u
 - Kako da instalirate GitHub i Slack Model Context Protocol (MCP) servere putem Agent Server API-ja
-- Kako da kreirate i pokrenete planiranu OpenHands automatizaciju koja objavljuje razvojni pregled na Slack
-- Kako da rešite najčešće greške vezane za lokalni model i automatizaciju
+- Kako da kreirate i pokrenete zakazanu OpenHands automatizaciju koja objavljuje razvojni pregled na Slack
+- Kako da rešite najčešće greške lokalnog modela i automatizacije
 
 ## Osnovni koncepti
 
-| Koncept | Šta je to | Gde se uklapa u ovaj vodič |
+| Koncept | Šta predstavlja | Gde se uklapa u ovom vodiču |
 | --- | --- | --- |
-| Lemonade Server | Lokalna platforma za serviranje LLM-a napravljena za AMD hardver koja izlaže OpenAI-kompatibilan API. Vaši podaci nikada ne napuštaju vaš računar. | Pokreće model koji pokreće agenta. |
+| Lemonade Server | Lokalna platforma za opsluživanje LLM-a napravljena za AMD hardver koja izlaže API kompatibilan sa OpenAI. Vaši podaci nikada ne napuštaju vaš računar. | Pokreće model koji pokreće agenta. |
 | OpenHands Agent Server | Pozadinski proces koji izvršava razgovore OpenHands agenta. | Hostuje agenta, njegov LLM profil i njegove MCP servere. |
-| Agent Canvas | Lokalna kontrolna ravan za OpenHands koja pokreće Agent Server i korisnički interfejs za pregled pokretanja agenta. | Pokreće pozadinske sisteme i pruža API koji pozivate. |
-| MCP server | Model Context Protocol server koji agentu daje alate za spoljni servis poput GitHub-a ili Slack-a. | Omogućava agentu da čita GitHub i piše na Slack. |
-| OpenHands automatizacija | Planirani ili događajima pokrenut razgovor agenta koji dohvata kontekst, razmišlja o njemu i negde zapisuje rezultat. | GitHub-ka-Slack pregled koji ovde gradite. |
+| Agent Canvas | Lokalna kontrolna ravan za OpenHands koja pokreće Agent Server i korisnički interfejs za pregled pokretanja agenta. | Pokreće pozadinske sisteme i obezbeđuje API koji pozivate. |
+| MCP server | Model Context Protocol server koji agentu pruža alate za spoljni servis kao što je GitHub ili Slack. | Omogućava agentu da čita sa GitHub-a i piše na Slack. |
+| OpenHands automatizacija | Zakazani ili događajima pokrenuti razgovor agenta koji dobavlja kontekst, rezonuje nad njim i negde upisuje rezultat. | Pregled od GitHub-a ka Slack-u koji ovde gradite. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Radni tokovi kodirajućeg agenta imaju koristi od većeg modela i prozora konteksta.
-> Koristite najmanje 32 GB sistemske memorije, a za veće GGUF modele je poželjno 64 GB ili više.
+> Radni tokovi agenta za kodiranje imaju koristi od većeg modela i veće dužine konteksta.
+> Koristite najmanje 32 GB sistemske memorije, a za veće GGUF modele poželjno je 64 GB ili više.
 <!-- @device:end -->
 
 ## Podešavanje konfiguracije memorije
@@ -70,36 +70,42 @@ Ona koristi GitHub za pregled nedavne aktivnosti repozitorijuma, Slack za objavl
 
 ## Preduslovi
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so only the Lemonade model is needed here. -->
+<!-- @prereq:lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 Potrebno vam je:
 
-- Lemonade Server instaliran prema standardnom [vodiču za instalaciju Lemonade-a](https://lemonade-server.ai/docs/guide/install/).
+- Lemonade Server instaliran prateći standardni [vodič za instalaciju Lemonade-a](https://lemonade-server.ai/docs/guide/install/).
 
 <!-- @os:linux -->
-- Node.js 22.12 ili noviji i `npm`, korišćeni za instalaciju objavljenog Agent Canvas CLI-ja i pokretanje MCP servera pomoću `npx`.
-- `uv`, Python menadžer paketa koji Agent Canvas koristi za izgradnju okruženja Agent Server-a. Ako još nije instaliran, instalirajte ga sa [vodiča za instalaciju uv-a](https://docs.astral.sh/uv/getting-started/installation/).
-- Nedavno objavljen `@openhands/agent-canvas` paket sa shema-vođenim podešavanjima agenta, `LLMSummarizingCondenserSettings.max_tokens`, i podrškom za LLM `custom_tokenizer`.
-- Python paket `transformers` dostupan u okruženju Agent Server-a. Potreban je za brojanje tokena chat-šablona kada je postavljen `custom_tokenizer`.
+- Node.js 22.12 ili noviji i `npm`, koji se koriste za instaliranje objavljenog Agent Canvas CLI-a i pokretanje MCP servera pomoću `npx`.
+- `uv`, Python menadžer paketa koji Agent Canvas koristi za izgradnju okruženja Agent Server-a. Ako već nije instaliran, instalirajte ga iz [vodiča za instalaciju uv-a](https://docs.astral.sh/uv/getting-started/installation/).
+- Nedavno objavljen paket `@openhands/agent-canvas` sa podešavanjima agenta zasnovanim na šemi, `LLMSummarizingCondenserSettings.max_tokens`, i podrškom za LLM `custom_tokenizer`.
+- Python paket `transformers` dostupan u okruženju Agent Server-a. Potreban je za brojanje tokena šablona chata kada je podešen `custom_tokenizer`.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- [Docker Desktop za Windows](https://docs.docker.com/desktop/setup/install/windows-install/), instaliran i pokrenut. Na Windows-u, Agent Canvas stek se pokreće iz objavljene Docker slike, koja objedinjuje Node.js, `uv`, `transformers` i `@openhands/agent-canvas` paket, tako da te komponente ne morate instalirati na host sistemu.
+- [Docker Desktop za Windows](https://docs.docker.com/desktop/setup/install/windows-install/), instaliran i pokrenut. Na Windows-u, Agent Canvas stek se pokreće iz objavljene Docker slike, koja uključuje Node.js, `uv`, `transformers` i paket `@openhands/agent-canvas`, tako da te komponente ne morate instalirati na domaćinu.
 <!-- @os:end -->
 
-- GitHub token sa pravom čitanja repozitorijuma koji želite da sumirate.
-- Slack bot token (`xoxb-...`) sa `chat:write` i pravom čitanja kanala.
-- Slack team ID (`T...`).
-- Slack channel ID (`C...`) gde treba objaviti pregled.
+- GitHub token sa pristupom za čitanje repozitorijuma koji želite da sumirate.
+- Slack bot token (`xoxb-...`) sa `chat:write` i pristupom za čitanje kanala.
+- ID Slack tima (`T...`).
+- ID Slack kanala (`C...`) gde treba objaviti pregled.
 
 Pozovite Slack aplikaciju u ciljni kanal pre testiranja automatizacije.
-## Varijable korišćene u ovom priručniku
+## Promenljive korišćene u ovom priručniku
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -117,11 +123,11 @@ $env:LEMONADE_MODEL = "Qwen3.6-35B-A3B-GGUF"
 ```
 <!-- @os:end -->
 
-Ove dve varijable koriste se u komandama za verifikaciju u nastavku.
-Model, tokenizer i druga podešavanja LLM-a unose se direktno u Agent Canvas korisnički interfejs u kasnijim koracima, pa su njihove doslovne vrednosti prikazane u tekstu tamo gde su vam potrebne.
+Ove dve promenljive koriste se u komandama za proveru u nastavku.
+Model, tokenizer i druga podešavanja LLM-a unose se direktno u Agent Canvas korisnički interfejs u kasnijim koracima, tako da su njihove doslovne vrednosti prikazane inline tamo gde su vam potrebne.
 
 Sledeće vrednosti se unose u Agent Canvas korisnički interfejs u kasnijim koracima.
-Postavite ih ovde kako biste ih mogli kopirati:
+Postavite ih ovde kako biste mogli da ih kopirate:
 
 <!-- @os:linux -->
 ```bash
@@ -140,7 +146,7 @@ $env:DIGEST_TIMEZONE = "America/New_York"
 <!-- @os:end -->
 
 Koristite eksplicitnu vrednost `owner/repo` za `GITHUB_REPO_FILTER`.
-Široki džoker znaci za organizacije mogu vratiti previše MCP konteksta za lokalne modele.
+Široki džoker znakovi za organizacije mogu vratiti previše MCP konteksta za lokalne modele.
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -150,7 +156,7 @@ lemonade --version
 
 ## 1. Pokretanje Lemonade servera
 
-Pokrenite model iz Lemonade CLI:
+Pokrenite model preko Lemonade CLI-ja:
 
 <!-- @os:linux -->
 ```bash
@@ -169,18 +175,18 @@ lemonade run "$env:LEMONADE_MODEL"
 <!-- @os:end -->
 
 > **Izaberite model koji odgovara vašem hardveru.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) je snažan model za ovaj radni tok, ali zahteva veliki memorijski prostor.
-> Ako vaš uređaj ima ograničenu memoriju ili GPU VRAM, izaberite manji GGUF model iz Lemonade biblioteke modela i koristite taj ID modela (i njegov odgovarajući tokenizer) u ovom priručniku.
+> Ako vaš uređaj ima ograničenu memoriju ili GPU VRAM, odaberite manji GGUF model iz Lemonade biblioteke modela i koristite taj ID modela (i odgovarajući tokenizer) tokom celog priručnika.
 
-> **Napomena:** Prvo pokretanje `lemonade run` preuzima model ako već nije prisutan, što može potrajati u zavisnosti od veličine modela i vaše konekcije.
+> **Napomena:** Prvo pokretanje `lemonade run` preuzima model ako već nije prisutan, što može potrajati u zavisnosti od veličine modela i vaše veze.
 
-Lemonade izlaže API kompatibilan sa OpenAI na:
+Lemonade izlaže OpenAI-kompatibilni API na:
 
 ```text
 http://127.0.0.1:13305/api/v1
 ```
 
-Opciono: ako Agent Canvas ili automatizovani izvršilac nisu na istom računaru, objavite Lemonade endpoint kroz bezbedan tunel i koristite HTTPS URL kao osnovni URL za LLM.
-[ngrok](https://ngrok.com/) izlaže lokalni port na internet preko bezbednog HTTPS URL-a; zahteva besplatan ngrok nalog, a `YOUR_NGROK_DOMAIN.ngrok-free.dev` zamenite svojim rezervisanim domenom:
+Opciono: ako Agent Canvas ili automatizacioni pokretač nisu na istom računaru, objavite Lemonade krajnju tačku kroz bezbedan tunel i koristite HTTPS URL kao osnovni URL za LLM.
+[ngrok](https://ngrok.com/) izlaže lokalni port na internet preko bezbednog HTTPS URL-a; zahteva besplatan ngrok nalog, a vi menjate `YOUR_NGROK_DOMAIN.ngrok-free.dev` svojim rezervisanim domenom:
 
 ```bash
 ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
@@ -188,7 +194,7 @@ ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
 
 
 
-## 2. Verifikacija lokalnog modela
+## 2. Provera lokalnog modela
 
 Potvrdite da Lemonade može da posluži izabrani model:
 
@@ -351,7 +357,7 @@ npm -v
 <!-- @test:end -->
 <!-- @os:end -->
 
-## 3. Pokretanje Agent Canvas-a
+## 3. Pokretanje Agent Canvas
 
 <!-- @os:linux -->
 Instalirajte objavljeni Agent Canvas paket i pokrenite ceo stek:
@@ -361,32 +367,32 @@ npm install -g @openhands/agent-canvas
 agent-canvas
 ```
 
-Ako globalna npm instalacija ne uspe zbog greške u vezi sa dozvolama, pogledajte odeljak o rešavanju problema sa npm dozvolama u nastavku.
+Ako globalna npm instalacija ne uspe zbog greške sa dozvolama, pogledajte stavku o rešavanju problema sa npm dozvolama ispod.
 
 Podrazumevano, Agent Canvas se pokreće na `http://localhost:8000`.
-Otvorite taj URL u pregledaču.
-Port nije poseban — ako je 8000 već zauzet, prosledite bilo koji slobodan port pomoću `--port` (ili `-p`).
-Podrazumevani lokalni bekend bi trebalo da se na početnom ekranu prikaže kao ispravan (healthy).
+Otvorite taj URL u svom pretraživaču.
+Port nije poseban – ako je 8000 već zauzet, prosledite bilo koji slobodan port pomoću `--port` (ili `-p`).
+Podrazumevani lokalni bekend bi trebalo da se prikaže kao ispravan na početnom ekranu.
 
-> **Napomena:** Prvo pokretanje gradi Python okruženje Agent Server-a kojim upravlja `uv`, pa može potrajati nekoliko minuta pre nego što bekend prijavi da je ispravan.
+> **Napomena:** Prvo pokretanje izgrađuje `uv`-upravljano Python okruženje Agent Server-a, tako da može potrajati nekoliko minuta pre nego što bekend prijavi da je ispravan.
 
-Komanda `agent-canvas` pokreće agent server, automatizovani bekend i veb frontend zajedno.
-Potrebna vam je samo ova jedna komanda da biste lokalno pokrenuli OpenHands.
-Ostatak ovog priručnika konfiguriše sve preko Agent Canvas korisničkog interfejsa u vašem pregledaču.
+Komanda `agent-canvas` pokreće agent server, automatizacioni bekend i veb frontend zajedno.
+Potrebna vam je samo ova jedna komanda da biste pokrenuli OpenHands lokalno.
+Ostatak ovog priručnika konfiguriše sve kroz Agent Canvas korisnički interfejs u vašem pretraživaču.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Na Windows-u, pokrenite objavljenu Agent Canvas kontejnersku sliku pomoću Docker Desktop-a.
-Slika obuhvata Agent Server, automatizovani bekend i veb frontend, tako da ne morate da instalirate Node.js, `uv` ili CLI na host mašini.
+Na Windows-u, pokrenite objavljenu sliku Agent Canvas kontejnera pomoću Docker Desktop-a.
+Slika objedinjuje Agent Server, automatizacioni bekend i veb frontend, tako da ne morate da instalirate Node.js, `uv` ili CLI na host sistemu.
 
-Prvo, kreirajte foldere za konfiguraciju i radni prostor koje kontejner montira:
+Prvo, kreirajte fascikle za konfiguraciju i radni prostor koje kontejner montira:
 
 ```powershell
 $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-Preuzmite objavljenu sliku (oko 6 GB; javno je dostupna, pa nije potrebna prijava):
+Preuzmite objavljenu sliku (oko 6 GB; javna je, tako da prijava nije potrebna):
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
@@ -402,13 +408,13 @@ docker run -it --rm `
   ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-Otvorite `http://localhost:8000/canvas` u pregledaču.
+Otvorite `http://localhost:8000/canvas` u svom pretraživaču.
 Ako je port 8000 već zauzet, mapirajte drugi host port, na primer `-p 8080:8000`, i umesto toga otvorite `http://localhost:8080/canvas`.
 
-> **Napomena:** Prvo pokretanje gradi okruženje Agent Server-a unutar kontejnera, pa može potrajati nekoliko minuta pre nego što bekend prijavi da je ispravan.
+> **Napomena:** Prvo pokretanje izgrađuje okruženje Agent Server-a unutar kontejnera, tako da može potrajati nekoliko minuta pre nego što bekend prijavi da je ispravan.
 
-Montiranje `.openhands` čuva vaš LLM profil, MCP servere i automatizacije nezavisno od ponovnog pokretanja kontejnera.
-Ostatak ovog priručnika konfiguriše sve preko Agent Canvas korisničkog interfejsa u vašem pregledaču na `http://localhost:8000/canvas`.
+Montiranje `.openhands` čuva vaš LLM profil, MCP servere i automatizacije prilikom ponovnog pokretanja kontejnera.
+Ostatak ovog priručnika konfiguriše sve kroz Agent Canvas korisnički interfejs u vašem pretraživaču na `http://localhost:8000/canvas`.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -540,25 +546,25 @@ finally {
 <!-- @os:end -->
 ## 4. Konfigurisanje lokalnog LLM-a u korisničkom interfejsu
 
-Prilikom prvog pokretanja, Agent Canvas otvara tok uvodnog podešavanja (onboarding).
+Pri prvom pokretanju, Agent Canvas otvara tok za uvodno podešavanje (onboarding).
 U tom toku:
 
-1. Zadržite **OpenHands** kao odabranog agenta i kliknite na **Next**.
-2. Na ekranu **Set up your LLM**, izaberite **Advanced**.
-3. Zadržite **Authentication** postavljeno na **API key**.
+1. Zadržite **OpenHands** kao izabranog agenta i kliknite na **Next**.
+2. Na **Set up your LLM**, izaberite **Advanced**.
+3. Zadržite **Authentication** podešeno na **API key**.
 4. Podesite **Custom Model** na `openai/Qwen3.6-35B-A3B-GGUF`.
 5. Podesite **Base URL** na `http://127.0.0.1:13305/api/v1`.
-6. Za **API Key**, unesite bilo koju nepraznu vrednost kao rezervisano mesto, na primer `lemonade-local`. Lemonade ne zahteva pravi ključ, ali OpenHands klijentu je potrebna vrednost da bi je poslao.
+6. Za **API Key**, unesite bilo koji vrednosni placeholder koji nije prazan, na primer `lemonade-local`. Lemonade ne zahteva pravi ključ, ali OpenHands klijentu je potrebna vrednost koju će poslati.
 
 <!-- @os:windows -->
 > **Windows (Docker):** Agent Server se izvršava unutar kontejnera, pa podesite **Base URL** na `http://host.docker.internal:13305/api/v1` umesto `http://127.0.0.1:13305/api/v1`.
-> Iz kontejnera, `127.0.0.1` predstavlja sâm kontejner; `host.docker.internal` dopire do Lemonade-a koji se izvršava na Windows hostu, a Docker Desktop automatski obezbeđuje taj naziv hosta.
+> Iznutra kontejnera, `127.0.0.1` predstavlja sam kontejner; `host.docker.internal` dopire do Lemonade koji se izvršava na Windows host mašini, a Docker Desktop automatski obezbeđuje to ime hosta.
 <!-- @os:end -->
 
-Polja za povezivanje bi trebalo da izgledaju ovako.
-Polje za API ključ je maskirano od strane korisničkog interfejsa.
+Polja za konekciju bi trebalo da izgledaju ovako.
+Polje za API ključ je maskirano u korisničkom interfejsu.
 
-![Agent Canvas naprednа podešavanja LLM-a pri prvom korišćenju sa Lemonade modelom i lokalnim baznim URL-om](assets/01-llm-advanced-settings.png)
+![Agent Canvas napredna LLM podešavanja pri prvoj upotrebi sa Lemonade modelom i lokalnim baznim URL-om](assets/01-llm-advanced-settings.png)
 
 Zatim izaberite **All** i podesite dodatna polja za lokalni model:
 
@@ -566,11 +572,11 @@ Zatim izaberite **All** i podesite dodatna polja za lokalni model:
 2. Skrolujte do **LiteLLM Extra Body** i podesite ga na `{"enable_thinking": true}`.
 3. Kliknite na **Next**.
 
-![Agent Canvas kartica All za LLM pri prvom korišćenju sa Qwen prilagođenim tokenizerom](assets/02-llm-all-tokenizer-settings.png)
+![Agent Canvas kartica All pri prvoj upotrebi LLM-a sa Qwen custom tokenizerom](assets/02-llm-all-tokenizer-settings.png)
 
-![Agent Canvas kartica All za LLM pri prvom korišćenju sa konfigurisanim LiteLLM extra body](assets/03-llm-all-extra-body-settings.png)
+![Agent Canvas kartica All pri prvoj upotrebi LLM-a sa konfigurisanim LiteLLM extra body](assets/03-llm-all-extra-body-settings.png)
 
-Podešavanja LLM-a bi trebalo da prikazuju:
+LLM podešavanja bi trebalo da prikazuju:
 
 | Polje | Vrednost |
 | --- | --- |
@@ -579,24 +585,24 @@ Podešavanja LLM-a bi trebalo da prikazuju:
 | Custom tokenizer | `Qwen/Qwen3.6-35B-A3B` |
 | LiteLLM extra body | `{"enable_thinking": true}` |
 
-Prefiks `openai/` govori LiteLLM-u da koristi formatiranje zahteva kompatibilno sa OpenAI protokolom prema Lemonade krajnjoj tački.
-Prilagođeni tokenizer je originalni Hugging Face tokenizer za GGUF model; on omogućava OpenHands-u da broji iste tokene chat šablona koje vidi lokalni server modela.
-Trenutni obrazac za LLM pri prvom korišćenju ne prikazuje podešavanja kondenzera (condenser).
-Ako vaša verzija Agent Canvas-a kasnije izlaže podešavanja kondenzera pod **Settings > LLM**, koristite `llm_summarizing` i podesite maksimalan broj tokena ispod granice Lemonade kontekstnog prozora, na primer `56000`.
+Prefiks `openai/` govori LiteLLM-u da koristi OpenAI-kompatibilno formatiranje zahteva prema Lemonade endpoint-u.
+Custom tokenizer je originalni Hugging Face tokenizer za GGUF model; on omogućava OpenHands-u da broji iste tokene chat-šablona koje vidi lokalni model server.
+Trenutni formular za prvu upotrebu LLM-a ne prikazuje podešavanja kondenzatora.
+Ako vaša verzija Agent Canvas-a kasnije izloži podešavanja kondenzatora pod **Settings > LLM**, koristite `llm_summarizing` i podesite maksimalan broj tokena ispod Lemonade kontekstnog prozora, na primer `56000`.
 
 ## 5. Instaliranje GitHub i Slack MCP servera
 
-U korisničkom interfejsu Agent Canvas-a, otvorite **Customize** (ili **Settings > MCP**) da biste dodali MCP servere koji agentu daju alate za GitHub i Slack.
+U Agent Canvas korisničkom interfejsu, otvorite **Customize** (ili **Settings > MCP**) da dodate MCP servere koji agentu daju alate za GitHub i Slack.
 Vrednosti tokena se šalju samo vašem lokalnom Agent Server-u i čuvaju se kao šifrovana podešavanja.
 
 <!-- @os:windows -->
-> **Windows (Docker):** komande MCP servera `npx` navedene ispod izvršavaju se unutar kontejnera, koji već uključuje Node.js, tako da se na hostu ništa dodatno ne instalira.
-> Pošto je `.openhands` montiran, MCP serveri i njihovi tokeni ostaju sačuvani i nakon ponovnog pokretanja kontejnera.
+> **Windows (Docker):** komande MCP servera `npx` navedene ispod se izvršavaju unutar kontejnera, koji već uključuje Node.js, tako da se na host mašini ne instalira ništa dodatno.
+> Pošto je `.openhands` montiran, MCP serveri i njihovi tokeni se čuvaju i nakon ponovnog pokretanja kontejnera.
 <!-- @os:end -->
 
 ### GitHub MCP server
 
-Dodajte novi MCP server sa sledećim podešavanjima:
+Dodajte novi MCP server sa ovim podešavanjima:
 
 | Polje | Vrednost |
 | --- | --- |
@@ -605,11 +611,11 @@ Dodajte novi MCP server sa sledećim podešavanjima:
 | Args | `-y @modelcontextprotocol/server-github` |
 | Env | `GITHUB_PERSONAL_ACCESS_TOKEN` = vaš GitHub token |
 
-Koristite GitHub token sa pravom čitanja za repozitorijum koji želite da sumirate.
+Koristite GitHub token sa pravima čitanja za repozitorijum koji želite da sumirate.
 
 ### Slack MCP server
 
-Dodajte drugi MCP server sa sledećim podešavanjima:
+Dodajte drugi MCP server sa ovim podešavanjima:
 
 | Polje | Vrednost |
 | --- | --- |
@@ -618,12 +624,12 @@ Dodajte drugi MCP server sa sledećim podešavanjima:
 | Args | `-y @modelcontextprotocol/server-slack` |
 | Env | `SLACK_BOT_TOKEN` = `xoxb-...` |
 | Env | `SLACK_TEAM_ID` = `T0123456789` |
-| Env | `SLACK_CHANNEL_IDS` = ID vašeg kanala za rezime |
+| Env | `SLACK_CHANNEL_IDS` = ID vašeg digest kanala |
 
-Podesite `SLACK_CHANNEL_IDS` na ID kanala za rezime (istu vrednost kao `SLACK_DIGEST_CHANNEL`) kako agent ne bi morao da pretražuje svaki Slack kanal.
+Podesite `SLACK_CHANNEL_IDS` na ID digest kanala (istu vrednost kao `SLACK_DIGEST_CHANNEL`) tako da agent ne mora da pretražuje svaki Slack kanal.
 
-Nakon dodavanja oba servera, koristite dugme **Test** na svakom od njih da potvrdite da se povezuje i da prijavljuje alate.
-GitHub server bi trebalo da prikaže GitHub alate, a Slack server bi trebalo da prikaže Slack alate.
+Nakon dodavanja oba servera, koristite dugme **Test** na svakom od njih da potvrdite da se povezuje i oglašava alate.
+GitHub server bi trebalo da prikaže listu GitHub alata, a Slack server listu Slack alata.
 
 ![Agent Canvas MCP stranica sa instaliranim GitHub i Slack serverima](assets/04-mcp-servers-installed.png)
 
@@ -636,13 +642,13 @@ npm view @modelcontextprotocol/server-slack version
 ```
 <!-- @test:end -->
 
-## 6. Kreiranje automatizacije za rezime
+## 6. Kreiranje automatizacije za digest
 
-U korisničkom interfejsu Agent Canvas-a, otvorite stranicu **Automations** i kreirajte novu automatizaciju:
+U Agent Canvas korisničkom interfejsu, otvorite stranicu **Automations** i kreirajte novu automatizaciju:
 
-1. Izaberite **Create automation** i odaberite tip **Prompt preset**.
+1. Izaberite **Create automation** i izaberite tip **Prompt preset**.
 2. Podesite **Name** na `GitHub Development Digest to Slack`.
-3. Podesite **Prompt** na sledeći tekst, zamenjujući rezervisana mesta za repozitorijum i kanal svojim vrednostima:
+3. Podesite **Prompt** na sledeći tekst, zamenjujući placeholdere za repozitorijum i kanal vašim vrednostima:
 
    ```text
    Use the GitHub MCP server for exactly one repository: your-org/your-repo.
@@ -659,38 +665,38 @@ U korisničkom interfejsu Agent Canvas-a, otvorite stranicu **Automations** i kr
    environment variables, or unrelated Slack messages.
    ```
 
-4. Podesite **Trigger** na **Cron** sa rasporedom `0 9 * * 1-5` (9 časova ujutru radnim danima) i podesite **Timezone** na svoju vremensku zonu, na primer `America/New_York`.
+4. Podesite **Trigger** na **Cron** sa rasporedom `0 9 * * 1-5` (9 ujutru radnim danima) i podesite **Timezone** na vašu vremensku zonu, na primer `America/New_York`.
 5. Podesite **Timeout** na `900` sekundi.
 6. Sačuvajte automatizaciju.
 
-Stranica sa detaljima automatizacije prikazuje novu automatizaciju sa njenim cron okidačem i generisanom ulaznom tačkom prompt preseta.
+Stranica sa detaljima automatizacije prikazuje novu automatizaciju sa njenim cron okidačem i generisanom ulaznom tačkom prompt-preseta.
 
-![Agent Canvas detalji automatizacije nakon kreiranja](assets/05-automation-created.png)
+![Agent Canvas stranica sa detaljima automatizacije nakon kreiranja](assets/05-automation-created.png)
 ## 7. Testiranje automatizacije
 
-Sa stranice sa detaljima automatizacije u Agent Canvas UI:
+Sa stranice sa detaljima automatizacije u Agent Canvas UI-ju:
 
-1. Kliknite na **Run now** (ili **Dispatch**) da biste odmah pokrenuli automatizaciju jednom.
-2. Posmatrajte listu pokretanja na istoj stranici. Najnovije pokretanje bi trebalo da pređe u status `COMPLETED`.
-3. Otvorite ciljni Slack kanal. Trebalo bi da sadrži generisani digest.
+1. Kliknite **Run now** (ili **Dispatch**) da odmah pokrenete automatizaciju jednom.
+2. Pratite listu pokretanja na istoj stranici. Najnovije pokretanje treba da pređe u status `COMPLETED`.
+3. Otvorite vaš ciljni Slack kanal. Trebalo bi da sadrži generisani digest.
 
-Ne morate da čekate da se cron raspored aktivira—**Run now** pokreće izvršavanje na zahtev, tako da možete da potvrdite da prompt, MCP konekcije i objavljivanje na Slack-u ispravno funkcionišu pre nego što se oslonite na raspored.
+Ne morate da čekate da se aktivira cron raspored—**Run now** pokreće izvršavanje na zahtev, tako da možete da potvrdite da prompt, MCP konekcije i objavljivanje na Slack-u rade pre nego što se oslonite na raspored.
 
-![Automatizacija u Agent Canvas-u je uspešno završena](assets/06-automation-run-completed.png)
+![Agent Canvas automatizacija je uspešno završena](assets/06-automation-run-completed.png)
 
 ![Slack kanal koji prikazuje generisani OpenHands digest](assets/07-slackbot-message.png)
 
 ## Rešavanje problema
 
 <!-- @os:windows -->
-- **Docker port 8000 je već u upotrebi:** mapirajte drugi host port, na primer `docker run ... -p 8080:8000 ...`, i otvorite `http://localhost:8080/canvas`.
-- **`docker pull` ne uspeva sa greškom u vezi sa kredencijalima** (na primer, "A specified logon session does not exist"): pokrenite pull iz interaktivne Windows sesije, ili unapred povucite (pre-pull) sliku. Slika je javna, tako da `docker login` nije potreban.
-- **UI se učitava, ali bekend nije ispravan (unhealthy):** prvo pokretanje gradi okruženje Agent Server-a unutar kontejnera. Sačekajte minut i osvežite stranicu, zatim proverite `docker logs <container>` radi uvida u napredak.
-- **Agent Canvas ne može da dostigne Lemonade iz kontejnera:** podesite LLM **Base URL** na `http://host.docker.internal:13305/api/v1` (a ne `127.0.0.1`), i potvrdite da Lemonade radi na Windows host mašini.
+- **Docker port 8000 je već u upotrebi:** mapirajte drugačiji host port, na primer `docker run ... -p 8080:8000 ...`, i otvorite `http://localhost:8080/canvas`.
+- **`docker pull` ne uspeva sa greškom u vezi sa kredencijalima** (na primer, "A specified logon session does not exist"): pokrenite pull iz interaktivne Windows sesije, ili unapred preuzmite sliku. Slika je javna, pa `docker login` nije potreban.
+- **UI se učitava, ali backend nije ispravan:** prvo pokretanje gradi okruženje Agent Server-a unutar kontejnera. Sačekajte minut i osvežite stranicu, zatim proverite `docker logs <container>` za napredak.
+- **Agent Canvas ne može da dosegne Lemonade iz kontejnera:** podesite LLM **Base URL** na `http://host.docker.internal:13305/api/v1` (ne `127.0.0.1`), i potvrdite da Lemonade radi na Windows host-u.
 <!-- @os:end -->
 
-- **Lemonade ne radi:** ponovo ga pokrenite pomoću komande `lemonade run "${LEMONADE_MODEL}"` iz koraka 1, a zatim ponovo pokrenite proveru ispravnosti.
-- **`npm install -g` ne uspeva sa greškom u vezi sa dozvolama:** na Linux-u ili WSL-u, podesite globalni npm direktorijum u vlasništvu korisnika, dodajte ga u startnu datoteku vaše ljuske, zatim ponovo instalirajte Agent Canvas:
+- **Lemonade je ugašen:** ponovo ga pokrenite komandom `lemonade run "${LEMONADE_MODEL}"` iz koraka 1, a zatim ponovo pokrenite proveru ispravnosti.
+- **`npm install -g` ne uspeva sa greškom u vezi sa dozvolama:** na Linux-u ili WSL-u, konfigurišite globalni npm direktorijum u vlasništvu korisnika, dodajte ga u vašu startup datoteku ljuske, a zatim ponovo instalirajte Agent Canvas:
 
   ```bash
   mkdir -p ~/.npm-global
@@ -701,26 +707,26 @@ Ne morate da čekate da se cron raspored aktivira—**Run now** pokreće izvrša
   ```
 
 Ako koristite `zsh`, dodajte istu liniju `export PATH=...` u `~/.zshrc` umesto u `~/.bashrc`.
-- **Agent Canvas odbija LLM podešavanja nakon postavljanja `custom_tokenizer`:** instalirajte `transformers` u Python okruženju Agent Server-a, ponovo pokrenite Agent Canvas ako je potrebno, i pokušajte ponovo da sačuvate LLM podešavanja. OpenHands zahteva Transformers biblioteku da bi učitao chat template tokenizatora kada je `custom_tokenizer` postavljen.
-- **Agent Canvas ne može da dostigne Lemonade:** proverite `curl -fsS "${LEMONADE_BASE_URL}/health"` i potvrdite da se osnovni URL unet u formi za LLM prilikom prvog korišćenja ili u **Settings > LLM** poklapa sa pokrenutim lokalnim endpoint-om ili HTTPS tunelom.
-- **LLM podešavanja nisu sačuvana:** proverite da ste kliknuli na **Next** nakon unosa vrednosti. Ponovo otvorite **Settings > LLM** da biste potvrdili da su vrednosti sačuvane.
-- **GitHub MCP ne može da vidi privatne repozitorijume:** proverite da GitHub token ima pristup za čitanje ciljnog repozitorijuma i da dugme **Test** za MCP u okviru **Customize** prikazuje GitHub alatke.
-- **Slack može da čita kanale, ali ne može da objavljuje:** pozovite Slack aplikaciju u ciljni kanal i proverite da bot ima dozvolu `chat:write`.
-- **Automatizacija prikazuje previše Slack kanala:** koristite ID Slack kanala i podesite `SLACK_CHANNEL_IDS` na Slack MCP serveru u okviru **Customize**.
-- **Pokretanje automatizacije ne uspeva ili premašuje kontekst:** proverite da je Lemonade pokrenut sa `ctx_size=65536`, proverite da OpenHands LLM ima postavljen `custom_tokenizer`, i koristite eksplicitno naveden repozitorijum sa GitHub skupovima rezultata ograničenim na 3 do 5 stavki. Ako vaša verzija Agent Canvas-a izlaže podešavanja kondenzatora (condenser), postavite maksimalan broj tokena kondenzatora ispod prozora konteksta Lemonade-a.
+- **Agent Canvas odbija LLM podešavanja nakon postavljanja `custom_tokenizer`:** instalirajte `transformers` u Python okruženju Agent Server-a, ponovo pokrenite Agent Canvas ako je potrebno, i pokušajte ponovo da sačuvate LLM podešavanja. OpenHands zahteva Transformers za učitavanje chat template-a tokenizera kada je postavljen `custom_tokenizer`.
+- **Agent Canvas ne može da dosegne Lemonade:** proverite `curl -fsS "${LEMONADE_BASE_URL}/health"` i potvrdite da se base URL unet u LLM formu prilikom prve upotrebe ili u **Settings > LLM** poklapa sa pokrenutim lokalnim endpoint-om ili HTTPS tunelom.
+- **LLM podešavanja nisu sačuvana:** proverite da ste kliknuli na **Next** nakon unosa vrednosti. Ponovo otvorite **Settings > LLM** da potvrdite da su vrednosti sačuvane.
+- **GitHub MCP ne vidi privatne repozitorijume:** potvrdite da GitHub token ima pristup za čitanje ciljnog repozitorijuma i da dugme **Test** za MCP u **Customize** prikazuje GitHub alate.
+- **Slack može da čita kanale, ali ne može da objavljuje:** pozovite Slack aplikaciju u ciljni kanal i potvrdite da bot ima `chat:write`.
+- **Automatizacija prikazuje previše Slack kanala:** koristite ID Slack kanala i postavite `SLACK_CHANNEL_IDS` na Slack MCP serveru u **Customize**.
+- **Izvršavanje automatizacije ne uspeva ili prevazilazi kontekst:** potvrdite da je Lemonade pokrenut sa `ctx_size=65536`, potvrdite da OpenHands LLM ima postavljen `custom_tokenizer`, i koristite eksplicitni repozitorijum sa GitHub rezultatima ograničenim na 3 do 5 stavki. Ako vaša verzija Agent Canvas-a izlaže podešavanja kondenzatora, postavite maksimalan broj tokena kondenzatora ispod Lemonade kontekstnog prozora.
 
 ## Sledeći koraci
 
-- Dodajte nedeljni digest samo za izdanja (release-only).
-- Dodajte automatizaciju pokrenutu GitHub događajem radi bržih upozorenja o PR-ovima ili push-evima.
-- Usmerite isti digest u Notion, Linear ili neki drugi alat podržan MCP-om.
+- Dodajte nedeljni digest samo za izdanja (release).
+- Dodajte automatizaciju pokrenutu GitHub događajima za brže obaveštenja o PR-ovima ili push-evima.
+- Usmerite isti digest u Notion, Linear, ili drugi alat podržan putem MCP-a.
 
 ## Resursi
 
 - [AMD AI Playbooks](https://developer.amd.com/playbooks/)
-- [Dokumentacija Lemonade Server-a](https://lemonade-server.ai/docs)
-- [Repozitorijum OpenHands ekstenzija](https://github.com/OpenHands/extensions)
-- [Serveri Model Context Protocol-a](https://github.com/modelcontextprotocol/servers)
+- [Dokumentacija za Lemonade Server](https://lemonade-server.ai/docs)
+- [Repozitorijum ekstenzija za OpenHands](https://github.com/OpenHands/extensions)
+- [Model Context Protocol serveri](https://github.com/modelcontextprotocol/servers)
 - [Slack MCP paket](https://www.npmjs.com/package/@modelcontextprotocol/server-slack)
 
 <!-- @os:linux -->

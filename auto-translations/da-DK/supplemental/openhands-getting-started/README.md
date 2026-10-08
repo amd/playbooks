@@ -19,50 +19,50 @@ SPDX-License-Identifier: MIT
 ## Oversigt
 
 [OpenHands](https://github.com/All-Hands-AI/OpenHands) er en AI-softwareagent,
-der kan skrive kode, køre kommandoer, gennemse internettet og redigere filer i et
-rigtigt arbejdsområde. I stedet for at kopiere forslag ud fra et chatvindue, peger
-du agenten på en projektmappe og lader den udføre arbejdet: implementere en
-funktion, rette en fejl, skrive tests eller forklare en kodebase.
+der kan skrive kode, køre kommandoer, browse på nettet og redigere filer i et
+reelt arbejdsområde. I stedet for at kopiere forslag ud fra et chatvindue
+peger du agenten mod en projektmappe og lader den udføre arbejdet: implementere
+en funktion, rette en fejl, skrive tests eller forklare en kodebase.
 
 [Agent Canvas](https://github.com/OpenHands/agent-canvas) er den anbefalede
 browser-UI til at køre OpenHands. En enkelt `agent-canvas`-kommando starter
-agentserveren, automatiseringsbackenden og webfrontenden sammen, så du kan
-føre en samtale med agenten fra din browser.
+agentserveren, automationsbackenden og webfrontenden sammen, så du kan styre
+en samtale med agenten fra din browser.
 
 For at holde alt på dit AMD-system taler agenten med en lokal model, der
-serveres af Lemonade Server. Lemonade eksponerer denne model gennem en
+serveres af Lemonade Server. Lemonade eksponerer denne model via en
 OpenAI-kompatibel API, så Agent Canvas kan konfigurere den som ethvert andet
-OpenAI-stil-endpoint, mens modellen, din kode og samtalekonteksten alle
+OpenAI-stil-endpoint, mens modellen, din kode og samtalekonteksten alt sammen
 forbliver på din maskine.
 
-I denne playbook starter du en lokal model, lancerer Agent Canvas, peger den på
-den model og kører din første kodningsopgave mod en rigtig projektmappe.
+I denne playbook starter du en lokal model, lancerer Agent Canvas, peger den
+mod den model og kører din første kodningsopgave mod en reel projektmappe.
 
 ## Hvad du vil lære
 
 - Hvordan du starter Lemonade Server og bekræfter, at en lokal model besvarer chatanmodninger
-- Hvordan du installerer og lancerer Agent Canvas fra npm-pakken
-- Hvordan du konfigurerer Agent Canvas til at bruge en lokal Lemonade-model som LLM'en
+- Hvordan du installerer og starter Agent Canvas fra npm-pakken
+- Hvordan du konfigurerer Agent Canvas til at bruge en lokal Lemonade-model som LLM
 - Hvordan du starter en OpenHands-samtale og ser agenten redigere filer og køre
   kommandoer i et arbejdsområde
 - Hvordan du gennemgår, hvad agenten har ændret, og styrer den med opfølgende beskeder
 
-## Kernebegreber
+## Centrale begreber
 
 | Begreb | Hvad det er | Hvor det passer ind i denne playbook |
 | --- | --- | --- |
 | Lemonade Server | En lokal LLM-serveringsplatform bygget til AMD-hardware, der eksponerer en OpenAI-kompatibel API. Dine data forlader aldrig din maskine. | Kører modellen, der driver agenten. |
-| OpenHands | En AI-softwareagent, der læser og redigerer filer, kører shell-kommandoer og gennemser internettet inde i et arbejdsområde. | Agenten, du styrer fra chatten. |
-| Agent Canvas | Browser-UI'et og backenden, der kører OpenHands-samtaler og viser værktøjskald og filændringer. | Lancerer stakken og hoster din samtale. |
+| OpenHands | En AI-softwareagent, der læser og redigerer filer, kører shell-kommandoer og browser på nettet inde i et arbejdsområde. | Agenten du styrer fra chatten. |
+| Agent Canvas | Browser-UI'en og backenden, der kører OpenHands-samtaler og viser værktøjskald og filændringer. | Starter stakken og hoster din samtale. |
 | Arbejdsområde | Projektmappen, som agenten har tilladelse til at læse og ændre. | Målet for agentens redigeringer og kommandoer. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Kodningsagent-arbejdsgange nyder godt af en større model og kontekstvindue. Brug
-> mindst 32 GB systemhukommelse, og foretræk 64 GB eller mere for større GGUF-modeller.
+> Kodningsagent-workflows drager fordel af en større model og et større kontekstvindue. Brug mindst
+> 32 GB systemhukommelse, og foretræk 64 GB eller mere til større GGUF-modeller.
 <!-- @device:end -->
 
-## Indstilling af hukommelseskonfiguration
+## Indstilling af hukommelseskonfigurationen
 
 <!-- @require:memory-config -->
 
@@ -76,11 +76,17 @@ den model og kører din første kodningsopgave mod en rigtig projektmappe.
 
 
 <!-- @os:linux -->
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so only the Lemonade model is needed here.
+     lemonade-chat-windows asserts the model is already downloaded. -->
+<!-- @prereq:lemonade-models-qwen3-35b-a3b -->
 <!-- @os:end -->
 
 Du skal bruge:
@@ -89,21 +95,21 @@ Du skal bruge:
 
 <!-- @os:linux -->
 - Node.js 22.12 eller nyere og `npm` (bruges af `agent-canvas`-CLI'en).
-- `uv`, Python-pakkehåndteringen, som Agent Canvas bruger til at håndtere agentserverens
-  miljø. Hvis dit system ikke allerede har det, kan du installere det fra
+- `uv`, den Python-pakkehåndtering, som Agent Canvas bruger til at styre
+  agentserverens miljø. Hvis dit system ikke allerede har den, så installer den fra
   [uv-installationsguiden](https://docs.astral.sh/uv/getting-started/installation/)
-  før du lancerer Agent Canvas.
+  før du starter Agent Canvas.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/),
+- [Docker Desktop til Windows](https://docs.docker.com/desktop/setup/install/windows-install/),
   installeret og kørende. På Windows kører Agent Canvas-stakken fra det
-  udgivne Docker-image, som bundler Node.js, `uv` og
-  `@openhands/agent-canvas`-pakken, så du behøver ikke installere disse på værten.
+  udgivne Docker-image, som indeholder Node.js, `uv` og
+  `@openhands/agent-canvas`-pakken, så du behøver ikke at installere disse på værten.
 <!-- @os:end -->
 
-- En projektmappe at arbejde i. Dette kan være et hvilket som helst lokalt
-  git-repository eller kodebibliotek, du ønsker, at agenten skal arbejde på.
+- En projektmappe at arbejde i. Dette kan være ethvert lokalt git-repository eller
+  kodekatalog, du ønsker, at agenten skal arbejde på.
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -149,7 +155,7 @@ Write-Host "OK: lemonade and docker are available"
 
 ## 1. Start Lemonade Server
 
-Start modellen fra Lemonade-CLI'en:
+Start modellen fra Lemonade CLI'en:
 
 ```bash
 lemonade config set llamacpp.backend=vulkan
@@ -157,7 +163,7 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
-> **Vælg en model, der passer til din hardware.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) er en stærk kodningsmodel, men kræver en stor hukommelsespulje. Hvis din enhed har begrænset hukommelse eller GPU-VRAM, skal du i stedet vælge en mindre GGUF-model fra Lemonade-modelbiblioteket og bruge det model-ID gennem hele denne playbook.
+> **Vælg en model, der passer til din hardware.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) er en stærk kodningsmodel, men kræver en stor hukommelsespulje. Hvis din enhed har begrænset hukommelse eller GPU-VRAM, så vælg i stedet en mindre GGUF-model fra Lemonade-modelbiblioteket, og brug det model-ID gennem hele denne playbook.
 
 > **Bemærk:** Den første `lemonade run` downloader modellen, hvis den ikke allerede findes, hvilket kan tage et stykke tid afhængigt af modelstørrelsen og din forbindelse.
 
@@ -344,7 +350,7 @@ Start derefter hele stakken fra en terminal:
 agent-canvas
 ```
 
-Som standard starter Agent Canvas på `http://localhost:8000`. Åbn den URL i
+Som standard starter Agent Canvas på `http://localhost:8000`. Åbn denne URL i
 din browser. Porten er ikke speciel — hvis 8000 allerede er i brug, kan du angive en
 ledig port med `--port` (eller `-p`), når du starter Agent Canvas:
 
@@ -352,11 +358,11 @@ ledig port med `--port` (eller `-p`), når du starter Agent Canvas:
 agent-canvas --port 3000
 ```
 
-Åbn derefter `http://localhost:3000` i stedet. Standard-backenden bør vises
+Åbn derefter `http://localhost:3000` i stedet. Standard-lokalbackenden bør vises
 som sund på startskærmen.
 
-Kommandoen `agent-canvas` starter agentserveren, automatiseringsbackenden og
-webfrontenden sammen. Du behøver kun denne ene kommando for at køre OpenHands
+Kommandoen `agent-canvas` starter agent-serveren, automatiseringsbackenden og
+webfronten sammen. Du behøver kun denne ene kommando for at køre OpenHands
 lokalt.
 
 <!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
@@ -411,18 +417,18 @@ echo "OK: agent-canvas agent-server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-På Windows skal du køre det udgivne Agent Canvas-container-image med Docker Desktop.
-Image'et indeholder agentserveren, automatiseringsbackenden og webfrontenden, så du
-behøver ikke installere Node.js, `uv` eller CLI'en på værtsmaskinen.
+På Windows skal du køre det udgivne Agent Canvas-containerbillede med Docker Desktop.
+Billedet indeholder agent-serveren, automatiseringsbackenden og webfronten, så du
+behøver ikke installere Node.js, `uv` eller CLI'en på værten.
 
-Opret først de config- og workspace-mapper, som containeren monterer:
+Opret først konfigurations- og workspace-mapperne, som containeren monterer:
 
 ```powershell
 $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-Hent det udgivne image (det er offentligt, så der kræves ikke login):
+Hent det udgivne billede (det er offentligt, så der kræves ikke login):
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
@@ -442,12 +448,12 @@ docker run -it --rm `
 brug, kan du mappe en anden værtsport, for eksempel `-p 8080:8000`, og åbne
 `http://localhost:8080/canvas` i stedet.
 
-> **Bemærk:** Første opstart initialiserer agentserveren inde i containeren,
-> så det kan tage et minut eller to, før backenden rapporterer sund tilstand.
+> **Bemærk:** Den første opstart initialiserer agent-serveren inde i containeren,
+> så det kan tage et minut eller to, før backenden rapporterer sund.
 
 `.openhands`-monteringen bevarer din LLM-profil og indstillinger på tværs af
-genstarter af containeren. Resten af denne playbook konfigurerer alt via Agent
-Canvas-brugerfladen i din browser.
+genstarter af containeren. Resten af denne guide konfigurerer alt gennem Agent
+Canvas-brugergrænsefladen i din browser.
 
 <!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
 ```powershell
@@ -499,53 +505,52 @@ finally {
 
 ## 4. Konfigurer den lokale LLM
 
-Ved første opstart åbner Agent Canvas et onboarding-forløb. I det forløb:
+Ved første opstart åbner Agent Canvas et onboarding-flow. I dette flow:
 
 1. Behold **OpenHands** valgt som agent, og klik på **Next**.
 2. Under **Set up your LLM** skal du vælge **Advanced**.
-3. Behold **Authentication** sat til **API key**.
-4. Sæt **Custom Model** til `openai/Qwen3.6-35B-A3B-GGUF`.
-5. Sæt **Base URL** til `http://127.0.0.1:13305/api/v1`.
+3. Behold **Authentication** indstillet til **API key**.
+4. Indstil **Custom Model** til `openai/Qwen3.6-35B-A3B-GGUF`.
+5. Indstil **Base URL** til `http://127.0.0.1:13305/api/v1`.
    <!-- @os:windows -->
    > På Windows kører stakken i en container, som ikke kan nå værten på
-   > `127.0.0.1`. Brug i stedet `http://host.docker.internal:13305/api/v1`, så
-   > den containeriserede agent kan nå Lemonade, der kører på Windows-værten.
+   > `127.0.0.1`. Brug i stedet `http://host.docker.internal:13305/api/v1`, så den
+   > containeriserede agent kan nå Lemonade, der kører på Windows-værten.
    <!-- @os:end -->
-6. Under **API Key** skal du indtaste en vilkårlig ikke-tom pladsholder, f.eks.
-   `lemonade-local`. Lemonade kræver ikke en reel nøgle, men OpenHands-klienten
-   skal have en værdi at sende.
+6. Under **API Key** skal du indtaste en vilkårlig ikke-tom pladsholder, f.eks. `lemonade-local`.
+   Lemonade kræver ikke en rigtig nøgle, men OpenHands-klienten skal bruge en værdi
+   at sende.
 7. Klik på **Next**.
 
 De udfyldte Advanced-indstillinger bør se sådan ud. API-nøglefeltet er
-maskeret af brugerfladen.
+maskeret af brugergrænsefladen.
 
-![Agent Canvas first-use LLM Advanced settings with the Lemonade model and local base URL](assets/01-llm-advanced-settings.png)
+![Agent Canvas Avancerede LLM-indstillinger ved første brug med Lemonade-modellen og lokal base-URL](assets/01-llm-advanced-settings.png)
 
 Agent Canvas gemmer disse værdier som en LLM-profil. Hvis din version beder dig
-navngive den profil, skal du bruge et navn uden mellemrum, f.eks. `lemonade-local`.
-Hvis du senere skifter model, skal du åbne **Settings > LLM** og opdatere de
-samme Advanced-felter. Du kan skifte mellem gemte profiler fra chatinputtet
-med kommandoen `/model`.
+navngive denne profil, skal du bruge et navn uden mellemrum, f.eks. `lemonade-local`. Hvis du skifter
+modeller senere, skal du åbne **Settings > LLM** og opdatere de samme Advanced-felter. Du
+kan skifte mellem gemte profiler fra chatinput med kommandoen `/model`.
 
-## 5. Åbn et arbejdsområde
+## 5. Åbn et workspace
 
-Agenten kan kun læse og ændre filer inde i et arbejdsområde, du vælger. Før du
-starter en opgave, skal du pege Agent Canvas mod din projektmappe:
+Agenten kan kun læse og ændre filer inde i et workspace, du vælger. Før du
+starter en opgave, skal du pege Agent Canvas på din projektmappe:
 
-1. Vælg **Open Workspace** fra startskærmen.
-2. Vælg mappen, der indeholder dit projekt (for eksempel et git-repository,
+1. Fra startskærmen skal du vælge **Open Workspace**.
+2. Vælg den mappe, der indeholder dit projekt (for eksempel et git-repository
    du vil have agenten til at arbejde på).
-3. Start en ny samtale i det arbejdsområde.
+3. Start en ny samtale i det workspace.
 
-Alt, agenten gør — læser filer, kører kommandoer, redigerer kode — er
-afgrænset til det arbejdsområde.
+Alt, hvad agenten gør—læse filer, køre kommandoer, redigere kode—er
+afgrænset til det workspace.
 
-![Agent Canvas home after onboarding](assets/02-agent-canvas-home.png)
+![Agent Canvas hjem efter onboarding](assets/02-agent-canvas-home.png)
 
-## 6. Kør din første kodningsopgave
+## 6. Kør din første kodeopgave
 
-Med arbejdsområdet åbent og den lokale LLM valgt, skal du skrive en konkret
-opgave i chatten. En god første opgave er lille og verificerbar, for eksempel:
+Med workspacet åbent og den lokale LLM valgt, skal du skrive en konkret opgave ind i
+chatten. En god første opgave er lille og verificerbar, for eksempel:
 
 ```text
 Create a new file called hello.py that defines a function greet(name) that
@@ -553,31 +558,30 @@ returns "Hello, {name}!", and add a small test that prints greet("World")
 when run as a script.
 ```
 
-Følg samtaleforløbet. OpenHands vil:
+Følg samtaletidslinjen. OpenHands vil:
 
-- Læse arbejdsområdet for at forstå strukturen.
+- Læse workspacet for at forstå strukturen.
 - Oprette `hello.py` med den ønskede funktion og testblok.
-- Eventuelt køre `python3 hello.py` for at verificere resultatet.
-- Rapportere, hvad den gjorde, og eventuel kommandooutput i chatten.
+- Eventuelt køre `python3 hello.py` for at verificere output.
+- Rapportere, hvad den gjorde, og eventuelt kommandooutput i chatten.
 
-Du bør se den nye fil dukke op i arbejdsområdet, og agentens afsluttende
-besked bør beskrive den ændring, den foretog. Dette er det afgørende øjeblik:
-agenten skrev og kørte reel kode i din projektmappe.
+Du bør se den nye fil dukke op i workspacet, og agentens afsluttende
+besked bør beskrive den ændring, den foretog. Dette er aha-øjeblikket: agenten
+skrev og kørte rigtig kode i din projektmappe.
 
 ## 7. Gennemgå og styr agenten
 
-Når agenten har afsluttet et trin, skal du gennemgå dens arbejde, før du
-accepterer det næste:
+Når agenten er færdig med et trin, skal du gennemgå dens arbejde, før du accepterer næste trin:
 
-- **Filændringer**: brug arbejdsområdets filbrowser eller agentens diff-visning
-  til at se præcis, hvad der blev tilføjet, ændret eller slettet.
-- **Kommandooutput**: udvid enhver kommando, agenten har kørt, for at se
-  stdout, stderr og afslutningskoden.
-- **Opfølgning**: hvis resultatet ikke er, hvad du ønskede, skal du svare i
-  samme samtale med en rettelse. Agenten bevarer den tidligere kontekst og
-  itererer på de samme filer.
+- **Filændringer**: brug workspacets filbrowser eller agentens diff-visning til at
+  se præcis, hvad der blev tilføjet, ændret eller slettet.
+- **Kommandooutput**: udvid enhver kommando, som agenten kørte, for at se stdout, stderr
+  og afslutningskoden.
+- **Opfølgninger**: hvis resultatet ikke er, hvad du ønskede, skal du svare i den samme
+  samtale med en rettelse. Agenten bevarer den tidligere kontekst og
+  arbejder videre på de samme filer.
 
-For eksempel, hvis testen ikke udskrev den forventede hilsen, kan du svare:
+For eksempel, hvis testen ikke udskrev den forventede hilsen, skal du svare:
 
 ```text
 The script did not print anything. Run python3 hello.py and fix it so the
@@ -585,16 +589,16 @@ greet("World") test prints to stdout.
 ```
 
 Agenten vil genlæse filen, køre kommandoen, diagnosticere problemet og redigere
-filen igen — alt sammen i den samme samtale.
+filen igen—alt sammen i den samme samtale.
 ## Fejlfinding
 
 <!-- @os:linux -->
-- **`agent-canvas` er ikke på PATH:** geninstaller med
-  `npm install -g @openhands/agent-canvas` og bekræft, at npm's globale binærmappe
+- **`agent-canvas` findes ikke på PATH:** geninstaller med
+  `npm install -g @openhands/agent-canvas` og bekræft, at mappen med npm's globale binære filer
   er på din PATH, før `agent-canvas` kan startes fra en ny
   terminal.
 - **`npm install -g` fejler med en tilladelsesfejl:** konfigurer en brugerejet
-  global npm-mappe, genåbn derefter terminalen og installer Agent Canvas igen.
+  global npm-mappe, genåbn derefter terminalen, og installer Agent Canvas igen.
 
   ```bash
   mkdir -p ~/.npm-global
@@ -604,54 +608,53 @@ filen igen — alt sammen i den samme samtale.
   npm install -g @openhands/agent-canvas
   ```
 - **`uv` mangler:** installer det fra
-  [uv installationsvejledningen](https://docs.astral.sh/uv/getting-started/installation/).
-  Agent Canvas bruger `uv` til at administrere agent-serverens Python-miljø.
+  [uv-installationsguiden](https://docs.astral.sh/uv/getting-started/installation/).
+  Agent Canvas bruger `uv` til at administrere agentserverens Python-miljø.
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - **`docker pull` eller `docker run` kan ikke oprette forbindelse:** sørg for, at Docker Desktop
-  kører (dets hval-ikon er i systembakken), og at motoren er
-  færdig med at starte. `docker version` bør udskrive både en Client- og en Server-
-  sektion.
-- **Containeren starter, men backend'en bliver aldrig sund (healthy):** den første
-  opstart initialiserer Agent Server'en inde i containeren; giv det et minut
-  eller to, tjek derefter `docker logs <container>` for fejl.
+  kører (dens hval-ikon er i proceslinjen), og at engine'en er færdig med at starte.
+  `docker version` bør udskrive både et Client- og et Server-afsnit.
+- **Containeren starter, men backend'en bliver aldrig sund:** den første
+  opstart initialiserer Agent Server inde i containeren; giv den et minut eller
+  to, og tjek derefter `docker logs <container>` for fejl.
 - **Containeren kan ikke nå Lemonade:** containeren når værten via
   `host.docker.internal`. Bekræft, at Lemonade kører på Windows-værten med
   `lemonade status`, og brug `http://host.docker.internal:13305/api/v1` som
-  Base URL, når du konfigurerer LLM'en.
+  Base URL, når LLM'en konfigureres.
 <!-- @os:end -->
 
-- **UI'et indlæses, men backend'en viser usund (unhealthy):** vent et minut
-  eller to på, at agent-serveren bliver færdig med at starte, og opdater derefter.
-  Hvis den forbliver usund, genstart stakken, og tjek logfilerne for fejl.
-- **Lemonade chat-forespørgsler fejler med en forbindelsesfejl:** bekræft, at
+- **Brugergrænsefladen indlæses, men backend'en viser sig usund:** vent et minut eller to på, at
+  agentserveren er færdig med at starte, og opdater derefter. Hvis den forbliver usund, så genstart
+  stakken, og tjek logfilerne for fejl.
+- **Lemonade-chatanmodninger mislykkes med en forbindelsesfejl:** bekræft, at
   `curl -fsS "http://127.0.0.1:13305/api/v1/health"` lykkes, og at
-  Lemonade stadig kører modellen med `lemonade status`.
-- **Agenten fejler med en kontekstlængde- eller token-grænsemeddelelse:** start en
-  ny samtale, så agenten ikke bærer en for stor historik med sig. Hvis det
-  bliver ved med at ske, genstart Lemonade med en større `ctx_size` end standarden på
-  65536 (for eksempel `ctx_size=131072`), hvis der er hukommelse nok.
-- **Agenten producerer redigeringer af lav kvalitet eller ufuldstændige redigeringer:** skift til en
-  større model i Lemonade, eller giv agenten en mindre, mere konkret opgave, og lad den
+  Lemonade stadig serverer modellen med `lemonade status`.
+- **Agenten fejler med en besked om kontekstlængde eller token-grænse:** start en
+  ny samtale, så agenten ikke bærer en for stor historik videre. Hvis det
+  fortsætter med at ske, så genstart Lemonade med en større `ctx_size` end standarden på
+  65536 (for eksempel `ctx_size=131072`), hvis hukommelsen tillader det.
+- **Agenten producerer redigeringer af lav kvalitet eller ufuldstændige redigeringer:** skift til en større
+  model i Lemonade, eller giv agenten en mindre, mere konkret opgave, og lad den
   blive færdig, før du beder om den næste ændring.
 
-## Næste skridt
+## Næste trin
 
-- Prøv en større opgave i det samme arbejdsområde, såsom at tilføje en unit test-fil eller
+- Prøv en større opgave i det samme workspace, såsom at tilføje en unit-testfil eller
   rette en kendt fejl, og gennemgå agentens diff, før du beholder ændringen.
-- Forbind en MCP-server såsom GitHub eller Slack under **Customize**, så
+- Forbind en MCP-server, såsom GitHub eller Slack, under **Customize**, så
   agenten kan læse issues eller poste opdateringer, mens den arbejder.
 - Gem flere LLM-profiler (en hurtig lille model og en stærkere stor model), og
   skift mellem dem med `/model` midt i en samtale.
-- Gå videre til [OpenHands-automatiseringer](https://docs.openhands.dev/openhands/usage/automations/overview) for at
+- Fortsæt til [OpenHands-automatiseringer](https://docs.openhands.dev/openhands/usage/automations/overview) for at
   omdanne tilbagevendende udviklingsforløb til planlagte eller hændelsesudløste agentkørsler.
 
 ## Ressourcer
 
 - [OpenHands-dokumentation](https://docs.openhands.dev/)
-- [Agent Canvas-oversigt](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
-- [Agent Canvas-opsætning](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
+- [Oversigt over Agent Canvas](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
+- [Opsætning af Agent Canvas](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
 - [LLM-profiler og modelkonfiguration](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
 - [Lemonade Server-dokumentation](https://lemonade-server.ai/docs)
 
