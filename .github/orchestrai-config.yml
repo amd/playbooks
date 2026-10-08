@@ -143,11 +143,18 @@ device_extra_tags:
   hermes-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+  # Fixed Qwen3.6-35B-A3B-GGUF needs more than 32 GB hosts expose; krk is mixed
+  # (16/32/64 GB), so pin krk runs to its 64 GB hosts.
+  github-slack-development-digest:
+    krk: ["ram_64gb"]
+  openhands-getting-started:
+    krk: ["ram_64gb"]
 
 # Devices that actually satisfy a given extra tag. A batch requesting an extra
 # tag on a device NOT listed here is dropped (the broker could never satisfy it).
 extra_tag_devices:
   ram_128gb: ["halo", "halo_box"]
+  ram_64gb: ["krk"]
 
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.
@@ -251,6 +258,11 @@ skip_playbook_devices:
   unsloth-llms-finetuning:  ["stx"]
   hermes-lemonade-server:  ["stx", "krk"]
   openclaw-lemonade-server: ["stx", "krk"]
+  # These Agent Canvas playbooks use the same fixed Qwen3.6-35B-A3B-GGUF.
+  # Current STX hosts expose 29 GB RAM: Lemonade's 23.2 GB eligibility ceiling is
+  # below the model's 23.3 GB requirement. Re-enable on eligible STX hardware.
+  github-slack-development-digest: ["stx"]
+  openhands-getting-started:       ["stx"]
   # LM Studio's survey exposed 10.71 GiB to Vulkan on Windows STX for an
   # 18.63 GB model; Windows failed with "unable to allocate Vulkan0 buffer".
   # Linux aborted at 91% while amdgpu reported insufficient submission memory.
