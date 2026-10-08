@@ -69,7 +69,7 @@ It uses GitHub to inspect recent repository activity, Slack to post the digest, 
 
 <!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
-<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->

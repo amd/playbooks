@@ -63,6 +63,7 @@ which python3
 
 <!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:lemonade -->
 <!-- @require:gaia -->
 <!-- @prereq:lemonade-models-qwen3-coder-30b -->
 
