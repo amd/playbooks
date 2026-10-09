@@ -143,11 +143,18 @@ device_extra_tags:
   hermes-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+  # Fixed Qwen3.6-35B-A3B-GGUF needs more than 32 GB hosts expose; krk is mixed
+  # (16/32/64 GB), so pin krk runs to its 64 GB hosts.
+  github-slack-development-digest:
+    krk: ["ram_64gb"]
+  openhands-getting-started:
+    krk: ["ram_64gb"]
 
 # Devices that actually satisfy a given extra tag. A batch requesting an extra
 # tag on a device NOT listed here is dropped (the broker could never satisfy it).
 extra_tag_devices:
   ram_128gb: ["halo", "halo_box"]
+  ram_64gb: ["krk"]
 
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.
@@ -164,8 +171,9 @@ extra_devices: {}
 # not on every machine on the platform. NOTE: install_scripts are batch-level, so
 # any OTHER playbook co-scheduled in the same batch (e.g. same device + extra
 # tags) also runs these scripts. Keep them idempotent and side-effect-safe.
-# Each entry: {script, reboot_after, platforms?}. "platforms" is an optional
-# filter; omit it to apply on all platforms. Paths resolve in ucicd-provisioning.
+# Each entry: {script, reboot_after, platforms?, devices?}. "platforms" and
+# "devices" are optional filters; omit them to apply everywhere. Paths resolve
+# in ucicd-provisioning.
 extra_install_scripts:
   # CVML validates inference on the Ryzen AI NPU. Install the matched XRT and
   # amdxdna package before the test phase; the driver needs a reboot to become
@@ -201,6 +209,21 @@ extra_install_scripts:
     - script: "InstallationScripts/gfx/windows-wsl.ps1"
       reboot_after: true
       platforms: ["windows"]
+
+  # Single-GPU isolation for the ML playbooks on discrete Radeon hosts calls
+  # TheRock's hipInfo.exe by absolute path (ucicd-test-library #4492). This
+  # script installs TheRock without touching the machine env/PATH, so nothing
+  # leaks into co-scheduled playbooks; it is a no-op until
+  # ORCHESTRAI_WINDOWS_THEROCK_URL is set.
+  llama-factory-finetuning:
+    - &windows_therock_hipinfo
+      script: "InstallationScripts/gfx/windows-therock-hipinfo.ps1"
+      reboot_after: false
+      platforms: ["windows"]
+      devices: ["rx7900xt", "rx9070xt", "r9700"]
+  pytorch-finetuning:      [*windows_therock_hipinfo]
+  pytorch-rocm-llms:       [*windows_therock_hipinfo]
+  unsloth-llms-finetuning: [*windows_therock_hipinfo]
 
   # deepseek-v4-flash-ds4 requires the GPU shared-memory pool raised to 110 GB
   # (its README's `amd-ttm --set 110`). With the default of half of memory the
@@ -251,6 +274,11 @@ skip_playbook_devices:
   unsloth-llms-finetuning:  ["stx"]
   hermes-lemonade-server:  ["stx", "krk"]
   openclaw-lemonade-server: ["stx", "krk"]
+  # These Agent Canvas playbooks use the same fixed Qwen3.6-35B-A3B-GGUF.
+  # Current STX hosts expose 29 GB RAM: Lemonade's 23.2 GB eligibility ceiling is
+  # below the model's 23.3 GB requirement. Re-enable on eligible STX hardware.
+  github-slack-development-digest: ["stx"]
+  openhands-getting-started:       ["stx"]
   # LM Studio's survey exposed 10.71 GiB to Vulkan on Windows STX for an
   # 18.63 GB model; Windows failed with "unable to allocate Vulkan0 buffer".
   # Linux aborted at 91% while amdgpu reported insufficient submission memory.
@@ -322,17 +350,17 @@ provisioning:
       - script: "InstallationScripts/gfx/linux.sh"
         reboot_after: true
 
-  # NOTE: no TheRock step here. windows-therock-tarball.ps1 requires a TheRock
-  # *Windows* tarball via THEROCK_URL, but the only TheRock variable
-  # (ORCHESTRAI_THEROCK_URL) is the Linux multiarch tarball, so the step could
-  # never be satisfied -- it failed with "THEROCK_URL is required" on every
-  # Windows batch. Nothing on Windows consumes the resulting ROCm userspace
-  # (C:\TheRock\build): Windows gets its GPU runtime from the AMD driver
-  # (windows.ps1) and PyTorch from the ROCm wheel index. Re-add this only
-  # alongside a real Windows tarball URL.
   windows_install_scripts:
     - script: "InstallationScripts/gfx/windows.ps1"
       reboot_after: true
+
+  # TheRock Windows multi-arch dist tarball, used only so hipInfo.exe exists for
+  # single-GPU isolation of the ML playbooks (see extra_install_scripts). Kept
+  # separate from therock_url above, which is the Linux tarball. Repo variable:
+  #   ORCHESTRAI_WINDOWS_THEROCK_URL
+  #     e.g. https://<host>/tarball-multi-arch/therock-dist-windows-multiarch-<ver>.tar.gz
+  # Unset = windows-therock-hipinfo.ps1 is a no-op.
+  windows_therock_url: ""
 
   # Windows AMD GPU driver source (UNC path) copied onto the machine.
   # The UNC path is internal — set it as a repo variable, not in this public file:
