@@ -211,13 +211,13 @@ extra_install_scripts:
       platforms: ["windows"]
 
   # Single-GPU isolation for the ML playbooks on discrete Radeon hosts calls
-  # TheRock's hipInfo.exe by absolute path (ucicd-test-library #4492). This
-  # script installs TheRock without touching the machine env/PATH, so nothing
-  # leaks into co-scheduled playbooks; it is a no-op until
-  # ORCHESTRAI_WINDOWS_THEROCK_URL is set.
+  # TheRock's hipInfo.exe by absolute path (ucicd-test-library #4492). The
+  # controller requires ORCHESTRAI_WINDOWS_THEROCK_URL for these batches and
+  # sends THEROCK_PUBLISH_ENV=0, so TheRock is installed without touching the
+  # machine env/PATH and nothing leaks into co-scheduled playbooks.
   llama-factory-finetuning:
     - &windows_therock_hipinfo
-      script: "InstallationScripts/gfx/windows-therock-hipinfo.ps1"
+      script: "InstallationScripts/gfx/windows-therock-tarball.ps1"
       reboot_after: false
       platforms: ["windows"]
       devices: ["rx7900xt", "rx9070xt", "r9700"]
@@ -359,7 +359,8 @@ provisioning:
   # separate from therock_url above, which is the Linux tarball. Repo variable:
   #   ORCHESTRAI_WINDOWS_THEROCK_URL
   #     e.g. https://<host>/tarball-multi-arch/therock-dist-windows-multiarch-<ver>.tar.gz
-  # Unset = windows-therock-hipinfo.ps1 is a no-op.
+  # Required for batches that schedule TheRock; the run fails before acquiring
+  # hardware if it is unset.
   windows_therock_url: ""
 
   # Windows AMD GPU driver source (UNC path) copied onto the machine.
