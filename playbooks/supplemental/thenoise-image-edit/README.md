@@ -116,7 +116,7 @@ The project ships a model download helper. Fetch the 4B checkpoints (DiT, text e
 
 <!-- @os:windows -->
 ```powershell
-& .\venv\Scripts\python.exe scripts/download.py --model klein
+& .\.venv\Scripts\python.exe scripts/download.py --model klein
 ```
 <!-- @os:end -->
 
@@ -136,7 +136,7 @@ ls -1 ./models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors \
 <!-- @test:id=thenoise-download-klein-windows timeout=1800 hidden=True -->
 ```powershell
 cd thenoise
-& .\venv\Scripts\python.exe scripts/download.py --model klein
+& .\.venv\Scripts\python.exe scripts/download.py --model klein
 $required = @(
   ".\models\klein\split_files\diffusion_models\flux-2-klein-4b.safetensors",
   ".\models\klein\split_files\text_encoders\qwen_3_4b.safetensors",
