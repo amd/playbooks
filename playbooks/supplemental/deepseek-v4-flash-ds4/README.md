@@ -32,7 +32,7 @@ This tutorial shows how to use `ai-toolbox-cockpit`, a terminal UI, to set up ds
 ## Installing Software Prerequisites
 
 <!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
-<!-- @prereq:distrobox,ds4-cockpit,ds4-toolbox-image -->
+<!-- @prereq:podman,distrobox,ds4-cockpit,ds4-toolbox-image -->
 
 > **System requirements for this configuration (single-node IQ2_XXS at 126k context):**
 > - A Strix Halo system with **at least 128 GB of unified memory**.

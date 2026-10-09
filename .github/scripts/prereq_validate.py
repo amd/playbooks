@@ -13,8 +13,13 @@ prerequisites a playbook needs are actually present on the machine -- and to
 
 For each ``@require:<dep>`` or ``@prereq:<dep>`` a playbook declares (scoped to the active
 ``@os:``/``@device:`` blocks), this reads a ``validate`` and optional
-``install`` command from ``playbooks/dependencies/registry.json`` and runs a
-validate -> (if missing) install -> re-validate loop:
+``install`` step from ``playbooks/dependencies/registry.json`` and runs a
+validate -> (if missing) install -> re-validate loop. A step is an inline ``cmd``
+or a ``script`` under ``.github/scripts/prereqs/``. An install step may also name
+a ``mirror`` group, seeded first (``mirror/get.py seed``) so the install runs only
+if still needed. A step that is only a ``mirror`` group checks or seeds the cache
+of models the tests download themselves; such dependencies are ``optional``, so a
+miss warns.
 
     validate passes                -> OK                 (provisioned; no install)
     validate fails, install fixes  -> INSTALLED          (self-healed; job continues)
@@ -29,14 +34,16 @@ visible in the uploaded CI artifacts and is clearly distinct from an ordinary
 test failure.
 
 Usage:
-    python prereq_validate.py --playbook <id> --platform linux|windows [--device <device>]
+    python prereq_validate.py --playbook <id> --platform linux|windows [--device <device>] [--locale <locale>]
 """
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -44,15 +51,37 @@ VALID_DEVICES = {"halo", "stx", "krk", "rx7900xt", "rx9070xt", "r9700"}
 # halo_box is a valid @device: scope in READMEs even though it is not a CI
 # --device value, so accept it when matching require scopes.
 KNOWN_DEVICE_SCOPES = VALID_DEVICES | {"halo_box"}
+# Multi-step recipes live here as files; registry steps reference them via "script".
+PREREQ_SCRIPTS_DIR = Path(__file__).parent / "prereqs"
+# Seeds an install step's "mirror" group into its tool's store before the install runs.
+MIRROR_GET = Path(__file__).parent / "mirror" / "get.py"
+# A fully seeded tool may notice its new files a few seconds later (LM Studio's folder watcher).
+SEED_SETTLE_TRIES, SEED_SETTLE_SECONDS = 4, 5
 
 
-def find_playbook_path(playbook_id: str, repo_root: Path) -> Optional[Path]:
-    """Find the playbook directory by ID (mirrors run_playbook_tests.py)."""
+def find_playbook_path(playbook_id: str, repo_root: Path, locale: str = "") -> Optional[Path]:
+    """Find the playbook directory by ID (mirrors run_playbook_tests.py); a locale's own README replaces English."""
+    base = repo_root / "localized-playbooks" / locale if locale else repo_root / "playbooks"
     for category in ["core", "supplemental"]:
-        playbook_path = repo_root / "playbooks" / category / playbook_id
+        playbook_path = base / category / playbook_id
         if playbook_path.exists() and (playbook_path / "README.md").exists():
             return playbook_path
     return None
+
+
+def load_registry(repo_root: Path, locale: str = "") -> dict:
+    """English dependencies, overlaid field by field with a locale's own.
+
+    A locale's entry localizes the docs and may add its own steps; steps it leaves
+    out come from English, so a shared dependency is checked the same way everywhere.
+    """
+    deps = json.loads((repo_root / "playbooks" / "dependencies" / "registry.json").read_text(encoding="utf-8"))
+    deps = deps.get("dependencies", {})
+    localized = repo_root / "localized-playbooks" / locale / "dependencies" / "registry.json"
+    if locale and localized.is_file():
+        for dep_id, spec in json.loads(localized.read_text(encoding="utf-8")).get("dependencies", {}).items():
+            deps[dep_id] = {**deps.get(dep_id, {}), **spec}
+    return deps
 
 
 def extract_scoped_requires(
@@ -127,14 +156,37 @@ def extract_scoped_requires(
     return ordered
 
 
-def _run(cmd: str, platform: str, timeout: int) -> int:
-    """Run a shell command and return its exit code (best-effort)."""
-    shell_exe = None
+def _step_args(step: dict, platform: str) -> list[str]:
+    """Build argv for a registry step: an inline ``cmd``, or a ``script`` under prereqs/."""
+    script = step.get("script")
+    if script:
+        path = str(PREREQ_SCRIPTS_DIR / script)
+        if platform == "windows":
+            return ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path]
+        return ["bash", path]
     if platform == "windows":
         # Use PowerShell so validate/install strings match the doc conventions.
-        args = ["powershell", "-NoProfile", "-Command", cmd]
-    else:
-        args = ["bash", "-c", cmd]
+        return ["powershell", "-NoProfile", "-Command", step["cmd"]]
+    return ["bash", "-c", step["cmd"]]
+
+
+def _run(step: dict, platform: str, timeout: int) -> int:
+    """Run a registry step and return its exit code (best-effort)."""
+    if step.get("script") and not (PREREQ_SCRIPTS_DIR / step["script"]).is_file():
+        print(f"  (prereq script not found: {step['script']})")
+        return 127
+    return _run_args(_step_args(step, platform), timeout)
+
+
+def _mirror(command: str, group: str, timeout: int) -> int:
+    """mirror/get.py seed or present, for one artifacts.json group."""
+    return _run_args([sys.executable, str(MIRROR_GET), command, group], timeout)
+
+
+def _run_args(args: list[str], timeout: int) -> int:
+    """Run a command with bounded, surfaced output and return its exit code."""
+    # Scripts run mirror/get.py with this interpreter, not whatever `python` resolves to.
+    env = dict(os.environ, PREREQ_PYTHON=sys.executable)
     try:
         proc = subprocess.run(
             args,
@@ -142,6 +194,7 @@ def _run(cmd: str, platform: str, timeout: int) -> int:
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
+            env=env,
         )
         if proc.stdout:
             # Surface command output for CI logs, but keep it bounded.
@@ -156,12 +209,45 @@ def _run(cmd: str, platform: str, timeout: int) -> int:
         return 1
 
 
+def _registry_path_entries() -> list[str]:
+    """Machine then user PATH as the Windows registry holds it now (installers write there)."""
+    import winreg
+    entries = []
+    for root, key in ((winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
+                      (winreg.HKEY_CURRENT_USER, "Environment")):
+        try:
+            with winreg.OpenKey(root, key) as handle:
+                value = winreg.QueryValueEx(handle, "Path")[0]
+        except OSError:
+            continue
+        entries += [winreg.ExpandEnvironmentStrings(p) for p in value.split(";") if p]
+    return entries
+
+
+def _refresh_windows_path() -> None:
+    """Pick up PATH entries an install just added, for the re-validate and, via GITHUB_PATH, the tests."""
+    have = {p.rstrip("\\").lower() for p in os.environ.get("PATH", "").split(os.pathsep) if p}
+    new = [p for p in dict.fromkeys(_registry_path_entries()) if p.rstrip("\\").lower() not in have]
+    if not new:
+        return
+    os.environ["PATH"] = os.pathsep.join(new + [os.environ.get("PATH", "")])
+    if os.environ.get("GITHUB_PATH"):
+        with open(os.environ["GITHUB_PATH"], "a", encoding="utf-8") as fh:
+            fh.writelines(p + "\n" for p in new)
+    print(f"  (PATH now also has: {'; '.join(new)})")
+
+
 def _validate(spec: dict, platform: str) -> bool:
     v = (spec.get("validate") or {}).get(platform)
     if not v:
         return False
-    rc = _run(v["cmd"], platform, v.get("timeout", 60))
+    timeout = v.get("timeout", 60)
+    rc = _mirror("present", v["mirror"], timeout) if _mirror_only(v) else _run(v, platform, timeout)
     return rc == v.get("expect_rc", 0)
+
+
+def _mirror_only(step: dict) -> bool:
+    return bool(step.get("mirror")) and not (step.get("cmd") or step.get("script"))
 
 
 def check_dependency(dep_id: str, spec: dict, platform: str) -> dict:
@@ -196,41 +282,56 @@ def check_dependency(dep_id: str, spec: dict, platform: str) -> dict:
 
     print(f"  MISSING: {dep_id} -> installing (this may take a while) ...")
     result["install_ran"] = True
-    install_rc = _run(install["cmd"], platform, install.get("timeout", 1800))
-    result["install_rc"] = install_rc
+    timeout = install.get("timeout", 1800)
+    if install.get("mirror"):
+        result["mirror_rc"] = _mirror("seed", install["mirror"], timeout)
+        # Only a complete seed may stand in for the install: a tool can list a model with a part missing.
+        for attempt in range(SEED_SETTLE_TRIES if result["mirror_rc"] == 0 else 0):
+            if attempt:
+                time.sleep(SEED_SETTLE_SECONDS)
+            if _validate(spec, platform):
+                result["status"] = "INSTALLED"
+                print(f"  INSTALLED: {dep_id} now present (from the internal mirror)")
+                return result
+    if not _mirror_only(install):
+        result["install_rc"] = _run(install, platform, timeout)
+        if platform == "windows":
+            _refresh_windows_path()
 
     print(f"  re-validating {dep_id} ...")
     if _validate(spec, platform):
         result["status"] = "INSTALLED"
         print(f"  INSTALLED: {dep_id} now present")
+    elif spec.get("optional"):
+        # Optional means the tests can get it themselves; the prereq only gets it ahead of them.
+        result["status"] = "MISSING_OPTIONAL"
+        print(f"  WARN: {dep_id} still missing after install; continuing (optional)")
     else:
         result["status"] = "FAILED"
         print(f"  FAILED: {dep_id} still missing after install")
     return result
 
 
-def validate_prereqs(playbook_id: str, platform: str, device: Optional[str]) -> bool:
+def validate_prereqs(playbook_id: str, platform: str, device: Optional[str], locale: str = "") -> bool:
     repo_root = Path(__file__).parent.parent.parent
-    dependencies_root = repo_root / "playbooks" / "dependencies"
-    registry_path = dependencies_root / "registry.json"
+    label = f"{locale}/{playbook_id}" if locale else playbook_id
 
-    playbook_path = find_playbook_path(playbook_id, repo_root)
+    playbook_path = find_playbook_path(playbook_id, repo_root, locale)
     if not playbook_path:
-        print(f"Error: playbook '{playbook_id}' not found")
+        print(f"Error: playbook '{label}' not found")
         return False
 
     try:
-        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        deps_map = load_registry(repo_root, locale)
     except Exception as exc:
         print(f"Error: could not read registry.json: {exc}")
         return False
-    deps_map = registry.get("dependencies", {})
 
     content = (playbook_path / "README.md").read_text(encoding="utf-8")
     required = extract_scoped_requires(content, platform, device)
 
     scope = f"{platform}/{device}" if device else platform
-    print(f"Prerequisite validation for {playbook_id} ({scope})")
+    print(f"Prerequisite validation for {label} ({scope})")
     if not required:
         print("No @require/@prereq dependencies in scope; nothing to validate.")
     print(f"In-scope dependencies: {', '.join(required) if required else '(none)'}\n")
@@ -266,7 +367,7 @@ def validate_prereqs(playbook_id: str, platform: str, device: Optional[str]) -> 
 
     if unresolved:
         print("=" * 60)
-        print(f"PREREQ UNRESOLVED - {playbook_id} ({scope})")
+        print(f"PREREQ UNRESOLVED - {label} ({scope})")
         for r in unresolved:
             why = (
                 "auto-install did not resolve it"
@@ -278,7 +379,7 @@ def validate_prereqs(playbook_id: str, platform: str, device: Optional[str]) -> 
         print("=" * 60)
         return False
 
-    print(f"All prerequisites satisfied for {playbook_id} ({scope}).")
+    print(f"All prerequisites satisfied for {label} ({scope}).")
     return True
 
 
@@ -294,9 +395,10 @@ def main():
         default=None,
         help="Target device (filters @device: blocks)",
     )
+    parser.add_argument("--locale", default="", help="Check a localized playbook, e.g. zh-CN")
     args = parser.parse_args()
 
-    ok = validate_prereqs(args.playbook, args.platform, args.device)
+    ok = validate_prereqs(args.playbook, args.platform, args.device, args.locale)
     sys.exit(0 if ok else 1)
 
 

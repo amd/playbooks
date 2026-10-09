@@ -38,7 +38,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:linux -->
 <!-- @device:halo_box -->
 在 Linux 上，在您选择的目录中打开终端，并按照以下命令创建一个已预装 ROCm+Pytorch 的 venv。
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -57,7 +57,7 @@ sudo usermod -aG render,video $LOGNAME
 ```
 
 在 Linux 上，在您选择的目录中打开终端，并按照以下命令创建一个 venv。
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -104,6 +104,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=ms_model device=halo,halo_box value="openai-mirror/gpt-oss-20b" -->
 <!-- @var:id=ms_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:modelscope-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:modelscope-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->

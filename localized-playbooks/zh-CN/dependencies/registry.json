@@ -105,6 +105,28 @@
         "linux": [],
         "windows": []
       },
+      "validate": {
+        "linux": {
+          "cmd": "lms ls --llm | grep -i qwen3.5-35b-a3b",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "lms ls --llm | findstr /I qwen3.5-35b-a3b",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "zh-CN/lmstudio-models-qwen3-35b-a3b",
+          "cmd": "lms get qwen3.5-35b-a3b --yes",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "zh-CN/lmstudio-models-qwen3-35b-a3b",
+          "cmd": "lms get qwen3.5-35b-a3b --yes",
+          "timeout": 3600
+        }
+      },
       "versionable": false
     },
     "lmstudio-models-qwen3-9b": {
@@ -204,6 +226,177 @@
       "preinstalled": {
         "linux": [],
         "windows": []
+      },
+      "versionable": false
+    },
+    "lemonade-models-qwen3-5-35b-a3b": {
+      "name": "Qwen3.5 35B A3B Model (Lemonade)",
+      "description": "由 Lemonade 提供的 Qwen3.5-35B-A3B GGUF 模型",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q Qwen3.5-35B-A3B-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Qwen3.5-35B-A3B-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "zh-CN/lemonade-models-qwen3-5-35b-a3b",
+          "cmd": "lemonade pull Qwen3.5-35B-A3B-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "zh-CN/lemonade-models-qwen3-5-35b-a3b",
+          "cmd": "lemonade pull Qwen3.5-35B-A3B-GGUF",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-qwen3-5-9b": {
+      "name": "Qwen3.5 9B Model (Lemonade)",
+      "description": "由 Lemonade 提供的 Qwen3.5-9B GGUF 模型",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q Qwen3.5-9B-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Qwen3.5-9B-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "zh-CN/lemonade-models-qwen3-5-9b",
+          "cmd": "lemonade pull Qwen3.5-9B-GGUF",
+          "timeout": 1800
+        },
+        "windows": {
+          "mirror": "zh-CN/lemonade-models-qwen3-5-9b",
+          "cmd": "lemonade pull Qwen3.5-9B-GGUF",
+          "timeout": 1800
+        }
+      },
+      "versionable": false
+    },
+    "modelscope-models-gpt-oss-20b": {
+      "name": "GPT-OSS 20B (ModelScope)",
+      "description": "openai-mirror/gpt-oss-20b，否则测试会在首次使用时从 ModelScope 下载",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-gpt-oss-20b"
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-gpt-oss-20b"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-gpt-oss-20b",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-gpt-oss-20b",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "modelscope-models-qwen3-5-4b": {
+      "name": "Qwen3.5 4B (ModelScope)",
+      "description": "Qwen/Qwen3.5-4B，否则测试会在首次使用时从 ModelScope 下载",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-qwen3-5-4b"
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-qwen3-5-4b"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-qwen3-5-4b",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-qwen3-5-4b",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "modelscope-models-gemma-3-4b-it": {
+      "name": "Gemma 3 4B IT (ModelScope)",
+      "description": "LLM-Research/gemma-3-4b-it，否则测试会在首次使用时从 ModelScope 下载",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-gemma-3-4b-it"
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-gemma-3-4b-it"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "zh-CN/modelscope-models-gemma-3-4b-it",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "zh-CN/modelscope-models-gemma-3-4b-it",
+          "timeout": 3600
+        }
       },
       "versionable": false
     }
