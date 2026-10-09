@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 This tutorial provides step-by-step examples for fine-tuning a large language model (LLM) with PyTorch and ROCm. It covers several techniques, from standard fine-tuning to memory-efficient Parameter-Efficient Fine-Tuning (PEFT) strategies, so you can easily adapt models for your needs.
 
-**Model Used**: google/gemma-3-4b-it  *(see [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) if gated)*  
+**Model Used**: google/gemma-3-4b-it (QLoRA script: openai/gpt-oss-20b)  *(see [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) if gated)*  
 **Hardware**: AMD Radeon™ GPU with ROCm support  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
@@ -367,11 +367,11 @@ from transformers import AutoTokenizer
 
 # Load model with LoRA or QLoRA adapters
 model = AutoPeftModelForCausalLM.from_pretrained(
-    "output-gemma-3-4b-it-qlora",   # or "output-gemma-3-4b-lora" depending on your training
+    "output-gpt-oss-20b-qlora",   # or "output-gemma-3-4b-it-lora" depending on your training
     device_map="auto",
     torch_dtype="auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-it-qlora")
+tokenizer = AutoTokenizer.from_pretrained("output-gpt-oss-20b-qlora")
 
 # Generate text
 prompt = "Explain quantum computing:"
@@ -390,7 +390,7 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **Note:**  
-- Make sure the model directory name (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) matches your actual output folder from training.  
+- Make sure the model directory name (`output-gemma-3-4b-it-full`, `output-gpt-oss-20b-qlora`) matches your actual output folder from training.  
 - If you used LoRA instead of QLoRA, just substitute the path accordingly.  
 - Some Gemma models require specifying `trust_remote_code=True` in `from_pretrained`; add if you see a related warning.
 

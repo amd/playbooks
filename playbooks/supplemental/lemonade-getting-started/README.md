@@ -608,8 +608,7 @@ To enable `FastFlowLM` on Linux:
 * Open the `Lemonade` App.
 * Visit the [official FLM](https://lemonade-server.ai/flm_npu_linux.html) documentation and follow the installation steps for FLM by selecting your Linux distribution.
 * Enable backports as instructed on the installation page.
-* Download the latest `v0.9.x` release from the [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).'
-<!-- @device:end -->
+* Download the latest `v0.9.x` release from the [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).
 
 <!-- @device:halo_box -->
 >[!Note]
