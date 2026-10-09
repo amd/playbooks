@@ -56,12 +56,13 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
-<!-- @prereq:n8n -->
+<!-- @prereq:n8n,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- Linux runs n8n as a Podman container (see compose.yml below), so Node.js and a host n8n install are not required; podman is the only extra prerequisite. -->
 <!-- @require:lemonade,podman -->
+<!-- @prereq:podman -->
 <!-- @os:end -->
 
 <!-- @device:halo,halo_box -->
