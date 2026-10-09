@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > **الترجمة الآلية.** تمت ترجمة هذه الصفحة تلقائيًا من اللغة الإنجليزية ولم تتم مراجعتها من قِبل مترجم بشري. قد تحتوي على أخطاء، وقد تختلف بعض التعليمات أو الأوامر أو خيارات التنزيل أو مدى توفر المنتج أو أي محتوى آخر باختلاف اللغة أو المنطقة. في حال وجود أي تعارض أو تباين، تكون النسخة الإنجليزية الأصلية من الـ playbook هي النسخة المعتمدة والمرجعية، ويُعمل بها في هذه الحالة.
 <!-- auto-translated-disclaimer:end -->
 
-# نظرة عامة
-
 <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
@@ -20,27 +18,27 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> يتطلب هذا الدليل حد أدنى قدره **32 جيجابايت** من ذاكرة النظام.
+> يتطلب هذا الدليل التوجيهي **32 غيغابايت** على الأقل من ذاكرة النظام.
 <!-- @device:end -->
 
-n8n هو منصة أتمتة سير العمل التي تتيح لك ربط التطبيقات والخدمات باستخدام محرر مرئي قائم على العُقد.
+n8n هي منصة أتمتة سير العمل التي تتيح لك ربط التطبيقات والخدمات باستخدام محرر مرئي قائم على العقد.
 
-يعلّمك هذا الدليل كيفية إعداد أداة تلخيص أخبار مالية مدعومة بالذكاء الاصطناعي تسحب أحدث عناوين الأخبار التجارية من خلاصة RSS إخبارية وتستخدم نموذج لغة كبير محلي يعمل على نظامك لإنشاء ملخص موجّه للمستثمرين.
+يعلّمك هذا الدليل التوجيهي كيفية إعداد أداة تلخيص إخبارية مالية مدعومة بالذكاء الاصطناعي تسحب أحدث العناوين التجارية من موجز RSS إخباري وتستخدم نموذج لغة كبير محلي يعمل على نظامك لإنشاء ملخص موجه للمستثمرين.
 
-## ما ستتعلمه
+## ما الذي ستتعلمه
 
 - كيفية تثبيت n8n وتشغيله
 - استيراد وتهيئة سير عمل مُعدّ مسبقًا
-- الاتصال بـ Lemonade باستخدام التكامل الأصلي في n8n
-- فهم عُقد سير العمل وتدفق البيانات
+- الاتصال بـ Lemonade باستخدام التكامل الأصلي لـ n8n
+- فهم عقد سير العمل وتدفق البيانات
 
 ## ما هو Lemonade؟
 
-[Lemonade](https://lemonade-server.ai) هو منصة تقديم نماذج لغة كبيرة محلية مبنية لعتاد AMD. توفر واجهة برمجة تطبيقات متوافقة مع OpenAI تعمل بالكامل على جهازك — بياناتك لا تغادر جهازك أبدًا.
+[Lemonade](https://lemonade-server.ai) هي منصة لتقديم نماذج لغة كبيرة محلية مبنية لأجهزة AMD. توفر واجهة برمجة تطبيقات متوافقة مع OpenAI تعمل بالكامل على جهازك - بياناتك لا تغادر جهازك أبدًا.
 
-في هذا الدليل، نستخدم Lemonade لتقديم نموذج لغة كبير محلي يتصل به n8n لإنجاز المهام المدعومة بالذكاء الاصطناعي.
+في هذا الدليل التوجيهي، نستخدم Lemonade لتقديم نموذج لغة كبير محلي تتصل به n8n لتنفيذ مهام مدعومة بالذكاء الاصطناعي.
 
-يتضمن n8n **عقدة Lemonade أصلية** (`Lemonade Chat Model`) توفر تكاملًا من الدرجة الأولى - لا حاجة إلى إعداد يدوي. هذا يجعل ربط نموذج اللغة الكبير المحلي الخاص بك بسير عمل الأتمتة أمرًا مباشرًا.
+يتضمن n8n **عقدة Lemonade أصلية** (`Lemonade Chat Model`) توفر تكاملًا من الدرجة الأولى - دون الحاجة إلى تهيئة يدوية. هذا يجعل ربط نموذج اللغة الكبير المحلي الخاص بك بسير عمل الأتمتة أمرًا بسيطًا ومباشرًا.
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## ضبط إعدادات الذاكرة
@@ -49,29 +47,36 @@ n8n هو منصة أتمتة سير العمل التي تتيح لك ربط ا�
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## التحقق من تحديثات البرمجيات
+## التحقق من تحديثات البرامج
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## تثبيت متطلبات البرمجيات الأساسية
+## تثبيت متطلبات البرامج الأساسية
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:n8n,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- Linux runs n8n as a Podman container (see compose.yml below), so Node.js and a host n8n install are not required; podman is the only extra prerequisite. -->
 <!-- @require:lemonade,podman -->
+<!-- @prereq:podman -->
 <!-- @os:end -->
 
 <!-- @device:halo,halo_box -->
+<!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:lemonade-models-gpt-oss-20b -->
 <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 
@@ -192,18 +197,20 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:windows -->
 <!-- @test:id=node-npm-version timeout=60 hidden=True -->
 ```bash
 node -v
 npm -v
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 ## تثبيت n8n
 <!-- @os:windows -->
-ثبّت n8n بشكل عام باستخدام npm.
+ثبّت n8n عالميًا باستخدام npm.
 
-> **ملاحظة**: قد تظهر لك بعض تحذيرات npm. هذا أمر متوقع.
+> **ملاحظة**: قد تلاحظ ظهور بعض تحذيرات npm. هذا أمر متوقع.
 
 ```bash
 npm install -g n8n
@@ -216,40 +223,31 @@ n8n --version
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @os:linux -->
-<!-- @test:id=n8n-version timeout=60 hidden=True -->
-```bash
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-n8n --version
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
 <!-- @os:windows -->
-> **نصيحة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell الخاصة بهم (على سبيل المثال
-> ضبطها على RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
+> **تلميح**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell الخاصة بهم (مثل
+> ضبطها إلى RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **مشكلة PATH**: إذا ظهرت رسالة أن `n8n --version` أمر غير موجود، تأكد من أن دليل npm العام الثنائي (bin) موجود ضمن متغير `PATH` الخاص بالمستخدم. المسار المعتاد للتثبيت هو `C:\Users\<username>\AppData\Roaming\npm`.
-> أضف هذا إلى مسار المستخدم (Edit the system environment variables > Environment Variables > Edit User Path) وأعد تحميل الطرفية.
+> **مشكلة PATH**: إذا أظهر `n8n --version` أن الأمر غير موجود، تأكد من أن دليل npm العام الخاص بك مدرج ضمن `PATH` الخاص بالمستخدم. مسار التثبيت المعتاد هو `C:\Users\<username>\AppData\Roaming\npm`.
+> أضف هذا إلى مسار المستخدم (تعديل متغيرات بيئة النظام > متغيرات البيئة > تعديل مسار المستخدم) وأعد تحميل الطرفية.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-سنستخدم الآن خدمة Podman لحوسبة تثبيت n8n داخل حاوية.
+سنستخدم الآن خدمة Podman لحاويات تثبيت n8n الخاص بنا.
 
-يُرجى تنزيل الملف التالي إلى دليل من اختيارك: [compose.yml](assets/compose.yml)
+يُرجى تنزيل ما يلي إلى الدليل الذي تختاره: [compose.yml](assets/compose.yml)
 
-في ذلك الدليل، شغّل الأمر التالي:
+في ذلك الدليل، نفّذ الأمر التالي:
 ```bash
 podman compose up -d
 ```
 
-يجب أن يؤدي هذا إلى تثبيت n8n والكتابة إلى تخزين دائم.
+يجب أن يُثبّت هذا n8n ويكتب إلى تخزين دائم.
 
-شغّل n8n بكتابة `localhost:5678` في شريط عنوان المتصفح الخاص بك.
+شغّل n8n بكتابة `localhost:5678` في شريط عنوان المتصفح.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -291,19 +289,14 @@ try {
 ```bash
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-p=""
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
 cleanup() {
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
+  podman compose -f compose.yml down >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-n8n start >/tmp/n8n-test.log 2>&1 &
-p=$!
+podman rm -f n8n >/dev/null 2>&1 || true
+podman compose -f compose.yml up -d
 
 ok=false
 for i in $(seq 1 120); do
@@ -317,6 +310,8 @@ done
 
 if [ "$ok" != "true" ]; then
   echo "n8n not ready on http://127.0.0.1:5678/healthz"
+  podman ps -a || true
+  podman logs n8n 2>&1 | tail -30 || true
   exit 1
 fi
 
@@ -330,23 +325,23 @@ echo "OK: n8n server is responding"
 <!-- @os:end -->
 
 
-> **نصيحة**: أبقِ نافذة الطرفية مفتوحة أثناء استخدام n8n. قد يؤدي إغلاقها إلى إيقاف الخادم.
+> **تلميح**: أبقِ نافذة الطرفية مفتوحة أثناء استخدام n8n. قد يؤدي إغلاقها إلى إيقاف الخادم.
 
 ## تشغيل Lemonade
 
 Lemonade هو الخادم المحلي الذي سيشغّل نموذجًا ويتصل بـ n8n.
 
 <!-- @os:linux -->
-افتح واجهة Lemonade الرسومية بالنقر على أيقونة Lemonade في شريط المهام. يمكنك من هنا تصفح النماذج والخلفيات (backends) وتحميل النماذج المثبتة مسبقًا.
+افتح واجهة Lemonade الرسومية بالنقر على أيقونة Lemonade في شريط المهام. يمكنك من هنا تصفح النماذج والخلفيات وتحميل النماذج المثبتة مسبقًا.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-افتح واجهة Lemonade الرسومية بالنقر على أيقونة Lemonade. انقر بزر الفأرة الأيمن على أيقونة الصينية لفتح التطبيق. بعد ذلك، يمكنك إضافة النماذج والخلفيات (backends) وتحميل النماذج المثبتة مسبقًا.
+افتح واجهة Lemonade الرسومية بالنقر على أيقونة Lemonade. انقر بزر الفأرة الأيمن على أيقونة شريط الأدوات لفتح التطبيق. بعد ذلك، يمكنك إضافة نماذج وخلفيات وتحميل النماذج المثبتة مسبقًا.
 <!-- @os:end -->
 
->**نصيحة**: بمجرد التشغيل، يمكن الوصول أيضًا إلى واجهة Lemonade الرسومية على http://localhost:13305
+>**تلميح**: بمجرد التشغيل، يمكن الوصول إلى واجهة Lemonade الرسومية أيضًا على http://localhost:13305
 
-بدلًا من ذلك، يمكنك فتح طرفية وتشغيل `lemonade list` لمعرفة النماذج المثبتة. ثم، شغّل:
+بدلاً من ذلك، يمكنك فتح طرفية وتنفيذ `lemonade list` لمعرفة النماذج المثبتة. ثم نفّذ:
 
 <!-- @device:halo_box -->
 <!-- @os:linux -->
@@ -383,22 +378,22 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 
 1. افتح `http://localhost:5678` في متصفحك
 2. أنشئ حسابًا محليًا جديدًا باستخدام بريدك الإلكتروني، أو سجّل الدخول إذا كان لديك حساب بالفعل
-3. بمجرد تسجيل الدخول، ستشاهد لوحة تحكم n8n
+3. بمجرد تسجيل الدخول، سترى لوحة تحكم n8n
 
-> **نصيحة**: إذا تم إقفال الدخول إلى حسابك، جرّب `n8n user-management:reset`
+> **تلميح**: إذا تعذّر الوصول إلى حسابك، جرّب `n8n user-management:reset`
 
 ### الخطوة 2: استيراد سير العمل
 
-لقد وفّرنا سير عمل مُعدًّا مسبقًا يمكنك استيراده مباشرة:
+لقد وفّرنا سير عمل مُعدّ مسبقًا يمكنك استيراده مباشرة:
 
 1. نزّل ملف سير العمل التالي: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. انقر على **Start from Scratch** لفتح محرر سير العمل. بدلًا من ذلك، انقر على زر + في أعلى اليسار، ثم **Add workflow**.
+2. انقر على **Start from Scratch** لفتح محرر سير العمل. بدلاً من ذلك، انقر على زر + في الأعلى على اليسار، ثم **Add workflow**.
 3. انقر على قائمة **...** (النقاط الثلاث) في الشريط العلوي الأيمن واختر **Import from file**
-4. اختر ملف `financial-news-workflow.json` الذي تم تنزيله
-5. سيظهر سير العمل على لوحة الرسم
+4. اختر ملف `financial-news-workflow.json` الذي نزّلته
+5. سيظهر سير العمل على لوحة العمل
 ### الخطوة 3: فهم سير العمل
 
-يحتوي سير العمل الذي تم استيراده على 8 عقد متصلة:
+يحتوي سير العمل الذي تم استيراده على 8 عُقد متصلة:
 
 <p align="center">
   <img src="assets/workflow-overview.png" alt="n8n Financial News Workflow" width="800"/>
@@ -407,23 +402,23 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 | العقدة | الغرض |
 |------|---------|
 | **When clicking 'Execute workflow'** | مشغّل يدوي لبدء سير العمل |
-| **Fetch Financial News Feed** | عقدة RSS Read تقوم بجلب أحدث عناوين الأخبار التجارية من خلاصة RSS (تستخدم افتراضيًا خلاصة NYT Business، ولا تتطلب مفتاح API) |
-| **Aggregate Headlines** | عقدة Aggregate تقوم بتجميع عناوين الأخبار والملخصات من كل عنصر في الخلاصة في قائمة واحدة |
+| **Fetch Financial News Feed** | عقدة RSS Read تجلب أحدث عناوين الأخبار التجارية من خلاصة RSS (تستخدم افتراضيًا خلاصة NYT Business، ولا تتطلب مفتاح API) |
+| **Aggregate Headlines** | عقدة Aggregate تجمع عناوين الأخبار والملخصات من كل عنصر في الخلاصة في قائمة واحدة |
 | **Clean Extracted News Data** | عقدة Set تدمج جميع العناوين في حقل نصي واحد |
 | **AI Financial News Summarizer** | وكيل ذكاء اصطناعي يعالج الأخبار باستخدام موجّه نظام لمحلل مالي |
-| **Lemonade Chat Model** | يتصل بخادم Lemonade المحلي لديك الذي يشغّل النموذج اللغوي |
-| **Structured Output Parser** | يقوم بتنسيق مخرجات الذكاء الاصطناعي كـ JSON منظم |
+| **Lemonade Chat Model** | يتصل بخادم Lemonade المحلي الذي يشغّل نموذج اللغة الكبير |
+| **Structured Output Parser** | ينسّق مخرجات الذكاء الاصطناعي بصيغة JSON منظمة |
 | **Convert to File** | يحوّل الملخص إلى ملف قابل للتنزيل |
 
 > **تلميح**: لاستخدام مصدر أخبار مختلف، انقر نقرًا مزدوجًا على عقدة **Fetch Financial News Feed** واستبدل الرابط بأي خلاصة RSS للأعمال أو الأسواق تفضلها.
 
-### الخطوة 4: تكوين بيانات اعتماد Lemonade
+### الخطوة 4: تهيئة بيانات اعتماد Lemonade
 
-قبل تشغيل سير العمل، تحتاج إلى ربطه بخادم Lemonade المحلي لديك:
+قبل تشغيل سير العمل، تحتاج إلى ربطه بخادم Lemonade المحلي الخاص بك:
 
 1. انقر نقرًا مزدوجًا على عقدة **Lemonade Chat Model** في n8n
 2. من القائمة المنسدلة **Credential to connect with** اختر **Create New Credential**
-3. أدخل القيم الموضحة في الجدول أدناه ثم انقر على حفظ.
+3. أدخل القيم في الجدول أدناه ثم انقر على حفظ.
 4. اختر النموذج المناسب الذي قمت بتحميله في Lemonade Server.
 
   | الحقل | القيمة |
@@ -433,16 +428,16 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 
 > **ملاحظة**: قبل الاختبار، شغّل الأمر `lemonade status` في الطرفية للتأكد من أن خادم Lemonade يعمل.
 <!-- @device:halo_box -->
-> يستخدم سير العمل هذا GPT-OSS-120B وهو مثبت مسبقًا في Lemonade. يمكنك تغيير ذلك إلى نماذج أخرى محمّلة في إعدادات عقدة Lemonade Chat Model.
+> يستخدم سير العمل هذا النموذج GPT-OSS-120B وهو مثبّت مسبقًا في Lemonade. يمكنك تغيير ذلك إلى نماذج أخرى محمّلة في إعدادات عقدة Lemonade Chat Model.
 <!-- @device:end -->
 
 ### الخطوة 5: اختبار سير العمل
 
 1. تأكد من أن Lemonade يعمل مع نموذج محمّل
-2. انقر على **Execute workflow** في أسفل منتصف اللوحة
+2. انقر على **Execute workflow** في أسفل منتصف لوحة العمل
 3. راقب تنفيذ كل عقدة من اليسار إلى اليمين—تتحول إلى اللون الأخضر عند الانتهاء
 4. انقر نقرًا مزدوجًا على عقدة **AI Financial News Summarizer** لرؤية الملخص الذي تم إنشاؤه في اللوحة السفلية.
-5. انقر نقرًا مزدوجًا على عقدة **Convert to File** لتنزيل ملف النص المقابل في اللوحة السفلية.
+5. انقر نقرًا مزدوجًا على عقدة **Convert to File** لتنزيل ملف النص المقابل من اللوحة السفلية.
 
 ## فهم وكيل الذكاء الاصطناعي
 
@@ -458,23 +453,23 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-يستقبل الوكيل بيانات الأخبار المُنظّفة ويُخرج ملخصًا منظمًا مع مؤشر معنويات السوق.
+يستقبل الوكيل بيانات الأخبار المنظفة ويُخرج ملخصًا منظمًا مع توجه السوق (market sentiment).
 
 ### حفظ سير العمل الخاص بك
 
-انقر على اسم سير العمل في الأعلى وأعد تسميته إذا رغبت في ذلك. يتم حفظ سير العمل تلقائيًا أثناء العمل.
+انقر على اسم سير العمل في الأعلى وأعد تسميته إذا أردت. تُحفظ سير العمل تلقائيًا أثناء عملك.
 
 ## الخطوات التالية
 
 - **جدولة الأتمتة**: استبدل Manual Trigger بـ **Schedule Trigger** لتشغيله يوميًا
 - **إرسال الإشعارات**: أضف عقدة **Discord** أو **Slack** أو **Email** لتلقي الملخصات
-- **جرّب نماذج مختلفة**: غيّر النموذج في عقدة Lemonade Chat Model لتجربة نماذج لغوية مختلفة
-- **غيّر مصدر الأخبار**: وجّه عقدة **Fetch Financial News Feed** إلى خلاصة RSS مختلفة لمتابعة أقسام أو منشورات أخرى
-- **جرّب واجهات خلفية مختلفة**: يدعم n8n أيضًا [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model)، وLM Studio، وواجهات خلفية أخرى للنماذج اللغوية المحلية
+- **جرب نماذج مختلفة**: غيّر النموذج في عقدة Lemonade Chat Model لتجربة نماذج لغة كبيرة مختلفة
+- **غيّر مصدر الأخبار**: وجّه عقدة **Fetch Financial News Feed** نحو خلاصة RSS مختلفة لمتابعة أقسام أو منشورات أخرى
+- **جرب خلفيات مختلفة**: يدعم n8n أيضًا [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model)، وLM Studio، وخلفيات نماذج لغة كبيرة محلية أخرى
 
 ### استكشاف قوالب n8n
 
-يحتوي n8n على مئات القوالب الجاهزة لسير العمل. تصفح مكتبة القوالب الرسمية على:
+يحتوي n8n على مئات من قوالب سير العمل الجاهزة. تصفح مكتبة القوالب الرسمية على:
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 

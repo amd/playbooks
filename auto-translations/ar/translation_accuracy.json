@@ -186,12 +186,12 @@
       "quality_issues": "\"تقديمها\" is acceptable but \"serving\" could be more precise; otherwise accurate and fluent."
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
-      "source_sha256": "9bc128f29f40f1a7b56da55d7c22d3520c4a232d990259f020928394eb7b517e",
+      "source_sha256": "fa7d8770c407468815e9a981c8a7349429d334b24c1002a729e277ac7f1988be",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Extra duplicated '# نظرة عامة' header added not in source; otherwise accurate, fluent, code/tags intact."
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent, code/URLs/tags intact; minor UI term handling but consistent and natural throughout."
     },
     "playbooks/core/n8n-automation-gpt-oss/platform.md": {
       "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
@@ -202,12 +202,12 @@
       "quality_issues": "Excellent; all code, URLs, brands intact. Minor: 'latest' left untranslated, acceptable in context."
     },
     "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
-      "source_sha256": "004e579ddcaf166de5205c73c05d8b368f701c20fdd5a1dd77be591927f0f441",
+      "source_sha256": "1dc9545bd669bc210df8f6ac88f72a7148cd91578322e5d614d9476bf9741e6a",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Accurate, fluent; brand terms and abbreviations intact."
+      "quality_issues": "Accurate, fluent translation; brand terms intact; natural phrasing throughout."
     },
     "playbooks/core/pytorch-rocm-llms/README.md": {
       "source_sha256": "c21d88a2b435760acf276582d292917abd1501bae2ab0343d07a71ee3e1970cd",
@@ -386,12 +386,12 @@
       "quality_issues": "Excellent translation; minor inconsistency leaving 'series' untranslated in NPU row while translated elsewhere."
     },
     "playbooks/supplemental/lemonade-getting-started/playbook.json": {
-      "source_sha256": "b6d4d92098822e89fb92aa2ed859b47a98a331cd123fb8bd07fe1b5f7e6139a1",
+      "source_sha256": "a3e0145b2d86aa1885a044ecbbef03e5824dfbb7ed9b219d960490517ec095ce",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Left 'Gen AI' and 'AI' untranslated; slightly less natural but acceptable and accurate."
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent, terminology intact; minor nit: 'البدء مع' slightly less idiomatic than 'البدء باستخدام'."
     },
     "playbooks/supplemental/open-webui-chat/platform.md": {
       "source_sha256": "1cc71fc518a4ba7e507047973d835456dc836155b3365f0e7fb64ed1f81d85cb",
@@ -418,20 +418,20 @@
       "quality_issues": "Accurate, fluent, brand terms intact; natural terminology."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
-      "source_sha256": "d6b66b52107f19e10f53a4dbac24c90a47ac5723bee591cd7e6ed4bf3026676d",
+      "source_sha256": "bc14fc60e96c238af90570c9452ad2bc37fe61451d7df1ac9f14688f69145e81",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'هذا البنية' gender agreement error; otherwise accurate, fluent, code/URLs/brands intact."
+      "quality_score": 92,
+      "quality_issues": "Stray '#' before first comment tag; otherwise accurate, fluent, code/URLs/brands intact. Minor grammar: 'يرتبط كل طريقة'."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
-      "source_sha256": "b6e938616f1c620508e5b8a50e4e07008ab3d1ce6398cb45acbd373a74b316c7",
+      "source_sha256": "edfbd025fcce55a03c54a50dca617bc17bf927da67e2e82056d8b4183ad2ccd8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Accurate and fluent; minor nit: 'برنامج' slightly narrow for 'Software'."
+      "quality_score": 88,
+      "quality_issues": "Redundant parenthetical 'fine-tune'; 'برنامج' slightly narrow for 'Software'; otherwise accurate and fluent."
     },
     "playbooks/supplemental/pytorch-kernels/platform.md": {
       "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",
@@ -498,28 +498,28 @@
       "quality_issues": "Trademark symbol placement slightly off; 'fine-tuned' rendered as 'fine-tune'; otherwise accurate and fluent."
     },
     "playbooks/supplemental/vllm-inference/README.md": {
-      "source_sha256": "2c7c430c6bd3a17f01f85f6d212bc2f41134c5fccba880eaaa5c884374f75ed7",
+      "source_sha256": "acc59b7a8652bc6d1269c1bcbf6c4f8bb8beb8956f38d6ea6814510156b1ef0f",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "'المُحوسط' is nonstandard for containerized; otherwise accurate, fluent, code/URLs/anchors intact."
+      "quality_score": 93,
+      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: 'المُحتوى' awkward for containerized; 'كرر العملية' slightly off for iterate."
     },
     "playbooks/supplemental/vllm-inference/playbook.json": {
-      "source_sha256": "8337b7e3e229f047e7bdad287599bb06a268a800b8524e6165ebf1ce15ca06db",
+      "source_sha256": "cd215e0c6fd0145f0786fc472ac0ce1ba3255108a2ca93ffffb1dbe053616c31",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Accurate and fluent; slightly verbose with parenthetical glosses; 'الخدمة' for serving acceptable but could be smoother."
+      "quality_score": 82,
+      "quality_issues": "\"المُحتوى\" is awkward for containerized; \"الخدمة\" slightly imprecise for serving. Otherwise accurate, fluent, terms intact."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
-      "source_sha256": "9352db15e96748d77bd1db916212ae60537bccec11f553ef9addc748715d5f22",
+      "source_sha256": "7cc148ae86900d4b631a0b0b2007c6bdeca29212a14af95e2b41d71a6b2a0748",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Minor: 'runtime model' rendered as 'يعمل بشكل أساسي' slightly off; omitted 'chat window' sentence. Code, URLs, numbers intact."
+      "quality_score": 94,
+      "quality_issues": "Excellent fluent translation; code, URLs, tags, numbers intact. Minor: 'prompt' rendered inconsistently, mostly natural terminology."
     },
     "playbooks/supplemental/open-webui-chat/README.md": {
       "source_sha256": "912f06c8f1493411e574a359dfa3159f362c2053ceb47535c2cc4198bdb996ae",

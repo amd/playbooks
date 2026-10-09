@@ -9,7 +9,9 @@ SPDX-License-Identifier: MIT
 > **Strojový překlad.** Tato stránka byla automaticky přeložena z angličtiny a nebyla zkontrolována člověkem. Může obsahovat chyby a určité pokyny, příkazy, soubory ke stažení, dostupnost produktů nebo jiný obsah se může lišit podle jazyka nebo regionu. V případě jakéhokoli nesouladu nebo rozporu je rozhodující původní anglická verze playbooku.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
+# Překlad
+
+<!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
@@ -23,22 +25,22 @@ SPDX-License-Identifier: MIT
 
 n8n je platforma pro automatizaci pracovních postupů, která umožňuje propojovat aplikace a služby pomocí vizuálního editoru založeného na uzlech.
 
-Tento playbook vás naučí, jak nastavit AI shrnovač finančních zpráv, který stahuje nejnovější obchodní titulky z RSS kanálu zpráv a používá lokální LLM běžící na vašem systému k vygenerování shrnutí zaměřeného na investory.
+Tento playbook vás naučí, jak nastavit sumarizátor finančních zpráv poháněný umělou inteligencí, který stahuje nejnovější obchodní titulky z RSS feedu zpráv a pomocí lokálního LLM běžícího na vašem systému vytváří shrnutí zaměřené na investory.
 
 ## Co se naučíte
 
 - Jak nainstalovat a spustit n8n
-- Import a konfiguraci předpřipraveného pracovního postupu
+- Import a konfigurace předpřipraveného workflow
 - Připojení k Lemonade pomocí nativní integrace n8n
-- Pochopení uzlů pracovního postupu a toku dat
+- Pochopení uzlů workflow a toku dat
 
 ## Co je Lemonade?
 
 [Lemonade](https://lemonade-server.ai) je platforma pro lokální provoz LLM postavená pro hardware AMD. Poskytuje API kompatibilní s OpenAI, které běží zcela na vašem počítači – vaše data nikdy neopustí vaše zařízení.
 
-V tomto playbooku používáme Lemonade k poskytování lokálního LLM, ke kterému se n8n připojuje pro úlohy poháněné AI.
+V tomto playbooku používáme Lemonade k provozování lokálního LLM, ke kterému se n8n připojuje pro úlohy poháněné umělou inteligencí.
 
-n8n obsahuje **nativní uzel Lemonade** (`Lemonade Chat Model`), který poskytuje integraci první třídy - není potřeba žádná ruční konfigurace. Díky tomu je připojení vašeho lokálního LLM k automatizačním pracovním postupům jednoduché.
+n8n obsahuje **nativní uzel Lemonade** (`Lemonade Chat Model`), který poskytuje integraci na profesionální úrovni – není potřeba žádná ruční konfigurace. Díky tomu je propojení vašeho lokálního LLM s automatizačními workflow jednoduché.
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Nastavení konfigurace paměti
@@ -57,19 +59,26 @@ n8n obsahuje **nativní uzel Lemonade** (`Lemonade Chat Model`), který poskytuj
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:n8n,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- Linux runs n8n as a Podman container (see compose.yml below), so Node.js and a host n8n install are not required; podman is the only extra prerequisite. -->
 <!-- @require:lemonade,podman -->
+<!-- @prereq:podman -->
 <!-- @os:end -->
 
 <!-- @device:halo,halo_box -->
+<!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:lemonade-models-gpt-oss-20b -->
 <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 
@@ -190,18 +199,20 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:windows -->
 <!-- @test:id=node-npm-version timeout=60 hidden=True -->
 ```bash
 node -v
 npm -v
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 ## Instalace n8n
 <!-- @os:windows -->
 Nainstalujte n8n globálně pomocí npm.
 
-> **Poznámka**: Můžete vidět některá npm varování. To je očekávané.
+> **Poznámka**: Může se zobrazit několik varování npm. To je očekávané.
 
 ```bash
 npm install -g n8n
@@ -214,38 +225,29 @@ n8n --version
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @os:linux -->
-<!-- @test:id=n8n-version timeout=60 hidden=True -->
-```bash
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-n8n --version
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
 <!-- @os:windows -->
-> **Tip**: Uživatelé Windows možná budou muset upravit svou PowerShell Execution Policy (např.
-> nastavením na RemoteSigned nebo Unrestricted) před spuštěním některých Powershell příkazů.
+> **Tip**: Uživatelé Windows mohou potřebovat upravit svou politiku spouštění PowerShellu (Execution Policy) (např.
+> nastavit ji na RemoteSigned nebo Unrestricted) před spuštěním některých příkazů PowerShellu.
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **Problém s PATH**: Pokud `n8n --version` hlásí, že příkaz nebyl nalezen, ujistěte se, že adresář globálního npm bin je v uživatelské proměnné `PATH`. Obvyklá instalační cesta je `C:\Users\<username>\AppData\Roaming\npm`. 
-> Přidejte tuto cestu do uživatelské cesty (Edit the system environment variables > Environment Variables > Edit User Path) a znovu načtěte terminál. 
+> **Problém s PATH**: Pokud `n8n --version` hlásí, že příkaz nebyl nalezen, ujistěte se, že adresář globálního bin npm je zahrnut v uživatelské proměnné `PATH`. Obvyklá instalační cesta je `C:\Users\<username>\AppData\Roaming\npm`.
+> Přidejte ji do uživatelské cesty (Upravit systémové proměnné prostředí > Proměnné prostředí > Upravit uživatelskou cestu) a znovu načtěte terminál.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Nyní použijeme službu Podman k containerizaci naší instalace n8n.
+Nyní použijeme službu Podman k kontejnerizaci naší instalace n8n.
 
-Stáhněte prosím následující do adresáře dle vaší volby: [compose.yml](assets/compose.yml)
+Stáhněte si prosím následující soubor do adresáře dle vlastního výběru: [compose.yml](assets/compose.yml)
 
 V tomto adresáři spusťte následující příkaz:
 ```bash
 podman compose up -d
 ```
 
-Tím se nainstaluje n8n a zapíše se do trvalého úložiště.
+Tím by se měl nainstalovat n8n a zapsat data do trvalého úložiště.
 
 Spusťte n8n zadáním `localhost:5678` do adresního řádku prohlížeče.
 <!-- @os:end -->
@@ -289,19 +291,14 @@ try {
 ```bash
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-p=""
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
 cleanup() {
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
+  podman compose -f compose.yml down >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-n8n start >/tmp/n8n-test.log 2>&1 &
-p=$!
+podman rm -f n8n >/dev/null 2>&1 || true
+podman compose -f compose.yml up -d
 
 ok=false
 for i in $(seq 1 120); do
@@ -315,6 +312,8 @@ done
 
 if [ "$ok" != "true" ]; then
   echo "n8n not ready on http://127.0.0.1:5678/healthz"
+  podman ps -a || true
+  podman logs n8n 2>&1 | tail -30 || true
   exit 1
 fi
 
@@ -328,23 +327,23 @@ n8n spustí lokální webový server. Stiskněte `'o'` nebo otevřete prohlíže
 <!-- @os:end -->
 
 
-> **Tip**: Nechte okno terminálu otevřené během používání n8n. Jeho zavření by mohlo zastavit server.
+> **Tip**: Během používání n8n nechte okno terminálu otevřené. Jeho zavření by mohlo server zastavit.
 
 ## Spuštění Lemonade
 
-Lemonade je lokální server, který bude spouštět model a připojí se k n8n.
+Lemonade je lokální server, který bude spouštět model a propojovat se s n8n.
 
 <!-- @os:linux -->
-Otevřete GUI aplikace Lemonade kliknutím na ikonu Lemonade na hlavním panelu. Odtud můžete procházet modely, backendy a načítat předinstalované modely.
+Otevřete GUI Lemonade kliknutím na ikonu Lemonade v hlavním panelu. Odsud můžete procházet modely, backendy a načítat předinstalované modely.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Otevřete GUI aplikace Lemonade kliknutím na ikonu Lemonade. Kliknutím pravým tlačítkem na ikonu v systémové liště otevřete aplikaci. Poté můžete přidávat modely, backendy a načítat předinstalované modely.
+Otevřete GUI Lemonade kliknutím na ikonu Lemonade. Pravým tlačítkem klikněte na ikonu v systémové liště pro otevření aplikace. Poté můžete přidávat modely, backendy a načítat předinstalované modely.
 <!-- @os:end -->
 
->**Tip**: Po spuštění je GUI aplikace Lemonade také dostupné na adrese http://localhost:13305
+>**Tip**: Po spuštění je GUI Lemonade také dostupné na adrese http://localhost:13305
 
-Alternativně můžete otevřít terminál a spustit `lemonade list`, abyste zjistili, jaké modely jsou nainstalované. Poté spusťte:
+Alternativně můžete otevřít terminál a spustit `lemonade list` pro zobrazení nainstalovaných modelů. Poté spusťte:
 
 <!-- @device:halo_box -->
 <!-- @os:linux -->
@@ -373,55 +372,55 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 <!-- @device:end -->
 
 
-## Nastavení pracovního postupu
+## Nastavení workflow
 
 ### Krok 1: Registrace nebo přihlášení do n8n
 
 Při prvním otevření n8n budete vyzváni k vytvoření účtu nebo přihlášení:
 
-1. Otevřete `http://localhost:5678` ve vašem prohlížeči
-2. Vytvořte nový lokální účet se svým e-mailem, nebo se přihlaste, pokud již účet máte
-3. Po přihlášení uvidíte řídicí panel n8n
+1. Otevřete `http://localhost:5678` ve svém prohlížeči
+2. Vytvořte nový lokální účet pomocí svého e-mailu, nebo se přihlaste, pokud již účet máte
+3. Po přihlášení se zobrazí dashboard n8n
 
-> **Tip**: Pokud jste uzamčeni mimo svůj účet, zkuste `n8n user-management:reset`
+> **Tip**: Pokud se nemůžete přihlásit ke svému účtu, zkuste `n8n user-management:reset`
 
-### Krok 2: Import pracovního postupu
+### Krok 2: Import workflow
 
-Připravili jsme pro vás předpřipravený pracovní postup, který můžete přímo importovat:
+Poskytli jsme předpřipravené workflow, které si můžete přímo importovat:
 
-1. Stáhněte následující soubor s pracovním postupem: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. Klikněte na **Start from Scratch** pro otevření editoru pracovních postupů. Alternativně klikněte na tlačítko + vlevo nahoře a poté na **Add workflow**.
-3. Klikněte na nabídku **...** (tři tečky) vpravo nahoře a vyberte **Import from file**
+1. Stáhněte si následující soubor s workflow: [financial-news-workflow.json](assets/financial-news-workflow.json)
+2. Kliknutím na **Start from Scratch** otevřete editor workflow. Alternativně klikněte na tlačítko + vlevo nahoře a poté na **Add workflow**.
+3. Klikněte na nabídku **...** (tři tečky) v pravém horním rohu a vyberte **Import from file**
 4. Vyberte stažený soubor `financial-news-workflow.json`
-5. Pracovní postup se zobrazí na plátně
-### Krok 3: Pochopení pracovního postupu
+5. Workflow se zobrazí na plátně
+### Krok 3: Pochopení workflow
 
-Importovaný pracovní postup obsahuje 8 propojených uzlů:
+Importované workflow obsahuje 8 propojených uzlů:
 
 <p align="center">
   <img src="assets/workflow-overview.png" alt="n8n Financial News Workflow" width="800"/>
 </p>
 
 | Uzel | Účel |
-|------|------|
-| **Při kliknutí na 'Execute workflow'** | Ruční spouštěč pro zahájení pracovního postupu |
-| **Fetch Financial News Feed** | Uzel RSS Read, který stahuje nejnovější obchodní titulky z RSS kanálu (výchozí je kanál NYT Business, není vyžadován žádný API klíč) |
-| **Aggregate Headlines** | Uzel Aggregate, který shromažďuje nadpisy a shrnutí ze všech položek kanálu do jednoho seznamu |
-| **Clean Extracted News Data** | Uzel Set, který kombinuje všechny titulky do jednoho textového pole |
+|------|---------|
+| **When clicking 'Execute workflow'** | Ruční spouštěč pro zahájení workflow |
+| **Fetch Financial News Feed** | Uzel RSS Read, který stahuje nejnovější obchodní titulky z RSS feedu (výchozí je feed NYT Business, není vyžadován žádný API klíč) |
+| **Aggregate Headlines** | Uzel Aggregate, který shromažďuje titulky a shrnutí ze všech položek feedu do jediného seznamu |
+| **Clean Extracted News Data** | Uzel Set, který spojí všechny titulky do jednoho textového pole |
 | **AI Financial News Summarizer** | AI Agent, který zpracovává zprávy pomocí systémového promptu finančního analytika |
-| **Lemonade Chat Model** | Připojuje se k vašemu lokálnímu Lemonade serveru se spuštěným LLM |
-| **Structured Output Parser** | Formátuje výstup AI do strukturovaného formátu JSON |
-| **Convert to File** | Převádí shrnutí do souboru ke stažení |
+| **Lemonade Chat Model** | Připojuje se k vašemu lokálnímu serveru Lemonade se spuštěným LLM |
+| **Structured Output Parser** | Formátuje výstup AI jako strukturovaný JSON |
+| **Convert to File** | Převede shrnutí na soubor ke stažení |
 
-> **Tip**: Chcete-li použít jiný zdroj zpráv, poklikejte na uzel **Fetch Financial News Feed** a nahraďte URL adresu libovolným RSS kanálem s obchodními nebo tržními zprávami dle vašeho výběru.
+> **Tip**: Chcete-li použít jiný zdroj zpráv, poklikejte na uzel **Fetch Financial News Feed** a nahraďte adresu URL libovolným preferovaným RSS feedem s obchodními nebo tržními zprávami.
 
 ### Krok 4: Konfigurace přihlašovacích údajů Lemonade
 
-Než pracovní postup spustíte, je třeba jej propojit s vaším lokálním Lemonade serverem:
+Než workflow spustíte, musíte jej propojit s vaším lokálním serverem Lemonade:
 
 1. Poklikejte na uzel **Lemonade Chat Model** v n8n
-2. V rozbalovací nabídce **Credential to connect with** vyberte možnost **Create New Credential**
-3. Zadejte hodnoty z níže uvedené tabulky a klikněte na tlačítko pro uložení.
+2. V rozevírací nabídce **Credential to connect with** vyberte **Create New Credential**
+3. Zadejte hodnoty z níže uvedené tabulky a klikněte na uložit.
 4. Vyberte příslušný model, který máte načtený v Lemonade Server.
 
   | Pole | Hodnota |
@@ -429,18 +428,18 @@ Než pracovní postup spustíte, je třeba jej propojit s vaším lokálním Lem
   | **Base URL** | `http://localhost:13305/api/v1` |
   | **API Key** | `lemonade` |
 
-> **Poznámka**: Před testováním spusťte v terminálu příkaz `lemonade status`, abyste ověřili, že Lemonade server běží.
+> **Poznámka**: Před testováním spusťte v terminálu příkaz `lemonade status`, abyste ověřili, že server Lemonade běží.
 <!-- @device:halo_box -->
-> Tento pracovní postup používá model GPT-OSS-120B, který je v Lemonade předinstalovaný. V nastavení uzlu Lemonade Chat Model jej můžete změnit na jiné načtené modely.
+> Toto workflow používá GPT-OSS-120B, který je v Lemonade předinstalovaný. V nastavení uzlu Lemonade Chat Model jej můžete změnit na jiné načtené modely.
 <!-- @device:end -->
 
-### Krok 5: Otestování pracovního postupu
+### Krok 5: Otestování workflow
 
 1. Ujistěte se, že Lemonade běží s načteným modelem
-2. Klikněte na tlačítko **Execute workflow** uprostřed dole na plátně
-3. Sledujte, jak se jednotlivé uzly zleva doprava postupně vykonávají – po dokončení se zbarví zeleně
-4. Poklikáním na uzel **AI Financial News Summarizer** zobrazíte vygenerované shrnutí v dolním panelu.
-5. Poklikáním na uzel **Convert to File** stáhnete odpovídající textový soubor v dolním panelu.
+2. Klikněte na **Execute workflow** uprostřed dole na plátně
+3. Sledujte, jak se jednotlivé uzly postupně zprava doleva vykonávají – po dokončení zezelenají
+4. Poklikejte na uzel **AI Financial News Summarizer**, abyste v dolním panelu zobrazili vygenerované shrnutí.
+5. Poklikejte na uzel **Convert to File**, abyste v dolním panelu stáhli odpovídající textový soubor.
 
 ## Pochopení AI Agenta
 
@@ -456,27 +455,27 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-Agent přijímá vyčištěná data zpráv a vytváří strukturované shrnutí s tržním sentimentem.
+Agent přijímá vyčištěná data zpráv a vrací strukturované shrnutí s náladou na trhu.
 
-### Uložení pracovního postupu
+### Uložení workflow
 
-Klikněte na název pracovního postupu nahoře a podle potřeby jej přejmenujte. Pracovní postupy se během práce automaticky ukládají.
+Klikněte na název workflow nahoře a podle potřeby jej přejmenujte. Workflow se během práce automaticky ukládá.
 
 ## Další kroky
 
-- **Naplánujte automatizaci**: Nahraďte ruční spouštěč (Manual Trigger) uzlem **Schedule Trigger** pro denní spouštění
-- **Odesílejte oznámení**: Přidejte uzel **Discord**, **Slack** nebo **Email** pro přijímání shrnutí
-- **Vyzkoušejte různé modely**: Změňte model v uzlu Lemonade Chat Model a experimentujte s různými LLM
-- **Změňte zdroj zpráv**: Nasměrujte uzel **Fetch Financial News Feed** na jiný RSS kanál, abyste sledovali jiné rubriky nebo publikace
-- **Vyzkoušejte různá backendová řešení**: n8n také podporuje [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio a další lokální backendy pro LLM
+- **Naplánování automatizace**: Nahraďte Manual Trigger uzlem **Schedule Trigger**, aby se workflow spouštělo denně
+- **Odesílání oznámení**: Přidejte uzel **Discord**, **Slack** nebo **Email** pro přijímání shrnutí
+- **Vyzkoušejte jiné modely**: Změňte model v uzlu Lemonade Chat Model a experimentujte s různými LLM
+- **Změna zdroje zpráv**: Nasměrujte uzel **Fetch Financial News Feed** na jiný RSS feed, abyste sledovali jiné sekce nebo publikace
+- **Vyzkoušejte jiné backendy**: n8n také podporuje [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model), LM Studio a další lokální LLM backendy
 
 ### Prozkoumejte šablony n8n
 
-n8n nabízí stovky předpřipravených šablon pracovních postupů. Prohlédněte si oficiální knihovnu šablon na adrese:
+n8n nabízí stovky předpřipravených šablon workflow. Procházejte oficiální knihovnu šablon na adrese:
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
-Vyhledejte pojmy „AI", „LLM" nebo „automation", abyste našli pracovní postupy, které lze importovat a přizpůsobit.
+Vyhledejte „AI“, „LLM“ nebo „automation“, abyste našli workflow, které můžete importovat a přizpůsobit.
 
 Další informace naleznete v [dokumentaci n8n](https://docs.n8n.io/).
 

@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
   "title": "Guida introduttiva a vLLM",
-  "description": "Scopri come eseguire l'inferenza e il serving utilizzando vLLM containerizzato sulla GPU integrata",
+  "description": "Scopri come eseguire inferenza e serving utilizzando vLLM containerizzato sulla iGPU integrata",
   "auto_translated": true
 }

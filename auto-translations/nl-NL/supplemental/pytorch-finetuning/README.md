@@ -16,50 +16,50 @@ SPDX-License-Identifier: MIT
 
 ## Overzicht
 
-Deze tutorial biedt stapsgewijze voorbeelden voor het fine-tunen van een groot taalmodel (LLM) met PyTorch en ROCm. Het behandelt verschillende technieken, van standaard fine-tuning tot geheugenefficiënte Parameter-Efficient Fine-Tuning (PEFT)-strategieën, zodat u modellen eenvoudig kunt aanpassen aan uw behoeften.
+Deze tutorial biedt stapsgewijze voorbeelden voor het fine-tunen van een large language model (LLM) met PyTorch en ROCm. Het behandelt verschillende technieken, van standaard fine-tuning tot geheugenefficiënte Parameter-Efficient Fine-Tuning (PEFT)-strategieën, zodat je modellen eenvoudig kunt aanpassen aan je behoeften.
 
-**Gebruikt model**: google/gemma-3-4b-it  *(zie [HF-authenticatie inschakelen](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) indien gated)*  
-**Hardware**: AMD Radeon™ GPU met ondersteuning voor ROCm  
+**Gebruikt model**: google/gemma-3-4b-it (QLoRA-script: openai/gpt-oss-20b)  *(zie [HF-authenticatie inschakelen](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) indien gated)*  
+**Hardware**: AMD Radeon™ GPU met ROCm-ondersteuning  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
 > **Opmerking:** 
-> - Voor volledige fine-tuning is minimaal **64 GB systeemgeheugen** vereist, waarvan minimaal **32 GB beschikbaar moet zijn voor de GPU** (die 32 GB maakt deel uit van de 64 GB, en komt daar niet bovenop).
-> - U kunt ook andere modelarchitecturen proberen, waaronder **GPT-OSS-20B**, door het model in de aangeleverde trainingsscripts te vervangen.
+> - Volledige fine-tuning vereist ten minste **64 GB systeemgeheugen**, waarvan ten minste **32 GB beschikbaar voor de GPU** (de 32 GB maakt deel uit van de 64 GB, en komt daar niet bovenop).
+> - Je kunt ook andere modelarchitecturen proberen, waaronder **GPT-OSS-20B**, door het model in de meegeleverde trainingsscripts te vervangen.
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **Opmerking:** Voor LoRA- en QLoRA-fine-tuning is minimaal **32 GB systeemgeheugen** vereist, waarvan minimaal **16 GB beschikbaar moet zijn voor de GPU** (die 16 GB maakt deel uit van de 32 GB, en komt daar niet bovenop).
+> **Opmerking:** LoRA- en QLoRA-fine-tuning vereisen ten minste **32 GB systeemgeheugen**, waarvan ten minste **16 GB beschikbaar voor de GPU** (de 16 GB maakt deel uit van de 32 GB, en komt daar niet bovenop).
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Opmerking:** Voor LoRA-fine-tuning is minimaal **32 GB systeemgeheugen** vereist, waarvan minimaal **16 GB beschikbaar moet zijn voor de GPU** (die 16 GB maakt deel uit van de 32 GB, en komt daar niet bovenop).
+> **Opmerking:** LoRA-fine-tuning vereist ten minste **32 GB systeemgeheugen**, waarvan ten minste **16 GB beschikbaar voor de GPU** (de 16 GB maakt deel uit van de 32 GB, en komt daar niet bovenop).
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Opmerking:** Voor LoRA- en QLoRA-fine-tuning is een grafische kaart met minimaal **16 GB toegewezen GPU-geheugen** en **32 GB systeemgeheugen** vereist.
+> **Opmerking:** LoRA- en QLoRA-fine-tuning vereisen een grafische kaart met ten minste **16 GB toegewezen GPU-geheugen** en **32 GB systeemgeheugen**.
 > - Onder Linux verloopt de training volledig in het toegewezen VRAM van de grafische kaart.
-> - Er wordt niet teruggevallen op gedeeld GPU-geheugen (systeemgeheugen) wanneer het VRAM vol is.
-> - Kaarten met minder dan 16 GB toegewezen VRAM lopen tijdens training onder Linux vast door onvoldoende geheugen, zelfs als het systeem over voldoende RAM beschikt.
+> - Er wordt niet teruggevallen op gedeeld GPU-geheugen (systeemgeheugen) wanneer het VRAM op is.
+> - Kaarten met minder dan 16 GB toegewezen VRAM lopen tijdens de training onder Linux zonder geheugen, zelfs als het systeem over voldoende RAM beschikt.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Opmerking:** Voor LoRA-fine-tuning is minimaal **16 GB totaal GPU-geheugen** en **32 GB systeemgeheugen** vereist.
-> - Onder Windows bestaat het totale GPU-geheugen uit het toegewezen VRAM van de grafische kaart samen met gedeeld GPU-geheugen (geleend van het systeemgeheugen).
-> - Kaarten met minder dan 16 GB toegewezen VRAM kunnen deze playbook daarom nog steeds uitvoeren door gedeeld GPU-geheugen te gebruiken om het verschil te compenseren.
+> **Opmerking:** LoRA-fine-tuning vereist ten minste **16 GB totaal GPU-geheugen** en **32 GB systeemgeheugen**.
+> - Onder Windows combineert het totale GPU-geheugen het toegewezen VRAM van de grafische kaart met gedeeld GPU-geheugen (geleend van het systeemgeheugen).
+> - Daarom kunnen kaarten met minder dan 16 GB toegewezen VRAM deze playbook nog steeds uitvoeren door gedeeld GPU-geheugen te gebruiken om het verschil te overbruggen.
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Wat u zult leren
+## Wat je leert
 
-- Hoe u een LLM fine-tunet met LoRA, QLoRA en volledige fine-tuning met PyTorch en ROCm
-- Hoe u uw fine-getunede model opslaat en implementeert
-- Hoe u de training bewaakt en veelvoorkomende problemen oplost
+- Hoe je een LLM fine-tunet met behulp van LoRA, QLoRA en volledige fine-tuning met PyTorch en ROCm
+- Hoe je je fine-getunede model opslaat en implementeert
+- Hoe je de training monitort en veelvoorkomende problemen oplost
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## De geheugenconfiguratie instellen
@@ -69,7 +69,7 @@ Deze tutorial biedt stapsgewijze voorbeelden voor het fine-tunen van een groot t
 
 <!-- @device:halo_box -->
 ## Controleren op software-updates
-> **Opmerking**: Als VS Code niet is geïnstalleerd, kunt u het installeren met Ryzen AI Developer Center.
+> **Opmerking**: Als VS Code niet is geïnstalleerd, kun je het installeren met Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -92,7 +92,7 @@ source finetune-venv/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Geef uw gebruiker toegang tot GPU-apparaten** (log uit en weer in om dit van kracht te laten worden):
+**Geef je gebruiker toegang tot GPU-apparaten** (log uit en weer in om dit van kracht te laten worden):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -154,12 +154,12 @@ pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate p
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### HF-authenticatie inschakelen (gated of aangepaste/niet-voorgeïnstalleerde modellen)
+#### HF-authenticatie inschakelen (gated of aangepaste / niet-vooraf geïnstalleerde modellen)
 
-In dit voorbeeld gebruiken we **google/gemma-3-4b-it**, wat een **gated** model is. U moet de voorwaarden van het model op Hugging Face accepteren en zich vervolgens authenticeren, zodat de trainingsscripts het kunnen downloaden.
+In dit voorbeeld gebruiken we **google/gemma-3-4b-it**, een **gated** model. Je moet de voorwaarden van het model op Hugging Face accepteren en je vervolgens authenticeren, zodat de trainingsscripts het kunnen downloaden.
 
-1. **Accepteer de licentie:** Open [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), meld u aan (of maak een account aan) en accepteer de licentie/voorwaarden op de modelpagina (bijv. "Agree and access repository").
-2. **Installeer en meld u aan:** Installeer de Hugging Face CLI en voer daarna de standaard login uit:
+1. **Accepteer de licentie:** Open [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), log in (of maak een account aan), en accepteer de licentie/voorwaarden op de modelpagina (bijv. "Agree and access repository").
+2. **Installeren en inloggen:** Installeer de Hugging Face CLI en voer vervolgens de standaard login uit:
 
 ```bash
 pip install huggingface_hub
@@ -269,7 +269,7 @@ sys.exit(r.returncode)
 
 **LoRA (Low-Rank Adaptation)** houdt het basismodel bevroren en traint alleen kleine "adapter"-matrices die aan bepaalde lagen worden toegevoegd. 
 
-- **Het kernidee**: in plaats van een enorme gewichtsmatrix met miljoenen parameters bij te werken, leren we een low-rank update (twee kleine matrices waarvan het product veel minder parameters heeft). Dat levert een grote vermindering op van trainbare parameters en VRAM-gebruik, terwijl het grootste deel van de kwaliteit van volledige fine-tuning behouden blijft.
+- **Het kernidee**: in plaats van een enorme gewichtsmatrix met miljoenen parameters bij te werken, leren we een low-rank update (twee kleine matrices waarvan het product veel minder parameters heeft). Dat levert een grote vermindering op van trainbare parameters en VRAM, terwijl het grootste deel van de kwaliteit van volledige fine-tuning behouden blijft.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -284,7 +284,7 @@ W_updated = W + B × A
 
 ### Wat is QLoRA?
 
-**QLoRA** combineert **4-bit-kwantisatie** met **LoRA**. Het basismodel wordt geladen in 4-bit (grote geheugenbesparing), en alleen de LoRA-adapters worden getraind in hogere precisie. Zo krijgt u de parameter-efficiëntie van LoRA plus veel lager VRAM-gebruik, met een kleine kwaliteitsafweging ten opzichte van full-precision LoRA. Merk op dat 4-bit-kwantisatie numerieke instabiliteiten kan veroorzaken (loss spikes of NaN's), waardoor gebruikers vaak de voorkeur geven aan **LoRA** als er voldoende VRAM beschikbaar is.
+**QLoRA** combineert **4-bit kwantisering** met **LoRA**. Het basismodel wordt geladen in 4-bit (grote geheugenbesparing), en alleen de LoRA-adapters worden getraind met hogere precisie. Zo krijg je de parameterefficiëntie van LoRA plus veel minder VRAM-gebruik, met een kleine kwaliteitsafweging ten opzichte van volledige-precisie LoRA. Let op dat 4-bit kwantisering numerieke instabiliteiten kan veroorzaken (loss-spikes of NaN's), dus gebruikers geven vaak de voorkeur aan **LoRA** als er voldoende VRAM beschikbaar is.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -292,16 +292,16 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **Opmerking**: Voor MXFP4-basismodellen zoals `openai/gpt-oss-20b` raden we aan **LoRA** (`train_lora.py`) te gebruiken in plaats van QLoRA. Het 4-bit-traject van `bitsandbytes` in het QLoRA-script dekwantiseert MXFP4-gewichten doorgaans naar BF16, waardoor de run zich gedraagt als standaard LoRA. Native MXFP4 vereist `bitsandbytes` gebouwd vanuit de broncode plus een bijpassende Transformers/Triton/kernels-stack. Zie de [Transformers MXFP4-documentatie](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Opmerking**: Voor MXFP4-basismodellen zoals `openai/gpt-oss-20b` raden we aan **LoRA** (`train_lora.py`) te gebruiken in plaats van QLoRA. Het 4-bit traject van `bitsandbytes` in het QLoRA-script dekwantiseert MXFP4-gewichten doorgaans naar BF16, waardoor de run zich gedraagt als standaard LoRA. Native MXFP4 vereist `bitsandbytes` die vanuit de broncode is gebouwd, plus een passende Transformers/Triton/kernels-stack. Zie de [Transformers MXFP4-documentatie](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
 ### 2. Kies uw methode
 
 | Methode | Geheugen | Snelheid | Kwaliteit | Beste voor |
 |--------|--------|-------|---------|----------|
-| **QLoRA** (alleen Linux) | 12-16GB | Snelste | 90-95% | Laag geheugengebruik |
+| **QLoRA** (alleen Linux) | 12-16GB | Snelst | 90-95% | Laag geheugengebruik |
 | **LoRA** | 24-32GB | Snel | 95-98% | Gebalanceerde aanpak |
-| **Full** | 80GB+ | Traagste | 100% | Maximale kwaliteit |
+| **Full** | 80GB+ | Langzaamst | 100% | Maximale kwaliteit |
 
 ### 3. Training uitvoeren
 
@@ -311,27 +311,27 @@ De scripts zetten de dataset om in chatvoorbeelden. Het QLoRA-script gebruikt bi
 - **Gebruiker:** “Geef me een citaat over: &lt;tag&gt;”
 - **Assistent:** “&lt;citaat&gt; – &lt;auteur&gt;”
 
-Fine-tuning leert het model om te reageren op prompts die vragen om citaten over een onderwerp en deze terug te geven in het formaat `<quote text> - <author>`. De LoRA- en full fine-tuning-scripts gebruiken **databricks/databricks-dolly-15k** (algemene instructie/antwoordparen), dus de exacte taak varieert per script; het idee is hetzelfde - pas het model aan uw gekozen dataset en formaat aan.
+Fine-tuning leert het model om te reageren op prompts die vragen om citaten over een onderwerp en deze terug te geven in het formaat `<quote text> - <author>`. De LoRA- en full fine-tuning-scripts gebruiken **databricks/databricks-dolly-15k** (algemene instructie/antwoord-paren), dus de exacte taak varieert per script; het idee is hetzelfde - pas het model aan uw gekozen dataset en formaat aan.
 
-Hieronder vindt u een overzicht van de beschikbare trainingsmethoden. Elke methode linkt naar het bijbehorende script en biedt een korte beschrijving om de juiste aanpak te kiezen.
+Hieronder vindt u een overzicht van de beschikbare trainingsmethoden. Elke methode linkt naar het bijbehorende script en bevat een korte beschrijving om de juiste aanpak te kiezen.
 
 | Script                           | Methode            | Beschrijving                                                                                                         | Typisch VRAM | Aanbevolen voor                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Traint kleine adaptermatrices terwijl het basismodel wordt bevroren. 3-5x sneller; ~95-98% volledige kwaliteit.                         | 24–32GB      | Gevorderde gebruikers; meerdere adapters; meer VRAM    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(alleen Linux)*             | **QLoRA**       | 4-bit kwantisering + LoRA-adapters. Laagste geheugengebruik, snelste, kleine kwaliteitscompromis. Vereist `bitsandbytes` (alleen Linux).                            | 12–16GB      | De meeste gebruikers; snelle experimenten; beperkt VRAM      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Werkt alle modelparameters bij. Maximale kwaliteit; hoogste geheugen- en rekengebruik.                                    | 40GB+        | Maximale kwaliteit; onderzoek; groot VRAM           |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Traint kleine adaptermatrices terwijl het basismodel bevroren blijft. 3-5x sneller; ~95-98% van de volledige kwaliteit.                         | 24–32GB      | Gevorderde gebruikers; meerdere adapters; meer VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(alleen Linux)*             | **QLoRA**       | 4-bit kwantisering + LoRA-adapters. Laagste geheugengebruik, snelst, kleine kwaliteitsafweging. Vereist `bitsandbytes` (alleen Linux).                            | 12–16GB      | Meeste gebruikers; snelle experimenten; beperkt VRAM      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Full Fine-tuning** | Werkt alle modelparameters bij. Maximale kwaliteit; hoogste geheugen- en rekengebruik.                                    | 40GB+        | Maximale kwaliteit; onderzoek; veel VRAM           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Opmerking:** Full fine-tuning (`train_full_finetuning.py`) kan meer dan 64GB systeem-RAM vereisen en is mogelijk niet haalbaar op dit apparaat. Overweeg om in plaats daarvan LoRA of QLoRA te gebruiken.
+> **Let op:** Full fine-tuning (`train_full_finetuning.py`) kan meer dan 64GB systeem-RAM vereisen en is mogelijk niet haalbaar op dit apparaat. Overweeg in plaats daarvan LoRA of QLoRA te gebruiken.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Opmerking:** Full fine-tuning (`train_full_finetuning.py`) kan meer dan 64GB systeem-RAM vereisen en is mogelijk niet haalbaar op dit apparaat. Overweeg om in plaats daarvan LoRA te gebruiken.
+> **Let op:** Full fine-tuning (`train_full_finetuning.py`) kan meer dan 64GB systeem-RAM vereisen en is mogelijk niet haalbaar op dit apparaat. Overweeg in plaats daarvan LoRA te gebruiken.
 <!-- @os:end -->
 <!-- @device:end -->
 
-Selecteer eenvoudig uw gewenste `Training method`, download het bijbehorende script en voer het uit met behulp van het commando terwijl uw virtuele omgeving actief blijft: 
+Selecteer eenvoudigweg uw gewenste `Training method`, download het bijbehorende script en voer het uit met het commando terwijl uw virtuele omgeving geactiveerd blijft: 
 
 ```python
 python3 train_<method_name>.py.
@@ -358,7 +358,7 @@ outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-### Na LoRA/QLoRA Training
+### Na LoRA/QLoRA-training
 
 ```python
 from peft import AutoPeftModelForCausalLM
@@ -366,11 +366,11 @@ from transformers import AutoTokenizer
 
 # Load model with LoRA or QLoRA adapters
 model = AutoPeftModelForCausalLM.from_pretrained(
-    "output-gemma-3-4b-it-qlora",   # or "output-gemma-3-4b-lora" depending on your training
+    "output-gpt-oss-20b-qlora",   # or "output-gemma-3-4b-it-lora" depending on your training
     device_map="auto",
     torch_dtype="auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-it-qlora")
+tokenizer = AutoTokenizer.from_pretrained("output-gpt-oss-20b-qlora")
 
 # Generate text
 prompt = "Explain quantum computing:"
@@ -388,12 +388,12 @@ merged_model.save_pretrained("gemma-3-4b-merged")
 tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
-**Opmerking:**  
-- Zorg ervoor dat de naam van de modelmap (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) overeenkomt met uw daadwerkelijke uitvoermap van de training.  
-- Als u LoRA in plaats van QLoRA hebt gebruikt, vervang dan gewoon het pad dienovereenkomstig.  
+**Let op:**  
+- Zorg ervoor dat de naam van de modelmap (`output-gemma-3-4b-it-full`, `output-gpt-oss-20b-qlora`) overeenkomt met uw werkelijke outputmap van de training.  
+- Als u LoRA heeft gebruikt in plaats van QLoRA, vervang dan gewoon het pad.  
 - Sommige Gemma-modellen vereisen het opgeven van `trust_remote_code=True` in `from_pretrained`; voeg dit toe als u een gerelateerde waarschuwing ziet.
 
-Voor meer aangepaste instellingen (padding tokens, apparaat, enz.), raadpleeg het script dat u voor de training hebt gebruikt.
+Voor meer aangepaste instellingen (padding tokens, device, enz.), raadpleegt u het script dat u voor de training heeft gebruikt.
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -493,7 +493,7 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ### Uw eigen dataset gebruiken
 
-Alle scripts gebruiken hetzelfde datasetformaat. Vervang het laadgedeelte:
+Alle scripts gebruiken hetzelfde datasetformaat. Vervang het ladingsgedeelte:
 
 ```python
 from datasets import load_dataset
@@ -521,11 +521,11 @@ dataset = dataset.map(format_instruction)
 
 **Datasetformaat voor lokaal JSON/JSONL-bestand:**
 
-Bij gebruik van deze methode dient u ervoor te zorgen dat uw JSON-bestanden correct zijn gestructureerd om parseerfouten te voorkomen. 
+Bij gebruik van deze methode dient u ervoor te zorgen dat uw JSON-bestanden correct gestructureerd zijn om verwerkingsfouten te voorkomen. 
 
 De volgende richtlijnen moeten worden nageleefd:
-* **Bestandsopmaak:** JSON-bestanden dienen te worden opgemaakt binnen een geïntegreerde ontwikkelomgeving (IDE) om een juiste structuur en syntaxis te waarborgen.
-* **Vereiste sleutels:** Het aangepaste JSON-bestand moet de sleutels `instruction` en `response` bevatten. Deze sleutels zijn essentieel om de methode correct te laten functioneren.
+* **Bestandsopmaak:** JSON-bestanden moeten worden opgemaakt binnen een Integrated Development Environment (IDE) om een correcte structuur en syntaxis te garanderen.
+* **Vereiste sleutels:** Het aangepaste JSON-bestand moet de sleutels `instruction` en `response` bevatten. Deze sleutels zijn essentieel voor het correct functioneren van de methode.
 ```json
 [
   {
@@ -540,13 +540,13 @@ De volgende richtlijnen moeten worden nageleefd:
 ```
 **Datasetformaat voor Hugging Face Hub-dataset**
 
-Bij gebruik van datasets van Hugging Face dient u ervoor te zorgen dat uw datasets correct zijn gestructureerd om naadloze integratie mogelijk te maken. 
+Bij gebruik van datasets van Hugging Face dient u ervoor te zorgen dat uw datasets correct gestructureerd zijn om naadloze integratie mogelijk te maken. 
 
 De volgende richtlijnen dienen te worden gevolgd:
-* **Instructie-antwoordpaar:** Focus op datasets die een `instruction-response`-paar bevatten. Deze structuur is essentieel voor de beoogde functionaliteit.
-* **Aangepaste sleutelwijziging:** Als uw dataset niet voldoet aan de `instruction-response`-structuur, hebt u de mogelijkheid om de `format_instruction()`-functie aan te passen. Hiermee kunt u specifieke sleutels naar wens toepassen.
+* **Instructie-antwoord-paar:** Focus op datasets die een `instruction-response`-paar bevatten. Deze structuur is essentieel voor de beoogde functionaliteit.
+* **Aangepaste sleutelwijziging:** Als uw dataset niet voldoet aan de `instruction-response`-structuur, heeft u de mogelijkheid om de functie `format_instruction()` aan te passen. Hiermee kunt u specifieke sleutels naar wens verwerken.
 
-Voorbeeldaanpassing: In gevallen waarin de uitvoer van de dataset moet worden aangepast, kunt u het antwoordgedeelte binnen de format_instruction()-functie wijzigen om aan uw vereisten te voldoen.
+Voorbeeldaanpassing: In gevallen waarin de output van de dataset moet worden aangepast, kunt u het antwoordgedeelte binnen de functie format_instruction() wijzigen om aan uw vereisten te voldoen.
 ```python
 def format_instruction(example):
     return {
@@ -567,10 +567,10 @@ instruction,response
 
 ### Trainingsparameters aanpassen
 
-Bewerk het trainingsscript en wijzig de variabelen zodat ze overeenkomen met uw doelen: **leersnelheid** (`LR`), **epochs** (`EPOCHS`), **batchgrootte** (`BATCH_SIZE`), **gradiëntaccumulatie** (`GRAD_ACCUM_STEPS`), en voor LoRA/QLoRA **rank** (`LORA_R`). Voor snellere runs gebruikt u minder epochs en een hogere leersnelheid (LR); voor betere kwaliteit gebruikt u meer epochs en een lagere LR. Verminder de batchgrootte of sequentielengte als u out-of-memory-fouten tegenkomt.
+Bewerk het trainingsscript en wijzig de variabelen zodat deze overeenkomen met uw doelen: **leersnelheid** (`LR`), **epochs** (`EPOCHS`), **batchgrootte** (`BATCH_SIZE`), **gradiëntaccumulatie** (`GRAD_ACCUM_STEPS`), en voor LoRA/QLoRA **rank** (`LORA_R`). Gebruik voor snellere runs minder epochs en een hogere leersnelheid (LR); gebruik voor betere kwaliteit meer epochs en een lagere LR. Verminder de batchgrootte of sequentielengte als u out-of-memory-fouten tegenkomt.
 ### Tips voor geheugenoptimalisatie
 
-Als u foutmeldingen over onvoldoende geheugen tegenkomt:
+Als u fouten door onvoldoende geheugen tegenkomt:
 
 **1. Verklein de batchgrootte:**
 ```python
@@ -583,7 +583,7 @@ GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
 max_seq_length=256  # Instead of 512
 ```
 
-**3. Gebruik agressievere kwantisatie:**
+**3. Gebruik agressievere quantisatie:**
 ```
 Full → LoRA → QLoRA
 ```
@@ -595,9 +595,9 @@ model.gradient_checkpointing_enable()
 
 ---
 
-## Bewaking en foutopsporing
+## Monitoring & foutopsporing
 
-### GPU-geheugen bewaken
+### GPU-geheugen bijhouden
 
 ```bash
 # Check ROCm GPU status
@@ -616,7 +616,7 @@ pip install wandb
 wandb login
 ```
 
-Stel in het trainingsscript `report_to="wandb"` in en optioneel `run_name="your-experiment-name"` in de trainerconfiguratie. Als u liever geen Wandb gebruikt, laat `report_to` dan op de standaardwaarde staan of stel deze in op `"none"`.
+Stel in het trainingsscript `report_to="wandb"` in en optioneel `run_name="your-experiment-name"` in de trainerconfiguratie. Als u liever geen gebruik maakt van Wandb, laat `report_to` dan op de standaardwaarde staan of stel deze in op `"none"`.
 
 ### Veelvoorkomende problemen
 
@@ -629,7 +629,7 @@ GRAD_ACCUM_STEPS = 16
 # Or: python train_qlora.py
 ```
 
-#### Loss neemt niet af
+#### Loss daalt niet
 
 **Oplossing:** Pas de leersnelheid aan
 ```python
@@ -646,14 +646,14 @@ BATCH_SIZE = 8
 ```
 ## Volgende stappen
 
-Nadat u succesvol fine-tuning hebt uitgevoerd, kunt u de volgende stappen overwegen om nog meer uit uw model te halen:
+Nadat u succesvol hebt gefinetuned, kunt u de volgende stappen overwegen om meer uit uw model te halen:
 
 1. **Evalueer** grondig op achtergehouden testdata om generalisatie te meten en overfitting te voorkomen.
 2. **Experimenteer** door verschillende hyperparameterwaarden te proberen voor een betere balans tussen nauwkeurigheid, snelheid en geheugengebruik.
 3. **Houd** al uw experimenten (en bijbehorende metrics) bij met Weights & Biases voor reproduceerbaar onderzoek.
-4. **Probeer** te trainen op uw eigen aangepaste datasets om het model specifiek af te stemmen op uw gebruikssituatie.
-5. **Implementeer** uw fine-tuned model voor snelle inferentie met behulp van efficiënte backends zoals vLLM op compatibele hardware.
-6. **Verken** geavanceerde technieken, waaronder prompt engineering, mixed precision en langere sequentielengtes.
-7. **Train** meerdere LoRA-adapters voor verschillende taken of domeinen en wissel deze naar behoefte.
+4. **Probeer** te trainen op uw eigen aangepaste datasets om het model specifiek af te stemmen op uw use-case.
+5. **Implementeer** uw gefinetunede model voor snelle inferentie met efficiënte backends zoals vLLM op compatibele hardware.
+6. **Verken** geavanceerde technieken zoals prompt engineering, mixed precision en langere sequentielengtes.
+7. **Train** meerdere LoRA-adapters voor verschillende taken of domeinen en wissel ze indien nodig.
 
 ---

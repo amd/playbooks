@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
-  "title": "Aloitus vLLM:n käytössä",
-  "description": "Opi suorittamaan päättelyä ja palvelinkäyttöä konteissa toimivalla vLLM:llä integroidulla GPU:lla",
+  "title": "Aloittaminen vLLM:n kanssa",
+  "description": "Opi suorittamaan päättelyä ja palvelua käyttämällä konteissa toimivaa vLLM:ää integroidulla GPU:lla",
   "auto_translated": true
 }

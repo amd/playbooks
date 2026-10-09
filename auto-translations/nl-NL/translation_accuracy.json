@@ -186,12 +186,12 @@
       "quality_issues": "Good; 'aanbieden' for 'serving' slightly off but acceptable in context."
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
-      "source_sha256": "9bc128f29f40f1a7b56da55d7c22d3520c4a232d990259f020928394eb7b517e",
+      "source_sha256": "fa7d8770c407468815e9a981c8a7349429d334b24c1002a729e277ac7f1988be",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Extra '# ' added before @github-only comment tag, altering markdown structure. Otherwise accurate, fluent, code/terms intact."
+      "quality_score": 93,
+      "quality_issues": "Stray '# ' added before @github-only comment; minor missing blank line before Step 3 header. Otherwise accurate, fluent, code intact."
     },
     "playbooks/core/n8n-automation-gpt-oss/platform.md": {
       "source_sha256": "6da0efa4363f8c8b33c8f0aa984442e5e1e00638ff41102554cf519a537dbfa1",
@@ -202,12 +202,12 @@
       "quality_issues": "\"deze playbook\" gender questionable (de/het playbook); otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/core/n8n-automation-gpt-oss/playbook.json": {
-      "source_sha256": "004e579ddcaf166de5205c73c05d8b368f701c20fdd5a1dd77be591927f0f441",
+      "source_sha256": "1dc9545bd669bc210df8f6ac88f72a7148cd91578322e5d614d9476bf9741e6a",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Fluent, accurate; 'nieuwssamenvatter' slightly awkward but understandable."
+      "quality_score": 94,
+      "quality_issues": "Minor: 'nieuwssamenvatter' slightly awkward neologism, but acceptable and clear."
     },
     "playbooks/core/pytorch-rocm-llms/README.md": {
       "source_sha256": "c21d88a2b435760acf276582d292917abd1501bae2ab0343d07a71ee3e1970cd",
@@ -386,12 +386,12 @@
       "quality_issues": "Accurate and fluent; minor stylistic naturalness only."
     },
     "playbooks/supplemental/lemonade-getting-started/README.md": {
-      "source_sha256": "9352db15e96748d77bd1db916212ae60537bccec11f553ef9addc748715d5f22",
+      "source_sha256": "7cc148ae86900d4b631a0b0b2007c6bdeca29212a14af95e2b41d71a6b2a0748",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Inconsistent register: 'je' in first half switches to formal 'u' in NPU section. 'visie' for vision is awkward. Otherwise accurate, code intact."
+      "quality_issues": "Inconsistent register: switches from 'je' (first half) to 'u' (NPU section onward). Minor: 'er verlaat nooit gegevens' awkward word order."
     },
     "playbooks/supplemental/lemonade-getting-started/platform.md": {
       "source_sha256": "091ccd8efa90e078a5d740aac0e40d742ad91f5898d0de9e1574d62e6778ec17",
@@ -402,12 +402,12 @@
       "quality_issues": "\"deze playbook\" should be \"dit playbook\" (gender); otherwise accurate and fluent."
     },
     "playbooks/supplemental/lemonade-getting-started/playbook.json": {
-      "source_sha256": "b6d4d92098822e89fb92aa2ed859b47a98a331cd123fb8bd07fe1b5f7e6139a1",
+      "source_sha256": "a3e0145b2d86aa1885a044ecbbef03e5824dfbb7ed9b219d960490517ec095ce",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Fluent, accurate; 'opensource lokale' word order slightly awkward, 'open-source lokale' preferred."
+      "quality_score": 93,
+      "quality_issues": "Accurate and fluent; 'Gen AI' kept as-is, acceptable but could render 'generatieve AI'."
     },
     "playbooks/supplemental/llama-factory-finetuning/README.md": {
       "source_sha256": "7ff1d8bf4e3a0e54af3a8c90e2ffc62350c8ba5c1e49d4e5ffbce3fe10fe78cb",
@@ -442,20 +442,20 @@
       "quality_issues": "Accurate, fluent, terminology and brand names intact; minor style preference only"
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
-      "source_sha256": "d6b66b52107f19e10f53a4dbac24c90a47ac5723bee591cd7e6ed4bf3026676d",
+      "source_sha256": "bc14fc60e96c238af90570c9452ad2bc37fe61451d7df1ac9f14688f69145e81",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Fluent, accurate, tags/code intact. Minor: 'deze playbook' gender inconsistency, slight quantisation terminology variation (kwantisatie/kwantisering)."
+      "quality_score": 90,
+      "quality_issues": "Minor T/U inconsistency (je vs u); 'deze playbook' gender; otherwise accurate, fluent, code/brands intact."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
-      "source_sha256": "b6e938616f1c620508e5b8a50e4e07008ab3d1ce6398cb45acbd373a74b316c7",
+      "source_sha256": "edfbd025fcce55a03c54a50dca617bc17bf927da67e2e82056d8b4183ad2ccd8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate, fluent; 'Fine-tuning'/'Fine-tune' kept in English, acceptable but slight inconsistency in casing."
+      "quality_score": 90,
+      "quality_issues": "Accurate, terms intact; 'Fine-tune' as imperative slightly informal but acceptable."
     },
     "playbooks/supplemental/pytorch-kernels/platform.md": {
       "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",
@@ -514,20 +514,20 @@
       "quality_issues": "Mixed English/Dutch 'fine-tuned' inconsistent; trademark placement acceptable; otherwise fluent and accurate."
     },
     "playbooks/supplemental/vllm-inference/README.md": {
-      "source_sha256": "2c7c430c6bd3a17f01f85f6d212bc2f41134c5fccba880eaaa5c884374f75ed7",
+      "source_sha256": "acc59b7a8652bc6d1269c1bcbf6c4f8bb8beb8956f38d6ea6814510156b1ef0f",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Fluent, accurate, code/URLs intact. Anglicisms (serveren, gecontaineriseerde) acceptable but slightly awkward; minor spacing before final heading."
+      "quality_issues": "Fluent, accurate, code/URLs intact. Minor: 'brokken' for chunks slightly awkward; missing blank line before Additional Resources heading."
     },
     "playbooks/supplemental/vllm-inference/playbook.json": {
-      "source_sha256": "8337b7e3e229f047e7bdad287599bb06a268a800b8524e6165ebf1ce15ca06db",
+      "source_sha256": "cd215e0c6fd0145f0786fc472ac0ce1ba3255108a2ca93ffffb1dbe053616c31",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Untranslated technical terms 'inference/serving' acceptable but could localize; 'gecontaineriseerde' slightly awkward. Otherwise accurate and fluent."
+      "quality_issues": "\"serving\" left untranslated; acceptable but slightly inconsistent terminology."
     },
     "playbooks/supplemental/speech2speech-translation/README.md": {
       "source_sha256": "30451d6a37e2c41dfe741c16d8e2ee3ff5ad1100f306755dffb3ec10b08e0653",

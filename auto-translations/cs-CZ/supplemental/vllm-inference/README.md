@@ -13,64 +13,58 @@ SPDX-License-Identifier: MIT
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
-
-
 ## Přehled
 
-vLLM je vysoce výkonný inferenční engine navržený pro velké jazykové modely (LLM). Poskytuje optimalizované obsluhování pomocí kontinuálního dávkování pro vysokou propustnost a OpenAI kompatibilní API pro bezproblémovou integraci aplikací. Díky tomu je vLLM skvělou volbou pro produkční nasazení, kde jsou klíčové rychlost a efektivita využití zdrojů.
+vLLM je vysoce výkonný inferenční engine navržený pro velké jazykové modely (LLM). Poskytuje optimalizované servírování s kontinuálním dávkováním pro vysokou propustnost a API kompatibilní s OpenAI pro bezproblémovou integraci aplikací. Díky tomu je vLLM skvělou volbou pro produkční nasazení, kde jsou klíčové rychlost a efektivní využití zdrojů.
 
-Tento playbook vás naučí, jak obsluhovat LLM pomocí kontejnerizovaného vLLM na integrovaném GPU a jak komunikovat s modely prostřednictvím OpenAI Python API.
+Tato příručka vás naučí, jak servírovat LLM pomocí kontejnerizovaného vLLM na integrovaném GPU a jak interagovat s modely prostřednictvím Python API OpenAI.
 
 ## Co se naučíte
 
 - Jak nastavit a spustit vLLM server s podporou AMD ROCm™
-- Jak komunikovat s modely přes koncové body kompatibilní s OpenAI API
+- Jak interagovat s modely přes API koncové body kompatibilní s OpenAI
 - Jak odesílat prompty na lokální server pomocí `vllm-prompt`
 
 ## Nastavení konfigurace paměti
-
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
 ## Kontrola aktualizací softwaru
 
-> **Poznámka**: Pokud VS Code není nainstalováno, můžete jej nainstalovat pomocí AMD Ryzen™ AI Developer Center.
-
+> **Poznámka**: Pokud VS Code není nainstalován, můžete jej nainstalovat pomocí AMD Ryzen™ AI Developer Center.
 <!-- @require:software-update -->
 <!-- @device:end -->
-
 ## Instalace softwarových předpokladů
 
-vLLM běží v předpřipraveném kontejneru s ROCm a jeho závislostmi, které jsou již sladěné. Není potřeba žádná další instalace.
+vLLM běží v předpřipraveném kontejneru s ROCm a jeho závislostmi, které jsou předem sladěny. Není nutná žádná další instalace.
 
-Není potřeba žádný krok instalace vLLM na straně hostitele. Spusťte vLLM pomocí:
+Na straně hostitele neexistuje žádný instalační krok pro vLLM. Spusťte vLLM pomocí:
 
 ```bash
 vllm-launch
 ```
 
-Spouštěč (launcher) spustí kontejner, zacílí na integrované GPU a zpřístupní lokální OpenAI kompatibilní vLLM server. Alternativně můžete kliknout na ikonu vLLM v hlavním panelu.
+Launcher spustí kontejner, cílí na integrovanou GPU a zpřístupní lokální OpenAI-kompatibilní vLLM server. Případně klikněte na ikonu vLLM na hlavním panelu.
 
 ## Rychlý start
 
-### 1. Ověřte, že server vLLM běží
+### 1. Ověřte, že vLLM server běží
 
-Spuštění pomocí `vllm-launch` může trvat pár minut, než se vše inicializuje. Jakmile se spustí, server je dostupný na adrese `http://localhost:8001`. Nechte terminál se spouštěním otevřený, protože server běží na popředí, a otevřete samostatný terminál pro zbývající kroky. Následující příklady používají `Qwen/Qwen3-1.7B`; pokud je váš spouštěč nakonfigurován pro jiný model, nahraďte v požadavcích toto ID modelu.
+Inicializace všeho pomocí `vllm-launch` může trvat několik minut. Jakmile se spustí, server je dostupný na adrese `http://localhost:8001`. Terminál se spuštěním nechte otevřený, protože server běží na popředí, a poté otevřete samostatný terminál pro zbývající kroky. Níže uvedené příklady používají `Qwen/Qwen3-1.7B`; pokud je váš launcher nakonfigurován pro jiný model, nahraďte v požadavcích odpovídajícím ID modelu.
 
 ### 2. Odešlete prompt
 
-Použijte poskytnutý skript `vllm-prompt` k odeslání požadavku na lokální OpenAI kompatibilní server vLLM:
+Pomocí přiloženého skriptu `vllm-prompt` odešlete požadavek na lokální OpenAI-kompatibilní vLLM server:
 
 ```bash
 vllm-prompt "Tell me a story"
 ```
 
-### 3. Komunikace s modelem pomocí OpenAI Python API
+### 3. Chatujte s modelem pomocí OpenAI Python API
 
-Jelikož vLLM poskytuje OpenAI kompatibilní API, můžete k interakci s ním použít Python balíček `openai`.
+Jelikož vLLM poskytuje API kompatibilní s OpenAI, můžete k interakci s ním použít balíček `openai` pro Python.
 
 Nejprve vytvořte virtuální prostředí Pythonu:
-
 <!-- @os:linux -->
 <!-- @device:halo_box -->
 ```bash
@@ -79,13 +73,13 @@ python3 -m venv vllm-env
 source vllm-env/bin/activate
 ```
 <!-- @device:end -->
-
+<!-- @os:end -->
 Nainstalujte balíček OpenAI
 ```bash
 pip install openai
 ```
 
-Vytvořte klienta `OpenAI` směřujícího na lokální server vLLM namísto serverů OpenAI. Klient vyžaduje `api_key`, ale vLLM jej neověřuje, takže funguje jakýkoli řetězec:
+Vytvořte klienta `OpenAI` nasměrovaného na místní server vLLM namísto serverů OpenAI. Klient vyžaduje `api_key`, ale vLLM jej neověřuje, takže funguje libovolný řetězec:
 
 ```python
 from openai import OpenAI
@@ -96,7 +90,7 @@ client = OpenAI(
 )
 ```
 
-Poté odešlete požadavek na dokončení chatu (chat completion). Používá se stejný formát zpráv jako u OpenAI API — seznam zpráv s rolemi jako `"user"` a `"assistant"`. Nastavení `stream=True` znamená, že odpověď bude přicházet postupně, nikoli najednou:
+Poté odešlete požadavek na dokončení chatu (chat completion request). Ten používá stejný formát zpráv jako OpenAI API — seznam zpráv s rolemi jako `"user"` a `"assistant"`. Nastavení `stream=True` znamená, že odpověď bude přicházet postupně, nikoli najednou:
 
 ```python
 response = client.chat.completions.create(
@@ -109,7 +103,7 @@ response = client.chat.completions.create(
 )
 ```
 
-Nakonec projděte streamované fragmenty a vypište každou část textu, jakmile dorazí:
+Nakonec iterujte přes streamovaná data (chunks) a vypisujte jednotlivé části textu, jak postupně přicházejí:
 
 ```python
 for chunk in response:
@@ -120,18 +114,17 @@ for chunk in response:
 
 Přiložený skript [chat_with_model.py](assets/chat_with_model.py) obsahuje celý příklad a lze jej stáhnout.
 
-
 ## Výběr a konfigurace modelu
 
-Ve výchozím nastavení `vllm-launch` obsluhuje `Qwen/Qwen3-1.7B` jako testovací model na portu `8001`. Model, port a parametry obsluhy vLLM můžete změnit bez opětovného sestavení nebo úpravy kontejneru.
+Ve výchozím nastavení `vllm-launch` poskytuje `Qwen/Qwen3-1.7B` jako testovací model na portu `8001`. Model, port a parametry vLLM serving můžete změnit bez nutnosti kontejner znovu sestavovat nebo upravovat.
 
-### Modely testované AMD
+### Modely testované společností AMD
 
 Následující modely jsou předkonfigurované a ověřené společností AMD:
 
 | Model | Poznámky |
 |-------|-------|
-| `Qwen/Qwen3-1.7B` | Výchozí model. Odlehčený a rychlý pro načítání. |
+| `Qwen/Qwen3-1.7B` | Výchozí model. Odlehčený a rychlý na načtení. |
 | `openai/gpt-oss-20b` | Větší model pro kvalitnější odpovědi. |
 
 ### Spuštění jiného modelu
@@ -144,31 +137,31 @@ vllm-launch --model openai/gpt-oss-20b
 
 ### Změna portu
 
-Předejte port vyšší než 1024 pomocí `--port` (nebo `-p`); výchozí je `8001`:
+Předejte port vyšší než 1024 pomocí `--port` (nebo `-p`); výchozí hodnota je `8001`:
 
 ```bash
 vllm-launch --port 8080 --model openai/gpt-oss-20b
 ```
 
-Pokud port změníte, nasměrujte `base_url` klienta na stejný port (například `http://localhost:8080/v1`).
+Pokud port změníte, nasměrujte `base_url` svého klienta na stejný port (například `http://localhost:8080/v1`).
 
 ### Předávání dalších parametrů vLLM
 
-Veškeré další argumenty jsou přeposílány přímo do vLLM, takže můžete ladit chování obsluhy, jako je délka kontextu nebo datový typ. Existují dva způsoby, jak je zadat.
+Jakékoli další argumenty jsou přeposlány přímo do vLLM, takže můžete doladit chování serveru, například délku kontextu nebo datový typ. Existují dva způsoby, jak je zadat.
 
-**Inline**, za volbami spouštěče:
+**Vložené (inline)**, za možnostmi spouštěče:
 
 ```bash
 vllm-launch --model openai/gpt-oss-20b --max-model-len 8192
 ```
 
-**Trvale**, v konfiguračním souboru `~/.local/share/vLLM/vllm-launch.conf`. Tento soubor ve výchozím stavu neexistuje — vytvořte jej a přidejte své argumenty jako pole Bash:
+**Trvale**, v konfiguračním souboru na `~/.local/share/vLLM/vllm-launch.conf`. Tento soubor ve výchozím stavu neexistuje – vytvořte jej a přidejte své argumenty jako pole Bash:
 
 ```bash
 VLLM_EXTRA_ARGS=(--max-model-len 8192 --dtype float16)
 ```
 
-Použijte `+=` k připojení k výchozím argumentům namísto jejich nahrazení:
+Pomocí `+=` připojíte hodnoty k výchozím argumentům, místo abyste je nahradili:
 
 ```bash
 VLLM_EXTRA_ARGS+=(--max-model-len 8192)
@@ -180,7 +173,7 @@ Chcete-li kdykoli zobrazit všechny možnosti spouštěče, spusťte:
 vllm-launch --help
 ```
 
-### Kde jsou modely uloženy
+### Kam se ukládají modely
 
 `vllm-launch` hledá modely na dvou místech:
 
@@ -195,11 +188,11 @@ Stažený model můžete umístit do kteréhokoli z těchto adresářů a spusti
 vllm-launch --model /var/cache/models/my-model
 ```
 
-> **Poznámka**: Očekává se, že spuštění vlastního staženého modelu tímto způsobem bude fungovat, jakmile je model umístěn do jednoho z výše uvedených adresářů, ale tento postup zatím nebyl oficiálně ověřen společností AMD.
+**Poznámka**: Spuštění vlastního staženého modelu tímto způsobem by mělo fungovat, jakmile je model umístěn v jednom z výše uvedených adresářů, ale tento pracovní postup zatím nebyl oficiálně ověřen společností AMD.
 
 ## Řešení problémů
 
-### Connection refused
+### Spojení odmítnuto
 
 Ujistěte se, že server běží:
 ```bash
@@ -208,22 +201,22 @@ curl http://localhost:8001/health
 
 ## Shrnutí
 
-V tomto playbooku jste se naučili, jak:
+V tomto playbooku jste se naučili:
 
-- Spustit kontejnerizované vLLM s podporou ROCm na integrovaném GPU
-- Spustit server vLLM s koncovými body kompatibilními s OpenAI API na portu 8001
+- Spustit kontejnerizovaný vLLM s podporou ROCm na integrovaném GPU
+- Spustit server vLLM s koncovými body API kompatibilními s OpenAI na portu 8001
 - Odesílat prompty pomocí `vllm-prompt`
-- Provádět volání API na server vLLM pomocí streamovaných i nestreamovaných požadavků
+- Provádět volání API na server vLLM pomocí jak streamovaných, tak nestreamovaných požadavků
 - Řešit běžné problémy se spuštěním serveru, pamětí a připojením klienta
 
-Nyní máte kontejnerizované nasazení vLLM pro obsluhu velkých jazykových modelů s optimalizovaným výkonem na integrovaném GPU.
+Nyní máte k dispozici kontejnerizované nasazení vLLM pro poskytování velkých jazykových modelů s optimalizovaným výkonem na integrovaném GPU.
 
 ## Další kroky
 
-- **Vyzkoušejte různé modely** — Použijte `vllm-launch --model <model>` k experimentování s různými LLM a porovnání výkonu (viz [Výběr a konfigurace modelu](#choosing-and-configuring-a-model)).
-- **Vytvořte aplikaci** — Použijte OpenAI kompatibilní API k integraci vLLM do Python aplikace, chatbota nebo automatizovaného pracovního postupu.
-- **Doladit a nasadit** — Doladit model pomocí LoRA nebo QLoRA a poté jej nasadit pomocí vLLM pro optimalizovanou inferenci.
+- **Vyzkoušejte různé modely** — Pomocí `vllm-launch --model <model>` experimentujte s různými LLM a porovnejte výkon (viz [Výběr a konfigurace modelu](#choosing-and-configuring-a-model)).
+- **Vytvořte aplikaci** — Použijte API kompatibilní s OpenAI k integraci vLLM do aplikace v Pythonu, chatbota nebo automatizovaného pracovního postupu.
+- **Doladění a nasazení** — Doladíte model pomocí LoRA nebo QLoRA a poté jej nasadíte pomocí vLLM pro optimalizovanou inferenci.
 ## Další zdroje
 
-- **[Oficiální dokumentace vLLM](https://docs.vllm.ai/)** — Komplexní příručky a odkazy na API
+- **[Oficiální dokumentace vLLM](https://docs.vllm.ai/)** — Komplexní návody a reference k API
 - **[Repozitář vLLM na GitHubu](https://github.com/vllm-project/vllm)** — Zdrojový kód, problémy a diskuze komunity

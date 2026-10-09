@@ -13,51 +13,46 @@ SPDX-License-Identifier: MIT
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
-
-
 ## Genel Bakış
 
-vLLM, büyük dil modelleri (LLM'ler) için tasarlanmış yüksek performanslı bir çıkarım motorudur. Yüksek verim için sürekli gruplama (continuous batching) ile optimize edilmiş sunum sağlar ve sorunsuz uygulama entegrasyonu için OpenAI uyumlu bir API sunar. Bu özellikler, hızın ve kaynak verimliliğinin kritik olduğu üretim dağıtımları için vLLM'yi mükemmel bir seçim haline getirir.
+vLLM, büyük dil modelleri (LLM) için tasarlanmış yüksek performanslı bir çıkarım motorudur. Yüksek verim için sürekli gruplama (continuous batching) özelliğiyle optimize edilmiş sunum ve sorunsuz uygulama entegrasyonu için OpenAI uyumlu bir API sağlar. Bu özellikler, vLLM'i hız ve kaynak verimliliğinin kritik önem taşıdığı üretim dağıtımları için mükemmel bir seçim haline getirir.
 
-Bu kılavuz, entegre GPU üzerinde konteynerleştirilmiş vLLM kullanarak LLM'leri nasıl sunacağınızı ve OpenAI Python API'si aracılığıyla modellerle nasıl etkileşime geçeceğinizi öğretir.
+Bu kılavuz, entegre GPU üzerinde container'laştırılmış vLLM kullanarak LLM'leri nasıl sunacağınızı ve modellerle OpenAI Python API aracılığıyla nasıl etkileşim kuracağınızı öğretir.
 
 ## Öğrenecekleriniz
 
-- AMD ROCm™ desteğiyle bir vLLM sunucusunu nasıl kuracağınızı ve başlatacağınızı
-- OpenAI uyumlu API uç noktaları aracılığıyla modellerle nasıl etkileşime geçeceğinizi
-- `vllm-prompt` ile yerel sunucuya nasıl istem gönderileceğini
+- AMD ROCm™ desteğiyle bir vLLM sunucusunun nasıl kurulup başlatılacağı
+- OpenAI uyumlu API uç noktaları üzerinden modellerle nasıl etkileşim kurulacağı
+- `vllm-prompt` ile yerel sunucuya nasıl komut gönderileceği
 
-## Bellek Yapılandırmasını Ayarlama
-
+## Bellek Yapılandırmasının Ayarlanması
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Yazılım Güncellemelerini Kontrol Etme
+## Yazılım Güncellemelerini Kontrol Edin
 
-> **Not**: VS Code yüklü değilse, AMD Ryzen™ AI Geliştirici Merkezi ile yükleyebilirsiniz.
-
+> **Not**: VS Code yüklü değilse, AMD Ryzen™ AI Developer Center ile yükleyebilirsiniz.
 <!-- @require:software-update -->
 <!-- @device:end -->
+## Yazılım Ön Koşullarının Yüklenmesi
 
-## Yazılım Ön Koşullarını Yükleme
+vLLM, ROCm ve bağımlılıklarının önceden eşleştirildiği önceden oluşturulmuş bir konteyner içinde çalışır. Ek bir yükleme gerekmez.
 
-vLLM, ROCm ve bağımlılıklarının önceden eşleştirildiği önceden oluşturulmuş bir konteynerde çalışır. Ek bir kurulum gerekmez.
-
-Ana makine tarafında bir vLLM kurulum adımı yoktur. vLLM'yi şununla başlatın:
+Ana makine tarafında vLLM yükleme adımı yoktur. vLLM'i şununla başlatın:
 
 ```bash
 vllm-launch
 ```
 
-Başlatıcı, konteyneri başlatır, entegre GPU'yu hedefler ve yerel bir OpenAI uyumlu vLLM sunucusu sunar. Alternatif olarak, görev çubuğundaki vLLM simgesine tıklayın.
+Başlatıcı, konteyneri çalıştırır, entegre GPU'yu hedefler ve OpenAI uyumlu yerel bir vLLM sunucusu sunar. Alternatif olarak, görev çubuğundaki vLLM simgesine tıklayın.
 
 ## Hızlı Başlangıç
 
 ### 1. vLLM Sunucusunun Çalıştığını Doğrulayın
 
-`vllm-launch`'ın her şeyi başlatması birkaç dakika sürebilir. Başladığında, sunucu `http://localhost:8001` adresinde kullanılabilir olur. Sunucu ön planda çalıştığından başlatma terminalini açık tutun, ardından kalan adımlar için ayrı bir terminal açın. Aşağıdaki örnekler `Qwen/Qwen3-1.7B` kullanır; başlatıcınız farklı bir model için yapılandırılmışsa, isteklerde o model kimliğini kullanın.
+`vllm-launch`, her şeyi başlatmak için birkaç dakika sürebilir. Başladıktan sonra sunucu `http://localhost:8001` adresinde kullanılabilir olur. Sunucu ön planda çalıştığı için başlatma terminalini açık tutun, ardından kalan adımlar için ayrı bir terminal açın. Aşağıdaki örneklerde `Qwen/Qwen3-1.7B` kullanılmaktadır; başlatıcınız farklı bir model için yapılandırılmışsa isteklerde o model kimliğini kullanın.
 
-### 2. Bir İstem Gönderin
+### 2. Bir İstem (Prompt) Gönderin
 
 Yerel vLLM OpenAI uyumlu sunucusuna bir istek göndermek için sağlanan `vllm-prompt` betiğini kullanın:
 
@@ -65,12 +60,11 @@ Yerel vLLM OpenAI uyumlu sunucusuna bir istek göndermek için sağlanan `vllm-p
 vllm-prompt "Tell me a story"
 ```
 
-### 3. OpenAI Python API'sini Kullanarak Modelle Sohbet Edin
+### 3. OpenAI Python API kullanarak modelle sohbet edin
 
-vLLM, OpenAI uyumlu bir API sunduğundan, onunla etkileşime geçmek için `openai` Python paketini kullanabilirsiniz.
+vLLM, OpenAI uyumlu bir API sunduğundan, onunla etkileşim kurmak için `openai` Python paketini kullanabilirsiniz.
 
-Öncelikle, bir Python sanal ortamı oluşturun:
-
+Öncelikle bir Python sanal ortamı oluşturun:
 <!-- @os:linux -->
 <!-- @device:halo_box -->
 ```bash
@@ -79,13 +73,13 @@ python3 -m venv vllm-env
 source vllm-env/bin/activate
 ```
 <!-- @device:end -->
-
+<!-- @os:end -->
 OpenAI paketini yükleyin
 ```bash
 pip install openai
 ```
 
-OpenAI'nin sunucuları yerine yerel vLLM sunucusuna yönlendirilmiş bir `OpenAI` istemcisi oluşturun. `api_key`, istemci tarafından gereklidir ancak vLLM bunu doğrulamaz, bu nedenle herhangi bir dize işe yarar:
+OpenAI'nin sunucuları yerine yerel vLLM sunucusuna yönlendirilmiş bir `OpenAI` istemcisi oluşturun. İstemci için `api_key` gereklidir, ancak vLLM bunu doğrulamaz, bu yüzden herhangi bir dize işe yarar:
 
 ```python
 from openai import OpenAI
@@ -96,7 +90,7 @@ client = OpenAI(
 )
 ```
 
-Ardından, bir sohbet tamamlama isteği gönderin. Bu, OpenAI API'siyle aynı mesaj biçimini kullanır — `"user"` ve `"assistant"` gibi rollere sahip mesajlardan oluşan bir liste. `stream=True` ayarı, yanıtın tamamının bir kerede değil, kademeli olarak geleceği anlamına gelir:
+Ardından, bir sohbet tamamlama (chat completion) isteği gönderin. Bu, OpenAI API ile aynı mesaj biçimini kullanır — `"user"` ve `"assistant"` gibi rollere sahip bir mesaj listesi. `stream=True` ayarlanması, yanıtın tek seferde değil, aşamalı olarak gelmesini sağlar:
 
 ```python
 response = client.chat.completions.create(
@@ -109,7 +103,7 @@ response = client.chat.completions.create(
 )
 ```
 
-Son olarak, akış halinde gelen parçalar üzerinde döngü kurun ve her metin parçasını geldiğinde yazdırın:
+İşte son adım: akışla gelen (streamed) parçalar üzerinde döngü kurun ve her bir metin parçasını geldiği anda yazdırın:
 
 ```python
 for chunk in response:
@@ -118,12 +112,11 @@ for chunk in response:
         print(content, end="", flush=True)
 ```
 
-Dahil edilen [chat_with_model.py](assets/chat_with_model.py) betiği, tüm örneği içerir ve indirilebilir.
+İndirilebilir [chat_with_model.py](assets/chat_with_model.py) betiği, örneğin tamamını içerir.
 
+## Model Seçme ve Yapılandırma
 
-## Bir Model Seçme ve Yapılandırma
-
-Varsayılan olarak, `vllm-launch`, `8001` portunda test modeli olarak `Qwen/Qwen3-1.7B`'yi sunar. Konteyneri yeniden oluşturmadan veya düzenlemeden modeli, portu ve vLLM sunum parametrelerini değiştirebilirsiniz.
+Varsayılan olarak, `vllm-launch`, test modeli olarak `Qwen/Qwen3-1.7B`'yi `8001` portunda sunar. Modeli, portu ve vLLM sunum parametrelerini konteyneri yeniden oluşturmadan veya düzenlemeden değiştirebilirsiniz.
 
 ### AMD tarafından test edilen modeller
 
@@ -136,7 +129,7 @@ Aşağıdaki modeller AMD tarafından önceden yapılandırılmış ve doğrulan
 
 ### Farklı bir model başlatma
 
-Model kimliğini `--model` (veya `-m`) ile geçirin:
+Model kimliğini `--model` (veya `-m`) ile iletin:
 
 ```bash
 vllm-launch --model openai/gpt-oss-20b
@@ -144,31 +137,31 @@ vllm-launch --model openai/gpt-oss-20b
 
 ### Portu değiştirme
 
-1024'ün üzerinde bir portu `--port` (veya `-p`) ile geçirin; varsayılan `8001`'dir:
+`--port` (veya `-p`) ile 1024'ün üzerinde bir port belirtin; varsayılan değer `8001`'dir:
 
 ```bash
 vllm-launch --port 8080 --model openai/gpt-oss-20b
 ```
 
-Portu değiştirirseniz, istemcinizin `base_url` değerini aynı porta yönlendirin (örneğin `http://localhost:8080/v1`).
+Bağlantı noktasını değiştirirseniz, istemcinizin `base_url` değerini aynı bağlantı noktasına yönlendirin (örneğin `http://localhost:8080/v1`).
 
-### Ek vLLM parametreleri geçirme
+### Ek vLLM parametrelerinin geçirilmesi
 
-Ek argümanların tümü doğrudan vLLM'ye iletilir, böylece bağlam uzunluğu veya veri türü gibi sunum davranışını ayarlayabilirsiniz. Bunları sağlamanın iki yolu vardır.
+Eklenen tüm ek bağımsız değişkenler doğrudan vLLM'e iletilir, böylece bağlam uzunluğu veya veri türü gibi sunum davranışlarını ayarlayabilirsiniz. Bunları sağlamanın iki yolu vardır.
 
-Başlatıcı seçeneklerinden sonra, **satır içi** olarak:
+**Satır içi**, başlatıcı seçeneklerinden sonra:
 
 ```bash
 vllm-launch --model openai/gpt-oss-20b --max-model-len 8192
 ```
 
-`~/.local/share/vLLM/vllm-launch.conf` konumundaki bir yapılandırma dosyasında **kalıcı olarak**. Bu dosya varsayılan olarak mevcut değildir — oluşturun ve argümanlarınızı bir Bash dizisi olarak ekleyin:
+**Kalıcı olarak**, `~/.local/share/vLLM/vllm-launch.conf` konumundaki bir yapılandırma dosyasında. Bu dosya varsayılan olarak mevcut değildir — oluşturun ve argümanlarınızı bir Bash dizisi olarak ekleyin:
 
 ```bash
 VLLM_EXTRA_ARGS=(--max-model-len 8192 --dtype float16)
 ```
 
-Varsayılan argümanların yerine geçmek yerine onlara eklemek için `+=` kullanın:
+`+=` kullanarak varsayılan argümanlara, onların yerine geçmek yerine ekleme yapın:
 
 ```bash
 VLLM_EXTRA_ARGS+=(--max-model-len 8192)
@@ -180,7 +173,7 @@ Herhangi bir zamanda tüm başlatıcı seçeneklerini görmek için şunu çalı
 vllm-launch --help
 ```
 
-### Modellerin depolandığı yer
+### Modellerin saklandığı konum
 
 `vllm-launch`, modelleri iki konumda arar:
 
@@ -189,13 +182,13 @@ vllm-launch --help
 | Sistem modelleri | `/var/cache/models` |
 | Kullanıcı modelleri | `~/.local/share/vLLM/models` |
 
-İndirilen bir modeli bu dizinlerden birine yerleştirebilir ve yolunu veya kimliğini `--model` ile geçirerek başlatabilirsiniz:
+İndirilen bir modeli bu dizinlerden birine yerleştirip yolunu veya kimliğini `--model` parametresine vererek başlatabilirsiniz:
 
 ```bash
 vllm-launch --model /var/cache/models/my-model
 ```
 
-> **Not**: Kendi indirdiğiniz modeli bu şekilde çalıştırmanın, model yukarıdaki dizinlerden birine yerleştirildikten sonra çalışması beklenir, ancak bu iş akışı AMD tarafından henüz resmi olarak doğrulanmamıştır.
+**Not**: Kendi indirdiğiniz modeli bu şekilde çalıştırmanın, model yukarıdaki dizinlerden birine yerleştirildiğinde çalışması beklenir, ancak bu iş akışı henüz AMD tarafından resmi olarak doğrulanmamıştır.
 
 ## Sorun Giderme
 
@@ -210,20 +203,20 @@ curl http://localhost:8001/health
 
 Bu kılavuzda şunları öğrendiniz:
 
-- Entegre GPU üzerinde ROCm desteğiyle konteynerleştirilmiş vLLM'yi başlatma
-- Port 8001'de OpenAI uyumlu API uç noktalarıyla bir vLLM sunucusu başlatma
-- `vllm-prompt` ile istem gönderme
-- Hem akış hem de akış olmayan istekler kullanarak vLLM sunucusuna API çağrıları yapma
+- Entegre GPU üzerinde ROCm destekli konteynerleştirilmiş vLLM'yi başlatma
+- 8001 portunda OpenAI uyumlu API uç noktalarına sahip bir vLLM sunucusu başlatma
+- `vllm-prompt` ile prompt gönderme
+- Hem akışlı hem de akışsız istekler kullanarak vLLM sunucusuna API çağrıları yapma
 - Sunucu başlatma, bellek ve istemci bağlantılarıyla ilgili yaygın sorunları giderme
 
 Artık entegre GPU üzerinde optimize edilmiş performansla büyük dil modellerini sunmak için konteynerleştirilmiş bir vLLM dağıtımına sahipsiniz.
 
 ## Sonraki Adımlar
 
-- **Farklı modeller deneyin** — Farklı LLM'leri denemek ve performansı karşılaştırmak için `vllm-launch --model <model>` kullanın (bkz. [Bir Model Seçme ve Yapılandırma](#choosing-and-configuring-a-model)).
+- **Farklı modeller deneyin** — Farklı LLM'leri denemek ve performansı karşılaştırmak için `vllm-launch --model <model>` komutunu kullanın (bkz. [Model Seçme ve Yapılandırma](#choosing-and-configuring-a-model)).
 - **Bir uygulama oluşturun** — vLLM'yi bir Python uygulamasına, sohbet botuna veya otomasyon iş akışına entegre etmek için OpenAI uyumlu API'yi kullanın.
 - **İnce ayar yapın ve sunun** — LoRA veya QLoRA kullanarak bir modele ince ayar yapın, ardından optimize edilmiş çıkarım için vLLM ile dağıtın.
 ## Ek Kaynaklar
 
 - **[vLLM Resmi Dokümantasyonu](https://docs.vllm.ai/)** — Kapsamlı kılavuzlar ve API referansları
-- **[vLLM GitHub Deposu](https://github.com/vllm-project/vllm)** — Kaynak kod, sorunlar ve topluluk tartışmaları
+- **[vLLM GitHub Deposu](https://github.com/vllm-project/vllm)** — Kaynak kodu, sorunlar ve topluluk tartışmaları
