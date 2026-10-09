@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-LoRA Fine-tuning GPT-OSS 20B (Pre-quantized) on AMD Strix Halo (GFX1151)
+LoRA Fine-tuning GPT-OSS 20B (Pre-quantized) on AMD GPUs
 
 This script fine-tunes the pre-quantized GPT-OSS 20B model using LoRA adapters.
 The model comes pre-quantized with Mxfp4, so we don't need additional quantization.
