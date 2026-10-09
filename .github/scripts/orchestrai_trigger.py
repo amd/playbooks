@@ -195,6 +195,9 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
     }
 
 
+WINDOWS_THEROCK_SCRIPT = "InstallationScripts/gfx/windows-therock-tarball.ps1"
+
+
 def make_builds(batch, cfg):
     """Return (builds, missing) — missing names required provisioning vars left empty."""
     platform = batch["platform"]
@@ -209,9 +212,6 @@ def make_builds(batch, cfg):
         if not source:
             missing.append("ORCHESTRAI_WINDOWS_DRIVER_SOURCE")
         build_vars = {"driver_source": source, "driver_copy": drv.get("copy", "direct")}
-        # Read only by windows-therock-hipinfo.ps1; unset makes that a no-op.
-        if prov.get("windows_therock_url"):
-            build_vars["THEROCK_URL"] = prov["windows_therock_url"]
     else:
         scripts = list(prov.get("linux_install_scripts", []))
         device = batch.get("arch", "")
@@ -354,6 +354,15 @@ def make_builds(batch, cfg):
                 "script": script,
                 "reboot_after": bool(entry.get("reboot_after", False)),
             })
+
+    # TheRock is scheduled via extra_install_scripts (hipInfo for GPU isolation).
+    # The installer needs a Windows source, and THEROCK_PUBLISH_ENV=0 keeps it
+    # off the machine env/PATH so it can't leak into other playbooks.
+    if any(s["script"] == WINDOWS_THEROCK_SCRIPT for s in scripts):
+        url = prov.get("windows_therock_url", "")
+        if not url:
+            missing.append("ORCHESTRAI_WINDOWS_THEROCK_URL")
+        build_vars.update(THEROCK_URL=url, THEROCK_PUBLISH_ENV="0")
 
     builds = {"install_scripts": scripts, "vars": build_vars}
     return builds, missing
