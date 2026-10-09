@@ -87,6 +87,9 @@ def apply_env_overrides(cfg):
     therock = os.environ.get("ORCHESTRAI_THEROCK_URL")
     if therock:
         prov["therock_url"] = therock
+    windows_therock = os.environ.get("ORCHESTRAI_WINDOWS_THEROCK_URL")
+    if windows_therock:
+        prov["windows_therock_url"] = windows_therock
     linux_driver = os.environ.get("ORCHESTRAI_LINUX_DRIVER_SOURCE")
     if linux_driver:
         prov.setdefault("linux_kernel_driver", {})["source"] = linux_driver
@@ -206,6 +209,9 @@ def make_builds(batch, cfg):
         if not source:
             missing.append("ORCHESTRAI_WINDOWS_DRIVER_SOURCE")
         build_vars = {"driver_source": source, "driver_copy": drv.get("copy", "direct")}
+        # Read only by windows-therock-hipinfo.ps1; unset makes that a no-op.
+        if prov.get("windows_therock_url"):
+            build_vars["THEROCK_URL"] = prov["windows_therock_url"]
     else:
         scripts = list(prov.get("linux_install_scripts", []))
         device = batch.get("arch", "")
@@ -336,6 +342,9 @@ def make_builds(batch, cfg):
         for entry in extra_map.get(pb_id, []):
             plats = entry.get("platforms")
             if plats and platform not in plats:
+                continue
+            devs = entry.get("devices")
+            if devs and batch.get("arch") not in devs:
                 continue
             script = entry.get("script")
             if not script or script in seen:
