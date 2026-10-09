@@ -18,12 +18,12 @@ SPDX-License-Identifier: MIT
 
 
 Chcesz uruchomić zaawansowane modele językowe AI na własnym sprzęcie? Ten przewodnik pokazuje, jak to zrobić.
-W tym samouczku wykorzystano PyTorch zasilany przez oprogramowanie AMD ROCm™ do uruchamiania modeli, które potrafią podsumowywać dokumenty, odpowiadać na pytania, generować tekst i wiele więcej — wszystko lokalnie.
+Ten samouczek wykorzystuje PyTorch zasilany przez oprogramowanie AMD ROCm™ do uruchamiania modeli, które potrafią streszczać dokumenty, odpowiadać na pytania, generować tekst i wiele więcej — wszystko działające lokalnie.
 
 ## Czego się nauczysz
 
 - Uruchamianie modeli LLM, takich jak gpt-oss-20b i qwen3.5-4B, lokalnie przy użyciu PyTorch i ROCm
-- Tworzenie narzędzia do podsumowywania dokumentów przy użyciu LLM
+- Tworzenie narzędzia do streszczania dokumentów przy użyciu modeli LLM
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Konfiguracja pamięci
@@ -44,7 +44,7 @@ W tym samouczku wykorzystano PyTorch zasilany przez oprogramowanie AMD ROCm™ d
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv z już zainstalowanym ROCm+PyTorch.
+W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć venv z już zainstalowanym ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -63,7 +63,7 @@ source pytorch-env/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv.
+W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć venv.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -79,7 +79,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv z już zainstalowanym ROCm+PyTorch.
+W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć venv z już zainstalowanym ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -90,7 +90,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv.
+W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć venv.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
@@ -100,8 +100,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Wskazówka**: Użytkownicy systemu Windows mogą potrzebować zmodyfikować swoją zasadę wykonywania PowerShell (np.
-> ustawiając ją na RemoteSigned lub Unrestricted) przed uruchomieniem niektórych poleceń Powershell.
+> **Wskazówka**: Użytkownicy systemu Windows mogą potrzebować zmodyfikować zasady wykonywania PowerShell
+> (np. ustawić RemoteSigned lub Unrestricted) przed uruchomieniem niektórych poleceń PowerShell.
 
 <!-- @os:end -->
 
@@ -112,6 +112,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:hf-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:hf-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->
@@ -130,10 +136,10 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Uwaga:** Jeśli model nie ładuje się poprawnie lub zabraknie pamięci, spróbuj zainstalować pakiet `kernels`, aby załadować model z zoptymalizowaną kwantyzacją.
+> **Uwaga:** Jeśli model nie wczyta się lub zabraknie pamięci, spróbuj zainstalować pakiet `kernels`, aby wczytać model z zoptymalizowaną kwantyzacją.
 >
 > ```bash
-> # Use this version which is compatible with the Transformers version
+> # Użyj tej wersji, która jest zgodna z wersją Transformers
 > pip install "kernels==0.14.1" 
 > ```
 <!-- @device:end -->
@@ -158,12 +164,12 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 
 ## Szybki start z przykładowymi skryptami
 
-Ten przewodnik zawiera gotowe do użycia skrypty. Kliknij je, aby wyświetlić podgląd i pobrać do tego samego katalogu, w którym utworzono środowisko.
+Ten przewodnik zawiera gotowe do użycia skrypty. Kliknij je, aby je podejrzeć i pobrać do tego samego katalogu, w którym znajduje się utworzone przez Ciebie środowisko.
 
 | Skrypt | Opis | Użycie |
 |--------|-------------|-------|
 | [run_llm.py](assets/run_llm.py) | Podstawowe generowanie tekstu przez LLM | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Narzędzie do podsumowywania dokumentów z obsługą Harmony | `python summarizer.py --file document.txt` |
+| [summarizer.py](assets/summarizer.py) | Narzędzie do streszczania dokumentów z obsługą Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -190,15 +196,15 @@ for script in ['run_llm.py', 'summarizer.py']:
 
 Oba skrypty obsługują:
 - Wybór modelu za pomocą flagi `--model`
-- Formatowanie szablonu czatu w celu prawidłowego prompowania modelu, co jest szczególnie przydatne przy podsumowywaniu dokumentów
+- Formatowanie szablonu czatu w celu prawidłowego podpowiadania modelowi, co jest szczególnie przydatne przy streszczaniu dokumentów
 
-## Ładowanie i uruchamianie pierwszego modelu LLM
+## Wczytywanie i uruchamianie pierwszego modelu LLM
 
 Dołączony skrypt [run_llm.py](assets/run_llm.py) pokazuje, jak generować tekst za pomocą modeli LLM przy użyciu PyTorch i AMD ROCm.
 
-> **Uwaga:** Podczas ładowania modelu Hugging Face Transformers najpierw sprawdza lokalną pamięć podręczną (`~/.cache/huggingface/hub` w systemie Linux, `C:\Users\<user>\.cache\huggingface\hub` w systemie Windows). Jeśli model nie znajduje się w pamięci podręcznej, zostaje automatycznie pobrany z huggingface.co. Pierwsze uruchomienie może potrwać kilka minut, w zależności od rozmiaru modelu i szybkości sieci.
+> **Uwaga:** Podczas wczytywania modelu Hugging Face Transformers najpierw sprawdza lokalną pamięć podręczną (`~/.cache/huggingface/hub` w systemie Linux, `C:\Users\<user>\.cache\huggingface\hub` w systemie Windows). Jeśli model nie znajduje się w pamięci podręcznej, zostaje automatycznie pobrany z huggingface.co. Pierwsze uruchomienie może potrwać kilka minut, w zależności od rozmiaru modelu i szybkości sieci.
 
-Poniższy fragment pokazuje, jak korzystać z modelu i dostosowywać zadawane pytania.
+Poniższy fragment kodu pokazuje, jak używać modelu i dostosowywać zadawane pytania.
 
 <!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -274,11 +280,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Tworzenie narzędzia do podsumowywania dokumentów
+## Tworzenie narzędzia do streszczania dokumentów
 
-Skoro wygenerowałeś już lokalny wynik LLM, możesz to wykorzystać do stworzenia praktycznego narzędzia do podsumowywania dokumentów. W tej sekcji użyjesz skryptu [summarizer.py](assets/summarizer.py), aby wczytać plik .txt i automatycznie wygenerować zwięzłe podsumowanie, wszystko działające lokalnie na Twoim GPU.
+Teraz, gdy wygenerowałeś lokalny wynik działania modelu LLM, możesz na tej podstawie zbudować praktyczne narzędzie do streszczania dokumentów. W tej sekcji użyjesz skryptu [summarizer.py](assets/summarizer.py), aby wczytać plik .txt i automatycznie wygenerować zwięzłe streszczenie, działające w całości lokalnie na Twoim GPU.
 
-Skrypt jest zaprojektowany tak, aby działać od razu po uruchomieniu. Otwórz skrypt w edytorze, aby zapoznać się z kodem, dostosować prompty i zmodyfikować parametry, takie jak długość i temperatura.
+Skrypt został zaprojektowany tak, aby działał od razu po uruchomieniu. Otwórz skrypt w edytorze, aby zapoznać się z kodem, dostosować podpowiedzi (prompty) i zmodyfikować parametry, takie jak długość i temperatura.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -306,23 +312,23 @@ python summarizer.py --file document.txt --max-length 400
 
 | Parametr | Co kontroluje | Typowe wartości |
 |-----------|------------------|----------------|
-| `max_new_tokens` | Maksymalna długość wyjścia LLM | Użyj 50–500 tokenów w przypadku podsumowań. (1 token to około 0,75 słowa w języku angielskim) |
-| `temperature` | Kreatywność. Niskie wartości sprawiają, że model jest bardziej skoncentrowany, wysokie zaś wprowadzają większą nieprzewidywalność | - **0,1–0,3**: Skoncentrowane, deterministyczne (dobre do podsumowań) <br> **0,5–0,7**: Zrównoważone (do ogólnego zastosowania) <br> **0,8–1,0**: Kreatywne, zróżnicowane (burza mózgów) |
-| `top_p` | Nucleus Sampling – niskie wartości ograniczają model do bardziej wąskich wyników | **0,1-0,5**: Ścisłe, przewidywalne <br> **0,9-0,95**: (standardowe, naturalne, konwersacyjne) |
+| `max_new_tokens` | Maksymalną długość danych wyjściowych modelu LLM | Użyj 50–500 tokenów dla streszczeń. (1 token to około 0,75 angielskiego słowa) |
+| `temperature` | Kreatywność. Niskie wartości sprawiają, że odpowiedź jest bardziej skoncentrowana, a wysokie — bardziej nieprzewidywalna | - **0,1–0,3**: skoncentrowana, deterministyczna (dobra do streszczeń) <br> **0,5–0,7**: zrównoważona (zastosowania ogólne) <br> **0,8–1,0**: kreatywna, zróżnicowana (burza mózgów) |
+| `top_p` | Nucleus Sampling — niskie wartości ograniczają model do węższego zakresu wyników | **0,1–0,5**: ścisłe, przewidywalne <br> **0,9–0,95**: (standardowe, naturalne, konwersacyjne) |
 
 
 ## Zastosowania w praktyce
 
-- **Analiza artykułów naukowych**: Wyodrębnianie kluczowych wniosków ze złożonych publikacji w celu szybkiego przeglądu
-- **Agregacja wiadomości**: Podsumowywanie artykułów informacyjnych w krótkie codzienne zestawienia lub najważniejsze informacje
-- **Notatki ze spotkań**: Kondensowanie transkrypcji do konkretnych zadań i zwięzłych podsumowań
-- **Przegląd dokumentów prawnych**: Szybkie wyodrębnianie istotnych klauzul lub zobowiązań z długich tekstów prawnych
-- **Dokumentacja kodu**: Generowanie zwięzłych przeglądów repozytoriów i wyjaśnień funkcji
-## Kolejne kroki
+- **Analiza prac badawczych**: wyodrębnianie kluczowych wniosków ze złożonych publikacji w celu szybkiego przeglądu
+- **Agregacja wiadomości**: streszczanie artykułów informacyjnych w krótkie codzienne podsumowania lub najważniejsze informacje
+- **Notatki ze spotkań**: skracanie transkrypcji do listy działań i zwięzłych podsumowań
+- **Przegląd dokumentów prawnych**: szybkie wyodrębnianie istotnych klauzul lub zobowiązań z długich tekstów prawnych
+- **Dokumentacja kodu**: generowanie zwięzłych przeglądów repozytoriów i wyjaśnień funkcji
+## Następne kroki
 
-- **Dostrajanie**: Dostosuj modele do swojej konkretnej dziedziny lub słownictwa branżowego, aby zwiększyć dokładność (zobacz Fine-tuning Playbooks)
+- **Dostrajanie (fine-tuning)**: Dostosuj modele do swojej konkretnej dziedziny lub terminologii, aby uzyskać lepszą dokładność (zobacz Fine-tuning Playbooks)
 - **Systemy RAG**: Połącz LLM-y z wyszukiwaniem dokumentów, aby uzyskać odpowiedzi i wyszukiwanie uwzględniające kontekst
 - **Eksploracja modeli**: Eksperymentuj z nowymi modelami, takimi jak Llama 3, Phi-3 czy Qwen, aby uzyskać lepsze wyniki
-- **Wdrożenie produkcyjne**: Skorzystaj z narzędzi takich jak vLLM do skalowalnego serwowania LLM w organizacjach
+- **Wdrożenie produkcyjne**: Korzystaj z narzędzi takich jak vLLM do skalowalnego serwowania LLM-ów w organizacjach
 
-Twój system daje Ci moc uruchamiania zaawansowanych modeli językowych lokalnie. Eksperymentuj z różnymi modelami, promptami i parametrami, aby odkryć, co najlepiej sprawdza się w Twoich aplikacjach.
+Twój system daje Ci możliwość lokalnego uruchamiania zaawansowanych modeli językowych. Eksperymentuj z różnymi modelami, promptami i parametrami, aby odkryć, co najlepiej sprawdza się w Twoich zastosowaniach.

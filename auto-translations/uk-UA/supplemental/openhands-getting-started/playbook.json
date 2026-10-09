@@ -1,6 +1,6 @@
 {
   "id": "openhands-getting-started",
-  "title": "Початок роботи з OpenHands і локальною LLM",
-  "description": "Встановіть Agent Canvas, підключіть локальну модель Lemonade та запустіть свого першого агента для написання коду OpenHands на AMD Ryzen™ AI.",
+  "title": "Початок роботи з OpenHands та локальною LLM",
+  "description": "Встановіть Agent Canvas, підключіть локальну модель Lemonade та запустіть свого першого агента з кодування OpenHands на вашому AMD Ryzen™ AI.",
   "auto_translated": true
 }

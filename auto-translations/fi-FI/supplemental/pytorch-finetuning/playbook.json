@@ -1,6 +1,6 @@
 {
   "id": "pytorch-finetuning",
-  "title": "Suurten kielimallien hienosäätö PyTorch- ja AMD ROCm™ -ohjelmistolla",
-  "description": "Hienosäädä suuria kielimalleja (LLM) käyttäen PyTorch- ja ROCm-tekniikoita.",
+  "title": "LLM-mallien hienosäätö PyTorch- ja AMD ROCm™ -ohjelmistolla",
+  "description": "Hienosäädä suuria kielimalleja (LLM) käyttäen PyTorch- ja ROCm-teknologioita.",
   "auto_translated": true
 }

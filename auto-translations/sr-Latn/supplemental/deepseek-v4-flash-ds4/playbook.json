@@ -1,6 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
   "title": "Pokretanje DeepSeek V4 Flash sa ds4",
-  "description": "Lokalno rasporedite DeepSeek V4 Flash koristeći ds4 inferentni mehanizam i interaktivno upravljajte modelima pomoću ds4-cockpit.",
+  "description": "Lokalno rasporedite DeepSeek V4 Flash koristeći ds4 inferencijski mehanizam i interaktivno upravljajte modelima pomoću ds4-cockpit.",
   "auto_translated": true
 }

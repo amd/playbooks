@@ -1,6 +1,6 @@
 {
   "id": "unsloth-llms-finetuning",
-  "title": "כוונון עדין (Fine-Tuning) של מודלי LLM עם Unsloth",
-  "description": "שימוש ב-Unsloth לכוונון עדין (fine-tuning) של LLM™ ביעילות זיכרון",
+  "title": "כוונון עדין (Fine-Tuning) של LLMs עם Unsloth",
+  "description": "שימוש ב-Unsloth לכוונון עדין (fine-tuning) של מודלי שפה גדולים (LLM) בצורה חסכונית בזיכרון™",
   "auto_translated": true
 }

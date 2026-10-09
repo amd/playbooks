@@ -16,35 +16,34 @@ SPDX-License-Identifier: MIT
 
 ## Översikt
 
-
-Vill du köra kraftfulla AI-språkmodeller på din egen hårdvara? Den här guiden visar dig hur.
-Den här handledningen använder PyTorch med stöd av AMD ROCm™-programvara för att köra modeller som kan sammanfatta dokument, svara på frågor, generera text med mera, allt körande lokalt.
+Vill du köra kraftfulla AI-språkmodeller på din egen hårdvara? Den här guiden visar hur du gör det.
+Den här handledningen använder PyTorch som drivs av AMD ROCm™-programvara för att köra modeller som kan sammanfatta dokument, svara på frågor, generera text med mera – allt lokalt.
 
 ## Vad du kommer att lära dig
 
-- Kör LLM:er som gpt-oss-20b och qwen3.5-4B lokalt med PyTorch och ROCm
+- Kör LLM:er som gpt-oss-20b och qwen3.5-4B lokalt med hjälp av PyTorch och ROCm
 - Skapa ett verktyg för dokumentsammanfattning med hjälp av LLM:er
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Ställa in minneskonfigurationen
+## Konfigurera minnesinställningar
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Kontrollera om det finns programvaruuppdateringar
+## Kontrollera om det finns programuppdateringar
 > **Obs**: Om VS Code inte är installerat kan du installera det med Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Installera nödvändig programvara
+## Installera programvaruförutsättningar
 
 ### Skapa en virtuell miljö
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-På Linux öppnar du en terminal i katalogen du valt och följer kommandona för att skapa en venv med ROCm+Pytorch redan installerat.
+På Linux öppnar du en terminal i katalogen du vill använda och följer kommandona för att skapa en venv med ROCm+Pytorch redan installerat.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -63,7 +62,7 @@ source pytorch-env/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-På Linux öppnar du en terminal i katalogen du valt och följer kommandona för att skapa en venv.
+På Linux öppnar du en terminal i katalogen du vill använda och följer kommandona för att skapa en venv.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -79,7 +78,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-På Windows öppnar du en terminal i katalogen du valt och följer kommandona för att skapa en venv med ROCm+Pytorch redan installerat.
+På Windows öppnar du en terminal i katalogen du vill använda och följer kommandona för att skapa en venv med ROCm+Pytorch redan installerat.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -90,7 +89,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-På Windows öppnar du en terminal i katalogen du valt och följer kommandona för att skapa en venv.
+På Windows öppnar du en terminal i katalogen du vill använda och följer kommandona för att skapa en venv.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
@@ -100,8 +99,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Tips**: Windows-användare kan behöva ändra sin PowerShell Execution Policy (t.ex.
-> genom att ställa in den till RemoteSigned eller Unrestricted) innan de kör vissa PowerShell-kommandon.
+> **Tips**: Windows-användare kan behöva ändra sin PowerShell-exekveringspolicy (t.ex.
+> genom att ställa in den till RemoteSigned eller Unrestricted) innan vissa PowerShell-kommandon körs.
 
 <!-- @os:end -->
 
@@ -112,6 +111,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:hf-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:hf-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->
@@ -130,7 +135,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Obs:** Om modellen inte kan läsas in eller får slut på minne kan du prova att installera paketet `kernels` för att läsa in modellen med optimerad kvantisering.
+> **Obs:** Om modellen inte kan laddas eller får slut på minne kan du prova att installera paketet `kernels` för att ladda modellen med optimerad kvantisering.
 >
 > ```bash
 > # Use this version which is compatible with the Transformers version
@@ -158,7 +163,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 
 ## Snabbstart med exempelskript
 
-Denna spelbok innehåller färdiga skript. Klicka på dem för att förhandsgranska och ladda ner dem till samma katalog som miljön du skapade.
+Den här handboken innehåller färdiga skript. Klicka på dem för att förhandsgranska och ladda ner dem till samma katalog som miljön du skapade.
 
 | Skript | Beskrivning | Användning |
 |--------|-------------|-------|
@@ -189,14 +194,14 @@ for script in ['run_llm.py', 'summarizer.py']:
 <!-- @test:end -->
 
 Båda skripten stöder:
-- Val av modell via flaggan `--model`
-- Formatering med chattmall för korrekt modellprompt, särskilt användbart för dokumentsammanfattning
+- Modellval via flaggan `--model`
+- Formatering av chattmallar för korrekt modellprompting, särskilt användbart för dokumentsammanfattning
 
-## Läsa in och köra din första LLM
+## Ladda och köra din första LLM
 
 Det medföljande skriptet [run_llm.py](assets/run_llm.py) visar hur du genererar text med LLM:er med hjälp av PyTorch och AMD ROCm.
 
-> **Obs:** När du läser in en modell kontrollerar Hugging Face Transformers först sin lokala cache (`~/.cache/huggingface/hub` på Linux, `C:\Users\<user>\.cache\huggingface\hub` på Windows). Om modellen inte finns i cachen laddas den automatiskt ner från huggingface.co. Första körningen kan ta några minuter beroende på modellens storlek och nätverkshastighet.
+> **Obs:** När du laddar en modell kontrollerar Hugging Face Transformers först dess lokala cache (`~/.cache/huggingface/hub` på Linux, `C:\Users\<user>\.cache\huggingface\hub` på Windows). Om modellen inte är cachad laddas den automatiskt ner från huggingface.co. Den första körningen kan ta några minuter beroende på modellstorlek och nätverkshastighet.
 
 Utdraget nedan visar hur du använder modellen och anpassar frågorna som ställs.
 
@@ -265,7 +270,7 @@ messages = [
 ]
 ```
 
-Prova det nedladdade skriptet:
+Testa det nedladdade skriptet:
 
 <!-- @test:id=run-llm-simple timeout=600 setup=activate-venv -->
 ```bash
@@ -274,9 +279,9 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Bygga en dokumentsammanfattare
+## Bygg en dokumentsammanfattare
 
-Nu när du har genererat lokal LLM-utdata kan du bygga vidare på det genom att skapa en praktisk dokumentsammanfattare. I det här avsnittet använder du skriptet [summarizer.py](assets/summarizer.py) för att mata in en .txt-fil och automatiskt generera en kortfattad sammanfattning, allt körande lokalt på din GPU.
+Nu när du har genererat lokal LLM-utdata kan du bygga vidare på detta genom att skapa en praktisk dokumentsammanfattare. I det här avsnittet använder du skriptet [summarizer.py](assets/summarizer.py) för att mata in en .txt-fil och automatiskt generera en koncis sammanfattning, allt körande lokalt på din GPU.
 
 Skriptet är utformat för att fungera direkt. Öppna skriptet i en editor för att utforska koden, anpassa prompter och justera parametrar som längd och temperatur.
 
@@ -306,18 +311,18 @@ python summarizer.py --file document.txt --max-length 400
 
 | Parameter | Vad den styr | Typiska värden |
 |-----------|------------------|----------------|
-| `max_new_tokens` | Den maximala längden på LLM:ens utdata | Använd 50–500 tokens för sammanfattningar. (1 token motsvarar ungefär 0,75 engelska ord) |
-| `temperature` | Kreativitet. Låga värden gör den fokuserad, medan höga värden ger mer oförutsägbarhet | - **0,1–0,3**: Fokuserad, deterministisk (bra för sammanfattningar) <br> **0,5–0,7**: Balanserad (allmän användning) <br> **0,8–1,0**: Kreativ, varierad (idégenerering) |
-| `top_p` | Nucleus Sampling – Låga värden begränsar modellen till mer avgränsade utdata | **0,1–0,5**: Strikt, förutsägbar <br> **0,9–0,95**: (standard, naturlig, konversationsmässig) |
+| `max_new_tokens` | Den maximala längden på LLM:ens utdata | Använd 50–500 token för sammanfattningar. (1 token motsvarar cirka 0,75 engelska ord) |
+| `temperature` | Kreativitet. Låga värden gör den fokuserad, medan höga värden ger mer oförutsägbarhet | - **0.1–0.3**: Fokuserad, deterministisk (bra för sammanfattningar) <br> **0.5–0.7**: Balanserad (allmän användning) <br> **0.8–1.0**: Kreativ, varierad (idégenerering) |
+| `top_p` | Nucleus Sampling - Låga värden begränsar modellen till mer smala utdata | **0.1-0.5**: Strikt, förutsägbar <br> **0.9-0.95**: (standard, naturligt, konversationellt) |
 
 
 ## Verkliga tillämpningar
 
 - **Analys av forskningsartiklar**: Extrahera viktiga resultat från komplexa publikationer för snabb genomgång
 - **Nyhetsaggregering**: Sammanfatta nyhetsartiklar till korta dagliga sammandrag eller höjdpunkter
-- **Mötesanteckningar**: Komprimera transkriptioner till konkreta åtgärdspunkter och kortfattade sammanfattningar
+- **Mötesanteckningar**: Komprimera transkriberingar till konkreta åtgärdspunkter och koncisa sammanfattningar
 - **Granskning av juridiska dokument**: Extrahera relevanta klausuler eller skyldigheter från långa juridiska texter snabbt
-- **Kodddokumentation**: Generera koncisa arkivöversikter och funktionsförklaringar
+- **Kodokumentation**: Generera koncisa översikter av repositorier och funktionsförklaringar
 ## Nästa steg
 
 - **Finjustering**: Anpassa modeller till ditt specifika område eller din jargong för bättre precision (se Fine-tuning Playbooks)
@@ -325,4 +330,4 @@ python summarizer.py --file document.txt --max-length 400
 - **Modellutforskning**: Experimentera med nya modeller som Llama 3, Phi-3 eller Qwen för bättre resultat
 - **Produktionsdistribution**: Använd verktyg som vLLM för skalbar LLM-servering i organisationer
 
-Ditt system ger dig möjlighet att köra sofistikerade språkmodeller lokalt. Experimentera med olika modeller, promptar och parametrar för att upptäcka vad som fungerar bäst för dina applikationer.
+Ditt system ger dig möjlighet att köra avancerade språkmodeller lokalt. Experimentera med olika modeller, prompter och parametrar för att upptäcka vad som fungerar bäst för dina tillämpningar.

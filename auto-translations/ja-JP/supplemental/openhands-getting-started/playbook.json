@@ -1,6 +1,6 @@
 {
   "id": "openhands-getting-started",
-  "title": "OpenHands とローカル LLM を使ってみよう",
-  "description": "Agent Canvasをインストールし、ローカルのLemonadeモデルに接続して、AMD Ryzen™ AIで最初のOpenHatsコーディングエージェントを実行しましょう。",
+  "title": "OpenHandsとローカルLLMの使い方",
+  "description": "Agent Canvas をインストールし、ローカルの Lemonade モデルを接続して、AMD Ryzen™ AI 上で最初の OpenHands コーディングエージェントを実行しましょう。",
   "auto_translated": true
 }

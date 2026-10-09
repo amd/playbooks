@@ -1,6 +1,6 @@
 {
   "id": "speech2speech-translation",
-  "title": "Preklad reči na reč v reálnom čase",
-  "description": "Vytvorte v reálnom čase preklad reči na reč na vašom lokálnom hardvéri.",
+  "title": "Preklad reči v reálnom čase",
+  "description": "Vytvorte si v reálnom čase preklad reči na reč na vašom lokálnom hardvéri.",
   "auto_translated": true
 }

@@ -11,26 +11,26 @@ SPDX-License-Identifier: MIT
 
 ## Prezentare generală
 
-Ajustarea eficientă (fine-tuning) este esențială pentru adaptarea modelelor mari de limbaj (LLM) la sarcini specifice. LLaMA Factory este o platformă open-source și ușor de utilizat care simplifică antrenarea și ajustarea modelelor mari de limbaj și a modelelor multimodale. Aceasta permite utilizatorilor să personalizeze sute de modele pre-antrenate local, cu un minim de programare.
+Ajustarea eficientă (fine-tuning) este esențială pentru adaptarea modelelor lingvistice mari (LLM) la sarcini specifice. LLaMA Factory este o platformă open-source și ușor de utilizat, care simplifică antrenarea și ajustarea fină a modelelor lingvistice mari și a modelelor multimodale. Aceasta permite utilizatorilor să personalizeze sute de modele preantrenate la nivel local, cu un minim de cod.
 
-Acest ghid vă învață cum să ajustați (fine-tune) modele LLM folosind LLaMA Factory pe hardware-ul dvs. local AMD.
+Acest ghid vă învață cum să ajustați fin LLM-uri folosind LLaMA Factory pe hardware-ul dvs. AMD local.
 
 <!-- @device:stx,krk -->
-> **Notă:** Tehnicile de ajustare (fine-tuning) din acest ghid necesită cel puțin **32 GB de memorie RAM de sistem**, din care cel puțin **16 GB trebuie să fie disponibili pentru GPU** (cei 16 GB fac parte din cei 32 GB, nu se adaugă la aceștia).
+> **Notă:** Tehnicile de ajustare fină din acest ghid necesită cel puțin **32 GB de RAM de sistem**, din care cel puțin **16 GB trebuie să fie disponibili pentru GPU** (cei 16 GB fac parte din cei 32 GB, nu se adaugă suplimentar).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Notă:** Tehnicile de ajustare (fine-tuning) din acest ghid necesită cel puțin **16 GB de memorie GPU totală** și **32 GB de memorie RAM de sistem**.
-> - Pe Windows, memoria GPU totală combină VRAM-ul dedicat al plăcii video cu memoria GPU partajată (împrumutată din RAM-ul de sistem).
-> - Prin urmare, plăcile cu mai puțin de 16 GB de VRAM dedicat pot totuși rula acest ghid folosind memoria GPU partajată pentru a compensa diferența.
+> **Notă:** Tehnicile de ajustare fină din acest ghid necesită cel puțin **16 GB de memorie GPU totală** și **32 GB de RAM de sistem**.
+> - Pe Windows, memoria GPU totală combină VRAM-ul dedicat al plăcii grafice cu memoria GPU partajată (împrumutată din RAM-ul de sistem).
+> - Prin urmare, plăcile cu mai puțin de 16 GB de VRAM dedicat pot totuși rula acest ghid, folosind memoria GPU partajată pentru a compensa diferența.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Notă:** Tehnicile de ajustare (fine-tuning) din acest ghid necesită o placă video cu cel puțin **16 GB de memorie GPU dedicată** și **32 GB de memorie RAM de sistem**.
-> - Pe Linux, antrenarea rulează în întregime în VRAM-ul dedicat al plăcii video.
-> - Nu se face revenire (fallback) la memoria GPU partajată (RAM-ul de sistem) atunci când VRAM-ul se epuizează.
+> **Notă:** Tehnicile de ajustare fină din acest ghid necesită o placă grafică cu cel puțin **16 GB de memorie GPU dedicată** și **32 GB de RAM de sistem**.
+> - Pe Linux, antrenarea rulează în întregime în VRAM-ul dedicat al plăcii grafice.
+> - Nu se face revenire la memoria GPU partajată (RAM de sistem) atunci când VRAM-ul se epuizează.
 > - Plăcile cu mai puțin de 16 GB de VRAM dedicat vor rămâne fără memorie în timpul antrenării pe Linux, chiar dacă sistemul are suficient RAM.
 <!-- @os:end -->
 <!-- @device:end -->
@@ -38,15 +38,15 @@ Acest ghid vă învață cum să ajustați (fine-tune) modele LLM folosind LLaMA
 ## Ce veți învăța
 
 - Cum să configurați LLaMA Factory cu software-ul AMD ROCm™
-- Cum să configurați parametrii de ajustare (fine-tuning) pentru LLM (folosind Qwen/Qwen3-4B-Instruct-2507 ca exemplu)
-- Cum să rulați ajustarea (fine-tuning) cu LLaMA Factory
-- Cum să rulați inferența cu modelul ajustat
-- Cum să exportați modelul ajustat
+- Cum să configurați parametrii de ajustare fină a LLM-urilor (folosind Qwen/Qwen3-4B-Instruct-2507 ca exemplu)
+- Cum să rulați ajustarea fină cu LLaMA Factory
+- Cum să rulați inferența cu modelul ajustat fin
+- Cum să exportați modelul ajustat fin 
 
 ## Timp estimat
 
 - Durată: Va dura aproximativ 60 de minute pentru a parcurge acest ghid (în funcție de dimensiunea modelului/setului de date și de viteza rețelei).
-- Consultați [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) pentru mai multe informații.
+- Vizitați [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) pentru mai multe informații.
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Configurarea memoriei
@@ -55,12 +55,14 @@ Acest ghid vă învață cum să ajustați (fine-tune) modele LLM folosind LLaMA
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Verificați actualizările software
+## Verificați actualizările de software
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalarea cerințelor preliminare software
+## Instalarea cerințelor preliminare de software
+
+<!-- @prereq:hf-models-qwen3-4b-instruct-2507 -->
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -186,7 +188,7 @@ python -m pip install huggingface_hub
 
 LLaMA Factory depinde de PyTorch. Ar trebui să îl aveți deja instalat conform cerințelor de mai sus.
 
-Descărcați codul sursă din [depozitul oficial GitHub al LLaMA Factory](https://github.com/hiyouga/LlamaFactory) și instalați dependențele acestuia.
+Descărcați codul sursă din [repository-ul oficial LLaMA Factory pe GitHub](https://github.com/hiyouga/LlamaFactory) și instalați-i dependențele.
 
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
@@ -244,24 +246,24 @@ Exemplu de rezultat:
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-După ce ați instalat cu succes LLaMA Factory, să rulăm ajustarea (fine-tuning) pe acesta.
+După ce ați instalat cu succes LLaMA Factory, să rulăm ajustarea fină pe acesta.
 
-## Utilizarea CLI-ului LLaMA Factory pentru ajustare (fine-tuning)
+## Utilizarea LLaMA Factory CLI pentru ajustare fină 
 
-Această secțiune va acoperi modul de pregătire a seturilor de date pentru ajustare, configurarea parametrilor LoRA/QLoRA și rularea ajustării LoRA.
+Această secțiune va acoperi modul de pregătire a seturilor de date pentru ajustare fină, configurarea parametrilor LoRA/QLoRA și rularea ajustării fine LoRA.
 
 ### Pregătirea setului de date
 
-LLaMA Factory acceptă seturi de date pentru ajustare în formatul Alpaca și formatul ShareGPT. Toate seturile de date disponibile au fost definite în [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Dacă utilizați un set de date personalizat, asigurați-vă că adăugați o descriere a acestuia în `dataset_info.json` și specificați numele setului de date înainte de antrenare. Detalii pot fi găsite în documentația lor [aici](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
+LLaMA Factory acceptă seturi de date pentru ajustare fină în format Alpaca și format ShareGPT. Toate seturile de date disponibile au fost definite în [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Dacă utilizați un set de date personalizat, asigurați-vă că adăugați o descriere a setului de date în `dataset_info.json` și specificați numele setului de date înainte de antrenare. Detaliile pot fi găsite în documentația lor [aici](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
-În acest ghid, vom folosi seturile de date identity și alpaca_en_demo ca exemplu, și vom configura informațiile despre setul de date în pasul următor.
+În acest ghid, vom folosi seturile de date identity și alpaca_en_demo ca exemplu și vom configura informațiile despre setul de date în pasul următor.
 ### Configurarea parametrilor de fine-tuning
 
-LLaMA Factory acceptă mai multe scheme de fine-tuning.
+LLaMA Factory suportă mai multe scheme de fine-tuning.
 
 | Scheme de fine-tuning | Exemple LLaMA Factory |
 |-----------|------|
-| Parametri compleți    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
+| Parametri compleți (Full-Parameter)    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
 | Fine-tuning LoRA  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
 | Fine-tuning QLoRA | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
@@ -286,29 +288,29 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-Aceste fișiere de configurare exemplu au specificat parametrii modelului, parametrii metodei de fine-tuning, parametrii setului de date, parametrii de evaluare și altele. Le poți configura conform propriilor nevoi. În acest playbook, vom folosi [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
+Aceste fișiere de configurare de exemplu au specificat parametrii modelului, parametrii metodei de fine-tuning, parametrii setului de date, parametrii de evaluare și altele. Le puteți configura în funcție de propriile nevoi. În acest ghid, vom folosi [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
-**Explicarea parametrilor cheie:**
-- `model_name_or_path` - Numele modelului Hugging Face sau calea locală către fișierul modelului.
+**Explicația parametrilor cheie:**
+- `model_name_or_path` - Numele modelului Hugging Face sau calea fișierului local al modelului.
 - `stage` - Etapa de antrenare. Opțiuni: rm (reward modeling), pt (pretrain), sft (Supervised Fine-Tuning), PPO, DPO, KTO, ORPO.
 - `do_train` - true pentru antrenare, false pentru evaluare
 - `finetuning_type` - Metoda de fine-tuning. Opțiuni: freeze, lora, full
-- `lora_rank` - Dimensionalitatea matricei de rang redus folosite în LoRA, valori tipice: 4, 6, 8, 16 (valori mai mici = mai puțini parametri = fine-tuning mai rapid; valori mai mari = adaptare mai bună la sarcină, dar utilizare mai mare a resurselor).
-- `lora_target` - Module țintă pentru metoda LoRA. Implicit: all.
-- `dataset` - Setul (seturile) de date de utilizat. Folosește „,” pentru a separa mai multe seturi de date
+- `lora_rank` - Dimensionalitatea matricei de rang redus utilizate în LoRA, valori tipice: 4, 6, 8, 16 (valori mai mici = mai puțini parametri = fine-tuning mai rapid; valori mai mari = adaptare mai bună la sarcină, dar consum mai mare de resurse).
+- `lora_target` - Modulele țintă pentru metoda LoRA. Implicit: all.
+- `dataset` - Setul (seturile) de date de utilizat. Folosiți „,” pentru a separa mai multe seturi de date
 - `output_dir` - Calea de ieșire pentru fine-tuning
-- `logging_steps` - Intervalul de logare, în pași
-- `save_steps` - Intervalul de salvare a punctelor de control (checkpoints) ale modelului.
+- `logging_steps` - Intervalul de logare în pași
+- `save_steps` - Intervalul de salvare a punctelor de control (checkpoint) ale modelului.
 - `overwrite_output_dir` - Dacă se permite suprascrierea directorului de ieșire.
-- `per_device_train_batch_size` - Dimensiunea batch-ului de antrenare per dispozitiv.
+- `per_device_train_batch_size` - Dimensiunea lotului (batch) de antrenare per dispozitiv.
 - `gradient_accumulation_steps` - Numărul de pași de acumulare a gradientului.
 - `learning_rate` - Rata de învățare
 - `num_train_epochs` - Numărul de epoci de antrenare
 - `lr_scheduler_type` - Programul ratei de învățare. Opțiuni: linear, cosine, polynomial, constant etc.
-- `warmup_ratio` - Raportul de încălzire (warmup) al ratei de învățare
+- `warmup_ratio` - Raportul de încălzire (warmup) a ratei de învățare
 
 <!-- @os:linux -->
-Vom modifica valoarea implicită a `lora_rank` pentru a rula fine-tuning pe GPU-uri AMD Ryzen™ & AMD Radeon™.
+Vom modifica valoarea implicită a `lora_rank` pentru a rula fine-tuning pe GPU-uri AMD Ryzen™ și AMD Radeon™.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
@@ -316,9 +318,9 @@ sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.ya
 
 <!-- @os:windows -->
 Vom actualiza configurația implicită de fine-tuning LoRA pentru o compatibilitate mai bună cu GPU-urile AMD Ryzen™ și AMD Radeon™:
-- Se setează `lora_rank` de la `8` la `6` pentru a reduce utilizarea memoriei în timpul fine-tuning-ului.
-- Se folosește `fp16` în loc de `bf16` pentru o compatibilitate mai largă cu GPU-urile AMD și o utilizare mai redusă a memoriei.
-- Se setează `dataloader_num_workers` la `0` pe Windows pentru a evita erorile `"Can't pickle local object<>"` cauzate de încărcarea datelor prin multiprocesare.
+- Setați `lora_rank` de la `8` la `6` pentru a reduce consumul de memorie în timpul fine-tuning-ului.
+- Utilizați `fp16` în loc de `bf16` pentru o compatibilitate mai largă cu GPU-urile AMD și un consum de memorie mai redus.
+- Setați `dataloader_num_workers` la `0` pe Windows pentru a evita erorile `"Can't pickle local object<>"` cauzate de încărcarea datelor cu procesare multiplă (multiprocessing).
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -338,13 +340,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### Rularea fine-tuning-ului LLaMA Factory 
+### Rulați fine-tuning-ul LLaMA Factory 
 
 **llamafactory-cli** este instrumentul oficial de interfață în linia de comandă (CLI) pentru LLaMA Factory, dezvoltat pentru a simplifica fluxurile de lucru LLM de la un capăt la altul (pregătirea datelor → fine-tuning → evaluare → implementare) fără a scrie cod complex.
 
-Pentru antrenare/fine-tuning, **llamafactory-cli train** este subcomanda de bază a CLI-ului LLaMA Factory. Aceasta abstractizează fluxurile de lucru de fine-tuning (preprocesarea datelor, reglarea hiperparametrilor, optimizarea hardware) într-o singură comandă CLI, acceptând mai multe paradigme de fine-tuning (LoRA/QLoRA/Fine-Tuning complet) și este optimizată pentru GPU-uri cu resurse reduse (de exemplu, QLoRA pe 16 GB VRAM).
+Pentru antrenare/fine-tuning, **llamafactory-cli train** este subcomanda de bază a CLI-ului LLaMA Factory. Aceasta abstractizează fluxurile de lucru de fine-tuning (preprocesarea datelor, reglarea hiperparametrilor, optimizarea hardware) într-o singură comandă CLI, suportând mai multe paradigme de fine-tuning (LoRA/QLoRA/Full Fine-Tuning) și este optimizată pentru GPU-uri cu resurse reduse (de exemplu, QLoRA pe 16 GB VRAM).
 
-Poți rula fine-tuning-ul LLaMA Factory folosind următoarea comandă, bazată pe fișierul de configurare modificat pentru fine-tuning-ul Qwen3 LoRA.
+Puteți rula fine-tuning-ul LLaMA Factory folosind următoarea comandă, care se bazează pe fișierul de configurare modificat pentru fine-tuning Qwen3 LoRA.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -427,7 +429,7 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 <!-- @test:end --> 
 <!-- @os:end -->
 
-După rularea fine-tuning-ului LLM, toate rezultatele generate sunt stocate în „output_dir”, inclusiv fișierele de puncte de control (checkpoint) ale modelului, fișierele de configurare și metricile de antrenare.
+După rularea fine-tuning-ului LLM, toate rezultatele generate sunt stocate în „output_dir”, inclusiv fișierele de checkpoint ale modelului, fișierele de configurare și metricile de antrenare.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -464,11 +466,11 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end --> 
 
-### Testarea modelului fine-tuned 
+### Testați modelul fine-tuned 
 
-**llamafactory-cli chat** este conceput pentru chat/inferență interactivă cu LLM-uri (atât modele de bază, cât și modele fine-tuned cu LoRA). LLaMA Factory oferă configurația exemplu pentru a rula inferența modelelor fine-tuned în [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). De asemenea, poți modifica această configurație exemplu pentru a schimba setările, cum ar fi backend-ul de inferență.
+**llamafactory-cli chat** este conceput pentru chat/inferență interactivă cu LLM-uri (atât modele de bază, cât și modele fine-tuned cu LoRA). LLaMA Factory oferă configurația de exemplu pentru a rula inferența modelelor fine-tuned în [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). Puteți, de asemenea, să modificați această configurație de exemplu pentru a schimba setările, cum ar fi backend-ul de inferență.
 
-Folosește următoarea comandă pentru a testa modelul Qwen3 fine-tuned:
+Utilizați următoarea comandă pentru a testa modelul Qwen3 fine-tuned:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
@@ -480,11 +482,11 @@ Mai jos este prezentat un exemplu de chat folosind modelul fine-tuned:
 </p>
 
 
-### Exportarea modelului fine-tuned
+### Exportați modelul fine-tuned
 
-Pentru cazurile de utilizare în producție, modelul preantrenat și adaptorul LoRA trebuie fuzionate și exportate într-un singur model. Acest model fuzionat poate fi utilizat ca un fișier de model Hugging Face normal. LLaMA Factory oferă configurațiile exemplu în [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
+Pentru scenarii de producție, modelul pre-antrenat și adaptorul LoRA trebuie combinate și exportate într-un singur model. Acest model combinat poate fi utilizat ca un fișier de model Hugging Face obișnuit. LLaMA Factory oferă configurațiile de exemplu în [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
-Folosește următoarea comandă pentru a exporta modelul Qwen3 fine-tuned:
+Utilizați următoarea comandă pentru a exporta modelul Qwen3 fine-tuned:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
@@ -593,24 +595,24 @@ print("PASS: Exported merged model output looks correct")
 <!-- @test:end -->
 ## Utilizarea interfeței grafice LLaMA Factory
 
-`LLaMA-Factory` acceptă, de asemenea, ajustarea fină (fine-tuning) fără cod a LLM-urilor printr-o interfață web în browser.
+`LLaMA-Factory` acceptă, de asemenea, fine-tuning fără cod al LLM-urilor printr-o interfață web în browser.
 
-Utilizați următoarea comandă pentru a o deschide:
+Folosiți următoarea comandă pentru a o deschide:
 
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI` oferă o interfață simplificată pentru gestionarea fluxurilor de lucru de învățare automată, inclusiv antrenare, evaluare, predicție, chat și exportul modelelor. Iată o scurtă introducere pentru fiecare filă:
+`LlamaFactory Web UI` oferă o interfață simplificată pentru gestionarea fluxurilor de lucru de machine learning, inclusiv antrenare, evaluare, predicție, chat și exportul modelelor. Iată o scurtă introducere pentru fiecare filă:
 
-* **Train**: Această filă vă permite să selectați un model și un set de date, să configurați parametrii de antrenare și să inițiați procesul de antrenare. Este esențial să înțelegeți parametrii obligatorii și opționali pentru a optimiza configurarea antrenării.
-* **Evaluate & Predict**: După antrenare, puteți evalua performanța modelului și puteți face predicții folosind această filă. Aceasta oferă informații despre acuratețea și eficacitatea modelului pe date noi.
+* **Train**: Această filă vă permite să selectați un model și un set de date, să configurați parametrii de antrenare și să inițiați procesul de antrenare. Este esențial să înțelegeți parametrii obligatorii și opționali pentru a optimiza configurația de antrenare.
+* **Evaluate & Predict**: După antrenare, puteți evalua performanța modelului și face predicții folosind această filă. Aceasta oferă informații despre acuratețea și eficiența modelului pe date noi.
 * **Chat**: După finalizarea antrenării, încărcați modelul în fila Chat pentru a interacționa cu el și a vedea rezultatele muncii dumneavoastră. Această funcție permite comunicarea în timp real cu modelul antrenat.
-* **Export**: Această filă facilitează exportul modelelor antrenate pentru implementare sau utilizare ulterioară. Puteți salva modelele în diverse formate potrivite pentru diferite aplicații.
+* **Export**: Această filă facilitează exportul modelelor antrenate pentru implementare sau utilizare ulterioară. Vă puteți salva modelele în diferite formate potrivite pentru diverse aplicații.
 
-Pentru îndrumări detaliate, vă încurajăm să consultați documentația oficială din [depozitul LlamaFactory GitHub](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) și din [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). În plus, [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) oferă informații valoroase despre interfață și funcționalitățile acesteia.
+Pentru îndrumări detaliate, vă încurajăm să consultați documentația oficială din [depozitul LlamaFactory GitHub](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) și [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). În plus, [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) oferă informații valoroase despre interfață și funcționalitățile acesteia.
 
 ## Pașii următori
 - Încercați diferite modele precum `gpt-oss` și alte modele de ultimă generație.
-- Experimentați cu diferite backend-uri pe modelul ajustat fin
- 
+- Experimentați cu diferite backend-uri pe modelul ajustat prin fine-tuning
+
 Pentru mai multă documentație, vizitați: https://llamafactory.readthedocs.io/en/latest/

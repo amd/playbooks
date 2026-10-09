@@ -1,6 +1,6 @@
 {
   "id": "openclaw-lemonade-server",
-  "title": "הרצת OpenClaw באופן מקומי עם שרת Lemonade",
-  "description": "התקינו והגדירו את סוכן ה-AI האוטונומי OpenClaw עם Lemonade Server.",
+  "title": "הפעלת OpenClaw באופן מקומי עם Lemonade Server",
+  "description": "התקן והגדר את סוכן הבינה המלאכותית האוטונומי OpenClaw יחד עם Lemonade Server.",
   "auto_translated": true
 }

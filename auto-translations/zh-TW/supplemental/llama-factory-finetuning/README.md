@@ -9,29 +9,29 @@ SPDX-License-Identifier: MIT
 > **機器翻譯。**本頁面是由英文自動翻譯而成，尚未經過人工審閱。內容可能包含錯誤，且某些指示、命令、下載項目、產品供應情況或其他內容可能因語言或地區而異。如本文件與英文版本之間存在任何不一致或差異，應以該 playbook 之英文原始版本為準。
 <!-- auto-translated-disclaimer:end -->
 
-## 概述
+## 概覽
 
-高效微調對於將大型語言模型（LLMs）調整以適應下游任務至關重要。LLaMA Factory 是一個開源且易於使用的平台，可簡化大型語言模型和多模態模型的訓練與微調流程。它讓使用者能夠以最少的程式編寫在本機自訂數百種預訓練模型。
+對於將大型語言模型（LLM）調整至下游任務而言，高效的微調至關重要。LLaMA Factory 是一個開源且易於使用的平台，可簡化大型語言模型與多模態模型的訓練與微調流程。它讓使用者能夠以最少的程式碼在本機自訂數百種預訓練模型。
 
-本操作手冊將教您如何在您的本機 AMD 硬體上使用 LLaMA Factory 微調 LLMs。
+本手冊將教您如何在本機 AMD 硬體上使用 LLaMA Factory 微調 LLM。
 
 <!-- @device:stx,krk -->
-> **注意：** 本操作手冊中的微調技術至少需要 **32 GB 的系統記憶體**，其中至少 **16 GB 可供 GPU 使用**（此 16 GB 是 32 GB 中的一部分，而非額外增加）。
+> **注意：** 本手冊中的微調技術至少需要 **32 GB 的系統 RAM**，其中至少 **16 GB 必須可供 GPU 使用**（這 16 GB 是 32 GB 中的一部分，而非額外需求）。
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **注意：** 本操作手冊中的微調技術至少需要 **16 GB 的總 GPU 記憶體**及 **32 GB 的系統記憶體**。
-> - 在 Windows 上，總 GPU 記憶體結合了顯示卡的專用 VRAM 與共享 GPU 記憶體（從系統記憶體借用）。
-> - 因此，專用 VRAM 少於 16 GB 的顯示卡仍可透過使用共享 GPU 記憶體來補足差額，進而執行本操作手冊。
+> **注意：** 本手冊中的微調技術至少需要 **16 GB 的總 GPU 記憶體**以及 **32 GB 的系統 RAM**。
+> - 在 Windows 上，總 GPU 記憶體結合了顯示卡的專用 VRAM 與共享 GPU 記憶體（從系統 RAM 借用）。
+> - 因此，即使專用 VRAM 不足 16 GB 的顯示卡，仍可透過使用共享 GPU 記憶體來補足差額，執行本手冊。
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **注意：** 本操作手冊中的微調技術需要具備至少 **16 GB 專用 GPU 記憶體**的顯示卡，以及 **32 GB 的系統記憶體**。
+> **注意：** 本手冊中的微調技術需要至少具備 **16 GB 專用 GPU 記憶體**的顯示卡，以及 **32 GB 的系統 RAM**。
 > - 在 Linux 上，訓練完全在顯示卡的專用 VRAM 中執行。
-> - 當 VRAM 用盡時，不會回退至共享 GPU 記憶體（系統記憶體）。
-> - 專用 VRAM 少於 16 GB 的顯示卡在 Linux 上訓練時將會記憶體不足，即使系統擁有充足的記憶體也是如此。
+> - 當 VRAM 用盡時，不會回退使用共享 GPU 記憶體（系統 RAM）。
+> - 專用 VRAM 不足 16 GB 的顯示卡，即使系統擁有充足的 RAM，在 Linux 上訓練時仍會發生記憶體不足的情況。
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -40,12 +40,12 @@ SPDX-License-Identifier: MIT
 - 如何使用 AMD ROCm™ 軟體設定 LLaMA Factory
 - 如何配置 LLM 微調參數（以 Qwen/Qwen3-4B-Instruct-2507 為範例）
 - 如何執行 LLaMA Factory 微調
-- 如何使用微調後的模型執行推論
+- 如何使用微調後的模型進行推論
 - 如何匯出微調後的模型
 
 ## 預估時間
 
-- 持續時間：執行本操作手冊大約需要 60 分鐘（依您的模型/資料集大小及網路速度而定）。
+- 時長：執行本手冊大約需要 60 分鐘（視您的模型／資料集大小及網路速度而定）。
 - 如需更多資訊，請參閱 [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory)。
 
 <!-- @device:halo_box,halo,stx,krk -->
@@ -60,7 +60,9 @@ SPDX-License-Identifier: MIT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 安裝軟體必要條件
+## 安裝軟體先決條件
+
+<!-- @prereq:hf-models-qwen3-4b-instruct-2507 -->
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -91,12 +93,12 @@ sudo apt install -y python3-venv
 python3 -m venv llamafactory-env --system-site-packages
 source llamafactory-env/bin/activate
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @setup:id=activate-venv command="source llamafactory-env/bin/activate" -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**授予您的使用者存取 GPU 裝置的權限**（登出並重新登入以使其生效）：
+**授予您的使用者存取 GPU 裝置的權限**（登出並重新登入後才會生效）：
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -109,7 +111,7 @@ sudo apt install -y python3-venv
 python3 -m venv llamafactory-env
 source llamafactory-env/bin/activate
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @setup:id=activate-venv command="source llamafactory-env/bin/activate" -->
 <!-- @device:end -->
 <!-- @os:end -->
@@ -121,8 +123,8 @@ source llamafactory-env/bin/activate
 python -m venv llamafactory-env --system-site-packages
 llamafactory-env\Scripts\activate
 ```
-<!-- @test:end --> 
-<!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" --> 
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -131,12 +133,12 @@ llamafactory-env\Scripts\activate
 python -m venv llamafactory-env
 llamafactory-env\Scripts\activate
 ```
-<!-- @test:end --> 
-<!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" --> 
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" -->
 <!-- @device:end -->
 <!-- @os:end -->
 
-### 安裝基本相依套件
+### 安裝基本相依性
 
 <!-- @require:pytorch,driver -->
 
@@ -156,7 +158,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 ```
 <!-- @test:end -->
 
-### 安裝其他相依套件
+### 安裝其他相依性
 
 > **注意**：請確認 Python 版本為 3.11、3.12 或 3.13
 
@@ -179,14 +181,14 @@ python3 -m pip install huggingface_hub
 python -m pip install --upgrade pip
 python -m pip install huggingface_hub
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 ### 安裝 LLaMA Factory
 
-LLaMA Factory 依賴 PyTorch。根據上述需求，您應該已經安裝好了。
+LLaMA Factory 依賴 PyTorch。根據上述需求，您應該已經安裝了它。
 
-從 [LLaMA Factory 官方 GitHub 儲存庫](https://github.com/hiyouga/LlamaFactory) 下載原始碼，並安裝其相依套件。
+從 [LLaMA Factory 官方 GitHub 儲存庫](https://github.com/hiyouga/LlamaFactory)下載原始碼，並安裝其相依性。
 
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
@@ -197,7 +199,7 @@ pip install setuptools --break-system-packages
 pip install -e . --break-system-packages
 pip install -r requirements/metrics.txt --break-system-packages
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -208,7 +210,7 @@ cd LlamaFactory
 pip install -e .
 pip install -r requirements/metrics.txt 
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @device:end -->
 
 驗證 `llamafactory-cli` 是否可執行。
@@ -221,7 +223,7 @@ llamafactory-cli version || python -m llamafactory.cli version || true
 echo "llamafactory-cli is available"
 command -v llamafactory-cli
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -235,7 +237,7 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
     Write-Host "llamafactory-cli is not available"
 }
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 輸出範例：
@@ -244,7 +246,7 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-成功安裝 LLaMA Factory 後，讓我們來執行微調。
+成功安裝 LLaMA Factory 後，讓我們開始執行微調。
 
 ## 使用 LLaMA Factory CLI 進行微調
 
@@ -252,10 +254,10 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
 
 ### 資料集準備
 
-LLaMA Factory 支援 Alpaca 格式和 ShareGPT 格式的微調資料集。所有可用的資料集皆已在 [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) 中定義。若您使用自訂資料集，請確保在 `dataset_info.json` 中新增資料集說明，並在訓練前指定資料集名稱。詳細資訊請參閱其文件 [這裡](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html)。
+LLaMA Factory 支援 Alpaca 格式與 ShareGPT 格式的微調資料集。所有可用的資料集皆已在 [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) 中定義。若您使用自訂資料集，請確保在 `dataset_info.json` 中新增資料集描述，並在訓練前指定資料集名稱。詳細資訊可參閱其文件[此處](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html)。
 
-在本操作手冊中，我們將以 identity 和 alpaca_en_demo 資料集為範例，並於下一步驟中配置資料集資訊。
-### 微調參數配置
+在本手冊中，我們將以 identity 與 alpaca_en_demo 資料集作為範例，並在下一步驟中配置資料集資訊。
+### 微調參數設定
 
 LLaMA Factory 支援多種微調方案。
 
@@ -286,24 +288,24 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-這些範例配置檔案已經指定了模型參數、微調方法參數、資料集參數、評估參數等等。您可以根據自己的需求進行配置。在本手冊中，我們將使用 [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml)。
+這些範例設定檔已指定模型參數、微調方法參數、資料集參數、評估參數等。您可以依照自身需求進行設定。在此操作手冊中，我們將使用 [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml)。
 
 **關鍵參數說明：**
 - `model_name_or_path` - Hugging Face 模型名稱或本機模型檔案路徑。
 - `stage` - 訓練階段。選項：rm（獎勵建模）、pt（預訓練）、sft（監督式微調）、PPO、DPO、KTO、ORPO。
 - `do_train` - true 表示訓練，false 表示評估
 - `finetuning_type` - 微調方法。選項：freeze、lora、full
-- `lora_rank` - LoRA 方法中使用的低秩矩陣維度，常見數值：4、6、8、16（數值越小＝參數越少＝微調速度越快；數值越大＝任務適應性更好但資源消耗更高）。
-- `lora_target` - LoRA 方法的目標模組。預設值：all。
-- `dataset` - 要使用的資料集。使用「,」分隔多個資料集
+- `lora_rank` - LoRA 中使用的低秩矩陣維度，常見數值：4、6、8、16（數值越小 = 參數越少 = 微調速度越快；數值越大 = 任務適應性越佳，但資源使用量越高）。
+- `lora_target` - LoRA 方法的目標模組。預設：all。
+- `dataset` - 使用的資料集。使用「,」分隔多個資料集
 - `output_dir` - 微調輸出路徑
-- `logging_steps` - 記錄日誌的步數間隔
-- `save_steps` - 模型檢查點儲存的步數間隔。
+- `logging_steps` - 日誌記錄的步數間隔
+- `save_steps` - 模型檢查點儲存的間隔。
 - `overwrite_output_dir` - 是否允許覆寫輸出目錄。
 - `per_device_train_batch_size` - 每個裝置的訓練批次大小。
 - `gradient_accumulation_steps` - 梯度累積步數。
 - `learning_rate` - 學習率
-- `num_train_epochs` - 訓練輪數
+- `num_train_epochs` - 訓練回合數
 - `lr_scheduler_type` - 學習率排程。選項：linear、cosine、polynomial、constant 等。
 - `warmup_ratio` - 學習率預熱比例
 
@@ -315,10 +317,10 @@ sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.ya
 <!-- @os:end -->
 
 <!-- @os:windows -->
-我們將更新預設的 LoRA 微調配置，以更好地相容於 AMD Ryzen™ 與 AMD Radeon™ GPU：
-- 將 `lora_rank` 從 `8` 設為 `6`，以降低微調過程中的記憶體用量。
-- 使用 `fp16` 取代 `bf16`，以獲得更廣泛的 AMD GPU 相容性並降低記憶體用量。
-- 在 Windows 上將 `dataloader_num_workers` 設為 `0`，以避免多執行緒資料載入所導致的 `"Can't pickle local object<>"` 錯誤。
+我們將更新預設的 LoRA 微調設定，以提升與 AMD Ryzen™ 及 AMD Radeon™ GPU 的相容性：
+- 將 `lora_rank` 從 `8` 設為 `6`，以降低微調過程中的記憶體使用量。
+- 使用 `fp16` 取代 `bf16`，以獲得更廣泛的 AMD GPU 相容性並降低記憶體使用量。
+- 在 Windows 上將 `dataloader_num_workers` 設為 `0`，以避免因多行程資料載入所導致的 `"Can't pickle local object<>"` 錯誤。
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -340,11 +342,11 @@ Set-Content -Path $filePath -Value $newContent
 
 ### 執行 LLaMA Factory 微調
 
-**llamafactory-cli** 是 LLaMA Factory 的官方命令列介面（CLI）工具，旨在簡化端對端的 LLM 工作流程（資料準備 → 微調 → 評估 → 部署），無需撰寫複雜的程式碼。
+**llamafactory-cli** 是 LLaMA Factory 的官方命令列介面（CLI）工具，旨在簡化端到端的 LLM 工作流程（資料準備 → 微調 → 評估 → 部署），無需撰寫複雜的程式碼。
 
-在訓練/微調方面，**llamafactory-cli train** 是 LLaMA Factory CLI 的核心子命令。它將微調工作流程（資料預處理、超參數調整、硬體優化）抽象化為一個單一的 CLI 命令，支援多種微調範式（LoRA/QLoRA/全參數微調），並針對低資源 GPU 進行了優化（例如在 16GB VRAM 上執行 QLoRA）。
+對於訓練/微調而言，**llamafactory-cli train** 是 LLaMA Factory CLI 的核心子命令。它將微調工作流程（資料前處理、超參數調整、硬體最佳化）抽象化為單一 CLI 命令，支援多種微調範式（LoRA/QLoRA/全參數微調），並針對低資源 GPU（例如在 16GB 顯示記憶體上執行 QLoRA）進行了最佳化。
 
-您可以使用以下命令執行 LLaMA Factory 微調，此命令基於修改過的 Qwen3 LoRA 微調配置檔案。
+您可以使用以下命令執行 LLaMA Factory 微調，該命令是根據修改後的 Qwen3 LoRA 微調設定檔。
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -380,7 +382,7 @@ fi
 
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -424,10 +426,10 @@ if (Select-String -Path $filePath -Pattern '^preprocessing_num_workers:' -Quiet)
 
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
-執行 LLM 微調後，所有生成的輸出都會儲存在「output_dir」中，包括模型檢查點檔案、配置檔案以及訓練指標。
+執行 LLM 微調後，所有產生的輸出都會儲存在「output_dir」中，包括模型檢查點檔案、設定檔與訓練指標。
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -462,18 +464,18 @@ if not adapter_weights:
 print("PASS: LLaMA Factory training output looks correct")
 print(f"Found adapter weights: {adapter_weights}")
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 
 ### 測試微調後的模型
 
-**llamafactory-cli chat** 專為與 LLM（包括基礎模型及 LoRA 微調後的模型）進行互動式聊天/推論而設計。LLaMA Factory 在 [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) 中提供了執行微調模型推論的範例配置。您也可以修改此範例配置來變更設定，例如推論後端。
+**llamafactory-cli chat** 專為與 LLM（包括基礎模型與 LoRA 微調模型）進行互動式對話/推論而設計。LLaMA Factory 在 [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) 中提供了範例設定，用於執行微調模型的推論。您也可以修改此範例設定，以變更設定值，例如推論後端。
 
-使用以下命令測試 Qwen3 微調後的模型：
+使用以下命令測試 Qwen3 微調模型：
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
-以下為使用微調後模型進行聊天的範例：
+以下是使用微調模型進行對話的範例：
 
 <p align="center">
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Fine-Tuned model" width="600"/>
@@ -482,14 +484,14 @@ llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 
 ### 匯出微調後的模型
 
-對於生產環境使用情境，需要將預訓練模型與 LoRA 適配器合併並匯出成單一模型。這個合併後的模型可以作為一般的 Hugging Face 模型檔案使用。LLaMA Factory 在 [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora) 中提供了範例配置。
+在正式生產環境使用情境中，需要將預訓練模型與 LoRA 轉接器合併並匯出為單一模型。此合併後的模型可作為一般的 Hugging Face 模型檔案使用。LLaMA Factory 在 [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora) 中提供了範例設定。
 
-使用以下命令匯出 Qwen3 微調後的模型：
+使用以下命令匯出 Qwen3 微調模型：
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
-以下顯示匯出微調後模型的結果。
+以下是匯出微調模型的結果。
 
 <p align="center">
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Fine-Tuned model " width="600"/>
@@ -519,7 +521,7 @@ PY
 
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 
@@ -560,7 +562,7 @@ if (-not (Test-Path "examples/merge_lora/qwen3_lora_sft_ci.yaml")) {throw "FAIL:
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 if ($LASTEXITCODE -ne 0) {throw "FAIL: llamafactory-cli export failed"}
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @test:id=verify-llamafactory-export-output timeout=120 hidden=True setup=activate-venv -->
@@ -593,24 +595,24 @@ print("PASS: Exported merged model output looks correct")
 <!-- @test:end -->
 ## 使用 LLaMA Factory GUI
 
-`LLaMA-Factory` 也支援透過瀏覽器中的網頁介面，以零程式碼方式微調 LLM。
+`LLaMA-Factory` 也支援透過瀏覽器中的網頁 UI 對 LLM 進行零程式碼微調。
 
-使用以下指令開啟：
+使用以下指令開啟它：
 
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI` 提供了一個精簡的介面，用於管理機器學習工作流程，包括訓練、評估、預測、聊天與匯出模型。以下是各個分頁的簡要介紹：
+`LlamaFactory Web UI` 提供了一個簡化的介面，用於管理機器學習工作流程，包括訓練、評估、預測、對話以及匯出模型。以下是各個分頁的簡要介紹：
 
-* **Train**：此分頁可讓您選擇模型與資料集、設定訓練參數並啟動訓練流程。了解必要與選用參數對於最佳化訓練設定至關重要。
-* **Evaluate & Predict**：訓練完成後，您可以使用此分頁評估模型的表現並進行預測。它能提供模型在新資料上的準確度與效能的深入分析。
-* **Chat**：訓練完成後，可在 Chat 分頁載入模型，與其互動並檢視您的成果。此功能可實現與已訓練模型的即時溝通。
-* **Export**：此分頁便於匯出已訓練的模型，以供部署或進一步使用。您可以將模型儲存為適用於不同應用程式的各種格式。
+* **Train**：此分頁可讓您選擇模型和資料集、設定訓練參數，並啟動訓練流程。了解必要和選用的參數對於優化訓練設定相當重要。
+* **Evaluate & Predict**：訓練完成後，您可以使用此分頁評估模型的效能並進行預測。它能提供模型在新資料上的準確度與效果的深入分析。
+* **Chat**：訓練完成後，在 Chat 分頁中載入模型即可與其互動，並查看您的成果。此功能可讓您與訓練好的模型進行即時溝通。
+* **Export**：此分頁可協助匯出已訓練的模型以供部署或進一步使用。您可以將模型儲存為適用於不同應用情境的多種格式。
 
-如需詳細指引，建議參閱 [LlamaFactory GitHub repository](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) 與 [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) 上的官方文件。此外，[Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) 也提供了關於此介面及其功能的寶貴見解。
+如需詳細指引，建議您參閱 [LlamaFactory GitHub repository](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) 以及 [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) 上的官方文件。此外，[Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) 也提供了關於此介面及其功能的寶貴資訊。
 
 ## 後續步驟
-- 嘗試不同的模型，例如 `gpt-oss` 及其他最先進的模型。
+- 嘗試不同的模型，例如 `gpt-oss` 以及其他最先進的模型。
 - 在微調後的模型上嘗試不同的後端
 
 如需更多文件，請造訪：https://llamafactory.readthedocs.io/en/latest/

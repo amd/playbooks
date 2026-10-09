@@ -16,34 +16,37 @@ SPDX-License-Identifier: MIT
 
 ## 概觀
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) 是 DeepSeek V4 系列中著重效率的變體——這是一款擁有 2840 億參數的混合專家（Mixture of Experts）模型，並具備 130 億個活躍參數。根據 [DeepSeek 的技術報告](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash)，該模型在 SWE-bench Verified 上得分為 79%，在 LiveCodeBench 上得分為 91.6%。
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) 是 DeepSeek V4 系列中專注於效率的變體 — 這是一個擁有 2840 億參數的混合專家模型（Mixture of Experts），其中有 130 億個啟用參數。根據[DeepSeek 的技術報告](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash)，該模型在 SWE-bench Verified 上得分為 79%，在 LiveCodeBench 上得分為 91.6%。
 
-[ds4（Dwarf Star 4）](https://github.com/antirez/ds4) 是專為此模型架構打造的專用推論引擎。它並非通用執行環境，而是直接針對 DeepSeek V4 系列，以架構特定的核心優化來搭配 AMD ROCm™ 軟體。目前它是在 Strix Halo 上表現最佳的 DeepSeek V4 Flash 實作之一。
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) 是專為此模型架構打造的推論引擎。與通用執行環境不同，ds4 直接針對 DeepSeek V4 系列，為 AMD ROCm™ 軟體提供特定架構的核心最佳化。目前它是在 Strix Halo 上效能表現最佳的 DeepSeek V4 Flash 實作之一。
 
-本教學說明如何使用 `ai-toolbox-cockpit`（一款終端機使用者介面）來設定 ds4、下載模型權重，並在 AMD Ryzen™ AI Halo Developer Platform 上本機啟動 DeepSeek V4 Flash 服務。
+本教學將說明如何使用終端機 UI `ai-toolbox-cockpit`，來設定 ds4、下載模型權重，並在 AMD Ryzen™ AI Halo Developer Platform 上本機啟動 DeepSeek V4 Flash 的服務。
 
 ## 您將學到什麼
 
-- 如何安裝並啟動 `ai-toolbox-cockpit` 終端機使用者介面
-- 如何建立 ds4 ROCm 工具箱容器
-- 下載適用於單一 Halo 節點的建議量化版本
-- 啟動 ds4 推論伺服器並公開一個相容 OpenAI 的端點
-- 將 Web UI 或程式撰寫代理程式連接到本機伺服器
+- 如何安裝並啟動 `ai-toolbox-cockpit` 終端機 UI
+- 如何建立 ds4 ROCm toolbox 容器
+- 針對單一 Halo 節點下載建議的量化版本
+- 啟動 ds4 推論伺服器並對外提供相容 OpenAI 的端點
+- 將 Web UI 或程式碼代理（coding agent）連接到本機伺服器
 
-## 設定記憶體組態
+## 設定記憶體配置
 
 <!-- @require:memory-config -->
 
-## 安裝軟體必要條件
+## 安裝軟體先決條件
 
-> **此組態的系統需求（單節點 IQ2_XXS，126k 上下文）：**
-> - 一台 Strix Halo 系統，**至少具備 128 GB 統一記憶體**。
-> - **BIOS 專屬 VRAM（UMA 訊框緩衝區）設定為最小值**，以便共用記憶體池盡可能大。
-> - GPU **共用記憶體池至少設定為 110 GB**：執行 `amd-ttm --set 110`（請參閱上方的記憶體組態步驟）並重新開機。若數值過低，在以 126k 上下文載入模型時可能會發生記憶體不足的錯誤。若您的系統可用記憶體較少，請改為在伺服器模式中降低**上下文**（Context）數值。
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:podman,distrobox,ds4-cockpit,ds4-toolbox-image -->
+
+> **此設定的系統需求（單節點 IQ2_XXS，126k 情境長度）：**
+> - 具備**至少 128 GB 統一記憶體**的 Strix Halo 系統。
+> - **BIOS 專用 VRAM（UMA frame buffer）設為最低值**，以便共享記憶體池能盡可能大。
+> - GPU **共享記憶體池至少設為 110 GB**：執行 `amd-ttm --set 110`（請參考上方的記憶體配置步驟）並重新開機。若數值過低，在模型以 126k 情境長度載入時可能會發生記憶體不足的錯誤。若您的系統可用記憶體較少，請改為在 Server Mode 中降低**情境長度（Context）**數值。
 >
-> **注意：** 您可以先嘗試將 **GPU 共用記憶體池** 設定為 **110 GB** 作為起始值。若遇到記憶體不足的錯誤，請提高共用記憶體池，或降低上下文大小。
+> **注意：**可先嘗試將 **GPU 共享記憶體池**設為 **110 GB** 作為起始值。若遇到記憶體不足的錯誤，請提高共享記憶體池或降低情境長度。
 
-ai-toolbox-cockpit 使用容器工具箱來執行 ds4 引擎。請安裝 `podman`、`distrobox` 和 `pipx`：
+ai-toolbox-cockpit 使用容器化 toolbox 來執行 ds4 引擎。請安裝 `podman`、`distrobox` 和 `pipx`：
 
 ```bash
 sudo apt update
@@ -63,20 +66,20 @@ echo "OK: podman, distrobox, and pipx are installed"
 
 ## 可用的量化版本
 
-ds4 的作者提供了多種 GGUF 格式的 DeepSeek V4 Flash 量化版本。以下所有模型皆使用重要性矩陣（imatrix）校準，能為模型中對程式撰寫與推理任務最重要的部分保留較高精度。
+ds4 的作者提供了多個 GGUF 格式的 DeepSeek V4 Flash 量化版本。以下所有模型都使用重要性矩陣（imatrix）校準，能在對編碼與推理任務最重要的部分保留較高的精確度。
 
 | 量化版本 | 大小 | 說明 |
 |-------------|------|-------------|
 | [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80.8 GB | 建議用於單一 128 GB 節點 |
-| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | 將第 37–42 層保持在 Q4 精度以獲得更佳準確度。可容納於 128 GB 中，但留給上下文的空間較少 |
+| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | 第 37–42 層保持 Q4 精度以提升準確度。可容納於 128 GB，但留給情境長度的空間較少 |
 | [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | 品質更高。需要透過多節點叢集使用兩個 Halo 節點 |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3.6 GB | 用於推測解碼（speculative decoding）的選用附加元件，可提升生成速度 |
+| [MTP 推測性解碼（Speculative Decoding）](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3.6 GB | 用於推測性解碼以提升生成速度的選用附加元件 |
 
-**IQ2_XXS imatrix** 模型是一個不錯的起點。它能舒適地容納於單一節點中，並留有足夠的記憶體空間供合理大小的上下文視窗使用。
+**IQ2_XXS imatrix** 模型是不錯的起始選擇。它可輕鬆容納於單一節點，並留有足夠的記憶體空間供合理的情境視窗使用。
 
 ## 安裝 ai-toolbox-cockpit
 
-[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) 是一款輕量的終端機使用者介面，能讓安裝各種 AI 後端變得容易。我們將使用它來處理建立 ds4 容器、下載模型權重，以及啟動伺服器等工作。請使用 `pipx` 安裝：
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) 是一個輕量級的終端機 UI，讓安裝各種 AI 後端變得容易。我們將使用它來處理建立 ds4 容器、下載模型權重以及啟動伺服器等工作。請使用 `pipx` 安裝：
 
 <!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
@@ -99,9 +102,9 @@ echo "OK: ai-toolbox-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
-## 步驟 1：建立工具箱
+## 步驟 1：建立 Toolbox
 
-在 **Interactive Toolboxes** 分頁中，選取最新可用／穩定版本的 ds4 工具箱（例如 `ds4-rocm-10.0`），然後點選 **Create/Update**。此動作會提取容器映像檔並建立工具箱環境。
+在**Interactive Toolboxes**分頁中，為 ds4 選擇最新的可用/穩定 toolbox（例如 `ds4-rocm-10.0`），然後點選**Create/Update**。這會拉取容器映像檔並建立 toolbox 環境。
 
 
 <p align="center">
@@ -124,9 +127,9 @@ echo "OK: ds4 toolbox container image is present"
 
 ## 步驟 2：下載模型
 
-前往 **Models** 分頁。首先選取後端（ds4）。接著，從下拉選單中選取 **IQ2_XXS imatrix (~80.8 GB)**，然後點選 **Download**。模型檔案預設會儲存至 `~/ds4`（您可以變更儲存路徑）。
+前往**Models**分頁。首先選擇後端（ds4）。接着從下拉選單中選取 **IQ2_XXS imatrix (~80.8 GB)**，然後點選**Download**。模型檔案預設會儲存到 `~/ds4`（您可以變更儲存路徑）。
 
-> **注意：** IQ2_XXS 模型大小約為 80 GB，因此下載時間可能會依您的網路連線狀況而有所不同。下載完成後即可繼續下一步。
+> **注意：**IQ2_XXS 模型大小約為 80 GB，因此下載可能需要一段時間，具體取決於您的網路連線。下載完成後即可繼續。
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
@@ -160,17 +163,17 @@ fi
 
 ## 步驟 3：啟動伺服器
 
-前往 **Server Mode** 分頁。選取已下載的模型與工具箱，然後設定上下文大小、主機和連接埠。準備就緒後，點選 **Start ds4-server**。
+前往**Server Mode**分頁。選擇已下載的模型與 toolbox，然後設定情境長度、主機與連接埠。準備就緒後，點選**Start ds4-server**。
 
-> **提示** `126000` 的上下文大小是一個合理的起始值，應可容納於單一節點中——如果您有多餘的記憶體，可以將其設得更高；若遇到記憶體不足的錯誤，則可將其調低。連接埠（本指南中為 `8000`）可任意指定；請選擇任一未被使用的連接埠。
+> **提示**情境長度設為 `126000` 是一個合理的起始值，應可容納於單一節點 — 若您有多餘的記憶體，可以設定更高的數值；若遇到記憶體不足的錯誤，則可降低該值。連接埠（本指南中為 `8000`）可任意指定，選擇任何未被佔用的連接埠即可。
 
-> **KV 磁碟快取（選用）。** 開啟 **KV Disk Cache** 會將 KV 快取卸載至磁碟（位於 **Host Cache Dir**，預設為 `~/.cache/ds4-kv`），如此一來重複的系統提示便可從 SSD 還原，而無需重新運算。這是針對長且重複提示的程式撰寫代理工作流程的一項效能優化，並**非**執行伺服器所必需。
+> **KV 磁碟快取（選用）。**開啟 **KV Disk Cache** 會將 KV 快取卸載到磁碟（位於 **Host Cache Dir**，預設為 `~/.cache/ds4-kv`），讓重複的系統提示可以從 SSD 還原，而不必重新計算。這是針對長且重複提示的程式碼代理（coding-agent）工作流程的效能最佳化選項，**並非**執行伺服器所必需的設定。
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
 </p>
 
-伺服器將啟動並在連接埠 8000 上進行監聽，並在 `http://localhost:8000/v1` 公開一個相容 OpenAI 的 API 端點。
+伺服器將啟動並在連接埠 8000 上監聽，並在 `http://localhost:8000/v1` 提供相容 OpenAI 的 API 端點。
 
 **快速測試：**
 ```bash
@@ -321,13 +324,13 @@ docker run --network=host \
 
 在瀏覽器中開啟 `http://localhost:3000` 即可開始聊天。
 
-> **注意：** `--network=host` 會將 Web UI 放置於主機的網路上，讓它可以直接透過 `localhost` 連接到 ds4 伺服器。這樣可以讓 ds4 伺服器保持綁定在 loopback（不需要對其他介面公開）。
+> **注意：** `--network=host` 會將 Web UI 置於主機的網路上，使其能夠直接連接到 `localhost` 上的 ds4 伺服器。這樣可讓 ds4 伺服器保持綁定於 loopback（不需要暴露在其他介面上）。
 
-> **提示：** Web UI 的連接埠（此處為 `3000`，透過 `PORT` 設定）是任意的——如果 `3000` 已被使用，可以選擇任何可用的連接埠，並在瀏覽器中開啟該連接埠。請確保 `OPENAI_BASE_URL` 中的連接埠與您的 ds4 伺服器所運行的連接埠一致。
+> **提示：** Web UI 連接埠（此處為 `3000`，透過 `PORT` 設定）是任意的 — 若 `3000` 已被佔用，可選擇任何可用的連接埠，並在瀏覽器中開啟該連接埠即可。請確保 `OPENAI_BASE_URL` 中的連接埠與 ds4 伺服器運行的連接埠相符。
 
 ## 連接編碼代理程式
 
-ds4 伺服器同時公開了 OpenAI 與 Anthropic 相容的端點，因此大多數編碼代理程式都可以直接連接到它。例如，若要將其新增到 `pi` 編碼代理程式，請在 `~/.pi/agent/models.json` 中加入以下區塊：
+ds4 伺服器同時提供與 OpenAI 和 Anthropic 相容的端點，因此大多數編碼代理程式都可以直接連接到它。例如，若要將其加入 `pi` 編碼代理程式，請在 `~/.pi/agent/models.json` 中加入以下區塊：
 
 ```json
 "ds4": {
@@ -374,8 +377,8 @@ ds4 伺服器同時公開了 OpenAI 與 Anthropic 相容的端點，因此大多
 
 ## 後續步驟
 
-- **多節點叢集化**：如果您擁有兩台 Halo 裝置，ds4 支援透過管線平行化（pipeline parallelism）將 Q4 模型（約 153 GB）分散到兩台機器上。請參閱 [ds4-toolbox 文件](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) 以取得設定說明。
-- **推測解碼（MTP）**：下載 MTP 權重（約 3.6 GB），並在伺服器中傳入 `--mtp` 以提升生成速度。
-- **KV 快取磁碟卸載**：對於編碼代理程式工作流程，啟用 `--kv-disk-dir` 可讓重複的系統提示從 SSD 還原，而不需要每次重新運算。
+- **多節點叢集**：如果您有兩台 Halo 裝置，ds4 支援透過管線平行化（pipeline parallelism）將 Q4 模型（約 153 GB）分散到兩台機器上。請參閱 [ds4-toolbox 文件](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) 以取得設定說明。
+- **推測性解碼（MTP）**：下載 MTP 權重（約 3.6 GB），並在啟動伺服器時傳入 `--mtp` 以提升生成速度。
+- **KV 快取磁碟卸載**：對於編碼代理程式工作流程，啟用 `--kv-disk-dir` 可讓重複的系統提示從 SSD 中還原，而不必每次重新計算。
 
-如需更多資訊，請參閱 [ds4 儲存庫](https://github.com/antirez/ds4) 與 [ds4-cockpit toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox)。
+如需更多資訊，請參閱 [ds4 儲存庫](https://github.com/antirez/ds4) 和 [ds4-cockpit 工具箱](https://github.com/kyuz0/strix-halo-ds4-toolbox)。

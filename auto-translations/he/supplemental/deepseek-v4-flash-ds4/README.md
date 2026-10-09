@@ -9,41 +9,44 @@ SPDX-License-Identifier: MIT
 > **תרגום מכונה.** דף זה תורגם באופן אוטומטי מאנגלית ולא נבדק על ידי אדם. ייתכן שהוא מכיל שגיאות, וייתכן שהוראות, פקודות, הורדות, זמינות מוצרים, או תוכן אחר מסוימים ישתנו בהתאם לשפה או לאזור. בכל מקרה של אי-התאמה או סתירה, הגרסה המקורית באנגלית של ה-playbook היא הקובעת והמחייבת.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
+<!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## סקירה כללית
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) הוא הווריאנט הממוקד ביעילות של משפחת DeepSeek V4 — מודל Mixture of Experts בעל 284 מיליארד פרמטרים עם 13 מיליארד פרמטרים פעילים. לפי [הדוח הטכני של DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash), הוא משיג ציון של 79% ב-SWE-bench Verified ו-91.6% ב-LiveCodeBench.
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) הוא הווריאנט הממוקד ביעילות ממשפחת DeepSeek V4 — מודל Mixture of Experts בן 284 מיליארד פרמטרים עם 13 מיליארד פרמטרים פעילים. לפי [הדוח הטכני של DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash), הוא משיג 79% ב-SWE-bench Verified ו-91.6% ב-LiveCodeBench.
 
-[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) הוא מנוע היסק ייעודי שנבנה במיוחד עבור ארכיטקטורת מודל זו. במקום להיות ריצה כללית, ds4 מכוון ישירות למשפחת DeepSeek V4 עם אופטימיזציות ליבה ייעודיות לארכיטקטורה עבור תוכנת AMD ROCm™. כרגע זוהי אחת ההטמעות בעלות הביצועים הטובים ביותר של DeepSeek V4 Flash על Strix Halo.
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) הוא מנוע הסקה ייעודי שנבנה במיוחד עבור ארכיטקטורת המודל הזו. במקום runtime כללי, ds4 מכוון ישירות למשפחת DeepSeek V4 עם אופטימיזציות ליבה ספציפיות לארכיטקטורה עבור תוכנת AMD ROCm™. זהו כיום אחד מהמימושים בעלי הביצועים הטובים ביותר של DeepSeek V4 Flash על Strix Halo.
 
-מדריך זה מראה כיצד להשתמש ב-`ai-toolbox-cockpit`, ממשק משתמש טרמינל, כדי להגדיר את ds4, להוריד את משקלי המודל, ולהתחיל להריץ את DeepSeek V4 Flash באופן מקומי בפלטפורמת המפתחים AMD Ryzen™ AI Halo.
+מדריך זה מראה כיצד להשתמש ב-`ai-toolbox-cockpit`, ממשק משתמש טרמינלי, כדי להגדיר את ds4, להוריד משקלי מודל, ולהתחיל להגיש את DeepSeek V4 Flash באופן מקומי על AMD Ryzen™ AI Halo Developer Platform.
 
 ## מה תלמדו
 
-- כיצד להתקין ולהפעיל את ממשק המשתמש בטרמינל `ai-toolbox-cockpit`
-- כיצד ליצור את מכולת הכלים (toolbox) של ds4 עבור ROCm
-- הורדת רמת הקוונטיזציה המומלצת עבור צומת Halo יחיד
-- הפעלת שרת ההיסק של ds4 וחשיפת נקודת קצה תואמת OpenAI
-- חיבור ממשק Web UI או סוכן קידוד לשרת המקומי
+- כיצד להתקין ולהפעיל את ממשק המשתמש הטרמינלי `ai-toolbox-cockpit`
+- כיצד ליצור את מכולת ROCm toolbox של ds4
+- הורדת רמת הכימות המומלצת עבור צומת Halo יחיד
+- הפעלת שרת ההסקה ds4 וחשיפת נקודת קצה תואמת OpenAI
+- חיבור Web UI או סוכן קידוד לשרת המקומי
 
 ## הגדרת תצורת הזיכרון
 
 <!-- @require:memory-config -->
 
-## התקנת דרישות תוכנה מוקדמות
+## התקנת דרישות תוכנה מקדימות
+
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:podman,distrobox,ds4-cockpit,ds4-toolbox-image -->
 
 > **דרישות מערכת עבור תצורה זו (IQ2_XXS בצומת יחיד עם הקשר של 126k):**
-> - מערכת Strix Halo עם **לפחות 128 GB של זיכרון מאוחד**.
-> - **מאגר ה-VRAM הייעודי ב-BIOS (מאגר מסגרות UMA) מוגדר למינימום**, כך שמאגר הזיכרון המשותף יוכל להיות גדול ככל האפשר.
-> - **מאגר הזיכרון המשותף של ה-GPU מוגדר לפחות ל-110 GB**: הריצו `amd-ttm --set 110` (ראו את שלב הגדרת הזיכרון לעיל) והפעילו מחדש. ערכים נמוכים יותר עלולים להיכשל עם שגיאת אזל הזיכרון כאשר המודל נטען עם הקשר של 126k. אם למערכת שלכם יש פחות זיכרון זמין, הורידו במקום זאת את ערך **Context** במצב שרת (Server Mode).
+> - מערכת Strix Halo עם **לפחות 128GB של זיכרון מאוחד**.
+> - **זיכרון VRAM ייעודי ב-BIOS (מאגר הפריימים UMA) מוגדר למינימום**, כך שמאגר הזיכרון המשותף יוכל להיות גדול ככל האפשר.
+> - מאגר הזיכרון המשותף של ה-GPU **מוגדר לפחות ל-110GB**: הריצו `amd-ttm --set 110` (ראו שלב הגדרת תצורת הזיכרון לעיל) והפעילו מחדש. ערכים נמוכים יותר עלולים להיכשל עם שגיאת חוסר זיכרון כאשר המודל נטען עם הקשר של 126k. אם במערכת שלכם יש פחות זיכרון זמין, הורידו במקום זאת את ערך **Context** במצב Server Mode.
 >
-> **הערה:** נסו להגדיר את **מאגר הזיכרון המשותף של ה-GPU** ל-**110 GB** כנקודת פתיחה. אם נתקלתם בשגיאות אזל זיכרון, הגדילו את מאגר הזיכרון המשותף או הורידו את גודל ההקשר.
+> **הערה:** נסו להגדיר את **מאגר הזיכרון המשותף של ה-GPU** ל-**110GB** כנקודת התחלה. אם נתקלתם בשגיאות חוסר זיכרון, הגדילו את מאגר הזיכרון המשותף או הורידו את גודל ההקשר.
 
-ai-toolbox-cockpit משתמש במכולות כלים (toolboxes) כדי להריץ את מנוע ds4. התקינו את `podman`, `distrobox`, ו-`pipx`:
+ai-toolbox-cockpit משתמש במכולות toolbox להרצת מנוע ds4. התקינו את `podman`, `distrobox`, ו-`pipx`:
 
 ```bash
 sudo apt update
@@ -61,22 +64,22 @@ echo "OK: podman, distrobox, and pipx are installed"
 ```
 <!-- @test:end -->
 
-## רמות קוונטיזציה זמינות
+## רמות כימות זמינות
 
-יוצר ds4 מספק מספר גרסאות מקוונטזות של DeepSeek V4 Flash בפורמט GGUF. כל המודלים שלהלן משתמשים בכיול מטריצת חשיבות (imatrix), אשר שומר על דיוק גבוה יותר עבור חלקי המודל החשובים ביותר למשימות קידוד והיגיון.
+מחבר ds4 מספק מספר גרסאות מכומתות של DeepSeek V4 Flash בפורמט GGUF. כל המודלים למטה משתמשים בכיול importance matrix (imatrix), אשר שומר על דיוק גבוה יותר עבור חלקי המודל החשובים ביותר למשימות קידוד והיסק.
 
-| רמת קוונטיזציה | גודל | תיאור |
+| כימות | גודל | תיאור |
 |-------------|------|-------------|
-| [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80.8 GB | מומלץ עבור צומת יחיד של 128 GB |
-| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | שומר על שכבות 37–42 בדיוק Q4 לדיוק טוב יותר. נכנס ל-128 GB אך משאיר פחות מקום להקשר |
-| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | איכות גבוהה יותר. דורש שני צמתי Halo באמצעות אשכול רב-צמתי (multi-node clustering) |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3.6 GB | תוסף אופציונלי לפענוח ספקולטיבי (speculative decoding) לשיפור מהירות היצירה |
+| [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80.8GB | מומלץ עבור צומת יחיד בן 128GB |
+| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97GB | שומר על שכבות 37–42 בדיוק Q4 לדיוק טוב יותר. מתאים ל-128GB אך משאיר פחות מקום להקשר |
+| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153GB | איכות גבוהה יותר. דורש שני צמתי Halo באמצעות אשכול מרובה-צמתים |
+| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3.6GB | תוספת אופציונלית לפענוח ספקולטיבי לשיפור מהירות היצירה |
 
-מודל **IQ2_XXS imatrix** מהווה נקודת פתיחה טובה. הוא נכנס בנוחות לצומת יחיד ומשאיר מספיק זיכרון עבור חלון הקשר סביר.
+מודל **IQ2_XXS imatrix** הוא נקודת התחלה טובה. הוא מתאים בנוחות לצומת יחיד ומשאיר מספיק זיכרון לחלון הקשר סביר.
 
 ## התקנת ai-toolbox-cockpit
 
-[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) הוא ממשק משתמש טרמינל קל להקלת התקנת מגוון backends של AI. נשתמש בו כדי לטפל ביצירת מכולת ds4 שלנו, הורדת משקלי המודל, והפעלת שרתים. התקינו אותו עם `pipx`:
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) הוא ממשק משתמש טרמינלי קליל שמקל על התקנת מגוון backends של AI. נשתמש בו כדי לטפל ביצירת מכולת ה-ds4 שלנו, הורדת משקלי מודל, והפעלת שרתים. התקינו אותו עם `pipx`:
 
 <!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
@@ -99,9 +102,9 @@ echo "OK: ai-toolbox-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
-## שלב 1: יצירת מכולת הכלים (Toolbox)
+## שלב 1: יצירת ה-Toolbox
 
-בלשונית **Interactive Toolboxes**, בחרו את מכולת הכלים העדכנית/היציבה הזמינה עבור ds4 (למשל, `ds4-rocm-10.0`) ולחצו על **Create/Update**. פעולה זו מושכת את תמונת המכולה ויוצרת את סביבת מכולת הכלים.
+בלשונית **Interactive Toolboxes**, בחרו את ה-toolbox העדכני/היציב הזמין עבור ds4 (למשל `ds4-rocm-10.0`) ולחצו על **Create/Update**. פעולה זו מושכת את תמונת המכולה ויוצרת את סביבת ה-toolbox.
 
 
 <p align="center">
@@ -124,9 +127,9 @@ echo "OK: ds4 toolbox container image is present"
 
 ## שלב 2: הורדת המודל
 
-עברו ללשונית **Models**. תחילה, בחרו את ה-backend (ds4). לאחר מכן, בחרו את **IQ2_XXS imatrix (~80.8 GB)** מהתפריט הנפתח ולחצו על **Download**. קובצי המודל יישמרו ב-`~/ds4` כברירת מחדל (ניתן לשנות את נתיב האחסון).
+עברו ללשונית **Models**. ראשית, בחרו את ה-backend (ds4). לאחר מכן, בחרו את **IQ2_XXS imatrix (~80.8GB)** מתוך התפריט הנפתח ולחצו על **Download**. קבצי המודל יישמרו ב-`~/ds4` כברירת מחדל (ניתן לשנות את נתיב האחסון).
 
-> **הערה:** גודל מודל ה-IQ2_XXS הוא כ-80 GB, כך שההורדה עשויה לקחת זמן מה בהתאם לחיבור שלכם. תוכלו להמשיך לאחר שהיא תושלם.
+> **הערה:** מודל ה-IQ2_XXS הוא כ-80GB, כך שההורדה עשויה לקחת זמן בהתאם לחיבור שלכם. ניתן להמשיך לאחר סיומה.
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
@@ -160,17 +163,17 @@ fi
 
 ## שלב 3: הפעלת השרת
 
-עברו ללשונית **Server Mode**. בחרו את המודל שהורדתם ואת מכולת הכלים, לאחר מכן הגדירו את גודל ההקשר, המארח (host), והפורט (port). כשמוכנים, לחצו על **Start ds4-server**.
+עברו ללשונית **Server Mode**. בחרו את המודל שהורדתם ואת ה-toolbox, ולאחר מכן הגדירו את גודל ההקשר, ה-host, וה-port. כשתהיו מוכנים, לחצו על **Start ds4-server**.
 
-> **טיפ** גודל הקשר של `126000` הוא ערך פתיחה סביר שאמור להיכנס בצומת יחיד — ניתן להגדיר אותו גבוה יותר אם יש לכם זיכרון פנוי, או להורידו אם נתקלים בשגיאות אזל זיכרון. הפורט (`8000` במדריך זה) הוא שרירותי; בחרו כל פורט פנוי.
+> **טיפ** גודל הקשר של `126000` הוא ערך התחלתי סביר שאמור להתאים לצומת יחיד — ניתן להגדיר אותו גבוה יותר אם יש לכם זיכרון פנוי, או להוריד אותו אם נתקלתם בשגיאות חוסר זיכרון. ה-port (`8000` במדריך זה) הוא שרירותי; בחרו כל port פנוי.
 
-> **מטמון דיסק KV (אופציונלי).** הפעלת **KV Disk Cache** מעבירה את מטמון ה-KV לדיסק (ב-**Host Cache Dir**, ברירת מחדל `~/.cache/ds4-kv`) כך שהנחיות מערכת חוזרות ונשנות משוחזרות מ-SSD במקום להיחשב מחדש. זוהי אופטימיזציית ביצועים עבור זרימות עבודה של סוכני קידוד עם הנחיות ארוכות וחוזרות, ו**אינה נדרשת** להפעלת השרת.
+> **מטמון KV בדיסק (אופציונלי).** הפעלת **KV Disk Cache** מעבירה את מטמון ה-KV לדיסק (ב-**Host Cache Dir**, ברירת מחדל `~/.cache/ds4-kv`) כך ש-system prompts חוזרים משוחזרים מה-SSD במקום להיחשב מחדש. זהו אופטימיזציה לביצועים עבור זרימות עבודה של סוכני קידוד עם prompts ארוכים וחוזרים, ו**אינו נדרש** כדי להפעיל את השרת.
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
 </p>
 
-השרת יופעל ויאזין בפורט 8000, וחושף נקודת קצה API תואמת OpenAI בכתובת `http://localhost:8000/v1`.
+השרת יופעל ויאזין ל-port 8000, תוך חשיפת נקודת קצה API תואמת OpenAI בכתובת `http://localhost:8000/v1`.
 
 **בדיקה מהירה:**
 ```bash
@@ -308,7 +311,7 @@ echo "OK: ds4 server test complete; server stopped and GPU memory released"
 <!-- @test:end -->
 ## חיבור ממשק Web UI
 
-ניתן לחבר כל ממשק צ'אט התומך בפורמט OpenAI API. לדוגמה, כדי להשתמש ב-HuggingFace ChatUI:
+ניתן לחבר כל ממשק צ'אט שתומך בפורמט OpenAI API. לדוגמה, כדי להשתמש ב-HuggingFace ChatUI:
 
 ```bash
 docker run --network=host \
@@ -319,15 +322,15 @@ docker run --network=host \
   ghcr.io/huggingface/chat-ui-db
 ```
 
-פתחו את `http://localhost:3000` בדפדפן שלכם כדי להתחיל לשוחח.
+פתחו את `http://localhost:3000` בדפדפן כדי להתחיל לשוחח.
 
-> **הערה:** `--network=host` מציב את ה-Web UI ברשת של המארח כך שהוא יכול להגיע לשרת ה-ds4 ישירות דרך `localhost`. כך שרת ה-ds4 נשאר מקושר ל-loopback (אין צורך לחשוף אותו בממשקים אחרים).
+> **הערה:** `--network=host` ממקם את ה-Web UI ברשת של המארח כך שהוא יכול להגיע לשרת ds4 ישירות דרך `localhost`. כך שרת ds4 נשאר מוגבל ל-loopback (אין צורך לחשוף אותו בממשקים אחרים).
 
-> **טיפ:** יציאת ה-Web UI (`3000` כאן, שמוגדרת באמצעות `PORT`) היא שרירותית — ניתן לבחור כל יציאה פנויה אם `3000` כבר תפוסה, ולפתוח את אותה יציאה בדפדפן במקום זאת. ודאו שהיציאה ב-`OPENAI_BASE_URL` תואמת ליציאה שבה פועל שרת ה-ds4.
+> **טיפ:** הפורט של ה-Web UI (`3000` כאן, מוגדר באמצעות `PORT`) הוא שרירותי — ניתן לבחור כל פורט פנוי אם `3000` כבר תפוס, ולפתוח את אותו פורט בדפדפן במקום זאת. ודאו שהפורט ב-`OPENAI_BASE_URL` תואם לפורט שבו פועל שרת ds4 שלכם.
 
 ## חיבור סוכן קידוד (Coding Agent)
 
-שרת ds4 חושף נקודות קצה תואמות הן ל-OpenAI והן ל-Anthropic, כך שרוב סוכני הקידוד יכולים להתחבר אליו ישירות. לדוגמה, כדי להוסיף אותו לסוכן הקידוד `pi`, הוסיפו את הבלוק הבא לקובץ `~/.pi/agent/models.json`:
+שרת ds4 חושף נקודות קצה תואמות הן ל-OpenAI והן ל-Anthropic, כך שרוב סוכני הקידוד יכולים להתחבר אליו ישירות. לדוגמה, כדי להוסיף אותו לסוכן הקידוד `pi`, הוסיפו את הבלוק הבא ל-`~/.pi/agent/models.json`:
 
 ```json
 "ds4": {
@@ -367,15 +370,15 @@ docker run --network=host \
 }
 ```
 
-> **טיפ**: אם סוכן הקידוד או ה-Web UI שלכם פועלים על מכונה שונה מפלטפורמת Halo, יהיה עליכם להעביר (forward) את יציאת השרת (`8000` כאן) דרך SSH:
+> **טיפ**: אם סוכן הקידוד או ה-Web UI שלכם פועלים על מכונה שונה מפלטפורמת Halo, תצטרכו להעביר את פורט השרת (`8000` כאן) באמצעות SSH:
 > ```bash
 > ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## הצעדים הבאים
 
-- **אשכול רב-צמתי (Multi-node clustering)**: אם יש לכם שני מכשירי Halo, ds4 תומך בפיזור מודל Q4 (~153 GB) בין שתי המכונות באמצעות pipeline parallelism. עיינו ב[תיעוד ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) להוראות התקנה.
-- **פענוח ספקולטיבי (MTP)**: הורידו את משקלי ה-MTP (~3.6 GB) והעבירו `--mtp` לשרת כדי לקבל מהירות יצירה מהירה יותר.
-- **פריקת מטמון KV לדיסק**: עבור זרימות עבודה של סוכני קידוד, הפעילו את `--kv-disk-dir` כך שהנחיות מערכת חוזרות ישוחזרו מה-SSD במקום להיות מחושבות מחדש בכל פעם.
+- **אשכול (clustering) מרובה-צמתים**: אם יש לכם שני מכשירי Halo, ds4 תומך בהפצת מודל Q4 (~153 GB) בין שתי המכונות באמצעות pipeline parallelism. ראו את [תיעוד ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) להוראות הגדרה.
+- **פענוח ספקולטיבי (MTP)**: הורידו את משקולות ה-MTP (~3.6 GB) והעבירו `--mtp` לשרת לקבלת מהירות יצירה מהירה יותר.
+- **העברת מטמון KV לדיסק**: עבור תהליכי עבודה של סוכני קידוד, הפעילו את `--kv-disk-dir` כדי שהנחיות מערכת חוזרות ישוחזרו מה-SSD במקום להיות מחושבות מחדש בכל פעם.
 
-למידע נוסף, ראו את [מאגר ds4](https://github.com/antirez/ds4) ואת [ערכת הכלים ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox).
+למידע נוסף, ראו את [מאגר ds4](https://github.com/antirez/ds4) ואת [ארגז הכלים ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox).

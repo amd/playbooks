@@ -16,26 +16,26 @@ SPDX-License-Identifier: MIT
 
 ## Pregled
 
-Ovaj vodič pruža korak-po-korak primere za fino podešavanje velikog jezičkog modela (LLM) pomoću PyTorch i ROCm. Obuhvata nekoliko tehnika, od standardnog fino podešavanja do memorijski efikasnih Parameter-Efficient Fine-Tuning (PEFT) strategija, kako biste lako prilagodili modele svojim potrebama.
+Ovaj tutorijal pruža primere korak po korak za fino podešavanje velikog jezičkog modela (LLM) pomoću PyTorch i ROCm. Obuhvata nekoliko tehnika, od standardnog fino podešavanja do memorijski efikasnih strategija Parameter-Efficient Fine-Tuning (PEFT), kako biste lako prilagodili modele svojim potrebama.
 
-**Korišćeni model**: google/gemma-3-4b-it  *(pogledajte [Omogućavanje HF autentifikacije](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) ako je model zaključan)*  
+**Korišćeni model**: google/gemma-3-4b-it (QLoRA skripta: openai/gpt-oss-20b)  *(pogledajte [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) ako je model zaključan)*  
 **Hardver**: AMD Radeon™ GPU sa ROCm podrškom  
-**Radni okvir**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
+**Okvir (Framework)**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
 > **Napomena:** 
-> - Potpuno fino podešavanje zahteva najmanje **64 GB sistemske RAM memorije**, od čega najmanje **32 GB mora biti dostupno GPU-u** (tih 32 GB je deo tih 64 GB, a ne dodatnih 32 GB).
-> - Možete takođe isprobati i druge arhitekture modela, uključujući **GPT-OSS-20B**, tako što ćete zameniti model u priloženim skriptama za obuku.
+> - Potpuno fino podešavanje zahteva najmanje **64 GB sistemske RAM memorije**, pri čemu najmanje **32 GB mora biti dostupno GPU-u** (ovih 32 GB je deo od ukupno 64 GB, a ne dodatak na njih).
+> - Takođe možete isprobati i druge arhitekture modela, uključujući **GPT-OSS-20B**, zamenom modela u priloženim skriptama za obuku.
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **Napomena:** LoRA i QLoRA fino podešavanje zahtevaju najmanje **32 GB sistemske RAM memorije**, od čega najmanje **16 GB mora biti dostupno GPU-u** (tih 16 GB je deo tih 32 GB, a ne dodatnih 16 GB).
+> **Napomena:** LoRA i QLoRA fino podešavanje zahtevaju najmanje **32 GB sistemske RAM memorije**, pri čemu najmanje **16 GB mora biti dostupno GPU-u** (ovih 16 GB je deo od ukupno 32 GB, a ne dodatak na njih).
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Napomena:** LoRA fino podešavanje zahteva najmanje **32 GB sistemske RAM memorije**, od čega najmanje **16 GB mora biti dostupno GPU-u** (tih 16 GB je deo tih 32 GB, a ne dodatnih 16 GB).
+> **Napomena:** LoRA fino podešavanje zahteva najmanje **32 GB sistemske RAM memorije**, pri čemu najmanje **16 GB mora biti dostupno GPU-u** (ovih 16 GB je deo od ukupno 32 GB, a ne dodatak na njih).
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -44,22 +44,22 @@ Ovaj vodič pruža korak-po-korak primere za fino podešavanje velikog jezičkog
 <!-- @os:linux -->
 > **Napomena:** LoRA i QLoRA fino podešavanje zahtevaju grafičku karticu sa najmanje **16 GB namenske GPU memorije** i **32 GB sistemske RAM memorije**.
 > - Na Linux-u, obuka se u potpunosti izvršava u namenskoj VRAM memoriji grafičke kartice.
-> - Ne prelazi se na deljenu GPU memoriju (sistemsku RAM memoriju) kada ponestane VRAM-a.
-> - Kartice sa manje od 16 GB namenske VRAM memorije ostaće bez memorije tokom obuke na Linux-u, čak i ako sistem ima dovoljno RAM memorije.
+> - Ne prelazi se na deljenu GPU memoriju (sistemski RAM) kada VRAM memorija ponestane.
+> - Kartice sa manje od 16 GB namenske VRAM memorije ostaju bez memorije tokom obuke na Linux-u, čak i ako sistem ima dovoljno RAM memorije.
 <!-- @os:end -->
 
 <!-- @os:windows -->
 > **Napomena:** LoRA fino podešavanje zahteva najmanje **16 GB ukupne GPU memorije** i **32 GB sistemske RAM memorije**.
-> - Na Windows-u, ukupna GPU memorija kombinuje namensku VRAM memoriju grafičke kartice sa deljenom GPU memorijom (pozajmljenom iz sistemske RAM memorije).
-> - Zbog toga, kartice sa manje od 16 GB namenske VRAM memorije i dalje mogu da pokrenu ovaj priručnik koristeći deljenu GPU memoriju za nadoknadu razlike.
+> - Na Windows-u, ukupna GPU memorija kombinuje namensku VRAM memoriju grafičke kartice sa deljenom GPU memorijom (pozajmljenom iz sistemskog RAM-a).
+> - Zbog toga, kartice sa manje od 16 GB namenske VRAM memorije i dalje mogu da pokrenu ovaj vodič koristeći deljenu GPU memoriju da nadoknade razliku.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Šta ćete naučiti
 
-- Kako da fino podesite LLM koristeći LoRA, QLoRA i potpuno fino podešavanje sa PyTorch i ROCm
-- Kako da sačuvate i primenite svoj fino podešeni model
-- Kako da pratite obuku i rešavate uobičajene probleme
+- Kako fino podesiti LLM koristeći LoRA, QLoRA i potpuno fino podešavanje sa PyTorch i ROCm
+- Kako sačuvati i implementirati svoj fino podešeni model
+- Kako pratiti obuku i otkloniti uobičajene probleme
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Podešavanje konfiguracije memorije
@@ -74,7 +74,12 @@ Ovaj vodič pruža korak-po-korak primere za fino podešavanje velikog jezičkog
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instaliranje neophodnog softvera
+## Instaliranje preduslova za softver
+
+<!-- @prereq:hf-models-gemma-3-4b-it,hf-datasets-databricks-dolly-15k -->
+<!-- @os:linux -->
+<!-- @prereq:hf-datasets-english-quotes -->
+<!-- @os:end -->
 
 #### Kreiranje virtuelnog okruženja
 
@@ -92,7 +97,7 @@ source finetune-venv/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Dodelite svom korisniku pristup GPU uređajima** (odjavite se i ponovo prijavite kako bi ovo stupilo na snagu):
+**Dodelite svom korisniku pristup GPU uređajima** (odjavite se i ponovo prijavite da bi ovo stupilo na snagu):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -146,7 +151,7 @@ pip install transformers==5.10.1 safetensors==0.6.2 accelerate peft trl bitsandb
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** Ovde su testirani i podržani samo osnovni paketi. **bitsandbytes nije dobro podržan na Windows-u**, pa ga Windows instalacija izostavlja; koristite LoRA ili potpuno fino podešavanje na Windows-u (QLoRA zahteva bitsandbytes i namenjena je za Linux).
+**Windows:** Ovde su testirani i podržani samo osnovni paketi. **bitsandbytes nije dobro podržan na Windows-u**, pa Windows instalacija izostavlja taj paket; koristite LoRA ili potpuno fino podešavanje na Windows-u (QLoRA zahteva bitsandbytes i namenjen je za Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
@@ -156,9 +161,9 @@ pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate p
 
 #### Omogućavanje HF autentifikacije (zaključani ili prilagođeni / unapred neinstalirani modeli)
 
-U ovom primeru koristimo **google/gemma-3-4b-it**, koji je **zaključani (gated)** model. Morate prihvatiti uslove modela na Hugging Face, a zatim se autentifikovati kako bi skripte za obuku mogle da ga preuzmu.
+U ovom primeru koristimo **google/gemma-3-4b-it**, koji je **zaključan (gated)** model. Morate prihvatiti uslove modela na Hugging Face, a zatim se autentifikovati kako bi skripte za obuku mogle da ga preuzmu.
 
-1. **Prihvatite licencu:** Otvorite [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), prijavite se (ili napravite nalog) i prihvatite licencu/uslove na strani modela (npr. „Agree and access repository“).
+1. **Prihvatite licencu:** Otvorite [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), prijavite se (ili kreirajte nalog) i prihvatite licencu/uslove na stranici modela (npr. „Agree and access repository”).
 2. **Instalirajte i prijavite se:** Instalirajte Hugging Face CLI, a zatim pokrenite standardnu prijavu:
 
 ```bash
@@ -267,9 +272,9 @@ sys.exit(r.returncode)
 
 ### Šta je LoRA?
 
-**LoRA (Low-Rank Adaptation)** zadržava bazni model zamrznutim i trenira samo male „adapter" matrice koje se dodaju određenim slojevima. 
+**LoRA (Low-Rank Adaptation)** zadržava bazni model zamrznutim i obučava samo male „adapter” matrice koje se dodaju određenim slojevima. 
 
-- **Ključna ideja**: umesto ažuriranja ogromne matrice težina sa milionima parametara, učimo ažuriranje niskog ranga (dve male matrice čiji proizvod ima mnogo manje parametara). To daje veliko smanjenje broja parametara koji se treniraju i VRAM memorije, uz zadržavanje najvećeg dela kvaliteta potpunog fino podešavanja.
+- **Ključna ideja**: umesto ažuriranja ogromne matrice težina sa milionima parametara, učimo ažuriranje niskog ranga (dve male matrice čiji proizvod ima znatno manje parametara). To daje veliko smanjenje broja obučivih parametara i VRAM memorije, uz zadržavanje većine kvaliteta potpunog fino podešavanja.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -284,7 +289,7 @@ W_updated = W + B × A
 
 ### Šta je QLoRA?
 
-**QLoRA** kombinuje **4-bitnu kvantizaciju** sa **LoRA**. Bazni model se učitava u 4-bitnom formatu (velika ušteda memorije), a samo se LoRA adapteri treniraju u višoj preciznosti. Tako dobijate efikasnost parametara LoRA plus mnogo manju potrošnju VRAM memorije, uz mali kompromis u kvalitetu u odnosu na LoRA pune preciznosti. Imajte u vidu da 4-bitna kvantizacija može izazvati numeričku nestabilnost (skokove gubitka ili NaN vrednosti), pa korisnici često mogu preferirati **LoRA** ako je dostupno dovoljno VRAM memorije.
+**QLoRA** kombinuje **4-bitnu kvantizaciju** sa **LoRA**. Bazni model se učitava u 4-bitnom formatu (velika ušteda memorije), a obučavaju se samo LoRA adapteri u višoj preciznosti. Tako dobijate efikasnost parametara koju pruža LoRA, plus znatno manju potrošnju VRAM memorije, uz mali kompromis u kvalitetu u odnosu na LoRA u punoj preciznosti. Imajte na umu da 4-bitna kvantizacija može izazvati numeričku nestabilnost (skokove gubitka ili NaN vrednosti), pa korisnici često mogu preferirati **LoRA** ako je dostupno dovoljno VRAM memorije.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -292,14 +297,14 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **Napomena**: Za MXFP4 bazne modele poput `openai/gpt-oss-20b`, preporučujemo korišćenje **LoRA** (`train_lora.py`) umesto QLoRA. `bitsandbytes` 4-bitna putanja QLoRA skripte obično dekvantizuje MXFP4 težine u BF16, pa se izvršavanje ponaša kao standardni LoRA. Nativni MXFP4 zahteva `bitsandbytes` izgrađen iz izvornog koda plus odgovarajući Transformers/Triton/kernels sloj. Pogledajte [Transformers MXFP4 dokumentaciju](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Napomena**: Za MXFP4 bazne modele poput `openai/gpt-oss-20b`, preporučujemo korišćenje **LoRA** (`train_lora.py`) umesto QLoRA. 4-bitna putanja QLoRA skripte koja koristi `bitsandbytes` obično dekvantizuje MXFP4 težine u BF16, tako da se pokretanje ponaša kao standardna LoRA. Nativni MXFP4 zahteva `bitsandbytes` izgrađen iz izvornog koda, plus odgovarajući Transformers/Triton/kernels skup. Pogledajte [Transformers MXFP4 dokumentaciju](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
-### 2. Izaberite metod
+### 2. Izaberite svoj metod
 
 | Metod | Memorija | Brzina | Kvalitet | Najbolje za |
 |--------|--------|-------|---------|----------|
-| **QLoRA** (samo Linux) | 12-16GB | Najbrže | 90-95% | Malu upotrebu memorije |
+| **QLoRA** (samo Linux) | 12-16GB | Najbrže | 90-95% | Nisku potrošnju memorije |
 | **LoRA** | 24-32GB | Brzo | 95-98% | Uravnotežen pristup |
 | **Full** | 80GB+ | Najsporije | 100% | Maksimalan kvalitet |
 
@@ -308,30 +313,30 @@ Total: 12GB (vs 40GB full precision)
 **Skup podataka i šta model uči**  
 Skripte pretvaraju skup podataka u primere razgovora. Na primer, QLoRA skripta koristi **Abirate/english_quotes**: svaki primer postaje par korisnik–asistent poput:
 
-- **Korisnik:** „Daj mi citat o: &lt;tag&gt;"
-- **Asistent:** „&lt;citat&gt; – &lt;autor&gt;"
+- **Korisnik:** „Daj mi citat o: &lt;tag&gt;”
+- **Asistent:** „&lt;citat&gt; – &lt;autor&gt;”
 
-Fino podešavanje uči model da odgovara na upite kojima se traže citati o nekoj temi i da ih vraća u formatu `<quote text> - <author>`. LoRA i skripte za potpuno fino podešavanje koriste **databricks/databricks-dolly-15k** (opšti parovi instrukcija/odgovor), tako da se tačan zadatak razlikuje u zavisnosti od skripte; ideja je ista - prilagoditi model odabranom skupu podataka i formatu.
+Fino podešavanje uči model da odgovara na upite koji traže citate o nekoj temi i da ih vraća u formatu `<quote text> - <author>`. LoRA i skripte za potpuno fino podešavanje koriste **databricks/databricks-dolly-15k** (opšti parovi instrukcija/odgovor), tako da se tačan zadatak razlikuje od skripte do skripte; ideja je ista – prilagoditi model vašem izabranom skupu podataka i formatu.
 
-Ispod se nalazi pregled dostupnih metoda obuke. Svaki metod je povezan sa svojom skriptom i sadrži kratak opis za odabir pravog pristupa.
+U nastavku je dat pregled dostupnih metoda obuke. Svaki metod sadrži vezu ka svojoj skripti i kratak opis koji pomaže u izboru odgovarajućeg pristupa.
 
 | Skripta                           | Metod            | Opis                                                                                                         | Tipičan VRAM | Preporučeno za                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Obučava male matrice adaptera dok osnovni model ostaje zamrznut. 3–5 puta brže; ~95–98% punog kvaliteta.                         | 24–32GB      | Napredni korisnici; više adaptera; više VRAM-a    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(samo Linux)*             | **QLoRA**       | 4-bitna kvantizacija + LoRA adapteri. Najmanja upotreba memorije, najbrže, mali kompromis u kvalitetu. Zahteva `bitsandbytes` (samo Linux).                            | 12–16GB      | Većina korisnika; brzi eksperimenti; ograničen VRAM      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Potpuno fino podešavanje** | Ažurira sve parametre modela. Maksimalan kvalitet; najveća upotreba memorije i procesorske snage.                                    | 40GB+        | Maksimalan kvalitet; istraživanje; veliki VRAM           |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Obučava male matrice adaptera dok je osnovni model zamrznut. 3–5x brže; ~95–98% punog kvaliteta.                         | 24–32GB      | Napredni korisnici; više adaptera; više VRAM-a    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(samo Linux)*             | **QLoRA**       | 4-bitna kvantizacija + LoRA adapteri. Najmanja potrošnja memorije, najbrže, mali kompromis u kvalitetu. Zahteva `bitsandbytes` (samo Linux).                            | 12–16GB      | Većina korisnika; brzi eksperimenti; ograničen VRAM      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Potpuno fino podešavanje** | Ažurira sve parametre modela. Maksimalan kvalitet; najveća potrošnja memorije i računarskih resursa.                                    | 40GB+        | Maksimalan kvalitet; istraživanje; veliki VRAM           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Napomena:** Potpuno fino podešavanje (`train_full_finetuning.py`) može zahtevati više od 64GB sistemske RAM memorije i možda nije izvodljivo na ovom uređaju. Razmislite o korišćenju LoRA ili QLoRA umesto toga.
+> **Napomena:** Potpuno fino podešavanje (`train_full_finetuning.py`) može zahtevati više od 64GB sistemske RAM memorije i možda nije izvodljivo na ovom uređaju. Razmotrite korišćenje LoRA ili QLoRA metoda.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Napomena:** Potpuno fino podešavanje (`train_full_finetuning.py`) može zahtevati više od 64GB sistemske RAM memorije i možda nije izvodljivo na ovom uređaju. Razmislite o korišćenju LoRA umesto toga.
+> **Napomena:** Potpuno fino podešavanje (`train_full_finetuning.py`) može zahtevati više od 64GB sistemske RAM memorije i možda nije izvodljivo na ovom uređaju. Razmotrite korišćenje LoRA metoda.
 <!-- @os:end -->
 <!-- @device:end -->
 
-Jednostavno izaberite željeni `Training method`, preuzmite odgovarajuću skriptu i izvršite je pomoću komande dok vaše virtuelno okruženje ostaje aktivirano: 
+Jednostavno izaberite željeni `Training method`, preuzmite odgovarajuću skriptu i izvršite je pomoću komande, dok vaše virtuelno okruženje ostaje aktivirano: 
 
 ```python
 python3 train_<method_name>.py.
@@ -339,7 +344,7 @@ python3 train_<method_name>.py.
 
 ## Korišćenje vašeg fino podešenog modela
 
-### Nakon potpunog finog podešavanja
+### Nakon potpunog fino podešavanja
 
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -366,11 +371,11 @@ from transformers import AutoTokenizer
 
 # Load model with LoRA or QLoRA adapters
 model = AutoPeftModelForCausalLM.from_pretrained(
-    "output-gemma-3-4b-it-qlora",   # or "output-gemma-3-4b-lora" depending on your training
+    "output-gpt-oss-20b-qlora",   # or "output-gemma-3-4b-it-lora" depending on your training
     device_map="auto",
     torch_dtype="auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-it-qlora")
+tokenizer = AutoTokenizer.from_pretrained("output-gpt-oss-20b-qlora")
 
 # Generate text
 prompt = "Explain quantum computing:"
@@ -379,7 +384,7 @@ outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-### Spajanje LoRA adaptera u osnovni model
+### Spajanje LoRA adaptera sa osnovnim modelom
 
 ```python
 # Merge LoRA/QLoRA adapter weights into the base model for standalone inference
@@ -389,11 +394,11 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **Napomena:**  
-- Uverite se da naziv direktorijuma modela (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) odgovara vašem stvarnom izlaznom folderu iz obuke.  
-- Ako ste koristili LoRA umesto QLoRA, samo zamenite putanju u skladu s tim.  
-- Neki Gemma modeli zahtevaju navođenje `trust_remote_code=True` u `from_pretrained`; dodajte ako vidite povezano upozorenje.
+- Proverite da li naziv direktorijuma modela (`output-gemma-3-4b-it-full`, `output-gpt-oss-20b-qlora`) odgovara stvarnom izlaznom folderu iz obuke.  
+- Ako ste koristili LoRA umesto QLoRA, samo odgovarajuće zamenite putanju.  
+- Pojedini Gemma modeli zahtevaju navođenje `trust_remote_code=True` u `from_pretrained`; dodajte ovo ako vidite odgovarajuće upozorenje.
 
-Za dodatna prilagođena podešavanja (tokeni za popunjavanje, uređaj, itd.), pogledajte skriptu koju ste koristili za obuku.
+Za dodatna prilagođena podešavanja (tokeni za popunu, uređaj, itd.), pogledajte skriptu koju ste koristili za obuku.
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -493,7 +498,7 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ### Koristite sopstveni skup podataka
 
-Sve skripte koriste isti format skupa podataka. Zamenite deo za učitavanje:
+Sve skripte koriste isti format skupa podataka. Zamenite odeljak za učitavanje:
 
 ```python
 from datasets import load_dataset
@@ -519,13 +524,13 @@ def format_instruction(example):
 dataset = dataset.map(format_instruction)
 ```
 
-**Format skupa podataka za lokalnu JSON/JSONL datoteku:**
+**Format skupa podataka za lokalni JSON/JSONL fajl:**
 
-Kada koristite ovaj metod, uverite se da su vaše JSON datoteke ispravno strukturirane kako biste izbegli greške u obradi. 
+Kada koristite ovaj metod, obavezno se pobrinite da vaši JSON fajlovi budu pravilno strukturirani kako biste izbegli greške pri parsiranju. 
 
-Moraju se poštovati sledeće smernice:
-* **Formatiranje datoteke:** JSON datoteke treba formatirati u integrisanom razvojnom okruženju (IDE) kako bi se obezbedila ispravna struktura i sintaksa.
-* **Obavezni ključevi:** Prilagođena JSON datoteka mora sadržati ključeve `instruction` i `response`. Ovi ključevi su neophodni da bi metod ispravno funkcionisao.
+Potrebno je pridržavati se sledećih smernica:
+* **Formatiranje fajla:** JSON fajlovi treba da budu formatirani u integrisanom razvojnom okruženju (IDE) kako bi se obezbedila pravilna struktura i sintaksa.
+* **Obavezni ključevi:** Prilagođeni JSON fajl mora sadržati ključeve `instruction` i `response`. Ovi ključevi su neophodni da bi metod ispravno funkcionisao.
 ```json
 [
   {
@@ -538,15 +543,15 @@ Moraju se poštovati sledeće smernice:
   }
 ]
 ```
-**Format skupa podataka za Hugging Face Hub skup podataka**
+**Format skupa podataka za skup podataka sa Hugging Face Hub-a**
 
-Kada koristite skupove podataka sa Hugging Face, uverite se da su vaši skupovi podataka pravilno strukturirani kako bi se omogućila neometana integracija. 
+Kada koristite skupove podataka sa Hugging Face-a, obavezno se pobrinite da vaši skupovi podataka budu pravilno strukturirani radi neometane integracije. 
 
-Treba se pridržavati sledećih smernica:
-* **Par instrukcija-odgovor:** Fokusirajte se na skupove podataka koji sadrže par `instruction-response`. Ova struktura je neophodna za nameravanu funkcionalnost.
-* **Prilagođena izmena ključeva:** Ako vaš skup podataka ne odgovara strukturi `instruction-response`, imate mogućnost da izmenite funkciju `format_instruction()`. Ovo vam omogućava da prilagodite specifične ključeve po potrebi.
+Potrebno je pridržavati se sledećih smernica:
+* **Par instrukcija-odgovor:** Fokusirajte se na skupove podataka koji sadrže par `instruction-response`. Ova struktura je neophodna za predviđenu funkcionalnost.
+* **Prilagođena izmena ključeva:** Ako vaš skup podataka ne odgovara strukturi `instruction-response`, imate opciju da izmenite funkciju `format_instruction()`. Ovo vam omogućava da prilagodite specifične ključeve prema potrebi.
 
-Primer prilagođavanja: U slučajevima kada je potrebno prilagoditi izlaz skupa podataka, možete izmeniti deo odgovora unutar funkcije format_instruction() kako bi odgovarao vašim zahtevima.
+Primer prilagođavanja: U slučajevima kada izlaz skupa podataka treba prilagoditi, možete izmeniti deo odgovora unutar funkcije format_instruction() kako bi odgovarao vašim potrebama.
 ```python
 def format_instruction(example):
     return {
@@ -556,9 +561,9 @@ def format_instruction(example):
         ]
     }
 ```
-**Format skupa podataka za CSV datoteku**
+**Format skupa podataka za CSV fajl**
 
-Da bi skripta mogla da koristi format CSV datoteke, morate obezbediti da CSV datoteka sadrži kolone pod nazivom `instruction` i `response`. 
+Da biste prilagodili skriptu za korišćenje CSV formata fajla, potrebno je da obezbedite da CSV fajl sadrži kolone pod nazivom `instruction` i `response`. 
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
@@ -567,10 +572,10 @@ instruction,response
 
 ### Prilagodite parametre obuke
 
-Uredite skriptu za obuku i promenite promenljive kako bi odgovarale vašim ciljevima: **stopa učenja** (`LR`), **epohe** (`EPOCHS`), **veličina serije** (`BATCH_SIZE`), **akumulacija gradijenta** (`GRAD_ACCUM_STEPS`), i za LoRA/QLoRA **rang** (`LORA_R`). Za brže pokretanje koristite manje epoha i veću stopu učenja (LR); za bolji kvalitet koristite više epoha i manju LR. Smanjite veličinu serije ili dužinu sekvence ako naiđete na greške zbog nedostatka memorije.
+Izmenite skriptu za obuku i promenite promenljive kako bi odgovarale vašim ciljevima: **stopa učenja** (`LR`), **epohe** (`EPOCHS`), **veličina serije** (`BATCH_SIZE`), **akumulacija gradijenta** (`GRAD_ACCUM_STEPS`), i za LoRA/QLoRA **rang** (`LORA_R`). Za brže pokretanja koristite manje epoha i veću stopu učenja (LR); za bolji kvalitet koristite više epoha i manju LR. Smanjite veličinu serije ili dužinu sekvence ako naiđete na greške zbog nedostatka memorije.
 ### Saveti za optimizaciju memorije
 
-Ako naiđete na greške zbog nedovoljne memorije:
+Ako naiđete na greške usled nedostatka memorije:
 
 **1. Smanjite veličinu batch-a:**
 ```python
@@ -609,18 +614,18 @@ rocm-smi --showmeminfo vram
 
 ### (Opciono) Praćenje eksperimenata pomoću Weights & Biases
 
-Da biste beležili pokretanja i metrike na [Weights & Biases](https://wandb.ai):
+Da biste beležili pokretanja i metrike u [Weights & Biases](https://wandb.ai):
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-U skripti za obuku, postavite `report_to="wandb"` i po želji `run_name="your-experiment-name"` u konfiguraciji trenera. Ako ne želite da koristite Wandb, ostavite `report_to` na podrazumevanoj vrednosti ili je postavite na `"none"`.
+U skripti za treniranje, podesite `report_to="wandb"` i, po želji, `run_name="your-experiment-name"` u konfiguraciji trenera. Ako ne želite da koristite Wandb, ostavite `report_to` na podrazumevanoj vrednosti ili ga podesite na `"none"`.
 
 ### Uobičajeni problemi
 
-#### Nedovoljno memorije (OOM)
+#### Nedostatak memorije (OOM)
 
 **Rešenje:** Smanjite veličinu batch-a i/ili koristite QLoRA
 ```python
@@ -631,14 +636,14 @@ GRAD_ACCUM_STEPS = 16
 
 #### Gubitak se ne smanjuje
 
-**Rešenje:** Podesite stopu učenja
+**Rešenje:** Prilagodite stopu učenja
 ```python
 LR = 1e-4  # Try lower
 # or
 LR = 5e-4  # Try higher
 ```
 
-#### Spora obuka
+#### Sporo treniranje
 
 **Rešenje:** Povećajte veličinu batch-a ako memorija to dozvoljava
 ```python
@@ -646,14 +651,14 @@ BATCH_SIZE = 8
 ```
 ## Sledeći koraci
 
-Nakon što uspešno završite fino podešavanje, razmotrite sledeće korake kako biste izvukli još više iz svog modela:
+Nakon što uspešno završite fino podešavanje, razmotrite sledeće korake kako biste izvukli više iz svog modela:
 
-1. **Ocenite** temeljno na test podacima koji nisu korišćeni u obuci kako biste izmerili generalizaciju i izbegli preprilagođavanje (overfitting).
+1. **Procenite** temeljno na izdvojenim test podacima kako biste izmerili generalizaciju i izbegli prekomerno prilagođavanje (overfitting).
 2. **Eksperimentišite** isprobavanjem različitih vrednosti hiperparametara radi boljeg odnosa tačnosti, brzine i memorije.
 3. **Pratite** sve svoje eksperimente (i odgovarajuće metrike) pomoću Weights & Biases radi reproduktivnog istraživanja.
-4. **Isprobajte** obuku na sopstvenim prilagođenim skupovima podataka kako biste prilagodili model specifično za svoj slučaj upotrebe.
-5. **Primenite** svoj fino podešeni model za brzo zaključivanje koristeći efikasne backend-e kao što je vLLM na kompatibilnom hardveru.
-6. **Istražite** napredne tehnike uključujući prompt inženjering, mešovitu preciznost i duže dužine sekvenci.
-7. **Obučite** više LoRA adaptera za različite zadatke ili domene i menjajte ih po potrebi.
+4. **Isprobajte** treniranje na sopstvenim prilagođenim skupovima podataka kako biste prilagodili model specifično za svoj slučaj upotrebe.
+5. **Implementirajte** svoj fino podešeni model za brzo zaključivanje koristeći efikasne pozadinske sisteme poput vLLM na kompatibilnom hardveru.
+6. **Istražite** napredne tehnike, uključujući inženjering upita, mešovitu preciznost i duže dužine sekvenci.
+7. **Trenirajte** više LoRA adaptera za različite zadatke ili domene i menjajte ih po potrebi.
 
 ---

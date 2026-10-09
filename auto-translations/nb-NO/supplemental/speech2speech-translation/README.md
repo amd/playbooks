@@ -16,42 +16,42 @@ SPDX-License-Identifier: MIT
 
 ## Oversikt
 
-AMD ROCm™-programvaren og PyTorch-stacken skaper et samlet økosystem for AI på enheten. Den fungerer for både Windows og Linux med offisiell støtte for et bredt spekter av enheter, inkludert Ryzen™ AI APU-er og Radeon™ GPU-er.
+AMD ROCm™-programvaren og PyTorch-stakken skaper et samlet økosystem for AI på enheten. Den fungerer for både Windows og Linux med offisiell støtte for et bredt utvalg av enheter, inkludert Ryzen™ AI APU-er og Radeon™ GPU-er.
 
-Denne oppskriften lærer deg hvordan du kjører lav-latens, uttrykksfull og privat tale-til-tale-oversettelse helt på kanten (edge).
+Denne håndboken lærer deg hvordan du kjører lav-latens, uttrykksfull og privat tale-til-tale-oversettelse helt på kanten (edge).
 
 ## Hva du vil lære
 
 - Hvordan sette opp et tale-til-tale-miljø
-- Hvordan skrive Python-kode for å laste inn og bruke tale-til-tale-modeller
+- Hvordan skrive Python-kode for å laste og bruke tale-til-tale-modeller
 - Hvordan kjøre og eksperimentere med Gradio-brukergrensesnittet
 
 ## Hvorfor bruke sanntids tale-til-tale-oversettelse?
 
 - Fjerner friksjon mellom oversettelse og språkbarrierer
-- Formidler tone, følelser og hensikt uten kleine pauser
+- Formidler tone, følelser og hensikt uten ubehagelige pauser
 - Muliggjør globalt samarbeid og raskere beslutningstaking
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Angi minnekonfigurasjonen
+## Konfigurere minneinnstillingene
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Sjekk om det finnes programvareoppdateringer
+## Se etter programvareoppdateringer
 > **Merk**: Hvis VS Code ikke er installert, kan du installere det med Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Installere programvareforutsetninger
+## Installere nødvendig programvare
 
-### Opprett et virtuelt miljø
+### Opprette et virtuelt miljø
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-På Linux åpner du en terminal og kjører følgende kommando for å opprette et venv med ROCm+PyTorch allerede installert:
+På Linux, åpne en terminal og kjør følgende kommando for å opprette et venv med ROCm+Pytorch allerede installert:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -71,7 +71,7 @@ source s2st-env/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-På Linux åpner du en terminal og kjører følgende kommando for å opprette et venv:
+På Linux, åpne en terminal og kjør følgende kommando for å opprette et venv:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-På Windows åpner du en terminal i mappen du ønsker, og følger kommandoene for å opprette et venv med ROCm+PyTorch allerede installert:
+På Windows, åpne en terminal i katalogen du ønsker, og følg kommandoene for å opprette et venv med ROCm+Pytorch allerede installert:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,13 +97,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tips**: Windows-brukere kan måtte endre PowerShell-utførelsespolicyen (Execution Policy) (f.eks.
+> **Tips**: Windows-brukere kan måtte endre PowerShell Execution Policy (f.eks.
 > sette den til RemoteSigned eller Unrestricted) før de kjører enkelte PowerShell-kommandoer.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-På Windows åpner du en terminal i mappen du ønsker, og følger kommandoene for å opprette et venv:
+På Windows, åpne en terminal i katalogen du ønsker, og følg kommandoene for å opprette et venv:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -113,7 +113,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tips**: Windows-brukere kan måtte endre PowerShell-utførelsespolicyen (Execution Policy) (f.eks.
+> **Tips**: Windows-brukere kan måtte endre PowerShell Execution Policy (f.eks.
 > sette den til RemoteSigned eller Unrestricted) før de kjører enkelte PowerShell-kommandoer.
 
 <!-- @device:end -->
@@ -126,13 +126,14 @@ s2st-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @require:pytorch -->
+<!-- @prereq:hf-models-seamless-m4t-v2-large -->
 
 ### Ytterligere avhengigheter
 
 Installer m4t-avhengigheter med pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -202,7 +203,7 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Sett opp tale-til-tale-demoen
+## Sette opp tale-til-tale-demoen
 
 #### Lær om seamless-m4t-v2
 
@@ -214,17 +215,17 @@ Dette er den tekniske arkitekturen til tale-til-tale-modellene:
 
 #### Last ned skript
 
-Denne oppskriften inkluderer ferdige skript. Vennligst last ned alle til samme mappe som miljøet du opprettet.
+Denne håndboken inkluderer ferdige skript som kan tas i bruk med en gang. Last ned alle sammen til samme katalog som miljøet du opprettet.
 
 | Skript | Beskrivelse | Bruk |
 |--------|-------------|-------|
 | [infer.py](assets/infer.py) | Grunnleggende LLM-tekstgenerering | `python infer.py` |
-| [input1.wav](assets/input1.wav) | Eksempel på lydfil | N/A |
-| [lang_list.py](assets/lang_list.py) | Fil for språkstøtte | N/A |
+| [input1.wav](assets/input1.wav) | Eksempel på lydfil | Ikke tilgjengelig |
+| [lang_list.py](assets/lang_list.py) | Fil for språkstøtte | Ikke tilgjengelig |
 | [gradio_demo.py](assets/gradio_demo.py) | Intuitivt brukergrensesnitt for taleoversettelse | `python gradio_demo.py --no-share` |
 
 
-### Kom i gang med infer.py
+### Komme i gang med infer.py
 
 For å kjøre skriptet, kjør 
 ```bash
@@ -234,7 +235,7 @@ python infer.py
  
   
 #### Forklaring av koden
-**Utdrag 1: Importere de nødvendige avhengighetene**
+**Utdrag 1: Importere nødvendige avhengigheter**
 
 ```python 
 import os
@@ -261,9 +262,9 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**Utdrag 2: Laste inn modellene fra HuggingFace**
+**Utdrag 2: Laste modellene fra HuggingFace**
 
-Denne funksjonen tar inn en modell-ID og laster ned modellen hvis den ikke allerede er lastet ned. Deretter returnerer den prosessoren og modellen for at neste funksjon skal kunne bruke dem.
+Denne funksjonen tar imot en modell-ID og laster ned modellen hvis den ikke allerede er lastet ned. Deretter returnerer den prosessoren og modellen for bruk i neste funksjon.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -282,7 +283,7 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Utdrag 3: Legg inn lydklipp .wav-fil og forhåndsbehandle den**
+**Utdrag 3: Mate inn lydklipp .wav-fil og forhåndsbehandle den**
 
 Denne funksjonen laster inn lydklippet og resampler det til målfrekvensen.
 ```python
@@ -304,7 +305,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**Utdrag 4: Kjør inferens**
+**Utdrag 4: Kjøre inferens**
 
 Denne funksjonen kjører inferens med modellen og returnerer det genererte resultatet.
 ```python
@@ -336,7 +337,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **Utdrag 5: Lagre den oversatte filen**
 
-Denne funksjonen lagrer lydarrayet til en .WAV-fil. 
+Denne funksjonen lagrer lydmatrisen til en .WAV-fil. 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -399,16 +400,16 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Kjøre Gradio UI-demoen:
+### Kjøre Gradio-UI-demoen:
 
-Nå som du har kjørt et grunnleggende skripteksempel, gir følgende instruksjoner et nyttig brukergrensesnitt som bygger videre på koden vi har skrevet, og som gjør sanntids tale-til-tale-oversettelse enkelt.
+Nå som du har kjørt et grunnleggende skript-eksempel, gir følgende instruksjoner et nyttig brukergrensesnitt som bygger videre på koden vi har skrevet, og som gjør direkte tale-til-tale-oversettelse enkelt.
 
 #### Kjør Gradio lokalt
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Åpne deretter nettleseren din på `http://127.0.0.1:7860` for å få tilgang til brukergrensesnittet.
+Deretter åpner du nettleseren din på `http://127.0.0.1:7860` for å få tilgang til brukergrensesnittet.
 
 
 ### Eksempel på Gradio-brukergrensesnitt:
@@ -535,7 +536,7 @@ PY
 
 ## Ressurser
 
-Nedenfor er noen tilleggsressurser for å lære mer om tale-til-tale-oversettelse:  
+Nedenfor er noen ekstra ressurser for å lære mer om tale-til-tale-oversettelse:  
 * Repoet finner du her https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Forskning innen akademia knyttet til «Seamless: Multilingual Expressive and Streaming Speech Translation»
-* Deling og distribusjon med Gradio: [Guide for deling av appen din](https://www.gradio.app/guides/sharing-your-app) og [Distribuer til Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Forskning innen akademia relatert til «Seamless: Multilingual Expressive and Streaming Speech Translation»
+* Gradio-deling og -distribusjon: [Veiledning for deling av appen din](https://www.gradio.app/guides/sharing-your-app) og [Distribuer til Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

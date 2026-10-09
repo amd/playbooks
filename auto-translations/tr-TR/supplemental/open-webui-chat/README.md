@@ -16,32 +16,32 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Bu kılavuz için en az **32GB** sistem belleği gereklidir.
+> Bu kılavuz en az **32GB** sistem belleği gerektirir.
 <!-- @device:end -->
 
 ## Genel Bakış
 
-[Open WebUI](https://docs.openwebui.com), bir veya daha fazla AI model sunucusu için önyüz görevi görürken tanıdık bir sohbet robotu deneyimi sunan, kendi kendine barındırılan, tarayıcı tabanlı bir arayüzdür. Tek bir sağlayıcıya bağlı kalmak yerine, Open WebUI **OpenAI uyumlu bir API sunan herhangi bir arka uca** bağlanabilir; böylece arayüzü değiştirmeden modelleri ve yetenekleri değiştirebilirsiniz.
+[Open WebUI](https://docs.openwebui.com), bir veya daha fazla AI model sunucusu için önyüz görevi görürken tanıdık bir sohbet botu deneyimi sunan, kendi kendine barındırılan, tarayıcı tabanlı bir arayüzdür. Tek bir sağlayıcıya bağlı kalmak yerine Open WebUI, **OpenAI uyumlu bir API sunan herhangi bir arka uca** bağlanabilir; böylece arayüzü değiştirmeden modelleri ve yetenekleri değiştirebilirsiniz.
 
-Bu kılavuzda arka uç olarak [**Lemonade**](https://lemonade-server.ai) kullanıyoruz çünkü birden fazla modaliteyi destekleyen **birleşik bir OpenAI uyumlu uç nokta** sunuyor:
+Bu kılavuzda, birden fazla modaliteyi destekleyen **birleşik OpenAI uyumlu bir uç nokta** sunduğu için arka uç olarak [**Lemonade**](https://lemonade-server.ai) kullanıyoruz:
 - Metin üretimi için **Büyük Dil Modelleri (LLM'ler)**
 - Görüntü anlama için **görsel modeller**
 - Görüntü üretimi için **Stable Diffusion**
 - Konuşmadan metne dönüştürme için **ses transkripsiyon modelleri**
 
-Bu kurulum, **uçtan uca eksiksiz bir çok modlu iş akışını** keşfetmenize olanak tanır.
+Bu kurulum, **uçtan uca eksiksiz çok modlu iş akışını** keşfetmenizi sağlar.
 
 ---
 
-## Bu Kılavuzdan Öğrenecekleriniz
+## Neler Öğreneceksiniz
 
-Kılavuzun sonunda şunları yapabileceksiniz:
+Bu kılavuzun sonunda şunları yapabileceksiniz:
 
 - Open WebUI'yi yerel bir OpenAI uyumlu arka uca (Lemonade) bağlama
 - Tarayıcınızdan yerel bir LLM ile sohbet etme
 - Bir görüntü yükleyip görsel bir modele bu görüntüyle ilgili sorular sorma
-- Stable Diffusion modellerini (SDXL-Turbo / SDXL) kullanarak metin komutlarından görüntü üretme
-- Zihinsel modeli anlayarak diğer arka uçları (Ollama, vLLM, llama.cpp server vb.) kullanabilme
+- Stable Diffusion modellerini (SDXL-Turbo / SDXL) kullanarak metin istemlerinden görüntü üretme
+- Diğer arka uçları (Ollama, vLLM, llama.cpp server vb.) kullanabilmeniz için zihinsel modeli anlama
 
 ---
 
@@ -49,39 +49,39 @@ Kılavuzun sonunda şunları yapabileceksiniz:
 
 ### Üç Bileşen
 
-| Bileşen | Ne yapar | Örnekler |
+| Parça | Ne yapar | Örnekler |
 |---|---|---|
 | Önyüz (UI) | Etkileşimde bulunduğunuz web uygulaması | Open WebUI |
-| Arka Uç (Model Sunucusu) | Modelleri barındırır ve HTTP uç noktaları sunar | Lemonade, Ollama, vLLM, llama.cpp server, OpenAI uyumlu sunucular |
-| Modeller | Gerçek LLM / Görsel / Difüzyon / Ses modelleri | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
+| Arka uç (Model Sunucusu) | Modelleri barındırır ve HTTP uç noktaları sunar | Lemonade, Ollama, vLLM, llama.cpp server, OpenAI uyumlu sunucular |
+| Modeller | Gerçek LLM / Görsel / Diffusion / Ses modelleri | CodeLlama, DeepSeek, Gemma-MM, SDXL, SD-Turbo, Whisper |
 
 #### "OpenAI uyumlu API" neden önemli
 
-Open WebUI, aşağıdaki gibi standart OpenAI tarzı uç noktalar etrafında oluşturulmuştur:
+Open WebUI, aşağıdakiler gibi standart OpenAI tarzı uç noktalar etrafında oluşturulmuştur:
   - Sohbet: `/chat/completions`
   - Model listesi: `/models`
   - Görüntü üretimi: `/images/generations`
   - Ses transkripsiyonu: `/audio/transcriptions`
 
-Lemonade bunları `http://localhost:13305/api/v1/...` altında sunar.
+Lemonade bunları `http://localhost:13305/api/v1/...` altında sunar
 
-Bir arka uç bu uç noktaları destekliyorsa, Open WebUI minimum kurulumla onunla konuşabilir. Bu yüzden iş akışımızı değiştirmeden arka uçlar arasında geçiş yapabiliriz.
+Bir arka uç bu uç noktaları destekliyorsa, Open WebUI minimum kurulumla onunla iletişim kurabilir. Bu nedenle iş akışımızı değiştirmeden arka uçları değiştirebiliriz.
 
-#### İki hizmet, iki port
+#### İki hizmet, iki bağlantı noktası
 
 Bu kılavuz boyunca iki ayrı hizmetle çalışacaksınız:
 
-| Hizmet | URL | Orada ne yapıyorsunuz |
+| Hizmet | URL | Orada ne yaparsınız |
 |---|---|---|
 | **Lemonade** (GUI) | `http://localhost:13305` | Modellere göz atma, indirme ve yönetme |
 | **Open WebUI** | `http://localhost:8080` | Sohbet etme, görüntü yükleme, görüntü üretme — kullanıcıya yönelik arayüz |
 
-Lemonade modelleri çalıştırır; Open WebUI ise etkileşimde bulunduğunuz arayüzdür. Önce modellerinizi indirmek için Lemonade GUI'sini, ardından bunları kullanmak için Open WebUI'yi kullanın.
+Lemonade modelleri çalıştırır; Open WebUI ise etkileşimde bulunduğunuz arayüzdür. Önce modellerinizi indirmek için Lemonade GUI'yi kullanın, ardından bunları Open WebUI üzerinden kullanın.
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Bellek Yapılandırmasını Ayarlama
+## Bellek Yapılandırmasının Ayarlanması
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
@@ -94,21 +94,24 @@ Lemonade modelleri çalıştırır; Open WebUI ise etkileşimde bulunduğunuz ar
 
 ## Tek Seferlik Kurulum
 
-Bu kılavuz için Lemonade'in arka uç olarak çalışması ve Linux'ta Open WebUI'yi çalıştırmak için bir konteyner motoru (Podman) gerekir. Open WebUI'yi kurmadan önce bunları ayarlayın.
+Bu kılavuz, arka uç olarak Lemonade'in çalışıyor olmasını ve Linux'ta Open WebUI'yi çalıştırmak için bir konteyner motoru (Podman) gerektirir. Open WebUI'yi kurmadan önce bunları ayarlayın.
 
 <!-- @os:windows -->
 <!-- @device:halo_box,halo,stx,krk -->
 <!-- @require:lemonade -->
+<!-- @prereq:lemonade -->
 <!-- @device:end -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver,lemonade -->
 <!-- @device:end -->
+<!-- @prereq:hf-models-all-minilm-l6-v2 -->
 ---
 <!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
 <!-- @require:lemonade,podman -->
+<!-- @prereq:podman -->
 <!-- @device:end -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver,lemonade,podman -->
@@ -118,25 +121,29 @@ Bu kılavuz için Lemonade'in arka uç olarak çalışması ve Linux'ta Open Web
 <!-- @device:end -->
 <!-- @os:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:lemonade-models-qwen3-5-4b,lemonade-models-sdxl-turbo -->
+
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash
 lemonade --version
 ```
 <!-- @test:end --> 
 
-## Lemonade'de Modelleri İndirme
+## Lemonade'de Model İndirme
 
-Open WebUI'yi kurmadan önce, kullanmak istediğiniz modellerin Lemonade'de indirilip hazır olduğundan emin olun.
+Open WebUI'yi kurmadan önce, kullanmak istediğiniz modellerin Lemonade'de indirilmiş ve hazır olduğundan emin olun.
 
-1. `http://localhost:13305` adresinden Lemonade GUI'sini açın.
-2. Kullanılabilir modellere göz atın ve kullanmak istediklerinizi indirin (örneğin sohbet için bir LLM, bir görsel model ve/veya görüntü üretimi için bir Stable Diffusion modeli).
-3. Tarayıcınızda `http://localhost:13305/api/v1/models` adresini ziyaret ederek API'nin erişilebilir olduğunu doğrulayın — indirdiğiniz modellerin listelendiğini görmelisiniz.
+1. `http://localhost:13305` adresinden Lemonade GUI'yi açın.
+2. Mevcut modellere göz atın ve kullanmak istediklerinizi indirin (örneğin, sohbet için bir LLM, bir görsel model ve/veya görüntü üretimi için bir Stable Diffusion modeli).
+3. API'nin erişilebilir olduğunu doğrulamak için tarayıcınızda `http://localhost:13305/api/v1/models` adresini ziyaret edin — indirdiğiniz modellerin listelendiğini görmelisiniz.
 
-> Modellerin **Open WebUI**'de (`localhost:8080`) görünebilmesi için önce **Lemonade**'de (`localhost:13305`) indirilmesi gerekir. Daha sonra bir model Open WebUI'de görünmüyorsa, buraya dönüp önce Lemonade'i kontrol edin.
+> Modellerin **Open WebUI**'de (`localhost:8080`) görünebilmesi için önce **Lemonade**'de (`localhost:13305`) indirilmiş olması gerekir. Bir model daha sonra Open WebUI'de görünmüyorsa, buraya geri dönün ve önce Lemonade'i kontrol edin.
 
 
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk -->
+<!-- @prereq:lemonade-models-qwen3-4b-hybrid -->
 <!-- @test:id=openwebui-lemonade-multimodal-smoke-windows timeout=1800 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
@@ -472,12 +479,12 @@ PY
 <!-- @test:end --> 
 <!-- @os:end --> 
 
-## Open WebUI'yi Kurma
+## Open WebUI Kurulumu
 
 <!-- @os:windows -->
-### 1. Python 3.12'yi Kurun
+### 1. Python 3.12 Kurulumu
 
-Open WebUI **Python 3.12** gerektirir — Python 3.13+ üzerinde kurulmaz. Windows Python Başlatıcısı (`py`), mevcut herhangi bir Python sürümüyle çakışma olmadan 3.12'yi yan yana kurmanıza olanak tanır.
+Open WebUI **Python 3.12** gerektirir — Python 3.13+ üzerine kurulmaz. Windows Python Başlatıcısı (`py`), mevcut herhangi bir Python sürümüyle çakışma olmadan 3.12'yi yan yana kurmanıza olanak tanır.
 
 ```powershell
 winget install Python.Python.3.12
@@ -491,7 +498,7 @@ py -3.12 --version
 ```
 
 <!-- @device:halo_box -->
-> **Not:** Sisteminizde Python 3.13 önceden kurulu geliyor. 3.12'yi kurmak bunu etkilemez — `python` 3.13'ü kullanmaya devam eder ve `py -3.12` yalnızca ihtiyaç duyduğunuzda 3.12'yi hedefler.
+> **Not:** Sisteminizde Python 3.13 önceden kurulu gelir. 3.12'yi kurmak bunu etkilemez — `python` 3.13'ü kullanmaya devam eder ve `py -3.12` yalnızca ihtiyaç duyduğunuzda 3.12'yi hedefler.
 <!-- @device:end -->
 
 <!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
@@ -506,7 +513,7 @@ Write-Host "OK: $v"
 ```
 <!-- @test:end --> 
 
-### 2. Sanal ortam oluşturun ve Open WebUI'yi kurun
+### 2. Sanal ortam oluşturma ve Open WebUI'yi kurma
 
 ```powershell
 mkdir openwebui
@@ -573,17 +580,17 @@ Write-Host "OK: open-webui CLI is available"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Open WebUI kurulumumuzu konteynerleştirmek için şimdi Podman hizmetini kullanacağız.
+Şimdi Open WebUI kurulumumuzu konteynerleştirmek için Podman hizmetini kullanacağız.
 
 Lütfen aşağıdakini seçtiğiniz bir dizine indirin: [compose.yml](assets/compose.yml)
 
-O dizinde aşağıdaki komutu çalıştırın:
+O dizinde, aşağıdaki komutu çalıştırın:
 
 ```bash
 podman compose up -d
 ```
 
-Bu, Open WebUI imajını çeker ve kalıcı depolamaya yazar.
+Bu, Open WebUI görüntüsünü çeker ve kalıcı depolamaya yazar.
 
 Tarayıcınızın adres çubuğuna `localhost:8080` yazarak Open WebUI'yi başlatın.
 
@@ -652,7 +659,7 @@ echo "OK: podman compose can parse compose.yml"
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **İpucu**: Open WebUI, [GitHub](https://github.com/open-webui/open-webui) sayfasında başka kurulum seçenekleri de sunmaktadır.
+> **İpucu**: Open WebUI, [GitHub](https://github.com/open-webui/open-webui) sayfasında başka kurulum seçenekleri de sunar.
 ## Open WebUI Sunucusunu Başlatma
 
 <!-- @os:windows -->
@@ -663,7 +670,7 @@ open-webui serve
 <!-- @os:end -->
 
 - Bir tarayıcıda `http://localhost:8080` adresine gidin.
-- Open WebUI, yerel bir yönetici hesabı oluşturmanızı isteyecektir. Giriş yaptıktan sonra sohbet arayüzünü göreceksiniz.
+- Open WebUI sizden yerel bir yönetici hesabı oluşturmanızı isteyecektir. Giriş yaptıktan sonra sohbet arayüzünü göreceksiniz.
 
 <p align="center">
   <img src="assets/open-webui_chat_interface.png" alt="Open WebUI Chat Interface" width="600"/>
@@ -674,7 +681,7 @@ open-webui serve
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Konteyner arka planda çalışır. `compose.yml` dosyasını içeren dizinden, `podman compose down` (durdurmak için) ve `podman compose up -d` (başlatmak için) ile yönetin. Hesaplarınız ve ayarlarınız `open_webui_data` volume'ünde saklanır.
+> Konteyner arka planda çalışır. `compose.yml` dosyasını içeren dizinden, `podman compose down` (durdurmak için) ve `podman compose up -d` (başlatmak için) ile yönetin. Hesaplarınız ve ayarlarınız `open_webui_data` birimi içinde kalıcı olarak saklanır.
 <!-- @os:end -->
 
 
@@ -763,9 +770,9 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 ## Open WebUI'yi Lemonade'e Bağlama
 
-Artık her iki servis de çalışıyor — Lemonade `localhost:13305` üzerinde ve Open WebUI `localhost:8080` üzerinde — Open WebUI'nin Lemonade'in modellerini kullanabilmesi için bunları bağlayalım.
+Artık her iki hizmet de çalışıyor — Lemonade `localhost:13305` üzerinde ve Open WebUI `localhost:8080` üzerinde — bunları bağlayarak Open WebUI'nin Lemonade'in modellerini kullanabilmesini sağlayın.
 
-Open WebUI'de:
+Open WebUI içinde:
 
 1. Sağ üst köşedeki **kullanıcı profili simgesine** tıklayın, ardından **Settings**'i seçin.
 
@@ -779,21 +786,21 @@ Open WebUI'de:
      <img src="assets/click_admin_settings.png" alt="Select Admin Settings" width="450"/>
    </p>
 
-3. Admin Settings kenar çubuğunda, **Connections**'a tıklayın (veya doğrudan `http://localhost:8080/admin/settings/connections` adresine gidin).
+3. Admin Settings kenar çubuğunda **Connections**'a tıklayın (veya doğrudan `http://localhost:8080/admin/settings/connections` adresine gidin).
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Admin Settings Connections page" width="600"/>
    </p>
 
-4. **OpenAI API** altında, yeni bir bağlantı ekleyin:
+4. **OpenAI API** altında yeni bir bağlantı ekleyin:
    - **Base URL:** `http://localhost:13305/api/v1`
-   - **API Key:** `-` (yerel kullanım için tek bir tire işe yarar)
+   - **API Key:** `-` (yerel için tek bir tire yeterlidir)
 
    <p align="center">
      <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
    </p>
 
-5. **"Manage OpenAI API Connections"** altında, yalnızca `http://localhost:13305/api/v1` adresinin etkin olduğundan emin olun. Diğer tüm bağlantıları devre dışı bırakın (ör. varsayılan OpenAI bağlantısı).
+5. **"Manage OpenAI API Connections"** altında yalnızca `http://localhost:13305/api/v1` bağlantısının etkin olduğundan emin olun. Diğer tüm bağlantıları (örneğin varsayılan OpenAI bağlantısını) devre dışı bırakın.
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Manage OpenAI API Connections with only Lemonade enabled" width="600"/>
@@ -801,7 +808,7 @@ Open WebUI'de:
 
 6. **Save**'e tıklayın.
 
-7. **(Önerilir)** Open WebUI'yi yerel LLM'lerle duyarlı tutmak için otomatik oluşturma özelliklerini devre dışı bırakın. **Admin Settings → Settings → Interface** kısmına gidin ve şunları kapatın:
+7. **(Önerilen)** Open WebUI'nin yerel LLM'lerle duyarlı kalmasını sağlamak için otomatik oluşturma özelliklerini devre dışı bırakın. **Admin Settings → Settings → Interface**'e gidin ve şunları kapatın:
    - Title Generation
    - Follow Up Generation
    - Tags Generation
@@ -817,11 +824,11 @@ Open WebUI'de:
 
 ## Ana Etkinlikler
 
-Artık kurulum tamamlandı. Yapılabilecek üç ilginç şeye bakalım.
+Artık her şey hazır. Yapılacak üç ilginç şeye bakalım.
 
 ---
 
-### Etkinlik 1: Yerel Bir LLM ile Sohbet Etme
+### Etkinlik 1: Yerel bir LLM ile Sohbet Edin
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk -->
 1. Arayüzün sol üstündeki açılır menüye tıklayın. Bu, yüklediğiniz Lemonade modellerini gösterecektir. Devam etmek için birini seçin. (örnek: `Qwen3-4B-Hybrid`).
@@ -830,7 +837,7 @@ Artık kurulum tamamlandı. Yapılabilecek üç ilginç şeye bakalım.
       <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
     </p>
 
-2. LLM'ye bir mesaj girin ve gönder'e tıklayın (veya Enter tuşuna basın). LLM'nin belleğe yüklenmesi birkaç saniye sürecek ve ardından yanıtın akışını göreceksiniz.
+2. LLM'ye bir mesaj girin ve gönder'e tıklayın (veya Enter'a basın). LLM'nin belleğe yüklenmesi birkaç saniye sürecek ve ardından yanıtın akışını göreceksiniz.
 
     <p align="center">
       <img src="assets/sending_a_message.png" alt="Sending a message" width="37.5%"/>
@@ -845,7 +852,7 @@ Artık kurulum tamamlandı. Yapılabilecek üç ilginç şeye bakalım.
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. LLM'ye bir mesaj girin ve gönder'e tıklayın (veya Enter tuşuna basın). LLM'nin belleğe yüklenmesi birkaç saniye sürecek ve ardından yanıtın akışını göreceksiniz.
+2. LLM'ye bir mesaj girin ve gönder'e tıklayın (veya Enter'a basın). LLM'nin belleğe yüklenmesi birkaç saniye sürecek ve ardından yanıtın akışını göreceksiniz.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -853,9 +860,9 @@ Artık kurulum tamamlandı. Yapılabilecek üç ilginç şeye bakalım.
    </p>
 <!-- @device:end -->    
 
-3. Model, sohbette yanıt verecektir.
+3. Model sohbette yanıt verecektir.
 
-4. Bu sırada, sisteminizde `Task Manager`'ı açın. Seçtiğiniz modele bağlı olarak **Hybrid** veya **NPU** ise sırasıyla **yüksek GPU veya NPU kullanımı** göreceksiniz. Görev yöneticisini kullanarak, modeli yerel olarak çalıştırdığınızı doğrulayabilirsiniz.
+4. Bu sırada sisteminizde `Task Manager`'ı açın. Seçtiğiniz modelin **Hybrid** mi yoksa **NPU** mı olduğuna bağlı olarak sırasıyla **yüksek GPU veya NPU kullanımı** göreceksiniz. Görev yöneticisini kullanarak, modeli yerel olarak çalıştırdığınızı doğrulayabilirsiniz.
 
     <p align="center">
       <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
@@ -869,23 +876,23 @@ Artık kurulum tamamlandı. Yapılabilecek üç ilginç şeye bakalım.
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. LLM'ye bir mesaj girin ve gönder'e tıklayın (veya Enter tuşuna basın). LLM'nin belleğe yüklenmesi birkaç saniye sürecek ve ardından yanıtın akışını göreceksiniz.
+2. LLM'ye bir mesaj girin ve gönder'e tıklayın (veya Enter'a basın). LLM'nin belleğe yüklenmesi birkaç saniye sürecek ve ardından yanıtın akışını göreceksiniz.
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
      <img src="assets/linux_llm_response.png" alt="LLM Response" width="46%"/>
    </p>
 
-3. Model, sohbette yanıt verecektir.
+3. Model sohbette yanıt verecektir.
 <!-- @os:end -->
 
-Bu, Open WebUI'nin OpenAI uyumlu chat uç noktasını kullanarak Lemonade'e istek gönderebildiğini doğrular.
+Bu, Open WebUI'nin OpenAI uyumlu sohbet uç noktasını kullanarak Lemonade'e istek gönderebildiğini doğrular.
 
 ---
 
-### Etkinlik 2: Bir Görsel Yükleyip Sorular Sorma (Görü)
+### Etkinlik 2: Bir Görsel Yükleyin ve Sorular Sorun (Görme)
 
-Bu, görsel girişi destekleyen bir model gerektirir (bir Görü veya Çok Modlu model).
+Bu, görsel girişi destekleyen bir model gerektirir (Vision veya Multimodal bir model).
 
 1. Filtre simgesine tıklayın, "By Category"yi seçin, ardından **Vision** bölümünden bir model seçin (ör. `Qwen3.5-4B-GGUF`)
 
@@ -894,35 +901,35 @@ Bu, görsel girişi destekleyen bir model gerektirir (bir Görü veya Çok Modlu
    </p>
 
 2. Mesaj kutusundaki **`+`** düğmesine tıklayın ve bir görsel yükleyin
-3. Gerçek görsel anlamayı zorlayan bir soru sorun: `Do you think this is a well-designed GUI?`
+3. Gerçek görsel anlama gerektiren bir şey sorun: `Do you think this is a well-designed GUI?`
 
    <p align="center">
      <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="43%"/>
      <img src="assets/vlm_response.png" alt="VLM Response" width="40%"/>
    </p>
 
-4. Model, genel bir metne değil, görselin içeriğine dayanarak yanıt verir.
+4. Model, genel bir metne değil, görsel içeriğine dayalı olarak yanıt verir.
 
-Bu, Open WebUI'nin backend (Lemonade) aracılığıyla bir görü modeline çok modlu istekler (metin + görsel) gönderebildiğini gösterir.
+Bu, Open WebUI'nin arka uç (Lemonade) aracılığıyla bir görme modeline çok modlu istekler (metin + görsel) gönderebildiğini gösterir.
 
 ---
 
 <!-- @os:windows -->
-### Etkinlik 3: Bir Metin İsteminden Görsel Oluşturma (Stable Diffusion)
+### Etkinlik 3: Bir Metin İstemcisinden Görsel Oluşturun (Stable Diffusion)
 
-Stable Diffusion modelleri metin üretimini desteklemez, yalnızca Images API üzerinden görsel oluştururlar.
+Stable Diffusion modelleri metin oluşturmayı desteklemez, yalnızca Images API aracılığıyla görsel oluştururlar.
 
-#### Adım 1: Open WebUI'de Görsel Oluşturmayı Yapılandırma
+#### Adım 1: Open WebUI'de Görsel Oluşturmayı Yapılandırın
 
-1. Lemonade GUI'sinde (`http://localhost:13305`), `SDXL-Turbo` (hızlı) veya `SDXL-Base-1.0` (daha yüksek kalite) araması yapın ve indirin.
-2. **Admin Settings → Images** kısmına gidin (http://localhost:8080/admin/settings/images)
-3. Şunları ayarlayın:
+1. Lemonade GUI'sinde (`http://localhost:13305`), `SDXL-Turbo` (hızlı) veya `SDXL-Base-1.0` (daha yüksek kalite) aratın ve indirin.
+2. **Admin Settings → Images**'e gidin (http://localhost:8080/admin/settings/images)
+3. Ayarlayın:
    - **Image Generation:** ON
    - **Image Generation Engine:** Default (OpenAI)
    - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` veya `SDXL-Base-1.0`
-4. Daha fazla parametre eklemek isterseniz, bunları metin alanına JSON olarak ekleyin. Örneğin: `{ "steps": 4, "cfg_scale": 1 }`. Kullanılabilir parametreler için bkz. [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+4. Daha fazla parametre eklemek isterseniz, bunları JSON olarak metin alanına ekleyin. Örneğin: `{ "steps": 4, "cfg_scale": 1 }`. Kullanılabilir parametreler için bkz. [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
@@ -930,7 +937,7 @@ Stable Diffusion modelleri metin üretimini desteklemez, yalnızca Images API ü
 
 5. Kaydedin
 #### Adım 2: Model için Görüntü Oluşturmayı Etkinleştirin
-Bu adım, modeliniz için Görüntü Oluşturma özelliğini bir yetenek olarak etkinleştirmenizi sağlar.
+Bu adım, modeliniz için bir yetenek olarak Görüntü Oluşturmayı etkinleştirmenizi sağlar.
 1. **Admin Settings → Models** (http://localhost:8080/admin/settings/models) bölümüne gidin ve modelinizi seçin
 2. `Image Generation` özelliğini açın
 
@@ -939,12 +946,12 @@ Bu adım, modeliniz için Görüntü Oluşturma özelliğini bir yetenek olarak 
      <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
    </p>
 
-#### Adım 3: Sohbet Ekranından Görüntü Oluşturun
+#### Adım 3: Sohbet ekranından bir görüntü oluşturun
 
 1. `http://localhost:8080` adresindeki sohbete geri dönün.
-2. Model açılır menüsünden bir **Metin Üretim LLM'i** seçin (örnek: Qwen, Llama). Bu bir sohbet modeli seçici olduğundan **bir Stable Diffusion modeli seçmeyin**.
-3. Mesaj alanında **Integrations** üzerine tıklayın ve **Image** seçeneğini AÇIK konuma getirin.
-4. Şu şekilde bir prompt kullanın: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
+2. Model açılır menüsünden bir **Metin Oluşturma LLM'i** seçin (örnek: Qwen, Llama). Bu bir sohbet modeli seçici olduğundan **bir Stable Diffusion modeli seçmeyin**.
+3. Mesaj alanında, **Integrations** üzerine tıklayın ve **Image** seçeneğini AÇIK konuma getirin.
+4. Şöyle bir istem kullanın: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. Bir görüntü oluşturulur ve sohbette görünür.
 
    <p align="center">
@@ -952,20 +959,20 @@ Bu adım, modeliniz için Görüntü Oluşturma özelliğini bir yetenek olarak 
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-Bu, Open WebUI'nin "iki bölümlü" bir iş akışını koordine edebildiğini gösterir:
-  - LLM, prompt'u iyileştirmeye yardımcı olur
-  - Görüntü, Stable Diffusion kullanılarak Lemonade'in Images uç noktası üzerinden oluşturulur
+Bu, Open WebUI'nin "iki parçalı" bir iş akışını koordine edebildiğini gösterir:
+  - LLM istemin iyileştirilmesine yardımcı olur
+  - Görüntü, Lemonade'in Images uç noktası aracılığıyla Stable Diffusion kullanılarak oluşturulur
 <!-- @os:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-### Etkinlik 3: Bir Metin Prompt'undan Görüntü Oluşturma (Stable Diffusion)
+### Etkinlik 3: Bir Metin İsteminden Görüntü Oluşturma (Stable Diffusion)
 
-Stable Diffusion modelleri metin üretimini desteklemez, yalnızca Images API üzerinden görüntü oluştururlar.
+Stable Diffusion modelleri metin oluşturmayı desteklemez, yalnızca Images API aracılığıyla görüntü oluştururlar.
 
 #### Adım 1: Open WebUI'de Görüntü Oluşturmayı Yapılandırın
 
-1. Lemonade GUI'sinde (`http://localhost:13305`), `SDXL-Turbo` (hızlı) veya `SDXL-Base-1.0` (daha yüksek kalite) modelini arayın ve indirin.
+1. Lemonade GUI'de (`http://localhost:13305`), `SDXL-Turbo` (hızlı) veya `SDXL-Base-1.0` (daha yüksek kalite) modelini arayın ve indirin.
 2. **Admin Settings → Images** (http://localhost:8080/admin/settings/images) bölümüne gidin
 3. Şunları ayarlayın:
    - **Image Generation:** ON
@@ -973,17 +980,17 @@ Stable Diffusion modelleri metin üretimini desteklemez, yalnızca Images API ü
    - **OpenAI API Base URL:** `http://localhost:13305/api/v1`
    - **OpenAI API Key:** `-`
    - **Model:** `SDXL-Turbo` veya `SDXL-Base-1.0`
-4. Daha fazla parametre eklemek isterseniz, bunları metin alanına JSON olarak ekleyin. Örneğin: `{ "steps": 4, "cfg_scale": 1 }`. Kullanılabilir parametreler için bkz. [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html).
+4. Daha fazla parametre eklemek isterseniz, bunları metin alanına JSON olarak ekleyin. Örneğin: `{ "steps": 4, "cfg_scale": 1 }`. Kullanılabilir parametreler için [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html) adresine bakın.
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
    </p>
 
-5. Kaydedin
+5. Kaydet
 
 
 #### Adım 2: Model için Görüntü Oluşturmayı Etkinleştirin
-Bu adım, modeliniz için Görüntü Oluşturma özelliğini bir yetenek olarak etkinleştirmenizi sağlar.
+Bu adım, modeliniz için bir yetenek olarak Görüntü Oluşturmayı etkinleştirmenizi sağlar.
 1. **Admin Settings → Models** (http://localhost:8080/admin/settings/models) bölümüne gidin ve modelinizi seçin
 2. `Image Generation` özelliğini açın
 
@@ -992,12 +999,12 @@ Bu adım, modeliniz için Görüntü Oluşturma özelliğini bir yetenek olarak 
      <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
    </p>
 
-#### Adım 3: Sohbet Ekranından Görüntü Oluşturun
+#### Adım 3: Sohbet ekranından bir görüntü oluşturun
 
 1. `http://localhost:8080` adresindeki sohbete geri dönün.
-2. Model açılır menüsünden bir **Metin Üretim LLM'i** seçin (örnek: Qwen, Llama). Bu bir sohbet modeli seçici olduğundan **bir Stable Diffusion modeli seçmeyin**.
-3. Mesaj alanında **Integrations** üzerine tıklayın ve **Image** seçeneğini AÇIK konuma getirin.
-4. Şu şekilde bir prompt kullanın: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
+2. Model açılır menüsünden bir **Metin Oluşturma LLM'i** seçin (örnek: Qwen, Llama). Bu bir sohbet modeli seçici olduğundan **bir Stable Diffusion modeli seçmeyin**.
+3. Mesaj alanında, **Integrations** üzerine tıklayın ve **Image** seçeneğini AÇIK konuma getirin.
+4. Şöyle bir istem kullanın: `A cinematic photo of heavy traffic at sunset, ultra detailed`.
 5. Bir görüntü oluşturulur ve sohbette görünür.
 
    <p align="center">
@@ -1005,9 +1012,9 @@ Bu adım, modeliniz için Görüntü Oluşturma özelliğini bir yetenek olarak 
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-Bu, Open WebUI'nin "iki bölümlü" bir iş akışını koordine edebildiğini gösterir:
-  - LLM, prompt'u iyileştirmeye yardımcı olur
-  - Görüntü, Stable Diffusion kullanılarak Lemonade'in Images uç noktası üzerinden oluşturulur
+Bu, Open WebUI'nin "iki parçalı" bir iş akışını koordine edebildiğini gösterir:
+  - LLM istemin iyileştirilmesine yardımcı olur
+  - Görüntü, Lemonade'in Images uç noktası aracılığıyla Stable Diffusion kullanılarak oluşturulur
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -1015,40 +1022,40 @@ Bu, Open WebUI'nin "iki bölümlü" bir iş akışını koordine edebildiğini g
 
 ## Sorun Giderme
 
-### "Open WebUI'de hiçbir model görünmüyor"
-- Öncelikle Lemonade'i kontrol edin: bir tarayıcıda `http://localhost:13305/api/v1/models` adresini açın ve modellerinizin listelendiğini ve indirildiğini doğrulayın
-- Ardından, Open WebUI bağlantısını kontrol edin: `http://localhost:8080/admin/settings/connections` adresindeki **Admin Settings → Connections** bölümüne gidin ve Base URL'nin `http://localhost:13305/api/v1` olduğunu doğrulayın
+### "No models show up in Open WebUI" (Open WebUI'de hiçbir model görünmüyor)
+- Öncelikle Lemonade'i kontrol edin: tarayıcıda `http://localhost:13305/api/v1/models` adresini açın ve modellerinizin listelendiğini ve indirildiğini doğrulayın
+- Ardından, Open WebUI bağlantısını kontrol edin: `http://localhost:8080/admin/settings/connections` adresinden **Admin Settings → Connections** bölümüne gidin ve Base URL'nin `http://localhost:13305/api/v1` olduğunu doğrulayın
 
 ### "This model does not support chat completion" hata mesajı
 - Sohbet modeli açılır menüsünde bir görüntü modeli (SDXL-Turbo / SDXL-Base-1.0) seçtiniz.
-- **Çözüm**: sohbet için bir LLM seçin ve oluşturma için Image geçişi + Images ayarlarını kullanın.
+- **Çözüm**: sohbet için bir LLM seçin ve oluşturma için Image anahtarını + Images ayarlarını kullanın.
 <p align="center">
   <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
 </p>
 
 ### Görüntü oluşturma hataları/zaman aşımları
 - Önce `SDXL-Turbo` ile başlayın (hızlı, daha az adım)
-- Çalıştıktan sonra, kalite için görüntü modelini `SDXL-Base-1.0` olarak değiştirin
+- Çalıştığında, kalite için görüntü modelini `SDXL-Base-1.0` olarak değiştirin
 
 ---
 
 ## Sonraki Adımlar
 
-Artık çalışan bir **'yerel yapay zeka yığınınız'** var; standart bir API aracılığıyla birden fazla model türünü kontrol eden tek bir arayüz.
+Artık çalışan bir **'yerel yapay zeka yığınınız'** var; standart bir API üzerinden birden çok model türünü kontrol eden tek bir arayüz.
 
 İşte tamamen yeni iş akışlarının kilidini açan üç genişleme:
 
-### 1. Whisper ile Konuşmadan Metne
+### 1. Whisper ile Konuşmadan Metne Dönüştürme
 
-Bir Whisper modeli kullanarak sesi metne dönüştürmeyi deneyin, ardından özetleme, eylem öğeleri veya yeniden yazma için bunu bir LLM'ye besleyin. Bu, toplantı notları ve sesle çalışan asistanlar için temeldir.
+Bir Whisper modeli kullanarak sesi metne dönüştürmeyi deneyin, ardından özetleme, eylem öğeleri veya yeniden yazma için bir LLM'ye besleyin. Bu, toplantı notları ve sesle çalışan asistanların temelidir.
 
-### 2. Open WebUI İçinde Python Kodlama
+### 2. Open WebUI içinde Python Kodlama
 
 Python kod parçacıklarını çalıştırmak, çıktıları incelemek ve arayüzden ayrılmadan daha hızlı yineleme yapmak için Open WebUI'nin yerleşik kod yürütme deneyimini kullanın. [Referans](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
 
-### 3. Open WebUI İçinde HTML Görüntüleme
+### 3. Open WebUI içinde HTML Görüntüleme
 
-HTML çıktılarını doğrudan arayüzde görüntüleyin. Bu, hızlı prototipler, biçimlendirilmiş raporlar ve etkileşimli parçacıklar oluşturmak için şaşırtıcı derecede güçlüdür. [Referans](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
+HTML çıktılarını doğrudan arayüzde görüntüleyin. Bu, hızlı prototipler, biçimlendirilmiş raporlar ve etkileşimli kod parçacıkları oluşturmak için şaşırtıcı derecede güçlüdür. [Referans](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
 
 ---
 

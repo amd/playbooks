@@ -11,56 +11,58 @@ SPDX-License-Identifier: MIT
 
 ## Áttekintés
 
-A hatékony finomhangolás létfontosságú a nagy nyelvi modellek (LLM-ek) adaptálásához a downstream feladatokhoz. A LLaMA Factory egy nyílt forráskódú és felhasználóbarát platform, amely leegyszerűsíti a nagy nyelvi modellek és multimodális modellek betanítását és finomhangolását. Lehetővé teszi a felhasználók számára, hogy helyben, minimális kódolással testre szabjanak több száz előre betanított modellt.
+A hatékony finomhangolás elengedhetetlen a nagy nyelvi modellek (LLM-ek) adaptálásához konkrét feladatokhoz. A LLaMA Factory egy nyílt forráskódú, felhasználóbarát platform, amely egyszerűsíti a nagy nyelvi modellek és multimodális modellek betanítását és finomhangolását. Lehetővé teszi a felhasználók számára, hogy minimális kódolással, helyben testreszabjanak több száz előre betanított modellt.
 
-Ez a playbook megtanítja, hogyan finomhangolhatók LLM-ek a LLaMA Factory segítségével a helyi AMD hardveren.
+Ez a playbook megtanítja, hogyan finomhangolj LLM-eket a LLaMA Factory segítségével, a helyi AMD hardveren.
 
 <!-- @device:stx,krk -->
-> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikák legalább **32 GB rendszer-RAM-ot** igényelnek, amelyből legalább **16 GB-nak elérhetőnek kell lennie a GPU számára** (ez a 16 GB a 32 GB részét képezi, nem pluszban értendő).
+> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikák legalább **32 GB rendszer-RAM-ot** igényelnek, amelyből legalább **16 GB-nak elérhetőnek kell lennie a GPU számára** (a 16 GB a 32 GB része, nem pedig azon felül értendő).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 > **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikák legalább **16 GB teljes GPU-memóriát** és **32 GB rendszer-RAM-ot** igényelnek.
-> - Windows rendszeren a teljes GPU-memória a videokártya dedikált VRAM-jából és a megosztott GPU-memóriából (a rendszer RAM-jából kölcsönzött) tevődik össze.
-> - Ezért a 16 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák is futtathatják ezt a playbookot, mivel a hiányzó részt megosztott GPU-memória pótolja.
+> - Windows rendszeren a teljes GPU-memória a videokártya dedikált VRAM-ját és a megosztott GPU-memóriát (amelyet a rendszer-RAM-ból kölcsönöz) egyaránt magában foglalja.
+> - Ennek megfelelően a 16 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák is futtathatják ezt a playbookot, mivel a megosztott GPU-memória pótolja a különbséget.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 > **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikák legalább **16 GB dedikált GPU-memóriával** rendelkező videokártyát és **32 GB rendszer-RAM-ot** igényelnek.
 > - Linux rendszeren a betanítás teljes egészében a videokártya dedikált VRAM-jában fut.
-> - Nem esik vissza megosztott GPU-memóriára (rendszer-RAM-ra), ha elfogy a VRAM.
-> - A 16 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák Linuxon elfogynak memóriából a betanítás során, még akkor is, ha a rendszerben bőven van RAM.
+> - Nem áll vissza megosztott GPU-memóriára (rendszer-RAM-ra), amikor a VRAM elfogy.
+> - A 16 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák Linux rendszeren a betanítás során kifogynak a memóriából, még akkor is, ha a rendszerben bőven van RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Amit Meg Fogsz Tanulni
+## Amit megtanulsz
 
-- Hogyan állítsd be a LLaMA Factoryt az AMD ROCm™ szoftverrel
+- Hogyan állítsd be a LLaMA Factory-t az AMD ROCm™ szoftverrel
 - Hogyan konfiguráld az LLM finomhangolási paramétereit (a Qwen/Qwen3-4B-Instruct-2507 modellt használva példaként)
-- Hogyan futtasd a LLaMA Factory finomhangolást
-- Hogyan végezz következtetést (inference) a finomhangolt modellel
-- Hogyan exportáld a finomhangolt modellt
+- Hogyan futtass finomhangolást a LLaMA Factory segítségével
+- Hogyan futtass következtetést (inference) a finomhangolt modellel
+- Hogyan exportáld a finomhangolt modellt 
 
-## Becsült Idő
+## Becsült idő
 
-- Időtartam: A playbook futtatása körülbelül 60 percet vesz igénybe (a modell/adathalmaz méretétől és a hálózati sebességtől függően).
-- Tekintsd meg a [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) oldalt további információkért.
+- Időtartam: Körülbelül 60 percet vesz igénybe ennek a playbooknak a futtatása (a modell/adathalmaz méretétől és a hálózati sebességtől függően).
+- Tekintsd meg a [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) oldalát további információkért.
 
 <!-- @device:halo_box,halo,stx,krk -->
-## A Memóriakonfiguráció Beállítása
+## A memóriakonfiguráció beállítása
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Szoftverfrissítések Ellenőrzése
+## Szoftverfrissítések ellenőrzése
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## A Szoftverkövetelmények Telepítése
+## Szoftveres előfeltételek telepítése
+
+<!-- @prereq:hf-models-qwen3-4b-instruct-2507 -->
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -80,7 +82,7 @@ pip --version
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Virtuális Környezet Létrehozása
+#### Virtuális környezet létrehozása
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
@@ -96,7 +98,7 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Adj hozzáférést a felhasználódnak a GPU-eszközökhöz** (jelentkezz ki és be újra, hogy ez érvénybe lépjen):
+**Adj hozzáférést a felhasználódnak a GPU-eszközökhöz** (jelentkezz ki és vissza be, hogy ez érvénybe lépjen):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -136,7 +138,7 @@ llamafactory-env\Scripts\activate
 <!-- @device:end -->
 <!-- @os:end -->
 
-### Alapvető Függőségek Telepítése
+### Alapvető függőségek telepítése
 
 <!-- @require:pytorch,driver -->
 
@@ -156,7 +158,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 ```
 <!-- @test:end -->
 
-### További Függőségek Telepítése
+### Kiegészítő függőségek telepítése
 
 > **Megjegyzés**: Győződj meg róla, hogy a Python verziója 3.11, 3.12 vagy 3.13
 
@@ -182,9 +184,9 @@ python -m pip install huggingface_hub
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### A LLaMA Factory Telepítése
+### LLaMA Factory telepítése
 
-A LLaMA Factory a PyTorch-tól függ. Ennek a fenti követelmények szerint már telepítve kell lennie.
+A LLaMA Factory a PyTorch-ra épül. A fenti követelmények szerint ennek már telepítve kell lennie.
 
 Töltsd le a forráskódot a [LLaMA Factory hivatalos GitHub tárolójából](https://github.com/hiyouga/LlamaFactory), és telepítsd a függőségeit.
 
@@ -211,7 +213,7 @@ pip install -r requirements/metrics.txt
 <!-- @test:end --> 
 <!-- @device:end -->
 
-Ellenőrizd, hogy a `llamafactory-cli` végrehajtható-e.
+Ellenőrizd, hogy a `llamafactory-cli` futtatható-e.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-llamafactory-cli timeout=60 hidden=False setup=activate-venv -->
@@ -244,22 +246,22 @@ Példa kimenet:
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-Miután sikeresen telepítettük a LLaMA Factoryt, futtassuk rajta a finomhangolást.
+Miután sikeresen telepítetted a LLaMA Factory-t, futtassunk rajta finomhangolást.
 
-## A LLaMA Factory CLI Használata Finomhangoláshoz
+## A LLaMA Factory CLI használata finomhangoláshoz
 
-Ez a szakasz bemutatja, hogyan készítsd elő a finomhangolási adathalmazokat, hogyan konfiguráld a LoRA/QLoRA paramétereket, és hogyan futtass LoRA finomhangolást.
+Ez a szakasz bemutatja, hogyan kell előkészíteni a finomhangolási adathalmazokat, konfigurálni a LoRA/QLoRA paramétereket, és futtatni a LoRA finomhangolást.
 
-### Az Adathalmaz Előkészítése
+### Adathalmaz előkészítése
 
-A LLaMA Factory Alpaca formátumú és ShareGPT formátumú finomhangolási adathalmazokat támogat. Az összes elérhető adathalmaz meg van adva a [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) fájlban. Ha egyéni adathalmazt használsz, ügyelj arra, hogy adj hozzá egy adathalmaz-leírást a `dataset_info.json` fájlhoz, és add meg az adathalmaz nevét a betanítás előtt. Részletek [itt](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html) találhatók a dokumentációjukban.
+A LLaMA Factory támogatja az Alpaca formátumú és a ShareGPT formátumú finomhangolási adathalmazokat. Az összes elérhető adathalmaz meg van határozva a [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) fájlban. Ha egyéni adathalmazt használsz, ügyelj arra, hogy egy adathalmaz-leírást adj hozzá a `dataset_info.json` fájlhoz, és add meg az adathalmaz nevét a betanítás előtt. A részletek a dokumentációjukban találhatók [itt](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
-Ebben a playbookban az identity és alpaca_en_demo adathalmazokat használjuk példaként, és a következő lépésben konfiguráljuk az adathalmaz-információkat.
+Ebben a playbookban az identity és az alpaca_en_demo adathalmazokat fogjuk használni példaként, és a következő lépésben konfiguráljuk az adathalmaz-információkat.
 ### Finomhangolási paraméterek konfigurálása
 
-A LLaMA Factory több finomhangolási módszert is támogat.
+A LLaMA Factory több finomhangolási sémát is támogat.
 
-| Finomhangolási módszer | LLaMA Factory példák |
+| Finomhangolási séma | LLaMA Factory példák |
 |-----------|------|
 | Teljes paraméteres    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
 | LoRA finomhangolás  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
@@ -286,39 +288,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-Ezek a példakonfigurációs fájlok megadják a modellparamétereket, a finomhangolási módszer paramétereit, az adathalmaz paramétereit, az értékelési paramétereket és egyebeket. Ezeket saját igényeid szerint konfigurálhatod. Ebben az útmutatóban a [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml) fájlt fogjuk használni.
+Ezek a példa konfigurációs fájlok tartalmazzák a modell paramétereit, a finomhangolási módszer paramétereit, az adathalmaz paramétereit, a kiértékelési paramétereket és egyebeket. Ezeket saját igényeid szerint konfigurálhatod. Ebben a playbookban a [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml) fájlt fogjuk használni.
 
 **A legfontosabb paraméterek magyarázata:**
 - `model_name_or_path` - A Hugging Face modell neve vagy a helyi modellfájl elérési útja.
-- `stage` - A tanítási szakasz. Lehetőségek: rm (jutalommodellezés), pt (előtanítás), sft (felügyelt finomhangolás), PPO, DPO, KTO, ORPO.
+- `stage` - A tanítási szakasz. Lehetőségek: rm (reward modeling), pt (pretrain), sft (Supervised Fine-Tuning), PPO, DPO, KTO, ORPO.
 - `do_train` - true tanításhoz, false kiértékeléshez
 - `finetuning_type` - A finomhangolási módszer. Lehetőségek: freeze, lora, full
-- `lora_rank` - A LoRA módszerben használt alacsony rangú mátrix dimenzionalitása, tipikus értékek: 4, 6, 8, 16 (kisebb érték = kevesebb paraméter = gyorsabb finomhangolás; nagyobb érték = jobb feladat-adaptáció, de nagyobb erőforrásigény).
-- `lora_target` - A LoRA módszer célmoduljai. Alapértelmezett: all.
-- `dataset` - A használandó adathalmaz(ok). Több adathalmaz esetén használj „,” elválasztót
+- `lora_rank` - A LoRA módszer által használt alacsony rangú mátrix dimenziója, tipikus értékek: 4, 6, 8, 16 (kisebb érték = kevesebb paraméter = gyorsabb finomhangolás; nagyobb érték = jobb feladat-adaptáció, de magasabb erőforrásigény).
+- `lora_target` - A LoRA módszer célmodulljai. Alapértelmezett: all.
+- `dataset` - A használandó adathalmaz(ok). Több adathalmaz esetén válaszd el őket „,” karakterrel
 - `output_dir` - A finomhangolás kimeneti elérési útja
-- `logging_steps` - Naplózási intervallum lépésekben
-- `save_steps` - Modell-ellenőrzőpont mentési intervalluma.
-- `overwrite_output_dir` - Engedélyezett-e a kimeneti könyvtár felülírása.
-- `per_device_train_batch_size` - A tanítási kötegméret eszközönként.
+- `logging_steps` - A naplózási intervallum lépésekben
+- `save_steps` - A modell ellenőrzőpont (checkpoint) mentési intervalluma.
+- `overwrite_output_dir` - Megengedett-e a kimeneti könyvtár felülírása.
+- `per_device_train_batch_size` - A tanítási köteg (batch) mérete eszközönként.
 - `gradient_accumulation_steps` - A gradiens-akkumulációs lépések száma.
 - `learning_rate` - Tanulási ráta
 - `num_train_epochs` - A tanítási epochok száma
 - `lr_scheduler_type` - A tanulási ráta ütemezése. Lehetőségek: linear, cosine, polynomial, constant, stb.
-- `warmup_ratio` - A tanulási ráta bemelegítési aránya
+- `warmup_ratio` - A tanulási ráta bemelegítési (warmup) aránya
 
 <!-- @os:linux -->
-Módosítani fogjuk a `lora_rank` alapértelmezett értékét, hogy a finomhangolást AMD Ryzen™ és AMD Radeon™ GPU-kon futtathassuk.
+Módosítani fogjuk a `lora_rank` alapértelmezett értékét, hogy AMD Ryzen™ és AMD Radeon™ GPU-kon futtassuk a finomhangolást.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Frissítjük az alapértelmezett LoRA finomhangolási konfigurációt, hogy jobban kompatibilis legyen az AMD Ryzen™ és AMD Radeon™ GPU-kkal:
-- A `lora_rank` értékét `8`-ról `6`-ra állítjuk, hogy csökkentsük a finomhangolás során felhasznált memóriát.
-- A `bf16` helyett `fp16` formátumot használunk a szélesebb körű AMD GPU-kompatibilitás és az alacsonyabb memóriafelhasználás érdekében.
-- Windows rendszeren a `dataloader_num_workers` értékét `0`-ra állítjuk, hogy elkerüljük a többszálú adatbetöltés miatti `"Can't pickle local object<>"` hibákat.
+Frissíteni fogjuk az alapértelmezett LoRA finomhangolási konfigurációt a jobb kompatibilitás érdekében az AMD Ryzen™ és AMD Radeon™ GPU-kkal:
+- A `lora_rank` értékét `8`-ról `6`-ra állítjuk, hogy csökkentsük a memóriahasználatot a finomhangolás során.
+- A `bf16` helyett `fp16`-ot használunk a szélesebb körű AMD GPU-kompatibilitás és az alacsonyabb memóriahasználat érdekében.
+- A `dataloader_num_workers` értékét Windows rendszeren `0`-ra állítjuk, hogy elkerüljük a többfolyamatos adatbetöltés által okozott `"Can't pickle local object<>"` hibákat.
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -338,13 +340,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### A LLaMA Factory finomhangolás futtatása
+### LLaMA Factory finomhangolás futtatása
 
-Az **llamafactory-cli** a LLaMA Factory hivatalos parancssori (CLI) eszköze, amelyet azért fejlesztettek ki, hogy egyszerűsítse a nagy nyelvi modellekkel kapcsolatos teljes munkafolyamatot (adat-előkészítés → finomhangolás → kiértékelés → üzembe helyezés), anélkül, hogy bonyolult kódot kellene írni.
+A **llamafactory-cli** a LLaMA Factory hivatalos parancssori (CLI) eszköze, amelyet azért fejlesztettek ki, hogy egyszerűsítse a teljes LLM-munkafolyamatokat (adat-előkészítés → finomhangolás → kiértékelés → üzembe helyezés) bonyolult kód írása nélkül.
 
-A tanításhoz/finomhangoláshoz az **llamafactory-cli train** a LLaMA Factory CLI központi alparancsa. Egyetlen CLI-parancsba foglalja a finomhangolási munkafolyamatokat (adat-előfeldolgozás, hiperparaméter-hangolás, hardveroptimalizálás), és több finomhangolási paradigmát is támogat (LoRA/QLoRA/teljes finomhangolás), miközben optimalizálva van alacsony erőforrású GPU-khoz is (pl. QLoRA 16 GB VRAM mellett).
+A tanításhoz/finomhangoláshoz a **llamafactory-cli train** a LLaMA Factory CLI alapvető alparancsa. A finomhangolási munkafolyamatokat (adatok előfeldolgozása, hiperparaméter-hangolás, hardveroptimalizálás) egyetlen CLI-parancsba foglalja, több finomhangolási paradigmát támogat (LoRA/QLoRA/teljes finomhangolás), és alacsony erőforrású GPU-khoz is optimalizált (pl. QLoRA 16 GB VRAM mellett).
 
-A LLaMA Factory finomhangolást a következő paranccsal futtathatod, amely a módosított Qwen3 LoRA finomhangolási konfigurációs fájlon alapul.
+A LLaMA Factory finomhangolást az alábbi paranccsal futtathatod, amely a Qwen3 LoRA finomhangolás módosított konfigurációs fájlján alapul.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -380,7 +382,7 @@ fi
 
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -424,10 +426,10 @@ if (Select-String -Path $filePath -Pattern '^preprocessing_num_workers:' -Quiet)
 
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
-Az LLM-finomhangolás futtatása után minden létrehozott kimenet az „output_dir” könyvtárban tárolódik, beleértve a modell-ellenőrzőpont-fájlokat, a konfigurációs fájlokat és a tanítási metrikákat.
+Az LLM-finomhangolás futtatása után minden generált kimenet az "output_dir" könyvtárban kerül tárolásra, beleértve a modell ellenőrzőpont-fájljait, konfigurációs fájljait és a tanítási metrikákat.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -462,18 +464,18 @@ if not adapter_weights:
 print("PASS: LLaMA Factory training output looks correct")
 print(f"Found adapter weights: {adapter_weights}")
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 
 ### A finomhangolt modell tesztelése
 
-Az **llamafactory-cli chat** interaktív csevegésre/következtetésre készült LLM-ekkel (mind az alapmodellekkel, mind a LoRA-val finomhangolt modellekkel). A LLaMA Factory a [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) mappában biztosít mintakonfigurációt a finomhangolt modellek következtetésének futtatásához. Ezt a mintakonfigurációt módosíthatod is a beállítások, például a következtetési háttérrendszer megváltoztatásához.
+A **llamafactory-cli chat** parancsot interaktív csevegésre/inferenciára tervezték LLM-ekkel (mind alapmodellekkel, mind LoRA-val finomhangolt modellekkel). A LLaMA Factory biztosít egy mintakonfigurációt a finomhangolt modellek inferenciájának futtatásához az [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) könyvtárban. Ezt a mintakonfigurációt módosíthatod is a beállítások, például az inferencia háttérrendszer (backend) megváltoztatásához.
 
-A következő paranccsal tesztelheted a finomhangolt Qwen3 modellt:
+A finomhangolt Qwen3 modell teszteléséhez használd az alábbi parancsot:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
-Az alábbiakban egy példa látható a finomhangolt modell használatával folytatott csevegésre:
+Az alábbiakban egy példa látható a finomhangolt modell használatával történő csevegésre:
 
 <p align="center">
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Fine-Tuned model" width="600"/>
@@ -482,9 +484,9 @@ Az alábbiakban egy példa látható a finomhangolt modell használatával folyt
 
 ### A finomhangolt modell exportálása
 
-Éles felhasználási esetekhez az előtanított modellt és a LoRA adaptert egyetlen modellé kell egyesíteni és exportálni. Ez az egyesített modell normál Hugging Face modellfájlként használható. A LLaMA Factory a [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora) mappában biztosít mintakonfigurációkat.
+Éles (production) felhasználási esetekhez az előtanított modellt és a LoRA adaptert össze kell vonni és egyetlen modellként exportálni. Ez az összevont modell normál Hugging Face modellfájlként használható. A LLaMA Factory biztosítja a mintakonfigurációkat az [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora) könyvtárban.
 
-A következő paranccsal exportálhatod a finomhangolt Qwen3 modellt:
+A finomhangolt Qwen3 modell exportálásához használd az alábbi parancsot:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
@@ -519,7 +521,7 @@ PY
 
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 
@@ -560,7 +562,7 @@ if (-not (Test-Path "examples/merge_lora/qwen3_lora_sft_ci.yaml")) {throw "FAIL:
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft_ci.yaml
 if ($LASTEXITCODE -ne 0) {throw "FAIL: llamafactory-cli export failed"}
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @test:id=verify-llamafactory-export-output timeout=120 hidden=True setup=activate-venv -->
@@ -593,24 +595,24 @@ print("PASS: Exported merged model output looks correct")
 <!-- @test:end -->
 ## LLaMA Factory GUI használata
 
-A `LLaMA-Factory` böngészőben elérhető webes felhasználói felületen keresztül is támogatja a nyelvi modellek kódolás nélküli finomhangolását.
+A `LLaMA-Factory` lehetővé teszi az LLM-ek kódolás nélküli finomhangolását egy böngészőben futó webes felületen keresztül is.
 
-Használja a következő parancsot a megnyitásához:
+A megnyitásához használd a következő parancsot:
 
 ```bash
 llamafactory-cli webui
 ```
-A `LlamaFactory Web UI` egy áttekinthető felületet kínál a gépi tanulási munkafolyamatok kezeléséhez, beleértve a tanítást, kiértékelést, előrejelzést, csevegést és a modellek exportálását. Íme egy rövid bemutatás az egyes fülekről:
+A `LlamaFactory Web UI` áttekinthető felületet kínál a gépi tanulási munkafolyamatok kezeléséhez, beleértve a tanítást, kiértékelést, előrejelzést, csevegést és a modellek exportálását. Íme egy rövid bemutatás az egyes lapokról:
 
-* **Train**: Ez a fül lehetővé teszi egy modell és egy adathalmaz kiválasztását, a tanítási paraméterek konfigurálását, valamint a tanítási folyamat elindítását. Fontos megérteni a kötelező és opcionális paramétereket a tanítási beállítások optimalizálásához.
-* **Evaluate & Predict**: A tanítás után ezen a fülön értékelheti ki a modell teljesítményét, és készíthet előrejelzéseket. Betekintést nyújt a modell pontosságába és hatékonyságába új adatokon.
-* **Chat**: A tanítás befejezése után töltse be a modellt a Chat fülön, hogy interakcióba léphessen vele, és láthassa munkája eredményeit. Ez a funkció lehetővé teszi a valós idejű kommunikációt a betanított modellel.
-* **Export**: Ez a fül megkönnyíti a betanított modellek exportálását üzembe helyezéshez vagy további felhasználáshoz. A modelleket különböző, más-más alkalmazásokhoz megfelelő formátumokban mentheti el.
+* **Train**: Ez a lap lehetővé teszi egy modell és egy adathalmaz kiválasztását, a tanítási paraméterek konfigurálását, valamint a tanítási folyamat elindítását. Fontos megérteni a kötelező és opcionális paramétereket a tanítási beállítások optimalizálásához.
+* **Evaluate & Predict**: A tanítás után ezen a lapon értékelheted ki a modell teljesítményét, és végezhetsz előrejelzéseket. Betekintést nyújt a modell pontosságába és hatékonyságába új adatokon.
+* **Chat**: A tanítás befejezése után töltsd be a modellt a Chat lapon, hogy interakcióba léphess vele, és megtekinthesd a munkád eredményeit. Ez a funkció valós idejű kommunikációt tesz lehetővé a betanított modellel.
+* **Export**: Ez a lap megkönnyíti a betanított modellek exportálását üzembe helyezéshez vagy további felhasználáshoz. A modelleket különböző, más-más alkalmazásokhoz megfelelő formátumokban mentheted el.
 
-Részletes útmutatásért javasoljuk, hogy tekintse meg a hivatalos dokumentációt a [LlamaFactory GitHub repository](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) oldalon, valamint a [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) dokumentációt. Emellett a [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) hasznos betekintést nyújt a felületbe és annak funkcióiba.
+Részletes útmutatásért javasoljuk, hogy tekintsd meg a hivatalos dokumentációt a [LlamaFactory GitHub repository](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) oldalon és a [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) oldalon. Emellett a [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) hasznos betekintést nyújt a felületbe és annak funkcióiba.
 
 ## Következő lépések
-- Próbáljon ki különböző modelleket, például a `gpt-oss`-t és más élvonalbeli modelleket.
-- Kísérletezzen különböző háttérrendszerekkel a finomhangolt modellen
-
-További dokumentációért kérjük, látogasson el ide: https://llamafactory.readthedocs.io/en/latest/
+- Próbálj ki különböző modelleket, például a `gpt-oss`-t és más élvonalbeli modelleket.
+- Kísérletezz különböző háttérrendszerekkel a finomhangolt modellen
+ 
+További dokumentációért keresd fel: https://llamafactory.readthedocs.io/en/latest/

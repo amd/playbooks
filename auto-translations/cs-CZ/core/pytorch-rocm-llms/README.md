@@ -17,13 +17,13 @@ SPDX-License-Identifier: MIT
 ## Přehled
 
 
-Chcete spouštět výkonné jazykové modely AI na vlastním hardwaru? Tento návod vám ukáže, jak na to.
-Tento tutoriál používá PyTorch poháněný softwarem AMD ROCm™ ke spouštění modelů, které dokážou shrnovat dokumenty, odpovídat na otázky, generovat text a mnoho dalšího, a to vše lokálně.
+Chcete spouštět výkonné jazykové modely AI na vlastním hardwaru? Tento návod vám ukáže jak.
+Tento tutoriál využívá PyTorch poháněný softwarem AMD ROCm™ ke spouštění modelů, které dokážou shrnovat dokumenty, odpovídat na otázky, generovat text a další, to vše lokálně.
 
 ## Co se naučíte
 
-- Spouštět LLM modely, jako je gpt-oss-20b a qwen3.5-4B, lokálně pomocí PyTorch a ROCm
-- Vytvořit nástroj pro sumarizaci dokumentů pomocí LLM
+- Spouštět lokálně LLM jako gpt-oss-20b a qwen3.5-4B pomocí PyTorch a ROCm
+- Vytvořit nástroj pro shrnování dokumentů pomocí LLM
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Nastavení konfigurace paměti
@@ -32,19 +32,19 @@ Tento tutoriál používá PyTorch poháněný softwarem AMD ROCm™ ke spoušt�
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Kontrola aktualizací softwaru
-> **Poznámka**: Pokud není VS Code nainstalováno, můžete jej nainstalovat pomocí Ryzen AI Developer Center.
+## Zkontrolujte aktualizace softwaru
+> **Poznámka**: Pokud není nainstalován VS Code, můžete jej nainstalovat pomocí Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalace požadovaného softwaru
+## Instalace softwarových předpokladů
 
 ### Vytvoření virtuálního prostředí
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-V systému Linux otevřete terminál v adresáři podle vlastního výběru a postupujte podle příkazů pro vytvoření venv s již nainstalovaným ROCm+Pytorch.
+Na Linuxu otevřete terminál v adresáři dle vašeho výběru a postupujte podle příkazů k vytvoření venv s již nainstalovaným ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -57,13 +57,13 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Udělte svému uživateli přístup k zařízením GPU** (pro projevení této změny se odhlaste a znovu přihlaste):
+**Udělte svému uživateli přístup k zařízením GPU** (pro uplatnění se odhlaste a znovu přihlaste):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-V systému Linux otevřete terminál v adresáři podle vlastního výběru a postupujte podle příkazů pro vytvoření venv.
+Na Linuxu otevřete terminál v adresáři dle vašeho výběru a postupujte podle příkazů k vytvoření venv.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -79,7 +79,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-V systému Windows otevřete terminál v adresáři podle vlastního výběru a postupujte podle příkazů pro vytvoření venv s již nainstalovaným ROCm+Pytorch.
+Na Windows otevřete terminál v adresáři dle vašeho výběru a postupujte podle příkazů k vytvoření venv s již nainstalovaným ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -90,7 +90,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-V systému Windows otevřete terminál v adresáři podle vlastního výběru a postupujte podle příkazů pro vytvoření venv.
+Na Windows otevřete terminál v adresáři dle vašeho výběru a postupujte podle příkazů k vytvoření venv.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
@@ -100,8 +100,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Tip**: Uživatelé Windows možná budou muset upravit zásady spouštění (Execution Policy) PowerShellu (např.
-> nastavit ji na RemoteSigned nebo Unrestricted) před spuštěním některých příkazů PowerShellu.
+> **Tip**: Uživatelé Windows možná budou muset upravit zásady spouštění PowerShell (Execution Policy) (např.
+> nastavit ji na RemoteSigned nebo Unrestricted) před spuštěním některých příkazů Powershell.
 
 <!-- @os:end -->
 
@@ -112,6 +112,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:hf-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:hf-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->
@@ -163,7 +169,7 @@ Tento playbook obsahuje připravené skripty k okamžitému použití. Klikněte
 | Skript | Popis | Použití |
 |--------|-------------|-------|
 | [run_llm.py](assets/run_llm.py) | Základní generování textu pomocí LLM | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Sumarizátor dokumentů s podporou Harmony | `python summarizer.py --file document.txt` |
+| [summarizer.py](assets/summarizer.py) | Nástroj pro shrnování dokumentů s podporou Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -189,16 +195,16 @@ for script in ['run_llm.py', 'summarizer.py']:
 <!-- @test:end -->
 
 Oba skripty podporují:
-- Výběr modelu pomocí přepínače `--model`
-- Formátování šablony chatu pro správné promptování modelu, což je obzvláště užitečné při sumarizaci dokumentů
+- Výběr modelu pomocí příznaku `--model`
+- Formátování chatovací šablony pro správné formulování promptů modelu, což je zvlášť užitečné pro shrnování dokumentů
 
 ## Načtení a spuštění vašeho prvního LLM
 
 Přiložený skript [run_llm.py](assets/run_llm.py) ukazuje, jak generovat text pomocí LLM za použití PyTorch a AMD ROCm.
 
-> **Poznámka:** Při načítání modelu Hugging Face Transformers nejprve zkontroluje svou lokální mezipaměť (`~/.cache/huggingface/hub` v systému Linux, `C:\Users\<user>\.cache\huggingface\hub` v systému Windows). Pokud model není uložen v mezipaměti, automaticky se stáhne z huggingface.co. První spuštění může trvat několik minut v závislosti na velikosti modelu a rychlosti sítě.
+> **Poznámka:** Při načítání modelu Hugging Face Transformers nejprve zkontroluje lokální cache (`~/.cache/huggingface/hub` na Linuxu, `C:\Users\<user>\.cache\huggingface\hub` na Windows). Pokud model není v cache, automaticky se stáhne z huggingface.co. První spuštění může trvat několik minut v závislosti na velikosti modelu a rychlosti sítě.
 
-Následující úryvek ukazuje, jak model použít a přizpůsobit kladené otázky.
+Níže uvedený úryvek ukazuje, jak model použít a přizpůsobit kladené otázky.
 
 <!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -274,11 +280,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Vytvoření sumarizátoru dokumentů
+## Vytvoření nástroje pro shrnování dokumentů
 
-Nyní, když jste vygenerovali lokální výstup LLM, můžete na tom stavět a vytvořit praktický sumarizátor dokumentů. V této části použijete skript [summarizer.py](assets/summarizer.py) k načtení souboru .txt a automatickému vygenerování stručného shrnutí, a to vše běžící lokálně na vašem GPU.
+Nyní, když jste vygenerovali lokální výstup LLM, na to můžete navázat vytvořením praktického nástroje pro shrnování dokumentů. V této části použijete skript [summarizer.py](assets/summarizer.py) k načtení souboru .txt a automatickému vygenerování stručného shrnutí, to vše lokálně na vašem GPU.
 
-Skript je navržen tak, aby fungoval hned po instalaci. Otevřete jej v editoru a prozkoumejte kód, přizpůsobte prompty a upravte parametry, jako je délka a teplota.
+Skript je navržen tak, aby fungoval ihned po stažení. Otevřete skript v editoru, abyste si prohlédli kód, přizpůsobili prompty a vyladili parametry jako délka a teplota.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -302,27 +308,27 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## Naučte se o parametrech generování
+## Seznamte se s parametry generování
 
 | Parametr | Co ovlivňuje | Typické hodnoty |
 |-----------|------------------|----------------|
 | `max_new_tokens` | Maximální délku výstupu LLM | Pro shrnutí použijte 50–500 tokenů. (1 token odpovídá přibližně 0,75 anglického slova) |
-| `temperature` | Kreativitu. Nízké hodnoty ji činí soustředěnou, vysoké hodnoty přinášejí větší nepředvídatelnost | - **0,1–0,3**: Soustředěné, deterministické (vhodné pro shrnutí) <br> **0,5–0,7**: Vyvážené (obecné použití) <br> **0,8–1,0**: Kreativní, rozmanité (brainstorming) |
-| `top_p` | Nucleus Sampling - nízké hodnoty omezují model na užší výstupy | **0,1-0,5**: Přísné, předvídatelné <br> **0,9-0,95**: (standardní, přirozené, konverzační) |
+| `temperature` | Kreativitu. Nízké hodnoty ji činí zaměřenou, vysoké hodnoty přinášejí větší nepředvídatelnost | - **0,1–0,3**: Zaměřené, deterministické (vhodné pro shrnutí) <br> **0,5–0,7**: Vyvážené (obecné použití) <br> **0,8–1,0**: Kreativní, rozmanité (brainstorming) |
+| `top_p` | Nucleus Sampling – nízké hodnoty omezují model na úžší výstupy | **0,1-0,5**: Striktní, předvídatelné <br> **0,9-0,95**: (standardní, přirozené, konverzační) |
 
 
-## Praktické využití
+## Praktické aplikace
 
 - **Analýza výzkumných prací**: Extrahujte klíčová zjištění ze složitých publikací pro rychlý přehled
-- **Agregace zpráv**: Shrňte zpravodajské články do stručných denních souhrnů nebo highlightů
-- **Poznámky z jednání**: Zhušťujte přepisy do konkrétních úkolů a stručných shrnutí
-- **Kontrola právních dokumentů**: Rychle extrahujte relevantní klauzule nebo povinnosti z dlouhých právních textů
+- **Agregace zpráv**: Shrňte zpravodajské články do stručných denních přehledů nebo shrnutí
+- **Poznámky ze schůzek**: Zhustěte přepisy do akčních položek a stručných shrnutí
+- **Revize právních dokumentů**: Rychle extrahujte relevantní klauzule nebo povinnosti z dlouhých právních textů
 - **Dokumentace kódu**: Generujte stručné přehledy repozitářů a vysvětlení funkcí
 ## Další kroky
 
-- **Fine-tuning**: Přizpůsobte modely svému konkrétnímu oboru nebo terminologii pro lepší přesnost (viz Fine-tuning Playbooks)
-- **RAG systémy**: Kombinujte LLM s vyhledáváním v dokumentech pro kontextově uvědomělé odpovědi a vyhledávání
-- **Prozkoumávání modelů**: Experimentujte s novými modely, jako je Llama 3, Phi-3 nebo Qwen, pro lepší výsledky
+- **Doladění (fine-tuning)**: Přizpůsobte modely své konkrétní oblasti nebo terminologii pro vyšší přesnost (viz Fine-tuning Playbooks)
+- **RAG systémy**: Kombinujte LLM s vyhledáváním v dokumentech pro kontextově relevantní odpovědi a vyhledávání
+- **Zkoumání modelů**: Experimentujte s novými modely, jako jsou Llama 3, Phi-3 nebo Qwen, pro dosažení lepších výsledků
 - **Nasazení do produkce**: Používejte nástroje jako vLLM pro škálovatelné poskytování LLM v organizacích
 
 Váš systém vám dává možnost spouštět sofistikované jazykové modely lokálně. Experimentujte s různými modely, prompty a parametry, abyste zjistili, co nejlépe funguje pro vaše aplikace.

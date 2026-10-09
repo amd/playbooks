@@ -16,19 +16,19 @@ SPDX-License-Identifier: MIT
 
 ## Áttekintés
 
-A [DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) a DeepSeek V4 család hatékonyságra optimalizált változata — egy 284 milliárd paraméteres Mixture of Experts modell 13 milliárd aktív paraméterrel. A [DeepSeek technikai jelentése](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) szerint 79%-ot ér el a SWE-bench Verified teszten, és 91,6%-ot a LiveCodeBench teszten.
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) a DeepSeek V4 család hatékonyságra optimalizált változata — egy 284 milliárd paraméteres Mixture of Experts modell, 13 milliárd aktív paraméterrel. [A DeepSeek technikai jelentése](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) szerint 79%-os eredményt ér el a SWE-bench Verified teszten, és 91,6%-ot a LiveCodeBench teszten.
 
-A [ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) egy kifejezetten ehhez a modellarchitektúrához épített, dedikált következtetési motor. Nem egy általános célú futtatókörnyezetről van szó — a ds4 közvetlenül a DeepSeek V4 családot célozza meg, architektúraspecifikus kernel-optimalizációkkal az AMD ROCm™ szoftverhez. Jelenleg ez az egyik legjobban teljesítő implementáció a DeepSeek V4 Flash modellhez a Strix Halo platformon.
+A [ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) egy kifejezetten ehhez a modellarchitektúrához épített következtetési motor. Nem általános célú futtatókörnyezetről van szó: a ds4 közvetlenül a DeepSeek V4 családot célozza meg, architektúra-specifikus kernel optimalizációkkal az AMD ROCm™ szoftverhez. Jelenleg ez az egyik legjobb teljesítményt nyújtó DeepSeek V4 Flash implementáció Strix Halo rendszereken.
 
-Ez az útmutató bemutatja, hogyan használható az `ai-toolbox-cockpit` terminálos felhasználói felület a ds4 beállításához, a modellsúlyok letöltéséhez, valamint a DeepSeek V4 Flash helyi kiszolgálásának elindításához az AMD Ryzen™ AI Halo Developer Platformon.
+Ez az oktatóanyag bemutatja, hogyan használható az `ai-toolbox-cockpit` terminál felhasználói felület a ds4 beállításához, a modellsúlyok letöltéséhez, valamint a DeepSeek V4 Flash helyi kiszolgálásának elindításához az AMD Ryzen™ AI Halo Developer Platformon.
 
 ## Amit meg fogsz tanulni
 
-- Hogyan telepítsd és indítsd el az `ai-toolbox-cockpit` terminálos felhasználói felületet
+- Hogyan telepítsd és indítsd el az `ai-toolbox-cockpit` terminál felhasználói felületet
 - Hogyan hozd létre a ds4 ROCm toolbox konténert
-- Az egyetlen Halo csomóponthoz ajánlott kvantálás letöltése
-- A ds4 következtetési kiszolgáló elindítása és egy OpenAI-kompatibilis végpont közzététele
-- Egy Web UI vagy kódoló ügynök csatlakoztatása a helyi kiszolgálóhoz
+- Az ajánlott kvantálás letöltése egyetlen Halo csomóponthoz
+- A ds4 következtetési kiszolgáló elindítása és OpenAI-kompatibilis végpont elérhetővé tétele
+- Web UI vagy kódoló ügynök csatlakoztatása a helyi kiszolgálóhoz
 
 ## A memóriakonfiguráció beállítása
 
@@ -36,14 +36,17 @@ Ez az útmutató bemutatja, hogyan használható az `ai-toolbox-cockpit` termin�
 
 ## A szoftveres előfeltételek telepítése
 
-> **Rendszerkövetelmények ehhez a konfigurációhoz (egyetlen csomópontos IQ2_XXS, 126k kontextussal):**
-> - Egy Strix Halo rendszer **legalább 128 GB egységesített memóriával**.
-> - A **BIOS-ban dedikált VRAM (UMA framebuffer) minimumra állítva**, hogy a megosztott memóriapool a lehető legnagyobb lehessen.
-> - A GPU **megosztott memóriapoolja legalább 110 GB-ra állítva**: futtasd az `amd-ttm --set 110` parancsot (lásd a fenti memóriakonfigurációs lépést), majd indítsd újra a rendszert. Alacsonyabb értékek esetén memóriahiány léphet fel a modell betöltésekor 126k kontextusnál. Ha a rendszereden kevesebb memória áll rendelkezésre, inkább csökkentsd a **Context** értéket a Server Mode nézetben.
->
-> **Megjegyzés:** Kiindulási értékként próbáld a **GPU megosztott memóriapoolját** **110 GB**-ra állítani. Ha memóriahibákba ütközöl, növeld a megosztott memóriapoolt, vagy csökkentsd a kontextusméretet.
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:podman,distrobox,ds4-cockpit,ds4-toolbox-image -->
 
-Az ai-toolbox-cockpit konténeres toolboxokat használ a ds4 motor futtatásához. Telepítsd a `podman`, `distrobox` és `pipx` eszközöket:
+> **Rendszerkövetelmények ehhez a konfigurációhoz (egycsomópontos IQ2_XXS, 126k kontextus mellett):**
+> - Strix Halo rendszer **legalább 128 GB egyesített memóriával**.
+> - A **BIOS dedikált VRAM (UMA keretpuffer) beállítása a minimumra**, hogy az osztott memóriakészlet a lehető legnagyobb lehessen.
+> - A GPU **osztott memóriakészletének beállítása legalább 110 GB-ra**: futtasd az `amd-ttm --set 110` parancsot (lásd a fenti memóriakonfigurációs lépést), majd indítsd újra a rendszert. Alacsonyabb értékek esetén memóriahiány léphet fel a modell betöltésekor 126k kontextus mellett. Ha a rendszereden kevesebb memória áll rendelkezésre, csökkentsd inkább a **Context** értéket a Server Mode módban.
+>
+> **Megjegyzés:** Kezdetnek próbáld meg a **GPU osztott memóriakészletét** **110 GB**-ra beállítani. Ha memóriahiba lép fel, növeld az osztott memóriakészletet, vagy csökkentsd a kontextusméretet.
+
+Az ai-toolbox-cockpit konténeres toolboxokat használ a ds4 motor futtatásához. Telepítsd a `podman`, `distrobox` és `pipx` csomagokat:
 
 ```bash
 sudo apt update
@@ -63,20 +66,20 @@ echo "OK: podman, distrobox, and pipx are installed"
 
 ## Elérhető kvantálások
 
-A ds4 szerzője több kvantált változatot is biztosít a DeepSeek V4 Flash modellhez GGUF formátumban. Az alábbi modellek mindegyike importance matrix (imatrix) kalibrációt használ, amely magasabb pontosságot őriz meg a modell azon részeinél, amelyek a kódolási és következtetési feladatok szempontjából a legfontosabbak.
+A ds4 szerzője a DeepSeek V4 Flash több kvantált változatát biztosítja GGUF formátumban. Az alábbi modellek mindegyike importance matrix (imatrix) kalibrációt használ, amely nagyobb pontosságot őriz meg a modell azon részein, amelyek a legfontosabbak a kódolási és következtetési feladatok szempontjából.
 
 | Kvantálás | Méret | Leírás |
 |-------------|------|-------------|
 | [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 GB | Ajánlott egyetlen 128 GB-os csomóponthoz |
-| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | A 37–42. rétegeket Q4 pontosságon tartja a jobb pontosság érdekében. Elfér 128 GB-ban, de kevesebb helyet hagy a kontextusnak |
-| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Magasabb minőség. Két Halo csomópontot igényel, több csomópontos klaszterezéssel |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Opcionális kiegészítő a spekulatív dekódoláshoz a generálási sebesség javítása érdekében |
+| [Hibrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | A 37–42. rétegeket Q4 pontosságon tartja a jobb pontosság érdekében. Elfér 128 GB-ban, de kevesebb hely marad a kontextusnak |
+| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Magasabb minőség. Két Halo csomópontot igényel többcsomópontos fürtözés révén |
+| [MTP spekulatív dekódolás](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Opcionális kiegészítő spekulatív dekódoláshoz a generálási sebesség javítása érdekében |
 
-Az **IQ2_XXS imatrix** modell jó kiindulási pont. Kényelmesen elfér egyetlen csomóponton, és elegendő memóriát hagy egy ésszerű kontextusablak számára.
+Az **IQ2_XXS imatrix** modell jó kiindulópont. Kényelmesen elfér egyetlen csomóponton, és elegendő memóriát hagy egy ésszerű méretű kontextusablakhoz.
 
 ## Az ai-toolbox-cockpit telepítése
 
-Az [ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) egy könnyű terminálos felhasználói felület, amely megkönnyíti a különböző AI háttérrendszerek telepítését. Ezt fogjuk használni a ds4 konténerünk létrehozásához, a modellsúlyok letöltéséhez és a kiszolgálók elindításához. Telepítsd `pipx` segítségével:
+Az [ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) egy könnyű terminál felhasználói felület, amely megkönnyíti a különféle AI háttérrendszerek telepítését. Ezt fogjuk használni a ds4 konténerünk létrehozásához, a modellsúlyok letöltéséhez és a kiszolgálók indításához. Telepítsd `pipx` segítségével:
 
 <!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
@@ -101,7 +104,7 @@ echo "OK: ai-toolbox-cockpit is installed and on PATH"
 
 ## 1. lépés: A toolbox létrehozása
 
-Az **Interactive Toolboxes** lapon válaszd ki a ds4 legújabb elérhető/stabil toolboxát (pl. `ds4-rocm-10.0`), majd kattints a **Create/Update** gombra. Ez lehúzza a konténerképet, és létrehozza a toolbox környezetet.
+Az **Interactive Toolboxes** fülön válaszd ki a ds4 legújabb elérhető/stabil toolboxát (pl. `ds4-rocm-10.0`), majd kattints a **Create/Update** gombra. Ez letölti a konténerképet, és létrehozza a toolbox környezetet.
 
 
 <p align="center">
@@ -124,9 +127,9 @@ echo "OK: ds4 toolbox container image is present"
 
 ## 2. lépés: A modell letöltése
 
-Menj a **Models** lapra. Először válaszd ki a háttérrendszert (ds4). Ezután válaszd ki az **IQ2_XXS imatrix (~80,8 GB)** modellt a legördülő listából, majd kattints a **Download** gombra. A modellfájlok alapértelmezés szerint a `~/ds4` mappába kerülnek mentésre (a tárolási útvonal módosítható).
+Nyisd meg a **Models** fület. Először válaszd ki a háttérrendszert (ds4). Ezután válaszd ki az **IQ2_XXS imatrix (~80,8 GB)** opciót a legördülő listából, majd kattints a **Download** gombra. A modellfájlok alapértelmezetten a `~/ds4` mappába kerülnek mentésre (a tárolási útvonal módosítható).
 
-> **Megjegyzés:** Az IQ2_XXS modell körülbelül 80 GB, így a letöltés a kapcsolatod sebességétől függően eltarthat egy ideig. A befejezése után folytathatod.
+> **Megjegyzés:** Az IQ2_XXS modell körülbelül 80 GB, így a letöltés az internetkapcsolat sebességétől függően hosszabb ideig is eltarthat. Folytathatod, amint befejeződött.
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
@@ -160,19 +163,19 @@ fi
 
 ## 3. lépés: A kiszolgáló elindítása
 
-Menj a **Server Mode** lapra. Válaszd ki a letöltött modellt és a toolboxot, majd állítsd be a kontextusméretet, a hostot és a portot. Ha készen állsz, kattints a **Start ds4-server** gombra.
+Nyisd meg a **Server Mode** fület. Válaszd ki a letöltött modellt és a toolboxot, majd állítsd be a kontextusméretet, a hosztot és a portot. Ha készen állsz, kattints a **Start ds4-server** gombra.
 
-> **Tipp** A `126000` kontextusméret ésszerű kiindulási érték, amely elférhet egyetlen csomóponton — ha van elég szabad memóriád, magasabbra is állíthatod, vagy csökkentheted, ha memóriahibákba ütközöl. A port (ebben az útmutatóban `8000`) tetszőleges — válassz bármilyen szabad portot.
+> **Tipp** A `126000` kontextusméret ésszerű kiindulási érték, amelynek el kell férnie egyetlen csomóponton — ha van bőven memóriád, magasabbra is állíthatod, vagy csökkentheted, ha memóriahibákba ütközöl. A port (jelen útmutatóban `8000`) tetszőleges — válassz bármilyen szabad portot.
 
-> **KV Disk Cache (opcionális).** A **KV Disk Cache** bekapcsolása a KV gyorsítótárat lemezre helyezi ki (a **Host Cache Dir** helyen, alapértelmezés szerint `~/.cache/ds4-kv`), így az ismétlődő rendszerpromptok SSD-ről állíthatók vissza ahelyett, hogy újra ki kellene számítani őket. Ez egy teljesítményoptimalizálás kódoló ügynök munkafolyamatokhoz, hosszú, ismétlődő promptok esetén, és **nem szükséges** a kiszolgáló futtatásához.
+> **KV lemezes gyorsítótár (opcionális).** A **KV Disk Cache** bekapcsolása a KV gyorsítótárat lemezre tölti ki (a **Host Cache Dir** helyen, alapértelmezetten `~/.cache/ds4-kv`), így az ismétlődő rendszerüzenetek SSD-ről állíthatók vissza, ahelyett hogy újra ki kellene számítani őket. Ez egy teljesítmény-optimalizálás a hosszú, ismétlődő promptokkal dolgozó kódoló ügynök munkafolyamatokhoz, és a kiszolgáló futtatásához **nem szükséges**.
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
 </p>
 
-A kiszolgáló elindul, és a 8000-es porton fog figyelni, közzétéve egy OpenAI-kompatibilis API végpontot a `http://localhost:8000/v1` címen.
+A kiszolgáló elindul, és a 8000-es porton figyel, OpenAI-kompatibilis API végpontot biztosítva a `http://localhost:8000/v1` címen.
 
-**Gyorsteszt:**
+**Gyors teszt:**
 ```bash
 curl http://127.0.0.1:8000/v1/chat/completions \
   -H 'Content-Type: application/json' \
@@ -306,9 +309,9 @@ PY
 echo "OK: ds4 server test complete; server stopped and GPU memory released"
 ```
 <!-- @test:end -->
-## Egy Web UI csatlakoztatása
+## Webes felhasználói felület csatlakoztatása
 
-Bármilyen olyan csevegőfelületet csatlakoztathatsz, amely támogatja az OpenAI API formátumot. Például a HuggingFace ChatUI használatához:
+Bármilyen olyan csevegőfelületet csatlakoztathat, amely támogatja az OpenAI API formátumot. Például a HuggingFace ChatUI használatához:
 
 ```bash
 docker run --network=host \
@@ -319,15 +322,15 @@ docker run --network=host \
   ghcr.io/huggingface/chat-ui-db
 ```
 
-Nyisd meg a `http://localhost:3000` címet a böngésződben a csevegés elindításához.
+Nyissa meg a `http://localhost:3000` címet a böngészőjében a csevegés megkezdéséhez.
 
-> **Megjegyzés:** A `--network=host` a Web UI-t a hoszt hálózatára helyezi, így az közvetlenül el tudja érni a ds4 szervert a `localhost` címen. Ez azt eredményezi, hogy a ds4 szerver a loopback interfészhez marad kötve (nem kell más interfészeken elérhetővé tenni).
+> **Megjegyzés:** A `--network=host` a webes felhasználói felületet a gazdagép hálózatára helyezi, így az közvetlenül el tudja érni a ds4 szervert a `localhost` címen. Ez biztosítja, hogy a ds4 szerver loopback-re kötve maradjon (nem kell más interfészeken keresztül elérhetővé tenni).
 
-> **Tipp:** A Web UI portja (itt `3000`, a `PORT` változón keresztül beállítva) tetszőleges — válassz egy szabad portot, ha a `3000` már foglalt, és ezt a portot nyisd meg a böngésződben. Győződj meg róla, hogy az `OPENAI_BASE_URL`-ben szereplő port megegyezik azzal a porttal, amelyen a ds4 szervered fut.
+> **Tipp:** A webes felhasználói felület portja (itt `3000`, a `PORT` változón keresztül beállítva) tetszőleges — válasszon másik szabad portot, ha a `3000` már foglalt, és ezt a portot nyissa meg a böngészőjében. Győződjön meg róla, hogy az `OPENAI_BASE_URL`-ben szereplő port megegyezik azzal a porttal, amelyen a ds4 szerver fut.
 
-## Egy kódoló ügynök csatlakoztatása
+## Kódoló ügynök csatlakoztatása
 
-A ds4 szerver mind OpenAI-, mind Anthropic-kompatibilis végpontokat biztosít, így a legtöbb kódoló ügynök közvetlenül csatlakozhat hozzá. Például a `pi` kódoló ügynökhöz való hozzáadáshoz illeszd be a következő blokkot a `~/.pi/agent/models.json` fájlba:
+A ds4 szerver mind az OpenAI-, mind az Anthropic-kompatibilis végpontokat elérhetővé teszi, így a legtöbb kódoló ügynök közvetlenül tud hozzá csatlakozni. Például a `pi` kódoló ügynökhöz való hozzáadáshoz illessze be a következő blokkot a `~/.pi/agent/models.json` fájlba:
 
 ```json
 "ds4": {
@@ -367,15 +370,15 @@ A ds4 szerver mind OpenAI-, mind Anthropic-kompatibilis végpontokat biztosít, 
 }
 ```
 
-> **Tipp**: Ha a kódoló ügynököd vagy Web UI-d egy másik gépen fut, mint a Halo platform, akkor SSH-n keresztül továbbítanod kell a szerver portját (itt `8000`):
+> **Tipp**: Ha a kódoló ügynök vagy a webes felhasználói felület egy másik gépen fut, mint a Halo platform, akkor a szerver portját (itt `8000`) SSH-n keresztül kell továbbítania:
 > ```bash
 > ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## Következő lépések
 
-- **Több csomópontos fürtözés**: Ha két Halo eszközöd van, a ds4 támogatja a Q4 modell (~153 GB) elosztását a két gép között pipeline párhuzamosítás segítségével. A beállítási útmutatóért lásd a [ds4-toolbox dokumentációját](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism).
-- **Spekulatív dekódolás (MTP)**: Töltsd le az MTP súlyokat (~3,6 GB), és add meg a `--mtp` kapcsolót a szervernek a gyorsabb generálási sebesség érdekében.
-- **KV gyorsítótár lemezre helyezése**: Kódoló ügynök munkafolyamatokhoz engedélyezd a `--kv-disk-dir` opciót, hogy az ismétlődő rendszer promptok SSD-ről kerüljenek visszaállításra ahelyett, hogy minden alkalommal újraszámolásra kerülnének.
+- **Több csomópontos fürtözés**: Ha két Halo eszközzel rendelkezik, a ds4 támogatja a Q4 modell (~153 GB) elosztását mindkét gép között pipeline párhuzamosítás segítségével. A beállítási útmutatóért lásd a [ds4-toolbox dokumentációját](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism).
+- **Spekulatív dekódolás (MTP)**: Töltse le az MTP súlyokat (~3,6 GB), és adja meg a `--mtp` kapcsolót a szervernek a gyorsabb generálási sebesség érdekében.
+- **KV gyorsítótár lemezre helyezése**: Kódoló ügynök munkafolyamatokhoz engedélyezze a `--kv-disk-dir` kapcsolót, hogy az ismétlődő rendszerüzeneteket SSD-ről állítsa vissza ahelyett, hogy minden alkalommal újra kiszámolná azokat.
 
-További információért lásd a [ds4 repository-t](https://github.com/antirez/ds4) és a [ds4-cockpit toolboxot](https://github.com/kyuz0/strix-halo-ds4-toolbox).
+További információért lásd a [ds4 tárolót](https://github.com/antirez/ds4) és a [ds4-cockpit eszközkészletet](https://github.com/kyuz0/strix-halo-ds4-toolbox).

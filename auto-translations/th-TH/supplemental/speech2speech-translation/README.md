@@ -16,31 +16,31 @@ SPDX-License-Identifier: MIT
 
 ## ภาพรวม
 
-ซอฟต์แวร์ AMD ROCm™ และสแตก PyTorch สร้างระบบนิเวศแบบครบวงจรสำหรับ AI บนอุปกรณ์ ใช้งานได้ทั้งบน Windows และ Linux โดยรองรับอย่างเป็นทางการสำหรับอุปกรณ์หลากหลายชนิด รวมถึง Ryzen™ AI APU และ Radeon™ GPU
+ซอฟต์แวร์ AMD ROCm™ และสแตก PyTorch สร้างระบบนิเวศแบบรวมศูนย์สำหรับ AI บนอุปกรณ์ ใช้งานได้ทั้งบน Windows และ Linux โดยมีการรองรับอย่างเป็นทางการสำหรับอุปกรณ์หลากหลายชนิด รวมถึง APU ของ Ryzen™ AI และ GPU ของ Radeon™
 
-คู่มือนี้จะสอนวิธีการรันการแปลเสียงเป็นเสียงแบบเรียลไทม์ ที่มีความหน่วงต่ำ แสดงออกได้เป็นธรรมชาติ และเป็นส่วนตัว โดยทำงานทั้งหมดบนอุปกรณ์ปลายทาง
+เพลย์บุ๊กนี้จะสอนวิธีการรันการแปลภาษาแบบเสียงต่อเสียง (speech-to-speech) ที่มีความหน่วงต่ำ แสดงอารมณ์ได้ และเป็นส่วนตัวทั้งหมดบนอุปกรณ์ edge
 
 ## สิ่งที่คุณจะได้เรียนรู้
 
-- วิธีตั้งค่าสภาพแวดล้อมสำหรับการแปลเสียงเป็นเสียง
-- วิธีเขียนโค้ด Python เพื่อโหลดและใช้งานโมเดลแปลงเสียงเป็นเสียง
-- วิธีรันและทดลองใช้ UI ของ Gradio
+- วิธีการตั้งค่าสภาพแวดล้อมสำหรับ speech-to-speech
+- วิธีการเขียนโค้ด Python เพื่อโหลดและใช้งานโมเดล speech-speech
+- วิธีการรันและทดลองใช้งาน UI ของ Gradio
 
-## เหตุใดจึงควรใช้การแปลเสียงเป็นเสียงแบบเรียลไทม์?
+## เหตุใดจึงควรใช้การแปลภาษาแบบ speech-to-speech แบบเรียลไทม์?
 
-- ขจัดอุปสรรคระหว่างการแปลและกำแพงทางภาษา
-- ถ่ายทอดน้ำเสียง อารมณ์ และเจตนาโดยไม่มีช่วงเงียบที่น่าอึดอัด
-- เปิดโอกาสให้เกิดความร่วมมือระดับโลกและการตัดสินใจที่รวดเร็วขึ้น
+- ขจัดความไม่ลื่นไหลระหว่างการแปลและอุปสรรคทางภาษา
+- สื่อสารน้ำเสียง อารมณ์ และความตั้งใจได้โดยไม่มีการหยุดชะงักที่น่าอึดอัด
+- ช่วยให้เกิดการทำงานร่วมกันทั่วโลกและการตัดสินใจที่รวดเร็วยิ่งขึ้น
 
 <!-- @device:halo_box,halo,stx,krk -->
-## การตั้งค่าหน่วยความจำ
+## การตั้งค่าหน่วยความจำ (Memory Configuration)
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## ตรวจสอบการอัปเดตซอฟต์แวร์
-> **หมายเหตุ**: หากยังไม่ได้ติดตั้ง VS Code คุณสามารถติดตั้งได้ด้วย Ryzen AI Developer Center
+> **หมายเหตุ**: หากยังไม่ได้ติดตั้ง VS Code คุณสามารถติดตั้งได้ผ่าน Ryzen AI Developer Center
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -51,7 +51,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-บน Linux ให้เปิดเทอร์มินัลและรันคำสั่งต่อไปนี้เพื่อสร้าง venv ที่ติดตั้ง ROCm+Pytorch ไว้แล้ว:
+บน Linux ให้เปิดเทอร์มินัลและรันคำสั่งต่อไปนี้เพื่อสร้าง venv ที่ติดตั้ง ROCm+PyTorch ไว้แล้ว:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -65,7 +65,7 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**ให้สิทธิ์ผู้ใช้ของคุณในการเข้าถึงอุปกรณ์ GPU** (ต้องออกจากระบบและเข้าสู่ระบบใหม่เพื่อให้มีผล):
+**ให้สิทธิ์ผู้ใช้ของคุณในการเข้าถึงอุปกรณ์ GPU** (ออกจากระบบและเข้าสู่ระบบใหม่เพื่อให้มีผล):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-บน Windows ให้เปิดเทอร์มินัลในไดเรกทอรีที่คุณเลือก แล้วทำตามคำสั่งเพื่อสร้าง venv ที่ติดตั้ง ROCm+Pytorch ไว้แล้ว:
+บน Windows ให้เปิดเทอร์มินัลในไดเรกทอรีที่คุณเลือก แล้วทำตามคำสั่งเพื่อสร้าง venv ที่ติดตั้ง ROCm+PyTorch ไว้แล้ว:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,7 +97,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **เคล็ดลับ**: ผู้ใช้ Windows อาจต้องแก้ไข PowerShell Execution Policy (เช่น
+> **เคล็ดลับ**: ผู้ใช้ Windows อาจต้องปรับเปลี่ยน PowerShell Execution Policy (เช่น
 > ตั้งค่าเป็น RemoteSigned หรือ Unrestricted) ก่อนที่จะรันคำสั่ง Powershell บางคำสั่ง
 
 <!-- @device:end -->
@@ -113,26 +113,27 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **เคล็ดลับ**: ผู้ใช้ Windows อาจต้องแก้ไข PowerShell Execution Policy (เช่น
+> **เคล็ดลับ**: ผู้ใช้ Windows อาจต้องปรับเปลี่ยน PowerShell Execution Policy (เช่น
 > ตั้งค่าเป็น RemoteSigned หรือ Unrestricted) ก่อนที่จะรันคำสั่ง Powershell บางคำสั่ง
 
 <!-- @device:end -->
 <!-- @os:end -->
 
-### การติดตั้งการพึ่งพาพื้นฐาน (Dependencies)
+### การติดตั้งการพึ่งพาพื้นฐาน (Basic Dependencies)
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
 
 <!-- @require:pytorch -->
+<!-- @prereq:hf-models-seamless-m4t-v2-large -->
 
-### การพึ่งพาเพิ่มเติม
+### การพึ่งพาเพิ่มเติม (Additional Dependencies)
 
 ติดตั้งการพึ่งพาของ m4t โดยใช้ pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -202,39 +203,39 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## ตั้งค่าเดโมการแปลเสียงเป็นเสียง
+## ตั้งค่าเดโมสำหรับ speech-to-speech
 
 #### เรียนรู้เกี่ยวกับ seamless-m4t-v2
 
-ดูข้อมูลเพิ่มเติมได้ที่ [model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) บน Hugging Face
-นี่คือสถาปัตยกรรมทางเทคนิคของโมเดลแปลงเสียงเป็นเสียง:
+ดู[model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) บน Hugging Face เพื่อข้อมูลเพิ่มเติม
+นี่คือสถาปัตยกรรมทางเทคนิคของโมเดล speech-speech:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### ดาวน์โหลดสคริปต์
 
-คู่มือนี้มีสคริปต์พร้อมใช้งานอยู่แล้ว โปรดดาวน์โหลดทั้งหมดไปไว้ในไดเรกทอรีเดียวกันกับสภาพแวดล้อมที่คุณสร้างขึ้น
+เพลย์บุ๊กนี้มาพร้อมกับสคริปต์ที่พร้อมใช้งาน กรุณาดาวน์โหลดทั้งหมดไปยังไดเรกทอรีเดียวกันกับสภาพแวดล้อมที่คุณสร้างขึ้น
 
 | สคริปต์ | คำอธิบาย | การใช้งาน |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | การสร้างข้อความด้วย LLM แบบพื้นฐาน | `python infer.py` |
+| [infer.py](assets/infer.py) | การสร้างข้อความพื้นฐานด้วย LLM | `python infer.py` |
 | [input1.wav](assets/input1.wav) | ไฟล์เสียงตัวอย่าง | N/A |
 | [lang_list.py](assets/lang_list.py) | ไฟล์รองรับภาษา | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | UI ที่ใช้งานง่ายสำหรับการแปลเสียง | `python gradio_demo.py --no-share` |
+| [gradio_demo.py](assets/gradio_demo.py) | UI ที่ใช้งานง่ายสำหรับการแปลภาษาด้วยเสียง | `python gradio_demo.py --no-share` |
 
 
 ### เริ่มต้นด้วย infer.py
 
-หากต้องการรันสคริปต์ ให้รัน 
+ในการรันสคริปต์ ให้รัน 
 ```bash
 python infer.py
 ```
-> **หมายเหตุ**: คุณอาจเห็นคำเตือนบางอย่าง ซึ่งเป็นเรื่องปกติ
+> **หมายเหตุ**: คุณอาจเห็นคำเตือนบางอย่าง นี่เป็นเรื่องปกติ
  
   
 #### อธิบายโค้ด
-**ส่วนที่ 1: การนำเข้าการพึ่งพาที่จำเป็น**
+**ส่วนที่ 1: การนำเข้า dependencies ที่จำเป็น**
 
 ```python 
 import os
@@ -263,7 +264,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **ส่วนที่ 2: การโหลดโมเดลจาก HuggingFace**
 
-ฟังก์ชันนี้รับ model ID เข้ามาและดาวน์โหลดโมเดลหากยังไม่เคยดาวน์โหลดมาก่อน จากนั้นจะส่งคืน processor และ model เพื่อให้ฟังก์ชันถัดไปนำไปใช้
+ฟังก์ชันนี้รับ model ID และดาวน์โหลดโมเดลหากยังไม่ได้ดาวน์โหลด จากนั้นจะส่งคืน processor และ model สำหรับฟังก์ชันถัดไปเพื่อใช้งาน
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -282,9 +283,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**ส่วนที่ 3: นำไฟล์เสียง .wav มาป้อนเข้าและประมวลผลเบื้องต้น**
+**ส่วนที่ 3: นำเข้าไฟล์คลิปเสียง .wav และประมวลผลเบื้องต้น**
 
-ฟังก์ชันนี้จะโหลดไฟล์เสียงและปรับอัตราสุ่มตัวอย่าง (resample) ให้ตรงกับอัตราเป้าหมาย
+ฟังก์ชันนี้โหลดคลิปเสียงและ resample ให้เป็นอัตราเป้าหมาย
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -304,7 +305,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**ส่วนที่ 4: รันการอนุมาน (Inference)**
+**ส่วนที่ 4: รันการอนุมาน (inference)**
 
 ฟังก์ชันนี้รันการอนุมานด้วยโมเดลและส่งคืนผลลัพธ์ที่สร้างขึ้น
 ```python
@@ -336,7 +337,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **ส่วนที่ 5: บันทึกไฟล์ที่แปลแล้ว**
 
-ฟังก์ชันนี้บันทึกอาร์เรย์เสียงลงในไฟล์ .WAV 
+ฟังก์ชันนี้บันทึก audio array ลงในไฟล์ .WAV 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -401,14 +402,14 @@ echo "PASS: infer.py created out1.wav successfully"
 
 ### การรันเดโม Gradio UI:
 
-เมื่อคุณได้รันตัวอย่างสคริปต์พื้นฐานแล้ว ขั้นตอนต่อไปนี้จะแสดงวิธีสร้าง UI ที่มีประโยชน์ ซึ่งต่อยอดจากโค้ดที่เราเขียนไว้ และทำให้การแปลเสียงเป็นเสียงแบบสดทำได้ง่ายขึ้น
+ตอนนี้คุณได้รันตัวอย่างสคริปต์พื้นฐานแล้ว คำแนะนำต่อไปนี้จะช่วยให้คุณใช้งาน UI ที่เป็นประโยชน์ ซึ่งต่อยอดจากโค้ดที่เราเขียนไว้และทำให้การแปลภาษา speech-speech แบบสดทำได้ง่ายขึ้น
 
-#### รัน Gradio ในเครื่อง
+#### รัน Gradio แบบ Local
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-จากนั้นเปิดเว็บเบราว์เซอร์ของคุณไปที่ `http://127.0.0.1:7860` เพื่อเข้าถึง UI
+จากนั้นเปิดเว็บเบราว์เซอร์ของคุณที่ `http://127.0.0.1:7860` เพื่อเข้าถึง UI
 
 
 ### ตัวอย่าง Gradio UI:
@@ -531,11 +532,11 @@ PY
 ## ขั้นตอนถัดไป
 
 - ผสมผสานระหว่างภาษาต่าง ๆ นับสิบภาษาเพื่อการแปลที่รวดเร็ว
-- แชร์เดโมของคุณให้ผู้อื่น: เพิ่ม --share เพื่อสร้างลิงก์สาธารณะที่ทุกคนสามารถเข้าถึงได้จากระยะไกล หรือปรับใช้แบบถาวรโดยใช้ Hugging Face Spaces
+- แบ่งปันเดโมของคุณกับผู้อื่น: เพิ่ม --share เพื่อสร้างลิงก์สาธารณะที่ทุกคนสามารถเข้าถึงได้จากระยะไกล หรือนำไปใช้งานแบบถาวรโดยใช้ Hugging Face Spaces
 
 ## แหล่งข้อมูล
 
-ด้านล่างนี้คือแหล่งข้อมูลเพิ่มเติมสำหรับการเรียนรู้เกี่ยวกับการแปลเสียงเป็นเสียง:  
+ด้านล่างนี้คือแหล่งข้อมูลเพิ่มเติมเพื่อเรียนรู้เพิ่มเติมเกี่ยวกับการแปลภาษาแบบ speech-to-speech:  
 * รีโพซิทอรีอยู่ที่นี่ https://huggingface.co/facebook/seamless-m4t-v2-large 
-* งานวิจัยเชิงวิชาการที่เกี่ยวข้องกับ "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* การแชร์และปรับใช้ Gradio: [คู่มือการแชร์แอปของคุณ](https://www.gradio.app/guides/sharing-your-app) และ [ปรับใช้บน Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* งานวิจัยทางวิชาการที่เกี่ยวข้องกับ "Seamless: Multilingual Expressive and Streaming Speech Translation"
+* การแชร์และการนำ Gradio ไปใช้งาน: [คู่มือการแชร์แอปของคุณ](https://www.gradio.app/guides/sharing-your-app) และ [การนำไปใช้งานบน Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

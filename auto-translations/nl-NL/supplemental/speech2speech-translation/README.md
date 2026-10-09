@@ -16,20 +16,20 @@ SPDX-License-Identifier: MIT
 
 ## Overzicht
 
-De AMD ROCm™ software en PyTorch stack creëren samen een uniform ecosysteem voor AI op het apparaat zelf. Het werkt zowel op Windows als Linux, met officiële ondersteuning voor een breed scala aan apparaten, waaronder Ryzen™ AI APU's en Radeon™ GPU's.
+De AMD ROCm™-software en PyTorch-stack creëren een uniform ecosysteem voor on-device AI. Het werkt zowel voor Windows als Linux met officiële ondersteuning voor een breed scala aan apparaten, waaronder Ryzen™ AI APU's en Radeon™ GPU's.
 
-Dit playbook leert je hoe je spraak-naar-spraakvertaling met lage latentie, expressief en volledig privé kunt uitvoeren, geheel op de edge.
+Dit playbook leert u hoe u latency-vrije, expressieve en privé spraak-naar-spraakvertaling volledig op de edge kunt uitvoeren.
 
-## Wat je zult leren
+## Wat u zult leren
 
-- Hoe je een spraak-naar-spraakomgeving opzet
-- Hoe je Python-code schrijft om spraak-naar-spraakmodellen te laden en te gebruiken
-- Hoe je de Gradio UI uitvoert en ermee experimenteert
+- Hoe u een spraak-naar-spraak-omgeving opzet
+- Hoe u Python-code schrijft om spraak-naar-spraakmodellen te laden en te gebruiken
+- Hoe u de Gradio UI uitvoert en ermee experimenteert
 
-## Waarom real-time spraak-naar-spraakvertaling gebruiken?
+## Waarom realtime spraak-naar-spraakvertaling gebruiken?
 
 - Verwijdert wrijving tussen vertaling en taalbarrières
-- Brengt toon, emotie en intentie over zonder ongemakkelijke pauzes
+- Draagt toon, emotie en intentie over zonder ongemakkelijke pauzes
 - Maakt wereldwijde samenwerking en snellere besluitvorming mogelijk
 
 <!-- @device:halo_box,halo,stx,krk -->
@@ -40,18 +40,18 @@ Dit playbook leert je hoe je spraak-naar-spraakvertaling met lage latentie, expr
 
 <!-- @device:halo_box -->
 ## Controleren op software-updates
-> **Opmerking**: Als VS Code niet is geïnstalleerd, kun je het installeren via het Ryzen AI Developer Center.
+> **Opmerking**: Als VS Code niet is geïnstalleerd, kunt u het installeren met Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Software-vereisten installeren
+## Softwarevereisten installeren
 
-### Een virtuele omgeving aanmaken
+### Een virtuele omgeving maken
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Open op Linux een terminal en voer de volgende prompt uit om een venv aan te maken met ROCm+Pytorch al geïnstalleerd:
+Open op Linux een terminal en voer de volgende prompt uit om een venv te maken met ROCm+Pytorch al geïnstalleerd:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -65,13 +65,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Geef je gebruiker toegang tot GPU-apparaten** (log uit en weer in om dit van kracht te laten worden):
+**Geef uw gebruiker toegang tot GPU-apparaten** (log uit en weer in om dit van kracht te laten worden):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Open op Linux een terminal en voer de volgende prompt uit om een venv aan te maken:
+Open op Linux een terminal en voer de volgende prompt uit om een venv te maken:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Open op Windows een terminal in de map van je keuze en volg de commando's om een venv aan te maken met ROCm+Pytorch al geïnstalleerd:
+Open op Windows een terminal in de map van uw keuze en volg de commando's om een venv te maken met ROCm+Pytorch al geïnstalleerd:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,13 +97,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tip**: Windows-gebruikers moeten mogelijk hun PowerShell Execution Policy aanpassen (bijvoorbeeld
-> instellen op RemoteSigned of Unrestricted) voordat ze bepaalde PowerShell-commando's uitvoeren.
+> **Tip**: Windows-gebruikers moeten mogelijk hun PowerShell Execution Policy aanpassen (bijv.
+> instellen op RemoteSigned of Unrestricted) voordat ze bepaalde Powershell-commando's uitvoeren.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Open op Windows een terminal in de map van je keuze en volg de commando's om een venv aan te maken:
+Open op Windows een terminal in de map van uw keuze en volg de commando's om een venv te maken:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -113,8 +113,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tip**: Windows-gebruikers moeten mogelijk hun PowerShell Execution Policy aanpassen (bijvoorbeeld
-> instellen op RemoteSigned of Unrestricted) voordat ze bepaalde PowerShell-commando's uitvoeren.
+> **Tip**: Windows-gebruikers moeten mogelijk hun PowerShell Execution Policy aanpassen (bijv.
+> instellen op RemoteSigned of Unrestricted) voordat ze bepaalde Powershell-commando's uitvoeren.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -126,13 +126,14 @@ s2st-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @require:pytorch -->
+<!-- @prereq:hf-models-seamless-m4t-v2-large -->
 
 ### Aanvullende afhankelijkheden
 
 Installeer m4t-afhankelijkheden met pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -202,11 +203,11 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## De spraak-naar-spraak demo opzetten
+## De spraak-naar-spraak-demo opzetten
 
-#### Meer over seamless-m4t-v2
+#### Meer te weten komen over seamless-m4t-v2
 
-Bekijk de [modelkaart](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) op Hugging Face voor meer informatie.
+Bekijk de [model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) op Hugging Face voor meer informatie.
 Dit is de technische architectuur van de spraak-naar-spraakmodellen:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
@@ -214,23 +215,23 @@ Dit is de technische architectuur van de spraak-naar-spraakmodellen:
 
 #### Scripts downloaden
 
-Dit playbook bevat kant-en-klare scripts. Download ze allemaal naar dezelfde map als de omgeving die je hebt aangemaakt.
+Dit playbook bevat kant-en-klare scripts. Download ze allemaal naar dezelfde map als de omgeving die u hebt gemaakt.
 
 | Script | Beschrijving | Gebruik |
 |--------|-------------|-------|
 | [infer.py](assets/infer.py) | Basis LLM-tekstgeneratie | `python infer.py` |
-| [input1.wav](assets/input1.wav) | Voorbeeld audiobestand | N.v.t. |
-| [lang_list.py](assets/lang_list.py) | Taalondersteuningsbestand | N.v.t. |
+| [input1.wav](assets/input1.wav) | Voorbeeld audiobestand | N/A |
+| [lang_list.py](assets/lang_list.py) | Taalondersteuningsbestand | N/A |
 | [gradio_demo.py](assets/gradio_demo.py) | Intuïtieve UI voor spraakvertaling | `python gradio_demo.py --no-share` |
 
 
-### Aan de slag met infer.py
+### Beginnen met infer.py
 
-Voer het script uit door 
+Om het script uit te voeren, voert u 
 ```bash
 python infer.py
 ```
-> **Opmerking**: Je kunt enkele waarschuwingen zien. Dit is te verwachten.
+> **Opmerking**: U kunt enkele waarschuwingen zien. Dit is verwacht.
  
   
 #### Uitleg van de code
@@ -263,7 +264,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **Fragment 2: De modellen laden vanuit HuggingFace**
 
-Deze functie neemt een model-ID en downloadt het model als het nog niet is gedownload. Vervolgens retourneert het de processor en het model voor gebruik in de volgende functie.
+Deze functie neemt een model-ID aan en downloadt het model als het nog niet is gedownload. Vervolgens retourneert het de processor en het model voor de volgende functie om te gebruiken.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -282,9 +283,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Fragment 3: Het audiobestand .wav inlezen en voorbewerken**
+**Fragment 3: Invoer-audioclip .wav-bestand invoeren en voorbewerken**
 
-Deze functie laadt het audiofragment en resamplet het naar de doelsnelheid.
+Deze functie laadt de audioclip en resamplet deze naar de doelsnelheid.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -306,7 +307,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
 
 **Fragment 4: Inferentie uitvoeren**
 
-Deze functie voert inferentie uit met het model en retourneert de gegenereerde output.
+Deze functie voert inferentie uit met het model en retourneert de gegenereerde uitvoer.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -399,19 +400,19 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### De Gradio UI demo uitvoeren:
+### De Gradio UI-demo uitvoeren:
 
-Nu je een basisvoorbeeldscript hebt uitgevoerd, laten de volgende instructies zien hoe je een handige UI kunt gebruiken die voortbouwt op de code die we hebben geschreven en live spraak-naar-spraakvertaling eenvoudig maakt.
+Nu u een basisscriptvoorbeeld hebt uitgevoerd, bieden de volgende instructies een handige UI die voortbouwt op de code die we hebben geschreven en live spraak-naar-spraakvertaling eenvoudig maakt.
 
 #### Gradio lokaal uitvoeren
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Open vervolgens je webbrowser op `http://127.0.0.1:7860` om toegang te krijgen tot de UI.
+Open vervolgens uw webbrowser op `http://127.0.0.1:7860` om toegang te krijgen tot de UI.
 
 
-### Voorbeeld van de Gradio UI:
+### Gradio UI-voorbeeld:
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
@@ -531,11 +532,11 @@ PY
 ## Volgende stappen
 
 - Combineer en wissel tussen tientallen talen voor snelle vertaling. 
-- Deel je demo met anderen: voeg --share toe om een openbare link te maken die iedereen op afstand kan gebruiken, of implementeer permanent via Hugging Face Spaces
+- Deel uw demo met anderen: Voeg --share toe om een publieke link te maken die iedereen op afstand kan benaderen, of implementeer permanent met behulp van Hugging Face Spaces
 
 ## Bronnen
 
-Hieronder vind je enkele aanvullende bronnen om meer te leren over spraak-naar-spraakvertaling:  
-* De repo is hier te vinden: https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Academisch onderzoek gerelateerd aan "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Gradio delen en implementeren: [Handleiding voor het delen van je app](https://www.gradio.app/guides/sharing-your-app) en [Implementeren op Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+Hieronder vindt u enkele aanvullende bronnen om meer te leren over spraak-naar-spraakvertaling:  
+* De repo bevindt zich hier https://huggingface.co/facebook/seamless-m4t-v2-large 
+* Onderzoeksacademia gerelateerd aan "Seamless: Multilingual Expressive and Streaming Speech Translation"
+* Gradio delen en implementeren: [Handleiding voor het delen van uw app](https://www.gradio.app/guides/sharing-your-app) en [Implementeren naar Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

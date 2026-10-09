@@ -9,52 +9,52 @@ SPDX-License-Identifier: MIT
 > **Traducere automată.** Această pagină a fost tradusă automat din limba engleză și nu a fost revizuită de o persoană. Aceasta poate conține erori, iar anumite instrucțiuni, comenzi, descărcări, disponibilitatea produselor sau alt conținut pot varia în funcție de limbă sau regiune. În cazul oricărei neconcordanțe sau discrepanțe, versiunea originală în limba engleză a playbook-ului prevalează.
 <!-- auto-translated-disclaimer:end -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## Prezentare generală
 
-Acest playbook arată cum să realizați fine-tuning local pentru un model de limbaj folosind Unsloth pe hardware AMD.
+Acest playbook arată cum să ajustezi fin (fine-tune) un model de limbaj local cu Unsloth pe hardware AMD.
 
-Folosește un exemplu scurt de Supervised Fine-Tuning (SFT) cu adaptoare LoRA pe `unsloth/gemma-4-E4B-it`, utilizând un subset al setului de date `mlabonne/FineTome-100k`. Scopul este să vă ofere un flux de lucru simplu, de la un capăt la altul, care acoperă configurarea, antrenarea, inferența și salvarea rezultatului fine-tuned.
+Folosește un exemplu scurt de Supervised Fine-Tuning (SFT) cu adaptoare LoRA pe `unsloth/gemma-4-E4B-it`, utilizând un subset al setului de date `mlabonne/FineTome-100k`. Scopul este să îți ofere un flux de lucru simplu, de la cap la coadă, care acoperă configurarea, antrenarea, inferența și salvarea rezultatului ajustat fin.
 
-Exemplul este conceput pentru a fi practic și ușor de modificat, astfel încât să îl puteți folosi ca punct de plecare pentru propriile seturi de date și modele.
+Exemplul este conceput să fie practic și ușor de modificat, astfel încât să îl poți folosi ca punct de plecare pentru propriile seturi de date și modele.
 
-## Ce veți învăța
+## Ce vei învăța
 
-- Cum să configurați mediul Unsloth
-- Cum să realizați fine-tuning pentru un LLM folosind SFT cu Unsloth
-- Cum să salvați rezultatul fine-tuned în stocarea locală
+- Cum să configurezi mediul Unsloth
+- Cum să ajustezi fin un LLM folosind SFT cu Unsloth
+- Cum să salvezi rezultatul ajustat fin în stocarea locală
 
 <!-- @device:halo,stx,krk -->
-> **Notă:** Tehnicile de fine-tuning din acest playbook necesită cel puțin **64 GB de RAM de sistem**, din care cel puțin **24 GB disponibili pentru GPU** (cei 24 GB fac parte din cei 64 GB, nu se adaugă la aceștia).
+> **Notă:** Tehnicile de ajustare fină din acest playbook necesită cel puțin **64 GB de memorie RAM de sistem**, din care cel puțin **24 GB disponibili pentru GPU** (cei 24 GB fac parte din cei 64 GB, nu se adaugă suplimentar).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Notă:** Tehnicile de fine-tuning din acest playbook necesită cel puțin **24 GB de memorie GPU totală** și **32 GB de RAM de sistem**.
-> - Pe Windows, memoria GPU totală combină VRAM-ul dedicat al plăcii grafice cu memoria GPU partajată (împrumutată din RAM-ul de sistem).
-> - Prin urmare, plăcile cu mai puțin de 24 GB de VRAM dedicat pot totuși rula acest playbook folosind memoria GPU partajată pentru a compensa diferența.
+> **Notă:** Tehnicile de ajustare fină din acest playbook necesită cel puțin **24 GB de memorie GPU totală** și **32 GB de memorie RAM de sistem**.
+> - Pe Windows, memoria GPU totală combină VRAM-ul dedicat al plăcii grafice cu memoria GPU partajată (împrumutată din memoria RAM de sistem).
+> - Prin urmare, plăcile cu mai puțin de 24 GB de VRAM dedicat pot rula totuși acest playbook folosind memoria GPU partajată pentru a compensa diferența.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Notă:** Tehnicile de fine-tuning din acest playbook necesită o placă grafică cu cel puțin **24 GB de memorie GPU dedicată** și **32 GB de RAM de sistem**.
+> **Notă:** Tehnicile de ajustare fină din acest playbook necesită o placă grafică cu cel puțin **24 GB de memorie GPU dedicată** și **32 GB de memorie RAM de sistem**.
 > - Pe Linux, antrenarea rulează în întregime în VRAM-ul dedicat al plăcii grafice.
-> - Nu se recurge la memoria GPU partajată (RAM-ul de sistem) atunci când VRAM-ul se epuizează.
-> - Plăcile cu mai puțin de 24 GB de VRAM dedicat vor rămâne fără memorie în timpul antrenării pe Linux, chiar dacă sistemul are suficient RAM.
+> - Nu se trece la memoria GPU partajată (RAM de sistem) atunci când VRAM-ul se epuizează.
+> - Plăcile cu mai puțin de 24 GB de VRAM dedicat vor rămâne fără memorie în timpul antrenării pe Linux, chiar dacă sistemul are suficientă memorie RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## De ce Unsloth?
 
-Unsloth face ca fine-tuning-ul LLM să fie mai ușor de rulat pe hardware local, reducând utilizarea memoriei și accelerând antrenarea comparativ cu o configurare standard.
+Unsloth face ca ajustarea fină a LLM-urilor să fie mai ușor de rulat pe hardware local, reducând utilizarea memoriei și accelerând antrenarea comparativ cu o configurare standard.
 
-În acest playbook, folosim Unsloth împreună cu **SFT bazat pe LoRA**. Aceasta înseamnă că modelul de bază rămâne în mare parte înghețat, în timp ce un set mult mai mic de ponderi de adaptor este antrenat. Acest lucru se potrivește bine cu dezvoltarea locală, deoarece este mai ușor decât fine-tuning-ul complet și mai rapid pentru iterații.
+În acest playbook, folosim Unsloth împreună cu **SFT bazat pe LoRA**. Asta înseamnă că modelul de bază rămâne în mare parte înghețat, în timp ce un set mult mai mic de ponderi de adaptor este antrenat. Aceasta este o potrivire bună pentru dezvoltarea locală deoarece este mai ușoară decât ajustarea fină completă și mai rapidă pentru iterare.
 
-Unsloth acceptă, de asemenea, alte abordări de antrenare, inclusiv QLoRA și fluxuri de lucru de învățare prin întărire. Acest playbook se concentrează mai întâi pe calea cea mai simplă: un exemplu mic de fine-tuning LoRA pe care utilizatorii îl pot rula, înțelege și extinde.
+Unsloth susține de asemenea și alte abordări de antrenare, inclusiv QLoRA și fluxuri de lucru de învățare prin întărire (reinforcement learning). Acest playbook se concentrează mai întâi pe cea mai simplă cale: un exemplu mic de ajustare fină LoRA pe care utilizatorii îl pot rula, înțelege și extinde.
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Configurarea memoriei
@@ -63,20 +63,22 @@ Unsloth acceptă, de asemenea, alte abordări de antrenare, inclusiv QLoRA și f
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Verificați actualizările software
-> **Notă**: Dacă VS Code nu este instalat, îl puteți instala cu Ryzen AI Developer Center.
+## Verificarea actualizărilor de software
+> **Notă**: Dacă VS Code nu este instalat, îl poți instala cu Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalarea cerințelor software preliminare
+## Instalarea cerințelor preliminare de software
+
+<!-- @prereq:hf-models-gemma-4-e4b-it,hf-datasets-finetome-100k -->
 
 ### Crearea unui mediu virtual
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Deschideți un terminal și creați un venv cu AMD ROCm™ software și PyTorch deja instalate:
-<!-- @test:id=create-venv timeout=120 -->
+Deschide un terminal și creează un venv cu software-ul AMD ROCm™ și PyTorch deja instalate:
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 python3 -m venv unsloth-env --system-site-packages
@@ -87,13 +89,13 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Acordați accesul utilizatorului dumneavoastră la dispozitivele GPU** (deconectați-vă și reconectați-vă pentru ca aceasta să aibă efect):
+**Acordă-i utilizatorului tău acces la dispozitivele GPU** (deconectează-te și reconectează-te pentru ca aceasta să aibă efect):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Deschideți un terminal și creați un venv:
+Deschide un terminal și creează un venv:
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -110,7 +112,7 @@ source unsloth-env/bin/activate
 > **Notă:** Python 3.13 este necesar pentru Windows.
 
 <!-- @device:halo_box -->
-Deschideți un terminal PowerShell și creați un mediu virtual:
+Deschide un terminal PowerShell și creează un mediu virtual:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env --system-site-packages
@@ -121,7 +123,7 @@ python -m venv unsloth-env --system-site-packages
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Deschideți un terminal PowerShell și creați un mediu virtual:
+Deschide un terminal PowerShell și creează un mediu virtual:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env
@@ -135,9 +137,9 @@ python -m venv unsloth-env
 ### Instalarea dependențelor de bază
 <!-- @require:driver -->
 
-> **Important:** Unsloth nu acceptă încă versiunea PyTorch 2.13 livrată cu ROCm 10. Pentru acest playbook, instalați **ROCm 7.14 cu PyTorch 2.12** folosind comenzile de mai jos. Nu utilizați pachetele ROCm 10 / PyTorch 2.13.
+> **Important:** Unsloth nu susține încă varianta PyTorch 2.13 livrată cu ROCm 10. Pentru acest playbook, instalează **ROCm 7.14 cu PyTorch 2.12** folosind comenzile de mai jos. Nu folosi pachetele ROCm 10 / PyTorch 2.13.
 
-**Instalați PyTorch cu suport AMD ROCm™ software** în mediul virtual creat:
+**Instalează PyTorch cu suport pentru software-ul AMD ROCm™** în mediul virtual creat:
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
@@ -179,7 +181,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "tor
 <!-- @test:end -->
 <!-- @device:end -->
 
-Pentru alte dispozitive, consultați [Documentația ROCm 7.14](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html) pentru instrucțiuni complete.
+Pentru alte dispozitive, consultă [ROCm 7.14 Documentation](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html) pentru instrucțiuni complete.
 
 <!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -215,10 +217,10 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git" triton
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Notă:** În timpul importului, Unsloth poate testa căi opționale de accelerare `bitsandbytes`. Pe unele versiuni de ROCm, este posibil să vedeți un mesaj precum `bitsandbytes library load error: Configured ROCm binary not found`. Acest playbook folosește fine-tuning LoRA standard cu `optim="adamw_torch"`, deci nu depindem de optimizatorul `bitsandbytes` sau de QLoRA pe 4 biți. Acest mesaj poate fi ignorat în siguranță.
+> **Notă:** În timpul importului, Unsloth poate sonda căi opționale de accelerare `bitsandbytes`. Pe unele versiuni de ROCm, poți vedea un mesaj precum `bitsandbytes library load error: Configured ROCm binary not found`. Acest playbook folosește ajustare fină LoRA standard cu `optim="adamw_torch"`, așadar nu ne bazăm pe optimizatorul `bitsandbytes` sau pe QLoRA pe 4 biți. Acest mesaj poate fi ignorat în siguranță.
 
 <!-- @os:windows -->
-> **Notă:** Pe Windows ROCm, Unsloth va afișa mai multe avertismente la pornire — consultați [Avertismente cunoscute](#known-warnings) mai jos. Toate acestea pot fi ignorate în siguranță; antrenarea funcționează corect.
+> **Notă:** Pe Windows ROCm, Unsloth va afișa câteva avertismente la pornire — vezi [Known Warnings](#known-warnings) mai jos. Toate acestea pot fi ignorate în siguranță; antrenarea funcționează corect.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -241,11 +243,11 @@ print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
-## Descărcați scriptul de fine-tuning Unsloth
+## Descarcă scriptul de ajustare fină Unsloth
 
-În loc să executați manual fiecare pas, acest playbook oferă un script curat, de la un capăt la altul, aici: [test_unsloth.py](assets/test_unsloth.py).
+În loc să execuți manual fiecare pas, acest playbook oferă un script curat, de la cap la coadă, aici: [test_unsloth.py](assets/test_unsloth.py).
 
-Rulați următorul cod pentru a executa scriptul:
+Rulează următorul cod pentru a executa scriptul:
 
 ```bash
 python test_unsloth.py
@@ -278,20 +280,20 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-Restul playbook-ului va parcurge conceptual fiecare pas major al scriptului.
+Restul playbook-ului va parcurge conceptual fiecare pas major al scriptului. 
 
 ## Cum funcționează
 
-Scriptul test_unsloth.py realizează următorii pași:
-* **Încărcare model**: Încarcă unsloth/gemma-4-E4B-it folosind FastModel.
-* **Pregătire date**: Standardizează setul de date (de ex., FineTome-100k) și aplică șablonul de chat Gemma-4.
-* **Aplicare LoRA**: Adaugă adaptoare la modulele de limbaj, atenție și MLP pentru o antrenare eficientă.
-* **Antrenare**: Folosește SFTTrainer cu mascarea pierderilor doar pe răspunsuri.
+Scriptul test_unsloth.py efectuează următorii pași:
+* **Încărcarea modelului**: Încarcă unsloth/gemma-4-E4B-it folosind FastModel.
+* **Pregătirea datelor**: Standardizează setul de date (de exemplu, FineTome-100k) și aplică șablonul de chat Gemma-4.
+* **Aplicarea LoRA**: Adaugă adaptoare modulelor de limbaj, atenție și MLP pentru o antrenare eficientă.
+* **Antrenare**: Folosește SFTTrainer cu mascarea pierderii doar pe răspunsuri (response-only loss masking).
 * **Inferență**: Rulează un test rapid de generare pentru a verifica performanța.
 * **Salvare**: Exportă adaptoarele LoRA local.
-## Configurare cheie
+## Configurarea cheilor
 
-Puteți modifica următoarele constante pentru a personaliza rularea:
+Puteți modifica următoarele constante pentru a personaliza execuția:
 
 ```python
 MODEL_NAME = "unsloth/gemma-4-E4B-it"
@@ -310,17 +312,17 @@ Folosim un subset din:
 ```text
 mlabonne/FineTome-100k
 ```
-Setul de date este:
+Setul de date este: 
 * Convertit în format de chat
 * Procesat folosind șablonul de chat Gemma-4
 * Curățat pentru a elimina token-urile BOS duplicate
 
 ## Antrenarea modelului
 
-Scriptul rulează un demo scurt de antrenare, cu următorii parametri:
+Scriptul rulează o scurtă demonstrație de antrenare, cu următorii parametri:
 - ~50 de pași
-- Dimensiune mică a batch-ului
-- Acumulare de gradient
+- Dimensiune mică a lotului
+- Acumulare de gradienți
 
 În timpul antrenării, veți vedea jurnale precum:
 
@@ -370,10 +372,10 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end -->
 
-### Salvarea modelului îmbinat (pentru vLLM)
+### Salvarea modelului îmbinat (pentru vLLM) 
 
 <!-- @os:windows -->
-> **Notă:** vLLM nu suportă Windows. Pentru a implementa modelul dvs. reglat fin pe Windows, utilizați llama.cpp (consultați [Exportați GGUF](#export-gguf-for-llamacpp) mai jos) sau transferați modelul îmbinat pe o mașină Linux care rulează vLLM.
+> **Notă:** vLLM nu acceptă Windows. Pentru a implementa modelul dvs. ajustat fin pe Windows, utilizați llama.cpp (consultați [Export GGUF](#export-gguf-for-llamacpp) mai jos) sau transferați modelul îmbinat către o mașină Linux care rulează vLLM.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -415,7 +417,7 @@ print("PASS: Merged model output looks correct")
 ```
 <!-- @test:end -->
 
-### Exportați GGUF (pentru llama.cpp)
+### Export GGUF (pentru llama.cpp)
 
 Convertiți direct în GGUF pentru inferență locală:
 ```python
@@ -429,10 +431,10 @@ Aceste avertismente sunt afișate de Unsloth la pornire pe Windows ROCm și pot 
 
 | Avertisment | Motiv | Poate fi ignorat în siguranță? |
 |---|---|---|
-| `bitsandbytes library load error` | bitsandbytes nu are un build pentru Windows ROCm | Da — acest playbook folosește `adamw_torch`, nu bnb |
-| `No ROCm platform found for torch.distributed` | ROCm pe Windows nu are antrenare distribuită | Da — antrenarea pe un singur GPU nu este afectată |
-| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth semnalează build-urile non-Linux | Da — Windows ROCm funcționează pentru SFT pe un singur GPU |
-| `triton is not available` | Triton nu are build pentru Windows | Da — Unsloth revine la kernelurile PyTorch |
+| `bitsandbytes library load error` | bitsandbytes nu are o versiune compilată pentru Windows ROCm | Da — acest playbook folosește `adamw_torch`, nu bnb |
+| `No ROCm platform found for torch.distributed` | ROCm pe Windows nu dispune de antrenare distribuită | Da — antrenarea pe un singur GPU nu este afectată |
+| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth semnalează versiunile non-Linux | Da — Windows ROCm funcționează pentru SFT pe un singur GPU |
+| `triton is not available` | Triton nu are o versiune pentru Windows | Da — Unsloth revine la nucleele PyTorch |
 
 Antrenarea va continua corect în ciuda acestor avertismente.
 <!-- @os:end -->
@@ -440,16 +442,16 @@ Antrenarea va continua corect în ciuda acestor avertismente.
 ## Pașii următori
 - Încercați [Unsloth Studio](https://unsloth.ai/docs/new/studio), o interfață grafică intuitivă pentru Unsloth
 - Antrenați pe propriile seturi de date specifice
-- Încercați reglarea fină cu hiperparametri diferiți
+- Încercați ajustarea fină cu diferiți hiperparametri
 - Implementați cu vLLM sau llama.cpp
-- Încercați QLoRA pentru o configurație cu memorie redusă
+- Încercați QLoRA pentru o configurație cu consum redus de memorie
 
 ## Resurse
 
-Mai jos găsiți câteva resurse suplimentare pentru a afla mai multe despre Unsloth și reglarea fină:
+Mai jos sunt câteva resurse suplimentare pentru a afla mai multe despre Unsloth și ajustarea fină:
 
 * [Documentația Unsloth](https://docs.unsloth.ai)
 
 * [Unsloth GitHub](https://github.com/unslothai/unsloth)
 
-* [Ghidul de reglare fină Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)
+* [Ghidul de ajustare fină Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)

@@ -16,42 +16,42 @@ SPDX-License-Identifier: MIT
 
 ## Visão Geral
 
-Este tutorial fornece exemplos passo a passo para o ajuste fino (fine-tuning) de um modelo de linguagem de grande escala (LLM) com PyTorch e ROCm. Aborda várias técnicas, desde o ajuste fino padrão até estratégias de ajuste fino eficiente em parâmetros (Parameter-Efficient Fine-Tuning, PEFT) com eficiência de memória, para que possa adaptar facilmente os modelos às suas necessidades.
+Este tutorial fornece exemplos passo a passo para o ajuste fino (fine-tuning) de um modelo de linguagem de grande dimensão (LLM) com PyTorch e ROCm. Abrange várias técnicas, desde o ajuste fino padrão até estratégias de ajuste fino eficiente em parâmetros (Parameter-Efficient Fine-Tuning, PEFT), com uso eficiente de memória, para que possa adaptar facilmente os modelos às suas necessidades.
 
-**Modelo Utilizado**: google/gemma-3-4b-it  *(consulte [Ativar autenticação HF](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) se for um modelo restrito)*  
-**Hardware**: GPU AMD Radeon™ com suporte para ROCm  
+**Modelo Utilizado**: google/gemma-3-4b-it (script QLoRA: openai/gpt-oss-20b)  *(ver [Ativar a autenticação HF](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) se for um modelo restrito)*  
+**Hardware**: GPU AMD Radeon™ com suporte ROCm  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
 > **Nota:** 
-> - O ajuste fino completo requer, no mínimo, **64 GB de RAM do sistema**, com, no mínimo, **32 GB disponíveis para a GPU** (os 32 GB fazem parte dos 64 GB, e não são adicionais a estes).
-> - Também pode experimentar outras arquiteturas de modelo, incluindo o **GPT-OSS-20B**, substituindo o modelo nos scripts de treino fornecidos.
+> - O ajuste fino completo requer, no mínimo, **64 GB de RAM do sistema**, com pelo menos **32 GB disponíveis para a GPU** (os 32 GB fazem parte dos 64 GB, não são adicionais a estes).
+> - Também pode experimentar outras arquiteturas de modelos, incluindo o **GPT-OSS-20B**, substituindo o modelo nos scripts de treino fornecidos.
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **Nota:** O ajuste fino com LoRA e QLoRA requer, no mínimo, **32 GB de RAM do sistema**, com, no mínimo, **16 GB disponíveis para a GPU** (os 16 GB fazem parte dos 32 GB, e não são adicionais a estes).
+> **Nota:** O ajuste fino com LoRA e QLoRA requer, no mínimo, **32 GB de RAM do sistema**, com pelo menos **16 GB disponíveis para a GPU** (os 16 GB fazem parte dos 32 GB, não são adicionais a estes).
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Nota:** O ajuste fino com LoRA requer, no mínimo, **32 GB de RAM do sistema**, com, no mínimo, **16 GB disponíveis para a GPU** (os 16 GB fazem parte dos 32 GB, e não são adicionais a estes).
+> **Nota:** O ajuste fino com LoRA requer, no mínimo, **32 GB de RAM do sistema**, com pelo menos **16 GB disponíveis para a GPU** (os 16 GB fazem parte dos 32 GB, não são adicionais a estes).
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Nota:** O ajuste fino com LoRA e QLoRA requer uma placa gráfica com, no mínimo, **16 GB de memória de GPU dedicada** e **32 GB de RAM do sistema**.
+> **Nota:** O ajuste fino com LoRA e QLoRA requer uma placa gráfica com, pelo menos, **16 GB de memória de GPU dedicada** e **32 GB de RAM do sistema**.
 > - No Linux, o treino é executado inteiramente na VRAM dedicada da placa gráfica.
 > - Não recorre à memória de GPU partilhada (RAM do sistema) quando a VRAM se esgota.
-> - Placas com menos de 16 GB de VRAM dedicada ficarão sem memória durante o treino no Linux, mesmo que o sistema tenha bastante RAM.
+> - As placas com menos de 16 GB de VRAM dedicada ficarão sem memória durante o treino no Linux, mesmo que o sistema tenha bastante RAM.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Nota:** O ajuste fino com LoRA requer, no mínimo, **16 GB de memória de GPU total** e **32 GB de RAM do sistema**.
-> - No Windows, a memória de GPU total combina a VRAM dedicada da placa gráfica com a memória de GPU partilhada (obtida a partir da RAM do sistema).
-> - Por isso, placas com menos de 16 GB de VRAM dedicada ainda conseguem executar este guia, utilizando a memória de GPU partilhada para compensar a diferença.
+> **Nota:** O ajuste fino com LoRA requer, no mínimo, **16 GB de memória total de GPU** e **32 GB de RAM do sistema**.
+> - No Windows, a memória total da GPU combina a VRAM dedicada da placa gráfica com a memória de GPU partilhada (retirada da RAM do sistema).
+> - Assim, as placas com menos de 16 GB de VRAM dedicada ainda conseguem executar este manual de procedimentos, utilizando memória de GPU partilhada para compensar a diferença.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -76,6 +76,11 @@ Este tutorial fornece exemplos passo a passo para o ajuste fino (fine-tuning) de
 
 ## Instalar os Pré-requisitos de Software
 
+<!-- @prereq:hf-models-gemma-3-4b-it,hf-datasets-databricks-dolly-15k -->
+<!-- @os:linux -->
+<!-- @prereq:hf-datasets-english-quotes -->
+<!-- @os:end -->
+
 #### Criar um Ambiente Virtual
 
 <!-- @os:linux -->
@@ -92,7 +97,7 @@ source finetune-venv/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Conceda ao seu utilizador acesso aos dispositivos GPU** (termine e volte a iniciar sessão para que isto tenha efeito):
+**Conceda ao seu utilizador acesso aos dispositivos GPU** (termine sessão e volte a iniciá-la para que esta alteração tenha efeito):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -146,7 +151,7 @@ pip install transformers==5.10.1 safetensors==0.6.2 accelerate peft trl bitsandb
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** Apenas os pacotes principais são testados e suportados aqui. **O bitsandbytes não é bem suportado no Windows**, pelo que a instalação no Windows o omite; utilize LoRA ou o ajuste fino completo no Windows (o QLoRA requer bitsandbytes e destina-se ao Linux).
+**Windows:** Aqui, apenas os pacotes principais foram testados e são suportados. **O bitsandbytes não é bem suportado no Windows**, pelo que a instalação no Windows o omite; utilize LoRA ou ajuste fino completo no Windows (o QLoRA requer o bitsandbytes e destina-se ao Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
 pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
@@ -154,12 +159,12 @@ pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate p
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Ativar autenticação HF (modelos restritos, personalizados ou não pré-instalados)
+#### Ativar a autenticação HF (modelos restritos, personalizados ou não pré-instalados)
 
-Neste exemplo utilizamos o **google/gemma-3-4b-it**, que é um modelo **restrito** (gated). Tem de aceitar os termos do modelo no Hugging Face e depois autenticar-se para que os scripts de treino o possam transferir.
+Neste exemplo, utilizamos o **google/gemma-3-4b-it**, que é um modelo **restrito** (gated). Tem de aceitar os termos do modelo no Hugging Face e, em seguida, autenticar-se para que os scripts de treino o possam transferir.
 
-1. **Aceite a licença:** Abra [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), inicie sessão (ou crie uma conta) e aceite a licença/termos na página do modelo (por exemplo, "Agree and access repository").
-2. **Instale e inicie sessão:** Instale a CLI do Hugging Face e execute depois o início de sessão padrão:
+1. **Aceitar a licença:** Abra [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), inicie sessão (ou crie uma conta) e aceite a licença/termos na página do modelo (por exemplo, “Agree and access repository”).
+2. **Instalar e iniciar sessão:** Instale a CLI do Hugging Face e execute depois o início de sessão padrão:
 
 ```bash
 pip install huggingface_hub
@@ -265,11 +270,11 @@ sys.exit(r.returncode)
 
 ## Compreender as Técnicas
 
-### O Que É o LoRA?
+### O Que é o LoRA?
 
-O **LoRA (Low-Rank Adaptation)** mantém o modelo base congelado e treina apenas pequenas matrizes "adaptadoras" que são adicionadas a determinadas camadas. 
+O **LoRA (Low-Rank Adaptation)** mantém o modelo base congelado e apenas treina pequenas matrizes "adaptadoras" que são adicionadas a determinadas camadas. 
 
-- **A ideia principal**: em vez de atualizar uma enorme matriz de pesos com milhões de parâmetros, aprendemos uma atualização de baixa característica (rank) (duas matrizes pequenas cujo produto tem muito menos parâmetros). Isto proporciona uma grande redução nos parâmetros treináveis e na VRAM, mantendo, ao mesmo tempo, a maior parte da qualidade do ajuste fino completo.
+- **A ideia principal**: em vez de atualizar uma matriz de pesos enorme com milhões de parâmetros, aprendemos uma atualização de baixa ordem (duas matrizes pequenas cujo produto tem muito menos parâmetros). Isto traduz-se numa grande redução dos parâmetros treináveis e da VRAM, mantendo a maior parte da qualidade do ajuste fino completo.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -282,9 +287,9 @@ W_updated = W + B × A
 # Total: 262K params (98% reduction!)
 ```
 
-### O Que É o QLoRA?
+### O Que é o QLoRA?
 
-O **QLoRA** combina a **quantização de 4 bits** com o **LoRA**. O modelo base é carregado em 4 bits (grande poupança de memória), e apenas os adaptadores LoRA são treinados com maior precisão. Assim, obtém a eficiência de parâmetros do LoRA aliada a uma VRAM muito inferior, com uma pequena perda de qualidade em comparação com o LoRA de precisão total. Note-se que a quantização de 4 bits pode causar instabilidades numéricas (picos de perda ou NaNs), pelo que os utilizadores podem preferir frequentemente o **LoRA** se houver VRAM suficiente disponível.
+O **QLoRA** combina a **quantização de 4 bits** com o **LoRA**. O modelo base é carregado em 4 bits (grande poupança de memória), e apenas os adaptadores LoRA são treinados com maior precisão. Assim, obtém a eficiência de parâmetros do LoRA, juntamente com uma VRAM muito mais reduzida, com uma pequena perda de qualidade em comparação com o LoRA de precisão total. Note que a quantização de 4 bits pode causar instabilidades numéricas (picos de perda ou NaNs), pelo que os utilizadores poderão preferir frequentemente o **LoRA** se houver VRAM suficiente disponível.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -292,52 +297,52 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **Nota**: Para modelos base MXFP4 como o `openai/gpt-oss-20b`, recomendamos utilizar **LoRA** (`train_lora.py`) em vez de QLoRA. O caminho de 4 bits do `bitsandbytes` no script QLoRA normalmente desquantiza os pesos MXFP4 para BF16, pelo que a execução se comporta como um LoRA padrão. O MXFP4 nativo requer um `bitsandbytes` compilado a partir do código-fonte, juntamente com uma pilha correspondente de Transformers/Triton/kernels. Consulte a [documentação MXFP4 do Transformers](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Nota**: Para modelos base MXFP4 como `openai/gpt-oss-20b`, recomendamos a utilização do **LoRA** (`train_lora.py`) em vez do QLoRA. O caminho de 4 bits do `bitsandbytes` utilizado no script QLoRA normalmente desquantiza os pesos MXFP4 para BF16, pelo que a execução se comporta como um LoRA padrão. O MXFP4 nativo requer que o `bitsandbytes` seja compilado a partir do código-fonte, juntamente com uma stack correspondente de Transformers/Triton/kernels. Consulte a [documentação MXFP4 do Transformers](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
-### 2. Escolha o Seu Método
+### 2. Escolha o seu Método
 
-| Método | Memória | Velocidade | Qualidade | Melhor Para |
+| Método | Memória | Velocidade | Qualidade | Mais Indicado Para |
 |--------|--------|-------|---------|----------|
-| **QLoRA** (apenas Linux) | 12-16GB | Mais rápido | 90-95% | Baixo uso de memória |
+| **QLoRA** (apenas Linux) | 12-16GB | Mais rápido | 90-95% | Baixa Utilização de Memória |
 | **LoRA** | 24-32GB | Rápido | 95-98% | Abordagem equilibrada |
 | **Full** | 80GB+ | Mais lento | 100% | Qualidade máxima |
 
 ### 3. Executar o Treino
 
 **Conjunto de dados e o que o modelo aprende**  
-Os scripts transformam o conjunto de dados em exemplos de chat. Por exemplo, o script QLoRA utiliza **Abirate/english_quotes**: cada exemplo torna-se num par utilizador-assistente como:
+Os scripts transformam o conjunto de dados em exemplos de chat. Por exemplo, o script QLoRA utiliza **Abirate/english_quotes**: cada exemplo torna-se um par utilizador–assistente, como:
 
 - **Utilizador:** “Dá-me uma citação sobre: &lt;tag&gt;”
 - **Assistente:** “&lt;citação&gt; – &lt;autor&gt;”
 
-O ajuste fino ensina o modelo a responder a pedidos de citações sobre um tópico e a devolvê-las no formato `<quote text> - <author>`. Os scripts de LoRA e ajuste fino completo utilizam **databricks/databricks-dolly-15k** (pares gerais de instrução/resposta), pelo que a tarefa exata varia consoante o script; a ideia é a mesma - adaptar o modelo ao conjunto de dados e formato escolhidos.
+O ajuste fino ensina o modelo a responder a pedidos de citações sobre um determinado tema e a devolvê-las no formato `<quote text> - <author>`. Os scripts de LoRA e de ajuste fino completo utilizam **databricks/databricks-dolly-15k** (pares genéricos de instrução/resposta), pelo que a tarefa exata varia consoante o script; a ideia é a mesma - adaptar o modelo ao conjunto de dados e formato escolhidos.
 
-Abaixo encontra-se um resumo dos métodos de treino disponíveis. Cada método tem uma ligação para o respetivo script e uma breve descrição para ajudar a escolher a abordagem certa.
+Segue-se um resumo dos métodos de treino disponíveis. Cada método inclui uma ligação para o respetivo script e uma breve descrição para ajudar a escolher a abordagem certa.
 
 | Script                           | Método            | Descrição                                                                                                         | VRAM Típica | Recomendado Para                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
 | [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Treina pequenas matrizes adaptadoras enquanto congela o modelo base. 3–5x mais rápido; ~95–98% da qualidade total.                         | 24–32GB      | Utilizadores avançados; múltiplos adaptadores; mais VRAM    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(apenas Linux)*             | **QLoRA**       | Quantização de 4 bits + adaptadores LoRA. Menor uso de memória, mais rápido, pequena perda de qualidade. Requer `bitsandbytes` (apenas Linux).                            | 12–16GB      | A maioria dos utilizadores; experiências rápidas; VRAM limitada      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Ajuste Fino Completo** | Atualiza todos os parâmetros do modelo. Qualidade máxima; uso máximo de memória e computação.                                    | 40GB+        | Qualidade máxima; investigação; VRAM elevada           |
+| [`train_qlora.py`](assets/train_qlora.py)  *(apenas Linux)*             | **QLoRA**       | Quantização de 4 bits + adaptadores LoRA. Menor utilização de memória, mais rápido, ligeira perda de qualidade. Requer `bitsandbytes` (apenas Linux).                            | 12–16GB      | A maioria dos utilizadores; experiências rápidas; VRAM limitada      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Ajuste Fino Completo** | Atualiza todos os parâmetros do modelo. Qualidade máxima; maior utilização de memória e processamento.                                    | 40GB+        | Qualidade máxima; investigação; VRAM elevada           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Nota:** O ajuste fino completo (`train_full_finetuning.py`) pode exigir mais de 64GB de RAM do sistema e pode não ser viável neste dispositivo. Considere usar LoRA ou QLoRA em alternativa.
+> **Nota:** O ajuste fino completo (`train_full_finetuning.py`) pode exigir mais de 64GB de RAM do sistema e pode não ser viável neste dispositivo. Considere utilizar LoRA ou QLoRA em alternativa.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Nota:** O ajuste fino completo (`train_full_finetuning.py`) pode exigir mais de 64GB de RAM do sistema e pode não ser viável neste dispositivo. Considere usar LoRA em alternativa.
+> **Nota:** O ajuste fino completo (`train_full_finetuning.py`) pode exigir mais de 64GB de RAM do sistema e pode não ser viável neste dispositivo. Considere utilizar LoRA em alternativa.
 <!-- @os:end -->
 <!-- @device:end -->
 
-Basta selecionar o seu `Training method` (método de treino) preferido, transferir o script correspondente e executá-lo com o comando, mantendo o seu ambiente virtual ativado:
+Basta selecionar o `Training method` pretendido, transferir o script correspondente e executá-lo através do comando, mantendo o seu ambiente virtual ativado: 
 
 ```python
 python3 train_<method_name>.py.
 ```
 
-## Utilizar o Seu Modelo Ajustado
+## Utilizar o seu Modelo Ajustado
 
 ### Após o Ajuste Fino Completo
 
@@ -366,11 +371,11 @@ from transformers import AutoTokenizer
 
 # Load model with LoRA or QLoRA adapters
 model = AutoPeftModelForCausalLM.from_pretrained(
-    "output-gemma-3-4b-it-qlora",   # or "output-gemma-3-4b-lora" depending on your training
+    "output-gpt-oss-20b-qlora",   # or "output-gemma-3-4b-it-lora" depending on your training
     device_map="auto",
     torch_dtype="auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-it-qlora")
+tokenizer = AutoTokenizer.from_pretrained("output-gpt-oss-20b-qlora")
 
 # Generate text
 prompt = "Explain quantum computing:"
@@ -389,9 +394,9 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **Nota:**  
-- Certifique-se de que o nome do diretório do modelo (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) corresponde à pasta de saída real do seu treino.  
-- Se utilizou LoRA em vez de QLoRA, basta substituir o caminho em conformidade.  
-- Alguns modelos Gemma requerem a especificação de `trust_remote_code=True` em `from_pretrained`; adicione se vir um aviso relacionado.
+- Certifique-se de que o nome do diretório do modelo (`output-gemma-3-4b-it-full`, `output-gpt-oss-20b-qlora`) corresponde à sua pasta de saída real do treino.  
+- Se tiver utilizado LoRA em vez de QLoRA, basta substituir o caminho em conformidade.  
+- Alguns modelos Gemma exigem a especificação de `trust_remote_code=True` em `from_pretrained`; adicione-o se vir um aviso relacionado.
 
 Para mais definições personalizadas (tokens de preenchimento, dispositivo, etc.), consulte o script que utilizou para o treino.
 
@@ -491,7 +496,7 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ## Guia de Personalização
 
-### Utilize o Seu Próprio Conjunto de Dados
+### Utilizar o seu Próprio Conjunto de Dados
 
 Todos os scripts utilizam o mesmo formato de conjunto de dados. Substitua a secção de carregamento:
 
@@ -523,9 +528,9 @@ dataset = dataset.map(format_instruction)
 
 Ao utilizar este método, certifique-se de que os seus ficheiros JSON estão corretamente estruturados para evitar erros de análise. 
 
-Devem ser respeitadas as seguintes diretrizes:
-* **Formatação de Ficheiros:** Os ficheiros JSON devem ser formatados num Ambiente de Desenvolvimento Integrado (IDE) para garantir a estrutura e sintaxe adequadas.
-* **Chaves Necessárias:** O ficheiro JSON personalizado deve conter as chaves `instruction` e `response`. Estas chaves são essenciais para o funcionamento correto do método.
+Devem ser seguidas as seguintes diretrizes:
+* **Formatação do Ficheiro:** Os ficheiros JSON devem ser formatados num Ambiente de Desenvolvimento Integrado (IDE) para garantir a estrutura e sintaxe corretas.
+* **Chaves Obrigatórias:** O ficheiro JSON personalizado deve conter as chaves `instruction` e `response`. Estas chaves são essenciais para que o método funcione corretamente.
 ```json
 [
   {
@@ -540,13 +545,13 @@ Devem ser respeitadas as seguintes diretrizes:
 ```
 **Formato do Conjunto de Dados para Conjunto de Dados do Hugging Face Hub**
 
-Ao utilizar conjuntos de dados do Hugging Face, certifique-se de que os seus conjuntos de dados estão estruturados corretamente para facilitar uma integração perfeita. 
+Ao utilizar conjuntos de dados do Hugging Face, certifique-se de que os seus conjuntos de dados estão corretamente estruturados para facilitar uma integração sem problemas. 
 
 Devem ser seguidas as seguintes diretrizes:
-* **Par Instrução-Resposta:** Concentre-se em conjuntos de dados que incluam um par `instruction-response`. Esta estrutura é essencial para o funcionamento pretendido.
-* **Modificação de Chave Personalizada:** Se o seu conjunto de dados não estiver em conformidade com a estrutura `instruction-response`, tem a opção de modificar a função `format_instruction()`. Isto permite-lhe acomodar chaves específicas conforme necessário.
+* **Par Instrução-Resposta:** Centre-se em conjuntos de dados que incluam um par `instruction-response`. Esta estrutura é essencial para o funcionamento pretendido.
+* **Modificação de Chaves Personalizadas:** Se o seu conjunto de dados não estiver em conformidade com a estrutura `instruction-response`, tem a opção de modificar a função `format_instruction()`. Isto permite-lhe adaptar chaves específicas conforme necessário.
 
-Exemplo de Ajuste: Nos casos em que a saída do conjunto de dados precise de ser ajustada, pode modificar a secção de resposta dentro da função format_instruction() para se adequar às suas necessidades.
+Exemplo de Ajuste: Nos casos em que o resultado do conjunto de dados precise de ser ajustado, pode modificar a secção de resposta dentro da função format_instruction() para se adequar aos seus requisitos.
 ```python
 def format_instruction(example):
     return {
@@ -558,17 +563,17 @@ def format_instruction(example):
 ```
 **Formato do Conjunto de Dados para Ficheiro CSV**
 
-Para adaptar o script a um formato de ficheiro CSV, deve garantir que o ficheiro CSV contém colunas denominadas `instruction` e `response`. 
+Para adaptar o script à utilização de um formato de ficheiro CSV, deve certificar-se de que o ficheiro CSV contém colunas denominadas `instruction` e `response`. 
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
 "Your second instruction here","Expected response here"
 ```
 
-### Ajustar Parâmetros de Treino
+### Ajustar os Parâmetros de Treino
 
-Edite o script de treino e altere as variáveis de acordo com os seus objetivos: **taxa de aprendizagem** (`LR`), **épocas** (`EPOCHS`), **tamanho do lote** (`BATCH_SIZE`), **acumulação de gradiente** (`GRAD_ACCUM_STEPS`) e, para LoRA/QLoRA, **rank** (`LORA_R`). Para execuções mais rápidas, use menos épocas e uma taxa de aprendizagem (LR) mais elevada; para melhor qualidade, use mais épocas e uma LR mais baixa. Reduza o tamanho do lote ou o comprimento da sequência se ocorrerem erros de memória insuficiente.
-### Sugestões de Otimização de Memória
+Edite o script de treino e altere as variáveis de acordo com os seus objetivos: **taxa de aprendizagem** (`LR`), **épocas** (`EPOCHS`), **tamanho do lote** (`BATCH_SIZE`), **acumulação de gradiente** (`GRAD_ACCUM_STEPS`) e, para LoRA/QLoRA, **rank** (`LORA_R`). Para execuções mais rápidas, utilize menos épocas e uma taxa de aprendizagem (LR) mais elevada; para melhor qualidade, utilize mais épocas e uma LR mais baixa. Reduza o tamanho do lote ou o comprimento da sequência se encontrar erros de falta de memória.
+### Dicas de Otimização de Memória
 
 Se encontrar erros de falta de memória:
 
@@ -583,12 +588,12 @@ GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
 max_seq_length=256  # Instead of 512
 ```
 
-**3. Usar Quantização Mais Agressiva:**
+**3. Utilizar uma Quantização Mais Agressiva:**
 ```
 Full → LoRA → QLoRA
 ```
 
-**4. Ativar Gradient Checkpointing (apenas para ajuste fino completo):**
+**4. Ativar o Gradient Checkpointing (apenas para ajuste fino completo):**
 ```python
 model.gradient_checkpointing_enable()
 ```
@@ -616,13 +621,13 @@ pip install wandb
 wandb login
 ```
 
-No script de treino, defina `report_to="wandb"` e, opcionalmente, `run_name="your-experiment-name"` na configuração do trainer. Se preferir não usar o Wandb, deixe `report_to` no valor predefinido ou defina-o como `"none"`.
+No script de treino, defina `report_to="wandb"` e, opcionalmente, `run_name="your-experiment-name"` na configuração do trainer. Se preferir não utilizar o Wandb, deixe `report_to` com o valor predefinido ou defina-o como `"none"`.
 
 ### Problemas Comuns
 
 #### Falta de Memória (OOM)
 
-**Solução:** Reduza o tamanho do lote e/ou use QLoRA
+**Solução:** Reduza o tamanho do lote e/ou utilize QLoRA
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16
@@ -646,14 +651,14 @@ BATCH_SIZE = 8
 ```
 ## Próximos Passos
 
-Depois de concluir um ajuste fino com sucesso, considere os seguintes próximos passos para tirar mais partido do seu modelo:
+Depois de concluir com sucesso o ajuste fino, considere os seguintes próximos passos para tirar mais partido do seu modelo:
 
-1. **Avalie** minuciosamente com dados de teste reservados para medir a generalização e evitar overfitting.
-2. **Experimente** testar diferentes valores de hiperparâmetros para obter melhores compromissos entre precisão, velocidade e memória.
-3. **Acompanhe** todas as suas experiências (e as métricas correspondentes) com o Weights & Biases para uma investigação reprodutível.
+1. **Avalie** minuciosamente em dados de teste reservados para medir a generalização e evitar o overfitting.
+2. **Experimente** testando diferentes valores de hiperparâmetros para obter melhores compromissos entre precisão, velocidade e memória.
+3. **Acompanhe** todas as suas experiências (e as métricas correspondentes) com o Weights & Biases para uma investigação reproduzível.
 4. **Experimente** treinar com os seus próprios conjuntos de dados personalizados para adaptar o modelo especificamente ao seu caso de uso.
-5. **Implemente** o seu modelo ajustado para inferência rápida usando backends eficientes como o vLLM em hardware compatível.
-6. **Explore** técnicas avançadas, incluindo engenharia de prompts, precisão mista e comprimentos de sequência maiores.
-7. **Treine** vários adaptadores LoRA para diferentes tarefas ou domínios e troque-os conforme necessário.
+5. **Implemente** o seu modelo ajustado para inferência rápida utilizando back-ends eficientes como o vLLM em hardware compatível.
+6. **Explore** técnicas avançadas, incluindo engenharia de prompts, precisão mista e comprimentos de sequência mais longos.
+7. **Treine** múltiplos adaptadores LoRA para diferentes tarefas ou domínios e troque-os conforme necessário.
 
 ---

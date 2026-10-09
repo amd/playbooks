@@ -17,13 +17,13 @@ SPDX-License-Identifier: MIT
 ## Áttekintés
 
 
-Szeretne hatékony AI nyelvi modelleket futtatni a saját hardverén? Ez az útmutató megmutatja, hogyan.
-Ez az oktatóanyag az AMD ROCm™ szoftver által támogatott PyTorch-ot használja olyan modellek futtatásához, amelyek képesek dokumentumokat összefoglalni, kérdésekre válaszolni, szöveget generálni és még sok minden mást elvégezni, mindezt helyben futtatva.
+Szeretne hatékony AI nyelvi modelleket futtatni saját hardverén? Ez az útmutató megmutatja, hogyan.
+Ez az oktatóanyag a PyTorch keretrendszert használja, amelyet az AMD ROCm™ szoftver hajt meg, hogy olyan modelleket futtasson, amelyek dokumentumokat képesek összefoglalni, kérdésekre válaszolni, szöveget generálni és még sok mást, mindezt helyben futtatva.
 
-## Amit meg fog tanulni
+## Mit fog megtanulni
 
-- LLM-ek, például a gpt-oss-20b és a qwen3.5-4B helyi futtatása PyTorch és ROCm segítségével
-- Dokumentum-összefoglaló eszköz létrehozása LLM-ek használatával
+- Olyan LLM-ek futtatása, mint a gpt-oss-20b és a qwen3.5-4B, helyben, PyTorch és ROCm használatával
+- Dokumentum-összefoglaló eszköz létrehozása LLM-ek segítségével
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## A memóriakonfiguráció beállítása
@@ -38,13 +38,13 @@ Ez az oktatóanyag az AMD ROCm™ szoftver által támogatott PyTorch-ot haszná
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Szoftverelőfeltételek telepítése
+## A szükséges szoftverek telepítése
 
 ### Virtuális környezet létrehozása
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Linux rendszeren nyisson meg egy terminált a választott könyvtárban, és kövesse a parancsokat egy venv létrehozásához, amelyben már telepítve van a ROCm+PyTorch.
+Linux rendszeren nyisson meg egy terminált a kívánt könyvtárban, és kövesse a parancsokat egy olyan venv létrehozásához, amelyben a ROCm+Pytorch már telepítve van.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -57,13 +57,13 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Adjon hozzáférést a felhasználójának a GPU-eszközökhöz** (jelentkezzen ki és vissza, hogy ez érvénybe lépjen):
+**Adjon hozzáférést felhasználójának a GPU-eszközökhöz** (ahhoz, hogy ez érvénybe lépjen, jelentkezzen ki, majd újra be):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Linux rendszeren nyisson meg egy terminált a választott könyvtárban, és kövesse a parancsokat egy venv létrehozásához.
+Linux rendszeren nyisson meg egy terminált a kívánt könyvtárban, és kövesse a parancsokat egy venv létrehozásához.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -79,7 +79,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Windows rendszeren nyisson meg egy terminált a választott könyvtárban, és kövesse a parancsokat egy venv létrehozásához, amelyben már telepítve van a ROCm+PyTorch.
+Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, és kövesse a parancsokat egy olyan venv létrehozásához, amelyben a ROCm+Pytorch már telepítve van.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -90,7 +90,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Windows rendszeren nyisson meg egy terminált a választott könyvtárban, és kövesse a parancsokat egy venv létrehozásához.
+Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, és kövesse a parancsokat egy venv létrehozásához.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
@@ -100,8 +100,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Tipp**: Előfordulhat, hogy a Windows felhasználóknak módosítaniuk kell a PowerShell futtatási házirendjét
-> (pl. RemoteSigned vagy Unrestricted értékre állítva), mielőtt egyes PowerShell parancsokat futtatnának.
+> **Tipp**: Előfordulhat, hogy Windows felhasználóknak módosítaniuk kell a PowerShell végrehajtási szabályzatát (pl.
+> RemoteSigned vagy Unrestricted értékre állítva) néhány PowerShell parancs futtatása előtt.
 
 <!-- @os:end -->
 
@@ -112,6 +112,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:hf-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:hf-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->
@@ -130,7 +136,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Megjegyzés:** Ha a modell betöltése sikertelen, vagy elfogy a memória, próbálja meg telepíteni a `kernels` csomagot, hogy optimalizált kvantálással töltse be a modellt.
+> **Megjegyzés:** Ha a modell betöltése sikertelen, vagy elfogy a memória, próbálja meg telepíteni a `kernels` csomagot a modell optimalizált kvantálással történő betöltéséhez.
 >
 > ```bash
 > # Használja ezt a verziót, amely kompatibilis a Transformers verzióval
@@ -158,7 +164,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 
 ## Gyors kezdés példaszkriptekkel
 
-Ez a útmutató használatra kész szkripteket tartalmaz. Kattintson rájuk az előnézethez, majd töltse le őket ugyanabba a könyvtárba, ahol a létrehozott környezet található.
+Ez a playbook azonnal használható szkripteket tartalmaz. Kattintson rájuk az előnézethez, és töltse le őket ugyanabba a könyvtárba, amelyben a korábban létrehozott környezet található.
 
 | Szkript | Leírás | Használat |
 |--------|-------------|-------|
@@ -188,17 +194,17 @@ for script in ['run_llm.py', 'summarizer.py']:
 ```
 <!-- @test:end -->
 
-Mindkét szkript támogatja:
-- Modell kiválasztását a `--model` jelzővel
-- Csevegősablon-formázást a megfelelő modell-prompthoz, ami különösen hasznos dokumentum-összefoglaláshoz
+Mindkét szkript támogatja a következőket:
+- Modellkiválasztás a `--model` kapcsolóval
+- Chat sablon formázás a megfelelő modell-promptoláshoz, ami különösen hasznos dokumentum-összefoglaláshoz
 
 ## Az első LLM betöltése és futtatása
 
 A mellékelt [run_llm.py](assets/run_llm.py) szkript bemutatja, hogyan generálhat szöveget LLM-ekkel PyTorch és AMD ROCm használatával.
 
-> **Megjegyzés:** Amikor betölt egy modellt, a Hugging Face Transformers először ellenőrzi a helyi gyorsítótárat (`~/.cache/huggingface/hub` Linuxon, `C:\Users\<user>\.cache\huggingface\hub` Windows rendszeren). Ha a modell nincs gyorsítótárazva, automatikusan letöltődik a huggingface.co oldalról. Az első futtatás a modell méretétől és a hálózati sebességtől függően néhány percet is igénybe vehet.
+> **Megjegyzés:** Amikor betölt egy modellt, a Hugging Face Transformers először ellenőrzi a helyi gyorsítótárat (`~/.cache/huggingface/hub` Linuxon, `C:\Users\<user>\.cache\huggingface\hub` Windowson). Ha a modell nincs gyorsítótárazva, automatikusan letöltődik a huggingface.co oldalról. Az első futtatás a modell méretétől és a hálózati sebességtől függően néhány percig is eltarthat.
 
-Az alábbi kódrészlet bemutatja, hogyan használhatja a modellt, és hogyan testreszabhatja a feltett kérdéseket.
+Az alábbi kódrészlet bemutatja, hogyan használható a modell, és hogyan testre szabhatók a feltett kérdések.
 
 <!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -276,9 +282,9 @@ python run_llm.py --model ${hf_model}
 
 ## Dokumentum-összefoglaló készítése
 
-Miután generált helyi LLM-kimenetet, erre építve gyakorlati dokumentum-összefoglalót is készíthet. Ebben a szakaszban a [summarizer.py](assets/summarizer.py) szkriptet fogja használni egy .txt fájl betöltésére, és automatikusan tömör összefoglalót generál, mindezt helyben, a GPU-n futtatva.
+Most, hogy már generált helyi LLM-kimenetet, erre építve létrehozhat egy gyakorlati dokumentum-összefoglalót. Ebben a részben a [summarizer.py](assets/summarizer.py) szkriptet fogja használni egy .txt fájl betöltéséhez, és automatikusan tömör összefoglalót generál, mindezt a GPU-n, helyben futtatva.
 
-A szkriptet úgy tervezték, hogy azonnal működjön. Nyissa meg a szkriptet egy szerkesztőben, hogy megismerje a kódot, testreszabja a promptokat, és finomhangolja a paramétereket, például a hosszúságot és a hőmérsékletet (temperature).
+A szkriptet úgy tervezték, hogy azonnal, módosítás nélkül is működjön. Nyissa meg a szkriptet egy szerkesztőben, hogy felfedezze a kódot, testre szabja a promptokat, és finomhangolja az olyan paramétereket, mint a hossz és a hőmérséklet.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -302,27 +308,27 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## Ismerje meg a generálási paramétereket
+## A generálási paraméterek megismerése
 
 | Paraméter | Mit vezérel | Tipikus értékek |
 |-----------|------------------|----------------|
-| `max_new_tokens` | Az LLM kimenetének maximális hossza | Használjon 50–500 tokent összefoglalókhoz. (1 token körülbelül 0,75 angol szónak felel meg) |
-| `temperature` | Kreativitás. Az alacsony értékek fókuszáltabbá teszik, míg a magas értékek nagyobb kiszámíthatatlansággal járnak | - **0,1–0,3**: Fókuszált, determinisztikus (jó összefoglalókhoz) <br> **0,5–0,7**: Kiegyensúlyozott (általános használatra) <br> **0,8–1,0**: Kreatív, változatos (ötletelés) |
-| `top_p` | Nucleus Sampling - Az alacsony értékek szűkebb kimenetekre korlátozzák a modellt | **0,1-0,5**: Szigorú, kiszámítható <br> **0,9-0,95**: (szabványos, természetes, beszélgetős) |
+| `max_new_tokens` | Az LLM kimenetének maximális hossza | Összefoglalókhoz használjon 50–500 tokent. (1 token körülbelül 0,75 angol szónak felel meg) |
+| `temperature` | Kreativitás. Alacsony értékek fókuszáltabbá teszik, míg magas értékek kiszámíthatatlanabbá | - **0,1–0,3**: Fókuszált, determinisztikus (jó összefoglalókhoz) <br> **0,5–0,7**: Kiegyensúlyozott (általános használatra) <br> **0,8–1,0**: Kreatív, változatos (ötletelés) |
+| `top_p` | Nucleus Sampling - Az alacsony értékek szűkebb kimenetekre korlátozzák a modellt | **0,1-0,5**: Szigorú, kiszámítható <br> **0,9-0,95**: (standard, természetes, beszélgetős) |
 
 
 ## Valós alkalmazások
 
-- **Kutatási cikkek elemzése**: Kulcsfontosságú eredmények kiemelése összetett publikációkból gyors áttekintéshez
-- **Hírösszesítés**: Híranyagok tömörítése rövid napi összefoglalókba vagy kiemelésekbe
-- **Megbeszélési jegyzetek**: Átiratok tömörítése konkrét teendőkké és tömör összefoglalókká
-- **Jogi dokumentumok áttekintése**: Releváns kikötések vagy kötelezettségek gyors kiemelése hosszú jogi szövegekből
-- **Kód dokumentáció**: Tömör áttekintések és funkciómagyarázatok generálása tárolókról
+- **Kutatási cikkek elemzése**: Kulcsfontosságú megállapítások kiemelése összetett publikációkból a gyors áttekintéshez
+- **Hírösszesítés**: Hírcikkek összefoglalása rövid napi kivonatokba vagy kiemelésekbe
+- **Értekezletjegyzetek**: Átiratok tömörítése cselekvési pontokká és tömör összefoglalókká
+- **Jogi dokumentumok áttekintése**: Releváns záradékok vagy kötelezettségek gyors kinyerése hosszú jogi szövegekből
+- **Kóddokumentáció**: Tömör tárhely-áttekintések és funkcióleírások generálása
 ## Következő lépések
 
-- **Finomhangolás**: Alakítsd a modelleket a saját szakterületedhez vagy szakzsargonodhoz a nagyobb pontosság érdekében (lásd: Fine-tuning Playbooks)
-- **RAG rendszerek**: Kombináld az LLM-eket dokumentum-visszakereséssel a kontextusérzékeny válaszokhoz és kereséshez
-- **Modellfelfedezés**: Kísérletezz új modellekkel, például Llama 3, Phi-3 vagy Qwen, a jobb eredmények érdekében
-- **Éles környezetbe telepítés**: Használj olyan eszközöket, mint a vLLM, a skálázható LLM-kiszolgáláshoz szervezeteken belül
+- **Finomhangolás**: Igazítsd a modelleket a saját szakterületedhez vagy szaknyelvedhez a jobb pontosság érdekében (lásd a Finomhangolási útmutatókat)
+- **RAG rendszerek**: Kombináld az LLM-eket dokumentumkereséssel a kontextustudatos válaszokért és kereséshez
+- **Modellek felfedezése**: Kísérletezz új modellekkel, például Llama 3, Phi-3 vagy Qwen, a jobb eredmények érdekében
+- **Éles üzembe helyezés**: Használj olyan eszközöket, mint a vLLM, a skálázható LLM-kiszolgáláshoz szervezeteknél
 
 A rendszered lehetővé teszi, hogy kifinomult nyelvi modelleket futtass helyben. Kísérletezz különböző modellekkel, promptokkal és paraméterekkel, hogy megtaláld, mi működik a legjobban az alkalmazásaidhoz.

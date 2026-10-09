@@ -1,6 +1,6 @@
 {
   "id": "unsloth-llms-finetuning",
-  "title": "Fino podešavanje (fine-tuning) LLM-ova pomoću Unsloth",
-  "description": "Koristite Unsloth za memorijski efikasno fino podešavanje LLM-ova™",
+  "title": "Fino podešavanje LLM-ova pomoću Unsloth",
+  "description": "Koristite Unsloth za fino podešavanje LLM-ova™ uz efikasno korišćenje memorije",
   "auto_translated": true
 }

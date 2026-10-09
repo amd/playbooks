@@ -1,6 +1,6 @@
 {
   "id": "speech2speech-translation",
-  "title": "Tradução de Fala para Fala em Tempo Real",
-  "description": "Crie uma tradução voz-a-voz em tempo real no seu hardware local.",
+  "title": "Tradução de Voz para Voz em Tempo Real",
+  "description": "Crie um sistema de tradução fala-para-fala em tempo real no seu hardware local.",
   "auto_translated": true
 }
